@@ -191,7 +191,7 @@ describe('triggered operations definitions', () => {
         });
     });
 
-    it('authors a single-axis local approach to Podkozara', () => {
+    it('authors a single-axis Cajnice-to-Podkozara local approach', () => {
         const operation = _TRIGGERED_OPS.find((def) => def.name === 'Operation Gorazde Local Approach');
         assert.ok(operation, 'Operation Gorazde Local Approach must exist in the triggered catalog');
         assert.equal(operation.primary_corps, 'vrs_herzegovina');
@@ -203,9 +203,16 @@ describe('triggered operations definitions', () => {
             brigades: [
                 'rs_ajnie_brigade',
                 'rs_foa_brigade',
+                'rs_kalinovik_brigade',
+                'rs_nevesinje_brigade',
+                'rs_bilea_brigade',
             ],
-            objectives: ['op:gorazde:podkozara_donja_2'],
-            staging_osid: 'op:cajnice:miljeno_2',
+            objectives: [
+                'op:cajnice:batotici',
+                'op:cajnice:miljeno_2',
+                'op:gorazde:podkozara_donja_2',
+            ],
+            staging_osid: 'op:cajnice:cajnice_2',
         }]);
     });
 
@@ -275,13 +282,15 @@ describe('triggered operations definitions', () => {
 });
 
 describe('checkTriggeredOperations', () => {
-    it('offers Gorazde Local Approach in a bounded window after Herzegovina Consolidation', () => {
+    it('offers Gorazde Local Approach in its bounded master window after Herzegovina Consolidation', () => {
         const state = makeState(17);
         state.operation_history = [{
             corps_id: 'vrs_herzegovina',
             operation_name: 'Operation Herzegovina Consolidation',
         } as any];
         state.military.triggered_operations_accepted = { 'Operation Herzegovina Consolidation': 12 };
+        state.political.political_controllers!['op:cajnice:cajnice_2'] = 'RS';
+        state.political.political_controllers!['op:cajnice:batotici'] = 'RS';
         state.political.political_controllers!['op:cajnice:miljeno_2'] = 'RS';
         state.political.political_controllers!['op:gorazde:kolovarice'] = 'RS';
         state.political.political_controllers!['op:gorazde:podkozara_donja_2'] = 'RBiH';
@@ -293,13 +302,39 @@ describe('checkTriggeredOperations', () => {
         assert.equal(operation.axes?.length, 1);
         assert.deepEqual(operation.objectives, ['op:gorazde:podkozara_donja_2']);
 
-        const late = makeState(21);
+        const late = makeState(29);
         late.operation_history = state.operation_history;
         late.military.triggered_operations_accepted = { 'Operation Herzegovina Consolidation': 12 };
+        late.political.political_controllers!['op:cajnice:cajnice_2'] = 'RS';
+        late.political.political_controllers!['op:cajnice:batotici'] = 'RS';
         late.political.political_controllers!['op:cajnice:miljeno_2'] = 'RS';
         late.political.political_controllers!['op:gorazde:kolovarice'] = 'RS';
         late.political.political_controllers!['op:gorazde:podkozara_donja_2'] = 'RBiH';
         assert.ok(!checkTriggeredOperations(late).includes('Operation Gorazde Local Approach'));
+    });
+
+    it('keeps the Upper Drina follow-on reachable after the master trajectory delays Herzegovina Consolidation', () => {
+        const state = makeState(24);
+        state.operation_history = [{
+            corps_id: 'vrs_herzegovina',
+            operation_name: 'Operation Herzegovina Consolidation',
+        } as any];
+        state.military.triggered_operations_accepted = { 'Operation Herzegovina Consolidation': 12 };
+        state.political.political_controllers!['op:cajnice:cajnice_2'] = 'RS';
+        state.political.political_controllers!['op:cajnice:batotici'] = 'RBiH';
+        state.political.political_controllers!['op:cajnice:miljeno_2'] = 'RBiH';
+        state.political.political_controllers!['op:gorazde:podkozara_donja_2'] = 'RBiH';
+
+        const injected = checkTriggeredOperations(state);
+
+        assert.ok(injected.includes('Operation Gorazde Local Approach'));
+        const operation = state.military.corps_command!.vrs_herzegovina!.active_operations[0]!;
+        assert.equal(operation.staging_osid, 'op:cajnice:cajnice_2');
+        assert.deepEqual(operation.objectives, [
+            'op:cajnice:batotici',
+            'op:cajnice:miljeno_2',
+            'op:gorazde:podkozara_donja_2',
+        ]);
     });
 
     it('offers Praca Local Containment only on turn 12 after Prsten completes', () => {

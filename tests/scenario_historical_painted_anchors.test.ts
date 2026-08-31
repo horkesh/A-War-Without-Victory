@@ -19,6 +19,7 @@ import {
     type HistoricalAreaShareBand,
     type HistoricalEpochOsidAnchor,
 } from '../src/scenario/historical_anchors.js';
+import { ENCLAVE_DEFINITIONS } from '../src/sim/combat/enclave_resilience.js';
 
 /**
  * Tier 1 painted-target anchor contract tests.
@@ -194,6 +195,53 @@ describe('Tier 1 painted-target anchors — Jan 1993 (w40)', () => {
 
         expect(initialControl.controllers_by_mun1990_id.bosanski_brod).toBe('RS');
     });
+
+    it('jan1993: Rat and Prozor are owner-painted HRHB', () => {
+        expect(painted?.by_settlement_id['op:novi_travnik:rat_2']).toBe('HRHB');
+        expect(painted?.by_settlement_id['op:prozor:prozor_2']).toBe('HRHB');
+    });
+
+    it('jan1993: every explicit Gorazde enclave member is painted RBiH', () => {
+        const gorazde = ENCLAVE_DEFINITIONS.find((enclave) => enclave.id === 'gorazde');
+        expect(gorazde?.osid_list?.length).toBeGreaterThan(0);
+        for (const osid of gorazde?.osid_list ?? []) {
+            const paintedFaction = painted?.by_settlement_id[osid];
+            if (paintedFaction !== undefined) expect(paintedFaction, osid).toBe('RBiH');
+        }
+    });
+
+    it('jan1993: restored Upper Drina pockets belong to their RBiH enclave geometry', () => {
+        const gorazde = ENCLAVE_DEFINITIONS.find((enclave) => enclave.id === 'gorazde');
+        const zepa = ENCLAVE_DEFINITIONS.find((enclave) => enclave.id === 'zepa');
+        expect(gorazde?.osid_list).toEqual(expect.arrayContaining([
+            'op:visegrad:drinsko',
+            'op:visegrad:medjedja_2',
+        ]));
+        expect(zepa?.osid_list).toContain('op:rogatica:brcigovo');
+    });
+
+    it('jan1993: VRS Drina command treats RS-painted Gojcin as a must-hold anchor', () => {
+        const master = JSON.parse(readFileSync(join(
+            process.cwd(), 'data', 'scenarios', 'apr1992_definitive_188w.json'
+        ), 'utf8'));
+        expect(master.must_hold_osids_by_corps?.vrs_drina).toContain('op:kalesija:gojcin_2');
+    });
+
+    it('master trajectory pins the accepted January Upper Drina calibration cells to RBiH', () => {
+        const master = JSON.parse(readFileSync(join(
+            process.cwd(), 'data', 'scenarios', 'apr1992_definitive_188w.json'
+        ), 'utf8'));
+        for (const osid of [
+            'op:foca:donje_zesce',
+            'op:gorazde:glamoc',
+            'op:gorazde:kamen',
+            'op:gorazde:sopotnica',
+            'op:trnovo:tosici',
+        ]) {
+            expect(master.osid_control_overrides?.[osid], osid).toBe('RBiH');
+        }
+    });
+
 });
 
 describe('Tier 1 painted-target anchors — Apr 1994 (w104)', () => {

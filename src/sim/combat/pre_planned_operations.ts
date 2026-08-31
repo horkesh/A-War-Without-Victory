@@ -391,7 +391,6 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 objectives: [
                     'op:visegrad:visegrad_2',
                     'op:visegrad:kamenica_2',
-                    'op:visegrad:medjedja_2',
                 ],
                 staging_osid: 'op:visegrad:okrugla',
             },

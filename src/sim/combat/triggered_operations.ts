@@ -304,22 +304,28 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         ],
     },
     {
-        // Goražde Local Approach — a narrow post-consolidation follow-on against
-        // Podkožara using two local brigades on one Miljeno-staged axis.
+        // Goražde Local Approach — a narrow post-consolidation follow-on through
+        // the Čajniče approach to Podkožara using the surviving local brigades.
         // HISTORICAL PROVENANCE BOUNDARY: BB1 p. 187 supports only the broad 1992
         // upper-Drina/Goražde combat context. It does not name Podkožara as an
         // operational target or these brigades as participants. The exact target
-        // comes solely from the authoritative January 1993 painter; Miljeno is a
-        // graph/live-control staging choice, and the roster is the scenario OOB.
-        // Turn 17 is bounded scenario cadence after the accepted
-        // Herzegovina consolidation, not a sourced date.
+        // comes solely from the authoritative January 1993 painter; Čajniče town
+        // is the graph/live-control staging choice, and the roster is the scenario
+        // OOB. Kalinovik, Nevesinje, and Bileća Brigades provide corps-level depth
+        // because the master trajectory leaves Čajniče Brigade below the participant
+        // strength floor and the depleted Foča Brigade cannot carry the first attack
+        // alone after consolidation; this does not alter Operation Višegrad or its
+        // targets. The turn 17-28 window is bounded 1992 scenario cadence after the
+        // accepted Herzegovina consolidation, not a sourced date. It accommodates
+        // the definitive master trajectory's Višegrad-first opening without
+        // treating the retired short scenario's earlier corps queue as authority.
         name: 'Operation Gorazde Local Approach',
         faction: 'RS',
         primary_corps: 'vrs_herzegovina',
-        staging_osid: 'op:cajnice:miljeno_2',
+        staging_osid: 'op:cajnice:cajnice_2',
         planning_duration: 2,
         min_attack_outcome: 'repulsed' as const,
-        trigger: (state, turn) => turn >= 17 && turn <= 20
+        trigger: (state, turn) => turn >= 17 && turn <= 28
             && corpsCompletedOp(state, 'vrs_herzegovina', 'Operation Herzegovina Consolidation'),
         axes: [
             {
@@ -329,11 +335,16 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                 brigades: [
                     'rs_ajnie_brigade' as FormationId,
                     'rs_foa_brigade' as FormationId,
+                    'rs_kalinovik_brigade' as FormationId,
+                    'rs_nevesinje_brigade' as FormationId,
+                    'rs_bilea_brigade' as FormationId,
                 ],
                 objectives: [
+                    'op:cajnice:batotici',
+                    'op:cajnice:miljeno_2',
                     'op:gorazde:podkozara_donja_2',
                 ],
-                staging_osid: 'op:cajnice:miljeno_2',
+                staging_osid: 'op:cajnice:cajnice_2',
             },
         ],
     },

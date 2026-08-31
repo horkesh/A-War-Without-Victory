@@ -882,7 +882,7 @@ export function resolveAttackOrdersOsid(
         // fights alongside regular brigades in besieged enclaves.
         // Added to ALL defense paths — even ghost militia gets reinforced.
         const garrisonPower = getEnclaveGarrisonPower(
-            state, targetOsid, osidPopulationMap?.get(targetOsid) ?? 0
+            state, targetOsid, osidPopulationMap?.get(targetOsid) ?? 0, controller
         );
         defenderPower += garrisonPower;
         // COLLAPSE PHASE IV-e — combat consumer (own-OSID-only defender degradation).

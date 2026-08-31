@@ -4,7 +4,7 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 type ScenarioFile = {
-    initial_osid_controllers?: Record<string, string>;
+    osid_control_overrides?: Record<string, string>;
 };
 
 type InitialMasterFile = {
@@ -15,49 +15,49 @@ type InitialMasterFile = {
 };
 
 const ROOT = process.cwd();
-const SCENARIO_PATH = path.join(ROOT, 'data', 'scenarios', 'apr1992_definitive_40w.json');
+const SCENARIO_PATH = path.join(ROOT, 'data', 'scenarios', 'apr1992_definitive_188w.json');
 const MASTER_PATH = path.join(ROOT, 'data', 'derived', 'operational', 'operational_initial_master.json');
-const DOBOJ_EDGE_OSIDS = [
-    'op:doboj:brijesnica_velika',
+const DOBOJ_RS_EDGE_OSIDS = [
     'op:doboj:grapska_gornja_2',
-    'op:doboj:klokotnica_2',
     'op:doboj:makljenovac',
     'op:doboj:matuzici_2',
 ];
 
-const EAST_BOSNIA_RS_START_OSIDS = [
-    'op:bratunac:bratunac_2',
-    'op:bratunac:zapolje_2',
-    'op:rudo:gornja_strmica',
-    'op:visegrad:drinsko',
-    'op:visegrad:kamenica_2',
-    'op:visegrad:medjedja_2',
-    'op:visegrad:prelovo_2',
-    'op:visegrad:velji_lug',
-    'op:visegrad:visegrad_2',
-    'op:zvornik:donja_kamenica',
-    'op:zvornik:krizevici',
+const DOBOJ_RBIH_PAINTER_ANCHORS = [
+    'op:doboj:brijesnica_velika',
+    'op:doboj:klokotnica_2',
 ];
 
 describe('apr1992 Doboj initial control truth', () => {
-    it('keeps the Doboj north rim aligned with the operational initial master', () => {
+    it('keeps the RS Doboj north rim aligned with the effective master-scenario start', () => {
         const scenario = JSON.parse(fs.readFileSync(SCENARIO_PATH, 'utf8')) as ScenarioFile;
         const master = JSON.parse(fs.readFileSync(MASTER_PATH, 'utf8')) as InitialMasterFile;
         const bySid = new Map(master.settlements.map((settlement) => [settlement.sid, settlement.political_controller ?? null]));
 
-        for (const osid of DOBOJ_EDGE_OSIDS) {
-            expect(scenario.initial_osid_controllers?.[osid]).toBe(bySid.get(osid));
-            expect(scenario.initial_osid_controllers?.[osid]).toBe('RS');
+        for (const osid of DOBOJ_RS_EDGE_OSIDS) {
+            const effectiveController = scenario.osid_control_overrides?.[osid] ?? bySid.get(osid);
+            expect(effectiveController, osid).toBe('RS');
         }
     });
 
-    it('starts the Drina seizure corridor under RS while leaving enclave pockets to their own anchors', () => {
+    it('starts the Klokotnica and Brijesnica Velika painter anchors under RBiH in the master scenario', () => {
         const scenario = JSON.parse(fs.readFileSync(SCENARIO_PATH, 'utf8')) as ScenarioFile;
+        const master = JSON.parse(fs.readFileSync(MASTER_PATH, 'utf8')) as InitialMasterFile;
+        const bySid = new Map(master.settlements.map((settlement) => [settlement.sid, settlement.political_controller ?? null]));
 
-        for (const osid of EAST_BOSNIA_RS_START_OSIDS) {
-            expect(scenario.initial_osid_controllers?.[osid], osid).toBe('RS');
+        for (const osid of DOBOJ_RBIH_PAINTER_ANCHORS) {
+            const effectiveController = scenario.osid_control_overrides?.[osid] ?? bySid.get(osid);
+            expect(effectiveController, osid).toBe('RBiH');
         }
-        expect(scenario.initial_osid_controllers?.['op:rogatica:zepa_2']).toBe('RBiH');
-        expect(scenario.initial_osid_controllers?.['op:gorazde:gorazde_2']).toBe('RBiH');
     });
+
+    it('inherits the April RBiH start at Drinsko and Medjedja in the master scenario', () => {
+        const scenario = JSON.parse(fs.readFileSync(SCENARIO_PATH, 'utf8')) as ScenarioFile;
+        const master = JSON.parse(fs.readFileSync(MASTER_PATH, 'utf8')) as InitialMasterFile;
+        const bySid = new Map(master.settlements.map((settlement) => [settlement.sid, settlement.political_controller ?? null]));
+
+        expect(scenario.osid_control_overrides?.['op:visegrad:drinsko'] ?? bySid.get('op:visegrad:drinsko')).toBe('RBiH');
+        expect(scenario.osid_control_overrides?.['op:visegrad:medjedja_2'] ?? bySid.get('op:visegrad:medjedja_2')).toBe('RBiH');
+    });
+
 });

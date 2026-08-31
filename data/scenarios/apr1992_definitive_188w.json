@@ -26,6 +26,13 @@
     "op:travnik:ovcarevo_2": "RBiH",
     "op:zvornik:rastosnica_2": "RBiH",
     "op:doboj:grapska_gornja_2": "RS",
+    "op:doboj:brijesnica_velika": "RBiH",
+    "op:doboj:klokotnica_2": "RBiH",
+    "op:foca:donje_zesce": "RBiH",
+    "op:gorazde:glamoc": "RBiH",
+    "op:gorazde:kamen": "RBiH",
+    "op:gorazde:sopotnica": "RBiH",
+    "op:trnovo:tosici": "RBiH",
     "op:doboj:makljenovac": "RS",
     "op:maglaj:donja_bocinja_2": "RS",
     "op:maglaj:gornja_bocinja": "RS",
@@ -74,7 +81,8 @@
   "rbih_hrhb_war_earliest_week": 40,
   "must_hold_osids_by_corps": {
     "vrs_drina": [
-      "op:zvornik:zvornik"
+      "op:zvornik:zvornik",
+      "op:kalesija:gojcin_2"
     ]
   },
   "comms_override_by_corps": {

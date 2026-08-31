@@ -1619,7 +1619,7 @@ export function computeDefenderPowerBreakdown(
         const terrainMult = terrainMultByOsid[targetOsid] ?? 1.0;
         const urbanMult = getUrbanMult(targetOsid);
         const forestMult = getForestMult(targetOsid);
-        const enclaveMult = getEnclaveDefenseBonus(state, targetOsid);
+        const enclaveMult = getEnclaveDefenseBonus(state, targetOsid, formation.faction);
         const toTerrainMult = getToTerrainDefenseMult(getFormationTier(formation), targetOsid, terrainMultByOsid);
         const decorationDefBonus = getDecorationDefBonus(formation);
         const perBrigadeTerrainBonus = 1.0 + (formation.defense_terrain_bonus ?? decorationDefBonus);

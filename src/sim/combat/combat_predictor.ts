@@ -470,7 +470,7 @@ export function predictCombatOutcome(
 
     // Enclave garrison: organized civilian defense (same as resolver)
     const garrisonPower = getEnclaveGarrisonPower(
-        state, targetOsid, osidPopulationMap?.get(targetOsid) ?? 0
+        state, targetOsid, osidPopulationMap?.get(targetOsid) ?? 0, controller
     );
     defenderPower += garrisonPower;
 

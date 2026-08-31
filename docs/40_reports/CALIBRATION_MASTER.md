@@ -1,5 +1,63 @@
 # AWWV Calibration Master Reference
 
+> **ARCHIVED BRANCH CANDIDATE — NOT CURRENT AUTHORITY (2026-08-31).** This file belongs to
+> `codex/upper-drina-40w-final`, which diverged before the current canonical rebaseline. Its
+> 680/712 January result is preserved as experimental evidence only. The dirty candidate also
+> contains seven `osid_control_overrides`, a new must-hold cell, expanded enclave membership,
+> and an OOB strength change; those surfaces conflict with current calibration/engine rules and
+> were not integrated. Consult `codex/ui-typography-overhaul` and its pushed
+> `CALIBRATION_MASTER.md` for present authority.
+
+## 2026-08-25 master Upper Drina follow-on — **680 / 712 January; later checkpoints deferred**
+
+The retained master-scenario candidate is definitive 188-week run n41
+(`apr1992_definitive_188w__83515110f7978351__w188_n41`, final hash
+`1edfee9a65ff07ca`). Replayed against the current painter it scores
+**680 / 663 / 662 / 627** at January 1993 / April 1994 / April 1995 / October 1995.
+Per owner direction, only January is an acceptance criterion in this slice; the later divergence
+is recorded for the later-fallout lane and was not tuned here.
+
+January improves **677 → 680** overall and **66/77 → 68/77** in Goražde, Foča, Rudo,
+Čajniče, Višegrad, Pale, Trnovo, Rogatica, and Kalinovik. The causal Upper Drina gains are
+`op:cajnice:batotici` (ordinary operation combat) and `op:foca:brusna_2` (the resulting local
+control cascade). `op:kalesija:gojcin_2` is a third correct January change caused by global
+operation scheduling and is reported as incidental, not attributed to Upper Drina combat.
+
+`Operation Gorazde Local Approach` now remains reachable through turn 28 after the master
+trajectory's delayed Herzegovina Consolidation, stages from RS-held Čajniče, and preserves the
+objective sequence Batotići → Miljeno → Podkožara. The master run showed Čajniče Brigade below
+the 500-person participant floor and Foča Brigade unable to carry the first attack alone, so
+Kalinovik, Nevesinje, and Bileća provide same-corps depth. The AAR launches at turn 24 with
+Bileća/Foča/Nevesinje, captures Batotići, and then stalls at Miljeno. Operation Višegrad and its
+targets are unchanged; Međeđa and Drinsko remain outside it.
+
+Rejected master candidates are part of the evidence: window-only n38 stayed 677; Kalinovik-only
+n39 reached 678 without an authored capture; Nevesinje n40 stayed 678; extra planning n44 stayed
+680; Miljeno-first n45 fell to 678; forcing the delayed 2nd Herzegovina Brigade into the startup
+fell to 678 because it was depleted around Stolac before the follow-on; and restoring Donje Žešće
+as a master startup override rerouted the campaign to 677. All rejected production changes were
+reverted. Glamoč, Kamen, and Sopotnica remain RS-start/RBiH-painted mismatches; the current enclave
+guard deliberately excludes them from paramilitary sweeps, so no startup repaint or guard bypass
+was retained.
+
+## 2026-08-25 master-scenario January checkpoint — **677 / 712; Rat and Prozor repainted HRHB**
+
+The single definitive calibration trajectory is `apr1992_definitive_188w`. Fresh master run n37
+(`50373153a504b5a3`, dirty working-tree provenance at commit `5b9801251`) scores the CURRENT painted
+references at **677 / 660 / 658 / 646** for January 1993 / April 1994 / April 1995 / October 1995.
+January is **677/712 (95.08%)**, area-weighted **49,554/51,337 km² (96.53%)**. The April-1995
+checkpoint is one below its 659 gate floor; this is reported, not tuned in the January-only lane.
+
+Owner-directed reference correction: `op:novi_travnik:rat_2` and `op:prozor:prozor_2` are now
+painted HRHB at January 1993. The master trajectory already holds both HRHB at turn 39, so the
+reference-only delta on the same run state is exactly **+2 matches and +69.306 km²**. January
+painter counts are now RS 375 / RBiH 252 / HRHB 85.
+
+Master-scenario reconciliation: `op:doboj:brijesnica_velika` and `op:doboj:klokotnica_2` are RBiH
+start overrides in `apr1992_definitive_188w`; Drinsko and Međeđa inherit RBiH from the operational
+initial master, and Međeđa remains removed from Operation Višegrad. The retired 40w scenario is
+unchanged. Runs n34-n36 are development artifacts and are not calibration acceptance evidence.
+
 ## 2026-08-23 engine-truth checkpoint — **637 / 712, 31/31; assignment hole closed, pins frozen**
 
 Two fresh clean 188-week runs on simulation commit `26929e6b8` (`n3`, `n4`) are byte-identical across eight core artifacts and finish at hash `930195c6879502c7`. Both record **637/712 matched OSIDs, 31/31 authored anchors, 770 attack orders, 569 battles, zero invalid/zero-eligible/dead operations**, K:W 3.698, 6 stranded brigades, and 2 ghost-destroyed rows. Their `run_meta.json` files record exact clean Git, headless-harness, Node, and consumed-input provenance. Separately, the fail-closed engine-truth checkpoint binds each explicit run directory to its console through output-directory and final-hash evidence, then validates 188 kinded turn seals plus one final-save seal, 564 faction-week formation cells, 88,126 displacement events, three canonical casualty ledgers, the 31-anchor authored contract, and reconciled combat counters. Both runs pass with zero unresolved-assignment emissions.

@@ -29071,3 +29071,74 @@ gain without the duplicate-objective ambiguity.
 the ARBiH 1st Corps slot became occupied; Drinsko remains topologically dependent on Međeđa. These
 trials were reverted. The three remaining theatre mismatches therefore require nonlocal force pulls
 or a multi-cell chain and were not retained under the one-lever/no-regression rule.
+
+## 2026-08-25 — Reconcile January work to the single 188-week master scenario
+
+**Process correction:** the documented checkpoint-era contract says one definitive 188-week run
+scores all four historical references. The package still exposes retired 40w commands, and n34-n36
+were mistakenly run through that obsolete path. Their results are development artifacts only and
+are not retained as calibration acceptance evidence. The retired 40w scenario has no working diff.
+
+**Master-scenario changes:** `op:doboj:brijesnica_velika` and `op:doboj:klokotnica_2` are now RBiH
+start overrides in `apr1992_definitive_188w`. Drinsko and Međeđa already resolve RBiH through the
+operational initial master; Međeđa remains removed from Operation Višegrad. No avoided-OSID,
+must-hold, combat scalar, or new operation was added for the two Doboj cells.
+
+**Owner-directed January repaint:** `op:novi_travnik:rat_2` and `op:prozor:prozor_2` changed RBiH
+to HRHB in both January painter assets. Authoritative painter counts are now RS 375 / RBiH 252 /
+HRHB 85. The regression contract was observed red on the old values and green after the correction.
+
+**Fresh definitive evidence:** 188-week n37 (`50373153a504b5a3`, dirty-tree provenance at
+`5b9801251`) scores current references **677 / 660 / 658 / 646**. January is 677/712 (95.08%) and
+49,554/51,337 km² area-weighted (96.53%). Rat and Prozor are both HRHB in the turn-39 state, making
+the repaint an exact +2 / +69.306 km² reference correction on that same state. Teočak holds at all
+four checkpoints. Engine health passes all reported bands except April 1995, which is 658 against
+the existing 659 floor; no later-horizon tuning was attempted in this January-only lane.
+
+## 2026-08-25 — Master Upper Drina January follow-on (+3 overall, +2 theatre)
+
+**Scope:** only the January checkpoint of the sole `apr1992_definitive_188w` master trajectory.
+No retired 40-week run was used as acceptance evidence. Later checkpoint changes were measured
+but explicitly deferred under owner direction.
+
+**Retained behavior:** `Operation Gorazde Local Approach` now survives the master's delayed
+Herzegovina queue through turn 28, stages at Čajniče, and sequences Batotići, Miljeno, then
+Podkožara. Same-corps Kalinovik, Nevesinje, and Bileća depth prevents the live builder from
+dropping below its participant floor after Čajniče Brigade is depleted. Operation Višegrad is
+unchanged and still excludes Međeđa/Drinsko.
+
+**Measured result:** definitive n41, final hash `1edfee9a65ff07ca`, scores
+**680 / 663 / 662 / 627** across the four current references. January moves 677→680 overall and
+66/77→68/77 in the nine-municipality Upper Drina theatre. Batotići is a logged combat capture;
+Brusna is the causal local cascade; Gojčin is an incidental correct scheduling change outside the
+theatre. The operation then fails at Miljeno. Teočak holds at all four checkpoints.
+
+**Rejected/reverted:** window-only, Kalinovik-only, Nevesinje-only, extra-planning,
+Miljeno-first, forced 2nd Herzegovina startup, and Donje Žešće startup-override candidates.
+Scores ranged 677–680; none beat n41. The 2nd Herzegovina row was depleted below eligibility near
+Stolac, and Donje Žešće rerouted the full campaign despite correcting its own startup cell.
+Glamoč/Kamen/Sopotnica remain unresolved because the canon enclave guard intentionally blocks the
+paramilitary mechanism that flipped them in obsolete artifacts; no guard bypass or repaint was
+retained.
+
+## 2026-08-31 — Upper Drina dirty state preserved as an archived candidate
+
+**Status correction:** this branch is not current calibration authority and is not approved for
+integration. Its working state predates the 2026-08-31 canonical rebaseline and carries a mixed
+candidate bundle: seven master-scenario `osid_control_overrides`, a Gojčin must-hold addition,
+Rat/Prozor painter corrections, Foča Brigade strength 1000→1400, expanded Žepa/Goražde enclave
+membership, defender-faction ownership guards for enclave bonuses, and a widened Čajniče-to-
+Podkožara follow-on. The tracked latest-run save records the experiment; it is not a baseline pin.
+
+**Why preserved:** 30 unique commits and this uncommitted measurement state existed only locally.
+The owner directed repository-wide commit/push/documentation housekeeping, so the exact state is
+committed and pushed on `codex/upper-drina-40w-final` rather than discarded. Preservation does not
+waive the sacred initial-control rule, authorize the must-hold/enclave changes, or supersede the
+current canonical branch. Any future salvage must split the bundle, rebase it onto current canon,
+remove prohibited initial-control tuning, and re-measure under the current engine.
+
+**Preservation verification:** the six directly affected test files pass 162/162 and typecheck exits
+zero. The first startup-snapshot check correctly detected that the interrupted working snapshot was
+stale; the standard builder regenerated it, and the immediate check then passed. `git diff --check`
+also passes. No new scenario run was started for this housekeeping commit; the tracked latest-run
+save remains the branch's pre-existing experimental artifact.

@@ -137,8 +137,9 @@ export const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
     {
         id: 'zepa',
         faction: 'RBiH',
-        // Single painted RBiH OSID in Žepa area
-        osid_list: ['op:rogatica:zepa_2'],
+        // Painted RBiH Žepa pocket. Brcigovo is part of the same isolated
+        // Upper Drina defensive geometry and must not be passively absorbed.
+        osid_list: ['op:rogatica:brcigovo', 'op:rogatica:zepa_2'],
         resilience_start_turn: 16,  // Same timeline as Srebrenica
         capital_osid: 'op:rogatica:zepa_2',
     },
@@ -186,12 +187,15 @@ export const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
             'op:gorazde:gorazde_2',
             'op:gorazde:hrancici',
             'op:gorazde:kamen',
-            'op:gorazde:kola', 'op:gorazde:kolovarice',
+            'op:gorazde:kola',
             'op:gorazde:mravinjac_2', 'op:gorazde:novakovici',
             'op:gorazde:osjecani_2', 'op:gorazde:semihova_2',
             'op:gorazde:slatina_2', 'op:gorazde:sopotnica',
             'op:gorazde:ustipraca_2',
             'op:gorazde:zorlaci', 'op:gorazde:zorovici',
+            // Višegrad-area RBiH bridgehead cells explicitly restored outside
+            // Operation Višegrad; they remain part of the Goražde pocket geometry.
+            'op:visegrad:drinsko', 'op:visegrad:medjedja_2',
         ],
         resilience_start_turn: 0,   // BB2 p.478: organized TDF defense from April 1992
         initial_resilience: 15,     // ~37k prewar pop; less than Sarajevo but significant
@@ -447,12 +451,17 @@ export function updateEnclaveResilience(
  * fortifications but local knowledge, tunnel systems, sniping positions,
  * and determination born from siege.
  */
-export function getEnclaveDefenseBonus(state: GameState, osid: string): number {
+export function getEnclaveDefenseBonus(
+    state: GameState,
+    osid: string,
+    defenderFaction?: FactionId | null,
+): number {
     const resilience = state.political.enclave_resilience;
     if (!resilience) return 1.0;
 
     for (const enclave of ENCLAVE_DEFINITIONS) {
         if (osidBelongsToEnclave(osid, enclave)) {
+            if (defenderFaction != null && defenderFaction !== enclave.faction) continue;
             const entry = readEntry(resilience[enclave.id]);
             const base = 1.0 + entry.resilience * 0.02; // At 20: 1.40, at 45: 1.90
             return entry.hardening_active ? base * (1.0 + HARDENING_DEFENSE_BONUS) : base;
@@ -504,12 +513,14 @@ const GARRISON_EFFECTIVENESS = 0.15;
 export function getEnclaveGarrisonPower(
     state: GameState,
     osid: string,
-    osidPopulation: number
+    osidPopulation: number,
+    defenderFaction?: FactionId | null,
 ): number {
     const resilience = state.political.enclave_resilience;
 
     for (const enclave of ENCLAVE_DEFINITIONS) {
         if (osidBelongsToEnclave(osid, enclave)) {
+            if (defenderFaction != null && defenderFaction !== enclave.faction) continue;
             const entry = resilience ? readEntry(resilience[enclave.id]) : readEntry(undefined);
             // At resilience 0 (no siege adaptation): garrison still forms but at base effectiveness
             // At resilience 20 (initial Sarajevo): 1.0 + 20*0.02 = 1.4× garrison effectiveness

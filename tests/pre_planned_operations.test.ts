@@ -253,6 +253,16 @@ describe('pre-planned operations', () => {
         );
     });
 
+    it('keeps Drinsko and Medjedja outside Operation Visegrad objectives', () => {
+        const visegrad = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Visegrad');
+        assert.ok(visegrad);
+
+        assert.deepEqual(
+            visegrad.axes.flatMap((axis) => axis.objectives),
+            ['op:visegrad:visegrad_2', 'op:visegrad:kamenica_2'],
+        );
+    });
+
     it('injects one active operation per corps and preserves current queue chains', () => {
         const state = makeMinimalState();
         injectPrePlannedOperations(state);

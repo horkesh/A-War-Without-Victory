@@ -7,13 +7,27 @@
     "total_osids": 712,
     "counts": {
       "RS": 375,
-      "RBiH": 254,
-      "HRHB": 83
+      "RBiH": 252,
+      "HRHB": 85
     },
     "source": "painted_control_targets",
     "painted_at": "2026-03-17T10:04:59.555Z",
-    "revision": 4,
+    "revision": 5,
     "changelog": [
+      {
+        "date": "2026-08-25",
+        "osid": "op:novi_travnik:rat_2",
+        "from": "RBiH",
+        "to": "HRHB",
+        "rationale": "Owner determination, 2026-08-25. The January 1993 Reference Painter is authoritative for this calibration target. Recorded as an owner-directed reference correction without additional historical research."
+      },
+      {
+        "date": "2026-08-25",
+        "osid": "op:prozor:prozor_2",
+        "from": "RBiH",
+        "to": "HRHB",
+        "rationale": "Owner determination, 2026-08-25. The January 1993 Reference Painter is authoritative for this calibration target. Recorded as an owner-directed reference correction without additional historical research."
+      },
       {
         "date": "2026-08-24",
         "osid": "op:kladanj:kladanj_3",
@@ -567,7 +581,7 @@
     "op:novi_travnik:novi_travnik_2": "RBiH",
     "op:novi_travnik:orasac_2": "RBiH",
     "op:novi_travnik:rankovici_2": "HRHB",
-    "op:novi_travnik:rat_2": "RBiH",
+    "op:novi_travnik:rat_2": "HRHB",
     "op:novi_travnik:ruda_2": "HRHB",
     "op:novi_travnik:senkovici_2": "RBiH",
     "op:novi_travnik:trenica_2": "RBiH",
@@ -617,7 +631,7 @@
     "op:prozor:ljubunci_2": "HRHB",
     "op:prozor:lug_2": "RBiH",
     "op:prozor:paros": "RBiH",
-    "op:prozor:prozor_2": "RBiH",
+    "op:prozor:prozor_2": "HRHB",
     "op:prozor:rumboci_2": "HRHB",
     "op:prozor:ustirama_3": "RBiH",
     "op:prozor:uzdol_2": "RBiH",

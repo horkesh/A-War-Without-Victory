@@ -69,6 +69,12 @@ describe('Gorazde enclave defender contract', () => {
         }
     });
 
+    it('keeps the Foca Brigade above the master-trajectory local offensive floor', () => {
+        const foca = oob.find(b => b.id === 'rs_foa_brigade');
+        expect(foca, 'rs_foa_brigade missing from OOB').toBeDefined();
+        expect(foca!.initial_personnel).toBe(1400);
+    });
+
     it('rastosnica_2 starts RBiH in the 40w scenario', () => {
         const scenarioPath = path.resolve(__dirname, '../data/scenarios/apr1992_definitive_40w.json');
         const scenario = JSON.parse(fs.readFileSync(scenarioPath, 'utf8'));

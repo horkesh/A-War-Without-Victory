@@ -4,8 +4,8 @@
     "total_osids": 744,
     "counts": {
       "RS": 407,
-      "RBiH": 251,
-      "HRHB": 86
+      "RBiH": 249,
+      "HRHB": 88
     },
     "painted_at": "2026-03-17T10:04:59.555Z"
   },
@@ -460,7 +460,7 @@
     "op:vogosca:vogosca_3": "RS",
     "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo": "RBiH",
     "op:novo_sarajevo:lukavica": "RS",
-    "op:novi_travnik:rat_2": "RBiH",
+    "op:novi_travnik:rat_2": "HRHB",
     "op:novi_travnik:novi_travnik_2": "RBiH",
     "op:novi_travnik:ruda_2": "HRHB",
     "op:novi_travnik:rankovici_2": "HRHB",
@@ -500,7 +500,7 @@
     "op:prozor:ljubunci_2": "HRHB",
     "op:prozor:paros": "RBiH",
     "op:prozor:jaklici": "HRHB",
-    "op:prozor:prozor_2": "RBiH",
+    "op:prozor:prozor_2": "HRHB",
     "op:rogatica:kramer_selo_2": "RS",
     "op:rogatica:kovanj": "RS",
     "op:rogatica:varosiste_2": "RS",

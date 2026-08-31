@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
     updateEnclaveResilience,
     getEnclaveDefenseBonus,
+    getEnclaveGarrisonPower,
     getEnclaveCohesionRecovery,
     getMaxEnclaveResilienceForFaction,
     readResilience,
@@ -199,6 +200,21 @@ describe('getEnclaveDefenseBonus — with hardening', () => {
   } as any,
 });
         expect(getEnclaveDefenseBonus(state, 'op:banja_luka:center')).toBe(1.0);
+    });
+
+    it('does not lend an RBiH enclave bonus or garrison to a hostile occupier', () => {
+        const state = makeMinimalState({
+            political: {
+                enclave_resilience: {
+                    srebrenica: { resilience: 20, isolation_turns: 10, hardening_active: true },
+                },
+            } as any,
+        });
+
+        expect(getEnclaveDefenseBonus(state, SREB_OSID_1, 'RS')).toBe(1.0);
+        expect(getEnclaveGarrisonPower(state, SREB_OSID_1, 10_000, 'RS')).toBe(0);
+        expect(getEnclaveDefenseBonus(state, SREB_OSID_1, 'RBiH')).toBeGreaterThan(1.0);
+        expect(getEnclaveGarrisonPower(state, SREB_OSID_1, 10_000, 'RBiH')).toBeGreaterThan(0);
     });
 });
 
