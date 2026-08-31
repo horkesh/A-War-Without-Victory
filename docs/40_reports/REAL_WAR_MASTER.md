@@ -911,6 +911,44 @@ Sector :2 (Rogatica/Sokolac, 18 edges) has 0 assigned brigades. SCR still shows 
 
 ## Open / Under Investigation
 
+### Probe instances inflate the live-operation count in a PLAYER campaign — read the number carefully (2026-09-01)
+
+**Where it bit.** The first full 188-week player campaign (D2, RS, Level 3 —
+`docs/40_reports/playtests/20260901_d2_rs_188week_full_campaign_diary.md`) ends with 6 live
+operations against the calibration line's 3, and has run higher since roughly week 40. Read naively
+that says the player fights twice as much. It does not.
+
+**What it actually is.** `tools/ai_play/op_launch_diff.ts` records the first turn each
+`(corps, operation)` appears in `active_operations` on each path and diffs them. Over 45 turns:
+
+```
+calibration-only:  42 probes + 1 named operation
+harness-only:      57 probes + 2 named operations
+```
+
+Probes are auto-named `probe_<corps>_t<N>`, so the SAME probe machinery firing on a different turn
+reads as a different operation. The played war runs ~15 more probe instances. **Probes can never
+capture ground** (established finding), so the extra count is recon noise, not fighting.
+
+**Why it matters beyond this run.** Live-operation count is a tempting health signal and it is a
+bad one in any comparison involving a player faction: probe churn dominates the delta. Any future
+claim of the form "the player campaign is more/less active than the calibration line" that rests on
+an operation count needs the probe instances stripped out first.
+
+**Companion finding — named operations are NOT the source of the divergence.** 45 named operations
+launch on the SAME turn in both paths. Only four differ, and in BOTH directions (Herzegovina
+Consolidation +1, Majevica +7, Jajce -1, Posavina Corridor -3). This falsified the standing
+hypothesis that standing authorization delays the opening offensive. Three named operations differ
+in existence — `Operacija Strijela` (arbih_3rd_corps, calibration only), `Operacija Ihlas`
+(arbih_3rd_corps, harness only), `Operacija Oklop` (vrs_sarajevo_romanija, harness only) — and two
+of the three are in a faction the player is not commanding, so the divergence is downstream bot
+response to a marginally different board, not the player's own war. Not chased: the queued RBiH and
+HRHB campaigns discriminate ambient bot variation from a player-specific effect for free.
+
+**Not yet measured:** the probe attribution is from a 45-turn diff. The 188-turn endpoint ratio
+(6 vs 3) is explained by inference from the opening, not by direct measurement there.
+
+
 ### 33. RS brigade-dissolution asymmetry (15x) via cohesion-ratchet — FIXED (flag default-ON, 188w floor re-blessed 633→630, 2026-08-05)
 
 **What we found (baseline n139, 188w run `apr1992_definitive_188w__63a3a0858050b865`):** Over the 188-week war RS suffers 61 brigade-dissolution events; RBiH only 4; HRHB 4. Three ARBiH corps (103 brigades) end the war at ~0% permanent brigade destruction; RS corps up to 61% (vrs_1st_krajina 22/36). A 15x asymmetry is absurd on its face — ARBiH lost formations historically (Srebrenica's 28th Division, Žepa, the 1992 eastern falls, the 1993 HVO war).

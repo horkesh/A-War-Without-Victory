@@ -52,13 +52,10 @@ An earlier reading of this run — taken from the t40-onward window — describe
 that never compounds. That is true after week 39 and wrong before it. The real shape is a large
 opening lag that converges.
 
-**Interpretation, offered as hypothesis not finding:** the player path's opening offensive develops
-more slowly. Historical operations now proceed under standing authorization
-(`ensureHistoricalOperationAuthorizationReview` creates the review already accepted) rather than
-being live in the baked snapshot from turn 0, so the same operations plausibly launch a beat later.
-By the January 1993 checkpoint the Drina and Krajina objectives have been taken either way and the
-paths reconverge. **This has not been attributed** — it needs the per-turn operation launch order
-diffed between paths, not inferred from territory counts.
+**HYPOTHESIS FALSIFIED — see the launch-order diff below.** This diary originally recorded, as an
+unattributed hypothesis, that the opening offensive develops more slowly because historical
+operations now proceed under standing authorization rather than sitting live in the baked snapshot
+from turn 0. `tools/ai_play/op_launch_diff.ts` was built to test exactly that, and it is wrong.
 
 That the two paths reconverge to within 2 cells by w39 and stay there for 149 more weeks is the
 substantive result. It means the opening lag is a timing difference, not an accumulating error.
@@ -72,12 +69,56 @@ substantive result. It means the opening lag is a timing difference, not an accu
 - **The mid-war plateau is reproduced.** Weeks 60–104 are static at 372/370 in both paths, the same
   frozen front the calibration line shows.
 
+## Operation launch-order diff — what actually differs
+
+`node_modules/.bin/tsx tools/ai_play/op_launch_diff.ts --turns 45 --faction RS` records the first
+turn each `(corps, operation)` appears in `active_operations` on each path and diffs them.
+
+**Named historical operations launch essentially on time.** 45 launch on the SAME turn. Only four
+differ at all, and they go BOTH directions — which is what kills the "standing authorization delays
+the opening" story:
+
+```
+LATER    +1  vrs_herzegovina  :: Operation Herzegovina Consolidation   t27 -> t28
+         +7  vrs_east_bosnian :: Operation Majevica                     t11 -> t18
+EARLIER  -1  vrs_1st_krajina  :: Operation Jajce                        t19 -> t18
+         -3  vrs_1st_krajina  :: Operation Posavina Corridor            t19 -> t16
+```
+
+**The divergence is almost entirely PROBES.**
+
+```
+calibration-only:  42 probes + 1 named operation
+harness-only:      57 probes + 2 named operations
+```
+
+Probes are auto-named `probe_<corps>_t<N>`, so a probe firing on a different turn reads as a
+different operation. This also explains the operations-count gap flagged below: the played war runs
+roughly 15 more probe instances, and **probes can never capture ground**. A higher live-operation
+count in a player campaign is therefore mostly probe noise, not more fighting — a distinction worth
+holding onto before anyone reads the number as "the player fights more".
+
+**Three named operations genuinely differ:**
+
+```
+Operacija Strijela   arbih_3rd_corps         calibration t29 — never in the played war
+Operacija Ihlas      arbih_3rd_corps         harness t34    — only in the played war
+Operacija Oklop      vrs_sarajevo_romanija   harness t22    — only in the played war
+```
+
+**Two of the three are ARBiH 3rd Corps — a faction the player is not commanding.** So the divergence
+is not in RS's own behaviour under standing authorization; it is downstream, in how the other
+factions respond to a marginally different board. Whether Strijela/Ihlas is a substitution within
+one corps or two independent differences is NOT established here and is deliberately not chased: the
+queued RBiH and HRHB campaigns are the free discriminator. If all three factions show 3rd Corps
+churn it is ambient bot variation; if it appears only when RS is the player, it earns a lane.
+
 ## Open, not resolved
 
-**The operations gap.** Harness 6 versus calibration 3 at the endpoint, and the harness has been the
-higher of the two since roughly week 40. An earlier phase-timing hypothesis (ops counted in planning
-vs execution at the sampling instant) is weakened by the gap persisting at the endpoint. It should
-be attributed before anyone reads the operation count as healthy in a player campaign.
+**The operations gap is now explained but not fully closed.** Harness 6 versus calibration 3 at the
+endpoint. The launch diff attributes the bulk of it to probe instances rather than fighting
+operations, at 45 turns. It has NOT been re-measured at the 188-turn endpoint, so the endpoint ratio
+is explained by inference from the opening, not by direct measurement there.
 
 **Single faction, single policy.** RS at Level 3 taking authored historical defaults. This is the
 BASELINE campaign — evidence that the played war tracks the historical one when the player chooses
