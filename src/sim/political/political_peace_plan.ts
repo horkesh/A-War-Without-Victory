@@ -23,7 +23,6 @@
  *   Source: UNSCR 942 (23 September 1994); Holbrooke p. 44; Burg & Shoup pp. 311-315.
  * - RBiH defiance modifier fires in scorePoliticalOption (survivalScore component)
  * - HRHB patron_sensitivity = 0.80 confirmed correct across all plans
- * - Cutileiro (plan.id === 'cutileiro') excluded from personality scoring; use legacy bot
  * - Patron hard override at >= 80 (raised from 50; at 50 patron already dominates via patronScore)
  *
  * Deterministic: no Math.random(), no Date.now(). Tie-break: 'accept' < 'reject' lexicographically.
@@ -89,16 +88,6 @@ export function computePoliticalPeacePlanResponse(
     personality: PoliticalPersonality,
     warWeek: number = 0,
 ): 'accepted' | 'rejected' {
-    // Cutileiro exclusion: pre-war plan with non-genuine acceptance dynamics.
-    // Use legacy bot (caller should handle this before calling here, but guard defensively).
-    if (plan.id === 'cutileiro') {
-        // Fallback: accept if plan gives >= current territory OR patron override active.
-        // This matches the historical reality that all three sides initially signed.
-        return (plan.proposed_split[faction] ?? 0) >= currentTerritoryPct || patronOverrideAuthority > 50
-            ? 'accepted'
-            : 'rejected';
-    }
-
     // RBiH Owen-Stoltenberg tactical acceptance branch.
     // When RBiH is in a weak position (situation_score < 50) and evaluates O-S, it accepts for
     // international optics: O-S is always evaluated when RS controls ~63%+ of territory (well above

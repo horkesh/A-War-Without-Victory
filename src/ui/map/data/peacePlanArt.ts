@@ -15,9 +15,8 @@
  *   - plan_contact_group.webp     — ruler dividing two document stacks (51/49)
  *   - plan_dayton.webp            — the empty pre-signing conference table
  *
- * PLAN ID → FILE mapping (5 catalog plans, 4 files — `cutileiro` has no
- * dedicated still and resolves `null`; the modal keeps its decision-header
- * treatment unchanged):
+ * PLAN ID → FILE mapping (4 catalog plans, 4 files — one still each since
+ * `cutileiro` was removed from the catalog on 2026-08-31 as pre-war):
  *   vance_owen       → plan_vance_owen
  *   owen_stoltenberg → plan_owen_stoltenberg
  *   contact_group    → plan_contact_group
@@ -46,9 +45,8 @@ const PEACE_PLAN_ART = import.meta.glob('../assets/plans/*.webp', {
  * Explicit, owner-editable plan id → on-disk basename map.
  *
  * Keys are the `PeacePlanDefinition.id` values from
- * `src/sim/negotiation/peace_plan_data.ts`. `cutileiro` is intentionally
- * absent (no dedicated still); an unmapped or asset-less id resolves to
- * `null` and the modal renders without a still.
+ * `src/sim/negotiation/peace_plan_data.ts`. An unmapped or asset-less id
+ * resolves to `null` and the modal renders without a still.
  */
 export const PEACE_PLAN_ID_TO_BASENAME: Readonly<Record<string, string>> = {
   vance_owen: 'plan_vance_owen.webp',

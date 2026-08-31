@@ -31173,6 +31173,30 @@ No painted control, baseline manifest, floor, or full 188-week baseline was chan
 
 **Verification:** seven focused suites pass 207/207, typecheck passes, and `git diff --check`
 passes.
+## 2026-08-31 — Cutileiro wartime-catalog removal candidate preserved, NOT ADOPTED
+
+**Owner direction represented by the candidate:** Cutileiro/Lisbon belongs to the pre-war March 1992
+record and should not appear as a live negotiation after the April 1992 campaign begins. The working
+candidate removes `cutileiro` from `PEACE_PLANS`, deletes the week-zero/first-war-turn catch-up and
+documented-disposition replay, removes its political-scoring exception, and updates the peace-plan
+art inventory. The generated April startup snapshot was rebuilt in the same working tree.
+
+**Authority boundary:** this preservation commit is not canonical adoption. The current
+`WAR_TERMINATION_SPEC.md`, Engine Invariants, Systems Manual, determinism matrix, and regression
+tests still require the Cutileiro opening disposition. Those canon changes require their normal
+review before this candidate can be integrated. The historical essay remains valid as a record of
+the pre-war proposal; removing a wartime transaction does not erase the event from history.
+
+**Measured verification state:** a focused five-file Vitest run completed 91 tests with 73 passing
+and 18 failing. Seventeen failures are explicit stale Cutileiro catalog/catch-up/scoring contracts;
+one UI art test already passes with the four-plan catalog. This is recorded evidence of unfinished
+integration, not a green test claim. The branch is preserved and pushed so no working state is lost
+while review, canon synchronization, and regression replacement remain pending.
+
+**Commit process:** the pre-commit RE scope hook rejected this unrelated preservation commit because
+its lock still names base `c5f58b2253c46ab49d0c7437060d1b290b4fa685` while this branch is at
+`b0099d46d57385c83a2b0ac6620d6108d7a1773b`. Per the owner's explicit authorization to bypass that
+stale guard, the commit uses `HUSKY=0` after exact-path staging and `git diff --cached --check`.
 ### 2026-08-31 — Desktop campaign rebased to the definitive 188w scenario; all three sides simulated
 
 **Finding:** the shipped desktop campaign and every `tools/ai_play` playthrough started from

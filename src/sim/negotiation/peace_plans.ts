@@ -19,7 +19,6 @@ import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
 import { resolveEventDecisionCore } from '../events/resolve_decision_core.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
-const CUTILEIRO_PLAN_ID = 'cutileiro';
 const DAYTON_PLAN_ID = 'dayton';
 const VANCE_OWEN_EVENT_ID = 'vance_owen_plan_1993';
 const OWEN_STOLTENBERG_PLAN_ID = 'owen_stoltenberg';
@@ -194,14 +193,7 @@ export function evaluatePeacePlans(state: GameState): void {
 
     // Check each plan in chronological order
     for (const plan of PEACE_PLANS) {
-        // runTurn advances the turn before war phases execute, so the opening
-        // week-zero plan is first observed at war week one. Keep its recorded
-        // offer date canonical without relaxing exact-week scheduling later.
-        const openingPlanCatchUp =
-            plan.id === CUTILEIRO_PLAN_ID
-            && plan.trigger_week === 0
-            && warWeek === 1;
-        if (plan.trigger_week !== warWeek && !openingPlanCatchUp) continue;
+        if (plan.trigger_week !== warWeek) continue;
         // Dayton has its own package negotiation, trigger, and resolution flow.
         // Offering the legacy binary plan at week 185 would bypass that system.
         if (plan.id === DAYTON_PLAN_ID) continue;
@@ -221,9 +213,7 @@ export function evaluatePeacePlans(state: GameState): void {
         // Create pending peace plan
         neg.pending_peace_plan = {
             plan_id: plan.id,
-            turn_offered: openingPlanCatchUp
-                ? (state.meta.war_start_turn ?? 0)
-                : state.meta.turn,
+            turn_offered: state.meta.turn,
             bot_responses: botResponses,
         };
 
@@ -473,21 +463,10 @@ export function resolvePeacePlan(
         synchronizeVanceOwenEventDecision(state, playerResponse, playerFaction);
     }
 
-    // Cutileiro is a pre-war disposition replayed at the April 1992 start for
-    // completeness. When the player chooses their documented response, resolve
-    // the whole pre-war record as documented rather than letting week-one
-    // emergent signals rewrite the other signatories and manufacture an
-    // ahistorical unanimous settlement before play begins.
-    const replayDocumentedCutileiroOutcome =
-        planId === CUTILEIRO_PLAN_ID
-        && plan.historical_responses[playerFaction] === playerResponse;
-
     // Build complete response map: bot responses + player response
     const allResponses: Record<string, 'accepted' | 'rejected' | 'pending'> = {};
     for (const faction of CANONICAL_FACTIONS) {
-        if (replayDocumentedCutileiroOutcome) {
-            allResponses[faction] = plan.historical_responses[faction] ?? 'rejected';
-        } else if (faction === playerFaction) {
+        if (faction === playerFaction) {
             allResponses[faction] = playerResponse;
         } else {
             allResponses[faction] = neg.pending_peace_plan.bot_responses[faction] ?? 'rejected';

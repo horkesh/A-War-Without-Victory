@@ -10,44 +10,6 @@
 import type { PeacePlanDefinition } from '../../state/negotiation_types.js';
 
 /**
- * Cutileiro Plan (Lisbon Agreement), March 1992.
- * Proposed ethnic cantonization of BiH into three constituent units.
- * Trigger: week ~0 (pre-war, but included for completeness in Apr 1992 scenarios).
- */
-const CUTILEIRO_PLAN: PeacePlanDefinition = {
-    id: 'cutileiro',
-    name: 'Cutileiro Plan (Lisbon Agreement)',
-    trigger_week: 0,
-    historical_responses: {
-        RBiH: 'rejected',
-        RS: 'accepted',
-        HRHB: 'accepted',
-    },
-    proposed_split: {
-        RBiH: 44,
-        RS: 44,
-        HRHB: 12,
-    },
-    institutional_model: 'cantonization',
-    override_change_on_reject: {
-        RBiH: 5,
-        RS: 5,
-        HRHB: 5,
-    },
-    credibility_change_on_reject: {
-        RBiH: -5,
-        RS: -5,
-        HRHB: -5,
-    },
-    narrative: 'The EC-brokered Cutileiro Plan proposes dividing Bosnia-Herzegovina into three '
-        + 'ethnically-defined cantons under a weak central government. Each constituent people '
-        + 'would govern areas where they form a majority. The split would give Bosniaks and Serbs '
-        + '44% each, with Croats receiving 12%. All three sides initially agreed in Lisbon, but '
-        + 'the deal is fragile — rejection by any party will signal that partition cannot be '
-        + 'achieved through negotiation alone.',
-};
-
-/**
  * Vance-Owen Peace Plan, January 1993.
  * 10 decentralized provinces (3 Bosniak-majority, 3 Serb-majority, 3 Croat-majority, 1 mixed Sarajevo).
  * Trigger: week ~40 (roughly January 1993).
@@ -204,9 +166,20 @@ export const DAYTON_PLAN: PeacePlanDefinition = {
     narrative: 'The Dayton Peace Agreement (November 1995) establishes two entities — Republika Srpska (49%) and the Bosnian-Croat Federation (51%) — with IFOR enforcing the ceasefire. The territorial allocation ratifies the Contact Group framework that RS rejected by referendum in 1994.',
 };
 
-/** All historical peace plans in chronological order. */
+/**
+ * All historical peace plans in chronological order.
+ *
+ * CUTILEIRO REMOVED 2026-08-31 (owner: "Cutiliero needs to be removed ... It's
+ * ahistorical, that happened in March, before the war started"). The Lisbon
+ * Agreement was signed 18 March 1992 and Izetbegovic withdrew on 28 March —
+ * both before this scenario's April 1992 start. Modelling it as a live wartime
+ * negotiation required three special cases (a week-0 -> week-1 catch-up, a
+ * documented-outcome replay, and an exclusion from personality scoring), and
+ * the replay comment conceded the sim would otherwise "manufacture an
+ * ahistorical unanimous settlement before play begins". All three are gone
+ * with it.
+ */
 export const PEACE_PLANS: readonly PeacePlanDefinition[] = [
-    CUTILEIRO_PLAN,
     VANCE_OWEN_PLAN,
     OWEN_STOLTENBERG_PLAN,
     CONTACT_GROUP_PLAN,
