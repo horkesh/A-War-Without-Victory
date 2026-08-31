@@ -1,29 +1,18 @@
-LANE: PLAYTHROUGH HARNESS PARITY (2026-08-31)
+LANE: D2 — FULL CAMPAIGN PLAYTHROUGH, START TO DAYTON (2026-09-01)
 
-Goal (owner): "a harness for playing that will be able to produce the exact same
-results as the calibration runs. Only THEN can we play with ahistorical results."
+The D2 diary sequence (20260731_D2_OWNER_DIARY_REMEDIATION_AND_REPOSITORY_CLOSEOUT)
+reached 104 weeks as an active RS player. The outstanding piece is a FULL campaign,
+week 0 to Dayton at w188 — the standing 1.0 go/no-go, previously impossible because a
+headless playthrough stalled on decisions and authorizations nobody answered.
 
-DONE: observer parity is byte-identical for the full 188 weeks (t0..t188, every turn,
-through Dayton at w185). tools/ai_play/parity_probe.ts is the standing instrument.
+That blocker is gone as of PR #490 (merged edf69e27d): historical operations proceed
+under standing authorization, Level-3 resolves player decisions to their authored
+historical response, and observer parity is byte-identical to the calibration line for
+all 188 turns.
 
-THIS CHANGE: make a Level-3 (Observer) playthrough complete instead of stalling.
- - Historical operations: the authorization review is now born ACCEPTED, so staff
-   proceed under standing authorization (owner: "Auto-authorize. It should be the same
-   as headless calibration runs, which do run those ops.").
- - Player events at Level 3 resolve to their AUTHORED HISTORICAL default, forced even
-   under decision_mode 'emergent' (owner: "Even the events should be auto-accepted with
-   historical option."). Plus a sweep for decisions queued before Observer engaged.
+THIS RUN: tools/ai_play/parity_probe.ts --turns 188 --faction RS --play --autonomy 3.
+It advances BOTH paths, so the calibration line is carried alongside as the
+counterfactual — distance-from-history per turn rather than a bare playthrough.
 
-Measured RS at t40: territory 324 -> 372 against calibration's 374; live ops 1 -> 7;
-unresolved authorizations 9 -> 0; pending decisions 3 -> 0.
-
-PURPOSE OF THIS RUN: operations that previously never launched now do, so this is a
-combat-behaviour change and needs a 188w measurement.
-
-COMPARE AGAINST n389, NOT n388. n389 is Node 24 with Cutileiro already removed, so it
-differs from this run in exactly one variable: the auto-authorize change. n388 is Node 22
-and would confound the two.
-
-CAVEAT: Node 24.13.0, the only toolchain here; .nvmrc now pins 22 and the new launch gate
-refuses off-major runs, so this run uses AWWV_PROVENANCE_OVERRIDE and is disqualified from
-any §6 verdict by construction.
+Node 22.23.2 (pinned). Purpose is a playtest observation, NOT a calibration bless: no
+threshold moves, no baseline refresh, no manifest touch.
