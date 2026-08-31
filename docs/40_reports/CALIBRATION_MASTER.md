@@ -46,6 +46,24 @@ promotes `n388` as the future-work provenance authority without rewriting identi
 golden hashes. The committed manifest SHA-256 before these documentation edits remains
 `0e96d999476e06e91b7ebdd6d11a71f1c0c378815e72aa1eb8843d56626c4a4e`.
 
+### Pending Foča takeover candidate — bounded proof only, not adopted
+
+Owner-directed work removes the five Foča turn-zero overrides (`izbisno`, `kosman`,
+`miljevina_2`, `tjentiste_2`, and `ustikolina`) from the active April scenario family and makes
+their takeover battle-owned by Operation Foca. A first single-axis attempt exposed a truthful
+reachability rejection: the Bileća brigade cannot march through RS-controlled territory to the
+Foča-town staging area within the operation's planning budget. The catalog now assigns the local
+Foča brigade to the northern valley and the Bileća brigade to a southern axis staged at
+`op:gacko:izgori`; no engine exception, direct control write, event flip, must-hold rule, or initial
+override replaces the deleted entries.
+
+Bounded Node 22.23.2 evidence is retained at
+`F:\A-War-Without-Victory\runs\codex_foca_takeover_dev\apr1992_definitive_188w__7c3a0f299a8c80e9__w40_n1`
+(final hash `14518b3e46df6d25`). All five cells start RBiH and finish RS through Operation Foca's
+logged captures during turns 8–12; the January checkpoint is 694/712. This dirty-provenance,
+40-week development run does **not** supersede clean baseline `n388`, reconcile the manifest, or
+authorize new floors. A clean owner-authorized 188-week run is still required for adoption.
+
 ### Previous RE reference — historical lineage, superseded for current calibration
 
 The clean corrected RE baseline pair was captured by the fresh distinct-output Node-22 runs at exact commit

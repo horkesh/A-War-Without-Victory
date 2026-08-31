@@ -108,6 +108,32 @@ function makeMinimalState(): GameState {
 }
 
 describe('pre-planned operations', () => {
+    it('assigns the former Foča start-override cells to Operation Foca combat', () => {
+        const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Foca');
+        assert.ok(operation);
+        const valleyAxis = operation.axes.find((candidate) => candidate.axis_id === 'foca_valley');
+        assert.ok(valleyAxis);
+        assert.equal(valleyAxis.staging_osid, 'op:foca:foca_3');
+        assert.deepEqual(valleyAxis.brigades, ['rs_foa_brigade']);
+        assert.deepEqual(valleyAxis.objectives, [
+            'op:foca:patkovina',
+            'op:foca:prevrac',
+            'op:foca:ustikolina',
+            'op:gorazde:kolovarice',
+        ]);
+
+        const southernAxis = operation.axes.find((candidate) => candidate.axis_id === 'foca_south');
+        assert.ok(southernAxis);
+        assert.equal(southernAxis.staging_osid, 'op:gacko:izgori');
+        assert.deepEqual(southernAxis.brigades, ['rs_bilea_brigade']);
+        assert.deepEqual(southernAxis.objectives, [
+            'op:foca:tjentiste_2',
+            'op:foca:miljevina_2',
+            'op:foca:izbisno',
+            'op:foca:kosman',
+        ]);
+    });
+
     it('defines staggered local ARBiH operations for Visoko-Breza and Maglaj', () => {
         const visoko = _ALL_PRE_PLANNED.find((def) => def.name === 'Visoko–Breza Line Clearing');
         assert.ok(visoko);
@@ -1304,7 +1330,7 @@ describe('pre-planned operations', () => {
         assert.ok(!brigades.includes('jna_mostar_garrison_tg'));
     });
 
-    it('preserves authored main effort for queued Operation Foca when Bileca is also viable', () => {
+    it('assigns queued Operation Foca brigades to their reachable authored axes', () => {
         const state = makeMinimalState();
         state.meta.turn = 8;
         const command = state.military.corps_command!.vrs_herzegovina!;
@@ -1318,9 +1344,13 @@ describe('pre-planned operations', () => {
         assert.ok(foca);
         const focaValley = foca!.axes?.find((axis) => axis.axis_id === 'foca_valley');
         assert.ok(focaValley);
-        assert.deepEqual(focaValley!.assigned_brigades, ['rs_foa_brigade', 'rs_bilea_brigade']);
+        assert.deepEqual(focaValley!.assigned_brigades, ['rs_foa_brigade']);
         assert.equal(focaValley!.main_brigade, 'rs_foa_brigade');
-        assert.deepEqual(focaValley!.support_brigades, ['rs_bilea_brigade']);
+        assert.equal(focaValley!.support_brigades, undefined);
+        const focaSouth = foca!.axes?.find((axis) => axis.axis_id === 'foca_south');
+        assert.ok(focaSouth);
+        assert.deepEqual(focaSouth!.assigned_brigades, ['rs_bilea_brigade']);
+        assert.equal(focaSouth!.main_brigade, 'rs_bilea_brigade');
     });
 
     it('excludes queued Operation Foca brigades that cannot reach the authored axis staging area', () => {

@@ -644,9 +644,11 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         // Historically VRS held the Foča-Kalinovik axis and pressed the Goražde pocket (BB1 p.193,
         // BB2 p.514).
         //
-        // IMPORTANT: All Foča-municipality OSIDs (foca_3, brusna_2, etc.) AND all Kalinovik
-        // OSIDs start RS (municipality-level initial control). The old objective lists were
-        // entirely RS from turn 0 — both axes produced op_empty on every run.
+        // Foča town and several approach OSIDs begin RS from census-derived control, while five
+        // large municipality cells begin RBiH and must be taken through combat. BB1 p.187 dates
+        // the capture of Foča and the subsequent municipal mop-up to April 1992. Two converging
+        // axes model that takeover: the Foča brigade clears the northern valley while the Bileća
+        // brigade advances from its reachable southern staging area through Tjentište.
         //
         // foca_valley fix: foca_3 → prevrac (RS waypoint, foca_3-adjacent). The original
         //   gorazde:kolovarice + gorazde:ustipraca_2 objectives are painted RBiH and caused RS
@@ -672,24 +674,36 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
             {
                 axis_id: 'foca_valley',
                 name: 'Foca Valley',
-                brigades: [
-                    'rs_foa_brigade',
-                    'rs_bilea_brigade',
-                ],
-                // foca_3 → patkovina (RBiH; painted RS) → prevrac (RS waypoint) → kolovarice (RBiH; painted RS).
-                // R22 2026-05-25: inserted patkovina before prevrac.
-                // R23 2026-05-25: ustikolina inserted then REVERTED — zero-delta (identical political_controllers,
-                //   84.55% unchanged). Patkovina captured at wi=10 and lost before wi=188; ustikolina never captured.
-                // foca_3 adj patkovina ✓, patkovina adj prevrac ✓, prevrac adj kolovarice ✓ (all verified).
+                brigades: ['rs_foa_brigade'],
+                // The local brigade clears the northern valley from Foča through Patkovina and
+                // RS-held Prevrac to Ustikolina. Held waypoints are stripped at execution.
                 // patkovina 89.2 km²; painted RS; sim=RBiH — legitimate target.
                 // ustipraca_2 removed (painted RBiH, caused DRINA over-capture in n1243).
                 // VRS historically pressed the Goražde enclave from the west (BB2 p.289).
                 objectives: [
                     'op:foca:patkovina',            // RBiH-held; painted RS — R22 insertion, foca_3-adjacent
-                    'op:foca:prevrac',              // RS waypoint (patkovina-adjacent); stripped at execution
+                    'op:foca:prevrac',              // RS waypoint; stripped at execution
+                    'op:foca:ustikolina',           // census RBiH; painted RS — northern branch from Prevrac
                     'op:gorazde:kolovarice',         // RBiH-held; painted RS — legitimate enclave approach target
                 ],
                 staging_osid: 'op:foca:foca_3',
+            },
+            {
+                axis_id: 'foca_south',
+                name: 'Foča Southern Mop-Up',
+                brigades: ['rs_bilea_brigade'],
+                // Bileća cannot reach foca_3 through RS territory during the six-turn planning
+                // window, so assigning it to foca_valley made the authored participant illusory.
+                // It can reach RS-held Izgori in three edges. From there Tjentište is adjacent,
+                // and the remaining objectives clear the southern municipality toward RS-held Brod.
+                // BB1 p.187: after Foča fell in April, Serb forces mopped up the municipality.
+                objectives: [
+                    'op:foca:tjentiste_2',
+                    'op:foca:miljevina_2',
+                    'op:foca:izbisno',
+                    'op:foca:kosman',
+                ],
+                staging_osid: 'op:gacko:izgori',
             },
             {
                 axis_id: 'cajnice_south',

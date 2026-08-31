@@ -12,7 +12,35 @@ const ACTIVE_SCENARIO_FILES = getAvailableScenarios()
     .filter((file) => file.length > 0)
     .sort();
 
+const ACTIVE_APRIL_DEFINITIVE_SCENARIOS = [
+    'apr1992_definitive_40w.json',
+    'apr1992_definitive_40w_emergent.json',
+    'apr1992_definitive_52w.json',
+    'apr1992_definitive_104w.json',
+    'apr1992_definitive_188w.json',
+    'apr1992_definitive_188w_dayton_close.json',
+] as const;
+
 describe('scenario guardrails', () => {
+    it('keeps Foča takeover cells out of active April 1992 starting-control overrides', () => {
+        const violations: string[] = [];
+
+        for (const scenarioFile of ACTIVE_APRIL_DEFINITIVE_SCENARIOS) {
+            const scenarioPath = join(process.cwd(), 'data', 'scenarios', scenarioFile);
+            const raw = JSON.parse(readFileSync(scenarioPath, 'utf8')) as {
+                osid_control_overrides?: Record<string, string>;
+            };
+            const focaOverrides = Object.keys(raw.osid_control_overrides ?? {})
+                .filter((osid) => osid.startsWith('op:foca:'))
+                .sort();
+            if (focaOverrides.length > 0) {
+                violations.push(`${scenarioFile}: ${focaOverrides.join(', ')}`);
+            }
+        }
+
+        expect(violations).toEqual([]);
+    });
+
     it('rejects non-empty avoided_osids_by_faction instead of silently consuming bot compensation', () => {
         expect(() =>
             normalizeScenario({

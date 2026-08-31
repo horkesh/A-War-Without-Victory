@@ -31043,3 +31043,32 @@ were deliberately left unchanged rather than rewritten with identical content. T
 incidental tracked `data/derived/latest_run_final_save.json` map-viewer write was restored; the
 retained absolute run directory is the evidence artifact. This confirmation does not close the
 documented lethality shortfall or the zero-attack-operation advisory.
+
+## 2026-08-31 — Foča start overrides removed; takeover moved to ordinary combat (candidate)
+
+**Owner direction:** the five Foča OSIDs that legitimately begin RBiH must not be corrected by
+turn-zero overrides. Their historical April 1992 RS takeover belongs to a special operation and
+must be earned through ordinary combat. BB1 p.187 records the capture of Foča followed by the
+municipal mop-up.
+
+**Implementation:** removed `op:foca:izbisno`, `op:foca:kosman`,
+`op:foca:miljevina_2`, `op:foca:tjentiste_2`, and `op:foca:ustikolina` from all six active April
+definitive scenarios. Operation Foca now has two reachable axes: `rs_foa_brigade` clears the
+northern valley from Foča town, while `rs_bilea_brigade` stages at RS-held
+`op:gacko:izgori` and clears the southern municipality through Tjentište. Control remains
+battle-owned by `CorpsOperation`; no engine exception, direct controller write, event flip,
+must-hold rule, or replacement initial override was added.
+
+**Defect finding:** the first bounded design retained Bileća on the Foča-town axis. The engine's
+reachability gate correctly excluded it because no RS-controlled route reached that staging area
+inside the planning budget. The defect was in the authored operation catalog, not the engine, and
+was corrected before calibration tuning.
+
+**Bounded evidence:** Node 22.23.2 run
+`F:\A-War-Without-Victory\runs\codex_foca_takeover_dev\apr1992_definitive_188w__7c3a0f299a8c80e9__w40_n1`
+(final hash `14518b3e46df6d25`) uses the canonical 188-week scenario with a 40-week development
+override and explicit dirty-provenance stamp. All five cells start RBiH and finish RS through
+Operation Foca's logged captures in turns 8–12. The operation made 14 attacks; the January
+checkpoint is 694/712. Focused suites pass 67/67 and typecheck passes. This is candidate evidence
+only: clean 188-week adoption, full health comparison, and any baseline reconciliation await
+separate owner authorization.
