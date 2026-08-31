@@ -31457,3 +31457,62 @@ here. Check `git status` first, or use `git stash create` with an explicit ref.
 (`docs/plans/2026-08-31-s6-ring3-half-migration-packet.md`); the Srebrenica enclave-definition
 defect (`docs/plans/2026-08-31-srebrenica-enclave-definition-defect.md`); the deterministic-Math
 lane; endgame dimension rail-saturation. D2 is unblocked.
+
+### 2026-09-01 — D2: first full campaigns played, week 0 to Dayton, all three factions
+
+**Verdict: D2 ANSWERED, CONDITIONAL.** The campaign completes for every faction with zero unanswered
+decisions and zero unresolved authorizations across all 188 turns — the blocking defect is gone.
+One named defect blocks ahistorical use.
+
+**Runs.** `parity_probe --turns 188 --faction <F> --play --autonomy 3`, Node 22.23.2, base
+`edf69e27d`. The probe advances BOTH paths, carrying the calibration line as the counterfactual.
+
+Calibration at t188: RBiH 294 / RS 319 / HRHB 99.
+
+| player | harness endpoint | player faction vs history |
+|---|---|---:|
+| RS | 292 / 317 / 103 | −2 |
+| RBiH | 272 / 349 / 91 | **−22** |
+| HRHB | 289 / 342 / 81 | **−18** |
+
+**THE PLAYER FACTION IS HANDICAPPED, AND ONLY LATE.** All three track within ~2 cells for 156 of
+188 weeks, then two blow out in the final 32 — the late-1995 Federation offensive window. The played
+faction's share of that offensive does not arrive: RBiH gains +4 where history gives +24; HRHB gains
+0 where history gives +16. RS converges because RS has no late-war offensive to suppress, which is
+why the RS run alone read as a clean pass. One faction was the wrong sample.
+
+**ROOT CAUSE, LOCATED.** `scenario_runner.ts:2646` sweeps every faction's opportunities post-turn
+with an explicit `null`; the in-pipeline step (`war_phases.ts:2549-2551`) skips the player faction —
+correct at Levels 0-2, where those decisions are a present human's — and `advanceTurn` never runs
+the post-turn sweep that would resolve them afterwards. The player faction's opportunity-driven
+operations are never decided. Late-war Federation offensives are exactly that kind of operation, and
+the evidence agrees on all three axes: late-war only, attacking factions only, never RS.
+
+This gap was recorded on 2026-08-31 as one of the post-turn steps `advanceTurn` omits and left
+unclosed because nothing had shown it mattered. Queued with fix options and verification bar in
+`docs/plans/2026-09-01-player-opportunity-sweep-gap.md`. **Not attempted in the same breath as
+finding it.**
+
+**A FALSIFIED HYPOTHESIS, corrected in the record.** The RS diary originally attributed the opening
+divergence (peaking at −28 OSIDs around week 20, closing by week 39) to standing authorization
+launching historical operations a beat later than the baked snapshot. `tools/ai_play/op_launch_diff.ts`
+was built to test it and killed it: 45 named operations launch on the SAME turn in both paths, and
+the only four that differ go in BOTH directions (Herzegovina Consolidation +1, Majevica +7, Jajce
+−1, Posavina Corridor −3).
+
+**What the opening divergence actually is: PROBES.** Over 45 turns, calibration-only = 42 probes + 1
+named op; harness-only = 57 probes + 2 named ops. Probes are auto-named `probe_<corps>_t<N>`, so the
+same machinery firing a turn apart reads as a different operation. This also explains the endpoint
+operations gap previously flagged as unexplained (6 vs 3): probes cannot capture ground, so the
+extra count is recon noise, not fighting. Recorded in `REAL_WAR_MASTER.md` because it generalises —
+live-operation count is a bad health signal in any comparison involving a player faction.
+
+**What holds.** Observer parity byte-identical for all 188 turns (this is a player-path defect, not
+a parity defect); the opening faithful for all three factions at the jan1993 checkpoint; the mid-war
+plateau reproduced in every run; nothing stalled across 3 factions x 188 turns.
+
+**Limits.** Three campaigns, one policy each — Level 3 taking authored historical defaults. This is
+the BASELINE set: evidence that the played war tracks history when the player chooses historically,
+and a measurement of what being the player costs before any choice is made. It says nothing yet
+about ahistorical play, which is blocked on the defect above. Not a calibration result; the scoring
+instrument remains `scenario_runner`.
