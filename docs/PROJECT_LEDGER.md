@@ -30976,3 +30976,37 @@ The BFS now uses explicit undefined guards with unchanged reachable behavior; th
 records 540 optional fields / 343 sim-domain fields. Focused inventory and baseline-ownership tests
 pass 93/93, typecheck and map build pass, and the complete Node-22 four-scenario baseline regression
 remains hash-identical after the correction.
+
+## 2026-08-31 — Repository worktree and branch preservation closeout
+
+**Registered worktrees:** housekeeping reduced the shared repository from 11 registered worktrees
+to three. The retained trees are the clean canonical `codex/ui-typography-overhaul` checkout, the
+desktop candidate checkout on `lane/desktop-calibration-parity`, and the archived Upper Drina
+checkout on `codex/upper-drina-40w-final`. Six clean/redundant worktrees, one detached performance
+checkout, and the malformed locked `re-engine-integrity-golden` checkout were removed only after
+their refs or unique files were preserved. `git worktree prune` left no stale registered metadata.
+
+**Preserved branches:** the desktop candidate is committed and pushed at `b6a3d3475`; it removes
+Cutileiro from the wartime catalog but is explicitly **not adopted**, because 18/91 focused tests
+remain red and current canon still requires the opening Cutileiro disposition. Upper Drina is
+committed and pushed at `6cf71e067`; its 162/162 focused tests, typecheck, and regenerated startup
+snapshot pass, but it is explicitly **archived/noncanonical** because the bundle includes prohibited
+initial-control overrides, a must-hold addition, OOB tuning, and expanded enclave geometry. Clean
+local-only branches `codex/eb1-coherence` (`8f6b1d211`) and `codex/re-plan-refinement`
+(`54887119e`) were pushed without merging. Remote-backed HV and playtest branch tips remain on
+origin after their redundant local worktrees/pointers were removed.
+
+**External salvage:** the detached performance tree's unique CPU profile is retained at
+`F:\AWWV-perf\archive\re_0d_candidate_fa6357833\t1c_rca.cpuprofile` with SHA-256
+`DD61FEB970BE55B653AAB8BA782E224741DA77D9D752C453680CEFE3B17BF6EA`. A content-normalized audit
+of the malformed golden checkout found 4,587 files byte-identical to its HEAD, 162 differing only
+by checkout filters/line endings, and one genuinely different file. That file is retained at
+`F:\AWWV-worktree-archives\re-engine-integrity-golden-20260831\docs\plans\2026-08-26-engine-integrity-plan.md`
+with SHA-256 `31D62877FFACD749CAF27BDAB570A7A4BCDD3BF5E59F94FE96253A128D8CD454`.
+
+**Verification and limits:** the full shared object scan `git fsck --no-dangling` exited zero. The
+canonical branch remained clean and synchronized with origin throughout the branch-preservation
+work; no canonical engine, scenario, calibration, canon, or baseline file changed. One unregistered
+filesystem shell remains at `F:\AWWV-perf\re_0d_candidate_fa6357833`, containing only a
+`node_modules` junction whose direct deletion was blocked by the filesystem guard. It is not a Git
+worktree and does not affect repository status.
