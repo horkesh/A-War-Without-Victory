@@ -30996,6 +30996,14 @@ local-only branches `codex/eb1-coherence` (`8f6b1d211`) and `codex/re-plan-refin
 (`54887119e`) were pushed without merging. Remote-backed HV and playtest branch tips remain on
 origin after their redundant local worktrees/pointers were removed.
 
+The final all-local-ref audit found six additional tips that were neither attached to worktrees nor
+contained by any remote ref. They were preserved verbatim and assigned matching upstreams:
+`codex/brcko-anchor-guard` (`dee0e4ad34`), `codex/brcko-reactive-anchor` (`d2767ade4c`),
+`codex/exhaustion-friction-fix2` (`69f4c46d63`), `codex/re-engine-integrity-execution`
+(`63671dd8c0`), `codex/re-mixed-scope-quarantine-20260827` (the same `63671dd8c0` tip), and
+`codex/rs-cohesion-floor-probe` (`fbbfb1d59e`). Pushing preserves these historical candidates; it
+does not merge or adopt them.
+
 **External salvage:** the detached performance tree's unique CPU profile is retained at
 `F:\AWWV-perf\archive\re_0d_candidate_fa6357833\t1c_rca.cpuprofile` with SHA-256
 `DD61FEB970BE55B653AAB8BA782E224741DA77D9D752C453680CEFE3B17BF6EA`. A content-normalized audit
