@@ -1034,6 +1034,40 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
 
 const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
     {
+        // Local 1st Corps perimeter action. Gornja Vratnica is an exposed RS-held
+        // micro-salient between Visoko and Breza at war start and is painted RBiH
+        // by January 1993. This remains ordinary battle-owned control: the operation
+        // only assembles the local brigades and authorizes one attack objective.
+        //
+        // This short action deliberately precedes Operation Circle in the 1st Corps
+        // slot-0 queue. Once it completes or fails, Circle can inject normally for its
+        // documented late-July Goražde/Trnovo fighting.
+        corps: 'arbih_1st_corps',
+        faction: 'RBiH',
+        name: 'Visoko–Breza Line Clearing',
+        available_from: 8,
+        staging_osid: 'op:visoko:visoko_2',
+        // This local action is opportunistic, not a sacrificial assault. Wait for
+        // the ordinary predictor to see a breakthrough and allow the later-forming
+        // Guards Brigade to join the Visoko assembly if it materializes in time.
+        min_attack_outcome: 'victory',
+        planning_duration: 8,
+        axes: [
+            {
+                axis_id: 'visoko_breza_perimeter',
+                name: 'Visoko–Breza Perimeter',
+                brigades: [
+                    'arbih_165th_mountain',
+                    'arbih_146th_light',
+                    'arbih_164th_mountain',
+                    'arbih_guards_brigade',
+                ],
+                objectives: ['op:visoko:gornja_vratnica_2'],
+                staging_osid: 'op:visoko:visoko_2',
+            },
+        ],
+    },
+    {
         // BB1 p.187: after early fighting on the Čajniče approaches, Bosnian TO/Army
         // forces launched a major late-July counteroffensive, expanded the Goražde
         // pocket, and opened the thread-like route through Trnovo. Political control
@@ -1124,6 +1158,36 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                 ],
                 objectives: ['op:bratunac:jezestica_2'],
                 staging_osid: 'op:srebrenica:bostahovine_2',
+            },
+        ],
+    },
+    {
+        // Local 3rd Corps counterattack on the north-eastern Maglaj perimeter.
+        // The target begins RS-held and contains the 1st Ozren Light Infantry;
+        // therefore the plan assembles three nearby ARBiH brigades and begins later
+        // than the lighter Visoko action. Capture remains contingent on ordinary
+        // readiness, prediction, combat, retreat, and control-flip resolution.
+        corps: 'arbih_3rd_corps',
+        faction: 'RBiH',
+        name: 'Maglaj Local Counterattack',
+        available_from: 14,
+        staging_osid: 'op:maglaj:maglaj_2',
+        // The resident Ozren force and surrounding 1KK sector make a hasty attack
+        // suicidal. Require a predicted breakthrough and give the three local
+        // brigades a full marching/assembly budget.
+        min_attack_outcome: 'victory',
+        planning_duration: 8,
+        axes: [
+            {
+                axis_id: 'maglaj_ozren_perimeter',
+                name: 'Maglaj–Ozren Perimeter',
+                brigades: [
+                    'arbih_327th_vitezka_mountain',
+                    'arbih_372nd_vitezka_mountain',
+                    'arbih_328th_mountain',
+                ],
+                objectives: ['op:maglaj:jablanica'],
+                staging_osid: 'op:maglaj:maglaj_2',
             },
         ],
     },

@@ -108,6 +108,53 @@ function makeMinimalState(): GameState {
 }
 
 describe('pre-planned operations', () => {
+    it('defines staggered local ARBiH operations for Visoko-Breza and Maglaj', () => {
+        const visoko = _ALL_PRE_PLANNED.find((def) => def.name === 'Visoko–Breza Line Clearing');
+        assert.ok(visoko);
+        assert.equal(visoko.corps, 'arbih_1st_corps');
+        assert.equal(visoko.faction, 'RBiH');
+        assert.equal(visoko.available_from, 8);
+        assert.equal(visoko.staging_osid, 'op:visoko:visoko_2');
+        assert.equal(visoko.min_attack_outcome, 'victory');
+        assert.equal(visoko.planning_duration, 8);
+        assert.deepEqual(visoko.axes, [
+            {
+                axis_id: 'visoko_breza_perimeter',
+                name: 'Visoko–Breza Perimeter',
+                brigades: [
+                    'arbih_165th_mountain',
+                    'arbih_146th_light',
+                    'arbih_164th_mountain',
+                    'arbih_guards_brigade',
+                ],
+                objectives: ['op:visoko:gornja_vratnica_2'],
+                staging_osid: 'op:visoko:visoko_2',
+            },
+        ]);
+
+        const maglaj = _ALL_PRE_PLANNED.find((def) => def.name === 'Maglaj Local Counterattack');
+        assert.ok(maglaj);
+        assert.equal(maglaj.corps, 'arbih_3rd_corps');
+        assert.equal(maglaj.faction, 'RBiH');
+        assert.equal(maglaj.available_from, 14);
+        assert.equal(maglaj.staging_osid, 'op:maglaj:maglaj_2');
+        assert.equal(maglaj.min_attack_outcome, 'victory');
+        assert.equal(maglaj.planning_duration, 8);
+        assert.deepEqual(maglaj.axes, [
+            {
+                axis_id: 'maglaj_ozren_perimeter',
+                name: 'Maglaj–Ozren Perimeter',
+                brigades: [
+                    'arbih_327th_vitezka_mountain',
+                    'arbih_372nd_vitezka_mountain',
+                    'arbih_328th_mountain',
+                ],
+                objectives: ['op:maglaj:jablanica'],
+                staging_osid: 'op:maglaj:maglaj_2',
+            },
+        ]);
+    });
+
     it('keeps the January 1993 RBiH Višegrad bridgehead outside Operation Višegrad', () => {
         const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Visegrad');
         assert.ok(operation);
@@ -226,7 +273,7 @@ describe('pre-planned operations', () => {
     });
 
     it('defines the current pre-planned operation catalog', () => {
-        assert.equal(_ALL_PRE_PLANNED.length, 21);
+        assert.equal(_ALL_PRE_PLANNED.length, 23);
         assert.deepEqual(
             _ALL_PRE_PLANNED.map((def) => def.name),
             [
@@ -254,8 +301,10 @@ describe('pre-planned operations', () => {
                 'Operation Donji Vakuf',
                 'Operation Bosanski Novi',
                 'Operation Jackal',
+                'Visoko–Breza Line Clearing',
                 'Operation Circle',
                 'Srebrenica–Cerska Link-Up',
+                'Maglaj Local Counterattack',
             ],
         );
     });

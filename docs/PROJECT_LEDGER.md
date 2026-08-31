@@ -30911,3 +30911,33 @@ Historical reports remain unchanged as evidence of what they measured. `FORAWWV.
 calibration data, and the baseline manifest were not edited. The transient tracked
 `data/derived/latest_run_final_save.json` rewrite was restored to HEAD only after its SHA-256 was
 proved byte-identical to the retained Orašje run's `final_save.json`; no run evidence was lost.
+
+## 2026-08-31 — Staggered ARBiH local operations for Visoko–Breza and Maglaj
+
+**Owner direction:** April 1992 RS control of `op:visoko:gornja_vratnica_2` and
+`op:maglaj:jablanica` is correct; ARBiH should have early-war, ordinary-operation opportunities to
+capture them rather than receiving initial-control edits or scripted flips. The two attempts are
+staggered: 1st Corps may begin the Visoko–Breza action at week 8, while 3rd Corps may begin the
+Maglaj counterattack at week 14.
+
+**Implementation:** `pre_planned_operations.ts` now contains two single-axis, single-objective
+`CorpsOperation` definitions. Visoko stages from Visoko with the local 165th, 146th, 164th, and
+later-forming Guards Brigade roster; Maglaj stages from Maglaj with the 327th, 372nd, and 328th.
+Both require a predicted victory and use an eight-week marching/assembly budget. Control remains
+battle-owned under the ordinary predictor, fog, combat, casualty, retreat, and control-flip paths.
+The operation names are simulation labels, not asserted historical codenames. Operation Circle
+remains behind the short Visoko action in 1st Corps' authored slot-zero queue.
+
+**TDD and bounded evidence:** the catalog contract failed first because both definitions were
+absent, then passed after implementation. An initial 24-week diagnostic with a permissive
+`repulsed` threshold was rejected after it produced suicidal realized ratios (Visoko 0.54/0.35;
+Maglaj 0.16/0.13). The retained design was tested on the canonical 188-week master scenario with a
+26-week override only at
+`F:\AWWV-worktrees\ui-typography-overhaul\runs\codex_arbih_local_ops_26w\apr1992_definitive_188w__715bf343fa2462d2__w26_n0`
+(final hash `219936a8c769d73e`). Visoko fought a week-14 stalemate (0.81), won at week 15
+(costly victory, 1.42), and captured Gornja Vratnica through ordinary combat. Maglaj assembled all
+three named brigades but stale intelligence preceded two catastrophic realized attacks at weeks
+20–21 (0.46/0.49); Jablanica remained RS. No distant formations were added to manufacture the
+checkpoint. A second identical 26-week run produced the same final hash,
+`219936a8c769d73e`. No 188-week run, scenario edit, calibration-data edit, canon edit, or
+baseline-manifest change was made.
