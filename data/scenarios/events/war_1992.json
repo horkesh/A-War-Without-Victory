@@ -579,8 +579,8 @@
       {
         "id": "aggressive",
         "branch_tag": "rs_aggressive",
-        "label": "Centralize operational command",
-        "description": "The Assembly decision is part of the historical record; here you determine centralized operational orders and chain-of-command reporting. General Mladic's warning remains in that record and constrains the command.",
+        "label": "Pursue all six goals by maximum force",
+        "description": "The Assembly decision is part of the historical record; here you set the operational posture behind it — prosecute all six goals by maximum force, accepting no operational restraint on the corps carrying them out. General Mladic warned the Assembly that some of these goals could not be reached without consequences the record now names; that warning remains in the record and does not constrain this order.",
         "effects": [
           {
             "kind": "morale_change",
