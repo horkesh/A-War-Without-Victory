@@ -14,11 +14,11 @@ that say a particular R6, late-war, or pre-1.0 scope was "closed" remain phase-l
 They do not close the present calibration program. The sole scoring scenario remains
 `data/scenarios/apr1992_definitive_188w.json`.
 
-### Current canonical rebaseline — clean Node 22 evidence
+### Current canonical baseline — clean Node 22 HEAD revalidation
 
 The owner-authorized clean run is
-`F:\A-War-Without-Victory\runs\apr1992_definitive_188w__46834a3b41033bff__w188_n387`
-at commit `ed6d8af8d792add2b4bf84b767729959f5bbe3db` (`git_dirty:false`, Node 22.23.2,
+`F:\A-War-Without-Victory\runs\apr1992_definitive_188w__46834a3b41033bff__w188_n388`
+at commit `3474df2e0dc7c20375c6724352b4ea79178fb761` (`git_dirty:false`, Node 22.23.2,
 final-state hash `a29714d7dabc2d9f`). It is the current canonical measurement:
 
 | checkpoint | measured | new floor |
@@ -36,9 +36,14 @@ breach. The corrected AAR advisory remains open: 12/46 operations and 16/67 axes
 attacks, while 44/200 probes and 16/50 sector attacks died in planning. Reconciliation does not
 declare those behaviors healthy and does not gate them in as a floor.
 
-The standard baseline owner regenerated all four manifest scenarios on Node 22.23.2 and reconciled
-24 changed artifact hashes (8 × 188w, 8 × 52w, 4 × baseline-ops 4w, 4 × noop 4w). The committed
-manifest SHA-256 before documentation edits is
+The run consumed input digest
+`2a931ec116acd1c8e22e667e74524fddd25a75808fbb6ec625352d682e3105a6`.
+All 14 non-metadata artifacts are byte-identical to the earlier `n387` rebaseline, and all eight
+188-week manifest-tracked artifacts match the committed hashes. The standard baseline owner had
+already regenerated all four manifest scenarios on Node 22.23.2 and reconciled 24 changed artifact
+hashes (8 × 188w, 8 × 52w, 4 × baseline-ops 4w, 4 × noop 4w). Therefore this HEAD revalidation
+promotes `n388` as the future-work provenance authority without rewriting identical thresholds or
+golden hashes. The committed manifest SHA-256 before these documentation edits remains
 `0e96d999476e06e91b7ebdd6d11a71f1c0c378815e72aa1eb8843d56626c4a4e`.
 
 ### Previous RE reference — historical lineage, superseded for current calibration
@@ -252,13 +257,13 @@ Earlier bounded historical run:
 lineage, not the current baseline. Its generic
 `run_summary.json` also retains the scenario's terminal October historical-fit/anchor contract
 when the run stops at week 39 (565/712 there is not a January score). The January **697/712**
-figure was established by replay against the January paint and is independently reproduced by the
-clean full-length n387 rebaseline above. No clean replay is owed; n387 establishes all four current
-checkpoint measurements.
+figure was established by replay against the January paint, reproduced by the clean full-length
+n387 rebaseline, and confirmed byte-for-byte by the current n388 HEAD run above. The n388 evidence
+establishes all four current checkpoint measurements.
 
 | scope | matched | mismatched | standing |
 |---|---:|---:|---|
-| National January checkpoint | **697 / 712 (97.89%)** | 15 | reproduced by current n387 |
+| National January checkpoint | **697 / 712 (97.89%)** | 15 | reproduced by current n388 |
 | Čajniče–Foča–Goražde–Pale–Trnovo–Rudo–Višegrad focus | **59 / 62 (95.16%)** | 3 | n372 regional lineage |
 
 The three n372 regional residuals were:

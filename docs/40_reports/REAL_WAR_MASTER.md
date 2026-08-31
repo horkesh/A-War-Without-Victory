@@ -1,9 +1,11 @@
 # Real War Master
 
-## Latest Review: canonical clean rebaseline — territorial fit improved; military deaths now below the working band (2026-08-31)
+## Latest Review: canonical baseline revalidated at current HEAD — military deaths remain below the working band (2026-08-31)
 
-**Run:** `F:\A-War-Without-Victory\runs\apr1992_definitive_188w__46834a3b41033bff__w188_n387` at
-`ed6d8af8d` (`git_dirty:false`, Node 22.23.2, final hash `a29714d7dabc2d9f`).
+**Run:** `F:\A-War-Without-Victory\runs\apr1992_definitive_188w__46834a3b41033bff__w188_n388` at
+`3474df2e0` (`git_dirty:false`, Node 22.23.2, final hash `a29714d7dabc2d9f`). Its 14
+non-metadata artifacts are byte-identical to `n387`, and its eight manifest-owned artifacts match
+the committed golden hashes; `n388` is therefore the current future-work baseline authority.
 
 | Faction | KIA | WIA | Missing/Captured |
 |---|---:|---:|---:|

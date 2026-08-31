@@ -31018,3 +31018,28 @@ work; no canonical engine, scenario, calibration, canon, or baseline file change
 filesystem shell remains at `F:\AWWV-perf\re_0d_candidate_fa6357833`, containing only a
 `node_modules` junction whose direct deletion was blocked by the filesystem guard. It is not a Git
 worktree and does not affect repository status.
+
+## 2026-08-31 — Current-HEAD 188-week baseline confirmation (`n388`)
+
+**Owner direction:** perform one full canonical 188-week run and make the validated result the
+baseline for future work. Exactly one full-length run was launched; no deprecated or auxiliary
+scenario was run.
+
+**Measured:** clean Node 22.23.2 run
+`F:\A-War-Without-Victory\runs\apr1992_definitive_188w__46834a3b41033bff__w188_n388`
+at `3474df2e0dc7c20375c6724352b4ea79178fb761`, with `git_dirty:false`, consumed-input digest
+`2a931ec116acd1c8e22e667e74524fddd25a75808fbb6ec625352d682e3105a6`, and final-state hash
+`a29714d7dabc2d9f`. Checkpoints are 697/677/671/644; military losses remain 51,309 killed and
+194,456 wounded; K:W is 3.790. The hard engine-health gate passes with zero zero-eligible failures,
+zero invalid-op weeks, zero ghost destructions, 13 stranded brigades, and zero consistency failures.
+The enclave guard holds 9/9. The checkpoint tool's red exit remains solely its known Farz positive
+discriminator and is not an enclave or Section 6 engine-health breach.
+
+**Baseline disposition:** every one of the eight 188-week manifest-owned artifacts matches its
+committed SHA-256, and all 14 non-metadata run artifacts are byte-identical to the prior `n387`
+rebaseline. `n388` is now the documented current-HEAD provenance authority for future work. Because
+the measured bytes and health figures did not move, the baseline manifest and health thresholds
+were deliberately left unchanged rather than rewritten with identical content. The runner's
+incidental tracked `data/derived/latest_run_final_save.json` map-viewer write was restored; the
+retained absolute run directory is the evidence artifact. This confirmation does not close the
+documented lethality shortfall or the zero-attack-operation advisory.
