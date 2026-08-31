@@ -31299,3 +31299,105 @@ construction, but it changes combat math, will move the floor, and needs its own
 argue Node does not move these figures. That is weaker than stated — n388 and n389 differ in BOTH
 Node major and the Cutileiro change, so neither variable is isolated. A clean test needs one commit
 run on both majors, which has never been done.
+
+### 2026-08-31 — Play harness reaches byte-identical parity with the calibration line
+
+**Goal (owner):** *"a harness for playing that will be able to produce the exact same results as the
+calibration runs. Only THEN can we play with ahistorical results."*
+
+**Instrument first.** `tools/ai_play/parity_probe.ts` runs one campaign down BOTH execution paths
+turn-by-turn and reports the first divergent turn plus the differing state sections. It immediately
+falsified the working assumption: the turn-loop plumbing was not the blocker — the paths **diverged
+at birth**, on five player-path startup mutations (`meta.{player_faction,
+headless_scenario_auto_control, decision_mode, autonomy_level, pending_proposal_reviews}` and
+`military.{corps_command, fired_event_ids, event_fire_counts, event_last_fired_turn,
+event_readiness, pending_event_decisions}`).
+
+**Result:** `startNewCampaign({ observerParity: true })` skips exactly those and returns the
+untouched `buildScenarioStartupState` output. Parity is byte-identical for the FULL 188 weeks —
+every turn t0..t188, through Dayton at w185 (t188 `78f0d3d98fca2f1f` on both paths). Independently
+corroborated by artifact diff: n388 vs n389 are byte-identical in 12 of 15 artifacts including
+`control_delta.json` and every week of `weekly_report.jsonl`.
+
+**What it does NOT claim.** A campaign in which a player actually decides cannot be byte-identical
+to a run with no player in it; the player path legitimately creates state the calibration path never
+does. Observer parity is the precondition that makes an ahistorical run divergence attributable to
+CHOICES rather than plumbing.
+
+### 2026-08-31 — A Level-3 playthrough now runs to completion
+
+**Finding:** a headless or LLM playthrough stalled on decisions nobody answers. Measured as RS over
+40 turns (`parity_probe --play`): 9 historical-operation authorizations unresolved, 3 event
+decisions unanswered, live operations 1 against calibration 4, and RS **50 OSIDs short** of the
+calibration line (324 vs 374). The 1992 Serb offensive did not happen when RS was the player.
+
+**Two gates, per owner direction.**
+
+1. *"Auto-authorize. It should be the same as headless calibration runs, which do run those ops."*
+   `ensureHistoricalOperationAuthorizationReview` now creates the review already accepted — the
+   receipt is still recorded and still drives `presidential_cadence`, but the operation proceeds as
+   it does with no player present. Authorization became opt-OUT via the existing stop-op lever. A
+   DECLINED review still withholds the operation; only the default moved.
+2. *"Even the events should be auto-accepted with historical option. ... We are simulating history."*
+   Level 3 (Observer) resolves the player own decisions to their AUTHORED historical response,
+   forced even under `decision_mode: 'emergent'`, `requires_player_response` included. The carve-out
+   remains in full force at Levels 0-2, where a player is present.
+
+**After:** RS at t40 territory 372 vs calibration 374 (RBiH exact), live ops 7, unresolved
+authorizations 0, pending decisions 0.
+
+**Provably inert on the calibration line.** n390 (auto-authorize) vs n389: identical
+`final_state_hash` `029b5947f61784df`, 14 of 15 artifacts byte-identical, only `run_meta.json`
+differs. `ensureHistoricalOperationAuthorizationReview` returns `not_required` for every non-player
+faction and the Level-3 branch gates on `isPlayerRespondent`, so a run with no player faction is
+untouched by construction.
+
+**REGRESSION FOUND AND FIXED, and one real defect.**
+
+- `advanceTurn` promised not to mutate its argument and did: the new `BotManager` pass wrote into
+  the caller state before `runTurn`. Now cloned via `structuredClone` — NOT a
+  serialize/deserialize round-trip, because `serializeState` validates and would convert a
+  deliberately-invalid input into "State failed validation before serialize", swallowing the
+  actionable post-turn invariant error the desktop must surface.
+- Gating Observer auto-resolve on an authored default broke the v0.8.4 Phase A contract that
+  Observer resolves EVERY player decision; events without an authored default queued forever.
+  Restored — the authored historical response is PREFERRED where one exists, otherwise the ordinary
+  bot path, as always.
+
+### 2026-08-31 — §6: rs_strategic_goals `aggressive` relabelled honestly
+
+**Four-seat §6 panel, unanimous GO** (Historian, canon-compliance, game-designer, war-or-game).
+Full packet: `docs/plans/2026-08-31-s6-ring3-half-migration-packet.md`.
+
+**Defect:** the option read "Centralize operational command" and described itself as setting
+"centralized operational orders and chain-of-command reporting" — administrative-reform wording on
+the maximum-atrocity branch. 16 downstream events gate on flag value `aggressive`, including
+`csq_accelerated_camps_discovery_1992`, `csq_early_war_crimes_tribunal_1993` and
+`rs_paramilitary_policy_1992`. A player could select the camps branch believing they were
+centralising command.
+
+**Provenance (cited so the diff cannot read as softening):** at `0ab531262` the option was "Pursue
+with maximum force" with dims mil_cred +15 / cohesion +15 / intl_standing -15. Commit `3c2e8a47f`
+relabelled Ring-3 options and rewrote `sets_flags` but left ids and `dimension_shifts` untouched —
+today numbers are byte-identical to the original. Its own ledger records that id retention was
+DELIBERATE and that only "option-level humanitarian and positive-morale effects" were in scope.
+
+**Changed:** label and description only. Flag VALUE `aggressive` deliberately untouched (id and flag
+value are separable; the 16 conditions read the value). No `dimension_shifts` touched. Wording
+lint-checked against `isDirectRefusedSensitiveChoice`. Simulation-inert: observer parity held 40
+turns; 218/218 across the event, sensitive-history and autonomy suites.
+
+**Test gap closed.** `sensitive_history_player_choice_content.test.ts` asserted labels and flags and
+read `dimension_shifts` and option `id`s NOWHERE — which is how a half-migrated option passed as
+correct, and, by locking the drina label array, why the bot picks `options[0]` every run. Both
+events now assert ids and dimension shifts, with the drina numbers pinned as-is and annotated as
+known-mispriced so the queued repair cannot land silently.
+
+**QUEUED, NOT DONE:** the drina re-pricing, and authoring its `historical_default_response_id` — the
+last decision in the game resolved by JSON array order. Needs a 188w with `control_delta` diffed.
+
+**Suite state:** every remaining red is pre-existing at `3474df2e0`, verified by baselining each:
+`war_phase_step_order`, `desktop_release_ci_guardrails` x2, `desktop_packaging_contract`,
+`map_workspace_script_contract`, `integration_deployment_health`, plus the intentional
+`deliberate_failure.fixture`. `real_save_sector_truth_contracts` and `desktop_calibration_compare`
+are artifact-driven from the refreshed run outputs.
