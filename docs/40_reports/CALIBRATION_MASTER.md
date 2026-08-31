@@ -1,16 +1,18 @@
 # AWWV Calibration Master Reference
 
-## ★ CURRENT RE/CALIBRATION AUTHORITY — 2026-08-28
+## ★ CURRENT RE/CALIBRATION AUTHORITY — 2026-08-31
 
-Further calibration is paused until [RE — 1.0 Engine Integrity](../plans/2026-08-26-engine-integrity-plan.md)
-closes. The original probe channel is closed at `b711cffa9`. P1/P2A are accepted; P2B is HELD before
-implementation and P3 waits. The owner-authorized
-[auxiliary packaged-probe recovery](../plans/2026-08-28-packaged-probe-recovery-plan.md) is a
-separate, non-calibrating safety-control lane outside RE's seven outcomes/eight packets.
-Instrumentation stopped at final R2 RED before production and there is no R3; only read-only
-alternate packaged-proof discovery may follow under a fresh lock. It grants no calibration tuning,
-threshold/manifest/reference/hash refresh, long run, RE outcome credit, or automatic P2B proof.
-The calibration pause is unchanged.
+**Calibration is OPEN by owner direction.** The 2026-08-28 pause pending RE — 1.0 Engine Integrity
+is lifted. Calibration may again run the canonical 188-week scenario, investigate engine defects,
+make owner-approved scenario/calibration changes, and deliberately reconcile thresholds and golden
+artifacts after the resulting behaviour is measured and documented. Engine defects still take
+priority over tuning: correct the engine first, then calibrate from a truthful baseline.
+
+The original probe channel remains closed at `b711cffa9`; reopening calibration does not revive its
+rejected experiments or convert historical RE evidence into current authority. Older headings below
+that say a particular R6, late-war, or pre-1.0 scope was "closed" remain phase-lineage records only.
+They do not close the present calibration program. The sole scoring scenario remains
+`data/scenarios/apr1992_definitive_188w.json`.
 
 The clean corrected RE baseline pair is captured by the fresh distinct-output Node-22 runs at exact commit
 `177882fc28ec2eaee2d2ecdc015a5a06c99ee06b`. Both 188-week runs have identical 15-file inventories,
@@ -199,7 +201,7 @@ whose ledger the October/cascade/stranded regressions belonged to: **nobody's �
 > signature of a calendar offset rather than a scheduling defect. **Do not re-raise it as a defect
 > without first establishing the mapping.**
 
-## ACCEPTED JANUARY EVIDENCE — FURTHER CALIBRATION PAUSED ON RE
+## ACCEPTED JANUARY EVIDENCE — CALIBRATION OPEN; RE PAUSE LIFTED 2026-08-31
 
 The only scoring calibration scenario is
 `data/scenarios/apr1992_definitive_188w.json` (`calibration_scenario: true`).

@@ -30941,3 +30941,15 @@ three named brigades but stale intelligence preceded two catastrophic realized a
 checkpoint. A second identical 26-week run produced the same final hash,
 `219936a8c769d73e`. No 188-week run, scenario edit, calibration-data edit, canon edit, or
 baseline-manifest change was made.
+
+## 2026-08-31 — Calibration authority reopened; canonical rebaseline authorized
+
+**Owner direction:** calibration is open. The stale 2026-08-28 pause at the top of
+`CALIBRATION_MASTER.md` is lifted, while older phase-specific closure records remain historical
+lineage rather than present authority. The canonical scoring surface remains the sole 188-week
+master scenario. Engine defects continue to take precedence over calibration tuning.
+
+**Authorized next step:** run the clean canonical 188-week scenario on the current branch, measure
+the four checkpoints and engine-health counters, deliberately reconcile the golden baseline and
+health thresholds to the accepted current engine/scenario, document the exact artifacts, then
+verify, commit, push, and clean obsolete worktree/branch metadata.
