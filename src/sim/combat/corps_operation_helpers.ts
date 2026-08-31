@@ -28,6 +28,8 @@ interface PrePlannedOpDef {
     name: string;
     planning_duration?: number;
     minimum_viable_participants?: number;
+    minimum_assembled_participants?: number;
+    execution_attack_power_mult?: number;
     staging_osid: string;
     min_attack_outcome?: CorpsOperation['min_attack_outcome'];
 }
@@ -124,6 +126,20 @@ export function findBrigadeOperationAnywhere(
         }
     }
     return null;
+}
+
+/**
+ * Exceptional authored attack-power modifier for this brigade's executing
+ * operation. The modifier is formation-scoped: mixed attack stacks must not
+ * inherit the first attacker's operation quality.
+ */
+export function getBrigadeExecutionAttackPowerMult(
+    state: GameState,
+    brigadeId: FormationId,
+): number {
+    const match = findBrigadeOperationAnywhere(state, brigadeId);
+    if (!match || match.op.phase !== 'execution') return 1;
+    return Math.max(0.5, Math.min(2, match.op.execution_attack_power_mult ?? 1));
 }
 
 /** Find a brigade's planning/execution commitment anywhere in corps command. */
@@ -264,6 +280,12 @@ export function buildCorpsOperation(
         planning_duration: def.planning_duration ?? 1,
         ...(def.minimum_viable_participants != null
             ? { minimum_viable_participants: Math.max(1, Math.trunc(def.minimum_viable_participants)) }
+            : {}),
+        ...(def.minimum_assembled_participants != null
+            ? { minimum_assembled_participants: Math.max(1, Math.trunc(def.minimum_assembled_participants)) }
+            : {}),
+        ...(def.execution_attack_power_mult != null
+            ? { execution_attack_power_mult: Math.max(0.5, Math.min(2, def.execution_attack_power_mult)) }
             : {}),
         supply_readiness: 1.0,
         momentum: 0,

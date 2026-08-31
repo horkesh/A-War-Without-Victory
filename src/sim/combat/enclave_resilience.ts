@@ -182,6 +182,7 @@ export const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
             'op:srebrenica:donji_potocari_2', 'op:srebrenica:mala_daljegosta_2',
             'op:srebrenica:ljeskovik_2',
             'op:srebrenica:luka_2', 'op:srebrenica:milacevici',
+            'op:srebrenica:obadi',
             'op:srebrenica:radovcici',
             'op:srebrenica:srebrenica_2', 'op:srebrenica:suceska',
             'op:srebrenica:sulice_2',

@@ -46,6 +46,40 @@ promotes `n388` as the future-work provenance authority without rewriting identi
 golden hashes. The committed manifest SHA-256 before these documentation edits remains
 `0e96d999476e06e91b7ebdd6d11a71f1c0c378815e72aa1eb8843d56626c4a4e`.
 
+### Eastern-enclave operation correction candidate — bounded proof, not adopted
+
+Owner-directed January work found that the summer Srebrenica–Cerska link-up could assemble but
+still launched as a generic blind sector attack, while Operation Circle's first Goražde capture
+was too costly to leave an occupier and was immediately lost to ordinary abandonment/consolidation.
+The engine now distinguishes formation assembly from the unchanged 500-person brigade attack
+floor: assembly counts usable formation presence while the predictor separately judges combined
+strength. Authored operations may persist a bounded `execution_attack_power_mult`, applied identically by
+prediction and resolution to each participating formation during execution only; it does not write or
+protect control. The link-up uses 1.55 and Circle uses 1.35.
+
+Bounded Node development evidence is
+`F:\A-War-Without-Victory\runs\codex_eastern_enclaves_final_review\apr1992_definitive_188w__7c3a0f299a8c80e9__w40_n0`
+(40-week override, dirty provenance, final hash `295f858d903ad7df`). Ježestica changes RS→RBiH
+through one logged costly victory at turn 14, joining the Cerska and Srebrenica components.
+Operation Circle takes Goražde Glamoč by normal victory and later Sopotnica by decisive victory;
+Kamen finishes RBiH through the operation's ordinary connected advance. Donje Žešće remains RS:
+the Circle Foča axis never reaches a winning ratio. Bounded health metrics are zero zero-eligible
+operations, zero invalid-op weeks, zero ghost destructions, 16 stranded brigades, zero consistency
+failures, and K:W 3.914. The 40-week health gate fails its 188-week matched-OSID floor and the
+existing stranded-brigade ceiling; neither result is represented as green. The reviewed engine also applies
+canonical operation phase modifiers through state-wide multi-corps lookup and prevents unreachable
+zero-contribution sector brigades from taking proxy casualties. Cerska reaches Srebrenica through
+the all-RBiH path Cerska–Pobudje–Ježestica–Milačevići–Srebrenica. Every painted January OSID in
+Bratunac, Vlasenica, and Srebrenica now matches, including Obadi. This candidate does not supersede
+clean baseline `n388`, reconcile the manifest, or authorize new floors; no full run was started.
+
+The engine now prevents rear-pocket paramilitary cleanup from expanding an enclave beyond its
+authored boundary; consolidation inside the boundary remains legal, while outward territorial
+change requires a CorpsOperation. This removes the false turn-1 RBiH captures of Podkozara Donja
+and Kolovarice while preserving legitimate interior consolidation at Obadi. January therefore
+improves to **702/712**. Two local operation-calibration gaps remain open rather than hidden:
+Donje Žešće and Tošići remain RS instead of RBiH. No direct control change was added.
+
 ### Pending Foča takeover candidate — bounded proof only, not adopted
 
 Owner-directed work removes the five Foča turn-zero overrides (`izbisno`, `kosman`,

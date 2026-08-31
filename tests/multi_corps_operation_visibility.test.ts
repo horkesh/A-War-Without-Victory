@@ -30,7 +30,10 @@ import { describe, it } from 'vitest';
 import {
     findBrigadeOperation,
     findBrigadeOperationAnywhere,
+    getBrigadeExecutionAttackPowerMult,
 } from '../src/sim/combat/corps_operation_helpers.js';
+import { getOperationsMult } from '../src/sim/combat/combat_math.js';
+import { isPinnedActiveOperationAttacker } from '../src/sim/combat/bot_brigade_ai_osid.js';
 import type {
     CorpsCommandState,
     CorpsOperation,
@@ -102,6 +105,24 @@ describe('multi-corps operation visibility — pre-fix bug exposure', () => {
 });
 
 describe('multi-corps operation visibility — fix contract', () => {
+    it('pins a foreign-corps participant against attack-share trimming while its hosted operation executes', () => {
+        const brigadeId = 'arbih_246th_vitezka_mountain';
+        const op = makeOp([brigadeId], 'Srebrenica–Cerska Link-Up');
+        const state = makeState({
+            arbih_2nd_corps: makeCmd([op]),
+            arbih_enclave_command: makeCmd([]),
+        });
+        state.military.formations = {
+            [brigadeId]: {
+                id: brigadeId,
+                corps_id: 'arbih_enclave_command',
+                status: 'active',
+            },
+        } as any;
+
+        assert.equal(isPinnedActiveOperationAttacker(state, brigadeId), true);
+    });
+
     it('findBrigadeOperationAnywhere finds the op via state-wide search', () => {
         const op = makeOp([
             'hvo_1st_guard_abb',
@@ -135,6 +156,31 @@ describe('multi-corps operation visibility — fix contract', () => {
         // Brigades use this to read op.phase and op.participating_brigades for directive logic;
         // they continue to use their OWN corps_command for stance, sector assignment, etc.
         assert.equal(sec1!.cmd, state.military.corps_command!.hvo_main_staff);
+    });
+
+    it('applies operation combat modifiers to foreign-corps participants by their own phase', () => {
+        const brigadeId = 'hrhb_kralj_tomislav_brigade';
+        const op = makeOp([brigadeId], 'Operation Mistral 2');
+        op.execution_attack_power_mult = 1.6;
+        const state = makeState({
+            hvo_main_staff: makeCmd([op]),
+            hvo_tomislavgrad: makeCmd([]),
+        });
+        const formation = {
+            id: brigadeId,
+            corps_id: 'hvo_tomislavgrad',
+        } as any;
+
+        assert.equal(getOperationsMult(state, formation), 1.3);
+        assert.equal(getBrigadeExecutionAttackPowerMult(state, brigadeId as any), 1.6);
+
+        op.phase = 'planning';
+        assert.equal(getOperationsMult(state, formation), 1);
+        assert.equal(getBrigadeExecutionAttackPowerMult(state, brigadeId as any), 1);
+
+        op.phase = 'recovery';
+        assert.equal(getOperationsMult(state, formation), 0.6);
+        assert.equal(getBrigadeExecutionAttackPowerMult(state, brigadeId as any), 1);
     });
 
     it('findBrigadeOperationAnywhere returns null when no op participates the brigade', () => {

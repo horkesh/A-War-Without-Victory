@@ -130,6 +130,74 @@ describe('paramilitary_sweep', () => {
             expect(report.pending_player_requests).toBe(0);
         });
 
+        it('does not let a besieged enclave expand through rear-pocket cleanup', () => {
+            const target = 'op:gorazde:podkozara_donja_2';
+            const neighbors = [
+                'op:gorazde:gorazde_2',
+                'op:gorazde:kolovarice',
+                'op:gorazde:ustipraca_2',
+            ];
+            const edges = makeEdges(neighbors.map((neighbor) => [neighbor, target]));
+            const reverseMap = makeReverseMap([target, ...neighbors]);
+            const controllers = Object.fromEntries([
+                [target, 'RS'],
+                ...neighbors.map((neighbor) => [neighbor, 'RBiH']),
+            ]);
+            const state = makeBaseState({
+                political: {
+                    political_controllers: controllers,
+                    municipalities: {
+                        gorazde: {
+                            organizational_penetration: {
+                                patriotska_liga: 90,
+                                paramilitary_rs: 5,
+                            },
+                        },
+                    },
+                } as any,
+            });
+
+            const report = detectParamilitaryTargets(state, edges, reverseMap);
+
+            expect(report.spawned.some((spawn) =>
+                spawn.faction === 'RBiH' && spawn.target_osid === target,
+            )).toBe(false);
+        });
+
+        it('still permits rear-pocket consolidation inside the defined enclave boundary', () => {
+            const target = 'op:srebrenica:obadi';
+            const neighbors = [
+                'op:srebrenica:srebrenica_2',
+                'op:srebrenica:donji_potocari_2',
+                'op:srebrenica:ljeskovik_2',
+            ];
+            const edges = makeEdges(neighbors.map((neighbor) => [neighbor, target]));
+            const reverseMap = makeReverseMap([target, ...neighbors]);
+            const controllers = Object.fromEntries([
+                [target, 'RS'],
+                ...neighbors.map((neighbor) => [neighbor, 'RBiH']),
+            ]);
+            const state = makeBaseState({
+                political: {
+                    political_controllers: controllers,
+                    municipalities: {
+                        srebrenica: {
+                            organizational_penetration: {
+                                patriotska_liga: 90,
+                                paramilitary_rs: 5,
+                            },
+                        },
+                    },
+                } as any,
+            });
+
+            const report = detectParamilitaryTargets(state, edges, reverseMap);
+
+            expect(report.spawned.some((spawn) =>
+                spawn.faction === 'RBiH' && spawn.target_osid === target,
+            )).toBe(true);
+        });
+
         it('does not spawn paramilitaries after week 20', () => {
             const edges = makeEdges([['op:a', 'op:b'], ['op:a', 'op:d'], ['op:b', 'op:d']]);
             const reverseMap = makeReverseMap(['op:a', 'op:b', 'op:d']);

@@ -127,6 +127,7 @@ Paramilitary formations (`kind: 'paramilitary'`) are a separate formation kind f
 - **Short lifecycle:** Spawn → instant capture (MARCH_TURNS=0, rear pockets already surrounded) → dissolve (set to `inactive` + `disbanded` + `degraded`, personnel zero); formations found after the final active week dissolve before acting
 - **Low combat value:** Cohesion 20 (vs brigade 45-72); cannot hold positions or provide garrison defense
 - **Deterministic selection:** eligible undefended pockets must pass local organizational-penetration and dominance floors, then rank by attacker paramilitary penetration, party penetration, adjacent friendly support, dominance margin, municipality, and OSID
+- **Enclave boundary guard:** rear-pocket cleanup may consolidate a target inside the faction's authored enclave boundary, but may not expand the enclave into a same-municipality OSID outside that boundary; outward change requires a CorpsOperation
 
 **Constants (formation_constants.ts):**
 

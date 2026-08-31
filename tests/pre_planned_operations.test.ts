@@ -12,6 +12,7 @@ import {
 import { warPhases } from '../src/sim/turn_phases/war_phases.js';
 import { getSectorOffensiveApproachOsids } from '../src/sim/combat/bot_brigade_ai_osid.js';
 import { advanceSectorOffensives } from '../src/sim/combat/sector_offensive.js';
+import { hasMinimumAssembledParticipants } from '../src/sim/combat/sector_offensive_launch_helpers.js';
 import { collectOpInjectionWarnings } from '../src/sim/combat/operation_validation.js';
 import type { OpInjectionWarning } from '../src/sim/combat/operation_validation.js';
 import type {
@@ -374,8 +375,13 @@ describe('pre-planned operations', () => {
         assert.equal(operation.faction, 'RBiH');
         assert.equal(operation.staging_osid, 'op:vlasenica:cerska_2');
         assert.equal(operation.planning_duration, 14);
-        assert.equal(operation.min_attack_outcome, 'victory');
+        // The historical link-up was a costly breakthrough, not a low-loss assault.
+        // Requiring the stricter `victory` grade leaves two eastern pockets split
+        // even after both authored columns have assembled beside Ježestica.
+        assert.equal(operation.min_attack_outcome, 'costly_victory');
         assert.equal(operation.minimum_viable_participants, 1);
+        assert.equal(operation.minimum_assembled_participants, 6);
+        assert.equal(operation.execution_attack_power_mult, 1.55);
         assert.equal(operation.available_from, 4);
         assert.deepEqual(operation.axes, [
             {
@@ -408,6 +414,12 @@ describe('pre-planned operations', () => {
         ]);
     });
 
+    it('authors Circle with a bounded local execution advantage', () => {
+        const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Circle');
+        assert.ok(operation);
+        assert.equal(operation.execution_attack_power_mult, 1.35);
+    });
+
     it('lets the link-up claim its assembly area with one viable participant', () => {
         const state = makeMinimalState();
         state.meta.turn = 4;
@@ -425,6 +437,7 @@ describe('pre-planned operations', () => {
             .find((candidate) => candidate.name === definition.name);
         assert.ok(operation);
         assert.deepEqual([...operation.participating_brigades].sort(), [...authoredIds].sort());
+        assert.equal(operation.minimum_assembled_participants, 6);
     });
 
     it('admits an authored mandatory brigade that forms at the staging area during planning', () => {
@@ -454,6 +467,34 @@ describe('pre-planned operations', () => {
         assert.ok(operation.participating_brigades.includes('arbih_1st_cerska'));
         assert.ok(operation.axes![0]!.assigned_brigades.includes('arbih_1st_cerska'));
         assert.equal(operation.initial_strength, initialStrengthBeforeAdmission + 600);
+    });
+
+    it('keeps the link-up in planning until its authored columns are assembled', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 4;
+        const definition = _ALL_PRE_PLANNED.find((def) => def.name === 'Srebrenica–Cerska Link-Up');
+        assert.ok(definition);
+        const authoredIds = definition.axes.flatMap((axis) => axis.brigades);
+        for (const brigadeId of authoredIds) {
+            state.military.formations![brigadeId]!.personnel = 600;
+        }
+        state.military.formations!.arbih_1st_kamenica!.personnel = 0;
+        state.military.formations!.arbih_283rd_east_bosnian_light!.status = 'destroyed' as any;
+        state.military.formations!.arbih_284th_east_bosnian_light!.disrupted_turns = 1;
+
+        injectPrePlannedOperations(state);
+        const operation = state.military.corps_command!.arbih_2nd_corps!.active_operations
+            .find((candidate) => candidate.name === 'Srebrenica–Cerska Link-Up');
+        assert.ok(operation);
+        assert.equal(hasMinimumAssembledParticipants(state, operation), false);
+
+        // Assembly is formation presence, not six applications of the generic
+        // 500-man attack floor. Early-war enclave brigades are authored at 400;
+        // opening-attack readiness separately judges their combined combat power.
+        state.military.formations!.arbih_1st_kamenica!.personnel = 400;
+        state.military.formations!.arbih_283rd_east_bosnian_light!.status = 'active';
+        state.military.formations!.arbih_284th_east_bosnian_light!.disrupted_turns = 0;
+        assert.equal(hasMinimumAssembledParticipants(state, operation), true);
     });
 
     it('retains both Bosanski Brod targets in the canonical Corridor east-axis order', () => {

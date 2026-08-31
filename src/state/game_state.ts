@@ -511,6 +511,10 @@ export interface CorpsOperation {
     planning_duration?: number;
     /** Authored live-roster floor; when absent, the operation type default applies. */
     minimum_viable_participants?: number;
+    /** Active, non-disrupted, non-empty authored formations required before planning may transition to execution. */
+    minimum_assembled_participants?: number;
+    /** Authored execution quality for exceptional operations; defaults to 1.0. */
+    execution_attack_power_mult?: number;
     /** Fraction of participating brigades with adequate supply (0-1). */
     supply_readiness?: number;
     /** Consecutive objective captures (legacy — used when axes is absent). */
@@ -551,7 +555,7 @@ export interface CorpsOperation {
     /** Internal consumption flag for artillery preparation. */
     artillery_preparation_consumed?: boolean;
     /** Reason the operation entered recovery. */
-    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high' | 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'insufficient_donation' | 'offensive_ops_suppressed' | 'tg_cohesion_exhausted' | 'tg_max_lifecycle';
+    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high' | 'participants_below_attack_floor' | 'participants_below_assembly_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'insufficient_donation' | 'offensive_ops_suppressed' | 'tg_cohesion_exhausted' | 'tg_max_lifecycle';
     /** Named officer commanding this operation (if any). */
     commander_officer_id?: string;
     /** Named tactical_commander leading this op's Tactical Group anchor assault (ADR-0006 Phase 3A).

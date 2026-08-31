@@ -324,6 +324,40 @@ describe('getOperationIntelConfidence', () => {
         });
         expect(getOperationIntelConfidence(state, op)).toBeCloseTo(0.35, 2);
     });
+
+    it('does not borrow confidence from an unrelated enemy sector when the objective sector is known', () => {
+        const state = makeMinimalState();
+        addSectorIntel(state, 'sector_a', 'enemy_sector_1', 0.9);
+        state.military.corps_front_sectors = {
+            sector_a: {
+                sector_id: 'sector_a',
+                corps_id: 'arbih_2nd_corps',
+                faction: 'RBiH',
+                opposing_factions: ['RS'],
+                edge_ids: [],
+                sub_segments: [],
+            },
+            enemy_sector_2: {
+                sector_id: 'enemy_sector_2',
+                corps_id: 'vrs_drina',
+                faction: 'RS',
+                opposing_factions: ['RBiH'],
+                edge_ids: [],
+                sub_segments: [{
+                    sub_segment_id: 'enemy_sector_2:0',
+                    friendly_osids: ['jezestica'],
+                    opposing_osids: [],
+                }],
+            },
+        } as any;
+        state.political.political_controllers = { jezestica: 'RS' };
+        const op = makeOperation({
+            sector_id: 'sector_a',
+            objectives: ['jezestica'],
+        });
+
+        expect(getOperationIntelConfidence(state, op)).toBe(0);
+    });
 });
 
 describe('estimateForceRatio', () => {

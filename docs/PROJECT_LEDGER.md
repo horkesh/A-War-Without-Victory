@@ -31115,3 +31115,61 @@ passes. The unsharded full Vitest command was interrupted after a CPU-active int
 returned no result for 30 minutes; no assertion failed before interruption, so it is recorded as a
 timeout rather than a pass. `canon:check` was stopped when its wrapper unexpectedly invoked a
 baseline regression and reached turn 108; that incomplete run is discarded and is not evidence.
+## 2026-08-31 — Eastern enclave operation concentration correction (candidate)
+
+**Owner direction:** eliminate the unacceptable split between the Cerska and Srebrenica pockets
+and continue improving the Goražde/Foča region, correcting engine truth before calibration.
+
+**Engine and scenario result:** authored assembly now measures usable formation presence rather
+than applying the generic 500-person floor to every participant; the 500-person attack floor
+itself is unchanged. Added bounded persisted
+`execution_attack_power_mult` (default 1.0; clamp 0.5–2.0), consumed by both prediction and OSID
+resolution. Srebrenica–Cerska uses 1.55; Operation Circle uses 1.35. Neither field changes control
+directly or protects captured territory.
+
+**Measured:** bounded canonical-188w/40-week artifact
+`F:\A-War-Without-Victory\runs\codex_eastern_enclaves_final_candidate\apr1992_definitive_188w__7c3a0f299a8c80e9__w40_n0`
+finishes at 700/712 (hash `d3d9c00580e1a2fe`). Ježestica, Goražde Glamoč, Kamen, and
+Sopotnica are RBiH; Donje Žešće remains RS. Zero-eligible/invalid/ghost counts are zero,
+stranded brigades 15, consistency failures zero, K:W 3.889. No 188-week run, baseline manifest
+change, painted-control change, or floor reconciliation was performed.
+
+**Propagation:** updated Systems Manual, Rulebook, AI Strategy Specification, Calibration Master,
+project ledger, and `.claude/napkin.md`; no stale structural references were intentionally left.
+
+## 2026-08-31 — Eastern-enclave review hardening and bounded confirmation
+
+**Owner direction:** remove the unacceptable split between the Cerska and Srebrenica pockets,
+continue improving Goražde/Foča, and correct engine defects before calibration.
+
+**Review corrections:** exceptional authored execution quality is now applied per formation and
+only while that formation's operation is in execution, so an unrelated attacker in the same
+target group cannot inherit the first attacker's multiplier. Canonical operation phase modifiers
+now use state-wide operation lookup, including foreign-corps participants in a hosted multi-corps
+operation. Sector coverage with no reachable positive-power contributor remains militia-only;
+unreachable roster brigades no longer become proxy defenders or receive ghost casualties.
+
+**Engine correction:** rear-pocket paramilitary cleanup can consolidate an OSID inside the
+authored boundary of an enclave, but it can no longer expand that enclave into a
+same-municipality OSID outside the boundary. Outward territorial change requires a
+CorpsOperation. This corrects the false turn-1 RBiH seizures of Podkozara Donja and Kolovarice
+without blocking legitimate interior consolidation at Obadi. The Srebrenica enclave definition
+now includes painted RBiH OSID Obadi. No direct control change was added.
+
+**Measured bounded result:**
+`F:\A-War-Without-Victory\runs\codex_eastern_enclaves_final_review\apr1992_definitive_188w__7c3a0f299a8c80e9__w40_n0`
+finishes at January **702/712**, final hash `295f858d903ad7df`. Every painted January OSID in
+Bratunac, Vlasenica, and Srebrenica matches. The RBiH-controlled graph contains the continuous
+path Cerska–Pobudje–Ježestica–Milačevići–Srebrenica, and Obadi is RBiH; the reported two-pocket
+split is eliminated. Operation Circle retains Goražde Glamoč, Kamen, and Sopotnica. Applicable
+bounded health fields are zero zero-eligible operations, zero invalid-op weeks, zero ghost
+destructions, zero consistency failures, and K:W 3.914. The report counts 16 stranded brigades;
+its terminal matched-OSID failure is expected because this is a 40-week run, not a 188-week
+baseline.
+
+**Remaining regional truth:** Donje Žešće and Tošići remain RS rather than their January RBiH
+reference. They are operation-calibration gaps, not permission to restore paramilitary expansion.
+No painted control, baseline manifest, floor, or full 188-week baseline was changed.
+
+**Verification:** seven focused suites pass 207/207, typecheck passes, and `git diff --check`
+passes.

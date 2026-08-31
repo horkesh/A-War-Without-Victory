@@ -255,13 +255,13 @@ export function isOperationParticipant(op: CorpsOperation, brigadeId: FormationI
     return op.participating_brigades.includes(brigadeId);
 }
 
-function isPinnedActiveOperationAttacker(state: GameState, brigadeId: FormationId): boolean {
-    const brigade = state.military.formations?.[brigadeId];
-    const corpsId = brigade?.corps_id;
-    if (!corpsId) return false;
-    const cmd = state.military.corps_command?.[corpsId];
-    if (!cmd) return false;
-    const activeOp = findBrigadeOperation(cmd, brigadeId);
+export function isPinnedActiveOperationAttacker(state: GameState, brigadeId: FormationId): boolean {
+    // Joint and enclave operations are stored only on the hosting corps. A
+    // participant's own corps_id may therefore point at a command that does not
+    // contain the operation. Use the same state-wide visibility contract as the
+    // brigade evaluation hot path; otherwise legitimate operation attackers are
+    // misclassified as ambient attacks and trimmed out of the synchronized wave.
+    const activeOp = findBrigadeOperationAnywhere(state, brigadeId)?.op;
     if (!activeOp) return false;
     if (activeOp.phase !== 'execution') return false;
     if (activeOp.type !== 'sector_attack' && activeOp.type !== 'probe') return false;

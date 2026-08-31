@@ -150,6 +150,8 @@ Operations pass through a preparation phase between launch and execution. The pr
 
 Authored exceptional force floors use `minimum_viable_participants`. The value is persisted on the live `CorpsOperation` and reused during later viability reevaluation; absent values retain the operation-type default. This is intentionally operation-specific and does not lower generic sector-attack admission floors.
 
+Authored synchronization uses `minimum_assembled_participants`; it counts active, non-disrupted, non-empty formations and leaves combined combat sufficiency to the opening-attack predictor. The generic 500-person brigade attack floor is unchanged. `execution_attack_power_mult` is an optional `[0.5, 2.0]` operation field, default `1.0`, consumed identically by prediction and OSID resolution per participating formation during execution only. State-wide operation lookup gives hosted multi-corps participants the same canonical execution/recovery modifiers as the host corps.
+
 **State fields (CorpsOperation):** `preparation_sub_phase`, `preparation_turns_elapsed`, `preparation_max_turns`, `intel_confidence_at_assessment`, `supply_readiness_at_assessment`, `force_ratio_estimate`, `commander_assessment`, `postponement_count`, `active_probe: OperationActiveProbe`.
 
 **Types (game_state.ts):** `PreparationSubPhase`, `CommanderAssessment`, `OperationActiveProbe`.

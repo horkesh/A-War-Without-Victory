@@ -78,8 +78,11 @@ export interface PrePlannedOp {
     min_attack_outcome?: CorpsOperation['min_attack_outcome'];
     /** Planning duration override — gives brigades time to march to staging. */
     planning_duration?: number;
-    /** Authored assembly floor; launch readiness remains separately enforced. */
+    /** Live-roster floor required to admit and retain the operation. */
     minimum_viable_participants?: number;
+    /** Active, attack-capable authored formations required before planning may transition to execution. */
+    minimum_assembled_participants?: number;
+    execution_attack_power_mult?: number;
 }
 
 export interface PrePlannedOperationInjectionOptions {
@@ -1091,11 +1094,14 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         faction: 'RBiH',
         name: 'Operation Circle',
         staging_osid: 'op:gorazde:gorazde_2',
-        // The offensive begins only once the enclave's small brigades have rebuilt
-        // above the ordinary 500-person attack floor; the combat window still falls
-        // inside the August-November series described by BB1 p.187.
+        // The offensive begins only once its available enclave brigades can assemble;
+        // the combat window remains inside the August-November series in BB1 p.187.
         available_from: 8,
         min_attack_outcome: 'repulsed',
+        // The late-July enclave counteroffensive used local routes and converging
+        // pocket brigades. Preserve that operational advantage as combat quality,
+        // not scripted control; the Foča axis remains too weak to win at this value.
+        execution_attack_power_mult: 1.35,
         planning_duration: 4,
         axes: [
             {
@@ -1135,12 +1141,21 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         available_from: 4,
         staging_osid: 'op:vlasenica:cerska_2',
         // A historical link-up is not a reconnaissance-in-force. Hold launch
-        // until at least one assembled axis predicts an actual breakthrough.
-        min_attack_outcome: 'victory',
+        // until the assembled two-column force predicts a ground-taking result.
+        min_attack_outcome: 'costly_victory',
         minimum_viable_participants: 1,
-        // Marching budget with slack for both the Sapna/Cerska/Kamenica and
-        // Srebrenica columns to assemble at attack-capable strength. It is not
-        // a mandatory staff delay.
+        // Planning may begin with the first local formation, but six active,
+        // non-disrupted, non-empty authored formations must be on the roster
+        // before execution. The separate opening-attack predictor then judges
+        // whether the executable approach has enough combined strength (the
+        // enclave brigades are authored below the generic 500-man attack floor).
+        minimum_assembled_participants: 6,
+        // Local guides and a converging attack through enclave home ground gave
+        // this link-up substantially better tactical concentration than a generic
+        // blind sector assault. This modifies combat power; it does not grant
+        // control and can still fail or later be reversed by VRS operations.
+        execution_attack_power_mult: 1.55,
+        // Marching budget with slack for both columns; not a mandatory delay.
         planning_duration: 14,
         axes: [
             {
@@ -1158,9 +1173,6 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                 staging_osid: 'op:vlasenica:cerska_2',
             },
             {
-                // Local enclave formations converge from the opposite side of
-                // Ježestica. Bostahovine is directly adjacent in the operational
-                // graph, so both columns resolve through ordinary stacked combat.
                 axis_id: 'srebrenica_convergence',
                 name: 'Srebrenica Column',
                 brigades: [

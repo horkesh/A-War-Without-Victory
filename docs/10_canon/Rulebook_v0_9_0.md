@@ -282,6 +282,8 @@ Sector stances are constrained by the parent corps stance. An offensive corps ca
 
 Brigades do not attack independently. All offensive attacks flow through **corps operations** (CorpsOperation). The corps operation system decides when, where, and with which brigades to attack based on the commander's directives, sector intelligence, and available forces.
 
+Exceptionally authored operations may carry a bounded execution-quality multiplier. During execution it changes ordinary predicted and resolved combat power for that operation's participating formations only, not political control, and therefore does not guarantee a capture. The generic 500-person brigade attack floor remains unchanged.
+
 The sole exception is **counter-attacks**: a brigade that has just lost its position (retreat from a successful enemy attack) may attempt to retake the lost OSID on its own initiative. This represents the immediate, reflexive response of a unit trying to recover ground before the enemy consolidates.
 
 **Design rationale:** Independent brigade attacks — where a single brigade decides on its own to attack an adjacent enemy OSID — were historically rare in the Bosnian War. Operations required corps-level coordination: reconnaissance, supply buildup, artillery preparation, and multi-brigade timing. The ops-only doctrine ensures that attacks are deliberate, planned events rather than opportunistic single-brigade gambles.

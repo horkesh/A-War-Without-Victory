@@ -157,6 +157,10 @@ Three HRHB decisions had exact pages, judgment sections, a resolved tier, and a 
 **Reusable rule:** historical event metadata needs both roles: `historical_source` identifies the cited instrument, and `source_note` explains which claims it supports and where the counterfactual boundary begins. When repairing older rows, promote only citations already present in the note; do not expand the evidence claim merely to clear the inventory.
 
 ## Engine Runtime Patterns
+0. **[2026-08-31] Rear-pocket cleanup is consolidation, not enclave expansion**
+   Do instead: allow paramilitary cleanup inside an authored enclave boundary, but require a CorpsOperation for outward territorial change. Keep the enclave list complete enough that legitimate interior cells are not accidentally blocked.
+0. **[2026-08-31] Operation assembly is not six copies of the brigade attack floor**
+   Do instead: count active, non-disrupted formation presence for an authored assembly contract; let the combined predictor judge strength. Keep the generic 500-person attack floor. Any exceptional operation execution multiplier must be persisted, bounded, applied per participating formation during execution in both prediction and resolution, and must never write control directly. Never derive a whole mixed stack's multiplier from its first attacker.
 1. **[2026-07-13] Terminal lifecycle truth must close live synthetic commands**
    Do instead: project authoritative event flags through persisted lifecycle state, retire synthetic commands only after spawned subordinates are gone, and hide them from live UI without deleting historical AARs.
 2. **[2026-06-30] War spawn directives run during War turns**

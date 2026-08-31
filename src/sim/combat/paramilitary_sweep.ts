@@ -375,6 +375,22 @@ function buildRegularForceClaimedTargets(state: GameState): Set<string> {
     return targets;
 }
 
+/**
+ * Rear-pocket cleanup is a rear-area mechanism, not an enclave offensive.
+ * A besieged enclave faction must use a CorpsOperation to expand within the
+ * enclave capital's municipality, even when OSID topology makes an enemy
+ * perimeter cell look isolated.
+ */
+function isEnclaveMunicipalityExpansion(faction: FactionId, targetOsid: string): boolean {
+    const targetMunicipality = municipalityIdFromOsid(targetOsid);
+    const enclave = ENCLAVE_DEFINITIONS.find((candidate) =>
+        candidate.faction === faction
+        && typeof candidate.capital_osid === 'string'
+        && municipalityIdFromOsid(candidate.capital_osid) === targetMunicipality,
+    );
+    return enclave != null && !osidBelongsToEnclave(targetOsid, enclave);
+}
+
 /** Split total casualties into KIA/WIA/MIA using the main-path split.
  * Routed through the B1 casualty-realism V2 gate (default OFF ⇒ KIA/WIA_FRACTION exactly). */
 function splitCasualties(total: number): { killed: number; wounded: number; missing_captured: number } {
@@ -466,6 +482,9 @@ export function detectParamilitaryTargets(
             if (existingTargets.has(`${faction}:${pocketOsid}`)) continue;
             // Skip enclave OSIDs — surrounded topology is correct siege geometry, not abandoned pocket
             if (ENCLAVE_DEFINITIONS.some(enc => enc.faction !== faction && osidBelongsToEnclave(pocketOsid, enc))) continue;
+            // The enclave holder may not turn the same topological abstraction
+            // into a free outward capture. Expansion requires CorpsOperation.
+            if (isEnclaveMunicipalityExpansion(faction, pocketOsid)) continue;
             const currentController = getPoliticalControllerOSID(state, pocketOsid, reverseMap);
             if (!currentController || currentController === faction) continue;
             if (isRbihHrhbCombatBlocked(state, faction, currentController)) continue;

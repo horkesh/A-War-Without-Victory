@@ -68,6 +68,7 @@ import {
     rankDefendersByPower,
     getPowerRatioCasualtyMult,
     MIN_DEFENSE_FLOOR_FRACTION,
+    applyMinimumSectorDefenseFloor,
     MAX_EDGES_PER_BRIGADE,
     REACTIVE_DEFENSE_RATIO,
     DEFENDER_CASUALTY_ENGAGEMENT_CAP,
@@ -79,6 +80,7 @@ import {
 import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import { getEnclaveGarrisonPower } from './enclave_resilience.js';
 import { getSectorPairIntelConfidence } from './sector_intel.js';
+import { getBrigadeExecutionAttackPowerMult } from './corps_operation_helpers.js';
 import { buildLocalFrontDensityModifierByFormationIdForSector } from './local_front_defense.js';
 import {
     getStandingOgDefenseBrigadeIds,
@@ -419,9 +421,14 @@ export function predictCombatOutcome(
             // After retreat/repulse, brigade has direct combat intel — fog is at least FOG_AFTER_RETREAT_CAP
             const fogMult = learnedFromTarget ? Math.max(intelFog, FOG_AFTER_RETREAT_CAP) : intelFog;
             const localMilitiaDefensePower = computeMilitiaDefensePower(osidPopulationMap?.get(targetOsid));
+            const sectorDefenderPower = applyMinimumSectorDefenseFloor(
+                baseDef,
+                minFloor,
+                contributingBrigadeCount,
+            );
             const defenderFloor = physicalDefenders.length === 0
-                ? Math.max(baseDef, minFloor, localMilitiaDefensePower)
-                : Math.max(baseDef, minFloor);
+                ? Math.max(sectorDefenderPower, localMilitiaDefensePower)
+                : sectorDefenderPower;
             defenderPower = defenderFloor * fogMult;
             defenderFormation = primary;
             sectorDefBrigades = sectorBrigades;
@@ -486,7 +493,8 @@ export function predictCombatOutcome(
         profilePrefix,
         '.attackerPower',
         () => attackerFormations.reduce(
-            (s, a) => s + computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid), 0
+            (s, a) => s + computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid)
+                * getBrigadeExecutionAttackPowerMult(state, a.id), 0
         ) * coordPenalty * seasonal.attack_mult,
     );
     defenderPower *= seasonal.defense_mult;

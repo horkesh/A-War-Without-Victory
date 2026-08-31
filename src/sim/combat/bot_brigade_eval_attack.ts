@@ -179,7 +179,6 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
     // Combat ineffective gate: brigades below minimum personnel (500) defend only.
     // A sub-battalion unit cannot execute an attack — it needs to reconstitute.
     // Uses MIN_ATTACK_PERSONNEL from formation_constants (canonical single source).
-    // NOTE: the local constant was previously 400 — unified to 500 to match MIN_ATTACK_PERSONNEL.
     const offAssignedFront = sectorAttackProfileTime('.sectorAttack.offAssignedFront', () =>
         !isActiveSectorOperationParticipant &&
         assignedBrigadeNotOnSectorFrontOsids(state, brigade, loc, ctx.assignedSectorFrontOsids)

@@ -190,10 +190,6 @@ export function getOperationIntelConfidence(
         best = Math.max(best, rec.confidence);
     }
 
-    if (best <= 0) {
-        return records.reduce((fallback, rec) => Math.max(fallback, rec.confidence), 0);
-    }
-
     return best;
 }
 

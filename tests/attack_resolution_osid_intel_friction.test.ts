@@ -396,6 +396,29 @@ describe('attack resolution intel execution friction', () => {
         expect(state.military.formations.brig_rbih_1?.personnel).toBe(1200);
     });
 
+    it('does not assign casualties to an unreachable sector brigade with zero defensive contribution', () => {
+        const { state, edges } = makeScenario();
+        const remoteDefender = state.military.formations.brig_rbih_1!;
+        remoteDefender.location_osid = 'op:rbih:remote';
+        remoteDefender.personnel = 1200;
+        state.political.political_controllers!['op:rbih:remote'] = 'RBiH';
+        const defenderSector = state.military.corps_front_sectors!['sector:rbih_defense:0']!;
+        defenderSector.sub_segments[0]!.friendly_osids = ['op:rbih:target', 'op:rbih:remote'];
+        defenderSector.territory_osids = ['op:rbih:target', 'op:rbih:remote'] as any;
+
+        const report = resolveAttackOrdersOsid(
+            state,
+            edges,
+            new Map<string, string[]>(),
+            null,
+            undefined,
+            new Map([['op:rbih:target', 100]]),
+        );
+
+        expect(report.battles[0]?.defender_brigade).toBeNull();
+        expect(state.military.formations.brig_rbih_1?.personnel).toBe(1200);
+    });
+
     it('computes deterministic stale-intel attack and OPSEC defense multipliers', () => {
         expect(getIntelExecutionFrictionMultipliers(1, false)).toEqual({
             attackerPowerMult: 1,
@@ -444,6 +467,48 @@ describe('attack resolution intel execution friction', () => {
         const refreshedRecord = stale.state.military.sector_intel!['sector:vrs_1st:0']![0]!;
         expect(refreshedRecord.confidence).toBe(1);
         expect(refreshedRecord.visible_brigade_ids).toEqual(['brig_rbih_1']);
+    });
+
+    it('applies a bounded authored operation execution multiplier to resolved power', () => {
+        const baseline = makeScenario();
+        const boosted = makeScenario();
+        seedIntel(baseline.state, 1);
+        seedIntel(boosted.state, 1);
+        boosted.state.military.corps_command!.vrs_1st!.active_operations[0]!
+            .execution_attack_power_mult = 1.5;
+
+        const baselineReport = resolveAttackOrdersOsid(baseline.state, baseline.edges, new Map<string, string[]>());
+        const boostedReport = resolveAttackOrdersOsid(boosted.state, boosted.edges, new Map<string, string[]>());
+
+        expect(boostedReport.battles[0]!.power_ratio)
+            .toBeCloseTo(baselineReport.battles[0]!.power_ratio * 1.5, 2);
+    });
+
+    it('does not spill an operation execution multiplier onto an unrelated attacker in the same battle', () => {
+        const baseline = makeScenario();
+        const boosted = makeScenario();
+        for (const scenario of [baseline, boosted]) {
+            const second = makeFormation('brig_rs_2', 'RS', 'brigade', 'op:rs:staging', {
+                corps_id: 'vrs_1st',
+                personnel: 5000,
+                experience: 0.7,
+            });
+            scenario.state.military.formations.brig_rs_2 = second;
+            scenario.state.military.brigade_attack_orders!.brig_rs_2 = 'op:rbih:target' as any;
+            seedIntel(scenario.state, 1);
+        }
+        boosted.state.military.corps_command!.vrs_1st!.active_operations[0]!
+            .execution_attack_power_mult = 1.5;
+
+        const baselineRatio = resolveAttackOrdersOsid(
+            baseline.state, baseline.edges, new Map<string, string[]>(),
+        ).battles[0]!.power_ratio;
+        const boostedRatio = resolveAttackOrdersOsid(
+            boosted.state, boosted.edges, new Map<string, string[]>(),
+        ).battles[0]!.power_ratio;
+
+        expect(boostedRatio).toBeGreaterThan(baselineRatio);
+        expect(boostedRatio).toBeLessThan(baselineRatio * 1.5);
     });
 
     it('refreshes reciprocal defender intel so combat reveals attacker offensive signs', () => {

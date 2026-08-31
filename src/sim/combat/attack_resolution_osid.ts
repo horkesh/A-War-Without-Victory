@@ -63,7 +63,7 @@ import {
 } from './ethnic_defense.js';
 import { isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 import { getPostWashingtonJointPressureMultiplier } from '../early_war/washington_agreement.js';
-import { findBrigadeOperationAnywhere, countAxisConcentrationSupport } from './corps_operation_helpers.js';
+import { findBrigadeOperationAnywhere, countAxisConcentrationSupport, getBrigadeExecutionAttackPowerMult } from './corps_operation_helpers.js';
 import { getBrigadeAxis } from './bot_brigade_ai_osid.js';
 import { evacuateFormationsSeveredByCapture } from './salient_withdrawal.js';
 
@@ -95,6 +95,7 @@ import {
     getToTerrainDefenseMult,
     rankDefendersByPower,
     MIN_DEFENSE_FLOOR_FRACTION,
+    applyMinimumSectorDefenseFloor,
     MAX_EDGES_PER_BRIGADE,
     REACTIVE_DEFENSE_RATIO,
     DEFENDER_CASUALTY_ENGAGEMENT_CAP,
@@ -809,8 +810,12 @@ export function resolveAttackOrdersOsid(
                 // REASON-CODE INSTRUMENTATION (topic `battle_power`): capture the
                 // floor comparison BEFORE the Math.max collapses it. Read-only —
                 // the comparison below is the engine's, unchanged.
-                dbgMinFloorApplied = minFloor > defenderPower;
-                defenderPower = Math.max(defenderPower, minFloor);
+                dbgMinFloorApplied = contributingBrigadeCount > 0 && minFloor > defenderPower;
+                defenderPower = applyMinimumSectorDefenseFloor(
+                    defenderPower,
+                    minFloor,
+                    contributingBrigadeCount,
+                );
                 if (defenderFormations.length === 0) {
                     defenderPower = Math.max(defenderPower, localMilitiaDefensePower);
                 }
@@ -820,11 +825,22 @@ export function resolveAttackOrdersOsid(
                 dbgDefenderPhysicalPower = physicalPower;
                 dbgDefenderReactiveResponse = reactiveResponse;
                 dbgSectorStance = sector?.sector_stance ?? null;
-                defenderFormation = primary;
-                isSectorCoverageDefense = true;
-                sectorDefenseBrigades = sectorBrigades;
-                sectorBrigadeWeights = brigadeWeights;
-                sectorBrigadeMeta = brigadeMeta;
+                // A sector roster may contain only unreachable formations. Their
+                // zero weighted contribution must not make them the physical
+                // defender or route militia casualties into remote brigades.
+                if (contributingBrigadeCount > 0) {
+                    defenderFormation = primary;
+                    isSectorCoverageDefense = true;
+                    sectorDefenseBrigades = sectorBrigades;
+                    sectorBrigadeWeights = brigadeWeights;
+                    sectorBrigadeMeta = brigadeMeta;
+                } else {
+                    defenderFormation = null;
+                    isSectorCoverageDefense = false;
+                    sectorDefenseBrigades = null;
+                    sectorBrigadeWeights = null;
+                    sectorBrigadeMeta = null;
+                }
             } else if (defenderFormations.length > 0) {
                 // Brigade at OSID but not in any sector (edge case: garrison, enclave)
                 const { primary, totalPower } = rankDefendersByPower(defenderFormations, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
@@ -963,7 +979,8 @@ export function resolveAttackOrdersOsid(
             const rawPower = computeAttackerPower(state, a, supplyStateByOsid, effectivePosture, targetTerrainMult, targetOsid);
             // Support brigades contribute reduced power — main brigade carries the assault
             const supportMult = isSupportBrigadeOnActiveOp(state, a.id, a.corps_id) ? SUPPORT_POWER_MULT : 1.0;
-            return s + rawPower * supportMult;
+            const executionMult = getBrigadeExecutionAttackPowerMult(state, a.id);
+            return s + rawPower * supportMult * executionMult;
         }, 0);
         const tempoMult = getWarExhaustionTempoMult(state, attackerFaction); // P7: war exhaustion → attack tempo penalty
         // Attacker firepower-deficit penalty: no-op (1.0) unless

@@ -25,7 +25,7 @@ import {
     RESERVE_ADEQUATE_THRESHOLD,
     RESERVE_STRAINED_THRESHOLD,
 } from '../../state/supply_reserve_constants.js';
-import { findBrigadeOperation } from './corps_operation_helpers.js';
+import { findBrigadeOperation, findBrigadeOperationAnywhere } from './corps_operation_helpers.js';
 import { getEnclaveDefenseBonus } from './enclave_resilience.js';
 // ADR-0006 Phase 3A: named TG commander anchor mod (flag-gated; flag-off branch never taken).
 import { ENABLE_TG_FORMATION } from './tactical_group_config.js';
@@ -150,6 +150,22 @@ export const MAX_EDGES_PER_BRIGADE = 2;
  * per edge is at least this fraction of one brigade's average power.
  */
 export const MIN_DEFENSE_FLOOR_FRACTION = 0.75;
+
+/**
+ * Apply the institutional sector-defense floor only when at least one formation
+ * can physically defend or react along a friendly route. A roster entry that is
+ * cut off from the point of contact cannot project a brigade-equivalent ghost
+ * defense into an otherwise empty OSID.
+ */
+export function applyMinimumSectorDefenseFloor(
+    defenderPower: number,
+    minimumFloor: number,
+    contributingBrigadeCount: number,
+): number {
+    return contributingBrigadeCount > 0
+        ? Math.max(defenderPower, minimumFloor)
+        : defenderPower;
+}
 
 /**
  * Sector reserve response fraction.
@@ -1261,10 +1277,8 @@ export function getCorpsStance(state: GameState, formation: FormationState): Cor
 }
 
 export function getOperationsMult(state: GameState, formation: FormationState): number {
-    if (!formation.corps_id || !state.military.corps_command) return 1.0;
-    const cmd = state.military.corps_command[formation.corps_id];
-    if (!cmd) return 1.0;
-    const op = findBrigadeOperation(cmd, formation.id);
+    if (!state.military.corps_command) return 1.0;
+    const op = findBrigadeOperationAnywhere(state, formation.id)?.op;
     if (!op) return 1.0;
     if (op.phase === 'execution') return 1.3;
     if (op.phase === 'planning') return 1.0;

@@ -18,9 +18,51 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { advanceSectorOffensives } from '../src/sim/combat/sector_offensive.js';
+import { advanceSectorOffensives, resolveOperationSectorId } from '../src/sim/combat/sector_offensive.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import type { CorpsCommandState, CorpsOperation, GameState } from '../src/state/game_state.js';
+
+describe('operation primary-sector anchoring', () => {
+    it('prefers the objective-facing sector that contains the operation participants and staging area', () => {
+        const state = {
+            military: {
+                formations: {
+                    cerska_brigade: {
+                        id: 'cerska_brigade',
+                        status: 'active',
+                        location_osid: 'op:vlasenica:cerska_2',
+                    },
+                },
+                corps_front_sectors: {
+                    'sector:arbih_2nd_corps:1': {
+                        sector_id: 'sector:arbih_2nd_corps:1',
+                        corps_id: 'arbih_2nd_corps',
+                        sub_segments: [{
+                            friendly_osids: ['op:srebrenica:bostahovine_2'],
+                            enemy_osids: ['op:bratunac:jezestica_2'],
+                        }],
+                    },
+                    'sector:arbih_2nd_corps:10': {
+                        sector_id: 'sector:arbih_2nd_corps:10',
+                        corps_id: 'arbih_2nd_corps',
+                        sub_segments: [{
+                            friendly_osids: ['op:vlasenica:cerska_2'],
+                            enemy_osids: ['op:bratunac:jezestica_2'],
+                        }],
+                    },
+                },
+            },
+        } as unknown as GameState;
+
+        expect(resolveOperationSectorId(
+            state,
+            'arbih_2nd_corps',
+            ['op:bratunac:jezestica_2'],
+            ['cerska_brigade'],
+            'op:vlasenica:cerska_2',
+        )).toBe('sector:arbih_2nd_corps:10');
+    });
+});
 
 // ── LANE-NIGHTSHIFT-A2: minimum predictor force-ratio launch floor ──────────
 

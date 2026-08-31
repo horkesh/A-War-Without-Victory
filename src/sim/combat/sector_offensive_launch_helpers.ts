@@ -814,6 +814,7 @@ export interface AxisRejectionFactsOut {
 
 export type OpeningAttackBlocker =
     | 'participants_below_attack_floor'
+    | 'participants_below_assembly_floor'
     | 'no_approach_osid'
     | 'zero_eligible_axis'
     | 'insufficient_donation'
@@ -1223,6 +1224,31 @@ export function donationReadinessBlocksAxis(
     return donated < readinessFraction * anchorPersonnel;
 }
 
+/**
+ * Whether an authored operation has assembled the usable formations required
+ * by its launch contract. Assembly measures presence and synchronization, not
+ * whether every formation independently clears the generic brigade attack floor:
+ * early-war enclave formations are deliberately smaller than that floor. The
+ * opening-attack predictor remains authoritative for whether their combined
+ * force is strong enough against the particular objective.
+ */
+export function hasMinimumAssembledParticipants(
+    state: GameState,
+    op: Pick<CorpsOperation, 'participating_brigades' | 'minimum_assembled_participants'>,
+): boolean {
+    if (op.minimum_assembled_participants == null) return true;
+    const required = Math.max(1, Math.trunc(op.minimum_assembled_participants));
+    let assembled = 0;
+    for (const brigadeId of [...(op.participating_brigades ?? [])].sort(strictCompare)) {
+        const brigade = state.military.formations?.[brigadeId];
+        if (!brigade || brigade.status !== 'active') continue;
+        if ((brigade.personnel ?? 0) <= 0) continue;
+        if ((brigade.disrupted_turns ?? 0) > 0) continue;
+        assembled += 1;
+    }
+    return assembled >= required;
+}
+
 export function evaluateOpeningAttackReadiness(
     state: GameState,
     corpsId: FormationId,
@@ -1231,6 +1257,9 @@ export function evaluateOpeningAttackReadiness(
     staticAdjacency?: Map<string, string[]>,
     predictionContext?: OpeningAttackPredictionContext,
 ): OpeningAttackReadinessResult {
+    if (!hasMinimumAssembledParticipants(state, op)) {
+        return { executable: false, blocker: 'participants_below_assembly_floor' };
+    }
     const operationStaticAdjacency = op.is_pre_planned === true ? staticAdjacency : undefined;
     const adjacency = buildOsidAdjacencyFromFrontEdges(state);
     if (adjacency.size === 0 && !isMultiAxis(op) && !operationStaticAdjacency) {

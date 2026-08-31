@@ -10,6 +10,7 @@ import {
     REACTIVE_DISTANCE_BASE,
     REACTIVE_DISTANCE_MAX_HOPS,
     HOME_DEFENSE_REACTIVE_BONUS,
+    applyMinimumSectorDefenseFloor,
 } from '../src/sim/combat/combat_math.js';
 import { munFromOsid } from '../src/sim/combat/osid_adjacency.js';
 
@@ -122,6 +123,11 @@ describe('munFromOsid', () => {
 // ── Integration: home bonus vs distance ───────────────────────────────────
 
 describe('distance-weighted defense integration', () => {
+    it('does not manufacture a brigade floor when no sector defender can contribute', () => {
+        expect(applyMinimumSectorDefenseFloor(0, 62.5, 0)).toBe(0);
+        expect(applyMinimumSectorDefenseFloor(20, 62.5, 1)).toBe(62.5);
+    });
+
     it('home-municipality brigade at 3 hops contributes less than stranger at 2 hops but gap narrows', () => {
         // Home brigade at 3 hops: 0.60^3 × 1.3 = 0.216 × 1.3 = 0.2808
         // Stranger at 2 hops: 0.60^2 × 1.0 = 0.36

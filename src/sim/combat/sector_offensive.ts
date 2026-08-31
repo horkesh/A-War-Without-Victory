@@ -993,6 +993,7 @@ function getRecoveryDuration(op: CorpsOperation): number {
         case 'no_launch_readiness':
         case 'defender_power_too_high':
         case 'participants_below_attack_floor':
+        case 'participants_below_assembly_floor':
         case 'no_approach_osid':
         case 'zero_eligible_axis':
         case 'tg_cohesion_exhausted':
@@ -1054,6 +1055,7 @@ function getMultiAxisRecoveryDuration(op: CorpsOperation): number {
         case 'no_launch_readiness':
         case 'defender_power_too_high':
         case 'participants_below_attack_floor':
+        case 'participants_below_assembly_floor':
         case 'no_approach_osid':
         case 'zero_eligible_axis':
         case 'tg_cohesion_exhausted':
@@ -1106,25 +1108,50 @@ function fullyRevealProbeSectorIntel(state: GameState, operation: CorpsOperation
     }
 }
 
-function resolveOperationSectorId(
+export function resolveOperationSectorId(
     state: GameState,
     corpsId: FormationId,
     objectives: string[],
+    participatingBrigadeIds: readonly FormationId[] = [],
+    stagingOsid?: string,
 ): string | null {
     if (!state.military.corps_front_sectors || objectives.length === 0) return null;
     const objectiveSet = new Set(objectives);
     let bestSectorId: string | null = null;
     let bestOverlap = 0;
-    for (const sector of Object.values(state.military.corps_front_sectors)) {
+    let bestParticipantCount = -1;
+    let bestContainsStaging = false;
+    const sectors = Object.values(state.military.corps_front_sectors)
+        .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
+    for (const sector of sectors) {
         if (sector.corps_id !== corpsId) continue;
         let overlap = 0;
+        const friendlyOsids = new Set<string>(sector.territory_osids ?? []);
         for (const ss of sector.sub_segments ?? []) {
+            for (const friendlyOsid of ss.friendly_osids ?? []) friendlyOsids.add(friendlyOsid);
             for (const eo of ss.enemy_osids) {
                 if (objectiveSet.has(eo)) overlap += 1;
             }
         }
-        if (overlap > bestOverlap) {
+        if (overlap <= 0) continue;
+        const containsStaging = typeof stagingOsid === 'string' && friendlyOsids.has(stagingOsid);
+        let participantCount = 0;
+        for (const brigadeId of participatingBrigadeIds) {
+            const location = state.military.formations?.[brigadeId]?.location_osid;
+            if (location && friendlyOsids.has(location)) participantCount += 1;
+        }
+        if (
+            (containsStaging && !bestContainsStaging)
+            || (containsStaging === bestContainsStaging && participantCount > bestParticipantCount)
+            || (
+                containsStaging === bestContainsStaging
+                && participantCount === bestParticipantCount
+                && overlap > bestOverlap
+            )
+        ) {
             bestOverlap = overlap;
+            bestParticipantCount = participantCount;
+            bestContainsStaging = containsStaging;
             bestSectorId = sector.sector_id;
         }
     }
@@ -1219,7 +1246,13 @@ export function advanceSectorOffensives(
         const allObjectives = multiAxis ? getAllAxisObjectives(op) : (op.objectives ?? []);
         const allBrigades = multiAxis ? getAllAxisBrigades(op) : op.participating_brigades;
 
-        const resolvedSectorId = resolveOperationSectorId(state, corpsId, allObjectives);
+        const resolvedSectorId = resolveOperationSectorId(
+            state,
+            corpsId,
+            allObjectives,
+            allBrigades,
+            op.staging_osid,
+        );
         if (resolvedSectorId) {
             op.sector_id = resolvedSectorId;
         }
