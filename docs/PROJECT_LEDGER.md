@@ -31173,3 +31173,48 @@ No painted control, baseline manifest, floor, or full 188-week baseline was chan
 
 **Verification:** seven focused suites pass 207/207, typecheck passes, and `git diff --check`
 passes.
+### 2026-08-31 — Desktop campaign rebased to the definitive 188w scenario; all three sides simulated
+
+**Finding:** the shipped desktop campaign and every `tools/ai_play` playthrough started from
+`data/scenarios/apr1992_definitive_52w.json`, not the definitive 188-week scenario. That fork was
+missing `firepower_deficit_penalty_enabled` and `must_hold_osids_by_corps`, and carried 27 of the
+188w file's 33 `osid_control_overrides` — so every player ran a combat engine two fixes behind the
+calibrated one, on a different April 1992 map. This is the failure already recorded at
+`scenario_runner.ts:768` for `apr1992_definitive_104w`, reproduced in the product's shipping
+configuration rather than in a scoring instrument. Separately, `startNewCampaign` left
+`autonomy_level` unset (0, Full Control), which drops the player's faction from
+`selectBotBrigadeOrderFactions` (`war_phases.ts`) and `selectAutomaticRecruitmentFactions`
+(`recruitment_turn.ts`) — one of three armies neither manoeuvred nor reinforced itself in any
+headless or LLM playthrough.
+
+**Change:** `startup_snapshot.ts` and `desktop_sim.ts` (`NEW_GAME_SCENARIO_RELATIVE`) both repointed
+to `apr1992_definitive_188w.json`; `data/derived/startup/apr_1992_initial_save.json` rebuilt.
+`startNewCampaign` now sets `meta.autonomy_level = 1` (Assisted), and the recruitment-delegation
+threshold in `selectAutomaticRecruitmentFactions` moved `>= 2` to `>= 1` so Level 1 delegates force
+generation as well as manoeuvre. Stale prose corrected in `run_provenance.ts` (snapshot "pinned to
+the 52-WEEK scenario") and `DESKTOP_GUI_IPC_CONTRACT.md`, with the matching assertion in
+`docs_desktop_v09_truth.test.ts`.
+
+**Behavioural effect (player path only):** the attacker firepower-deficit mechanic is now ON for
+players, the Drina Corps Zvornik must-hold is present, and six OSIDs start under the calibrated
+controller — `donji_vakuf:jemanlici`, `srebrenica:brezovice_2`, `travnik:paklarevo`,
+`zvornik:djulici` to RS; `kladanj:brgule`, `kladanj:vucinici_2` to RBiH. Verified at runtime for all
+three player factions: `selectBotBrigadeOrderFactions` and `selectAutomaticRecruitmentFactions` both
+return all three factions regardless of which side the player selects. `applyPlayerRecruitment`
+(desktop IPC) is unaffected and still works; both it and automatic recruitment draw the same
+`recruitment_state` pool, so at Level 1 the engine may spend capital a player was saving.
+
+**Verification:** `tsc --noEmit` exit 0; `desktop:map:build` exit 0; startup-snapshot contract,
+guardrails, campaign-start contract, campaign-start authorization, OOB t0 spawn completeness and
+Goražde OOB divergence suites all green (40 tests).
+
+**NOT verified — calibration:** no 188-week run was executed. `CALIBRATION_MASTER.md` records that
+further calibration is paused until RE-0 S0 and that no current run satisfies it (two fresh
+byte-identical runs, clean metadata, Node 22). The change touches no engine code and no 188w
+scenario data, and the startup snapshot is classified `not_an_input` with no headless consumer
+(`run_provenance.ts`), so the calibration line should be unaffected — this is reasoning from the
+change surface, not measurement, and must not be quoted as a no-move proof.
+
+**Open:** whether `autonomy_level = 1` is the right shipped default for a human player (it delegates
+brigade placement and recruitment while retaining the accept/reject proposal loop) is an owner
+posture decision, recorded here rather than assumed settled.

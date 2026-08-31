@@ -17,7 +17,7 @@ describe('desktop and roadmap truth docs', () => {
 
     expect(ipcContract).toContain('loadStartupSnapshotState(...)');
     expect(ipcContract).toContain('data/derived/startup/apr_1992_initial_save.json');
-    expect(ipcContract).toContain('data/scenarios/apr1992_definitive_52w.json');
+    expect(ipcContract).toContain('data/scenarios/apr1992_definitive_188w.json');
   });
 
   it('defines one authoritative roadmap and one derived command board', () => {

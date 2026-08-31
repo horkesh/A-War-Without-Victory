@@ -101,7 +101,7 @@
  *
  * ★ `data/derived/startup/apr_1992_initial_save.json` is DELIBERATELY ABSENT from the
  * headless set. It is produced by `tools/scenario_runner/build_startup_snapshot.ts`, is
- * pinned to the 52-WEEK scenario, and its only consumers are desktop/UI (`electron-main.cjs`,
+ * pinned to the DEFINITIVE 188-WEEK scenario, and its only consumers are desktop/UI (`electron-main.cjs`,
  * `warroom.ts`, `campaignRecruitmentActions.ts`). It has NO headless consumer. Including it
  * would be worse than omitting it: it is byte-identical across the exact n222/n223 pair that
  * caused the incident, so the stamp would MATCH while the armies differed — rebuilding the

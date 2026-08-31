@@ -13,6 +13,11 @@ import type { LoadedSettlementGraph } from '../map/settlements_parse.js';
 import { loadMunicipalityHqSettlement, loadOobBrigades } from '../scenario/oob_loader.js';
 import { canonicalizeStartupState, createStateFromScenario } from '../scenario/scenario_runner.js';
 import { loadStartupSnapshotState } from '../scenario/startup_snapshot.js';
+import { loadSharedTurnInputs } from '../scenario/turn_inputs.js';
+import { BotManager } from '../sim/bot/bot_manager.js';
+import { computeFrontEdges } from '../map/front_edges.js';
+import { buildSettlementsByMun } from '../sim/early_war/control_strain.js';
+import { buildOsidToMunFromReverseMap, buildSidToMunFromSettlements } from '../scenario/oob_early_war_entry.js';
 import { shortestPathThroughFriendly } from '../sim/combat/brigade_movement.js';
 import { isSrkStranglePostureEnabled } from '../sim/combat/contain_posture_gate.js';
 import { buildAdjacencyFromEdges, isSettlementSetContiguous } from '../sim/combat/war_adjacency.js';
@@ -121,7 +126,7 @@ export interface DesktopSimAdvanceResult {
 }
 
 /** Scenario file used for "New Game" (April 1992 definitive war start, hybrid_1992). */
-export const NEW_GAME_SCENARIO_RELATIVE = 'data/scenarios/apr1992_definitive_52w.json';
+export const NEW_GAME_SCENARIO_RELATIVE = 'data/scenarios/apr1992_definitive_188w.json';
 export type DesktopScenarioKey = 'apr_1992';
 const DEFAULT_DESKTOP_SCENARIO_KEY: DesktopScenarioKey = 'apr_1992';
 const SCENARIO_KEY_TO_PATH: Record<DesktopScenarioKey, string> = {
@@ -133,7 +138,7 @@ const OPENING_FOUNDATIONAL_EVENT_BY_FACTION: Record<'RBiH' | 'RS' | 'HRHB', stri
     HRHB: 'hrhb_political_goal',
 };
 
-/** April 1992 game start: initial recruitment capital and equipment for desktop recruitment UI (from apr1992_definitive_52w). */
+/** April 1992 game start: initial recruitment capital and equipment for desktop recruitment UI (from apr1992_definitive_188w). */
 const NEW_GAME_RECRUITMENT_CAPITAL: Record<string, number> = { HRHB: 300, RBiH: 400, RS: 600 };
 const NEW_GAME_EQUIPMENT_POINTS: Record<string, number> = { HRHB: 350, RBiH: 100, RS: 800 };
 
@@ -289,6 +294,22 @@ export async function startNewCampaign(
         // unset states migrate to historical, but new campaigns do not rely on
         // that migration side effect.
         state.meta.decision_mode = decisionMode;
+        // ALL THREE SIDES SIMULATED (owner, 2026-08-31). At Level 0 (Full Control)
+        // `selectBotBrigadeOrderFactions` (war_phases.ts) drops the player faction
+        // from bot brigade orders, corps directives and automatic recruitment, so
+        // the player's army only moves when the player moves it — which leaves one
+        // of three armies idle in any headless/LLM playthrough.
+        //
+        // LEVEL 2, NOT LEVEL 1. Level 1 also restores engine drive, but its
+        // `commander_loop` guard (commander_loop.ts, "block plan from advancing to
+        // 'executing' unless player_op_response … approved") holds every
+        // commander-generated plan at 'ready' until a human answers it. Measured at
+        // t=30 as RS: autonomy 0 → active=3/planning=2/ready=0, autonomy 1 →
+        // active=2/planning=0/ready=2 — two plans stalled, never admitted. With
+        // ops-only attacks that starves the war in any run without a human in the
+        // loop. Level 2 (Political) carries no `=== 1` gate and delegates
+        // recruitment natively, so all three armies both manoeuvre AND fight.
+        state.meta.autonomy_level = 2;
     }
     deferUnauthorizedHistoricalOperationsForPlayer(state);
     const canonicalState = canonicalizeStartupState(state).state;
@@ -320,10 +341,48 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
         loadOperationalCentroids(baseDir),
     ]);
 
+    // PARITY WITH THE CALIBRATION PATH (2026-08-31). `scenario_runner` feeds these
+    // seven census/OOB-derived inputs to `runTurn`; this function fed none of them,
+    // so the shipped campaign and every `tools/ai_play` playthrough ran the war on a
+    // different input set from the line the project calibrates against. Most
+    // consequential: without `municipalityPopulation1991`, `formation_spawn.ts`
+    // skips its minimum-eligible-population gate outright, so brigades spawned in
+    // municipalities the calibration path suppresses. Single owner in
+    // `scenario/turn_inputs.ts` so the two paths cannot drift apart again.
+    const sharedTurnInputs = await loadSharedTurnInputs(baseDir, graph.settlements.keys());
+
     const graphForBrowser = graph as LoadedSettlementGraph;
 
     try {
         if (phase === 'war') {
+            // SMART-BOT PASS (2026-08-31). `scenario_runner` runs `BotManager.runBots`
+            // once per simulated week before `runTurn` whenever the scenario sets
+            // `use_smart_bots` (the definitive 188w scenario does). This path ran no
+            // smart-bot layer at all, so the shipped campaign fought a different war
+            // from the calibrated one regardless of anything else.
+            //
+            // Constructed per call rather than held across turns: `SimpleGeneralBot`
+            // assigns `this` only in its constructor and `makeDecisions` is a pure
+            // read of GameState, so a fresh manager each turn is equivalent to a
+            // reused one. `difficulty` and `scenarioStartWeek` are omitted because
+            // their defaults (`medium`, `0`) are exactly the definitive scenario's
+            // values; if a scenario ever needs different ones they must be persisted
+            // to `meta`, not defaulted here.
+            //
+            // `sidToMun` is OSID-keyed, matching `scenario_runner`, which rebuilds it
+            // via `buildOsidToMunFromReverseMap` once operational data is present —
+            // passing the canonical SID map here would silently mis-key the bots.
+            const botManager = new BotManager({ seed: `${seed}:smart-bots` });
+            const canonicalSidToMun = buildSidToMunFromSettlements(graph.settlements);
+            const sidToMun = operationalData?.operationalToCanonical
+                ? buildOsidToMunFromReverseMap(operationalData.operationalToCanonical, canonicalSidToMun)
+                : canonicalSidToMun;
+            botManager.runBots(state, computeFrontEdges(state, graph.edges), {
+                edges: graph.edges,
+                sidToMun,
+                settlementsByMun: buildSettlementsByMun(graph.settlements),
+            });
+
             const result = await runTurn(state, {
                 seed,
                 settlementGraph: graphForBrowser,
@@ -334,6 +393,13 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
                     centroids: operationalCentroids,
                 },
                 settlementEdges: graph.edges,
+                municipalityPopulation1991: sharedTurnInputs.municipalityPopulation1991,
+                settlementPopulationBySid: sharedTurnInputs.settlementPopulationBySid,
+                settlementDataRaw: sharedTurnInputs.settlementDataRaw,
+                municipalityHqSettlement: sharedTurnInputs.municipalityHqSettlement,
+                historicalNameLookup: sharedTurnInputs.historicalNameLookup,
+                historicalCorpsLookup: sharedTurnInputs.historicalCorpsLookup,
+                historicalOobIdLookup: sharedTurnInputs.historicalOobIdLookup,
                 eventDefinitions: loadDesktopEventDefinitions(baseDir),
             });
             assertTurnSuccess(result);

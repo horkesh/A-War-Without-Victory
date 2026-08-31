@@ -14,6 +14,7 @@ test('desktop dev-map detection survives Vite React-refresh injection', async ()
 
 import { queryBattleEvents, startNewCampaign } from '../src/desktop/desktop_sim.js';
 import { createStateFromScenario, runScenario } from '../src/scenario/scenario_runner.js';
+import { selectAutomaticRecruitmentFactions } from '../src/sim/recruitment_turn.js';
 import { selectBotBrigadeOrderFactions } from '../src/sim/turn_phases/war_phases.js';
 import { deserializeState, serializeState } from '../src/state/serialize.js';
 
@@ -86,9 +87,30 @@ test('startNewCampaign disables headless auto-control for the selected player fa
             true,
             `${faction} new campaign must not keep the scenario harness headless-control flag`,
         );
+        // CONTRACT INVERTED 2026-08-31 (owner: "make sure that we have all 3 sides
+        // simulated"). This previously asserted the OPPOSITE — that the player's
+        // faction is EXCLUDED from bot brigade orders — which is correct only at
+        // autonomy Level 0 (Full Control), where the player moves their own
+        // brigades. New campaigns now start at Level 2 (Political), so all three
+        // armies are engine-driven and the player commands through the presidential
+        // levers. At Level 0 one of three armies stood still for the whole war in
+        // any headless or LLM playthrough.
+        //
+        // Level 2 specifically, NOT Level 1: the `commander_loop` Level-1 guard
+        // holds every commander-generated plan at 'ready' pending a
+        // `player_op_response` that no headless run sends.
+        assert.strictEqual(
+            state.meta.autonomy_level,
+            2,
+            `${faction} new campaign must start at autonomy Level 2 so all three armies are engine-driven`,
+        );
         assert.ok(
-            !selectBotBrigadeOrderFactions(state).includes(faction),
-            `${faction} must be excluded from bot-controlled brigade order factions`,
+            selectBotBrigadeOrderFactions(state).includes(faction),
+            `${faction} must be INCLUDED in bot-controlled brigade order factions (all three sides simulated)`,
+        );
+        assert.ok(
+            selectAutomaticRecruitmentFactions(state).includes(faction),
+            `${faction} must be INCLUDED in automatic recruitment (manoeuvre without reinforcement is not "simulated")`,
         );
     }
 }, 120_000);

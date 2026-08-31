@@ -248,6 +248,15 @@ export function selectAutomaticRecruitmentFactions(state: GameState): FactionId[
     const playerFaction = state.meta.headless_scenario_auto_control === true
         ? null
         : state.meta.player_faction ?? null;
+    // Level 2 (Political) and above delegate force generation; Levels 0-1 keep
+    // recruitment with the player. This threshold was briefly lowered to >= 1 on
+    // 2026-08-31 to stop the player's army manoeuvring without reinforcement, but
+    // that was only a problem while new campaigns started at Level 1. They now
+    // start at Level 2 (see desktop_sim.startNewCampaign), where recruitment
+    // already delegates — and at Level 1 the lower threshold broke a deliberate
+    // guarantee: the bot would consume the very brigade a player was saving for
+    // through the Recruit modal, since both draw the same `recruitment_state`
+    // pool. Kept at >= 2. See tests/recruitment_turn.ts, which pins both halves.
     const delegatesRecruitment = (state.meta.autonomy_level ?? 0) >= 2;
     return sortedFactionIds(state).filter(
         (factionId) => playerFaction == null || delegatesRecruitment || factionId !== playerFaction,

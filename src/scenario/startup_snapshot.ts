@@ -15,7 +15,7 @@ interface StartupSnapshotDefinition {
 
 const STARTUP_SNAPSHOT_DEFINITIONS: Record<StartupSnapshotKey, StartupSnapshotDefinition> = {
     apr_1992: {
-        scenarioRelativePath: 'data/scenarios/apr1992_definitive_52w.json',
+        scenarioRelativePath: 'data/scenarios/apr1992_definitive_188w.json',
         artifactRelativePath: 'data/derived/startup/apr_1992_initial_save.json',
         overrideEnvVar: 'AWWV_STARTUP_SNAPSHOT_OVERRIDE_APR_1992',
     },
