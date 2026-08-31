@@ -479,6 +479,10 @@ export function evaluateEvents(
         const stillPending: PendingEventDecision[] = [];
         for (const pending of state.military.pending_event_decisions ?? []) {
             const def = eventsById.get(pending.event_id);
+            // Same rule as the fire-time branch: resolve to the AUTHORED historical response,
+            // `requires_player_response` included. A decision with no authored default is left
+            // pending rather than guessed at — the scorer's pick would not be "the historical
+            // option", which is the only thing this mode is licensed to choose.
             if (!def || !hasAuthoredAIDefaultResponse(def)) {
                 stillPending.push(pending);
                 continue;
@@ -626,7 +630,28 @@ export function evaluateEvents(
             // stop a HUMAN'S high-stakes choice being made for them, and at Observer there is no
             // human to protect. The authored historical default is used — NOT the emergent
             // political scorer — because the point of Observer is to reproduce the historical line.
-            const observerAutoResolves = isPlayerRespondent && autonomyLevel >= 3;
+            // LEVEL 3 AUTO-RESOLVES EVERY PLAYER DECISION, `requires_player_response` INCLUDED
+            // (owner, 2026-08-31: *"We are simulating history. Nothing wrong with choosing
+            // historical options because it recreates history. Override it."*).
+            //
+            // That flag is carried by the atrocity decisions — drina_cleansing_decision_1992,
+            // concentration_camps_revealed_1992, {rs,rbih}_paramilitary_policy_1992,
+            // rbih_minority_retention_1992 — and it exists so a HUMAN cannot have those choices
+            // made for them. At Observer there is no human, so nothing is being taken from anyone:
+            // the run reproduces the recorded response, which is the whole purpose of the mode.
+            // Selecting the historical response is not the engine rewarding atrocity — the
+            // atrocity gate and the grade model still score the outcome exactly as before. The
+            // carve-out remains fully in force at Levels 0-2, where a player IS present.
+            //
+            // HARD LIMIT, and the reason this is gated on an AUTHORED default rather than on the
+            // autonomy level alone: "choose the historical option" is only meaningful where a
+            // historical option was authored. `drina_cleansing_decision_1992` has NO
+            // `historical_default_response_id`, so auto-resolving it would hand the choice to the
+            // political scorer — the bot improvising, which is the opposite of recreating history.
+            // Events without an authored default therefore still queue, at every level.
+            const observerAutoResolves = isPlayerRespondent
+                && autonomyLevel >= 3
+                && hasAuthoredAIDefaultResponse(def);
             const mustShowPlayer = isPlayerRespondent && !observerAutoResolves;
             if (mustShowPlayer) {
                 // Player faction (levels 0-2) OR high-stakes event at any level: queue as pending decision
