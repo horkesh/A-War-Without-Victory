@@ -1,3 +1,20 @@
-RE-PLANNING-DURATION-BUDGET-OWNER-DISPOSITION is COMPLETE at implementation commit 6da16cef689fc95cfa89d36eab5e278136675173 with evidence commit c5f58b2253c46ab49d0c7437060d1b290b4fa685.
-The single clean Node-22 188w run restored 55,915 killed / 205,278 wounded / 865 attack orders / 659 battles / 37 operations, with zero operationless battles or unattributed combat captures and enclave guard 9/9. January measured 688; its measured-minus-three floor is now 685 by explicit owner-authorized guard bypass. The one long-run authority is consumed; no rerun is authorized. Scenario files and the baseline manifest remain unchanged.
-The packaged-probe prerequisite remains historical NO_VERDICT and P2B/P3 remain blocked; this successor grants no authority to reopen them.
+LANE: CUTILEIRO REMOVAL — calibration impact measurement (2026-08-31)
+
+Cutileiro (Lisbon Agreement) removed from the peace-plan catalog by owner direction:
+the plan was signed 18 March 1992 and Izetbegovic withdrew 28 March, both BEFORE this
+scenario's April 1992 start, so modelling it as a live wartime negotiation is
+ahistorical. Removal also deletes three special cases that existed only to prop it up
+(week-0 -> week-1 catch-up, documented-outcome replay, exclusion from personality
+scoring).
+
+PURPOSE OF THIS RUN: measure whether removing it moves the calibration checkpoints.
+Compare against n388 (commit 3474df2e0, Node 22.23.2): jan1993 697 / apr1994 677 /
+apr1995 671 / oct1995 644. Committed floors are 694 / 674 / 668 / 641.
+
+CAVEAT: this run is on Node 24.13.0, not the Node 22.23.2 of n387/n388 — the only
+toolchain present on this machine. An exact four-checkpoint match therefore confirms
+BOTH that Node 24 does not move these figures and that the removal is neutral. Any
+divergence is unattributable between the two causes and requires a control run at
+3474df2e0 on the same Node 24 before drawing a conclusion.
+
+Calibration is OPEN (owner, 2026-08-31); the RE scope lock is retired.
