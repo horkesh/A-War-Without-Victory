@@ -1,0 +1,24 @@
+import { chromium } from 'playwright';
+
+const browser = await chromium.launch({ headless: true });
+const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+const errors = [];
+page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
+page.on('pageerror', (error) => errors.push(String(error)));
+await page.goto('http://localhost:3000', { waitUntil: 'networkidle' });
+await page.waitForSelector('svg .osid');
+const paths = await page.locator('svg .osid').count();
+const before = await page.locator('svg').getAttribute('viewBox');
+await page.locator('svg').hover({ position: { x: 800, y: 440 } });
+await page.mouse.wheel(0, -500);
+await page.waitForTimeout(100);
+const after = await page.locator('svg').getAttribute('viewBox');
+const first = page.locator('svg .osid').first();
+await first.hover();
+await page.waitForSelector('.tooltip');
+const tooltip = await page.locator('.tooltip').innerText();
+await page.getByRole('button', { name: 'Start overrides' }).click();
+const note = await page.locator('nav p').innerText();
+console.log(JSON.stringify({ paths, before, after, zoomChanged: before !== after, tooltip, note, errors }, null, 2));
+if (paths !== 744 || before === after || !tooltip.includes('op:') || !note.includes('28 explicit') || errors.length) process.exitCode = 1;
+await browser.close();

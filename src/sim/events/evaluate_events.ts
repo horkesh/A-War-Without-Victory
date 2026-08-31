@@ -464,6 +464,38 @@ export function evaluateEvents(
         }
     }
 
+    // OBSERVER SWEEP — drain decisions that were queued BEFORE Observer was engaged.
+    //
+    // The branch further down auto-resolves the player's decisions historically at Level 3, but it
+    // only sees events as they FIRE. Two paths queue a decision without passing through it:
+    // `queueOpeningFoundationalDecision` writes the opening decision directly at campaign birth
+    // (desktop_sim.ts), and any decision queued at Levels 0-2 survives a later switch to Observer.
+    // Without this sweep `rs_strategic_goals` sat unanswered for the whole war — measured as the
+    // last surviving pending decision after the fire-time branch was added.
+    //
+    // Deterministic: iterates the pending list in order and resolves each to its AUTHORED default.
+    // A decision with no authored default is LEFT PENDING rather than guessed at.
+    if ((state.meta.autonomy_level ?? 0) >= 3 && (state.military.pending_event_decisions?.length ?? 0) > 0) {
+        const stillPending: PendingEventDecision[] = [];
+        for (const pending of state.military.pending_event_decisions ?? []) {
+            const def = eventsById.get(pending.event_id);
+            if (!def || !hasAuthoredAIDefaultResponse(def)) {
+                stillPending.push(pending);
+                continue;
+            }
+            const auto = applyAIDefaultResponse(state, def);
+            recordEventDecision(
+                state,
+                def.id,
+                auto.id,
+                'bot_ai_default',
+                pending.faction ?? playerFaction ?? null,
+                currentTurn,
+            );
+        }
+        state.military.pending_event_decisions = stillPending;
+    }
+
     // Phase 1: Collect candidates
     const queuedIds = uniqueStringsInOrder(state.military.event_overflow_queue);
     const queuedIdSet = new Set(queuedIds);
@@ -580,7 +612,22 @@ export function evaluateEvents(
                 ?? def.response_options?.[0]?.dimension_shifts?.[0]?.faction
                 ?? null;
             const isPlayerRespondent = playerFaction != null && respondingFaction === playerFaction;
-            const mustShowPlayer = isPlayerRespondent && (autonomyLevel < 3 || def.requires_player_response === true);
+            // OBSERVER (Level 3) AUTO-RESOLVES THE PLAYER'S DECISIONS HISTORICALLY
+            // (owner, 2026-08-31: *"Even the events should be auto-accepted with historical
+            // option."*). At Levels 0-2 a human is present and every player-owned decision is
+            // theirs. At Level 3 nobody is answering, and an unanswered decision does not wait —
+            // it silently withholds whatever the response would have applied, for the rest of the
+            // war. Measured as RS over 40 turns before this: three decisions accumulated unanswered
+            // (rs_strategic_goals, milosevic_isolation_warning_aug92,
+            // concentration_camps_revealed_1992). This mirrors the standing-authorization rule
+            // applied to historical operations in historical_operation_authorization.ts.
+            //
+            // `requires_player_response` no longer forces a queue at Level 3: that flag exists to
+            // stop a HUMAN'S high-stakes choice being made for them, and at Observer there is no
+            // human to protect. The authored historical default is used — NOT the emergent
+            // political scorer — because the point of Observer is to reproduce the historical line.
+            const observerAutoResolves = isPlayerRespondent && autonomyLevel >= 3;
+            const mustShowPlayer = isPlayerRespondent && !observerAutoResolves;
             if (mustShowPlayer) {
                 // Player faction (levels 0-2) OR high-stakes event at any level: queue as pending decision
                 if (!state.military.pending_event_decisions) {
@@ -629,7 +676,11 @@ export function evaluateEvents(
                 // ('historical') independently of notification delivery.
                 const emergent = state.meta.decision_mode === 'emergent';
                 const historical = !emergent;
-                if (historical && hasAuthoredAIDefaultResponse(def)) {
+                // `observerAutoResolves` forces the AUTHORED HISTORICAL default even under
+                // decision_mode 'emergent': Observer exists to reproduce the historical line, and
+                // the desktop campaign sets 'emergent' by default, which would otherwise route the
+                // player's own decisions through the political scorer instead.
+                if ((historical || observerAutoResolves) && hasAuthoredAIDefaultResponse(def)) {
                     chosen = applyAIDefaultResponse(state, def);
                     decisionSource = 'bot_ai_default';
                 // Free War Phase 0.5: in EMERGENT mode, route EVERY faction-attributed

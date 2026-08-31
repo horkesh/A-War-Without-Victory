@@ -69,19 +69,38 @@ export function ensureHistoricalOperationAuthorizationReview(
         return 'pending';
     }
 
+    // AUTO-AUTHORIZED (owner, 2026-08-31: *"Auto-authorize. It should be the same as headless
+    // calibration runs, which do run those ops."*).
+    //
+    // This gate returns 'not_required' for every non-player faction, which is why the calibration
+    // line runs the full historical operation slate. For the player's own faction it used to
+    // return 'pending' and BLOCK — and nothing in a headless or LLM playthrough ever answers a
+    // review, so the operations never launched. Measured as RS over 40 turns
+    // (`tools/ai_play/parity_probe.ts --play`): 9 authorizations still unresolved, live operations
+    // 1 against calibration's 4, and RS 50 OSIDs short of the calibration line (324 vs 374). The
+    // 1992 Serb offensive simply did not happen when RS was the player.
+    //
+    // The review is still CREATED — it is the player's record that staff acted, it drives the
+    // `presidential_cadence` surface, and `getAcceptedHistoricalOperationAuthorizationTurn` reads
+    // its turn — but it is born accepted, so the operation proceeds exactly as it does with no
+    // player present. Authorization becomes opt-OUT rather than opt-in: the president countermands
+    // a running operation through the existing stop-op lever, rather than history stalling on an
+    // unanswered prompt.
     state.meta.pending_proposal_reviews ??= [];
     state.meta.pending_proposal_reviews.push({
         id: reviewIdForAction(turn, action),
         turn,
         faction: input.faction,
         domain: 'ops',
-        description: `${input.operationName} - staff requests authorization to proceed.`,
+        description: `${input.operationName} - staff proceeded under standing authorization.`,
         proposed_action: action,
         current_value: 'awaiting_authorization',
         proposed_value: 'authorize',
+        accepted: true,
+        resolved_turn: turn,
     });
     state.meta.pending_proposal_reviews.sort((a, b) => strictCompare(a.id, b.id));
-    return 'pending';
+    return 'accepted';
 }
 
 /**

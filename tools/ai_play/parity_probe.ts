@@ -87,6 +87,33 @@ function differingKeys(a: unknown, b: unknown, limit = 8): string[] {
     return out;
 }
 
+/** Compact per-faction OSID counts, for play-mode drift tracking. */
+function terrLine(state: GameState): string {
+    const counts: Record<string, number> = {};
+    for (const v of Object.values(state.political.political_controllers ?? {})) {
+        counts[v as string] = (counts[v as string] ?? 0) + 1;
+    }
+    return ['RBiH', 'RS', 'HRHB'].map(f => `${f}:${counts[f] ?? 0}`).join(' ');
+}
+
+/** Operations currently in planning or execution across all corps. */
+function liveOps(state: GameState): number {
+    const cc = (state.military.corps_command ?? {}) as Record<string, { active_operations?: Array<{ phase?: string }> }>;
+    let n = 0;
+    for (const k of Object.keys(cc)) {
+        for (const op of cc[k]?.active_operations ?? []) {
+            if (op.phase === 'planning' || op.phase === 'execution') n += 1;
+        }
+    }
+    return n;
+}
+
+/** Authorization reviews the player never answered. */
+function unresolvedReviews(state: GameState): number {
+    return ((state.meta.pending_proposal_reviews ?? []) as Array<{ accepted?: boolean }>)
+        .filter(r => r.accepted == null).length;
+}
+
 async function main(): Promise<void> {
     const turns = Number.parseInt(arg('turns', '10'), 10);
     const faction = arg('faction', 'RS') as FactionId;
@@ -131,6 +158,15 @@ async function main(): Promise<void> {
         { observerParity },
     );
     let b: GameState = playState;
+    // --autonomy N overrides the shipped default (2). Level 3 (Observer) is the fully
+    // automatic configuration: historical operations proceed under standing authorization and
+    // the player's own event decisions resolve to their authored historical default, so a
+    // headless playthrough completes instead of stalling on prompts nobody answers.
+    const autonomyArg = arg('autonomy', '');
+    if (!observerParity && autonomyArg !== '') {
+        const lvl = Number.parseInt(autonomyArg, 10);
+        if (lvl === 0 || lvl === 1 || lvl === 2 || lvl === 3) b.meta.autonomy_level = lvl;
+    }
 
     console.log(`parity probe — ${turns} turns, harness faction ${faction}`
         + `, mode ${observerParity ? 'observer-parity' : 'player (--play)'}`);
@@ -184,10 +220,15 @@ async function main(): Promise<void> {
 
         const ha = hash(a);
         const hb = hash(b);
-        const mark = ha === hb ? 'MATCH' : 'DIFF ';
-        console.log(`t${i + 1}  calibration=${ha}  harness=${hb}  ${mark}`);
-        if (ha !== hb) {
+        if (ha === hb) {
+            console.log(`t${i + 1}  calibration=${ha}  harness=${hb}  MATCH`);
+            continue;
+        }
+
+        // OBSERVER MODE: the first divergence is the finding — stop and attribute it.
+        if (observerParity) {
             const secs = differingSections(a, b);
+            console.log(`t${i + 1}  calibration=${ha}  harness=${hb}  DIFF`);
             console.log(`  first divergence at turn ${i + 1} — sections: ${secs.join(', ')}`);
             for (const s of secs) {
                 const keys = differingKeys(
@@ -198,8 +239,34 @@ async function main(): Promise<void> {
             }
             return;
         }
+
+        // PLAY MODE: divergence is EXPECTED — a player campaign legitimately carries state a
+        // no-player run never has. Stopping at t1 would report the obvious and measure nothing.
+        // Keep running and track what the player path is actually costing: territory drift, and
+        // whether the decisions the player path creates ever get answered.
+        console.log(
+            `t${i + 1}  ${terrLine(a)} | harness ${terrLine(b)}`
+            + `  pendingEvents=${(b.military.pending_event_decisions ?? []).length}`
+            + `  unresolvedReviews=${unresolvedReviews(b)}`
+            + `  ops(cal/harness)=${liveOps(a)}/${liveOps(b)}`
+        );
     }
-    console.log(`PARITY HELD for ${turns} turns.`);
+    if (observerParity) {
+        console.log(`PARITY HELD for ${turns} turns.`);
+    } else {
+        console.log('');
+        console.log(`PLAY-MODE INVENTORY after ${turns} turns (faction ${faction}):`);
+        console.log(`  territory  calibration ${terrLine(a)}`);
+        console.log(`             harness     ${terrLine(b)}`);
+        console.log(`  live operations: calibration ${liveOps(a)}, harness ${liveOps(b)}`);
+        const pend = (b.military.pending_event_decisions ?? []) as Array<{ event_id?: string }>;
+        console.log(`  pending event decisions never answered: ${pend.length}`
+            + (pend.length ? ` [${pend.map(d => d.event_id).join(', ')}]` : ''));
+        const revs = ((b.meta.pending_proposal_reviews ?? []) as Array<{ accepted?: boolean; proposed_action?: string }>)
+            .filter(r => r.accepted == null);
+        console.log(`  unresolved authorization reviews: ${revs.length}`
+            + (revs.length ? ` [${revs.map(r => String(r.proposed_action ?? '').slice(0, 44)).join('; ')}]` : ''));
+    }
 }
 
 main().catch((err) => {
