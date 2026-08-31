@@ -627,12 +627,27 @@ describe('requires_player_response: Level 3 gate', () => {
         } as unknown as GameState;
     }
 
-    it('at Level 3, event with requires_player_response:true still queues as PendingEventDecision', () => {
+    // CARVE-OUT REMOVED 2026-08-31 (owner: "We are simulating history. Nothing wrong with
+    // choosing historical options because it recreates history. Override it."). At Level 3
+    // (Observer) there is no human whose high-stakes choice needs protecting, and an unanswered
+    // decision does not wait — it silently withholds its response for the rest of the war. The
+    // carve-out remains in full force at Levels 0-2, where a player IS present; the test below
+    // pins that.
+    it('at Level 3, event with requires_player_response:true auto-resolves like any other', () => {
         const state = makeEventState(3, 'RS');
         evaluateEvents(state, alwaysRng, 10, [HIGH_STAKES_EVENT]);
         const pending = state.military.pending_event_decisions ?? [];
-        expect(pending.length).toBe(1);
-        expect(pending[0].event_id).toBe('test_high_stakes_event');
+        expect(pending.length).toBe(0);
+    });
+
+    it('at Levels 0-2 a requires_player_response event still queues for the player', () => {
+        for (const level of [0, 1, 2] as const) {
+            const state = makeEventState(level, 'RS');
+            evaluateEvents(state, alwaysRng, 10, [HIGH_STAKES_EVENT]);
+            const pending = state.military.pending_event_decisions ?? [];
+            expect(pending.length, `level ${level} must still ask the player`).toBe(1);
+            expect(pending[0].event_id).toBe('test_high_stakes_event');
+        }
     });
 
     it('at Level 3, event without requires_player_response auto-resolves (no PendingEventDecision)', () => {

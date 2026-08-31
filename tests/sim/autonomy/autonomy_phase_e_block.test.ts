@@ -261,9 +261,10 @@ describe('evaluateEvents: requires_player_response stamped onto PendingEventDeci
         expect(decision!.requires_player_response).toBeFalsy();
     });
 
-    it('queues high-stakes event at autonomy level 3 (must-show-player gate)', () => {
-        // At level 3, mustShowPlayer requires requires_player_response:true
-        const state = makeState({ pendingDecisions: [], autonomyLevel: 3, playerFaction: 'RBiH' });
+    it('stamps requires_player_response onto the queued decision at Level 2', () => {
+        // Level 3 no longer queues these (owner override 2026-08-31, see autonomy_phase_d);
+        // Level 2 is where the stamping this test owns is observable.
+        const state = makeState({ pendingDecisions: [], autonomyLevel: 2, playerFaction: 'RBiH' });
         evaluateEvents(state, alwaysRng, 5, [HIGH_STAKES_EVENT_DEF]);
         const pending = state.military.pending_event_decisions ?? [];
         const decision = pending.find(d => d.event_id === 'test_high_stakes_stamping');

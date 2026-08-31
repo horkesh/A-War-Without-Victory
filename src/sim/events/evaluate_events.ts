@@ -649,9 +649,23 @@ export function evaluateEvents(
             // `historical_default_response_id`, so auto-resolving it would hand the choice to the
             // political scorer — the bot improvising, which is the opposite of recreating history.
             // Events without an authored default therefore still queue, at every level.
-            const observerAutoResolves = isPlayerRespondent
-                && autonomyLevel >= 3
-                && hasAuthoredAIDefaultResponse(def);
+            // Observer resolves EVERY player decision — it does not queue. That contract predates
+            // this work (v0.8.4 Phase A, pinned by tests/sim/autonomy/autonomy_event_routing.ts
+            // "Level 3 (Observer): event auto-responds, no PendingEventDecision created"), and
+            // gating it on an authored default broke it: any event without one started queueing
+            // forever, which is the exact stall Observer exists to avoid.
+            //
+            // The owner's direction ("auto-accepted with historical option") is honoured by the
+            // branch below, which PREFERS the authored historical response whenever one exists,
+            // even under decision_mode 'emergent'. Where none is authored the event falls through
+            // to the ordinary bot path, as it always did.
+            //
+            // NOTE the residual hazard, which is DATA not code: with no authored default and
+            // bot_response_logic 'historical', pickBotResponseV1 returns `options[0]` — resolution
+            // by array position. Exactly one event in the corpus is in that state
+            // (drina_cleansing_decision_1992); the §6 packet in
+            // docs/plans/2026-08-31-s6-ring3-half-migration-packet.md is what fixes it.
+            const observerAutoResolves = isPlayerRespondent && autonomyLevel >= 3;
             const mustShowPlayer = isPlayerRespondent && !observerAutoResolves;
             if (mustShowPlayer) {
                 // Player faction (levels 0-2) OR high-stakes event at any level: queue as pending decision
