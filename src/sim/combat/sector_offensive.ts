@@ -2528,7 +2528,9 @@ export function reevaluateWeakenedOperations(state: GameState): void {
         }
 
         // --- Decision: should this operation be aborted? ---
-        const minRequired = MIN_BRIGADES_BY_TYPE[op.type] ?? 2;
+        const minRequired = op.minimum_viable_participants != null
+            ? Math.max(1, Math.trunc(op.minimum_viable_participants))
+            : (MIN_BRIGADES_BY_TYPE[op.type] ?? 2);
         let abortReason: string | null = null;
 
         if (activeBrigadeCount === 0) {

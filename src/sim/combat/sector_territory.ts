@@ -932,13 +932,33 @@ export function consolidateIsolatedCorpsPockets(
     }
 
     const corpsLocations = new Map<FormationId, Set<Osid>>();
+    const corpsHomeMunicipalities = new Map<FormationId, Set<string>>();
     for (const f of Object.values(formations)) {
-        if (f.faction !== faction || !f.location_osid) continue;
+        if (f.faction !== faction) continue;
         const fCorpsId = getFormationCorpsId(f);
         if (!fCorpsId) continue;
-        let locations = corpsLocations.get(fCorpsId);
-        if (!locations) { locations = new Set(); corpsLocations.set(fCorpsId, locations); }
-        locations.add(f.location_osid);
+        if (f.location_osid) {
+            let locations = corpsLocations.get(fCorpsId);
+            if (!locations) { locations = new Set(); corpsLocations.set(fCorpsId, locations); }
+            locations.add(f.location_osid);
+        }
+        if (
+            f.status === 'active'
+            && (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group')
+            && f.home_osid
+            && f.location_osid
+            && munFromOsid(f.location_osid) === munFromOsid(f.home_osid)
+        ) {
+            const homeMunicipality = munFromOsid(f.home_osid);
+            if (homeMunicipality) {
+                let municipalities = corpsHomeMunicipalities.get(fCorpsId);
+                if (!municipalities) {
+                    municipalities = new Set();
+                    corpsHomeMunicipalities.set(fCorpsId, municipalities);
+                }
+                municipalities.add(homeMunicipality);
+            }
+        }
     }
 
     // Process each corps: find connected components of its edges
@@ -978,13 +998,21 @@ export function consolidateIsolatedCorpsPockets(
             if (ci === largestIdx) continue;
             const isolatedEdges = [...components[ci]!];
 
-            // GOLDEN RULE: If a home brigade is present in the pocket, protect it.
+            // GOLDEN RULE: If a corps brigade is physically on the component or
+            // homed in its municipality, protect it. A brigade normally holds from
+            // one or more OSIDs behind the boundary; exact endpoint-only matching
+            // falsely strips its own home-area frontage (for example, 2KK's 11th
+            // Krupa Brigade at Donji Dubovik and the Bosanska Krupa boundary).
             let homeBrigadePresent = false;
             for (const eid of isolatedEdges) {
                 const meta = edgeMeta.get(eid);
                 if (!meta) continue;
                 const friendlyOsid = meta.side_a === faction ? meta.a : meta.b;
                 if (corpsLocations.get(corpsId)?.has(friendlyOsid)) homeBrigadePresent = true;
+                const municipality = munFromOsid(friendlyOsid);
+                if (municipality && corpsHomeMunicipalities.get(corpsId)?.has(municipality)) {
+                    homeBrigadePresent = true;
+                }
                 if (homeBrigadePresent) break;
             }
             if (homeBrigadePresent) continue;

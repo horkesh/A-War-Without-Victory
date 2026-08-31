@@ -328,6 +328,31 @@ test('baked April 1992 HVO Bosnian Posavina frontage is not claimed by Central B
     ]);
 }, 120_000);
 
+test('rebuilt April 1992 Bosanska Krupa frontage belongs to 2nd Krajina Corps', async () => {
+    const savedState = await loadStartupSnapshotState(process.cwd(), 'apr_1992');
+    const rebuiltState = deserializeState(serializeState(savedState));
+    const edges = await loadOperationalEdges();
+    const sectors = Object.values(buildCorpsFrontSectors(rebuiltState, edges, null));
+    const bosanskaKrupaTargetEdges = [
+        'op:bosanska_krupa:gornja_suvaja__op:bosanska_krupa:veliki_badic',
+        'op:bosanska_krupa:ivanjska_2__op:bosanska_krupa:otoka_2',
+        'op:bosanska_krupa:ivanjska_2__op:bosanska_krupa:veliki_badic',
+        'op:bosanska_krupa:veliki_badic__op:bosanska_krupa:vranjska_2',
+    ];
+
+    const owners = bosanskaKrupaTargetEdges.map((edgeId) => {
+        const owner = sectors.find((sector) =>
+            sector.faction === 'RS' && (sector.edge_ids ?? []).includes(edgeId));
+        return `${edgeId}:${owner?.corps_id ?? 'missing'}`;
+    });
+
+    assert.deepStrictEqual(
+        owners,
+        bosanskaKrupaTargetEdges.map((edgeId) => `${edgeId}:vrs_2nd_krajina`),
+        'the local Krupa brigade and its home-area front must not be assigned to an empty 1st Krajina Corps sector',
+    );
+}, 120_000);
+
 test('baked April 1992 startup sector roster and sectorless brigades are structurally explicit', async () => {
     const state = await loadStartupSnapshotState(process.cwd(), 'apr_1992');
     const edges = await loadOperationalEdges();

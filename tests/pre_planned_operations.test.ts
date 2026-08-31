@@ -226,7 +226,7 @@ describe('pre-planned operations', () => {
     });
 
     it('defines the current pre-planned operation catalog', () => {
-        assert.equal(_ALL_PRE_PLANNED.length, 20);
+        assert.equal(_ALL_PRE_PLANNED.length, 21);
         assert.deepEqual(
             _ALL_PRE_PLANNED.map((def) => def.name),
             [
@@ -247,6 +247,7 @@ describe('pre-planned operations', () => {
                 'Operation Trnovo',
                 'Operation Herzegovina',
                 'Operation Foca',
+                'Bosanska Krupa Takeover',
                 'Operation Prijedor',
                 'Operation Corridor',
                 'Operation Jajce',
@@ -257,6 +258,24 @@ describe('pre-planned operations', () => {
                 'Srebrenica–Cerska Link-Up',
             ],
         );
+    });
+
+    it('authors the April Bosanska Krupa takeover as a narrow 2KK operation', () => {
+        const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Bosanska Krupa Takeover');
+        assert.ok(operation);
+        assert.equal(operation.corps, 'vrs_2nd_krajina');
+        assert.equal(operation.faction, 'RS');
+        assert.equal(operation.available_from, 0);
+        assert.equal(operation.minimum_viable_participants, 1);
+        assert.equal(operation.planning_duration, 2);
+        assert.equal(operation.staging_osid, 'op:bosanska_krupa:ivanjska_2');
+        assert.deepEqual(operation.axes, [{
+            axis_id: 'krupa_town',
+            name: 'Bosanska Krupa',
+            brigades: ['rs_11th_krupa_light_infantry'],
+            objectives: ['op:bosanska_krupa:veliki_badic'],
+            staging_osid: 'op:bosanska_krupa:ivanjska_2',
+        }]);
     });
 
     it('defines the summer 1992 Srebrenica-Cerska link-up as ordinary combat', () => {
@@ -409,6 +428,15 @@ describe('pre-planned operations', () => {
         assert.deepEqual(
             state.military.corps_command?.vrs_1st_krajina?.queued_operations,
             ['Operation Corridor', 'Operation Jajce', 'Operation Donji Vakuf', 'Operation Bosanski Novi'],
+        );
+
+        assert.equal(
+            state.military.corps_command?.vrs_2nd_krajina?.active_operations[0]?.name,
+            'Bosanska Krupa Takeover',
+        );
+        assert.equal(
+            state.military.corps_command?.vrs_2nd_krajina?.active_operations[0]?.minimum_viable_participants,
+            1,
         );
 
         assert.equal(state.military.corps_command?.vrs_drina?.active_operations[0]?.name, 'Operation Drina');

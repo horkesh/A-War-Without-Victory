@@ -727,6 +727,36 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
+        // Bosanska Krupa was surrounded on 22 April 1992 and local Serb
+        // territorials, supported by a battalion of the JNA 6th Partisan
+        // Brigade, occupied most of the town by 23 April (BB1 p.185). The
+        // operational aggregate represents the town and its eastern-bank
+        // approaches; Jezerski and Otoka remain outside this operation because
+        // the Bosniak-held hills and suburbs survived the initial takeover.
+        //
+        // The 11th Krupa Light Infantry is the engine's local organized-force
+        // abstraction for this opening action. Keep the operation single-axis,
+        // single-objective, and locally sourced so it cannot pull 2KK forces
+        // away from the Bihać-pocket frontage.
+        corps: 'vrs_2nd_krajina',
+        faction: 'RS',
+        name: 'Bosanska Krupa Takeover',
+        staging_osid: 'op:bosanska_krupa:ivanjska_2',
+        available_from: 0,
+        min_attack_outcome: 'repulsed',
+        planning_duration: 2,
+        minimum_viable_participants: 1,
+        axes: [
+            {
+                axis_id: 'krupa_town',
+                name: 'Bosanska Krupa',
+                brigades: ['rs_11th_krupa_light_infantry'],
+                objectives: ['op:bosanska_krupa:veliki_badic'],
+                staging_osid: 'op:bosanska_krupa:ivanjska_2',
+            },
+        ],
+    },
+    {
         corps: 'vrs_1st_krajina',
         faction: 'RS',
         name: 'Operation Prijedor',

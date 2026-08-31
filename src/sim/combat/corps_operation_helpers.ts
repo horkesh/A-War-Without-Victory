@@ -27,6 +27,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 interface PrePlannedOpDef {
     name: string;
     planning_duration?: number;
+    minimum_viable_participants?: number;
     staging_osid: string;
     min_attack_outcome?: CorpsOperation['min_attack_outcome'];
 }
@@ -261,6 +262,9 @@ export function buildCorpsOperation(
         objectives: [...new Set(allObjectives)],
         current_objective_index: 0,
         planning_duration: def.planning_duration ?? 1,
+        ...(def.minimum_viable_participants != null
+            ? { minimum_viable_participants: Math.max(1, Math.trunc(def.minimum_viable_participants)) }
+            : {}),
         supply_readiness: 1.0,
         momentum: 0,
         failure_count: 0,

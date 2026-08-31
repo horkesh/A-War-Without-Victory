@@ -509,6 +509,8 @@ export interface CorpsOperation {
     current_objective_index?: number;
     /** Turns of preparation required (from scope). */
     planning_duration?: number;
+    /** Authored live-roster floor; when absent, the operation type default applies. */
+    minimum_viable_participants?: number;
     /** Fraction of participating brigades with adequate supply (0-1). */
     supply_readiness?: number;
     /** Consecutive objective captures (legacy — used when axes is absent). */

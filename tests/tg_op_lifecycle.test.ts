@@ -294,6 +294,20 @@ describe('Tactical Group operation lifecycle', () => {
         expect(state.military.tactical_groups?.tg_a).toBeUndefined();
     });
 
+    it('preserves an authored one-brigade viability floor during lifecycle reevaluation', () => {
+        const op = makeOperation('Local Takeover');
+        op.phase = 'execution';
+        op.minimum_viable_participants = 1;
+        const state = makeLifecycleState(op);
+        delete state.military.corps_command?.corps_b;
+        delete state.military.tactical_groups?.tg_b;
+
+        reevaluateWeakenedOperations(state);
+
+        expect(op.phase).toBe('execution');
+        expect(op.recovery_reason).toBeUndefined();
+    });
+
     it('routes final-truth empty-roster recovery through TG closeout', () => {
         const op = makeOperation('Final Truth Recovery');
         op.phase = 'execution';
