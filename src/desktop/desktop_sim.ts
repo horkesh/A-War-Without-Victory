@@ -142,6 +142,18 @@ const OPENING_FOUNDATIONAL_EVENT_BY_FACTION: Record<'RBiH' | 'RS' | 'HRHB', stri
 const NEW_GAME_RECRUITMENT_CAPITAL: Record<string, number> = { HRHB: 300, RBiH: 400, RS: 600 };
 const NEW_GAME_EQUIPMENT_POINTS: Record<string, number> = { HRHB: 350, RBiH: 100, RS: 800 };
 
+export interface StartNewCampaignOptions {
+    /**
+     * Return the untouched calibration startup state — no player faction, no
+     * autonomy level, no decision mode, headless auto-control left ON, historical
+     * operations left live, and no opening foundational decision queued.
+     *
+     * This is the parity baseline for `tools/ai_play/parity_probe.ts`, not a way
+     * to play. Nothing can be decided in this mode because there is no player.
+     */
+    observerParity?: boolean;
+}
+
 export interface DesktopRuntimeFeatureFlags {
     srkStranglePostureActive: boolean;
 }
@@ -264,7 +276,9 @@ export async function startNewCampaign(
     playerFaction: 'RBiH' | 'RS' | 'HRHB',
     scenarioKey: DesktopScenarioKey = DEFAULT_DESKTOP_SCENARIO_KEY,
     decisionMode: 'emergent' | 'historical' = 'emergent',
+    options: StartNewCampaignOptions = {},
 ): Promise<{ state: GameState }> {
+    const observerParity = options.observerParity === true;
     const key = scenarioKey in SCENARIO_KEY_TO_PATH ? scenarioKey : DEFAULT_DESKTOP_SCENARIO_KEY;
     const scenarioPath = join(baseDir, SCENARIO_KEY_TO_PATH[key]);
     const state = key === 'apr_1992'
@@ -285,6 +299,26 @@ export async function startNewCampaign(
             undefined,
             1
         );
+    }
+
+    // OBSERVER PARITY (owner, 2026-08-31: *"a harness for playing that will be able
+    // to produce the exact same results as the calibration runs. Only THEN can we
+    // play with ahistorical results."*). Every mutation below this point is what
+    // makes a PLAYER campaign a player campaign — and each one is a measured
+    // divergence from the calibration line. `tools/ai_play/parity_probe.ts` reports
+    // them at t0 as: meta.{player_faction, headless_scenario_auto_control,
+    // decision_mode, autonomy_level, pending_proposal_reviews} and
+    // military.{corps_command, fired_event_ids, event_fire_counts,
+    // event_last_fired_turn, event_readiness, pending_event_decisions}.
+    //
+    // In observer-parity mode we skip all of them, so the returned state is the
+    // untouched `buildScenarioStartupState` output — i.e. exactly what the
+    // calibration runner starts from. This is the baseline that makes an
+    // ahistorical playthrough's divergence attributable to CHOICES rather than
+    // plumbing. It is NOT a play mode: there is no player faction, so nothing can
+    // be decided. Live campaigns take the normal path below.
+    if (observerParity) {
+        return { state: canonicalizeStartupState(state).state };
     }
 
     if (state.meta) {

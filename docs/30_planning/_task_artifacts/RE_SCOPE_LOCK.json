@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "status": "active",
+  "status": "closed",
   "lane": "RE",
   "task": "RE-GUARDRAIL",
   "packet": "owner-directed-retirement-of-the-re-scope-guard",
@@ -57,5 +57,6 @@
         "baseline manifest remains immutable"
       ]
     }
-  }
+  },
+  "closure_note": "Retired 2026-08-31 by owner direction. The pre-commit hook no longer invokes scripts/repo/check_re_scope.ps1, so this lock is inert. Reinstate a lane with install_re_scope_hook.ps1 and a fresh lock rather than reactivating this one."
 }
