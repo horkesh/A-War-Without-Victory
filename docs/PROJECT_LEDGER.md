@@ -30870,3 +30870,44 @@ the 18 reported `holding` formations are the preceding 14 persistent HVO pocket 
 Cerska/Srebrenica enclave formations and the newly admitted mandatory Herceg Stjepan brigade. Focused
 changed-area suites pass 182/182 and typecheck exits zero; the final three operation suites pass
 100/100. No scenario, calibration data, canon, or baseline manifest changed.
+
+## 2026-08-31 — Bosanska Krupa opening takeover and documentation truth sync
+
+**Owner direction and historical scope:** January 1993 must show the Bosanska Krupa town aggregate
+under RS control while Jezerski and Otoka remain RBiH. Balkan Battlegrounds I p.185 records local
+Serb territorials crossing the Una on 21 April 1992, surrounding the town the next morning, and—with
+probable support from a battalion of the JNA 6th Partisan Brigade—occupying most of Bosanska Krupa by
+23 April. The implementation therefore uses ordinary operation-owned combat against only
+`op:bosanska_krupa:veliki_badic`; it does not write control directly or extend the objective into the
+Bosniak-held hills and suburbs represented by Jezerski and Otoka.
+
+**Engine defects corrected first:** initial OSID-to-corps mapping correctly assigned the local
+Bosanska Krupa frontage to VRS 2nd Krajina Corps, but `consolidateIsolatedCorpsPockets()` later
+reassigned it to 1st Krajina Corps because its home-formation test recognized only a brigade standing
+on the exact boundary OSID. The 11th Krupa Light Infantry was one hop behind at Donji Dubovik.
+Administrative consolidation now protects a small component when an active brigade or operational
+group of that corps is on the component or operating inside its authored home municipality. A second
+defect discarded authored `minimum_viable_participants` while building the live operation, after
+which lifecycle reevaluation hard-coded the generic two-brigade sector-attack floor and aborted a
+healthy local one-brigade operation as `brigade_attrition`. The field now persists on
+`CorpsOperation`, is clamped to at least one, and remains authoritative during reevaluation; absent
+values retain the operation-type default.
+
+**Operation and bounded evidence:** `Bosanska Krupa Takeover` is a 2nd Krajina Corps, single-axis,
+single-objective operation using only the 11th Krupa Light Infantry. In two deterministic four-week
+runs, the operation spent weeks 1–2 planning/marching and captured `veliki_badic` in week 3 by
+decisive victory; Jezerski and Otoka remained RBiH. The repeated final-state hash was
+`02ceef127f86e0e0`; retained evidence is
+`F:\A-War-Without-Victory\runs\apr1992_definitive_40w__2f896698dd1995fb__w4_n386`.
+No 188-week run was started, so this is mechanism and opening-outcome evidence, not final calibration
+acceptance.
+
+**Verification and truth propagation:** commit `b4f635e6c` was pushed to
+`codex/ui-typography-overhaul`. Typecheck, startup-snapshot rebuild/check, 96 focused operation,
+lifecycle, sector, and reconciliation tests, `git diff --check`, and the deterministic bounded repeat
+passed before push. This follow-up synchronizes Engine Invariants, Systems Manual, context,
+AI strategy, REPO_MAP, the repo-shipped operations skill, napkin categories, and ledger knowledge.
+Historical reports remain unchanged as evidence of what they measured. `FORAWWV.md`, scenarios,
+calibration data, and the baseline manifest were not edited. The transient tracked
+`data/derived/latest_run_final_save.json` rewrite was restored to HEAD only after its SHA-256 was
+proved byte-identical to the retained Orašje run's `final_save.json`; no run evidence was lost.

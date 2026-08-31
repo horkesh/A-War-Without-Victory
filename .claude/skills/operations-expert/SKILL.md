@@ -80,10 +80,10 @@ TRIGGERED DEF ──→ checkTriggeredOperations (per turn, condition-gated)
 1. **One active op per corps.** Ops queue sequentially. Use synthetic corps for parallelism.
 2. **NEVER share brigades between ops on different corps.** The first op grabs them; the second runs empty. VRS brigades follow their OWN `corps_id`'s active op, not the synthetic corps op.
 3. **Staging OSID must be adjacent to the first objective.** Non-adjacent staging = weeks of marching = op stalls.
-4. **NEVER add a painted-opposite-faction OSID as an objective.** Check `painted_control_jan1993.json` before adding ANY objective. If painted RBiH, it MUST NOT be a VRS objective (and vice versa).
+4. **NEVER add a checkpoint-opposite-faction OSID as an objective without dated historical authority.** Check all four painted snapshots (`jan1993`, `apr1994`, `apr1995`, `oct1995`) and the operation's date; one checkpoint alone cannot define the whole war.
 5. **After ANY objective change, verify corridor anchors.** Run BFS from teocak_krstac_2 to tuzla_2. Check zepa_2, vitinica_2, rastosnica_2.
 6. **After removing objectives (e.g. OSID merge), add replacements to maintain op tempo.** Fewer objectives = faster completion = freed brigades = cascade.
-7. **Preparation sub-phase overrides planning_duration.** An aggressive commander completes preparation in 3 turns regardless. Use `force_staging` assembly check for brigade march timing, not `planning_duration`.
+7. **`planning_duration` is a marching/preparation budget, not a mandatory delay.** Every operation spends at least one planning turn; after that, staged/prepared readiness may launch it early. Use `force_staging` and live readiness for assembly, and use authored `minimum_viable_participants` only for a historically justified operation-specific force floor.
 
 ## Synthetic JNA Corps Pattern
 For parallel early-war JNA-directed operations:

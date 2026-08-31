@@ -428,6 +428,8 @@ After the paramilitary lifecycle ends, the War pipeline runs deterministic rear-
 
 An empty, reachable, same-corps front sector is resolved through movement authority rather than a direct location rewrite. T1 may emit one deterministic `sector_reassignment_order` for a legal donor; T2 translates that intent into a column order; T3 moves the brigade along the friendly path on later turns. Donors in an operation, dig-in cycle, elite loan, or active transit are ineligible, line sectors retain a minimum staffing floor, and enclave movement restrictions remain binding. When no legal donor can reach the sector, the derived sector must carry `unstaffed_front: true`; legal isolation is advisory truth, not a teleport exception.
 
+Derived cross-corps consolidation must not strip a small front component from its local corps merely because the corps formation stands behind, rather than exactly on, the boundary edge. An active brigade or operational group physically on the component, or currently operating inside its authored home municipality, protects that corps' local front component from administrative reassignment. Political control remains independent of this derived command ownership.
+
 ### 14.10 Bottom-up recruitment in War context
 
 When `state.meta.recruitment_mode === 'bottom_up'`, the turn pipeline **must** run militia emergence, pool population, formation spawn, activate corps, and promote formations steps after the main War steps, regardless of `state.meta.phase`.
@@ -439,6 +441,8 @@ Recruitment catalog visibility and recruitment application must evaluate the sam
 ### 14.11 Operation lifecycle and AAR causality
 
 An operation must spend at least one full turn in planning before ordinary execution. After that turn, a prepared or staged operation may execute before `planning_duration` expires, but readiness and attack-executability gates remain binding. `planning_duration` is the deterministic march/preparation and anti-paralysis budget: it bounds how long the operation may wait for assembly, and expiry opens the existing forced-attempt or named-recovery path. `force_launch` remains the sole player-directed readiness bypass. None of these transitions grant brigades independent attack authority; attacks still require an executing `CorpsOperation`.
+
+An authored `minimum_viable_participants` is operation lifecycle state, not catalog-only metadata. Construction must persist it and every later viability reevaluation must honor it, clamped to at least one. When absent, the operation-type default applies. This permits an explicitly authored local one-formation action without weakening the generic multi-formation floor.
 
 Operation truth is projected from active operations and raw operation history into labeled `proposed`, `planning`, `executing`, `recovery`, `completed`, and `archived` counts. Active and history rows require stable IDs; every raw history row must be visible or have an explicit exclusion reason. Player-generated operations follow the same projection.
 

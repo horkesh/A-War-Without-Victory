@@ -4777,3 +4777,24 @@ breach. At `037396e3c` the guard was simultaneously **fully vacuous and breached
 two symptoms. Six of its seven hold-cells are UNCONTESTED today; the falls half does all the work.
 
 Applied in `[2026-08-30] fix(events): gate the Srebrenica chain on local control, not a territory share`.
+
+## 2026-08-31 - Authored exceptions must survive every lifecycle boundary
+
+An authored operation can pass catalog validation and still be erased semantically when its definition
+is converted into live state. Bosanska Krupa supplied the concrete failure: the catalog authorized a
+one-brigade local action, but `buildCorpsOperation()` dropped the authored viability floor and later
+reevaluation applied the generic two-brigade default. The healthy operation then died as alleged
+attrition without losing a brigade.
+
+The same boundary principle applies to derived geography. Initial mapping correctly gave Bosanska
+Krupa's local frontage to 2nd Krajina Corps, but a later consolidation pass recognized local ownership
+only when a formation occupied the exact boundary OSID. The local brigade one hop behind the edge was
+therefore ignored and correct command ownership was overwritten.
+
+**Reusable rule:** trace an authored exception through construction, serialization, reevaluation, and
+closure; a value that exists only in the catalog is not engine behavior. For derived front ownership,
+test the physical command pattern the model permits—formations normally stand behind a boundary—not
+only exact endpoint occupancy. Defaults apply only when an authored value is absent, and administrative
+sector ownership must remain separate from political control.
+
+Applied in `[2026-08-31] fix(RE): restore Bosanska Krupa opening takeover`.
