@@ -757,18 +757,23 @@ describe('strict null inventory progress', () => {
             // BrigadeMovementOrder.owner and BrigadeMovementState.owner. Untagged
             // legacy/player/recall/loan movement remains protected; only unified
             // bot routing writes `bot_discretionary`. So 537 → 539 / sim 340 → 342.
-            optional_fields_game_state: 539,
+            // Authored local-operation viability: +1 optional CorpsOperation field,
+            // `minimum_viable_participants`. It persists the catalog's explicit floor so
+            // lifecycle reevaluation cannot silently restore the generic two-brigade
+            // default. Absent legacy operations retain that default. So 539 → 540 /
+            // sim 342 → 343, with no type escape.
+            optional_fields_game_state: 540,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
         // so sim 335->336 and state is UNCHANGED at 186. Gated by
         // `AWWV_DEBUG_REASON_CODES=axis_reject`; absent on every default run.
-        expect(current.optional_field_domains.total).toBe(539);
+        expect(current.optional_field_domains.total).toBe(540);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 342,
+            sim: 343,
             state: 187,
             ui_adapter: 0,
             unknown: 0,

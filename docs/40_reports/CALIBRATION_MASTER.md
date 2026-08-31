@@ -14,7 +14,36 @@ that say a particular R6, late-war, or pre-1.0 scope was "closed" remain phase-l
 They do not close the present calibration program. The sole scoring scenario remains
 `data/scenarios/apr1992_definitive_188w.json`.
 
-The clean corrected RE baseline pair is captured by the fresh distinct-output Node-22 runs at exact commit
+### Current canonical rebaseline — clean Node 22 evidence
+
+The owner-authorized clean run is
+`F:\A-War-Without-Victory\runs\apr1992_definitive_188w__46834a3b41033bff__w188_n387`
+at commit `ed6d8af8d792add2b4bf84b767729959f5bbe3db` (`git_dirty:false`, Node 22.23.2,
+final-state hash `a29714d7dabc2d9f`). It is the current canonical measurement:
+
+| checkpoint | measured | new floor |
+|---|---:|---:|
+| jan1993 | **697 / 712** | **694** |
+| apr1994 | **677 / 712** | **674** |
+| apr1995 | **671 / 712** | **668** |
+| oct1995 | **644 / 712** | **641** |
+
+`engine_health_gate` passes: zero eligible failures 0, invalid-op weeks 0, ghost destructions 0,
+stranded brigades 13, consistency failures 0, 51,309 killed, 194,456 wounded, K:W 3.790,
+781 attack orders and 545 battles. All 9 enclave-guard cells pass. The generic checkpoint verifier
+still exits red only on the separately carved-out Farz discriminator; that output is **not** a §6
+breach. The corrected AAR advisory remains open: 12/46 operations and 16/67 axes recorded zero
+attacks, while 44/200 probes and 16/50 sector attacks died in planning. Reconciliation does not
+declare those behaviors healthy and does not gate them in as a floor.
+
+The standard baseline owner regenerated all four manifest scenarios on Node 22.23.2 and reconciled
+24 changed artifact hashes (8 × 188w, 8 × 52w, 4 × baseline-ops 4w, 4 × noop 4w). The committed
+manifest SHA-256 before documentation edits is
+`0e96d999476e06e91b7ebdd6d11a71f1c0c378815e72aa1eb8843d56626c4a4e`.
+
+### Previous RE reference — historical lineage, superseded for current calibration
+
+The clean corrected RE baseline pair was captured by the fresh distinct-output Node-22 runs at exact commit
 `177882fc28ec2eaee2d2ecdc015a5a06c99ee06b`. Both 188-week runs have identical 15-file inventories,
 all 14 non-metadata artifacts byte-identical, fingerprint `6f2b4a10126a980e`, and green engine-only
 plus direct-consistency gates; save/replay compatibility is separately green. Their checkpoint observations are identically
@@ -201,7 +230,7 @@ whose ledger the October/cascade/stranded regressions belonged to: **nobody's �
 > signature of a calendar offset rather than a scheduling defect. **Do not re-raise it as a defect
 > without first establishing the mapping.**
 
-## ACCEPTED JANUARY EVIDENCE — CALIBRATION OPEN; RE PAUSE LIFTED 2026-08-31
+## JANUARY CALIBRATION LINEAGE — n372 HISTORICAL; CURRENT n387 ABOVE
 
 The only scoring calibration scenario is
 `data/scenarios/apr1992_definitive_188w.json` (`calibration_scenario: true`).
@@ -210,36 +239,35 @@ surfaces and must not be used to quote, tune, or bless a current calibration res
 `tests/historical_checkpoints_contract.test.ts` enforces that exactly one scenario carries
 the scoring declaration.
 
-The last accepted task checkpoint was **week 39 / January 1993**. Its settlement-level authority is
+January 1993 remains the active detailed calibration checkpoint. Its settlement-level authority is
 `data/source/calibration/painted_control_jan1993.json`; the painted controller is treated as
 historical truth. Historical research may bound which combat operations existed and when,
-but may not overrule the painted target during this pass. A week-39 run does not establish
-the April 1994, April 1995, or October 1995 checkpoints; replaying its final save against
-later painted maps produces non-evidence.
+but may not overrule the painted target during this pass.
 
-Accepted historical run:
+Earlier bounded historical run:
 `runs/apr1992_definitive_188w__d3464b9122c3c8e9__w39_n372`, final-state hash
 `e343f978c0b82fff`.
 
-**Provenance qualification:** n372 records `git_dirty: true`; it is the accepted calibration
-artifact for the current working tree, not yet a clean committed baseline. Its generic
+**Superseded provenance:** n372 records `git_dirty: true`; it is retained as bounded January
+lineage, not the current baseline. Its generic
 `run_summary.json` also retains the scenario's terminal October historical-fit/anchor contract
 when the run stops at week 39 (565/712 there is not a January score). The January **697/712**
-figure is established by `tools/verify_checkpoints.cjs` replay against the current January
-painted file. A clean replay is owed after the implementation is committed; no later checkpoint
-or full-trajectory cleanliness claim rests on n372.
+figure was established by replay against the January paint and is independently reproduced by the
+clean full-length n387 rebaseline above. No clean replay is owed; n387 establishes all four current
+checkpoint measurements.
 
 | scope | matched | mismatched | standing |
 |---|---:|---:|---|
-| National January checkpoint | **697 / 712 (97.89%)** | 15 | accepted current result |
-| Čajniče–Foča–Goražde–Pale–Trnovo–Rudo–Višegrad focus | **59 / 62 (95.16%)** | 3 | accepted regional result |
+| National January checkpoint | **697 / 712 (97.89%)** | 15 | reproduced by current n387 |
+| Čajniče–Foča–Goražde–Pale–Trnovo–Rudo–Višegrad focus | **59 / 62 (95.16%)** | 3 | n372 regional lineage |
 
-The three regional residuals remain visible rather than scripted:
+The three n372 regional residuals were:
 `op:foca:donje_zesce` and `op:trnovo:tosici` remain RS instead of painted RBiH after
 failed ARBiH attacks; `op:gorazde:podkozara_donja_2` changes to RBiH through the ordinary
 paramilitary system instead of remaining painted RS.
 
-Accepted package, all on the 188-week master:
+Historical package at n372; later owner-directed changes and the current result are recorded above
+and in `PROJECT_LEDGER.md`:
 
 - January painter corrections set `op:novi_travnik:rat_2` and
   `op:prozor:prozor_2` to HRHB.

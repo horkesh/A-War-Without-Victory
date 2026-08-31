@@ -1,5 +1,31 @@
 # Real War Master
 
+## Latest Review: canonical clean rebaseline — territorial fit improved; military deaths now below the working band (2026-08-31)
+
+**Run:** `F:\A-War-Without-Victory\runs\apr1992_definitive_188w__46834a3b41033bff__w188_n387` at
+`ed6d8af8d` (`git_dirty:false`, Node 22.23.2, final hash `a29714d7dabc2d9f`).
+
+| Faction | KIA | WIA | Missing/Captured |
+|---|---:|---:|---:|
+| RBiH | 27,438 | 107,792 | 5,421 |
+| RS | 16,981 | 62,427 | 11,907 |
+| HRHB | 6,890 | 24,237 | 2,457 |
+| **Total** | **51,309** | **194,456** | **19,785** |
+
+This is the current output, not a claim that lethality is solved. Total KIA is about 10% below the
+working historical military-death band of roughly 57–62k used below, and the VRS figure is below
+the corrected army-of-service expectation. K:W remains plausible at 3.790. The working calibration
+target therefore remains approximately **60,000 military dead over 188 weeks**, with faction shape
+cross-checked rather than achieved by inflating a single army. Golden/hash reconciliation records
+the engine's present deterministic truth; it does not redefine the historical target to 51,309.
+
+Territory scores **644/712** at October 1995 and **30/31** authored anchors, with checkpoints
+697/677/671/644 and the enclave guard 9/9. Combat causality records 781 attack orders, 545 battles,
+zero invalid operations, and zero zero-eligible operations. The more truthful AAR diagnostic still
+finds 12/46 operations with no attack; REAL_WAR_MASTER #40 remains open and unblessed by the rebase.
+Civilian output is 35,148 killed and 301,068 fled abroad; coverage against the complete historical
+civilian-death universe remains not established.
+
 ## Latest Review: clean 188w engine checkpoint — headline military deaths plausible; independent lethality proof still open (2026-08-23)
 
 **Runs:** clean same-commit `n3` and `n4` at `26929e6b8`, final hash `930195c6879502c7`; core artifacts byte-identical.

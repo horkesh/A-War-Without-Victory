@@ -79,7 +79,8 @@ export function consolidateRearPockets(
     const defendedOsids = new Set<string>();
     const activeBrigadeFactionLocations = new Set<string>();
     for (const fid of Object.keys(formations).sort(strictCompare)) {
-        const f = formations[fid]!;
+        const f = formations[fid];
+        if (f === undefined) continue;
         if (f.status === 'active' && f.location_osid && f.kind === 'brigade') {
             defendedOsids.add(f.location_osid);
             activeBrigadeFactionLocations.add(`${f.faction}:${f.location_osid}`);
@@ -105,7 +106,8 @@ export function consolidateRearPockets(
         let head = 0;
 
         while (head < bfsQueue.length) {
-            const curr = bfsQueue[head++]!;
+            const curr = bfsQueue[head++];
+            if (curr === undefined) break;
             cluster.push(curr);
             if (cluster.length > MAX_POCKET_CLUSTER) { tooLarge = true; break; }
             if (defendedOsids.has(curr)) hasDefender = true;
@@ -192,7 +194,8 @@ export function consolidateRearPockets(
             if (hasUncontrolledBoundary || !isCritical || !hasDominantShare || !hasAdjacentOrganizedForce) {
                 continue;
             }
-            surroundingFaction = dominant![0];
+            if (dominant === undefined) continue;
+            surroundingFaction = dominant[0];
             mechanism = 'abandoned';
         }
 

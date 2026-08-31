@@ -10,23 +10,24 @@
     "kw_ratio_hi": 4.559
   },
   "_note": "Engine-health gate thresholds (EH-1 Part B). Counts = ratcheting ceilings (+15%/+3 headroom); matched_osids = floor (no headroom); kw_ratio = advisory band. Re-bless via: node tools/engine_health_gate.cjs <run_dir> --horizon <h> --update",
+  "_note_rebaseline_2026_08_31": "OWNER-AUTHORIZED canonical rebaseline from clean Node 22.23.2 run F:\\A-War-Without-Victory\\runs\\apr1992_definitive_188w__46834a3b41033bff__w188_n387 at commit ed6d8af8d. Measured checkpoints 697/677/671/644 become jitter-tolerant floors 694/674/668/641; terminal matched_osids is pinned without headroom at 644. Hard integrity counts measured 0/0/0/13/0 and were refreshed by the standard --update formula. Corrected AAR dead-operations and planning-death counts remain advisory and explicitly unblessed; see CALIBRATION_MASTER and REAL_WAR_MASTER #40.",
   "_note_stranded_188w_2026_08_12": "stranded_brigades_max HAND-EDITED 10 -> 9, NOT via --update. The metric's DEFINITION changed in ccd0d2e4e: it was counting DESTROYED formations that retained a stale stranded_status, and now carries a lifecycle guard. The old band of 10 was blessed against the inflated measure, so leaving it would have silently loosened a HARD check. Under the new definition the metric reads 6 flat across n215/n218/n219/n220, and ceilH(6) = max(ceil(6*1.15), 6+3) = 9. Done by hand because a blanket --update on this run would ALSO have raised matched_osids_min 622 -> 629, locking in the -9 territory debt as the new floor -- that is an owner posture decision, not a metric-definition fix, and the debt is explicitly recorded as owed rather than accepted (see CALIBRATION_MASTER). 40w deliberately left at 3: it measures 2 under the new definition and a fresh bless would give ceilH(2) = 5, i.e. LOOSER, so the existing band is already the stricter one.",
   "188w": {
     "zero_eligible_ops_max": 3,
-    "dead_ops_max": 6,
-    "ghost_destroyed_max": 4,
-    "stranded_brigades_max": 25,
+    "dead_ops_max": 3,
+    "ghost_destroyed_max": 3,
+    "stranded_brigades_max": 16,
     "consistency_failures_max": 3,
-    "matched_osids_min": 622,
+    "matched_osids_min": 644,
     "checkpoint_matched_min": {
-      "jan1993": 685,
-      "apr1994": 648,
-      "apr1995": 642,
-      "oct1995": 622
+      "jan1993": 694,
+      "apr1994": 674,
+      "apr1995": 668,
+      "oct1995": 641
     },
-    "kw_ratio_lo": 3.211,
-    "kw_ratio_hi": 4.345
+    "kw_ratio_lo": 3.221,
+    "kw_ratio_hi": 4.358
   },
-  "_note_sequential_calibration_2026_08_26": "checkpoint_matched_min RESET BY HAND, not via --update, under the owner's 2026-08-26 sequential-calibration directive: January is calibrated first, then apr1994, then apr1995, then oct1995, so a later-checkpoint regression is not automatically a defect -- it may be a lane that has not had its turn. Floors now express that policy: the ACTIVE lane (jan1993) is pinned at measured - 3, the S4 jitter boundary; UNCALIBRATED lanes are pinned at measured - 25, the S4 escalate-to-owner boundary. Re-tighten a lane to -3 when it becomes active. Values measured on n374 (697/673/667/640), the flag-ON default. The oct1995 regression (-7), the western-Bosnia cascade regression (-6: bosansko_grahovo 4/4->2/4, mrkonjic_grad 5/6->2/6, sanski_most 10/10->9/10) and the stranded_brigades jump (5->21) all arrived with the January lane and are ACCEPTED by the same owner directive -- not owed, not deferred, not charged to any lane. stranded_brigades_max 9 -> 25 by the file's own headroom formula, ceilH(21) = max(ceil(21*1.15), 24) = 25. Done by hand because a blanket --update on n374 would ALSO have raised matched_osids_min 622 -> 640 and left ghost_destroyed_max free to loosen; neither was approved. NOTE: matched_osids_min and checkpoint_matched_min.oct1995 gate the SAME quantity -- the gate reads historical_fit.osid_pair_match.matched_osids, which IS the terminal oct1995 figure (proof: n373 reported 'matched_osids 643 >= 622' and 'checkpoint_oct1995 643 >= 644' on the same 643). They are set equal here so the binding floor is explicit rather than accidental.",
+  "_note_sequential_calibration_2026_08_26_superseded_2026_08_31": "HISTORICAL POLICY, superseded by the owner-authorized 2026-08-31 full canonical rebaseline. checkpoint_matched_min was reset by hand under the owner's 2026-08-26 sequential-calibration directive: January first, then apr1994, apr1995, oct1995. Values were measured on n374 (697/673/667/640), with later lanes held loose. The current 188w block no longer implements those loose floors; see _note_rebaseline_2026_08_31.",
   "_note_checkpoints_2026_08_24": "checkpoint_matched_min ADDED BY HAND, not via --update. The gate previously read only historical_fit.osid_pair_match.matched_osids -- the TERMINAL (oct1995) figure -- so a change could regress jan1993 by 20 OSIDs and pass green. Values are n287 measured (677/663/662/647) minus a 3-OSID turn-boundary jitter tolerance; jitter is endemic (two captures at t9/t10 moved ~two dozen unrelated captures by one turn, and sanski_most:kljevci lands on turn 188 in one run and falls off the end in the next), and an exact pin would just teach everyone to pass --force. Done by hand because a blanket --update on n287 would ALSO have loosened ghost_destroyed_max 4 -> 5 and raised matched_osids_min 622 -> 647; the first is a silent weakening and the second is an owner posture decision. Both were declined."
 }
