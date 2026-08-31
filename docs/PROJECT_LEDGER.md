@@ -31401,3 +31401,59 @@ last decision in the game resolved by JSON array order. Needs a 188w with `contr
 `map_workspace_script_contract`, `integration_deployment_health`, plus the intentional
 `deliberate_failure.fixture`. `real_save_sector_truth_contracts` and `desktop_calibration_compare`
 are artifact-driven from the refreshed run outputs.
+
+### 2026-09-01 — Harness parity lane rebased onto the current base and opened as PR #490
+
+**Type:** integration and review packaging. No new engine, scenario, calibration, threshold, canon,
+or baseline change beyond the derived-artifact rebuild recorded below.
+
+**Rebase.** `lane/desktop-calibration-parity` moved from `3474df2e0` onto
+`codex/ui-typography-overhaul` `e24ec2e15`, picking up six base commits — three of them engine or
+calibration changes (`918661e0d` eastern enclave continuity, `9c2b6a62a` queued-operation brigades
+from probes, `d9f0451b0` Foca takeover). Two `PROJECT_LEDGER.md` append conflicts, resolved by
+keeping both sides. Re-verified on top: `tsc` clean, observer parity **HELD 40 turns**, 289/293
+across the affected suites.
+
+**Derived artifact rebuilt.** `data/derived/startup/apr_1992_initial_save.json` regenerated on the
+new base, because those three engine commits change the built startup state.
+
+**BASE-BRANCH FINDINGS — surfaced by the rebase, NOT introduced here.** Both attributed by
+checking out `e24ec2e15` with none of this lane's commits applied and re-running.
+
+1. **`triggered_operations` crashes on the base.** Three tests fail with
+   `TypeError: Cannot read properties of undefined (reading 'includes')` at
+   `src/sim/combat/corps_operation_helpers.ts:123` — `findBrigadeOperationAnywhere` assumes
+   `op.participating_brigades` is defined. Reached via `getOperationsMult` ->
+   `computeAttackerPower` -> `evaluateLaunchFeasibility` -> `buildOperation`. Reproduces cleanly at
+   the base. Left untouched: another lane's engine defect, not this one's to repair.
+
+2. **The base's committed startup snapshot is STALE.** At `e24ec2e15` two contract tests fail —
+   "baked April 1992 startup artifact matches canonical builder truth after checkout normalization"
+   and "startup snapshot validator reports the committed artifact as current" — because the three
+   engine commits altered the built startup state and the artifact was never regenerated.
+   Rebuilding it here fixes both AND exposes what the staleness was masking: `arbih_443rd_mountain`
+   ends up **sectorless**, failing the structural sector-roster contract. A consequence of the
+   base's engine changes revealed by a rebuild, not caused by this lane. Flagged prominently in the
+   PR for whoever owns those commits.
+
+**Attribution discipline.** Every remaining red on this branch was individually baselined against
+`e24ec2e15`: `war_phase_step_order`, `desktop_release_ci_guardrails` x2,
+`desktop_packaging_contract`, `map_workspace_script_contract`, `integration_deployment_health`, the
+intentional `deliberate_failure.fixture`, and the three `triggered_operations` crashes above. None
+originate in this lane.
+
+**PR #490** opened into `codex/ui-typography-overhaul` — 15 commits. Not merged; the merge is the
+owner's call. `origin/main` remains at `16f1400f7`, ~520 commits behind this line, so merging to
+main is a repository-integration decision rather than a lane one.
+
+**Process note worth recording.** A stray `git stash pop` — paired with a `git stash -u` that found
+a clean tree and therefore stashed nothing — popped an unrelated session's stash
+("podkozara: paramilitary enclosure guard", from `codex/master-roadmap-execution`) into this
+worktree. Restored unchanged to `stash@{0}` with its origin in the message. This repository carries
+a 21-deep stash stack from other worktrees and lanes: blind `stash`/`stash pop` pairs are unsafe
+here. Check `git status` first, or use `git stash create` with an explicit ref.
+
+**Still queued, unstarted:** the drina re-pricing and its `historical_default_response_id`
+(`docs/plans/2026-08-31-s6-ring3-half-migration-packet.md`); the Srebrenica enclave-definition
+defect (`docs/plans/2026-08-31-srebrenica-enclave-definition-defect.md`); the deterministic-Math
+lane; endgame dimension rail-saturation. D2 is unblocked.
