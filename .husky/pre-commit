@@ -1,9 +1,12 @@
 #!/bin/sh
 
-# RE is scope-locked. This must run before any docs-only/typecheck fast path.
-if [ "${AWWV_RE_EXTERNAL_SCOPE_VERIFIED:-}" != "1" ]; then
-  powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/repo/check_re_scope.ps1 -Staged || exit 1
-fi
+# RE scope lock RETIRED 2026-08-31 by owner direction ("Close the lock, not
+# needed any more"). The RE-PLANNING-DURATION-BUDGET packet had already recorded
+# terminal_receipt.status=complete_by_owner_guard_bypass, but the lock stayed
+# status=active pinned to a base 23 commits behind the line, so the checker
+# rejected every file-changing commit while its SEALED branch passed only on a
+# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
 
 # Typecheck code/data commits, but do not block docs-only architecture commits
 # on unrelated WIP in a shared Claude/Codex checkout.
