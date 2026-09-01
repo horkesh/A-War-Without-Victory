@@ -105,6 +105,12 @@ export function renderBalancedVitestConfig(files) {
     '    globals: false,',
     "    environment: 'node',",
     '    environmentMatchGlobs,',
+    // MUST mirror vitest.config.ts. This generated config REPLACES the root one for
+    // sharded runs, so anything the root config installs has to be repeated here or it
+    // silently does not apply to CI. That divergence is exactly how the jsdom
+    // createObjectURL polyfill appeared fixed while Baseline Regression stayed red on
+    // 2026-09-01. tests/run_vitest_balanced.test.ts pins the two together.
+    "    setupFiles: [join(rootDir, 'tools/test/jsdom_browser_polyfills.ts')],",
     '    testTimeout: 120_000,',
     '    fileParallelism: false,',
     '    minWorkers: 1,',

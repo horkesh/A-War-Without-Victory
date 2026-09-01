@@ -1,4 +1,4 @@
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
@@ -106,4 +106,40 @@ describe('balanced Vitest execution plan', () => {
       .toEqual(['tests/a.test.ts', 'tests/shared.test.ts']);
     expect(() => filterInventoryByPattern(inventory, '[')).toThrow(/invalid match pattern/);
   });
+});
+
+describe('generated balanced config mirrors the root vitest config', () => {
+    // The sharded runner REPLACES vitest.config.ts with a generated one, so anything the
+    // root config installs must be repeated in the generated config or it silently does
+    // not apply to CI. On 2026-09-01 the jsdom createObjectURL polyfill was added to the
+    // root config only; the Full Suite happened to pass on shard luck while Baseline
+    // Regression stayed red with the exact failure the polyfill was meant to fix.
+    const generated = renderBalancedVitestConfig(['tests/example.test.ts']);
+    const rootConfig = readFileSync(join(process.cwd(), 'vitest.config.ts'), 'utf8');
+
+    it('installs the jsdom browser polyfills the root config installs', () => {
+        expect(rootConfig).toContain('tools/test/jsdom_browser_polyfills.ts');
+        expect(generated).toContain('tools/test/jsdom_browser_polyfills.ts');
+        expect(generated).toContain('setupFiles');
+    });
+
+    it('keeps every resolve alias the root config pins', () => {
+        // Dual-copy hazards (react, maplibre-gl, @deck.gl/*) are only neutralised if BOTH
+        // configs alias them to the root node_modules.
+        for (const pkg of [
+            'react-dom/server', 'react-dom/client', 'react-dom', 'react',
+            'use-sync-external-store', 'zustand', 'maplibre-gl',
+            '@deck.gl/core', '@deck.gl/extensions', '@deck.gl/layers', '@deck.gl/mapbox',
+        ]) {
+            expect(rootConfig, `root config must alias ${pkg}`).toContain(`'${pkg}'`);
+            expect(generated, `generated config must alias ${pkg}`).toContain(`'${pkg}'`);
+        }
+    });
+
+    it('keeps the serial execution guarantees the root config sets', () => {
+        for (const option of ['fileParallelism: false', 'minWorkers: 1', 'maxWorkers: 1']) {
+            expect(rootConfig).toContain(option);
+            expect(generated).toContain(option);
+        }
+    });
 });

@@ -516,8 +516,8 @@ async function waitForTacticalMap(page, timeout = 30000) {
   }, { timeout });
 }
 
-async function clickByText(page, text) {
-  const clicked = await page.evaluate((needle) => {
+async function tryClickByText(page, text) {
+  return page.evaluate((needle) => {
     const normalizedNeedle = needle.toLowerCase();
     const candidates = Array.from(document.querySelectorAll('button, [role="button"], a'))
       .map((el) => {
@@ -545,6 +545,10 @@ async function clickByText(page, text) {
     target.click();
     return true;
   }, text);
+}
+
+async function clickByText(page, text) {
+  const clicked = await tryClickByText(page, text);
   if (!clicked) throw new Error(`No visible clickable control matched "${text}"`);
 }
 
@@ -873,6 +877,13 @@ async function selectArmyHqCorpsWithSectorBrigadeInspect(page, summary) {
 
   const corpsCount = await visibleSelectorCount(page, '[data-testid="army-hq-corps-card"]');
   for (let index = 0; index < corpsCount; index += 1) {
+    // Opening a corps card REPLACES the corps index with the card detail, so the cards
+    // are gone on the next pass. Without returning to the index first, this loop could
+    // only ever inspect index 0 and then failed with "No visible Army HQ corps card
+    // matched ... at index 1" — which looked like missing corps but was really this
+    // navigation gap. It stayed hidden while the first corps happened to expose an
+    // inspectable brigade and the loop returned early.
+    await waitForVisibleSelector(page, '[data-testid="army-hq-corps-index"]');
     await clickVisibleSelectorAt(page, '[data-testid="army-hq-corps-card"]', index, 'Army HQ corps card');
     await waitForVisibleSelector(page, '[data-testid="army-hq-corps-card-detail"]');
     await waitForVisibleSelector(page, '[data-testid="army-hq-sector-row"][data-sector-id]');
@@ -883,6 +894,7 @@ async function selectArmyHqCorpsWithSectorBrigadeInspect(page, summary) {
       summary.evidence.armyHqSectorBrigadeProofFormationId = found.formationId;
       return found;
     }
+    await tryClickByText(page, 'Back');
   }
 
   throw new Error(`No Army HQ corps sector exposed a visible brigade inspect-on-field control after inspecting ${corpsCount} corps cards`);
@@ -1233,6 +1245,17 @@ async function runFoundationalFlow(page, summary) {
   });
   await page.reload({ waitUntil: 'domcontentloaded', timeout: 60000 });
   await waitForVisibleText(page, 'A WAR WITHOUT VICTORY');
+  await captureEvidence(page, summary, 'opening_splash');
+
+  // The opening splash is an unconditional first gate: MainMenu renders it from
+  // useState(true) and returns early, so no menu control exists until it is dismissed.
+  // Its wordmark is the SAME "A War Without Victory" title this sweep waits for above,
+  // so that wait now lands on the splash rather than the menu — which is why the next
+  // step failed with 'No visible clickable control matched "New War"' even though the
+  // menu was perfectly healthy. tools/ui/first_hour_browser_gate.cjs already dismisses
+  // it this way and kept passing; this sweep was simply never taught about the gate.
+  await clickByText(page, 'Assume Responsibility');
+  await waitForVisibleText(page, 'New War');
   await captureEvidence(page, summary, 'main_menu');
 
   await clickByText(page, 'New War');
@@ -1252,7 +1275,13 @@ async function runFoundationalFlow(page, summary) {
   await waitForVisibleText(page, 'WAR HAS STARTED');
   await captureEvidence(page, summary, 'war_start_splash');
 
-  await clickByText(page, 'Acknowledge');
+  // WarHasBegunSplash dismisses itself three ways — "a timed auto-advance, or click / any
+  // key to skip" (its own contract). Requiring the click makes this step race that timer:
+  // the splash was captured fully visible one line above and had already auto-advanced by
+  // the time the click ran, so the sweep failed on a screen that behaved correctly.
+  // Click when it is still up, otherwise let the auto-advance stand. The real assertion is
+  // the absence check below — the splash MUST be gone either way.
+  await tryClickByText(page, 'Acknowledge');
   await waitUntilDialogTextAbsent(page, 'WAR HAS STARTED');
   await waitForVisibleText(page, 'President');
   await clickFirstMatchingText(page, ['Open Desk', 'President', 'Desk', 'Begin at Desk', 'Open President']);
