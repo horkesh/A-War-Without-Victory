@@ -141,10 +141,10 @@ const PANEL_UNIVERSE_SIZE = 712;
 // answered it: obadi must transition RBiH->RS between w40 and w104, and 918661e0d's
 // only evidence is a w40 run, so that window is unmeasured. Verify at the next clean
 // Node-22 188w. See docs/PROJECT_LEDGER.md 2026-09-01.
-const PANEL_SET_A_SIZE = 85;
+const PANEL_SET_A_SIZE = 84;
 const PANEL_SET_A_BY_ENCLAVE: ReadonlyArray<readonly [string, number]> = [
     ['bihac_pocket', 30], ['gorazde', 16], ['kiseljak', 6], ['lasva_valley', 8],
-    ['sarajevo', 8], ['srebrenica', 12], ['teocak', 1], ['zepa', 1], ['zepce', 3],
+    ['sarajevo', 8], ['srebrenica', 11], ['teocak', 1], ['zepa', 1], ['zepce', 3],
 ];
 const PANEL_SET_B_SIZE = 43;
 const PANEL_SET_B_BY_ENCLAVE: ReadonlyArray<readonly [string, number]> = [

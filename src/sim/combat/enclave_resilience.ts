@@ -197,12 +197,37 @@ export const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
         // mala_daljegosta_2 are painted RS at Jan 1993 and are members anyway. Resolving
         // the rule is docs/plans/2026-08-31-srebrenica-enclave-definition-defect.md and
         // needs a floor measurement, not a comment edit.
+        // 11 cells. Corrected 2026-09-01 to satisfy the rule this set states, in BOTH
+        // directions. Two independent routes converged on exactly this membership:
+        //   (1) the stated rule applied symmetrically to painted_control_jan1993, and
+        //   (2) the Historian seat's ICTY ruling (Oric TJ, IT-03-68-T).
+        // Added osmace_2: Oric TJ para 102 names Osmace among Bosnian-Muslim-held land for
+        //   most of 1992; para 107 places it "in the southeast of the enclave" when the
+        //   Feb-Mar 1993 Serb offensive reached it; para 148 bases the 4th Osmace and 5th
+        //   Skenderovici battalions and the 3rd Karacici Brigade there — three of this
+        //   cell's six constituents. BB2 p.407 dates the storming to 24 March 1993.
+        // Dropped brezovice_2: painted RS at jan1993, and ICTY does NOT support ARBiH
+        //   control. Oric TJ para 594 finds Ratkovici "exclusively Bosnian Serb"; paras
+        //   600-601 make 21 June 1992 a raid with a Serb counter-attack the same afternoon.
+        //   The cell merges both sides of a described local ethnic frontier (Ratkovici vs
+        //   Mocevici/Poznanovici, 2-4 km apart across the Grabovicka Rijeka valley), so it
+        //   is NOT RESOLVABLE at this granularity — a merge artefact, not a sourced call.
+        // Dropped mala_daljegosta_2: painted RS at EVERY snapshot including initial. Skelani
+        //   was proclaimed a Serb municipality 27 Feb 1992 (para 92) and forcibly taken
+        //   11 April 1992 (para 97), with no finding of recapture. BB2 p.405 has Oric halted
+        //   "within a kilometer of Skelani" on 16 Jan 1993.
+        // NOT the historically ideal rule — see the plan doc. The entity that actually
+        // "resisted siege despite supply isolation" is the UN safe area of 16 Apr 1993 -
+        // 11 Jul 1995 (Oric TJ para 107: under 20 km diameter, Potocari to Zeleni Jadar),
+        // which is ~8 cells. That needs an external boundary source before it becomes code.
+        // "ARBiH-held at any point" was considered and REJECTED: para 106's January
+        // contiguity would sweep in Kravica, Konjevic Polje, Cerska and Glogova.
         osid_list: [
-            'op:srebrenica:bostahovine_2', 'op:srebrenica:brezovice_2',
-            'op:srebrenica:donji_potocari_2', 'op:srebrenica:mala_daljegosta_2',
+            'op:srebrenica:bostahovine_2',
+            'op:srebrenica:donji_potocari_2',
             'op:srebrenica:ljeskovik_2',
             'op:srebrenica:luka_2', 'op:srebrenica:milacevici',
-            'op:srebrenica:obadi',
+            'op:srebrenica:obadi', 'op:srebrenica:osmace_2',
             'op:srebrenica:radovcici',
             'op:srebrenica:srebrenica_2', 'op:srebrenica:suceska',
             'op:srebrenica:sulice_2',

@@ -32134,3 +32134,102 @@ at ~w168; obadi is painted RS from apr1994. The historical mechanism is the VRS 
 `osmace_2` wrong at w104/w156. Four existing siblings in the list carry the identical imprecision,
 so this is a backstop, not the historical cause. The `source_note` now says so explicitly, closing a
 §4 minimisation risk on a genocide surface.
+
+
+### 2026-09-02 - Srebrenica enclave key space corrected to 11 cells. PANEL_SET_A_SIZE 85 -> 84. Net -2, and the -2 is a revealed defect.
+
+**The change.** `enclave_resilience.ts` srebrenica `osid_list` 12 -> 11: added `osmace_2`,
+dropped `brezovice_2` and `mala_daljegosta_2`. `PANEL_SET_A_SIZE` 85 -> 84,
+`PANEL_SET_A_BY_ENCLAVE['srebrenica']` 12 -> 11. This is (A), run LAST of three so its result
+would be attributable once both Srebrenica cells were event-owned.
+
+**Two independent routes converged on exactly these 11.** The calibration seat applied the set's
+own stated rule ("Painted January 1993 RBiH OSIDs only") symmetrically to
+`painted_control_jan1993`. The Historian seat ruled from ICTY (*Oric* TJ, IT-03-68-T) without
+reference to the painting. Same 11 cells. Neither route had to agree with the other.
+- `osmace_2` ADDED: para 102 names Osmace among Bosnian-Muslim-held land for most of 1992;
+  para 107 places it "in the southeast of the enclave" when the Feb-Mar 1993 offensive reached it;
+  para 148 bases the 4th Osmace and 5th Skenderovici battalions and the 3rd Karacici Brigade there
+  - three of the cell's six constituents. BB2 p.407 dates the storming to 24 March 1993.
+- `brezovice_2` DROPPED: painted RS at jan1993, and ICTY does not support ARBiH control. Para 594
+  finds Ratkovici "exclusively Bosnian Serb"; paras 600-601 make 21 June 1992 a raid with a Serb
+  counter-attack the same afternoon. The cell merges both sides of a described local ethnic frontier
+  (Ratkovici vs Mocevici/Poznanovici, 2-4 km apart across the Grabovicka Rijeka valley) - **not
+  resolvable at this granularity**, a merge artefact rather than a sourced call. The Historian
+  RETRACTED an earlier "painted RS is wrong" ruling on this cell after reading para 594.
+- `mala_daljegosta_2` DROPPED: painted RS at every snapshot including initial. Skelani proclaimed a
+  Serb municipality 27 Feb 1992 (para 92), forcibly taken 11 April 1992 (para 97), no finding of
+  recapture. BB2 p.405 has Oric halted "within a kilometer of Skelani" on 16 Jan 1993.
+
+**RESULT - 188w, `apr1992_definitive_188w`, Node 22.23.2, no provenance override.**
+Run `F:/AWWV-worktrees/engine-health/runs/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n2`,
+scored against the (B2) run `...__w188_n1`, one change apart.
+
+| checkpoint | B2 | A | delta |
+|---|---|---|---|
+| jan1993 | 702 | 702 | 0 |
+| apr1994 | 678 | 678 | 0 |
+| apr1995 | 672 | **669** | **-3** |
+| oct1995 | 659 | **660** | **+1** |
+
+**THE FACT THAT DECIDES IT: the Srebrenica outcome is BYTE-IDENTICAL.** All five relevant cells
+match across the change - `obadi` RS/RS, `osmace_2` RS/RS, `brezovice_2` RS/RS,
+`mala_daljegosta_2` RS/RS, `srebrenica_2` RS/RS. **None of the nine changed cells is in
+Srebrenica.** The historically correct set models the enclave exactly as the wrong set did. So this
+is NOT "historical correctness costs 2 matched OSIDs" and there is no §6 tension to resolve -
+nothing about the enclave, the fall, or the atrocity moved.
+
+**31/31 AUTHORED ANCHORS, ZERO FLIPS - the check that makes -2 safe.** Verified by diffing the full
+`anchor_checks` array, not the count, per the standing lesson that net matched masks anchor flips.
+n1: 31 anchors 31 passing. n2: 31 anchors 31 passing. Zero pass/fail flips.
+
+**THE -2 IS A PRE-EXISTING DEFECT THIS PERTURBATION EXPOSED, NOT A COST OF THE CORRECTION.**
+At oct1995 the movement is one ARBiH push up the Vlasic axis:
+    Travnik       gornje_krcevine, paklarevo, varosluk   RS->RBiH   ALL THREE NOW CORRECT
+    Skender Vakuf imljani_2, javorani_2, knezevo_2       RS->RBiH   ALL THREE NOW WRONG
+Same faction, same direction, same region. The Skender Vakuf block sits **exactly two hops** from
+the Travnik block in the contact graph and is **not directly adjacent** to any Travnik gain - so
+this is one advance corridor, not one contiguous blob. **The push gets Travnik right and then runs
+two cells too far.** That is the failure shape the Farz P-B guard exists to catch - the correct
+shape of an operation is its gains AND its limits. Rejecting the historically correct key space to
+avoid surfacing it would be hiding an engine defect behind a definitional error.
+
+**QUEUED AS ITS OWN DEFECT: the Vlasic-axis advance has no stopping line.** Worth **+3** if fixed,
+and now visible.
+
+**Mechanism of the far-field churn - real, causal, diffuse.** `ENCLAVE_DEFINITIONS` is not a lookup
+table: `osidBelongsToEnclave` (`enclave_resilience.ts:391-394`) is consumed by 15+ combat modules
+including `brigade_assignment`, `brigade_front_distribution`, `bot_corps_directives`, `combat_math`
+and `combat_predictor`. Changing membership changes brigade allocation, which frees or pins
+formations, which re-times operations nationwide. But it is diffuse, NOT local: two of the three
+apr1995 losses are in Nevesinje and one in Konjic, 150-200 km away with no enclave relationship to
+Srebrenica. Attributable to the change, yes; attributable to the two dropped cells losing
+resilience, no.
+
+**Control-events delta: 19 added / 16 removed** on the key `turn|cell|from|to|mechanism`
+(222 -> 225 total). An earlier figure of 47/44 in this session was WRONG - it keyed on the full
+event object, whose `battle_id` embeds the turn and both brigades, so one capture re-timed against
+a different defender counted as two distinct events. 13 of the 19 added cells also appear in the
+removed set: the bulk genuinely is re-timing, e.g. `konjic:bijela_2` t160 -> t107,
+`nevesinje:hrusta_2` t167 -> t129, `kalinovik:golubici_2` t173 -> t160.
+
+**Not gated on net matched, deliberately.** (A) is a definitional correction to what the engine
+ASSERTS about the enclave; its whole point is that it may cost matched OSIDs. A stop rule on net
+would have been a rule that the historically correct answer must also be the higher-scoring one.
+The seat gated on six lines instead - anchors, enclave guard, Srebrenica outcome, Farz, cascade,
+historical basis - and every one passes. Net is reported as evidence, not as a gate.
+
+**Not split.** Dropping only one of the two cells was considered and REJECTED: choosing which of two
+ICTY findings to honour on the basis of its calibration cost is exactly the failure this panel
+exists to prevent, and would leave the key space historically wrong in a way that is now written
+down. The set is taken whole.
+
+**Unchanged:** enclave guard 9/9. Operation Farz identical - all four Ozren P1 cells still TAKEN,
+so the tool's own "a fix that breaks this is the WRONG fix" warning is not triggered. Western-Bosnia
+cascade identical, 38 matched, same per-municipality breakdown. `RESULT: GUARD BREACHED` remains the
+pre-existing Farz P-A discriminator: same t171, same `arbih_327th_vitezka_mountain`, same 3rd Corps,
+in every run of this series. Merged with it recorded; the tool was not relaxed.
+
+**Process note, recorded against myself.** I ran (A) without asking for a stop rule first, having
+had explicit numeric ones for (B) and (B2). The seat's answer was that it would not have gated on
+net at all - but I did not know that when I started the run, and the right order was to ask.
