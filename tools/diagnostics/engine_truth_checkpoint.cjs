@@ -51,6 +51,18 @@ function forceTotals(temporalRows, scenarioStartDate) {
   return [...groups.values()].sort((a, b) => a.week_index - b.week_index || STRICT_COMPARE(a.faction, b.faction));
 }
 
+/** Sum one breakdown record (per_formation or per_militia_pool) into K/W/M totals. */
+function sumBreakdown(breakdown) {
+  const out = { killed: 0, wounded: 0, missing_captured: 0 };
+  for (const key of Object.keys(breakdown || {}).sort(STRICT_COMPARE)) {
+    const row = breakdown[key] || {};
+    out.killed += row.killed || 0;
+    out.wounded += row.wounded || 0;
+    out.missing_captured += row.missing_captured || 0;
+  }
+  return out;
+}
+
 function casualtyReport(ledger) {
   const out = {};
   for (const faction of Object.keys(ledger || {}).sort(STRICT_COMPARE)) {
@@ -58,10 +70,27 @@ function casualtyReport(ledger) {
     const killed = row.killed;
     const wounded = row.wounded;
     const missingCaptured = row.missing_captured;
+
+    // ACCOUNTING INVARIANT: a faction total must equal the sum of BOTH breakdown
+    // classes. Militia defenders have no formation id, so their losses live in
+    // per_militia_pool; if a total drifts from the two breakdowns, a casualty event was
+    // written twice, written to the wrong class, or dropped.
+    const formations = sumBreakdown(row.per_formation);
+    const militia = sumBreakdown(row.per_militia_pool);
+    const accounting = {
+      per_formation: formations,
+      per_militia_pool: militia,
+      balanced:
+        killed === formations.killed + militia.killed
+        && wounded === formations.wounded + militia.wounded
+        && missingCaptured === formations.missing_captured + militia.missing_captured,
+    };
+
     out[faction] = {
       killed,
       wounded,
       missing_captured: missingCaptured,
+      accounting,
       ratios: {
         wounded_per_killed: roundedRatio(wounded, killed),
         missing_captured_per_killed: roundedRatio(missingCaptured, killed),
@@ -369,6 +398,19 @@ function buildChecks(input, sections) {
   const casualtiesValid = JSON.stringify(casualtyFactions) === JSON.stringify([...CANONICAL_FACTIONS].sort(STRICT_COMPARE)) && casualtyRows.every((row) =>
     finiteNonNegative(row.killed) && finiteNonNegative(row.wounded) && finiteNonNegative(row.missing_captured));
   add('casualty_ledger', casualtiesValid, casualtiesValid ? `${casualtyRows.length} faction ledgers valid` : 'missing, negative, or non-finite casualty value');
+
+  // faction total === sum(per_formation) + sum(per_militia_pool), for every faction.
+  const ledgerForAccounting = normalized.finalSave?.military?.casualty_ledger || {};
+  const accountingRows = casualtyReport(ledgerForAccounting);
+  const unbalanced = Object.keys(accountingRows).sort(STRICT_COMPARE)
+    .filter((faction) => accountingRows[faction].accounting.balanced !== true);
+  add(
+    'casualty_accounting_balanced',
+    unbalanced.length === 0,
+    unbalanced.length === 0
+      ? 'faction totals equal per_formation + per_militia_pool'
+      : `unbalanced: ${unbalanced.join(', ')}`,
+  );
 
   const civilianRows = Object.values(sections.civilians.by_faction);
   const eventValues = Object.values(sections.civilians.event_totals);

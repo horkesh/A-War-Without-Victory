@@ -164,6 +164,15 @@ export interface WeeklyBattleEntry {
     power_ratio: number;
     attacker_won: boolean;
     defender_brigade: FormationId | null;
+    /**
+     * What defended this OSID, emitted only when it was NOT a formation. Militia
+     * battles carry 'militia' plus the pool their losses were recorded against;
+     * formation rows omit the field so this baselined artifact stays byte-identical
+     * for them.
+     */
+    defender_kind?: 'militia' | 'none';
+    /** Canonical `${mun_id}:${faction}` pool key militia losses were recorded against. */
+    defender_militia_pool_key?: string;
     attacker_casualties: number;
     defender_casualties: number;
     /** Public-safe execution-friction annotation; no hidden enemy truth. */

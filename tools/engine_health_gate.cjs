@@ -133,7 +133,10 @@ const stranded = formations.filter(
     && !activeOperationFormationIds.has(f.id)
 ).length;
 
-// K:W from faction-level casualty_ledger (fall back to summing per_formation).
+// K:W from faction-level casualty_ledger. The faction totals are the primary source and
+// already include BOTH breakdown classes; the fallback must therefore sum per_formation
+// AND per_militia_pool, or it silently undercounts every militia-only battle (42 of them
+// in the 40-week artifact) and reports a K:W ratio for a war that was only partly fought.
 const ledger = mil.casualty_ledger || {};
 let killed = 0;
 let wounded = 0;
@@ -142,11 +145,14 @@ for (const faction of Object.keys(ledger)) {
   if (typeof fl.killed === 'number' && typeof fl.wounded === 'number') {
     killed += fl.killed;
     wounded += fl.wounded;
-  } else if (fl.per_formation) {
-    for (const fid of Object.keys(fl.per_formation)) {
-      const pf = fl.per_formation[fid] || {};
-      killed += pf.killed || 0;
-      wounded += pf.wounded || 0;
+  } else {
+    for (const breakdown of [fl.per_formation, fl.per_militia_pool]) {
+      if (!breakdown) continue;
+      for (const key of Object.keys(breakdown)) {
+        const row = breakdown[key] || {};
+        killed += row.killed || 0;
+        wounded += row.wounded || 0;
+      }
     }
   }
 }
