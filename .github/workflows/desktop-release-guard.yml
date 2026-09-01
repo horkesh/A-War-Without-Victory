@@ -113,6 +113,12 @@ jobs:
         with:
           # detect-changed-paths.sh needs the base commit in history.
           fetch-depth: 0
+          # The packaged runtime probe LOADS the map. data/derived/tiles/osm.pmtiles is
+          # Git-LFS tracked (.gitattributes: `*.pmtiles filter=lfs`), so without this the
+          # runner checks out the LFS POINTER TEXT and the packaged app fails with
+          # "Wrong magic number for PMTiles archive" — which is exactly how this job has
+          # been failing. The binary is ~460MB, hence LFS only on the job that needs it.
+          lfs: true
 
       # Always-report shim: the job always reports the `desktop-packaged-runtime-probe`
       # check; only the package+probe steps are gated on the DESKTOP path set.
