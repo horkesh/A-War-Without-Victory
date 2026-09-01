@@ -35,8 +35,9 @@ militia accounting adds across a full war moves none of them across a boundary. 
 reassurance, not clearance: it is computed from a pre-v38 run and needs re-checking against
 a post-v38 188-week run.
 
-`docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md` defines this cost axis and has NOT been
-amended; its definition of the axis has changed in substance.
+`docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md` defines this cost axis. Its definition changed
+in substance without its thresholds moving, so it carries a cost-axis note (§0a, 2026-09-01)
+recording that the faction totals it measures now include militia-only defenders.
 
 ### Both pool channels that can move territory
 

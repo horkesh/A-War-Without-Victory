@@ -31203,7 +31203,9 @@ strength served in local defence units (BB1 p.180). Kozarac held ~2 days under 5
 **Owner decision: persistence only, no cap.** Defence magnitude is unchanged; only the accounting
 changes. Two tests keep the falsified premise out of the engine (identical casualties, power ratio
 and outcome with the pool full vs empty; an OSID with no pool at all still defends), and Engine
-Invariants §6.1 now prohibits binding militia defence to `pool.available`.
+Invariants §6.1 now prohibits binding militia defence to `pool.available` **while that field
+retains its present semantics** (`committed` never decremented, controller-gated refills,
+`POST_FLIP_LOST_STRENGTH = 0`); a future change that repairs those semantics first may revisit it.
 
 **What shipped.** `per_militia_pool` on each faction ledger and `wounded_pending` on each militia
 pool (v38, additive, forward-only). One atomic writer, `src/sim/combat/militia_casualties.ts`,
@@ -31229,9 +31231,11 @@ non-formation defenders so this baselined artifact is unchanged for formation ro
 | pools exhausted | 4,107 | **4,629 (+522)** |
 | negative pool fields | 0 | **0** |
 
-Territory is identical. `available` is unchanged because 27 of 30 pools held zero. The single
-second-order channel that can move territory is `exhausted`, which now receives militia permanent
-losses and throttles later mobilization through the exhaustion gate; `per_formation` drifted by
+Territory is identical. `available` is unchanged because 27 of 30 pools held zero. TWO
+second-order channels can move territory: `exhausted` (primary), which now receives militia
+permanent losses and throttles later mobilization through the exhaustion gate, and `available`,
+which feeds the faction-wide cohesion exhaustion ratio (`cohesion_drift.ts:30-44`) — measured at
+zero net change here, with the RBiH ratio moving 0.93610 -> 0.93605 via `committed`. `per_formation` drifted by
 −2 K / −6 W / +4 M and the arithmetic ties out exactly (+1,231 militia − 4 formation = +1,227
 observed total delta), so this is that feedback, not a double write.
 
@@ -31267,9 +31271,16 @@ protocol: uninterrupted 0→12 vs 0→6 plus resume 6→12.
 
 The killed (+4) and missing (−3) divergences are IDENTICAL before and after; territory is
 identical on every path. The plan's "save/load continuation must be byte-identical"
-invariant is violated AT THE BASE COMMIT. This lane neither introduces nor materially
-worsens it — the wounded delta widens only because the newly-recorded militia casualties
-flow through the same pre-existing divergence. **Queued as its own lane; fixing it here
+invariant is violated AT THE BASE COMMIT. **The wounded term is NOT established as unworsened, and this entry does not claim it is.**
+It widened +7 -> +10, a rise both absolutely and proportionally (0.062% -> 0.082% of the wounded
+total). "Militia casualties merely flow through the existing divergence" is a hypothesis, not a
+measurement, and a competing mechanism cannot yet be excluded: `applyMilitiaBattleCasualties`
+reads LIVE pool state to compute `drawnFromAvailable` and the proportional `wounded_pending`
+credit (`militia_casualties.ts:113,130-133`), so a pool that differs at resume yields a different
+militia credit — militia accounting can AMPLIFY the existing divergence rather than merely pass
+through it. **That is the queued lane's first question.**
+
+**Queued as its own lane; fixing it here
 would be an unrelated combat-system change and would destroy this lane's attribution.**
 
 **Canon-compliance review returned NON-COMPLIANT; three of four required changes are
@@ -31302,3 +31313,7 @@ Teočak and the Sarajevo core, which MUST hold. The project's own rule applies: 
 is a false-green for combat-behaviour changes. **This lane was explicitly instructed not to
 start a 188-week run without fresh owner authorization, so it did not.** The run, or a
 recorded owner/panel waiver, is the remaining merge gate.
+
+**That 188-week run MUST BE UNINTERRUPTED.** This lane's own save/resume finding forces it: a
+resumed run inherits the pre-existing divergence, so its enclave-guard verdict would not be
+authoritative.
