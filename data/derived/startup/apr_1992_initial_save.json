@@ -28031,7 +28031,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "banja_luka",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "banja_luka:RBiH": {
         "available": 170,
@@ -28040,7 +28041,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "banja_luka",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "banja_luka:RS": {
         "available": 0,
@@ -28049,7 +28051,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "banja_luka",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "banovici:HRHB": {
         "available": 19,
@@ -28058,7 +28061,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "banovici",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "banovici:RBiH": {
         "available": 93,
@@ -28067,7 +28071,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "banovici",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "banovici:RS": {
         "available": 70,
@@ -28076,7 +28081,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "banovici",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bihac:RBiH": {
         "available": 0,
@@ -28085,7 +28091,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "bihac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bihac:RS": {
         "available": 0,
@@ -28094,7 +28101,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "bihac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bijeljina:HRHB": {
         "available": 19,
@@ -28103,7 +28111,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "bijeljina",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bijeljina:RBiH": {
         "available": 213,
@@ -28112,7 +28121,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "bijeljina",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bijeljina:RS": {
         "available": 0,
@@ -28121,7 +28131,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "bijeljina",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bileca:HRHB": {
         "available": 1,
@@ -28130,7 +28141,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "bileca",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bileca:RBiH": {
         "available": 11,
@@ -28139,7 +28151,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "bileca",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bileca:RS": {
         "available": 0,
@@ -28148,7 +28161,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "bileca",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanska_dubica:HRHB": {
         "available": 19,
@@ -28157,7 +28171,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "bosanska_dubica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanska_dubica:RBiH": {
         "available": 38,
@@ -28166,7 +28181,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "bosanska_dubica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanska_dubica:RS": {
         "available": 0,
@@ -28175,7 +28191,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "bosanska_dubica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanska_gradiska:HRHB": {
         "available": 135,
@@ -28184,7 +28201,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "bosanska_gradiska",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanska_gradiska:RBiH": {
         "available": 94,
@@ -28193,7 +28211,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "bosanska_gradiska",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanska_gradiska:RS": {
         "available": 0,
@@ -28202,7 +28221,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "bosanska_gradiska",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanska_kostajnica:HRHB": {
         "available": 5,
@@ -28211,7 +28231,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "bosanska_kostajnica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanska_kostajnica:RBiH": {
         "available": 5,
@@ -28220,7 +28241,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "bosanska_kostajnica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanska_kostajnica:RS": {
         "available": 78,
@@ -28229,7 +28251,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "bosanska_kostajnica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanska_krupa:HRHB": {
         "available": 5,
@@ -28238,7 +28261,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "bosanska_krupa",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanska_krupa:RBiH": {
         "available": 0,
@@ -28247,7 +28271,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "bosanska_krupa",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanska_krupa:RS": {
         "available": 0,
@@ -28256,7 +28281,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "bosanska_krupa",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanski_brod:HRHB": {
         "available": 397,
@@ -28265,7 +28291,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "bosanski_brod",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanski_brod:RBiH": {
         "available": 24,
@@ -28274,7 +28301,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "bosanski_brod",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanski_brod:RS": {
         "available": 184,
@@ -28283,7 +28311,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "bosanski_brod",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanski_novi:HRHB": {
         "available": 9,
@@ -28292,7 +28321,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "bosanski_novi",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanski_novi:RBiH": {
         "available": 87,
@@ -28301,7 +28331,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "bosanski_novi",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanski_novi:RS": {
         "available": 0,
@@ -28310,7 +28341,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "bosanski_novi",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanski_petrovac:HRHB": {
         "available": 1,
@@ -28319,7 +28351,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "bosanski_petrovac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanski_petrovac:RBiH": {
         "available": 19,
@@ -28328,7 +28361,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "bosanski_petrovac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanski_petrovac:RS": {
         "available": 0,
@@ -28337,7 +28371,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "bosanski_petrovac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanski_samac:HRHB": {
         "available": 708,
@@ -28346,7 +28381,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "bosanski_samac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanski_samac:RBiH": {
         "available": 7,
@@ -28355,7 +28391,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "bosanski_samac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosanski_samac:RS": {
         "available": 0,
@@ -28364,7 +28401,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "bosanski_samac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosansko_grahovo:HRHB": {
         "available": 8,
@@ -28373,7 +28411,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "bosansko_grahovo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosansko_grahovo:RBiH": {
         "available": 0,
@@ -28382,7 +28421,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "bosansko_grahovo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bosansko_grahovo:RS": {
         "available": 0,
@@ -28391,7 +28431,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "bosansko_grahovo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bratunac:HRHB": {
         "available": 1,
@@ -28400,7 +28441,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "bratunac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bratunac:RBiH": {
         "available": 93,
@@ -28409,7 +28451,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "bratunac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bratunac:RS": {
         "available": 0,
@@ -28418,7 +28461,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "bratunac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "brcko:RBiH": {
         "available": 0,
@@ -28427,7 +28471,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "brcko",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "brcko:RS": {
         "available": 0,
@@ -28436,7 +28481,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "brcko",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "breza:HRHB": {
         "available": 33,
@@ -28445,7 +28491,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "breza",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "breza:RBiH": {
         "available": 0,
@@ -28454,7 +28501,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "breza",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "breza:RS": {
         "available": 34,
@@ -28463,7 +28511,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "breza",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bugojno:HRHB": {
         "available": 597,
@@ -28472,7 +28521,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "bugojno",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bugojno:RBiH": {
         "available": 0,
@@ -28481,7 +28531,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "bugojno",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "bugojno:RS": {
         "available": 127,
@@ -28490,7 +28541,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "bugojno",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "busovaca:HRHB": {
         "available": 0,
@@ -28499,7 +28551,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "busovaca",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "busovaca:RBiH": {
         "available": 59,
@@ -28508,7 +28561,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "busovaca",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "busovaca:RS": {
         "available": 9,
@@ -28517,7 +28571,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "busovaca",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "cajnice:HRHB": {
         "available": 0,
@@ -28526,7 +28581,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "cajnice",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "cajnice:RBiH": {
         "available": 28,
@@ -28535,7 +28591,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "cajnice",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "cajnice:RS": {
         "available": 0,
@@ -28544,7 +28601,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "cajnice",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "capljina:HRHB": {
         "available": 170,
@@ -28553,7 +28611,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "capljina",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "capljina:RBiH": {
         "available": 45,
@@ -28562,7 +28621,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "capljina",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "capljina:RS": {
         "available": 62,
@@ -28571,7 +28631,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "capljina",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "cazin:HRHB": {
         "available": 5,
@@ -28580,7 +28641,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "cazin",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "cazin:RBiH": {
         "available": 0,
@@ -28589,7 +28651,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "cazin",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "cazin:RS": {
         "available": 12,
@@ -28598,7 +28661,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "cazin",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "celinac:HRHB": {
         "available": 3,
@@ -28607,7 +28671,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "celinac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "celinac:RBiH": {
         "available": 8,
@@ -28616,7 +28681,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "celinac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "celinac:RS": {
         "available": 0,
@@ -28625,7 +28691,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "celinac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "centar_sarajevo:HRHB": {
         "available": 0,
@@ -28634,7 +28701,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "centar_sarajevo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "centar_sarajevo:RBiH": {
         "available": 0,
@@ -28643,7 +28711,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "centar_sarajevo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "centar_sarajevo:RS": {
         "available": 276,
@@ -28652,7 +28721,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "centar_sarajevo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "citluk:HRHB": {
         "available": 160,
@@ -28661,7 +28731,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "citluk",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "citluk:RBiH": {
         "available": 0,
@@ -28670,7 +28741,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "citluk",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "citluk:RS": {
         "available": 0,
@@ -28679,7 +28751,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "citluk",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "derventa:HRHB": {
         "available": 970,
@@ -28688,7 +28761,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "derventa",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "derventa:RBiH": {
         "available": 42,
@@ -28697,7 +28771,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "derventa",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "derventa:RS": {
         "available": 0,
@@ -28706,7 +28781,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "derventa",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "doboj:HRHB": {
         "available": 426,
@@ -28715,7 +28791,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "doboj",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "doboj:RBiH": {
         "available": 289,
@@ -28724,7 +28801,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "doboj",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "doboj:RS": {
         "available": 0,
@@ -28733,7 +28811,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "doboj",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "donji_vakuf:HRHB": {
         "available": 24,
@@ -28742,7 +28821,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "donji_vakuf",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "donji_vakuf:RBiH": {
         "available": 65,
@@ -28751,7 +28831,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "donji_vakuf",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "donji_vakuf:RS": {
         "available": 0,
@@ -28760,7 +28841,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "donji_vakuf",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "duvno:HRHB": {
         "available": 1354,
@@ -28769,7 +28851,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "duvno",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "duvno:RBiH": {
         "available": 10,
@@ -28778,7 +28861,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "duvno",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "duvno:RS": {
         "available": 8,
@@ -28787,7 +28871,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "duvno",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "foca:HRHB": {
         "available": 3,
@@ -28796,7 +28881,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "foca",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "foca:RBiH": {
         "available": 146,
@@ -28805,7 +28891,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "foca",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "foca:RS": {
         "available": 0,
@@ -28814,7 +28901,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "foca",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "fojnica:HRHB": {
         "available": 345,
@@ -28823,7 +28911,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "fojnica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "fojnica:RBiH": {
         "available": 0,
@@ -28832,7 +28921,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "fojnica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "fojnica:RS": {
         "available": 2,
@@ -28841,7 +28931,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "fojnica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "gacko:HRHB": {
         "available": 1,
@@ -28850,7 +28941,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "gacko",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "gacko:RBiH": {
         "available": 27,
@@ -28859,7 +28951,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "gacko",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "gacko:RS": {
         "available": 0,
@@ -28868,7 +28961,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "gacko",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "glamoc:HRHB": {
         "available": 7,
@@ -28877,7 +28971,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "glamoc",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "glamoc:RBiH": {
         "available": 13,
@@ -28886,7 +28981,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "glamoc",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "glamoc:RS": {
         "available": 0,
@@ -28895,7 +28991,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "glamoc",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "gorazde:HRHB": {
         "available": 3,
@@ -28904,7 +29001,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "gorazde",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "gorazde:RBiH": {
         "available": 0,
@@ -28913,7 +29011,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "gorazde",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "gorazde:RS": {
         "available": 163,
@@ -28922,7 +29021,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "gorazde",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "gornji_vakuf:HRHB": {
         "available": 499,
@@ -28931,7 +29031,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "gornji_vakuf",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "gornji_vakuf:RBiH": {
         "available": 68,
@@ -28940,7 +29041,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "gornji_vakuf",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "gornji_vakuf:RS": {
         "available": 0,
@@ -28949,7 +29051,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "gornji_vakuf",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "gracanica:HRHB": {
         "available": 4,
@@ -28958,7 +29061,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "gracanica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "gracanica:RBiH": {
         "available": 0,
@@ -28967,7 +29071,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "gracanica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "gracanica:RS": {
         "available": 0,
@@ -28976,7 +29081,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "gracanica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "gradacac:RBiH": {
         "available": 0,
@@ -28985,7 +29091,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "gradacac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "gradacac:RS": {
         "available": 0,
@@ -28994,7 +29101,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "gradacac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "grude:HRHB": {
         "available": 259,
@@ -29003,7 +29111,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "grude",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "grude:RBiH": {
         "available": 0,
@@ -29012,7 +29121,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "grude",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "grude:RS": {
         "available": 0,
@@ -29021,7 +29131,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "grude",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "hadzici:HRHB": {
         "available": 29,
@@ -29030,7 +29141,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "hadzici",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "hadzici:RBiH": {
         "available": 0,
@@ -29039,7 +29151,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "hadzici",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "hadzici:RS": {
         "available": 105,
@@ -29048,7 +29161,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "hadzici",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "han_pijesak:HRHB": {
         "available": 0,
@@ -29057,7 +29171,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "han_pijesak",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "han_pijesak:RBiH": {
         "available": 17,
@@ -29066,7 +29181,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "han_pijesak",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "han_pijesak:RS": {
         "available": 88,
@@ -29075,7 +29191,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "han_pijesak",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "ilidza:HRHB": {
         "available": 251,
@@ -29084,7 +29201,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "ilidza",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "ilidza:RBiH": {
         "available": 148,
@@ -29093,7 +29211,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "ilidza",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "ilidza:RS": {
         "available": 0,
@@ -29102,7 +29221,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "ilidza",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "ilijas:RBiH": {
         "available": 98,
@@ -29111,7 +29231,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "ilijas",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "ilijas:RS": {
         "available": 221,
@@ -29120,7 +29241,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "ilijas",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "jablanica:HRHB": {
         "available": 90,
@@ -29129,7 +29251,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "jablanica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "jablanica:RBiH": {
         "available": 0,
@@ -29138,7 +29261,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "jablanica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "jablanica:RS": {
         "available": 7,
@@ -29147,7 +29271,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "jablanica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "jajce:HRHB": {
         "available": 594,
@@ -29156,7 +29281,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "jajce",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "jajce:RBiH": {
         "available": 29,
@@ -29165,7 +29291,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "jajce",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "jajce:RS": {
         "available": 127,
@@ -29174,7 +29301,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "jajce",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kakanj:HRHB": {
         "available": 592,
@@ -29183,7 +29311,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "kakanj",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kakanj:RBiH": {
         "available": 148,
@@ -29192,7 +29321,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "kakanj",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kakanj:RS": {
         "available": 77,
@@ -29201,7 +29331,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "kakanj",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kalesija:HRHB": {
         "available": 1,
@@ -29210,7 +29341,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "kalesija",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kalesija:RBiH": {
         "available": 161,
@@ -29219,7 +29351,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "kalesija",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kalesija:RS": {
         "available": 120,
@@ -29228,7 +29361,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "kalesija",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kalinovik:HRHB": {
         "available": 0,
@@ -29237,7 +29371,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "kalinovik",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kalinovik:RBiH": {
         "available": 7,
@@ -29246,7 +29381,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "kalinovik",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kalinovik:RS": {
         "available": 0,
@@ -29255,7 +29391,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "kalinovik",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kiseljak:HRHB": {
         "available": 0,
@@ -29264,7 +29401,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "kiseljak",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kiseljak:RBiH": {
         "available": 0,
@@ -29273,7 +29411,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "kiseljak",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kiseljak:RS": {
         "available": 11,
@@ -29282,7 +29421,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "kiseljak",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kladanj:HRHB": {
         "available": 1,
@@ -29291,7 +29431,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "kladanj",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kladanj:RBiH": {
         "available": 58,
@@ -29300,7 +29441,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "kladanj",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kladanj:RS": {
         "available": 51,
@@ -29309,7 +29451,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "kladanj",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kljuc:HRHB": {
         "available": 13,
@@ -29318,7 +29461,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "kljuc",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kljuc:RBiH": {
         "available": 124,
@@ -29327,7 +29471,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "kljuc",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kljuc:RS": {
         "available": 0,
@@ -29336,7 +29481,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "kljuc",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "konjic:HRHB": {
         "available": 0,
@@ -29345,7 +29491,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "konjic",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "konjic:RBiH": {
         "available": 0,
@@ -29354,7 +29501,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "konjic",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "konjic:RS": {
         "available": 109,
@@ -29363,7 +29511,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "konjic",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kotor_varos:HRHB": {
         "available": 398,
@@ -29372,7 +29521,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "kotor_varos",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kotor_varos:RBiH": {
         "available": 5,
@@ -29381,7 +29531,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "kotor_varos",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kotor_varos:RS": {
         "available": 0,
@@ -29390,7 +29541,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "kotor_varos",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kresevo:HRHB": {
         "available": 0,
@@ -29399,7 +29551,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "kresevo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kresevo:RBiH": {
         "available": 9,
@@ -29408,7 +29561,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "kresevo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kresevo:RS": {
         "available": 0,
@@ -29417,7 +29571,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "kresevo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kupres:HRHB": {
         "available": 193,
@@ -29426,7 +29581,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "kupres",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kupres:RBiH": {
         "available": 4,
@@ -29435,7 +29591,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "kupres",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "kupres:RS": {
         "available": 0,
@@ -29444,7 +29601,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "kupres",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "laktasi:HRHB": {
         "available": 101,
@@ -29453,7 +29611,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "laktasi",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "laktasi:RBiH": {
         "available": 2,
@@ -29462,7 +29621,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "laktasi",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "laktasi:RS": {
         "available": 0,
@@ -29471,7 +29631,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "laktasi",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "listica:HRHB": {
         "available": 1021,
@@ -29480,7 +29641,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "listica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "listica:RBiH": {
         "available": 0,
@@ -29489,7 +29651,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "listica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "listica:RS": {
         "available": 2,
@@ -29498,7 +29661,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "listica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "livno:HRHB": {
         "available": 1297,
@@ -29507,7 +29671,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "livno",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "livno:RBiH": {
         "available": 34,
@@ -29516,7 +29681,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "livno",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "livno:RS": {
         "available": 64,
@@ -29525,7 +29691,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "livno",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "ljubinje:HRHB": {
         "available": 1,
@@ -29534,7 +29701,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "ljubinje",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "ljubinje:RBiH": {
         "available": 1,
@@ -29543,7 +29711,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "ljubinje",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "ljubinje:RS": {
         "available": 73,
@@ -29552,7 +29721,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "ljubinje",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "ljubuski:HRHB": {
         "available": 968,
@@ -29561,7 +29731,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "ljubuski",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "ljubuski:RBiH": {
         "available": 9,
@@ -29570,7 +29741,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "ljubuski",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "ljubuski:RS": {
         "available": 0,
@@ -29579,7 +29751,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "ljubuski",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "lopare:RBiH": {
         "available": 152,
@@ -29588,7 +29761,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "lopare",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "lopare:RS": {
         "available": 0,
@@ -29597,7 +29771,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "lopare",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "lukavac:HRHB": {
         "available": 77,
@@ -29606,7 +29781,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "lukavac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "lukavac:RBiH": {
         "available": 185,
@@ -29615,7 +29791,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "lukavac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "lukavac:RS": {
         "available": 0,
@@ -29624,7 +29801,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "lukavac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "maglaj:RBiH": {
         "available": 0,
@@ -29633,7 +29811,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "maglaj",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "maglaj:RS": {
         "available": 157,
@@ -29642,7 +29821,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "maglaj",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "modrica:HRHB": {
         "available": 0,
@@ -29651,7 +29831,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "modrica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "modrica:RBiH": {
         "available": 24,
@@ -29660,7 +29841,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "modrica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "modrica:RS": {
         "available": 0,
@@ -29669,7 +29851,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "modrica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "mostar:HRHB": {
         "available": 0,
@@ -29678,7 +29861,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "mostar",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "mostar:RBiH": {
         "available": 0,
@@ -29687,7 +29871,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "mostar",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "mostar:RS": {
         "available": 374,
@@ -29696,7 +29881,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "mostar",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "mrkonjic_grad:HRHB": {
         "available": 78,
@@ -29705,7 +29891,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "mrkonjic_grad",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "mrkonjic_grad:RBiH": {
         "available": 13,
@@ -29714,7 +29901,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "mrkonjic_grad",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "mrkonjic_grad:RS": {
         "available": 0,
@@ -29723,7 +29911,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "mrkonjic_grad",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "neum:HRHB": {
         "available": 197,
@@ -29732,7 +29921,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "neum",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "neum:RBiH": {
         "available": 0,
@@ -29741,7 +29931,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "neum",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "neum:RS": {
         "available": 2,
@@ -29750,7 +29941,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "neum",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "nevesinje:HRHB": {
         "available": 8,
@@ -29759,7 +29951,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "nevesinje",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "nevesinje:RBiH": {
         "available": 16,
@@ -29768,7 +29961,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "nevesinje",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "nevesinje:RS": {
         "available": 0,
@@ -29777,7 +29971,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "nevesinje",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "novi_grad_sarajevo:HRHB": {
         "available": 348,
@@ -29786,7 +29981,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "novi_grad_sarajevo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "novi_grad_sarajevo:RBiH": {
         "available": 0,
@@ -29795,7 +29991,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "novi_grad_sarajevo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "novi_grad_sarajevo:RS": {
         "available": 617,
@@ -29804,7 +30001,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "novi_grad_sarajevo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "novi_travnik:HRHB": {
         "available": 0,
@@ -29813,7 +30011,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "novi_travnik",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "novi_travnik:RBiH": {
         "available": 82,
@@ -29822,7 +30021,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "novi_travnik",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "novi_travnik:RS": {
         "available": 67,
@@ -29831,7 +30031,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "novi_travnik",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "novo_sarajevo:HRHB": {
         "available": 346,
@@ -29840,7 +30041,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "novo_sarajevo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "novo_sarajevo:RBiH": {
         "available": 0,
@@ -29849,7 +30051,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "novo_sarajevo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "novo_sarajevo:RS": {
         "available": 0,
@@ -29858,7 +30061,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "novo_sarajevo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "odzak:HRHB": {
         "available": 741,
@@ -29867,7 +30071,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "odzak",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "odzak:RBiH": {
         "available": 54,
@@ -29876,7 +30081,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "odzak",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "odzak:RS": {
         "available": 100,
@@ -29885,7 +30091,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "odzak",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "olovo:HRHB": {
         "available": 25,
@@ -29894,7 +30101,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "olovo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "olovo:RBiH": {
         "available": 0,
@@ -29903,7 +30111,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "olovo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "olovo:RS": {
         "available": 50,
@@ -29912,7 +30121,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "olovo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "orasje:HRHB": {
         "available": 224,
@@ -29921,7 +30131,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "orasje",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "orasje:RBiH": {
         "available": 11,
@@ -29930,7 +30141,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "orasje",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "orasje:RS": {
         "available": 70,
@@ -29939,7 +30151,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "orasje",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "pale:HRHB": {
         "available": 5,
@@ -29948,7 +30161,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "pale",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "pale:RBiH": {
         "available": 26,
@@ -29957,7 +30171,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "pale",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "pale:RS": {
         "available": 0,
@@ -29966,7 +30181,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "pale",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "posusje:HRHB": {
         "available": 413,
@@ -29975,7 +30191,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "posusje",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "posusje:RBiH": {
         "available": 0,
@@ -29984,7 +30201,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "posusje",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "posusje:RS": {
         "available": 0,
@@ -29993,7 +30211,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "posusje",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "prijedor:HRHB": {
         "available": 225,
@@ -30002,7 +30221,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "prijedor",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "prijedor:RBiH": {
         "available": 240,
@@ -30011,7 +30231,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "prijedor",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "prijedor:RS": {
         "available": 0,
@@ -30020,7 +30241,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "prijedor",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "prnjavor:HRHB": {
         "available": 68,
@@ -30029,7 +30251,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "prnjavor",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "prnjavor:RBiH": {
         "available": 42,
@@ -30038,7 +30261,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "prnjavor",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "prnjavor:RS": {
         "available": 0,
@@ -30047,7 +30271,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "prnjavor",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "prozor:HRHB": {
         "available": 76,
@@ -30056,7 +30281,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "prozor",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "prozor:RBiH": {
         "available": 51,
@@ -30065,7 +30291,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "prozor",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "prozor:RS": {
         "available": 0,
@@ -30074,7 +30301,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "prozor",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "rogatica:HRHB": {
         "available": 0,
@@ -30083,7 +30311,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "rogatica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "rogatica:RBiH": {
         "available": 0,
@@ -30092,7 +30321,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "rogatica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "rogatica:RS": {
         "available": 0,
@@ -30101,7 +30331,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "rogatica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "rudo:HRHB": {
         "available": 0,
@@ -30110,7 +30341,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "rudo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "rudo:RBiH": {
         "available": 10,
@@ -30119,7 +30351,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "rudo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "rudo:RS": {
         "available": 159,
@@ -30128,7 +30361,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "rudo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "sanski_most:HRHB": {
         "available": 154,
@@ -30137,7 +30371,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "sanski_most",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "sanski_most:RBiH": {
         "available": 137,
@@ -30146,7 +30381,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "sanski_most",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "sanski_most:RS": {
         "available": 0,
@@ -30155,7 +30391,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "sanski_most",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "sekovici:HRHB": {
         "available": 0,
@@ -30164,7 +30401,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "sekovici",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "sekovici:RBiH": {
         "available": 1,
@@ -30173,7 +30411,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "sekovici",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "sekovici:RS": {
         "available": 190,
@@ -30182,7 +30421,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "sekovici",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "sipovo:HRHB": {
         "available": 1,
@@ -30191,7 +30431,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "sipovo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "sipovo:RBiH": {
         "available": 17,
@@ -30200,7 +30441,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "sipovo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "sipovo:RS": {
         "available": 0,
@@ -30209,7 +30451,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "sipovo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "skender_vakuf:HRHB": {
         "available": 203,
@@ -30218,7 +30461,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "skender_vakuf",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "skender_vakuf:RBiH": {
         "available": 6,
@@ -30227,7 +30471,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "skender_vakuf",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "skender_vakuf:RS": {
         "available": 0,
@@ -30236,7 +30481,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "skender_vakuf",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "sokolac:HRHB": {
         "available": 0,
@@ -30245,7 +30491,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "sokolac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "sokolac:RBiH": {
         "available": 29,
@@ -30254,7 +30501,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "sokolac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "sokolac:RS": {
         "available": 249,
@@ -30263,7 +30511,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "sokolac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "srbac:HRHB": {
         "available": 5,
@@ -30272,7 +30521,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "srbac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "srbac:RBiH": {
         "available": 5,
@@ -30281,7 +30531,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "srbac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "srbac:RS": {
         "available": 0,
@@ -30290,7 +30541,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "srbac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "srebrenica:HRHB": {
         "available": 1,
@@ -30299,7 +30551,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "srebrenica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "srebrenica:RBiH": {
         "available": 0,
@@ -30308,7 +30561,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "srebrenica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "srebrenica:RS": {
         "available": 0,
@@ -30317,7 +30571,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "srebrenica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "srebrenik:RBiH": {
         "available": 304,
@@ -30326,7 +30581,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "srebrenik",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "srebrenik:RS": {
         "available": 82,
@@ -30335,7 +30591,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "srebrenik",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "stari_grad_sarajevo:HRHB": {
         "available": 46,
@@ -30344,7 +30601,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "stari_grad_sarajevo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "stari_grad_sarajevo:RBiH": {
         "available": 0,
@@ -30353,7 +30611,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "stari_grad_sarajevo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "stari_grad_sarajevo:RS": {
         "available": 125,
@@ -30362,7 +30621,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "stari_grad_sarajevo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "stolac:HRHB": {
         "available": 0,
@@ -30371,7 +30631,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "stolac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "stolac:RBiH": {
         "available": 35,
@@ -30380,7 +30641,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "stolac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "stolac:RS": {
         "available": 60,
@@ -30389,7 +30651,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "stolac",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "tesanj:RBiH": {
         "available": 352,
@@ -30398,7 +30661,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "tesanj",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "tesanj:RS": {
         "available": 26,
@@ -30407,7 +30671,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "tesanj",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "teslic:HRHB": {
         "available": 393,
@@ -30416,7 +30681,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "teslic",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "teslic:RBiH": {
         "available": 76,
@@ -30425,7 +30691,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "teslic",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "teslic:RS": {
         "available": 0,
@@ -30434,7 +30701,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "teslic",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "titov_drvar:HRHB": {
         "available": 1,
@@ -30443,7 +30711,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "titov_drvar",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "titov_drvar:RBiH": {
         "available": 0,
@@ -30452,7 +30721,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "titov_drvar",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "titov_drvar:RS": {
         "available": 0,
@@ -30461,7 +30731,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "titov_drvar",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "travnik:HRHB": {
         "available": 1304,
@@ -30470,7 +30741,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "travnik",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "travnik:RBiH": {
         "available": 0,
@@ -30479,7 +30751,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "travnik",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "travnik:RS": {
         "available": 121,
@@ -30488,7 +30761,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "travnik",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "trebinje:HRHB": {
         "available": 49,
@@ -30497,7 +30771,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "trebinje",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "trebinje:RBiH": {
         "available": 33,
@@ -30506,7 +30781,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "trebinje",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "trebinje:RS": {
         "available": 0,
@@ -30515,7 +30791,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "trebinje",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "trnovo:HRHB": {
         "available": 0,
@@ -30524,7 +30801,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "trnovo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "trnovo:RBiH": {
         "available": 23,
@@ -30533,7 +30811,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "trnovo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "trnovo:RS": {
         "available": 0,
@@ -30542,7 +30821,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "trnovo",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "tuzla:RBiH": {
         "available": 0,
@@ -30551,7 +30831,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "tuzla",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "tuzla:RS": {
         "available": 334,
@@ -30560,7 +30841,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "tuzla",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "ugljevik:HRHB": {
         "available": 2,
@@ -30569,7 +30851,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "ugljevik",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "ugljevik:RBiH": {
         "available": 0,
@@ -30578,7 +30861,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "ugljevik",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "ugljevik:RS": {
         "available": 0,
@@ -30587,7 +30871,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "ugljevik",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "vares:HRHB": {
         "available": 456,
@@ -30596,7 +30881,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "vares",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "vares:RBiH": {
         "available": 0,
@@ -30605,7 +30891,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "vares",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "vares:RS": {
         "available": 59,
@@ -30614,7 +30901,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "vares",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "velika_kladusa:RBiH": {
         "available": 13,
@@ -30623,7 +30911,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "velika_kladusa",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "velika_kladusa:RS": {
         "available": 37,
@@ -30632,7 +30921,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "velika_kladusa",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "visegrad:HRHB": {
         "available": 1,
@@ -30641,7 +30931,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "visegrad",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "visegrad:RBiH": {
         "available": 58,
@@ -30650,7 +30941,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "visegrad",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "visegrad:RS": {
         "available": 0,
@@ -30659,7 +30951,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "visegrad",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "visoko:HRHB": {
         "available": 74,
@@ -30668,7 +30961,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "visoko",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "visoko:RBiH": {
         "available": 0,
@@ -30677,7 +30971,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "visoko",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "visoko:RS": {
         "available": 123,
@@ -30686,7 +30981,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "visoko",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "vitez:HRHB": {
         "available": 906,
@@ -30695,7 +30991,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "vitez",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "vitez:RBiH": {
         "available": 81,
@@ -30704,7 +31001,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "vitez",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "vitez:RS": {
         "available": 24,
@@ -30713,7 +31011,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "vitez",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "vlasenica:HRHB": {
         "available": 1,
@@ -30722,7 +31021,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "vlasenica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "vlasenica:RBiH": {
         "available": 129,
@@ -30731,7 +31031,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "vlasenica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "vlasenica:RS": {
         "available": 0,
@@ -30740,7 +31041,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "vlasenica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "vogosca:RBiH": {
         "available": 0,
@@ -30749,7 +31051,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "vogosca",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "vogosca:RS": {
         "available": 0,
@@ -30758,7 +31061,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "vogosca",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "zavidovici:HRHB": {
         "available": 122,
@@ -30767,7 +31071,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "zavidovici",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "zavidovici:RBiH": {
         "available": 163,
@@ -30776,7 +31081,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "zavidovici",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "zavidovici:RS": {
         "available": 0,
@@ -30785,7 +31091,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "zavidovici",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "zenica:HRHB": {
         "available": 891,
@@ -30794,7 +31101,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "zenica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "zenica:RBiH": {
         "available": 0,
@@ -30803,7 +31111,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "zenica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "zenica:RS": {
         "available": 391,
@@ -30812,7 +31121,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "zenica",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "zepce:HRHB": {
         "available": 581,
@@ -30821,7 +31131,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "zepce",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "zepce:RBiH": {
         "available": 82,
@@ -30830,7 +31141,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "zepce",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "zepce:RS": {
         "available": 39,
@@ -30839,7 +31151,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "zepce",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "zivinice:HRHB": {
         "available": 142,
@@ -30848,7 +31161,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "zivinice",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "zivinice:RBiH": {
         "available": 214,
@@ -30857,7 +31171,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "zivinice",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "zivinice:RS": {
         "available": 54,
@@ -30866,7 +31181,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "zivinice",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "zvornik:HRHB": {
         "available": 4,
@@ -30875,7 +31191,8 @@
         "faction": "HRHB",
         "fatigue": 0,
         "mun_id": "zvornik",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "zvornik:RBiH": {
         "available": 0,
@@ -30884,7 +31201,8 @@
         "faction": "RBiH",
         "fatigue": 0,
         "mun_id": "zvornik",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       },
       "zvornik:RS": {
         "available": 0,
@@ -30893,7 +31211,8 @@
         "faction": "RS",
         "fatigue": 0,
         "mun_id": "zvornik",
-        "updated_turn": 0
+        "updated_turn": 0,
+        "wounded_pending": 0
       }
     },
     "must_hold_osids_by_corps": {
@@ -43471,6 +43790,6 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 37,
+  "schema_version": 38,
   "turn_summaries": []
 }
