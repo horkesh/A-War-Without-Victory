@@ -268,6 +268,13 @@ describe('war-phase step ordering', () => {
         // flag-gated AWWV_BRCKO_TACTICAL_GROUP, default OFF, 2026-08-11).
         // +1 from repair-active-elite-deployment-after-final-topology: restores
         // movement ownership if final topology invalidates a live loan assignment.
-        expect(stepNames.length).toBe(189);
+        // +1 from admit-authored-pre-planned-reinforcements (bdc69939f, "restore Srebrenica
+        // operation convergence"). That commit added the step and did not move this pin,
+        // so 189 has been stale since. Named here rather than silently bumped: this
+        // assertion's whole value is the changelog above it, and a bare re-bless would
+        // have recorded a count without recording what changed. Verified the step is
+        // pre-existing rather than introduced by the current lane — warPhases.length is
+        // 190 at base commit e24ec2e15 as well.
+        expect(stepNames.length).toBe(190);
     });
 });

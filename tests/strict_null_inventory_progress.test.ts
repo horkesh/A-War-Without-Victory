@@ -762,18 +762,29 @@ describe('strict null inventory progress', () => {
             // lifecycle reevaluation cannot silently restore the generic two-brigade
             // default. Absent legacy operations retain that default. So 539 → 540 /
             // sim 342 → 343, with no type escape.
-            optional_fields_game_state: 540,
+            // 540 -> 543, and the +3 is fully attributed rather than blanket-blessed.
+            // Measured on the base commit e24ec2e15 this counter already read 542: +2
+            // from two unrelated lanes that landed in the same window without moving the
+            // pin. The remaining +1 is `MilitiaPoolState.wounded_pending?`, added by the
+            // militia casualty-persistence lane (schema v38) so a pool that has taken
+            // militia losses can report wounded awaiting return to `available`.
+            // as_any / as_factionid / as_unknown / non_null_assertions are ALL unchanged
+            // at 0 / 3 / 5 / 7 — this bump is purely the optional-field ratchet, with no
+            // new type escape. All three land in the `sim` domain (343 -> 346); `state`
+            // is unchanged at 187, because classifyDomain routes MilitiaPoolState by its
+            // interface-name rule rather than by the file it lives in.
+            optional_fields_game_state: 543,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
         // so sim 335->336 and state is UNCHANGED at 186. Gated by
         // `AWWV_DEBUG_REASON_CODES=axis_reject`; absent on every default run.
-        expect(current.optional_field_domains.total).toBe(540);
+        expect(current.optional_field_domains.total).toBe(543);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 343,
+            sim: 346,
             state: 187,
             ui_adapter: 0,
             unknown: 0,
