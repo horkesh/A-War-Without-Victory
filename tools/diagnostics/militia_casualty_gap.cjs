@@ -15,12 +15,22 @@
  * Deterministic: no wall clock, no randomness. Faction and OSID output is ordered by
  * descending raw casualties, ties broken lexically. Never mutates the run directory.
  *
+ * With `--preflight`, it additionally answers the architecture question the militia
+ * persistence plan gates on: for every militia-only battle, was there a matching
+ * (municipality, faction) militia pool, and how much `available` manpower did that pool
+ * hold AT BATTLE TIME? Pool state is read from `replay_save_sequence.json`, so the run
+ * must have been produced with `--full-replay-save-sequence`. Snapshot-only joins against
+ * initial/final saves are NOT equivalent — militia pools drain steadily across a run, so
+ * an end-state zero says nothing about what the pool held when the battle was fought.
+ *
  * Usage:
- *   node tools/diagnostics/militia_casualty_gap.cjs <run_dir> [--json]
+ *   node tools/diagnostics/militia_casualty_gap.cjs <run_dir> [--json] [--preflight]
  */
 
 const fs = require('fs');
 const path = require('path');
+
+const NEWLINE = String.fromCharCode(10);
 
 /** Lexical comparator matching the engine's `strictCompare` ordering. */
 function strictCompare(a, b) {
@@ -123,9 +133,92 @@ function collect(runDir) {
     };
 }
 
+/**
+ * Join each militia-only battle to the militia-pool state at the START of the week the
+ * battle was fought: the initial save for week 0, otherwise the replay sequence entry for
+ * the preceding turn. Within-week drift is not modelled, which is sound for the question
+ * asked — before this lane a militia battle debited nothing, so a pool cannot have been
+ * reduced by the battle being measured.
+ */
+function preflight(runDir) {
+    const seqPath = path.join(runDir, 'replay_save_sequence.json');
+    const initPath = path.join(runDir, 'initial_save.json');
+    if (!fs.existsSync(seqPath)) {
+        throw new Error(`no replay_save_sequence.json in ${runDir} `
+            + `(re-run the scenario with --full-replay-save-sequence)`);
+    }
+    const sequence = JSON.parse(fs.readFileSync(seqPath, 'utf8'));
+    const initial = JSON.parse(fs.readFileSync(initPath, 'utf8'));
+    const lines = fs.readFileSync(path.join(runDir, 'weekly_report.jsonl'), 'utf8')
+        .split(NEWLINE).filter((l) => l.trim().length > 0);
+
+    const poolsAtWeek = (i) => {
+        const state = i === 0 ? initial : sequence[i - 1];
+        return (state && state.military && state.military.militia_pools) || {};
+    };
+
+    const rows = [];
+    let noPool = 0, zeroAvailable = 0, underBacked = 0, fullyBacked = 0;
+
+    lines.forEach((line, i) => {
+        const report = JSON.parse(line);
+        for (const battle of report.battles || []) {
+            if (!isMilitiaOnly(battle)) continue;
+            const mun = (battle.target_osid || '').split(':')[1];
+            const key = `${mun}:${battle.defender_faction}`;
+            const pool = poolsAtWeek(i)[key];
+            const available = pool ? (pool.available || 0) : null;
+            const casualties = battle.defender_casualties || 0;
+
+            let verdict;
+            if (!pool) { verdict = 'no_pool'; noPool += 1; }
+            else if (available === 0) { verdict = 'zero_available'; zeroAvailable += 1; }
+            else if (available < casualties) { verdict = 'under_backed'; underBacked += 1; }
+            else { verdict = 'fully_backed'; fullyBacked += 1; }
+
+            rows.push({
+                week: report.week_index != null ? report.week_index : i,
+                pool_key: key,
+                available,
+                casualties,
+                target_osid: battle.target_osid,
+                verdict,
+            });
+        }
+    });
+
+    return {
+        run_dir: runDir,
+        militia_only_battles: rows.length,
+        no_pool: noPool,
+        zero_available: zeroAvailable,
+        under_backed: underBacked,
+        fully_backed: fullyBacked,
+        rows,
+    };
+}
+
+function printPreflight(result) {
+    console.log('');
+    console.log('  architecture preflight — pool availability AT BATTLE TIME');
+    console.log(`    militia-only battles            ${result.militia_only_battles}`);
+    console.log(`    no matching pool                ${result.no_pool}`);
+    console.log(`    pool exists, available == 0     ${result.zero_available}`);
+    console.log(`    available > 0 but < casualties  ${result.under_backed}`);
+    console.log(`    fully backed                    ${result.fully_backed}`);
+    console.log('');
+    console.log('    wk  pool_key                       avail    cas  verdict         osid');
+    for (const r of result.rows) {
+        console.log(`    ${String(r.week).padStart(2)}  ${String(r.pool_key).padEnd(28)}`
+            + `${String(r.available).padStart(6)}${String(r.casualties).padStart(7)}`
+            + `  ${r.verdict.padEnd(14)}  ${r.target_osid}`);
+    }
+}
+
 function main() {
     const args = process.argv.slice(2);
     const asJson = args.includes('--json');
+    const wantPreflight = args.includes('--preflight');
     const runDir = args.find((a) => !a.startsWith('--'));
     if (!runDir) {
         console.error('usage: node tools/diagnostics/militia_casualty_gap.cjs <run_dir> [--json]');
@@ -134,6 +227,7 @@ function main() {
 
     const result = collect(runDir);
     if (asJson) {
+        if (wantPreflight) result.preflight = preflight(runDir);
         console.log(JSON.stringify(result, null, 2));
         return;
     }
@@ -160,8 +254,10 @@ function main() {
     for (const o of result.top_osids) {
         console.log(`    ${String(o.raw).padStart(6)}  ${o.key}`);
     }
+
+    if (wantPreflight) printPreflight(preflight(runDir));
 }
 
 if (require.main === module) main();
 
-module.exports = { collect, splitKiaWiaMia, strictCompare };
+module.exports = { collect, preflight, splitKiaWiaMia, strictCompare };
