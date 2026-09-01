@@ -176,13 +176,32 @@ describe('RS Six Strategic Goals — foundational decision-event §6 guard', () 
         }
     });
 
-    it('the remediated aggressive branch is command policy while historical harm remains a non-player consequence', () => {
+    it('the aggressive branch is labelled honestly while historical harm remains a non-player consequence', () => {
+        // REVERSED 2026-09-01. This test previously required the label
+        // 'Centralize operational command' and the description to contain
+        // 'chain-of-command reporting'. That wording WAS THE §6 DEFECT, not the
+        // remediation: a5d1a1cf4 (four-seat §6 panel, unanimous GO) relabelled it
+        // because administrative-reform language was hiding the maximum-atrocity
+        // branch. Sixteen downstream events gate on flag value `aggressive`, including
+        // csq_accelerated_camps_discovery_1992 ("The Camps Are Found"), so a player
+        // could select the camps branch believing they were centralising command.
+        // Ring 3 forbids authoring cleansing by name; it does not license labelling
+        // that branch as paperwork.
+        //
+        // That commit updated sensitive_history_player_choice_content.test.ts but not
+        // this file, leaving an assertion that would fail the honest label and pass the
+        // euphemism — i.e. a guard pointing at the defect. Satisfying it by editing the
+        // catalog would have REVERTED a panel-approved §6 remediation.
         const options = EVENT!.response_options ?? [];
         const aggressive = options.find((o) => o.id === 'aggressive');
         expect(aggressive).toBeDefined();
-        expect(aggressive!.label).toBe('Centralize operational command');
+        expect(aggressive!.label).toBe('Pursue all six goals by maximum force');
         expect(aggressive!.description).toContain('Assembly decision is part of the historical record');
-        expect(aggressive!.description).toContain('chain-of-command reporting');
+        expect(aggressive!.description).toContain('maximum force');
+        // The euphemism must not come back.
+        expect(aggressive!.label).not.toContain('Centralize');
+        expect(aggressive!.description).not.toContain('chain-of-command reporting');
+        // Harm is still never authored on the option itself — it stays a consequence.
         expect((aggressive!.effects ?? []).some((effect) => effect.kind === 'humanitarian_impact')).toBe(false);
 
         expect(DRINA_CONSEQUENCE).toBeDefined();
