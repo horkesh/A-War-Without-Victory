@@ -31708,3 +31708,38 @@ authoritative.
 THIS GATE.** Escalating the 188-week run discharges the LANE's obligation; it does not satisfy
 the requirement. The requirement now belongs to the owner or the panel. Do not read the canon
 verdict in this entry as clearance to merge.
+
+### 2026-09-01 — Integration: militia casualty persistence + sharded test-runner default
+
+**Branch** `claude/integration` = `lane/desktop-calibration-parity` (`ef05545d8`) + `claude/test-runner-default` + `claude/militia-casualty-persistence`, merged by owner direction ("I want the militia and test work finished, merged, fixed").
+
+**Conflicts, both expected and both resolved deliberately.**
+`RE_SCOPE_LOCK.json` — the militia lane replicated the owner's lock retirement onto its older
+base (`status: active`, base `e24ec2e15`); this line already carries the owner's own authoritative
+retirement (`status: closed`, base `85aa0ef1a`). Took the owner's; the replication existed only
+because the militia base predated it. `PROJECT_LEDGER.md` — both lanes append; kept BOTH entry
+sets in full.
+
+**OWNER WAIVER ON THE 188-WEEK ENCLAVE-GUARD GATE — RECORDED, NOT SILENTLY PASSED.**
+Canon-compliance review returned COMPLIANT but stated that COMPLIANT does not open the gate: the
+lane "must not merge until an uninterrupted 188-week run is scored with
+`tools/verify_checkpoints.cjs` (enclave guard + all four checkpoints + a full `anchor_checks`
+diff), or the owner/panel records a waiver." No such run was performed — this session was
+instructed not to start one. **The owner directed the merge; that is the waiver, and this is the
+record of it.** The reviewer's reasoning stands unrefuted and is repeated here so a future lane
+does not mistake the merge for evidence: the enclave guard is a 188-week property, and every
+effect of this change drains the faction that fought a militia-only defence — predominantly RBiH,
+which holds Goražde, Bihać, Teočak and the Sarajevo core. A 40-week GO is a false-green for
+combat-behaviour changes. **The 188-week verification remains OWED, not satisfied.**
+
+**Startup snapshot re-blessed here, and the Foča question closed.** Re-blessing on the militia
+lane produced five initial-control flips in Foča and was refused there. Owner confirmed those
+OSIDs correctly start RBiH and are taken through operations, in their own completed lane. On THIS
+line the snapshot already post-dates that work, so the re-bless is clean: schema 37→38,
+`wounded_pending` on 319/319 pools, **zero control flips**, formations unchanged at 225. It also
+fixes two pre-existing `startup_snapshot_contract` failures and introduces none.
+
+**Test attribution, measured not assumed.** Base `e24ec2e15` fails 17 tests in the affected set;
+those are pre-existing. Seven were this work's, all now closed. One `startup_snapshot_contract`
+failure ("sector roster and sectorless brigades are structurally explicit") remains and is
+pre-existing on this line — it fails identically with and without the re-bless.
