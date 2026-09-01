@@ -250,6 +250,7 @@ const VALIDATOR_ENCLAVE_DEFINITIONS = [
             'op:srebrenica:ljeskovik_2',
             'op:srebrenica:luka_2',
             'op:srebrenica:milacevici',
+            'op:srebrenica:obadi',
             'op:srebrenica:radovcici',
             'op:srebrenica:srebrenica_2',
             'op:srebrenica:suceska',
