@@ -170,7 +170,7 @@ describe('triggered operations definitions', () => {
         const skelaniAxis = operation.axes.find((axis) => axis.axis_id === 'skelani_cutoff')!;
 
         assert.equal(operation.planning_duration, 20);
-        assert.equal(operation.min_attack_outcome, 'costly_victory');
+        assert.equal(operation.min_attack_outcome, 'repulsed');
         assert.equal(operation.execution_attack_power_mult, 2.0);
         assert.equal(operation.require_all_axes_ready, true);
         assert.deepEqual(cerskaAxis.objectives, ['op:vlasenica:cerska_2']);
@@ -182,6 +182,7 @@ describe('triggered operations definitions', () => {
         assert.ok(!cerskaAxis.brigades.includes('rs_65th_protection_motorized_regiment'));
         assert.ok(!kamenicaAxis.brigades.includes('rs_1st_guards_motorized'));
         assert.ok(!kamenicaAxis.brigades.includes('rs_65th_protection_motorized_regiment'));
+        assert.ok(kamenicaAxis.brigades.includes('rs_5th_podrinje'));
         assert.ok(kamenicaAxis.brigades.includes('rs_1st_podrinje'));
         assert.ok(kamenicaAxis.brigades.includes('rs_visegrad_brigade'));
         assert.equal(kamenicaAxis.staging_osid, 'op:srebrenica:brezovice_2');
@@ -196,6 +197,8 @@ describe('triggered operations definitions', () => {
             'rs_1st_guards_motorized',
             'rs_65th_protection_motorized_regiment',
         ]);
+        assert.equal(skelaniAxis.minimum_staged_brigades, 2);
+        assert.equal(skelaniAxis.minimum_forward_brigades, 2);
         assert.equal(skelaniAxis.staging_osid, 'op:vlasenica:sebiocina');
         assert.equal(skelaniAxis.minimum_staged_brigades, 2);
         assert.equal(skelaniAxis.minimum_forward_brigades, 2);

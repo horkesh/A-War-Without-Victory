@@ -68,7 +68,10 @@ import {
 } from '../../state/elite_loan_types.js';
 import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants.js';
 import { computeOsidGraphDistance } from './home_distance.js';
-import { isEliteReservedForHistoricalOperation } from './historical_elite_reservations.js';
+import {
+    isEliteAuthoredForHistoricalOperation,
+    isEliteReservedForHistoricalOperation,
+} from './historical_elite_reservations.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getPrimaryOperation } from './corps_operation_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -1319,6 +1322,19 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
                 operation.participating_brigades.includes(bid)
                 || (operation.axes ?? []).some((axis) => axis.assigned_brigades.includes(bid))
             ));
+        const reservedForHistoricalOperation = isEliteReservedForHistoricalOperation(bid as FormationId, turn);
+        const authoredOperationStillLive = !!receivingCommand?.active_operations?.some((operation) =>
+            (operation.phase === 'planning' || operation.phase === 'execution')
+            && isEliteAuthoredForHistoricalOperation(bid as FormationId, operation.name));
+
+        // A dated Main Staff commitment owns the interval between operations as
+        // well as its launch turn. Once the current operation releases an
+        // earmarked formation, return it to Army HQ instead of leaving it on a
+        // threatened corps front where generic demand can consume its strength.
+        if (reservedForHistoricalOperation && !committedToActiveOperation && !authoredOperationStillLive) {
+            recallEliteLoan(state, bid, 'op_complete', turn);
+            continue;
+        }
         // ── Force recall checks (in priority order) ──
 
         // Permanent degradation — > 50% personnel loss
@@ -1376,7 +1392,6 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
 
         const corpsId = ls.loaned_to_corps;
         const cmd = corpsCommand[corpsId];
-        const reservedForHistoricalOperation = isEliteReservedForHistoricalOperation(bid as FormationId, turn);
         const hasActiveOp = committedToActiveOperation
             || (!reservedForHistoricalOperation && !!cmd?.active_operations?.some(op => op.phase === 'execution'));
         const cfs = state.military.corps_front_sectors ?? {};

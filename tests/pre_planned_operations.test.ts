@@ -183,6 +183,48 @@ describe('pre-planned operations', () => {
         ]);
     });
 
+    it('defines the three ARBiH combat operations for the 1993 HVO war', () => {
+        const centralBosnia = _ALL_PRE_PLANNED.find((def) => def.name === 'Central Bosnia Counteroffensive');
+        assert.ok(centralBosnia);
+        assert.equal(centralBosnia.corps, 'arbih_3rd_corps');
+        assert.equal(centralBosnia.faction, 'RBiH');
+        assert.equal(centralBosnia.available_from, 60);
+        assert.deepEqual(centralBosnia.axes.flatMap((axis) => axis.objectives), [
+            'op:fojnica:bakovici_2',
+            'op:kakanj:slapnica_2',
+            'op:kakanj:bukovlje_2',
+            'op:kakanj:seoce_2',
+            'op:kakanj:poljani_2',
+            'op:gornji_vakuf:zdrimci',
+            'op:novi_travnik:rat_2',
+            'op:novi_travnik:ruda_2',
+            'op:vares:gornja_borovica_2',
+            'op:vares:vares_2',
+        ]);
+
+        const bugojno = _ALL_PRE_PLANNED.find((def) => def.name === 'Battle of Bugojno');
+        assert.ok(bugojno);
+        assert.equal(bugojno.corps, 'arbih_3rd_corps');
+        assert.equal(bugojno.available_from, 66);
+        assert.deepEqual(bugojno.axes.flatMap((axis) => axis.objectives), [
+            'op:bugojno:vucipolje_3',
+            'op:bugojno:udurlije',
+            'op:gornji_vakuf:pajic_polje_2',
+            'op:bugojno:medini',
+        ]);
+
+        const neretva = _ALL_PRE_PLANNED.find((def) => def.name === "Operation Neretva '93");
+        assert.ok(neretva);
+        assert.equal(neretva.corps, 'arbih_4th_corps');
+        assert.equal(neretva.available_from, 70);
+        assert.deepEqual(neretva.axes.flatMap((axis) => axis.objectives), [
+            'op:konjic:turija',
+            'op:konjic:buturovic_polje_2',
+            'op:jablanica:doljani_2',
+        ]);
+        assert.equal(neretva.army_hq_op_id, 'ahq:RBiH:1993:neretva_93');
+    });
+
     it('keeps the January 1993 RBiH Višegrad bridgehead outside Operation Višegrad', () => {
         const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Visegrad');
         assert.ok(operation);
@@ -301,7 +343,7 @@ describe('pre-planned operations', () => {
     });
 
     it('defines the current pre-planned operation catalog', () => {
-        assert.equal(_ALL_PRE_PLANNED.length, 23);
+        assert.equal(_ALL_PRE_PLANNED.length, 26);
         assert.deepEqual(
             _ALL_PRE_PLANNED.map((def) => def.name),
             [
@@ -333,23 +375,31 @@ describe('pre-planned operations', () => {
                 'Operation Circle',
                 'Srebrenica–Cerska Link-Up',
                 'Maglaj Local Counterattack',
+                'Central Bosnia Counteroffensive',
+                'Battle of Bugojno',
+                "Operation Neretva '93",
             ],
         );
 
         const zvezda = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Zvezda 94')!;
         const roster = zvezda.axes.flatMap((axis) => axis.brigades);
-        assert.equal(zvezda.available_from, 96);
+        assert.equal(zvezda.available_from, 93);
         assert.equal(zvezda.prestage_from, 88);
-        assert.equal(zvezda.execution_attack_power_mult, 2);
+        assert.equal(zvezda.execution_attack_power_mult, 3);
+        assert.equal(zvezda.minimum_viable_participants, 2);
+        assert.equal(zvezda.minimum_assembled_participants, 3);
+        assert.equal(zvezda.planning_duration, 10);
         assert.ok(roster.includes('rs_1st_guards_motorized'));
         assert.ok(roster.includes('rs_65th_protection_motorized_regiment'));
-        assert.equal(zvezda.axes[0]?.minimum_staged_brigades, 4);
+        assert.equal(zvezda.axes[0]?.minimum_staged_brigades, 2);
         assert.equal(zvezda.axes[0]?.minimum_forward_brigades, 2);
         assert.deepEqual(zvezda.axes[0]?.objectives, [
             'op:gorazde:slatina_2',
             'op:gorazde:sopotnica',
-            'op:gorazde:ustipraca_2',
         ]);
+        assert.deepEqual(zvezda.axes[1]?.objectives, ['op:gorazde:ustipraca_2']);
+        assert.equal(zvezda.axes[1]?.minimum_staged_brigades, 1);
+        assert.equal(zvezda.axes[1]?.minimum_forward_brigades, 1);
     });
 
     it('reserves probe participants only for the head queued historical operation', () => {
@@ -482,6 +532,51 @@ describe('pre-planned operations', () => {
         assert.ok(operation.participating_brigades.includes('arbih_1st_cerska'));
         assert.ok(operation.axes![0]!.assigned_brigades.includes('arbih_1st_cerska'));
         assert.equal(operation.initial_strength, initialStrengthBeforeAdmission + 600);
+    });
+
+    it('admits and loans an authored Army-HQ elite that reaches Zvezda staging during planning', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 97;
+        const operation = {
+            name: 'Operation Zvezda 94',
+            phase: 'planning',
+            is_pre_planned: true,
+            participating_brigades: ['rs_1st_guards_motorized'],
+            axes: [{
+                axis_id: 'ustipraca_cutoff',
+                assigned_brigades: ['rs_1st_guards_motorized'],
+                support_brigades: [],
+                objectives: ['op:gorazde:ustipraca_2'],
+            }],
+            initial_strength: 1000,
+        } as unknown as CorpsOperation;
+        state.military.corps_command!.vrs_drina!.active_operations = [operation];
+        state.military.formations!.rs_65th_protection_motorized_regiment = {
+            id: 'rs_65th_protection_motorized_regiment',
+            name: '65th Protection Motorized Regiment',
+            faction: 'RS',
+            corps_id: 'vrs_main_staff',
+            kind: 'brigade',
+            status: 'active',
+            personnel: 800,
+            location_osid: 'op:gorazde:podkozara_donja_2',
+            elite_loan_state: {
+                on_loan: false,
+                loaned_to_corps: null,
+                loan_start_turn: null,
+                last_recall_turn: 88,
+                loan_start_personnel: null,
+                permanently_degraded: false,
+                current_episode_id: null,
+            },
+        } as FormationState;
+
+        assert.equal(admitAuthoredPrePlannedReinforcements(state), 1);
+        assert.ok(operation.participating_brigades.includes('rs_65th_protection_motorized_regiment'));
+        assert.equal(
+            state.military.formations!.rs_65th_protection_motorized_regiment!.elite_loan_state?.loaned_to_corps,
+            'vrs_drina',
+        );
     });
 
     it('keeps the link-up in planning until its authored columns are assembled', () => {

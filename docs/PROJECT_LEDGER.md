@@ -31599,3 +31599,29 @@ formations. It wins and captures Slatina (t99), Sopotnica (t102), and Ustiprača
 battles. All **17/17** painted Goražde-area cells match; Goražde remains RBiH and its 15-cell RBiH
 component has only RS-controlled external neighbours, so the enclave is fully cut off. Focused
 Vitest suites and TypeScript typecheck are the regression surface.
+
+### 2026-09-01 — April 1994 three-lane operations calibration
+
+The April checkpoint is now driven by named operations in all three requested lanes. Operation
+Cerska-Kamenica captures all seven authored pocket/cutoff objectives in ten attacks while the 1st
+Guards Motorized Brigade and 65th Protection Motorized Regiment are present in the live operation
+from t40 through t50. Operation Zvezda 94 is a two-axis Main Staff attack: the 1st Guards takes
+Slatina and Sopotnica while the 65th takes Ustiprača. Its AAR records success, three attacks, three
+combat captures, and both elite formations. Goražde town remains RBiH while its corridor is cut.
+
+The RBiH-HRHB lane contains the Central Bosnia Counteroffensive, Battle of Bugojno, Operation
+Neretva '93, Operacija Naprijed, and Operacija Rijeka. Together they account for all **17**
+HRHB-to-RBiH control changes through logged combat capture. There are **zero** RBiH-to-HRHB gains
+and no passive bilateral transfer. Lug and Paroš remain the two deliberate April target
+exceptions: both start RBiH in the January calibration but are painted HRHB in April, and matching
+them would require the post-breakdown HVO territorial gain the historical contract forbids.
+
+The integrated proof is
+`runs/apr1994_three_lanes_final_v21/apr1992_definitive_188w__1db784e85c2e6de0__w104`, final hash
+`5a04c481b3e4c74c`. It matches **688/712 (96.63%)** April OSIDs, including **379/398 RS**,
+**241/243 RBiH**, and **68/71 HRHB**. Supporting corrections prevent a stale prior-turn
+catastrophic engagement from stalling a current objective, return dated elite reserves to Army HQ
+between authored commitments, keep attacker victories from consuming the failure budget merely
+because occupation resolves later, and let AAR causality consume canonical `territory_flipped`
+battle receipts when weekly telemetry lags. No direct-control, consolidation, or abandonment
+calibration mechanism was added.

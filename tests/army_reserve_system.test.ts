@@ -968,6 +968,28 @@ describe('elite loan per-turn reconciliation and tick', () => {
         expect(brigade.elite_loan_state!.on_loan).toBe(false);
     });
 
+    it('recalls a Zvezda-reserved elite between operations even while the receiving front is threatened', () => {
+        const brigade = makeOnLoanBrigade('rs_65th_protection_motorized_regiment', { loanStartTurn: 40 });
+        brigade.elite_loan_state!.loaned_to_corps = 'vrs_drina';
+        const state = makeState({
+            formations: { rs_65th_protection_motorized_regiment: brigade },
+            corps_command: { vrs_drina: { active_operations: [] } },
+            corps_front_sectors: {
+                drina_front: {
+                    corps_id: 'vrs_drina',
+                    threat_ratio: 2,
+                    assigned_brigade_ids: ['rs_65th_protection_motorized_regiment'],
+                },
+            },
+            turn: 54,
+        });
+
+        tickEliteLoans(state, 54);
+
+        expect(brigade.elite_loan_state!.on_loan).toBe(false);
+        expect(brigade.elite_loan_state!.last_recall_turn).toBe(54);
+    });
+
     it('does not issue generic reserve routing for an active-operation participant', () => {
         const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: 0 });
         brigade.location_osid = 'op:mun:o0';

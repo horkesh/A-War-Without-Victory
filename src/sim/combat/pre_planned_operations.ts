@@ -88,6 +88,8 @@ export interface PrePlannedOp {
     /** Active, attack-capable authored formations required before planning may transition to execution. */
     minimum_assembled_participants?: number;
     execution_attack_power_mult?: number;
+    /** Optional faction-wide Army HQ donor pool for a historically HQ-directed operation. */
+    army_hq_op_id?: string;
 }
 
 export interface PrePlannedOperationInjectionOptions {
@@ -331,6 +333,8 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 name: 'Prača Encirclement',
                 brigades: [
                     'rs_1st_podrinje',
+                    'rs_1st_zvornik',
+                    'rs_visegrad_brigade',
                     'rs_5th_podrinje',
                 ],
                 // BB2 p.409: May–Jun 1993 TG "Višegrad" (Drina Corps), Prača River offensive.
@@ -352,8 +356,8 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         // Operation Zvezda 94 — VRS Drina Corps spring 1994 offensive on Goražde safe area.
         // Historically: Drina Corps tactical groups pressed from the east and south, reaching
         // outskirts of Goražde town (BB2 p.289). Fires after Op Pracha River (w41) completes
-        // and frees brigades. Available w96 so the offensive can unfold before the w104
-        // April 1994 calibration checkpoint.
+        // and frees brigades. Planning authority opens at w93 so the columns can
+        // assemble before the late-March offensive and the w104 April checkpoint.
         //
         // Staging: podkozara_donja_2 (RS-painted from init, adj slatina_2 ✓)
         // Objectives: slatina_2 (RBiH-painted, adj gorazde_2 — encirclement approach);
@@ -367,37 +371,54 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         faction: 'RS',
         name: 'Operation Zvezda 94',
         staging_osid: 'op:gorazde:podkozara_donja_2',
-        available_from: 96,
+        available_from: 93,
         prestage_from: 88,
         min_attack_outcome: 'repulsed',
         // Main Staff artillery, engineering, and command concentration. This
         // modifies combat power only; every objective still requires a battle.
-        execution_attack_power_mult: 2,
-        // Ten planning turns permit the full five-formation group to assemble before execution.
+        execution_attack_power_mult: 3,
+        // The two Main Staff assault formations are the irreducible attack
+        // group. Local Drina Corps formations join when the live front and
+        // route state permit, but their absence must not cancel the offensive.
+        minimum_viable_participants: 2,
+        minimum_assembled_participants: 3,
+        // The formations pre-stage before the Drina command slot opens; the
+        // preparation budget lets both converging columns assemble.
         planning_duration: 10,
         axes: [
             {
                 axis_id: 'gorazde_encirclement',
                 name: 'Goražde Encirclement',
                 brigades: [
-                    'rs_visegrad_brigade',
                     'rs_1st_podrinje',
-                    'rs_5th_podrinje',
+                    'rs_visegrad_brigade',
                     // Main Staff allocation for scenario balance. BB2 supports
                     // higher-HQ concentration at Zvezda, not these exact unit names.
                     'rs_1st_guards_motorized',
-                    'rs_65th_protection_motorized_regiment',
                 ],
                 // podkozara_donja_2 adj slatina_2 ✓; slatina_2 adj sopotnica ✓;
                 // sopotnica adj ustipraca_2 ✓
                 objectives: [
                     'op:gorazde:slatina_2',   // RBiH-painted; adj gorazde_2 — encirclement chokepoint
                     'op:gorazde:sopotnica',   // RBiH-painted; adj slatina_2 — pocket tightener
-                    'op:gorazde:ustipraca_2', // RBiH-painted; closes the eastern corridor
                 ],
                 staging_osid: 'op:gorazde:podkozara_donja_2',
-                minimum_staged_brigades: 4,
+                minimum_staged_brigades: 2,
                 minimum_forward_brigades: 2,
+            },
+            {
+                axis_id: 'ustipraca_cutoff',
+                name: 'Ustiprača Cutoff',
+                brigades: [
+                    'rs_5th_podrinje',
+                    'rs_65th_protection_motorized_regiment',
+                ],
+                // The operational graph places Ustiprača directly adjacent to
+                // Podkožara Donja, permitting a simultaneous eastern thrust.
+                objectives: ['op:gorazde:ustipraca_2'],
+                staging_osid: 'op:gorazde:podkozara_donja_2',
+                minimum_staged_brigades: 1,
+                minimum_forward_brigades: 1,
             },
         ],
     },
@@ -1229,6 +1250,192 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
             },
         ],
     },
+    {
+        // ARBiH 3rd Corps summer 1993 counteroffensive in Central Bosnia. The
+        // Travnik, Fojnica, Gornji Vakuf, Kakanj, and Novi Travnik fighting was
+        // one operational theater, but not one magical territorial transfer:
+        // each axis below must assemble, attack, win, and occupy its own cells.
+        // The selected objectives are the HVO-held peripheral positions that
+        // changed hands during the campaign; the Vitez/Busovača/Kiseljak and
+        // Žepče enclave cores are deliberately outside the operation.
+        corps: 'arbih_3rd_corps',
+        faction: 'RBiH',
+        name: 'Central Bosnia Counteroffensive',
+        available_from: 60,
+        staging_osid: 'op:travnik:travnik_2',
+        min_attack_outcome: 'repulsed',
+        execution_attack_power_mult: 1.35,
+        planning_duration: 8,
+        axes: [
+            {
+                axis_id: 'fojnica_periphery',
+                name: 'Fojnica Periphery',
+                brigades: [
+                    'arbih_17th_vitezka_mountain',
+                    'arbih_733rd_mountain',
+                    'arbih_737th_muslim_light',
+                ],
+                objectives: ['op:fojnica:bakovici_2'],
+                staging_osid: 'op:fojnica:fojnica_2',
+            },
+            {
+                axis_id: 'kakanj_salient',
+                name: 'Kakanj Salient',
+                brigades: [
+                    'arbih_329th_mountain',
+                    'arbih_303rd_vitezka_mountain',
+                    'arbih_319th_liberation',
+                ],
+                objectives: [
+                    'op:kakanj:slapnica_2',
+                    'op:kakanj:bukovlje_2',
+                    'op:kakanj:seoce_2',
+                    'op:kakanj:poljani_2',
+                ],
+                staging_osid: 'op:kakanj:kakanj_2',
+            },
+            {
+                axis_id: 'gornji_vakuf_novi_travnik',
+                name: 'Gornji Vakuf–Novi Travnik',
+                brigades: [
+                    'arbih_314th_slavna_liberation',
+                    'arbih_330th_liberation',
+                    'arbih_717th_slavna_mountain',
+                ],
+                objectives: [
+                    'op:gornji_vakuf:zdrimci',
+                    'op:novi_travnik:rat_2',
+                ],
+                staging_osid: 'op:gornji_vakuf:drazev_dolac',
+            },
+            {
+                axis_id: 'novi_travnik_northern_approach',
+                name: 'Novi Travnik Northern Approach',
+                brigades: [
+                    'arbih_708th_mountain',
+                    'arbih_712th_mountain',
+                    'arbih_727th_slavna',
+                ],
+                objectives: ['op:novi_travnik:ruda_2'],
+                staging_osid: 'op:novi_travnik:novi_travnik_2',
+            },
+            {
+                axis_id: 'vares_approach',
+                name: 'Vareš Approach',
+                brigades: [
+                    'arbih_327th_vitezka_mountain',
+                    'arbih_328th_mountain',
+                    'arbih_351st_liberation',
+                ],
+                objectives: [
+                    'op:vares:gornja_borovica_2',
+                    'op:vares:vares_2',
+                ],
+                staging_osid: 'op:vares:budozelje_2',
+            },
+        ],
+    },
+    {
+        // Battle of Bugojno, 18–28 July 1993. The local 3rd Corps group attacks
+        // the remaining HVO positions from the ARBiH-held town approaches. This
+        // is a follow-on to the wider Central Bosnia fighting and therefore sits
+        // behind it in the same corps queue.
+        corps: 'arbih_3rd_corps',
+        faction: 'RBiH',
+        name: 'Battle of Bugojno',
+        available_from: 66,
+        staging_osid: 'op:bugojno:kula_2',
+        min_attack_outcome: 'repulsed',
+        execution_attack_power_mult: 1.4,
+        planning_duration: 6,
+        axes: [
+            {
+                axis_id: 'bugojno_southern_positions',
+                name: 'Bugojno Southern Positions',
+                brigades: [
+                    'arbih_705th_slavna_mountain',
+                    'arbih_707th_slavna_mountain',
+                    'arbih_725th_light',
+                    'arbih_7th_vitezka_muslim_liberation',
+                ],
+                objectives: [
+                    'op:bugojno:vucipolje_3',
+                    'op:bugojno:udurlije',
+                    'op:gornji_vakuf:pajic_polje_2',
+                ],
+                staging_osid: 'op:bugojno:kula_2',
+            },
+            {
+                axis_id: 'bugojno_northern_positions',
+                name: 'Bugojno Northern Positions',
+                brigades: [
+                    'arbih_708th_mountain',
+                    'arbih_712th_mountain',
+                    'arbih_727th_slavna',
+                ],
+                objectives: ['op:bugojno:medini'],
+                staging_osid: 'op:bugojno:brizina',
+            },
+        ],
+    },
+    {
+        // Operation Neretva '93, September 1993. BB2 pp.434–435 describes a
+        // sizeable but bounded offensive east of Prozor and along the Neretva,
+        // not the seizure of Prozor itself. The operation therefore attacks only
+        // the exposed Turija position from the Konjic bridgehead and excludes the
+        // HVO-held Prozor core and its immediate shoulder.
+        corps: 'arbih_4th_corps',
+        faction: 'RBiH',
+        name: "Operation Neretva '93",
+        // Planning opens four weeks before the dated September attack so the
+        // 4th Corps group is assembled—and not borrowed by an unrelated local
+        // operation—when the historical execution window begins.
+        available_from: 70,
+        staging_osid: 'op:konjic:konjic_2',
+        min_attack_outcome: 'repulsed',
+        execution_attack_power_mult: 1.2,
+        // The operation was directed by the ARBiH General Staff. Marking that
+        // command relationship opens the canonical faction-wide donor pool; it
+        // does not grant control or bypass the opening-attack readiness check.
+        army_hq_op_id: 'ahq:RBiH:1993:neretva_93',
+        planning_duration: 6,
+        axes: [
+            {
+                axis_id: 'upper_neretva',
+                name: 'Upper Neretva',
+                brigades: [
+                    'arbih_441st_vitezka_mountain',
+                    'arbih_443rd_mountain',
+                    'arbih_450th_light',
+                    'arbih_4th_muslim_light',
+                ],
+                objectives: ['op:konjic:turija'],
+                staging_osid: 'op:konjic:konjic_2',
+            },
+            {
+                axis_id: 'konjic_western_approach',
+                name: 'Konjic Western Approach',
+                brigades: [
+                    'arbih_442nd_mountain',
+                    'arbih_448th_liberation',
+                    'arbih_4th_muslim_light',
+                ],
+                objectives: ['op:konjic:buturovic_polje_2'],
+                staging_osid: 'op:konjic:celebici_2',
+            },
+            {
+                axis_id: 'jablanica_approach',
+                name: 'Jablanica Approach',
+                brigades: [
+                    'arbih_444th_mountain',
+                    'arbih_447th_liberation',
+                    'arbih_448th_liberation',
+                ],
+                objectives: ['op:jablanica:doljani_2'],
+                staging_osid: 'op:jablanica:jablanica_2',
+            },
+        ],
+    },
     // R28 BLOCKED: Op Sana 95 on arbih_5th_corps caused regression (−6, −1pp).
     // Root cause: triggered "Operation Sana" already runs on 5th Corps at w175-188.
     // Op Sana 95 queued behind it, stayed in planning, brigade marching from
@@ -1730,7 +1937,7 @@ export function injectPrePlannedOperations(
         }
     }
 
-    // Queue Drina Corps: Operation Drina → Podrinje Sweep → Pracha River → Zvezda 94 (available_from:96)
+    // Queue Drina Corps: Operation Drina → Podrinje Sweep → Pracha River → Zvezda 94 (planning from w93)
     if (injectedCorps.has('vrs_drina')) {
         const cmd = corpsCommand['vrs_drina'];
         if (cmd && !cmd.queued_operations) {
@@ -1944,8 +2151,30 @@ export function admitAuthoredPrePlannedReinforcements(state: GameState): number 
                     if (committedElsewhere.has(brigadeId)) continue;
                     if (!isEligibleOperationFormation(formation)) continue;
                     if ((formation.disrupted_turns ?? 0) > 0) continue;
-                    if (getFormationCorpsId(formation) !== corpsId) continue;
                     if (formation.location_osid !== stagingOsid) continue;
+
+                    const isArmyHqElite = isSectorAssignmentExemptCorpsId(formation.corps_id)
+                        && formation.elite_loan_state != null;
+                    if (!isArmyHqElite && getFormationCorpsId(formation) !== corpsId) continue;
+                    if (isArmyHqElite) {
+                        if (formation.elite_loan_state?.on_loan) continue;
+                        if (!isEliteAvailableForLoan(formation, state.meta.turn)) continue;
+                        deployEliteLoan(
+                            state,
+                            brigadeId,
+                            corpsId,
+                            'offensive_support',
+                            0,
+                            state.meta.turn,
+                            {
+                                purpose: 'offensive',
+                                why_needed: `Late assembly: ${brigadeId} assigned to ${operation.name}`,
+                                how_to_use: `Assault reserve on main axis of ${operation.name}`,
+                            },
+                            `Late pre-planned elite loan for ${operation.name}`,
+                            'army_ai',
+                        );
+                    }
 
                     const strengthBeforeAdmission = operation.initial_strength
                         ?? operation.participating_brigades.reduce(

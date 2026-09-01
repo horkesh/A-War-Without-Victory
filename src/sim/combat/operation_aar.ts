@@ -707,6 +707,18 @@ export function finalizeOperationAAR(
             causalCaptureSet.delete(osid);
         }
     }
+    // Weekly operation entries are written before some same-turn battle capture
+    // receipts are folded back into the operation log. Brigade engagement
+    // history is the canonical resolved-combat record, including whether that
+    // battle actually flipped territory, so use it to close that telemetry gap.
+    for (const brigadeId of op.participating_brigades) {
+        const engagements = state.military.formations[brigadeId as FormationId]?.brigade_history?.engagements ?? [];
+        for (const engagement of engagements) {
+            if (engagement.turn < op.started_turn || engagement.turn > state.meta.turn) continue;
+            if (engagement.role !== 'attacker' || engagement.territory_flipped !== true) continue;
+            if (objectives.includes(engagement.osid)) causalCaptureSet.add(engagement.osid);
+        }
+    }
     const objectivesLoggedCaptured = objectives.filter((osid) => loggedCaptureSet.has(osid));
     const causallyCapturedObjectives = objectives.filter((osid) => causalCaptureSet.has(osid));
     const objectivesHeldWithoutLoggedCapture = heldObjectives.filter((osid) => !loggedCaptureSet.has(osid));

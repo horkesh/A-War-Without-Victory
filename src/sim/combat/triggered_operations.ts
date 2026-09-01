@@ -319,7 +319,11 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         // and do not permit a local unsupported probe to start the offensive.
         planning_duration: 20,
         prestage_from: 28,
-        min_attack_outcome: 'costly_victory',
+        // The Main Staff commitment is allowed to keep occupying ground after
+        // costly/locally checked assaults instead of terminating the Kamenica
+        // axis after its opening success. Every cell still requires a resolved
+        // battle; this is the operation's exploitation threshold, not a flip.
+        min_attack_outcome: 'repulsed',
         // BB1 p.220 and BB2 p.415 describe a Main Staff effort built around
         // crack formations and outside armoured/fire support. Preserve that
         // operational concentration as the columns advance beyond staging.
@@ -347,6 +351,7 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                     'rs_1st_zvornik' as FormationId,
                     'rs_1st_bratunac' as FormationId,
                     'rs_1st_podrinje' as FormationId,
+                    'rs_5th_podrinje' as FormationId,
                     'rs_visegrad_brigade' as FormationId,
                 ],
                 objectives: [
