@@ -8,14 +8,20 @@
 ```
 data/derived/settlements_wgs84_1990.geojson     (5,823 canonical settlement polygons)
         ↓ derive_operational_settlements.ts
-        ↓   Phase 1-4: Cluster canonical settlements → 712 OSIDs (was 744; 32 micro-OSIDs merged 2026-03-21)
+        ↓   Phase 1-4: Cluster canonical settlements → 744 OSID POLYGONS in the geojson.
+        ↓   The 2026-03-21 micro-OSID merge (<1 km², tools/merge_micro_osids.cjs) took the
+        ↓   MODEL to 712 but deliberately did NOT rewrite this geojson — rewriting polygon
+        ↓   geometry regenerates areas and the contact graph and moves calibration.
+        ↓   712 is the modelled universe (canonical map, controllers, painted refs, areas,
+        ↓   contact graph); 744 is the drawn one. Statistics over the geojson feature list
+        ↓   silently include the 32 merged micro-OSIDs and are wrong.
         ↓   Phase 5a: Build global TopoJSON topology (shared arcs)
         ↓   Phase 5b: Simplify topology (shared arcs simplified together)
         ↓   Phase 5c: topojsonClient.merge() per cluster
         ↓   Phase 5d: Vertex snapping — snap near-miss boundary vertices between clusters
         ↓   Phase 6: normalizeGeometry() — close rings, remove tiny holes, fix winding
         ↓
-data/derived/operational/operational_settlements.geojson  (712 OSID polygons, after micro-OSID merge)
+data/derived/operational/operational_settlements.geojson  (744 OSID polygons — PRE-merge, by design; see below)
 data/derived/operational/operational_contact_graph.json   (2,047 adjacency edges)
 ```
 

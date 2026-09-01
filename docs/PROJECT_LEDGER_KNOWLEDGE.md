@@ -4822,12 +4822,21 @@ Applied in `[2026-08-31] fix(engine): preserve queued operation brigades from pr
 
 ## The 744 / 712 OSID gap — 32 micro-settlements awaiting merge
 
-**Owner, 2026-09-01, when this was rediscovered from scratch:** *"Those 32 OSIDs were
-micro-settlements that were later supposed to be merged into their neighbouring OSIDs. I
-can't believe we are having this discussion months later and that it is not written down
-anywhere."*
+**CORRECTED 2026-09-01, same day, before this entry could mislead anyone.** The first
+version of this section said the knowledge "existed only in the owner's memory" and called
+the state an "unfinished merge". **Both claims were wrong.** The merge is COMPLETE, and it
+was documented in three places all along:
 
-**Write it down once, here, so nobody re-derives it a third time.**
+- `src/state/political_control_init.ts:908` — "Post-merge (2026-03-21): settlement graph has
+  712 OSIDs (32 micro-OSIDs < 1 km² merged)."
+- `docs/10_canon/context.md:79` — "A second merge (2026-03-21) removed 32 micro-OSIDs
+  (< 1 km²) via `tools/merge_micro_osids.cjs`: 744 → 712 OSIDs."
+- `docs/40_reports/CALIBRATION_MASTER.md` — run **n982**, with its butterfly effects.
+
+The owner's recollection ("supposed to be merged into their neighbouring OSIDs") was exactly
+right about intent; what neither they nor this session could see was that it had already
+been done. The reason nobody could find it is recorded below — a stale line in
+MAP_GEOMETRY_MASTER pointed the wrong way. **That** was the defect, not the merge.
 
 `data/derived/operational/operational_settlements.geojson` holds **744** unique OSIDs.
 `political.political_controllers` holds **712**. The 32-cell difference is not a bug, a
@@ -4871,6 +4880,56 @@ Any per-cell rule of the form "painted controller says X" is **unevaluable** for
 e.g. three Srebrenica cells (`kalimanici`, `lijesce`, `petrica`) exist in geometry and in no
 painted reference.
 
-**Status: OPEN, unscheduled.** Finishing the merge changes OSID populations and any figure
-keyed on them. Leaving it unfinished is defensible if the 32 are inert in play. What is NOT
-defensible is the state this entry ends: the knowledge living only in the owner's memory.
+**What the 32 actually are — VERIFIED.** `tools/merge_micro_osids.cjs:18` sets
+`THRESHOLD_KM2 = 1.0`; every OSID under 1 km² merges into its largest same-municipality
+neighbour. `tools/micro_osid_merge_map.json` holds exactly 32 entries, byte-identical to the
+orphan list, and all 32 targets are controlled. The separation is a clean threshold, not a
+coincidence: orphan max area **0.452 km²**, kept min area **1.317 km²**.
+
+**Why the geojson still shows 744 — BY DESIGN.** The merge script's header names the four
+files it rewrites (`osid_areas.json`, `operational_contact_graph.json`,
+`operational_political_control.json`, `canonical_to_operational_map.json`).
+`operational_settlements.geojson` is deliberately NOT among them, because rewriting polygon
+geometry regenerates areas and the contact graph and moves calibration —
+MAP_GEOMETRY_MASTER already records that geometry round-trips regress the floor. Controllers
+are built from the canonical map, not the geojson: `promotePoliticalControllersToOsid`
+(`src/state/political_control_init.ts:33-45`) iterates `operationalToCanonical.keys()` = 712.
+**That line is the divergence point.**
+
+**The area and population are NOT lost.** `osid_areas.json` totals 51,337.257 km² =
+kept 51,334.45 + orphan 2.805 — the orphan area was folded into the targets. 26 of the 32
+orphan SIDs redirect to their merge target in the canonical map, 5 redirect cross-municipality
+to a different controlled OSID, and 15 appear in `settlement_displacement` in the current
+save, so the population participates at SID granularity.
+
+**The implausible density is real and UPSTREAM, not a pipeline artifact.** Each orphan's
+polygon area matches its source SID polygon to three decimals — the OSID pipeline fragments
+nothing. Gornja Lučka really is 981 people on 1.6 hectares in the SOURCE census geometry,
+whose polygons here are degenerate placeholder boxes (5-9 vertices, sub-500 m bboxes).
+Repo-wide, 246 of 5,823 source SIDs are under 1 km² carrying 108,147 people. So the earlier
+"sliver polygon carrying full census population" hypothesis was right about the symptom and
+wrong about the cause.
+
+**Are they reachable? NO — verified.** 0 of 246 brigades home there, 0 of 305 formations
+stand there, 0 nodes and 0 edges in the contact graph (so nothing can attack them), absent
+from `osid_areas.json` and `operational_political_control.json`, absent from
+`political.settlements` and every displacement structure. All four painted references declare
+`total_osids: 712`. One latent path: `pushDisplacementEventLogFromMun`
+(`src/state/displacement.ts:387-395`) iterates the 744-entry geojson map and COULD allocate to
+an uncontrolled OSID — inert in the current save (`displacement_event_log` length 0), but it
+is the one thing that would falsify "does not matter". Only live surface is cosmetic:
+`DataLoader.ts:97` fetches all 744, so 32 sub-pixel polygons render with no controller.
+
+**Bosanski Šamac is fine.** `S165689` is the only duplicated SID in 5,823 features (once in
+`bosanski_samac`, once in `odzak`), both population 0 — it is the administrative seat polygon.
+The town's 6,239 people live in `S229083` "Šamac", inside the controlled
+`op:bosanski_samac:samac_2`. `op:odzak:bosanski_samac` is a 0.272 km² empty boundary fragment.
+
+**Status: CLOSED. Leave the 32 alone.** Do NOT regenerate the geojson to 712 — that touches
+polygon geometry and is certain calibration impact. If the 14,601 is ever wanted on controlled
+OSIDs, the minimal correct change is properties-only (fold `population_total` and ethnic counts
+into the merge target, union `constituent_sids`, touch no coordinates); not floor-moving for
+territory, but behaviour-moving for displacement and casualty maths, so 188w not 40w.
+
+**And they are NOT evidence that settlement-into-OSID merging harms calibration.** The merge is
+what keeps the model at a clean 712.
