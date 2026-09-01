@@ -32052,3 +32052,85 @@ CI reported green while skipping the steps that do the work; the 40w fingerprint
 map the engine had stopped producing 42 engine-commits earlier; the roadmap asserted a pause that
 had ended. In each case the live evidence was available and cheap to check. **Check the artifact's
 date and whether its check actually ran, before trusting what it claims.**
+
+
+### 2026-09-01 - obadi: enclave outcome moved from an emergent mop-up onto the fall event. §6 panel UNANIMOUS. +2 oct1995.
+
+**One line of data.** `data/scenarios/events/war_1995.json`, `srebrenica_falls_1995`,
+`control_change.osids` 10 -> 11: added `op:srebrenica:obadi`. No code changed.
+
+**The defect.** `918661e0d` added obadi to `ENCLAVE_DEFINITIONS['srebrenica'].osid_list`, which
+makes `shouldProtectRearPocketClusterFromEnclave` (`rear_pocket_consolidation.ts:42-55`) shield it.
+That predicate **never reads the cell's controller**, so protection is a one-way ratchet: RS can
+never consolidate obadi back, RBiH can always take it. obadi ended RBiH against painted RS at
+apr1994/apr1995/oct1995 - a permanent RBiH holdout inside a fallen enclave. Reverting was NOT the
+answer: the same list line is load-bearing for jan1993 via `isEnclaveMunicipalityExpansion`
+(`paramilitary_sweep.ts:384-392`), so removing it would cost the January gain. One line served two
+unrelated predicates; this separates them.
+
+**§6 PANEL - 5 seats, unanimous.**
+- **Canon: COMPLIANT.** Ordinary §6 remit; no eight-seat broader panel. Decisive evidence, found by
+  that seat: **four cells already in the list - `ljeskovik_2`, `sulice_2`, `luka_2`, `radovcici` -
+  have exactly obadi's painted profile** (RBiH jan1993, RS from apr1994), and `brezovice_2` is RS at
+  all four dates. The list was never a claim about what was overrun in July 1995; it is already a
+  control-restoration backstop, and obadi makes it *more* internally consistent. Bright line posed
+  explicitly and answered NO: `war_crimes_delta` is flat and unchanged, obadi is **not** in
+  `enclave_formation_displacement.source_osids`, and the rupture predicate keys on `srebrenica_2`
+  alone - the atrocity footprint does not move by one unit. H1.8 satisfied
+  (`SENSITIVE_HISTORY_DESIGN_GATE.md:33` names event `control_change` as the designated mechanism);
+  H2.1 satisfied because `applyControlChange` writes `mechanism: 'event'`.
+- **Engine: GO.** Probe-verified on live code - obadi in the list = 0 flips, removed = 2 flips.
+- **Red-team: endorsed this lever, BLOCKED the alternative** ("let consolidation read the painted
+  controller") as a railroad: no sim decision path reads the painted answer key today.
+- **Historian: GO.** painted RBiH at jan1993 is historically correct (BB2 p.416 fn.31).
+- **Calibration: GO on five conditions**, all met.
+
+**RESULT - 188w, `apr1992_definitive_188w`, Node 22.23.2 portable, no provenance override.**
+Run: `F:/AWWV-worktrees/engine-health/runs/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0`
+(absolute path deliberately - a run dir of the SAME NAME with DIFFERENT contents exists in
+`F:/AWWV-worktrees/apr1994-calibration-investigation`; relative run paths are ambiguous across
+worktrees). `final_state_hash: d7a4f7da5afbb9b5` is the first 16 hex of that file's sha256 - a FILE
+hash, not a separate engine final-state hash. Do not treat the two as interchangeable.
+
+| checkpoint | baseline | run | delta |
+|---|---|---|---|
+| jan1993 | 702 | 702 | 0 |
+| apr1994 | 678 | 678 | 0 |
+| apr1995 | 672 | 672 | 0 |
+| oct1995 | 657 | **659** | **+2** |
+
+Control delta: exactly 2 cells (`obadi`, `osmace_2`, both RBiH->RS). Control-events multiset diff
+vs baseline: **2 added, 0 removed, 0 altered** - the whole trajectory is otherwise identical.
+Western-Bosnia cascade measured, not inferred: belt mismatches 26/83 -> 26/83, **zero movement**
+against an allowance of 2. Enclave guard 9/9.
+
+**Baseline was the committed `latest_run_final_save.json`, NOT n388** - n388 predates `d9f0451b0`
+and is a run in which both cells ALREADY fell, so scoring against it would have double-counted.
+Verified same-code: `git diff 7753b4d2c..HEAD -- src/sim src/scenario src/state data/scenarios
+data/source` is empty, and the Foca commit is an ancestor.
+
+**`RESULT: GUARD BREACHED` (exit 1) IS PRE-EXISTING AND UNRELATED - MERGED WITH IT RECORDED.**
+It is the Operation Farz P-A discriminator. Verified directly rather than argued: in BOTH baseline
+and candidate, `op:lukavac:brijesnica_donja_2` is taken at t171 by `arbih_327th_vitezka_mountain`
+(`arbih_3rd_corps`); P-A wants an `arbih_2nd_corps` capture at t>=160. Identical cell, turn, brigade
+and corps. **The tool was NOT relaxed, no carve-out was added, nothing was re-blessed to obtain a
+green exit.** The tool exiting 1 while this merges is the correct and honest state - it reports a
+real open defect this change did not touch. **A future green here must never be read as evidence
+Farz was fixed.**
+
+**QUEUED, and the run itself is the reason.** Only obadi is event-owned. `osmace_2` flipped by
+`mechanism: 'consolidation'` - correct today only as a downstream side effect of obadi's flip
+re-enabling the sweep. That is the SAME trajectory-dependent mechanism by which a Foca scenario
+change ~90 km away silently un-fell both cells yesterday, invisible to the enclave guard (which
+watches `srebrenica_2`, event-owned, and passes regardless). **(B2): add `osmace_2` to the same
+event list - its own run, expected ZERO delta at every checkpoint, where the success condition is
+the mechanism column reading `event`, not the score.** It must precede the 85->84 key-space
+correction, because that change touches `ENCLAVE_DEFINITIONS` in exactly the t162 neighbourhood
+where osmace_2's consolidation fires; run it first and a -1 would be unattributable between the two.
+
+**Date fidelity, recorded so "obadi fixed" is not misread as "obadi correct".** The event transfers
+at ~w168; obadi is painted RS from apr1994. The historical mechanism is the VRS Final Push of
+20 March - 18 April 1993 (BB2 p.407, p.416 fn.31), which the engine lacks - the same gap that leaves
+`osmace_2` wrong at w104/w156. Four existing siblings in the list carry the identical imprecision,
+so this is a backstop, not the historical cause. The `source_note` now says so explicitly, closing a
+§4 minimisation risk on a genocide surface.

@@ -372,7 +372,7 @@
     "image": "event_srebrenica_falls_1995.webp",
     "title": "Srebrenica Falls",
     "narrative": "The VRS overruns the Srebrenica safe area in a carefully planned operation. Dutch UNPROFOR peacekeepers are unable to prevent the advance. In the days that follow, over 8,000 Bosniak men and boys are systematically executed in the worst massacre in Europe since World War II. The fall of Srebrenica becomes a defining moment of the war and of international failure.",
-    "source_note": "Existing Srebrenica arc sources, including ICTY/ICJ and UN reporting, ground the row's provenance. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing.",
+    "source_note": "Existing Srebrenica arc sources, including ICTY/ICJ and UN reporting, ground the row's provenance. This note adds no casualty figures, causal claims, prohibited player choices, or alternate-outcome prevention framing. SCOPE OF control_change.osids: this list is NOT a claim about which settlements were overrun in July 1995. It is a control-restoration set: five cells (srebrenica_2, donji_potocari_2, milacevici, bostahovine_2, suceska) are painted RBiH through apr1995 and RS at oct1995, while six (ljeskovik_2, sulice_2, luka_2, radovcici, obadi, brezovice_2) were already painted RS from apr1994 or earlier and are restored here as a backstop because the engine lacks the March-April 1993 VRS Final Push that historically took them. The casualty and displacement footprint is carried separately by enclave_formation_displacement.source_osids and by the flat war_crimes_delta, neither of which this list affects.",
     "category": "humanitarian",
     "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Srebrenica genocide findings; ICTY Mladic Trial Judgment (IT-09-92-T), Srebrenica; ICTY Krstic Trial Judgment (IT-98-33-T); ICJ Bosnia v. Serbia (2007), genocide finding; UN Report on Srebrenica (A/54/549, 1999)",
     "source_tier": "icty_icj_un",
@@ -471,7 +471,8 @@
           "op:srebrenica:luka_2",
           "op:srebrenica:suceska",
           "op:srebrenica:radovcici",
-          "op:srebrenica:brezovice_2"
+          "op:srebrenica:brezovice_2",
+          "op:srebrenica:obadi"
         ]
       },
       {
