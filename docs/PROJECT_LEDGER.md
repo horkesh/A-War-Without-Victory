@@ -31832,3 +31832,70 @@ Blessing the count retires the tripwire that noticed the geometry change. Nothin
 decision produced that evidence. **Verify at the next clean Node-22 188-week run**, together
 with the enclave guard itself — the two are the same measurement. The objection is
 reproduced in a comment at the pin so a future reader meets it at the code, not only here.
+
+### 2026-09-01 — 188-week verification on Node 22: guard HOLDS, and red-team's blocked objection is CONFIRMED
+
+**Node 22 obtained rather than treated as a blocker.** Portable v22.23.2 unpacked to a
+scratch dir — no system install, no `AWWV_PROVENANCE_OVERRIDE`. Run provenance records
+`node_version v22.23.2`, `git_dirty false`, no override, so the run is §6-valid.
+
+**ENCLAVE GUARD 9/9 — the gate the canon reviewer required, now satisfied.**
+Goražde, Bihać, Teočak and all four Sarajevo cells HOLD; Srebrenica and Žepa FALL ON
+SCHEDULE. Checkpoints improve against `n388`: **jan1993 697→702, apr1994 678, apr1995 672,
+oct1995 644→657**.
+
+**`RESULT: GUARD BREACHED` is PRE-EXISTING and not this work.** It is the Operation Farz
+P-A discriminator (needs an `arbih_2nd_corps` capture at t≥160). `n388` fails it identically
+— "never captured" there, "taken t171 by arbih_327th (3rd Corps)" here.
+
+**RED-TEAM WAS RIGHT — `op:srebrenica:obadi` is now wrong, and `918661e0d` causes it.**
+
+| | t1 | t162 | final | painted apr94/95/oct95 |
+|---|---|---|---|---|
+| `n388` (before) | RS→RBiH paramilitary | **RBiH→RS consolidation** | **RS** ✓ | RS |
+| now | RS→RBiH paramilitary | *(never fires)* | **RBiH** ✗ | RS |
+
+The t1 paramilitary flip is pre-existing. Adding obadi to `ENCLAVE_DEFINITIONS` makes
+`shouldProtectRearPocketClusterFromEnclave` shield it, so the t162 consolidation recovery
+no longer fires and it ends a permanent RBiH holdout inside a fallen enclave. This is
+exactly red-team's Defect C, predicted statically, blocked on, and **overridden without
+this evidence**. The engine seat identified the same mechanism and judged it benign; it was
+not. The count re-bless (SET A 85) remains correct and the guard genuinely holds — the
+defect is in `918661e0d`, not in the pin.
+
+**QUEUED, not fixed here:** the obadi repair is a §6 geometry-behaviour change (let
+consolidation still recover an enclave cell whose painted controller is RS) and needs the
+panel plus its own 188w. Belongs to
+`docs/plans/2026-08-31-srebrenica-enclave-definition-defect.md`, which already scopes the
+set's rule inconsistency. It is a January gain (+5) bought with obadi's 1994-95 truth.
+
+### 2026-09-01 — startup sector orphan: `unresolved_sector_brigades` is transient, so its guard bucket is unreachable
+
+`arbih_443rd_mountain` reached `missingSectorClassification` because
+`ensureMinimumSectorCoverage` moves it `op:konjic:brdjani → op:trnovo:trnovo` (3 hops) to
+staff the 8-OSID Foča/Kalinovik/Trnovo front, the sector it was rostered into is then
+deleted by `canonicalizeSameFactionEdgeOwnership` (`corps_front_sectors.ts:741-744`), and
+no rehome pass runs after that delete.
+
+**The seal is NOT broken — serialization discards its evidence.**
+`collectUnresolvedSectorBrigades` flags the brigade correctly, but
+`military.unresolved_sector_brigades` is TRANSIENT (`serializeGameState.ts:36-50`, Engine
+Invariants §13), so it never reaches a baked artifact. The test's `unresolvedIds` bucket is
+therefore **unreachable on a loaded save**, not merely empty — and the neighbouring
+`savedAudit.counts.unresolved_sector_brigades === 0` assertion is vacuous for the same
+reason. `tools/validate_run_consistency.cjs:1232` already models this correctly
+("NOT ESTABLISHED … absent from this artifact") and is the precedent.
+
+Self-healing: turn 1's `partition-corps-front-sectors` rosters it into
+`sector:arbih_4th_corps:0`. Surfaced by `acd637f13` rebuilding the snapshot on the rebased
+base (the Foča takeover reshaped that front) — not by the militia or schema-v38 work.
+Pinned BY NAME so a different brigade orphaning still goes red.
+
+**QUEUED, 188w-gated:** re-run `rehomeUnassignedBrigadesToPhysicalSectorOwners` after the
+delete loop. Roster-only, but it fires every turn for every faction and moves sector
+density/defensive power/op eligibility — 40w + CI is a false green for it.
+
+**Also flagged, separate Historian lane:** `arbih_443rd_mountain` is authored
+`available_from: 0` but BB2 p455 n.5 / p516 dates it 3 November 1992 (as the 7th "Suad
+Alić", later redesignated); `arbih_450th_light` is BB-dated 30 November 1993. An OOB
+availability-date question, calibration-moving, not this fix.

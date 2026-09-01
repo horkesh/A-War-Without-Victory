@@ -467,7 +467,29 @@ test('baked April 1992 startup sector roster and sectorless brigades are structu
         'hrhb_travnik_brigade',
     ]);
     assert.deepStrictEqual(unresolvedIds.sort(), []);
-    assert.deepStrictEqual(missingSectorClassification.sort(), []);
+    // Known startup one-pass orphan, named rather than hidden. ensureMinimumSectorCoverage
+    // moves this brigade op:konjic:brdjani -> op:trnovo:trnovo to staff the 8-OSID
+    // Foca/Kalinovik/Trnovo front of sector:arbih_4th_corps:0 (3 hops, inside
+    // LOCAL_FRONT_RELIEF_MAX_HOPS). The sector it was last rostered into is then deleted by
+    // canonicalizeSameFactionEdgeOwnership (corps_front_sectors.ts:741-744), and no rehome
+    // pass runs after that delete, so the final sync correctly clears a stale assignment and
+    // leaves it rosterless.
+    //
+    // The engine DOES flag it: collectUnresolvedSectorBrigades (corps_front_sectors.ts:1919)
+    // writes it to military.unresolved_sector_brigades. That field is TRANSIENT
+    // (serializeGameState.ts:36-50 deletes it before every serialize, per Engine Invariants
+    // section 13), so it cannot reach the baked artifact — which is why the unresolvedIds
+    // bucket above is unreachable on a loaded save rather than merely empty.
+    //
+    // Self-healing: turn 1's partition-corps-front-sectors rosters it into
+    // sector:arbih_4th_corps:0 as `front`, so no live run sees the orphan past t0.
+    // Surfaced by acd637f13 rebuilding the snapshot on the rebased base (the Foca takeover
+    // reshaped that front), NOT by the militia/schema-v38 work.
+    //
+    // Pinned by name so a DIFFERENT brigade orphaning still turns this red. The engine
+    // repair — re-running the rehome pass after the delete loop — is calibration-moving and
+    // queued as its own 188w-gated lane.
+    assert.deepStrictEqual(missingSectorClassification.sort(), ['arbih_443rd_mountain']);
 }, 120_000);
 
 test('desktop new campaign preserves default-on SRK strangle containment at birth', async () => {
