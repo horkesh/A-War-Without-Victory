@@ -31968,3 +31968,47 @@ The font was restored byte-identically (sha256 `750124fb…`). A remote font, a 
 resource, any other error, and http-status failures all still fail.
 `tests/desktop_runtime_probe_cache_artifact.test.ts` pins both halves so the forgiveness
 cannot outlive the assertion that justifies it. Packaged probe: exit 1 → **exit 0**.
+
+**The 40w structural fingerprint has been failing behind a green-fast skip — and the
+drift predates the whole integration.**
+
+`full-suite-and-fingerprint.yml` skips the compare when the path detector says
+`relevant != 'true'`, and the job still reports success:
+
+```
+skipped   Fresh 40w run + structural-fingerprint compare
+success   No relevant changes — fingerprint compare skipped (green-fast)
+```
+
+That is what "Full Suite green on dd7d3fed7" actually meant. The last run in which the
+compare *executed* (`7753b4d2c`) failed. A desktop-only commit (`8cb3b91d8`) flipped the
+detector to relevant, the gate ran for the first time in a while, and reported:
+
+```
+expected: f3ef9fad99b0771a
+actual:   cd5582f4a945842e
+control_counts: expected {HRHB:87, RBiH:250, RS:375} got {HRHB:85, RBiH:249, RS:378}
+```
+
+**Three measurements, not inferences:**
+
+1. **Deterministic, not flaky.** Re-running the same CI job on the same commit reproduced
+   the identical actual hash.
+2. **Platform-independent.** A local Windows/Node 22 run of
+   `npm run ci:structural-fingerprint:check` produced `cd5582f4a945842e` — byte-identical
+   to CI's Ubuntu/Node 22 result. (The provenance guard correctly refused Node 24 first;
+   the run was redone on portable Node 22.23.2 rather than overridden.)
+3. **It predates this lane entirely.** The same check at `e24ec2e15` — the pre-militia
+   base commit this lane started from — produces the *same* `cd5582f4a945842e` and the
+   same counts. So neither the militia casualty work nor today's integration moved the
+   40w map. The golden has been stale since before the lane began; 42 engine-touching
+   commits have landed since it was last reconciled at `295901939`.
+
+**NOT reconciled, deliberately.** Blessing this golden is a calibration act, not a CI
+chore: it moves `control_counts` and the flip list includes Goražde cells
+(`kolovarice`, `podkozara_donja_2`, `sopotnica`, `kamen`) — enclave-guard territory that
+is the Pyrrhic panel's to rule on. `kolovarice` is already on record as a merge defect
+wrong under any controller. Left for an explicit decision.
+
+**Second false-green worth fixing separately:** a job that skips its only real step still
+reports success, so "green" on this workflow does not imply the fingerprint was checked.
