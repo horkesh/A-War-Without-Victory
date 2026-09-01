@@ -557,6 +557,27 @@ function isIgnorableRuntimeProbeFailure(entry) {
   if (url.startsWith('blob:')) return true;
   if (entry?.resource_type === 'font' && /^https:\/\/fonts\.(?:gstatic|googleapis)\.com\//.test(url)) return true;
   if (isIgnorablePackagedRouteTeardownFailure(entry, url)) return true;
+  // A local font reporting net::ERR_CACHE_MISS is a Chromium cache-lookup artifact, not a
+  // delivery failure — and it is NOT evidence the font is missing.
+  //
+  // MEASURED, not assumed (2026-09-01). Instrumenting the map server showed it received
+  // exactly one request per font, answered 200, and finished the response
+  // (writableFinished === true). Instrumenting the renderer showed
+  // document.fonts.status === 'loaded' with document.fonts.check() true for both families.
+  // The bytes arrived and the text rendered; only the cache lookup errored, and which
+  // webContents reports it varies run to run, so it is a flaky signal about a working app.
+  //
+  // This is a swap, not a hole: assertPackagedFontsLoaded() below now asserts directly that
+  // every declared @font-face resolved and both families are usable. A genuinely missing or
+  // corrupt font file leaves a face in status 'error' and fails the probe there — a
+  // stronger check than the network error this replaces, which could not tell the two
+  // apart. Only same-origin local fonts are forgiven; a remote font still fails.
+  if (
+    entry?.type === 'request-failed'
+    && entry?.resource_type === 'font'
+    && String(entry?.error || '') === 'net::ERR_CACHE_MISS'
+    && /^http:\/\/127\.0\.0\.1:\d+\//.test(url)
+  ) return true;
   if (message.includes('data:') || message.includes('blob:')) return true;
   if (message.includes('favicon.ico')) return true;
   if (
@@ -566,6 +587,58 @@ function isIgnorableRuntimeProbeFailure(entry) {
     entry?.intentional_abort === true
   ) return true;
   return false;
+}
+
+// Positive proof that every @font-face the packaged UI declares actually resolved.
+// Replaces the net::ERR_CACHE_MISS network signal forgiven above, and is strictly
+// stronger: a missing, unreadable or corrupt font file leaves its FontFace in status
+// 'error', which fails here regardless of what the cache layer reported.
+//
+// A face left 'unloaded' is correct and expected: unicode-range faces (the Latin-2 IBM
+// Plex Mono subsets) are only fetched when a matching glyph is rendered, so 'unloaded' is
+// lazy-loading working as designed, not a missing file.
+async function assertPackagedFontsLoaded(win, label) {
+  const diagnostic = await win.webContents.executeJavaScript(`
+    (async () => {
+      try { await document.fonts.ready; } catch (error) { /* fall through to inspection */ }
+      const faces = [];
+      document.fonts.forEach((face) => {
+        faces.push({ family: face.family, weight: face.weight, status: face.status });
+      });
+      faces.sort((a, b) => {
+        const left = a.family + '|' + a.weight + '|' + a.status;
+        const right = b.family + '|' + b.weight + '|' + b.status;
+        return left < right ? -1 : left > right ? 1 : 0;
+      });
+      return {
+        status: document.fonts.status,
+        faces,
+        usable: {
+          'IBM Plex Sans Condensed': document.fonts.check('16px "IBM Plex Sans Condensed"'),
+          'IBM Plex Mono': document.fonts.check('16px "IBM Plex Mono"'),
+        },
+      };
+    })()
+  `);
+
+  const erroredFaces = (diagnostic.faces ?? []).filter((face) => face.status === 'error');
+  if (erroredFaces.length > 0) {
+    throw new Error(
+      `${label} failed to load packaged fonts: ${JSON.stringify(erroredFaces)}`,
+    );
+  }
+  const unusableFamilies = Object.keys(diagnostic.usable ?? {})
+    .filter((family) => !diagnostic.usable[family])
+    .sort(strictCompare);
+  if (unusableFamilies.length > 0) {
+    throw new Error(
+      `${label} cannot render with packaged font families: ${unusableFamilies.join(', ')}`,
+    );
+  }
+  if (!(diagnostic.faces ?? []).some((face) => face.status === 'loaded')) {
+    throw new Error(`${label} loaded no packaged @font-face at all`);
+  }
+  return diagnostic;
 }
 
 function attachRuntimeProbeFailureCapture(win, label, runtimeFailureChecks) {
@@ -1297,6 +1370,10 @@ async function runPackagedRuntimeProbe() {
     'packaged tactical map window',
   );
   await waitForDesktopSessionReady(mapProbeWindow, 'packaged tactical map window');
+  const packagedFontDiagnostic = await assertPackagedFontsLoaded(
+    mapProbeWindow,
+    'packaged tactical map window',
+  );
 
   const { win: sandboxProbeWindow, targetUrl: tacticalSandboxUrl } = createTacticalMapWindow({
     mode: 'sandbox',
@@ -1451,6 +1528,11 @@ async function runPackagedRuntimeProbe() {
     probe: 'awwv_desktop_runtime_probe',
     mode: 'packaged',
     files: requiredFiles,
+    packaged_font_status: {
+      status: packagedFontDiagnostic.status,
+      usable: packagedFontDiagnostic.usable,
+      faces: packagedFontDiagnostic.faces,
+    },
     map_server_checks: [
       { route: '/', status: mapIndexResponse.statusCode },
       { route: '/data/derived/startup/apr_1992_initial_save.json', status: snapshotResponse.statusCode },
