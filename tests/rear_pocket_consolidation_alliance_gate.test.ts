@@ -68,12 +68,13 @@ describe('rear-pocket consolidation bilateral-war gate', () => {
         expect(state.political.control_events).toEqual([]);
     });
 
-    it('permits the same undefended pocket after the scenario war floor', () => {
+    it('requires an operation for RBiH-HRHB territory even after bilateral war opens', () => {
         const state = makeState(26);
 
         const report = consolidateRearPockets(state, makeEdges(), new Map());
 
-        expect(report.total_flipped).toBe(1);
-        expect(state.political.political_controllers?.[POCKET]).toBe('RBiH');
+        expect(report.total_flipped).toBe(0);
+        expect(state.political.political_controllers?.[POCKET]).toBe('HRHB');
+        expect(state.political.control_events).toEqual([]);
     });
 });

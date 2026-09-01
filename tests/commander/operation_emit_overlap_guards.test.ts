@@ -298,6 +298,84 @@ function makePlanDecision(): PlanDecision {
 }
 
 describe('commander emission overlap guards', () => {
+    it('emits a bilateral operation from plan-reserved brigades even when the new allocation garrison-locks them', () => {
+        const briefing = { ...makeBriefing(), bilateral_offensive: true } as CommanderBriefing;
+        const planDecision = makePlanDecision();
+        planDecision.plan = {
+            ...planDecision.plan!,
+            assigned_brigades: ['b1', 'b2'] as FormationId[],
+            bilateral_offensive: true,
+        } as any;
+        const allocation: AllocationResult = {
+            ...makeAllocation(),
+            surplus_pool: [],
+            garrison_locks: [
+                { brigade_id: 'b1' as FormationId, zone_id: 'zone:test:0' as ZoneId },
+                { brigade_id: 'b2' as FormationId, zone_id: 'zone:test:0' as ZoneId },
+            ] as any,
+        };
+
+        const output = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            allocation,
+            planDecision,
+            makeDecisions(),
+            makeThreats(),
+        );
+
+        expect(output.operations).toHaveLength(1);
+        expect(output.operations[0]).toMatchObject({
+            type: 'sector_attack',
+            participating_brigades: ['b1', 'b2'],
+        });
+    });
+
+    it('emits a bilateral operation when its reserved group is elsewhere in the same corps zone', () => {
+        const targetSector = {
+            ...makeSector(),
+            assigned_brigade_ids: ['b3'] as FormationId[],
+            reserve_brigade_ids: [],
+            sub_segments: [{
+                ...makeSector().sub_segments[0]!,
+                primary_brigade_ids: ['b3'] as FormationId[],
+            }],
+        } as CorpsFrontSector;
+        const briefing = {
+            ...makeBriefing([], [
+                makeBrigade('b1', 'op:test:approach'),
+                makeBrigade('b2', 'op:test:approach'),
+                makeBrigade('b3', 'op:test:approach'),
+            ]),
+            bilateral_offensive: true,
+            sectors: [targetSector],
+        } as CommanderBriefing;
+        const planDecision = makePlanDecision();
+        planDecision.plan = {
+            ...planDecision.plan!,
+            assigned_brigades: ['b1', 'b2'] as FormationId[],
+            bilateral_offensive: true,
+        } as any;
+        const allocation: AllocationResult = {
+            ...makeAllocation(),
+            surplus_pool: [],
+        };
+
+        const output = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            allocation,
+            planDecision,
+            makeDecisions(),
+            makeThreats(),
+        );
+
+        expect(output.operations).toHaveLength(1);
+        expect(output.operations[0]?.participating_brigades).toEqual(['b1', 'b2']);
+    });
+
     it('does not emit a new commander op that overlaps a live operation by sector/objective/brigades', () => {
         const briefing = makeBriefing([{
             name: 'Existing Main Effort',

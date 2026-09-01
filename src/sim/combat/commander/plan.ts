@@ -92,6 +92,7 @@ export function isContainSuppressionActiveFor(faction: FactionId): boolean {
 
 /** Minimum surplus brigades required to create a plan. */
 export const MIN_BRIGADES_FOR_PLAN = 3;
+const BILATERAL_MIN_BRIGADES_FOR_PLAN = 2;
 
 /**
  * Number of turns an OSID from a failed operation stays on cooldown.
@@ -1272,7 +1273,10 @@ function tryCreateFromOpportunity(
     surplusPool: BrigadeEvaluation[],
     turn: number,
 ): PlanDecision | null {
-    if (surplusPool.length < MIN_BRIGADES_FOR_PLAN) return null;
+    const minimumBrigades = briefing.bilateral_offensive
+        ? BILATERAL_MIN_BRIGADES_FOR_PLAN
+        : MIN_BRIGADES_FOR_PLAN;
+    if (!briefing.bilateral_offensive && surplusPool.length < minimumBrigades) return null;
 
     // Find projecting or balanced zones (surplus check is already done at corps level above).
     // Issue #13 Option H: besieged zones with surplus brigades AND an enemy front are
@@ -1306,11 +1310,21 @@ function tryCreateFromOpportunity(
         // Besieged corps can only do local ops
         // Still allow opportunity within hop limit
         const bestZone = eligibleZones[0]!;
-        return createOpportunityPlan(briefing, bestZone, surplusPool, forces.tier_counts.main_effort, turn, true);
+        const planningPool = briefing.bilateral_offensive
+            ? (forces.by_zone[bestZone.zone_id] ?? []).filter(ev => !ev.is_on_loan)
+            : surplusPool;
+        return createOpportunityPlan(briefing, bestZone, planningPool, forces.tier_counts.main_effort, turn, true);
     }
 
     const bestZone = eligibleZones[0]!;
-    return createOpportunityPlan(briefing, bestZone, surplusPool, forces.tier_counts.main_effort, turn, false);
+    // A bilateral corps attacks from an already continuous front; its assault
+    // group therefore comes from combat-ready brigades assigned to that front,
+    // not only from the allocation layer's residual "surplus" label. Ordinary
+    // opportunity operations retain the stricter surplus-only contract.
+    const planningPool = briefing.bilateral_offensive
+        ? (forces.by_zone[bestZone.zone_id] ?? []).filter(ev => !ev.is_on_loan)
+        : surplusPool;
+    return createOpportunityPlan(briefing, bestZone, planningPool, forces.tier_counts.main_effort, turn, false);
 }
 
 function createOpportunityPlan(
@@ -1321,6 +1335,9 @@ function createOpportunityPlan(
     turn: number,
     isLocal: boolean,
 ): PlanDecision | null {
+    const minimumBrigades = briefing.bilateral_offensive
+        ? BILATERAL_MIN_BRIGADES_FOR_PLAN
+        : MIN_BRIGADES_FOR_PLAN;
     // ── Reachability-aware selection (Fix A) ───────────────────────────
     // Pre-filter surplus to brigades that can actually reach at least one
     // enemy objective approach OSID within MAX_REACHABILITY_HOPS.
@@ -1332,7 +1349,7 @@ function createOpportunityPlan(
     );
 
     // Use the reachable pool if it can form a plan; otherwise the plan truly cannot form.
-    if (reachableSurplus.length < MIN_BRIGADES_FOR_PLAN) {
+    if (reachableSurplus.length < minimumBrigades) {
         return null;
     }
 
@@ -1346,10 +1363,12 @@ function createOpportunityPlan(
     // it has reachable main_effort-capable brigades. When no main_effort are reachable,
     // allow a bounded fallback at MIN_BRIGADES_FOR_PLAN scale only.
     const effectiveMainEffortCap = reachableMainEffort > 0 ? reachableMainEffort : 0;
-    const naturalRequired = Math.min(reachableSurplus.length, stagingZone.surplus_brigades.length);
-    const mainEffortLimit = effectiveMainEffortCap > 0 ? effectiveMainEffortCap : MIN_BRIGADES_FOR_PLAN;
+    const naturalRequired = briefing.bilateral_offensive
+        ? reachableSurplus.length
+        : Math.min(reachableSurplus.length, stagingZone.surplus_brigades.length);
+    const mainEffortLimit = effectiveMainEffortCap > 0 ? effectiveMainEffortCap : minimumBrigades;
     const baseRequiredBrigades = Math.max(
-        MIN_BRIGADES_FOR_PLAN,
+        minimumBrigades,
         Math.min(mainEffortLimit, naturalRequired),
     );
     // ARBiH historically accepted unfavorable heavy-equipment ratios when attacking
@@ -1695,10 +1714,17 @@ function checkAbandonConditions(
         return 'staging zone is now besieged';
     }
 
-    // Required brigades no longer achievable — check assigned brigade availability,
-    // not raw surplus pool size (which fluctuates with garrison budgets).
+    // Required brigades no longer achievable — an assigned brigade remains
+    // available when a later allocation pass garrison-locks it in the same zone.
+    // Raw surplus membership fluctuates with front-edge budgets and must not
+    // make an otherwise active concentrating/ready plan evaporate.
     const abandonAssignedIds = new Set(plan.assigned_brigades);
-    const abandonAvailable = surplusPool.filter(ev => abandonAssignedIds.has(ev.brigade_id)).length;
+    const knownBrigadeIds = new Set<string>();
+    for (const ev of surplusPool) knownBrigadeIds.add(ev.brigade_id);
+    for (const zone of zones) {
+        for (const brigadeId of zone.assigned_brigades) knownBrigadeIds.add(brigadeId);
+    }
+    const abandonAvailable = [...abandonAssignedIds].filter(id => knownBrigadeIds.has(id)).length;
     if (abandonAvailable < Math.ceil(plan.required_brigades * 0.5)) {
         return `assigned brigades depleted: ${abandonAvailable}/${plan.required_brigades}`;
     }

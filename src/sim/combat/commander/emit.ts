@@ -741,6 +741,16 @@ function buildOperations(
         const surplusSet = new Set(
             allocation.surplus_pool.map(ev => ev.brigade_id),
         );
+        if (activePlan.bilateral_offensive) {
+            // The plan reserved these brigades on creation. A subsequent front
+            // repartition may garrison-lock them because the bilateral front has
+            // many edges; that allocation churn must not erase the real operation
+            // between READY and emission. Combat readiness and reachability remain
+            // enforced below for every reserved participant.
+            for (const brigadeId of activePlan.assigned_brigades) {
+                surplusSet.add(brigadeId);
+            }
+        }
 
         // Build brigade location lookup from briefing
         const brigadeLocationMap = new Map<string, string>();
@@ -797,7 +807,7 @@ function buildOperations(
         };
 
         // Primary pool: brigades assigned to the primary sector that are surplus + reachable.
-        const primaryPool: string[] = botOrdersPerfTime(
+        let primaryPool: string[] = botOrdersPerfTime(
             `${BUILD_OPERATIONS_PROFILE_PREFIX}.plan.primaryPool`,
             () => primarySector
                 ? primarySector.assigned_brigade_ids
@@ -805,6 +815,18 @@ function buildOperations(
                     .sort(strictCompare)
                 : [],
         );
+        if (activePlan.bilateral_offensive) {
+            // The planner explicitly formed this small assault group from the
+            // same corps zone. Sector topology may place the selected objective
+            // under a neighboring sub-sector between planning and launch; keep
+            // the reserved group coherent so that bookkeeping churn does not
+            // turn a real corps operation into a paper plan.
+            primaryPool = [...new Set([
+                ...primaryPool,
+                ...activePlan.assigned_brigades.filter(id =>
+                    canReach(id) && isCombatReadyParticipant(briefing, id)),
+            ])].sort(strictCompare);
+        }
 
         // Adjacent-sector attachments: bounded by ADJACENT_SECTOR_ATTACH_RATE per sector.
         // Only sectors territory-adjacent to the primary sector may contribute.
@@ -854,7 +876,7 @@ function buildOperations(
             },
         );
 
-        let participatingBrigades = [...primaryPool, ...attachedPool].sort(strictCompare);
+        let participatingBrigades = [...new Set([...primaryPool, ...attachedPool])].sort(strictCompare);
 
         // When the primary sector is anchored, 2 brigades is viable — the sector
         // anchor provides strategic coherence the old broad-pool lacked. The predictor

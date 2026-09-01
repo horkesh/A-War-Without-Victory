@@ -191,4 +191,24 @@ describe('bilateral formation diversion', () => {
         expect(state.military.corps_command?.arbih_7th.stance).toBe('offensive');
         expect(state.military.corps_command?.arbih_7th.directive?.offensive_targets).toEqual(['op:zepce:e']);
     });
+
+    test('RBiH never diverts a rested corps that has no live HVO front', () => {
+        const state = makeState('RBiH', ['arbih_1st', 'arbih_2nd', 'arbih_vitez', 'arbih_4th']);
+        state.military.corps_command!.arbih_vitez!.corps_exhaustion = 73;
+        state.military.corps_command!.arbih_4th!.corps_exhaustion = 0;
+        state.military.corps_front_sectors = {
+            s1: sector('s1', 'arbih_vitez', 'RBiH', ['HRHB'], ['op:travnik:h'], ['op:vitez:e']),
+            // Sector metadata can remain mixed after the live enemy cell changed
+            // controller; diversion must follow current political truth.
+            s2: sector('s2', 'arbih_4th', 'RBiH', ['HRHB'], ['op:mostar:h'], ['op:nevesinje:e']),
+        };
+        state.political.political_controllers!['op:vitez:e'] = 'HRHB';
+        state.political.political_controllers!['op:nevesinje:e'] = 'RS';
+
+        const report = reassignCorpsForBilateralWar(state, 'RBiH');
+
+        expect(report.diverted_corps_id).toBe('arbih_vitez');
+        expect(state.military.corps_command?.arbih_vitez.directive?.offensive_targets).toEqual(['op:vitez:e']);
+        expect(state.military.corps_command?.arbih_4th.status_reason).not.toBe('rbih_hrhb_bilateral_front_diversion');
+    });
 });

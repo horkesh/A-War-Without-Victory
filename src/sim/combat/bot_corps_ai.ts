@@ -315,7 +315,7 @@ export function reassignCorpsForBilateralWar(state: GameState, faction: FactionI
             mixedOverlap,
             operationallyReady: (command[corps.id]?.corps_exhaustion ?? 0) <= MAX_EXHAUSTION_FOR_OPERATION,
         };
-    }).filter(row => row.sectorIds.length > 0)
+    }).filter(row => row.sectorIds.length > 0 && row.enemyOsids.length > 0)
         .sort((a, b) => {
             if (faction === 'RBiH' && a.operationallyReady !== b.operationallyReady) {
                 return Number(b.operationallyReady) - Number(a.operationallyReady);

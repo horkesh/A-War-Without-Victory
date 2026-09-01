@@ -758,6 +758,43 @@ describe('plan', () => {
         expect(result.plan!.concentration_progress).toBe(0.5);
     });
 
+    it('keeps a bilateral plan alive when assigned brigades become garrison-locked but remain active in the zone', () => {
+        const zoneId = 'zone:test_corps:0' as ZoneId;
+        const brigIds = ['b1', 'b2'].map(id => id as FormationId);
+        const zones = [makeZone({
+            zone_id: zoneId,
+            posture: 'projecting',
+            front_edge_count: 40,
+            surplus_brigades: [],
+            assigned_brigades: brigIds,
+        })];
+        const forces = makeForces(brigIds.map(id => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            is_combat_effective: true,
+        })), zones);
+        const plan: CommanderPlan = {
+            plan_id: 'plan_bilateral_garrison_lock',
+            objective_description: 'bilateral attack',
+            target_osids: ['op:vitez:e'],
+            required_brigades: 2,
+            assigned_brigades: brigIds,
+            staging_zone: zoneId,
+            status: 'ready',
+            created_turn: 53,
+            target_ready_turn: 54,
+            concentration_progress: 1,
+            viability_score: 1,
+            source: 'opportunity',
+            bilateral_offensive: true,
+        };
+
+        const result = managePlan(makeMinimalBriefing({ bilateral_offensive: true }), zones, forces, [], plan, 54);
+
+        expect(result.action).toBe('launched');
+        expect(result.plan?.status).toBe('executing');
+    });
+
     it('transitions to ready at 80% concentration', () => {
         const zoneId = 'zone:test_corps:0' as ZoneId;
         // 4 of 5 brigades at staging = 80%
@@ -998,9 +1035,9 @@ describe('plan', () => {
         }
     });
 
-    it('turns an explicit ARBiH bilateral objective into an opportunity plan before generic intent competition', () => {
+    it('turns an explicit ARBiH bilateral objective and two surplus brigades into an opportunity plan', () => {
         const zoneId = 'zone:test_corps:0' as ZoneId;
-        const brigIds = ['b1', 'b2', 'b3', 'b4'].map(id => id as FormationId);
+        const brigIds = ['b1', 'b2'].map(id => id as FormationId);
         const target = 'op:vitez:e';
         const zones = [makeZone({
             zone_id: zoneId,
@@ -1036,6 +1073,40 @@ describe('plan', () => {
         expect(result.plan?.status).toBe('ready');
         expect(result.plan?.target_osids).toContain(target);
         expect(result.reason).toContain('bilateral offensive directive');
+    });
+
+    it('forms a bilateral operation from combat-ready front-line brigades when only one is allocation surplus', () => {
+        const zoneId = 'zone:test_corps:0' as ZoneId;
+        const brigIds = ['b1', 'b2'].map(id => id as FormationId);
+        const target = 'op:vitez:e';
+        const zones = [makeZone({
+            zone_id: zoneId,
+            posture: 'projecting',
+            front_edge_count: 20,
+            surplus_brigades: [brigIds[0]!],
+            assigned_brigades: brigIds,
+            enemy_adjacent_osids: [target],
+        })];
+        const evals = brigIds.map(id => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            is_combat_effective: true,
+            is_disrupted: false,
+        }));
+        const forces = makeForces(evals, zones);
+        const briefing = makeMinimalBriefing({
+            corps_stance: 'offensive',
+            campaign_role: 'primary',
+            campaign_offensive_targets: [target],
+            bilateral_offensive: true,
+        });
+
+        const result = managePlan(briefing, zones, forces, [evals[0]!], null, 53);
+
+        expect(result.action).toBe('created');
+        expect(result.plan?.required_brigades).toBe(2);
+        expect(result.plan?.assigned_brigades).toEqual(brigIds);
+        expect(result.plan?.target_osids).toContain(target);
     });
 
     it('should clear executing plan so new plans can be created', () => {

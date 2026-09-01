@@ -31549,3 +31549,29 @@ commander briefing/plan/emit state path, `triggered_operations.ts`, and
 triggered, and pre-planned test files. TypeScript, focused Vitest suites, scenario tests, diff
 checks, and the 188-week engine-health gate are the acceptance surface. No calibration-authored
 control event was introduced.
+
+### 2026-09-01 — CORRECTION: bilateral territory is operations-only
+
+The preceding entry's ten turn-52 RBiH gains are **rejected** as a calibration result. They were
+three `consolidation` and seven `abandoned` transfers, not operations, and therefore answered the
+map while violating the owner's explicit mechanism requirement. RBiH-HVO rear-pocket resolution
+now skips passive transfer in either direction. This does not disable those mechanisms for any
+other faction pair.
+
+The traced commander failure had three linked boundaries: the designated 4th Corps could not form
+a plan from only two residual-surplus brigades; front repartition then garrison-locked its reserved
+group; and the target's sub-sector did not own those same brigade IDs at emission. Bilateral plans
+now use a minimum two-brigade combat-ready group from their assigned continuous front, retain that
+reserved group through allocation churn, and admit it across sub-sector bookkeeping when it remains
+combat-ready and can reach the objective. Ordinary opportunity operations retain the generic
+three-brigade, surplus-only, sector-scoped rules.
+
+The corrected 104-week run
+`apr1992_definitive_188w__1db784e85c2e6de0__w104_n0`, hash
+`601b642d55a43fcd`, scores **669/712 (93.96%)** at April 1994 with **31/32** anchors. RBiH 4th Corps
+captures Buturović Polje (t56), Doljani (t62), and Ljubunci (t67) in three named sector operations;
+all three control events are `combat`. HVO captures zero RBiH OSIDs, and there are zero bilateral
+non-combat transfers. The lower score versus 678/712 is accepted as the honest cost of removing the
+wrong mechanism. Focused verification passes 85/85 tests; TypeScript typecheck passes. The run has
+408 attack orders, 280 battles, zero invalid operations, zero zero-eligible operations, and zero
+recovery-without-attempt rows. No attack-resolution constant or direct-control event was added.

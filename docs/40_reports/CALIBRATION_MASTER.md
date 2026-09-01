@@ -4015,12 +4015,19 @@ brigades, and low intelligence converted commitments back into probes. Commander
 recognizes the designated bilateral attacker and its canonical reachable objectives, while
 ceasefire/Washington state removes that designation.
 
-The bounded April checkpoint is stable at **678/712**, with all historical anchors passing.
-HVO captures no ARBiH territory after bilateral war begins. ARBiH applies all observed bilateral
-combat pressure and receives ten HVO OSIDs through the existing consolidation/abandonment
-mechanisms at turn 52; those transfers are not claimed as combat captures. No pre-Washington
-ARBiH occupying sector attack against HVO forms in this deterministic run, so that residual
-underperformance remains explicit rather than being hidden behind a control-change event.
+The operations-only April checkpoint is **669/712 (93.96%)**, with **31/32** April anchors
+passing (`op:vares:vares_2` remains HVO instead of RBiH). HVO captures no ARBiH territory after
+bilateral war begins. ARBiH 4th Corps launches three occupying sector attacks before Washington:
+Operacija Proljeće captures `op:konjic:buturovic_polje_2` at turn 56, Operacija Odbrana captures
+`op:jablanica:doljani_2` at turn 62, and Operacija Čelik captures
+`op:prozor:ljubunci_2` at turn 67. All three transfers are logged combat captures. Passive
+`consolidation` and `abandoned` changes are forbidden in either direction between RBiH and HVO;
+the previous ten-cell passive result is rejected rather than retained for its higher score.
+
+The corrected run is
+`apr1992_definitive_188w__1db784e85c2e6de0__w104_n0`, hash
+`601b642d55a43fcd`. Its combat-causality report is valid: 408 attack orders, 280 battles,
+zero invalid operations, zero zero-eligible operations, and zero recovery-without-attempt rows.
 
 Operation Cerska–Kamenica and Operation Zvezda 94 now explicitly roster the VRS 1st Guards
 Motorized Brigade and 65th Protection Motorized Regiment, with admission governed by the shared
@@ -4029,9 +4036,10 @@ II p.406 specifically supports both formations at Cerska. Its Zvezda account (p.
 Main Staff direction and higher-HQ concentration but not those exact two unit identities, so
 their Zvezda roster is recorded as a scenario allocation rather than exact-order-of-battle fact.
 
-Full verification run
+The earlier full verification run
 `apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0`, hash
-`6c00e419e8248c97`, passes the 188-week engine-health gate and **31/31** anchors. Cerska launches
+`6c00e419e8248c97`, remains evidence for the VRS elite allocations but is superseded for bilateral
+territorial calibration because it contains the rejected passive transfers. Cerska launches
 at turn 40 with the 1st Guards, captures `op:vlasenica:cerska_2` by logged combat, and ends
 partial. Zvezda launches at turn 100 with the 1st Guards but fails to capture its Goražde
 objectives. The 65th remains roster-eligible but is unavailable to these two operations in this
