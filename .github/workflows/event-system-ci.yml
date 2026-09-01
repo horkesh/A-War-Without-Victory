@@ -54,6 +54,7 @@ on:
       - main
       - 'codex/**'
       - 'feature/**'
+      - 'claude/**'
   pull_request:
     branches: [main]
 
