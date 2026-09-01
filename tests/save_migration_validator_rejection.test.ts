@@ -123,6 +123,70 @@ function currentVersionState(): any {
 }
 
 describe('save migration validator hardening', () => {
+    it('rejects a negative militia casualty count', () => {
+        const state = currentVersionState();
+        state.military.casualty_ledger = {
+            RBiH: {
+                killed: 0, wounded: 0, missing_captured: 0,
+                equipment_lost: { tanks: 0, artillery: 0, aa_systems: 0 },
+                per_formation: {},
+                per_militia_pool: { 'gorazde:RBiH': { killed: -1, wounded: 0, missing_captured: 0 } },
+            },
+        };
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /per_militia_pool\.gorazde:RBiH\.killed must be a finite non-negative number/
+        );
+    });
+
+    it('rejects a non-finite militia casualty count', () => {
+        const state = currentVersionState();
+        state.military.casualty_ledger = {
+            RBiH: {
+                killed: 0, wounded: 0, missing_captured: 0,
+                equipment_lost: { tanks: 0, artillery: 0, aa_systems: 0 },
+                per_formation: {},
+                per_militia_pool: { 'gorazde:RBiH': { killed: 0, wounded: 'many', missing_captured: 0 } },
+            },
+        };
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /per_militia_pool\.gorazde:RBiH\.wounded must be a finite non-negative number/
+        );
+    });
+
+    it('rejects a militia casualty row that is not keyed by a militia pool key', () => {
+        const state = currentVersionState();
+        state.military.casualty_ledger = {
+            RBiH: {
+                killed: 0, wounded: 0, missing_captured: 0,
+                equipment_lost: { tanks: 0, artillery: 0, aa_systems: 0 },
+                per_formation: {},
+                // A bare formation id here is the exact confusion the split record prevents.
+                per_militia_pool: { arbih_1st_brigade: { killed: 0, wounded: 0, missing_captured: 0 } },
+            },
+        };
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /per_militia_pool\.arbih_1st_brigade must use a composite militia pool key/
+        );
+    });
+
+    it('rejects a negative militia wounded_pending value', () => {
+        const state = currentVersionState();
+        state.military.militia_pools = {
+            'gorazde:RBiH': {
+                mun_id: 'gorazde', faction: 'RBiH',
+                available: 0, committed: 0, exhausted: 0, updated_turn: 0,
+                wounded_pending: -5,
+            },
+        };
+
+        expect(() => deserializeState(JSON.stringify(state))).toThrow(
+            /militia_pools\.gorazde:RBiH\.wounded_pending must be a finite non-negative number/
+        );
+    });
+
     it('rejects a current-version save missing required sector intelligence memory', () => {
         const state = currentVersionState();
         delete state.military.sector_intel;

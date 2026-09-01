@@ -29,6 +29,17 @@ export interface FactionCasualtyLedger {
     missing_captured: number;
     equipment_lost: FactionEquipmentLosses;
     per_formation: Record<FormationId, FormationCasualties>;
+    /**
+     * Schema v38: casualties taken by militia defenders, keyed by the canonical militia
+     * pool key `${mun_id}:${faction}` (src/state/militia_pool_key.ts).
+     *
+     * Militia defenders have no formation id, so before v38 their losses were reported by
+     * the resolver and then dropped — 42 battles / 3,844 raw casualties went unrecorded in
+     * the 40-week artifact. They are kept SEPARATE from `per_formation` so a pool key can
+     * never be mistaken for a formation id, and the invariant
+     * `killed = sum(per_formation) + sum(per_militia_pool)` holds after every write.
+     */
+    per_militia_pool: Record<string, FormationCasualties>;
 }
 
 export type CasualtyLedger = Record<FactionId, FactionCasualtyLedger>;
@@ -113,7 +124,8 @@ export function initializeCasualtyLedger(factionIds: readonly string[]): Casualt
             wounded: 0,
             missing_captured: 0,
             equipment_lost: { tanks: 0, artillery: 0, aa_systems: 0 },
-            per_formation: {}
+            per_formation: {},
+            per_militia_pool: {}
         };
     }
     return ledger;
@@ -127,10 +139,14 @@ function ensureFaction(ledger: CasualtyLedger, factionId: string): FactionCasual
             wounded: 0,
             missing_captured: 0,
             equipment_lost: { tanks: 0, artillery: 0, aa_systems: 0 },
-            per_formation: {}
+            per_formation: {},
+            per_militia_pool: {}
         };
     }
-    return ledger[factionId]!;
+    // Repair runtime-created and pre-v38 ledgers so the accounting invariant can hold.
+    const faction = ledger[factionId]!;
+    if (!faction.per_militia_pool) faction.per_militia_pool = {};
+    return faction;
 }
 
 /** Ensure a formation entry exists within a faction ledger. */
@@ -165,6 +181,49 @@ export function recordBattleCasualties(
     formation.killed += killed;
     formation.wounded += wounded;
     formation.missing_captured += missing;
+}
+
+/** Ensure a militia-pool entry exists within a faction ledger. */
+function ensureMilitiaPool(factionLedger: FactionCasualtyLedger, poolKey: string): FormationCasualties {
+    if (!factionLedger.per_militia_pool[poolKey]) {
+        factionLedger.per_militia_pool[poolKey] = { killed: 0, wounded: 0, missing_captured: 0 };
+    }
+    return factionLedger.per_militia_pool[poolKey]!;
+}
+
+/**
+ * Record personnel casualties taken by militia defenders, keyed by militia pool.
+ *
+ * The militia counterpart of recordBattleCasualties: same faction totals, same realism
+ * scaling applied exactly ONCE, but the per-source breakdown lands in `per_militia_pool`
+ * rather than `per_formation`, because a militia defender has no formation id and a pool
+ * key must never be laundered into the formation record.
+ *
+ * `casualties` are RAW battle losses; the realism fraction converts them to the permanent
+ * share the historical ledger records. Callers that also debit pool manpower must use the
+ * RAW values for that — the two quantities are not interchangeable.
+ */
+export function recordMilitiaCasualties(
+    ledger: CasualtyLedger,
+    factionId: string,
+    poolKey: string,
+    casualties: FormationCasualties
+): void {
+    const faction = ensureFaction(ledger, factionId);
+    const pool = ensureMilitiaPool(faction, poolKey);
+
+    const frac = activeRealismFraction(factionId);
+    const killed = applyRealismFraction(casualties.killed, frac);
+    const wounded = applyRealismFraction(casualties.wounded, frac);
+    const missing = applyRealismFraction(casualties.missing_captured, frac);
+
+    faction.killed += killed;
+    faction.wounded += wounded;
+    faction.missing_captured += missing;
+
+    pool.killed += killed;
+    pool.wounded += wounded;
+    pool.missing_captured += missing;
 }
 
 /** Record equipment losses for a faction in the ledger. */

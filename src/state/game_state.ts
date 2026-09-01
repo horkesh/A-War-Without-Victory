@@ -39,7 +39,7 @@ import type { ArmyLabel } from './identity.js';
 import type { RecruitmentResourceState } from './recruitment_types.js';
 import type { CommanderState } from '../sim/combat/commander/commander_state.js';
 
-export const CURRENT_SCHEMA_VERSION = 37 as const;
+export const CURRENT_SCHEMA_VERSION = 38 as const;
 
 // --- ID types (canonical) ---
 export type FactionId = string;
@@ -1610,6 +1610,17 @@ export interface MilitiaPoolState {
     updated_turn: number; // integer, last mutation turn, deterministic from state.meta.turn (NOT wall clock)
     tags?: string[]; // optional labels, no mechanics
     fatigue?: number; // Phase 10: integer >= 0, irreversible operational degradation
+    /**
+     * Schema v38: militia wounded awaiting return to `available`, integer >= 0.
+     *
+     * Only manpower actually drawn from `available` by a militia-only battle is credited
+     * here, so WIA recovery can never CREATE manpower in a pool the defenders were not
+     * taken from. Militia defence is NOT capped by `available` — that field is the
+     * post-mobilization recruitment residual, structurally 0 wherever militia-only defence
+     * occurs, so capping by it would delete historically attested local defence.
+     * See docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md.
+     */
+    wounded_pending?: number;
 }
 
 /**

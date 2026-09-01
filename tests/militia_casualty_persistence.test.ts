@@ -273,16 +273,46 @@ function resolve(fixture: ReturnType<typeof makeMilitiaOnlyScenario>) {
     );
 }
 
+/**
+ * Same fixture, but with an ARBiH brigade physically defending the target OSID. Used to
+ * prove the militia writer never fires for a battle a formation fought.
+ */
+function makeFormationDefendedScenario() {
+    const fixture = makeMilitiaOnlyScenario();
+    const defender = makeFormation('arbih_defender', 'RBiH', 'brigade', TARGET_OSID, {
+        personnel: 3000, cohesion: 60, morale: 60, experience: 0.3,
+    });
+    (fixture.state.military.formations as Record<string, FormationState>)[defender.id] = defender;
+    return fixture;
+}
+
 function poolOf(state: GameState): MilitiaPoolState {
     const pool = (state.military.militia_pools as Record<string, MilitiaPoolState>)[POOL_KEY];
     if (!pool) throw new Error(`missing militia pool ${POOL_KEY}`);
     return pool;
 }
 
+
+/** Sum a set of casualty rows into one total. */
+function sumRows(rows: Record<string, FormationCasualties> | undefined): FormationCasualties {
+    return Object.values(rows ?? {}).reduce(
+        (acc, r) => ({
+            killed: acc.killed + r.killed,
+            wounded: acc.wounded + r.wounded,
+            missing_captured: acc.missing_captured + r.missing_captured,
+        }),
+        { killed: 0, wounded: 0, missing_captured: 0 }
+    );
+}
+
+function totalOf(c: FormationCasualties): number {
+    return c.killed + c.wounded + c.missing_captured;
+}
+
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
-describe('militia-only battles consume durable manpower', () => {
-    it('fights a militia defender and reports casualties (pre-existing behaviour)', () => {
+describe('militia-only battle losses are persisted', () => {
+    it('fights a militia defender and reports casualties', () => {
         const fixture = makeMilitiaOnlyScenario();
         const report = resolve(fixture);
 
@@ -294,38 +324,22 @@ describe('militia-only battles consume durable manpower', () => {
 
     it('classifies the defender as militia and names the pool it drew from', () => {
         const fixture = makeMilitiaOnlyScenario();
-        const report = resolve(fixture);
-        const battle = report.battles[0]!;
+        const battle = resolve(fixture).battles[0]!;
 
         expect(asBattleView(battle).defender_kind).toBe('militia');
         expect(asBattleView(battle).defender_militia_pool_key).toBe(POOL_KEY);
     });
 
-    it('debits the militia pool by exactly the raw casualties reported', () => {
-        const fixture = makeMilitiaOnlyScenario();
-        const before = poolOf(fixture.state).available;
-
-        const report = resolve(fixture);
-        const battle = report.battles[0]!;
-
-        expect(poolOf(fixture.state).available).toBe(before - battle.defender_casualties);
-    });
-
-    it('writes a per_militia_pool ledger row and no per_formation row', () => {
+    it('writes a per_militia_pool ledger row and never a per_formation row', () => {
         const fixture = makeMilitiaOnlyScenario();
         resolve(fixture);
 
-        const ledger = fixture.state.military.casualty_ledger!;
-        const rbih = asLedgerView(ledger.RBiH);
-
+        const rbih = asLedgerView(fixture.state.military.casualty_ledger!.RBiH);
         expect(rbih.per_militia_pool?.[POOL_KEY]).toBeDefined();
-        const row = rbih.per_militia_pool![POOL_KEY]!;
-        expect(row.killed + row.wounded + row.missing_captured).toBeGreaterThan(0);
+        expect(totalOf(rbih.per_militia_pool![POOL_KEY]!)).toBeGreaterThan(0);
 
-        // No synthetic militia identifier may appear among formation casualties.
-        for (const id of Object.keys(rbih.per_formation)) {
-            expect(id).not.toContain(':');
-        }
+        // A militia pool key must never be laundered into per_formation as a
+        // synthetic formation id.
         expect(rbih.per_formation[POOL_KEY]).toBeUndefined();
     });
 
@@ -336,65 +350,119 @@ describe('militia-only battles consume durable manpower', () => {
         const ledger = fixture.state.military.casualty_ledger!;
         for (const faction of ['RS', 'RBiH'] as const) {
             const f = asLedgerView(ledger[faction]);
-            const sum = (rows: Record<string, { killed: number; wounded: number; missing_captured: number }>) =>
-                Object.values(rows).reduce(
-                    (acc, r) => ({
-                        killed: acc.killed + r.killed,
-                        wounded: acc.wounded + r.wounded,
-                        missing_captured: acc.missing_captured + r.missing_captured,
-                    }),
-                    { killed: 0, wounded: 0, missing_captured: 0 }
-                );
-            const formations = sum(f.per_formation);
-            const militia = sum(f.per_militia_pool ?? {});
+            const formations = sumRows(f.per_formation);
+            const militia = sumRows(f.per_militia_pool);
             expect(f.killed).toBe(formations.killed + militia.killed);
             expect(f.wounded).toBe(formations.wounded + militia.wounded);
             expect(f.missing_captured).toBe(formations.missing_captured + militia.missing_captured);
         }
     });
 
-    it('tracks militia wounded as pending and permanent losses as exhaustion', () => {
+    it('records the casualties exactly once', () => {
         const fixture = makeMilitiaOnlyScenario();
+        const battle = resolve(fixture).battles[0]!;
+
+        const rbih = asLedgerView(fixture.state.military.casualty_ledger!.RBiH);
+        const recorded = totalOf(sumRows(rbih.per_militia_pool));
+
+        // Realism scaling shrinks the recorded total, so it can never exceed the raw
+        // battle total; a double write would push it above.
+        expect(recorded).toBeGreaterThan(0);
+        expect(recorded).toBeLessThanOrEqual(battle.defender_casualties);
+    });
+
+    it('does not create a militia row for a battle fought by a formation', () => {
+        const fixture = makeFormationDefendedScenario();
+        resolve(fixture);
+
+        const rbih = asLedgerView(fixture.state.military.casualty_ledger!.RBiH);
+        expect(sumRows(rbih.per_militia_pool)).toEqual(
+            { killed: 0, wounded: 0, missing_captured: 0 });
+        expect(totalOf(sumRows(rbih.per_formation))).toBeGreaterThan(0);
+    });
+});
+
+describe('militia pool demographic accounting', () => {
+    it('feeds permanent losses into exhausted and stamps the turn', () => {
+        const fixture = makeMilitiaOnlyScenario();
+        const before = poolOf(fixture.state).exhausted;
         resolve(fixture);
 
         const pool = asPoolView(poolOf(fixture.state));
-        expect(pool.wounded_pending).toBeGreaterThan(0);
-        expect(pool.exhausted).toBeGreaterThan(0);
+        expect(pool.exhausted).toBeGreaterThan(before);
         expect(pool.updated_turn).toBe(5);
     });
 
-    it('never spends more manpower than the pool has available', () => {
+    it('draws from available only as far as available reaches', () => {
+        const fixture = makeMilitiaOnlyScenario({ poolAvailable: 4_000 });
+        const battle = resolve(fixture).battles[0]!;
+
+        expect(poolOf(fixture.state).available).toBe(4_000 - battle.defender_casualties);
+    });
+
+    it('never drives a pool field negative when available is short', () => {
         const fixture = makeMilitiaOnlyScenario({ poolAvailable: 12 });
-        const report = resolve(fixture);
-        const battle = report.battles[0]!;
+        resolve(fixture);
 
-        expect(poolOf(fixture.state).available).toBeGreaterThanOrEqual(0);
-        expect(battle.defender_casualties).toBeLessThanOrEqual(12);
+        const pool = asPoolView(poolOf(fixture.state));
+        expect(pool.available).toBe(0);
+        expect(pool.exhausted).toBeGreaterThanOrEqual(0);
+        expect(pool.wounded_pending).toBeGreaterThanOrEqual(0);
     });
 
-    it('gives an exhausted pool no militia defence at all', () => {
+    it('returns no wounded to a pool it never drew from', () => {
+        // 27 of 30 militia battles in a bounded canonical run draw on a pool whose
+        // available is 0. Crediting their wounded back to `available` would CREATE
+        // manpower, so only the share actually taken from the pool may return to it.
         const fixture = makeMilitiaOnlyScenario({ poolAvailable: 0 });
-        const report = resolve(fixture);
-        const battle = report.battles[0]!;
+        resolve(fixture);
 
-        expect(poolOf(fixture.state).available).toBe(0);
-        expect(battle.defender_casualties).toBe(0);
+        const pool = asPoolView(poolOf(fixture.state));
+        expect(pool.available).toBe(0);
+        expect(pool.wounded_pending).toBe(0);
     });
 
-    it('makes a second OSID in the same municipality observe the first battle\'s debit', () => {
+    it('accumulates two OSIDs in one municipality into one pool and one ledger row', () => {
         const fixture = makeMilitiaOnlyScenario({
             poolAvailable: 4_000,
             targets: [TARGET_OSID, SECOND_OSID],
         });
-        const before = poolOf(fixture.state).available;
         const report = resolve(fixture);
-
         expect(report.battles.length).toBe(2);
+
         const spent = report.battles.reduce((s, b) => s + b.defender_casualties, 0);
-        expect(poolOf(fixture.state).available).toBe(before - spent);
-        // Two OSIDs share one budget: the second battle cannot draw on manpower the
-        // first already lost, so the two battles are not identical.
-        expect(report.battles[1]!.defender_casualties)
-            .toBeLessThanOrEqual(report.battles[0]!.defender_casualties);
+        expect(poolOf(fixture.state).available).toBe(4_000 - spent);
+
+        const rbih = asLedgerView(fixture.state.military.casualty_ledger!.RBiH);
+        expect(Object.keys(rbih.per_militia_pool ?? {})).toEqual([POOL_KEY]);
+    });
+});
+
+describe('militia defence magnitude is independent of pool state', () => {
+    // The approved architecture deliberately does NOT cap militia defence by
+    // `pool.available`. That field is the post-mobilization recruitment residual and is
+    // structurally 0 wherever militia-only defence occurs (27 of 30 battles in a bounded
+    // canonical run), so capping by it would zero ~90% of militia defence across 50% of
+    // opening-war battles — at Kozarac, Foca, Visegrad, Zvornik, Vlasenica, places whose
+    // local defence is historically attested. These tests keep that premise out of the
+    // engine.
+    it('inflicts identical casualties whether the pool is full or empty', () => {
+        const full = makeMilitiaOnlyScenario({ poolAvailable: 4_000 });
+        const empty = makeMilitiaOnlyScenario({ poolAvailable: 0 });
+
+        const fullBattle = resolve(full).battles[0]!;
+        const emptyBattle = resolve(empty).battles[0]!;
+
+        expect(emptyBattle.defender_casualties).toBe(fullBattle.defender_casualties);
+        expect(emptyBattle.power_ratio).toBe(fullBattle.power_ratio);
+        expect(emptyBattle.outcome).toBe(fullBattle.outcome);
+    });
+
+    it('still defends an OSID whose municipality has no pool at all', () => {
+        const fixture = makeMilitiaOnlyScenario();
+        delete (fixture.state.military.militia_pools as Record<string, unknown>)[POOL_KEY];
+
+        const battle = resolve(fixture).battles[0]!;
+        expect(battle.defender_casualties).toBeGreaterThan(0);
     });
 });
