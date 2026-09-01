@@ -10,12 +10,11 @@ const HISTORICAL_ELITE_RESERVATIONS: ReadonlyArray<{
     brigadeId: FormationId;
     releaseTurn: number;
 }> = [
-    { brigadeId: 'rs_1st_guards_motorized' as FormationId, releaseTurn: 40 },
-    { brigadeId: 'rs_65th_protection_motorized_regiment' as FormationId, releaseTurn: 40 },
+    { brigadeId: 'rs_1st_guards_motorized' as FormationId, releaseTurn: 95 },
+    { brigadeId: 'rs_65th_protection_motorized_regiment' as FormationId, releaseTurn: 95 },
 ];
 
 export function isEliteReservedForHistoricalOperation(brigadeId: FormationId, turn: number): boolean {
     return HISTORICAL_ELITE_RESERVATIONS.some((reservation) =>
         reservation.brigadeId === brigadeId && turn <= reservation.releaseTurn);
 }
-

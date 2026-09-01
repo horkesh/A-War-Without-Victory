@@ -31575,3 +31575,27 @@ non-combat transfers. The lower score versus 678/712 is accepted as the honest c
 wrong mechanism. Focused verification passes 85/85 tests; TypeScript typecheck passes. The run has
 408 attack orders, 280 battles, zero invalid operations, zero zero-eligible operations, and zero
 recovery-without-attempt rows. No attack-resolution constant or direct-control event was added.
+
+### 2026-09-01 — Operation Zvezda 94 closes the Goražde corridor through combat
+
+The Goražde lane is now an authored VRS operation rather than a control correction. Operation
+Zvezda 94 becomes available at turn 96 and pre-stages its named five-formation assault group from
+turn 88. The roster includes both Main Staff elite formations (`rs_1st_guards_motorized` and
+`rs_65th_protection_motorized_regiment`) alongside the Višegrad, 1st Podrinje, and 5th Podrinje
+brigades. The single axis requires four formations staged and two forward before launch. Its only
+objectives are Slatina, Sopotnica, and Ustiprača; Goražde town is deliberately excluded.
+
+The supporting engine correction is narrow: an elite reserved for a future historical operation
+cannot be borrowed by an unrelated operation; deferred bot-controlled operations may march their
+explicit elite roster toward staging before availability; and a named elite already at its
+authored staging point is admitted even if the generic reserve system still carries a home-return
+transit order. Pre-staging clears `dig_in`, which otherwise rejected the historical march order.
+No direct-control, consolidation, abandonment, or battle-resolution rule was added.
+
+Fresh 104-week proof run
+`apr1992_definitive_188w__1db784e85c2e6de0__w104_n0`, hash
+`909b150792131228`: Zvezda plans at t96, executes at t99, and completes at t103 with all five
+formations. It wins and captures Slatina (t99), Sopotnica (t102), and Ustiprača (t103) in three
+battles. All **17/17** painted Goražde-area cells match; Goražde remains RBiH and its 15-cell RBiH
+component has only RS-controlled external neighbours, so the enclave is fully cut off. Focused
+Vitest suites and TypeScript typecheck are the regression surface.

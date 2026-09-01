@@ -936,6 +936,38 @@ describe('elite loan per-turn reconciliation and tick', () => {
         expect(brigade.elite_loan_state!.last_recall_turn).toBeNull();
     });
 
+    it('does not attach a historically reserved Zvezda elite to an unrelated executing operation', () => {
+        const brigade = makeOnLoanBrigade('rs_1st_guards_motorized', { loanStartTurn: 40 });
+        brigade.elite_loan_state!.loaned_to_corps = 'vrs_drina';
+        const state = makeState({
+            formations: { rs_1st_guards_motorized: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: 'Operation Pracha River',
+                        phase: 'execution',
+                        participating_brigades: ['rs_1st_podrinje'],
+                        axes: [{
+                            axis_id: 'pracha_encirclement',
+                            assigned_brigades: ['rs_1st_podrinje'],
+                            objectives: ['op:rogatica:brcigovo'],
+                        }],
+                    }],
+                },
+            },
+            corps_front_sectors: {},
+            turn: 54,
+        });
+
+        generateArmyReserveRequests(state);
+        tickEliteLoans(state, 54);
+
+        const operation = state.military.corps_command!.vrs_drina!.active_operations[0]!;
+        expect(operation.participating_brigades).not.toContain('rs_1st_guards_motorized');
+        expect(operation.axes?.[0]!.assigned_brigades).not.toContain('rs_1st_guards_motorized');
+        expect(brigade.elite_loan_state!.on_loan).toBe(false);
+    });
+
     it('does not issue generic reserve routing for an active-operation participant', () => {
         const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: 0 });
         brigade.location_osid = 'op:mun:o0';

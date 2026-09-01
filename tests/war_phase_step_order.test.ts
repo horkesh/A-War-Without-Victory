@@ -27,6 +27,7 @@ describe('war-phase step ordering', () => {
         assertBefore('generate-bot-brigade-orders', 'resolve-attack-orders');
 
         // Column movement must be processed before general brigade movement
+        assertBefore('prestage-deferred-historical-elites', 'osid-column-movement');
         assertBefore('osid-column-movement', 'apply-brigade-movement');
 
         // Attacks must resolve before displacement from conquered territory
@@ -268,6 +269,8 @@ describe('war-phase step ordering', () => {
         // flag-gated AWWV_BRCKO_TACTICAL_GROUP, default OFF, 2026-08-11).
         // +1 from repair-active-elite-deployment-after-final-topology: restores
         // movement ownership if final topology invalidates a live loan assignment.
-        expect(stepNames.length).toBe(189);
+        // +1 from prestage-deferred-historical-elites: emits the dated Main Staff
+        // concentration march before column movement consumes it.
+        expect(stepNames.length).toBe(191);
     });
 });

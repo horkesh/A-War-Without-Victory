@@ -338,8 +338,18 @@ describe('pre-planned operations', () => {
 
         const zvezda = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Zvezda 94')!;
         const roster = zvezda.axes.flatMap((axis) => axis.brigades);
+        assert.equal(zvezda.available_from, 96);
+        assert.equal(zvezda.prestage_from, 88);
+        assert.equal(zvezda.execution_attack_power_mult, 2);
         assert.ok(roster.includes('rs_1st_guards_motorized'));
         assert.ok(roster.includes('rs_65th_protection_motorized_regiment'));
+        assert.equal(zvezda.axes[0]?.minimum_staged_brigades, 4);
+        assert.equal(zvezda.axes[0]?.minimum_forward_brigades, 2);
+        assert.deepEqual(zvezda.axes[0]?.objectives, [
+            'op:gorazde:slatina_2',
+            'op:gorazde:sopotnica',
+            'op:gorazde:ustipraca_2',
+        ]);
     });
 
     it('reserves probe participants only for the head queued historical operation', () => {

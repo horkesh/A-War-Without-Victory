@@ -18,6 +18,7 @@ import type {
     FormationState,
     GameState,
     OperationAxis,
+    SettlementId,
 } from '../../state/game_state.js';
 import { munFromOsid, type Osid } from './osid_adjacency.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -63,6 +64,8 @@ export interface AxisDef {
     brigades: FormationId[];
     objectives: string[];
     staging_osid?: string;
+    minimum_staged_brigades?: number;
+    minimum_forward_brigades?: number;
 }
 
 export interface PrePlannedOp {
@@ -74,6 +77,8 @@ export interface PrePlannedOp {
     staging_osid: string;
     /** Minimum turn before this op can be injected (default: 0). */
     available_from?: number;
+    /** Turn from which reserved Army-HQ formations begin their concentration march. */
+    prestage_from?: number;
     /** Override attack threshold — brigades attack even at worse predicted outcomes. */
     min_attack_outcome?: CorpsOperation['min_attack_outcome'];
     /** Planning duration override — gives brigades time to march to staging. */
@@ -347,29 +352,28 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         // Operation Zvezda 94 — VRS Drina Corps spring 1994 offensive on Goražde safe area.
         // Historically: Drina Corps tactical groups pressed from the east and south, reaching
         // outskirts of Goražde town (BB2 p.289). Fires after Op Pracha River (w41) completes
-        // and frees brigades. Available w100 (~April 1994, contemporaneous with Washington Agreement).
+        // and frees brigades. Available w96 so the offensive can unfold before the w104
+        // April 1994 calibration checkpoint.
         //
         // Staging: podkozara_donja_2 (RS-painted from init, adj slatina_2 ✓)
         // Objectives: slatina_2 (RBiH-painted, adj gorazde_2 — encirclement approach);
-        //             sopotnica (RBiH-painted, adj slatina_2 — tighten pocket; skipped if already RS)
+        //             sopotnica (RBiH-painted, adj slatina_2 — pocket tightener; skipped if already RS);
+        //             ustipraca_2 (RBiH-painted, adj sopotnica — closes the remaining corridor)
         // gorazde_2 excluded: cascade risk documented in Op Pracha River comment (line 233).
         // Sacred Rule checks: staging adj first objective ✓; no painted-opposite objectives ✓;
-        //   1st/5th Podrinje finish Op Pracha River ~w55-60, then ~40w gap before Zvezda 94 fires at w100 ✓.
+        //   1st/5th Podrinje finish Op Pracha River ~w55-60, then ~36w gap before Zvezda 94 opens at w96 ✓.
         //   They end Op Pracha River in the Prača corridor, 2-3 hops from podkozara_donja_2 staging ✓.
         corps: 'vrs_drina',
         faction: 'RS',
         name: 'Operation Zvezda 94',
         staging_osid: 'op:gorazde:podkozara_donja_2',
-        available_from: 100,
+        available_from: 96,
+        prestage_from: 88,
         min_attack_outcome: 'repulsed',
-        // planning_duration: 10 — extended to allow brigades time to march 6+ hops to staging.
-        // ENGINE LIMITATION (documented 2026-05-28): all vrs_drina brigades are sector-pinned by
-        // bot AI after w46 and do not execute march orders (sector assignment > op march priority).
-        // Op injects at w100 (3 brigades ≥ MIN_OPERATION_PARTICIPANTS=2), issues movement_orders
-        // each planning turn, but eligible_attacker_count stays 0 for all 13 turns → aborts w113
-        // with zero_eligible_axis. Single-brigade variant (1 < MIN=2) never injects at all —
-        // keeping 3-brigade for observability. Requires engine fix: march priority for op-assigned
-        // brigades must override sector defensive assignment. Assign to gameplay-programmer.
+        // Main Staff artillery, engineering, and command concentration. This
+        // modifies combat power only; every objective still requires a battle.
+        execution_attack_power_mult: 2,
+        // Ten planning turns permit the full five-formation group to assemble before execution.
         planning_duration: 10,
         axes: [
             {
@@ -384,12 +388,16 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'rs_1st_guards_motorized',
                     'rs_65th_protection_motorized_regiment',
                 ],
-                // podkozara_donja_2 adj slatina_2 ✓; slatina_2 adj sopotnica ✓
+                // podkozara_donja_2 adj slatina_2 ✓; slatina_2 adj sopotnica ✓;
+                // sopotnica adj ustipraca_2 ✓
                 objectives: [
                     'op:gorazde:slatina_2',   // RBiH-painted; adj gorazde_2 — encirclement chokepoint
                     'op:gorazde:sopotnica',   // RBiH-painted; adj slatina_2 — pocket tightener
+                    'op:gorazde:ustipraca_2', // RBiH-painted; closes the eastern corridor
                 ],
                 staging_osid: 'op:gorazde:podkozara_donja_2',
+                minimum_staged_brigades: 4,
+                minimum_forward_brigades: 2,
             },
         ],
     },
@@ -1417,11 +1425,18 @@ function buildAxesFromDef(
             if (!fid || !formation) return [];
             if (!isEligibleOperationFormation(formation)) return [];
             if ((formation.disrupted_turns ?? 0) > 0) return [];
+            const isArmyHqElite = isSectorAssignmentExemptCorpsId(formation.corps_id)
+                && formation.elite_loan_state != null;
+            const isAuthoredEliteAtStaging = isArmyHqElite
+                && isForwardDeployedOnAxis(formation, axisDef);
             // Existing movement owners retain authority. Injection cannot prove
             // whether transit is player-, recall-, loan-, or bot-authored, so it
-            // must not claim or reset a brigade already in column movement.
+            // must not claim or reset a brigade already in column movement. The
+            // one exception is a named Army-HQ elite already at this authored
+            // axis's staging OSID: its generic home-return transit is superseded
+            // by the operation it physically assembled for.
             if (movementState[fid]?.status === 'in_transit') {
-                if (movementState[fid]?.owner !== 'bot_discretionary') return [];
+                if (movementState[fid]?.owner !== 'bot_discretionary' && !isAuthoredEliteAtStaging) return [];
             }
             // Already fighting for someone else — see collectCommittedFormationIds.
             if (committedElsewhere.has(fid)) return [];
@@ -1440,15 +1455,21 @@ function buildAxesFromDef(
             // if explicitly named in a pre-planned op — they get an elite loan
             // to the operation's corps at injection time.
             const corpsId = getFormationCorpsId(formation);
-            if (isSectorAssignmentExemptCorpsId(corpsId)) {
+            if (isArmyHqElite || isSectorAssignmentExemptCorpsId(corpsId)) {
                 if (!formation.elite_loan_state) return []; // non-elite exempt = skip
                 const ls = formation.elite_loan_state;
                 if (ls.on_loan) return [];
                 if (!isEliteAvailableForLoan(formation, state.meta.turn)) return [];
-                if (adjacency && !canEliteLoanReachCorpsTerritory(state, fid, def.corps, adjacency)) return [];
+                if (
+                    !isAuthoredEliteAtStaging
+                    && adjacency
+                    && !canEliteLoanReachCorpsTerritory(state, fid, def.corps, adjacency)
+                ) return [];
                 eliteLoans.push({ brigadeId: fid, corpsId: def.corps });
             }
-            if (movementState[fid]?.status === 'in_transit') reclaimedBotTransit.push(fid);
+            if (movementState[fid]?.status === 'in_transit' || isAuthoredEliteAtStaging) {
+                reclaimedBotTransit.push(fid);
+            }
             if ((formation.personnel ?? 0) >= MIN_ATTACK_PERSONNEL) viableParticipating += 1;
             return [fid];
         });
@@ -1470,6 +1491,12 @@ function buildAxesFromDef(
         const lastAxis = builtAxes[builtAxes.length - 1]!;
         lastAxis.axis_id = axisDef.axis_id;
         lastAxis.name = axisDef.name;
+        if (axisDef.minimum_staged_brigades != null) {
+            lastAxis.minimum_staged_brigades = Math.max(1, Math.trunc(axisDef.minimum_staged_brigades));
+        }
+        if (axisDef.minimum_forward_brigades != null) {
+            lastAxis.minimum_forward_brigades = Math.max(1, Math.trunc(axisDef.minimum_forward_brigades));
+        }
         allParticipating.push(...axisBrigades);
     }
 
@@ -1513,6 +1540,44 @@ function deployPrePlannedEliteLoans(
     }
 }
 
+/** Begin an authored Main Staff concentration march before a deferred operation opens. */
+function prestageReservedPrePlannedElites(state: GameState, def: PrePlannedOp, turn: number): void {
+    if (def.prestage_from == null || turn < def.prestage_from) return;
+    if (state.meta.player_faction === def.faction) return;
+    const formations = state.military.formations ?? {};
+    const movementState = state.military.brigade_movement_state ?? {};
+    for (const axis of def.axes) {
+        if (!axis.staging_osid) continue;
+        for (const brigadeId of [...axis.brigades].sort(strictCompare)) {
+            const formation = formations[brigadeId];
+            if (!formation || !isSectorAssignmentExemptCorpsId(formation.corps_id)) continue;
+            if (formation.elite_loan_state?.on_loan) continue;
+            if (formation.location_osid === axis.staging_osid) continue;
+            if (movementState[brigadeId]?.status === 'in_transit') continue;
+            if (formation.posture === 'dig_in') {
+                formation.posture = 'defend';
+                formation.dig_in_progress = 0;
+            }
+            if (!state.military.brigade_movement_orders) state.military.brigade_movement_orders = {};
+            // This bot-only dated commitment owns the non-transit movement
+            // slot. In particular it supersedes the generic post-loan return
+            // order that otherwise keeps a reserved elite at Army HQ.
+            state.military.brigade_movement_orders[brigadeId] = {
+                destination_sids: [axis.staging_osid as SettlementId],
+                stance: 'column',
+            };
+        }
+    }
+}
+
+/** Advance dated bot-controlled Main Staff concentrations every war turn. */
+export function prestageDeferredPrePlannedElites(state: GameState): void {
+    const turn = state.meta.turn;
+    for (const def of ALL_PRE_PLANNED) {
+        prestageReservedPrePlannedElites(state, def, turn);
+    }
+}
+
 // PERMITTED CREATION ENTRY POINT — pre-planned and player-queued operations only.
 // All CorpsOperation objects must be built via buildCorpsOperation() in corps_operation_helpers.ts.
 /**
@@ -1538,6 +1603,11 @@ export function injectPrePlannedOperations(
 
     const formations = state.military.formations ?? {};
     const turn = state.meta?.turn ?? 0;
+
+    for (const def of ALL_PRE_PLANNED) {
+        if (options?.faction && def.faction !== options.faction) continue;
+        prestageReservedPrePlannedElites(state, def, turn);
+    }
 
     // Validate only definitions that are actually eligible to inject now.
     // Deferred operations are validated when their queue slot becomes live.
@@ -1660,7 +1730,7 @@ export function injectPrePlannedOperations(
         }
     }
 
-    // Queue Drina Corps: Operation Drina → Podrinje Sweep → Pracha River → Zvezda 94 (available_from:100)
+    // Queue Drina Corps: Operation Drina → Podrinje Sweep → Pracha River → Zvezda 94 (available_from:96)
     if (injectedCorps.has('vrs_drina')) {
         const cmd = corpsCommand['vrs_drina'];
         if (cmd && !cmd.queued_operations) {

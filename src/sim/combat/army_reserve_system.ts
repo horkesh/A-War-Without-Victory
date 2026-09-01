@@ -1273,6 +1273,12 @@ function reconcileEliteLoanOperationCommitments(state: GameState): Set<string> {
         const targetCommand = corpsCommand[loan.loaned_to_corps];
         if (!targetCommand || alreadyCommitted) continue;
 
+        // A live loan left over from an earlier authored operation must not be
+        // absorbed by whichever unrelated corps offensive happens to execute
+        // next. Keep dated Main Staff assault formations free for their next
+        // historical commitment; tickEliteLoans will recall the stale loan.
+        if (isEliteReservedForHistoricalOperation(bid as FormationId, state.meta.turn)) continue;
+
         const operation = (targetCommand.active_operations ?? []).find((candidate) => candidate.phase === 'execution');
         if (operation) attachEliteToOperation(operation, bid);
     }
@@ -1370,8 +1376,9 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
 
         const corpsId = ls.loaned_to_corps;
         const cmd = corpsCommand[corpsId];
+        const reservedForHistoricalOperation = isEliteReservedForHistoricalOperation(bid as FormationId, turn);
         const hasActiveOp = committedToActiveOperation
-            || !!(cmd?.active_operations?.some(op => op.phase === 'execution'));
+            || (!reservedForHistoricalOperation && !!cmd?.active_operations?.some(op => op.phase === 'execution'));
         const cfs = state.military.corps_front_sectors ?? {};
         const sector = Object.keys(cfs).sort(strictCompare).map(k => cfs[k]).find(s => s.corps_id === corpsId);
         const threatHigh = sector ? sector.threat_ratio >= 1.5 : false;

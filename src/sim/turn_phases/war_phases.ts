@@ -169,6 +169,7 @@ import {
     admitAuthoredPrePlannedReinforcements,
     injectPrePlannedOperations,
     injectQueuedOperation,
+    prestageDeferredPrePlannedElites,
 } from '../combat/pre_planned_operations.js';
 import { isSlot0AvailableForQueue, hasAvailableSlot, getAvailableBrigades, buildCorpsOperation, findBrigadeOperationAnywhere, removeOperation } from '../combat/corps_operation_helpers.js';
 import { validateOpAtInjection, hasBlockingOpInjectionWarnings } from '../combat/operation_validation.js';
@@ -1523,6 +1524,13 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             computeHomeDefenseActive(context.state);
+        }
+    },
+    {
+        name: 'prestage-deferred-historical-elites',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            prestageDeferredPrePlannedElites(context.state);
         }
     },
     {
