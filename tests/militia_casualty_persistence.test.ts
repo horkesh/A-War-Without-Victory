@@ -425,6 +425,35 @@ describe('militia pool demographic accounting', () => {
         expect(pool.wounded_pending).toBe(0);
     });
 
+    it('still records casualties when the pool contradicts its own key', () => {
+        // The pool key is built from the defending faction, so a stored faction that
+        // disagrees means the pool is inconsistent with its key. The pool must not be
+        // mutated — but returning early would silently DROP the casualties, which is the
+        // exact defect this lane exists to fix.
+        const fixture = makeMilitiaOnlyScenario({ poolAvailable: 4_000 });
+        const pool = poolOf(fixture.state);
+        (pool as { faction: string }).faction = 'RS';
+
+        resolve(fixture);
+
+        const rbih = asLedgerView(fixture.state.military.casualty_ledger!.RBiH);
+        expect(totalOf(sumRows(rbih.per_militia_pool))).toBeGreaterThan(0);
+        // ...and the mismatched pool is left alone.
+        expect(pool.available).toBe(4_000);
+        expect(pool.exhausted).toBe(0);
+    });
+
+    it('records casualties for a municipality that has no pool at all', () => {
+        const fixture = makeMilitiaOnlyScenario();
+        delete (fixture.state.military.militia_pools as Record<string, unknown>)[POOL_KEY];
+
+        resolve(fixture);
+
+        const rbih = asLedgerView(fixture.state.military.casualty_ledger!.RBiH);
+        expect(rbih.per_militia_pool?.[POOL_KEY]).toBeDefined();
+        expect(totalOf(sumRows(rbih.per_militia_pool))).toBeGreaterThan(0);
+    });
+
     it('accumulates two OSIDs in one municipality into one pool and one ledger row', () => {
         const fixture = makeMilitiaOnlyScenario({
             poolAvailable: 4_000,

@@ -53,6 +53,8 @@ export interface MilitiaBattleCasualtyResult {
     appliedTotal: number;
     /** RAW manpower actually taken out of `pool.available` (0 when the pool is empty). */
     drawnFromAvailable: number;
+    /** False when no pool existed, or its stored faction contradicted its key. */
+    poolMutated: boolean;
 }
 
 function totalOf(c: FormationCasualties): number {
@@ -68,9 +70,11 @@ function totalOf(c: FormationCasualties): number {
  * `recordMilitiaCasualties`. The two quantities are not interchangeable.
  *
  * Returns `null` only when there is nothing to record (no municipality resolvable from
- * the OSID, or zero/negative casualties). A missing pool is NOT a reason to skip the
- * ledger write: the casualties happened and must still reach the faction totals, so the
- * row is recorded against the canonical key and only the pool mutation is skipped.
+ * the OSID, or zero/negative casualties). Neither a MISSING pool nor a pool whose stored
+ * faction contradicts its own key is a reason to skip the ledger write: the casualties
+ * happened and must still reach the faction totals, so the row is recorded against the
+ * canonical key and only the pool mutation is skipped. `poolMutated` reports which
+ * happened.
  */
 export function applyMilitiaBattleCasualties(params: {
     state: GameState;
@@ -101,12 +105,17 @@ export function applyMilitiaBattleCasualties(params: {
     const pools = state.military.militia_pools as Record<string, MilitiaPoolState> | undefined;
     const pool = pools?.[poolKey];
 
-    let drawnFromAvailable = 0;
-    if (pool) {
-        // A pool belongs to exactly one faction; a mismatch means the key was built
-        // wrongly and the losses must not be attributed here.
-        if (pool.faction != null && pool.faction !== faction) return null;
+    // A pool belongs to exactly one faction. The key is built from `faction` above, so a
+    // mismatch means the stored pool is inconsistent with its own key. When that happens
+    // the pool must NOT be mutated — but the casualties still happened, so they must still
+    // reach the ledger. Returning early here would silently drop them, which is precisely
+    // the defect this module exists to fix.
+    const poolFactionMismatch = pool != null && pool.faction != null && pool.faction !== faction;
+    const mutablePool = poolFactionMismatch ? undefined : pool;
 
+    let drawnFromAvailable = 0;
+    if (mutablePool) {
+        const pool = mutablePool;
         // Uncommitted local manpower that fought is no longer uncommitted. This is a
         // debit of what the pool actually holds, NOT a cap on what the defence was:
         // in the common case `available` is 0 and this is a no-op.
@@ -138,5 +147,5 @@ export function applyMilitiaBattleCasualties(params: {
     const ledger = state.military.casualty_ledger as CasualtyLedger | undefined;
     if (ledger) recordMilitiaCasualties(ledger, faction, poolKey, applied);
 
-    return { poolKey, appliedRaw: applied, appliedTotal: total, drawnFromAvailable };
+    return { poolKey, appliedRaw: applied, appliedTotal: total, drawnFromAvailable, poolMutated: mutablePool != null };
 }

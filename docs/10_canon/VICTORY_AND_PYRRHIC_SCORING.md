@@ -1,11 +1,29 @@
 # Victory Conditions and Pyrrhic Scoring — Canonical
 
 **Status:** CANON (v0.9.0 gate)
-**Last Updated:** 2026-04-16
+**Last Updated:** 2026-09-01
 **Authority:** Canon hierarchy, Tier 2 (above Rulebook, below Engine Invariants)
 **Owners:** Game Designer, Gameplay Programmer, Product Manager
 **Supersedes:** open question #5 in `MASTER_ROADMAP.md` ("Endgame scoring / victory conditions")
 **Referenced by:** `docs/30_planning/design/ENDGAME_AND_NEGOTIATION_DESIGN.md`, `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`
+
+---
+
+## 0a. Cost-axis note (LANE-MILITIA-CASUALTY-PERSISTENCE, 2026-09-01)
+
+The cost axis is faction casualties measured against the frozen historical baseline
+(RBiH 140,000 / RS 95,000 / HRHB 35,000). **As of schema v38 those faction totals include
+militia-only defenders**, whose losses were previously reported by the combat resolver and
+then discarded. The axis therefore changed in substance without the thresholds moving:
+the numerator rose, the frozen denominator did not, so the shift is one-directional —
+grades can only become worse, and a faction near a step boundary (0.75 / 1.33 / 2.0) can
+flip a whole grade.
+
+At the last clean pre-v38 188-week baseline all three factions sat inside the `[0.75, 1.33)`
+par band (RBiH 1.005, RS 0.961, HRHB 0.960) with enough headroom that the added militia
+casualties move none of them across a boundary — but that is computed from a pre-v38 run and
+must be re-verified against a post-v38 188-week run before it is treated as settled.
+See `docs/40_reports/REAL_WAR_MASTER.md` for the mechanism and run ids.
 
 ---
 

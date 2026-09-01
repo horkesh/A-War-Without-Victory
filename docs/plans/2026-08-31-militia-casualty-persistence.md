@@ -1,5 +1,13 @@
 # Militia Casualty Persistence Implementation Plan
 
+> **SUPERSEDED IN PART, 2026-09-01.** Task 2's own preflight falsifier FIRED: 27 of 30
+> militia-only battles draw on a pool with `available == 0`, because `available` is the
+> post-mobilization recruitment residual. **Task 5 (the manpower cap) was dropped by owner
+> decision** and is now prohibited by Engine Invariants §6.1; Task 8 Step 2 is deferred.
+> The projections in "Established evidence" below (1,733/370 and 2,821/609) are stale — the
+> committed diagnostic produces 1,728/380 and 2,792/614 using the engine's real
+> KIA/WIA/MIA split (0.22/0.74/0.04). See `docs/PROJECT_LEDGER.md` 2026-09-01.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Make militia-only combat consume durable manpower and persist KIA/WIA/MIA exactly once in the canonical casualty ledger.

@@ -148,7 +148,7 @@ for (const faction of Object.keys(ledger)) {
   } else {
     for (const breakdown of [fl.per_formation, fl.per_militia_pool]) {
       if (!breakdown) continue;
-      for (const key of Object.keys(breakdown)) {
+      for (const key of Object.keys(breakdown).sort()) {
         const row = breakdown[key] || {};
         killed += row.killed || 0;
         wounded += row.wounded || 0;
