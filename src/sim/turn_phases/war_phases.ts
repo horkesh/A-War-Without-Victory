@@ -3107,6 +3107,20 @@ export const warPhases: NamedPhase[] = [
             // Approximate per-formation battle casualties from the report.
             // Uses the same loss rates and outcome modifiers as attack_resolution_osid.
             // Not exact (personnel already reduced), but close enough for pool exhaustion.
+            //
+            // DELIBERATELY RETAINED (militia casualty persistence lane, 2026-09-01).
+            // Replacing this reconstruction with exact receipts is a genuine accuracy
+            // improvement, but it is a FORMATION-side change: it would move every
+            // formation's pool.exhausted, hence mobilization, hence territory. Landing it
+            // in the same commit as the militia change would make the 40-week comparison
+            // unattributable and would break "one change per calibration run". It is also
+            // NOT required for militia correctness — this block skips militia entirely
+            // (it is guarded on battle.defender_brigade and keys off formation.origin_mun),
+            // so there is no double accounting with the militia writer, which owns the
+            // DEFENDING municipality's pool. Queued as its own lane.
+            //
+            // NOTE for that lane: the militia writer must not be routed through here.
+            // It already owns its pool mutation; adding it would exhaust twice.
             const KIA_FRAC = 0.30;
             const WIA_FRAC = 0.55;
             const ATK_RATE = 0.045;

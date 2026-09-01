@@ -33,7 +33,7 @@ import type {
     GameState,
     SettlementId
 } from '../../state/game_state.js';
-import { militiaPoolKey } from '../../state/militia_pool_key.js';
+import { applyMilitiaBattleCasualties } from './militia_casualties.js';
 import type { WarTimeline } from '../../state/war_timeline.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { clamp } from '../../utils/math.js';
@@ -1125,14 +1125,30 @@ const powerRatio = dPower <= 0 ? (aPower > 0 ? 999 : 0) : aPower / dPower;
             applyEquipmentBattleLoss(defenderFormation, casualties.defender.tanks_lost, casualties.defender.artillery_lost);
 
             recordFormationFatigue(defenderFormation, 1);
-        } else if (defGarrison > 0) {
+        } else if (defGarrison > 0 && defenderFaction) {
+            // Militia-only defence on the legacy SID path. Routed through the same
+            // atomic writer as the OSID resolver so both produce identical pool
+            // demographics AND a casualty-ledger row — this path previously debited
+            // pool.available and recorded nothing.
+            //
+            // Limitation, recorded deliberately: this resolver addresses settlements,
+            // not OSIDs, so it resolves the municipality from its own canonical
+            // settlement-to-municipality map and passes it explicitly. The pool key is
+            // therefore identical to the one the OSID path would produce, but no OSID
+            // provenance is available to attach to the receipt.
             const mun = settlementToMun.get(targetSid);
-            if (mun && state.military.militia_pools) {
-                const poolKey = militiaPoolKey(mun, defenderFaction!);
-                const pool = state.military.militia_pools[poolKey];
-                if (pool && typeof pool.available === 'number') {
-                    pool.available = Math.max(0, pool.available - totalPersonnelLoss(casualties.defender));
-                }
+            if (mun) {
+                applyMilitiaBattleCasualties({
+                    state,
+                    faction: defenderFaction,
+                    targetOsid: targetSid,
+                    mun,
+                    rawCasualties: {
+                        killed: casualties.defender.killed,
+                        wounded: casualties.defender.wounded,
+                        missing_captured: casualties.defender.missing_captured,
+                    },
+                });
             }
         }
 

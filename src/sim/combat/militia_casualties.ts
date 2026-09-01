@@ -77,6 +77,13 @@ export function applyMilitiaBattleCasualties(params: {
     faction: FactionId;
     targetOsid: string;
     rawCasualties: FormationCasualties;
+    /**
+     * Municipality override for callers that address settlements rather than OSIDs.
+     * The legacy SID resolver has a canonical settlement-to-municipality map but no
+     * OSID, so it resolves the municipality itself and passes it here rather than
+     * having this module guess one from a settlement id.
+     */
+    mun?: string;
 }): MilitiaBattleCasualtyResult | null {
     const { state, faction, targetOsid, rawCasualties } = params;
 
@@ -87,7 +94,7 @@ export function applyMilitiaBattleCasualties(params: {
     const total = totalOf(applied);
     if (total <= 0) return null;
 
-    const mun = munFromOsid(targetOsid);
+    const mun = params.mun ?? munFromOsid(targetOsid);
     if (!mun) return null;
     const poolKey = militiaPoolKey(mun, faction);
 
