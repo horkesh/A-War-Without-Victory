@@ -127,10 +127,24 @@ const rim = deriveEnclaveRim(graph, keySpace, MUST_HOLD_ENCLAVE_IDS);
  * which is the intended failure mode.
  */
 const PANEL_UNIVERSE_SIZE = 712;
-const PANEL_SET_A_SIZE = 84;
+// RE-BLESSED 84 -> 85 by owner decision, 2026-09-01, on a §6 panel that SPLIT 3 GO / 1
+// BLOCK (historian / engine / calibration GO; red-team BLOCK). Cause: 918661e0d added
+// op:srebrenica:obadi to ENCLAVE_DEFINITIONS. The key space GREW — one more cell that
+// must be byte-identical collapse-ON vs collapse-OFF — so this pin moved in the
+// stricter direction, not the direction its own warning guards against.
+//
+// BOTH constants move together, and that is not optional: the scalar assertion
+// short-circuits the by-enclave one below it, so blessing the scalar alone leaves this
+// suite red on srebrenica 11 vs 12. All four seats found that independently.
+//
+// Red-team's unresolved objection, recorded because the owner overrode it rather than
+// answered it: obadi must transition RBiH->RS between w40 and w104, and 918661e0d's
+// only evidence is a w40 run, so that window is unmeasured. Verify at the next clean
+// Node-22 188w. See docs/PROJECT_LEDGER.md 2026-09-01.
+const PANEL_SET_A_SIZE = 85;
 const PANEL_SET_A_BY_ENCLAVE: ReadonlyArray<readonly [string, number]> = [
     ['bihac_pocket', 30], ['gorazde', 16], ['kiseljak', 6], ['lasva_valley', 8],
-    ['sarajevo', 8], ['srebrenica', 11], ['teocak', 1], ['zepa', 1], ['zepce', 3],
+    ['sarajevo', 8], ['srebrenica', 12], ['teocak', 1], ['zepa', 1], ['zepce', 3],
 ];
 const PANEL_SET_B_SIZE = 43;
 const PANEL_SET_B_BY_ENCLAVE: ReadonlyArray<readonly [string, number]> = [

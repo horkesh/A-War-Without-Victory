@@ -31818,3 +31818,17 @@ drifted at HEAD with no sync pin. Rendering-only, no sim path.
 **Advisory (engine seat):** the pin is a bare cardinality and is blind to composition —
 swap one OSID for another and 85 stays 85. It catches the benign direction and misses the
 dangerous one. Consider pinning the sorted SET rather than the count.
+
+**OWNER DECISION on the split, 2026-09-01: BLESSED.** The owner resolved the 3 GO / 1 BLOCK
+split in favour of re-blessing. Both constants moved together in
+`tests/collapse_s6_criteria_4_7_enclave_outcome.test.ts`:
+`PANEL_SET_A_SIZE` **84 → 85** and `PANEL_SET_A_BY_ENCLAVE` **srebrenica 11 → 12**.
+Suite green, 17 passed.
+
+**Red-team's objection was OVERRIDDEN, not answered, and that distinction is the point of
+this entry.** It blocked on evidence: `op:srebrenica:obadi` must transition RBiH→RS between
+w40 and w104, `918661e0d`'s only evidence is a w40 run, and that window is unmeasured.
+Blessing the count retires the tripwire that noticed the geometry change. Nothing in this
+decision produced that evidence. **Verify at the next clean Node-22 188-week run**, together
+with the enclave guard itself — the two are the same measurement. The objection is
+reproduced in a comment at the pin so a future reader meets it at the code, not only here.
