@@ -174,9 +174,29 @@ export const ENCLAVE_DEFINITIONS: readonly EnclaveDefinition[] = [
     {
         id: 'srebrenica',
         faction: 'RBiH',
-        // Painted January 1993 RBiH OSIDs only — not entire municipality
         // Painted January 1993 RBiH OSIDs only — not entire municipality.
-        // osmace_2 omitted: VRS captured it before Jan 1993 (painted RS in calibration data).
+        //
+        // osmace_2 omitted PENDING THE ENCLAVE-DEFINITION LANE, not because it was
+        // Serb-held. The previous comment here claimed "VRS captured it before Jan 1993
+        // (painted RS in calibration data)" and that was false twice over: painted
+        // jan1993 records op:srebrenica:osmace_2 = RBiH, and Osmače fell on 24 MARCH
+        // 1993 (BB2 p.407 — VRS 65th Protection Regiment and VJ 63rd Airborne "finally
+        // stormed the village on 24 March"; Mladić calls it "a big Muslim base",
+        // BB2 p.416 fn.31). Corrected on §6 historian-seat ruling, 2026-09-01.
+        //
+        // obadi and osmace_2 in fact share a history — ARBiH-held at Jan 1993, both lost
+        // in the VRS Final Push of 20 March – 18 April 1993 — so under the stated rule
+        // BOTH belong and the honest count is 86. They are not interchangeable in the
+        // engine, which is why only obadi was added: obadi is RS at turn 0 and at t188
+        // and self-neutralises (both live consumers enumerate the enclave faction's own
+        // reports, so an RS-held member drops out), whereas osmace_2 is RBiH at initial
+        // control and is never written to RS — a known holdout that should have fallen.
+        // Granting it resilience would be floor-moving in the wrong direction.
+        //
+        // The set also fails its own rule in the other direction: brezovice_2 and
+        // mala_daljegosta_2 are painted RS at Jan 1993 and are members anyway. Resolving
+        // the rule is docs/plans/2026-08-31-srebrenica-enclave-definition-defect.md and
+        // needs a floor measurement, not a comment edit.
         osid_list: [
             'op:srebrenica:bostahovine_2', 'op:srebrenica:brezovice_2',
             'op:srebrenica:donji_potocari_2', 'op:srebrenica:mala_daljegosta_2',

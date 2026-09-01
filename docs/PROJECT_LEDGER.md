@@ -31743,3 +31743,78 @@ fixes two pre-existing `startup_snapshot_contract` failures and introduces none.
 those are pre-existing. Seven were this work's, all now closed. One `startup_snapshot_contract`
 failure ("sector roster and sectorless brigades are structurally explicit") remains and is
 pre-existing on this line — it fails identically with and without the re-bless.
+
+### 2026-09-01 — §6 panel on the enclave key-space pin: SPLIT 3 GO / 1 BLOCK — ESCALATED
+
+**Question.** `918661e0d` added `op:srebrenica:obadi` to `ENCLAVE_DEFINITIONS`. The guarded
+key space is therefore 85 where `tests/collapse_s6_criteria_4_7_enclave_outcome.test.ts`
+pins `PANEL_SET_A_SIZE = 84`. The test's own message requires "a fresh panel count".
+Four seats, polled independently, implementer excluded.
+
+| seat | verdict |
+|---|---|
+| Historian | **COMPLIANT** (F1 must-fix, F2 lane) |
+| Engine / systems | **COMPLIANT** (2 advisory) |
+| Scenario-tester / calibration | **COMPLIANT** (2 binding conditions) |
+| Red-team | **NON-COMPLIANT** |
+
+**Per CLAUDE.md a split verdict escalates to the owner. The pin was NOT re-blessed.**
+
+**UNANIMOUS, and it corrects the proposal as first stated:** re-blessing the scalar alone
+leaves the suite RED. A second pin, `PANEL_SET_A_BY_ENCLAVE` `['srebrenica', 11]`, must
+move to 12 in the same edit; it is hidden behind a short-circuiting assertion at line 270.
+All four seats found it independently.
+
+**Historian (GO), with a direct citation.** The `obadi` OSID is a 4-settlement merge
+including **Brežani**. Mladić, late March 1993 (BB2 p.416 fn.31): "the Serb village of
+Brežani, which the Muslims had burned down… We wanted to liberate those Serb villages as
+well" — i.e. still ARBiH-held after January 1993. BB corroborates painted jan1993 = RBiH
+exactly. Obadi sits 6.0 km east of Srebrenica town and borders five enclave cells and one
+outside cell; excluding it left a hole in the interior of the definition.
+
+**Engine (GO).** Delta is exactly +1 in the srebrenica bucket. SET B (43) and ring-2 (110)
+unchanged — obadi touches no must-hold seed. Determinism clean: no positional indexing, no
+cardinality-keyed hash. Two territory-moving consumers recorded: RS paramilitary sweep now
+skips obadi, and RBiH sweep expansion into it is unblocked.
+
+**Calibration (GO, conditional).** The pin reads one JSON file and the predicate — no run
+can inform it, so demanding a 188w for the COUNT would be ritual. Existence proof that
+membership does not force RBiH control: `mala_daljegosta_2` is a long-standing member
+painted **RS at all four checkpoints**.
+
+**Red-team (BLOCK).** Could not break the core claim and said so, but blocks on evidence:
+`obadi` must transition RBiH→RS between w40 and w104, and `918661e0d`'s only evidence is a
+w40 run. That window is literally unmeasured. Blessing the count retires the one tripwire
+that noticed the geometry change.
+
+**The shared substantive concern is NOT the fall.** The fall is event-owned
+(`srebrenica_falls_1995`, `turn_min 160`, keyed on `srebrenica_2`), does not reference
+obadi, and obadi is RS from turn 0. It is that `getEnclaveDefenseBonus` carries **no end
+turn and no `srebrenica_fell` gate** (verified: the flag at `enclave_resilience.ts:755`
+gates contain Lane V, which is default-OFF), so membership grants an ungated war-long
+multiplier. Currently inert — measured `srebrenica.resilience = 0` at t188 → 1.0× — but
+un-priced beyond w40.
+
+**F1 APPLIED HERE (historian must-fix).** The comment at `enclave_resilience.ts:179` was
+false twice over: it claimed osmace_2 was "painted RS in calibration data" when
+`painted_control_jan1993.json` records **RBiH**, and that VRS took it "before Jan 1993"
+when it fell **24 March 1993** (BB2 p.407). A wrong historical claim on a §6 surface is how
+the next auditor is misled. Corrected with citations; no behaviour change.
+
+**F2 QUEUED, not fixed.** The set fails its own stated rule in BOTH directions —
+`osmace_2` wrongly out (same history as obadi: ARBiH at Jan 1993, lost in the 20 Mar –
+18 Apr 1993 Final Push), `brezovice_2` and `mala_daljegosta_2` wrongly in (painted RS at
+Jan 1993). Under the stated rule the honest count is **86**, not 85. They are NOT
+interchangeable in the engine: obadi self-neutralises (RS at turn 0 and t188; both live
+consumers enumerate the enclave faction's own reports), while osmace_2 is RBiH at initial
+control and never written to RS — a known holdout that should have fallen, where
+resilience would be floor-moving the wrong way. Belongs to
+`docs/plans/2026-08-31-srebrenica-enclave-definition-defect.md` with a floor measurement.
+
+**Also found, not fixed:** a FIFTH enclave-geometry replica,
+`ENCLAVE_DEFINITIONS_UI` (`src/ui/map/map/builders/buildEnclaveGeoJSON.ts:19`), still
+drifted at HEAD with no sync pin. Rendering-only, no sim path.
+
+**Advisory (engine seat):** the pin is a bare cardinality and is blind to composition —
+swap one OSID for another and 85 stays 85. It catches the benign direction and misses the
+dangerous one. Consider pinning the sorted SET rather than the count.
