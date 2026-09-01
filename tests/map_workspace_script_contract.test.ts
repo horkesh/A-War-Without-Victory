@@ -54,22 +54,39 @@ test('Warroom Vite build declares browser-safe warning boundaries', () => {
     );
 });
 
-test('tactical map build keeps geometry builders out of the interactive map chunk', () => {
+test('tactical map build leaves app source unchunked so the chunk graph stays acyclic', () => {
     const config = readFileSync(join(process.cwd(), 'src', 'ui', 'map', 'vite.config.ts'), 'utf8');
 
-    assert.match(
+    // INVERTED DELIBERATELY (2026-09-01). This test used to require a manual
+    // 'map-geometry' chunk for /src/ui/map/map/builders/. ccc98891f removed that chunk
+    // BECAUSE it shipped a broken app: the tactical map's modules form a strongly
+    // connected component (army_hq, map-rendering, map-geometry, warroom all import one
+    // another), so a manual chunk cutting through it produced 26 chunk cycles and a
+    // production bundle that threw "Cannot access 'ir' before initialization" before
+    // React could mount — the packaged desktop fell back to its legacy recovery menu.
+    // Dev never saw it because dev does not chunk-split.
+    //
+    // Restoring the old assertion would reintroduce that crash, so the contract is now
+    // the opposite one: app source must NOT be manually chunked. Only leaves that cannot
+    // import back into app source (vendor packages, large static JSON) may be named.
+    assert.doesNotMatch(
         config,
-        /normalized\.includes\('\/src\/ui\/map\/map\/builders\/'\).*return 'map-geometry'/,
-        'GeoJSON builders must have a stable chunk separate from the interactive map shell',
+        /manualChunks[\s\S]*normalized\.includes\('\/src\/ui\/map\/(?!.*node_modules)/,
+        'app source must not be manually chunked — it cuts the SCC and produces a cyclic chunk graph',
     );
     assert.match(
         config,
-        /normalized\.endsWith\('\/src\/ui\/map\/map\/generateFactionBorders\.ts'\).*return 'map-geometry'/,
-        'the front-line geometry helper must stay with its builder chunk to prevent a circular chunk edge',
+        /Rollup's automatic chunking keeps modules that are cyclic in the same chunk/,
+        'the rationale for leaving app source unchunked must stay documented next to the code',
     );
     assert.match(
         config,
-        /chunkSizeWarningLimit:\s*1200/,
-        'the tactical map warning boundary must not be raised to hide oversized chunks',
+        /check_chunk_cycles\.cjs/,
+        'vite.config must point at the cycle checker that guards this invariant',
+    );
+    assert.match(
+        config,
+        /chunkSizeWarningLimit:\s*3000/,
+        'the tactical map warning boundary must match the unchunked build (raised from 1200 when source-level manualChunks were removed)',
     );
 });

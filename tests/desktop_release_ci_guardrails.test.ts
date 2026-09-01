@@ -26,7 +26,10 @@ test('package.json exposes one canonical desktop release check script', async ()
 
     assert.strictEqual(
         packageJson.scripts?.['desktop:release:check'],
-        'npm run desktop:map:build && npm run desktop:sim:build && npm run warroom:build',
+        // qa:chunk-cycles added deliberately by ccc98891f ("break the tactical-map chunk
+        // cycle so the packaged opening paints") — the packaged opening does not render
+        // without it, so it belongs on the canonical shipped-build path.
+        'npm run desktop:map:build && npm run qa:chunk-cycles && npm run desktop:sim:build && npm run warroom:build',
         'desktop:release:check should define the canonical shipped-build verification path',
     );
     assert.strictEqual(

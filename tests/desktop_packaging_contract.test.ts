@@ -35,12 +35,25 @@ test('electron-builder config matches the packaged runtime resource contract', a
     const extraResources = build?.extraResources ?? [];
     const electronMainSource = await readFile(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
     const packagedFiles = build?.files ?? [];
-    const localDesktopCjsDeps = Array.from(new Set(
-        Array.from(
-            electronMainSource.matchAll(/require\('\.\/([^']+\.cjs)'\)/g),
-            (match) => `src/desktop/${match[1]}`,
-        ),
-    )).sort();
+    // TRANSITIVE closure, not just electron-main.cjs's direct requires. app.asar must
+    // contain everything the main process can reach: field_command.cjs is required by
+    // op_halt.cjs / op_directive_staging.cjs / co_replacement.cjs rather than by
+    // electron-main.cjs, and omitting it breaks all three inside the packaged app
+    // (fixed in packaging by 07977ca98). A direct-only scan cannot see that, and hid it
+    // behind an earlier assertion in this same test.
+    const requireRe = /require\('\.\/([^']+\.cjs)'\)/g;
+    const seen = new Set<string>();
+    const queue: string[] = [electronMainSource];
+    while (queue.length > 0) {
+        const source = queue.shift()!;
+        for (const match of source.matchAll(requireRe)) {
+            const file = match[1]!;
+            if (seen.has(file)) continue;
+            seen.add(file);
+            queue.push(await readFile(join(process.cwd(), 'src', 'desktop', file), 'utf8'));
+        }
+    }
+    const localDesktopCjsDeps = Array.from(seen, (file) => `src/desktop/${file}`).sort();
 
     assert.strictEqual(build?.appId, 'com.awwv.desktop');
     assert.strictEqual(build?.productName, 'A War Without Victory');
@@ -68,6 +81,11 @@ test('electron-builder config matches the packaged runtime resource contract', a
             'src/desktop/save_records.cjs',
             'src/desktop/settings_store.cjs',
             'src/desktop/author_op_staging.cjs',
+            // Required TRANSITIVELY, not by electron-main.cjs directly: op_halt.cjs,
+            // op_directive_staging.cjs and co_replacement.cjs each require it for
+            // isNonFieldCommandCorps. Shipped by 07977ca98; omitting it breaks those
+            // three helpers inside app.asar. The list is order-sensitive.
+            'src/desktop/field_command.cjs',
             'src/desktop/op_halt.cjs',
             'src/desktop/op_directive_staging.cjs',
             'src/desktop/municipality_support_staging.cjs',
@@ -78,7 +96,7 @@ test('electron-builder config matches the packaged runtime resource contract', a
             'src/desktop/ipc_mutex.cjs',
             'src/desktop/ipc_mutation_policy.cjs',
         ],
-        'packaged desktop should ship the Electron entrypoints and any local main-process CJS helpers that electron-main.cjs requires from app.asar',
+        'packaged desktop should ship the Electron entrypoints and any local main-process CJS helpers that electron-main.cjs requires, directly or transitively, from app.asar',
     );
     assert.deepStrictEqual(
         localDesktopCjsDeps,
