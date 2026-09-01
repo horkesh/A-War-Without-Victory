@@ -137,6 +137,66 @@ test('execution-phase operation attacks current objective even without a corps d
     assert.equal(state.military.brigade_attack_orders?.rs_1st_bratunac, 'op:bratunac:bratunac_2');
 });
 
+test('forward assault floor holds an adjacent brigade until its axis mate reaches the objective approach', () => {
+    const state = {
+        meta: { turn: 2, phase: 'war', seed: 'test-seed' },
+        corps_front_directives: {},
+        military: {
+            formations: {
+                lead: {
+                    id: 'lead', kind: 'brigade', faction: 'RS', status: 'active', corps_id: 'vrs_drina',
+                    posture: 'defend', cohesion: 70, morale: 70, personnel: 1000,
+                    equipment: { infantry: 1000, tanks: 0, artillery: 0, air_defense: 0 },
+                    location_osid: 'op:test:approach',
+                },
+                mate: {
+                    id: 'mate', kind: 'brigade', faction: 'RS', status: 'active', corps_id: 'vrs_drina',
+                    posture: 'defend', cohesion: 70, morale: 70, personnel: 1000,
+                    equipment: { infantry: 1000, tanks: 0, artillery: 0, air_defense: 0 },
+                    location_osid: 'op:test:rear',
+                },
+            },
+            corps_command: {
+                vrs_drina: {
+                    stance: 'offensive',
+                    active_operations: [{
+                        name: 'Operation Assembly', type: 'sector_attack', phase: 'execution',
+                        started_turn: 0, phase_started_turn: 1,
+                        participating_brigades: ['lead', 'mate'],
+                        objectives: ['op:test:objective'], current_objective_index: 0,
+                        momentum: 0, failure_count: 0, consecutive_failures_on_current: 0,
+                        axes: [{
+                            axis_id: 'axis', name: 'Axis', status: 'executing',
+                            assigned_brigades: ['lead', 'mate'], objectives: ['op:test:objective'],
+                            current_objective_index: 0, staging_osid: 'op:test:approach',
+                            minimum_forward_brigades: 2,
+                            momentum: 0, failure_count: 0, consecutive_failures_on_current: 0,
+                            consecutive_catastrophic_on_current: 0, objective_capture_count: 0,
+                            attack_attempt_count: 0, idle_execution_turn_streak: 0,
+                            movement_only_execution_turns: 0,
+                        }],
+                    }],
+                },
+            },
+            brigade_posture_orders: [],
+        },
+        political: { political_controllers: {
+            'op:test:rear': 'RS', 'op:test:approach': 'RS', 'op:test:objective': 'RBiH',
+        } },
+    } as unknown as GameState;
+
+    generateAllBotOrdersOsid(state, ['RS'], {
+        edges: [
+            { a: 'op:test:rear', b: 'op:test:approach' },
+            { a: 'op:test:approach', b: 'op:test:objective' },
+        ] as any,
+        reverseMap: new Map(), supplyStateByOsid: {} as any, osidPopulationMap: new Map(),
+    });
+
+    assert.equal(state.military.brigade_attack_orders?.lead, undefined);
+    assert.equal(state.military.brigade_movement_orders?.mate?.destination_sids?.[0], 'op:test:approach');
+});
+
 test('COHA suppresses bot attack orders and attack posture costs while preserving non-combat orders', () => {
     const state = {
   meta: { turn: 150, phase: 'war', seed: 'test-seed' },
@@ -292,6 +352,25 @@ test('merge mode preserves existing manual player orders for the same brigade', 
     assert.deepEqual(
         state.military.brigade_posture_orders?.filter((order: any) => order.brigade_id === 'rs_1st_bratunac'),
         [{ brigade_id: 'rs_1st_bratunac', posture: 'hold' }],
+    );
+
+    state.military.brigade_movement_orders = {
+        rs_1st_bratunac: { destination_sids: ['op:bratunac:manual_move'], stance: 'column' },
+    };
+    generateAllBotOrdersOsid(state, ['RS'], {
+        edges: [
+            { a: 'op:bratunac:slapasnica', b: 'op:bratunac:bratunac_2' },
+            { a: 'op:bratunac:slapasnica', b: 'op:bratunac:manual_target' },
+            { a: 'op:bratunac:slapasnica', b: 'op:bratunac:manual_move' },
+            { a: 'op:bratunac:slapasnica', b: 'op:bratunac:polom' },
+        ] as any,
+        reverseMap: new Map(),
+        supplyStateByOsid: {} as any,
+        osidPopulationMap: new Map(),
+    });
+    assert.deepEqual(
+        state.military.brigade_movement_orders?.rs_1st_bratunac,
+        { destination_sids: ['op:bratunac:manual_move'], stance: 'column' },
     );
 });
 

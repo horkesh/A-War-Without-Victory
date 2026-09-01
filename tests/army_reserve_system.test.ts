@@ -936,6 +936,42 @@ describe('elite loan per-turn reconciliation and tick', () => {
         expect(brigade.elite_loan_state!.last_recall_turn).toBeNull();
     });
 
+    it('does not issue generic reserve routing for an active-operation participant', () => {
+        const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: 0 });
+        brigade.location_osid = 'op:mun:o0';
+        const state = makeState({
+            formations: { rs_1st_guards: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: 'active_operation',
+                        phase: 'execution',
+                        participating_brigades: ['rs_1st_guards'],
+                    }],
+                },
+            },
+            corps_front_sectors: {
+                sector_a: {
+                    corps_id: 'vrs_drina',
+                    territory_osids: ['op:mun:o2'],
+                    threat_ratio: 2,
+                    assigned_brigade_ids: ['rs_1st_guards'],
+                },
+            },
+            turn: 10,
+        });
+        state.political.political_controllers = {
+            'op:mun:o0': 'RS',
+            'op:mun:o1': 'RS',
+            'op:mun:o2': 'RS',
+        } as any;
+        state.military.brigade_movement_orders = {};
+
+        tickEliteLoans(state, 10, chainAdj(3));
+
+        expect(state.military.brigade_movement_orders.rs_1st_guards).toBeUndefined();
+    });
+
     it('voluntary recalls after min duration when op ended and threat low', () => {
         const loanStart = 0;
         const currentTurn = loanStart + ELITE_LOAN_MIN_DURATION + 1;

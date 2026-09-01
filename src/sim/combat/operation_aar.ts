@@ -80,7 +80,7 @@ export interface AxisAAR {
      *  this axis never attacks. Surfaced on AAR so post-mortem tools see it. */
     unreachable_at_launch?: boolean;
     /** Typed launch blocker for axes that never had an executable opening attack. */
-    launch_blocker?: 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective' | 'insufficient_donation';
+    launch_blocker?: 'participants_below_attack_floor' | 'participants_below_assembly_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective' | 'insufficient_donation';
     /**
      * REASON-CODE INSTRUMENTATION, topic `axis_reject` — item 3. Carryover of
      * `OperationAxis.launch_blocker_detail`, which is written only when

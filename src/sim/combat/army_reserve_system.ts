@@ -68,6 +68,7 @@ import {
 } from '../../state/elite_loan_types.js';
 import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants.js';
 import { computeOsidGraphDistance } from './home_distance.js';
+import { isEliteReservedForHistoricalOperation } from './historical_elite_reservations.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getPrimaryOperation } from './corps_operation_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -799,6 +800,7 @@ export function generateArmyReserveRequests(
         // demands are known so one brigade cannot be promised more than once.
         const standingHoldOverride = standingHoldOverrideApplies(bestReason, commanderNeed?.priority);
         const availableElites = getAvailableElites(state, corpsFaction, turn)
+            .filter((brigadeId) => !isEliteReservedForHistoricalOperation(brigadeId, turn))
             .filter((brigadeId) => standingHoldOverride || !standingHoldBrigadeIds.has(brigadeId));
         if (availableElites.length === 0) continue;
 
@@ -1077,6 +1079,12 @@ export function retaskEliteLoan(
     travelHops: number,
     turn: number,
     adjacency?: Map<Osid, Osid[]>,
+    options?: {
+        approvalBy?: 'army_ai' | 'player';
+        approvalReason?: string;
+        requestDialogue?: { purpose: ReserveRequestPurpose; why_needed: string; how_to_use: string };
+        autoJoinOperation?: boolean;
+    },
 ): boolean {
     const f = state.military.formations?.[brigadeId];
     const ls = f?.elite_loan_state;
@@ -1100,10 +1108,11 @@ export function retaskEliteLoan(
         reason,
         travelHops,
         turn,
-        undefined,
-        'Army CO redirected an active elite commitment.',
-        'player',
+        options?.requestDialogue,
+        options?.approvalReason ?? 'Army CO redirected an active elite commitment.',
+        options?.approvalBy ?? 'player',
         adjacency,
+        { auto_join_operation: options?.autoJoinOperation },
     );
     ls.last_recall_turn = previousRecallTurn;
     return deployed;
@@ -1297,6 +1306,13 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
         const turnsSinceLoan = ls.loan_start_turn != null ? turn - ls.loan_start_turn : 0;
         const personnel = f.personnel ?? 0;
         const startPersonnel = ls.loan_start_personnel ?? personnel;
+        const receivingCommand = corpsCommand[ls.loaned_to_corps];
+        const committedToActiveOperation = !!receivingCommand?.active_operations?.some((operation) =>
+            (operation.phase === 'planning' || operation.phase === 'execution')
+            && (
+                operation.participating_brigades.includes(bid)
+                || (operation.axes ?? []).some((axis) => axis.assigned_brigades.includes(bid))
+            ));
         // ── Force recall checks (in priority order) ──
 
         // Permanent degradation — > 50% personnel loss
@@ -1343,13 +1359,19 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
         }
 
         if (turnsSinceLoan < ELITE_LOAN_MIN_DURATION) {
-            ensureActiveEliteDeploymentOrder(state, f, bid, ls.loaned_to_corps, adjacency);
+            // Once an operation owns the elite, its axis movement is
+            // authoritative. Generic reserve routing would otherwise pull a
+            // spearhead back toward a corps sector after each captured OSID.
+            if (!committedToActiveOperation) {
+                ensureActiveEliteDeploymentOrder(state, f, bid, ls.loaned_to_corps, adjacency);
+            }
             continue;
         }
 
         const corpsId = ls.loaned_to_corps;
         const cmd = corpsCommand[corpsId];
-        const hasActiveOp = !!(cmd?.active_operations?.some(op => op.phase === 'execution'));
+        const hasActiveOp = committedToActiveOperation
+            || !!(cmd?.active_operations?.some(op => op.phase === 'execution'));
         const cfs = state.military.corps_front_sectors ?? {};
         const sector = Object.keys(cfs).sort(strictCompare).map(k => cfs[k]).find(s => s.corps_id === corpsId);
         const threatHigh = sector ? sector.threat_ratio >= 1.5 : false;
@@ -1365,7 +1387,9 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
             continue;
         }
 
-        ensureActiveEliteDeploymentOrder(state, f, bid, corpsId, adjacency);
+        if (!committedToActiveOperation) {
+            ensureActiveEliteDeploymentOrder(state, f, bid, corpsId, adjacency);
+        }
 
     }
 }

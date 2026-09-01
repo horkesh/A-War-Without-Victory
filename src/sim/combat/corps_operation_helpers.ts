@@ -29,6 +29,7 @@ interface PrePlannedOpDef {
     planning_duration?: number;
     minimum_viable_participants?: number;
     minimum_assembled_participants?: number;
+    require_all_axes_ready?: boolean;
     execution_attack_power_mult?: number;
     staging_osid: string;
     min_attack_outcome?: CorpsOperation['min_attack_outcome'];
@@ -284,6 +285,7 @@ export function buildCorpsOperation(
         ...(def.minimum_assembled_participants != null
             ? { minimum_assembled_participants: Math.max(1, Math.trunc(def.minimum_assembled_participants)) }
             : {}),
+        ...(def.require_all_axes_ready === true ? { require_all_axes_ready: true } : {}),
         ...(def.execution_attack_power_mult != null
             ? { execution_attack_power_mult: Math.max(0.5, Math.min(2, def.execution_attack_power_mult)) }
             : {}),

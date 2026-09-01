@@ -31,6 +31,7 @@ import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants
 import {
     deployEliteLoan,
     isEliteAvailableForLoan,
+    retaskEliteLoan,
 } from './army_reserve_system.js';
 import { assignOperationCommander } from './officer_system.js';
 import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
@@ -73,6 +74,10 @@ interface TriggeredAxisDef {
     brigades: FormationId[];
     objectives: string[];
     staging_osid?: string;
+    /** Physical approach assembly required before this axis may launch. */
+    minimum_staged_brigades?: number;
+    /** Physical assault group required before each successive objective attack. */
+    minimum_forward_brigades?: number;
 }
 
 interface TriggeredOpDef {
@@ -87,8 +92,14 @@ interface TriggeredOpDef {
     trigger: (state: GameState, turn: number) => boolean;
     /** Planning duration in turns. */
     planning_duration: number;
+    /** Bot-only advance staging turn for explicitly rostered Army-HQ elites. */
+    prestage_from?: number;
     /** Override minimum attack outcome for brigades in this operation. */
     min_attack_outcome?: CorpsOperation['min_attack_outcome'];
+    /** Operation-specific striking-power concentration during execution. */
+    execution_attack_power_mult?: number;
+    /** Hold launch until every live authored axis can open its attack. */
+    require_all_axes_ready?: boolean;
     /** ADR-0005 v3.0: when set, this triggered op is an Army HQ operation marker
      *  (faction-wide cross-corps donor pool, doubled cohesion bleed, frequency-capped).
      *  Marker slug (e.g. "krivaja_95"); the full ArmyHqOpId
@@ -303,7 +314,17 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         faction: 'RS',
         primary_corps: 'vrs_drina',
         staging_osid: 'op:vlasenica:grabovica',
-        planning_duration: 2,
+        // Main Staff planning began before the February assault. Keep the
+        // operation in preparation while its dispersed elite columns assemble,
+        // and do not permit a local unsupported probe to start the offensive.
+        planning_duration: 20,
+        prestage_from: 28,
+        min_attack_outcome: 'costly_victory',
+        // BB1 p.220 and BB2 p.415 describe a Main Staff effort built around
+        // crack formations and outside armoured/fire support. Preserve that
+        // operational concentration as the columns advance beyond staging.
+        execution_attack_power_mult: 2.0,
+        require_all_axes_ready: true,
         trigger: (_state, turn) => turn >= 40,
         axes: [
             {
@@ -313,11 +334,10 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                 brigades: [
                     'rs_1st_birac' as FormationId,
                     'rs_1st_milii' as FormationId,
-                    'rs_1st_guards_motorized' as FormationId,
-                    'rs_65th_protection_motorized_regiment' as FormationId,
                 ],
                 objectives: ['op:vlasenica:cerska_2'],
                 staging_osid: 'op:vlasenica:grabovica',
+                minimum_staged_brigades: 2,
             },
             {
                 axis_id: 'kamenica',
@@ -326,13 +346,37 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                 brigades: [
                     'rs_1st_zvornik' as FormationId,
                     'rs_1st_bratunac' as FormationId,
+                    'rs_1st_podrinje' as FormationId,
+                    'rs_visegrad_brigade' as FormationId,
                 ],
                 objectives: [
                     'op:srebrenica:osmace_2',
                     'op:srebrenica:radovcici',
                     'op:srebrenica:sulice_2',
+                    'op:srebrenica:obadi',
                 ],
-                staging_osid: 'op:srebrenica:osmace_2',
+                staging_osid: 'op:srebrenica:brezovice_2',
+                minimum_staged_brigades: 3,
+            },
+            {
+                axis_id: 'skelani_cutoff',
+                name: 'Skelani Cutoff',
+                corps: 'vrs_drina',
+                brigades: [
+                    'rs_1st_guards_motorized' as FormationId,
+                    'rs_65th_protection_motorized_regiment' as FormationId,
+                ],
+                objectives: [
+                    'op:srebrenica:luka_2',
+                    'op:srebrenica:ljeskovik_2',
+                ],
+                // BB1 p.220: after the Konjević Polje breakthrough the Main
+                // Staff shifted its weight toward Skelani. Pomol is the RS
+                // graph-side approach directly adjacent to the Luka cutoff;
+                // unlike Pomol itself, it is RS-held at this date.
+                staging_osid: 'op:vlasenica:sebiocina',
+                minimum_staged_brigades: 2,
+                minimum_forward_brigades: 2,
             },
         ],
     },
@@ -849,7 +893,13 @@ function buildOperation(
     def: TriggeredOpDef,
     state: GameState,
     turn: number,
-): { op: CorpsOperation; corpsAxes: Map<string, OperationAxis[]>; eliteLoans: Array<{ brigadeId: FormationId; corpsId: string }> } | { failure: string; launch_feasibility?: LaunchFeasibilityResult } {
+): {
+    op: CorpsOperation;
+    corpsAxes: Map<string, OperationAxis[]>;
+    eliteLoans: Array<{ brigadeId: FormationId; corpsId: string }>;
+    eliteRetasks: Array<{ brigadeId: FormationId; corpsId: string }>;
+    eliteRestages: FormationId[];
+} | { failure: string; launch_feasibility?: LaunchFeasibilityResult } {
     const formations = state.military.formations ?? {};
     const movementState = state.military.brigade_movement_state ?? {};
 
@@ -857,6 +907,14 @@ function buildOperation(
     const allParticipating: FormationId[] = [];
     const corpsAxes = new Map<string, OperationAxis[]>();
     const eliteLoans: Array<{ brigadeId: FormationId; corpsId: string }> = [];
+    const eliteRetasks: Array<{ brigadeId: FormationId; corpsId: string }> = [];
+    const eliteRestages: FormationId[] = [];
+    const committedFormations = new Set<FormationId>();
+    for (const corpsId of Object.keys(state.military.corps_command ?? {}).sort(strictCompare)) {
+        for (const operation of state.military.corps_command?.[corpsId]?.active_operations ?? []) {
+            for (const brigadeId of operation.participating_brigades ?? []) committedFormations.add(brigadeId);
+        }
+    }
 
     for (const axisDef of def.axes) {
         const axisBrigades = axisDef.brigades.flatMap((authoredFormationId) => {
@@ -864,18 +922,49 @@ function buildOperation(
             const fid = resolved.formation_id;
             const formation = resolved.formation;
             if (!fid || !formation) return [];
+            const authoredCorpsId = formation.corps_id;
+            const isArmyHqElite = isSectorAssignmentExemptCorpsId(authoredCorpsId);
+            // An Army-HQ reserve may be retasked from an idle loan, but it may
+            // never be admitted to two simultaneous operations merely because
+            // its live loan makes it appear to belong to the receiving corps.
+            if (isArmyHqElite && committedFormations.has(fid)) return [];
+
             const corpsId = getFormationCorpsId(formation);
+            let retaskIdleElite = false;
+            let deployAvailableElite = false;
+            let restageIdleElite = false;
             if (corpsId !== axisDef.corps) {
-                if (!isSectorAssignmentExemptCorpsId(corpsId)) return [];
                 const loanState = formation.elite_loan_state;
                 if (!loanState) return [];
-                if (!isEliteAvailableForLoan(formation, turn)) return [];
-                eliteLoans.push({ brigadeId: fid, corpsId: axisDef.corps });
+                if (!isArmyHqElite) return [];
+                if (loanState.on_loan) {
+                    if (loanState.loaned_to_corps === axisDef.corps) restageIdleElite = true;
+                    else retaskIdleElite = true;
+                } else {
+                    if (!isEliteAvailableForLoan(formation, turn)) return [];
+                    deployAvailableElite = true;
+                }
+            } else if (isArmyHqElite && formation.elite_loan_state?.on_loan) {
+                // The elite is already loaned to the right corps but may still
+                // carry a generic reserve march. Explicit historical operation
+                // orders supersede that idle same-corps routing.
+                restageIdleElite = true;
             }
             if (!isEligibleOperationFormation(formation)) return [];
             if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return [];
             if ((formation.disrupted_turns ?? 0) > 0) return [];
-            if (movementState[fid]?.status === 'in_transit') return [];
+            // Retasking closes the old loan and clears its superseded movement
+            // state, so an idle elite already marching for the old host remains
+            // eligible for its explicitly authored axis.
+            if (
+                movementState[fid]?.status === 'in_transit'
+                && !retaskIdleElite
+                && !restageIdleElite
+                && !deployAvailableElite
+            ) return [];
+            if (retaskIdleElite) eliteRetasks.push({ brigadeId: fid, corpsId: axisDef.corps });
+            if (deployAvailableElite) eliteLoans.push({ brigadeId: fid, corpsId: axisDef.corps });
+            if (restageIdleElite) eliteRestages.push(fid);
             return [fid];
         }).sort(strictCompare);
 
@@ -896,6 +985,12 @@ function buildOperation(
         );
         axis.axis_id = axisDef.axis_id;
         axis.name = axisDef.name;
+        if (axisDef.minimum_staged_brigades != null) {
+            axis.minimum_staged_brigades = Math.max(1, Math.trunc(axisDef.minimum_staged_brigades));
+        }
+        if (axisDef.minimum_forward_brigades != null) {
+            axis.minimum_forward_brigades = Math.max(1, Math.trunc(axisDef.minimum_forward_brigades));
+        }
 
         builtAxes.push(axis);
         allParticipating.push(...axisBrigades);
@@ -929,7 +1024,47 @@ function buildOperation(
     );
     if (!feasibility.feasible) return { failure: `build_${feasibility.blocker || 'launch_feasibility'}`, launch_feasibility: feasibility };
 
-    return { op, corpsAxes, eliteLoans };
+    return { op, corpsAxes, eliteLoans, eliteRetasks, eliteRestages };
+}
+
+/** Release stale generic routing for idle same-corps elites on an authored axis. */
+function restageTriggeredEliteLoans(state: GameState, eliteRestages: ReadonlyArray<FormationId>): void {
+    for (const brigadeId of [...new Set(eliteRestages)].sort(strictCompare)) {
+        delete state.military.brigade_movement_orders?.[brigadeId];
+        delete state.military.brigade_movement_state?.[brigadeId];
+    }
+}
+
+/** Retask idle, already-loaned Army-HQ elites named by a historical operation. */
+function retaskTriggeredEliteLoans(
+    state: GameState,
+    eliteRetasks: ReadonlyArray<{ brigadeId: FormationId; corpsId: string }>,
+    def: TriggeredOpDef,
+    turn: number,
+): void {
+    const orderedRetasks = [...eliteRetasks].sort((a, b) =>
+        strictCompare(a.brigadeId, b.brigadeId) || strictCompare(a.corpsId, b.corpsId));
+    for (const retask of orderedRetasks) {
+        retaskEliteLoan(
+            state,
+            retask.brigadeId,
+            retask.corpsId,
+            'offensive_support',
+            0,
+            turn,
+            undefined,
+            {
+                approvalBy: 'army_ai',
+                approvalReason: `Army Main Staff assigned ${retask.brigadeId} to ${def.name}.`,
+                requestDialogue: {
+                    purpose: 'offensive',
+                    why_needed: `Historical operation roster requires ${retask.brigadeId} on ${def.name}`,
+                    how_to_use: `Assault reserve on an authored axis of ${def.name}`,
+                },
+                autoJoinOperation: false,
+            },
+        );
+    }
 }
 
 /** Deploy explicitly rostered Army-HQ elites through the canonical reserve lifecycle. */
@@ -1042,6 +1177,30 @@ export function prestageBrigadesForTriggeredOp(
     }
 }
 
+/** Begin the historical concentration march while elites remain at Army HQ. */
+function prestageReservedTriggeredElites(state: GameState, def: TriggeredOpDef, turn: number): void {
+    if (def.prestage_from == null || turn < def.prestage_from) return;
+    if (state.meta.player_faction === def.faction) return;
+    const formations = state.military.formations ?? {};
+    const movementState = state.military.brigade_movement_state ?? {};
+    for (const axis of def.axes) {
+        if (!axis.staging_osid) continue;
+        for (const brigadeId of [...axis.brigades].sort(strictCompare)) {
+            const formation = formations[brigadeId];
+            if (!formation || !isSectorAssignmentExemptCorpsId(formation.corps_id)) continue;
+            if (formation.elite_loan_state?.on_loan) continue;
+            if (formation.location_osid === axis.staging_osid) continue;
+            if (movementState[brigadeId]?.status === 'in_transit') continue;
+            if (state.military.brigade_movement_orders?.[brigadeId]) continue;
+            if (!state.military.brigade_movement_orders) state.military.brigade_movement_orders = {};
+            state.military.brigade_movement_orders[brigadeId] = {
+                destination_sids: [axis.staging_osid as SettlementId],
+                stance: 'column',
+            };
+        }
+    }
+}
+
 /**
  * Check triggered operation conditions and auto-inject for bot factions.
  * Called each turn from the pipeline. Returns names of newly injected ops.
@@ -1063,6 +1222,7 @@ export function checkTriggeredOperations(state: GameState): string[] {
         //      they keep firing via this legacy path exactly as before (188w 940251e4acaff3d4).
         if (def.army_hq_only) continue;
         if (ENABLE_TG_ARMY_HQ_OPS && def.army_hq_op_id != null) continue;
+        prestageReservedTriggeredElites(state, def, turn);
         // Already accepted?
         if (state.military.triggered_operations_accepted?.[def.name]) continue;
 
@@ -1212,7 +1372,9 @@ export function checkTriggeredOperations(state: GameState): string[] {
             continue;
         }
 
+        retaskTriggeredEliteLoans(state, result.eliteRetasks, effectiveDef, turn);
         deployTriggeredEliteLoans(state, result.eliteLoans, effectiveDef, turn);
+        restageTriggeredEliteLoans(state, result.eliteRestages);
 
         // LANE-2026-05-02-KRIVAJA: emit column-march orders for any participant
         // whose location_osid is not the axis staging_osid. Phase B distribution
@@ -1365,7 +1527,9 @@ export function injectArmyHqOperations(state: GameState): string[] {
         const result = buildOperation(effectiveDef, state, turn);
         if ('failure' in result) continue;
 
+        retaskTriggeredEliteLoans(state, result.eliteRetasks, effectiveDef, turn);
         deployTriggeredEliteLoans(state, result.eliteLoans, effectiveDef, turn);
+        restageTriggeredEliteLoans(state, result.eliteRestages);
 
         // Compose the canonical ArmyHqOpId and tag the op.
         const year = armyHqScenarioYear(turn);

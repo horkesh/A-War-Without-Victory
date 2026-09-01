@@ -281,6 +281,10 @@ export interface OperationAxis {
     main_brigade?: FormationId;
     /** All other brigades on this axis. Reduced combat power, reduced casualties. */
     support_brigades?: FormationId[];
+    /** Authored physical assembly floor at an approach to the current objective. */
+    minimum_staged_brigades?: number;
+    /** Assigned brigades required on friendly approaches before a new objective is attacked. */
+    minimum_forward_brigades?: number;
     objectives: string[];
     current_objective_index: number;
     status: 'executing' | 'stalled' | 'complete';
@@ -306,7 +310,7 @@ export interface OperationAxis {
      *  See LATE_WAR_OPERATION_COMBAT_DELIVERY_MEGA_LANE Phase C, sector_offensive_launch_helpers.ts. */
     unreachable_at_launch?: boolean;
     /** Typed diagnostic for axes that fail the opening-attack launch gate. */
-    launch_blocker?: 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective' | 'insufficient_donation';
+    launch_blocker?: 'participants_below_attack_floor' | 'participants_below_assembly_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective' | 'insufficient_donation';
     /**
      * REASON-CODE INSTRUMENTATION, topic `axis_reject` — item 3. Written ONLY
      * when `AWWV_DEBUG_REASON_CODES` requests it, so a default run never carries
@@ -513,6 +517,8 @@ export interface CorpsOperation {
     minimum_viable_participants?: number;
     /** Active, non-disrupted, non-empty authored formations required before planning may transition to execution. */
     minimum_assembled_participants?: number;
+    /** Authored synchronized operation: every live axis must have an executable opening attack before launch. */
+    require_all_axes_ready?: boolean;
     /** Authored execution quality for exceptional operations; defaults to 1.0. */
     execution_attack_power_mult?: number;
     /** Fraction of participating brigades with adequate supply (0-1). */

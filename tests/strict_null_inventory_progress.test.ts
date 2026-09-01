@@ -762,18 +762,22 @@ describe('strict null inventory progress', () => {
             // lifecycle reevaluation cannot silently restore the generic two-brigade
             // default. Absent legacy operations retain that default. So 539 → 540 /
             // sim 342 → 343, with no type escape.
-            optional_fields_game_state: 540,
+            // April-1994 operation calibration: the checked-in contract inventory was
+            // already 542 at this baseline. +3 absent-safe operation fields now preserve
+            // authored all-axis launch synchronization, launch assembly floors, and
+            // per-objective forward assault-group floors. 542 → 545; no type escapes.
+            optional_fields_game_state: 545,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
         // so sim 335->336 and state is UNCHANGED at 186. Gated by
         // `AWWV_DEBUG_REASON_CODES=axis_reject`; absent on every default run.
-        expect(current.optional_field_domains.total).toBe(540);
+        expect(current.optional_field_domains.total).toBe(545);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 343,
+            sim: 348,
             state: 187,
             ui_adapter: 0,
             unknown: 0,
