@@ -46,6 +46,7 @@ import {
 import { strictCompare } from '../../state/validateGameState.js';
 import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
 import { isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
+import { MAX_EXHAUSTION_FOR_OPERATION } from './bot_constants.js';
 
 // ── v0.8 Commander Loop ────────────────────────────────────────────────
 import { runCommanderForCorps, applyCommanderOutput } from './commander/commander_loop.js';
@@ -180,16 +181,21 @@ function munFromBilateralOsid(osid: string | undefined): string | null {
     return parts.length >= 2 ? parts[1] : null;
 }
 
-function createBilateralDirective(sectorIds: string[], holdOsids: string[], faction: FactionId): CorpsDirective {
+function createBilateralDirective(
+    sectorIds: string[],
+    holdOsids: string[],
+    enemyOsids: string[],
+    faction: FactionId,
+): CorpsDirective {
     return {
         assigned_front_ids: [...sectorIds].sort(strictCompare),
-        offensive_targets: [],
+        offensive_targets: faction === 'RBiH' ? [...enemyOsids].sort(strictCompare) : [],
         hold_osids: [...holdOsids].sort(strictCompare),
         avoid_osids: [],
         max_attackers_per_target: 1,
         reserve_fraction: 0.2,
         min_attack_outcome: faction === 'HRHB' ? 'costly_victory' : 'stalemate',
-        aggression_modifier: faction === 'HRHB' ? 0.1 : -0.05,
+        aggression_modifier: faction === 'HRHB' ? -0.05 : 0.1,
     };
 }
 
@@ -282,26 +288,38 @@ export function reassignCorpsForBilateralWar(state: GameState, faction: FactionI
         const corpsSectors = sectors.filter(sec => sec.corps_id === corps.id);
         let mixedOverlap = 0;
         const holdOsids: string[] = [];
+        const enemyOsids: string[] = [];
         for (const sec of corpsSectors) {
-            const osids = [
+            const friendlyOsids = [
                 ...sec.territory_osids,
-                ...sec.sub_segments.flatMap(sub => [...sub.friendly_osids, ...sub.enemy_osids]),
+                ...sec.sub_segments.flatMap(sub => sub.friendly_osids),
             ].sort(strictCompare);
+            const sectorEnemyOsids = sec.sub_segments
+                .flatMap(sub => sub.enemy_osids)
+                .filter(osid => state.political.political_controllers?.[osid] === otherFaction)
+                .sort(strictCompare);
+            holdOsids.push(...friendlyOsids);
+            enemyOsids.push(...sectorEnemyOsids);
+            const osids = [...friendlyOsids, ...sectorEnemyOsids].sort(strictCompare);
             for (const osid of osids) {
                 const mun = munFromBilateralOsid(osid)?.toLowerCase();
                 if (!mun || !mixedMuns.has(mun)) continue;
                 mixedOverlap++;
-                holdOsids.push(osid);
             }
         }
         return {
             corpsId: corps.id,
             sectorIds: corpsSectors.map(sec => sec.sector_id).sort(strictCompare),
             holdOsids: [...new Set(holdOsids)].sort(strictCompare),
+            enemyOsids: [...new Set(enemyOsids)].sort(strictCompare),
             mixedOverlap,
+            operationallyReady: (command[corps.id]?.corps_exhaustion ?? 0) <= MAX_EXHAUSTION_FOR_OPERATION,
         };
     }).filter(row => row.sectorIds.length > 0)
         .sort((a, b) => {
+            if (faction === 'RBiH' && a.operationallyReady !== b.operationallyReady) {
+                return Number(b.operationallyReady) - Number(a.operationallyReady);
+            }
             if (b.mixedOverlap !== a.mixedOverlap) return b.mixedOverlap - a.mixedOverlap;
             return strictCompare(a.corpsId, b.corpsId);
         });
@@ -314,8 +332,13 @@ export function reassignCorpsForBilateralWar(state: GameState, faction: FactionI
     rhs.bilateral_diverted_corps[faction] = selected.corpsId;
     const selectedCmd = command[selected.corpsId];
     if (selectedCmd) {
-        selectedCmd.stance = (faction === 'HRHB' ? 'offensive' : 'defensive') as CorpsStance;
-        selectedCmd.directive = createBilateralDirective(selected.sectorIds, selected.holdOsids, faction);
+        selectedCmd.stance = (faction === 'HRHB' ? 'defensive' : 'offensive') as CorpsStance;
+        selectedCmd.directive = createBilateralDirective(
+            selected.sectorIds,
+            selected.holdOsids,
+            selected.enemyOsids,
+            faction,
+        );
         selectedCmd.status_reason = 'rbih_hrhb_bilateral_front_diversion';
     }
 

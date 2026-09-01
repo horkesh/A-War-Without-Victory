@@ -4002,3 +4002,38 @@ Three focus mismatches remain explicitly visible: `op:foca:donje_zesce` and
 `op:gorazde:podkozara_donja_2` flips to RBiH through the ordinary paramilitary system instead
 of remaining RS. No direct control-change event was added. A zero-gain late reserve-operation
 candidate was removed rather than retained as calibration clutter.
+
+## 2026-09-01 — April 1994 bilateral doctrine and VRS Army-HQ allocation ADOPTED
+
+The open Croat–Bosniak-war doctrine was inverted in the live bilateral diversion: HVO now
+defends and receives no bilateral offensive objectives, while ARBiH receives the operational
+initiative against only HVO-controlled objectives on the selected mixed front. The diagnosed
+ARBiH failure was cumulative rather than a combat-strength constant: the directive exposed no
+offensive targets, corps selection preferred the heavily exhausted 3rd Corps over an available
+4th Corps, the heavy-equipment force-size increment rejected the three reachable surplus
+brigades, and low intelligence converted commitments back into probes. Commander planning now
+recognizes the designated bilateral attacker and its canonical reachable objectives, while
+ceasefire/Washington state removes that designation.
+
+The bounded April checkpoint is stable at **678/712**, with all historical anchors passing.
+HVO captures no ARBiH territory after bilateral war begins. ARBiH applies all observed bilateral
+combat pressure and receives ten HVO OSIDs through the existing consolidation/abandonment
+mechanisms at turn 52; those transfers are not claimed as combat captures. No pre-Washington
+ARBiH occupying sector attack against HVO forms in this deterministic run, so that residual
+underperformance remains explicit rather than being hidden behind a control-change event.
+
+Operation Cerska–Kamenica and Operation Zvezda 94 now explicitly roster the VRS 1st Guards
+Motorized Brigade and 65th Protection Motorized Regiment, with admission governed by the shared
+Army-HQ elite availability, reachability, deployment, and loan lifecycle. Balkan Battlegrounds
+II p.406 specifically supports both formations at Cerska. Its Zvezda account (p.480) supports
+Main Staff direction and higher-HQ concentration but not those exact two unit identities, so
+their Zvezda roster is recorded as a scenario allocation rather than exact-order-of-battle fact.
+
+Full verification run
+`apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0`, hash
+`6c00e419e8248c97`, passes the 188-week engine-health gate and **31/31** anchors. Cerska launches
+at turn 40 with the 1st Guards, captures `op:vlasenica:cerska_2` by logged combat, and ends
+partial. Zvezda launches at turn 100 with the 1st Guards but fails to capture its Goražde
+objectives. The 65th remains roster-eligible but is unavailable to these two operations in this
+run under the ordinary loan lifecycle; focused tests prove its admission when canonically
+available. No attack-resolution rule or direct control authority changed.

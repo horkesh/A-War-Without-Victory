@@ -31516,3 +31516,36 @@ the BASELINE set: evidence that the played war tracks history when the player ch
 and a measurement of what being the player costs before any choice is made. It says nothing yet
 about ahistorical play, which is blocked on the defect above. Not a calibration result; the scoring
 instrument remains `scenario_runner`.
+
+### 2026-09-01 — April 1994 operational corrections: ARBiH initiative and VRS Main Staff elites
+
+**Behavior.** Open RBiH-HRHB war now assigns the bilateral offensive directive to ARBiH and a
+targetless defensive directive to HVO. Enemy objectives are filtered by actual opposing political
+control. ARBiH corps selection prefers operationally ready corps before mixed-front overlap, and
+the commander can form a bilateral sector plan from reachable campaign targets without the generic
+heavy-equipment size increment or low-intelligence probe conversion. Ceasefire/Washington state
+abandons the designation. This changes planning and order emission only; no combat-resolution or
+direct-control mechanism changed.
+
+**Historical operations.** Cerska–Kamenica and Zvezda 94 explicitly roster
+`rs_1st_guards_motorized` and `rs_65th_protection_motorized_regiment`. Triggered operations admit
+those explicit Army-HQ formations only through the canonical elite availability and deployment
+helpers. BB2 p.406 is unit-specific evidence for Cerska. BB2 p.480 establishes Main Staff/higher-HQ
+involvement at Zvezda but not these exact units; the latter is therefore a declared scenario
+allocation.
+
+**Measured result.** Full run
+`apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0`, final hash
+`6c00e419e8248c97`: April 1994 **678/712**, October 1995 **661/712**, **31/31** anchors, and all
+hard 188-week engine-health checks pass. HVO makes zero post-breakdown territorial gains against
+ARBiH. ARBiH gains ten HVO OSIDs via existing consolidation/abandonment at turn 52, not battle
+capture; a pre-Washington occupying ARBiH sector attack still does not form. Cerska launches at
+t40 with the 1st Guards and records one combat capture; Zvezda launches at t100 with the 1st Guards
+and fails at Goražde. The 65th is rostered but unavailable under its live loan state in this seed.
+
+**Files and verification.** Implementation is in `bot_corps_ai.ts`, `bot_corps_stance.ts`, the
+commander briefing/plan/emit state path, `triggered_operations.ts`, and
+`pre_planned_operations.ts`, with focused regressions in the corresponding bilateral, commander,
+triggered, and pre-planned test files. TypeScript, focused Vitest suites, scenario tests, diff
+checks, and the 188-week engine-health gate are the acceptance surface. No calibration-authored
+control event was introduced.

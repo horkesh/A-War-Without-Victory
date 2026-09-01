@@ -127,14 +127,17 @@ describe('bilateral formation diversion', () => {
             s2: sector('s2', 'hvo_vitez', 'HRHB', ['RBiH'], ['op:vitez:h'], ['op:travnik:e']),
             s3: sector('s3', 'hvo_zepce', 'HRHB', ['RBiH'], ['op:zepce:h'], ['op:zenica:e']),
         };
+        state.political.political_controllers!['op:travnik:e'] = 'RBiH';
 
         const report = reassignCorpsForBilateralWar(state, 'HRHB');
 
         expect(report.diverted_corps_id).toBe('hvo_vitez');
         expect(report.release_progress).toBe(0);
         expect(state.political.rbih_hrhb_state?.bilateral_diverted_corps?.HRHB).toBe('hvo_vitez');
-        expect(state.military.corps_command?.hvo_vitez.stance).toBe('offensive');
+        expect(state.military.corps_command?.hvo_vitez.stance).toBe('defensive');
         expect(state.military.corps_command?.hvo_vitez.directive?.assigned_front_ids).toEqual(['s2']);
+        expect(state.military.corps_command?.hvo_vitez.directive?.offensive_targets).toEqual([]);
+        expect(state.military.corps_command?.hvo_vitez.directive?.hold_osids).toEqual(['op:vitez:h']);
         expect(state.military.corps_command?.hvo_zepce.stance).toBe('balanced');
     });
 
@@ -143,6 +146,7 @@ describe('bilateral formation diversion', () => {
         state.military.corps_front_sectors = {
             s1: sector('s1', 'hvo_vitez', 'HRHB', ['RBiH'], ['op:vitez:h'], ['op:travnik:e']),
         };
+        state.political.political_controllers!['op:vitez:e'] = 'HRHB';
 
         const report = reassignCorpsForBilateralWar(state, 'HRHB');
 
@@ -150,17 +154,41 @@ describe('bilateral formation diversion', () => {
         expect(state.political.rbih_hrhb_state?.bilateral_diverted_corps?.HRHB).toBeUndefined();
     });
 
-    test('RBiH with at least four corps assigns one corps to a defensive bilateral posture', () => {
+    test('RBiH with at least four corps assigns one corps to an offensive bilateral posture', () => {
         const state = makeState('RBiH', ['arbih_1st', 'arbih_2nd', 'arbih_vitez', 'arbih_7th']);
         state.military.corps_front_sectors = {
             s1: sector('s1', 'arbih_1st', 'RBiH', ['RS'], ['op:sarajevo:h'], ['op:pale:e']),
             s2: sector('s2', 'arbih_vitez', 'RBiH', ['HRHB'], ['op:travnik:h'], ['op:vitez:e']),
         };
+        state.political.political_controllers!['op:vitez:e'] = 'HRHB';
+        state.political.political_controllers!['op:busovaca:e'] = 'HRHB';
+        state.political.political_controllers!['op:zepce:e'] = 'HRHB';
 
         const report = reassignCorpsForBilateralWar(state, 'RBiH');
 
         expect(report.diverted_corps_id).toBe('arbih_vitez');
-        expect(state.military.corps_command?.arbih_vitez.stance).toBe('defensive');
+        expect(state.military.corps_command?.arbih_vitez.stance).toBe('offensive');
         expect(state.military.corps_command?.arbih_vitez.directive?.assigned_front_ids).toEqual(['s2']);
+        expect(state.military.corps_command?.arbih_vitez.directive?.offensive_targets).toEqual(['op:vitez:e']);
+        expect(state.military.corps_command?.arbih_vitez.directive?.hold_osids).toEqual(['op:travnik:h']);
+    });
+
+    test('RBiH prefers an operationally ready bilateral-front corps over an exhausted corps with more overlap', () => {
+        const state = makeState('RBiH', ['arbih_1st', 'arbih_2nd', 'arbih_vitez', 'arbih_7th']);
+        state.military.corps_command!.arbih_vitez!.corps_exhaustion = 73;
+        state.military.corps_command!.arbih_7th!.corps_exhaustion = 10;
+        state.military.corps_front_sectors = {
+            s1: sector('s1', 'arbih_vitez', 'RBiH', ['HRHB'], ['op:travnik:h', 'op:busovaca:h'], ['op:vitez:e', 'op:busovaca:e']),
+            s2: sector('s2', 'arbih_7th', 'RBiH', ['HRHB'], ['op:zenica:h'], ['op:zepce:e']),
+        };
+        state.political.political_controllers!['op:vitez:e'] = 'HRHB';
+        state.political.political_controllers!['op:busovaca:e'] = 'HRHB';
+        state.political.political_controllers!['op:zepce:e'] = 'HRHB';
+
+        const report = reassignCorpsForBilateralWar(state, 'RBiH');
+
+        expect(report.diverted_corps_id).toBe('arbih_7th');
+        expect(state.military.corps_command?.arbih_7th.stance).toBe('offensive');
+        expect(state.military.corps_command?.arbih_7th.directive?.offensive_targets).toEqual(['op:zepce:e']);
     });
 });

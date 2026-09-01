@@ -936,6 +936,26 @@ export function managePlan(
         };
     }
 
+    // A designated ARBiH bilateral attacker has already received a bounded,
+    // front-derived target list from corps diversion. Try to turn that explicit
+    // intent into a canonical opportunity plan before generic intent competition;
+    // all normal force, reachability, fatigue, exhaustion, and operation-slot
+    // gates above and inside tryCreateFromOpportunity still apply.
+    if (briefing.bilateral_offensive && briefing.campaign_offensive_targets.length > 0) {
+        const bilateralDecision = tryCreateFromOpportunity(briefing, zones, forces, surplusPool, turn);
+        if (bilateralDecision) {
+            const gated = applyForceQualitySoftGates(bilateralDecision, briefing);
+            const stagedPlan = gated.plan?.concentration_progress === 1
+                ? { ...gated.plan, status: 'ready' as const, target_ready_turn: turn }
+                : gated.plan;
+            return {
+                ...gated,
+                plan: stagedPlan,
+                reason: `bilateral offensive directive: ${gated.reason}`,
+            };
+        }
+    }
+
     // v0.8.1 Phase 3: Candidate intent competition.
     // Run the competition to determine what the commander *wants* to do this turn.
     // The existing stance/exhaustion/fatigue/role guards above already enforce the same
@@ -994,6 +1014,19 @@ function advanceExistingPlan(
     plan: CommanderPlan,
     turn: number,
 ): PlanDecision {
+    if (plan.bilateral_offensive) {
+        const bilateralState = briefing.state_ref?.political.rbih_hrhb_state;
+        if (bilateralState?.ceasefire_active || bilateralState?.washington_signed) {
+            return {
+                plan: { ...plan, status: 'abandoned' },
+                action: 'abandoned',
+                reason: bilateralState.washington_signed
+                    ? 'Washington Agreement ended bilateral offensive authority'
+                    : 'bilateral ceasefire ended offensive authority',
+            };
+        }
+    }
+
     // Clear already-abandoned plans so new plans can be created next turn.
     // Abandoned plans are stored in state for one turn to allow EMIT to see the reason,
     // but on the NEXT advance they must be cleared rather than re-evaluated.
@@ -1319,7 +1352,11 @@ function createOpportunityPlan(
         MIN_BRIGADES_FOR_PLAN,
         Math.min(mainEffortLimit, naturalRequired),
     );
-    const requiredBrigades = baseRequiredBrigades + getEnemyEquipmentBrigadeBump(briefing);
+    // ARBiH historically accepted unfavorable heavy-equipment ratios when attacking
+    // HVO. The designated bilateral attacker still needs the normal reachable force
+    // floor, but does not wait for a tank/artillery matching increment it cannot meet.
+    const equipmentBump = briefing.bilateral_offensive ? 0 : getEnemyEquipmentBrigadeBump(briefing);
+    const requiredBrigades = baseRequiredBrigades + equipmentBump;
     if (requiredBrigades > naturalRequired) {
         return null;
     }
@@ -1333,8 +1370,12 @@ function createOpportunityPlan(
         stagingZone.enemy_adjacent_osids,
     );
 
+    const scopedReachableEnemyOsids = briefing.bilateral_offensive
+        ? reachableEnemyOsids.filter(osid => briefing.campaign_offensive_targets.includes(osid))
+        : reachableEnemyOsids;
+
     // If no enemy objectives survive the reachability filter, this plan cannot be created.
-    if (reachableEnemyOsids.length === 0) {
+    if (scopedReachableEnemyOsids.length === 0) {
         return null;
     }
 
@@ -1342,8 +1383,8 @@ function createOpportunityPlan(
     // Fall back to the full reachable set if every candidate is on cooldown (avoids
     // indefinite planning freeze when the corps has only one axis of advance).
     const cooldownSet = buildCatastrophicOsidCooldownSet(briefing, briefing.turn);
-    const cooledCandidates = reachableEnemyOsids.filter(osid => !cooldownSet.has(osid));
-    const effectiveOsids = cooledCandidates.length > 0 ? cooledCandidates : reachableEnemyOsids;
+    const cooledCandidates = scopedReachableEnemyOsids.filter(osid => !cooldownSet.has(osid));
+    const effectiveOsids = cooledCandidates.length > 0 ? cooledCandidates : scopedReachableEnemyOsids;
 
     // contain Lane V (§6 VRS strangle-not-capture, DEFAULT-OFF): withhold the
     // bot's OWN organic assault target-generation against CONTAINED enclave OSIDs
@@ -1405,6 +1446,7 @@ function createOpportunityPlan(
             : 0,
         viability_score: isFallback ? 0.55 : 0.8,  // Fallback plans (no reachable main_effort) start weaker
         source: 'opportunity',
+        bilateral_offensive: briefing.bilateral_offensive || undefined,
     };
 
     return {
@@ -1461,7 +1503,11 @@ function selectOpportunityTargets(
     };
 
     return [...enemyOsids]
-        .filter(osid => !isIsolatedCapture(osid))
+        // Bilateral objectives already passed the stricter friendly-approach BFS
+        // filter above. Do not let the secondary shared-boundary representation
+        // erase that verified HVO objective and leave an empty plan that later
+        // falls back onto an unrelated VRS target.
+        .filter(osid => briefing.bilateral_offensive || !isIsolatedCapture(osid))
         .sort((a, b) => {
             const campaignDiff = Number(campaignTargetSet.has(b)) - Number(campaignTargetSet.has(a));
             if (campaignDiff !== 0) return campaignDiff;

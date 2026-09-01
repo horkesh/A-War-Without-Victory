@@ -567,6 +567,26 @@ function collectCampaignIntent(
         ? overlay.deviation_reason
         : null;
 
+    // Open Croat-Bosniak war is deliberately asymmetric. The diverted ARBiH
+    // corps receives the opposing bilateral-front OSIDs as campaign objectives;
+    // the diverted HVO corps is hold-only. Consume this transient directive
+    // before the commander replaces it with its emitted per-turn directive.
+    const corpsCommand = state.military.corps_command?.[corpsId];
+    if (corpsCommand?.status_reason === 'rbih_hrhb_bilateral_front_diversion') {
+        const bilateralTargets = faction === 'RBiH'
+            ? [...(corpsCommand.directive?.offensive_targets ?? [])].sort(strictCompare)
+            : [];
+        return {
+            role: faction === 'RBiH' ? 'primary' : 'contain',
+            offensiveTargets: bilateralTargets,
+            holdTargets: [...(corpsCommand.directive?.hold_osids ?? [])].sort(strictCompare),
+            stanceCeiling: faction === 'RBiH' ? 'offensive' : 'defensive',
+            syncRole: null,
+            syncTargets: [],
+            deviationReason,
+        };
+    }
+
     if (!plan || plan.valid_until_turn < turn) {
         // No CampaignPlan — overlay still wins for `role` if present.
         return {
@@ -831,6 +851,8 @@ export function buildBriefing(
         must_hold_osids: mustHoldOsids,
         campaign_role: campaignIntent.role,
         campaign_offensive_targets: campaignIntent.offensiveTargets,
+        bilateral_offensive: faction === 'RBiH'
+            && corpsCmd?.status_reason === 'rbih_hrhb_bilateral_front_diversion',
         campaign_hold_targets: campaignIntent.holdTargets,
         campaign_stance_ceiling: campaignIntent.stanceCeiling,
         campaign_sync_role: campaignIntent.syncRole,

@@ -27,6 +27,11 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { DefenderPowerBreakdown } from './combat_math.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
+import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants.js';
+import {
+    deployEliteLoan,
+    isEliteAvailableForLoan,
+} from './army_reserve_system.js';
 import { assignOperationCommander } from './officer_system.js';
 import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import {
@@ -308,6 +313,8 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                 brigades: [
                     'rs_1st_birac' as FormationId,
                     'rs_1st_milii' as FormationId,
+                    'rs_1st_guards_motorized' as FormationId,
+                    'rs_65th_protection_motorized_regiment' as FormationId,
                 ],
                 objectives: ['op:vlasenica:cerska_2'],
                 staging_osid: 'op:vlasenica:grabovica',
@@ -842,13 +849,14 @@ function buildOperation(
     def: TriggeredOpDef,
     state: GameState,
     turn: number,
-): { op: CorpsOperation; corpsAxes: Map<string, OperationAxis[]> } | { failure: string; launch_feasibility?: LaunchFeasibilityResult } {
+): { op: CorpsOperation; corpsAxes: Map<string, OperationAxis[]>; eliteLoans: Array<{ brigadeId: FormationId; corpsId: string }> } | { failure: string; launch_feasibility?: LaunchFeasibilityResult } {
     const formations = state.military.formations ?? {};
     const movementState = state.military.brigade_movement_state ?? {};
 
     const builtAxes: OperationAxis[] = [];
     const allParticipating: FormationId[] = [];
     const corpsAxes = new Map<string, OperationAxis[]>();
+    const eliteLoans: Array<{ brigadeId: FormationId; corpsId: string }> = [];
 
     for (const axisDef of def.axes) {
         const axisBrigades = axisDef.brigades.flatMap((authoredFormationId) => {
@@ -856,7 +864,14 @@ function buildOperation(
             const fid = resolved.formation_id;
             const formation = resolved.formation;
             if (!fid || !formation) return [];
-            if (getFormationCorpsId(formation) !== axisDef.corps) return [];
+            const corpsId = getFormationCorpsId(formation);
+            if (corpsId !== axisDef.corps) {
+                if (!isSectorAssignmentExemptCorpsId(corpsId)) return [];
+                const loanState = formation.elite_loan_state;
+                if (!loanState) return [];
+                if (!isEliteAvailableForLoan(formation, turn)) return [];
+                eliteLoans.push({ brigadeId: fid, corpsId: axisDef.corps });
+            }
             if (!isEligibleOperationFormation(formation)) return [];
             if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return [];
             if ((formation.disrupted_turns ?? 0) > 0) return [];
@@ -914,7 +929,37 @@ function buildOperation(
     );
     if (!feasibility.feasible) return { failure: `build_${feasibility.blocker || 'launch_feasibility'}`, launch_feasibility: feasibility };
 
-    return { op, corpsAxes };
+    return { op, corpsAxes, eliteLoans };
+}
+
+/** Deploy explicitly rostered Army-HQ elites through the canonical reserve lifecycle. */
+function deployTriggeredEliteLoans(
+    state: GameState,
+    eliteLoans: ReadonlyArray<{ brigadeId: FormationId; corpsId: string }>,
+    def: TriggeredOpDef,
+    turn: number,
+): void {
+    const orderedLoans = [...eliteLoans].sort((a, b) =>
+        strictCompare(a.brigadeId, b.brigadeId) || strictCompare(a.corpsId, b.corpsId));
+    for (const loan of orderedLoans) {
+        deployEliteLoan(
+            state,
+            loan.brigadeId,
+            loan.corpsId,
+            'offensive_support',
+            0,
+            turn,
+            {
+                purpose: 'offensive',
+                why_needed: `Triggered deployment: ${loan.brigadeId} assigned to ${def.name}`,
+                how_to_use: `Assault reserve on an authored axis of ${def.name}`,
+            },
+            `Triggered elite loan for ${def.name}`,
+            'army_ai',
+            undefined,
+            { auto_join_operation: false },
+        );
+    }
 }
 
 // LANE-2026-05-02-KRIVAJA: trigger-turn pre-stage helper.
@@ -1167,6 +1212,8 @@ export function checkTriggeredOperations(state: GameState): string[] {
             continue;
         }
 
+        deployTriggeredEliteLoans(state, result.eliteLoans, effectiveDef, turn);
+
         // LANE-2026-05-02-KRIVAJA: emit column-march orders for any participant
         // whose location_osid is not the axis staging_osid. Phase B distribution
         // (brigade_assignment.ts:1809/1876/1992) treats existing
@@ -1317,6 +1364,8 @@ export function injectArmyHqOperations(state: GameState): string[] {
 
         const result = buildOperation(effectiveDef, state, turn);
         if ('failure' in result) continue;
+
+        deployTriggeredEliteLoans(state, result.eliteLoans, effectiveDef, turn);
 
         // Compose the canonical ArmyHqOpId and tag the op.
         const year = armyHqScenarioYear(turn);

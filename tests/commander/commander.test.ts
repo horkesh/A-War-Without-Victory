@@ -998,6 +998,46 @@ describe('plan', () => {
         }
     });
 
+    it('turns an explicit ARBiH bilateral objective into an opportunity plan before generic intent competition', () => {
+        const zoneId = 'zone:test_corps:0' as ZoneId;
+        const brigIds = ['b1', 'b2', 'b3', 'b4'].map(id => id as FormationId);
+        const target = 'op:vitez:e';
+        const zones = [makeZone({
+            zone_id: zoneId,
+            posture: 'balanced',
+            front_edge_count: 20,
+            surplus_brigades: brigIds,
+            assigned_brigades: brigIds,
+            enemy_adjacent_osids: [target],
+        })];
+        const evals = brigIds.map(id => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            is_combat_effective: true,
+            is_disrupted: false,
+        }));
+        const forces = makeForces(evals, zones);
+        const briefing = makeMinimalBriefing({
+            corps_stance: 'offensive',
+            campaign_role: 'primary',
+            campaign_offensive_targets: [target],
+            bilateral_offensive: true,
+            enemy_equipment_summary: {
+                tanks: 100,
+                artillery: 100,
+                infantry_only: false,
+            },
+        });
+
+        const result = managePlan(briefing, zones, forces, evals, null, 53);
+
+        expect(result.action).toBe('created');
+        expect(result.plan?.source).toBe('opportunity');
+        expect(result.plan?.status).toBe('ready');
+        expect(result.plan?.target_osids).toContain(target);
+        expect(result.reason).toContain('bilateral offensive directive');
+    });
+
     it('should clear executing plan so new plans can be created', () => {
         const zoneId = 'zone:test_corps:0' as ZoneId;
         const brigIds = ['b1', 'b2', 'b3', 'b4'].map(id => id as FormationId);

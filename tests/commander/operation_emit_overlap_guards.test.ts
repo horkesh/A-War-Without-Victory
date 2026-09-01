@@ -380,6 +380,26 @@ describe('commander emission overlap guards', () => {
         expect(output.operations[0]!.type).toBe('sector_attack');
     });
 
+    it('commits the designated ARBiH bilateral attacker despite low intel', () => {
+        const briefing = {
+            ...makeIntelBriefing([0]),
+            bilateral_offensive: true,
+        };
+
+        const output = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            makeAllocation(),
+            makePlanDecision(),
+            makeDecisions(),
+            makeThreats(),
+        );
+
+        expect(output.operations).toHaveLength(1);
+        expect(output.operations[0]!.type).toBe('sector_attack');
+    });
+
     it('forces a full commitment after two accepted probes', () => {
         const briefing = makeIntelBriefing([0], { consecutiveProbes: 2 });
 

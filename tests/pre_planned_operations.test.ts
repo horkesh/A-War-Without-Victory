@@ -335,6 +335,11 @@ describe('pre-planned operations', () => {
                 'Maglaj Local Counterattack',
             ],
         );
+
+        const zvezda = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Zvezda 94')!;
+        const roster = zvezda.axes.flatMap((axis) => axis.brigades);
+        assert.ok(roster.includes('rs_1st_guards_motorized'));
+        assert.ok(roster.includes('rs_65th_protection_motorized_regiment'));
     });
 
     it('reserves probe participants only for the head queued historical operation', () => {

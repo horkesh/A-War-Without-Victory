@@ -994,7 +994,11 @@ function buildOperations(
         const sectorIntelConfidence = briefing.state_ref && sectorId
             ? getStalestSectorIntelConfidence(briefing.state_ref, sectorId)
             : 0;
-        const launchProbe = shouldLaunchProbeInstead(
+        // The designated ARBiH bilateral corps already has an explicit,
+        // front-derived campaign objective. Treat that as sufficient command
+        // intent to commit rather than converting the short war window into
+        // another non-occupying reconnaissance probe.
+        const launchProbe = !briefing.bilateral_offensive && shouldLaunchProbeInstead(
             briefing.faction,
             sectorIntelConfidence,
             commandState?.consecutive_probes ?? 0,

@@ -379,6 +379,10 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'rs_visegrad_brigade',
                     'rs_1st_podrinje',
                     'rs_5th_podrinje',
+                    // Main Staff allocation for scenario balance. BB2 supports
+                    // higher-HQ concentration at Zvezda, not these exact unit names.
+                    'rs_1st_guards_motorized',
+                    'rs_65th_protection_motorized_regiment',
                 ],
                 // podkozara_donja_2 adj slatina_2 ✓; slatina_2 adj sopotnica ✓
                 objectives: [

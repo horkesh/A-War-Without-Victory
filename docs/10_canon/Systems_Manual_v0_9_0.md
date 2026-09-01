@@ -229,6 +229,8 @@ When active, these corps pairs do not generate attack orders against each other'
 
 Alliance drift is computed per turn in `alliance_update.ts`: alliance deterioration from territorial friction, patron pressure (HRHB patron commitment × PATRON_PRESSURE_COEFF), and escalation events. When alliance drops below threshold and turn ≥ `war_earliest_turn`, RBiH-HRHB fronts activate and the factions enter open conflict.
 
+**Implementation-note (2026-09-01):** During open RBiH-HRHB war, the bilateral corps diversion assigns the operational initiative to RBiH and a defensive stance to HVO. The selected RBiH corps receives only live HVO-controlled objectives on its mixed front; the HVO corps receives no bilateral offensive objectives. Corps selection prefers a formation below the operation-exhaustion ceiling before using mixed-front overlap as a tie-break. Washington/ceasefire state terminates this special bilateral offensive designation. These rules shape ordinary commander plans and attack orders only; they do not authorize direct political-control changes.
+
 ### 6.7 Reactive Sector Defense
 
 **Implementation-note (n524→n668, elevated to normative v0.7):** Defense at an OSID may draw on eligible, reachable contributors selected by the combat resolver; standing-OG membership by itself is not participation. Two layers interact:
