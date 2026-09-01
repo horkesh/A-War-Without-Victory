@@ -60,7 +60,7 @@ to the pre-candidate blobs. Its implementation and run authority are consumed. O
 mutation or product/test/build/package/Electron/probe execution, is excluded from acceptance
 evidence, and is nontransferable and nonreusable. The authorized diff-check budget remains zero.
 No long run is authorized until the one final
-RE A/B pair, and calibration remains paused until reduced RE closes.
+RE A/B pair. **RE CLOSED 2026-09-01; calibration OPEN** — calibration is no longer paused.
 
 ## Packet governance
 
@@ -99,7 +99,7 @@ proof route, a root-cause prerequisite, or an explicit blocker. It terminated at
 `C_P2B_BLOCKED`; the result remains `RECOMMENDATION_ONLY_NOT_AUTHORIZED`. The owner's later,
 standalone prerequisite approval did not reopen discovery or R2/R3. That prerequisite is terminal
 `NO_VERDICT`; its exact hypothesis is rolled back. Known historical TDZ risk remains unresolved and
-non-authorizing. RE is blocked at P2B with no packaged-proof route active; P3 waits and calibration
+non-authorizing. **RE CLOSED 2026-09-01; calibration OPEN.** Historically RE was blocked at P2B with no packaged-proof route active; P3 waited and calibration
 remains paused. Disjoint R7 may continue. There is no rerun, diagnosis, instrumentation, supervisor
 redesign, correction, P2B/P3 execution, or successor authority.
 
@@ -154,4 +154,4 @@ Remote push, merge, release, tag, signing, upload, and publication remain unauth
 - Route B was not unanimous because causality is unproven; observing it would repeat substantially unchanged churn, while editing first would be hypothesis-driven remediation.
 - Orchestrator therefore bound route C under the unanimous-route and fail-closed rules.
 
-At discovery close, P2B remained **HELD** before implementation; P3 waits; calibration remains paused; this auxiliary discovery earns no RE credit. No implementation, diagnosis, rerun, build, package, Electron/probe execution, P2B restart, P3 start, R2/R3 revival, or successor task is authorized.
+**HISTORICAL (superseded by RE closure, owner, 2026-09-01).** As recorded at discovery close: P2B remained **HELD** before implementation; P3 waited; calibration was paused; the auxiliary discovery earned no RE credit. None of those constraints is live — RE is closed and calibration is ongoing. No implementation, diagnosis, rerun, build, package, Electron/probe execution, P2B restart, P3 start, R2/R3 revival, or successor task is authorized.

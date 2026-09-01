@@ -41,7 +41,7 @@ changed. (Compounding this: `tools/verify_checkpoints.cjs:106-140` records that 
 cells are never battle-targeted across 188 weeks, so an enclave-guard pass is vacuous and must never
 be cited as §6 clearance.)
 
-Neither run was executed: calibration is paused until RE-0 S0 and no current run satisfies it.
+Neither run was executed at the time: calibration was paused until RE-0 S0 and no current run satisfied it. **RE closed 2026-09-01 and calibration is open again — this constraint no longer applies.**
 
 ## Queued, not done
 

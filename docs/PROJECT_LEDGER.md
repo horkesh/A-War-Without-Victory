@@ -32023,3 +32023,32 @@ is a separate open item, unaffected by this bless.)
 
 **Second false-green worth fixing separately:** a job that skips its only real step still
 reports success, so "green" on this workflow does not imply the fingerprint was checked.
+
+### 2026-09-01 — document sync: RE is CLOSED and calibration is OPEN; the planning docs said otherwise
+
+**The written record had drifted from reality, and it actively misled.** Asked "what next", a
+session read `MASTER_ROADMAP.md` — snapshot dated 2026-08-28, last touched 2026-08-30 — and
+reported RE *"BLOCKED AT P2B — NO PACKAGED PROOF ROUTE ACTIVE"* with *"calibration remains
+paused"*, and recommended work on that basis. The owner corrected it:
+
+> *"RE is closed and calibration is open and actually ongoing. Engine health is sacrosanct,
+> calibration just works on top of that."*
+
+**The evidence already said so; only the documents did not.** `d9f0451b0 calibration(foca): earn
+takeover through operation` had landed; the upper-Drina Cajnice/Foca/Kalinovik axes were developed
+2026-08-31; `codex/apr1994-operational-corrections` has recent Gorazde runs and live uncommitted
+work; D2 played full 188-turn campaigns for all three factions (`ef05545d8`). A paused programme
+does not produce four days of calibration commits.
+
+**Synced (owner instruction, 2026-09-01):** `MASTER_ROADMAP.md` header, execution snapshot, program
+sequence, and the RE / R7 / R8 register rows. RE is CLOSED and gates nothing; calibration is OPEN
+and ONGOING; **engine health is sacrosanct and calibration works on top of it** is recorded as the
+standing principle rather than as an RE gate. Superseded paragraphs are kept but explicitly marked
+HISTORICAL with their date, so the reasoning survives without asserting a dead state.
+
+**This is the third instance of one failure mode in a single day**, and the pattern is worth naming:
+a stale artifact asserting a state that is no longer true, trusted because it looked authoritative.
+CI reported green while skipping the steps that do the work; the 40w fingerprint golden asserted a
+map the engine had stopped producing 42 engine-commits earlier; the roadmap asserted a pause that
+had ended. In each case the live evidence was available and cheap to check. **Check the artifact's
+date and whether its check actually ran, before trusting what it claims.**

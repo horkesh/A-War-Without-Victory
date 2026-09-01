@@ -1,5 +1,11 @@
 # RE — 1.0 Engine Integrity Contract
 
+> **CLOSED — owner, 2026-09-01.** RE is complete and gates nothing: not calibration, not R7, not
+> R8. This contract is retained as the record of what RE covered and how P2B was reached and
+> retired. **Engine health remains sacrosanct as a standing principle** — engine-health defects are
+> fixed before tuning — but it is no longer administered as an RE gate. Do not read anything below
+> as a live constraint.
+
 **Status:** BLOCKED AT P2B — terminal NO VERDICT prerequisite rolled back exactly; no packaged-proof route active, 2026-08-28
 **Purpose:** Reach 1.0 with one truthful engine owner for each affected responsibility.
 **Not the purpose:** general cleanup, optimization, calibration, or speculative mechanic design.

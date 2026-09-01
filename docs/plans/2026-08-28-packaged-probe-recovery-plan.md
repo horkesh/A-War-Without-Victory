@@ -1,5 +1,10 @@
 # Packaged Probe Recovery Implementation Plan
 
+> **HISTORICAL — superseded by RE closure (owner, 2026-09-01).** The packaged-proof recovery
+> question is moot: RE closed without it. Retained as a record. Separately, the packaged runtime
+> probe itself was repaired on 2026-09-01 (`c15228482`) and Desktop Release Guard is green — that
+> is a CI fix, NOT a revived proof route.
+
 ## Terminal standalone chunk prerequisite receipt — 2026-08-28
 
 > **ARCHIVED — NO FUTURE EXECUTION AUTHORITY:** All earlier authorization and execution language
