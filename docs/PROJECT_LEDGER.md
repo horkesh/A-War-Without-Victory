@@ -31317,3 +31317,8 @@ recorded owner/panel waiver, is the remaining merge gate.
 **That 188-week run MUST BE UNINTERRUPTED.** This lane's own save/resume finding forces it: a
 resumed run inherits the pre-existing divergence, so its enclave-guard verdict would not be
 authoritative.
+
+**Canon-compliance review returned COMPLIANT on the second pass — and COMPLIANT DOES NOT OPEN
+THIS GATE.** Escalating the 188-week run discharges the LANE's obligation; it does not satisfy
+the requirement. The requirement now belongs to the owner or the panel. Do not read the canon
+verdict in this entry as clearance to merge.
