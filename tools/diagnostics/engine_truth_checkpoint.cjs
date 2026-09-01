@@ -400,10 +400,9 @@ function buildChecks(input, sections) {
   add('casualty_ledger', casualtiesValid, casualtiesValid ? `${casualtyRows.length} faction ledgers valid` : 'missing, negative, or non-finite casualty value');
 
   // faction total === sum(per_formation) + sum(per_militia_pool), for every faction.
-  const ledgerForAccounting = normalized.finalSave?.military?.casualty_ledger || {};
-  const accountingRows = casualtyReport(ledgerForAccounting);
-  const unbalanced = Object.keys(accountingRows).sort(STRICT_COMPARE)
-    .filter((faction) => accountingRows[faction].accounting.balanced !== true);
+  // sections.casualties is already casualtyReport(...) output, which carries `accounting`.
+  const unbalanced = Object.keys(sections.casualties).sort(STRICT_COMPARE)
+    .filter((faction) => sections.casualties[faction]?.accounting?.balanced !== true);
   add(
     'casualty_accounting_balanced',
     unbalanced.length === 0,
