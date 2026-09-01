@@ -4819,3 +4819,58 @@ a factory changes representation, trace which lifecycle branch that representati
 covered only for a legacy shape is not an engine invariant.
 
 Applied in `[2026-08-31] fix(engine): preserve queued operation brigades from probes`.
+
+## The 744 / 712 OSID gap — 32 micro-settlements awaiting merge
+
+**Owner, 2026-09-01, when this was rediscovered from scratch:** *"Those 32 OSIDs were
+micro-settlements that were later supposed to be merged into their neighbouring OSIDs. I
+can't believe we are having this discussion months later and that it is not written down
+anywhere."*
+
+**Write it down once, here, so nobody re-derives it a third time.**
+
+`data/derived/operational/operational_settlements.geojson` holds **744** unique OSIDs.
+`political.political_controllers` holds **712**. The 32-cell difference is not a bug, a
+silent drop, or duplicate geometry — it is an **unfinished merge**. The intent was to fold
+these micro-settlements into their neighbouring OSIDs; that step was never completed.
+
+**Measured facts, so the next reader does not have to re-measure them:**
+
+| | |
+|---|---|
+| OSIDs in geometry | 744 |
+| OSIDs with a controller | 712 |
+| Geometry-only (no controller) | **32** |
+| Controller-only (no geometry) | **0** |
+| Combined area of the 32 | 2.8 km² (median well under 0.5 km²) |
+| Combined 1991 population | 14,601 |
+| Zero-population among them | 3 of 32 |
+| Median constituent settlements each | 1 |
+| Sharing any `constituent_sids` with a controlled OSID | **0 of 32** |
+
+That last row is the one that matters: they are **not** duplicates of already-merged cells.
+Their settlements appear nowhere else, so the population is not double-counted — it is
+simply outside the political model. Examples: `op:cazin:gornja_lucka` (981),
+`op:bosanski_brod:gornja_barica` (592), `op:bosanska_gradiska:gornja_jurkovica` (297),
+`op:odzak:bosanski_samac` (0, and note a separate controlled `op:bosanski_samac:samac_2`
+exists — a municipal-boundary sliver).
+
+**Caution on the population figure.** 14,601 people in 2.8 km² is ~5,200/km², implausible
+for rural BiH. The likely reading is that each sliver polygon carries its settlement's FULL
+census population while holding only a fragment of its area. Treat 14,601 as an upper bound
+on affected population, not as a settled figure.
+
+**Denominators — use the right one.** **712 is the modelled universe; 744 is the drawn one.**
+Statistics over the geojson feature list silently include the 32 and are wrong. This has
+already caused errors twice: a triage report's denominator was corrected 744 → 712 once
+before, and on 2026-09-01 an area-percentile analysis was computed over 744 and had to be
+redone (correct median OSID area over the 712 is **58.75 km²**, not 56.9).
+
+**Related, same root:** the painted references are 712-cell files, so the 32 are unpainted.
+Any per-cell rule of the form "painted controller says X" is **unevaluable** for them —
+e.g. three Srebrenica cells (`kalimanici`, `lijesce`, `petrica`) exist in geometry and in no
+painted reference.
+
+**Status: OPEN, unscheduled.** Finishing the merge changes OSID populations and any figure
+keyed on them. Leaving it unfinished is defensible if the 32 are inert in play. What is NOT
+defensible is the state this entry ends: the knowledge living only in the owner's memory.
