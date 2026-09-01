@@ -32004,11 +32004,22 @@ control_counts: expected {HRHB:87, RBiH:250, RS:375} got {HRHB:85, RBiH:249, RS:
    40w map. The golden has been stale since before the lane began; 42 engine-touching
    commits have landed since it was last reconciled at `295901939`.
 
-**NOT reconciled, deliberately.** Blessing this golden is a calibration act, not a CI
-chore: it moves `control_counts` and the flip list includes Goražde cells
-(`kolovarice`, `podkozara_donja_2`, `sopotnica`, `kamen`) — enclave-guard territory that
-is the Pyrrhic panel's to rule on. `kolovarice` is already on record as a merge defect
-wrong under any controller. Left for an explicit decision.
+**RECONCILED on the owner's instruction (2026-09-01):** *"Well obviously the game
+progressed. We changed the loading screen and the calibration. Tests should know and
+accommodate that."* — and, on the enclave question, *"map is fine. In fact, calibration is
+ongoing. Let me worry about enclave guard."* Golden regenerated with
+`ci_structural_fingerprint.cjs --update` on Node 22:
+`f3ef9fad99b0771a` → `cd5582f4a945842e`. Only that one file changed.
+
+**The §6 caution raised before the bless was overstated for THIS golden, and the
+correction is worth keeping.** The fingerprint runs `apr1992_definitive_40w` — 40 weeks
+from April 1992, ending around January 1993. Srebrenica fell in July 1995, near week 170.
+The Goražde cells in the flip list (`kolovarice`, `podkozara_donja_2`, `sopotnica`,
+`kamen`) are therefore 1992-93 Drina fighting, NOT the enclave endgame. The ENCLAVE GUARD
+is a 188-week criterion and is untouched by this artifact. Do not re-raise §6 against the
+40w fingerprint on the strength of a Goražde settlement id alone — check the horizon
+first. (`kolovarice` remains on record as a merge defect wrong under any controller; that
+is a separate open item, unaffected by this bless.)
 
 **Second false-green worth fixing separately:** a job that skips its only real step still
 reports success, so "green" on this workflow does not imply the fingerprint was checked.
