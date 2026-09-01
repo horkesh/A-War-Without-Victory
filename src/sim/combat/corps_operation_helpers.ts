@@ -119,8 +119,14 @@ export function findBrigadeOperationAnywhere(
     for (const cid of corpsIds) {
         const cmd = corpsCommand[cid];
         if (!cmd) continue;
-        for (const op of cmd.active_operations) {
-            if (op.participating_brigades.includes(brigadeId)) {
+        // Both fields are optional in practice: a corps command may carry no
+        // active_operations at all, and an operation mid-construction (or loaded from a
+        // save predating the field) may have no participating_brigades. This is a
+        // read-only lookup, so skipping a malformed entry is correct — it cannot mask a
+        // write-path defect, and dereferencing them unguarded crashed
+        // checkTriggeredOperations through getOperationsMult -> computeAttackerPower.
+        for (const op of cmd.active_operations ?? []) {
+            if (op?.participating_brigades?.includes(brigadeId)) {
                 return { corps_id: cid as FormationId, cmd, op };
             }
         }
