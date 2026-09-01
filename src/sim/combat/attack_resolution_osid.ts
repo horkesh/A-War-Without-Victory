@@ -188,6 +188,7 @@ import {
     distributeDefenderCasualties,
     buildDefenderContributions,
 } from './attack_casualty_distribution.js';
+import { applyMilitiaBattleCasualties, type MilitiaBattleCasualtyResult } from './militia_casualties.js';
 
 // ── Post-battle effects (extracted to attack_post_battle_effects.ts) ──
 import {
@@ -1106,6 +1107,9 @@ export function resolveAttackOrdersOsid(
                 finalDefenderCas,
             })
             : undefined;
+        // Militia losses are applied further down (the no-formation branch); the result
+        // carries the pool key and the RAW total actually applied.
+        let militiaResult: MilitiaBattleCasualtyResult | null = null;
         const appliedDefenderCas = defenderCasualtyShares
             ? [...defenderCasualtyShares.values()].reduce((sum, cas) => sum + cas, 0)
             : finalDefenderCas;
@@ -1264,6 +1268,22 @@ export function resolveAttackOrdersOsid(
                     pushSnapEvent(report, ev);
                 }
             }
+        } else if (finalDefenderCas > 0 && controller) {
+            // ── Militia-only defence ──────────────────────────────────────────
+            // No formation defended this OSID, but a local garrison did and it took
+            // losses. Before this branch those losses were reported and then dropped.
+            // One atomic writer owns the pool debit and the ledger row together, so the
+            // battle report, the AAR and the casualty ledger cannot disagree.
+            //
+            // This does NOT change how much defence the OSID had — the militia defence
+            // power above is untouched. See militia_casualties.ts for why capping it by
+            // pool manpower was falsified before implementation.
+            militiaResult = applyMilitiaBattleCasualties({
+                state,
+                faction: controller,
+                targetOsid,
+                rawCasualties: splitKiaWiaMia(finalDefenderCas),
+            });
         }
 
         // ── Equipment transfers (extracted to attack_equipment_effects.ts) ──
@@ -1318,6 +1338,8 @@ export function resolveAttackOrdersOsid(
             power_ratio: powerRatio,
             attacker_won: outcome === 'decisive_victory' || outcome === 'victory' || outcome === 'costly_victory',
             defender_brigade: defenderFormation?.id ?? null,
+            defender_kind: defenderFormation ? 'formation' : (militiaResult ? 'militia' : 'none'),
+            ...(militiaResult ? { defender_militia_pool_key: militiaResult.poolKey } : {}),
             snap_events: battleSnapEvents,
             attacker_casualties: finalAttackerCas,
             defender_casualties: appliedDefenderCas,

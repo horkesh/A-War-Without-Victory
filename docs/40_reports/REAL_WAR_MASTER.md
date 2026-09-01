@@ -1,5 +1,87 @@
 # Real War Master
 
+## Accounting-regime change: militia casualties are now recorded (2026-09-01)
+
+Every casualty total in this document that predates this entry — including the `n388` table
+immediately below — was produced under an accounting regime that **silently dropped the losses of
+militia-only defenders**. `attack_resolution_osid.ts` wrote defender losses only when a defending
+formation existed, so battles fought against a local garrison reported casualties and then
+discarded them: **42 battles / 3,844 raw defender casualties in the 40-week artifact, 66 / 5,979 in
+`n388`** — roughly 1,728 and 2,792 ledger casualties at current realism fractions.
+
+Those totals are **not** retroactively rewritten. They stand as accurate records of what the old
+regime measured. Totals produced after schema v38 include militia losses and are therefore **not
+directly comparable** with anything above this line.
+
+### Militia losses feed the Pyrrhic grade, against a frozen baseline
+
+Faction ledger totals are a LIVE SCORING INPUT, and this change increases them. The
+default-ON simple grade model reads exactly these totals:
+`applyHumanCostShift(grade, faction, factionTotalCasualties(state, faction))`
+(`src/sim/negotiation/scoring.ts:781-782`), where `factionTotalCasualties` is
+`killed + wounded + missing_captured` from the ledger (`:485-488`) — now including militia.
+
+It is measured against `HISTORICAL_CASUALTY_BASELINE`, which is **frozen** at
+RBiH 140,000 / RS 95,000 / HRHB 35,000 (`:447-451`), with hard step boundaries at ratio
+**0.75 / 1.33 / 2.0** (`:462-469`). Numerator rises, denominator does not. The bias is
+therefore ONE-DIRECTIONAL — grades can only get worse — and a faction sitting near a
+boundary can flip a whole grade step. The same applies to the legacy `computeWarCostIndex`
+path (`:357-361`) and the endgame cost-ledger templates.
+
+Headroom at the last clean 188-week baseline (`n388`, OLD accounting regime, indicative
+only): RBiH 140,651 / 140,000 = 1.005; RS 91,315 / 95,000 = 0.961; HRHB 33,584 / 35,000 =
+0.960. All three sit inside the `[0.75, 1.33)` par band, and the ~2,800 ledger casualties
+militia accounting adds across a full war moves none of them across a boundary. That is
+reassurance, not clearance: it is computed from a pre-v38 run and needs re-checking against
+a post-v38 188-week run.
+
+`docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md` defines this cost axis. Its definition changed
+in substance without its thresholds moving, so it carries a cost-axis note (§0a, 2026-09-01)
+recording that the faction totals it measures now include militia-only defenders.
+
+### Both pool channels that can move territory
+
+`pool.exhausted` is the primary one (mobilization exhaustion gate,
+`ongoing_mobilization.ts:285-291`). But `pool.available` is ALSO mutated — debited by the
+writer, credited back by the trickleback — and it feeds
+`getFactionExhaustionRatio = committed / (committed + available)` in
+`cohesion_drift.ts:30-44`, a faction-wide cohesion penalty (RBiH 0.80 / RS 0.92 /
+HRHB 0.85). Measured on the controlled 12-week pair: **zero pools ended with a different
+`available`** (the pools that were debited were driven to 0 by other mechanisms anyway), and
+the RBiH ratio moved 0.93610 -> 0.93605 — via `committed`, not `available`. Small, and in
+the favourable direction. Not zero by construction, so it must be re-measured at 188 weeks.
+### Run identification for every figure quoted
+
+| figure | run directory |
+|---|---|
+| 42 battles / 3,844 raw (pre-change 40w) | `runs/codex_eastern_enclaves_final_review/apr1992_definitive_188w__7c3a0f299a8c80e9__w40_n0` |
+| 66 / 5,979 (pre-change 188w) | `runs/apr1992_definitive_188w__46834a3b41033bff__w188_n388` |
+| 27 of 30; 50% / 52%; PRE half of the controlled pair | `runs/preflight_baseline/apr1992_definitive_188w__f0b9d7b1bda55de4__w12_n0` |
+| POST half of the controlled pair | `runs/postchange_12w/apr1992_definitive_188w__f0b9d7b1bda55de4__w12_n0` |
+| 40 battles / 3,874 raw / 1,728 recorded (post-change 40w) | `runs/postchange_40w/apr1992_definitive_40w__21b49604f90cfc2f__w40_n0` |
+
+**The two 40-week figures are NOT a controlled pair.** They are different scenario
+configurations (`apr1992_definitive_188w.json` truncated to w40 vs
+`apr1992_definitive_40w.json`), different commits, and different Node majors (22 vs 24).
+Do not read a territory delta between them as this change's cost. The controlled comparison
+is the 12-week pair above: same machine, same Node, same worktree, only the engine differs —
+and its territory is IDENTICAL (271/342/99).
+
+`runs/` is gitignored, so the 12-week and post-change evidence is machine-local to the lane
+worktree and is not recoverable from the repository.
+
+Two further findings from the same lane, recorded because they generalise:
+
+- **`militia_pools[...].available` is not a measure of local defensive manpower.** It is the
+  uncommitted recruitment remainder, and it is structurally 0 for a faction defending ground it does
+  not control. In a bounded canonical run, 27 of 30 militia-only battles drew on a pool reading
+  zero. Any future mechanic that gates local defence on that field will delete historically attested
+  defence at Kozarac, Foča, Višegrad, Zvornik and Vlasenica.
+- **Militia-only battles are not a rounding error.** In the first 12 weeks they are **50% of all
+  battles and 52% of all attacker wins**. A change to how they resolve is a change to half the
+  opening war.
+
+
 ## Latest Review: canonical baseline revalidated at current HEAD — military deaths remain below the working band (2026-08-31)
 
 **Run:** `F:\A-War-Without-Victory\runs\apr1992_definitive_188w__46834a3b41033bff__w188_n388` at

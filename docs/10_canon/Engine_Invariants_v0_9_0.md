@@ -1,6 +1,6 @@
 # A War Without Victory -- Engine Invariants v0.9.0
 
-**Last Updated:** 2026-05-05
+**Last Updated:** 2026-09-01
 
 One game turn equals one week.
 
@@ -56,7 +56,23 @@ Development-time validation tools may abort execution on invariant violation.
 
 ### 6.1 Defense of Unoccupied OSIDs
 
+*(Amended LANE-MILITIA-CASUALTY-PERSISTENCE, 2026-09-01 — canon-compliance review; owner decision on record in `docs/PROJECT_LEDGER.md`.)*
+
 Unoccupied OSIDs adjacent to friendly brigades have militia-only defense. Frontage constraint is enforced by `BRIGADE_OPERATIONAL_FRONTAGE_CAP=48`. Local front density modifier (`local_front_defense.ts`) applies `THIN_FRONT_THRESHOLD=0.5` / `MIN_COVERAGE_PENALTY=0.6` to defender power when brigades are sparse.
+
+**Militia defense magnitude is population-derived and MUST NOT be bounded by `MilitiaPoolState.available` while that field retains its present semantics** — `committed` never decremented, refills gated on controlling the municipality, and `POST_FLIP_LOST_STRENGTH = 0` on control flip while pool population only ever raises. Under those semantics `available` is the post-mobilization recruitment *residual*, structurally 0 for exactly the faction defending ground it is losing, and binding defense to it deletes historically attested local defense (Kozarac, Foča, Višegrad, Zvornik, Vlasenica). `computeMilitiaDefensePower()` reads OSID population only. A future change that first repairs `available` semantics may revisit this; the prohibition is on binding defense to the residual, not on the idea of a manpower bound. Measurements and run ids: `docs/40_reports/REAL_WAR_MASTER.md` and `docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md` §1.
+
+**Militia casualties are durable and are recorded exactly once.** Losses from a militia-only battle are applied by a single writer (`src/sim/combat/militia_casualties.ts`). When a matching pool exists and is consistent with its own key, the same call debits `pool.available` by at most what it holds, feeds permanent losses (killed + missing) into `pool.exhausted` at the standard 0.75 demographic share, and credits recoverable wounded to `pool.wounded_pending` **only in proportion to manpower actually drawn from the pool**. **The ledger row is written unconditionally** — a missing pool, or one whose stored faction contradicts its key, suppresses only the pool mutation, never the casualty record. Militia rows are keyed by the composite militia-pool key and MUST NOT appear in `per_formation`.
+
+**Casualty accounting invariant.** For every faction, after every write:
+
+```
+killed           == sum(per_formation.killed)           + sum(per_militia_pool.killed)
+wounded          == sum(per_formation.wounded)          + sum(per_militia_pool.wounded)
+missing_captured == sum(per_formation.missing_captured) + sum(per_militia_pool.missing_captured)
+```
+
+Raw casualties drive manpower depletion; realism-scaled casualties drive the historical ledger. The two quantities are not interchangeable.
 
 ### 6.2 Brigade No-Destruction Invariant
 

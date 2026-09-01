@@ -841,6 +841,10 @@ export function spawnFormationsFromPools(
 export interface WiaTricklebackReport {
     formations_returned: number;
     personnel_returned: number;
+    /** Militia pools that returned wounded to `available` this turn. */
+    militia_pools_returned?: number;
+    /** Militia manpower returned to `available` this turn. */
+    militia_personnel_returned?: number;
 }
 
 /**
@@ -884,6 +888,50 @@ export function applyWiaTrickleback(state: GameState): WiaTricklebackReport {
     }
 
     return report;
+}
+
+/**
+ * Militia WIA trickleback: return wounded local defenders to their municipal pool's
+ * `available`.
+ *
+ * The militia counterpart of applyWiaTrickleback. `pool.wounded_pending` is credited
+ * only with manpower that a militia battle actually drew OUT of `available`
+ * (see militia_casualties.ts), so this can only ever give back what was taken —
+ * it cannot create manpower in a pool the defenders were never drawn from.
+ * Conservation therefore holds exactly: the rise in `available` equals the fall in
+ * `wounded_pending`. Killed and missing never return; they sit in `exhausted`.
+ *
+ * Deterministic: pool keys processed in `strictCompare` order.
+ */
+export function applyMilitiaWiaTrickleback(state: GameState, report: WiaTricklebackReport): void {
+    const pools = state.military.militia_pools as Record<string, MilitiaPoolState> | undefined;
+    if (!pools) return;
+
+    let poolsReturned = 0;
+    let personnelReturned = 0;
+
+    for (const key of Object.keys(pools).sort(strictCompare)) {
+        const pool = pools[key];
+        if (!pool) continue;
+
+        const pending = pool.wounded_pending ?? 0;
+        if (pending <= 0) continue;
+
+        const returned = Math.min(pending, WIA_TRICKLE_RATE);
+        if (returned <= 0) continue;
+
+        pool.wounded_pending = pending - returned;
+        pool.available = Math.max(0, (pool.available ?? 0) + returned);
+        pool.updated_turn = state.meta?.turn ?? pool.updated_turn ?? 0;
+
+        poolsReturned += 1;
+        personnelReturned += returned;
+    }
+
+    if (poolsReturned > 0) {
+        report.militia_pools_returned = (report.militia_pools_returned ?? 0) + poolsReturned;
+        report.militia_personnel_returned = (report.militia_personnel_returned ?? 0) + personnelReturned;
+    }
 }
 
 /**

@@ -836,6 +836,41 @@ registerMigration({
 });
 
 registerMigration({
+    version: 38,
+    description: 'Persist durable militia casualty accounting: per-pool casualty rows on each '
+        + 'faction ledger and a wounded_pending bucket on each militia pool. Sensitive: no. '
+        + 'Forward-only and purely additive — every existing value is preserved, missing fields '
+        + 'begin as deterministic zeros/empty records, and no old save loses information. '
+        + 'Militia losses were previously reported by the resolver and then dropped, so the '
+        + 'final-state hash MOVES on any run that contains a militia-only battle (42 such '
+        + 'battles in the 40-week artifact); casualty totals from before this migration are '
+        + 'historical records of the old accounting regime and are not comparable.',
+    migrate: (state) => {
+        const military = asRecord(state.military);
+        if (!military) return;
+
+        const ledger = asRecord(military.casualty_ledger);
+        if (ledger) {
+            for (const factionId of Object.keys(ledger).sort(strictCompare)) {
+                const factionLedger = asRecord(ledger[factionId]);
+                if (factionLedger) ensureRecord(factionLedger, 'per_militia_pool');
+            }
+        }
+
+        const pools = asRecord(military.militia_pools);
+        if (pools) {
+            for (const poolKey of Object.keys(pools).sort(strictCompare)) {
+                const pool = asRecord(pools[poolKey]);
+                if (!pool) continue;
+                if (typeof pool.wounded_pending !== 'number' || !Number.isFinite(pool.wounded_pending)) {
+                    pool.wounded_pending = 0;
+                }
+            }
+        }
+    },
+});
+
+registerMigration({
     version: 37,
     description: 'Persist sector intelligence and the materialized current-turn corps-front standing OG snapshot. Sensitive: no; missing legacy fields begin as deterministic empty records.',
     migrate: (state) => {

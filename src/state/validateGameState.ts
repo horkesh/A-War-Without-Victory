@@ -7,6 +7,7 @@
 
 import type { PhaseName } from './game_state.js';
 import { proposalDecisionIdentity } from './proposal_decision_history.js';
+import { isCompositeMilitiaPoolKey } from './militia_pool_key.js';
 import { COMMAND_AUTHORITY_ALLOWED_INCOME_SOURCES } from '../shared/commandAuthorityEconomy.js';
 
 
@@ -1355,6 +1356,32 @@ function validateCasualtyLedger(value: unknown, errors: string[]): void {
                 }
             }
         }
+        // Schema v38: militia casualties, keyed by militia pool key rather than formation id.
+        // Optional on the type check so pre-v38 saves still validate before migration runs.
+        if (factionLedger.per_militia_pool !== undefined) {
+            const perMilitiaPath = `${factionPath}.per_militia_pool`;
+            if (!isRecord(factionLedger.per_militia_pool)) {
+                errors.push(`${perMilitiaPath} must be an object`);
+            } else {
+                for (const poolKey of Object.keys(factionLedger.per_militia_pool).sort(strictCompare)) {
+                    const poolPath = `${perMilitiaPath}.${poolKey}`;
+                    if (!isCompositeMilitiaPoolKey(poolKey)) {
+                        errors.push(`${poolPath} must use a composite militia pool key (mun_id:faction)`);
+                    }
+                    const poolLedger = factionLedger.per_militia_pool[poolKey];
+                    if (!isRecord(poolLedger)) {
+                        errors.push(`${poolPath} must be an object`);
+                        continue;
+                    }
+                    for (const key of ['killed', 'wounded', 'missing_captured']) {
+                        if (!isFiniteNonNegativeNumber(poolLedger[key])) {
+                            errors.push(`${poolPath}.${key} must be a finite non-negative number`);
+                        }
+                    }
+                }
+            }
+        }
+
         const perFormationPath = `${factionPath}.per_formation`;
         if (!isRecord(factionLedger.per_formation)) {
             errors.push(`${perFormationPath} must be an object`);
@@ -1372,6 +1399,23 @@ function validateCasualtyLedger(value: unknown, errors: string[]): void {
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * Schema v38 militia-pool casualty fields. Only the fields this lane introduces are
+ * checked; the rest of MilitiaPoolState keeps its existing `isRecord` contract.
+ */
+function validateMilitiaPoolCasualtyFields(value: unknown, errors: string[]): void {
+    const path = 'military.militia_pools';
+    if (!isRecord(value)) return; // shape is already asserted by VERSION_REQUIRED_FIELDS
+    for (const poolKey of Object.keys(value).sort(strictCompare)) {
+        const pool = value[poolKey];
+        if (!isRecord(pool)) continue;
+        if (pool.wounded_pending !== undefined
+            && !isFiniteNonNegativeNumber(pool.wounded_pending)) {
+            errors.push(`${path}.${poolKey}.wounded_pending must be a finite non-negative number`);
         }
     }
 }
@@ -4015,6 +4059,9 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'sector_intel' in military && military.sector_intel !== undefined) {
         validateSectorIntel(military.sector_intel, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'militia_pools' in military && military.militia_pools !== undefined) {
+        validateMilitiaPoolCasualtyFields(military.militia_pools, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'casualty_ledger' in military && military.casualty_ledger !== undefined) {
         validateCasualtyLedger(military.casualty_ledger, errors);

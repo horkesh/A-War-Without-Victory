@@ -31558,3 +31558,153 @@ the "3513 tests, 298 suites" claim this entry removes.
 
 `npm run test:vitest:serial` is retained as the unsharded whole-suite escape hatch for diagnosing
 a suspected cross-shard interaction.
+
+
+### 2026-09-01 — Militia casualties are durable; the planned manpower cap was falsified and dropped
+
+**Branch** `claude/militia-casualty-persistence`, base `e24ec2e15`. Schema **v37 → v38**.
+
+**The defect.** An OSID under enemy political control with no defending formation is still
+defended — `computeMilitiaDefensePower()` gives it a population-derived garrison and the resolver
+fights a real battle. `attack_resolution_osid.ts` then wrote defender losses only inside
+`if (defenderFormation)`, so those casualties were reported and dropped: **42 battles / 3,844 raw
+casualties in the 40-week artifact, 66 / 5,979 in `n388`**. No pool debit, no ledger row.
+
+**The plan's architecture was falsified before implementation, by its own preflight.** The plan
+proposed capping militia defence at `min(populationCeiling, pool.available)`. Joining every
+militia-only battle to its `(mun, faction)` pool **at battle time** on a bounded 12-week canonical
+run: **30 battles, 0 with no pool, 27 with `available == 0`**, 1 under-backed, 2 fully backed.
+`available` is the post-mobilization recruitment RESIDUAL, not local defensive manpower —
+`committed` is never decremented anywhere in the engine, refills are gated on controlling the
+municipality, and on control flip the loser's `war_militia_strength` is set to
+`POST_FLIP_LOST_STRENGTH = 0` while pool population only ever raises. It is therefore structurally
+0 for exactly the faction defending ground it is losing. Militia-only battles are **50% of all
+battles and 52% of all attacker wins** in the first 12 weeks, so the cap would have rewritten half
+the opening war. The historian found the premise inverted: 1992 BiH had surplus manpower and a
+rifle famine (BB1 printed p.143, >100k men vs 40–50k small arms) and "the great majority" of ARBiH
+strength served in local defence units (BB1 p.180). Kozarac held ~2 days under 5,600 shells; Foča
+~3 weeks. Glogova is the one true zero-defence case and it was **disarmed by a promise first**
+(Deronjić Sentencing Judgement) — which argues for a disarmament state, not a pool cap.
+
+**Owner decision: persistence only, no cap.** Defence magnitude is unchanged; only the accounting
+changes. Two tests keep the falsified premise out of the engine (identical casualties, power ratio
+and outcome with the pool full vs empty; an OSID with no pool at all still defends), and Engine
+Invariants §6.1 now prohibits binding militia defence to `pool.available` **while that field
+retains its present semantics** (`committed` never decremented, controller-gated refills,
+`POST_FLIP_LOST_STRENGTH = 0`); a future change that repairs those semantics first may revisit it.
+
+**What shipped.** `per_militia_pool` on each faction ledger and `wounded_pending` on each militia
+pool (v38, additive, forward-only). One atomic writer, `src/sim/combat/militia_casualties.ts`,
+owns every militia casualty event: debits `available` by at most what it holds, adds
+`(killed + missing) * 0.75` to `exhausted`, credits `wounded_pending` **only in proportion to
+manpower actually drawn from the pool** (so WIA recovery cannot create manpower in a pool the
+defenders were never taken from — the normal case), and writes the realism-scaled row. Militia WIA
+recover in the existing `wia-trickleback` phase. The legacy SID resolver routes through the same
+writer. Battle rows carry `defender_kind` and `defender_militia_pool_key`, emitted only for
+non-formation defenders so this baselined artifact is unchanged for formation rows.
+
+**Controlled measurement — 12-week pair, same machine, same Node, only the engine differs:**
+
+| | PRE (v37) | POST (v38) |
+|---|---|---|
+| control RBiH/RS/HRHB | 271 / 342 / 99 | **271 / 342 / 99 — IDENTICAL** |
+| battles / militia-only | 60 / 30 | 60 / 30 |
+| raw militia casualties | 2,819 | 2,819 |
+| ledger K/W/M | 2,971 / 11,266 / 1,346 | 3,233 / 12,190 / 1,387 |
+| … `per_militia_pool` | 0 (0 rows) | **264 / 930 / 37 (18 rows)** |
+| accounting balanced | true | true |
+| pools available | 16,134 | 16,134 |
+| pools exhausted | 4,107 | **4,629 (+522)** |
+| negative pool fields | 0 | **0** |
+
+Territory is identical. `available` is unchanged because 27 of 30 pools held zero. TWO
+second-order channels can move territory: `exhausted` (primary), which now receives militia
+permanent losses and throttles later mobilization through the exhaustion gate, and `available`,
+which feeds the faction-wide cohesion exhaustion ratio (`cohesion_drift.ts:30-44`) — measured at
+zero net change here, with the RBiH ratio moving 0.93610 -> 0.93605 via `committed`. `per_formation` drifted by
+−2 K / −6 W / +4 M and the arithmetic ties out exactly (+1,231 militia − 4 formation = +1,227
+observed total delta), so this is that feedback, not a double write.
+
+**40-week canonical run** (`runs/postchange_40w`, exit 0): 136 battles, 40 militia-only, 3,874 raw
+militia casualties, **1,728 recorded militia ledger casualties (372 K / 1,301 W / 55 M) — exactly
+the projection the diagnostic computed before implementation**. Accounting balanced, no negative
+pool fields. `engine_truth_checkpoint` reports the new `casualty_accounting_balanced` check PASS;
+its four other failures are identical on the pre-change run (missing `--assignment-log`, 188w
+anchor set) and are unrelated to this lane.
+
+**Deliberately NOT done.** Task 8 Step 2 (replacing the ATK/DEF reconstruction in
+`apply-casualty-pool-exhaustion` with exact receipts) is deferred with its reasoning recorded at
+the site: it is a formation-side change that would move every formation's `pool.exhausted`, hence
+mobilization, hence territory, making this lane's comparison unattributable. It is not needed for
+militia correctness — that block is guarded on `defender_brigade` and keys off
+`formation.origin_mun`, so it skips militia and cannot double-count against the militia writer,
+which owns the DEFENDING municipality's pool.
+
+**No 188-week run. No baseline-manifest reconciliation, no floor change, no painted-control change,
+no initial-control change, no scenario-data change.** Pre-v38 casualty totals are historical
+records of the old accounting regime and are not comparable with post-v38 totals; this is stated at
+the top of `REAL_WAR_MASTER.md` and `CALIBRATION_MASTER.md`.
+
+**Save/resume is NOT byte-identical — and it already was not, before this lane.** A
+controlled A/B on the base-commit engine (worktree `militia-control-base`, detached at
+`e24ec2e15`, verified to contain zero references to the new module) run with the identical
+protocol: uninterrupted 0→12 vs 0→6 plus resume 6→12.
+
+| | uninterrupted | resume | divergence |
+|---|---|---|---|
+| PRE-change K/W/M | 2,971 / 11,266 / 1,346 | 2,975 / 11,273 / 1,343 | **+4 / +7 / −3** |
+| POST-change K/W/M | 3,233 / 12,190 / 1,387 | 3,237 / 12,200 / 1,384 | **+4 / +10 / −3** |
+
+The killed (+4) and missing (−3) divergences are IDENTICAL before and after; territory is
+identical on every path. The plan's "save/load continuation must be byte-identical"
+invariant is violated AT THE BASE COMMIT. **The wounded term is NOT established as unworsened, and this entry does not claim it is.**
+It widened +7 -> +10, a rise both absolutely and proportionally (0.062% -> 0.082% of the wounded
+total). "Militia casualties merely flow through the existing divergence" is a hypothesis, not a
+measurement, and a competing mechanism cannot yet be excluded: `applyMilitiaBattleCasualties`
+reads LIVE pool state to compute `drawnFromAvailable` and the proportional `wounded_pending`
+credit (`militia_casualties.ts:113,130-133`), so a pool that differs at resume yields a different
+militia credit — militia accounting can AMPLIFY the existing divergence rather than merely pass
+through it. **That is the queued lane's first question.**
+
+**Queued as its own lane; fixing it here
+would be an unrelated combat-system change and would destroy this lane's attribution.**
+
+**Canon-compliance review returned NON-COMPLIANT; three of four required changes are
+applied.** Applied: (a) Engine Invariants §6.1 scoped to the current semantics of
+`available` rather than prohibiting a manpower bound outright, with the measurement moved
+to the report/design docs and a lane tag added; (b) every quoted figure given its run
+directory, with an explicit statement that the two 40-week runs are DIFFERENT
+configurations and not a controlled pair, and that `runs/` is gitignored; (c) the scoring
+channel disclosed (below). Also fixed on the reviewer's recommendation: a latent
+silent-drop path in `militia_casualties.ts` where a pool whose stored faction contradicted
+its own key returned before the ledger write — reintroducing, as a guard clause, the exact
+defect this lane exists to fix. The ledger write is now unconditional; two tests pin it.
+
+**The scoring channel — the review's material catch.** Faction ledger totals are a live
+scoring input and this change increases them: `applyHumanCostShift(grade, faction,
+factionTotalCasualties(...))` (`scoring.ts:781-782`) measures `killed + wounded + missing`
+against a FROZEN baseline (140k/95k/35k, `:447-451`) with hard step boundaries at
+0.75/1.33/2.0. Numerator rises, denominator does not, so the bias is one-directional and a
+faction near a boundary can flip a grade step. At the last clean pre-v38 188-week baseline
+all three sit mid-band (RBiH 1.005, RS 0.961, HRHB 0.960) with ample headroom, but that is
+computed from a pre-v38 run and is reassurance, not clearance.
+`VICTORY_AND_PYRRHIC_SCORING.md` now carries a cost-axis note.
+
+**BLOCKING, and NOT satisfiable by this lane: the 188-week enclave-guard verification.**
+The reviewer requires a 188-week run scored with `tools/verify_checkpoints.cjs` (enclave
+guard + all four checkpoints + a full `anchor_checks` diff), because the enclave guard is a
+188-week property and every effect of this change drains the faction that fought a
+militia-only defence — predominantly RBiH in 1992, i.e. the faction holding Goražde, Bihać,
+Teočak and the Sarajevo core, which MUST hold. The project's own rule applies: a 40-week GO
+is a false-green for combat-behaviour changes. **This lane was explicitly instructed not to
+start a 188-week run without fresh owner authorization, so it did not.** The run, or a
+recorded owner/panel waiver, is the remaining merge gate.
+
+**That 188-week run MUST BE UNINTERRUPTED.** This lane's own save/resume finding forces it: a
+resumed run inherits the pre-existing divergence, so its enclave-guard verdict would not be
+authoritative.
+
+**Canon-compliance review returned COMPLIANT on the second pass — and COMPLIANT DOES NOT OPEN
+THIS GATE.** Escalating the 188-week run discharges the LANE's obligation; it does not satisfy
+the requirement. The requirement now belongs to the owner or the panel. Do not read the canon
+verdict in this entry as clearance to merge.

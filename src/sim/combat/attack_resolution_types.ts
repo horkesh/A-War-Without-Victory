@@ -89,6 +89,15 @@ export interface AttackResolutionOsidReport {
         power_ratio: number;
         attacker_won: boolean;
         defender_brigade: FormationId | null;
+        /**
+         * What actually defended this OSID. `defender_brigade: null` is retained for
+         * compatibility but is no longer the only source classifier — 'militia' battles
+         * are fought by a population-derived local garrison with no formation id, and
+         * their losses are recorded against `defender_militia_pool_key`.
+         */
+        defender_kind?: 'formation' | 'militia' | 'none';
+        /** Canonical `${mun_id}:${faction}` pool key militia losses were recorded against. */
+        defender_militia_pool_key?: string;
         snap_events: AttackResolutionOsidSnapEvent[];
         /** Actual total attacker casualties (KIA+WIA+MIA) from this battle. */
         attacker_casualties: number;

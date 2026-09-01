@@ -2957,6 +2957,15 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                         power_ratio: Math.round(b.power_ratio * 100) / 100,
                         attacker_won: b.attacker_won,
                         defender_brigade: b.defender_brigade,
+                        // Provenance is forwarded, never recomputed. Emitted only when the
+                        // defender was NOT a formation, so formation rows in this baselined
+                        // artifact keep exactly the shape they had.
+                        ...(b.defender_kind && b.defender_kind !== 'formation'
+                            ? { defender_kind: b.defender_kind }
+                            : {}),
+                        ...(b.defender_militia_pool_key
+                            ? { defender_militia_pool_key: b.defender_militia_pool_key }
+                            : {}),
                         attacker_casualties: b.attacker_casualties,
                         defender_casualties: b.defender_casualties,
                         ...(b.execution_friction ? { execution_friction: b.execution_friction } : {}),

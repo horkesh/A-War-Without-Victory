@@ -49,9 +49,31 @@ function minimalLegacyState(schemaVersion = 2): any {
 }
 
 describe('versioned save migration steps', () => {
+    it('materializes v38 militia casualty accounts and preserves existing values', () => {
+        const state = minimalLegacyState() as Record<string, any>;
+        state.military.casualty_ledger = {
+            RBiH: {
+                killed: 7, wounded: 11, missing_captured: 2,
+                equipment_lost: { tanks: 0, artillery: 0, aa_systems: 0 },
+                per_formation: { brigade_1: { killed: 7, wounded: 11, missing_captured: 2 } },
+            },
+        };
+
+        applyMigrations(state as never);
+
+        // Additive: the new records exist and start empty/zero...
+        expect(state.military.casualty_ledger.RBiH.per_militia_pool).toEqual({});
+        expect(state.military.militia_pools['mun1:ARBiH'].wounded_pending).toBe(0);
+        // ...and nothing that was already there is disturbed.
+        expect(state.military.casualty_ledger.RBiH.killed).toBe(7);
+        expect(state.military.casualty_ledger.RBiH.per_formation.brigade_1)
+            .toEqual({ killed: 7, wounded: 11, missing_captured: 2 });
+        expect(state.military.militia_pools['mun1:ARBiH'].available).toBe(4);
+    });
+
     it('bumps GameState schema to the latest registered migration', () => {
         expect(CURRENT_SCHEMA_VERSION).toBe(getLatestSchemaVersion());
-        expect(getLatestSchemaVersion()).toBe(37);
+        expect(getLatestSchemaVersion()).toBe(38);
     });
 
     it('materializes legacy defaults through versioned registry steps', () => {
