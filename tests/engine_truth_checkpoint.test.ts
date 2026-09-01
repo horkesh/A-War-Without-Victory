@@ -39,10 +39,28 @@ function fixture(): Record<string, unknown> {
                     b: { id: 'b', faction: 'RS', personnel: 180, status: 'active' },
                     c: { id: 'c', faction: 'HRHB', personnel: 45, status: 'active' },
                 },
+                // Faction totals carry a breakdown that sums to them exactly. Both ledger
+                // writers (recordBattleCasualties, recordMilitiaCasualties) always populate
+                // one, so totals with no breakdown at all is a state the engine cannot
+                // produce — and the casualty_accounting_balanced check exists to catch a
+                // casualty written twice, to the wrong class, or dropped. RBiH carries a
+                // militia row so the militia class is exercised, not just the formation one.
                 casualty_ledger: {
-                    HRHB: { killed: 5, wounded: 15, missing_captured: 1 },
-                    RBiH: { killed: 10, wounded: 30, missing_captured: 2 },
-                    RS: { killed: 20, wounded: 60, missing_captured: 4 },
+                    HRHB: {
+                        killed: 5, wounded: 15, missing_captured: 1,
+                        per_formation: { hvo_1st: { killed: 5, wounded: 15, missing_captured: 1 } },
+                        per_militia_pool: {},
+                    },
+                    RBiH: {
+                        killed: 10, wounded: 30, missing_captured: 2,
+                        per_formation: { arbih_1st: { killed: 8, wounded: 24, missing_captured: 2 } },
+                        per_militia_pool: { 'gorazde:RBiH': { killed: 2, wounded: 6, missing_captured: 0 } },
+                    },
+                    RS: {
+                        killed: 20, wounded: 60, missing_captured: 4,
+                        per_formation: { vrs_1st: { killed: 20, wounded: 60, missing_captured: 4 } },
+                        per_militia_pool: {},
+                    },
                 },
             },
             displacement: {

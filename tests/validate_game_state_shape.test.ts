@@ -242,7 +242,11 @@ describe('validateGameStateShape optional military local state records', () => {
 
         expect(result.ok).toBe(false);
         if (!result.ok) {
-            expect(result.errors).toContain(`v${CURRENT_SCHEMA_VERSION} required field missing or invalid: military.sector_intel`);
+            // The requirement still holds at the current schema, but the message carries the
+            // version the field was REGISTERED as required at (v37), not the current one.
+            // Pinning the interpolated version made this fail on every later bump.
+            expect(result.errors.some((e) => e.endsWith(
+                'required field missing or invalid: military.sector_intel'))).toBe(true);
         }
     });
 
@@ -254,7 +258,11 @@ describe('validateGameStateShape optional military local state records', () => {
 
         expect(result.ok).toBe(false);
         if (!result.ok) {
-            expect(result.errors).toContain(`v${CURRENT_SCHEMA_VERSION} required field missing or invalid: military.corps_front_sectors`);
+            // The requirement still holds at the current schema, but the message carries the
+            // version the field was REGISTERED as required at (v37), not the current one.
+            // Pinning the interpolated version made this fail on every later bump.
+            expect(result.errors.some((e) => e.endsWith(
+                'required field missing or invalid: military.corps_front_sectors'))).toBe(true);
         }
     });
 

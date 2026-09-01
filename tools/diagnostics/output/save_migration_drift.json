@@ -1,7 +1,7 @@
 {
   "generated_by": "tools/diagnostics/save_migration_drift_audit.cjs",
-  "latest_schema_version": 37,
-  "registered_migration_count": 37,
+  "latest_schema_version": 38,
+  "registered_migration_count": 38,
   "strict_required_field_count": 79,
   "anonymous_default_count": 0,
   "fields": [],
@@ -153,6 +153,10 @@
     {
       "version": 37,
       "description": "Persist sector intelligence and the materialized current-turn corps-front standing OG snapshot. Sensitive: no; missing legacy fields begin as deterministic empty records."
+    },
+    {
+      "version": 38,
+      "description": "Persist durable militia casualty accounting: per-pool casualty rows on each "
     }
   ],
   "required_fields": [
