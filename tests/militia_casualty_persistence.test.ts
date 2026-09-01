@@ -28,6 +28,9 @@ import type {
     MilitiaPoolState,
 } from '../src/state/game_state.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
+import { applyMilitiaWiaTrickleback } from '../src/sim/formation_spawn.js';
+import { WIA_TRICKLE_RATE } from '../src/state/formation_constants.js';
+import { strictCompare } from '../src/state/validateGameState.js';
 import type { FormationCasualties } from '../src/state/casualty_ledger.js';
 
 // ─── Expected contract ──────────────────────────────────────────────────────
@@ -464,5 +467,88 @@ describe('militia defence magnitude is independent of pool state', () => {
 
         const battle = resolve(fixture).battles[0]!;
         expect(battle.defender_casualties).toBeGreaterThan(0);
+    });
+});
+
+describe('militia WIA recovery', () => {
+    function poolsState(pools: Record<string, Partial<MilitiaPoolState>>): GameState {
+        const built: Record<string, MilitiaPoolState> = {};
+        for (const [key, p] of Object.entries(pools)) {
+            const [mun, faction] = key.split(':');
+            built[key] = {
+                mun_id: mun!, faction: faction as FactionId,
+                available: 0, committed: 0, exhausted: 0, updated_turn: 0,
+                ...p,
+            } as MilitiaPoolState;
+        }
+        return {
+            meta: { turn: 9, phase: 'war' },
+            military: { militia_pools: built },
+        } as unknown as GameState;
+    }
+
+    function report() {
+        return { formations_returned: 0, personnel_returned: 0 };
+    }
+
+    it('conserves personnel exactly: available rises by what wounded_pending falls', () => {
+        const state = poolsState({ 'gorazde:RBiH': { available: 100, wounded_pending: 30 } });
+        applyMilitiaWiaTrickleback(state, report());
+
+        const pool = (state.military.militia_pools as Record<string, MilitiaPoolState>)['gorazde:RBiH']!;
+        const view = pool as MilitiaPoolState & { wounded_pending?: number };
+        expect(view.wounded_pending).toBe(0);
+        expect(pool.available).toBe(130);
+    });
+
+    it('never returns more than the rate in one turn', () => {
+        const state = poolsState({ 'gorazde:RBiH': { available: 0, wounded_pending: 500 } });
+        applyMilitiaWiaTrickleback(state, report());
+
+        const pool = (state.military.militia_pools as Record<string, MilitiaPoolState>)['gorazde:RBiH']!;
+        const view = pool as MilitiaPoolState & { wounded_pending?: number };
+        expect(pool.available).toBe(WIA_TRICKLE_RATE);
+        expect(view.wounded_pending).toBe(500 - WIA_TRICKLE_RATE);
+    });
+
+    it('never returns more than is pending and never goes negative', () => {
+        const state = poolsState({ 'gorazde:RBiH': { available: 5, wounded_pending: 3 } });
+        applyMilitiaWiaTrickleback(state, report());
+
+        const pool = (state.military.militia_pools as Record<string, MilitiaPoolState>)['gorazde:RBiH']!;
+        const view = pool as MilitiaPoolState & { wounded_pending?: number };
+        expect(pool.available).toBe(8);
+        expect(view.wounded_pending).toBe(0);
+    });
+
+    it('leaves killed and missing permanently gone', () => {
+        const state = poolsState({ 'gorazde:RBiH': { available: 0, exhausted: 400, wounded_pending: 0 } });
+        applyMilitiaWiaTrickleback(state, report());
+
+        const pool = (state.military.militia_pools as Record<string, MilitiaPoolState>)['gorazde:RBiH']!;
+        expect(pool.available).toBe(0);
+        expect(pool.exhausted).toBe(400);
+    });
+
+    it('processes pools in stable sorted order and reports the totals', () => {
+        const state = poolsState({
+            'zvornik:RBiH': { wounded_pending: 10 },
+            'bratunac:RBiH': { wounded_pending: 10 },
+            'gorazde:RBiH': { wounded_pending: 10 },
+        });
+        const r = report() as ReturnType<typeof report> & {
+            militia_pools_returned?: number; militia_personnel_returned?: number;
+        };
+        applyMilitiaWiaTrickleback(state, r);
+
+        expect(r.militia_pools_returned).toBe(3);
+        expect(r.militia_personnel_returned).toBe(30);
+
+        const pools = state.military.militia_pools as Record<string, MilitiaPoolState>;
+        expect(Object.keys(pools).sort(strictCompare))
+            .toEqual(['bratunac:RBiH', 'gorazde:RBiH', 'zvornik:RBiH']);
+        for (const key of Object.keys(pools)) {
+            expect(pools[key]!.available).toBe(10);
+        }
     });
 });

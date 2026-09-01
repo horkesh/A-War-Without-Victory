@@ -106,7 +106,8 @@ import {
     applyWiaTrickleback,
     getActiveFormationSpawnDirective,
     reinforceBrigadesFromPools,
-    spawnFormationsFromPools
+    spawnFormationsFromPools,
+    applyMilitiaWiaTrickleback,
 } from '../formation_spawn.js';
 import { runFormationHqRelocation } from '../formation_hq_relocation.js';
 import { ensureRbihHrhbState, updateAllianceValue, countBilateralFlips, countTerritorialIncidents } from '../early_war/alliance_update.js';
@@ -3711,7 +3712,11 @@ export const warPhases: NamedPhase[] = [
         name: 'wia-trickleback',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            context.report.wia_trickleback = applyWiaTrickleback(context.state);
+            const report = applyWiaTrickleback(context.state);
+            // Militia wounded recover in the same phase, so returned manpower cannot be
+            // spent until the next turn — same ordering guarantee the formation path has.
+            applyMilitiaWiaTrickleback(context.state, report);
+            context.report.wia_trickleback = report;
         }
     },
     {
