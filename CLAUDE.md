@@ -58,6 +58,26 @@ Smoke-test triad after every change: `tsc --noEmit` + `vitest run` + `desktop:ma
   routes to the sharded runner CI uses; the unsharded `test:vitest:serial` is ~4x slower
   for identical coverage.
 
+## Branch Hygiene (run after every merge)
+
+Lanes create branches; nothing deletes them. On 2026-09-01 this had reached **40 local /
+50 remote** branches, mostly abandoned pointers whose work had already landed by
+squash-merge — indistinguishable from genuinely stranded work without an audit.
+
+```bash
+npm run repo:branches         # report: STRANDED / ARCHIVED / LANDED
+npm run repo:branches:clean   # archive unique work as tags, then delete
+```
+
+- **Classify with `git cherry`, never `--no-merged` or `git diff`.** `--no-merged` compares
+  ancestry, so a squash-merged branch looks unmerged forever. `git diff main..branch`
+  counts *main's own progress* as the branch's differences (it reported 300-1200 changed
+  files for branches that had fully landed). Only `git cherry` compares patch IDs.
+- **Nothing is deleted unless it has zero unique commits or an `archive/<branch>` tag.**
+  Restore with `git switch -c <branch> archive/<branch>`. `--prune` exits non-zero and
+  refuses if any branch would lose work.
+- Archive tags are pushed to origin, so recovery never depends on one machine.
+
 ## Shell & Platform
 
 - **Windows**: Use `;` not `&&` to chain commands in PowerShell.
