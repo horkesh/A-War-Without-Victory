@@ -31899,3 +31899,41 @@ density/defensive power/op eligibility — 40w + CI is a false green for it.
 `available_from: 0` but BB2 p455 n.5 / p516 dates it 3 November 1992 (as the 7th "Suad
 Alić", later redesignated); `arbih_450th_light` is BB-dated 30 November 1993. An OOB
 availability-date question, calibration-moving, not this fix.
+
+### 2026-09-01 — main fast-forwarded 561 commits; CI runs for the first time since 2026-08-07
+
+`origin/main` was an ANCESTOR of `claude/integration` — 0 behind, 561 ahead — so this was a
+pure fast-forward `16f1400f7 → 7753b4d2c → dd7d3fed7`. Nothing on main was rewritten and no
+merge commit was created. `lane/desktop-calibration-parity` was deliberately NOT touched:
+it is Codex's calibration lane and carries uncommitted work in the main worktree.
+
+**"CI hasn't been green for a month" was mostly CI NOT RUNNING.** All four workflows fire
+only on `push: [main]` or `pull_request: [main]`, and main sat 561 commits behind while all
+real work happened on `codex/**` lanes. The last main push was 2026-08-07 and all four
+failed there. Separately, `claude/**` matched no trigger at all until this session added it.
+
+**Results on main after the fast-forward:**
+
+| workflow | before | after |
+|---|---|---|
+| Full Suite + Structural Fingerprint | failure (2026-08-07) | **success** |
+| Baseline Regression | failure (2026-08-07) | **success** |
+| Event System CI | failure since the Foča commit | **success** |
+| Desktop Release Guard | failure (every main push) | fix pushed, verifying |
+
+**Baseline Regression is the substantive one.** It was CI's genuine red —
+`apr1992_52w` and `apr1992_188w` golden mismatches across 8 artifacts, red on
+`codex/ui-typography-overhaul` before this work began. The Node 22 re-bless cleared it.
+
+**Platform question, now answered:** the baseline manifest records hashes but NO OS
+provenance, and the goldens were re-blessed on Windows/Node 22 while CI runs ubuntu/Node 22.
+That risk did not materialise — Baseline Regression passes, so the artifact hashes are not
+platform-sensitive. Worth knowing before the next re-bless.
+
+**Desktop Release Guard root cause — a CI config defect, not a code one.**
+`.gitattributes` tracks `*.pmtiles filter=lfs`, but `desktop-packaged-runtime-probe` used
+`actions/checkout@v5` WITHOUT `lfs: true`. The runner received the LFS pointer text where
+the packaged app expected a ~460MB PMTiles binary, so MapLibre failed with
+"Wrong magic number for PMTiles archive". Locally the file is the real binary, which is why
+this only ever failed in CI. `lfs: true` scoped to that one job so the other does not pay
+the fetch.
