@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, relative, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { discoverTests } from './discover_test_files.mjs';
+import { renderAliasEntryLines, renderSetupFilesLine } from './vitest_shared_config.mjs';
 
 const ROOT = process.cwd();
 const VITEST_CLI = join(ROOT, 'node_modules', 'vitest', 'vitest.mjs');
@@ -77,16 +78,11 @@ export function writeVitestSliceConfig(root, files) {
       'export default defineConfig({',
       '  resolve: {',
       '    alias: {',
-      "      'react/jsx-runtime': join(rootModules, 'react/jsx-runtime'),",
-      "      'react/jsx-dev-runtime': join(rootModules, 'react/jsx-dev-runtime'),",
-      "      'react-dom/server': join(rootModules, 'react-dom/server'),",
-      "      'react-dom/client': join(rootModules, 'react-dom/client'),",
-      "      'react-dom': join(rootModules, 'react-dom'),",
-      "      'react': join(rootModules, 'react'),",
-      "      'use-sync-external-store/shim/with-selector': join(rootModules, 'use-sync-external-store/shim/with-selector'),",
-      "      'use-sync-external-store/shim': join(rootModules, 'use-sync-external-store/shim'),",
-      "      'use-sync-external-store': join(rootModules, 'use-sync-external-store'),",
-      "      'zustand': join(rootModules, 'zustand'),",
+      // From tools/test/vitest_shared_config.mjs. This list previously omitted
+      // maplibre-gl and the @deck.gl/* family, so vi.mock('maplibre-gl') resolved a
+      // different module id than the component's own import, the real module loaded, and
+      // every jsdom suite touching the map crashed on window.URL.createObjectURL.
+      ...renderAliasEntryLines('      '),
       '    },',
       '  },',
       '  test: {',
@@ -94,6 +90,7 @@ export function writeVitestSliceConfig(root, files) {
       '    globals: false,',
       "    environment: 'node',",
       '    environmentMatchGlobs,',
+      renderSetupFilesLine('    '),
       '    testTimeout: 120_000,',
       '    fileParallelism: false,',
       '    minWorkers: 1,',

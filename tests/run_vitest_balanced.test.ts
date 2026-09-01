@@ -1,4 +1,5 @@
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { VITEST_ALIASED_PACKAGES, VITEST_SETUP_FILE } from '../tools/test/vitest_shared_config.mjs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
@@ -108,38 +109,62 @@ describe('balanced Vitest execution plan', () => {
   });
 });
 
-describe('generated balanced config mirrors the root vitest config', () => {
-    // The sharded runner REPLACES vitest.config.ts with a generated one, so anything the
-    // root config installs must be repeated in the generated config or it silently does
-    // not apply to CI. On 2026-09-01 the jsdom createObjectURL polyfill was added to the
-    // root config only; the Full Suite happened to pass on shard luck while Baseline
-    // Regression stayed red with the exact failure the polyfill was meant to fix.
-    const generated = renderBalancedVitestConfig(['tests/example.test.ts']);
+describe('every vitest config surface stays in sync', () => {
+    // THREE surfaces run tests: vitest.config.ts (direct), run_vitest_balanced.mjs
+    // (sharded — Full Suite) and run_vitest_slice.mjs (fast slice — Baseline Regression).
+    // The generated two REPLACE the root config, so anything installed in one has to be
+    // installed in all three or it silently does not apply in CI.
+    //
+    // Both halves of this bit on 2026-09-01: the jsdom polyfill was added to the root
+    // config only (sharded runs never got it), and the slice config had drifted so far it
+    // was missing the maplibre-gl and @deck.gl/* aliases outright — which is why
+    // vi.mock('maplibre-gl') never engaged and the real module crashed on
+    // window.URL.createObjectURL. tools/test/vitest_shared_config.mjs is now the single
+    // source; this test is what keeps it that way.
+    const generatedBalanced = renderBalancedVitestConfig(['tests/example.test.ts']);
     const rootConfig = readFileSync(join(process.cwd(), 'vitest.config.ts'), 'utf8');
+    const sliceRunner = readFileSync(join(process.cwd(), 'tools/test/run_vitest_slice.mjs'), 'utf8');
+    const balancedRunner = readFileSync(join(process.cwd(), 'tools/test/run_vitest_balanced.mjs'), 'utf8');
 
-    it('installs the jsdom browser polyfills the root config installs', () => {
-        expect(rootConfig).toContain('tools/test/jsdom_browser_polyfills.ts');
-        expect(generated).toContain('tools/test/jsdom_browser_polyfills.ts');
-        expect(generated).toContain('setupFiles');
+    it('aliases every dual-copy hazard package on all three surfaces', () => {
+        for (const pkg of VITEST_ALIASED_PACKAGES) {
+            expect(rootConfig, `vitest.config.ts must alias ${pkg}`).toContain(`'${pkg}'`);
+            expect(generatedBalanced, `balanced config must alias ${pkg}`).toContain(`'${pkg}'`);
+        }
+        // The slice runner builds its aliases from the shared list rather than repeating
+        // them, which is what makes the guarantee hold rather than needing to be rechecked.
+        expect(sliceRunner).toContain('renderAliasEntryLines');
     });
 
-    it('keeps every resolve alias the root config pins', () => {
-        // Dual-copy hazards (react, maplibre-gl, @deck.gl/*) are only neutralised if BOTH
-        // configs alias them to the root node_modules.
-        for (const pkg of [
-            'react-dom/server', 'react-dom/client', 'react-dom', 'react',
-            'use-sync-external-store', 'zustand', 'maplibre-gl',
-            '@deck.gl/core', '@deck.gl/extensions', '@deck.gl/layers', '@deck.gl/mapbox',
-        ]) {
-            expect(rootConfig, `root config must alias ${pkg}`).toContain(`'${pkg}'`);
-            expect(generated, `generated config must alias ${pkg}`).toContain(`'${pkg}'`);
+    it('installs the jsdom browser polyfills on all three surfaces', () => {
+        expect(rootConfig).toContain(VITEST_SETUP_FILE);
+        expect(generatedBalanced).toContain(VITEST_SETUP_FILE);
+        expect(sliceRunner).toContain('renderSetupFilesLine');
+    });
+
+    it('keeps maplibre-gl and the deck.gl family in the shared list', () => {
+        // Named explicitly: these are the ones whose absence produced a silent,
+        // shard-dependent crash rather than a clear failure.
+        for (const pkg of ['maplibre-gl', '@deck.gl/core', '@deck.gl/extensions', '@deck.gl/layers', '@deck.gl/mapbox']) {
+            expect(VITEST_ALIASED_PACKAGES).toContain(pkg);
         }
     });
 
-    it('keeps the serial execution guarantees the root config sets', () => {
+    it('orders aliases most-specific-first so shorter keys cannot capture longer paths', () => {
+        const idx = (pkg: string) => VITEST_ALIASED_PACKAGES.indexOf(pkg);
+        expect(idx('react-dom/server')).toBeLessThan(idx('react-dom'));
+        expect(idx('react-dom/client')).toBeLessThan(idx('react-dom'));
+        expect(idx('react-dom')).toBeLessThan(idx('react'));
+        expect(idx('use-sync-external-store/shim/with-selector')).toBeLessThan(idx('use-sync-external-store/shim'));
+        expect(idx('use-sync-external-store/shim')).toBeLessThan(idx('use-sync-external-store'));
+    });
+
+    it('keeps the serial execution guarantees on every surface', () => {
         for (const option of ['fileParallelism: false', 'minWorkers: 1', 'maxWorkers: 1']) {
             expect(rootConfig).toContain(option);
-            expect(generated).toContain(option);
+            expect(generatedBalanced).toContain(option);
+            expect(sliceRunner).toContain(option);
         }
+        expect(balancedRunner).toContain('maxWorkers: 1');
     });
 });
