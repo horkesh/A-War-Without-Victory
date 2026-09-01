@@ -13,7 +13,8 @@ Deterministic strategic-level simulation of the 1992-1995 Bosnian War. Negative-
 ## Key Commands
 
 ```bash
-npm run test:vitest          # 3513 tests, 298 suites
+npm run test:vitest          # whole suite, sharded (same gate CI runs)
+npm run test:vitest -- <file>  # one file / -t pattern (unsharded)
 npx tsc --noEmit             # Typecheck
 npm run sim:scenario:run:40w # 40-week calibration scenario
 npm run sim:scenario:run:default  # 52-week historical scenario
@@ -45,6 +46,11 @@ Smoke-test triad after every change: `tsc --noEmit` + `vitest run` + `desktop:ma
 
 - **Windows**: Use `;` not `&&` to chain commands in PowerShell.
 - **tsx**: Use `node_modules/.bin/tsx` directly (not `npx tsx`). Prefer `npm run test:vitest`.
+- **Test runner**: `npm run test:vitest` with NO arguments runs the balanced sharded suite —
+  the same gate `.github/workflows/full-suite-and-fingerprint.yml` runs, ~4x faster than
+  unsharded for identical coverage. Passing a file or `-t` pattern runs it unsharded, because
+  the balanced runner gives each shard an explicit file list and a filter would leave the other
+  shards with no tests. `npm run test:vitest:serial` is the unsharded whole-suite escape hatch.
 - **Paths**: Always use absolute paths for tool calls.
 
 ## Architecture (pointers)

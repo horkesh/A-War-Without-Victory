@@ -31516,3 +31516,45 @@ the BASELINE set: evidence that the played war tracks history when the player ch
 and a measurement of what being the player costs before any choice is made. It says nothing yet
 about ahistorical play, which is blocked on the defect above. Not a calibration result; the scoring
 instrument remains `scenario_runner`.
+
+### 2026-09-01 — `npm run test:vitest` now runs the sharded suite CI runs
+
+**Branch** `claude/test-runner-default`, base `ef05545d8`. Developer-workflow change; no sim,
+scenario, calibration or state surface touched.
+
+**The defect was in the documentation, and it cost hours.** `CLAUDE.md` listed
+`npm run test:vitest # 3513 tests, 298 suites` as the whole-suite command. That script was a
+bare `vitest run`, and `vitest.config.ts` sets `fileParallelism: false` / `maxWorkers: 1`, so it
+executed ~1,290 discovered files strictly one at a time. CI has never run it that way:
+`.github/workflows/full-suite-and-fingerprint.yml` runs `npm run test:vitest:balanced`, which
+partitions the same files into duration-balanced shards. Anyone following the documentation took
+the slowest path to identical coverage, with nothing indicating a faster one existed. The quoted
+count was also stale by roughly 4x.
+
+**Measured from the stored inventory** (`run_vitest_balanced.mjs --shards=4 --list`): four shards
+of 301 / 324 / 333 / 329 files, 7.1 min each, ~28.4 min summed serially — and far worse in
+practice, because that figure is test execution only and excludes per-file startup under
+`maxWorkers: 1`.
+
+**Why this is a dispatcher and not an alias.** The balanced runner hands each shard an EXPLICIT
+file list. Aliasing `test:vitest` straight to it would break `npm run test:vitest -- <file>`: the
+filter matches in at most one shard and the other three exit non-zero having found no tests.
+`tools/test/run_vitest_default.mjs` therefore routes **no arguments** to the balanced runner
+(CI's exact `--shards=4` invocation) and **any arguments** to a plain unsharded `vitest run`.
+Each shard still carries `fileParallelism: false` / `maxWorkers: 1` internally, so the
+serialisation those settings exist to guarantee is preserved WITHIN a shard; parallelism is only
+ACROSS shards.
+
+**Verified functionally, both paths:**
+- `npm run test:vitest` → `[balanced-vitest] workers=4; partitioned files=1; serial files=51`
+- `npm run test:vitest -- tests/test_runner_default_contract.test.ts` → that one file, 2.15s
+
+**`tests/test_runner_default_contract.test.ts` binds the three surfaces that drift apart** — npm
+scripts, the CI workflow, and `CLAUDE.md`. **Mutation-tested**: reverting `test:vitest` to
+`vitest run` turns it red (`expected 'vitest run' to contain 'run_vitest_default.mjs'`), so the
+guard demonstrably catches the regression it exists for rather than passing vacuously. It
+deliberately pins the COMMAND and not a test count — a pinned count is exactly what rotted into
+the "3513 tests, 298 suites" claim this entry removes.
+
+`npm run test:vitest:serial` is retained as the unsharded whole-suite escape hatch for diagnosing
+a suspected cross-shard interaction.
