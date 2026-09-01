@@ -16,7 +16,12 @@ async function git(cwd: string, args: string[]): Promise<string> {
 function toBashPath(path: string): string {
     const normalized = path.replaceAll('\\', '/');
     if (process.platform !== 'win32') return normalized;
-    return normalized.replace(/^([A-Za-z]):\//, (_, drive: string) => `/mnt/${drive.toLowerCase()}/`);
+    // MSYS form (/f/...), not WSL form (/mnt/f/...). The `bash` on PATH under this
+    // repo's Windows toolchain is Git for Windows — scripts/repo/install_re_scope_hook.ps1
+    // explicitly hunts for its sh.exe — and Git Bash cannot resolve /mnt/<drive>.
+    // Measured: /mnt/f/... exits 127 (command not found) while /f/... reaches the script.
+    // CI is ubuntu and never takes this branch.
+    return normalized.replace(/^([A-Za-z]):\//, (_, drive: string) => `/${drive.toLowerCase()}/`);
 }
 
 test('package.json exposes one canonical desktop release check script', async () => {

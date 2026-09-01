@@ -162,10 +162,12 @@ describe('desktop calibration comparison provenance', () => {
     const output = JSON.parse(result.stdout);
     expect(output.schema_version).toBe(1);
     expect(output.comparison_kind).toBe('player_choice_vs_headless');
+    // The apr_1992 startup-snapshot definition was rebased 52w -> 188w by bad620632
+    // ("rebase campaign to 188w and simulate all three sides"); this pin lagged it.
     expect(output.scenario).toMatchObject({
       key: 'apr_1992',
-      scenario_id: 'apr1992_definitive_52w',
-      source_path: 'data/scenarios/apr1992_definitive_52w.json',
+      scenario_id: 'apr1992_definitive_188w',
+      source_path: 'data/scenarios/apr1992_definitive_188w.json',
       startup_snapshot_path: 'data/derived/startup/apr_1992_initial_save.json',
     });
     expect(output.scenario.startup_snapshot_sha256).toMatch(/^[a-f0-9]{64}$/);
@@ -248,7 +250,7 @@ describe('desktop calibration comparison provenance', () => {
     expect(output.electron_replay.provenance).toMatchObject({
       faction: 'RBiH',
       turn: 1,
-      scenario_id: 'apr1992_definitive_52w',
+      scenario_id: 'apr1992_definitive_188w',
       validation: {
         faction: 'matched',
         turn: 'matched',
