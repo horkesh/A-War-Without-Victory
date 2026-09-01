@@ -102,10 +102,46 @@ describe.skipIf(!hasFixture)('buildDetachedNarrowReadState — fidelity against 
                 }
             }
         }
-        // Positive guard: the source save must actually exercise both paths,
-        // or this test would pass vacuously.
-        expect(sawDirective).toBe(true);
+        // Positive guard: both reshape paths must actually be exercised, or this test
+        // would pass vacuously.
+        //
+        // axis objectives come from the real save — every run has them (10 axes here).
         expect(sawAxisObjectives).toBe(true);
+
+        // directive.priority_sector_id does NOT. It is optional and sparse: the previous
+        // baked artifact carried it on exactly ONE of 19 corps, and the current one on
+        // none — same 19 corps, same 18 directives, same 10 axes. Sourcing an
+        // anti-vacuity guard from a ROTATING artifact made it a lottery: refreshing
+        // data/derived/latest_run_final_save.json from any run whose final turn happens
+        // to have no priority_sector_id turned this red without anything regressing.
+        //
+        // So the branch is exercised deterministically instead, against a source state
+        // that is guaranteed to contain it. This keeps the guard's force — the reshape
+        // must still un-flatten the field — while removing the dependence on luck.
+        if (!sawDirective) {
+            const seededCorpsId = Object.keys(rawCorpsCommand)[0]!;
+            const seeded = {
+                ...state,
+                military: {
+                    ...state.military,
+                    corps_command: {
+                        ...rawCorpsCommand,
+                        [seededCorpsId]: {
+                            ...rawCorpsCommand[seededCorpsId]!,
+                            directive: {
+                                ...(rawCorpsCommand[seededCorpsId]!.directive ?? {}),
+                                priority_sector_id: 'sector:test:priority',
+                            },
+                        },
+                    },
+                },
+            } as typeof state;
+            const seededInput = captureSectorTopologySolveInput(
+                seeded, edges as never, null, undefined, undefined, { isFinalPass: true });
+            const seededDetached = buildDetachedNarrowReadState(seededInput);
+            expect(seededDetached.military.corps_command?.[seededCorpsId]?.directive?.priority_sector_id)
+                .toBe('sector:test:priority');
+        }
     });
 
     it('named_officers / named_officer_data / campaign_plans / brigade_movement / posture orders round-trip', () => {

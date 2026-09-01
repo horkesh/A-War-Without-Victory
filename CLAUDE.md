@@ -42,6 +42,22 @@ Smoke-test triad after every change: `tsc --noEmit` + `vitest run` + `desktop:ma
   - **A crossing must be recorded where the thesis is stated**, not only where the code changed — the relevant canon doc (`docs/10_canon/FORAWWV.md` §IX.6 — H1.8/H1.9/H2.1/H2.4; FORAWWV has no "§6", its headings are roman numerals / `SENSITIVE_HISTORY_DESIGN_GATE.md`, which is where the operative §6 lives / `VICTORY_AND_PYRRHIC_SCORING.md`) is amended in the same change, with the panel's reasoning. A thesis that moves silently in engine behaviour while canon still claims otherwise is the one outcome this rule exists to prevent.
   - **Surface it to the owner as a decision, not as a completed panel outcome.** The delegation makes it *possible* without the owner; it does not make it routine. AWWV's stated thesis is that atrocity is never rewarded and the war is negative-sum — a proposal to change that is a change to what the game is about, and the owner should know it is happening while it is still a proposal.
 
+## Long-Running Work — never idle-wait
+
+- **Never end a turn to narrate waiting.** The owner must not have to ask "status?" for work
+  to continue. Background Bash (`run_in_background`) fires a completion notification and
+  `Monitor` fires per event — both wake you unprompted.
+- **Arm a `Monitor` for anything long**, and grep for BOTH success and failure signatures:
+  a filter that matches only the happy path is silent through a crash, and silence is
+  indistinguishable from "still running".
+- **Do other work while it runs.** If there is none, end the turn silently. Return to the
+  owner only for a result, a decision that is genuinely theirs, or completion.
+- **Never call a job green from a wrapper's exit code or a partial log.** Read the
+  command's own status (`${PIPESTATUS[0]}`, or capture `rc=$?` before piping).
+- **Check what CI actually runs before spending hours locally.** `npm run test:vitest`
+  routes to the sharded runner CI uses; the unsharded `test:vitest:serial` is ~4x slower
+  for identical coverage.
+
 ## Shell & Platform
 
 - **Windows**: Use `;` not `&&` to chain commands in PowerShell.
