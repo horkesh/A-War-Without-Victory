@@ -63,6 +63,11 @@ export default defineConfig({
     globals: false,
     environment: 'node',
     environmentMatchGlobs,
+    // Install jsdom browser polyfills before each test file's module graph is
+    // evaluated. maplibre-gl calls window.URL.createObjectURL at import time, so this
+    // cannot wait for a test body — see the file for the ordering accident this
+    // replaces.
+    setupFiles: [join(rootDir, 'tools/test/jsdom_browser_polyfills.ts')],
     testTimeout: 120_000,
     fileParallelism: false,
     minWorkers: 1,
