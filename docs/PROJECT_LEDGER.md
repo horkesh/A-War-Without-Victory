@@ -31937,3 +31937,34 @@ the packaged app expected a ~460MB PMTiles binary, so MapLibre failed with
 "Wrong magic number for PMTiles archive". Locally the file is the real binary, which is why
 this only ever failed in CI. `lfs: true` scoped to that one job so the other does not pay
 the fetch.
+
+**Desktop Release Guard, second defect — the fonts. Not a font bug at all.**
+With the LFS fix in, the probe still failed on all six fonts the tactical map uses
+(`net::ERR_CACHE_MISS`, `resource_type: font`). Measured rather than assumed:
+
+- The map server received **exactly one request per font**, answered **200**, and finished
+  each response (`writableFinished === true`).
+- The renderer reported `document.fonts.status === 'loaded'`, all seven faces registered,
+  and `document.fonts.check()` true for both families.
+
+The bytes arrived and the text rendered. Only Chromium's cache lookup errored, and which
+`webContents` reported it varied between runs — a flaky signal about a working app. The
+seventh face (IBM Plex Mono 400 Latin2) is legitimately `unloaded`: its `unicode-range`
+matched no rendered glyph, which is also why it is the one font never requested.
+
+**Two hypotheses were built and falsified before this one.** (1) The cold-cache clear
+leaking into the packaged runtime — removing it made *more* windows report the error, not
+fewer. (2) A `clearCache()` race against a concurrently loading window — the probe creates
+its windows strictly sequentially, each awaited. Both were killed by measurement, and the
+`immutable` cache policy was left alone throughout: it is deliberate and contract-tested.
+
+**The fix is a swap, not a hole.** `assertPackagedFontsLoaded()` now asserts directly that
+every declared `@font-face` resolved and both families are renderable, and the probe
+forgives `ERR_CACHE_MISS` only for local same-origin fonts. This is strictly stronger than
+what it replaces: **verified by corrupting `IBMPlexSans_Condensed-Bold.ttf` and
+repackaging — the probe failed and named the exact face** (`IBM Plex Sans Condensed 700,
+status: error`), a real breakage the old signal could not distinguish from a working app.
+The font was restored byte-identically (sha256 `750124fb…`). A remote font, a non-font
+resource, any other error, and http-status failures all still fail.
+`tests/desktop_runtime_probe_cache_artifact.test.ts` pins both halves so the forgiveness
+cannot outlive the assertion that justifies it. Packaged probe: exit 1 → **exit 0**.
