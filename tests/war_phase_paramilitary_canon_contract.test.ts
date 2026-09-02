@@ -11,12 +11,10 @@ describe('war-phase paramilitary canon contract', () => {
         expect(phaseNames).toContain('paramilitary-advance');
     });
 
-    it('hands post-fade undefended pockets to regular consolidation', () => {
+    it('does not pass control to a passive post-fade consolidation phase', () => {
         const phaseNames = warPhases.map((phase) => phase.name);
-        const paramilitaryAdvance = phaseNames.indexOf('paramilitary-advance');
-        const rearPocketConsolidation = phaseNames.indexOf('rear-pocket-consolidation');
 
-        expect(paramilitaryAdvance).toBeGreaterThanOrEqual(0);
-        expect(rearPocketConsolidation).toBe(paramilitaryAdvance + 1);
+        expect(phaseNames).toContain('paramilitary-advance');
+        expect(phaseNames).not.toContain('rear-pocket-consolidation');
     });
 });

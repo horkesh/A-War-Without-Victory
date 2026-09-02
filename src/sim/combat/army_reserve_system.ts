@@ -1324,16 +1324,8 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
             ));
         const reservedForHistoricalOperation = isEliteReservedForHistoricalOperation(bid as FormationId, turn);
         const authoredOperationStillLive = !!receivingCommand?.active_operations?.some((operation) =>
-            (operation.phase === 'planning' || operation.phase === 'execution')
+            (operation.phase === 'planning' || operation.phase === 'execution' || operation.phase === 'recovery')
             && isEliteAuthoredForHistoricalOperation(bid as FormationId, operation.name));
-        const authoredPlanningCommitment = !!receivingCommand?.active_operations?.some((operation) =>
-            operation.phase === 'planning'
-            && isEliteAuthoredForHistoricalOperation(bid as FormationId, operation.name)
-            && (
-                operation.participating_brigades.includes(bid)
-                || (operation.axes ?? []).some((axis) => axis.assigned_brigades.includes(bid))
-            ));
-
         // A dated Main Staff commitment owns the interval between operations as
         // well as its launch turn. Once the current operation releases an
         // earmarked formation, return it to Army HQ instead of leaving it on a
@@ -1352,19 +1344,23 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
         }
 
         // Casualty threshold — > 30% personnel loss
-        if (startPersonnel > 0 && personnel < startPersonnel * (1 - ELITE_CASUALTY_THRESHOLD)) {
+        if (
+            !authoredOperationStillLive
+            && startPersonnel > 0
+            && personnel < startPersonnel * (1 - ELITE_CASUALTY_THRESHOLD)
+        ) {
             recallEliteLoan(state, bid, 'casualty_threshold', turn);
             continue;
         }
 
         // Morale collapse
-        if ((f.morale ?? 60) < ELITE_MORALE_RECALL) {
+        if (!authoredOperationStillLive && (f.morale ?? 60) < ELITE_MORALE_RECALL) {
             recallEliteLoan(state, bid, 'morale_collapse', turn);
             continue;
         }
 
         // Cohesion collapse
-        if ((f.cohesion ?? 50) < ELITE_COHESION_RECALL && !authoredPlanningCommitment) {
+        if ((f.cohesion ?? 50) < ELITE_COHESION_RECALL && !authoredOperationStillLive) {
             recallEliteLoan(state, bid, 'cohesion_collapse', turn);
             continue;
         }
@@ -1400,6 +1396,7 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
         const corpsId = ls.loaned_to_corps;
         const cmd = corpsCommand[corpsId];
         const hasActiveOp = committedToActiveOperation
+            || authoredOperationStillLive
             || (!reservedForHistoricalOperation && !!cmd?.active_operations?.some(op => op.phase === 'execution'));
         const cfs = state.military.corps_front_sectors ?? {};
         const sector = Object.keys(cfs).sort(strictCompare).map(k => cfs[k]).find(s => s.corps_id === corpsId);

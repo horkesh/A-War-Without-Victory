@@ -908,6 +908,58 @@ describe('elite loan per-turn reconciliation and tick', () => {
         expect(brigade.elite_loan_state!.last_recall_turn).toBeNull();
     });
 
+    it('retains a still-combat-capable elite through an authored operation execution', () => {
+        const brigade = makeOnLoanBrigade('rs_65th_protection_motorized_regiment', { loanStartTurn: 93 });
+        brigade.personnel = Math.ceil((brigade.elite_loan_state!.loan_start_personnel ?? 1000) * 0.6);
+        brigade.cohesion = ELITE_COHESION_RECALL - 1;
+        const state = makeState({
+            formations: { rs_65th_protection_motorized_regiment: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: 'Operation Zvezda 94',
+                        phase: 'execution',
+                        participating_brigades: ['rs_65th_protection_motorized_regiment'],
+                        axes: [{
+                            axis_id: 'gorazde_encirclement',
+                            assigned_brigades: ['rs_65th_protection_motorized_regiment'],
+                            objectives: ['op:gorazde:sopotnica'],
+                        }],
+                    }],
+                },
+            },
+            turn: 100,
+        });
+
+        tickEliteLoans(state, 100);
+
+        expect(brigade.elite_loan_state!.on_loan).toBe(true);
+        expect(brigade.elite_loan_state!.last_recall_turn).toBeNull();
+    });
+
+    it('retains an authored elite through recovery so the operation AAR keeps its assault group', () => {
+        const brigade = makeOnLoanBrigade('rs_1st_guards_motorized', { loanStartTurn: 93 });
+        const state = makeState({
+            formations: { rs_1st_guards_motorized: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: 'Operation Zvezda 94',
+                        phase: 'recovery',
+                        participating_brigades: ['rs_1st_guards_motorized'],
+                    }],
+                },
+            },
+            corps_front_sectors: {},
+            turn: 100,
+        });
+
+        tickEliteLoans(state, 100);
+
+        expect(brigade.elite_loan_state!.on_loan).toBe(true);
+        expect(brigade.elite_loan_state!.last_recall_turn).toBeNull();
+    });
+
     it('does NOT recall before min duration even if op ended', () => {
         const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: 8 });
         const state = makeState({

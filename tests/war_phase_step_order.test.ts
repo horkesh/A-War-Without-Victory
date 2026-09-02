@@ -264,13 +264,12 @@ describe('war-phase step ordering', () => {
         // -4 assertion steps; Engine Invariants section 1 now runs one barrier after the pipeline.
         // +1 from jna-transition (event-backed JNA withdrawal lifecycle projection).
         // -1 from consolidating offensive paramilitary detection into the bounded sweep path.
-        // +1 from rear-pocket-consolidation after the paramilitary fade week.
         // +1 from apply-brcko-tactical-group-relocation (Brčko defense lever part 2,
         // flag-gated AWWV_BRCKO_TACTICAL_GROUP, default OFF, 2026-08-11).
         // +1 from repair-active-elite-deployment-after-final-topology: restores
         // movement ownership if final topology invalidates a live loan assignment.
         // +1 from prestage-deferred-historical-elites: emits the dated Main Staff
         // concentration march before column movement consumes it.
-        expect(stepNames.length).toBe(191);
+        expect(stepNames.length).toBe(190);
     });
 });

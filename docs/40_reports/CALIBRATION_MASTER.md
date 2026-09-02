@@ -4101,3 +4101,27 @@ positions, while the changed operational sequence leaves four Goražde contracti
 RBiH because Zvezda 94 does not launch. The latter is a historical-operation scheduling/force-flow
 problem and must be solved in that subsystem; it is not grounds for weakening the purpose rule or
 adding passive control changes.
+
+## 2026-09-02 — Brčko and Zvezda regression correction ADOPTED
+
+The v52 Brčko result was not a combat capture. Generic RBiH 2nd Corps priorities expanded the
+whole Brčko municipality into campaign objectives; after three southern cells changed hands, the
+post-fade rear-pocket phase awarded `op:brcko:brcko` without a battle. That phase contradicted the
+War Specification's operations-only control rule and has been removed from the production
+pipeline. `Tuzla Expansion` now names only the southern approach at `op:brcko:brka_2`; Brčko city
+remains available to an explicit authored or Army-HQ operation rather than being hard-locked.
+
+The same run showed that Zvezda 94 was queued but could not retain its Main Staff assault group.
+Authored elite reservations now cover the complete historical execution window, and an elite
+committed to an authored operation remains attached through recovery so the completed AAR retains
+the formations that actually fought. Ordinary elite loans still use the usual recall rules;
+permanent degradation remains an immediate recall condition.
+
+The accepted 104-week proof is
+`runs/apr1994_fix_v56/apr1992_definitive_188w__1db784e85c2e6de0__w104_n0`, hash
+`8b7f2246c7c2d27b`. Brčko, Donji Rahić, and Potočari remain RS; Brka remains RBiH. Operation
+Zvezda 94 starts at turn 93 and completes successfully at turn 98 with both the 1st Guards and
+65th Protection Regiment in its seven-formation roster. Four logged battles capture Sopotnica,
+Slatina, Ustiprača, and Kolovariće, while Goražde town remains RBiH. The run contains zero
+`consolidation` or `abandoned` control changes and scores **684/712** at April 1994. The lower
+national score is the visible cost of removing a non-canonical global auto-flip mechanism.

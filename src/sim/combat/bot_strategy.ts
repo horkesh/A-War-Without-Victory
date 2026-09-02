@@ -524,7 +524,13 @@ const RBIH_ARMY_PRIORITIES: ArmyOperationPriority[] = [
     // 2nd Corps historically fought for Brčko corridor throughout 1992-93. The corridor
     // was the most contested area of the war — ARBiH constantly probed and counterattacked.
     { name: 'Tuzla Defense', corps_id: 'arbih_2nd_corps', target_municipalities: ['tuzla', 'kalesija', 'lukavac', 'zivinice', 'gradacac', 'srebrenik', 'kladanj', 'zvornik', 'brcko'], start_week: 0, end_week: 56, weight: 80, min_outcome: 'repulsed' },
-    { name: 'Tuzla Expansion', corps_id: 'arbih_2nd_corps', target_municipalities: ['tuzla', 'kalesija', 'lukavac', 'zivinice', 'gradacac', 'srebrenik', 'kladanj', 'lopare', 'ugljevik', 'zvornik', 'brcko'], start_week: 56, end_week: 9999, weight: 60, min_outcome: 'stalemate' },
+    // Brčko city is the keystone of the Posavina corridor, not an ordinary
+    // municipality-wide expansion target. Keep 2nd Corps' standing pressure on
+    // the historically contested southern approach. Taking the city itself
+    // requires an explicitly authored / Army-HQ operation, preserving player
+    // freedom without letting a generic corps opportunity acquire it by scope
+    // expansion.
+    { name: 'Tuzla Expansion', corps_id: 'arbih_2nd_corps', target_municipalities: ['tuzla', 'kalesija', 'lukavac', 'zivinice', 'gradacac', 'srebrenik', 'kladanj', 'lopare', 'ugljevik', 'zvornik'], target_osids: ['op:brcko:brka_2'], start_week: 56, end_week: 9999, weight: 60, min_outcome: 'stalemate' },
     // 3rd Corps: Central Bosnia — defensive only until week 56
     { name: 'Central Corridor Defense', corps_id: 'arbih_3rd_corps', target_municipalities: ['zenica', 'kakanj', 'visoko', 'tesanj', 'maglaj', 'zavidovici', 'zepce'], start_week: 0, end_week: 56, weight: 80, min_outcome: 'repulsed' },
     // 3rd Corps: Central corridor counter — reclaim municipalities RS overruns (calibration: Phase M, Jan 1993 painted targets)

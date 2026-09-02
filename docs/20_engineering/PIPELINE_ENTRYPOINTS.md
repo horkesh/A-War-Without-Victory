@@ -199,7 +199,7 @@ These are **not** simulation entrypoints. They are opt-in tooling and must remai
 
 This section supersedes older details in the broad War-phase OSID paragraph where they conflict:
 
-- `paramilitary-detect` and `paramilitary-advance` run after sector partitioning. `rear-pocket-consolidation` follows `paramilitary-advance` and is active only after `PARAMILITARY_FADE_WEEK`; it consolidates only deterministic undefended fully surrounded clusters of one to six OSIDs that pass enclave guards.
+- `paramilitary-detect` and `paramilitary-advance` run after sector partitioning through `PARAMILITARY_FADE_WEEK`. No post-fade passive consolidation phase changes political control; later pockets require attack/operation resolution.
 - Sector partitioning promotes only roster-eligible, legally reachable formations. It does not guarantee paper staffing when enclave rules, connectivity, or donor commitments make relief impossible; those sectors carry `unstaffed_front: true`.
 - During `generate-bot-corps-orders`, commander decision/emit may write a same-corps `sector_reassignment_order` for an empty staffable front. `generate-bot-brigade-orders` translates that T1 intent into a T2 column order, and a later T3 movement pass changes physical location. No assignment or final reconciliation step teleports a formation.
 

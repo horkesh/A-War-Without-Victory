@@ -31721,3 +31721,28 @@ and bilateral opponent scope. The 104-week run
 `27f3e651cf7a29ee`, scores **696/712**, leaves Lopare Selo RS, and emits no generic `Farz`.
 Remaining Brčko and Zvezda/Goražde differences are recorded as calibration debt rather than hidden
 with target-specific prohibitions.
+
+### 2026-09-02 — CORRECTION: Brčko requires an operation; Zvezda retains its Main Staff group
+
+The v52 Brčko city change is rejected. RBiH 2nd Corps first received every hostile OSID in the
+Brčko municipality as a generic campaign objective, then the post-fade rear-pocket phase changed
+the city from RS to RBiH without combat after its three neighbours became RBiH. The production
+war pipeline no longer runs `rear-pocket-consolidation`; this restores the War Specification rule
+that control changes only through attacks or operations. The late `Tuzla Expansion` priority now
+names only `op:brcko:brka_2`. An explicit authored or Army-HQ operation may still attack Brčko, so
+this is command-scope discipline rather than an immutable controller lock.
+
+Operation Zvezda 94 remains the authored two-axis Goražde offensive. Its two Main Staff formations
+are reserved through turn 113, covering the catalogued operation window, and authored elite loans
+remain attached through the operation's recovery phase. Permanent degradation still forces
+recall; ordinary loans retain the standard lifecycle.
+
+Fresh 104-week evidence:
+`runs/apr1994_fix_v56/apr1992_definitive_188w__1db784e85c2e6de0__w104_n0`, hash
+`8b7f2246c7c2d27b`, April score **684/712**. Brčko city, Donji Rahić, and Potočari remain RS;
+Brka remains RBiH. Zvezda starts t93 and completes successfully t98 with seven formations,
+including the 1st Guards Motorized Brigade and 65th Protection Motorized Regiment. Its four
+logged battles capture Sopotnica, Slatina, Ustiprača, and Kolovariće; Goražde remains RBiH. The
+entire 104-week run contains zero `consolidation` or `abandoned` control changes. Focused tests
+were observed red before implementation and cover the removed pipeline phase, Brčko objective
+scope, reservation window, and authored recovery retention.
