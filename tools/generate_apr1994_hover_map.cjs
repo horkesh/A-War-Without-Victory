@@ -39,14 +39,13 @@ const paintedOsids = Object.keys(painted);
 const correct = paintedOsids.filter((osid) => finalControl[osid] === painted[osid]).length;
 const pct = ((correct / paintedOsids.length) * 100).toFixed(2);
 html = html
-  .replace(/const osids=\[.*?\];/s, `const osids=${JSON.stringify(osids)};`)
+  .replace(/const osids=\[.*?\];/s, `const osids=${JSON.stringify(osids)};\nconst controlFill={RS:'#b03636',RBiH:'#4a7c54',HRHB:'#486ebe'};\ndocument.querySelectorAll('.hit-region').forEach((region,index)=>{const item=osids[index];region.style.setProperty('--cell-fill',item.mismatch?'#c98e26':controlFill[item.simulated]);region.setAttribute('tabindex','0');region.setAttribute('aria-label',item.osid+' — '+item.settlement+' — '+item.simulated);});`)
   .replace(/\d+ \/ 712 correct · \d+\.\d+%/, `${correct} / ${paintedOsids.length} correct · ${pct}%`)
   .replace(/April 1994 calibration · 104-week run/g, 'April 1994 calibration · corrected 104-week run')
   .replace(/\.hit-region\{fill:transparent;stroke:transparent;stroke-width:2;/,
     '.hit-region{fill:var(--cell-fill,transparent);fill-opacity:.92;stroke:rgba(8,12,17,.58);stroke-width:.65;')
   .replace(/\.hit-region:hover,\.hit-region:focus\{fill:rgba\(255,255,255,\.16\);stroke:rgba\(255,255,255,\.95\);/,
     '.hit-region:hover,.hit-region:focus{fill:var(--cell-fill,transparent);fill-opacity:1;stroke:rgba(255,255,255,.98);stroke-width:1.8;')
-  .replace('const image=document.getElementById', `const controlFill={RS:'#b03636',RBiH:'#4a7c54',HRHB:'#486ebe'};\ndocument.querySelectorAll('.hit-region').forEach((region,index)=>{const item=osids[index];region.style.setProperty('--cell-fill',item.mismatch?'#c98e26':controlFill[item.simulated]);region.setAttribute('tabindex','0');region.setAttribute('aria-label',item.osid+' — '+item.settlement+' — '+item.simulated);});\nconst image=document.getElementById`)
   .replace('Amber fill marks a wrong OSID; its outline and center dot show the painted controller.',
     'Amber fill marks a wrong OSID; hover or tap it to see the painted controller.')
   .replace('Full north-up April 1994 operational control map with amber mismatches and expected-faction marks.',

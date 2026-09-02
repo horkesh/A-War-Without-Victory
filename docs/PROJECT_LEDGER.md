@@ -31746,3 +31746,12 @@ logged battles capture Sopotnica, Slatina, Ustiprača, and Kolovariće; Goražde
 entire 104-week run contains zero `consolidation` or `abandoned` control changes. Focused tests
 were observed red before implementation and cover the removed pipeline phase, Brčko objective
 scope, reservation window, and authored recovery retention.
+
+### 2026-09-02 — CORRECTION: April hover map applies controller colors after OSID initialization
+
+The first published corrected-April map embedded the right v56 controller data but executed its
+SVG color-overlay loop before declaring `osids`. The resulting browser error left the older v46
+background visible, making RS-held Lopare Selo appear RBiH. The generator now declares the updated
+OSID dataset before applying controller fills. A focused regression test was observed red on the
+old ordering and green after the correction. This is visualization-only: the accepted simulation
+already had `op:lopare:lopare_selo_2` as RS initially, finally, and in the April painted target.
