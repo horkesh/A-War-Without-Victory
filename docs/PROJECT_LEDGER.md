@@ -31651,3 +31651,30 @@ four decisive attacks and four logged combat captures: Sopotnica, Slatina, Ustip
 Kolovariće. The Trnovo corridor targets are RS, Goražde town is RBiH, and the April comparator rises
 from the integrated **688/712** baseline to **699/712 (98.17%)**. The relevant regression surface is
 green at **352/352** tests across 11 suites, with `git diff --check` clean.
+
+### 2026-09-02 — Srebrenica lane completed through named-operation combat
+
+Root-cause tracing against the v44 battle ledger showed that the January ARBiH
+Srebrenica–Cerska Link-Up captured Pobuđe and Ježeštica, while the later VRS Cerska-pocket axis
+ended immediately after taking Cerska. The operational contact graph confirms a contiguous route
+from Cerska through Pobuđe to Ježeštica. The existing Operation Cerska–Kamenica objective chain was
+extended along that route; no strength constant, battle resolver, direct-control event,
+consolidation, or abandonment mechanism changed.
+
+Fresh proof run
+`runs/apr1994_srebrenica_v45/apr1992_definitive_188w__1db784e85c2e6de0__w104`, hash
+`29338a032c484801`: the 1st Birač Brigade wins decisive battles at Cerska (t45), Pobuđe (t46), and
+Ježeštica (t47). Operation Cerska–Kamenica completes successfully with all nine objectives
+captured. Both Army-HQ elites are present in the live operation through execution, and the 1st
+Guards leads the Skelani-cutoff axis. April rises from **699/712** to **701/712 (98.46%)**; the
+controller diff is exactly the two repaired cells and there are no added mismatches. Combat
+causality remains valid with zero invalid or zero-eligible operations.
+
+Changed files: `src/sim/combat/triggered_operations.ts`,
+`tests/triggered_operations.test.ts`, `docs/40_reports/CALIBRATION_MASTER.md`, and this ledger.
+Verification: the new catalog assertion failed before implementation, then the full neighboring
+surface passed **302/302** tests across 11 suites; TypeScript typecheck and `git diff --check`
+passed. Canon propagation found no stale structural Cerska references in `docs/10_canon`,
+`docs/20_engineering`, active planning documents, or role skills; the timeline's historical
+February–March 1993 statement already agrees with the implementation. Zero structural references
+were changed and no uncertain references remain.

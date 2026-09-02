@@ -4045,3 +4045,28 @@ partial. Zvezda launches at turn 100 with the 1st Guards but fails to capture it
 objectives. The 65th remains roster-eligible but is unavailable to these two operations in this
 run under the ordinary loan lifecycle; focused tests prove its admission when canonically
 available. No attack-resolution rule or direct control authority changed.
+
+## 2026-09-02 — Srebrenica lane completed through Operation Cerska–Kamenica
+
+The January ARBiH Srebrenica–Cerska Link-Up captures Pobuđe and Ježeštica through ordinary
+operation combat, but the February VRS counteroffensive previously stopped after its first
+Cerska-pocket objective. The operational contact graph provides the contiguous historical axis
+`op:vlasenica:cerska_2` → `op:bratunac:pobudje_2` →
+`op:bratunac:jezestica_2`. Operation Cerska–Kamenica now carries that complete three-objective
+chain. No combat multiplier, control event, consolidation rule, or special capture authority was
+added.
+
+The 104-week proof run is
+`runs/apr1994_srebrenica_v45/apr1992_definitive_188w__1db784e85c2e6de0__w104`, final hash
+`29338a032c484801`. The operation starts at turn 40 with both Army-HQ elites in its nine-formation
+live roster. The 1st Birač Brigade decisively captures Cerska at turn 45, Pobuđe at turn 46, and
+Ježeštica at turn 47. The operation completes successfully after nine total combat captures; the
+two elite formations remain committed through execution and the 1st Guards leads the separate
+Skelani-cutoff attacks.
+
+Both former Srebrenica residuals now match the painted April map, with no added mismatch anywhere
+else. The April comparator improves from **699/712 (98.17%)** to **701/712 (98.46%)**, leaving 11
+residuals outside this lane. Combat causality remains valid: 424 attack orders, 284 battles, zero
+invalid operations, zero zero-eligible operations, and zero recovery-without-attempt rows. The
+neighboring operation/elite regression surface passes **302/302** tests across 11 suites;
+TypeScript typecheck and `git diff --check` pass.

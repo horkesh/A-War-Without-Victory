@@ -339,7 +339,15 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                     'rs_1st_birac' as FormationId,
                     'rs_1st_milii' as FormationId,
                 ],
-                objectives: ['op:vlasenica:cerska_2'],
+                // Continue the historical pocket reduction along the live
+                // operational graph: Cerska -> Pobudje -> Jezestica. The
+                // January ARBiH link-up took the latter two through combat;
+                // this February counteroffensive must retake them the same way.
+                objectives: [
+                    'op:vlasenica:cerska_2',
+                    'op:bratunac:pobudje_2',
+                    'op:bratunac:jezestica_2',
+                ],
                 staging_osid: 'op:vlasenica:grabovica',
                 minimum_staged_brigades: 2,
             },

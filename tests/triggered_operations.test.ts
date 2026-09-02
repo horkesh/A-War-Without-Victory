@@ -173,7 +173,11 @@ describe('triggered operations definitions', () => {
         assert.equal(operation.min_attack_outcome, 'repulsed');
         assert.equal(operation.execution_attack_power_mult, 2.0);
         assert.equal(operation.require_all_axes_ready, true);
-        assert.deepEqual(cerskaAxis.objectives, ['op:vlasenica:cerska_2']);
+        assert.deepEqual(cerskaAxis.objectives, [
+            'op:vlasenica:cerska_2',
+            'op:bratunac:pobudje_2',
+            'op:bratunac:jezestica_2',
+        ]);
         assert.equal(cerskaAxis.staging_osid, 'op:vlasenica:grabovica');
         assert.equal(cerskaAxis.minimum_staged_brigades, 2);
         assert.ok(!cerskaAxis.objectives.includes('op:srebrenica:brezovice_2'));
@@ -798,7 +802,13 @@ describe('checkTriggeredOperations', () => {
         const state = makeState(40);
         state.military.corps_command!['vrs_herzegovina']!.active_operations = [{ name: 'x', participating_brigades: [] } as any];
         state.military.corps_command!['vrs_1st_krajina']!.active_operations = [{ name: 'y', participating_brigades: [] } as any];
-        state.political.political_controllers!['op:vlasenica:cerska_2'] = 'RS';
+        for (const osid of [
+            'op:vlasenica:cerska_2',
+            'op:bratunac:pobudje_2',
+            'op:bratunac:jezestica_2',
+        ]) {
+            state.political.political_controllers![osid] = 'RS';
+        }
 
         const injected = checkTriggeredOperations(state);
         assert.ok(injected.includes('Operation Cerska-Kamenica'));
@@ -813,7 +823,13 @@ describe('checkTriggeredOperations', () => {
         const state = makeState(40);
         state.military.corps_command!['vrs_herzegovina']!.active_operations = [{ name: 'x', participating_brigades: [] } as any];
         state.military.corps_command!['vrs_1st_krajina']!.active_operations = [{ name: 'y', participating_brigades: [] } as any];
-        state.political.political_controllers!['op:vlasenica:cerska_2'] = 'RS';
+        for (const osid of [
+            'op:vlasenica:cerska_2',
+            'op:bratunac:pobudje_2',
+            'op:bratunac:jezestica_2',
+        ]) {
+            state.political.political_controllers![osid] = 'RS';
+        }
 
         const injected = checkTriggeredOperations(state);
 
