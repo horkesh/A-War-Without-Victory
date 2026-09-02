@@ -31625,3 +31625,29 @@ between authored commitments, keep attacker victories from consuming the failure
 because occupation resolves later, and let AAR causality consume canonical `territory_flipped`
 battle receipts when weekly telemetry lags. No direct-control, consolidation, or abandonment
 calibration mechanism was added.
+
+### 2026-09-02 — Goražde–Trnovo lane completed through named operations
+
+The eastern April 1994 lane is now produced by two VRS operations rather than passive control
+logic. Operation Lukavac 93 concentrates the Sarajevo–Romanija local group and the two Army-HQ
+elites to seize Trnovo and sever the surviving land corridor. Operation Zvezda 94 then attacks on
+two Drina Corps axes: the 1st Guards-led northern column contracts the enclave through Sopotnica
+and Slatina, while the cutoff column takes Ustiprača and continues through Kolovariće. Goražde town
+is deliberately excluded and remains RBiH. The 1st Guards Motorized Brigade and 65th Protection
+Motorized Regiment are explicitly present in both operations through their execution phases; the
+weekly battle ledger records the 65th leading Lukavac's corridor attacks and the 1st Guards leading
+Zvezda's northern breakthrough.
+
+The supporting implementation is operational only: dated bot pre-staging, explicit historical
+elite reservations, admission of assembled Army-HQ loans, and retention of an authored elite during
+the receiving operation's planning phase. No direct-control event, consolidation, abandonment, or
+special capture rule was added. Every calibrated OSID still requires a battle, and one attack can
+capture at most one OSID.
+
+The 104-week proof run is
+`runs/apr1994_gorazde_trnovo_v44/apr1992_definitive_188w__1db784e85c2e6de0__w104_n0`, final hash
+`d5aac65186ad550f`. Zvezda starts at t93, executes at t96, and completes successfully at t98 with
+four decisive attacks and four logged combat captures: Sopotnica, Slatina, Ustiprača, and
+Kolovariće. The Trnovo corridor targets are RS, Goražde town is RBiH, and the April comparator rises
+from the integrated **688/712** baseline to **699/712 (98.17%)**. The relevant regression surface is
+green at **352/352** tests across 11 suites, with `git diff --check` clean.

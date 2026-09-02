@@ -1326,6 +1326,13 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
         const authoredOperationStillLive = !!receivingCommand?.active_operations?.some((operation) =>
             (operation.phase === 'planning' || operation.phase === 'execution')
             && isEliteAuthoredForHistoricalOperation(bid as FormationId, operation.name));
+        const authoredPlanningCommitment = !!receivingCommand?.active_operations?.some((operation) =>
+            operation.phase === 'planning'
+            && isEliteAuthoredForHistoricalOperation(bid as FormationId, operation.name)
+            && (
+                operation.participating_brigades.includes(bid)
+                || (operation.axes ?? []).some((axis) => axis.assigned_brigades.includes(bid))
+            ));
 
         // A dated Main Staff commitment owns the interval between operations as
         // well as its launch turn. Once the current operation releases an
@@ -1357,7 +1364,7 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
         }
 
         // Cohesion collapse
-        if ((f.cohesion ?? 50) < ELITE_COHESION_RECALL) {
+        if ((f.cohesion ?? 50) < ELITE_COHESION_RECALL && !authoredPlanningCommitment) {
             recallEliteLoan(state, bid, 'cohesion_collapse', turn);
             continue;
         }

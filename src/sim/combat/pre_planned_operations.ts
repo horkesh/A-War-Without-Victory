@@ -51,6 +51,7 @@ import {
 import { resolveOperationFormation } from './operation_formation_resolver.js';
 import { isOperationObjectiveHostile } from './operation_objective_hostility.js';
 import { computeMultiAxisPlanningDuration } from './sector_offensive_axis_helpers.js';
+import { isEliteAuthoredForHistoricalOperation } from './historical_elite_reservations.js';
 // Graz truce imports removed: east Herzegovina truce is handled by sector_offensive
 // on operation completion (graz_east_herzegovina_active_turn), not by injection.
 
@@ -359,7 +360,10 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         // and frees brigades. Planning authority opens at w93 so the columns can
         // assemble before the late-March offensive and the w104 April checkpoint.
         //
-        // Staging: podkozara_donja_2 (RS-painted from init, adj slatina_2 ✓)
+        // Staging: the Main Staff group and Drina locals assemble on the
+        // northern Rogatica shoulder. Fresh Drina Corps formations provide
+        // the mass on the cutoff and western axes while the Army-HQ group
+        // drives the principal contraction of the enclave.
         // Objectives: slatina_2 (RBiH-painted, adj gorazde_2 — encirclement approach);
         //             sopotnica (RBiH-painted, adj slatina_2 — pocket tightener; skipped if already RS);
         //             ustipraca_2 (RBiH-painted, adj sopotnica — closes the remaining corridor)
@@ -372,7 +376,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         name: 'Operation Zvezda 94',
         staging_osid: 'op:gorazde:podkozara_donja_2',
         available_from: 93,
-        prestage_from: 88,
+        prestage_from: 84,
         min_attack_outcome: 'repulsed',
         // Main Staff artillery, engineering, and command concentration. This
         // modifies combat power only; every objective still requires a battle.
@@ -390,33 +394,37 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 axis_id: 'gorazde_encirclement',
                 name: 'Goražde Encirclement',
                 brigades: [
-                    'rs_1st_podrinje',
-                    'rs_visegrad_brigade',
                     // Main Staff allocation for scenario balance. BB2 supports
                     // higher-HQ concentration at Zvezda, not these exact unit names.
                     'rs_1st_guards_motorized',
+                    'rs_65th_protection_motorized_regiment',
+                    'rs_5th_podrinje',
                 ],
-                // podkozara_donja_2 adj slatina_2 ✓; slatina_2 adj sopotnica ✓;
-                // sopotnica adj ustipraca_2 ✓
+                // The northern shoulder presses south through Sopotnica to
+                // Slatina instead of routing the Army-HQ reserve around the
+                // eastern side of the enclave before the attack begins.
                 objectives: [
-                    'op:gorazde:slatina_2',   // RBiH-painted; adj gorazde_2 — encirclement chokepoint
                     'op:gorazde:sopotnica',   // RBiH-painted; adj slatina_2 — pocket tightener
+                    'op:gorazde:slatina_2',   // RBiH-painted; adj gorazde_2 — encirclement chokepoint
                 ],
-                staging_osid: 'op:gorazde:podkozara_donja_2',
-                minimum_staged_brigades: 2,
-                minimum_forward_brigades: 2,
+                staging_osid: 'op:rogatica:brcigovo',
+                minimum_staged_brigades: 1,
+                minimum_forward_brigades: 1,
             },
             {
                 axis_id: 'ustipraca_cutoff',
                 name: 'Ustiprača Cutoff',
                 brigades: [
-                    'rs_5th_podrinje',
-                    'rs_65th_protection_motorized_regiment',
+                    'rs_1st_bratunac',
+                    'rs_1st_birac',
+                    'rs_1st_podrinje',
+                    'rs_visegrad_brigade',
                 ],
-                // The operational graph places Ustiprača directly adjacent to
-                // Podkožara Donja, permitting a simultaneous eastern thrust.
-                objectives: ['op:gorazde:ustipraca_2'],
-                staging_osid: 'op:gorazde:podkozara_donja_2',
+                objectives: [
+                    'op:gorazde:ustipraca_2',
+                    'op:gorazde:kolovarice',
+                ],
+                staging_osid: 'op:rogatica:brcigovo',
                 minimum_staged_brigades: 1,
                 minimum_forward_brigades: 1,
             },
@@ -549,9 +557,9 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
-        // Operation Trnovo — VRS Sarajevo-Romanija Corps (SRK) secures the Trnovo cluster
-        // south of Sarajevo. Historically, SRK held the Trnovo area throughout the war
-        // (BB2 p.289). rs_trnovo_brigade home OSID is gornja_presjenica (RS from init).
+        // Operation Lukavac 93 — Main Staff-led VRS attack that took Trnovo and
+        // severed the land corridor into Goražde. Elite Army-HQ formations provide
+        // the assault weight while local SRK brigades secure the shoulders.
         //
         // Painted control (Sacred Rule 4):
         //   gornja_presjenica = RS (staging — not an objective)
@@ -582,21 +590,24 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         // including Romanija-area brigades pre-positioned south of Sarajevo (BB2 p.289).
         corps: 'vrs_sarajevo_romanija',
         faction: 'RS',
-        name: 'Operation Trnovo',
+        name: 'Operation Lukavac 93',
         staging_osid: 'op:trnovo:gornja_presjenica',
         // available_from: 69 — historical Lukavac 93 = August 1993 (~w69). Earlier firing
         // would capture trnovo/delijas before Jan 1993, breaking the 40w calibration target.
         available_from: 69,
+        prestage_from: 62,
         min_attack_outcome: 'repulsed',
         // 3 hops from rs_igman_brigade's home (hadzici:misevici_2) to the staging OSID.
         // Same reasoning as Operation Foca's planning_duration:6 -- the default anti-paralysis
         // window fires before a marching brigade arrives and produces zero_eligible_axis.
         planning_duration: 6,
+        minimum_viable_participants: 3,
+        minimum_assembled_participants: 3,
+        execution_attack_power_mult: 3,
         axes: [
             {
-                // gornja_presjenica → kijevo_2 (RS waypoint, strips) → delijas (RBiH-painted)
-                axis_id: 'trnovo_east',
-                name: 'Trnovo East — Delijas',
+                axis_id: 'trnovo_corridor',
+                name: 'Trnovo–Goražde Corridor',
                 // rs_igman_brigade ADDED 2026-08-24. WHY LUKAVAC 93 NEVER FIRED ON TIME:
                 // rs_trnovo_brigade is authored mandatory with available_from 6, but it does not
                 // enter the war until t140 -- canFormEmergentBrigade gates a later-forming
@@ -611,18 +622,28 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 // (July-August 1993) took Trnovo, Mt Igman and Bjelasnica. It spawns t29, is alive
                 // at t69, and is committed to no other operation. Keeping rs_trnovo_brigade in the
                 // list costs nothing -- it simply joins if and when it exists.
-                brigades: ['rs_trnovo_brigade', 'rs_igman_brigade'],
+                brigades: [
+                    'rs_65th_protection_motorized_regiment',
+                    'rs_igman_brigade',
+                    'rs_trnovo_brigade',
+                ],
                 objectives: [
-                    'op:trnovo:kijevo_2',   // RS waypoint (painted RS, strips at execution)
-                    'op:trnovo:delijas',     // RBiH-painted, persistent RBiH mismatch
+                    'op:trnovo:kijevo_2',
+                    'op:trnovo:delijas',
+                    'op:foca:mazlina',
+                    'op:foca:donje_zesce',
+                    'op:pale:podgrab',
                 ],
                 staging_osid: 'op:trnovo:gornja_presjenica',
             },
             {
-                // gornja_presjenica → trnovo (RBiH-painted, directly adjacent)
                 axis_id: 'trnovo_town',
                 name: 'Trnovo Town',
-                brigades: ['rs_1st_romanija_infantry'],
+                brigades: [
+                    'rs_1st_guards_motorized',
+                    'rs_2nd_romanija_brigade',
+                    'rs_1st_romanija_infantry',
+                ],
                 objectives: [
                     'op:trnovo:trnovo',     // RBiH-painted, persistent RBiH mismatch
                 ],
@@ -701,6 +722,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         faction: 'RS',
         name: 'Operation Foca',
         staging_osid: 'op:foca:foca_3',
+        prestage_from: 0,
         // planning_duration:6 — kalinovik axis brigades take 5 elapsed turns to reach vlaholje
         // (adjacent to golubici_2). Default aggressiveness anti-paralysis fires at elapsed=5 (t10=w09),
         // 1 turn before brigades arrive → zero_eligible_axis. Extending to 6 shifts anti-paralysis
@@ -1636,6 +1658,10 @@ function buildAxesFromDef(
                 && formation.elite_loan_state != null;
             const isAuthoredEliteAtStaging = isArmyHqElite
                 && isForwardDeployedOnAxis(formation, axisDef);
+            const isAlreadyLoanedToHost = isArmyHqElite
+                && formation.elite_loan_state?.on_loan === true
+                && formation.elite_loan_state.loaned_to_corps === def.corps
+                && isEliteAuthoredForHistoricalOperation(fid, def.name);
             // Existing movement owners retain authority. Injection cannot prove
             // whether transit is player-, recall-, loan-, or bot-authored, so it
             // must not claim or reset a brigade already in column movement. The
@@ -1643,7 +1669,11 @@ function buildAxesFromDef(
             // axis's staging OSID: its generic home-return transit is superseded
             // by the operation it physically assembled for.
             if (movementState[fid]?.status === 'in_transit') {
-                if (movementState[fid]?.owner !== 'bot_discretionary' && !isAuthoredEliteAtStaging) return [];
+                if (
+                    movementState[fid]?.owner !== 'bot_discretionary'
+                    && !isAuthoredEliteAtStaging
+                    && !isAlreadyLoanedToHost
+                ) return [];
             }
             // Already fighting for someone else — see collectCommittedFormationIds.
             if (committedElsewhere.has(fid)) return [];
@@ -1665,14 +1695,16 @@ function buildAxesFromDef(
             if (isArmyHqElite || isSectorAssignmentExemptCorpsId(corpsId)) {
                 if (!formation.elite_loan_state) return []; // non-elite exempt = skip
                 const ls = formation.elite_loan_state;
-                if (ls.on_loan) return [];
-                if (!isEliteAvailableForLoan(formation, state.meta.turn)) return [];
-                if (
-                    !isAuthoredEliteAtStaging
-                    && adjacency
-                    && !canEliteLoanReachCorpsTerritory(state, fid, def.corps, adjacency)
-                ) return [];
-                eliteLoans.push({ brigadeId: fid, corpsId: def.corps });
+                if (ls.on_loan && !isAlreadyLoanedToHost) return [];
+                if (!isAlreadyLoanedToHost) {
+                    if (!isEliteAvailableForLoan(formation, state.meta.turn)) return [];
+                    if (
+                        !isAuthoredEliteAtStaging
+                        && adjacency
+                        && !canEliteLoanReachCorpsTerritory(state, fid, def.corps, adjacency)
+                    ) return [];
+                    eliteLoans.push({ brigadeId: fid, corpsId: def.corps });
+                }
             }
             if (movementState[fid]?.status === 'in_transit' || isAuthoredEliteAtStaging) {
                 reclaimedBotTransit.push(fid);
@@ -1726,7 +1758,16 @@ function deployPrePlannedEliteLoans(
     adjacency?: Map<Osid, Osid[]>,
 ): void {
     for (const loan of eliteLoans) {
-        if (adjacency && !canEliteLoanReachCorpsTerritory(state, loan.brigadeId, loan.corpsId, adjacency)) {
+        const formation = state.military.formations?.[loan.brigadeId];
+        const assembledAtAuthoredStaging = def.axes.some((axis) =>
+            axis.brigades.includes(loan.brigadeId)
+            && formation?.location_osid === axis.staging_osid
+        );
+        if (
+            adjacency
+            && !assembledAtAuthoredStaging
+            && !canEliteLoanReachCorpsTerritory(state, loan.brigadeId, loan.corpsId, adjacency)
+        ) {
             continue;
         }
         deployEliteLoan(
@@ -1747,20 +1788,44 @@ function deployPrePlannedEliteLoans(
     }
 }
 
-/** Begin an authored Main Staff concentration march before a deferred operation opens. */
+/** Begin an authored concentration march before a deferred or queued operation opens. */
 function prestageReservedPrePlannedElites(state: GameState, def: PrePlannedOp, turn: number): void {
     if (def.prestage_from == null || turn < def.prestage_from) return;
     if (state.meta.player_faction === def.faction) return;
+    const command = state.military.corps_command?.[def.corps];
+    const liveOperation = command?.active_operations?.find((operation) => operation.name === def.name);
+    if (liveOperation && liveOperation.phase !== 'planning') return;
+    if (prePlannedOperationAlreadyResolved(state, def)) return;
     const formations = state.military.formations ?? {};
     const movementState = state.military.brigade_movement_state ?? {};
     for (const axis of def.axes) {
         if (!axis.staging_osid) continue;
         for (const brigadeId of [...axis.brigades].sort(strictCompare)) {
             const formation = formations[brigadeId];
-            if (!formation || !isSectorAssignmentExemptCorpsId(formation.corps_id)) continue;
+            if (!formation) continue;
             if (formation.elite_loan_state?.on_loan) continue;
-            if (formation.location_osid === axis.staging_osid) continue;
-            if (movementState[brigadeId]?.status === 'in_transit') continue;
+            if (formation.location_osid === axis.staging_osid) {
+                const transit = movementState[brigadeId];
+                const order = state.military.brigade_movement_orders?.[brigadeId];
+                const destinations = transit?.destination_sids ?? order?.destination_sids ?? [];
+                const orderedAway = destinations.length > 0 && !destinations.includes(axis.staging_osid as SettlementId);
+                const reclaimable = transit?.owner === 'bot_discretionary'
+                    || order?.owner === 'bot_discretionary'
+                    || isSectorAssignmentExemptCorpsId(formation.corps_id);
+                if (orderedAway && reclaimable) {
+                    delete state.military.brigade_movement_state?.[brigadeId];
+                    delete state.military.brigade_movement_orders?.[brigadeId];
+                }
+                continue;
+            }
+            if (movementState[brigadeId]?.status === 'in_transit') {
+                if (movementState[brigadeId]?.destination_sids?.includes(axis.staging_osid as SettlementId)) continue;
+                const authoredHistoricalElite = isSectorAssignmentExemptCorpsId(formation.corps_id)
+                    && isEliteAuthoredForHistoricalOperation(brigadeId, def.name);
+                if (movementState[brigadeId]?.owner !== 'bot_discretionary' && !authoredHistoricalElite) continue;
+                delete state.military.brigade_movement_state?.[brigadeId];
+                delete state.military.brigade_movement_orders?.[brigadeId];
+            }
             if (formation.posture === 'dig_in') {
                 formation.posture = 'defend';
                 formation.dig_in_progress = 0;
@@ -1769,10 +1834,13 @@ function prestageReservedPrePlannedElites(state: GameState, def: PrePlannedOp, t
             // This bot-only dated commitment owns the non-transit movement
             // slot. In particular it supersedes the generic post-loan return
             // order that otherwise keeps a reserved elite at Army HQ.
-            state.military.brigade_movement_orders[brigadeId] = {
+            const concentrationOrder = {
                 destination_sids: [axis.staging_osid as SettlementId],
-                stance: 'column',
+                stance: 'column' as const,
             };
+            state.military.brigade_movement_orders[brigadeId] = liveOperation?.phase === 'planning'
+                ? concentrationOrder
+                : { ...concentrationOrder, owner: 'bot_discretionary' };
         }
     }
 }
@@ -1945,12 +2013,11 @@ export function injectPrePlannedOperations(
         }
     }
 
-    // Queue SRK: Operation Prsten → autumn Kijevo shoulder → Operation Trnovo
-    // Prsten completes ~w9-10; Trnovo (available_from:6) injects immediately after.
+    // Queue SRK: Operation Prsten → Kijevo shoulder → Operation Lukavac 93.
     if (injectedCorps.has('vrs_sarajevo_romanija')) {
         const cmd = corpsCommand['vrs_sarajevo_romanija'];
         if (cmd && !cmd.queued_operations) {
-            cmd.queued_operations = ['Operation Kijevo', 'Operation Trnovo'];
+            cmd.queued_operations = ['Operation Kijevo', 'Operation Lukavac 93'];
         }
     }
 

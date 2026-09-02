@@ -24,6 +24,7 @@ import {
     createEliteLoanState,
     ELITE_LOAN_MIN_DURATION,
     ELITE_CASUALTY_THRESHOLD,
+    ELITE_COHESION_RECALL,
     ELITE_MORALE_RECALL,
     MAX_AUTO_DEPLOY_HOPS,
 } from '../src/state/elite_loan_types.js';
@@ -882,6 +883,29 @@ describe('elite loan per-turn reconciliation and tick', () => {
         tickEliteLoans(state, 10);
 
         expect(brigade.elite_loan_state!.on_loan).toBe(false);
+    });
+
+    it('does not immediately recall a combat-capable elite rostered in its authored historical operation', () => {
+        const brigade = makeOnLoanBrigade('rs_1st_guards_motorized', { loanStartTurn: 93 });
+        brigade.cohesion = ELITE_COHESION_RECALL - 1;
+        const state = makeState({
+            formations: { rs_1st_guards_motorized: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: 'Operation Zvezda 94',
+                        phase: 'planning',
+                        participating_brigades: ['rs_1st_guards_motorized'],
+                    }],
+                },
+            },
+            turn: 93,
+        });
+
+        tickEliteLoans(state, 93);
+
+        expect(brigade.elite_loan_state!.on_loan).toBe(true);
+        expect(brigade.elite_loan_state!.last_recall_turn).toBeNull();
     });
 
     it('does NOT recall before min duration even if op ended', () => {

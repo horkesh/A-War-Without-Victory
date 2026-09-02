@@ -7,6 +7,7 @@ import {
     getHeadQueuedPrePlannedBrigadeIds,
     injectPrePlannedOperations,
     injectQueuedOperation,
+    prestageDeferredPrePlannedElites,
     _ALL_PRE_PLANNED,
 } from '../src/sim/combat/pre_planned_operations.js';
 import { warPhases } from '../src/sim/turn_phases/war_phases.js';
@@ -113,6 +114,7 @@ describe('pre-planned operations', () => {
     it('assigns the former Foča start-override cells to Operation Foca combat', () => {
         const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Foca');
         assert.ok(operation);
+        assert.equal(operation.prestage_from, 0);
         const valleyAxis = operation.axes.find((candidate) => candidate.axis_id === 'foca_valley');
         assert.ok(valleyAxis);
         assert.equal(valleyAxis.staging_osid, 'op:foca:foca_3');
@@ -134,6 +136,168 @@ describe('pre-planned operations', () => {
             'op:foca:izbisno',
             'op:foca:kosman',
         ]);
+    });
+
+    it('authors Lukavac 93 as the Main Staff operation that severs the Trnovo–Goražde corridor', () => {
+        const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Lukavac 93');
+        assert.ok(operation);
+        assert.equal(operation.corps, 'vrs_sarajevo_romanija');
+        assert.equal(operation.available_from, 69);
+        assert.equal(operation.prestage_from, 62);
+        assert.equal(operation.minimum_viable_participants, 3);
+        assert.equal(operation.minimum_assembled_participants, 3);
+        assert.equal(operation.execution_attack_power_mult, 3);
+
+        const town = operation.axes.find((axis) => axis.axis_id === 'trnovo_town');
+        const corridor = operation.axes.find((axis) => axis.axis_id === 'trnovo_corridor');
+        assert.ok(town);
+        assert.ok(corridor);
+        assert.ok(town.brigades.includes('rs_1st_guards_motorized'));
+        assert.ok(town.brigades.includes('rs_2nd_romanija_brigade'));
+        assert.ok(corridor.brigades.includes('rs_65th_protection_motorized_regiment'));
+        assert.deepEqual(town.objectives, ['op:trnovo:trnovo']);
+        assert.deepEqual(corridor.objectives, [
+            'op:trnovo:kijevo_2',
+            'op:trnovo:delijas',
+            'op:foca:mazlina',
+            'op:foca:donje_zesce',
+            'op:pale:podgrab',
+        ]);
+    });
+
+    it('lets an authored concentration reclaim bot-discretionary transit before injection', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 0;
+        const brigadeId = 'rs_bilea_brigade';
+        state.military.formations[brigadeId]!.location_osid = 'op:bileca:bileca_2';
+        state.military.brigade_movement_state = {
+            [brigadeId]: {
+                status: 'in_transit',
+                stance: 'column',
+                destination_sids: ['op:ljubinje:bancici'],
+                turns_remaining: 3,
+                owner: 'bot_discretionary',
+            },
+        };
+        state.military.brigade_movement_orders = {
+            [brigadeId]: {
+                stance: 'column',
+                destination_sids: ['op:ljubinje:bancici'],
+                owner: 'bot_discretionary',
+            },
+        };
+
+        prestageDeferredPrePlannedElites(state);
+
+        assert.equal(state.military.brigade_movement_state[brigadeId], undefined);
+        assert.deepEqual(state.military.brigade_movement_orders[brigadeId], {
+            destination_sids: ['op:gacko:izgori'],
+            stance: 'column',
+            owner: 'bot_discretionary',
+        });
+
+        const concentrationTransit = {
+            status: 'in_transit' as const,
+            stance: 'column' as const,
+            destination_sids: ['op:gacko:izgori'],
+            turns_remaining: 2,
+            owner: 'bot_discretionary' as const,
+        };
+        state.military.brigade_movement_state[brigadeId] = structuredClone(concentrationTransit);
+        prestageDeferredPrePlannedElites(state);
+        assert.deepEqual(
+            state.military.brigade_movement_state[brigadeId],
+            concentrationTransit,
+            'an in-progress march to the authored staging area must not restart',
+        );
+
+        state.military.corps_command!.vrs_herzegovina!.active_operations = [{
+            name: 'Operation Foca',
+            type: 'sector_attack',
+            phase: 'planning',
+            started_turn: 1,
+            phase_started_turn: 1,
+            participating_brigades: [brigadeId],
+            objectives: ['op:foca:tjentiste_2'],
+            is_pre_planned: true,
+        }];
+        state.meta.turn = 1;
+        state.military.formations[brigadeId]!.location_osid = 'op:gacko:izgori';
+        delete state.military.brigade_movement_state[brigadeId];
+        state.military.brigade_movement_orders[brigadeId] = {
+            stance: 'column',
+            destination_sids: ['op:ljubinje:bancici'],
+            owner: 'bot_discretionary',
+        };
+
+        prestageDeferredPrePlannedElites(state);
+
+        assert.equal(
+            state.military.brigade_movement_orders[brigadeId],
+            undefined,
+            'planning must hold an assembled formation at authored staging',
+        );
+
+        state.military.formations[brigadeId]!.location_osid = 'op:bileca:bileca_2';
+        prestageDeferredPrePlannedElites(state);
+        assert.deepEqual(
+            state.military.brigade_movement_orders[brigadeId],
+            { destination_sids: ['op:gacko:izgori'], stance: 'column' },
+            'a launched planning phase must own its march over discretionary bot routing',
+        );
+
+        state.military.corps_command!.vrs_herzegovina!.active_operations[0]!.phase = 'execution';
+        delete state.military.brigade_movement_orders[brigadeId];
+
+        prestageDeferredPrePlannedElites(state);
+
+        assert.equal(
+            state.military.brigade_movement_orders[brigadeId],
+            undefined,
+            'the executing operation owns movement after the concentration phase',
+        );
+    });
+
+    it('reclaims a historical elite return march before its next operation opens', () => {
+        const state = makeMinimalState();
+        const brigadeId = 'rs_1st_guards_motorized';
+        state.meta.turn = 84;
+        state.military.corps_command!.vrs_drina!.active_operations = [];
+        state.operation_history = [
+            { corps_id: 'vrs_drina', operation_name: 'Operation Cerska-Kamenica', ended_turn: 53, outcome: 'success' } as any,
+            { corps_id: 'vrs_sarajevo_romanija', operation_name: 'Operation Lukavac 93', ended_turn: 79, outcome: 'partial' } as any,
+        ];
+        const formation = state.military.formations[brigadeId]!;
+        formation.corps_id = 'vrs_main_staff';
+        formation.location_osid = 'op:vlasenica:sebiocina';
+        formation.elite_loan_state = {
+            on_loan: false,
+            loaned_to_corps: null,
+            loan_start_turn: null,
+            last_recall_turn: 74,
+            loan_start_personnel: formation.personnel ?? null,
+            permanently_degraded: false,
+            current_episode_id: 1,
+        };
+        state.military.brigade_movement_state = { [brigadeId]: {
+            status: 'in_transit',
+            stance: 'column',
+            destination_sids: ['op:vlasenica:bacici'],
+            turns_remaining: 1,
+        } };
+        state.military.brigade_movement_orders = { [brigadeId]: {
+            stance: 'column',
+            destination_sids: ['op:vlasenica:bacici'],
+        } };
+
+        prestageDeferredPrePlannedElites(state);
+
+        assert.equal(state.military.brigade_movement_state[brigadeId], undefined);
+        assert.deepEqual(state.military.brigade_movement_orders[brigadeId], {
+            destination_sids: ['op:rogatica:brcigovo'],
+            stance: 'column',
+            owner: 'bot_discretionary',
+        });
     });
 
     it('defines staggered local ARBiH operations for Visoko-Breza and Maglaj', () => {
@@ -361,7 +525,7 @@ describe('pre-planned operations', () => {
                 'Operation Visegrad',
                 'Operation Prsten',
                 'Operation Kijevo',
-                'Operation Trnovo',
+                'Operation Lukavac 93',
                 'Operation Herzegovina',
                 'Operation Foca',
                 'Bosanska Krupa Takeover',
@@ -384,29 +548,44 @@ describe('pre-planned operations', () => {
         const zvezda = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Zvezda 94')!;
         const roster = zvezda.axes.flatMap((axis) => axis.brigades);
         assert.equal(zvezda.available_from, 93);
-        assert.equal(zvezda.prestage_from, 88);
+        assert.equal(zvezda.prestage_from, 84);
         assert.equal(zvezda.execution_attack_power_mult, 3);
         assert.equal(zvezda.minimum_viable_participants, 2);
         assert.equal(zvezda.minimum_assembled_participants, 3);
         assert.equal(zvezda.planning_duration, 10);
         assert.ok(roster.includes('rs_1st_guards_motorized'));
         assert.ok(roster.includes('rs_65th_protection_motorized_regiment'));
-        assert.equal(zvezda.axes[0]?.minimum_staged_brigades, 2);
-        assert.equal(zvezda.axes[0]?.minimum_forward_brigades, 2);
+        assert.equal(zvezda.axes[0]?.minimum_staged_brigades, 1);
+        assert.equal(zvezda.axes[0]?.minimum_forward_brigades, 1);
+        assert.equal(zvezda.axes[0]?.staging_osid, 'op:rogatica:brcigovo');
         assert.deepEqual(zvezda.axes[0]?.objectives, [
-            'op:gorazde:slatina_2',
             'op:gorazde:sopotnica',
+            'op:gorazde:slatina_2',
         ]);
-        assert.deepEqual(zvezda.axes[1]?.objectives, ['op:gorazde:ustipraca_2']);
-        assert.equal(zvezda.axes[1]?.minimum_staged_brigades, 1);
-        assert.equal(zvezda.axes[1]?.minimum_forward_brigades, 1);
+        assert.equal(zvezda.axes.length, 2);
+        assert.deepEqual(zvezda.axes[1]?.objectives, [
+            'op:gorazde:ustipraca_2',
+            'op:gorazde:kolovarice',
+        ]);
+        assert.deepEqual(zvezda.axes[1]?.brigades, [
+            'rs_1st_bratunac',
+            'rs_1st_birac',
+            'rs_1st_podrinje',
+            'rs_visegrad_brigade',
+        ]);
+        assert.equal(zvezda.axes[1]?.staging_osid, 'op:rogatica:brcigovo');
+        assert.deepEqual(zvezda.axes[0]?.brigades, [
+            'rs_1st_guards_motorized',
+            'rs_65th_protection_motorized_regiment',
+            'rs_5th_podrinje',
+        ]);
     });
 
     it('reserves probe participants only for the head queued historical operation', () => {
         const state = makeMinimalState();
         state.military.corps_command!.vrs_sarajevo_romanija!.queued_operations = [
             'Operation Kijevo',
-            'Operation Trnovo',
+            'Operation Lukavac 93',
         ];
 
         const reserved = getHeadQueuedPrePlannedBrigadeIds(state);
@@ -543,10 +722,10 @@ describe('pre-planned operations', () => {
             is_pre_planned: true,
             participating_brigades: ['rs_1st_guards_motorized'],
             axes: [{
-                axis_id: 'ustipraca_cutoff',
+                axis_id: 'gorazde_encirclement',
                 assigned_brigades: ['rs_1st_guards_motorized'],
                 support_brigades: [],
-                objectives: ['op:gorazde:ustipraca_2'],
+                objectives: ['op:gorazde:sopotnica'],
             }],
             initial_strength: 1000,
         } as unknown as CorpsOperation;
@@ -559,7 +738,7 @@ describe('pre-planned operations', () => {
             kind: 'brigade',
             status: 'active',
             personnel: 800,
-            location_osid: 'op:gorazde:podkozara_donja_2',
+            location_osid: 'op:rogatica:brcigovo',
             elite_loan_state: {
                 on_loan: false,
                 loaned_to_corps: null,
@@ -577,6 +756,82 @@ describe('pre-planned operations', () => {
             state.military.formations!.rs_65th_protection_motorized_regiment!.elite_loan_state?.loaned_to_corps,
             'vrs_drina',
         );
+    });
+
+    it('loans Zvezda elites already assembled at authored staging even when detached from current corps sectors', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 95;
+        const command = state.military.corps_command!.vrs_drina!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Zvezda 94'];
+        for (const brigadeId of ['rs_5th_podrinje', 'rs_visegrad_brigade']) {
+            delete state.military.formations[brigadeId];
+        }
+        state.military.formations.rs_1st_podrinje!.location_osid = 'op:gorazde:podkozara_donja_2';
+        state.military.formations.rs_1st_podrinje!.personnel = 1000;
+        state.military.formations.rs_1st_bratunac!.location_osid = 'op:rogatica:brcigovo';
+        state.military.formations.rs_1st_birac!.location_osid = 'op:rogatica:brcigovo';
+        for (const brigadeId of ['rs_1st_guards_motorized', 'rs_65th_protection_motorized_regiment']) {
+            const formation = state.military.formations[brigadeId]!;
+            formation.corps_id = 'vrs_main_staff';
+            formation.location_osid = brigadeId === 'rs_1st_guards_motorized'
+                ? 'op:gorazde:podkozara_donja_2'
+                : 'op:rogatica:brcigovo';
+            formation.personnel = 1000;
+            formation.status = 'active';
+            formation.elite_loan_state = {
+                on_loan: false,
+                loaned_to_corps: null,
+                loan_start_turn: null,
+                last_recall_turn: 74,
+                loan_start_personnel: null,
+                permanently_degraded: false,
+                current_episode_id: null,
+            };
+        }
+
+        assert.equal(injectQueuedOperation(state, 'vrs_drina'), true);
+        const operation = command.active_operations.find((candidate) => candidate.name === 'Operation Zvezda 94');
+        assert.ok(operation);
+        assert.ok(operation.participating_brigades.includes('rs_1st_bratunac'));
+        assert.ok(operation.participating_brigades.includes('rs_1st_birac'));
+        assert.equal(state.military.formations.rs_1st_guards_motorized!.elite_loan_state?.loaned_to_corps, 'vrs_drina');
+        assert.equal(
+            state.military.formations.rs_65th_protection_motorized_regiment!.elite_loan_state?.loaned_to_corps,
+            'vrs_drina',
+        );
+    });
+
+    it('claims an idle elite loan already held by the historical operation corps', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 95;
+        const command = state.military.corps_command!.vrs_drina!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Zvezda 94'];
+        const elite = state.military.formations.rs_1st_guards_motorized!;
+        elite.corps_id = 'vrs_main_staff';
+        elite.location_osid = 'op:rogatica:brcigovo';
+        elite.personnel = 1000;
+        elite.status = 'active';
+        elite.elite_loan_state = {
+            on_loan: true,
+            loaned_to_corps: 'vrs_drina',
+            loan_start_turn: 90,
+            last_recall_turn: 82,
+            loan_start_personnel: 1000,
+            permanently_degraded: false,
+            current_episode_id: 1,
+        };
+        const local = state.military.formations.rs_1st_podrinje!;
+        local.location_osid = 'op:gorazde:podkozara_donja_2';
+        local.personnel = 1000;
+        local.status = 'active';
+
+        assert.equal(injectQueuedOperation(state, 'vrs_drina', new Map()), true);
+        const operation = command.active_operations.find((candidate) => candidate.name === 'Operation Zvezda 94');
+        assert.ok(operation);
+        assert.ok(operation.participating_brigades.includes('rs_1st_guards_motorized'));
+        assert.equal(elite.elite_loan_state?.loaned_to_corps, 'vrs_drina');
     });
 
     it('keeps the link-up in planning until its authored columns are assembled', () => {
@@ -1442,7 +1697,7 @@ describe('pre-planned operations', () => {
         state.meta.turn = 69;
         const command = state.military.corps_command!.vrs_sarajevo_romanija!;
         command.active_operations = [];
-        command.queued_operations = ['Operation Trnovo'];
+        command.queued_operations = ['Operation Lukavac 93'];
         state.political.political_controllers!['op:trnovo:gornja_presjenica'] = 'RS';
         state.political.political_controllers!['op:trnovo:kijevo_2'] = 'RS';
         state.political.political_controllers!['op:trnovo:delijas'] = 'RBiH';
@@ -1457,11 +1712,15 @@ describe('pre-planned operations', () => {
         const injected = injectQueuedOperation(state, 'vrs_sarajevo_romanija', adjacency as any);
 
         assert.equal(injected, true);
-        const trnovo = command.active_operations.find((op) => op.name === 'Operation Trnovo');
+        const trnovo = command.active_operations.find((op) => op.name === 'Operation Lukavac 93');
         assert.ok(trnovo);
-        const eastAxis = trnovo!.axes?.find((axis) => axis.axis_id === 'trnovo_east');
+        const eastAxis = trnovo!.axes?.find((axis) => axis.axis_id === 'trnovo_corridor');
         assert.ok(eastAxis);
-        assert.deepEqual(eastAxis!.objectives, ['op:trnovo:delijas']);
+        assert.deepEqual(eastAxis!.objectives, [
+            'op:trnovo:delijas',
+            'op:foca:mazlina',
+            'op:pale:podgrab',
+        ]);
         const approaches = getSectorOffensiveApproachOsids(
             state,
             trnovo!,

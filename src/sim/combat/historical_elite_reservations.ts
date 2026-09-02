@@ -18,12 +18,12 @@ const HISTORICAL_ELITE_RESERVATIONS: ReadonlyArray<{
     {
         brigadeId: 'rs_1st_guards_motorized' as FormationId,
         releaseTurn: 97,
-        operationNames: ['Operation Cerska-Kamenica', 'Operation Zvezda 94'],
+        operationNames: ['Operation Cerska-Kamenica', 'Operation Lukavac 93', 'Operation Zvezda 94'],
     },
     {
         brigadeId: 'rs_65th_protection_motorized_regiment' as FormationId,
         releaseTurn: 97,
-        operationNames: ['Operation Cerska-Kamenica', 'Operation Zvezda 94'],
+        operationNames: ['Operation Cerska-Kamenica', 'Operation Lukavac 93', 'Operation Zvezda 94'],
     },
 ];
 

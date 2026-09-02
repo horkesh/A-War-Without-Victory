@@ -15,6 +15,8 @@ describe('historical elite reservations', () => {
         expect(isEliteReservedForHistoricalOperation('rs_65th_protection_motorized_regiment', 98)).toBe(false);
         expect(isEliteReservedForHistoricalOperation('rs_other' as never, 1)).toBe(false);
         expect(isEliteAuthoredForHistoricalOperation('rs_1st_guards_motorized', 'Operation Cerska-Kamenica')).toBe(true);
+        expect(isEliteAuthoredForHistoricalOperation('rs_1st_guards_motorized', 'Operation Lukavac 93')).toBe(true);
+        expect(isEliteAuthoredForHistoricalOperation('rs_65th_protection_motorized_regiment', 'Operation Lukavac 93')).toBe(true);
         expect(isEliteAuthoredForHistoricalOperation('rs_65th_protection_motorized_regiment', 'Operation Zvezda 94')).toBe(true);
         expect(isEliteAuthoredForHistoricalOperation('rs_1st_guards_motorized', 'Operation Pracha River')).toBe(false);
     });
