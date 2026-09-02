@@ -1,5 +1,9 @@
 # Isolated Position Operations Implementation Plan
 
+**Status:** Completed in `68e5d22e8`. Independent v63/v64 runs produced identical hash
+`270709e4d303deed`; the integrated result is documented in
+[`20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md`](../40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md).
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Recover historically correct April 1994 pocket reductions through ordinary corps operations and attack resolution without restoring passive political-control transfers.

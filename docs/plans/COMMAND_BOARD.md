@@ -1,6 +1,6 @@
 # AWWV Command Board
 
-**Status:** Derived dispatch view, synchronized 2026-08-28.
+**Status:** Derived dispatch view, synchronized 2026-09-02.
 
 **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole authority for unfinished work and wins if this board differs.
 
@@ -21,7 +21,7 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 3 | R3 | **COMPLETE** | None. | [TG convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) |
 | 4 | R4 | **COMPLETE** | None; Phase 6 and its packaging follow-up are closed. | [Command/event/Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) |
 | 5 | R5 | **COMPLETE -- CLOSED 2026-08-05** | None. The accepted performance floor is approximately 1.09 seconds per turn; the 100 ms target and incremental-reuse Task 6 are retired from 1.0 scope. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
-| 6 | R6 | **JANUARY 1993 CHECKPOINT SLICE LANDED; FURTHER CALIBRATION PAUSED ON RE** | Preserve the landed evidence. Do not start reference, init-control, objective, axis, timing, roster, or outcome tuning until RE closes. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
+| 6 | R6 | **CALIBRATION OPEN; APRIL 1994 AT 703/712** | Continue only from the accepted checkpoint and visible residual ledger; fix engine defects before tuning and preserve operations-only control causality. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) / [April report](../40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md) |
 | 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
 | 7 | R7 | **ACTIVE — CINEMATIC OPENING MECHANICS, TYPOGRAPHY, AND BROWSER FALLBACK-ART PROOF COMPLETE** | Integrate the two required analogue-first neutral images at `OpeningSplash.tsx` and `MainMenu.tsx` without reopening mechanics; reject all computer/CRT/terminal/video-wall imagery, then run separately authorized live packaged-Electron first-paint acceptance. Separately validate/re-export or canvas-normalize the retained 2750×1536 RBiH plate against the 2752-wide contract; it is not a new creative deliverable. Foreground/portal prompts are optional later enhancements. Human listen/sensitivity, broader English accessibility/readability, and closeout reconciliation also remain. RE stays blocked and untouched; no probe/RE credit follows. Localization Phase 3 stays post-1.0. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [accepted functional opening](2026-08-23-opening-screens-implementation-plan.md) / [cinematic opening and typography amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md) |
 | 7.5 | RE | **BLOCKED AT P2B — NO PACKAGED PROOF ROUTE ACTIVE** | P1/P2A remain accepted. The prerequisite config/test blobs were restored exactly to bb97f789 identity and the rollback receipt is closed. P3 waits; no run, diagnosis, recovery redesign, or successor route is authorized. | [Recovery plan](2026-08-28-packaged-probe-recovery-plan.md) / [1.0 Engine Integrity contract](2026-08-26-engine-integrity-plan.md) |
@@ -59,8 +59,9 @@ packaged-probe invocation and ended terminal `NO_VERDICT` because of external-su
 failure; no cause is inferred and it supplies no P2B credit. Commit `48909e1d6` restored the exact
 config blob `7a098b350461cdbb47ec94d453ff35ec655c7b91` and test blob
 `29194ca0844acb8ac6cfb7dff6f1cb17f9513157`. RE is BLOCKED at P2B with no packaged-proof route
-active; P3 waits and the calibration pause is unchanged. No run, retry, diagnosis, instrumentation,
-supervisor redesign, or successor route is authorized. Production LOC stays net non-positive;
+active; P3 waits. This RE block does not re-close the separately owner-reopened calibration lane.
+No RE run, retry, diagnosis, instrumentation, supervisor redesign, or successor route is authorized.
+Production LOC stays net non-positive;
 forbidden engine surfaces cannot grow. The `+3.62853%` mandatory-correctness cost is watch-only, not
 a 1.0 blocker, and no further pre-1.0 performance diagnosis is authorized. Active formation
 strength, dissolution salvage, enclave targeting, hostile breakout, and speculative mechanics are

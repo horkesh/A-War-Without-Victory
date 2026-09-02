@@ -38,6 +38,10 @@ Scenario runner (`src/scenario/scenario_runner.ts`) routes to whichever pipeline
   `node tools/build_calibration_map_html.mjs <map.png> <out.html> <title> <score> [footer]`.
   The map must be north-up; amber marks actual/painted disagreement, and outline plus center
   circle denote the painted faction.
+- Interactive April hover comparator:
+  `node tools/generate_apr1994_hover_map.cjs <template.html> <run-dir> <painted.json> <out.html>`.
+  It embeds the accepted run's controller map after OSID initialization, preserves hover names and
+  controller details, and remains a derived visualization rather than calibration authority.
 - Living authority: `docs/40_reports/CALIBRATION_MASTER.md`.
 
 ### Scenario CLI (Scripted)

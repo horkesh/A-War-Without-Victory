@@ -1,15 +1,17 @@
 # A War Without Victory — Master Roadmap
 
-**Status:** IN AUTONOMOUS EXECUTION. The owner ruled 2026-08-26 that **engine health is
-sacrosanct and precedes further calibration**. The accepted January-1993 slice remains historical
-evidence, but all further calibration waits on **RE — 1.0 Engine Integrity**. The original probe
-channel is closed history at `b711cffa9`. The auxiliary packaged-proof prerequisite ended terminal
+**Status:** IN AUTONOMOUS EXECUTION. Engine health remains sacrosanct and defects precede tuning,
+but the owner reopened calibration on 2026-08-31. The sole scoring trajectory is
+`data/scenarios/apr1992_definitive_188w.json`; current checkpoint authority is
+`docs/40_reports/CALIBRATION_MASTER.md`. The original probe channel remains closed history at
+`b711cffa9`; reopening calibration does not revive it or alter the separate **RE — 1.0 Engine
+Integrity** contract. The auxiliary packaged-proof prerequisite ended terminal
 NO_VERDICT and its exact unproven config/test hypothesis was rolled back in `48909e1d6`; no
 packaged-proof route is active or implied. RE is blocked at P2B and P3 waits. R7 may continue only
 where file ownership is actually disjoint. RE is scope-locked on `codex/re-engine-integrity-repaired`; the superseded mixed
 line is quarantined. RE and R7 gate R8; R9 follows R8.
 
-**Last updated:** 2026-08-28
+**Last updated:** 2026-09-02
 
 **Execution branch:** `codex/master-roadmap-execution` (integration target: `main` after all workstreams are green)
 
@@ -224,7 +226,7 @@ Auxiliary packaged-proof prerequisite TERMINAL NO_VERDICT; exact hypothesis roll
 RE 1.0 Engine Integrity
   -> seven release outcomes through eight serial packets
   -> one final Node-22 A/B pair and profile
-  -> precedes all further calibration; gates R8
+  -> engine defects remain prior to calibration tuning; gates R8
   -> may overlap R7 only where inspected file ownership is disjoint
 
 R1–R7 green + RE green
@@ -369,7 +371,7 @@ No experiment remains “partial” after evaluation.
 | `App.tsx`, `MapContainer.tsx`, `shellNavigation.ts`, `gameStore.ts` | R1 first; R2 FR-03 rebases on R1. |
 | Decision priority/cadence read models and authored initiatives | R2 first; R4 consumes and generalizes the accepted contract. |
 | Tactical Group/GameState lifecycle | R3 first; R5 persistence work rebases on R3 schema. |
-| Combat resolution and calibration | R3/R5/R6 history is closed. **RE precedes every further calibration change.** Calibration does not run in parallel with RE. |
+| Combat resolution and calibration | R3/R5 history is closed. R6 calibration is open by owner direction on the sole 188-week scoring trajectory; engine defects remain prior to tuning. RE keeps its separate scope lock and still gates R8. |
 | RE-owned engine/desktop surfaces | RE owns only exact files in the reviewed `RE_SCOPE_LOCK.json`; wildcard allowlists fail and the external worktree hook pins reviewed lock/checker bytes. Packets are serial. Scenario, calibration, reference, and FORAWWV paths are denied. The authoritative branch is `codex/re-engine-integrity-repaired`; the mixed line remains quarantined. R7 may overlap only on inspected disjoint files. No per-packet campaign; one final clean Node-22 A/B pair/profile hands the reduced rail to R8. |
 | Event/essay authored rows | R4 inventory/convergence first; R7 attribution/content pass second. |
 | Map/Desk English layout strings | R1/R2 layout first; R7 accessibility/readability proof second. Multilingual expansion is post-1.0. |

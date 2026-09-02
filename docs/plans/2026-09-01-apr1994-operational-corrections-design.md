@@ -1,5 +1,8 @@
 # April 1994 Operational Corrections — Design
 
+**Status:** Implemented and superseded by the integrated April calibration summarized in
+[`20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md`](../40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md).
+
 ## Objective
 
 Correct two causes of the April 1994 calibration divergence without introducing scripted control transfers: ARBiH should be the attacking side in the open Croat–Bosniak war while HVO primarily defends, and the two major VRS eastern offensives should draw on Army Main Staff elite formations.
@@ -27,4 +30,3 @@ Operation Zvezda 94 will roster the same two Army-HQ elite formations as a delib
 - Systems Manual v0.9.0
 - CODE_CANON and determinism/invariant mappings
 - PROJECT_LEDGER and PROJECT_LEDGER_KNOWLEDGE relevant entries
-

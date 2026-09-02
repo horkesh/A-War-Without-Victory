@@ -168,6 +168,13 @@ Ordinary emergent operations are capped at six planned and emitted participants.
 
 `historical_operation_names.ts` owns the semantic reservation set for catalog names. Emergent naming normalizes accents, punctuation, year suffixes, and `Operation` / `Operacija` prefixes before rejecting a collision. Fictional replacement entries preserve each faction pool's prior length, keeping the modulo-based deterministic picker stable.
 
+**HVO contacted-home defense (2026-09-02):** During open RBiH-HRHB war, a combat-ready HVO
+formation tagged `placement:fixed_home_osid` receives deterministic first subsegment assignment to
+its friendly home OSID only when the home lies on that contacted subsegment and an active opposing
+operation names it as an objective. This is an assignment preference, not a control lock, combat
+modifier, movement prohibition, or operation-membership override. Quiet homes and other factions
+retain ordinary widest-front assignment.
+
 **Tests:** `tests/probe_preparation.test.ts` — 30 tests covering personality formulas, intel confidence, probe selection, state machine lifecycle, probe resolution, constants validation.
 
 **Full spec:** Systems Manual §7.6.

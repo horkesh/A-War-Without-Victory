@@ -14,6 +14,21 @@ that say a particular R6, late-war, or pre-1.0 scope was "closed" remain phase-l
 They do not close the present calibration program. The sole scoring scenario remains
 `data/scenarios/apr1992_definitive_188w.json`.
 
+### Current April 1994 checkpoint — operational calibration at week 104
+
+The current accepted April checkpoint is the deterministic v72/v73 pair at commit `4167d2bd4`.
+Both runs use identical initial saves and produce identical final saves with SHA-256
+`d6095cb8408ddfa85a52223cc6c4c5eb7ae46165cbb2b25fbe438d88c7245148` and final-state hash
+`d6095cb8408ddfa8`. The result is **703/712 (98.74%)**, area-weighted **98.9%**. Krajina,
+Posavina NE, Drina, and Sarajevo are exact; the remaining nine mismatches are enumerated in
+[the consolidated April implementation report](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md).
+
+This week-104 acceptance supersedes older April candidates as the current April territorial
+measurement. It does **not** replace the clean 188-week whole-campaign baseline below, re-floor
+later checkpoints, or reconcile golden artifacts. The accepted run has zero `consolidation` and
+zero `abandoned` control changes. Brčko and Lopare Selo remain RS, Goražde town remains RBiH,
+and no painted-HRHB OSID is held by RBiH.
+
 ### Current canonical baseline — clean Node 22 HEAD revalidation
 
 The owner-authorized clean run is
@@ -4168,3 +4183,7 @@ overcaptured by RBiH. Brčko and Lopare Selo remain RS, and Goražde town remain
 the preceding accepted run, the four corrected OSIDs are offset by visible regressions at Donji
 Vakuf and Korenići; these remain calibration debt rather than receiving passive or direct-control
 corrections.
+
+The complete April lane chronology, implementation ownership, final nine-cell residual list,
+combat attribution, determinism receipts, and interactive-map publication are consolidated in
+[`implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md`](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md).

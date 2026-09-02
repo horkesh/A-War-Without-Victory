@@ -1,5 +1,9 @@
 # Emergent Operation Purpose and Historical Name Ownership Implementation Plan
 
+**Status:** Completed in `174a53b11`, `85b99e48f`, and `f8c5d1268`; calibrated evidence and
+subsequent regression recovery are consolidated in
+[`20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md`](../40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md).
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Prevent commander-generated operations from borrowing historical catalogue names and prevent exposed-but-pointless OSIDs from becoming offensive objectives unless their capture advances a state-derived operational purpose.
@@ -48,4 +52,3 @@
 3. Run the deterministic April-1994 checkpoint scenario from the established calibration command and inspect operation AARs, control-change attribution, Lopare Selo, and all prior Goražde/Srebrenica corrections.
 4. Run determinism/diff checks required by the calibration lane.
 5. Append the measured result and exact commands to the ledger and calibration master; commit documentation and evidence.
-

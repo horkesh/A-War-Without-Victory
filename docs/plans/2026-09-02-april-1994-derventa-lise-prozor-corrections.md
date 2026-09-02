@@ -1,5 +1,9 @@
 # April 1994 Derventa, Lise, and Prozor Corrections Implementation Plan
 
+**Status:** Completed in `4167d2bd4`. Deterministic v72/v73 evidence, final controls, remaining
+debt, and publication details are recorded in
+[`20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md`](../40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md).
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Correct the April 1994 calibration through historically bounded operations and local defensive force behavior: VRS clears Živinice during Operation Corridor, the Liše home brigade covers its threatened home front before corps redistribution, and HVO takes only Lug and Paroš near Prozor.
@@ -50,3 +54,16 @@
 2. Run the definitive scenario through week 104 twice and compare hashes.
 3. Verify Živinice is RS, Liše remains HRHB, Lug and Paroš are HRHB, and inspect all HRHB↔RBiH deviations for regressions.
 4. Update canon/ledger notes, commit only intended files, and publish/open the new remote interactive map.
+
+## Completion record
+
+- Operation Corridor uses a parallel `derventa_pocket` axis rather than inserting Živinice into
+  the main east objective chain; this keeps the 27th Derventa Motorized Brigade local while the
+  1st Prnjavor remains on the main effort.
+- The fixed-home regression lives in `tests/brigade_aor_subsegment.test.ts`, matching the actual
+  subsegment assignment owner.
+- The Prozor-Rama operation starts at turn 52 in the accepted trajectory and captures Lug and Paros
+  at turns 54 and 55.
+- v72 and v73 produce identical initial and final saves; the final-state hash is
+  `d6095cb8408ddfa8`.
+- The accepted April comparator is 703/712, with nine explicitly documented residuals.

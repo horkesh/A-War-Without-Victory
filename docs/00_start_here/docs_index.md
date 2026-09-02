@@ -11,7 +11,7 @@
 - **Pyrrhic roster and handoffs:** [.cursor/AGENT_TEAM_ROSTER.md](../../.cursor/AGENT_TEAM_ROSTER.md) — Pyrrhic Games (subagent collective); when to invoke which specialist; clarification-first and handoff rules.
 - **Canon (game truth):** [docs/10_canon/CANON.md](../10_canon/CANON.md) — canonical doc index and precedence order; includes industry mapping (GDD / TDD / process) for readers used to standard game-dev docs.
 - **Project state:** [docs/PROJECT_LEDGER.md](../PROJECT_LEDGER.md) — changelog and current state (at docs root).
-- **Calibration authority:** [CALIBRATION_MASTER.md](../40_reports/CALIBRATION_MASTER.md) — current checkpoint, accepted run, retired surfaces, residuals, and calibration debt. Further calibration is paused until reduced RE closes. The clean corrected RE baseline pair is captured separately at `177882fc2`; its `+3.62853%` correction cost is watch-only and historical-fit fields remain non-authorizing observations. The sole scoring scenario is `data/scenarios/apr1992_definitive_188w.json`; January 1993 is evaluated at week 39 of that master, never in a separate 40-week scenario.
+- **Calibration authority:** [CALIBRATION_MASTER.md](../40_reports/CALIBRATION_MASTER.md) — current checkpoint, accepted run, retired surfaces, residuals, and calibration debt. Calibration is open by owner direction; engine defects still precede tuning. The clean corrected RE baseline pair is captured separately at `177882fc2`; its `+3.62853%` correction cost is watch-only and historical-fit fields remain non-authorizing observations. The sole scoring scenario is `data/scenarios/apr1992_definitive_188w.json`; January 1993 and April 1994 are evaluated at weeks 39 and 104 of that master, never as separate scoring scenarios.
 
 ## Canon set (docs/10_canon/)
 
@@ -50,15 +50,16 @@
 
 ## Planning (docs/plans/)
 
-**Current override (2026-08-28):** engine health precedes further calibration, but RE is finite.
-The original probe channel is closed history at `b711cffa9`; it is not RE. The owner-approved
-[1.0 Engine Integrity contract](../plans/2026-08-26-engine-integrity-plan.md) supersedes the old
-T0–T14 monolith with seven outcomes/eight packets. P1/P2A are accepted; RE is blocked at P2B and P3
-waits. The auxiliary packaged-proof discovery and prerequisite are terminally closed at
-`NO_VERDICT`; their exact unproven hypothesis was rolled back at `48909e1d6`. No packaged-proof
-route, retry, diagnosis, instrumentation, or successor proof route is active or implied. The
-auxiliary work earns no RE credit or automatic P2B proof, and the calibration pause is unchanged.
-The corrected
+**Current override (2026-08-31):** calibration is open by owner direction. Engine defects still
+precede tuning, but the earlier calibration pause is historical rather than active. The sole scoring
+trajectory remains `data/scenarios/apr1992_definitive_188w.json`; current checkpoint authority and
+residuals live in [CALIBRATION_MASTER.md](../40_reports/CALIBRATION_MASTER.md). The original probe
+channel is closed history at `b711cffa9`; reopening calibration does not revive it or alter the
+separate [1.0 Engine Integrity contract](../plans/2026-08-26-engine-integrity-plan.md). P1/P2A are
+accepted; RE remains blocked at P2B and P3 waits. The auxiliary packaged-proof discovery and
+prerequisite are terminally closed at `NO_VERDICT`; their exact unproven hypothesis was rolled back
+at `48909e1d6`. No packaged-proof route, retry, diagnosis, instrumentation, or successor proof route
+is active or implied. The corrected
 Node-22 baseline at `177882fc2` is deterministic, engine-green, byte-identical outside normalized
 metadata, and save/replay-green. Its `+3.62853%` mandatory-correctness cost is watch-only, not a
 1.0 gate; no further pre-1.0 performance diagnosis is authorized. No packet runs a campaign; one
@@ -67,7 +68,7 @@ targeting, hostile breakout, and speculative mechanics are deferred. Broad audit
 standalone closeout machinery, and repeated full-team review are retired. Historical fit remains
 non-authorizing calibration observation.
 
-**Current control plane (synchronized 2026-08-28):** [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md) is the sole authority for unfinished product work. R1–R6 and narrow RC are closed. R7 cinematic-opening mechanics, typography, and fallback-art browser proof are complete; required owner splash/neutral art, live packaged acceptance, human listen/sensitivity, broader English accessibility/readability, and closeout remain. RE is blocked at P2B with no proof route; P3 waits. The terminal discovery/prerequisite and exact rollback at `48909e1d6` are closed history, not an active queue. [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md) is the derived dispatch view, and the [plans index](../plans/README.md) links the executable contracts. Collapse D-topology and multilingual localization remain post-1.0. Old RE T-tasks, performance-remediation, WP-9/D2/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, and release-operator queues are historical inputs, not separate authorities.
+**Current control plane (synchronized 2026-09-02):** [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md) is the sole authority for unfinished product work. R1–R5 and narrow RC are closed; R6 calibration is open and the current April checkpoint is 703/712. R7 cinematic-opening mechanics, typography, and fallback-art browser proof are complete; required owner splash/neutral art, live packaged acceptance, human listen/sensitivity, broader English accessibility/readability, and closeout remain. RE is blocked at P2B with no proof route; P3 waits, but that separate block does not close calibration. The terminal discovery/prerequisite and exact rollback at `48909e1d6` are closed history, not an active queue. [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md) is the derived dispatch view, and the [plans index](../plans/README.md) links the executable contracts. Collapse D-topology and multilingual localization remain post-1.0. Old RE T-tasks, performance-remediation, WP-9/D2/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, and release-operator queues are historical inputs, not separate authorities.
 
 The remaining files under `docs/30_planning/` are design specifications, not active execution queues: [multi-brigade operations](../30_planning/MULTI_BRIGADE_OPERATION_DESIGN_SPEC.md), [operation reevaluation](../30_planning/OPERATION_REEVALUATION_DESIGN_SPEC.md), and [spatial context](../30_planning/SPATIAL_CONTEXT_DESIGN_SPEC.md). Historical plans removed from that folder remain available through Git history and the ledgers.
 
@@ -75,6 +76,7 @@ The remaining files under `docs/30_planning/` are design specifications, not act
 
 - **Entrypoint:** [40_reports/README.md](../40_reports/README.md) — master index and structure (2026-02-13).
 - **Latest D2 closeout:** [implemented/20260731_D2_OWNER_DIARY_REMEDIATION_AND_REPOSITORY_CLOSEOUT.md](../40_reports/implemented/20260731_D2_OWNER_DIARY_REMEDIATION_AND_REPOSITORY_CLOSEOUT.md) — seven owner diaries, preserved evidence, bug-first remediation, open friction lanes, and repository reconciliation.
+- **Latest April 1994 calibration:** [implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md](../40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md) — three operational lanes, Brčko/Lopare safeguards, deterministic week-104 evidence, final nine-OSID debt, and interactive map publication.
 - **Consolidated views:** [CONSOLIDATED_IMPLEMENTED.md](../40_reports/CONSOLIDATED_IMPLEMENTED.md) (what’s done; single doc [IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md](../40_reports/IMPLEMENTED_WORK_CONSOLIDATED_2026_02_15.md), reports archived 2026-02-15), [CONSOLIDATED_BACKLOG.md](../40_reports/CONSOLIDATED_BACKLOG.md) (what’s not yet done), [CONSOLIDATED_LESSONS_LEARNED.md](../40_reports/CONSOLIDATED_LESSONS_LEARNED.md) (patterns and corrections).
 - **Cleanup plan:** [ORCHESTRATOR_40_REPORTS_CLEANUP_AND_CONSOLIDATION_2026_02_13.md](../40_reports/ORCHESTRATOR_40_REPORTS_CLEANUP_AND_CONSOLIDATION_2026_02_13.md).
 - Subfolders: [audits/](../40_reports/audits/), [implemented/](../40_reports/implemented/), [backlog/](../40_reports/backlog/), [convenes/](../40_reports/convenes/), [handovers/](../40_reports/handovers/), [playtests/](../40_reports/playtests/). Custodian: `.cursor/skills/reports-custodian/SKILL.md`.

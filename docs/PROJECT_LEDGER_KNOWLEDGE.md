@@ -1,3 +1,26 @@
+## 2026-09-02 - Calibration must preserve causal ownership, not merely painted control
+
+**A correct endpoint produced by the wrong mechanism is still a defect.** April 1994 initially
+looked stronger when rear-pocket consolidation and abandonment awarded territory, but those gains
+did not represent operations. Accept the temporary score regression when removing invalid control
+authority, then recover only the historically supported positions through forces, staging,
+objectives, and normal battle resolution. Topology may establish operational purpose; it cannot
+write political control. Applied in the [April 1994 operational calibration ledger sequence](PROJECT_LEDGER.md#2026-09-02--correction-brčko-requires-an-operation-zvezda-retains-its-main-staff-group)
+and consolidated in [the implementation report](40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md).
+
+**Operational purpose and feasibility are distinct gates.** Exposure, adjacency, or a favorable
+ratio can make an attack feasible without making the target strategically sensible. Ordinary
+emergent operations need a live-state purpose before tactical ranking can authorize execution, and
+an unpurposed first proposal should end the cycle rather than search the whole map for a convenient
+substitute. Historical catalog names are identity-bearing data and must remain reserved to their
+authored operations. Applied in the [purpose/name ledger entry](PROJECT_LEDGER.md#2026-09-02--purposeful-emergent-operations-and-reserved-historical-names).
+
+**Determinism requires source-state identity as well as save identity.** Two runs with identical
+serialized starts may still diverge if their executable catalog definitions differ. When the first
+divergence is an operation roster, compare source revisions before diagnosing RNG or unstable
+iteration, then pin the accepted roster in a direct test. Applied in the [Derventa/Liše/Prozor
+ledger entry](PROJECT_LEDGER.md#2026-09-02--april-derventa-liše-and-prozor-operational-corrections).
+
 ## 2026-08-30 - Converging operation axes must share one physical combat truth
 
 **An operation axis is a planning partition, not an independent battle.** When two live axes have the

@@ -1,5 +1,8 @@
 # April 1994 Operational Corrections — Implementation Plan
 
+**Status:** Completed. Later corrections refined the accepted result; see
+[`20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md`](../40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md).
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Make ARBiH the operational attacker against HVO and add canonical Army-HQ elite participation to Cerska–Kamenica and Zvezda 94.
@@ -38,7 +41,7 @@
 
 ### Task 4: Propagate the result
 
-**Files:** `docs/30_planning/CALIBRATION_MASTER.md`, `docs/PROJECT_LEDGER.md`, and any directly affected system documentation
+**Files:** `docs/40_reports/CALIBRATION_MASTER.md`, `docs/PROJECT_LEDGER.md`, and any directly affected system documentation
 
 1. Record the doctrine correction, historical-source distinction, implementation files, tests, and measured calibration delta.
 2. Verify documentation names canonical files and does not overstate the Zvezda unit evidence.

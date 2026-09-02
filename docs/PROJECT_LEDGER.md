@@ -31814,3 +31814,49 @@ Release-gate follow-up: all three focused suites pass **98/98**, TypeScript type
 `git diff --check` passes, and `tools/validate_run_consistency.cjs` reports **PASS** for the v73
 artifact. The generated interactive map contains all 744 hover regions, reports 703/712, and was
 published as version 4 of the existing remote April 1994 calibration map.
+
+### 2026-09-02 — April 1994 documentation and authority synchronization
+
+The complete September 1–2 April-calibration sequence is now consolidated in
+`docs/40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md`. The report records the
+three requested lanes, the Lopare and Brčko mechanism corrections, isolated-position recovery,
+Derventa/Liše/Prozor corrections, candidate score/hash progression, final regional comparison,
+all nine remaining mismatches, control-change attribution, determinism evidence, runtime owners,
+and the authenticated interactive-map URL.
+
+`CALIBRATION_MASTER.md` now exposes v72/v73 as the current week-104 April measurement while keeping
+the clean 188-week baseline and floors distinct. The Systems Manual's displacement note no longer
+lists the retired rear-pocket phase or null-OSID auto-claim as active control owners; the War
+Specification now names the April operations-only contract. Engineering synchronization adds the
+hover-map entrypoint, actual emergent name-pool cardinalities,
+historical-name reservation owner, HVO contacted-home assignment rule, and the production-versus-
+legacy rear-pocket test distinction. The reports index, consolidated implemented index, docs index,
+five completed plan records, and thematic knowledge base now link to the consolidated report. The
+Master Roadmap, Command Board, and plans index now reflect the owner's 2026-08-31 reopening of
+calibration while preserving the separate blocked RE status.
+
+Fresh artifact inspection confirms the v72/v73 initial-save SHA-256 is
+`a536e7bbb8e9de7b30abf979ce5f5e8c720473006c851df5ba30891c99effd0a` and final-save SHA-256 is
+`d6095cb8408ddfa85a52223cc6c4c5eb7ae46165cbb2b25fbe438d88c7245148`; both run summaries report
+final-state hash `d6095cb8408ddfa8`. The earlier ledger shorthand calling the 16-character value a
+SHA-256 should be read as the final-state hash; this entry supplies the full file digest without
+rewriting append-only history. Final v73 comparison is 703/712 with the exact nine-cell residual
+list in the report. One transparent diagnostic caveat is retained: Prozor-Rama's turn-41 injection
+attempt is rejected because both objectives are then friendly, after which the operation starts at
+turn 52 and captures both objectives through logged combat.
+
+Documentation files updated: 20 existing documents plus one new implemented report. Structural
+stale references corrected: six classes (current April authority, retired control owner, April
+canon contract, interactive-map entrypoint, operation-name ownership/cardinality, and active
+governance status), plus plan/report indexing. The operational initial master was re-counted and
+remains correctly documented at 744 entries; the painted scorer evaluates 712 OSIDs. No uncertain
+structural reference remains in the audited April scope.
+`docs/10_canon/FORAWWV.md` was not edited. The unrelated modified
+`data/derived/latest_run_final_save.json` remains untouched and unstaged.
+
+Fresh closeout verification: the three focused suites pass **98/98**; TypeScript typecheck exits
+0; v73 run-consistency validation reports **PASS**; the painted comparator independently reproduces
+**703/712**, **98.9%** area-weighted, and the same nine residuals; `git diff --check` passes. All new
+relative links to the consolidated report resolve. A broad link scan also surfaced older unrelated
+missing report/source links already present in the long-lived Calibration Master and reports index;
+none is introduced or relied on by this April synchronization.

@@ -2,6 +2,12 @@
 
 **Purpose:** Single entrypoint for implementation reports, handovers, convenes, investigations, and audits. Use consolidated summaries for quick reference; use individual reports for detail.
 
+**2026-09-02 April 1994 operational calibration:**
+[implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md)
+consolidates the three requested lanes, the Lopare/Brčko mechanism corrections, accepted v72/v73
+determinism evidence, 703/712 current checkpoint, nine remaining OSID mismatches, and the
+authenticated interactive map publication. `CALIBRATION_MASTER.md` remains the living authority.
+
 **2026-08-28 RE 1.0 engine-integrity execution:** The sole RE authority remains the
 [seven-outcome/eight-packet 1.0 contract](../plans/2026-08-26-engine-integrity-plan.md). The
 original probe channel closed at `b711cffa9` and is historical evidence. The owner-authorized
