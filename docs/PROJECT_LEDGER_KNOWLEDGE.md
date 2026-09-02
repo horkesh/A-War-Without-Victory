@@ -4933,3 +4933,91 @@ territory, but behaviour-moving for displacement and casualty maths, so 188w not
 
 **And they are NOT evidence that settlement-into-OSID merging harms calibration.** The merge is
 what keeps the model at a clean 712.
+
+
+## Is OSID granularity a calibration ceiling? NO — it is position, then geography
+
+**The owner asked on 2026-09-01 whether merging census settlements into OSIDs is what calibration
+is stuck on.** It is not. Measured, with denominators, so nobody re-derives it.
+
+### Constituent count does NOT predict mismatch
+
+Cochran-Armitage trend test, 4 checkpoints x 2 saves = **8 tests. Not one reaches p<0.08.**
+Mann-Whitney AUC 0.468-0.652. Median constituents is **7 in BOTH** the matched and mismatched
+groups at oct1995. The single apparently-significant cell (chi2=10.20, df=4, p=0.037) fails three
+ways: it does not replicate on the canonical baseline n388 (p=0.45); it is non-monotone (3-4 = 14.0%
+and 16+ = 14.0% high, 9-15 = 6.1% low — a U, not a dose-response); and Bonferroni-adjusted it is
+p=0.29.
+
+**A claim made in-session and KILLED — do not resurrect it:** "1-2 constituent cells are 0.0%
+wrong". On n388 that bin is **2/25 = 8.0%**, sitting on the base rate. Single-settlement cells are
+wrong as often as merged ones.
+
+**The direct test of the merge-defect shape** — does the cell contain a settlement whose ethnic
+plurality differs from the cell's aggregate? 389 of 712 (55%) qualify. Mismatch 40/389 (10.3%) split
+vs 28/323 (8.7%) homogeneous. **chi2=0.53, p=0.47. Not significant**, and absorbed by front-straddle
+in the logistic.
+
+### What DOES predict it: position
+
+`frontStraddle` = fraction of contact-graph neighbours with a different PAINTED controller at the
+same checkpoint (reference-side only, so no circularity with the sim). n388 oct1995:
+
+| refMix | cells | mismatched | rate |
+|---|---|---|---|
+| 0 (interior) | 416 | 24 | 5.8% |
+| (0, 0.25] | 113 | 11 | 9.7% |
+| (0.25, 0.50] | 135 | 28 | **20.7%** |
+| (0.50, 1.0] | 48 | 5 | 10.4% |
+
+Trend z=4.09, **p=4.4e-5**, replicating 4/4 checkpoints on BOTH saves. The top bin dips because
+those are enclave interiors ringed by the other side, which the engine gets right.
+
+Hop-distance to the painted front is the cleanest cut (n388 oct1995):
+**hop 0: 296 cells, 14.9% wrong · hop 1: 208, 11.1% · hop 2: 114, 0.9% · hop 3+: 94, 0.0%**
+**67 of 68 mismatches lie within ONE cell of the confrontation line.** At jan1993 it is 15/15 within
+one hop, zero beyond. The engine never puts control wrong in the deep interior. **Every error is
+line placement.**
+
+Multivariate logistic, standardized: frontStraddle b=0.44 z=3.84 p=1e-4; log(constituents)
+z=-1.14 p=0.25. **Size adds nothing once position is in the model.**
+
+Second real predictor, running OPPOSITE to the size hypothesis: **population**. Mismatched cells are
+SMALLER (AUC 0.24-0.39, p to 3e-6; median pop 2,485 vs 3,724). Towns are right; small rural cells
+are where the line wobbles.
+
+### And then: geography, which dwarfs both
+
+**36 of 68 oct1995 mismatches (53%) fall in 13 western-Bosnia municipalities** — Jajce, Sanski Most,
+Mrkonjić Grad, Ključ, Bosanski Petrovac, Šipovo, Drvar, Glamoč, Grahovo, Donji Vakuf, Skender Vakuf,
+Travnik, Novi Travnik — holding only **83 of 712 cells**.
+**Belt rate 43.4%. Rest of country 5.1%.**
+That is the autumn-1995 Sana/Una - Mistral/Southern Move corridor, the repo's already-documented
+cascade site. **An operations-TIMING failure an order of magnitude larger than anything granularity
+explains.**
+
+### The exemplar that was supposed to prove the granularity thesis, and disproved it
+
+`op:gorazde:kolovarice` was offered in-session as the irreducible merge-defect case: 22 constituents
+(not 23), 41.684 km2, 8 neighbours split exactly 4 RS / 4 RBiH at jan1993, 20 of 22 constituents
+Bosniak-majority and all 22 RBiH at initial control. **It MATCHES the painted reference at all four
+checkpoints in both runs.** It is not a mismatch at all. It was fixed on 2026-08-12 by correcting
+the REFERENCE (RBiH->RS), not by re-cutting the cell. Its area is also rank 478 of 712 — BELOW the
+58.75 km2 median — so area was never the anomaly either.
+
+### Upper bound on genuinely irreducible cells
+
+n388 oct1995, 68 mismatches: 35 front-straddling; 23 front-straddling AND internally ethnically
+split (the full kolovarice shape); 8 that AND wrong at >=3 of 4 checkpoints. But the shape is not
+sufficient — **122 cells carry it and 99 (81%) are CORRECT.** Excess is ~11 points over 122 cells =
+**at most ~14 cells**, and that does not separate "merged across a frontier" from "sits on the
+front". **NOT ESTABLISHED below that bound**: the painted references are OSID-level only, so "wrong
+under any controller" is currently unmeasurable. Settling it needs settlement-level historical
+control truth for the 23 kolovarice-shaped cells — a bounded Historian task, not a code change.
+
+### What to do with this
+
+**Do not spend effort re-cutting OSIDs to chase calibration.** The merge is what keeps the model at
+a clean 712, and finishing the remaining micro-merge is documented separately as CLOSED. Spend it on
+**where the front sits and when the 1995 offensives fire** — see the Vlašić-axis defect, which is
+one visible, fixable instance of exactly that.

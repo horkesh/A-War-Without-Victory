@@ -32233,3 +32233,183 @@ in every run of this series. Merged with it recorded; the tool was not relaxed.
 **Process note, recorded against myself.** I ran (A) without asking for a stop rule first, having
 had explicit numeric ones for (B) and (B2). The seat's answer was that it would not have gated on
 net at all - but I did not know that when I started the run, and the right order was to ask.
+
+
+### 2026-09-02 - Vlasic axis: a CALIBRATION defect, authored one municipality too far. The owner was right; I was wrong.
+
+**QUEUED, not fixed. Worth ~+3 at oct1995 and ~+1 at apr1995.**
+
+`src/sim/combat/operation_opportunity_catalog_central_bosnia.ts:42-52` authors the Vlasic
+opportunity with two objective groups:
+
+    VLASIC_TRAVNIK_RIDGE_OBJECTIVES = [ paklarevo, varosluk, gornje_krcevine ]
+    VLASIC_SKENDER_VAKUF_OBJECTIVES = [ donji_koricani, imljani_2, javorani_2, knezevo_2 ]
+
+The engine takes what it is told to take. **There is no missing culmination mechanic.**
+
+**MY ERROR, recorded because the reasoning chain matters more than the conclusion.** I searched
+`src/sim/combat/*operations*.ts`, a glob that CANNOT match `operation_opportunity_catalog_*.ts`,
+concluded the cells were "in no catalog", and built on it: unauthored capture -> no stopping line ->
+engine gap. Every step after the bad glob reasoned from a false absence, stated confidently. The
+NARROW-LOOKUP GUARD warns about exactly this shape and I read past it. **The owner's first instinct
+- "isn't that a calibration problem, not an engine problem?" - was correct.**
+
+**HISTORIAN RULING (cached ICTY corpus + BB2 Annexes 36 and 55).**
+- The operation is **DOMET-1, 04:30 20 March - 24 March 1995**, ARBiH 7th Corps under Brig. Gen.
+  Mehmed Alagic, ~10 brigades / 20,900-24,500 men including the **712th** and **737th** the run
+  uses. Preceded by the failed DOMET-95 (24 Feb 1995). **NOT autumn 1995** - an in-session
+  assumption that was wrong.
+- **Imljani, Javorani and Knezevo were NEVER ARBiH-held, at any date.** Knezevo IS Skender Vakuf
+  town: VRS 22nd Infantry Bde HQ *and* 1st Knezevo Lt Inf Bde HQ for the whole war (BB2 KB p.493),
+  SDS-declared Serb municipality from 12 Apr 1991 (Karadzic TJ, D1889), and secure Serb rear area in
+  Aug 1992 - the Trnopolje convoy drove *through* it before the Koricanske Stijene massacre
+  (Karadzic TJ paras 1833-1841). RS today. The one event resembling a capture is not one: UN reports
+  have **1,200+ Serb civilians evacuating Imljani by 25 Mar 1995**, 12 km from the fighting -
+  civilians fleeing an offensive, not a front line moving.
+- The Domet-1 terminal line is recorded verbatim: "Srnece brdo - Catici - Santici - tt 1528 -
+  Harambasine vode - Debele jele - Groznicavica - Sesice vode - Kostolac - **Secevo**."
+- **The painted references are RIGHT on all six cells** - the opposite of the Gorazde rim case, and
+  corroborated twice over: `op:travnik:paklarevo` contains **Secevo**, the named terminus of that
+  line, and `op:travnik:gornje_krcevine` contains **Vitovlje**, the VRS "Vlasic" OG headquarters.
+  Taking those is precisely what Domet-1 did. A second in-session assumption - that the painting
+  might be suspect here as at Gorazde - was also wrong.
+
+**THE ENGINE IS ALSO MISTIMED, AND MERGES TWO OPERATIONS.** Verified by replaying control_events:
+
+| cell | engine capture | history |
+|---|---|---|
+| paklarevo | t157 | Domet-1, 20-24 Mar 1995, ~w152 |
+| gornje_krcevine | t160 | Domet-1, ~w152 |
+| varosluk (Komar) | t158 | **September 1995** Donji Vakuf advance, ~w180 |
+| donji_koricani, imljani_2, javorani_2, knezevo_2 | t156-t161 | never |
+
+Domet-1 arrives **4-8 weeks late**, and Komar - a different operation in a different season -
+arrives ~4 months early. The catalog compresses two historically distinct operations into one
+mid-1995 window.
+
+**CONSEQUENCE FOR THE (A) MEASUREMENT, and a correction to it.** At w156 ALL SIX cells are RS in
+both runs, because every capture lands at t157 or later. So the three Travnik gains **score only at
+oct1995 and cannot have helped apr1995** - an in-session claim that they were "now correct" was true
+only at the final checkpoint. And the apr1995 **-3 is NOT diffuse timing churn**: it is four named
+over-captures of cells painted RS, arriving early because freed brigades attacked sooner -
+`konjic:sitnik` t128, `nevesinje:hrusta_2` t129, `nevesinje:sopilja` t156, and
+**`skender_vakuf:donji_koricani` t156, which is the fourth Vlasic objective**. One gain,
+`konjic:bijela_2` t107, painted RBiH. **So the Vlasic axis is implicated at BOTH checkpoints**, and
+the earlier "diffuse, not local" characterisation understated how attributable it is.
+
+**THE FIX (queued):** drop the four `VLASIC_SKENDER_VAKUF_OBJECTIVES`; retime the ridge group to
+~w152; split Komar/`varosluk` out to the September Donji Vakuf advance. Pure catalog data, no engine
+change, no railroad exposure. One caveat on `donji_koricani`: the Historian flags it NOT ESTABLISHED
+- Croat-majority (5,088/5,566), painted RS at oct1995, Federation post-Dayton, which under the
+repo rule that oct1995 is the ceasefire line and not the IEBL is consistent, but no source was found
+for its wartime control.
+
+### 2026-09-02 - The VRS "Final Push", 20 Mar - 18 Apr 1993: SIX cells, three axes, and NOT one operation
+
+**QUEUED. This is the gap that leaves `obadi` AND `osmace_2` wrong at w104 and w156** - the two
+cells whose ENDPOINT was fixed on 2026-09-01 by the fall-event backstop. That backstop corrects
+oct1995; only this corrects apr1994 and apr1995.
+
+**"The Final Push" is Balkan Battlegrounds' section heading, not a Serb codename** - NOT ESTABLISHED
+that the VRS had one for this phase. Beware a collision: "final push" in Karadzic TJ para 5676 means
+**March 1995**, not 1993.
+
+**Three axes, two UN pauses, one successful ARBiH counterattack:**
+- **Main (Skelani-Srebrenica road)** - VRS 65th Protection Motorized Rgt + VJ 63rd Airborne, Mladic
+  personally leading from Jezero, 20 Mar. Kraljeve Vode 22 Mar, **Osmace stormed 24 Mar**, on to
+  within ~2 km of Zeleni Jadar.
+- **Right** - 1st Guards Motorized, 3 Apr toward **Skenderovici**; Kvarac and Pribicevac 15 Apr.
+- **North-east** - "Panthers" Special Bde (Ljubisa Savic-Mauzer) via the **Sase** mine; Zalazje 15 Apr.
+- Pauses: UN humanitarian ceasefire 28 Mar - 1 Apr. **ARBiH retakes Zeleni Jadar and the water supply
+  on 7 Apr**, stalling the VRS to 14 Apr (VRS reported 43 KIA / 71 WIA in two days).
+- 15 Apr all three axes break through; ceasefire signed 17 Apr, effective **18 Apr** - it was not
+  stopped by UNSCR 819 (16 Apr), which "had almost no effect". The boundary was fixed by the 8 May
+  1993 comprehensive agreement (Krstic TJ fn.19, fn.1261).
+
+**SIX Srebrenica cells flip RBiH->RS between jan1993 and apr1994, not two:**
+`osmace_2` (VERIFIED - contains Osmace, Sase AND Skenderovici, three named objectives in one cell),
+`obadi` (VERIFIED as objective, INFERRED as captured - Mladic on Brezani), `ljeskovik_2`,
+`radovcici`, `sulice_2` (INFERRED - the Jezero/Skelani road axis and southern shoulder), and
+`luka_2` (**NOT ESTABLISHED** as Final Push - west/south-west, more likely the general Feb-Apr
+collapse). The Cerska 93 losses are in Vlasenica and Bratunac, not Srebrenica, and do not add here.
+
+**DO NOT MODEL IT AS ONE OPERATION.** Six cells flipping in one tick reproduces exactly the failure
+already on record for the enclave's fall (10 OSIDs, one tick, mechanism=event). Model it as one
+corps operation with three distinct objective groups starting ~w50, or as two sequenced operations
+(20-24 Mar; 3-18 Apr) with **the 7 April Oric counterattack as a real reversal** - that detail is
+load-bearing, and a monolithic op loses it.
+
+**A SPECIALIST CHALLENGE, REJECTED ON EVIDENCE.** The calibration seat suggested `osmace_2` painted
+RS at apr1994/apr1995 "looks historically wrong" because the cell sat inside the demilitarised safe
+area until July 1995 (2,461 Bosniaks of 2,564). The Historian ruled that **backwards**: the 2,461 is
+a **1991** census figure - it is why the village was a target and why it emptied, not evidence it
+stayed inside the pocket. Osmace sits ~9 km SE of the town; the post-push front ran ~7 km east and
+south-east; the enclave contracted 900 km2 -> 150 km2 in this very window (Krstic TJ paras 13-14).
+**If the engine leaves `osmace_2` RBiH, the ENGINE is wrong, not the painting.**
+
+### 2026-09-02 - Three queue items CLOSED without code, and one stale authority
+
+**Sector-orphan rehome - CLOSED, do not implement.** The proposal was to re-run
+`rehomeUnassignedBrigadesToPhysicalSectorOwners` after the delete loop at
+`corps_front_sectors.ts:741-744`. Red-team's decisive test was: measure which call site OWNS the
+orphan field first. `runCurrentSectorSeal` (`final_sector_truth_reconciliation.ts:317-340`) runs
+`applyFinalSectorOwnerTruthPass` twice - each containing a rehome - and only then writes
+`state.military.unresolved_sector_brigades`. **It owns the field.** And the 188w run log answers it
+outright: `FINAL_SEAL ... unresolved=0` on **all 189 turns**. The change would be a **no-op for the
+metric and a non-no-op for calibration** - it mutates `assigned_brigade_ids` and, via the deep-rear
+branch, expands `territory_osids` using full adjacency that bridges enemy territory, after the last
+contiguity repair. Settled from an existing log at zero cost; no worktree, no bake, no 188w.
+Surviving sub-findings worth keeping: there are **three** delete loops, not one, and only 743 lacks
+a following rehome; `pruneRemovedDuplicateEdgeTruth` is a second un-repaired orphan path on partial
+edge loss; **7 brigades are rosterless at turn 0, not 1**, and two (`hvo_posusje_brigade`,
+`hvo_rama_brigade`) fall in no bucket of the startup contract test at all; and the test's
+`unresolvedIds` assertion is structurally vacuous because the field is transient, though the same
+test already builds `rebuiltSectors`, so asserting
+`rebuiltAudit.counts.unresolved_sector_brigades === 0` there would be a real guard for free.
+
+**`op:gorazde:kolovarice` - CLOSED, not a defect.** It **matches the painted reference at all four
+checkpoints in both runs**. It was fixed on 2026-08-12 by correcting the REFERENCE (RBiH->RS), not
+by re-cutting the cell. The long-standing "23 settlements, 41.7 km2, wrong under any single
+controller" note is superseded: it is **22** constituents, and 41.684 km2 is **rank 478 of 712,
+below the 58.75 km2 median** - area was never the anomaly. What is true of it - 8 neighbours split
+exactly 4 RS / 4 RBiH at jan1993, 20 of 22 constituents Bosniak-majority, all 22 RBiH at initial
+control - describes a front-straddling cell, and the wider analysis shows that shape is common
+(122 cells carry it) and mostly CORRECT (99 of 122).
+
+**CALIBRATION_MASTER floor table is STALE - do not score against it.** The recorded floor
+697/677/671/644 describes a scenario configuration that no longer exists at HEAD. Current HEAD
+measures 702/678/672/657 before this session's changes. The gap is at least partly `d9f0451b0`
+(Foca) and its downstream, **not** demonstrated engine improvement. n388 also predates that commit,
+so it is not a valid baseline either. Until a fresh owner-authorised clean 188w exists, score
+change-over-change against a same-code run, as the three §6 changes in this session did.
+
+### 2026-09-02 - The 40w and 188w scenarios start from different maps, and the 40w override block is DEAD
+
+**34 of 712 cells differ at turn 0** between `apr1992_definitive_40w.json` (712 EXPLICIT
+`initial_osid_controllers`) and `apr1992_definitive_188w.json` (zero explicit; derives via
+`init_control: apr1992`, `init_control_mode: hybrid_1992`). Both declare the same init_control base;
+the 40w overrides it with a baked table.
+
+**Mechanism, verified in `src/scenario/scenario_runner.ts`:** `:1739-1741` a non-empty
+`initial_osid_controllers` REPLACES the derived base, and `:1774` gates
+`osid_control_overrides` on `!scenario.initial_osid_controllers`. **So the 40w's baked table
+completely shadows the 40w's own `osid_control_overrides` block - that block is DEAD.** That is
+exactly what happened with Foca: `d9f0451b0` removed the same five Foca cells from the override
+block of six scenario files; in the 188w it changed behaviour, in the 40w it hit the dead block.
+
+**Part deliberate, part stale.** The baked table encodes POST-takeover Apr-Jun 1992 (Visegrad 6,
+Foca 6, Doboj 5, Zvornik 4, Bratunac 3, Stolac 3 - all Bosniak-majority in 1991 and RS-held by
+mid-1992 through takeover and expulsion), while the 188w encodes ethnic-majority 1991 and asks the
+engine to earn it. Two defensible theses. But the 40w is **internally inconsistent with itself** -
+31 of its 712 baked cells disagree with its own declared base plus its own overrides - **no
+regenerator exists** for the field anywhere in the repo, and **nothing guards it**:
+`tests/scenario_sister_parity.test.ts:31-38` places BOTH `osid_control_overrides` and
+`initial_osid_controllers` in `INTENTIONALLY_INLINE_ONLY`, so the one test comparing the sisters is
+explicitly blind to this exact field.
+
+**Consequence for the structural fingerprint.** As a DRIFT DETECTOR it remains valid - fixed input,
+fixed expected output - and the 2026-09-01 re-bless stands on those terms. As EVIDENCE ABOUT THE
+SCORED WORLD it is not valid, and worse than inaccurate: it is **silently insulated**, because the
+40w never reads `osid_control_overrides` at all. **Do not cite the 40w fingerprint as engine-health
+evidence for the 188w.** `docs/00_start_here/docs_index.md` states the sole scoring scenario is the
+188w master; `tools/diagnostics/ci_structural_fingerprint.cjs` runs the 40w.
