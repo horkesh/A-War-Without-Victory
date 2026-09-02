@@ -328,14 +328,18 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         staging_osid: 'op:rogatica:stara_gora',
         available_from: 41,
         min_attack_outcome: 'repulsed',
+        // The May-June tactical group concentrated enough force to reduce both
+        // the Prača corridor and the small Višegrad bridgehead. These remain
+        // ordinary attacks; the multiplier represents the authored operational
+        // concentration, not a control transfer.
+        execution_attack_power_mult: 2.5,
+        planning_duration: 10,
         axes: [
             {
                 axis_id: 'pracha_encirclement',
                 name: 'Prača Encirclement',
                 brigades: [
-                    'rs_1st_podrinje',
                     'rs_1st_zvornik',
-                    'rs_visegrad_brigade',
                     'rs_5th_podrinje',
                 ],
                 // BB2 p.409: May–Jun 1993 TG "Višegrad" (Drina Corps), Prača River offensive.
@@ -350,6 +354,23 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'op:gorazde:ustipraca_2',
                 ],
                 staging_osid: 'op:rogatica:stara_gora',
+            },
+            {
+                axis_id: 'visegrad_bridgehead',
+                name: 'Višegrad Bridgehead',
+                brigades: [
+                    'rs_visegrad_brigade',
+                    'rs_1st_podrinje',
+                ],
+                // Both cells were still in the ARBiH bridgehead at the January
+                // checkpoint and were reduced during the later Prača campaign.
+                // Stara Gora directly adjoins Medjedja; Medjedja adjoins Drinsko.
+                objectives: [
+                    'op:visegrad:medjedja_2',
+                    'op:visegrad:drinsko',
+                ],
+                staging_osid: 'op:rogatica:stara_gora',
+                minimum_staged_brigades: 2,
             },
         ],
     },
@@ -991,6 +1012,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         name: 'Operation Donji Vakuf',
         staging_osid: 'op:sipovo:pribeljci_2',
         min_attack_outcome: 'repulsed',
+        execution_attack_power_mult: 1.65,
         planning_duration: 7,
         axes: [
             {
@@ -1287,7 +1309,9 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
         staging_osid: 'op:travnik:travnik_2',
         min_attack_outcome: 'repulsed',
         execution_attack_power_mult: 1.35,
-        planning_duration: 8,
+        // The Vareš and Zavidovići columns are geographically dispersed; this
+        // budget lets both authored axes assemble before the campaign opens.
+        planning_duration: 12,
         axes: [
             {
                 axis_id: 'fojnica_periphery',
@@ -1354,6 +1378,19 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                     'op:vares:vares_2',
                 ],
                 staging_osid: 'op:vares:budozelje_2',
+            },
+            {
+                axis_id: 'zavidovici_position',
+                name: 'Zavidovići Position',
+                brigades: [
+                    'arbih_7th_vitezka_muslim_liberation',
+                ],
+                // Čardak is a mixed-boundary VRS position, so it is not eligible
+                // for the generic isolated-position operation. The 3rd Corps
+                // counteroffensive attacks it explicitly from adjacent, ARBiH-held
+                // Hajderovići.
+                objectives: ['op:zavidovici:cardak_2'],
+                staging_osid: 'op:zavidovici:hajderovici_2',
             },
         ],
     },
@@ -1831,16 +1868,15 @@ function prestageReservedPrePlannedElites(state: GameState, def: PrePlannedOp, t
                 formation.dig_in_progress = 0;
             }
             if (!state.military.brigade_movement_orders) state.military.brigade_movement_orders = {};
-            // This bot-only dated commitment owns the non-transit movement
-            // slot. In particular it supersedes the generic post-loan return
-            // order that otherwise keeps a reserved elite at Army HQ.
+            // This dated authored commitment owns the movement slot over
+            // discretionary sector routing and later march correction, including
+            // while the operation is queued behind an earlier authored operation.
             const concentrationOrder = {
                 destination_sids: [axis.staging_osid as SettlementId],
                 stance: 'column' as const,
+                owner: 'authored_preplanned' as const,
             };
-            state.military.brigade_movement_orders[brigadeId] = liveOperation?.phase === 'planning'
-                ? concentrationOrder
-                : { ...concentrationOrder, owner: 'bot_discretionary' };
+            state.military.brigade_movement_orders[brigadeId] = concentrationOrder;
         }
     }
 }

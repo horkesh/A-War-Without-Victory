@@ -76,7 +76,7 @@ import type {
 } from './commander_state.js';
 import type { AllocationResult } from './allocate.js';
 import type { PlanDecision } from './plan.js';
-import { MIN_BRIGADES_FOR_PLAN } from './plan.js';
+import { isBoundedIsolatedEnemyPosition, MIN_BRIGADES_FOR_PLAN } from './plan.js';
 import { COMMITMENT_RATIO_UNBOUNDED_PERSISTED } from './zone_detection.js';
 import type { DecisionResult } from './decide.js';
 import { augmentOffensiveTargetsWithShifts } from './bot_priority_shift_augmentation.js';
@@ -109,6 +109,9 @@ const MAX_SECTOR_ACTIVITY_LOG = 20;
 
 /** Max operation history entries to retain in CommanderState. */
 const MAX_OPERATION_HISTORY_ENTRIES = 20;
+
+/** Minimal local group for reducing a bounded position without stripping the corps front. */
+const ISOLATED_POSITION_OPERATION_BRIGADES = 2;
 
 /** Max BFS hops from brigade location to first objective OSID (through friendly territory). */
 const MAX_REACHABILITY_HOPS = 8;
@@ -1335,17 +1338,113 @@ function buildOperations(
                 );
 
                 if (probeReachable) {
+                    const commandState = briefing.state_ref?.military.corps_command?.[briefing.corps_id];
+                    const sectorIntelConfidence = briefing.state_ref && probeSectorId
+                        ? getStalestSectorIntelConfidence(briefing.state_ref, probeSectorId)
+                        : 0;
+                    const targetIsBoundedPosition = isBoundedIsolatedEnemyPosition(
+                        probeObjectives[0]!,
+                        briefing,
+                    );
+                    const queuedHistoricalParticipants = briefing.state_ref
+                        ? getHeadQueuedPrePlannedBrigadeIds(briefing.state_ref)
+                        : new Set<FormationId>();
+                    const probeSector = briefing.sectors.find((sector) => sector.sector_id === probeSectorId);
+                    const targetApproaches = (
+                        briefing.spatial.sharedBoundaryAdjacency?.get(probeObjectives[0]!)
+                        ?? briefing.spatial.adjacency.get(probeObjectives[0]!)
+                        ?? []
+                    ).filter((osid) => briefing.spatial.friendlyOsidsByFaction?.get(briefing.faction)?.has(osid));
+                    const distanceToReduction = (brigadeId: FormationId): number => {
+                        const location = briefing.brigades.find((entry) => entry.id === brigadeId)?.location_osid;
+                        if (!location) return Number.POSITIVE_INFINITY;
+                        let best = Number.POSITIVE_INFINITY;
+                        for (const approach of [...targetApproaches].sort(strictCompare)) {
+                            const distance = spatialFriendlyDistance(
+                                briefing.spatial,
+                                briefing.faction,
+                                location,
+                                approach,
+                                MAX_REACHABILITY_HOPS,
+                            );
+                            if (distance >= 0 && distance < best) best = distance;
+                        }
+                        return best;
+                    };
+                    const sameSectorParticipants = new Set<FormationId>([
+                        ...(probeSector?.reserve_brigade_ids ?? []),
+                        ...(probeSector?.rear_brigade_ids ?? []),
+                        ...(probeSector?.assigned_brigade_ids ?? []),
+                    ]);
+                    const reductionParticipants = [
+                        probeBrigade.brigade_id,
+                        ...(probeSector?.reserve_brigade_ids ?? []),
+                        ...(probeSector?.rear_brigade_ids ?? []),
+                        ...(probeSector?.assigned_brigade_ids ?? []),
+                        ...briefing.brigades.map((entry) => entry.id),
+                    ]
+                        .filter((brigadeId, index, all) => all.indexOf(brigadeId) === index)
+                        .filter((brigadeId) => !queuedHistoricalParticipants.has(brigadeId))
+                        .filter((brigadeId) => isCombatReadyParticipant(briefing, brigadeId))
+                        .filter((brigadeId) => {
+                            const brigade = briefing.brigades.find((entry) => entry.id === brigadeId);
+                            return brigade?.corps_id === briefing.corps_id
+                                && isBrigadeEligibleForOperationObjectives(brigade, probeObjectives)
+                                && Number.isFinite(distanceToReduction(brigadeId));
+                        })
+                        .sort((left, right) => {
+                            if (left === probeBrigade.brigade_id) return -1;
+                            if (right === probeBrigade.brigade_id) return 1;
+                            const sectorDiff = Number(sameSectorParticipants.has(right)) - Number(sameSectorParticipants.has(left));
+                            if (sectorDiff !== 0) return sectorDiff;
+                            const distanceDiff = distanceToReduction(left) - distanceToReduction(right);
+                            return distanceDiff !== 0 ? distanceDiff : strictCompare(left, right);
+                        })
+                        .slice(0, ISOLATED_POSITION_OPERATION_BRIGADES);
+                    const escalateToOperation = targetIsBoundedPosition
+                        && reductionParticipants.length >= ISOLATED_POSITION_OPERATION_BRIGADES
+                        && !shouldLaunchProbeInstead(
+                        briefing.faction,
+                        sectorIntelConfidence,
+                        commandState?.consecutive_probes ?? 0,
+                        briefing.turn,
+                        briefing.state_ref?.military.war_timeline,
+                    );
                     const probeOp = botOrdersPerfTime(
-                        `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.buildProbeOperation`,
+                        escalateToOperation
+                            ? `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.buildIsolatedPositionOperation`
+                            : `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.buildProbeOperation`,
                         () => {
                             // PERMITTED CREATION ENTRY POINT — commander-generated operations only.
                             // All CorpsOperation objects must be built via the factory functions in corps_operation_helpers.ts.
-                            return buildProbeOperation(
+                            if (!escalateToOperation) {
+                                return buildProbeOperation(
+                                    briefing.corps_id,
+                                    briefing.turn,
+                                    probeBrigade.brigade_id,
+                                    probeSectorId,
+                                    probeObjectives,
+                                );
+                            }
+                            const personnelById = new Map(
+                                briefing.brigades.map((entry) => [entry.id, entry.personnel ?? 0]),
+                            );
+                            return buildCommanderOperation(
                                 briefing.corps_id,
                                 briefing.turn,
-                                probeBrigade.brigade_id,
+                                reductionParticipants,
                                 probeSectorId,
                                 probeObjectives,
+                                reductionParticipants.reduce(
+                                    (sum, brigadeId) => sum + (personnelById.get(brigadeId) ?? 0),
+                                    0,
+                                ),
+                                pickOperationName(
+                                    briefing.corps_id,
+                                    briefing.turn,
+                                    briefing.faction,
+                                    briefing.state_ref,
+                                ),
                             );
                         },
                     );

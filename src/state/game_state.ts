@@ -112,7 +112,7 @@ export interface BrigadePostureOrder {
 export type BrigadeMovementStatus = 'deployed' | 'packing' | 'in_transit' | 'unpacking';
 
 /** Authority that created a brigade movement record. Untagged legacy records are protected. */
-export type BrigadeMovementOwner = 'bot_discretionary';
+export type BrigadeMovementOwner = 'bot_discretionary' | 'authored_preplanned';
 
 /** Deployment posture action staged by UI/IPC. */
 export type BrigadeDeployAction = 'deploy' | 'undeploy';

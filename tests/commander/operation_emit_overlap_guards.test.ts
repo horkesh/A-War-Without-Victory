@@ -506,6 +506,45 @@ describe('commander emission overlap guards', () => {
         expect(output.operations[0]!.type).toBe('sector_attack');
     });
 
+    it('escalates fallback probing into an occupying operation against a bounded isolated position', () => {
+        const briefing = makeBriefing();
+        briefing.state_ref!.political.political_controllers = {
+            'op:test:approach': FACTION,
+            'op:test:objective': 'RBiH',
+        } as any;
+        briefing.state_ref!.military.corps_command![CORPS_ID]!.consecutive_probes = 2;
+        const noPlan: PlanDecision = {
+            plan: null,
+            action: 'none',
+            reason: 'no major plan',
+            decision_trace: {
+                turn: briefing.turn,
+                winning_intent_id: null,
+                candidates: [],
+                hard_constraints: [],
+                lessons_applied: [],
+                relationships_applied: [],
+            },
+        };
+
+        const output = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            makeAllocation(),
+            noPlan,
+            makeDecisions(),
+            makeThreats(),
+        );
+
+        expect(output.operations).toHaveLength(1);
+        expect(output.operations[0]).toMatchObject({
+            type: 'sector_attack',
+            objectives: ['op:test:objective'],
+            participating_brigades: ['b1', 'b2'],
+        });
+    });
+
     it('emits byte-identical intel-gated operations for identical inputs', () => {
         const briefing = makeIntelBriefing([0.24]);
         const emit = () => emitCommanderOutput(

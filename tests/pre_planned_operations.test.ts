@@ -193,15 +193,15 @@ describe('pre-planned operations', () => {
         assert.deepEqual(state.military.brigade_movement_orders[brigadeId], {
             destination_sids: ['op:gacko:izgori'],
             stance: 'column',
-            owner: 'bot_discretionary',
-        });
+            owner: 'authored_preplanned',
+        }, 'a dated authored concentration must outrank discretionary sector routing');
 
         const concentrationTransit = {
             status: 'in_transit' as const,
             stance: 'column' as const,
             destination_sids: ['op:gacko:izgori'],
             turns_remaining: 2,
-            owner: 'bot_discretionary' as const,
+            owner: 'authored_preplanned' as const,
         };
         state.military.brigade_movement_state[brigadeId] = structuredClone(concentrationTransit);
         prestageDeferredPrePlannedElites(state);
@@ -242,7 +242,7 @@ describe('pre-planned operations', () => {
         prestageDeferredPrePlannedElites(state);
         assert.deepEqual(
             state.military.brigade_movement_orders[brigadeId],
-            { destination_sids: ['op:gacko:izgori'], stance: 'column' },
+            { destination_sids: ['op:gacko:izgori'], stance: 'column', owner: 'authored_preplanned' },
             'a launched planning phase must own its march over discretionary bot routing',
         );
 
@@ -296,7 +296,7 @@ describe('pre-planned operations', () => {
         assert.deepEqual(state.military.brigade_movement_orders[brigadeId], {
             destination_sids: ['op:rogatica:brcigovo'],
             stance: 'column',
-            owner: 'bot_discretionary',
+            owner: 'authored_preplanned',
         });
     });
 
@@ -353,6 +353,7 @@ describe('pre-planned operations', () => {
         assert.equal(centralBosnia.corps, 'arbih_3rd_corps');
         assert.equal(centralBosnia.faction, 'RBiH');
         assert.equal(centralBosnia.available_from, 60);
+        assert.equal(centralBosnia.planning_duration, 12);
         assert.deepEqual(centralBosnia.axes.flatMap((axis) => axis.objectives), [
             'op:fojnica:bakovici_2',
             'op:kakanj:slapnica_2',
@@ -364,7 +365,13 @@ describe('pre-planned operations', () => {
             'op:novi_travnik:ruda_2',
             'op:vares:gornja_borovica_2',
             'op:vares:vares_2',
+            'op:zavidovici:cardak_2',
         ]);
+
+        const zavidovici = centralBosnia.axes.find((axis) => axis.axis_id === 'zavidovici_position');
+        assert.ok(zavidovici);
+        assert.equal(zavidovici.staging_osid, 'op:zavidovici:hajderovici_2');
+        assert.deepEqual(zavidovici.brigades, ['arbih_7th_vitezka_muslim_liberation']);
 
         const bugojno = _ALL_PRE_PLANNED.find((def) => def.name === 'Battle of Bugojno');
         assert.ok(bugojno);
@@ -887,6 +894,26 @@ describe('pre-planned operations', () => {
         assert.ok(sweep.brigades.includes('rs_22nd_krajina_infantry'));
         assert.ok(sweep.brigades.includes('rs_5th_kozara_light_infantry'));
         assert.ok(sweep.brigades.includes('rs_16th_krajina_motorized'));
+        assert.equal(operation.execution_attack_power_mult, 1.65);
+    });
+
+    it('uses a separate Pracha River axis to reduce the Visegrad bridgehead', () => {
+        const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Pracha River');
+        assert.ok(operation);
+        assert.equal(operation.execution_attack_power_mult, 2.5);
+        assert.equal(operation.planning_duration, 10);
+
+        const axis = operation.axes.find((candidate) => candidate.axis_id === 'visegrad_bridgehead');
+        assert.ok(axis);
+        assert.equal(axis.staging_osid, 'op:rogatica:stara_gora');
+        assert.deepEqual(axis.objectives, [
+            'op:visegrad:medjedja_2',
+            'op:visegrad:drinsko',
+        ]);
+        assert.deepEqual(axis.brigades, [
+            'rs_visegrad_brigade',
+            'rs_1st_podrinje',
+        ]);
     });
 
     it('uses a full-operation Vlasic axis to clear the isolated Gornje Krcevine pocket', () => {

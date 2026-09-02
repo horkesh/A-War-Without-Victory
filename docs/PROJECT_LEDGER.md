@@ -31755,3 +31755,26 @@ background visible, making RS-held Lopare Selo appear RBiH. The generator now de
 OSID dataset before applying controller fills. A focused regression test was observed red on the
 old ordering and green after the correction. This is visualization-only: the accepted simulation
 already had `op:lopare:lopare_selo_2` as RS initially, finally, and in the April painted target.
+
+### 2026-09-02 — CORRECTION: isolated positions require operations, not passive flips
+
+The removal of post-fade rear-pocket consolidation revealed that several April matches in Krajina,
+Vareš, Zavidovići, and Foča had depended on either passive control or cancelled historical staging.
+The commander now recognizes only fully bounded hostile positions of at most six connected OSIDs as
+a legitimate reduction purpose. It may escalate its probe into a normal sector attack only after the
+existing intelligence threshold and with two reachable, combat-ready same-corps brigades. This rule
+does not consult painted control and does not make mixed-boundary targets such as Čardak or unpurposed
+targets such as Lopare Selo eligible.
+
+Pre-planned staging movement now carries `authored_preplanned` ownership and survives routine march
+correction while queued. Authored operation data adds the Višegrad bridgehead to Operation Pracha
+River and Čardak to the Central Bosnia Counteroffensive, extends the latter's assembly budget, and
+applies scoped execution concentration to Cerska–Kamenica and Donji Vakuf. Focused tests were written
+red first and now pass. Two independent 104-week runs have identical hash `270709e4d303deed`; the
+accepted v63 run scores **701/712 (98.46%)**, with **127/127 Krajina** and **112/112 Drina**. All
+named regressions are repaired through logged combat; Brčko and Lopare Selo remain RS, Brka and
+Goražde town remain RBiH, and the run contains zero `consolidation` or `abandoned` transfers.
+The focused change surface passes **166/166** tests, TypeScript typecheck passes, run-consistency
+validation passes, and `git diff --check` passes. The repository-wide suite separately reports its
+pre-existing enclave-fixture drift: the simulation includes Obadi in the Srebrenica enclave list
+while `tools/validate_run_consistency.cjs` does not; neither file is changed by this correction.

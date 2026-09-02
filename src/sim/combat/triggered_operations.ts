@@ -327,7 +327,7 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         // BB1 p.220 and BB2 p.415 describe a Main Staff effort built around
         // crack formations and outside armoured/fire support. Preserve that
         // operational concentration as the columns advance beyond staging.
-        execution_attack_power_mult: 2.0,
+        execution_attack_power_mult: 2.5,
         require_all_axes_ready: true,
         trigger: (_state, turn) => turn >= 40,
         axes: [

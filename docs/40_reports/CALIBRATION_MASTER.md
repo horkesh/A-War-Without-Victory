@@ -4125,3 +4125,27 @@ Zvezda 94 starts at turn 93 and completes successfully at turn 98 with both the 
 Slatina, Ustiprača, and Kolovariće, while Goražde town remains RBiH. The run contains zero
 `consolidation` or `abandoned` control changes and scores **684/712** at April 1994. The lower
 national score is the visible cost of removing a non-canonical global auto-flip mechanism.
+
+## 2026-09-02 — Isolated-position operations and April regression recovery ADOPTED
+
+Removing rear-pocket auto-flips correctly protected Brčko but exposed positions that had only
+matched because topology silently awarded control. The replacement is operational: a commander may
+classify a connected hostile position of at most six OSIDs as a reduction objective only when its
+entire external shared-boundary ring belongs to the commander's faction. Low intelligence still
+requires probes, and escalation requires a reachable, combat-ready two-brigade same-corps group.
+Lopare Selo is not a commander objective and remains RS; Brčko is not a bounded hostile position.
+
+Authored pre-planned staging now has explicit movement ownership, preventing routine march correction
+from cancelling a historical concentration while its operation waits in the corps queue. This
+recovers Operation Foca's southern axis. Operation Cerska–Kamenica receives its documented Main Staff
+concentration and completes the Kamenica and Skelani axes. Operation Pracha River uses a separate
+Višegrad-bridgehead axis; the Central Bosnia Counteroffensive explicitly attacks the mixed-boundary
+Čardak position and has enough assembly time for its Vareš column; Operation Donji Vakuf completes
+its authored sweep through Korenići. Every recovered OSID is taken in a logged battle.
+
+The accepted 104-week run is
+`runs/apr1994_isolated_ops_v63/apr1992_definitive_188w__1db784e85c2e6de0__w104`, hash
+`270709e4d303deed`. An independent rerun in `apr1994_isolated_ops_v64` produced the same hash. The
+April comparison is **701/712 (98.46%)**, area-weighted **98.48%**. Krajina is **127/127** and Drina
+is **112/112**. Brčko city, Donji Rahić, and Potočari remain RS; Brka remains RBiH; Lopare Selo
+remains RS; Goražde town remains RBiH. There are zero `consolidation` or `abandoned` transfers.

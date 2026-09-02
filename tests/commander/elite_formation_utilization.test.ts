@@ -811,6 +811,54 @@ describe('prepositioning pipeline priority', () => {
         expect(state.military.brigade_movement_state?.['bde_1' as FormationId]?.destination_sids?.[0]).toBe('op:foca:prevrac');
     });
 
+    it('correctTransitStates preserves authored pre-planned concentration while its operation is queued', () => {
+        const state = makeMinimalState({
+            locationOsid: 'op:bileca:bileca_2',
+            inTransit: true,
+            transitDest: 'op:gacko:izgori',
+        });
+        const brigade = state.military.formations!['bde_1' as FormationId]!;
+        brigade.corps_id = 'vrs_herzegovina' as FormationId;
+        brigade.assigned_sub_segment_id = 'subseg:bileca:0';
+        state.military.brigade_movement_state!['bde_1' as FormationId]!.owner = 'authored_preplanned';
+        state.military.corps_command = {
+            vrs_herzegovina: {
+                active_operations: [],
+                queued_operations: ['Operation Foca'],
+            },
+        } as any;
+        state.political!.political_controllers = {
+            'op:bileca:bileca_2': 'RS',
+            'op:gacko:korita': 'RS',
+            'op:gacko:izgori': 'RS',
+        } as any;
+        state.military.corps_front_sectors = {
+            'sector:bileca:0': {
+                sub_segments: [{
+                    sub_segment_id: 'subseg:bileca:0',
+                    friendly_osids: ['op:bileca:bileca_2'],
+                    enemy_osids: ['op:enemy:front'],
+                    edge_ids: ['edge:bileca'],
+                    length_edges: 1,
+                    primary_brigade_ids: ['bde_1'],
+                }],
+            },
+        } as any;
+        const adjacency = new Map<string, string[]>([
+            ['op:bileca:bileca_2', ['op:gacko:korita']],
+            ['op:gacko:korita', ['op:bileca:bileca_2', 'op:gacko:izgori']],
+            ['op:gacko:izgori', ['op:gacko:korita']],
+        ]);
+
+        correctTransitStates(state, adjacency);
+
+        expect(state.military.brigade_movement_state?.['bde_1' as FormationId]).toMatchObject({
+            status: 'in_transit',
+            destination_sids: ['op:gacko:izgori'],
+            owner: 'authored_preplanned',
+        });
+    });
+
     it('prepositioning overrides existing distribution order', () => {
         // Simulate step 648 (distribute-brigades-to-front) having already written an order
         const state = {

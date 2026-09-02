@@ -14,6 +14,7 @@ import {
 const FACTION: FactionId = 'RBiH';
 const TARGET = 'op:lopare:lopare_selo_2';
 const CAMPAIGN_TARGET = 'op:brcko:donji_rahic';
+const POCKET_MATE = 'op:lopare:pocket_mate';
 const FRIENDLY = [
     'op:kalesija:kikaci',
     'op:tuzla:gornja_tuzla',
@@ -194,5 +195,69 @@ describe('emergent operation purpose guard', () => {
             },
         });
         expect(deriveOpportunityTargetPurpose(TARGET, makeZone(), briefing)).toBe('cut_enemy_salient');
+    });
+
+    it('treats a completely surrounded enemy singleton as an operation purpose', () => {
+        const briefing = makeBriefing({
+            state_ref: {
+                political: {
+                    political_controllers: {
+                        [TARGET]: 'RS',
+                        ...Object.fromEntries(FRIENDLY.map((osid) => [osid, FACTION])),
+                        'op:lopare:lopare_2': FACTION,
+                        'op:lopare:priboj_2': FACTION,
+                    },
+                },
+            } as unknown as CommanderBriefing['state_ref'],
+        });
+
+        expect(deriveOpportunityTargetPurpose(TARGET, makeZone(), briefing)).toBe('reduce_isolated_position');
+        expect(selectOpportunityTargets(makeZone(), 2, briefing)).toEqual([TARGET]);
+    });
+
+    it('recognizes a bounded connected enemy pocket rather than requiring each cell to be isolated alone', () => {
+        const adjacency = new Map<string, readonly string[]>([
+            [TARGET, [POCKET_MATE, FRIENDLY[0]!]],
+            [POCKET_MATE, [TARGET, FRIENDLY[1]!]],
+            [FRIENDLY[0]!, [TARGET]],
+            [FRIENDLY[1]!, [POCKET_MATE]],
+        ]);
+        const briefing = makeBriefing({
+            spatial: {
+                ...makeBriefing().spatial,
+                adjacency,
+                sharedBoundaryAdjacency: adjacency,
+                friendlyOsidsByFaction: new Map([[FACTION, new Set(FRIENDLY)]]),
+            } as SpatialContext,
+            state_ref: {
+                political: {
+                    political_controllers: {
+                        [TARGET]: 'RS',
+                        [POCKET_MATE]: 'RS',
+                        [FRIENDLY[0]!]: FACTION,
+                        [FRIENDLY[1]!]: FACTION,
+                    },
+                },
+            } as unknown as CommanderBriefing['state_ref'],
+        });
+
+        expect(deriveOpportunityTargetPurpose(TARGET, makeZone(), briefing)).toBe('reduce_isolated_position');
+    });
+
+    it('does not call an enemy cluster isolated when it has an external boundary not held by the faction', () => {
+        const briefing = makeBriefing({
+            state_ref: {
+                political: {
+                    political_controllers: {
+                        [TARGET]: 'RS',
+                        ...Object.fromEntries(FRIENDLY.map((osid) => [osid, FACTION])),
+                        'op:lopare:lopare_2': 'HRHB',
+                        'op:lopare:priboj_2': FACTION,
+                    },
+                },
+            } as unknown as CommanderBriefing['state_ref'],
+        });
+
+        expect(deriveOpportunityTargetPurpose(TARGET, makeZone(), briefing)).toBeNull();
     });
 });

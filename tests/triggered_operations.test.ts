@@ -171,7 +171,7 @@ describe('triggered operations definitions', () => {
 
         assert.equal(operation.planning_duration, 20);
         assert.equal(operation.min_attack_outcome, 'repulsed');
-        assert.equal(operation.execution_attack_power_mult, 2.0);
+        assert.equal(operation.execution_attack_power_mult, 2.5);
         assert.equal(operation.require_all_axes_ready, true);
         assert.deepEqual(cerskaAxis.objectives, [
             'op:vlasenica:cerska_2',

@@ -1514,10 +1514,45 @@ function createOpportunityPlan(
 export type OpportunityTargetPurpose =
     | 'campaign_objective'
     | 'recent_recapture'
+    | 'reduce_isolated_position'
     | 'cut_enemy_salient'
     | 'relieve_must_hold';
 
 const RECENT_RECAPTURE_WINDOW_TURNS = 8;
+const MAX_ISOLATED_POSITION_OSIDS = 6;
+
+export function isBoundedIsolatedEnemyPosition(
+    targetOsid: string,
+    briefing: CommanderBriefing,
+): boolean {
+    const controllers = briefing.state_ref?.political.political_controllers;
+    const adjacency = briefing.spatial.sharedBoundaryAdjacency ?? briefing.spatial.adjacency;
+    const targetController = controllers?.[targetOsid];
+    if (!controllers || !adjacency || !targetController || targetController === briefing.faction) return false;
+
+    const cluster = new Set<string>([targetOsid]);
+    const queue = [targetOsid];
+    for (let head = 0; head < queue.length; head++) {
+        const current = queue[head];
+        if (!current) break;
+        for (const neighbor of [...(adjacency.get(current) ?? [])].sort(strictCompare)) {
+            if (cluster.has(neighbor) || controllers[neighbor] !== targetController) continue;
+            cluster.add(neighbor);
+            if (cluster.size > MAX_ISOLATED_POSITION_OSIDS) return false;
+            queue.push(neighbor);
+        }
+    }
+
+    let externalBoundaryCount = 0;
+    for (const member of [...cluster].sort(strictCompare)) {
+        for (const neighbor of [...(adjacency.get(member) ?? [])].sort(strictCompare)) {
+            if (cluster.has(neighbor)) continue;
+            externalBoundaryCount++;
+            if (controllers[neighbor] !== briefing.faction) return false;
+        }
+    }
+    return externalBoundaryCount > 0;
+}
 
 /**
  * Return the state-derived reason that can justify an occupying corps
@@ -1542,6 +1577,10 @@ export function deriveOpportunityTargetPurpose(
     );
     if (wasRecentlyLost) return 'recent_recapture';
 
+    if (isBoundedIsolatedEnemyPosition(targetOsid, briefing)) {
+        return 'reduce_isolated_position';
+    }
+
     const isEnemySalientNeck = (briefing.front_geometry?.enemy_salients ?? []).some((salient) =>
         salient.neck_osids.includes(targetOsid),
     );
@@ -1560,6 +1599,7 @@ export function deriveOpportunityTargetPurpose(
 const PURPOSE_PRIORITY: Readonly<Record<OpportunityTargetPurpose, number>> = {
     recent_recapture: 4,
     campaign_objective: 3,
+    reduce_isolated_position: 2,
     cut_enemy_salient: 2,
     relieve_must_hold: 1,
 };
