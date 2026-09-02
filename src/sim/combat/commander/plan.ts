@@ -93,6 +93,23 @@ export function isContainSuppressionActiveFor(faction: FactionId): boolean {
 /** Minimum surplus brigades required to create a plan. */
 export const MIN_BRIGADES_FOR_PLAN = 3;
 const BILATERAL_MIN_BRIGADES_FOR_PLAN = 2;
+export const EMERGENT_OPERATION_MAX_BRIGADES = 6;
+
+export function capEmergentOperationBrigades(requiredBrigades: number, bilateralOffensive: boolean): number {
+    return bilateralOffensive
+        ? requiredBrigades
+        : Math.min(EMERGENT_OPERATION_MAX_BRIGADES, requiredBrigades);
+}
+
+export function isBilateralOpponentTarget(targetOsid: string, briefing: CommanderBriefing): boolean {
+    const opponent = briefing.faction === 'RBiH'
+        ? 'HRHB'
+        : briefing.faction === 'HRHB'
+            ? 'RBiH'
+            : null;
+    if (opponent === null) return false;
+    return briefing.state_ref?.political.political_controllers?.[targetOsid] === opponent;
+}
 
 /**
  * Number of turns an OSID from a failed operation stays on cooldown.
@@ -1367,9 +1384,17 @@ function createOpportunityPlan(
         ? reachableSurplus.length
         : Math.min(reachableSurplus.length, stagingZone.surplus_brigades.length);
     const mainEffortLimit = effectiveMainEffortCap > 0 ? effectiveMainEffortCap : minimumBrigades;
-    const baseRequiredBrigades = Math.max(
+    const uncappedRequiredBrigades = Math.max(
         minimumBrigades,
         Math.min(mainEffortLimit, naturalRequired),
+    );
+    // Corps-created opportunities are bounded local operations. Larger force
+    // concentrations belong to authored or Army-HQ operations, which carry
+    // explicit objectives and reserve authority. The bilateral HVO-war path
+    // remains uncapped because it represents an assigned theatre offensive.
+    const baseRequiredBrigades = capEmergentOperationBrigades(
+        uncappedRequiredBrigades,
+        briefing.bilateral_offensive === true,
     );
     // ARBiH historically accepted unfavorable heavy-equipment ratios when attacking
     // HVO. The designated bilateral attacker still needs the normal reachable force
@@ -1390,7 +1415,10 @@ function createOpportunityPlan(
     );
 
     const scopedReachableEnemyOsids = briefing.bilateral_offensive
-        ? reachableEnemyOsids.filter(osid => briefing.campaign_offensive_targets.includes(osid))
+        ? reachableEnemyOsids.filter(osid =>
+            briefing.campaign_offensive_targets.includes(osid)
+            && isBilateralOpponentTarget(osid, briefing),
+        )
         : reachableEnemyOsids;
 
     // If no enemy objectives survive the reachability filter, this plan cannot be created.
@@ -1530,8 +1558,8 @@ export function deriveOpportunityTargetPurpose(
 }
 
 const PURPOSE_PRIORITY: Readonly<Record<OpportunityTargetPurpose, number>> = {
-    campaign_objective: 4,
-    recent_recapture: 3,
+    recent_recapture: 4,
+    campaign_objective: 3,
     cut_enemy_salient: 2,
     relieve_must_hold: 1,
 };
@@ -1573,12 +1601,30 @@ export function selectOpportunityTargets(
         return !(neighbors as readonly string[]).some(n => factionFriendlyOsids.has(n));
     };
 
-    return [...enemyOsids]
+    const tacticallyRanked = [...enemyOsids]
         // Bilateral objectives already passed the stricter friendly-approach BFS
         // filter above. Do not let the secondary shared-boundary representation
         // erase that verified HVO objective and leave an empty plan that later
         // falls back onto an unrelated VRS target.
         .filter(osid => briefing.bilateral_offensive || !isIsolatedCapture(osid))
+        .sort((a, b) => {
+            const campaignTargetSet = getPriorityTargetSet(briefing);
+            const campaignDiff = Number(campaignTargetSet.has(b)) - Number(campaignTargetSet.has(a));
+            if (campaignDiff !== 0) return campaignDiff;
+            const diff = approachCount(b) - approachCount(a); // descending
+            return diff !== 0 ? diff : strictCompare(a, b);
+        });
+
+    // Purpose is a command veto, not a front-wide target-search service. If the
+    // commander's primary tactical proposal has no operational reason, end this
+    // planning cycle instead of silently redirecting the same assembled force
+    // to a distant target that merely happens to satisfy another predicate.
+    const primaryProposal = tacticallyRanked[0];
+    if (!primaryProposal || deriveOpportunityTargetPurpose(primaryProposal, stagingZone, briefing) === null) {
+        return [];
+    }
+
+    return tacticallyRanked
         .filter(osid => deriveOpportunityTargetPurpose(osid, stagingZone, briefing) !== null)
         .sort((a, b) => {
             const purposeA = deriveOpportunityTargetPurpose(a, stagingZone, briefing)!;

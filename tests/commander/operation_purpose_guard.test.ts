@@ -6,12 +6,14 @@ import type {
     ZoneAssessment,
 } from '../../src/sim/combat/commander/commander_state.js';
 import {
+    capEmergentOperationBrigades,
     deriveOpportunityTargetPurpose,
     selectOpportunityTargets,
 } from '../../src/sim/combat/commander/plan.js';
 
 const FACTION: FactionId = 'RBiH';
 const TARGET = 'op:lopare:lopare_selo_2';
+const CAMPAIGN_TARGET = 'op:brcko:donji_rahic';
 const FRIENDLY = [
     'op:kalesija:kikaci',
     'op:tuzla:gornja_tuzla',
@@ -23,6 +25,7 @@ const FRIENDLY = [
 function makeBriefing(overrides: Partial<CommanderBriefing> = {}): CommanderBriefing {
     const adjacency = new Map<string, readonly string[]>([
         [TARGET, [...FRIENDLY, 'op:lopare:lopare_2', 'op:lopare:priboj_2']],
+        [CAMPAIGN_TARGET, [FRIENDLY[0]!]],
         ...FRIENDLY.map((osid) => [osid, [TARGET]] as const),
         ['op:lopare:lopare_2', [TARGET]],
         ['op:lopare:priboj_2', [TARGET]],
@@ -100,6 +103,11 @@ function makeZone(): ZoneAssessment {
 }
 
 describe('emergent operation purpose guard', () => {
+    it('bounds ordinary corps opportunities but leaves assigned bilateral offensives uncapped', () => {
+        expect(capEmergentOperationBrigades(11, false)).toBe(6);
+        expect(capEmergentOperationBrigades(11, true)).toBe(11);
+    });
+
     it('rejects a highly exposed OSID when exposure is its only recommendation', () => {
         const briefing = makeBriefing();
         expect(deriveOpportunityTargetPurpose(TARGET, makeZone(), briefing)).toBeNull();
@@ -121,6 +129,45 @@ describe('emergent operation purpose guard', () => {
             } as CommanderBriefing['state_ref'],
         });
         expect(deriveOpportunityTargetPurpose(TARGET, makeZone(), briefing)).toBe('recent_recapture');
+    });
+
+    it('restores a fresh local loss before pursuing a standing campaign objective', () => {
+        const briefing = makeBriefing({
+            campaign_offensive_targets: [CAMPAIGN_TARGET],
+            state_ref: {
+                political: {
+                    control_events: [{ turn: 67, settlement_id: TARGET, mechanism: 'combat', from: FACTION, to: 'RS' }],
+                },
+            } as CommanderBriefing['state_ref'],
+        });
+        const zone = { ...makeZone(), enemy_adjacent_osids: [CAMPAIGN_TARGET, TARGET] };
+
+        expect(selectOpportunityTargets(zone, 2, briefing)).toEqual([TARGET]);
+    });
+
+    it('vetoes an unpurposed primary proposal instead of shopping the front for a fallback target', () => {
+        const briefing = makeBriefing({
+            front_geometry: {
+                own_salients: [],
+                enemy_salients: [{
+                    salient_id: 'salient:brcko',
+                    side: 'enemy',
+                    body_osids: ['op:brcko:brcko'],
+                    neck_osids: [CAMPAIGN_TARGET],
+                    neck_width: 1,
+                    body_size: 1,
+                    vulnerability: 1,
+                    front_exposure: 0.2,
+                }],
+                line_shortening_scores: new Map(),
+                critical_holds: [],
+            },
+        });
+        const zone = { ...makeZone(), enemy_adjacent_osids: [TARGET, CAMPAIGN_TARGET] };
+
+        expect(deriveOpportunityTargetPurpose(TARGET, zone, briefing)).toBeNull();
+        expect(deriveOpportunityTargetPurpose(CAMPAIGN_TARGET, zone, briefing)).toBe('cut_enemy_salient');
+        expect(selectOpportunityTargets(zone, 2, briefing)).toEqual([]);
     });
 
     it('accepts an enemy position directly threatening a must-hold OSID', () => {

@@ -19,7 +19,10 @@ import type { AllocationResult } from '../../src/sim/combat/commander/allocate.j
 import type { PlanDecision } from '../../src/sim/combat/commander/plan.js';
 import type { DecisionResult } from '../../src/sim/combat/commander/decide.js';
 import type { SpatialContext } from '../../src/sim/spatial_context.js';
-import { emitCommanderOutput } from '../../src/sim/combat/commander/emit.js';
+import {
+    capOpportunityOperationParticipants,
+    emitCommanderOutput,
+} from '../../src/sim/combat/commander/emit.js';
 import { applyCommanderOutput } from '../../src/sim/combat/commander/commander_loop.js';
 import { CURRENT_SCHEMA_VERSION } from '../../src/state/game_state.js';
 
@@ -31,6 +34,14 @@ const defaultPersonality: OfficerPersonality = {
     initiative: 0.8,
     competence: 0.6,
 };
+
+describe('opportunity operation force contract', () => {
+    it('does not let launch-time sector attachments exceed the planned force', () => {
+        const assembled = Array.from({ length: 11 }, (_, index) => `b${index + 1}`);
+        expect(capOpportunityOperationParticipants(assembled, 'opportunity', 6)).toEqual(assembled.slice(0, 6));
+        expect(capOpportunityOperationParticipants(assembled, 'pre_planned', 6)).toEqual(assembled);
+    });
+});
 
 function makeBrigade(id: string, locationOsid: string, overrides: Partial<FormationState> = {}): FormationState {
     return {

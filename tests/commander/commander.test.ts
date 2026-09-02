@@ -50,7 +50,7 @@ import {
     MAX_SUSPENSION_TURNS,
 } from '../../src/sim/combat/commander/plan.js';
 import { BotCorpsCommander } from '../../src/sim/combat/commander/commander_loop.js';
-import type { CorpsOperation } from '../../src/state/game_state.js';
+import type { CorpsOperation, GameState } from '../../src/state/game_state.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Test helpers — extracted to tests/_helpers/commander.ts (canonical home).
@@ -1053,6 +1053,9 @@ describe('plan', () => {
             campaign_role: 'primary',
             campaign_offensive_targets: [target],
             bilateral_offensive: true,
+            state_ref: {
+                political: { political_controllers: { [target]: 'HRHB' } },
+            } as unknown as GameState,
             enemy_equipment_summary: {
                 tanks: 100,
                 artillery: 100,
@@ -1067,6 +1070,40 @@ describe('plan', () => {
         expect(result.plan?.status).toBe('ready');
         expect(result.plan?.target_osids).toContain(target);
         expect(result.reason).toContain('bilateral offensive directive');
+    });
+
+    it('does not redirect an ARBiH-HVO bilateral offensive onto RS territory', () => {
+        const zoneId = 'zone:test_corps:0' as ZoneId;
+        const brigIds = ['b1', 'b2'].map(id => id as FormationId);
+        const target = 'op:brcko:donji_rahic';
+        const zones = [makeZone({
+            zone_id: zoneId,
+            posture: 'projecting',
+            front_edge_count: 20,
+            surplus_brigades: brigIds,
+            assigned_brigades: brigIds,
+            enemy_adjacent_osids: [target],
+        })];
+        const evals = brigIds.map(id => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            is_combat_effective: true,
+            is_disrupted: false,
+        }));
+        const briefing = makeMinimalBriefing({
+            corps_stance: 'offensive',
+            campaign_role: 'primary',
+            campaign_offensive_targets: [target],
+            bilateral_offensive: true,
+            state_ref: {
+                political: { political_controllers: { [target]: 'RS' } },
+            } as unknown as GameState,
+        });
+
+        const result = managePlan(briefing, zones, makeForces(evals, zones), evals, null, 53);
+
+        expect(result.action).toBe('none');
+        expect(result.plan).toBeNull();
     });
 
     it('forms a bilateral operation from combat-ready front-line brigades when only one is allocation surplus', () => {
@@ -1093,6 +1130,9 @@ describe('plan', () => {
             campaign_role: 'primary',
             campaign_offensive_targets: [target],
             bilateral_offensive: true,
+            state_ref: {
+                political: { political_controllers: { [target]: 'HRHB' } },
+            } as unknown as GameState,
         });
 
         const result = managePlan(briefing, zones, forces, [evals[0]!], null, 53);

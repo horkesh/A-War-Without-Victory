@@ -67,6 +67,20 @@ import { isHistoricalOperationNameReserved } from './historical_operation_names.
  * triggered_operations.ts were already correct via `d622b762`.)
  */
 const RS_NAMES: string[] = [
+    // Fictional replacements retain the original deterministic slot count.
+    // The picker hashes modulo pool length, so deleting reserved slots would
+    // reseed every later emergent operation and turn naming into a game lever.
+    'Operacija Sjever',
+    'Operacija Istok',
+    'Operacija Spona',
+    'Operacija Prag',
+    'Operacija Greben',
+    'Operacija Izvor',
+    'Operacija Krov',
+    'Operacija Obala',
+    'Operacija Usjek',
+    'Operacija Straža',
+    'Operacija Zavoj',
     // LANE-NIGHTSHIFT-STUPCANICA-W27-TRIGGER-FIX (2026-05-07): "Operacija
     // Krivaja" + "Operacija Stup\u010Danica" REMOVED from bot pool — they
     // collide with canonical "Operation Krivaja-95" / "Operation
@@ -111,6 +125,19 @@ const RS_NAMES: string[] = [
 // ═══════════════════════════════════════════════════════════════════════════
 
 const RBiH_NAMES: string[] = [
+    // Fictional replacements retain the original deterministic slot count.
+    'Operacija Put',
+    'Operacija Most',
+    'Operacija Vidik',
+    'Operacija Zamah',
+    'Operacija Slap',
+    'Operacija Krug',
+    'Operacija Svjetlost',
+    'Operacija Zavet',
+    'Operacija Korak',
+    'Operacija Val',
+    'Operacija Znak',
+    'Operacija Smjer',
     // LANE-NIGHTSHIFT-STUPCANICA-W27-TRIGGER-FIX (2026-05-07): "Operacija
     // Sana" REMOVED — collides with canonical "Operation Sana" in the
     // 5th Corps opportunity catalog (operation_opportunity_catalog_5th_corps.ts).
@@ -150,6 +177,14 @@ const RBiH_NAMES: string[] = [
 // ═══════════════════════════════════════════════════════════════════════════
 
 const HRHB_NAMES: string[] = [
+    // Fictional replacements retain the original deterministic slot count.
+    'Operacija Val',
+    'Operacija Greben',
+    'Operacija Zamah',
+    'Operacija Prag',
+    'Operacija Baklja',
+    'Operacija Sokol',
+    'Operacija Kamen',
     // LANE-NIGHTSHIFT-STUPCANICA-W27-TRIGGER-FIX (2026-05-07): "Operacija
     // Maestral" REMOVED — collides with canonical "Operation Mistral 2"
     // (triggered_operations.ts; September 1995 HV-HVO joint offensive).

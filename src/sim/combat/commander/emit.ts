@@ -84,6 +84,16 @@ import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 import { shouldLaunchProbeInstead } from '../bot_corps_directives.js';
 import { getStalestSectorIntelConfidence } from '../sector_intel.js';
 
+export function capOpportunityOperationParticipants(
+    participantIds: readonly string[],
+    source: 'pre_planned' | 'reactive' | 'opportunity',
+    requiredBrigades: number,
+): string[] {
+    return source === 'opportunity'
+        ? participantIds.slice(0, Math.max(0, requiredBrigades))
+        : [...participantIds];
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
 // ═══════════════════════════════════════════════════════════════════════════
@@ -876,7 +886,11 @@ function buildOperations(
             },
         );
 
-        let participatingBrigades = [...new Set([...primaryPool, ...attachedPool])].sort(strictCompare);
+        let participatingBrigades = capOpportunityOperationParticipants(
+            [...new Set([...primaryPool, ...attachedPool])].sort(strictCompare),
+            activePlan.source,
+            activePlan.required_brigades,
+        );
 
         // When the primary sector is anchored, 2 brigades is viable — the sector
         // anchor provides strategic coherence the old broad-pool lacked. The predictor

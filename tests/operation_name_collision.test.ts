@@ -72,6 +72,15 @@ function allCatalogOperationNames(): string[] {
 }
 
 describe('operation-name collisions (Phase 0, item 0.6)', () => {
+    it('keeps deterministic picker slot counts stable when historical names are replaced', () => {
+        // pickOperationName hashes corps+turn modulo the faction pool length.
+        // These are the pre-reservation slot counts; changing them globally
+        // remaps names and can alter name-keyed operation ordering.
+        expect(OPERATION_NAMES.RS).toHaveLength(38);
+        expect(OPERATION_NAMES.RBiH).toHaveLength(39);
+        expect(OPERATION_NAMES.HRHB).toHaveLength(35);
+    });
+
     it('LIVENESS: both sets are non-empty — a collision check over an empty set proves nothing', () => {
         // Without this, deleting the pool or moving the catalogs would turn the assertion below
         // into a vacuous pass. Five such vacuous checks shipped in this repo on 2026-08-26 alone.
