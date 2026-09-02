@@ -4052,21 +4052,22 @@ The January ARBiH Srebrenica–Cerska Link-Up captures Pobuđe and Ježeštica t
 operation combat, but the February VRS counteroffensive previously stopped after its first
 Cerska-pocket objective. The operational contact graph provides the contiguous historical axis
 `op:vlasenica:cerska_2` → `op:bratunac:pobudje_2` →
-`op:bratunac:jezestica_2`. Operation Cerska–Kamenica now carries that complete three-objective
-chain. No combat multiplier, control event, consolidation rule, or special capture authority was
-added.
+`op:bratunac:jezestica_2`. Its elite Skelani axis has a second graph-valid chain from RS-held
+Sebiočina through `op:vlasenica:pomol_2` to Luka and Ljeskovik. Operation Cerska–Kamenica now
+carries both complete contractions. No combat multiplier, control event, consolidation rule, or
+special capture authority was added.
 
 The 104-week proof run is
-`runs/apr1994_srebrenica_v45/apr1992_definitive_188w__1db784e85c2e6de0__w104`, final hash
-`29338a032c484801`. The operation starts at turn 40 with both Army-HQ elites in its nine-formation
+`runs/apr1994_srebrenica_v46/apr1992_definitive_188w__1db784e85c2e6de0__w104`, final hash
+`1f6674ac395a1616`. The operation starts at turn 40 with both Army-HQ elites in its nine-formation
 live roster. The 1st Birač Brigade decisively captures Cerska at turn 45, Pobuđe at turn 46, and
-Ježeštica at turn 47. The operation completes successfully after nine total combat captures; the
-two elite formations remain committed through execution and the 1st Guards leads the separate
-Skelani-cutoff attacks.
+Ježeštica at turn 47. The 1st Guards decisively captures Pomol at turn 45, Luka at turn 46, and
+Ljeskovik at turn 50. The operation completes successfully after ten total combat captures and
+both elite formations remain committed through execution.
 
-Both former Srebrenica residuals now match the painted April map, with no added mismatch anywhere
-else. The April comparator improves from **699/712 (98.17%)** to **701/712 (98.46%)**, leaving 11
-residuals outside this lane. Combat causality remains valid: 424 attack orders, 284 battles, zero
+All three former Srebrenica-lane residuals now match the painted April map, with no added mismatch
+anywhere else. The April comparator improves from **699/712 (98.17%)** to **702/712 (98.60%)**, leaving 10
+residuals outside this lane. Combat causality remains valid: 426 attack orders, 288 battles, zero
 invalid operations, zero zero-eligible operations, and zero recovery-without-attempt rows. The
 neighboring operation/elite regression surface passes **302/302** tests across 11 suites;
 TypeScript typecheck and `git diff --check` pass.

@@ -31678,3 +31678,25 @@ passed. Canon propagation found no stale structural Cerska references in `docs/1
 `docs/20_engineering`, active planning documents, or role skills; the timeline's historical
 February–March 1993 statement already agrees with the implementation. Zero structural references
 were changed and no uncertain references remain.
+
+### 2026-09-02 — CORRECTION: Pomol completes the Srebrenica lane
+
+The v45 map exposed one remaining Srebrenica-area residual at
+`op:vlasenica:pomol_2`. Trace evidence showed that Pomol began and remained RBiH because no
+operation ever named or attacked it. It is directly adjacent to the elite Skelani axis staging
+point at RS-held Sebiočina and to the next objective at Luka. Pomol is therefore now the first
+objective of that existing axis. No combat-power or control-resolution rule changed.
+
+Fresh proof run
+`runs/apr1994_srebrenica_v46/apr1992_definitive_188w__1db784e85c2e6de0__w104`, hash
+`1f6674ac395a1616`: the 1st Guards Motorized Brigade decisively captures Pomol at turn 45, Luka at
+turn 46, and Ljeskovik at turn 50. Operation Cerska–Kamenica completes successfully with all ten
+objectives captured. The full April comparison improves from **701/712** to **702/712 (98.60%)**;
+the controller diff is exactly Pomol and no mismatch is added. Combat causality remains valid with
+zero invalid, zero-eligible, or recovery-without-attempt operations.
+
+Changed files: `src/sim/combat/triggered_operations.ts`,
+`tests/triggered_operations.test.ts`, `docs/40_reports/CALIBRATION_MASTER.md`, and this ledger.
+The definition assertion was observed red before implementation. Canon propagation found no stale
+structural Pomol references in `docs/10_canon`, `docs/20_engineering`, active planning documents,
+or role skills; zero structural references required changes and no uncertain references remain.

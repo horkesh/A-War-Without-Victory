@@ -380,13 +380,14 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                     'rs_65th_protection_motorized_regiment' as FormationId,
                 ],
                 objectives: [
+                    'op:vlasenica:pomol_2',
                     'op:srebrenica:luka_2',
                     'op:srebrenica:ljeskovik_2',
                 ],
                 // BB1 p.220: after the Konjević Polje breakthrough the Main
-                // Staff shifted its weight toward Skelani. Pomol is the RS
-                // graph-side approach directly adjacent to the Luka cutoff;
-                // unlike Pomol itself, it is RS-held at this date.
+                // Staff shifted its weight toward Skelani. From RS-held
+                // Sebiocina the graph-valid contraction is Pomol -> Luka;
+                // each objective still requires its own resolved battle.
                 staging_osid: 'op:vlasenica:sebiocina',
                 minimum_staged_brigades: 2,
                 minimum_forward_brigades: 2,

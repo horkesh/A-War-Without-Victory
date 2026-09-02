@@ -207,6 +207,7 @@ describe('triggered operations definitions', () => {
         assert.equal(skelaniAxis.minimum_staged_brigades, 2);
         assert.equal(skelaniAxis.minimum_forward_brigades, 2);
         assert.deepEqual(skelaniAxis.objectives, [
+            'op:vlasenica:pomol_2',
             'op:srebrenica:luka_2',
             'op:srebrenica:ljeskovik_2',
         ]);
