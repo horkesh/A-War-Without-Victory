@@ -32435,3 +32435,35 @@ SCORED WORLD it is not valid, and worse than inaccurate: it is **silently insula
 40w never reads `osid_control_overrides` at all. **Do not cite the 40w fingerprint as engine-health
 evidence for the 188w.** `docs/00_start_here/docs_index.md` states the sole scoring scenario is the
 188w master; `tools/diagnostics/ci_structural_fingerprint.cjs` runs the 40w.
+
+## 2026-09-02 — CI GREEN ON MAIN, ALL FOUR WORKFLOWS, FIRST TIME SINCE EARLY AUGUST
+
+`7c903203c`. Event System CI, Desktop Release Guard, Full Suite + Structural Fingerprint,
+Baseline Regression — all success.
+
+**Verified by STEP, not by conclusion.** This repo's workflows carry a `green-fast` path
+detector: on a miss they skip their only real step and still report success. A conclusion of
+`success` is therefore not evidence that anything ran. The real steps confirmed green here:
+
+- Full Suite: `Fresh 40w run + structural-fingerprint compare`, `Full vitest suite (balanced;
+  all files)`, `Player experience gate`.
+- Baseline Regression: `npx tsc --noEmit`, `Fast unit tests`, `Focused scenario anchor tests`,
+  `Scenario tests`, `Fresh 188w run + required engine-health gate`.
+
+In each job it was the green-fast FALLBACK that showed `skipped` — the inverse of the false-green
+shape. **When reporting CI, list steps. A job conclusion is not a result.**
+
+**What had been red, and who owned it:**
+| failure | owner |
+|---|---|
+| 2 enclave-geometry sync guards | this session's own regression — replicas resynced |
+| `apr1992_188w` baseline, 7 artifacts | legitimate; re-blessed after 188w validation |
+| `apr1992_52w` | red since 2026-08-12 (`b9da847f1`), never repaired — retired from gating |
+| `noop_4w` / `baseline_ops_4w` | artifacts stale since 2026-08-11, never reached — retired |
+
+Only the first two were mine. The other three had been red for weeks behind a fail-fast
+comparison, which is exactly how a permanently-red gate trains people to stop reading it.
+
+Repo state: 3 worktrees, 4 local branches, all load-bearing. `lane/sector-orphan-probe` pruned
+(landed, 0 unique commits, clean tree). Local `main` fast-forwarded from `08a5978dc` (519 behind).
+`codex/apr1994-operational-corrections` (14 unique commits) untouched — active calibration lane.
