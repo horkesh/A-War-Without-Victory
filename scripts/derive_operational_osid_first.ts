@@ -150,6 +150,39 @@ for (let i = 0; i < osids.length; i++) {
 edges.sort((x, y) => strictCompare(`${x.a}\t${x.b}`, `${y.a}\t${y.b}`));
 console.log(`  Edges: ${edges.length}`);
 
+// ─── Calibrated-count guard ─────────────────────────────────────────────────
+// RE-RUNNING THIS SCRIPT UNGUARDED SILENTLY UNDOES THE 2026-03-21 MICRO-OSID MERGE.
+//
+// That merge (`tools/merge_micro_osids.cjs`, THRESHOLD_KM2 = 1.0, run n982) folded 32
+// sub-1-km² OSIDs into their largest same-municipality neighbour, taking the MODEL from
+// 744 to 712. It deliberately does NOT rewrite `operational_settlements.geojson`, because
+// regenerating polygon geometry moves areas and the contact graph and regresses the floor
+// (MAP_GEOMETRY_MASTER records that). So the geojson still holds 744 polygons ON PURPOSE,
+// and 712 lives in the four index files the merge DOES rewrite.
+//
+// This script rebuilds two of those four — `canonical_to_operational_map.json` by centroid
+// point-in-polygon over every polygon it finds, and `operational_contact_graph.json` from
+// the same set. Given a 744-polygon geojson it therefore reproduces a 744-cell model: the
+// 32 regain controllers and adjacency, and the floor moves. The 712 state has survived only
+// because nobody has re-run this since 2026-03-21.
+//
+// `derive_operational_settlements.ts:797` already throws on exactly this drift. This is the
+// same guard on the other script that can cause it. If you are DELIBERATELY changing the
+// OSID universe, update CALIBRATED_OPERATIONAL_TARGET_COUNT in BOTH scripts in the same
+// change, and expect a 188-week validation — this is floor-moving by construction.
+const CALIBRATED_OPERATIONAL_TARGET_COUNT = 712;
+const operationalTargetCount = new Set(Object.values(canonicalToOperational)).size;
+if (operationalTargetCount !== CALIBRATED_OPERATIONAL_TARGET_COUNT) {
+    throw new Error(
+        `Operational target count drifted to ${operationalTargetCount}; expected calibrated `
+        + `count ${CALIBRATED_OPERATIONAL_TARGET_COUNT}. Re-running this script against the `
+        + `744-polygon geojson silently undoes the 2026-03-21 micro-OSID merge (n982) and moves `
+        + `the calibration floor. If this change is deliberate, update `
+        + `CALIBRATED_OPERATIONAL_TARGET_COUNT here AND in scripts/derive_operational_settlements.ts, `
+        + `and validate with a 188-week run.`,
+    );
+}
+
 // ─── Write outputs ──────────────────────────────────────────────────────────
 console.log('Writing outputs...');
 writeFileSync(opPath, JSON.stringify(opGeo, null, 2));
