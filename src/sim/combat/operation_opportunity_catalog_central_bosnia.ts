@@ -44,13 +44,6 @@ const VLASIC_TRAVNIK_RIDGE_OBJECTIVES: readonly string[] = [
     'op:travnik:gornje_krcevine',
 ];
 
-const VLASIC_SKENDER_VAKUF_OBJECTIVES: readonly string[] = [
-    'op:skender_vakuf:donji_koricani',
-    'op:skender_vakuf:imljani_2',
-    'op:skender_vakuf:javorani_2',
-    'op:skender_vakuf:knezevo_2',
-];
-
 const VLASIC_STAGING_ANCHORS: readonly string[] = [
     STAGING_TRAVNIK,
     STAGING_TURBE,
@@ -59,7 +52,6 @@ const VLASIC_STAGING_ANCHORS: readonly string[] = [
 
 const VLASIC_ENEMY_TARGETS: readonly string[] = [
     ...VLASIC_TRAVNIK_RIDGE_OBJECTIVES,
-    ...VLASIC_SKENDER_VAKUF_OBJECTIVES,
 ];
 
 const VLASIC_READINESS_FLOOR = 0.36;
@@ -161,27 +153,65 @@ const VLASIC_AXES: readonly OpportunityAxisDef[] = [
         axis_id: 'vlasic_travnik_ridge',
         name: 'Travnik Ridge Line',
         corps: PRIMARY_CORPS,
+        // The 712th, 737th and 705th moved here from the deleted 'vlasic_skender_vakuf'
+        // axis. They fought in DOMET-1 — BB2 puts ~10 brigades / 20,900-24,500 men under
+        // Alagic on this operation — so deleting them outright was historically wrong, and
+        // measurably so: the first cut of this fix (188w n3) LOST op:travnik:gornje_krcevine,
+        // which contains VITOVLJE, the VRS "Vlasic" Operational Group headquarters that
+        // Domet-1 demonstrably took. The ridge axis could not reach it three brigades light.
+        // They belong on the ridge, which is where the operation actually went.
         brigades: [
             'arbih_17th_vitezka_mountain' as FormationId,
             'arbih_706th_muslim_mountain' as FormationId,
             'arbih_727th_slavna' as FormationId,
-        ],
-        objectives: VLASIC_TRAVNIK_RIDGE_OBJECTIVES,
-        staging_osid: STAGING_TURBE,
-    },
-    {
-        axis_id: 'vlasic_skender_vakuf',
-        name: 'Skender Vakuf Shoulder',
-        corps: PRIMARY_CORPS,
-        brigades: [
             'arbih_712th_mountain' as FormationId,
             'arbih_737th_muslim_light' as FormationId,
             'arbih_705th_slavna_mountain' as FormationId,
         ],
-        objectives: VLASIC_SKENDER_VAKUF_OBJECTIVES,
-        staging_osid: STAGING_CUKLE,
+        objectives: VLASIC_TRAVNIK_RIDGE_OBJECTIVES,
+        staging_osid: STAGING_TURBE,
     },
 ];
+
+// REMOVED 2026-09-02: the 'vlasic_skender_vakuf' ("Skender Vakuf Shoulder") axis, whose
+// objectives were op:skender_vakuf:{donji_koricani, imljani_2, javorani_2, knezevo_2}.
+//
+// THE ARBiH NEVER HELD ANY OF THEM, AT ANY DATE. Knezevo IS Skender Vakuf town: the VRS
+// 22nd Infantry Bde HQ *and* 1st Knezevo Light Infantry Bde HQ for the whole war
+// (BB2 Annex 55, KB p.493), an SDS-declared Serb municipality from 12 April 1991
+// (Karadzic TJ, D1889), and secure Serb rear area in August 1992 — the Trnopolje convoy
+// drove THROUGH it to reach the line of separation before the Koricanske Stijene massacre
+// (Karadzic TJ paras 1833-1841). All three villages are in Knezevo municipality, RS, today.
+// The one event that looks like a capture is not one: UN reporting has 1,200+ Serb civilians
+// EVACUATING Imljani by 25 March 1995 — civilians fleeing an offensive 12 km away, not a
+// front line moving. All four cells are painted RS at ALL FOUR checkpoints.
+//
+// The real operation is DOMET-1 (04:30 20 March – 24 March 1995, ARBiH 7th Corps under
+// Brig. Gen. Mehmed Alagic), and its recorded terminal line ends at Secevo/Kostolac — which
+// is inside op:travnik:paklarevo, an objective the RIDGE axis correctly retains. Domet-1
+// took the Vlasic massif and stopped; it did not cross the Ugar into Skender Vakuf. The
+// post-Dayton IEBL follows the Ugar here, splitting the pre-war municipality into Knezevo
+// (RS) and Dobretici (Federation).
+//
+// MEASURED COST OF LEAVING IT IN, from the 188w pair on 2026-09-02: imljani_2 t159,
+// javorani_2 t160 and knezevo_2 t161 each captured a cell painted RS at oct1995 (-3), and
+// donji_koricani t156 did the same at apr1995 (-1).
+//
+// DELIBERATELY NOT DONE HERE — 1995 calibration is a later lane. The ridge axis is still
+// MISTIMED (fires t157-t160; Domet-1 is ~w152), and op:travnik:varosluk/Komar belongs to the
+// SEPTEMBER 1995 Donji Vakuf advance (~w180), not to Domet-1 at all. The catalog currently
+// compresses two historically distinct operations into one mid-1995 window. Retiming and
+// splitting those is queued, not attempted in this change.
+//
+// donji_koricani carries one caveat: the Historian seat marked its wartime control NOT
+// ESTABLISHED. It is Croat-majority (5,088/5,566), painted RS at oct1995, and Federation
+// post-Dayton — consistent under the repo rule that oct1995 is the ceasefire line and not the
+// IEBL, but no source was found either way. It is removed here because the painted reference
+// says RS, not because its history is settled.
+//
+// The 712th, 737th and 705th brigades DID take part in Domet-1 (BB2 lists ~10 brigades).
+// Re-committing them to the ridge axis is a brigade-weighting question for the 1995 lane;
+// this change only stops the operation attacking ground it never took.
 
 const VLASIC_RIDGE_PROBE_AXES: readonly OpportunityAxisDef[] = [
     {
