@@ -221,6 +221,7 @@ describe('Fix A: reachability-aware plan formation', () => {
         const forces = makeForces(evals);
 
         const briefing = makeBriefing({
+            campaign_offensive_targets: ['op:enemy:target'],
             brigades: [
                 // main_effort at far:deep — unreachable
                 { id: 'me1' as FormationId, location_osid: 'op:far:deep' },
@@ -263,6 +264,7 @@ describe('Fix A: reachability-aware plan formation', () => {
         const forces = makeForces(evals);
 
         const briefing = makeBriefing({
+            campaign_offensive_targets: ['op:enemy:target'],
             brigades: [
                 { id: 'me1' as FormationId, location_osid: 'op:far:deep' }, // unreachable
                 { id: 'g1' as FormationId, location_osid: 'op:near:a' },
@@ -294,6 +296,7 @@ describe('Fix A: reachability-aware plan formation', () => {
         const forces = makeForces(evals);
 
         const briefing = makeBriefing({
+            campaign_offensive_targets: ['op:enemy:target'],
             brigades: [
                 { id: 'me1' as FormationId, location_osid: 'op:near:a' }, // REACHABLE
                 { id: 'g1' as FormationId, location_osid: 'op:near:a' },

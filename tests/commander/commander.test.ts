@@ -1000,7 +1000,7 @@ describe('plan', () => {
         expect(result.action).toBe('none');
     });
 
-    it('opportunity plan gets non-empty target_osids from zone enemy_adjacent_osids', () => {
+    it('does not create an occupying opportunity from exposed enemy adjacency alone', () => {
         const zoneId = 'zone:test_corps:0' as ZoneId;
         const brigIds = ['b1', 'b2', 'b3', 'b4'].map(id => id as FormationId);
         const zones = [makeZone({
@@ -1025,14 +1025,8 @@ describe('plan', () => {
 
         const result = managePlan(briefing, zones, forces, evals, null, 10);
 
-        expect(result.action).toBe('created');
-        expect(result.plan).not.toBeNull();
-        expect(result.plan!.source).toBe('opportunity');
-        expect(result.plan!.target_osids.length).toBeGreaterThan(0);
-        // Targets should be a subset of the zone's enemy_adjacent_osids
-        for (const t of result.plan!.target_osids) {
-            expect(['op:enemy:e1', 'op:enemy:e2', 'op:enemy:e3']).toContain(t);
-        }
+        expect(result.action).toBe('none');
+        expect(result.plan).toBeNull();
     });
 
     it('turns an explicit ARBiH bilateral objective and two surplus brigades into an opportunity plan', () => {
@@ -1172,7 +1166,10 @@ describe('plan', () => {
         const forces = makeForces(evals, zones);
 
         // Set doctrine_stance to 'defensive' — the old system would have blocked this
-        const briefing = makeMinimalBriefing({ doctrine_stance: 'defensive' });
+        const briefing = makeMinimalBriefing({
+            doctrine_stance: 'defensive',
+            campaign_offensive_targets: ['op:target:target_1'],
+        });
 
         const result = managePlan(briefing, zones, forces, evals, null, 10);
 
@@ -1202,7 +1199,10 @@ describe('plan', () => {
             is_disrupted: false,
         }));
         const forces = makeForces(evals, zones);
-        const briefing = makeMinimalBriefing({ doctrine_stance: 'balanced' });
+        const briefing = makeMinimalBriefing({
+            doctrine_stance: 'balanced',
+            campaign_offensive_targets: ['op:target:target_1'],
+        });
 
         const result = managePlan(briefing, zones, forces, evals, null, 10);
 
@@ -1242,7 +1242,10 @@ describe('plan', () => {
             ...balBrigs.map(id => makeEval({ brigade_id: id, current_zone: balancedId, is_combat_effective: true, is_disrupted: false })),
         ];
         const forces = makeForces(evals, zones);
-        const briefing = makeMinimalBriefing({ doctrine_stance: 'balanced' });
+        const briefing = makeMinimalBriefing({
+            doctrine_stance: 'balanced',
+            campaign_offensive_targets: ['op:target:proj_1'],
+        });
 
         const result = managePlan(briefing, zones, forces, evals, null, 10);
 

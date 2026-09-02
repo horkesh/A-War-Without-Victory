@@ -1447,13 +1447,15 @@ function createOpportunityPlan(
     const brigadesAlreadyAtStaging = countBrigadesInZone(assignedBrigades, surplusPool, stagingZone.zone_id);
     const brigadesToMove = Math.max(0, requiredBrigades - brigadesAlreadyAtStaging);
     const concentrationTurns = Math.ceil(brigadesToMove / PLAN_CONCENTRATION_RATE);
+    const selectedTargets = selectOpportunityTargets(filteredZone, requiredBrigades, briefing);
+    if (selectedTargets.length === 0) return null;
 
     const plan: CommanderPlan = {
         plan_id: `plan_${briefing.corps_id}_t${turn}_opportunity`,
         objective_description: isLocal
             ? `local opportunity from ${stagingZone.zone_id}`
             : `offensive opportunity from ${stagingZone.zone_id}`,
-        target_osids: selectOpportunityTargets(filteredZone, requiredBrigades, briefing),
+        target_osids: selectedTargets,
         required_brigades: requiredBrigades,
         assigned_brigades: assignedBrigades,
         staging_zone: stagingZone.zone_id,
@@ -1481,12 +1483,64 @@ function createOpportunityPlan(
 // Helper: select opportunity targets from zone's enemy adjacency
 // ═══════════════════════════════════════════════════════════════════════════
 
+export type OpportunityTargetPurpose =
+    | 'campaign_objective'
+    | 'recent_recapture'
+    | 'cut_enemy_salient'
+    | 'relieve_must_hold';
+
+const RECENT_RECAPTURE_WINDOW_TURNS = 8;
+
 /**
- * n1301: Select opportunity targets ranked by approach count (strength-based).
- * Enemy OSIDs with more friendly-zone neighbors are more exposed and thus
- * preferred attack vectors. Secondary sort: lexicographic for determinism.
+ * Return the state-derived reason that can justify an occupying corps
+ * operation. Exposure and force ratio are feasibility facts, not purposes.
  */
-function selectOpportunityTargets(
+export function deriveOpportunityTargetPurpose(
+    targetOsid: string,
+    stagingZone: ZoneAssessment,
+    briefing: CommanderBriefing,
+): OpportunityTargetPurpose | null {
+    if (getPriorityTargetSet(briefing).has(targetOsid)) {
+        return 'campaign_objective';
+    }
+
+    const recentLossFloor = Math.max(0, briefing.turn - RECENT_RECAPTURE_WINDOW_TURNS);
+    const wasRecentlyLost = (briefing.state_ref?.political.control_events ?? []).some((event) =>
+        event.settlement_id === targetOsid
+        && event.turn >= recentLossFloor
+        && event.turn <= briefing.turn
+        && event.from === briefing.faction
+        && event.to !== briefing.faction,
+    );
+    if (wasRecentlyLost) return 'recent_recapture';
+
+    const isEnemySalientNeck = (briefing.front_geometry?.enemy_salients ?? []).some((salient) =>
+        salient.neck_osids.includes(targetOsid),
+    );
+    if (isEnemySalientNeck) return 'cut_enemy_salient';
+
+    const zoneOsids = new Set(stagingZone.osids);
+    const threatensMustHold = (briefing.must_hold_osids ?? []).some((holdOsid) =>
+        zoneOsids.has(holdOsid)
+        && (briefing.spatial.sharedBoundaryAdjacency?.get(targetOsid) ?? []).includes(holdOsid),
+    );
+    if (threatensMustHold) return 'relieve_must_hold';
+
+    return null;
+}
+
+const PURPOSE_PRIORITY: Readonly<Record<OpportunityTargetPurpose, number>> = {
+    campaign_objective: 4,
+    recent_recapture: 3,
+    cut_enemy_salient: 2,
+    relieve_must_hold: 1,
+};
+
+/**
+ * Select purpose-qualified targets. Physical exposure ranks candidates only
+ * after the commander has a reason to occupy them.
+ */
+export function selectOpportunityTargets(
     stagingZone: ZoneAssessment,
     requiredBrigades: number,
     briefing: CommanderBriefing,
@@ -1494,8 +1548,6 @@ function selectOpportunityTargets(
     const enemyOsids = stagingZone.enemy_adjacent_osids;
     if (enemyOsids.length === 0) return [];
     const maxObjectives = Math.max(1, Math.min(6, Math.floor(requiredBrigades * 0.5)));
-    const campaignTargetSet = getPriorityTargetSet(briefing);
-
     // Rank by number of staging-zone OSIDs adjacent to each enemy OSID.
     // More approach vectors = more exposed target = higher priority.
     // Guard: adjacency may be absent in unit tests — fall back to lex sort.
@@ -1527,9 +1579,12 @@ function selectOpportunityTargets(
         // erase that verified HVO objective and leave an empty plan that later
         // falls back onto an unrelated VRS target.
         .filter(osid => briefing.bilateral_offensive || !isIsolatedCapture(osid))
+        .filter(osid => deriveOpportunityTargetPurpose(osid, stagingZone, briefing) !== null)
         .sort((a, b) => {
-            const campaignDiff = Number(campaignTargetSet.has(b)) - Number(campaignTargetSet.has(a));
-            if (campaignDiff !== 0) return campaignDiff;
+            const purposeA = deriveOpportunityTargetPurpose(a, stagingZone, briefing)!;
+            const purposeB = deriveOpportunityTargetPurpose(b, stagingZone, briefing)!;
+            const purposeDiff = PURPOSE_PRIORITY[purposeB] - PURPOSE_PRIORITY[purposeA];
+            if (purposeDiff !== 0) return purposeDiff;
             const diff = approachCount(b) - approachCount(a); // descending
             return diff !== 0 ? diff : strictCompare(a, b);
         })

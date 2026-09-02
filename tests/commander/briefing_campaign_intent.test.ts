@@ -1054,6 +1054,7 @@ describe('commander planning campaign intent', () => {
         const forces = makeForces(evals, zones);
 
         const briefing = makeMinimalBriefing({
+            campaign_offensive_targets: ['op:enemy:priority'],
             enemy_equipment_summary: {
                 tanks: 12,
                 artillery: 12,
