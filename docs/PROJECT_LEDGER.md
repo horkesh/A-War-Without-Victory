@@ -32306,9 +32306,31 @@ for its wartime control.
 
 ### 2026-09-02 - The VRS "Final Push", 20 Mar - 18 Apr 1993: SIX cells, three axes, and NOT one operation
 
-**QUEUED. This is the gap that leaves `obadi` AND `osmace_2` wrong at w104 and w156** - the two
-cells whose ENDPOINT was fixed on 2026-09-01 by the fall-event backstop. That backstop corrects
-oct1995; only this corrects apr1994 and apr1995.
+**CORRECTED SAME DAY — NOT A QUEUED GAP. THIS IS AN ACTIVE LANE: `codex/apr1994-operational-corrections`.
+DO NOT DUPLICATE IT.**
+
+The first version of this entry called the Final Push "QUEUED" and "the largest single historical gap
+now identified". **Wrong.** The owner corrected it, and the branch confirms it: that lane is already
+several commits into this exact campaign, modelling it through combat rather than scripted flips —
+`ce564efd9` calibrate Cerska-Kamenica, `da09c5099` capture Pomol in Cerska operation, `a9afcae42`
+calibrate Gorazde-Trnovo, `d6cef44d6` complete Srebrenica April calibration. That last one extends
+the February counteroffensive along Cerska -> Pobudje -> Jezestica in `triggered_operations.ts`, with
+the reasoning stated in-code: *"The January ARBiH link-up took the latter two through combat; this
+February counteroffensive must retake them the same way."* All six Final Push cells and all thirteen
+Srebrenica cells appear in that lane's diff.
+
+**Why this session could not see it:** the work is on a branch, not on `main`, and it is the one
+worktree this session was deliberately leaving alone. This is the SECOND time today the same mistake
+was made — declaring something undone because it was not visible from `main` (the first was the 32
+micro-OSIDs, documented in three places all along). **Before filing anything as a gap, check the
+active lanes, not just `main`.**
+
+**What remains true and useful below** is the historical detail: the axes, dates, formations, the
+six cells, and the warning against modelling it as one operation. That is offered to whoever owns
+the lane, not as a claim on the work.
+
+**Still true and NOT owned by that lane:** the `obadi`/`osmace_2` fall-event backstop shipped on
+2026-09-01 corrects oct1995 only; apr1994 and apr1995 depend on this campaign landing.
 
 **"The Final Push" is Balkan Battlegrounds' section heading, not a Serb codename** - NOT ESTABLISHED
 that the VRS had one for this phase. Beware a collision: "final push" in Karadzic TJ para 5676 means

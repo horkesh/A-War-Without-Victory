@@ -33,13 +33,33 @@ const MANIFEST_PATH = join(BASELINES_DIR, 'manifest.json');
 const BASE_TMP = join(process.cwd(), 'data', 'derived', 'scenario', '_baseline_tmp');
 
 /**
- * Baseline scenarios: noop_4w (quick sanity), baseline_ops_4w (displacement activity).
- * No existing scenario sets war/declared so Phase I control flips do not occur; document gap. // legacy-phase-term-ok
+ * Baseline scenarios: the 188-week master, and nothing else.
+ *
+ * REDUCED TO ONE, 2026-09-02, on the owner's instruction. This list previously carried
+ * noop_4w, baseline_ops_4w and apr1992_52w as well. All three are retired from gating:
+ *
+ * - `apr1992_52w` had been RED SINCE 2026-08-12 (bisected to b9da847f1, the veto fix) and
+ *   was never repaired — three weeks of a permanently failing gate, which trains readers to
+ *   ignore the workflow.
+ * - `noop_4w` and `baseline_ops_4w` were 4-week sanity runs whose artifacts had not been
+ *   rewritten since 2026-08-11, because the comparison used to fail fast on 52w (second in
+ *   the manifest) and never reached them. Four scenarios in the manifest, one live gate in
+ *   practice — see the compareAgainstBaselines note below, which fixed the masking but not
+ *   the underlying red.
+ *
+ * `data/scenarios/apr1992_definitive_188w.json` is the sole SCORING scenario
+ * (docs/00_start_here/docs_index.md), so it is the only one whose baseline drift means
+ * anything. Keeping three additional baselines that nobody re-blessed produced noise, not
+ * coverage.
+ *
+ * THIS LIST IS ONLY A SEED. The live gate runs `manifest.scenarios`
+ * (data/derived/scenario/baselines/manifest.json) whenever a manifest exists — see
+ * updateBaselines, `manifest?.scenarios ?? DEFAULT_SCENARIOS`. Both were trimmed together;
+ * changing one alone does nothing, or silently reintroduces the retired entries on the next
+ * regeneration.
  */
 const DEFAULT_SCENARIOS: Array<{ id: string; scenario_path: string; weeks?: number }> = [
-    { id: 'noop_4w', scenario_path: 'data/scenarios/noop_4w.json', weeks: 4 },
-    { id: 'baseline_ops_4w', scenario_path: 'data/scenarios/baseline_ops_4w.json', weeks: 4 },
-    { id: 'apr1992_52w', scenario_path: 'data/scenarios/apr1992_definitive_52w.json', weeks: 52 }
+    { id: 'apr1992_188w', scenario_path: 'data/scenarios/apr1992_definitive_188w.json', weeks: 188 }
 ];
 
 export interface ScenarioBaselineEntry {

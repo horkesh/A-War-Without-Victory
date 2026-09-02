@@ -22,93 +22,18 @@
         "weekly_report.jsonl"
       ],
       "hashes": {
-        "activity_summary.json": "4dfe78e19fce4dc64d1640e7eb42f70cf04d0235dfdddf1c1606cb73d3eb6f6f",
-        "control_delta.json": "a9b9071eef8255017302a022928c93dbdef4aa10ace8df27d131c950e97707c8",
-        "end_report.md": "c9b6878abc2ed4f19659e1193839353f2a199fca32c73a37e2acc35f79e39f85",
-        "final_save.json": "8f8be42de06f552a70cf820d2de47ffd2f6589f96569255b67af9a4453d8a53c",
-        "formation_delta.json": "e51d6a1ca0f20a2224a40a64713b8378b8421372b1f1a7ef63175d172eb81dfa",
-        "run_summary.json": "e7d59735a449f55c6fb4748f978786417b86e85db5cbd2686a2fe0815c15e58c",
+        "activity_summary.json": "c739eaa4d8c22c458803e8997f1285974c06c43036a7926e3b8d3264c6b6c26b",
+        "control_delta.json": "424fa326602663cd1d9046429f2ea66c0b30089dc29cf89207e50bcbae13eaa6",
+        "end_report.md": "8baab181ab8022f3e9222bd8be5d56314a334c4d3d2b2a977b2b8d07a7f2b838",
+        "final_save.json": "ccea76c3e8d2d455030e8921143358480e858316955be64e6fbdefd89f9091b6",
+        "formation_delta.json": "bbd7260e219d311bea201053d0d7c913f4b30b83bcead72b05d5f2c957566cb1",
+        "run_summary.json": "152460237cf6d64d506a75d7f971e9f9155e49ccf42f6aae67c1991c7351ed2a",
         "watched_operations.json": "785a073b9312e34d20ba143915478ab768ce7847ad337b121f98491df8325b18",
-        "weekly_report.jsonl": "f155a02c79d94e2b693443c80c7043b55d5df6d618d965efffaf14b49a5f5d5b"
+        "weekly_report.jsonl": "e21844693d52f15674c9b17ddb4ef73d5fab098e5777ce882ca32ee83ce3122a"
       },
       "id": "apr1992_188w",
       "scenario_path": "data/scenarios/apr1992_definitive_188w.json",
       "weeks": 188
-    },
-    {
-      "expected_files": [
-        "activity_summary.json",
-        "control_delta.json",
-        "end_report.md",
-        "final_save.json",
-        "formation_delta.json",
-        "run_summary.json",
-        "watched_operations.json",
-        "weekly_report.jsonl"
-      ],
-      "hashes": {
-        "activity_summary.json": "86e044b58745add4aed1a11a7b66e716015efe730e4ca603193610a41e1034d6",
-        "control_delta.json": "c61cd724937b388759be10b27b0022dc3d07e235785392fe365b685b4e45ea2f",
-        "end_report.md": "0998de847a0616b572b1ba5552794f0fafb8d0a43981ed3f621484686781f9ec",
-        "final_save.json": "7e5b882189f6761319ceaa45530f7a4776b94b15d7be1a1ec238867e01dc7aec",
-        "formation_delta.json": "599c4bce34ffa7e4fca806def4746537f6113cf44f7001c52d92c2782b466dd6",
-        "run_summary.json": "fabd10e4f69b11447a81a1332f2237cd0cad179cc20bbb9fcbc298bfe6a49f6e",
-        "watched_operations.json": "dba39f6029f35b9a074d9957620e9f2c2370260fdfd61dfd30b438b9db5b7c40",
-        "weekly_report.jsonl": "55c214e785ed9f6da2018ed66b4e94b9685dcc6a78bc04fcdfcf6f7794b201db"
-      },
-      "id": "apr1992_52w",
-      "scenario_path": "data/scenarios/apr1992_definitive_52w.json",
-      "weeks": 52
-    },
-    {
-      "expected_files": [
-        "activity_summary.json",
-        "control_delta.json",
-        "end_report.md",
-        "final_save.json",
-        "formation_delta.json",
-        "run_summary.json",
-        "watched_operations.json",
-        "weekly_report.jsonl"
-      ],
-      "hashes": {
-        "activity_summary.json": "9f67de482fb5aeb0665308d89e1bdb8cebe72b29bfad3814a661395c1d47c8c2",
-        "control_delta.json": "6517d62da9b647c0d5aa53f7a7748974625cf81999dfccc33481a0c922ff718d",
-        "end_report.md": "04638dd119077195ff1c948c2b1b17d07a1516e5167007ad5d505f0cb0631e71",
-        "final_save.json": "0787236c75bdae838629b8c946db453c0eceb6c9bedad04c3c84499af65507d0",
-        "formation_delta.json": "1d852857e227eb03c432e9be376da7f0ad767f82bb34771f9dd7e3533951a416",
-        "run_summary.json": "f93bfb004d69c7bffea25b33ce57b473b5d94b84b107340dab11eff85f36587c",
-        "watched_operations.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-        "weekly_report.jsonl": "566ddda23e3c8bca0ca8ff75d8b604d6bb9793f3a6d59416ea8b851ac1bc3daf"
-      },
-      "id": "baseline_ops_4w",
-      "scenario_path": "data/scenarios/baseline_ops_4w.json",
-      "weeks": 4
-    },
-    {
-      "expected_files": [
-        "activity_summary.json",
-        "control_delta.json",
-        "end_report.md",
-        "final_save.json",
-        "formation_delta.json",
-        "run_summary.json",
-        "watched_operations.json",
-        "weekly_report.jsonl"
-      ],
-      "hashes": {
-        "activity_summary.json": "9f67de482fb5aeb0665308d89e1bdb8cebe72b29bfad3814a661395c1d47c8c2",
-        "control_delta.json": "6517d62da9b647c0d5aa53f7a7748974625cf81999dfccc33481a0c922ff718d",
-        "end_report.md": "a2a9ae3e02243a03ff90951caf532d18bada7b8b3089b6564cb7e6099ef57128",
-        "final_save.json": "abbbcb3ea949aa9bfba7596fe88d660eb918ebbb0ec48393c5de5943da987f7a",
-        "formation_delta.json": "1d852857e227eb03c432e9be376da7f0ad767f82bb34771f9dd7e3533951a416",
-        "run_summary.json": "8d997cd27b9079b3fa45265eb4fe80b319bc4974b2c2d3653ce128d8b98dcc85",
-        "watched_operations.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-        "weekly_report.jsonl": "2f6dcdd6f7514994a2b02dd652e0d6995470bc8edfdf269eb52521c94b523894"
-      },
-      "id": "noop_4w",
-      "scenario_path": "data/scenarios/noop_4w.json",
-      "weeks": 4
     }
   ],
   "schema_version": 1

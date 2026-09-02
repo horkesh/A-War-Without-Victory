@@ -243,14 +243,16 @@ const VALIDATOR_ENCLAVE_DEFINITIONS = [
         id: 'srebrenica',
         faction: 'RBiH',
         osid_list: [
+            // 11 cells. Synced 2026-09-02 with ENCLAVE_DEFINITIONS: added osmace_2,
+            // dropped brezovice_2 and mala_daljegosta_2. See the enclave_resilience.ts
+            // comment for the ICTY basis (Oric TJ paras 102/107/148, 594, 600-601, 92/97).
             'op:srebrenica:bostahovine_2',
-            'op:srebrenica:brezovice_2',
             'op:srebrenica:donji_potocari_2',
-            'op:srebrenica:mala_daljegosta_2',
             'op:srebrenica:ljeskovik_2',
             'op:srebrenica:luka_2',
             'op:srebrenica:milacevici',
             'op:srebrenica:obadi',
+            'op:srebrenica:osmace_2',
             'op:srebrenica:radovcici',
             'op:srebrenica:srebrenica_2',
             'op:srebrenica:suceska',
