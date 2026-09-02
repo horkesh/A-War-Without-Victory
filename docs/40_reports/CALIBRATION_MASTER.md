@@ -4071,3 +4071,33 @@ residuals outside this lane. Combat causality remains valid: 426 attack orders, 
 invalid operations, zero zero-eligible operations, and zero recovery-without-attempt rows. The
 neighboring operation/elite regression surface passes **302/302** tests across 11 suites;
 TypeScript typecheck and `git diff --check` pass.
+
+## 2026-09-02 — Emergent operation purpose and historical-name ownership ADOPTED
+
+The April v46 trace exposed `arbih_2nd_corps:Operacija Farz:t70` taking
+`op:lopare:lopare_selo_2` at turn 71. The target was neither a campaign objective nor a recent
+loss, salient neck, or must-hold relief position; high exposure was its only recommendation.
+That is now insufficient operational intent. The commander's first tactical proposal must carry
+one of those four purposes or the corps declines that planning cycle. This does not compare the
+proposal with the painted map and does not force a historical controller.
+
+Historical catalog names are now semantically reserved for authored operations. Prefix, accent,
+punctuation, and year variants collide deliberately, so `Farz` cannot be emitted from a generic
+name pool while its catalog operation remains available to the authored system. Fictional
+replacement slots preserve the old faction-pool lengths and therefore avoid globally reseeding
+the modulo-based deterministic name picker.
+
+Ordinary corps opportunities are also bounded to six planned and emitted participants, preventing
+launch-time sector attachments from turning a local opportunity into an undeclared army offensive.
+The HVO-war bilateral path retains its explicit theatre authority but may select only OSIDs held by
+the actual bilateral opponent.
+
+The retained 104-week evidence run is
+`runs/apr1994_purpose_v52/apr1992_definitive_188w__1db784e85c2e6de0__w104_n0`, hash
+`27f3e651cf7a29ee`. Lopare Selo remains RS and no emergent operation uses `Farz`. The April
+comparison is **696/712 (97.75%)**. Seven v46 matches become open calibration debt rather than
+being suppressed by target-specific rules: ARBiH legitimately captures three Brčko campaign
+positions, while the changed operational sequence leaves four Goražde contraction objectives
+RBiH because Zvezda 94 does not launch. The latter is a historical-operation scheduling/force-flow
+problem and must be solved in that subsystem; it is not grounds for weakening the purpose rule or
+adding passive control changes.

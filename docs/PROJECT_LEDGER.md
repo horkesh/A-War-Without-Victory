@@ -31700,3 +31700,24 @@ Changed files: `src/sim/combat/triggered_operations.ts`,
 The definition assertion was observed red before implementation. Canon propagation found no stale
 structural Pomol references in `docs/10_canon`, `docs/20_engineering`, active planning documents,
 or role skills; zero structural references required changes and no uncertain references remain.
+
+### 2026-09-02 — Purposeful emergent operations and reserved historical names
+
+**Problem:** ARBiH 2nd Corps used the catalog-owned name `Farz` for a generic operation and captured
+Lopare Selo solely because it was exposed. The same emission path could silently grow a planned
+local operation through sector attachments, and the HVO-war bilateral path did not independently
+prove that its objective was held by the bilateral opponent.
+
+**Change:** Added semantic historical-name ownership with fictional, slot-count-preserving emergent
+replacements; added a four-purpose command veto (campaign objective, recent recapture, salient cut,
+must-hold relief); capped ordinary opportunity plans and emitted rosters at six brigades; and scoped
+bilateral targets to current opponent control. No painted controller, direct control effect,
+consolidation mechanism, or combat-result override was added.
+
+**Evidence:** Focused RED/GREEN tests cover the Lopare rejection, purposeful alternatives, primary-
+proposal veto, name collisions across all active catalogs, stable pool cardinality, participant cap,
+and bilateral opponent scope. The 104-week run
+`runs/apr1994_purpose_v52/apr1992_definitive_188w__1db784e85c2e6de0__w104_n0` has hash
+`27f3e651cf7a29ee`, scores **696/712**, leaves Lopare Selo RS, and emits no generic `Farz`.
+Remaining Brčko and Zvezda/Goražde differences are recorded as calibration debt rather than hidden
+with target-specific prohibitions.
