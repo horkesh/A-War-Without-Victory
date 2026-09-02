@@ -24,7 +24,15 @@
  */
 import { describe, it, expect } from 'vitest';
 import { OPERATION_NAMES } from '../src/sim/combat/operation_names.js';
+import {
+    normalizeOperationNameStem,
+    RESERVED_HISTORICAL_OPERATION_NAMES,
+} from '../src/sim/combat/historical_operation_names.js';
 import { _ALL_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
+import { _TRIGGERED_OPS } from '../src/sim/combat/triggered_operations.js';
+import { FIFTH_CORPS_OPPORTUNITIES } from '../src/sim/combat/operation_opportunity_catalog_5th_corps.js';
+import { CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES } from '../src/sim/combat/operation_opportunity_catalog_central_bosnia.js';
+import { FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES } from '../src/sim/combat/operation_opportunity_catalog_federation_western_bosnia.js';
 
 /** Every name the emergent picker can produce, flattened across factions. */
 function poolNames(): string[] {
@@ -53,6 +61,16 @@ function authoredNames(): Map<string, string[]> {
     return found;
 }
 
+function allCatalogOperationNames(): string[] {
+    return [
+        ..._ALL_PRE_PLANNED.map((operation) => operation.name),
+        ..._TRIGGERED_OPS.map((operation) => operation.name),
+        ...FIFTH_CORPS_OPPORTUNITIES.map((operation) => operation.name),
+        ...CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES.map((operation) => operation.name),
+        ...FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES.map((operation) => operation.name),
+    ];
+}
+
 describe('operation-name collisions (Phase 0, item 0.6)', () => {
     it('LIVENESS: both sets are non-empty — a collision check over an empty set proves nothing', () => {
         // Without this, deleting the pool or moving the catalogs would turn the assertion below
@@ -78,6 +96,32 @@ describe('operation-name collisions (Phase 0, item 0.6)', () => {
               + `correct. Rename in the pool (not in the catalog — authored names are historical).`
             : undefined,
         ).toEqual([]);
+    });
+
+    it('no emergent name semantically borrows a historical catalogue operation name', () => {
+        const catalogStems = new Map<string, string[]>();
+        for (const name of allCatalogOperationNames()) {
+            const stem = normalizeOperationNameStem(name);
+            const aliases = catalogStems.get(stem) ?? [];
+            aliases.push(name);
+            catalogStems.set(stem, aliases);
+        }
+
+        const collisions = poolNames()
+            .map((name) => ({ name, stem: normalizeOperationNameStem(name) }))
+            .filter(({ stem }) => catalogStems.has(stem))
+            .map(({ name, stem }) => `${name} -> ${catalogStems.get(stem)!.join(', ')}`)
+            .sort();
+
+        expect(collisions).toEqual([]);
+    });
+
+    it('keeps every explicitly reserved historical name outside emergent pools', () => {
+        const poolStems = new Set(poolNames().map(normalizeOperationNameStem));
+        const leaked = RESERVED_HISTORICAL_OPERATION_NAMES
+            .filter((name) => poolStems.has(normalizeOperationNameStem(name)))
+            .sort();
+        expect(leaked).toEqual([]);
     });
 
     it('the pool itself contains no duplicates within a faction', () => {

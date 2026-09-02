@@ -1,10 +1,11 @@
 /**
  * Per-faction operation name pools for bot-generated operations.
  *
- * Historical names (Balkan Battlegrounds, ICTY records) listed first,
- * then faction-flavored placeholders. Sequential consumption — each name
- * used at most once per game. Deterministic: hash selects starting index,
- * then scans forward for first unused name.
+ * These pools contain faction-flavored fictional names only. Historical names
+ * belong to authored catalogues and are reserved even when their catalogue
+ * definition is incomplete or disabled. Sequential consumption — each name is
+ * used at most once per game. Deterministic: hash selects starting index, then
+ * scans forward for the first unused, non-reserved name.
  *
  * Naming conventions follow historical patterns:
  *   VRS: JNA bureaucratic style — nature, geography, fortification + year
@@ -47,14 +48,14 @@
  */
 
 import type { GameState } from '../../state/game_state.js';
+import { isHistoricalOperationNameReserved } from './historical_operation_names.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // VRS (RS) — JNA-inherited bureaucratic style
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Historical names first (Koridor 92 through Vaganj 95),
- * then JNA-style placeholders: nature, minerals, fortification terms.
+ * JNA-style fictional names: nature, minerals, fortification terms.
  *
  * Note: "Koridor", "Drina", "Prsten", "Foca", "Prijedor", "Bosanski Novi",
  * "Posavina Corridor", "Kotor Varos", "Jajce", "Cerska-Kamenica",
@@ -66,17 +67,6 @@ import type { GameState } from '../../state/game_state.js';
  * triggered_operations.ts were already correct via `d622b762`.)
  */
 const RS_NAMES: string[] = [
-    // --- Historical (BB1/BB2, ICTY) ---
-    'Operacija Vrbas',          // Vrbas 92 — Jajce salient, Oct 1992
-    'Operacija Lukavac',        // Lukavac 93 — counter-offensive, Ozren, Jul 1993
-    'Operacija Sadejstvo',      // Cooperation — Posavina, Jul 1993
-    'Operacija Zvijezda',       // Star 94 — Gorazde, Apr 1994
-    'Operacija Brana',          // Dam 94 — Vozuca defensive, Jun 1994
-    'Operacija Breza',          // Birch 94 — 1st Krajina, Sep 1994
-    'Operacija Štit',           // Shield 94 — western Bosnia, Nov 1994
-    'Operacija Jesen',          // Autumn 94 — Herzegovina, Nov 1994
-    'Operacija Pauk',           // Spider — Bihac, joint VRS/SVK, Nov 1994
-    'Operacija Plamen',         // Flame 95 — Orasje, May 1995
     // LANE-NIGHTSHIFT-STUPCANICA-W27-TRIGGER-FIX (2026-05-07): "Operacija
     // Krivaja" + "Operacija Stup\u010Danica" REMOVED from bot pool — they
     // collide with canonical "Operation Krivaja-95" / "Operation
@@ -86,8 +76,7 @@ const RS_NAMES: string[] = [
     // t≥172 since `d622b762`) were always correct; only the bot pool
     // leaked. Faction-symmetric: same exclusion applied to RBiH (Sana) +
     // HRHB (Maestral) below.
-    'Operacija Vaganj',         // Vaganj 95 — defensive umbrella, 1995
-    // --- Placeholders: JNA-style nature/fortification ---
+    // --- Emergent: JNA-style nature/fortification ---
     'Operacija Grom',           // Thunder
     'Operacija Čelik',          // Steel
     'Operacija Hrast',          // Oak
@@ -122,24 +111,11 @@ const RS_NAMES: string[] = [
 // ═══════════════════════════════════════════════════════════════════════════
 
 const RBiH_NAMES: string[] = [
-    // --- Historical (BB1/BB2, ICTY) ---
-    'Operacija Neretva',        // Neretva 93 — anti-HVO, Sep 1993
-    'Operacija Proljeće',      // Spring 94 — Ozren/Vozuca, 1994
-    'Operacija Tigar-Sloboda',  // Tiger-Freedom 94 — vs Abdic, Jun 1994
-    'Operacija Grmeč',         // Grmec 94 — 5th Corps offensive, Oct 1994
-    'Operacija Domet',          // Range 95 — Vlasic liberation, Mar 1995
-    'Operacija Zora',           // Dawn — 5th Corps vs Bihac siege, May 1995
-    'Operacija Majevica',       // Majevica — 2nd Corps, Mar 1995
-    'Operacija Tekbir',         // Tekbir 95 — Sarajevo breakout attempt, Jun 1995
-    'Operacija Trokut',         // Triangle — 5th Corps, Jul 1995
-    'Operacija Crveni Lav',     // Red Lion — Vozuca phase 1, Sep 1995
-    'Operacija Farz',           // Farz 95 — 3rd Corps Vozuca, Sep 1995
-    'Operacija Uragan',         // Hurricane — 2nd Corps Vozuca, Sep 1995
     // LANE-NIGHTSHIFT-STUPCANICA-W27-TRIGGER-FIX (2026-05-07): "Operacija
     // Sana" REMOVED — collides with canonical "Operation Sana" in the
     // 5th Corps opportunity catalog (operation_opportunity_catalog_5th_corps.ts).
     // Same name-collision class as Krivaja / Stup\u010Danica above.
-    // --- Placeholders: aspirational + nature + Islamic ---
+    // --- Emergent: aspirational + nature + Islamic ---
     'Operacija Sabur',          // Patience (Islamic virtue)
     'Operacija Nada',           // Hope
     'Operacija Osvit',          // First light / Daybreak
@@ -174,19 +150,11 @@ const RBiH_NAMES: string[] = [
 // ═══════════════════════════════════════════════════════════════════════════
 
 const HRHB_NAMES: string[] = [
-    // --- Historical (BB1/BB2, Croatian military records) ---
-    'Operacija Lipanjske Zore',  // June Dawns — Herzegovina, Jun 1992
-    'Operacija Bura',            // Bora wind — Nevesinje, Nov 1992
-    'Operacija Cincar',          // Mt Cincar — first joint HVO-ARBiH, Nov 1994
-    'Operacija Zima',            // Winter 94 — SW Bosnia, Dec 1994
-    'Operacija Skok',            // Leap — Dinara positions, Apr 1995
-    'Operacija Ljeto',           // Summer 95 — Grahovo/Glamoc, Jul 1995
     // LANE-NIGHTSHIFT-STUPCANICA-W27-TRIGGER-FIX (2026-05-07): "Operacija
     // Maestral" REMOVED — collides with canonical "Operation Mistral 2"
     // (triggered_operations.ts; September 1995 HV-HVO joint offensive).
     // Same name-collision class as Krivaja / Stup\u010Danica / Sana above.
-    'Operacija Južni Potez',    // Southern Move — final offensive, Oct 1995
-    // --- Placeholders: Croatian weather/force/action ---
+    // --- Emergent: Croatian weather/force/action ---
     'Operacija Jugo',            // Sirocco wind (Adriatic)
     'Operacija Bljesak',         // Flash
     'Operacija Guja',            // Viper
@@ -271,14 +239,14 @@ export function pickOperationName(
     for (let i = 0; i < pool.length; i++) {
         const idx = (startIdx + i) % pool.length;
         const name = pool[idx]!;
-        if (!used[name]) return markUsed(name);
+        if (!used[name] && !isHistoricalOperationNameReserved(name)) return markUsed(name);
     }
 
     // Pool exhausted — recycle with numeric suffix
     for (let i = 0; i < pool.length; i++) {
         const idx = (startIdx + i) % pool.length;
         const name = `${pool[idx]!} 2`;
-        if (!used[name]) return markUsed(name);
+        if (!used[name] && !isHistoricalOperationNameReserved(name)) return markUsed(name);
     }
 
     // Absolute fallback (should never reach in practice with 40+ names)
