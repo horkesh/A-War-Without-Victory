@@ -4149,3 +4149,22 @@ The accepted 104-week run is
 April comparison is **701/712 (98.46%)**, area-weighted **98.48%**. Krajina is **127/127** and Drina
 is **112/112**. Brčko city, Donji Rahić, and Potočari remain RS; Brka remains RBiH; Lopare Selo
 remains RS; Goražde town remains RBiH. There are zero `consolidation` or `abandoned` transfers.
+
+## 2026-09-02 — Derventa, Liše, and Prozor corrections ADOPTED
+
+Three bounded operational corrections replace the remaining errors identified in the Derventa and
+HVO-war review. Operation Corridor now retains the 1st Prnjavor Light Infantry Brigade on its east
+axis while the 27th Derventa Motorized Brigade runs a parallel one-objective pocket axis against
+`op:derventa:zivinice`. During the open RBiH–HRHB war, a threatened combat-ready HVO fixed-home
+brigade is assigned first to its contacted home position only when an active opposing operation
+names that OSID; this preserves Liše without a controller lock or a combat modifier. The bounded
+Prozor–Rama Line Counterattack uses the Rama Brigade to attack Lug and Paros after bilateral war
+opens. Its AAR records two attacks and two logged combat captures at turns 54 and 55.
+
+Independent runs `apr1994_three_fixes_v72` and `apr1994_three_fixes_v73` are byte-identical at final
+hash `d6095cb8408ddfa8`, with zero unresolved assignment-seal violations. April matches
+**703/712 (98.74%)**. Živinice is RS; Liše, Lug, and Paros are HRHB; no painted-HRHB OSID is
+overcaptured by RBiH. Brčko and Lopare Selo remain RS, and Goražde town remains RBiH. Relative to
+the preceding accepted run, the four corrected OSIDs are offset by visible regressions at Donji
+Vakuf and Korenići; these remain calibration debt rather than receiving passive or direct-control
+corrections.

@@ -920,12 +920,11 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 axis_id: 'corridor_east',
                 name: 'Corridor East',
                 brigades: [
-                    'rs_27th_derventa_motorized',   // spearhead — named for Derventa, fighting for home ground
                     'rs_16th_krajina_motorized',     // redeployed from Op Prijedor (Sanski Most axis) — historically at Derventa
                     'rs_1st_trebava_infantry',       // homed at Modriča — local knowledge, natural staging
                     'rs_1st_krnjin_light_infantry',  // local — home: Doboj area
                     'rs_3rd_ozren_light_infantry',   // local — home: Doboj area
-                    'rs_1st_prnjavor_light_infantry', // nearby — home: Prnjavor (~4 hops)
+                    'rs_1st_prnjavor_light_infantry', // retained on the main east axis while 27th Derventa clears its home pocket
                 ],
                 objectives: [
                     'op:modrica:modrica',
@@ -936,6 +935,15 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'op:bosanski_brod:brod',
                 ],
                 staging_osid: 'op:modrica:skugric_gornji_2',
+            },
+            {
+                // The 27th Derventa Motorized clears the residual pocket from
+                // its own home ground while the main effort keeps moving east.
+                axis_id: 'derventa_pocket',
+                name: 'Derventa Pocket',
+                brigades: ['rs_27th_derventa_motorized'],
+                objectives: ['op:derventa:zivinice'],
+                staging_osid: 'op:derventa:cerani_2',
             },
             {
                 // Southern prong toward Odžak — historically fell 12 July (BB1 p.182)
@@ -1121,6 +1129,34 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
                     'op:stolac:stolac_2',
                 ],
                 staging_osid: 'op:capljina:capljina_2',
+            },
+        ],
+    },
+    {
+        // The January 1993 control paint leaves Lug and Paroš in RBiH hands,
+        // while the April 1994 paint places both on the HVO side of the Prozor
+        // line. This local Rama Brigade counterattack owns that bounded change;
+        // it is not permission for a general HVO offensive in Herzegovina.
+        corps: 'hvo_tomislavgrad',
+        faction: 'HRHB',
+        name: 'Prozor–Rama Line Counterattack',
+        staging_osid: 'op:prozor:prozor_2',
+        available_from: 41,
+        min_attack_outcome: 'repulsed',
+        execution_attack_power_mult: 1.8,
+        planning_duration: 4,
+        minimum_viable_participants: 1,
+        minimum_assembled_participants: 1,
+        axes: [
+            {
+                axis_id: 'prozor_northern_shoulder',
+                name: 'Prozor Northern Shoulder',
+                brigades: ['hvo_rama_brigade'],
+                objectives: [
+                    'op:prozor:lug_2',
+                    'op:prozor:paros',
+                ],
+                staging_osid: 'op:prozor:prozor_2',
             },
         ],
     },

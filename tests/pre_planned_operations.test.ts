@@ -514,7 +514,7 @@ describe('pre-planned operations', () => {
     });
 
     it('defines the current pre-planned operation catalog', () => {
-        assert.equal(_ALL_PRE_PLANNED.length, 26);
+        assert.equal(_ALL_PRE_PLANNED.length, 27);
         assert.deepEqual(
             _ALL_PRE_PLANNED.map((def) => def.name),
             [
@@ -542,6 +542,7 @@ describe('pre-planned operations', () => {
                 'Operation Donji Vakuf',
                 'Operation Bosanski Novi',
                 'Operation Jackal',
+                'Prozor–Rama Line Counterattack',
                 'Visoko–Breza Line Clearing',
                 'Operation Circle',
                 'Srebrenica–Cerska Link-Up',
@@ -879,6 +880,64 @@ describe('pre-planned operations', () => {
             eastAxis.objectives.filter((objective) => objective.startsWith('op:bosanski_brod:')),
             ['op:bosanski_brod:novo_selo_2', 'op:bosanski_brod:brod'],
         );
+    });
+
+    it('clears the residual Derventa pocket on a parallel Corridor axis without delaying Bosanski Brod', () => {
+        const corridor = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Corridor');
+        assert.ok(corridor);
+        const eastAxis = corridor.axes.find((axis) => axis.axis_id === 'corridor_east');
+        const pocketAxis = corridor.axes.find((axis) => axis.axis_id === 'derventa_pocket');
+        assert.ok(eastAxis);
+        assert.ok(pocketAxis);
+
+        assert.deepEqual(
+            eastAxis.objectives.slice(2),
+            [
+                'op:derventa:derventa_2',
+                'op:derventa:misinci_2',
+                'op:bosanski_brod:novo_selo_2',
+                'op:bosanski_brod:brod',
+            ],
+        );
+        assert.deepEqual(eastAxis.brigades, [
+            'rs_16th_krajina_motorized',
+            'rs_1st_trebava_infantry',
+            'rs_1st_krnjin_light_infantry',
+            'rs_3rd_ozren_light_infantry',
+            'rs_1st_prnjavor_light_infantry',
+        ]);
+        assert.deepEqual(pocketAxis.brigades, ['rs_27th_derventa_motorized']);
+        assert.deepEqual(pocketAxis.objectives, ['op:derventa:zivinice']);
+        assert.equal(pocketAxis.staging_osid, 'op:derventa:cerani_2');
+    });
+
+    it('bounds the post-January Prozor counterattack to Lug and Paros', () => {
+        const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Prozor–Rama Line Counterattack');
+        assert.ok(operation);
+        assert.equal(operation.corps, 'hvo_tomislavgrad');
+        assert.equal(operation.faction, 'HRHB');
+        assert.equal(operation.available_from, 41);
+        assert.equal(operation.minimum_viable_participants, 1);
+        assert.equal(operation.execution_attack_power_mult, 1.8);
+        assert.deepEqual(operation.axes.flatMap((axis) => axis.brigades), ['hvo_rama_brigade']);
+        assert.deepEqual(operation.axes.flatMap((axis) => axis.objectives), [
+            'op:prozor:lug_2',
+            'op:prozor:paros',
+        ]);
+    });
+
+    it('queues the Prozor counterattack at scenario start and injects it after the January checkpoint', () => {
+        const state = makeMinimalState();
+        injectPrePlannedOperations(state);
+
+        const command = state.military.corps_command!.hvo_tomislavgrad!;
+        assert.deepEqual(command.queued_operations, ['Prozor–Rama Line Counterattack']);
+
+        state.meta.turn = 41;
+        state.political.war_alliance_rbih_hrhb = -1;
+        assert.equal(injectQueuedOperation(state, 'hvo_tomislavgrad'), true);
+        assert.equal(command.active_operations[0]?.name, 'Prozor–Rama Line Counterattack');
+        assert.equal(command.active_operations[0]?.is_pre_planned, true);
     });
 
     it('finishes the 1992 Donji Vakuf sweep at Korenici after Prusac', () => {

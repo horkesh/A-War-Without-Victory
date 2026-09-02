@@ -31778,3 +31778,39 @@ The focused change surface passes **166/166** tests, TypeScript typecheck passes
 validation passes, and `git diff --check` passes. The repository-wide suite separately reports its
 pre-existing enclave-fixture drift: the simulation includes Obadi in the Srebrenica enclave list
 while `tools/validate_run_consistency.cjs` does not; neither file is changed by this correction.
+
+### 2026-09-02 — April Derventa, Liše, and Prozor operational corrections
+
+The approved three-part correction is complete. Operation Corridor retains the 1st Prnjavor Light
+Infantry Brigade on its main east axis and gives the 27th Derventa Motorized Brigade a parallel
+one-objective Derventa-pocket axis, so `op:derventa:zivinice` changes from HRHB to RS through the
+authored operation. During open RBiH–HRHB war, a combat-ready HVO brigade tagged
+`placement:fixed_home_osid` receives deterministic first assignment to its friendly contacted home
+OSID only when an active opposing operation names that home as an objective; the calibrated case is
+the open RBiH–HRHB war. The rule is assignment
+only: it changes no controller, attack power, battle result, movement authority, or operation
+membership. A bounded Prozor–Rama Line Counterattack uses the Rama Brigade to capture Lug at turn 54
+and Paros at turn 55 in two logged battles.
+
+The initial apparent rerun nondeterminism was traced to an experimental source-state difference:
+the bad run omitted 1st Prnjavor from Operation Corridor. The successful roster is now asserted
+directly in `tests/pre_planned_operations.test.ts`. Independent 104-week runs
+`apr1994_three_fixes_v72` and `apr1994_three_fixes_v73` have identical final SHA-256
+`d6095cb8408ddfa8` and zero unresolved assignment-seal violations. April scores **703/712
+(98.74%)**; Živinice is RS, Liše/Lug/Paros are HRHB, and there are zero painted-HRHB OSIDs held by
+RBiH. Brčko and Lopare Selo remain RS, while Goražde town remains RBiH. The two visible offsets
+against the preceding accepted run are Donji Vakuf and Korenići, retained as calibration debt.
+
+Changed repository files: `src/sim/combat/pre_planned_operations.ts`,
+`src/sim/combat/subsegment_assignment.ts`, `tests/pre_planned_operations.test.ts`,
+`tests/brigade_aor_subsegment.test.ts`, `docs/10_canon/Systems_Manual_v0_9_0.md`,
+`docs/20_engineering/DETERMINISM_TEST_MATRIX.md`, `docs/40_reports/CALIBRATION_MASTER.md`, the
+implementation plan, and this ledger. Focused operation/assignment suites pass **97/97** and
+TypeScript typecheck passes; the hover-map generator regression and final diff checks are the
+remaining release gates. Canon propagation changed two structural descriptions and left no
+uncertain references.
+
+Release-gate follow-up: all three focused suites pass **98/98**, TypeScript typecheck passes,
+`git diff --check` passes, and `tools/validate_run_consistency.cjs` reports **PASS** for the v73
+artifact. The generated interactive map contains all 744 hover regions, reports 703/712, and was
+published as version 4 of the existing remote April 1994 calibration map.

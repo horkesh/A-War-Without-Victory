@@ -42,6 +42,11 @@
 - `tests/pre_planned_operations.test.ts` pins the Višegrad objective exclusions, Donji Vakuf
   and Vlašić pocket axes, Srebrenica high-water exclusion, and the Operation
   Circle/Kijevo/Upper Drina combat package.
+- `tests/pre_planned_operations.test.ts` also pins the Operation Corridor Derventa-pocket axis
+  and retained east-axis roster, plus the bounded Prozor–Rama counterattack's exact HVO roster,
+  timing, objectives, and execution multiplier. `tests/brigade_aor_subsegment.test.ts` pins the
+  deterministic HVO fixed-home local-contact assignment preference and proves it is inactive for
+  quiet homes and other factions.
 - `tests/gorazde_pocket_event_state_truth.test.ts`,
   `tests/srebrenica_linkup_event_state_truth.test.ts`, and
   `tests/upper_drina_front_event_state_truth.test.ts` forbid calibration-authored
