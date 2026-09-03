@@ -32789,3 +32789,37 @@ map. `stability_score` rolls up to municipality stability and is read by
 flips**, and by `legitimacy.ts:49`. So re-deriving moves the turn-0 political map and the early-war
 flip base, which lands on the calibration floor. It needs a measured 188w run and a floor
 comparison — not a "the docs said to run this" refresh.
+
+### 2026-09-04 — Correcting the correction: `contested_control` is COSMETIC
+
+The 2026-09-03 entry above called the 42 `contested_control` flips "the headline" and said they
+would move the turn-0 contested map and change how the opening weeks play out. **That is wrong.**
+The owner caught it: *"there is no contested control. Each OSID is initiated into control at the
+start of the game."*
+
+Verified:
+
+- **`contested_control` appears NOWHERE in `src/sim/`.** Zero reads. Every consumer is init
+  plumbing (`political_control_init.ts`), the state validator, or **UI** —
+  `GameStateAdapter.ts:1736`, `WarPlanningMap.ts:610`, `map_viewer_app.ts:770`.
+- On the OSID start path the scenario runner **explicitly zeroes it for every OSID**
+  (`scenario_runner.ts:1756-1759`, *"Reset contested_control to match (ethnic-based start = no
+  contested)"*). Every OSID is initialised to a definite controller.
+
+So those 42 flips change **nothing about how the war plays**. They are a display flag.
+
+**What survives, and it is much smaller.** The committed master and its generator disagree on 269
+rows. The `stability_score` half (~227 rows) is real and does reach the simulation: the master's
+per-settlement value rolls into `state.political.municipalities[mun].stability_score`
+(`political_control_init.ts:967-996`), which `control_flip.ts:384` reads as
+`base = mun?.stability_score ?? 50`, and that path is live via
+`src/sim/turn_phases/early_war_phases.ts`. The disagreement is **bucketed values (35/55/65/75) in
+the committed file vs computed fractions (71.67, 66.43) from the script** — so the committed file
+is a different artifact from an earlier formula, not a stale copy. Re-deriving is still a change
+worth measuring; it is just a narrower one than claimed.
+
+**The lesson, and it is the actual one.** Twice in a row I inferred consequence from a field
+appearing in the initialisation path without checking whether anything in `src/sim/` READS it.
+Presence in init is not effect on the simulation. ⇒ Before calling any data change
+"calibration-moving", grep the field in `src/sim/` and name the reader. If there is no reader, it
+is cosmetic, however prominent it looks in the init code.
