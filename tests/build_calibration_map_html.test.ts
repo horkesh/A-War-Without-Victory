@@ -76,6 +76,7 @@ describe('build_calibration_map_html', () => {
         expect(detailsSource).toBeTruthy();
         const details = JSON.parse(detailsSource!) as Array<{
             osid: string;
+            mergedInto: string | null;
             changed: boolean;
             mismatch: boolean;
             painted: string | null;
@@ -84,9 +85,16 @@ describe('build_calibration_map_html', () => {
         expect(html.match(/class="hit-region"/g)).toHaveLength(744);
         expect(details).toHaveLength(744);
         expect(details.every((row, index) => index === 0 || details[index - 1]!.osid < row.osid)).toBe(true);
-        expect(details.filter(row => row.painted !== null)).toHaveLength(712);
-        expect(details.filter(row => row.mismatch)).toHaveLength(11);
-        expect(details.filter(row => row.changed)).toHaveLength(11);
+
+        // 744 polygons are DRAWN; 712 cells are SCORED. Counts belong to the
+        // scored set — the 32 merge children mirror a parent, so counting drawn
+        // regions double-counts any parent that carries one (13, not 11).
+        const scored = new Map<string, typeof details[number]>();
+        for (const row of details) scored.set(row.mergedInto ?? row.osid, row);
+        expect(scored.size).toBe(712);
+        expect([...scored.values()].every(row => row.painted !== null)).toBe(true);
+        expect([...scored.values()].filter(row => row.mismatch)).toHaveLength(11);
+        expect([...scored.values()].filter(row => row.changed)).toHaveLength(11);
     });
     test('a tap keeps the tooltip open on non-hover pointers, and Escape dismisses it', () => {
         // Regression: the synthetic pointerleave that follows pointerup on touch
@@ -126,22 +134,44 @@ describe('build_calibration_map_html', () => {
         expect(basic).not.toContain('Hover or tap any OSID');
         expect(basic).toContain('Amber fill marks a wrong OSID');
     });
-    test('an OSID with no painted reference reads as not compared, never as correct', () => {
-        // 744 operational regions vs 712 painted cells: the 32 unpainted polygons
-        // were reporting a successful calibration they were never part of.
+    test('merge children are scored under their parent, and the scored universe stays 712', () => {
+        // THE DENOMINATOR TRAP: 744 polygons are DRAWN, but only 712 are SCORED.
+        // The other 32 are sub-1km2 micro-OSIDs that merge_micro_osids.cjs folded
+        // into a same-municipality neighbour (geometry and population included);
+        // their retention in the geojson is intentional. They must therefore
+        // report the PARENT's calibration state — not a hole, and not a bare
+        // "Correct" they never earned. Any count must be taken over the SCORED
+        // set, never over the drawn regions.
         const html = readFileSync(resolve('docs/60_visualisations/20260830_january_1993_calibration_map.html'), 'utf8');
         const script = html.match(/<script>([\s\S]*)<\/script>/)?.[1];
         const details = JSON.parse(script!.match(/const osids=(.*?);const hitLayer/s)![1]!) as Array<{
-            compared: boolean; mismatch: boolean; painted: string | null;
+            osid: string; mergedInto: string | null; compared: boolean; mismatch: boolean;
+            changed: boolean; painted: string | null; simulated: string | null;
         }>;
 
-        expect(details.filter(row => row.compared)).toHaveLength(712);
-        expect(details.filter(row => !row.compared)).toHaveLength(32);
-        // an uncompared row can never be a mismatch, and never renders "Correct"
-        expect(details.filter(row => !row.compared).every(row => !row.mismatch)).toBe(true);
-        expect(details.every(row => row.compared === (row.painted !== null))).toBe(true);
-        expect(script).toContain("detail.compared?(detail.mismatch?'Mismatch':'Correct'):'Not compared'");
-        expect(script).toContain("setText('tip-painted',detail.compared?detail.painted:'No painted reference')");
+        expect(details).toHaveLength(744);
+        expect(details.filter(row => row.mergedInto !== null)).toHaveLength(32);
+
+        // every drawn region resolves to a scored cell — no holes on the map
+        expect(details.filter(row => !row.compared)).toHaveLength(0);
+
+        // and the scored universe is unchanged by the drawing
+        const scored = new Map<string, typeof details[number]>();
+        for (const row of details) scored.set(row.mergedInto ?? row.osid, row);
+        expect(scored.size).toBe(712);
+        expect([...scored.values()].filter(row => row.mismatch)).toHaveLength(11);
+        expect([...scored.values()].filter(row => row.changed)).toHaveLength(11);
+
+        // a merge child mirrors its parent exactly
+        const child = details.find(row => row.osid === 'op:bosanska_gradiska:gornja_jurkovica')!;
+        const parent = details.find(row => row.osid === child.mergedInto)!;
+        expect(child.simulated).toBe(parent.simulated);
+        expect(child.painted).toBe(parent.painted);
+        expect(child.mismatch).toBe(parent.mismatch);
+
+        // and the tooltip says so rather than implying the child was scored itself
+        expect(script).toContain('Sub-1 km');
+        expect(script).toContain('detail.mergedInto');
     });
 
     test('every OSID region is keyboard reachable and named', () => {
