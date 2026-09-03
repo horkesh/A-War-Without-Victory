@@ -88,4 +88,38 @@ describe('build_calibration_map_html', () => {
         expect(details.filter(row => row.mismatch)).toHaveLength(11);
         expect(details.filter(row => row.changed)).toHaveLength(11);
     });
+    test('a tap keeps the tooltip open on non-hover pointers, and Escape dismisses it', () => {
+        // Regression: the synthetic pointerleave that follows pointerup on touch
+        // closed the tooltip immediately, so tapping only flashed the details.
+        const html = readFileSync(resolve('docs/60_visualisations/20260830_january_1993_calibration_map.html'), 'utf8');
+        const script = html.match(/<script>([\s\S]*)<\/script>/)?.[1];
+        expect(script).toBeTruthy();
+        expect(() => new Function(script!)).not.toThrow();
+
+        expect(script).toContain("matchMedia('(hover: hover)')");
+        expect(script).toContain('let sticky=false');
+        // pointerleave must respect the sticky (tap-opened) state
+        expect(script).toContain("pointerleave',()=>{if(!drag&&!sticky)hideTooltip()}");
+        // a tap outside a region, or Escape, is the dismissal path
+        expect(script).toContain("if(sticky&&!event.target.closest?.('.hit-region'))hideTooltip()");
+        expect(script).toContain("event.key==='Escape'");
+    });
+
+    test('the hover instruction only appears when an interactive hit layer is emitted', () => {
+        const interactive = readFileSync(resolve('docs/60_visualisations/20260830_january_1993_calibration_map.html'), 'utf8');
+        expect(interactive).toContain('class="hit-region"');
+        expect(interactive).toContain('Hover or tap any OSID');
+
+        // basic invocation: no geo/save/painted inputs -> no hit layer, no hover copy
+        const dir = mkdtempSync(join(tmpdir(), 'awwv-basic-map-'));
+        tempDirs.push(dir);
+        const basicPng = join(dir, 'map.png');
+        const basicOut = join(dir, 'basic.html');
+        writeFileSync(basicPng, Buffer.from('89504e470d0a1a0a', 'hex'));
+        execFileSync(process.execPath, [TOOL, basicPng, basicOut, 'January 1993', '1 / 2 correct', 'fixture']);
+        const basic = readFileSync(basicOut, 'utf8');
+        expect(basic).not.toContain('class="hit-region"');
+        expect(basic).not.toContain('Hover or tap any OSID');
+        expect(basic).toContain('Amber fill marks a wrong OSID');
+    });
 });
