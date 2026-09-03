@@ -32615,7 +32615,7 @@ crest; 1366 and 1280 also failed.**
 - `DESK` had never received the nowrap/shrink-0 treatment (its className is a template literal, so
   the first pass's regex missed it) — caught by the new contract test.
 - **Command windows now open at 1920×1080** (`PREFERRED_WINDOW`), clamped to the primary display's
-  `workAreaSize`, with `MIN_WINDOW` 1280×720 as the floor. The previous hardcoded 1400×900 put a
+  `workAreaSize`. `DESIGN_MIN_WINDOW` 1280×720 is the verified design floor and is itself clamped to the work area (`getCommandWindowMinimum`), so a display smaller than the floor never gets an off-screen, un-resizable window. The previous hardcoded 1400×900 put a
   fresh install into the compact band on every machine. Owner question — "why is it 1400, can it be
   full HD?" — answered: it was arbitrary, and now it is not.
 

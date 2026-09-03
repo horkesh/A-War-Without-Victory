@@ -1089,9 +1089,13 @@ against its track's box (start-side overflow) and against the crest's box (actua
 `tests/ui/toolbar_fit_contract.test.ts` pins the source properties that make overflow impossible.
 
 **Window size.** `electron-main.cjs` opens command windows at `PREFERRED_WINDOW` 1920x1080,
-clamped to the primary display's `workAreaSize`, with `MIN_WINDOW` 1280x720 as the floor the UI is
-verified against. The previous hardcoded 1400x900 put a fresh install into the compact band on every
-machine; do not reintroduce a sub-HD default (pinned by the contract test).
+clamped to the primary display's `workAreaSize`. `DESIGN_MIN_WINDOW` 1280x720 is the size the UI is
+verified down to — it is the design INTENT, not necessarily the applied minimum: `getCommandWindowMinimum()`
+clamps it to the work area as well, because on a display smaller than the floor (a 1024-wide screen, a
+scaled remote session, 720p minus a taskbar) applying 1280x720 would push the window's edges
+off-screen and `minWidth`/`minHeight` would make it un-resizable back into view. The previous
+hardcoded 1400x900 put a fresh install into the compact band on every machine; do not reintroduce a
+sub-HD default, and do not re-apply the floor unclamped (both pinned by the contract test).
 
 Audit trail: `docs/40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md` (P1 #1); the
 incomplete first fix was caught by Codex review on PR #491.

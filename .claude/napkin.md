@@ -146,6 +146,8 @@
 10. **[2026-07-15] Modal completion actions stay outside narrative scrolling**
    Do instead: keep the only acknowledge/commit action in a persistent footer and scroll the long dispatch body independently; pin DOM ownership and inspect a real Electron viewport.
 
+> Demoted from Map & UI Shell on 2026-09-03 to keep the 10-cap: the 2026-06-26 focused-control shortcut rule now lives in [map counters](napkin/map_counters.md) — demoted to [map counters], not dropped.
+
 ## 2026-08-15 - Name actors at the claim boundary
 
 The sensitive-history inventory's `both sides` / `all sides` pattern found ten genuinely vague combined-party formulations and one spatial phrase (`surrounded on all sides`). All required review, but only the former required actor attribution.
