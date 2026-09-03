@@ -133,7 +133,7 @@ hitLayer.addEventListener('pointerleave',()=>{if(!drag&&!sticky)hideTooltip()});
 map.addEventListener('pointermove',event=>{if(sticky&&Math.hypot(event.clientX-tapX,event.clientY-tapY)>TAP_SLOP)hideTooltip()});
 map.addEventListener('pointerdown',event=>{if(sticky&&!event.target.closest?.('.hit-region'))hideTooltip()});
 window.addEventListener('keydown',event=>{if(event.key==='Escape')hideTooltip()});
-hitLayer.addEventListener('focusin',event=>{const path=event.target.closest?.('.hit-region');if(path){sticky=false;showFromFocus(path)}});
+hitLayer.addEventListener('focusin',event=>{const path=event.target.closest?.('.hit-region');if(path)showFromFocus(path)});
 hitLayer.addEventListener('focusout',event=>{const path=event.target.closest?.('.hit-region');if(path&&!sticky)hideTooltip()})}
 </script></body></html>`;
 

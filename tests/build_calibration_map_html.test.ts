@@ -152,5 +152,9 @@ describe('build_calibration_map_html', () => {
         const script = html.match(/<script>([\s\S]*)<\/script>/)?.[1];
         expect(script).toContain("hitLayer.addEventListener('focusin'");
         expect(script).toContain('showFromFocus');
+        // On touch, focus is the default action of pointerdown — focusin must
+        // never clear stickiness or it undoes the tap fix (flash-only tooltip).
+        expect(script).toContain("focusin',event=>{const path=event.target.closest?.('.hit-region');if(path)showFromFocus(path)}");
+        expect(script).not.toContain('if(path){sticky=false;showFromFocus(path)}');
     });
 });
