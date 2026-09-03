@@ -17,7 +17,7 @@ failing; **P3** = polish; **P4** = nit.
 
 ## P1 — Defects visible at a glance
 
-### 1. Tactical top-bar collision cluster (every map-shell screen)
+### 1. Tactical top-bar collision cluster (every map-shell screen) — **FIXED, PR #491**
 At 1920×1080 the toolbar centre is broken on every tactical screen (`02_war_map`,
 `07a_sector_command`, `07a2_formation_detail`, `04_review_before_advance`):
 - The faction crest overlaps the `RECORDS` nav item and floats over the bar.
@@ -26,6 +26,20 @@ At 1920×1080 the toolbar centre is broken on every tactical screen (`02_war_map
 - `REVIEW BLOCKERS` is clipped by the right viewport edge (`REVIEW BLOCKE…`).
 This is not a resolution problem — it reproduces at full HD. The centre cluster needs a real layout
 (flex with min-widths) instead of absolute stacking. *This is the exact defect the owner circled.*
+
+**Resolution (2026-09-03, PR #491).** Reference routes moved into the left navigation group; every
+toolbar item is `whitespace-nowrap shrink-0` with the date the only shrinkable element; chips take a
+compact band below `2xl` keeping the full phrase as `aria-label`. Windows now open at 1920x1080
+clamped to the display work area, with the 1280x720 design floor clamped too.
+
+**Two things this one defect taught, both now enforced.** First, `scrollWidth === clientWidth`
+CANNOT see this bug: the cluster is `justify-end`, so overflow projects from the START edge and is
+excluded from `scrollWidth` in LTR. Verification must compare child rects against the track and the
+crest. Second, the geometric verifier that does that originally lived under gitignored
+`tmp_gui_observation/` — cited by the contract test but absent from a clean checkout. It is now
+tracked at `tools/ui/verify_toolbar_fit.mjs`, and it reports **PARTIAL vs FULL coverage**, because
+the RESERVE and REVIEWS chips are state-dependent: a save without them passes every width
+trivially, which is not the same as passing.
 
 ### 2. "Sustainment: 0 critical, 0 strained, 55 collapsed" (situation report, all factions)
 The war-map SITUATION REPORT prints `55 collapsed` in a quiet front with "Operations: 0 active
