@@ -32629,3 +32629,35 @@ crest collision at 1280/1366/1400/1440/1600/1920 — **PASS at all six**. Real E
 **Durable lesson recorded** (`life_lessons/process.md`): a measurement can be structurally blind to
 the failure it is cited as disproving — ask what the failure would look like to that instrument, and
 test at the size the product actually ships at.
+
+### 2026-09-03 — Calibration viewer: merge children scored under their parent (owner correction)
+
+**Two wrong answers before the right one.** The operational geojson draws 744 polygons; the
+simulated universe is 712. The viewer first rendered the 32-feature difference as **"Correct"**
+(no painted reference, `mismatch: false`); Codex caught that on PR #492 and I shipped **"Not
+compared"** — also wrong. The owner's correction stands: those 32 are micro-OSIDs that
+`tools/merge_micro_osids.cjs` (`THRESHOLD_KM2 = 1.0`) merged into a same-municipality neighbour,
+**geometry and population included**. Verified: `tools/micro_osid_merge_map.json` is set-identical
+to the 32; orphan max area 0.452 km² vs smallest kept OSID 1.317 km²; `osid_areas.json`,
+`operational_contact_graph.json`, `operational_political_control.json` and
+`canonical_to_operational_map.json` are all 712 with zero orphan references; retention in the
+geojson is intentional. **This was already recorded and CLOSED in
+`PROJECT_LEDGER_KNOWLEDGE.md:4883-4897` ("leave the 32 alone") — the investigation should have
+started there.**
+
+**Fix** (PR #493, branch `fix/calibration-map-merged-children`): each merge child resolves through
+the merge map and reports the PARENT's simulated/painted/mismatch/changed state, with a tooltip line
+naming the merge. No holes on the map, no unearned verdicts.
+
+**The denominator trap, now pinned in tests.** 744 are DRAWN, 712 are SCORED. Counting drawn regions
+gives **13** mismatches because two parents each carry a merge child (`op:ilijas:hadzici`,
+`op:vlasenica:bukovica_gornja`); the scored set gives **11**. The pre-existing assertion
+(`painted !== null === 712`) had silently encoded the old hole-model and was corrected too. Both now
+count over the scored map and assert `scored.size === 712`.
+
+**Verification.** vitest 6/6, `tsc --noEmit` clean, artifact rebuilt: 744 drawn / 712 scored / 11
+mismatches / 11 changed / 0 uncompared; a merge child asserted to mirror its parent exactly.
+
+**Follow-up noted, not actioned:** 3 of the 32 (`op:bugojno:okoliste`, `op:prozor:hudutsko`,
+`op:prozor:meopotocje`) are stale entries in `data/derived/operational/forest_osids.json` — terrain
+flags on merged-away cells.

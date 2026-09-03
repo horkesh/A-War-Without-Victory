@@ -5,6 +5,13 @@
 
 ---
 
+### [Process] ★★ A DIFFERENCE BETWEEN TWO COUNTS IS NOT A DEFECT UNTIL YOU KNOW WHAT THE ROWS ARE (2026-09-03) — NEW
+- 744 geojson polygons vs 712 simulated OSIDs. I called the 32-row difference "unpainted cells falsely reporting Correct", shipped a fix labelling them **"Not compared"** — and that was **the second wrong answer**. They are micro-OSIDs (**max 0.452 km²** against a smallest-kept **1.317 km²**) that `merge_micro_osids.cjs` folded into a same-municipality neighbour, geometry and population included. Their ground IS scored, under the parent. The orphan→parent mapping was sitting in `tools/micro_osid_merge_map.json`, set-identical to my 32, and **the whole question was already answered and CLOSED in `PROJECT_LEDGER_KNOWLEDGE.md:4883-4897` — "leave the 32 alone."** The owner had to tell me twice.
+- ⇒ **Before naming a count difference a bug, characterise the rows.** One `filter(...).map(r => r.area_km2)` would have shown a median of 0.05 against 58.75 and ended it. I had already *printed* that all 32 also lacked a simulated controller — a fact that says "not in the universe", not "unscored member of it" — and moved on anyway.
+- ⇒ **Search the closure log before opening an investigation.** The repo's own knowledge ledger had the answer, with the same numbers, marked CLOSED. This is the "triage must cross-check closure" rule, re-violated.
+- ⇒ **Then the same confusion bites the assertions.** After fixing it, counting *drawn regions* gave **13** mismatches instead of 11, because two parents each carry a merged child. Any count must be taken over the SCORED set (712), never the DRAWN set (744) — and the pre-existing test had silently encoded the wrong model too (`painted !== null === 712` held only while merge children were holes).
+
+
 ### [Process] ★★ A MEASUREMENT CAN BE BLIND TO THE EXACT FAILURE IT IS CITED AS DISPROVING (2026-09-03) — NEW
 - Fixed a toolbar overflow and reported it "measured, verified": `scrollWidth === clientWidth` on both halves at 1280/1440/1920, plus screenshots. **The check is structurally incapable of seeing the bug.** The cluster is `justify-end`; when min-content exceeds the track the overflow projects from the START edge, and start-side overflow is excluded from `scrollWidth` in LTR. At 1400px — **the app's own default window size** — the reviews chip was still 74px under the crest. Codex review caught it; my own evidence had "passed".
 - ⇒ **Before quoting a measurement as proof, ask what the failure would LOOK like to that specific instrument.** Here the instrument reports a number that is identical whether the layout is perfect or catastrophically overflowing leftward. The screenshots could have caught it and I looked at them — at a width where it happened to fit.

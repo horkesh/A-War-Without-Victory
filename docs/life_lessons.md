@@ -1,10 +1,13 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 319 lessons across 9 topic files (count verified 2026-09-03).
+> Last restructured: 2026-04-11. 320 lessons across 9 topic files (count verified 2026-09-03).
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
 ## New Lessons (2026-09-03) — the defect an outsider found on a screenshot
+
+### [Process] ★★ A DIFFERENCE BETWEEN TWO COUNTS IS NOT A DEFECT UNTIL YOU KNOW WHAT THE ROWS ARE — see `docs/life_lessons/process.md`
+- 744 polygons vs 712 scored OSIDs: I called the 32-row gap "cells falsely reporting Correct", then shipped "Not compared" — **both wrong**. They are sub-1 km² micro-OSIDs merged into neighbours (geometry and population folded in); their ground is scored under the parent, the mapping was in `tools/micro_osid_merge_map.json`, and **the question was already CLOSED in `PROJECT_LEDGER_KNOWLEDGE.md:4883-4897`**. ⇒ Characterise the rows before naming a bug (median area 0.05 vs 58.75 km² settles it in one line), and search the closure log first. ⇒ The same confusion then poisons the tests: count over the SCORED set (712), never the DRAWN set (744) — drawn-region counting reports 13 mismatches instead of 11.
 
 ### [Process] ★★ A MEASUREMENT CAN BE BLIND TO THE FAILURE IT IS CITED AS DISPROVING — see `docs/life_lessons/process.md`
 - Reported the toolbar fix as "measured, verified" on `scrollWidth === clientWidth` at 1280/1440/1920. That check **cannot see** start-side overflow on a `justify-end` container, which is precisely this bug: at **1400px — the app's own default window size** — the chip was still 74px under the crest. **Codex review caught what my evidence had cleared.** ⇒ Ask what the failure would look like TO THAT INSTRUMENT before quoting it, and test at the size the product actually ships at.
