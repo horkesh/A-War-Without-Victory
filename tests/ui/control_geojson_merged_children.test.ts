@@ -15,8 +15,9 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import type { FeatureCollection } from 'geojson';
+import type { Feature, FeatureCollection, Polygon } from 'geojson';
 import { buildControlGeoJSON } from '../../src/ui/map/map/builders/buildControlGeoJSON';
+import { buildFrontLinesGeoJSON } from '../../src/ui/map/map/builders/buildFrontLinesGeoJSON';
 
 const mergeMap = JSON.parse(
     readFileSync(resolve('data/derived/operational/micro_osid_merge_map.json'), 'utf8'),
@@ -81,5 +82,46 @@ describe('buildControlGeoJSON: merged-away OSIDs render as their parent', () => 
         for (const feature of out.features) {
             expect(feature.properties!.controller).toBe('RS');
         }
+    });
+});
+
+/**
+ * Every caller feeds buildControlGeoJSON's OUTPUT into buildFrontLinesGeoJSON,
+ * so the null controller propagated there too: generateFactionBorders skips any
+ * edge whose two sides don't both have a controller, which meant the front line
+ * went MISSING along the outer boundary of a merge child that faced an enemy
+ * cell. Resolving the child to its parent closes that gap as well.
+ */
+describe('buildFrontLinesGeoJSON: merge children no longer punch holes in the front', () => {
+    // three unit squares in a row: parent | child | enemy, sharing exact edges
+    const square = (osid: string, x0: number): Feature<Polygon> => ({
+        type: 'Feature',
+        properties: { osid },
+        geometry: {
+            type: 'Polygon',
+            coordinates: [[[x0, 0], [x0 + 1, 0], [x0 + 1, 1], [x0, 1], [x0, 0]]],
+        },
+    });
+    const enemy = 'op:test:enemy_1';
+    const row: FeatureCollection = {
+        type: 'FeatureCollection',
+        features: [square(parent, 0), square(child, 1), square(enemy, 2)],
+    };
+    const control = { [parent]: 'RS', [enemy]: 'RBiH' } as Record<string, string | null>;
+
+    const fronts = buildFrontLinesGeoJSON(buildControlGeoJSON(row, control)).features.filter(
+        (f) => f.properties!.lineType === 'front',
+    );
+
+    it('draws the front along the boundary the child inherits from its parent', () => {
+        expect(fronts.length).toBeGreaterThan(0);
+        const pair = new Set(fronts.flatMap((f) => [f.properties!.factionA, f.properties!.factionB]));
+        expect(pair).toEqual(new Set(['RS', 'RBiH']));
+    });
+
+    it('puts that front on the real faction boundary, not on the internal merge seam', () => {
+        const xs = new Set(fronts.flatMap((f) => f.geometry.coordinates.map((c) => c[0])));
+        // x=2 is parent-territory vs enemy; x=1 is the seam between child and parent
+        expect(xs).toEqual(new Set([2]));
     });
 });
