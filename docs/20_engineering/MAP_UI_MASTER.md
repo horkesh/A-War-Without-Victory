@@ -1056,3 +1056,25 @@ The Map UI is maintained according to the **Paradox Team Protocols**.
 | **QA Engineer** | `qa-engineer.md` | Browser verification, layout regression testing. |
 
 **Current Protocol:** Orchestrator-First. Documentation changes must be reviewed by the UI Expert (UI/UX Developer) for alignment with established visual patterns.
+
+## Tactical toolbar single-line contract (2026-09-03)
+
+`PresidentialToolbar.tsx` renders `grid-cols-[minmax(0,1fr)_7rem_minmax(0,1fr)]` with the army
+crest fixed over the centre column, so **each half must fit its own maximum content** — there is no
+reflow room. Before 2026-09-03 the right cluster (reference routes + review/reserve/tensions chips +
+authority gauge + advance button, ~1180px max) exceeded its column at 1440 **and** 1920: chips
+wrapped into lines clipped by the `h-12` bar and the row spilled leftward under the crest.
+
+Rules:
+- Reference routes (`RECORDS`, `CHRONICLE`, `CODEX`) belong to the LEFT navigation group.
+- Every toolbar item is `whitespace-nowrap shrink-0`; the turn date is the only shrinkable element
+  (`truncate min-w-0`) and acts as the relief valve at narrow widths.
+- Alert chips use short labels (`presidentialToolbar.reserveChip` = `RESERVE · N`,
+  `presidentialToolbar.tensions` = `TENSIONS`) with the full severity sentence in `title`.
+  `getArmyReserveToolbarSignal`'s long label is unchanged — it still drives the reserve desk and is
+  pinned by `tests/army_reserve_legibility.test.ts`.
+- Adding anything to the right cluster is the regression shape. Verify by measuring
+  `scrollWidth === clientWidth` on both toolbar halves at 1280/1440/1920 with max chip load
+  (reviews + critical reserve + tensions), not by inspecting a single width.
+
+Audit trail: `docs/40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md` (P1 #1).

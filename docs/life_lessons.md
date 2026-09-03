@@ -1,8 +1,16 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 316 lessons across 9 topic files (count verified 2026-08-31).
+> Last restructured: 2026-04-11. 318 lessons across 9 topic files (count verified 2026-09-03).
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
+
+## New Lessons (2026-09-03) — the defect an outsider found on a screenshot
+
+### [UI] ★★ A FIXED-CENTER ELEMENT TURNS EACH TOOLBAR HALF INTO A HARD BUDGET — see `docs/life_lessons/ui_map.md`
+- The tactical toolbar's right cluster could exceed its grid column at 1440 **and** 1920; chips wrapped into lines clipped by the 48px bar and spilled under the fixed crest. It shipped for months and was caught by **the owner looking at a pitch screenshot** — the failure is silent, untested, and at any one width merely looks cramped. ⇒ With a fixed-size island between flexible regions you have TWO budgets, not one flow: everything `nowrap shrink-0`, one designated shrinkable, and measure `scrollWidth === clientWidth` on both halves at 1280/1440/1920 under max load.
+
+### [Process] ★ RE-VIOLATED: `cmd | tail; echo $?` reads the FILTER's exit code — see `docs/life_lessons/process.md`
+- A failed `desktop:map:build` reported `BUILD_EXIT=0`; a `tsc` that exited 2 reported 0. The repo hook warned both times. A stale `dist` then got served to a capture rig and rendered black. ⇒ Redirect and check the bare command, or `set -o pipefail`. Third recorded instance; same *derived-signal* family as reading a step count as proof of content — a harness said **13/13 ok** while two screenshots showed the wrong surface entirely.
 
 ## New Lessons (2026-08-26e) — probe fixes; a tag's meaning inferred from ONE instance
 
