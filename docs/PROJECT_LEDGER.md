@@ -32740,3 +32740,30 @@ fix applied: no slivers. The invariant test's master assertion flipped from "32 
 
 **Note:** Codex review hit its usage limit partway through this work, so these two changes were
 self-reviewed against the gates above rather than machine-reviewed.
+
+### 2026-09-03 — The toolbar's geometric verifier is now tracked, and says when its pass is partial
+
+Closing a Codex P2 from PR #491 that shipped: `tests/ui/toolbar_fit_contract.test.ts` cited its
+geometric proof as `tmp_gui_observation/verify_toolbar_fit.mjs`, under a **gitignored** directory.
+On a clean checkout that file does not exist, so the only surviving evidence was the source-string
+assertions — which the test's own comment says cannot prove geometry. Same failure class as the
+#493 P1 (a test reading gitignored `runs/`), and it was the *evidence* half that went missing,
+which is the half nobody notices until a collision recurs.
+
+The verifier now lives at **`tools/ui/verify_toolbar_fit.mjs`** and defaults to a **tracked** save
+(`docs/40_reports/playtests/evidence/20260731_session16_rs_104week_player/autosaves/final-autosave.json`),
+so it runs from a clean checkout. `--save`, `--url` and `--out` override; output goes to the
+ignored `tmp-toolbar-fit/`. Docs repointed in `MAP_UI_MASTER.md` and `GUI_MASTER.md`.
+
+**And it now refuses to overstate itself.** Running it against the tracked save passed at all six
+widths — but that save shows only three chips. **RESERVE and REVIEWS are state-dependent and were
+absent**, and those are precisely the chips whose width caused the original collision, so the pass
+was measuring a case that fits trivially. The tool now tracks which worst-case chips were on screen
+and reports **`PASS, PARTIAL COVERAGE`** naming the missing ones, versus **`PASS, FULL COVERAGE`**
+when the complete set was measured. Both branches were exercised: tracked save → PARTIAL (missing
+REVIEWS/RESERVE); mid-campaign pitch save → FULL, with all six widths clean
+(start-side overflow ≤ −150 px, no crest collision, no wrap).
+
+Generalises the lesson the toolbar bug already taught once: **a green verifier is only as strong as
+the state it loaded**, and a harness that cannot tell you what it covered will be quoted as if it
+covered everything.
