@@ -126,4 +126,31 @@ describe('build_calibration_map_html', () => {
         expect(basic).not.toContain('Hover or tap any OSID');
         expect(basic).toContain('Amber fill marks a wrong OSID');
     });
+    test('an OSID with no painted reference reads as not compared, never as correct', () => {
+        // 744 operational regions vs 712 painted cells: the 32 unpainted polygons
+        // were reporting a successful calibration they were never part of.
+        const html = readFileSync(resolve('docs/60_visualisations/20260830_january_1993_calibration_map.html'), 'utf8');
+        const script = html.match(/<script>([\s\S]*)<\/script>/)?.[1];
+        const details = JSON.parse(script!.match(/const osids=(.*?);const hitLayer/s)![1]!) as Array<{
+            compared: boolean; mismatch: boolean; painted: string | null;
+        }>;
+
+        expect(details.filter(row => row.compared)).toHaveLength(712);
+        expect(details.filter(row => !row.compared)).toHaveLength(32);
+        // an uncompared row can never be a mismatch, and never renders "Correct"
+        expect(details.filter(row => !row.compared).every(row => !row.mismatch)).toBe(true);
+        expect(details.every(row => row.compared === (row.painted !== null))).toBe(true);
+        expect(script).toContain("detail.compared?(detail.mismatch?'Mismatch':'Correct'):'Not compared'");
+        expect(script).toContain("setText('tip-painted',detail.compared?detail.painted:'No painted reference')");
+    });
+
+    test('every OSID region is keyboard reachable and named', () => {
+        const html = readFileSync(resolve('docs/60_visualisations/20260830_january_1993_calibration_map.html'), 'utf8');
+        expect(html.match(/tabindex="0" role="button"/g)).toHaveLength(744);
+        expect(html.match(/class="hit-region"/g)).toHaveLength(744);
+        // focus must drive the same tooltip that hover does
+        const script = html.match(/<script>([\s\S]*)<\/script>/)?.[1];
+        expect(script).toContain("hitLayer.addEventListener('focusin'");
+        expect(script).toContain('showFromFocus');
+    });
 });
