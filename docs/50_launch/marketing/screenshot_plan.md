@@ -40,6 +40,14 @@ Harness lives in `tmp_gui_observation/` (untracked working area; documented in p
   "Desktop command bridge unavailable" notice (the packaged desktop app has the bridge).
 - Never publish a shot of a feature marked planned or gated in `claims_inventory.md`.
 - Do not crop away UI needed to understand the claim.
+- **Check the published FILES, not the capture run** — `check_media.mjs` in the showcase repo
+  fails if any still a page references is not 1920x1080. This is not belt-and-braces: the
+  1920x1080 re-shoot *missed one file* and nobody saw it. `capture_faction_v2.mjs`'s
+  `05_decision_room` step looks for `OPEN REVIEW` / `REVIEW PRIORITIES` and **skips without
+  failing** when neither exists; HRHB exposes that queue as the `N REVIEWS` toolbar chip, so the
+  step wrote nothing and a stale 1440x900 file from the previous round stayed published on both
+  language versions for a day. **A skipped capture is invisible — the old file is still there and
+  looks exactly like a fresh one.** Prefer a step that throws over one that logs and continues.
 - If a capture reveals a defect, log it in the screenshot GUI audit rather than hiding it —
   see `docs/40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md`. Re-capture affected
   surfaces after the fix lands (the 2026-09-03 toolbar fix required a full re-shoot of every
