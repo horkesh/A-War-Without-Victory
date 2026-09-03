@@ -23,6 +23,7 @@ const EXPECTED_GEOREF_FILES = [
 const EXPECTED_OPERATIONAL_FILES = [
     'data/derived/operational/canonical_to_operational_map.json',
     'data/derived/operational/forest_osids.json',
+    'data/derived/operational/micro_osid_merge_map.json',
     'data/derived/operational/operational_contact_graph.json',
     'data/derived/operational/operational_initial_master.json',
     'data/derived/operational/operational_political_control.json',
@@ -86,6 +87,7 @@ test('georef, operational, and municipality audit artifacts have retained owners
     assert.ok(operationalRow.includes('map:derive:operational-settlements'), 'operational row should cite settlement owner');
     assert.ok(operationalRow.includes('map:derive:operational-osid-first'), 'operational row should cite OSID-first owner');
     assert.ok(operationalRow.includes('map:derive:operational-initial-master'), 'operational row should cite initial master owner');
+    assert.ok(operationalRow.includes('tools/merge_micro_osids.cjs'), 'operational row should cite the micro-OSID merge map owner');
 
     assert.ok(municipalityAuditRow.includes('audit:muni:diagnose-borders'), 'municipality audit row should cite border diagnostic owner');
     assert.ok(municipalityAuditRow.includes('audit:settlements:muni'), 'municipality audit row should cite settlement alignment owner');
