@@ -172,7 +172,7 @@ describe('field toolbar navigation ownership', () => {
       onReviewPriorities,
     });
 
-    for (const name of ['DESK', 'WAR MAP', 'ARMY HQ', 'RECORDS', 'CHRONICLE', 'CODEX', '1 REVIEW', 'TENSIONS RISING']) {
+    for (const name of ['DESK', 'WAR MAP', 'ARMY HQ', 'RECORDS', 'CHRONICLE', 'CODEX', '1 REVIEW', 'TENSIONS']) {
       const button = screen.getByRole('button', { name });
       expect(button).toHaveProperty('disabled', true);
       fireEvent.click(button);
