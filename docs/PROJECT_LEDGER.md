@@ -32661,3 +32661,42 @@ mismatches / 11 changed / 0 uncompared; a merge child asserted to mirror its par
 **Follow-up noted, not actioned:** 3 of the 32 (`op:bugojno:okoliste`, `op:prozor:hudutsko`,
 `op:prozor:meopotocje`) are stale entries in `data/derived/operational/forest_osids.json` — terrain
 flags on merged-away cells.
+
+### 2026-09-03 — The 744-vs-712 OSID gap is now an executable invariant; in-game impact measured
+
+**Why.** The gap between the 744 drawn polygons and the 712 simulated OSIDs has produced FOUR wrong
+answers in this repo: a viewer reporting merged cells as "Correct", then as "Not compared", a
+mismatch count of 13 instead of 11, and a hardcoded `total = 744` denominator. Each time the meaning
+of the gap was re-derived from raw file counts instead of from the merge map — even though the facts
+are documented in canon (`context.md`, Area-Weighted Territory & Degenerate OSID Merge),
+`CALIBRATION_MASTER.md` (n982) and closed in `PROJECT_LEDGER_KNOWLEDGE.md`. Documentation did not
+stop it, so the invariant is asserted in code.
+
+**`tests/operational_osid_universe_invariant.test.ts`** (new, 7 assertions) pins:
+geojson 744 === contact graph 712 + merge-map children 32, with set equality both directions; every
+merge parent is live and no child is itself a parent (no chains); it is a SIZE rule — every merged
+cell is <1 km² and every live cell ≥1 km² (`THRESHOLD_KM2 = 1.0`); merged ids appear nowhere in the
+contact graph nodes or edge endpoints, so they can never become a front; and it pins exactly WHICH
+files still contain merged ids so a new leak fails loudly. Clean and asserted clean: `osid_areas`,
+`urban_osids`, `canonical_to_operational_map`, `painted_control_jan1993`. Known deviations, tracked
+with reasons: `forest_osids.json` (3 dead terrain flags, inert — a merged cell cannot host a battle,
+proved by the contact-graph assertion) and `operational_initial_master.json` (still 744;
+`political_control_init.ts:907-923` drops them at startup with a warn — canon says this file should
+be re-derived to 712 after a merge and it has not been).
+
+**Fixed:** `tools/compare_n635_n636.cjs` divided control counts by 744, understating every faction's
+share; `control_counts` can only sum to 712.
+
+**IN-GAME IMPACT — MEASURED, and it is real but cosmetic.** `buildControlGeoJSON` maps over ALL 744
+features without filtering (`src/ui/map/map/builders/buildControlGeoJSON.ts:8-33`), so the 32 reach
+MapLibre with `controller: null` and the `osid-control-fill` match expression falls through to its
+default `rgba(60,60,70,0.15)`. Because their geometry was never unioned into the parent, they render
+as **32 tiny neutral slivers punched into solid faction territory** — an "unowned enclave" look where
+no enclave exists — and they are hoverable/clickable, so a player can select an OSID the simulation
+does not know. Scale: 1.2 to 3.5 px across at 1920 width (max area 0.452 km², ~27 px² per km²).
+No impact on force-quality or damage overlays (both iterate state, not features), ethnic map mode
+(renders correctly from population properties), scenarios/OOB/operations (0 references across 205
+files), or `verify_checkpoints.cjs` (correctly 712). One unverified: `buildFrontLinesGeoJSON`
+consumes the same 744-feature collection. **Recommended fix (not applied): resolve the child through
+the merge map in the render path so it inherits the parent's colour and hover target** — the same
+principle already merged for the calibration viewer in #493, presentational only.
