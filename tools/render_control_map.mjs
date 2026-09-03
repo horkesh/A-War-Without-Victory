@@ -49,6 +49,10 @@ const EXPECTED_COLORS = {
 const MISMATCH_FILL = 'rgb(201, 142, 38)';
 
 const geo = JSON.parse(readFileSync(`${ROOT}/data/derived/operational/operational_settlements.geojson`, 'utf-8'));
+// orphan -> merge parent (tools/merge_micro_osids.cjs); absent map degrades to
+// the previous behaviour rather than failing the render.
+let mergeMap = {};
+try { mergeMap = JSON.parse(readFileSync(`${ROOT}/tools/micro_osid_merge_map.json`, 'utf-8')); } catch { mergeMap = {}; }
 const save = JSON.parse(readFileSync(SAVE_PATH, 'utf-8'));
 const pc = save.political.political_controllers;
 const turn = save.meta?.turn ?? '?';
@@ -120,13 +124,20 @@ const mismatchList = [];
 for (const pass of ['fill', 'outline', 'dot']) {
   for (const f of features) {
     const osid = f.properties.osid;
-    const controller = pc[osid] ?? null;
-    const want = painted ? painted[osid] : undefined;
+    // A merge child is drawn as, and scored as, its parent cell.
+    const mergedInto = mergeMap[osid] ?? null;
+    const scoredOsid = mergedInto ?? osid;
+    const controller = pc[scoredOsid] ?? null;
+    const want = painted ? painted[scoredOsid] : undefined;
     const isMismatch = want !== undefined && controller !== want;
 
     if (pass === 'fill') {
-      if (want === undefined) { if (painted) unpainted += 1; } else { compared += 1; }
-      if (isMismatch) {
+      // statistics belong to the SCORED set (712) — never count a merge child,
+      // or its parent is double-counted and the denominator drifts to 744.
+      if (!mergedInto) {
+        if (want === undefined) { if (painted) unpainted += 1; } else { compared += 1; }
+      }
+      if (isMismatch && !mergedInto) {
         mismatched += 1;
         if (want in byExpected) byExpected[want] += 1;
         mismatchList.push({ osid, engine: controller, want });
