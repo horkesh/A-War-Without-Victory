@@ -11,8 +11,12 @@
  * scrollWidth in LTR. So this suite pins the SOURCE contract instead — the
  * properties that make overflow impossible — which is what a jsdom test can
  * assert honestly. Geometric proof at real widths is
- * `tmp_gui_observation/verify_toolbar_fit.mjs` (measures start-side overflow and
- * crest collision at 1280/1366/1400/1440/1600/1920).
+ * `tools/ui/verify_toolbar_fit.mjs` (measures start-side overflow and crest
+ * collision at 1280/1366/1400/1440/1600/1920). It is TRACKED deliberately: the
+ * first version of this comment cited a path under the gitignored
+ * `tmp_gui_observation/`, so on a clean checkout the geometric half of the proof
+ * did not exist and only these source assertions remained — which this comment
+ * itself says cannot prove geometry.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';

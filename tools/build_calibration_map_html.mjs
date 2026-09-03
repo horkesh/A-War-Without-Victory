@@ -33,7 +33,7 @@ function buildInteractiveLayer() {
   // orphan -> merge parent, written by tools/merge_micro_osids.cjs
   let mergeMap = {};
   try {
-    mergeMap = JSON.parse(readFileSync(new URL('./micro_osid_merge_map.json', import.meta.url), 'utf8'));
+    mergeMap = JSON.parse(readFileSync(new URL('../data/derived/operational/micro_osid_merge_map.json', import.meta.url), 'utf8'));
   } catch {
     mergeMap = {}; // viewer still builds; merged children then report as unscored
   }

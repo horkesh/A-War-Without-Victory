@@ -1085,7 +1085,7 @@ and start-side overflow is excluded from `scrollWidth` in LTR. The first pass at
 exactly that and reported "no overflow at 1280/1440/1920" while the reviews chip was still 74px under
 the crest at 1400. Measure GEOMETRY instead: compare each cluster child's `getBoundingClientRect()`
 against its track's box (start-side overflow) and against the crest's box (actual collision).
-`tmp_gui_observation/verify_toolbar_fit.mjs` does this at 1280/1366/1400/1440/1600/1920;
+`tools/ui/verify_toolbar_fit.mjs` does this at 1280/1366/1400/1440/1600/1920;
 `tests/ui/toolbar_fit_contract.test.ts` pins the source properties that make overflow impossible.
 
 **Window size.** `electron-main.cjs` opens command windows at `PREFERRED_WINDOW` 1920x1080,

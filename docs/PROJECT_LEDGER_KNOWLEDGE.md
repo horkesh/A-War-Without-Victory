@@ -4820,7 +4820,7 @@ covered only for a legacy shape is not an engine invariant.
 
 Applied in `[2026-08-31] fix(engine): preserve queued operation brigades from probes`.
 
-## The 744 / 712 OSID gap — 32 micro-settlements awaiting merge
+## The 744 / 712 OSID gap — 32 micro-settlements ALREADY MERGED (drawn, not simulated)
 
 **CORRECTED 2026-09-01, same day, before this entry could mislead anyone.** The first
 version of this section said the knowledge "existed only in the owner's memory" and called
@@ -4882,7 +4882,7 @@ painted reference.
 
 **What the 32 actually are — VERIFIED.** `tools/merge_micro_osids.cjs:18` sets
 `THRESHOLD_KM2 = 1.0`; every OSID under 1 km² merges into its largest same-municipality
-neighbour. `tools/micro_osid_merge_map.json` holds exactly 32 entries, byte-identical to the
+neighbour. `data/derived/operational/micro_osid_merge_map.json` holds exactly 32 entries, byte-identical to the
 orphan list, and all 32 targets are controlled. The separation is a clean threshold, not a
 coincidence: orphan max area **0.452 km²**, kept min area **1.317 km²**.
 
@@ -4917,8 +4917,8 @@ from `osid_areas.json` and `operational_political_control.json`, absent from
 `total_osids: 712`. One latent path: `pushDisplacementEventLogFromMun`
 (`src/state/displacement.ts:387-395`) iterates the 744-entry geojson map and COULD allocate to
 an uncontrolled OSID — inert in the current save (`displacement_event_log` length 0), but it
-is the one thing that would falsify "does not matter". Only live surface is cosmetic:
-`DataLoader.ts:97` fetches all 744, so 32 sub-pixel polygons render with no controller.
+is the one thing that would falsify "does not matter". The live surfaces were presentational, and are now **FIXED** — see the closure note at the
+end of this section.
 
 **Bosanski Šamac is fine.** `S165689` is the only duplicated SID in 5,823 features (once in
 `bosanski_samac`, once in `odzak`), both population 0 — it is the administrative seat polygon.
@@ -4933,6 +4933,50 @@ territory, but behaviour-moving for displacement and casualty maths, so 188w not
 
 **And they are NOT evidence that settlement-into-OSID merging harms calibration.** The merge is
 what keeps the model at a clean 712.
+
+### Closure (2026-09-03) — what was still leaking, and what now stops it recurring
+
+This section had been right for two days and the gap still cost a full session, because
+"CLOSED, leave them alone" was **advice**, and advice does not survive a reader who counts
+744 somewhere and reasons from it. Three things changed.
+
+**1. The presentational leak was real and is fixed.** `buildControlGeoJSON` mapped over all
+744 features unfiltered, so the 32 arrived at MapLibre with `controller: null` and the
+`osid-control-fill` match expression painted them with its neutral fallback: 32 tiny
+"unowned enclave" patches (1.2-3.5 px at 1920) inside solid faction territory, hoverable and
+clickable for cells the engine has never heard of. They now resolve through the merge map and
+inherit the parent's controller, with `properties.osid` rewritten to the parent so a click
+opens the cell the simulation owns.
+
+**There was a SECOND symptom nobody had spotted**, and it was subtler than the slivers. Every
+caller feeds that same output into `buildFrontLinesGeoJSON`, and `generateFactionBorders`
+skips any edge whose two sides don't both have a controller — so wherever one of the 32 sat on
+a faction boundary, **the front line simply went missing there.** Same null, same fix, now
+pinned by `tests/ui/control_geojson_merged_children.test.ts` (negative-controlled: neuter the
+merge map and 5 of its 7 tests fail).
+
+**2. The 744 is now an executable invariant, not a paragraph.**
+`tests/operational_osid_universe_invariant.test.ts` asserts `744 = 712 + 32` and that
+`meta.settlement_count` cannot drift from the array it describes. A future reader who
+"corrects" one number to match the other breaks a test that explains why both are right.
+
+**3. `operational_initial_master.json` was cleaned to 712.** Canon has required this after any
+OSID merge since 2026-03-21 and it had never been done; `political_control_init.ts:907-923`
+papered over it with a startup warning on every launch, which is precisely the kind of
+tolerated noise that teaches everyone the number is negotiable.
+
+**The trap that cost the most, and will catch the next person too.** The documented command
+`npm run map:derive:operational-initial-master` does produce 712 — **and also silently changes
+168 surviving records** (`stability_score: null -> 75`). The derive script and the committed
+file have DRIFTED. The 32 were therefore removed surgically instead, leaving every surviving
+record byte-identical, proven by a 3-turn RS campaign with an identical sha256 either side.
+**Do not run that script expecting a no-op.** Reconciling it with the committed file is real,
+unscoped work; it has not been done.
+
+**Still true, unchanged:** do NOT regenerate `operational_settlements.geojson` to 712. The
+geojson keeps 744 by design — rewriting polygon geometry regenerates areas and the contact
+graph and moves calibration. The 32 are *drawn but not simulated*, and that asymmetry is the
+correct end state, not a defect to tidy away.
 
 
 ## Is OSID granularity a calibration ceiling? NO — it is position, then geography

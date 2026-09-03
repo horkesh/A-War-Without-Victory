@@ -123,3 +123,4 @@ Thumbs.db
 storybook-static
 .worktrees/
 *.pre-harmonize.bak
+tmp-toolbar-fit/

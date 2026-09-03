@@ -52,7 +52,7 @@ const geo = JSON.parse(readFileSync(`${ROOT}/data/derived/operational/operationa
 // orphan -> merge parent (tools/merge_micro_osids.cjs); absent map degrades to
 // the previous behaviour rather than failing the render.
 let mergeMap = {};
-try { mergeMap = JSON.parse(readFileSync(`${ROOT}/tools/micro_osid_merge_map.json`, 'utf-8')); } catch { mergeMap = {}; }
+try { mergeMap = JSON.parse(readFileSync(`${ROOT}/data/derived/operational/micro_osid_merge_map.json`, 'utf-8')); } catch { mergeMap = {}; }
 const save = JSON.parse(readFileSync(SAVE_PATH, 'utf-8'));
 const pc = save.political.political_controllers;
 const turn = save.meta?.turn ?? '?';
