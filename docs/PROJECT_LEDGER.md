@@ -32767,3 +32767,25 @@ REVIEWS/RESERVE); mid-campaign pitch save → FULL, with all six widths clean
 Generalises the lesson the toolbar bug already taught once: **a green verifier is only as strong as
 the state it loaded**, and a harness that cannot tell you what it covered will be quoted as if it
 covered everything.
+
+### 2026-09-03 (later) — Correcting the derive-script drift figure
+
+**CORRECTED 2026-09-03 (same day).** The figure first recorded here — "168 surviving records,
+`stability_score: null -> 75`" — was WRONG, and was not reproducible. Re-running the derive against
+the cleaned 712-row file and diffing row by row gives the real drift:
+
+- **269 of the 712 surviving rows change**, not 168.
+- **42 rows flip `contested_control: false -> true`** — turn-0 contested settlements go from **176 to
+  218, +24%**. That is the headline, and it was invisible in the original description.
+- The rest are `stability_score`, and the direction was misread: the committed file holds **clean
+  bucketed values (35 / 55 / 65 / 75)** and the script recomputes **fractional** ones
+  (75 -> 71.67, 65 -> 66.43, 55 -> 61.67). The committed file is therefore not a stale copy of the
+  script's output; it is a *different artifact* produced by an earlier formula or by hand.
+
+**Why that is a calibration decision and not a cleanup.** `contested_control` seeds
+`state.political.contested_control`, promoted to OSID keying at init — it is the turn-0 contested
+map. `stability_score` rolls up to municipality stability and is read by
+`control_flip.ts:384` (`base = mun?.stability_score ?? 50`), which drives **early-war control
+flips**, and by `legitimacy.ts:49`. So re-deriving moves the turn-0 political map and the early-war
+flip base, which lands on the calibration floor. It needs a measured 188w run and a floor
+comparison — not a "the docs said to run this" refresh.
