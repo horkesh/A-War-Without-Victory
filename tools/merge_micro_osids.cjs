@@ -152,4 +152,4 @@ fs.writeFileSync(
     JSON.stringify(mergeMap, null, 2) + '\n',
     'utf8'
 );
-console.log(`\nMerge map saved to: tools/micro_osid_merge_map.json`);
+console.log(`\nMerge map saved to: data/derived/operational/micro_osid_merge_map.json`);
