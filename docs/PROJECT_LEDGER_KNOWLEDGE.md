@@ -4967,11 +4967,17 @@ tolerated noise that teaches everyone the number is negotiable.
 
 **The trap that cost the most, and will catch the next person too.** The documented command
 `npm run map:derive:operational-initial-master` does produce 712 — **and also silently rewrites
-269 of the 712 surviving records**, including **42 that flip `contested_control` false -> true**
-(turn-0 contested settlements 176 -> 218, +24%), plus ~227 `stability_score` values where the
-committed file holds clean buckets (35/55/65/75) and the script emits fractions (75 -> 71.67).
-*(An earlier version of this paragraph said "168 records, null -> 75". That was wrong and not
-reproducible; the figures here are from a row-by-row diff of a real re-derive.)* The derive script and the committed
+269 of the 712 surviving records.** Of those, ~227 are `stability_score`, where the committed file
+holds clean buckets (35/55/65/75) and the script emits fractions (75 -> 71.67); **that half is
+real** and reaches the sim via municipality stability -> `control_flip.ts:384`
+(`base = mun?.stability_score ?? 50`, live through `early_war_phases.ts`). The other 42 flip
+`contested_control`, and **those are COSMETIC**: the field appears nowhere in `src/sim/` (UI and
+validator only), and the scenario runner zeroes it for every OSID on the OSID start path
+(`scenario_runner.ts:1756-1759`) — every OSID starts with a definite controller.
+*(Two earlier versions of this paragraph were wrong: first "168 records, null -> 75" — not
+reproducible; then "42 contested_control flips are the headline, +24% turn-0 contested map" —
+inferred from the field's presence in init without checking for a reader in `src/sim/`. There is
+none.)* The derive script and the committed
 file have DRIFTED. The 32 were therefore removed surgically instead, leaving every surviving
 record byte-identical, proven by a 3-turn RS campaign with an identical sha256 either side.
 **Do not run that script expecting a no-op.** Reconciling it with the committed file is real,
