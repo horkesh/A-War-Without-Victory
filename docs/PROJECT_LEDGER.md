@@ -32700,3 +32700,43 @@ files), or `verify_checkpoints.cjs` (correctly 712). One unverified: `buildFront
 consumes the same 744-feature collection. **Recommended fix (not applied): resolve the child through
 the merge map in the render path so it inherits the parent's colour and hover target** — the same
 principle already merged for the calibration viewer in #493, presentational only.
+
+### 2026-09-03 — Merged-away OSIDs removed from the war map and from the initial master
+
+Both items the owner approved after the 744-vs-712 impact sweep.
+
+**1. The war map no longer draws them as unowned slivers.** `buildControlGeoJSON` mapped over all
+744 GeoJSON features without filtering, so the 32 merge children reached MapLibre with
+`controller: null` and the `osid-control-fill` match expression painted them with its neutral
+fallback — 32 "unowned enclave" patches (1.2-3.5 px across at 1920) inside solid faction territory,
+hoverable and selectable for cells the engine has never heard of. They now resolve through the merge
+map and inherit the parent's controller, and `properties.osid` is rewritten to the parent so a click
+opens the cell the simulation actually owns (`merged_child_osid`/`merged_into` retain provenance).
+Presentational only; nothing here feeds the simulation. Pinned by
+`tests/ui/control_geojson_merged_children.test.ts` (5 assertions, including that ordinary OSIDs are
+untouched and a genuinely unknown OSID still yields null so real gaps stay visible).
+
+**The merge map moved to its canonical derived home**, `data/derived/operational/micro_osid_merge_map.json`
+(was `tools/`), with `merge_micro_osids.cjs` writing there and all consumers repointed — single
+ownership, and importable by the UI like the other derived data.
+
+**2. `operational_initial_master.json` cleaned to 712**, which canon (`context.md`) has required
+after any OSID merge and which had never been done; `political_control_init.ts:907-923` was papering
+over it with a startup warn on every launch.
+
+**A trap avoided, worth recording.** Running the documented `map:derive:operational-initial-master`
+produced 712 — *and also silently changed 168 surviving records* (`stability_score: null -> 75`),
+an unreviewed engine-input change well outside the approval. That was reverted. The 32 were instead
+removed surgically from the committed file, leaving every surviving record byte-identical, and
+`meta.settlement_count` corrected from its stale 744. **The derive script and the committed file have
+drifted; re-running it wholesale is not a no-op.** Flagged, not chased.
+
+**Verification.** A 3-turn RS campaign is **byte-identical** before and after the master change
+(sha256 `73de43a34c2027ed…`, 3,687,151 bytes both sides), and the startup drop-warning is gone.
+`tsc --noEmit` clean; `desktop:map:build` + chunk-cycle clean; `tests/ui` + invariant +
+calibration-map suites **3148/3148 green across 345 files**. War map captured at 1920x1080 with the
+fix applied: no slivers. The invariant test's master assertion flipped from "32 known deviation" to
+"clean", and gained a check that `meta.settlement_count` cannot drift from the array it describes.
+
+**Note:** Codex review hit its usage limit partway through this work, so these two changes were
+self-reviewed against the gates above rather than machine-reviewed.

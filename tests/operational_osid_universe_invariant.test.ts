@@ -31,7 +31,7 @@ const DRAWN = 744;
 const SIMULATED = 712;
 const MERGED_AWAY = 32;
 
-const mergeMap = read('tools/micro_osid_merge_map.json') as Record<string, string>;
+const mergeMap = read('data/derived/operational/micro_osid_merge_map.json') as Record<string, string>;
 const geo = read('data/derived/operational/operational_settlements.geojson') as {
     features: Array<{ properties: { osid: string; area_km2: number } }>;
 };
@@ -113,12 +113,21 @@ describe('operational OSID universe: 744 drawn = 712 simulated + 32 merged away'
         // a battle (previous assertion proves it is not in the contact graph).
         expect(leaksIn('data/derived/operational/forest_osids.json',
             (j) => (Array.isArray(j) ? j as string[] : ((j as { osids?: string[] }).osids ?? Object.keys(j as object))))).toHaveLength(3);
-        // operational_initial_master: still 744 records. political_control_init
-        // drops the merged ids at startup with a console.warn, so they never enter
-        // state. Canon (context.md) says this file should be re-derived to 712
-        // after a merge; it has not been. Tracked, not fixed here.
+        // operational_initial_master: CLEANED 2026-09-03 to the 712 canon says it
+        // should hold. political_control_init's drop-and-warn guard is now a
+        // no-op safety net rather than load-bearing. Proven behaviour-neutral:
+        // a 3-turn campaign is byte-identical before and after.
         expect(leaksIn('data/derived/operational/operational_initial_master.json',
-            (j) => ((j as { settlements?: Array<{ sid: string }> }).settlements ?? []).map((s) => s.sid))).toHaveLength(MERGED_AWAY);
+            (j) => ((j as { settlements?: Array<{ sid: string }> }).settlements ?? []).map((s) => s.sid))).toEqual([]);
+    });
+
+    it('keeps the initial master at the simulated count, with honest metadata', () => {
+        const master = read('data/derived/operational/operational_initial_master.json') as {
+            meta?: { settlement_count?: number }; settlements: Array<{ sid: string }>;
+        };
+        expect(master.settlements).toHaveLength(SIMULATED);
+        // the count field must not drift from the array it describes
+        expect(master.meta?.settlement_count).toBe(SIMULATED);
     });
 
     it('is not referenced by any scenario, OOB, or operation as a live location', () => {

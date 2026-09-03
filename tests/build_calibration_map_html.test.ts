@@ -197,7 +197,7 @@ describe('build_calibration_map_html', () => {
         // Built entirely from TRACKED inputs (the merge map) plus a synthetic
         // save/painted pair — runs/ is gitignored, so a fixture reaching into it
         // would ENOENT in a clean checkout.
-        const mergeMap = JSON.parse(readFileSync(resolve('tools/micro_osid_merge_map.json'), 'utf8')) as Record<string, string>;
+        const mergeMap = JSON.parse(readFileSync(resolve('data/derived/operational/micro_osid_merge_map.json'), 'utf8')) as Record<string, string>;
         const [child, parent] = Object.entries(mergeMap)[0]!;
 
         const dir = mkdtempSync(join(tmpdir(), 'awwv-authoritative-'));

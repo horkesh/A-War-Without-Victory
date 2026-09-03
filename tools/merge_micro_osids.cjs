@@ -148,7 +148,7 @@ console.log(`  - political_control_init.ts: comment update`);
 
 // Output merge map for manual reference
 fs.writeFileSync(
-    path.join(__dirname, 'micro_osid_merge_map.json'),
+    path.join(__dirname, '..', 'data', 'derived', 'operational', 'micro_osid_merge_map.json'),
     JSON.stringify(mergeMap, null, 2) + '\n',
     'utf8'
 );
