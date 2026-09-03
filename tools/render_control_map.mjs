@@ -125,7 +125,7 @@ for (const pass of ['fill', 'outline', 'dot']) {
   for (const f of features) {
     const osid = f.properties.osid;
     // A merge child is drawn as, and scored as, its parent cell.
-    const mergedInto = pc[osid] === undefined ? (mergeMap[osid] ?? null) : null;
+    const mergedInto = mergeMap[osid] ?? null;
     const scoredOsid = mergedInto ?? osid;
     const controller = pc[scoredOsid] ?? null;
     const want = painted ? painted[scoredOsid] : undefined;

@@ -78,7 +78,7 @@ function buildInteractiveLayer() {
     const osid = feature.properties.osid;
     // A merge child is scored under its parent: read every calibration field
     // through the parent's osid, and say so in the tooltip.
-    const mergedInto = paintedControllers[osid] === undefined ? (mergeMap[osid] ?? null) : null;
+    const mergedInto = mergeMap[osid] ?? null;
     const scoredOsid = mergedInto ?? osid;
     const change = changes.get(scoredOsid);
     return {

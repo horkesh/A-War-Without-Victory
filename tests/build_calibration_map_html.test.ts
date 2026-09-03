@@ -187,4 +187,36 @@ describe('build_calibration_map_html', () => {
         expect(script).toContain("focusin',event=>{const path=event.target.closest?.('.hit-region');if(path)showFromFocus(path)}");
         expect(script).not.toContain('if(path){sticky=false;showFromFocus(path)}');
     });
+    test('the merge map is authoritative regardless of what the painted file contains', () => {
+        // painted_control_jan1993_improved.json carries 744 entries — including
+        // all 32 merge children, 7 of which disagree with their mapped parent.
+        // Resolution must NOT be conditional on "absent from painted", or those
+        // children become live scored cells and invent mismatches against ground
+        // the engine never simulates.
+        const dir = mkdtempSync(join(tmpdir(), 'awwv-improved-map-'));
+        tempDirs.push(dir);
+        const png = join(dir, 'm.png');
+        const out = join(dir, 'improved.html');
+        writeFileSync(png, Buffer.from('89504e470d0a1a0a', 'hex'));
+        execFileSync(process.execPath, [TOOL, png, out, 'title', 'score', 'footer',
+            resolve('data/derived/operational/operational_settlements.geojson'),
+            resolve('runs/codex_orasje_corrected_jan1993/apr1992_definitive_188w__d3464b9122c3c8e9__w39_n0/final_save.json'),
+            resolve('data/source/calibration/painted_control_jan1993_improved.json')]);
+
+        const details = JSON.parse(readFileSync(out, 'utf8').match(/const osids=(.*?);const hitLayer/s)![1]!) as Array<{
+            osid: string; mergedInto: string | null; painted: string | null;
+        }>;
+        expect(details).toHaveLength(744);
+        expect(details.filter(row => row.mergedInto !== null)).toHaveLength(32);
+
+        // the scored universe stays 712 even though the reference file has 744
+        const scored = new Set(details.map(row => row.mergedInto ?? row.osid));
+        expect(scored.size).toBe(712);
+
+        // and every child takes its parent's painted value, never its own
+        const byOsid = new Map(details.map(row => [row.osid, row]));
+        for (const child of details.filter(row => row.mergedInto !== null)) {
+            expect(child.painted).toBe(byOsid.get(child.mergedInto!)!.painted);
+        }
+    });
 });
