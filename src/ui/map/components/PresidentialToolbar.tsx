@@ -514,7 +514,7 @@ export function PresidentialToolbar({
                             disabled={modalLocked}
                             className="flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 py-1 text-xs font-mono font-bold uppercase tracking-wide bg-amber-900/30 text-amber-400 border border-amber-500/30 rounded hover:bg-amber-900/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                             title={t('presidentialToolbar.tensionsRising')}
-                            aria-label={t('presidentialToolbar.tensions')}
+                            aria-label={t('presidentialToolbar.tensionsRising')}
                         >
                             <span className="w-2 h-2 rounded-full bg-amber-500" />
                             <span className="hidden 2xl:inline">{t('presidentialToolbar.tensions')}</span>

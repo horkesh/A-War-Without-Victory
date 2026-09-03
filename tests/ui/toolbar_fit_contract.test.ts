@@ -58,9 +58,12 @@ describe('tactical toolbar single-line contract', () => {
     });
 
     it('keeps the full phrase as the accessible name while the label is visually hidden', () => {
+        // In the compact band the chip is a coloured dot, so the accessible name
+        // must be the LONG phrase, never the shortened visual label.
         expect(toolbar).toMatch(/aria-label=\{t\(pendingReviews === 1 \? 'presidentialToolbar\.reviewSingular'/);
         expect(toolbar).toContain('aria-label={reserveSignal.label}');
-        expect(toolbar).toMatch(/aria-label=\{t\('presidentialToolbar\.tensions'\)\}/);
+        expect(toolbar).toContain("aria-label={t('presidentialToolbar.tensionsRising')}");
+        expect(toolbar).not.toContain("aria-label={t('presidentialToolbar.tensions')}");
     });
 
     it('leaves exactly one shrinkable element — the turn date', () => {
@@ -74,19 +77,32 @@ describe('tactical toolbar single-line contract', () => {
 describe('command window is sized for the toolbar it hosts', () => {
     const main = read('src/desktop/electron-main.cjs');
 
-    it('opens at full HD, clamped to the display work area, with a verified floor', () => {
+    it('opens at full HD, clamped to the display work area', () => {
         expect(main).toContain('const PREFERRED_WINDOW = { width: 1920, height: 1080 }');
-        expect(main).toContain('const MIN_WINDOW = { width: 1280, height: 720 }');
+        expect(main).toContain('const DESIGN_MIN_WINDOW = { width: 1280, height: 720 }');
         expect(main).toContain('getCommandWindowSize');
         expect(main).toContain('workAreaSize');
         // no window may reintroduce a hardcoded sub-HD default
         expect(main).not.toMatch(/width:\s*1400,/);
     });
 
-    it('applies the computed size and the minimum to every command window', () => {
-        const sites = main.match(/const windowSize = getCommandWindowSize\(\);/g) ?? [];
-        expect(sites.length).toBe(2);
-        const mins = main.match(/minWidth: MIN_WINDOW\.width,/g) ?? [];
-        expect(mins.length).toBe(2);
+    it('never lets the floor exceed the display, which would strand the window off-screen', () => {
+        // A work area smaller than the design floor (a 1024-wide screen, a scaled
+        // remote session, 720p minus a taskbar) must clamp the MINIMUM too —
+        // otherwise minWidth pins the window larger than the screen and it can
+        // never be resized back into view.
+        expect(main).toContain('getCommandWindowMinimum');
+        expect(main).toContain('Math.min(DESIGN_MIN_WINDOW.width, work.width)');
+        expect(main).toContain('Math.min(DESIGN_MIN_WINDOW.height, work.height)');
+        // the requested size is a pure min() against the work area — no max() floor
+        expect(main).toContain('width: Math.min(PREFERRED_WINDOW.width, work.width)');
+        expect(main).not.toMatch(/Math\.max\(\s*(DESIGN_)?MIN_WINDOW\.width/);
+    });
+
+    it('applies the computed size and the clamped minimum to every command window', () => {
+        expect((main.match(/const windowSize = getCommandWindowSize\(\);/g) ?? []).length).toBe(2);
+        expect((main.match(/const windowMinimum = getCommandWindowMinimum\(\);/g) ?? []).length).toBe(2);
+        expect((main.match(/minWidth: windowMinimum\.width,/g) ?? []).length).toBe(2);
+        expect((main.match(/minHeight: windowMinimum\.height,/g) ?? []).length).toBe(2);
     });
 });

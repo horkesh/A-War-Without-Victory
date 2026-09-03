@@ -1120,25 +1120,46 @@ function getTacticalMapWindowUrl(mode = 'operational', options = {}) {
  * (see MAP_UI_MASTER "Tactical toolbar single-line contract").
  *
  * We ask for 1920x1080 but clamp to the display's WORK AREA so a 1366x768
- * laptop still gets an on-screen window instead of one running off the edge,
- * and set a floor the UI is verified against.
+ * laptop still gets an on-screen window instead of one running off the edge.
+ *
+ * The work area ALWAYS wins, including over the minimum: on a display whose
+ * work area is smaller than the design floor (a 1024-wide screen, a scaled
+ * remote session, 1280x720 minus a taskbar), forcing MIN_WINDOW would push the
+ * window's bottom/right edge off-screen and `minWidth` would make it
+ * un-resizable back into view. The floor is therefore itself clamped.
  */
 const PREFERRED_WINDOW = { width: 1920, height: 1080 };
-const MIN_WINDOW = { width: 1280, height: 720 };
+const DESIGN_MIN_WINDOW = { width: 1280, height: 720 };
 
-function getCommandWindowSize() {
+function fitToWorkArea() {
     let work = null;
     try {
         work = screen?.getPrimaryDisplay?.()?.workAreaSize ?? null;
     } catch {
         work = null; // screen is unavailable before app-ready in some harnesses
     }
-    if (!work || !Number.isFinite(work.width) || !Number.isFinite(work.height)) {
-        return { ...PREFERRED_WINDOW };
+    if (!work || !Number.isFinite(work.width) || !Number.isFinite(work.height) || work.width <= 0 || work.height <= 0) {
+        return null;
     }
+    return work;
+}
+
+function getCommandWindowSize() {
+    const work = fitToWorkArea();
+    if (!work) return { ...PREFERRED_WINDOW };
     return {
-        width: Math.max(MIN_WINDOW.width, Math.min(PREFERRED_WINDOW.width, work.width)),
-        height: Math.max(MIN_WINDOW.height, Math.min(PREFERRED_WINDOW.height, work.height)),
+        width: Math.min(PREFERRED_WINDOW.width, work.width),
+        height: Math.min(PREFERRED_WINDOW.height, work.height),
+    };
+}
+
+/** Design floor, never larger than what the display can actually show. */
+function getCommandWindowMinimum() {
+    const work = fitToWorkArea();
+    if (!work) return { ...DESIGN_MIN_WINDOW };
+    return {
+        width: Math.min(DESIGN_MIN_WINDOW.width, work.width),
+        height: Math.min(DESIGN_MIN_WINDOW.height, work.height),
     };
 }
 
@@ -1147,11 +1168,12 @@ function createMainWindow(options = {}) {
   const warroomUrl = 'awwv://warroom/index.html';
 
   const windowSize = getCommandWindowSize();
+  const windowMinimum = getCommandWindowMinimum();
   const win = new BrowserWindow({
     width: windowSize.width,
     height: windowSize.height,
-    minWidth: MIN_WINDOW.width,
-    minHeight: MIN_WINDOW.height,
+    minWidth: windowMinimum.width,
+    minHeight: windowMinimum.height,
     show,
     icon: getAppIconPath(),
     webPreferences: {
@@ -1248,11 +1270,12 @@ function createTacticalMapWindow(options = {}) {
   const targetUrl = getTacticalMapWindowUrl(mode, { disablePmtiles });
 
   const windowSize = getCommandWindowSize();
+  const windowMinimum = getCommandWindowMinimum();
   const win = new BrowserWindow({
     width: windowSize.width,
     height: windowSize.height,
-    minWidth: MIN_WINDOW.width,
-    minHeight: MIN_WINDOW.height,
+    minWidth: windowMinimum.width,
+    minHeight: windowMinimum.height,
     show,
     icon: getAppIconPath(),
     webPreferences: {
