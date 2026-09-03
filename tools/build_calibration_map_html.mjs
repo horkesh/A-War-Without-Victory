@@ -116,9 +116,17 @@ map.addEventListener('touchstart',e=>{if(e.touches.length===2)dist=Math.hypot(e.
 const osids=${interactive.details};const hitLayer=document.getElementById('hit-layer'),tooltip=document.getElementById('map-tooltip');
 function setText(id,value){document.getElementById(id).textContent=value??'—'}
 function showTooltip(event,path){const detail=osids[Number(path.dataset.index)];if(!detail)return;setText('tip-osid',detail.osid);setText('tip-place',[detail.settlement,detail.municipality].filter(Boolean).join(' · '));setText('tip-sim',detail.simulated);setText('tip-painted',detail.painted);const match=document.getElementById('tip-match');match.textContent=detail.mismatch?'Mismatch':'Correct';match.className=detail.mismatch?'wrong':'';const changed=document.getElementById('tip-changed');changed.textContent=detail.changed?detail.changedFrom+' → '+detail.changedTo:'No';changed.className=detail.changed?'changed':'';tooltip.dataset.open='true';const rect=map.getBoundingClientRect(),gap=14;let left=event.clientX-rect.left+gap,top=event.clientY-rect.top+gap;tooltip.style.left=left+'px';tooltip.style.top=top+'px';const box=tooltip.getBoundingClientRect();if(box.right>rect.right-8)left=Math.max(8,event.clientX-rect.left-box.width-gap);if(box.bottom>rect.bottom-8)top=Math.max(8,event.clientY-rect.top-box.height-gap);tooltip.style.left=left+'px';tooltip.style.top=top+'px'}
-const canHover=window.matchMedia&&window.matchMedia('(hover: hover)').matches;let sticky=false;
+const canHover=window.matchMedia&&window.matchMedia('(hover: hover)').matches;let sticky=false,tapX=0,tapY=0;const TAP_SLOP=8;
 function hideTooltip(){sticky=false;tooltip.dataset.open='false'}
-if(hitLayer){hitLayer.addEventListener('pointermove',event=>{if(drag||sticky)return;const path=event.target.closest?.('.hit-region');if(path&&(canHover||event.pointerType==='mouse'))showTooltip(event,path)});hitLayer.addEventListener('pointerdown',event=>{const path=event.target.closest?.('.hit-region');if(!path)return;sticky=!canHover||event.pointerType==='touch'||event.pointerType==='pen';showTooltip(event,path)});hitLayer.addEventListener('pointerleave',()=>{if(!drag&&!sticky)hideTooltip()});map.addEventListener('pointerdown',event=>{if(sticky&&!event.target.closest?.('.hit-region'))hideTooltip()});window.addEventListener('keydown',event=>{if(event.key==='Escape')hideTooltip()})}
+if(hitLayer){
+hitLayer.addEventListener('pointermove',event=>{
+ if(sticky){if(Math.hypot(event.clientX-tapX,event.clientY-tapY)>TAP_SLOP)hideTooltip();return}
+ if(drag)return;const path=event.target.closest?.('.hit-region');if(path&&(canHover||event.pointerType==='mouse'))showTooltip(event,path)});
+hitLayer.addEventListener('pointerdown',event=>{const path=event.target.closest?.('.hit-region');if(!path)return;tapX=event.clientX;tapY=event.clientY;sticky=!canHover||event.pointerType==='touch'||event.pointerType==='pen';showTooltip(event,path)});
+hitLayer.addEventListener('pointerleave',()=>{if(!drag&&!sticky)hideTooltip()});
+map.addEventListener('pointermove',event=>{if(sticky&&Math.hypot(event.clientX-tapX,event.clientY-tapY)>TAP_SLOP)hideTooltip()});
+map.addEventListener('pointerdown',event=>{if(sticky&&!event.target.closest?.('.hit-region'))hideTooltip()});
+window.addEventListener('keydown',event=>{if(event.key==='Escape')hideTooltip()})}
 </script></body></html>`;
 
 writeFileSync(outPath, html);

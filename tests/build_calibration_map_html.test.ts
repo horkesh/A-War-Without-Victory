@@ -100,6 +100,10 @@ describe('build_calibration_map_html', () => {
         expect(script).toContain('let sticky=false');
         // pointerleave must respect the sticky (tap-opened) state
         expect(script).toContain("pointerleave',()=>{if(!drag&&!sticky)hideTooltip()}");
+        // a pan that STARTS on a polygon must dismiss, not park a tooltip over the map
+        expect(script).toContain('TAP_SLOP');
+        expect(script).toContain('if(sticky){if(Math.hypot(event.clientX-tapX,event.clientY-tapY)>TAP_SLOP)hideTooltip();return}');
+        expect(script).toContain("map.addEventListener('pointermove',event=>{if(sticky&&Math.hypot(event.clientX-tapX,event.clientY-tapY)>TAP_SLOP)hideTooltip()})");
         // a tap outside a region, or Escape, is the dismissal path
         expect(script).toContain("if(sticky&&!event.target.closest?.('.hit-region'))hideTooltip()");
         expect(script).toContain("event.key==='Escape'");
