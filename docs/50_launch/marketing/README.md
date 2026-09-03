@@ -10,4 +10,10 @@ Files:
 - `press_kit.md` - fact sheet and press materials outline.
 - `screenshot_plan.md` - required screenshots, setup notes, and missing-state flags.
 
-These drafts describe the current repo at commit `7842189c8b8127c3f6f170ff18e7fd39af876027` plus any later committed roadmap implementation batch. Refresh the commit line before external publication.
+**Status (2026-09-03):** the public showcase is LIVE at
+<https://horkesh.github.io/a-war-without-victory-showcase/> (EN + `/bs/`), carrying media captured
+at 1920×1080 from the current playable build. `screenshot_plan.md` and `press_kit.md` describe
+what actually shipped; `high_concept.md` and `store_page.md` remain internal drafts.
+
+Claims on the live site must stay traceable through `claims_inventory.md`. Defects visible in the
+published media are tracked in `docs/40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md`.

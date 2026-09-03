@@ -32467,3 +32467,165 @@ comparison, which is exactly how a permanently-red gate trains people to stop re
 Repo state: 3 worktrees, 4 local branches, all load-bearing. `lane/sector-orphan-probe` pruned
 (landed, 0 unique commits, clean tree). Local `main` fast-forwarded from `08a5978dc` (519 behind).
 `codex/apr1994-operational-corrections` (14 unique commits) untouched — active calibration lane.
+### 2026-09-01 — January 1993 calibration map gains exact OSID hover inspection
+
+**Type:** Calibration visualization/tooling output; no simulation, scenario, painted-control, or
+canonical geometry change.
+
+**Change.** `tools/build_calibration_map_html.mjs` now accepts an optional operational GeoJSON,
+scenario save, and painted-control snapshot. When supplied together it embeds deterministic,
+OSID-sorted SVG hit regions aligned to the renderer's existing 1600×1500 WGS84 projection. Hover
+or tap exposes the OSID, settlement and municipality names, simulated controller, painted
+controller, mismatch state, and any recorded painted-reference change. Pan and zoom now transform
+the raster and interaction layer together. The published January 1993 artifact at
+`docs/60_visualisations/20260830_january_1993_calibration_map.html` was rebuilt in this mode.
+
+**Validation.** `tests/build_calibration_map_html.test.ts` pins deterministic repeated output,
+stable OSID ordering, valid embedded JavaScript, 744 operational hit regions, 712 painted cells,
+11 mismatches, and 11 changed-reference cells. `npm run map:validate:operational-geometry` reports
+744 features, 798 polygon parts/rings, and zero invalid rings. The artifact remains self-contained.
+
+### 2026-09-02 — Public pitch site rebuilt in the game's own analogue voice, all media recaptured
+
+**Type:** Marketing/showcase output only; no simulation, engine, scenario, or canonical change.
+
+**Change.** The publisher/press showcase (`horkesh/a-war-without-victory-showcase`, GitHub Pages)
+was fully redesigned and re-shot at the owner's request ("screams AI slop"; wants the new starting
+screens' direction). The page now speaks the build's own design language — the analogue-opening
+palette and the two-family typography contract (IBM Plex Sans Condensed + IBM Plex Mono) — framed
+as an observation file with exhibit sections, using the game's opening art as hero and closing
+imagery. EN and BS pages kept in full parity. New OG image. Copy refreshed to verified facts only:
+188-week campaigns completed for all three factions (D2, 2026-09-01), ~90% settlement agreement /
+31/31 anchors on the historical line, 3,500+ tests.
+
+**Media.** Everything recaptured from the current build (v0.9.9-beta.1, main): 3× cold-start
+opening videos through the new cinematic case-file flow, 3× command tours (~65s), 14 screens per
+faction from fresh week-68 player saves (generated headlessly via desktop_sim Path-B at autonomy 3),
+plus a fresh endgame set from a signed-Dayton game-over save produced with the engine's own
+`resolvePendingDaytonCloseOut` (`meta.dayton_close_out`): the Dayton negotiation, the Verdict under
+condemnation, the campaign recap, Another Such Victory. Harness (all in `tmp_gui_observation/`,
+untracked): `serve_map.mjs` (dist + /data + /runs on :3002), `generate_pitch_saves.mjs`,
+`capture_faction_v2.mjs`, `record_opening_v2.mjs`, `record_tour_v2.mjs`, `make_gameover_save.mjs`,
+showcase-side `build_panels.mjs`.
+
+**Verification.** Local Playwright QA: zero 404s/console errors on EN/BS/mobile, lightbox works.
+Pages deploy `33634577753` success; live URL serves the new hero, BS page, videos, and endgame
+exhibits (all HTTP 200). Note: the earlier `desktop:map:build` false-green (exit code read off the
+tail pipe; dist was stale Aug-31 cyclic-chunk build) was caught by the chunk-cycle checker and the
+build re-run clean — the derived-signal lesson held again.
+
+### 2026-09-02 — Pitch site revision: decision-layer exhibits, new hero line, openings end on the map
+
+**Type:** Marketing/showcase output only. Owner feedback on the same-day rebuild: add
+events/decisions/presidential actions, replace the hero wording, make the openings show the
+office→map transition. Shipped (`97a71be`): hero now uses the game's own menu line ("Command a war
+that cannot be won." / "Komandujte ratom koji se ne može dobiti."), the per-faction gallery grew to
+16 exhibits (Peace Proposal event modal, Required Decision — paramilitary packet with projected
+civilian cost / brigade dossier, Army HQ reserve request), and all three opening videos were
+re-recorded to end on the president's-office→war-map cut. New OG image. Pages deploy green; live
+assets verified 200. New harness piece: `tmp_gui_observation/capture_extras.mjs` (hides the
+browser-only "command bridge unavailable" notice, which does not exist in the packaged desktop app).
+
+### 2026-09-02 — Pitch site: presidential-agency showcase, captured in the real Electron app
+
+**Type:** Marketing/showcase output only. Owner direction: showcase player agency (decorations,
+ordering the army onto objectives), don't be limited to the browser build. Shipped (`867083f`):
+the abstract proposition trio and the generic weekly-loop section are gone; the page now leads
+with **"What your signature does"** — six verb exhibits captured in the packaged-path Electron
+desktop app (command-surface tray with the Conscience & Atrocity card; Decorate-a-unit with its
+morale/credibility gains and internal-cohesion cost; Visit the front; Address the nation; Release
+the reserve; the paramilitary bright line) — plus a 44-second unedited flagship clip, **"One
+order, start to finish"**: 1st Corps requests the Guards Brigade for the Čajniče offensive, the
+president reads the dossier (expected effect vs. Visoko losing its strategic-reserve fallback) and
+signs for 25 command authority ("authority is spent now; the order is consumed when you advance"),
+ending on the war map. EN/BS parity; deploy green; live assets verified.
+
+**Electron capture harness** (new, `tmp_gui_observation/`): `electron_lib.mjs` launches the real
+app via Playwright `_electron` (`launch({ args: ['.'] })`, poll non-devtools window), hydrates BOTH
+main-process and renderer state from a staged save in `saves/` by piping `loadSaveRecord`'s
+stateJson through the warroom's own `mm-file-input` (the IPC alone sets only main-process state);
+`recordVideo` works on Electron contexts. Traps recorded in memory: event popups
+("ACKNOWLEDGED") and intel popups arrive mid-flow and intercept pointer clicks; the directive act
+card mounts async (`data-testid="directive-card-header-art"`); UI labels are CSS-uppercased so
+matching must be case-insensitive on textContent; `request_op` decision-room cards did not
+materialize in these saves (officer read-model gate — not chased; the reserve-release directive
+carried the flagship instead).
+
+### 2026-09-03 — Showcase media recaptured at 1920×1080; GUI audit of every captured surface
+
+**Type:** Marketing output + UI audit. No simulation change. Owner direction: full-HD captures, and
+a critical examination of each screenshot for bugs/leaks/inconsistencies.
+
+**Media.** Every showcase asset re-taken at 1920×1080 (was 1440×900): 51 faction stills, 6 verb
+exhibits, 4 endgame shots, 6 opening/tour videos, the flagship directive clip. Capture-rig fixes
+found during the re-shoot: Formation Detail had regressed to an OG intel panel (now a real brigade
+panel opened from a map counter); War Summary duplicated the Briefing tab (now the SUMMARY tab,
+verified); the browser-only "command bridge unavailable" notice is excluded from stills. Deployed
+(`63649aa`).
+
+**Audit.** `docs/40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md` — 29 findings.
+P1: the tactical top-bar collision cluster (crest over nav, chips clipped/hidden — reproduces at
+full HD on every map screen); the situation report printing the internal EH-3
+`stranded_status='collapsed'` bucket as "55 collapsed"; OSID/slug leakage into player-facing names
+("Battle of Petrovo 2", "Battle of medojevici", "Op Bratunac Bratunac 2"). P2 classes: ownership/
+contract prose shown to players ("Records owns…", "Ring 2 — ghost entry"), "Unreported" styled as
+a value, rounded-vs-exact casualty figures on one screen, truncation/overflow cluster (review
+modal ellipses, chip-row clipping, DirectiveCard button overlap), duplicate/contradictory cards
+(two OG MAGLAJ rows, two commander-replacement cards for one post, CRITICAL 10 vs 0), OG panel
+empty OFFENSIVE POWER + own-side REDACTED, `Ilijaš`/`Ilijas` in one card, verdict "68.3 B" beside
+FAILURE, vertical V/R/S letter-stacking. Full list with reproduction pointers in the report.
+
+### 2026-09-03 — fix(ui): tactical toolbar can no longer overflow into the crest or clip its chips
+
+**Change** (`PresidentialToolbar.tsx`, audit P1 #1). The RECORDS/CHRONICLE/CODEX reference routes
+move from the right cluster into the left navigation group; every toolbar item is now
+single-line (`whitespace-nowrap shrink-0`) with the date as the only shrinkable element; the
+army-reserve chip renders a compact `RESERVE · N` label (the full severity sentence moved to the
+tooltip — `getArmyReserveToolbarSignal` and its pinned label are untouched); the tensions chip
+label is `TENSIONS` with the full "TENSIONS RISING" as tooltip (new i18n keys
+`presidentialToolbar.reserveChip`/`tensions`, EN+BCS); right-cluster gap and chip padding
+tightened. Previously the right cluster's max content (~1180px) exceeded its grid column at BOTH
+1440 and 1920, so chips wrapped into lines clipped by the h-12 bar and the row spilled leftward
+under the fixed-center crest — the defect the owner flagged on the showcase screenshots.
+
+**Verification.** `tsc --noEmit` clean for changed files (one pre-existing error in the untracked
+`tests/build_calibration_map_html.test.ts` from the calibration-map lane, unrelated); full
+`tests/ui` + `army_reserve_legibility` suite 3141/3142 → the one failure was the test pinning the
+old "TENSIONS RISING" visible label, updated (`shell_navigation_ownership.test.ts`), suite green;
+`desktop:map:build` clean, chunk-cycle check OK. Measured post-fix with the worst-case chip load
+(reviews + critical reserve + tensions, RS w68): `scrollWidth == clientWidth` on both toolbar
+halves at 1920, 1440, and 1280, and screenshots confirm one clean line at all three widths.
+
+### 2026-09-03 — Toolbar fix completed after Codex caught it incomplete; command windows open at full HD
+
+**The first fix was insufficient, and the verification was the reason.** PR #491's initial pass
+moved the reference routes left and made every item nowrap, then reported "measured, verified" on
+`scrollWidth === clientWidth` at 1280/1440/1920. That check is structurally blind to this defect:
+the right cluster is `justify-end`, so when its min-content exceeds the track the overflow projects
+from the START edge, which LTR `scrollWidth` excludes. Codex review on the PR flagged it with the
+right reasoning. **Re-measured geometrically (child rects vs. track box and vs. the crest box): at
+1400px — `electron-main.cjs`'s own default window width — the reviews chip was still 74px under the
+crest; 1366 and 1280 also failed.**
+
+**Completed fix.**
+- Alert chips and the authority gauge now have a COMPACT BAND: below `2xl` each chip renders dot +
+  count and drops its word; the gauge drops its label (bar below `xl`). The full phrase is kept as
+  `aria-label`, so the accessible name is unchanged by the breakpoint. Reference routes fold below
+  `lg`. New i18n keys `presidentialToolbar.reviewWord`/`reviewWordPlural`/`reserveWord` (EN + BCS).
+- `DESK` had never received the nowrap/shrink-0 treatment (its className is a template literal, so
+  the first pass's regex missed it) — caught by the new contract test.
+- **Command windows now open at 1920×1080** (`PREFERRED_WINDOW`), clamped to the primary display's
+  `workAreaSize`. `DESIGN_MIN_WINDOW` 1280×720 is the verified design floor and is itself clamped to the work area (`getCommandWindowMinimum`), so a display smaller than the floor never gets an off-screen, un-resizable window. The previous hardcoded 1400×900 put a
+  fresh install into the compact band on every machine. Owner question — "why is it 1400, can it be
+  full HD?" — answered: it was arbitrary, and now it is not.
+
+**Verification.** `tests/ui/toolbar_fit_contract.test.ts` (new, 7 assertions) pins the source
+properties that make overflow impossible plus the window-size contract; full `tests/ui` +
+`army_reserve_legibility` **3142/3142 green**; `tsc --noEmit` clean; `desktop:map:build` +
+chunk-cycle clean. `tmp_gui_observation/verify_toolbar_fit.mjs` measures start-side overflow and
+crest collision at 1280/1366/1400/1440/1600/1920 — **PASS at all six**. Real Electron launch opens
+1906×849 inner on a 2294×912 work area (full-HD width, height correctly clamped).
+
+**Durable lesson recorded** (`life_lessons/process.md`): a measurement can be structurally blind to
+the failure it is cited as disproving — ask what the failure would look like to that instrument, and
+test at the size the product actually ships at.

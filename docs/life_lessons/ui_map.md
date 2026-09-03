@@ -3,6 +3,12 @@
 
 ---
 
+### [UI] A FIXED-CENTER ELEMENT TURNS EACH TOOLBAR HALF INTO A HARD BUDGET (2026-09-03) — NEW
+- The tactical toolbar pins the army crest over the centre column of a symmetric grid, so each half must fit its own MAXIMUM content — there is no reflow. The right cluster could reach ~1180px against an ~888px column at 1920 (and ~648px at 1440): chips wrapped into lines the 48px bar clipped, and the row spilled leftward under the crest. **It shipped for months and was found by an OUTSIDER looking at a screenshot, not by anyone using the app** — because the failure is silent (no error, no test, and at any single width it just looks slightly cramped).
+- ⇒ With a fixed-center element: everything `whitespace-nowrap shrink-0`, ONE designated shrinkable (here the date), and reference routes moved to whichever half has slack. Verify by measuring `scrollWidth === clientWidth` on BOTH halves at 1280/1440/1920 under maximum badge load — not by eyeballing one viewport. Contract recorded in MAP_UI_MASTER "Tactical toolbar single-line contract".
+- ⇒ Generalises: **any layout with a fixed-size island between flexible regions is two budgets, not one flow.** Adding an item to either side is the regression shape.
+
+
 ### [UI] Player-facing state must go through tier-gated abstraction functions — never expose raw numerics (2026-04-10) — NEW
 - **Context**: 6 hardening commits in one session all followed the same pattern: replace raw numeric state reads with `playerSafe*()` abstraction functions. `playerSafeThreat()` (threat precision), `playerSafeForceBalance()` (operation balance), `playerVisibility` filter (sector front gating), `playerFaction` canonical resolver (shell boundary), reserve request identity alignment, autonomy review faction scoping.
 - **Wrong approach**: Passing raw `threat_ratio`, `force_balance`, or `sector.density` directly to player-facing UI components. Raw numerics bypass fog-of-war and reveal internal sim state the player shouldn't see. They also create brittle coupling — UI components break when the sim changes its internal representation.

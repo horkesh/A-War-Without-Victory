@@ -16,6 +16,11 @@
 | Soundscape | Stub/composer brief implemented; full audio assets not yet implemented | `docs/40_reports/implemented/20260517_SOUNDSCAPE_KICKOFF_AUDIO_STUB.md` |
 | BCS localization | First-pass Settings substrate implemented; full BCS localization not launch-claimable | `docs/40_reports/implemented/20260517_BCS_LOCALIZATION_FIRST_PASS.md`; `docs/plans/2026-05-17-bcs-localization-plan.md` |
 | Opt-in telemetry/crash reporting | Default-off local crash diagnostics implemented; upload/aggregation not launch-claimable | `docs/40_reports/implemented/20260518_TELEMETRY_LOCAL_FIRST_CRASH_DIAGNOSTICS.md`; `docs/40_reports/implemented/20260523_LOCALIZED_CRASH_DIAGNOSTICS.md` |
+| Public showcase site (live) | Implemented and deployed | <https://horkesh.github.io/a-war-without-victory-showcase/>; repo `horkesh/a-war-without-victory-showcase`; EN + BS parity |
+| "All footage and screenshots from the current playable build" | Implemented | Capture pipeline and standards in `docs/50_launch/marketing/screenshot_plan.md`; all assets 1920×1080 from v0.9.9-beta.1 |
+| "188-week campaigns completed end to end for all three factions" | Implemented | PROJECT_LEDGER 2026-09-01 D2 entry (RS/RBiH/HRHB, week 0 → Dayton); note the recorded late-war player-faction handicap defect |
+| "~90% settlement-level agreement with the historical map, 31/31 anchors" | Implemented | `docs/40_reports/CALIBRATION_MASTER.md` + `manifest.json` — refresh the figure from the authoritative file, never from a literal |
+| "3,500+ automated tests" | Implemented | `npm run test:vitest` suite size; refresh count before publication |
 | High Concept one-pager | Drafted for internal launch/press alignment | `docs/50_launch/marketing/high_concept.md` |
 
 ## Cut Or Future Claims

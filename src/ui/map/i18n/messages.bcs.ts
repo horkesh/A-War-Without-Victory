@@ -2234,6 +2234,12 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'presidentialToolbar.openAttentionQueue': 'Otvori predsjednički red pažnje u Sobi odluka',
     'presidentialToolbar.reviewSingular': '{count} PREGLED',
     'presidentialToolbar.reviewPlural': '{count} PREGLEDA',
+    'presidentialToolbar.reviewWord': 'PREGLED',
+    'presidentialToolbar.reviewWordPlural': 'PREGLEDA',
+    'presidentialToolbar.reserveWord': 'REZERVA',
+
+    'presidentialToolbar.reserveChip': 'REZERVA · {count}',
+    'presidentialToolbar.tensions': 'TENZIJE',
     'presidentialToolbar.tensionsRising': 'TENZIJE RASTU',
     'presidentialToolbar.advancing': 'NAPREDUJE...',
     'presidentialToolbar.advanceTurn': 'SLJEDEĆI POTEZ ->',

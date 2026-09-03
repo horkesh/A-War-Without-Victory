@@ -19,3 +19,5 @@ High-value current rule: Deck counters are screen-space command symbols. Keep ta
 2026-07-12 truthful-edge/stack rule: never clamp or relocate a formation counter to the viewport edge; omit it when its true projection is off-screen or occluded. Fan co-located counters deterministically with at most 12 visible members, preserve the complete stable membership in the stack picker, and prove exact-member selection from a real final-state stack.
 
 2026-07-12 stale-hit rule: while turn/save readiness is changing, cover and inert the previous canvas and publish fallback/Deck counters only from the current viewport-selected dataset. Hidden or stale formations must not remain interactive beneath loading or shell chrome.
+
+2026-06-26 focused-control shortcut rule (demoted from the napkin index 2026-09-03 when the toolbar-budget rule took the tenth slot — the rule itself still stands): global shortcuts must respect focused controls. Guard app-level key handlers with interactive-focus checks and use modified shortcuts for global cycling, so typing in an input never triggers a map/shell action.

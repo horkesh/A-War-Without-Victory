@@ -5,7 +5,10 @@
  * The president's desk is the Warroom; this bar is the command interface
  * the president uses while observing the battlefield.
  *
- * Layout: date + navigation (left), alert badges + army crest (center), advance turn (right).
+ * Layout: navigation + reference routes + date (left), army crest (center, fixed),
+ * alert badges + command authority + advance turn (right). Every item is
+ * single-line nowrap; the date is the only shrinkable element, so neither half
+ * can ever wrap below the h-12 bar or spill under the fixed-center crest.
  * Deep review routes to the Warroom Decision Room. Campaign context routes to Warroom.
  *
  * Command levels on this bar:
@@ -69,7 +72,7 @@ function CommandAuthorityGauge({ current, max }: { current: number; max: number 
     const authorityLabel = t('toolbar.commandAuthority.ariaLabel', { current, max });
     return (
         <div
-            className="flex items-center gap-1.5"
+            className="flex shrink-0 items-center gap-1.5 whitespace-nowrap"
             role="group"
             aria-label={t('presidentialToolbar.commandAuthorityValue', { current, max })}
             aria-describedby="command-authority-description"
@@ -78,8 +81,8 @@ function CommandAuthorityGauge({ current, max }: { current: number; max: number 
             <span id="command-authority-description" className="sr-only">
                 {t('presidentialToolbar.commandAuthorityDescription')}
             </span>
-            <span className="text-xs font-mono font-bold uppercase tracking-[0.12em] text-text-secondary">{t('presidentialToolbar.auth')}</span>
-            <div className="w-14 h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <span className="hidden 2xl:inline text-xs font-mono font-bold uppercase tracking-[0.12em] text-text-secondary">{t('presidentialToolbar.auth')}</span>
+            <div className="hidden xl:block w-14 h-1.5 bg-white/10 rounded-full overflow-hidden">
                 <div className={`h-full ${barColor} transition-all duration-500`} style={{ width: `${pct}%` }} />
             </div>
             <span className={`text-xs font-mono font-bold ${color}`}>{current}</span>
@@ -338,7 +341,7 @@ export function PresidentialToolbar({
                         onClick={handleOpenDesk}
                         disabled={modalLocked}
                         data-testid="toolbar-route-desk"
-                        className={`px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
+                        className={`shrink-0 whitespace-nowrap px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
                             showWarroomReturn
                                 ? 'text-amber-400 hover:text-amber-300'
                                 : 'text-text-secondary hover:text-amber-400'
@@ -352,7 +355,7 @@ export function PresidentialToolbar({
                         onClick={handleOpenMap}
                         disabled={shellRouteDisabled}
                         data-testid="toolbar-route-war-map"
-                        className="px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        className="shrink-0 whitespace-nowrap px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title="Clear field selections"
                     >
                         {t('presidentialToolbar.warMap')}
@@ -362,14 +365,49 @@ export function PresidentialToolbar({
                         onClick={handleOpenHQ}
                         disabled={shellRouteDisabled}
                         data-testid="toolbar-route-army-hq"
-                        className="px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        className="shrink-0 whitespace-nowrap px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title={t('presidentialToolbar.visitArmyHq')}
                     >
                         {t('presidentialToolbar.armyHq')}
                     </button>
+                    {/* Reference routes live with navigation on the LEFT so the right
+                        cluster (alerts + authority + advance) can never overflow into
+                        the fixed-center crest. Both halves are single-line by contract:
+                        every toolbar item is nowrap; the date is the only shrinkable. */}
+                    <button
+                        type="button"
+                        onClick={handleOpenRecords}
+                        disabled={shellRouteDisabled}
+                        data-testid="toolbar-route-records"
+                        className="hidden lg:inline-block shrink-0 whitespace-nowrap px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        title={t('presidentialToolbar.openRecordsTitle')}
+                    >
+                        {t('presidentialToolbar.records')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleOpenChronicle}
+                        disabled={shellRouteDisabled}
+                        data-testid="toolbar-route-chronicle"
+                        className="hidden lg:inline-block shrink-0 whitespace-nowrap px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        title={t('presidentialToolbar.chronicleTitle')}
+                    >
+                        {t('presidentialToolbar.chronicle')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleOpenCodex}
+                        disabled={shellRouteDisabled}
+                        data-testid="toolbar-route-codex"
+                        data-coachmark-id="codex"
+                        className="hidden lg:inline-block shrink-0 whitespace-nowrap px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        title={t('presidentialToolbar.historicalReference')}
+                    >
+                        {t('presidentialToolbar.codex')}
+                    </button>
                     {loadedGameState ? (
                         <span
-                            className="font-mono text-[12px] text-text-primary tracking-wider uppercase"
+                            className="font-mono text-[12px] text-text-primary tracking-wider uppercase truncate min-w-0"
                             title={t('presidentialToolbar.currentDateTitle')}
                         >
                             {formatTurnLabel(loadedGameState.label)}
@@ -395,39 +433,8 @@ export function PresidentialToolbar({
                 {/* CENTER: reserved for the floating crest. */}
                 <div className="col-start-2 row-start-1 h-full pointer-events-none" aria-hidden="true" />
 
-                {/* RIGHT: reference, alert badges, command authority, advance turn. */}
-                <div className="col-start-3 row-start-1 flex items-center justify-end gap-3 min-w-0">
-                    <button
-                        type="button"
-                        onClick={handleOpenRecords}
-                        disabled={shellRouteDisabled}
-                        data-testid="toolbar-route-records"
-                        className="px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
-                        title={t('presidentialToolbar.openRecordsTitle')}
-                    >
-                        {t('presidentialToolbar.records')}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={handleOpenChronicle}
-                        disabled={shellRouteDisabled}
-                        data-testid="toolbar-route-chronicle"
-                        className="px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
-                        title={t('presidentialToolbar.chronicleTitle')}
-                    >
-                        {t('presidentialToolbar.chronicle')}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={handleOpenCodex}
-                        disabled={shellRouteDisabled}
-                        data-testid="toolbar-route-codex"
-                        data-coachmark-id="codex"
-                        className="px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
-                        title={t('presidentialToolbar.historicalReference')}
-                    >
-                        {t('presidentialToolbar.codex')}
-                    </button>
+                {/* RIGHT: alert badges, command authority, advance turn. */}
+                <div className="col-start-3 row-start-1 flex items-center justify-end gap-2 min-w-0">
                     {/*
                       NIGHTSHIFT-G5: Pre-Advance Severity Pip.
                       The pip surfaces pre-advance review severity. The ring
@@ -463,27 +470,40 @@ export function PresidentialToolbar({
                         <button
                             onClick={handleReviewPriorities}
                             disabled={modalLocked}
-                            className="flex items-center gap-1.5 px-3 py-1 text-xs font-mono font-bold uppercase tracking-wide bg-red-900/30 text-red-400 border border-red-500/30 rounded animate-pulse hover:bg-red-900/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 py-1 text-xs font-mono font-bold uppercase tracking-wide bg-red-900/30 text-red-400 border border-red-500/30 rounded animate-pulse hover:bg-red-900/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                             title={t('presidentialToolbar.openAttentionQueue')}
+                            aria-label={t(pendingReviews === 1 ? 'presidentialToolbar.reviewSingular' : 'presidentialToolbar.reviewPlural', { count: pendingReviews })}
                         >
                             <span className="w-2 h-2 rounded-full bg-red-500" />
-                            {t(pendingReviews === 1 ? 'presidentialToolbar.reviewSingular' : 'presidentialToolbar.reviewPlural', { count: pendingReviews })}
+                            <span>{pendingReviews}</span>
+                            <span className="hidden 2xl:inline">
+                                {t(pendingReviews === 1 ? 'presidentialToolbar.reviewWord' : 'presidentialToolbar.reviewWordPlural')}
+                            </span>
                         </button>
                     )}
 
+                    {/* The chip stays one short line; the full severity sentence
+                        (reserveSignal.label/title) lives in the tooltip. The long
+                        label used to wrap to three clipped lines under the h-12 bar. */}
                     {reserveAttention && reserveAttention.pendingCount > 0 && reserveSignal && (
                         <button
                             onClick={handleOpenArmyReserve}
                             disabled={modalLocked}
-                            className={`flex items-center gap-1.5 px-3 py-1 text-xs font-mono font-bold uppercase tracking-wide border rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
+                            className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 py-1 text-xs font-mono font-bold uppercase tracking-wide border rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
                                 reserveSignal.tone === 'critical'
                                     ? 'bg-amber-900/30 text-amber-400 border-amber-500/30 hover:bg-amber-900/50'
                                     : 'bg-sky-900/30 text-sky-300 border-sky-400/30 hover:bg-sky-900/50'
                             }`}
-                            title={reserveSignal.title}
+                            title={`${reserveSignal.label} — ${reserveSignal.title}`}
+                            aria-label={reserveSignal.label}
                         >
                             <span className={`w-2 h-2 rounded-full ${reserveSignal.tone === 'critical' ? 'bg-amber-500' : 'bg-sky-300'}`} />
-                            {reserveSignal.label}
+                            <span className="hidden 2xl:inline">{t('presidentialToolbar.reserveWord')}</span>
+                            <span>
+                                {reserveSignal.tone === 'critical'
+                                    ? reserveAttention.criticalCount
+                                    : reserveAttention.pendingCount}
+                            </span>
                         </button>
                     )}
 
@@ -492,10 +512,12 @@ export function PresidentialToolbar({
                         <button
                             onClick={handleOpenHQ}
                             disabled={modalLocked}
-                            className="flex items-center gap-1.5 px-3 py-1 text-xs font-mono font-bold uppercase tracking-wide bg-amber-900/30 text-amber-400 border border-amber-500/30 rounded hover:bg-amber-900/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            className="flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 py-1 text-xs font-mono font-bold uppercase tracking-wide bg-amber-900/30 text-amber-400 border border-amber-500/30 rounded hover:bg-amber-900/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                            title={t('presidentialToolbar.tensionsRising')}
+                            aria-label={t('presidentialToolbar.tensionsRising')}
                         >
                             <span className="w-2 h-2 rounded-full bg-amber-500" />
-                            {t('presidentialToolbar.tensionsRising')}
+                            <span className="hidden 2xl:inline">{t('presidentialToolbar.tensions')}</span>
                         </button>
                     )}
                     {/* Command Authority + Advance Turn */}
@@ -511,7 +533,7 @@ export function PresidentialToolbar({
                         disabled={modalLocked || advancing || !loadedGameState || (!advanceBlocked && !ipc.isAvailable)}
                         title={advanceGateTitle}
                         aria-label={advanceBlocked ? advanceGateTitle : undefined}
-                        className={`px-5 py-1.5 text-xs font-mono font-bold uppercase tracking-[0.15em] border rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 ${
+                        className={`shrink-0 whitespace-nowrap px-4 py-1.5 text-xs font-mono font-bold uppercase tracking-[0.15em] border rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 ${
                             advanceBlocked
                                 ? 'bg-red-500/10 text-red-300 border-red-500/45 hover:bg-red-500/20 hover:border-red-400/60'
                                 : 'bg-amber-400/10 text-amber-400 border-amber-400/30 hover:bg-amber-400/20 hover:border-amber-400/50'

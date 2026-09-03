@@ -5,6 +5,19 @@
 
 ---
 
+### [Process] ★★ A MEASUREMENT CAN BE BLIND TO THE EXACT FAILURE IT IS CITED AS DISPROVING (2026-09-03) — NEW
+- Fixed a toolbar overflow and reported it "measured, verified": `scrollWidth === clientWidth` on both halves at 1280/1440/1920, plus screenshots. **The check is structurally incapable of seeing the bug.** The cluster is `justify-end`; when min-content exceeds the track the overflow projects from the START edge, and start-side overflow is excluded from `scrollWidth` in LTR. At 1400px — **the app's own default window size** — the reviews chip was still 74px under the crest. Codex review caught it; my own evidence had "passed".
+- ⇒ **Before quoting a measurement as proof, ask what the failure would LOOK like to that specific instrument.** Here the instrument reports a number that is identical whether the layout is perfect or catastrophically overflowing leftward. The screenshots could have caught it and I looked at them — at a width where it happened to fit.
+- ⇒ Corollary: **test at the size the product actually ships at.** I measured 1280/1440/1920 and never 1400, which is what `electron-main.cjs` opened. The defect lived exactly in the gap between my sample points and the real default.
+- ⇒ Same family as the derived-signal lessons (`cmd | tail; echo $?`, "13/13 steps ok" with two wrong screenshots): the number answered a different question than the one asked.
+
+
+### [Process] RE-VIOLATED AGAIN: `cmd | tail; echo $?` READS THE FILTER'S EXIT CODE (2026-09-03) — NEW
+- Ran `npm run desktop:map:build 2>&1 | tail -5; echo "BUILD_EXIT=$?"` and got `BUILD_EXIT=0` from a build that had **failed with MODULE_NOT_FOUND** — the 0 belonged to `tail`. Same for `tsc --noEmit | tail -3; echo $?`, which printed 0 while tsc exited 2. The repo hook fired both times and I still had to be told by it. Cost: a stale `dist` was served to a capture rig and the app rendered black with the known cyclic-chunk TDZ crash before the real cause was found.
+- ⇒ **Never read `$?` after a pipe.** Redirect to a file and check the bare command (`cmd > /tmp/x.log 2>&1; echo $?`), or `set -o pipefail`, or `${PIPESTATUS[0]}`. This is now at least the third recorded instance in this repo; the pattern is *derived-signal* — the number you read answers a different question than the one you asked.
+- ⇒ Companion finding the same day: a capture harness reported **13/13 steps ok** while two of the thirteen screenshots showed the wrong surface entirely (Formation Detail had regressed to an OG intel panel; War Summary was a duplicate of the Briefing tab). **A step-success count proves navigation ran, not that the right thing is on screen.** Look at the artifact.
+
+
 ### [Process] STOP-and-report safeguard prevents broken cleanups when audits recommend deletion (2026-05-29) — NEW
 - **Context**: Phase I cleanup arcs (Packets I3a, I5, I6) hit recurring failure mode: an engine simplification audit recommended deleting a function/field on the basis of grep results, but the dispatched agent's verification turn surfaced a live consumer the audit had missed. Across the arc, the STOP-and-report safeguard fired 5x correctly — once because `assertNoAoRInEarlyWar` actually guards a still-live faction-level field (the audit was thinking of brigade-AoR), once because `learning_rate` legacy still has a live external-config read branch, once because `tryCreateFromPrePlanned` was located at a different file than the audit cited and has a live commander-loop consumer. Each STOP saved a broken cleanup commit.
 - **Wrong approach**: Implementing audit recommendations verbatim because the audit is dispatched authority. Audits encode a hypothesis ("0 consumers found"); agent execution must verify the hypothesis before acting on it.

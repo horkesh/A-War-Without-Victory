@@ -1056,3 +1056,46 @@ The Map UI is maintained according to the **Paradox Team Protocols**.
 | **QA Engineer** | `qa-engineer.md` | Browser verification, layout regression testing. |
 
 **Current Protocol:** Orchestrator-First. Documentation changes must be reviewed by the UI Expert (UI/UX Developer) for alignment with established visual patterns.
+
+## Tactical toolbar single-line contract (2026-09-03)
+
+`PresidentialToolbar.tsx` renders `grid-cols-[minmax(0,1fr)_7rem_minmax(0,1fr)]` with the army
+crest fixed over the centre column, so **each half must fit its own maximum content** — there is no
+reflow room. Before 2026-09-03 the right cluster (reference routes + review/reserve/tensions chips +
+authority gauge + advance button, ~1180px max) exceeded its column at 1440 **and** 1920: chips
+wrapped into lines clipped by the `h-12` bar and the row spilled leftward under the crest.
+
+Rules:
+- Reference routes (`RECORDS`, `CHRONICLE`, `CODEX`) belong to the LEFT navigation group.
+- Every toolbar item is `whitespace-nowrap shrink-0`; the turn date is the only shrinkable element
+  (`truncate min-w-0`) and acts as the relief valve at narrow widths.
+- Alert chips use short labels (`presidentialToolbar.reserveChip` = `RESERVE · N`,
+  `presidentialToolbar.tensions` = `TENSIONS`) with the full severity sentence in `title`.
+  `getArmyReserveToolbarSignal`'s long label is unchanged — it still drives the reserve desk and is
+  pinned by `tests/army_reserve_legibility.test.ts`.
+- Alert chips and the authority gauge carry a COMPACT BAND: below `2xl` (1536px) each chip renders
+  dot + count and drops its word, and the gauge drops its label (and its bar below `xl`). The full
+  phrase stays as `aria-label`, so the accessible name never changes with the breakpoint.
+- Reference routes fold away below `lg` rather than pushing the date out.
+- Adding anything to either cluster is the regression shape.
+
+**Verification method — `scrollWidth === clientWidth` IS NOT SUFFICIENT.** The right cluster is
+`justify-end`, so when its min-content exceeds the track the overflow projects from the START edge,
+and start-side overflow is excluded from `scrollWidth` in LTR. The first pass at this fix measured
+exactly that and reported "no overflow at 1280/1440/1920" while the reviews chip was still 74px under
+the crest at 1400. Measure GEOMETRY instead: compare each cluster child's `getBoundingClientRect()`
+against its track's box (start-side overflow) and against the crest's box (actual collision).
+`tmp_gui_observation/verify_toolbar_fit.mjs` does this at 1280/1366/1400/1440/1600/1920;
+`tests/ui/toolbar_fit_contract.test.ts` pins the source properties that make overflow impossible.
+
+**Window size.** `electron-main.cjs` opens command windows at `PREFERRED_WINDOW` 1920x1080,
+clamped to the primary display's `workAreaSize`. `DESIGN_MIN_WINDOW` 1280x720 is the size the UI is
+verified down to — it is the design INTENT, not necessarily the applied minimum: `getCommandWindowMinimum()`
+clamps it to the work area as well, because on a display smaller than the floor (a 1024-wide screen, a
+scaled remote session, 720p minus a taskbar) applying 1280x720 would push the window's edges
+off-screen and `minWidth`/`minHeight` would make it un-resizable back into view. The previous
+hardcoded 1400x900 put a fresh install into the compact band on every machine; do not reintroduce a
+sub-HD default, and do not re-apply the floor unclamped (both pinned by the contract test).
+
+Audit trail: `docs/40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md` (P1 #1); the
+incomplete first fix was caught by Codex review on PR #491.

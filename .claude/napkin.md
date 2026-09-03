@@ -78,7 +78,9 @@
    Do instead: reproduce with engine_health_gate.cjs, update through the gate command, rerun strict JSON, and record evidence.
 7. **[2026-07-12] Electron replay proof is an exact-turn hard gate**
    Do instead: bind the actual Electron log and autosave; validate scenario/faction/full control timeline, tour all required surfaces, enforce 12px unclipped essential text and clean runtime/network output, and retain Records/Chronicle screenshot evidence.
-8. **[2026-07-17] CI tests cannot depend on local evidence roots**
+8. **[2026-09-03] Capture at the resolution you publish, and read every frame**
+   Do instead: set the harness viewport to the delivery size (1920x1080) BEFORE a capture run, not after — a 1440x900 set had to be re-shot wholesale. Then actually LOOK at each output: the re-shoot found the Formation Detail exhibit had silently regressed to an OG intel panel and War Summary was a duplicate of the Briefing tab, both "passing" 13/13 steps. A green step count proves navigation, not content.
+9. **[2026-07-17] CI tests cannot depend on local evidence roots**
    Do instead: keep executable QA harnesses under tracked `tools/`; write generated screenshots, saves, and logs under excluded `tmp-*` roots, and prove harness contracts from a clean-checkout path.
 
 ## Domain Behavior Guardrails
@@ -123,18 +125,18 @@
    Do instead: project active/history lifecycle once with stable IDs and explicit exclusions; count AAR captures only from attack-backed receipts; grade zero attempts as one-star no-assault with no duration reward; cap ending-force scoring at 100; let Records show the full ledger; and let Chronicle emit exactly one entry per visible completion.
 
 ## Map & UI Shell
-1. **[2026-07-05] Deck counters are screen symbols, not terrain decals**
+1. **[2026-09-03] A fixed-center element makes each toolbar half a hard budget**
+   Do instead: with the crest pinned over the centre grid column, every item must be `whitespace-nowrap shrink-0` with ONE designated shrinkable (the date); keep reference routes in the left group; give alert chips short labels + full sentence in `title`. **`scrollWidth === clientWidth` CANNOT SEE THIS** — a `justify-end` cluster overflows from the START edge, which LTR `scrollWidth` excludes; that check passed at 1280/1440/1920 while the chip was 74px under the crest at 1400 (caught by Codex review, not by me). Measure child rects against the track and the crest instead (`verify_toolbar_fit.mjs`), and give chips a compact band. See MAP_UI_MASTER "Tactical toolbar single-line contract".
+2. **[2026-07-05] Deck counters are screen symbols, not terrain decals**
    Do instead: keep tactical Deck overlay non-interleaved and counter/label layers depth-disabled.
-2. **[2026-07-09] Critical counters do not wait for idle**
+3. **[2026-07-09] Critical counters do not wait for idle**
    Do instead: render the DOM fallback as soon as control GeoJSON is ready; keep optional overlay sources out of counter readiness gates.
-3. **[2026-07-12] Tactical readiness is state-revision readiness**
+4. **[2026-07-12] Tactical readiness is state-revision readiness**
    Do instead: keep the loading surface active until the required control source and formation counters have rendered for the current turn and loaded-save fingerprint; timeout only required-source failure and leave optional MapLibre errors diagnostic.
-4. **[2026-07-04] Stack counters in pixels, not coordinates**
+5. **[2026-07-04] Stack counters in pixels, not coordinates**
    Do instead: anchor to OSID coordinate, apply Deck pixel offsets, and verify against live UI occluders by screenshot.
-5. **[2026-06-25] Formation physical anchors differ from navigation anchors**
+6. **[2026-06-25] Formation physical anchors differ from navigation anchors**
    Do instead: use physical location_osid for counters, hovers, stacks, arrows, and settlement truth.
-6. **[2026-06-26] Global shortcuts respect focused controls**
-   Do instead: guard app-level handlers with interactive-focus checks and use modified shortcuts for global cycling.
 7. **[2026-07-12] Map context and telemetry must be bounded**
    Do instead: clear tactical overlays/selections before Warroom transitions; release MapLibre/Deck contexts and callbacks on unmount; expose only bounded aggregate formation-counter status in DOM telemetry.
 8. **[2026-07-12] Named counter controls own exact selection**
@@ -143,6 +145,8 @@
    Do instead: require visible parent surface, visible target control, and visible changed destination; hidden React/Warroom copies in the DOM are not player-reachable proof.
 10. **[2026-07-15] Modal completion actions stay outside narrative scrolling**
    Do instead: keep the only acknowledge/commit action in a persistent footer and scroll the long dispatch body independently; pin DOM ownership and inspect a real Electron viewport.
+
+> Demoted from Map & UI Shell on 2026-09-03 to keep the 10-cap: the 2026-06-26 focused-control shortcut rule now lives in [map counters](napkin/map_counters.md) — demoted to [map counters], not dropped.
 
 ## 2026-08-15 - Name actors at the claim boundary
 

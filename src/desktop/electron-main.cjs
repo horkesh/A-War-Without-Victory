@@ -10,7 +10,7 @@ if (typeof _electronModule === 'string') {
   );
   process.exit(1);
 }
-const { app, BrowserWindow, protocol, ipcMain, dialog, Menu, session } = _electronModule;
+const { app, BrowserWindow, protocol, ipcMain, dialog, Menu, session, screen } = _electronModule;
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
@@ -1110,13 +1110,70 @@ function getTacticalMapWindowUrl(mode = 'operational', options = {}) {
   return `${getMapServerUrl(targetPath)}?${query.toString()}`;
 }
 
+/**
+ * Window size for the command shell.
+ *
+ * The UI is designed at full HD: the tactical toolbar carries navigation, a
+ * fixed-centre crest, alert chips, the authority gauge and the advance button
+ * on one line, and its comfortable layout assumes 1920 logical px. The former
+ * 1400x900 default put the toolbar into its compact band on a fresh install
+ * (see MAP_UI_MASTER "Tactical toolbar single-line contract").
+ *
+ * We ask for 1920x1080 but clamp to the display's WORK AREA so a 1366x768
+ * laptop still gets an on-screen window instead of one running off the edge.
+ *
+ * The work area ALWAYS wins, including over the minimum: on a display whose
+ * work area is smaller than the design floor (a 1024-wide screen, a scaled
+ * remote session, 1280x720 minus a taskbar), forcing MIN_WINDOW would push the
+ * window's bottom/right edge off-screen and `minWidth` would make it
+ * un-resizable back into view. The floor is therefore itself clamped.
+ */
+const PREFERRED_WINDOW = { width: 1920, height: 1080 };
+const DESIGN_MIN_WINDOW = { width: 1280, height: 720 };
+
+function fitToWorkArea() {
+    let work = null;
+    try {
+        work = screen?.getPrimaryDisplay?.()?.workAreaSize ?? null;
+    } catch {
+        work = null; // screen is unavailable before app-ready in some harnesses
+    }
+    if (!work || !Number.isFinite(work.width) || !Number.isFinite(work.height) || work.width <= 0 || work.height <= 0) {
+        return null;
+    }
+    return work;
+}
+
+function getCommandWindowSize() {
+    const work = fitToWorkArea();
+    if (!work) return { ...PREFERRED_WINDOW };
+    return {
+        width: Math.min(PREFERRED_WINDOW.width, work.width),
+        height: Math.min(PREFERRED_WINDOW.height, work.height),
+    };
+}
+
+/** Design floor, never larger than what the display can actually show. */
+function getCommandWindowMinimum() {
+    const work = fitToWorkArea();
+    if (!work) return { ...DESIGN_MIN_WINDOW };
+    return {
+        width: Math.min(DESIGN_MIN_WINDOW.width, work.width),
+        height: Math.min(DESIGN_MIN_WINDOW.height, work.height),
+    };
+}
+
 function createMainWindow(options = {}) {
   const { show = true, openDevTools = true, runtimeFailureChecks = null, runtimeProbeLabel = 'main window' } = options;
   const warroomUrl = 'awwv://warroom/index.html';
 
+  const windowSize = getCommandWindowSize();
+  const windowMinimum = getCommandWindowMinimum();
   const win = new BrowserWindow({
-    width: 1400,
-    height: 900,
+    width: windowSize.width,
+    height: windowSize.height,
+    minWidth: windowMinimum.width,
+    minHeight: windowMinimum.height,
     show,
     icon: getAppIconPath(),
     webPreferences: {
@@ -1212,9 +1269,13 @@ function createTacticalMapWindow(options = {}) {
   } = options;
   const targetUrl = getTacticalMapWindowUrl(mode, { disablePmtiles });
 
+  const windowSize = getCommandWindowSize();
+  const windowMinimum = getCommandWindowMinimum();
   const win = new BrowserWindow({
-    width: 1400,
-    height: 900,
+    width: windowSize.width,
+    height: windowSize.height,
+    minWidth: windowMinimum.width,
+    minHeight: windowMinimum.height,
     show,
     icon: getAppIconPath(),
     webPreferences: {
