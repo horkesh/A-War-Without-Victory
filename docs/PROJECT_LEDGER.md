@@ -32595,3 +32595,37 @@ old "TENSIONS RISING" visible label, updated (`shell_navigation_ownership.test.t
 `desktop:map:build` clean, chunk-cycle check OK. Measured post-fix with the worst-case chip load
 (reviews + critical reserve + tensions, RS w68): `scrollWidth == clientWidth` on both toolbar
 halves at 1920, 1440, and 1280, and screenshots confirm one clean line at all three widths.
+
+### 2026-09-03 — Toolbar fix completed after Codex caught it incomplete; command windows open at full HD
+
+**The first fix was insufficient, and the verification was the reason.** PR #491's initial pass
+moved the reference routes left and made every item nowrap, then reported "measured, verified" on
+`scrollWidth === clientWidth` at 1280/1440/1920. That check is structurally blind to this defect:
+the right cluster is `justify-end`, so when its min-content exceeds the track the overflow projects
+from the START edge, which LTR `scrollWidth` excludes. Codex review on the PR flagged it with the
+right reasoning. **Re-measured geometrically (child rects vs. track box and vs. the crest box): at
+1400px — `electron-main.cjs`'s own default window width — the reviews chip was still 74px under the
+crest; 1366 and 1280 also failed.**
+
+**Completed fix.**
+- Alert chips and the authority gauge now have a COMPACT BAND: below `2xl` each chip renders dot +
+  count and drops its word; the gauge drops its label (bar below `xl`). The full phrase is kept as
+  `aria-label`, so the accessible name is unchanged by the breakpoint. Reference routes fold below
+  `lg`. New i18n keys `presidentialToolbar.reviewWord`/`reviewWordPlural`/`reserveWord` (EN + BCS).
+- `DESK` had never received the nowrap/shrink-0 treatment (its className is a template literal, so
+  the first pass's regex missed it) — caught by the new contract test.
+- **Command windows now open at 1920×1080** (`PREFERRED_WINDOW`), clamped to the primary display's
+  `workAreaSize`, with `MIN_WINDOW` 1280×720 as the floor. The previous hardcoded 1400×900 put a
+  fresh install into the compact band on every machine. Owner question — "why is it 1400, can it be
+  full HD?" — answered: it was arbitrary, and now it is not.
+
+**Verification.** `tests/ui/toolbar_fit_contract.test.ts` (new, 7 assertions) pins the source
+properties that make overflow impossible plus the window-size contract; full `tests/ui` +
+`army_reserve_legibility` **3142/3142 green**; `tsc --noEmit` clean; `desktop:map:build` +
+chunk-cycle clean. `tmp_gui_observation/verify_toolbar_fit.mjs` measures start-side overflow and
+crest collision at 1280/1366/1400/1440/1600/1920 — **PASS at all six**. Real Electron launch opens
+1906×849 inner on a 2294×912 work area (full-HD width, height correctly clamped).
+
+**Durable lesson recorded** (`life_lessons/process.md`): a measurement can be structurally blind to
+the failure it is cited as disproving — ask what the failure would look like to that instrument, and
+test at the size the product actually ships at.

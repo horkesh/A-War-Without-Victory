@@ -2275,6 +2275,10 @@ export const enMessages = {
     'presidentialToolbar.openAttentionQueue': 'Open Decision Room presidential attention queue',
     'presidentialToolbar.reviewSingular': '{count} REVIEW',
     'presidentialToolbar.reviewPlural': '{count} REVIEWS',
+    'presidentialToolbar.reviewWord': 'REVIEW',
+    'presidentialToolbar.reviewWordPlural': 'REVIEWS',
+    'presidentialToolbar.reserveWord': 'RESERVE',
+
     'presidentialToolbar.reserveChip': 'RESERVE · {count}',
     'presidentialToolbar.tensions': 'TENSIONS',
     'presidentialToolbar.tensionsRising': 'TENSIONS RISING',

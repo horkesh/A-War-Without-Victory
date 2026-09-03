@@ -81,8 +81,8 @@ function CommandAuthorityGauge({ current, max }: { current: number; max: number 
             <span id="command-authority-description" className="sr-only">
                 {t('presidentialToolbar.commandAuthorityDescription')}
             </span>
-            <span className="text-xs font-mono font-bold uppercase tracking-[0.12em] text-text-secondary">{t('presidentialToolbar.auth')}</span>
-            <div className="w-14 h-1.5 bg-white/10 rounded-full overflow-hidden">
+            <span className="hidden 2xl:inline text-xs font-mono font-bold uppercase tracking-[0.12em] text-text-secondary">{t('presidentialToolbar.auth')}</span>
+            <div className="hidden xl:block w-14 h-1.5 bg-white/10 rounded-full overflow-hidden">
                 <div className={`h-full ${barColor} transition-all duration-500`} style={{ width: `${pct}%` }} />
             </div>
             <span className={`text-xs font-mono font-bold ${color}`}>{current}</span>
@@ -341,7 +341,7 @@ export function PresidentialToolbar({
                         onClick={handleOpenDesk}
                         disabled={modalLocked}
                         data-testid="toolbar-route-desk"
-                        className={`px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
+                        className={`shrink-0 whitespace-nowrap px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
                             showWarroomReturn
                                 ? 'text-amber-400 hover:text-amber-300'
                                 : 'text-text-secondary hover:text-amber-400'
@@ -379,7 +379,7 @@ export function PresidentialToolbar({
                         onClick={handleOpenRecords}
                         disabled={shellRouteDisabled}
                         data-testid="toolbar-route-records"
-                        className="shrink-0 whitespace-nowrap px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        className="hidden lg:inline-block shrink-0 whitespace-nowrap px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title={t('presidentialToolbar.openRecordsTitle')}
                     >
                         {t('presidentialToolbar.records')}
@@ -389,7 +389,7 @@ export function PresidentialToolbar({
                         onClick={handleOpenChronicle}
                         disabled={shellRouteDisabled}
                         data-testid="toolbar-route-chronicle"
-                        className="shrink-0 whitespace-nowrap px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        className="hidden lg:inline-block shrink-0 whitespace-nowrap px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title={t('presidentialToolbar.chronicleTitle')}
                     >
                         {t('presidentialToolbar.chronicle')}
@@ -400,7 +400,7 @@ export function PresidentialToolbar({
                         disabled={shellRouteDisabled}
                         data-testid="toolbar-route-codex"
                         data-coachmark-id="codex"
-                        className="shrink-0 whitespace-nowrap px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
+                        className="hidden lg:inline-block shrink-0 whitespace-nowrap px-2 py-1 text-xs font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title={t('presidentialToolbar.historicalReference')}
                     >
                         {t('presidentialToolbar.codex')}
@@ -472,9 +472,13 @@ export function PresidentialToolbar({
                             disabled={modalLocked}
                             className="flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 py-1 text-xs font-mono font-bold uppercase tracking-wide bg-red-900/30 text-red-400 border border-red-500/30 rounded animate-pulse hover:bg-red-900/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                             title={t('presidentialToolbar.openAttentionQueue')}
+                            aria-label={t(pendingReviews === 1 ? 'presidentialToolbar.reviewSingular' : 'presidentialToolbar.reviewPlural', { count: pendingReviews })}
                         >
                             <span className="w-2 h-2 rounded-full bg-red-500" />
-                            {t(pendingReviews === 1 ? 'presidentialToolbar.reviewSingular' : 'presidentialToolbar.reviewPlural', { count: pendingReviews })}
+                            <span>{pendingReviews}</span>
+                            <span className="hidden 2xl:inline">
+                                {t(pendingReviews === 1 ? 'presidentialToolbar.reviewWord' : 'presidentialToolbar.reviewWordPlural')}
+                            </span>
                         </button>
                     )}
 
@@ -491,13 +495,15 @@ export function PresidentialToolbar({
                                     : 'bg-sky-900/30 text-sky-300 border-sky-400/30 hover:bg-sky-900/50'
                             }`}
                             title={`${reserveSignal.label} — ${reserveSignal.title}`}
+                            aria-label={reserveSignal.label}
                         >
                             <span className={`w-2 h-2 rounded-full ${reserveSignal.tone === 'critical' ? 'bg-amber-500' : 'bg-sky-300'}`} />
-                            {t('presidentialToolbar.reserveChip', {
-                                count: reserveSignal.tone === 'critical'
+                            <span className="hidden 2xl:inline">{t('presidentialToolbar.reserveWord')}</span>
+                            <span>
+                                {reserveSignal.tone === 'critical'
                                     ? reserveAttention.criticalCount
-                                    : reserveAttention.pendingCount,
-                            })}
+                                    : reserveAttention.pendingCount}
+                            </span>
                         </button>
                     )}
 
@@ -508,9 +514,10 @@ export function PresidentialToolbar({
                             disabled={modalLocked}
                             className="flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 py-1 text-xs font-mono font-bold uppercase tracking-wide bg-amber-900/30 text-amber-400 border border-amber-500/30 rounded hover:bg-amber-900/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                             title={t('presidentialToolbar.tensionsRising')}
+                            aria-label={t('presidentialToolbar.tensions')}
                         >
                             <span className="w-2 h-2 rounded-full bg-amber-500" />
-                            {t('presidentialToolbar.tensions')}
+                            <span className="hidden 2xl:inline">{t('presidentialToolbar.tensions')}</span>
                         </button>
                     )}
                     {/* Command Authority + Advance Turn */}

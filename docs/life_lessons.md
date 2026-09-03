@@ -1,10 +1,13 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 318 lessons across 9 topic files (count verified 2026-09-03).
+> Last restructured: 2026-04-11. 319 lessons across 9 topic files (count verified 2026-09-03).
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
 ## New Lessons (2026-09-03) — the defect an outsider found on a screenshot
+
+### [Process] ★★ A MEASUREMENT CAN BE BLIND TO THE FAILURE IT IS CITED AS DISPROVING — see `docs/life_lessons/process.md`
+- Reported the toolbar fix as "measured, verified" on `scrollWidth === clientWidth` at 1280/1440/1920. That check **cannot see** start-side overflow on a `justify-end` container, which is precisely this bug: at **1400px — the app's own default window size** — the chip was still 74px under the crest. **Codex review caught what my evidence had cleared.** ⇒ Ask what the failure would look like TO THAT INSTRUMENT before quoting it, and test at the size the product actually ships at.
 
 ### [UI] ★★ A FIXED-CENTER ELEMENT TURNS EACH TOOLBAR HALF INTO A HARD BUDGET — see `docs/life_lessons/ui_map.md`
 - The tactical toolbar's right cluster could exceed its grid column at 1440 **and** 1920; chips wrapped into lines clipped by the 48px bar and spilled under the fixed crest. It shipped for months and was caught by **the owner looking at a pitch screenshot** — the failure is silent, untested, and at any one width merely looks cramped. ⇒ With a fixed-size island between flexible regions you have TWO budgets, not one flow: everything `nowrap shrink-0`, one designated shrinkable, and measure `scrollWidth === clientWidth` on both halves at 1280/1440/1920 under max load.

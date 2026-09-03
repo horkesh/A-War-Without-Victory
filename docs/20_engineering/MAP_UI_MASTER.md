@@ -1073,8 +1073,25 @@ Rules:
   `presidentialToolbar.tensions` = `TENSIONS`) with the full severity sentence in `title`.
   `getArmyReserveToolbarSignal`'s long label is unchanged — it still drives the reserve desk and is
   pinned by `tests/army_reserve_legibility.test.ts`.
-- Adding anything to the right cluster is the regression shape. Verify by measuring
-  `scrollWidth === clientWidth` on both toolbar halves at 1280/1440/1920 with max chip load
-  (reviews + critical reserve + tensions), not by inspecting a single width.
+- Alert chips and the authority gauge carry a COMPACT BAND: below `2xl` (1536px) each chip renders
+  dot + count and drops its word, and the gauge drops its label (and its bar below `xl`). The full
+  phrase stays as `aria-label`, so the accessible name never changes with the breakpoint.
+- Reference routes fold away below `lg` rather than pushing the date out.
+- Adding anything to either cluster is the regression shape.
 
-Audit trail: `docs/40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md` (P1 #1).
+**Verification method — `scrollWidth === clientWidth` IS NOT SUFFICIENT.** The right cluster is
+`justify-end`, so when its min-content exceeds the track the overflow projects from the START edge,
+and start-side overflow is excluded from `scrollWidth` in LTR. The first pass at this fix measured
+exactly that and reported "no overflow at 1280/1440/1920" while the reviews chip was still 74px under
+the crest at 1400. Measure GEOMETRY instead: compare each cluster child's `getBoundingClientRect()`
+against its track's box (start-side overflow) and against the crest's box (actual collision).
+`tmp_gui_observation/verify_toolbar_fit.mjs` does this at 1280/1366/1400/1440/1600/1920;
+`tests/ui/toolbar_fit_contract.test.ts` pins the source properties that make overflow impossible.
+
+**Window size.** `electron-main.cjs` opens command windows at `PREFERRED_WINDOW` 1920x1080,
+clamped to the primary display's `workAreaSize`, with `MIN_WINDOW` 1280x720 as the floor the UI is
+verified against. The previous hardcoded 1400x900 put a fresh install into the compact band on every
+machine; do not reintroduce a sub-HD default (pinned by the contract test).
+
+Audit trail: `docs/40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md` (P1 #1); the
+incomplete first fix was caught by Codex review on PR #491.
