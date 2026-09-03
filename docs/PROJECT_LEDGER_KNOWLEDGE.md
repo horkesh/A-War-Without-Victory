@@ -4966,8 +4966,12 @@ papered over it with a startup warning on every launch, which is precisely the k
 tolerated noise that teaches everyone the number is negotiable.
 
 **The trap that cost the most, and will catch the next person too.** The documented command
-`npm run map:derive:operational-initial-master` does produce 712 — **and also silently changes
-168 surviving records** (`stability_score: null -> 75`). The derive script and the committed
+`npm run map:derive:operational-initial-master` does produce 712 — **and also silently rewrites
+269 of the 712 surviving records**, including **42 that flip `contested_control` false -> true**
+(turn-0 contested settlements 176 -> 218, +24%), plus ~227 `stability_score` values where the
+committed file holds clean buckets (35/55/65/75) and the script emits fractions (75 -> 71.67).
+*(An earlier version of this paragraph said "168 records, null -> 75". That was wrong and not
+reproducible; the figures here are from a row-by-row diff of a real re-derive.)* The derive script and the committed
 file have DRIFTED. The 32 were therefore removed surgically instead, leaving every surviving
 record byte-identical, proven by a 3-turn RS campaign with an identical sha256 either side.
 **Do not run that script expecting a no-op.** Reconciling it with the committed file is real,
