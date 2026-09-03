@@ -188,35 +188,59 @@ describe('build_calibration_map_html', () => {
         expect(script).not.toContain('if(path){sticky=false;showFromFocus(path)}');
     });
     test('the merge map is authoritative regardless of what the painted file contains', () => {
-        // painted_control_jan1993_improved.json carries 744 entries — including
-        // all 32 merge children, 7 of which disagree with their mapped parent.
+        // The repo's painted_control_jan1993_improved.json carries entries for the
+        // merge children themselves, several disagreeing with their mapped parent.
         // Resolution must NOT be conditional on "absent from painted", or those
         // children become live scored cells and invent mismatches against ground
         // the engine never simulates.
-        const dir = mkdtempSync(join(tmpdir(), 'awwv-improved-map-'));
+        //
+        // Built entirely from TRACKED inputs (the merge map) plus a synthetic
+        // save/painted pair — runs/ is gitignored, so a fixture reaching into it
+        // would ENOENT in a clean checkout.
+        const mergeMap = JSON.parse(readFileSync(resolve('tools/micro_osid_merge_map.json'), 'utf8')) as Record<string, string>;
+        const [child, parent] = Object.entries(mergeMap)[0]!;
+
+        const dir = mkdtempSync(join(tmpdir(), 'awwv-authoritative-'));
         tempDirs.push(dir);
         const png = join(dir, 'm.png');
-        const out = join(dir, 'improved.html');
+        const geo = join(dir, 'geo.geojson');
+        const save = join(dir, 'save.json');
+        const paintedPath = join(dir, 'painted.json');
+        const out = join(dir, 'out.html');
         writeFileSync(png, Buffer.from('89504e470d0a1a0a', 'hex'));
-        execFileSync(process.execPath, [TOOL, png, out, 'title', 'score', 'footer',
-            resolve('data/derived/operational/operational_settlements.geojson'),
-            resolve('runs/codex_orasje_corrected_jan1993/apr1992_definitive_188w__d3464b9122c3c8e9__w39_n0/final_save.json'),
-            resolve('data/source/calibration/painted_control_jan1993_improved.json')]);
+        writeFileSync(geo, JSON.stringify({
+            type: 'FeatureCollection',
+            features: [child, parent].map((osid, i) => ({
+                type: 'Feature',
+                properties: { osid, settlement_name: osid, mun1990_name: 'Mun' },
+                geometry: { type: 'Polygon', coordinates: [[[i, 0], [i + 1, 0], [i + 1, 1], [i, 1], [i, 0]]] },
+            })),
+        }));
+        // only the PARENT is simulated — the child was merged away
+        writeFileSync(save, JSON.stringify({ political: { political_controllers: { [parent]: 'RS' } } }));
+        // the painted reference nonetheless carries the child, DISAGREEING with the parent
+        writeFileSync(paintedPath, JSON.stringify({
+            meta: { changelog: [] },
+            by_settlement_id: { [parent]: 'RS', [child]: 'HRHB' },
+        }));
 
+        execFileSync(process.execPath, [TOOL, png, out, 'title', 'score', 'footer', geo, save, paintedPath]);
         const details = JSON.parse(readFileSync(out, 'utf8').match(/const osids=(.*?);const hitLayer/s)![1]!) as Array<{
-            osid: string; mergedInto: string | null; painted: string | null;
+            osid: string; mergedInto: string | null; painted: string | null; mismatch: boolean;
         }>;
-        expect(details).toHaveLength(744);
-        expect(details.filter(row => row.mergedInto !== null)).toHaveLength(32);
 
-        // the scored universe stays 712 even though the reference file has 744
+        const childRow = details.find(row => row.osid === child)!;
+        const parentRow = details.find(row => row.osid === parent)!;
+        // resolved despite having its own painted entry
+        expect(childRow.mergedInto).toBe(parent);
+        // and scored as the parent — never on its own disagreeing value
+        expect(childRow.painted).toBe('RS');
+        expect(childRow.painted).toBe(parentRow.painted);
+        expect(childRow.mismatch).toBe(parentRow.mismatch);
+        expect(childRow.mismatch).toBe(false);
+
+        // the scored universe is the parents only
         const scored = new Set(details.map(row => row.mergedInto ?? row.osid));
-        expect(scored.size).toBe(712);
-
-        // and every child takes its parent's painted value, never its own
-        const byOsid = new Map(details.map(row => [row.osid, row]));
-        for (const child of details.filter(row => row.mergedInto !== null)) {
-            expect(child.painted).toBe(byOsid.get(child.mergedInto!)!.painted);
-        }
+        expect(scored.size).toBe(1);
     });
 });
