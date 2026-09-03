@@ -34,7 +34,11 @@ const weeks636 = loadJsonl(RUN_636, 'weekly_report.jsonl');
 const lastWeek635 = weeks635[weeks635.length - 1];
 const lastWeek636 = weeks636[weeks636.length - 1];
 
-const total = 744; // total OSIDs
+// SIMULATED universe, not the drawn one: the geojson has 744 polygons but 32
+// are sub-1km2 micro-OSIDs merged into neighbours (tools/merge_micro_osids.cjs),
+// so control_counts can only ever sum to 712. Pinned by
+// tests/operational_osid_universe_invariant.test.ts.
+const total = 712;
 for (const faction of ['RS', 'RBiH', 'HRHB']) {
   const c635 = lastWeek635.control_counts[faction] || 0;
   const c636 = lastWeek636.control_counts[faction] || 0;
