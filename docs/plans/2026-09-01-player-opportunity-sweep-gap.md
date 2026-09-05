@@ -3,6 +3,9 @@
 **Date:** 2026-09-01 · **Status:** QUEUED, not started. Located and evidenced; fix not attempted.
 **Corrected:** 2026-09-05 — the fix section was rewritten (see *Correction record* at the end). The
 root-cause trace below is unchanged and still holds.
+**Corrected again:** 2026-09-05 — the Level-2 open question is RULED (auto-apply, does not queue);
+two factual citation errors fixed; canon-clarification recommendations recorded (see the second
+*Correction record* entry at the end). Still does not authorize implementation.
 **Found by:** the D2 full-campaign set —
 [all three factions](../40_reports/playtests/20260901_d2_full_campaign_all_three_factions.md).
 **Blocks:** ahistorical playthrough experiments. Does NOT block observer parity, which is unaffected.
@@ -74,9 +77,16 @@ Levels 0, 2 and 3. The defect is confined to the **LANE B operation-opportunity 
   and **never added to `src/desktop/desktop_sim.ts::advanceTurn`**, which drives both the
   interactive desktop app and `tools/ai_play/parity_probe.ts`.
 - **The rest of the pipeline scales its human-present guard with autonomy; this one does not.**
-  `commander_loop.ts:236,258` gates on `autonomyLevel === 1` only; `war_phases.ts:934-941,
-  2245-2287` use `fid === playerFaction ? autonomyLevel >= 2 : true`. The opportunity skip has no
-  such scaling. The inconsistency is evidence of an **unfinished build**, not an intended design.
+  `commander_loop.ts:236,258` gates on `autonomyLevel === 1` only; `war_phases.ts:2245-2287` use
+  `fid === playerFaction ? autonomyLevel >= 2 : true`. The opportunity skip has no such scaling. The
+  inconsistency is evidence of an **unfinished build**, not an intended design.
+  *(Corrected 2026-09-05 — Game Designer: `war_phases.ts:934-941` (`selectBotBrigadeOrderFactions`,
+  `assistedExecutionActive`) gates brigade orders at `autonomy_level >= 1`, not the
+  `fid === playerFaction ? autonomyLevel >= 2 : true` pattern originally cited here; that pattern is
+  correct for `war_phases.ts:2245-2287` only [`ai-army-decisions` / `ai-corps-decisions`]. The
+  corrected reading strengthens this section's argument rather than weakening it: every military
+  decision class scales its guard with autonomy in one of two documented ways, and the opportunity
+  skip alone scales in neither.)*
 
 ## Fix options — CORRECTED 2026-09-05
 
@@ -115,6 +125,15 @@ that nothing takes its place at the default level.
   **Level 0 = "Full Control" = "Player Handles Everything / AI Handles Nothing"** — the mode where
   the player should have the *most* direct authority, and where this decision class currently has
   none.
+  *(Corrected 2026-09-05 — Game Designer: this is true of the field default but not of a started
+  campaign. New campaigns start at autonomy **Level 2**, not Level 0 — `desktop_sim.ts:346`, with a
+  deliberate, measured rationale recorded in the comment at :331-346: Level 1's `=== 1` guard held
+  commander plans at `ready` and starved the war of engine drive, so the shipped default is
+  "LEVEL 2, NOT LEVEL 1." This does not reopen the Level-0 fix below — staffing the desk remains
+  right for a player who has deliberately chosen Full Control — but the implementer should know that
+  L0 is not where most players will be, and that under the Level-2 ruling recorded further down, the
+  **default campaign gets auto-apply**, not a review queue. It changes who each half of the fix
+  serves, not either half.)*
 
 Net effect at default settings: **the dossier is fully populated and fully inert.** The uncanonical
 third state this produces is **propose → display → silent expiry** — worse than either full autonomy
@@ -127,7 +146,7 @@ operation without having chosen anything.
 |-------|------|-----------|--------|
 | 0 | Full Control (default) | **Staff the desk** — create the review record so the buttons that already exist go live | **Primary fix** |
 | 1 | Strategic | Proposal generator already runs | Already correct, no change |
-| 2 | Political | Auto-apply, or queue for the president? | **UNRESOLVED — open decision** |
+| 2 | Political | **Auto-apply through the bot path — does not queue** (Game Designer ruling, 2026-09-05) | **RULED — see below** |
 | 3 | Observer | Sweep decides opportunities like any other faction (pass `null`) | Correct; retained from the original option 2 |
 
 **Level 0 (default) — staff the desk.** Create the review record so the already-built dossier
@@ -137,18 +156,60 @@ reversal of it.
 
 **Level 1 — already correct.** No change.
 
-**Level 2 — UNRESOLVED. Do not assume a behaviour when implementing.** Level 2 is partial
-delegation: the player handles political events, diplomacy and peace plans while the AI handles all
-military. The Game Designer called the absence of a review queue "more defensible" here but **did
-not rule**, and no seat has. The open question, stated in full:
+**Level 2 — RULED (Game Designer, 2026-09-05).** Level 2 is partial delegation: the player handles
+political events, diplomacy and peace plans while the AI handles all military. The Game Designer had
+earlier called the absence of a review queue "more defensible" here but not ruled. The open question,
+stated in full as it was asked:
 
 > **At Level 2 (Political) — partial delegation, where the AI handles all military matters — does an
 > operation opportunity for the player's faction auto-apply through the bot path, or does it queue
 > for the president's authorization as it does at Levels 0 and 1?**
 
-This must be answered by the Game Designer (with the Operations Expert on mechanism) before any
-Level-2 behaviour is written. An implementer who picks one silently has made a command-model
-decision that was not theirs to make.
+**The ruling: auto-apply through the bot path. It does not queue.** This is precedent-based, not a
+first-principles judgement:
+
+- `commander_loop.ts:261` gates presidential authorization of a corps operation launch on
+  `autonomyLevel === 1`, **not** `<= 1` — so at Level 2 a commander's plan already advances to
+  `executing` with no presidential authorization. **This is the same decision arriving by a different
+  channel**, not an analogy. Ruling "queue" would make the LANE B catalog the only operation-launch
+  decision in the game that holds for a human at Level 2, so the same operation would or would not
+  need authorization depending on which subsystem proposed it — a distinction the president cannot
+  see and canon does not draw.
+- The convention is canon, named the **"Player automation boundary"**: `Systems_Manual_v0_9_0.md:187`,
+  `Engine_Invariants_v0_9_0.md:455` (§14.10a), `Rulebook_v0_9_0.md:382`. Canon records recruitment's
+  `>= 2` carve-out *because it differs from the `>= 1` staff-execution default*; opportunity decisions
+  have no carve-out recorded anywhere, so they fall to the general rule.
+- The one decision class the player retains at Level 2 — political event decisions — is gated at
+  `>= 3` (`evaluate_events.ts:668`), exactly where the autonomy table draws Level 2's line. **There is
+  no military decision class in the codebase that queues for the player at Level 2.**
+- The autonomy design already anticipated the concern behind "queue" and answered it with **override,
+  not a queue** — `docs/plans/2026-03-24-v082-autonomy-api-plan.md` §4: *"At Level 2 (Political): AI
+  proposes army-level directives. Player sees them as a briefing. Player can override specific corps
+  stances or operation approvals."* / *"Override does NOT change the autonomy level. It is a
+  per-decision escape hatch."* The shipped **Stop op** lever is that hatch: `electron-main.cjs:2569`,
+  costs `STOP_OP_COST`, **no autonomy gate**.
+- Autonomy table wording: Level 2's "AI Handles" column reads *"All military (army + corps +
+  brigades)"*; **"operation approval" is listed as a Player-Handles item at Level 1 and dropped at
+  Level 2** — the table had the vocabulary and chose not to carry it down.
+
+**Implementation rider — a requirement, not an aside.** Auto-apply is correct *provided the launch is
+surfaced*. The existing dossier must not go dark at Level 2 — it must render the launched operation
+with the commander's reasoning and a live Stop-op affordance, read-only as to authorization. A silent
+launch converts "the player watched an offensive he would have declined" into "the player never
+knew," which breaks attribution.
+
+**Failure-mode comparison.** Auto-apply's failure is recoverable (Stop op, priced in CA, no autonomy
+gate), visible, and in character. Queue's failure is unrecoverable without abandoning the level
+(nothing sits between "asked about every opportunity" and "asked about nothing"), fails silently via
+lapse, and is worth RBiH −22 / HRHB −18 OSIDs.
+
+**The unifying principle**, in the ruling's own framing: *no decision may be left in a state where it
+neither reaches the player nor gets decided.* At Level 0 the cure is to make it reach the player
+(staff the desk); at Level 2 the cure is to make it get decided (auto-apply). The Level-0 fix and this
+Level-2 ruling are the same rule at opposite ends of one axis — consistent, not opposed.
+
+**This ruling closes the open question. It does not authorize the work** — see the correction record
+below.
 
 **Level 3 (Observer) — the sweep is correct.** The player has delegated everything, including
 political events; there is no human to protect. Pass `null`. This is the plan's existing option 2,
@@ -164,6 +225,36 @@ reachable, which is a measurement defect rather than a difficulty setting. Staff
 soften the game: once the review record exists, CA cost, commander pushback and faction-asymmetric
 friction all still apply to every authorization. The negative-sum thesis is **served** by this fix,
 not threatened by it — the player makes the choice and then bears its cost, which is the point.
+
+## Canon clarification recommended (not authorized)
+
+*(Game Designer, 2026-09-05.)* The Level-2 ruling above requires no canon *change* — it reads an
+existing boundary — but **two seats in a row have had to infer it** rather than read it stated
+plainly. That is the signal it should be written down. Four targets, in priority order:
+
+1. **`docs/plans/2026-03-24-v082-autonomy-api-plan.md` §2, the level table** — add an explicit
+   operation-authorization row: presidential authorization of corps operations (both commander-loop
+   plans and LANE B opportunities) applies at Levels 0-1 and delegates at Levels 2-3. Plan document —
+   **no panel needed**.
+2. **`docs/10_canon/Systems_Manual_v0_9_0.md` §187, "Player automation boundary"** — record that
+   operation-opportunity decisions follow the corps staff-execution rule and delegate at autonomy 2
+   and above, the same as the recruitment carve-out already recorded there.
+3. **`docs/10_canon/Engine_Invariants_v0_9_0.md` §14.10a** — currently recruitment-only
+   ("Shared recruitment eligibility and autonomy"). Generalize the section to the automation boundary,
+   or add the parallel invariant for opportunity decisions alongside it.
+4. **`docs/10_canon/Rulebook_v0_9_0.md` §1 (Presidential Command Model) and §17.3 item 3** — lever #1
+   "Authorize op" currently reads as level-independent. Note that the authorize/reject lever is
+   exercised at autonomy 0-1, and that at 2+ the president's operation lever is **Stop op** rather
+   than Authorize op.
+
+**Items 2-4 touch canon and require Pyrrhic-panel sign-off per CLAUDE.md.** None of the four has been
+drafted. This document does not authorize drafting or landing any of them.
+
+**One item is beyond any single seat, named so it is not mistaken for settled here:** a proposal to
+overturn the `commander_loop.ts:261` `=== 1` convention — i.e. to make Level 2 queue operations
+*generally*, not just the LANE B catalog — is a change to the autonomy level table itself, and the
+shipped campaign default (`desktop_sim.ts:346`) depends on that convention with a measured rationale.
+**That goes to the owner, not to a panel and not to this ruling.**
 
 ## Measured cost and provenance
 
@@ -225,3 +316,38 @@ cost, provenance and the unconfirmed attribution recorded.
 QUEUED and requires its own go-ahead. Nothing here touches §6, the bright line, or the enclave
 guard — the Game Designer confirmed this is a command-model completeness question, not an atrocity
 or enclave matter.
+
+---
+
+**Corrected again 2026-09-05** by the Game Designer seat, ruling the Level-2 open question:
+
+- **The ruling:** at Level 2 (Political), an operation opportunity for the player's faction
+  auto-applies through the bot path; it does not queue. Precedent-based: `commander_loop.ts:261`
+  already gates presidential authorization of a corps-operation launch on `autonomyLevel === 1`, so
+  Level 2 auto-launches the same decision by a different channel today; the "Player automation
+  boundary" convention (`Systems_Manual_v0_9_0.md:187`, `Engine_Invariants_v0_9_0.md:455`,
+  `Rulebook_v0_9_0.md:382`) and the autonomy level table both delegate all military decisions at
+  Level 2 with no carve-out for opportunities; and the shipped **Stop op** lever
+  (`electron-main.cjs:2569`, no autonomy gate) is the design's own answer — override, not a queue.
+  The dossier must still surface the launch with the commander's reasoning and a live Stop-op
+  affordance; visibility is required, authorization is not.
+- **Two factual corrections to material this correction record's predecessor introduced:**
+  (1) `war_phases.ts:934-941` gates brigade orders at `autonomy_level >= 1`, not the
+  `fid === playerFaction ? autonomyLevel >= 2 : true` pattern this document had attributed to it —
+  that pattern belongs to `war_phases.ts:2245-2287` only. The corrected citation strengthens the
+  document's scaling argument rather than weakening it. (2) New campaigns start at autonomy
+  **Level 2**, not Level 0 (`desktop_sim.ts:346`, deliberate rationale at :331-346) — the document's
+  *"`autonomy_level` defaults to `?? 0`"* is true of the field, not of a started campaign. This does
+  not reopen the Level-0 fix, but it means the **default campaign gets auto-apply** under this
+  ruling, not a review queue.
+- **Canon-clarification recommendations recorded, none authorized:** four documents named in
+  priority order (the autonomy-plan level table; `Systems_Manual` §187; `Engine_Invariants` §14.10a;
+  `Rulebook` §1/§17.3) — the first is a plan-doc edit needing no panel, the other three touch canon
+  and **require Pyrrhic-panel sign-off per CLAUDE.md**. None has been drafted.
+- **One item flagged as beyond any single seat, for the owner:** overturning the
+  `commander_loop.ts:261` `=== 1` convention itself — i.e. making Level 2 queue operations generally,
+  not just the LANE B catalog — would change the autonomy level table the shipped campaign default
+  depends on. That is not settled by this ruling and does not go to a panel; it goes to the owner.
+
+**This closes the Level-2 open question. It still does not authorize the work.** Implementation
+remains QUEUED. Nothing here touches §6, the bright line, or the enclave guard.
