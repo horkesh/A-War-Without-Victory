@@ -32823,3 +32823,140 @@ appearing in the initialisation path without checking whether anything in `src/s
 Presence in init is not effect on the simulation. ⇒ Before calling any data change
 "calibration-moving", grep the field in `src/sim/` and name the reader. If there is no reader, it
 is cosmetic, however prominent it looks in the init code.
+
+### 2026-09-05 — The showcase audit routed, the game re-graded B, and a canon boundary that was never written down
+
+A documentation day: three PRs (#498, #499, #500), no `src/` file touched, no behaviour changed. It is
+in the ledger anyway because two of the day's findings are about the *simulation*, and because the
+day produced three process lessons that cost real time to learn.
+
+**The showcase audit has an executable home (#498).** The 2026-09-03 screenshot audit — 29 findings
+from capturing the publisher pitch at 1920x1080 — was a frozen report with no lane. A four-seat panel
+with disjoint finding ownership located them in source; a named integrator routed every one. The
+routing is R7's own, not a new lane: R7's linked plan §3 already scopes "English string correctness,
+accessibility, readability" and its Phase 5 carries an unticked *"Inspect English at 1920x1080"* item.
+**This audit IS that inspection, run early.** Split: ~17 to a new R7 amendment plan, 9 pre-seeded to
+R8's register (B1–B9, inert until R8 opens), 3 closing with no code, 5 to the post-1.0 backlog, 3 held
+with a named owner and one unblocking query each. `COMMAND_BOARD` was four days stale and is resynced.
+
+**Two of the audit's own premises were wrong, and the writer+reader gate is what caught them.**
+
+- **Finding 2's "55 collapsed" is NOT EH-3 `stranded_status`.** The audit said so and the
+  orchestrator's brief repeated it as established. The field is
+  `state.displacement.sustainability_state[munId].collapsed`, written at
+  `src/state/sustainability.ts:332-344`, whose own comment reads *"sustainability_score never
+  increases"* — a municipality-level, permanent-once-triggered economic-collapse ratchet. Nothing
+  resets it; every `sustainability_score =` and `.collapsed = false` assignment in `src/` was grepped.
+  Unrelated to formation-level `stranded_status` and to the reconstitution-Path-C constraint. The
+  label fix is unchanged; the reasoning and the ownership are not.
+- **Finding 10's `FORCE BALANCE: REDACTED` is not fog-of-war as designed.**
+  `CorpsFrontSector.intel_confidence` has **no writer anywhere in `src/`** —
+  `node tools/hooks/whowrites.mjs intel_confidence` returns three, all on an unrelated
+  operation-prep object. `hasReliableThreatIntel` (`>= 0.4`) can therefore never be true, so every
+  OG reads REDACTED unconditionally, forever. **The UI is reading a dead twin of a live system**:
+  `state.military.sector_intel[sid].confidence` is computed every turn
+  (`src/sim/combat/sector_intel.ts:91-129`) and DOES gate behaviour —
+  `bot_corps_directives.ts:58-59,286` (`INTEL_GATE_LAUNCH_THRESHOLD`, default 0.30, gates whether a
+  corps may launch), `combat_predictor.ts:82`, `sector_offensive.ts:716,1105-1106`, and the commander
+  modules. Whoever fixes this is wiring a dead field to a load-bearing one — a bigger act than the
+  blank panel suggests, and the sector-id-churn caution applies to it directly.
+
+**Four engine defects surfaced that the audit never saw**, none among the 29: the dead
+`intel_confidence` (B1); `sector_combat_ratings[sid]` absent for a sector with an active front (B2);
+`generateTacticalGroupName`'s RS branch non-injective for ordinal >= 2, so two genuinely distinct
+sectors get one name (B3); and `army_reserve_system.ts:716,755` baking `` Op "${op.name}" `` into a
+sentence that reaches the player raw through `why_needed` at `GameStateAdapter.ts:3958` (B4).
+
+**B2 was measured rather than assumed, on an owner ruling, and the measurement changed the answer.**
+`sector_combat_ratings` does reach simulation — `army_hq_gathering.ts:269,340-360` feeds
+`CorpsAssessment.sector_threat_avg`, consumed by `bot_corps_directives`, `bot_corps_stance`,
+`bot_strategy` and the commander modules. The owner ruled MEASURE FIRST rather than authorize repair.
+Result: **ENDGAME-ONLY. Seven mid-war snapshots (t41, t44, t60 x3, t70, t80) in perfect parity —
+79/79, 89/89, 83/83, 0 missing, 7/7.** At t188: 63/63 missing. Explained by code, not correlation —
+every writer of `corps_front_sectors`' key set calls `computeSectorCombatRatings` immediately
+afterward in the same function, and the one standalone mutator (`bot_corps_ai.ts:431`) only ever
+REMOVES keys. **The presumed consequence was also wrong:** absence is all-or-nothing, so
+`computeSectorThreatAvg` hits `count === 0` and every corps takes the flat 0.5 fallback — not a
+partial average over a skewed subset. It never crosses the `<= 0` skip test. The measurement avoided
+authorizing engine repair for a failure that does not occur in play. **B9 is new and unowned:** near
+war-end something rebuilds `corps_front_sectors` back to 63 in the same turn without a paired rating
+recompute; that asymmetry, not the wipe, leaves the final state inconsistent. Rebuild site not
+identified.
+
+**The game re-graded: B+ (firm) -> B (#498).** First full panel re-grade since 2026-06-09. Three
+categories down, two flat, none up. Simulation core ~A- -> ~B+/A-; Frontend/shell ~A-/B+ -> ~B
+(largest mover); Content ~A- held but qualified (A- on substance, C+/B- on delivered voice);
+Code/engineering ~B+/A- -> ~B+; Production ~C+ flat. **The throughline: every downgrade came from a
+system graded as BUILT that has now been PROVEN for the first time** — via three instruments that did
+not exist in June (D2's played campaigns, the full-HD audit, and a packaged app someone finally
+looked at). This partly reverses June's headline (*"B+ but now broad-based, not engine-carried"*): the
+breadth was real but unproven. Rows 21 and +N2 are capped near C+ by the 2026-07-06 grade-coupling
+rule, not by the auditors — the latest owner diary scores *"Did I feel like the President?"* 3/5,
+late-campaign information hierarchy 2/5.
+
+**Playing the game costs territory, and the fix shape was wrong before it was corrected (#499).** D2
+found the player faction's own LANE B opportunities are never decided: RBiH -22 OSIDs, HRHB -18,
+before any ahistorical choice. Observer parity is byte-identical and `scenario_runner` is untouched,
+so this is not a calibration-scoring defect. The queued plan offered two fix options and **option 1
+would have violated the command model** — running the sweep in `advanceTurn` auto-executes operations
+for the player's faction like a bot's, which `Rulebook_v0_9_0.md:118,134,157` forbids. Struck with its
+reasoning left visible. The real defect is that the authorization path is dead at the default
+autonomy level: the dossier UI is fully built (named commander, readiness axes, five-way decision at
+`operationOpportunityDossiers.ts:269-277`) but every button's `enabled` flag is `hasLiveReview`, and
+that review record exists only at Level 1. Corrected fix splits by level — staff the desk at L0, no
+change at L1, sweep at L3 — and the L2 question was then **RULED: auto-apply, not queue**, on the
+ground that `commander_loop.ts:261` gates on `=== 1`, so the *same decision* already auto-launches at
+L2 through the commander channel. Ruling "queue" would have made LANE B the only operation-launch
+decision in the game that holds for a human at L2.
+
+**A canon boundary that was implemented but never written down (#500).** From autonomy Level 2 upward,
+operation authorization delegates to the AI. Implemented consistently across five decision classes,
+and canon even names the concept — the **"Player automation boundary"** — but spells it out only for
+RECRUITMENT. **Two Pyrrhic seats in a row had to reconstruct it from code**, and the Rulebook as
+written would lead a careful reader to conclude the president must authorize every operation at every
+level. Recorded in `Engine_Invariants` §14.10b (new, parallel to 14.10a), `Systems_Manual` §6.5,
+`Rulebook` §1 / §17.3 item 3 / §17.1 item 3, and the autonomy-api plan's level table.
+
+**The owner waived panel review for that canon edit; an independent Canon Compliance Reviewer stood in
+its place and returned NON-COMPLIANT on the first pass.** It is the reason the commit is correct:
+
+- The first draft would have put **ruled intent into Engine Invariants as a shipped invariant** —
+  asserting opportunity decisions are bot-resolved at L2+, while the plan doc it cites is titled
+  *"never decided — QUEUED"*. An implementer reading §14.10b would have concluded the path works and
+  treated any observed failure as a regression in their own change.
+- **The Level-1 hold is NOT player-faction-scoped.** `applyCommanderOutput` (`commander_loop.ts:203`)
+  has no faction test; at L1 it holds EVERY faction's plans at `ready`. The corroboration sits nine
+  lines above a citation the draft already used — `desktop_sim.ts:331-346` records the measured
+  stalls (*"autonomy 1 -> active=2/planning=0/ready=2 — two plans stalled, never admitted"*), and
+  that is why the shipped campaign default is Level 2 rather than Level 1.
+- *"its corps' queued operations are cleared"* was wrong twice: on `pending` nothing is cleared, on
+  `declined` only the head entry is shifted.
+
+Two further corrections were made to the **orchestrator's own brief**, both verified independently:
+**authored historical operations (pre-planned and triggered) require presidential authorization at
+EVERY autonomy level** — none of the three files consults `autonomy_level`, so an unqualified "at 2+
+the lever is Stop op" would have been false in three canon documents; and **at Level 0 no
+commander-loop plan is generated for the player faction at all**, so nothing is owed authorization —
+which is *why* the gate is `=== 1` and not `<= 1`.
+
+**Three lessons, all of which cost time today.**
+
+1. **A field's meaning must come from its WRITER and its READER, never from where it appears.** Both
+   wrong audit premises, and both engine escalations, were caught by requiring `file.ts:line` for both
+   ends before planning anything. This is the same rule the 2026-09-04 `contested_control` retraction
+   paid for, applied in mirror image: that entry inferred effect from presence in init; these inferred
+   meaning from presence on screen. ⇒ Name the writer and the reader, or hold the item.
+2. **A background subagent's final plain text NEVER reaches the orchestrator** — it must
+   `SendMessage` to `"main"`. Every report that arrived carried a `summary=` attribute (a SendMessage
+   parameter); every one that vanished came from an agent that ended its turn with text. Five seats
+   lost work this way before the cause was found, and one was re-dispatched unnecessarily. The cause
+   was the dispatch brief: *"Return the report as your final message. Do not write files."* — the
+   first clause instructs the failure and the second removes the fallback. ⇒ End every brief with
+   "write to scratchpad, THEN SendMessage to main." An agent idle with no report has probably hit
+   this, not crashed — **ask before re-dispatching.**
+3. **The evidence for a screenshot audit was on disk the whole time.** Two seats reported nine
+   findings UNLOCATED after exhaustive source-reading; reading the actual PNGs in
+   `tmp_gui_observation/` closed **seven of them in one pass**, including a one-word CSS fix
+   (`ArmyHQModal.tsx:724` missing `content-start`) and a root cause settled by comparing two
+   screenshots. ⇒ When an audit cites captured evidence, look at the capture before reasoning from
+   source.
