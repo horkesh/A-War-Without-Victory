@@ -1322,10 +1322,8 @@ Commander Intelligence Overhaul (n1294–1301): must_hold 1.5× garrison (Brcko/
 9. Scenario manifest — scenario JSON schema + baseline regression
 
 ## Session Startup (do these EVERY session — BEFORE any work)
-1. **[2026-03-13] Check crons and schedule if missing — ALWAYS (two crons)**
-   Do instead: Run `CronList` at session start. Crons are session-only and auto-expire after 3 days. **Re-schedule every session.** Two required crons:
-   **(A) Daily Pyrrhic Standup** — cron `27 6 * * *`. Invokes /orchestrator to convene Pyrrhic team. Three phases: (1) Yesterday's retrospective (good/bad/ugly from `git log --since=24h`, ledger, life lessons), (2) Fresh game analysis (CALIBRATION_MASTER, REAL_WAR_MASTER, War-or-Game assessment), (3) Today's priorities — plan big and ambitious (3-5 items a team of AI agents can accomplish). Present everything via /visual-explainer as a war room briefing board. Full prompt stored in `memory/cron_daily_standup.md`.
-   **(B) Life-lessons review** — cron `3 6 * * *`. Gather 24h git activity, detect life-lesson violations, synthesize new lessons, promote/demote, generate visual report via `/visual-explainer`.
+1. **[2026-09-04] DISCONTINUED — the two standing crons (daily Pyrrhic standup, life-lessons review)**
+   Do instead: Nothing. The owner discontinued both on 2026-09-04. Do NOT re-schedule them and do NOT run `CronList` expecting to find them. Crons remain available for ad-hoc, task-scoped use (e.g. an agent-health heartbeat during a parallel panel) — they are just no longer a standing session-startup obligation.
 3. **[2026-03-30 VIOLATED 2026-04-08] Write working-on.md at session START — AND update at each commit**
    Do instead: Before writing any code, create `working-on.md` at project root capturing: what you're working on, current state, open tasks. **Update it at each commit** — treat it as a mandatory commit checklist step, not an optional afterthought. Delete only at session closeout. This is a crash-recovery artifact — if the session dies, the next session reads it first. 2026-04-08 violation: file covered first 3 lanes only; 6 subsequent packaged-desktop commits left it stale for 3+ hours.
 
@@ -1652,8 +1650,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: Treat Claude/subagent/older handoff notes as claim sets to verify locally; Codex is the active owner for planning, implementation, verification, docs, and cleanup from here forward.
 2. **[Standing] working-on.md — task continuity across compaction**
    Do instead: When context is visibly high, write `working-on.md` to project root: (1) current task, (2) files being modified, (3) next 3 steps. At session start: read and delete if exists.
-3. **[Standing] Life lessons enforcement system (3 mechanisms)**
-   Do instead: (A) Session start: read `docs/life_lessons.md`, flag relevant lessons. (B) Pre-commit: `/awwv_pre_commit_check` includes life-lessons compliance. (C) Daily cron: `3 6 * * *` — re-schedule each session.
+3. **[Standing] Life lessons enforcement system (2 mechanisms)**
+   Do instead: (A) Session start: read `docs/life_lessons.md`, flag relevant lessons. (B) Pre-commit: `/awwv_pre_commit_check` includes life-lessons compliance. (The former daily `3 6 * * *` cron was DISCONTINUED by the owner on 2026-09-04 — do not re-schedule it.)
 4. **[Standing] Absolute paths**
    Do instead: Always use absolute paths for tool calls.
 5. **[Standing] Update napkin during work**
