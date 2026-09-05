@@ -1,6 +1,6 @@
 # AWWV Command Board
 
-**Status:** Derived dispatch view, synchronized 2026-08-28.
+**Status:** Derived dispatch view, synchronized 2026-09-05.
 
 **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole authority for unfinished work and wins if this board differs.
 
@@ -23,23 +23,39 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 5 | R5 | **COMPLETE -- CLOSED 2026-08-05** | None. The accepted performance floor is approximately 1.09 seconds per turn; the 100 ms target and incremental-reuse Task 6 are retired from 1.0 scope. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
 | 6 | R6 | **JANUARY 1993 SLICE LANDED; CALIBRATION OPEN AND ONGOING (RE closed 2026-09-01)** | Preserve the landed evidence. Reference, init-control, objective, axis, timing, roster and outcome work is live again. Engine health is sacrosanct — fix engine-health defects before tuning. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
 | 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
-| 7 | R7 | **ACTIVE — CINEMATIC OPENING MECHANICS, TYPOGRAPHY, AND BROWSER FALLBACK-ART PROOF COMPLETE** | Integrate the two required analogue-first neutral images at `OpeningSplash.tsx` and `MainMenu.tsx` without reopening mechanics; reject all computer/CRT/terminal/video-wall imagery, then run separately authorized live packaged-Electron first-paint acceptance. Separately validate/re-export or canvas-normalize the retained 2750×1536 RBiH plate against the 2752-wide contract; it is not a new creative deliverable. Foreground/portal prompts are optional later enhancements. Human listen/sensitivity, broader English accessibility/readability, and closeout reconciliation also remain. RE stays blocked and untouched; no probe/RE credit follows. Localization Phase 3 stays post-1.0. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [accepted functional opening](2026-08-23-opening-screens-implementation-plan.md) / [cinematic opening and typography amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md) |
+| 7 | R7 | **ACTIVE — CINEMATIC OPENING MECHANICS, TYPOGRAPHY, AND BROWSER FALLBACK-ART PROOF COMPLETE** | Integrate the two required analogue-first neutral images at `OpeningSplash.tsx` and `MainMenu.tsx` without reopening mechanics; reject all computer/CRT/terminal/video-wall imagery, then run separately authorized live packaged-Electron first-paint acceptance. Separately validate/re-export or canvas-normalize the retained 2750×1536 RBiH plate against the 2752-wide contract; it is not a new creative deliverable. Foreground/portal prompts are optional later enhancements. Human listen/sensitivity and closeout reconciliation also remain. **Broader English accessibility/readability now has an executable contract:** run the 2026-09-05 presentation and English-readability amendment, which discharges R7 Phase 5's unticked full-HD English inspection against the frozen showcase audit — renderer-only, byte-neutral, fixes no bugs (owner D1: HOLD FOR R8), creates no lane. RE closed 2026-09-01 and no longer constrains this row. Localization Phase 3 stays post-1.0. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [accepted functional opening](2026-08-23-opening-screens-implementation-plan.md) / [cinematic opening and typography amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md) / [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) |
 | 7.5 | RE | **CLOSED — owner, 2026-09-01** | RE gates nothing. P1/P2A were accepted; the P2B packaged-proof blocker and its rollback receipt are closed history. Engine health continues as a standing principle, not as an RE gate. | [Recovery plan](2026-08-28-packaged-probe-recovery-plan.md) / [1.0 Engine Integrity contract](2026-08-26-engine-integrity-plan.md) |
-| 8 | R8 | **WAITING ON RC, R1-R7, AND RE GREEN** | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until the final two diaries score 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
+| 8 | R8 | **WAITING ON R7.** RE closed 2026-09-01 and no longer gates this. | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until the final two diaries score 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
 | 9 | R9 | **WAITING ON R8** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
 ## Current Critical Path
 
-`RE P2B BLOCKED (no proof route active) + R7 live-packaged first-paint gate CLOSED 2026-08-29 (owner art CLOSED, packaged boot fixed) + jan1993 floor BREACHED 688/694 unrepaired + Srebrenica chain re-gated and detector added 2026-08-30 + inherited balanced-suite residual -> owner decision on P2B proof policy/route -> RE P2B–P7 -> final RE pair/profile -> R8 -> R9`
+`R7 live-packaged first-paint gate CLOSED 2026-08-29 (owner art CLOSED, packaged boot fixed) + R7 presentation/English-readability amendment REGISTERED 2026-09-05 + jan1993 floor BREACHED 688/694 unrepaired + Srebrenica chain re-gated and detector added 2026-08-30 + inherited balanced-suite residual -> R7 remaining gates -> R8 -> R9`
+
+**RE no longer appears on the critical path.** It closed by owner decision on 2026-09-01; the P2B
+packaged-proof blocker that used to head this line is closed history and gates nothing. Engine
+health continues as a standing principle, not as an RE gate.
 
 The R7 implementation slice is not the source of the current full-suite red. The canonical balanced
 run passes 1325/1335 files and 13231/13273 tests; five inherited files (six tests) remain red around
 three unstaffed sectors and the Cutileiro RBiH 43.6798%-versus-44% expectation. That residual blocks
 an overall green claim but does not authorize engine/canon edits from R7.
 
-**RE INSERTED 2026-08-26 AND REDUCED 2026-08-27 BY OWNER APPROVAL.** Engine health remains
-sacrosanct, but RE is not a general cleanup or optimization lane. Further calibration waits on the
-seven release outcomes. R7 may overlap only after exact file inspection proves disjoint ownership.
+**Unscheduled work landed 2026-09-01/04, recorded so it is not mistaken for roadmap progress.**
+PRs #491-#497 changed no lane row's status. #491 fixed the tactical toolbar collision and added the
+geometric verifier `tools/ui/verify_toolbar_fit.mjs`, which still reports **PARTIAL** coverage --
+it exercises only the chips present in the one tracked save it loads. #492-#495 covered
+calibration-state reporting for merge children and merged-away OSID rendering; #494 made the
+744-drawn-versus-712-simulated OSID gap an executable invariant. **#496/#497 net position:** the
+committed `operational_initial_master.json` and its derive script disagree on **269 of 712 rows**;
+the ~227 `stability_score` rows are real and reach the sim through `control_flip.ts:384`, while the
+42 `contested_control` flips are **cosmetic** (no reader in `src/sim/`, zeroed for every OSID at
+init). The earlier "168 rows" and "`contested_control` is the headline" figures were retracted by
+those same PRs.
+
+**RE INSERTED 2026-08-26 AND REDUCED 2026-08-27 BY OWNER APPROVAL -- HISTORY, CLOSED 2026-09-01.**
+Engine health remains sacrosanct as a standing principle. Calibration no longer waits on the seven
+release outcomes; the paragraphs below this line are the closed RE record, not live constraints.
 
 The original probe channel remains closed at `b711cffa9`; its findings are not RE implementation
 authority. The auxiliary prerequisite ended terminal `NO_VERDICT`, its exact unproven hypothesis
