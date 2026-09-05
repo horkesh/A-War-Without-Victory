@@ -46,10 +46,47 @@ Rationale:
 
 | Level | Name | Player Handles | AI Handles |
 |-------|------|----------------|------------|
-| 0 | **Full Control** | Everything | Nothing (current behavior) |
+| 0 | **Full Control** | Everything, including operation authorization | Nothing (current behavior) |
 | 1 | **Strategic** | Political events + corps stances + operation approval | Sector stances, brigade movement, operation execution |
-| 2 | **Political** | Political events + diplomacy + peace plans | All military (army + corps + brigades) |
+| 2 | **Political** | Political events + diplomacy + peace plans | All military (army + corps + brigades), including operation authorization |
 | 3 | **Observer** | Nothing (watch mode) | Everything including political events |
+
+**Operation authorization across the levels (clarified 2026-09-05).** The table drops "operation
+approval" between Level 1 and Level 2; that is deliberate. Presidential authorization of a
+*staff-generated* corps operation is gated on Level 1 exactly — it applies at Levels 0-1 and
+delegates at Levels 2-3. The two staff-generated channels diverge on whether they implement that:
+the commander loop does, the LANE B opportunity channel does not and is a recorded open defect:
+
+- **Commander-loop plans.** `commander_loop.ts:261` gates the authorization hold on
+  `autonomyLevel === 1`, not `<= 1`. At Level 0 the commander loop does not run for the player
+  faction at all (`selectBotBrigadeOrderFactions`, `war_phases.ts:937`, gated `>= 1`), so no staff
+  plan is proposed and there is nothing to authorize. At Level 1 the plan is held at `ready` until
+  the president answers it. At Levels 2-3 it advances to `executing` unauthorized.
+- **LANE B operation opportunities — NOT IMPLEMENTED at any level but 1.**
+  `applyBotOpportunityDecisions` (`operation_opportunities.ts:1630`) skips the player faction
+  *unconditionally*, with no autonomy test, and `generateOpportunityProposalReviews`
+  (`operation_opportunities.ts:1662`) surfaces a review only at `autonomy_level === 1`. Those two
+  facts together mean Levels 0, 2 **and 3** do **neither**: the opportunity is evaluated, then
+  neither surfaced nor decided. Levels 2-3 do not delegate to the bot decision path — nothing
+  resolves the player faction's opportunities there. Only the headless scenario runner sweeps them
+  (`scenario_runner.ts:2646`, passing `null`); `advanceTurn` has no such sweep. *This is an open
+  defect, not the intended boundary. The ruled dispositions — a review record at Level 0,
+  auto-apply through the bot path at Levels 2-3 — are ruled but **not built**; see
+  `docs/plans/2026-09-01-player-opportunity-sweep-gap.md`.*
+- **Authored historical operations are the exception and never delegate.** A pre-planned or triggered
+  operation for the player faction requires an accepted `HISTORICAL_OP:*` authorization at every
+  level, including 2 and 3 (`historical_operation_authorization.ts`,
+  `pre_planned_operations.ts:1594,1744`, `triggered_operations.ts:1145,1310` — none of these consults
+  `autonomy_level`).
+
+At Levels 2-3 the president's operation lever is **Stop op**, not Authorize op — the per-decision
+escape hatch described in §4 below, shipped as `stage-op-halt-order` (`electron-main.cjs:2569`,
+`op_halt.cjs`), which costs `STOP_OP_COST` command authority and carries no autonomy gate. New
+campaigns start at Level 2 (`desktop_sim.ts:346`), so this is the default campaign's behaviour rather
+than an edge case.
+
+*(Clarified 2026-09-05 — Game Designer ruling; owner waived panel review. Describes shipped
+behaviour; no behaviour change. Reasoning: `docs/plans/2026-09-01-player-opportunity-sweep-gap.md`.)*
 
 Rationale:
 - A slider implies fine-grained tuning that the system cannot actually deliver. The command chain has natural boundaries (political / army / corps / brigade) — discrete levels map directly to these.

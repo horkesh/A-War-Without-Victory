@@ -1,6 +1,6 @@
 # A War Without Victory -- Engine Invariants v0.9.0
 
-**Last Updated:** 2026-09-01
+**Last Updated:** 2026-09-05
 
 One game turn equals one week.
 
@@ -453,6 +453,14 @@ When `state.meta.recruitment_mode === 'bottom_up'`, the turn pipeline **must** r
 ### 14.10a Shared recruitment eligibility and autonomy
 
 Recruitment catalog visibility and recruitment application must evaluate the same faction, turn, scenario catalog, control, manpower, capital, equipment, availability, and already-recruited context. A brigade shown as eligible must be accepted under that unchanged context; an ineligible brigade must carry an explicit reason. In player campaigns, automatic recruitment excludes the selected player faction at autonomy levels 0 and 1 and includes it at autonomy level 2 or above. Headless auto-control has no selected-player exclusion.
+
+### 14.10b Player operation-authorization boundary
+
+Presidential authorization of a staff-generated corps operation is gated on autonomy level 1 exactly, and is neither the staff-execution boundary of `>= 1` nor the recruitment boundary of §14.10a. At autonomy level 1 a commander-loop plan that would advance to `executing` must be held at `ready`, and must not admit its operations, until an approving player operation response for that exact plan is recorded. The hold is keyed on the campaign's autonomy level, not on the plan's faction: at level 1 it applies to every faction's corps, which is the recorded reason the shipped campaign default is level 2 rather than level 1 (`desktop_sim.ts:331-346`). At autonomy level 2 or above the plan advances to `executing` without presidential authorization. At autonomy level 0 the corps staff generates no plan for the selected player faction, so no plan authorization is owed. An operation-opportunity decision belonging to the selected player faction is surfaced as a pending proposal review at autonomy level 1 only. At every other autonomy level it is neither surfaced nor resolved: the deterministic bot decision path excludes the selected player faction unconditionally, and the desktop turn advance runs no compensating post-turn sweep. That is a recorded open defect, not an invariant — the ruled dispositions (a review record at level 0, auto-apply through the bot path at levels 2 and above) are not built. It is named here so the gap is not read as intended behaviour: `docs/plans/2026-09-01-player-opportunity-sweep-gap.md`. The headless scenario runner sweeps every faction after each turn and has no such gap. Headless auto-control has no selected-player exclusion in corps staff execution and never holds a plan for authorization. The opportunity and historical-operation authorization paths key on `player_faction` alone and do not consult the headless flag.
+
+Authored historical operations are outside this boundary at every autonomy level. A pre-planned or triggered operation belonging to the selected player faction must carry an accepted `HISTORICAL_OP:*` authorization before it may hold a slot in `active_operations`; while that authorization is pending the operation is deferred; a declined authorization additionally drops that entry from the corps' operation queue. No autonomy level waives this requirement.
+
+*(Amended LANE-PLAYER-OPERATION-AUTHORIZATION, 2026-09-05 — Game Designer ruling; owner waived panel review. Records shipped behaviour; no behaviour change. Reasoning: `docs/plans/2026-09-01-player-opportunity-sweep-gap.md`.)*
 
 ### 14.11 Operation lifecycle and AAR causality
 
