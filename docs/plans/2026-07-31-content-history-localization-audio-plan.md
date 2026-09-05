@@ -10,6 +10,19 @@
 
 **Date:** 2026-07-31
 **Status:** ACTIVE CURRENT LANE — audio implementation landed at `2d106e5e0`; remaining pre-1.0 gates are human listen/sensitivity acceptance, English accessibility/readability, offline browser and packaged-runtime proof, and closeout reconciliation; Phase 3 localization deferred post-1.0
+
+**Registered amendment, 2026-09-05 — presentation and English readability.** Phase 5's English
+inspection line was run early at 1920x1080 against the publisher pitch. The frozen
+[29-finding audit](../40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md) and its
+[four-specialist panel record](../40_reports/working/20260905_SHOWCASE_AUDIT_PANEL_SPECIALIST_REPORTS.md)
+are discharged by
+[2026-09-05-r7-presentation-and-english-readability-amendment-plan.md](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md),
+which is an amendment to **this** plan and not a second active plan for R7 — the same mechanism the
+[2026-08-28 cinematic amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md)
+used. It is renderer-only and byte-neutral to the simulation. It **fixes no bugs**: under owner
+decision D1 (2026-09-04) every bug in that audit is held for R8 and pre-seeded into R8's own plan.
+This plan's Phase 5 does not close until the amendment closes and the remaining two resolutions are
+inspected.
 **Roadmap workstream:** R7
 **Canonical owner:** authored JSON plus source/license manifests; `src/ui/map/i18n/` for locale; `src/ui/map/audio/` for playback
 **Collision rule:** Do not edit the same event/essay as R4. Do not edit map/Desk layout until R1/R2 finish.
@@ -387,6 +400,12 @@ npm.cmd run desktop:release:check
 - [ ] Require zero failing historical claim, identity, and audio inventory rows except explicitly `unsupported/omitted` dispositions; localization findings remain tracked post-1.0 and are non-blocking here.
 - [ ] Run full content/event/Codex, English accessibility, audio, baseline, browser, and packaged-runtime tests.
 - [ ] Inspect English at 1920x1080, 1366x768, and 3440x1440 across the required surfaces.
+      **This line is being executed early, by the registered amendment below.** The 1920x1080 pass
+      ran on 2026-09-03 against the publisher pitch and produced 29 findings; the located English
+      and presentation half is scheduled in
+      [the presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md).
+      1366x768 and 3440x1440 remain uninspected, and this box does not tick until all three
+      resolutions are covered and each discharged finding is confirmed **by image, not by diff**.
 - [ ] Verify packaged runtime makes no remote font/audio request.
 - [ ] Create `docs/40_reports/implemented/20260731_CONTENT_HISTORY_AUDIO.md` and record the Phase 3 post-1.0 deferral explicitly.
 - [ ] Update master roadmap, ledger, and reusable knowledge.
