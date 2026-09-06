@@ -87,7 +87,9 @@ below its threshold is unreachable for the entire run.
 
 ---
 
-## A. The one hard blocker
+## A1. First hard blocker — `ahmici_massacre_1993`
+
+*(Heading was "The one hard blocker" before the 2026-09-06 correction. It is one of two.)*
 
 **`ahmici_massacre_1993`** (`data/scenarios/events/war_1993.json`, window 54-70)
 
