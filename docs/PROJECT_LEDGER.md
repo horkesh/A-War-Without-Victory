@@ -32960,3 +32960,156 @@ which is *why* the gate is `=== 1` and not `<= 1`.
    (`ArmyHQModal.tsx:724` missing `content-start`) and a root cause settled by comparing two
    screenshots. ⇒ When an audit cites captured evidence, look at the capture before reasoning from
    source.
+
+## 2026-09-05 — Event system measured by what it FIRES, not by what was authored (diagnostic; no change)
+
+Owner observation — *"the 3 barracks events fire on the same week"* — opened a three-seat investigation
+(scenario-tester, Historian, Game Designer). **Nothing was changed: no code, no data, no canon.** Full
+synthesis and the three seat reports:
+`docs/40_reports/20260905_EVENT_FIRING_SATURATION_AND_DEAD_CATALOG.md` (+ `audits/20260905_EVENT_*`).
+
+**The observation was right and the headline was backwards.** There are **four** barracks events, not
+three, and week 4 carries seven — but two are decisions and five are notifications, and the Historian
+ruled the cluster an **authoring artifact** (real span w3→w9: Visoko 26 Apr, Sarajevo 2-3 May, Tuzla
+15 May, Zenica 18 May — and four *different kinds* of event, one seizure, one ambush of a column
+withdrawing under agreement, two negotiated evacuations without a shot). The system's real failure mode
+is the opposite of crowding: **132 of 188 weeks present the player with zero decision**, the
+`MAX_EVENTS_PER_TURN = 4` cap bound **exactly once in 188 weeks** (3 overflow entries at t96), and every
+pacing control in the codebase is a **ceiling** — there is no floor anywhere. Stable across six 188w
+runs with different scenario hashes (175-178 firings, 82-86 empty weeks).
+
+**The campaign has no ending, for two independent reasons.** `flag_not_set` is a **key-presence** test —
+`!(condition.flag in flags)` at `event_types.ts:830-833` — while `coha_expires_1995` *writes*
+`coha_active: false` rather than deleting the key, so from w156 `ceasefire_1995` (turn_min 181) can never
+fire and takes `dayton_talks_begin` → `dayton_signed` → both `*_dayton_acceptance` with it. All 99
+`flag_not_set` usages were audited against every flag written `false`: **exactly one collision, and it is
+this one.** Separately, the two acceptance events open at `turn_min: 190` against `"weeks": 188`. Dayton
+was initialled 21 Nov 1995 = **w190**, Paris 14 Dec = **w193** — if D2 means "play to Dayton" the horizon
+needs ≥190. Last 15 weeks of a full run end on five consecutive empty ones.
+
+**A second window is dead by construction, and the control proves it.** `nato_ultimatum_sarajevo_1994`
+has `turn_min == turn_max == 96` and requires `markale_massacre_1994`, which fires *at* w96;
+`requires_events` reads `fired_event_ids`, populated **by** the firing pass, so a same-turn prerequisite
+can never resolve. `rbih_nato_ultimatum_compliance_1994` has the identical prerequisite with a 96-98
+window and **fired at w97**. One turn of slack is the whole difference. Recommended as a **loader lint**,
+not an instance fix.
+
+**Two findings were wrong on first measurement and are corrected in place — both from the same family.**
+(1) The 12 presidential-gesture events are **not** one-shot: all carry an `action_cadence` block (5-8
+fires, 8-10 turn cooldown) consumed by desktop player-action handlers, so **9 of 12 repeat**; only the
+three `strategic_posture_review_*` are genuinely unwired. **A headless `events_fired` count structurally
+cannot see the player-action path.** (2) Ahmići was reported blocked on a dead flag
+`hvo_arbih_tensions_rising` — **that flag is written**, by `hvo_arbih_tensions_rise_1992` in
+`war_1992.json` via `sets_flags`, fires at w23, reads `true` in the final save. **Event flags are written
+from DATA; the check was `src/`-only.** ⇒ Both errors are the 2026-09-04 lesson in mirror image: name the
+writer AND the reader, and remember the writer may not be code.
+
+**The real Ahmići cause is worse than the one first reported, and it is a defect CLASS.** The live
+blocker is `faction_controls_municipality HRHB vitez >= 0.5`. Vitez has **three** OSIDs; HRHB holds
+**one** (`op:vitez:vitez_2`), identical in `initial_save` and `final_save`, and Vitez appears in **none**
+of the run's control flips. **1/3 = 0.333 < 0.5, constant t1→t188 — Ahmići is arithmetically unreachable
+in every playthrough ever run**, and a non-firing event leaves no trace in any artifact. `turn_min = 54`
+is historically exact: the date is right, the gate is wrong. The catalog fires **Trusina**
+(Bosniak-perpetrated, 16 Apr 1993) and **Sovići/Doljani** (17 Apr) but never the HVO-perpetrated
+massacre of the same day — mid-April 1993 renders **selectively complete in one direction,
+deterministically**. Routed to the **standard §6 four** (Historian's ruling: nothing crosses the bright
+line; it moves *toward* the stated thesis). **A sweep of `faction_controls_municipality >= 0.5` against
+small-OSID municipalities has NOT been run** — one row was checked because one row was asked about.
+
+**Three further items routed, none acted on.** Srebrenica falls in-game at w162 against a true w171
+(11 Jul 1995) and Žepa w164 against w173 — the ENCLAVE GUARD holds in letter but the campaign dates the
+genocide two months early, before the Split Agreement (**22 Jul 1995, w172 — absent from the catalog
+entirely**, though Summer '95/Storm/Mistral 2 all fire with nothing explaining why Croatia entered
+Bosnia). And `ENDGAME_AND_NEGOTIATION_DESIGN.md:339,341` records a **RESOLVED** decision that Srebrenica
+carries an RS restraint-path decision event and Storm has "player-influenced scope" — measured, all seven
+of those 1995 events have **zero `response_options`**. A resolved design decision and the shipped data
+disagree on the game's central ethical claim. **No Srebrenica decision event is proposed here.**
+
+**70 events read 32 flags nothing writes — and it is NOT a pacing fix.** Reconciled across three
+independent counts (66/28, 71/33, 70/32) by counting **data writers as well as code**: 234 flags written
+by the catalog, 134 read by triggers, 32 read-but-never-written, none present in the final save. They are
+read with `flag_at_least` — **odometers** projecting state the engine already computes; a projection step
+was never built. **Only 2 of the 70 carry `response_options`**, so implementing it adds two decisions in
+188 weeks, while carrying the lane's only real 188w calibration risk (~69 new consequence firings with
+live effects). Extend `observer_threshold_flags.ts` default-OFF; schedule **after** D2.
+
+**Prior closure extended, not overturned.** `20260508_V090_EVENTS_AUTHORING_SATURATION.md` declared the
+catalog "saturated at 121 events" and assessed condition-kind utilization "healthy", counting
+`flag_at_least` at 80 uses — **it measured authoring, never firing**, and those are the same reads that
+have no writers. It knew about missing substrate for a handful of named flags, framed as blocking *new*
+authoring, not as leaving already-shipped events dead.
+
+**Written cadence targets exist and the catalog inverts all three.** `Rulebook_v0_9_0.md:567` (§17.5)
+requires recurring decisions with **escalating stakes** — 0 of 299 events use `recurrence`, and 11 of the
+12 `action_cadence` rows are `escalation: "static"`. `Game_Bible_v0_9_0.md:257` targets ~60% decision
+events — measured **28%**. D2 order: (1) the Dayton ending, both blockers, validate on 188w since 40w
+cannot see w181; (2) the w139-188 decision drought, pure authoring, ~30 decisions not 7, COHA window
+first; (3) gesture escalation + wire the three posture-review handlers; (4) the odometer layer, after D2;
+(5) spike weeks — **do nothing**.
+
+## 2026-09-06 — Baseline re-blessed to `n392`; the barracks stagger lands; the event catalog measured
+
+**Owner-authorized baseline re-bless.** `n392` replaces `n388` as the canonical 188-week measurement.
+`n388` stood **34 commits stale**, and the run this session's investigation had been using throughout
+(`n390`) turned out to be inadmissible twice over — **Node v24.13.0** against a pinned major of 22, and
+a commit that is **not an ancestor of HEAD** (its branch was re-landed under new SHAs; the merge-base
+with HEAD *is* n388's commit). The provenance check that exposed both costs one line and was run at the
+eleventh hour rather than the first.
+
+**What moved, and what is NOT claimed.** `n392` scores 702/678/672/665 against floors 694/674/668/641.
+**The floors are not raised and 665 does not become one.** The delta from `n388` is **unattributed** —
+four consumed-input files and ~20 sim-core files differ across the gap; an independent scenario-tester
+traced 15 of 26 gained OSIDs to the Sana valley with three appearing verbatim inside the
+`034e9c4af calibration(vlasic)` diff. A barracks-alone pair was priced (~140 min) and **declined**: the
+change's correctness rests on historical dates, not match-percentage.
+
+**Reproduced four times, independently.** `n391` (rejected, `git_dirty:true`), `n392`, the GitHub
+Actions **Linux** runner, and the `UPDATE_BASELINES=1` refresh run are **byte-identical** on
+`control_delta.json`, `final_save.json` and `run_summary.json`. That cross-platform identity also
+retired the open question about `n391`: its dirty paths were a session lock and a derived fixture, and
+the byte-identity proves they never touched the sim. Manifest: **6 of 8 pins moved**;
+`formation_delta.json` and `watched_operations.json` unchanged; all 8 match `n392`.
+
+**The four Battle of the Barracks events no longer fire in one week.** All carried
+`turn_min 4 / turn_max 6` against a condition already true at turn 4. Staggered to Visoko w3, Sarajevo
+w4-9, Tuzla w6, Zenica w7 — six weeks, and four different kinds of action: one seizure, one ambush of a
+column withdrawing under agreement, two negotiated evacuations without a shot. **Not cosmetic**: the
+four grant 13 tanks and 26 artillery, and Tuzla carries a `control_change`. The file was re-sorted
+because `event_timeline_integrity.test.ts` enforces per-file chronological order.
+
+**An enclave check was reading a name nothing writes.** `csq_enclave_held_alt_intervention` gated on
+`srebrenica_fallen` / `zepa_fallen` / `gorazde_fallen`; the writer exists as **`srebrenica_fell`**, and
+`zepa_falls_1995` set no flags at all. All three checks were permanently true — correct today *only*
+because the window closes at w145 and Srebrenica falls at w162. Widen it past 162 and it would silently
+assert the enclaves were standing after they had fallen.
+
+**The event catalog measured by what it FIRES, not what was authored.** 178 firings / 188 weeks; **84
+weeks with no event, 132 with no player decision**; 122 of 299 events never fire;
+`MAX_EVENTS_PER_TURN = 4` bound **once**. Under-saturation is the defect, not crowding. Prior closure
+had declared the catalog "saturated" on an authoring count while counting `flag_at_least` reads that
+have no writers.
+
+**The orphan-flag problem REGENERATES, which is what determines the fix order.**
+`2026-03-23-event-flag-wiring-plan.md` closed 2026-03-25 stating *"Zero orphan flags remain."*
+`consequences.json` **did not exist until 2026-04-22**. All 32 current orphans arrived afterwards with
+the Wave 4-18 authoring. ⇒ Wiring them without a load-time check means the next wave recreates them;
+one consolidated post-1.0 backlog row now puts the ratchet first.
+
+**A five-seat §6 panel returned UNANIMOUS GO and refused the naive plan.** Its most valuable output was
+negative: correcting Srebrenica's date *in isolation* would put Markale II and Deliberate Force at or
+before the fall, and `turn_min 171 + turn_max 172` would activate the RRF brake for the first time in
+the game's history, leaving readiness at 7.0 against a threshold of 8 — **Srebrenica never falls**. Two
+items escalated to the owner as bright-line proposals; no repair work landed.
+
+**Four self-corrections, all left visible.** "The campaign has no ending" (false — it ends on the
+packaged player path); "Ahmići is the only blocker of its kind" (there are two); the `n390` baseline
+above; and **"nothing breaches"** — `verify_checkpoints.cjs` prints
+`RESULT: GUARD BREACHED` on **every** run here including `n388`, and I had grepped for the lines I
+expected rather than reading the verdict. It is the carved-out Farz discriminator
+(`CALIBRATION_MASTER.md:104-110`), but the claim was wrong on its face.
+
+⇒ **Lesson, three times in one session:** a wrapper's exit code, a grep for the happy path, and a
+`pgrep` that does not exist on this shell each reported success that had not happened — a Node-major
+preflight refusal behind exit 0, a `turn 188` filter that cannot match `turn=188`, and a false
+"refresh complete" at turn 17 of 188. **Build the check around the signal that cannot be faked** — here,
+the manifest's own hash changing.
