@@ -192,3 +192,26 @@ scorer had been using that instrument all along. The §E loader warning proposed
 
 ⇒ **Lesson, for the record:** *"no artifact carries this"* is an absence claim, and absence claims are
 the ones this project keeps getting wrong. Grep for the reader before declaring the data missing.
+
+---
+
+## Addendum 2 — the twin predicate this sweep never audited (raised by the §6 engine seat)
+
+**`territory_control` with a `municipality` key is a byte-identical twin of
+`faction_controls_municipality`.** `event_types.ts:736-742` and `:749-756` are the same computation —
+same `:mun:` filter, same `?? 0.5` default, same whole-OSID fraction, same `>=`. **Two names, one
+semantics.** This sweep audited only one of them.
+
+**Audited now. Result: zero occurrences.** No event in the shipped catalog uses `territory_control`
+with a `municipality` key; the 10 `territory_control` conditions in the catalog are all OSID-form,
+which is exempt from the granularity class by construction.
+
+⇒ **The sweep's findings are unchanged — still two hard blockers.** But the seat's condition stands for
+the *repair*: **any lint or predicate change must cover both names**, or the class is left half-open
+for the next author, who will reach for whichever name they happen to see first.
+
+**And one correction to Addendum 1 from the same seat:** the §E silent-premium lint would **not** have
+caught `operation_lukavac_93`. Trnovo's premium is **0.0** by this sweep's own table (N=6, threshold
+0.5, required 3/6 = exactly 0.500). Lukavac needs a different instrument — a reachability check against
+the run, not an arithmetic check against the schema. Addendum 1's claim that the lint "would have caught
+**both** Vitez and Trnovo" is **wrong**; it would have caught Vitez only.
