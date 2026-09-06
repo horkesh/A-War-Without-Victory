@@ -33046,3 +33046,70 @@ events — measured **28%**. D2 order: (1) the Dayton ending, both blockers, val
 cannot see w181; (2) the w139-188 decision drought, pure authoring, ~30 decisions not 7, COHA window
 first; (3) gesture escalation + wire the three posture-review handlers; (4) the odometer layer, after D2;
 (5) spike weeks — **do nothing**.
+
+## 2026-09-06 — Baseline re-blessed to `n392`; the barracks stagger lands; the event catalog measured
+
+**Owner-authorized baseline re-bless.** `n392` replaces `n388` as the canonical 188-week measurement.
+`n388` stood **34 commits stale**, and the run this session's investigation had been using throughout
+(`n390`) turned out to be inadmissible twice over — **Node v24.13.0** against a pinned major of 22, and
+a commit that is **not an ancestor of HEAD** (its branch was re-landed under new SHAs; the merge-base
+with HEAD *is* n388's commit). The provenance check that exposed both costs one line and was run at the
+eleventh hour rather than the first.
+
+**What moved, and what is NOT claimed.** `n392` scores 702/678/672/665 against floors 694/674/668/641.
+**The floors are not raised and 665 does not become one.** The delta from `n388` is **unattributed** —
+four consumed-input files and ~20 sim-core files differ across the gap; an independent scenario-tester
+traced 15 of 26 gained OSIDs to the Sana valley with three appearing verbatim inside the
+`034e9c4af calibration(vlasic)` diff. A barracks-alone pair was priced (~140 min) and **declined**: the
+change's correctness rests on historical dates, not match-percentage.
+
+**Reproduced four times, independently.** `n391` (rejected, `git_dirty:true`), `n392`, the GitHub
+Actions **Linux** runner, and the `UPDATE_BASELINES=1` refresh run are **byte-identical** on
+`control_delta.json`, `final_save.json` and `run_summary.json`. That cross-platform identity also
+retired the open question about `n391`: its dirty paths were a session lock and a derived fixture, and
+the byte-identity proves they never touched the sim. Manifest: **6 of 8 pins moved**;
+`formation_delta.json` and `watched_operations.json` unchanged; all 8 match `n392`.
+
+**The four Battle of the Barracks events no longer fire in one week.** All carried
+`turn_min 4 / turn_max 6` against a condition already true at turn 4. Staggered to Visoko w3, Sarajevo
+w4-9, Tuzla w6, Zenica w7 — six weeks, and four different kinds of action: one seizure, one ambush of a
+column withdrawing under agreement, two negotiated evacuations without a shot. **Not cosmetic**: the
+four grant 13 tanks and 26 artillery, and Tuzla carries a `control_change`. The file was re-sorted
+because `event_timeline_integrity.test.ts` enforces per-file chronological order.
+
+**An enclave check was reading a name nothing writes.** `csq_enclave_held_alt_intervention` gated on
+`srebrenica_fallen` / `zepa_fallen` / `gorazde_fallen`; the writer exists as **`srebrenica_fell`**, and
+`zepa_falls_1995` set no flags at all. All three checks were permanently true — correct today *only*
+because the window closes at w145 and Srebrenica falls at w162. Widen it past 162 and it would silently
+assert the enclaves were standing after they had fallen.
+
+**The event catalog measured by what it FIRES, not what was authored.** 178 firings / 188 weeks; **84
+weeks with no event, 132 with no player decision**; 122 of 299 events never fire;
+`MAX_EVENTS_PER_TURN = 4` bound **once**. Under-saturation is the defect, not crowding. Prior closure
+had declared the catalog "saturated" on an authoring count while counting `flag_at_least` reads that
+have no writers.
+
+**The orphan-flag problem REGENERATES, which is what determines the fix order.**
+`2026-03-23-event-flag-wiring-plan.md` closed 2026-03-25 stating *"Zero orphan flags remain."*
+`consequences.json` **did not exist until 2026-04-22**. All 32 current orphans arrived afterwards with
+the Wave 4-18 authoring. ⇒ Wiring them without a load-time check means the next wave recreates them;
+one consolidated post-1.0 backlog row now puts the ratchet first.
+
+**A five-seat §6 panel returned UNANIMOUS GO and refused the naive plan.** Its most valuable output was
+negative: correcting Srebrenica's date *in isolation* would put Markale II and Deliberate Force at or
+before the fall, and `turn_min 171 + turn_max 172` would activate the RRF brake for the first time in
+the game's history, leaving readiness at 7.0 against a threshold of 8 — **Srebrenica never falls**. Two
+items escalated to the owner as bright-line proposals; no repair work landed.
+
+**Four self-corrections, all left visible.** "The campaign has no ending" (false — it ends on the
+packaged player path); "Ahmići is the only blocker of its kind" (there are two); the `n390` baseline
+above; and **"nothing breaches"** — `verify_checkpoints.cjs` prints
+`RESULT: GUARD BREACHED` on **every** run here including `n388`, and I had grepped for the lines I
+expected rather than reading the verdict. It is the carved-out Farz discriminator
+(`CALIBRATION_MASTER.md:104-110`), but the claim was wrong on its face.
+
+⇒ **Lesson, three times in one session:** a wrapper's exit code, a grep for the happy path, and a
+`pgrep` that does not exist on this shell each reported success that had not happened — a Node-major
+preflight refusal behind exit 0, a `turn 188` filter that cannot match `turn=188`, and a false
+"refresh complete" at turn 17 of 188. **Build the check around the signal that cannot be faked** — here,
+the manifest's own hash changing.

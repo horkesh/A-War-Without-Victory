@@ -89,7 +89,49 @@ that say a particular R6, late-war, or pre-1.0 scope was "closed" remain phase-l
 They do not close the present calibration program. The sole scoring scenario remains
 `data/scenarios/apr1992_definitive_188w.json`.
 
-### Current canonical baseline — clean Node 22 HEAD revalidation
+### ★ CURRENT CANONICAL BASELINE — `n392`, owner-blessed 2026-09-06
+
+**Supersedes `n388` below**, which stood 34 commits stale. `n388` remains the lineage record and the
+provenance of the floors; it is no longer the measurement.
+
+The blessed run is
+`runs\apr1992_definitive_188w__6898d6d2e324c7a3__w188_n392`
+at commit `c2f6592ec1e2f049d93ade595760c19633bb2ce7` (`git_dirty:false`, Node 22.23.2, no override,
+launched through the gated `sim:scenario:run:188w` entrypoint).
+
+| checkpoint | `n388` (prior) | **`n392` (current)** | floor (unchanged) |
+|---|---:|---:|---:|
+| jan1993 | 697 / 712 | **702 / 712** | 694 |
+| apr1994 | 677 / 712 | **678 / 712** | 674 |
+| apr1995 | 671 / 712 | **672 / 712** | 668 |
+| oct1995 | 644 / 712 | **665 / 712** | 641 |
+
+**The floors are NOT raised.** Per the S0 rule, a measurement is not a floor. `665` in particular must
+not become one: the delta from `n388` is **not attributed** to any single change — four consumed-input
+files and ~20 sim-core files differ across the gap, 15 of 26 gained OSIDs sit in the Sana valley, and
+three appear verbatim in the `034e9c4af calibration(vlasic)` diff.
+
+**Reproduced four times independently**, which is why it is trustworthy as an artifact even though the
+delta is unattributed: the initial run (`n391`, rejected on `git_dirty:true`), `n392`, the GitHub
+Actions Linux runner, and the `UPDATE_BASELINES=1` refresh run — all byte-identical on
+`control_delta.json`, `final_save.json`, `run_summary.json`. Cross-platform and cross-host on the same
+Node major.
+
+Manifest re-blessed in the same change: **6 of 8 pins moved**, `formation_delta.json` and
+`watched_operations.json` unchanged, and all 8 match `n392` exactly.
+
+Guard state unchanged from `n388`: 9/9 enclave cells, Srebrenica and Žepa both fall on schedule,
+eastern capture provenance CLEAN. `verify_checkpoints.cjs` still exits red on the carved-out Farz P-A
+discriminator — as it does for `n388` — which per the note below is **not** a §6 breach.
+
+**Merge-order caution.** The `codex/apr1994-operational-corrections` lane is moving these same numbers
+in the opposite direction (its `n1`: +9 apr1995, −7 jan1993, −7 oct1995 against its own `n0`). Blessing
+`n392` sets the reference that lane will be measured against; whichever lands second must re-measure
+rather than carry its own run forward.
+
+---
+
+### Prior canonical baseline — `n388`, clean Node 22 HEAD revalidation (superseded 2026-09-06)
 
 The owner-authorized clean run is
 `F:\A-War-Without-Victory\runs\apr1992_definitive_188w__46834a3b41033bff__w188_n388`
