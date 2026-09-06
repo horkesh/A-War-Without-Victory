@@ -3293,6 +3293,60 @@
     }
   },
   {
+    "id": "battle_of_the_barracks_visoko",
+    "title": "Battle of the Barracks — Visoko",
+    "narrative": "The small JNA depot at Visoko is overrun by local TDF. A handful of armored vehicles and mortar tubes are captured. The symbolic victory boosts morale among defenders of the Sarajevo approaches.",
+    "source_note": "Existing barracks/JNA-withdrawal sources ground the row's military-provenance context. This note adds no casualty figures, equipment quantities, causal claims, prohibited player choices, or alternate-outcome framing.",
+    "category": "military",
+    "historical_source": "ICTY Galic Trial Judgment (IT-98-29-T), Sarajevo corridor military context; ICTY Hadzihasanovic Trial Judgment (IT-01-47-T), 3rd Corps formation and central Bosnia equipment",
+    "source_tier": "icty_icj_un",
+    "trigger": {
+      "turn_min": 3,
+      "turn_max": 4,
+      "phase": "war",
+      "condition": {
+        "type": "faction_controls_municipality",
+        "faction": "RBiH",
+        "municipality": "visoko",
+        "threshold": 0.3
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "equipment_grant",
+      "faction": "RBiH",
+      "tanks": 1,
+      "artillery": 3,
+      "target_municipality": "visoko"
+    },
+    "effects": [
+      {
+        "kind": "supply_delta",
+        "faction": "RBiH",
+        "delta": 5
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 2
+      },
+      {
+        "kind": "narrative",
+        "text": "Local TDF forces seize the Visoko depot. A few tanks and mortars join the defense of the Sarajevo corridor."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": 5
+      }
+    ],
+    "sets_flags": {
+      "barracks_visoko_seized": true
+    }
+  },
+  {
     "id": "hrhb_1992_graz_cooperation_collapse",
     "title": "Graz and the Frictions of Cooperation",
     "narrative": "Karadzic and Boban have met in Graz. The 6 May 1992 joint statement records a Croat-Serb understanding on the territorial organization of Bosnia-Herzegovina — partition lines that leave only residual central-Bosnia ground for Sarajevo. The HVO 4th Brigade still holds the Mostar line against the JNA/VRS; in Prozor, Novi Travnik, and Vitez, local HVO commanders begin asserting HZ HB jurisdiction over checkpoints, factories, and municipal command. Zagreb's transcripts read Graz as compatible with the HZ HB project, but with diplomatic risk. The political files require a posture: accept the local frictions as the visible cost of separate trajectories, or have the Presidency intervene at command level to suppress them and preserve the joint anti-VRS framework.",
@@ -3518,7 +3572,7 @@
     "source_tier": "icty_icj_un",
     "trigger": {
       "turn_min": 4,
-      "turn_max": 6,
+      "turn_max": 9,
       "phase": "war",
       "condition": {
         "type": "faction_controls_municipality",
@@ -3576,191 +3630,6 @@
     ],
     "sets_flags": {
       "barracks_sarajevo_seized": true
-    }
-  },
-  {
-    "id": "battle_of_the_barracks_tuzla",
-    "title": "Battle of the Barracks — Tuzla",
-    "narrative": "The Tuzla column incident: JNA's 92nd Motorized Brigade is ambushed on Brčanska Malta while withdrawing from the city. In the chaos, TDF forces seize the barracks complex with its armored vehicles and artillery depot. Over 50 JNA soldiers are killed — the bloodiest barracks seizure in Bosnia. The captured equipment transforms 2nd Corps capability.",
-    "source_note": "Existing barracks/JNA-withdrawal sources ground the row's military-provenance context. This note adds no casualty figures, equipment quantities, causal claims, prohibited player choices, or alternate-outcome framing.",
-    "category": "military",
-    "historical_source": "ICTY Mladic Trial Judgment (IT-09-92-T), JNA withdrawal and VRS formation context; ICTY Tolimir Trial Judgment (IT-05-88/2), VRS intelligence operations in northeastern Bosnia",
-    "source_tier": "icty_icj_un",
-    "trigger": {
-      "turn_min": 4,
-      "turn_max": 6,
-      "phase": "war",
-      "condition": {
-        "type": "faction_controls_municipality",
-        "faction": "RBiH",
-        "municipality": "tuzla",
-        "threshold": 0.3
-      }
-    },
-    "once": true,
-    "effect": {
-      "kind": "equipment_grant",
-      "faction": "RBiH",
-      "tanks": 6,
-      "artillery": 10,
-      "target_municipality": "tuzla"
-    },
-    "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": 15
-      },
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 8
-      },
-      {
-        "kind": "aggression_modifier",
-        "faction": "RS",
-        "delta": 0.2,
-        "duration_turns": 10
-      },
-      {
-        "kind": "patron_pressure",
-        "faction": "RBiH",
-        "delta": 10
-      },
-      {
-        "kind": "humanitarian_impact",
-        "faction": "RBiH",
-        "war_crimes_delta": 2
-      },
-      {
-        "kind": "control_change",
-        "faction": "RBiH",
-        "osids": [
-          "op:tuzla:simin_han_2"
-        ]
-      },
-      {
-        "kind": "narrative",
-        "text": "The Brčanska Malta ambush kills over 50 JNA soldiers. Belgrade and the international community condemn the attack. TDF forces secure the Simin Han barracks complex. VRS high command redirects forces toward the Tuzla corridor."
-      }
-    ],
-    "dimension_shifts": [
-      {
-        "faction": "RBiH",
-        "dimension": "military_credibility",
-        "delta": 5
-      }
-    ],
-    "sets_flags": {
-      "barracks_tuzla_seized": true
-    }
-  },
-  {
-    "id": "battle_of_the_barracks_zenica",
-    "title": "Battle of the Barracks — Zenica",
-    "narrative": "ARBiH forces seize the JNA barracks in Zenica, capturing artillery pieces and ammunition stores. The Zenica garrison, weakened by Bosniak desertions, offers limited resistance. The captured equipment is distributed to 3rd Corps formations defending central Bosnia.",
-    "source_note": "Existing barracks/JNA-withdrawal sources ground the row's military-provenance context. This note adds no casualty figures, equipment quantities, causal claims, prohibited player choices, or alternate-outcome framing.",
-    "category": "military",
-    "historical_source": "ICTY Hadzihasanovic Trial Judgment (IT-01-47-T), 3rd Corps formation and equipment acquisition; Balkan Battlegrounds, Vol. I, p. 140",
-    "source_tier": "icty_icj_un",
-    "trigger": {
-      "turn_min": 4,
-      "turn_max": 6,
-      "phase": "war",
-      "condition": {
-        "type": "faction_controls_municipality",
-        "faction": "RBiH",
-        "municipality": "zenica",
-        "threshold": 0.3
-      }
-    },
-    "once": true,
-    "effect": {
-      "kind": "equipment_grant",
-      "faction": "RBiH",
-      "tanks": 2,
-      "artillery": 5,
-      "target_municipality": "zenica"
-    },
-    "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": 8
-      },
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 3
-      },
-      {
-        "kind": "narrative",
-        "text": "3rd Corps inherits JNA artillery from the Zenica garrison. Central Bosnia defenses are strengthened."
-      }
-    ],
-    "dimension_shifts": [
-      {
-        "faction": "RBiH",
-        "dimension": "military_credibility",
-        "delta": 5
-      }
-    ],
-    "sets_flags": {
-      "barracks_zenica_seized": true
-    }
-  },
-  {
-    "id": "battle_of_the_barracks_visoko",
-    "title": "Battle of the Barracks — Visoko",
-    "narrative": "The small JNA depot at Visoko is overrun by local TDF. A handful of armored vehicles and mortar tubes are captured. The symbolic victory boosts morale among defenders of the Sarajevo approaches.",
-    "source_note": "Existing barracks/JNA-withdrawal sources ground the row's military-provenance context. This note adds no casualty figures, equipment quantities, causal claims, prohibited player choices, or alternate-outcome framing.",
-    "category": "military",
-    "historical_source": "ICTY Galic Trial Judgment (IT-98-29-T), Sarajevo corridor military context; ICTY Hadzihasanovic Trial Judgment (IT-01-47-T), 3rd Corps formation and central Bosnia equipment",
-    "source_tier": "icty_icj_un",
-    "trigger": {
-      "turn_min": 4,
-      "turn_max": 6,
-      "phase": "war",
-      "condition": {
-        "type": "faction_controls_municipality",
-        "faction": "RBiH",
-        "municipality": "visoko",
-        "threshold": 0.3
-      }
-    },
-    "once": true,
-    "effect": {
-      "kind": "equipment_grant",
-      "faction": "RBiH",
-      "tanks": 1,
-      "artillery": 3,
-      "target_municipality": "visoko"
-    },
-    "effects": [
-      {
-        "kind": "supply_delta",
-        "faction": "RBiH",
-        "delta": 5
-      },
-      {
-        "kind": "morale_change",
-        "faction": "RBiH",
-        "delta": 2
-      },
-      {
-        "kind": "narrative",
-        "text": "Local TDF forces seize the Visoko depot. A few tanks and mortars join the defense of the Sarajevo corridor."
-      }
-    ],
-    "dimension_shifts": [
-      {
-        "faction": "RBiH",
-        "dimension": "military_credibility",
-        "delta": 5
-      }
-    ],
-    "sets_flags": {
-      "barracks_visoko_seized": true
     }
   },
   {
@@ -3900,6 +3769,83 @@
     ],
     "sets_flags": {
       "jna_withdrawn": true
+    }
+  },
+  {
+    "id": "battle_of_the_barracks_tuzla",
+    "title": "Battle of the Barracks — Tuzla",
+    "narrative": "The Tuzla column incident: JNA's 92nd Motorized Brigade is ambushed on Brčanska Malta while withdrawing from the city. In the chaos, TDF forces seize the barracks complex with its armored vehicles and artillery depot. Over 50 JNA soldiers are killed — the bloodiest barracks seizure in Bosnia. The captured equipment transforms 2nd Corps capability.",
+    "source_note": "Existing barracks/JNA-withdrawal sources ground the row's military-provenance context. This note adds no casualty figures, equipment quantities, causal claims, prohibited player choices, or alternate-outcome framing.",
+    "category": "military",
+    "historical_source": "ICTY Mladic Trial Judgment (IT-09-92-T), JNA withdrawal and VRS formation context; ICTY Tolimir Trial Judgment (IT-05-88/2), VRS intelligence operations in northeastern Bosnia",
+    "source_tier": "icty_icj_un",
+    "trigger": {
+      "turn_min": 6,
+      "turn_max": 7,
+      "phase": "war",
+      "condition": {
+        "type": "faction_controls_municipality",
+        "faction": "RBiH",
+        "municipality": "tuzla",
+        "threshold": 0.3
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "equipment_grant",
+      "faction": "RBiH",
+      "tanks": 6,
+      "artillery": 10,
+      "target_municipality": "tuzla"
+    },
+    "effects": [
+      {
+        "kind": "supply_delta",
+        "faction": "RBiH",
+        "delta": 15
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 8
+      },
+      {
+        "kind": "aggression_modifier",
+        "faction": "RS",
+        "delta": 0.2,
+        "duration_turns": 10
+      },
+      {
+        "kind": "patron_pressure",
+        "faction": "RBiH",
+        "delta": 10
+      },
+      {
+        "kind": "humanitarian_impact",
+        "faction": "RBiH",
+        "war_crimes_delta": 2
+      },
+      {
+        "kind": "control_change",
+        "faction": "RBiH",
+        "osids": [
+          "op:tuzla:simin_han_2"
+        ]
+      },
+      {
+        "kind": "narrative",
+        "text": "The Brčanska Malta ambush kills over 50 JNA soldiers. Belgrade and the international community condemn the attack. TDF forces secure the Simin Han barracks complex. VRS high command redirects forces toward the Tuzla corridor."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": 5
+      }
+    ],
+    "sets_flags": {
+      "barracks_tuzla_seized": true
     }
   },
   {
@@ -4061,6 +4007,60 @@
     "effect": {
       "kind": "narrative",
       "text": "The historical record of the Bijeljina takeover is documented in the Codex."
+    }
+  },
+  {
+    "id": "battle_of_the_barracks_zenica",
+    "title": "Battle of the Barracks — Zenica",
+    "narrative": "ARBiH forces seize the JNA barracks in Zenica, capturing artillery pieces and ammunition stores. The Zenica garrison, weakened by Bosniak desertions, offers limited resistance. The captured equipment is distributed to 3rd Corps formations defending central Bosnia.",
+    "source_note": "Existing barracks/JNA-withdrawal sources ground the row's military-provenance context. This note adds no casualty figures, equipment quantities, causal claims, prohibited player choices, or alternate-outcome framing.",
+    "category": "military",
+    "historical_source": "ICTY Hadzihasanovic Trial Judgment (IT-01-47-T), 3rd Corps formation and equipment acquisition; Balkan Battlegrounds, Vol. I, p. 140",
+    "source_tier": "icty_icj_un",
+    "trigger": {
+      "turn_min": 7,
+      "turn_max": 8,
+      "phase": "war",
+      "condition": {
+        "type": "faction_controls_municipality",
+        "faction": "RBiH",
+        "municipality": "zenica",
+        "threshold": 0.3
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "equipment_grant",
+      "faction": "RBiH",
+      "tanks": 2,
+      "artillery": 5,
+      "target_municipality": "zenica"
+    },
+    "effects": [
+      {
+        "kind": "supply_delta",
+        "faction": "RBiH",
+        "delta": 8
+      },
+      {
+        "kind": "morale_change",
+        "faction": "RBiH",
+        "delta": 3
+      },
+      {
+        "kind": "narrative",
+        "text": "3rd Corps inherits JNA artillery from the Zenica garrison. Central Bosnia defenses are strengthened."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "military_credibility",
+        "delta": 5
+      }
+    ],
+    "sets_flags": {
+      "barracks_zenica_seized": true
     }
   },
   {
