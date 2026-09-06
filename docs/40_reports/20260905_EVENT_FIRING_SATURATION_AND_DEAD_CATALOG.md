@@ -28,6 +28,30 @@
 
 **Primary run:** `runs/apr1992_definitive_188w__46834a3b41033bff__w188_n390/weekly_report.jsonl`, field
 `events_fired` (per-week array of `{id, text}`), key `week_index`, 188 rows.
+
+> ### ⚠ PROVENANCE CAVEAT — added 2026-09-06, after the fact
+>
+> **`n390` is not an admissible calibration baseline, and this report should not have used it without
+> checking.** Two defects, both discovered only when a later run forced a provenance comparison:
+>
+> 1. **Node major.** `n390` was produced on **Node v24.13.0**. The repo pins **22** (`.nvmrc`), and
+>    `run_scenario_with_preflight.ts` now *refuses to start* on a mismatched major, because the sim
+>    calls implementation-approximated `pow/exp/log/atan2` in combat hot paths and a different V8
+>    major can move a result by a final bit — enough to flip a battle.
+>    `CALIBRATION_MASTER.md` already recorded `n374` as inadmissible for exactly this reason; `n390`
+>    has the same defect and nobody had noticed.
+> 2. **Off mainline.** `n390`'s commit `4b4e8e388` is **not an ancestor of HEAD** (verified with
+>    `git merge-base --is-ancestor`) — its branch was re-landed under new SHAs. The declared canonical
+>    baseline is **`n388`** (`CALIBRATION_MASTER.md:88-104`, commit `3474df2e0`, Node v22.23.2, clean
+>    tree), and n390's merge-base with HEAD *is* that commit. This report treated the off-mainline run
+>    as authoritative and the real baseline as unknown.
+>
+> **What this does and does not invalidate.** Every figure in §§1-5 is a **structural count** — how many
+> events fired, in which weeks, gated on what — and each was independently reproduced across **six 188w
+> runs with different scenario hashes** (§0). Counts of that kind do not turn on a final-bit combat
+> difference, so the findings stand. But they were taken on a run the project's own gate would reject,
+> and the check that would have caught it costs one line. **Any future work here should re-derive from
+> `n388` or a successor, not from `n390`.**
 Supporting: `final_save.json` (`military.event_flags`, `military.event_causality_log`,
 `military.event_decision_log`, `political.political_controllers`), `initial_save.json`.
 
