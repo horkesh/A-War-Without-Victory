@@ -479,7 +479,12 @@
       {
         "kind": "enclave_formation_displacement",
         "faction": "RBiH",
-        "source_osids": ["op:srebrenica:srebrenica_2", "op:srebrenica:donji_potocari_2", "op:srebrenica:ljeskovik_2", "op:srebrenica:osmace_2"],
+        "source_osids": [
+          "op:srebrenica:srebrenica_2",
+          "op:srebrenica:donji_potocari_2",
+          "op:srebrenica:ljeskovik_2",
+          "op:srebrenica:osmace_2"
+        ],
         "destination_osid": "op:zivinice:gracanica_2",
         "casualty_fraction": 0.6,
         "reconstitute_as": "reduced"
@@ -545,7 +550,9 @@
       {
         "kind": "enclave_formation_displacement",
         "faction": "RBiH",
-        "source_osids": ["op:rogatica:zepa_2"],
+        "source_osids": [
+          "op:rogatica:zepa_2"
+        ],
         "destination_osid": "op:zivinice:gracanica_2",
         "casualty_fraction": 0.15,
         "reconstitute_as": "none"
@@ -554,7 +561,10 @@
         "kind": "narrative",
         "text": "Zepa falls to the VRS. A second UN safe area is overrun in two weeks, deepening the international crisis."
       }
-    ]
+    ],
+    "sets_flags": {
+      "zepa_fell": true
+    }
   },
   {
     "id": "srebrenica_column_breakout_1995",
@@ -980,7 +990,9 @@
     },
     "requires_enabled": true,
     "once": true,
-    "tags": ["keystone_dilemma"],
+    "tags": [
+      "keystone_dilemma"
+    ],
     "requires_player_response": true,
     "responding_faction": "RS",
     "bot_response_logic": "historical",
@@ -1921,8 +1933,8 @@
         "risk_level": 0.9
       }
     ],
-  "historical_source": "NATO Operation Deliberate Force chronology (30 Aug-14 Sep 1995). UN S/1995/755 (30 Aug 1995). ICTY Mladić IT-09-92-T §§4631-4685 (Markale II attribution and Mladić preference for absorption). ICTY Karadžić IT-95-5/18-T §§4940-4982 (Sarajevo TEZ compliance decision and Patriarch Paper command chain). Holbrooke, To End a War (1998), ch. 8.",
-  "source_note": "The cited record supports the Deliberate Force chronology, the demand to remove heavy weapons from the Sarajevo exclusion zone, and the historical compliance path. The response options and numeric penalties are simulation abstractions of operational and diplomatic pressure; they do not claim exact private motives or guarantee a particular counterfactual outcome."
+    "historical_source": "NATO Operation Deliberate Force chronology (30 Aug-14 Sep 1995). UN S/1995/755 (30 Aug 1995). ICTY Mladić IT-09-92-T §§4631-4685 (Markale II attribution and Mladić preference for absorption). ICTY Karadžić IT-95-5/18-T §§4940-4982 (Sarajevo TEZ compliance decision and Patriarch Paper command chain). Holbrooke, To End a War (1998), ch. 8.",
+    "source_note": "The cited record supports the Deliberate Force chronology, the demand to remove heavy weapons from the Sarajevo exclusion zone, and the historical compliance path. The response options and numeric penalties are simulation abstractions of operational and diplomatic pressure; they do not claim exact private motives or guarantee a particular counterfactual outcome."
   },
   {
     "id": "operation_mistral_2_1995",
@@ -1950,7 +1962,10 @@
         "kind": "morale_change",
         "faction": "RS",
         "delta": -8,
-        "affected_corps": ["vrs_1st_krajina", "vrs_2nd_krajina"]
+        "affected_corps": [
+          "vrs_1st_krajina",
+          "vrs_2nd_krajina"
+        ]
       },
       {
         "kind": "morale_change",
@@ -2020,7 +2035,10 @@
         "kind": "morale_change",
         "faction": "RS",
         "delta": -8,
-        "affected_corps": ["vrs_1st_krajina", "vrs_2nd_krajina"]
+        "affected_corps": [
+          "vrs_1st_krajina",
+          "vrs_2nd_krajina"
+        ]
       },
       {
         "kind": "supply_delta",
