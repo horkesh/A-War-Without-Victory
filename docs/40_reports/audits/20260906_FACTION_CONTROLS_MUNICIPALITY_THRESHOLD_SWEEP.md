@@ -10,21 +10,32 @@ class**, not one row, and that *"one row was checked because one row was asked a
 
 ---
 
-## Verdict
+## Verdict — CORRECTED 2026-09-06 by the §6 panel's scenario/calibration seat
 
-**Ahmići is NOT a class. It is the only hard blocker of its kind in the catalog.**
+> ### ⚠ THIS SWEEP'S FIRST VERDICT WAS WRONG. **There are TWO hard blockers, not one.**
+>
+> The original text read *"Ahmići is NOT a class. It is the only hard blocker of its kind."* That
+> conclusion rested on a **false claim about the available instruments** (see "Method", limit 2). The
+> panel's scenario/calibration seat refuted it: `final_save.json → political.control_events` **is** a
+> complete per-turn, per-OSID control log, and `tools/verify_checkpoints.cjs:83-89` already replays it
+> as `stateAt(week)`. `control_delta.json` is a net summary *derived from* it.
+>
+> Replayed, `operation_lukavac_93` is dead on **the same arithmetic as Ahmići** and belongs in class A.
+> **Class B is empty.**
 
-Of **20 `faction_controls_municipality` conditions across 20 events in 15 municipalities**, exactly
-**one** is provably dead. The sweep also cleared one false positive of its own making and left one case
-genuinely unsettled.
+**Two of 20 conditions are provably dead.** The sweep also cleared one false positive of its own making.
 
 | Class | Count | |
 |---|---|---|
-| **A. Hard blocker** — clause false at t0 *and* t188, municipality frozen, clause is a conjunct | **1** | `ahmici_massacre_1993` |
-| **B. False at both ends, not provably dead** — municipality does move; window-scoped, not settled by these artifacts | **1** | `operation_lukavac_93` |
+| **A. Hard blocker** — clause unsatisfiable throughout the event's window | **2** | `ahmici_massacre_1993`, `operation_lukavac_93` |
+| **B. False at both ends, not provably dead** | **0** | *(emptied by the correction above)* |
 | **C. Negated clause** — satisfied *because* the faction is below the threshold | 1 | `mostar_liberation_1992` |
 | **D. Never fired but control clause satisfiable** — blocker is elsewhere | 0 | — |
 | Satisfied and fired | 17 | — |
+
+**Both confirmed across six 188w runs with different scenario hashes** — Trnovo peaks at 2/6 in weeks
+69-71 and Vitez at 1/3 in weeks 54-70 in **every** run. The seat's caveat (Trnovo *can* move, unlike
+frozen Vitez, so one run is not enough) is discharged.
 
 ---
 
@@ -49,10 +60,26 @@ Evidence: `runs/apr1992_definitive_188w__46834a3b41033bff__w188_n390` —
    `mostar_liberation_1992` as unreachable. Its clause is **negated** — *"RS does NOT hold ≥30% of
    Mostar"* — and is therefore satisfied *precisely because* RS holds 1 of 9. The corrected walk carries
    negation and `or`-membership down the tree. **A sweep that ignores polarity manufactures defects.**
-2. **`control_delta.json` records NET start-vs-end change**, so an OSID that flips out and back is
-   invisible to it. A first pass replayed those flips in *file* order and reported a "peak" holding —
-   which is not a temporal peak and was dropped. **This sweep therefore cannot answer window-scoped
-   questions and does not pretend to** (see class B).
+2. **~~This sweep cannot answer window-scoped questions.~~ WRONG — CORRECTED 2026-09-06.**
+   It is true that `control_delta.json` records NET start-vs-end change, so an OSID that flips out and
+   back is invisible to it, and that a first pass replayed those flips in *file* order and reported a
+   "peak" that is not temporal. Both of those are real and the "peak" column stayed dropped.
+   **But the conclusion drawn from them was false.** A per-turn, per-OSID control log **does** exist —
+   `final_save.json → political.control_events`, 201 records carrying
+   `{turn, settlement_id, from, to, mechanism, battle_id, mun_id}` — and `verify_checkpoints.cjs:83-89`
+   already replays it:
+
+   ```js
+   function stateAt(week) {
+     const st = { ...init };
+     for (const e of events) if (e.turn <= week) st[e.settlement_id] = e.to;
+     return st;
+   }
+   ```
+
+   **The instrument the sweep declared missing was already in the repo, already used by the checkpoint
+   scorer.** ⇒ Window-scoped questions ARE answerable, and answering one turned class B into a second
+   class-A blocker.
 
 What it *can* establish robustly: exact t0/t188 holdings; whether a municipality appears in the net
 flip set at all; and hence that a municipality frozen at `t0 == t188` with zero net flips and a holding
@@ -74,15 +101,36 @@ an OSID-granularity artifact, not a flag bug — the gate encodes a map resoluti
 
 Routed to the §6 panel as **P1**. This sweep proposes no fix.
 
-## B. The one unsettled case
+## A2. The second hard blocker — `operation_lukavac_93`
 
-**`operation_lukavac_93`** (`war_1993.json`, window 69-71): RS holds 2 of 6 Trnovo OSIDs at both t0 and
-t188 and needs 3, but **Trnovo does flip during the run**. Whether RS held 3 during weeks 69-71
-specifically cannot be answered from net-delta artifacts. Its sibling conjunct
-(`flag_equals sarajevo_siege_active true`) is not in doubt.
+*(Originally filed as "the one unsettled case". Settled 2026-09-06 by replaying
+`political.control_events`.)*
 
-**This is a live question, not a cleared one** — it needs per-turn control resolution, which no current
-run artifact carries.
+**`operation_lukavac_93`** (`war_1993.json`, window 69-71) requires
+`faction_controls_municipality RS trnovo >= 0.5` — **3 of 6 OSIDs**.
+
+MEASURED, replayed per turn:
+
+| Week | RS holdings in Trnovo | |
+|---|---|---|
+| w0-19 | 2/6 = 0.333 | not satisfied |
+| w20 | 1/6 = 0.167 | `tosici` RS→RBiH (combat) |
+| w25-188 | 2/6 = 0.333 | `kijevo_2` RBiH→RS (combat) |
+| **w69, w70, w71** | **2/6 = 0.333** | **not satisfied — the entire window** |
+
+There are exactly **two** Trnovo control events in 188 weeks, both before w26, and zero Trnovo battles
+after w38. RS never reaches 3/6 at any point in the run. Its sibling conjunct
+(`flag_equals sarajevo_siege_active true`) is not in doubt, so the control clause is the blocker.
+The event has never fired.
+
+**Confirmed across six 188w runs with different scenario hashes**, which discharges the caveat that
+Trnovo — unlike frozen Vitez — *can* move: in all six, RS peaks at 2/6 across w69-71.
+
+This is the same defect shape as Ahmići: a `0.5` threshold on a municipality whose achievable fractions
+are `0.00, 0.17, 0.33, 0.50, 0.67, 0.83, 1.00`. Unlike Vitez, **0.5 IS achievable here** — Trnovo has 6
+OSIDs, so the threshold is not arithmetically impossible; the modelled war simply never delivers the
+third cell. Whether that is a fidelity defect in the gate or in the war is the **Historian's** question,
+not this sweep's, and it is not currently before the panel.
 
 ## C. The false positive this sweep created and caught
 
@@ -122,3 +170,23 @@ directory and is ~120 lines). Regenerate by walking the six catalog files for
 `faction_controls_municipality` nodes **carrying negation and `or`-membership**, then joining against
 `political_controllers` from the run's initial and final saves and the `flips` array in
 `control_delta.json`.
+
+---
+
+## Addendum — the instrument, and one line for CALIBRATION_MASTER
+
+Raised by the §6 panel's scenario/calibration seat and adopted here.
+
+**`control_delta.json` is net-only. `final_save.json → political.control_events` is the temporal source
+of truth.** The former is derived from the latter. Any question of the form *"who held X in week N"* is
+answerable today by the four-line replay at `tools/verify_checkpoints.cjs:83-89`; no new instrument is
+needed, only discoverability. The seat's suggestion — lift `stateAt` into a ~10-line
+`tools/control_at.cjs` CLI — is cheap and carries zero calibration risk.
+
+**This sweep is the cautionary case.** It reached a wrong headline not because the measurement was hard
+but because it asserted an instrument did not exist without looking for one, in a repo whose checkpoint
+scorer had been using that instrument all along. The §E loader warning proposed above would have caught
+**both** Vitez and Trnovo at authoring time, before either needed a sweep.
+
+⇒ **Lesson, for the record:** *"no artifact carries this"* is an absence claim, and absence claims are
+the ones this project keeps getting wrong. Grep for the reader before declaring the data missing.
