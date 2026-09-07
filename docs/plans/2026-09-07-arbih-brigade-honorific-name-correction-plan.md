@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-07
 **Lane:** R7 — Content, historical attribution (small disjoint packet)
-**Status:** PLANNED, NOT YET IMPLEMENTED
+**Status:** IMPLEMENTED 2026-09-07 (branch `r7-arbih-honorific-names`, not yet merged to `main`)
 **Branch/worktree:** `r7-arbih-honorific-names` at `F:/AWWV-worktrees/r7-arbih-honorific-names` (isolated from `main` and from the concurrent `codex/*` branches/worktrees — `apr1994-operational-corrections`, `bc01-player-opportunities`, `bc02-load-ratings`)
 
 ## Finding
@@ -43,6 +43,20 @@ Apply the identical strip to the 33 matching entries in `formationNameLocalizati
 ## Precedent
 
 `docs/40_reports/proposals/20260619_VITEZOVI_IDENTITY_MODELING_DECISION.md` is the closest prior case (HRHB `hrhb_vitezovi_brigade_vitez` identity correction) and is the template for process weight here: it warns "even display/name-only changes can move output surfaces because OOB loading and reports depend on formation names" — hence the explicit test/docs sweep above rather than treating this as a pure data edit.
+
+## Implementation notes (added on execution)
+
+Actual scope was wider than the original steps by one file: `data/source/oob_brigade_designations.json`
+is a 246-row catalog (`designation_code`, `english_gloss`, `official_bcs`) that `getLocalizedFormationName`
+consults **before** `formation.name` or `EXACT_BCS_NAMES` — it would have kept leaking the honorific
+into the UI (and into the `designation_code` string, e.g. `AWWV-BDE-ARBIH-503RD-SLAVNA-MOUNTAIN`) even
+after `oob_brigades.json.name` was fixed. All three fields were corrected for the 33 rows. The baked
+`data/derived/startup/apr_1992_initial_save.json` snapshot also needed a rebuild
+(`npm run desktop:startup-snapshot:build -- --write`), diffed row-by-row against the pre-rebuild copy
+to confirm only the 33 brigades' `name` changed (26 of them are present at turn 0; the other 7 have
+`available_from > 0`). `docs/knowledge/*` was checked but deliberately left untouched — those are
+historical order-of-battle references correctly citing the real-world post-honor unit names, a
+different claim from what the game's turn-0 data should show.
 
 ## Non-goals
 

@@ -498,7 +498,7 @@ describe('runBotRecruitment', () => {
             makeBrigade({
                 id: 'arbih_770th_slavna_mountain',
                 faction: 'RBiH',
-                name: '770th Slavna Mountain',
+                name: '770th Mountain',
                 home_mun: 'donji_vakuf',
                 mandatory: true,
                 home_osid: 'op:donji_vakuf:donji_vakuf_2',

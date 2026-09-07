@@ -25,9 +25,9 @@
     {
       "id": "arbih_104th_vitezka_motorized",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-104TH-VITEZKA-MOTORIZED",
-      "english_gloss": "104th Vitezka Motorized",
-      "official_bcs": "104. viteška motorizovana brigada",
+      "designation_code": "AWWV-BDE-ARBIH-104TH-MOTORIZED",
+      "english_gloss": "104th Motorized",
+      "official_bcs": "104. motorizovana brigada",
       "unit_type": "motorized",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -65,9 +65,9 @@
     {
       "id": "arbih_111th_vitezka_motorized",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-111TH-VITEZKA-MOTORIZED",
-      "english_gloss": "111th Vitezka Motorized",
-      "official_bcs": "111. viteška motorizovana brigada",
+      "designation_code": "AWWV-BDE-ARBIH-111TH-MOTORIZED",
+      "english_gloss": "111th Motorized",
+      "official_bcs": "111. motorizovana brigada",
       "unit_type": "motorized",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -75,9 +75,9 @@
     {
       "id": "arbih_112th_vitezka_motorized",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-112TH-VITEZKA-MOTORIZED",
-      "english_gloss": "112th Vitezka Motorized",
-      "official_bcs": "112. viteška motorizovana brigada",
+      "designation_code": "AWWV-BDE-ARBIH-112TH-MOTORIZED",
+      "english_gloss": "112th Motorized",
+      "official_bcs": "112. motorizovana brigada",
       "unit_type": "motorized",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -205,9 +205,9 @@
     {
       "id": "arbih_161st_slavna_olovo_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-161ST-SLAVNA-OLOVO-MOUNTAIN",
-      "english_gloss": "161st Slavna Olovo Mountain",
-      "official_bcs": "161. slavna olovska brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-161ST-OLOVO-MOUNTAIN",
+      "english_gloss": "161st Olovo Mountain",
+      "official_bcs": "161. olovska brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -255,9 +255,9 @@
     {
       "id": "arbih_17th_vitezka_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-17TH-VITEZKA-MOUNTAIN",
-      "english_gloss": "17th Vitezka Mountain",
-      "official_bcs": "17. viteška brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-17TH-MOUNTAIN",
+      "english_gloss": "17th Mountain",
+      "official_bcs": "17. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -275,9 +275,9 @@
     {
       "id": "arbih_182nd_vitezka_light",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-182ND-VITEZKA-LIGHT",
-      "english_gloss": "182nd Vitezka Light",
-      "official_bcs": "182. viteška lahka brigada",
+      "designation_code": "AWWV-BDE-ARBIH-182ND-LIGHT",
+      "english_gloss": "182nd Light",
+      "official_bcs": "182. lahka brigada",
       "unit_type": "light",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -335,9 +335,9 @@
     {
       "id": "arbih_210th_vitezka_liberation_nesib_maliki",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-210TH-VITEZKA-LIBERATION-NESIB-MALIKI",
-      "english_gloss": "210th Vitezka Liberation \"Nesib Malikić\"",
-      "official_bcs": "210. viteška oslobodilačka brigada \"Nesib Malikić\"",
+      "designation_code": "AWWV-BDE-ARBIH-210TH-LIBERATION-NESIB-MALIKI",
+      "english_gloss": "210th Liberation \"Nesib Malikić\"",
+      "official_bcs": "210. oslobodilačka brigada \"Nesib Malikić\"",
       "unit_type": "liberation",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -365,9 +365,9 @@
     {
       "id": "arbih_213th_vitezka_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-213TH-VITEZKA-MOUNTAIN",
-      "english_gloss": "213th Vitezka Mountain",
-      "official_bcs": "213. viteška brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-213TH-MOUNTAIN",
+      "english_gloss": "213th Mountain",
+      "official_bcs": "213. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -375,9 +375,9 @@
     {
       "id": "arbih_215th_vitezka_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-215TH-VITEZKA-MOUNTAIN",
-      "english_gloss": "215th Vitezka Mountain",
-      "official_bcs": "215. viteška brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-215TH-MOUNTAIN",
+      "english_gloss": "215th Mountain",
+      "official_bcs": "215. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -385,9 +385,9 @@
     {
       "id": "arbih_217th_vitezka_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-217TH-VITEZKA-MOUNTAIN",
-      "english_gloss": "217th Vitezka Mountain",
-      "official_bcs": "217. viteška brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-217TH-MOUNTAIN",
+      "english_gloss": "217th Mountain",
+      "official_bcs": "217. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -505,9 +505,9 @@
     {
       "id": "arbih_246th_vitezka_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-246TH-VITEZKA-MOUNTAIN",
-      "english_gloss": "246th Vitezka Mountain",
-      "official_bcs": "246. viteška brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-246TH-MOUNTAIN",
+      "english_gloss": "246th Mountain",
+      "official_bcs": "246. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -525,9 +525,9 @@
     {
       "id": "arbih_252nd_slavna_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-252ND-SLAVNA-MOUNTAIN",
-      "english_gloss": "252nd Slavna Mountain",
-      "official_bcs": "252. slavna brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-252ND-MOUNTAIN",
+      "english_gloss": "252nd Mountain",
+      "official_bcs": "252. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -555,9 +555,9 @@
     {
       "id": "arbih_255th_slavna_mountain_hajrudin_mesi",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-255TH-SLAVNA-MOUNTAIN-HAJRUDIN-MESI",
-      "english_gloss": "255th Slavna Mountain \"Hajrudin Mesić\"",
-      "official_bcs": "255. slavna brdska brigada \"Hajrudin Mesić\"",
+      "designation_code": "AWWV-BDE-ARBIH-255TH-MOUNTAIN-HAJRUDIN-MESI",
+      "english_gloss": "255th Mountain \"Hajrudin Mesić\"",
+      "official_bcs": "255. brdska brigada \"Hajrudin Mesić\"",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -665,9 +665,9 @@
     {
       "id": "arbih_303rd_vitezka_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-303RD-VITEZKA-MOUNTAIN",
-      "english_gloss": "303rd Vitezka Mountain",
-      "official_bcs": "303. viteška brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-303RD-MOUNTAIN",
+      "english_gloss": "303rd Mountain",
+      "official_bcs": "303. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -675,9 +675,9 @@
     {
       "id": "arbih_314th_slavna_liberation",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-314TH-SLAVNA-LIBERATION",
-      "english_gloss": "314th Slavna Liberation",
-      "official_bcs": "314. slavna oslobodilačka brigada",
+      "designation_code": "AWWV-BDE-ARBIH-314TH-LIBERATION",
+      "english_gloss": "314th Liberation",
+      "official_bcs": "314. oslobodilačka brigada",
       "unit_type": "liberation",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -695,9 +695,9 @@
     {
       "id": "arbih_327th_vitezka_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-327TH-VITEZKA-MOUNTAIN",
-      "english_gloss": "327th Vitezka Mountain",
-      "official_bcs": "327. viteška brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-327TH-MOUNTAIN",
+      "english_gloss": "327th Mountain",
+      "official_bcs": "327. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -745,9 +745,9 @@
     {
       "id": "arbih_372nd_vitezka_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-372ND-VITEZKA-MOUNTAIN",
-      "english_gloss": "372nd Vitezka Mountain",
-      "official_bcs": "372. viteška brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-372ND-MOUNTAIN",
+      "english_gloss": "372nd Mountain",
+      "official_bcs": "372. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -755,9 +755,9 @@
     {
       "id": "arbih_373rd_slavna_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-373RD-SLAVNA-MOUNTAIN",
-      "english_gloss": "373rd Slavna Mountain",
-      "official_bcs": "373. slavna brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-373RD-MOUNTAIN",
+      "english_gloss": "373rd Mountain",
+      "official_bcs": "373. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -765,9 +765,9 @@
     {
       "id": "arbih_374th_slavna_light",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-374TH-SLAVNA-LIGHT",
-      "english_gloss": "374th Slavna Light",
-      "official_bcs": "374. slavna lahka brigada",
+      "designation_code": "AWWV-BDE-ARBIH-374TH-LIGHT",
+      "english_gloss": "374th Light",
+      "official_bcs": "374. lahka brigada",
       "unit_type": "light",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -785,9 +785,9 @@
     {
       "id": "arbih_377th_vitezka_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-377TH-VITEZKA-MOUNTAIN",
-      "english_gloss": "377th Vitezka Mountain",
-      "official_bcs": "377. viteška brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-377TH-MOUNTAIN",
+      "english_gloss": "377th Mountain",
+      "official_bcs": "377. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -795,9 +795,9 @@
     {
       "id": "arbih_441st_vitezka_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-441ST-VITEZKA-MOUNTAIN",
-      "english_gloss": "441st Vitezka Mountain",
-      "official_bcs": "441. viteška brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-441ST-MOUNTAIN",
+      "english_gloss": "441st Mountain",
+      "official_bcs": "441. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -905,9 +905,9 @@
     {
       "id": "arbih_501st_slavna_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-501ST-SLAVNA-MOUNTAIN",
-      "english_gloss": "501st Slavna Mountain",
-      "official_bcs": "501. slavna brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-501ST-MOUNTAIN",
+      "english_gloss": "501st Mountain",
+      "official_bcs": "501. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -915,9 +915,9 @@
     {
       "id": "arbih_502nd_vitezka_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-502ND-VITEZKA-MOUNTAIN",
-      "english_gloss": "502nd Vitezka Mountain",
-      "official_bcs": "502. viteška brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-502ND-MOUNTAIN",
+      "english_gloss": "502nd Mountain",
+      "official_bcs": "502. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -925,9 +925,9 @@
     {
       "id": "arbih_503rd_slavna_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-503RD-SLAVNA-MOUNTAIN",
-      "english_gloss": "503rd Slavna Mountain",
-      "official_bcs": "503. slavna brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-503RD-MOUNTAIN",
+      "english_gloss": "503rd Mountain",
+      "official_bcs": "503. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -945,9 +945,9 @@
     {
       "id": "arbih_505th_vitezka_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-505TH-VITEZKA-MOUNTAIN",
-      "english_gloss": "505th Vitezka Mountain",
-      "official_bcs": "505. viteška brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-505TH-MOUNTAIN",
+      "english_gloss": "505th Mountain",
+      "official_bcs": "505. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -975,9 +975,9 @@
     {
       "id": "arbih_511th_slavna_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-511TH-SLAVNA-MOUNTAIN",
-      "english_gloss": "511th Slavna Mountain",
-      "official_bcs": "511. slavna brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-511TH-MOUNTAIN",
+      "english_gloss": "511th Mountain",
+      "official_bcs": "511. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -995,9 +995,9 @@
     {
       "id": "arbih_705th_slavna_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-705TH-SLAVNA-MOUNTAIN",
-      "english_gloss": "705th Slavna Mountain",
-      "official_bcs": "705. slavna brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-705TH-MOUNTAIN",
+      "english_gloss": "705th Mountain",
+      "official_bcs": "705. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -1015,9 +1015,9 @@
     {
       "id": "arbih_707th_slavna_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-707TH-SLAVNA-MOUNTAIN",
-      "english_gloss": "707th Slavna Mountain",
-      "official_bcs": "707. slavna brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-707TH-MOUNTAIN",
+      "english_gloss": "707th Mountain",
+      "official_bcs": "707. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -1045,9 +1045,9 @@
     {
       "id": "arbih_717th_slavna_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-717TH-SLAVNA-MOUNTAIN",
-      "english_gloss": "717th Slavna Mountain",
-      "official_bcs": "717. slavna brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-717TH-MOUNTAIN",
+      "english_gloss": "717th Mountain",
+      "official_bcs": "717. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -1065,9 +1065,9 @@
     {
       "id": "arbih_727th_slavna",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-727TH-SLAVNA",
-      "english_gloss": "727th Slavna",
-      "official_bcs": "727. slavna brigada",
+      "designation_code": "AWWV-BDE-ARBIH-727TH-BRIGADE",
+      "english_gloss": "727th Brigade",
+      "official_bcs": "727. brigada",
       "unit_type": "brigade",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -1095,9 +1095,9 @@
     {
       "id": "arbih_770th_slavna_mountain",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-770TH-SLAVNA-MOUNTAIN",
-      "english_gloss": "770th Slavna Mountain",
-      "official_bcs": "770. slavna brdska brigada",
+      "designation_code": "AWWV-BDE-ARBIH-770TH-MOUNTAIN",
+      "english_gloss": "770th Mountain",
+      "official_bcs": "770. brdska brigada",
       "unit_type": "mountain",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -1105,9 +1105,9 @@
     {
       "id": "arbih_7th_vitezka_muslim_liberation",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-7TH-VITEZKA-MUSLIM-LIBERATION",
-      "english_gloss": "7th Vitezka Muslim Liberation",
-      "official_bcs": "7. viteška muslimanska oslobodilačka brigada",
+      "designation_code": "AWWV-BDE-ARBIH-7TH-MUSLIM-LIBERATION",
+      "english_gloss": "7th Muslim Liberation",
+      "official_bcs": "7. muslimanska oslobodilačka brigada",
       "unit_type": "liberation",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"
@@ -1175,9 +1175,9 @@
     {
       "id": "arbih_851st_vitezka_liberation",
       "faction": "RBiH",
-      "designation_code": "AWWV-BDE-ARBIH-851ST-VITEZKA-LIBERATION",
-      "english_gloss": "851st Vitezka Liberation",
-      "official_bcs": "851. viteška oslobodilačka brigada",
+      "designation_code": "AWWV-BDE-ARBIH-851ST-LIBERATION",
+      "english_gloss": "851st Liberation",
+      "official_bcs": "851. oslobodilačka brigada",
       "unit_type": "liberation",
       "echelon": "brigade",
       "source_basis": "catalogued_designation"

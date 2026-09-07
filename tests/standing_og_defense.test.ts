@@ -23,7 +23,7 @@ function makeState(): GameState {
                 },
                 arbih_246th_vitezka_mountain: {
                     id: 'arbih_246th_vitezka_mountain',
-                    name: '246th Vitezka Mountain',
+                    name: '246th Mountain',
                     faction: 'RBiH',
                     kind: 'brigade',
                     status: 'active',

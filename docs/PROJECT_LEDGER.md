@@ -33346,3 +33346,37 @@ contract and desktop IPC contract were synchronized. BC02 is CLOSED; BC03 is the
 closure-register item.
 
 Final documentation checks passed 12/12 after compacting the master summary to its size limit; independent Sol documentation review returned GO and diff hygiene passed.
+
+## 2026-09-07 - R7 ARBiH brigade honorific display-name correction
+
+33 ARBiH brigades started the game with wartime combat-honor titles ("Vitezka"/"Viteška", "Slavna")
+already baked into their display name, presenting an unearned decoration as pre-existing at turn 0.
+The mechanical half was already correct — `distinction_potential` (earn-in-play decorations) already
+targets exactly these 33 brigades, and no brigade carries the old turn-0-award `honor` field — only
+the display text lagged the mechanic.
+
+Corrected the `name` field for all 33 rows in `data/source/oob_brigades.json`, the matching
+`designation_code`/`english_gloss`/`official_bcs` rows in `data/source/oob_brigade_designations.json`,
+the 3 hardcoded `EXACT_BCS_NAMES` overrides in `formationNameLocalizations.ts`, and rebuilt the baked
+`data/derived/startup/apr_1992_initial_save.json` startup snapshot (26 of the 33 brigades are present
+at turn 0; the remaining 7 have `available_from > 0` and are generated later in play, so they were
+correctly absent from the snapshot diff). Internal `id` values were left untouched — each carries
+1,300+ references across engine files, operation catalogs, and tests, and renaming is a load-bearing
+identifier change with no player-facing benefit. `docs/knowledge/*` historical order-of-battle
+references were deliberately NOT touched — they correctly cite real-world post-honor unit
+designations as history, which is a different claim from what the game should display at its own
+turn 0.
+
+Verified byte-neutral to simulation: no `src/sim/`/`src/state/` logic reads brigade `.name` for
+gating or comparison (confirmed across all matches, not just the obvious decoration files), and the
+CI structural fingerprint check passed unchanged (`cd5582f4a945842e`) — empirical confirmation, not
+just code-reading. Rebuilt-artifact diff confirmed only the 26 targeted brigades' `name` field
+changed and nothing else in the startup snapshot moved. Focused suite (7 files, 61 tests: OOB
+loader/early-war-entry/elite-commander, brigade name localization, recruitment engine, startup
+snapshot ownership and drift guardrails) plus `decoration_system`, `standing_og_defense`, and
+`final_sector_war_front_faction_side_coverage` all passed; `tsc --noEmit` clean. No 188w
+recalibration required. Developed on branch/worktree `r7-arbih-honorific-names`, isolated from
+concurrent `codex/*` OOB and calibration work.
+
+Plan: `docs/plans/2026-09-07-arbih-brigade-honorific-name-correction-plan.md`. Slotted into R7
+(content/historical-attribution) in `docs/plans/MASTER_ROADMAP.md`.

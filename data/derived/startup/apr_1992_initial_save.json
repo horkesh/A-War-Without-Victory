@@ -13009,7 +13009,7 @@
         "location_osid": "op:ilidza:sarajevo_dio_ilidza_2",
         "max_personnel": 2200,
         "morale": 60,
-        "name": "104th Vitezka Motorized",
+        "name": "104th Motorized",
         "officer_quality": 0.15,
         "ops": {
           "fatigue": 0,
@@ -13306,7 +13306,7 @@
         "location_osid": "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
         "max_personnel": 2200,
         "morale": 60,
-        "name": "111th Vitezka Motorized",
+        "name": "111th Motorized",
         "officer_quality": 0.15,
         "ops": {
           "fatigue": 0,
@@ -13380,7 +13380,7 @@
         "location_osid": "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
         "max_personnel": 2200,
         "morale": 60,
-        "name": "112th Vitezka Motorized",
+        "name": "112th Motorized",
         "officer_quality": 0.15,
         "ops": {
           "fatigue": 0,
@@ -14194,7 +14194,7 @@
         "location_osid": "op:olovo:gurdici_2",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "161st Slavna Olovo Mountain",
+        "name": "161st Olovo Mountain",
         "officer_quality": 0.1,
         "ops": {
           "fatigue": 0,
@@ -14566,7 +14566,7 @@
         "location_osid": "op:travnik:gluha_bukovica",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "17th Vitezka Mountain",
+        "name": "17th Mountain",
         "officer_quality": 0.15,
         "ops": {
           "fatigue": 0,
@@ -14714,7 +14714,7 @@
         "location_osid": "op:hadzici:luke",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "182nd Vitezka Light",
+        "name": "182nd Light",
         "officer_quality": 0.15,
         "ops": {
           "fatigue": 0,
@@ -14963,7 +14963,7 @@
         "location_osid": "op:gradacac:donja_tramosnica_2",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "213th Vitezka Mountain",
+        "name": "213th Mountain",
         "officer_quality": 0.15,
         "ops": {
           "fatigue": 0,
@@ -15038,7 +15038,7 @@
         "location_osid": "op:brcko:bijela_2",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "215th Vitezka Mountain",
+        "name": "215th Mountain",
         "officer_quality": 0.15,
         "ops": {
           "fatigue": 0,
@@ -15113,7 +15113,7 @@
         "location_osid": "op:gradacac:gradacac_2",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "217th Vitezka Mountain",
+        "name": "217th Mountain",
         "officer_quality": 0.15,
         "ops": {
           "fatigue": 0,
@@ -15336,7 +15336,7 @@
         "location_osid": "op:zvornik:sapna",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "246th Vitezka Mountain",
+        "name": "246th Mountain",
         "officer_quality": 0.15,
         "ops": {
           "fatigue": 0,
@@ -15486,7 +15486,7 @@
         "location_osid": "op:zivinice:gracanica_2",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "252nd Slavna Mountain",
+        "name": "252nd Mountain",
         "officer_quality": 0.1,
         "ops": {
           "fatigue": 0,
@@ -15638,7 +15638,7 @@
         "location_osid": "op:ugljevik:teocak_krstac_2",
         "max_personnel": 1600,
         "morale": 60,
-        "name": "255th Slavna Mountain \"Hajrudin Mesić\"",
+        "name": "255th Mountain \"Hajrudin Mesić\"",
         "officer_quality": 0.25,
         "ops": {
           "fatigue": 0,
@@ -16038,7 +16038,7 @@
         "location_osid": "op:zenica:gornja_vraca",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "303rd Vitezka Mountain",
+        "name": "303rd Mountain",
         "officer_quality": 0.15,
         "ops": {
           "fatigue": 0,
@@ -16112,7 +16112,7 @@
         "location_osid": "op:zenica:gornja_zenica_2",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "314th Slavna Liberation",
+        "name": "314th Liberation",
         "officer_quality": 0.1,
         "ops": {
           "fatigue": 0,
@@ -16186,7 +16186,7 @@
         "location_osid": "op:maglaj:cobe_2",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "327th Vitezka Mountain",
+        "name": "327th Mountain",
         "officer_quality": 0.15,
         "ops": {
           "fatigue": 0,
@@ -16362,7 +16362,7 @@
         "location_osid": "op:mostar:blagaj_2",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "441st Vitezka Mountain",
+        "name": "441st Mountain",
         "officer_quality": 0.15,
         "ops": {
           "fatigue": 0,
@@ -17127,7 +17127,7 @@
         "location_osid": "op:bihac:bihac_2",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "501st Slavna Mountain",
+        "name": "501st Mountain",
         "officer_quality": 0.2,
         "ops": {
           "fatigue": 0,
@@ -17201,7 +17201,7 @@
         "location_osid": "op:bihac:brekovica_2",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "502nd Vitezka Mountain",
+        "name": "502nd Mountain",
         "officer_quality": 0.15,
         "ops": {
           "fatigue": 0,
@@ -17276,7 +17276,7 @@
         "location_osid": "op:cazin:cazin_2",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "503rd Slavna Mountain",
+        "name": "503rd Mountain",
         "officer_quality": 0.1,
         "ops": {
           "fatigue": 0,
@@ -17351,7 +17351,7 @@
         "location_osid": "op:bosanska_krupa:otoka_2",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "505th Vitezka Mountain",
+        "name": "505th Mountain",
         "officer_quality": 0.15,
         "ops": {
           "fatigue": 0,
@@ -17574,7 +17574,7 @@
         "location_osid": "op:bosanska_krupa:jezerski_2",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "511th Slavna Mountain",
+        "name": "511th Mountain",
         "officer_quality": 0.1,
         "ops": {
           "fatigue": 0,
@@ -17749,7 +17749,7 @@
         "location_osid": "op:bugojno:kula_2",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "705th Slavna Mountain",
+        "name": "705th Mountain",
         "officer_quality": 0.1,
         "ops": {
           "fatigue": 0,
@@ -17898,7 +17898,7 @@
         "location_osid": "op:bugojno:vesela_2",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "707th Slavna Mountain",
+        "name": "707th Mountain",
         "officer_quality": 0.1,
         "ops": {
           "fatigue": 0,
@@ -18046,7 +18046,7 @@
         "location_osid": "op:travnik:podstinje",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "727th Slavna",
+        "name": "727th Brigade",
         "officer_quality": 0.1,
         "ops": {
           "fatigue": 0,
@@ -18195,7 +18195,7 @@
         "location_osid": "op:zavidovici:hajderovici_2",
         "max_personnel": 2200,
         "morale": 60,
-        "name": "7th Vitezka Muslim Liberation",
+        "name": "7th Muslim Liberation",
         "officer_quality": 0.15,
         "ops": {
           "fatigue": 0,
@@ -18576,7 +18576,7 @@
         "location_osid": "op:gorazde:citluk_2",
         "max_personnel": 1800,
         "morale": 60,
-        "name": "851st Vitezka Liberation",
+        "name": "851st Liberation",
         "officer_quality": 0.15,
         "ops": {
           "fatigue": 0,
