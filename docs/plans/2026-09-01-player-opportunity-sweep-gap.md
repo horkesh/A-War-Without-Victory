@@ -10,6 +10,14 @@ two factual citation errors fixed; canon-clarification recommendations recorded 
 [all three factions](../40_reports/playtests/20260901_d2_full_campaign_all_three_factions.md).
 **Blocks:** ahistorical playthrough experiments. Does NOT block observer parity, which is unaffected.
 
+## Current handoff — 2026-09-07
+
+**QUEUED; no implementation or scheduling authority added.** Existing home: [Master BC01](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) / [R8 acceptance detail](2026-07-31-full-campaign-electron-validation-plan.md#behavior-closure-acceptance-detail-2026-09-07). [BC08 verification](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md) is closed by bounded disposition, not an overall-green or player-path proof. BC01–BC07 remain pending; D1 and the corrected contract still govern when repairs are scheduled.
+
+**Controlling autonomy interpretation:** L0 creates a live human review; L1 preserves existing review; L2 auto-applies military opportunities with **no queue**; L3 retains automatic observer decisions. New campaigns start at L2; the missing-field fallback is L0. Earlier text below saying “default L0” or “Levels 0–2 belong to the human” is historical diagnosis, superseded by the dated corrections and this summary. Do not implement a blanket post-turn player sweep. Acceptance covers all four levels, RBiH/HRHB player-path deficits and RS regression, not headless parity alone. **First when scheduled: run `tools/ai_play/op_launch_diff.ts` for RBiH and HRHB before implementation; attribution to the opportunity channel remains unconfirmed.** Current acceptance also requires no-player calibration neutrality on the n392 lineage, all-three-player runs and observer parity; the verification section below remains controlling. This handoff introduces no new design.
+
+## Historical diagnosis and correction record
+
 ## The defect
 
 ```
@@ -20,8 +28,7 @@ desktop_sim.ts            no post-turn opportunity sweep at all
 ```
 
 The calibration runner sweeps every faction's opportunities after each turn with an explicit `null`.
-The in-pipeline step skips the player faction — which is CORRECT at Levels 0-2, where those
-decisions belong to a present human — and `advanceTurn` never performs the post-turn sweep that
+The in-pipeline step skips the player faction — correct for human review at L0/L1, but incomplete at L2, which must auto-apply military opportunities — and `advanceTurn` never performs the post-turn sweep that
 would resolve them afterwards. The player faction's opportunity-driven operations are therefore
 never decided at all.
 
@@ -109,7 +116,7 @@ presupposes a plan put to them. CLAUDE.md's Sacred Rule on ops-only attacks says
 original document's own parenthetical — that skipping the player is "CORRECT at Levels 0-2" — was
 right, and **this half must not be reverted or unified with bot handling.**
 
-### The real defect: the authorization path is dead at the DEFAULT autonomy level
+### Historical diagnosis: the authorization path is dead at L0 (not the shipped L2 default)
 
 *(Game Designer, 2026-09-05.)* Excluding the player from auto-apply is correct. What is broken is
 that nothing takes its place at the default level.
@@ -135,7 +142,7 @@ that nothing takes its place at the default level.
   **default campaign gets auto-apply**, not a review queue. It changes who each half of the fix
   serves, not either half.)*
 
-Net effect at default settings: **the dossier is fully populated and fully inert.** The uncanonical
+At L0 without a review record, **the dossier is fully populated and fully inert**; the shipped L2 default instead requires auto-application. The uncanonical
 third state this produces is **propose → display → silent expiry** — worse than either full autonomy
 or full consultation, because the player is shown a decision they cannot make and then loses the
 operation without having chosen anything.
@@ -144,12 +151,12 @@ operation without having chosen anything.
 
 | Level | Name | Behaviour | Status |
 |-------|------|-----------|--------|
-| 0 | Full Control (default) | **Staff the desk** — create the review record so the buttons that already exist go live | **Primary fix** |
+| 0 | Full Control (missing-field fallback, not campaign default) | **Staff the desk** — create the review record so the buttons that already exist go live | **Primary fix** |
 | 1 | Strategic | Proposal generator already runs | Already correct, no change |
 | 2 | Political | **Auto-apply through the bot path — does not queue** (Game Designer ruling, 2026-09-05) | **RULED — see below** |
 | 3 | Observer | Sweep decides opportunities like any other faction (pass `null`) | Correct; retained from the original option 2 |
 
-**Level 0 (default) — staff the desk.** Create the review record so the already-built dossier
+**Level 0 (Full Control) — staff the desk.** Create the review record so the already-built dossier
 becomes live. The UI, the five-way decision and the IPC handler all exist; only the review-record
 plumbing is missing. This is the primary fix, and it is a *completion* of LANE B Phase 2, not a
 reversal of it.
@@ -278,14 +285,14 @@ question; settling it needs a run diff.
 RBiH and HRHB and confirm which channel the missing late-1995 operations come from. Do not implement
 against an unconfirmed attribution.
 
-## Verification required
+## Current verification required
 
 - **`tools/ai_play/op_launch_diff.ts` for RBiH and HRHB first** — confirm the attribution above
   before writing any code.
 - Re-run all three D2 campaigns; the RBiH and HRHB deficits should close toward RS's ~2.
 - **188w with `control_delta` diffed.** The change must remain inert on the calibration line — a run
   with no player faction should be untouched by construction, exactly as the auto-authorize change
-  was (n389 vs n390 identical `final_state_hash`). Prove it, do not assume it.
+  was (n389 vs n390 identical `final_state_hash` — historical comparison only; n390 is not current acceptance evidence). Prove a fresh controlled no-player comparison on the accepted n392 lineage when scheduled; do not assume it.
 - Observer parity must still hold at 188 turns.
 
 ## Related, still open

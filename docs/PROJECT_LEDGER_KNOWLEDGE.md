@@ -5075,3 +5075,26 @@ control truth for the 23 kolovarice-shaped cells — a bounded Historian task, n
 a clean 712, and finishing the remaining micro-merge is documented separately as CLOSED. Spend it on
 **where the front sits and when the 1995 offensives fire** — see the Vlašić-axis defect, which is
 one visible, fixable instance of exactly that.
+
+
+## 2026-09-07 — Final calibration follows finite behavior settlement
+
+[Ledger decision](PROJECT_LEDGER.md#2026-09-07--finite-behavior-closure-registered-before-final-calibration-planning-only):
+use [MASTER_ROADMAP §4.1](plans/MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07)
+for known pre-freeze dispositions, within existing lanes. Administrative RE closure is not proof that
+all later player-path or event behavior is fixed. Headless parity cannot close player-action defects;
+serialized text changes do not themselves require a calibration re-floor. Keep diagnostic calibration
+open, accept final calibration after behavior settlement, and explicitly reopen affected evidence if
+later packaged play finds a behavior defect. Registration grants no repair authority and does not
+promote post-1.0 debt.
+
+
+## 2026-09-07 — Bounded verification is not an overall-green claim
+
+[BC08 receipt](40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md): retain the raw
+suite exit1 even when an unchanged focused file passes with corrected child-only shell selection.
+Skipped tests and absent transient fields remain coverage gaps. Matching canonical consumed-input
+hashes and unchanged source/runtime supports old-artifact gate reuse, not a fresh campaign claim.
+Keep current entrypoints synchronized while labeling dated failure counts as history; a retired
+assertion passing today does not prove its earlier numeric symptom was repaired. See the
+[2026-09-07 synchronization ledger](PROJECT_LEDGER.md#2026-09-07--entry-point-synchronization-before-bc01-docs-only).

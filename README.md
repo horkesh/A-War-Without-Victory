@@ -22,15 +22,21 @@ Deterministic strategic-political simulation of the 1992-1995 Bosnian War.
 ## Core Commands
 
 ```powershell
-npm run test:engine
-npm run test:ui
-npm run test:all
+npm run test:vitest              # canonical balanced full suite (no arguments)
+npm run test:engine              # engine slice
+npm run test:ui                  # unsharded Vitest discovery
+npm run test:all                 # alias for canonical balanced full suite
 npx tsc --noEmit
-npm run sim:scenario:run:40w
-npm run sim:scenario:run:default
+npm run sim:scenario:run:188w    # sole scoring calibration scenario
+npm run sim:scenario:run:40w     # short diagnostic scenario
+npm run sim:scenario:run:default # 52-week diagnostic scenario
 npm run dev:map
 npm run desktop
 ```
+
+On Windows, the test process must resolve unqualified `bash` to Git Bash for MSYS `/f/...` paths,
+not the Windows/WSL launcher. Scope any PATH adjustment to the test child, not global settings.
+[BC08 evidence and limits](docs/40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md).
 
 ## Repo Notes
 

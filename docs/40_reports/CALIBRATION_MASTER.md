@@ -91,6 +91,9 @@ They do not close the present calibration program. The sole scoring scenario rem
 
 ### ★ CURRENT CANONICAL BASELINE — `n392`, owner-blessed 2026-09-06
 
+**2026-09-07 verification boundary:** [BC08 audit](audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md) reapplies current unchanged gates to n392: 31/31 normalized consumed inputs match and source/runtime equivalence is established. This is not a fresh HEAD 188-week run or player-path/transient-state proof. n392 and floors remain accepted unchanged; final calibration acceptance follows [BC01–BC07 settlement](../plans/MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07). BC08 alone is closed; raw full suite remains red on one classified shell failure, unchanged focused file 8/8 passes.
+
+
 **Supersedes `n388` below**, which stood 34 commits stale. `n388` remains the lineage record and the
 provenance of the floors; it is no longer the measurement.
 

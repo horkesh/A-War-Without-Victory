@@ -193,7 +193,7 @@ Each diary must include:
 - [ ] historical-choice transcript summary and all `staff_recommendation` fallbacks;
 - [ ] presentation/polish findings from the player's perspective.
 
-### Pre-seeded finding register -- 2026-09-03 showcase GUI audit
+### Pre-seeded finding register
 
 **R8 remains WAITING ON R7. This register is inert until R8 opens** -- it starts nothing and claims
 no R8 progress. It exists so that bugs found before R8 survive to the R8 gate, where roadmap §12
@@ -220,6 +220,17 @@ Sources: [frozen audit](../40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_A
 | B7 (8d) | Review-before-advance lists the same two decisions twice: "Vance Owen Peace Plan" appears as a `REQUIRED / PEACE PROPOSAL` card *and* as a `DECISION/BLOCKING` row; same for "Paramilitary authorization". **Two real decisions, each listed twice** — two independently-computed "what blocks advance" pipelines with no shared identity check, rendered sequentially with no dedup. Fix: dedupe `review.items` against `blockers` by decision id before rendering, or merge upstream | `AdvanceTurnModal.tsx:197-198` (`derivePresidentialBlockers`) + `:189-196` (`buildPreAdvanceCommandReviewView`, from `data/preAdvanceCommandReview.ts`) | same file, `:421-435` (`BlockerRow`) and `:437-450` (`ReviewItemRow`) | display | N |
 | B8 (8f) | "Preserve international standing" and "Maintain internal cohesion" both show `Next available lever: Decision Room / Review political decisions` — identical label, identical navigation target, so the CTA is false for at least one of them. The `!config.militaryOwner` branch returns **one hardcoded lever for every non-military objective** with no per-objective branching, so any two political objectives always collide. Fix: branch `objectiveLever()` on `config.dimension`/`config.id` for the political case as it already does for the military case; **verify all four objective cards still resolve sensibly** — the function is shared | `GameStateAdapter.ts:251-266` (`objectiveLever()`) | `WarSummaryContent.tsx` objective-card CTA, via `buildFactionStrategicObjectiveViews` → `nextLever` | display | N |
 | B9 | **Not an audit finding** -- surfaced by B2's measurement, and previously unnamed. The `final_sector_truth_reconciliation.ts` guard clauses fire when sectors momentarily go empty near war-end, and then **something rebuilds `corps_front_sectors` back to 63 later in the same turn WITHOUT a paired rating recompute**. That asymmetry, not the wipe, is what leaves the final state inconsistent. **Recorded, not scheduled**; its only measured consequence is the same bounded final-turn one as B2, so it does not trigger the escalation rule as it stands -- **if anyone finds a mid-war manifestation, it does, and the call returns to the owner**. **First step: the rebuild site was NOT identified** -- find what re-populates `corps_front_sectors` after the guard fires without calling `computeSectorCombatRatings`; everything else is downstream of that | **unidentified** | endgame state | engine path | N |
+
+**2026-09-07 routing reconciliation — planning only.** The event investigation previously proposed the following rows but had not added them here. They are now registered, not scheduled. [Master §4.1](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) owns the finite behavior dispositions and final-calibration sequence. D1 remains in force. B10–B13 and BC01–BC08 do not authorize repairs by their existence; scheduled behavioral settlement precedes final calibration and fresh final campaign acceptance. Panel P1/P2 remain conditioned planning, never permission to repair today.
+
+| ID | Bug / routing | Writer / consumer | Impact and disposition |
+|---|---|---|---|
+| B10 | Dead narrated COHA/ceasefire/Dayton chain; mechanical packaged negotiation works | `event_types.ts`, `war_1995.json`, event termination and negotiation paths | BC03 **FIX when scheduled**, before final full-campaign acceptance. One terminal owner, complete verdict/receipts; no global predicate shortcut or horizon extension. See [investigation corrections](../40_reports/20260905_EVENT_FIRING_SATURATION_AND_DEAD_CATALOG.md). |
+| B11 | Historical chronology findings; sensitive P1 Ahmići/P2 enclave packet retain panel ownership | Catalog gates/dates and downstream displacement/NATO | BC04 **FIX after planning conditions**. Reconcile n392 first, exclude already-landed barracks work. [Conditional panel record](../40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md); no isolated Srebrenica date edit or map repaint. |
+| B12 | Same-turn prerequisite dead NATO windows; `operation_lukavac_93` control gate | Event loader/catalog and firing pass | BC05: lint is byte-neutral; enabling events is not. NATO **FIX when scheduled**; Lukavac **VERIFY/DISPOSITION** with Historian deciding gate versus simulated-war defect. [Measured sweep](../40_reports/audits/20260906_FACTION_CONTROLS_MUNICIPALITY_THRESHOLD_SWEEP.md). |
+| B13 | Three posture-review handlers unwired; bounded gesture-escalation gap | Desktop player-action handlers and `action_cadence` | BC06 **FIX when scheduled**; prove live player effects and cooldown/receipts, not only headless parity. No general recurrence redesign. [PM ruling](../40_reports/audits/20260905_EVENT_ROADMAP_FIT_PM_RULING.md). |
+
+**Friction, separate from bugs:** **F1 — endgame decision drought** is R8 diary triage, not a repair or authoring commission. Inspect the player path and truthful positive-hold coverage; source-supported omissions are evidence, never a per-week quota. Broad drought authoring and orphan-flag activation remain the explicit post-1.0 backlog.
 
 **B2 IS MEASURED ENDGAME-ONLY. D1 covers it; this row is final (2026-09-05).**
 `sector_combat_ratings` is not display-only in the source -- `army_hq_gathering.ts:269,340-360`
@@ -287,6 +298,44 @@ designed), 27 (a generated-art content difference; all three plates share one co
 (one authored response template in `war_1993.json:8172-8194` stamped over N real formations — a
 content-authoring gap for Narrative/Game Design, not a code item for this register).
 
+### Behavior closure acceptance detail (2026-09-07)
+
+**Owner-authorized planning only.** These BC identifiers index existing work, not milestones or a
+new lane. **FIX** is the planned disposition when scheduled, not permission to implement today.
+**VERIFY/DISPOSITION** closes with bounded evidence: fix a demonstrated in-scope defect, prove no
+relevant effect, or explicitly defer outside the 1.0 definition of done. D1's HOLD FOR R8 remains;
+the event findings previously proposed as B10–B13/F1 are now recorded in R8's existing register.
+R1–R5, the accepted R6 slice, RC and RE stay closed; calibration remains ongoing. Implementer and reviewer remain different people.
+
+| ID / existing home | Owner | Impact | Pre-freeze disposition and acceptance evidence |
+|---|---|---|---|
+| **BC01 — player opportunity path / R8** | Gameplay/operations + Game Designer; QA | Player campaign territory and operation decisions; observer parity alone cannot test it | **FIX**, using the [corrected queued contract](2026-09-01-player-opportunity-sweep-gap.md). L0 gets live review, L1 retains review, L2 auto-applies military opportunities without queuing, L3 remains observer. Verify all four modes, no duplicate decision/application, preserved human authorization at L0/L1, and fresh RBiH/HRHB player-path evidence against observer plus RS regression proof; do not copy a blanket post-turn sweep. |
+| **BC02 — B2/B9 sector/rating truth / R8** | Systems + QA | Engine-consumed final-turn ratings; seven old mid-war samples are not a complete trace | **VERIFY/DISPOSITION**: reconcile on the accepted n392 lineage before scheduling B2 repair; locate the post-reconciliation rebuild writer, distinguish terminal-only from mid-war effects, and prove matching sector/rating truth. B9 remains a bounded investigation, not authority to redesign sectors. [Existing evidence and limits](#pre-seeded-finding-register). |
+| **BC03 — B10 narrated Dayton / R8** | Events/systems + Game Designer + QA | Event effects, termination ordering, receipts and endgame state | **FIX** the dead narrated chain with one coherent terminal owner; preserve the working packaged negotiation. Resolve the redundant event game-over writer first, then the catalog gate/window; verify COHA false-key semantics, firing/termination order and complete packaged verdict snapshot/receipts. The headless terminal contract is VERIFY/DISPOSITION, not a mandate to add a headless closeout. Do not globally redefine `flag_not_set` or extend the 188-week horizon as a shortcut. [Investigation corrections §10–11](../40_reports/20260905_EVENT_FIRING_SATURATION_AND_DEAD_CATALOG.md). |
+| **BC04 — B11 chronology + P1/P2 / R8, panel-owned history** | Historian + events/systems + scenario/calibration + independent §6 panel | Event timing/effects, displacement, personnel, NATO and downstream operations | **FIX after bounded planning conditions**: reconcile what already landed against n392 first; remove the completed barracks stagger from the repair set. P1/P2 follow the [existing conditional panel record](../40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md), which authorizes proceeding to a plan only. P1 preserves the historical date and map; P2 is a coherent chronology packet, measured receipt dates with brakes active, no narrowed expiry/backstop shortcut. Separate P1 and P2 controlled runs, full anchors/health/§6 and displacement/operation diffs; no fresh re-floor until explained and accepted. |
+| **BC05 — B12 dead event windows/control gates / R8** | Events/systems + Historian + QA | Enabling dormant NATO events can change outcomes; a loader lint alone is byte-neutral | **FIX** the established NATO same-turn prerequisite/window defects after consumed-baseline confirmation; **VERIFY/DISPOSITION** for `operation_lukavac_93`: the [sweep](../40_reports/audits/20260906_FACTION_CONTROLS_MUNICIPALITY_THRESHOLD_SWEEP.md) proves an unreachable gate in measured runs, not whether the gate or simulated war is historically wrong. Resolve that exact question, then fix or justify disposition; never repaint initial control or blanket-lower thresholds. Verify actual event receipts and downstream effects separately from lint coverage. |
+| **BC06 — B13 posture/gesture controls / R8** | Gameplay/desktop + Game Designer + QA | Player-action decisions/effects; headless neutrality is insufficient | **FIX** the three unwired posture-review handlers and settle bounded gesture escalation per the [PM ruling](../40_reports/audits/20260905_EVENT_ROADMAP_FIT_PM_RULING.md). Verify the live action path, recurrence/cooldown, decision receipts and effects; no general recurrence-system redesign. |
+| **BC07 — initial-master stability divergence / calibration-data authority** | Asset/data integration + Systems + calibration | Potentially behavior-bearing `stability_score`; mode-dependent consumption | **VERIFY/DISPOSITION**: establish consumed mode and writer/reader for the 269-row master/derive disagreement, including ~227 stability rows. `hybrid_1992`/`ethnic_1991` early returns must be accounted for; do not infer 227 effects in the blessed scenario. Record retain/regenerate policy and affected scenario scope; no mandated regeneration, initial-control override, or re-floor for the cosmetic contested-control subset. [2026-09-04 correction](../PROJECT_LEDGER.md#2026-09-04--correcting-the-correction-contested_control-is-cosmetic), [calibration authority](../40_reports/CALIBRATION_MASTER.md). |
+| **BC08 — inherited suite residual / verification** | QA + owning Systems/Game Design seats | Current-suite environment failure, not a reproduced simulation residual | **CLOSED — verification/disposition, 2026-09-07.** Full suite exit 1 retained: one Bash-resolution failure; unchanged focused file 8/8 with child-scoped Git Bash. Located deployment/diagnostics suites and peace plans pass; n392 artifact gates pass with source/input-equivalence and transient coverage limits. [Complete receipt](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md); no overall-green or whole-engine claim. |
+
+**Freeze and evidence rule.** Every BC row needs a linked fix-and-verification receipt or explicit
+bounded disposition before final calibration acceptance; the register is not closed merely because
+RE is closed or headless hashes match. Behavioral changes retain one-change-per-controlled-run
+discipline and applicable deterministic paired proof. Group final acceptance after the last accepted
+behavior change; do not skip causal intermediate measurements to save runs. n392 remains the accepted
+reference and its floors remain unchanged until an explained, authorized acceptance supersedes it.
+Text-only B3/B4 fixes can change serialized strings/hashes without changing game behavior: explain
+that exact delta, prove numeric/decision/control equivalence, and do not call it a calibration re-floor.
+If later R8 play uncovers a new behavior defect, fix/disposition it and revalidate the affected evidence;
+a freeze is a controlled change boundary, not a promise that no bug can ever be found.
+
+**Explicit exclusions:** no revival of retired RE packets or closed R6 experiments; no D-topology,
+new mechanics, broad recurrence redesign, 190/193-week horizon expansion, or 32-orphan-flag debt
+activation. The [event-catalog backlog](MASTER_ROADMAP.md#10-finding-routing) and broad drought authoring stay post-1.0;
+its byte-neutral orphan ratchet may be scheduled separately but does not gate this freeze. **F1** stays
+R8 diary triage (truthful positive-hold intervals are valid), not an event quota or automatic authoring
+commission. Presentation-only findings and R9 packaging remain governed by their existing plans.
+
 ## Phase 4 -- Automatic remediation loop
 
 **Assigned role:** Orchestrator
@@ -304,7 +353,7 @@ content-authoring gap for Narrative/Game Design, not a code item for this regist
 4. Rerun the affected faction from a fresh campaign through the original reproduction turn; if the fix can affect later state, rerun the full 188 turns.
 5. Repeat until the final acceptance rule is met.
 
-No owner decision is required for an in-scope repair whose correct behavior is already defined. A genuine canon contradiction is documented as an unsupported/omitted behavior rather than improvised into runtime.
+Once R8 repair work is scheduled under D1, no owner decision is required for an in-scope repair whose correct behavior is already defined. The §4.1 register itself supplies no scheduling authority. A new behavior finding explicitly reopens the affected closure and calibration evidence before final acceptance; it does not silently enlarge the frozen list. A genuine canon contradiction is documented as an unsupported/omitted behavior rather than improvised into runtime.
 
 ## Phase 5 -- Final two clean diaries and closeout
 

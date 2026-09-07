@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-09-01
+**Last updated:** 2026-09-07 (finite behavior-closure planning; no repair authorization)
 
 **Execution branch:** `codex/master-roadmap-execution` (integration target: `main` after all workstreams are green)
 
@@ -63,7 +63,9 @@ an explicit tag and **commit the enumerated caught set as the S3 predicted set b
 
 ---
 
-## Current Execution Snapshot (2026-09-05)
+## Current Execution Snapshot (2026-09-07)
+
+- **Final calibration follows finite behavior settlement:** the [closure register](#41-finite-behavior-closure-register-2026-09-07) inventories known pre-freeze work inside existing lanes. This is planning only: D1's HOLD FOR R8 remains; R7 continues on disjoint presentation files. No RE revival, new lane, implementation, or baseline refresh is authorized by registration.
 
 - **Calibration: OPEN AND ONGOING (2026-09-01).** The pause described here ended when RE closed.
   The January-1993 slice remains landed evidence, and reference, `init_control`, objective, axis,
@@ -75,23 +77,8 @@ an explicit tag and **commit the enumerated caught set as the S3 predicted set b
 - **Original probe channel:** **CLOSED at `b711cffa9`.** Stable sector identity and
   `occupies_on_victory` landed; the fixed-home exclusion was reverted. RE preserves that
   disposition and does not reopen probe work.
-- **Auxiliary packaged-proof prerequisite (HISTORICAL — RE closed 2026-09-01; this no longer blocks anything):** **TERMINAL NO_VERDICT; EXACT HYPOTHESIS ROLLED BACK.**
-  The consumed one-shot ended with external-supervisor custody failure; no cause is inferred and no
-  P2B credit follows. Rollback commit `48909e1d6` restored config blob
-  `7a098b350461cdbb47ec94d453ff35ec655c7b91` and test blob
-  `29194ca0844acb8ac6cfb7dff6f1cb17f9513157`. No retry, diagnosis, instrumentation, supervisor
-  redesign, or successor proof route is authorized. P2B is blocked, P3 waits, calibration remains
-  paused, and the auxiliary work earns no RE credit.
-- **RE — 1.0 Engine Integrity: CLOSED (owner, 2026-09-01).** RE no longer gates anything and
-  calibration is no longer paused behind it. The reduced eight-packet contract approved on
-  2026-08-27 is retired along with the P2B packaged-proof blocker that had stalled it; the
-  "TERMINAL NO_VERDICT / no successor proof route authorized" disposition below is history, not a
-  live constraint. Do not read the paragraphs above as current state.
-
-  **Standing order from the owner (2026-09-01): engine health is sacrosanct, and calibration works
-  on top of it.** Engine-health defects therefore outrank tuning: they are fixed first, and
-  calibration builds on a healthy engine rather than compensating for a sick one. This supersedes
-  any earlier sequencing that put calibration behind an RE gate.
+- **Historical auxiliary proof:** terminal NO_VERDICT; exact hypothesis rolled back at `48909e1d6`. [Closed recovery record](2026-08-28-packaged-probe-recovery-plan.md). RE closure makes this non-blocking.
+- **RE — CLOSED (owner, 2026-09-01).** It gates nothing; P2B and the reduced packet contract are retired history. Engine-health defects still outrank tuning.
 
 - **Complete:** R1, R2, R3, R4, R5, and the defined pre-1.0 scope of R6.
 - **Unscheduled work landed 2026-08-29/30, recorded so it is not mistaken for roadmap progress.**
@@ -105,11 +92,11 @@ an explicit tag and **commit the enumerated caught set as the S3 predicted set b
   and carries a new anomaly detector proven against the original failing run. **None of this was
   scheduled**; the only enclave items on this roadmap are deferred post-1.0. R7's own open gates and
   RE's packet queue are untouched by it.
-- **Open and unrepaired:** the jan1993 checkpoint floor is BREACHED at **688 against 694**, attributed
+- **Historical breach, superseded as current baseline status by n392:** the jan1993 checkpoint floor was **688 against 694**, attributed
   to `175bea593` (ops-only attack doctrine); no commit in the RE-0C/0D chain repairs it, and the
   baseline manifest must not be re-reconciled to hide it. `037396e3c` additionally cut `total_killed`
   by 24% and tripled `political_blocked` planning deaths, and warrants reconsideration on its own.
-  Per-commit evidence:
+  On 2026-09-06 the owner accepted n392 at **702/678/672/665**, against unchanged floors **694/674/668/641**. The improvement from n388 is unattributed; this is not proof that a named engine defect was repaired. [Current authority](../40_reports/CALIBRATION_MASTER.md). Historical per-commit evidence:
   [S0 ladder](../40_reports/20260829_RE_S0_CHECKPOINT_LADDER_AND_FLOOR_BREACH.md).
 - **Complete RC narrow packet:** the default-OFF v3 selector plus reversible D-shape is retained. Paired 188-week runs produced hash `70d5e04c6f49e041`, fingerprint `22cf3c5d8884bfb8`, 31/31 anchors, 6/6 bot benchmarks, 7/7 health gates, one live non-enclave HRHB damage/capacity write, and full Section 6 pass. Bucovaca peaked at strain 62 and recovered to 37; Sipovo/Drvar peaks remained 11/7.5. D-topology neighbour cascade remains owner-reserved and is post-1.0.
 - **Parallel non-engine lane:** R7 audio implementation landed at `2d106e5e0`. Cinematic-opening
@@ -151,19 +138,11 @@ an explicit tag and **commit the enumerated caught set as the S3 predicted set b
   — no reader in `src/sim/`, and the field is zeroed for every OSID at init. The earlier "168 rows"
   and "`contested_control` is the headline" figures were retracted by those same PRs; do not carry
   them forward.
-- **Full-suite residual outside the R7 UI slice:** the canonical balanced run is red only on five
-  inherited files (six tests): three deployment-health/run-diagnostics expectations around the same
-  three unstaffed sectors, plus the Cutileiro RBiH accepted-control expectation (43.6798% current vs
-  44% offer). This blocks an overall green claim but does not reopen R7 presentation or authorize
-  engine/canon work from this branch.
+- **BC08 CLOSED by verification/disposition (2026-09-07):** current simulation suites pass; full suite remains exit 1 on one Windows Bash-resolution failure, unchanged focused file passes 8/8 with child-scoped Git Bash. No overall-green claim. [Evidence](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md).
 - **Canon landed this cycle:** `SENSITIVE_HISTORY_DESIGN_GATE.md` **§10, "Provenance and the Integrity of the Historical Record"** — ratified by unanimous Pyrrhic panel (`5f462e8aa`), twelve conditions discharged across two rounds. `FORAWWV.md` §XIII temporal scope is drafted-but-**HELD** behind two engineering items (provenance channel separation + the determinism-scan pair) and is **not** canon.
-- **Measurement substrate and a clean corrected RE baseline pair exist.** Run provenance records
-  commit/input/flag evidence and pair selection rejects incomparable artifacts. The exact-commit
-  Node-22 pair at `177882fc2` is the clean deterministic/correctness baseline. Its accepted
-  correction cost is watch-only. Historical mixed-tree or Node-24 artifacts remain inadmissible.
-- **RE scope is finite and release-specific.** Only the seven outcomes in the executable contract
-  block R8. Deferred and retired findings do not silently re-enter the critical path.
-- **After R7 and RE:** R8 packaged full-campaign validation, then R9 release-candidate readiness.
+- **Historical RE evidence:** corrected clean Node-22 pair at `177882fc2`; mixed-tree/Node-24 runs remain inadmissible. See the closed RE contract for provenance.
+- **RE is closed and gates nothing.** Deferred and retired findings do not silently re-enter the critical path.
+- **Remaining order:** R7; scheduled R8 behavior settlement and final calibration acceptance per §4.1; final packaged-campaign acceptance; R9 release-candidate readiness.
 - **Publication boundary:** signing, store upload, public release creation, and a public `1.0` tag still require a separate explicit `Publish 1.0` instruction.
 
 This snapshot governs any older status or "next" wording retained later in long workstream-history cells. Detailed evidence remains in the linked reports and project ledger; the derived command board must mirror this snapshot.
@@ -230,45 +209,46 @@ These are verification barriers and authority boundaries, not unresolved product
 
 ## 4. Program Sequence
 
-```text
-R1 Map transition
-  -> R2 RS Desk/Decision/Advance friction
-       -> R4 Command/event/Codex convergence
+**Current sequence (2026-09-07):** R7 presentation may continue on disjoint files; settle the finite
+behavior register below within existing scheduling authority, then accept final calibration on the
+settled behavior, then finish R8 packaged acceptance and R9. Diagnostic calibration remains open.
+Historical packet sequencing is linked below, not reinstated.
 
-R3 Tactical Group convergence
-  -> R5 Engine quality/performance/stability
-       -> RC Pressure/exhaustion/COLLAPSE pipeline
-            -> R6 Historical gameplay depth/final calibration
+Historical RE packet sequencing and rollback evidence remain in the [closed contract](2026-08-26-engine-integrity-plan.md) and [recovery record](2026-08-28-packaged-probe-recovery-plan.md); they impose no live dependency.
 
-R4 + R6 + stable R1/R2 UI
-  -> R7 Content/history/audio/accessibility/opening
+### 4.1 Finite behavior-closure register (2026-09-07)
 
-Original probe channel CLOSED at b711cffa9
-  -> landed/reverted disposition preserved
+**Current disposition:** BC01–BC07 pending; BC08 closed by verification/disposition.
 
-Auxiliary packaged-proof prerequisite TERMINAL NO_VERDICT; exact hypothesis rolled back at 48909e1d6
-  -> no packaged proof route active; no retry, diagnosis, instrumentation, or supervisor redesign
-  -> RE P2B BLOCKED; P3 waiting
+**Owner-authorized planning only.** These IDs index existing work, not milestones or a new lane.
+FIX means planned repair **when scheduled**, not authority to implement. VERIFY/DISPOSITION means
+bounded evidence followed by an accepted fix, proof of no relevant effect, or evidenced release
+exclusion. D1 HOLD FOR R8 remains. R1–R5, the accepted R6 slice, RC and RE stay closed; calibration
+stays open. [Detailed acceptance and sources](2026-07-31-full-campaign-electron-validation-plan.md#behavior-closure-acceptance-detail-2026-09-07)
+live in the existing R8 plan; its previously proposed B10–B13/F1 are now registered, not scheduled.
 
-RE 1.0 Engine Integrity
-  -> seven release outcomes through eight serial packets
-  -> one final Node-22 A/B pair and profile
-  -> precedes all further calibration; gates R8
-  -> may overlap R7 only where inspected file ownership is disjoint
+| ID / existing home | Owner | Impact / pre-freeze disposition |
+|---|---|---|
+| BC01 player opportunities / R8 | Gameplay/operations + Game Designer + QA | **FIX** player operation decisions: L0 review, L1 preserved, L2 auto-apply/no queue, L3 observer; all modes and all three factions verified. |
+| BC02 B2/B9 sector/rating truth / R8 | Systems + QA | **VERIFY/DISPOSITION** endgame engine-consumed mismatch against current lineage; locate writer and distinguish terminal from mid-war effects. |
+| BC03 B10 narrated Dayton / R8 | Events/systems + Game Designer + QA | **FIX** coherent event/terminal ownership before gate/window activation; preserve working packaged ending. Headless terminal behavior is separate **VERIFY/DISPOSITION**, not a mandated closeout. |
+| BC04 B11 chronology + P1/P2 / R8/panel | Historian + systems + calibration + independent §6 panel | **FIX after existing conditional planning**, fresh n392 reconciliation first. Exclude landed barracks stagger. P1 and coherent P2 separately controlled; timing/displacement/NATO outcomes measured. |
+| BC05 B12 NATO/Lukavac gates / R8 | Events/systems + Historian + QA | NATO windows **FIX** after current-baseline confirmation; Lukavac **VERIFY/DISPOSITION** gate versus simulated-war cause. Lint is byte-neutral; enabling events is not. |
+| BC06 B13 posture/gestures / R8 | Gameplay/desktop + Game Designer + QA | **FIX** bounded handlers/escalation with live player-action effects/receipts proof, not merely headless parity. |
+| BC07 stability divergence / calibration-data | Asset/data integration + Systems + calibration | **VERIFY/DISPOSITION** consumed mode and retain/regenerate policy. Hybrid/ethnic initialization bypass matters; 227 potential stability rows do not prove 227 effects. No mandated regeneration or control repaint. |
+| BC08 inherited test residual / verification | QA + owning Systems/Game Design | **CLOSED — verification/disposition.** Current simulation suites pass; one environmental full-suite failure classified, not erased. [Receipt](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md). |
 
-R1–R7 green + RE green
-  -> R8 Full packaged-Electron validation
+**Acceptance boundary:** settle every row before final calibration acceptance, retain one-change-per-
+controlled-run and applicable paired deterministic proof, then finish R8 packaged acceptance and R9.
+No forced re-floor: n392 and unchanged floors remain until explained, authorized replacement.
+B3/B4 serialized text/hash changes require exact delta and gameplay-equivalence evidence, not automatic
+recalibration. New behavioral findings explicitly reopen affected closure/calibration evidence; they
+never silently enlarge this finite list. Implementer and reviewer remain different people.
 
-Two clean 5/5 R8 diaries + all barriers green
-  -> R9 Release candidate/gold/publication readiness
-```
-
-**HISTORICAL (superseded 2026-09-01).** RE is CLOSED and this sequence no longer gates anything;
-the paragraph is kept as the record of how P2B was reached and retired. It read: the auxiliary
-packaged-proof prerequisite ended NO_VERDICT after its consumed one-shot and supplied no P2B
-evidence; its exact unproven config/test hypothesis was rolled back at `48909e1d6` to the
-pre-candidate blobs; no packaged-proof route was active or implied; RE was blocked at P2B and P3
-waited. R7 no longer needs a file-ownership independence proof to proceed.
+**Excluded:** retired RE/R6 work, D-topology, new mechanics, broad recurrence, horizon extension,
+orphan-flag debt activation and broad drought authoring. F1 is diary triage with truthful positive
+holds, not an event quota. The byte-neutral orphan ratchet may be scheduled separately and gates
+nothing here. R7 continues disjoint presentation work; publication authority remains separate.
 
 ## 5. Workstream Register
 
@@ -281,8 +261,8 @@ waited. R7 no longer needs a file-ownership independence proof to proceed.
 | R5 | Engine quality, performance, and stability | **COMPLETE — CLOSED 2026-08-05 at the current performance floor (~1,086 ms/turn fresh).** Every self-executable item is done (Phases 0/1/3/4.1, Phase 2e Tasks 1-10, Task 7 baseline gate). Phase 2e's pure-solve/serial-commit extraction was proven correct but FAIL_REVERTED for a 3-7% wall-clock + ~45% heap regression; production uses the direct `buildCorpsFrontSectors` call. **Task 6 (incremental-reuse toward 100 ms/turn) is DECLINED, not deferred:** its only user-facing motivation was the warroom->map delay, which is R1's domain and already solved (~4.3 s -> ~114 ms warm; the map reads pre-computed sectors and never calls the builder). ~1 s/turn sim throughput is acceptable for a strategic game; the 100 ms/turn target is retired as aspirational. The reverted Phase 2e pipeline and its characterization suite are preserved for an optional future re-attempt (its flaky pure-solve `sectors_rebuilt` divergence test is skipped) | [Engine-quality plan](2026-07-31-engine-quality-performance-stability-plan.md) / [Phase 2c/2d packet](2026-08-01-r5-phase2c-amortized-sector-topology-plan.md) / [Phase 2e pure solve](2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md) | Optional state is classified, measured hot paths improve without byte drift, save/replay contracts are stable, generated artifacts have owners, and local/CI release checks match. |
 | R6 | Historical gameplay depth and final calibration | **PRE-1.0 SCOPE COMPLETE — CLOSED 2026-08-09.** Final R6 re-floor `n163`: 634 matched OSIDs, 30/31 anchors (Brčko debt only), Section 6 correct, 40-week fingerprint `5cfcf1c8` golden-match, and all seven engine-health checks passing. Later RC-base fixes moved current HEAD to 629 matched and 31/31 anchors; do not conflate that newer integration baseline with the R6 closeout snapshot. Remaining Brčko/force-density, exhaustion re-pacing, casualty-grade, combat-earned-cohesion, and institutional-veto work is recorded post-1.0 debt unless explicitly reactivated. | [Historical-gameplay plan](2026-07-31-historical-gameplay-depth-calibration-plan.md) · [exhaustion/scoring plan](2026-08-06-exhaustion-scoring-redesign-plan.md) | Calendar/weak-predicate events cannot manufacture control; experiments close by predeclared criteria; long-run evidence remains deterministic and Section 6-safe. |
 | RC | Pressure → exhaustion → **COLLAPSE** pipeline | **PRE-1.0 NARROW SCOPE COMPLETE — CLOSED 2026-08-15.** Retained v3 selection plus reversible D-shape (`4.0` shock / `0.5` recovery) produced one live non-enclave HRHB write while remaining deterministic and trajectory-flat: hash `70d5e04c6f49e041`, fingerprint `22cf3c5d8884bfb8`, 31/31 anchors, 6/6 benchmarks, 7/7 health gates, and full Section 6 pass. Bucovaca peaked 62 and recovered to 37; Sipovo/Drvar peaks 11/7.5. D-topology is explicitly post-1.0/reserved. | [Scope](../40_reports/proposals/20260609_SCOPE_collapse_pipeline.md) · [build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) · [measurement plan](2026-08-15-collapse-d-selection-measurement-plan.md) · [D-shape design](2026-08-15-collapse-d-shape-design.md) · [Stage 0/2 panel record](../40_reports/20260813_RC_COLLAPSE_PANEL_FROZEN_ARTIFACT.md) | The default-OFF local collapse model measures historically discriminating combat pressure, recovers on quiet turns, reaches a bounded live writer, preserves Section 6, and leaves neighbour cascade to an explicit post-1.0 topology packet. |
-| RE | 1.0 engine integrity: seven outcomes, no general cleanup | **CLOSED — owner, 2026-09-01.** RE no longer gates calibration, R7 or R8. P1/P2A were accepted; the P2B packaged-proof blocker and the terminal-NO_VERDICT auxiliary prerequisite are history, not live constraints. Engine health remains sacrosanct as a standing principle — engine-health defects are fixed before tuning — but it is no longer administered as an RE gate. | [1.0 contract](2026-08-26-engine-integrity-plan.md) · [recovery plan](2026-08-28-packaged-probe-recovery-plan.md) · [living audit](../40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md) | The unproven prerequisite config/test hypothesis was rolled back exactly and its receipt closed. P2B–P7 and the final pair/profile retain their gates; no retry, diagnosis, instrumentation, supervisor redesign, or successor proof route is authorized. |
-| R7 | Content, historical attribution, audio, accessibility, and opening experience | **ACTIVE — CINEMATIC OPENING MECHANICS, TYPOGRAPHY, OWNER ART, AND BROWSER PROOF COMPLETE.** React owns healthy browser/desktop-host opening; faction-room continuity and the two bundled font families are implemented. The two required analogue-first owner plates are integrated and that art gate is closed; the separately approved map-portal texture is integrated as atmospheric terrain only, carrying no political border, control, or gameplay state. Live packaged-Electron first-paint acceptance remains open; the optional foreground asset was never supplied and does not gate this work. Human listen/sensitivity, broader English accessibility/readability, and closeout reconciliation also remain. **The broader English readability/accessibility gate now has an executable contract:** the 2026-09-05 [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) runs R7 Phase 5's unticked *"Inspect English at 1920x1080, 1366x768, and 3440x1440"* line early, against the frozen 29-finding [showcase screenshot audit](../40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md) and its [four-specialist panel record](../40_reports/working/20260905_SHOWCASE_AUDIT_PANEL_SPECIALIST_REPORTS.md). It is renderer-only and byte-neutral to the simulation; it fixes no bugs (owner decision D1, 2026-09-04: HOLD FOR R8) and creates no lane. **Localization Phase 3 is post-1.0.** | [Content/history/audio plan](2026-07-31-content-history-localization-audio-plan.md) · [accepted functional opening plan](2026-08-23-opening-screens-implementation-plan.md) · [cinematic opening and typography amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md) · [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) | Claims, identities, English strings, and audio are machine-auditable; unsupported content is absent; opening keyboard/focus/reduced-motion behavior, mechanics, typography, and browser proof pass; required owner art, human/audio sensitivity, broader English readability/accessibility, live packaged acceptance, and closeout reconciliation pass. |
+| RE | 1.0 engine integrity: seven outcomes, no general cleanup | **CLOSED — owner, 2026-09-01.** RE no longer gates calibration, R7 or R8. P1/P2A were accepted; the P2B packaged-proof blocker and the terminal-NO_VERDICT auxiliary prerequisite are history, not live constraints. Engine health remains sacrosanct as a standing principle — engine-health defects are fixed before tuning — but it is no longer administered as an RE gate. | [1.0 contract](2026-08-26-engine-integrity-plan.md) · [recovery plan](2026-08-28-packaged-probe-recovery-plan.md) · [living audit](../40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md) | The unproven prerequisite config/test hypothesis was rolled back exactly and its receipt closed. P2B–P7 and final-pair/profile gates are retired historical acceptance, not unfinished current work; no successor proof route is active. |
+| R7 | Content, historical attribution, audio, accessibility, and opening experience | **ACTIVE — CINEMATIC OPENING MECHANICS, TYPOGRAPHY, OWNER ART, AND BROWSER PROOF COMPLETE.** React owns healthy browser/desktop-host opening; faction-room continuity and the two bundled font families are implemented. The two required analogue-first owner plates are integrated and that art gate is closed; the separately approved map-portal texture is integrated as atmospheric terrain only, carrying no political border, control, or gameplay state. Live packaged-Electron first-paint acceptance PASSED 2026-08-29; the optional foreground asset was never supplied and does not gate this work. Human listen/sensitivity, broader English accessibility/readability, and closeout reconciliation also remain. **The broader English readability/accessibility gate now has an executable contract:** the 2026-09-05 [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) runs R7 Phase 5's unticked *"Inspect English at 1920x1080, 1366x768, and 3440x1440"* line early, against the frozen 29-finding [showcase screenshot audit](../40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md) and its [four-specialist panel record](../40_reports/working/20260905_SHOWCASE_AUDIT_PANEL_SPECIALIST_REPORTS.md). It is renderer-only and byte-neutral to the simulation; it fixes no bugs (owner decision D1, 2026-09-04: HOLD FOR R8) and creates no lane. **Localization Phase 3 is post-1.0.** | [Content/history/audio plan](2026-07-31-content-history-localization-audio-plan.md) · [accepted functional opening plan](2026-08-23-opening-screens-implementation-plan.md) · [cinematic opening and typography amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md) · [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) | Claims, identities, English strings, and audio are machine-auditable; unsupported content is absent; opening keyboard/focus/reduced-motion behavior, mechanics, typography, and browser proof pass; required owner art, human/audio sensitivity, broader English readability/accessibility, live packaged acceptance, and closeout reconciliation pass. |
 | R8 | Full-campaign packaged-Electron validation and diaries | **WAITING ON R7.** RE closed 2026-09-01 and no longer gates this. **Harness-side full campaigns are DONE:** all three factions ran week 0 to Dayton (188 turns) on `tools/ai_play/president_playthrough.ts` with zero pending decisions and zero unresolved authorizations, Observer parity byte-identical, opening faithful within 2 cells at the jan1993 checkpoint — [D2 report](../40_reports/playtests/20260901_d2_full_campaign_all_three_factions.md), `ef05545d8`. That is the BASELINE set (Level 3, authored historical defaults); ahistorical play is blocked on the queued player-path opportunity-sweep gap. Packaged-Electron validation and the scored diaries remain. | [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md) | Fresh historical-policy RBiH, RS, and HRHB campaigns cover full duration and required surfaces; bugs and friction are separately routed; final two diaries score 5/5 with clean diagnostics. |
 | R9 | Release candidate, gold, and publication | READY AFTER R8 | [Release plan](2026-07-31-release-candidate-gold-publication-plan.md) | One immutable RC passes clean-machine/security/license/store proofs; artifacts are reproducible; signing/upload inputs are documented; publication awaits only the explicit instruction. |
 
@@ -508,7 +488,8 @@ Additional rules:
 
 The roadmap is complete only when:
 
-- RC, R1–R7, and RE acceptance criteria and plan checklists are green;
+- RC and R1–R7 acceptance criteria and plan checklists are green; RE remains owner-closed;
+- every §4.1 BC row has accepted fix/verification or an evidenced release exclusion before final calibration acceptance; new behavioral findings explicitly reopen affected closure and calibration evidence, never silently enlarge the finite register;
 - R8 completes fresh full-duration RBiH, RS, and HRHB coverage and the final two owner-style diaries score 5/5;
 - every R8 finding is either fixed and reverified or explicitly proven outside the 1.0 definition of done;
 - bugs and friction remain separately reported;

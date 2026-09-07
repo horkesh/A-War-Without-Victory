@@ -33113,3 +33113,59 @@ expected rather than reading the verdict. It is the carved-out Farz discriminato
 preflight refusal behind exit 0, a `turn 188` filter that cannot match `turn=188`, and a false
 "refresh complete" at turn 17 of 188. **Build the check around the signal that cannot be faked** — here,
 the manifest's own hash changing.
+
+
+## 2026-09-07 — Finite behavior closure registered before final calibration (planning only)
+
+Owner requested step 1: inventory and reconcile the remaining behavior-bearing work before final
+calibration, without starting repairs. MASTER_ROADMAP §4.1 now owns BC01–BC08 inside existing lanes:
+player opportunities, sector/rating truth, narrated Dayton, historical chronology/P1/P2, NATO/Lukavac
+gates, posture/gesture handlers, consumed stability-data policy, and inherited verification residuals.
+The existing R8 plan supplies detailed owners, impact, FIX-when-scheduled or VERIFY/DISPOSITION,
+acceptance evidence and source links; missing B10–B13/F1 routing is now recorded there. No new lane,
+milestone renumbering, broad RE revival, simulation edit, run, commit, or baseline refresh.
+
+D1 HOLD FOR R8 remains. R7 can continue on disjoint presentation files. Settle accepted behavior
+before final calibration acceptance and final packaged R8 proof, then R9. Causal intermediate tests
+and one-change-per-run remain mandatory; new behavior findings explicitly reopen affected closure
+and calibration evidence. n392 remains accepted at 702/678/672/665 against unchanged floors
+694/674/668/641, with the improvement from n388 unattributed. Older 688-breach and R7 art/package
+status were reconciled; obsolete RE sequencing is linked as history. Post-1.0 debt is excluded.
+
+Documentation verification: `docs_desktop_v09_truth.test.ts` passes 7/7; all 35 added/changed local links and anchors resolve; `git diff --check` is clean. Independent technical review: GO; Process QA: PASS. FORAWWV and all canon/source/data files remain untouched.
+
+
+## 2026-09-07 — BC08 closed by bounded verification/disposition, not overall green
+
+[Audit](40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md): canonical full suite
+completed in 31m36s, exit 1, 1,344 passed/1 failed/4 skipped file executions; 13,607 passed/1 failed/31
+skipped tests. Only failure is Windows Bash resolution; unchanged focused file passes 8/8 with Git
+Bash selected only in the child environment. Raw red remains. Located deployment-health 11,
+run-diagnostics 6, and peace-plan 35 tests pass; old five-file inventory is not retroactively invented.
+Typecheck 0; all six pre-existing dirty paths unchanged through execution.
+
+Current default/engine-only/direct consistency gates on accepted n392 pass 0. Source/runtime and all 31
+normalized consumed-input hashes establish equivalence limits; no fresh 188w was run or claimed.
+Transient assignment completeness is NOT ESTABLISHED; advisory/floor-shortfall findings remain.
+Master BC08, R8 detail and board now link this disposition; BC01–BC07 and D1 stay unchanged. No code,
+canon, expectations, thresholds or baseline changed. Report indexed as audit; no implemented feature
+or new backlog work was created. BC01 remains the recommended next behavior priority when scheduled.
+
+Documentation verification: focused documentation tests pass 7/7. Independent technical review: GO; Process QA: PASS. Final local-link verification is recorded by the parent task.
+
+
+## 2026-09-07 — Entry-point synchronization before BC01 (docs only)
+
+Reconciled plans index, reports index, GUI master, documentation index and calibration master to
+current master/board/R8 truth: BC01–BC07 pending, BC08 bounded closure; raw suite RED on one Bash
+resolution failure with unchanged focused 8/8 proof. R7 art and packaged first-paint passed; remaining
+readability/audio/closeout stays open. RE is closed, old packet status historical. n392 remains the
+accepted equivalent artifact, not a fresh current campaign or complete transient/player-path proof.
+Queued BC01 now points to the finite register and receipt and states the controlling L0 review,
+L1 preserve, L2 auto-apply/no queue, L3 automatic contract above its historical diagnosis. No design,
+repair scheduling, source/canon/data/baseline changes or new lane. Dated ledger history was
+not rewritten. Documentation review and focused checks follow in the parent task.
+
+Root README/CLAUDE command guidance now distinguishes the sole scoring 188-week scenario from short diagnostics and records child-scoped Git Bash selection for Windows tests; no shell configuration or script changed.
+
+Final synchronization verification: documentation tests 7/7; 94 added/new local links and anchors checked with zero errors; independent technical review GO after command-label correction; Process QA PASS; git diff --check passed. Source, data, tests, tools and baseline files unchanged.
