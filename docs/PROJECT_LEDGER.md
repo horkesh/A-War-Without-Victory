@@ -33169,3 +33169,13 @@ not rewritten. Documentation review and focused checks follow in the parent task
 Root README/CLAUDE command guidance now distinguishes the sole scoring 188-week scenario from short diagnostics and records child-scoped Git Bash selection for Windows tests; no shell configuration or script changed.
 
 Final synchronization verification: documentation tests 7/7; 94 added/new local links and anchors checked with zero errors; independent technical review GO after command-label correction; Process QA PASS; git diff --check passed. Source, data, tests, tools and baseline files unchanged.
+
+
+## 2026-09-07 — BC01 scheduled; attribution gate precedes implementation
+
+Owner instruction “Start BC01 then” activates BC01 only. Its existing plan now contains the bounded
+execution/check plan; master, board and R8 mirror ACTIVE. RBiH/HRHB launch-channel attribution runs
+first, before source writes. Engine routing and the launched L2 dossier/Stop-op rider remain one
+scope; corrected L0 review/L1 preserve/L2 auto-apply/no queue/L3 automatic applies only to opportunity
+handling. Historical-operation player authorization is unchanged. BC02–BC07 retain D1; BC08 stays
+closed by bounded verification/disposition. No source, canon or baseline change at scheduling.

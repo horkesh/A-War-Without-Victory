@@ -1,6 +1,6 @@
-# The player faction's opportunities are never decided — QUEUED
+# The player faction's opportunities are never decided — BC01 ACTIVE
 
-**Date:** 2026-09-01 · **Status:** QUEUED, not started. Located and evidenced; fix not attempted.
+**Date:** 2026-09-01 · **Status:** BC01 ACTIVE, owner scheduled 2026-09-07. Attribution proof runs first; implementation has not started.
 **Corrected:** 2026-09-05 — the fix section was rewritten (see *Correction record* at the end). The
 root-cause trace below is unchanged and still holds.
 **Corrected again:** 2026-09-05 — the Level-2 open question is RULED (auto-apply, does not queue);
@@ -12,9 +12,61 @@ two factual citation errors fixed; canon-clarification recommendations recorded 
 
 ## Current handoff — 2026-09-07
 
-**QUEUED; no implementation or scheduling authority added.** Existing home: [Master BC01](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) / [R8 acceptance detail](2026-07-31-full-campaign-electron-validation-plan.md#behavior-closure-acceptance-detail-2026-09-07). [BC08 verification](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md) is closed by bounded disposition, not an overall-green or player-path proof. BC01–BC07 remain pending; D1 and the corrected contract still govern when repairs are scheduled.
+**ACTIVE — owner instruction “Start BC01 then”, 2026-09-07.** This schedules BC01 only; BC02–BC07 retain D1. No source writes before the attribution gate below is assessed. Existing home: [Master BC01](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) / [R8 acceptance detail](2026-07-31-full-campaign-electron-validation-plan.md#behavior-closure-acceptance-detail-2026-09-07). [BC08 verification](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md) is closed by bounded disposition, not an overall-green or player-path proof. BC01 is active; BC02–BC07 remain pending under D1. The corrected contract governs this repair.
 
 **Controlling autonomy interpretation:** L0 creates a live human review; L1 preserves existing review; L2 auto-applies military opportunities with **no queue**; L3 retains automatic observer decisions. New campaigns start at L2; the missing-field fallback is L0. Earlier text below saying “default L0” or “Levels 0–2 belong to the human” is historical diagnosis, superseded by the dated corrections and this summary. Do not implement a blanket post-turn player sweep. Acceptance covers all four levels, RBiH/HRHB player-path deficits and RS regression, not headless parity alone. **First when scheduled: run `tools/ai_play/op_launch_diff.ts` for RBiH and HRHB before implementation; attribution to the opportunity channel remains unconfirmed.** Current acceptance also requires no-player calibration neutrality on the n392 lineage, all-three-player runs and observer parity; the verification section below remains controlling. This handoff introduces no new design.
+
+## Bounded execution plan — 2026-09-07
+
+**Authority and scope:** existing BC01 only. Attribution runs finish on unchanged source first;
+then a clean sibling checkout at `F:/AWWV-worktrees/bc01-player-opportunities`, branch
+`codex/bc01-player-opportunities`, supplies the fresh canonical no-player PRE 188-week baseline
+before any source edits. The dirty root checkout and its unrelated scheduled-task lock stay intact. Gameplay/systems
+implements; independent architecture and QA review. No new lane, mechanics, canon, initial-control,
+scenario, baseline or default-autonomy change. No blanket player post-turn sweep. The earlier
+“not authorized” passages record their September 5 status; the owner scheduling above supersedes
+that timing alone. Use writing-plans and test-driven-development discipline inside this existing home.
+
+1. **Attribution gate (in progress, architecture owns runs).** Preserve exact RBiH/HRHB
+   `op_launch_diff.ts` artifacts and classify missing launches by channel before implementation.
+   A catalog-fix claim about the territorial deficit is allowed only if the evidence supports it.
+   If attribution fails, revise this bounded causal claim before code; do not widen to commander AI.
+2. **Failing engine contracts first.** Extend `tests/operation_opportunities_phase2_decisions.test.ts`
+   and the relevant real war-pipeline test: L0 review actually generated and actionable; L1 preserved;
+   L2 auto-apply/no queue; L3 automatic; non-player and no-player paths unchanged; repeated calls and
+   delayed/resolved proposals do not duplicate decisions or launches. Verify absence of silent expiry
+   caused solely by missing ownership. Run focused tests to observe the intended red before edits.
+3. **Minimal engine routing.** Own `src/sim/combat/operation_opportunities.ts` and
+   `src/sim/turn_phases/war_phases.ts`. Protect a present human only at L0/L1 for opportunity
+   auto-decisions; generate reviews at those levels. Keep existing sorted proposal iteration,
+   eligibility/admission and single decision writer. Preserve no-player inputs by construction;
+   do not change `desktop_sim.advanceTurn` into an unconditional bot sweep.
+4. **L2 dossier rider, with UI tests first.** Own `src/ui/map/data/operationOpportunityDossiers.ts`,
+   its view types in `src/ui/map/data/types.ts`, and
+   `src/ui/map/components/army_hq/OperationOpportunityDossierPanel.tsx`, plus necessary adapter
+   projection/copy and focused tests. Launched opportunities must remain visible with actual staff/
+   commander reasoning and exact live operation/corps identity. Bind through persisted resolution,
+   never normalized display-name similarity. Reuse the existing Stop-op decision/IPC path; no new
+   lever or authorization action. Test wrong-faction/stale/completed operation exclusion, truthful
+   disabled states and a live Stop-op affordance, alongside unchanged L0/L1 five-way review actions.
+   Extend existing `tests/ui/decision_room_stop_op_executing.test.ts` and
+   `tests/ui/directive_card_stop_op_action.test.ts` only if the reused bridge changes.
+5. **Review and proof.** Focused engine/UI tests, typecheck, relevant state/migration/serialization
+   checks if persisted fields change (prefer no schema change), canonical full suite and desktop map
+   build; live UI proof for launched reasoning/Stop-op. Independent review checks singular ownership,
+   deterministic ordering and no authorization leak. Final behavior evidence: fresh controlled
+   no-player 188w neutrality on n392 lineage, all-three player paths, observer parity and the
+   attribution comparison again. One controlled candidate per run; no baseline update. Runs are
+   serial under the root's orchestration, never concurrent with changing source.
+6. **Closeout only on actual evidence.** Update this checklist, master/board/R8, GUI/calibration
+   pointers as affected, report/index and ledger/knowledge; preserve failures and limitations.
+   BC01 is not closed by engine unit tests alone or by headless parity; other BC rows remain pending.
+
+**Canon basis:** War Specification requires deterministic War-only mechanics; Engine Invariants
+§14.10b and Systems Manual's player-automation boundary inform the dated L2 ruling above. Existing
+presidential review and Stop-op paths remain the authority. No new canon design is proposed;
+precise stale-unbuilt-status propagation in §14.10b/Systems Manual requires the independent
+panel disposition before any canon edit. Historical-operation authorization is unchanged at every level.
 
 ## Historical diagnosis and correction record
 
