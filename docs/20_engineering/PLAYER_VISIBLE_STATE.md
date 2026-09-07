@@ -114,7 +114,7 @@ This contract is being followed when:
 5. regression tests fail if forbidden truth leaks back into the client
 
 
-## Operation opportunity receipt boundary (BC01 candidate, 2026-09-07)
+## Operation opportunity receipt boundary (BC01 implementation, 2026-09-07)
 
 Own opportunity proposals are player-safe through their exact `approver_faction`; factionless
 resolution receipts are included only when their nonempty proposal/opportunity identity pair has
@@ -132,4 +132,4 @@ action requires a unique current own operation with the exact projected corps, r
 start turn, and execution phase; it reuses the existing authority/cost/IPC. L0/L1 opportunity reviews
 remain advisory under the decision manifest. Candidate proof lives in
 `tests/desktop_player_visible_state.test.ts`, `tests/operation_opportunity_launched_dossier.test.ts`
-and `tests/ui/presidential_decision_room_panel_i18n.test.ts`; BC01 campaign acceptance remains active.
+and `tests/ui/presidential_decision_room_panel_i18n.test.ts`; BC01 remains ACTIVE: endpoint-convergence expectation unmet; see [verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md).

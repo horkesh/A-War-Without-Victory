@@ -132,7 +132,7 @@
 - Gate: `tests/sandbox_slice_determinism.test.ts` (ordering + idempotence)
 
 
-### BC01 opportunity autonomy and renderer boundary (candidate, 2026-09-07)
+### BC01 opportunity autonomy and renderer boundary (implemented, 2026-09-07)
 
 - `tests/operation_opportunities_phase2_decisions.test.ts`: real opportunity/pipeline L0/L1 review,
   L2/L3 automatic decisions, unresolved-review deduplication and no-player neutrality.
@@ -142,4 +142,4 @@
 - `tests/operation_opportunity_launched_dossier.test.ts` and
   `tests/ui/presidential_decision_room_panel_i18n.test.ts`: exact launch binding, unavailable states,
   raw projection through adapter to the actual mounted Decision Room, and no false pending reviews.
-- These gates do not replace BC01 clean 188-week POST and all-three-player/observer acceptance.
+- Clean 188-week POST and observer parity passed; all-three-player matched evidence leaves endpoint convergence unmet. See [BC01 verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md); test gates do not waive that expectation.

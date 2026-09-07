@@ -1,8 +1,8 @@
-# The player faction's opportunities are never decided — BC01 ACTIVE
+# Player opportunity autonomy boundary — implemented, BC01 ACTIVE
 
-**Date:** 2026-09-01 · **Status:** BC01 ACTIVE, owner scheduled 2026-09-07. Attribution proof runs first; implementation has not started.
+**Date:** 2026-09-01 · **Status:** BC01 ACTIVE, owner scheduled 2026-09-07. Implementation verified; player endpoint expectation unmet; owner disposition required. See [verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md).
 **Corrected:** 2026-09-05 — the fix section was rewritten (see *Correction record* at the end). The
-root-cause trace below is unchanged and still holds.
+root-cause trace below preserves the historical diagnosis, superseded by the dated implementation verification.
 **Corrected again:** 2026-09-05 — the Level-2 open question is RULED (auto-apply, does not queue);
 two factual citation errors fixed; canon-clarification recommendations recorded (see the second
 *Correction record* entry at the end). Still does not authorize implementation.
@@ -12,11 +12,13 @@ two factual citation errors fixed; canon-clarification recommendations recorded 
 
 ## Current handoff — 2026-09-07
 
-**ACTIVE — owner instruction “Start BC01 then”, 2026-09-07.** This schedules BC01 only; BC02–BC07 retain D1. No source writes before the attribution gate below is assessed. Existing home: [Master BC01](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) / [R8 acceptance detail](2026-07-31-full-campaign-electron-validation-plan.md#behavior-closure-acceptance-detail-2026-09-07). [BC08 verification](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md) is closed by bounded disposition, not an overall-green or player-path proof. BC01 is active; BC02–BC07 remain pending under D1. The corrected contract governs this repair.
+**ACTIVE — owner instruction “Start BC01 then”, 2026-09-07.** This schedules BC01 only; BC02–BC07 retain D1. The unchanged-source attribution and clean PRE/POST gates passed; candidate implementation is verified, while endpoint-convergence expectation is unmet. Existing home: [Master BC01](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) / [R8 acceptance detail](2026-07-31-full-campaign-electron-validation-plan.md#behavior-closure-acceptance-detail-2026-09-07). [BC08 verification](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md) is closed by bounded disposition, not an overall-green or player-path proof. BC01 is active; BC02–BC07 remain pending under D1. The corrected contract governs this repair.
 
-**Controlling autonomy interpretation:** L0 creates a live human review; L1 preserves existing review; L2 auto-applies military opportunities with **no queue**; L3 retains automatic observer decisions. New campaigns start at L2; the missing-field fallback is L0. Earlier text below saying “default L0” or “Levels 0–2 belong to the human” is historical diagnosis, superseded by the dated corrections and this summary. Do not implement a blanket post-turn player sweep. Acceptance covers all four levels, RBiH/HRHB player-path deficits and RS regression, not headless parity alone. **First when scheduled: run `tools/ai_play/op_launch_diff.ts` for RBiH and HRHB before implementation; attribution to the opportunity channel remains unconfirmed.** Current acceptance also requires no-player calibration neutrality on the n392 lineage, all-three-player runs and observer parity; the verification section below remains controlling. This handoff introduces no new design.
+**Controlling autonomy interpretation:** L0 creates a live human review; L1 preserves existing review; L2 auto-applies military opportunities with **no queue**; L3 retains automatic observer decisions. New campaigns start at L2; the missing-field fallback is L0. Earlier text below saying “default L0” or “Levels 0–2 belong to the human” is historical diagnosis, superseded by the dated corrections and this summary. Do not implement a blanket post-turn player sweep. Acceptance covers all four levels, RBiH/HRHB player-path deficits and RS regression, not headless parity alone. **Attribution gate completed:** unchanged-source probes confirmed six missing RBiH and four missing HRHB catalog launches; territory-deficit magnitude is not thereby proven. Post-repair channel evidence and endpoint disposition are recorded in the verification report. Current acceptance also requires no-player calibration neutrality on the n392 lineage, all-three-player runs and observer parity; the verification section below remains controlling. This handoff introduces no new design.
 
 ## Bounded execution plan — 2026-09-07
+
+The sequence below records the authorized implementation plan. Source/desktop/live verification and controlled no-player neutrality are complete; BC01 remains ACTIVE because endpoint convergence is unmet; owner disposition is required. The linked current verification report supersedes in-progress wording below without changing the acceptance expectation.
 
 **Authority and scope:** existing BC01 only. Attribution runs finish on unchanged source first;
 then a clean sibling checkout at `F:/AWWV-worktrees/bc01-player-opportunities`, branch
@@ -27,7 +29,7 @@ scenario, baseline or default-autonomy change. No blanket player post-turn sweep
 “not authorized” passages record their September 5 status; the owner scheduling above supersedes
 that timing alone. Use writing-plans and test-driven-development discipline inside this existing home.
 
-1. **Attribution gate (in progress, architecture owns runs).** Preserve exact RBiH/HRHB
+1. **Attribution gate (completed; historical plan wording follows).** Preserve exact RBiH/HRHB
    `op_launch_diff.ts` artifacts and classify missing launches by channel before implementation.
    A catalog-fix claim about the territorial deficit is allowed only if the evidence supports it.
    If attribution fails, revise this bounded causal claim before code; do not widen to commander AI.

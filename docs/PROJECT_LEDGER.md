@@ -33231,3 +33231,31 @@ This is an implementation checkpoint only. BC01 stays ACTIVE pending clean canon
 three-faction D2 and observer acceptance, final panel-approved canon completion amendment and
 current-document synchronization. BC02-BC07 retain D1; BC08 remains closed by bounded disposition.
 No new lane, baseline refresh, broader repair authorization or final engine/calibration closure.
+
+
+## 2026-09-07 - BC01 campaign adjudication and implementation documentation; ACTIVE
+
+[Verification](40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)
+records candidate 3ad5ed25a, clean canonical POST equal to PRE/n392 across six principal artifacts
+and all 31 consumed inputs/digest, inherited Farz P-A carveout unchanged, and observer MATCH.
+All matched PRE/POST faction runs reached 188 weeks, exit 0, zero unresolved inventories and equal
+direct controls. Own-faction gaps PRE -> POST: RBiH -9 -> +24 (absolute 9 -> 24), HRHB -9 -> +9
+(absolute 9 -> 9), RS -16 -> -16 (all 189 printed rows identical). The endpoint-convergence
+expectation is **unmet**, not waived; BC01 stays ACTIVE for explicit owner disposition.
+
+Post-repair launch probes restore all ten previously absent RBiH/HRHB catalog launches at control
+first-seen timings. This proves the channel repair without assigning aggregate territory to individual
+launches. No calibration, floor, baseline, mechanics or broader lane change follows. The existing
+BC01 plan/master/board/R8, current entrypoints, autonomy and engineering documents now record
+implemented-but-ACTIVE status. Exact opportunity-only Engine Invariants/Systems Manual propagation
+received final independent Systems and Canon QA GO; historical commander/historical-operation
+clauses and September 5 annotation remain. Documentation does not grant endpoint acceptance.
+
+The report preserves raw full-suite exit 1 (13,427 passed / one missing-BCS-key failure / 31 skipped
+assertions plus four whole-file skips), bounded five-key correction with 29 focused tests and fresh
+build, 111 focused candidate tests, CSS supplement 222/222, and four final synthetic DTO live cases.
+No full-suite-green, natural-play, packaged acceptance or general engine closure is claimed.
+Current next action: owner/PM with Systems/QA explicitly resolves the endpoint expectation before
+further investigation or closure; BC02-BC07 retain D1 and BC08 remains unchanged.
+
+Documentation verification: 7/7 focused documentation tests passed; 18 new/changed local links and anchors checked with zero errors; git diff --check passed. Final independent Process QA GO and Systems GO (with launch-instrument scope correction applied). No production changes in this propagation.

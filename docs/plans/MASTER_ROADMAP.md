@@ -218,7 +218,7 @@ Historical RE packet sequencing and rollback evidence remain in the [closed cont
 
 ### 4.1 Finite behavior-closure register (2026-09-07)
 
-**Current disposition:** BC01 ACTIVE by owner scheduling 2026-09-07 (attribution before code); BC02–BC07 pending under D1; BC08 closed by verification/disposition.
+**Current disposition:** BC01 ACTIVE: implemented; endpoint-convergence expectation unmet; owner disposition required ([verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)); BC02–BC07 pending under D1; BC08 closed by verification/disposition.
 
 **Register authority only; BC01 separately scheduled above.** These IDs index existing work, not milestones or a new lane.
 FIX means planned repair **when scheduled**, not authority to implement. VERIFY/DISPOSITION means
@@ -229,7 +229,7 @@ live in the existing R8 plan; its previously proposed B10–B13/F1 are now regis
 
 | ID / existing home | Owner | Impact / pre-freeze disposition |
 |---|---|---|
-| BC01 player opportunities / R8 | Gameplay/operations + Game Designer + QA | **ACTIVE — attribution first, then FIX** player operation decisions: L0 review, L1 preserved, L2 auto-apply/no queue, L3 observer; all modes and all three factions verified. |
+| BC01 player opportunities / R8 | Gameplay/operations + Game Designer + QA | **ACTIVE — implemented; endpoint expectation unmet; owner disposition required.** Player operation decisions: L0 review, L1 preserved, L2 auto-apply/no queue, L3 observer; all modes and all three factions verified. |
 | BC02 B2/B9 sector/rating truth / R8 | Systems + QA | **VERIFY/DISPOSITION** endgame engine-consumed mismatch against current lineage; locate writer and distinguish terminal from mid-war effects. |
 | BC03 B10 narrated Dayton / R8 | Events/systems + Game Designer + QA | **FIX** coherent event/terminal ownership before gate/window activation; preserve working packaged ending. Headless terminal behavior is separate **VERIFY/DISPOSITION**, not a mandated closeout. |
 | BC04 B11 chronology + P1/P2 / R8/panel | Historian + systems + calibration + independent §6 panel | **FIX after existing conditional planning**, fresh n392 reconciliation first. Exclude landed barracks stagger. P1 and coherent P2 separately controlled; timing/displacement/NATO outcomes measured. |

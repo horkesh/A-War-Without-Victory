@@ -54,25 +54,20 @@ Rationale:
 **Operation authorization across the levels (clarified 2026-09-05).** The table drops "operation
 approval" between Level 1 and Level 2; that is deliberate. Presidential authorization of a
 *staff-generated* corps operation is gated on Level 1 exactly — it applies at Levels 0-1 and
-delegates at Levels 2-3. The two staff-generated channels diverge on whether they implement that:
-the commander loop does, the LANE B opportunity channel does not and is a recorded open defect:
+delegates at Levels 2-3. The commander-loop and operation-opportunity channels use separate boundaries:
 
 - **Commander-loop plans.** `commander_loop.ts:261` gates the authorization hold on
   `autonomyLevel === 1`, not `<= 1`. At Level 0 the commander loop does not run for the player
   faction at all (`selectBotBrigadeOrderFactions`, `war_phases.ts:937`, gated `>= 1`), so no staff
   plan is proposed and there is nothing to authorize. At Level 1 the plan is held at `ready` until
   the president answers it. At Levels 2-3 it advances to `executing` unauthorized.
-- **LANE B operation opportunities — NOT IMPLEMENTED at any level but 1.**
-  `applyBotOpportunityDecisions` (`operation_opportunities.ts:1630`) skips the player faction
-  *unconditionally*, with no autonomy test, and `generateOpportunityProposalReviews`
-  (`operation_opportunities.ts:1662`) surfaces a review only at `autonomy_level === 1`. Those two
-  facts together mean Levels 0, 2 **and 3** do **neither**: the opportunity is evaluated, then
-  neither surfaced nor decided. Levels 2-3 do not delegate to the bot decision path — nothing
-  resolves the player faction's opportunities there. Only the headless scenario runner sweeps them
-  (`scenario_runner.ts:2646`, passing `null`); `advanceTurn` has no such sweep. *This is an open
-  defect, not the intended boundary. The ruled dispositions — a review record at Level 0,
-  auto-apply through the bot path at Levels 2-3 — are ruled but **not built**; see
-  `docs/plans/2026-09-01-player-opportunity-sweep-gap.md`.*
+- **LANE B operation opportunities — implemented (BC01 ACTIVE, 2026-09-07).**
+  L0/L1 create advisory human reviews; L2/L3 automatically resolve military opportunities without
+  a queue. The bot path excludes the selected player at L0/L1. The actual Decision Room presents
+  factual receipts and the existing Stop-op action only for a uniquely bound executing own operation.
+  No blanket post-turn sweep is added. [Verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)
+  records restored launches and neutral canonical POST, but the endpoint-convergence expectation
+  is unmet and requires explicit owner disposition. This is not BC01 closure.
 - **Authored historical operations are the exception and never delegate.** A pre-planned or triggered
   operation for the player faction requires an accepted `HISTORICAL_OP:*` authorization at every
   level, including 2 and 3 (`historical_operation_authorization.ts`,

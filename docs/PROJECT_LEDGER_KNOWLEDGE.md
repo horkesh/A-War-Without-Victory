@@ -5098,3 +5098,15 @@ hashes and unchanged source/runtime supports old-artifact gate reuse, not a fres
 Keep current entrypoints synchronized while labeling dated failure counts as history; a retired
 assertion passing today does not prove its earlier numeric symptom was repaired. See the
 [2026-09-07 synchronization ledger](PROJECT_LEDGER.md#2026-09-07--entry-point-synchronization-before-bc01-docs-only).
+
+
+## 2026-09-07 - Verify the full renderer boundary and separate mechanism proof from endpoint acceptance
+
+BC01 tests initially proved an unused component; live inspection then exposed dropped owned proposals,
+and the documentation audit exposed a renderer catalog import. Verify raw main-process projection,
+adapter, actual mounted route and persisted state together. Enrich identity-only DTOs outside the
+renderer, never canonical saves, and test missing/ambiguous ownership. Restored launch channels and
+byte-identical canonical POST do not prove a player endpoint-convergence proxy: matched PRE/POST
+controls are necessary, and an unmet expectation stays explicit until owner disposition.
+See [BC01 verification](40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)
+and [dated ledger](PROJECT_LEDGER.md#2026-09-07---bc01-campaign-adjudication-and-implementation-documentation-active).
