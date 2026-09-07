@@ -1,0 +1,251 @@
+{
+  "reviewed": true,
+  "caseId": "targeting/live-hrhb-02",
+  "fixture": "F:\\A-War-Without-Victory\\logs\\bc06\\fixture-hrhb-1.json",
+  "loadSteps": [
+    {
+      "buttonName": "Assume responsibility"
+    },
+    {
+      "buttonName": "Field Records"
+    },
+    {
+      "buttonName": "Resume bc06-proof-fixture"
+    }
+  ],
+  "before": [
+    {
+      "path": [
+        "meta",
+        "turn"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    }
+  ],
+  "steps": [
+    {
+      "selector": "[data-testid=\"toolbar-route-desk\"]",
+      "frameUrlIncludes": "http"
+    },
+    {
+      "buttonRegex": "^Command surface$"
+    },
+    {
+      "buttonRegex": "Command & Personnel"
+    },
+    {
+      "selector": "[data-testid=\"decision-room-priority-card-command:decorate-unit\"] button",
+      "buttonRegex": "^Dossier$"
+    },
+    {
+      "buttonRegex": "^Issue \\(10\\)$"
+    },
+    {
+      "selector": "[data-testid=\"event-decision-response\"][aria-label=\"Choose response: Decorate 101st Orašje Brigade\"]"
+    }
+  ],
+  "after": [
+    {
+      "path": [
+        "military",
+        "command_authority",
+        "current"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "event_fire_counts",
+        "decorate_a_unit_hrhb"
+      ],
+      "equals": 1
+    },
+    {
+      "path": [
+        "military",
+        "event_last_fired_turn",
+        "decorate_a_unit_hrhb"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    },
+    {
+      "path": [
+        "military",
+        "event_decision_log"
+      ],
+      "equals": [
+        {
+          "event_id": "decorate_a_unit_hrhb",
+          "response_id": "decorate_steadfast_hrhb__hrhb_101st_oraje_brigade",
+          "decision_source": "player",
+          "faction": "HRHB",
+          "turn": 90
+        }
+      ]
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "hrhb_101st_oraje_brigade",
+        "morale"
+      ],
+      "equals": 55
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "hrhb_101st_oraje_brigade",
+        "cohesion"
+      ],
+      "equals": 52
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "hrhb_102nd_brigade",
+        "morale"
+      ],
+      "equals": 50
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "hrhb_102nd_brigade",
+        "cohesion"
+      ],
+      "equals": 50
+    }
+  ],
+  "persisted": [
+    {
+      "path": [
+        "military",
+        "command_authority",
+        "current"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "event_fire_counts",
+        "decorate_a_unit_hrhb"
+      ],
+      "equals": 1
+    },
+    {
+      "path": [
+        "military",
+        "event_last_fired_turn",
+        "decorate_a_unit_hrhb"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    },
+    {
+      "path": [
+        "military",
+        "event_decision_log"
+      ],
+      "equals": [
+        {
+          "event_id": "decorate_a_unit_hrhb",
+          "response_id": "decorate_steadfast_hrhb__hrhb_101st_oraje_brigade",
+          "decision_source": "player",
+          "faction": "HRHB",
+          "turn": 90
+        }
+      ]
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "hrhb_101st_oraje_brigade",
+        "morale"
+      ],
+      "equals": 55
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "hrhb_101st_oraje_brigade",
+        "cohesion"
+      ],
+      "equals": 52
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "hrhb_102nd_brigade",
+        "morale"
+      ],
+      "equals": 50
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "hrhb_102nd_brigade",
+        "cohesion"
+      ],
+      "equals": 50
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "arbih_101st_mountain",
+        "morale"
+      ],
+      "equals": 50
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "arbih_101st_mountain",
+        "cohesion"
+      ],
+      "equals": 50
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_notifications",
+        "length"
+      ],
+      "equals": 2
+    }
+  ],
+  "expectsMutation": true,
+  "repeatAction": "initiateDecorateUnit",
+  "repeatReason": "on_cooldown"
+}

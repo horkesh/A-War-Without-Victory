@@ -1,0 +1,559 @@
+{
+  "baseHead": "d7fb720353c2b6b37a80269261ec1e193a205161",
+  "live": [
+    {
+      "case": "targeting/live-rbih-02",
+      "pass": true,
+      "diagnostics": [],
+      "resultPath": "F:\\A-War-Without-Victory\\logs\\bc06\\targeting\\live-rbih-02\\result.json",
+      "resultSha256": "1fbd98c78404c8ee743b29cc6a664e822c647dffc6e86f01d3c6abbebebc30b6",
+      "autosavePath": "F:\\A-War-Without-Victory\\logs\\bc06\\targeting\\live-rbih-02\\saves\\autosave.json",
+      "autosaveSha256": "962fb9c33fbe09671a1ad8689b6935485441b51b31f7c511b81e803b7bebe503",
+      "fixtureSha256": "230730e35d87bbb96e3e9df77d986b9818ac039057ee9a3bc813f0353bf27226",
+      "assertions": [
+        {
+          "path": [
+            "military",
+            "command_authority",
+            "current"
+          ],
+          "equals": 90
+        },
+        {
+          "path": [
+            "military",
+            "event_fire_counts",
+            "decorate_a_unit_rbih"
+          ],
+          "equals": 1
+        },
+        {
+          "path": [
+            "military",
+            "event_last_fired_turn",
+            "decorate_a_unit_rbih"
+          ],
+          "equals": 90
+        },
+        {
+          "path": [
+            "military",
+            "pending_event_decisions"
+          ],
+          "equals": []
+        },
+        {
+          "path": [
+            "military",
+            "event_decision_log"
+          ],
+          "equals": [
+            {
+              "event_id": "decorate_a_unit_rbih",
+              "response_id": "decorate_steadfast_rbih__arbih_101st_mountain",
+              "decision_source": "player",
+              "faction": "RBiH",
+              "turn": 90
+            }
+          ]
+        },
+        {
+          "path": [
+            "military",
+            "formations",
+            "arbih_101st_mountain",
+            "morale"
+          ],
+          "equals": 55
+        },
+        {
+          "path": [
+            "military",
+            "formations",
+            "arbih_101st_mountain",
+            "cohesion"
+          ],
+          "equals": 52
+        },
+        {
+          "path": [
+            "military",
+            "formations",
+            "arbih_102nd_motorized",
+            "morale"
+          ],
+          "equals": 50
+        },
+        {
+          "path": [
+            "military",
+            "formations",
+            "arbih_102nd_motorized",
+            "cohesion"
+          ],
+          "equals": 50
+        },
+        {
+          "path": [
+            "military",
+            "formations",
+            "hrhb_101st_oraje_brigade",
+            "morale"
+          ],
+          "equals": 50
+        },
+        {
+          "path": [
+            "military",
+            "formations",
+            "hrhb_101st_oraje_brigade",
+            "cohesion"
+          ],
+          "equals": 50
+        },
+        {
+          "path": [
+            "military",
+            "pending_event_notifications",
+            "length"
+          ],
+          "equals": 2
+        }
+      ],
+      "receipts": [
+        {
+          "decision_source": "player",
+          "event_id": "decorate_a_unit_rbih",
+          "faction": "RBiH",
+          "response_id": "decorate_steadfast_rbih__arbih_101st_mountain",
+          "turn": 90
+        }
+      ],
+      "notifications": [
+        {
+          "body": "The RBiH presidency honours one of the army's regular formations for steadfast defence. Mostar reads a morale gesture and the politics of favour within the ARBiH.",
+          "consumed": false,
+          "event_id": "decorate_a_unit_rbih",
+          "headline": "Sarajevo decorates a regular formation",
+          "notification_id": "decorate_a_unit_rbih:RBiH:HRHB",
+          "response_id": "decorate_steadfast_rbih__arbih_101st_mountain",
+          "source_faction": "RBiH",
+          "surfaced_on_turn": 91,
+          "target_faction": "HRHB"
+        },
+        {
+          "body": "The RBiH presidency awards a unit citation to a regular formation. Pale sees a morale signal and the internal jockeying it implies.",
+          "consumed": false,
+          "event_id": "decorate_a_unit_rbih",
+          "headline": "Sarajevo decorates a regular formation",
+          "notification_id": "decorate_a_unit_rbih:RBiH:RS",
+          "response_id": "decorate_steadfast_rbih__arbih_101st_mountain",
+          "source_faction": "RBiH",
+          "surfaced_on_turn": 91,
+          "target_faction": "RS"
+        }
+      ],
+      "repeatProof": {
+        "repeatKind": "real preload IPC after visible player action",
+        "method": "initiateDecorateUnit",
+        "result": {
+          "ok": false,
+          "error": "on_cooldown",
+          "reason": "on_cooldown"
+        },
+        "autosaveUnchanged": true
+      },
+      "proofKind": "visible local Electron controls, real preload IPC and canonical autosave; synthetic turn 90, no campaign or packaged acceptance"
+    },
+    {
+      "case": "targeting/live-rs-02",
+      "pass": true,
+      "diagnostics": [],
+      "resultPath": "F:\\A-War-Without-Victory\\logs\\bc06\\targeting\\live-rs-02\\result.json",
+      "resultSha256": "72b3fe397a9188f123a653dc9558075cfd82695258a96fd2687100aadb6441d0",
+      "autosavePath": "F:\\A-War-Without-Victory\\logs\\bc06\\targeting\\live-rs-02\\saves\\autosave.json",
+      "autosaveSha256": "55336bbfcf18c577742add9e157372764a887487269dc3a55fcd82de51a1636f",
+      "fixtureSha256": "5c9d445a08a58fac3bd91bc5b94a99de8707419dd7d647d53e96e84cbd091021",
+      "assertions": [
+        {
+          "path": [
+            "military",
+            "command_authority",
+            "current"
+          ],
+          "equals": 90
+        },
+        {
+          "path": [
+            "military",
+            "event_fire_counts",
+            "decorate_a_unit_rs"
+          ],
+          "equals": 1
+        },
+        {
+          "path": [
+            "military",
+            "event_last_fired_turn",
+            "decorate_a_unit_rs"
+          ],
+          "equals": 90
+        },
+        {
+          "path": [
+            "military",
+            "pending_event_decisions"
+          ],
+          "equals": []
+        },
+        {
+          "path": [
+            "military",
+            "event_decision_log"
+          ],
+          "equals": [
+            {
+              "event_id": "decorate_a_unit_rs",
+              "response_id": "decorate_steadfast_rs__rs_11th_dubica_infantry",
+              "decision_source": "player",
+              "faction": "RS",
+              "turn": 90
+            }
+          ]
+        },
+        {
+          "path": [
+            "military",
+            "formations",
+            "rs_11th_dubica_infantry",
+            "morale"
+          ],
+          "equals": 55
+        },
+        {
+          "path": [
+            "military",
+            "formations",
+            "rs_11th_dubica_infantry",
+            "cohesion"
+          ],
+          "equals": 52
+        },
+        {
+          "path": [
+            "military",
+            "formations",
+            "rs_11th_krupa_light_infantry",
+            "morale"
+          ],
+          "equals": 50
+        },
+        {
+          "path": [
+            "military",
+            "formations",
+            "rs_11th_krupa_light_infantry",
+            "cohesion"
+          ],
+          "equals": 50
+        },
+        {
+          "path": [
+            "military",
+            "formations",
+            "arbih_101st_mountain",
+            "morale"
+          ],
+          "equals": 50
+        },
+        {
+          "path": [
+            "military",
+            "formations",
+            "arbih_101st_mountain",
+            "cohesion"
+          ],
+          "equals": 50
+        },
+        {
+          "path": [
+            "military",
+            "pending_event_notifications",
+            "length"
+          ],
+          "equals": 2
+        }
+      ],
+      "receipts": [
+        {
+          "decision_source": "player",
+          "event_id": "decorate_a_unit_rs",
+          "faction": "RS",
+          "response_id": "decorate_steadfast_rs__rs_11th_dubica_infantry",
+          "turn": 90
+        }
+      ],
+      "notifications": [
+        {
+          "body": "The RS presidency honours one of the VRS's regular formations. Mostar reads a morale gesture and the politics of favour within the officer corps.",
+          "consumed": false,
+          "event_id": "decorate_a_unit_rs",
+          "headline": "Pale decorates a regular VRS formation",
+          "notification_id": "decorate_a_unit_rs:RS:HRHB",
+          "response_id": "decorate_steadfast_rs__rs_11th_dubica_infantry",
+          "source_faction": "RS",
+          "surfaced_on_turn": 91,
+          "target_faction": "HRHB"
+        },
+        {
+          "body": "The RS presidency awards a citation to a regular VRS formation. Sarajevo sees a morale signal and the internal jockeying it implies.",
+          "consumed": false,
+          "event_id": "decorate_a_unit_rs",
+          "headline": "Pale decorates a regular VRS formation",
+          "notification_id": "decorate_a_unit_rs:RS:RBiH",
+          "response_id": "decorate_steadfast_rs__rs_11th_dubica_infantry",
+          "source_faction": "RS",
+          "surfaced_on_turn": 91,
+          "target_faction": "RBiH"
+        }
+      ],
+      "repeatProof": {
+        "repeatKind": "real preload IPC after visible player action",
+        "method": "initiateDecorateUnit",
+        "result": {
+          "ok": false,
+          "error": "on_cooldown",
+          "reason": "on_cooldown"
+        },
+        "autosaveUnchanged": true
+      },
+      "proofKind": "visible local Electron controls, real preload IPC and canonical autosave; synthetic turn 90, no campaign or packaged acceptance"
+    },
+    {
+      "case": "targeting/live-hrhb-02",
+      "pass": true,
+      "diagnostics": [],
+      "resultPath": "F:\\A-War-Without-Victory\\logs\\bc06\\targeting\\live-hrhb-02\\result.json",
+      "resultSha256": "4b68aa831a2a5d7e7da2ab8193333939ec352a23fc08773ded382bb3c47a623f",
+      "autosavePath": "F:\\A-War-Without-Victory\\logs\\bc06\\targeting\\live-hrhb-02\\saves\\autosave.json",
+      "autosaveSha256": "e7674798d4c33cbbdbf17127956f6780093d214e47382aafe1ab60c8bc734423",
+      "fixtureSha256": "99adb9c090b4c3be2dbac2dd522ee8efe78670e1e803d88ddfe5bba6b824b53c",
+      "assertions": [
+        {
+          "path": [
+            "military",
+            "command_authority",
+            "current"
+          ],
+          "equals": 90
+        },
+        {
+          "path": [
+            "military",
+            "event_fire_counts",
+            "decorate_a_unit_hrhb"
+          ],
+          "equals": 1
+        },
+        {
+          "path": [
+            "military",
+            "event_last_fired_turn",
+            "decorate_a_unit_hrhb"
+          ],
+          "equals": 90
+        },
+        {
+          "path": [
+            "military",
+            "pending_event_decisions"
+          ],
+          "equals": []
+        },
+        {
+          "path": [
+            "military",
+            "event_decision_log"
+          ],
+          "equals": [
+            {
+              "event_id": "decorate_a_unit_hrhb",
+              "response_id": "decorate_steadfast_hrhb__hrhb_101st_oraje_brigade",
+              "decision_source": "player",
+              "faction": "HRHB",
+              "turn": 90
+            }
+          ]
+        },
+        {
+          "path": [
+            "military",
+            "formations",
+            "hrhb_101st_oraje_brigade",
+            "morale"
+          ],
+          "equals": 55
+        },
+        {
+          "path": [
+            "military",
+            "formations",
+            "hrhb_101st_oraje_brigade",
+            "cohesion"
+          ],
+          "equals": 52
+        },
+        {
+          "path": [
+            "military",
+            "formations",
+            "hrhb_102nd_brigade",
+            "morale"
+          ],
+          "equals": 50
+        },
+        {
+          "path": [
+            "military",
+            "formations",
+            "hrhb_102nd_brigade",
+            "cohesion"
+          ],
+          "equals": 50
+        },
+        {
+          "path": [
+            "military",
+            "formations",
+            "arbih_101st_mountain",
+            "morale"
+          ],
+          "equals": 50
+        },
+        {
+          "path": [
+            "military",
+            "formations",
+            "arbih_101st_mountain",
+            "cohesion"
+          ],
+          "equals": 50
+        },
+        {
+          "path": [
+            "military",
+            "pending_event_notifications",
+            "length"
+          ],
+          "equals": 2
+        }
+      ],
+      "receipts": [
+        {
+          "decision_source": "player",
+          "event_id": "decorate_a_unit_hrhb",
+          "faction": "HRHB",
+          "response_id": "decorate_steadfast_hrhb__hrhb_101st_oraje_brigade",
+          "turn": 90
+        }
+      ],
+      "notifications": [
+        {
+          "body": "The Herceg-Bosna presidency honours one of the HVO's regular formations. Sarajevo reads a morale gesture and the politics of favour across the divided geography.",
+          "consumed": false,
+          "event_id": "decorate_a_unit_hrhb",
+          "headline": "Mostar decorates a regular HVO formation",
+          "notification_id": "decorate_a_unit_hrhb:HRHB:RBiH",
+          "response_id": "decorate_steadfast_hrhb__hrhb_101st_oraje_brigade",
+          "source_faction": "HRHB",
+          "surfaced_on_turn": 91,
+          "target_faction": "RBiH"
+        },
+        {
+          "body": "The Herceg-Bosna presidency awards a citation to a regular HVO formation. Pale sees a morale signal and the internal balance it shifts.",
+          "consumed": false,
+          "event_id": "decorate_a_unit_hrhb",
+          "headline": "Mostar decorates a regular HVO formation",
+          "notification_id": "decorate_a_unit_hrhb:HRHB:RS",
+          "response_id": "decorate_steadfast_hrhb__hrhb_101st_oraje_brigade",
+          "source_faction": "HRHB",
+          "surfaced_on_turn": 91,
+          "target_faction": "RS"
+        }
+      ],
+      "repeatProof": {
+        "repeatKind": "real preload IPC after visible player action",
+        "method": "initiateDecorateUnit",
+        "result": {
+          "ok": false,
+          "error": "on_cooldown",
+          "reason": "on_cooldown"
+        },
+        "autosaveUnchanged": true
+      },
+      "proofKind": "visible local Electron controls, real preload IPC and canonical autosave; synthetic turn 90, no campaign or packaged acceptance"
+    }
+  ],
+  "reviewedSourceHashes": {
+    "src/desktop/decorate_unit_contract.cjs": "ac8e9a723a2c9b666f94a94361f3ff9750da53bba7d1308049a84a2cc92269f2",
+    "src/sim/events/apply_effects.ts": "7c50ad5293adaf987b34d97f0471455028272e19dee91247446896df4e036dde",
+    "src/sim/events/event_types.ts": "d23d657518fae810fadf74f73ab5ab545cdec55b8414929d61f2786bce0b3d0f",
+    "src/sim/events/resolve_decision_core.ts": "f5b58b2843de998930abe2050bf5579fdefb70c6e97aa49772a54cc7d1fe4953",
+    "tests/leadership_actions.test.ts": "d2b3a39bd83a61e256bc96d44e73a0f641119f0eb09c113e0c5ad1d4a130fc3f"
+  },
+  "localChecks": {
+    "diff-check": {
+      "exit": 0,
+      "log": "logs/bc06/targeting/diff-check.log"
+    },
+    "focused-targeting-tests-final": {
+      "exit": 0,
+      "log": "logs/bc06/targeting/focused-targeting-tests-final.log"
+    },
+    "live-hrhb-final": {
+      "exit": 0,
+      "log": "logs/bc06/targeting/live-hrhb-final.log"
+    },
+    "live-rbih-final": {
+      "exit": 0,
+      "log": "logs/bc06/targeting/live-rbih-final.log"
+    },
+    "live-rbih": {
+      "exit": 1,
+      "log": "logs/bc06/targeting/live-rbih.log"
+    },
+    "live-rs-final": {
+      "exit": 0,
+      "log": "logs/bc06/targeting/live-rs-final.log"
+    },
+    "map-build": {
+      "exit": 0,
+      "log": "logs/bc06/targeting/map-build.log"
+    },
+    "red-per-unit-targeting": {
+      "exit": 1,
+      "log": "logs/bc06/targeting/red-per-unit-targeting.log"
+    },
+    "reviewer-tests": {
+      "exit": 0,
+      "log": "logs/bc06/targeting/reviewer-tests.log"
+    },
+    "scope-check": {
+      "exit": 0,
+      "log": "logs/bc06/targeting/scope-check.log"
+    },
+    "sim-build": {
+      "exit": 0,
+      "log": "logs/bc06/targeting/sim-build.log"
+    },
+    "typecheck": {
+      "exit": 0,
+      "log": "logs/bc06/targeting/typecheck.log"
+    }
+  },
+  "remainingGates": [
+    "six unauthored address/decoration escalation rules",
+    "final packaged acceptance"
+  ],
+  "historicalFailedTargetProof": "logs/bc06/live-decorate-final-01/result.json (retained unchanged)"
+}

@@ -1,0 +1,251 @@
+{
+  "reviewed": true,
+  "caseId": "targeting/live-rs-02",
+  "fixture": "F:\\A-War-Without-Victory\\logs\\bc06\\fixture-rs-1.json",
+  "loadSteps": [
+    {
+      "buttonName": "Assume responsibility"
+    },
+    {
+      "buttonName": "Field Records"
+    },
+    {
+      "buttonName": "Resume bc06-proof-fixture"
+    }
+  ],
+  "before": [
+    {
+      "path": [
+        "meta",
+        "turn"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    }
+  ],
+  "steps": [
+    {
+      "selector": "[data-testid=\"toolbar-route-desk\"]",
+      "frameUrlIncludes": "http"
+    },
+    {
+      "buttonRegex": "^Command surface$"
+    },
+    {
+      "buttonRegex": "Command & Personnel"
+    },
+    {
+      "selector": "[data-testid=\"decision-room-priority-card-command:decorate-unit\"] button",
+      "buttonRegex": "^Dossier$"
+    },
+    {
+      "buttonRegex": "^Issue \\(10\\)$"
+    },
+    {
+      "selector": "[data-testid=\"event-decision-response\"][aria-label=\"Choose response: Decorate 11th Dubica Infantry\"]"
+    }
+  ],
+  "after": [
+    {
+      "path": [
+        "military",
+        "command_authority",
+        "current"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "event_fire_counts",
+        "decorate_a_unit_rs"
+      ],
+      "equals": 1
+    },
+    {
+      "path": [
+        "military",
+        "event_last_fired_turn",
+        "decorate_a_unit_rs"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    },
+    {
+      "path": [
+        "military",
+        "event_decision_log"
+      ],
+      "equals": [
+        {
+          "event_id": "decorate_a_unit_rs",
+          "response_id": "decorate_steadfast_rs__rs_11th_dubica_infantry",
+          "decision_source": "player",
+          "faction": "RS",
+          "turn": 90
+        }
+      ]
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "rs_11th_dubica_infantry",
+        "morale"
+      ],
+      "equals": 55
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "rs_11th_dubica_infantry",
+        "cohesion"
+      ],
+      "equals": 52
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "rs_11th_krupa_light_infantry",
+        "morale"
+      ],
+      "equals": 50
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "rs_11th_krupa_light_infantry",
+        "cohesion"
+      ],
+      "equals": 50
+    }
+  ],
+  "persisted": [
+    {
+      "path": [
+        "military",
+        "command_authority",
+        "current"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "event_fire_counts",
+        "decorate_a_unit_rs"
+      ],
+      "equals": 1
+    },
+    {
+      "path": [
+        "military",
+        "event_last_fired_turn",
+        "decorate_a_unit_rs"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    },
+    {
+      "path": [
+        "military",
+        "event_decision_log"
+      ],
+      "equals": [
+        {
+          "event_id": "decorate_a_unit_rs",
+          "response_id": "decorate_steadfast_rs__rs_11th_dubica_infantry",
+          "decision_source": "player",
+          "faction": "RS",
+          "turn": 90
+        }
+      ]
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "rs_11th_dubica_infantry",
+        "morale"
+      ],
+      "equals": 55
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "rs_11th_dubica_infantry",
+        "cohesion"
+      ],
+      "equals": 52
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "rs_11th_krupa_light_infantry",
+        "morale"
+      ],
+      "equals": 50
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "rs_11th_krupa_light_infantry",
+        "cohesion"
+      ],
+      "equals": 50
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "arbih_101st_mountain",
+        "morale"
+      ],
+      "equals": 50
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "arbih_101st_mountain",
+        "cohesion"
+      ],
+      "equals": 50
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_notifications",
+        "length"
+      ],
+      "equals": 2
+    }
+  ],
+  "expectsMutation": true,
+  "repeatAction": "initiateDecorateUnit",
+  "repeatReason": "on_cooldown"
+}

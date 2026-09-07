@@ -34039,3 +34039,47 @@ reviewed source hashes, command exits and live artifact paths/hashes. Bulky fixt
 Electron profiles and screenshots remain local evidence; reproducible harness/configuration and
 summary receipts accompany the commit. Normal pre-commit typechecking remains enabled. This
 commit implements reviewed bounded repairs, not BC06 closure or campaign acceptance.
+
+## 2026-09-08 — BC06 owner-authorized decoration target follow-up
+
+Base: clean `d7fb720353c2b6b37a80269261ec1e193a205161`. The owner approved the
+separate targeting repair after the original live non-target control failed. Astra
+orchestrated; the existing Sol/medium implementer handled code and focused tests, and
+the independent Sol/medium reviewer owns the follow-up review. No new panel or campaign.
+
+Generated per-unit decoration responses now validate the event/faction, response suffix
+and selected formation before any decision mutation. Only the selected active, friendly
+regular formation receives the existing morale/cohesion deltas; invalid, missing, stale,
+enemy and nonregular targets reject without effects or receipts. The builder now requires
+explicit active status, matching the formation schema and resolver. Broad citations and
+legacy unsuffixed responses retain faction-wide behavior; other authored effects,
+dimensions, flags, notification aliases, command authority and cadence are preserved.
+
+Focused tests passed 62/62 across leadership actions, event decisions and theater morale
+scope. TypeScript, tactical-map build and desktop-sim bundle/read-only startup-snapshot
+check passed. Original RED targeting evidence remains in `logs/bc06/targeting/`.
+The first follow-up Electron harness attempt incorrectly checked a foreign formation in
+the restricted player projection; its canonical save showed the expected unchanged unit.
+The corrected configuration checks foreign controls in the canonical save, preserving
+both this harness failure and the earlier genuine faction-wide-effect failure.
+
+All three final local Electron cases passed: selected unit +5 morale/+2 cohesion,
+friendly and foreign controls unchanged, one 10-CA debit/count/player decision receipt,
+two opponent notifications, pending decision removed, and immediate repeat rejected on
+cooldown with identical canonical autosave bytes. All recorded zero page/network
+diagnostics. Paths and source/evidence hashes: `logs/bc06/targeting/validation.json`.
+These are visible player actions through real IPC at synthetic turn 90, not campaign
+or packaged acceptance. Six unauthored escalation rules and final packaged acceptance
+remain open. No data, calibration, natural event evaluator, combat or chronology change;
+all previously protected boundaries and BC ordering remain as recorded above.
+
+Roadmap, command board and existing validation plan now distinguish the repaired target
+criterion from retained historical failures and remaining BC06 gates. The existing engine
+runbook records authoritative target validation and the canonical-save control check.
+
+Independent Sol/medium review returned GO with no blocking issue in the bounded repair;
+its fresh 62/62 run and inspected three-faction live evidence are recorded in the follow-up
+addendum to `logs/bc06/independent-review.md`. General malformed trusted-effect-payload
+hardening is outside this target-validation contract. Commit attribution: Sol implementation,
+independent Sol review, Astra orchestration/live verification/documentation. The normal
+pre-commit TypeScript hook remains enabled; no remote push or publication is authorized.

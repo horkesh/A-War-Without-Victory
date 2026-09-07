@@ -392,6 +392,9 @@ export interface EventResponseOption {
     historical_marker?: 'historical_default' | 'counterfactual';
     /** Effects applied when this response is chosen. */
     effects: EventEffect[];
+    /** Desktop-authored per-unit decoration target; resolved only for generated
+     * `decorate_steadfast_*__<formationId>` responses. */
+    target_formation_id?: string;
     // v0.6.0 metagame fields
     /** Flags set when this option is chosen. */
     sets_flags?: Record<string, string | number | boolean>;

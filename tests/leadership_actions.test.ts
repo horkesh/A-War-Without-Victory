@@ -254,6 +254,14 @@ describe('decorate-a-unit — BRIGHT LINE: regular formations only', () => {
     expect(ids).not.toContain('arbih_inactive'); // inactive
   });
 
+  it('excludes formations without the required active status', () => {
+    const state = makeState({ eventId: 'decorate_a_unit_rbih', formations: {
+      legacy_missing_status: { faction: 'RBiH', name: 'Missing status', kind: 'brigade' },
+    } });
+
+    expect(decorateContract.eligibleRegularFormations(state, 'RBiH')).toEqual([]);
+  });
+
   it('is deterministic: corps before brigades, then by id', () => {
     const state = makeState({ eventId: 'decorate_a_unit_rbih', formations });
     const a = decorateContract.eligibleRegularFormations(state, 'RBiH');
@@ -348,5 +356,97 @@ describe('decorate-a-unit — BRIGHT LINE: regular formations only', () => {
     const state = makeState({ eventId: 'decorate_a_unit_rbih', formations: many });
     const eligible = decorateContract.eligibleRegularFormations(state, 'RBiH');
     expect(eligible.length).toBe(decorateContract.MAX_UNIT_BRANCHES);
+  });
+});
+
+describe('decorate-a-unit — authoritative per-unit resolution', () => {
+  const factionCases = [
+    ['RBiH', 'rbih'],
+    ['RS', 'rs'],
+    ['HRHB', 'hrhb'],
+  ] as const;
+
+  function targetedState(faction: 'RBiH' | 'RS' | 'HRHB', suffix: string) {
+    const targetId = `${suffix}_target`;
+    const otherId = `${suffix}_other`;
+    const foreignFaction = faction === 'RS' ? 'RBiH' : 'RS';
+    const foreignId = `${suffix}_foreign`;
+    const state = makeState({ formations: {
+      [targetId]: { faction, name: 'Target', kind: 'brigade', status: 'active', morale: 50, cohesion: 50 },
+      [otherId]: { faction, name: 'Other', kind: 'brigade', status: 'active', morale: 50, cohesion: 50 },
+      [foreignId]: { faction: foreignFaction, name: 'Foreign', kind: 'brigade', status: 'active', morale: 50, cohesion: 50 },
+    } }) as unknown as GameState;
+    state.meta.player_faction = faction;
+    state.military.pending_event_decisions = [{
+      event_id: `decorate_a_unit_${suffix}`,
+      event_title: 'Decorate a Unit',
+      turn_fired: 90,
+      faction,
+      response_options: [{
+        id: `decorate_steadfast_${suffix}__${targetId}`,
+        label: 'Decorate Target',
+        target_formation_id: targetId,
+        effects: [
+          { kind: 'morale_change', faction, delta: 5 },
+          { kind: 'cohesion_change', faction, delta: 3 },
+        ],
+      }],
+    } as any];
+    return { state, targetId, otherId, foreignId };
+  }
+
+  it.each(factionCases)('applies %s per-unit morale/cohesion only to the selected regular formation', (faction, suffix) => {
+    const { state, targetId, otherId, foreignId } = targetedState(faction, suffix);
+    const responseId = `decorate_steadfast_${suffix}__${targetId}`;
+
+    resolveEventDecision(state, `decorate_a_unit_${suffix}`, responseId);
+
+    expect(state.military.formations[targetId]).toMatchObject({ morale: 55, cohesion: 53 });
+    expect(state.military.formations[otherId]).toMatchObject({ morale: 50, cohesion: 50 });
+    expect(state.military.formations[foreignId]).toMatchObject({ morale: 50, cohesion: 50 });
+    expect(() => resolveEventDecision(state, `decorate_a_unit_${suffix}`, responseId)).toThrow(/No pending decision/);
+  });
+
+  it.each([
+    ['missing target metadata', 'missing'],
+    ['unknown target', 'unknown'],
+    ['enemy target', 'enemy'],
+    ['inactive target', 'inactive'],
+    ['nonregular target', 'nonregular'],
+  ] as const)('rejects %s before any mutation', (_label, invalidKind) => {
+    const { state, targetId, foreignId } = targetedState('RBiH', 'rbih');
+    const chosen = state.military.pending_event_decisions![0].response_options[0] as any;
+    if (invalidKind === 'missing') delete chosen.target_formation_id;
+    if (invalidKind === 'unknown') {
+      chosen.id = 'decorate_steadfast_rbih__missing_formation';
+      chosen.target_formation_id = 'missing_formation';
+    }
+    if (invalidKind === 'enemy') {
+      chosen.id = `decorate_steadfast_rbih__${foreignId}`;
+      chosen.target_formation_id = foreignId;
+    }
+    if (invalidKind === 'inactive') state.military.formations[targetId].status = 'inactive';
+    if (invalidKind === 'nonregular') state.military.formations[targetId].kind = 'paramilitary';
+    const before = structuredClone(state);
+
+    expect(() => resolveEventDecision(state, 'decorate_a_unit_rbih', chosen.id)).toThrow(/decoration target/i);
+    expect(state).toEqual(before);
+  });
+
+  it.each([
+    ['decorate_broadly_rbih', 3],
+    ['decorate_steadfast_rbih', 5],
+  ] as const)('preserves unsuffixed %s as a faction-wide effect', (responseId, delta) => {
+    const { state, targetId, otherId } = targetedState('RBiH', 'rbih');
+    state.military.pending_event_decisions![0].response_options = [{
+      id: responseId,
+      label: 'Legacy decoration response',
+      effects: [{ kind: 'morale_change', faction: 'RBiH', delta }],
+    }];
+
+    resolveEventDecision(state, 'decorate_a_unit_rbih', responseId);
+
+    expect(state.military.formations[targetId].morale).toBe(50 + delta);
+    expect(state.military.formations[otherId].morale).toBe(50 + delta);
   });
 });

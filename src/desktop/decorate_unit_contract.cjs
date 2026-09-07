@@ -7,11 +7,12 @@
  * This module force-queues the ALREADY-AUTHORED `decorate_a_unit_<faction>` event
  * (data/scenarios/events/war_1993.json) into
  * `state.military.pending_event_decisions` so EventDecisionModal surfaces it.
- * ZERO new sim/event code — the event's authored effects (morale / cohesion /
+ * The event's authored effects (morale / cohesion /
  * military_credibility / internal_cohesion shifts, all double-edged), voluntary action cadence
  * (max_fires 5 / cooldown 10t), and branches are reused. This contract ADDS the
  * deterministic per-unit branch expansion so the PLAYER picks WHICH regular
- * formation to honour (we never auto-pick the unit).
+ * formation to honour (we never auto-pick the unit). The decision resolver scopes
+ * morale/cohesion to that selected formation while retaining authored deltas.
  *
  * ⚠ BRIGHT LINE (design §5, non-§6 — keep it that way):
  * ONLY REGULAR MILITARY FORMATIONS are eligible — NEVER paramilitaries, militia,
@@ -78,7 +79,7 @@ function eligibleRegularFormations(state, playerFaction) {
     const f = formations[id];
     if (!f || typeof f !== 'object') continue;
     if (f.faction !== playerFaction) continue;
-    if (f.status && f.status !== 'active') continue;
+    if (f.status !== 'active') continue;
     const kind = typeof f.kind === 'string' ? f.kind : 'brigade'; // schema default
     if (!ELIGIBLE_REGULAR_KINDS.has(kind)) continue; // bright-line gate
     out.push({ id, name: typeof f.name === 'string' && f.name ? f.name : id, kind });
@@ -182,12 +183,11 @@ function steadfastBranchId(playerFaction) {
  * steadfast template is dropped entirely (only broad/decline offered) — the
  * bright line means there is simply no unit to single out.
  *
- * Each per-unit branch id is `<steadfast>__<formationId>` so the downstream
- * resolver still finds the authored template effects (the resolver should match
- * on the template prefix; the suffix is presentational targeting only). To keep
- * the existing resolver working WITHOUT engine changes, each cloned option also
- * carries the authored `effects` / `dimension_shifts` inline so resolution does
- * not depend on id lookup.
+ * Each per-unit branch id is `<steadfast>__<formationId>`. The authoritative
+ * resolver validates that suffix and applies the cloned morale/cohesion effects
+ * only to the selected active regular formation. Each cloned option carries the
+ * authored `effects` / `dimension_shifts` inline so resolution does not depend
+ * on a second response-option lookup.
  *
  * @returns the PendingEventDecision-shaped object (or null if not buildable).
  */

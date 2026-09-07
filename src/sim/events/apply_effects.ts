@@ -78,7 +78,11 @@ function recordNonFiniteEffectAnomaly(
  * Apply event effects to GameState. Effects are sorted by kind for determinism.
  * Mutates state in place.
  */
-export function applyEventEffects(state: GameState, effects: EventEffect[]): void {
+export function applyEventEffects(
+    state: GameState,
+    effects: EventEffect[],
+    targetFormationId?: string,
+): void {
     if (effects.length === 0) return;
 
     // Sort by kind for deterministic application order
@@ -89,20 +93,28 @@ export function applyEventEffects(state: GameState, effects: EventEffect[]): voi
     });
 
     for (const effect of sorted) {
-        applySingleEffect(state, effect);
+        applySingleEffect(state, effect, targetFormationId);
     }
 }
 
-function applySingleEffect(state: GameState, effect: EventEffect): void {
+function applySingleEffect(state: GameState, effect: EventEffect, targetFormationId?: string): void {
     switch (effect.kind) {
         case 'morale_change':
-            applyMoraleChange(state, effect.faction, effect.delta, effect.affected_corps);
+            if (targetFormationId) {
+                applyTargetedFormationStatChange(state, targetFormationId, effect.faction, 'morale', effect.delta);
+            } else {
+                applyMoraleChange(state, effect.faction, effect.delta, effect.affected_corps);
+            }
             break;
         case 'supply_delta':
             applySupplyDelta(state, effect.faction, effect.delta);
             break;
         case 'cohesion_change':
-            applyCohesionChange(state, effect.faction, effect.delta);
+            if (targetFormationId) {
+                applyTargetedFormationStatChange(state, targetFormationId, effect.faction, 'cohesion', effect.delta);
+            } else {
+                applyCohesionChange(state, effect.faction, effect.delta);
+            }
             break;
         case 'humanitarian_impact':
             applyHumanitarianImpact(state, effect.faction, effect.war_crimes_delta);
@@ -156,6 +168,25 @@ function applySingleEffect(state: GameState, effect: EventEffect): void {
             // No mechanical effect; narrative text is logged via FiredEvent.
             break;
     }
+}
+
+function applyTargetedFormationStatChange(
+    state: GameState,
+    formationId: string,
+    faction: FactionId,
+    stat: 'morale' | 'cohesion',
+    delta: number,
+): void {
+    if (!Number.isFinite(delta)) {
+        recordNonFiniteEffectAnomaly(state, `${stat}_change`, faction, delta);
+        return;
+    }
+    const formation = state.military.formations[formationId];
+    if (!formation || formation.faction !== faction || formation.status !== 'active') {
+        throw new Error(`Invalid targeted event effect formation "${formationId}"`);
+    }
+    const current = formation[stat];
+    if (current != null) formation[stat] = clamp(current + delta, 0, 100);
 }
 
 /** Enclave-column displacement (RS brigade-attrition follow-up, 2026-08-05).

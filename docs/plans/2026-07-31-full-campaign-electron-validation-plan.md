@@ -749,7 +749,7 @@ Sources: [frozen audit](../40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_A
 | B10 | Dead narrated COHA/ceasefire/Dayton chain; mechanical packaged negotiation works | `event_types.ts`, `war_1995.json`, event termination and negotiation paths | BC03 **CLOSED 2026-09-07**: verified repair; owner deferred post-horizon acceptance/tickers; signing requires accepted talks. One terminal owner, complete verdict/receipts; no global predicate shortcut or horizon extension. See [investigation corrections](../40_reports/20260905_EVENT_FIRING_SATURATION_AND_DEAD_CATALOG.md). |
 | B11 | Historical chronology findings; sensitive P1 Ahmići/P2 enclave packet retain panel ownership | Catalog gates/dates and downstream displacement/NATO | BC04 **P1 IMPLEMENTED/REVIEWED; campaign acceptance pending**. P2 IMPLEMENTED/REVIEWED (GO); campaign acceptance remains deferred. Current n392 reconciliation and separate P1/P2 scopes are recorded in the BC04 subsection above; landed barracks work is excluded. [Conditional panel record](../40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md); no isolated Srebrenica date edit or map repaint. |
 | B12 | Same-turn prerequisite dead NATO windows; duplicate Lukavac event | Event loader/catalog and firing pass | BC05 **NATO IMPLEMENTED/REVIEWED (GO); Lukavac event REMOVED/REVIEWED (GO)** by owner disposition. Military Operation Trnovo is preserved; its execution/calibration is outside scope. Campaign/downstream acceptance remains unmeasured. See BC05 above; [historical sweep with current annotation](../40_reports/audits/20260906_FACTION_CONTROLS_MUNICIPALITY_THRESHOLD_SWEEP.md). |
-| B13 | Three posture-review handlers unwired; bounded gesture-escalation gap | Desktop player-action handlers and `action_cadence` | BC06 **bounded repair implemented/reviewed (GO)**. Voluntary posture wiring and authored third-use posture/front-visit choices; six address/decoration escalation rules, per-unit decoration targeting and final packaged acceptance remain open. [BC06 evidence](#bc06-bounded-posture-and-gesture-repair--2026-09-07); [PM ruling](../40_reports/audits/20260905_EVENT_ROADMAP_FIT_PM_RULING.md). |
+| B13 | Three posture-review handlers unwired; bounded gesture-escalation gap | Desktop player-action handlers and `action_cadence` | BC06 **bounded repair implemented/reviewed (GO)**. Voluntary posture wiring and authored third-use posture/front-visit choices; per-unit decoration targeting passes all three local faction paths in the owner-authorized follow-up. Six address/decoration escalation rules and final packaged acceptance remain open. [BC06 evidence](#bc06-bounded-posture-and-gesture-repair--2026-09-07); [PM ruling](../40_reports/audits/20260905_EVENT_ROADMAP_FIT_PM_RULING.md). |
 
 **Friction, separate from bugs:** **F1 — endgame decision drought** is R8 diary triage, not a repair or authoring commission. Inspect the player path and truthful positive-hold coverage; source-supported omissions are evidence, never a per-week quota. Broad drought authoring and orphan-flag activation remain the explicit post-1.0 backlog.
 
@@ -835,7 +835,7 @@ R1–R5, the accepted R6 slice, RC and RE stay closed; calibration remains ongoi
 | **BC03 — B10 narrated Dayton / R8** | Events/systems + Game Designer + QA | Event effects, termination ordering, receipts and endgame state | **CLOSED 2026-09-07 — verified repair and owner-approved post-horizon deferral.** Repaired the narrated chain with one coherent terminal owner; preserve the working packaged negotiation. Resolve the redundant event game-over writer first, then the catalog gate/window; verify COHA false-key semantics, firing/termination order and complete packaged verdict snapshot/receipts. The headless terminal contract is VERIFY/DISPOSITION, not a mandate to add a headless closeout. Do not globally redefine `flag_not_set` or extend the 188-week horizon as a shortcut. [Investigation corrections §10–11](../40_reports/20260905_EVENT_FIRING_SATURATION_AND_DEAD_CATALOG.md). |
 | **BC04 — B11 chronology + P1/P2 / R8, panel-owned history** | Historian + events/systems + scenario/calibration + independent §6 panel | Event timing/effects, displacement, personnel, NATO and downstream operations | **P1 IMPLEMENTED/REVIEWED; campaign acceptance pending; P2 implemented/reviewed; campaigns deferred**: current code and n392 receipts reconciled in the BC04 subsection above; completed barracks stagger excluded. P1/P2 follow the [existing conditional panel record](../40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md), with the subsequent owner-approved P1/P2 implementation amendments recorded above. P1 preserves the historical date and map; P2 is a coherent chronology packet, measured receipt dates with brakes active, no narrowed expiry/backstop shortcut. Separate P1 and P2 controlled runs, full anchors/health/§6 and displacement/operation diffs; no fresh re-floor until explained and accepted. |
 | **BC05 — B12 dead event windows/control gates / R8** | Events/systems + Historian + QA | Enabling NATO events and removing a political decision can change outcomes; a loader lint alone is byte-neutral | **NATO IMPLEMENTED/REVIEWED (GO); Lukavac event REMOVED/REVIEWED (GO)** by owner disposition; removal verified across 12 focused files/289 tests by recorded evidence union. Military Operation Trnovo is preserved; its execution/calibration is outside scope. Focused checks do not establish campaign/downstream acceptance. No initial repaint, threshold reduction, baseline refresh or campaign authorized. |
-| **BC06 — B13 posture/gesture controls / R8** | Gameplay/desktop + Game Designer + QA | Player-action decisions/effects; headless neutrality is insufficient | **BOUNDED REPAIR IMPLEMENTED/REVIEWED (GO), BC06 OPEN.** Voluntary posture wiring, authored third-use choices and receipts verified locally. Per-unit decoration targeting, six undefined escalation rules and final packaged acceptance remain open. [Evidence and limits](#bc06-bounded-posture-and-gesture-repair--2026-09-07); no general recurrence-system redesign. |
+| **BC06 — B13 posture/gesture controls / R8** | Gameplay/desktop + Game Designer + QA | Player-action decisions/effects; headless neutrality is insufficient | **BOUNDED REPAIR IMPLEMENTED/REVIEWED (GO), BC06 OPEN.** Voluntary posture wiring, authored third-use choices, receipts and owner-authorized per-unit decoration targeting verified locally. Six undefined escalation rules and final packaged acceptance remain open. [Evidence and limits](#bc06-bounded-posture-and-gesture-repair--2026-09-07); no general recurrence-system redesign. |
 | **BC07 — initial-master stability divergence / calibration-data authority** | Asset/data integration + Systems + calibration | Potentially behavior-bearing `stability_score`; mode-dependent consumption | **VERIFY/DISPOSITION**: establish consumed mode and writer/reader for the 269-row master/derive disagreement, including ~227 stability rows. `hybrid_1992`/`ethnic_1991` early returns must be accounted for; do not infer 227 effects in the blessed scenario. Record retain/regenerate policy and affected scenario scope; no mandated regeneration, initial-control override, or re-floor for the cosmetic contested-control subset. [2026-09-04 correction](../PROJECT_LEDGER.md#2026-09-04--correcting-the-correction-contested_control-is-cosmetic), [calibration authority](../40_reports/CALIBRATION_MASTER.md). |
 | **BC08 — inherited suite residual / verification** | QA + owning Systems/Game Design seats | Current-suite environment failure, not a reproduced simulation residual | **CLOSED — verification/disposition, 2026-09-07.** Full suite exit 1 retained: one Bash-resolution failure; unchanged focused file 8/8 with child-scoped Git Bash. Located deployment/diagnostics suites and peace plans pass; n392 artifact gates pass with source/input-equivalence and transient coverage limits. [Complete receipt](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md); no overall-green or whole-engine claim. |
 | **BC09 — shared production inputs / R8** | Systems + QA | Required census/ethnicity inputs and runner equivalence | **PLANNED, not implemented.** [Runtime integrity Phase 1](2026-09-07-r8-runtime-input-ai-integrity-plan.md) owns one validated loader, explicit fixture omissions and failure before state mutation. Supplies delivery evidence for BC07; does not decide stability-data provenance or regeneration. |
@@ -958,6 +958,46 @@ Earlier nine effect fixtures are retained rather than rerun for a shared message
 Review: `logs/bc06/independent-review.md`; consolidated receipts: `logs/bc06/validation.json`.
 The reviewer accepts 10 CA only as explicit parity inference. Nonblocking stale builder comments
 were aligned with actual pre-queue filtering; no behavioral retest was needed for those comments.
+
+### BC06 decoration target follow-up — 2026-09-08
+
+After bounded repair commit `d7fb720353c2b6b37a80269261ec1e193a205161`, the owner
+authorized the separate per-unit targeting repair ("Sure, wrap it up"). The earlier
+failed non-target check above remains historical evidence. Scope is consuming the
+existing selected formation in the authoritative decision/effect path, preserving
+authored deltas, broad/decline choices, command ownership, cadence and receipts.
+Invalid or stale targets must fail before mutation rather than apply faction-wide effects.
+
+Fixed validation plan: focused leadership/event decision and affected effect tests,
+TypeScript, tactical-map build, read-only startup-snapshot check/desktop-sim rebuild,
+then the existing isolated Electron harness with all three faction fixtures. Each live
+case must prove selected-unit +5 morale/+2 cohesion, unchanged friendly and foreign
+controls, one command-authority debit and decision receipt, opponent notifications,
+and cooldown rejection with unchanged autosave bytes. Expected cost is a few minutes
+of local checks and one independent Sol/medium review. Stop after review and targeted
+corrections; no campaign, calibration, fingerprint simulation or packaged acceptance.
+The six unauthored address/decoration escalation rules remain outside this repair.
+
+Implementation validates generated response suffix/metadata, event/faction and active
+regular friendly target before effects or any other decision mutation. The existing
+authored morale/cohesion deltas then affect only that target. Broad/decline and legacy
+unsuffixed responses retain their authored semantics. Missing status is ineligible,
+matching the required formation schema and authoritative resolver.
+
+Focused tests passed 62/62; TypeScript, map build and desktop-sim/startup-snapshot check
+passed. All three live Electron cases (`logs/bc06/targeting/live-{rbih,rs,hrhb}-02`)
+passed the declared effects, friendly/foreign controls, receipts, authority, cadence and
+repeat-rejection assertions, with zero page/network diagnostics. Foreign controls are
+checked in canonical autosaves because the player projection hides them. The first
+RBiH follow-up config incorrectly queried that projection; its failed harness result
+is retained alongside the earlier genuine targeting failure. No production correction
+was needed for that fixture assertion. Reproducible configs and consolidated receipts
+are under `logs/bc06/targeting/`; synthetic turn 90 does not establish campaign timing.
+
+Independent Sol/medium review returned **GO** for this follow-up, with a fresh 62/62
+focused run and inspection of all three live cases. See the dated addendum in
+`logs/bc06/independent-review.md`. The earlier target-isolation criterion is satisfied;
+BC06 remains open for the six undefined escalation rules and final packaged acceptance.
 
 ## Phase 4 -- Automatic remediation loop
 

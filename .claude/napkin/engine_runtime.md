@@ -13,4 +13,7 @@ authored notification payload under each generated ID as well. The resolver look
 chosen ID exactly; copying the original map alone silently loses notifications. Verify the
 real resolver's emitted receipts, and use a non-target control when a choice names one unit:
 the label and `target_formation_id` alone do not prove scoped mechanical effects. BC06's
-decoration notification alias is repaired; faction-wide decoration effects remain unresolved.
+decoration notification alias and selected-unit effect scope are repaired. Revalidate
+the selected active friendly regular formation before any decision mutation; never fall
+back to faction-wide effects for invalid targets. Check foreign non-target controls in
+the canonical save, since the player projection intentionally hides those formations.
