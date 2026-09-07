@@ -33301,3 +33301,20 @@ or baseline changes were made. Focused documentation verification passed locally
 three files) and independently at the coordinating root (9/9 across two files); diff hygiene passed.
 
 Independent Luna tabletop review covered documentation closure, a targeted engine-test failure, and an ambiguous endpoint proxy. Root verified the requested owner-only expansion and explicit unmet-acceptance guards. This was a policy simulation, not a measured end-to-end token-savings trial. The local Codex CLI loaded the updated configuration successfully.
+
+
+## 2026-09-07 - BC02 existing-save investigation and bounded next plan
+
+Owner authorized existing-save inspection and code tracing only. Sol investigated; an independent
+Sol review checks the exact cause and limits. Accepted n392 and byte-identical BC01 POST each have
+49 sectors and no persisted ratings, because canonical serialization deliberately strips derived
+`sector_combat_ratings`. A small in-memory sentinel probe confirmed canonical/runtime serializer
+behavior. This explains the inspected artifacts without the previously hypothesized late rebuild.
+The traced load path leaves rating fields absent for the initial display; next-turn recomputation
+precedes the traced Army HQ consumer. No simulation decision impact is demonstrated. Historical
+mid-war snapshot provenance is unresolved; no all-turn runtime parity claim is made.
+
+The existing R8 plan now preserves the historical findings, records this correction, and contains
+an actionable focused load/display contract and conditional hydration plan. BC02 stays ACTIVE;
+no full campaign, production edit, calibration change or baseline refresh was performed. Evidence
+is retained locally at `runs/bc02_20260907/evidence.json`. Independent Sol review approved the bounded finding and plan; the requested board wording correction was applied. Documentation checks passed 9/9 after shortening the master summary to satisfy its size limit (initial check: 8 passed, one size-limit failure). No behavior tests or campaigns were added.
