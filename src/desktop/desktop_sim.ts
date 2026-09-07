@@ -1,3 +1,4 @@
+import { OPERATION_OPPORTUNITY_CATALOG } from '../sim/combat/operation_opportunities.js';
 /**
  * Desktop (Electron main) sim API: load scenario/state, advance turn.
  * Used by electron-main.cjs via a CJS bundle. No browser/DOM deps; Node fs/path OK.
@@ -1255,4 +1256,9 @@ export async function redirectReserveLoan(
         return { ok: false, error: `${brigadeId} could not be redirected` };
     }
     return { ok: true };
+}
+
+/** Main-process projection metadata only; never added to canonical saves. */
+export function getOpportunityOwnershipMetadata(): ReadonlyArray<{ opportunity_id: string; faction: string; primary_corps: string }> {
+    return OPERATION_OPPORTUNITY_CATALOG.map(({ opportunity_id, faction, primary_corps }) => ({ opportunity_id, faction, primary_corps }));
 }

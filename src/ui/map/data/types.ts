@@ -821,6 +821,10 @@ export interface OperationOpportunityRedirectVariantView {
 }
 
 export interface OperationOpportunityProposalView {
+    /** Exact persisted launch receipt, never a display-name match. */
+    launch?: { corps_id: string; op_name: string; started_turn: number; phase: string; commander_name?: string; assessment?: string };
+    decision_outcome?: 'launched' | 'defensive_commitment' | 'not_launched' | 'no_active_operation';
+    decision_evidence?: string[];
     proposal_id: string;
     opportunity_id: string;
     display_name: string;

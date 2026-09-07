@@ -463,7 +463,7 @@ function projectSmugglingRoutes(value, playerFaction) {
   );
 }
 
-function projectMilitary(state, playerFaction) {
+function projectMilitary(state, playerFaction, opportunityOwnership) {
   const military = isRecord(state?.military) ? state.military : {};
   if (!playerFaction) {
     return { formations: {}, corps_command: {}, corps_front_sectors: {} };
@@ -631,8 +631,32 @@ function projectMilitary(state, playerFaction) {
   projected.reserve_request_history = rowsForFaction(military.reserve_request_history, playerFaction);
   projected.pending_officer_events = rowsForFaction(military.pending_officer_events, playerFaction);
   projected.officer_decision_history = rowsForFaction(military.officer_decision_history, playerFaction);
-  projected.operation_opportunities = rowsForFaction(military.operation_opportunities, playerFaction);
-  projected.operation_opportunity_resolutions = rowsForFaction(military.operation_opportunity_resolutions, playerFaction);
+  // Opportunity ownership is approver_faction; factionless receipts inherit it
+  // only through a globally unique proposal/opportunity pair, never a guessed faction.
+  const opportunityRows = (Array.isArray(military.operation_opportunities) ? military.operation_opportunities : [])
+    .filter(isRecord);
+  projected.operation_opportunities = opportunityRows
+    .filter((row) => row.approver_faction === playerFaction)
+    .map((row) => {
+      const dto = cloneJson(row);
+      delete dto.primary_corps; // Never trust an imported save to author this DTO-only field.
+      const definitions = (Array.isArray(opportunityOwnership) ? opportunityOwnership : [])
+        .filter((definition) => isRecord(definition) && definition.opportunity_id === row.opportunity_id
+          && definition.faction === playerFaction);
+      if (definitions.length === 1 && typeof definitions[0].primary_corps === 'string'
+        && ownCorpsIds.has(definitions[0].primary_corps)) dto.primary_corps = definitions[0].primary_corps;
+      return dto;
+    });
+  projected.operation_opportunity_resolutions = (Array.isArray(military.operation_opportunity_resolutions)
+    ? military.operation_opportunity_resolutions : [])
+    .filter((receipt) => {
+      if (!isRecord(receipt) || typeof receipt.proposal_id !== 'string' || !receipt.proposal_id
+        || typeof receipt.opportunity_id !== 'string' || !receipt.opportunity_id) return false;
+      const owners = opportunityRows.filter((row) => row.proposal_id === receipt.proposal_id
+        && row.opportunity_id === receipt.opportunity_id);
+      return owners.length === 1 && owners[0].approver_faction === playerFaction;
+    })
+    .map(cloneJson);
   projected.operation_opportunity_diagnostics = rowsForFaction(military.operation_opportunity_diagnostics, playerFaction);
   projected.operation_opportunity_traces = rowsForFaction(military.operation_opportunity_traces, playerFaction);
   projected.army_co_decision_traces = rowsForFaction(military.army_co_decision_traces, playerFaction);
@@ -803,10 +827,10 @@ function projectOperationHistory(value, playerFaction) {
     .map(cloneJson);
 }
 
-function projectPlayerVisibleState(state, fallbackFaction) {
+function projectPlayerVisibleState(state, fallbackFaction, opportunityOwnership) {
   if (!isRecord(state)) throw new TypeError('Player-visible projection requires a GameState object');
   const playerFaction = resolvePlayerFaction(state, fallbackFaction);
-  const projectedMilitary = projectMilitary(state, playerFaction);
+  const projectedMilitary = projectMilitary(state, playerFaction, opportunityOwnership);
   const projectedPolitical = projectPolitical(state.political, playerFaction);
   const projected = {
     schema_version: state.schema_version,
@@ -877,16 +901,16 @@ function projectPlayerVisibleState(state, fallbackFaction) {
   return sortDeep(projected);
 }
 
-function projectPlayerVisibleStateJson(stateJson, fallbackFaction) {
+function projectPlayerVisibleStateJson(stateJson, fallbackFaction, opportunityOwnership) {
   if (typeof stateJson !== 'string') throw new TypeError('Player-visible projection requires serialized GameState JSON');
-  return JSON.stringify(projectPlayerVisibleState(JSON.parse(stateJson), fallbackFaction));
+  return JSON.stringify(projectPlayerVisibleState(JSON.parse(stateJson), fallbackFaction, opportunityOwnership));
 }
 
-function projectPlayerVisibleReplaySequenceJson(sequenceJson, fallbackFaction) {
+function projectPlayerVisibleReplaySequenceJson(sequenceJson, fallbackFaction, opportunityOwnership) {
   if (typeof sequenceJson !== 'string') throw new TypeError('Replay projection requires serialized replay JSON');
   const sequence = JSON.parse(sequenceJson);
   if (!Array.isArray(sequence)) throw new TypeError('Replay projection requires a GameState array');
-  return JSON.stringify(sequence.map((state) => projectPlayerVisibleState(state, fallbackFaction)));
+  return JSON.stringify(sequence.map((state) => projectPlayerVisibleState(state, fallbackFaction, opportunityOwnership)));
 }
 
 module.exports = {

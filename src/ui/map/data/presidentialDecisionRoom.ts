@@ -1,6 +1,6 @@
 import type { ArmyHQRecordsSubTab, ArmyHQTab } from '../../shared/shellHandoff';
 import type { FieldInspectionTarget } from '../utils/fieldInspectionTarget';
-import type { CommandBriefingItemView, LoadedGameState, OperationOpportunityProposalView } from './types';
+import type { CommandBriefingItemView, LoadedGameState, OperationView, OperationOpportunityProposalView } from './types';
 import {
   buildTurnAftermathCampaignCost,
   buildTurnAftermathRecordViews,
@@ -202,6 +202,8 @@ export type PresidentialDecisionRoomNavigationTarget =
   | { kind: 'none' };
 
 export interface PresidentialDecisionRoomCard {
+  /** An already resolved opportunity receipt owes no review. */
+  resolvedOpportunityReceipt?: boolean;
   id: string;
   category: PresidentialDecisionRoomCategory;
   severity: PresidentialDecisionRoomSeverity;
@@ -723,7 +725,7 @@ function addCounterOfferCards(state: LoadedGameState, cards: CandidateCard[]): v
 function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): void {
   const playerFaction = state.player_faction ?? null;
   const opportunities = [...(state.operationOpportunityProposals ?? [])]
-    .filter(isReviewableOperationOpportunity)
+    .filter((opportunity) => isReviewableOperationOpportunity(opportunity) || Boolean(opportunity.decision_outcome))
     .filter((opportunity) => playerFactionMatch(opportunity.faction, playerFaction))
     .sort((a, b) => {
       const aExpiry = a.expires_turn ?? LARGE_SORT;
@@ -736,6 +738,36 @@ function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): vo
     });
 
   for (const opportunity of opportunities) {
+    if (opportunity.decision_outcome) {
+      const launch = opportunity.launch;
+      const matches = launch ? (state.operations ?? []).filter((op) =>
+        op.corps_id === launch.corps_id && op.name === launch.op_name
+        && op.started_turn === launch.started_turn && op.faction === playerFaction) : [];
+      const directive = matches.length === 1 && playerFaction
+        ? executingStopOpDirective(matches[0], playerFaction) : undefined;
+      const explanation = opportunity.decision_outcome === 'defensive_commitment'
+        ? t('opportunity.defensiveCommitment')
+        : launch ? t('opportunity.launchedReceipt', { operation: launch.op_name })
+          : t('opportunity.noLiveLaunch');
+      const evidence = [
+        launch?.commander_name,
+        launch?.assessment ? t('opportunity.commanderAssessment', { assessment: launch.assessment }) : null,
+        ...(opportunity.decision_evidence ?? []),
+        !directive && launch ? t('opportunity.stopNotAvailable') : null,
+      ].filter((entry): entry is string => Boolean(entry));
+      cards.push({
+        id: `opportunity:${opportunity.proposal_id}`, category: 'opportunity', severity: 'info',
+        resolvedOpportunityReceipt: true,
+        title: opportunity.display_name, explanation, evidence,
+        sourceOwner: t('decisionRoom.card.opportunity.sourceOwner'),
+        sourceLabel: t('decisionRoom.card.opportunity.sourceLabel'),
+        actionLabel: t('decisionRoom.action.reviewDossier'),
+        navigationTarget: { kind: 'decision-room', lens: 'opportunity', cardId: `opportunity:${opportunity.proposal_id}` },
+        sourceIds: [opportunity.proposal_id], ...(directive ? { directive } : {}),
+        deadlineTurn: null, urgencySort: LARGE_SORT, sourceSort: opportunity.proposal_id,
+      });
+      continue;
+    }
     const expires = opportunity.expires_turn ?? LARGE_SORT;
     const required = opportunity.required_axes_total != null
       ? opportunity.required_axes_green == null
@@ -1074,6 +1106,14 @@ function addBriefingCards(state: LoadedGameState, cards: CandidateCard[]): void 
  * Deterministic: operations are iterated in a stable strictCompare order (corps id then
  * raw op name). No nondeterministic or time-based sources.
  */
+/** Shared live Stop-op authority for the Decision Room and exact-bound opportunity dossier. */
+export function executingStopOpDirective(op: OperationView, playerFaction: string): PresidentialDecisionRoomDirective | undefined {
+  if (op.faction !== playerFaction || op.phase !== 'execution') return undefined;
+  return { lever: 'stop_op', corpsId: op.corps_id, cost: STOP_OP_COST,
+    payload: { corpsId: op.corps_id, opName: op.name } };
+}
+
+
 function addStopOpDirectiveCards(state: LoadedGameState, cards: CandidateCard[]): void {
   const playerFaction = state.player_faction ?? null;
   if (!playerFaction) return;
@@ -1104,12 +1144,7 @@ function addStopOpDirectiveCards(state: LoadedGameState, cards: CandidateCard[])
         t('decisionRoom.card.stopOp.evidence.executing'),
       ],
       navigationTarget: { kind: 'army-hq-corps-briefing', corpsId: op.corps_id },
-      directive: {
-        lever: 'stop_op',
-        corpsId: op.corps_id,
-        cost: STOP_OP_COST,
-        payload: { corpsId: op.corps_id, opName: op.name },
-      },
+      directive: executingStopOpDirective(op, playerFaction),
       urgencySort: 7,
       sourceSort: `command:stop-op:${op.corps_id}:${op.name}`,
     });
@@ -1888,11 +1923,11 @@ function finalizeCards(state: LoadedGameState, cards: CandidateCard[]): Presiden
     const priorityModel = buildPresidentialPriorityReadModel({
       id: card.id,
       required: requiredIds.has(card.id),
-      recordOnly: card.category === 'turn' || card.category === 'cost' || card.category === 'memory',
+      recordOnly: (card.resolvedOpportunityReceipt === true && !card.directive) || card.category === 'turn' || card.category === 'cost' || card.category === 'memory',
       hasPresidentialLever: Boolean(card.directive)
         || card.category === 'decision'
         || card.category === 'counter_offer'
-        || card.category === 'opportunity'
+        || (card.category === 'opportunity' && !card.resolvedOpportunityReceipt)
         || card.category === 'command',
       sourceId,
       currentTurn: state.turn ?? 0,
@@ -1911,6 +1946,7 @@ function finalizeCards(state: LoadedGameState, cards: CandidateCard[]): Presiden
       const sourceHandoffTarget = card.sourceHandoffTarget ?? (decisionRoomOwned ? card.navigationTarget : undefined);
       return {
         id: card.id,
+        ...(card.resolvedOpportunityReceipt ? { resolvedOpportunityReceipt: true } : {}),
         category: card.category,
         severity: card.severity,
         priorityBand: priorityModel.priorityBand,
@@ -2300,7 +2336,8 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   const sourceHandoffs = buildPresidentialDecisionRoomSourceHandoffs(cards);
   const activeDossier = buildActiveDossier(cards, sourceHandoffs, advanceReadiness, input.selectedCardId);
   const livePendingReviewCards = cards.filter((card) => (
-    card.category === 'decision' || card.category === 'counter_offer' || card.category === 'opportunity'
+    card.category === 'decision' || card.category === 'counter_offer'
+    || (card.category === 'opportunity' && !card.resolvedOpportunityReceipt)
   ));
 
   return {
@@ -2313,7 +2350,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
     metrics: {
       priorityCounts: countPresidentialPriorityBands(cards),
       pendingReviews: weightedCardCount(livePendingReviewCards),
-      opportunities: (state.operationOpportunityProposals ?? []).filter(isReviewableOperationOpportunity).length,
+      opportunities: (state.operationOpportunityProposals ?? []).filter((opportunity) => isReviewableOperationOpportunity(opportunity) || Boolean(opportunity.decision_outcome)).length,
       hardTurns: cards.filter((card) => card.category === 'turn').length,
       advanceReviewCount: weightedCardCount(advanceReadiness.items),
     },

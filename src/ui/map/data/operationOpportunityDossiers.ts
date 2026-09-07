@@ -11,7 +11,8 @@ type RawRecord = Record<string, unknown>;
 type ForceTraitBand = OperationOpportunityProposalView['force_quality_traits'][number]['band'];
 
 const REVIEW_ACTION_PREFIX = 'OPPORTUNITY:';
-const LIVE_PROPOSAL_STATUSES = new Set(['eligible_pending_review', 'delayed']);
+const RESOLVED_APPROVAL_STATUSES = new Set(['approved', 'redirected', 'under_resourced_approved']);
+const LIVE_PROPOSAL_STATUSES = new Set(['eligible_pending_review', 'delayed', ...RESOLVED_APPROVAL_STATUSES]);
 const FORCE_TRAIT_ORDER = [
     'operation_readiness',
     'staging_reliability',
@@ -220,10 +221,41 @@ export function deriveOperationOpportunityProposals(
         const proposalId = typeof proposal.proposal_id === 'string' ? proposal.proposal_id : '';
         const opportunityId = typeof proposal.opportunity_id === 'string' ? proposal.opportunity_id : '';
         const status = typeof proposal.status === 'string' ? proposal.status : '';
+        const isApproved = RESOLVED_APPROVAL_STATUSES.has(status);
         const faction = typeof proposal.approver_faction === 'string' ? proposal.approver_faction : undefined;
         if (!proposalId || !opportunityId || !LIVE_PROPOSAL_STATUSES.has(status)) continue;
         if (!playerFactionMatch(faction, playerFaction)) continue;
 
+        const resolutions = (state.military?.operation_opportunity_resolutions ?? []) as RawRecord[];
+        const matchingReceipts = resolutions.filter(r => r.proposal_id === proposalId
+            && r.opportunity_id === opportunityId
+            && r.response_turn === proposal.response_turn);
+        const receipt = matchingReceipts.length === 1 ? matchingReceipts[0] : undefined;
+        if (isApproved && typeof proposal.response_turn === 'number' && proposal.response_turn > state.meta?.turn) continue;
+        let launch: OperationOpportunityProposalView['launch'];
+        // Supplied only by the trusted desktop projection; absent raw-save metadata fails closed.
+        const hostCorps = typeof proposal.primary_corps === 'string' ? proposal.primary_corps : undefined;
+        if (isApproved && hostCorps && receipt?.executed_op_name && !receipt.executed_op_aar_id
+            && receipt.exit_class !== 't3_authorized_no_offensive') {
+            const matches: NonNullable<OperationOpportunityProposalView['launch']>[] = [];
+            for (const corpsId of [hostCorps]) {
+                if (state.military?.formations?.[corpsId]?.faction !== playerFaction) continue;
+                for (const op of state.military?.corps_command?.[corpsId]?.active_operations ?? []) {
+                    if (op.name !== receipt.executed_op_name || op.started_turn !== receipt.response_turn) continue;
+                    const officer = (state.military.named_officer_data ?? []).find((o: RawRecord) => o.id === op.commander_officer_id);
+                    matches.push({ corps_id: corpsId, op_name: op.name, started_turn: op.started_turn,
+                        phase: op.phase, commander_name: officer?.name,
+                        assessment: typeof (op.commander_assessment_at_launch ?? op.commander_assessment) === 'string'
+                            ? op.commander_assessment_at_launch ?? op.commander_assessment : undefined });
+                }
+            }
+            if (matches.length === 1) launch = matches[0];
+        }
+        // Live operations stay on the desk; recent no-launch/defensive receipts remain visible
+        // for one advance, then Records owns their history. Never retain all past approvals.
+        if (isApproved && !launch
+            && !(typeof proposal.response_turn === 'number' && state.meta?.turn - proposal.response_turn >= 0
+                && state.meta.turn - proposal.response_turn <= 1)) continue;
         const review = reviewByProposalId.get(proposalId);
         const reviewDescription = typeof review?.description === 'string' ? review.description : undefined;
         const descriptionParts = splitDescription(reviewDescription);
@@ -244,6 +276,13 @@ export function deriveOperationOpportunityProposals(
             status: status as OperationOpportunityProposalView['status'],
             eligibility_turn: typeof proposal.eligibility_turn === 'number' ? proposal.eligibility_turn : undefined,
             expires_turn: typeof proposal.expires_turn === 'number' ? proposal.expires_turn : undefined,
+            ...(isApproved ? {
+                launch,
+                decision_outcome: receipt?.exit_class === 't3_authorized_no_offensive' ? 'defensive_commitment' as const
+                    : launch ? 'launched' as const : receipt?.executed_op_name ? 'no_active_operation' as const : 'not_launched' as const,
+                decision_evidence: axes.filter(axis => typeof axis.reason === 'string' && axis.reason.trim())
+                    .map(axis => axis.reason as string),
+            } : {}),
             review_id: typeof review?.id === 'string' ? review.id : undefined,
             description: descriptionParts.detail ?? reviewDescription,
             recommendation: typeof review?.proposed_value === 'string' ? review.proposed_value : undefined,

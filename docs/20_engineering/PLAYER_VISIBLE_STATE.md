@@ -112,3 +112,24 @@ This contract is being followed when:
 3. raw ids no longer appear in normal play
 4. debug-only surfaces are explicit and gated
 5. regression tests fail if forbidden truth leaks back into the client
+
+
+## Operation opportunity receipt boundary (BC01 candidate, 2026-09-07)
+
+Own opportunity proposals are player-safe through their exact `approver_faction`; factionless
+resolution receipts are included only when their nonempty proposal/opportunity identity pair has
+one globally unique owned proposal. Opponent, unknown and ambiguous receipts are excluded.
+
+The desktop sim bundle derives opportunity ownership metadata from the authoritative catalog.
+The main process supplies it to snapshot, broadcast and replay projection. Only the cloned own
+proposal DTO receives `primary_corps`, after a unique authored faction/opportunity match and own
+corps check; any same-named field in the input is removed first. Canonical GameState, saves and
+autosaves gain no field. The renderer imports no simulation catalog and cannot infer a missing
+host; raw browser saves without this enrichment display a truthful unavailable action state.
+
+The Presidential Decision Room shows resolved receipts as evidence, not pending reviews. A Stop-op
+action requires a unique current own operation with the exact projected corps, receipt name and
+start turn, and execution phase; it reuses the existing authority/cost/IPC. L0/L1 opportunity reviews
+remain advisory under the decision manifest. Candidate proof lives in
+`tests/desktop_player_visible_state.test.ts`, `tests/operation_opportunity_launched_dossier.test.ts`
+and `tests/ui/presidential_decision_room_panel_i18n.test.ts`; BC01 campaign acceptance remains active.

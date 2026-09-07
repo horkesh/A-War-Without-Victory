@@ -5629,4 +5629,9 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'commandStrain.delegation.strained': 'Komandant preporucuje pokretanje u delegiranom ovlastenju - komandni odnos je napregnut',
     'commandStrain.delegation.presidentialAbort': 'Komandant preporucuje otkazivanje - ovlastenje za odluku je kod Predsjednistva',
     'commandStrain.delegation.presidentialPostpone': 'Komandant preporucuje odgodu - ovlastenje za odluku je kod Predsjednistva',
+    'opportunity.defensiveCommitment': 'Odobreno je angažovanje u odbrani; nije pokrenuta ofanzivna operacija.',
+    'opportunity.launchedReceipt': 'Štab je pokrenuo operaciju {operation}.',
+    'opportunity.noLiveLaunch': 'Za ovu odluku nema aktivne ofanzivne operacije. Ishod pogledajte u Zapisima.',
+    'opportunity.commanderAssessment': 'Procjena komandanta: {assessment}',
+    'opportunity.stopNotAvailable': 'Zaustavljanje operacije dostupno je samo dok je ova konkretna operacija u toku.',
 };

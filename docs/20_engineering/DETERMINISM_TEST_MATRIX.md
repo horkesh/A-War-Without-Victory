@@ -130,3 +130,16 @@
   - edges canonicalized (`a <= b`) then sorted by `a:b`
   - political controller keys emitted in sorted SID order
 - Gate: `tests/sandbox_slice_determinism.test.ts` (ordering + idempotence)
+
+
+### BC01 opportunity autonomy and renderer boundary (candidate, 2026-09-07)
+
+- `tests/operation_opportunities_phase2_decisions.test.ts`: real opportunity/pipeline L0/L1 review,
+  L2/L3 automatic decisions, unresolved-review deduplication and no-player neutrality.
+- `tests/desktop_player_visible_state.test.ts`: deterministic own-proposal/unique receipt projection,
+  metadata-only host enrichment, spoof/ambiguous/missing metadata rejection, source immutability,
+  snapshot/replay equivalence and renderer catalog-import guard.
+- `tests/operation_opportunity_launched_dossier.test.ts` and
+  `tests/ui/presidential_decision_room_panel_i18n.test.ts`: exact launch binding, unavailable states,
+  raw projection through adapter to the actual mounted Decision Room, and no false pending reviews.
+- These gates do not replace BC01 clean 188-week POST and all-three-player/observer acceptance.

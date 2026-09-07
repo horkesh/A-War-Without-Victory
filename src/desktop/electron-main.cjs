@@ -282,11 +282,11 @@ function getActivePlayerFaction() {
 }
 
 function projectCurrentGameStateForRenderer() {
-  return currentGameStateJson ? projectPlayerVisibleStateJson(currentGameStateJson) : null;
+  return currentGameStateJson ? projectPlayerVisibleStateJson(currentGameStateJson, undefined, getDesktopSim().getOpportunityOwnershipMetadata()) : null;
 }
 
 function sendGameStateToRenderer(stateJson, excludeSender, metadata) {
-  const playerVisibleStateJson = projectPlayerVisibleStateJson(stateJson);
+  const playerVisibleStateJson = projectPlayerVisibleStateJson(stateJson, undefined, getDesktopSim().getOpportunityOwnershipMetadata());
   const targets = [mainWindow, tacticalMapWindow];
   for (const win of targets) {
     if (win && !win.isDestroyed()) {
@@ -333,7 +333,7 @@ function readReplaySaveManifestSidecar(statePath) {
 /** Forward a replay save sequence (raw JSON string of GameState[]) to renderers. */
 function sendReplaySequenceToRenderer(sequenceJson, excludeSender) {
   if (!sequenceJson) return;
-  const playerVisibleSequenceJson = projectPlayerVisibleReplaySequenceJson(sequenceJson, getActivePlayerFaction());
+  const playerVisibleSequenceJson = projectPlayerVisibleReplaySequenceJson(sequenceJson, getActivePlayerFaction(), getDesktopSim().getOpportunityOwnershipMetadata());
   const targets = [mainWindow, tacticalMapWindow];
   for (const win of targets) {
     if (win && !win.isDestroyed()) {

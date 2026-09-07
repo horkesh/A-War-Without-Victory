@@ -33179,3 +33179,55 @@ first, before source writes. Engine routing and the launched L2 dossier/Stop-op 
 scope; corrected L0 review/L1 preserve/L2 auto-apply/no queue/L3 automatic applies only to opportunity
 handling. Historical-operation player authorization is unchanged. BC02–BC07 retain D1; BC08 stays
 closed by bounded verification/disposition. No source, canon or baseline change at scheduling.
+
+
+## 2026-09-07 - BC01 implementation candidate checkpoint; campaign acceptance pending
+
+Owner-scheduled BC01 implements the ruled opportunity boundary: L0 advisory human review, L1
+preserved review, L2 auto-apply without queue, L3 automatic decisions. Unchanged attribution runs
+confirmed six RBiH and four HRHB missing catalog launches; this does not establish the historical
+22/18 territorial deficit magnitude. Clean canonical PRE at 534d86bd8 completed 188 weeks with six
+artifacts byte-identical to n392, independently verified.
+
+The actual Presidential Decision Room now surfaces factual opportunity receipts and the existing
+Stop-op action for a uniquely bound executing own operation. Desktop projection retains own
+approver proposals and exact, globally unique receipt joins. Authored host metadata is supplied by
+the desktop sim bundle to snapshot, update and replay projection; it enriches only cloned DTOs,
+never canonical saves. Opponent/ambiguous/malformed receipts and missing host metadata fail closed.
+Independent findings on wrong-corps binding, orphan UI reachability, false pending-review counts,
+IPC projection and renderer catalog coupling were repaired. Historical-operation authorization,
+commander-loop authorization, scenario data, calibration and floors are unchanged.
+
+Verification: final focused six files / 111 tests passed; final typecheck, desktop sim/map builds
+and the fresh post-translation map build passed. The completed canonical full suite ran 27m21s
+and remains **raw exit 1: 13,427 passed, one failed, 31 skipped**. Its sole failure was five missing
+Bosnian translation keys. Only those five entries were then added; localization and the mounted
+Decision Room suites passed 29/29. Independent QA confirmed the rest of the completed-suite diff
+is unchanged and accepted focused verification plus fresh build for that translation-only delta.
+This does not turn the raw full-suite run green. Two earlier suites were interrupted for discovered
+boundary defects and are not completion evidence.
+
+Coverage: the worktree dependency junction omitted 216 dynamically discovered dependency-CSS
+checks; authored CSS checks still ran. An unchanged shared-dependency CSS supplement passed
+222/222 (exit 0), closing that scanner coverage difference without claiming equal suite counts.
+The 31 skipped cases remain a coverage limit. Independent Systems, privacy, Process QA and BCS
+review are GO for the bounded candidate checkpoint, not final campaign closure.
+
+Final isolated development Electron cases `dto-l0-01`, `dto-l2-01`, `dto-t3-01`, and
+`dto-failed-01` all passed with actual exit 0 and visual inspection. They use synthetic controlled
+inputs on a copied canonical save, not natural campaign or packaged-release acceptance. L0
+Authorize persists approve/resolved turn with no CA spend; L2 stages the exact Operation Sana
+halt and persists CA 100 -> 75, leaving active-operation removal to the next engine halt step.
+Defensive/failed receipts expose no authorization/halt action or CA spend. The renderer receives
+the host DTO field; L0/L2 persisted autosaves do not contain it.
+
+Machine-local/gitignored evidence: `runs/bc01_checks_20260907/test_vitest_dto_boundary`,
+`desktop_map_build_bcs_fix`, and `shared_dependency_css_receipt.json` in the root checkout;
+`runs/bc01_ui_proof_20260907/INDEPENDENT_UI_QA_DTO_FINAL.md` and `final-dto-ui-summary.json` there;
+focused/typecheck receipts in sibling `runs/bc01_focused`. Receipts explicitly distinguish
+transcribed actual tool output from redirected raw logs; these are not committed release artifacts.
+
+This is an implementation checkpoint only. BC01 stays ACTIVE pending clean canonical POST,
+three-faction D2 and observer acceptance, final panel-approved canon completion amendment and
+current-document synchronization. BC02-BC07 retain D1; BC08 remains closed by bounded disposition.
+No new lane, baseline refresh, broader repair authorization or final engine/calibration closure.
