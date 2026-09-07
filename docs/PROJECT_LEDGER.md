@@ -34083,3 +34083,41 @@ addendum to `logs/bc06/independent-review.md`. General malformed trusted-effect-
 hardening is outside this target-validation contract. Commit attribution: Sol implementation,
 independent Sol review, Astra orchestration/live verification/documentation. The normal
 pre-commit TypeScript hook remains enabled; no remote push or publication is authorized.
+
+## 2026-09-08 — BC06 design disposition and bounded BC09 authorization
+
+Base: clean `491cf2110ce6de89fa7df0e572b424bb7d9ef654`. The owner instructed
+"Resolve then authorize" after the recommendation to settle six BC06 escalation
+rules and schedule BC09. Acting on that delegated decision, the orchestrator retains
+the six address/decoration gestures' current static choices, effects, costs, five-use
+caps and ten-turn cooldowns for 1.0. New escalation stages are deferred post-1.0.
+This explicitly removes that authoring gap from 1.0 scope; it does not assert full
+Rulebook §17.5 compliance or amend canon. The existing PM ruling assumed an escalation
+label could close the gap, but the six definitions have no authored later-use options
+or numerical rule. No inert label flip or invented scaling is justified. The existing
+posture/front-visit stages and reviewed targeting repair remain unchanged.
+
+BC06 local repairs/design disposition are complete; final packaged acceptance remains
+open. The historical failed evidence and prior unresolved records are preserved, with
+the new disposition appended in the controlling R8 plan and master post-1.0 backlog.
+
+BC09 Phase 1 is now AUTHORIZED/SCHEDULED, implementation not started: shared validated
+production inputs, explicit fixture omissions, valid-input equivalence, and missing/
+malformed required-data rejection before advance/save/broadcast. Authorization includes
+bounded implementation, focused local tests/builds/live-boundary fixtures, one independent
+Sol/medium review, docs/ledger and a separate local commit on an isolated `codex/` branch.
+The no-campaign restriction persists; applicable long-run gates are deferred, not waived.
+No structural-fingerprint simulation, data/calibration changes, baseline refresh, remote
+push or publication. BC09 supplies BC07 delivery evidence without deciding data policy.
+BC10, cleanup and build preparation remain planned. This commit records decisions and
+authorization only; it does not implement or claim acceptance for BC09.
+
+Validation: documentation suites 9/9, exit 0; 13 added local links and the two new
+disposition/authorization anchors resolved; diff whitespace check passed. Logs:
+`logs/bc06/disposition-{docs-tests-final,links,diff-check}.log`. Initial docs run
+retained at `disposition-docs-tests.log`: roadmap exceeded its existing 60,000-character
+limit (60,325 at HEAD; 61,296 with draft additions). Concise summary rows now pass
+without relaxing the test or removing linked evidence. Independent review identified
+three stale scheduling/prompt references; corrected to the bounded current authority.
+Independent Sol/medium review returned GO after those targeted corrections; the dated
+addendum is in `logs/bc06/independent-review.md`. No production files changed.

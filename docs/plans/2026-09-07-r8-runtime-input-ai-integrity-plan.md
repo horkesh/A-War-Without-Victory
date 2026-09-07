@@ -5,13 +5,42 @@
 **Goal:** Ensure valid production data reaches both campaign runners and optional external AI has one replay-safe command boundary.
 **Architecture:** Reuse the shared turn-input loader and canonical commander. Delete duplicate assembly/direct mutation; make fixture omissions explicit, commit asynchronous results in stable order, and preserve recorded decisions on replay.
 **Tech stack:** TypeScript, existing Node/Electron loaders, Vitest and recorded/fake AI clients.
-**Date/status:** 2026-09-07; PLANNED, no implementation started.
+**Date/status:** Updated 2026-09-08; BC09 Phase 1 AUTHORIZED/SCHEDULED, implementation not started. BC10 Phase 2 remains PLANNED.
 **Owner / board row:** R8; BC09 (inputs) and BC10 (optional AI) are explicit additions to the finite behavior register, not new workstreams or a reopening of R4/R5/RE.
 **Slot:** After R7 under D1. Phase 1 establishes input delivery before BC07's final stability-data disposition. Phase 2 follows BC01/BC06 command settlement and Phase 1. Both precede final calibration and final packaged acceptance.
-**Next action:** Phase 1.1 consumer/fixture inventory when R8 schedules this packet.
+**Next action:** Execute Phase 1.1 consumer/fixture inventory under the bounded authorization below.
 **Collisions:** No simultaneous edits with BC04/05 to turn phases, BC06 to command/desktop handlers, BC07 to input assembly, or R9 preparation to dependency/build inputs. Freeze consumed data at each phase; diagnostic calibration remains open on separate identified trees.
 
 ## 1. Scope, overlap and decisions
+
+### 2026-09-08 — Owner-delegated BC09 scheduling
+
+The owner instructed "Resolve then authorize" after BC06 commit `491cf2110`.
+The orchestrator resolved the six unauthored BC06 escalation rows as an explicit
+post-1.0 scope exception in the existing R8 plan, then scheduled **Phase 1 only**.
+This overrides the earlier PLANNED status for BC09; it does not activate BC10,
+cleanup or build preparation. BC06 packaged acceptance remains open, but its
+completed command/desktop edits no longer collide with this input packet.
+
+Authorized work: inventory consumers and explicit production/fixture requirements;
+implement the smallest shared-loader repair; prove valid-input equivalence and
+required-input failure before mutation/save/broadcast; focused tests, local builds,
+one independent Sol/medium review, documentation/ledger synchronization and a
+separate local commit on an isolated `codex/` branch. Astra orchestrates; use one
+fresh Sol/medium implementer and one independent Sol/medium reviewer with compact
+briefs. Read command wrappers, state exact commands/cost/pass criteria before
+dispatch, and retain logs and source/input hashes. No duplicate investigation.
+
+The owner's no-campaign restriction persists: **do not run new campaigns or
+`ci:structural-fingerprint:check`**, refresh baselines, change calibration/data,
+push remotely or publish. Use existing evidence and minimal local fixtures for
+the real desktop advance boundary. Section 5's applicable long-run acceptance
+requirements remain **deferred, not waived**, and cannot be used to imply launch
+authority. If the valid-input contract changes output, stop with exact evidence;
+do not tune or regenerate data. BC09 cannot claim final acceptance without its
+remaining applicable gates. Handoff delivery evidence to BC07 without deciding
+stability-data retain/regenerate policy. Stop after the bounded reviewed local
+commit and report residual acceptance; do not proceed into Phase 2.
 
 Audit S4 maps to BC09: `src/scenario/turn_inputs.ts` claims one owner but the scenario runner retains inline assembly. Read/parse failures become undefined; missing population can disable brigade eligibility. Preflight does not validate these census/ethnicity inputs. BC07 separately decides stability-data provenance and retain/regenerate policy; neither row discharges the other.
 
@@ -109,8 +138,8 @@ The separate R9 dependency preparation must land before final calibration accept
 
 BC09 and BC10 close independently with exact files, positive/negative tests, source/input identity, scenario evidence and residuals. Update this plan, R8 controlling plan, master §4.1/4.2, command board and dated ledger. Reuse existing R8 report/evidence; do not create per-check reports. Knowledge updates are only for new reusable lessons. No rating or retired-lane status changes.
 
-**Planning evidence (2026-09-07):** documentation suites 9/9, exit 0; 163 local file links and 22 section anchors resolve; `git diff --check` exit 0. Logs: `logs/repository-audit-planning/{docs-tests.log,links.json,anchors.json,diff-check.log}`. Independent Sol/medium review found one missing alias disposition; cleanup Task 5 now explicitly owns `test:ui` retirement/compatibility and its public documentation. No other material coverage, ordering, canon or validation issues were found. **Implementation:** both phases NOT STARTED.
+**Planning evidence (2026-09-07):** documentation suites 9/9, exit 0; 163 local file links and 22 section anchors resolve; `git diff --check` exit 0. Logs: `logs/repository-audit-planning/{docs-tests.log,links.json,anchors.json,diff-check.log}`. Independent Sol/medium review found one missing alias disposition; cleanup Task 5 now explicitly owns `test:ui` retirement/compatibility and its public documentation. No other material coverage, ordering, canon or validation issues were found. **Implementation (2026-09-08):** both phases NOT STARTED; Phase 1 is now authorized as bounded above, Phase 2 remains planned.
 
 ```text
-Execute the next scheduled phase of docs/plans/2026-09-07-r8-runtime-input-ai-integrity-plan.md under R8. Read its canon/authority references and preserve BC04 conditions. BC09 owns validated shared inputs, not BC07 stability-data policy. BC10 owns scoped external proposals and replay, not new AI features. Honor the Phase 0 affected-expert requirement before BC10 code. Preserve source data, FOW, autonomy, historical constraints and existing log compatibility; stop on canon conflict, unexplained drift, new command fields or ownership collision. Use fake/recorded clients; no paid API calls. Commit phases separately, run named focused and required campaign/packaged checks once per supported question, preserve attribution and retired-run decisions, and return exit codes, evidence paths, residuals and ledger updates.
+Execute the next scheduled phase of docs/plans/2026-09-07-r8-runtime-input-ai-integrity-plan.md under R8. Read its canon/authority references and preserve BC04 conditions. BC09 owns validated shared inputs, not BC07 stability-data policy. BC10 owns scoped external proposals and replay, not new AI features. Honor the Phase 0 affected-expert requirement before BC10 code. Preserve source data, FOW, autonomy, historical constraints and existing log compatibility; stop on canon conflict, unexplained drift, new command fields or ownership collision. Use fake/recorded clients; no paid API calls. Commit phases separately, run only the checks allowed by the 2026-09-08 Phase 1 authorization; campaign and final packaged acceptance remain deferred, not waived, preserve attribution and retired-run decisions, and return exit codes, evidence paths, residuals and ledger updates.
 ```

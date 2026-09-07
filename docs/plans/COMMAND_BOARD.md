@@ -1,6 +1,6 @@
 # AWWV Command Board
 
-**Status:** Derived dispatch view, synchronized 2026-09-07.
+**Status:** Derived dispatch view, synchronized 2026-09-08.
 
 **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole authority for unfinished work and wins if this board differs.
 
@@ -40,25 +40,34 @@ this packet. Campaign/downstream acceptance remains open. [BC05 scope/evidence](
 **BC06 — owner scheduled 2026-09-07; bounded repair implemented/reviewed (GO).**
 Voluntary posture controls and authored third-use posture/front-visit choices are wired; pending
 guards and decision/notification receipts are repaired. Owner-authorized per-unit decoration
-targeting now passes all three local faction action paths (2026-09-08 follow-up). Six
-address/decoration escalation rules and final packaged acceptance remain open. No campaign or calibration change is
+targeting now passes all three local faction action paths (2026-09-08 follow-up). The owner-delegated
+2026-09-08 disposition retains static address/decoration behavior for 1.0 and defers six new
+escalation stages post-1.0 as an explicit scope exception. Final packaged acceptance remains open. No campaign or calibration change is
 claimed. [BC06 scope/evidence](2026-07-31-full-campaign-electron-validation-plan.md#bc06-bounded-posture-and-gesture-repair--2026-09-07).
 
-**Repository audit packets — PLANNED (2026-09-07):** [Master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07) assigns three subordinate packets:
+**BC09 — AUTHORIZED/SCHEDULED, implementation not started (2026-09-08).** Execute only
+runtime Phase 1: shared validated inputs, explicit fixture omissions, valid-input equivalence
+and failure before advance/save/broadcast. Use focused/local fixtures, independent review and
+a separate local commit. No campaigns; applicable long-run acceptance remains deferred.
+BC07 receives delivery evidence afterward; BC10 is not activated.
+
+**Repository audit packets — BC09 Phase 1 scheduled; other work PLANNED:** [Master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07) assigns three subordinate packets:
 
 | Packet | Existing owner and sequence |
 |---|---|
 | [Deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | R8; eight bounded tasks, with BC04/05/06 and R7 file handoffs. |
-| [Runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | R8; new BC09 shared input delivery precedes BC07 final policy; BC10 optional AI execution follows BC01/06 and BC09. |
+| [Runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | R8; BC09 Phase 1 authorized within the 2026-09-08 bounds and precedes BC07 final policy. BC10 remains planned after BC01/06 and BC09. |
 | [Build preparation](2026-09-07-r9-build-validation-preparation-plan.md) | Limited early R9 subset; cleanup script handoff and BC09 resource contract precede final build evidence. Freeze still waits for R8. |
 
-All precede final calibration and packaged acceptance. This registration starts no implementation or campaigns, creates no workstream, and preserves D1 and separately authorized BC04 work.
+All precede final calibration and packaged acceptance. The 2026-09-08 authorization schedules
+only BC09 Phase 1; no implementation or campaign has started. Other packet registration creates
+no execution authority or new workstream; D1 and separately authorized BC04 work are preserved.
 
 ## Current Critical Path
 
 `R7 remaining presentation/audio gates (disjoint work may continue) -> scheduled R8 behavior settlement and deletion cleanup + limited R9 build preparation (§§4.1–4.2) -> final calibration acceptance -> final R8 packaged acceptance -> R9`
 
-**Finite closure register (2026-09-07; BC01 separately scheduled):** [Master §4.1](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) owns BC01 CLOSED (owner accepted verified repair and retired territory similarity, 2026-09-07; [verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)), BC02 CLOSED by the owner-approved verified Electron load/display repair, BC03 CLOSED by verified repair and owner-approved deferrals, BC04 campaign acceptance and BC05–BC07 remain open; BC09/BC10 are planned, and BC08 is closed by bounded disposition: BC01 opportunity decisions; BC02 sector/rating truth; BC03 narrated Dayton; BC04 chronology/P1/P2; BC05 NATO/Lukavac gates; BC06 posture/gesture controls; BC07 stability-data policy; BC08 inherited tests. FIX means planned disposition when scheduled; VERIFY/DISPOSITION needs bounded evidence. D1 HOLD FOR R8 remains. Registration creates no new lane, RE revival, broader repair authorization, or automatic baseline refresh. BC02 changed no canonical save bytes, campaign result, calibration or baseline. BC03 is closed; BC03 is committed as c95e25241; BC04 P1 is owner-authorized, implemented and independently reviewed; campaign acceptance is deferred to the next calibration, preserving clean before/after attribution; extra P1 repeat/ON runs are owner-retired. P2 completed-week targets are historically ratified; the owner approved the bounded same-turn follow-up/display packet and scoped panel-condition amendment. P2 is implemented, focused checks passed, and independent review returned GO; campaign acceptance remains deferred. Diagnostic calibration stays open; final calibration follows accepted behavior settlement. n392 is 702/678/672/665 against unchanged floors 694/674/668/641; the older 688 breach is historical, and improvement attribution remains unknown.
+**Finite closure register (2026-09-07; BC01 separately scheduled):** [Master §4.1](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) owns BC01 CLOSED (owner accepted verified repair and retired territory similarity, 2026-09-07; [verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)), BC02 CLOSED by the owner-approved verified Electron load/display repair, BC03 CLOSED by verified repair and owner-approved deferrals, BC04 campaign acceptance and BC05–BC07 remain open; BC09 Phase 1 is authorized/scheduled (not started), BC10 remains planned, and BC08 is closed by bounded disposition: BC01 opportunity decisions; BC02 sector/rating truth; BC03 narrated Dayton; BC04 chronology/P1/P2; BC05 NATO/Lukavac gates; BC06 posture/gesture controls; BC07 stability-data policy; BC08 inherited tests. FIX means planned disposition when scheduled; VERIFY/DISPOSITION needs bounded evidence. D1 HOLD FOR R8 remains. Registration creates no new lane, RE revival, broader repair authorization, or automatic baseline refresh. BC02 changed no canonical save bytes, campaign result, calibration or baseline. BC03 is closed; BC03 is committed as c95e25241; BC04 P1 is owner-authorized, implemented and independently reviewed; campaign acceptance is deferred to the next calibration, preserving clean before/after attribution; extra P1 repeat/ON runs are owner-retired. P2 completed-week targets are historically ratified; the owner approved the bounded same-turn follow-up/display packet and scoped panel-condition amendment. P2 is implemented, focused checks passed, and independent review returned GO; campaign acceptance remains deferred. Diagnostic calibration stays open; final calibration follows accepted behavior settlement. n392 is 702/678/672/665 against unchanged floors 694/674/668/641; the older 688 breach is historical, and improvement attribution remains unknown.
 
 **RE no longer appears on the critical path.** It closed by owner decision on 2026-09-01; the P2B
 packaged-proof blocker that used to head this line is closed history and gates nothing. Engine

@@ -193,7 +193,8 @@ Diagnostic calibration stays open; D1 and BC04's current owner/panel conditions 
 
 ### 4.1 Finite behavior-closure register (2026-09-07)
 
-**Current disposition:** BC01 CLOSED by owner approval: verified repair accepted; territory-similarity requirement retired ([verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)); BC02 CLOSED by its verified Electron load/display repair; BC03 CLOSED; BC04 campaign acceptance and BC05–BC07 remain open; BC08 closed by verification/disposition; BC09/BC10 are planned.
+**Current disposition:** BC01/02/03/08 CLOSED; BC04 campaign acceptance and BC05–BC07 open.
+BC09 Phase 1 authorized, not started; BC10 planned. Details and evidence below.
 
 **BC02:** CLOSED 2026-09-07; Electron load/display only. No campaign or calibration change. BC03 CLOSED; BC04 P1 is implemented/reviewed with campaign acceptance deferred to next calibration (clean before/after retained; P1 repeat/ON companion retired); P2 implemented/reviewed; campaigns deferred.
 
@@ -209,12 +210,12 @@ live in the existing R8 plan; its previously proposed B10–B13/F1 are now regis
 | BC01 player opportunities / R8 | Gameplay/operations + Game Designer + QA | **CLOSED — owner accepted repair and retired territory similarity (2026-09-07).** Verified L0/L1 review, L2 auto-apply/no queue, L3 observer across three factions. |
 | BC02 B2/B9 sector/rating truth / R8 | Systems + QA | **CLOSED — verified 2026-09-07.** Electron save load rebuilds only transient ratings before player projection; canonical bytes and privacy remain intact. |
 | BC03 B10 narrated Dayton / R8 | Events/systems + Game Designer + QA | **CLOSED 2026-09-07** — termination owner/COHA/signing repaired and verified; owner deferred post-horizon acceptance/tickers. Working negotiation preserved; no headless change. |
-| BC04 B11 chronology + P1/P2 / R8/panel | Historian + systems + calibration + independent §6 panel | **P1 IMPLEMENTED/REVIEWED — campaign acceptance deferred to next calibration (clean before/after retained; P1 repeat/ON companion retired); P2 implemented/reviewed; campaigns deferred.** See [BC04 evidence and scope](2026-07-31-full-campaign-electron-validation-plan.md#bc04-bounded-implementation-plan--2026-09-07). Barracks stagger excluded. P2 week targets ratified; same-turn/display fix reviewed GO. Scoped panel amendment recorded in plan. |
-| BC05 B12 NATO/Lukavac gates / R8 | Events/systems + Historian + QA | **NATO IMPLEMENTED/REVIEWED (GO), `0690a47ea`; Lukavac event REMOVED/REVIEWED (GO)** by owner disposition. Military Operation Trnovo remains; its execution/calibration is outside scope. Campaign/downstream acceptance remains open. [Evidence and scope](2026-07-31-full-campaign-electron-validation-plan.md#bc05-bounded-nato-repair-and-lukavac-disposition--2026-09-07). |
-| BC06 B13 posture/gestures / R8 | Gameplay/desktop + Game Designer + QA | **BOUNDED REPAIR IMPLEMENTED/REVIEWED (GO).** Voluntary posture wiring, authored third-use posture/front-visit choices, duplicate-pending guards and receipts. Owner-authorized per-unit decoration targeting passes all three local faction action paths (2026-09-08 follow-up). Six address/decoration escalation rules and final packaged acceptance remain open. [Scope/evidence](2026-07-31-full-campaign-electron-validation-plan.md#bc06-bounded-posture-and-gesture-repair--2026-09-07). |
+| BC04 B11 chronology + P1/P2 / R8/panel | Historian + systems + calibration + independent §6 panel | **P1/P2 IMPLEMENTED/REVIEWED; campaign acceptance deferred.** Preserve attribution and retired P1 repeat/ON runs; barracks stagger excluded. Ratified P2 targets and panel amendment: [BC04 evidence](2026-07-31-full-campaign-electron-validation-plan.md#bc04-bounded-implementation-plan--2026-09-07). |
+| BC05 B12 NATO/Lukavac gates / R8 | Events/systems + Historian + QA | **NATO fixed (`0690a47ea`); Lukavac removed; reviewed GO.** Trnovo remains calibration-owned. Campaign/downstream acceptance open. [Evidence](2026-07-31-full-campaign-electron-validation-plan.md#bc05-bounded-nato-repair-and-lukavac-disposition--2026-09-07). |
+| BC06 B13 posture/gestures / R8 | Gameplay/desktop + Game Designer + QA | **Local repairs reviewed GO; design disposed 2026-09-08.** Six new escalation stages deferred post-1.0; packaged acceptance open. [Repairs, live proof and disposition](2026-07-31-full-campaign-electron-validation-plan.md#bc06-bounded-posture-and-gesture-repair--2026-09-07). |
 | BC07 stability divergence / calibration-data | Asset/data integration + Systems + calibration | **VERIFY/DISPOSITION** consumed mode and retain/regenerate policy. Hybrid/ethnic initialization bypass matters; 227 potential stability rows do not prove 227 effects. No mandated regeneration or control repaint. |
 | BC08 inherited test residual / verification | QA + owning Systems/Game Design | **CLOSED — verification/disposition.** Current simulation suites pass; one environmental full-suite failure classified, not erased. [Receipt](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md). |
-| BC09 shared production inputs / R8 | Systems + QA | **PLANNED:** [runtime packet Phase 1](2026-09-07-r8-runtime-input-ai-integrity-plan.md). One validated loader; explicit fixture omissions; failure before mutation. Supplies BC07's input-delivery evidence, not its data policy. |
+| BC09 shared production inputs / R8 | Systems + QA | **AUTHORIZED 2026-09-08; not started.** [Phase 1 contract](2026-09-07-r8-runtime-input-ai-integrity-plan.md): local repair/review/commit; campaigns deferred. Delivery before BC07 policy. |
 | BC10 optional AI ownership/replay / R8 | Commander + Systems + QA | **PLANNED:** [runtime packet Phase 2](2026-09-07-r8-runtime-input-ai-integrity-plan.md). Canonical commander owns final emit; recorded inputs replay without API calls. Cadet preserved; required Phase 0 review before code. |
 
 **Acceptance boundary:** settle every row before final calibration acceptance, retain one-change-per-
@@ -231,12 +232,12 @@ nothing here. R7 continues disjoint presentation work; publication authority rem
 
 ### 4.2 Repository audit integration (2026-09-07)
 
-Owner-requested planning; no implementation started. Three subordinate packets, no new workstream:
+BC09 Phase 1 authorized 2026-09-08, not started; other packets planned. No new workstream:
 
 | Owner / packet | Slot and overlap |
 |---|---|
 | R8 [deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | Original four items plus audit D1–D7, Tasks 1–8. Script Tasks 5/7/8 hand off before dependency work; event Task 2 follows BC04/05, UI Task 3 follows BC06/R7. KEEP with evidence is valid. |
-| R8 [runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | BC09 establishes delivery before BC07 final disposition; BC10 follows BC01/06 and BC09. Separate attribution/acceptance; no data regeneration or retired-lane revival. |
+| R8 [runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | BC09 authorized locally; campaigns deferred. BC07 policy follows delivery; BC10 planned after BC01/06 and BC09. Separate attribution; no data regeneration. |
 | R9 [build preparation](2026-09-07-r9-build-validation-preparation-plan.md) | Limited early R9 subset: dependencies after R7/script handoff; CI before final costly checks; payload after BC09. All before final calibration/R8 acceptance, not after freeze. |
 
 R7 retains live English/readability work; R4/R5/RE stay closed. Package/lockfile edits are serial.
@@ -443,6 +444,7 @@ Optional improvements identified outside the 1.0 outcome, per the routing rule a
 
 | Date | Item | Design doc | Status |
 |---|---|---|---|
+| 2026-09-08 | Six address/decoration escalation stages; retain static 1.0 behavior. | [BC06 disposition](2026-07-31-full-campaign-electron-validation-plan.md#bc06-final-design-disposition-and-bc09-authorization--2026-09-08) | **DEFERRED POST-1.0**, owner-delegated scope exception; not full canon compliance. Packaged gate remains. |
 | 2026-08-15 | Collapse D-topology: add an explicitly reviewed neighbour-loss/cascade mechanism only if post-1.0 thesis-depth work requires territorial propagation beyond the retained local selection/shape model. Must reopen ordinary Section 6 review and fresh 188-week re-floor; do not reopen struck breadth tuning. | [RC panel synthesis](../40_reports/20260813_RC_COLLAPSE_PANEL_RECONCILER_SYNTHESIS.md#option-d--address-the-model-three-variants-priced-very-differently) | **RESERVED POST-1.0**; narrow RC lanes 1-3 are complete and this does not gate R7, R8, R9, or 1.0 |
 | 2026-08-15 | Multilingual localization: canonicalize `bs`/`bs-BA`, migrate legacy `bcs`, add deterministic pseudolocalization, complete Bosnian strings, obtain native linguistic/in-product review, and run locale-specific packaged visual proof. Existing translations/compatibility remain; English is the sole required 1.0 language. | [R7 plan Phase 3](2026-07-31-content-history-localization-audio-plan.md#phase-3----deferred-post-10----bosnian-locale-contract-and-localizability) | **DEFERRED POST-1.0 by owner decision**; does not gate R7, R8, R9, or the 1.0 release |
 | 2026-08-05 | Faction-wide current equipment totals visibility (Warroom Faction Overview MILITARY quadrant + Army HQ corps-list rollup) | [Design note](2026-08-05-faction-equipment-totals-visibility-design.md) | Proposed — not implemented; does not gate any R1–R9 lane |
