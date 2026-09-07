@@ -126,20 +126,10 @@ an explicit tag and **commit the enumerated caught set as the S3 predicted set b
   ratchet, not EH-3 `stranded_status`; and finding 10's `FORCE BALANCE: REDACTED` is not fog-of-war as
   designed but a field with **no writer anywhere in `src/`**. Three findings remain HELD with
   exhaustive negative evidence and one named unblocking query each.
-- **R7 ARBiH brigade honorific name correction registered 2026-09-07.** 33 ARBiH brigades carry
-  "Vitezka"/"Slavna" — real wartime ARBiH combat-honor titles — baked into their `name` field in
-  `data/source/oob_brigades.json` and into `formationNameLocalizations.ts`, so the game starts
-  displaying honors as already earned. The mechanical half of this is already fixed:
-  `distinction_potential` (earn-in-play decorations, `decoration_evaluator.ts`) already targets
-  exactly these 33 brigades and no brigade carries the old turn-0-award `honor` field; only the
-  display text lags the mechanic. Scoped to
-  [display-name correction only](2026-09-07-arbih-brigade-honorific-name-correction-plan.md) —
-  `id` stays untouched (each id carries 1,300+ references across engine/tests/calibration
-  artifacts; renaming it would be calibration-risky for no player-facing benefit). Confirmed
-  byte-neutral to simulation (no `src/sim/`/`src/state/` logic reads brigade `.name`), so **no
-  recalibration required**. Small disjoint-file R7 content packet, not a new lane; developed on
-  branch/worktree `r7-arbih-honorific-names` to avoid collision with concurrent `codex/*` OOB/
-  calibration work. PLANNED, NOT YET IMPLEMENTED.
+- **R7 ARBiH brigade honorific name correction, IMPLEMENTED 2026-09-07.** 33 brigades displayed
+  earn-in-play combat honors as already granted at t0; fixed display name only, `id` untouched.
+  Mechanical fields unchanged; saved/displayed name text changes. Branch `r7-arbih-honorific-names`, not
+  yet merged. [Plan](2026-09-07-arbih-brigade-honorific-name-correction-plan.md).
 - **Unscheduled work landed 2026-09-01/04, recorded so it is not mistaken for roadmap progress.**
   PRs #491–#497 touched no lane and no lane row's status changes for them. #491 fixed the tactical
   toolbar collision and added the geometric (not `scrollWidth`) verifier `tools/ui/verify_toolbar_fit.mjs`

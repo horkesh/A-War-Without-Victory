@@ -33380,3 +33380,12 @@ concurrent `codex/*` OOB and calibration work.
 
 Plan: `docs/plans/2026-09-07-arbih-brigade-honorific-name-correction-plan.md`. Slotted into R7
 (content/historical-attribution) in `docs/plans/MASTER_ROADMAP.md`.
+
+### 2026-09-07 - Honorific-name branch documentation preserved for integration
+
+The owner requested review and merge of this worktree. Commit the pre-existing roadmap
+planned-to-implemented status correction before integration, while correcting its overbroad
+byte-neutral wording: brigade IDs and mechanical fields are unchanged, but display/catalog
+strings and serialized names intentionally change. Main's independent merge-readiness review
+owns the final integration verdict; this documentation commit does not claim campaign proof
+or that the branch is already merged.
