@@ -8,6 +8,7 @@ import assert from 'node:assert';
 import { test } from 'vitest';
 import { compareEventCandidates, evaluateEvents, filterMutexCandidates } from '../src/sim/events/evaluate_events.js';
 import { loadEventDefinitions } from '../src/sim/events/event_loader.js';
+import { resolveEventDecision } from '../src/sim/events/resolve_decision.js';
 import { updateEventReadiness } from '../src/sim/events/pressure_system.js';
 import type { EventDefinition, Rng } from '../src/sim/events/event_types.js';
 import { triggerMatches } from '../src/sim/events/event_types.js';
@@ -911,6 +912,104 @@ test('evaluateEvents: an opted-in automatic dependent observes its parent receip
     assert.deepStrictEqual(result.fired.map((event) => event.id), ['same_turn_parent', 'same_turn_child']);
     assert.deepStrictEqual(state.military.fired_event_ids, ['same_turn_parent', 'same_turn_child']);
     assert.strictEqual(state.military.event_fire_counts?.same_turn_child, 1);
+});
+
+test.each(['comply_withdraw_hwez', 'defy_ultimatum_hwez'] as const)(
+    'evaluateEvents: Markale, NATO %s, and the exclusion zone produce chronological receipts and effects',
+    (responseId) => {
+        const markale = loadedEventById('markale_massacre_1994');
+        const ultimatum = loadedEventById('nato_ultimatum_sarajevo_1994');
+        const exclusion = loadedEventById('sarajevo_exclusion_zone_1994');
+        const events = [markale, ultimatum, exclusion];
+        const state = minimalState('war', 96);
+        state.meta.player_faction = 'RS';
+        state.military.event_flags = { sarajevo_siege_active: true };
+        state.military.general_supply_reserve = { RBiH: 20, RS: 20, HRHB: 20 };
+        state.military.formations = {
+            rbih_brigade: {
+                id: 'rbih_brigade',
+                faction: 'RBiH',
+                status: 'active',
+                morale: 50,
+            } as any,
+        };
+        state.military.negotiation = {
+            strategic_dimensions: {
+                RBiH: {},
+                RS: {
+                    international_standing: { base_value: 50, event_modifier: 0 },
+                    patron_confidence: { base_value: 50, event_modifier: 0 },
+                    military_credibility: { base_value: 50, event_modifier: 0 },
+                },
+                HRHB: {},
+            },
+        } as any;
+
+        assert.deepStrictEqual(
+        evaluateEvents(state, rejectRandomness, 96, events).fired.map((event) => event.id),
+        ['markale_massacre_1994'],
+        );
+
+        state.meta.turn = 97;
+        assert.deepStrictEqual(
+        evaluateEvents(state, rejectRandomness, 97, events).fired.map((event) => event.id),
+        ['nato_ultimatum_sarajevo_1994'],
+        );
+        assert.strictEqual(state.military.pending_event_decisions?.[0]?.event_id, 'nato_ultimatum_sarajevo_1994');
+        resolveEventDecision(state, 'nato_ultimatum_sarajevo_1994', responseId);
+        assert.strictEqual(state.military.pending_event_decisions?.length, 0);
+        assert.deepStrictEqual(state.military.event_decision_log?.at(-1), {
+        event_id: 'nato_ultimatum_sarajevo_1994',
+        response_id: responseId,
+        decision_source: 'player',
+        faction: 'RS',
+        turn: 97,
+        });
+        assert.strictEqual(
+        state.military.event_flags?.[
+            responseId === 'comply_withdraw_hwez' ? 'sarajevo_hwez_complied' : 'sarajevo_hwez_defied'
+        ],
+        true,
+        );
+        const rsDimensions = state.military.negotiation?.strategic_dimensions?.RS as any;
+        assert.strictEqual(
+        rsDimensions.international_standing.event_modifier,
+        responseId === 'comply_withdraw_hwez' ? 8 : -12,
+        );
+        assert.strictEqual(
+        rsDimensions.patron_confidence.event_modifier,
+        responseId === 'comply_withdraw_hwez' ? -5 : 4,
+        );
+        assert.strictEqual(
+        rsDimensions.military_credibility.event_modifier,
+        responseId === 'comply_withdraw_hwez' ? -4 : 5,
+        );
+
+        state.meta.turn = 98;
+        assert.deepStrictEqual(
+        evaluateEvents(state, rejectRandomness, 98, events).fired.map((event) => event.id),
+        ['sarajevo_exclusion_zone_1994'],
+        );
+        assert.deepStrictEqual(state.military.fired_event_ids, [
+        'markale_massacre_1994',
+        'nato_ultimatum_sarajevo_1994',
+        'sarajevo_exclusion_zone_1994',
+        ]);
+        assert.strictEqual(state.military.general_supply_reserve.RS, 15);
+        assert.strictEqual(state.military.formations.rbih_brigade?.morale, 55);
+        assert.deepStrictEqual(state.military.event_aggression_modifiers, [
+        { faction: 'RS', delta: -0.1, expires_turn: 110 },
+        ]);
+    },
+);
+
+test('evaluateEvents: extending the NATO window does not bypass the Sarajevo siege condition', () => {
+    const ultimatum = loadedEventById('nato_ultimatum_sarajevo_1994');
+    const state = minimalState('war', 97);
+    state.military.fired_event_ids = ['markale_massacre_1994'];
+
+    assert.deepStrictEqual(evaluateEvents(state, rejectRandomness, 97, [ultimatum]).fired, []);
+    assert.deepStrictEqual(state.military.fired_event_ids, ['markale_massacre_1994']);
 });
 
 test('evaluateEvents: a non-opted exact-window prerequisite remains unavailable after its parent fires', () => {

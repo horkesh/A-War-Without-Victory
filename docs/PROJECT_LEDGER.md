@@ -33850,3 +33850,59 @@ passed. Git confirms the rename branch is an ancestor of main, and both main and
 rename worktree have no uncommitted tracked or ordinary untracked changes. Ignored generated
 logs/run artifacts remain local. No push or publication occurred. The explicit diagnostic-run
 deviation above does not close BC04, final calibration, R7, or any newly planned audit packet.
+
+### 2026-09-07 - BC05 NATO window repair and Lukavac reconciliation
+
+Owner authorized current-code/evidence investigation, the smallest supported NATO repair, focused
+regressions, one independent Sol review, documentation synchronization and local commit. Main HEAD
+`fd8d5e66c615fa4731cde01122d6050fbc86619f` matched the handoff and the working tree was clean.
+No campaign, calibration edit, baseline refresh, push or publication is authorized. The
+structural-fingerprint wrapper is excluded because it launches a 40-week simulation.
+
+Accepted n392 confirms Markale I at t96 and the RBiH NATO companion at t97, with the RS ultimatum
+and exclusion zone absent. The bounded repair extends only the RS ultimatum's `turn_max` 96 to 97,
+preserving all prerequisites, player options/effects and the exclusion zone's 97–98 window. The
+ordinary event pass can then deliver t96/t97/t98. Direct prerequisite-window loader protection
+detects a child closing before its parent's earliest opening, or on that opening without the existing
+bounded same-turn opt-in. It does not infer pressure/condition satisfaction or expand BC04's opt-ins.
+
+The inherited Lukavac premise is superseded by accepted evidence: n392 has 3/6 RS Trnovo cells
+through t69–71 and records `operation_lukavac_93` plus RS `comply` at t70. Its catalog row is identical
+to clean n392 source `c2f6592ec1e2f049d93ade595760c19633bb2ce7`; the intervening war_1993 diff is
+only P1. Evidence: `logs/bc05/read_n392.cjs`, `n392-evidence.json`, `n392-read.log`, exit 0. Persisted
+weekly-report `week_index` is the state receipt turn, unlike the zero-based runner loop index.
+
+No Lukavac mechanics changed. Its post-advance narrative still overstates measured territorial
+evidence: Trnovo town is RBiH at the receipt. BB2 printed pp.391–392 (KB scan pages 410–411)
+supports the historical capture/Igman advance/withdrawal sequence, but supplies no authoritative
+replacement game predicate. The concrete owner decision remains: retain the abstract municipal
+proxy with this limitation, or require simulation-backed territorial evidence and authorize a
+separate historical/design correction. Lowering thresholds or repainting the map is not a repair.
+
+Current roadmap, board, R8 plan and both existing investigation homes now distinguish old measured
+runs from n392. BC01/02/03/08 stay closed; BC04 and final calibration stay open. Preserve chronology
+attribution pre-P1 `c95e25241`, P1 `f117fe475`, P2 `558f253a2`, and the known display/serialized-name
+changes integrated in `c2c8300d6`. The cleanup, runtime-input/AI and build-preparation packets remain
+PLANNED, with BC09 preceding BC07 final policy and BC10 following input/command settlement.
+
+Preserved limitation: the existing exclusion-zone row keys on the ultimatum receipt rather than a
+compliance flag; both responses lead to the same relief effects and withdrawal narrative. Exercising
+both branches establishes preservation, not the historical adequacy of that defiance narrative.
+No branch redesign is included in the owner-authorized timing repair.
+
+Implementation validation: pre-fix regression run had three expected failures. Final direct Vitest
+run of `tests/event_loader.test.ts`, `tests/event_timeline_integrity.test.ts` and
+`tests/events_evaluate.test.ts` passed 115/115 tests across 3 files, exit 0
+(`logs/bc05/final-focused-tests.log`). Both RS response branches resolve before the exclusion-zone
+receipt and preserve flags/dimension shifts and existing downstream effects. Direct
+`node node_modules/typescript/bin/tsc --noEmit -p tsconfig.json` passed with no diagnostics
+(`logs/bc05/typecheck.log`, exit 0). `git diff --check` passed. These are focused mechanism checks;
+no current-HEAD campaign, territory neutrality, downstream campaign acceptance or calibration
+acceptance is claimed.
+
+Independent Sol review returned **GO with no findings**, covering correctness, historical/canon
+authority, determinism, both player-response branches, preserved effects and the documented
+acceptance limits. Evidence: `logs/bc05/independent-review.md`; command exits and reviewed hashes:
+`logs/bc05/validation.json`. No correction pass was needed. Final scope/document verification is
+recorded in `logs/bc05/scope-docs.log`; normal pre-commit typechecking remains enabled for the
+authorized commit. BC05 remains open for the explicit disposition and unmeasured campaign effects.

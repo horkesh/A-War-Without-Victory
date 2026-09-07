@@ -8,6 +8,14 @@ class**, not one row, and that *"one row was checked because one row was asked a
 **Scope:** read-only measurement. No code, data, or canon changed.
 **Precedes:** the §6 panel on P1/P2/P4 — the panel cannot rule on a scope it has not seen.
 
+**Current BC05 reconciliation, 2026-09-07:** the six-run findings below are historical. Accepted
+`n392` has **3/6 RS Trnovo cells throughout t69–71**, and `operation_lukavac_93` fires at **t70**
+with an RS `comply` decision. The current Lukavac row is unchanged from that run's source.
+Thus the dead-gate diagnosis is **not reproduced in the accepted baseline**. No gate reduction is
+justified. Trnovo town remains RBiH-held, leaving a distinct narrative-versus-territory design question;
+see the [BC05 evidence and disposition](../../plans/2026-07-31-full-campaign-electron-validation-plan.md#bc05-bounded-nato-repair-and-lukavac-disposition--2026-09-07).
+This annotation supersedes the current applicability of the old headline, not its measured receipts.
+
 ---
 
 ## Verdict — CORRECTED 2026-09-06 by the §6 panel's scenario/calibration seat

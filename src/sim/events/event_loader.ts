@@ -732,6 +732,48 @@ function validateEventReferences(rows: EventDefinition[]): void {
 }
 
 /**
+ * Reject prerequisite windows that cannot observe a receipt under the event
+ * evaluator's turn ordering. Ordinary prerequisite rows can first observe an
+ * event on the turn after that event's earliest possible turn. The bounded
+ * `same_turn_requires_events` opt-in is the sole exception when both windows
+ * meet on that turn.
+ *
+ * This is intentionally an earliest-bound proof only. Wider overlapping
+ * windows remain valid because their conditions may allow the prerequisite to
+ * fire early enough; the loader must not guess at runtime condition outcomes.
+ */
+function validateImpossiblePrerequisiteWindows(rows: EventDefinition[]): void {
+    const byId = new Map(rows.map((row) => [row.id, row]));
+    const impossible: string[] = [];
+
+    for (const row of rows) {
+        const dependentMax = row.trigger.turn_max;
+        if (typeof dependentMax !== 'number' || !Number.isFinite(dependentMax)) continue;
+
+        for (const prerequisiteId of row.trigger.requires_events ?? []) {
+            const prerequisiteMin = byId.get(prerequisiteId)?.trigger.turn_min;
+            if (typeof prerequisiteMin !== 'number' || !Number.isFinite(prerequisiteMin)) continue;
+
+            const closesBeforePrerequisite = dependentMax < prerequisiteMin;
+            const closesOnPrerequisite = dependentMax === prerequisiteMin;
+            if (
+                closesBeforePrerequisite ||
+                (closesOnPrerequisite && row.same_turn_requires_events !== true)
+            ) {
+                impossible.push(`${row.id}->${prerequisiteId}`);
+            }
+        }
+    }
+
+    if (impossible.length > 0) {
+        impossible.sort(strictCompare);
+        throw new Error(
+            `Impossible prerequisite window(s) in required event catalog: ${impossible.join(', ')}`,
+        );
+    }
+}
+
+/**
  * Cross-faction option-id rejection (test plan gate 9). Two option ids
  * identical across rows of different `responding_faction` are rejected
  * WHEN the option carries runtime causality (`enables_events_runtime` or
@@ -1129,6 +1171,7 @@ export function loadEventDefinitionsFromDir(scenarioStartWeek: number, eventsDir
     }
     validateUniqueEventIds(allEvents);
     validateEventReferences(allEvents);
+    validateImpossiblePrerequisiteWindows(allEvents);
     // ─── Phase D Packet 44 vocabulary passes. ──────────────────────────────
     // Run vocabulary checks before family/structural causality passes so a
     // typo on `dimension_shifts[].dimension` or `effects[].kind` fails with

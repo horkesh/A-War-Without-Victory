@@ -30,6 +30,12 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 
 **R7 name correction integrated:** [ARBiH honorific-name packet](2026-09-07-arbih-brigade-honorific-name-correction-plan.md); IDs and mechanical fields preserved, saved/displayed text changed. Remaining R7 gates stay open.
 
+**BC05 scheduled separately (2026-09-07):** bounded NATO deadline/loader repair is
+**implemented and independently reviewed (GO), 115 focused tests pass**. n392 disproves the inherited
+Lukavac dead-gate premise: it fires at t70, with 3/6 RS Trnovo
+cells and a `comply` decision. No Lukavac mechanics change; territorial-narrative disposition and
+NATO campaign/downstream acceptance remain open. [BC05 scope/evidence](2026-07-31-full-campaign-electron-validation-plan.md#bc05-bounded-nato-repair-and-lukavac-disposition--2026-09-07).
+
 **Repository audit packets — PLANNED (2026-09-07):** [Master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07) assigns three subordinate packets:
 
 | Packet | Existing owner and sequence |

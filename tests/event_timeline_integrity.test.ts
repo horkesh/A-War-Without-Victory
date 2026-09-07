@@ -221,9 +221,34 @@ describe('Event timeline historical integrity', () => {
         expect(wa.trigger.requires_events).toContain('croat_bosniak_war_begins_1993');
     });
 
-    it('NATO ultimatum requires Markale massacre', () => {
+    it('NATO ultimatum and Sarajevo exclusion zone retain their bounded chronology and effects', () => {
         const ult = allEvents.find((e: any) => e.id === 'nato_ultimatum_sarajevo_1994');
-        expect(ult.trigger.requires_events).toContain('markale_massacre_1994');
+        const exclusion = allEvents.find((e: any) => e.id === 'sarajevo_exclusion_zone_1994');
+
+        expect([ult.trigger.turn_min, ult.trigger.turn_max]).toEqual([96, 97]);
+        expect(ult.trigger.requires_events).toEqual(['markale_massacre_1994']);
+        expect(ult.same_turn_requires_events).toBeUndefined();
+        expect(ult.response_options.map((option: any) => option.id)).toEqual([
+            'comply_withdraw_hwez',
+            'defy_ultimatum_hwez',
+        ]);
+        expect(ult.effect).toEqual({ kind: 'patron_pressure', faction: 'RS', delta: 10 });
+        expect(ult.effects).toEqual([{
+            kind: 'narrative',
+            text: "NATO demands VRS withdrawal of heavy weapons from around Sarajevo. The threat of air strikes becomes credible for the first time.",
+        }]);
+
+        expect([exclusion.trigger.turn_min, exclusion.trigger.turn_max]).toEqual([97, 98]);
+        expect(exclusion.trigger.requires_events).toEqual(['nato_ultimatum_sarajevo_1994']);
+        expect(exclusion.effect).toEqual({ kind: 'supply_delta', faction: 'RS', delta: -5 });
+        expect(exclusion.effects).toEqual([
+            { kind: 'morale_change', faction: 'RBiH', delta: 5 },
+            { kind: 'aggression_modifier', faction: 'RS', delta: -0.1, duration_turns: 12 },
+            {
+                kind: 'narrative',
+                text: 'VRS heavy weapons are withdrawn from around Sarajevo. The exclusion zone brings the first sustained relief to the besieged capital.',
+            },
+        ]);
     });
 
     it('Federation ground offensive requires both Washington and Deliberate Force', () => {

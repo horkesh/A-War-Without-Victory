@@ -1,0 +1,11 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/events_evaluate.test.ts (48 tests) 869ms
+ ✓ tests/event_loader.test.ts (44 tests) 883ms
+ ✓ tests/event_timeline_integrity.test.ts (23 tests) 40ms
+
+ Test Files  3 passed (3)
+      Tests  115 passed (115)
+   Start at  22:24:52
+   Duration  4.45s (transform 844ms, setup 24ms, collect 1.12s, tests 1.79s, environment 1ms, prepare 328ms)
