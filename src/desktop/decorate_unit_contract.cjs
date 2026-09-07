@@ -50,6 +50,8 @@ const DECORATE_UNIT_EVENT_BY_FACTION = {
   HRHB: 'decorate_a_unit_hrhb',
 };
 
+const { responseOptionsForFire } = require('./action_cadence_contract.cjs');
+
 /** Returns the authored decorate-a-unit event id for a faction, or null. */
 function decorateUnitEventIdForFaction(faction) {
   return DECORATE_UNIT_EVENT_BY_FACTION[faction] ?? null;
@@ -126,6 +128,9 @@ function computeDecorateUnitAvailability(state, playerFaction, eventDef) {
 
   if (!playerFaction) return { ...base, reason: 'no_player_faction' };
   if (!eventId || !eventDef) return { ...base, reason: 'no_event' };
+  if ((state?.military?.pending_event_decisions ?? []).some((decision) => decision?.event_id === eventId)) {
+    return { ...base, reason: 'already_pending' };
+  }
 
   const actionCadence = eventDef.action_cadence;
   if (!actionCadence) return { ...base, reason: 'no_action_cadence' };
@@ -192,7 +197,10 @@ function buildDecorateUnitPendingDecision(state, playerFaction, eventDef, availa
   const templateId = steadfastBranchId(playerFaction);
   const eligible = Array.isArray(availability.eligibleFormations) ? availability.eligibleFormations : [];
 
-  const authored = Array.isArray(eventDef.response_options) ? eventDef.response_options : [];
+  const authored = responseOptionsForFire(
+    eventDef.response_options,
+    (state?.military?.event_fire_counts?.[eventDef.id] ?? 0) + 1,
+  );
   const template = authored.find((o) => o && o.id === templateId) || null;
 
   const options = [];
@@ -251,6 +259,20 @@ function buildDecorateUnitPendingDecision(state, playerFaction, eventDef, availa
   }
   if (eventDef.staff_recommended_response_id) {
     decision.staff_recommended_response_id = eventDef.staff_recommended_response_id;
+  }
+  if (eventDef.notifications_to_other_factions) {
+    const notifications = { ...eventDef.notifications_to_other_factions };
+    const templateNotifications = templateId
+      ? eventDef.notifications_to_other_factions[templateId]
+      : null;
+    if (templateNotifications) {
+      for (const option of options) {
+        if (option.id.startsWith(`${templateId}__`)) {
+          notifications[option.id] = templateNotifications;
+        }
+      }
+    }
+    decision.notifications_to_other_factions = notifications;
   }
   return decision;
 }

@@ -37,6 +37,12 @@ cells and a `comply` decision. **Owner disposition implemented: separate Lukavac
 independently reviewed (GO)**. Military Operation Trnovo is preserved; its execution belongs to calibration and is outside
 this packet. Campaign/downstream acceptance remains open. [BC05 scope/evidence](2026-07-31-full-campaign-electron-validation-plan.md#bc05-bounded-nato-repair-and-lukavac-disposition--2026-09-07).
 
+**BC06 — owner scheduled 2026-09-07; bounded repair implemented/reviewed (GO).**
+Voluntary posture controls and authored third-use posture/front-visit choices are wired; pending
+guards and decision/notification receipts are repaired. Six address/decoration escalation rules
+and per-unit decoration targeting remain unresolved; final packaged acceptance remains open. No campaign or calibration change is
+claimed. [BC06 scope/evidence](2026-07-31-full-campaign-electron-validation-plan.md#bc06-bounded-posture-and-gesture-repair--2026-09-07).
+
 **Repository audit packets — PLANNED (2026-09-07):** [Master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07) assigns three subordinate packets:
 
 | Packet | Existing owner and sequence |

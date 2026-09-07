@@ -36,7 +36,7 @@ const { stageOpDirective, REQUEST_OP_COST } = require('../src/desktop/op_directi
 
 describe('IPC mutation policy — membership + classification (Task 6.5)', () => {
   it('pins the READ_ONLY exclusion set (any change forces review)', () => {
-    // Snapshot the 25 unique read-only channel names. Adding/removing forces a reviewer
+    // Snapshot the 26 unique read-only channel names. Adding/removing forces a reviewer
     // to re-confirm the channel truly never mutates the shared canonical state.
     expect([...READ_ONLY_IPC_CHANNELS].sort()).toEqual(
       [
@@ -47,6 +47,7 @@ describe('IPC mutation policy — membership + classification (Task 6.5)', () =>
         'get-current-game-state',
         'get-decorate-unit-availability',
         'get-front-visit-availability',
+        'get-strategic-posture-review-availability',
         'get-map-server-url',
         'get-recruitment-catalog',
         'get-runtime-feature-flags',

@@ -6314,7 +6314,7 @@
     "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
-      "escalation": "static"
+      "escalation": "escalating"
     },
     "effect": {
       "kind": "narrative",
@@ -6605,7 +6605,7 @@
     "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
-      "escalation": "static"
+      "escalation": "escalating"
     },
     "effect": {
       "kind": "narrative",
@@ -6881,7 +6881,7 @@
     "action_cadence": {
       "max_fires": 5,
       "cooldown_turns": 10,
-      "escalation": "static"
+      "escalation": "escalating"
     },
     "effect": {
       "kind": "narrative",

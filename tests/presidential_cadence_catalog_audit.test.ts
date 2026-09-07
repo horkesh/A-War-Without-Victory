@@ -22,9 +22,13 @@ describe('presidential cadence catalog audit', () => {
       expect(event?.once, id).toBe(true);
       expect(event?.tags ?? [], id).not.toContain('recurring');
       expect(event?.recurrence, id).toBeUndefined();
-      expect(event?.action_cadence, id).toEqual(id.startsWith('strategic_posture_review_')
-        ? { max_fires: 8, cooldown_turns: 8, escalation: 'escalating' }
-        : { max_fires: 5, cooldown_turns: 10, escalation: 'static' });
+      const isPosture = id.startsWith('strategic_posture_review_');
+      const isFrontVisit = id.startsWith('visit_to_front_');
+      expect(event?.action_cadence, id).toEqual({
+        max_fires: isPosture ? 8 : 5,
+        cooldown_turns: isPosture ? 8 : 10,
+        escalation: isPosture || isFrontVisit ? 'escalating' : 'static',
+      });
     }
   });
 

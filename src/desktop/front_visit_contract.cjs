@@ -38,6 +38,8 @@ const FRONT_VISIT_EVENT_BY_FACTION = {
   HRHB: 'visit_to_front_hrhb',
 };
 
+const { responseOptionsForFire } = require('./action_cadence_contract.cjs');
+
 /**
  * Branch (response_option) id → target front area, expressed as OSID prefixes
  * (`op:<mun>:`). A branch is reachability-gated iff it appears here. Every
@@ -134,6 +136,9 @@ function computeFrontVisitAvailability(state, playerFaction, eventDef) {
 
   if (!playerFaction) return { ...base, reason: 'no_player_faction' };
   if (!eventId || !eventDef) return { ...base, reason: 'no_event' };
+  if ((state?.military?.pending_event_decisions ?? []).some((decision) => decision?.event_id === eventId)) {
+    return { ...base, reason: 'already_pending' };
+  }
 
   // ── Cooldown / cap (voluntary desktop action only; engine ignores it) ───────
   const actionCadence = eventDef.action_cadence;
@@ -185,8 +190,8 @@ function computeFrontVisitAvailability(state, playerFaction, eventDef) {
  * Build the pending-event-decision payload that EventDecisionModal consumes,
  * mirroring the push at src/sim/events/evaluate_events.ts:577. The authored
  * response_options are FILTERED to the reachable front branches plus the
- * always-available non-front branches (stay_* / press_*, the latter still
- * subject to its own authored available_from_fire gate downstream).
+ * non-front branches (stay_* / press_*). Authored available_from_fire eligibility
+ * is applied here before reachability filtering and queueing.
  *
  * @returns the PendingEventDecision-shaped object (or null if not buildable).
  */
@@ -195,7 +200,11 @@ function buildFrontVisitPendingDecision(state, playerFaction, eventDef, availabi
   const currentTurn = state?.meta?.turn ?? 0;
   const reachable = new Set(availability.reachableBranchIds);
 
-  const filteredOptions = (eventDef.response_options || []).filter((opt) => {
+  const cadenceEligibleOptions = responseOptionsForFire(
+    eventDef.response_options,
+    (state?.military?.event_fire_counts?.[eventDef.id] ?? 0) + 1,
+  );
+  const filteredOptions = cadenceEligibleOptions.filter((opt) => {
     const id = opt?.id;
     if (!id) return false;
     if (id in FRONT_VISIT_BRANCH_AREAS) {
@@ -233,6 +242,9 @@ function buildFrontVisitPendingDecision(state, playerFaction, eventDef, availabi
   }
   if (eventDef.staff_recommended_response_id) {
     decision.staff_recommended_response_id = eventDef.staff_recommended_response_id;
+  }
+  if (eventDef.notifications_to_other_factions) {
+    decision.notifications_to_other_factions = eventDef.notifications_to_other_factions;
   }
   return decision;
 }

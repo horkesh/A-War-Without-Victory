@@ -1,0 +1,6 @@
+# Keep reproducible harnesses, configs, logs and summary receipts in Git.
+# Fixture save copies and Electron profiles/screenshots remain local evidence.
+/fixture-*.json
+!/fixture-provenance.json
+/live-*-*/
+/inspect-*

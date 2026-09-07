@@ -722,7 +722,7 @@ describe('DirectiveCard stop-op action host', () => {
       expect(initiateFrontVisit).toHaveBeenCalled();
     });
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
-      'Directive staged for next turn',
+      'Decision opened. Command authority is spent now; choose a response to apply its effects.',
     );
   });
 

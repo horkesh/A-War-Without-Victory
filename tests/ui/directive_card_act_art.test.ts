@@ -48,6 +48,7 @@ describe('DirectiveCard act-layer lever → art map', () => {
       // are temporary byte-identical copies of the front_visit art.
       address_nation: 'act_address_nation',
       decorate_unit: 'act_decorate_unit',
+      strategic_posture_review: 'act_front_visit',
     });
   });
 

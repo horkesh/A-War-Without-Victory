@@ -21,6 +21,7 @@ import {
   FRONT_VISIT_COST,
   ADDRESS_NATION_COST,
   DECORATE_UNIT_COST,
+  STRATEGIC_POSTURE_REVIEW_COST,
   REQUEST_OP_COST,
   FORCE_LAUNCH_COST,
   PROACTIVE_FORCE_LAUNCH_COST,
@@ -160,7 +161,8 @@ export interface PresidentialDecisionRoomDirective {
     | 'review_proposal'
     | 'front_visit'
     | 'address_nation'
-    | 'decorate_unit';
+    | 'decorate_unit'
+    | 'strategic_posture_review';
   /**
    * Corps the directive acts on (request/stop/force/replace_co/elite_deploy).
    * Absent for authorize-op, front-visit, address-nation, and decorate-unit (the
@@ -1533,6 +1535,26 @@ function addCommandPersonnelCards(
     },
     urgencySort: 52,
     sourceSort: 'command:decorate-unit',
+  });
+
+  cards.push({
+    id: 'command:strategic-posture-review',
+    category: 'command',
+    severity: 'info',
+    title: t('decisionRoom.card.strategicPostureReview.title'),
+    explanation: t('decisionRoom.card.strategicPostureReview.explanation'),
+    sourceOwner: t('decisionRoom.card.command.sourceOwner'),
+    sourceLabel: t('decisionRoom.card.strategicPostureReview.sourceLabel'),
+    actionLabel: t('decisionRoom.action.personnel'),
+    evidence: [t('decisionRoom.card.strategicPostureReview.evidence.gesture')],
+    navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
+    directive: {
+      lever: 'strategic_posture_review',
+      cost: STRATEGIC_POSTURE_REVIEW_COST,
+      payload: {},
+    },
+    urgencySort: 53,
+    sourceSort: 'command:strategic-posture-review',
   });
 }
 

@@ -26,6 +26,7 @@ const {
   FRONT_VISIT_COST,
   ADDRESS_NATION_COST,
   DECORATE_UNIT_COST,
+  STRATEGIC_POSTURE_REVIEW_COST,
 } = require('./autonomy_ipc_contract.cjs');
 const { stageAuthoredOperation, stageCanonAttackOrder } = require('./author_op_staging.cjs');
 const { stageOpHalt } = require('./op_halt.cjs');
@@ -50,6 +51,12 @@ const {
   computeDecorateUnitAvailability,
   buildDecorateUnitPendingDecision,
 } = require('./decorate_unit_contract.cjs');
+const {
+  strategicPostureReviewEventIdForFaction,
+  computeStrategicPostureReviewAvailability,
+  buildStrategicPostureReviewPendingDecision,
+  initiateStrategicPostureReviewOnState,
+} = require('./strategic_posture_review_contract.cjs');
 const { stageConvoyDecisionOnState } = require('./convoy_ipc_contract.cjs');
 const { fileOfficerDecisionRecord } = require('./officer_decision_history.cjs');
 const { listSaveRecords, resolveSaveRecordPath } = require('./save_records.cjs');
@@ -3108,6 +3115,47 @@ app.whenReady().then(() => {
     }
   });
 
+  // ── Presidential STRATEGIC POSTURE REVIEW ──────────────────────────────────
+  // The three faction rows share one player-owned action contract. Their
+  // authored effects remain in the event resolver; this bridge only applies
+  // action cadence, queues the eligible response set, and records the fire.
+  ipcMain.handle('get-strategic-posture-review-availability', async () => {
+    if (!currentGameStateJson) return { ok: false, error: 'No game loaded' };
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const playerFaction = state.meta?.player_faction ?? null;
+      const eventId = strategicPostureReviewEventIdForFaction(playerFaction);
+      const eventDef = loadFrontVisitEventDef(eventId);
+      const availability = computeStrategicPostureReviewAvailability(state, playerFaction, eventDef);
+      return { ok: true, costCA: STRATEGIC_POSTURE_REVIEW_COST, ...availability };
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
+  ipcMain.handle('initiate-strategic-posture-review', async (_event) => {
+    if (!currentGameStateJson) return { ok: false, error: 'No game loaded' };
+    try {
+      const sim = getDesktopSim();
+      const state = sim.deserializeState(currentGameStateJson);
+      const playerFaction = state.meta?.player_faction ?? null;
+      const eventId = strategicPostureReviewEventIdForFaction(playerFaction);
+      const eventDef = loadFrontVisitEventDef(eventId);
+      const result = initiateStrategicPostureReviewOnState(
+        state,
+        playerFaction,
+        eventDef,
+        STRATEGIC_POSTURE_REVIEW_COST,
+      );
+      if (!result.ok) return result;
+      writeCanonicalCurrentState(sim, state, _event.sender);
+      return result;
+    } catch (e) {
+      return { ok: false, error: e.message || String(e) };
+    }
+  });
+
   ipcMain.handle('stage-operation-decision', async (_event, payload) => {
     const { corpsId, operationName, decision } = payload || {};
     if (!currentGameStateJson || typeof corpsId !== 'string' || typeof operationName !== 'string' || typeof decision !== 'string') {
@@ -3275,7 +3323,7 @@ app.whenReady().then(() => {
       const sim = getDesktopSim();
       const state = readCanonicalCurrentState(sim);
       sim.resolveEventDecision(state, eventId, responseId);
-      writeCanonicalCurrentState(sim, state);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };

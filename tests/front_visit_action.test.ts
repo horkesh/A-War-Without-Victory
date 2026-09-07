@@ -129,16 +129,33 @@ describe('front visit — force-queue inserts the player faction event', () => {
     expect(decision.turn_fired).toBe(90);
     // Mirror of evaluate_events.ts: queue shape carries response_options.
     const ids = decision.response_options.map((o: any) => o.id);
-    // All three reachable fronts offered + the always-available stay/press.
+    // All three reachable fronts plus stay are offered; the authored press
+    // escalation remains hidden until the third action.
     expect(ids).toContain('visit_sarajevo');
     expect(ids).toContain('visit_eastern_front');
     expect(ids).toContain('visit_bihac');
     expect(ids).toContain('stay_capital_rbih');
-    expect(ids).toContain('visit_press_rbih');
+    expect(ids).not.toContain('visit_press_rbih');
+  });
+
+  it('reveals the authored press branch on the third action', () => {
+    const state = makeState({ fireCount: 2, lastFired: 80 });
+    const def = makeRbihEventDef();
+    const availability = computeFrontVisitAvailability(state, 'RBiH', def);
+    const decision = buildFrontVisitPendingDecision(state, 'RBiH', def, availability);
+    expect(decision.response_options.map((option: any) => option.id)).toContain('visit_press_rbih');
   });
 });
 
 describe('front visit — voluntary action cooldown / cap', () => {
+  it('refuses while the same decision is already pending', () => {
+    const state = makeState();
+    state.military.pending_event_decisions = [{ event_id: 'visit_to_front_rbih' }];
+    const result = computeFrontVisitAvailability(state, 'RBiH', makeRbihEventDef());
+    expect(result.available).toBe(false);
+    expect(result.reason).toBe('already_pending');
+  });
+
   it('fails closed when voluntary action cadence metadata is absent', () => {
     const def = makeRbihEventDef();
     delete (def as any).action_cadence;

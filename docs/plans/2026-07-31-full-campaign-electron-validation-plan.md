@@ -749,7 +749,7 @@ Sources: [frozen audit](../40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_A
 | B10 | Dead narrated COHA/ceasefire/Dayton chain; mechanical packaged negotiation works | `event_types.ts`, `war_1995.json`, event termination and negotiation paths | BC03 **CLOSED 2026-09-07**: verified repair; owner deferred post-horizon acceptance/tickers; signing requires accepted talks. One terminal owner, complete verdict/receipts; no global predicate shortcut or horizon extension. See [investigation corrections](../40_reports/20260905_EVENT_FIRING_SATURATION_AND_DEAD_CATALOG.md). |
 | B11 | Historical chronology findings; sensitive P1 Ahmići/P2 enclave packet retain panel ownership | Catalog gates/dates and downstream displacement/NATO | BC04 **P1 IMPLEMENTED/REVIEWED; campaign acceptance pending**. P2 IMPLEMENTED/REVIEWED (GO); campaign acceptance remains deferred. Current n392 reconciliation and separate P1/P2 scopes are recorded in the BC04 subsection above; landed barracks work is excluded. [Conditional panel record](../40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md); no isolated Srebrenica date edit or map repaint. |
 | B12 | Same-turn prerequisite dead NATO windows; duplicate Lukavac event | Event loader/catalog and firing pass | BC05 **NATO IMPLEMENTED/REVIEWED (GO); Lukavac event REMOVED/REVIEWED (GO)** by owner disposition. Military Operation Trnovo is preserved; its execution/calibration is outside scope. Campaign/downstream acceptance remains unmeasured. See BC05 above; [historical sweep with current annotation](../40_reports/audits/20260906_FACTION_CONTROLS_MUNICIPALITY_THRESHOLD_SWEEP.md). |
-| B13 | Three posture-review handlers unwired; bounded gesture-escalation gap | Desktop player-action handlers and `action_cadence` | BC06 **FIX when scheduled**; prove live player effects and cooldown/receipts, not only headless parity. No general recurrence redesign. [PM ruling](../40_reports/audits/20260905_EVENT_ROADMAP_FIT_PM_RULING.md). |
+| B13 | Three posture-review handlers unwired; bounded gesture-escalation gap | Desktop player-action handlers and `action_cadence` | BC06 **bounded repair implemented/reviewed (GO)**. Voluntary posture wiring and authored third-use posture/front-visit choices; six address/decoration escalation rules, per-unit decoration targeting and final packaged acceptance remain open. [BC06 evidence](#bc06-bounded-posture-and-gesture-repair--2026-09-07); [PM ruling](../40_reports/audits/20260905_EVENT_ROADMAP_FIT_PM_RULING.md). |
 
 **Friction, separate from bugs:** **F1 — endgame decision drought** is R8 diary triage, not a repair or authoring commission. Inspect the player path and truthful positive-hold coverage; source-supported omissions are evidence, never a per-week quota. Broad drought authoring and orphan-flag activation remain the explicit post-1.0 backlog.
 
@@ -835,7 +835,7 @@ R1–R5, the accepted R6 slice, RC and RE stay closed; calibration remains ongoi
 | **BC03 — B10 narrated Dayton / R8** | Events/systems + Game Designer + QA | Event effects, termination ordering, receipts and endgame state | **CLOSED 2026-09-07 — verified repair and owner-approved post-horizon deferral.** Repaired the narrated chain with one coherent terminal owner; preserve the working packaged negotiation. Resolve the redundant event game-over writer first, then the catalog gate/window; verify COHA false-key semantics, firing/termination order and complete packaged verdict snapshot/receipts. The headless terminal contract is VERIFY/DISPOSITION, not a mandate to add a headless closeout. Do not globally redefine `flag_not_set` or extend the 188-week horizon as a shortcut. [Investigation corrections §10–11](../40_reports/20260905_EVENT_FIRING_SATURATION_AND_DEAD_CATALOG.md). |
 | **BC04 — B11 chronology + P1/P2 / R8, panel-owned history** | Historian + events/systems + scenario/calibration + independent §6 panel | Event timing/effects, displacement, personnel, NATO and downstream operations | **P1 IMPLEMENTED/REVIEWED; campaign acceptance pending; P2 implemented/reviewed; campaigns deferred**: current code and n392 receipts reconciled in the BC04 subsection above; completed barracks stagger excluded. P1/P2 follow the [existing conditional panel record](../40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md), with the subsequent owner-approved P1/P2 implementation amendments recorded above. P1 preserves the historical date and map; P2 is a coherent chronology packet, measured receipt dates with brakes active, no narrowed expiry/backstop shortcut. Separate P1 and P2 controlled runs, full anchors/health/§6 and displacement/operation diffs; no fresh re-floor until explained and accepted. |
 | **BC05 — B12 dead event windows/control gates / R8** | Events/systems + Historian + QA | Enabling NATO events and removing a political decision can change outcomes; a loader lint alone is byte-neutral | **NATO IMPLEMENTED/REVIEWED (GO); Lukavac event REMOVED/REVIEWED (GO)** by owner disposition; removal verified across 12 focused files/289 tests by recorded evidence union. Military Operation Trnovo is preserved; its execution/calibration is outside scope. Focused checks do not establish campaign/downstream acceptance. No initial repaint, threshold reduction, baseline refresh or campaign authorized. |
-| **BC06 — B13 posture/gesture controls / R8** | Gameplay/desktop + Game Designer + QA | Player-action decisions/effects; headless neutrality is insufficient | **FIX** the three unwired posture-review handlers and settle bounded gesture escalation per the [PM ruling](../40_reports/audits/20260905_EVENT_ROADMAP_FIT_PM_RULING.md). Verify the live action path, recurrence/cooldown, decision receipts and effects; no general recurrence-system redesign. |
+| **BC06 — B13 posture/gesture controls / R8** | Gameplay/desktop + Game Designer + QA | Player-action decisions/effects; headless neutrality is insufficient | **BOUNDED REPAIR IMPLEMENTED/REVIEWED (GO), BC06 OPEN.** Voluntary posture wiring, authored third-use choices and receipts verified locally. Per-unit decoration targeting, six undefined escalation rules and final packaged acceptance remain open. [Evidence and limits](#bc06-bounded-posture-and-gesture-repair--2026-09-07); no general recurrence-system redesign. |
 | **BC07 — initial-master stability divergence / calibration-data authority** | Asset/data integration + Systems + calibration | Potentially behavior-bearing `stability_score`; mode-dependent consumption | **VERIFY/DISPOSITION**: establish consumed mode and writer/reader for the 269-row master/derive disagreement, including ~227 stability rows. `hybrid_1992`/`ethnic_1991` early returns must be accounted for; do not infer 227 effects in the blessed scenario. Record retain/regenerate policy and affected scenario scope; no mandated regeneration, initial-control override, or re-floor for the cosmetic contested-control subset. [2026-09-04 correction](../PROJECT_LEDGER.md#2026-09-04--correcting-the-correction-contested_control-is-cosmetic), [calibration authority](../40_reports/CALIBRATION_MASTER.md). |
 | **BC08 — inherited suite residual / verification** | QA + owning Systems/Game Design seats | Current-suite environment failure, not a reproduced simulation residual | **CLOSED — verification/disposition, 2026-09-07.** Full suite exit 1 retained: one Bash-resolution failure; unchanged focused file 8/8 with child-scoped Git Bash. Located deployment/diagnostics suites and peace plans pass; n392 artifact gates pass with source/input-equivalence and transient coverage limits. [Complete receipt](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md); no overall-green or whole-engine claim. |
 | **BC09 — shared production inputs / R8** | Systems + QA | Required census/ethnicity inputs and runner equivalence | **PLANNED, not implemented.** [Runtime integrity Phase 1](2026-09-07-r8-runtime-input-ai-integrity-plan.md) owns one validated loader, explicit fixture omissions and failure before state mutation. Supplies delivery evidence for BC07; does not decide stability-data provenance or regeneration. |
@@ -873,6 +873,91 @@ is their sole task-level contract.
 Both settle before final calibration/packaged acceptance. Commit phases separately; preserve
 attribution and master §11/§6 requirements. Fake/recorded clients avoid live API spending. New
 failures are not permission to reset baselines, weaken a test, or enlarge the repair.
+
+## BC06 bounded posture and gesture repair — 2026-09-07
+
+Owner scheduled BC06 after clean HEAD `4c419c464adce4e59d9046b37b79d163979d5c7d`.
+Investigate the three reported posture-review handlers against current code, trace visible
+player actions through authoritative decisions/effects, and repair only confirmed defects
+plus the PM-ratified bounded `action_cadence` escalation. General recurrence and option-decay
+authoring are outside this packet. One Sol/medium implementer and one independent Sol/medium
+reviewer; orchestrator owns live proof, synthesis, documentation and commit.
+
+Fixed validation: direct Vitest on affected event/cadence/desktop/UI contracts; direct
+TypeScript check; tactical map build and desktop simulation bundle for a local Electron
+fixture loaded through the real player surface. Inspect wrappers before execution. Capture
+visible actions, before/after effects, cooldown/repeated-input behavior and persisted receipts
+under `logs/bc06/`. Expected cost: local tests/builds in minutes plus fixture preparation.
+Stop after one review and targeted corrections. No campaign, structural-fingerprint check,
+calibration or baseline refresh, remote push, publication, or separately PLANNED audit packet.
+Local fixture proof cannot close final packaged/full-campaign acceptance.
+
+Preserve BC04 same-week follow-up restrictions, NATO timing, Dayton prerequisites/receipts,
+protected expiry/backstops, owner-deferred post-horizon rows, initial control, 188-week horizon,
+calibration floors and event-owned enclave outcomes. Lukavac's event disposition is retired;
+military Operation Trnovo execution remains outside scope. Chronology attribution remains
+pre-P1 `c95e25241`, P1 `f117fe475`, P2 `558f253a2`; `c2c8300d6` changed display/catalog and
+saved names, not IDs or mechanics. BC04/BC05 campaign acceptance remains open; BC09 precedes
+BC07 final data policy and BC10 follows input/command settlement.
+
+**Current-code findings (2026-09-08):** the three reported IDs are
+`strategic_posture_review_rbih`, `strategic_posture_review_rs`, and
+`strategic_posture_review_hrhb`. Their natural event decisions already use the generic
+event-response resolver; the missing wiring is voluntary player initiation and repeat use.
+Visits, addresses and decorations already have that initiation path. The catalog actually
+contains three escalating postures and nine static gestures, correcting the historical
+"11 of 12" count without rewriting the original audit.
+
+Bounded escalation means enforcing existing `available_from_fire: 3` options for voluntary
+posture/front-visit decisions and classifying the three front visits as escalating. No effect
+delta, max-fire count, cooldown, natural-event evaluator, option-decay rule, or multiplier is
+authored here. Six address/decoration rows have no authored escalation stages or numerical
+rule; their broader escalation gap remains unresolved, not satisfied by an inert label flip.
+The new posture control uses the established leadership-gesture price of 10 CA by explicit
+implementation parity inference; no posture-specific price clause was found. Independent
+review must assess that inference and the bounded authority claim.
+
+**Review correction and remaining boundary:** per-unit decoration response IDs are expanded
+from an authored template; notification lookup needs matching aliases for those expanded IDs.
+The existing payload is reused, with no new notification content. Separately,
+`target_formation_id` is not consumed by the effect applier: selecting one regular formation
+still applies the authored faction-wide morale/cohesion effects. That existing targeting
+mismatch remains an unmet BC06 criterion requiring a separately authorized targeting repair;
+it is not waived by the cadence/receipt repair or by other passing tests.
+
+**Validation (2026-09-08):** the final 10-file focused run passed 150/150. A targeted
+notification-alias correction then passed 48/48 across leadership actions and event decisions;
+these overlap and are not a claimed single 198-test run. Both RED logs are retained. The first
+TypeScript pass found the missing exhaustive directive-art entry; after correction, final
+TypeScript and tactical-map build passed. Desktop simulation bundle/startup-snapshot check
+passed. `logs/bc06/validation.json` binds current source hashes, local command exits and live
+case evidence; `logs/bc06/scope-check.log` records preserved protected inputs/evaluator.
+
+Six first/third posture cases (all factions), two first/third RBiH front-visit cases and one
+RBiH address case passed through visible Desk -> Command Surface -> Command & Personnel ->
+Dossier -> Issue -> response controls, real IPC and canonical autosaves. They establish
+offered options, actual effects/receipts, one CA debit/count and rejected immediate reissue with
+unchanged autosave bytes. Fixture turn 90 and prior counts are synthetic inputs, not campaign
+history or natural timing evidence. All nine cases captured no page/network diagnostics.
+Per-unit decoration's separate non-target acceptance check failed: unselected
+`arbih_102nd_motorized` morale became 55 rather than remaining 50. Keep that failed evidence
+and unmet criterion. A separate targeted live check verifies the corrected notification receipt;
+it does not certify decoration target isolation. No campaign, packaged acceptance, calibration
+neutrality measurement or baseline refresh is claimed.
+
+**Final independent review: GO for the bounded repair**, with BC06 residual gates retained.
+The reviewer independently passed 151/151 across the affected ten files after notification
+alias correction. Screenshot inspection found the generic next-turn staging receipt was false
+for leadership decisions; the dedicated EN/BCS receipt now explains that the decision is open,
+authority is spent, and effects await the selected response. The affected UI suite passed
+28/28 (implementer and independent reviewer), the map rebuilt successfully, and
+`live-posture-receipt-final-01/result.json` records the exact new text in a rendered status box
+before modal navigation, plus unchanged effect/receipt/repeat-rejection checks. This is live DOM
+observation; the transition screenshot is not cited as stable readable receipt proof.
+Earlier nine effect fixtures are retained rather than rerun for a shared message-only change.
+Review: `logs/bc06/independent-review.md`; consolidated receipts: `logs/bc06/validation.json`.
+The reviewer accepts 10 CA only as explicit parity inference. Nonblocking stale builder comments
+were aligned with actual pre-queue filtering; no behavioral retest was needed for those comments.
 
 ## Phase 4 -- Automatic remediation loop
 

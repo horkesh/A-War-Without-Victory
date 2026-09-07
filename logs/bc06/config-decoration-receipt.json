@@ -1,0 +1,197 @@
+{
+  "reviewed": true,
+  "caseId": "live-decorate-receipt-final-01",
+  "fixture": "F:\\A-War-Without-Victory\\logs\\bc06\\fixture-gesture-decorate.json",
+  "loadSteps": [
+    {
+      "buttonName": "Assume responsibility"
+    },
+    {
+      "buttonName": "Field Records"
+    },
+    {
+      "buttonName": "Resume bc06-proof-fixture"
+    }
+  ],
+  "before": [
+    {
+      "path": [
+        "meta",
+        "turn"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    }
+  ],
+  "steps": [
+    {
+      "selector": "[data-testid=\"toolbar-route-desk\"]",
+      "frameUrlIncludes": "http"
+    },
+    {
+      "buttonRegex": "^Command surface$"
+    },
+    {
+      "buttonRegex": "Command & Personnel"
+    },
+    {
+      "selector": "[data-testid=\"decision-room-priority-card-command:decorate-unit\"] button",
+      "buttonRegex": "^Dossier$"
+    },
+    {
+      "buttonRegex": "^Issue \\(10\\)$"
+    },
+    {
+      "selector": "[data-testid=\"event-decision-response\"][aria-label=\"Choose response: Decorate 101st Mountain\"]"
+    }
+  ],
+  "after": [
+    {
+      "path": [
+        "military",
+        "command_authority",
+        "current"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "event_fire_counts",
+        "decorate_a_unit_rbih"
+      ],
+      "equals": 1
+    },
+    {
+      "path": [
+        "military",
+        "event_last_fired_turn",
+        "decorate_a_unit_rbih"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    },
+    {
+      "path": [
+        "military",
+        "event_decision_log"
+      ],
+      "equals": [
+        {
+          "event_id": "decorate_a_unit_rbih",
+          "response_id": "decorate_steadfast_rbih__arbih_101st_mountain",
+          "decision_source": "player",
+          "faction": "RBiH",
+          "turn": 90
+        }
+      ]
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "arbih_101st_mountain",
+        "morale"
+      ],
+      "equals": 55
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "arbih_101st_mountain",
+        "cohesion"
+      ],
+      "equals": 52
+    }
+  ],
+  "persisted": [
+    {
+      "path": [
+        "military",
+        "command_authority",
+        "current"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "event_fire_counts",
+        "decorate_a_unit_rbih"
+      ],
+      "equals": 1
+    },
+    {
+      "path": [
+        "military",
+        "event_last_fired_turn",
+        "decorate_a_unit_rbih"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    },
+    {
+      "path": [
+        "military",
+        "event_decision_log"
+      ],
+      "equals": [
+        {
+          "event_id": "decorate_a_unit_rbih",
+          "response_id": "decorate_steadfast_rbih__arbih_101st_mountain",
+          "decision_source": "player",
+          "faction": "RBiH",
+          "turn": 90
+        }
+      ]
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "arbih_101st_mountain",
+        "morale"
+      ],
+      "equals": 55
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "arbih_101st_mountain",
+        "cohesion"
+      ],
+      "equals": 52
+    },
+    {
+      "equals": 2,
+      "path": [
+        "military",
+        "pending_event_notifications",
+        "length"
+      ]
+    }
+  ],
+  "expectsMutation": true,
+  "repeatAction": "initiateDecorateUnit",
+  "repeatReason": "on_cooldown"
+}

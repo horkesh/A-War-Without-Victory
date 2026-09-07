@@ -1,0 +1,192 @@
+{
+  "reviewed": true,
+  "caseId": "live-rbih-1-02",
+  "fixture": "F:\\A-War-Without-Victory\\logs\\bc06\\fixture-rbih-1.json",
+  "loadSteps": [
+    {
+      "buttonName": "Assume responsibility"
+    },
+    {
+      "buttonName": "Field Records"
+    },
+    {
+      "buttonName": "Resume bc06-proof-fixture"
+    }
+  ],
+  "before": [
+    {
+      "path": [
+        "meta",
+        "turn"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    }
+  ],
+  "steps": [
+    {
+      "selector": "[data-testid=\"toolbar-route-desk\"]",
+      "frameUrlIncludes": "http"
+    },
+    {
+      "buttonRegex": "^Command surface$"
+    },
+    {
+      "buttonRegex": "Command & Personnel"
+    },
+    {
+      "selector": "[data-testid=\"decision-room-priority-card-command:strategic-posture-review\"] button:first-of-type",
+      "buttonRegex": "^Dossier$"
+    },
+    {
+      "selector": "[data-testid=\"decision-room-active-dossier\"]",
+      "inspectOnly": true
+    },
+    {
+      "buttonRegex": "^(Issue \\(10\\)|Authorize)$"
+    },
+    {
+      "selector": "[data-testid=\"event-decision-response\"][aria-label=\"Choose response: Press the offensive\"]",
+      "absentSelectors": [
+        "[data-testid=\"event-decision-response\"][aria-label=\"Choose response: Accept ceasefire terms to buy time\"]"
+      ]
+    }
+  ],
+  "after": [
+    {
+      "path": [
+        "military",
+        "event_fire_counts",
+        "strategic_posture_review_rbih"
+      ],
+      "equals": 1
+    },
+    {
+      "path": [
+        "military",
+        "event_last_fired_turn",
+        "strategic_posture_review_rbih"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    },
+    {
+      "path": [
+        "military",
+        "event_decision_log"
+      ],
+      "equals": [
+        {
+          "event_id": "strategic_posture_review_rbih",
+          "response_id": "press_offensive",
+          "decision_source": "player",
+          "faction": "RBiH",
+          "turn": 90
+        }
+      ]
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "arbih_101st_mountain",
+        "morale"
+      ],
+      "equals": 53
+    },
+    {
+      "path": [
+        "military",
+        "general_supply_reserve",
+        "RBiH"
+      ],
+      "equals": 47
+    },
+    {
+      "path": [
+        "military",
+        "event_flags",
+        "rbih_posture"
+      ],
+      "equals": "offensive"
+    }
+  ],
+  "persisted": [
+    {
+      "path": [
+        "military",
+        "event_fire_counts",
+        "strategic_posture_review_rbih"
+      ],
+      "equals": 1
+    },
+    {
+      "path": [
+        "military",
+        "event_last_fired_turn",
+        "strategic_posture_review_rbih"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    },
+    {
+      "path": [
+        "military",
+        "event_decision_log"
+      ],
+      "equals": [
+        {
+          "event_id": "strategic_posture_review_rbih",
+          "response_id": "press_offensive",
+          "decision_source": "player",
+          "faction": "RBiH",
+          "turn": 90
+        }
+      ]
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "arbih_101st_mountain",
+        "morale"
+      ],
+      "equals": 53
+    },
+    {
+      "path": [
+        "military",
+        "general_supply_reserve",
+        "RBiH"
+      ],
+      "equals": 47
+    },
+    {
+      "path": [
+        "military",
+        "event_flags",
+        "rbih_posture"
+      ],
+      "equals": "offensive"
+    }
+  ],
+  "expectsMutation": true
+}

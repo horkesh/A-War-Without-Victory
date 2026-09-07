@@ -1997,6 +1997,17 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(card?.directive?.corpsId).toBeUndefined();
   });
 
+  it('always emits one strategic-posture-review action for the player faction', () => {
+    const view = buildPresidentialDecisionRoomView({ state: makeState() });
+    const cards = view.cards.filter((card) => card.id === 'command:strategic-posture-review');
+    expect(cards).toHaveLength(1);
+    expect(cards[0]?.directive).toEqual({
+      lever: 'strategic_posture_review',
+      cost: 10,
+      payload: {},
+    });
+  });
+
   it('routes Command & Personnel cards into the command lens deterministically', () => {
     const state = makeState({
       formations: [

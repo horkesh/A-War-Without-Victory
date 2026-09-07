@@ -78,6 +78,7 @@ function leverLabel(lever: PresidentialDecisionRoomDirective['lever']): string {
     case 'front_visit': return t('directive.lever.front_visit');
     case 'address_nation': return t('directive.lever.address_nation');
     case 'decorate_unit': return t('directive.lever.decorate_unit');
+    case 'strategic_posture_review': return t('directive.lever.strategic_posture_review');
     default: return t('directive.lever.default');
   }
 }
@@ -178,11 +179,12 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
   const isFrontVisit = directive.lever === 'front_visit';
   const isAddressNation = directive.lever === 'address_nation';
   const isDecorateUnit = directive.lever === 'decorate_unit';
+  const isStrategicPostureReview = directive.lever === 'strategic_posture_review';
   const isReviewProposal = directive.lever === 'review_proposal';
   const isEliteDeploy = directive.lever === 'elite_deploy';
   // The three initiatable presidential leadership gestures share an async
   // availability query + single CA-cost confirm.
-  const isLeadershipGesture = isFrontVisit || isAddressNation || isDecorateUnit;
+  const isLeadershipGesture = isFrontVisit || isAddressNation || isDecorateUnit || isStrategicPostureReview;
 
   // request_op target OSID: a fixed payload target wins; otherwise the president
   // types one into the in-card input. The input is shown ONLY when this is a
@@ -299,6 +301,22 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
       );
       return;
     }
+    if (isStrategicPostureReview) {
+      const r = await ipc.getStrategicPostureReviewAvailability();
+      setGestureReady(true);
+      if (!r.ok) { setGestureUnavailableReason(t('directive.strategicPostureReview.unknown')); return; }
+      if (r.available) setGestureUnavailableReason(null);
+      else if (r.reason === 'on_cooldown' || r.onCooldown) {
+        setGestureUnavailableReason(t('directive.strategicPostureReview.onCooldown'));
+      } else if (r.reason === 'already_pending') {
+        setGestureUnavailableReason(t('directive.strategicPostureReview.alreadyPending'));
+      } else if (r.reason === 'exhausted') {
+        setGestureUnavailableReason(t('directive.strategicPostureReview.exhausted'));
+      } else {
+        setGestureUnavailableReason(t('directive.strategicPostureReview.unavailable'));
+      }
+      return;
+    }
     // decorate_unit
     const r = await ipc.getDecorateUnitAvailability();
     setGestureReady(true);
@@ -309,7 +327,7 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
           ?? (r.onCooldown ? t('directive.decorateUnit.onCooldown')
             : t('directive.decorateUnit.unavailable'))),
     );
-  }, [ipc, isLeadershipGesture, isFrontVisit, isAddressNation]);
+  }, [ipc, isLeadershipGesture, isFrontVisit, isAddressNation, isStrategicPostureReview]);
 
   useEffect(() => {
     void refreshGesture();
@@ -413,6 +431,10 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
 
   const markIssued = () => {
     publishReceipt({ kind: 'success', message: t('directive.receipt.stagedNextTurn') });
+  };
+
+  const markLeadershipDecisionOpened = () => {
+    publishReceipt({ kind: 'success', message: t('directive.receipt.leadershipDecisionOpened') });
   };
 
   const markFailed = (reason: string) => {
@@ -540,9 +562,11 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
           ? await ipc.initiateFrontVisit()
           : isAddressNation
             ? await ipc.initiateAddressNation()
-            : await ipc.initiateDecorateUnit();
+            : isStrategicPostureReview
+              ? await ipc.initiateStrategicPostureReview()
+              : await ipc.initiateDecorateUnit();
         if (!result.ok) markFailed(result.error ?? t('directive.gesture.failed'));
-        else { resetTransient(); markIssued(); await refreshGesture(); }
+        else { resetTransient(); markLeadershipDecisionOpened(); await refreshGesture(); }
         return;
       }
 

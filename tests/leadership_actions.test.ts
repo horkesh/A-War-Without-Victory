@@ -19,6 +19,8 @@ import { createRequire } from 'node:module';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { resolveEventDecision } from '../src/sim/events/resolve_decision.js';
+import type { GameState } from '../src/state/game_state.js';
 
 const require = createRequire(import.meta.url);
 
@@ -76,6 +78,7 @@ function makeAddressEventDef() {
       { id: 'address_endurance_rbih', label: 'Endurance' },
       { id: 'address_appeal_world_rbih', label: 'Appeal' },
       { id: 'address_stay_silent_rbih', label: 'Silent' },
+      { id: 'address_late', label: 'Late', available_from_fire: 3 },
     ],
   };
 }
@@ -100,6 +103,15 @@ function makeDecorateEventDef() {
       { id: 'decorate_broadly_rbih', label: 'Broad citation', effects: [{ kind: 'morale_change', faction: 'RBiH', delta: 3 }] },
       { id: 'decorate_decline_rbih', label: 'Decline', effects: [{ kind: 'morale_change', faction: 'RBiH', delta: -1 }] },
     ],
+    notifications_to_other_factions: {
+      decorate_steadfast_rbih: {
+        RS: { headline: 'A formation is decorated', body: 'The presidency singled out one regular formation.' },
+        HRHB: { headline: 'A formation is decorated', body: 'The presidency singled out one regular formation.' },
+      },
+      decorate_broadly_rbih: {
+        RS: { headline: 'Broad citations issued', body: 'The presidency spread recognition across the army.' },
+      },
+    },
   };
 }
 
@@ -124,6 +136,9 @@ function makeState(opts: {
     meta: { turn: opts.turn ?? 90, player_faction: 'RBiH' },
     military,
     political: {},
+    factions: { RBiH: {}, RS: {}, HRHB: {} },
+    displacement: {},
+    economic: {},
   };
 }
 
@@ -170,6 +185,18 @@ describe('address-the-nation — event resolution + faction-wide queue', () => {
       'address_appeal_world_rbih',
       'address_stay_silent_rbih',
     ]);
+  });
+
+  it('rejects duplicate pending input and reveals authored later options on the numbered fire', () => {
+    const def = makeAddressEventDef();
+    const pending = makeState();
+    pending.military.pending_event_decisions = [{ event_id: def.id }];
+    expect(addressContract.computeAddressNationAvailability(pending, 'RBiH', def).reason).toBe('already_pending');
+
+    const thirdState = makeState({ fireCount: 2, lastFired: 80 });
+    const availability = addressContract.computeAddressNationAvailability(thirdState, 'RBiH', def);
+    const decision = addressContract.buildAddressNationPendingDecision(thirdState, 'RBiH', def, availability);
+    expect(decision.response_options.map((option: any) => option.id)).toContain('address_late');
   });
 
   it('refuses exhausted at max_fires and on_cooldown within cooldown', () => {
@@ -263,6 +290,35 @@ describe('decorate-a-unit — BRIGHT LINE: regular formations only', () => {
     expect(unitBranch.dimension_shifts).toEqual([{ faction: 'RBiH', dimension: 'military_credibility', delta: 4 }]);
     expect(unitBranch.target_formation_id).toBe('arbih_1st_corps');
     expect(unitBranch.label).toBe('Decorate 1st Corps');
+  });
+
+  it('aliases authored notifications for a per-unit branch and emits them once through resolution', () => {
+    const state = makeState({ eventId: 'decorate_a_unit_rbih', formations }) as unknown as GameState;
+    const def = makeDecorateEventDef();
+    const availability = decorateContract.computeDecorateUnitAvailability(state, 'RBiH', def);
+    const decision = decorateContract.buildDecorateUnitPendingDecision(state, 'RBiH', def, availability);
+    const responseId = 'decorate_steadfast_rbih__arbih_1st_corps';
+
+    expect(decision.response_options.map((option: any) => option.id)).toEqual([
+      'decorate_steadfast_rbih__arbih_1st_corps',
+      'decorate_steadfast_rbih__arbih_2nd_corps',
+      'decorate_steadfast_rbih__arbih_brigade_a',
+      'decorate_broadly_rbih',
+      'decorate_decline_rbih',
+    ]);
+    expect(decision.notifications_to_other_factions[responseId]).toEqual(
+      def.notifications_to_other_factions.decorate_steadfast_rbih,
+    );
+    state.military.pending_event_decisions = [decision];
+
+    resolveEventDecision(state, def.id, responseId);
+
+    expect(state.military.pending_event_notifications).toHaveLength(2);
+    expect(state.military.pending_event_notifications?.map((notification) => notification.response_id)).toEqual([
+      responseId,
+      responseId,
+    ]);
+    expect(state.military.event_decision_log?.filter((entry) => entry.event_id === def.id)).toHaveLength(1);
   });
 
   it('drops the steadfast path when there is NO eligible regular formation (bright line)', () => {

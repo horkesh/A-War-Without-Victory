@@ -1,0 +1,55 @@
+{
+  "source": "F:\\A-War-Without-Victory\\data\\derived\\startup\\apr_1992_initial_save.json",
+  "sourceSha256": "5a68253b783517b7295d91128f0b80fb85189735747480533287889f7b57e3b7",
+  "scope": "synthetic turn-90 player action fixtures; no campaign chronology claim",
+  "cases": [
+    {
+      "file": "fixture-rbih-1.json",
+      "faction": "RBiH",
+      "eventId": "strategic_posture_review_rbih",
+      "priorCount": 0,
+      "turn": 90,
+      "sampleFormation": "arbih_101st_mountain"
+    },
+    {
+      "file": "fixture-rbih-3.json",
+      "faction": "RBiH",
+      "eventId": "strategic_posture_review_rbih",
+      "priorCount": 2,
+      "turn": 90,
+      "sampleFormation": "arbih_101st_mountain"
+    },
+    {
+      "file": "fixture-rs-1.json",
+      "faction": "RS",
+      "eventId": "strategic_posture_review_rs",
+      "priorCount": 0,
+      "turn": 90,
+      "sampleFormation": "rs_11th_dubica_infantry"
+    },
+    {
+      "file": "fixture-rs-3.json",
+      "faction": "RS",
+      "eventId": "strategic_posture_review_rs",
+      "priorCount": 2,
+      "turn": 90,
+      "sampleFormation": "rs_11th_dubica_infantry"
+    },
+    {
+      "file": "fixture-hrhb-1.json",
+      "faction": "HRHB",
+      "eventId": "strategic_posture_review_hrhb",
+      "priorCount": 0,
+      "turn": 90,
+      "sampleFormation": "hrhb_101st_oraje_brigade"
+    },
+    {
+      "file": "fixture-hrhb-3.json",
+      "faction": "HRHB",
+      "eventId": "strategic_posture_review_hrhb",
+      "priorCount": 2,
+      "turn": 90,
+      "sampleFormation": "hrhb_101st_oraje_brigade"
+    }
+  ]
+}

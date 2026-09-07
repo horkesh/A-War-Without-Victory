@@ -33961,3 +33961,81 @@ and test-inventory corrections. `logs/bc05/lukavac-removal/independent-review.md
 reviewed hashes. All 13 reviewed data/test hashes matched. The owner-directed removal disposition
 is complete; campaign/downstream acceptance remains unmeasured. Normal pre-commit typechecking is
 retained for the authorized local commit. No calibration work or military-operation change follows.
+
+### 2026-09-08 - BC06 bounded posture/gesture controls; residual gates remain open
+
+Owner scheduled BC06 on 2026-09-07 and authorized bounded repairs, focused tests, live player
+proof, one independent review, documentation synchronization and local commit. Start HEAD
+`4c419c464adce4e59d9046b37b79d163979d5c7d` matched and the tree was clean. Orchestrator directed
+one fresh Sol/medium implementer and one separate Sol/medium reviewer. No campaign,
+structural-fingerprint check, calibration change, baseline refresh, remote push or publication.
+Cleanup, runtime-input/AI and build-preparation packets remain PLANNED.
+
+The reported missing controls are `strategic_posture_review_rbih`,
+`strategic_posture_review_rs`, and `strategic_posture_review_hrhb`. Natural event decisions
+already reached the generic event resolver; voluntary player initiation/repeat use was absent.
+Existing visits/addresses/decorations were already wired. The actual starting catalog was
+three escalating postures plus nine static gestures, not the old report's eleven static rows.
+
+The repair adds a visible posture card and preload/useIPC/serialized desktop mutation path,
+reuses the authoritative decision resolver, enforces authored third-use options and pending
+exclusion, preserves notification metadata, and refreshes the invoking renderer on response.
+The fixed 10-CA posture price is an explicit parity inference from the other leadership gestures,
+not a newly found posture-specific ruling. Only the three front-visit cadence classifications
+change to escalating, matching their existing third-use press options. No numerical escalation,
+option decay, authored effect delta, cap/cooldown or natural-event evaluator change is added.
+Six address/decoration rows have no authored escalation stages; that design gap remains open.
+
+One independent review found per-unit decoration notification IDs needed aliases from each
+expanded response ID to the existing authored payload. The targeted builder/test correction
+preserves response ordering and creates no new content. A separate live non-target control
+confirmed an older unmet behavior: choosing the 101st Mountain also raised the unselected
+102nd Motorized's morale from 50 to 55. `target_formation_id` is not consumed by the faction-wide
+effect applier. That targeting repair requires a separate scope decision; BC06 is not closed.
+The failed non-target evidence remains in `logs/bc06/live-decorate-final-01/`.
+
+Validation: 150/150 in the 10-file focused run (`focused-tests-2.log`); after the notification
+alias correction, 48/48 across leadership actions and event decisions
+(`decoration-notification-correction.log`). These overlap, not a single 198-test run. RED
+missing-contract/notification tests and the initial stale source-expectation failures are
+retained. Initial TypeScript found an exhaustive art-map entry missing; corrected final
+TypeScript and tactical map build passed, as did the desktop sim bundle's read-only startup
+snapshot check. Logs and exit files are under `logs/bc06/`.
+
+Six posture first/third cases across all factions, two RBiH front-visit first/third cases, and
+one RBiH address case passed visible Desk -> Command Surface -> Command & Personnel -> Dossier
+-> Issue -> response, real IPC, canonical effects and receipts. Immediate repeat requests were
+rejected with identical autosave bytes. A separate live decoration-receipt check passed with
+two opponent notifications and one player receipt after alias correction; it does not waive
+the failed target-isolation criterion. The nine main passing cases and targeted receipt case
+recorded no page/network diagnostics. Fixture turn 90 and previous fire counts were synthetic,
+not simulated campaign history. Screenshot review then found the generic 'staged next turn'
+message was wrong for immediately opened gesture decisions; its focused correction follows
+without re-running unchanged effect fixtures.
+
+Preservation: initial save/control, 188-week scenario, calibration inputs, combat source,
+1994/1995 event catalogs and natural event evaluator remain unchanged. BC04 restricted followups,
+NATO timing, Dayton prerequisites/receipts, protected expiry/backstops, deferred post-horizon
+rows and event-owned enclaves are preserved. Military Operation Trnovo remains calibration
+territory; the Lukavac political event question stays retired. Chronology remains pre-P1
+`c95e25241`, P1 `f117fe475`, P2 `558f253a2`; `c2c8300d6` changed display/catalog/saved names,
+not IDs or mechanical fields. BC01/02/03/08 stay closed; BC04/BC05 campaign acceptance remains
+open, BC09 precedes BC07 final data policy, and BC10 follows input/command settlement.
+
+Final independent review returned GO for the bounded repair with the above unmet gates retained
+(`logs/bc06/independent-review.md`). The reviewer independently passed 151/151 across the affected
+ten files after notification aliases, then 28/28 in the UI receipt suite after the message-only
+correction. The dedicated EN/BCS leadership receipt states that the decision is open, authority
+is spent, and effects await the response; ordinary orders retain next-turn staging copy. The
+last map rebuild passed. `live-posture-receipt-final-01/result.json` captures exact receipt text
+in a rendered status box before modal navigation and passes effects, canonical receipt and
+repeat-rejection checks. The screenshot captures the transition and is not stable text proof.
+Previously passing effect cases were not repeated for this shared message correction. The
+reviewer's two nonblocking stale builder comments were aligned without behavioral changes.
+
+Roadmap, command board, existing R8 plan and this ledger are synchronized; the existing engine
+runbook topic records the response-ID/notification-key lesson. `logs/bc06/validation.json` binds
+reviewed source hashes, command exits and live artifact paths/hashes. Bulky fixture save copies,
+Electron profiles and screenshots remain local evidence; reproducible harness/configuration and
+summary receipts accompany the commit. Normal pre-commit typechecking remains enabled. This
+commit implements reviewed bounded repairs, not BC06 closure or campaign acceptance.

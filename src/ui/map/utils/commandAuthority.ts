@@ -88,6 +88,8 @@ export const ADDRESS_NATION_COST = 10;
  * initiate-decorate-unit IPC handler.
  */
 export const DECORATE_UNIT_COST = 10;
+/** Cost parity for the authored strategic-posture-review leadership gesture. */
+export const STRATEGIC_POSTURE_REVIEW_COST = 10;
 export {
     COMMAND_AUTHORITY_BASE_RECOVERY_PER_TURN as COMMAND_AUTHORITY_RECOVERY_PER_TURN,
     COMMAND_AUTHORITY_RESERVE_MAX,
