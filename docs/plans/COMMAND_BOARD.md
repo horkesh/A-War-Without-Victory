@@ -33,8 +33,9 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 **BC05 scheduled separately (2026-09-07):** bounded NATO deadline/loader repair is
 **implemented and independently reviewed (GO), 115 focused tests pass**. n392 disproves the inherited
 Lukavac dead-gate premise: it fires at t70, with 3/6 RS Trnovo
-cells and a `comply` decision. No Lukavac mechanics change; territorial-narrative disposition and
-NATO campaign/downstream acceptance remain open. [BC05 scope/evidence](2026-07-31-full-campaign-electron-validation-plan.md#bc05-bounded-nato-repair-and-lukavac-disposition--2026-09-07).
+cells and a `comply` decision. **Owner disposition implemented: separate Lukavac event removed and
+independently reviewed (GO)**. Military Operation Trnovo is preserved; its execution belongs to calibration and is outside
+this packet. Campaign/downstream acceptance remains open. [BC05 scope/evidence](2026-07-31-full-campaign-electron-validation-plan.md#bc05-bounded-nato-repair-and-lukavac-disposition--2026-09-07).
 
 **Repository audit packets — PLANNED (2026-09-07):** [Master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07) assigns three subordinate packets:
 

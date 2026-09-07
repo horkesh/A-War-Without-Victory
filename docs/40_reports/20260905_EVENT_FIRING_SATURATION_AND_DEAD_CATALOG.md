@@ -16,8 +16,10 @@ independently reviewed (GO, no findings; 115 focused tests pass);
 [current reconciliation](../plans/2026-07-31-full-campaign-electron-validation-plan.md#bc05-bounded-nato-repair-and-lukavac-disposition--2026-09-07)
 confirms D3's remaining RS ultimatum defect in current code and n392. The previously blocked
 Lukavac event **fires at t70 in n392** (RS `comply`, 3/6 Trnovo cells); its old dead-gate diagnosis
-is superseded for the accepted baseline. Its territorial narrative still needs a separate design
-disposition. No campaign acceptance or new campaign follows from this packet.
+is superseded for the accepted baseline. **Subsequent owner disposition: remove this separate
+Lukavac event (now removed and independently reviewed GO).** Keep military Operation Trnovo; operation execution is calibration territory outside
+BC05. The earlier abstract-proxy design question is retired. No campaign acceptance or new campaign
+follows from this packet.
 
 **Date:** 2026-09-05
 **Trigger:** Owner observation — *"I noticed the 3 barracks events fire on the same week for some reason."*

@@ -283,7 +283,7 @@ describe('Event timeline historical integrity', () => {
         }
     });
 
-    it('total event count is 159', () => {
-        expect(allEvents.length).toBe(159);
+    it('total event count is 158 after retiring the Lukavac political event', () => {
+        expect(allEvents.length).toBe(158);
     });
 });

@@ -323,14 +323,17 @@ test('real dynamic Codex claims name a non-calendar predicate and rupture tags s
     );
 });
 
-test('inventory-identified safe essay residuals carry source notes without copied prose', async () => {
+test('inventory-identified safe essay residuals and the rewritten NATO record carry source notes', async () => {
     const result = await inventory.scanSensitiveClaimInventory({ rootDir: process.cwd() });
+    const rewrittenNatoEssay = JSON.parse(await readFile(
+        join(process.cwd(), 'data', 'scenarios', 'essays', 'nato_air_strike_threat_1993.json'),
+        'utf8',
+    ));
     const safeFiles = new Map([
         ['data/scenarios/essays/battle_of_the_barracks_sarajevo.json', 'icty_icj_un'],
         ['data/scenarios/essays/battle_of_the_barracks_visoko.json', 'icty_icj_un'],
         ['data/scenarios/essays/belgrade_embargo_rs_1994.json', 'icty_icj_un'],
         ['data/scenarios/essays/mostar_liberation_1992.json', 'icty_icj_un'],
-        ['data/scenarios/essays/nato_air_strike_threat_1993.json', 'agreement_text'],
         ['data/scenarios/essays/operation_lukavac_93.json', 'icty_icj_un'],
         ['data/scenarios/essays/un_hostage_crisis_1995.json', 'icty_icj_un'],
     ]);
@@ -344,6 +347,9 @@ test('inventory-identified safe essay residuals carry source notes without copie
         Object.fromEntries(safeClaims.map((claim: { file: string; source_tier: string }) => [claim.file, claim.source_tier])),
         Object.fromEntries(safeFiles),
     );
+    assert.strictEqual(rewrittenNatoEssay.event_id, 'nato_air_strike_threat_1993');
+    assert.strictEqual(rewrittenNatoEssay.source_tier, 'agreement_text');
+    assert.match(rewrittenNatoEssay.source_note, /original synthesis and does not reproduce source prose/);
 });
 
 test('unindexed Wave-4 essay deposits remain inventoried without entering the player-facing history queue', async () => {

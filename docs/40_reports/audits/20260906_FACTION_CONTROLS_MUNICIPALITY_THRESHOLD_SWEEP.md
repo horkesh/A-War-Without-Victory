@@ -10,11 +10,16 @@ class**, not one row, and that *"one row was checked because one row was asked a
 
 **Current BC05 reconciliation, 2026-09-07:** the six-run findings below are historical. Accepted
 `n392` has **3/6 RS Trnovo cells throughout t69–71**, and `operation_lukavac_93` fires at **t70**
-with an RS `comply` decision. The current Lukavac row is unchanged from that run's source.
+with an RS `comply` decision. The Lukavac row at BC05's initial reconciliation (`0690a47ea`) was
+unchanged from that run's source, before the subsequent removal disposition below.
 Thus the dead-gate diagnosis is **not reproduced in the accepted baseline**. No gate reduction is
 justified. Trnovo town remains RBiH-held, leaving a distinct narrative-versus-territory design question;
 see the [BC05 evidence and disposition](../../plans/2026-07-31-full-campaign-electron-validation-plan.md#bc05-bounded-nato-repair-and-lukavac-disposition--2026-09-07).
 This annotation supersedes the current applicability of the old headline, not its measured receipts.
+
+**Subsequent owner disposition:** Lukavac must not be a separate event; removal is implemented and independently reviewed (GO).
+Military Operation Trnovo remains unchanged, and its execution is calibration territory outside
+BC05. The old sweep and n392 receipts are retained as history, not instructions to repair a control gate.
 
 ---
 

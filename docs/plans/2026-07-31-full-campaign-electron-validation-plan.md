@@ -588,9 +588,10 @@ historical/design correction. No campaigns (including the structural-fingerprint
 changes, baseline refreshes, remote pushes or publication. Starting main HEAD was
 `fd8d5e66c615fa4731cde01122d6050fbc86619f`, with a clean working tree.
 
-**Status: NATO implementation and independent review complete (GO, no findings).** BC05 is not
-closed: the Lukavac territorial-narrative disposition and NATO campaign/downstream acceptance remain
-open. The owner-authorized local commit does not waive them.
+**Status: NATO implementation and independent review complete (GO, no findings), committed
+`0690a47ea`.** The owner subsequently ruled that Lukavac must not be a separate event; its removal
+is **implemented and independently reviewed (GO)** below. Military-operation execution is calibration territory and outside this packet.
+BC05 campaign/downstream acceptance remains open; local implementation does not waive it.
 
 **Consumed-baseline reconciliation:** accepted `n392` records Markale I at **t96**, the RBiH NATO
 compliance companion at **t97**, and no RS ultimatum or exclusion-zone receipt. Current code retains
@@ -617,24 +618,25 @@ loop index is zero-based, but **persisted `weekly_report.jsonl.week_index` equal
 (`scenario_reporting.ts`, `buildWeeklyReport`). Do not add one to that persisted field. This clarifies
 the BC04 loop-index statement without changing its receipt dates, epoch, targets or raw receipts.
 
-**Lukavac is not blocked in the accepted baseline.** Replaying n392's complete
+**Accepted n392 reconciliation, before event removal:** Lukavac is not blocked in that baseline. Replaying its complete
 `political.control_events` over `initial_political_controllers` yields **3/6 RS** at t68–71:
 `gornja_presjenica`, `kijevo_2`, and `tosici`. Only `kijevo_2` changes in the Trnovo log (combat,
 t25). `operation_lukavac_93` fires at **t70**, and `event_decision_log` records RS `comply` at t70.
-Its current catalog row is unchanged from n392's clean source commit
+Its catalog row at `0690a47ea` was unchanged from n392's clean source commit
 `c2f6592ec1e2f049d93ade595760c19633bb2ce7`; the intervening 1993 catalog diff is only BC04 P1.
 The corrected six-run sweep remains historical evidence about those runs, not a present dead-gate
-verdict. No threshold, initial control, operation or Lukavac event change is supported by this finding.
+verdict. This finding alone supported no threshold, initial control, operation or event edit;
+the later owner disposition independently authorizes removal.
 
-**Concrete remaining design question:** the event is a post-advance withdrawal confrontation, not
+**Initial design question — superseded by the owner disposition below:** the event is a post-advance withdrawal confrontation, not
 an operation-launch notice. BB2 printed pp.391–392 (KB scan pages 410–411, the catalog's citation)
 describes capture of Trnovo, the later Igman/Bjelašnica advance, and withdrawal under UN/NATO pressure.
 Yet n392's Trnovo town remains RBiH-held when its 3/6 municipal proxy admits that narrative. Existing
 authority does not select a replacement predicate that establishes all those territorial claims.
-The owner must decide whether to retain this abstract proxy with that limitation, or require
+The initial question asked whether to retain this abstract proxy with that limitation, or require
 simulation-backed territorial evidence and authorize a separately scoped historical/design correction.
-Lowering the threshold or changing the date cannot resolve this mismatch. BC05 remains open on this
-disposition and NATO campaign/downstream acceptance; this packet does not repair the wider operation.
+Lowering the threshold or changing the date cannot resolve this mismatch. This assessment did not
+authorize repair of the wider military operation; the owner has now rejected the duplicate event.
 
 **Fixed local validation plan:** inspect wrappers/configuration, run direct focused Vitest loader,
 timeline and evaluator regressions plus TypeScript checking and `git diff --check`; retain logs in
@@ -657,6 +659,60 @@ exclusion-zone effects. Direct `tsc --noEmit -p tsconfig.json` passed without di
 branches and scope (`logs/bc05/independent-review.md`). `logs/bc05/validation.json` records command
 exits and reviewed source/test hashes; `verify_scope.cjs` checks catalog-field preservation,
 untouched BC04/Dayton/Lukavac source, append-only ledger continuity and added documentation links.
+
+**Subsequent owner disposition — remove the duplicate Lukavac event.** The owner clarified:
+"That is calibration territory, which is not in our scope. Lukavac should not be an event."
+Remove `operation_lukavac_93` from the live event catalog and reconcile its necessary live wiring
+and tests. Do not substitute a stronger control gate, artificial territorial transfer, or another
+Lukavac event. Preserve the historical essay and sources, with obsolete live-choice references
+reconciled. Preserve old saved receipts as historical records where applicable; do not migrate or
+erase accepted n392 evidence.
+
+Legacy compatibility uses the existing save contract: pending decisions carry their own response
+options and effects, and resolution reads that saved record rather than reloading the catalog.
+Retain the essay's legacy event/response linkage for old recorded decisions, while removing prose
+that advertises a currently available Lukavac choice. No live compatibility event or engine shim
+is needed. Focused regressions must cover both old pending-decision resolution and old essay receipts.
+
+The military **Operation Trnovo** remains authored in `pre_planned_operations.ts`, available from
+t69. Its n392 AAR records start t69, end t79, zero attacks/captures and `zero_eligible_axis`;
+the separately named political event fired t70. These are distinct mechanisms. The event has no
+direct OSID-transfer effect. Operation execution, territory and calibration investigation are
+explicitly outside this removal. This disposition supersedes the abstract-proxy question above.
+
+**Removal validation boundary:** one Sol implementer and one independent Sol reviewer; targeted
+event/pressure/reporting/essay tests, direct TypeScript checking and diff/scope checks only, with
+logs under `logs/bc05/lukavac-removal/`. Expected cost: a few minutes, no campaign. Prove the live
+event is absent, necessary references are reconciled, generic decision/pressure coverage survives,
+historical material is preserved, and operation/NATO/BC04/Dayton code remains unchanged. No new
+campaigns, structural-fingerprint wrapper, tuning, baseline refresh, remote push or publication.
+
+The retained 1993 NATO notice and its essay also advertise a separate Lukavac decision. Remove only
+those stale live-choice references as necessary wiring cleanup. Preserve that notice's date, trigger,
+effects and sources, and every 1994/1995 NATO field; no replacement choice is authored.
+
+**Removal implementation and verification:** the live event is removed. Historical essays and their
+sources remain; legacy response sections and self-contained pending choices still work for old
+saves. Generic pressure/decision tests now use synthetic fixtures rather than the removed catalog
+row. All production source, military Operation Trnovo, initial control and calibration inputs remain
+unchanged. The 1993 NATO notice has only stale-choice narrative cleanup; its mechanics are preserved.
+
+The first absence regression failed as expected. The 12-file focused run recorded **287 passed,
+2 failed (289 tests)**, with failures in stale catalog-count and safe-claim inventory expectations.
+The catalog now has 158 entries in the tested year-file subset, rather than 159. The inventory
+correction removes the rewritten NATO essay from the expected finding set because its stale-choice
+finding is gone; all six remaining safe-file entries stay asserted, and the NATO essay's provenance
+is checked separately. Retained Lukavac provenance and legacy sections remain checked. Only the affected two files were
+rerun: **52/52 passed, exit 0**. Together with the ten unchanged passing files, this verifies
+**289 tests across 12 files**; it is not a claim of one all-green 12-file invocation. TypeScript,
+`git diff --check` and the **13-check scope verifier** pass. Evidence is under
+`logs/bc05/lukavac-removal/` (`final-focused-tests.log`, `correction-tests.log`, `typecheck.log`,
+`scope.log`). No campaign or calibration acceptance is claimed.
+
+Independent Sol review returned **GO, no blocking findings**, including the targeted stale-reference
+and test-inventory corrections. `logs/bc05/lukavac-removal/independent-review.md` records the review;
+`validation.json` preserves all command exits, the evidence union and final reviewed file hashes.
+This completes the owner-directed Lukavac removal disposition, not campaign/calibration acceptance.
 
 ### Pre-seeded finding register
 
@@ -692,7 +748,7 @@ Sources: [frozen audit](../40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_A
 |---|---|---|---|
 | B10 | Dead narrated COHA/ceasefire/Dayton chain; mechanical packaged negotiation works | `event_types.ts`, `war_1995.json`, event termination and negotiation paths | BC03 **CLOSED 2026-09-07**: verified repair; owner deferred post-horizon acceptance/tickers; signing requires accepted talks. One terminal owner, complete verdict/receipts; no global predicate shortcut or horizon extension. See [investigation corrections](../40_reports/20260905_EVENT_FIRING_SATURATION_AND_DEAD_CATALOG.md). |
 | B11 | Historical chronology findings; sensitive P1 Ahmići/P2 enclave packet retain panel ownership | Catalog gates/dates and downstream displacement/NATO | BC04 **P1 IMPLEMENTED/REVIEWED; campaign acceptance pending**. P2 IMPLEMENTED/REVIEWED (GO); campaign acceptance remains deferred. Current n392 reconciliation and separate P1/P2 scopes are recorded in the BC04 subsection above; landed barracks work is excluded. [Conditional panel record](../40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md); no isolated Srebrenica date edit or map repaint. |
-| B12 | Same-turn prerequisite dead NATO windows; `operation_lukavac_93` control gate | Event loader/catalog and firing pass | BC05 **NATO IMPLEMENTED/REVIEWED (GO)**: bounded deadline/loader repair. n392 has Lukavac t70 at 3/6 RS, so no dead-gate edit; territorial-narrative disposition remains. Campaign/downstream acceptance is unmeasured. See the BC05 subsection above; [historical sweep with current annotation](../40_reports/audits/20260906_FACTION_CONTROLS_MUNICIPALITY_THRESHOLD_SWEEP.md). |
+| B12 | Same-turn prerequisite dead NATO windows; duplicate Lukavac event | Event loader/catalog and firing pass | BC05 **NATO IMPLEMENTED/REVIEWED (GO); Lukavac event REMOVED/REVIEWED (GO)** by owner disposition. Military Operation Trnovo is preserved; its execution/calibration is outside scope. Campaign/downstream acceptance remains unmeasured. See BC05 above; [historical sweep with current annotation](../40_reports/audits/20260906_FACTION_CONTROLS_MUNICIPALITY_THRESHOLD_SWEEP.md). |
 | B13 | Three posture-review handlers unwired; bounded gesture-escalation gap | Desktop player-action handlers and `action_cadence` | BC06 **FIX when scheduled**; prove live player effects and cooldown/receipts, not only headless parity. No general recurrence redesign. [PM ruling](../40_reports/audits/20260905_EVENT_ROADMAP_FIT_PM_RULING.md). |
 
 **Friction, separate from bugs:** **F1 — endgame decision drought** is R8 diary triage, not a repair or authoring commission. Inspect the player path and truthful positive-hold coverage; source-supported omissions are evidence, never a per-week quota. Broad drought authoring and orphan-flag activation remain the explicit post-1.0 backlog.
@@ -778,7 +834,7 @@ R1–R5, the accepted R6 slice, RC and RE stay closed; calibration remains ongoi
 | **BC02 — B2/B9 sector/rating truth / R8** | Systems + QA | Canonical saves omit derived ratings; immediate load/display gap, no demonstrated simulation effect | **CLOSED — owner-approved Electron load/display repair verified 2026-09-07.** Loaded saves rebuild only the transient rating cache before runtime/player projection; canonical bytes, other state, privacy, and next-turn simulation ordering remain unchanged. Browser raw-JSON fallback is outside this repair. [Implementation and verification](#bc02-existing-save-investigation--2026-09-07). |
 | **BC03 — B10 narrated Dayton / R8** | Events/systems + Game Designer + QA | Event effects, termination ordering, receipts and endgame state | **CLOSED 2026-09-07 — verified repair and owner-approved post-horizon deferral.** Repaired the narrated chain with one coherent terminal owner; preserve the working packaged negotiation. Resolve the redundant event game-over writer first, then the catalog gate/window; verify COHA false-key semantics, firing/termination order and complete packaged verdict snapshot/receipts. The headless terminal contract is VERIFY/DISPOSITION, not a mandate to add a headless closeout. Do not globally redefine `flag_not_set` or extend the 188-week horizon as a shortcut. [Investigation corrections §10–11](../40_reports/20260905_EVENT_FIRING_SATURATION_AND_DEAD_CATALOG.md). |
 | **BC04 — B11 chronology + P1/P2 / R8, panel-owned history** | Historian + events/systems + scenario/calibration + independent §6 panel | Event timing/effects, displacement, personnel, NATO and downstream operations | **P1 IMPLEMENTED/REVIEWED; campaign acceptance pending; P2 implemented/reviewed; campaigns deferred**: current code and n392 receipts reconciled in the BC04 subsection above; completed barracks stagger excluded. P1/P2 follow the [existing conditional panel record](../40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md), with the subsequent owner-approved P1/P2 implementation amendments recorded above. P1 preserves the historical date and map; P2 is a coherent chronology packet, measured receipt dates with brakes active, no narrowed expiry/backstop shortcut. Separate P1 and P2 controlled runs, full anchors/health/§6 and displacement/operation diffs; no fresh re-floor until explained and accepted. |
-| **BC05 — B12 dead event windows/control gates / R8** | Events/systems + Historian + QA | Enabling dormant NATO events can change outcomes; a loader lint alone is byte-neutral | **NATO IMPLEMENTED/REVIEWED (GO)** per BC05 subsection: deadline 96→97 plus loader protection; 115 focused tests pass. Accepted n392 confirms NATO absence but Lukavac t70/RS comply at 3/6 Trnovo, overturning the current dead-gate premise. No Lukavac edit; retain the concrete territorial-narrative decision. Focused fixture receipts/effects do not establish campaign/downstream acceptance. No initial repaint, threshold reduction, baseline refresh or campaign authorized. |
+| **BC05 — B12 dead event windows/control gates / R8** | Events/systems + Historian + QA | Enabling NATO events and removing a political decision can change outcomes; a loader lint alone is byte-neutral | **NATO IMPLEMENTED/REVIEWED (GO); Lukavac event REMOVED/REVIEWED (GO)** by owner disposition; removal verified across 12 focused files/289 tests by recorded evidence union. Military Operation Trnovo is preserved; its execution/calibration is outside scope. Focused checks do not establish campaign/downstream acceptance. No initial repaint, threshold reduction, baseline refresh or campaign authorized. |
 | **BC06 — B13 posture/gesture controls / R8** | Gameplay/desktop + Game Designer + QA | Player-action decisions/effects; headless neutrality is insufficient | **FIX** the three unwired posture-review handlers and settle bounded gesture escalation per the [PM ruling](../40_reports/audits/20260905_EVENT_ROADMAP_FIT_PM_RULING.md). Verify the live action path, recurrence/cooldown, decision receipts and effects; no general recurrence-system redesign. |
 | **BC07 — initial-master stability divergence / calibration-data authority** | Asset/data integration + Systems + calibration | Potentially behavior-bearing `stability_score`; mode-dependent consumption | **VERIFY/DISPOSITION**: establish consumed mode and writer/reader for the 269-row master/derive disagreement, including ~227 stability rows. `hybrid_1992`/`ethnic_1991` early returns must be accounted for; do not infer 227 effects in the blessed scenario. Record retain/regenerate policy and affected scenario scope; no mandated regeneration, initial-control override, or re-floor for the cosmetic contested-control subset. [2026-09-04 correction](../PROJECT_LEDGER.md#2026-09-04--correcting-the-correction-contested_control-is-cosmetic), [calibration authority](../40_reports/CALIBRATION_MASTER.md). |
 | **BC08 — inherited suite residual / verification** | QA + owning Systems/Game Design seats | Current-suite environment failure, not a reproduced simulation residual | **CLOSED — verification/disposition, 2026-09-07.** Full suite exit 1 retained: one Bash-resolution failure; unchanged focused file 8/8 with child-scoped Git Bash. Located deployment/diagnostics suites and peace plans pass; n392 artifact gates pass with source/input-equivalence and transient coverage limits. [Complete receipt](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md); no overall-green or whole-engine claim. |

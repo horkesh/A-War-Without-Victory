@@ -1,0 +1,25 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ❯ tests/sim/events/event_acceptance_report.test.ts (17 tests | 1 failed) 907ms
+   × event acceptance diagnostic report > does not expose Operation Lukavac 93 as a live political event 20ms
+     → expected [ 'gornji_vakuf_clashes_1993', …(69) ] to not include 'operation_lukavac_93'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/sim/events/event_acceptance_report.test.ts > event acceptance diagnostic report > does not expose Operation Lukavac 93 as a live political event
+AssertionError: expected [ 'gornji_vakuf_clashes_1993', …(69) ] to not include 'operation_lukavac_93'
+ ❯ tests/sim/events/event_acceptance_report.test.ts:275:30
+    273|             .map((entry) => entry.id);
+    274|
+    275|         expect(eventIds).not.toContain('operation_lukavac_93');
+       |                              ^
+    276|     });
+    277|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 16 passed (17)
+   Start at  23:18:07
+   Duration  1.86s (transform 161ms, setup 19ms, collect 169ms, tests 907ms, environment 0ms, prepare 109ms)

@@ -99,27 +99,35 @@ describe('pressure system', () => {
         expect(isEventReady(state, noPressure)).toBe(false);
     });
 
-    it('decays Lukavac route proxy readiness when the local Sarajevo gate closes', () => {
-        const events = JSON.parse(readFileSync('data/scenarios/events/war_1993.json', 'utf8')) as EventDefinition[];
-        const lukavac = events.find((event) => event.id === 'operation_lukavac_93');
-        const state = minState();
-        state.meta.turn = 69;
-        state.military.event_flags = { sarajevo_siege_active: true };
-        state.political.political_controllers = {
-            'op:trnovo:trnovo_2': 'RS',
-            'op:trnovo:dejcici': 'RBiH',
-            'op:hadzici:lokve': 'RS',
-            'op:hadzici:pazaric': 'RS',
-            'op:hadzici:tarcin_2': 'RS',
+    it('decays modifier-boosted readiness when a local runtime gate closes', () => {
+        const localGateEvent: EventDefinition = {
+            id: 'test_local_gate_event',
+            trigger: {
+                turn_min: 10,
+                phase: 'war',
+                condition: { type: 'flag_equals', flag: 'local_gate_open', value: true },
+            },
+            effect: { kind: 'narrative', text: 'test' },
+            pressure: {
+                base_rate: 1,
+                threshold: 5,
+                decay_rate: 1,
+                modifiers: [{
+                    condition: { type: 'territory_control', osid: 'test:route', faction: 'RS' },
+                    rate_bonus: 3,
+                }],
+            },
         };
+        const state = minState();
+        state.military.event_flags = { local_gate_open: true };
+        state.political.political_controllers = { 'test:route': 'RS' };
 
-        expect(lukavac).toBeDefined();
-        updateEventReadiness(state, [lukavac!]);
-        expect(state.military.event_readiness!['operation_lukavac_93']).toBe(4);
+        updateEventReadiness(state, [localGateEvent]);
+        expect(state.military.event_readiness!.test_local_gate_event).toBe(4);
 
-        state.military.event_flags = { sarajevo_siege_active: false };
-        updateEventReadiness(state, [lukavac!]);
-        expect(state.military.event_readiness!['operation_lukavac_93']).toBe(3);
+        state.military.event_flags = { local_gate_open: false };
+        updateEventReadiness(state, [localGateEvent]);
+        expect(state.military.event_readiness!.test_local_gate_event).toBe(3);
     });
 
     it('does not apply a pressure modifier written later in the same event-evaluation turn', () => {

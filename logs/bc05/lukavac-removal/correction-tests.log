@@ -1,0 +1,27 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/codex_sensitive_claim_inventory.test.ts (29 tests) 42650ms
+   ✓ real dynamic Codex claims name a non-calendar predicate and rupture tags stay on rupture essays 2667ms
+   ✓ inventory-identified safe essay residuals and the rewritten NATO record carry source notes 2485ms
+   ✓ unindexed Wave-4 essay deposits remain inventoried without entering the player-facing history queue 2502ms
+   ✓ player-facing claims with complete citations and source notes carry a resolved source tier 2496ms
+   ✓ inventory reports the 1993 placement/window contract for Neretva, Grabovica, and Uzdol 2472ms
+   ✓ inventory documents the sourced 1993 central-Bosnia provenance packet 2542ms
+   ✓ inventory documents the summer 1992 Herceg-Bosna posture packet 2464ms
+   ✓ inventory documents conditional consequence rows as design counterfactuals 2500ms
+   ✓ inventory documents every player-facing essay and dynamic section 2464ms
+   ✓ inventory documents event rows paired with player-facing essays 2494ms
+   ✓ inventory documents every player-facing historical event claim 2486ms
+   ✓ inventory has no unresolved player-facing claim 2476ms
+   ✓ inventory clears the source floor for the Jajce-to-final-offensives packet 2477ms
+   ✓ inventory documents the state-identity and adjudicated-command provenance packet 2461ms
+   ✓ inventory has no player-facing essay below the two-source floor 2485ms
+   ✓ inventory has no generic actor-symmetry claim in player-facing history 2502ms
+   ✓ inventory covers claim prose without relying on a narrow keyword list 2468ms
+ ✓ tests/event_timeline_integrity.test.ts (23 tests) 38ms
+
+ Test Files  2 passed (2)
+      Tests  52 passed (52)
+   Start at  23:34:32
+   Duration  44.04s (transform 199ms, setup 20ms, collect 234ms, tests 42.69s, environment 1ms, prepare 212ms)

@@ -73,7 +73,6 @@ const EXPECTED_PACKET_2B_DEFAULTS = new Map([
 ]);
 
 const EXPECTED_PACKET_3_DEFAULTS = new Map([
-    ['operation_lukavac_93', 'comply'],
     ['os_rbih_tactical_acceptance_1993', 'reject_via_assembly'],
     ['csq_patron_recovery_offer', 'accept_recovery'],
 ]);
@@ -97,17 +96,6 @@ const EXPECTED_1993_MODAL_PACKET_DEFAULTS = new Map([
 
 function loadEventFixtures(file: string): EventFixture[] {
     return JSON.parse(readFileSync(file, 'utf8')) as EventFixture[];
-}
-
-function collectConditionTypes(condition: unknown): string[] {
-    if (typeof condition !== 'object' || condition === null || Array.isArray(condition)) return [];
-    const record = condition as Record<string, unknown>;
-    const current = typeof record.type === 'string' ? [record.type] : [];
-    const nested = Array.isArray(record.conditions)
-        ? record.conditions.flatMap((entry) => collectConditionTypes(entry))
-        : [];
-    const singleNested = collectConditionTypes(record.condition);
-    return [...current, ...nested, ...singleNested].sort();
 }
 
 describe('event acceptance diagnostic report', () => {
@@ -252,15 +240,9 @@ describe('event acceptance diagnostic report', () => {
         }
     });
 
-    it('cleans Holbrooke and Lukavac scheduled-only debt with state or pressure gates', () => {
+    it('cleans Holbrooke scheduled-only debt with a state or pressure gate', () => {
         const report = buildEventAcceptanceReport();
-        const lukavac = report.required_response_rows.find((entry) => entry.id === 'operation_lukavac_93');
         const holbrooke = report.required_response_rows.find((entry) => entry.id === 'holbrooke_ceasefire_demand_oct95');
-
-        expect(lukavac).toBeDefined();
-        expect(lukavac!.trigger_gate).toBe('state_or_pressure');
-        expect(lukavac!.blocking_reasons).not.toContain('scheduled_only_trigger_needs_predicate_cleanup_or_exogenous_waiver');
-        expect(report.scheduled_only_rows.map((row) => row.id)).not.toContain('operation_lukavac_93');
 
         expect(holbrooke).toBeDefined();
         expect(holbrooke!.trigger_gate).toBe('state_or_pressure');
@@ -268,33 +250,11 @@ describe('event acceptance diagnostic report', () => {
         expect(report.scheduled_only_rows.map((row) => row.id)).not.toContain('holbrooke_ceasefire_demand_oct95');
     });
 
-    it('authors Lukavac with the local Sarajevo and Trnovo trigger plus Hadzici route pressure proxies', () => {
-        const event = loadEventFixtures('data/scenarios/events/war_1993.json')
-            .find((entry) => entry.id === 'operation_lukavac_93');
-        const trigger = event?.trigger;
-        const pressure = event?.pressure as {
-            base_rate?: number;
-            threshold?: number;
-            decay_rate?: number;
-            modifiers?: Array<{ condition?: { type?: string; osid?: string; faction?: string }; rate_bonus?: number }>;
-        } | undefined;
+    it('does not expose Operation Lukavac 93 as a live political event', () => {
+        const eventIds = loadEventFixtures('data/scenarios/events/war_1993.json')
+            .map((entry) => entry.id);
 
-        expect(event).toBeDefined();
-        expect(trigger).toMatchObject({ turn_min: 69, turn_max: 71, phase: 'war' });
-        expect(trigger?.condition).toEqual({
-            type: 'and',
-            conditions: [
-                { type: 'flag_equals', flag: 'sarajevo_siege_active', value: true },
-                { type: 'faction_controls_municipality', faction: 'RS', municipality: 'trnovo', threshold: 0.5 },
-            ],
-        });
-        expect(collectConditionTypes(trigger?.condition)).not.toContain('territory_percentage');
-        expect(pressure).toMatchObject({ base_rate: 1, threshold: 2, decay_rate: 1 });
-        expect(pressure?.modifiers).toEqual([
-            { condition: { type: 'territory_control', osid: 'op:hadzici:lokve', faction: 'RS' }, rate_bonus: 1 },
-            { condition: { type: 'territory_control', osid: 'op:hadzici:pazaric', faction: 'RS' }, rate_bonus: 1 },
-            { condition: { type: 'territory_control', osid: 'op:hadzici:tarcin_2', faction: 'RS' }, rate_bonus: 1 },
-        ]);
+        expect(eventIds).not.toContain('operation_lukavac_93');
     });
 
     it('marks the approved first authoring packet as production modal-ready only after safe-first JSON authoring', () => {
@@ -336,7 +296,6 @@ describe('event acceptance diagnostic report', () => {
             'hrhb_central_bosnia_defense_1993',
             'rs_assembly_rejects_voplan_1993',
             'hrhb_territorial_scope_1993',
-            'operation_lukavac_93',
             'os_rbih_tactical_acceptance_1993',
             'rbih_arms_embargo_lift_advocacy_1993',
             'hrhb_owen_stoltenberg_response_1993',

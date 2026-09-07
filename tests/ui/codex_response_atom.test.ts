@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
 import {
     evaluateEssayCondition,
     resolveCodexEssay,
@@ -98,6 +99,27 @@ describe('codex RESPONSE: atom', () => {
         expect(dynamic).toHaveLength(1);
         expect(dynamic[0].text).toBe('You endorsed all six strategic objectives.');
         expect(dynamic[0].variant).toBe('note');
+    });
+
+    it.each([
+        ['comply', 'On the historical course'],
+        ['defy_nato', 'In this campaign'],
+    ] as const)('renders the retained Lukavac %s annotation from old-save receipts', (responseId, expectedText) => {
+        const index = JSON.parse(readFileSync('data/scenarios/essays/essay_index.json', 'utf8')) as {
+            essays: EssayEntry[];
+        };
+        const retainedEssay = index.essays.find((entry) => entry.id === 'essay_operation_lukavac_93');
+        expect(retainedEssay).toBeDefined();
+
+        const resolved = resolveCodexEssay(retainedEssay!, context({
+            firedEventIds: new Set(['operation_lukavac_93']),
+            decisionResponses: new Set([`operation_lukavac_93:${responseId}`]),
+        }));
+        const dynamic = resolved.paragraphs.filter((paragraph) => paragraph.kind === 'dynamic');
+
+        expect(resolved.isUnlocked).toBe(true);
+        expect(dynamic).toHaveLength(1);
+        expect(dynamic[0].text).toContain(expectedText);
     });
 
     it('composes with AND / OR / NOT', () => {

@@ -122,8 +122,8 @@ describe('triggered operations definitions', () => {
         // ADR-0005 v3.0 (2026-05-29): Farz 95 (Vozuća, codename Farz, Sept 1995) added
         // as an army_hq_only RBiH def (net-new; only fires via the inject-army-hq-operations
         // step when ENABLE_TG_ARMY_HQ_OPS is on). Inserted after Krivaja-95, before
-        // Stupčanica-95. The fabricated "Lukavac 93" RBiH def was dropped (collided with
-        // the real VRS operation_lukavac_93 event).
+        // Stupčanica-95. The fabricated "Lukavac 93" RBiH def was dropped because the
+        // historical VRS operation is represented by the pre-planned Operation Trnovo.
         assert.equal(_TRIGGERED_OPS.length, 7);
         assert.deepEqual(
             _TRIGGERED_OPS.map((def) => def.name),

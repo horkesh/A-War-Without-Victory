@@ -33906,3 +33906,58 @@ acceptance limits. Evidence: `logs/bc05/independent-review.md`; command exits an
 `logs/bc05/validation.json`. No correction pass was needed. Final scope/document verification is
 recorded in `logs/bc05/scope-docs.log`; normal pre-commit typechecking remains enabled for the
 authorized commit. BC05 remains open for the explicit disposition and unmeasured campaign effects.
+
+### 2026-09-07 - BC05 owner removes the duplicate Lukavac event
+
+After NATO commit `0690a47eacb133631f32324681c8eb5343afc03a`, the owner clarified that military
+operation execution belongs to calibration and is outside this scope: "Lukavac should not be an
+event." This retires the earlier abstract-control-proxy question. Remove only the separate
+`operation_lukavac_93` political event and necessary live wiring; preserve military Operation Trnovo,
+historical essay/source material and existing saved receipts. No stronger gate, replacement event,
+OSID transfer, operation repair, calibration run or tuning is authorized.
+
+The distinction was verified against current code and accepted n392: Operation Trnovo is available
+from t69; its `operation_aars.json` entry starts t69, ends t79, records zero attacks/captures and
+`zero_eligible_axis`. The separate political event fires t70 and offers an Igman withdrawal choice;
+its effects do not directly write OSID ownership. Its existence and misleading narrative do not
+authorize calibration work. Preserve that evidence as history rather than deleting old receipts.
+
+Start HEAD `0690a47ea` and clean working tree verified. One Sol implementer handles event removal,
+necessary references and meaningful regression preservation; one independent Sol reviewer covers
+the result. Fixed checks: affected event/pressure/reporting/essay suites, direct TypeScript check,
+scope/document checks and diff check. Expected cost a few minutes; logs in
+`logs/bc05/lukavac-removal/`. No campaign, structural-fingerprint wrapper, map/floor/baseline edits,
+remote push or publication. Roadmap/board/R8 plan and existing investigations record the owner
+disposition; BC04 and final campaign/calibration acceptance remain open.
+
+Legacy compatibility is supported by the existing self-contained `PendingEventDecision` contract:
+resolution uses saved response options/effects, not a current catalog lookup. Preserve legacy essay
+event/response linkage and old receipts while removing stale live-choice prose. Add explicit pending
+resolution and essay regressions; no replacement event or production compatibility shim is needed.
+
+The independent review also identified stale live-choice promises in the retained 1993 NATO notice
+and its essay/index. Their removal is part of the event's necessary wiring cleanup; all NATO1993
+mechanical fields and 1994/1995 NATO rows remain preserved. No replacement choice is introduced.
+
+Removal implementation is complete: event deleted, historical/source material and legacy receipt
+interpretation retained, stale live-choice references removed. Old pending comply/defy choices
+resolve through the saved options without a live catalog entry. Generic pressure/decision tests use
+synthetic fixtures. No production source or military-operation code changed.
+
+Validation preserves the actual sequence: absence regression RED as expected; seven affected
+files passed 136/136; the declared 12-file run passed 287 tests and failed two stale inventory
+expectations. Catalog count is now 158 rather than 159. The safe-claim expected finding set drops
+only the rewritten NATO essay, whose stale-choice finding is gone; its provenance is separately
+asserted, and all six remaining safe-file entries, including Lukavac, remain checked.
+Targeted correction run passed **52/52 across the two affected files**. Reusing the
+other ten unchanged passing files verifies **289 tests across 12 files**, not a single all-green
+12-file run. TypeScript exit 0, diff check exit 0 and scope verification 13/13 exit 0. Logs:
+`logs/bc05/lukavac-removal/`; original failed run remains `final-focused-tests.log`, corrected files
+are `correction-tests.log`. No campaign, calibration change or baseline refresh occurred.
+
+Independent Sol review returned **GO, no blocking findings**, after targeted stale-choice reference
+and test-inventory corrections. `logs/bc05/lukavac-removal/independent-review.md` records the verdict;
+`validation.json` records actual command exits, the 12-file/289-test evidence union and final
+reviewed hashes. All 13 reviewed data/test hashes matched. The owner-directed removal disposition
+is complete; campaign/downstream acceptance remains unmeasured. Normal pre-commit typechecking is
+retained for the authorized local commit. No calibration work or military-operation change follows.
