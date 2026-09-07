@@ -33432,3 +33432,137 @@ and desktop IPC contract are synchronized; BC04 is next pending, final calibrati
 and no baseline, horizon, initial control or pre-existing lock-file change was made. No commit.
 
 Closure documentation checks passed 9/9, exit 0 (`logs/bc03/approval-docs.log`).
+
+## 2026-09-07 - BC04 opened for n392 reconciliation and P1/P2 planning only
+
+Owner authorized investigation, planning and documentation from verified HEAD
+`be5d7690470e9ce38a6fe98abd08199137bb5386`; no production implementation, new campaign,
+commit or baseline change. BC01, BC02 and BC03 remain CLOSED; final calibration remains open.
+BC03's termination-owner removal, explicit COHA gating/copy and accepted-RBiH-talks signing
+gate are uncommitted working-tree changes, not changes attributed to that HEAD. Preserve
+those changes, complete Dayton verdict/receipts, and the pre-existing scheduled-task lock.
+The owner's beyond-horizon acceptance/ticker deferral remains settled.
+
+The existing [BC04/R8 plan](plans/2026-07-31-full-campaign-electron-validation-plan.md#bc04-bounded-implementation-plan--2026-09-07)
+is the sole plan home. Reuse the [conditional panel record](40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md):
+it authorizes proceeding to a plan, not implementation. The bounded question is which historical
+chronology diagnoses remain true in current code and accepted n392 receipts, after excluding the
+landed barracks stagger. P1 retains Ahmići's historical date and initial map with the panel's
+perpetrator-basing-cell reasoning; P2 must remain a coherent packet with measured readiness,
+unchanged expiry/backstop restrictions, and separately attributable later controlled evidence.
+
+One Sol investigator/planner and one independent Sol reviewer are the authorized team; no
+new canon panel is convened. Checks are existing receipt extraction, focused documentation
+checks, local-link/diff hygiene and starting-file hash preservation, with logs in `logs/bc04/`.
+Starting evidence is `pre-session.patch`, `pre-session-hashes.json` and `bc03-preserved.diff`.
+The master roadmap and command board record planning active, with implementation unauthorized.
+Findings, review disposition and check receipts follow in this entry.
+Reconciliation findings: the barracks stagger landed in `2c2aa72a8` and is excluded. n392
+records Ahmići absent; Tuzla/hostage crisis at t160, RRF t168, Srebrenica t162, column t163,
+Žepa t164, Markale II t170 and Deliberate Force t171. `logs/bc04/n392-summary.json` and
+`n392-receipts.json` retain read-only extraction with exit 0 sidecars. The proposed P1 production
+scope is one basing-cell predicate in `war_1993.json`; P2 is one coherent `war_1995.json`
+packet, with exact regression files and later separate controlled validation in the R8 plan.
+Current brake-on Srebrenica arithmetic is 3.5 per eligible turn, making minimum turn 169 a
+candidate for receipt 171, not a measured campaign result. n392's five displaced brigades have
+319 personnel each at t162 and 710 each at t167; older force estimates are not current receipts.
+
+The current prerequisite evaluation lag exposes an unresolved P2 receipt-target decision:
+Srebrenica at 171 implies column no earlier than 172; Markale at 178 implies Deliberate Force
+no earlier than 179. Existing panel target labels do not authorize a global evaluator change
+or waive the historical receipt buckets. Record the precise tuple and seek the required
+historical ratification/owner disposition before dependent production work. Do not reopen the
+settled enclave-outcome ownership question. P1 is independently specified; P2 remains gated.
+No reusable knowledge entry is added for these task-specific measurements; existing determinism,
+receipt-versus-window and provenance rules already cover the general lesson.
+Independent Sol review required three targeted plan corrections. First, the historical panel's
+one-based week buckets are not the runtime displayed date of the same numbered turn:
+`turnToDateString` adds `turn * 7` days to 6 April 1992. The plan now preserves raw receipt turns,
+historical targets and runtime dates separately; Ahmići's authored date/minimum 54 stay unchanged.
+Second, the proposed full tuple now includes column/UN safe-area failure at t172 and Žepa at t173
+(displayed 31 July), with Markale t178 and Deliberate Force t179. This exposes an unresolved
+calendar/receipt acceptance question, not authority to revise history or evaluator semantics.
+Third, later validation explicitly requires separate chronology comparisons, deterministic repeats,
+and same-commit collapse ON/OFF companions for both P1 and P2: seven proposed 188-week runs,
+approximately 385 serialized minutes at the preflight's historical estimate of 55 minutes/run.
+Exact commands, clean Node-22 provenance, environment, logs/exits and stopping rules are in the plan.
+None of those campaigns or clean candidate commits is authorized or created today.
+
+The newly identified reusable calendar-convention distinction is appended to
+`PROJECT_LEDGER_KNOWLEDGE.md`, superseding the earlier expectation that this session would add
+no reusable knowledge. The read-only summary generator's calendar annotation was corrected and
+regenerated; original n392 receipt values are unchanged. Review is retained in
+`logs/bc04/independent-review.md`; the same reviewer verifies only these three corrections.
+Final disposition: the same independent Sol reviewer returned GO for the corrected planning artifact
+only, with no residual in its targeted pass (`logs/bc04/independent-review.md`). Existing documentation
+truth checks passed 9/9, exit 0 (`docs-tests.log`); final preservation/local-link checks passed 35,
+exit 0 (`docs-preservation.log`), and diff hygiene passed, exit 0 (`diff-check.log`). Protected BC03
+production/test files and `.claude/scheduled_tasks.lock` retain their starting hashes. The plan,
+roadmap, command board and investigation routing are synchronized. BC04 remains OPEN with a reviewed
+plan; the calendar/receipt tuple still requires historical/owner disposition before P2, and all
+production implementation and the costed run matrix require owner authorization. No campaign,
+production edit, commit, canon change, initial-map change, baseline refresh or closure was performed.
+## 2026-09-07 - BC03 committed separately; BC04 P1 implemented and locally verified
+
+The owner accepted the recommendation to commit BC03 separately and proceed with P1, with P2's
+calendar/receipt decision and expensive campaigns separate. BC03 was staged from the snapshot
+captured before BC04 planning, excluding `.claude/scheduled_tasks.lock`, and committed as
+`c95e2524176cffee63ea6d45e5b2d357aab75b74` (`fix(events): preserve Dayton negotiation and gate
+narrated signing`). Its pre-commit typecheck passed, exit 0. The commit contains BC03 code/tests
+and its closure documentation, not BC04 planning. Evidence: `logs/bc04/p1/bc03-commit.log`,
+`bc03-commit-files.log` and `bc03-committed.log`. BC03 remains CLOSED, and its deferred content,
+negotiation ownership, accepted-talks gate and complete verdict/receipts are preserved.
+
+One Sol implementer applied exactly the panel-preferred P1 predicate in
+`data/scenarios/events/war_1993.json`: Ahmići requires HRHB control of the perpetrator basing
+cell `op:vitez:vitez_2`, replacing the Vitez municipality 0.5 threshold. The authored date,
+turns 54–70, prerequisite, tensions flag, once behavior, narrative and effects remain unchanged.
+No victim-cell gate, map repaint, threshold relaxation, engine/schema/calendar or P2 change.
+The existing distinct panel record supplies historical authority; no new history was authored
+and no panel was reconvened. Canon/engineering reference search found no structural description
+requiring amendment. Current roadmap, R8 plan, command board and investigation routing were updated;
+historical ledger/seat records remain lineage. No new reusable knowledge was added in this step.
+
+Tests in `tests/event_timeline_integrity.test.ts` and `tests/events_evaluate.test.ts` pin the
+catalog contract and exercise the real evaluator: HRHB basing with only 1/3 municipal control
+fires, while RBiH basing despite HRHB holding 2/3 blocks; prerequisite/window/once/effects are
+also covered. RED reproduced 3 expected failures (60 pass), exit 1; GREEN passed 63/63, exit 0.
+The affected event-timeline/loader/evaluator/pressure suite passed 108/108, exit 0. Typecheck,
+desktop simulation build plus startup-snapshot check, and warroom build passed, exit 0. Logs and
+exit-code sidecars are in `logs/bc04/p1/` (`focused-red`, `focused-green`, `authorized-suites`,
+`typecheck`, `desktop-sim-build`, `warroom-build`). Independent Sol review returned GO for the
+bounded candidate, no findings (`independent-review.md`), with implementer and reviewer separate.
+
+P1 remains an uncommitted candidate pending separately authorized controlled campaign evidence;
+local tests/builds do not satisfy campaign acceptance. BC04 and final calibration remain OPEN.
+P2's calendar/receipt tuple remains unresolved and no P2 implementation or proposed seven-run
+matrix is authorized here. No campaign, initial-control change, baseline/floor/manifest refresh,
+or lock-file edit occurred. Final scope/preservation and documentation checks follow below.
+Final verification passed: documentation truth 9/9 (`docs-tests.log`), scope/preservation/local
+links 30 checks (`scope-preservation.log`), and diff hygiene (`final-diff-check.log`), all exit 0.
+The scope check proves the entire 1993 catalog equals HEAD plus exactly the one Ahmići predicate
+replacement; BC03 production/tests and the lock match their preserved starting hashes. No staged
+P1 or unrelated work remains. These checks establish the bounded candidate, not campaign acceptance.
+## 2026-09-07 - Owner authorizes P1 candidate commit and reduces P1 validation
+
+The owner accepted committing the locally verified P1 candidate now and deferring campaign
+acceptance to the next planned calibration session. P1's extra same-input repeat and collapse-ON
+companion requirements are explicitly RETIRED unless a concrete failure justifies them. This
+supersedes the earlier seven-run plan and the requirement to leave P1 uncommitted until campaigns.
+The clean pre-P1 source base is `c95e2524176cffee63ea6d45e5b2d357aab75b74`; the candidate is
+the commit containing this entry. Preserve that exact before/after comparison for attribution,
+with receipt, anchors, health, absolute enclave protections, displacement and operation checks.
+Do not compare a mixed later tree with n392 and attribute the whole difference to P1. No floor,
+baseline, historical target or P2 requirement is changed. P2 remains unresolved and unauthorized.
+
+The existing P1 implementation review returned GO; 108 affected event tests, 9 documentation
+tests, typecheck and both builds passed. This closeout changes documentation/process only around
+that same reviewed production patch; no new implementation, review round or campaign is needed.
+The existing R8 plan, master roadmap and command board record the owner revision. Commit scope
+includes the three P1 implementation/test files and existing BC04 plan/continuity documentation;
+exclude `.claude/scheduled_tasks.lock` and local `logs/`. BC03 stays in its separate prior commit.
+BC04 remains open, and committing a candidate does not claim campaign or final-calibration acceptance.
+Candidate closeout checks passed: 30 scope/preservation/local-link checks and 9 documentation
+tests, exit 0 (`logs/bc04/p1/candidate-scope.log`, `candidate-docs.log`). The catalog comparison
+still proves exactly one changed gate and preserves BC03 bytes and the lock. The mandatory
+pre-commit typecheck will run normally; no verification hook is bypassed and no campaign is launched.

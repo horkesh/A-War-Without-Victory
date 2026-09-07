@@ -60,6 +60,23 @@ function seedEventReadiness(state: GameState, event: EventDefinition): void {
     state.military.event_readiness[event.id] = event.pressure.threshold;
 }
 
+function makeAhmiciState(turn: number): GameState {
+    const state = minimalState('war', turn);
+    state.military.fired_event_ids = ['croat_bosniak_war_begins_1993'];
+    state.military.event_flags = { hvo_arbih_tensions_rising: true };
+    state.military.negotiation = {
+        capital: {
+            HRHB: {
+                war_crimes_events: 0,
+                international_credibility: 50,
+            } as any,
+        },
+        patron_relationships: {},
+        peace_plan_history: [],
+    } as any;
+    return state;
+}
+
 function expectEventOwnedControl(
     state: GameState,
     expectedOsids: readonly string[],
@@ -671,6 +688,58 @@ test('explicitly dated spring 1993 events cannot surface before their first hist
             `${eventId} must not match one week early`,
         );
     }
+});
+
+test('Ahmici fires from the HRHB Vitez basing cell at turn 54 and applies its direct effects once', () => {
+    const event = loadedEventById('ahmici_massacre_1993');
+
+    const beforeWindow = makeAhmiciState(53);
+    beforeWindow.political.political_controllers = {
+        'op:vitez:vitez_2': 'HRHB',
+        'op:vitez:kruscica': 'RBiH',
+        'op:vitez:preocica_3': 'RBiH',
+    };
+    assert.deepStrictEqual(evaluateEvents(beforeWindow, rejectRandomness, 53, [event]).fired, []);
+
+    const missingPrerequisite = makeAhmiciState(54);
+    missingPrerequisite.military.fired_event_ids = [];
+    missingPrerequisite.political.political_controllers = {
+        'op:vitez:vitez_2': 'HRHB',
+        'op:vitez:kruscica': 'RBiH',
+        'op:vitez:preocica_3': 'RBiH',
+    };
+    assert.deepStrictEqual(evaluateEvents(missingPrerequisite, rejectRandomness, 54, [event]).fired, []);
+
+    const eligible = makeAhmiciState(54);
+    eligible.political.political_controllers = {
+        'op:vitez:vitez_2': 'HRHB',
+        'op:vitez:kruscica': 'RBiH',
+        'op:vitez:preocica_3': 'RBiH',
+    };
+    assert.deepStrictEqual(
+        evaluateEvents(eligible, rejectRandomness, 54, [event]).fired.map((fired) => fired.id),
+        ['ahmici_massacre_1993'],
+    );
+    assert.strictEqual((eligible.military.negotiation as any).capital.HRHB.war_crimes_events, 3);
+    assert.strictEqual((eligible.military.negotiation as any).capital.HRHB.international_credibility, 25);
+
+    assert.deepStrictEqual(evaluateEvents(eligible, rejectRandomness, 55, [event]).fired, []);
+    assert.strictEqual((eligible.military.negotiation as any).capital.HRHB.war_crimes_events, 3);
+    assert.strictEqual((eligible.military.negotiation as any).capital.HRHB.international_credibility, 25);
+});
+
+test('Ahmici stays blocked when RBiH holds the Vitez basing cell despite HRHB control elsewhere in Vitez', () => {
+    const event = loadedEventById('ahmici_massacre_1993');
+    const state = makeAhmiciState(54);
+    state.political.political_controllers = {
+        'op:vitez:vitez_2': 'RBiH',
+        'op:vitez:kruscica': 'HRHB',
+        'op:vitez:preocica_3': 'HRHB',
+    };
+
+    assert.deepStrictEqual(evaluateEvents(state, rejectRandomness, 54, [event]).fired, []);
+    assert.strictEqual((state.military.negotiation as any).capital.HRHB.war_crimes_events, 0);
+    assert.strictEqual((state.military.negotiation as any).capital.HRHB.international_credibility, 50);
 });
 
 test('the general safe-areas card is the turn-57 Resolution 824 expansion, not a duplicate Resolution 819 card', () => {

@@ -1,5 +1,15 @@
 # Event-System Firing Saturation and Dead Catalog — Investigation
 
+**Current routing, 2026-09-07:** the status below records the original investigation,
+not current implementation authority. BC01–BC03 are CLOSED; BC03's verified Dayton/COHA
+repair is separately committed as `c95e2524176cffee63ea6d45e5b2d357aab75b74`.
+BC04 P1 is owner-authorized, implemented and independently reviewed as a candidate in the
+[existing R8 plan](../plans/2026-07-31-full-campaign-electron-validation-plan.md#bc04-bounded-implementation-plan--2026-09-07).
+That reconciliation distinguishes current code and accepted n392 receipts from older
+diagnoses, excludes the landed barracks stagger, and retains the existing panel's P1/P2
+restrictions. P1 focused tests/builds pass; campaign acceptance is pending. P2 implementation
+and all proposed campaigns remain unauthorized; final calibration stays open.
+
 **Date:** 2026-09-05
 **Trigger:** Owner observation — *"I noticed the 3 barracks events fire on the same week for some reason."*
 **Scope:** Diagnostic only. **No code, data, or canon was changed by this investigation.**

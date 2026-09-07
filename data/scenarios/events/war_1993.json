@@ -1569,10 +1569,9 @@
         "type": "and",
         "conditions": [
           {
-            "type": "faction_controls_municipality",
-            "faction": "HRHB",
-            "municipality": "vitez",
-            "threshold": 0.5
+            "type": "territory_control",
+            "osid": "op:vitez:vitez_2",
+            "faction": "HRHB"
           },
           {
             "type": "flag_equals",

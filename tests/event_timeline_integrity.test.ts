@@ -63,6 +63,41 @@ describe('Event timeline historical integrity', () => {
         expect(siege.trigger.requires_events).toContain('croat_bosniak_war_begins_1993');
     });
 
+    it('Ahmici uses the HRHB Vitez basing cell while preserving its historical contract', () => {
+        const ahmici = allEvents.find((e: any) => e.id === 'ahmici_massacre_1993');
+
+        expect(ahmici).toBeDefined();
+        expect(ahmici.trigger.turn_min).toBe(54);
+        expect(ahmici.trigger.turn_max).toBe(70);
+        expect(ahmici.trigger.requires_events).toEqual(['croat_bosniak_war_begins_1993']);
+        expect(ahmici.trigger.condition).toEqual({
+            type: 'and',
+            conditions: [
+                { type: 'territory_control', osid: 'op:vitez:vitez_2', faction: 'HRHB' },
+                { type: 'flag_equals', flag: 'hvo_arbih_tensions_rising', value: true },
+            ],
+        });
+        expect(JSON.stringify(ahmici.trigger.condition)).not.toContain('op:vitez:preocica_3');
+        expect(ahmici.once).toBe(true);
+        expect(ahmici.effect).toEqual({
+            kind: 'humanitarian_impact',
+            faction: 'HRHB',
+            war_crimes_delta: 3,
+        });
+        expect(ahmici.effects).toEqual([
+            {
+                kind: 'negotiation_capital',
+                faction: 'HRHB',
+                dimension: 'international_credibility',
+                delta: -25,
+            },
+            {
+                kind: 'narrative',
+                text: 'The Ahmici massacre shocks the international community. HVO credibility suffers a devastating blow.',
+            },
+        ]);
+    });
+
     it('Stari Most destruction requires East Mostar siege', () => {
         const bridge = allEvents.find((e: any) => e.id === 'mostar_bridge_destroyed_1993');
         expect(bridge.trigger.requires_events).toContain('east_mostar_siege_1993');

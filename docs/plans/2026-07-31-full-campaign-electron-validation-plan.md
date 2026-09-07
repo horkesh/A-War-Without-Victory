@@ -270,6 +270,218 @@ sequence. RED reproduced the missing gate and false signing; GREEN passed **20/2
 (`logs/bc03/approval-green.log`, exit 0). The same independent Sol reviewer returned
 GO on this delta, with no findings. Follow-up typecheck passed (exit 0, `approval-typecheck.log`). BC03 is CLOSED under these explicit dispositions; final calibration remains open. Prior complete-verdict, canonical n392 roundtrip,
 UI, build and 111-test evidence stands; there is no new packaged run or campaign claim.
+### BC04 bounded implementation plan — 2026-09-07
+
+**Status and authority.** Plan independently reviewed; **P1 implementation authorized by the owner
+on 2026-09-07; implemented and independently reviewed as a candidate**. BC04 is not closed. P2 implementation and campaigns
+remain unauthorized. The existing [§6 panel record](../40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md)
+unanimously authorizes P1/P2 to proceed only to a plan. Reuse its Historian, scenario/calibration,
+engine/systems, red-team and game-design seats; do not reconvene a panel. The four Battle of the Barracks
+windows already landed in `2c2aa72a8` (`3-4`, `4-9`, `6-7`, `7-8`) and are outside BC04. BC01-BC03 are
+closed. BC03's previously uncommitted edits in `src/sim/turn_pipeline.ts`,
+`data/scenarios/events/war_1995.json`, tests and closure docs were committed separately as
+`c95e2524176cffee63ea6d45e5b2d357aab75b74` after owner authorization. They were never part of
+the planning-start HEAD `be5d7690470e9ce38a6fe98abd08199137bb5386`. BC04 does not reopen BC03's
+Dayton verdict/receipt contract or the settled post-horizon deferrals.
+
+The sensitive-history gate §6, War-only phase specification (one week per turn), Engine
+Invariants §§9.8–9.9, canonical `GameState` schema and `CALIBRATION_MASTER.md` remain controlling.
+Neither packet introduces a state field/migration or changes evaluator iteration: retain catalog
+ordering and stable OSID ordering; introduce no wall-clock timestamps, randomness or unsorted
+simulation traversal. Existing panel outcome-ownership questions remain outside this plan.
+
+**Accepted evidence and calendar semantics.** `n392` remains the owner-blessed reference with unchanged
+floors `694/674/668/641`, not a fresh current-HEAD run. Its actual receipts are Ahmići absent; Tuzla
+Gate `t160`; hostage crisis `t160`; RRF `t168`; Srebrenica `t162`; column `t163`; Žepa `t164`;
+Markale II `t170`; Deliberate Force `t171`; Storm `t174`; Mistral 2 `t179`.
+**Calendar convention is unresolved for historical acceptance:** the panel's one-based elapsed
+week buckets are `w54=12-18 Apr 1993`, `w164=22-28 May 1995`, `w171=10-16 Jul`, and
+`w178=28 Aug-3 Sep`. They are not runtime dates for the same numbered receipt. Runtime
+`turnToDateString` (`src/ui/warroom/components/warroom_utils.ts:70-75`) uses 6 Apr 1992 plus
+`turn*7` days: `t54=19 Apr 1993`, `t164=29 May 1995`, `t171=17 Jul`, `t173=31 Jul`,
+`t178=4 Sep`, and `t179=11 Sep`. The runner's `week_index` is zero-based
+(`src/scenario/scenario_runner.ts:3121-3126`). Preserve both raw receipt turns and
+displayed dates; do not silently repair the epoch, UI, Ahmići date, or historical target to hide
+this mismatch. The accepted artifact also shows the five 280th-284th
+East Bosnian Light Brigades displaced at `t162` to `op:zivinice:gracanica_2` with 319 personnel each,
+then rebuilding to 710 each at `t167`; this is the P2 force-economy blast radius. Evidence and exit 0:
+`logs/bc04/n392-summary.json` and `logs/bc04/n392-summary.exitcode`; the fuller extraction remains at
+`logs/bc04/n392-receipts.json`. The summary's original calendar bucket annotation was corrected
+after independent review; receipt extraction is unchanged.
+
+**P1 — Ahmići, one catalog gate.** Change only
+`data/scenarios/events/war_1993.json`: in `ahmici_massacre_1993`, replace the
+`faction_controls_municipality(vitez, HRHB, 0.5)` clause with
+`territory_control(op:vitez:vitez_2, HRHB)`. Preserve `turn_min:54`, `turn_max:70`, the
+`croat_bosniak_war_begins_1993` prerequisite, the tensions flag, effects, cited narrative, and the
+hybrid/census-derived initial map. Never gate on victim cell `op:vitez:preocica_3`, delete the control
+gate, repaint Vitez, or lower a municipality threshold. Extend `tests/event_timeline_integrity.test.ts`
+to pin the exact basing-cell predicate and unchanged date/prerequisites, and `tests/events_evaluate.test.ts`
+with positive/negative catalog-backed fixtures: it fires at `t54` when HRHB holds `vitez_2`, and stays
+blocked when RBiH holds that cell. No production TypeScript or schema change is proposed.
+
+The focused event timeline/loader/evaluator tests have passed. At the next planned calibration,
+compare a clean Node-22 188-week P1 run against its clean pre-P1 base, without the retired P1
+repeat or collapse companion requirements, recording both commits,
+`git_dirty:false`, scenario id/hash, normalized consumed-input path list/digest, command log and exit code.
+Pass requires exactly one Ahmići receipt at `t54`, the direct `+3` HRHB war-crimes and `-25`
+international-credibility effects, no unexpected event/decision deltas, byte-identical
+`control_delta.json`, zero rung-4 operation divergence from `tools/op_schedule_diff.cjs`, unchanged
+four checkpoint matched counts and complete `anchor_checks`, unchanged displacement/formation outputs,
+and no new §6 or health failure. Run `tools/verify_checkpoints.cjs`, preserving and naming its accepted
+Farz P-A residual rather than claiming a green exit, `tools/engine_health_gate.cjs --horizon 188w`
+without `--strict`/`--update`, and applicable absolute enclave checks. This is not full collapse
+ON/OFF proof. Do not raise floors or update manifests.
+Stop P1 on any territory, operation, formation, displacement, or unexplained receipt delta; explain it
+before acceptance rather than tuning around it.
+
+**P2 — one coherent 1995 chronology packet, after P1 acceptance.** The sole production file proposed is
+`data/scenarios/events/war_1995.json`. Preserve all event effects, control lists, prerequisites,
+pressure constants, `turn_max:185` for Srebrenica, `turn_max:190` for the column/Žepa/Markale, and
+`turn_max:195` for Deliberate Force. Preserve `CONTAIN_RELEASE_TURN_BACKSTOP=160` in
+`src/sim/combat/enclave_resilience.ts`; it is not a BC04 edit. Do not edit Žepa's inert `turn_min:160`,
+initial control, painted references, calibration floors, or any operation. The candidate catalog packet
+is: Tuzla Gate `160→164` (single-turn receipt); hostage crisis shift `160-163→164-167` (same width,
+no narrower expiry); Srebrenica `turn_min 160→169` as the smallest current-code candidate for a `t171`
+receipt; column `turn_min 160→171`; Markale II candidate `turn_min 165→177` for a `t178` receipt;
+Deliberate Force `turn_min 165→178`. The Srebrenica candidate is based on the live brake-on rate
+`1 + 2 (coha_expired) - 0.5 (rrf_deployed) + 1 (hostage) = 3.5`, yielding readiness
+`3.5/7.0/10.5` at `t169/t170/t171`; the earlier Historian seat's 3/2.5 discussion omitted the hostage
+modifier, so the receipt must be proved from current code rather than inferred from that arithmetic.
+
+One bounded historical/owner decision remains before the P2 data edit: obtain new ratification of the
+complete **receipt tuple and calendar convention**, not merely the `turn_min` labels. The existing
+panel record is evidence for this decision, not ratification of new acceptance. Current ordering makes a
+`requires_events` consumer observe a prerequisite on a later turn, as n392's `162→163` column and
+`170→171` Markale/Deliberate-Force receipts demonstrate. Thus a Srebrenica receipt at `t171` implies
+the column at earliest `t172`; a Markale receipt at `t178` implies Deliberate Force at earliest `t179`.
+The complete current-code hypothesis (not accepted history) is:
+
+| Receipt | Candidate raw turn | Runtime displayed date |
+|---|---:|---|
+| Tuzla Gate / hostage crisis | 164 | 29 May 1995 |
+| Srebrenica | 171 | 17 Jul 1995 |
+| Column / `un_safe_areas_fail_1995` | 172 | 24 Jul 1995 |
+| Žepa, unchanged row; readiness 3 at 172, 6 at 173 | 173 | 31 Jul 1995 |
+| Markale II | 178 | 4 Sep 1995 |
+| Deliberate Force | 179 | 11 Sep 1995 |
+
+The panel did not authorize changing evaluator semantics to force same-turn chains, nor adopting
+these displayed dates as historically correct. Preserve its historical targets as unmet until the
+required Historian/owner disposition explicitly resolves the calendar and dependent-event timing.
+The concrete decision is what receipt/date tuple is acceptable, and whether satisfying it requires
+a separately scoped ordering proposal. Do not assume shifting a predecessor can preserve both
+historical buckets. No P2 production edit proceeds until this is recorded. Reuse the existing panel
+record; any newly required distinct sign-off seats remain distinct. Do not reopen outcome ownership.
+
+Extend `tests/event_timeline_integrity.test.ts` to pin the ratified windows, wide maxima, Žepa's unchanged
+row, Srebrenica/Žepa event-owned control effects and the absence of response options. Extend
+`tests/pressure_system.test.ts` with the current four-modifier brake-on accrual and expiry-margin case,
+and `tests/events_evaluate.test.ts` with a catalog-backed `t164-180` sequence asserting every actual
+receipt turn and the existing prerequisite lag. A failing fixture is evidence that the tuple needs
+ratification/correction; it is not authority to alter the evaluator, pressure schema, expiry semantics,
+containment backstop, or to isolate the Srebrenica edit.
+
+After focused tests and Historian ratification, run one clean Node-22 controlled 188-week P2 POST against
+the accepted clean P1 run, with the same provenance record and only the ratified `war_1995.json` packet
+as a consumed production diff. Record receipt dates and readiness at every eligible turn; full
+`anchor_checks` and all four checkpoint scores; `engine_health_gate`; the complete §6 HOLDS/FALLS and
+capture-provenance output; final and per-turn control diffs; `op_schedule_diff.cjs` rung 4 plus
+`operation_aars.json`/`watched_operations.json`; displacement totals/events; and formation/location/
+personnel diffs for the 280th-284th brigades, especially Živinice-Lopare-Posavina and the
+Storm/Sana/Mistral-2 window. P2 passes only with the ratified receipts, Srebrenica and Žepa still
+event-owned and fallen by `t188`, protected enclaves and all previously passing anchors intact, all
+unchanged health thresholds met, and every territory/operation/displacement delta causally explained
+and explicitly accepted. Scores must remain above the unchanged floors; do not re-floor or refresh a
+manifest from an unexplained run. Stop after the fixed run matrix and one independent review with
+at most one targeted correction pass. A run beyond that matrix, evaluator redesign, containment
+change, isolated date edit, or calibration tuning requires a new owner decision.
+
+**Owner-revised validation disposition — 2026-09-07.** Commit the locally verified P1 candidate
+now; defer campaign acceptance to the next planned calibration session. The owner retired P1's
+extra same-input repeat and collapse-ON companion requirements unless a concrete failure justifies
+them. Preserve the clean P1 before/after comparison, receipt/anchor/health and displacement/operation
+checks, unchanged floors and applicable absolute enclave protections. This does not claim full
+collapse ON/OFF proof for P1. No campaign is authorized in this closeout.
+
+**Later validation matrix — deferred/proposed, not scheduled.** A is the clean pre-P1 source
+commit `c95e2524176cffee63ea6d45e5b2d357aab75b74`; B is the P1 candidate commit recording this
+disposition. Resolve B's exact hash from git before a future run. C remains B plus a separately
+ratified and authorized P2 packet. Preserve A even if other changes land before calibration;
+never attribute a mixed later-tree difference to P1. Use the same Node 22 version and scenario:
+
+| Run | Commit | Collapse | Purpose |
+|---|---|---|---|
+| A-OFF | A | unset | Clean P1 control, reconciled against n392 |
+| B-OFF | B | unset | P1 attribution against A, deferred to next calibration |
+| C-OFF-1 / C-OFF-2 | C | unset | P2 attribution against accepted B; deterministic repeat |
+| C-ON | C | `true` | P2 §6 companion against C-OFF-1 |
+
+The preflight's historical cost is approximately 55 minutes per serialized 188-week run:
+P1's retained before/after comparison is at most **two runs, approximately 110 minutes** before
+proven-equivalent reuse, deferred rather than launched as a separate campaign now. The P2-only
+repeat and ON companion remain proposed, not newly authorized or retired by this P1 decision.
+The old seven-run / 385-minute proposal is superseded; there is no seven-run acceptance mandate.
+Reuse an existing run only if its exact candidate commit, normalized consumed bytes/path list,
+Node version, environment and artifacts establish equivalence; an n392 score alone cannot replace A.
+Stop at the first failed preflight, receipt target, determinism comparison or acceptance gate;
+diagnose before advancing to the next matrix stage. Unexplained deltas do not authorize tuning.
+
+Commands for later execution (placeholders must resolve to recorded run paths, not newest-by-time):
+
+```powershell
+npx.cmd vitest run tests/event_timeline_integrity.test.ts tests/event_loader.test.ts tests/events_evaluate.test.ts tests/pressure_system.test.ts tests/enclave_formation_displacement.test.ts tests/turn_pipeline.test.ts tests/event_conditions.test.ts
+npm.cmd run typecheck
+npm.cmd run desktop:sim:build
+npm.cmd run warroom:build
+$env:AWWV_S6_GRADE_RUN = 'true'
+Remove-Item Env:ENABLE_COLLAPSE -ErrorAction SilentlyContinue
+npm.cmd run sim:scenario:run:188w
+# For a separately authorized P2 C-ON only, before the same gated entrypoint:
+$env:ENABLE_COLLAPSE = 'true'
+npm.cmd run sim:scenario:run:188w
+node tools/verify_checkpoints.cjs <run_dir>
+node tools/engine_health_gate.cjs <run_dir> --horizon 188w
+node tools/op_schedule_diff.cjs <chronology_PRE> <chronology_POST> --list
+node tools/verify_collapse_section6.cjs <same_commit_ON>/final_save.json --compare <same_commit_OFF>/final_save.json
+```
+
+Record/restore environment values explicitly between rows. Redirect each command's stdout/stderr
+to `logs/bc04/<row>-<check>.log`, retain its literal command in `.command.txt` and exit code in
+`.exit.txt`. Before comparisons, verify `run_meta.json` clean commit/Node/scenario and normalized
+consumed-input path list/digest: no production input difference in repeats or ON/OFF; only the
+declared catalog packet differs in chronology PRE/POST. Record the separately controlled collapse
+flag and scoring-reference hashes. Same-input repeats must match the canonical simulation artifacts
+and final-state hash, excluding only documented observational timing metadata. Compare all named
+receipts, anchors, displacement and operation outputs, not just a score. The proposed P2 collapse
+comparison is C-ON/C-OFF; P1 has no required ON companion under the owner revision. A chronology
+pair is never a collapse flag pair. Artifact-only verifier success does not
+establish source attribution by itself. The accepted Farz P-A verifier residual remains explicitly
+classified, never generalized into permission for another failed check. No baseline manifest refresh.
+
+**Planning-session verification:** one independent Sol review requested three corrections (calendar
+convention, full receipt tuple and controlled-run matrix); targeted verification returned **GO for
+this planning artifact only**, with no residual finding. See `logs/bc04/independent-review.md`.
+Documentation truth tests passed 9/9 (`docs-tests.log`, exit 0); preservation/local-link checks passed
+35 checks (`docs-preservation.log`, exit 0); `git diff --check` passed (`diff-check.log`, exit 0).
+BC03 production/tests and the scheduled-task lock retain their starting hashes. No production
+implementation, campaign, commit, canon change, floor refresh or BC04 closure occurred.
+
+**Owner-approved P1 implementation — 2026-09-07.** After accepting the recommendation to commit
+BC03 and proceed with P1, the owner authorized the exact basing-cell repair and focused verification.
+BC03 was staged from the pre-BC04 snapshot and committed with its closure docs; its pre-commit
+typecheck passed. The scheduled-task lock and all BC04 planning changes stayed outside that commit.
+P1 changes only the Ahmići control clause in `war_1993.json`; the two planned regression files
+pin the full event contract and exercise the real evaluator's positive/negative, prerequisite,
+window, once-only and direct-effect behavior. Focused RED reproduced three expected failures;
+GREEN passed 63/63 (exit 0), with logs in `logs/bc04/p1/`.
+The affected four-file suite passed **108/108**, exit 0 (`authorized-suites.log`). Typecheck,
+desktop simulation/startup-snapshot build and warroom build passed, exit 0 (matching log and
+exit-code sidecars). Independent Sol implementation review returned **GO for the bounded P1
+candidate**, no findings (`logs/bc04/p1/independent-review.md`), using the existing panel record.
+The owner subsequently authorized committing this locally verified candidate and deferring campaign
+acceptance under the revised disposition above. P1 campaign acceptance, P2 calendar/receipt disposition
+and final calibration remain open. No P2 code, date, initial control, schema or baseline changed.
 ### Pre-seeded finding register
 
 **R8 remains WAITING ON R7. This register is inert until R8 opens** -- it starts nothing and claims
@@ -303,7 +515,7 @@ Sources: [frozen audit](../40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_A
 | ID | Bug / routing | Writer / consumer | Impact and disposition |
 |---|---|---|---|
 | B10 | Dead narrated COHA/ceasefire/Dayton chain; mechanical packaged negotiation works | `event_types.ts`, `war_1995.json`, event termination and negotiation paths | BC03 **CLOSED 2026-09-07**: verified repair; owner deferred post-horizon acceptance/tickers; signing requires accepted talks. One terminal owner, complete verdict/receipts; no global predicate shortcut or horizon extension. See [investigation corrections](../40_reports/20260905_EVENT_FIRING_SATURATION_AND_DEAD_CATALOG.md). |
-| B11 | Historical chronology findings; sensitive P1 Ahmići/P2 enclave packet retain panel ownership | Catalog gates/dates and downstream displacement/NATO | BC04 **FIX after planning conditions**. Reconcile n392 first, exclude already-landed barracks work. [Conditional panel record](../40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md); no isolated Srebrenica date edit or map repaint. |
+| B11 | Historical chronology findings; sensitive P1 Ahmići/P2 enclave packet retain panel ownership | Catalog gates/dates and downstream displacement/NATO | BC04 **P1 IMPLEMENTED/REVIEWED; campaign acceptance pending**. P2 and campaigns remain unauthorized. Current n392 reconciliation and separate P1/P2 scopes are recorded in the BC04 subsection above; landed barracks work is excluded. [Conditional panel record](../40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md); no isolated Srebrenica date edit or map repaint. |
 | B12 | Same-turn prerequisite dead NATO windows; `operation_lukavac_93` control gate | Event loader/catalog and firing pass | BC05: lint is byte-neutral; enabling events is not. NATO **FIX when scheduled**; Lukavac **VERIFY/DISPOSITION** with Historian deciding gate versus simulated-war defect. [Measured sweep](../40_reports/audits/20260906_FACTION_CONTROLS_MUNICIPALITY_THRESHOLD_SWEEP.md). |
 | B13 | Three posture-review handlers unwired; bounded gesture-escalation gap | Desktop player-action handlers and `action_cadence` | BC06 **FIX when scheduled**; prove live player effects and cooldown/receipts, not only headless parity. No general recurrence redesign. [PM ruling](../40_reports/audits/20260905_EVENT_ROADMAP_FIT_PM_RULING.md). |
 
@@ -389,7 +601,7 @@ R1–R5, the accepted R6 slice, RC and RE stay closed; calibration remains ongoi
 | **BC01 — player opportunity path / R8** | Gameplay/operations + Game Designer; QA | Player campaign territory and operation decisions; observer parity alone cannot test it | **CLOSED — owner accepted verified repair and retired territory similarity, 2026-09-07** ([verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)), using the [corrected contract](2026-09-01-player-opportunity-sweep-gap.md). L0 gets live review, L1 retains review, L2 auto-applies military opportunities without queuing, L3 remains observer. Verify all four modes, no duplicate decision/application, preserved human authorization at L0/L1, and fresh RBiH/HRHB player-path evidence against observer plus RS regression proof; do not copy a blanket post-turn sweep. |
 | **BC02 — B2/B9 sector/rating truth / R8** | Systems + QA | Canonical saves omit derived ratings; immediate load/display gap, no demonstrated simulation effect | **CLOSED — owner-approved Electron load/display repair verified 2026-09-07.** Loaded saves rebuild only the transient rating cache before runtime/player projection; canonical bytes, other state, privacy, and next-turn simulation ordering remain unchanged. Browser raw-JSON fallback is outside this repair. [Implementation and verification](#bc02-existing-save-investigation--2026-09-07). |
 | **BC03 — B10 narrated Dayton / R8** | Events/systems + Game Designer + QA | Event effects, termination ordering, receipts and endgame state | **CLOSED 2026-09-07 — verified repair and owner-approved post-horizon deferral.** Repaired the narrated chain with one coherent terminal owner; preserve the working packaged negotiation. Resolve the redundant event game-over writer first, then the catalog gate/window; verify COHA false-key semantics, firing/termination order and complete packaged verdict snapshot/receipts. The headless terminal contract is VERIFY/DISPOSITION, not a mandate to add a headless closeout. Do not globally redefine `flag_not_set` or extend the 188-week horizon as a shortcut. [Investigation corrections §10–11](../40_reports/20260905_EVENT_FIRING_SATURATION_AND_DEAD_CATALOG.md). |
-| **BC04 — B11 chronology + P1/P2 / R8, panel-owned history** | Historian + events/systems + scenario/calibration + independent §6 panel | Event timing/effects, displacement, personnel, NATO and downstream operations | **FIX after bounded planning conditions**: reconcile what already landed against n392 first; remove the completed barracks stagger from the repair set. P1/P2 follow the [existing conditional panel record](../40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md), which authorizes proceeding to a plan only. P1 preserves the historical date and map; P2 is a coherent chronology packet, measured receipt dates with brakes active, no narrowed expiry/backstop shortcut. Separate P1 and P2 controlled runs, full anchors/health/§6 and displacement/operation diffs; no fresh re-floor until explained and accepted. |
+| **BC04 — B11 chronology + P1/P2 / R8, panel-owned history** | Historian + events/systems + scenario/calibration + independent §6 panel | Event timing/effects, displacement, personnel, NATO and downstream operations | **P1 IMPLEMENTED/REVIEWED; campaign acceptance pending; P2/campaigns unauthorized**: current code and n392 receipts reconciled in the BC04 subsection above; completed barracks stagger excluded. P1/P2 follow the [existing conditional panel record](../40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md), which authorizes proceeding to a plan only. P1 preserves the historical date and map; P2 is a coherent chronology packet, measured receipt dates with brakes active, no narrowed expiry/backstop shortcut. Separate P1 and P2 controlled runs, full anchors/health/§6 and displacement/operation diffs; no fresh re-floor until explained and accepted. |
 | **BC05 — B12 dead event windows/control gates / R8** | Events/systems + Historian + QA | Enabling dormant NATO events can change outcomes; a loader lint alone is byte-neutral | **FIX** the established NATO same-turn prerequisite/window defects after consumed-baseline confirmation; **VERIFY/DISPOSITION** for `operation_lukavac_93`: the [sweep](../40_reports/audits/20260906_FACTION_CONTROLS_MUNICIPALITY_THRESHOLD_SWEEP.md) proves an unreachable gate in measured runs, not whether the gate or simulated war is historically wrong. Resolve that exact question, then fix or justify disposition; never repaint initial control or blanket-lower thresholds. Verify actual event receipts and downstream effects separately from lint coverage. |
 | **BC06 — B13 posture/gesture controls / R8** | Gameplay/desktop + Game Designer + QA | Player-action decisions/effects; headless neutrality is insufficient | **FIX** the three unwired posture-review handlers and settle bounded gesture escalation per the [PM ruling](../40_reports/audits/20260905_EVENT_ROADMAP_FIT_PM_RULING.md). Verify the live action path, recurrence/cooldown, decision receipts and effects; no general recurrence-system redesign. |
 | **BC07 — initial-master stability divergence / calibration-data authority** | Asset/data integration + Systems + calibration | Potentially behavior-bearing `stability_score`; mode-dependent consumption | **VERIFY/DISPOSITION**: establish consumed mode and writer/reader for the 269-row master/derive disagreement, including ~227 stability rows. `hybrid_1992`/`ethnic_1991` early returns must be accounted for; do not infer 227 effects in the blessed scenario. Record retain/regenerate policy and affected scenario scope; no mandated regeneration, initial-control override, or re-floor for the cosmetic contested-control subset. [2026-09-04 correction](../PROJECT_LEDGER.md#2026-09-04--correcting-the-correction-contested_control-is-cosmetic), [calibration authority](../40_reports/CALIBRATION_MASTER.md). |

@@ -5112,3 +5112,5 @@ byte-identical canonical POST do not prove a player endpoint-convergence proxy: 
 controls are necessary, and an unmet expectation stays explicit until owner disposition.
 See [BC01 verification](40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)
 and [dated ledger](PROJECT_LEDGER.md#2026-09-07---bc01-campaign-adjudication-and-implementation-documentation-active).
+
+- **2026-09-07 — Historical week buckets and runtime turn dates are different contracts.** A one-based historical bucket `wN = floor((date - 1992-04-06)/7)+1` must not be presented as the displayed date for raw receipt `tN`: `turnToDateString` adds `turn*7` days to the epoch, while runner `week_index` is zero-based. Preserve raw receipt turn, displayed date and historical target separately; resolve their intended alignment before retiming events. BC04 preserves Ahmići's authored date/minimum 54 and records the mismatch rather than silently fixing the epoch or UI. See [2026-09-07 BC04 reconciliation and review](PROJECT_LEDGER.md#2026-09-07---bc04-opened-for-n392-reconciliation-and-p1p2-planning-only).

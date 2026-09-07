@@ -220,7 +220,7 @@ Historical RE packet sequencing and rollback evidence remain in the [closed cont
 
 **Current disposition:** BC01 CLOSED by owner approval: verified repair accepted; territory-similarity requirement retired ([verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)); BC02 CLOSED by its verified Electron load/display repair; BC03 CLOSED; BC04–BC07 pending under D1; BC08 closed by verification/disposition.
 
-**BC02:** CLOSED 2026-09-07; Electron load/display only. No campaign or calibration change. BC03 CLOSED; BC04 is next pending.
+**BC02:** CLOSED 2026-09-07; Electron load/display only. No campaign or calibration change. BC03 CLOSED; BC04 P1 is implemented/reviewed with campaign acceptance deferred to next calibration (clean before/after retained; P1 repeat/ON companion retired); P2 and campaigns remain unauthorized.
 
 **Register authority only; BC01 separately scheduled above.** These IDs index existing work, not milestones or a new lane.
 FIX means planned repair **when scheduled**, not authority to implement. VERIFY/DISPOSITION means
@@ -234,7 +234,7 @@ live in the existing R8 plan; its previously proposed B10–B13/F1 are now regis
 | BC01 player opportunities / R8 | Gameplay/operations + Game Designer + QA | **CLOSED — owner accepted repair and retired territory similarity (2026-09-07).** Verified L0/L1 review, L2 auto-apply/no queue, L3 observer across three factions. |
 | BC02 B2/B9 sector/rating truth / R8 | Systems + QA | **CLOSED — verified 2026-09-07.** Electron save load rebuilds only transient ratings before player projection; canonical bytes and privacy remain intact. |
 | BC03 B10 narrated Dayton / R8 | Events/systems + Game Designer + QA | **CLOSED 2026-09-07** — termination owner/COHA/signing repaired and verified; owner deferred post-horizon acceptance/tickers. Working negotiation preserved; no headless change. |
-| BC04 B11 chronology + P1/P2 / R8/panel | Historian + systems + calibration + independent §6 panel | **FIX after existing conditional planning**, fresh n392 reconciliation first. Exclude landed barracks stagger. P1 and coherent P2 separately controlled; timing/displacement/NATO outcomes measured. |
+| BC04 B11 chronology + P1/P2 / R8/panel | Historian + systems + calibration + independent §6 panel | **P1 IMPLEMENTED/REVIEWED — campaign acceptance deferred to next calibration (clean before/after retained; P1 repeat/ON companion retired); P2/campaigns unauthorized.** Current n392 reconciliation is in the [existing BC04 plan](2026-07-31-full-campaign-electron-validation-plan.md#bc04-bounded-implementation-plan--2026-09-07); exclude landed barracks stagger. P1 and coherent P2 separately controlled later; timing/displacement/NATO outcomes measured. |
 | BC05 B12 NATO/Lukavac gates / R8 | Events/systems + Historian + QA | NATO windows **FIX** after current-baseline confirmation; Lukavac **VERIFY/DISPOSITION** gate versus simulated-war cause. Lint is byte-neutral; enabling events is not. |
 | BC06 B13 posture/gestures / R8 | Gameplay/desktop + Game Designer + QA | **FIX** bounded handlers/escalation with live player-action effects/receipts proof, not merely headless parity. |
 | BC07 stability divergence / calibration-data | Asset/data integration + Systems + calibration | **VERIFY/DISPOSITION** consumed mode and retain/regenerate policy. Hybrid/ethnic initialization bypass matters; 227 potential stability rows do not prove 227 effects. No mandated regeneration or control repaint. |
