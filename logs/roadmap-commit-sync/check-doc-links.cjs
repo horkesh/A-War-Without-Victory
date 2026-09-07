@@ -2,8 +2,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 const cp = require('node:child_process');
 const tracked = cp.execFileSync('git', ['diff', '--name-only', '--', 'docs'], {encoding: 'utf8'}).trim().split(/\r?\n/).filter(Boolean);
+const staged = cp.execFileSync('git', ['diff', '--cached', '--name-only', '--', 'docs'], {encoding: 'utf8'}).trim().split(/\r?\n/).filter(Boolean);
 const untracked = cp.execFileSync('git', ['ls-files', '--others', '--exclude-standard', 'docs'], {encoding: 'utf8'}).trim().split(/\r?\n/).filter(Boolean);
-const files = [...new Set([...tracked, ...untracked])].filter(f => f.endsWith('.md')).sort();
+const files = [...new Set([...tracked, ...staged, ...untracked])].filter(f => f.endsWith('.md')).sort();
+if (!files.length) throw new Error('No changed Markdown files selected; empty scope is not verification.');
 const missing = [];
 let links = 0;
 for (const file of files) {

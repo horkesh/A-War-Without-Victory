@@ -28,6 +28,8 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 8 | R8 | **WAITING ON R7.** RE closed 2026-09-01 and no longer gates this. | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until the final two diaries score 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
 | 9 | R9 | **FREEZE WAITING ON R8; LIMITED PREPARATION AT §4.2** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
+**R7 name correction integrated:** [ARBiH honorific-name packet](2026-09-07-arbih-brigade-honorific-name-correction-plan.md); IDs and mechanical fields preserved, saved/displayed text changed. Remaining R7 gates stay open.
+
 **Repository audit packets — PLANNED (2026-09-07):** [Master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07) assigns three subordinate packets:
 
 | Packet | Existing owner and sequence |

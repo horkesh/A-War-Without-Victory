@@ -29,6 +29,8 @@ The former owner-decision and post-D2 residual lists are historical inputs, not 
 | R8 | [Full-campaign packaged-Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) | R7 remaining gates, scheduled finite behavior settlement, final calibration, then final packaged acceptance; RE gates nothing |
 | R9 | [Release candidate, gold, and publication](2026-07-31-release-candidate-gold-publication-plan.md) | Freeze follows two clean 5/5 R8 diaries; limited build preparation runs earlier under master §4.2 |
 
+**R7 name correction integrated:** [ARBiH honorific-name packet](2026-09-07-arbih-brigade-honorific-name-correction-plan.md); IDs/mechanical fields preserved, saved/displayed text changed. This does not close R7.
+
 **Subordinate repository-audit packets:** [Master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07) owns their dependencies and scheduling; all are planned, with implementation not started by this registration.
 
 | Packet | Slot / overlap |

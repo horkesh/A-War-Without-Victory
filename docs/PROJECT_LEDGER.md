@@ -33763,3 +33763,82 @@ the independent GO and final focused checks. Normal pre-commit typechecking rema
 Campaign acceptance is deferred; preserve pre-P1 c95e25241 and P1 f117fe475 separately from
 this P2 source boundary. The coming brigade-name merge must not be included in a P2-only
 before/after campaign attribution without explicitly accounting for its changed text bytes.
+
+## 2026-09-07 - R7 ARBiH brigade honorific display-name correction
+
+33 ARBiH brigades started the game with wartime combat-honor titles ("Vitezka"/"Viteška", "Slavna")
+already baked into their display name, presenting an unearned decoration as pre-existing at turn 0.
+The mechanical half was already correct — `distinction_potential` (earn-in-play decorations) already
+targets exactly these 33 brigades, and no brigade carries the old turn-0-award `honor` field — only
+the display text lagged the mechanic.
+
+Corrected the `name` field for all 33 rows in `data/source/oob_brigades.json`, the matching
+`designation_code`/`english_gloss`/`official_bcs` rows in `data/source/oob_brigade_designations.json`,
+the 3 hardcoded `EXACT_BCS_NAMES` overrides in `formationNameLocalizations.ts`, and rebuilt the baked
+`data/derived/startup/apr_1992_initial_save.json` startup snapshot (26 of the 33 brigades are present
+at turn 0; the remaining 7 have `available_from > 0` and are generated later in play, so they were
+correctly absent from the snapshot diff). Internal `id` values were left untouched — each carries
+1,300+ references across engine files, operation catalogs, and tests, and renaming is a load-bearing
+identifier change with no player-facing benefit. `docs/knowledge/*` historical order-of-battle
+references were deliberately NOT touched — they correctly cite real-world post-honor unit
+designations as history, which is a different claim from what the game should display at its own
+turn 0.
+
+Verified byte-neutral to simulation: no `src/sim/`/`src/state/` logic reads brigade `.name` for
+gating or comparison (confirmed across all matches, not just the obvious decoration files), and the
+CI structural fingerprint check passed unchanged (`cd5582f4a945842e`) — empirical confirmation, not
+just code-reading. Rebuilt-artifact diff confirmed only the 26 targeted brigades' `name` field
+changed and nothing else in the startup snapshot moved. Focused suite (7 files, 61 tests: OOB
+loader/early-war-entry/elite-commander, brigade name localization, recruitment engine, startup
+snapshot ownership and drift guardrails) plus `decoration_system`, `standing_og_defense`, and
+`final_sector_war_front_faction_side_coverage` all passed; `tsc --noEmit` clean. No 188w
+recalibration required. Developed on branch/worktree `r7-arbih-honorific-names`, isolated from
+concurrent `codex/*` OOB and calibration work.
+
+Plan: `docs/plans/2026-09-07-arbih-brigade-honorific-name-correction-plan.md`. Slotted into R7
+(content/historical-attribution) in `docs/plans/MASTER_ROADMAP.md`.
+
+### 2026-09-07 - Honorific-name branch documentation preserved for integration
+
+The owner requested review and merge of this worktree. Commit the pre-existing roadmap
+planned-to-implemented status correction before integration, while correcting its overbroad
+byte-neutral wording: brigade IDs and mechanical fields are unchanged, but display/catalog
+strings and serialized names intentionally change. Main's independent merge-readiness review
+owns the final integration verdict; this documentation commit does not claim campaign proof
+or that the branch is already merged.
+
+BC04 P2 committed as 558f253a2, separately from documentation commit 0b90cd678 and the
+brigade-name source branch. The later controlled-run plan now pins C=558f253a2, preserving
+A=c95e25241 and B=f117fe475. The brigade-name source commits are 272dfc34d / 878cbb34b /
+1ddf6f01a; the last preserves its formerly uncommitted roadmap correction. Independent review
+returned GO with no production/data/test blocker. Main's merge conflicts were documentation-only:
+retain current roadmap rows (including BC09/BC10 and early R9 preparation), add the R7 name
+packet link/status, and preserve both complete ledger tails. The R7 parent, index and command
+board now identify the integrated packet without closing R7's remaining gates.
+
+Merged-tree checks passed: six focused files, 60/60 (rename consumers, chronology integration,
+and documentation truth), plus startup-snapshot check (exit 0). The staged rename production
+blobs exactly match the reviewed branch; P2 production files have no delta from 558f253a2.
+The branch semantic diff is 33 name fields, 99 designation text fields and 26 starting-save
+name fields only. IDs/mechanical/control fields remain unchanged; save/narrative bytes do not.
+The review and test evidence is under logs/roadmap-commit-sync.
+
+Scope deviation, recorded explicitly: during independent merge review,
+`npm run ci:structural-fingerprint:check` was invoked without first inspecting its wrapper.
+It internally ran a fresh 40-week scenario despite the no-campaign validation boundary.
+This was a preventable check-selection error, not newly granted campaign authorization.
+The completed ignored artifact is F:/AWWV-worktrees/r7-arbih-honorific-names/runs/
+apr1992_definitive_40w__21b49604f90cfc2f__w40_n3. Its run_meta provenance records clean
+1ddf6f01a2a4b5cc09bbf32373e4656c71f26969 and Node v22.23.2; the helper matched fingerprint
+cd5582f4a945842e, but that is not a 188-week or Section 6 acceptance result. No tracked
+branch file changed, no additional campaign followed, and no floor/manifest was refreshed.
+The owner was informed immediately on receipt of this finding. Calibration acceptance remains
+unchanged; the reusable wrapper-selection lesson is recorded in PROJECT_LEDGER_KNOWLEDGE.
+
+Final merge preparation checks: all 12 production blobs match their separately reviewed
+P2/rename source commits; the complete pre-merge main ledger and incoming rename ledger tail
+are preserved; no unresolved conflict remains (merge-preservation.log, exit 0). The local
+preservation helper needed a larger output buffer for the existing large ledger; that check
+was corrected and rerun, without changing project behavior. Merged documentation links:
+195 checked across eight changed Markdown files, no missing targets. Normal pre-commit
+checks remain enabled for the owner-authorized merge commit.

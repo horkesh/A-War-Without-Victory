@@ -23,6 +23,13 @@ used. It is renderer-only and byte-neutral to the simulation. It **fixes no bugs
 decision D1 (2026-09-04) every bug in that audit is held for R8 and pre-seeded into R8's own plan.
 This plan's Phase 5 does not close until the amendment closes and the remaining two resolutions are
 inspected.
+**ARBiH display-name packet — 2026-09-07:** the owner-authorized
+[honorific-name correction](2026-09-07-arbih-brigade-honorific-name-correction-plan.md)
+is integrated as a bounded R7 content amendment. It removes pre-awarded honors from 33 names,
+updates the display catalog and 26 starting-save names, and preserves IDs and mechanical fields.
+Saved/displayed text changes; this is not whole-save byte identity or campaign acceptance.
+The remaining R7 English/readability, human audio/sensitivity and closeout gates are unchanged.
+
 **Roadmap workstream:** R7
 **Canonical owner:** authored JSON plus source/license manifests; `src/ui/map/i18n/` for locale; `src/ui/map/audio/` for playback
 **Collision rule:** Do not edit the same event/essay as R4. Do not edit map/Desk layout until R1/R2 finish.

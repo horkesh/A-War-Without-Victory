@@ -463,7 +463,7 @@ the general lint work or its BC05 routing. The exception applies only to this pa
 change to historical dates is proposed. The review and source notes are in
 `logs/bc04/p2-temporal/review.md` and `historical-targets.md`.
 
-**P2 implementation evidence — 2026-09-07; reviewed candidate (GO), included in the owner-authorized P2 commit.** The approved eight-file
+**P2 implementation evidence — 2026-09-07; reviewed candidate (GO), committed as `558f253a2`.** The approved eight-file
 production packet is implemented. Exactly the column and Deliberate Force rows opt in to
 one nonrecursive, canonical-order follow-up snapshot through the shared effect/receipt writer.
 All event effects, prerequisites, protected maxima and catalog order compare equal to f117fe475
@@ -504,8 +504,7 @@ checks, unchanged floors and applicable absolute enclave protections. This does 
 collapse ON/OFF proof for P1. No campaign is authorized in this closeout.
 
 **Later validation matrix — deferred/proposed, not scheduled.** A is the clean pre-P1 source
-commit `c95e2524176cffee63ea6d45e5b2d357aab75b74`; B is P1 commit `f117fe47536398add3a966d177b3dce54fc820ac`. C remains B plus a separately
-ratified and authorized P2 packet. Preserve A even if other changes land before calibration;
+commit `c95e2524176cffee63ea6d45e5b2d357aab75b74`; B is P1 commit `f117fe47536398add3a966d177b3dce54fc820ac`. C is reviewed P2 commit `558f253a2` (before the brigade-name merge). Preserve A even if other changes land before calibration;
 never attribute a mixed later-tree difference to P1. Use the same Node 22 version and scenario:
 
 | Run | Commit | Collapse | Purpose |
