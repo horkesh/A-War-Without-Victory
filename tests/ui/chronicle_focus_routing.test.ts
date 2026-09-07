@@ -3,7 +3,7 @@ import React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ChronicleOverlay } from '../../src/ui/map/components/chronicle/ChronicleOverlay.js';
+import { ChronicleOverlay, formatChronicleGroupDate } from '../../src/ui/map/components/chronicle/ChronicleOverlay.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
@@ -87,6 +87,28 @@ afterEach(() => {
 });
 
 describe('Chronicle focused decision routing', () => {
+  it('uses completed weeks only for receipt-only groups and preserves mixed decision dates', () => {
+    const receipt = {
+      turn: 171,
+      type: 'political',
+      headline: false,
+      title: 'Receipt',
+      detail: '',
+      metadata: { decisionRecordId: 'event:decision', receiptRecordId: 'receipt:decision:effect' },
+    } as any;
+    const decision = {
+      turn: 171,
+      type: 'political',
+      headline: false,
+      title: 'Decision',
+      detail: '',
+      metadata: { decisionRecordId: 'event:decision' },
+    } as any;
+
+    expect(formatChronicleGroupDate(171, [receipt])).toBe('10-16 Jul 1995');
+    expect(formatChronicleGroupDate(171, [receipt, decision])).toBe(turnToDateString(171));
+    expect(formatChronicleGroupDate(171, [decision])).toBe(turnToDateString(171));
+  });
   it('selects and marks the Chronicle entry matching a Records decision id', async () => {
     render(React.createElement(ChronicleOverlay));
 

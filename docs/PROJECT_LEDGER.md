@@ -33755,3 +33755,11 @@ absolute link to the historical n110 final save no longer resolves in this check
 explicitly labeled an absent historical local receipt, with its path retained. No replacement
 campaign was run. Existing planning-review evidence for the three new packets is retained in
 logs/repository-audit-planning; BC04's independent implementation GO is retained in its own logs.
+
+Documentation and retained evidence are committed as 0b90cd678. The following separate commit
+records the already reviewed BC04 P2 implementation (eight production files and nine test
+files), under the owner's explicit commit authorization. No production source changed after
+the independent GO and final focused checks. Normal pre-commit typechecking remains enabled.
+Campaign acceptance is deferred; preserve pre-P1 c95e25241 and P1 f117fe475 separately from
+this P2 source boundary. The coming brigade-name merge must not be included in a P2-only
+before/after campaign attribution without explicitly accounting for its changed text bytes.

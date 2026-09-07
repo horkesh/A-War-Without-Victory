@@ -507,6 +507,12 @@ export interface EventDefinition {
     probability?: number;
     /** If true, event can fire only once (tracked via fired_event_ids on state). Default: false. */
     once?: boolean;
+    /**
+     * Allow this automatic, once-only event to observe prerequisite receipts written
+     * by the primary event wave in the same turn. Evaluated in one non-recursive
+     * post-primary snapshot; loader validation forbids pressure and response options.
+     */
+    same_turn_requires_events?: boolean;
     /** Player choice options. When present, each affected faction must respond. */
     response_options?: EventResponseOption[];
     /** Explicit response option id used as the historical/default calibration path. */

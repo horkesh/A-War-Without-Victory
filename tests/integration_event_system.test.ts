@@ -4,6 +4,8 @@ import { resolve } from 'node:path';
 import type { EventDefinition, EventCondition } from '../src/sim/events/event_types.js';
 import { evaluateCondition } from '../src/sim/events/event_types.js';
 import { applyEventEffects } from '../src/sim/events/apply_effects.js';
+import { evaluateEvents } from '../src/sim/events/evaluate_events.js';
+import { updateEventReadiness } from '../src/sim/events/pressure_system.js';
 import type { GameState } from '../src/state/game_state.js';
 
 const EVENTS_DIR = resolve(__dirname, '..', 'data', 'scenarios', 'events');
@@ -142,8 +144,86 @@ describe('event system integration', () => {
             const evTurn = ev.trigger.turn_min ?? 0;
             for (const reqId of reqs) {
                 const reqTurn = turnMap.get(reqId) ?? 0;
-                expect(evTurn).toBeGreaterThanOrEqual(reqTurn);
+                if (
+                    ['zepa_falls_1995', 'un_safe_area_enforcement_1995'].includes(ev.id)
+                    && reqId === 'srebrenica_falls_1995'
+                ) {
+                    expect(evTurn).toBe(160);
+                    expect(reqTurn).toBe(169);
+                } else if (ev.id === 'federation_ground_offensive_1995' && reqId === 'nato_deliberate_force_1995') {
+                    expect(evTurn).toBe(165);
+                    expect(reqTurn).toBe(178);
+                } else {
+                    expect(evTurn).toBeGreaterThanOrEqual(reqTurn);
+                }
             }
         }
+    });
+
+    it('produces the ratified 1995 receipt sequence with same-week causal dependents', () => {
+        const ids = [
+            'tuzla_gate_massacre_1995',
+            'un_hostage_crisis_1995',
+            'srebrenica_falls_1995',
+            'srebrenica_column_breakout_1995',
+            'zepa_falls_1995',
+            'second_markale_massacre_1995',
+            'nato_deliberate_force_1995',
+        ];
+        const registry = ids.map((id) => {
+            const source = allEvents.find((event) => event.id === id)!;
+            return {
+                ...source,
+                effect: { kind: 'narrative', text: id },
+                effects: undefined,
+                response_options: undefined,
+                requires_player_response: undefined,
+                responding_faction: undefined,
+            } as EventDefinition;
+        });
+        const state = {
+            meta: { turn: 164, phase: 'war', seed: 'p2-sequence' },
+            factions: [],
+            political: {
+                political_controllers: {
+                    'op:srebrenica:srebrenica_2': 'RBiH',
+                    'op:rogatica:zepa_2': 'RBiH',
+                },
+            },
+            military: {
+                formations: {},
+                fired_event_ids: [],
+                enabled_event_ids: ['un_hostage_crisis_1995'],
+                event_flags: {
+                    rs_strategic_goals: 'all_six',
+                    srebrenica_enclave_formed: true,
+                    srebrenica_demilitarized: true,
+                    coha_expired: true,
+                    rrf_deployed: true,
+                    sarajevo_siege_active: true,
+                },
+                event_readiness: {},
+                negotiation: { capital: { RS: { war_crimes_events: 8 } }, patron_relationships: {}, peace_plan_history: [] },
+            },
+            displacement: {},
+        } as unknown as GameState;
+        const receipts: Array<[string, number]> = [];
+
+        for (const turn of [164, 169, 170, 171, 172, 173, 177, 178]) {
+            state.meta.turn = turn;
+            updateEventReadiness(state, registry);
+            const report = evaluateEvents(state, () => { throw new Error('unexpected RNG'); }, turn, registry);
+            receipts.push(...report.fired.map((event) => [event.id, turn] as [string, number]));
+        }
+
+        expect(receipts).toEqual([
+            ['tuzla_gate_massacre_1995', 164],
+            ['un_hostage_crisis_1995', 164],
+            ['srebrenica_falls_1995', 171],
+            ['srebrenica_column_breakout_1995', 171],
+            ['zepa_falls_1995', 173],
+            ['second_markale_massacre_1995', 178],
+            ['nato_deliberate_force_1995', 178],
+        ]);
     });
 });

@@ -6,7 +6,7 @@ import type { EventDefinition } from '../../../../sim/events/event_types.js';
 import { ChronicleCard } from './ChronicleCard.js';
 import { ChronicleRibbon, ChronicleRibbonScrubber } from './ChronicleSpine.js';
 import { CHRONICLE_FILTERS, chronicleFilterLabel, countChronicleEntriesByFilter, filterChronicleEntries, getVisibleChronicleFilters } from './ChronicleReviewFilters.js';
-import { turnToDateString } from '../../utils/formatters.js';
+import { turnToCompletedWeekRange, turnToDateString } from '../../utils/formatters.js';
 import { openArmyHQAftermathRecord, openArmyHQDecisionConsequenceRecord, openArmyHQOperationHistory, openChronicleDecisionRecord } from '../../utils/shellNavigation.js';
 import {
     buildChronicleCampaignRecap,
@@ -34,6 +34,21 @@ function turnToShortDate(turn: number): string {
 /** Full date for group headers: "25 Dec 1992" */
 function turnToFullDate(turn: number): string {
     return turnToDateString(turn);
+}
+
+/** Receipt-only Chronicle groups describe the week just completed. A decision
+ * in the same group retains its authored boundary date, avoiding a false date
+ * shift for player choices that happen at that boundary. */
+export function formatChronicleGroupDate(
+    turn: number,
+    entries: readonly ChronicleEntry[],
+): string {
+    const includesDecision = entries.some((entry) => (
+        Boolean(entry.metadata?.decisionRecordId) && !entry.metadata?.receiptRecordId
+    ));
+    return includesDecision
+        ? turnToDateString(turn)
+        : turnToCompletedWeekRange(turn);
 }
 
 /** Minimum width for turns with no events. */
@@ -593,7 +608,7 @@ export function ChronicleOverlay() {
                             /* Single entry — show card directly with date */
                             <div className="flex flex-col items-center" style={{ gap: `${CARD_STACK_GAP}px` }}>
                                 <div className="text-xs font-mono text-stone-400 mb-1">
-                                    {turnToFullDate(turn)}
+                                    {formatChronicleGroupDate(turn, group)}
                                 </div>
                                 <ChronicleCard key={`${turn}-${group[0].type}-0`} entry={group[0]} />
                             </div>
@@ -612,7 +627,7 @@ export function ChronicleOverlay() {
                                         minWidth: '140px',
                                     }}
                                 >
-                                    <span className="text-amber-400/80">{turnToFullDate(turn)}</span>
+                                    <span className="text-amber-400/80">{formatChronicleGroupDate(turn, group)}</span>
                                     <span className="text-stone-400">—</span>
                                     <span>{t('chronicle.eventCount', { count: group.length })}</span>
                                     <span className="ml-auto text-xs text-stone-400">

@@ -16,6 +16,31 @@ export function turnToDateString(turn: number): string {
     return `${startDate.getUTCDate()} ${month} ${startDate.getUTCFullYear()}`;
 }
 
+/**
+ * Formats the interval completed by a raw turn receipt. Turn N closes the
+ * seven days before the turn-N boundary date. Turn zero has no preceding
+ * simulated interval, so it safely retains the campaign opening date.
+ */
+export function turnToCompletedWeekRange(turn: number): string {
+    if (!Number.isFinite(turn) || turn <= 0) return turnToDateString(0);
+
+    const start = new Date('1992-04-06T00:00:00Z');
+    start.setUTCDate(start.getUTCDate() + (turn - 1) * 7);
+    const end = new Date('1992-04-06T00:00:00Z');
+    end.setUTCDate(end.getUTCDate() + turn * 7 - 1);
+    const months = SHORT_MONTHS_BY_LOCALE[getActiveLocale()];
+    const startMonth = months[start.getUTCMonth()];
+    const endMonth = months[end.getUTCMonth()];
+
+    if (start.getUTCFullYear() === end.getUTCFullYear() && start.getUTCMonth() === end.getUTCMonth()) {
+        return `${start.getUTCDate()}-${end.getUTCDate()} ${endMonth} ${end.getUTCFullYear()}`;
+    }
+    if (start.getUTCFullYear() === end.getUTCFullYear()) {
+        return `${start.getUTCDate()} ${startMonth}-${end.getUTCDate()} ${endMonth} ${end.getUTCFullYear()}`;
+    }
+    return `${start.getUTCDate()} ${startMonth} ${start.getUTCFullYear()}-${end.getUTCDate()} ${endMonth} ${end.getUTCFullYear()}`;
+}
+
 export function formatCampaignWeekLabel(turn: number | null | undefined): string {
     const safeTurn = Number.isFinite(turn) ? Number(turn) : 0;
     if (safeTurn <= 0) return t('campaign.openingWeekLabel');

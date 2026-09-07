@@ -409,7 +409,7 @@ test('compareEventCandidates: loaded catalog preserves current stable priority-o
 test('evaluateEvents: Srebrenica and Zepa falls write event-owned control receipts without operations', () => {
     const srebrenica = loadedEventById('srebrenica_falls_1995');
     const zepa = loadedEventById('zepa_falls_1995');
-    const state = minimalState('war', 160);
+    const state = minimalState('war', 169);
     state.military.event_flags = {
         srebrenica_enclave_formed: true,
         srebrenica_demilitarized: true,
@@ -426,29 +426,29 @@ test('evaluateEvents: Srebrenica and Zepa falls write event-owned control receip
     const srebrenicaResult = evaluateEvents(
         state,
         rejectRandomness,
-        160,
+        169,
         [srebrenica, zepa],
     );
 
     assert.deepStrictEqual(srebrenicaResult.fired.map((event) => event.id), ['srebrenica_falls_1995']);
     assert.ok(state.military.fired_event_ids.includes('srebrenica_falls_1995'));
     assert.strictEqual(state.military.event_flags.srebrenica_fell, true);
-    expectEventOwnedControl(state, SREBRENICA_FALL_OSIDS, 160);
+    expectEventOwnedControl(state, SREBRENICA_FALL_OSIDS, 169);
     assert.strictEqual(state.military.corps_command, undefined);
     assert.strictEqual(state.operation_history, undefined);
 
-    state.meta.turn = 161;
+    state.meta.turn = 170;
     seedEventReadiness(state, zepa);
     const zepaResult = evaluateEvents(
         state,
         rejectRandomness,
-        161,
+        170,
         [srebrenica, zepa],
     );
 
     assert.deepStrictEqual(zepaResult.fired.map((event) => event.id), ['zepa_falls_1995']);
     assert.ok(state.military.fired_event_ids.includes('zepa_falls_1995'));
-    expectEventOwnedControl(state, ZEPA_FALL_OSIDS, 161);
+    expectEventOwnedControl(state, ZEPA_FALL_OSIDS, 170);
     assert.strictEqual(state.military.corps_command, undefined);
     assert.strictEqual(state.operation_history, undefined);
 });
@@ -881,4 +881,126 @@ test('triggerMatches: requires ALL listed events in requires_events (not just on
     };
     const result = evaluateEvents(state, rejectRandomness, 6, [dependent]);
     assert.ok(!result.fired.some(f => f.id === 'multi_dep_event'), 'should not fire with only one of two prerequisites');
+});
+
+test('evaluateEvents: an opted-in automatic dependent observes its parent receipt in the same turn', () => {
+    const state = minimalState('war', 10);
+    const parent: EventDefinition = {
+        id: 'same_turn_parent',
+        trigger: { turn_min: 10, turn_max: 10, phase: 'war' },
+        effect: { kind: 'narrative', text: 'parent' },
+        sets_flags: { same_turn_parent_fired: true },
+        once: true,
+    };
+    const child = {
+        id: 'same_turn_child',
+        trigger: {
+            turn_min: 10,
+            turn_max: 10,
+            phase: 'war',
+            requires_events: ['same_turn_parent'],
+            condition: { type: 'flag_equals', flag: 'same_turn_parent_fired', value: true },
+        },
+        effect: { kind: 'narrative', text: 'child' },
+        once: true,
+        same_turn_requires_events: true,
+    } as EventDefinition;
+
+    const result = evaluateEvents(state, rejectRandomness, 10, [child, parent]);
+
+    assert.deepStrictEqual(result.fired.map((event) => event.id), ['same_turn_parent', 'same_turn_child']);
+    assert.deepStrictEqual(state.military.fired_event_ids, ['same_turn_parent', 'same_turn_child']);
+    assert.strictEqual(state.military.event_fire_counts?.same_turn_child, 1);
+});
+
+test('evaluateEvents: a non-opted exact-window prerequisite remains unavailable after its parent fires', () => {
+    const state = minimalState('war', 10);
+    const parent: EventDefinition = {
+        id: 'ordinary_parent',
+        trigger: { turn_min: 10, turn_max: 10, phase: 'war' },
+        effect: { kind: 'narrative', text: 'parent' },
+        once: true,
+    };
+    const child: EventDefinition = {
+        id: 'ordinary_child',
+        trigger: { turn_min: 10, turn_max: 10, phase: 'war', requires_events: ['ordinary_parent'] },
+        effect: { kind: 'narrative', text: 'child' },
+        once: true,
+    };
+
+    assert.deepStrictEqual(
+        evaluateEvents(state, rejectRandomness, 10, [child, parent]).fired.map((event) => event.id),
+        ['ordinary_parent'],
+    );
+    state.meta.turn = 11;
+    assert.deepStrictEqual(evaluateEvents(state, rejectRandomness, 11, [child, parent]).fired, []);
+});
+
+test('evaluateEvents: an opted-in child stays inert when its required parent receipt is absent', () => {
+    const state = minimalState('war', 10);
+    const child: EventDefinition = {
+        id: 'missing_parent_child',
+        trigger: {
+            turn_min: 10,
+            turn_max: 10,
+            phase: 'war',
+            requires_events: ['missing_parent'],
+        },
+        effect: { kind: 'narrative', text: 'must remain inert' },
+        sets_flags: { missing_parent_child_effect: true },
+        once: true,
+        same_turn_requires_events: true,
+    };
+
+    const result = evaluateEvents(state, rejectRandomness, 10, [child]);
+
+    assert.deepStrictEqual(result.fired, []);
+    assert.deepStrictEqual(state.military.fired_event_ids, []);
+    assert.strictEqual(state.military.event_flags?.missing_parent_child_effect, undefined);
+    assert.strictEqual(state.military.event_fire_counts?.missing_parent_child, undefined);
+});
+
+test('evaluateEvents: the post-primary wave is one canonical snapshot without third-level cascading', () => {
+    const state = minimalState('war', 12);
+    const defs = [
+        {
+            id: 'snapshot_parent',
+            trigger: { turn_min: 12, phase: 'war' },
+            effect: { kind: 'narrative', text: 'parent' },
+            once: true,
+        },
+        {
+            id: 'snapshot_child_b',
+            priority: 20,
+            trigger: { turn_min: 12, phase: 'war', requires_events: ['snapshot_parent'] },
+            effect: { kind: 'narrative', text: 'child b' },
+            once: true,
+            same_turn_requires_events: true,
+        },
+        {
+            id: 'snapshot_child_a',
+            priority: 10,
+            trigger: { turn_min: 12, phase: 'war', requires_events: ['snapshot_parent'] },
+            effect: { kind: 'narrative', text: 'child a' },
+            once: true,
+            same_turn_requires_events: true,
+        },
+        {
+            id: 'snapshot_grandchild',
+            trigger: { turn_min: 12, phase: 'war', requires_events: ['snapshot_child_a'] },
+            effect: { kind: 'narrative', text: 'grandchild' },
+            once: true,
+            same_turn_requires_events: true,
+        },
+    ] as EventDefinition[];
+
+    const result = evaluateEvents(state, rejectRandomness, 12, defs.reverse());
+
+    assert.deepStrictEqual(
+        result.fired.map((event) => event.id),
+        ['snapshot_parent', 'snapshot_child_a', 'snapshot_child_b'],
+    );
+    assert.strictEqual(state.military.event_fire_counts?.snapshot_child_a, 1);
+    assert.strictEqual(state.military.event_fire_counts?.snapshot_child_b, 1);
+    assert.strictEqual(state.military.event_fire_counts?.snapshot_grandchild, undefined);
 });

@@ -463,7 +463,7 @@ the general lint work or its BC05 routing. The exception applies only to this pa
 change to historical dates is proposed. The review and source notes are in
 `logs/bc04/p2-temporal/review.md` and `historical-targets.md`.
 
-**P2 implementation evidence — 2026-09-07; reviewed uncommitted candidate (GO).** The approved eight-file
+**P2 implementation evidence — 2026-09-07; reviewed candidate (GO), included in the owner-authorized P2 commit.** The approved eight-file
 production packet is implemented. Exactly the column and Deliberate Force rows opt in to
 one nonrecursive, canonical-order follow-up snapshot through the shared effect/receipt writer.
 All event effects, prerequisites, protected maxima and catalog order compare equal to f117fe475
@@ -478,7 +478,7 @@ the corrected Chronicle suite passed 3/3. Condensed chapter cards retain their o
 dates because their references do not carry the required receipt metadata. Full receipt groups,
 Settlement historical events and fired-receipt records use the completed-week formatter.
 Typecheck and the final affected map build passed after this correction. Independent review returned GO with no open findings. Desktop simulation and warroom builds also passed. Logs and literal commands
-are retained in `logs/bc04/p2-implementation/`. No campaign, commit, save migration, baseline
+are retained in `logs/bc04/p2-implementation/`. This commit includes no campaign, save migration, baseline
 refresh, initial-map change or BC04 closure is implied.
 
 For a later separately approved calibration session, run one clean Node-22 controlled 188-week P2 POST against

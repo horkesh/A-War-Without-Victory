@@ -421,6 +421,9 @@ function validateEventRow(row: unknown, filename: string, rowIndex: number): voi
     if (hasOwn(row, 'once')) {
         validateOptionalBoolean(row.once, 'once', filename, rowIndex);
     }
+    if (hasOwn(row, 'same_turn_requires_events')) {
+        validateOptionalBoolean(row.same_turn_requires_events, 'same_turn_requires_events', filename, rowIndex);
+    }
     if (row.once === true && hasOwn(row, 'recurrence')) {
         failRow(filename, rowIndex, 'once and recurrence cannot both be set');
     }
@@ -460,6 +463,20 @@ function validateEventRow(row: unknown, filename: string, rowIndex: number): voi
         const requiresEvents = row.trigger.requires_events;
         if (!Array.isArray(requiresEvents) || !requiresEvents.every((id) => typeof id === 'string')) {
             failRow(filename, rowIndex, 'trigger.requires_events must be a string array when present');
+        }
+    }
+    if (row.same_turn_requires_events === true) {
+        if (row.once !== true) {
+            failRow(filename, rowIndex, 'same_turn_requires_events requires once:true');
+        }
+        if (!Array.isArray(row.trigger.requires_events) || row.trigger.requires_events.length === 0) {
+            failRow(filename, rowIndex, 'same_turn_requires_events requires non-empty trigger.requires_events');
+        }
+        if (hasOwn(row, 'pressure')) {
+            failRow(filename, rowIndex, 'same_turn_requires_events must not define pressure');
+        }
+        if (hasOwn(row, 'response_options')) {
+            failRow(filename, rowIndex, 'same_turn_requires_events must not define response_options');
         }
     }
     if (hasOwn(row, 'enables_events')) {

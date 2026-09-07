@@ -820,3 +820,31 @@ test('loadEventDefinitionsFromDir accepts valid response option future_consequen
         explanation: 'Accepting makes the later branch visible.',
     }]);
 });
+
+test('loadEventDefinitionsFromDir accepts the bounded same-turn prerequisite opt-in', () => {
+    const dir = makeTempEventsDir();
+    writeCatalogRows(dir, [
+        validCatalogRow({ id: 'parent_event' }),
+        validCatalogRow({
+            id: 'child_event',
+            trigger: { turn_min: 0, phase: 'war', requires_events: ['parent_event'] },
+            same_turn_requires_events: true,
+        }),
+    ]);
+
+    const loaded = loadEventDefinitionsFromDir(0, dir);
+    assert.strictEqual((loaded.find((event) => event.id === 'child_event') as any)?.same_turn_requires_events, true);
+});
+
+test.each([
+    ['non-boolean', { same_turn_requires_events: 'yes' }, /same_turn_requires_events must be a boolean/],
+    ['not once-only', { once: false, same_turn_requires_events: true, trigger: { turn_min: 0, phase: 'war', requires_events: ['parent_event'] } }, /requires once:true/],
+    ['empty prerequisites', { same_turn_requires_events: true, trigger: { turn_min: 0, phase: 'war', requires_events: [] } }, /non-empty trigger\.requires_events/],
+    ['pressure-driven', { same_turn_requires_events: true, trigger: { turn_min: 0, phase: 'war', requires_events: ['parent_event'] }, pressure: { base_rate: 1, threshold: 1, decay_rate: 0 } }, /must not define pressure/],
+    ['decision-bearing', { same_turn_requires_events: true, trigger: { turn_min: 0, phase: 'war', requires_events: ['parent_event'] }, response_options: [{ id: 'ok', label: 'OK', effects: [] }] }, /must not define response_options/],
+])('loadEventDefinitionsFromDir rejects %s same-turn prerequisite opt-ins', (_shape, overrides, expected) => {
+    assertCatalogRowsThrow([
+        validCatalogRow({ id: 'parent_event' }),
+        validCatalogRow({ id: 'child_event', ...overrides }),
+    ], expected);
+});

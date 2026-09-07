@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { updateEventReadiness, isEventReady } from '../src/sim/events/pressure_system.js';
+import { evaluateEvents } from '../src/sim/events/evaluate_events.js';
 import type { GameState } from '../src/state/game_state.js';
 import type { EventDefinition } from '../src/sim/events/event_types.js';
 
@@ -119,5 +120,58 @@ describe('pressure system', () => {
         state.military.event_flags = { sarajevo_siege_active: false };
         updateEventReadiness(state, [lukavac!]);
         expect(state.military.event_readiness!['operation_lukavac_93']).toBe(3);
+    });
+
+    it('does not apply a pressure modifier written later in the same event-evaluation turn', () => {
+        const state = minState();
+        const pressureEvent: EventDefinition = {
+            id: 'future_modifier_target',
+            trigger: { turn_min: 10, phase: 'war' },
+            effect: { kind: 'narrative', text: 'target' },
+            pressure: {
+                base_rate: 1,
+                threshold: 10,
+                decay_rate: 0,
+                modifiers: [{
+                    condition: { type: 'flag_equals', flag: 'future_modifier', value: true },
+                    rate_bonus: 4,
+                }],
+            },
+        };
+        const writer: EventDefinition = {
+            id: 'future_modifier_writer',
+            trigger: { turn_min: 10, phase: 'war' },
+            effect: { kind: 'narrative', text: 'writer' },
+            sets_flags: { future_modifier: true },
+            once: true,
+        };
+
+        updateEventReadiness(state, [pressureEvent]);
+        evaluateEvents(state, () => { throw new Error('unexpected RNG'); }, 10, [writer, pressureEvent]);
+
+        expect(state.military.event_readiness?.future_modifier_target).toBe(1);
+    });
+
+    it('reaches Srebrenica readiness at turn 171 with the RRF brake before the unchanged expiry', () => {
+        const events = JSON.parse(readFileSync('data/scenarios/events/war_1995.json', 'utf8')) as EventDefinition[];
+        const srebrenica = events.find((event) => event.id === 'srebrenica_falls_1995')!;
+        const state = minState();
+        state.military.event_flags = {
+            srebrenica_enclave_formed: true,
+            srebrenica_demilitarized: true,
+            coha_expired: true,
+            rrf_deployed: true,
+            un_hostage_crisis_occurred: true,
+        };
+        state.political.political_controllers = { 'op:srebrenica:srebrenica_2': 'RBiH' };
+
+        for (const turn of [169, 170, 171]) {
+            state.meta.turn = turn;
+            updateEventReadiness(state, [srebrenica]);
+        }
+
+        expect(srebrenica.trigger.turn_max).toBe(185);
+        expect(state.military.event_readiness?.srebrenica_falls_1995).toBe(10.5);
+        expect(isEventReady(state, srebrenica)).toBe(true);
     });
 });

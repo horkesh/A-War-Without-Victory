@@ -6,9 +6,14 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ChronicleRibbonScrubber } from '../../src/ui/map/components/chronicle/ChronicleSpine.js';
 import { getChronicleChromeTurnRange, getNarratedChronicleTurnSummaries } from '../../src/ui/map/components/chronicle/ChronicleOverlay.js';
-import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
+import { turnToCompletedWeekRange, turnToDateString } from '../../src/ui/map/utils/formatters.js';
 
 describe('ChronicleRibbonScrubber', () => {
+    it('formats completed receipt weeks while keeping turn zero safe', () => {
+        expect(turnToCompletedWeekRange(171)).toBe('10-16 Jul 1995');
+        expect(turnToCompletedWeekRange(178)).toBe('28 Aug-3 Sep 1995');
+        expect(turnToCompletedWeekRange(0)).toBe('6 Apr 1992');
+    });
     afterEach(() => {
         cleanup();
     });

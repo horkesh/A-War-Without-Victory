@@ -20,7 +20,7 @@ import {
 import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets';
 import { t, useLocale, type MessageKey } from '../../i18n';
 import { useGameStore } from '../../store/gameStore';
-import { turnToDateString } from '../../utils/formatters';
+import { turnToCompletedWeekRange, turnToDateString } from '../../utils/formatters';
 import { getPlayerSafeDisplayLabel } from '../../utils/playerSafeText';
 import { openChronicleDecisionRecord } from '../../utils/shellNavigation';
 
@@ -265,7 +265,7 @@ function DecisionHistoryRecordRow({
                     <div className="mt-0.5 flex items-center justify-between gap-2">
                       <span>
                         {receiptStatusLabel(receipt)}
-                        {receipt.firedTurn !== null ? ` · ${turnToDateString(receipt.firedTurn)}` : ''}
+                        {receipt.firedTurn !== null ? ` · ${turnToCompletedWeekRange(receipt.firedTurn)}` : ''}
                       </span>
                       <button
                         type="button"
