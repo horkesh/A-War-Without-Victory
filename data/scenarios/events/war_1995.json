@@ -2075,7 +2075,7 @@
   {
     "id": "ceasefire_1995",
     "title": "General Ceasefire Takes Effect",
-    "narrative": "A general ceasefire takes effect across Bosnia-Herzegovina, freezing the front lines after 1,340 days of war. The Dayton Agreement establishes Bosnia as a single state composed of two entities — the Federation of Bosnia and Herzegovina and Republika Srpska — with NATO-led IFOR deployed to enforce the peace. The war that killed over 100,000 people and displaced two million is over.",
+    "narrative": "A general ceasefire takes effect across Bosnia-Herzegovina. After three and a half years of fighting, the parties prepare for negotiations intended to turn the military halt into a peace settlement.",
     "category": "diplomatic",
     "historical_source": "General Framework Agreement for Peace (Dayton Agreement), 21 November 1995; Richard Holbrooke, To End a War (1998), account of the October 1995 ceasefire negotiations",
     "source_tier": "corroborated_participant",
@@ -2088,8 +2088,9 @@
         "federation_ground_offensive_1995"
       ],
       "condition": {
-        "type": "flag_not_set",
-        "flag": "coha_active"
+        "type": "flag_equals",
+        "flag": "coha_active",
+        "value": false
       }
     },
     "once": true,
@@ -2555,7 +2556,12 @@
       "phase": "war",
       "requires_events": [
         "dayton_talks_begin_1995"
-      ]
+      ],
+      "condition": {
+        "type": "flag_equals",
+        "flag": "rbih_dayton_acceptance",
+        "value": "accept"
+      }
     },
     "once": true,
     "effect": {

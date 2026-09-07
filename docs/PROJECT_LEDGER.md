@@ -33346,3 +33346,89 @@ contract and desktop IPC contract were synchronized. BC02 is CLOSED; BC03 is the
 closure-register item.
 
 Final documentation checks passed 12/12 after compacting the master summary to its size limit; independent Sol documentation review returned GO and diff hygiene passed.
+
+## 2026-09-07 - BC03 termination ownership and COHA gate repaired; timing disposition pending
+
+Owner scheduled BC03 from verified `be5d7690470e9ce38a6fe98abd08199137bb5386`.
+The pre-existing `.claude/scheduled_tasks.lock` edit is preserved. The corrected investigation
+was confirmed: packaged Electron Dayton negotiation already works; the narrative COHA gate
+was dead, and enabling it exposed an incomplete redundant terminal writer.
+
+Two separate regression-backed steps remove the `dayton_signed` game-over writer from
+`src/sim/turn_pipeline.ts`, then change only `ceasefire_1995` in `war_1995.json` to test
+`flag_equals coha_active false`. Global key-absence semantics, player negotiation resolution,
+headless behavior, initial control, calibration floors and the 188-week horizon are unchanged.
+Stage 1 failed before removal (exit 1), then passed (exit 0); Stage 2 likewise failed before
+the data repair and passed afterward. Combined stage checks passed 18/18. The controlled
+paired late-war pipeline fixture records ceasefire at 181, talks at 184 and signing at 185,
+with deterministic equality and the horizon negotiation still pending at 188. The existing
+n392 final save resolves in memory to a populated Dayton result and verdict/cost/comparison
+snapshot; no campaign ran. Evidence and exit-code sidecars are in `logs/bc03/`.
+
+The existing R8 BC03 plan, master roadmap, command board and desktop IPC contract were
+synchronized. A knowledge correction beside the historical event-wiring entry records the
+terminal-owner distinction and false-versus-absent semantics. No canon rule was changed.
+BC03 remains ACTIVE: the owner must disposition beyond-horizon RS/HRHB acceptance and ticker
+content, and signing after a rejected talks choice, before dependent edits or closure.
+Affected-suite/build evidence and the independent Sol review are pending at this entry's
+initial recording; append their results below before declaring the bounded work verified.
+
+BC03 bounded verification completed: the affected suite passed 111/111 (exit 0), typecheck,
+desktop simulation build plus startup-snapshot check, and warroom build all passed. Independent
+Sol review found that the newly enabled ceasefire copy prematurely announced Dayton/IFOR and
+the war's end. The targeted correction now describes the ceasefire and upcoming negotiations,
+with no new dates/effects; its regression failed before the copy edit and passed 15/15 afterward.
+The retained n392 proof now uses the actual canonical deserialize/resolve/serialize/deserialize
+path, proving the Dayton result and populated verdict, cost ledger and historical comparison
+survive reload at frozen turn 188 (exit 0). Separate production diffs are retained in
+`logs/bc03/stage1-termination.patch` and `stage2-event-data.patch`; the reproducible existing-save
+command is `npx tsx logs/bc03/n392-in-memory-closeout.ts`. The initial chain-development failure
+used the wrong snapshot field name; the corrected paired fixture and affected suite passed.
+
+Independent Sol review returned GO for the bounded patch after that one targeted correction,
+with no remaining review findings. It confirmed negotiated-termination ownership, explicit flag
+semantics, causal narrative and deterministic ordering against the relevant canon. BC03 is still
+ACTIVE pending the owner's acceptance/ticker timing and rejection/signing decisions. Neither
+passing tests nor this review waive those outstanding acceptance items. No fresh packaged Electron
+runtime or full campaign ran; no commit, baseline refresh, headless closeout or lock-file edit was
+made. Documentation truth checks passed 9/9 before final evidence synchronization; final focused
+documentation and diff-hygiene results follow below.
+
+Final documentation truth checks passed 9/9, exit 0 (logs/bc03/docs-final.log).
+
+## 2026-09-07 - BC03 owner disposition: defer post-horizon content; gate signing on acceptance
+
+The owner approved both proposed decisions: defer the turn-190 RS/HRHB acceptance events
+and turn-195–207 Dayton ticker chronology from BC03, and require the existing RBiH accepted-talks
+flag before narrating signing. Deferred content retains its authored dates; neither the campaign
+horizon nor headless closeout changes. This explicitly dispositions those beyond-horizon items
+for BC03 closure rather than claiming they now fire. Signing must be absent for missing/hardline
+responses while the actual horizon Dayton negotiation remains reachable for either choice.
+
+The approved follow-up is limited to the signing event condition and focused branch regressions,
+typecheck, documentation checks and targeted review by the same independent Sol reviewer.
+Implementation and verification results will follow; no additional campaign is authorized or needed.
+
+## 2026-09-07 - BC03 CLOSED: accepted-talks signing gate and explicit content deferral
+
+Implemented the owner's approved exact signing condition:
+`dayton_signed_1995` requires `rbih_dayton_acceptance === 'accept'`. The actual autonomy-0
+player decision test resolves the queued talks response as `hardline`, proves no signing event
+or flag, and reaches turn 188 with the Dayton negotiation still pending. Missing acceptance also
+fails closed. The accepted deterministic branch retains ceasefire/talks/signing at 181/184/185.
+
+Targeted RED reproduced both the absent gate and false hardline signing; GREEN passed 20/20
+(exit 0, `logs/bc03/approval-green.log`). Follow-up typecheck and diff check passed, exit 0.
+The same independent Sol reviewer approved the delta with no findings. The refreshed
+`stage2-event-data.patch` preserves separate reviewability from terminal-writer removal.
+The catalog is loaded at runtime as an Electron resource; no bundle source changed in this delta,
+so the prior passing desktop/warroom builds remain applicable. Earlier 111-test, UI and canonical
+n392 complete-verdict roundtrip evidence stands; no new packaged run or campaign is claimed.
+
+BC03 is CLOSED with the owner's explicit deferral of turn-190 RS/HRHB acceptance events and
+turn-195–207 ticker chronology. Those events retain their dates and are not claimed reachable.
+Headless closeout remains unchanged and separate. The R8 plan, master roadmap, command board
+and desktop IPC contract are synchronized; BC04 is next pending, final calibration remains open,
+and no baseline, horizon, initial control or pre-existing lock-file change was made. No commit.
+
+Closure documentation checks passed 9/9, exit 0 (`logs/bc03/approval-docs.log`).

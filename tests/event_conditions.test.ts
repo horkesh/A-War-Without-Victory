@@ -162,4 +162,50 @@ describe('event condition evaluation', () => {
         });
         expect(evaluateCondition(event!.trigger!.condition!, corridorState)).toBe(true);
     });
+
+    it('starts the 1995 general ceasefire only after COHA is explicitly inactive', () => {
+        const catalog = JSON.parse(readFileSync(
+            join(process.cwd(), 'data', 'scenarios', 'events', 'war_1995.json'),
+            'utf8',
+        )) as Array<{ id: string; narrative?: string; trigger?: { condition?: EventCondition } }>;
+        const event = catalog.find((entry) => entry.id === 'ceasefire_1995');
+
+        expect(event?.narrative).toBe(
+            'A general ceasefire takes effect across Bosnia-Herzegovina. After three and a half years of fighting, '
+            + 'the parties prepare for negotiations intended to turn the military halt into a peace settlement.',
+        );
+        expect(event?.trigger?.condition).toEqual({
+            type: 'flag_equals',
+            flag: 'coha_active',
+            value: false,
+        });
+
+        const absent = makeState({ military: { event_flags: {} } });
+        const inactive = makeState({ military: { event_flags: { coha_active: false } } });
+        const active = makeState({ military: { event_flags: { coha_active: true } } });
+        expect(evaluateCondition(event!.trigger!.condition!, absent)).toBe(false);
+        expect(evaluateCondition(event!.trigger!.condition!, inactive)).toBe(true);
+        expect(evaluateCondition(event!.trigger!.condition!, active)).toBe(false);
+    });
+
+    it('narrates Dayton signing only after RBiH accepts the talks', () => {
+        const catalog = JSON.parse(readFileSync(
+            join(process.cwd(), 'data', 'scenarios', 'events', 'war_1995.json'),
+            'utf8',
+        )) as Array<{ id: string; trigger?: { condition?: EventCondition } }>;
+        const event = catalog.find((entry) => entry.id === 'dayton_signed_1995');
+
+        expect(event?.trigger?.condition).toEqual({
+            type: 'flag_equals',
+            flag: 'rbih_dayton_acceptance',
+            value: 'accept',
+        });
+
+        const absent = makeState({ military: { event_flags: {} } });
+        const accepted = makeState({ military: { event_flags: { rbih_dayton_acceptance: 'accept' } } });
+        const hardline = makeState({ military: { event_flags: { rbih_dayton_acceptance: 'hardline' } } });
+        expect(evaluateCondition(event!.trigger!.condition!, absent)).toBe(false);
+        expect(evaluateCondition(event!.trigger!.condition!, accepted)).toBe(true);
+        expect(evaluateCondition(event!.trigger!.condition!, hardline)).toBe(false);
+    });
 });
