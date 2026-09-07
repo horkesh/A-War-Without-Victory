@@ -33842,3 +33842,11 @@ preservation helper needed a larger output buffer for the existing large ledger;
 was corrected and rerun, without changing project behavior. Merged documentation links:
 195 checked across eight changed Markdown files, no missing targets. Normal pre-commit
 checks remain enabled for the owner-authorized merge commit.
+
+Integration completed: merge commit c2c8300d6fcd61f617508f6691d95d3dabd16686 has parents
+558f253a206a8f6df3f92b4d0d7e53a5c5a63dbc (main/P2) and
+1ddf6f01a2a4b5cc09bbf32373e4656c71f26969 (rename branch). Its normal pre-commit typecheck
+passed. Git confirms the rename branch is an ancestor of main, and both main and the named
+rename worktree have no uncommitted tracked or ordinary untracked changes. Ignored generated
+logs/run artifacts remain local. No push or publication occurred. The explicit diagnostic-run
+deviation above does not close BC04, final calibration, R7, or any newly planned audit packet.
