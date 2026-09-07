@@ -33271,3 +33271,33 @@ ten catalog launches, neutral canonical POST/observer and bounded test evidence 
 Current documentation and canon disposition notes reflect the approval without changing mechanics.
 BC02 sector/rating truth is next priority only; no implementation is authorized in this turn.
 Final calibration remains open; no baseline/floor changes. Focused documentation checks passed 7/7 and git diff --check passed; independent Process QA approved closure and merge against the explicit owner decision.
+
+
+## 2026-09-07 - Orchestration efficiency policy adopted
+
+The owner approved a bounded orchestration policy after the observed BC01 workflow exposed excess
+whole-history context, repeated review/status loops, broad committees and a growing validation
+campaign. The global `orchestrator` skill now defaults to Astra coordination, one Sol implementer
+and one independent Sol reviewer, with Luna reserved for narrow routine work and Astra children
+requiring a named hard-reasoning need. Fresh children receive bounded briefs rather than whole
+history; relevant warm workers may be reused without duplicating root investigation.
+
+Each task now fixes its initial question, commands or observations, pass criteria and stopping rule.
+Necessary canon, determinism and behavior checks remain mandatory. Required canon panels and
+distinct review seats remain exceptions to the small-team default. Additional expensive campaigns
+require an explicit owner decision naming the new question, cost and evidence gap; existing owner
+authorization remains valid for planned checks and targeted retests. Failed checks receive targeted correction and retest, long runs require
+scope freeze, and proxy acceptance must be reconciled with the actual bug before expansion. One
+independent review and one targeted correction pass is the default; unresolved contradictions go to
+the owner rather than another review loop. Long test output is batched to logs, existing reports and
+this ledger remain the artifact system, and token metrics are reported only when supplied by the
+runtime. Root `AGENTS.md` provides portable entry points and points to the runtime skill without
+copying it. Documentation/process-only changes use focused checks; production-required checks stay
+in force. Machine-local Codex settings and the global agent policy were updated outside git: Sol at
+medium reasoning is the default worker, concurrent children are capped at two, and other parsed
+configuration fields were preserved. These defaults apply to new workers, do not retroactively alter
+running workers, and do not claim hard token-budget enforcement. No source, game plan, canon,
+or baseline changes were made. Focused documentation verification passed locally (13/13 across
+three files) and independently at the coordinating root (9/9 across two files); diff hygiene passed.
+
+Independent Luna tabletop review covered documentation closure, a targeted engine-test failure, and an ambiguous endpoint proxy. Root verified the requested owner-only expansion and explicit unmet-acceptance guards. This was a policy simulation, not a measured end-to-end token-savings trial. The local Codex CLI loaded the updated configuration successfully.
