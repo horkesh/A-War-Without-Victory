@@ -24,6 +24,7 @@ import { isSrkStranglePostureEnabled } from '../sim/combat/contain_posture_gate.
 import { buildAdjacencyFromEdges, isSettlementSetContiguous } from '../sim/combat/war_adjacency.js';
 import { estimateAttackCost, type AttackEstimate } from '../sim/combat/combat_estimate.js';
 import { computeFrontWidthMetrics } from '../sim/combat/front_width_metrics.js';
+import { computeSectorCombatRatings } from '../sim/combat/sector_combat_rating.js';
 import { applyRecruitment, evaluateRecruitmentEligibility, initializeRecruitmentResources, recruitBrigade } from '../sim/recruitment_engine.js';
 import { buildRecruitmentContext } from '../sim/recruitment_context.js';
 import { assertTurnSuccess, runTurn } from '../sim/turn_pipeline.js';
@@ -358,7 +359,9 @@ export async function startNewCampaign(
 /** Load a saved state file (final_save.json or any GameState JSON). */
 export async function loadStateFromPath(statePath: string): Promise<{ state: GameState }> {
     const content = await readFile(statePath, 'utf8');
-    return { state: deserializeState(content) };
+    const state = deserializeState(content);
+    computeSectorCombatRatings(state, null);
+    return { state };
 }
 
 /**

@@ -218,9 +218,9 @@ Historical RE packet sequencing and rollback evidence remain in the [closed cont
 
 ### 4.1 Finite behavior-closure register (2026-09-07)
 
-**Current disposition:** BC01 CLOSED by owner approval: verified repair accepted; territory-similarity requirement retired ([verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)); BC02 ACTIVE: existing-save/code investigation; BC03–BC07 pending under D1; BC08 closed by verification/disposition.
+**Current disposition:** BC01 CLOSED by owner approval: verified repair accepted; territory-similarity requirement retired ([verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)); BC02 CLOSED by its verified Electron load/display repair; BC03–BC07 pending under D1; BC08 closed by verification/disposition.
 
-**BC02:** existing-save/code investigation (owner, 2026-09-07); no campaign or repair. Calibration stays open.
+**BC02:** CLOSED 2026-09-07; Electron load/display only. No campaign or calibration change. BC03 is next pending.
 
 **Register authority only; BC01 separately scheduled above.** These IDs index existing work, not milestones or a new lane.
 FIX means planned repair **when scheduled**, not authority to implement. VERIFY/DISPOSITION means
@@ -232,7 +232,7 @@ live in the existing R8 plan; its previously proposed B10–B13/F1 are now regis
 | ID / existing home | Owner | Impact / pre-freeze disposition |
 |---|---|---|
 | BC01 player opportunities / R8 | Gameplay/operations + Game Designer + QA | **CLOSED — owner accepted repair and retired territory similarity (2026-09-07).** Verified L0/L1 review, L2 auto-apply/no queue, L3 observer across three factions. |
-| BC02 B2/B9 sector/rating truth / R8 | Systems + QA | **ACTIVE.** Save serialization explains absent ratings; load/display plan next. No demonstrated simulation effect; no repair scheduled. |
+| BC02 B2/B9 sector/rating truth / R8 | Systems + QA | **CLOSED — verified 2026-09-07.** Electron save load rebuilds only transient ratings before player projection; canonical bytes and privacy remain intact. |
 | BC03 B10 narrated Dayton / R8 | Events/systems + Game Designer + QA | **FIX** coherent event/terminal ownership before gate/window activation; preserve working packaged ending. Headless terminal behavior is separate **VERIFY/DISPOSITION**, not a mandated closeout. |
 | BC04 B11 chronology + P1/P2 / R8/panel | Historian + systems + calibration + independent §6 panel | **FIX after existing conditional planning**, fresh n392 reconciliation first. Exclude landed barracks stagger. P1 and coherent P2 separately controlled; timing/displacement/NATO outcomes measured. |
 | BC05 B12 NATO/Lukavac gates / R8 | Events/systems + Historian + QA | NATO windows **FIX** after current-baseline confirmation; Lukavac **VERIFY/DISPOSITION** gate versus simulated-war cause. Lint is byte-neutral; enabling events is not. |

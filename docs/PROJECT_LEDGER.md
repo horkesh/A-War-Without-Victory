@@ -33318,3 +33318,31 @@ The existing R8 plan now preserves the historical findings, records this correct
 an actionable focused load/display contract and conditional hydration plan. BC02 stays ACTIVE;
 no full campaign, production edit, calibration change or baseline refresh was performed. Evidence
 is retained locally at `runs/bc02_20260907/evidence.json`. Independent Sol review approved the bounded finding and plan; the requested board wording correction was applied. Documentation checks passed 9/9 after shortening the master summary to satisfy its size limit (initial check: 8 passed, one size-limit failure). No behavior tests or campaigns were added.
+
+
+## 2026-09-07 - BC02 Electron loaded-save sector ratings restored; CLOSED
+
+The owner approved the prepared small load/display repair. `loadStateFromPath` now runs the existing
+authoritative `computeSectorCombatRatings(state, null)` after canonical deserialization and before
+all three Electron save-load entrypoints create their runtime snapshot or player-visible renderer
+projection. It preserves the materialized `corps_front_sectors`, adds only the derived transient
+`sector_combat_ratings` cache, and introduces no new persistent field, sector rebuild, order, combat
+state or simulation-decision path. Canonical serialization still omits the cache. Player projection
+retains only the loaded player's own sector-rating keys; `GameStateAdapter` receives the computed
+offensive, defensive, defense-per-edge, strength-class and personnel values. Browser-only raw-JSON
+fallback loading was outside the approved Electron scope.
+
+The focused TDD regression first failed because loaded ratings were undefined, then passed against
+the tracked canonical startup save with exact equality to the authoritative computation, 172/172
+sector/rating keys, canonical-byte identity, and no non-cache state delta. The accepted n392 final
+save hydrated 49/49 keys and preserved canonical SHA-256
+`723726ab301b0b8483a13e014f67535bb18f4a4c56176e328efa1440f4cbe301`. Focused load,
+persistence, serialization, adapter and privacy tests passed 95/95; typecheck, desktop simulation
+bundle plus startup-snapshot check, tactical-map build (1,378 modules), and desktop bundle smoke
+passed. No campaign, calibration, baseline or canon text changed. Independent Sol review returned
+GO with no findings and confirmed the load convergence, optional-input fallbacks, privacy boundary,
+and absence of simulation mutation. The R8 plan, master roadmap, command board, ADR-0006 persistence
+contract and desktop IPC contract were synchronized. BC02 is CLOSED; BC03 is the next pending
+closure-register item.
+
+Final documentation checks passed 12/12 after compacting the master summary to its size limit; independent Sol documentation review returned GO and diff hygiene passed.
