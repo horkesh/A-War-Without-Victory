@@ -33259,3 +33259,15 @@ Current next action: owner/PM with Systems/QA explicitly resolves the endpoint e
 further investigation or closure; BC02-BC07 retain D1 and BC08 remains unchanged.
 
 Documentation verification: 7/7 focused documentation tests passed; 18 new/changed local links and anchors checked with zero errors; git diff --check passed. Final independent Process QA GO and Systems GO (with launch-instrument scope correction applied). No production changes in this propagation.
+
+
+## 2026-09-07 - Owner closes BC01 and retires territory-similarity requirement
+
+The owner explicitly approved closing and merging BC01 based on its verified operation/decision
+fixes, retiring similar final territory as a BC01 acceptance requirement. BC01 is CLOSED. Earlier
+ACTIVE entries remain historical. Measured absolute gaps remain RBiH 9 -> 24, HRHB 9 -> 9,
+RS 16 -> 16; this disposition does not claim convergence was met. The verified repair, restored
+ten catalog launches, neutral canonical POST/observer and bounded test evidence are unchanged.
+Current documentation and canon disposition notes reflect the approval without changing mechanics.
+BC02 sector/rating truth is next priority only; no implementation is authorized in this turn.
+Final calibration remains open; no baseline/floor changes. Focused documentation checks passed 7/7 and git diff --check passed; independent Process QA approved closure and merge against the explicit owner decision.

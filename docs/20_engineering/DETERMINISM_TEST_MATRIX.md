@@ -142,4 +142,4 @@
 - `tests/operation_opportunity_launched_dossier.test.ts` and
   `tests/ui/presidential_decision_room_panel_i18n.test.ts`: exact launch binding, unavailable states,
   raw projection through adapter to the actual mounted Decision Room, and no false pending reviews.
-- Clean 188-week POST and observer parity passed; all-three-player matched evidence leaves endpoint convergence unmet. See [BC01 verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md); test gates do not waive that expectation.
+- Clean 188-week POST and observer parity passed; all-three-player matched evidence leaves endpoint convergence unmet. See [BC01 verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md); the owner explicitly retired territory similarity as a BC01 acceptance requirement on 2026-09-07; final calibration stays open.

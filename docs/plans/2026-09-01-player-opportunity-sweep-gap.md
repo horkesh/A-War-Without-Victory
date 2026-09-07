@@ -1,6 +1,6 @@
-# Player opportunity autonomy boundary — implemented, BC01 ACTIVE
+# Player opportunity autonomy boundary — BC01 CLOSED
 
-**Date:** 2026-09-01 · **Status:** BC01 ACTIVE, owner scheduled 2026-09-07. Implementation verified; player endpoint expectation unmet; owner disposition required. See [verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md).
+**Date:** 2026-09-01 · **Status:** CLOSED by explicit owner approval, 2026-09-07. Verified operation/decision fixes accepted; similar final territory is retired as a BC01 requirement. Measured gaps remain unchanged; final calibration is open. See [verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md).
 **Corrected:** 2026-09-05 — the fix section was rewritten (see *Correction record* at the end). The
 root-cause trace below preserves the historical diagnosis, superseded by the dated implementation verification.
 **Corrected again:** 2026-09-05 — the Level-2 open question is RULED (auto-apply, does not queue);
@@ -10,7 +10,11 @@ two factual citation errors fixed; canon-clarification recommendations recorded 
 [all three factions](../40_reports/playtests/20260901_d2_full_campaign_all_three_factions.md).
 **Blocks:** ahistorical playthrough experiments. Does NOT block observer parity, which is unaffected.
 
-## Current handoff — 2026-09-07
+## Current disposition — 2026-09-07
+
+The owner approved closing and merging BC01 based on verified operation/decision behavior and explicitly retired similar final territory as its acceptance requirement. This does not claim convergence was met. BC02 is next priority only; no further implementation is authorized here. The earlier ACTIVE handoff below is historical.
+
+## Historical implementation handoff — 2026-09-07
 
 **ACTIVE — owner instruction “Start BC01 then”, 2026-09-07.** This schedules BC01 only; BC02–BC07 retain D1. The unchanged-source attribution and clean PRE/POST gates passed; candidate implementation is verified, while endpoint-convergence expectation is unmet. Existing home: [Master BC01](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) / [R8 acceptance detail](2026-07-31-full-campaign-electron-validation-plan.md#behavior-closure-acceptance-detail-2026-09-07). [BC08 verification](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md) is closed by bounded disposition, not an overall-green or player-path proof. BC01 is active; BC02–BC07 remain pending under D1. The corrected contract governs this repair.
 

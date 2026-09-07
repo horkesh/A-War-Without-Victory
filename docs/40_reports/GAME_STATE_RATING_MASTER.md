@@ -1,6 +1,6 @@
 # AWWV Game State Rating — vs. AAA+++ (Paradox-tier) Bar
 
-**BC01 evidence update (2026-09-07):** [Implementation verification](audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md) supersedes the historical “not built” opportunity diagnosis below: the ruled boundary and all ten missing catalog launches are repaired. No automatic regrade follows. Matched endpoint convergence is unmet and BC01 remains ACTIVE for owner disposition; the dated ratings remain historical assessments.
+**BC01 evidence update (2026-09-07):** [Implementation verification](audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md) supersedes the historical “not built” opportunity diagnosis below: the ruled boundary and all ten missing catalog launches are repaired. No automatic regrade follows. Matched endpoint convergence is unmet and BC01 is CLOSED by owner approval; the territory-similarity requirement is retired; the dated ratings remain historical assessments.
 
 **Purpose:** Single living "where is the game today, honestly" master. Per-system rating against an AAA+++ / Paradox-tier reference bar, with the exact remaining gap and what work would close it. **Observation-only — no code changes.**
 

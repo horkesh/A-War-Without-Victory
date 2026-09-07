@@ -1,7 +1,7 @@
 # BC01 player opportunity implementation verification
 
 2026-09-07. Candidate `3ad5ed25a835ef37a607ca3d0ba33f9cec7e9b15`.
-**Implemented and behavior verified; BC01 ACTIVE: endpoint-convergence expectation unmet, explicit owner disposition required.**
+**BC01 CLOSED by explicit owner approval, 2026-09-07.** The owner accepted the verified operation/decision fixes and approved merging, retiring similar final territory as a BC01 requirement. The measurements below are preserved; convergence was not met. Final calibration stays open.
 
 ## Implemented behavior
 
@@ -81,11 +81,9 @@ and do not prove first attack timing.
 
 ## Disposition and next action
 
-BC01 remains ACTIVE. Owner/PM with independent Systems/QA must explicitly dispose of the unmet
-endpoint expectation: retain it and authorize a bounded causal investigation, or explicitly retire
-that acceptance proxy with evidence and rationale. No waiver is inferred from the restored launches,
-neutral canonical run or terminal completion. No further mechanics/calibration change is authorized
-by this report. BC02-BC07 retain D1; BC08 is unchanged. Final behavior and calibration closure remain open.
+The owner explicitly approved BC01 closure and merge on 2026-09-07, based on the verified operation/decision fixes, and retired the similar-final-territory requirement. This is the requested disposition, not a claim that endpoint convergence succeeded. The earlier ACTIVE assessment and all measured gaps remain historical evidence.
+
+BC02 sector/rating truth is the next priority only; no BC02 implementation is authorized by this report. BC02-BC07 retain their existing scheduling policy; BC08 is unchanged. Final calibration and broader behavior closure remain open. No mechanics, floors or baseline changes accompany this disposition.
 
 ## Evidence
 

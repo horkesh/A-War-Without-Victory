@@ -61,13 +61,13 @@ delegates at Levels 2-3. The commander-loop and operation-opportunity channels u
   faction at all (`selectBotBrigadeOrderFactions`, `war_phases.ts:937`, gated `>= 1`), so no staff
   plan is proposed and there is nothing to authorize. At Level 1 the plan is held at `ready` until
   the president answers it. At Levels 2-3 it advances to `executing` unauthorized.
-- **LANE B operation opportunities — implemented (BC01 ACTIVE, 2026-09-07).**
+- **LANE B operation opportunities — implemented (BC01 CLOSED by owner approval, 2026-09-07).**
   L0/L1 create advisory human reviews; L2/L3 automatically resolve military opportunities without
   a queue. The bot path excludes the selected player at L0/L1. The actual Decision Room presents
   factual receipts and the existing Stop-op action only for a uniquely bound executing own operation.
   No blanket post-turn sweep is added. [Verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)
   records restored launches and neutral canonical POST, but the endpoint-convergence expectation
-  is unmet and requires explicit owner disposition. This is not BC01 closure.
+  was unmet; the owner explicitly retired it and approved BC01 closure. Final calibration stays open.
 - **Authored historical operations are the exception and never delegate.** A pre-planned or triggered
   operation for the player faction requires an accepted `HISTORICAL_OP:*` authorization at every
   level, including 2 and 3 (`historical_operation_authorization.ts`,
