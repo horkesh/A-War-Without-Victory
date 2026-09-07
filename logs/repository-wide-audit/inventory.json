@@ -1,0 +1,387 @@
+{
+  "trackedFileCount": 8252,
+  "counts": {
+    ".agent": 9,
+    ".claude": 142,
+    ".cursor": 1,
+    ".editorconfig": 1,
+    ".gitattributes": 1,
+    ".githooks": 2,
+    ".github": 9,
+    ".gitignore": 1,
+    ".husky": 5,
+    ".nvmrc": 1,
+    ".puppeteerrc.cjs": 1,
+    "AGENTS.md": 1,
+    "CLAUDE.md": 1,
+    "README.md": 1,
+    "artifacts": 6,
+    "assets": 106,
+    "build": 2,
+    "data": 1330,
+    "docs": 3210,
+    "handoffs": 11,
+    "package-lock.json": 1,
+    "package.json": 1,
+    "scripts": 146,
+    "src": 1293,
+    "tests": 1403,
+    "tools": 563,
+    "tsconfig.json": 1,
+    "tsx.cmd": 1,
+    "vitest.cmd": 1,
+    "vitest.config.ts": 1
+  },
+  "bytes": {
+    ".agent": 107483,
+    ".claude": 1416250,
+    ".cursor": 10777,
+    ".editorconfig": 151,
+    ".gitattributes": 648,
+    ".githooks": 572,
+    ".github": 77129,
+    ".gitignore": 2839,
+    ".husky": 3201,
+    ".nvmrc": 4,
+    ".puppeteerrc.cjs": 1021,
+    "AGENTS.md": 1060,
+    "CLAUDE.md": 9854,
+    "README.md": 2449,
+    "artifacts": 4585371,
+    "assets": 116808289,
+    "build": 14680,
+    "data": 1538153680,
+    "docs": 859773576,
+    "handoffs": 56759,
+    "package-lock.json": 659129,
+    "package.json": 34828,
+    "scripts": 2032658,
+    "src": 86150646,
+    "tests": 15126252,
+    "tools": 150554442,
+    "tsconfig.json": 520,
+    "tsx.cmd": 55,
+    "vitest.cmd": 56,
+    "vitest.config.ts": 3926
+  },
+  "scriptCount": 315,
+  "overlappingDeps": [
+    {
+      "name": "@deck.gl/mapbox",
+      "root": "^9.3.3",
+      "map": "^9.2.11"
+    },
+    {
+      "name": "@turf/bezier-spline",
+      "root": "^7.3.4",
+      "map": "^6.5.0"
+    },
+    {
+      "name": "@turf/helpers",
+      "root": "^7.3.4",
+      "map": "^6.5.0"
+    },
+    {
+      "name": "maplibre-gl",
+      "root": "^5.24.0",
+      "map": "^4.0.0"
+    },
+    {
+      "name": "pmtiles",
+      "root": "^4.4.1",
+      "map": "^3.0.0"
+    },
+    {
+      "name": "react",
+      "root": "^18.3.1",
+      "map": "^18.2.0"
+    },
+    {
+      "name": "react-dom",
+      "root": "^18.3.1",
+      "map": "^18.2.0"
+    },
+    {
+      "name": "zustand",
+      "root": "^4.5.7",
+      "map": "^4.5.0"
+    },
+    {
+      "name": "@types/react",
+      "root": "^18.3.28",
+      "map": "^18.2.0"
+    },
+    {
+      "name": "@types/react-dom",
+      "root": "^18.3.7",
+      "map": "^18.2.0"
+    },
+    {
+      "name": "@vitejs/plugin-react",
+      "root": "^4.7.0",
+      "map": "^4.2.0"
+    },
+    {
+      "name": "autoprefixer",
+      "root": "^10.4.27",
+      "map": "^10.4.0"
+    },
+    {
+      "name": "postcss",
+      "root": "^8.5.6",
+      "map": "^8.4.0"
+    },
+    {
+      "name": "tailwindcss",
+      "root": "^3.4.19",
+      "map": "^3.4.0"
+    },
+    {
+      "name": "typescript",
+      "root": "^5.5.4",
+      "map": "^5.5.0"
+    },
+    {
+      "name": "vite",
+      "root": "^5.0.0",
+      "map": "^5.0.0"
+    }
+  ],
+  "duplicateCommands": [
+    {
+      "command": "npm run test:vitest:fast",
+      "names": [
+        "test",
+        "test:engine",
+        "test:node:progress"
+      ]
+    },
+    {
+      "command": "vitest run",
+      "names": [
+        "test:ui",
+        "test:vitest:serial"
+      ]
+    },
+    {
+      "command": "node tools/ui/first_hour_browser_gate.cjs",
+      "names": [
+        "qa:player-starts:browser",
+        "qa:first-hour:browser"
+      ]
+    },
+    {
+      "command": "tsx src/cli/phase3abc_audit_harness.ts",
+      "names": [
+        "phase3:abc_audit",
+        "phase3:abc_audit:tsx"
+      ]
+    },
+    {
+      "command": "tsx tools/map/derive_municipality_boundaries_from_fabric.ts",
+      "names": [
+        "map:derive:muni-boundaries-from-fabric",
+        "map:derive-muni-boundaries"
+      ]
+    },
+    {
+      "command": "tsx scripts/map/build_substrate_viewer_index.ts",
+      "names": [
+        "map:viewer:substrate:index",
+        "map:viewer:map:index"
+      ]
+    }
+  ],
+  "missingCommandPaths": [
+    {
+      "name": "sim:aorcheck",
+      "path": "src/cli/sim_aorcheck.ts"
+    },
+    {
+      "name": "viewer:settlements:only1990",
+      "path": "tools/dev_viewer/settlements_only_1990/vite.config.ts"
+    },
+    {
+      "name": "map:build:raw",
+      "path": "scripts/map/build_raw_settlements_from_js.ts"
+    },
+    {
+      "name": "map:audit:settlement-names:h3_4",
+      "path": "scripts/map/audit_settlement_name_fields_h3_4.ts"
+    },
+    {
+      "name": "map:query:settlement-names:h3_4a",
+      "path": "scripts/map/query_settlement_by_name_streaming_h3_4a.ts"
+    },
+    {
+      "name": "map:build:settlement-names:h3_6",
+      "path": "scripts/map/build_settlement_names_from_census_h3_6.ts"
+    },
+    {
+      "name": "map:validate:settlement-names:h3_6",
+      "path": "scripts/map/validate_settlement_names_h3_6.ts"
+    },
+    {
+      "name": "map:audit:geometry:s209422:h3_8",
+      "path": "scripts/map/audit_settlement_geometry_s209422_h3_8.ts"
+    },
+    {
+      "name": "map:derive:continuity:g3_6",
+      "path": "scripts/map/derive_settlement_continuity_graph_g3_6.ts"
+    },
+    {
+      "name": "data:extractMun1990Registry",
+      "path": "scripts/data/extract_municipalities_1990_registry_from_xlsx.ts"
+    },
+    {
+      "name": "data:buildMun1990Registry110",
+      "path": "scripts/data/merge_municipalities_1990_registry_110.ts"
+    },
+    {
+      "name": "map:attachSettlementNamesFromPolygons",
+      "path": "scripts/map/attach_settlement_names_from_polygons.ts"
+    },
+    {
+      "name": "map:attachSettlementTrueNames",
+      "path": "scripts/map/attach_true_settlement_names_option_b.ts"
+    },
+    {
+      "name": "map:deriveMun1990Geometry",
+      "path": "scripts/map/derive_municipalities_1990_geometry.ts"
+    },
+    {
+      "name": "audit:breza:trace",
+      "path": "scripts/audits/trace_breza_presence_and_mapping.ts"
+    },
+    {
+      "name": "audit:settlementNames:feasibility",
+      "path": "scripts/audits/scan_settlement_name_sources.ts"
+    },
+    {
+      "name": "audit:settlements:missingTargets",
+      "path": "scripts/audits/find_missing_settlements_by_municipality.ts"
+    },
+    {
+      "name": "map:importMissingSettlements",
+      "path": "scripts/map/import_missing_settlements_from_donor.ts"
+    },
+    {
+      "name": "audit:settlements:locateNamed",
+      "path": "scripts/audits/locate_named_settlements_in_donor.ts"
+    },
+    {
+      "name": "map:importNamedSettlementPatch",
+      "path": "scripts/map/import_settlements_by_sid_patch.ts"
+    },
+    {
+      "name": "audit:settlements:verifyNamedPresent",
+      "path": "scripts/audits/verify_named_settlements_present_in_derived.ts"
+    },
+    {
+      "name": "phaseF3:aor_fallback_usage_audit",
+      "path": "src/cli/phaseF3_aor_fallback_usage_audit.ts"
+    }
+  ],
+  "largestTracked": [
+    {
+      "file": "data/derived/tiles/osm.pmtiles",
+      "bytes": 459741592
+    },
+    {
+      "file": "data/source/osm/bosnia-herzegovina-latest.osm.pbf",
+      "bytes": 155880483
+    },
+    {
+      "file": "data/derived/tiles/hillshade.pmtiles",
+      "bytes": 79685018
+    },
+    {
+      "file": "docs/40_reports/playtests/evidence/20260731_session16_rs_104week_player/run-data/paradox-local-qa-progress-20260731-session16c-rs-104w-player-final.json",
+      "bytes": 68117806
+    },
+    {
+      "file": "data/derived/municipality_borders.geojson",
+      "bytes": 62099915
+    },
+    {
+      "file": "data/derived/terrain/contours_A1.geojson",
+      "bytes": 61396915
+    },
+    {
+      "file": "data/derived/settlement_polygons.geojson",
+      "bytes": 57097566
+    },
+    {
+      "file": "data/derived/municipality_borders_from_settlements.geojson",
+      "bytes": 56693641
+    },
+    {
+      "file": "data/derived/terrain/osm_roads_snapshot_h6_2.geojson.gz",
+      "bytes": 51287082
+    },
+    {
+      "file": "data/derived/terrain/osm_waterways_snapshot_h6_2.geojson",
+      "bytes": 46126335
+    },
+    {
+      "file": "docs/knowledge/GUI Expert Review - A War Without Victory.mhtml",
+      "bytes": 45592785
+    },
+    {
+      "file": "docs/40_reports/playtests/evidence/20260731_session16_rs_104week_player/run-data/paradox-local-qa-netlog-20260731-session16c-rs-104w-player-final.json",
+      "bytes": 31603257
+    },
+    {
+      "file": "assets/raw_sora/hq_base_mvp_v1_sora.psd",
+      "bytes": 31445720
+    },
+    {
+      "file": "docs/40_reports/playtests/evidence/20260731_session16_rs_104week_player/run-data/paradox-local-qa-live-events-20260731-session16c-rs-104w-player-final.json",
+      "bytes": 26927794
+    },
+    {
+      "file": "tools/map_calibrator/maps/master-gmd-gmd6m-g6841m-g6841sm-gct00210-cs000018.jpg",
+      "bytes": 25714166
+    },
+    {
+      "file": "data/derived/terrain/dem_clip_h6_2.tif",
+      "bytes": 22874198
+    },
+    {
+      "file": "data/source/historical data/Balkan_BattlegroundsI.pdf",
+      "bytes": 22479117
+    },
+    {
+      "file": "docs/Balkan_BattlegroundsI.pdf",
+      "bytes": 22479117
+    },
+    {
+      "file": "data/source/master_municipalities.json",
+      "bytes": 21042731
+    },
+    {
+      "file": "data/source/dem/bosnia_herzegovina_dem.tiff",
+      "bytes": 20167778
+    },
+    {
+      "file": "data/source/dem/raw/copernicus_dem_glo30_raw.tiff",
+      "bytes": 20167778
+    },
+    {
+      "file": "data/source_v2/master_municipalities.json",
+      "bytes": 19710309
+    },
+    {
+      "file": "docs/40_reports/playtests/evidence/20260730_session14_rbih_80turn_complete/segment-b-progress.json",
+      "bytes": 19616125
+    },
+    {
+      "file": "data/derived/settlements_index_1990.json",
+      "bytes": 19166717
+    },
+    {
+      "file": "data/derived/settlements_index.json",
+      "bytes": 18971209
+    }
+  ]
+}

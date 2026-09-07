@@ -1,0 +1,5 @@
+
+> awwv@0.9.9-beta.1 typecheck
+> tsc --noEmit -p tsconfig.json
+
+src/ui/map/components/chronicle/ChronicleOverlay.tsx(247,78): error TS2741: Property 'detail' is missing in type 'ChronicleChapterEntryRef' but required in type 'ChronicleEntry'.

@@ -1,5 +1,14 @@
 # AWWV Calibration Master Reference
 
+**Current delivery status (2026-09-07):** accepted n392 evidence and unchanged checkpoint floors
+remain controlling; the reviewed BC04 P1/P2 chronology repairs have not received campaign
+acceptance. Preserve separate before/after source attribution as specified in the
+[BC04 plan](../plans/2026-07-31-full-campaign-electron-validation-plan.md#bc04-bounded-implementation-plan--2026-09-07).
+The new cleanup, runtime-input/AI and build-preparation packets are planned, not implemented;
+[master §§4.1–4.2](../plans/MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07)
+owns their sequence before final calibration and packaged acceptance. No baseline refresh
+or campaign result is implied by committing these repairs and plans.
+
 ## ⚠ Casualty accounting regime changed 2026-09-01 — militia losses are now recorded
 
 Schema v38 added `casualty_ledger[faction].per_militia_pool`, and militia-only battles now persist
@@ -3613,7 +3622,7 @@ Two-part fix per L23:
   - **Weekly report `.ops`**: This is a config flag `{enabled: boolean, level: number}` for baseline_ops scenario action — NOT operation count. Actual operations live in `weekly_report.operation_diagnostics[]` array. Confirmed n587: w1=6 ops (VRS corps), w10=7 (+HVO), w20=11 (+ARBiH), w30=12.
   - **Weekly report `.week_index`**: NOT `.week` or `.turn`. The week number field is `week_index`.
 - **Catastrophic casualty ratios (n590 — FIXED):** Two root causes: (1) `OUTCOME_DEFENDER_MOD['catastrophic']` was 0.3 (raised to 0.7 in n589). (2) `personnelDefender` used only primary brigade personnel, not total sector — sector with 5 brigades/4,000 men based defender casualties on one brigade's 500 men (fixed in n590). After both fixes: worst outlier 22.7:1 (at Lukavica — most fortified Sarajevo position), avg catastrophic 8.5:1, aggregate 0.88:1. Remaining outliers are geographically plausible (fortified positions). If you see >25:1, check whether it's Sarajevo/Lukavica first — those ARE expected to be extreme.
-- Tactical fog-of-war is only partially active in the current live path. The engine derives `sector_intel` every war turn, but [`src/ui/map/data/GameStateAdapter.ts`](F:\A-War-Without-Victory\src\ui\map\data\GameStateAdapter.ts) and [`src/ui/map/map/builders/buildFogOfWarGeoJSON.ts`](F:\A-War-Without-Victory\src\ui\map\map\builders\buildFogOfWarGeoJSON.ts) still consume legacy `recon_intelligence.confirmed_empty`. Live evidence: [`runs/apr1992_definitive_40w__7c821fa7d934716d__w40_n110/final_save.json`](F:\A-War-Without-Victory\runs\apr1992_definitive_40w__7c821fa7d934716d__w40_n110\final_save.json) has `sector_intel` and no `recon_intelligence`. Treat current map fog as a UI-layer legacy overlay, not proof that sector-intel-driven FoW is functioning end-to-end.
+- Tactical fog-of-war is only partially active in the current live path. The engine derives `sector_intel` every war turn, but [`src/ui/map/data/GameStateAdapter.ts`](F:\A-War-Without-Victory\src\ui\map\data\GameStateAdapter.ts) and [`src/ui/map/map/builders/buildFogOfWarGeoJSON.ts`](F:\A-War-Without-Victory\src\ui\map\map\builders\buildFogOfWarGeoJSON.ts) still consume legacy `recon_intelligence.confirmed_empty`. Live evidence: `runs/apr1992_definitive_40w__7c821fa7d934716d__w40_n110/final_save.json` (historical local receipt; absent from this checkout at the 2026-09-07 documentation check) has `sector_intel` and no `recon_intelligence`. Treat current map fog as a UI-layer legacy overlay, not proof that sector-intel-driven FoW is functioning end-to-end.
 - Autonomous corps operation planning exists, but the path is internally split. [`src/sim/combat/bot_corps_ai.ts`](F:\A-War-Without-Victory\src\sim\combat\bot_corps_ai.ts) still creates generic named operations in `generateCorpsOperationOrders()`, then later in the same `generateAllCorpsOrders()` pass allows `generateCorpsDirectives()` to replace any non-`sector_attack` active operation with a new sector offensive. Treat generic named-op behavior as partially shadowed until this ownership is unified.
 
 ## 2026-08-14 — §6 status of the R1 collapse ON/OFF pair (n222 / n221)

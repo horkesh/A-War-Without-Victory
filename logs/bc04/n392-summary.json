@@ -1,0 +1,271 @@
+{
+  "run_dir": "F:\\A-War-Without-Victory\\runs\\apr1992_definitive_188w__6898d6d2e324c7a3__w188_n392",
+  "event_receipts": [
+    {
+      "id": "ahmici_massacre_1993",
+      "fired": false,
+      "fired_turn": null
+    },
+    {
+      "id": "tuzla_gate_massacre_1995",
+      "fired": true,
+      "fired_turn": 160
+    },
+    {
+      "id": "un_hostage_crisis_1995",
+      "fired": true,
+      "fired_turn": 160
+    },
+    {
+      "id": "rapid_reaction_force_1995",
+      "fired": true,
+      "fired_turn": 168
+    },
+    {
+      "id": "srebrenica_falls_1995",
+      "fired": true,
+      "fired_turn": 162
+    },
+    {
+      "id": "srebrenica_column_breakout_1995",
+      "fired": true,
+      "fired_turn": 163
+    },
+    {
+      "id": "zepa_falls_1995",
+      "fired": true,
+      "fired_turn": 164
+    },
+    {
+      "id": "second_markale_massacre_1995",
+      "fired": true,
+      "fired_turn": 170
+    },
+    {
+      "id": "nato_deliberate_force_1995",
+      "fired": true,
+      "fired_turn": 171
+    },
+    {
+      "id": "operation_storm_1995",
+      "fired": true,
+      "fired_turn": 174
+    },
+    {
+      "id": "operation_mistral_2_1995",
+      "fired": true,
+      "fired_turn": 179
+    }
+  ],
+  "turn_162_all_control_events": 15,
+  "turn_162_mechanism_counts": {
+    "consolidation": 2,
+    "combat": 1,
+    "event": 12
+  },
+  "enclave_displaced_brigade_snapshots": [
+    {
+      "turn": 160,
+      "brigade_id": "arbih_280th_east_bosnian_light",
+      "personnel": 600,
+      "location_osid": "op:srebrenica:ljeskovik_2",
+      "status": "active"
+    },
+    {
+      "turn": 160,
+      "brigade_id": "arbih_281st_east_bosnian_light",
+      "personnel": 600,
+      "location_osid": "op:srebrenica:luka_2",
+      "status": "active"
+    },
+    {
+      "turn": 160,
+      "brigade_id": "arbih_282nd_east_bosnian_light",
+      "personnel": 600,
+      "location_osid": "op:srebrenica:ljeskovik_2",
+      "status": "active"
+    },
+    {
+      "turn": 160,
+      "brigade_id": "arbih_283rd_east_bosnian_light",
+      "personnel": 600,
+      "location_osid": "op:srebrenica:bostahovine_2",
+      "status": "active"
+    },
+    {
+      "turn": 160,
+      "brigade_id": "arbih_284th_east_bosnian_light",
+      "personnel": 600,
+      "location_osid": "op:srebrenica:osmace_2",
+      "status": "active"
+    },
+    {
+      "turn": 162,
+      "brigade_id": "arbih_280th_east_bosnian_light",
+      "personnel": 319,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    },
+    {
+      "turn": 162,
+      "brigade_id": "arbih_281st_east_bosnian_light",
+      "personnel": 319,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    },
+    {
+      "turn": 162,
+      "brigade_id": "arbih_282nd_east_bosnian_light",
+      "personnel": 319,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    },
+    {
+      "turn": 162,
+      "brigade_id": "arbih_283rd_east_bosnian_light",
+      "personnel": 319,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    },
+    {
+      "turn": 162,
+      "brigade_id": "arbih_284th_east_bosnian_light",
+      "personnel": 319,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    },
+    {
+      "turn": 167,
+      "brigade_id": "arbih_280th_east_bosnian_light",
+      "personnel": 710,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    },
+    {
+      "turn": 167,
+      "brigade_id": "arbih_281st_east_bosnian_light",
+      "personnel": 710,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    },
+    {
+      "turn": 167,
+      "brigade_id": "arbih_282nd_east_bosnian_light",
+      "personnel": 710,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    },
+    {
+      "turn": 167,
+      "brigade_id": "arbih_283rd_east_bosnian_light",
+      "personnel": 710,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    },
+    {
+      "turn": 167,
+      "brigade_id": "arbih_284th_east_bosnian_light",
+      "personnel": 710,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    },
+    {
+      "turn": 176,
+      "brigade_id": "arbih_280th_east_bosnian_light",
+      "personnel": 1387,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    },
+    {
+      "turn": 176,
+      "brigade_id": "arbih_281st_east_bosnian_light",
+      "personnel": 1387,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    },
+    {
+      "turn": 176,
+      "brigade_id": "arbih_282nd_east_bosnian_light",
+      "personnel": 1387,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    },
+    {
+      "turn": 176,
+      "brigade_id": "arbih_283rd_east_bosnian_light",
+      "personnel": 1115,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    },
+    {
+      "turn": 176,
+      "brigade_id": "arbih_284th_east_bosnian_light",
+      "personnel": 991,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    },
+    {
+      "turn": 179,
+      "brigade_id": "arbih_280th_east_bosnian_light",
+      "personnel": 1500,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    },
+    {
+      "turn": 179,
+      "brigade_id": "arbih_281st_east_bosnian_light",
+      "personnel": 1500,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    },
+    {
+      "turn": 179,
+      "brigade_id": "arbih_282nd_east_bosnian_light",
+      "personnel": 1500,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    },
+    {
+      "turn": 179,
+      "brigade_id": "arbih_283rd_east_bosnian_light",
+      "personnel": 1282,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    },
+    {
+      "turn": 179,
+      "brigade_id": "arbih_284th_east_bosnian_light",
+      "personnel": 1097,
+      "location_osid": "op:zivinice:gracanica_2",
+      "status": "active"
+    }
+  ],
+  "calendar": {
+    "epoch": "1992-04-06",
+    "convention": "one-based historical bucket wN = floor((date - 1992-04-06) / 7) + 1; not the runtime date of tN",
+    "runtime_convention": "displayed date = 1992-04-06 + turn * 7 days; week_index is zero-based",
+    "runtime_dates": {
+      "t54": "1993-04-19",
+      "t164": "1995-05-29",
+      "t171": "1995-07-17",
+      "t172": "1995-07-24",
+      "t173": "1995-07-31",
+      "t178": "1995-09-04",
+      "t179": "1995-09-11"
+    },
+    "w54": "1993-04-12..18",
+    "w164": "1995-05-22..28",
+    "w171": "1995-07-10..16",
+    "w178": "1995-08-28..09-03"
+  },
+  "current_code_candidate": {
+    "turn_min": 169,
+    "rate": "1 + 2 coha_expired - 0.5 rrf_deployed + 1 un_hostage_crisis_occurred = 3.5",
+    "accrual": [
+      "t169=3.5",
+      "t170=7.0",
+      "t171=10.5 => receipt"
+    ],
+    "caveat": "requires_events consumers observe the prerequisite on a later evaluation turn; do not promise same-turn column or Deliberate Force receipts without changing engine semantics"
+  }
+}

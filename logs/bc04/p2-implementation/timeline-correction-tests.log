@@ -1,0 +1,11 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/event_timeline_integrity.test.ts (23 tests) 37ms
+ ✓ tests/integration_event_system.test.ts (9 tests) 41ms
+
+ Test Files  2 passed (2)
+      Tests  32 passed (32)
+   Start at  21:02:04
+   Duration  1.93s (transform 582ms, setup 20ms, collect 763ms, tests 78ms, environment 1ms, prepare 210ms)
+

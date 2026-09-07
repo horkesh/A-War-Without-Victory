@@ -1,0 +1,105 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ❯ tests/events_evaluate.test.ts (44 tests | 1 failed) 658ms
+   × evaluateEvents: Srebrenica and Zepa falls write event-owned control receipts without operations 93ms
+     → Expected values to be strictly deep-equal:
++ actual - expected
+
++ []
+- [
+-   'srebrenica_falls_1995'
+- ]
+
+ ✓ tests/event_loader.test.ts (41 tests) 761ms
+ ❯ tests/event_timeline_integrity.test.ts (23 tests | 2 failed) 45ms
+   × Event timeline historical integrity > events within each file are sorted by turn_min 12ms
+     → 1995: zepa_falls_1995 (turn 160) should not precede srebrenica_falls_1995 (turn 169): expected 160 to be greater than or equal to 169
+   × Event timeline historical integrity > requires_events references point to events with earlier or equal turn_min 5ms
+     → zepa_falls_1995 (turn 160) must fire after prerequisite srebrenica_falls_1995 (turn 169): expected 160 to be greater than or equal to 169
+ ✓ tests/event_conditions.test.ts (16 tests) 20ms
+ ❯ tests/integration_event_system.test.ts (9 tests | 1 failed) 48ms
+   × event system integration > requires_events have turn_min <= the dependent event turn_min 8ms
+     → expected 160 to be greater than or equal to 169
+ ✓ tests/pressure_system.test.ts (12 tests) 19ms
+ ✓ tests/turn_pipeline.test.ts (4 tests) 7794ms
+   ✓ runTurn determinism > is deterministic for same state and seed 809ms
+   ✓ runTurn determinism > plays the narrated ceasefire chain before opening and resolving the horizon negotiation 4571ms
+   ✓ runTurn determinism > preserves the horizon negotiation when the player rejects the narrated talks 2114ms
+ ✓ tests/enclave_formation_displacement.test.ts (8 tests) 8ms
+ ✓ tests/ui/decision_consequence_records_panel.test.ts (9 tests) 398ms
+ ✓ tests/ui/settlement_timeline_i18n.test.ts (14 tests) 125ms
+ ✓ tests/ui/chronicle_focus_routing.test.ts (3 tests) 235ms
+ ✓ tests/ui/chronicle_spine_scrubber.test.ts (4 tests) 115ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/event_timeline_integrity.test.ts > Event timeline historical integrity > events within each file are sorted by turn_min
+AssertionError: 1995: zepa_falls_1995 (turn 160) should not precede srebrenica_falls_1995 (turn 169): expected 160 to be greater than or equal to 169
+ ❯ tests/event_timeline_integrity.test.ts:34:149
+     32|                 const prev = (events as any[])[i - 1].trigger.turn_min…
+     33|                 const curr = (events as any[])[i].trigger.turn_min ?? …
+     34|                 expect(curr, `${name}: ${(events as any[])[i].id} (tur…
+       |                                                                                                                                                     ^
+     35|             }
+     36|         }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  tests/event_timeline_integrity.test.ts > Event timeline historical integrity > requires_events references point to events with earlier or equal turn_min
+AssertionError: zepa_falls_1995 (turn 160) must fire after prerequisite srebrenica_falls_1995 (turn 169): expected 160 to be greater than or equal to 169
+ ❯ tests/event_timeline_integrity.test.ts:48:126
+     46|                 const reqTurn = turnMap.get(reqId)!;
+     47|                 const eventTurn = event.trigger.turn_min ?? 0;
+     48|                 expect(eventTurn, `${event.id} (turn ${eventTurn}) mus…
+       |                                                                                                                              ^
+     49|             }
+     50|         }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  tests/events_evaluate.test.ts > evaluateEvents: Srebrenica and Zepa falls write event-owned control receipts without operations
+AssertionError: Expected values to be strictly deep-equal:
++ actual - expected
+
++ []
+- [
+-   'srebrenica_falls_1995'
+- ]
+
+
+- Expected
++ Received
+
+- Array [
+-   "srebrenica_falls_1995",
+- ]
++ Array []
+
+ ❯ tests/events_evaluate.test.ts:433:12
+    431|     );
+    432| 
+    433|     assert.deepStrictEqual(srebrenicaResult.fired.map((event) => event…
+       |            ^
+    434|     assert.ok(state.military.fired_event_ids.includes('srebrenica_fall…
+    435|     assert.strictEqual(state.military.event_flags.srebrenica_fell, tru…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  tests/integration_event_system.test.ts > event system integration > requires_events have turn_min <= the dependent event turn_min
+AssertionError: expected 160 to be greater than or equal to 169
+ ❯ tests/integration_event_system.test.ts:147:32
+    145|             for (const reqId of reqs) {
+    146|                 const reqTurn = turnMap.get(reqId) ?? 0;
+    147|                 expect(evTurn).toBeGreaterThanOrEqual(reqTurn);
+       |                                ^
+    148|             }
+    149|         }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+ Test Files  3 failed | 9 passed (12)
+      Tests  4 failed | 183 passed (187)
+   Start at  20:58:11
+   Duration  37.14s (transform 9.68s, setup 47ms, collect 18.92s, tests 10.22s, environment 3.30s, prepare 1.27s)
+

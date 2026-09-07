@@ -1,0 +1,20 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/dayton_negotiation.test.ts (39 tests) 63ms
+ ✓ tests/condition_evaluator.test.ts (26 tests) 13ms
+ ✓ tests/event_conditions.test.ts (15 tests) 20ms
+ ✓ tests/turn_pipeline.test.ts (3 tests) 5774ms
+   ✓ runTurn determinism > is deterministic for same state and seed 834ms
+   ✓ runTurn determinism > plays the narrated ceasefire chain before opening and resolving the horizon negotiation 4645ms
+ ✓ tests/endgame_save_load_round_trip.test.ts (4 tests) 34ms
+ ✓ tests/endgame_snapshot_freeze.test.ts (4 tests) 33ms
+ ✓ tests/desktop_game_over_advance_gate.test.ts (2 tests) 6ms
+ ✓ tests/ui/endgame_snapshot_verdict_fidelity.test.ts (13 tests) 123ms
+ ✓ tests/ui/dayton_negotiation_modal.test.ts (5 tests) 565ms
+
+ Test Files  9 passed (9)
+      Tests  111 passed (111)
+   Start at  15:36:13
+   Duration  64.65s (transform 9.14s, setup 46ms, collect 36.93s, tests 6.63s, environment 17.48s, prepare 962ms)
+

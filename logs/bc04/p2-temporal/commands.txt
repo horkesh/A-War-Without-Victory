@@ -1,0 +1,13 @@
+HEAD: f117fe47536398add3a966d177b3dce54fc820ac
+
+Read-only source inspection:
+  rg/Get-Content over the files cited in trace.md
+  Exit: 0 for the focused reads used in the report
+
+Temporal fixture:
+  npx tsx logs/bc04/p2-temporal/temporal_fixture.ts
+  Exit: 0
+  Stdout: logs/bc04/p2-temporal/fixture-output.json
+  Stderr: logs/bc04/p2-temporal/fixture-stderr.log (empty)
+
+No scenario campaign, production edit, test edit, commit, or baseline update was run.

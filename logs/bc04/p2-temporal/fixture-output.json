@@ -1,0 +1,108 @@
+{
+  "semantics": {
+    "initial_turn": 0,
+    "first_run_turn_receipt": 1,
+    "relation": "scenario week_index = raw receipt turn - 1; receipt tN closes interval [date(tN-1), date(tN)-1 day]; UI chronology displays date(tN)"
+  },
+  "candidate_projection": {
+    "enclave": [
+      {
+        "raw_turn": 169,
+        "scenario_week_index": 168,
+        "completed_week": "1995-06-26..1995-07-02",
+        "displayed_after_advance": "3 Jul 1995",
+        "readiness_before_evaluation": {
+          "srebrenica_falls_1995": 3.5,
+          "zepa_falls_1995": 0
+        },
+        "fired": []
+      },
+      {
+        "raw_turn": 170,
+        "scenario_week_index": 169,
+        "completed_week": "1995-07-03..1995-07-09",
+        "displayed_after_advance": "10 Jul 1995",
+        "readiness_before_evaluation": {
+          "srebrenica_falls_1995": 7,
+          "zepa_falls_1995": 0
+        },
+        "fired": []
+      },
+      {
+        "raw_turn": 171,
+        "scenario_week_index": 170,
+        "completed_week": "1995-07-10..1995-07-16",
+        "displayed_after_advance": "17 Jul 1995",
+        "readiness_before_evaluation": {
+          "srebrenica_falls_1995": 10.5,
+          "zepa_falls_1995": 0
+        },
+        "fired": [
+          "srebrenica_falls_1995"
+        ]
+      },
+      {
+        "raw_turn": 172,
+        "scenario_week_index": 171,
+        "completed_week": "1995-07-17..1995-07-23",
+        "displayed_after_advance": "24 Jul 1995",
+        "readiness_before_evaluation": {
+          "srebrenica_falls_1995": 3.5,
+          "zepa_falls_1995": 3
+        },
+        "fired": [
+          "srebrenica_column_breakout_1995"
+        ]
+      },
+      {
+        "raw_turn": 173,
+        "scenario_week_index": 172,
+        "completed_week": "1995-07-24..1995-07-30",
+        "displayed_after_advance": "31 Jul 1995",
+        "readiness_before_evaluation": {
+          "srebrenica_falls_1995": 7,
+          "zepa_falls_1995": 6
+        },
+        "fired": [
+          "zepa_falls_1995"
+        ]
+      }
+    ],
+    "markale_deliberate_force": [
+      {
+        "raw_turn": 177,
+        "scenario_week_index": 176,
+        "completed_week": "1995-08-21..1995-08-27",
+        "displayed_after_advance": "28 Aug 1995",
+        "readiness_before_evaluation": {
+          "second_markale_massacre_1995": 3.3
+        },
+        "fired": []
+      },
+      {
+        "raw_turn": 178,
+        "scenario_week_index": 177,
+        "completed_week": "1995-08-28..1995-09-03",
+        "displayed_after_advance": "4 Sep 1995",
+        "readiness_before_evaluation": {
+          "second_markale_massacre_1995": 6.6
+        },
+        "fired": [
+          "second_markale_massacre_1995"
+        ]
+      },
+      {
+        "raw_turn": 179,
+        "scenario_week_index": 178,
+        "completed_week": "1995-09-04..1995-09-10",
+        "displayed_after_advance": "11 Sep 1995",
+        "readiness_before_evaluation": {
+          "second_markale_massacre_1995": 3.3
+        },
+        "fired": [
+          "nato_deliberate_force_1995"
+        ]
+      }
+    ]
+  }
+}

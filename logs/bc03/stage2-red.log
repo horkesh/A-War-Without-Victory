@@ -1,0 +1,37 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ❯ tests/event_conditions.test.ts (15 tests | 1 failed) 28ms
+   × event condition evaluation > starts the 1995 general ceasefire only after COHA is explicitly inactive 14ms
+     → expected { type: 'flag_not_set', …(1) } to deeply equal { type: 'flag_equals', …(2) }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/event_conditions.test.ts > event condition evaluation > starts the 1995 general ceasefire only after COHA is explicitly inactive
+AssertionError: expected { type: 'flag_not_set', …(1) } to deeply equal { type: 'flag_equals', …(2) }
+
+- Expected
++ Received
+
+  Object {
+    "flag": "coha_active",
+-   "type": "flag_equals",
+-   "value": false,
++   "type": "flag_not_set",
+  }
+
+ ❯ tests/event_conditions.test.ts:173:43
+    171|         const event = catalog.find((entry) => entry.id === 'ceasefire_…
+    172| 
+    173|         expect(event?.trigger?.condition).toEqual({
+       |                                           ^
+    174|             type: 'flag_equals',
+    175|             flag: 'coha_active',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 14 passed (15)
+   Start at  15:29:04
+   Duration  1.23s (transform 382ms, setup 19ms, collect 425ms, tests 28ms, environment 0ms, prepare 110ms)
+

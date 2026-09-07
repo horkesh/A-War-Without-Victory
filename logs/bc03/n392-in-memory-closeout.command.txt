@@ -1,0 +1,1 @@
+npx tsx logs/bc03/n392-in-memory-closeout.ts

@@ -1,0 +1,32 @@
+{
+  "scenarioDerivedGroups": {
+    "baseline_ops_sensitivity": {
+      "files": 51,
+      "bytes": 8082428
+    },
+    "baseline_ops_sensitivity_run2": {
+      "files": 51,
+      "bytes": 8082453
+    },
+    "baselines": {
+      "files": 1,
+      "bytes": 1493
+    },
+    "recruitment_test_matrix_2026_02_11": {
+      "files": 25,
+      "bytes": 6054862
+    },
+    "sweeps": {
+      "files": 112,
+      "bytes": 30812056
+    }
+  },
+  "sourceLiteralReferences": {
+    "baseline_ops_sensitivity": [
+      "src/scenario/baseline_ops_sensitivity.ts"
+    ],
+    "data/derived/scenario": [],
+    "municipality_borders.geojson": [],
+    "contours_A1.geojson": []
+  }
+}

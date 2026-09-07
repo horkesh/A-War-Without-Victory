@@ -1,0 +1,21 @@
+
+> awwv@0.9.9-beta.1 warroom:build
+> node node_modules/vite/bin/vite.js build --config src/ui/warroom/vite.config.ts && tsx tools/ui/warroom_stage_assets.ts
+
+vite v5.4.21 building for production...
+transforming...
+✓ 664 modules transformed.
+rendering chunks...
+computing gzip size...
+../../../dist/warroom/map_viewer_standalone.html                8.95 kB │ gzip:   2.43 kB
+../../../dist/warroom/index.html                               11.43 kB │ gzip:   3.09 kB
+../../../dist/warroom/assets/wall_map_frame_v1-RYnjYstq.webp  292.94 kB
+../../../dist/warroom/assets/game start-Cn-sIyrH.webp         467.77 kB
+../../../dist/warroom/assets/flag_RS-DsYaumpc.webp            573.66 kB
+../../../dist/warroom/assets/flag_RBiH-D13oUq6S.webp          613.30 kB
+../../../dist/warroom/assets/flag_HRHB-CKSpPRr-.webp          665.53 kB
+../../../dist/warroom/assets/main-Ddhk2kXE.css                 39.69 kB │ gzip:   7.29 kB
+../../../dist/warroom/assets/map-viewer-L5N0bsRw.js            15.72 kB │ gzip:   5.80 kB
+../../../dist/warroom/assets/main-BWCCiLTJ.js                 257.19 kB │ gzip:  54.50 kB
+../../../dist/warroom/assets/playerSafeText-D7vyqtPC.js       725.72 kB │ gzip: 192.95 kB
+✓ built in 3.47s

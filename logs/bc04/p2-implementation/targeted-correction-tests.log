@@ -1,0 +1,60 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/events_evaluate.test.ts (44 tests) 654ms
+ ❯ tests/event_timeline_integrity.test.ts (23 tests | 2 failed) 45ms
+   × Event timeline historical integrity > events within each file are sorted by turn_min 12ms
+     → 1995: un_safe_area_enforcement_1995 (turn 160) should not precede srebrenica_column_breakout_1995 (turn 171): expected 160 to be greater than or equal to 171
+   × Event timeline historical integrity > requires_events references point to events with earlier or equal turn_min 5ms
+     → un_safe_area_enforcement_1995 (turn 160) must fire after prerequisite srebrenica_falls_1995 (turn 169): expected 160 to be greater than or equal to 169
+ ❯ tests/integration_event_system.test.ts (9 tests | 1 failed) 47ms
+   × event system integration > requires_events have turn_min <= the dependent event turn_min 8ms
+     → expected 160 to be greater than or equal to 169
+ ✓ tests/ui/decision_consequence_records_panel.test.ts (9 tests) 396ms
+ ✓ tests/ui/settlement_timeline_i18n.test.ts (14 tests) 140ms
+ ✓ tests/ui/chronicle_focus_routing.test.ts (3 tests) 235ms
+ ✓ tests/ui/chronicle_spine_scrubber.test.ts (4 tests) 107ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/event_timeline_integrity.test.ts > Event timeline historical integrity > events within each file are sorted by turn_min
+AssertionError: 1995: un_safe_area_enforcement_1995 (turn 160) should not precede srebrenica_column_breakout_1995 (turn 171): expected 160 to be greater than or equal to 171
+ ❯ tests/event_timeline_integrity.test.ts:40:122
+     38|                     expect(prev).toBe(169);
+     39|                 } else {
+     40|                     expect(curr, `${name}: ${currentId} (turn ${curr})…
+       |                                                                                                                          ^
+     41|                 }
+     42|             }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/event_timeline_integrity.test.ts > Event timeline historical integrity > requires_events references point to events with earlier or equal turn_min
+AssertionError: un_safe_area_enforcement_1995 (turn 160) must fire after prerequisite srebrenica_falls_1995 (turn 169): expected 160 to be greater than or equal to 169
+ ❯ tests/event_timeline_integrity.test.ts:59:130
+     57|                     expect(reqTurn).toBe(169);
+     58|                 } else {
+     59|                     expect(eventTurn, `${event.id} (turn ${eventTurn})…
+       |                                                                                                                                  ^
+     60|                 }
+     61|             }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/integration_event_system.test.ts > event system integration > requires_events have turn_min <= the dependent event turn_min
+AssertionError: expected 160 to be greater than or equal to 169
+ ❯ tests/integration_event_system.test.ts:151:36
+    149|                     expect(reqTurn).toBe(169);
+    150|                 } else {
+    151|                     expect(evTurn).toBeGreaterThanOrEqual(reqTurn);
+       |                                    ^
+    152|                 }
+    153|             }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  2 failed | 5 passed (7)
+      Tests  3 failed | 103 passed (106)
+   Start at  20:59:46
+   Duration  20.76s (transform 5.57s, setup 38ms, collect 12.93s, tests 1.62s, environment 3.27s, prepare 749ms)
+

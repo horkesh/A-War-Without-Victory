@@ -1,0 +1,30 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ❯ tests/event_conditions.test.ts (15 tests | 1 failed) 36ms
+   × event condition evaluation > starts the 1995 general ceasefire only after COHA is explicitly inactive 22ms
+     → expected 'A general ceasefire takes effect acro…' to be 'A general ceasefire takes effect acro…' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/event_conditions.test.ts > event condition evaluation > starts the 1995 general ceasefire only after COHA is explicitly inactive
+AssertionError: expected 'A general ceasefire takes effect acro…' to be 'A general ceasefire takes effect acro…' // Object.is equality
+
+Expected: "A general ceasefire takes effect across Bosnia-Herzegovina. After three and a half years of fighting, the parties prepare for negotiations intended to turn the military halt into a peace settlement."
+Received: "A general ceasefire takes effect across Bosnia-Herzegovina, freezing the front lines after 1,340 days of war. The Dayton Agreement establishes Bosnia as a single state composed of two entities — the Federation of Bosnia and Herzegovina and Republika Srpska — with NATO-led IFOR deployed to enforce the peace. The war that killed over 100,000 people and displaced two million is over."
+
+ ❯ tests/event_conditions.test.ts:173:34
+    171|         const event = catalog.find((entry) => entry.id === 'ceasefire_…
+    172| 
+    173|         expect(event?.narrative).toBe(
+       |                                  ^
+    174|             'A general ceasefire takes effect across Bosnia-Herzegovin…
+    175|             + 'the parties prepare for negotiations intended to turn t…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 14 passed (15)
+   Start at  15:41:31
+   Duration  1.21s (transform 372ms, setup 19ms, collect 423ms, tests 36ms, environment 0ms, prepare 108ms)
+

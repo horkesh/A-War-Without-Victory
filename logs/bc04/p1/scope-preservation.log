@@ -1,0 +1,35 @@
+PASS BC03 commit is HEAD
+PASS no staged P1 or unrelated work
+PASS preserved .claude/scheduled_tasks.lock
+PASS preserved data/scenarios/events/war_1995.json
+PASS preserved src/sim/turn_pipeline.ts
+PASS preserved tests/turn_pipeline.test.ts
+PASS preserved tests/event_conditions.test.ts
+PASS preserved docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md
+PASS positive control: original gate is municipal
+PASS whole catalog equals HEAD plus exactly one gate replacement
+PASS bounded tracked change .claude/scheduled_tasks.lock
+PASS bounded tracked change data/scenarios/events/war_1993.json
+PASS bounded tracked change docs/40_reports/20260905_EVENT_FIRING_SATURATION_AND_DEAD_CATALOG.md
+warning: in the working copy of 'docs/PROJECT_LEDGER.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/PROJECT_LEDGER_KNOWLEDGE.md', CRLF will be replaced by LF the next time Git touches it
+PASS local link ../plans/2026-07-31-full-campaign-electron-validation-plan.md
+PASS bounded tracked change docs/PROJECT_LEDGER.md
+warning: in the working copy of 'docs/PROJECT_LEDGER.md', CRLF will be replaced by LF the next time Git touches it
+PASS local link plans/2026-07-31-full-campaign-electron-validation-plan.md
+PASS local link 40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md
+PASS bounded tracked change docs/PROJECT_LEDGER_KNOWLEDGE.md
+warning: in the working copy of 'docs/PROJECT_LEDGER_KNOWLEDGE.md', CRLF will be replaced by LF the next time Git touches it
+PASS local link PROJECT_LEDGER.md
+PASS bounded tracked change docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
+PASS local link ../40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md
+PASS local link ../40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md
+PASS local link ../40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md
+PASS bounded tracked change docs/plans/COMMAND_BOARD.md
+PASS local link MASTER_ROADMAP.md
+PASS local link ../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md
+PASS bounded tracked change docs/plans/MASTER_ROADMAP.md
+PASS local link 2026-07-31-full-campaign-electron-validation-plan.md
+PASS bounded tracked change tests/event_timeline_integrity.test.ts
+PASS bounded tracked change tests/events_evaluate.test.ts
+30 checks passed

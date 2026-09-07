@@ -1,0 +1,56 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ❯ tests/event_timeline_integrity.test.ts (23 tests | 2 failed) 45ms
+   × Event timeline historical integrity > events within each file are sorted by turn_min 12ms
+     → 1995: federation_ground_offensive_1995 (turn 165) should not precede nato_deliberate_force_1995 (turn 178): expected 165 to be greater than or equal to 178
+   × Event timeline historical integrity > requires_events references point to events with earlier or equal turn_min 5ms
+     → federation_ground_offensive_1995 (turn 165) must fire after prerequisite nato_deliberate_force_1995 (turn 178): expected 165 to be greater than or equal to 178
+ ❯ tests/integration_event_system.test.ts (9 tests | 1 failed) 47ms
+   × event system integration > requires_events have turn_min <= the dependent event turn_min 9ms
+     → expected 165 to be greater than or equal to 178
+ ✓ tests/ui/chronicle_focus_routing.test.ts (3 tests) 233ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/event_timeline_integrity.test.ts > Event timeline historical integrity > events within each file are sorted by turn_min
+AssertionError: 1995: federation_ground_offensive_1995 (turn 165) should not precede nato_deliberate_force_1995 (turn 178): expected 165 to be greater than or equal to 178
+ ❯ tests/event_timeline_integrity.test.ts:43:122
+     41|                     expect(prev).toBe(171);
+     42|                 } else {
+     43|                     expect(curr, `${name}: ${currentId} (turn ${curr})…
+       |                                                                                                                          ^
+     44|                 }
+     45|             }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/event_timeline_integrity.test.ts > Event timeline historical integrity > requires_events references point to events with earlier or equal turn_min
+AssertionError: federation_ground_offensive_1995 (turn 165) must fire after prerequisite nato_deliberate_force_1995 (turn 178): expected 165 to be greater than or equal to 178
+ ❯ tests/event_timeline_integrity.test.ts:65:130
+     63|                     expect(reqTurn).toBe(169);
+     64|                 } else {
+     65|                     expect(eventTurn, `${event.id} (turn ${eventTurn})…
+       |                                                                                                                                  ^
+     66|                 }
+     67|             }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/integration_event_system.test.ts > event system integration > requires_events have turn_min <= the dependent event turn_min
+AssertionError: expected 165 to be greater than or equal to 178
+ ❯ tests/integration_event_system.test.ts:154:36
+    152|                     expect(reqTurn).toBe(169);
+    153|                 } else {
+    154|                     expect(evTurn).toBeGreaterThanOrEqual(reqTurn);
+       |                                    ^
+    155|                 }
+    156|             }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  2 failed | 1 passed (3)
+      Tests  3 failed | 32 passed (35)
+   Start at  21:01:05
+   Duration  10.16s (transform 4.96s, setup 28ms, collect 7.48s, tests 326ms, environment 855ms, prepare 329ms)
+

@@ -1,0 +1,28 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ❯ tests/turn_pipeline.test.ts (3 tests | 1 failed) 3505ms
+   ✓ runTurn determinism > is deterministic for same state and seed 827ms
+   ✓ runTurn determinism > does not let the narrated Dayton signing flag preempt the negotiation owner 305ms
+   × runTurn determinism > plays the narrated ceasefire chain before opening and resolving the horizon negotiation 2372ms
+     → expected undefined to be defined
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/turn_pipeline.test.ts > runTurn determinism > plays the narrated ceasefire chain before opening and resolving the horizon negotiation
+AssertionError: expected undefined to be defined
+ ❯ tests/turn_pipeline.test.ts:126:55
+    124|     expect(state.military.negotiation?.dayton_result).toBeDefined();
+    125|     expect(state.meta.endgame_snapshot).toBeDefined();
+    126|     expect(state.meta.endgame_snapshot?.full_verdict).toBeDefined();
+       |                                                       ^
+    127|     expect(state.meta.endgame_snapshot?.cost_ledger).toBeDefined();
+    128|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  15:31:24
+   Duration  10.63s (transform 4.94s, setup 18ms, collect 6.34s, tests 3.51s, environment 0ms, prepare 106ms)
+

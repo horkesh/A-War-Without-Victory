@@ -33566,3 +33566,192 @@ Candidate closeout checks passed: 30 scope/preservation/local-link checks and 9 
 tests, exit 0 (`logs/bc04/p1/candidate-scope.log`, `candidate-docs.log`). The catalog comparison
 still proves exactly one changed gate and preserves BC03 bytes and the lock. The mandatory
 pre-commit typecheck will run normally; no verification hook is bypassed and no campaign is launched.
+
+## [2026-09-07] Bounded deletion cleanup planned under R8
+
+**Type:** Owner-requested planning and roadmap placement; documentation only.
+
+**Scope:** Registered `docs/plans/2026-09-07-bounded-deletion-cleanup-plan.md` as a subordinate
+R8 packet in master §4.2, after scheduled BC04–BC07 disposition and before final calibration
+acceptance/final packaged acceptance. Four outcomes: remove the unused browser combat runner,
+remove the global event registry, consolidate equivalent pre-advance routing, and trim closed
+history from the derived command board. No implementation started or new workstream created.
+
+**Contract refinement:** Pipeline `eventDefinitions` is optional. The registry deletion must
+preserve no-event inputs explicitly with `?? []` at the two pipeline callers while requiring
+an explicit evaluator array; it must not introduce a broader runtime failure contract. Browser
+campaign retirement, event authoring/quotas, recurrence removal, schemas, canon and baselines
+remain excluded. Supported KEEP dispositions are acceptable. Existing R8/global checks remain;
+the packet commissions no separate campaign or automatic baseline refresh.
+
+**Documents:** New packet, master roadmap, command board, plans index, and R8 controlling plan.
+Focused document verification is recorded in the packet. No production code, data or tests changed.
+
+## 2026-09-07 - BC04 P2 receipt/calendar investigation authorized
+
+The owner authorized the recommended bounded investigation: trace actual event receipt turns
+through simulation advancement and calendar readers, preserve the primary-source historical
+sequence, and produce the smallest coherent implementation decision. Start HEAD:
+`f117fe47536398add3a966d177b3dce54fc820ac` (committed P1 candidate); BC03 remains in `c95e25241`.
+No production edits, campaigns, baseline changes, new broad panel or commit are authorized here.
+P1 acceptance remains deferred to next calibration; its extra repeat/ON requirements stay retired.
+
+One Sol technical investigator traces the relevant pipeline/evaluator/calendar consumers and may
+use bounded in-memory fixtures. A separate Sol reviewer applies the Historian lens to retained
+primary-source dates and reviews the combined technical proposal. Existing panel restrictions and
+distinct seat record are reused; no historical date or receipt target is waived to fit the engine.
+Evidence lives in `logs/bc04/p2-temporal/`; the existing BC04 subsection remains the plan home.
+Concurrent owner-requested deletion-cleanup planning edits appeared in shared documentation during
+this session and are preserved separately from these BC04 findings. Checks are small fixture and
+documentation/scope checks, with no full simulation campaign. Findings and disposition follow.
+P2 trace resolves the calendar interpretation: `runTurn` increments N−1 to N before producing
+receipts/TurnSummary, and runner week_index is N−1 for the canonical zero-start campaign.
+Receipt t171 therefore closes 10–16 July, while the advanced state header shows 17 July.
+The earlier helper-only review correctly noticed different labels but did not establish this
+writer lifecycle; it does not justify shifting the panel's target weeks. Current receipt readers
+use the boundary date directly. A derived completed-week formatter is proposed only for those
+occurrence groups, preserving current headers, raw receipt identities, epoch and save schema.
+This is a well-supported weekly-pipeline interpretation, not a stored interval field.
+
+The isolated real-function fixture (controlled flags, unrelated effects stripped) reproduces
+Srebrenica at171, column172, Žepa173, Markale178 and DeliberateForce179 for the candidate minima.
+Readiness and eligibility both inspect prerequisites before the firing phase appends receipts;
+changing catalog order cannot fix the two one-week dependent lags. Evidence:
+`logs/bc04/p2-temporal/trace.md`, `temporal_fixture.ts`, `fixture-output.json`, `commands.txt`
+(exit0, empty stderr). This establishes timing mechanics, not a new campaign result.
+
+The independent Historian/technical reviewer ratifies completed-week targets
+164/164/171/171/173/178/178 for Tuzla/hostage/Srebrenica/column/Žepa/Markale/DeliberateForce.
+Primary judicial/NATO sources and locally available BB pages are recorded with procedural posture
+in `historical-targets.md`; missing local July pages were not given invented BB citations.
+The smallest proposed correction is one explicit opt-in on column and DeliberateForce, one
+non-recursive snapshot wave after normal firing, once-only automatic pressure-free rows,
+unchanged prerequisites/conditions and no second readiness update. Ordinary events, Žepa's
++2-week relationship, wide expiry, containment backstop160 and outcomes remain unchanged.
+Exact proposed core/UI files and regression tests are in the existing BC04 subsection.
+
+Review verdict: historical tuple and mechanism supported, but CHANGES NEEDED before implementation
+authorization (`logs/bc04/p2-temporal/review.md`). The existing scenario/calibration seat's
+turn_min-only condition and engine seat's generalized D3+two-sibling lint-first condition were
+not discharged by the technical evidence. The recommended single owner decision is to approve
+the exact narrow packet and explicitly replace those process conditions with the stated opt-in,
+receipt display scope and pre-change regressions covering all three timing failure shapes.
+Until approved, the conditions remain binding; no lint retirement or implementation is claimed.
+No new broad panel or historical-date choice is needed. Existing panel seats remain separate.
+
+The existing plan, roadmap and command board now record this conditional proposal; the calendar
+knowledge entry is corrected in place to prevent repeating the helper-only inference. Concurrent
+cleanup-planning edits are preserved. P1's owner-retired extra runs and deferred acceptance remain
+unchanged; P2's later campaign gates are neither run nor silently waived. No production/test edit,
+commit, campaign, initial-map change, baseline or floor refresh occurred in this investigation.Focused verification: documentation suites passed 9/9 (exit 0), recorded in
+`logs/bc04/p2-temporal/docs-tests.log` and `.exit`. The first check found the roadmap
+53 characters over its existing size limit; shortening only the BC04 summary resolved it.
+`git diff --check` passed (exit 0); production/data/test diff against f117fe475 is empty.
+HEAD remains f117fe47536398add3a966d177b3dce54fc820ac. The pre-existing scheduled-task
+lock SHA256 matches the investigation-start receipt. Concurrent cleanup docs remain intact.
+BC04 and final calibration remain open; the reviewed P2 proposal awaits the explicit owner
+process-condition amendment above before implementation.
+## 2026-09-07 - BC04 P2 bounded implementation approved
+
+After a plain-language explanation, the owner approved the proposed chronology repair and
+focused tests. This authorizes the coherent date packet, same-week follow-ups for the
+Srebrenica column and Deliberate Force, and receipt-only completed-week display correction.
+It also accepts the scoped replacement of the earlier turn_min-only and generalized
+lint-first conditions described in the existing BC04 plan. All other panel restrictions,
+prerequisites/effects, initial map, expiry protections, floors and 188-week horizon remain.
+Full-campaign validation remains deferred and separately authorized; no commit is requested.
+
+Starting HEAD: f117fe47536398add3a966d177b3dce54fc820ac. Existing documentation and cleanup
+planning changes are preserved; initial diff and scheduled-task lock hash are recorded in
+logs/bc04/p2-implementation. One fresh Sol-medium implementer owns code/tests; the orchestrator
+owns documentation and will request one independent Sol-medium review. The existing distinct
+canon panel and completed historical review are reused, not reconvened.
+
+Validation is bounded to pre-change timing regressions, the prescribed event and receipt-UI
+suites, typecheck and affected builds, plus focused documentation/scope checks. Local cost is
+expected to be minutes, not campaign runtime. Pass requires correct parent/child ordering,
+no recursive cascade or duplicate effects, unchanged non-opted behavior and readiness update,
+correct completed-week display without changing current headers, and preserved protected
+catalog fields. Stop after one independent review and targeted corrections; campaign acceptance
+and BC04 closure remain open.
+
+
+## 2026-09-07 - Repository audit converted to subordinate R8/R9 plans
+
+Owner requested actionable plans from the repository-wide first-principles audit, with the master roadmap studied first for overlaps and sequencing. Documentation-only work expands the existing bounded deletion plan from four to eight tasks (audit D1-D7); adds one R8 runtime packet for BC09 shared validated production inputs and BC10 optional AI command/replay ownership (S4/S5); and adds one limited early R9 preparation packet for dependencies, duplicate validation and research payload exclusions (S1-S3). No new workstream or reopening of R4/R5/RE.
+
+The master §4.2, finite register, collision table, R8/R9 parent plans, command board and index now share the dependency order. BC09 delivers inputs before BC07's separate stability-data policy; BC10 follows command settlement and retains canon's initial-assistance versus recorded-replay distinction. Cleanup hands package-script ownership to R9 preparation. Dependency/payload corrections precede final calibration and packaged acceptance; R9 freeze still follows the final two clean R8 diaries. Existing D1 and separately authorized BC04/P2 work and retired P1 repeats remain intact. KEEP with consumer evidence is valid; no automation or optimization lane is added.
+
+This task writes planning documents only; concurrent BC04 production/test changes, determinism documentation and scheduled-task lock are preserved. No implementation, dependency install, campaign, commit or publication was performed by this planning task. Focused documentation suites passed 9/9 (exit 0), 163 local document links resolved, and git diff --check passed (exit 0). Evidence: logs/repository-audit-planning/docs-tests.log, links.json, diff-check.log. Independent review and any targeted corrections are recorded in the child plans' planning receipts. Master remains below its existing 60,000-character guard; historical probe detail was condensed with its closed source retained, without changing owner rulings or test thresholds.
+
+Implementation milestone: the test-first run reproduced delayed same-week children, missing
+opt-in loader enforcement, old catalog dates, and missing completed-week formatting. Existing
+future-modifier and brake-on readiness behavior was characterized before production edits.
+Evidence: logs/bc04/p2-implementation/prechange-regressions.log. The code now uses the shared
+firing path with one follow-up snapshot; focused validation and independent review are in progress.
+The catalog preservation check passed (exit 0): every field except the six approved rows'
+window changes and two opt-ins is deeply equal to f117fe475, including effects, prerequisites,
+protected maxima, row order and unrelated Dayton entries. Production changes are restricted
+to the eight approved paths; HEAD and the pre-existing lock hash are unchanged. Evidence:
+logs/bc04/p2-implementation/preservation.log. The determinism audit received a scoped current
+contract note; historical panel/review records remain intact.
+
+Independent Sol/medium review completed: one missing public-command disposition (`test:ui` misleading full-suite alias) was added to cleanup Task 5; no other material coverage, dependency, canon or gate issues were found. Final documentation suites passed 9/9, exit 0. Review receipt: `logs/repository-audit-planning/independent-review.md`.
+
+Focused implementation verification: the twelve-file affected suite passed 187/187 (exit 0,
+focused-tests-final.log); the subsequent direct missing-parent regression passed within the
+45/45 evaluator suite (missing-parent-regression.log). Independent review found that actual
+consequence receipts carry both receipt and decision IDs; classification was corrected using
+realistic receipt and mixed-group tests. Condensed chapter references lack this metadata and
+retain original boundary dates rather than being falsely classified as receipts. Final targeted
+Chronicle tests passed 3/3 (chronicle-final3.log), and typecheck passed (typecheck-final3.log,
+exit 0). Intermediate typecheck failures exposed that chapter-reference mismatch and are not
+claimed as passing evidence. Desktop simulation and warroom builds passed; map build is being
+refreshed after the final TSX correction. Full checks/commands are in the existing log directory.
+Campaign acceptance remains deferred; this is an uncommitted candidate, not a new baseline.
+
+Independent implementation review returned GO with no open findings after the targeted
+corrections above: logs/bc04/p2-implementation/independent-review.md. This is the sole
+independent implementation review; no broad panel was reconvened. Plan, command board and
+roadmap now distinguish reviewed P2 implementation from deferred campaign acceptance.
+The original panel conditions remain preserved as history, with the owner's scoped amendment
+recorded in the plan and ledger. BC04 and final calibration remain open.
+
+Final closeout checks: corrected tactical map build passed (exit 0, 1,378 modules;
+desktop-map-build-final.log). Literal validation commands and exit summary are in
+logs/bc04/p2-implementation/commands.md. Documentation tests passed 9/9 (exit 0;
+docs-tests.log). Final preservation and whitespace checks passed; HEAD remains f117fe475
+and all candidate changes remain uncommitted. Existing cleanup documentation and the
+pre-existing scheduled-task lock modification are preserved. No campaign was launched,
+and no baseline, calibration floor, initial map, or 188-week horizon was changed.
+Concurrent-work note: final status also contains the release/gold plan modification and new
+R8 runtime-input/AI-integrity and R9 build-validation preparation plans, alongside the existing
+cleanup plan. These are other work in the shared tree, were preserved, and are not attributed
+to the BC04 P2 implementation or its validation.
+## 2026-09-07 - Owner-authorized documentation reconciliation and integration
+
+The owner requested that completed work and new roadmap items be documented truthfully,
+all current work committed, and the ARBiH honorific-name worktree examined and merged if ready.
+This authorizes local commits and an evidence-supported merge, not a push, publication,
+new campaign, baseline refresh, or implementation of the newly planned audit packets.
+
+Reconciliation corrects the event investigation's stale P2-unauthorized header, identifies
+BC09/BC10 in the controlling R8 acceptance register as well as the master/board, and retains
+the new cleanup/runtime/build-preparation packets as planned. The calibration master now
+points to current acceptance boundaries rather than suggesting that candidate commits are
+new accepted campaign evidence. Historical diagnoses and intermediate failures remain intact.
+BC04 remains open for deferred campaign acceptance; final calibration remains open.
+
+Commit scope is separated into documentation/evidence reconciliation, reviewed BC04 P2 code,
+and the separately reviewed ARBiH name merge. Existing logs are preserved as evidence;
+the pre-existing tracked scheduled-task lock snapshot is included unchanged under the owner's
+commit-all request. The rename worktree has two commits and one roadmap-only correction;
+its independent Sol review checks semantic field deltas, consumer safety, focused tests and
+merge readiness. No worktree state will be discarded to obtain a clean merge.
+
+Documentation reconciliation checks passed: 9/9 focused truth tests (exit 0) and 205 local
+links across 13 changed/new Markdown files (exit 0, no missing linked files). One pre-existing
+absolute link to the historical n110 final save no longer resolves in this checkout; it is now
+explicitly labeled an absent historical local receipt, with its path retained. No replacement
+campaign was run. Existing planning-review evidence for the three new packets is retained in
+logs/repository-audit-planning; BC04's independent implementation GO is retained in its own logs.

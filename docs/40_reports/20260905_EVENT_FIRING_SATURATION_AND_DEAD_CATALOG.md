@@ -7,8 +7,9 @@ BC04 P1 is owner-authorized, implemented and independently reviewed as a candida
 [existing R8 plan](../plans/2026-07-31-full-campaign-electron-validation-plan.md#bc04-bounded-implementation-plan--2026-09-07).
 That reconciliation distinguishes current code and accepted n392 receipts from older
 diagnoses, excludes the landed barracks stagger, and retains the existing panel's P1/P2
-restrictions. P1 focused tests/builds pass; campaign acceptance is pending. P2 implementation
-and all proposed campaigns remain unauthorized; final calibration stays open.
+restrictions as explicitly amended by the owner. P1 and P2 are implemented and independently
+reviewed; focused tests/builds pass. Their campaign acceptance remains deferred, no new
+campaign is authorized by this status update, and final calibration stays open.
 
 **Date:** 2026-09-05
 **Trigger:** Owner observation — *"I noticed the 3 barracks events fire on the same week for some reason."*

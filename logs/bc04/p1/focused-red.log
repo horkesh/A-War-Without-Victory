@@ -1,0 +1,133 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ❯ tests/events_evaluate.test.ts (41 tests | 2 failed) 655ms
+   × Ahmici fires from the HRHB Vitez basing cell at turn 54 and applies its direct effects once 43ms
+     → Expected values to be strictly deep-equal:
++ actual - expected
+
++ []
+- [
+-   'ahmici_massacre_1993'
+- ]
+
+   × Ahmici stays blocked when RBiH holds the Vitez basing cell despite HRHB control elsewhere in Vitez 29ms
+     → Expected values to be strictly deep-equal:
++ actual - expected
+
++ [
++   {
++     id: 'ahmici_massacre_1993',
++     text: 'Ahmici Massacre'
++   }
++ ]
+- []
+
+ ❯ tests/event_timeline_integrity.test.ts (22 tests | 1 failed) 49ms
+   × Event timeline historical integrity > Ahmici uses the HRHB Vitez basing cell while preserving its historical contract 13ms
+     → expected { type: 'and', conditions: [ …(2) ] } to deeply equal { type: 'and', conditions: [ …(2) ] }
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/event_timeline_integrity.test.ts > Event timeline historical integrity > Ahmici uses the HRHB Vitez basing cell while preserving its historical contract
+AssertionError: expected { type: 'and', conditions: [ …(2) ] } to deeply equal { type: 'and', conditions: [ …(2) ] }
+
+- Expected
++ Received
+
+  Object {
+    "conditions": Array [
+      Object {
+        "faction": "HRHB",
+-       "osid": "op:vitez:vitez_2",
+-       "type": "territory_control",
++       "municipality": "vitez",
++       "threshold": 0.5,
++       "type": "faction_controls_municipality",
+      },
+      Object {
+        "flag": "hvo_arbih_tensions_rising",
+        "type": "flag_equals",
+        "value": true,
+      },
+    ],
+    "type": "and",
+  }
+
+ ❯ tests/event_timeline_integrity.test.ts:73:42
+     71|         expect(ahmici.trigger.turn_max).toBe(70);
+     72|         expect(ahmici.trigger.requires_events).toEqual(['croat_bosniak…
+     73|         expect(ahmici.trigger.condition).toEqual({
+       |                                          ^
+     74|             type: 'and',
+     75|             conditions: [
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/events_evaluate.test.ts > Ahmici fires from the HRHB Vitez basing cell at turn 54 and applies its direct effects once
+AssertionError: Expected values to be strictly deep-equal:
++ actual - expected
+
++ []
+- [
+-   'ahmici_massacre_1993'
+- ]
+
+
+- Expected
++ Received
+
+- Array [
+-   "ahmici_massacre_1993",
+- ]
++ Array []
+
+ ❯ tests/events_evaluate.test.ts:719:12
+    717|         'op:vitez:preocica_3': 'RBiH',
+    718|     };
+    719|     assert.deepStrictEqual(
+       |            ^
+    720|         evaluateEvents(eligible, rejectRandomness, 54, [event]).fired.…
+    721|         ['ahmici_massacre_1993'],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/events_evaluate.test.ts > Ahmici stays blocked when RBiH holds the Vitez basing cell despite HRHB control elsewhere in Vitez
+AssertionError: Expected values to be strictly deep-equal:
++ actual - expected
+
++ [
++   {
++     id: 'ahmici_massacre_1993',
++     text: 'Ahmici Massacre'
++   }
++ ]
+- []
+
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   Object {
++     "id": "ahmici_massacre_1993",
++     "text": "Ahmici Massacre",
++   },
++ ]
+
+ ❯ tests/events_evaluate.test.ts:740:12
+    738|     };
+    739| 
+    740|     assert.deepStrictEqual(evaluateEvents(state, rejectRandomness, 54,…
+       |            ^
+    741|     assert.strictEqual((state.military.negotiation as any).capital.HRH…
+    742|     assert.strictEqual((state.military.negotiation as any).capital.HRH…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  2 failed (2)
+      Tests  3 failed | 60 passed (63)
+   Start at  19:01:52
+   Duration  3.51s (transform 626ms, setup 33ms, collect 750ms, tests 704ms, environment 1ms, prepare 900ms)
+

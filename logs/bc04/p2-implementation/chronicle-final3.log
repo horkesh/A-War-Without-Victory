@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/ui/chronicle_focus_routing.test.ts (3 tests) 242ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  21:09:42
+   Duration  8.77s (transform 4.48s, setup 20ms, collect 6.86s, tests 242ms, environment 858ms, prepare 111ms)
+

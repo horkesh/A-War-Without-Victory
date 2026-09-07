@@ -9,13 +9,29 @@
 **Tech stack:** Electron/electron-builder, GitHub Actions, Windows Artifact Signing/SignTool, Apple Developer ID/notarytool, Linux AppImage, SteamPipe, SHA-256 manifests.
 
 **Date:** 2026-07-31
-**Status:** READY -- starts after R8 produces two clean 5/5 diaries
+**Status:** Freeze/readiness starts after R8's two clean 5/5 diaries; the limited build-preparation subset below runs before final acceptance.
 **Roadmap workstream:** R9
 **Canonical owner:** immutable release commit plus generated release manifest
 **Collision rule:** No feature, calibration, schema, content, or map change after RC freeze. A blocker fix creates a new RC from a new commit and repeats all downstream phases.
 **Authority boundary:** `Execute the master roadmap` authorizes repo work, RC configuration, transient local packages, dry runs, and evidence templates. `Publish 1.0` (or equally explicit wording) authorizes signing with supplied credentials, store/upload actions, public release, final tag, and push.
 
 ---
+
+## Early build-preparation subset (2026-09-07)
+
+[Build and validation preparation](2026-09-07-r9-build-validation-preparation-plan.md) is the
+explicit preparatory subset of this plan, scheduled by [master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07)
+after R7/cleanup script handoff and before final calibration/R8 packaged acceptance. It owns
+dependency resolution, duplicated CI/local check execution, and research-payload exclusions.
+Payload exclusions wait for BC09's required-input contract. No implementation starts in this
+planning turn. R5 stays closed; no new release infrastructure workstream is created.
+
+This order prevents Phase 1.2 from changing the dependency graph/payload after accepted R8 proof
+or Phase 0 freeze. Phase 1.2 still performs final security/SBOM/license/offline verification on
+the accepted artifact. Phase 0 freeze requires preparation dispositions and final R8 evidence.
+If later verification requires a source/dependency/resource correction, create a new candidate
+and repeat affected R8/RC proof; never modify the frozen artifact in place. Signing, publication
+and external check-policy mutations remain separately authorized.
 
 ## 1. Resolved decisions
 
@@ -90,6 +106,7 @@ Before any external mutation, print the exact target account/channel/version/art
 - Create `tests/version_coherence.test.ts`
 
 - [ ] Require R1-R8 closed and link exact reports/evidence.
+- [ ] Require the early build-preparation packet's dependency/CI/payload dispositions; bind final R8 evidence to those exact build inputs before freeze.
 - [ ] Set `1.0.0-rc.1`; no tag yet.
 - [ ] Freeze scenario/baseline/save schema/content/package inputs by commit.
 - [ ] Create a release-blocker label/list that contains defects only, not speculative polish.
@@ -132,6 +149,9 @@ git diff --check
 - [ ] Verify Electron/Chromium/Node versions and supported status.
 
 ### Task 1.2 -- Supply-chain and offline completeness
+
+Dependency graph and research-payload corrections are owned by the early preparation packet
+above. This task verifies the final artifact; it does not rerun that implementation after freeze.
 
 **Files:**
 

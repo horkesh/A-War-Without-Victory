@@ -1,0 +1,63 @@
+{
+  "source": "runs/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n392/final_save.json",
+  "before": {
+    "turn": 188,
+    "game_over": false,
+    "pending": true,
+    "dayton_result": false,
+    "snapshot": false,
+    "coha_active": false
+  },
+  "after": {
+    "serialized_round_trip": true,
+    "turn": 188,
+    "game_over": true,
+    "outcome": "dayton",
+    "pending": false,
+    "dayton_result": true,
+    "dayton_result_keys": [
+      "brcko_arbitration",
+      "brcko_status",
+      "entity_autonomy_index",
+      "final_territory_split",
+      "institutional_choices",
+      "patron_overrides_applied",
+      "territorial_packages_accepted",
+      "territorial_packages_rejected"
+    ],
+    "snapshot": true,
+    "verdict": true,
+    "verdict_keys": [
+      "date",
+      "dayton_result",
+      "duration_weeks",
+      "entity_autonomy_index",
+      "faction_verdicts",
+      "outcome_label",
+      "outcome_type",
+      "turn"
+    ],
+    "cost_ledger": true,
+    "cost_ledger_keys": [
+      "annotations",
+      "entries",
+      "findings",
+      "operation_opportunities",
+      "rupture_consequences",
+      "total_civilian_killed",
+      "total_military_killed",
+      "war_duration_weeks"
+    ],
+    "historical_comparison": true,
+    "historical_comparison_keys": [
+      "casualty_ratio",
+      "displacement_ratio",
+      "divergence_notes",
+      "duration_delta_weeks",
+      "milestone_comparison",
+      "rupture_divergence",
+      "territory_divergence"
+    ],
+    "frozen_turn": 188
+  }
+}

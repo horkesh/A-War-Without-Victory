@@ -27,7 +27,15 @@ The former owner-decision and post-D2 residual lists are historical inputs, not 
 | R7 | [Content, history, audio, accessibility, and opening experience](2026-07-31-content-history-localization-audio-plan.md) / [accepted functional opening](2026-08-23-opening-screens-implementation-plan.md) / [cinematic opening and typography extension](2026-08-28-cinematic-opening-typography-implementation-plan.md) / [English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) | Cinematic opening mechanics, faction-room continuity, two-family typography, the five-viewport browser proof, and the two required analogue-first owner plates are complete — the owner-art gate is closed. The approved map-portal texture is integrated as atmospheric terrain only. Live packaged first-paint acceptance PASSED 2026-08-29; human listen/sensitivity, broader English accessibility/readability, and closeout remain. The optional foreground asset was never supplied and gates nothing. RE is closed and gates nothing. |
 | RE | [1.0 Engine Integrity contract](2026-08-26-engine-integrity-plan.md) / [historical packaged-proof recovery record](2026-08-28-packaged-probe-recovery-plan.md) | **RE CLOSED (owner, 2026-09-01); it gates nothing.** P1/P2A were accepted; the P2B blocker is history. Packaged-proof prerequisite/discovery concluded `NO_VERDICT`; the unproven hypothesis was rolled back at `48909e1d6`. No recovery/discovery successor is a current action. |
 | R8 | [Full-campaign packaged-Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) | R7 remaining gates, scheduled finite behavior settlement, final calibration, then final packaged acceptance; RE gates nothing |
-| R9 | [Release candidate, gold, and publication](2026-07-31-release-candidate-gold-publication-plan.md) | R8 produces two clean 5/5 diaries |
+| R9 | [Release candidate, gold, and publication](2026-07-31-release-candidate-gold-publication-plan.md) | Freeze follows two clean 5/5 R8 diaries; limited build preparation runs earlier under master §4.2 |
+
+**Subordinate repository-audit packets:** [Master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07) owns their dependencies and scheduling; all are planned, with implementation not started by this registration.
+
+| Packet | Slot / overlap |
+|---|---|
+| [Bounded deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | R8; original four tasks plus obsolete commands, UI, smoke engine and RE hook retirement. |
+| [Runtime input and AI integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | R8 BC09/BC10; input delivery before BC07 policy; commander ownership after BC01/06. |
+| [Build and validation preparation](2026-09-07-r9-build-validation-preparation-plan.md) | Explicit early R9 subset, after script/resource handoffs and before final calibration and packaged acceptance. |
 
 Each R1–R9 workstream has exactly one detailed plan that controls its roadmap lane.
 Its row links the controlling plan and any
@@ -54,7 +62,7 @@ See [Master Roadmap §2](MASTER_ROADMAP.md#2-authority-and-activation) for the e
 
 ## Current State
 
-**2026-09-07:** [Finite closure §4.1](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) owns BC01 CLOSED by owner approval; territory-similarity requirement retired; BC02–BC07 pending; BC08 is CLOSED by bounded verification/disposition ([receipt](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md)). The dated BC08 raw suite had one shell failure; current BC01 [verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md) records the later raw BCS-key failure and bounded translation recovery, not an overall-green rerun. [BC01 handoff](2026-09-01-player-opportunity-sweep-gap.md) and [implementation verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md) preserve the measured divergence and explicit owner retirement of that requirement. Diagnostic calibration remains open; final acceptance follows behavior settlement.
+**2026-09-07:** [Finite closure §4.1](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) owns current item status and owner dispositions; [audit integration §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07) adds BC09/BC10 and the three subordinate packets. Diagnostic calibration remains open; final acceptance follows behavior and build-input settlement. Existing BC04 authorizations and campaign deferrals remain authoritative in the master.
 
 **Current R7 opening status (2026-08-29):** cinematic mechanics, typography, the five-viewport
 browser proof, and the two required analogue-first owner plates are complete — the owner-art gate is
