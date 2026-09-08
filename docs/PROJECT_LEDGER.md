@@ -34242,3 +34242,22 @@ suite 151 passed/5 skipped; typecheck and diff check passed. Logs are under
 `task2-typecheck.log`). Independent Sol/medium review returned GO with no edits.
 No campaign, data/calibration, dependency, baseline, remote-push or packaged
 acceptance work ran. Tasks 3–8 remain not started.
+
+## 2026-09-08 — Cleanup Task 3: consolidate equivalent pre-advance routing
+
+Fast-forwarded local `main` to reviewed Task 2 commit `cdc8659b1`; no remote push.
+On isolated branch `codex/cleanup-pre-advance-routing`, `reviewPreAdvanceItem` now
+delegates to the existing `reviewPreAdvanceTarget(item.navigationTarget)` after
+comparison of Decision Room, counter-offer, enclave-dashboard, inbox, and generic
+branches. `openDecisionRoomTarget` remains separate because its shell-closing and
+return behavior differs. Only `src/ui/map/App.tsx` changed; no player-visible data,
+strings, simulation inputs, tests, or generated artifacts changed.
+
+Validation: named UI suite 34 passed/5 failed, exit 1, with existing recommended-count
+expectation mismatches and no navigation assertion failure; typecheck exit 0. Release
+build reached successful map build and chunk-cycle checks, then hit the existing stale
+startup-snapshot gate after a source-read timeout; no artifact was regenerated.
+Evidence: `logs/bounded-deletion-cleanup/task3-ui-tests.log`,
+`task3-typecheck.log`, and `task3-release-build.log`. Packaged Electron five-branch
+interaction was unavailable; no packaged acceptance credit claimed. Independent review
+and separate commit remain pending; Tasks 4–8 remain untouched.

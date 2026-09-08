@@ -58,7 +58,7 @@ values; hybrid/ethnic starts bypass them while mode-less operational starts can 
 
 | Packet | Existing owner and sequence |
 |---|---|
-| [Deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | R8; Tasks 1–2 deleted proven unused paths/fallback wiring, reviewed GO. Tasks 3–8 remain planned with their BC04/05/06 and R7 handoffs. |
+| [Deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | R8; Tasks 1–2 deleted proven unused paths/fallback wiring, reviewed GO. Task 3 consolidated equivalent pre-advance routing; focused tests/build have recorded residuals and packaged interaction remains unavailable. Tasks 4–8 remain planned with their BC04/05/06 and R7 handoffs. |
 | [Runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | R8; BC09 Phase 1 is integrated and supplied the verified BC07 retention disposition. BC10 remains planned after BC01/06 and BC09. |
 | [Build preparation](2026-09-07-r9-build-validation-preparation-plan.md) | Limited early R9 subset; cleanup script handoff and BC09 resource contract precede final build evidence. Freeze still waits for R8. |
 
