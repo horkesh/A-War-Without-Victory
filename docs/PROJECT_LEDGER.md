@@ -34743,3 +34743,47 @@ Documentation truth passed 13 tests, exit0; diff-check passed, exit0. Final stat
 verification is `phase2-docs-closeout.log`, and the enabled mandatory local commit hook
 is recorded in `phase2-commit.log`. Phase 2 is complete; next is the separately
 scheduled Phase 3 runtime-resource review after its BC09 input-contract handoff.
+
+## 2026-09-08 — R9 Phase 3 BC09 handoff and packaged-consumer review
+
+Owner approved beginning Phase 3 with its BC09 handoff and consumer review after
+Phase 2 commit `c65de2b98d002b650a48cbfc81f2992c11d574b7`. The review runs on
+`codex/r9-phase3-resource-review`; filters, shipped resources and production code
+remain unchanged. Existing worktrees and untracked receipts are preserved.
+
+The six current required BC09 resource files match accepted live-ipc-06 input hashes
+exactly. The finite matrix and current loader/prerequisite paths agree; the later
+loader typing correction does not redefine required inputs. This establishes the
+input-definition handoff without closing deferred BC09 campaign/packaged acceptance.
+Evidence: `phase3-review-bc09-identity.json` and `phase3-review-bc09-input-comparison.json`
+under `logs/r9-build-preparation/`. The 13-worktree collision scan found only this
+task's preserved Phase 1 proof overlay on shared package paths.
+
+The four research-family candidates still contain 239 tracked files / 53,031,799 raw
+bytes. Consumer dispositions and protected resources belong in the existing R9
+preparation plan, not a new report. Generic static HTTP addressability must be
+separated from an actual supported product reader. Research remains in Git even
+when a later package filter excludes it.
+
+Independent review identified implementation-proof obligations: current package
+probe campaign creation does not exercise advanceTurn's six BC09 reads, and audio
+binary presence is not explicitly asserted. Future implementation must verify actual
+packaged positive resources, valid packaged-production +1-turn with isolated saves, real
+emitted audio, PMTiles/geometry/fonts/startup, and same-package operation/recovery
+routes. Earlier loose Electron evidence cannot certify the changed package.
+
+This review runs no install, build, package, full suite, campaign, baseline refresh,
+remote CI or push/merge. Phase 3 filter implementation, its package/probe evidence,
+and final combined-suite validation remain outstanding. Final consumer-review verdict
+and focused documentation/commit receipts follow below.
+
+Consumer-review closeout: all four families are supported EXCLUDE candidates for
+packaging and KEEP in Git, with no untracked/ignored candidate files. Exact filters,
+reader/writer evidence, 20-OGG emitted-asset proof and same-package +1-turn/route
+obligations are recorded in the existing preparation plan. Independent Sol review
+is GO (`phase3-review-independent.log`). Inventory/summary checks pass; raw commands
+and exits are in `phase3-review-validation.log`. Documentation truth passed 13 tests
+(exit0), with final status verification in `phase3-review-docs-closeout.log`.
+Diff and enabled local commit-hook receipts are `phase3-review-diff-check.log` and
+`phase3-review-commit.log`. This commits the review handoff only; implementation,
+package/probe and final combined-suite acceptance remain outstanding.

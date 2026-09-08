@@ -21,8 +21,9 @@
 
 2026-09-08: preparation Phase 1 is complete with review GO at `38066eec2` after the
 recorded R7 build handoff. Phase 2 check-ownership cleanup is now complete/review GO.
-Phase 3, RC freeze and R7 presentation acceptance remain open; see the preparation
-plan for exact inputs, validation and retained compatibility obligations.
+Phase 3's BC09 input handoff and consumer review are complete/GO;
+filter/package acceptance, RC freeze and R7 presentation acceptance remain open.
+See the preparation plan for exact inputs and compatibility obligations.
 
 [Build and validation preparation](2026-09-07-r9-build-validation-preparation-plan.md) is the
 explicit preparatory subset of this plan, scheduled by [master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07)

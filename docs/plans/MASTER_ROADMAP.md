@@ -238,7 +238,7 @@ BC09 and cleanup Tasks 1–8 are GO; script handoff is ready. No new workstream:
 |---|---|
 | R8 [deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | Tasks 1–8 GO; health repair verified. Task 8 review and mandatory hook pass; script handoff ready. Final R8 acceptance is open. |
 | R8 [runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | BC09 integrated/reviewed GO; campaigns deferred. BC07 RETAIN disposition verified; BC10 planned. No regeneration. |
-| R9 [build preparation](2026-09-07-r9-build-validation-preparation-plan.md) | Phases 1–2 GO. Payload/freeze gated. |
+| R9 [build preparation](2026-09-07-r9-build-validation-preparation-plan.md) | P1–2 GO; P3 review GO, implementation pending. |
 
 R7 retains live English/readability work; R4/R5/RE stay closed. Package/lockfile edits are serial.
 Keep live viewers/recovery, main-process composition and existing IPC contracts; no code-generation task.

@@ -5,10 +5,10 @@
 **Goal:** Make tests and shipped UI use the intended dependency graph, eliminate duplicate check execution, and exclude development research from release payloads before final acceptance.
 **Architecture:** Keep the existing npm/Vite/Electron/CI stack. Consolidate dependency ownership and check execution; narrow existing package filters using verified runtime-resource consumers. Do not create a build system, check orchestrator or generated manifest framework.
 **Tech stack:** npm lockfiles/workspaces as needed, Vite, Vitest, electron-builder, existing GitHub Actions and package probes.
-**Date/status:** 2026-09-08; Phases 1–2 complete, independent review GO. Phase 3 remains planned.
+**Date/status:** 2026-09-08; Phases 1–2 complete/GO. Phase 3 handoff and consumer review complete/GO; implementation and acceptance pending.
 **Owner / board row:** R9 preparatory subset of existing dependency/offline/reproducibility ownership, executed before final R8 acceptance. This explicit subset is not activation of R9 freeze, signing or publication.
 **Slot:** Phase 1 follows R7 and cleanup script handoff (Tasks 5/7/8), before final BC09/BC10 campaign evidence where possible. Phase 2 follows Phase 1 and precedes final expensive validation. Phase 3 follows BC09 input-contract definition. All three precede final calibration, final R8 packaged diaries, and R9 Phase 0 freeze.
-**Next action:** Phase 3 runtime-resource consumer review after its BC09 input-contract handoff; not started here.
+**Next action:** Implement the four reviewed exclusions and required same-package proof, then run the final combined suite on settled inputs.
 **Collisions:** One owner for `package.json`, both lockfiles, Vite/test config and CI. Wait for cleanup script edits and R7 build/presentation edits. Runtime fixes may proceed on disjoint source, but final proof must use the resulting frozen build inputs.
 
 ## 1. Holistic scope and decisions
@@ -400,6 +400,126 @@ git diff --check
 Add targeted guard cases for any changed trigger/dependency edge: docs-only reports, relevant-code execution, strict canon retained, deliberate failing child fails the required parent, and trusted detector restoration. Record every removed invocation against its surviving same-input owner. Actual CI behavior is verified on the next authorized CI run; source tests are not a fabricated remote success. If a protected-name mutation needs external authorization, leave that removal unlanded with the concrete required mapping. Other independent phase work can close.
 
 ## 5. Phase 3 — Narrow release resources (audit S3)
+
+### BC09 handoff and consumer-review boundary — 2026-09-08
+
+The owner approved starting Phase 3 with the BC09 handoff and packaged-consumer
+review. Base is `c65de2b98d002b650a48cbfc81f2992c11d574b7`, tracked-clean, on
+`codex/r9-phase3-resource-review`. This slice settles the exclusion evidence and
+implementation handoff; it does not claim filter changes or package acceptance.
+The existing BC09 finite matrix and current loader/prerequisite registry define
+the required production resources. BC09 campaign/final packaged acceptance remains
+deferred; defining these inputs does not require declaring BC09 CLOSED.
+
+Bounded question: do the four named research families have any supported shipped
+consumer, and can their exclusion preserve BC09 inputs plus startup, map/PMTiles,
+geometry, fonts, audio and recovery resources? Inventory tracked paths/bytes in
+ordinal order; inspect package filters, packaged entrypoints, dynamic resource
+resolvers and existing probe coverage. Record source/input identity and explicit
+EXCLUDE-candidate/KEEP dispositions in this plan, with logs under `phase3-review-*`.
+One Sol/medium worker owns the consumer inventory, one independent Sol/medium
+reviewer checks platform/process boundaries, and the orchestrator owns BC09 handoff
+and documentation. Preserve all existing worktrees and untracked artifacts.
+
+Expected cost is minutes for read-only inventories and focused documentation checks.
+Run the three documentation-truth suites, `git diff --check` and the enabled local
+commit hook. Pass requires named consumers/uncertainties, protected resource mapping,
+and a concrete package-content validation handoff. KEEP any uncertain family; stop
+on a new required-input decision or scope conflict. No install, package, full suite,
+campaign, baseline refresh or remote operation runs in this review. The later
+implementation still owes the Phase 3 package/probe and final combined-suite gates.
+
+BC09 handoff evidence: all six required files match the accepted `live-ipc-06`
+provenance byte hashes (`phase3-review-bc09-input-comparison.json`, zero differences).
+The finite matrix in the [BC09 plan](2026-09-07-r8-runtime-input-ai-integrity-plan.md#11-characterize-the-valid-and-intentionally-incomplete-inputs)
+remains the requirement authority: municipality population, settlement census,
+settlement ethnicity, brigade OOB, municipality registry and municipality HQ mapping.
+Current loader/prerequisite paths agree. Compared with BC09 commit `fa900ba89`,
+the loader has only the later type-safe annotation/narrowing correction; prerequisite
+registry/check are unchanged. This confirms an input-definition handoff, not renewed
+campaign or packaged acceptance. Current bytes and six relevant source hashes are in
+`phase3-review-bc09-identity.json`. The 13-worktree check found no competing edits,
+apart from this task's preserved Phase 1 proof overlay (`phase3-review-worktrees.log`).
+
+The implementation proof must close gaps in the current packaged probe. Campaign
+creation does not call `advanceTurn`, where desktop production loads the six BC09
+inputs. Require both positive presence/byte assertions for those six packaged files
+and a valid +1-turn control through the packaged production simulation in an isolated fixture/save/profile.
+The existing route probe also lacks explicit audio-binary coverage: select a real
+Vite-imported audio asset and verify its emitted package asset, not just a directory.
+Retain startup, geometry, PMTiles range/header, font and recovery assets. Exercise
+operation/map and forced-recovery/React reclamation on the same Phase 3 package,
+or reuse only evidence whose exact package identity matches. Earlier Phase 1 loose
+Electron proof is not automatically Phase 3 package acceptance.
+
+### Consumer dispositions and implementation handoff
+
+All four families are **EXCLUDE candidates from release packaging; KEEP in Git**.
+There are no untracked or ignored files within these four roots. Counts are current
+source bytes, not a measured package-size reduction.
+
+| Root under `data/derived/scenario/` | Tracked files / bytes | Named retained consumers | Disposition |
+|---|---:|---|---|
+| `baseline_ops_sensitivity/` | 51 / 8,082,428 | `sim:scenario:baseline-ops:sensitivity` invokes the tool and `src/scenario/baseline_ops_sensitivity.ts`; its own run artifacts and ownership test are research consumers | EXCLUDE candidate |
+| `baseline_ops_sensitivity_run2/` | 51 / 8,082,453 | Explicit sensitivity `--outDir` mirror and `baseline_ops_sensitivity_artifact_ownership` repeatability test | EXCLUDE candidate |
+| `recruitment_test_matrix_2026_02_11/` | 25 / 6,054,862 | Static retained evidence, read by `recruitment_test_matrix_artifact_ownership`; no refresh command | EXCLUDE candidate |
+| `sweeps/` | 112 / 30,812,056 | `sim:scenario:sweep` / `run_scenario_sweep_h2_4.ts` and `scenario_sweep_artifact_ownership`; harness tests use temporary outputs | EXCLUDE candidate |
+| **Total** | **239 / 53,031,799** | Existing generated-artifact inventory/policy also classifies these research families | No source deletion |
+
+Packaged entrypoints, UI fixed/constrained fetch families, campaign loaders and resource
+catalogs neither name nor enumerate these trees. The generic HTTP and `awwv://` derived
+resource resolvers can currently serve a guessed candidate URL; after exclusion it
+would return 404. That transport capability is disclosed, not mistaken for a product
+consumer. The state-file picker can load user-selected external saves but does not
+catalog or require these bundled research trees. No supported shipped reader was found.
+
+Apply only these negative patterns to the existing `extraResources` entry whose
+`from` is `data/derived`; do not alter other filters or remove research from Git:
+
+```text
+!scenario/baseline_ops_sensitivity/**
+!scenario/baseline_ops_sensitivity_run2/**
+!scenario/recruitment_test_matrix_2026_02_11/**
+!scenario/sweeps/**
+```
+
+Before implementing, add the planned failing exclusion contract with positive controls.
+The actual unpacked `resources/data/derived/scenario` tree must omit all four roots.
+Check positive resources in that same package: six BC09 inputs with matching bytes,
+`startup/apr_1992_initial_save.json`, operational/WGS84 geometry, terrain, PMTiles
+range/header, both MapLibre glyph ranges, HQ clickable regions, source settlements,
+event catalogs, warroom/tactical-map and their fonts/assets. Extend the existing
+package probe's validation branch as needed (including its `electron-main.cjs`
+required-file/probe owner), external checker and source-contract test; avoid a second
+resource-manifest framework. Require a successful production `advanceTurn` after
+campaign creation, using isolated validation state.
+
+Audio proof must compare emitted OGG hashes with the 20 static imports in
+`src/ui/map/audio/audioAssets.ts`. Independent review confirmed all 20 have unique
+hashes and exceed the default Vite inline limit (minimum 4,514 bytes), so matching
+the emitted-file hash multiset is a viable positive control on this input. Recheck
+that assumption if audio/build inputs change. Run the existing Task 6 `operations`
+and `recovery` routes against the same untouched package and match executable/app.asar
+identity across receipts. Build once for these proofs; rebuild only for a concrete
+correction, then invalidate affected old evidence. The final combined-suite gate
+remains outstanding after implementation inputs are settled.
+
+Evidence: `phase3-review-consumer-disposition.json` contains exact writer/reader and
+probe mappings; `phase3-review-consumer-inventory.json` records source hashes and
+ordinal inventories; `phase3-review-consumer-{paths,trace}.log` retains raw paths and
+search traces. The helper is `phase3-review-consumer-inventory.mjs`. Aggregate ordinal
+path/content SHA-256 is `20834dab5d3eecfc6db136dcceb74928f1805cb8d7b2833cf2eef648f331e625`.
+These records justify the bounded implementation handoff, not a package-acceptance claim.
+
+Consumer-review closeout: independent Sol content review is GO; final receipt is
+`phase3-review-independent.log`. Inventory/JSON/summary controls pass
+(`phase3-review-validation.log`); the no-nondeterminism search's exit 1 means no
+matches, not a failed contract. Documentation truth passes 13 tests, exit 0
+(`phase3-review-docs.log`, final closeout `phase3-review-docs-closeout.log`). Diff and
+enabled local commit-hook receipts are `phase3-review-diff-check.log` and
+`phase3-review-commit.log`. Only documentation is committed in this review. The four
+filters, probe extensions, actual package absence/positive-resource proof and full
+combined-suite gate remain unimplemented/unrun.
 
 **Owner/reviewer:** Platform implementer; independent platform/QA reviewer.
 **Files:** `package.json` existing `extraResources` filters; `tools/desktop_packaged_runtime_probe.mjs` and `tests/desktop_packaged_runtime_probe.test.ts`; create `tests/release_research_exclusion.test.ts`; update existing artifact ownership documentation only if policy wording changes. Do not modify or delete `data/` research outputs.

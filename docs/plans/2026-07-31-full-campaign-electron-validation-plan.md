@@ -22,6 +22,8 @@
 2026-09-08: cleanup Tasks 1–8 and R9 preparation Phase 1 are reviewed GO.
 Phase 1 committed as `38066eec2`; Phase 2 check ownership is complete/review GO.
 These focused receipts do not replace final packaged acceptance on matching inputs.
+Phase 3's BC09 input-definition handoff and consumer review are complete/GO;
+resource exclusions and final package acceptance remain unimplemented.
 
 [Master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07) integrates the repository
 audit into existing owners. The original planning turn made no implementation changes.
