@@ -50,6 +50,27 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
+/**
+ * ONE SCENARIO, MANY SNAPSHOTS (owner, 2026-08-24: *"All we should have is one
+ * definitive 188-weeks scenario. Then we take our relevant snapshots from its runs."*).
+ *
+ * Intermediate checkpoints are views of the definitive campaign, NOT separate campaigns.
+ * The shorter `apr1992_definitive_{40,52,104,156}w` forks exist only because a scored
+ * intermediate once required a scenario whose duration selected that reference, and they
+ * DRIFTED: `apr1992_definitive_104w` was measured missing `firepower_deficit_penalty_enabled`
+ * and `must_hold_osids_by_corps`, scoring 639 where the 188w line scored 647 at the same
+ * week 104 — a fossil answering for an engine two fixes old.
+ *
+ * So this tool prefers the master when auto-discovering, and when asked to read anything
+ * else it says so loudly rather than presenting fossil scores as calibration truth. It does
+ * not refuse: 40w remains a legitimate DEVELOPMENT loop (and the structural-fingerprint
+ * gate's scenario). The rule it enforces is that a non-master score is never adoptable.
+ */
+const MASTER_SCENARIO_ID = 'apr1992_definitive_188w';
+
+/** Forks the repo has explicitly measured as drifted from the master line. */
+const KNOWN_DRIFTED_SCENARIOS = new Set(['apr1992_definitive_104w']);
+
 /** The only weeks at which painted historical truth exists. */
 const CHECKPOINTS = [
     { key: 'jan1993', week: 39, label: 'January 1993' },
@@ -83,11 +104,15 @@ for (let i = 0; i < argv.length; i += 1) {
 }
 
 /**
- * Newest run directory that actually holds a final_save.json.
+ * Newest run directory that actually holds a final_save.json, PREFERRING the master
+ * scenario.
  *
- * A partial or interrupted run leaves a directory with no final save; picking it
- * would fail confusingly, so incomplete directories are skipped rather than
- * treated as the answer.
+ * Two filters, each for a reason:
+ *  - A partial or interrupted run leaves a directory with no final save; picking it would
+ *    fail confusingly, so incomplete directories are skipped.
+ *  - Newest-wins alone will happily select a run of a drifted fork and score it with full
+ *    confidence. Master runs are therefore preferred outright, and a fallback to any other
+ *    scenario is reported rather than made silently.
  */
 function findLatestRunDir() {
     const runsRoot = join(ROOT, 'runs');
@@ -100,10 +125,18 @@ function findLatestRunDir() {
         if (!st.isDirectory()) continue;
         const save = join(dir, 'final_save.json');
         if (!existsSync(save)) continue;
-        candidates.push({ dir, mtime: statSync(save).mtimeMs });
+        let scenarioId = null;
+        try {
+            scenarioId = JSON.parse(readFileSync(join(dir, 'run_meta.json'), 'utf8')).scenario_id ?? null;
+        } catch { scenarioId = null; }
+        candidates.push({ dir, scenarioId, mtime: statSync(save).mtimeMs });
     }
     if (candidates.length === 0) return null;
     candidates.sort((a, b) => b.mtime - a.mtime || (a.dir < b.dir ? 1 : -1));
+    const master = candidates.find((c) => c.scenarioId === MASTER_SCENARIO_ID);
+    if (master) return master.dir;
+    console.log(`NOTE      no run of the master scenario (${MASTER_SCENARIO_ID}) found in runs/;`);
+    console.log(`          falling back to the newest run available: ${candidates[0].scenarioId ?? 'unknown scenario'}`);
     return candidates[0].dir;
 }
 
@@ -272,6 +305,21 @@ const provenance = {
 };
 
 const admissibility = [];
+if (provenance.scenario !== MASTER_SCENARIO_ID) {
+    admissibility.push(
+        `NOT THE MASTER SCENARIO. This run is \`${provenance.scenario ?? 'unknown'}\`, not `
+        + `\`${MASTER_SCENARIO_ID}\`. Canon is one definitive 188-week scenario with intermediate `
+        + `checkpoints taken as snapshots of ITS runs, so these scores are development-loop `
+        + `evidence only and are NOT adoptable as calibration figures.`
+    );
+    if (KNOWN_DRIFTED_SCENARIOS.has(String(provenance.scenario))) {
+        admissibility.push(
+            `\`${provenance.scenario}\` is a MEASURED-DRIFTED fork — missing `
+            + `firepower_deficit_penalty_enabled and must_hold_osids_by_corps, and known to score `
+            + `below the 188w line at the same week. Treat every number on this page as a fossil.`
+        );
+    }
+}
 if (provenance.run_dirty === true) admissibility.push('run metadata says git_dirty:true — inadmissible as a baseline');
 if (provenance.run_node && !/^v?22\./.test(String(provenance.run_node))) {
     admissibility.push(`run metadata says Node ${provenance.run_node} — .nvmrc pins 22`);

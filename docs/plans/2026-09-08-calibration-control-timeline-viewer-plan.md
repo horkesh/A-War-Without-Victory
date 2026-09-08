@@ -32,6 +32,9 @@ Verified on the tracked final save: **220 events spanning turns 1→188**, 64 di
 3. **Stamp provenance, and say when a run is inadmissible.** Run directory, the run's own commit/dirty/Node, painted-file sha256 + revision. Latest ≠ valid: a dirty tree or the wrong Node major disqualifies a run as a baseline however recent it is, and the page says so in red.
 4. **Merged sub-1km² cells render and score under their parent** (`micro_osid_merge_map.json`, 32 entries, 744 drawn / 712 scored). Stated in the UI, because amber *polygons* can exceed the scored mismatch count.
 5. **Reuse the existing projection**, identical to `build_calibration_map_html.mjs`, so the two viewers cannot drift.
+6. **ONE SCENARIO, MANY SNAPSHOTS.** Canon (owner, 2026-08-24) is a single definitive 188-week scenario with intermediate checkpoints taken as snapshots of *its* runs. Auto-discovery therefore **prefers `apr1992_definitive_188w`** rather than newest-wins, and any non-master run is called out — in stdout before the scores and as a red banner on the page — as development-loop evidence that is **not adoptable**. `apr1992_definitive_104w` is additionally named as a measured-drifted fossil (missing `firepower_deficit_penalty_enabled` and `must_hold_osids_by_corps`). The tool does not refuse non-master runs, because 40w remains a legitimate development loop and the structural-fingerprint gate's scenario; it refuses only to let their numbers *look like* calibration truth.
+
+   *Added after the first version got this wrong:* newest-wins auto-discovery selected a 104w fossil out of `runs/`, and its scores were reported without qualification. 36 master runs were present; the tool simply had no notion of which scenario was authoritative.
 
 ## What was built
 

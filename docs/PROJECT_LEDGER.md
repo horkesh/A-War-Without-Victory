@@ -34323,3 +34323,32 @@ simulation logic"; that wording appears to have been copied onto a field where n
 COMMENT-ONLY. Verified mechanically: every changed line in the diff is a comment line
 (no non-comment line appears in `git diff -U0`), and `tsc --noEmit` exits 0 with empty
 output. No behavior, no artifact, no calibration surface is touched.
+
+
+## 2026-09-08 - calibration_timeline made scenario-aware (ONE SCENARIO, MANY SNAPSHOTS)
+
+The first version auto-discovered "the newest run directory holding a final_save.json",
+with no notion of which scenario is authoritative. Demonstrating it, that rule selected
+`apr1992_definitive_104w__3c229860dd8df7ae__w104_n276` and reported 677/661 as though they
+were calibration figures. They are not: `apr1992_definitive_104w` is the fork
+`scenario_runner.ts` itself documents as drifted — missing `firepower_deficit_penalty_enabled`
+and `must_hold_osids_by_corps`, scoring 639 where the 188w line scored 647 at the same week
+104, "a fossil answering for an engine two fixes old". 36 runs of the master scenario were
+present in `runs/` at the time; newest-wins simply landed on one of four stragglers.
+
+This is the exact failure the tool's own provenance rules were written to prevent — an
+instrument reporting a confident number from an inadmissible source — so the rule is now
+enforced rather than assumed. Auto-discovery PREFERS `apr1992_definitive_188w` and reports
+any fallback. A non-master run is flagged twice: in stdout ahead of the scores, and as a red
+banner on the page, stating that canon is one definitive 188-week scenario with intermediate
+checkpoints taken as snapshots of ITS runs, and that non-master scores are development-loop
+evidence only and NOT adoptable. Scenarios in `KNOWN_DRIFTED_SCENARIOS` additionally name
+their measured drift.
+
+It does NOT refuse non-master runs. 40w remains a legitimate development loop and is the
+structural-fingerprint gate's scenario; what is refused is letting those numbers look like
+calibration truth.
+
+Verified both paths: a master-scenario run produces zero warnings and correctly reports
+checkpoints beyond its horizon as "not reached"; the 104w fossil produces both warnings
+ahead of its scores plus the in-page red banner.
