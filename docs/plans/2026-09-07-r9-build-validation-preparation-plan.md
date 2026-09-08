@@ -5,10 +5,10 @@
 **Goal:** Make tests and shipped UI use the intended dependency graph, eliminate duplicate check execution, and exclude development research from release payloads before final acceptance.
 **Architecture:** Keep the existing npm/Vite/Electron/CI stack. Consolidate dependency ownership and check execution; narrow existing package filters using verified runtime-resource consumers. Do not create a build system, check orchestrator or generated manifest framework.
 **Tech stack:** npm lockfiles/workspaces as needed, Vite, Vitest, electron-builder, existing GitHub Actions and package probes.
-**Date/status:** 2026-09-07; PLANNED, no implementation started.
+**Date/status:** 2026-09-08; dependency graph review GO. Phase 1 implementation/acceptance and Phases 2–3 remain open.
 **Owner / board row:** R9 preparatory subset of existing dependency/offline/reproducibility ownership, executed before final R8 acceptance. This explicit subset is not activation of R9 freeze, signing or publication.
 **Slot:** Phase 1 follows R7 and cleanup script handoff (Tasks 5/7/8), before final BC09/BC10 campaign evidence where possible. Phase 2 follows Phase 1 and precedes final expensive validation. Phase 3 follows BC09 input-contract definition. All three precede final calibration, final R8 packaged diaries, and R9 Phase 0 freeze.
-**Next action:** When the preparatory slot starts, Phase 1.1 capture actual runtime/test dependency resolution.
+**Next action:** Record the R7 build handoff, then add the Phase 1.1 mismatch contract before consolidating install authority.
 **Collisions:** One owner for `package.json`, both lockfiles, Vite/test config and CI. Wait for cleanup script edits and R7 build/presentation edits. Runtime fixes may proceed on disjoint source, but final proof must use the resulting frozen build inputs.
 
 ## 1. Holistic scope and decisions
@@ -36,6 +36,88 @@ rg -n 'npm ci|typecheck|test:vitest|baseline|fingerprint' .github/workflows tool
 Use an isolated `codex/` branch. Record dependency resolution and required-check ownership before modifying either. Stop on a necessary major-version behavior change, loss of check coverage/reporting, unclassified runtime resource, source/input drift, or file collision. Keep the existing safe mechanism when evidence is insufficient; do not delete checks to reach a target count.
 
 ## 3. Phase 1 — Shared runtime dependency authority (audit S1)
+
+### Dependency-review boundary — 2026-09-08
+
+The owner requested the next dependency review after cleanup Task 8. This review runs
+on `codex/r9-dependency-authority`, based on `d874817eb9dea609f89e80debc047d78fd1b046e`;
+Task 8 remains unmerged. Its cleanup script handoff is complete. All 12 accessible
+registered worktrees have no tracked changes on package, lockfile, Vite, test-runner
+or workflow surfaces. R7's presentation amendment remains active and declares no new
+runtime dependency, but a build handoff has not been recorded. Preserve current install
+ownership until that scheduling condition is resolved; an idle checkout is not a handoff.
+
+Bounded question: which package versions and physical paths do production component
+imports and direct/sliced/balanced Vitest actually consume? Inspect both installed graphs,
+lockfiles, aliases and direct consumers. Capture one Vite production module graph with
+the existing map config, `build.write=false`, a read-only module observer and only the
+output-copy plugin `copy-map-public-fonts` disabled. This capture changes no resolution
+or bundle source inputs and writes no distribution files. Sort evidence ordinally and
+record source hashes; do not use existing unattributed `dist` as current-build proof.
+
+Expected cost: resolution scans in minutes; one map graph build roughly 30 seconds to a
+few minutes. Pass requires a successful graph build with actual package identities,
+consumer mapping, and explicit test/production differences. Stop on build failure or
+unexplained graph drift. No install, lock regeneration, package, full suite, campaign,
+baseline refresh or runtime upgrade is part of this review. One independent Sol review
+and focused documentation/diff checks close the evidence slice, not Phase 1 acceptance.
+Logs and the observation script stay under `logs/r9-build-preparation/`.
+
+Observer correction: the first capture completed but emitted an empty package list;
+the next correctly failed its liveness assertion after parsing 1,378 modules. Rollup's
+forward-slash Windows IDs did not match the observer's backslash root-prefix check.
+Neither result certifies production resolution. The orchestrator authorized one final
+same-question capture after offline path-mapping controls pass, with raw IDs persisted
+before assertions. This bounded evidence-script correction changes no product input;
+it is not a package, full suite or campaign. Preserve both failed receipts.
+
+### Dependency graph evidence — 2026-09-08
+
+Final `node logs/r9-build-preparation/phase1.1_capture_production_graph.mjs` passed,
+exit 0: four offline mapper controls, 1,378 raw module IDs and eight target package rows.
+The capture uses the nested production Vite API/config and records package/lock/config
+hashes. It is an observed current production build graph, not a shipped-artifact receipt
+or byte-identity claim. Existing build-time metadata remains outside this graph evidence.
+`node logs/r9-build-preparation/phase1.1_capture_static_resolution.mjs` also passed,
+exit 0, recording installed identities and the direct/sliced/balanced test aliases.
+
+| Runtime family | Production graph (`src/ui/map/node_modules`) | Vitest resolution | Initial compatibility target |
+|---|---|---|---|
+| MapLibre | 4.7.1 | All three configs force root 5.24.0 | Preserve 4.7.1; do not promote a major |
+| PMTiles | 3.2.1 | Source import remains nested 3.2.1 | Preserve 3.2.1 |
+| Deck core/layers/mapbox | 9.2.11 | All three configs force root 9.3.3 | Preserve 9.2.11 family |
+| React / React DOM | 18.3.1 | Root 18.3.1; distinct paths, matching lock integrity | Preserve version and singleton/mock identity |
+| Zustand | 4.5.7 | Root 4.5.7; distinct path | Preserve version and mock identity |
+| Turf bezier/helpers | Nested 6.5.0 not observed in the graph | No explicit alias | KEEP declarations pending implementation consumer review |
+
+Deck extensions has a source import but is absent from the captured parsed module set;
+retain it during dependency review. Root Turf bezier/helpers 7.3.4 and `@turf/turf`
+7.3.2 have named map/build-tool consumers; a tooling split is permissible, not a reason
+to force every package onto one version. No dependency pruning occurred.
+
+Implementation handoff: declare the existing map package as a root workspace, preserve
+its runtime and Storybook ownership, and use package-manager-generated root lock authority.
+Complete direct runtime declarations from real consumers. Replace nested Vite command
+paths and redundant nested installs; retire aliases only after direct, sliced and balanced
+resolution/mock tests pass. The failing mismatch contract has not yet been added, and
+no install, lock edit or Phase 1 acceptance check has occurred. R7 build handoff remains
+the scheduling prerequisite. Phases 2/3 and final R8/RC acceptance are unchanged.
+
+Evidence in `logs/r9-build-preparation/`: `phase1.1-production-resolved-modules.json`,
+`phase1.1-production-raw-module-ids.json`, `phase1.1-production-capture.log`,
+`phase1.1-static-resolution.json`, `phase1.1-static-resolution.log`, and the two runnable
+capture scripts. Failed empty/path-normalization captures remain diagnostic history.
+
+Independent review identified eight virtual-module IDs whose NUL prefix survived
+path emission even though package lookup stripped it. Package identities were valid;
+the path receipt needed correction. Offline remapping from the saved raw IDs passed,
+exit 0 (`phase1.1-remap-validation.log`): 208 sorted, unique, repository-relative IDs
+across eight packages match the exact raw projection, retaining virtual query identities.
+Package identities and the final script hash are verified. Prior malformed/intermediate
+receipts are preserved; no additional production build ran for this review correction.
+Independent Sol review is GO with no remaining findings (`phase1.1-review.log`).
+Final documentation tests and commit-hook receipts are `phase1.1-final-docs.log` and
+`phase1.1-commit.log`; they close this documentation/evidence slice only.
 
 **Owner/reviewer:** Build implementer; independent build/UI/QA reviewer.
 **Files:** `package.json`, `package-lock.json`, `src/ui/map/package.json`, `src/ui/map/package-lock.json`; `src/ui/map/vite.config.ts`, `src/ui/warroom/vite.config.ts`, `vitest.config.ts`, `tools/test/vitest_shared_config.mjs`, `tools/test/run_vitest_slice.mjs`, `tools/test/run_vitest_balanced.mjs`; install commands in existing workflows; `tests/run_vitest_balanced.test.ts`, `tests/test_suite_inventory.test.ts`; create `tests/runtime_dependency_resolution.test.ts`.

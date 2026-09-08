@@ -34620,3 +34620,34 @@ with no findings (`task8-review.log`); mandatory `git hook run pre-commit` passe
 (`task8-pre-commit.log`). Task 8 is COMPLETE (GO); downstream script handoff is ready.
 Retained governance compatibility requires separate disposition. Final R8 packaged
 acceptance stays open; no R9 work, push or merge was started.
+
+## 2026-09-08 — R9 dependency graph review after cleanup handoff
+
+Owner requested the next dependency review after Task 8. Inspected the R9 preparation
+plan, controlling R8/R9 plans, shared-file history and all 12 accessible worktrees.
+No tracked package/lock/Vite/test/workflow collision was present. Cleanup handoff is
+complete at `d874817eb`; R7's active presentation amendment has no new runtime dependency
+but no recorded build handoff. The review runs on `codex/r9-dependency-authority` without
+merging Task 8 or changing dependency/install authority.
+
+The observed production graph consumes nested MapLibre 4.7.1, PMTiles 3.2.1, Deck
+core/layers/mapbox 9.2.11, React/DOM 18.3.1 and Zustand 4.5.7. Direct, sliced and balanced
+Vitest aliases force root MapLibre 5.24.0 and Deck 9.3.3; PMTiles source imports remain
+nested. Current passing tests therefore do not establish production-version parity.
+Preserve the production versions as the initial workspace-consolidation target; retain
+the separately consumed root Turf tooling graph. No pruning or runtime upgrade occurred.
+
+The observer build parsed 1,378 IDs and recorded eight target packages, with bundle writes
+disabled and only the output-copy plugin omitted. Two failed observer receipts remain
+history; offline path controls now pass 4/4. Independent review found a virtual-module
+path emission defect; its correction uses saved raw IDs without another production build.
+Focused documentation checks pass 13/13. Evidence and full limits are in the existing
+[preparation plan](plans/2026-09-07-r9-build-validation-preparation-plan.md#dependency-graph-evidence--2026-09-08)
+and `logs/r9-build-preparation/phase1.1-*`.
+
+This is dependency-review evidence, not Phase 1 acceptance: the mismatch contract, root
+install/lock consolidation, all runner and UI/resource checks remain unstarted. R7 build
+handoff precedes those changes. No package, full suite, campaign, baseline refresh, remote
+operation, RC freeze or publication occurred. Independent Sol correction review is GO: eight package identities and 208 normalized
+query-distinct IDs match the raw capture; all ten source hashes match. Final documentation
+and commit-hook receipts are recorded in the preparation plan.
