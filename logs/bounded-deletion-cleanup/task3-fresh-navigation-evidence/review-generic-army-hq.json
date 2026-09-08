@@ -1,0 +1,17 @@
+{
+  "id": "review-generic-army-hq",
+  "frames": [
+    {
+      "pageIndex": 0,
+      "frameIndex": 0,
+      "url": "awwv://warroom/index.html",
+      "body": ""
+    },
+    {
+      "pageIndex": 0,
+      "frameIndex": 1,
+      "url": "http://127.0.0.1:58358/index.html?embedded=1",
+      "body": "PRESIDENT'S DESK\nCOMMAND SURFACE\nDIPLOMACY\nINTELLIGENCE\nARMY HQ\nCHRONICLE\nFACTION\nWAR MAP\nADVANCE\nWAR\nREQUIRED 0\nREVIEW BEFORE ADVANCE\n2\n·\nPENDING 2\n27 Dec 1993\nCLOSE\nAUTHORITY & DIRECTIVES\nThe currency of command — and what it buys\nCOMMAND AUTHORITY\n100 / 100\nSpent this turn: 0\nBanked: 0 / 15\nAuthority is flowing from: basic institutional capacity\nAt capacity. Authority is reserve power, not a weekly quota. Overflow recovery banks only to the displayed reserve limit; spend only when a deliberate directive is warranted.\nLEVER COSTS\nVisit the front\n10 CA\nForce-launch (held plan)\n15 CA\nAuthor operation\n25 CA\nRequest operation\n25 CA\nHalt operation\n25 CA\nForce-launch (no proposal)\n25 CA\nRelease elite reserve\n25 CA\nReplace commander\n25 CA\nPRESIDENT'S DESK\nDecision Packet\nREQUIRED\n0\nNo required signatures.\nThe turn can advance, but advisory items may still deserve a call to Army HQ.\nRECOMMENDED\nOPERATION OPPORTUNITY\nTask 3 Decision Room route\n\nStaff recommends authorization.\n\nOPEN DECISION ROOM\nSTRATEGIC SITUATION\nRepublic of Bosnia and Herzegovina\n27 Dec 1993\nDESK ITEMS\n1\nADVANCE\nYour signature is required\nCALL ARMY HQ\nREVIEW ADVANCE BLOCKERS\nWHAT FOLLOWED\nNo campaign record loaded.\nRECORDS\nBATTLES\n0\nDISPLACED\n0\nEVENTS\n0\nDECISIONS\n0"
+    }
+  ]
+}

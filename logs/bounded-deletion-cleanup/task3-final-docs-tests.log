@@ -1,0 +1,29 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ❯ tests/docs_desktop_v09_truth.test.ts (7 tests | 1 failed) 37ms
+   × desktop and roadmap truth docs > defines one authoritative roadmap and one derived command board 7ms
+     → expected 60008 to be less than 60000
+ ✓ tests/docs_truth_no_skip_guard.test.ts (2 tests) 7ms
+ ✓ tests/v092_playtest_package_docs.test.ts (4 tests) 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/docs_desktop_v09_truth.test.ts > desktop and roadmap truth docs > defines one authoritative roadmap and one derived command board
+AssertionError: expected 60008 to be less than 60000
+ ❯ tests/docs_desktop_v09_truth.test.ts:35:28
+     33|     expect(plansIndex).toContain('Each R1–R9 workstream has exactly on…
+     34|
+     35|     expect(roadmap.length).toBeLessThan(60_000);
+       |                            ^
+     36|     expect(board.length).toBeLessThan(20_000);
+     37|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 12 passed (13)
+   Start at  13:36:42
+   Duration  1.60s (transform 80ms, setup 25ms, collect 86ms, tests 54ms, environment 1ms, prepare 321ms)
+
+EXIT_CODE=1

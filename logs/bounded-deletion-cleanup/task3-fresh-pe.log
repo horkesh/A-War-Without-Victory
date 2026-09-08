@@ -1,0 +1,12 @@
+{
+  "exe": "F:\\A-War-Without-Victory\\dist-packaged\\win-unpacked\\A War Without Victory.exe",
+  "bytes": 222836736,
+  "dos": "MZ",
+  "pe": "PE",
+  "machine": "AMD64",
+  "optionalHeader": "PE32+",
+  "sections": 14,
+  "allRawSectionsInBounds": true,
+  "sha256": "1d92189fa8d9cf8c0fc7f24e2a5e5f1a96f910c1881f4a539e8ec224e01d7edc"
+}
+EXIT_CODE=0

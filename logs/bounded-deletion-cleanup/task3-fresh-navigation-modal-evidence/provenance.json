@@ -1,0 +1,13 @@
+{
+  "proofKind": "packaged Electron; visible entrypoints plus actual compiled React callback invocation",
+  "executablePath": "F:\\A-War-Without-Victory\\dist-packaged\\win-unpacked\\A War Without Victory.exe",
+  "executableSha256": "1d92189fa8d9cf8c0fc7f24e2a5e5f1a96f910c1881f4a539e8ec224e01d7edc",
+  "baseFixturePath": "F:\\A-War-Without-Victory\\logs\\bc06\\fixture-rbih-1.json",
+  "baseFixtureSha256": "230730e35d87bbb96e3e9df77d986b9818ac039057ee9a3bc813f0353bf27226",
+  "fixtureSha256": "bdd77a6d2d4a3f393a6075d291ed044391bcd1d1c0d2346aea4b2e8a37d2cef6",
+  "profileRoot": "F:\\A-War-Without-Victory\\dist-packaged\\task3-validation-evidence\\task3-fresh-navigation-modal-profile",
+  "limits": [
+    "Synthetic isolated fixture proves route wiring and player-safe presentation, not natural campaign frequency.",
+    "Briefing-category enclave, inbox, and generic cards are excluded by the current pre-advance read-model filter, so those reviewPreAdvanceTarget branches are invoked through the actual packaged callback recovered from React fiber."
+  ]
+}

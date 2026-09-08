@@ -184,8 +184,10 @@ attribute effects to the 227 potential stability rows. Applicable long-run compa
 and final packaged three-faction acceptance remain **deferred, not waived**; BC09 is
 not CLOSED. BC06 packaged acceptance remains open. Cleanup Tasks 1–3 are implemented
 or bounded-pending review in the cleanup plan; Tasks 4–8 and BC10 remain PLANNED.
-Task 3's release retry passed without snapshot regeneration, but packaged interaction
-remains unavailable because packaging was interrupted and its output could not launch.
+Task 3's fresh Windows package, runtime probe and five-route modal checks now have
+local proof, with targeted Sol/medium review GO for integration. The interrupted package
+and failed launch remain historical receipts in the [Task 3 closeout](../../logs/bounded-deletion-cleanup/task3-validation-closeout.md#latest-local-task-3-packaged-evidence--2026-09-08).
+This local fixture evidence does not close final R8 packaged-game acceptance.
 Preserve pre-P1 `c95e25241`, P1 `f117fe475`, P2 `558f253a2`, the
 188-week horizon, calibration floors and existing protected historical boundaries.
 

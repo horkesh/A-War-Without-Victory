@@ -34274,3 +34274,45 @@ Task 3 comparison, retry, package, and launch logs under
 `logs/bounded-deletion-cleanup/`. No packaged Electron
 branch-by-branch interaction receipt was produced, so Task 3 remains NO-GO and is not
 ready to integrate. Tasks 4–8 remain untouched.
+
+### 2026-09-08 — Fresh packaged-validation continuation blocked before build
+
+Task 3 remains NO-GO. Checkout verified clean at `7fbe2b8b7`; local main remains
+`cdc8659b1`. Node is supported `v22.23.2`. No Electron or packaging process was
+running. The resolved cleanup target was exactly
+`F:\A-War-Without-Victory\dist-packaged\win-unpacked`, a normal directory with no
+link/reparse target; sibling validation evidence was excluded.
+
+Automatic approval review rejected both the guarded cleanup command and the
+literal-path-only PowerShell deletion with “blocked by policy”; neither executed.
+No fresh package build, launch, runtime probe or navigation check ran in this
+continuation. The fresh build sequence cannot proceed until that cleanup is allowed
+or the owner completes it. The pre-build question, commands, expected cost, pass
+criteria and stopping rule are appended to `task3-validation-plan.log`; rejection
+receipt: `logs/bounded-deletion-cleanup/task3-fresh-package-diagnosis.log`.
+
+Historical evidence clarification: `task3-package-dir-retry.log` and
+`task3-packaged-runtime-probe-retry.log` report exit 0; the validation repair summary
+records the later 222836736-byte executable. These do not close navigation: the
+last navigation retry failed before any required route assertion. Earlier failed
+receipts and NO-GO verdicts remain retained. All five required routes and relevant
+Decision Room/docket entrypoints remain without accepted packaged proof.
+This is local Task 3 status, not final R8 packaged-game acceptance. No merge, push,
+Task 4, production/data/config/dependency/snapshot/baseline change was performed.
+
+## 2026-09-08 — Cleanup Task 3: fresh packaged navigation proof
+
+Owner removed only the generated `win-unpacked` directory, resolving the earlier
+policy blocker. Fresh canonical Windows package and PE checks pass exit 0. The
+unchanged runtime probe passed a new-profile retry after one preserved Chromium
+cache-read failure. Navigation uses an isolated BC06 fixture copy and actual compiled
+callbacks: all five pre-advance modal routes prove destination, dismissal, shell,
+safe text and visible return; distinct Decision Room callback behavior and natural
+pre-advance/docket entrypoints are also verified. Navigation diagnostics are empty.
+
+Evidence and exact commands/exits: [existing Task 3 closeout](../logs/bounded-deletion-cleanup/task3-validation-closeout.md#latest-local-task-3-packaged-evidence--2026-09-08).
+Earlier failures and NO-GO receipts remain retained. No source, data, dependencies,
+configuration, snapshots or baselines changed; no campaigns or Task 4 work ran.
+Targeted independent Sol/medium review returned GO for local integration. This is local Task 3
+proof, not final R8 packaged-game acceptance. Attribution: Sol harness/fixture,
+Astra package/runtime/native inspection and documentation; separate Sol/medium review GO.

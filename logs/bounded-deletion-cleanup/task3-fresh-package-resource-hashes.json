@@ -1,0 +1,14 @@
+[
+  {
+    "Path": "F:\\A-War-Without-Victory\\dist-packaged\\win-unpacked\\resources\\app.asar",
+    "Hash": "B0146BD47124439C3659420A7163DBD5BC2FFB8F304872268D43B7B22C782CFD"
+  },
+  {
+    "Path": "F:\\A-War-Without-Victory\\dist-packaged\\win-unpacked\\resources\\app\\assets\\tactical_map-CJseegZ6.js",
+    "Hash": "8F84171E5166A04FDADD236F3496FFAFF4B69A7239A2EF961BE3EF4E9E2F6911"
+  },
+  {
+    "Path": "F:\\A-War-Without-Victory\\dist-packaged\\win-unpacked\\resources\\dist\\desktop\\desktop_sim.cjs",
+    "Hash": "37DEC2274B535684B2FDA0CA951A82F067F55DF8E8347DF4C036B0878313EA72"
+  }
+]

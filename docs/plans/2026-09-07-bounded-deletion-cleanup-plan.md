@@ -193,7 +193,7 @@ Planning verification (2026-09-07): documentation suites passed 9/9, exit 0
 was corrected by keeping §4.2 concise and removing one duplicate historical pointer; no test
 threshold changed. Local-link/scope checks and `git diff --check` passed, exit 0
 (`logs/bounded-deletion-cleanup/planning-links.log`, `planning-diff-check.log`).
-The preceding receipt covers the original four-item draft only. Repository-wide extension planning checks (2026-09-07): documentation suites 9/9, exit 0; 163 local file links and 22 section anchors resolve; `git diff --check` exit 0. Evidence: `logs/repository-audit-planning/{docs-tests.log,links.json,anchors.json,diff-check.log}`. Independent Sol/medium review found one missing alias disposition; cleanup Task 5 now explicitly owns `test:ui` retirement/compatibility and its public documentation. No other material coverage, ordering, canon or validation issues were found. Implementation Task 1: COMPLETE, reviewed GO (2026-09-08); Task 2 COMPLETE, reviewed GO (2026-09-08); Task 3 implementation reviewed NO-GO for closeout pending required validation; Tasks 4–8 NOT STARTED.
+The preceding receipt covers the original four-item draft only. Repository-wide extension planning checks (2026-09-07): documentation suites 9/9, exit 0; 163 local file links and 22 section anchors resolve; `git diff --check` exit 0. Evidence: `logs/repository-audit-planning/{docs-tests.log,links.json,anchors.json,diff-check.log}`. Independent Sol/medium review found one missing alias disposition; cleanup Task 5 now explicitly owns `test:ui` retirement/compatibility and its public documentation. No other material coverage, ordering, canon or validation issues were found. Implementation Task 1: COMPLETE, reviewed GO (2026-09-08); Task 2 COMPLETE, reviewed GO (2026-09-08); Task 3 initially reviewed NO-GO pending validation, now COMPLETE with local packaged proof and independent GO (2026-09-08); Tasks 4–8 NOT STARTED.
 
 At implementation closeout, update this evidence section with dispositions, files, command exit codes, log paths, UI branch coverage and any residual. Update `COMMAND_BOARD.md`, master §4.2 and the R8 controlling plan's packet status, then append `docs/PROJECT_LEDGER.md`. Put the implementation receipt in the existing R8 report if available; only if none fits, use one consolidated report under `docs/40_reports/implemented/`, not separate task reports. Update knowledge only for a new reusable lesson; no rating/backlog change is implied.
 
@@ -251,3 +251,45 @@ Final receipts in `logs/bounded-deletion-cleanup/`: `task1-typecheck.log` and
 `task1-warroom-build.log` exit 0; `task1-docs-tests.log` 13/13, exit 0;
 `task1-independent-review.md` GO; `task1-diff-check.log` exit 0. One stale
 BC09/BC07 roadmap status was corrected during review. No broader review or campaign.
+
+### 2026-09-08 — Fresh packaged-validation continuation blocked before build
+
+Task 3 remains NO-GO. Checkout verified clean at `7fbe2b8b7`; local main remains
+`cdc8659b1`. Node is supported `v22.23.2`. No Electron or packaging process was
+running. The resolved cleanup target was exactly
+`F:\A-War-Without-Victory\dist-packaged\win-unpacked`, a normal directory with no
+link/reparse target; sibling validation evidence was excluded.
+
+Automatic approval review rejected both the guarded cleanup command and the
+literal-path-only PowerShell deletion with “blocked by policy”; neither executed.
+No fresh package build, launch, runtime probe or navigation check ran in this
+continuation. The fresh build sequence cannot proceed until that cleanup is allowed
+or the owner completes it. The pre-build question, commands, expected cost, pass
+criteria and stopping rule are appended to `task3-validation-plan.log`; rejection
+receipt: `logs/bounded-deletion-cleanup/task3-fresh-package-diagnosis.log`.
+
+Historical evidence clarification: `task3-package-dir-retry.log` and
+`task3-packaged-runtime-probe-retry.log` report exit 0; the validation repair summary
+records the later 222836736-byte executable. These do not close navigation: the
+last navigation retry failed before any required route assertion. Earlier failed
+receipts and NO-GO verdicts remain retained. All five required routes and relevant
+Decision Room/docket entrypoints remain without accepted packaged proof.
+This is local Task 3 status, not final R8 packaged-game acceptance. No merge, push,
+Task 4, production/data/config/dependency/snapshot/baseline change was performed.
+
+### Task 3 fresh packaged proof — 2026-09-08
+
+The owner resolved the historical cleanup-policy blocker by removing only
+`win-unpacked`. Fresh `desktop:package:dir` and PE checks pass exit 0. The existing
+runtime probe passed on one new-profile retry after a preserved Chromium cache-read
+failure. The packaged five-route modal pass and distinct Decision Room callback
+continuation pass exit 0 with zero captured diagnostics. Real modal dismissal,
+destinations, shells, player-safe text and visible returns are proven for all five
+routes; natural pre-advance and priority-docket clicks are also retained.
+
+The [existing closeout](../../logs/bounded-deletion-cleanup/task3-validation-closeout.md#latest-local-task-3-packaged-evidence--2026-09-08)
+contains commands, exits, route matrix, screenshots, fixture limitations and earlier
+failed receipts. Synthetic fixture targets invoke actual compiled callbacks; no
+production debug control or router replacement was added. Local packaged criteria
+are satisfied; targeted independent Sol/medium review returned GO for integration.
+Tasks 4–8 are not started by this continuation. Final R8 acceptance remains separate.
