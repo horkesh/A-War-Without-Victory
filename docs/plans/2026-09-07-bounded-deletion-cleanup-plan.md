@@ -9,10 +9,10 @@
 **Tech stack:** TypeScript, React, Vitest, Vite/Electron, Markdown.
 
 **Date:** 2026-09-07
-**Status:** Tasks 1–7 COMPLETE, reviewed GO; combined-branch health repair verified 2026-09-08. Earlier failures remain historical receipts. Task 8 PLANNED. Dated receipts below retain earlier states.
+**Status:** Tasks 1–7 COMPLETE, reviewed GO; combined-branch health repair verified 2026-09-08. Task 8 implementation is complete with independent review pending. Earlier failures remain historical receipts. Dated receipts below retain earlier states.
 **Owner lane / command-board row:** R8, subordinate cleanup packet; no new workstream or BC identifier.
 **Phase covered:** R8 after R7; finish before final calibration/final packaged acceptance. Task 2 follows BC04/BC05 event settlement; Task 3 follows R7 and BC06 UI settlement. Other tasks may run on disjoint files while behavior work settles. Diagnostic calibration stays open.
-**Current next action:** Task 8: inspect active worktree references before retiring RE-specific hook tools; unstarted.
+**Current next action:** independent process/platform review of Task 8, then the required commit hook and integration.
 **Collision rule:** Do not overlap BC event edits, R7 `App.tsx` work, or another agent's roadmap/ledger writes. Re-read current files before each edit; preserve unrelated changes. No implementation is dispatched by this planning turn.
 
 ## 1. Purpose and non-goals
@@ -163,6 +163,31 @@ audit:settlements:verifyNamedPresent, phaseF3:aor_fallback_usage_audit
 1. Inspect `git worktree list --porcelain` and each accessible worktree's `core.hooksPath` plus referenced hook text. Read only: do not rewrite another worktree's Git config, delete a worktree or run the installer.
 2. Retire the three npm entrypoints. Delete checker/installer/exclusive tests only if no active external hook consumes them; otherwise retain those files as compatibility-only with the exact consuming worktree and unblock action recorded. That KEEP closes this bounded task; no forced hook migration.
 3. Correct `.githooks/README.md` to distinguish its historical governance hook from currently installed Husky hooks. Do not delete `check_claude_governance.ps1` or `.githooks/pre-commit` without a separate live-consumer disposition. Preserve actual Husky typecheck and Git LFS hooks byte-for-byte apart from stale RE comments. Verify scripts/references, documentation truth and `git diff --check`; commit the slice.
+
+#### Task 8 validation plan — 2026-09-08
+
+**Question:** Can the closed RE checker, installer, exclusive tests and npm aliases be
+retired without breaking any configured worktree hook chain or changing the live Husky
+typecheck, Git LFS hooks, or historical `.githooks` governance hook?
+
+**Commands/evidence:** inventory `git worktree list --porcelain` in ordinal path order;
+resolve `core.hooksPath` and worktree-local configuration for every accessible worktree;
+inspect each resolved hook, its referenced project hook, and Husky's optional user init
+shim; search active repository references; compare pre/post SHA-256 values for the live
+Husky typecheck and Git LFS hook files; run the focused documentation suites, a JSON parse
+of `package.json`, a post-edit reference scan, and `git diff --check`. Save deterministic
+receipts under `logs/bounded-deletion-cleanup/task8-*`.
+
+**Pass criteria and cost:** every candidate deletion has no configured external consumer;
+all 12 registered worktrees and every active wrapper are accounted for; package JSON,
+focused documentation tests and the diff check pass; the live hook hashes are unchanged
+except for the stale RE comment removal from `.husky/pre-commit`. Expected cost is a few
+minutes. Do not run the installer, alter Git configuration, remove worktrees, launch a
+package/campaign, or repeat the prior full-suite baseline.
+
+**Stopping rule:** stop after one independent process/platform review and one targeted
+correction verification. A supported compatibility KEEP with the exact consumer and
+unblock action recorded also closes Task 8.
 
 ## 4. Fixed validation plan and stopping rule
 
@@ -654,3 +679,44 @@ Final documentation checks and required commit-hook typecheck are recorded separ
 Evidence: logs/bounded-deletion-cleanup/health-{provenance,repair-targeted,map-build,
 full-suite,review,final-docs,commit}.log. Prior red receipts remain unchanged history.
 The owner-authorized local integration preserves both parents; no remote push.
+
+## Task 8 RE hook retirement — implementation complete 2026-09-08
+
+**DELETE supported.** The ordinal inventory covers all 12 registered worktrees; all are
+accessible and inherit `core.hooksPath=.husky/_` from the shared repository config. None
+has a worktree-local hook-path override or `awwv.reScope.*` key. Six resolved hook paths
+contain Husky wrappers that delegate to `.husky/pre-commit`, three contain only the four
+Git LFS hooks, and three contain no installed hook files. Every checked-out project
+pre-commit contains the staged-file-aware TypeScript check and no RE checker invocation or
+external-verification variable. Husky's optional
+`C:\Users\User\.config\husky\init.sh` consumer is absent. No configured external wrapper
+remains.
+
+Removed the three `governance:re:*` package aliases, the checker and installer, and their
+two exclusive PowerShell tests. Removed only the stale RE retirement/reinstallation
+comment block from `.husky/pre-commit`; its executable TypeScript logic is unchanged.
+`.githooks/README.md` now identifies `.husky/_` as the configured path and the tracked
+`.githooks/pre-commit` as an unconfigured historical compatibility hook. That hook and
+`scripts/repo/check_claude_governance.ps1` remain byte-identical. A release-guard test
+comment that used the installer as evidence for Git Bash path syntax now states the same
+platform constraint directly; executable test behavior is unchanged. Historical ledger
+and retired-lock references remain historical records, not live consumers.
+
+Focused documentation suites passed 13/13; the package JSON parse, active-reference scan,
+hook-byte check, release-guard suite (8/8), and `git diff --check` passed. The first docs
+run was 12/13, exit 1, because the new §4.2 status text exceeded its existing 60,000-character
+cap by 78 characters; concise wording restored the established bound and the rerun exited 0.
+The first release-guard run was 7/8, exit 1, because unqualified `bash` resolved WSL and
+could not read `/f/...`; the already documented process-local Git Bash selection passed
+8/8, exit 0, without a global environment change. Git LFS hooks are byte-identical. The
+Husky pre-commit hash changed only for the eight removed comment lines. Evidence:
+`logs/bounded-deletion-cleanup/task8-worktree-hook-inventory.log`,
+`task8-hook-byte-preservation.log`, `task8-references.log`, `task8-package-json.log`,
+`task8-docs-tests{,-rerun}.log`, `task8-release-guard-test{,-git-bash}.log`, and
+`task8-diff-check.log`. The prior green 13,717-test full gate, 31 skips, map build and hook
+typecheck remain the applicable combined-branch health evidence; no fresh full suite,
+package, campaign, installer, config change or worktree deletion was run. Independent
+Sol process/platform review is GO with no findings (`task8-review.log`). The mandatory
+`git hook run pre-commit` passed, exit 0 (`task8-pre-commit.log`). Task 8 is COMPLETE (GO).
+R9 receives the retired script surface and retained governance compatibility files;
+their separate disposition remains outside Task 8. No R9 work, push or merge is started.

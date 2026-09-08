@@ -34587,3 +34587,36 @@ Historical red receipts remain history, not current status. This is not final R8
 acceptance or remote CI evidence. Final docs and mandatory commit-hook receipts are in the
 [existing cleanup plan](plans/2026-09-07-bounded-deletion-cleanup-plan.md#combined-branch-health-repair-closeout--2026-09-08).
 Task 8 is unstarted. Local integration is owner-authorized; no remote push.
+
+## 2026-09-08 — Cleanup Task 8 RE hook machinery retired locally
+
+Inventory of all 12 accessible registered worktrees found one shared effective hook
+configuration: `core.hooksPath=.husky/_`, resolved relative to each worktree. No
+worktree-local hook-path override, `awwv.reScope.*` key, external RE wrapper, RE invocation
+in `.husky/pre-commit`, or Husky user init shim remains. The only live Husky pre-commit
+behavior is the staged-file-aware TypeScript check; other installed hook variants are
+generated Husky delegates or Git LFS hooks.
+
+Deleted the closed RE checker/installer, their two exclusive PowerShell tests, and the
+three `governance:re:*` aliases. Removed stale RE comments from `.husky/pre-commit` and
+corrected `.githooks/README.md`: registered worktrees use Husky, while the tracked
+`.githooks/pre-commit` remains an unconfigured historical compatibility hook. Its
+`scripts/repo/check_claude_governance.ps1` consumer, the hook itself, executable Husky
+typecheck logic, and all Git LFS hook bytes are preserved. One release-guard comment now
+states its Git Bash path assumption directly instead of citing the retired installer;
+test behavior did not change.
+
+Focused documentation suites passed 13/13; the first run exceeded the unchanged roadmap
+length bound by 78 characters, and concise §4.2 wording corrected it. The release guard
+passed 8/8 under the already documented process-local Git Bash selection after unqualified
+`bash` resolved WSL and failed its `/f/...` positive control. Package JSON parsing,
+active-reference and hook-byte checks, and `git diff --check` passed. Both initial red and
+corrected green receipts are preserved under `logs/bounded-deletion-cleanup/task8-*`.
+The previous combined-branch full suite (13,717 passed, 31 skipped), map build, and hook
+typecheck are prior health evidence, not fresh Task 8 results; no full suite, package,
+campaign, installer run, Git-config
+change, or worktree deletion occurred. Independent Sol process/platform review is GO
+with no findings (`task8-review.log`); mandatory `git hook run pre-commit` passed, exit 0
+(`task8-pre-commit.log`). Task 8 is COMPLETE (GO); downstream script handoff is ready.
+Retained governance compatibility requires separate disposition. Final R8 packaged
+acceptance stays open; no R9 work, push or merge was started.

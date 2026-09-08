@@ -232,11 +232,11 @@ nothing here. R7 continues disjoint presentation work; publication authority rem
 
 ### 4.2 Repository audit integration (2026-09-07)
 
-BC09 reviewed GO; cleanup Tasks 1–7 complete (GO); remaining work planned. No new workstream:
+BC09 and cleanup Tasks 1–8 are GO; script handoff is ready. No new workstream:
 
 | Owner / packet | Slot and overlap |
 |---|---|
-| R8 [deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | Tasks 1–7 COMPLETE (GO); combined-branch health repair verified. Task 8 unstarted before dependency work. Final R8 acceptance remains open. |
+| R8 [deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | Tasks 1–8 GO; health repair verified. Task 8 review and mandatory hook pass; script handoff ready. Final R8 acceptance is open. |
 | R8 [runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | BC09 integrated/reviewed GO; campaigns deferred. BC07 RETAIN disposition verified; BC10 planned. No regeneration. |
 | R9 [build preparation](2026-09-07-r9-build-validation-preparation-plan.md) | Limited early R9 subset: dependencies after R7/script handoff; CI before final costly checks; payload after BC09. All before final calibration/R8 acceptance, not after freeze. |
 
