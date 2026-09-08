@@ -360,7 +360,11 @@
         "filter": [
           "**/*",
           "!**/_debug/**",
-          "!**/municipalities_mun1990_viewer_v1.geojson"
+          "!**/municipalities_mun1990_viewer_v1.geojson",
+          "!scenario/baseline_ops_sensitivity/**",
+          "!scenario/baseline_ops_sensitivity_run2/**",
+          "!scenario/recruitment_test_matrix_2026_02_11/**",
+          "!scenario/sweeps/**"
         ]
       },
       {

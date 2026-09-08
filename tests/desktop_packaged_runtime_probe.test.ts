@@ -15,6 +15,68 @@ test('package.json exposes one canonical packaged runtime probe command', async 
     );
 });
 
+test('packaged probe proves Phase 3 resources and one production turn in its existing validation branch', async () => {
+    const source = await readFile(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
+
+    const requiredBc09Files = [
+        ['censusRolledUpWgs84', 'getDataDerivedDir\\(\\)', 'census_rolled_up_wgs84.json'],
+        ['municipalityHqSettlement', 'getDataDerivedDir\\(\\)', 'municipality_hq_settlement.json'],
+        ['municipalityPopulation1991', 'getDataDerivedDir\\(\\)', 'municipality_population_1991.json'],
+        ['settlementEthnicityData', 'getDataDerivedDir\\(\\)', 'settlement_ethnicity_data.json'],
+        ['municipalities1990Registry110', 'getDataSourceDir\\(\\)', 'municipalities_1990_registry_110.json'],
+        ['oobBrigades', 'getDataSourceDir\\(\\)', 'oob_brigades.json'],
+    ] as const;
+    for (const [key, resolver, basename] of requiredBc09Files) {
+        assert.match(
+            source,
+            new RegExp(`\\['${key}',\\s*path\\.join\\(${resolver},\\s*'${basename.replaceAll('.', '\\.')}'\\)\\]`),
+        );
+    }
+    assert.match(source, /sha256:\s*hashFileSha256\(filePath\)/);
+    assert.match(
+        source,
+        /const initialTurn =[\s\S]*await sim\.advanceTurn\(state, getBaseDir\(\)\)[\s\S]*advancedTurn !== initialTurn \+ 1/s,
+        'the packaged branch should exercise the production advanceTurn boundary and require exactly one turn of progress',
+    );
+    assert.match(source, /turn_advance:\s*\{[\s\S]*from_turn:[\s\S]*to_turn:[\s\S]*successful:\s*true/s);
+    assert.match(source, /audio_assets:\s*packagedAudioAssets/);
+    assert.match(source, /listFilesOrdinal\(getMapAppDir\(\)[\s\S]*\.endsWith\('\.ogg'\)/s);
+    assert.match(source, /excluded_research_roots:\s*excludedResearchRoots/);
+    for (const rootName of [
+        'baseline_ops_sensitivity',
+        'baseline_ops_sensitivity_run2',
+        'recruitment_test_matrix_2026_02_11',
+        'sweeps',
+    ]) {
+        assert.match(source, new RegExp(`scenario[\\s\\S]*${rootName}`));
+    }
+    assert.match(source, /failedExcludedResearchRoot[\s\S]*expected absent packaged research root/s);
+});
+
+test('external packaged probe uses a fresh profile and validates package, BC09, audio, and exclusion identities', async () => {
+    const source = await readFile(join(process.cwd(), 'tools', 'desktop_packaged_runtime_probe.mjs'), 'utf8');
+
+    assert.match(source, /runtimeProbeProfilePath/);
+    assert.match(source, /AWWV_DESKTOP_RUNTIME_PROBE_PROFILE_SUFFIX/);
+    assert.match(source, /existsSync\(runtimeProbeProfilePath\)[\s\S]*already exists/s);
+    assert.match(source, /mkdirSync\(runtimeProbeProfilePath, \{ recursive: true \}\)/);
+    assert.match(source, /`--user-data-dir=\$\{runtimeProbeProfilePath\}`/);
+    assert.match(source, /packagedAppAsarPath/);
+    assert.match(source, /manifest\.package_identity\s*=/);
+    assert.match(source, /executable_sha256:/);
+    assert.match(source, /app_asar_sha256:/);
+    assert.match(source, /packageIdentityBefore[\s\S]*packageIdentityAfter[\s\S]*changed while the probe was running/s);
+    assert.match(source, /expectedBc09Files/);
+    assert.match(source, /source_sha256:/);
+    assert.match(source, /packaged_sha256:/);
+    assert.match(source, /byteIdentical[\s\S]*not byte-identical/s);
+    assert.match(source, /audioAssetsSourcePath/);
+    assert.match(source, /\.matchAll\([\s\S]*\\\.ogg/s);
+    assert.match(source, /sourceAudioHashes[\s\S]*packagedAudioHashes[\s\S]*20/s);
+    assert.match(source, /expectedExcludedResearchRoots/);
+    assert.match(source, /existsSync\(join\(packagedResourcesPath, relativePath\)\)/);
+});
+
 test('electron main exposes a packaged runtime probe mode instead of a second launch path', async () => {
     const source = await readFile(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
 

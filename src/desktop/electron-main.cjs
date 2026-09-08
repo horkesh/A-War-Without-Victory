@@ -14,6 +14,7 @@ const { app, BrowserWindow, protocol, ipcMain, dialog, Menu, session, screen } =
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
+const crypto = require('crypto');
 const {
   getPendingProposalReviewsForPlayer,
   resolvePendingProposalAccess,
@@ -195,6 +196,25 @@ function getMapTransitionSaveRoot() {
 
 function strictCompare(a, b) {
   return a < b ? -1 : a > b ? 1 : 0;
+}
+
+function hashFileSha256(filePath) {
+  return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
+}
+
+function listFilesOrdinal(rootDir) {
+  const files = [];
+  const visit = (currentDir) => {
+    const entries = fs.readdirSync(currentDir, { withFileTypes: true })
+      .sort((a, b) => strictCompare(a.name, b.name));
+    for (const entry of entries) {
+      const filePath = path.join(currentDir, entry.name);
+      if (entry.isDirectory()) visit(filePath);
+      else if (entry.isFile()) files.push(filePath);
+    }
+  };
+  visit(rootDir);
+  return files.sort(strictCompare);
 }
 
 /** Project root (dev) or resources root (packaged). Used for data paths and desktop sim. */
@@ -1314,18 +1334,66 @@ async function runPackagedRuntimeProbe() {
   installRuntimeProbeNetworkFailureCapture(runtimeFailureChecks);
 
   const requiredFiles = [
+    ['censusRolledUpWgs84', path.join(getDataDerivedDir(), 'census_rolled_up_wgs84.json')],
     ['desktopSimBundle', path.join(getBaseDir(), 'dist', 'desktop', 'desktop_sim.cjs')],
     ['mapIndex', path.join(getMapAppDir(), 'index.html')],
+    ['municipalities1990Registry110', path.join(getDataSourceDir(), 'municipalities_1990_registry_110.json')],
+    ['municipalityHqSettlement', path.join(getDataDerivedDir(), 'municipality_hq_settlement.json')],
+    ['municipalityPopulation1991', path.join(getDataDerivedDir(), 'municipality_population_1991.json')],
+    ['oobBrigades', path.join(getDataSourceDir(), 'oob_brigades.json')],
+    ['settlementEthnicityData', path.join(getDataDerivedDir(), 'settlement_ethnicity_data.json')],
     ['startupSnapshot', path.join(getDataDerivedDir(), 'startup', 'apr_1992_initial_save.json')],
     ['warroomIndex', path.join(getWarroomAppDir(), 'index.html')],
   ].map(([key, filePath]) => ({
     key,
     relative_path: path.relative(getBaseDir(), filePath).replace(/\\/g, '/'),
     size_bytes: assertReadableFile(filePath, key),
+    sha256: hashFileSha256(filePath),
   })).sort((a, b) => strictCompare(a.key, b.key));
+
+  const packagedAudioAssets = listFilesOrdinal(getMapAppDir())
+    .filter((filePath) => filePath.toLowerCase().endsWith('.ogg'))
+    .map((filePath) => ({
+      relative_path: path.relative(getBaseDir(), filePath).replace(/\\/g, '/'),
+      sha256: hashFileSha256(filePath),
+      size_bytes: assertReadableFile(filePath, 'packaged audio asset'),
+    }));
+  if (packagedAudioAssets.length !== 20) {
+    throw new Error(`packaged runtime probe expected 20 emitted OGG assets, got ${packagedAudioAssets.length}`);
+  }
+
+  const excludedResearchRoots = [
+    ['baselineOpsSensitivity', path.join(getDataDerivedDir(), 'scenario', 'baseline_ops_sensitivity')],
+    ['baselineOpsSensitivityRun2', path.join(getDataDerivedDir(), 'scenario', 'baseline_ops_sensitivity_run2')],
+    ['recruitmentTestMatrix20260211', path.join(getDataDerivedDir(), 'scenario', 'recruitment_test_matrix_2026_02_11')],
+    ['scenarioSweeps', path.join(getDataDerivedDir(), 'scenario', 'sweeps')],
+  ].map(([key, rootPath]) => ({
+    absent: !fs.existsSync(rootPath),
+    key,
+    relative_path: path.relative(getBaseDir(), rootPath).replace(/\\/g, '/'),
+  })).sort((a, b) => strictCompare(a.key, b.key));
+  const failedExcludedResearchRoot = excludedResearchRoots.find((entry) => !entry.absent);
+  if (failedExcludedResearchRoot) {
+    throw new Error(`expected absent packaged research root: ${failedExcludedResearchRoot.relative_path}`);
+  }
 
   const sim = getDesktopSim();
   const { state } = await sim.startNewCampaign(getBaseDir(), 'RBiH');
+  const initialTurn = state?.meta?.turn;
+  if (!Number.isInteger(initialTurn)) {
+    throw new Error(`startup probe expected an integer turn, got ${initialTurn ?? 'null'}`);
+  }
+  const advanceResult = await sim.advanceTurn(state, getBaseDir());
+  if (advanceResult?.error) {
+    throw new Error(`packaged production advanceTurn failed: ${advanceResult.error}`);
+  }
+  const advancedTurn = advanceResult?.state?.meta?.turn;
+  if (advancedTurn !== initialTurn + 1) {
+    throw new Error(`packaged production advanceTurn expected ${initialTurn + 1}, got ${advancedTurn ?? 'null'}`);
+  }
+  if (state?.meta?.turn !== initialTurn) {
+    throw new Error('packaged production advanceTurn mutated its isolated input state');
+  }
   setCurrentStateSnapshots(sim, state);
   const probeTurnReport = {
     probe: 'awwv_turn_report_probe',
@@ -1595,6 +1663,8 @@ async function runPackagedRuntimeProbe() {
   const manifest = {
     probe: 'awwv_desktop_runtime_probe',
     mode: 'packaged',
+    audio_assets: packagedAudioAssets,
+    excluded_research_roots: excludedResearchRoots,
     files: requiredFiles,
     packaged_font_status: {
       status: packagedFontDiagnostic.status,
@@ -1620,6 +1690,13 @@ async function runPackagedRuntimeProbe() {
       player_faction: state?.meta?.player_faction ?? null,
       recruitment_ready: Boolean(state?.military?.recruitment_state),
       turn: state?.meta?.turn ?? null,
+    },
+    turn_advance: {
+      from_turn: initialTurn,
+      input_state_unchanged: state?.meta?.turn === initialTurn,
+      player_faction: advanceResult?.state?.meta?.player_faction ?? null,
+      to_turn: advancedTurn,
+      successful: true,
     },
     window_checks: [
       {
