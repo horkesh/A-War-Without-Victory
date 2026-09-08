@@ -19,12 +19,12 @@
 
 ## Subordinate audit packets (2026-09-07)
 
-2026-09-08: cleanup Tasks 1–8 are reviewed GO. R9 dependency graph is captured;
-the R7 build handoff is recorded and R9 Phase 1 consolidation is active. Graph evidence does not replace
-final packaged acceptance or certify a future consolidated dependency graph.
+2026-09-08: cleanup Tasks 1–8 and R9 preparation Phase 1 are reviewed GO.
+Phase 1 committed as `38066eec2`; Phase 2 check ownership is complete/review GO.
+These focused receipts do not replace final packaged acceptance on matching inputs.
 
 [Master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07) integrates the repository
-audit into existing owners. No implementation starts in this planning turn.
+audit into existing owners. The original planning turn made no implementation changes.
 
 - [Deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md), Tasks 1–8: original four plus
   obsolete commands/tools/UI/smoke/hooks. Script handoff precedes dependency work; event/UI tasks

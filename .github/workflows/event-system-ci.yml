@@ -21,18 +21,18 @@ name: Event System CI
 # `tests/ci_workflow_test_paths_exist.test.ts` asserts every path named in
 # this file exists on disk, so the next deletion fails loudly instead.
 #
-# Three layered gates run sequentially:
-#   1. TypeScript typecheck — catches loader / vocabulary / shape errors.
-#   2. Event-system + Phase E/F/H suite — covering loader, decisions,
+# Three event gates run sequentially on every trigger, preceded on development-
+# branch pushes by TypeScript typecheck for loader / vocabulary / shape errors:
+#   1. Event-system + Phase E/F/H suite — covering loader, decisions,
 #      evaluation, taxonomy, presidential acceptance, families, causality,
 #      political-dimension propagation, F2 audit, F3 graph, F5 runtime
 #      substrate integration, and the Phase H causality-query API + UI
 #      consequence-visualization layer (decision-context modal,
 #      faction-branch badges, codex unlock state, chronicle causality
 #      slides, catalog wire-up, archive spine / decision consequences).
-#   3. Phase F2 strict gate (Phase G3) — asserts CRITICAL + WARNING = 0
+#   2. Phase F2 strict gate (Phase G3) — asserts CRITICAL + WARNING = 0
 #      on the real catalog. This is the canon-compliance hard rail.
-#   4. Baseline regression — byte-identical run-artifact hash check via
+#   3. Baseline regression — byte-identical run-artifact hash check via
 #      tools/scenario_runner/run_baseline_regression.ts.
 #
 # Determinism + convention notes:
@@ -74,8 +74,12 @@ jobs:
       - name: Install dependencies (root)
         run: npm ci --legacy-peer-deps
 
-      - name: TypeScript typecheck
-        run: npx tsc --noEmit
+      # Baseline Regression owns the identical root typecheck on main pushes and
+      # pull requests. Keep this fast signal on development-branch pushes, where
+      # neither Baseline Regression nor Full Suite runs.
+      - name: TypeScript typecheck (development-branch pushes)
+        if: github.event_name == 'push' && github.ref != 'refs/heads/main'
+        run: npm run typecheck
 
       - name: Event-system + Phase E/F/H suite
         run: |

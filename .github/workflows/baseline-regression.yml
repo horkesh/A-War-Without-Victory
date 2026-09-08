@@ -34,7 +34,7 @@ jobs:
 
       - run: npm ci --legacy-peer-deps
 
-      - run: npx tsc --noEmit
+      - run: npm run typecheck
 
   scenario-anchors:
     needs: typecheck

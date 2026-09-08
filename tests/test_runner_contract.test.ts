@@ -48,16 +48,16 @@ test('package.json routes canonical test commands through Vitest lanes only', as
     }
 });
 
-test('typecheck workflow invokes the root compiler gate', async () => {
+test('baseline regression workflow invokes the root compiler gate', async () => {
     const workflow = await readFile(
-        join(process.cwd(), '.github', 'workflows', 'typecheck.yml'),
+        join(process.cwd(), '.github', 'workflows', 'baseline-regression.yml'),
         'utf8',
     );
 
     assert.match(
         workflow,
         /npm run typecheck/,
-        'typecheck workflow should invoke the canonical root typecheck script',
+        'baseline regression workflow should invoke the canonical root typecheck gate',
     );
 });
 

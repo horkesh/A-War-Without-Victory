@@ -34703,3 +34703,43 @@ receipt is `logs/r9-build-preparation/phase1-commit.log`. Phase 1 is complete.
 Disclosed residuals include the dormant ArcGIS peer, type-only audit boundary,
 Storybook-only `react-docgen` 8.0.2 to 8.0.3, and existing npm vulnerability debt;
 none closes final release-security or packaged acceptance.
+## 2026-09-08 — R9 preparation Phase 2: same-input check ownership
+
+Owner authorized Phase 2 after `38066eec205d6493c8ffe150f0f2220184f1ca79`.
+Work proceeds on `codex/r9-phase2-check-ownership`; primary tracked inputs were clean,
+and the 13-worktree collision inventory found only this task's preserved Phase 1
+proof overlay. No worktree/configuration or untracked validation receipt was removed.
+
+DELETE the standalone Typecheck workflow and repeated Event typecheck execution on
+main pushes/PRs: Baseline Regression's always-run canonical `npm run typecheck` owns
+that same event/root-lock/Node22 input. KEEP Event typecheck on development-branch
+pushes and all 27 named event tests on every existing trigger, including the explicit
+strict-canon step. Full discovery is not guaranteed to execute on identical events,
+especially feature pushes and workflow-only changes. KEEP byte baselines, structural
+fingerprints, health, package gates, reporting names, trusted detectors, failure
+propagation, complete discovery and isolation. Live read-only GitHub API results were
+explicit main-unprotected HTTP404 (CLI1) and rulesets[] (CLI0); no settings changed.
+
+Master §11 now runs baselines once through canon:check, with a mandatory manifest
+preflight and explicit nonzero-exit guard. Standalone baseline commands elsewhere
+remain where no canon invocation owns the same run. The canon wrapper, runtime,
+dependencies, canon content, gameplay, simulation, saves and baselines are unchanged.
+Updated the existing preparation plan, workflow catalog, command board, master §§4.2/8/11,
+and controlling R8/R9 plans. No new report or knowledge lesson is needed.
+
+Focused checks passed seven files/42 tests (exit0), including real child-failure
+propagation. The stale pre-Phase-1 nested-install test was corrected after its failure
+was recorded; it now verifies the existing root workspace authority. Exact documented
+PowerShell guard controls passed: present manifest0, absent manifest1, simulated canon7
+fails with exit1 and no continuation. An initial helper extraction mistake is preserved
+as failed diagnostic evidence; corrected controls pass. Evidence and exact DELETE/KEEP
+mapping are in the preparation plan and `logs/r9-build-preparation/phase2-*`.
+Final documentation/review/commit-hook results follow below. No remote CI success is
+claimed; actual Actions verification waits for the next authorized run. No install,
+full suite, build, package, campaign, baseline refresh, push, merge or Phase 3 work ran.
+Phase 2 final independent review is **GO**, no findings (`phase2-review.log`). All
+27 Event test paths exist; trusted detectors and runtime/dependency inputs are unchanged.
+Documentation truth passed 13 tests, exit0; diff-check passed, exit0. Final status
+verification is `phase2-docs-closeout.log`, and the enabled mandatory local commit hook
+is recorded in `phase2-commit.log`. Phase 2 is complete; next is the separately
+scheduled Phase 3 runtime-resource review after its BC09 input-contract handoff.

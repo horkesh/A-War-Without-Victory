@@ -5,10 +5,10 @@
 **Goal:** Make tests and shipped UI use the intended dependency graph, eliminate duplicate check execution, and exclude development research from release payloads before final acceptance.
 **Architecture:** Keep the existing npm/Vite/Electron/CI stack. Consolidate dependency ownership and check execution; narrow existing package filters using verified runtime-resource consumers. Do not create a build system, check orchestrator or generated manifest framework.
 **Tech stack:** npm lockfiles/workspaces as needed, Vite, Vitest, electron-builder, existing GitHub Actions and package probes.
-**Date/status:** 2026-09-08; Phase 1 complete, independent review GO and fresh acceptance passed. Phases 2–3 remain planned.
+**Date/status:** 2026-09-08; Phases 1–2 complete, independent review GO. Phase 3 remains planned.
 **Owner / board row:** R9 preparatory subset of existing dependency/offline/reproducibility ownership, executed before final R8 acceptance. This explicit subset is not activation of R9 freeze, signing or publication.
 **Slot:** Phase 1 follows R7 and cleanup script handoff (Tasks 5/7/8), before final BC09/BC10 campaign evidence where possible. Phase 2 follows Phase 1 and precedes final expensive validation. Phase 3 follows BC09 input-contract definition. All three precede final calibration, final R8 packaged diaries, and R9 Phase 0 freeze.
-**Next action:** Phase 2 coverage/required-check ownership review, on separate authorization. No Phase 2 execution in this slice.
+**Next action:** Phase 3 runtime-resource consumer review after its BC09 input-contract handoff; not started here.
 **Collisions:** One owner for `package.json`, both lockfiles, Vite/test config and CI. Wait for cleanup script edits and R7 build/presentation edits. Runtime fixes may proceed on disjoint source, but final proof must use the resulting frozen build inputs.
 
 ## 1. Holistic scope and decisions
@@ -288,6 +288,86 @@ Verify map rendering, Deck counters, PMTiles range/resource loading, Warroom/map
 
 ## 4. Phase 2 — One execution per identical validation contract (audit S2)
 
+### Activation and bounded validation — 2026-09-08
+
+Owner authorized Phase 2 after Phase 1 commit `38066eec205d6493c8ffe150f0f2220184f1ca79`.
+The primary tracked tree is clean on `codex/r9-phase2-check-ownership`; preserve all
+untracked receipts and existing worktrees. One Sol/medium implementer owns workflow
+and focused test edits; a separate Sol/medium reviewer covers process/platform and
+coverage. The orchestrator owns documentation, external read-only evidence and commit.
+
+Question: which repeated invocations have a surviving owner on the same input and
+event, with unchanged coverage, failure propagation and required reporting? Inspect
+workflow triggers, trusted detectors, test discovery and the canon wrapper before
+editing. Live read-only API receipts are `phase2-branch-protection.log` (explicit
+"Branch not protected", HTTP 404, CLI exit 1) and `phase2-rulesets.log` (empty list,
+exit 0). No external protection setting is changed. Record each DELETE/KEEP below;
+retain any invocation whose coverage or reporting equivalence cannot be proved.
+
+Validation commands: the five focused suites in §2.3, targeted guards for changed
+trigger/ownership edges, the three existing documentation-truth suites, and
+`git diff --check`, followed by the enabled mandatory commit hook. Expected cost:
+minutes for focused checks and hook typecheck; no install, release build, full suite,
+canon wrapper, baseline campaign, structural-fingerprint campaign or package run.
+Pass requires docs-only reporting, relevant-code coverage, feature-push feedback,
+strict canon, trusted detector restoration and real failure propagation to remain
+intact. Stop on uncertain reporting/coverage and record KEEP; one independent review
+and targeted correction verification. Actual remote CI waits for a separately
+authorized run. Phases 3, runtime/dependency changes, baseline refresh and remote
+mutation remain outside this slice. Logs stay under `logs/r9-build-preparation/phase2-*`.
+
+### Phase 2 ownership dispositions
+
+All comparisons use the checked-out commit, its root lock and Node 22; PR proofs
+refer to that event's merge input, not a separate branch-push SHA. The 13-worktree
+collision inventory found no overlapping work except the preserved Phase 1 proof
+overlay owned by this task (`phase2-worktree-collisions.log`).
+
+| Predicate / invocation | Existing report | Disposition and surviving owner | Retained coverage |
+|---|---|---|---|
+| PR to main: standalone root typecheck | Typecheck / `typecheck` | DELETE standalone workflow; Baseline Regression / `typecheck` runs on identical input | Always-run root type signal and dependency parent retained; live protection has no standalone obligation |
+| PR to main or main push: Event typecheck | Event system validation | DELETE repeated step execution on those events; Baseline Regression / `typecheck` owns it | Type failure remains in the surviving check; no success synthesizer |
+| `codex/**`, `feature/**`, `claude/**` push: Event typecheck | Event system validation | KEEP | Baseline and Full Suite do not run on these pushes |
+| Every Event trigger: 26-file subset | Event system validation | KEEP | Together with the strict gate, all 27 named files are in full discovery, but full execution is not guaranteed on the same event; workflow-only inputs may be skipped |
+| Every Event trigger: strict canon | Event system validation | KEEP explicit step | Named hard rail remains visible |
+| Every Event trigger: byte baselines | Event system validation | KEEP | Not equivalent to unit discovery, structural fingerprints or health |
+| Baseline fast/scenario/anchors; complete suite; fingerprint; health/package gates | Existing job names | KEEP | Trusted detector restoration, always-report logic, discovery, isolation and failure dependencies unchanged |
+| Master §11: second `test:baselines` after `canon:check` | Local command list | DELETE duplicate command; canon wrapper owns the same clean-input run | Required manifest preflight throws before the wrapper can skip; nonzero canon exit stops validation |
+
+Root README contains no duplicate canon/baseline command pair. Standalone baseline
+commands in parent acceptance lists and `qa:all` remain valid: no earlier canon owner
+runs in those lists. `tools/engineering/canon_check.ts` is inspected and unchanged.
+It conditionally includes baselines when the manifest exists, so removing the second
+command without the fail-closed preflight would be a coverage loss. No campaign runs
+are needed to verify this source/command ownership change.
+
+Focused verification passed seven files / 42 tests, exit 0
+(`phase2-focused-tests-rerun.log`): the five planned CI/runner/inventory suites plus
+`ci_dependency_install_contract` and `test_runner_contract`. The original focused
+run exposed a stale pre-Phase-1 nested-install assertion; its failure receipt remains
+in `phase2-focused-tests.log`. The corrected assertion verifies the existing root-only
+workspace install and retired workflow inventory; no install behavior changed here.
+
+The master preflight and canon-exit guard were extracted verbatim and exercised
+without running canon/baseline campaigns: present manifest exits 0; absent manifest
+and simulated canon exit 7 both terminate with exit 1 and no continuation. Overall
+control verification exits 0 (`phase2-doc-command-guards-verified.log`); scripts and
+raw results have `-verified` suffixes. The first evidence helper extracted one character
+instead of a line due to PowerShell scalar indexing; those failed diagnostic receipts
+remain, and one corrected extraction passed. This is a harness correction, not a
+product behavior change. Source checks do not claim a remote Actions run succeeded.
+
+Phase 2 closes with independent Sol review **GO**, no remaining findings
+(`phase2-review.log`): all 27 Event paths exist, detector scripts are unchanged,
+canonical typecheck ownership matches the trigger matrix, and strict canon/subset/
+byte-baseline gates remain. Documentation truth passed 13 tests, exit 0
+(`phase2-docs-tests.log`, final status verification `phase2-docs-closeout.log`);
+`git diff --check` passed, exit 0 (`phase2-final-diff-check.log`). The local commit
+runs the enabled mandatory hook with its receipt in `phase2-commit.log`. No workflow
+was dispatched and no push/merge occurred. The next authorized CI run must verify
+actual reporting and execution; these source/behavioral controls do not impersonate
+that result. Phase 3 remains a separate runtime-resource packet with its BC09 handoff.
+
 **Owner/reviewer:** DevOps implementer; independent QA/DevOps reviewer.
 **Files:** `.github/workflows/typecheck.yml`, `baseline-regression.yml`, `event-system-ci.yml`, `full-suite-and-fingerprint.yml`, `.github/workflows/README.md`; preserve trusted `.github/scripts/detect-*.sh` handling; active local command lists including master §11 and root README; existing CI guards `tests/baseline_regression_ci_guardrails.test.ts`, `tests/desktop_release_ci_guardrails.test.ts`, `tests/ci_workflow_test_paths_exist.test.ts`. `tools/engineering/canon_check.ts` is inspected, not rewritten merely to rename its contract.
 
@@ -345,7 +425,7 @@ Run the canonical full suite once after the final combined build changes, using 
 
 Update this plan, controlling R9 and R8 plans, master §4.2/§8 and command board, then append the ledger. R9 Phase 0 requires these phases' dispositions and final R8 evidence before freeze. A later source/dependency/payload change creates a new candidate and repeats affected acceptance; do not alter a frozen accepted artifact in place. Reuse existing release/R8 reports rather than per-phase duplicate reports. Record a new knowledge lesson only if one is learned.
 
-**Planning evidence (2026-09-07):** documentation suites 9/9, exit 0; 163 local file links and 22 section anchors resolve; `git diff --check` exit 0. Logs: `logs/repository-audit-planning/{docs-tests.log,links.json,anchors.json,diff-check.log}`. Independent Sol/medium review found one missing alias disposition; cleanup Task 5 now explicitly owns `test:ui` retirement/compatibility and its public documentation. No other material coverage, ordering, canon or validation issues were found. **Implementation:** all phases NOT STARTED.
+**Planning evidence (2026-09-07):** documentation suites 9/9, exit 0; 163 local file links and 22 section anchors resolve; `git diff --check` exit 0. Logs: `logs/repository-audit-planning/{docs-tests.log,links.json,anchors.json,diff-check.log}`. Independent Sol/medium review found one missing alias disposition; cleanup Task 5 now explicitly owns `test:ui` retirement/compatibility and its public documentation. No other material coverage, ordering, canon or validation issues were found. **At initial planning:** all phases were NOT STARTED; current phase status is recorded above.
 
 ```text
 Execute the next scheduled phase of docs/plans/2026-09-07-r9-build-validation-preparation-plan.md as the limited R9 preparation subset before final R8 acceptance. Read its ownership/collision and canon/security references. Reuse existing tooling: align runtime/test dependency resolution without opportunistic upgrades, remove identical check executions only with retained coverage/status evidence, then exclude verified research payloads while keeping source evidence and runtime assets. Preserve unknown required checks, live maps/recovery, FOW, stable inputs and baseline authority. No external protection mutation, push, signing or publication. Stop on missing consumer evidence, version-behavior changes, reporting/coverage loss or drift. Return changed files, version/check/resource mapping, exit codes, exact evidence identities, residuals and ledger updates.

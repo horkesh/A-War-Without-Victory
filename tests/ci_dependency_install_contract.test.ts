@@ -3,13 +3,12 @@ import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { test } from 'vitest';
 
-const WORKFLOW_INSTALL_PAIRS = [
+const WORKFLOW_INSTALL_COUNTS = [
     ['baseline-regression.yml', 5],
     ['desktop-release-guard.yml', 2],
     ['event-system-ci.yml', 1],
     ['full-suite-and-fingerprint.yml', 2],
     ['release.yml', 2],
-    ['typecheck.yml', 1],
 ] as const;
 
 test('CI dependency installs are immutable and workspace-local', async () => {
@@ -17,7 +16,7 @@ test('CI dependency installs are immutable and workspace-local', async () => {
     const actualWorkflowNames = (await readdir(workflowDir))
         .filter((name) => name.endsWith('.yml') || name.endsWith('.yaml'))
         .sort();
-    const expectedWorkflowNames = WORKFLOW_INSTALL_PAIRS.map(([name]) => name).sort();
+    const expectedWorkflowNames = WORKFLOW_INSTALL_COUNTS.map(([name]) => name).sort();
 
     assert.deepStrictEqual(
         actualWorkflowNames,
@@ -25,7 +24,7 @@ test('CI dependency installs are immutable and workspace-local', async () => {
         'every workflow should be covered by the dependency-install contract',
     );
 
-    for (const [name, expectedPairs] of WORKFLOW_INSTALL_PAIRS) {
+    for (const [name, expectedInstalls] of WORKFLOW_INSTALL_COUNTS) {
         const workflow = await readFile(
             join(workflowDir, name),
             'utf8',
@@ -34,23 +33,19 @@ test('CI dependency installs are immutable and workspace-local', async () => {
             workflow.matchAll(/^\s*(?:-\s+)?run:\s+(npm (?:ci|install)\b.*)$/gm),
             (match) => match[1],
         );
-        const mapPairs = workflow.match(
-            /^\s*(?:-\s+)?run:\s+npm ci --legacy-peer-deps\s*\r?\n\s+working-directory:\s+src\/ui\/map\s*$/gm,
-        ) ?? [];
-
         assert.strictEqual(
             installCommands.length,
-            expectedPairs * 2,
-            `${name} should contain exactly ${expectedPairs} root/map install pairs`,
+            expectedInstalls,
+            `${name} should contain exactly ${expectedInstalls} root workspace installs`,
         );
         assert.ok(
             installCommands.every((command) => command === 'npm ci --legacy-peer-deps'),
             `${name} should use only the exact immutable install command`,
         );
-        assert.strictEqual(
-            mapPairs.length,
-            expectedPairs,
-            `${name} should run every map install from src/ui/map`,
+        assert.doesNotMatch(
+            workflow,
+            /working-directory:\s+src\/ui\/map/,
+            `${name} should not install the map workspace separately from the root lock authority`,
         );
         assert.doesNotMatch(workflow, /\bnpm(?:\.cmd)?\s+install\b/, `${name} should not use lock-mutating npm install`);
         assert.doesNotMatch(workflow, /--prefix\b/, `${name} should not install a workspace through --prefix`);
@@ -64,7 +59,8 @@ test('workflow documentation states the immutable root and map install conventio
     );
 
     assert.match(readme, /Install command: `npm ci --legacy-peer-deps`\./);
-    assert.match(readme, /working-directory: src\/ui\/map/);
+    assert.match(readme, /root `npm ci --legacy-peer-deps` includes `src\/ui\/map` through the declared npm workspace/);
+    assert.match(readme, /Do not run a second map install/);
     assert.doesNotMatch(readme, /\bnpm(?:\.cmd)?\s+install\b/);
     assert.doesNotMatch(readme, /--prefix src\/ui\/map/);
 });

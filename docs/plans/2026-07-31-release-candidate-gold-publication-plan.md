@@ -19,10 +19,10 @@
 
 ## Early build-preparation subset (2026-09-07)
 
-2026-09-08: the owner activated the dependency review after cleanup Task 8. Actual
-production/test graph evidence is captured in the linked preparation plan;
-the subsequent owner instruction activates Phase 1 after the recorded R7 build handoff.
-This does not activate RC freeze or close R7 presentation acceptance.
+2026-09-08: preparation Phase 1 is complete with review GO at `38066eec2` after the
+recorded R7 build handoff. Phase 2 check-ownership cleanup is now complete/review GO.
+Phase 3, RC freeze and R7 presentation acceptance remain open; see the preparation
+plan for exact inputs, validation and retained compatibility obligations.
 
 [Build and validation preparation](2026-09-07-r9-build-validation-preparation-plan.md) is the
 explicit preparatory subset of this plan, scheduled by [master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07)

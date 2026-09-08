@@ -6,12 +6,17 @@ This directory contains the GitHub Actions workflow definitions for A War Withou
 
 | Workflow | File | Trigger | Purpose |
 |---|---|---|---|
-| Typecheck | `typecheck.yml` | PR to `main` | Fast standalone `tsc --noEmit` gate (cheap signal on PRs that touch types only). |
 | Full Suite + Structural Fingerprint | `full-suite-and-fingerprint.yml` | push to `main`, PR to `main` | Required full-suite gate: complete `test:vitest:balanced`, then the self-scanning `qa:player-experience` gate on relevant code-contract changes; separate structural fingerprint job compares the fresh 40w platform-stable fingerprint. |
 | Baseline Regression | `baseline-regression.yml` | push to `main`, PR to `main` | Multi-job broad gate: typecheck, focused scenario anchor tests, `test:vitest:fast` (137 fast suites, includes the event-system tests via auto-discovery), `test:vitest:scenario`. The `test`/`scenarios` heavy steps are path-filtered (CODE set) and `scenario-anchors`/`scenarios` (SIM set) via the always-report shim — see "Always-report path-filter shim" below. |
 | Desktop Release Guard | `desktop-release-guard.yml` | push to `main`, PR to `main` | Builds + smoke-tests the Linux AppImage and Windows NSIS desktop packages; uploads the artifacts on every run. The packaging/probe heavy steps are path-filtered (DESKTOP set) via the always-report shim — see below. |
 | Release | `release.yml` | (see file) | Tagged-release publication pipeline. |
-| **Event System CI** | **`event-system-ci.yml`** | **push to `main` / `codex/**` / `feature/**`, PR to `main`** | **Named, explicit CI surface for event-system validation. Wraps the Phase G3 F2 strict canon-compliance gate so it is visible at PR-review time as a discrete check rather than buried inside the broader fast-test slice. Phase H Packet 10 extended the test gate with the Phase H suites for the consequence-visualization layer.** |
+| **Event System CI** | **`event-system-ci.yml`** | **push to `main` / `codex/**` / `feature/**` / `claude/**`, PR to `main`** | **Event subset, explicit strict-canon gate and byte-baseline check on every trigger. Feature-branch pushes also run typecheck; Baseline Regression owns typecheck on main pushes and PRs.** |
+
+R9 preparation Phase 2 retires the standalone Typecheck workflow. Baseline Regression's
+always-run `typecheck` job owns that same PR/root-lock/Node 22 contract and remains the
+dependency parent for its jobs. Event System CI retains branch-push typechecking and
+all 27 named test files (26 in the subset plus the separate strict gate): full-suite
+coverage is not guaranteed on those pushes or when its trusted path detector skips.
 
 ## Always-report path-filter shim
 
@@ -44,6 +49,10 @@ for `pull_request` (not `pull_request_target`) workflows.
 | `scenarios` (Baseline Regression) | no | `sim` | `npm ci` + `test:vitest:scenario` |
 | `desktop-release-check` (Desktop Release Guard) | no | `desktop` | Linux AppImage package + smoke |
 | `desktop-packaged-runtime-probe` (Desktop Release Guard) | yes | `desktop` | Windows NSIS package + runtime probe |
+
+“Required” describes the intended merge-gate contract above. The Phase 2 read-only
+GitHub inspection reported main unprotected (HTTP 404) and no rulesets. No protection
+setting was changed; the surviving gate names and reporting behavior are retained.
 
 `typecheck` is intentionally left ALWAYS-RUN (fast, broad type signal) and is the
 `needs:` parent that keeps the gated Baseline jobs reporting. `full-suite` and
@@ -85,17 +94,20 @@ Fail-safe: an unresolved PR/push base, or an unknown `PATH_SET`, forces `relevan
 
 ## Event System CI — what it runs
 
-Phase G Packet 4 (2026-05-28) added `event-system-ci.yml` to automate the canon-compliance defense established by the Phase G3 strict gate test (`tests/sensitive_history_canon_gate_audit_strict_gate.test.ts`). Phase H Packet 10 (2026-05-29) extended the test gate with the seven Phase H suites (74 tests) so PR-time enforcement covers the consequence-visualization layer alongside the Phase B/D/E/F substrate. The workflow runs four sequential gates in a single `event-system-validation` job:
+Phase G Packet 4 (2026-05-28) added `event-system-ci.yml` to automate the canon-compliance defense established by the Phase G3 strict gate test (`tests/sensitive_history_canon_gate_audit_strict_gate.test.ts`). Phase H Packet 10 (2026-05-29) extended the test gate with the seven Phase H suites (74 tests) so PR-time enforcement covers the consequence-visualization layer alongside the Phase B/D/E/F substrate. The `event-system-validation` job runs the three event gates below, preceded by typecheck on feature-branch pushes:
 
 ### Gate 1 — TypeScript typecheck
 
 ```
-npx tsc --noEmit
+npm run typecheck
 ```
 
 Catches loader-vocabulary, event-shape, and substrate-writer typing errors.
+This step runs on `codex/**`, `feature/**` and `claude/**` pushes. On main pushes and
+PRs, Baseline Regression performs the same root typecheck; failure remains visible
+there. Local standalone validation still includes typechecking.
 
-### Gate 2 — Event-system + Phase E/F/H suite (25 test files, ~434 tests)
+### Gate 2 — Event-system + Phase E/F/H suite (26 test files)
 
 Loader + decisions + evaluation + acceptance reporting:
 
@@ -159,7 +171,7 @@ SHA256 comparison of run artifacts against committed baselines. Detects engine-b
 
 ```bash
 # Gate 1
-npx tsc --noEmit
+npm run typecheck
 
 # Gate 2 (one shot — Phase E/F substrate + Phase H consequence layer)
 node node_modules/vitest/vitest.mjs run \
@@ -207,7 +219,7 @@ The broader `npm run test:vitest:fast` command also covers Gates 1–3 (it auto-
 - Node version: **22** across all workflows. Bumping in one workflow without bumping the rest causes spurious diff between local-dev and CI behaviour.
 - Install command: `npm ci --legacy-peer-deps`.
 - Map workspace: the root `npm ci --legacy-peer-deps` includes `src/ui/map` through the declared npm workspace and sole root lockfile. Do not run a second map install; production and tests share the intended runtime dependency graph.
-- Action versions: `actions/checkout@v5` and `actions/setup-node@v5` (matches `baseline-regression.yml`, `typecheck.yml`, `desktop-release-guard.yml`). Pinning to v4 mid-workflow set causes intermittent cache-key drift.
+- Action versions: `actions/checkout@v5` and `actions/setup-node@v5` (matches `baseline-regression.yml` and `desktop-release-guard.yml`). Pinning to v4 mid-workflow set causes intermittent cache-key drift.
 
 ## Cross-references
 

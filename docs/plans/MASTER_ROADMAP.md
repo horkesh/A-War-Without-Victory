@@ -238,7 +238,7 @@ BC09 and cleanup Tasks 1–8 are GO; script handoff is ready. No new workstream:
 |---|---|
 | R8 [deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | Tasks 1–8 GO; health repair verified. Task 8 review and mandatory hook pass; script handoff ready. Final R8 acceptance is open. |
 | R8 [runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | BC09 integrated/reviewed GO; campaigns deferred. BC07 RETAIN disposition verified; BC10 planned. No regeneration. |
-| R9 [build preparation](2026-09-07-r9-build-validation-preparation-plan.md) | Phase 1 complete, review GO; fresh gates pass. Phase 2 check ownership next; payload/freeze stay gated. |
+| R9 [build preparation](2026-09-07-r9-build-validation-preparation-plan.md) | Phases 1–2 GO. Payload/freeze gated. |
 
 R7 retains live English/readability work; R4/R5/RE stay closed. Package/lockfile edits are serial.
 Keep live viewers/recovery, main-process composition and existing IPC contracts; no code-generation task.
@@ -376,7 +376,7 @@ No experiment remains “partial” after evaluation.
 | Combat, input delivery and calibration | RE is closed. BC09 delivery precedes BC07 final policy acceptance; BC10 follows command settlement. Freeze each source/input tree for attribution. Diagnostic calibration is open; final calibration follows §4.2 integration. |
 | Event/essay authored rows | R4 inventory/convergence first; R7 attribution/content pass second. |
 | Map/Desk English layout strings | R1/R2 layout first; R7 accessibility/readability proof second. Multilingual expansion is post-1.0. |
-| Package/release configuration | Cleanup script handoff -> R9 early dependency/CI/payload preparation -> final R8 acceptance -> R9 freeze. One package/lockfile owner; changed accepted inputs require a new candidate and affected proof. |
+| Package/release configuration | R9 owns package/CI edits after cleanup. Final R8 proof precedes freeze; changed inputs need new proof. |
 
 Before each workstream:
 
@@ -462,9 +462,10 @@ Optional improvements identified outside the 1.0 outcome, per the routing rule a
 Each plan contains focused commands. Before a workstream closes, run its focused suite plus every applicable global command:
 
 ```powershell
+if (!(Test-Path 'data/derived/scenario/baselines/manifest.json' -PathType Leaf)) { throw 'Missing required baseline manifest' }
 npm.cmd run typecheck
 npm.cmd run canon:check
-npm.cmd run test:baselines
+if ($LASTEXITCODE) { throw "canon:check exit $LASTEXITCODE" }
 npm.cmd run engine:health:gate
 npm.cmd run test:vitest -- --pool=forks --reporter=dot
 git diff --check
@@ -472,6 +473,7 @@ git diff --check
 
 Additional rules:
 
+- Stop on nonzero exits. The manifest preflight prevents `canon:check` skipping baselines; it runs them once.
 - Run two byte-identical long scenarios after any deterministic simulation/output change.
 - Run save migration and round-trip tests after any persisted-state change.
 - Run packaged/local-Electron console, network, renderer, WebGL, accessibility, and screenshot proof after player-facing or shell changes.
