@@ -6,7 +6,6 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 
 import { AutonomyPanel } from '../../src/ui/map/components/AutonomyPanel.js';
 import { ChiefOfStaffBriefing, generateCoSBriefing } from '../../src/ui/map/components/army_hq/ChiefOfStaffBriefing.js';
-import { CommandTopBar } from '../../src/ui/map/components/plan_ui/CommandTopBar.js';
 import { CommandBriefingLayer } from '../../src/ui/map/components/CommandBriefingLayer.js';
 import { WarroomShellLayer } from '../../src/ui/map/components/warroom/WarroomShellLayer.js';
 import { makeMockLoadedGameState } from '../../src/ui/map/__mocks__/loadedGameState.js';
@@ -43,46 +42,6 @@ describe('UI copy raw-id fallbacks', () => {
     setLocale('en');
     delete (window as unknown as { awwv?: unknown }).awwv;
     vi.unstubAllGlobals();
-  });
-
-  it('CommandTopBar shows a neutral commander placeholder when only an internal commander id is available', () => {
-    const { container } = render(createElement(CommandTopBar, {
-      opName: 'Test directive',
-      onNameChange: vi.fn(),
-      onClose: vi.fn(),
-      sectorName: 'Central sector',
-      commanderId: 'officer_rbih_slug_001',
-      commanderName: undefined,
-      onCommanderClick: vi.fn(),
-    }));
-
-    expect(screen.getByRole('button', { name: /Commander not assigned/i })).toBeTruthy();
-    expect(container.textContent).not.toContain('officer_rbih_slug_001');
-  });
-
-  it('CommandTopBar localizes commander and action chrome without debug placeholders', () => {
-    setLocale('bcs');
-
-    const { container } = render(createElement(CommandTopBar, {
-      opName: 'Test direktiva',
-      onNameChange: vi.fn(),
-      onClose: vi.fn(),
-      sectorName: 'Centralni sektor',
-      commanderId: null,
-      commanderName: undefined,
-      onCommanderClick: vi.fn(),
-      onAuthorize: vi.fn(),
-      isSubmitting: true,
-    }));
-
-    expect(container.textContent).toContain('Operativni komandant');
-    expect(container.textContent).toContain('Izaberi komandanta');
-    expect(container.textContent).toContain('Odbaci direktivu');
-    expect(container.textContent).toContain('Autorizacija...');
-    expect(container.textContent).not.toContain('Command Authority');
-    expect(container.textContent).not.toContain('DISCARD');
-    expect(container.textContent).not.toContain('AUTHORIZE directive');
-    expect(container.textContent).not.toContain('TRANSFUSING');
   });
 
   it('ChiefOfStaffBriefing uses neutral corps copy when command-strain prose lacks a player-facing corps name', () => {

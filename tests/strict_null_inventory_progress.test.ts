@@ -375,10 +375,6 @@ const SMOKE_ENTRYPOINT_AS_ANY_TAIL_FILES = [
     'src/index.ts',
 ];
 
-const OPS_MAP_RENDERER_AS_ANY_TAIL_FILES = [
-    'src/ui/map/components/plan_ui/OpsMapRenderer.ts',
-];
-
 const MAP_CONTAINER_AS_ANY_TAIL_FILES = [
     'src/ui/map/map/MapContainer.tsx',
 ];
@@ -1390,12 +1386,6 @@ describe('strict null inventory progress', () => {
     it('cleans the smoke entrypoint and sim-run CLI as-any tail slice', () => {
         const current = CURRENT_INVENTORY;
         const anyCount = phaseCount(current, 'as_any_casts', SMOKE_ENTRYPOINT_AS_ANY_TAIL_FILES);
-        expect(anyCount).toBe(0);
-    });
-
-    it('cleans the OpsMapRenderer as-any tail slice', () => {
-        const current = CURRENT_INVENTORY;
-        const anyCount = phaseCount(current, 'as_any_casts', OPS_MAP_RENDERER_AS_ANY_TAIL_FILES);
         expect(anyCount).toBe(0);
     });
 

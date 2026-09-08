@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-09-08 (cleanup Tasks 1–5 reviewed GO within existing R8/R9 ownership)
+**Last updated:** 2026-09-08 (cleanup Tasks 1–6 reviewed GO within existing R8/R9 ownership)
 
 **Execution branch:** `codex/master-roadmap-execution` (integration target: `main` after all workstreams are green)
 
@@ -232,11 +232,11 @@ nothing here. R7 continues disjoint presentation work; publication authority rem
 
 ### 4.2 Repository audit integration (2026-09-07)
 
-BC09 reviewed GO; cleanup Tasks 1–5 complete (GO); remaining work planned. No new workstream:
+BC09 reviewed GO; cleanup Tasks 1–6 complete (GO); remaining work planned. No new workstream:
 
 | Owner / packet | Slot and overlap |
 |---|---|
-| R8 [deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | Tasks 1–5 COMPLETE (GO); routes, board and commands verified. Tasks 6–8 planned; Tasks 7/8 still precede dependency work. Final R8 acceptance remains open. |
+| R8 [deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | Tasks 1–6 COMPLETE (GO); inherited test failure retained. Tasks 7–8 planned; Tasks 7/8 still precede dependency work. Final R8 acceptance remains open. |
 | R8 [runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | BC09 integrated/reviewed GO; campaigns deferred. BC07 RETAIN disposition verified; BC10 planned. No regeneration. |
 | R9 [build preparation](2026-09-07-r9-build-validation-preparation-plan.md) | Limited early R9 subset: dependencies after R7/script handoff; CI before final costly checks; payload after BC09. All before final calibration/R8 acceptance, not after freeze. |
 

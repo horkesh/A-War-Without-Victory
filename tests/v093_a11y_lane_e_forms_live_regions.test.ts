@@ -28,7 +28,7 @@ import {
 const repoRoot = resolve(__dirname, '..');
 const read = (p: string) => readFileSync(resolve(repoRoot, p), 'utf8');
 
-// The 7 live forms exclusively owned by Lane E (per Phase 0 panel + lane
+// The 6 live forms exclusively owned by Lane E (per Phase 0 panel + lane
 // scope; SettingsScreen is Lane D, RecruitmentModal is Lane A,
 // `army_hq/*` is Lane C, retired chrome is deleted, ReplayScrubber already
 // a11y-clean).
@@ -36,7 +36,6 @@ const AI_SETTINGS_PATH = 'src/ui/map/components/AiSettingsPanel.tsx';
 const PRESIDENTIAL_TOOLBAR_PATH =
     'src/ui/map/components/PresidentialToolbar.tsx';
 const SIDE_PICKER_PATH = 'src/ui/map/components/SidePickerOverlay.tsx';
-const COMMAND_TOPBAR_PATH = 'src/ui/map/components/plan_ui/CommandTopBar.tsx';
 const PLAN_PARAMETERS_PATH = 'src/ui/map/components/ops_modal/PlanParameters.tsx';
 const CORPS_CARD_PATH = 'src/ui/map/components/CorpsCard.tsx';
 const ENCLAVE_DASHBOARD_PATH = 'src/ui/map/components/EnclaveDashboard.tsx';
@@ -46,7 +45,6 @@ const ALL_LANE_E_FORM_FILES: ReadonlyArray<string> = [
     AI_SETTINGS_PATH,
     PRESIDENTIAL_TOOLBAR_PATH,
     SIDE_PICKER_PATH,
-    COMMAND_TOPBAR_PATH,
     PLAN_PARAMETERS_PATH,
     CORPS_CARD_PATH,
     ENCLAVE_DASHBOARD_PATH,
@@ -76,12 +74,6 @@ describe('v0.9.3 a11y Lane E — Forms + inputs + live regions', () => {
     it('T4 — SidePickerOverlay hidden file-picker carries aria-label', () => {
         const src = read(SIDE_PICKER_PATH);
         expect(src).toContain("aria-label={t('sidePicker.loadSaveAria')}");
-    });
-
-    it('T5 — CommandTopBar Directive Name label is htmlFor-bound', () => {
-        const src = read(COMMAND_TOPBAR_PATH);
-        expect(src).toContain('htmlFor="command-topbar-directive-name"');
-        expect(src).toContain('id="command-topbar-directive-name"');
     });
 
     it('T6 — PlanParameters op-name label is htmlFor-bound', () => {

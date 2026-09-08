@@ -9,10 +9,10 @@
 **Tech stack:** TypeScript, React, Vitest, Vite/Electron, Markdown.
 
 **Date:** 2026-09-07
-**Status:** Tasks 1–5 COMPLETE, reviewed GO. Tasks 6–8 PLANNED. Dated receipts below retain earlier states.
+**Status:** Tasks 1–6 COMPLETE, reviewed GO; inherited test failures remain recorded. Tasks 7–8 PLANNED. Dated receipts below retain earlier states.
 **Owner lane / command-board row:** R8, subordinate cleanup packet; no new workstream or BC identifier.
 **Phase covered:** R8 after R7; finish before final calibration/final packaged acceptance. Task 2 follows BC04/BC05 event settlement; Task 3 follows R7 and BC06 UI settlement. Other tasks may run on disjoint files while behavior work settles. Diagnostic calibration stays open.
-**Current next action:** Task 6 is the next bounded slice; it has not started.
+**Current next action:** Task 7 is the next bounded slice; it has not started.
 **Collision rule:** Do not overlap BC event edits, R7 `App.tsx` work, or another agent's roadmap/ledger writes. Re-read current files before each edit; preserve unrelated changes. No implementation is dispatched by this planning turn.
 
 ## 1. Purpose and non-goals
@@ -349,3 +349,101 @@ passed 20/20 across five files (exit 0). Evidence: `task5-disposition.log` and
 `task5-focused-tests.log` under `logs/bounded-deletion-cleanup/`. Independent Sol/medium review returned GO with no actionable findings (`task5-review.log`).
 The mandatory pre-commit typecheck result is recorded in `task5-commit.log`. Tasks 6–8 remain unstarted;
 final R8 acceptance and the R7/dependency handoffs remain unchanged.
+
+### Task 6 validation plan — 2026-09-08
+
+Reviewed Task 5 `f4305c898` fast-forwarded into local main; Task 6 is isolated on
+`codex/cleanup-unused-ui` in the owner-requested workspace. One Sol/medium implementer
+owns the six source candidates, exclusive test assertions and caller disposition;
+a separate Sol/medium reviewer owns independent review. Root owns validation routing,
+packaged smoke and status/ledger. No other worktree or dependency setup is changed.
+
+Question: can the six sources retire while supported operations proposal/inspection
+and Warroom recovery remain functional? Check imports, dynamic strings, HTML/Vite
+entries and stories; KEEP any live candidate. Run the six specified mixed suites plus
+`tests/ui/ops_modal_auto_propose.test.ts`, typecheck, and
+`npm.cmd run desktop:release:check`. Produce a fresh directory package using the
+same electron-builder configuration after that build, avoiding a duplicate release
+build, then run the existing isolated runtime smoke plus bounded operations-modal
+and deliberately induced opening-recovery routes. Use disposable profiles/fixture
+copies; retain receipts and resource hashes under `logs/bounded-deletion-cleanup/`.
+The package and route checks are local Task 6 proof, not final R8 acceptance.
+
+Expected cost: minutes to tens of minutes. Pass requires supported caller disposition,
+retained mixed-suite assertions, passing affected checks/build, and live route proof.
+Stop on behavior regression, unavailable prerequisite or unrelated repair; preserve
+inherited failures explicitly. No new features, campaigns, config/dependency changes,
+canon/data changes, Tasks 7–8 or remote push. Mandatory commit hook remains unchanged.
+
+Task 6 runtime interpretation: `tests/ui/presidential_command_model_surface.test.ts`
+explicitly verifies that `OpsPlanningModal` is unmounted and that presidential
+operation requests remain the live command route. Packaged proof therefore uses the
+current proposal dossier -> field inspection -> exact dossier return, with actual
+UI clicks and authoritative historical objective references; it does not mount the
+retired detailed planner. The required auto-propose unit suite remains included.
+Recovery proof cancels only the embedded opening document in an isolated profile,
+checks the real fallback menu/side-picker and lazy WarPlanningMap, then restores
+loading and requires React to reclaim ownership. This clarifies the live route in
+Task 6 rather than adding a new feature or weakening a failing route assertion.
+
+Task 6 bounded runtime correction: first probe timed out at its existing five-second
+session-readiness deadline; normal packaged operations and recovery routes then passed.
+The new-profile retry reached full probe observations but failed with Chromium
+ERR_CACHE_READ_FAILURE for bih_adm3_1990.geojson and its resulting MapLibre error.
+Source/package boundary-file SHA256 matches exactly, files are readable and disk
+space is ample; successful routes use the same executable/application hashes.
+Independent reviewer recommends one final never-used-profile retry of the unchanged
+probe to answer this specific cache-startup question. Cost: seconds to a minute.
+Stop after this attempt on any failure; do not disable caching, relax assertions,
+patch production or begin a broader campaign. Both earlier failures remain retained.
+
+### Task 6 deletion and packaged route evidence — 2026-09-08
+
+Base `f4305c898`; branch `codex/cleanup-unused-ui`. Removed the six named UI sources
+(754 lines) after import/dynamic-string/HTML/Vite/story disposition. Removed only their
+exclusive references/assertions in the six mixed suites; kept the distinct TacticalCard,
+ReadinessBar, opsConstants, retained OpsMap, map_viewer_app/HTML entry, and WarPlanningMap.
+No simulation, data, save/schema, dependency, build configuration or canon change.
+
+Validation receipts under `logs/bounded-deletion-cleanup/`:
+- `task6-disposition.log`: all six DELETE; no executable consumers remain. One old
+  GlassPanel visual-description comment is non-executable and unchanged.
+- `task6-focused-tests.log`: seven specified suites, **157/158, exit 1**. The unchanged
+  optional GameState domain floor expects five `as unknown` casts but base `f4305c898`
+  already contains six (including `src/scenario/turn_inputs.ts:171`). All six deleted
+  files contained zero; no other source changed. This inherited failure remains open;
+  the suite is not green and its floor is not weakened or retired by this cleanup.
+- `task6-typecheck.log`: `npm.cmd run typecheck`, exit 0.
+- `task6-release-check.log`: `npm.cmd run desktop:release:check`, exit 0, including
+  18 chunks without import cycles and map/sim/Warroom builds.
+- `task6-package.log`: `npx.cmd electron-builder --dir --publish never`, exit 0 after
+  the canonical release check; `task6-pe.log` verifies AMD64 PE32+ and all 14 sections.
+- `task6-runtime.log`: initial unchanged probe exit 1 (session-readiness timeout).
+  `task6-runtime-retry.log`: exit 1, Chromium boundary-file cache-read failure;
+  failed manifest retained. Boundary source/package SHA256 matches
+  `1bd0c9c0ae3b4f6bbd5ac54f460ac791ac9046e64f3a6cab1690eb60d9d4f2a7`.
+  `task6-runtime-cache-retry.log`: final bounded fresh-profile attempt exit 0;
+  passed manifest records zero failures, three windows, eight map-server checks,
+  eleven resource-route checks and two tactical interaction modes. Probe, cache
+  settings and assertions stayed unchanged; earlier failures are retained.
+- `task6-packaged-routes.cjs operations 1`: exit 1 from a missing Desk navigation
+  step in the harness, with zero renderer diagnostics. Corrected only that step;
+  `operations 2` exits 0, showing the exact historical proposal dossier, four
+  objective identities, ready field map, selection and exact dossier return.
+- `task6-packaged-routes.cjs recovery 1`: exit 0. Deliberately blocked only the
+  embedded opening document; real fallback menu, side-picker/back and lazy recovery
+  map initialization work. Restored loading returns ownership to React and disables
+  fallback. Only the induced blocked-request diagnostic is excluded, by exact URL.
+
+Both successful route receipts identify executable SHA256
+`1d92189fa8d9cf8c0fc7f24e2a5e5f1a96f910c1881f4a539e8ec224e01d7edc`
+and application archive SHA256
+`b0146bd47124439c3659420a7163dbd5bc2ffb8f304872268d43b7b22c782cfd`.
+The copied RS fixture adds only one pending historical proposal for route verification;
+this does not prove natural timing, authorization outcomes or campaign acceptance.
+Root visually inspected the field-plan and recovery-menu screenshots. All six real
+repository saves retain their pre-run SHA256; no Electron process remains. The prior
+Task 3 package remains intact at `dist-packaged/task3-preserved-package`.
+Independent Sol/medium review GO, no actionable findings (`task6-review.log`).
+Mandatory commit-hook result is retained in `task6-commit.log`. Tasks 7–8 remain unstarted;
+final R8 acceptance is open, and the inherited inventory-floor failure is not waived.

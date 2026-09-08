@@ -1,0 +1,33 @@
+{
+  "mode": "recovery",
+  "exe": "F:\\A-War-Without-Victory\\dist-packaged\\win-unpacked\\A War Without Victory.exe",
+  "profile": "F:\\A-War-Without-Victory\\dist-packaged\\task6-validation-evidence\\recovery-1",
+  "fixtureSource": "F:\\A-War-Without-Victory\\logs\\bc06\\fixture-rs-1.json",
+  "fixtureSourceHash": "5c9d445a08a58fac3bd91bc5b94a99de8707419dd7d647d53e96e84cbd091021",
+  "fixtureHash": "dfcc9de40df3a9e9de974b91bd154764d6a777734e95725fa78257cf52bdfe2e",
+  "exeHash": "1d92189fa8d9cf8c0fc7f24e2a5e5f1a96f910c1881f4a539e8ec224e01d7edc",
+  "appAsarHash": "b0146bd47124439c3659420a7163dbd5bc2ffb8f304872268d43b7b22c782cfd",
+  "limits": [
+    "Isolated synthetic pending historical proposal; validates routes, not campaign timing or outcomes."
+  ],
+  "checks": [
+    "Failed React document activates usable legacy recovery menu, lazy WarPlanningMap and side-picker/back",
+    "Late successful React load reclaims opening ownership and disables legacy recovery"
+  ],
+  "diagnostics": [
+    {
+      "kind": "requestfailed",
+      "url": "http://127.0.0.1:52017/index.html?embedded=1",
+      "message": "net::ERR_BLOCKED_BY_CLIENT"
+    }
+  ],
+  "blockedDocument": "http://127.0.0.1:52017/index.html?embedded=1",
+  "expectedDiagnostics": [
+    {
+      "kind": "requestfailed",
+      "url": "http://127.0.0.1:52017/index.html?embedded=1",
+      "message": "net::ERR_BLOCKED_BY_CLIENT"
+    }
+  ],
+  "status": "PASS"
+}

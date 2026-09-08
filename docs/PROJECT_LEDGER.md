@@ -34346,3 +34346,24 @@ tests and review are in the same directory and summarized in the existing
 Attribution: Sol/medium implementation, separate Sol/medium review, Astra orchestration
 and documentation closeout. Tasks 6–8 are unstarted; final R8 acceptance remains open.
 No build, package, campaign, dependency upgrade or remote push was performed.
+
+## 2026-09-08 — Cleanup Task 6: unused UI deletion and packaged route proof
+
+Fast-forwarded reviewed Task 5 `f4305c898` into local main; isolated Task 6 on
+`codex/cleanup-unused-ui`. Removed the six verified-unused UI sources and only their
+exclusive test references, retaining supported planning helpers, distinct TacticalCard,
+map-viewer entry and WarPlanningMap recovery. Sol/medium implementation and separate
+Sol/medium review GO; Astra owned build/runtime evidence and documentation closeout.
+
+Focused suites are **157/158, exit 1**: unchanged optional GameState cast floor expects
+five, while the parent already has six. This inherited failure remains open and is not
+waived. Typecheck, desktop release build, fresh package/PE and final unchanged runtime
+probe pass. Earlier readiness/cache failures remain recorded. Actual packaged proposal
+dossier -> four-objective field inspection -> exact return and induced opening-recovery
+menu/side-picker -> React ownership reclaim pass. No production behavior, dependencies,
+config, canon or data changed. All six repository saves remain byte-identical.
+
+Exact commands, hashes, limits, failed attempts and retained evidence are in the existing
+[Task 6 receipt](plans/2026-09-07-bounded-deletion-cleanup-plan.md#task-6-deletion-and-packaged-route-evidence--2026-09-08).
+Hook evidence: `logs/bounded-deletion-cleanup/task6-commit.log`. Tasks 7–8 are unstarted;
+final R8 acceptance remains open. No campaign, remote push or Task 6 merge into main.

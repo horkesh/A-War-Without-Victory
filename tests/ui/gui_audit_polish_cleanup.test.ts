@@ -27,11 +27,6 @@ describe('GUI audit Batch H polish cleanup', () => {
         expect(source).not.toMatch(/\u26A0|âš|Ã¢Å¡/);
     });
 
-    it('gates OpsMap diagnostic logging outside player runtime console.log', () => {
-        const source = read('src/ui/map/components/plan_ui/OpsMapRenderer.ts');
-        expect(source).not.toContain("console.log('[OpsMap]");
-    });
-
     it('removes dev separators from order interpretation headers', () => {
         const source = read('src/ui/map/components/army_hq/OrderInterpretationPanel.tsx');
         expect(source).not.toContain('ORDER INTERPRETATIONS //');
