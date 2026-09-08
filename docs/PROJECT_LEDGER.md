@@ -34242,3 +34242,49 @@ suite 151 passed/5 skipped; typecheck and diff check passed. Logs are under
 `task2-typecheck.log`). Independent Sol/medium review returned GO with no edits.
 No campaign, data/calibration, dependency, baseline, remote-push or packaged
 acceptance work ran. Tasks 3–8 remain not started.
+
+
+## 2026-09-08 - Calibration control timeline viewer (tools/, dev instrumentation)
+
+Added `tools/calibration_timeline.mjs`: a zero-dependency generator that emits one
+self-contained HTML viewer showing OSID control for EVERY week of a run, with painted
+scoring at the four historical checkpoints. Motivated by `matched_osids` being
+non-injective — two runs have scored an identical 637 over different maps four cells
+apart, so a score cannot attribute a delta and the cells themselves must be inspectable.
+
+No engine change and no new artifact were needed. `final_save.json` already carries the
+COMPLETE campaign flip log (`political.control_events`, verified 220 events spanning
+turns 1→188, with nothing pruning it anywhere in `src/state/` or `src/sim/turn_phases/`)
+plus `initial_political_controllers`; replaying the log over turn-0 control yields the
+controller map at any week. This is the same `stateAt()` replay `verify_checkpoints.cjs`
+scores from, and on the same run both tools report an identical 702/678/672/657 — the
+scoring agrees by construction, not coincidence.
+
+Three rules are built in because each prevents a known failure. (1) THE FOUR-SNAPSHOT
+RULE: painted truth exists at w39/w104/w156/w188 only, so control is shown for every week
+but mismatch is refused everywhere else with a stated reason — comparing a mid-period week
+against its era snapshot would report "mismatches" that are only unfought war. Verified:
+10/34/40/55 mismatches at the four checkpoints, zero at w73 and w150. (2) Always replay
+against the painted files on disk now, never the run's recorded `historical_fit` (the same
+run has read 673 then, 675 replayed; painted files are absent from `consumed_inputs.files`,
+so a repaint silently re-bases recorded scores). (3) Provenance is stamped — run dir, run
+commit/dirty/Node, painted sha256 + revision — and a dirty tree or non-22 Node is called
+out in red, because latest is not the same as valid. Merged sub-1km² cells render and score
+under their parent (744 drawn / 712 scored), stated in the UI since amber polygons can
+exceed the scored count.
+
+Output defaults to `<run_dir>/control_timeline.html`; `runs/` is gitignored, so no
+generated artifact enters the repo. Rendered and driven in a real browser: 744 cells, no
+console errors, viewport-fitting layout, flip-stepping / checkpoint-jump / mismatch-select
+all confirmed. Reuses the `build_calibration_map_html.mjs` projection so the two viewers
+cannot drift. Not wired into Electron or any product surface, and not a roadmap workstream
+— `tools/` instrumentation, same category as `engine_health_gate.cjs`.
+
+Two incidental findings recorded, neither fixed here: the `control_events` schema comment
+at `src/state/game_state.ts:3216` says "Kept for last 3 turns", which is stale and would,
+if acted on, silently break this tool and the checkpoint floors; and
+`docs/plans/MASTER_ROADMAP.md` sits at 59,963 of the 60,000-character cap its own
+`docs_desktop_v09_truth.test.ts` enforces — 37 characters of headroom for the next editor.
+
+Plan: `docs/plans/2026-09-08-calibration-control-timeline-viewer-plan.md`. Branch
+`calibration-timeline-viewer`, not yet merged.
