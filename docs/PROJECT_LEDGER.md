@@ -34261,3 +34261,13 @@ Evidence: `logs/bounded-deletion-cleanup/task3-ui-tests.log`,
 `task3-typecheck.log`, and `task3-release-build.log`. Packaged Electron five-branch
 interaction was unavailable; no packaged acceptance credit claimed. Independent review
 and separate commit remain pending; Tasks 4–8 remain untouched.
+
+Follow-up validation compared the identical UI command on unchanged Task 2 `cdc8659b1`
+and Task 3 `61db7e9df`; both produced the same five projection mismatches (34 passed,
+5 failed, exit 1), proving they are inherited and not routing regressions. The
+source-read probe, simulation/startup snapshot checks, and justified
+`desktop:release:check` retry passed exit 0 without snapshot regeneration; packaging
+reached `dist-packaged\\win-unpacked`. Receipts are the Task 3 comparison, retry, and
+package logs under `logs/bounded-deletion-cleanup/`. No packaged Electron
+branch-by-branch interaction receipt was produced, so Task 3 remains NO-GO and is not
+ready to integrate. Tasks 4–8 remain untouched.

@@ -203,6 +203,18 @@ Fast-forwarded local `main` from `223d97970` to reviewed Task 2 commit `cdc8659b
 
 Named UI tests: 34 passed, 5 failed, exit 1; failures are existing recommended-count expectation mismatches in pre-advance/docket projections, with no navigation assertion failure. Typecheck passed, exit 0. Release build passed map build/chunk-cycle checks but stopped at the existing stale startup-snapshot gate after a source-read timeout; no artifact was regenerated. Evidence: `logs/bounded-deletion-cleanup/task3-ui-tests.log`, `task3-typecheck.log`, `task3-release-build.log`. Packaged Electron interaction was unavailable because the release build did not complete; no acceptance credit claimed.
 
+Validation follow-up: the identical UI command on unchanged Task 2 `cdc8659b1` and
+Task 3 `61db7e9df` produced the same five projection mismatches (34 passed/5 failed,
+exit 1), proving they are inherited rather than routing regressions. The source-read
+probe, simulation/startup snapshot checks, and justified `npm.cmd run desktop:release:check`
+retry passed exit 0 without snapshot regeneration. Packaging reached
+`dist-packaged\\win-unpacked`, but no reviewable packaged Electron interaction receipt
+exists for the five target branches and relevant Decision Room/docket entrypoints.
+Evidence: `task3-task2-ui-compare.log`, `task3-candidate-ui-compare.log`,
+`task3-source-read-probe.log`, `task3-desktop-sim-retry.log`,
+`task3-startup-snapshot-retry.log`, `task3-release-build-retry.log`, and
+`task3-package-dir.log`. Task 3 remains NO-GO for packaged navigation proof.
+
 ## 6. Copy-ready implementation prompt
 
 ```text
