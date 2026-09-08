@@ -24,7 +24,7 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 6 | R6 | **JANUARY 1993 SLICE LANDED; CALIBRATION OPEN AND ONGOING (RE closed 2026-09-01)** | Preserve the landed evidence. Reference, init-control, objective, axis, timing, roster and outcome work is live again. Engine health is sacrosanct — fix engine-health defects before tuning. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
 | 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
 | 7 | R7 | **ACTIVE — CINEMATIC OPENING MECHANICS, TYPOGRAPHY, AND BROWSER FALLBACK-ART PROOF COMPLETE** | Required owner art and live packaged first-paint acceptance CLOSED 2026-08-29. Follow the authoritative R7 snapshot. Human listen/sensitivity and closeout reconciliation also remain. **Broader English accessibility/readability now has an executable contract:** run the 2026-09-05 presentation and English-readability amendment, which discharges R7 Phase 5's unticked full-HD English inspection against the frozen showcase audit — renderer-only, byte-neutral, fixes no bugs (owner D1: HOLD FOR R8), creates no lane. RE closed 2026-09-01 and no longer constrains this row. Localization Phase 3 stays post-1.0. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [accepted functional opening](2026-08-23-opening-screens-implementation-plan.md) / [cinematic opening and typography amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md) / [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) |
-| 7.5 | RE | **CLOSED — owner, 2026-09-01** | RE gates nothing. P1/P2A were accepted; the P2B packaged-proof blocker and its rollback receipt are closed history. Engine health continues as a standing principle, not as an RE gate. | [Recovery plan](2026-08-28-packaged-probe-recovery-plan.md) / [1.0 Engine Integrity contract](2026-08-26-engine-integrity-plan.md) |
+| 7.5 | RE | **CLOSED — owner, 2026-09-01** | None. RE gates nothing; engine-health defects are still fixed before tuning. | [Closed recovery record](2026-08-28-packaged-probe-recovery-plan.md) / [closed RE contract](2026-08-26-engine-integrity-plan.md) |
 | 8 | R8 | **WAITING ON R7.** RE closed 2026-09-01 and no longer gates this. | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until the final two diaries score 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
 | 9 | R9 | **FREEZE WAITING ON R8; LIMITED PREPARATION AT §4.2** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
@@ -54,11 +54,11 @@ Integrated unchanged into main as `fa900ba89`. Final acceptance remains deferred
 values; hybrid/ethnic starts bypass them while mode-less operational starts can consume them.
 [Disposition and acceptance order](2026-07-31-full-campaign-electron-validation-plan.md#bc07-stability-data-disposition--2026-09-08).
 
-**Repository audit packets — BC09 reviewed (GO); cleanup Tasks 1–3 complete (GO); remaining work PLANNED:** [Master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07) assigns three subordinate packets:
+**Repository audit packets — BC09 reviewed (GO); cleanup Tasks 1–4 complete (GO); remaining work PLANNED:** [Master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07) assigns three subordinate packets:
 
 | Packet | Existing owner and sequence |
 |---|---|
-| [Deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | R8; Tasks 1–2 reviewed GO. Task 3 fresh Windows package, runtime probe and all five modal routes have local proof; targeted independent Sol/medium review GO. Inherited UI failures remain recorded. Tasks 4–8 remain planned with their BC04/05/06 and R7 handoffs; final R8 acceptance remains separate. |
+| [Deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | R8; Tasks 1–4 reviewed GO, including Task 3 local packaged proof and Task 4 board trim. Inherited UI failures remain recorded. Tasks 5–8 retain BC04/05/06 and R7 handoffs; final R8 acceptance remains separate. |
 | [Runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | R8; BC09 Phase 1 is integrated and supplied the verified BC07 retention disposition. BC10 remains planned after BC01/06 and BC09. |
 | [Build preparation](2026-09-07-r9-build-validation-preparation-plan.md) | Limited early R9 subset; cleanup script handoff and BC09 resource contract precede final build evidence. Freeze still waits for R8. |
 
@@ -70,11 +70,7 @@ no execution authority or new workstream; D1 and separately authorized BC04 work
 
 `R7 remaining presentation/audio gates (disjoint work may continue) -> scheduled R8 behavior settlement and deletion cleanup + limited R9 build preparation (§§4.1–4.2) -> final calibration acceptance -> final R8 packaged acceptance -> R9`
 
-**Finite closure register (2026-09-07; BC01 separately scheduled):** [Master §4.1](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) owns BC01 CLOSED (owner accepted verified repair and retired territory similarity, 2026-09-07; [verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)), BC02 CLOSED by the owner-approved verified Electron load/display repair, BC03 CLOSED by verified repair and owner-approved deferrals, BC04 campaign acceptance and BC05–BC06 remain open; BC07 retention is settled; BC09 Phase 1 has local evidence under review, BC10 remains planned, and BC08 is closed by bounded disposition: BC01 opportunity decisions; BC02 sector/rating truth; BC03 narrated Dayton; BC04 chronology/P1/P2; BC05 NATO/Lukavac gates; BC06 posture/gesture controls; BC07 stability-data policy; BC08 inherited tests. FIX means planned disposition when scheduled; VERIFY/DISPOSITION needs bounded evidence. D1 HOLD FOR R8 remains. Registration creates no new lane, RE revival, broader repair authorization, or automatic baseline refresh. BC02 changed no canonical save bytes, campaign result, calibration or baseline. BC03 is closed; BC03 is committed as c95e25241; BC04 P1 is owner-authorized, implemented and independently reviewed; campaign acceptance is deferred to the next calibration, preserving clean before/after attribution; extra P1 repeat/ON runs are owner-retired. P2 completed-week targets are historically ratified; the owner approved the bounded same-turn follow-up/display packet and scoped panel-condition amendment. P2 is implemented, focused checks passed, and independent review returned GO; campaign acceptance remains deferred. Diagnostic calibration stays open; final calibration follows accepted behavior settlement. n392 is 702/678/672/665 against unchanged floors 694/674/668/641; the older 688 breach is historical, and improvement attribution remains unknown.
-
-**RE no longer appears on the critical path.** It closed by owner decision on 2026-09-01; the P2B
-packaged-proof blocker that used to head this line is closed history and gates nothing. Engine
-health continues as a standing principle, not as an RE gate.
+**Finite closure register (2026-09-07; BC01 separately scheduled):** [Master §4.1](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) owns BC01 CLOSED (owner accepted verified repair and retired territory similarity, 2026-09-07; [verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)), BC02 CLOSED by the owner-approved verified Electron load/display repair, BC03 CLOSED by verified repair and owner-approved deferrals, BC04 campaign acceptance and BC05–BC06 remain open; BC07 retention is settled; BC09 Phase 1 is locally reviewed GO with final acceptance deferred, BC10 remains planned, and BC08 is closed by bounded disposition: BC01 opportunity decisions; BC02 sector/rating truth; BC03 narrated Dayton; BC04 chronology/P1/P2; BC05 NATO/Lukavac gates; BC06 posture/gesture controls; BC07 stability-data policy; BC08 inherited tests. FIX means planned disposition when scheduled; VERIFY/DISPOSITION needs bounded evidence. D1 HOLD FOR R8 remains. Registration creates no new lane, RE revival, broader repair authorization, or automatic baseline refresh. BC02 changed no canonical save bytes, campaign result, calibration or baseline. BC03 is closed; BC03 is committed as c95e25241; BC04 P1 is owner-authorized, implemented and independently reviewed; campaign acceptance is deferred to the next calibration, preserving clean before/after attribution; extra P1 repeat/ON runs are owner-retired. P2 completed-week targets are historically ratified; the owner approved the bounded same-turn follow-up/display packet and scoped panel-condition amendment. P2 is implemented, focused checks passed, and independent review returned GO; campaign acceptance remains deferred. Diagnostic calibration stays open; final calibration follows accepted behavior settlement. n392 is 702/678/672/665 against unchanged floors 694/674/668/641; the older 688 breach is historical, and improvement attribution remains unknown.
 
 **BC08 CLOSED by verification/disposition, 2026-09-07.** The current full suite remains **RED, exit 1**, solely on Windows Bash resolution; the unchanged focused file passes 8/8 with child-scoped Git Bash. Current deployment/diagnostics and peace-plan suites pass. This is no engine closure or overall-green claim. [Report](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md).
 
@@ -90,35 +86,14 @@ the ~227 `stability_score` rows are real and reach the sim through `control_flip
 init). The earlier "168 rows" and "`contested_control` is the headline" figures were retracted by
 those same PRs.
 
-**RE INSERTED 2026-08-26 AND REDUCED 2026-08-27 BY OWNER APPROVAL -- HISTORY, CLOSED 2026-09-01.**
-Engine health remains sacrosanct as a standing principle. Calibration no longer waits on the seven
-release outcomes; the paragraphs below this line are the closed RE record, not live constraints.
-
-The original probe channel remains closed at `b711cffa9`; its findings are not RE implementation
-authority. The auxiliary prerequisite ended terminal `NO_VERDICT`, its exact unproven hypothesis
-was rolled back at `48909e1d6`, and it supplies no RE credit or automatic P2B satisfaction. No
-packaged-proof route is active or implied.
-
-**§6 status:** the clean lean RE baseline pair is captured at `177882fc2`. Both Node-22 runs preserve
-the enclave guard, pass engine-only and direct-consistency gates, and reproduce the same artifacts/fingerprint.
-The checkpoint tool's Farz timing red remains non-authorizing calibration observation.
-
-**CORRECTED RE BASELINE EVIDENCE EXISTS.** Run provenance stamps exact commit, consumed-input evidence, and flag
-state; the clean Node-22 A/B pair is byte-identical outside path-derived metadata. Historical
-mixed-tree or Node-24 runs remain inadmissible and cannot replace it.
-
-**HISTORICAL EXECUTION (RE closed 2026-09-01):** P1 and P2A are accepted. The prerequisite consumed its one canonical
-packaged-probe invocation and ended terminal `NO_VERDICT` because of external-supervisor custody
-failure; no cause is inferred and it supplies no P2B credit. Commit `48909e1d6` restored the exact
-config blob `7a098b350461cdbb47ec94d453ff35ec655c7b91` and test blob
-`29194ca0844acb8ac6cfb7dff6f1cb17f9513157`. RE is CLOSED (owner, 2026-09-01). Historically it was blocked at P2B with no packaged-proof route
-active; P3 waits and the calibration pause is unchanged. No run, retry, diagnosis, instrumentation,
-supervisor redesign, or successor route is authorized. Production LOC stays net non-positive;
-forbidden engine surfaces cannot grow. The `+3.62853%` mandatory-correctness cost is watch-only, not
-a 1.0 blocker, and no further pre-1.0 performance diagnosis is authorized. Active formation
-strength, dissolution salvage, enclave targeting, hostile breakout, and speculative mechanics are
-deferred. Broad audits/essays, standalone closeout, per-packet campaigns, and repeated full-team
-review are retired. R7 may continue where exact files are disjoint.
+**Closed RE/probe history:** the [master execution snapshot](MASTER_ROADMAP.md#current-execution-snapshot-2026-09-07)
+governs current work. The [closed RE contract](2026-08-26-engine-integrity-plan.md)
+retains P1/P2A acceptance and the corrected Node-22 pair at `177882fc2`; mixed-tree/Node-24
+runs remain inadmissible as RE evidence. The [closed recovery record](2026-08-28-packaged-probe-recovery-plan.md)
+retains the terminal `NO_VERDICT`, exact rollback at `48909e1d6`, and consumed authority.
+These records authorize no RE retry, diagnosis, instrumentation or successor proof route.
+RE is closed and gates nothing; its retired gates and deferred mechanics do not re-enter
+the critical path. Engine health remains a standing requirement, with defects fixed before tuning.
 
 **Canon landed 2026-08-17:** `SENSITIVE_HISTORY_DESIGN_GATE.md` §10, "Provenance and the Integrity of the Historical Record", ratified by unanimous Pyrrhic panel. `FORAWWV.md` §XIII temporal scope is drafted but **HELD** behind the provenance channel-separation and determinism-scan packets, and is not canon.
 

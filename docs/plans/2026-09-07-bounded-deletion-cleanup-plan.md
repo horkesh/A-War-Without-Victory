@@ -193,7 +193,7 @@ Planning verification (2026-09-07): documentation suites passed 9/9, exit 0
 was corrected by keeping §4.2 concise and removing one duplicate historical pointer; no test
 threshold changed. Local-link/scope checks and `git diff --check` passed, exit 0
 (`logs/bounded-deletion-cleanup/planning-links.log`, `planning-diff-check.log`).
-The preceding receipt covers the original four-item draft only. Repository-wide extension planning checks (2026-09-07): documentation suites 9/9, exit 0; 163 local file links and 22 section anchors resolve; `git diff --check` exit 0. Evidence: `logs/repository-audit-planning/{docs-tests.log,links.json,anchors.json,diff-check.log}`. Independent Sol/medium review found one missing alias disposition; cleanup Task 5 now explicitly owns `test:ui` retirement/compatibility and its public documentation. No other material coverage, ordering, canon or validation issues were found. Implementation Task 1: COMPLETE, reviewed GO (2026-09-08); Task 2 COMPLETE, reviewed GO (2026-09-08); Task 3 initially reviewed NO-GO pending validation, now COMPLETE with local packaged proof and independent GO (2026-09-08); Tasks 4–8 NOT STARTED.
+The preceding receipt covers the original four-item draft only. Repository-wide extension planning checks (2026-09-07): documentation suites 9/9, exit 0; 163 local file links and 22 section anchors resolve; `git diff --check` exit 0. Evidence: `logs/repository-audit-planning/{docs-tests.log,links.json,anchors.json,diff-check.log}`. Independent Sol/medium review found one missing alias disposition; cleanup Task 5 now explicitly owns `test:ui` retirement/compatibility and its public documentation. No other material coverage, ordering, canon or validation issues were found. Implementation Task 1: COMPLETE, reviewed GO (2026-09-08); Task 2 COMPLETE, reviewed GO (2026-09-08); Task 3 initially reviewed NO-GO pending validation, now COMPLETE with local packaged proof and independent GO (2026-09-08); Task 4 COMPLETE, reviewed GO (2026-09-08); Tasks 5–8 NOT STARTED.
 
 At implementation closeout, update this evidence section with dispositions, files, command exit codes, log paths, UI branch coverage and any residual. Update `COMMAND_BOARD.md`, master §4.2 and the R8 controlling plan's packet status, then append `docs/PROJECT_LEDGER.md`. Put the implementation receipt in the existing R8 report if available; only if none fits, use one consolidated report under `docs/40_reports/implemented/`, not separate task reports. Update knowledge only for a new reusable lesson; no rating/backlog change is implied.
 
@@ -293,3 +293,24 @@ failed receipts. Synthetic fixture targets invoke actual compiled callbacks; no
 production debug control or router replacement was added. Local packaged criteria
 are satisfied; targeted independent Sol/medium review returned GO for integration.
 Tasks 4–8 are not started by this continuation. Final R8 acceptance remains separate.
+
+### Task 4 command-board trim — 2026-09-08
+
+Base `71add22ef`; branch `codex/cleanup-command-board`. Replaced repeated closed
+RE/probe execution narratives with links to the existing closed contract, recovery
+record and master execution snapshot. Historical records themselves are unchanged.
+Retained current dispatch rows, dependencies, unresolved acceptance, engine-health
+priority, non-authorizing closed proof records, held canon and publication limits.
+Aligned the repeated BC09 sentence with its already-reviewed status in master §4.1.
+No new workflow authority, game behavior, canon, data or runtime change is introduced.
+
+Validation question: does the shorter derived board preserve every unfinished item's
+master owner and next action? Check all board links/anchors; compare live items with
+master §§4.1–4.2/5; run the three existing documentation suites and `git diff --check`.
+Expected cost: minutes. Pass requires retained authority/constraints and clean focused
+checks; stop on any unowned item, lost live constraint or unresolved authority conflict.
+No runtime tests. Evidence: `logs/bounded-deletion-cleanup/task4-validation.log` and
+`task4-docs-tests.log`. Task 4 COMPLETE: independent Sol/medium review GO, no findings
+(`task4-review.log`); 36 links/10 anchors resolve, live owners/actions retained,
+13/13 documentation tests and diff check pass. Master/derived packet status synchronized.
+Tasks 5–8 remain not started by this continuation.

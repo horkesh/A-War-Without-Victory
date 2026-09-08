@@ -34316,3 +34316,16 @@ configuration, snapshots or baselines changed; no campaigns or Task 4 work ran.
 Targeted independent Sol/medium review returned GO for local integration. This is local Task 3
 proof, not final R8 packaged-game acceptance. Attribution: Sol harness/fixture,
 Astra package/runtime/native inspection and documentation; separate Sol/medium review GO.
+
+## 2026-09-08 — Cleanup Task 4: trim the derived command board
+
+On `codex/cleanup-command-board` from `71add22ef`, replaced repeated closed RE/probe
+narratives with links to their existing records and the authoritative master snapshot.
+Preserved dispatch, dependencies, unfinished acceptance, engine health, held canon,
+publication limits and closed-record non-authority. Corrected only the repeated BC09
+status to match existing master truth; no new authority or historical-record edits.
+No production/data changes or runtime tests. All 36 links/10 anchors and live
+owner/action mappings pass; documentation tests 13/13 and diff check pass. Independent
+Sol/medium review GO, no findings. Packet status synchronized; see the existing
+[cleanup plan](plans/2026-09-07-bounded-deletion-cleanup-plan.md#task-4-command-board-trim--2026-09-08).
+Tasks 5–8 remain untouched. No reusable lesson or canon update is required.
