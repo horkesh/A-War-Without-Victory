@@ -34280,11 +34280,46 @@ all confirmed. Reuses the `build_calibration_map_html.mjs` projection so the two
 cannot drift. Not wired into Electron or any product surface, and not a roadmap workstream
 — `tools/` instrumentation, same category as `engine_health_gate.cjs`.
 
-Two incidental findings recorded, neither fixed here: the `control_events` schema comment
-at `src/state/game_state.ts:3216` says "Kept for last 3 turns", which is stale and would,
-if acted on, silently break this tool and the checkpoint floors; and
-`docs/plans/MASTER_ROADMAP.md` sits at 59,963 of the 60,000-character cap its own
-`docs_desktop_v09_truth.test.ts` enforces — 37 characters of headroom for the next editor.
+Two incidental findings recorded. The `control_events` schema comment is corrected in the
+follow-up entry below. `docs/plans/MASTER_ROADMAP.md` sits at 59,963 of the 60,000-character
+cap its own `docs_desktop_v09_truth.test.ts` enforces — 37 characters of headroom for the
+next editor, and NOT touched by this work.
 
 Plan: `docs/plans/2026-09-08-calibration-control-timeline-viewer-plan.md`. Branch
 `calibration-timeline-viewer`, not yet merged.
+
+
+## 2026-09-08 - control_events schema comment corrected (comment-only)
+
+The `control_events` doc comment in `src/state/game_state.ts` made four claims and THREE
+were false. It said the log was "Cleared at the start of each attack-resolution step",
+"Kept for last 3 turns", and "Used by the GUI battle-markers layer — does not affect
+simulation logic". Measured instead: every writer is an append (`attack_resolution_osid`,
+`sector_offensive`, `paramilitary_sweep`, `rear_pocket_consolidation`,
+`jna_phantom_brigades`, `events/apply_effects`, `early_war/control_flip`); nothing anywhere
+truncates or filters it; the single reset is `desktop_sim.ts`, which starts a NEW desktop
+campaign empty; and a persisted save carries 220 events spanning turns 1→188. Only the
+determinism sort claim (`war_phases.ts`, by turn then settlement_id) was true.
+
+The "does not affect simulation logic" line was the dangerous one, because it invites
+pruning the log for memory on the belief that it is cosmetic. It is not.
+`bot_strategy.priorityAreaTrend` scales each army priority's weight by the recent territory
+trend of that priority's own target area and can RE-ORDER THE ARGMAX within a corps;
+`army_hq_gathering.computeRecentTerritoryChange` feeds corps assessment; and `war_phases`
+derives the bilateral-flip and territorial-incident counts behind stalemate turns and
+ceasefire precondition C4, which gates Washington Agreement Path A. Separately, the log is
+the ONLY source of control at an intermediate week — replayed over
+`initial_political_controllers` it reconstructs the controller map at any turn, which is how
+`tools/verify_checkpoints.cjs` and `tools/calibration_timeline.mjs` produce the four
+checkpoint scores, so truncating it would destroy the calibration floors silently.
+
+The comment now states the append-only contract, names the writers, carries a DO NOT PRUNE
+warning with both reasons, and records what it previously got wrong. A stray duplicate
+section header at the top of the `GameState` interface, which described no field and
+implied the log lived there as GUI-only data, was removed. Likely origin of the error: the
+adjacent turn-AAR field legitimately is "Kept for last 3 turns" and "does not affect
+simulation logic"; that wording appears to have been copied onto a field where neither holds.
+
+COMMENT-ONLY. Verified mechanically: every changed line in the diff is a comment line
+(no non-comment line appears in `git diff -U0`), and `tsc --noEmit` exits 0 with empty
+output. No behavior, no artifact, no calibration surface is touched.
