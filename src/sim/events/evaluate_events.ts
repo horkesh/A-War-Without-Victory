@@ -8,7 +8,6 @@
 
 import type { GameState, FactionId, CausalityLogEntry } from '../../state/game_state.js';
 import type { EdgeRecord } from '../../map/settlements.js';
-import { getEventRegistry } from './event_registry.js';
 import { applyEventEffects } from './apply_effects.js';
 import type { EventDefinition, DimensionShift, EventResponseOption, FiredEvent, PendingEventDecision, Rng } from './event_types.js';
 import { triggerMatches } from './event_types.js';
@@ -438,7 +437,7 @@ export function evaluateEvents(
     state: GameState,
     _rng: Rng,
     currentTurn: number,
-    registry?: EventDefinition[],
+    registry: EventDefinition[],
     edges?: EdgeRecord[]
 ): EventsEvaluationReport {
     const fired: FiredEvent[] = [];
@@ -455,7 +454,7 @@ export function evaluateEvents(
     const firedIds = state.military.fired_event_ids;
     const playerFaction = state.meta.player_faction;
 
-    const events = registry ?? getEventRegistry();
+    const events = registry;
     const canonicalEvents = [...events].sort(compareEventCandidates);
     const eventsById = new Map<string, EventDefinition>();
     for (const def of canonicalEvents) {

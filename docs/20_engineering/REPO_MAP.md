@@ -30,7 +30,6 @@ Populate this section from the discovery checklist.
 - B1 Events: `src/sim/events/` — emergent event system (v0.6.0)
   - `event_types.ts` — EventCondition (23 variants), EventDefinition, EventResponseOption, PressureConfig, RecurrenceConfig, DimensionId, StrategicDimension, DimensionShift
   - `evaluate_events.ts` — collect-then-fire evaluation, pressure integration, recurrence gating, 3/turn queue cap
-  - `event_registry.ts` — registry initialization from JSON
   - `event_loader.ts` — loads `data/scenarios/events/war_*.json`
   - `apply_effects.ts` — deterministic effect application (10 effect kinds)
   - `resolve_decision.ts` — player decision resolution
@@ -87,6 +86,7 @@ Populate this section from the discovery checklist.
 - **AI Commander UI (v0.4.9):** `AiSettingsPanel.tsx` (API key + mode selector), `AiAdvisorPanel.tsx` (on-demand advisor overlay), `CorpsDialoguePanel.tsx` (officer reports with confidence indicators), `WarDispatchPanel.tsx` (archival dispatch display). All in `src/ui/map/components/`. Sim-side: `src/sim/ai_commander/` (14 files, ~1,683 lines). IPC: `set-ai-commander-config`, `get-ai-commander-config`, `get-advisor-recommendation`. See Systems Manual §7.9.
 - **Warroom/opening composition:** `src/ui/map/components/MainMenu.tsx` is the normal browser/Electron opening owner; `src/ui/map/components/warroom/WarroomScenePlate.tsx` and `WarroomShellLayer.tsx` share the exact scene substrate from faction preview into play. `src/ui/warroom/` is the Electron outer host/IPC relay; its `WarPlanningMap` and legacy menu/desk are lazy bounded recovery only. Dev: `npm run dev:map` for the canonical React surface; `npm run dev:warroom` for outer-host work. See `docs/40_reports/GUI_MASTER.md` and `WARROOM_MASTER.md`.
 - **Warroom turn advance:** `ClickableRegionManager` uses the desktop IPC bridge when available and retains its bounded `runPhaseITurn` browser fallback. The unused increment-only combat runner was removed in cleanup Task 1 (2026-09-08).
+- **Event catalog delivery:** `evaluateEvents` receives definitions from the optional turn input; scenario and desktop loaders inject their loaded catalogs, while omitted pipeline inputs use an explicit empty list. The former global registry fallback was removed in cleanup Task 2 (2026-09-08).
 
 ## Change X → Go Here
 Populate with concrete files once confirmed by discovery:

@@ -34222,3 +34222,23 @@ other behavior work, build preparation and final acceptance remain open.
 Review receipt: `logs/bounded-deletion-cleanup/task1-independent-review.md` (GO).
 The commit uses the existing main-checkout Husky launcher with identical hook bytes
 for the final typecheck; no hook is bypassed and no persistent hook setting changes.
+
+## 2026-09-08 — Cleanup Task 2: remove global event-registry fallback
+
+Base: `223d9797003a634402ccdcef03def8837cc7c6aa`; isolated branch
+`codex/cleanup-event-registry`. Confirmed no live registry initializer consumer.
+The evaluator now receives required explicit definitions; early-war and war
+pipeline callers pass `eventDefinitions ?? []`, preserving optional omission.
+Scenario and desktop loaders continue injecting their real loaded catalogs.
+Deleted `src/sim/events/event_registry.ts` and removed its engineering-map entry;
+no ordering, effects, timing, readiness, Graz handling, catalog data or game
+behavior was changed. Added explicit-empty and omitted-pipeline assertions while
+retaining real loaded-catalog positive controls.
+
+Validation: baseline focused event/pipeline suite 150 passed/5 skipped; post-edit
+suite 151 passed/5 skipped; typecheck and diff check passed. Logs are under
+`logs/bounded-deletion-cleanup/` (`task2-preflight-search.log`,
+`task2-baseline-focused.log`, `task2-focused-after-edit.log`,
+`task2-typecheck.log`). Independent Sol/medium review returned GO with no edits.
+No campaign, data/calibration, dependency, baseline, remote-push or packaged
+acceptance work ran. Tasks 3–8 remain not started.

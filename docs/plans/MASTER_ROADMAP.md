@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-09-07 (repository audit integrated into existing R8/R9 ownership)
+**Last updated:** 2026-09-08 (cleanup Tasks 1–2 integrated into existing R8/R9 ownership)
 
 **Execution branch:** `codex/master-roadmap-execution` (integration target: `main` after all workstreams are green)
 
@@ -232,7 +232,7 @@ nothing here. R7 continues disjoint presentation work; publication authority rem
 
 ### 4.2 Repository audit integration (2026-09-07)
 
-BC09 reviewed GO; cleanup Task 1 complete (GO); remaining work planned. No new workstream:
+BC09 reviewed GO; cleanup Tasks 1–2 complete (GO); remaining work planned. No new workstream:
 
 | Owner / packet | Slot and overlap |
 |---|---|

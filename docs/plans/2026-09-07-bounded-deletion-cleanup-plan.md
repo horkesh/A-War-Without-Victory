@@ -76,6 +76,12 @@ No new test is needed for deleting an uncalled, side-effect-free module. Pass: n
 
 ### Task 2 — Remove the global event-registry fallback
 
+**Status (2026-09-08): COMPLETE, independently reviewed GO.** Evidence:
+`logs/bounded-deletion-cleanup/task2-preflight-search.log`,
+`task2-baseline-focused.log`, `task2-focused-after-edit.log`, and
+`task2-typecheck.log`. Focused results were 151 passed/5 skipped; typecheck
+passed. Tasks 3–8 remain not started.
+
 **Owner:** implementation worker; independent reviewer checks event delivery and determinism.
 **Files:** delete `src/sim/events/event_registry.ts`; edit `src/sim/events/evaluate_events.ts`, `src/sim/turn_phases/early_war_phases.ts`, `src/sim/turn_phases/war_phases.ts`; targeted tests in `tests/events_evaluate.test.ts`, `tests/turn_pipeline.test.ts`, and affected direct evaluator tests; update `docs/20_engineering/REPO_MAP.md`.
 

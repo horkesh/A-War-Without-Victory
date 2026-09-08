@@ -40,6 +40,7 @@ describe('runTurn determinism', () => {
 
     expect(first.nextState).toEqual(second.nextState);
     expect(first.report).toEqual(second.report);
+    expect(first.report.events_fired).toEqual([]);
     expect(baseState.meta.turn, 'input state must remain unchanged').toBe(0);
   });
 

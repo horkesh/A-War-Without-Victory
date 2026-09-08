@@ -1057,7 +1057,7 @@ export const warPhases: NamedPhase[] = [
         name: 'evaluate-events',
         run: (context) => {
             const turn = context.state.meta.turn;
-            const result = evaluateEvents(context.state, context.rng, turn, context.input.eventDefinitions, context.input.settlementEdges);
+            const result = evaluateEvents(context.state, context.rng, turn, context.input.eventDefinitions ?? [], context.input.settlementEdges);
             context.report.events_fired = result.fired;
             // Graz Accords: fires at week 4 (6 May 1992), sets state.political.vienna_declaration_turn
             const grazText = checkAndFireGrazAccords(context.state);

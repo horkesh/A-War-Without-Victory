@@ -25,8 +25,11 @@ audit into existing owners. No implementation starts in this planning turn.
 - [Deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md), Tasks 1–8: original four plus
   obsolete commands/tools/UI/smoke/hooks. Script handoff precedes dependency work; event/UI tasks
   wait for their BC04/05/06 and R7 owners. KEEP with evidence is valid.
-  **2026-09-08:** owner authorized Task 1 only; unused runner/import deleted, typecheck
-  and Warroom build pass; independent review GO. Tasks 2–8 remain planned.
+  **2026-09-08:** cleanup Tasks 1–2 are complete with independent review GO. Task 1
+  deleted the unused runner/import; Task 2 removed the global event-registry fallback
+  while preserving injected catalogs and optional pipeline omission. Tasks 3–8 remain
+  planned. Focused event/pipeline tests and typecheck pass; final campaigns and packaged
+  acceptance remain deferred.
 - [Runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md): BC09 shared validated inputs
   supplies BC07 delivery evidence; BC10 optional-AI authority/replay follows BC09 and command
   settlement. These are explicit new behavior rows, not reopening R4/R5/RE or absorbing BC07 policy.

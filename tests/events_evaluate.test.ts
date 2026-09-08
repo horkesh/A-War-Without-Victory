@@ -252,6 +252,14 @@ test('evaluateEvents: five eligible same-priority same-turn events fire four and
     assert.ok(!state.military.fired_event_ids?.includes('overflow_e'), 'overflowed event must not be tracked as fired');
 });
 
+test('evaluateEvents: explicit empty definitions produce no catalog events', () => {
+    const state = minimalState('war', 12);
+    const result = evaluateEvents(state, rejectRandomness, 12, []);
+
+    assert.deepStrictEqual(result.fired, []);
+    assert.deepStrictEqual(state.military.fired_event_ids, []);
+});
+
 test('evaluateEvents: auto/flag-setter events bypass the cap; only player-decision events overflow', () => {
     // Silent-drop regression guard: five auto events (no response_options) plus
     // five player-decision events all eligible on the same turn. ALL five autos
