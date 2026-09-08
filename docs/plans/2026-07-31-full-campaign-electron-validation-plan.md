@@ -836,7 +836,7 @@ R1–R5, the accepted R6 slice, RC and RE stay closed; calibration remains ongoi
 | **BC04 — B11 chronology + P1/P2 / R8, panel-owned history** | Historian + events/systems + scenario/calibration + independent §6 panel | Event timing/effects, displacement, personnel, NATO and downstream operations | **P1 IMPLEMENTED/REVIEWED; campaign acceptance pending; P2 implemented/reviewed; campaigns deferred**: current code and n392 receipts reconciled in the BC04 subsection above; completed barracks stagger excluded. P1/P2 follow the [existing conditional panel record](../40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md), with the subsequent owner-approved P1/P2 implementation amendments recorded above. P1 preserves the historical date and map; P2 is a coherent chronology packet, measured receipt dates with brakes active, no narrowed expiry/backstop shortcut. Separate P1 and P2 controlled runs, full anchors/health/§6 and displacement/operation diffs; no fresh re-floor until explained and accepted. |
 | **BC05 — B12 dead event windows/control gates / R8** | Events/systems + Historian + QA | Enabling NATO events and removing a political decision can change outcomes; a loader lint alone is byte-neutral | **NATO IMPLEMENTED/REVIEWED (GO); Lukavac event REMOVED/REVIEWED (GO)** by owner disposition; removal verified across 12 focused files/289 tests by recorded evidence union. Military Operation Trnovo is preserved; its execution/calibration is outside scope. Focused checks do not establish campaign/downstream acceptance. No initial repaint, threshold reduction, baseline refresh or campaign authorized. |
 | **BC06 — B13 posture/gesture controls / R8** | Gameplay/desktop + Game Designer + QA | Player-action decisions/effects; headless neutrality is insufficient | **BOUNDED REPAIR IMPLEMENTED/REVIEWED (GO), BC06 OPEN.** Voluntary posture wiring, authored third-use choices, receipts and owner-authorized per-unit decoration targeting verified locally. Six undefined escalation stages are deferred post-1.0 by the 2026-09-08 owner-delegated disposition; final packaged acceptance remains open. [Evidence and limits](#bc06-bounded-posture-and-gesture-repair--2026-09-07); no general recurrence-system redesign. |
-| **BC07 — initial-master stability divergence / calibration-data authority** | Asset/data integration + Systems + calibration | Potentially behavior-bearing `stability_score`; mode-dependent consumption | **VERIFY/DISPOSITION**: establish consumed mode and writer/reader for the 269-row master/derive disagreement, including ~227 stability rows. `hybrid_1992`/`ethnic_1991` early returns must be accounted for; do not infer 227 effects in the blessed scenario. Record retain/regenerate policy and affected scenario scope; no mandated regeneration, initial-control override, or re-floor for the cosmetic contested-control subset. [2026-09-04 correction](../PROJECT_LEDGER.md#2026-09-04--correcting-the-correction-contested_control-is-cosmetic), [calibration authority](../40_reports/CALIBRATION_MASTER.md). |
+| **BC07 — initial-master stability divergence / calibration-data authority** | Asset/data integration + Systems + calibration | Mode-dependent stability consumption | **DISPOSED — RETAIN (GO), 2026-09-08.** Keep committed values: hybrid/ethnic starts bypass master stability; mode-less operational starts can consume it. Paired sentinel characterization passes 3/3; no regeneration/repaint or changed data. [Evidence and policy](#bc07-stability-data-disposition--2026-09-08). |
 | **BC08 — inherited suite residual / verification** | QA + owning Systems/Game Design seats | Current-suite environment failure, not a reproduced simulation residual | **CLOSED — verification/disposition, 2026-09-07.** Full suite exit 1 retained: one Bash-resolution failure; unchanged focused file 8/8 with child-scoped Git Bash. Located deployment/diagnostics suites and peace plans pass; n392 artifact gates pass with source/input-equivalence and transient coverage limits. [Complete receipt](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md); no overall-green or whole-engine claim. |
 | **BC09 — shared production inputs / R8** | Systems + QA | Required census/ethnicity inputs and runner equivalence | **LOCAL PACKET REVIEWED (GO).** [Runtime integrity Phase 1](2026-09-07-r8-runtime-input-ai-integrity-plan.md) records shared validation and real IPC 25/25 with matching one-turn baseline bytes. Campaign/final packaged gates deferred; BC07 data policy remains separate. |
 | **BC10 — optional external AI ownership/replay / R8** | Commander + Systems + QA | One final command writer and stable recorded inputs | **PLANNED, not implemented.** [Runtime integrity Phase 2](2026-09-07-r8-runtime-input-ai-integrity-plan.md) follows BC01/BC06 and BC09, including its required Phase 0 review. Commander keeps final authority; recorded decisions replay without API calls; cadet mode and player authorization remain intact. |
@@ -1103,3 +1103,59 @@ Handoff: session metadata, exact turns, evidence root, decision provenance, diag
 **Player-visible truth:** the complete president's loop across three factions and a full campaign.
 **Canonical UI surface:** Desk -> Decision Room/evidence -> Advance, with map/Army HQ/Records/Codex.
 **Done means:** two consecutive 5/5 clean diaries after three-faction full-campaign evidence and bug-first remediation.
+
+### BC07 stability-data disposition — 2026-09-08
+
+The owner authorized integrating BC09 and proceeding to the stability-data decision.
+BC09 commit `fa900ba89` is now integrated unchanged into local main. Its reviewed
+40-test/25-IPC-case evidence remains applicable; integration made no new source change.
+
+**Disposition: RETAIN the committed operational initial master.** Do not
+regenerate it, repaint control, change calibration floors, or treat the derive script
+as a no-op. The real-initializer characterization passes 3/3; independent Sol review returned GO.
+
+The accepted `apr1992_definitive_188w` scenario uses `hybrid_1992`. Both hybrid and
+`ethnic_1991` return before the operational-master stability-copy branch in
+`src/state/political_control_init.ts` (mode dispatch around lines 855–876; master
+selection/copy around 894–995). The scenario builder explicitly loads the canonical
+graph and passes its selected mode; desktop scenario starts use that builder or the
+startup snapshot. Thus the historical roughly 227 disputed stability rows do not
+establish 227 effects in the normal campaign. This is a startup-path finding, not a
+new campaign outcome or a claim that stability never matters.
+
+Mode-less operational-graph entry points can consume those committed values, including
+raw simulation/developer entry points. The early-war control-flip reader uses municipal
+stability, falling back to 50 when absent (`src/sim/early_war/control_flip.ts`, around
+381–391 and 577–600). Regeneration could therefore alter supported legacy behavior.
+The historical 269/712 disagreement and its roughly 227 stability/42 cosmetic split
+are reused evidence, not a new generator run. `contested_control` supplies no war-rule
+reader and is reset on scenario operational starts; it does not justify a repaint.
+
+Retain the current artifact as the compatibility input for these legacy paths. The
+derive script may produce a comparison candidate, but its output must not overwrite
+the retained file without a separately reviewed provenance/mode-impact decision and
+applicable controlled campaign evidence. This disposition does not certify the
+historical accuracy of every retained bucket or authorize data generation.
+
+**Validation plan:** a small temporary-fixture characterization of the actual initializer
+must show a changed sentinel stability value changes mode-less operational initialization,
+while hybrid/ethnic initialization remains identical. Run only that focused test and
+relevant documentation checks, then independent Sol review. Expected cost: minutes.
+Stop on unexpected mode consumption or any need to change historical data. Root owns
+documentation; the worker owns only the characterization test. No production edits.
+
+**Acceptance order:** the owner's go-ahead does not remove the existing prerequisites.
+Runtime Phase 1 §5 and the R9 build-preparation plan require settled build inputs before
+final calibration/package acceptance; cleanup and other scheduled behavior work also
+remain. Do not launch final campaigns or packaged diaries on this intermediate tree.
+Those checks remain required, and no final BC09/R8 closure follows from this disposition.
+
+**Local evidence:** `tests/bc07_operational_initial_master_consumption.test.ts` varies
+sentinel stability 37/83. Mode-less initialization copies each value; both other modes
+successfully initialize RBiH control and produce deep-equal completed states. Command:
+`npx.cmd vitest run tests/bc07_operational_initial_master_consumption.test.ts` — 3/3,
+exit 0 (`logs/r8-runtime-integrity/bc07-consumption-final.log`). No production/data diff.
+
+Independent review: `logs/r8-runtime-integrity/bc07-independent-review.md` — GO.
+TypeScript and 13 focused documentation checks pass (`bc07-typecheck.log` and
+`bc07-docs-tests.log` in the same evidence directory).

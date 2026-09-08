@@ -4985,6 +4985,14 @@ record byte-identical, proven by a 3-turn RS campaign with an identical sha256 e
 **Do not run that script expecting a no-op.** Reconciling it with the committed file is real,
 unscoped work; it has not been done.
 
+**2026-09-08 BC07 mode qualification:** the stability-copy path above is bypassed by
+`hybrid_1992` and `ethnic_1991`; the normal calibration/desktop startup therefore does
+not establish 227 stability effects. A paired 37/83 sentinel test proves mode-less
+initialization consumes the supplied value while both other modes initialize identical
+states. Preserve the committed values; regeneration remains a separate reviewed change.
+See the [BC07 disposition](plans/2026-07-31-full-campaign-electron-validation-plan.md#bc07-stability-data-disposition--2026-09-08)
+and [dated ledger](PROJECT_LEDGER.md#2026-09-08--bc09-integrated-bc07-retained-data-disposition).
+
 **Still true, unchanged:** do NOT regenerate `operational_settlements.geojson` to 712. The
 geojson keeps 744 by design — rewriting polygon geometry regenerates areas and the contact
 graph and moves calibration. The 32 are *drawn but not simulated*, and that asymmetry is the

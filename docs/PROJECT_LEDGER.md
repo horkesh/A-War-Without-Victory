@@ -34168,3 +34168,32 @@ codes are indexed in `logs/r8-runtime-integrity/validation.json`. This packet is
 committed locally on its isolated branch. The worktree lacks the generated Husky
 launcher despite the configured hook path; the hook-equivalent `npx.cmd tsc --noEmit`
 is run explicitly and recorded in `logs/r8-runtime-integrity/precommit-equivalent.log`.
+
+## 2026-09-08 — BC09 integrated; BC07 retained-data disposition
+
+Owner authorized the recommended next steps. Fast-forwarded local main from
+`03d039df2` to reviewed `fa900ba89`; no source or input changed during integration,
+and no remote push occurred. BC09's local evidence is preserved, with broader
+campaign/packaged acceptance still open.
+
+BC07 verified policy is to retain the committed operational initial master, because
+hybrid/ethnic starts bypass its stability-copy branch while mode-less operational
+entry points may consume it. Regenerating disputed buckets would change those paths
+without fixing a demonstrated normal-campaign defect. The existing R8 plan now records
+the scope, source references, retention policy and focused positive/negative startup
+characterization. No new generator run, historical-data change or campaign is claimed.
+The real-initializer characterization passes 3/3 with paired 37/83 sentinels: actual
+control initialization is asserted, mode-less stability follows the sentinel, and
+hybrid/ethnic completed states remain identical. Receipt:
+`logs/r8-runtime-integrity/bc07-consumption-final.log` (exit 0). Independent Sol review returned GO.
+
+The earlier conversational recommendation skipped existing prerequisites: final
+campaign and packaged acceptance must follow scheduled behavior/cleanup and R9 build
+preparation. Keep those gates required; do not spend final-validation runs on an
+intermediate tree or silently activate BC10/cleanup/build work through this decision.
+
+Verification: 3/3 mode-characterization tests, 13/13 focused documentation tests and
+TypeScript pass. `logs/r8-runtime-integrity/bc07-independent-review.md` records GO;
+`bc07-input-check.log` confirms no production/data diff and unchanged master hash.
+Attribution: Sol evidence/test implementation and separate Sol review; Astra integration,
+policy synthesis and continuity updates. Local commit only; no remote push.

@@ -4,7 +4,9 @@
 remain controlling; the reviewed BC04 P1/P2 chronology repairs have not received campaign
 acceptance. Preserve separate before/after source attribution as specified in the
 [BC04 plan](../plans/2026-07-31-full-campaign-electron-validation-plan.md#bc04-bounded-implementation-plan--2026-09-07).
-The new cleanup, runtime-input/AI and build-preparation packets are planned, not implemented;
+BC09 shared-input repair is locally reviewed and integrated (`fa900ba89`); its final
+acceptance remains open. BC07 retention is verified and independently reviewed (GO). Cleanup,
+optional-AI work and build preparation remain planned;
 [master §§4.1–4.2](../plans/MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07)
 owns their sequence before final calibration and packaged acceptance. No baseline refresh
 or campaign result is implied by committing these repairs and plans.
