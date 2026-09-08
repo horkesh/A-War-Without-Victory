@@ -116,7 +116,7 @@ paused or RE is blocked, they are describing 2026-08-28, not today.
   — no reader in `src/sim/`, and the field is zeroed for every OSID at init. The earlier "168 rows"
   and "`contested_control` is the headline" figures were retracted by those same PRs; do not carry
   them forward.
-- **BC08 CLOSED by verification/disposition (2026-09-07):** current simulation suites pass; full suite remains exit 1 on one Windows Bash-resolution failure, unchanged focused file passes 8/8 with child-scoped Git Bash. No overall-green claim. [Evidence](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md).
+- **BC08 CLOSED by verification/disposition (2026-09-07):** historical red receipt retained. The 2026-09-08 combined-branch full gate passes with child-scoped Git Bash (13,717 passed, 31 skipped); cleanup plan records the repair. Final R8 acceptance stays open. [Evidence](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md).
 - **Canon landed this cycle:** `SENSITIVE_HISTORY_DESIGN_GATE.md` **§10, "Provenance and the Integrity of the Historical Record"** — ratified by unanimous Pyrrhic panel (`5f462e8aa`), twelve conditions discharged across two rounds. `FORAWWV.md` §XIII temporal scope is drafted-but-**HELD** behind two engineering items (provenance channel separation + the determinism-scan pair) and is **not** canon.
 - **Historical RE evidence:** corrected clean Node-22 pair at `177882fc2`; mixed-tree/Node-24 runs remain inadmissible. See the closed RE contract for provenance.
 - **RE is closed and gates nothing.** Deferred and retired findings do not silently re-enter the critical path.
@@ -236,7 +236,7 @@ BC09 reviewed GO; cleanup Tasks 1–7 complete (GO); remaining work planned. No 
 
 | Owner / packet | Slot and overlap |
 |---|---|
-| R8 [deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | Tasks 1–7 COMPLETE (GO); inherited test failure retained. Task 8 planned before dependency work. Final R8 acceptance remains open. |
+| R8 [deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | Tasks 1–7 COMPLETE (GO); combined-branch health repair verified. Task 8 unstarted before dependency work. Final R8 acceptance remains open. |
 | R8 [runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | BC09 integrated/reviewed GO; campaigns deferred. BC07 RETAIN disposition verified; BC10 planned. No regeneration. |
 | R9 [build preparation](2026-09-07-r9-build-validation-preparation-plan.md) | Limited early R9 subset: dependencies after R7/script handoff; CI before final costly checks; payload after BC09. All before final calibration/R8 acceptance, not after freeze. |
 

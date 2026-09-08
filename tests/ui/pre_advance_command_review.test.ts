@@ -170,7 +170,7 @@ describe('buildPreAdvanceCommandReviewView', () => {
     expect(view.headline).toBe('Recommended before advance');
     expect(view.canReviewPriorities).toBe(true);
     expect(view.metrics).toMatchObject({
-      priorityCounts: { required: 0, recommended: 5, monitor: 1, record: 3 },
+      priorityCounts: { required: 0, recommended: 6, monitor: 1, record: 3 },
       pendingReviews: 2,
       opportunities: 1,
       advanceReviewCount: 2,

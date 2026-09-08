@@ -149,9 +149,9 @@ export async function loadMunicipalityPopulation1991(
         const byMunDirect = popRaw.by_mun1990_id;
         const byNumericId = popRaw.by_municipality_id;
         const flat: MunicipalityPopulation1991 = {};
-        const addEntry = (munId: string, v: { total: number; breakdown?: { bosniak: number; serb: number; croat: number; other: number } }) => {
+        const addEntry = (munId: string, v: unknown) => {
             if (!isRecord(v) || munId.length === 0) throw new Error('population row must be an object with a non-empty municipality id');
-            const b = v?.breakdown;
+            const b = v.breakdown;
             if (b != null && !isRecord(b)) throw new Error(`population row ${munId}.breakdown must be an object`);
             flat[munId] = {
                 total: requireFiniteNonNegative(v.total, `${munId}.total`),
@@ -168,7 +168,7 @@ export async function loadMunicipalityPopulation1991(
                 if (!isRecord(v) || typeof v.mun1990_id !== 'string' || v.mun1990_id.length === 0) {
                     throw new Error(`numeric population row ${_numId} requires a non-empty mun1990_id`);
                 }
-                addEntry(v.mun1990_id, v as unknown as { total: number; breakdown?: { bosniak: number; serb: number; croat: number; other: number } });
+                addEntry(v.mun1990_id, v);
             }
         }
         if (Object.keys(flat).length === 0) throw new Error('expected non-empty by_mun1990_id or by_municipality_id rows');

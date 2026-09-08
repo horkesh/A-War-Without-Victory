@@ -105,7 +105,7 @@ describe('shared presidential priority contract', () => {
     const categories = derivePresidentialCommandCategoryCounts(decisionRoom);
     const deskReview = buildPreAdvanceCommandReviewView({ state });
     const advance = buildWarroomPriorityDocketView({ state });
-    const expected = { required: 2, recommended: 3, monitor: 9, record: 0 };
+    const expected = { required: 2, recommended: 4, monitor: 9, record: 0 };
     const categoryTotals = categories.reduce(
       (sum, category) => ({
         required: sum.required + category.priorityCounts.required,
@@ -116,6 +116,11 @@ describe('shared presidential priority contract', () => {
       { required: 0, recommended: 0, monitor: 0, record: 0 },
     );
 
+    expect(decisionRoom.cards).toContainEqual(expect.objectContaining({
+      id: 'command:strategic-posture-review',
+      category: 'command',
+      priorityBand: 'recommended',
+    }));
     expect(decisionRoom.metrics.priorityCounts).toEqual(expected);
     expect(categoryTotals).toEqual(expected);
     expect(deskReview.metrics.priorityCounts).toEqual(expected);

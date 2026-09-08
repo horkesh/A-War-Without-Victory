@@ -759,9 +759,11 @@ describe('apr1992_definitive family — timeline & officer-config binding agreem
 
     it('discovers at least the known family members', () => {
         expect(files.length).toBeGreaterThanOrEqual(3);
+        // 104w retired 2026-09-08 as the last drifted scored-intermediate fork; the family
+        // is now the development loop (40w), the default (52w) and the definitive line (188w).
         for (const expected of [
             'apr1992_definitive_40w.json',
-            'apr1992_definitive_104w.json',
+            'apr1992_definitive_52w.json',
             'apr1992_definitive_188w.json',
         ]) {
             expect(files).toContain(expected);

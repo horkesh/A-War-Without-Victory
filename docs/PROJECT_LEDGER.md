@@ -34397,3 +34397,193 @@ original failed attempts; it is not full map-readiness or campaign acceptance. A
 original saves are unchanged. Final docs and mandatory hook receipts are recorded in the
 [cleanup plan](plans/2026-09-07-bounded-deletion-cleanup-plan.md#task-7-owner-authorized-retirement-closeout--2026-09-08).
 Task 8 is unstarted; final R8 acceptance remains open. No push or merge.
+
+## 2026-09-08 - Calibration control timeline viewer (tools/, dev instrumentation)
+
+Added `tools/calibration_timeline.mjs`: a zero-dependency generator that emits one
+self-contained HTML viewer showing OSID control for EVERY week of a run, with painted
+scoring at the four historical checkpoints. Motivated by `matched_osids` being
+non-injective — two runs have scored an identical 637 over different maps four cells
+apart, so a score cannot attribute a delta and the cells themselves must be inspectable.
+
+No engine change and no new artifact were needed. `final_save.json` already carries the
+COMPLETE campaign flip log (`political.control_events`, verified 220 events spanning
+turns 1→188, with nothing pruning it anywhere in `src/state/` or `src/sim/turn_phases/`)
+plus `initial_political_controllers`; replaying the log over turn-0 control yields the
+controller map at any week. This is the same `stateAt()` replay `verify_checkpoints.cjs`
+scores from, and on the same run both tools report an identical 702/678/672/657 — the
+scoring agrees by construction, not coincidence.
+
+Three rules are built in because each prevents a known failure. (1) THE FOUR-SNAPSHOT
+RULE: painted truth exists at w39/w104/w156/w188 only, so control is shown for every week
+but mismatch is refused everywhere else with a stated reason — comparing a mid-period week
+against its era snapshot would report "mismatches" that are only unfought war. Verified:
+10/34/40/55 mismatches at the four checkpoints, zero at w73 and w150. (2) Always replay
+against the painted files on disk now, never the run's recorded `historical_fit` (the same
+run has read 673 then, 675 replayed; painted files are absent from `consumed_inputs.files`,
+so a repaint silently re-bases recorded scores). (3) Provenance is stamped — run dir, run
+commit/dirty/Node, painted sha256 + revision — and a dirty tree or non-22 Node is called
+out in red, because latest is not the same as valid. Merged sub-1km² cells render and score
+under their parent (744 drawn / 712 scored), stated in the UI since amber polygons can
+exceed the scored count.
+
+Output defaults to `<run_dir>/control_timeline.html`; `runs/` is gitignored, so no
+generated artifact enters the repo. Rendered and driven in a real browser: 744 cells, no
+console errors, viewport-fitting layout, flip-stepping / checkpoint-jump / mismatch-select
+all confirmed. Reuses the `build_calibration_map_html.mjs` projection so the two viewers
+cannot drift. Not wired into Electron or any product surface, and not a roadmap workstream
+— `tools/` instrumentation, same category as `engine_health_gate.cjs`.
+
+Two incidental findings recorded. The `control_events` schema comment is corrected in the
+follow-up entry below. `docs/plans/MASTER_ROADMAP.md` sits at 59,963 of the 60,000-character
+cap its own `docs_desktop_v09_truth.test.ts` enforces — 37 characters of headroom for the
+next editor, and NOT touched by this work.
+
+Plan: `docs/plans/2026-09-08-calibration-control-timeline-viewer-plan.md`. Branch
+`calibration-timeline-viewer`, not yet merged.
+
+
+## 2026-09-08 - control_events schema comment corrected (comment-only)
+
+The `control_events` doc comment in `src/state/game_state.ts` made four claims and THREE
+were false. It said the log was "Cleared at the start of each attack-resolution step",
+"Kept for last 3 turns", and "Used by the GUI battle-markers layer — does not affect
+simulation logic". Measured instead: every writer is an append (`attack_resolution_osid`,
+`sector_offensive`, `paramilitary_sweep`, `rear_pocket_consolidation`,
+`jna_phantom_brigades`, `events/apply_effects`, `early_war/control_flip`); nothing anywhere
+truncates or filters it; the single reset is `desktop_sim.ts`, which starts a NEW desktop
+campaign empty; and a persisted save carries 220 events spanning turns 1→188. Only the
+determinism sort claim (`war_phases.ts`, by turn then settlement_id) was true.
+
+The "does not affect simulation logic" line was the dangerous one, because it invites
+pruning the log for memory on the belief that it is cosmetic. It is not.
+`bot_strategy.priorityAreaTrend` scales each army priority's weight by the recent territory
+trend of that priority's own target area and can RE-ORDER THE ARGMAX within a corps;
+`army_hq_gathering.computeRecentTerritoryChange` feeds corps assessment; and `war_phases`
+derives the bilateral-flip and territorial-incident counts behind stalemate turns and
+ceasefire precondition C4, which gates Washington Agreement Path A. Separately, the log is
+the ONLY source of control at an intermediate week — replayed over
+`initial_political_controllers` it reconstructs the controller map at any turn, which is how
+`tools/verify_checkpoints.cjs` and `tools/calibration_timeline.mjs` produce the four
+checkpoint scores, so truncating it would destroy the calibration floors silently.
+
+The comment now states the append-only contract, names the writers, carries a DO NOT PRUNE
+warning with both reasons, and records what it previously got wrong. A stray duplicate
+section header at the top of the `GameState` interface, which described no field and
+implied the log lived there as GUI-only data, was removed. Likely origin of the error: the
+adjacent turn-AAR field legitimately is "Kept for last 3 turns" and "does not affect
+simulation logic"; that wording appears to have been copied onto a field where neither holds.
+
+COMMENT-ONLY. Verified mechanically: every changed line in the diff is a comment line
+(no non-comment line appears in `git diff -U0`), and `tsc --noEmit` exits 0 with empty
+output. No behavior, no artifact, no calibration surface is touched.
+
+
+## 2026-09-08 - calibration_timeline made scenario-aware (ONE SCENARIO, MANY SNAPSHOTS)
+
+The first version auto-discovered "the newest run directory holding a final_save.json",
+with no notion of which scenario is authoritative. Demonstrating it, that rule selected
+`apr1992_definitive_104w__3c229860dd8df7ae__w104_n276` and reported 677/661 as though they
+were calibration figures. They are not: `apr1992_definitive_104w` is the fork
+`scenario_runner.ts` itself documents as drifted — missing `firepower_deficit_penalty_enabled`
+and `must_hold_osids_by_corps`, scoring 639 where the 188w line scored 647 at the same week
+104, "a fossil answering for an engine two fixes old". 36 runs of the master scenario were
+present in `runs/` at the time; newest-wins simply landed on one of four stragglers.
+
+This is the exact failure the tool's own provenance rules were written to prevent — an
+instrument reporting a confident number from an inadmissible source — so the rule is now
+enforced rather than assumed. Auto-discovery PREFERS `apr1992_definitive_188w` and reports
+any fallback. A non-master run is flagged twice: in stdout ahead of the scores, and as a red
+banner on the page, stating that canon is one definitive 188-week scenario with intermediate
+checkpoints taken as snapshots of ITS runs, and that non-master scores are development-loop
+evidence only and NOT adoptable. Scenarios in `KNOWN_DRIFTED_SCENARIOS` additionally name
+their measured drift.
+
+It does NOT refuse non-master runs. 40w remains a legitimate development loop and is the
+structural-fingerprint gate's scenario; what is refused is letting those numbers look like
+calibration truth.
+
+Verified both paths: a master-scenario run produces zero warnings and correctly reports
+checkpoints beyond its horizon as "not reached"; the 104w fossil produces both warnings
+ahead of its scores plus the in-page red banner.
+
+
+## 2026-09-08 - apr1992_definitive_104w RETIRED (last drifted scored-intermediate fork)
+
+Deleted `data/scenarios/apr1992_definitive_104w.json`. Canon (owner, 2026-08-24) is ONE
+definitive 188-week scenario with intermediate checkpoints taken as snapshots of ITS runs;
+the shorter `apr1992_definitive_{40,52,56,104,156}w` forks existed only because a scored
+intermediate once required a scenario whose duration selected that reference. 56w and 156w
+were already gone. 104w was both the last scored-intermediate fork and the only one the repo
+had MEASURED as drifted — missing `firepower_deficit_penalty_enabled` and
+`must_hold_osids_by_corps`, scoring 639 where the 188w line scored 647 at the same week 104,
+recorded in `scenario_runner.ts` as "a fossil answering for an engine two fixes old".
+
+It had already been removed from the scenario registry and survived only as a bare file that
+three tests read — which is exactly long enough for a stale run of it to be picked up and
+scored as though it were the definitive line. That is not hypothetical: it happened the same
+day, when `tools/calibration_timeline.mjs` auto-discovered a 104w run out of `runs/` and
+reported 677/661 as calibration figures.
+
+BLAST RADIUS, established before deleting. No npm script referenced it. Exactly three tests
+resolved the file and were updated: `scenario_guardrails.test.ts` (dropped from
+`ACTIVE_APRIL_DEFINITIVE_SCENARIOS`), `scenario_harness_contracts.test.ts` (family
+expectation now 40w/52w/188w), and `presidential_cadence_cli_provenance.test.ts` (repointed
+to 188w — it asserts the CLI refuses a save whose turn does not match `--end-turn`, a check
+that runs before scenario content matters). Everything else referencing the id is a recorded
+`scenarioId`/`runId` string in frozen evidence fixtures, a drift-rationale comment, or a
+historical diagnostic record; all were deliberately left intact, because they describe runs
+that really happened.
+
+NOT retired, and why: 40w is a live development loop AND the structural-fingerprint gate's
+scenario; 52w is the default and is pinned by `scenario_latest_run_final_save_artifact_ownership`
+via package.json. Retiring either would remove a working gate, not a fossil.
+
+The `scenario_runner.ts` ONE SCENARIO, MANY SNAPSHOTS note now records the retirement and
+says not to reintroduce a scored-intermediate fork. `KNOWN_DRIFTED_SCENARIOS` in
+`calibration_timeline.mjs` deliberately still names 104w, because existing run directories
+under the gitignored `runs/` are untouched and must keep warning. Focused suite 67/67 green.
+
+FULL-SUITE STATUS AT THIS COMMIT, stated plainly: the suite is RED, and it was red before
+this change. Six files fail on the branch base (cdc8659b1, inherited from local main's
+in-flight work): `strict_null_inventory_progress` (as_unknown_casts 5 -> 6),
+`ui/advance_turn_button_gated_feedback`, `ui/presidential_priority_contract` (recommended
+3 -> 4), `ui/presidential_decision_room_panel_i18n`, `ui/warroom_priority_docket` and
+`ui/pre_advance_command_review`. Causality was measured, not assumed: the working tree was
+stashed, the same six files were run at bare HEAD and all six failed identically, then the
+work was restored and the run repeated — the failure SET is byte-identical either way, so
+this change adds zero failures. An earlier green full run this session was on the
+`r7-arbih-honorific-names` worktree, whose base is an OLDER main; that green does not
+describe this base and was not treated as if it did. These six belong to whoever owns the
+in-flight main work; they are recorded here so a later reader does not attribute them to the
+104w retirement.
+
+## 2026-09-08 — Combined-branch health repair activated
+
+Owner accepted pausing cleanup Task 8, diagnosing the six failing suites, and integrating
+Claude's main merge 7634c193a with cleanup Tasks 6–7 through e35bea63d. The fresh focused
+reproduction is 9 failed / 148 passed across six files; earlier Task 7 success describes
+its bounded checks, not repository-wide health. The only textual merge conflict was
+this append-only ledger; both histories are preserved. The fixed validation and team
+scope are recorded in the existing cleanup plan's combined-branch health section.
+No test floor, gameplay behavior, canon or baseline change is authorized merely to
+obtain green. Final full-gate status will supersede this active record after validation.
+
+## 2026-09-08 — Combined-branch health repaired and full gate green
+
+Combined cleanup Tasks 6–7 (e35bea63d) and Claude's main merge (7634c193a); preserved
+both ledger histories. Removed the avoidable BC09 double cast without raising the
+inventory floor or changing runtime validation. Updated five stale UI test contracts for
+BC06's intentional strategic-posture recommended card, with an explicit identity assertion.
+No new gameplay, UI production, canon, data, baseline or dependency changes in the repair.
+Sol implementation and separate Sol review GO; Astra owned integration and validation.
+
+Focused 186/186 pass. Full balanced suite: 13,717 passed, 31 skipped; 1,348 file executions
+passed, four skipped; exit 0. The serial tail passed 51 files/806 tests. Windows Git Bash
+was selected only in the test process, preserving the BC08 environment disposition;
+its release guard passed 8/8. Tactical-map build passed. Full run took approximately
+31 minutes; skips and the intentional child-failure control are explicitly accounted for.
+Historical red receipts remain history, not current status. This is not final R8 packaged
+acceptance or remote CI evidence. Final docs and mandatory commit-hook receipts are in the
+[existing cleanup plan](plans/2026-09-07-bounded-deletion-cleanup-plan.md#combined-branch-health-repair-closeout--2026-09-08).
+Task 8 is unstarted. Local integration is owner-authorized; no remote push.

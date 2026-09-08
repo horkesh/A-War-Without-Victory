@@ -9,10 +9,10 @@
 **Tech stack:** TypeScript, React, Vitest, Vite/Electron, Markdown.
 
 **Date:** 2026-09-07
-**Status:** Tasks 1–7 COMPLETE, reviewed GO; inherited test failures remain recorded. Task 7 retirement authorized and verified 2026-09-08; Task 8 PLANNED. Dated receipts below retain earlier states.
+**Status:** Tasks 1–7 COMPLETE, reviewed GO; combined-branch health repair verified 2026-09-08. Earlier failures remain historical receipts. Task 8 PLANNED. Dated receipts below retain earlier states.
 **Owner lane / command-board row:** R8, subordinate cleanup packet; no new workstream or BC identifier.
 **Phase covered:** R8 after R7; finish before final calibration/final packaged acceptance. Task 2 follows BC04/BC05 event settlement; Task 3 follows R7 and BC06 UI settlement. Other tasks may run on disjoint files while behavior work settles. Diagnostic calibration stays open.
-**Current next action:** Task 8: inspect active worktree references before retiring RE-specific hook tools.
+**Current next action:** Task 8: inspect active worktree references before retiring RE-specific hook tools; unstarted.
 **Collision rule:** Do not overlap BC event edits, R7 `App.tsx` work, or another agent's roadmap/ledger writes. Re-read current files before each edit; preserve unrelated changes. No implementation is dispatched by this planning turn.
 
 ## 1. Purpose and non-goals
@@ -591,3 +591,66 @@ Final documentation checks and mandatory commit-hook typecheck receipts are
 logs/bounded-deletion-cleanup/task7-final-docs-tests.log and task7-commit.log;
 review and disposition are task7-review.log and task7-disposition.log. Task 8 is unstarted;
 final R8 acceptance remains open. No campaign, dependency change, push or merge.
+
+## Combined-branch health repair — owner accepted 2026-09-08
+
+Task 8 is paused. The owner accepted diagnosis and repair of the six reproduced failing
+suites, followed by integration and validation of Claude's merge with Tasks 6–7.
+Combined inputs: cleanup e35bea63d and main 7634c193a (common base f4305c898).
+The only textual merge conflict is the append-only ledger; retain both histories.
+Pre-repair reproduction: 9 failures across six files, 148 passes, exit 1, in
+logs/bounded-deletion-cleanup/post-task7-health-check.log and post-task7-health-ui-check.log.
+Earlier Task 7 focused success is not an overall-green repository claim.
+
+Fixed validation plan: establish the current intended contracts before correcting code
+or stale fixtures; do not raise inventory floors or weaken assertions to obtain green.
+One Sol implementer owns diagnosis/repair, one separate Sol reviewer checks correctness,
+contract preservation and integration. Root owns merge resolution and validation. Run
+changed/failing suites and direct contract neighbors first, then one full `npm run test:all`
+(the standard balanced four-shard gate), `npm run desktop:map:build`, and mandatory
+commit-hook typecheck. Use process-local Git Bash PATH precedence for the full suite,
+per the already measured BC08 Windows shell-resolution disposition; no global environment
+or test weakening. Expected cost: focused checks in minutes, full suite roughly 7–15+
+minutes from stored inventory, map build/typecheck minutes. Logs stay under
+logs/bounded-deletion-cleanup/health-*.log. No package, separate campaign, baseline refresh,
+dependency change, or remote push. Stop on new unexplained failures and diagnose before
+expanding validation. Pass requires all six failures resolved, full gate/build/typecheck
+passing, independent GO, and both branches preserved in the integrated ancestry.
+
+## Combined-branch health repair closeout — 2026-09-08
+
+**GO: full balanced gate exit 0.** Root combined cleanup e35bea63d and main 7634c193a,
+retaining both ledger histories. Independent Sol review verified all 53 branch-exclusive
+paths against their source blobs and the seven appended ledger entries. No other merge
+conflict occurred. Sol implemented the bounded repair; Astra owned integration and gates.
+
+The six-file red result had two causes: BC09's avoidable double assertion in
+src/scenario/turn_inputs.ts, and five stale UI test contracts after BC06 intentionally
+added the always-present strategic-posture card. The loader now takes unknown and narrows
+it before field access, retaining all runtime validation. The unchanged inventory floor
+of five passes. UI tests reflect the intended recommended-card increment and explicitly
+pin command:strategic-posture-review identity/category/band. No UI production, gameplay,
+canon, data, baseline, dependency or input-validation semantics changed in this repair.
+
+Validation on the frozen combined source tree:
+- Focused six suites plus shared input contract: 186/186 passed, exit 0.
+- npm run test:all: 1,348 file executions passed, four skipped; 13,717 tests passed,
+  31 skipped; exit 0. These are 1,352 file executions across 1,349 unique files because
+  one integration property file is partitioned four ways. All four shards and the
+  51-file/806-test serial tail passed. The deliberate failing child fixture is a passing
+  runner-propagation control and is excluded from the gate totals.
+- Node v22.23.2; process-local PATH selects C:/Program Files/Git/bin/bash.exe per BC08.
+  The unchanged Windows release guard passed 8/8. No global PATH change; unqualified
+  Windows-system Bash is not certified by this run.
+- Full run: approximately 31 minutes (16:19:05–16:50:08 local), consistent with the earlier
+  BC08 receipt's 31m36s. The initial 7–15+ minute stored-inventory estimate was optimistic.
+- Tactical-map build passed, exit 0 (23.36s); independent review GO, no remaining findings.
+
+The four wholly skipped files remain sector_front_role_truth_real_save,
+scenario_golden_baselines_h2_3, sector_drina_frontline_integrity and
+supply_sensitive_history_smoke. Skips provide no execution evidence. This gate is not
+final calibration, packaged-campaign acceptance, or a remote CI claim. Task 8 is unstarted.
+Final documentation checks and required commit-hook typecheck are recorded separately.
+Evidence: logs/bounded-deletion-cleanup/health-{provenance,repair-targeted,map-build,
+full-suite,review,final-docs,commit}.log. Prior red receipts remain unchanged history.
+The owner-authorized local integration preserves both parents; no remote push.

@@ -261,7 +261,7 @@ describe('ADVANCE_TURN gated feedback', () => {
     fireEvent.click(prioritiesButton);
 
     expect(screen.getByText('Review before advance')).toBeTruthy();
-    expect(screen.getByText('2 advance items / 0 required / 5 recommended / 0 monitor / 0 record / 2 pending')).toBeTruthy();
+    expect(screen.getByText('2 advance items / 0 required / 6 recommended / 0 monitor / 0 record / 2 pending')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Open Decision Room' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: "Open President's Desk" })).toBeNull();
     expect(screen.getByRole('button', { name: 'Review staff docket: 2 before-advance, 2 pending' }).getAttribute('aria-expanded')).toBe('true');
