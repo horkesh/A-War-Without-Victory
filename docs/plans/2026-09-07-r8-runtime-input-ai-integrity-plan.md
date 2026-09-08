@@ -184,8 +184,9 @@ attribute effects to the 227 potential stability rows. Applicable long-run compa
 and final packaged three-faction acceptance remain **deferred, not waived**; BC09 is
 not CLOSED. BC06 packaged acceptance remains open. Cleanup Tasks 1–3 are implemented
 or bounded-pending review in the cleanup plan; Tasks 4–8 and BC10 remain PLANNED.
-Task 3 packaged interaction remains unavailable because its release build hit the
-existing stale-snapshot gate; no artifact was regenerated. Preserve pre-P1 `c95e25241`, P1 `f117fe475`, P2 `558f253a2`, the
+Task 3's release retry passed without snapshot regeneration, but packaged interaction
+remains unavailable because packaging was interrupted and its output could not launch.
+Preserve pre-P1 `c95e25241`, P1 `f117fe475`, P2 `558f253a2`, the
 188-week horizon, calibration floors and existing protected historical boundaries.
 
 ## 4. Phase 2 — One optional-AI command and replay boundary (BC10)
