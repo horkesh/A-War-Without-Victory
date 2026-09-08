@@ -58,9 +58,7 @@ If you are changing war behavior, start at `src/sim/turn_pipeline.ts`. If you ar
 ### Bounded variant (not co-equal with canonical pipelines)
 - `src/sim/run_early_war_browser.ts` — the existing bounded `runPhaseITurn()` fallback in Warroom. Desktop advance uses its IPC bridge and the canonical simulation owner. The unused increment-only browser combat runner was removed in cleanup Task 1 (2026-09-08); no fallback behavior changed.
 
-### Demoted / smoke-only (do not treat as canonical)
-- `src/index.ts` — minimal deterministic smoke harness. Not the game entrypoint.
-- `src/turn/pipeline.ts` — legacy prototype `executeTurn()`. Only invoked by `src/index.ts`. Live war behavior belongs in `src/sim/turn_pipeline.ts`.
+### Demoted / legacy-only (do not treat as canonical)
 - `src/scenario/aor_init.ts` — deprecated (AoR removed in n344). Do not use for war-phase state; war phase uses `location_osid` only.
 
 ## Single Source of Truth for Entry Points

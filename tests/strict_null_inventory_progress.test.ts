@@ -370,9 +370,8 @@ const PHASE_F4_UNKNOWN_ATTRIBUTION_AS_ANY_TAIL_FILES = [
     'src/cli/phaseF4_unknown_control_attribution_audit.ts',
 ];
 
-const SMOKE_ENTRYPOINT_AS_ANY_TAIL_FILES = [
+const SIM_RUN_CLI_AS_ANY_TAIL_FILES = [
     'src/cli/sim_run.ts',
-    'src/index.ts',
 ];
 
 const MAP_CONTAINER_AS_ANY_TAIL_FILES = [
@@ -1383,9 +1382,9 @@ describe('strict null inventory progress', () => {
         expect(anyCount).toBe(0);
     });
 
-    it('cleans the smoke entrypoint and sim-run CLI as-any tail slice', () => {
+    it('cleans the sim-run CLI as-any tail slice', () => {
         const current = CURRENT_INVENTORY;
-        const anyCount = phaseCount(current, 'as_any_casts', SMOKE_ENTRYPOINT_AS_ANY_TAIL_FILES);
+        const anyCount = phaseCount(current, 'as_any_casts', SIM_RUN_CLI_AS_ANY_TAIL_FILES);
         expect(anyCount).toBe(0);
     });
 

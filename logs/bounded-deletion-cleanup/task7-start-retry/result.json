@@ -1,0 +1,78 @@
+{
+  "checks": [
+    "npm start reaches desktop Warroom host",
+    "Actual UI loads isolated copied save",
+    "Actual Electron process loads canonical desktop_sim.cjs exporting advanceTurn",
+    "All repository save bytes unchanged"
+  ],
+  "diagnostics": [],
+  "hostUrl": "awwv://warroom/index.html",
+  "frameUrl": "http://127.0.0.1:51691/index.html?embedded=1",
+  "main": {
+    "argv": [
+      "F:\\A-War-Without-Victory\\node_modules\\electron\\dist\\electron.exe",
+      ".",
+      "--user-data-dir=F:/A-War-Without-Victory/dist-packaged/task7-validation-profile",
+      "--remote-debugging-port=9337",
+      "--inspect=9338"
+    ],
+    "appPath": "F:\\A-War-Without-Victory",
+    "userData": "F:\\A-War-Without-Victory\\dist-packaged\\task7-validation-profile",
+    "simModules": [
+      {
+        "filename": "F:\\A-War-Without-Victory\\dist\\desktop\\desktop_sim.cjs",
+        "loaded": true,
+        "exports": [
+          "NEW_GAME_SCENARIO_RELATIVE",
+          "PLAYER_DECISION_FAMILIES",
+          "advanceTurn",
+          "applyPlayerRecruitment",
+          "approveReserveRequest",
+          "assignBrigadeToSector",
+          "buildReplayFrameSummary",
+          "buildReplaySaveManifest",
+          "countBlockingPlayerDecisions",
+          "createAiClient",
+          "declineReserveRequest",
+          "deserializeState",
+          "dismissEventNotification",
+          "evaluateBotResponse",
+          "getAdvisorRecommendation",
+          "getOpportunityOwnershipMetadata",
+          "getPlayerRecruitmentCatalog",
+          "getRecruitmentCatalog",
+          "getRuntimeFeatureFlags",
+          "holdReserveAtMainStaff",
+          "listBlockingPlayerDecisions",
+          "loadScenarioFromPath",
+          "loadStateFromPath",
+          "overrideInterpretation",
+          "queryBattleEvents",
+          "queryCombatEstimateForBrigade",
+          "queryCorpsSectors",
+          "queryDirectiveObjection",
+          "queryMovementPathForBrigade",
+          "queryMovementRangeForBrigade",
+          "queryOperationPrediction",
+          "querySupplyPaths",
+          "recallEliteBrigade",
+          "redirectReserveLoan",
+          "resolveDaytonNegotiation",
+          "resolveEventDecision",
+          "resolvePeacePlan",
+          "resolvePlayerParamilitaryDecisions",
+          "serializeRuntimeState",
+          "serializeState",
+          "startNewCampaign",
+          "submitPlayerCounterOffer",
+          "summarizePlayerDecisions",
+          "validateBrigadeMovementOrder",
+          "validateBrigadeRepositionOrder"
+        ]
+      }
+    ]
+  },
+  "simSha256": "37dec2274b535684b2fda0ca951a82f067f55df8e8347df4c036b0878313ea72",
+  "status": "PASS",
+  "closeRequested": true
+}

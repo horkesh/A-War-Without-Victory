@@ -26,7 +26,7 @@ For each invariant, we document:
 **Rule:** "Deterministic turn updates: given same input state + RNG seed, results must match exactly."
 
 **Enforcement:**
-- ✅ **Enforced:** RNG uses seed-based deterministic algorithm (`src/turn/pipeline.ts:43-63`)
+- ✅ **Enforced:** Canonical war-pipeline repeatability is covered by `tests/turn_pipeline.test.ts` (same state and seed produce identical state and report)
 - ✅ **Enforced:** Tests verify determinism (`tests/phase10_ops_fatigue.test.ts:774-796`, `tests/sim_formations_report.test.ts:7-52`)
 - ⚠️ **Partial:** Timestamp leakage in artifacts (see DETERMINISM_AUDIT.md)
 - ❌ **Not Enforced:** No automated check that state serialization excludes timestamps

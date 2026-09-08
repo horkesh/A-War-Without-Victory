@@ -9,10 +9,10 @@
 **Tech stack:** TypeScript, React, Vitest, Vite/Electron, Markdown.
 
 **Date:** 2026-09-07
-**Status:** Tasks 1–6 COMPLETE, reviewed GO; inherited test failures remain recorded. Tasks 7–8 PLANNED. Dated receipts below retain earlier states.
+**Status:** Tasks 1–7 COMPLETE, reviewed GO; inherited test failures remain recorded. Task 7 retirement authorized and verified 2026-09-08; Task 8 PLANNED. Dated receipts below retain earlier states.
 **Owner lane / command-board row:** R8, subordinate cleanup packet; no new workstream or BC identifier.
 **Phase covered:** R8 after R7; finish before final calibration/final packaged acceptance. Task 2 follows BC04/BC05 event settlement; Task 3 follows R7 and BC06 UI settlement. Other tasks may run on disjoint files while behavior work settles. Diagnostic calibration stays open.
-**Current next action:** Task 7 is the next bounded slice; it has not started.
+**Current next action:** Task 8: inspect active worktree references before retiring RE-specific hook tools.
 **Collision rule:** Do not overlap BC event edits, R7 `App.tsx` work, or another agent's roadmap/ledger writes. Re-read current files before each edit; preserve unrelated changes. No implementation is dispatched by this planning turn.
 
 ## 1. Purpose and non-goals
@@ -447,3 +447,147 @@ Task 3 package remains intact at `dist-packaged/task3-preserved-package`.
 Independent Sol/medium review GO, no actionable findings (`task6-review.log`).
 Mandatory commit-hook result is retained in `task6-commit.log`. Tasks 7–8 remain unstarted;
 final R8 acceptance is open, and the inherited inventory-floor failure is not waived.
+
+### Task 7 validation plan — 2026-09-08
+
+Owner requested Task 7. Branch `codex/cleanup-empty-smoke-engine` starts from reviewed
+Task 6 `1638c7a28`; local main remains `f4305c898`. Task 6 generated evidence remains
+untouched. One Sol/medium implementer owns consumer proof, start-script/deletions,
+current entrypoint docs and canonical turn tests. Separate Sol/medium systems review;
+root owns launch/build/typecheck and status/ledger.
+
+Question: can the empty smoke engine retire while npm start reaches the existing
+desktop and canonical simulation bundle? Confirm all current callers before deleting
+src/index.ts, src/turn/pipeline.ts, src/turn/steps.ts and the legacy-only test. Preserve
+src/sim/turn_pipeline.ts, src/state/turn_pipeline.ts, canonical/peace tests and all
+simulation semantics. Set start only to `npm run desktop`; no replacement engine.
+
+Run `npx.cmd vitest run tests/turn_pipeline.test.ts`, `npm.cmd run typecheck`, focused
+current-document/entrypoint contract checks when affected, and `npm.cmd start` through
+its real `desktop:release:check` -> Electron command chain. The nested canonical
+release build supplies the release-check receipt without a duplicate build. Add
+launch-only isolated-profile and loopback debugger arguments using npm argument
+forwarding; inspect the real desktop and main-process loaded-module cache after a
+copied save loads, then close the app. Preserve all real save hashes. No turn advance
+or new campaign is needed. Record outputs/exits in `logs/bounded-deletion-cleanup/`.
+
+Expected cost: several minutes. Pass requires supported caller disposition, unchanged
+canonical engine/peace surfaces, passing affected tests/typecheck/build and actual
+npm-start desktop/bundle proof. Stop on a live dependency or behavior regression;
+do not repair unrelated inherited floors or expand into Task 8/dependencies/config,
+packaging, campaign validation, main integration or remote push. Mandatory hook stays.
+
+Task 7 launch correction: first npm-start process exited 0 and reached the real
+desktop, but the observer failed because development getSavesDir() uses repository
+saves rather than packaged userData/saves. Preserved first observer receipt and log.
+The load-save-record handler only loads/project snapshots; it does not write a save.
+A uniquely named disposable copy is temporarily placed in repository saves for one
+corrected actual npm-start launch. No original save is changed; remove only that copy
+after proof and recheck all original hashes. Electron profile remains isolated.
+This corrects the harness fixture location, not production lookup or assertions.
+
+Task 7 independent review found a live consumer omitted from the initial scan:
+`package.json` exposes `dev:runner` -> `tools/dev_runner/server.ts`, which imports
+`src/turn/pipeline.js` at line 19 and calls executeTurn at line 396. The reviewer
+reproduced ERR_MODULE_NOT_FOUND from `npm.cmd run dev:runner` after deletion.
+Typecheck did not catch it because that tool is outside its checked project.
+The initial sole-caller claim is incorrect and superseded by this finding. Restore
+the pipeline, empty-step registry and legacy test as compatibility-only while owner
+disposition is pending; do not replace dev-runner behavior with canonical simulation.
+Root requested the concrete scope decision to retire the dev runner's command,
+server, two exclusive viewer files and current documentation, or retain its pipeline.
+The npm-start desktop/bundle proof remains valid; full Task 7 deletion is not accepted.
+
+### Task 7 current evidence and owner handoff — 2026-09-08
+
+The supported `start` change is the only package change. Canonical turn tests pass
+4/4 (`task7-turn-tests.log`); typecheck passes (`task7-typecheck.log`). The broader
+caller-contract run is 113/114 with the unchanged inherited as-unknown floor failure;
+the touched sim-run inventory assertion passes independently. This is not green-suite
+credit and does not waive that inherited residual.
+
+Actual launch command:
+`npm.cmd start -- -- --user-data-dir=F:/A-War-Without-Victory/dist-packaged/task7-validation-profile --remote-debugging-port=9337 --inspect=9338`.
+Both real npm processes executed the canonical release build and exited 0. Initial
+observer failed only on the development-mode fixture location; preserved in
+`task7-start-proof.log` and `task7-start-evidence/result.json`. Corrected observer
+`node logs/bounded-deletion-cleanup/task7-start-proof.cjs retry` passes exit 0:
+`task7-start-proof-retry.log`, `task7-start-retry/result.json`. It observed the actual
+Warroom host, copied-save desktop shell and one loaded main-process canonical
+`dist/desktop/desktop_sim.cjs` module exporting advanceTurn. Bundle SHA256:
+`37dec2274b535684b2fda0ca951a82f067f55df8e8347df4c036b0878313ea72`.
+This proves desktop/bundle entry, not a completed map-render or campaign acceptance.
+The screenshot was captured while the operational map was preparing. No turn advanced.
+All six original save hashes remain unchanged; the temporary copied save was hash-
+checked and removed, and Electron closed normally.
+
+Independent review `task7-review.log` is **NO-GO for full engine deletion** because
+of the dev-runner caller. Restored pipeline/steps/legacy test/invariant list exactly
+from the parent; restoration checks pass 27/27 (`task7-restoration-tests.log`).
+Current docs retain that compatibility dependency and remove only the retired root
+smoke entry. Owner choice remains pending: retire dev:runner plus its three exclusive
+files/current docs, or KEEP its pipeline. No Task 7 commit, integration, Task 8,
+package build, remote push or unrelated fix has occurred.
+
+### Task 7 owner-authorized dev-runner retirement — 2026-09-08
+
+Owner response: **“Retire it.”** This authorizes removing `dev:runner`,
+`tools/dev_runner/server.ts`, its `public/political_control.html` and
+`public/political_control.js`, and their current maintenance/entrypoint documentation.
+The only remaining runtime consumer is therefore retired with the empty pipeline;
+Task 7 may again delete `src/turn/pipeline.ts`, `src/turn/steps.ts` and the exclusive
+legacy test after a full executable-surface scan including tools and workflows.
+Earlier NO-GO/restoration receipts above remain historical, not unresolved authority.
+
+Fixed correction verification: one Sol implementation continuation and the same
+independent Sol reviewer perform targeted correction review. Recheck all retired
+command/path consumers across src/tools/scripts/tests/workflows/current docs; retain
+historical records. Rerun canonical turn tests, the affected invariant suite and
+only the touched strict-null assertion; run current documentation checks and diff
+hygiene. Mandatory commit hook supplies final typecheck. Expected cost: minutes.
+The existing successful real npm-start/build/module-cache receipt remains applicable:
+start/desktop commands and canonical product build inputs are unchanged by retirement
+of the dev-runner-only files. No repeat package or launch campaign is needed absent
+new evidence of a product dependency; the final review must verify that boundary.
+Stop on any further live consumer or behavior regression. Task 8 remains unstarted.
+
+Current-document correction verification also includes the existing
+`tests/replay_surface_truth.test.ts` and `tests/map_derived_artifact_ownership.test.ts`
+suites, which directly read the changed entrypoint/map-build documents. These are
+small read-only checks, not builds or scenario runs. The initializer's dev-runner
+mention is corrected as a source comment only; executable initialization and
+canonical simulation code remain unchanged.
+
+The protocol-consumer check identified two additional files belonging to the retired
+dev-runner tool: `tools/dev_viewer/index.html` and `viewer.js`. The latter hardcodes
+`http://localhost:3000` and the dev runner's state/step/reset/settlement and order
+endpoints. The orchestrator includes these exclusive clients in the owner's tool-
+retirement instruction so they are not left advertised with a deleted backend;
+this is not a migration or deletion of the product's Warroom/map viewers. Verify
+exclusivity and remove their current documentation references. The complete legacy
+dev-tool unit is therefore five files, not the initially inventoried three. Preserve
+this correction and scan endpoint/port consumers as well as module/path references.
+
+## Task 7 owner-authorized retirement closeout — 2026-09-08
+
+The owner answered **Retire it**, superseding the earlier dependency-decision NO-GO.
+Removed the dev:runner command, its server/public files and the two exclusive HTTP
+clients in tools/dev_viewer, then the empty src/turn pipeline/steps and exclusive test.
+The obsolete root entry is gone; npm start now invokes npm run desktop. Supported
+product map viewers, canonical simulation, peace tests, dependencies and data remain.
+The source initializer change is a comment only. Both missed-consumer findings and
+original failed attempts remain in the dated evidence; current references are corrected.
+
+Final focused canonical/invariant checks pass 28/28; the touched strict-null assertion
+passes 1/1 (89 unrelated tests skipped), and routing/artifact documentation checks pass
+5/5. The inherited global cast floor remains red (expected 5, actual 6), unchanged and
+not waived. Earlier actual npm-start release build, desktop saved-game load and loaded
+canonical desktop_sim.cjs proof remain valid: the extension removes exclusive dev tools
+and changes no desktop entry/build behavior. This is not full map-readiness or campaign
+acceptance. Six original saves remain byte-identical; temporary fixture was removed.
+
+One independent correction review covers final consumers, protocol clients and scope.
+Final documentation checks and mandatory commit-hook typecheck receipts are
+logs/bounded-deletion-cleanup/task7-final-docs-tests.log and task7-commit.log;
+review and disposition are task7-review.log and task7-disposition.log. Task 8 is unstarted;
+final R8 acceptance remains open. No campaign, dependency change, push or merge.

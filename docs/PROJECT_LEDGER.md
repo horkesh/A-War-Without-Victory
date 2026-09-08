@@ -34367,3 +34367,33 @@ Exact commands, hashes, limits, failed attempts and retained evidence are in the
 [Task 6 receipt](plans/2026-09-07-bounded-deletion-cleanup-plan.md#task-6-deletion-and-packaged-route-evidence--2026-09-08).
 Hook evidence: `logs/bounded-deletion-cleanup/task6-commit.log`. Tasks 7–8 are unstarted;
 final R8 acceptance remains open. No campaign, remote push or Task 6 merge into main.
+
+## 2026-09-08 — Cleanup Task 7: start route verified, dependency decision pending
+
+On `codex/cleanup-empty-smoke-engine` from Task 6 `1638c7a28`, redirected start to
+the existing desktop command and removed only the obsolete root smoke entry. Actual
+npm-start release build, desktop/copied-save load, canonical loaded sim-bundle proof,
+typecheck and canonical turn tests pass. All six original saves remain unchanged;
+temporary fixture removed and Electron closed. Inherited inventory floor remains red.
+Independent Sol review found a missed live `dev:runner` consumer of the proposed
+pipeline deletion. Restored pipeline/steps/legacy test/invariant list exactly to parent;
+restoration checks pass 27/27. Corrected the original caller claim and current docs.
+Full Task 7 deletion is NO-GO pending owner choice to retire dev:runner and its three
+files/current docs or retain compatibility. No Task 7 commit or integration; Task 8
+is untouched. Details and preserved failed/successful receipts: [cleanup plan](plans/2026-09-07-bounded-deletion-cleanup-plan.md#task-7-current-evidence-and-owner-handoff--2026-09-08).
+
+## 2026-09-08 — Cleanup Task 7: owner-authorized dev-tool retirement
+
+The owner answered **Retire it**, superseding the preceding pending-decision record.
+Removed dev:runner, its three server/public files, two exclusive dev_viewer HTTP clients,
+the empty smoke pipeline/steps and exclusive test. npm start launches the desktop product.
+Current routing/tool documentation and deletion-sensitive test inventories were updated;
+canonical simulation, supported viewers, peace behavior, dependencies and data are preserved.
+Sol/medium implementation and independent correction review; Astra owned runtime proof
+and closeout. Canonical/invariant checks pass 28/28, touched inventory assertion 1/1,
+and routing/artifact documentation checks 5/5. The inherited global cast floor remains
+red and unwaived. Actual npm-start build/load/canonical-bundle proof is retained, with
+original failed attempts; it is not full map-readiness or campaign acceptance. All six
+original saves are unchanged. Final docs and mandatory hook receipts are recorded in the
+[cleanup plan](plans/2026-09-07-bounded-deletion-cleanup-plan.md#task-7-owner-authorized-retirement-closeout--2026-09-08).
+Task 8 is unstarted; final R8 acceptance remains open. No push or merge.
