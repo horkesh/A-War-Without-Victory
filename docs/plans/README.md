@@ -31,6 +31,8 @@ The former owner-decision and post-D2 residual lists are historical inputs, not 
 
 **R7 name correction integrated:** [ARBiH honorific-name packet](2026-09-07-arbih-brigade-honorific-name-correction-plan.md); IDs/mechanical fields preserved, saved/displayed text changed. This does not close R7.
 
+**Development instrumentation, not a roadmap lane:** [calibration control timeline viewer](2026-09-08-calibration-control-timeline-viewer-plan.md) — `tools/calibration_timeline.mjs`, same category as `engine_health_gate.cjs` and `verify_checkpoints.cjs`. It claims no roadmap authority and gates nothing.
+
 **Subordinate repository-audit packets:** [Master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07) owns their dependencies and scheduling; all are planned, with implementation not started by this registration.
 
 | Packet | Slot / overlap |
