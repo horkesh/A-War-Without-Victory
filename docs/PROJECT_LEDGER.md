@@ -34352,3 +34352,54 @@ calibration truth.
 Verified both paths: a master-scenario run produces zero warnings and correctly reports
 checkpoints beyond its horizon as "not reached"; the 104w fossil produces both warnings
 ahead of its scores plus the in-page red banner.
+
+
+## 2026-09-08 - apr1992_definitive_104w RETIRED (last drifted scored-intermediate fork)
+
+Deleted `data/scenarios/apr1992_definitive_104w.json`. Canon (owner, 2026-08-24) is ONE
+definitive 188-week scenario with intermediate checkpoints taken as snapshots of ITS runs;
+the shorter `apr1992_definitive_{40,52,56,104,156}w` forks existed only because a scored
+intermediate once required a scenario whose duration selected that reference. 56w and 156w
+were already gone. 104w was both the last scored-intermediate fork and the only one the repo
+had MEASURED as drifted — missing `firepower_deficit_penalty_enabled` and
+`must_hold_osids_by_corps`, scoring 639 where the 188w line scored 647 at the same week 104,
+recorded in `scenario_runner.ts` as "a fossil answering for an engine two fixes old".
+
+It had already been removed from the scenario registry and survived only as a bare file that
+three tests read — which is exactly long enough for a stale run of it to be picked up and
+scored as though it were the definitive line. That is not hypothetical: it happened the same
+day, when `tools/calibration_timeline.mjs` auto-discovered a 104w run out of `runs/` and
+reported 677/661 as calibration figures.
+
+BLAST RADIUS, established before deleting. No npm script referenced it. Exactly three tests
+resolved the file and were updated: `scenario_guardrails.test.ts` (dropped from
+`ACTIVE_APRIL_DEFINITIVE_SCENARIOS`), `scenario_harness_contracts.test.ts` (family
+expectation now 40w/52w/188w), and `presidential_cadence_cli_provenance.test.ts` (repointed
+to 188w — it asserts the CLI refuses a save whose turn does not match `--end-turn`, a check
+that runs before scenario content matters). Everything else referencing the id is a recorded
+`scenarioId`/`runId` string in frozen evidence fixtures, a drift-rationale comment, or a
+historical diagnostic record; all were deliberately left intact, because they describe runs
+that really happened.
+
+NOT retired, and why: 40w is a live development loop AND the structural-fingerprint gate's
+scenario; 52w is the default and is pinned by `scenario_latest_run_final_save_artifact_ownership`
+via package.json. Retiring either would remove a working gate, not a fossil.
+
+The `scenario_runner.ts` ONE SCENARIO, MANY SNAPSHOTS note now records the retirement and
+says not to reintroduce a scored-intermediate fork. `KNOWN_DRIFTED_SCENARIOS` in
+`calibration_timeline.mjs` deliberately still names 104w, because existing run directories
+under the gitignored `runs/` are untouched and must keep warning. Focused suite 67/67 green.
+
+FULL-SUITE STATUS AT THIS COMMIT, stated plainly: the suite is RED, and it was red before
+this change. Six files fail on the branch base (cdc8659b1, inherited from local main's
+in-flight work): `strict_null_inventory_progress` (as_unknown_casts 5 -> 6),
+`ui/advance_turn_button_gated_feedback`, `ui/presidential_priority_contract` (recommended
+3 -> 4), `ui/presidential_decision_room_panel_i18n`, `ui/warroom_priority_docket` and
+`ui/pre_advance_command_review`. Causality was measured, not assumed: the working tree was
+stashed, the same six files were run at bare HEAD and all six failed identically, then the
+work was restored and the run repeated — the failure SET is byte-identical either way, so
+this change adds zero failures. An earlier green full run this session was on the
+`r7-arbih-honorific-names` worktree, whose base is an OLDER main; that green does not
+describe this base and was not treated as if it did. These six belong to whoever owns the
+in-flight main work; they are recorded here so a later reader does not attribute them to the
+104w retirement.

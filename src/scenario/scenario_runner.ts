@@ -777,6 +777,14 @@ export function pickHistoricalReferenceKey(scenario: Scenario): 'jan1993' | 'apr
  * A single run now scores at EVERY checkpoint it reaches, so an intermediate
  * snapshot is a view of the definitive campaign rather than a separate campaign.
  *
+ * RETIRED 2026-09-08: `apr1992_definitive_104w.json` is deleted — 56w and 156w were
+ * already gone, and 104w was the last scored-intermediate fork as well as the only one
+ * measured as drifted. It survived registry removal as a bare file that three tests read,
+ * which is long enough for a stale run of it to be picked up and scored as though it were
+ * the definitive line. What remains is the development loop (40w, also the
+ * structural-fingerprint gate's scenario), the default (52w), and the definitive line
+ * (188w). Do not reintroduce a scored-intermediate fork; take the snapshot from a 188w run.
+ *
  * Weeks are elapsed weeks from scenario start; a run of `weeks` reaches checkpoint
  * `w` when `w <= weeks`. Keep sorted ascending — the emitted array follows this order.
  */
