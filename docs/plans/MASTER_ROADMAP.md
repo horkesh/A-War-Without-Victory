@@ -236,7 +236,7 @@ BC09 reviewed GO; cleanup Tasks 1–2 complete (GO); remaining work planned. No 
 
 | Owner / packet | Slot and overlap |
 |---|---|
-| R8 [deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | Tasks 1–2 COMPLETE (GO); Task 3 routing consolidation implemented with focused-test expectation residuals and packaged interaction unavailable because the release build hit the existing stale-snapshot gate. Tasks 4–8 planned. Tasks 5/7/8 precede dependency work; Task 3 follows BC06/R7. |
+| R8 [deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | Tasks 1–2 COMPLETE (GO); Task 3 implemented but NO-GO pending packaged navigation. Tasks 4–8 planned; Tasks 5/7/8 precede dependency work. |
 | R8 [runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | BC09 integrated/reviewed GO; campaigns deferred. BC07 RETAIN disposition verified; BC10 planned. No regeneration. |
 | R9 [build preparation](2026-09-07-r9-build-validation-preparation-plan.md) | Limited early R9 subset: dependencies after R7/script handoff; CI before final costly checks; payload after BC09. All before final calibration/R8 acceptance, not after freeze. |
 

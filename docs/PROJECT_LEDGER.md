@@ -34267,7 +34267,10 @@ and Task 3 `61db7e9df`; both produced the same five projection mismatches (34 pa
 5 failed, exit 1), proving they are inherited and not routing regressions. The
 source-read probe, simulation/startup snapshot checks, and justified
 `desktop:release:check` retry passed exit 0 without snapshot regeneration; packaging
-reached `dist-packaged\\win-unpacked`. Receipts are the Task 3 comparison, retry, and
-package logs under `logs/bounded-deletion-cleanup/`. No packaged Electron
+reached `dist-packaged\\win-unpacked` but did not return after four minutes and was
+stopped under the bounded rule (exit 1). The resulting executable failed to launch as
+a valid Windows application, so it is not usable packaged evidence. Receipts are the
+Task 3 comparison, retry, package, and launch logs under
+`logs/bounded-deletion-cleanup/`. No packaged Electron
 branch-by-branch interaction receipt was produced, so Task 3 remains NO-GO and is not
 ready to integrate. Tasks 4–8 remain untouched.

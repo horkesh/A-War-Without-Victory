@@ -208,12 +208,16 @@ Task 3 `61db7e9df` produced the same five projection mismatches (34 passed/5 fai
 exit 1), proving they are inherited rather than routing regressions. The source-read
 probe, simulation/startup snapshot checks, and justified `npm.cmd run desktop:release:check`
 retry passed exit 0 without snapshot regeneration. Packaging reached
-`dist-packaged\\win-unpacked`, but no reviewable packaged Electron interaction receipt
+`dist-packaged\\win-unpacked` but did not return after four minutes and was stopped
+under the bounded stopping rule (exit 1). Its freshly written executable then failed
+to launch with Windows reporting that it was not a valid application, confirming the
+interrupted output is unusable. No reviewable packaged Electron interaction receipt
 exists for the five target branches and relevant Decision Room/docket entrypoints.
 Evidence: `task3-task2-ui-compare.log`, `task3-candidate-ui-compare.log`,
 `task3-source-read-probe.log`, `task3-desktop-sim-retry.log`,
-`task3-startup-snapshot-retry.log`, `task3-release-build-retry.log`, and
-`task3-package-dir.log`. Task 3 remains NO-GO for packaged navigation proof.
+`task3-startup-snapshot-retry.log`, `task3-release-build-retry.log`,
+`task3-package-dir.log`, `task3-packaged-launch.log`, and
+`task3-validation-closeout.md`. Task 3 remains NO-GO for packaged navigation proof.
 
 ## 6. Copy-ready implementation prompt
 
