@@ -9,10 +9,10 @@
 **Tech stack:** TypeScript, React, Vitest, Vite/Electron, Markdown.
 
 **Date:** 2026-09-07
-**Status:** Task 1 COMPLETE, reviewed GO (owner authorized 2026-09-08). Tasks 2–8 remain PLANNED.
+**Status:** Tasks 1–5 COMPLETE, reviewed GO. Tasks 6–8 PLANNED. Dated receipts below retain earlier states.
 **Owner lane / command-board row:** R8, subordinate cleanup packet; no new workstream or BC identifier.
 **Phase covered:** R8 after R7; finish before final calibration/final packaged acceptance. Task 2 follows BC04/BC05 event settlement; Task 3 follows R7 and BC06 UI settlement. Other tasks may run on disjoint files while behavior work settles. Diagnostic calibration stays open.
-**Current next action:** Task 1 is complete; Task 2 is next when separately scheduled.
+**Current next action:** Task 6 is the next bounded slice; it has not started.
 **Collision rule:** Do not overlap BC event edits, R7 `App.tsx` work, or another agent's roadmap/ledger writes. Re-read current files before each edit; preserve unrelated changes. No implementation is dispatched by this planning turn.
 
 ## 1. Purpose and non-goals
@@ -314,3 +314,38 @@ No runtime tests. Evidence: `logs/bounded-deletion-cleanup/task4-validation.log`
 (`task4-review.log`); 36 links/10 anchors resolve, live owners/actions retained,
 13/13 documentation tests and diff check pass. Master/derived packet status synchronized.
 Tasks 5–8 remain not started by this continuation.
+
+### Task 5 validation plan — 2026-09-08
+
+Reviewed Task 4 `85bafdd78` fast-forwarded into local main; Task 5 is isolated on
+`codex/cleanup-obsolete-commands`. Question: can the named obsolete commands/tools
+be retired without breaking a supported caller? One Sol/medium implementer handles
+consumer evidence and the bounded deletion; a separate Sol/medium reviewer checks it.
+
+Recheck all 22 historical missing targets and inbound consumers; explicitly resolve
+`test:ui`; preserve active equivalents, dependencies, workflows and historical outputs.
+Run workflow-command resolution, the existing documentation suites plus
+`tests/ci_workflow_test_paths_exist.test.ts`, `tests/test_discovery_contract.test.ts`,
+`git diff --check`, and the unchanged
+required pre-commit hook. Expected cost: minutes. No builds/packages/campaigns or
+new deletion-shape tests. Stop rather than expand into dependency, CI, runtime,
+canon/data or unrelated consumer repair. KEEP a now-live target with evidence.
+Root owns these status/ledger updates; worker owns script/tool/current-command docs.
+Evidence: `logs/bounded-deletion-cleanup/task5-disposition.log` and focused check logs.
+
+### Task 5 command retirement — 2026-09-08
+
+Removed all 22 verified absent-target commands, misleading `test:ui`, and the two
+obsolete audit commands/tools with their exclusive generator test. Removed only
+that deleted test's discovery representative; other assertions remain. All surviving
+scripts and non-script package fields are unchanged. Updated current README/backlog
+advertisements and three maintenance-only details in `docs/10_canon/context.md`:
+two retired command lines and the historical audit-output description. Protected-path
+policy and game canon are unchanged. Historical reports and generated outputs remain.
+
+Static disposition: 17 workflow npm references, 37 package-chain references and
+258 direct literal targets resolve. Focused documentation/workflow/discovery checks
+passed 20/20 across five files (exit 0). Evidence: `task5-disposition.log` and
+`task5-focused-tests.log` under `logs/bounded-deletion-cleanup/`. Independent Sol/medium review returned GO with no actionable findings (`task5-review.log`).
+The mandatory pre-commit typecheck result is recorded in `task5-commit.log`. Tasks 6–8 remain unstarted;
+final R8 acceptance and the R7/dependency handoffs remain unchanged.

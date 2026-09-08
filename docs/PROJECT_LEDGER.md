@@ -34329,3 +34329,20 @@ owner/action mappings pass; documentation tests 13/13 and diff check pass. Indep
 Sol/medium review GO, no findings. Packet status synchronized; see the existing
 [cleanup plan](plans/2026-09-07-bounded-deletion-cleanup-plan.md#task-4-command-board-trim--2026-09-08).
 Tasks 5–8 remain untouched. No reusable lesson or canon update is required.
+
+## 2026-09-08 — Cleanup Task 5: retire obsolete commands and audit tools
+
+Integrated reviewed Task 4 `85bafdd78` into local main, then isolated Task 5 on
+`codex/cleanup-obsolete-commands`. Removed 22 absent-target scripts, misleading
+`test:ui`, and two obsolete audit commands/tools plus their exclusive test. Updated
+only its discovery representative and current command documentation, including
+three maintenance-only context edits; game canon and protected-path policy remain.
+Surviving scripts, dependencies, workflows, production behavior and historical
+outputs are unchanged. Focused checks passed 20/20 across five files, static callers
+resolve, and independent Sol/medium review returned GO without actionable findings.
+Required hook evidence: `logs/bounded-deletion-cleanup/task5-commit.log`; disposition,
+tests and review are in the same directory and summarized in the existing
+[cleanup plan](plans/2026-09-07-bounded-deletion-cleanup-plan.md#task-5-command-retirement--2026-09-08).
+Attribution: Sol/medium implementation, separate Sol/medium review, Astra orchestration
+and documentation closeout. Tasks 6–8 are unstarted; final R8 acceptance remains open.
+No build, package, campaign, dependency upgrade or remote push was performed.

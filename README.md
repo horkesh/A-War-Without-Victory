@@ -24,7 +24,6 @@ Deterministic strategic-political simulation of the 1992-1995 Bosnian War.
 ```powershell
 npm run test:vitest              # canonical balanced full suite (no arguments)
 npm run test:engine              # engine slice
-npm run test:ui                  # unsharded Vitest discovery
 npm run test:all                 # alias for canonical balanced full suite
 npx tsc --noEmit
 npm run sim:scenario:run:188w    # sole scoring calibration scenario

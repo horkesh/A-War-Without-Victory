@@ -200,7 +200,7 @@ Refs: docs/PROJECT_LEDGER.md entry [date]
 **Protected Paths (never commit):**
 - `data/derived/_debug/` - Debug outputs
 - `data/derived/settlements_substrate.geojson` - Large derived file (regenerated)
-- `docs/cleanup/cleanup_audit.*` - Audit outputs (regenerated)
+- `docs/cleanup/cleanup_audit.*` - Historical audit outputs (generator retired)
 - `node_modules/` - Dependencies
 - `*.log` - Log files
 
@@ -382,7 +382,6 @@ npm run map:derive:substrate      # Build canonical settlement substrate
 npm run map:merge:adm3-1990       # Regenerate canonical 1990 municipality polygons (data/source/boundaries/bih_adm3_1990.geojson)
 npm run map:derive:mun1990:boundaries  # Build municipality 1990 boundary overlay (derived MultiLineString for viewers; canonical polygons = bih_adm3_1990.geojson)
 npm run map:derive:contact:phase1 # Build Phase 1 contact graph
-npm run map:derive:continuity:g3_6  # Build continuity graph
 npm run map:contact:enrich2       # Build Phase 2 enriched graph
 npm run map:viewer:substrate:index # Build substrate viewer
 npm run map:viewer:contact:phase1  # Build contact graph viewer
@@ -425,7 +424,6 @@ npm run dev:runner                # Start dev runner (port 3000)
 
 ### Repository Maintenance
 ```bash
-npm run repo:cleanup:audit        # Audit for orphan files
 npm run typecheck                 # Type check all TypeScript
 npm test                          # Run test suite
 ```
