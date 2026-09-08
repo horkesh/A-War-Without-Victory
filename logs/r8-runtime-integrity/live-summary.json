@@ -1,0 +1,24 @@
+{
+  "pass": true,
+  "caseDirectory": "live-ipc-06",
+  "negativeCases": 24,
+  "positive": {
+    "kind": "valid-control",
+    "ok": true,
+    "beforeTurn": 0,
+    "afterTurn": 1,
+    "broadcasts": [
+      "state",
+      "report",
+      "replay"
+    ],
+    "canonicalSaveChanged": true,
+    "baselineByteIdentical": true,
+    "canonicalSha256": "dfd6a3da3a5c03e5eaa3b0a5960ae7279604b3cddcd0498f1249d07ac8752547"
+  },
+  "bundleSha256": "851e3a065b6ef31bbfd6930a3ec0289f49a1a87bf4105661e2e85320c81267ac",
+  "resultSha256": "8cab5ecb6d035800980692d6107df2a87975fa901ee27bac2bb44a05f38c411f",
+  "provenanceSha256": "c9a0f238f8c3d1390436f46be4637a1a648f96b385db49b0c0c06aa0f4ea1c9d",
+  "copiedProductionInputCount": 21,
+  "proof": "Unmodified production Electron main/preload; actual main observes broadcasts; second real renderer invokes IPC; minimal synthetic war state."
+}

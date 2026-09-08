@@ -1,0 +1,1110 @@
+{
+  "displacement": {
+    "civilian_casualties": {},
+    "displacement_camp_state": {},
+    "displacement_event_log": [],
+    "displacement_flows_by_osid": {},
+    "displacement_humanitarian_aggregates": {},
+    "displacement_origin_dest_arrivals": {},
+    "displacement_recent_by_turn": {},
+    "displacement_state": {
+      "bihac": {
+        "displaced_in": 0,
+        "displaced_out": 0,
+        "last_updated_turn": 1,
+        "lost_population": 0,
+        "mun_id": "bihac",
+        "original_population": 10000
+      },
+      "brcko": {
+        "displaced_in": 0,
+        "displaced_out": 0,
+        "last_updated_turn": 1,
+        "lost_population": 0,
+        "mun_id": "brcko",
+        "original_population": 10000
+      },
+      "centar_sarajevo": {
+        "displaced_in": 0,
+        "displaced_out": 0,
+        "last_updated_turn": 1,
+        "lost_population": 0,
+        "mun_id": "centar_sarajevo",
+        "original_population": 10000
+      },
+      "gradacac": {
+        "displaced_in": 0,
+        "displaced_out": 0,
+        "last_updated_turn": 1,
+        "lost_population": 0,
+        "mun_id": "gradacac",
+        "original_population": 10000
+      },
+      "konjic": {
+        "displaced_in": 0,
+        "displaced_out": 0,
+        "last_updated_turn": 1,
+        "lost_population": 0,
+        "mun_id": "konjic",
+        "original_population": 10000
+      },
+      "mostar": {
+        "displaced_in": 0,
+        "displaced_out": 0,
+        "last_updated_turn": 1,
+        "lost_population": 0,
+        "mun_id": "mostar",
+        "original_population": 10000
+      },
+      "tesanj": {
+        "displaced_in": 0,
+        "displaced_out": 0,
+        "last_updated_turn": 1,
+        "lost_population": 0,
+        "mun_id": "tesanj",
+        "original_population": 10000
+      },
+      "tuzla": {
+        "displaced_in": 0,
+        "displaced_out": 0,
+        "last_updated_turn": 1,
+        "lost_population": 0,
+        "mun_id": "tuzla",
+        "original_population": 10000
+      }
+    },
+    "hostile_takeover_timers": {},
+    "minority_flight_state": {},
+    "municipality_displacement": {
+      "banja_luka": 0,
+      "banovici": 0,
+      "bihac": 0,
+      "bijeljina": 0,
+      "bileca": 0,
+      "bosanska_dubica": 0,
+      "bosanska_gradiska": 0,
+      "bosanska_kostajnica": 0,
+      "bosanska_krupa": 0,
+      "bosanski_brod": 0,
+      "bosanski_novi": 0,
+      "bosanski_petrovac": 0,
+      "bosanski_samac": 0,
+      "bosansko_grahovo": 0,
+      "bratunac": 0,
+      "brcko": 0,
+      "breza": 0,
+      "bugojno": 0,
+      "busovaca": 0,
+      "cajnice": 0,
+      "capljina": 0,
+      "cazin": 0,
+      "celinac": 0,
+      "centar_sarajevo": 0,
+      "citluk": 0,
+      "derventa": 0,
+      "doboj": 0,
+      "donji_vakuf": 0,
+      "duvno": 0,
+      "foca": 0,
+      "fojnica": 0,
+      "gacko": 0,
+      "glamoc": 0,
+      "gorazde": 0,
+      "gornji_vakuf": 0,
+      "gracanica": 0,
+      "gradacac": 0,
+      "grude": 0,
+      "hadzici": 0,
+      "hanpijesak": 0,
+      "ilidza": 0,
+      "ilijas": 0,
+      "jablanica": 0,
+      "jajce": 0,
+      "kakanj": 0,
+      "kalesija": 0,
+      "kalinovik": 0,
+      "kiseljak": 0,
+      "kladanj": 0,
+      "kljuc": 0,
+      "konjic": 0,
+      "kotor_varos": 0,
+      "kresevo": 0,
+      "kupres": 0,
+      "laktasi": 0,
+      "listica": 0,
+      "livno": 0,
+      "ljubinje": 0,
+      "ljubuski": 0,
+      "lopare": 0,
+      "lukavac": 0,
+      "maglaj": 0,
+      "modrica": 0,
+      "mostar": 0,
+      "mrkonjic_grad": 0,
+      "neum": 0,
+      "nevesinje": 0,
+      "novi_grad_sarajevo": 0,
+      "novi_travnik": 0,
+      "novo_sarajevo": 0,
+      "odzak": 0,
+      "olovo": 0,
+      "orasje": 0,
+      "pale": 0,
+      "posusje": 0,
+      "prijedor": 0,
+      "prnjavor": 0,
+      "prozor": 0,
+      "rogatica": 0,
+      "rudo": 0,
+      "sanski_most": 0,
+      "sekovici": 0,
+      "sipovo": 0,
+      "skender_vakuf": 0,
+      "sokolac": 0,
+      "srbac": 0,
+      "srebrenica": 0,
+      "srebrenik": 0,
+      "stari_grad_sarajevo": 0,
+      "stolac": 0,
+      "tesanj": 0,
+      "teslic": 0,
+      "titov_drvar": 0,
+      "travnik": 0,
+      "trebinje": 0,
+      "trnovo": 0,
+      "tuzla": 0,
+      "ugljevik": 0,
+      "vares": 0,
+      "velika_kladusa": 0,
+      "visegrad": 0,
+      "visoko": 0,
+      "vitez": 0,
+      "vlasenica": 0,
+      "vogosca": 0,
+      "zavidovici": 0,
+      "zenica": 0,
+      "zepce": 0,
+      "zivinice": 0,
+      "zvornik": 0
+    },
+    "settlement_displacement": {},
+    "settlement_displacement_started_turn": {},
+    "sustainability_state": {
+      "bihac": {
+        "collapsed": false,
+        "is_surrounded": true,
+        "last_updated_turn": 1,
+        "mun_id": "bihac",
+        "sustainability_score": 95,
+        "unsupplied_turns": 1
+      },
+      "brcko": {
+        "collapsed": false,
+        "is_surrounded": true,
+        "last_updated_turn": 1,
+        "mun_id": "brcko",
+        "sustainability_score": 95,
+        "unsupplied_turns": 1
+      },
+      "centar_sarajevo": {
+        "collapsed": false,
+        "is_surrounded": true,
+        "last_updated_turn": 1,
+        "mun_id": "centar_sarajevo",
+        "sustainability_score": 95,
+        "unsupplied_turns": 1
+      },
+      "gradacac": {
+        "collapsed": false,
+        "is_surrounded": true,
+        "last_updated_turn": 1,
+        "mun_id": "gradacac",
+        "sustainability_score": 95,
+        "unsupplied_turns": 1
+      },
+      "konjic": {
+        "collapsed": false,
+        "is_surrounded": true,
+        "last_updated_turn": 1,
+        "mun_id": "konjic",
+        "sustainability_score": 95,
+        "unsupplied_turns": 1
+      },
+      "mostar": {
+        "collapsed": false,
+        "is_surrounded": true,
+        "last_updated_turn": 1,
+        "mun_id": "mostar",
+        "sustainability_score": 95,
+        "unsupplied_turns": 1
+      },
+      "tesanj": {
+        "collapsed": false,
+        "is_surrounded": true,
+        "last_updated_turn": 1,
+        "mun_id": "tesanj",
+        "sustainability_score": 95,
+        "unsupplied_turns": 1
+      },
+      "tuzla": {
+        "collapsed": false,
+        "is_surrounded": true,
+        "last_updated_turn": 1,
+        "mun_id": "tuzla",
+        "sustainability_score": 95,
+        "unsupplied_turns": 1
+      }
+    },
+    "war_displacement_initiated": {}
+  },
+  "factions": [],
+  "meta": {
+    "decision_mode": "historical",
+    "game_over": false,
+    "peace_scheduled_referendum_turn": null,
+    "peace_scheduled_war_start_turn": null,
+    "peace_war_start_control_path": null,
+    "phase": "war",
+    "player_faction": "RBiH",
+    "referendum_deadline_turn": null,
+    "referendum_eligible_turn": null,
+    "referendum_held": true,
+    "referendum_turn": 0,
+    "seed": "bc09-local-ipc",
+    "turn": 1,
+    "war_start_turn": 0
+  },
+  "military": {
+    "alliance_locks": [],
+    "army_co_decision_traces": {},
+    "army_corps_directives_by_faction": {},
+    "army_hq_last_op_turn": {},
+    "army_hq_op_count_by_year": {},
+    "army_hq_operations": {},
+    "army_theatre_assignment": {},
+    "assignable_front_segments": [],
+    "bot_priority_shifts": [],
+    "brigade_front_assignment": {},
+    "brigade_movement_orders": {},
+    "brigade_posture_orders": [],
+    "cascade_penalties": [],
+    "casualty_ledger": {},
+    "closed_event_ids": [
+      "csq_drina_partisan_resistance_1992"
+    ],
+    "convoy_decision_history": [],
+    "corps_command": {},
+    "corps_front_sectors": {},
+    "cost_ledger_annotations": [],
+    "declined_operations": {},
+    "enabled_event_ids": [
+      "belgrade_embargo_rs_1994",
+      "deliberate_force_rs_compliance_1995",
+      "holbrooke_us_belgrade_channel_1995",
+      "karadzic_mladic_split_1995",
+      "rs_assembly_rejects_voplan_1993",
+      "rs_autonomy_path_decision_1993",
+      "rs_belgrade_pressure_response_1993",
+      "rs_contact_group_response_1994",
+      "rs_dayton_acceptance_1995",
+      "rs_owen_stoltenberg_response_1993",
+      "rs_paramilitary_policy_1992",
+      "rs_washington_rejection_1994",
+      "un_hostage_crisis_1995"
+    ],
+    "equipment_quality_modifiers": [],
+    "event_aggression_modifiers": [
+      {
+        "delta": 0.15,
+        "expires_turn": 53,
+        "faction": "RS"
+      }
+    ],
+    "event_causality_log": [
+      {
+        "from_event": "rs_strategic_goals",
+        "kind": "enables",
+        "source_response_id": "all_six",
+        "to_event": "belgrade_embargo_rs_1994",
+        "to_flag": null,
+        "turn": 1
+      },
+      {
+        "from_event": "rs_strategic_goals",
+        "kind": "closes",
+        "source_response_id": "all_six",
+        "to_event": "csq_drina_partisan_resistance_1992",
+        "to_flag": null,
+        "turn": 1
+      },
+      {
+        "from_event": "rs_strategic_goals",
+        "kind": "enables",
+        "source_response_id": "all_six",
+        "to_event": "deliberate_force_rs_compliance_1995",
+        "to_flag": null,
+        "turn": 1
+      },
+      {
+        "from_event": "rs_strategic_goals",
+        "kind": "enables",
+        "source_response_id": "all_six",
+        "to_event": "holbrooke_us_belgrade_channel_1995",
+        "to_flag": null,
+        "turn": 1
+      },
+      {
+        "from_event": "rs_strategic_goals",
+        "kind": "enables",
+        "source_response_id": "all_six",
+        "to_event": "karadzic_mladic_split_1995",
+        "to_flag": null,
+        "turn": 1
+      },
+      {
+        "from_event": "rs_strategic_goals",
+        "kind": "enables",
+        "source_response_id": "all_six",
+        "to_event": "rs_assembly_rejects_voplan_1993",
+        "to_flag": null,
+        "turn": 1
+      },
+      {
+        "from_event": "rs_strategic_goals",
+        "kind": "enables",
+        "source_response_id": "all_six",
+        "to_event": "rs_autonomy_path_decision_1993",
+        "to_flag": null,
+        "turn": 1
+      },
+      {
+        "from_event": "rs_strategic_goals",
+        "kind": "enables",
+        "source_response_id": "all_six",
+        "to_event": "rs_belgrade_pressure_response_1993",
+        "to_flag": null,
+        "turn": 1
+      },
+      {
+        "from_event": "rs_strategic_goals",
+        "kind": "enables",
+        "source_response_id": "all_six",
+        "to_event": "rs_contact_group_response_1994",
+        "to_flag": null,
+        "turn": 1
+      },
+      {
+        "from_event": "rs_strategic_goals",
+        "kind": "enables",
+        "source_response_id": "all_six",
+        "to_event": "rs_dayton_acceptance_1995",
+        "to_flag": null,
+        "turn": 1
+      },
+      {
+        "from_event": "rs_strategic_goals",
+        "kind": "enables",
+        "source_response_id": "all_six",
+        "to_event": "rs_owen_stoltenberg_response_1993",
+        "to_flag": null,
+        "turn": 1
+      },
+      {
+        "from_event": "rs_strategic_goals",
+        "kind": "enables",
+        "source_response_id": "all_six",
+        "to_event": "rs_paramilitary_policy_1992",
+        "to_flag": null,
+        "turn": 1
+      },
+      {
+        "from_event": "rs_strategic_goals",
+        "kind": "enables",
+        "source_response_id": "all_six",
+        "to_event": "rs_washington_rejection_1994",
+        "to_flag": null,
+        "turn": 1
+      },
+      {
+        "from_event": "rs_strategic_goals",
+        "kind": "enables",
+        "source_response_id": "all_six",
+        "to_event": "un_hostage_crisis_1995",
+        "to_flag": null,
+        "turn": 1
+      }
+    ],
+    "event_decision_log": [
+      {
+        "decision_source": "bot_ai_default",
+        "event_id": "rs_strategic_goals",
+        "faction": "RS",
+        "response_id": "all_six",
+        "turn": 1
+      }
+    ],
+    "event_fire_counts": {
+      "rs_strategic_goals": 1
+    },
+    "event_flags": {
+      "rs_strategic_goals": "all_six"
+    },
+    "event_last_fired_turn": {
+      "rs_strategic_goals": 1
+    },
+    "event_overflow_queue": [],
+    "event_readiness": {
+      "rs_strategic_goals": 0
+    },
+    "fired_event_ids": [
+      "rs_strategic_goals"
+    ],
+    "formations": {},
+    "front_edges": [],
+    "front_posture": {
+      "HRHB": {
+        "assignments": {}
+      },
+      "RBiH": {
+        "assignments": {}
+      },
+      "RS": {
+        "assignments": {}
+      }
+    },
+    "front_posture_regions": {},
+    "front_pressure": {},
+    "front_segments": {},
+    "last_briefing": {
+      "criticalCount": 0,
+      "faction": "RBiH",
+      "headline": "No significant activity to report.",
+      "items": [],
+      "turn": 1,
+      "warningCount": 0
+    },
+    "militia_pools": {
+      "bihac:HRHB": {
+        "available": 0,
+        "committed": 0,
+        "exhausted": 0,
+        "faction": "HRHB",
+        "fatigue": 1,
+        "mun_id": "bihac",
+        "updated_turn": 1,
+        "wounded_pending": 0
+      },
+      "brcko:HRHB": {
+        "available": 0,
+        "committed": 0,
+        "exhausted": 0,
+        "faction": "HRHB",
+        "fatigue": 1,
+        "mun_id": "brcko",
+        "updated_turn": 1,
+        "wounded_pending": 0
+      },
+      "centar_sarajevo:HRHB": {
+        "available": 0,
+        "committed": 0,
+        "exhausted": 0,
+        "faction": "HRHB",
+        "fatigue": 1,
+        "mun_id": "centar_sarajevo",
+        "updated_turn": 1,
+        "wounded_pending": 0
+      },
+      "gradacac:HRHB": {
+        "available": 0,
+        "committed": 0,
+        "exhausted": 0,
+        "faction": "HRHB",
+        "fatigue": 1,
+        "mun_id": "gradacac",
+        "updated_turn": 1,
+        "wounded_pending": 0
+      },
+      "konjic:RBiH": {
+        "available": 0,
+        "committed": 0,
+        "exhausted": 0,
+        "faction": "RBiH",
+        "fatigue": 1,
+        "mun_id": "konjic",
+        "updated_turn": 1,
+        "wounded_pending": 0
+      },
+      "mostar:RBiH": {
+        "available": 0,
+        "committed": 0,
+        "exhausted": 0,
+        "faction": "RBiH",
+        "fatigue": 1,
+        "mun_id": "mostar",
+        "updated_turn": 1,
+        "wounded_pending": 0
+      },
+      "tesanj:HRHB": {
+        "available": 0,
+        "committed": 0,
+        "exhausted": 0,
+        "faction": "HRHB",
+        "fatigue": 1,
+        "mun_id": "tesanj",
+        "updated_turn": 1,
+        "wounded_pending": 0
+      },
+      "tuzla:HRHB": {
+        "available": 0,
+        "committed": 0,
+        "exhausted": 0,
+        "faction": "HRHB",
+        "fatigue": 1,
+        "mun_id": "tuzla",
+        "updated_turn": 1,
+        "wounded_pending": 0
+      }
+    },
+    "negotiation": {
+      "capital": {
+        "HRHB": {
+          "civilian_casualties_caused": 0,
+          "civilians_under_protection": 0,
+          "combat_effective_brigades": 0,
+          "enclaves_held": [
+            "kiseljak",
+            "lasva_valley",
+            "zepce"
+          ],
+          "enclaves_lost": [],
+          "military_casualties_inflicted": 0,
+          "military_casualties_taken": 0,
+          "operations_launched": 0,
+          "operations_successful": 0,
+          "peace_plans_accepted": [],
+          "peace_plans_rejected": [],
+          "refugees_created": 0,
+          "refugees_received": 0,
+          "territory_controlled_km2": 0,
+          "territory_controlled_pct": 0,
+          "war_crimes_events": 0
+        },
+        "RBiH": {
+          "civilian_casualties_caused": 0,
+          "civilians_under_protection": 0,
+          "combat_effective_brigades": 0,
+          "enclaves_held": [
+            "sarajevo",
+            "srebrenica",
+            "zepa",
+            "gorazde",
+            "bihac"
+          ],
+          "enclaves_lost": [],
+          "military_casualties_inflicted": 0,
+          "military_casualties_taken": 0,
+          "operations_launched": 0,
+          "operations_successful": 0,
+          "peace_plans_accepted": [],
+          "peace_plans_rejected": [],
+          "refugees_created": 0,
+          "refugees_received": 0,
+          "territory_controlled_km2": 0,
+          "territory_controlled_pct": 0,
+          "war_crimes_events": 0
+        },
+        "RS": {
+          "civilian_casualties_caused": 0,
+          "civilians_under_protection": 0,
+          "combat_effective_brigades": 0,
+          "enclaves_held": [],
+          "enclaves_lost": [],
+          "military_casualties_inflicted": 0,
+          "military_casualties_taken": 0,
+          "operations_launched": 0,
+          "operations_successful": 0,
+          "peace_plans_accepted": [],
+          "peace_plans_rejected": [],
+          "refugees_created": 0,
+          "refugees_received": 0,
+          "territory_controlled_km2": 0,
+          "territory_controlled_pct": 0,
+          "war_crimes_events": 0
+        }
+      },
+      "patron_relationships": {
+        "HRHB": {
+          "override_authority": 0,
+          "patron_id": "croatia",
+          "relationship_events": [],
+          "sanctions_active": false,
+          "support_level": 70
+        },
+        "RBiH": {
+          "override_authority": 0,
+          "patron_id": "international_community",
+          "relationship_events": [],
+          "sanctions_active": false,
+          "support_level": 40
+        },
+        "RS": {
+          "override_authority": 0,
+          "patron_id": "serbia",
+          "relationship_events": [],
+          "sanctions_active": false,
+          "support_level": 80
+        }
+      },
+      "peace_plan_history": [],
+      "pending_counter_offers": [],
+      "rupture_consequences": [],
+      "strategic_dimensions": {
+        "HRHB": {
+          "internal_cohesion": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "international_standing": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "military_credibility": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "negotiating_leverage": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "patron_confidence": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "territorial_legitimacy": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          }
+        },
+        "RBiH": {
+          "internal_cohesion": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "international_standing": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "military_credibility": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "negotiating_leverage": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "patron_confidence": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "territorial_legitimacy": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          }
+        },
+        "RS": {
+          "internal_cohesion": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "international_standing": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "military_credibility": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "negotiating_leverage": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "patron_confidence": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          },
+          "territorial_legitimacy": {
+            "base_value": 50,
+            "effective_value": 50,
+            "event_modifier": 0
+          }
+        }
+      }
+    },
+    "offensive_ops_suppressions": [],
+    "officer_decision_history": [],
+    "operation_opportunities": [],
+    "pending_convoy_decisions": [],
+    "pending_event_decisions": [],
+    "pending_event_notifications": [
+      {
+        "body": "RS adoption of the Six Goals sharpens corridor and ethnic-separation claims that bear on western Herzegovina; Mostar leadership weighs patron consultation.",
+        "consumed": false,
+        "event_id": "rs_strategic_goals",
+        "headline": "Karadzic Assembly clarifies territorial reach",
+        "notification_id": "rs_strategic_goals:RS:HRHB",
+        "response_id": "all_six",
+        "source_faction": "RS",
+        "surfaced_on_turn": 2,
+        "target_faction": "HRHB"
+      },
+      {
+        "body": "Belgrade-aligned deputies adopt Karadzic's territorial maximalist platform. Sarajevo intelligence reads this as a hardening of war aims; federal options narrow.",
+        "consumed": false,
+        "event_id": "rs_strategic_goals",
+        "headline": "RS Assembly endorses Six Strategic Goals",
+        "notification_id": "rs_strategic_goals:RS:RBiH",
+        "response_id": "all_six",
+        "source_faction": "RS",
+        "surfaced_on_turn": 2,
+        "target_faction": "RBiH"
+      }
+    ],
+    "pending_officer_events": [],
+    "pending_reserve_requests": [],
+    "phantoms_spawned": [],
+    "production_facilities": {
+      "prod_breza_ammo": {
+        "base_capacity": 4,
+        "current_condition": 1,
+        "facility_id": "prod_breza_ammo",
+        "municipality_id": "breza",
+        "name": "Breza Munitions",
+        "required_inputs": {
+          "electricity": true,
+          "raw_materials": true,
+          "skilled_labor": true
+        },
+        "type": "ammunition"
+      },
+      "prod_bugojno_arms": {
+        "base_capacity": 5,
+        "current_condition": 1,
+        "facility_id": "prod_bugojno_arms",
+        "municipality_id": "bugojno",
+        "name": "Bugojno Factory",
+        "required_inputs": {
+          "electricity": true,
+          "raw_materials": true,
+          "skilled_labor": true
+        },
+        "type": "small_arms"
+      },
+      "prod_hadzici_ammo": {
+        "base_capacity": 5,
+        "current_condition": 1,
+        "facility_id": "prod_hadzici_ammo",
+        "municipality_id": "hadzici",
+        "name": "Hadžići Ammunition Plant",
+        "required_inputs": {
+          "electricity": true,
+          "raw_materials": true,
+          "skilled_labor": true
+        },
+        "type": "ammunition"
+      },
+      "prod_konjic_igman": {
+        "base_capacity": 6,
+        "current_condition": 1,
+        "facility_id": "prod_konjic_igman",
+        "municipality_id": "konjic",
+        "name": "Igman Konjic",
+        "required_inputs": {
+          "electricity": true,
+          "raw_materials": true,
+          "skilled_labor": true
+        },
+        "type": "small_arms"
+      },
+      "prod_lukavica_depot": {
+        "base_capacity": 4,
+        "current_condition": 1,
+        "facility_id": "prod_lukavica_depot",
+        "municipality_id": "lukavica",
+        "name": "Lukavica Repair Depot",
+        "required_inputs": {
+          "electricity": true,
+          "raw_materials": true,
+          "skilled_labor": true
+        },
+        "type": "heavy_equipment"
+      },
+      "prod_novi_travnik_bratstvo": {
+        "base_capacity": 6,
+        "current_condition": 1,
+        "facility_id": "prod_novi_travnik_bratstvo",
+        "municipality_id": "novi_travnik",
+        "name": "Bratstvo Novi Travnik",
+        "required_inputs": {
+          "electricity": true,
+          "raw_materials": true,
+          "skilled_labor": true
+        },
+        "type": "ammunition"
+      },
+      "prod_vitez_ammo": {
+        "base_capacity": 6,
+        "current_condition": 1,
+        "facility_id": "prod_vitez_ammo",
+        "municipality_id": "vitez",
+        "name": "Vitez Munitions Factory",
+        "required_inputs": {
+          "electricity": true,
+          "raw_materials": true,
+          "skilled_labor": true
+        },
+        "type": "ammunition"
+      },
+      "prod_vogosca_mortar": {
+        "base_capacity": 3,
+        "current_condition": 1,
+        "facility_id": "prod_vogosca_mortar",
+        "municipality_id": "vogosca",
+        "name": "Vogosca Industrial Complex",
+        "required_inputs": {
+          "electricity": true,
+          "raw_materials": true,
+          "skilled_labor": true
+        },
+        "type": "ammunition"
+      },
+      "prod_zenica_steel": {
+        "base_capacity": 8,
+        "current_condition": 1,
+        "facility_id": "prod_zenica_steel",
+        "municipality_id": "zenica",
+        "name": "Zenica Steel Works",
+        "required_inputs": {
+          "electricity": true,
+          "raw_materials": true,
+          "skilled_labor": true
+        },
+        "type": "heavy_equipment"
+      }
+    },
+    "recruitment_modifiers": [],
+    "reserve_request_history": [],
+    "sector_intel": {},
+    "sector_stance_orders": [],
+    "strategic_reserves": {
+      "HRHB": 258,
+      "RBiH": 9
+    },
+    "tactical_groups": {},
+    "theatres": {},
+    "triggered_operations_accepted": {},
+    "used_operation_names": {},
+    "war_front_edges_osid": [],
+    "war_jna": {
+      "asset_transfer_rs": 0,
+      "transition_begun": false,
+      "withdrawal_progress": 0
+    },
+    "war_militia_strength": {}
+  },
+  "operation_history": [],
+  "paramilitary_decision_history": [],
+  "paramilitary_deployment_count": {},
+  "paramilitary_policy": "ask",
+  "pending_paramilitary_requests": [],
+  "political": {
+    "ceasefire": {},
+    "effective_posture_exposure": {
+      "by_faction": {},
+      "last_updated_turn": 1
+    },
+    "enclave_resilience": {
+      "bihac_pocket": {
+        "hardening_active": false,
+        "isolation_turns": 0,
+        "resilience": 0
+      },
+      "gorazde": {
+        "hardening_active": false,
+        "isolation_turns": 1,
+        "resilience": 15.45
+      },
+      "kiseljak": {
+        "hardening_active": false,
+        "isolation_turns": 0,
+        "resilience": 0
+      },
+      "lasva_valley": {
+        "hardening_active": false,
+        "isolation_turns": 0,
+        "resilience": 0
+      },
+      "sarajevo": {
+        "hardening_active": false,
+        "isolation_turns": 1,
+        "resilience": 20.6
+      },
+      "srebrenica": {
+        "hardening_active": false,
+        "isolation_turns": 0,
+        "resilience": 0
+      },
+      "teocak": {
+        "hardening_active": false,
+        "isolation_turns": 0,
+        "resilience": 0
+      },
+      "zepa": {
+        "hardening_active": false,
+        "isolation_turns": 0,
+        "resilience": 0
+      },
+      "zepce": {
+        "hardening_active": false,
+        "isolation_turns": 0,
+        "resilience": 0
+      }
+    },
+    "enclaves": [],
+    "international_visibility_pressure": {
+      "atrocity_visibility": 0,
+      "composite_ivp": 0.006500000000000001,
+      "enclave_humanitarian_pressure": 0,
+      "last_major_shift": null,
+      "negotiation_momentum": 0,
+      "sarajevo_siege_visibility": 0.01625
+    },
+    "ivp_consequences_active": [],
+    "last_supply_state_by_osid": {},
+    "loss_of_control_trends": {
+      "by_edge": {},
+      "by_faction": {},
+      "by_settlement": {},
+      "last_updated_turn": 1,
+      "previous_turn_snapshot": {
+        "edge_friction": {},
+        "edge_pressure": {},
+        "faction_exhaustion": {},
+        "settlement_capacity": {},
+        "turn": 1
+      }
+    },
+    "municipalities": {},
+    "negotiation_ledger": [],
+    "negotiation_status": {
+      "ceasefire_active": false,
+      "ceasefire_since_turn": null,
+      "last_counter_turn": {},
+      "last_offer_turn": null
+    },
+    "political_controllers": {},
+    "rbih_hrhb_state": {
+      "allied_mixed_municipalities": [
+        "bugojno",
+        "busovaca",
+        "kiseljak",
+        "mostar",
+        "novi_travnik",
+        "travnik",
+        "vitez"
+      ],
+      "bilateral_corps_release_progress": {},
+      "bilateral_diverted_corps": {},
+      "bilateral_flips_this_turn": 0,
+      "ceasefire_active": false,
+      "ceasefire_since_turn": null,
+      "mobilization_started_turn": null,
+      "stalemate_turns": 1,
+      "territorial_incidents_this_turn": 0,
+      "total_bilateral_flips": 0,
+      "war_started_turn": null,
+      "washington_signed": false,
+      "washington_turn": null
+    },
+    "sarajevo_state": {
+      "external_supply": 0.35,
+      "humanitarian_pressure": 1,
+      "internal_supply": 0,
+      "international_focus": 1.825,
+      "last_updated_turn": 1,
+      "lifeline": {
+        "airlift_active": true,
+        "last_updated_turn": 1,
+        "status": "STRANGLED",
+        "throughput": 0.35,
+        "tunnel_active": false
+      },
+      "mun_id": "sarajevo_cluster_1990",
+      "mun_ids": [
+        "centar_sarajevo",
+        "novi_grad_sarajevo",
+        "novo_sarajevo",
+        "stari_grad_sarajevo"
+      ],
+      "settlement_ids": [],
+      "siege_duration": 1,
+      "siege_intensity": 0.0325,
+      "siege_status": "BESIEGED"
+    },
+    "settlements": {},
+    "supply_rights": {
+      "corridors": []
+    },
+    "war_alliance_rbih_hrhb": 0.753,
+    "war_consolidation_until": {},
+    "war_control_strain": {},
+    "war_exhaustion": {},
+    "war_exhaustion_local": {},
+    "war_supply_condition": {},
+    "war_supply_pressure": {}
+  },
+  "schema_version": 38,
+  "turn_summaries": [
+    {
+      "arc_transitions": [],
+      "battles": [],
+      "decoration_awards": [],
+      "displacement_by_ethnicity": {},
+      "displacement_total": 0,
+      "events_fired": [
+        {
+          "id": "rs_strategic_goals",
+          "text": "The Assembly Speaks"
+        }
+      ],
+      "formation_destructions": [],
+      "formation_spawns": [],
+      "heavy_munitions_deltas": {},
+      "movements": [],
+      "notable_events": [],
+      "notable_flips": [],
+      "supply_deltas": {},
+      "supply_snapshot": {},
+      "supply_transitions": [],
+      "territory_net": {},
+      "territory_snapshot": {},
+      "turn": 1
+    }
+  ]
+}

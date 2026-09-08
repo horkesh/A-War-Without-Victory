@@ -1,0 +1,50 @@
+
+ RUN  v2.1.9 F:/AWWV-worktrees/bc09-shared-inputs
+
+[E5] Political control initialized (initial municipal substrate): 5822 canonical graph nodes (SID-keyed), RBiH=2739, RS=1964, HRHB=1119, null=0. Promoted to OSID when operational data present.
+[E5] Political control initialized (initial municipal substrate): 5822 canonical graph nodes (SID-keyed), RBiH=2739, RS=1964, HRHB=1119, null=0. Promoted to OSID when operational data present.
+[E5] Political control initialized (initial municipal substrate): 5822 canonical graph nodes (SID-keyed), RBiH=2739, RS=1964, HRHB=1119, null=0. Promoted to OSID when operational data present.
+ ✓ tests/shared_turn_inputs_contract.test.ts (29 tests) 1694ms
+   ✓ shared validated turn input contract > actual scenario builder and desktop loader prepare identical numeric-key inputs 624ms
+   ✓ shared validated turn input contract > actual scenario builder and desktop loader prepare identical direct-key inputs 545ms
+   ✓ shared validated turn input contract > actual scenario builder accepts explicitly selected minimal shared-input omissions 337ms
+ ✓ tests/turn_pipeline.test.ts (4 tests) 7943ms
+   ✓ runTurn determinism > is deterministic for same state and seed 802ms
+   ✓ runTurn determinism > plays the narrated ceasefire chain before opening and resolving the horizon negotiation 4799ms
+   ✓ runTurn determinism > preserves the horizon negotiation when the player rejects the narrated talks 2056ms
+ ✓ tests/data_prereq_check_h1_2.test.ts (5 tests) 94ms
+stdout | tests/turn_result_production_callers.test.ts > TurnResult production caller handling > desktop keeps the input save unchanged and returns a deterministic actionable invariant error
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/turn_result_production_callers.test.ts > TurnResult production caller handling > desktop keeps the input save unchanged and returns a deterministic actionable invariant error
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:10 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/turn_result_production_callers.test.ts > TurnResult production caller handling > desktop keeps the input save unchanged and returns a deterministic actionable invariant error
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/turn_result_production_callers.test.ts > TurnResult production caller handling > desktop keeps the input save unchanged and returns a deterministic actionable invariant error
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:10 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stderr | tests/turn_result_production_callers.test.ts > TurnResult production caller handling > deterministic scenario CLI stops on the first invariant failure without advancing its input
+[displacement_triggers] hasLiveSectorFrontlineTruth=false — using legacy pressure eligibility fallback. Activity counts may differ from canonical sector truth.
+
+ ✓ tests/turn_result_production_callers.test.ts (2 tests) 7445ms
+   ✓ TurnResult production caller handling > desktop keeps the input save unchanged and returns a deterministic actionable invariant error 7099ms
+   ✓ TurnResult production caller handling > deterministic scenario CLI stops on the first invariant failure without advancing its input 345ms
+
+ Test Files  4 passed (4)
+      Tests  40 passed (40)
+   Start at  08:10:16
+   Duration  28.22s (transform 5.48s, setup 25ms, collect 9.20s, tests 17.18s, environment 1ms, prepare 414ms)
+
+EXIT_CODE=0

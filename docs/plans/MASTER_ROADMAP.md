@@ -194,7 +194,7 @@ Diagnostic calibration stays open; D1 and BC04's current owner/panel conditions 
 ### 4.1 Finite behavior-closure register (2026-09-07)
 
 **Current disposition:** BC01/02/03/08 CLOSED; BC04 campaign acceptance and BC05–BC07 open.
-BC09 Phase 1 authorized, not started; BC10 planned. Details and evidence below.
+BC09 Phase 1 locally implemented and reviewed (GO), final acceptance deferred. BC10 planned.
 
 **BC02:** CLOSED 2026-09-07; Electron load/display only. No campaign or calibration change. BC03 CLOSED; BC04 P1 is implemented/reviewed with campaign acceptance deferred to next calibration (clean before/after retained; P1 repeat/ON companion retired); P2 implemented/reviewed; campaigns deferred.
 
@@ -215,7 +215,7 @@ live in the existing R8 plan; its previously proposed B10–B13/F1 are now regis
 | BC06 B13 posture/gestures / R8 | Gameplay/desktop + Game Designer + QA | **Local repairs reviewed GO; design disposed 2026-09-08.** Six new escalation stages deferred post-1.0; packaged acceptance open. [Repairs, live proof and disposition](2026-07-31-full-campaign-electron-validation-plan.md#bc06-bounded-posture-and-gesture-repair--2026-09-07). |
 | BC07 stability divergence / calibration-data | Asset/data integration + Systems + calibration | **VERIFY/DISPOSITION** consumed mode and retain/regenerate policy. Hybrid/ethnic initialization bypass matters; 227 potential stability rows do not prove 227 effects. No mandated regeneration or control repaint. |
 | BC08 inherited test residual / verification | QA + owning Systems/Game Design | **CLOSED — verification/disposition.** Current simulation suites pass; one environmental full-suite failure classified, not erased. [Receipt](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md). |
-| BC09 shared production inputs / R8 | Systems + QA | **AUTHORIZED 2026-09-08; not started.** [Phase 1 contract](2026-09-07-r8-runtime-input-ai-integrity-plan.md): local repair/review/commit; campaigns deferred. Delivery before BC07 policy. |
+| BC09 shared production inputs / R8 | Systems + QA | **LOCAL PACKET REVIEWED (GO).** [Phase 1 evidence](2026-09-07-r8-runtime-input-ai-integrity-plan.md): shared validation; real IPC 25/25 and one-turn baseline bytes match. Final acceptance deferred; BC07 policy separate. |
 | BC10 optional AI ownership/replay / R8 | Commander + Systems + QA | **PLANNED:** [runtime packet Phase 2](2026-09-07-r8-runtime-input-ai-integrity-plan.md). Canonical commander owns final emit; recorded inputs replay without API calls. Cadet preserved; required Phase 0 review before code. |
 
 **Acceptance boundary:** settle every row before final calibration acceptance, retain one-change-per-
@@ -232,12 +232,12 @@ nothing here. R7 continues disjoint presentation work; publication authority rem
 
 ### 4.2 Repository audit integration (2026-09-07)
 
-BC09 Phase 1 authorized 2026-09-08, not started; other packets planned. No new workstream:
+BC09 Phase 1 locally implemented and reviewed (GO); other packets planned. No new workstream:
 
 | Owner / packet | Slot and overlap |
 |---|---|
 | R8 [deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | Original four items plus audit D1–D7, Tasks 1–8. Script Tasks 5/7/8 hand off before dependency work; event Task 2 follows BC04/05, UI Task 3 follows BC06/R7. KEEP with evidence is valid. |
-| R8 [runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | BC09 authorized locally; campaigns deferred. BC07 policy follows delivery; BC10 planned after BC01/06 and BC09. Separate attribution; no data regeneration. |
+| R8 [runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | BC09 local evidence under review; campaigns deferred. BC07 policy remains separate; BC10 planned. No data regeneration. |
 | R9 [build preparation](2026-09-07-r9-build-validation-preparation-plan.md) | Limited early R9 subset: dependencies after R7/script handoff; CI before final costly checks; payload after BC09. All before final calibration/R8 acceptance, not after freeze. |
 
 R7 retains live English/readability work; R4/R5/RE stay closed. Package/lockfile edits are serial.

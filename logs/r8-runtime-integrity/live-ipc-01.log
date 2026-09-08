@@ -1,0 +1,9 @@
+AssertionError [ERR_ASSERTION]: data/source/municipalities_1990_registry_110.json: file-specific error missing: Shared turn input data/source/oob_brigades.json: Expected property name or '}' in JSON at position 1 (line 1 column 2)
+    at main (F:\AWWV-worktrees\bc09-shared-inputs\logs\r8-runtime-integrity\live-ipc.cjs:70:11) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}

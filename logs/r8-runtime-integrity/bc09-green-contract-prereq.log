@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 F:/AWWV-worktrees/bc09-shared-inputs
+
+ ✓ tests/shared_turn_inputs_contract.test.ts (15 tests) 111ms
+ ✓ tests/data_prereq_check_h1_2.test.ts (5 tests) 95ms
+
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+   Start at  07:05:20
+   Duration  1.79s (transform 418ms, setup 21ms, collect 489ms, tests 206ms, environment 1ms, prepare 209ms)

@@ -1,0 +1,96 @@
+
+ RUN  v2.1.9 F:/AWWV-worktrees/bc09-shared-inputs
+
+ ❯ tests/shared_turn_inputs_contract.test.ts (28 tests | 2 failed | 26 skipped) 47ms
+   × shared validated turn input contract > does not reuse valid ethnicity rows after the source file becomes invalid 32ms
+     → promise resolved "{ …(7) }" instead of rejecting
+   × shared validated turn input contract > accepts corrected ethnicity rows after an invalid read 13ms
+     → promise rejected "Error: Shared turn input data/derived/set…" instead of resolving
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > does not reuse valid ethnicity rows after the source file becomes invalid
+AssertionError: promise resolved "{ …(7) }" instead of rejecting
+
+- Expected
++ Received
+
+- [Error: rejected promise]
++ Object {
++   "historicalCorpsLookup": [Function anonymous],
++   "historicalNameLookup": [Function anonymous],
++   "historicalOobIdLookup": [Function anonymous],
++   "municipalityHqSettlement": Object {
++     "mun-a": "sid_a",
++     "mun-z": "sid_z",
++   },
++   "municipalityPopulation1991": Object {
++     "mun-a": Object {
++       "bosniak": 400,
++       "croat": 50,
++       "other": 50,
++       "serb": 100,
++       "total": 600,
++     },
++     "mun-z": Object {
++       "bosniak": 100,
++       "croat": 50,
++       "other": 50,
++       "serb": 700,
++       "total": 900,
++     },
++   },
++   "settlementDataRaw": Array [
++     Object {
++       "ethnicity": Object {
++         "composition": Object {
++           "bosniak": 70,
++           "croat": 10,
++           "other": 10,
++           "serb": 10,
++         },
++       },
++       "population": 60,
++       "sid": "sid_a",
++     },
++   ],
++   "settlementPopulationBySid": Object {
++     "sid_a": 60,
++     "sid_z": 90,
++   },
++ }
+
+ ❯ tests/shared_turn_inputs_contract.test.ts:248:11
+    246|             sids: ['sid_a'],
+    247|             requirements: DESKTOP_PRODUCTION_TURN_INPUT_REQUIREMENTS,
+    248|         })).rejects.toThrow('settlement_ethnicity_data.json');
+       |           ^
+    249|     });
+    250|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > accepts corrected ethnicity rows after an invalid read
+AssertionError: promise rejected "Error: Shared turn input data/derived/set…" instead of resolving
+ ❯ tests/shared_turn_inputs_contract.test.ts:268:11
+    266|             sids: ['sid_a'],
+    267|             requirements: DESKTOP_PRODUCTION_TURN_INPUT_REQUIREMENTS,
+    268|         })).resolves.toMatchObject({
+       |           ^
+    269|             settlementDataRaw: [{ sid: 'sid_a', ethnicity: { compositi…
+    270|         });
+
+Caused by: Error: Shared turn input data/derived/settlement_ethnicity_data.json: by_settlement_id.sid_bad.composition must be an object
+ ❯ inputError src/scenario/turn_inputs.ts:108:12
+ ❯ loadSettlementDataRaw src/scenario/turn_inputs.ts:258:29
+ ❯ Module.prepareSharedTurnInputs src/scenario/turn_inputs.ts:343:11
+ ❯ tests/shared_turn_inputs_contract.test.ts:264:9
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 26 skipped (28)
+   Start at  08:05:52
+   Duration  7.59s (transform 5.06s, setup 18ms, collect 6.79s, tests 47ms, environment 0ms, prepare 103ms)
+
+EXIT_CODE=1

@@ -1,0 +1,9 @@
+AssertionError [ERR_ASSERTION]: ENOENT: no such file or directory, open 'F:\AWWV-worktrees\bc09-shared-inputs\logs\r8-runtime-integrity\live-fixture\data\source\municipalities_1990_initial_political_controllers.json'
+    at main (F:\AWWV-worktrees\bc09-shared-inputs\logs\r8-runtime-integrity\baseline-one-turn.cjs:20:3) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}

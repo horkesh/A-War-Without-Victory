@@ -29,5 +29,23 @@ export const DATA_PREREQS: DataPrereq[] = [
                 'Produces data/derived/settlements_index.json and data/derived/settlement_edges.json.'
             ]
         }
+    },
+    {
+        id: 'production_turn_inputs',
+        description: 'Validated census, ethnicity, OOB and HQ inputs for production turn advance',
+        required_paths: [
+            'data/derived/municipality_population_1991.json',
+            'data/derived/census_rolled_up_wgs84.json',
+            'data/derived/settlement_ethnicity_data.json',
+            'data/source/oob_brigades.json',
+            'data/source/municipalities_1990_registry_110.json',
+            'data/derived/municipality_hq_settlement.json'
+        ],
+        remediation: {
+            commands: [],
+            notes: [
+                'Restore the named runtime resources from the canonical repository inputs; the prerequisite check does not generate or download them.'
+            ]
+        }
     }
 ];

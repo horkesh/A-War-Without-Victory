@@ -1,0 +1,9 @@
+AssertionError [ERR_ASSERTION]: Required event file missing: war_1992.json
+    at main (F:\AWWV-worktrees\bc09-shared-inputs\logs\r8-runtime-integrity\baseline-one-turn.cjs:20:3) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}

@@ -1,0 +1,18 @@
+{
+  "scope": "BC09 Phase 1 bounded local packet; final BC09 acceptance deferred, not waived",
+  "base": "03d039df2f9b873787fe0a60242204716d14ef94",
+  "branch": "codex/bc09-shared-inputs",
+  "checks": [
+    {"command": "npx.cmd vitest run tests/shared_turn_inputs_contract.test.ts tests/data_prereq_check_h1_2.test.ts tests/turn_pipeline.test.ts tests/turn_result_production_callers.test.ts", "exitCode": 0, "passed": 40, "log": "bc09-final3-focused.log"},
+    {"command": "npm.cmd run typecheck", "exitCode": 0, "log": "bc09-final4-typecheck.log"},
+    {"command": "npm.cmd run desktop:sim:build", "exitCode": 0, "log": "bc09-final4-desktop-build.log"},
+    {"command": "node logs/r8-runtime-integrity/live-ipc.cjs logs/r8-runtime-integrity/live-fixture live-ipc-06", "exitCode": 0, "passed": 25, "log": "live-ipc-06.log"},
+    {"command": "node logs/r8-runtime-integrity/summarize-live.cjs live-ipc-06", "exitCode": 0, "log": "live-summary.log"},
+    {"command": "node logs/r8-runtime-integrity/fingerprint.cjs post-fingerprint.json", "exitCode": 0, "log": "post-fingerprint.log"},
+    {"command": "node logs/r8-runtime-integrity/check-evidence.cjs", "exitCode": 0, "log": "final-evidence-check.log"},
+    {"command": "npx.cmd vitest run tests/docs_desktop_v09_truth.test.ts tests/docs_truth_no_skip_guard.test.ts tests/v092_playtest_package_docs.test.ts", "exitCode": 0, "passed": 13, "log": "docs-tests.log"}
+  ],
+  "inputDigest": "2fb328888540d644c3261ca3a6ef61a5ef8ee305d65d2b54e472c86d3da2b421",
+  "canonicalPositiveSha256": "dfd6a3da3a5c03e5eaa3b0a5960ae7279604b3cddcd0498f1249d07ac8752547",
+  "note": "Final focused tests precede a type-only validated-record annotation. Archived text receipts have trailing whitespace normalized; substantive output and exit codes are unchanged. Failed and superseded receipts are retained; only the checks named here establish the final local candidate. Live cases use disposable data copies, real production Electron IPC and a synthetic one-turn war state, not packaged acceptance or a campaign. Runtime bundles, copied inputs and profiles are intentionally ignored. Configured Husky launcher is absent in this isolated worktree. The exact hook command npx.cmd tsc --noEmit is run explicitly; see precommit-equivalent.log."
+}

@@ -34121,3 +34121,50 @@ without relaxing the test or removing linked evidence. Independent review identi
 three stale scheduling/prompt references; corrected to the bounded current authority.
 Independent Sol/medium review returned GO after those targeted corrections; the dated
 addendum is in `logs/bc06/independent-review.md`. No production files changed.
+
+## 2026-09-08 — BC09 shared validated inputs: bounded local packet
+
+Base: clean `03d039df2f9b873787fe0a60242204716d14ef94`; implementation is isolated on
+`codex/bc09-shared-inputs`. The existing runtime plan records the production/fixture
+requirements matrix before production edits. Scenario startup now uses the shared
+preparation contract for municipality totals, census-by-SID, ethnicity and historical
+ordinal lookups, reusing loaded OOB/HQ objects. The existing desktop wrapper selects
+production requirements. Required-file failures no longer silently remove these
+inputs. The prerequisite registry inventories the six production resources; the OOB
+registry reader reports its own parse/shape failures without a second read.
+
+Local evidence: `logs/r8-runtime-integrity/`. The final focused set passed 40 tests;
+the desktop build preserved the existing startup snapshot. Real IPC `live-ipc-06`
+passed 24 missing/parse/top-level-structure/mixed-row negatives plus a valid synthetic war
+advance. Invalid inputs preserve runtime state, canonical save bytes and actual-main
+broadcast silence. The valid t0→t1 advance emits state/report/replay and matches the
+untouched base's canonical bytes, SHA-256
+`dfd6a3da3a5c03e5eaa3b0a5960ae7279604b3cddcd0498f1249d07ac8752547`.
+This proves a minimal local boundary, not campaign outcomes or packaged diaries.
+
+Failed attempts remain recorded: missing fixture resources; registry parse errors
+misattributed to OOB (fixed); and an inadmissible non-target broadcast observer in
+live 02 (replaced by all-case live 03). Independent Sol/medium review found two P1
+gaps: actual-builder fixture selection/parity and mixed-row structural validation.
+Those corrections are verified, including explicit missing-composition rejection and
+same-path recovery after an invalid ethnicity file. Live 05 exposed an inherited
+cache retaining invalid rows; the shared loader now validates fresh JSON. Final live
+acceptance passed 25/25, with exact baseline bytes; independent review returned GO.
+
+The named production input digest remains
+`2fb328888540d644c3261ca3a6ef61a5ef8ee305d65d2b54e472c86d3da2b421`.
+BC07 receives delivery evidence only; no stability-data policy is decided. BC09 is
+not CLOSED: applicable long-run and final packaged gates remain deferred, not waived.
+BC06 packaged acceptance stays open. BC10, deletion cleanup and build preparation
+remain PLANNED. No campaigns, structural-fingerprint simulation, historical/data/
+calibration changes, baseline refresh, remote push or publication. Attribution remains
+pre-P1 `c95e25241`, P1 `f117fe475`, P2 `558f253a2`.
+
+Attribution: Sol/medium implementation and a separate Sol/medium review; Astra
+orchestration, final desktop build, disposable live IPC proof and documentation.
+Independent review GO is recorded in `logs/r8-runtime-integrity/independent-review.md`.
+Typecheck, desktop build and 13 focused documentation checks pass; commands and exit
+codes are indexed in `logs/r8-runtime-integrity/validation.json`. This packet is
+committed locally on its isolated branch. The worktree lacks the generated Husky
+launcher despite the configured hook path; the hook-equivalent `npx.cmd tsc --noEmit`
+is run explicitly and recorded in `logs/r8-runtime-integrity/precommit-equivalent.log`.

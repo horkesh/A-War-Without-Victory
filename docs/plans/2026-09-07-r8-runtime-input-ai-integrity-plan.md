@@ -5,10 +5,10 @@
 **Goal:** Ensure valid production data reaches both campaign runners and optional external AI has one replay-safe command boundary.
 **Architecture:** Reuse the shared turn-input loader and canonical commander. Delete duplicate assembly/direct mutation; make fixture omissions explicit, commit asynchronous results in stable order, and preserve recorded decisions on replay.
 **Tech stack:** TypeScript, existing Node/Electron loaders, Vitest and recorded/fake AI clients.
-**Date/status:** Updated 2026-09-08; BC09 Phase 1 AUTHORIZED/SCHEDULED, implementation not started. BC10 Phase 2 remains PLANNED.
+**Date/status:** Updated 2026-09-08; BC09 Phase 1 locally implemented and independently reviewed (GO). Final acceptance remains deferred. BC10 Phase 2 remains PLANNED.
 **Owner / board row:** R8; BC09 (inputs) and BC10 (optional AI) are explicit additions to the finite behavior register, not new workstreams or a reopening of R4/R5/RE.
 **Slot:** After R7 under D1. Phase 1 establishes input delivery before BC07's final stability-data disposition. Phase 2 follows BC01/BC06 command settlement and Phase 1. Both precede final calibration and final packaged acceptance.
-**Next action:** Execute Phase 1.1 consumer/fixture inventory under the bounded authorization below.
+**Next action:** Preserve the reviewed bounded local packet; retain the deferred campaign/final packaged gates.
 **Collisions:** No simultaneous edits with BC04/05 to turn phases, BC06 to command/desktop handlers, BC07 to input assembly, or R9 preparation to dependency/build inputs. Freeze consumed data at each phase; diagnostic calibration remains open on separate identified trees.
 
 ## 1. Scope, overlap and decisions
@@ -75,6 +75,39 @@ Stop on input policy that requires historical-data changes, changed default-mode
 
 ### 1.1 Characterize the valid and intentionally incomplete inputs
 
+**BC09 Phase 1 finite input matrix (recorded before production edits, 2026-09-08):**
+
+| Input / source | Production desktop advance | Production scenario startup/turn | Explicit minimal fixture | Downstream purpose |
+|---|---|---|---|---|
+| Municipality totals and ethnic breakdowns — `data/derived/municipality_population_1991.json` | Required | Required | May omit only through the fixture contract | Militia pools, JNA inheritance, organizational penetration, formation eligibility, combat/population scaling and displacement seeding. Both `by_mun1990_id` and numeric `by_municipality_id` + `mun1990_id` key schemes remain accepted. |
+| Census population by SID — `data/derived/census_rolled_up_wgs84.json` | Required | Required | May omit only through the fixture contract | Positive first-column settlement population for holdout resistance and the population field in sorted settlement rows. |
+| Settlement ethnicity — `data/derived/settlement_ethnicity_data.json` | Required | Required | May omit only through the fixture contract | Ethnic/hybrid initialization and peace-wave holdout decisions through `settlementDataRaw`, iterated in stable ASCII SID order. |
+| Historical brigade OOB — `data/source/oob_brigades.json` (validated against `data/source/municipalities_1990_registry_110.json`) | Required | Required when OOB initialization, player-choice recruitment or formation spawning is enabled; otherwise explicitly omitted | May omit only through the fixture contract | Historical `(faction, home_mun, ordinal)` name, corps and OOB-ID lookups. Scenario startup reuses its already-loaded OOB list rather than rereading it. |
+| Municipality HQ map — `data/derived/municipality_hq_settlement.json` | Required | Required when OOB initialization or player-choice recruitment is enabled; otherwise explicitly omitted | May omit only through the fixture contract | Initial and emergent corps/brigade placement. Scenario startup reuses its already-loaded map rather than rereading it. |
+
+The fixture contract is a named boundary profile, not a weakening of production
+requirements. It is intended for narrow unit fixtures that deliberately exercise
+turn behavior without historical data. Scenario startup selects it through the fourth
+argument, `{ sharedTurnInputRequirements: EXPLICIT_MINIMAL_FIXTURE_TURN_INPUT_REQUIREMENTS }`;
+production calls omit that construction option. No persisted scenario/save flag is added.
+Omitted shared prepared fields return `undefined`; the builder retains its existing empty
+HQ-map result for a fixture without OOB initialization. Any required field rejects a missing file, malformed JSON
+or invalid top-level/row structure with the relative source path in the error.
+Input objects supplied by scenario startup remain caller-owned and are not mutated.
+
+**Fixed validation plan:** the bounded implementation owns only the shared loader,
+scenario duplicate removal, desktop boundary and prerequisite registry/check plus
+focused tests. Run the named Vitest set and the smallest relevant desktop boundary
+tests, then `npm.cmd run typecheck` and `npm.cmd run desktop:sim:build`; the root
+orchestrator separately runs the real Electron IPC probe from
+`logs/r8-runtime-integrity/live-ipc.cjs` against the shared fixture. Expected cost is
+minutes to tens of minutes. Pass requires valid desktop/scenario parity, both census
+key schemes, stable SID and historical lookup order, unchanged supplied objects,
+explicit fixture omissions, file-specific rejection before advance/save/broadcast,
+and a valid +1-turn positive control. Stop on source-data changes, valid-input output
+drift, unexplained fingerprints, canon conflict or any need for a campaign; do not
+run the structural-fingerprint campaign check.
+
 1. Inventory consumers of municipality population, census-by-SID, ethnicity, OOB ordinal lookups and HQ mappings. Identify which supported scenarios intentionally omit each input; record that finite matrix here before editing.
 2. Add tests comparing desktop/scenario prepared inputs from the same valid fixture: both census key schemes, sorted SID iteration, historical-name/corps/OOB lookup results, and unchanged input source objects. Include explicit minimal-fixture omission cases.
 3. Add failing boundary cases for missing required file, malformed JSON and structurally invalid required data. Prove that rejection occurs before turn increment, canonical save write or broadcast; use a valid positive control so an always-throw implementation cannot pass.
@@ -95,6 +128,63 @@ npm.cmd run desktop:sim:build
 ```
 
 Valid-data behavior must be unchanged; all required-data negative controls fail at the boundary; minimal fixtures remain supported explicitly. Record a clean source/input fingerprint and production/fixture policy. Hand that evidence to BC07; BC09 does not choose stability-score regeneration and BC07 does not waive BC09 failure handling. Commit Phase 1 separately before Phase 2 or a BC07 data edit.
+
+### 2026-09-08 — Bounded local implementation evidence
+
+Base is clean `03d039df2f9b873787fe0a60242204716d14ef94`, isolated branch
+`codex/bc09-shared-inputs`. `prepareSharedTurnInputs` owns preparation and required-input
+validation. Scenario startup reuses its loaded OOB/HQ objects and deletes corresponding
+census, ethnicity and ordinal-lookup assembly. The existing desktop wrapper selects the
+production requirements. The prerequisite registry now inventories the six required
+production resources. The existing OOB registry reader also reports its own file for
+parse/shape failures, without adding a second disk read. Ethnicity preparation reads
+JSON directly at the shared boundary so cached invalid rows cannot survive file
+restoration. Required composition records and finite non-negative components are
+validated; valid zero-population census rows retain their existing filtering.
+
+Local evidence is in `logs/r8-runtime-integrity/`:
+
+- `bc09-final3-focused.log`: 40 tests in four files passed, including shared contracts,
+  prerequisites, turn pipeline and production-caller invariants. Registry malformed/shape
+  attribution has two discriminating red/green regressions after the first live finding.
+- `bc09-final4-desktop-build.log`: desktop bundle build passed; the existing
+  startup snapshot check remained unchanged. `bc09-final4-typecheck.log` passes (exit 0).
+- `live-ipc-06/result.json`: all **25** cases passed through unmodified production
+  Electron main/preload and the fresh bundle. Six required files × missing/malformed/
+  invalid structure/mixed-invalid-row controls preserve runtime state, canonical save bytes and actual-main-window
+  broadcast silence. The positive war advance moves t0→t1, writes the save and emits
+  state/report/replay broadcasts.
+- `baseline-one-turn-result.json`: the untouched base source advances the identical
+  minimal synthetic war state with unchanged production resource copies. The final IPC
+  save is byte-identical: SHA-256
+  `dfd6a3da3a5c03e5eaa3b0a5960ae7279604b3cddcd0498f1249d07ac8752547`.
+  This is one synthetic turn, not campaign or player-diary evidence.
+- `pre-fingerprint.json` records 1,299 named source files and 15 production inputs;
+  live provenance records every copied fixture input and runtime source hash.
+- `validation.json` indexes final commands and exit codes; `docs-tests.log` passes
+  13 focused documentation checks. `live-summary.json` verifies final bundle identity
+  and all 21 copied production resources against repository bytes.
+
+Failed setup/probe attempts are retained. Live 01 found malformed registry errors naming
+only OOB; that production attribution defect was fixed. Live 02 caught an inadmissible
+broadcast observer: production sends only to its main/tactical windows. Live 03 observes
+the actual main window, invokes through a second real renderer, and repeats all cases;
+earlier broadcast-silence assertions supply no acceptance credit. The minimal fixture
+also needed the existing saved-state controller map and unchanged event/controller
+resources; no production data was authored or regenerated to satisfy it.
+Live 04 stopped on a probe-only OOB mutation shape error (array versus wrapper).
+Live 05 rejected all 24 invalid cases but its restored valid control exposed an
+inherited ethnicity cache retaining an invalid parsed row. That receipt is not a
+passing packet. Final live 06 repeats all 25 controls after the fresh-read correction
+and proves restored-file recovery plus unchanged canonical positive bytes.
+
+**BC07 handoff:** the finite matrix and delivery/failure evidence establish the BC09
+input boundary only. They do not decide stability-data retain/regenerate policy or
+attribute effects to the 227 potential stability rows. Applicable long-run comparisons
+and final packaged three-faction acceptance remain **deferred, not waived**; BC09 is
+not CLOSED. BC06 packaged acceptance remains open. BC10, cleanup and build preparation
+remain PLANNED. Preserve pre-P1 `c95e25241`, P1 `f117fe475`, P2 `558f253a2`, the
+188-week horizon, calibration floors and existing protected historical boundaries.
 
 ## 4. Phase 2 — One optional-AI command and replay boundary (BC10)
 
@@ -138,7 +228,7 @@ The separate R9 dependency preparation must land before final calibration accept
 
 BC09 and BC10 close independently with exact files, positive/negative tests, source/input identity, scenario evidence and residuals. Update this plan, R8 controlling plan, master §4.1/4.2, command board and dated ledger. Reuse existing R8 report/evidence; do not create per-check reports. Knowledge updates are only for new reusable lessons. No rating or retired-lane status changes.
 
-**Planning evidence (2026-09-07):** documentation suites 9/9, exit 0; 163 local file links and 22 section anchors resolve; `git diff --check` exit 0. Logs: `logs/repository-audit-planning/{docs-tests.log,links.json,anchors.json,diff-check.log}`. Independent Sol/medium review found one missing alias disposition; cleanup Task 5 now explicitly owns `test:ui` retirement/compatibility and its public documentation. No other material coverage, ordering, canon or validation issues were found. **Implementation (2026-09-08):** both phases NOT STARTED; Phase 1 is now authorized as bounded above, Phase 2 remains planned.
+**Planning evidence (2026-09-07):** documentation suites 9/9, exit 0; 163 local file links and 22 section anchors resolve; `git diff --check` exit 0. Logs: `logs/repository-audit-planning/{docs-tests.log,links.json,anchors.json,diff-check.log}`. Independent Sol/medium review found one missing alias disposition; cleanup Task 5 now explicitly owns `test:ui` retirement/compatibility and its public documentation. No other material coverage, ordering, canon or validation issues were found. **Implementation (2026-09-08):** Phase 1 local evidence is recorded above, with independent review GO and final acceptance deferred; Phase 2 remains planned.
 
 ```text
 Execute the next scheduled phase of docs/plans/2026-09-07-r8-runtime-input-ai-integrity-plan.md under R8. Read its canon/authority references and preserve BC04 conditions. BC09 owns validated shared inputs, not BC07 stability-data policy. BC10 owns scoped external proposals and replay, not new AI features. Honor the Phase 0 affected-expert requirement before BC10 code. Preserve source data, FOW, autonomy, historical constraints and existing log compatibility; stop on canon conflict, unexplained drift, new command fields or ownership collision. Use fake/recorded clients; no paid API calls. Commit phases separately, run only the checks allowed by the 2026-09-08 Phase 1 authorization; campaign and final packaged acceptance remain deferred, not waived, preserve attribution and retired-run decisions, and return exit codes, evidence paths, residuals and ledger updates.

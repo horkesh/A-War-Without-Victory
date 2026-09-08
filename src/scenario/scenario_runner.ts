@@ -9,7 +9,6 @@ import { createWriteStream } from 'node:fs';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { loadSettlementEthnicityData } from '../data/settlement_ethnicity.js';
 import { computeFrontEdges, computeFrontEdgesOsid } from '../map/front_edges.js';
 import type { LoadedSettlementGraph } from '../map/settlements.js';
 import { loadSettlementGraph } from '../map/settlements.js';
@@ -95,8 +94,6 @@ import { loadInitialFormations } from './initial_formations_loader.js';
 import { resolvePendingDaytonCloseOut } from '../sim/negotiation/dayton_negotiation.js';
 import { applyPoliticalLeaderDataInit } from '../sim/political/political_leader_data_loader.js';
 import {
-    loadMunicipalityHqSettlement,
-    loadOobBrigades,
     loadOobCorps,
     type OobBrigade,
     type OobCorps
@@ -120,6 +117,14 @@ import {
     type CombatCausalitySummary
 } from './combat_causality.js';
 import { buildOsidAdjacency } from '../sim/combat/osid_adjacency.js';
+import {
+    loadRequiredHistoricalOob,
+    loadRequiredMunicipalityHqSettlement,
+    prepareSharedTurnInputs,
+    scenarioProductionTurnInputRequirements,
+    type HistoricalOrdinalLookup,
+    type SharedTurnInputRequirements,
+} from './turn_inputs.js';
 import {
     countInitOverrideChanges,
     mergeControlChangeAttributionSummaries,
@@ -1464,10 +1469,6 @@ function collectActiveOperations(state: GameState): ActiveOperationSummary[] {
     return results;
 }
 
-type HistoricalNameLookup = (faction: string, mun_id: string, ordinal: number) => string | null;
-type HistoricalCorpsLookup = (faction: string, mun_id: string, ordinal: number) => string | null;
-type HistoricalOobIdLookup = (faction: string, mun_id: string, ordinal: number) => string | null;
-
 interface ScenarioStartupBuildResult {
     state: GameState;
     graph: Awaited<ReturnType<typeof loadSettlementGraph>>;
@@ -1479,11 +1480,16 @@ interface ScenarioStartupBuildResult {
     municipalityHqSettlement: Record<string, string>;
     operationalData: Awaited<ReturnType<typeof loadOperationalData>> | null;
     operationalCentroids: Awaited<ReturnType<typeof loadOperationalCentroids>> | undefined;
-    historicalNameLookup?: HistoricalNameLookup;
-    historicalCorpsLookup?: HistoricalCorpsLookup;
-    historicalOobIdLookup?: HistoricalOobIdLookup;
+    historicalNameLookup?: HistoricalOrdinalLookup;
+    historicalCorpsLookup?: HistoricalOrdinalLookup;
+    historicalOobIdLookup?: HistoricalOrdinalLookup;
     sidToMun: Map<string, string>;
     initOverrideChangeCount: number;
+}
+
+export interface BuildScenarioStartupStateOptions {
+    /** Test/fixture-only shared-input selection; never persisted in scenario data. */
+    sharedTurnInputRequirements?: Readonly<SharedTurnInputRequirements>;
 }
 
 function validateScenarioMustHoldContract(
@@ -1518,6 +1524,7 @@ export async function buildScenarioStartupState(
     scenario: Awaited<ReturnType<typeof loadScenario>>,
     baseDir: string,
     seed = 'harness-seed',
+    options?: BuildScenarioStartupStateOptions,
 ): Promise<ScenarioStartupBuildResult> {
     const controlPath = scenario.init_control ? resolveInitControlPath(scenario.init_control, baseDir) : undefined;
     const formationsPath = scenario.init_formations ? resolveInitFormationsPath(scenario.init_formations, baseDir) : undefined;
@@ -1528,68 +1535,6 @@ export async function buildScenarioStartupState(
         edgesPath: join(baseDir, 'data/derived/settlement_edges.json')
     });
 
-    let municipalityPopulation1991: MunicipalityPopulation1991 | undefined;
-    let settlementPopulationBySid: Record<string, number> | undefined;
-    try {
-        const popPath = join(baseDir, 'data/derived/municipality_population_1991.json');
-        const popRaw = JSON.parse(await readFile(popPath, 'utf8')) as {
-            by_mun1990_id?: Record<string, { total: number; breakdown?: { bosniak: number; serb: number; croat: number; other: number } }>;
-            by_municipality_id?: Record<string, { total: number; breakdown?: { bosniak: number; serb: number; croat: number; other: number }; mun1990_id?: string }>;
-        };
-        // Support both keying schemes: by_mun1990_id (kebab-case keys) or by_municipality_id (numeric keys with mun1990_id field)
-        const byMunDirect = popRaw.by_mun1990_id;
-        const byNumericId = popRaw.by_municipality_id;
-        const flat: MunicipalityPopulation1991 = {};
-        const addEntry = (munId: string, v: { total: number; breakdown?: { bosniak: number; serb: number; croat: number; other: number } }) => {
-            const b = v?.breakdown;
-            flat[munId] = { total: v?.total ?? 0, bosniak: b?.bosniak ?? 0, serb: b?.serb ?? 0, croat: b?.croat ?? 0, other: b?.other ?? 0 };
-        };
-        if (byMunDirect && Object.keys(byMunDirect).length > 0) {
-            for (const [munId, v] of Object.entries(byMunDirect)) addEntry(munId, v);
-        } else if (byNumericId) {
-            for (const [_numId, v] of Object.entries(byNumericId)) {
-                if (v?.mun1990_id) addEntry(v.mun1990_id, v);
-            }
-        }
-        municipalityPopulation1991 = flat;
-    } catch {
-        municipalityPopulation1991 = undefined;
-    }
-    try {
-        const censusPath = join(baseDir, 'data/derived/census_rolled_up_wgs84.json');
-        const censusRaw = JSON.parse(await readFile(censusPath, 'utf8')) as {
-            by_sid?: Record<string, { p?: number[] }>;
-        };
-        const bySid = censusRaw.by_sid ?? {};
-        const popBySid: Record<string, number> = {};
-        for (const [sid, v] of Object.entries(bySid)) {
-            const p = v?.p;
-            if (Array.isArray(p) && p.length > 0 && typeof p[0] === 'number' && p[0] > 0) {
-                popBySid[sid] = p[0];
-            }
-        }
-        settlementPopulationBySid = Object.keys(popBySid).length > 0 ? popBySid : undefined;
-    } catch {
-        settlementPopulationBySid = undefined;
-    }
-    let settlementDataRaw: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }> | undefined;
-    try {
-        const ethnicityData = await loadSettlementEthnicityData(join(baseDir, 'data/derived/settlement_ethnicity_data.json'));
-        const sids = Array.from(graph.settlements.keys()).sort(strictCompare);
-        const raw: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }> = [];
-        for (const sid of sids) {
-            const entry = ethnicityData.by_settlement_id?.[sid];
-            const pop = settlementPopulationBySid?.[sid];
-            raw.push({
-                sid,
-                ...(entry?.composition ? { ethnicity: { composition: entry.composition } } : {}),
-                ...(pop != null ? { population: pop } : {})
-            });
-        }
-        settlementDataRaw = raw.length > 0 ? raw : undefined;
-    } catch {
-        settlementDataRaw = undefined;
-    }
     let oobBrigades: OobBrigade[] = [];
     let oobCorps: OobCorps[] = [];
     let municipalityHqSettlement: Record<string, string> = {};
@@ -1606,45 +1551,43 @@ export async function buildScenarioStartupState(
     // safely import the combat helpers without pulling in fs/path.
     setUrbanOsidSet(loadUrbanOsidSet());
     setForestOsidSet(loadForestOsidSet());
+    const needsHistoricalOob = Boolean(
+        scenario.init_formations_oob ||
+        scenario.recruitment_mode === 'player_choice' ||
+        scenario.formation_spawn_directive
+    );
+    const needsMunicipalityHq = Boolean(
+        scenario.init_formations_oob || scenario.recruitment_mode === 'player_choice'
+    );
+    const sharedInputRequirements = options?.sharedTurnInputRequirements ??
+        scenarioProductionTurnInputRequirements({
+            historicalOobLookups: needsHistoricalOob,
+            municipalityHqSettlement: needsMunicipalityHq,
+        });
+    if (sharedInputRequirements.historicalOobLookups) {
+        oobBrigades = await loadRequiredHistoricalOob(baseDir);
+    }
     if (scenario.init_formations_oob || scenario.recruitment_mode === 'player_choice') {
-        oobBrigades = await loadOobBrigades(baseDir);
         oobCorps = await loadOobCorps(baseDir);
-        municipalityHqSettlement = await loadMunicipalityHqSettlement(baseDir);
-    } else if (scenario.formation_spawn_directive) {
-        oobBrigades = await loadOobBrigades(baseDir);
     }
-    /** Historical emergent brigade data: (faction, home_mun) -> entries in deterministic name order. */
-    const oobEntriesByFactionMun = new Map<string, Array<{ id: string; name: string; corps: string | null }>>();
-    for (const b of oobBrigades) {
-        const key = `${b.faction}:${b.home_mun}`;
-        const list = oobEntriesByFactionMun.get(key) ?? [];
-        list.push({ id: b.id, name: b.name, corps: b.corps ?? null });
-        oobEntriesByFactionMun.set(key, list);
+    if (sharedInputRequirements.municipalityHqSettlement) {
+        municipalityHqSettlement = await loadRequiredMunicipalityHqSettlement(baseDir);
     }
-    for (const list of oobEntriesByFactionMun.values()) {
-        list.sort((a, b) => strictCompare(a.name, b.name));
-    }
-    const historicalNameLookup =
-        oobEntriesByFactionMun.size > 0
-            ? (faction: string, mun_id: string, ordinal: number): string | null => {
-                const list = oobEntriesByFactionMun.get(`${faction}:${mun_id}`);
-                return list != null && ordinal >= 1 && ordinal <= list.length ? list[ordinal - 1]?.name ?? null : null;
-            }
-            : undefined;
-    const historicalCorpsLookup =
-        oobEntriesByFactionMun.size > 0
-            ? (faction: string, mun_id: string, ordinal: number): string | null => {
-                const list = oobEntriesByFactionMun.get(`${faction}:${mun_id}`);
-                return list != null && ordinal >= 1 && ordinal <= list.length ? list[ordinal - 1]?.corps ?? null : null;
-            }
-            : undefined;
-    const historicalOobIdLookup =
-        oobEntriesByFactionMun.size > 0
-            ? (faction: string, mun_id: string, ordinal: number): string | null => {
-                const list = oobEntriesByFactionMun.get(`${faction}:${mun_id}`);
-                return list != null && ordinal >= 1 && ordinal <= list.length ? list[ordinal - 1]?.id ?? null : null;
-            }
-            : undefined;
+    const sharedTurnInputs = await prepareSharedTurnInputs({
+        baseDir,
+        sids: graph.settlements.keys(),
+        requirements: sharedInputRequirements,
+        ...(sharedInputRequirements.historicalOobLookups ? { oobBrigades } : {}),
+        ...(sharedInputRequirements.municipalityHqSettlement ? { municipalityHqSettlement } : {}),
+    });
+    const {
+        municipalityPopulation1991,
+        settlementPopulationBySid,
+        settlementDataRaw,
+        historicalNameLookup,
+        historicalCorpsLookup,
+        historicalOobIdLookup,
+    } = sharedTurnInputs;
     let sidToMun = buildSidToMunFromSettlements(graph.settlements);
     let initOverrideChangeCount = 0;
     const canonicalSidToMun = sidToMun; // Preserve original canonical SID→mun map for later rebuilds

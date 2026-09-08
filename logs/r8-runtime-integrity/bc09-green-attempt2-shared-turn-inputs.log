@@ -1,0 +1,29 @@
+
+ RUN  v2.1.9 F:/AWWV-worktrees/bc09-shared-inputs
+
+ ❯ tests/shared_turn_inputs_contract.test.ts (15 tests | 1 failed) 132ms
+   × shared validated turn input contract > rejects a missing required production input with its path: data/source/municipalities_1990_registry_110.json 20ms
+     → expected [Function] to throw error including 'data/source/municipalities_1990_regis…' but got 'Shared turn input data/source/oob_bri…'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > rejects a missing required production input with its path: data/source/municipalities_1990_registry_110.json
+AssertionError: expected [Function] to throw error including 'data/source/municipalities_1990_regis…' but got 'Shared turn input data/source/oob_bri…'
+
+Expected: "data/source/municipalities_1990_registry_110.json"
+Received: "Shared turn input data/source/oob_brigades.json: ENOENT: no such file or directory, open 'C:\Users\User\AppData\Local\Temp\awwv-shared-turn-inputs-yVCiCe\data\source\municipalities_1990_registry_110.json'"
+
+ ❯ tests/shared_turn_inputs_contract.test.ts:157:9
+    155|         await rm(join(baseDir, relativePath));
+    156|
+    157|         await expect(prepareSharedTurnInputs({
+       |         ^
+    158|             baseDir,
+    159|             sids: ['sid_a'],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 14 passed (15)
+   Start at  06:56:24
+   Duration  1.42s (transform 431ms, setup 19ms, collect 495ms, tests 132ms, environment 0ms, prepare 112ms)

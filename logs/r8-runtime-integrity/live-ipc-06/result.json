@@ -1,0 +1,283 @@
+{
+  "pass": true,
+  "results": [
+    {
+      "file": "data/derived/municipality_population_1991.json",
+      "kind": "missing",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/derived/municipality_population_1991.json: ENOENT: no such file or directory, open 'F:\\AWWV-worktrees\\bc09-shared-inputs\\logs\\r8-runtime-integrity\\live-ipc-06\\app\\data\\derived\\municipality_population_1991.json'"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/derived/municipality_population_1991.json",
+      "kind": "malformed",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/derived/municipality_population_1991.json: Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/derived/municipality_population_1991.json",
+      "kind": "structural",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/derived/municipality_population_1991.json: expected a JSON object"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/derived/municipality_population_1991.json",
+      "kind": "mixed",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/derived/municipality_population_1991.json: banja_luka.total must be a finite non-negative number"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/derived/census_rolled_up_wgs84.json",
+      "kind": "missing",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/derived/census_rolled_up_wgs84.json: ENOENT: no such file or directory, open 'F:\\AWWV-worktrees\\bc09-shared-inputs\\logs\\r8-runtime-integrity\\live-ipc-06\\app\\data\\derived\\census_rolled_up_wgs84.json'"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/derived/census_rolled_up_wgs84.json",
+      "kind": "malformed",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/derived/census_rolled_up_wgs84.json: Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/derived/census_rolled_up_wgs84.json",
+      "kind": "structural",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/derived/census_rolled_up_wgs84.json: expected { by_sid: non-empty record }"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/derived/census_rolled_up_wgs84.json",
+      "kind": "mixed",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/derived/census_rolled_up_wgs84.json: by_sid.S100013.p must be a non-empty array"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/derived/settlement_ethnicity_data.json",
+      "kind": "missing",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/derived/settlement_ethnicity_data.json: ENOENT: no such file or directory, open 'F:\\AWWV-worktrees\\bc09-shared-inputs\\logs\\r8-runtime-integrity\\live-ipc-06\\app\\data\\derived\\settlement_ethnicity_data.json'"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/derived/settlement_ethnicity_data.json",
+      "kind": "malformed",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/derived/settlement_ethnicity_data.json: Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/derived/settlement_ethnicity_data.json",
+      "kind": "structural",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/derived/settlement_ethnicity_data.json: expected non-empty by_settlement_id record"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/derived/settlement_ethnicity_data.json",
+      "kind": "mixed",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/derived/settlement_ethnicity_data.json: by_settlement_id.S100013.composition must be an object"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/derived/municipality_hq_settlement.json",
+      "kind": "missing",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/derived/municipality_hq_settlement.json: ENOENT: no such file or directory, open 'F:\\AWWV-worktrees\\bc09-shared-inputs\\logs\\r8-runtime-integrity\\live-ipc-06\\app\\data\\derived\\municipality_hq_settlement.json'"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/derived/municipality_hq_settlement.json",
+      "kind": "malformed",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/derived/municipality_hq_settlement.json: Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/derived/municipality_hq_settlement.json",
+      "kind": "structural",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/derived/municipality_hq_settlement.json: Invalid municipality_hq_settlement.json: expected { by_mun1990_id: non-empty record }"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/derived/municipality_hq_settlement.json",
+      "kind": "mixed",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/derived/municipality_hq_settlement.json: Invalid municipality_hq_settlement.json entry for \"banovici\": expected non-empty string key/value"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/source/oob_brigades.json",
+      "kind": "missing",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/source/oob_brigades.json: ENOENT: no such file or directory, open 'F:\\AWWV-worktrees\\bc09-shared-inputs\\logs\\r8-runtime-integrity\\live-ipc-06\\app\\data\\source\\oob_brigades.json'"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/source/oob_brigades.json",
+      "kind": "malformed",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/source/oob_brigades.json: Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/source/oob_brigades.json",
+      "kind": "structural",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/source/oob_brigades.json: expected at least one OOB brigade"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/source/oob_brigades.json",
+      "kind": "mixed",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/source/oob_brigades.json: Invalid OOB brigade at index 246: required id, faction, name, home_mun"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/source/municipalities_1990_registry_110.json",
+      "kind": "missing",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/source/oob_brigades.json: Invalid data/source/municipalities_1990_registry_110.json: ENOENT: no such file or directory, open 'F:\\AWWV-worktrees\\bc09-shared-inputs\\logs\\r8-runtime-integrity\\live-ipc-06\\app\\data\\source\\municipalities_1990_registry_110.json'"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/source/municipalities_1990_registry_110.json",
+      "kind": "malformed",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/source/oob_brigades.json: Invalid data/source/municipalities_1990_registry_110.json: Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/source/municipalities_1990_registry_110.json",
+      "kind": "structural",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/source/oob_brigades.json: Invalid data/source/municipalities_1990_registry_110.json: expected { rows: non-empty array }"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/source/municipalities_1990_registry_110.json",
+      "kind": "mixed",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/source/oob_brigades.json: Invalid data/source/municipalities_1990_registry_110.json: row 110 requires a non-empty mun1990_id"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "kind": "valid-control",
+      "ok": true,
+      "beforeTurn": 0,
+      "afterTurn": 1,
+      "broadcasts": [
+        "state",
+        "report",
+        "replay"
+      ],
+      "canonicalSaveChanged": true,
+      "baselineByteIdentical": true,
+      "canonicalSha256": "dfd6a3da3a5c03e5eaa3b0a5960ae7279604b3cddcd0498f1249d07ac8752547"
+    }
+  ]
+}

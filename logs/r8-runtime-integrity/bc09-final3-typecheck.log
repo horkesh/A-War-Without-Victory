@@ -1,0 +1,7 @@
+
+> awwv@0.9.9-beta.1 typecheck
+> tsc --noEmit -p tsconfig.json
+
+src/scenario/turn_inputs.ts(249,28): error TS2339: Property 'composition' does not exist on type '{}'.
+src/scenario/turn_inputs.ts(249,76): error TS2339: Property 'composition' does not exist on type '{}'.
+EXIT_CODE=2

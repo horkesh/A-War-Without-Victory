@@ -13,11 +13,23 @@ import { describe, expect, it } from 'vitest';
 import { checkDataPrereqs, formatMissingRemediation } from '../src/data_prereq/check_data_prereqs.js';
 
 const TMP_BASE = join(process.cwd(), '.tmp_data_prereq_h1_2');
+const RUNTIME_INPUT_PATHS = [
+    'data/derived/municipality_population_1991.json',
+    'data/derived/census_rolled_up_wgs84.json',
+    'data/derived/settlement_ethnicity_data.json',
+    'data/source/oob_brigades.json',
+    'data/source/municipalities_1990_registry_110.json',
+    'data/derived/municipality_hq_settlement.json',
+] as const;
 
 async function ensureRemoved(dir: string): Promise<void> {
     if (existsSync(dir)) {
         await rm(dir, { recursive: true });
     }
+}
+
+async function writeRuntimeInputPlaceholders(baseDir: string): Promise<void> {
+    await Promise.all(RUNTIME_INPUT_PATHS.map((relativePath) => writeFile(join(baseDir, relativePath), '{}', 'utf8')));
 }
 
 describe('data prerequisite checks', () => {
@@ -30,10 +42,29 @@ describe('data prerequisite checks', () => {
         await writeFile(join(baseDir, 'data/source/municipality_political_controllers.json'), '{}', 'utf8');
         await writeFile(join(baseDir, 'data/derived/settlements_index.json'), '{}', 'utf8');
         await writeFile(join(baseDir, 'data/derived/settlement_edges.json'), '{}', 'utf8');
+        await writeRuntimeInputPlaceholders(baseDir);
 
         const result = checkDataPrereqs({ baseDir });
         expect(result.ok).toBe(true);
         expect(result.missing).toHaveLength(0);
+
+        await ensureRemoved(baseDir);
+    });
+
+    it('returns production_turn_inputs when shared production resources are absent', async () => {
+        const baseDir = join(TMP_BASE, 'missing_turn_inputs');
+        await ensureRemoved(baseDir);
+
+        await mkdir(join(baseDir, 'data', 'source'), { recursive: true });
+        await mkdir(join(baseDir, 'data', 'derived'), { recursive: true });
+        await writeFile(join(baseDir, 'data/source/municipality_political_controllers.json'), '{}', 'utf8');
+        await writeFile(join(baseDir, 'data/derived/settlements_index.json'), '{}', 'utf8');
+        await writeFile(join(baseDir, 'data/derived/settlement_edges.json'), '{}', 'utf8');
+
+        const result = checkDataPrereqs({ baseDir });
+        const turnInputs = result.missing.find((m) => m.prereq_id === 'production_turn_inputs');
+        expect(turnInputs).toBeDefined();
+        expect(turnInputs?.missing_paths).toEqual([...RUNTIME_INPUT_PATHS].sort((a, b) => a.localeCompare(b)));
 
         await ensureRemoved(baseDir);
     });

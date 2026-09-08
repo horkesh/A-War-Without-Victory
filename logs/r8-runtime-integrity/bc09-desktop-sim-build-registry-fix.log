@@ -1,0 +1,18 @@
+
+> awwv@0.9.9-beta.1 desktop:sim:build
+> node tools/desktop_bundle_sim.mjs
+
+[E5] Political control initialized (hybrid_1992, threshold=0.7): 5822 canonical graph nodes (SID-keyed), RBiH=2297, RS=2507, HRHB=1018. Promoted to OSID when operational data present.
+[Recruitment] Mandatory: 182, Elective: 2, Skipped: control=0 manpower=5 capital=0 equipment=0
+  RBiH: capital=400 equipment=100
+  RS: capital=600 equipment=800
+  HRHB: capital=280 equipment=350
+[Placement] Spread 0 brigades to front; 135 front OSIDs now covered
+  HRHB: spread=0 covered=23
+  RBiH: spread=0 covered=51
+  RS: spread=0 covered=61
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+[brigade_assignment] Rehomed arbih_448th_liberation into truthful sector owner sector:arbih_4th_corps:2 (reserve)
+[brigade_assignment] Rehomed arbih_4th_muslim_light into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+Startup snapshot OK: F:\AWWV-worktrees\bc09-shared-inputs\data\derived\startup\apr_1992_initial_save.json
+desktop:sim:build OK: F:\AWWV-worktrees\bc09-shared-inputs\dist\desktop\desktop_sim.cjs

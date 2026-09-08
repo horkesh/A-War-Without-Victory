@@ -1,0 +1,42 @@
+
+ RUN  v2.1.9 F:/AWWV-worktrees/bc09-shared-inputs
+
+ ✓ tests/shared_turn_inputs_contract.test.ts (17 tests) 123ms
+ ✓ tests/turn_pipeline.test.ts (4 tests) 7694ms
+   ✓ runTurn determinism > is deterministic for same state and seed 923ms
+   ✓ runTurn determinism > plays the narrated ceasefire chain before opening and resolving the horizon negotiation 4395ms
+   ✓ runTurn determinism > preserves the horizon negotiation when the player rejects the narrated talks 2089ms
+ ✓ tests/data_prereq_check_h1_2.test.ts (5 tests) 93ms
+stdout | tests/turn_result_production_callers.test.ts > TurnResult production caller handling > desktop keeps the input save unchanged and returns a deterministic actionable invariant error
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/turn_result_production_callers.test.ts > TurnResult production caller handling > desktop keeps the input save unchanged and returns a deterministic actionable invariant error
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:10 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/turn_result_production_callers.test.ts > TurnResult production caller handling > desktop keeps the input save unchanged and returns a deterministic actionable invariant error
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/turn_result_production_callers.test.ts > TurnResult production caller handling > desktop keeps the input save unchanged and returns a deterministic actionable invariant error
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:10 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stderr | tests/turn_result_production_callers.test.ts > TurnResult production caller handling > deterministic scenario CLI stops on the first invariant failure without advancing its input
+[displacement_triggers] hasLiveSectorFrontlineTruth=false — using legacy pressure eligibility fallback. Activity counts may differ from canonical sector truth.
+
+ ✓ tests/turn_result_production_callers.test.ts (2 tests) 7290ms
+   ✓ TurnResult production caller handling > desktop keeps the input save unchanged and returns a deterministic actionable invariant error 6969ms
+   ✓ TurnResult production caller handling > deterministic scenario CLI stops on the first invariant failure without advancing its input 320ms
+
+ Test Files  4 passed (4)
+      Tests  28 passed (28)
+   Start at  07:14:56
+   Duration  25.14s (transform 5.49s, setup 27ms, collect 8.04s, tests 15.20s, environment 1ms, prepare 422ms)

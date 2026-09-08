@@ -1,0 +1,12 @@
+{
+  "pass": true,
+  "changedSources": [
+    "src/data_prereq/data_prereq_registry.ts",
+    "src/scenario/oob_loader.ts",
+    "src/scenario/scenario_runner.ts",
+    "src/scenario/turn_inputs.ts"
+  ],
+  "inputDigest": "2fb328888540d644c3261ca3a6ef61a5ef8ee305d65d2b54e472c86d3da2b421",
+  "addedLocalLinks": 7,
+  "note": "Path targets checked; fragment rendering not independently certified."
+}
