@@ -1,0 +1,176 @@
+{
+  "pass": true,
+  "mode": "modal-only",
+  "fixtureHash": "bdd77a6d2d4a3f393a6075d291ed044391bcd1d1c0d2346aea4b2e8a37d2cef6",
+  "callbackReceipts": [
+    {
+      "owner": "AdvanceTurnModal.handleReviewItem",
+      "route": "decision-room",
+      "foundOn": "lte",
+      "sourceItemId": "counter-offer:task3_counter",
+      "sourceNavigationKind": "counter-offer",
+      "invokedNavigationKind": "decision-room",
+      "returnType": "undefined",
+      "returnValue": "__undefined__"
+    },
+    {
+      "owner": "AdvanceTurnModal.handleReviewItem",
+      "route": "counter-offer",
+      "foundOn": "lte",
+      "sourceItemId": "counter-offer:task3_counter",
+      "sourceNavigationKind": "counter-offer",
+      "invokedNavigationKind": "counter-offer",
+      "returnType": "undefined",
+      "returnValue": "__undefined__"
+    },
+    {
+      "owner": "AdvanceTurnModal.handleReviewItem",
+      "route": "enclave-dashboard",
+      "foundOn": "lte",
+      "sourceItemId": "counter-offer:task3_counter",
+      "sourceNavigationKind": "counter-offer",
+      "invokedNavigationKind": "enclave-dashboard",
+      "returnType": "undefined",
+      "returnValue": "__undefined__"
+    },
+    {
+      "owner": "AdvanceTurnModal.handleReviewItem",
+      "route": "inbox",
+      "foundOn": "lte",
+      "sourceItemId": "counter-offer:task3_counter",
+      "sourceNavigationKind": "counter-offer",
+      "invokedNavigationKind": "inbox",
+      "returnType": "undefined",
+      "returnValue": "__undefined__"
+    },
+    {
+      "owner": "AdvanceTurnModal.handleReviewItem",
+      "route": "generic-army-hq",
+      "foundOn": "lte",
+      "sourceItemId": "counter-offer:task3_counter",
+      "sourceNavigationKind": "counter-offer",
+      "invokedNavigationKind": "army-hq-tab",
+      "returnType": "undefined",
+      "returnValue": "__undefined__"
+    }
+  ],
+  "observations": [
+    {
+      "id": "00-loaded-fixture",
+      "frames": [
+        {
+          "pageIndex": 0,
+          "frameIndex": 0,
+          "url": "awwv://warroom/index.html"
+        },
+        {
+          "pageIndex": 0,
+          "frameIndex": 1,
+          "url": "http://127.0.0.1:59356/index.html?embedded=1"
+        }
+      ]
+    },
+    {
+      "id": "modal-decision-room-destination",
+      "frames": [
+        {
+          "pageIndex": 0,
+          "frameIndex": 0,
+          "url": "awwv://warroom/index.html"
+        },
+        {
+          "pageIndex": 0,
+          "frameIndex": 1,
+          "url": "http://127.0.0.1:59356/index.html?embedded=1"
+        }
+      ]
+    },
+    {
+      "id": "modal-decision-room-return-complete",
+      "modalAbsent": true,
+      "returnControlWorked": true
+    },
+    {
+      "id": "modal-counter-offer-destination",
+      "frames": [
+        {
+          "pageIndex": 0,
+          "frameIndex": 0,
+          "url": "awwv://warroom/index.html"
+        },
+        {
+          "pageIndex": 0,
+          "frameIndex": 1,
+          "url": "http://127.0.0.1:59356/index.html?embedded=1"
+        }
+      ]
+    },
+    {
+      "id": "modal-counter-offer-return-complete",
+      "modalAbsent": true,
+      "returnControlWorked": true
+    },
+    {
+      "id": "modal-enclave-dashboard-destination",
+      "frames": [
+        {
+          "pageIndex": 0,
+          "frameIndex": 0,
+          "url": "awwv://warroom/index.html"
+        },
+        {
+          "pageIndex": 0,
+          "frameIndex": 1,
+          "url": "http://127.0.0.1:59356/index.html?embedded=1"
+        }
+      ]
+    },
+    {
+      "id": "modal-enclave-dashboard-return-complete",
+      "modalAbsent": true,
+      "returnControlWorked": true
+    },
+    {
+      "id": "modal-inbox-destination",
+      "frames": [
+        {
+          "pageIndex": 0,
+          "frameIndex": 0,
+          "url": "awwv://warroom/index.html"
+        },
+        {
+          "pageIndex": 0,
+          "frameIndex": 1,
+          "url": "http://127.0.0.1:59356/index.html?embedded=1"
+        }
+      ]
+    },
+    {
+      "id": "modal-inbox-return-complete",
+      "modalAbsent": true,
+      "returnControlWorked": true
+    },
+    {
+      "id": "modal-generic-army-hq-destination",
+      "frames": [
+        {
+          "pageIndex": 0,
+          "frameIndex": 0,
+          "url": "awwv://warroom/index.html"
+        },
+        {
+          "pageIndex": 0,
+          "frameIndex": 1,
+          "url": "http://127.0.0.1:59356/index.html?embedded=1"
+        }
+      ]
+    },
+    {
+      "id": "modal-generic-army-hq-return-complete",
+      "modalAbsent": true,
+      "returnControlWorked": true
+    }
+  ],
+  "diagnostics": [],
+  "disallowedDiagnostics": []
+}

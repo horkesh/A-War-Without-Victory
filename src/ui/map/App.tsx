@@ -1229,33 +1229,6 @@ function App() {
     openWarroomDecisionRoomFromField('all');
   };
 
-  const reviewPreAdvanceItem = (item: PreAdvanceCommandReviewItem) => {
-    if (item.navigationTarget.kind === 'decision-room') {
-      openWarroomDecisionRoomFromField(item.navigationTarget.lens, item.navigationTarget.cardId ?? null);
-      return;
-    }
-    if (item.navigationTarget.kind === 'counter-offer') {
-      setSelectedCounterOfferId(item.navigationTarget.counterOfferId);
-      leaveWarroomForGame();
-      setSummaryOpen(false);
-      return;
-    }
-    if (item.navigationTarget.kind === 'enclave-dashboard') {
-      setEnclaveDashboardOpen(true);
-      leaveWarroomForGame();
-      setSummaryOpen(false);
-      return;
-    }
-    if (item.navigationTarget.kind === 'inbox') {
-      openInboxHome();
-      setSummaryOpen(false);
-      return;
-    }
-    openPresidentialDecisionRoomNavigationTarget(item.navigationTarget, useGameStore.getState());
-    leaveWarroomForGame();
-    setSummaryOpen(false);
-  };
-
   const reviewPreAdvanceTarget = (target: PresidentialDecisionRoomNavigationTarget) => {
     if (target.kind === 'decision-room') {
       openWarroomDecisionRoomFromField(target.lens, target.cardId ?? null);
@@ -1281,6 +1254,10 @@ function App() {
     openPresidentialDecisionRoomNavigationTarget(target, useGameStore.getState());
     leaveWarroomForGame();
     setSummaryOpen(false);
+  };
+
+  const reviewPreAdvanceItem = (item: PreAdvanceCommandReviewItem) => {
+    reviewPreAdvanceTarget(item.navigationTarget);
   };
 
   const openDecisionRoomTarget = (target: PresidentialDecisionRoomNavigationTarget) => {

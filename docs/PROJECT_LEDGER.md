@@ -34243,6 +34243,109 @@ suite 151 passed/5 skipped; typecheck and diff check passed. Logs are under
 No campaign, data/calibration, dependency, baseline, remote-push or packaged
 acceptance work ran. Tasks 3–8 remain not started.
 
+## 2026-09-08 — Cleanup Task 3: consolidate equivalent pre-advance routing
+
+Fast-forwarded local `main` to reviewed Task 2 commit `cdc8659b1`; no remote push.
+On isolated branch `codex/cleanup-pre-advance-routing`, `reviewPreAdvanceItem` now
+delegates to the existing `reviewPreAdvanceTarget(item.navigationTarget)` after
+comparison of Decision Room, counter-offer, enclave-dashboard, inbox, and generic
+branches. `openDecisionRoomTarget` remains separate because its shell-closing and
+return behavior differs. Only `src/ui/map/App.tsx` changed; no player-visible data,
+strings, simulation inputs, tests, or generated artifacts changed.
+
+Validation: named UI suite 34 passed/5 failed, exit 1, with existing recommended-count
+expectation mismatches and no navigation assertion failure; typecheck exit 0. Release
+build reached successful map build and chunk-cycle checks, then hit the existing stale
+startup-snapshot gate after a source-read timeout; no artifact was regenerated.
+Evidence: `logs/bounded-deletion-cleanup/task3-ui-tests.log`,
+`task3-typecheck.log`, and `task3-release-build.log`. Packaged Electron five-branch
+interaction was unavailable; no packaged acceptance credit claimed. Independent review
+and separate commit remain pending; Tasks 4–8 remain untouched.
+
+Follow-up validation compared the identical UI command on unchanged Task 2 `cdc8659b1`
+and Task 3 `61db7e9df`; both produced the same five projection mismatches (34 passed,
+5 failed, exit 1), proving they are inherited and not routing regressions. The
+source-read probe, simulation/startup snapshot checks, and justified
+`desktop:release:check` retry passed exit 0 without snapshot regeneration; packaging
+reached `dist-packaged\\win-unpacked` but did not return after four minutes and was
+stopped under the bounded rule (exit 1). The resulting executable failed to launch as
+a valid Windows application, so it is not usable packaged evidence. Receipts are the
+Task 3 comparison, retry, package, and launch logs under
+`logs/bounded-deletion-cleanup/`. No packaged Electron
+branch-by-branch interaction receipt was produced, so Task 3 remains NO-GO and is not
+ready to integrate. Tasks 4–8 remain untouched.
+
+### 2026-09-08 — Fresh packaged-validation continuation blocked before build
+
+Task 3 remains NO-GO. Checkout verified clean at `7fbe2b8b7`; local main remains
+`cdc8659b1`. Node is supported `v22.23.2`. No Electron or packaging process was
+running. The resolved cleanup target was exactly
+`F:\A-War-Without-Victory\dist-packaged\win-unpacked`, a normal directory with no
+link/reparse target; sibling validation evidence was excluded.
+
+Automatic approval review rejected both the guarded cleanup command and the
+literal-path-only PowerShell deletion with “blocked by policy”; neither executed.
+No fresh package build, launch, runtime probe or navigation check ran in this
+continuation. The fresh build sequence cannot proceed until that cleanup is allowed
+or the owner completes it. The pre-build question, commands, expected cost, pass
+criteria and stopping rule are appended to `task3-validation-plan.log`; rejection
+receipt: `logs/bounded-deletion-cleanup/task3-fresh-package-diagnosis.log`.
+
+Historical evidence clarification: `task3-package-dir-retry.log` and
+`task3-packaged-runtime-probe-retry.log` report exit 0; the validation repair summary
+records the later 222836736-byte executable. These do not close navigation: the
+last navigation retry failed before any required route assertion. Earlier failed
+receipts and NO-GO verdicts remain retained. All five required routes and relevant
+Decision Room/docket entrypoints remain without accepted packaged proof.
+This is local Task 3 status, not final R8 packaged-game acceptance. No merge, push,
+Task 4, production/data/config/dependency/snapshot/baseline change was performed.
+
+## 2026-09-08 — Cleanup Task 3: fresh packaged navigation proof
+
+Owner removed only the generated `win-unpacked` directory, resolving the earlier
+policy blocker. Fresh canonical Windows package and PE checks pass exit 0. The
+unchanged runtime probe passed a new-profile retry after one preserved Chromium
+cache-read failure. Navigation uses an isolated BC06 fixture copy and actual compiled
+callbacks: all five pre-advance modal routes prove destination, dismissal, shell,
+safe text and visible return; distinct Decision Room callback behavior and natural
+pre-advance/docket entrypoints are also verified. Navigation diagnostics are empty.
+
+Evidence and exact commands/exits: [existing Task 3 closeout](../logs/bounded-deletion-cleanup/task3-validation-closeout.md#latest-local-task-3-packaged-evidence--2026-09-08).
+Earlier failures and NO-GO receipts remain retained. No source, data, dependencies,
+configuration, snapshots or baselines changed; no campaigns or Task 4 work ran.
+Targeted independent Sol/medium review returned GO for local integration. This is local Task 3
+proof, not final R8 packaged-game acceptance. Attribution: Sol harness/fixture,
+Astra package/runtime/native inspection and documentation; separate Sol/medium review GO.
+
+## 2026-09-08 — Cleanup Task 4: trim the derived command board
+
+On `codex/cleanup-command-board` from `71add22ef`, replaced repeated closed RE/probe
+narratives with links to their existing records and the authoritative master snapshot.
+Preserved dispatch, dependencies, unfinished acceptance, engine health, held canon,
+publication limits and closed-record non-authority. Corrected only the repeated BC09
+status to match existing master truth; no new authority or historical-record edits.
+No production/data changes or runtime tests. All 36 links/10 anchors and live
+owner/action mappings pass; documentation tests 13/13 and diff check pass. Independent
+Sol/medium review GO, no findings. Packet status synchronized; see the existing
+[cleanup plan](plans/2026-09-07-bounded-deletion-cleanup-plan.md#task-4-command-board-trim--2026-09-08).
+Tasks 5–8 remain untouched. No reusable lesson or canon update is required.
+
+## 2026-09-08 — Cleanup Task 5: retire obsolete commands and audit tools
+
+Integrated reviewed Task 4 `85bafdd78` into local main, then isolated Task 5 on
+`codex/cleanup-obsolete-commands`. Removed 22 absent-target scripts, misleading
+`test:ui`, and two obsolete audit commands/tools plus their exclusive test. Updated
+only its discovery representative and current command documentation, including
+three maintenance-only context edits; game canon and protected-path policy remain.
+Surviving scripts, dependencies, workflows, production behavior and historical
+outputs are unchanged. Focused checks passed 20/20 across five files, static callers
+resolve, and independent Sol/medium review returned GO without actionable findings.
+Required hook evidence: `logs/bounded-deletion-cleanup/task5-commit.log`; disposition,
+tests and review are in the same directory and summarized in the existing
+[cleanup plan](plans/2026-09-07-bounded-deletion-cleanup-plan.md#task-5-command-retirement--2026-09-08).
+Attribution: Sol/medium implementation, separate Sol/medium review, Astra orchestration
+and documentation closeout. Tasks 6–8 are unstarted; final R8 acceptance remains open.
+No build, package, campaign, dependency upgrade or remote push was performed.
 
 ## 2026-09-08 - Calibration control timeline viewer (tools/, dev instrumentation)
 

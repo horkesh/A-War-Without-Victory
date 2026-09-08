@@ -1,0 +1,141 @@
+{
+  "pass": true,
+  "fixtureHash": "bdd77a6d2d4a3f393a6075d291ed044391bcd1d1c0d2346aea4b2e8a37d2cef6",
+  "callbackReceipts": [
+    {
+      "owner": "reviewPreAdvanceTarget",
+      "route": "enclave-dashboard",
+      "foundOn": "jte",
+      "returnType": "undefined",
+      "returnValue": "__undefined__"
+    },
+    {
+      "owner": "reviewPreAdvanceTarget",
+      "route": "inbox",
+      "foundOn": "jte",
+      "returnType": "undefined",
+      "returnValue": "__undefined__"
+    },
+    {
+      "owner": "reviewPreAdvanceTarget",
+      "route": "generic-army-hq",
+      "foundOn": "jte",
+      "returnType": "undefined",
+      "returnValue": "__undefined__"
+    },
+    {
+      "owner": "openDecisionRoomTarget",
+      "route": "generic-army-hq",
+      "foundOn": "qq",
+      "returnType": "boolean",
+      "returnValue": true
+    },
+    {
+      "owner": "openDecisionRoomTarget",
+      "route": "counter-offer",
+      "foundOn": "qq",
+      "returnType": "boolean",
+      "returnValue": true
+    },
+    {
+      "owner": "openDecisionRoomTarget",
+      "route": "enclave-dashboard",
+      "foundOn": "qq",
+      "returnType": "boolean",
+      "returnValue": true
+    },
+    {
+      "owner": "openDecisionRoomTarget",
+      "route": "inbox",
+      "foundOn": "qq",
+      "returnType": "boolean",
+      "returnValue": true
+    },
+    {
+      "owner": "openDecisionRoomTarget",
+      "route": "decision-room",
+      "foundOn": "qq",
+      "returnType": "boolean",
+      "returnValue": true
+    }
+  ],
+  "observations": [
+    {
+      "id": "00-loaded-fixture",
+      "frames": [
+        {
+          "pageIndex": 0,
+          "frameIndex": 0,
+          "url": "awwv://warroom/index.html"
+        },
+        {
+          "pageIndex": 0,
+          "frameIndex": 1,
+          "url": "http://127.0.0.1:58358/index.html?embedded=1"
+        }
+      ]
+    },
+    {
+      "id": "review-enclave-dashboard",
+      "frames": [
+        {
+          "pageIndex": 0,
+          "frameIndex": 0,
+          "url": "awwv://warroom/index.html"
+        },
+        {
+          "pageIndex": 0,
+          "frameIndex": 1,
+          "url": "http://127.0.0.1:58358/index.html?embedded=1"
+        }
+      ]
+    },
+    {
+      "id": "review-inbox",
+      "frames": [
+        {
+          "pageIndex": 0,
+          "frameIndex": 0,
+          "url": "awwv://warroom/index.html"
+        },
+        {
+          "pageIndex": 0,
+          "frameIndex": 1,
+          "url": "http://127.0.0.1:58358/index.html?embedded=1"
+        }
+      ]
+    },
+    {
+      "id": "review-generic-army-hq",
+      "frames": [
+        {
+          "pageIndex": 0,
+          "frameIndex": 0,
+          "url": "awwv://warroom/index.html"
+        },
+        {
+          "pageIndex": 0,
+          "frameIndex": 1,
+          "url": "http://127.0.0.1:58358/index.html?embedded=1"
+        }
+      ]
+    },
+    {
+      "id": "10-open-decision-room-target-final",
+      "frames": [
+        {
+          "pageIndex": 0,
+          "frameIndex": 0,
+          "url": "awwv://warroom/index.html"
+        },
+        {
+          "pageIndex": 0,
+          "frameIndex": 1,
+          "url": "http://127.0.0.1:58358/index.html?embedded=1"
+        }
+      ]
+    }
+  ],
+  "diagnostics": [],
+  "disallowedDiagnostics": []
+}

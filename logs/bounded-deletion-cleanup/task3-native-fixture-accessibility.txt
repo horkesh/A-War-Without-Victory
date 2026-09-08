@@ -1,0 +1,473 @@
+Window: "AWWV - Warroom", App: A War Without Victory.exe.
+	0 window AWWV - Warroom Secondary Actions: Raise
+		1 pane (disabled)
+		2 region AWWV - Warroom
+			3 region
+				4 region
+					5 region
+						6 region
+							7 menu bar
+								8 button File
+							9 region
+								10 region
+									11 document AWWV - Warroom ID: RootWebArea
+										12 group ID: tactical-map-scene
+											13 document A War Without Victory Description: A War Without Victory ID: tactical-map-iframe
+												14 document AWWV Map ID: RootWebArea
+													15 group ID: root
+														16 group
+															17 main Tactical map of Bosnia and Herzegovina; pan with arrow keys, zoom with plus and minus, press Home to reset view ID: main-content
+																18 button 101st Mountain
+																19 button Review 5 formations in this stack
+																20 button 102nd Motorized
+																21 button Review 2 formations in this stack
+																22 button 104th Motorized
+																23 button 105th Motorized
+																24 button Review 5 formations in this stack
+																25 button 109th Mountain
+																26 button 10th Mountain Brigade
+																27 button 111th Motorized
+																28 button 112th Motorized
+																29 button 115th Mountain
+																30 button Review 2 formations in this stack
+																31 button 123rd Light
+																32 button 124th Light "King Tvrtko"
+																33 button 131st Light
+																34 button 141st Light
+																35 button 143rd Light
+																36 button 146th Light
+																37 button 147th Light
+																38 button Review 2 formations in this stack
+																39 button 152nd Mountain
+																40 button 155th Motorized
+																41 button 161st Olovo Mountain
+																42 button 162nd Mountain
+																43 button 164th Mountain
+																44 button 165th Mountain
+																45 button 17th Muslim Light
+																46 button 181st Mountain
+																47 button 182nd Light
+																48 button 185th Light
+																49 button 1st Mountain Brigade
+																50 button 246th Mountain
+																51 button 250th Liberation
+																52 button 252nd Mountain
+																53 button 2nd Mountain Brigade
+																54 button 314th Liberation
+																55 button 330th Liberation
+																56 button 441st Mountain
+																57 button Review 2 formations in this stack
+																58 button 442nd Mountain
+																59 button Review 2 formations in this stack
+																60 button 443rd Mountain
+																61 button 444th Mountain
+																62 button 445th Mountain
+																63 button 447th Liberation
+																64 button 448th Liberation
+																65 button 449th Eastern Herzegovina Mountain
+																66 button 450th Light
+																67 button 4th Muslim Light
+																68 button 705th Mountain
+																69 button 707th Mountain
+																70 button 802nd Light
+																71 button 843rd Light
+																72 button 851st Liberation
+																73 button HVO Brigade "Kralj Tvrtko"
+																74 button Enemy contact
+																75 button Enemy contact
+																76 button Enemy contact
+																77 button Enemy contact
+																78 button Enemy contact
+																79 button Enemy contact
+																80 button Enemy contact
+																81 button Enemy contact
+																82 button Enemy contact
+																83 button Enemy contact
+																84 button Enemy contact
+																85 button Enemy contact
+																86 button Enemy contact
+																87 button Enemy contact
+																88 button Enemy contact
+																89 button Enemy contact
+																90 button Enemy contact
+																91 group
+																	92 region Map
+																93 group
+																	94 image ID: deckgl-overlay
+																95 button Zoom in Description: Zoom in
+																96 button Zoom out Description: Zoom out
+																97 button Reset bearing to north Description: Reset bearing to north
+															98 group
+																99 region Map
+														100 banner Presidential command toolbar
+															101 button DESK Description: Return to president's desk
+															102 button WAR MAP Description: Clear field selections
+															103 button ARMY HQ Description: Visit Army HQ [H]
+															104 button RECORDS Description: Open Army HQ Records: campaign archive
+															105 button CHRONICLE Description: Campaign chronicle
+															106 button CODEX Description: Historical reference
+															107 group Description: Current date - use CHRONICLE to review timeline
+																108 text 27 DEC 1993 (WAR)
+															109 group Description: Pre-Advance review queue clear
+															110 button 1 REVIEW Description: Open Decision Room presidential attention queue
+															111 group Authority: 100/100 Description: Authority: 100/100 Spent when the Presidency pushes past military advice. Recovers from political standing and command stability.
+																112 text Authority is the Presidency resource for exceptional intervention in the command chain. It recovers from political standing and command stability.
+																113 text AUTHORITY
+																114 text 100
+															115 button Resolve 1 pending decision to continue. Opens Decision Room review. Description: Resolve 1 pending decision to continue. Opens Decision Room review.
+															116 button ARBiH HQ [H] Description: Visit Army HQ [H]
+														117 text COMMAND BRIEFING
+														118 text 2
+														119 text 2 items in this briefing. 1 critical item requires attention.
+														120 button REVIEW
+														121 button DISMISS Description: DISMISS
+														122 complementary Order of Battle
+															123 text COMMAND
+															124 button Collapse Situation Description: Collapse Situation
+															125 text TERRITORY
+															126 text ARBiH
+															127 text 32.3
+															128 text %
+															129 text SITUATION REPORT
+															130 text Widespread thinly held front OGs need staff review.
+															131 text Front posture: widespread contact; thinly held OGs: widespread
+															132 text Sustainment: 0 critical, 0 strained
+															133 text Operations: 0 active commands
+															134 text Priority fronts: Aginci (bosanska dubica) - Kozarska dubica (bosanska dubica); Arapusa (bosanska krupa) - Donji dubovik (bosanska krupa)
+															135 text Weakest brigades: 123rd Light; 131st Light
+															136 text CAMPAIGN MILITARY CASUALTIES
+															137 text ARBiH
+															138 text No data
+															139 text BOSNIAK-CROAT COORDINATION
+															140 text Alliance posture: close coordination
+															141 text INTERNATIONAL PRESSURE
+															142 text Current pressure: quiet (0)
+															143 text Diplomatic pressure rises as sieges, displacement, and negotiation strain become visible.
+															144 text Consequences:
+															145 text
+															146 text none
+															147 text HUMANITARIAN CONVOYS
+															148 figure
+																149 text A humanitarian aid column on a contested route.
+															150 status
+																151 text NO CONVOY DECISIONS ARE PENDING.
+															152 text LOCAL SUPPORT
+															153 status
+																154 text NO LOCAL SUPPORT ORDER IS STAGED THIS TURN.
+															155 text OPERATIONAL SECURITY
+															156 status
+																157 text NO OGS ARE CURRENTLY UNDER AN OPERATIONAL-SECURITY SCREEN.
+															158 text DIPLOMACY
+															159 status
+																160 text DIPLOMACY CAPITAL IS NOT AVAILABLE IN THIS VIEW.
+															161 text ALERTS
+															162 text No active alerts.
+															163 button Collapse Army Description: Collapse Army
+															164 text ARBIH
+															165 button ARBiH / ARBiH CO: Gen. Rasim Delić Description: View ARBiH army summary
+															166 button Collapse ARBiH order of battle
+															167 group
+																168 button Inspect 1st Corps command card: 24,800 personnel; 34 fielded brigades Description: Inspect 1st Corps command card: 24,800 personnel; 34 fielded brigades
+																169 button Show 1st Corps details Description: Show 1st Corps details
+																	170 group Description: Tanks: 24 operational / 24 total
+																	171 group Description: Artillery: 52 operational / 52 total
+																172 group Description: Corps operational posture - affects aggression, operations, and entrenchment
+																	173 text STANCE
+																174 text BALANCED
+																175 button Open 1st Corps order of battle Description: Open 1st Corps order of battle
+															176 group
+																177 button Inspect 2nd Corps command card: 11,700 personnel; 14 fielded brigades Description: Inspect 2nd Corps command card: 11,700 personnel; 14 fielded brigades
+																178 button Show 2nd Corps details Description: Show 2nd Corps details
+																	179 group Description: Artillery: 14 operational / 14 total
+																180 group Description: Corps operational posture - affects aggression, operations, and entrenchment
+																	181 text STANCE
+																182 text BALANCED
+																183 button Open 2nd Corps order of battle Description: Open 2nd Corps order of battle
+															184 group
+																185 button Inspect 3rd Corps command card: 5,280 personnel; 12 fielded brigades Description: Inspect 3rd Corps command card: 5,280 personnel; 12 fielded brigades
+																186 button Show 3rd Corps details Description: Show 3rd Corps details
+																	187 group Description: Tanks: 4 operational / 4 total
+																	188 group Description: Artillery: 15 operational / 15 total
+																189 group Description: Corps operational posture - affects aggression, operations, and entrenchment
+																	190 text STANCE
+																191 text BALANCED
+																192 button Open 3rd Corps order of battle Description: Open 3rd Corps order of battle
+															193 group
+																194 button Inspect 4th Corps command card: 4,400 personnel; 10 fielded brigades Description: Inspect 4th Corps command card: 4,400 personnel; 10 fielded brigades
+																195 button Show 4th Corps details Description: Show 4th Corps details
+																	196 group Description: Tanks: 4 operational / 4 total
+																	197 group Description: Artillery: 13 operational / 13 total
+																198 group Description: Corps operational posture - affects aggression, operations, and entrenchment
+																	199 text STANCE
+																200 text BALANCED
+																201 button Open 4th Corps order of battle Description: Open 4th Corps order of battle
+															202 group
+																203 button Inspect 5th Corps command card: 5,600 personnel; 8 fielded brigades Description: Inspect 5th Corps command card: 5,600 personnel; 8 fielded brigades
+																204 button Show 5th Corps details Description: Show 5th Corps details
+																	205 group Description: Artillery: 8 operational / 8 total
+																206 group Description: Corps operational posture - affects aggression, operations, and entrenchment
+																	207 text STANCE
+																208 text BALANCED
+																209 button Open 5th Corps order of battle Description: Open 5th Corps order of battle
+															210 button Expand Mobilization Description: Expand Mobilization
+															211 button Expand Operations Description: Expand Operations
+															212 button Expand OGs Description: Expand OGs
+														213 text PRESIDENTIAL INBOX
+														214 text 1
+														215 button RECOMMENDED OPPORTUNITY Task 3 Decision Room route Staff recommends authorization.
+														216 text SITUATION
+														217 button RECORD SITUATION 27 Dec 1993 Situation as of 27 Dec 1993.
+														218 text MAP COUNTERS
+														219 group Faction colors
+															220 text ARBiH
+															221 text VRS
+															222 text HVO
+														223 text Type / echelon
+														224 text Strength / morale
+														225 text Selected
+														226 text Stack size
+														227 navigation Map controls and status
+															228 button POLITICAL
+															229 button ETHNIC
+															230 button SUPPLY
+															231 button OPERATIONS
+															232 button +MORE
+															233 button Open The War's Record Description: Open The War's Record
+																234 group Description: Territory control (area-weighted)
+															235 text ALLIED
+															236 button LAYERS
+								237 region
+
+Document text: ```
+101st Mountain
+Review 5 formations in this stack
+102nd Motorized
+Review 2 formations in this stack
+104th Motorized
+105th Motorized
+Review 5 formations in this stack
+109th Mountain
+10th Mountain Brigade
+111th Motorized
+112th Motorized
+115th Mountain
+Review 2 formations in this stack
+123rd Light
+124th Light "King Tvrtko"
+131st Light
+141st Light
+143rd Light
+146th Light
+147th Light
+Review 2 formations in this stack
+152nd Mountain
+155th Motorized
+161st Olovo Mountain
+162nd Mountain
+164th Mountain
+165th Mountain
+17th Muslim Light
+181st Mountain
+182nd Light
+185th Light
+1st Mountain Brigade
+246th Mountain
+250th Liberation
+252nd Mountain
+2nd Mountain Brigade
+314th Liberation
+330th Liberation
+441st Mountain
+Review 2 formations in this stack
+442nd Mountain
+Review 2 formations in this stack
+443rd Mountain
+444th Mountain
+445th Mountain
+447th Liberation
+448th Liberation
+449th Eastern Herzegovina Mountain
+450th Light
+4th Muslim Light
+705th Mountain
+707th Mountain
+802nd Light
+843rd Light
+851st Liberation
+HVO Brigade "Kralj Tvrtko"
+Enemy contact
+Enemy contact
+Enemy contact
+Enemy contact
+Enemy contact
+Enemy contact
+Enemy contact
+Enemy contact
+Enemy contact
+Enemy contact
+Enemy contact
+Enemy contact
+Enemy contact
+Enemy contact
+Enemy contact
+Enemy contact
+Enemy contact
+Map
+￼
+￼
+Zoom in
+Zoom out
+Reset bearing to north
+￼
+￼
+Map
+￼
+￼
+￼
+￼
+DESK
+WAR MAP
+ARMY HQ
+RECORDS
+CHRONICLE
+CODEX
+27 DEC 1993 (WAR)
+￼
+1
+REVIEW
+Authority is the Presidency resource for exceptional intervention in the command chain. It recovers from political standing and command stability.
+AUTHORITY
+100
+REVIEW BLOCKERS
+ARBIH
+￼
+COMMAND BRIEFING
+2
+2 items in this briefing. 1 critical item requires attention.
+REVIEW
+×
+COMMAND
+SITUATION
+TERRITORY
+ARBiH
+32.3%
+SITUATION REPORT
+Widespread thinly held front OGs need staff review.
+Front posture: widespread contact; thinly held OGs: widespread
+Sustainment: 0 critical, 0 strained
+Operations: 0 active commands
+Priority fronts: Aginci (bosanska dubica) - Kozarska dubica (bosanska dubica); Arapusa (bosanska krupa) - Donji dubovik (bosanska krupa)
+Weakest brigades: 123rd Light; 131st Light
+CAMPAIGN MILITARY CASUALTIES
+ARBiH
+No data
+BOSNIAK-CROAT COORDINATION
+Alliance posture: close coordination
+INTERNATIONAL PRESSURE
+Current pressure: quiet (0)
+Diplomatic pressure rises as sieges, displacement, and negotiation strain become visible.
+Consequences: none
+HUMANITARIAN CONVOYS
+A humanitarian aid column on a contested route.
+NO CONVOY DECISIONS ARE PENDING.
+LOCAL SUPPORT
+NO LOCAL SUPPORT ORDER IS STAGED THIS TURN.
+OPERATIONAL SECURITY
+NO OGS ARE CURRENTLY UNDER AN OPERATIONAL-SECURITY SCREEN.
+DIPLOMACY
+DIPLOMACY CAPITAL IS NOT AVAILABLE IN THIS VIEW.
+ALERTS
+No active alerts.
+ARMY
+ARBIH
+ARBiH / ARBiH
+CO: Gen. Rasim Delić
+78 fielded / 0 reserve
+▼
+1ST CORPS
+24,800
+34 fielded brigades
+Commander:
+Mustafa Hajrulahović "Talijan"
+TANKS
+24/24
+ARTY
+52/52
+STANCE
+BALANCED
+ORDER OF BATTLE
+2ND CORPS
+11,700
+14 fielded brigades
+Commander:
+Željko Knez
+ARTY
+14/14
+STANCE
+BALANCED
+ORDER OF BATTLE
+3RD CORPS
+5,280
+12 fielded brigades
+TANKS
+4/4
+ARTY
+15/15
+STANCE
+BALANCED
+ORDER OF BATTLE
+4TH CORPS
+4,400
+10 fielded brigades
+TANKS
+4/4
+ARTY
+13/13
+STANCE
+BALANCED
+ORDER OF BATTLE
+5TH CORPS
+5,600
+8 fielded brigades
+Commander:
+Ramiz Dreković
+ARTY
+8/8
+STANCE
+BALANCED
+ORDER OF BATTLE
+MOBILIZATION
+OPERATIONS
+OGS
+PRESIDENTIAL INBOX
+1
+RECOMMENDED
+OPPORTUNITY
+Task 3 Decision Room route
+Staff recommends authorization.
+SITUATION
+RECORD
+SITUATION
+27 Dec 1993
+Situation as of 27 Dec 1993.
+MAP COUNTERS
+ARBiH
+VRS
+HVO
+Type / echelon
+Strength / morale
+Selected
+Stack size
+POLITICAL
+ETHNIC
+SUPPLY
+OPERATIONS
++MORE
+32%
+68%
+Friendly 32.3%
+|
+Hostile-held 67.7%
+ALLIED
+LAYERS
+```

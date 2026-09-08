@@ -1,0 +1,128 @@
+{
+  "pass": false,
+  "error": "Error: Visible target absent: {\"name\":\"Review Later\"}\n    at waitVisible (F:\\A-War-Without-Victory\\logs\\bounded-deletion-cleanup\\task3-fresh-navigation.cjs:141:9)\n    at async click (F:\\A-War-Without-Victory\\logs\\bounded-deletion-cleanup\\task3-fresh-navigation.cjs:154:17)\n    at async main (F:\\A-War-Without-Victory\\logs\\bounded-deletion-cleanup\\task3-fresh-navigation.cjs:337:9)",
+  "callbackReceipts": [
+    {
+      "owner": "reviewPreAdvanceTarget",
+      "route": "decision-room",
+      "foundOn": "jte",
+      "returnType": "undefined",
+      "returnValue": "__undefined__"
+    },
+    {
+      "owner": "reviewPreAdvanceTarget",
+      "route": "counter-offer",
+      "foundOn": "jte",
+      "returnType": "undefined",
+      "returnValue": "__undefined__"
+    }
+  ],
+  "observations": [
+    {
+      "id": "00-loaded-fixture",
+      "frames": [
+        {
+          "pageIndex": 0,
+          "frameIndex": 0,
+          "url": "awwv://warroom/index.html"
+        },
+        {
+          "pageIndex": 0,
+          "frameIndex": 1,
+          "url": "http://127.0.0.1:54466/index.html?embedded=1"
+        }
+      ]
+    },
+    {
+      "id": "01-natural-pre-advance-decision-room",
+      "frames": [
+        {
+          "pageIndex": 0,
+          "frameIndex": 0,
+          "url": "awwv://warroom/index.html"
+        },
+        {
+          "pageIndex": 0,
+          "frameIndex": 1,
+          "url": "http://127.0.0.1:54466/index.html?embedded=1"
+        }
+      ]
+    },
+    {
+      "id": "02-natural-docket",
+      "frames": [
+        {
+          "pageIndex": 0,
+          "frameIndex": 0,
+          "url": "awwv://warroom/index.html"
+        },
+        {
+          "pageIndex": 0,
+          "frameIndex": 1,
+          "url": "http://127.0.0.1:54466/index.html?embedded=1"
+        }
+      ]
+    },
+    {
+      "id": "03-natural-docket-decision-room",
+      "frames": [
+        {
+          "pageIndex": 0,
+          "frameIndex": 0,
+          "url": "awwv://warroom/index.html"
+        },
+        {
+          "pageIndex": 0,
+          "frameIndex": 1,
+          "url": "http://127.0.0.1:54466/index.html?embedded=1"
+        }
+      ]
+    },
+    {
+      "id": "review-decision-room",
+      "frames": [
+        {
+          "pageIndex": 0,
+          "frameIndex": 0,
+          "url": "awwv://warroom/index.html"
+        },
+        {
+          "pageIndex": 0,
+          "frameIndex": 1,
+          "url": "http://127.0.0.1:54466/index.html?embedded=1"
+        }
+      ]
+    },
+    {
+      "id": "04-review-counter-offer",
+      "frames": [
+        {
+          "pageIndex": 0,
+          "frameIndex": 0,
+          "url": "awwv://warroom/index.html"
+        },
+        {
+          "pageIndex": 0,
+          "frameIndex": 1,
+          "url": "http://127.0.0.1:54466/index.html?embedded=1"
+        }
+      ]
+    },
+    {
+      "id": "failure",
+      "frames": [
+        {
+          "pageIndex": 0,
+          "frameIndex": 0,
+          "url": "awwv://warroom/index.html"
+        },
+        {
+          "pageIndex": 0,
+          "frameIndex": 1,
+          "url": "http://127.0.0.1:54466/index.html?embedded=1"
+        }
+      ]
+    }
+  ],
+  "diagnostics": []
+}

@@ -1,0 +1,17 @@
+{
+  "id": "failure",
+  "frames": [
+    {
+      "pageIndex": 0,
+      "frameIndex": 0,
+      "url": "awwv://warroom/index.html",
+      "body": ""
+    },
+    {
+      "pageIndex": 0,
+      "frameIndex": 1,
+      "url": "http://127.0.0.1:65382/index.html?embedded=1",
+      "body": "5\n2\n5\n2\n2\n2\n2\nDESK\nWAR MAP\nARMY HQ\nRECORDS\nCHRONICLE\nCODEX\n27 DEC 1993 (WAR)\n1\nREVIEW\nAuthority is the Presidency resource for exceptional intervention in the command chain. It recovers from political standing and command stability.\nAUTHORITY\n100\nREVIEW BLOCKERS\nARBIH\nCOMMAND\nSITUATION\n▼\nTERRITORY\nARBiH\n32.3%\nSITUATION REPORT\nWidespread thinly held front OGs need staff review.\nFront posture: widespread contact; thinly held OGs: widespread\nSustainment: 0 critical, 0 strained\nOperations: 0 active commands\nPriority fronts: Aginci (bosanska dubica) - Kozarska dubica (bosanska dubica); Arapusa (bosanska krupa) - Donji dubovik (bosanska krupa)\nWeakest brigades: 123rd Light; 131st Light\nCAMPAIGN MILITARY CASUALTIES\nARBiH\nNo data\nBOSNIAK-CROAT COORDINATION\nAlliance posture: close coordination\nINTERNATIONAL PRESSURE\nCurrent pressure: quiet (0)\nDiplomatic pressure rises as sieges, displacement, and negotiation strain become visible.\nConsequences: none\nHUMANITARIAN CONVOYS\nA humanitarian aid column on a contested route.\nNO CONVOY DECISIONS ARE PENDING.\nLOCAL SUPPORT\nNO LOCAL SUPPORT ORDER IS STAGED THIS TURN.\nOPERATIONAL SECURITY\nNO OGS ARE CURRENTLY UNDER AN OPERATIONAL-SECURITY SCREEN.\nDIPLOMACY\nDIPLOMACY CAPITAL IS NOT AVAILABLE IN THIS VIEW.\nALERTS\nNo active alerts.\nARMY\n78\n▼\nARBIH\nARBiH / ARBiH\nCO: Gen. Rasim Delić\n78 fielded / 0 reserve\n▼\n1ST CORPS\n24,800\n34 fielded brigades\nCommander:\nMustafa Hajrulahović \"Talijan\"\nTANKS\n24/24\nARTY\n52/52\nSTANCE\nBALANCED\nORDER OF BATTLE\n2ND CORPS\n11,700\n14 fielded brigades\nCommander:\nŽeljko Knez\nARTY\n14/14\nSTANCE\nBALANCED\nORDER OF BATTLE\n3RD CORPS\n5,280\n12 fielded brigades\nTANKS\n4/4\nARTY\n15/15\nSTANCE\nBALANCED\nORDER OF BATTLE\n4TH CORPS\n4,400\n10 fielded brigades\nTANKS\n4/4\nARTY\n13/13\nSTANCE\nBALANCED\nORDER OF BATTLE\n5TH CORPS\n5,600\n8 fielded brigades\nCommander:\nRamiz Dreković\nARTY\n8/8\nSTANCE\nBALANCED\nORDER OF BATTLE\nMOBILIZATION\n1\n▶\nOPERATIONS\n▶\nOGS\n72\n▶\nPRESIDENTIAL INBOX\n1\nRECOMMENDED\nOPPORTUNITY\nTask 3 Decision Room route\nStaff recommends authorization.\nSITUATION\nRECORD\nSITUATION\n27 Dec 1993\nSituation as of 27 Dec 1993.\nHUMANITARIAN & SIEGE LEDGER\nx\nPRESIDENTIAL READOUT\nCritical\n0\nHeightened\n0\nAirdrop-ready\n0\nNo enclave data.\nMAP COUNTERS\nARBiH\nVRS\nHVO\nX\n×\n3\nType / echelon\nStrength / morale\nSelected\nStack size\nPOLITICAL\nETHNIC\nSUPPLY\nOPERATIONS\n+MORE\n32%\n68%\nFriendly 32.3%\n|\nHostile-held 67.7%\nALLIED\nLAYERS"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{"executable":"F:\\A-War-Without-Victory\\dist-packaged\\win-unpacked\\A War Without Victory.exe","args":["--user-data-dir=F:\\A-War-Without-Victory\\logs\\bounded-deletion-cleanup\\task3-fresh-runtime-user-data"],"profile":"F:\\A-War-Without-Victory\\logs\\bounded-deletion-cleanup\\task3-fresh-runtime-user-data"}
+Error: Packaged desktop runtime probe failed with exit code 1.
+
+
+(electron) 'console-message' arguments are deprecated and will be removed. Please use Event<WebContentsConsoleMessageEventParams> object instead.
+AWWV_DESKTOP_RUNTIME_PROBE_FAIL packaged runtime probe captured renderer/network failures: [
+  {
+    "type": "request-failed",
+    "label": "webContents:1",
+    "error": "net::ERR_CACHE_READ_FAILURE",
+    "method": "GET",
+    "resource_type": "script",
+    "url": "http://127.0.0.1:61922/assets/tactical_map-CJseegZ6.js",
+    "intentional_abort": false
+  }
+]
+    at file:///F:/A-War-Without-Victory/tools/desktop_packaged_runtime_probe.mjs:51:9
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+EXIT_CODE=1

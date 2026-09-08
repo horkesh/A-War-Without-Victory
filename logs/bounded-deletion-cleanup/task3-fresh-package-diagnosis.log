@@ -1,0 +1,19 @@
+Fresh Task 3 package preflight — 2026-09-08
+HEAD=7fbe2b8b7efafbfb7305334d3feb77135f553a32
+MAIN=cdc8659b12c9be141fa0f55f8f6fc9aceab7db7d
+NODE=v22.23.2
+TARGET=F:\A-War-Without-Victory\dist-packaged\win-unpacked
+Directory attributes=Directory; LinkType/Target empty
+Active Electron/app-builder/electron-builder/packaged-probe processes=0
+Existing executable bytes=222836736
+Attempt 1: guarded PowerShell cleanup plus logged build command.
+Result: exec_command CreateProcess rejected: blocked by policy. Not executed; no exit code.
+Attempt 2: Remove-Item -LiteralPath 'F:\A-War-Without-Victory\dist-packaged\win-unpacked' -Recurse -Force
+Result: exec_command CreateProcess rejected: blocked by policy. Not executed; no exit code.
+No alternate deletion mechanism attempted. Package directory retained.
+Fresh package/runtime/navigation=NOT RUN
+All required route checks=UNTESTED in this continuation
+VERDICT=NO-GO; no merge; no Task 4; no push.
+Independent review: Sol/medium task3_blocker_review returned documentation GO, no findings. Task 3 acceptance remains NO-GO. Review confirmed no fresh build/navigation proof, historical receipts preserved, no integration or Task 4. Focused docs 13/13 exit 0; diff check exit 0. Documentation edits left uncommitted while blocked.
+Owner removed win-unpacked. Verified absent; sibling task3-validation-evidence retained; no packaging/Electron processes. Node v22.23.2. Resuming authorized fresh build.
+Runtime first isolated probe exit 1 (cache read failure), new-profile retry exit 0, runtime_failure_checks empty. Closed runtime profiles moved intact from logs to dist-packaged/task3-validation-evidence; manifests and logs remain under logs.

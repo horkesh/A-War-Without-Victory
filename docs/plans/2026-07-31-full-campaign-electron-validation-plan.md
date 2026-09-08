@@ -1164,3 +1164,27 @@ exit 0 (`logs/r8-runtime-integrity/bc07-consumption-final.log`). No production/d
 Independent review: `logs/r8-runtime-integrity/bc07-independent-review.md` — GO.
 TypeScript and 13 focused documentation checks pass (`bc07-typecheck.log` and
 `bc07-docs-tests.log` in the same evidence directory).
+
+### 2026-09-08 — Cleanup Task 3 packaged-validation continuation
+
+Task 3 source/documentation acceptance remains settled; integration remains NO-GO
+because five-route packaged navigation proof is absent. A fresh clean-package
+continuation was blocked before build: automatic approval review rejected deletion
+of the verified generated `dist-packaged/win-unpacked` directory (“blocked by policy”).
+No command exit code exists for either rejected deletion; neither ran. Historical
+package/runtime retry exit-0 receipts do not establish route acceptance. See the
+[existing cleanup evidence](2026-09-07-bounded-deletion-cleanup-plan.md#2026-09-08--fresh-packaged-validation-continuation-blocked-before-build)
+and `logs/bounded-deletion-cleanup/task3-fresh-package-diagnosis.log`.
+Local main stays at reviewed Task 2; Task 4 is not started. This local Task 3
+validation does not discharge final R8 packaged-game acceptance.
+
+### 2026-09-08 — Cleanup Task 3 fresh local packaged proof
+
+Owner cleanup resolved the earlier policy blocker. Fresh Windows package and PE
+checks pass; the existing runtime probe passes after one preserved transient-cache
+retry. All five pre-advance modal routes now prove destination, dismissal, shell,
+return and safe text in the completed package. Distinct Decision Room callback
+behavior and natural pre-advance/docket entrypoints also have receipts. Navigation
+diagnostics are empty. See the [Task 3 closeout](../../logs/bounded-deletion-cleanup/task3-validation-closeout.md#latest-local-task-3-packaged-evidence--2026-09-08).
+Targeted independent Sol/medium review returned GO for local integration. Task 4 is untouched;
+these local fixture checks do not discharge final R8 packaged-game acceptance.

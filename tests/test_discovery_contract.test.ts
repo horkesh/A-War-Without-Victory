@@ -50,7 +50,6 @@ describe('test discovery contracts', () => {
             'tests/acceptance_brcko_completeness.test.ts',
             'tests/acceptance_constraints.test.ts',
             'tests/artifact_determinism.test.ts',
-            'tests/audit_state_of_game_determinism.test.ts',
             'tests/calibration.test.ts',
             'tests/test_discovery_contract.test.ts',
             'tests/combat_exhaustion.test.ts',

@@ -9,10 +9,10 @@
 **Tech stack:** TypeScript, React, Vitest, Vite/Electron, Markdown.
 
 **Date:** 2026-09-07
-**Status:** Task 1 COMPLETE, reviewed GO (owner authorized 2026-09-08). Tasks 2–8 remain PLANNED.
+**Status:** Tasks 1–5 COMPLETE, reviewed GO. Tasks 6–8 PLANNED. Dated receipts below retain earlier states.
 **Owner lane / command-board row:** R8, subordinate cleanup packet; no new workstream or BC identifier.
 **Phase covered:** R8 after R7; finish before final calibration/final packaged acceptance. Task 2 follows BC04/BC05 event settlement; Task 3 follows R7 and BC06 UI settlement. Other tasks may run on disjoint files while behavior work settles. Diagnostic calibration stays open.
-**Current next action:** Task 1 is complete; Task 2 is next when separately scheduled.
+**Current next action:** Task 6 is the next bounded slice; it has not started.
 **Collision rule:** Do not overlap BC event edits, R7 `App.tsx` work, or another agent's roadmap/ledger writes. Re-read current files before each edit; preserve unrelated changes. No implementation is dispatched by this planning turn.
 
 ## 1. Purpose and non-goals
@@ -193,9 +193,31 @@ Planning verification (2026-09-07): documentation suites passed 9/9, exit 0
 was corrected by keeping §4.2 concise and removing one duplicate historical pointer; no test
 threshold changed. Local-link/scope checks and `git diff --check` passed, exit 0
 (`logs/bounded-deletion-cleanup/planning-links.log`, `planning-diff-check.log`).
-The preceding receipt covers the original four-item draft only. Repository-wide extension planning checks (2026-09-07): documentation suites 9/9, exit 0; 163 local file links and 22 section anchors resolve; `git diff --check` exit 0. Evidence: `logs/repository-audit-planning/{docs-tests.log,links.json,anchors.json,diff-check.log}`. Independent Sol/medium review found one missing alias disposition; cleanup Task 5 now explicitly owns `test:ui` retirement/compatibility and its public documentation. No other material coverage, ordering, canon or validation issues were found. Implementation Task 1: COMPLETE, reviewed GO (2026-09-08); Tasks 2–8 NOT STARTED.
+The preceding receipt covers the original four-item draft only. Repository-wide extension planning checks (2026-09-07): documentation suites 9/9, exit 0; 163 local file links and 22 section anchors resolve; `git diff --check` exit 0. Evidence: `logs/repository-audit-planning/{docs-tests.log,links.json,anchors.json,diff-check.log}`. Independent Sol/medium review found one missing alias disposition; cleanup Task 5 now explicitly owns `test:ui` retirement/compatibility and its public documentation. No other material coverage, ordering, canon or validation issues were found. Implementation Task 1: COMPLETE, reviewed GO (2026-09-08); Task 2 COMPLETE, reviewed GO (2026-09-08); Task 3 initially reviewed NO-GO pending validation, now COMPLETE with local packaged proof and independent GO (2026-09-08); Task 4 COMPLETE, reviewed GO (2026-09-08); Tasks 5–8 NOT STARTED.
 
 At implementation closeout, update this evidence section with dispositions, files, command exit codes, log paths, UI branch coverage and any residual. Update `COMMAND_BOARD.md`, master §4.2 and the R8 controlling plan's packet status, then append `docs/PROJECT_LEDGER.md`. Put the implementation receipt in the existing R8 report if available; only if none fits, use one consolidated report under `docs/40_reports/implemented/`, not separate task reports. Update knowledge only for a new reusable lesson; no rating/backlog change is implied.
+
+### Task 3 local evidence — 2026-09-08
+
+Fast-forwarded local `main` from `223d97970` to reviewed Task 2 commit `cdc8659b1`. On isolated branch `codex/cleanup-pre-advance-routing`, compared all five target branches and consolidated `reviewPreAdvanceItem` into `reviewPreAdvanceTarget(item.navigationTarget)`. `openDecisionRoomTarget` remains separate. Only `src/ui/map/App.tsx` changed; no tests or strings added.
+
+Named UI tests: 34 passed, 5 failed, exit 1; failures are existing recommended-count expectation mismatches in pre-advance/docket projections, with no navigation assertion failure. Typecheck passed, exit 0. Release build passed map build/chunk-cycle checks but stopped at the existing stale startup-snapshot gate after a source-read timeout; no artifact was regenerated. Evidence: `logs/bounded-deletion-cleanup/task3-ui-tests.log`, `task3-typecheck.log`, `task3-release-build.log`. Packaged Electron interaction was unavailable because the release build did not complete; no acceptance credit claimed.
+
+Validation follow-up: the identical UI command on unchanged Task 2 `cdc8659b1` and
+Task 3 `61db7e9df` produced the same five projection mismatches (34 passed/5 failed,
+exit 1), proving they are inherited rather than routing regressions. The source-read
+probe, simulation/startup snapshot checks, and justified `npm.cmd run desktop:release:check`
+retry passed exit 0 without snapshot regeneration. Packaging reached
+`dist-packaged\\win-unpacked` but did not return after four minutes and was stopped
+under the bounded stopping rule (exit 1). Its freshly written executable then failed
+to launch with Windows reporting that it was not a valid application, confirming the
+interrupted output is unusable. No reviewable packaged Electron interaction receipt
+exists for the five target branches and relevant Decision Room/docket entrypoints.
+Evidence: `task3-task2-ui-compare.log`, `task3-candidate-ui-compare.log`,
+`task3-source-read-probe.log`, `task3-desktop-sim-retry.log`,
+`task3-startup-snapshot-retry.log`, `task3-release-build-retry.log`,
+`task3-package-dir.log`, `task3-packaged-launch.log`, and
+`task3-validation-closeout.md`. Task 3 remains NO-GO for packaged navigation proof.
 
 ## 6. Copy-ready implementation prompt
 
@@ -229,3 +251,101 @@ Final receipts in `logs/bounded-deletion-cleanup/`: `task1-typecheck.log` and
 `task1-warroom-build.log` exit 0; `task1-docs-tests.log` 13/13, exit 0;
 `task1-independent-review.md` GO; `task1-diff-check.log` exit 0. One stale
 BC09/BC07 roadmap status was corrected during review. No broader review or campaign.
+
+### 2026-09-08 — Fresh packaged-validation continuation blocked before build
+
+Task 3 remains NO-GO. Checkout verified clean at `7fbe2b8b7`; local main remains
+`cdc8659b1`. Node is supported `v22.23.2`. No Electron or packaging process was
+running. The resolved cleanup target was exactly
+`F:\A-War-Without-Victory\dist-packaged\win-unpacked`, a normal directory with no
+link/reparse target; sibling validation evidence was excluded.
+
+Automatic approval review rejected both the guarded cleanup command and the
+literal-path-only PowerShell deletion with “blocked by policy”; neither executed.
+No fresh package build, launch, runtime probe or navigation check ran in this
+continuation. The fresh build sequence cannot proceed until that cleanup is allowed
+or the owner completes it. The pre-build question, commands, expected cost, pass
+criteria and stopping rule are appended to `task3-validation-plan.log`; rejection
+receipt: `logs/bounded-deletion-cleanup/task3-fresh-package-diagnosis.log`.
+
+Historical evidence clarification: `task3-package-dir-retry.log` and
+`task3-packaged-runtime-probe-retry.log` report exit 0; the validation repair summary
+records the later 222836736-byte executable. These do not close navigation: the
+last navigation retry failed before any required route assertion. Earlier failed
+receipts and NO-GO verdicts remain retained. All five required routes and relevant
+Decision Room/docket entrypoints remain without accepted packaged proof.
+This is local Task 3 status, not final R8 packaged-game acceptance. No merge, push,
+Task 4, production/data/config/dependency/snapshot/baseline change was performed.
+
+### Task 3 fresh packaged proof — 2026-09-08
+
+The owner resolved the historical cleanup-policy blocker by removing only
+`win-unpacked`. Fresh `desktop:package:dir` and PE checks pass exit 0. The existing
+runtime probe passed on one new-profile retry after a preserved Chromium cache-read
+failure. The packaged five-route modal pass and distinct Decision Room callback
+continuation pass exit 0 with zero captured diagnostics. Real modal dismissal,
+destinations, shells, player-safe text and visible returns are proven for all five
+routes; natural pre-advance and priority-docket clicks are also retained.
+
+The [existing closeout](../../logs/bounded-deletion-cleanup/task3-validation-closeout.md#latest-local-task-3-packaged-evidence--2026-09-08)
+contains commands, exits, route matrix, screenshots, fixture limitations and earlier
+failed receipts. Synthetic fixture targets invoke actual compiled callbacks; no
+production debug control or router replacement was added. Local packaged criteria
+are satisfied; targeted independent Sol/medium review returned GO for integration.
+Tasks 4–8 are not started by this continuation. Final R8 acceptance remains separate.
+
+### Task 4 command-board trim — 2026-09-08
+
+Base `71add22ef`; branch `codex/cleanup-command-board`. Replaced repeated closed
+RE/probe execution narratives with links to the existing closed contract, recovery
+record and master execution snapshot. Historical records themselves are unchanged.
+Retained current dispatch rows, dependencies, unresolved acceptance, engine-health
+priority, non-authorizing closed proof records, held canon and publication limits.
+Aligned the repeated BC09 sentence with its already-reviewed status in master §4.1.
+No new workflow authority, game behavior, canon, data or runtime change is introduced.
+
+Validation question: does the shorter derived board preserve every unfinished item's
+master owner and next action? Check all board links/anchors; compare live items with
+master §§4.1–4.2/5; run the three existing documentation suites and `git diff --check`.
+Expected cost: minutes. Pass requires retained authority/constraints and clean focused
+checks; stop on any unowned item, lost live constraint or unresolved authority conflict.
+No runtime tests. Evidence: `logs/bounded-deletion-cleanup/task4-validation.log` and
+`task4-docs-tests.log`. Task 4 COMPLETE: independent Sol/medium review GO, no findings
+(`task4-review.log`); 36 links/10 anchors resolve, live owners/actions retained,
+13/13 documentation tests and diff check pass. Master/derived packet status synchronized.
+Tasks 5–8 remain not started by this continuation.
+
+### Task 5 validation plan — 2026-09-08
+
+Reviewed Task 4 `85bafdd78` fast-forwarded into local main; Task 5 is isolated on
+`codex/cleanup-obsolete-commands`. Question: can the named obsolete commands/tools
+be retired without breaking a supported caller? One Sol/medium implementer handles
+consumer evidence and the bounded deletion; a separate Sol/medium reviewer checks it.
+
+Recheck all 22 historical missing targets and inbound consumers; explicitly resolve
+`test:ui`; preserve active equivalents, dependencies, workflows and historical outputs.
+Run workflow-command resolution, the existing documentation suites plus
+`tests/ci_workflow_test_paths_exist.test.ts`, `tests/test_discovery_contract.test.ts`,
+`git diff --check`, and the unchanged
+required pre-commit hook. Expected cost: minutes. No builds/packages/campaigns or
+new deletion-shape tests. Stop rather than expand into dependency, CI, runtime,
+canon/data or unrelated consumer repair. KEEP a now-live target with evidence.
+Root owns these status/ledger updates; worker owns script/tool/current-command docs.
+Evidence: `logs/bounded-deletion-cleanup/task5-disposition.log` and focused check logs.
+
+### Task 5 command retirement — 2026-09-08
+
+Removed all 22 verified absent-target commands, misleading `test:ui`, and the two
+obsolete audit commands/tools with their exclusive generator test. Removed only
+that deleted test's discovery representative; other assertions remain. All surviving
+scripts and non-script package fields are unchanged. Updated current README/backlog
+advertisements and three maintenance-only details in `docs/10_canon/context.md`:
+two retired command lines and the historical audit-output description. Protected-path
+policy and game canon are unchanged. Historical reports and generated outputs remain.
+
+Static disposition: 17 workflow npm references, 37 package-chain references and
+258 direct literal targets resolve. Focused documentation/workflow/discovery checks
+passed 20/20 across five files (exit 0). Evidence: `task5-disposition.log` and
+`task5-focused-tests.log` under `logs/bounded-deletion-cleanup/`. Independent Sol/medium review returned GO with no actionable findings (`task5-review.log`).
+The mandatory pre-commit typecheck result is recorded in `task5-commit.log`. Tasks 6–8 remain unstarted;
+final R8 acceptance and the R7/dependency handoffs remain unchanged.

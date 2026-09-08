@@ -1,0 +1,17 @@
+{
+  "id": "01-natural-pre-advance-decision-room",
+  "frames": [
+    {
+      "pageIndex": 0,
+      "frameIndex": 0,
+      "url": "awwv://warroom/index.html",
+      "body": ""
+    },
+    {
+      "pageIndex": 0,
+      "frameIndex": 1,
+      "url": "http://127.0.0.1:54466/index.html?embedded=1",
+      "body": "PRESIDENT'S DESK\nCOMMAND SURFACE\nDIPLOMACY\nINTELLIGENCE\nARMY HQ\nCHRONICLE\nFACTION\nWAR MAP\nADVANCE\nWAR\nREQUIRED 0\nREVIEW BEFORE ADVANCE\n2\n·\nPENDING 2\n27 Dec 1993\nCOMMAND SURFACE\nDecision Room\nCLOSE\nSTRATEGIC PRIORITIES\nDecisions, staff reports, and campaign records.\nREVIEW BEFORE ADVANCE\nALL\n8 ITEMS\nREQ 1 · REC 5 · MON 2 · RECORD 0\nCOUNTER\n1 ITEM\nREQ 1 · REC 0 · MON 0 · RECORD 0\nOPPORTUNITY\n1 ITEM\nREQ 0 · REC 1 · MON 0 · RECORD 0\nBRIEFING\n2 ITEMS\nREQ 0 · REC 0 · MON 2 · RECORD 0\nCOMMAND\n4 ITEMS\nREQ 0 · REC 4 · MON 0 · RECORD 0\nCRITICAL\nOPPORTUNITY\nRECOMMENDED BEFORE ADVANCE\nDOSSIER\nTask 3 Decision Room route\nStaff recommends authorization.\nCURRENT DOSSIER\nReview by 3 Jan 1994\nOPERATION OPPORTUNITY DOSSIERS / ARMY HQ OPPORTUNITY\nPRIORITY DOSSIER\nTask 3 Decision Room route\nOPPORTUNITY\nStaff recommends authorization.\nSOURCE\nOperation opportunity dossiers\nARMY HQ OPPORTUNITY\nADVANCE\nRecommended before advance\nEVIDENCE\nReview by 3 Jan 1994\nISSUE DIRECTIVE\nAuthorize operation\nFREE\nAUTHORIZE\nCANCEL DIRECTIVE\nOPEN BRIEFING"
+    }
+  ]
+}
