@@ -20,7 +20,7 @@
 ## Subordinate audit packets (2026-09-07)
 
 2026-09-08: cleanup Tasks 1–8 are reviewed GO. R9 dependency graph is captured;
-install changes await the R7 build handoff. Current graph evidence does not replace
+the R7 build handoff is recorded and R9 Phase 1 consolidation is active. Graph evidence does not replace
 final packaged acceptance or certify a future consolidated dependency graph.
 
 [Master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07) integrates the repository

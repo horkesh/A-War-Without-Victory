@@ -206,7 +206,7 @@ The broader `npm run test:vitest:fast` command also covers Gates 1–3 (it auto-
 
 - Node version: **22** across all workflows. Bumping in one workflow without bumping the rest causes spurious diff between local-dev and CI behaviour.
 - Install command: `npm ci --legacy-peer-deps`.
-- Map workspace: run the same command with `working-directory: src/ui/map` because root `tsc --noEmit` references map UI types. Running from the workspace keeps the root package out of the map dependency graph.
+- Map workspace: the root `npm ci --legacy-peer-deps` includes `src/ui/map` through the declared npm workspace and sole root lockfile. Do not run a second map install; production and tests share the intended runtime dependency graph.
 - Action versions: `actions/checkout@v5` and `actions/setup-node@v5` (matches `baseline-regression.yml`, `typecheck.yml`, `desktop-release-guard.yml`). Pinning to v4 mid-workflow set causes intermittent cache-key drift.
 
 ## Cross-references

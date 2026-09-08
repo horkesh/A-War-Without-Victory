@@ -19,13 +19,13 @@ test('root map scripts route through the map workspace Vite entrypoint', () => {
     assert.strictEqual(mapPkg.scripts?.build, 'tsc -b && vite build', 'map workspace owns the Vite build command');
     assert.strictEqual(
         rootPkg.scripts?.['dev:map'],
-        'node src/ui/map/node_modules/vite/bin/vite.js --config src/ui/map/vite.config.ts --host 127.0.0.1',
-        'documented root dev:map command must not depend on a root .bin vite shim',
+        'npm exec --workspace awwv-map -- vite --config vite.config.ts --host 127.0.0.1',
+        'documented root dev:map command must use the root workspace install authority',
     );
     assert.strictEqual(
         rootPkg.scripts?.['desktop:map:build'],
-        'node src/ui/map/node_modules/vite/bin/vite.js build --config src/ui/map/vite.config.ts',
-        'desktop map build must use the workspace-local Vite entrypoint without changing release typecheck scope',
+        'npm exec --workspace awwv-map -- vite build --config vite.config.ts',
+        'desktop map build must use the root workspace Vite entrypoint without changing release typecheck scope',
     );
     assert.strictEqual(
         rootPkg.scripts?.['warroom:build'],

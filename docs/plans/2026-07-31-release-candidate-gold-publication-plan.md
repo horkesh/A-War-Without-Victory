@@ -21,14 +21,15 @@
 
 2026-09-08: the owner activated the dependency review after cleanup Task 8. Actual
 production/test graph evidence is captured in the linked preparation plan;
-install consolidation awaits the R7 build handoff. This does not activate RC freeze.
+the subsequent owner instruction activates Phase 1 after the recorded R7 build handoff.
+This does not activate RC freeze or close R7 presentation acceptance.
 
 [Build and validation preparation](2026-09-07-r9-build-validation-preparation-plan.md) is the
 explicit preparatory subset of this plan, scheduled by [master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07)
 after R7/cleanup script handoff and before final calibration/R8 packaged acceptance. It owns
 dependency resolution, duplicated CI/local check execution, and research-payload exclusions.
-Payload exclusions wait for BC09's required-input contract. No implementation starts in this
-planning turn. R5 stays closed; no new release infrastructure workstream is created.
+Payload exclusions wait for BC09's required-input contract. The initial planning turn made no
+implementation changes; the subsequent Phase 1 activation is recorded above. R5 stays closed.
 
 This order prevents Phase 1.2 from changing the dependency graph/payload after accepted R8 proof
 or Phase 0 freeze. Phase 1.2 still performs final security/SBOM/license/offline verification on

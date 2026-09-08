@@ -5,10 +5,10 @@
 **Goal:** Make tests and shipped UI use the intended dependency graph, eliminate duplicate check execution, and exclude development research from release payloads before final acceptance.
 **Architecture:** Keep the existing npm/Vite/Electron/CI stack. Consolidate dependency ownership and check execution; narrow existing package filters using verified runtime-resource consumers. Do not create a build system, check orchestrator or generated manifest framework.
 **Tech stack:** npm lockfiles/workspaces as needed, Vite, Vitest, electron-builder, existing GitHub Actions and package probes.
-**Date/status:** 2026-09-08; dependency graph review GO. Phase 1 implementation/acceptance and Phases 2–3 remain open.
+**Date/status:** 2026-09-08; Phase 1 complete, independent review GO and fresh acceptance passed. Phases 2–3 remain planned.
 **Owner / board row:** R9 preparatory subset of existing dependency/offline/reproducibility ownership, executed before final R8 acceptance. This explicit subset is not activation of R9 freeze, signing or publication.
 **Slot:** Phase 1 follows R7 and cleanup script handoff (Tasks 5/7/8), before final BC09/BC10 campaign evidence where possible. Phase 2 follows Phase 1 and precedes final expensive validation. Phase 3 follows BC09 input-contract definition. All three precede final calibration, final R8 packaged diaries, and R9 Phase 0 freeze.
-**Next action:** Record the R7 build handoff, then add the Phase 1.1 mismatch contract before consolidating install authority.
+**Next action:** Phase 2 coverage/required-check ownership review, on separate authorization. No Phase 2 execution in this slice.
 **Collisions:** One owner for `package.json`, both lockfiles, Vite/test config and CI. Wait for cleanup script edits and R7 build/presentation edits. Runtime fixes may proceed on disjoint source, but final proof must use the resulting frozen build inputs.
 
 ## 1. Holistic scope and decisions
@@ -36,6 +36,147 @@ rg -n 'npm ci|typecheck|test:vitest|baseline|fingerprint' .github/workflows tool
 Use an isolated `codex/` branch. Record dependency resolution and required-check ownership before modifying either. Stop on a necessary major-version behavior change, loss of check coverage/reporting, unclassified runtime resource, source/input drift, or file collision. Keep the existing safe mechanism when evidence is insufficient; do not delete checks to reach a target count.
 
 ## 3. Phase 1 — Shared runtime dependency authority (audit S1)
+
+### Build handoff and Phase 1 activation — 2026-09-08
+
+Following the graph review, the owner instructed proceeding with the R7 build handoff
+and Phase 1. HEAD is `f22bcbb63af7c5d017c59cfc3fe29838e3af1508` on
+`codex/r9-dependency-authority`; no intervening tracked edits exist. All 12 registered
+worktrees have no tracked changes on the shared package/lock/Vite/test/workflow surfaces.
+R7's active presentation amendment declares no new runtime dependency and its file
+ownership is disjoint. The orchestrator records the handoff: R9 now owns these build
+surfaces serially; R7 presentation/audio acceptance remains open. A later overlapping
+R7 change must be coordinated and its acceptance must use the resulting build identity.
+This resolves the scheduling condition recorded below without claiming R7 completion.
+
+Fixed validation question: can one root install reproduce the observed production
+runtime graph and give direct, sliced and balanced Vitest equivalent resolution and
+mock identity? Write and observe the failing `runtime_dependency_resolution` contract
+with a deliberate mismatch control before implementation. Regenerate locks only with
+npm, preserving observed runtime versions; keep named tooling-only splits.
+
+Run `npm.cmd ci --legacy-peer-deps`, `npm.cmd run typecheck`, focused
+`runtime_dependency_resolution`, `run_vitest_balanced` and `test_suite_inventory`
+suites, and `npm.cmd run desktop:release:check`. Verify a fresh isolated install from
+the root lock, generated runner configurations, map/Deck/PMTiles behavior, shell
+transitions and existing mock contracts using focused existing gates. Use process-local
+Git Bash precedence for Windows shell checks. Root owns final validation and commit;
+one Sol implementer and a separate Sol reviewer cover the phase.
+
+Expected cost: installs/builds and UI verification take minutes to tens of minutes;
+focused tests take minutes. Logs remain under `logs/r9-build-preparation/phase1-*`.
+Stop on required runtime upgrade, unexplained source/input drift, collision or unresolved
+compatibility failure. No Phase 2/3 changes, check-name retirement, dependency pruning,
+package-payload changes, campaigns, baseline refresh or remote operation is authorized.
+The full combined-build gate remains at the plan's final combined-input checkpoint;
+focused runner checks are not presented as that full-suite result. Reuse no prior
+UI acceptance automatically across changed build inputs. One review and targeted
+correction verification close Phase 1 only when its applicable gates pass.
+
+### Phase 1 validation corrections — 2026-09-08
+
+Implementation validation correction: the first fresh root install and release build
+passed, as did live operation/map and recovery routes. These receipts remain preliminary:
+a subsequent direct-dependency audit found four Storybook packages re-resolved from
+10.2.13 to 10.6.0, requiring restoration and a corrected-lock install. The focused
+platform gate also exposed a Deck test collection failure at the `wgsl_reflect`
+named-export boundary; five other suites passed 45 tests. Neither passing UI evidence
+nor those focused passes waive this compatibility failure. Diagnose the module boundary,
+verify the targeted correction across runners, and record final input identity before
+acceptance. Preserve the original failed receipts under `phase1-*`.
+
+Independent review traced the failure to actual production-transitive drift:
+the prior nested lock resolved `@luma.gl/shadertools@9.2.6` to
+`wgsl_reflect@1.2.3`, while the first unified lock selected 1.6.0. The initial
+family-filtered comparison omitted this dependency and cannot certify complete
+closure preservation. Restore the observed version through npm lock generation,
+compare the full reachable dependency closure, and rerun the fresh install,
+release build and UI checks on the corrected lock. These are targeted correction
+checks within the existing acceptance question, not an additional campaign.
+
+Intermediate corrected-input verification passed (all exit 0): fresh root `npm.cmd ci
+--legacy-peer-deps`, `npm.cmd run desktop:release:check`, `npm.cmd run typecheck`,
+and the runtime-resolution/Deck-counter/MapLibre-mock suites (53 tests). The fresh
+checkout is `F:/AWWV-worktrees/r9-phase1-install-proof`; 19 changed input files match
+the primary checkout by SHA-256. Live Electron operation/map proof rendered seven
+counters, fetched a 16-byte PMTiles range with status 206 and the expected header,
+selected all four objectives, and restored the exact dossier. Recovery proof passed
+legacy-menu/side-picker/back and React ownership reclamation. These bounded synthetic
+route fixtures do not certify campaign outcomes or final packaged acceptance.
+Evidence: `phase1-final-fresh-{npm-ci,release-build,typecheck,runtime-contracts}.log`,
+`phase1-final-fresh-input-identity.log`, `phase1-final-ui-{operations,recovery}.log`
+and corresponding `phase1-ui-*-final-fresh/` receipts. Despite their `final` filename,
+these receipts are superseded: the completed reachable-closure audit subsequently
+found 14 further transitive version changes. The premature freeze was invalid.
+Restore the prior runtime closure while retaining root-tooling splits; the independent
+reviewer must verify the complete closure comparison before another fresh proof starts.
+Phase 1 acceptance remains open.
+
+Review clarified the comparison boundary: traverse normal and installed optional
+dependencies, and inventory supplied/missing peers separately. The old map lock
+auto-installed `@arcgis/core@4.34.8` through the unused `deck.gl`/`@deck.gl/arcgis`
+peer chain; neither package has a repository import or appeared in the observed
+production module graph. Its absence under the retained `--legacy-peer-deps`
+installation contract is an explicit legacy-peer difference, not proof that the
+entire old lock is byte-equivalent. Direct declarations remain retained. Reject
+unlocked generation that floats root tooling; use the existing lock as npm's seed.
+
+### Reviewed Phase 1 inputs — 2026-09-08
+
+Independent review approved the corrected input freeze before the next fresh proof.
+The root workspace and npm-generated root lock replace the nested lock/install;
+all public build commands and workflow check names remain. Runtime targets remain
+MapLibre 4.7.1, PMTiles 3.2.1, Deck 9.2.11, React/React DOM 18.3.1 and Zustand 4.5.7.
+Storybook remains 10.2.13. Root Turf 7.3.x and map declarations 6.5.0 remain an
+intentional tooling/workspace split. Redundant MapLibre/Deck test aliases are removed;
+necessary React/Zustand singleton and mock aliases remain.
+
+The final audit follows normal and installed optional runtime dependencies, classifies
+`@types` branches as tooling, and inventories peers separately. It passes with 168
+prior and 170 final physical package nodes, zero version-set differences, zero missing
+runtime edges, and a live deliberate-mismatch control. Same-version non-singleton
+placement accounts for the node-count difference. Root direct tooling versions match.
+Preservation overrides retain the prior map transitive versions, including
+`wgsl_reflect@1.2.3`. The `core-util-is` split explicitly preserves map 1.0.3 and
+`verror`'s exact 1.0.2; compatible shared tooling consumers can now use 1.0.3.
+This is not a claim of identical root-transitive placement. The reviewer checked
+the override consumers and semver constraints. ArcGIS's dormant peer difference is
+recorded above; its direct parent declarations remain.
+
+The reviewed-input checks use `phase1-reviewed-*` logs and a SHA-256 input inventory;
+earlier `phase1-final-*` files remain superseded evidence. Install lifecycle preparation
+uses process-local `HUSKY=0` to preserve Git hook configuration. The final commit hook
+must run enabled. The fresh checkout and isolated lock-generation directory remain
+available for inspection. Reviewed-input fresh install, release build, typecheck,
+eight runtime/platform suites (98 tests), and both live UI routes passed, all exit 0.
+The input inventory confirms 19 matching files across checkouts. Final independent
+review is GO (`phase1-review.log`), with no remaining findings. Storybook-only
+`react-docgen` 8.0.2 to 8.0.3 is a disclosed tooling-transitive difference with no
+production consumer; npm vulnerability debt remains for the existing release-security
+owner. Local commit runs the enabled mandatory hook (`phase1-commit.log`). Phases 2–3,
+R7 acceptance, final R8 diaries and R9 freeze remain open.
+
+| Accepted check | Command / evidence (`logs/r9-build-preparation/`) | Result |
+|---|---|---|
+| Fresh root install | `HUSKY=0 npm.cmd ci --legacy-peer-deps`; `phase1-reviewed-fresh-npm-ci.log` | Exit 0 |
+| Release build and chunk guard | `npm.cmd run desktop:release:check`; `phase1-reviewed-fresh-release-build.log` | Exit 0 |
+| Fresh typecheck | `npm.cmd run typecheck`; `phase1-reviewed-fresh-typecheck.log` | Exit 0 |
+| Runtime/platform gates | `npx.cmd vitest run` on the eight named suites in `phase1-reviewed-fresh-runtime-platform.log` | 98 tests; exit 0 |
+| Live operations/map | `node logs/r9-build-preparation/phase1-ui-routes.cjs operations reviewed`; `phase1-reviewed-ui-operations.log` | PASS; exit 0 |
+| Live recovery | Same helper, `recovery reviewed`; `phase1-reviewed-ui-recovery.log` | PASS; exit 0 |
+| Input equivalence | `phase1-reviewed-input-identity.log` | 19 files; zero mismatches; exit 0 |
+| Primary focused contracts | `phase1-final-focused-direct-accepted.log` | 6 files; 78 tests; exit 0 |
+| Sliced runtime and Deck | `phase1-final-runtime-deck-sliced-accepted.log` | 46 tests; exit 0 |
+| Balanced runtime / Deck | `phase1-final-runtime-balanced-accepted.log`, `phase1-final-deck-balanced-accepted.log` | 12 / 34 tests; exit 0 |
+| Documentation truth | `phase1-reviewed-docs.log` | 13 tests; exit 0 |
+| Diff whitespace | `git diff --check`; `phase1-reviewed-diff-check.log` | Exit 0 |
+
+The live helper uses `AWWV_PHASE1_CHECKOUT=F:/AWWV-worktrees/r9-phase1-install-proof`
+and isolated fixture/save/profile paths. It verifies map/Deck ownership and counters,
+PMTiles 206 range/header bytes, four objectives, exact dossier return, legacy recovery
+and React ownership reclamation. No gameplay, canon, simulation, saves, baselines or
+campaign result is changed. Full combined-build acceptance remains at the final
+combined-input checkpoint; the prior 13,717-test suite is not a post-Phase-1 result.
 
 ### Dependency-review boundary — 2026-09-08
 

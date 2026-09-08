@@ -20,6 +20,12 @@ runtime dependency.
 
 ## 1. Header Contract
 
+**Build handoff — 2026-09-08:** after the reviewed dependency graph and owner instruction
+to proceed, R9 Phase 1 takes serial ownership of package/lockfiles, Vite/test configuration
+and install commands. This amendment declares no new runtime dependency and retains its
+presentation-file ownership. R7 acceptance remains open and must use the resulting build
+identity; coordinate any later shared-build edit through the R9 preparation owner.
+
 | Field | Value |
 |---|---|
 | **Date** | 2026-09-05 |

@@ -34651,3 +34651,55 @@ handoff precedes those changes. No package, full suite, campaign, baseline refre
 operation, RC freeze or publication occurred. Independent Sol correction review is GO: eight package identities and 208 normalized
 query-distinct IDs match the raw capture; all ten source hashes match. Final documentation
 and commit-hook receipts are recorded in the preparation plan.
+
+## 2026-09-08 — R9 preparation Phase 1: one root dependency authority
+
+Owner instructed proceeding after the graph review. Recorded the R7 build handoff,
+kept its presentation/audio acceptance open, and implemented only Phase 1 on
+`codex/r9-dependency-authority`, based on `f22bcbb63af7c5d017c59cfc3fe29838e3af1508`.
+The initial 12-worktree collision check was clean on shared build surfaces. The new
+fresh proof checkout and isolated npm lock-generation directory remain available.
+
+The map package is now an npm workspace under one generated root lock. Deleted the
+nested lock and redundant nested CI installs; preserved public scripts, workflow check
+names, production versions, Storybook ownership and required React/Zustand mock aliases.
+Removed redundant MapLibre/Deck aliases across direct/sliced/balanced Vitest and added
+a real resolution contract with a deliberate mismatch control. Active install docs
+now use the root command. No simulation, gameplay, canon, saves, baselines or campaign
+was changed; no push, merge, Phase 2/3 work, package or full-suite run occurred.
+
+The initial family-filtered audit missed Storybook and runtime-transitive drift,
+including a `wgsl_reflect` named-export collection failure. Passing early build/UI
+receipts were invalidated and preserved. The complete runtime dependency comparison
+was reviewed before the accepted fresh proof: 168 prior/170 final physical nodes,
+zero version-set differences or missing runtime edges; `@types` tooling and peers are
+classified separately. Exact runtime versions and intentional Turf/tooling splits,
+the dormant unsupplied ArcGIS peer, and the scoped `core-util-is` exception are recorded
+in the [existing plan](plans/2026-09-07-r9-build-validation-preparation-plan.md#reviewed-phase-1-inputs--2026-09-08).
+Seeded, targeted npm lock generation avoided opportunistic root-tooling upgrades and
+worked around transient Windows lockfile writes. Root direct tooling versions match.
+
+Accepted fresh checks all exited 0: root `npm.cmd ci --legacy-peer-deps` with
+process-local `HUSKY=0`, `npm.cmd run desktop:release:check`, `npm.cmd run typecheck`,
+eight runtime/platform suites (98 tests), and live operation/map and recovery routes.
+The 19 changed inputs match the primary checkout by SHA-256. See
+`logs/r9-build-preparation/phase1-reviewed-*` and the plan's command/result table.
+The fixture routes prove map/Deck counters, PMTiles range loading and shell transitions;
+they do not certify campaign outcomes or final packaged acceptance. The earlier full
+suite of 13,717 passes with 31 skipped remains prior evidence.
+
+Final review, documentation checks and enabled commit-hook receipts complete this
+entry below. R7 presentation, Phases 2–3, final calibration/R8 diaries and R9 freeze
+remain open. The next bounded handoff is Phase 2's coverage and required-check ownership
+review; do not retire any external check name without its disposition. The knowledge
+ledger adds the reusable full-graph-before-freeze lesson.
+Final closeout: independent Sol review **GO**, no remaining findings
+(`logs/r9-build-preparation/phase1-review.log`). It recomputed all 19 input hashes,
+verified 14 acceptance logs at exit 0, and checked the closure assertion and positive
+control. Direct six-file proof passed 78 tests; sliced runtime/Deck passed 46; balanced
+runtime and Deck passed 12 and 34. Documentation truth passed 13 tests. All exited 0;
+authoritative raw paths are in the existing plan. The enabled mandatory commit-hook
+receipt is `logs/r9-build-preparation/phase1-commit.log`. Phase 1 is complete.
+Disclosed residuals include the dormant ArcGIS peer, type-only audit boundary,
+Storybook-only `react-docgen` 8.0.2 to 8.0.3, and existing npm vulnerability debt;
+none closes final release-security or packaged acceptance.

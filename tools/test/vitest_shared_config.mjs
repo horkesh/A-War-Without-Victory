@@ -11,13 +11,9 @@
  * That divergence caused two real CI failures on 2026-09-01:
  *   1. The jsdom createObjectURL polyfill was added to the root config only, so sharded
  *      runs never got it.
- *   2. The slice config had silently drifted and was missing the maplibre-gl and
- *      @deck.gl/* aliases entirely — the exact aliases vitest.config.ts documents at
- *      length as load-bearing. Without the maplibre alias, a test's
- *      vi.mock('maplibre-gl') resolves a different module id than the component's own
- *      import when a nested src/ui/map/node_modules copy exists, so the mock never
- *      engages, the REAL module loads, and it crashes on jsdom's missing
- *      window.URL.createObjectURL at import time.
+ *   2. The slice config had silently drifted from the root aliases. The root workspace
+ *      lock now owns map/Deck identity directly; React/Zustand singleton and mock
+ *      aliases remain shared here.
  *
  * Keep this list ordered most-specific-first: 'react-dom/server' must precede
  * 'react-dom', which must precede 'react', or the shorter key captures the longer paths.
@@ -36,11 +32,6 @@ export const VITEST_ALIASED_PACKAGES = [
     'use-sync-external-store/shim',
     'use-sync-external-store',
     'zustand',
-    'maplibre-gl',
-    '@deck.gl/core',
-    '@deck.gl/extensions',
-    '@deck.gl/layers',
-    '@deck.gl/mapbox',
 ];
 
 /** Installed before each test file's module graph is evaluated. */

@@ -2,7 +2,6 @@ import assert from 'node:assert';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { test } from 'vitest';
-// @ts-expect-error JS-only repo helper exercised at runtime by the test suite.
 import { buildVitestSliceArgs } from '../tools/test/run_vitest_slice.mjs';
 
 type PackageJson = {

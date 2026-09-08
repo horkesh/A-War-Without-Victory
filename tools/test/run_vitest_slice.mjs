@@ -56,9 +56,8 @@ export function buildVitestSliceArgs(root, files, passthrough) {
   ];
 }
 
-export function writeVitestSliceConfig(root, files) {
+export function writeVitestSliceConfig(root, files, configPath = join(root, GENERATED_CONFIG_FILE)) {
   const include = files.map((file) => toPosixPath(relative(root, file)));
-  const configPath = join(root, GENERATED_CONFIG_FILE);
   mkdirSync(dirname(configPath), { recursive: true });
   writeFileSync(
     configPath,
@@ -78,10 +77,8 @@ export function writeVitestSliceConfig(root, files) {
       'export default defineConfig({',
       '  resolve: {',
       '    alias: {',
-      // From tools/test/vitest_shared_config.mjs. This list previously omitted
-      // maplibre-gl and the @deck.gl/* family, so vi.mock('maplibre-gl') resolved a
-      // different module id than the component's own import, the real module loaded, and
-      // every jsdom suite touching the map crashed on window.URL.createObjectURL.
+      // From tools/test/vitest_shared_config.mjs so singleton/mock aliases cannot
+      // silently diverge between direct and sliced runs.
       ...renderAliasEntryLines('      '),
       '    },',
       '  },',

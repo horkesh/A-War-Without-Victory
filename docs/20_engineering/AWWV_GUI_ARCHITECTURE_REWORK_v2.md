@@ -1217,13 +1217,17 @@ The rework is complete when:
 
 ## Appendix A: Quick Reference for Agents
 
-### Install new dependencies (UI app)
+### Install the UI workspace
 ```bash
-cd src/ui/map
-npm install react react-dom maplibre-gl pmtiles zustand
-npm install -D @vitejs/plugin-react tailwindcss postcss autoprefixer @types/react @types/react-dom
-npx tailwindcss init -p
+# Run at the repository root; the root lock includes the map workspace.
+npm ci --legacy-peer-deps
+npm run dev:map
 ```
+
+For an approved dependency change, use the root npm workspace command with an explicit
+compatible version (`npm install --workspace awwv-map <package>@<version>`). Preserve
+the production runtime versions and regenerate the root lock with npm; there is no
+separate map lock or second install step.
 
 ### Install tile generation tools (one-time, on build machine)
 ```bash
