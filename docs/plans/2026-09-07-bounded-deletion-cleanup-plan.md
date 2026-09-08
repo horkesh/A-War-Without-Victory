@@ -9,10 +9,10 @@
 **Tech stack:** TypeScript, React, Vitest, Vite/Electron, Markdown.
 
 **Date:** 2026-09-07
-**Status:** PLANNED — owner requested plan and roadmap placement; implementation not started.
+**Status:** Task 1 COMPLETE, reviewed GO (owner authorized 2026-09-08). Tasks 2–8 remain PLANNED.
 **Owner lane / command-board row:** R8, subordinate cleanup packet; no new workstream or BC identifier.
 **Phase covered:** R8 after R7; finish before final calibration/final packaged acceptance. Task 2 follows BC04/BC05 event settlement; Task 3 follows R7 and BC06 UI settlement. Other tasks may run on disjoint files while behavior work settles. Diagnostic calibration stays open.
-**Current next action:** When R8 reaches this slot, confirm current call sites and file ownership, then execute Task 1.
+**Current next action:** Task 1 is complete; Task 2 is next when separately scheduled.
 **Collision rule:** Do not overlap BC event edits, R7 `App.tsx` work, or another agent's roadmap/ledger writes. Re-read current files before each edit; preserve unrelated changes. No implementation is dispatched by this planning turn.
 
 ## 1. Purpose and non-goals
@@ -187,7 +187,7 @@ Planning verification (2026-09-07): documentation suites passed 9/9, exit 0
 was corrected by keeping §4.2 concise and removing one duplicate historical pointer; no test
 threshold changed. Local-link/scope checks and `git diff --check` passed, exit 0
 (`logs/bounded-deletion-cleanup/planning-links.log`, `planning-diff-check.log`).
-The preceding receipt covers the original four-item draft only. Repository-wide extension planning checks (2026-09-07): documentation suites 9/9, exit 0; 163 local file links and 22 section anchors resolve; `git diff --check` exit 0. Evidence: `logs/repository-audit-planning/{docs-tests.log,links.json,anchors.json,diff-check.log}`. Independent Sol/medium review found one missing alias disposition; cleanup Task 5 now explicitly owns `test:ui` retirement/compatibility and its public documentation. No other material coverage, ordering, canon or validation issues were found. Implementation Tasks 1–8: NOT STARTED.
+The preceding receipt covers the original four-item draft only. Repository-wide extension planning checks (2026-09-07): documentation suites 9/9, exit 0; 163 local file links and 22 section anchors resolve; `git diff --check` exit 0. Evidence: `logs/repository-audit-planning/{docs-tests.log,links.json,anchors.json,diff-check.log}`. Independent Sol/medium review found one missing alias disposition; cleanup Task 5 now explicitly owns `test:ui` retirement/compatibility and its public documentation. No other material coverage, ordering, canon or validation issues were found. Implementation Task 1: COMPLETE, reviewed GO (2026-09-08); Tasks 2–8 NOT STARTED.
 
 At implementation closeout, update this evidence section with dispositions, files, command exit codes, log paths, UI branch coverage and any residual. Update `COMMAND_BOARD.md`, master §4.2 and the R8 controlling plan's packet status, then append `docs/PROJECT_LEDGER.md`. Put the implementation receipt in the existing R8 report if available; only if none fits, use one consolidated report under `docs/40_reports/implemented/`, not separate task reports. Update knowledge only for a new reusable lesson; no rating/backlog change is implied.
 
@@ -196,3 +196,30 @@ At implementation closeout, update this evidence section with dispositions, file
 ```text
 Execute docs/plans/2026-09-07-bounded-deletion-cleanup-plan.md Tasks 1–8 as the subordinate R8 packet at master §4.2. Respect task-specific BC04/05/06 and R7 collisions; hand script ownership to the R9 build packet afterward. Read AGENTS, napkin, CODE_CANON, invariants, sensitive-history gate and shell hierarchy. Use one implementer and independent reviewer with mandatory specialist exceptions. Delete proven obsolete paths only, preserve optional no-event semantics, live UI/recovery, history and active external hooks. No canon, FORAWWV, content, timing, save schema, dependency-version or baseline changes. Stop on live consumers, non-equivalent routes, collisions or drift. Run focused and applicable master/R8 checks, keep logs, and return per-task disposition, files, exit codes, evidence, remaining acceptance and ledger updates. KEEP with evidence is valid.
 ```
+
+### Task 1 local evidence — 2026-09-08
+
+Owner authorized only the first small cleanup and its separate commit. Base:
+`650fad4ec`, isolated branch `codex/cleanup-browser-combat`.
+The tracked executable search found only one definition and one unused import,
+with no invocation or top-level side effect. Deleted the 44-line increment-only
+runner and that single import. The live `runPhaseITurn` call and desktop IPC
+advance branch remain unchanged. After deletion, executable search has zero matches
+(exit 1 is the expected no-match result). Receipt: `logs/bounded-deletion-cleanup/task1-search.log`.
+
+Corrected current entrypoint descriptions in REPO_MAP, CODE_CANON, PIPELINE_ENTRYPOINTS,
+PRODUCT_ARCHITECTURE_AUTHORITY and DESKTOP_GUI_IPC_CONTRACT. Historical reports and
+old plans are retained as history; no canonical game rules changed.
+
+Validation is limited to the Task 1 commands: `npm.cmd run typecheck`,
+`npm.cmd run warroom:build`, executable-reference search and focused documentation
+checks. Expected cost: minutes. Pass requires no live consumer, unchanged live
+fallback and passing checks; stop on any contradiction or build failure needing
+broader work. No new test is warranted for this uncalled side-effect-free deletion.
+Independent Sol review returned GO; typecheck/build and 13 documentation checks pass. Tasks 2–8 and later acceptance
+remain open; no campaign, dependency or historical-data change is authorized here.
+
+Final receipts in `logs/bounded-deletion-cleanup/`: `task1-typecheck.log` and
+`task1-warroom-build.log` exit 0; `task1-docs-tests.log` 13/13, exit 0;
+`task1-independent-review.md` GO; `task1-diff-check.log` exit 0. One stale
+BC09/BC07 roadmap status was corrected during review. No broader review or campaign.

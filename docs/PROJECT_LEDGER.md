@@ -34197,3 +34197,28 @@ TypeScript pass. `logs/r8-runtime-integrity/bc07-independent-review.md` records 
 `bc07-input-check.log` confirms no production/data diff and unchanged master hash.
 Attribution: Sol evidence/test implementation and separate Sol review; Astra integration,
 policy synthesis and continuity updates. Local commit only; no remote push.
+
+## 2026-09-08 — Cleanup Task 1: unused browser combat runner
+
+Owner authorized only the first cleanup task and a separate local commit. Base
+`650fad4ec`; isolated branch `codex/cleanup-browser-combat`. Deleted the 44-line
+`src/sim/run_combat_browser.ts` module and its one unused import from
+`ClickableRegionManager.ts`. Tracked search found no caller or top-level side effect;
+post-deletion executable search has no matches. Desktop IPC advance and the live
+`runPhaseITurn` fallback are unchanged.
+
+Corrected five current engineering entrypoint documents, plus cleanup plan, board,
+roadmap and R8 status. Historical reports/old plans remain history. Typecheck and
+Warroom build pass, exit 0. Evidence: `logs/bounded-deletion-cleanup/task1-search.log`,
+`task1-typecheck.log`, `task1-warroom-build.log`. Independent review GO and 13/13 documentation
+checks pass. No new test for deleting an uncalled side-effect-free module, per
+Task 1's explicit verification contract. No game rules, data, schema, catalog,
+calibration, dependency versions or live fallback behavior changed; no campaign run.
+
+Attribution: Sol implementation and separate Sol review; Astra coordination,
+validation and documentation. Stop after this task's local commit. Tasks 2–8,
+other behavior work, build preparation and final acceptance remain open.
+
+Review receipt: `logs/bounded-deletion-cleanup/task1-independent-review.md` (GO).
+The commit uses the existing main-checkout Husky launcher with identical hook bytes
+for the final typecheck; no hook is bypassed and no persistent hook setting changes.

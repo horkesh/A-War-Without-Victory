@@ -26,7 +26,7 @@ This is a product-architecture map, not a changelog and not a speculative vision
 - War phase → `src/sim/turn_pipeline.ts` (`runTurn()`).
 - Peace / weekly state progression → `src/state/turn_pipeline.ts` (`runOneTurn()`).
 
-All other turn-advance code in the repo is either a caller of these (scenario runner, CLIs, desktop sim), a bounded UI variant (`src/sim/run_combat_browser.ts`), or a demoted smoke harness (`src/index.ts`, `src/turn/pipeline.ts`). Do not treat those as co-equal.
+All other turn-advance code in the repo is either a caller of these (scenario runner, CLIs, desktop sim), a bounded UI fallback (`src/sim/run_early_war_browser.ts`), or a demoted smoke harness (`src/index.ts`, `src/turn/pipeline.ts`). Do not treat those as co-equal.
 
 ### 3. Player-truth and shell ownership
 - [PLAYER_VISIBLE_STATE.md](PLAYER_VISIBLE_STATE.md)

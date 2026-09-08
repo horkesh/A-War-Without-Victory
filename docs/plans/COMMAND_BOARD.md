@@ -54,16 +54,16 @@ Integrated unchanged into main as `fa900ba89`. Final acceptance remains deferred
 values; hybrid/ethnic starts bypass them while mode-less operational starts can consume them.
 [Disposition and acceptance order](2026-07-31-full-campaign-electron-validation-plan.md#bc07-stability-data-disposition--2026-09-08).
 
-**Repository audit packets — BC09 Phase 1 reviewed (GO); other work PLANNED:** [Master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07) assigns three subordinate packets:
+**Repository audit packets — BC09 reviewed (GO); cleanup Task 1 complete (GO); remaining work PLANNED:** [Master §4.2](MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07) assigns three subordinate packets:
 
 | Packet | Existing owner and sequence |
 |---|---|
-| [Deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | R8; eight bounded tasks, with BC04/05/06 and R7 file handoffs. |
-| [Runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | R8; BC09 Phase 1 authorized within the 2026-09-08 bounds and precedes BC07 final policy. BC10 remains planned after BC01/06 and BC09. |
+| [Deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | R8; Task 1 deleted the unused browser runner, reviewed GO. Tasks 2–8 remain planned with their BC04/05/06 and R7 handoffs. |
+| [Runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | R8; BC09 Phase 1 is integrated and supplied the verified BC07 retention disposition. BC10 remains planned after BC01/06 and BC09. |
 | [Build preparation](2026-09-07-r9-build-validation-preparation-plan.md) | Limited early R9 subset; cleanup script handoff and BC09 resource contract precede final build evidence. Freeze still waits for R8. |
 
-All precede final calibration and packaged acceptance. The 2026-09-08 authorization schedules
-only BC09 Phase 1; local implementation has begun, no campaign has run. Other packet registration creates
+All precede final calibration and packaged acceptance. Owner-authorized cleanup Task 1
+follows the integrated BC09 repair and BC07 retention decision; no campaign has run. Other packet registration creates
 no execution authority or new workstream; D1 and separately authorized BC04 work are preserved.
 
 ## Current Critical Path

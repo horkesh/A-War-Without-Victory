@@ -80,8 +80,8 @@ Scenario runner (`src/scenario/scenario_runner.ts`) routes to whichever pipeline
   - Inputs: `docs/50_research/*.pdf`
   - Outputs: `docs/50_research/extracts/*.txt` (agent-readable). See `docs/50_research/README_KNOWLEDGE_BASE.md`.
 
-### War-Phase Browser Advance (Warroom — bounded variant, not co-equal)
-- `src/sim/run_combat_browser.ts` — `runPhaseIITurn(state, input)` — browser-safe war-phase turn advance. No Node/fs. Used only by the warroom (`src/ui/warroom/ClickableRegionManager.ts`) when advancing a turn in war phase. Increments the turn counter; war phase uses location_osid only (no AoR). Does not run supply pressure or exhaustion. This is a bounded UI variant; full war-phase behavior comes from the canonical war pipeline `runTurn()` in `src/sim/turn_pipeline.ts`.
+### Warroom advance ownership
+- `src/ui/warroom/ClickableRegionManager.ts` uses the desktop IPC bridge when present and retains its existing `runPhaseITurn` browser fallback. Full war-phase behavior belongs to canonical `runTurn()` in `src/sim/turn_pipeline.ts`. The unused increment-only browser combat runner was removed in cleanup Task 1 (2026-09-08).
 
 ### War-phase location_osid (AoR removed)
 - AoR init is removed. War-phase brigade location is **location_osid** only; set at formation creation and via `backfillFormationLocationOsid` at war entry. See docs/30_planning/AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md. Legacy `src/scenario/aor_init.ts` is deprecated and must not be used for war-phase state.

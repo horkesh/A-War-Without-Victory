@@ -56,7 +56,7 @@ If you are changing war behavior, start at `src/sim/turn_pipeline.ts`. If you ar
 - Current accepted evidence and debt: `docs/40_reports/CALIBRATION_MASTER.md`.
 
 ### Bounded variant (not co-equal with canonical pipelines)
-- `src/sim/run_combat_browser.ts` — `runPhaseIITurn()`. Browser-safe war-phase turn advance (no Node/fs). Increments the turn counter only; does not run supply pressure or exhaustion. Used by the warroom when advancing a turn in war phase. Full war-phase behavior comes from `runTurn()` in Node; do not treat this file as equivalent to `src/sim/turn_pipeline.ts`.
+- `src/sim/run_early_war_browser.ts` — the existing bounded `runPhaseITurn()` fallback in Warroom. Desktop advance uses its IPC bridge and the canonical simulation owner. The unused increment-only browser combat runner was removed in cleanup Task 1 (2026-09-08); no fallback behavior changed.
 
 ### Demoted / smoke-only (do not treat as canonical)
 - `src/index.ts` — minimal deterministic smoke harness. Not the game entrypoint.

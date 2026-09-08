@@ -24,7 +24,7 @@ Populate this section from the discovery checklist.
 - Code entrypoints (one canonical owner per phase; nothing else is co-equal):
   - **Canonical war-phase pipeline:** `src/sim/turn_pipeline.ts` — `runTurn()`. Steps in `src/sim/turn_phases/war_phases.ts` + `early_war_phases.ts`; shared types in `src/sim/turn_pipeline_types.ts`.
   - **Canonical peace/state pipeline:** `src/state/turn_pipeline.ts` — `runOneTurn()`. Weekly state progression (directives, deployments, military_interaction, fragmentation_resolution, supply_resolution, political_effects, exhaustion_update, persistence).
-  - Bounded browser variant (not co-equal): `src/sim/run_combat_browser.ts` — warroom-only war-phase turn advance; increments turn counter only (see §GUI for details).
+  - Bounded browser fallback (not co-equal): `src/sim/run_early_war_browser.ts` — the existing Warroom fallback; desktop advance uses the IPC bridge.
   - Demoted smoke harness: `src/index.ts` → `src/turn/pipeline.ts`. Deterministic smoke only; do not route live behavior through this path.
 - Militia/brigade formation (early-war): pool population `src/sim/early_war/pool_population.ts`, formation spawn `src/sim/formation_spawn.ts`, recruitment (player_choice mode) `src/sim/recruitment_engine.ts`, `src/state/recruitment_types.ts`; design: `docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md`. CLI: `src/cli/sim_generate_formations.ts`.
 - B1 Events: `src/sim/events/` — emergent event system (v0.6.0)
@@ -86,7 +86,7 @@ Populate this section from the discovery checklist.
 - **Legacy 3D tactical render path:** `src/ui/map/map_operational_3d.ts`, `src/ui/map/map_staff_3d.ts`, `src/ui/map/tactical_sandbox.ts`. Shared render contract type: `MapViewInput` in `src/ui/map/types.ts`.
 - **AI Commander UI (v0.4.9):** `AiSettingsPanel.tsx` (API key + mode selector), `AiAdvisorPanel.tsx` (on-demand advisor overlay), `CorpsDialoguePanel.tsx` (officer reports with confidence indicators), `WarDispatchPanel.tsx` (archival dispatch display). All in `src/ui/map/components/`. Sim-side: `src/sim/ai_commander/` (14 files, ~1,683 lines). IPC: `set-ai-commander-config`, `get-ai-commander-config`, `get-advisor-recommendation`. See Systems Manual §7.9.
 - **Warroom/opening composition:** `src/ui/map/components/MainMenu.tsx` is the normal browser/Electron opening owner; `src/ui/map/components/warroom/WarroomScenePlate.tsx` and `WarroomShellLayer.tsx` share the exact scene substrate from faction preview into play. `src/ui/warroom/` is the Electron outer host/IPC relay; its `WarPlanningMap` and legacy menu/desk are lazy bounded recovery only. Dev: `npm run dev:map` for the canonical React surface; `npm run dev:warroom` for outer-host work. See `docs/40_reports/GUI_MASTER.md` and `WARROOM_MASTER.md`.
-- **War-phase browser advance:** `src/sim/run_combat_browser.ts` — browser-safe war-phase turn advance (no Node/fs). Used by warroom when advancing a turn in war phase. Increments turn. Does not run supply pressure or exhaustion; for full war-phase use Node `runTurn`.
+- **Warroom turn advance:** `ClickableRegionManager` uses the desktop IPC bridge when available and retains its bounded `runPhaseITurn` browser fallback. The unused increment-only combat runner was removed in cleanup Task 1 (2026-09-08).
 
 ## Change X → Go Here
 Populate with concrete files once confirmed by discovery:

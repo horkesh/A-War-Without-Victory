@@ -312,5 +312,5 @@ The `awwv` custom protocol is registered as standard+privileged with `supportFet
 ## Determinism Notes
 
 - UI does not mutate canonical sim ordering.
-- Turn execution remains in deterministic phase runners (`run_peace_browser`, `run_combat_browser`).
+- Turn execution remains with the desktop simulation owner through IPC and the existing bounded `runPhaseITurn` browser fallback when the bridge is unavailable.
 - IPC reports are metadata only and do not affect game-state evolution.

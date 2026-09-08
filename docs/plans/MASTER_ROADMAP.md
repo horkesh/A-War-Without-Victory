@@ -232,12 +232,12 @@ nothing here. R7 continues disjoint presentation work; publication authority rem
 
 ### 4.2 Repository audit integration (2026-09-07)
 
-BC09 Phase 1 locally implemented and reviewed (GO); other packets planned. No new workstream:
+BC09 reviewed GO; cleanup Task 1 complete (GO); remaining work planned. No new workstream:
 
 | Owner / packet | Slot and overlap |
 |---|---|
-| R8 [deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | Original four items plus audit D1–D7, Tasks 1–8. Script Tasks 5/7/8 hand off before dependency work; event Task 2 follows BC04/05, UI Task 3 follows BC06/R7. KEEP with evidence is valid. |
-| R8 [runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | BC09 local evidence under review; campaigns deferred. BC07 policy remains separate; BC10 planned. No data regeneration. |
+| R8 [deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | Task 1 COMPLETE (GO): unused browser runner deleted. Tasks 2–8 planned. Tasks 5/7/8 precede dependency work; Task 2 follows BC04/05, Task 3 follows BC06/R7. |
+| R8 [runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | BC09 integrated/reviewed GO; campaigns deferred. BC07 RETAIN disposition verified; BC10 planned. No regeneration. |
 | R9 [build preparation](2026-09-07-r9-build-validation-preparation-plan.md) | Limited early R9 subset: dependencies after R7/script handoff; CI before final costly checks; payload after BC09. All before final calibration/R8 acceptance, not after freeze. |
 
 R7 retains live English/readability work; R4/R5/RE stay closed. Package/lockfile edits are serial.

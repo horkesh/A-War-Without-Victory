@@ -1,0 +1,20 @@
+TASK 1 TRACKED SEARCH EVIDENCE
+
+BEFORE
+COMMAND: git grep -n -E 'runPhaseIITurn|run_combat_browser'
+EXECUTABLE MATCH: src/sim/run_combat_browser.ts:26 exported runPhaseIITurn definition.
+EXECUTABLE MATCH: src/ui/warroom/ClickableRegionManager.ts:41 unused import.
+CALLER FINDING: no runPhaseIITurn invocation in tracked executable code.
+SIDE EFFECT FINDING: the deleted module contained imports, type declarations, and a function declaration only; it performed no top-level mutation or registration.
+
+AFTER
+COMMAND: git grep -n -E 'runPhaseIITurn|run_combat_browser' -- src tests tools scripts .github package.json
+EXIT_CODE=1
+RESULT: no tracked executable matches.
+
+LIVE FALLBACK
+src/sim/run_early_war_browser.ts:72 exports runPhaseITurn.
+src/ui/warroom/ClickableRegionManager.ts:40 imports runPhaseITurn.
+src/ui/warroom/ClickableRegionManager.ts:451 invokes runPhaseITurn.
+
+Historical and current documentation matches were left for the root-owned documentation sync.
