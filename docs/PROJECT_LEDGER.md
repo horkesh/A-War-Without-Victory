@@ -34886,3 +34886,4 @@ Committed slices (one production file per commit):
 - SituationTab hook retry: phase3-commit-situation-retry.log, exit 0; the first receipt retains the Phase 4 fixture type error, corrected before retry.
 - src/ui/map/components/army_hq/DirectiveCard.tsx: fix(ui): contain R7 directive button labels. Hook receipt: phase3-commit-directive.log.
 - src/ui/map/components/warroom/AdvanceTurnModal.tsx: fix(ui): show complete R7 advance review labels. Hook receipt: phase3-commit-advance.log.
+- src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx: fix(ui): separate R7 decision filters and action receipts. Hook receipt: phase3-commit-decision-room.log.

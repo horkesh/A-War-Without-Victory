@@ -238,6 +238,9 @@ describe('PresidentialDecisionRoomPanel flat contract', () => {
     expect(screen.getByTestId('decision-room-action-receipt').textContent).toContain(
       'Directive staged for next turn',
     );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    expect(screen.queryByTestId('decision-room-action-receipt')).toBeNull();
   });
 
   it('marks advance-sensitive cards while keeping the header advance chip', () => {
