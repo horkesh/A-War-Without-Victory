@@ -35024,8 +35024,8 @@ actual images showed ancestor clipping; attempt2 is the corrected proof. The reg
 test now rejects placing the transform on the clipped child or the projected map.
 
 Final frozen-source UI checks pass 354 files/2,974 tests; typecheck and map build pass,
-all exit 0. Independent source/image review is GO; the local hook/commit remains pending.
-Clean POST-A will run only from the reviewed commit in a new detached checkout,
+all exit 0. Independent source/image review is GO; source commit `88996a23d` and its
+mandatory hook pass, exit 0. Clean POST-A ran from that commit in a new detached checkout,
 preserving every untracked owner-checkout artifact. The PRE control validates the preflight's
 31 normalized consumed-input hashes and raw package identity; output artifacts remain raw-byte
 comparisons. Its initial CRLF hashing error and corrected control receipts are preserved.
@@ -35035,5 +35035,22 @@ for unaffected scope. No new full suite, package or baseline campaign is authori
 The baseline investigation remains complete and reviewed: accepted n392 owns all eight pins;
 four inputs changed before R7 and six outputs differ from PRE. PRE/POST-B match all eight
 artifacts and inputs; POST-B remains dirty. Do not refresh pins, change calibration, call
-current outputs canonical, or close the failing baseline gate. Clean POST-A is the last
-remaining slot in the fixed one-PRE/two-POST budget. R7 broader gates and R8/R9 remain open.
+current outputs canonical, or close the failing baseline gate. Clean POST-A consumed the
+last slot in the fixed one-PRE/two-POST budget. R7 broader gates and R8/R9 remain open.
+
+Clean POST-A completes 188 weeks at `88996a23d2441a391b25706c734626b5732e37b5`, Node 22.23.2,
+`git_dirty=false`, without a provenance override (`desk39-layout-post-a-run1.log`, exit 0).
+Preflight passes all 31 consumed inputs and package identity; the detached checkout remains
+clean. Health passes at 667/712 matched and zero consistency failures, exit 0
+(`desk39-layout-post-a-health1.log`). All eight raw artifact hashes and all consumed-input
+rows/digests match PRE and POST-B (`desk39-layout-post-a-comparison1.log`, exit 0).
+The complete 188-frame replay and final save also match PRE byte-for-byte
+(`desk39-layout-post-a-provenance1.log`/`.json`, exit 0); final-state fingerprint is
+`e414dc69f6e875fc`. The retained partial comparison and all failed attempts remain intact.
+No duplicate campaign, baseline wrapper, pin refresh or calibration change was made.
+The existing report, plan, board and roadmap record the result without declaring R7 closed.
+
+Final documentation checks pass 13/13, exit 0 (`desk39-layout-final-docs1.log`); source
+hashes, clean POST-A checkout and diff checks pass (`desk39-layout-final-state1.log`, exit 0).
+Targeted final review uses `desk39-layout-review.log`; the final local documentation hook
+and commit outcome are recorded in `desk39-layout-final-docs-commit1.log`.

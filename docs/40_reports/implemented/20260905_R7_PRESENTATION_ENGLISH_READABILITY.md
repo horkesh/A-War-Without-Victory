@@ -2,8 +2,9 @@
 
 Status: the authorized date-layout implementation passes focused tests and the nine-case
 initial/maximum-scroll browser proof; independent source/image review is GO. Final full UI,
-typecheck, map build and documentation checks pass. Local commit and clean POST-A remain
-outstanding. The inherited baseline gate remains open.
+typecheck, map build and documentation checks pass. Source is committed locally as
+`88996a23d` with its mandatory hook passing. Clean POST-A, health and hash checks pass;
+the inherited baseline gate remains open, so this is not R7 closure.
 Prior global Vitest/player-experience receipts are reused only for unaffected scope.
 
 The [registered amendment](../../plans/2026-09-05-r7-presentation-and-english-readability-amendment-plan.md)
@@ -29,6 +30,11 @@ fixtures remain local evidence; this report is the single designated implementat
 
 | Command/check | Exit/result | Receipt |
 |---|---|---|
+| Desk/date local commit and mandatory hook | 0; `88996a23d2441a391b25706c734626b5732e37b5` | `desk39-layout-commit1.log` |
+| Clean POST-A 188-week run | 0; 188 weeks, clean `88996a23d`, Node 22.23.2, no override | `desk39-layout-post-a-run1.log` |
+| POST-A engine health gate | 0; 667/712 matched, zero consistency failures; unchanged advisories remain reported | `desk39-layout-post-a-health1.log` |
+| PRE/POST-A/POST-B eight-artifact and consumed-input comparison | 0; all eight byte-identical and all 31 normalized consumed inputs identical | `desk39-layout-post-a-comparison1.log`, `final-simulation-comparison.json` |
+| POST-A provenance, 188-frame replay and final-save hashes | 0; clean expected commit/Node/weeks; full replay and final save identical to PRE | `desk39-layout-post-a-provenance1.log`, `.json` |
 | Final Desk `npm.cmd run test:vitest -- tests/ui` | 0; 354 files, 2,974 tests | `desk39-layout-ui3.log` |
 | Final Desk typecheck and map build | 0/0 | `desk39-layout-typecheck3.log`, `desk39-layout-map-build3.log` |
 | Frozen Desk source/test hashes and forbidden-surface/diff check | 0; three reviewed hashes unchanged; 76 prior files unchanged and one focused test extended; no forbidden diff | `desk39-layout-freeze-check.log` |
@@ -159,15 +165,15 @@ campaign, R9 freeze, push, merge, release package or publication is authorized b
 ## Remaining acceptance and handoff
 
 - Phase 3.7/3.9 implementation, nine-case browser proof and final UI checks are complete
-  and independently reviewed GO; the authorized coupled local commit remains pending.
+  and independently reviewed GO, committed locally as `88996a23d` with the hook passing.
   The owner approved date-only acceptance and necessary date/header layout expansion,
   preserving Desk column position, header content/controls and artwork.
 - `canon:check` and its embedded baseline gate remain exit 1 on six PRE-existing pins.
   The authorized investigation below explains the discrepancy; matching PRE/POST-B bytes
   does not silently waive the gate or authorize replacement pins.
-- Clean POST-A remains outstanding after the final reviewed Desk disposition. POST-B has
-  already consumed the baseline-regression slot in the fixed one-PRE/two-POST budget.
-  Do not launch another standalone baseline regression or refresh manifest pins.
+- Clean POST-A is complete and matches PRE/POST-B; POST-B retains its disclosed dirty
+  provenance. The fixed one-PRE/two-POST budget is now fully consumed. Do not launch
+  another baseline regression or campaign, or refresh manifest pins under this amendment.
 - R8's existing B1–B9 register remains waiting; human listening/sensitivity and broader R7
   reconciliation retain their existing owners. No downstream lane is opened here.
 
@@ -260,3 +266,44 @@ receipts remain historical. Frozen-source `*3.log` checks pass: 354 UI files/2,9
 typecheck and map build, all exit 0. The mandatory hook runs with the local commit.
 Startup preservation verified all 77 prior hashes; unchanged full-suite
 and player-experience evidence is reused explicitly, with fresh proof covering this slice.
+
+## Clean POST-A result and final boundary
+
+Source commit `88996a23d2441a391b25706c734626b5732e37b5` is the reviewed implementation
+identity. Its mandatory hook passes, exit 0. POST-A ran from the new detached clean checkout
+`F:/AWWV-worktrees/r7-readability-post-a`; the owner checkout's untracked evidence remained
+in place. No dependencies were installed; the ignored node_modules junction reuses PRE's
+runtime. Preflight passes all 31 normalized consumed inputs, clean commit, Node 22.23.2
+and raw package/lock identity (`desk39-layout-post-a-preflight1.log`/`.json`, exit 0).
+
+The exact scenario command and environment are recorded in `desk39-layout-post-a-run1.log`:
+`node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario.ts --scenario data/scenarios/apr1992_definitive_188w.json --weeks 188 --full-replay-save-sequence --out F:/A-War-Without-Victory/logs/r7-english-readability/post-188w`,
+with process-local `AWWV_S6_GRADE_RUN=true` and no provenance override. Run directory:
+`post-188w/apr1992_definitive_188w__6898d6d2e324c7a3__w188`. Runner exit is 0, with 188
+completed weeks and clean provenance at the source commit. The checkout remains clean.
+
+`node tools/engine_health_gate.cjs <POST-A-run-dir> --horizon 188w --json` passes, exit 0:
+667/712 matched OSIDs and zero consistency failures; advisories are preserved. Existing
+`compare-simulation.mjs <PRE> <POST-A> <POST-B>` passes, exit 0, for every one of the eight
+raw-byte artifacts and all consumed-input rows/digests. The retained partial comparison is
+unchanged. POST-B remains `f6b1b63d6`, `git_dirty=true`; matching bytes do not relabel it clean.
+
+The separate provenance/replay verifier passes, exit 0. POST-A has exactly 188 replay frames
+and its complete 1,304,620,232-byte replay is identical to PRE (SHA-256
+`53444b42084d4ea05b146d67651e0c9b19304b1200fafa5bea7a63775784cb56`). This also preserves the
+input to the prior exhaustive name enumeration. Final-save SHA-256 is
+`e414dc69f6e875fcd2a7394582921f20ca03123112baf12e9308c50035c29c50`; its displayed fingerprint
+`e414dc69f6e875fc` matches the runner receipt. No extra campaign or baseline wrapper ran.
+
+This completes the authorized clean POST-A and presentation-neutrality proof. It does not
+resolve the inherited six-pin gate: all stored pins still belong to accepted n392, while
+four event/OOB inputs changed before R7. Canonical calibration adoption after BC settlement
+and an explicit pin-reconciliation decision remain under the existing calibration authority.
+No pin, threshold, simulation, save schema, dependency or artwork was changed. Human
+listening/sensitivity and broader R7 closure remain separate; no R8/R9 work, push or merge.
+
+Final documentation checks pass 13/13, exit 0 (`desk39-layout-final-docs1.log`), and the
+source/clean-checkout/diff receipt passes, exit 0 (`desk39-layout-final-state1.log`).
+Targeted independent POST-A/documentation confirmation is recorded in the existing
+`desk39-layout-review.log`. The final local documentation-hook receipt is
+`desk39-layout-final-docs-commit1.log`; its outcome is recorded when that commit executes.

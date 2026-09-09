@@ -88,7 +88,7 @@ identity; coordinate any later shared-build edit through the R9 preparation owne
 | Field | Value |
 |---|---|
 | **Date** | 2026-09-05 |
-| **Status** | ACTIVE — registered R7 amendment |
+| **Status** | ACTIVE — implementation and neutrality proof complete; inherited baseline gate open |
 | **Owner lane** | **R7 — Content, historical attribution, audio, accessibility, and opening experience** |
 | **Command-board row** | 7 |
 | **Parent plan (amended)** | [Content/history/audio plan](2026-07-31-content-history-localization-audio-plan.md) — this plan executes its **Phase 5** checklist line *"Inspect English at 1920x1080, 1366x768, and 3440x1440 across the required surfaces."* |
@@ -96,7 +96,7 @@ identity; coordinate any later shared-build edit through the R9 preparation owne
 | **Source finding set** | [Showcase screenshot GUI audit](../40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md) (FROZEN, 29 findings) |
 | **Panel record** | [Tier-1 specialist reports](../40_reports/working/20260905_SHOWCASE_AUDIT_PANEL_SPECIALIST_REPORTS.md) |
 | **Collision rules** | §8 of the roadmap: *"Map/Desk English layout strings — R1/R2 layout first; R7 accessibility/readability proof second."* R1/R2 are CLOSED, so their layout pass is complete and this is the open second pass. One file has one owning phase; see §4. |
-| **Current next action** | Frozen Desk/date source, nine-case visual proof and final UI checks pass, independently reviewed GO. Commit locally with the mandatory hook, then clean POST-A. The inherited baseline gate remains open. |
+| **Current next action** | Desk/date source is committed as `88996a23d`; clean POST-A health/hash checks pass. Retain the failing baseline gate pending calibration/BC settlement and authorized pin reconciliation; no new campaign in this amendment. |
 
 **Owner continuation:** date-only whiteboard acceptance is approved, and investigation of
 the six pre-existing baseline mismatches is authorized. This supersedes the full-board
@@ -346,7 +346,7 @@ One commit per file. These are independent one-line `className` fixes and must n
 | 3.6 | Finding 17 — the corps card's OG list is cut mid-name (`OG VISOKO`, `OG MAGLAJ`) with a dead black band below it, because the corps cards sit in one CSS Grid with **no `content-start`**: default `align-content` computes as `stretch`, so surplus height in the scroll area is pushed into the row tracks instead of packing row 2 under row 1. Add `content-start` to the grid container className. **One word, no restructuring, no change to the `auto-fit`/`minmax` column logic** | `ArmyHQModal.tsx:724` | S |
 | 3.7 | Finding 7d (desk half) — the RESERVE REQUEST body cuts flush mid-sentence. The content is **not lost**: `president-desk-scroll-region` is a genuinely scrollable `overflow-y-auto` with no visual affordance, which at a glance — and in a press screenshot — is indistinguishable from truncated text. Add a bottom fade/scroll-shadow (mask-image gradient or a pinned gradient overlay) | `PresidentDeskShell.tsx:107-109` | S |
 | 3.8 | Finding 7d (Codex half) — same root cause, different container: the campaign-context essay cuts mid-citation (`…in Prosecutor v.`) inside a `max-h-44 overflow-y-auto` `<section>` with no cue. Add the same affordance **independently**. **Two small CSS additions in two files — deliberately NOT a shared component**, so no design-system scope creep | `CodexPanel.tsx:359-362` | S |
-| 3.9 | Finding 24 — the whiteboard date (`26 Jul 1993`) is a DOM date label anchored to the background whiteboard and is sliced to a ~12px sliver ("26 Jul 1…") by the `PresidentDeskShell` right column, which lands its `flex gap-3` exactly across the whiteboard. Adjust the date-label/header layout and header-to-packet gap as necessary to expose every date character at all nine faction/viewport combinations (owner-approved date-only criterion). **Treat the accidental sliver as the bug; do not reposition the column** | `PresidentDeskShell.tsx:94,107-117` (header block `:111-113`, packet block `:115-117`) | S-M |
+| 3.9 | Finding 24 — the whiteboard date (`26 Jul 1993`) is a DOM date label anchored to the background whiteboard and is sliced to a ~12px sliver ("26 Jul 1…") by the `PresidentDeskShell` right column, which lands its `flex gap-3` exactly across the whiteboard. Adjust the date-label/header layout and header-to-packet gap as necessary to expose every date character at all nine faction/viewport combinations (owner-approved date-only criterion). **Treat the accidental sliver as the bug; do not reposition the column** | `WarroomShellLayer.tsx:474-515`; retained fade in `PresidentDeskShell.tsx:107-109` | S-M |
 
 **3.4 and 3.5 are the same file: one commit, two distinct diffs — do not merge the edits.**
 **3.7 and expanded 3.9 form one coupled Desk/date commit, preserving the fade and layout as distinct diffs.**
@@ -445,9 +445,9 @@ no tenure string contains "mo" or "month". `npm.cmd run test:vitest -- tests/ui`
       with `--save` pointing at a save where **both** state-dependent chips (RESERVE and REVIEWS) are
       simultaneously live. A save without them passes every width trivially, which is not the same
       as passing. Record FULL or record why it remains PARTIAL.
-- [ ] Re-capture the audit's surfaces at **1920×1080, 1366×768, and 3440×1440** (the parent plan's
+- [x] Re-capture the audit's surfaces at **1920×1080, 1366×768, and 3440×1440** (the parent plan's
       Phase 5 resolutions) and confirm each discharged finding by image, not by diff.
-- [ ] Confirm **zero simulation drift**: baseline artifacts, fingerprints and calibration hashes are
+- [x] Confirm **zero simulation drift**: baseline artifacts, fingerprints and calibration hashes are
       byte-identical to the pre-plan HEAD. A changed hash fails this phase.
 - [x] Produce the **bug/friction split table** required by roadmap §12 (*"bugs and friction remain
       separately reported"*) — friction discharged here, bugs pre-seeded to R8, neither merged.
@@ -1168,3 +1168,36 @@ in `desk39-layout-review.log`. Documentation checks pass 13/13 in `desk39-layout
 the two earlier roadmap-length failures remain preserved and the guard is unchanged.
 The mandatory hook receipt will be `desk39-layout-commit1.log`; no hook pass is claimed
 until that local commit succeeds. Clean POST-A and the inherited baseline gate remain open.
+
+### Clean POST-A and final reconciliation
+
+Reviewed source is committed locally as `88996a23d2441a391b25706c734626b5732e37b5`;
+`desk39-layout-commit1.log` confirms mandatory hook/commit exit 0. Clean detached checkout
+`F:/AWWV-worktrees/r7-readability-post-a` passes preflight: 31 consumed inputs match PRE,
+package files match, Node is 22.23.2 and Git is clean. All original untracked evidence is
+preserved in the owner checkout. No dependency installation occurred; retain the checkout
+and its ignored node_modules junction.
+
+POST-A completes 188 weeks, exit 0 (`desk39-layout-post-a-run1.log`). The required health
+gate passes, exit 0 (`desk39-layout-post-a-health1.log`), with 667/712 matched OSIDs and
+zero consistency failures. Existing comparison tooling passes all eight raw-byte artifacts
+and all normalized consumed inputs across PRE/POST-A/POST-B, exit 0
+(`desk39-layout-post-a-comparison1.log`, `final-simulation-comparison.json`). The separate
+provenance/replay/final-save check passes, exit 0 (`desk39-layout-post-a-provenance1.log`/`.json`):
+clean `88996a23d`, exactly 188 frames, full replay identical to PRE, and final-state SHA
+`e414dc69f6e875fcd2a7394582921f20ca03123112baf12e9308c50035c29c50`.
+
+The visual checkbox uses the previously reviewed unaffected integrated/supplemental captures
+plus the new nine-case initial/max-scroll Desk proof; no unchanged browser campaign is
+repeated. Zero R7 simulation drift is established, but baseline-pin acceptance is not:
+the inherited six-pin gate still fails, and POST-B retains dirty provenance. The fixed
+one-PRE/two-POST budget is consumed. Final calibration adoption after BC settlement and an
+explicit pin-reconciliation decision remain under existing calibration authority. Do not
+refresh pins, rerun baseline/canon wrappers, declare current behavior canonical or close R7.
+No source changes follow the reviewed commit; final documentation and receipt reconciliation
+use focused documentation checks and the mandatory local documentation hook only.
+
+Final documentation checks pass 13/13 (`desk39-layout-final-docs1.log`, exit 0); reviewed
+source hashes, clean POST-A checkout and diff checks pass (`desk39-layout-final-state1.log`,
+exit 0). The targeted final confirmation uses the existing `desk39-layout-review.log`;
+the local documentation-hook outcome is recorded in `desk39-layout-final-docs-commit1.log`.
