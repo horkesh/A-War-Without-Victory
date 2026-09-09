@@ -53,7 +53,7 @@ function makeVerdict(): GameVerdict {
     };
 }
 
-function makeCostLedger(): CostLedger {
+function makeCostLedger(severity: 'record' | 'grave' | 'rupture' = 'grave'): CostLedger {
     return {
         war_duration_weeks: 188,
         entries: [],
@@ -64,7 +64,7 @@ function makeCostLedger(): CostLedger {
             {
                 id: 'civilian_displacement_record',
                 category: 'displacement',
-                severity: 'grave',
+                severity,
                 title: 'Civilian displacement record',
                 text: 'The negotiation capital record attributes 1,950,000 refugees created to the war path.',
                 sources: ['test'],
@@ -108,6 +108,35 @@ describe('CinematicVerdict', () => {
         expect(html).toContain('War lasted 12 weeks shorter');
         expect(html).toContain('A War Without Victory - Verdict');
         expect(html).not.toContain('undefined');
+    });
+
+    it.each([
+        ['record', 'Filed finding'],
+        ['grave', 'Grave finding'],
+        ['rupture', 'Locked condemnation'],
+    ] as const)('renders the %s cost signal as player-facing copy', (severity, label) => {
+        const html = renderToStaticMarkup(createElement(CinematicVerdict, {
+            verdict: makeVerdict(),
+            costLedger: makeCostLedger(severity),
+            focusFaction: 'RBiH',
+            dateLabel: '1995-10-01',
+            durationLabel: '188 weeks',
+        }));
+
+        expect(html).toContain(label);
+        expect(html).not.toContain(`>${severity}<`);
+    });
+
+    it('renders the absent cost signal as player-facing copy', () => {
+        const html = renderToStaticMarkup(createElement(CinematicVerdict, {
+            verdict: makeVerdict(),
+            focusFaction: 'RBiH',
+            dateLabel: '1995-10-01',
+            durationLabel: '188 weeks',
+        }));
+
+        expect(html).toContain('No finding');
+        expect(html).not.toContain('>none<');
     });
 
     it('localizes the cinematic verdict shell labels in BCS mode', () => {

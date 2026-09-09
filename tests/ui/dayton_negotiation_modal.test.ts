@@ -47,6 +47,8 @@ describe('DaytonNegotiationModal — Phase-4 player-agency surface', () => {
         expect(screen.getByText('Dysfunction (floor)')).toBeTruthy();
         expect(screen.getByText('Territorial Packages')).toBeTruthy();
         expect(screen.getByText('Institutional Architecture')).toBeTruthy();
+        const rbihHolder = screen.getByText('RBiH');
+        expect(rbihHolder.className).not.toContain('uppercase');
     });
 
     it('surfaces the Brčko outcome, defaulting to the international arbitration district', () => {

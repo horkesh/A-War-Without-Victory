@@ -169,7 +169,7 @@ describe('generateWrappedSlides', () => {
                 ],
             });
             const slide = generateWrappedSlides(state).find(s => s.id === 'bloodiest_week')!;
-            expect(slide.heroValue).toBe('Unreported');
+            expect(slide.heroValue).toBe('No staff report');
             expect(slide.data?.bloodiestCasualties).toBeNull();
         });
     });
@@ -223,7 +223,7 @@ describe('generateWrappedSlides', () => {
                 ],
             });
             const slide = generateWrappedSlides(state).find(s => s.id === 'what_it_cost')!;
-            expect(slide.heroValue).toBe('Unreported');
+            expect(slide.heroValue).toBe('No staff report');
             expect(slide.data?.totalCasualties).toBeNull();
             expect(slide.data?.totalDisplaced).toBe(500);
         });
@@ -242,7 +242,7 @@ describe('generateWrappedSlides', () => {
                 ],
             });
             const slide = generateWrappedSlides(state).find(s => s.id === 'what_it_cost')!;
-            expect(slide.heroValue).toBe('Unreported');
+            expect(slide.heroValue).toBe('No staff report');
             expect(slide.data?.totalCasualties).toBeNull();
             expect(slide.data?.totalDisplaced).toBe(1500);
         });

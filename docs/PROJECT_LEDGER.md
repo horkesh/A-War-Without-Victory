@@ -34903,3 +34903,45 @@ screenshots prove both repeated military figures in one frame (`phase4-war-summa
 The interim full UI run has one known RED-test failure and is not final acceptance;
 the frozen-source full Vitest gate will include the complete UI boundary. Mandatory hook:
 `logs/r7-english-readability/phase4-commit.log`. Whiteboard item 3.9 remains separately held.
+
+## R7 Phase 5 remaining presentation copy — 2026-09-09
+
+Reused the existing severity formatter for Cinematic Verdict, preserved RBiH casing,
+made Dayton's exact-price lock explanation visible, removed duplicate sector density and
+single-subsegment noise, merged missing-intel prose with subdued styling, and retained weeks
+for officer tenure. No source value, combat aggregate, severity meaning or action changed.
+Independent Narrative/Modern Wargame/code review is GO after moving the locked-price strike
+to the label/cost wrapper alone (`phase5-review.log`). Focused tests pass five files/35 tests,
+exit 0 (`phase5-final-focused.log`); final typecheck passes (`phase5-final-typecheck.log`).
+Three-resolution computed-style/geometry proof passes (`phase5-dayton-corrected.log`, exit 0).
+The locked branch uses a documented in-memory low-capital fixture; no save was persisted.
+The initial GREEN log was overwritten during correction; the RED and selector-failure
+receipts remain, and this entry does not claim a recovered full first-GREEN failure log.
+Final full Vitest and integrated player-experience gates are running on frozen production
+source. Phase 3.9 and baseline-manifest acceptance remain open. Mandatory commit hook:
+`logs/r7-english-readability/phase5-commit.log`.
+
+Phase 5 final regression correction: the full gate found one avoidable `sub_segments!`
+assertion plus three recap expectations retaining the old missing-data wording. Removed
+that assertion inside the same >1 guard without raising the strict-null inventory pin;
+changed only the three text expectations and preserved all null/quantity controls.
+Independent targeted review is GO (`final-review.log`). Focused checks pass 133 tests,
+typecheck and diff check pass, all exit 0 (`final-regression-*`). The unpublished Phase 5
+checkpoint `47eab7ffa` is amended to keep its source corrections in the same phase commit;
+its original hook receipt remains historical evidence. Final hook: `phase5-final-amend.log`.
+The corrected full-suite retry is required and remains pending; no targeted-only closure.
+
+The completed first full suite returned six real failing assertions across four files.
+Its last two findings were a stale duplicate-density expectation and a real small-text
+contrast defect: secondary text at 70% alpha measured 3.674:1 over the panel background.
+Restored full secondary color while retaining italics and no tabular numerals; the strict
+contrast guard remains unchanged. The density check now requires one figure and retains
+front-segment/no-kilometer controls. Focused checks pass 62 tests and typecheck, exit 0
+(`final-regression-sector-green.log`, `final-regression-sector-typecheck.log`). Actual
+three-resolution captures measure 5.991:1 with density once, exit 0
+(`final-regression-sector-contrast-capture.log`, `-results.json`). The first full failure
+receipt remains in `final-vitest.log`; its intentional child failure is a passing runner
+control, not a product failure. This final correction amends the unpublished Phase 5
+checkpoint again; both earlier hook receipts remain historical evidence. Final correction
+review is recorded in `final-review.log`; final hook receipt is
+`phase5-contrast-amend.log`. The corrected global retry remains required.

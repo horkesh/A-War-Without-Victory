@@ -183,24 +183,32 @@ export function DaytonInstitutionalDimensions({
                         const active = dial === setting;
                         const declCost = getDialDeclarationCost(setting, faction);
                         const reachable = declCost <= Math.max(0, capitalAvailable);
+                        const locked = !reachable && !active;
                         return (
                             <button
                                 key={setting}
                                 type="button"
-                                disabled={!reachable && !active}
+                                disabled={locked}
                                 onClick={() => setDial(setting)}
                                 className={`text-xs px-2 py-2 rounded border font-bold text-center leading-tight ${
                                     active
                                         ? 'bg-[#8a6a3a] text-white border-[#8a6a3a]'
                                         : reachable
                                             ? 'text-[#6a5a40] border-[#8a7a60]/40 hover:bg-[#e8dcc4]'
-                                            : 'text-[#b0a890] border-[#c8b898]/30 bg-[#e8dcc4]/20 cursor-not-allowed line-through'
+                                            : 'text-[#b0a890] border-[#c8b898]/30 bg-[#e8dcc4]/20 cursor-not-allowed'
                                 }`}
                                 style={{ fontFamily: 'var(--font-command)' }}
-                                title={!reachable && !active ? t('dayton.optionLocked') : undefined}
+                                title={locked ? t('dayton.optionLocked') : undefined}
                             >
-                                {t(DIAL_LABEL_KEY[setting])}
-                                {declCost > 0 && <span className="block text-xs opacity-80 mt-0.5">−{declCost}</span>}
+                                <span className={locked ? 'block line-through' : 'block'}>
+                                    {t(DIAL_LABEL_KEY[setting])}
+                                    {declCost > 0 && <span className="block text-xs opacity-80 mt-0.5">−{declCost}</span>}
+                                </span>
+                                {locked && (
+                                    <span className="mt-1 block text-xs font-normal normal-case">
+                                        {t('dayton.optionLocked')}
+                                    </span>
+                                )}
                             </button>
                         );
                     })}

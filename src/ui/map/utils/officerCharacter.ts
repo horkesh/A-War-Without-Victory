@@ -210,9 +210,7 @@ export function formatCombatRecord(battles: number, victories: number): string {
 
 export function formatTenure(turnsInCommand: number): string {
     if (turnsInCommand === 0) return 'Newly assigned';
-    if (turnsInCommand <= 4) return `${turnsInCommand}w in command`;
-    const months = Math.round(turnsInCommand / 4.33);
-    return `${months}mo in command`;
+    return `${turnsInCommand}w in command`;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

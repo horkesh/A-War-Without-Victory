@@ -6,6 +6,7 @@ import { resolveVerdictBackground } from '../../data/verdictArt.js';
 import { formatHistoricalDivergenceNote } from '../../data/historicalDivergenceNotes.js';
 import { buildVerdictShareSummary } from '../../data/verdictShareSummary.js';
 import { t, useLocale } from '../../i18n';
+import { formatFindingSeverity } from '../WarCostSummary';
 
 export interface CinematicVerdictProps {
     verdict: GameVerdict;
@@ -111,7 +112,7 @@ export function CinematicVerdict({
                     <div className="mt-3 grid grid-cols-3 gap-2 sm:mt-5 sm:gap-3">
                         <VerdictMetric label={t('verdict.metric.focus')} value={scene.focusFaction ?? t('verdict.campaign')} accent={accent} />
                         <VerdictMetric label={t('verdict.metric.outcome')} value={scene.focusOutcomeLabel} accent={accent} />
-                        <VerdictMetric label={t('verdict.metric.costSignal')} value={scene.costEmphasis.severity.toString()} accent={accent} />
+                        <VerdictMetric label={t('verdict.metric.costSignal')} value={formatFindingSeverity(scene.costEmphasis.severity)} accent={accent} />
                     </div>
                 </div>
 

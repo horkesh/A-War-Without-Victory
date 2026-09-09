@@ -1401,7 +1401,8 @@ describe('GUI audit label discipline', () => {
     expect(frontage?.getAttribute('data-front-segments')).toBe('4');
     expect(container.textContent).toMatch(/1 on line; 4 front segments; density 0\.25/i);
     expect(container.textContent).toMatch(/Front segments: 4/i);
-    expect(container.textContent).toMatch(/Brigades per front segment: 0\.25/i);
+    expect(container.textContent?.match(/density 0\.25/gi)).toHaveLength(1);
+    expect(container.textContent).not.toMatch(/Brigades per front segment: 0\.25/i);
     expect(container.textContent).not.toMatch(/\bKM\b|per km|FRONTAGE/i);
   });
 
