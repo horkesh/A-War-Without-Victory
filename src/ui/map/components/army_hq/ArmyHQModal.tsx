@@ -748,7 +748,7 @@ export function ArmyHQModal({
 
                     {/* ═══ SUMMARY TAB ═══ */}
                     {activeTab === 'summary' && (
-                        <WarSummaryContent />
+                        <WarSummaryContent onNavigateTarget={onDecisionRoomNavigateTarget} />
                     )}
 
                     {/* ═══ RECORDS TAB ═══ */}

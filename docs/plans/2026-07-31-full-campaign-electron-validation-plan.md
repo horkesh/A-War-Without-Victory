@@ -15,6 +15,220 @@
 **Collision rule:** This plan does not repair source while a session is running. Findings are routed to the owning plan, verified, then the affected session restarts from a fresh campaign.
 **Activation:** `Execute the master roadmap` authorizes transient local directory packages for this validation, but not installer publication, signing, upload, tag, or release.
 
+## B7/B5/B8/B1 playability packet — owner scheduled 2026-09-09
+
+The owner approved the four decision-and-command usability fixes and the subsequent three-faction
+24-turn packaged shakedowns. This specifically schedules B7, B5, B8 and B1 under D1 while broader
+R7/R8 acceptance remains open. Human listening belongs to the owner's eventual game inspection;
+it does not block this packet. No other registered bug, full campaign, calibration or baseline
+refresh is activated by this scheduling.
+
+**Starting identity:** clean tracked `bd7b819750d32811738a87143a66bb02807ab867` on
+`codex/r7-english-readability`, no intervening commits. Work is isolated at
+`F:/AWWV-worktrees/r8-decision-command-usability`, branch `codex/r8-decision-command-usability`.
+The original checkout, R7 source/date proof and all existing untracked evidence are preserved.
+
+**Question and implementation boundary:** Can the real player routes present each blocking
+decision once, give a consistent current commander-replacement recommendation, expose truthful
+objective actions and display only the player's legitimately available force-balance intelligence?
+Reproduce current behavior before changing it; earlier register descriptions may have been partly
+superseded. One Sol/medium implementer owns minimal UI fixes and failing-first regressions; a
+separate Sol/medium reviewer covers correctness, player experience, faction privacy, determinism
+and scope. The orchestrator owns documentation and actual route/package proof. Preserve existing
+mechanics, simulation/state/save contracts, assets, dependencies, canon and baselines.
+
+Expected production files are the existing `AdvanceTurnModal`, `inboxItems`, `GameStateAdapter`
+and directly affected UI helpers/consumers, with focused tests. Any necessary change to the
+existing `paradox_local_qa.cjs` shakedown harness is limited to opt-in prescribed checkpoints,
+final Save/load proof and attributed historical/staff event selection, with retained evidence.
+The same player is used and legacy defaults remain unchanged; no product gameplay policy changes.
+
+**Save/load evidence gap found before launch:** the existing player preserves and hashes autosaves
+but does not click Save or reload one during a fresh run. Add an opt-in `--save-load-proof` final
+step to that same harness: Escape -> Save Game -> Main Menu -> Field Records -> Resume quicksave.
+Archive the selected save and compare canonical state, autosave and loaded turn/faction before
+and after; fail on absence, mismatch or route failure. This costs under two minutes per faction,
+adds no turns or headless replay campaign, and supplies Phase 1's one load/replay route through
+load. It does not establish deterministic re-execution from a replay stream.
+
+**Historical-choice gap found before launch:** the legacy harness clicks the first event option;
+the renderer preserves authored order, so that is not proof of this plan's policy. Add an opt-in
+`--historical-choice` selector to the existing response route. Use authored default id/marker,
+then explicit staff-recommended id; bind the chosen id to its visible control and record the
+rendered source/basis as player input. Stop before an unranked or ambiguous choice instead of
+inventing doctrine, restraint or a historical source. This introduces no product policy and leaves
+legacy harness defaults unchanged. Focused pure selection cases take seconds; the same planned
+three runs supply integration proof. No additional campaign or package is authorized by this fix.
+
+**Review correction boundary:** B5's `OfficerMatterModal` must share the inbox's incumbent identity
+and deterministic representative ordering. B1 also covers `SituationTab` and `tooltipPlayerSafe`:
+both expose force balance and must obey the existing finite, at-least-0.4 confidence gate. Mixed
+known/unknown active reports withhold aggregate balance; malformed or non-positive edge counts
+cannot establish an active report. These are UI truth/privacy corrections, with targeted tests,
+not changes to the intelligence calculation or simulation. B8's objective-specific copy updates
+both existing English and BCS catalogs.
+
+**B8 actual-route correction:** the advisory cohesion fixture proved that the Decision Room
+intentionally omits non-required event decisions while the inbox retains their response surface.
+A generic room-opening assertion therefore did not prove an actionable lever. Preserve the
+advisory choice and route a matching event through the existing inbox action surface, with a
+truthful President's Desk owner label; retain Decision Room for its other supported families.
+Extend only the affected presentation target/type/callback consumers as necessary. Verify the
+specific matching event can be opened from the objective, not just that a container appeared.
+The earlier host-only route receipt and first source-freeze manifest remain preserved as partial
+evidence. Run one focused correction and actual route proof, then write a new final source freeze
+before the already-authorized combined suite; no expensive gate has yet been consumed.
+
+**Validation sequence and commands:**
+
+1. Use bounded source tracing and failing-first `npm.cmd run test:vitest -- <affected test files>`
+   to reproduce B7/B5/B8/B1, then verify positive and negative cases. Preserve distinct RED/GREEN
+   receipts and record exact file lists. Confirm deduplication retains distinct decisions/events,
+   all four objective cards resolve truthfully, and absent/low-confidence/wrong-faction intel
+   remains redacted without mutating input state.
+2. Exercise the actual four UI routes with retained or explicitly labelled diagnostic fixtures;
+   capture screenshots and resulting actions, not only text/DOM presence. Freeze source for review.
+3. Run `npm.cmd run test:vitest` once on the reviewed candidate; the combined suite includes the
+   complete UI boundary, so do not duplicate it with another UI-only campaign. Run
+   `npm.cmd run typecheck`, the focused documentation checks and `git diff --check`.
+   Run `npm.cmd run desktop:package:dir` once after the reviewed source commit; its
+   `desktop:release:check` includes the required map build, chunk check, simulation bundle and
+   Warroom build. Preserve the mandatory source commit hook separately.
+4. Bind the package's source commit, executable and `app.asar` hashes. Reuse that exact package
+   (including externally emitted renderer/data resources): `node <evidence>/package-proof.mjs freeze`,
+   then `node <evidence>/package-proof.mjs check <unique-label> <faction>` before each launch.
+   This read-only complete file/hash inventory costs seconds to a minute; stop on changed bytes,
+   dirty tracked source or a non-fresh/out-of-worktree profile/archive path.
+   Preserve the manifest outside the package. Reuse the artifact
+   for separate fresh RBiH, RS and HRHB shakedowns, in that order:
+   `node tools/ui/paradox_local_qa.cjs --turns=24 --faction=<faction> --label=<unique-attempt> --strategic --auto-recruit --historical-choice --final-checkpoint-tour --checkpoint-turns=1,4,8,12,16,20,24 --save-load-proof --packaged-executable=<absolute-exe>`.
+   The optional checkpoint selector preserves the previous default schedule. Use checkpoints 1, 4, 8, 12, 16, 20 and 24
+   from Phase 1, and the existing historical-choice, autonomy, save/replay and route contract.
+   Confirm the harness's actual behavior before spending a run; report any uncovered acceptance
+   obligation explicitly. Technical audio/network observations may share this package evidence;
+   they do not provide human listening approval.
+
+**Cost and stopping rule:** Focused tests take seconds to minutes; the combined suite is expected
+to take tens of minutes, packaging several minutes, and three 24-turn runs roughly 30–90 minutes
+depending on host and route latency. Initial allowance is one final combined suite, one package
+and one 24-turn shakedown per faction. Stop an affected run on crash, save mismatch, stale state,
+blocked progress or confirmed bug; preserve its receipt, diagnose and make a targeted correction
+within the authorized player loop before restarting the affected fresh run. Do not launch full
+188-turn campaigns, a headless scenario, baseline/canon wrappers or an unrelated investigation.
+Expand expensive work only for a concrete new question; routine targeted verification is already
+authorized. Stop on a required simulation/canon change or new product decision outside the packet.
+
+**Pass criteria and receipts:** Four defects are repaired and independently reviewed, or a
+superseded premise is disproved by concrete route evidence; all required focused/global/build/hook
+checks pass. Three fresh packaged shakedowns reach exactly turn 24 with attributable screenshots,
+actions, state/autosave/replay and clean required diagnostics. Use distinct logs under
+`F:/A-War-Without-Victory/logs/r8-decision-command-usability/` and the harness's exclusive run
+archives. Existing R7 PRE/POST-A/POST-B receipts establish only their original neutrality scope;
+the inherited six-pin baseline gate, accepted n392 and dirty POST-B remain disclosed. Its
+one-PRE/two-POST budget stays exhausted. No gate is waived and no R7/R8 closure is implied.
+Update this existing plan, board, roadmap and ledger with results, then commit locally. Do not
+push, merge, publish, create a duplicate report, or start BC10/other bugs by implication.
+
+### Reviewed source results — 2026-09-09
+
+The four registered defects have bounded UI repairs and independent source/harness review **GO**
+in `logs/r8-decision-command-usability/review.log` in the original checkout. B7 removes duplicate
+blocker-owned review rows; B5 groups by incumbent and opens the same newest recommendation;
+B8 uses actual objective-specific availability and opens the exact event from both Army HQ and
+tactical Summary; B1 projects only complete, reliable player-owned sector intelligence and gates
+all affected force-balance consumers. The paper-panel threat text measures 7.62:1 contrast at 12 px.
+The register below retains its original defect descriptions as the reproduction record.
+
+All receipts below are under `F:/A-War-Without-Victory/logs/r8-decision-command-usability/`.
+
+| Check | Result and receipt |
+|---|---|
+| Failing-first feature/correction tests | Separate `b1-*`, `b5-*`, `b7-*`, `b8-*` and `reviewer-corrections-*` RED/GREEN receipts retained; exact commands and exits are in each log. |
+| Focused candidate | `final-focused-tests3.log`: exit 0, 225/225 across ten files; subsequent B1 contrast and B8 exact-event route corrections have separate green receipts. |
+| Final tooltip fixture correction | `typecheck1.log`: exit 2, missing required `fogOfWar` in one new fixture. `b1-tooltip-fixture-green1.log`: exit 0, 18/18. Fresh `typecheck2.log`: exit 0. No production change for this correction. |
+| Harness selection | `checkpoints-green1.log`: exit 0, 47/47; `historical-choice-green2.log`: exit 0, 48/48. Earlier RED attempts remain. |
+| Actual B7/B5 routes | `routes-b7-corrected2.log`: exit 0, one row per real blocker and actual peace-proposal modal. B5 matching card/modal screenshots pass within `routes-diagnostic2.log`, whose overall exit 1 belongs to other failed checks. |
+| Actual B8 routes | `routes-b8-final1.log`: exit 0, exact advisory event and reachable answer from both HQ and tactical Summary. Response actionability uses a trial click; it does not claim an applied event response. `routes-b8-corrected1.log` supplies unaffected military/reserve/international and unavailable-card proof; its earlier generic cohesion destination was partial evidence. |
+| Actual B1/privacy/contrast | Known/low/unknown/mixed cases retained in `routes-diagnostic1` and `routes-diagnostic2`; those overall failed attempts are not relabelled green. `routes-b1-contrast1.log`: exit 0, screenshot and measured 7.62:1. Original diagnostic save SHA-256 is unchanged. |
+| Independent correction checks | `independent-review-tests1/2/3.log`: exit 0, respectively 15, 5 and 1 selected tests. Consolidated GO is in `review.log`. |
+| Final freeze and scope | `source-freeze3.json` / `source-freeze3.log`: exit 0, 25 source/test hashes; original tracked checkout and all 870 previously inventoried untracked paths preserved. Earlier freezes remain historical. |
+
+The optional harness flags add explicit checkpoints, real final Save/load proof and attributed
+historical/staff choice selection to the existing player. They do not change gameplay, save
+contracts or default harness policy. `full-vitest1.log` completed all four shards and the final
+51-file serial batch: **exit 1, 13,570 reported passes, four failures and 36 skips**. All four
+failures are the two checkout checks described below; the runner's deliberate child-failure
+fixture is an expected negative control, excluded from these totals. The complete UI boundary
+ran without a failed UI test. Package, mandatory source commit hook and all three fresh
+shakedowns remain pending at this entry.
+Earlier failed browser attempts include corrected fixture assertions and one invalidated HMR
+attempt; all remain separate. Final B8 screenshots were captured after source stopped changing.
+
+**Worktree environment correction question, recorded during `full-vitest1`:** the runtime identity
+guard reports the same React/ReactDOM/Zustand versions through different absolute paths because
+`node_modules` is a shared junction. The release exclusion guard also reports 53,032,794 research
+bytes versus the retained 53,031,799. Audit only those 239 research files against the untouched
+original checkout and inventory local dependency files/links (`environment-audit.mjs`). If the
+research differences are exclusively checkout line endings, restore those worktree copies from
+the same clean original revision; never alter the test expectation or research content. Give the
+worktree a physical copy of the existing dependency tree, preserving the shared junction under
+the evidence directory and rebinding only the npm workspace link to this worktree. Verify all
+copied dependency file hashes and research bytes; no install, version/lockfile or source change.
+Copy into a new contained staging directory, require fresh paths and sufficient disk space, and
+switch only after the full suite has ended. Cost: local inventory/copy roughly 1–5 minutes and
+two focused test files seconds. Stop on a non-line-ending research difference, file/hash mismatch,
+unexpected link or tracked source change. Rerun only
+`npm.cmd run test:vitest -- tests/runtime_dependency_resolution.test.ts tests/release_research_exclusion.test.ts`
+after correction; reuse the completed suite's unaffected tests against unchanged source and
+dependency bytes. Preserve the full failed receipt and each correction receipt. Do not spend a
+second full suite, package or campaign merely to correct checkout environment identity.
+
+The completed full receipt has four failed assertions in those two files and 36 reported skips.
+Five extra skips come from `force_quality_trajectory_diagnostic.test.ts`: this fresh checkout has
+no completed run to read. Its unchanged tool consumes only `brigade_temporal_log.jsonl` and
+`run_summary.json` plus the tracked historical reference. Copy those two inputs from the latest
+retained completed original-checkout run into a clearly labelled, fresh diagnostic-input directory;
+record original paths/hashes and preserve source bytes. Run the unchanged five read-only schema,
+determinism and non-mutation tests with the two environment test files. This costs seconds and
+executes no scenario, replay campaign or baseline gate. Require all five to run and pass and all
+input hashes to remain unchanged; retain the inherited 31 skips separately.
+
+Independent environment review in `review.log` confirms that these are the only real failures
+and approves targeted correction/reuse after byte, topology and test verification. The initial
+read-only audit is `environment-audit1.log`/`.json`; the completed-suite audit is
+`environment-audit2.log`/`.json`, both exit 0. Its 41,708 dependency files total 1,226,418,799 bytes
+(4,626 more than the in-flight audit due to completed test-cache output). All 49 research
+differences are CRLF-only; the original 239 files total exactly 53,031,799 bytes. The partial
+diagnostic copy is explicitly labelled, uses the retained n392 run, and binds both original and
+copied files in `diagnostic-inputs1.json` (`diagnostic-inputs1.log`, exit 0). No simulation ran.
+
+The serial dependency copy exceeded its five-minute estimate before switching the live junction.
+Preserve its script, partial staging directory and exit receipt; stop only the identified copy
+process. Use native `robocopy <original-node_modules> <fresh-stage> /E /MT:16 /COPY:DAT /DCOPY:DAT /XJ /R:1 /W:1 /NFL /NDL /NP`
+for the same physical copy, then verify every source/copy file hash and the reviewed counts,
+research bytes and junction topology. Record Robocopy's raw exit code (0–7 are success statuses)
+separately from wrapper exit. Expected additional copy/verification cost is 1–5 minutes; stop on
+copy errors, unexpected files/links or any byte mismatch. No validation campaign is repeated.
+
+Serial verification also showed the same I/O bottleneck (39,112 reads / 1.03 GB after 4m36s).
+Preserve that script/receipt and stop only its identified process before it writes the manifest.
+Use 16 bounded asynchronous readers for the identical SHA-256 source/copy comparisons, counts,
+extra-file rejection and topology checks; keep every predicate. Expected cost is under two minutes,
+with progress every 5,000 files. This is the same file audit, not another test or campaign.
+
+**Environment correction verified:** `parallel-copy1.log` passes (wrapper exit 0, Robocopy raw 1).
+`materialize-environment3.log` passes, exit 0: every one of 41,708 dependency files matches,
+tree SHA-256 `db69eeb906a0e71b47d72cd79daaa692b5f3fc46aadbd31c7404cddac4798f88`, all 239
+research files match the original and total 53,031,799 bytes, and tracked data is unchanged.
+`switch-dependencies1.log` passes, exit 0, with a physical local dependency tree, preserved original
+junction and local workspace-link target. Interrupted serial attempts 1/2 retain raw exit
+4294967295, their script snapshots and the first partial tree; no failed receipt was overwritten.
+`environment-tests1.log` passes **18/18 across all three targeted files, exit 0**. This resolves
+the four full-run assertions and runs all five added skips; the inherited 31 skips remain.
+It is targeted correction evidence plus unaffected full-run evidence, not a second full-suite
+exit-0 claim. Product source/test hashes, original evidence and diagnostic inputs are checked
+again before the source commit. Package and all three shakedowns remain pending.
+
 ---
 
 ## Subordinate audit packets (2026-09-07)

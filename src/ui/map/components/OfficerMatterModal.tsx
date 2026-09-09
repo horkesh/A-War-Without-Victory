@@ -6,6 +6,7 @@ import { useGameStore } from '../store/gameStore';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
 import { t } from '../i18n';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
+import { strictCompare } from '../../../state/validateGameState';
 
 interface OfficerMatterModalProps {
   itemId: string | null;
@@ -25,6 +26,17 @@ function normalizeOfficerSubject(value: string | null | undefined): string | nul
 }
 
 function officerEventDedupeKey(event: NonNullable<LoadedGameState['pendingOfficerEvents']>[number]): string {
+  if (event.type === 'replacement_suggested') {
+    const incumbent =
+      normalizeOfficerSubject(event.current_commander_id)
+      ?? normalizeOfficerSubject(event.current_commander_name)
+      ?? normalizeOfficerSubject(event.officer_id)
+      ?? normalizeOfficerSubject(event.officer_name)
+      ?? normalizeOfficerSubject(event.corps_id)
+      ?? normalizeOfficerSubject(event.event_id)
+      ?? 'unknown';
+    return `${event.type}:${incumbent}`;
+  }
   const subject =
     normalizeOfficerSubject(event.officer_id)
     ?? normalizeOfficerSubject(event.current_commander_id)
@@ -35,12 +47,17 @@ function officerEventDedupeKey(event: NonNullable<LoadedGameState['pendingOffice
   return `${event.type}:${subject}`;
 }
 
-function matchesOfficerMatterId(
-  event: NonNullable<LoadedGameState['pendingOfficerEvents']>[number],
+function findOfficerMatter(
+  events: NonNullable<LoadedGameState['pendingOfficerEvents']>,
   rawId: string | null,
-): boolean {
-  if (!rawId) return false;
-  return event.event_id === rawId || officerEventDedupeKey(event) === rawId;
+): NonNullable<LoadedGameState['pendingOfficerEvents']>[number] | null {
+  if (!rawId) return null;
+  const exact = events.find((event) => event.event_id === rawId);
+  if (exact) return exact;
+  const matches = events
+    .filter((event) => officerEventDedupeKey(event) === rawId)
+    .sort((a, b) => b.turn - a.turn || strictCompare(a.event_id, b.event_id));
+  return matches[0] ?? null;
 }
 
 function officerEventTypeLabel(type: string): string {
@@ -61,7 +78,9 @@ export function OfficerMatterModal({ itemId, state, onClose, onOpenPersonnel }: 
   const ipc = useIPC();
   const setLoadError = useGameStore((s) => s.setLoadError);
   const rawId = itemId ? stripOfficerPrefix(itemId) : null;
-  const event = state?.pendingOfficerEvents?.find((entry) => matchesOfficerMatterId(entry, rawId)) ?? null;
+  const event = state?.pendingOfficerEvents
+    ? findOfficerMatter(state.pendingOfficerEvents, rawId)
+    : null;
   const headerImage = getDecisionHeaderForFamily('officer_event');
   const acknowledgeLabel = event?.type === 'replacement_suggested'
     ? t('decisionModal.officer.keepCurrentCommander')

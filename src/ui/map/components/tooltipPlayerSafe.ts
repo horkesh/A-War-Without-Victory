@@ -6,7 +6,7 @@ import type {
 } from '../data/types';
 import { getPlayerFacingFaction, filterPlayerVisibleMapFormations, isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
-import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
+import { getPlayerSafeThreatPresentation, hasReliableThreatIntel } from '../utils/playerSafeThreat';
 import { buildSectorFormationAssignment } from '../utils/sectorUtils';
 import { t, type Locale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
@@ -266,7 +266,13 @@ export function buildPlayerSafeFrontTooltipModel(args: {
     pressureLine,
     densityValue: ownSector && ownSectorHasCurrentLine && typeof ownSector.density === 'number' && Number.isFinite(ownSector.density) ? ownSector.density : null,
     densityLabel: ownSector && ownSectorHasCurrentLine && typeof ownSector.density === 'number' && Number.isFinite(ownSector.density) ? getDensityLabel(ownSector.density, locale) : null,
-    threatSummary: ownSector && ownSectorHasCurrentLine && typeof ownSector.threat_ratio === 'number' && Number.isFinite(ownSector.threat_ratio) ? getPlayerSafeThreatPresentation(ownSector.threat_ratio).summary : null,
+    threatSummary: ownSector
+      && ownSectorHasCurrentLine
+      && hasReliableThreatIntel(ownSector.intel_confidence)
+      && typeof ownSector.threat_ratio === 'number'
+      && Number.isFinite(ownSector.threat_ratio)
+        ? getPlayerSafeThreatPresentation(ownSector.threat_ratio).summary
+        : null,
     ownFormationLabels,
     enemyContactSummary: enemyContacts.length > 0
       ? t(enemyContacts.length === 1 ? 'tooltip.enemyContact.one' : 'tooltip.enemyContact.many', { count: enemyContacts.length }, locale)

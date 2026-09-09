@@ -4,6 +4,14 @@ export interface PlayerSafeThreatPresentation {
   toneClass: string;
 }
 
+export const THREAT_INTEL_CONFIDENCE_MIN = 0.4;
+
+export function hasReliableThreatIntel(confidence: unknown): confidence is number {
+  return typeof confidence === 'number'
+    && Number.isFinite(confidence)
+    && confidence >= THREAT_INTEL_CONFIDENCE_MIN;
+}
+
 export function getPlayerSafeThreatPresentation(ratio: number): PlayerSafeThreatPresentation {
   if (ratio > 2.0) {
     return { label: 'OVERMATCHED', summary: 'critical pressure', toneClass: 'text-red-500 font-black' };

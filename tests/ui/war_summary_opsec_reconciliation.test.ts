@@ -47,6 +47,20 @@ function stateWithFilteredOpsecOperations(): LoadedGameState {
     } as LoadedGameState;
 }
 
+function stateWithOpsecSector(intelConfidence: number | undefined): LoadedGameState {
+    return {
+        ...makeMockLoadedGameState(),
+        player_faction: 'RS',
+        operations: [],
+        corpsFrontSectors: [{
+            sector_id: 'sector:vrs:1', corps_id: 'vrs_1st_krajina', corps_name: '1st Krajina Corps',
+            faction: 'RS', display_name: 'Northern OG', opposing_factions: ['RBiH'], edge_ids: ['a__b'],
+            sub_segment_count: 1, length_edges: 1, assigned_brigade_ids: [], reserve_brigade_ids: [],
+            threat_ratio: 1.7, intel_confidence: intelConfidence, offensive_signs: false, opsec_active: true,
+        }],
+    } as LoadedGameState;
+}
+
 afterEach(() => {
     cleanup();
     setLocale('en');
@@ -72,5 +86,15 @@ describe('War Summary OPSEC reconciliation', () => {
         expect(screen.getByText('Una Push')).toBeTruthy();
         expect(screen.getByText('Vrbas Hold')).toBeTruthy();
         expect(screen.queryByText('Operational Posture')).toBeNull();
+    });
+
+    it('redacts OPSEC force balance until sector intelligence is reliable', () => {
+        const low = render(createElement(SituationTab, { state: stateWithOpsecSector(0.2), focusSection: 'opsec' }));
+        expect(screen.getByText('Pressure No staff report · Intel 20%')).toBeTruthy();
+        expect(low.container.textContent).not.toContain('heavy pressure');
+        low.unmount();
+
+        render(createElement(SituationTab, { state: stateWithOpsecSector(0.6), focusSection: 'opsec' }));
+        expect(screen.getByText('Pressure heavy pressure · Intel 60%')).toBeTruthy();
     });
 });

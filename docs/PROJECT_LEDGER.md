@@ -35103,3 +35103,52 @@ existing Game Designer, Canon Compliance and QA roles, with the license/provenan
 within them. `closeout-audit-review.log` retains the initial verdict and targeted confirmation;
 `closeout-audit-docs2.log`, `closeout-audit-scope2.log` and `closeout-audit-commit1.log` record final
 checks and the mandatory local hook outcome.
+
+## R8 decision/command usability source packet — 2026-09-09
+
+The owner scheduled B7/B5/B8/B1 and three fresh 24-turn packaged shakedowns, with human listening
+deferred to eventual owner inspection. Work starts from clean tracked `bd7b819750d32811738a87143a66bb02807ab867`
+in the isolated `F:/AWWV-worktrees/r8-decision-command-usability` worktree on
+`codex/r8-decision-command-usability`. The original R7 checkout and 870 inventoried untracked
+paths remain preserved. The existing Electron validation plan records scope, commands, cost,
+pass criteria and stop rules before implementation and expensive gates.
+
+B7 deduplicates blocker-owned review rows; B5 shares deterministic incumbent/current-candidate
+identity between inbox and modal; B8 derives truthful objective levers and routes the exact event
+from HQ and tactical Summary; B1 projects complete player-owned intelligence and withholds low,
+unknown or incomplete force balance across affected consumers. Paper-panel threat text has
+measured 7.62:1 contrast. Canonical input, engine, save contracts, assets and dependencies are unchanged.
+The existing QA harness gains opt-in checkpoints, attributed event choice and final Save/load proof;
+these do not claim deterministic replay re-execution or alter legacy defaults.
+
+One Sol/medium implementer and a separate Sol/medium reviewer produced source/harness **GO**.
+Receipts live in `F:/A-War-Without-Victory/logs/r8-decision-command-usability/`; the existing plan
+contains the result table. Focused candidate tests pass 225/225, with separate green corrections,
+actual route screenshots and independent targeted verification. `typecheck1.log` failed on one
+test fixture's missing `fogOfWar`; the corrected tooltip file passes 18/18 and `typecheck2.log`
+passes, exit 0. Every failed attempt remains retained. `source-freeze3.json` binds the final 25
+source/test hashes. The complete combined suite finishes in `full-vitest1.log`, exit 1: 13,570
+reported passes, four failures and 36 skips. The four failures are checkout-only React/ReactDOM/
+Zustand junction-path identities and a research-file raw-byte assertion; all UI tests pass.
+
+Independent review approves a bounded environment correction. A physical copy of the identical
+dependency files replaces the shared worktree junction, which is preserved under the evidence
+directory. All 41,708 dependency files match; all 239 research files match the original checkout
+at 53,031,799 bytes after restoring 49 CRLF-only differences. No tracked data, dependency version,
+lockfile, source or test expectation changes. Slow serial copy/verification attempts are retained;
+the native parallel copy and parallel SHA-256 verifier pass (`parallel-copy1.log`,
+`materialize-environment3.log`, `switch-dependencies1.log`, wrapper exits 0).
+
+The five added skips came from absent run inputs in this fresh checkout. Two explicitly labelled
+retained n392 files supply only the unchanged read-only diagnostic tests; no simulation or replay
+campaign runs. `environment-tests1.log` passes 18/18 across the two corrected environment checks
+and five diagnostics, exit 0. This resolves the full run's four failures and five added skips;
+31 inherited skips remain. Preserve the full exit-1 receipt and reuse its unaffected results;
+do not describe this as a second clean full-suite run. Mandatory source hook, package and three
+shakedowns remain pending at this entry; no final R8 acceptance is claimed.
+
+R7 PRE/POST-A/POST-B still match their eight artifacts and 31 inputs. Clean POST-A and dirty
+POST-B provenance remain distinct, accepted n392 pins stay unchanged, and the one-PRE/two-POST
+budget is exhausted. The inherited six-pin gate, remaining behavior settlement, calibration,
+full packaged acceptance and owner listening remain open. No baseline wrapper, standalone
+scenario, full campaign, BC10 work, push, merge or publication is authorized by this packet.

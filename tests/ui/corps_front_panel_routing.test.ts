@@ -155,6 +155,22 @@ describe('CorpsFrontPanel field routing', () => {
     useGameStore.setState(useGameStore.getInitialState());
   });
 
+  it.each([
+    [3, 'OVERMATCHED', 'text-red-800'],
+    [1.3, 'PRESSURE', 'text-amber-800'],
+    [0.4, 'SUPERIOR', 'text-emerald-800'],
+  ] as const)('uses readable light-surface force-balance color for ratio %s', (ratio, label, toneClass) => {
+    const state = makeState();
+    state.corpsFrontSectors![0]!.threat_ratio = ratio;
+    useGameStore.setState({ loadedGameState: state });
+
+    render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    const badge = screen.getByText(label);
+    expect(badge.classList.contains(toneClass)).toBe(true);
+    expect(badge.className).not.toMatch(/text-(?:red|amber|green|emerald)-(?:400|500)/);
+  });
+
   it('routes brigade rows through field inspection and clears stale shell context', () => {
     render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 

@@ -39,6 +39,33 @@ function loadFunction<T>(source: string, name: string, context: Record<string, u
     return runInNewContext(`(${extractFunctionSource(source, name)})`, context) as T;
 }
 
+test('explicit shakedown checkpoints preserve required visits and reject incomplete or disabled schedules', () => {
+    const select = loadFunction<(raw: string | null, target: number, skip: boolean) => Set<number>>(
+        readHarness(), 'selectCheckpointTurns',
+    );
+    assert.deepEqual(Array.from(select(null, 24, false)), [1, 2, 5, 10, 15, 20, 30, 40, 24]);
+    assert.deepEqual(Array.from(select(null, 24, true)), []);
+    assert.deepEqual(Array.from(select('24,1,4,8,12,16,20,4', 24, false)), [1, 4, 8, 12, 16, 20, 24]);
+    for (const invalid of ['', '0,24', '1.5,24', '25,24', '1,4', 'one,24']) {
+        assert.throws(() => select(invalid, 24, false), /checkpoint/i, invalid);
+    }
+    assert.throws(() => select('1,24', 24, true), /checkpoint/i);
+});
+
+test('historical choice uses explicit provenance instead of first option and stops on ambiguity', () => {
+    const select = loadFunction<(decision: any) => { id: string; basis: string }>(readHarness(), 'selectHistoricalEventChoice');
+    const options = [{ id: 'first', label: 'First' }, { id: 'historical', label: 'Historical' }, { id: 'staff', label: 'Staff' }];
+    assert.equal(select({ response_options: options, historical_default_response_id: 'historical', staff_recommended_response_id: 'staff' }).id, 'historical');
+    assert.equal(select({ response_options: [...options].reverse(), historical_default_response_id: 'historical' }).id, 'historical');
+    assert.equal(select({ response_options: options, staff_recommended_response_id: 'staff' }).basis, 'staff_recommendation');
+    assert.equal(select({ response_options: [{ ...options[1], historical_marker: 'historical_default' }] }).basis, 'authored_historical_default');
+    assert.throws(() => select({ response_options: options }), /ranked/i);
+    assert.throws(() => select({ response_options: [{}] }), /ranked/i);
+    assert.throws(() => select({ response_options: options, historical_default_response_id: 'missing' }), /missing/i);
+    assert.throws(() => select({ response_options: options.map(o => ({ ...o, historical_marker: 'historical_default' })) }), /ambiguous/i);
+    assert.throws(() => select({ response_options: [{ ...options[0], historical_marker: 'historical_default' }, options[1]], historical_default_response_id: 'historical' }), /ambiguous/i);
+});
+
 test('52-week Electron QA supports bounded major-surface checkpoint tours', () => {
     const harness = readHarness();
 

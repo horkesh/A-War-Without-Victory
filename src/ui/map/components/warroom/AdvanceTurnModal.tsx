@@ -57,6 +57,20 @@ export interface AdvanceTurnModalProps {
   onResolveBlocker?: (action: InboxItem['action'], itemId: string) => void;
 }
 
+function isBlockerReviewDuplicate(item: PreAdvanceCommandReviewItem, blockers: PresidentialBlocker[]): boolean {
+  return blockers.some((blocker) => {
+    if (item.id === blocker.id) return true;
+    switch (blocker.type) {
+      case 'event_decision': return item.id === 'review:pending';
+      case 'peace_plan': return item.id === 'manifest:peace_plan';
+      case 'dayton_negotiation': return item.id === 'manifest:dayton_negotiation';
+      case 'convoy_decision': return item.id === 'manifest:convoy_decision';
+      case 'paramilitary_request': return item.id === 'paramilitary:pending';
+      default: return false;
+    }
+  });
+}
+
 function statusClass(status: PreAdvanceCommandReviewStatus): string {
   if (status === 'blocked') return 'border-red-500/60 bg-red-950/40 text-red-300';
   if (status === 'review') return 'border-amber-500/60 bg-amber-950/35 text-amber-300';
@@ -202,6 +216,10 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
   const blockers = useMemo(
     () => derivePresidentialBlockers(loadedGameState, osidDisplayNames),
     [loadedGameState, osidDisplayNames],
+  );
+  const reviewItems = useMemo(
+    () => review.items.filter((item) => !isBlockerReviewDuplicate(item, blockers)),
+    [blockers, review.items],
   );
 
   useEffect(() => {
@@ -440,11 +458,11 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
           )}
 
           <section className="space-y-1.5">
-            {review.items.length === 0 ? (
+            {reviewItems.length === 0 ? (
               <div className="border border-panel-border/60 bg-panel-card/65 px-2 py-2 text-xs text-text-secondary">
                 {t('decisionRoom.noBuriedItems')}
               </div>
-            ) : review.items.map((item) => (
+            ) : reviewItems.map((item) => (
               <ReviewItemRow
                 key={item.id}
                 item={item}

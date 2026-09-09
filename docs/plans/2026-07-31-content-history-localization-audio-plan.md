@@ -11,6 +11,12 @@
 **Date:** 2026-07-31
 **Status:** ACTIVE CURRENT LANE — audio implementation landed at `2d106e5e0`; three-resolution browser English inspection is complete. Human audio/sensitivity, scoped packaged-offline proof, baseline acceptance and final closeout remain open; Phase 3 localization is deferred post-1.0.
 
+**Owner sequencing, 2026-09-09:** Human listening will occur when the owner inspects the game
+after it is acceptably good. Retain the listening checklist as pending inspection, not the next
+engineering task. The owner has scheduled the R8 B7/B5/B8/B1 usability repairs and subsequent
+three-faction 24-turn packaged shakedowns to improve that readiness. This does not waive audio,
+offline-runtime or baseline acceptance, close R7, or activate full campaigns.
+
 ### Bounded closeout audit — authorized 2026-09-09
 
 **Question:** Which R7 acceptance gates are established by retained evidence, and exactly

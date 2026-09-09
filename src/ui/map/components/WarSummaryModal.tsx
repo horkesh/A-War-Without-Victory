@@ -16,14 +16,16 @@ import { WarSummaryContent } from './army_hq/WarSummaryContent';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { t } from '../i18n';
+import type { PresidentialDecisionRoomNavigationTarget } from '../data/presidentialDecisionRoom';
 
 interface WarSummaryModalProps {
     isOpen: boolean;
     focusSection?: SummaryFocusSection;
     onClose: () => void;
+    onNavigateTarget?: (target: PresidentialDecisionRoomNavigationTarget) => boolean | void;
 }
 
-export function WarSummaryModal({ isOpen, focusSection = 'overview', onClose }: WarSummaryModalProps) {
+export function WarSummaryModal({ isOpen, focusSection = 'overview', onClose, onNavigateTarget }: WarSummaryModalProps) {
     return (
         <Modal
             isOpen={isOpen}
@@ -58,7 +60,7 @@ export function WarSummaryModal({ isOpen, focusSection = 'overview', onClose }: 
                 </button>
             </div>
 
-            <WarSummaryContent focusSection={focusSection} />
+            <WarSummaryContent focusSection={focusSection} onNavigateTarget={onNavigateTarget} />
         </Modal>
     );
 }

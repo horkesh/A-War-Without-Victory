@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { createElement } from 'react';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import type { TurnSummary } from '../../src/state/turn_summary.js';
@@ -18,6 +18,8 @@ vi.mock('../../src/ui/map/store/gameStore', () => ({
 
 // @ts-expect-error TS1378: Vitest supports top-level await in ESM tests.
 const { WarSummaryContent } = await import('../../src/ui/map/components/army_hq/WarSummaryContent');
+// @ts-expect-error TS1378: Vitest supports top-level await in ESM tests.
+const { WarSummaryModal } = await import('../../src/ui/map/components/WarSummaryModal');
 
 function makeSummary(overrides: Partial<TurnSummary> = {}): TurnSummary {
     return {
@@ -338,7 +340,8 @@ describe('War Summary campaign cost localization', () => {
         expect(posture.textContent).toBe('No presidential signature is due; current policy remains in force.');
         expect(screen.getAllByText('No presidential signature is due; current policy remains in force.')).toHaveLength(1);
         expect(section.textContent).toContain('No staff request filed');
-        expect(section.textContent).toContain('No presidential signature due');
+        expect(section.textContent).toContain('No international-standing decision due');
+        expect(section.textContent).toContain('No internal-cohesion decision due');
         expect(section.textContent).not.toContain('hold present policy');
         expect(within(section).queryAllByRole('button')).toHaveLength(0);
         expect(summaryTab.compareDocumentPosition(posture) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -355,7 +358,8 @@ describe('War Summary campaign cost localization', () => {
         expect(screen.getByTestId('war-summary-posture').textContent)
             .toBe('Nije potreban potpis predsjednika; sadašnja politika ostaje na snazi.');
         expect(section.textContent).toContain('Nije podnesen zahtjev štaba');
-        expect(section.textContent).toContain('Nije potreban potpis predsjednika');
+        expect(section.textContent).toContain('Nema odluke o međunarodnom položaju');
+        expect(section.textContent).toContain('Nema odluke o unutrašnjoj koheziji');
         expect(section.textContent).not.toContain('hold present policy');
     });
 
@@ -371,5 +375,34 @@ describe('War Summary campaign cost localization', () => {
         expect(section.textContent).toContain('Sljedeca dostupna poluga');
         expect(section.textContent).toContain('Posljednja relevantna posljedica');
         expect(section.textContent).toContain('Nije prijavljeno');
+    });
+
+    it('hands an advisory objective lever to its exact presidential event action', () => {
+        const state = stateWithStrategicObjectives();
+        storeState.loadedGameState = {
+            ...state,
+            pendingEventDecisions: [{
+                event_id: 'coalition_choice', event_title: 'Coalition choice', faction: 'RBiH', turn_fired: 8,
+                requires_player_response: false,
+                response_options: [{
+                    id: 'answer', label: 'Answer', effects: [],
+                    dimension_shifts: [{ faction: 'RBiH', dimension: 'internal_cohesion', delta: 5 }],
+                }],
+            }],
+        };
+        const onNavigateTarget = vi.fn();
+
+        render(createElement(WarSummaryModal as typeof WarSummaryModal & ((props: {
+            isOpen: true;
+            onClose: () => void;
+            onNavigateTarget: typeof onNavigateTarget;
+        }) => ReturnType<typeof WarSummaryModal>), {
+            isOpen: true,
+            onClose: vi.fn(),
+            onNavigateTarget,
+        }));
+        fireEvent.click(screen.getByRole('button', { name: "President's Desk: Review internal-cohesion decision" }));
+
+        expect(onNavigateTarget).toHaveBeenCalledWith({ kind: 'inbox', itemId: 'event:coalition_choice' });
     });
 });
