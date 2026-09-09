@@ -108,7 +108,10 @@ Contrast is 8.34:1 and last text clears the fade by at least 16.25px. At 1366x76
 scroll viewport is 266px tall; the lower header and packet are accessed through scrolling.
 The complete UI boundary passes 354 files / 2,988 tests in 848.44 seconds, exit 0
 (`desk39-onboard-ui1.log`). Focused checks pass 75/75; typecheck and map build exit 0.
-The normal commit hook remains required before completion.
+The mandatory normal typecheck hook and source commit pass, exit 0, in
+`desk39-onboard-commit1.log`: `ea33b23a52d5be6b2a126512fc00ce9062a76a88`.
+Focused documentation checks pass 13/13, and scope/link/hash checks pass. Item 3.9's
+date-on-board criterion is repaired; aggregate R7 baseline/closeout gates remain open.
 
 Local commit sequence after those checks: stage only the three frozen date source/test
 files and the six existing amended documentation files, then run
@@ -186,7 +189,7 @@ identity; coordinate any later shared-build edit through the R9 preparation owne
 | Field | Value |
 |---|---|
 | **Date** | 2026-09-05 |
-| **Status** | ACTIVE — date-on-whiteboard correction reopened; inherited baseline gate open |
+| **Status** | DATE-ON-WHITEBOARD CORRECTION VERIFIED — source `ea33b23a5`; inherited baseline gate open |
 | **Owner lane** | **R7 — Content, historical attribution, audio, accessibility, and opening experience** |
 | **Command-board row** | 7 |
 | **Parent plan (amended)** | [Content/history/audio plan](2026-07-31-content-history-localization-audio-plan.md) — this plan executes its **Phase 5** checklist line *"Inspect English at 1920x1080, 1366x768, and 3440x1440 across the required surfaces."* |
@@ -194,7 +197,7 @@ identity; coordinate any later shared-build edit through the R9 preparation owne
 | **Source finding set** | [Showcase screenshot GUI audit](../40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md) (FROZEN, 29 findings) |
 | **Panel record** | [Tier-1 specialist reports](../40_reports/working/20260905_SHOWCASE_AUDIT_PANEL_SPECIALIST_REPORTS.md) |
 | **Collision rules** | §8 of the roadmap: *"Map/Desk English layout strings — R1/R2 layout first; R7 accessibility/readability proof second."* R1/R2 are CLOSED, so their layout pass is complete and this is the open second pass. One file has one owning phase; see §4. |
-| **Current next action** | Correct the date's attachment to the actual whiteboard under existing date/header authorization. Earlier source `88996a23d` has clean POST-A proof, but its detached date placement is not accepted. Retain the failing baseline gate; no new simulation campaign. |
+| **Current next action** | Date correction is reviewed, validated and locally committed at `ea33b23a5`. Preserve the existing PRE/POST provenance and failing baseline gate; no new simulation campaign. The separate opening Inbox/replacement-package scope decision and broader R7 acceptance remain open. |
 
 **Owner continuation:** date-only whiteboard acceptance is approved, and investigation of
 the six pre-existing baseline mismatches is authorized. This supersedes the full-board

@@ -35244,7 +35244,11 @@ requires complete control coverage, unchanged source/fixture/region hashes, fixe
 and accepted asset byte/Git identities; neither failed receipt is rewritten. Independent
 source/image review gives GO after all eighteen endpoint and 77 intermediate images.
 Typecheck/map build pass, and the complete UI boundary passes 354 files / 2,988 tests,
-exit 0 (`desk39-onboard-ui1.log`). Normal hook/commit identity follows in the existing report.
+exit 0 (`desk39-onboard-ui1.log`). Focused documentation checks pass 13/13 and the scope/
+link/frozen-hash check passes. Source repair and acceptance correction are committed at
+`ea33b23a52d5be6b2a126512fc00ce9062a76a88` with the normal mandatory typecheck hook,
+exit 0 (`desk39-onboard-commit1.log`), and a clean tracked tree afterward. The documentation
+follow-up records that result without another source or broad validation change.
 
 The separate opening Inbox/Desk blocker and replacement package remain pending owner scope
 authorization. No package, campaign or simulation run is added for this date correction.

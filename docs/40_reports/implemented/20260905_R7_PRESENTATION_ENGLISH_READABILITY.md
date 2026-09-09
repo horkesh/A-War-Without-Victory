@@ -1,9 +1,10 @@
 # R7 presentation and English readability
 
-Status: date-on-whiteboard placement is reopened after the owner's 2026-09-10 correction.
-The prior visibility proof accepted a date shifted off its intended artwork surface; that
-date-layout GO was too broad. Existing full UI/typecheck/build/hook and clean POST-A receipts
-remain evidence for source `88996a23d`, not proof of correct date placement or a later revision.
+Status: date-on-whiteboard correction verified and committed at `ea33b23a52d5be6b2a126512fc00ce9062a76a88`.
+The owner's 2026-09-10 correction exposed an overbroad prior visibility GO. Fresh source,
+image, complete UI, typecheck, build and normal hook evidence now cover the repair below.
+Earlier receipts and clean POST-A remain evidence for their original revisions, including
+`88996a23d`; they are not re-labelled as runs of the repaired source.
 The inherited baseline gate remains open, so this is not R7 closure.
 Prior global Vitest/player-experience receipts are reused only for unaffected scope.
 
@@ -43,6 +44,9 @@ Fresh evidence under `logs/r7-english-readability/`:
 | `npm run desktop:map:build` | Exit 0 | `desk39-onboard-map-build1.log` |
 | `npm run test:vitest -- tests/ui` | Exit 0; complete UI boundary, 354 files / 2,988 tests, 848.44 seconds | `desk39-onboard-ui1.log` |
 | `node desk39-onboard-scope.mjs freeze` | Exit 0; three date source/test hashes frozen, 25 R8 source/test hashes preserved, 870 prior untracked paths retained | `desk39-onboard-source-freeze.log`, `desk39-onboard-source-freeze.json` |
+| `npm run test:vitest -- tests/docs_desktop_v09_truth.test.ts tests/docs_truth_no_skip_guard.test.ts tests/v092_playtest_package_docs.test.ts` | Exit 0, 13/13 | `desk39-onboard-docs1.log` |
+| `node desk39-onboard-scope.mjs` including `git diff --check`, scope, links and frozen hashes | Exit 0 | `desk39-onboard-scope1.log` |
+| `git commit -m "fix(ui): keep the R7 date on its whiteboard"` with normal mandatory hook | Exit 0; source commit `ea33b23a52d5be6b2a126512fc00ce9062a76a88`, tracked tree clean afterward | `desk39-onboard-commit1.log` |
 
 The corrected traversal is bounded by the stable target count and stops on no progress;
 no source change was needed for that harness correction. Artifact reconciliation strips
@@ -64,7 +68,9 @@ evidence includes eighteen endpoint images and 77 intermediate readability image
 Independent review in `desk39-onboard-review.log` gives final source/image **GO**, after
 inspecting all eighteen endpoint and 77 intermediate screenshots and independently
 checking source/asset identities. The complete UI boundary passes 354 files / 2,988 tests,
-exit 0. The normal local hook and commit remain pending at this entry.
+exit 0. The normal local typecheck hook and source commit pass, exit 0. Closeout documentation
+and final hash/scope receipts use the distinct `desk39-onboard-docs2.log`,
+`desk39-onboard-scope2.log`, `desk39-onboard-commit2.log` and `desk39-onboard-final-scope.log`.
 The existing package remains from product `217c9f70a`;
 this date correction is not packaged by the earlier build. The separate opening Inbox
 blocker/replacement-package decision remains pending. R7 PRE, clean POST-A and dirty

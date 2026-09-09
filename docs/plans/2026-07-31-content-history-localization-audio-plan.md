@@ -9,7 +9,7 @@
 **Tech stack:** JSON data, TypeScript/React i18n, Vitest, Electron visual/audio proof, Balkan Battlegrounds KB, IRMCT/UN sources, Web Audio/OGG assets.
 
 **Date:** 2026-07-31
-**Status:** ACTIVE CURRENT LANE — audio implementation landed at `2d106e5e0`; date-on-whiteboard placement is reopened after the owner's 2026-09-10 visual correction. Other recorded English checks retain their original scope. Human audio/sensitivity, scoped packaged-offline proof, baseline acceptance and final closeout remain open; Phase 3 localization is deferred post-1.0.
+**Status:** ACTIVE CURRENT LANE — audio implementation landed at `2d106e5e0`; the owner's date-on-whiteboard correction is verified and locally committed at `ea33b23a5` with nine-case image review and complete UI/hook checks. Other recorded English checks retain their original scope. Human listening waits for owner inspection; audio/sensitivity, scoped packaged-offline proof, baseline acceptance and final closeout remain open. Phase 3 localization is deferred post-1.0.
 
 **Owner sequencing, 2026-09-09:** Human listening will occur when the owner inspects the game
 after it is acceptably good. Retain the listening checklist as pending inspection, not the next
