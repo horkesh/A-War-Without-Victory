@@ -129,6 +129,7 @@
 ## Map & UI Shell
 1. **[2026-09-03] A fixed-center element makes each toolbar half a hard budget**
    Do instead: with the crest pinned over the centre grid column, every item must be `whitespace-nowrap shrink-0` with ONE designated shrinkable (the date); keep reference routes in the left group; give alert chips short labels + full sentence in `title`. **`scrollWidth === clientWidth` CANNOT SEE THIS** — a `justify-end` cluster overflows from the START edge, which LTR `scrollWidth` excludes; that check passed at 1280/1440/1920 while the chip was 74px under the crest at 1400 (caught by Codex review, not by me). Measure child rects against the track and the crest instead (`verify_toolbar_fit.mjs`), and give chips a compact band. See MAP_UI_MASTER "Tactical toolbar single-line contract".
+   **[2026-09-09] Also inspect ancestor clipping and actual pixels:** transformed glyph rectangles can be clear while an unchanged region `clipPath` removes every painted character. See the R7 date-label lesson in `docs/PROJECT_LEDGER_KNOWLEDGE.md`.
 2. **[2026-07-05] Deck counters are screen symbols, not terrain decals**
    Do instead: keep tactical Deck overlay non-interleaved and counter/label layers depth-disabled.
 3. **[2026-07-09] Critical counters do not wait for idle**

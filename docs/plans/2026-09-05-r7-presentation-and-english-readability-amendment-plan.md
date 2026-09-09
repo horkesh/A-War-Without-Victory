@@ -20,6 +20,65 @@ runtime dependency.
 
 ## 1. Header Contract
 
+### Authorized date-layout continuation — 2026-09-09
+
+Starting branch/HEAD verified: `codex/r7-english-readability` /
+`31823917a057a8933669ad8fb9d8839cc258fdce`; no intervening commits. Preserve the
+existing uncommitted Desk fade, its test, and all untracked evidence.
+
+Owner authorization supersedes the gap-only limitation below: item 3.9 requires the
+complete date (not the complete whiteboard) for RBiH, RS and HRHB at 1920×1080,
+1366×768 and 3440×1440. Necessary DOM date-label/header layout changes are authorized;
+the Desk column position and room artwork stay fixed, with readable header content
+and controls. Phase 3 additionally owns `WarroomShellLayer.tsx` and, only if necessary,
+`DeskAuthorityHeader.tsx` for this layout. A single atomic Desk/date source-and-test
+commit replaces the per-file rule for this coupled slice; documentation may follow.
+
+Question: can that small layout slice expose every date without text/card intersections,
+clipping, inadequate contrast, lost controls, or maximum-scroll fade obstruction?
+One Sol/medium implementer owns implementation and the nine-case screenshot/geometry
+probe; a separate Sol/medium reviewer checks source and actual images independently.
+Use distinct `logs/r7-english-readability/desk39-layout-*` attempts, preserving exact
+commands and child exit codes. Run focused Desk/Warroom tests, then
+`npm.cmd run test:vitest -- tests/ui`, `npm.cmd run typecheck`,
+`npm.cmd run desktop:map:build`, and `git diff --check`; local `git commit` must run
+the mandatory hook. Browser command is a bounded adaptation of the retained
+`desk39-feasibility.mjs`/`probe-desk-bottom.mjs` harnesses, recorded before execution.
+Expected cost: focused checks and nine-case browser proof a few minutes each, complete
+UI boundary about 10 minutes, typecheck about two minutes, map build about one minute.
+Pass requires actual screenshot inspection plus glyph bounds, clipping/occlusion,
+text/card intersections, date contrast >=4.5:1, readable header/control content, fixed
+column/artwork, and last text above the fade at maximum scroll. Stop on forbidden
+surface needs, unexplained failures after targeted correction, or unmet acceptance;
+never substitute DOM text presence or scrollWidth for visual proof.
+
+After reviewed source is committed and tracked tree is clean, execute only the remaining
+authorized POST-A using Node v22.23.2, process-local `AWWV_S6_GRADE_RUN=true`, and
+`node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario.ts --scenario data/scenarios/apr1992_definitive_188w.json --weeks 188 --full-replay-save-sequence --out logs/r7-english-readability/post-188w`.
+Expected cost 20–40 minutes. Use existing `compare-simulation.mjs` and retained PRE/POST-B
+artifacts; record exact health/hash commands before launch. Pass requires clean provenance,
+188 completed weeks, eight identical artifacts and consumed inputs, and required health
+checks. Stop on drift/incomplete output; no pins, calibration, or simulation edits and no
+extra campaign. Canon already consumed POST-B: do not rerun canon/baseline regression.
+Reuse the unaffected prior 13,562-pass/31-skip full-suite and player-experience receipts
+explicitly; no automatic full-suite, package or unchanged browser campaign repetition.
+The inherited six-pin baseline gate remains failing until separately dispositioned;
+POST-A agreement cannot close it or declare current behavior canonical.
+
+POST-A cleanliness preparation: provenance includes untracked files. Preserve all evidence
+in the owner checkout and use a new detached `F:/AWWV-worktrees/r7-readability-post-a`
+at the final reviewed commit, with the same ignored node_modules junction as PRE and no
+dependency installation. Keep the worktree afterward; never recursively remove a junction.
+Write POST-A artifacts to the absolute owner-checkout output root above, outside the clean
+runner checkout. Verify `git status --porcelain` is empty, Node is v22.23.2, and package/
+lockfiles and consumed inputs match PRE before launch. Run
+`node tools/engine_health_gate.cjs <POST-A-run-dir> --horizon 188w --json`, then from the
+owner checkout `node logs/r7-english-readability/compare-simulation.mjs logs/r7-english-readability/pre-188w-clean/apr1992_definitive_188w__6898d6d2e324c7a3__w188 <POST-A-run-dir> data/derived/scenario/_baseline_tmp/apr1992_188w`.
+These are read-only post-run checks (seconds/minutes), not extra campaigns. Preserve the
+existing partial comparison; the final comparison path must not already exist. Verify
+run_meta provenance and all 188 replay frames, plus the full final-save SHA-256/fingerprint,
+before claiming clean completion.
+
 **Build handoff — 2026-09-08:** after the reviewed dependency graph and owner instruction
 to proceed, R9 Phase 1 takes serial ownership of package/lockfiles, Vite/test configuration
 and install commands. This amendment declares no new runtime dependency and retains its
@@ -37,7 +96,7 @@ identity; coordinate any later shared-build edit through the R9 preparation owne
 | **Source finding set** | [Showcase screenshot GUI audit](../40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md) (FROZEN, 29 findings) |
 | **Panel record** | [Tier-1 specialist reports](../40_reports/working/20260905_SHOWCASE_AUDIT_PANEL_SPECIALIST_REPORTS.md) |
 | **Collision rules** | §8 of the roadmap: *"Map/Desk English layout strings — R1/R2 layout first; R7 accessibility/readability proof second."* R1/R2 are CLOSED, so their layout pass is complete and this is the open second pass. One file has one owning phase; see §4. |
-| **Current next action** | Date-only 3.9 needs header/date layout scope: required cases are hidden by the fixed header. Baseline investigation reviewed GO; Desk/POST-A and baseline acceptance remain open. |
+| **Current next action** | Frozen Desk/date source, nine-case visual proof and final UI checks pass, independently reviewed GO. Commit locally with the mandatory hook, then clean POST-A. The inherited baseline gate remains open. |
 
 **Owner continuation:** date-only whiteboard acceptance is approved, and investigation of
 the six pre-existing baseline mismatches is authorized. This supersedes the full-board
@@ -178,7 +237,7 @@ change wanted inside a Phase-3-owned file is raised to the integrator, not made 
 |---|---|
 | 1 | `src/ui/map/i18n/messages.en.ts` |
 | 2 | `generateChronicleEntries.ts`, `ChronicleOverlay.tsx`, `playerSafeText.ts`, `FormationDetail.tsx`, new municipality-name map module |
-| 3 | `DirectiveCard.tsx`, `AdvanceTurnModal.tsx`, `PresidentialDecisionRoomPanel.tsx`, `SituationTab.tsx`, `PresidentDeskShell.tsx`, `CodexPanel.tsx`, `ArmyHQModal.tsx` |
+| 3 | `DirectiveCard.tsx`, `AdvanceTurnModal.tsx`, `PresidentialDecisionRoomPanel.tsx`, `SituationTab.tsx`, `PresidentDeskShell.tsx`, `DeskAuthorityHeader.tsx`, `WarroomShellLayer.tsx`, `CodexPanel.tsx`, `ArmyHQModal.tsx` |
 | 4 | `formatters.ts`, `WarSummaryContent.tsx`, `TurnAftermathModal.tsx`, `TurnAftermathRecordsPanel.tsx`, `BrigadeRow.tsx`, `SettlementDetailContent.tsx` |
 | 5 | `SectorsSection.tsx`, `CorpsFrontPanel.tsx`, `DaytonNegotiationModal.tsx`, `DaytonInstitutionalDimensions.tsx`, `CinematicVerdict.tsx`, `PersonnelContent.tsx`, `officerCharacter.ts` |
 
@@ -287,10 +346,10 @@ One commit per file. These are independent one-line `className` fixes and must n
 | 3.6 | Finding 17 — the corps card's OG list is cut mid-name (`OG VISOKO`, `OG MAGLAJ`) with a dead black band below it, because the corps cards sit in one CSS Grid with **no `content-start`**: default `align-content` computes as `stretch`, so surplus height in the scroll area is pushed into the row tracks instead of packing row 2 under row 1. Add `content-start` to the grid container className. **One word, no restructuring, no change to the `auto-fit`/`minmax` column logic** | `ArmyHQModal.tsx:724` | S |
 | 3.7 | Finding 7d (desk half) — the RESERVE REQUEST body cuts flush mid-sentence. The content is **not lost**: `president-desk-scroll-region` is a genuinely scrollable `overflow-y-auto` with no visual affordance, which at a glance — and in a press screenshot — is indistinguishable from truncated text. Add a bottom fade/scroll-shadow (mask-image gradient or a pinned gradient overlay) | `PresidentDeskShell.tsx:107-109` | S |
 | 3.8 | Finding 7d (Codex half) — same root cause, different container: the campaign-context essay cuts mid-citation (`…in Prosecutor v.`) inside a `max-h-44 overflow-y-auto` `<section>` with no cue. Add the same affordance **independently**. **Two small CSS additions in two files — deliberately NOT a shared component**, so no design-system scope creep | `CodexPanel.tsx:359-362` | S |
-| 3.9 | Finding 24 — the whiteboard date (`26 Jul 1993`) is a DOM date label anchored to the background whiteboard and is sliced to a ~12px sliver ("26 Jul 1…") by the `PresidentDeskShell` right column, which lands its `flex gap-3` exactly across the whiteboard. Widen the reveal gap between the `DeskAuthorityHeader` block and the Decision Packet block so the gap exposes every date character (owner-approved date-only criterion). **Treat the accidental sliver as the bug; do not reposition the column** | `PresidentDeskShell.tsx:94,107-117` (header block `:111-113`, packet block `:115-117`) | S-M |
+| 3.9 | Finding 24 — the whiteboard date (`26 Jul 1993`) is a DOM date label anchored to the background whiteboard and is sliced to a ~12px sliver ("26 Jul 1…") by the `PresidentDeskShell` right column, which lands its `flex gap-3` exactly across the whiteboard. Adjust the date-label/header layout and header-to-packet gap as necessary to expose every date character at all nine faction/viewport combinations (owner-approved date-only criterion). **Treat the accidental sliver as the bug; do not reposition the column** | `PresidentDeskShell.tsx:94,107-117` (header block `:111-113`, packet block `:115-117`) | S-M |
 
 **3.4 and 3.5 are the same file: one commit, two distinct diffs — do not merge the edits.**
-**3.7 and 3.9 are the same file: one commit, two distinct diffs — do not merge the edits.**
+**3.7 and expanded 3.9 form one coupled Desk/date commit, preserving the fade and layout as distinct diffs.**
 
 **3.9 needs one live visual-iteration pass in a browser.** The whiteboard artwork is baked
 into a `.webp`, but the date itself is the DOM `warroom-date-board-label` in
@@ -298,7 +357,7 @@ into a `.webp`, but the date itself is the DOM `warroom-date-board-label` in
 all faction plates have identical overlap: their date positions differ. Acceptance is a
 before/after screenshot at the same window size: under the owner-approved continuation, the
 **complete date must be readable, with no clipped characters**; the whole board need not be exposed.
-The change remains a header-to-packet gap adjustment. If tuning starts requiring the column to move or
+The owner-authorized expansion includes date-label/header layout and gap adjustments. If tuning requires the column to move or
 the art to change, STOP — that is out of this plan.
 
 **Provenance for 3.6–3.9.** All four were HELD as UNLOCATED in the first panel round and were closed
@@ -1073,3 +1132,39 @@ run log and eight screenshots; the intentionally stopped process exit was not ca
 No 3.9 edit was made. Proceeding needs authorization to change header/date-label layout,
 followed by all-faction/all-resolution verification. The existing Desk fade/test remain
 unchanged and held; their latest applicable full boundary is `final-vitest-corrected.log`.
+
+### Authorized layout execution receipts
+
+The next owner continuation expands header/date layout scope as recorded in §1. The
+starting preservation check (`desk39-layout-start-preservation.log`, exit 0) confirms all
+77 prior source/test hashes unchanged. First root validation launches
+`desk39-layout-{ui,typecheck,map-build}1.log` exit 1 before executing their npm scripts:
+the cmd.exe wrapper rejected command quoting. Preserved retries invoke the same npm
+scripts through Node 22's `node_modules/npm/bin/npm-cli.js`, with exact executable and
+argument arrays in each receipt. `typecheck2` and `map-build2` exit 0. A later reviewed
+header-shadow correction makes these interim checks; final source is frozen only after
+the all-faction screenshot/scroll proof. No baseline or scenario run was launched by
+these UI commands.
+
+The accepted implementation translates the date-board parent, carrying its region clip
+with it, and adds a single-line paper-backed label. The Desk column/header, map and artwork
+remain unchanged; the original Desk fade is preserved. Focused final checks pass 48 tests,
+and corrected browser attempt2 passes all nine initial/max-scroll cases. Attempt1 remains
+explicitly invalidated because translated child rectangles did not prove painted visibility.
+Final source is inventoried in `desk39-layout-final-freeze.json`; final typecheck3 and
+map-build3 and the complete UI3 boundary pass, exit 0; independent source/image review is GO.
+
+Documentation verification question: do the existing control docs retain truthful pending
+gates and correct desktop/readability scope? Run `npm.cmd run test:vitest -- tests/docs_desktop_v09_truth.test.ts tests/docs_truth_no_skip_guard.test.ts tests/v092_playtest_package_docs.test.ts`
+and `git diff --check` (seconds; pass all 13 existing tests and no whitespace errors).
+Stop on false closure, baseline waiver or unrelated edits. Source commit hook and the final
+POST-A evidence reconciliation remain separate required receipts.
+
+Final source gate: `desk39-layout-ui3.log` passes 354 files/2,974 tests, exit 0;
+typecheck3 and map-build3 pass, exit 0. `desk39-layout-freeze-check.log` confirms the three
+reviewed hashes unchanged, no forbidden-surface change and 76 unaffected prior files; the
+remaining prior file is the extended Desk test. Independent source/18-image review is GO
+in `desk39-layout-review.log`. Documentation checks pass 13/13 in `desk39-layout-docs3.log`;
+the two earlier roadmap-length failures remain preserved and the guard is unchanged.
+The mandatory hook receipt will be `desk39-layout-commit1.log`; no hook pass is claimed
+until that local commit succeeds. Clean POST-A and the inherited baseline gate remain open.

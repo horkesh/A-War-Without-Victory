@@ -35005,3 +35005,35 @@ R7 closeout and downstream R8/R9 remain open. Plan, board, roadmap and the exist
 are updated; no duplicate report or knowledge entry. Documentation validation/hook receipts:
 `continuation-docs-check.log`, `continuation-docs-final-check.log`,
 `continuation-docs-commit.log` under `logs/r7-english-readability/`.
+
+## R7 authorized date-label layout — 2026-09-09
+
+Starting branch/HEAD matched `codex/r7-english-readability` / `31823917a057a8933669ad8fb9d8839cc258fdce`
+with no intervening commits. All 77 prior source/test hashes matched at startup. The owner
+expanded item 3.9 to necessary date/header layout with date-only acceptance, fixed column
+and artwork, and readable header/controls. One Sol/medium implementer and a separate
+Sol/medium reviewer handled the coupled slice; the original Desk fade/test were preserved.
+
+The date-board parent now moves left below 2200px, carrying its clip polygon with the
+single-line paper-backed date; the original header and map layout remain intact. All nine
+faction/viewport cases pass initial and maximum-scroll browser proof, with 8.336:1 minimum
+contrast and final-text fade clearance 16.25–16.5px. Focused tests pass 48/48, exit 0.
+Evidence is `logs/r7-english-readability/desk39-layout-*`; exact commands and distinct failed
+attempts are retained. Attempt1's false-positive geometry is explicitly invalidated after
+actual images showed ancestor clipping; attempt2 is the corrected proof. The regression
+test now rejects placing the transform on the clipped child or the projected map.
+
+Final frozen-source UI checks pass 354 files/2,974 tests; typecheck and map build pass,
+all exit 0. Independent source/image review is GO; the local hook/commit remains pending.
+Clean POST-A will run only from the reviewed commit in a new detached checkout,
+preserving every untracked owner-checkout artifact. The PRE control validates the preflight's
+31 normalized consumed-input hashes and raw package identity; output artifacts remain raw-byte
+comparisons. Its initial CRLF hashing error and corrected control receipts are preserved.
+The prior full-suite 13,562 passes/31 skipped and player-experience exit 0 are reused only
+for unaffected scope. No new full suite, package or baseline campaign is authorized here.
+
+The baseline investigation remains complete and reviewed: accepted n392 owns all eight pins;
+four inputs changed before R7 and six outputs differ from PRE. PRE/POST-B match all eight
+artifacts and inputs; POST-B remains dirty. Do not refresh pins, change calibration, call
+current outputs canonical, or close the failing baseline gate. Clean POST-A is the last
+remaining slot in the fixed one-PRE/two-POST budget. R7 broader gates and R8/R9 remain open.

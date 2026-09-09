@@ -5141,3 +5141,13 @@ and [dated ledger](PROJECT_LEDGER.md#2026-09-07---bc01-campaign-adjudication-and
 - **2026-09-07 — A political event receipt is not military-operation execution.** Lukavac's political event fired at t70 while Operation Trnovo's AAR recorded zero attacks/captures during t69–79. Name the mechanism and inspect its own receipts before saying an operation "fires" or "works." The owner removed the duplicate event and explicitly kept operation/calibration work outside BC05; do not turn content removal into an operation repair. Preserve historical essays and old-save records without keeping the removed decision live. See [owner disposition](PROJECT_LEDGER.md#2026-09-07---bc05-owner-removes-the-duplicate-lukavac-event).
 
 - **2026-09-08 — Freeze a consolidated lock only after traversing the full dependency graph.** Workspace lock generation can preserve direct runtime versions while re-resolving transitive packages and Storybook tooling. A package-family filter missed `wgsl_reflect` drift and produced a false preservation claim; passing builds and live UI did not prevent a Vitest import failure. Compare the complete reachable graph against the prior production lock, retain intentional root-tooling splits, and have the reviewer confirm that comparison before expensive fresh-build proof. Record invalidated receipts explicitly. See [R9 Phase 1 corrections](plans/2026-09-07-r9-build-validation-preparation-plan.md#phase-1-validation-corrections--2026-09-08).
+
+## 2026-09-09 — Transformed text bounds do not prove painted visibility
+
+The R7 date-label probe reported clear glyph/card rectangles and adequate computed contrast,
+but actual screenshots showed no date. Its ancestor retained the original region `clipPath`:
+a child transform moved measured bounds outside that clipping polygon without freeing its paint.
+Inspect ancestor clipping and stacking, then confirm actual pixels at initial and maximum scroll.
+Keep false-green receipts and record their invalidation; do not replace image review with DOM
+presence, `getClientRects()` or theoretical color ratios. See the existing
+[R7 report](40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md).

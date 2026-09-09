@@ -106,7 +106,7 @@ export function PresidentDeskShell({
       )}
       <div
         data-testid="president-desk-scroll-region"
-        className="min-h-0 flex flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto overscroll-contain pb-3"
+        className="min-h-0 flex flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto overscroll-contain pb-3 [-webkit-mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)] [mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)]"
       >
         <div className="shrink-0">
           <DeskAuthorityHeader state={state} />

@@ -1,8 +1,10 @@
 # R7 presentation and English readability
 
-Status: completed scope reviewed and global Vitest/player-experience checks passed;
-owner approved date-only 3.9 acceptance and baseline investigation. Date verification and
-baseline/clean-run acceptance remain open.
+Status: the authorized date-layout implementation passes focused tests and the nine-case
+initial/maximum-scroll browser proof; independent source/image review is GO. Final full UI,
+typecheck, map build and documentation checks pass. Local commit and clean POST-A remain
+outstanding. The inherited baseline gate remains open.
+Prior global Vitest/player-experience receipts are reused only for unaffected scope.
 
 The [registered amendment](../../plans/2026-09-05-r7-presentation-and-english-readability-amendment-plan.md)
 owns this renderer-only work. Branch: `codex/r7-english-readability`. The control commit is
@@ -16,7 +18,7 @@ calibration, dependency, baseline, canon, IPC or owner artwork change is authori
 | Phase 1 English wording | Staff voice, explicit weeks/settlement units, missing-report language and critical-queue domains; full reserve roster, historical caveat and decision-cost precision preserved | `46961f056`; independent Canon/Modern Wargame GO; `phase1-review.log` |
 | Phase 2 display names | Chronicle and formation labels reuse authoritative names; authored numeric operation names retained; unknown municipality remains an em dash | `684920edc`; independent Historian/code GO; `phase2-review.log` |
 | Phase 3 layout, items 3.1–3.8 | Acronyms, directive labels, advance labels, decision filters/receipts, corps packing and scroll cues; Codex final text clears its fade | Independent code/QA GO after targeted correction; `phase3-review.log`; per-file commit receipts |
-| Phase 3.9 whiteboard | Owner accepted date-only readability; live geometry shows fixed-header occlusion for RS/HRHB at 1920 and RBiH at 1366 | Gap-only implementation remains blocked; no 3.9 source change |
+| Phase 3.7/3.9 Desk/date | Existing Desk fade retained; date board moves clear of the fixed column at constrained widths, with a single-line date and paper backing; original header/artwork preserved | 48 focused tests, all nine initial/max-scroll cases, and final 354-file/2,974-test UI boundary pass; independent GO in `desk39-layout-review.log` |
 | Phase 4 numbers | Compact million displacement, consistent repeated military casualty formats and personnel displays; exact civilian deaths and missing/captured counts retained | `f6b1b63d6`; independent GO after civilian precision correction; `phase4-review.log` |
 | Phase 5 component copy | Shared severity labels, RBiH casing, visible lock explanation, density once, single-subsegment suppression, subdued missing-intel prose and week-based tenure | `1bc1f7369`; independent Narrative/Modern/code GO after targeted corrections; `phase5-review.log`, `final-review.log` |
 
@@ -27,6 +29,10 @@ fixtures remain local evidence; this report is the single designated implementat
 
 | Command/check | Exit/result | Receipt |
 |---|---|---|
+| Final Desk `npm.cmd run test:vitest -- tests/ui` | 0; 354 files, 2,974 tests | `desk39-layout-ui3.log` |
+| Final Desk typecheck and map build | 0/0 | `desk39-layout-typecheck3.log`, `desk39-layout-map-build3.log` |
+| Frozen Desk source/test hashes and forbidden-surface/diff check | 0; three reviewed hashes unchanged; 76 prior files unchanged and one focused test extended; no forbidden diff | `desk39-layout-freeze-check.log` |
+| Focused documentation checks | 0; 13 tests | `desk39-layout-docs3.log`; `docs1`/`docs2` preserve roadmap-length failures corrected without changing the guard |
 | Phase 1 `npm.cmd run test:vitest -- tests/ui` | 0; 344 files, 2,939 tests | `phase1-ui-final.log` |
 | Phase 1 typecheck/map build | 0/0 | `phase1-typecheck.log`, `phase1-final-map-build.log` |
 | Phase 2 full UI boundary | 0; 345 files, 2,944 tests | `phase2-ui.log` |
@@ -152,11 +158,10 @@ campaign, R9 freeze, push, merge, release package or publication is authorized b
 
 ## Remaining acceptance and handoff
 
-- Phase 3.9 now has owner-approved date-only acceptance. The reviewed Desk fade and its
-  test remain uncommitted so the specified single-file 3.7/3.9 commit is not split.
-  Required cases have fixed-header occlusion that a gap below the header cannot resolve.
-  Header/date layout scope must be authorized before implementation; no artwork change is
-  authorized. Unmeasured cases are not claimed passed.
+- Phase 3.7/3.9 implementation, nine-case browser proof and final UI checks are complete
+  and independently reviewed GO; the authorized coupled local commit remains pending.
+  The owner approved date-only acceptance and necessary date/header layout expansion,
+  preserving Desk column position, header content/controls and artwork.
 - `canon:check` and its embedded baseline gate remain exit 1 on six PRE-existing pins.
   The authorized investigation below explains the discrepancy; matching PRE/POST-B bytes
   does not silently waive the gate or authorize replacement pins.
@@ -196,7 +201,7 @@ Evidence: `baseline-investigation.json`, `baseline-investigation-detailed.log` (
 `baseline-history.log`, and the existing `partial-simulation-comparison.json`. No scenario,
 simulation, calibration, baseline, dependency or saved artifact was modified.
 
-## Date-only continuation result
+## Gap-only feasibility result (superseded scope)
 
 Live glyph-range and card intersections show that the fixed header covers part of the
 date in required cases. Its vertical bounds are 146–499. RS/HRHB dates at 1920×1080 lie
@@ -215,4 +220,43 @@ and typecheck receipts for unchanged source rather than launching another campai
 
 Evidence: `desk39-feasibility-summary.json`, `desk39-feasibility-run1.log`,
 `desk39-feasibility.mjs`, and eight screenshots under `desk39-feasibility/`. This is a
-supported blocked result, not implementation acceptance.
+supported blocked result, not implementation acceptance. The subsequent owner authorization
+expands item 3.9 to the necessary date-label/header layout adjustments, preserving column
+position, artwork and readable header content/controls. The existing amendment now records
+the implementation, review and clean POST-A validation contract for that continuation.
+
+## Authorized date-layout implementation — 2026-09-09
+
+The final slice retains the existing `PresidentDeskShell.tsx` bottom fade and changes only
+`WarroomDateBoard` in `WarroomShellLayer.tsx`. A continuous CSS translation moves the date
+board left below 2200px and leaves its authored position at 3440px. Translating the parent
+moves its clipping polygon with the label. The date stays on one line, with a light paper
+backing; the Desk column, authority header, controls, projected map and room artwork retain
+their original layout. No simulation, saved value, dependency or asset changes are involved.
+
+`desk39-layout-proof.mjs --out logs/r7-english-readability/desk39-layout-browser-attempt2`
+passes all RBiH/RS/HRHB × 1920×1080/1366×768/3440×1440 cases, at initial and maximum
+scroll. The 18 PNGs and per-case JSON show the complete date outside the fixed Desk column,
+no date/card intersections or clipped glyphs, readable header/control content, loaded
+unchanged room images and the retained fade. The conservative contrast lower bound is
+8.336:1 (black/white underlay bounds for the translucent backing); final text clears the fade
+by 16.25–16.5px. Actual image inspection is recorded separately, not inferred from rectangles.
+Exact commands, exit 0 and results are in `desk39-layout-browser-attempt2-command.txt`,
+`desk39-layout-browser-attempt2.log`, its `summary.json`, and
+`desk39-layout-browser-attempt2-visual-inspection.txt`.
+
+The first attempt is explicitly invalidated: its moved child glyph rectangles passed, but
+the unchanged ancestor clip polygon prevented date painting. Its JSON/PNGs and exit 1
+remain untouched, with `desk39-layout-browser-attempt1-disposition.txt` rejecting the
+false-green labels. The earlier narrowed-header candidate was discarded because scrolling
+could cover the date. A transient wrong-target transform was caught during independent
+review and removed before accepted captures; the projected map is unchanged. The focused
+test now confines translation to the date-board parent and rejects it on the label or map.
+
+Focused final verification passes 48 tests across four files, exit 0
+(`desk39-layout-focused-final.log`). Root's `*1.log` launches failed before npm execution
+on Windows quoting; `*2.log` UI/typecheck/build pass but predate final source. Their
+receipts remain historical. Frozen-source `*3.log` checks pass: 354 UI files/2,974 tests,
+typecheck and map build, all exit 0. The mandatory hook runs with the local commit.
+Startup preservation verified all 77 prior hashes; unchanged full-suite
+and player-experience evidence is reused explicitly, with fresh proof covering this slice.

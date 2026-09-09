@@ -474,9 +474,11 @@ function WarroomDateBoard({ region, label }: { region: WarroomRegion; label: str
   return (
     <div
       aria-hidden="true"
+      data-testid="warroom-date-board"
       style={{
         position: 'absolute',
         ...box,
+        transform: 'translateX(min(0px, calc(28vw - 616px)))',
         pointerEvents: 'none',
         zIndex: 1,
         display: 'flex',
@@ -498,10 +500,12 @@ function WarroomDateBoard({ region, label }: { region: WarroomRegion; label: str
           lineHeight: 1,
           transform: 'rotate(-0.45deg)',
           textShadow: 'none',
-          whiteSpace: 'normal',
+          whiteSpace: 'nowrap',
           textAlign: 'center',
-          maxWidth: '96%',
-          overflowWrap: 'break-word',
+          background: 'rgba(236, 232, 216, 0.94)',
+          border: '1px solid rgba(78, 68, 52, 0.35)',
+          padding: '5px 9px 4px',
+          boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)',
         }}
       >
         {label}
