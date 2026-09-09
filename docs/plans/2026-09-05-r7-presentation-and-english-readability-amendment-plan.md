@@ -37,7 +37,24 @@ identity; coordinate any later shared-build edit through the R9 preparation owne
 | **Source finding set** | [Showcase screenshot GUI audit](../40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md) (FROZEN, 29 findings) |
 | **Panel record** | [Tier-1 specialist reports](../40_reports/working/20260905_SHOWCASE_AUDIT_PANEL_SPECIALIST_REPORTS.md) |
 | **Collision rules** | §8 of the roadmap: *"Map/Desk English layout strings — R1/R2 layout first; R7 accessibility/readability proof second."* R1/R2 are CLOSED, so their layout pass is complete and this is the open second pass. One file has one owning phase; see §4. |
-| **Current next action** | Owner whiteboard/baseline disposition; full Vitest/player-experience pass, completed scope reviewed GO. Desk commit and clean POST-A remain pending. |
+| **Current next action** | Date-only 3.9 needs header/date layout scope: required cases are hidden by the fixed header. Baseline investigation reviewed GO; Desk/POST-A and baseline acceptance remain open. |
+
+**Owner continuation:** date-only whiteboard acceptance is approved, and investigation of
+the six pre-existing baseline mismatches is authorized. This supersedes the full-board
+criterion for 3.9, but does not authorize moving the column, changing artwork, refreshing
+baseline pins, or waiving clean POST-A or other global gates.
+
+Bounded validation question: can the complete date remain readable at 1920×1080,
+1366×768 and 3440×1440 using the permitted gap adjustment, and can existing artifacts and
+Git history explain the baseline discrepancy? Use the existing Desk fixtures and browser
+harness with before/after captures, focused Desk tests, typecheck and the mandatory hook;
+inspect manifest history, runner hashing rules and PRE/POST-B consumed inputs/artifacts.
+Expected cost: minutes for investigation and focused/browser checks, approximately two
+minutes for typecheck. No new campaign is part of this initial investigation. Pass requires
+unclipped complete dates at each viewport and an evidence-backed discrepancy explanation;
+do not infer baseline acceptance from failure counts alone. Stop before column/art changes,
+simulation edits, an unsupported pin refresh or an additional expensive campaign. The
+previously authorized clean POST-A remains available after final reviewed source is ready.
 
 ### Why this is legally an R7 amendment and not a new lane
 
@@ -270,16 +287,18 @@ One commit per file. These are independent one-line `className` fixes and must n
 | 3.6 | Finding 17 — the corps card's OG list is cut mid-name (`OG VISOKO`, `OG MAGLAJ`) with a dead black band below it, because the corps cards sit in one CSS Grid with **no `content-start`**: default `align-content` computes as `stretch`, so surplus height in the scroll area is pushed into the row tracks instead of packing row 2 under row 1. Add `content-start` to the grid container className. **One word, no restructuring, no change to the `auto-fit`/`minmax` column logic** | `ArmyHQModal.tsx:724` | S |
 | 3.7 | Finding 7d (desk half) — the RESERVE REQUEST body cuts flush mid-sentence. The content is **not lost**: `president-desk-scroll-region` is a genuinely scrollable `overflow-y-auto` with no visual affordance, which at a glance — and in a press screenshot — is indistinguishable from truncated text. Add a bottom fade/scroll-shadow (mask-image gradient or a pinned gradient overlay) | `PresidentDeskShell.tsx:107-109` | S |
 | 3.8 | Finding 7d (Codex half) — same root cause, different container: the campaign-context essay cuts mid-citation (`…in Prosecutor v.`) inside a `max-h-44 overflow-y-auto` `<section>` with no cue. Add the same affordance **independently**. **Two small CSS additions in two files — deliberately NOT a shared component**, so no design-system scope creep | `CodexPanel.tsx:359-362` | S |
-| 3.9 | Finding 24 — the whiteboard date (`26 Jul 1993`) is painted into the background art at a fixed screen position and is sliced to a ~12px sliver ("26 Jul 1…") by the `PresidentDeskShell` right column, which lands its `flex gap-3` exactly across the whiteboard. Widen the reveal gap between the `DeskAuthorityHeader` block and the Decision Packet block so the gap clears the whiteboard's full vertical extent. **Treat the accidental sliver as the bug; do not reposition the column** | `PresidentDeskShell.tsx:94,107-117` (header block `:111-113`, packet block `:115-117`) | S-M |
+| 3.9 | Finding 24 — the whiteboard date (`26 Jul 1993`) is a DOM date label anchored to the background whiteboard and is sliced to a ~12px sliver ("26 Jul 1…") by the `PresidentDeskShell` right column, which lands its `flex gap-3` exactly across the whiteboard. Widen the reveal gap between the `DeskAuthorityHeader` block and the Decision Packet block so the gap exposes every date character (owner-approved date-only criterion). **Treat the accidental sliver as the bug; do not reposition the column** | `PresidentDeskShell.tsx:94,107-117` (header block `:111-113`, packet block `:115-117`) | S-M |
 
 **3.4 and 3.5 are the same file: one commit, two distinct diffs — do not merge the edits.**
 **3.7 and 3.9 are the same file: one commit, two distinct diffs — do not merge the edits.**
 
-**3.9 needs one live visual-iteration pass in a browser.** The whiteboard's pixel bounds are baked
-into a `.webp`; they are not readable from source, and all three faction plates place the prop in
-roughly the same region, so the column slices it identically on every faction. Acceptance is a
-before/after screenshot at the same window size: the whiteboard must end up **either fully in the
-gap or fully behind a card, never sliced**. If the tuning starts requiring the column to move or
+**3.9 needs one live visual-iteration pass in a browser.** The whiteboard artwork is baked
+into a `.webp`, but the date itself is the DOM `warroom-date-board-label` in
+`WarroomShellLayer.tsx`. The continuation measurements correct the earlier assumption that
+all faction plates have identical overlap: their date positions differ. Acceptance is a
+before/after screenshot at the same window size: under the owner-approved continuation, the
+**complete date must be readable, with no clipped characters**; the whole board need not be exposed.
+The change remains a header-to-packet gap adjustment. If tuning starts requiring the column to move or
 the art to change, STOP — that is out of this plan.
 
 **Provenance for 3.6–3.9.** All four were HELD as UNLOCATED in the first panel round and were closed
@@ -1025,3 +1044,32 @@ dirty provenance and the pending clean POST-A are not waived. Keep the fixed cam
 budget: POST-B already consumed the baseline slot; do not run a duplicate or refresh pins.
 Next is the owner whiteboard/baseline disposition, then the final Desk commit and clean
 POST-A if still required by that disposition. R7 broader closeout and R8/R9 stay gated.
+
+### Baseline investigation result
+
+The owner-authorized read-only investigation found all eight manifest hashes match retained
+`n392` exactly. Clean n392 and clean R7 PRE both used Node 22.23.2, but four consumed inputs
+differ: the 1993/1994/1995 event catalogs and `oob_brigades.json`. The last pin update is
+`2c2aa72a8`, preceding later BC03/BC04/BC05 and honorific work. Weekly event evidence first
+differs at week 54 (Ahmici now fires); battle records at 77; territory counts at 162.
+The six mismatches include real state/output changes, not only names, whitespace or runtime
+metadata. No claim assigns every downstream change to a single commit.
+
+Original n392 provenance is `c2f6592ec`, not an ancestor of PRE; its source/data/package/runner
+comparison to merged `2c2aa72a8` differs only in the subsequently updated manifest. Preserve
+that distinction rather than substituting an invented Git lineage. The calibration authority
+continues to bless n392 and requires BC settlement before final calibration adoption.
+Investigation therefore does not authorize a pin refresh. The downstream unblock is accepted
+calibration evidence and an explicit reconciliation decision; R7 PRE/POST-B identity and
+the pending clean POST-A are separate presentation-neutrality evidence.
+Receipts: `baseline-investigation.json`, `baseline-investigation-detailed.log` (exit 0),
+`baseline-history.log`; no campaign, baseline, calibration or simulation modification.
+
+Date-only continuation is independently BLOCKED within gap-only scope. Live glyph/card
+intersections put RS/HRHB 1920 and all three 1366 dates inside the fixed header. RBiH
+1920 is gap-feasible, RBiH/RS 3440 already avoid the cards, and HRHB 3440 was deliberately
+left unmeasured after the stop condition. See `desk39-feasibility-summary.json`, its raw
+run log and eight screenshots; the intentionally stopped process exit was not captured.
+No 3.9 edit was made. Proceeding needs authorization to change header/date-label layout,
+followed by all-faction/all-resolution verification. The existing Desk fade/test remain
+unchanged and held; their latest applicable full boundary is `final-vitest-corrected.log`.

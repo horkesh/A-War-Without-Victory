@@ -1,7 +1,8 @@
 # R7 presentation and English readability
 
 Status: completed scope reviewed and global Vitest/player-experience checks passed;
-amendment acceptance remains open on whiteboard 3.9 and baseline/clean-run requirements.
+owner approved date-only 3.9 acceptance and baseline investigation. Date verification and
+baseline/clean-run acceptance remain open.
 
 The [registered amendment](../../plans/2026-09-05-r7-presentation-and-english-readability-amendment-plan.md)
 owns this renderer-only work. Branch: `codex/r7-english-readability`. The control commit is
@@ -15,7 +16,7 @@ calibration, dependency, baseline, canon, IPC or owner artwork change is authori
 | Phase 1 English wording | Staff voice, explicit weeks/settlement units, missing-report language and critical-queue domains; full reserve roster, historical caveat and decision-cost precision preserved | `46961f056`; independent Canon/Modern Wargame GO; `phase1-review.log` |
 | Phase 2 display names | Chronicle and formation labels reuse authoritative names; authored numeric operation names retained; unknown municipality remains an em dash | `684920edc`; independent Historian/code GO; `phase2-review.log` |
 | Phase 3 layout, items 3.1–3.8 | Acronyms, directive labels, advance labels, decision filters/receipts, corps packing and scroll cues; Codex final text clears its fade | Independent code/QA GO after targeted correction; `phase3-review.log`; per-file commit receipts |
-| Phase 3.9 whiteboard | Held: a gap-only change can expose the whole date at 1920×1080, but cannot expose the whole board already covered by fixed cards; other viewport acceptance is unproven | Owner acceptance clarification pending; no gap change implemented |
+| Phase 3.9 whiteboard | Owner accepted date-only readability; live geometry shows fixed-header occlusion for RS/HRHB at 1920 and RBiH at 1366 | Gap-only implementation remains blocked; no 3.9 source change |
 | Phase 4 numbers | Compact million displacement, consistent repeated military casualty formats and personnel displays; exact civilian deaths and missing/captured counts retained | `f6b1b63d6`; independent GO after civilian precision correction; `phase4-review.log` |
 | Phase 5 component copy | Shared severity labels, RBiH casing, visible lock explanation, density once, single-subsegment suppression, subdued missing-intel prose and week-based tenure | `1bc1f7369`; independent Narrative/Modern/code GO after targeted corrections; `phase5-review.log`, `final-review.log` |
 
@@ -56,6 +57,8 @@ fixtures remain local evidence; this report is the single designated implementat
 | PRE versus POST-B deterministic bytes | All eight artifacts and all consumed-input hashes match; full three-run proof remains incomplete | `partial-simulation-comparison.json` (exit 1 explicitly because POST-A is pending) |
 | `node tools/engine_health_gate.cjs data/derived/scenario/_baseline_tmp/apr1992_188w --horizon 188w --json` | 0; all hard health gates pass on POST-B | `final-engine-health.log` |
 | Focused documentation checks / `git diff --check` | 0/0; three files, 13 tests | `final-docs-checkpoint.log`, `final-docs-diff-check.log` |
+| Baseline investigation of existing n392/PRE artifacts and history | 0; explanation reviewed GO, baseline gate remains blocked | `baseline-investigation-detailed.log`, `baseline-history.log`, `final-review.log` |
+| Date-only feasibility browser observation | Blocked by header occlusion; intentionally stopped, exit code not captured; eight measured cases | `desk39-feasibility-summary.json`, `desk39-feasibility-run1.log`, `desk39-feasibility/` |
 
 The first metric geometry check incorrectly compared text with the outer cell rather than
 its own clipping box. Its initial PASS is superseded by the final check, which waits for
@@ -149,14 +152,67 @@ campaign, R9 freeze, push, merge, release package or publication is authorized b
 
 ## Remaining acceptance and handoff
 
-- Phase 3.9 needs the owner's whiteboard criterion decision. The reviewed Desk fade and its
-  test remain uncommitted so the specified single-file 3.7/3.9 commit is not split. No
-  whiteboard gap or artwork change is claimed.
+- Phase 3.9 now has owner-approved date-only acceptance. The reviewed Desk fade and its
+  test remain uncommitted so the specified single-file 3.7/3.9 commit is not split.
+  Required cases have fixed-header occlusion that a gap below the header cannot resolve.
+  Header/date layout scope must be authorized before implementation; no artwork change is
+  authorized. Unmeasured cases are not claimed passed.
 - `canon:check` and its embedded baseline gate remain exit 1 on six PRE-existing pins.
-  The owner must choose a separate discrepancy investigation or an explicit blocked-gate
-  disposition; matching PRE/POST-B bytes does not silently waive the gate.
+  The authorized investigation below explains the discrepancy; matching PRE/POST-B bytes
+  does not silently waive the gate or authorize replacement pins.
 - Clean POST-A remains outstanding after the final reviewed Desk disposition. POST-B has
   already consumed the baseline-regression slot in the fixed one-PRE/two-POST budget.
   Do not launch another standalone baseline regression or refresh manifest pins.
 - R8's existing B1–B9 register remains waiting; human listening/sensitivity and broader R7
   reconciliation retain their existing owners. No downstream lane is opened here.
+
+## Authorized baseline investigation
+
+Existing artifacts explain the failure without another campaign. All eight manifest pins
+exactly match the retained accepted `n392` run. Its clean provenance records Node 22.23.2,
+as does clean R7 PRE, but their consumed-input digests differ in four files:
+`war_1993.json`, `war_1994.json`, `war_1995.json`, and `oob_brigades.json`. The manifest's
+last update is `2c2aa72a8`; subsequent BC03/BC04/BC05 and honorific-name changes precede
+R7 PRE. The baseline comparator hashes raw artifact bytes; it is correctly reporting six
+differences, not a formatting-only or Node-version discrepancy.
+
+Weekly artifacts first differ in fired events at week 54: PRE includes
+`ahmici_massacre_1993`, consistent with the later `f117fe475` gate correction. Battles first
+differ at week 77; territory counts first differ at week 162 (RBiH 255→268, RS 372→359,
+HRHB 85 unchanged). Final saves differ in military, control and displacement state as well
+as names. This is real pre-R7 output change; the investigation does not causally attribute
+every downstream difference to one commit or endorse a new calibration result.
+
+The original n392 commit `c2f6592ec` is not an ancestor of PRE. Comparing its source, data,
+packages and scenario-runner surfaces with the merged `2c2aa72a8` finds only the manifest
+update, supporting equivalent runtime surfaces while preserving the distinct Git provenance.
+The calibration authority still names n392 as owner-blessed and ties final acceptance to
+BC settlement. Retain its pins: investigation authorization is not a baseline adoption.
+The downstream unblock is accepted calibration evidence and an explicit pin-reconciliation
+decision under that authority. PRE/POST-B identity remains valid R7 neutrality evidence;
+clean POST-A remains required.
+
+Evidence: `baseline-investigation.json`, `baseline-investigation-detailed.log` (exit 0),
+`baseline-history.log`, and the existing `partial-simulation-comparison.json`. No scenario,
+simulation, calibration, baseline, dependency or saved artifact was modified.
+
+## Date-only continuation result
+
+Live glyph-range and card intersections show that the fixed header covers part of the
+date in required cases. Its vertical bounds are 146–499. RS/HRHB dates at 1920×1080 lie
+at 414.98–432.68 and 426.84–444.54 respectively. At 1366×768 all three faction dates
+intersect it: RBiH 358.75–376.44, RS 292.50–310.19, HRHB 300.93–318.63. Increasing the
+gap below that header cannot expose those glyphs. RBiH at 1920 is gap-feasible; RBiH/RS
+at 3440 already avoid both cards. HRHB at 3440 was deliberately left unmeasured once
+required failures established the stop condition; no all-viewport PASS is claimed.
+
+The date is a DOM label (`warroom-date-board-label` in `WarroomShellLayer.tsx`), rather
+than text baked into the image. The plan's earlier description and identical-faction
+assumption are corrected. Altering that label or the header layout is beyond the currently
+permitted header-to-packet gap change and needs a bounded scope decision. No 3.9 source/test
+edit was made; the existing fade remains unchanged. Reuse the prior corrected full-suite
+and typecheck receipts for unchanged source rather than launching another campaign.
+
+Evidence: `desk39-feasibility-summary.json`, `desk39-feasibility-run1.log`,
+`desk39-feasibility.mjs`, and eight screenshots under `desk39-feasibility/`. This is a
+supported blocked result, not implementation acceptance.

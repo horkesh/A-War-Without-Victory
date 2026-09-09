@@ -34973,3 +34973,35 @@ pending. The baseline slot is already consumed in the fixed one-PRE/two-POST bud
 Do not refresh pins, duplicate campaigns or open R8/R9. Next action is the owner's
 whiteboard/baseline disposition, then the final Desk/clean-run work if still required.
 Documentation checkpoint hook receipt: `logs/r7-english-readability/final-docs-commit.log`.
+
+## R7 date-only acceptance and baseline investigation — 2026-09-09
+
+The owner approved date-only whiteboard acceptance and investigation of the six inherited
+baseline mismatches. Existing-artifact investigation passes, exit 0, and independent review
+is GO (`baseline-investigation-detailed.log`, `baseline-history.log`, `final-review.log`).
+All eight manifest pins exactly match accepted n392. Clean n392 and clean R7 PRE use the
+same Node 22.23.2 but differ in four consumed inputs: 1993/1994/1995 event catalogs and OOB
+brigades. Event records first differ at week 54; control counts at 162; real military,
+control and displacement outputs differ. PRE/POST-B still match all eight artifacts and
+inputs. No single-commit attribution of the aggregate change is claimed. Original n392
+Git provenance is distinct from the merged pin-update commit, with equivalent scoped
+runtime surfaces apart from the manifest itself. The accepted calibration authority retains
+n392 pending BC settlement/adoption; investigation does not authorize a pin refresh.
+
+Date-only feasibility is blocked under the existing header-to-packet gap restriction.
+The fixed header covers part of RS/HRHB dates at 1920 and all faction dates at 1366;
+widening a gap below it cannot expose them. RBiH 1920 is gap-feasible, RBiH/RS 3440 avoid
+both cards, and HRHB 3440 was left unmeasured after the stopping condition. Eight screenshots,
+glyph/card measurements and command metadata are in `desk39-feasibility-summary.json`,
+`desk39-feasibility-run1.log` and `desk39-feasibility/`. The intentionally stopped harness
+exit code was not captured; no process PASS is claimed. Source tracing corrects the old
+plan premise: the date is a DOM label in WarroomShellLayer.tsx, not baked image text.
+
+No production/test, baseline, simulation, save, dependency or artwork change was made in
+this continuation. The prior Desk fade/test remain uncommitted and unchanged. Existing
+corrected full-suite/typecheck evidence remains applicable; no new campaign ran. Next is a
+bounded header/date-layout scope decision, then final Desk/clean POST-A work. Baseline gate,
+R7 closeout and downstream R8/R9 remain open. Plan, board, roadmap and the existing R7 report
+are updated; no duplicate report or knowledge entry. Documentation validation/hook receipts:
+`continuation-docs-check.log`, `continuation-docs-final-check.log`,
+`continuation-docs-commit.log` under `logs/r7-english-readability/`.
