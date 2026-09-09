@@ -229,6 +229,65 @@ It is targeted correction evidence plus unaffected full-run evidence, not a seco
 exit-0 claim. Product source/test hashes, original evidence and diagnostic inputs are checked
 again before the source commit. Package and all three shakedowns remain pending.
 
+### Packaged startup correction — 2026-09-09
+
+Source commit `217c9f70a040d999f7787c08a9283e304c0b0563` and its mandatory hook pass. The commit
+wrapper's post-commit status assertion failed because 49 restored research files retained cached
+CRLF sizes in the index; `index-identity-refresh1.log` proves raw SHA-256 and Git blob SHA-1
+identity, refreshes only those stat entries, stages no content and restores clean status, exit 0.
+`package1.log` passes the complete release build/package command, exit 0. `package-freeze1.log`
+binds its 1,200 files / 1,912,980,288 bytes to tree SHA-256
+`e8ac985ade776c331103b0db49b707c7dcfb5f8f2e358fa8f7af25eed793f8fa` and fresh RBiH paths.
+
+`shakedown-rbih1.log` exits 1 before a campaign or turn: `startCampaign` attempts New Campaign
+immediately after DOM content load. Its retained actual screenshot is still black, with empty
+text/buttons and no recorded console/page/network errors. **Question:** does the packaged opening
+render normally when awaited, and can the same harness enter its actual menu before starting?
+Use one bounded startup-only observation (`node <evidence>/opening-proof.mjs`) on this same frozen
+package, with a fresh contained profile, readiness timeout, screenshots and visible controls.
+Do not advance a turn. Then minimally correct the existing harness's startup readiness/Enter
+route if needed, with focused failing-first tests, independent review and targeted verification.
+Stop on a persistent blank opening or a required product-source change outside this packet.
+Cost: seconds to a minute for observation and focused tests. Preserve attempt 1 and restart only
+the affected fresh RBiH shakedown with a new label; the ordinary stop/restart rule applies.
+
+This is a harness-only correction. Reuse the exact package without rebuilding: bind its product
+source commit separately from the later harness commit, require no changes to packaged source,
+data, assets, dependencies or build configuration, and compare all package file hashes before
+each fresh run. A harness/doc edit does not change the frozen package; record both identities
+explicitly. No second full suite or package is justified by this route correction.
+
+`opening-proof1.log` exits 1 because the diagnostic itself used the old New Campaign label;
+its retained screenshot proves the normal New War menu rendered after splash dismissal, without
+runtime errors. The corrected startup-only `opening-proof2.log` exits 0: actual embedded splash
+-> New War -> faction -> Take command -> Begin, with the current default emergent mode unchanged.
+The four screenshots were visually inspected; no campaign was started and no turn advanced.
+The harness must await this actual frame and controls, then use that route; `--historical-choice`
+continues to govern attributed event responses, not the campaign's mode choice.
+
+After the focused harness correction/review and normal local commit hook, use
+`node <evidence>/package-proof2.mjs check <unique-label> <faction>` for subsequent launches.
+This retained-manifest checker requires clean tracked status, descent from product commit
+`217c9f70a040d999f7787c08a9283e304c0b0563`, differences restricted to the QA harness/test and
+existing five documentation files, and exact equality of all 1,200 package file hashes.
+It prints the product and harness commits separately; it cannot refreeze the package manifest.
+The original checker and both failed startup receipts remain preserved. The question, cost and
+stop rule are unchanged: reuse proven package bytes, stop on any packaged-input change, and
+restart the pre-campaign RBiH failure only after targeted review passes.
+
+Focused startup receipts preserve `startup-readiness-red1.log` and
+`startup-command-ready-red1.log` (exit 1 for the missing behavior) plus the intermediate
+`startup-readiness-green1.log` failure in the test's async function extraction. The corrected
+full harness file passes 49/49 in `startup-harness-full-green2.log`, exit 0. Review additionally
+requires exact visible intro controls instead of whole-body word matching; preserve its targeted
+correction receipt before freeze/commit. `startup-docs1.log` passes all 13 focused documentation
+checks, exit 0. Game source and test hashes outside the two harness files remain bound to freeze 3;
+freeze 4 binds the final harness correction for its local commit and packaged retry.
+`startup-exact-intro-red1.log` exits 1 for the broad selector; the exact visible-control correction
+passes its targeted verification in `startup-exact-intro-green1.log`, exit 0. Unaffected cases
+reuse the preceding complete 49/49 harness-file receipt. Splash dismissal uses the actual button;
+the final readiness check requires the Desk toolbar and matching faction from the live bridge.
+
 ---
 
 ## Subordinate audit packets (2026-09-07)

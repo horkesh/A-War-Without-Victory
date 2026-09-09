@@ -66,6 +66,52 @@ test('historical choice uses explicit provenance instead of first option and sto
     assert.throws(() => select({ response_options: [{ ...options[0], historical_marker: 'historical_default' }, options[1]], historical_default_response_id: 'historical' }), /ambiguous/i);
 });
 
+test('packaged startup waits for the embedded React owner and follows its complete campaign controls', async () => {
+    const harness = readHarness();
+    const startReactCampaign = runInNewContext(
+        `(async ${extractFunctionSource(harness, 'startReactCampaign')})`,
+    ) as (surface: any, faction: string) => Promise<void>;
+    const actions: string[] = [];
+    const control = (name: string) => ({
+        waitFor: async ({ state }: { state: string }) => actions.push(`wait:${name}:${state}`),
+        click: async () => actions.push(`click:${name}`),
+        first() { return this; },
+    });
+    const surface = {
+        getByTestId: (testid: string) => testid === 'opening-splash-art'
+            ? { isVisible: async () => true }
+            : control(testid),
+        getByRole: (_role: string, options: { name: RegExp }) => ({
+            first: () => control(String(options.name)),
+        }),
+        locator: (selector: string) => control(selector),
+    };
+
+    await startReactCampaign(surface, 'RBiH');
+
+    assert.deepEqual(actions, [
+        'wait:[aria-labelledby="opening-splash-title"] button:visible',
+        'click:[aria-labelledby="opening-splash-title"] button',
+        'wait:/^New War$/i:visible',
+        'click:/^New War$/i',
+        'wait:main-menu-faction-RBiH:visible',
+        'click:main-menu-faction-RBiH',
+        'wait:/^Take command$/i:visible',
+        'click:/^Take command$/i',
+        'wait:/^Begin$/i:visible',
+        'click:/^Begin$/i',
+        'wait:/^Begin$/i:hidden',
+    ]);
+    const startCampaign = extractFunctionSource(harness, 'startCampaign');
+    assert.match(startCampaign, /waitForCampaignOpeningOwner/);
+    assert.match(startCampaign, /opening\.kind === 'react'/);
+    assert.match(startCampaign, /startReactCampaign\(opening\.surface, faction,/);
+    assert.match(startCampaign, /waitForCampaignCommandReady\(frame, faction\)/);
+    assert.doesNotMatch(startCampaign, /const text = await bodyText\(frame\)/);
+    assert.match(startCampaign, /getByRole\('button', \{ name: \/\^Acknowledge\$\/i \}\)/);
+    assert.match(startCampaign, /getByRole\('button', \{ name: \/\^Begin\$\/i \}\)/);
+});
+
 test('52-week Electron QA supports bounded major-surface checkpoint tours', () => {
     const harness = readHarness();
 

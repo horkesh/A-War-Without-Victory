@@ -35152,3 +35152,26 @@ POST-B provenance remain distinct, accepted n392 pins stay unchanged, and the on
 budget is exhausted. The inherited six-pin gate, remaining behavior settlement, calibration,
 full packaged acceptance and owner listening remain open. No baseline wrapper, standalone
 scenario, full campaign, BC10 work, push, merge or publication is authorized by this packet.
+
+### R8 packaged startup handoff — 2026-09-09
+
+Reviewed UI source is committed at `217c9f70a040d999f7787c08a9283e304c0b0563`; its mandatory
+Husky hook and Git commit pass. The commit wrapper's later status assertion fails on stale index
+stat metadata for the 49 byte-restored research files. `index-identity-refresh1.log`, exit 0,
+verifies their unchanged raw and Git-blob hashes, refreshes only those entries, stages no content
+and restores clean status. The single package build passes in `package1.log`, exit 0.
+`package-manifest1.json` binds all 1,200 files / 1,912,980,288 bytes and product commit 217c9f70a.
+
+The first RBiH shakedown stops before a campaign (`shakedown-rbih1.log`, exit 1): the legacy
+harness clicks parent New Campaign before the current embedded opening is ready. The first
+startup-only probe preserves its own obsolete-label failure. `opening-proof2.log`, exit 0, then
+proves the actual splash -> New War -> faction -> Take command -> Begin route in screenshots,
+with no runtime errors, campaign start or advanced turn. The existing plan records a bounded
+harness/test correction, focused verification and independent review before a fresh RBiH retry.
+The current default campaign mode remains unchanged; historical-choice governs only responses.
+
+Reuse the same package after the harness correction: `package-proof2.mjs` separately binds the
+product and later harness commits, requires clean tracked status and only the exact harness/test
+or five existing documentation files to differ, and compares every frozen package file hash.
+No second full suite, rebuild or baseline campaign is spent. The three 24-turn results and final
+R8 acceptance remain outstanding at this entry; inherited calibration/baseline obligations stand.

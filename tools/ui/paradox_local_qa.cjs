@@ -2178,6 +2178,70 @@ async function waitForGamePage(app) {
   throw new Error('Timed out waiting for Electron game window');
 }
 
+async function findCampaignOpeningOwner(page) {
+  for (const frame of page.frames()) {
+    const url = frame.url();
+    if (!url.includes('/index.html') || !url.includes('embedded=1')) continue;
+    const splashVisible = await frame.getByTestId('opening-splash-art').isVisible().catch(() => false);
+    const newWarVisible = await frame.getByRole('button', { name: /^New War$/i }).first().isVisible().catch(() => false);
+    if (splashVisible || newWarVisible) return { kind: 'react', surface: frame };
+  }
+  const legacyNewCampaign = page.locator('#mm-new-campaign');
+  if (await legacyNewCampaign.isVisible().catch(() => false)) return { kind: 'legacy', surface: page };
+  return null;
+}
+
+async function waitForCampaignOpeningOwner(page, timeoutMs = 90000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const opening = await findCampaignOpeningOwner(page);
+    if (opening) return opening;
+    await sleep(250);
+  }
+  const observed = page.frames().map((candidate) => candidate.url()).filter(Boolean);
+  throw new Error(`Timed out waiting for a visible campaign opening owner; observed ${JSON.stringify(observed)}`);
+}
+
+async function startReactCampaign(surface, faction, onStep = async () => {}) {
+  if (await surface.getByTestId('opening-splash-art').isVisible().catch(() => false)) {
+    const enter = surface.locator('[aria-labelledby="opening-splash-title"] button').first();
+    await enter.waitFor({ state: 'visible', timeout: 30000 });
+    await enter.click({ timeout: 10000 });
+  }
+  const newWar = surface.getByRole('button', { name: /^New War$/i }).first();
+  await newWar.waitFor({ state: 'visible', timeout: 60000 });
+  await newWar.click({ timeout: 10000 });
+  await onStep('side-picker');
+  const factionChoice = surface.getByTestId(`main-menu-faction-${faction}`);
+  await factionChoice.waitFor({ state: 'visible', timeout: 30000 });
+  await factionChoice.click({ timeout: 10000 });
+  await onStep('faction-dossier');
+  const takeCommand = surface.getByRole('button', { name: /^Take command$/i }).first();
+  await takeCommand.waitFor({ state: 'visible', timeout: 30000 });
+  await takeCommand.click({ timeout: 10000 });
+  await onStep('command-mode');
+  const begin = surface.getByRole('button', { name: /^Begin$/i }).first();
+  await begin.waitFor({ state: 'visible', timeout: 30000 });
+  await begin.click({ timeout: 10000 });
+  await begin.waitFor({ state: 'hidden', timeout: 120000 });
+}
+
+async function waitForCampaignCommandReady(frame, faction, timeoutMs = 120000) {
+  await frame.getByTestId('toolbar-route-desk').waitFor({ state: 'visible', timeout: timeoutMs });
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const ready = await frame.evaluate(async (expectedFaction) => {
+      const value = await window.awwv?.getCurrentGameState?.();
+      if (!value) return false;
+      const state = typeof value === 'string' ? JSON.parse(value) : value;
+      return state?.meta?.player_faction === expectedFaction;
+    }, faction).catch(() => false);
+    if (ready) return;
+    await sleep(250);
+  }
+  throw new Error(`Campaign command surface did not expose current ${faction} state`);
+}
+
 async function waitForEmbeddedFrame(page) {
   const deadline = Date.now() + 90000;
   while (Date.now() < deadline) {
@@ -2195,18 +2259,27 @@ async function waitForEmbeddedFrame(page) {
 }
 
 async function startCampaign(page, faction, events) {
-  await snapshot(page, null, faction, events, 'launch-screen');
-  if (!await clickMatch(page, /New Campaign/i, 'new campaign')) throw new Error('Could not click New Campaign');
-  await snapshot(page, null, faction, events, 'side-picker');
-  const factionPattern = faction === 'RS'
-    ? /Play as RS|RS \(VRS\)|RS\s+STANDARD/i
-    : faction === 'RBiH'
-      ? /Play as RBiH|RBiH|ARBiH|Bosnian Government/i
-      : /Play as HRHB|HRHB|HVO|Croat/i;
-  if (!await clickMatch(page, factionPattern, `play as ${faction}`, { afterMs: 1600 })) {
-    throw new Error(`Could not click faction ${faction}`);
+  const opening = await waitForCampaignOpeningOwner(page);
+  await snapshot(page, opening.kind === 'react' ? opening.surface : null, faction, events, 'launch-screen');
+  let frame;
+  if (opening.kind === 'react') {
+    await startReactCampaign(opening.surface, faction, async (label) => {
+      await snapshot(page, opening.surface, faction, events, label);
+    });
+    frame = opening.surface;
+  } else {
+    if (!await clickMatch(page, /New Campaign/i, 'new campaign')) throw new Error('Could not click New Campaign');
+    await snapshot(page, null, faction, events, 'side-picker');
+    const factionPattern = faction === 'RS'
+      ? /Play as RS|RS \(VRS\)|RS\s+STANDARD/i
+      : faction === 'RBiH'
+        ? /Play as RBiH|RBiH|ARBiH|Bosnian Government/i
+        : /Play as HRHB|HRHB|HVO|Croat/i;
+    if (!await clickMatch(page, factionPattern, `play as ${faction}`, { afterMs: 1600 })) {
+      throw new Error(`Could not click faction ${faction}`);
+    }
+    frame = await waitForEmbeddedFrame(page);
   }
-  const frame = await waitForEmbeddedFrame(page);
   try {
     await frame.waitForLoadState('networkidle', { timeout: 120000 });
   } catch (error) {
@@ -2214,17 +2287,25 @@ async function startCampaign(page, faction, events) {
   }
   await snapshot(page, frame, faction, events, 'intro-before-dismiss');
   for (let i = 0; i < 10; i += 1) {
-    const text = await bodyText(frame);
-    if (/WAR HAS STARTED|A\s*C\s*K\s*N\s*O\s*W\s*L\s*E\s*D\s*G\s*E|Acknowledge/i.test(text)) {
-      await clickMatch(frame, /A\s*C\s*K\s*N\s*O\s*W\s*L\s*E\s*D\s*G\s*E|Acknowledge/i, 'acknowledge', { afterMs: 1000 });
+    const acknowledge = frame.getByRole('button', { name: /^Acknowledge$/i }).first();
+    if (await acknowledge.isVisible().catch(() => false)) {
+      await acknowledge.click({ timeout: 10000 });
+      await sleep(1000);
       continue;
     }
-    if (/WAR BEGINS|WHO YOU ARE|B\s*E\s*G\s*I\s*N|Begin/i.test(text)) {
-      await clickMatch(frame, /B\s*E\s*G\s*I\s*N|Begin/i, 'begin', { afterMs: 1200 });
+    const begin = frame.getByRole('button', { name: /^Begin$/i }).first();
+    if (await begin.isVisible().catch(() => false)) {
+      await begin.click({ timeout: 10000 });
+      await sleep(1200);
       continue;
     }
     break;
   }
+  const remainingIntroAction = frame.getByRole('button', { name: /^(?:Acknowledge|Begin)$/i }).first();
+  if (await remainingIntroAction.isVisible().catch(() => false)) {
+    throw new Error('Campaign intro remained visible after bounded dismissal');
+  }
+  await waitForCampaignCommandReady(frame, faction);
   await snapshot(page, frame, faction, events, 'command-post-after-intro');
   return frame;
 }
