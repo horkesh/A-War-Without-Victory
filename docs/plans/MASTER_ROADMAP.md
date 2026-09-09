@@ -101,6 +101,7 @@ paused or RE is blocked, they are describing 2026-08-28, not today.
   ratchet, not EH-3 `stranded_status`; and finding 10's `FORCE BALANCE: REDACTED` is not fog-of-war as
   designed but a field with **no writer anywhere in `src/`**. Three findings remain HELD with
   exhaustive negative evidence and one named unblocking query each.
+- **R7 readability:** reviewed; 3.9/gates open.
 - **R7 ARBiH brigade honorific name correction, IMPLEMENTED 2026-09-07.** 33 brigades displayed
   earn-in-play combat honors as already granted at t0; fixed display name only, `id` untouched.
   Mechanical fields unchanged; saved/displayed name text changes. Integrated from `r7-arbih-honorific-names`. [Plan](2026-09-07-arbih-brigade-honorific-name-correction-plan.md).

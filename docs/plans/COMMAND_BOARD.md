@@ -28,6 +28,8 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 8 | R8 | **WAITING ON R7.** RE closed 2026-09-01 and no longer gates this. | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until the final two diaries score 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
 | 9 | R9 | **FREEZE WAITING ON R8; LIMITED PREPARATION AT §4.2** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
+**R7 readability execution — 2026-09-09:** Phases 1, 2, 4 and 5 are reviewed and committed; Phase 3.1–3.8 is reviewed, with six layout files committed. Corrected full Vitest and player-experience gates pass; three-resolution visual evidence is reviewed GO. Whiteboard item 3.9 awaits owner acceptance clarification; the Desk fade/test remain held for its single-file commit. Canon/embedded baseline fail on the same six PRE-existing pins, despite identical PRE/POST-B bytes; clean POST-A remains outstanding. No closure, baseline refresh or downstream lane is claimed. See the amendment and its designated implementation report.
+
 **R7 name correction integrated:** [ARBiH honorific-name packet](2026-09-07-arbih-brigade-honorific-name-correction-plan.md); IDs and mechanical fields preserved, saved/displayed text changed. Remaining R7 gates stay open.
 
 **BC05 scheduled separately (2026-09-07):** bounded NATO deadline/loader repair is

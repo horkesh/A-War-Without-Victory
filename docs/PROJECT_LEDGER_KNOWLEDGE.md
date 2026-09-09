@@ -1,3 +1,12 @@
+## 2026-09-09 - Measure the text clipping box and the final scroll position
+
+For UI readability proof, wait for fonts and entry animation, compare drawn text with its
+own clipping box rather than the outer card, and check masked scroll regions at maximum
+scroll. A label can fit its card while its inner overflow box clips it; a fade can signal
+scrolling while permanently obscuring the last citation. Keep failed geometry receipts and
+supersede them explicitly after a discriminating correction. R7's metric tracking and Codex
+bottom-padding corrections are recorded in the presentation/readability implementation report.
+
 ## 2026-08-30 - Converging operation axes must share one physical combat truth
 
 **An operation axis is a planning partition, not an independent battle.** When two live axes have the

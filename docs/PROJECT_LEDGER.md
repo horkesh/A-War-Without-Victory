@@ -34945,3 +34945,31 @@ control, not a product failure. This final correction amends the unpublished Pha
 checkpoint again; both earlier hook receipts remain historical evidence. Final correction
 review is recorded in `final-review.log`; final hook receipt is
 `phase5-contrast-amend.log`. The corrected global retry remains required.
+
+## R7 reviewed execution checkpoint — 2026-09-09
+
+The corrected full `npm.cmd run test:vitest` passes, exit 0: aggregate execution-group
+summaries report 13,562 passes and 31 skipped, including the entire UI boundary and all
+formerly failing files (`final-vitest-corrected.log`). All 77 inventoried source/test
+SHA-256 hashes stayed unchanged through the run (`final-source-freeze-check.log`, exit 0).
+Final Phase 5 commit is `1bc1f7369`; its mandatory hook passes, exit 0. The player-experience
+umbrella passes all nested checks and its output scan, exit 0 (`final-player-experience.log`).
+Independent review is GO for completed scope and targeted corrections (`final-review.log`).
+
+Three-resolution integrated captures, methodology/recap supplements, actual officer tenure,
+corrected sector contrast and the actual Cost Ledger target now have bounded evidence.
+The Cost Ledger retains exact civilian/military/refugee figures and historical consequences;
+its real target captures supersede the earlier HQ Records images mislabelled cost-ledger.
+The first Cost Ledger matcher-failure log was overwritten; its final log explicitly records
+that limitation. No recovered receipt is claimed. The designated implementation report is
+`docs/40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md`; plan, command
+board, roadmap, knowledge ledger and napkin are reconciled together without another report.
+
+Acceptance is still open: whiteboard 3.9 requires an owner criterion decision; reviewed
+Desk fade/test remain uncommitted for the specified single-file commit. Canon/embedded
+baseline exit 1 on six pins already mismatched by clean PRE. All eight PRE/POST-B artifact
+and consumed-input hashes match; POST-B has dirty provenance and clean POST-A remains
+pending. The baseline slot is already consumed in the fixed one-PRE/two-POST budget.
+Do not refresh pins, duplicate campaigns or open R8/R9. Next action is the owner's
+whiteboard/baseline disposition, then the final Desk/clean-run work if still required.
+Documentation checkpoint hook receipt: `logs/r7-english-readability/final-docs-commit.log`.

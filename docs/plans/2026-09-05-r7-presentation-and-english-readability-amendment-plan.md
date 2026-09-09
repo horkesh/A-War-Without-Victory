@@ -37,7 +37,7 @@ identity; coordinate any later shared-build edit through the R9 preparation owne
 | **Source finding set** | [Showcase screenshot GUI audit](../40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md) (FROZEN, 29 findings) |
 | **Panel record** | [Tier-1 specialist reports](../40_reports/working/20260905_SHOWCASE_AUDIT_PANEL_SPECIALIST_REPORTS.md) |
 | **Collision rules** | §8 of the roadmap: *"Map/Desk English layout strings — R1/R2 layout first; R7 accessibility/readability proof second."* R1/R2 are CLOSED, so their layout pass is complete and this is the open second pass. One file has one owning phase; see §4. |
-| **Current next action** | Phase 3 layout fixes; Phase 2 implemented/reviewed GO, integrated enumeration pending. |
+| **Current next action** | Owner whiteboard/baseline disposition; full Vitest/player-experience pass, completed scope reviewed GO. Desk commit and clean POST-A remain pending. |
 
 ### Why this is legally an R7 amendment and not a new lane
 
@@ -362,7 +362,7 @@ no tenure string contains "mo" or "month". `npm.cmd run test:vitest -- tests/ui`
 
 **Implementer:** QA Engineer · **Independent review:** Process QA + Reports Custodian
 
-- [ ] **Close the finding-1 coverage gap.** `tools/ui/verify_toolbar_fit.mjs` currently reports
+- [x] **Close the finding-1 coverage gap.** `tools/ui/verify_toolbar_fit.mjs` initially reported
       **PARTIAL** — it exercises only the chips present in the one tracked save it loads. Re-run
       with `--save` pointing at a save where **both** state-dependent chips (RESERVE and REVIEWS) are
       simultaneously live. A save without them passes every width trivially, which is not the same
@@ -371,10 +371,10 @@ no tenure string contains "mo" or "month". `npm.cmd run test:vitest -- tests/ui`
       Phase 5 resolutions) and confirm each discharged finding by image, not by diff.
 - [ ] Confirm **zero simulation drift**: baseline artifacts, fingerprints and calibration hashes are
       byte-identical to the pre-plan HEAD. A changed hash fails this phase.
-- [ ] Produce the **bug/friction split table** required by roadmap §12 (*"bugs and friction remain
+- [x] Produce the **bug/friction split table** required by roadmap §12 (*"bugs and friction remain
       separately reported"*) — friction discharged here, bugs pre-seeded to R8, neither merged.
-- [ ] Create `docs/40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md`.
-- [ ] Update roadmap, command board, ledger, knowledge ledger, and napkin together.
+- [x] Create `docs/40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md`.
+- [x] Update roadmap, command board, ledger, knowledge ledger, and napkin together.
 
 **Global verification barriers (roadmap §11) — all must pass before this plan closes:**
 
@@ -946,3 +946,82 @@ Stop on forbidden-surface requirements or unexplained drift; do not refresh a ba
 start additional campaigns, or silently waive the known pre-existing manifest mismatch.
 The pending whiteboard acceptance question remains separate and must be resolved by the
 owner before claiming item 3.9. No push, merge, packaging or R9 work is part of this run.
+
+Integrated command expansion: `canon:check` invokes the determinism static scan and,
+when the manifest exists, the same `run_baseline_regression.ts` entry point as
+`test:baselines`. Its already-running nested baseline regression is POST-B within the
+fixed one-PRE/two-POST budget; do not launch a duplicate standalone baseline run. It
+started on frozen reviewed presentation source while local presentation commits/docs
+were pending, so preserve its actual commit/dirty provenance and do not describe it as
+a clean-final-commit run. This is a deviation from the earlier clean-run preparation,
+not a waived acceptance condition. POST-A still requires a clean reviewed checkout.
+The final comparison must report exact deterministic bytes and consumed inputs, with
+provenance differences separately visible. The known manifest mismatch may cause both
+canon:check and its nested baseline gate to exit nonzero; record both accurately.
+
+## Final regression correction and gate retry
+
+The first integrated full suite exposed three stale recap expectations (`Unreported`
+versus the approved `No staff report`) and one real avoidable non-null assertion in
+Phase 5's subsegment display. The assertion is removed with optional access inside the
+unchanged >1 guard; the inventory pin remains seven. Only the three recap text
+expectations change, preserving all missing-data and quantity controls. Focused corrected
+validation passes 133 tests, exit 0 (`final-regression-green.log`), and typecheck passes
+(`final-regression-typecheck.log`). No simulation input, value or behavior changes.
+
+Question for the required retry: does frozen corrected source pass the complete global
+Vitest gate, including the entire UI boundary and the corrected global guards? After the
+initial full run finishes collecting its failure set, run `npm.cmd run test:vitest` once
+more with process-local Git Bash precedence, to `final-vitest-corrected.log` (~31 minutes).
+This retry is required by the existing all-global-gates-pass acceptance after a real new
+source/test failure; it replaces a separate ten-minute UI-only repeat. Preserve the first
+full result and every RED receipt. Stop and diagnose any additional unexplained failure;
+do not change a baseline, remove a check, or claim targeted tests alone close the global gate.
+The player-experience umbrella already passed all six nested steps and its output scan;
+this final assertion correction preserves the same guarded rendering behavior.
+
+The completed first full run exits 1 with six real failing assertions across four files.
+In addition to the four above, one old density assertion requires the duplicate removed
+by 5.4, and the existing sector contrast guard catches 5.5's 70%-alpha prose. Measured
+12px text over the actual panel background has only 3.674:1 contrast. Keep that guard;
+restore the full secondary text color while retaining italics and no tabular numerals,
+as permitted by 5.5. Correct the density expectation to exactly one occurrence while
+preserving the front-segment/no-kilometer checks. Targeted tests, typecheck and actual
+three-resolution color/contrast proof precede independent correction review and the
+already required single corrected full-suite retry. This is an actual readability fix,
+not a blanket test exemption. The log's deliberately failing child-process fixture is
+the runner's passing positive control, not a seventh product failure.
+
+Corrected sector verification passes 62 focused tests and typecheck, exit 0. The actual
+three-resolution browser measurement now reports 5.991:1 contrast, italic prose without
+tabular numerals, density once and no single-subsegment label at each viewport
+(`final-regression-sector-contrast-capture.log`, exit 0). These targeted images supersede
+the earlier lower-opacity sector target; the other unchanged integrated captures remain
+valid for their stated routes and limitations.
+
+## Reviewed execution checkpoint — acceptance still open
+
+The final corrected `npm.cmd run test:vitest` passes, exit 0
+(`final-vitest-corrected.log`): the five execution-group summaries total 13,562 passes and
+31 skipped. This includes the complete UI boundary and all four formerly failing files.
+All 77 inventoried source/test files retained their SHA-256 hashes throughout the gate
+(`final-source-freeze-check.log`, exit 0). The final Phase 5 commit is `1bc1f7369`;
+its mandatory hook passes (`phase5-contrast-amend.log`, exit 0). The player-experience
+umbrella passes all nested gates and its output scan (`final-player-experience.log`, exit 0).
+Independent review is GO for completed scope and targeted corrections (`final-review.log`).
+
+Toolbar coverage is FULL at all six widths. Integrated and supplemental evidence covers
+all three specified resolutions; the actual Cost Ledger target is now captured and
+independently reviewed (`final-cost-ledger-*`), superseding the earlier wrong-route captures.
+The designated report records exact command receipts, visual limitations, historical
+failed/overwritten-log provenance and the existing bug/friction split. No duplicate report
+or new R8 register was created. The owned visual server is stopped and port 3247 is clear.
+
+Acceptance remains open. Whiteboard 3.9 still awaits the owner's criterion decision; the
+reviewed Desk fade/test remain uncommitted to preserve the required one-file 3.7/3.9 commit.
+Canon/embedded baseline remain exit 1 on six pins already mismatched in the clean PRE run.
+PRE and POST-B match in all eight deterministic artifacts and consumed inputs, but POST-B
+dirty provenance and the pending clean POST-A are not waived. Keep the fixed campaign
+budget: POST-B already consumed the baseline slot; do not run a duplicate or refresh pins.
+Next is the owner whiteboard/baseline disposition, then the final Desk commit and clean
+POST-A if still required by that disposition. R7 broader closeout and R8/R9 stay gated.
