@@ -34888,3 +34888,4 @@ Committed slices (one production file per commit):
 - src/ui/map/components/warroom/AdvanceTurnModal.tsx: fix(ui): show complete R7 advance review labels. Hook receipt: phase3-commit-advance.log.
 - src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx: fix(ui): separate R7 decision filters and action receipts. Hook receipt: phase3-commit-decision-room.log.
 - src/ui/map/components/army_hq/ArmyHQModal.tsx: fix(ui): pack R7 corps cards against their content. Hook receipt: phase3-commit-army-hq.log.
+- src/ui/map/components/CodexPanel.tsx: fix(ui): signal Codex scrolling without masking final text. Hook receipt: phase3-commit-codex.log.

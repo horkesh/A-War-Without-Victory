@@ -359,7 +359,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                 {(liveDynamicCodex.receipts.length > 0 || liveDynamicCodex.ghosts.length > 0) && (
                     <section
                         data-testid="codex-live-campaign-records"
-                        className="border-b border-neutral-700/40 bg-[#0d0f16] px-3 py-2 max-h-44 overflow-y-auto"
+                        className="border-b border-neutral-700/40 bg-[#0d0f16] px-3 pt-2 pb-6 max-h-44 overflow-y-auto [-webkit-mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)] [mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)]"
                     >
                         <div className="text-amber-400 text-xs font-bold tracking-[0.12em] uppercase mb-1.5">
                             {t('codex.campaignContext.title')}
