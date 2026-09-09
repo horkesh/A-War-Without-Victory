@@ -34803,3 +34803,34 @@ Owner authorized implementation after consumer-review commit `f28fef7750d6182d2c
 **Handoff:** Phases 1–3 are complete/review GO; required remote CI proof, remaining R7/R8/BC09/BC10 work, final calibration/diaries and R9 security/license/platform/freeze gates remain. Reuse only same-contract evidence on matching inputs. Future direct probes require a fresh validated `AWWV_DESKTOP_RUNTIME_PROBE_PROFILE_SUFFIX`. This transient Windows package is not an RC. Phase 3 changed no research source, gameplay, save schema, dependencies, baseline or Git configuration; no push, merge, signing or publication occurred. No new knowledge-ledger entry is needed: the dynamic-count detail is recorded here and in the existing plan.
 
 Local closeout: documentation truth passed 13/13, exit 0 (`logs/r9-build-preparation/phase3-docs.log`). Final diff/roadmap-size verification is in `phase3-final-doc-check.log`; the enabled mandatory typecheck hook and local commit receipt are in `phase3-commit.log`. The committed slice includes only the five package/probe/test files and the existing plan/board/master/ledger updates.
+
+## 2026-09-09 — Cleanup Task 8 closeout reconciled against 13 worktrees
+
+Repeated the read-only hook inventory after the registered worktree count grew from 12 to
+13. All 13 are accessible and inherit `core.hooksPath=.husky/_`, resolved relative to each
+checkout; none has a worktree-local override, and the optional Husky user init is absent.
+Eleven older checkouts still contain the two historical RE retirement comments in their
+local `.husky/pre-commit`, but a separate executable-line classification found zero RE
+checker or installer invocations. Current active package, hook, script, test, source, tool
+and workflow surfaces likewise contain no RE consumer.
+
+The four retired scripts/tests and three `governance:re:*` aliases remain absent. Retained
+`.husky/pre-commit`, Git LFS hooks, `.githooks/pre-commit` and
+`scripts/repo/check_claude_governance.ps1` match the original Task 8 retirement commit
+`d874817eb`. Corrected the cleanup plan's stale top-level “review pending” status and
+reconciled its Task 8 closeout, command board and master §4.2. Fresh receipts are
+`logs/bounded-deletion-cleanup/task8-recheck-*`. This process-only recheck introduces no
+reusable knowledge entry and changes no canon, runtime, package, installer, Git config,
+worktree or later R9 implementation.
+
+Fresh closeout validation: documentation truth passed 13/13, exit 0
+(`task8-recheck-docs-tests.log`); exact retired aliases and the complete `governance:re:*`
+set are absent (`task8-recheck-package-json-corrected.log` and
+`task8-recheck-package-json-all-aliases.log`, both exit 0). The initial inventory counted
+comment mentions as consumers; `task8-recheck-hook-consumer-disposition.log` corrects
+that classification (zero executable consumers, exit 0). Original receipts are preserved.
+Independent Sol process/platform review is GO (`task8-recheck-review.log`). The mandatory
+staged `git hook run pre-commit` passed, exit 0 (`task8-recheck-pre-commit.log`); its existing
+docs-only rule skipped typecheck. Final prose verification and local commit receipts are
+`task8-recheck-final-docs.log` and `task8-recheck-commit.log`. The 13,717-test/31-skip health
+run remains prior evidence; no fresh full suite, build, package, push or merge was run.

@@ -58,7 +58,7 @@ values; hybrid/ethnic starts bypass them while mode-less operational starts can 
 
 | Packet | Existing owner and sequence |
 |---|---|
-| [Deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | R8; Tasks 1–8 reviewed GO. Task 8 focused checks and mandatory hook passed; script handoff ready. Final R8 acceptance remains separate. |
+| [Deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | R8; Tasks 1–8 reviewed GO. A 13-worktree recheck found no executable RE consumer; script handoff ready. Final R8 acceptance remains separate. |
 | [Runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | R8; BC09 Phase 1 is integrated and supplied the verified BC07 retention disposition. BC10 remains planned after BC01/06 and BC09. |
 | [Build preparation](2026-09-07-r9-build-validation-preparation-plan.md) | Phases 1–3 complete/review GO. Package/resource/route proof and combined suite pass (13,520 passed / 31 skipped); final R8 gates remain. |
 

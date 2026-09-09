@@ -9,10 +9,10 @@
 **Tech stack:** TypeScript, React, Vitest, Vite/Electron, Markdown.
 
 **Date:** 2026-09-07
-**Status:** Tasks 1–7 COMPLETE, reviewed GO; combined-branch health repair verified 2026-09-08. Task 8 implementation is complete with independent review pending. Earlier failures remain historical receipts. Dated receipts below retain earlier states.
+**Status:** Tasks 1–8 COMPLETE, reviewed GO; combined-branch health repair verified 2026-09-08. A 13-worktree Task 8 recheck on 2026-09-09 found no executable RE consumer. Earlier failures remain historical receipts. Dated receipts below retain earlier states.
 **Owner lane / command-board row:** R8, subordinate cleanup packet; no new workstream or BC identifier.
 **Phase covered:** R8 after R7; finish before final calibration/final packaged acceptance. Task 2 follows BC04/BC05 event settlement; Task 3 follows R7 and BC06 UI settlement. Other tasks may run on disjoint files while behavior work settles. Diagnostic calibration stays open.
-**Current next action:** independent process/platform review of Task 8, then the required commit hook and integration.
+**Current next action:** final R8 acceptance; Task 8 review, required commit hook and script handoff are complete.
 **Collision rule:** Do not overlap BC event edits, R7 `App.tsx` work, or another agent's roadmap/ledger writes. Re-read current files before each edit; preserve unrelated changes. No implementation is dispatched by this planning turn.
 
 ## 1. Purpose and non-goals
@@ -188,6 +188,26 @@ package/campaign, or repeat the prior full-suite baseline.
 **Stopping rule:** stop after one independent process/platform review and one targeted
 correction verification. A supported compatibility KEEP with the exact consumer and
 unblock action recorded also closes Task 8.
+
+#### Task 8 closeout recheck plan — 2026-09-09
+
+**Question:** Does the current 13-worktree checkout still have no active consumer of the
+retired RE checker, installer, exclusive tests or npm aliases, and do the active hook and
+closeout documents still truthfully preserve the completed Task 8 disposition?
+
+**Commands/evidence and pass criteria:** repeat the ordinal worktree inventory with each
+effective `core.hooksPath` resolved relative to its worktree, inspect actual wrappers,
+project hooks, optional user init and repository consumers, then confirm the four files
+and three aliases remain absent. Compare retained `.githooks/pre-commit`,
+`check_claude_governance.ps1`, Husky executable logic and Git LFS hook bytes with the
+original retirement. Run the focused docs commands recorded in `task8-final-docs.log`,
+package parse/reference checks and `git diff --check`. Save fresh non-overwriting
+`task8-recheck-*` receipts. Pass requires no active RE consumer, truthful current docs and
+all focused checks at exit 0. Expected cost is a few minutes.
+
+**Stopping rule:** stop on an unresolved consumer, scope expansion into installer/config,
+worktree deletion or R9 changes, or a repeated check failure. Do not run the full suite,
+build, package or campaign.
 
 ## 4. Fixed validation plan and stopping rule
 
@@ -720,3 +740,24 @@ Sol process/platform review is GO with no findings (`task8-review.log`). The man
 `git hook run pre-commit` passed, exit 0 (`task8-pre-commit.log`). Task 8 is COMPLETE (GO).
 R9 receives the retired script surface and retained governance compatibility files;
 their separate disposition remains outside Task 8. No R9 work, push or merge is started.
+
+The 2026-09-09 closeout recheck covers all 13 currently registered, accessible
+worktrees. Every effective `core.hooksPath` remains `.husky/_`, resolved relative to its
+checkout, with no worktree-local override or user Husky init. Eleven older checkouts retain
+two RE retirement comments in their local project hook, but executable-consumer inspection
+found zero RE invocations. The four retired files and three aliases remain absent; the
+retained Husky/LFS hooks, `.githooks/pre-commit` and governance checker match `d874817eb`.
+Fresh evidence is under `logs/bounded-deletion-cleanup/task8-recheck-*`; historical Task 8
+receipts above remain unchanged.
+
+Fresh closeout validation: documentation truth passed 13/13, exit 0
+(`task8-recheck-docs-tests.log`); exact retired aliases and the complete `governance:re:*`
+set are absent (`task8-recheck-package-json-corrected.log` and
+`task8-recheck-package-json-all-aliases.log`, both exit 0). The initial inventory counted
+comment mentions as consumers; `task8-recheck-hook-consumer-disposition.log` corrects
+that classification (zero executable consumers, exit 0). Original receipts are preserved.
+Independent Sol process/platform review is GO (`task8-recheck-review.log`). The mandatory
+staged `git hook run pre-commit` passed, exit 0 (`task8-recheck-pre-commit.log`); its existing
+docs-only rule skipped typecheck. Final prose verification and local commit receipts are
+`task8-recheck-final-docs.log` and `task8-recheck-commit.log`. The 13,717-test/31-skip health
+run remains prior evidence; no fresh full suite, build, package, push or merge was run.

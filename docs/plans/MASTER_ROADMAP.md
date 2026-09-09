@@ -236,7 +236,7 @@ BC09 and cleanup Tasks 1–8 are GO; script handoff is ready. No new workstream:
 
 | Owner / packet | Slot and overlap |
 |---|---|
-| R8 [deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | Tasks 1–8 GO; health repair verified. Task 8 review and mandatory hook pass; script handoff ready. Final R8 acceptance is open. |
+| R8 [deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) | Tasks 1–8 GO; health repair verified. A 13-worktree recheck found no executable RE consumer; final R8 acceptance is open. |
 | R8 [runtime integrity](2026-09-07-r8-runtime-input-ai-integrity-plan.md) | BC09 integrated/reviewed GO; campaigns deferred. BC07 RETAIN disposition verified; BC10 planned. No regeneration. |
 | R9 [build preparation](2026-09-07-r9-build-validation-preparation-plan.md) | P1–3 complete/review GO. |
 
