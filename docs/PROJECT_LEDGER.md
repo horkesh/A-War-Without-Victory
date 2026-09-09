@@ -35192,3 +35192,26 @@ dismissal, accept Warroom or field controls in the shared readiness helper, and 
 after Save/load. Focused tests, targeted independent review, a new source freeze and the normal
 local hook precede the next fresh RBiH retry. No game source, package, full-suite, baseline or
 calibration repetition is included. All failed receipts and profiles remain preserved.
+
+### R8 first-decision packaged blocker — 2026-09-10
+
+The Warroom readiness correction is committed at `fdb5b24b3fd45e455bb49c3bdd6437663ac266e2`
+with normal hook/commit exit 0 (`warroom-readiness-commit1.log`). Focused harness verification
+passes 49/49 (`command-surface-harness-full-green1.log`); package bytes still match the original
+product commit 217c9f70a (`package-check-rbih3.log`, exit 0). RBiH attempt 3 now reaches the
+actual command post with the intro dismissed, but stops at turn 0 on the first required decision,
+`rbih_state_identity` (`shakedown-rbih3.log`, exit 1). No historical response was chosen.
+
+`opening-proof4.log`, exit 1, isolates a real product defect: the standalone opening-brief Inbox
+stays over the open President's Desk. The correct event card/action exists, but the Inbox covers
+the header/action and intercepts pointer events. Actual screenshots and the failed click trace
+are retained under `opening-proof4/`. Independent review records STOP in the existing
+`review.log`; this additional surface-ownership defect is outside the four scheduled repairs.
+
+The proposed minimal correction hides the standalone opening-brief Inbox only while the Desk
+is open, preserving its return afterward and using the Desk's existing identical event action.
+Owner scope authorization and one replacement package are pending; no production change or
+harness bypass has been made. RBiH has not advanced beyond turn 0, RS/HRHB have not started,
+and no 24-turn or full R8 acceptance is claimed. Existing combined-suite/environment receipts,
+source hooks and package proof remain valid for their recorded inputs. All inherited R7 baseline,
+calibration and owner-inspection obligations remain open; no additional baseline campaign ran.

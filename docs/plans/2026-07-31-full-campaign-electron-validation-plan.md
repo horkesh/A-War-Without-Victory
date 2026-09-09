@@ -320,6 +320,50 @@ absence of either toolbar, matching faction, Save/load helper reuse and readines
 ordering. Unaffected harness tests reuse the prior 49/49 file receipt. The 13 focused docs checks
 pass in `warroom-readiness-docs1.log`, exit 0; freeze 5 records the corrected harness candidate.
 
+### First required decision route — 2026-09-10
+
+`warroom-readiness-commit1.log` passes the hook and local commit at
+`fdb5b24b3fd45e455bb49c3bdd6437663ac266e2`, exit 0. The complete focused harness file also
+passes 49/49 in `command-surface-harness-full-green1.log`, exit 0. Package reuse passes in
+`package-check-rbih3.log`, exit 0. `shakedown-rbih3.log` exits 1 at turn 0 trying to open
+`rbih_state_identity` before its first tour. Its command-post screenshot proves the real Warroom
+with the intro dismissed and the required What is Bosnia? inbox card visible. Initial state/save
+evidence is bound; no turn advances or historical responses were applied.
+
+**Question:** does the first required event have an actionable current player route, and where
+does the existing Desk helper fail? Use one bounded `node <evidence>/opening-proof4.mjs` probe
+on the same frozen package and a fresh contained profile, through turn-0 startup only. Capture
+the actual Desk route, card/action identity and matching event modal; inspect the visible inbox
+route if the Desk route fails. Do not choose an answer or advance. Cost: under two minutes.
+Stop on a product defect outside B7/B5/B8/B1, missing identity or ambiguous action. A proved
+harness-only selector/readiness correction remains within the authorized player-loop scope:
+focused RED/GREEN, targeted independent verification, freeze and local hook before a new fresh
+RBiH attempt. Preserve every failed receipt and reuse the unchanged full suite/package.
+
+**Confirmed blocker / owner decision pending:** `opening-proof4.log` exits 1. The Desk opens
+with the correct `desk-card-event_decision` / `event:rbih_state_identity` / `event_modal` identity,
+but the standalone `presidential-inbox` stays above it and intercepts the enabled Decide now
+button. `opening-proof4/06-desk-route.png` and `failure.png` visibly show the Inbox obscuring
+the Desk header and action; the Playwright trace names the intercepting subtree. No answer or
+turn was applied. Independent review records **STOP** in the existing `review.log`: this is a
+product surface-ownership defect outside B7/B5/B8/B1, not another harness selector error.
+
+The minimal proposed fix is one render-condition guard in `App.tsx`: keep the standalone
+opening-brief Inbox hidden while `warroomDeskOpen`. The Desk already renders the same pending
+decision/action handler; closing it would restore the still-pending brief. Proposed regression:
+Inbox present on Warroom home, absent while Desk is open, restored after closing Desk if the
+brief remains pending. Verify the actual first required decision route without interception,
+then review/commit and rebuild once before restarting fresh RBiH -> RS -> HRHB shakedowns.
+Owner authorization for this additional product fix and replacement package is pending; no
+production change or bypass has been made. RBiH has not advanced beyond turn 0, and RS/HRHB
+have not launched. Source review GO for the four repairs does not constitute packaged acceptance.
+
+The blocker documentation passes 13 focused tests (`blocked-docs1.log`, exit 0) and frozen-source,
+protected-path, local-link and original-evidence checks (`blocked-scope1.log`, exit 0). Independent
+documentation review approves it after clarifying that the Inbox physically obscures the decision.
+The normal local documentation commit hook remains required; all failed campaign/probe receipts
+retain their original exits. The pending owner decision is not an authorization by elapsed time.
+
 ---
 
 ## Subordinate audit packets (2026-09-07)
