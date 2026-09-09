@@ -721,7 +721,7 @@ export function ArmyHQModal({
                                     {t('armyHq.allCorps', { count: data.corpsFormations.length })}
                                 </div>
 
-                                <div className={`grid gap-2 ${expandedCorpsId
+                                <div className={`grid content-start gap-2 ${expandedCorpsId
                                     ? 'grid-cols-[repeat(auto-fit,minmax(16rem,1fr))]'
                                     : 'grid-cols-[repeat(auto-fit,minmax(18rem,1fr))]'
                                 }`}>
