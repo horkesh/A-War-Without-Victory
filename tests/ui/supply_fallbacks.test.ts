@@ -119,7 +119,7 @@ describe('supply UI fallbacks', () => {
     }));
 
     expect(screen.getByText('ARBiH')).toBeTruthy();
-    expect(screen.getAllByText('Unreported')).toHaveLength(2);
+    expect(screen.getAllByText('No staff report')).toHaveLength(2);
     expect(screen.queryByText('0')).toBeNull();
   });
 
@@ -138,7 +138,7 @@ describe('supply UI fallbacks', () => {
 
     expect(screen.getByText('Strained').parentElement?.textContent).toContain('0');
     expect(screen.getByText('Supply').parentElement?.textContent).toContain('80');
-    expect(screen.getByText('Ammo').parentElement?.textContent).toContain('Unreported');
+    expect(screen.getByText('Ammo').parentElement?.textContent).toContain('No staff report');
   });
 
   it('buildSupplyGeoJSON treats high legacy pressure as critical, not adequate', () => {

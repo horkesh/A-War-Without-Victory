@@ -84,8 +84,8 @@ describe('ParamilitaryReviewModal', () => {
         expect(screen.getByText('Projected international standing impact')).toBeTruthy();
         expect(screen.getByText('-10 points on deployment; -10.05 total if the target is captured')).toBeTruthy();
         expect(screen.getByText(/Balkan Battlegrounds, Vol\. I/)).toBeTruthy();
-        expect(screen.getByText(/fixed 5,000-person target baseline/)).toBeTruthy();
-        expect(screen.getByText(/not a claim that this exact outcome occurred here/)).toBeTruthy();
+        expect(screen.getByText(/fixed 5,000-person baseline for the target/)).toBeTruthy();
+        expect(screen.getByText(/do not claim that this exact outcome occurred here/)).toBeTruthy();
     });
 
     it('marks target population as unreported when the loaded census map has no value', () => {

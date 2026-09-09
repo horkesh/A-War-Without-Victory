@@ -37,7 +37,7 @@ identity; coordinate any later shared-build edit through the R9 preparation owne
 | **Source finding set** | [Showcase screenshot GUI audit](../40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md) (FROZEN, 29 findings) |
 | **Panel record** | [Tier-1 specialist reports](../40_reports/working/20260905_SHOWCASE_AUDIT_PANEL_SPECIALIST_REPORTS.md) |
 | **Collision rules** | §8 of the roadmap: *"Map/Desk English layout strings — R1/R2 layout first; R7 accessibility/readability proof second."* R1/R2 are CLOSED, so their layout pass is complete and this is the open second pass. One file has one owning phase; see §4. |
-| **Current next action** | Phase 1 (`messages.en.ts` string pass). |
+| **Current next action** | Phase 2 display-name lookup wiring; Phase 1 complete/reviewed GO. |
 
 ### Why this is legally an R7 amendment and not a new lane
 
@@ -670,3 +670,73 @@ has two distinct fields for exactly this reason.
 > if a baseline hash moves, you edited something you should not have. Gate the whole `tests/ui`
 > directory, never a focused subset. Implementer and reviewer seats are named per phase and must be
 > different people.
+
+## Execution checkpoint — 2026-09-09
+
+Owner authorized execution after the Task 8 closeout integration. Starting source is
+`16389f6c9` on `codex/r7-english-readability`; pre-existing validation artifacts remain.
+First question: identify which numbered tasks are still open by checking current source,
+tests and receipts in phase/task order. Inventory is read-only and costs minutes;
+`logs/r7-english-readability/current-task-inventory.log` records the result.
+
+Phase 1 question: can the listed English labels become clear staff prose while preserving
+all interpolation fields, quantities, contextual missing-report phrases, historical facts,
+and sensitive-history caveats? Run a focused failing vocabulary/semantic test first, then
+`npm.cmd run test:vitest -- tests/ui`, `npm.cmd run typecheck`, the required map build,
+and `git diff --check`. Logs use `logs/r7-english-readability/phase1-*`; the starting
+`npm.cmd run typecheck` receipt is `start-typecheck.log`. Expected cost is minutes per
+local gate. Pass requires all listed string tasks resolved, the full UI gate green,
+and independent semantic and canon review; no simulation or persisted-data edits.
+Stop on conflicting canon, unclear value semantics, forbidden-file requirements or
+repeated verification failure. Final visual, long-run and global acceptance gates in
+Phase 6 remain required; local Phase 1 checks cannot close them. Their commands, input
+identity, cost and stopping rule will be fixed before launching those runs.
+
+Phase 1 ownership clarification: item 1.5's reserve and review counts both consume
+`attention.critical` in `PresidentialAttentionPanel.tsx`. Assign that component to Phase 1
+solely for its two label call sites and two distinct translation keys; keep the shared key
+for any other consumers. This is the wiring required by the already listed domain-label
+task, with no value, ordering or layout change. Phase 1 also owns the missing
+`warCost.findingSeverity.none` translation needed by Phase 5.1, so Phase 5 does not edit
+Phase 1's file. For Phase 5.2, textContent alone cannot detect CSS uppercase: verify the
+rendered computed text-transform and visible casing as well as the underlying text.
+
+Phase 1 first full UI gate: 344 files, 2,939 tests; 316 files/2,886 tests passed and
+28 files/53 tests failed, exit 1, in 614.17 seconds. Receipt:
+`logs/r7-english-readability/phase1-ui-suite.log`. The UI filter also matches root
+`tests/ui_*` consumers. Classify the failed old-copy assertions individually and retain
+all quantity, sparse-truth and negative controls when updating expected wording.
+Run the affected tests first, then one complete UI rerun (about 10 minutes measured).
+The first focused RED was 9 failures/13 passes; the implementation focused GREEN is
+22/22. Starting and Phase 1 typechecks and the first Phase 1 map build passed.
+Review requested count-neutral grammar for the shared archive-count summary; that
+correction is included before final verification. These are interim receipts, not
+Phase 1 or amendment acceptance.
+
+Phase 2 source precheck is GO (`logs/r7-english-readability/phase2-source-precheck.log`).
+Current operational GeoJSON covers 712/712 scored OSIDs with zero display collisions;
+110 municipality IDs map without conflicts. Of the 712 scored labels, 710 are census-derived
+and two are the explicitly authored Mostar Istok/Zapad operational splits. Preserve these
+source labels exactly; do not claim that all 712 are literal census names. Task 2.2's pure
+slug suffix removal already exists and its existing focused suite passes 7/7; retain it
+and add only any missing discriminating regression coverage. The initial inventory's
+claim that this suffix removal was absent is corrected in its appended root note.
+
+## Phase 1 closeout — 2026-09-09
+
+Phase 1 is COMPLETE, independently reviewed GO. The production slice is the English
+catalog plus the two explicitly assigned critical-queue label call sites. All eleven
+listed tasks are implemented; the full reserve roster and sensitive-history facts,
+caveat and precision remain intact. The three new English keys use the existing fallback
+contract; Bosnian translation remains deferred. Shared UI tests retain their original
+quantity, visibility and missing-data controls with corrected text expectations.
+
+Evidence under `logs/r7-english-readability/`: `phase1-ui-final.log` passes 344 files and
+2,939 tests, exit 0 (573.04 seconds); `phase1-typecheck.log` and
+`phase1-final-map-build.log` pass, exit 0. Independent Canon Compliance and Modern Wargame
+semantic review is GO in `phase1-review.log`, after the count-neutral archive wording
+correction. Initial red and correction receipts remain preserved. Documentation/diff
+verification and the mandatory local commit-hook result are recorded in
+`phase1-docs.log` and `phase1-commit.log`. Phase 2 is next. No simulation, save, dependency,
+scenario, baseline or canon change occurred; fresh long-run and visual acceptance remain
+required at the integrated closeout. No push or merge is authorized by this checkpoint.

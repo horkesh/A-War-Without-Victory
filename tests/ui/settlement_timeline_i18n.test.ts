@@ -294,7 +294,7 @@ describe('SettlementTimeline localization', () => {
 
     const { container } = render(createElement(SettlementTimeline, { events }));
 
-    expect(container.textContent).toContain('Casualties: Unreported attacker / Unreported defender');
+    expect(container.textContent).toContain('Casualties: No staff report attacker / No staff report defender');
     expect(container.textContent).not.toContain('Casualties: 0 attacker / 0 defender');
   });
 
@@ -326,7 +326,7 @@ describe('SettlementTimeline localization', () => {
 
     const { container } = render(createElement(SettlementTimeline, { events }));
 
-    expect(container.textContent).toContain('Casualties: Unreported attacker / Unreported defender');
+    expect(container.textContent).toContain('Casualties: No staff report attacker / No staff report defender');
     expect(container.textContent).not.toContain('Casualties: 0 attacker / 0 defender');
   });
 

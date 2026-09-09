@@ -418,12 +418,12 @@ describe('GUI audit label discipline', () => {
     }));
 
     expect(container.textContent).toContain('Battles2');
-    expect(container.textContent).toContain('Win RateUnreported');
-    expect(container.textContent).toContain('Men lostUnreported');
-    expect(container.textContent).toContain('Casualties InflictedUnreported');
-    expect(container.textContent).toContain('Exchange RatioUnreported');
-    expect(container.textContent).toContain('Ground Won/LostUnreported');
-    expect(container.textContent).toContain('BrigadesUnreported');
+    expect(container.textContent).toContain('Win RateNo staff report');
+    expect(container.textContent).toContain('Men lostNo staff report');
+    expect(container.textContent).toContain('Casualties InflictedNo staff report');
+    expect(container.textContent).toContain('Exchange RatioNo staff report');
+    expect(container.textContent).toContain('Ground Won/LostNo staff report');
+    expect(container.textContent).toContain('BrigadesNo staff report');
     expect(container.textContent).not.toMatch(/0\.0%|0\.00:1|0 won \/ 0 lost|0 active brigades \/ 0 total/i);
 
     cleanup();
@@ -436,12 +436,12 @@ describe('GUI audit label discipline', () => {
     }));
 
     expect(corpsContainer.textContent).toContain('Battles2');
-    expect(corpsContainer.textContent).toContain('RecordUnreported');
-    expect(corpsContainer.textContent).toContain('Win RateUnreported');
-    expect(corpsContainer.textContent).toContain('Casualties TakenUnreported');
-    expect(corpsContainer.textContent).toContain('Casualties InflictedUnreported');
-    expect(corpsContainer.textContent).toContain('Exchange RatioUnreported');
-    expect(corpsContainer.textContent).toContain('Ground Won/LostUnreported');
+    expect(corpsContainer.textContent).toContain('RecordNo staff report');
+    expect(corpsContainer.textContent).toContain('Win RateNo staff report');
+    expect(corpsContainer.textContent).toContain('Casualties TakenNo staff report');
+    expect(corpsContainer.textContent).toContain('Casualties InflictedNo staff report');
+    expect(corpsContainer.textContent).toContain('Exchange RatioNo staff report');
+    expect(corpsContainer.textContent).toContain('Ground Won/LostNo staff report');
     expect(corpsContainer.textContent).not.toMatch(/Wins: 0|Losses: 0|Stalemates: 0|0%|0\.00:1|0 won \/ 0 lost/i);
 
     cleanup();
@@ -459,8 +459,8 @@ describe('GUI audit label discipline', () => {
       corps: { combatSummary: partialGroupedSummary } as unknown as FormationView,
     }));
 
-    expect(partialCorpsContainer.textContent).toContain('RecordUnreported');
-    expect(partialCorpsContainer.textContent).toContain('Ground Won/LostUnreported');
+    expect(partialCorpsContainer.textContent).toContain('RecordNo staff report');
+    expect(partialCorpsContainer.textContent).toContain('Ground Won/LostNo staff report');
     expect(partialCorpsContainer.textContent).not.toMatch(/Wins: 1 \/ Losses: 0 \/ Stalemates: 0|2 won \/ 0 lost/i);
   });
 
@@ -622,7 +622,7 @@ describe('GUI audit label discipline', () => {
 
     const stanceSelect = screen.getByLabelText('Corps stance') as HTMLSelectElement;
     expect(stanceSelect.value).toBe('unreported');
-    expect(stanceSelect.textContent).toContain('Unreported');
+    expect(stanceSelect.textContent).toContain('No staff report');
     expect(stanceSelect.textContent).toContain('Balanced');
   });
 
@@ -649,7 +649,7 @@ describe('GUI audit label discipline', () => {
     expect(flipTarget).toBeTruthy();
     fireEvent.click(flipTarget!);
 
-    expect(container.textContent).toContain('Avg CohesionUnreported');
+    expect(container.textContent).toContain('Avg CohesionNo staff report');
     expect(container.textContent).not.toContain('Avg Cohesion0%');
   });
 
@@ -739,8 +739,8 @@ describe('GUI audit label discipline', () => {
     }));
 
     expect(container.textContent).toContain('Command Relationship');
-    expect(container.textContent).toContain('Command strainUnreported');
-    expect(container.textContent).toContain('Corps exhaustionUnreported');
+    expect(container.textContent).toContain('Command strainNo staff report');
+    expect(container.textContent).toContain('Corps exhaustionNo staff report');
     expect(container.textContent).not.toContain('Command Relationship - Healthy');
     expect(container.textContent).not.toContain('Corps exhaustion (0%)');
   });
@@ -820,7 +820,7 @@ describe('GUI audit label discipline', () => {
     } as Parameters<typeof CorpsCard>[0]));
     expect(unreportedContainer.querySelector('[data-testid="corps-card-personnel"]')?.className).toContain('text-text-secondary');
     expect(unreportedContainer.querySelector('[data-testid="corps-card-personnel-icon"]')?.getAttribute('data-color')).toBe('neutral');
-    expect(unreportedContainer.textContent).toContain('Unreported');
+    expect(unreportedContainer.textContent).toContain('No staff report');
     cleanup();
 
     const { container: armyUnreportedContainer } = render(createElement(ArmyHQCorpsCard, {
@@ -1208,11 +1208,11 @@ describe('GUI audit label discipline', () => {
       brigades: [partiallyReported],
       faction: 'RBiH',
     } as Parameters<typeof CorpsCard>[0]));
-    expect(corpsCardSparseEquipment.textContent).toContain('Unreported');
+    expect(corpsCardSparseEquipment.textContent).toContain('No staff report');
     expect(corpsCardSparseEquipment.textContent).not.toContain('0/10');
     expect(corpsCardSparseEquipment.textContent).not.toContain('0/5');
-    expect(corpsCardSparseEquipment.querySelector('[title="Tanks: Unreported"]')).toBeTruthy();
-    expect(corpsCardSparseEquipment.querySelector('[title="Artillery: Unreported"]')).toBeTruthy();
+    expect(corpsCardSparseEquipment.querySelector('[title="Tanks: No staff report"]')).toBeTruthy();
+    expect(corpsCardSparseEquipment.querySelector('[title="Artillery: No staff report"]')).toBeTruthy();
     expect(corpsCardSparseEquipment.querySelector('[title="Tanks: 0 operational / 10 total"]')).toBeNull();
     cleanup();
 
@@ -1291,9 +1291,9 @@ describe('GUI audit label discipline', () => {
     } as unknown as FormationView;
 
     for (const [formations, expected, unexpected] of [
-      [[corps, reported], /1[,.]200/, /Partial|Unreported/i],
+      [[corps, reported], /1[,.]200/, /Partial|No staff report/i],
       [[corps, reported, unreported], /Partial 1[,.]200/, /\b2[,.]400\b/],
-      [[corps, unreported], /Unreported/, /\b0\b|Partial/i],
+      [[corps, unreported], /No staff report/, /\b0\b|Partial/i],
     ] as const) {
       useGameStore.setState({
         ...useGameStore.getInitialState(),

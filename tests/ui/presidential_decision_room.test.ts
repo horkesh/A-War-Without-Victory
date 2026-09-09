@@ -1914,10 +1914,10 @@ describe('buildPresidentialDecisionRoomView', () => {
     // Missing staff candidate truth remains visible, but no release order can be issued.
     expect(beta).toBeDefined();
     expect(beta?.directive).toBeUndefined();
-    expect(beta?.evidence.join(' ')).toContain('Candidate force: Unreported');
-    expect(beta?.evidence.join(' ')).toContain('Donor command: Unreported');
-    expect(beta?.evidence.join(' ')).toContain('Source position: Unreported');
-    expect(beta?.evidence.join(' ')).toContain('Weakened position: Unreported');
+    expect(beta?.evidence.join(' ')).toContain('Candidate force: No staff report');
+    expect(beta?.evidence.join(' ')).toContain('Donor command: No staff report');
+    expect(beta?.evidence.join(' ')).toContain('Source position: No staff report');
+    expect(beta?.evidence.join(' ')).toContain('Weakened position: No staff report');
     // Enemy-faction reserve requests never surface to the player.
     expect(view.cards.find((c) => c.id === 'command:elite-deploy:reserve_enemy')).toBeUndefined();
   });

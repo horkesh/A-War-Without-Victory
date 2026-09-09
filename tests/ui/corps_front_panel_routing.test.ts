@@ -244,8 +244,8 @@ describe('CorpsFrontPanel field routing', () => {
     const reportGap = container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap') ?? '';
     expect(reportGap).toContain('operational security');
     expect(reportGap).toContain('supply priority');
-    expect(container.textContent).not.toMatch(/Operational security:\s*Unreported/i);
-    expect(container.textContent).not.toMatch(/Supply Priority\s*Unreported/i);
+    expect(container.textContent).not.toMatch(/Operational security:\s*No staff report/i);
+    expect(container.textContent).not.toMatch(/Supply Priority\s*No staff report/i);
     expect(container.textContent).not.toMatch(/Supply Priority\s*1\.0x\s*\(neutral\)/i);
   });
 
@@ -314,7 +314,7 @@ describe('CorpsFrontPanel field routing', () => {
     expect(container.textContent).not.toMatch(/Ops Supply Readiness\s*0%/);
 
     fireEvent.click(screen.getByRole('tab', { name: /Ops Snapshot/i }));
-    expect(container.textContent).toMatch(/Supply Status\s*Unreported/i);
+    expect(container.textContent).toMatch(/Supply Status\s*No staff report/i);
     expect(container.textContent).not.toMatch(/Supply Status\s*0%/i);
   });
 
@@ -418,7 +418,7 @@ describe('CorpsFrontPanel field routing', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
     expect(container.textContent).toMatch(/Ops Supply Readiness/i);
-    expect(container.textContent).not.toMatch(/Ops Supply Readiness\s*Unreported/i);
+    expect(container.textContent).not.toMatch(/Ops Supply Readiness\s*No staff report/i);
     expect(container.textContent).not.toMatch(/Ops Supply Readiness\s*80%/i);
   });
 
@@ -769,8 +769,8 @@ describe('CorpsFrontPanel field routing', () => {
     fireEvent.click(screen.getByRole('tab', { name: /Order of battle/i }));
     expect(container.textContent).not.toContain('—');
     for (const name of ['101st Brigade', 'Reserve Brigade', 'Directed Brigade', 'Rear Support Brigade']) {
-      expect(container.textContent).toMatch(new RegExp(`${name}[\\s\\S]*Unreported`, 'i'));
-      expect(screen.getByRole('button', { name: new RegExp(`${name}.*Personnel Unreported`, 'i') })).toBeTruthy();
+      expect(container.textContent).toMatch(new RegExp(`${name}[\\s\\S]*No staff report`, 'i'));
+      expect(screen.getByRole('button', { name: new RegExp(`${name}.*Personnel No staff report`, 'i') })).toBeTruthy();
     }
     expect(screen.getByRole('button', { name: /Assigned brigade 101st Brigade/i }).getAttribute('data-corps-front-row-kind')).toBe('frontline');
     expect(screen.getByRole('button', { name: /Reserve brigade Reserve Brigade/i }).getAttribute('data-corps-front-row-kind')).toBe('reserve');
@@ -796,7 +796,7 @@ describe('CorpsFrontPanel field routing', () => {
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
     expect(container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('sector stance');
-    expect(container.textContent).not.toMatch(/Sector Stance:\s*Unreported/i);
+    expect(container.textContent).not.toMatch(/Sector Stance:\s*No staff report/i);
     expect(container.textContent).not.toMatch(/Sector Stance:\s*Defend/i);
   });
 
@@ -876,7 +876,7 @@ describe('CorpsFrontPanel field routing', () => {
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
     expect(container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('confidence');
-    expect(container.textContent).not.toMatch(/Confidence:\s*Unreported/i);
+    expect(container.textContent).not.toMatch(/Confidence:\s*No staff report/i);
     expect(screen.getByTestId('corps-front-combat-personnel').textContent).toMatch(/1[,.]200/);
     expect(screen.getByTestId('corps-front-combat-morale').textContent).toContain('64');
     expect(container.textContent).toMatch(/Force Balance\s*Redacted/i);
@@ -1092,7 +1092,7 @@ describe('CorpsFrontPanel field routing', () => {
     fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
 
     expect(container.textContent).toContain('Partial 3.0 turns');
-    expect(container.textContent).toMatch(/Avg Dig-in\s*Unreported/i);
+    expect(container.textContent).toMatch(/Avg Dig-in\s*No staff report/i);
     expect(container.textContent).not.toContain('Average dig-in0%');
   });
 
@@ -1198,7 +1198,7 @@ describe('CorpsFrontPanel field routing', () => {
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
     fireEvent.click(screen.getByRole('tab', { name: /Ops Snapshot/i }));
-    expect(container.textContent).toContain('Cdr Assessment: Unreported');
+    expect(container.textContent).toContain('Cdr Assessment: No staff report');
     expect(container.textContent).not.toMatch(/Wait For Terrain Probe|wait_for_terrain_probe/i);
   });
 
@@ -1225,7 +1225,7 @@ describe('CorpsFrontPanel field routing', () => {
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
     fireEvent.click(screen.getByRole('tab', { name: /Ops Snapshot/i }));
-    expect(container.textContent).toContain('Unreported');
+    expect(container.textContent).toContain('No staff report');
     expect(container.textContent).not.toMatch(/Waiting For Bridge Report|waiting_for_bridge_report/i);
   });
 
@@ -1318,7 +1318,7 @@ describe('CorpsFrontPanel field routing', () => {
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
     expect(container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('corps stance');
-    expect(container.textContent).not.toMatch(/Corps Stance:\s*Unreported/i);
+    expect(container.textContent).not.toMatch(/Corps Stance:\s*No staff report/i);
     expect(container.textContent).not.toMatch(/Wait For Orders|wait_for_orders/i);
   });
 

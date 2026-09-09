@@ -104,7 +104,7 @@ describe('Army HQ readiness and threat copy', () => {
 
         expect(html).toContain('Military Credibility');
         expect(html).toContain('65');
-        expect(html).toContain('Unreported');
+        expect(html).toContain('No staff report');
         expect(html).toContain('Composite unreported');
         expect(html).not.toContain('Weighted Composite');
     });

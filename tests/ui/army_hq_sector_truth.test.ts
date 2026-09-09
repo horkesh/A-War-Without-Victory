@@ -261,7 +261,7 @@ describe('Army HQ sector truth', () => {
     expect(copy).toMatch(/Morale:\s*Partial 70/i);
     expect(copy).toMatch(/Fatigue:\s*Partial 4/i);
     expect(copy).toMatch(/Personnel:\s*Partial 1\.2k/i);
-    expect(copy).toContain('Unreported');
+    expect(copy).toContain('No staff report');
     expect(copy).not.toMatch(/MOR\s*70\s*FAT\s*4\s*PERS\s*1\.2k/i);
   });
 

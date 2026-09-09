@@ -34834,3 +34834,22 @@ staged `git hook run pre-commit` passed, exit 0 (`task8-recheck-pre-commit.log`)
 docs-only rule skipped typecheck. Final prose verification and local commit receipts are
 `task8-recheck-final-docs.log` and `task8-recheck-commit.log`. The 13,717-test/31-skip health
 run remains prior evidence; no fresh full suite, build, package, push or merge was run.
+
+## Phase 1 closeout — 2026-09-09
+
+Phase 1 is COMPLETE, independently reviewed GO. The production slice is the English
+catalog plus the two explicitly assigned critical-queue label call sites. All eleven
+listed tasks are implemented; the full reserve roster and sensitive-history facts,
+caveat and precision remain intact. The three new English keys use the existing fallback
+contract; Bosnian translation remains deferred. Shared UI tests retain their original
+quantity, visibility and missing-data controls with corrected text expectations.
+
+Evidence under `logs/r7-english-readability/`: `phase1-ui-final.log` passes 344 files and
+2,939 tests, exit 0 (573.04 seconds); `phase1-typecheck.log` and
+`phase1-final-map-build.log` pass, exit 0. Independent Canon Compliance and Modern Wargame
+semantic review is GO in `phase1-review.log`, after the count-neutral archive wording
+correction. Initial red and correction receipts remain preserved. Documentation/diff
+verification and the mandatory local commit-hook result are recorded in
+`phase1-docs.log` and `phase1-commit.log`. Phase 2 is next. No simulation, save, dependency,
+scenario, baseline or canon change occurred; fresh long-run and visual acceptance remain
+required at the integrated closeout. No push or merge is authorized by this checkpoint.

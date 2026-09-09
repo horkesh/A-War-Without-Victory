@@ -345,8 +345,8 @@ describe('AAR and tooltip friction labels', () => {
       vi.advanceTimersByTime(301);
     });
 
-    expect(document.body.textContent).toMatch(/Attacker losses\s*Unreported/);
-    expect(document.body.textContent).toMatch(/Defender losses\s*Unreported/);
+    expect(document.body.textContent).toMatch(/Attacker losses\s*No staff report/);
+    expect(document.body.textContent).toMatch(/Defender losses\s*No staff report/);
     expect(document.body.textContent).not.toMatch(/Attacker losses\s*[-−]0|Defender losses\s*[-−]0/);
   });
 
@@ -385,7 +385,7 @@ describe('AAR and tooltip friction labels', () => {
       vi.advanceTimersByTime(301);
     });
 
-    expect(document.body.textContent).toMatch(/Cohesion:\s*Unreported/);
+    expect(document.body.textContent).toMatch(/Cohesion:\s*No staff report/);
     expect(document.body.textContent).not.toMatch(/Cohesion:\s*0\b/);
   });
 

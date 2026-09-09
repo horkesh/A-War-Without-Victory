@@ -427,7 +427,7 @@ describe('CodexPanel dynamic essay proof', () => {
 
         fireEvent.click(screen.getByText('The Fall of Srebrenica: Europe\'s Worst Atrocity Since 1945'));
 
-        expect(screen.getByText('Historical Ghost Entry')).toBeTruthy();
+        expect(screen.getByText('Speculative Historical Note')).toBeTruthy();
         expect(
             screen.getByText('This entry records the historical fall of Srebrenica. In your war, the enclave survived; the historical July 1995 catastrophe never arrived.'),
         ).toBeTruthy();
@@ -749,6 +749,6 @@ describe('CodexPanel dynamic essay proof', () => {
         fireEvent.click(screen.getByText(daytonTitle));
         expect(screen.getByTestId('codex-selected-essay-body')).toBeTruthy();
         expect(screen.queryByText('Player War Divergence')).toBeNull();
-        expect(screen.queryByText('Historical Ghost Entry')).toBeNull();
+        expect(screen.queryByText('Speculative Historical Note')).toBeNull();
     });
 });

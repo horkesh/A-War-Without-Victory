@@ -35,7 +35,7 @@ describe('TacticalCard sparse truth', () => {
       onClick: vi.fn(),
     }));
 
-    expect(screen.getByText('Unreported')).toBeTruthy();
+    expect(screen.getByText('No staff report')).toBeTruthy();
     expect(screen.getByTitle('Cohesion: Unreported')).toBeTruthy();
     expect(screen.getByTitle('Fatigue: Unreported')).toBeTruthy();
     expect(screen.queryByText('0')).toBeNull();

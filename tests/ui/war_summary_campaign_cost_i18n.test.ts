@@ -220,7 +220,7 @@ describe('War Summary campaign cost localization', () => {
         expect(campaignCost.textContent).toContain('Campaign cost so far: 12,000 killed / 17,000 wounded / 500 missing or captured');
         expect(within(campaignCost).getByText('29.5k')).toBeTruthy();
         const sitrep = screen.getByText('Situation Report').parentElement?.textContent ?? '';
-        expect(sitrep).toContain('0 critical / 1 strained, 2 collapsed');
+        expect(sitrep).toContain('0 critical / 1 strained, 2 permanently collapsed municipalities (cumulative)');
     });
 
     it('renders missing casualty and displacement sources as unreported in the overview', () => {
@@ -235,10 +235,10 @@ describe('War Summary campaign cost localization', () => {
         render(createElement(WarSummaryContent, { focusSection: 'overview' }));
 
         const copy = document.body.textContent ?? '';
-        expect(copy).toMatch(/Killed\s*Unreported/i);
-        expect(copy).toMatch(/Wounded\s*Unreported/i);
-        expect(copy).toMatch(/Theater-wide displaced\s*Unreported/i);
-        expect(copy).toMatch(/Own-side displaced\s*Unreported/i);
+        expect(copy).toMatch(/Killed\s*No staff report/i);
+        expect(copy).toMatch(/Wounded\s*No staff report/i);
+        expect(copy).toMatch(/Theater-wide displaced\s*No staff report/i);
+        expect(copy).toMatch(/Own-side displaced\s*No staff report/i);
     });
 
     it('preserves explicit zero casualty and displacement records in the overview', () => {
@@ -257,7 +257,7 @@ describe('War Summary campaign cost localization', () => {
         expect(copy).toMatch(/Wounded\s*0/i);
         expect(copy).toMatch(/Theater-wide displaced\s*0/i);
         expect(copy).toMatch(/Own-side displaced\s*0/i);
-        expect(copy).not.toMatch(/Killed\s*Unreported/i);
+        expect(copy).not.toMatch(/Killed\s*No staff report/i);
     });
 
     it('renders four accessible RBiH strategic objectives with canonical owner links', () => {
@@ -272,11 +272,11 @@ describe('War Summary campaign cost localization', () => {
         expect(objectives[0]?.textContent).toContain('Protect state survival');
         expect(objectives[0]?.textContent).toContain('StatusCritical');
         expect(objectives[0]?.textContent).toContain('TrendWorsening');
-        expect(objectives[0]?.textContent).toContain('Responsible owner1st Corps');
+        expect(objectives[0]?.textContent).toContain('In command1st Corps');
         expect(objectives[0]?.textContent).toContain('Current commitment4 front contacts / 2 thinly held');
         expect(objectives[0]?.textContent).toContain('Last relevant consequenceTurn 8: territorial control was lost.');
-        expect(objectives[2]?.textContent).toContain('StatusUnreported');
-        expect(objectives[2]?.textContent).toContain('Responsible ownerPresidency');
+        expect(objectives[2]?.textContent).toContain('StatusNo staff report');
+        expect(objectives[2]?.textContent).toContain('In commandPresidency');
         expect(within(section).getAllByRole('button', { name: /Decision Room: Review/i }).length).toBeGreaterThan(0);
         expect(within(section).getAllByRole('button', { name: /Army HQ: Review/i }).length).toBeGreaterThan(0);
         expect(screen.queryByTestId('war-summary-posture')).toBeNull();
@@ -312,8 +312,8 @@ describe('War Summary campaign cost localization', () => {
         const objectives = within(section).getAllByRole('article');
         const summaryTab = screen.getByRole('button', { name: 'Overview' });
         const posture = screen.getByTestId('war-summary-posture');
-        expect(objectives[0]?.textContent).toContain('Responsible ownerGeneral Staff ARBiH');
-        expect(objectives[2]?.textContent).toContain('Responsible ownerPresidency');
+        expect(objectives[0]?.textContent).toContain('In commandGeneral Staff ARBiH');
+        expect(objectives[2]?.textContent).toContain('In commandPresidency');
         expect(posture.textContent).toBe('No presidential signature is due; current policy remains in force.');
         expect(screen.getAllByText('No presidential signature is due; current policy remains in force.')).toHaveLength(1);
         expect(section.textContent).toContain('No staff request filed');

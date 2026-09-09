@@ -15,7 +15,7 @@ test('Personnel reserve-officer details scroll instead of clipping the available
 });
 
 test('force, mobilization, and casualty labels state their non-comparable scopes', () => {
-  expect(enMessages['personnel.totalPersonnel']).toBe('Fielded personnel now');
+  expect(enMessages['personnel.totalPersonnel']).toBe('Fielded personnel');
   expect(enMessages['personnel.mobilization']).toBe('CUMULATIVE MOBILIZATION THROUGHPUT');
   expect(enMessages['personnel.mobilization.committed']).toBe('Committed over campaign');
   expect(enMessages['situation.casualties']).toBe('Campaign military casualties');

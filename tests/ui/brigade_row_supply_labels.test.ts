@@ -116,9 +116,9 @@ describe('BrigadeRow supply labels', () => {
 
     const row = screen.getByRole('button');
     expect(screen.getByText('UNREPORTED')).toBeTruthy();
-    expect(row.getAttribute('title')).toBe('Supply: Supply unreported | Fatigue: Unreported | Cohesion: Unreported');
-    expect(row.getAttribute('aria-label')).toContain('cohesion Unreported');
-    expect(row.getAttribute('aria-label')).toContain('fatigue Unreported');
+    expect(row.getAttribute('title')).toBe('Supply: Supply unreported | Fatigue: No staff report | Cohesion: No staff report');
+    expect(row.getAttribute('aria-label')).toContain('cohesion No staff report');
+    expect(row.getAttribute('aria-label')).toContain('fatigue No staff report');
     expect(row.getAttribute('title')).not.toContain('Cohesion: 0%');
     expect(row.getAttribute('title')).not.toContain('Fatigue: 0');
     expect(screen.queryByText('RECORDED')).toBeNull();

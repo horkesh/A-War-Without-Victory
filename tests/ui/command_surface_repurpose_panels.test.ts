@@ -118,7 +118,7 @@ describe('presidential command surface repurpose panels', () => {
       }),
     );
 
-    expect(html).toContain('Unreported');
+    expect(html).toContain('No staff report');
     expect(html).toContain('disabled');
     expect(html).toContain('Desktop command bridge unavailable');
   });

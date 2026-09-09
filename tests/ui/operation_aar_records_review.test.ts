@@ -906,7 +906,7 @@ describe('Army HQ Records operation AAR review', () => {
         fireEvent.click(screen.getAllByRole('button', { name: /Partial Losses Brigade/i })[0]);
         const copy = view.container.textContent ?? '';
 
-        expect(copy).toContain('7 killed / Unreported wounded / Unreported missing or captured');
+        expect(copy).toContain('7 killed / No staff report wounded / No staff report missing or captured');
         expect(copy).not.toContain('7 killed / 0 wounded / 0 missing or captured');
     });
 
@@ -937,7 +937,7 @@ describe('Army HQ Records operation AAR review', () => {
         fireEvent.click(screen.getAllByRole('button', { name: /Partial Zero Losses Brigade/i })[0]);
         const copy = view.container.textContent ?? '';
 
-        expect(copy).toContain('0 killed / Unreported wounded / Unreported missing or captured');
+        expect(copy).toContain('0 killed / No staff report wounded / No staff report missing or captured');
     });
 
     it('labels derived ORBAT campaign casualty splits as estimates', () => {
