@@ -300,6 +300,7 @@ export function ChronicleOverlay() {
     const setOpen = useGameStore(s => s.setChronicleOpen);
     const focusedChronicleDecisionRecordId = useGameStore(s => s.focusedChronicleDecisionRecordId);
     const state = useGameStore(s => s.loadedGameState);
+    const osidDisplayNames = useGameStore(s => s.osidDisplayNames);
 
     const scrollRef = useRef<HTMLDivElement>(null);
     const [viewportFraction, setViewportFraction] = useState(1);
@@ -325,8 +326,8 @@ export function ChronicleOverlay() {
     }, [open]);
 
     const allEntries = useMemo(() =>
-        state ? generateChronicleEntries(state, eventCatalogFull) : [],
-        [state, eventCatalogFull, locale]
+        state ? generateChronicleEntries(state, eventCatalogFull, osidDisplayNames) : [],
+        [state, eventCatalogFull, osidDisplayNames, locale]
     );
 
     const narratedTurnSummaries = useMemo(

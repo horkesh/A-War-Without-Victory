@@ -34853,3 +34853,19 @@ verification and the mandatory local commit-hook result are recorded in
 `phase1-docs.log` and `phase1-commit.log`. Phase 2 is next. No simulation, save, dependency,
 scenario, baseline or canon change occurred; fresh long-run and visual acceptance remain
 required at the integrated closeout. No push or merge is authorized by this checkpoint.
+
+## R7 Phase 2 implementation closeout — 2026-09-09
+
+Chronicle battle titles now use the existing canonical OSID display-name map. Formation
+home municipalities use a deterministic lookup from the existing map properties, with `—`
+for missing authoritative data. Existing operation-suffix handling is retained and protected
+by an authored-number regression. No identifiers, simulation, saves, inputs or dependencies
+changed. All 712 scored names and 110 municipality mappings have executable source invariants.
+
+Independent Historian/code/determinism review is GO after one fallback correction
+(`logs/r7-english-readability/phase2-review.log`). Focused correction: 5 files/90 tests,
+exit 0. Full UI gate: 345 files/2,944 tests, exit 0, 610.71s (`phase2-ui.log`). Typecheck,
+map build and diff check pass, exit 0 (`phase2-typecheck.log`, `phase2-map-build.log`,
+`phase2-diff-check.log`). Mandatory commit hook receipt: `phase2-commit.log`.
+The exhaustive 188-week enumeration and final simulation/visual gates remain required;
+this is the implementation checkpoint, not final amendment acceptance. Phase 3 follows.

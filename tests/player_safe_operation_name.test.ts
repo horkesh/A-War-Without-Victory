@@ -8,6 +8,11 @@ describe('getPlayerSafeOperationName', () => {
         expect(getPlayerSafeOperationName('Emergency Defense')).toBe('Emergency Defense');
     });
 
+    it('strips a technical trailing number without changing authored numbered names', () => {
+        expect(getPlayerSafeOperationName('probe_arbih_1st_corps_2')).toBe('Probe — 1st Corps');
+        expect(getPlayerSafeOperationName('Operation Mistral 2')).toBe('Operation Mistral 2');
+    });
+
     it('humanizes a probe slug, resolving the corps and dropping the turn suffix', () => {
         const out = getPlayerSafeOperationName('probe_arbih_1st_corps_t12');
         expect(out).toBe('Probe — 1st Corps');

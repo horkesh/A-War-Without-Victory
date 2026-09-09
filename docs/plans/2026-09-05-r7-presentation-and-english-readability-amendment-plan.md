@@ -37,7 +37,7 @@ identity; coordinate any later shared-build edit through the R9 preparation owne
 | **Source finding set** | [Showcase screenshot GUI audit](../40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md) (FROZEN, 29 findings) |
 | **Panel record** | [Tier-1 specialist reports](../40_reports/working/20260905_SHOWCASE_AUDIT_PANEL_SPECIALIST_REPORTS.md) |
 | **Collision rules** | §8 of the roadmap: *"Map/Desk English layout strings — R1/R2 layout first; R7 accessibility/readability proof second."* R1/R2 are CLOSED, so their layout pass is complete and this is the open second pass. One file has one owning phase; see §4. |
-| **Current next action** | Phase 2 display-name lookup wiring; Phase 1 complete/reviewed GO. |
+| **Current next action** | Phase 3 layout fixes; Phase 2 implemented/reviewed GO, integrated enumeration pending. |
 
 ### Why this is legally an R7 amendment and not a new lane
 
@@ -740,3 +740,101 @@ verification and the mandatory local commit-hook result are recorded in
 `phase1-docs.log` and `phase1-commit.log`. Phase 2 is next. No simulation, save, dependency,
 scenario, baseline or canon change occurred; fresh long-run and visual acceptance remain
 required at the integrated closeout. No push or merge is authorized by this checkpoint.
+
+## Phase 2 bounded validation plan — 2026-09-09
+
+Base: Phase 1 commit `46961f056`. Question: can Chronicle and formation home-municipality
+labels consume the existing canonical map names without changing identifiers, source data,
+state or operation-name semantics? Reuse `osidDisplayNames` and `osidPropertiesMap`; no new
+fetch, persisted field or naming heuristic. The source precheck above remains applicable.
+
+Run discriminating focused tests RED/GREEN, including the actual lookup helpers over all
+712 scored OSIDs, 110 municipality mappings, and authored numeric operation names; then
+`npm.cmd run test:vitest -- tests/ui`, `npm.cmd run typecheck`,
+`npm.cmd run desktop:map:build`, and `git diff --check`. Logs use
+`logs/r7-english-readability/phase2-*`. Cost: focused checks seconds/minutes, full UI about
+10 minutes, typecheck minutes, map build about 40 seconds on this host. Independent
+Historian/source and code review must pass. Stop for missing authoritative names,
+conflicting source mappings, forbidden-surface requirements or repeated unexplained
+failures. Do not repair data under this presentation packet.
+
+The exhaustive 188-week display-name enumeration and before/after simulation identity
+proof remain required; local lookup tests alone cannot close that acceptance. Root owns
+those integrated runs and will record exact inputs, commands, expected cost and stopping
+rule before launch. No worker starts a duplicate campaign or updates a baseline.
+
+## Integrated simulation proof — bounded execution
+
+Question: do the presentation-only edits leave all eight baseline artifacts, simulation
+fingerprints and consumed calibration inputs byte-identical to pre-amendment commit
+`16389f6c9c66f13517806bae30ac78165563b66e`? Use Node v22.23.2 and unchanged dependencies.
+PRE runs in clean detached checkout `F:/AWWV-worktrees/r7-readability-pre`; package and
+lockfile match the implementation branch, and a node_modules junction reuses the installed
+runtime without an installer. Data prerequisite check passed (`pre-data-prereqs.log`).
+
+Bound: one PRE and two POST 188-week runs. PRE and POST-A command, with respective fixed
+output roots `F:/A-War-Without-Victory/logs/r7-english-readability/pre-188w` and `post-188w`:
+`node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario.ts --scenario data/scenarios/apr1992_definitive_188w.json --weeks 188 --full-replay-save-sequence --out <root>`.
+Set process-local `AWWV_S6_GRADE_RUN=true` for clean start-time provenance. Do not use
+`--map`, `--unique`, or timing output. POST-B is the required `npm.cmd run test:baselines`
+and supplies the second independent final run, avoiding an unnecessary fourth campaign.
+Compare the eight baseline artifacts and consumed-input hashes in stable path order;
+Git revision provenance is expected to identify different commits, never silently scrubbed.
+The full replay enables exhaustive display-name enumeration over the run.
+
+Expected cost: 20–40 minutes per run; run PRE alongside independent UI work, and POST only
+from the final clean reviewed implementation commit. Pass: complete 188 weeks, baseline
+gate exit 0, identical simulation artifact hashes and inputs, complete name coverage.
+Stop acceptance on unexplained drift, missing names, or incomplete runs; do not refresh
+baselines, alter calibration, relax thresholds, or launch extra campaigns to seek green.
+Logs and artifacts stay under the existing R7 log directory; baseline runner's existing
+`data/derived/scenario/_baseline_tmp` output is retained and cited separately.
+
+Control setup correction: the first launch was stopped at the opening turns because this note was accidentally appended in the PRE checkout. The note was moved here and that exact edit restored. Preserve pre-188w.log as INVALID (interrupted exit 1); the clean restart uses pre-188w-clean output and log. No completed campaign was repeated.
+
+Phase 2 implementation checkpoint: independent Historian/code/determinism review is GO
+(`phase2-review.log`) after one targeted correction. The municipality lookup now fails
+closed to `—` when canonical properties are missing, instead of guessing ASCII names.
+The final focused correction suite passes 5 files/90 tests (`phase2-review-green.log`,
+exit 0). Typecheck (`phase2-typecheck.log`) and map build (`phase2-map-build.log`, 25.74s)
+pass, exit 0. Full UI validation remains pending; no integrated acceptance is claimed.
+
+## Phase 3 bounded validation plan
+
+Question: do the nine listed layout fixes make existing English text legible without
+changing content, actions, column position, grid templates or room art? Keep one production
+file per commit (paired items in the same file share that commit), with independent
+Code Review/QA and relevant focused tests. Root owns live browser evidence; the implementer
+owns the specified CSS and receipt dismissal changes. Preserve the pre-layout capture at
+`logs/r7-english-readability/visual-before/desk.png` (1920x1080, rbih_w68 fixture).
+
+Commands: focused Vitest files for each component, typecheck and mandatory commit hook;
+full `npm.cmd run test:vitest -- tests/ui` after the phase; browser geometry and screenshots
+at 1920x1080, 1366x768, 3440x1440. Measure sibling rectangles/single-line heights and content
+containment, expanded HQ grid row placement, visible scroll fades and whiteboard/date
+occlusion. No scrollWidth-only acceptance. Estimated cost: focused checks seconds/minutes,
+full UI about 10 minutes, live inspection roughly 15–30 minutes. Stop if the whiteboard
+requires moving the column or changing art, if geometry remains ambiguous, or if a fix
+changes player truth. Preserve failed receipts and perform targeted correction verification.
+
+Phase 3.9 feasibility review identified an acceptance conflict: the existing header already
+covers the upper whiteboard at 1920x1080; changing only the header-to-packet gap can reveal
+the complete date but cannot reveal the entire board. Owner clarification requested:
+accept the complete date with no clipped characters, or keep 3.9 blocked. Do not silently
+substitute date visibility for full-board acceptance. Other Phase 3 items remain authorized.
+
+## R7 Phase 2 implementation closeout — 2026-09-09
+
+Chronicle battle titles now use the existing canonical OSID display-name map. Formation
+home municipalities use a deterministic lookup from the existing map properties, with `—`
+for missing authoritative data. Existing operation-suffix handling is retained and protected
+by an authored-number regression. No identifiers, simulation, saves, inputs or dependencies
+changed. All 712 scored names and 110 municipality mappings have executable source invariants.
+
+Independent Historian/code/determinism review is GO after one fallback correction
+(`logs/r7-english-readability/phase2-review.log`). Focused correction: 5 files/90 tests,
+exit 0. Full UI gate: 345 files/2,944 tests, exit 0, 610.71s (`phase2-ui.log`). Typecheck,
+map build and diff check pass, exit 0 (`phase2-typecheck.log`, `phase2-map-build.log`,
+`phase2-diff-check.log`). Mandatory commit hook receipt: `phase2-commit.log`.
+The exhaustive 188-week enumeration and final simulation/visual gates remain required;
+this is the implementation checkpoint, not final amendment acceptance. Phase 3 follows.

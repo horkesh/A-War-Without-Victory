@@ -297,11 +297,28 @@ describe('Formation Detail parity display', () => {
   });
 
   it('renders known municipality slugs as player-facing names', () => {
+    useGameStore.setState({
+      osidPropertiesMap: {
+        'op:vogosca:svrake': {
+          mun1990_id: 'vogosca',
+          mun1990_name: 'Vogošća',
+        },
+      },
+    });
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
     const copy = view.container.textContent ?? '';
 
-    expect(copy).toContain('Home municipality: Vogosca');
+    expect(copy).toContain('Home municipality: Vogošća');
     expect(copy).not.toContain('Home municipality: vogosca');
+  });
+
+  it('does not guess a municipality name while canonical properties are unavailable', () => {
+    useGameStore.setState({ osidPropertiesMap: null });
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    const copy = view.container.textContent ?? '';
+
+    expect(copy).toContain('Home municipality: —');
+    expect(copy).not.toContain('Home municipality: Vogosca');
   });
 
   it('shows recent engagements newest first', () => {
