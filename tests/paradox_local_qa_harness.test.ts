@@ -110,6 +110,25 @@ test('packaged startup waits for the embedded React owner and follows its comple
     assert.doesNotMatch(startCampaign, /const text = await bodyText\(frame\)/);
     assert.match(startCampaign, /getByRole\('button', \{ name: \/\^Acknowledge\$\/i \}\)/);
     assert.match(startCampaign, /getByRole\('button', \{ name: \/\^Begin\$\/i \}\)/);
+    assert.ok(
+        startCampaign.indexOf('waitForCampaignCommandReady(frame, faction)')
+            < startCampaign.indexOf("name: /^Acknowledge$/i"),
+        'campaign state and a real command surface must settle before late intro controls are dismissed',
+    );
+
+    const commandSurfaceVisible = runInNewContext(
+        `(async ${extractFunctionSource(harness, 'isCampaignCommandSurfaceVisible')})`,
+    ) as (frame: any) => Promise<boolean>;
+    const commandFrame = (visibleTestId: string | null) => ({
+        getByTestId: (testid: string) => ({ isVisible: async () => testid === visibleTestId }),
+    });
+    assert.equal(await commandSurfaceVisible(commandFrame('warroom-toolbar')), true);
+    assert.equal(await commandSurfaceVisible(commandFrame('toolbar-route-desk')), true);
+    assert.equal(await commandSurfaceVisible(commandFrame(null)), false);
+
+    const saveLoad = extractFunctionSource(harness, 'exerciseFinalSaveLoad');
+    assert.match(saveLoad, /waitForCampaignCommandReady\(frame, faction/);
+    assert.doesNotMatch(saveLoad, /getByTestId\('toolbar-route-desk'\)\.waitFor/);
 });
 
 test('52-week Electron QA supports bounded major-surface checkpoint tours', () => {

@@ -288,6 +288,38 @@ passes its targeted verification in `startup-exact-intro-green1.log`, exit 0. Un
 reuse the preceding complete 49/49 harness-file receipt. Splash dismissal uses the actual button;
 the final readiness check requires the Desk toolbar and matching faction from the live bridge.
 
+### Warroom readiness correction — 2026-09-10
+
+`startup-commit1.log` passes the mandatory hook and local commit, exit 0, at
+`85c7e45c8546d7d00e0f13ca97955f4483db6ddc`. `package-check-rbih2.log` passes all 1,200
+file hashes and separate product/harness provenance, exit 0. `shakedown-rbih2.log` then exits 1
+at turn 0 waiting for `toolbar-route-desk`: that is the field-map toolbar, whereas a new campaign
+opens on the Warroom with `warroom-toolbar`. The opening autosave is RBiH/war/turn 0; no turn
+was advanced. Preserve this failed receipt, profile, screenshots and harness snapshot.
+
+**Question:** can the actual loaded Warroom establish readiness without first visiting the map?
+Correct only the existing readiness helper and its use after Save/load to accept either actual
+Warroom or field toolbar, together with matching live bridge faction. Use a bounded startup-only
+`node <evidence>/opening-proof3.mjs` observation on the same package: click Begin, await the
+Warroom, capture its actual screenshot and require exact RBiH turn 0 in both bridge and save.
+No advance, strategic setup or route tour. Cost: under two minutes. Stop on missing/incorrect
+campaign state or a real product failure; do not lengthen timeouts to mask the wrong selector.
+Run focused failing-first readiness tests and independent targeted correction verification,
+record a new freeze and normal local commit hook, then retry only the affected fresh RBiH run.
+The full suite and package stay reused; no simulation, baseline or calibration work is added.
+
+`opening-proof3.log` exits 0: actual Warroom appears in 11.6 seconds, bridge and save both report
+RBiH/war/turn 0, and runtime errors are empty. Its inspected screenshot includes the real War Has
+Started overlay. Therefore readiness must precede exact intro dismissal: the earlier Begin text
+changes to Opening before the shell/overlay is mounted. The next full retry's command-post
+screenshot must show the dismissed overlay; this probe establishes shell/state identity only.
+
+`command-surface-readiness-red1.log` and `late-intro-order-red1.log` retain the failing cases,
+exit 1. Their separate `*-green1.log` receipts pass, exit 0, covering Warroom/field readiness,
+absence of either toolbar, matching faction, Save/load helper reuse and readiness-before-intro
+ordering. Unaffected harness tests reuse the prior 49/49 file receipt. The 13 focused docs checks
+pass in `warroom-readiness-docs1.log`, exit 0; freeze 5 records the corrected harness candidate.
+
 ---
 
 ## Subordinate audit packets (2026-09-07)

@@ -35175,3 +35175,20 @@ product and later harness commits, requires clean tracked status and only the ex
 or five existing documentation files to differ, and compares every frozen package file hash.
 No second full suite, rebuild or baseline campaign is spent. The three 24-turn results and final
 R8 acceptance remain outstanding at this entry; inherited calibration/baseline obligations stand.
+
+### R8 Warroom readiness correction — 2026-09-10
+
+The normal harness commit/hook passes at `85c7e45c8546d7d00e0f13ca97955f4483db6ddc`
+(`startup-commit1.log`, exit 0), and `package-check-rbih2.log` passes exact package reuse. RBiH
+attempt 2 stops at turn 0 (`shakedown-rbih2.log`, exit 1) because the added readiness check names
+the map-only Desk button. Fresh campaigns instead open the Warroom; the package itself creates
+the correct RBiH/war/turn-0 save. This failed harness criterion is not a product acceptance result.
+
+The plan records the targeted correction before edits. `opening-proof3.log`, exit 0, captures
+the actual loaded Warroom in 11.6 seconds, with matching bridge/save faction and turn and no
+runtime errors. Its screenshot still includes the real War Has Started overlay; it proves the
+loaded shell, not unobstructed control actionability. Await the real shell before exact intro
+dismissal, accept Warroom or field controls in the shared readiness helper, and reuse that helper
+after Save/load. Focused tests, targeted independent review, a new source freeze and the normal
+local hook precede the next fresh RBiH retry. No game source, package, full-suite, baseline or
+calibration repetition is included. All failed receipts and profiles remain preserved.

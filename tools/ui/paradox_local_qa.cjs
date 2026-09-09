@@ -2226,17 +2226,27 @@ async function startReactCampaign(surface, faction, onStep = async () => {}) {
   await begin.waitFor({ state: 'hidden', timeout: 120000 });
 }
 
+async function isCampaignCommandSurfaceVisible(frame) {
+  const [warroomVisible, fieldVisible] = await Promise.all([
+    frame.getByTestId('warroom-toolbar').isVisible().catch(() => false),
+    frame.getByTestId('toolbar-route-desk').isVisible().catch(() => false),
+  ]);
+  return warroomVisible || fieldVisible;
+}
+
 async function waitForCampaignCommandReady(frame, faction, timeoutMs = 120000) {
-  await frame.getByTestId('toolbar-route-desk').waitFor({ state: 'visible', timeout: timeoutMs });
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    const ready = await frame.evaluate(async (expectedFaction) => {
+    const [commandSurfaceVisible, factionReady] = await Promise.all([
+      isCampaignCommandSurfaceVisible(frame),
+      frame.evaluate(async (expectedFaction) => {
       const value = await window.awwv?.getCurrentGameState?.();
       if (!value) return false;
       const state = typeof value === 'string' ? JSON.parse(value) : value;
       return state?.meta?.player_faction === expectedFaction;
-    }, faction).catch(() => false);
-    if (ready) return;
+      }, faction).catch(() => false),
+    ]);
+    if (commandSurfaceVisible && factionReady) return;
     await sleep(250);
   }
   throw new Error(`Campaign command surface did not expose current ${faction} state`);
@@ -2285,6 +2295,7 @@ async function startCampaign(page, faction, events) {
   } catch (error) {
     throw new Error(`intro frame did not reach network idle before dismissal: ${error.message}`);
   }
+  await waitForCampaignCommandReady(frame, faction);
   await snapshot(page, frame, faction, events, 'intro-before-dismiss');
   for (let i = 0; i < 10; i += 1) {
     const acknowledge = frame.getByRole('button', { name: /^Acknowledge$/i }).first();
@@ -2305,7 +2316,6 @@ async function startCampaign(page, faction, events) {
   if (await remainingIntroAction.isVisible().catch(() => false)) {
     throw new Error('Campaign intro remained visible after bounded dismissal');
   }
-  await waitForCampaignCommandReady(frame, faction);
   await snapshot(page, frame, faction, events, 'command-post-after-intro');
   return frame;
 }
@@ -5190,7 +5200,7 @@ async function exerciseFinalSaveLoad(page, frame, faction, events, userDataDir, 
   await resume.waitFor({ state: 'visible', timeout: 10000 });
   await snapshot(page, frame, faction, events, 'save-load-field-records', { savedEvidence });
   await resume.click();
-  await frame.getByTestId('toolbar-route-desk').waitFor({ state: 'visible', timeout: 15000 });
+  await waitForCampaignCommandReady(frame, faction, 15000);
   const afterState = await readState(frame);
   const afterStateHash = await readRawStateHash(frame);
   const afterAutosaveHash = fileSha256(canonicalAutosavePath);
