@@ -34869,3 +34869,17 @@ map build and diff check pass, exit 0 (`phase2-typecheck.log`, `phase2-map-build
 `phase2-diff-check.log`). Mandatory commit hook receipt: `phase2-commit.log`.
 The exhaustive 188-week enumeration and final simulation/visual gates remain required;
 this is the implementation checkpoint, not final amendment acceptance. Phase 3 follows.
+
+## R7 Phase 3 reviewed layout checkpoints — 2026-09-09
+
+Independent Code Review/QA is GO for items 3.1–3.8 after a targeted Codex fade correction
+(`logs/r7-english-readability/phase3-review.log`). Browser rectangle, text-clipping and
+scroll checks pass at 1920x1080, 1366x768 and 3440x1440. Directive geometry uses an inert
+availability stub to render desktop controls; no command is executed. Focused regression
+receipts and individual mandatory commit-hook receipts are under the same log directory.
+The 2,951-test UI pass predates the final metric-spacing and Codex-padding corrections;
+the next full UI gate must certify those. Item 3.9 remains held for owner clarification,
+and PresidentDeskShell is held with it to preserve the same-file commit grouping.
+
+Committed slices (one production file per commit):
+- src/ui/map/components/SituationTab.tsx: fix(ui): keep R7 situation acronyms on one line. Hook receipt: phase3-commit-situation.log.

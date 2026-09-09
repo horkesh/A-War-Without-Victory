@@ -838,3 +838,83 @@ map build and diff check pass, exit 0 (`phase2-typecheck.log`, `phase2-map-build
 `phase2-diff-check.log`). Mandatory commit hook receipt: `phase2-commit.log`.
 The exhaustive 188-week enumeration and final simulation/visual gates remain required;
 this is the implementation checkpoint, not final amendment acceptance. Phase 3 follows.
+
+PRE control completed 188 weeks, exit 0 (`pre-188w-clean.log`), final_state_hash
+`e414dc69f6e875fc`; start provenance confirms clean commit `16389f6c9`.
+A read-only SHA256 comparison to the committed baseline manifest found 6/8 mismatches
+(`pre-baseline-hashes.json`); formation_delta and watched_operations match. This mismatch
+exists before all amendment source changes. Preserve the manifest and artifacts; final
+baseline acceptance remains unmet. Continue authorized presentation work and compare POST
+against this clean PRE; do not refresh baselines or silently waive the required gate.
+
+Toolbar finding-1 gap is now CLOSED with FULL coverage: the existing verifier loaded
+`tmp_gui_observation/pitch_saves/rbih_w68.json` on the owned Vite server at port 3247.
+`node tools/ui/verify_toolbar_fit.mjs --save tmp_gui_observation/pitch_saves/rbih_w68.json --url http://127.0.0.1:3247 --out logs/r7-english-readability/toolbar-fit`
+passed exit 0 at 1920, 1600, 1440, 1400, 1366 and 1280px, with REVIEWS, RESERVE and TENSIONS
+present at every width and no start-side overflow, crest collision or wrapping.
+Receipt: `toolbar-fit.log`; the toolbar production code is unchanged by this amendment.
+Before-layout desk images for all three factions and all three required viewports passed
+capture (`desk-before.log`, exit 0); `desk-before/geometry.json` records actual card bounds
+and overflowing scroll regions with maskImage=none before the fix.
+
+## Phase 4 bounded validation plan
+
+Question: do the four formatting tasks preserve numeric magnitude, missing-value truth,
+and canon-required precision while consistently presenting briefing counts? Read the
+sensitive-history gate §3 ask-mode and §4 Cost Ledger constraints; leave their exact costs
+and civilian integer counts unchanged. Use existing formatters, with only the required
+million branch addition; no state/data changes or new format framework.
+Focused tests cover 999/1000/999999/1000000/1211000, consistent same-number casualty text
+in WarSummaryContent, and affected aftermath/personnel callers. Then full UI tests,
+typecheck, independent Modern Wargame review and mandatory hook. Cost: focused minutes,
+UI approximately 10 minutes; reuse integrated screenshot matrix for the same-frame proof.
+Stop if displayed magnitude changes, canon precision is reduced, or unknown data becomes
+zero. Root retains full-suite, visual and commit ownership; no additional scenario run.
+
+## Phase 5 bounded validation plan
+
+Question: do the six component-copy tasks expose readable labels and truthful units while
+preserving enum values, faction identity, numeric precision and all existing actions?
+Reuse existing English catalog keys (including Phase 1's `warCost.findingSeverity.none`).
+The named `formatFindingSeverity` helper is currently private in WarCostSummary.tsx;
+assign its export and `none` mapping to item 5.1 so CinematicVerdict can reuse that exact
+helper without a duplicate mapping or new formatting module. Existing record/grave/rupture
+labels and the Cost Ledger's numbers/prose remain intact.
+
+Focused tests render all severity values, assert RBiH casing plus absence of inherited
+uppercase, require a visible locked sublabel, count density once and hide single subsegments,
+and exercise week-only tenure. Browser evidence must check computed text-transform and
+visible text, since textContent alone cannot detect CSS uppercase. Then full UI tests,
+typecheck, independent Narrative/Modern Wargame review, and mandatory commit hooks.
+Cost: focused minutes, full UI about 10 minutes; use the final three-resolution captures
+for visual proof. Stop on a changed severity meaning, real name truncation, hidden cost,
+or required engine/data changes. Group the two SectorsSection tasks in one file commit.
+
+Phase 2 exhaustive run enumeration is GO: 188 completed frames, all three faction views,
+712/712 replay OSIDs resolved, 466 formation locations resolved, 582 operation/history
+inputs and 1,558 unique Chronicle player strings with no raw-token leak. Chronicle produces
+1,326 deduplicated source-name corrections. Receipts: `phase2-display-name-enumeration.log`,
+`.json` and `-run.log`. The initial 446 apparent misses were extractor artifacts caused by
+`${from_osid}__${to_osid}` values; preserve the initial receipt and exact origin classification,
+not R8 bug rows. Corrected parsing adds zero display-name bugs to the existing R8 register.
+
+Phase 3 interim full UI gate passed 352 files/2,951 tests, exit 0, 605.77s
+(`phase3-ui-final.log`). Browser review then caught Recommended text outside its own
+clipping box despite fitting the outer cell: the first metric geometry PASS was invalid.
+The correction reduces only MetricCell tracking from 0.14em to 0.08em, retaining grid,
+font size and values. Focused RED/GREEN: `phase3-advance-spacing-red.log` / `-green.log`,
+20 tests pass after correction. Final browser measurement waits for entry animation and
+compares drawn text to the label's clipping box (`phase3-text-geometry-final.log`).
+The next full UI run after Phase 4 must include this corrected source; the earlier pass
+is not silently attributed to it. Phase 4 is independent and remains authorized while
+Phase 3.9 awaits the owner decision.
+
+Phase 3 review correction: the first Codex mask left its final citation within the 24px
+fade even at maximum scroll. The targeted correction changes only section padding from
+`py-2` to `pt-2 pb-6`, preserving its height limit, scroll behavior, content and mask.
+`phase3-codex-padding-green.log` passes 20 tests, exit 0. At all three required viewports,
+`codex-bottom-final.log` passes and the final text ends 3.5px above the fade start; before
+measurement and screenshots remain in `codex-bottom-probe/`. The desk requires no padding
+change: its last text already clears the fade because of child-card padding
+(`desk-bottom-probe/bottom.json`). Independent review records the initial concern and
+this targeted verification in `phase3-review.log`; the existing 3.9 owner question remains.

@@ -275,7 +275,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         <div className="font-sans text-xs uppercase tracking-wide text-accent-gold font-semibold">{t('warSummary.section.territory')}</div>
         {playerFaction ? (
           <div className="flex items-center justify-between">
-            <span className={FACTION_COLORS[playerFaction]}>{playerMilitaryLabel}</span>
+            <span className={`${FACTION_COLORS[playerFaction]} whitespace-nowrap shrink-0`}>{playerMilitaryLabel}</span>
             <span className="text-text-secondary tabular-nums">
               {(territoryPct[playerFaction] ?? sitrep?.territory.territoryPercent ?? 0).toFixed(1)}%
             </span>
@@ -338,7 +338,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
             : t('situation.noData');
           return (
             <div className="flex items-center justify-between gap-2">
-              <span className={FACTION_COLORS[playerFaction]}>{playerMilitaryLabel}</span>
+              <span className={`${FACTION_COLORS[playerFaction]} whitespace-nowrap shrink-0`}>{playerMilitaryLabel}</span>
               <span className="text-text-secondary text-right">{military}</span>
             </div>
           );
