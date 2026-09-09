@@ -856,7 +856,7 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
               onClick={handleConfirm}
               disabled={issueDisabled}
               title={issueTitle}
-              className="h-7 min-w-0 whitespace-nowrap rounded border border-amber-400/35 bg-amber-400/12 px-2 text-xs font-bold uppercase tracking-[0.08em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
+              className="h-7 min-w-0 truncate whitespace-nowrap rounded border border-amber-400/35 bg-amber-400/12 px-2 text-xs font-bold uppercase tracking-[0.08em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
             >
               {busy
                 ? (needsObjection ? t('directive.button.consulting') : t('directive.button.issuing'))
@@ -872,7 +872,7 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
                 onClick={() => { void handleWithhold(); }}
                 disabled={busy}
                 title={t('directive.issue.freeTitle')}
-                className="h-7 min-w-0 whitespace-nowrap rounded border border-panel-border/60 bg-panel-bg/50 px-2 text-xs font-bold uppercase tracking-[0.08em] text-text-secondary transition hover:border-text-secondary/70 hover:text-text-primary disabled:opacity-40"
+                className="h-7 min-w-0 truncate whitespace-nowrap rounded border border-panel-border/60 bg-panel-bg/50 px-2 text-xs font-bold uppercase tracking-[0.08em] text-text-secondary transition hover:border-text-secondary/70 hover:text-text-primary disabled:opacity-40"
               >
                 {busy ? t('directive.button.withholding') : t('directive.button.withhold')}
               </button>
@@ -883,7 +883,7 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
                 onClick={() => { void handleHoldAtMainStaff(); }}
                 disabled={busy}
                 title={t('directive.reserveHold.title')}
-                className="h-7 min-w-0 whitespace-nowrap rounded border border-sky-400/35 bg-sky-400/10 px-2 text-xs font-bold uppercase tracking-[0.08em] text-sky-200 transition hover:bg-sky-400/20 disabled:opacity-40"
+                className="h-7 min-w-0 truncate whitespace-nowrap rounded border border-sky-400/35 bg-sky-400/10 px-2 text-xs font-bold uppercase tracking-[0.08em] text-sky-200 transition hover:bg-sky-400/20 disabled:opacity-40"
               >
                 {busy ? t('directive.button.holdingReserve') : t('directive.button.holdReserve')}
               </button>
@@ -892,7 +892,8 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
               type="button"
               onClick={handleCancel}
               disabled={busy}
-              className="h-7 min-w-0 whitespace-nowrap rounded border border-panel-border/60 bg-panel-bg/50 px-2 text-xs font-bold uppercase tracking-[0.08em] text-text-secondary transition hover:border-text-secondary/70 hover:text-text-primary disabled:opacity-40"
+              title={isReviewProposal ? t('directive.button.cancelShort') : t('directive.button.cancel')}
+              className="h-7 min-w-0 truncate whitespace-nowrap rounded border border-panel-border/60 bg-panel-bg/50 px-2 text-xs font-bold uppercase tracking-[0.08em] text-text-secondary transition hover:border-text-secondary/70 hover:text-text-primary disabled:opacity-40"
             >
               {isReviewProposal ? t('directive.button.cancelShort') : t('directive.button.cancel')}
             </button>

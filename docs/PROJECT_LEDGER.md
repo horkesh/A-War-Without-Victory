@@ -34883,3 +34883,5 @@ and PresidentDeskShell is held with it to preserve the same-file commit grouping
 
 Committed slices (one production file per commit):
 - src/ui/map/components/SituationTab.tsx: fix(ui): keep R7 situation acronyms on one line. Hook receipt: phase3-commit-situation.log.
+- SituationTab hook retry: phase3-commit-situation-retry.log, exit 0; the first receipt retains the Phase 4 fixture type error, corrected before retry.
+- src/ui/map/components/army_hq/DirectiveCard.tsx: fix(ui): contain R7 directive button labels. Hook receipt: phase3-commit-directive.log.
