@@ -1,6 +1,6 @@
 # AWWV Command Board
 
-**Status:** Derived dispatch view, synchronized 2026-09-08.
+**Status:** Derived dispatch view, synchronized 2026-09-09.
 
 **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole authority for unfinished work and wins if this board differs.
 
@@ -23,12 +23,20 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 5 | R5 | **COMPLETE -- CLOSED 2026-08-05** | None. The accepted performance floor is approximately 1.09 seconds per turn; the 100 ms target and incremental-reuse Task 6 are retired from 1.0 scope. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
 | 6 | R6 | **JANUARY 1993 SLICE LANDED; CALIBRATION OPEN AND ONGOING (RE closed 2026-09-01)** | Preserve the landed evidence. Reference, init-control, objective, axis, timing, roster and outcome work is live again. Engine health is sacrosanct — fix engine-health defects before tuning. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
 | 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
-| 7 | R7 | **ACTIVE — CINEMATIC OPENING MECHANICS, TYPOGRAPHY, AND BROWSER FALLBACK-ART PROOF COMPLETE** | Required owner art and live packaged first-paint acceptance CLOSED 2026-08-29. Follow the authoritative R7 snapshot. Human listen/sensitivity and closeout reconciliation also remain. **Broader English accessibility/readability now has an executable contract:** run the 2026-09-05 presentation and English-readability amendment, which discharges R7 Phase 5's unticked full-HD English inspection against the frozen showcase audit — renderer-only, byte-neutral, fixes no bugs (owner D1: HOLD FOR R8), creates no lane. RE closed 2026-09-01 and no longer constrains this row. Localization Phase 3 stays post-1.0. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [accepted functional opening](2026-08-23-opening-screens-implementation-plan.md) / [cinematic opening and typography amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md) / [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) |
+| 7 | R7 | **ACTIVE — OPENING AND ENGLISH SCREENSHOT PROOF COMPLETE; ACCEPTANCE OPEN** | Follow the reconciled listening/approval checklist in the existing R7 plan. Required owner art and packaged first-paint acceptance are closed; the three-resolution English inspection and clean POST-A neutrality proof pass. Human audio/sensitivity, scoped offline-runtime evidence and the inherited baseline gate remain acceptance work. Preserve existing receipts; no duplicate campaign or pin refresh. D1 HOLD FOR R8 remains; localization Phase 3 stays post-1.0. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [accepted functional opening](2026-08-23-opening-screens-implementation-plan.md) / [cinematic opening and typography amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md) / [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) |
 | 7.5 | RE | **CLOSED — owner, 2026-09-01** | None. RE gates nothing; engine-health defects are still fixed before tuning. | [Closed recovery record](2026-08-28-packaged-probe-recovery-plan.md) / [closed RE contract](2026-08-26-engine-integrity-plan.md) |
 | 8 | R8 | **WAITING ON R7.** RE closed 2026-09-01 and no longer gates this. | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until the final two diaries score 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
 | 9 | R9 | **FREEZE WAITING ON R8; LIMITED PREPARATION AT §4.2** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
 **R7 readability execution — 2026-09-09:** The authorized date-label expansion now has nine-case initial/maximum-scroll proof, preserving the fixed Desk column, header and artwork. Final UI/typecheck/build checks and independent review pass; Desk/date commit `88996a23d` and its hook pass. Clean POST-A completes 188 weeks with health/hash checks passing; PRE/POST-A/POST-B match all eight artifacts and inputs. The fixed run budget is consumed. Earlier phases and unaffected global Vitest/player-experience receipts remain reviewed. Baseline investigation is GO: pins match accepted n392, while four consumed inputs changed before R7; PRE/POST-B match all eight artifacts. Retain the six-pin failing baseline gate and dirty POST-B disclosure. No R7 closure or downstream lane is claimed. See the amendment and designated report.
+
+**R7 closeout audit — 2026-09-09:** The existing parent plan now carries the listening/approval
+checklist. The supplied set is 20 assets (17 neutral UI cues and three ambient beds); 16 optional
+placeholders remain absent. A named human listening/sensitivity acceptance receipt was not located
+in the scoped search. Retained package evidence proves the 20 emitted OGGs match source, but does
+not record playback/control observations or zero remote audio requests. Next is the bounded
+listening/control and offline audio acceptance described in that plan; this audit runs no new
+runtime campaign and gives no audio sign-off. The six-pin baseline gate remains separate and open.
 
 **R7 name correction integrated:** [ARBiH honorific-name packet](2026-09-07-arbih-brigade-honorific-name-correction-plan.md); IDs and mechanical fields preserved, saved/displayed text changed. Remaining R7 gates stay open.
 

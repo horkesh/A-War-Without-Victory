@@ -7,6 +7,59 @@ typecheck, map build and documentation checks pass. Source is committed locally 
 the inherited baseline gate remains open, so this is not R7 closure.
 Prior global Vitest/player-experience receipts are reused only for unaffected scope.
 
+## R7 closeout reconciliation — 2026-09-09
+
+The English visual scope in this report is complete. Integrated captures cover 15 required
+surfaces at 1920x1080, 1366x768 and 3440x1440; the final Desk/date proof covers all nine
+RBiH/RS/HRHB by resolution cases at initial and maximum scroll. This supersedes the parent
+plan's earlier statement that 1366x768 and 3440x1440 were uninspected. It remains browser image
+evidence, not packaged-offline or audio evidence.
+
+The reconciled parent plan now carries the executable human checklist. Its evidence boundary is:
+
+| Gate | Retained evidence | Reconciled verdict |
+|---|---|---|
+| Historical claims and sensitive-history semantics | Parent-plan Phase 1.1/1.2 closeout; `docs/40_reports/audits/20260801_R7_HISTORICAL_CLAIM_LOCALIZATION_INVENTORIES.md`; strict CLI receipt summarized in the ledger | 3,654 inventoried claims: 3,642 documented plus 12 explicit non-player-facing deposits; zero unresolved player-facing rows; strict CLI 0 CRITICAL / 0 WARNING / 1 nonblocking INFO; September 1993 Neretva/Grabovica/Uzdol boundary retained |
+| Officer/OOB identity provenance | `docs/40_reports/audits/20260801_R7_OFFICER_AUDIO_PROVENANCE_INVENTORY.md` | 334/334 playable rows exact-supported: 68 officers, 19 corps, 244 brigades and three elite-command links; 40 candidates explicitly omitted; zero unsupported playable rows |
+| Current content/UI execution | This report's corrected full-suite and player-experience receipts | 13,562 passes / 31 skips and player-experience exit 0 for the recorded source; inherited baseline failure prevents an aggregate Phase 5 GREEN claim |
+| Audio inventory and lineage | `docs/audio/AUDIO_ASSET_PROVENANCE.json`; `docs/audio/AMBIENT_BED_ASSET_MANIFEST.md`; audio commit `2d106e5e0` | 36 keyed cues: 20 provided OGGs (17 CC0 UI, three first-party ambient), 16 missing optional placeholders; automated provenance/wiring complete |
+| Packaged audio bytes | `logs/r9-build-preparation/phase3-runtime-probe.json`; 2026-09-08 R9 Phase 3 ledger entry | 20 emitted OGGs match source hashes byte-for-byte; reusable package-content evidence only |
+| Opening packaged first paint | 2026-08-29 opening receipt summarized in `docs/40_reports/WARROOM_MASTER.md` | Closed for opening images/crests/React paint; supplies no audio or final-English offline proof |
+| Human listen and design approval | No named, attributable receipt located in the bounded plan/report/ledger/audio/log search | Open for all 20 supplied assets; actual cue IDs, listening locations and criteria are in the parent checklist |
+| Canon/sensitivity approval | No named, attributable post-audio listen receipt located | Open; five `requires_sensitivity_review` rows are absent optional placeholders and remain silent, while supplied assets still need an actual restraint review |
+| License-review approval | Complete machine-readable lineage and per-file notes, but no attributable closeout approval located | Open approval lens assigned within the existing required review roles; existing hashes/licenses are the review input |
+| Current scoped offline runtime | Earlier package launches and byte inventory exist; no receipt binds final R7 source to audible decode/playback, controls and a zero-remote-audio request capture | Open QA receipt |
+| Baseline/canon aggregate | PRE/POST-A/POST-B presentation neutrality passes; accepted n392 pins still differ in six outputs after four pre-R7 input changes | Open inherited gate; no pin refresh or new campaign authorized |
+
+The bounded static search located product call sites for ten of the 20 supplied cue IDs: `ambient_warroom`,
+`ambient_field`, `ambient_archive`, `turn_review_open`, `peace_plan_offered`, `turn_complete`,
+`battle_notification`, `battle_decisive`, `event_notification` and `operation_complete`.
+The other ten — `ui_click`, `ui_hover`, `ui_open_panel`, `ui_close_panel`, `turn_advance`,
+`battle_catastrophic`, `operation_launched`, `event_critical`, `game_over` and
+`tutorial_objective_complete` — are packaged and provenance-complete, but the search did not
+locate non-registry call sites for them. Their runtime-hook state remains unproven; this is not
+an exhaustive absence claim. The human sheet listens to every supplied file directly and uses
+established product routes for reachable cues; direct-file results do not establish live triggers.
+
+The R9 package receipt proves bytes and a successful packaged runtime, but records no audible
+playback/decode result, gesture/mute/volume observation or network-request inventory for audio.
+It also does not bind the package to the final R7 readability source identity. The exact missing
+receipts, distinct Game Designer, Canon Compliance and QA roles, the license/provenance lens,
+evidence filenames
+and pass criteria are in
+[the parent R7 plan](../../plans/2026-07-31-content-history-localization-audio-plan.md#human-listening-and-sensitivity-checklist--open).
+Phase 3 localization remains deferred post-1.0. No aggregate R7 box is ticked by this audit.
+This existing report is the sole closeout-reconciliation report; the formerly proposed
+`20260731_CONTENT_HISTORY_AUDIO.md` is deliberately not created.
+
+Audit checks: `closeout-audit-docs1.log` passes 13/13, exit 0; `closeout-audit-scope1.log`
+passes the five-document boundary, added local links, whitespace and retained untracked-path
+checks, exit 0. Review requested six wording corrections, now applied; its initial verdict and
+targeted confirmation remain in `closeout-audit-review.log`. Final documentation/scope checks
+and the mandatory local hook are recorded separately in `closeout-audit-docs2.log`,
+`closeout-audit-scope2.log` and `closeout-audit-commit1.log`. These are documentation receipts,
+not new audio or runtime proof.
+
 The [registered amendment](../../plans/2026-09-05-r7-presentation-and-english-readability-amendment-plan.md)
 owns this renderer-only work. Branch: `codex/r7-english-readability`. The control commit is
 `16389f6c9c66f13517806bae30ac78165563b66e`. No simulation, state, save, scenario,

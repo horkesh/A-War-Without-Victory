@@ -35054,3 +35054,52 @@ Final documentation checks pass 13/13, exit 0 (`desk39-layout-final-docs1.log`);
 hashes, clean POST-A checkout and diff checks pass (`desk39-layout-final-state1.log`, exit 0).
 Targeted final review uses `desk39-layout-review.log`; the final local documentation hook
 and commit outcome are recorded in `desk39-layout-final-docs-commit1.log`.
+
+## R7 bounded closeout audit — 2026-09-09
+
+**Scope:** Owner-authorized reconciliation of retained R7 evidence into the existing parent
+content/history/audio plan and readability report. Started on clean tracked
+`997b2fb6c559c933203bae070dfba7b7299660f3`, branch `codex/r7-english-readability`, with no intervening
+commits. One Sol/medium implementer and a separate Sol/medium reviewer cover the bounded audit.
+The board and roadmap mirror the resulting acceptance state; no duplicate report is created.
+
+The parent plan's stale three-resolution inspection text is reconciled to the reviewed English
+screenshots and clean POST-A receipts. The broader all-green acceptance gate remains unticked.
+Audio provenance records 36 cue IDs: 20 supplied assets (17 neutral CC0 UI cues and three
+first-party ambient beds) and 16 absent optional placeholders. The checklist names the supplied
+assets and the required listening, controls and sensitivity observations. A named human
+listening/sensitivity acceptance receipt was not located in the scoped retained-evidence search.
+Automated lineage/wiring checks and package byte identity do not stand in for human acceptance.
+
+Retained `logs/r9-build-preparation/phase3-runtime-probe.json` establishes 20 packaged OGGs matching
+source and a runtime launch at its recorded identity; it contains no audio playback/control
+observations or request trace proving zero remote audio requests. Reuse that limited evidence;
+current scoped offline-audio acceptance remains open. Packaged opening first paint remains closed
+on its own evidence. This audit neither performs a listening session nor activates another
+runtime campaign. Actual audio acceptance retains its required independent review roles.
+
+The readability source remains `88996a23d`; PRE/POST-A/POST-B identity for all eight artifacts and
+31 inputs is retained, with clean POST-A and disclosed dirty POST-B provenance. Accepted n392 pins
+are unchanged. The inherited six-pin failure still requires behavior settlement, final calibration
+adoption and explicit reconciliation under existing authority. The one-PRE/two-POST budget is
+exhausted; no scenario, baseline/canon wrapper, calibration, pin refresh or R8/R9 work runs here.
+
+Verification uses only the planned 13 focused documentation tests, added-link/scope/preserved-path
+checks and mandatory local commit hook. Exact commands, exit codes and independent review are
+retained under `logs/r7-english-readability/closeout-audit-*`. No runtime, asset, test, dependency,
+save or canon file is edited; all existing untracked evidence is preserved. R7 remains open.
+
+The bounded static search locates product call sites for ten supplied cues and does not locate
+non-registry call sites for the other ten. This leaves their runtime-hook state unproven; it does
+not establish exhaustive absence or authorize a wiring change. The listening sheet covers all
+20 supplied files directly and distinguishes those results from live-trigger proof.
+
+Focused documentation tests pass 13/13, exit 0 (`closeout-audit-docs1.log`); the five-file boundary,
+local links, whitespace and preservation of 870 recorded untracked paths pass, exit 0
+(`closeout-audit-scope1.log`). Independent review requested six wording corrections and no runtime
+change: stale status, signature language, static-search overclaim, intentional clicks, observation
+protocol versus binding criteria, and a fourth review seat. The corrected checklist retains the
+existing Game Designer, Canon Compliance and QA roles, with the license/provenance lens assigned
+within them. `closeout-audit-review.log` retains the initial verdict and targeted confirmation;
+`closeout-audit-docs2.log`, `closeout-audit-scope2.log` and `closeout-audit-commit1.log` record final
+checks and the mandatory local hook outcome.

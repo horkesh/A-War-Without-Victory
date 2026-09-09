@@ -9,7 +9,173 @@
 **Tech stack:** JSON data, TypeScript/React i18n, Vitest, Electron visual/audio proof, Balkan Battlegrounds KB, IRMCT/UN sources, Web Audio/OGG assets.
 
 **Date:** 2026-07-31
-**Status:** ACTIVE CURRENT LANE — audio implementation landed at `2d106e5e0`; remaining pre-1.0 gates are human listen/sensitivity acceptance, English accessibility/readability, offline browser and packaged-runtime proof, and closeout reconciliation; Phase 3 localization deferred post-1.0
+**Status:** ACTIVE CURRENT LANE — audio implementation landed at `2d106e5e0`; three-resolution browser English inspection is complete. Human audio/sensitivity, scoped packaged-offline proof, baseline acceptance and final closeout remain open; Phase 3 localization is deferred post-1.0.
+
+### Bounded closeout audit — authorized 2026-09-09
+
+**Question:** Which R7 acceptance gates are established by retained evidence, and exactly
+which listening/approval or runtime receipts are still missing after the readability work?
+Starting branch is `codex/r7-english-readability`, clean tracked HEAD
+`997b2fb6c559c933203bae070dfba7b7299660f3`; there are no intervening commits.
+
+**Scope and sequence:** Reconcile this plan against the existing audio manifests, inventories,
+opening/package receipts and readability report. One Sol/medium implementer audits and updates
+this plan and the existing readability report; a separate Sol/medium reviewer checks the
+evidence and remaining checklist. The orchestrator mirrors the result into COMMAND_BOARD,
+MASTER_ROADMAP and PROJECT_LEDGER. Keep all source, assets, canon, dependencies, saves,
+baselines and untracked evidence unchanged. Continue in the existing task branch. Create no
+duplicate report or new workstream, and do not perform the human acceptance during this audit.
+
+**Commands and observations:** Use bounded `rg`/`Get-Content` reads and `git log`/`git diff`
+to locate exact retained receipts, manifest asset IDs, status and limitations. Verify local
+evidence links and the documentation-only file boundary. Run
+`npm.cmd run test:vitest -- tests/docs_desktop_v09_truth.test.ts tests/docs_truth_no_skip_guard.test.ts tests/v092_playtest_package_docs.test.ts`
+and `git diff --check`, then commit reviewed documentation locally through the mandatory hook.
+Use the existing `logs/r7-english-readability/desk39-layout-run-check.mjs` command recorder with
+new `closeout-audit-*` receipts; each attempt records its command and exit code without replacing
+older receipts.
+
+**Expected cost:** One bounded document/evidence pass and one independent review (roughly
+10–20 minutes); focused documentation tests take seconds. No full suite, media generation,
+browser campaign, package build or scenario run. The one-PRE/two-POST budget is exhausted.
+
+**Pass criteria:** Every remaining gate has a specific evidence reference or an explicit missing
+receipt, owner/action and acceptance condition; the human checklist names the actual assets
+and listening/control observations. Reuse evidence only for its proven scope. Preserve the
+inherited six-pin baseline failure, accepted n392 authority and dirty POST-B provenance; do not
+claim R7 closure. Documentation checks and mandatory hook must pass with no runtime diff.
+
+**Stopping rule:** Stop the audit after one review and targeted correction verification.
+Record unresolved or absent evidence as open; do not expand into implementation, new expensive
+validation, calibration, pin reconciliation, R8/R9, push or merge.
+
+### Closeout reconciliation — retained evidence and exact open receipts
+
+This evidence-only reconciliation does not perform the human listen or create a new runtime
+campaign. The canonical audio inventory has **36 keyed cues: 20 provided OGG assets** (17 CC0
+neutral UI cues and three first-party restrained ambient beds) and **16 absent optional
+placeholders**. All 20 provided rows have file, processed hash, duration, finite integrated
+loudness, measurement method and license/TASL or first-party lineage in
+`docs/audio/AUDIO_ASSET_PROVENANCE.json`; the strict provenance, deterministic ambient recipe,
+static URL resolution, gesture lock, mute/preferences and surface-selection contracts were
+accepted with audio commit `2d106e5e0`. This is automated lineage and wiring evidence, not a
+record that a person heard or approved the sounds.
+
+The non-audio content gates also have retained bounded evidence. Phase 1.2 closed at **3,654
+inventoried claims: 3,642 documented and 12 explicit non-player-facing deposits, with zero
+unresolved player-facing rows**; the strict sensitive-history CLI recorded 0 CRITICAL, 0 WARNING
+and one nonblocking observational INFO. Phase 1.1 separately preserves the September 1993
+Neretva/Grabovica/Uzdol chronology and the crime-finding versus individual-liability distinction.
+The officer/OOB report records **334/334 playable rows exact-supported** (68 officers, 19 corps,
+244 brigades and three elite-command links), 40 explicit omitted candidates and zero unsupported
+playable rows. These findings come from the Phase 1.2 closeout in this plan and
+`docs/40_reports/audits/20260801_R7_OFFICER_AUDIO_PROVENANCE_INVENTORY.md`; they are not a fresh
+inventory run. The final readability full-suite receipt reports 13,562 passes and 31 skips and the
+player-experience umbrella passes for its recorded source. The inherited six-pin baseline failure
+still prevents the broad Phase 5/content-package aggregate from being called green.
+
+The later R9 preparation receipt at
+`logs/r9-build-preparation/phase3-runtime-probe.json`, summarized in
+`docs/PROJECT_LEDGER.md` under 2026-09-08 Phase 3, found all **20 emitted packaged OGGs** and
+matched every packaged hash byte-for-byte to the source asset. It also records a successful
+packaged RBiH turn 0 to 1 and no runtime-failure rows. It does not record audible playback,
+decode completion, gesture/mute/volume behavior, a request log proving zero remote audio
+requests, or the final R7 readability source identity. Reuse it only as package-content and
+earlier packaged-runtime evidence. The 2026-08-29 packaged opening first-paint acceptance proves
+the opening images, crests and React opening painted; it is not an audio or final-English
+offline-runtime receipt.
+
+The bounded source/evidence search located no named, attributable human listening, Game Designer,
+canon/sensitivity, license, or runtime-QA acceptance for the supplied audio. It also located no
+receipt showing all 17 provided UI cues through live product hooks. The bounded static search
+located product call sites for
+the three ambient beds plus `turn_review_open`, `peace_plan_offered`, `turn_complete`,
+`battle_notification`, `battle_decisive`, `event_notification` and `operation_complete`.
+The other ten provided IDs — `ui_click`, `ui_hover`, `ui_open_panel`, `ui_close_panel`,
+`turn_advance`, `battle_catastrophic`, `operation_launched`, `event_critical`, `game_over` and
+`tutorial_objective_complete` — are provenance-complete and packaged, but the bounded search
+did not locate non-registry call sites for them. Their runtime-hook state remains unproven;
+this is not an exhaustive absence claim. Do not infer a live trigger or require an invented
+route during acceptance; listen to their files directly and record the evidence limitation.
+
+#### Human listening and sensitivity checklist — open
+
+Perform this checklist against one identified candidate commit/package and retain the reviewer,
+date, host/output device, package hashes and per-row observations. Store the listening sheet as
+`logs/r7-english-readability/closeout-human-audio-listen.md`, the distinct approvals as
+`closeout-audio-approvals.md`, and the bounded offline/runtime capture as
+`closeout-offline-audio-runtime.{log,json}`. A failed row remains open with cue ID, time or trigger,
+observation and owner; do not replace it with an aggregate PASS.
+
+- [ ] **All 20 supplied files, direct listen:** play the 17 UI cue/file pairs under
+  `src/ui/map/assets/audio/ui/`: `ui_click` (`ui_click.ogg`), `ui_hover` (`ui_hover.ogg`),
+  `ui_open_panel` (`ui_open.ogg`), `ui_close_panel` (`ui_close.ogg`), `turn_advance`
+  (`turn_advance.ogg`), `turn_complete` (`turn_complete.ogg`), `turn_review_open`
+  (`turn_review_open.ogg`), `battle_notification` (`battle.ogg`), `battle_decisive`
+  (`battle_decisive.ogg`), `battle_catastrophic` (`battle_catastrophic.ogg`),
+  `operation_launched` (`op_launch.ogg`), `operation_complete` (`op_complete.ogg`),
+  `event_notification` (`event.ogg`), `event_critical` (`event_critical.ogg`),
+  `peace_plan_offered` (`peace_plan.ogg`), `game_over` (`game_over.ogg`) and
+  `tutorial_objective_complete` (`tutorial_complete.ogg`). Then play the three ambient pairs
+  under `src/ui/map/assets/audio/ambient/`: `ambient_warroom` (`ambient_warroom.ogg`),
+  `ambient_field` (`ambient_field.ogg`) and `ambient_archive` (`ambient_archive.ogg`). Accept
+  each only if it decodes, is non-silent, has no unintended digital clipping, discontinuity or pop,
+  and its perceived urgency matches the ID without literal weapons, voices or spectacle.
+  Authored click transients in UI cues are permitted.
+- [ ] **Ambient beds in context:** after one user gesture, listen to `ambient_warroom` in the
+  Warroom; `ambient_field` on the tactical map; and `ambient_archive` in Chronicle and Army HQ
+  Records. Recommended observation protocol: hear two complete 30-second loops on headphones
+  and speakers, then listen for five minutes per bed; an equivalent documented protocol is valid.
+  Accept only if no seam or conspicuous cycle is heard, the bed remains subordinate to UI cues,
+  surface changes do not overlap or jump, and the listening session reveals no obvious fatigue.
+- [ ] **Live reachable cues:** open Review Before Advance (`turn_review_open`), open a peace-plan
+  offer (`peace_plan_offered`), and observe a completed turn with ordinary battle, territorial
+  flip, historical event and completed operation outcomes (`turn_complete`,
+  `battle_notification`, `battle_decisive`, `event_notification`, `operation_complete`). Record
+  which cue fired once per trigger, whether meanings are distinguishable, and any cooldown,
+  duplication or masking defect. The ten IDs with unproven runtime hooks above receive direct-file
+  results; those results do not establish a live-trigger PASS.
+- [ ] **Controls:** confirm silence before first gesture; immediate silence when muted; no ambient
+  restart while muted; useful level change at low/default/high master volume; preference persistence
+  after relaunch; and silence plus no error for all 16 optional placeholders. Record actual values
+  and relaunch result.
+- [ ] **Sensitivity approval, distinct Canon Compliance reviewer:** confirm the supplied set has no
+  anthem/folk melody, speech, scream, close gunfire, bombardment spectacle, atrocity-specific cue,
+  faction-coded triumphalism or melodramatic treatment of civilian harm. The five absent
+  `requires_sensitivity_review` placeholders (`ambient_siege_distant`, `ambient_war_winter`,
+  `stinger_dayton_ceasefire`, `stinger_humanitarian_warning`, `stinger_major_escalation`) remain
+  silent and need no audible approval unless assets are later supplied.
+- [ ] **Design/listen approval, distinct Game Designer:** approve semantic fit, relative level,
+  loop fatigue and restrained tone for the 20 supplied files, explicitly naming any rejected cue.
+- [ ] **License/provenance approval lens:** assign and record this review through one of the
+  required Game Designer, Canon Compliance or QA reviewers; no fourth reviewer is required.
+  Confirm the 17 Kenney files remain
+  byte-identical CC0 assets with their per-cue notes and the three ambient files remain tied to
+  the checked-in first-party PCM recipes, processed hashes and FFmpeg 8.1.2 scope. This approval
+  validates the retained records; it does not substitute for listening.
+- [ ] **QA/offline-runtime approval, distinct QA reviewer:** on the same candidate package, launch
+  with external network unavailable; visit opening/Warroom, tactical map, Chronicle or Records,
+  Settings, Review Before Advance and a peace-plan surface; exercise gesture unlock, mute, volume
+  and relaunch persistence; capture console/decode failures and all `http:`/`https:` requests.
+  Accept only when all 20 packaged hashes match the canonical manifest, reachable cues and beds
+  play from packaged URLs, optional placeholders stay silent, and zero remote font/audio request
+  occurs. Record source commit plus executable and `app.asar` hashes so the receipt is attributable.
+
+The English visual line below is complete: the integrated captures cover 15 required surfaces at
+1920x1080, 1366x768 and 3440x1440, while the final Desk/date proof covers all nine
+faction/resolution cases at initial and maximum scroll. Those browser images supersede the stale
+statement that the two non-1920 viewports were uninspected. They do not provide packaged-offline
+or audio proof.
+
+**Audit verification:** The first focused documentation check passes 13/13, exit 0
+(`closeout-audit-docs1.log`); the five-file boundary, added local links, whitespace and preservation
+of the 870 recorded untracked paths pass, exit 0 (`closeout-audit-scope1.log`). Independent review
+identified six wording corrections: stale status, signature language, an overbroad static-search
+claim, authored-click treatment, optional listening protocol and an unnecessary fourth review
+seat. These are corrected above. Targeted confirmation is retained in `closeout-audit-review.log`;
+final check and local hook receipts use `closeout-audit-docs2.log`, `closeout-audit-scope2.log`
+and `closeout-audit-commit1.log` under `logs/r7-english-readability/`. The audit gives no human
+audio approval and does not close R7.
 
 **Registered amendment, 2026-09-05 — presentation and English readability.** Phase 5's English
 inspection line was run early at 1920x1080 against the publisher pitch. The frozen
@@ -406,16 +572,25 @@ npm.cmd run desktop:release:check
 
 - [ ] Require zero failing historical claim, identity, and audio inventory rows except explicitly `unsupported/omitted` dispositions; localization findings remain tracked post-1.0 and are non-blocking here.
 - [ ] Run full content/event/Codex, English accessibility, audio, baseline, browser, and packaged-runtime tests.
-- [ ] Inspect English at 1920x1080, 1366x768, and 3440x1440 across the required surfaces.
-      **This line is being executed early, by the registered amendment below.** The 1920x1080 pass
-      ran on 2026-09-03 against the publisher pitch and produced 29 findings; the located English
-      and presentation half is scheduled in
-      [the presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md).
-      1366x768 and 3440x1440 remain uninspected, and this box does not tick until all three
-      resolutions are covered and each discharged finding is confirmed **by image, not by diff**.
+- [x] Inspect English at 1920x1080, 1366x768, and 3440x1440 across the required surfaces.
+      The 2026-09-03 1920x1080 publisher-pitch pass produced 29 findings. The registered
+      [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md)
+      then supplied integrated 15-surface captures at all three resolutions and the final nine-case
+      faction/resolution Desk/date proof at initial and maximum scroll. The designated
+      [readability report](../40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md)
+      records the corrected image evidence. This checked line is browser visual acceptance only;
+      it does not tick the aggregate packaged-runtime, audio, baseline or R7 closeout gates.
 - [ ] Verify packaged runtime makes no remote font/audio request.
-- [ ] Create `docs/40_reports/implemented/20260731_CONTENT_HISTORY_AUDIO.md` and record the Phase 3 post-1.0 deferral explicitly.
+- [x] Reuse the existing designated
+      `docs/40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md` for closeout
+      reconciliation and record the Phase 3 post-1.0 deferral there. Do not create the formerly
+      proposed `20260731_CONTENT_HISTORY_AUDIO.md` duplicate.
 - [ ] Update master roadmap, ledger, and reusable knowledge.
+
+The command block below is the historical full Phase 5 verification inventory. It is not an
+executable instruction for the 2026-09-09 closeout audit: existing same-scope receipts are reused,
+the one-PRE/two-POST budget is exhausted, and `canon:check`/`test:baselines` retain the disclosed
+six-pin failure. Any new package, browser, full-suite or scenario campaign requires separate scope.
 
 ```powershell
 npm.cmd run typecheck
