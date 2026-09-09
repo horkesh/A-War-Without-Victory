@@ -1,15 +1,81 @@
 # R7 presentation and English readability
 
-Status: the authorized date-layout implementation passes focused tests and the nine-case
-initial/maximum-scroll browser proof; independent source/image review is GO. Final full UI,
-typecheck, map build and documentation checks pass. Source is committed locally as
-`88996a23d` with its mandatory hook passing. Clean POST-A, health and hash checks pass;
-the inherited baseline gate remains open, so this is not R7 closure.
+Status: date-on-whiteboard placement is reopened after the owner's 2026-09-10 correction.
+The prior visibility proof accepted a date shifted off its intended artwork surface; that
+date-layout GO was too broad. Existing full UI/typecheck/build/hook and clean POST-A receipts
+remain evidence for source `88996a23d`, not proof of correct date placement or a later revision.
+The inherited baseline gate remains open, so this is not R7 closure.
 Prior global Vitest/player-experience receipts are reused only for unaffected scope.
+
+## Owner correction: detached date — 2026-09-10
+
+Date-only acceptance requires the date to remain on the whiteboard. The CSS translation
+introduced in `WarroomDateBoard` moved the entire region left to avoid Desk content, and
+the regression test mandated that workaround. The initial and independent image reviews
+both missed the resulting loss of attachment to the board. Those claims are corrected here.
+
+`logs/r7-english-readability/desk39-onboard-prior-audit.log` exits 0 for the read-only
+reproduction: mapping the retained scene/label geometry onto the unchanged authored board
+polygon finds labels and glyphs outside it for all factions at 1920x1080 and 1366x768.
+All three 3440x1440 cases stay inside. The JSON and original PNGs remain preserved; the
+audit's successful exit means it reproduced the defect, not that the layout passes.
+The existing amendment plan records the correction and new containment/image checks before
+implementation. Column/artwork remain fixed; no simulation or package run is added.
+
+The correction removes the translation from `WarroomDateBoard`. At overlapping widths,
+only opaque Desk scroll content starts lower; the shell bounds, right-column position,
+close control, room image and authored board region stay fixed. The content returns to
+its ordinary position at 2048px. The reviewer caught and corrected an earlier 2001px
+reset that would have left a narrow overlap interval. Header content and controls remain
+intact and scrollable; at 1366x768 the visible scroll region is 266px tall, so the lower
+header and packet require scrolling. This is the explicit cost of the fixed-column layout.
+
+Fresh evidence under `logs/r7-english-readability/`:
+
+| Check / command | Result | Receipt |
+|---|---|---|
+| Focused `npm.cmd run test:vitest -- tests/ui/r7_president_desk_layout_readability.test.ts tests/ui/desk_authority_header.test.ts tests/ui/president_desk_shell.test.ts tests/ui/warroom_shell_accessibility.test.ts tests/ui/warroom_scene_continuity.test.ts tests/ui/warroom_shell_ownership.test.ts` | Exit 0, 75/75 | `desk39-onboard-focused-green3.log` |
+| Original translation and early-breakpoint behavioral RED | Exit 1 as expected; setup failures are separately retained | `desk39-onboard-focused-red3.log`, `desk39-onboard-focused-red4.log`; setup `red.log` has no exit stamp, `red2.log` exits 1 |
+| `node desk39-onboard-proof.mjs --out .../desk39-onboard-browser-attempt1` | Exit 1 retained: seven case passes; two small-screen cases exhaust the proof's twelve-step coverage cap; all nine also flag checkout-specific image URL paths | `desk39-onboard-browser1.log` |
+| `node desk39-onboard-proof2.mjs --cases rbih-1366x768,rs-1366x768 --out .../desk39-onboard-browser-attempt2` | Both targeted cases pass every case criterion; wrapper exit 1 retains the same URL-path identity flags | `desk39-onboard-browser2.log` |
+| `node desk39-onboard-consolidate.mjs` | Exit 0; all nine final cases pass, combining seven original and two corrected results | `desk39-onboard-consolidate1.log`, `desk39-onboard-final-summary.json` |
+| `npm run typecheck` | Exit 0 | `desk39-onboard-typecheck1.log` |
+| `npm run desktop:map:build` | Exit 0 | `desk39-onboard-map-build1.log` |
+| `npm run test:vitest -- tests/ui` | Exit 0; complete UI boundary, 354 files / 2,988 tests, 848.44 seconds | `desk39-onboard-ui1.log` |
+| `node desk39-onboard-scope.mjs freeze` | Exit 0; three date source/test hashes frozen, 25 R8 source/test hashes preserved, 870 prior untracked paths retained | `desk39-onboard-source-freeze.log`, `desk39-onboard-source-freeze.json` |
+
+The corrected traversal is bounded by the stable target count and stops on no progress;
+no source change was needed for that harness correction. Artifact reconciliation strips
+only the two known checkout prefixes, then checks the same relative asset, its natural
+dimensions, original/worktree SHA-256 and Git blob identity against source `88996a23d`.
+It preserves both failed browser receipts and does not re-label the fresh consolidation
+asset hashes as earlier browser snapshots. Source, fixtures and authored-region hashes
+match before/after both browser runs and the final source freeze.
+
+All nine complete labels and glyph bounds stay within the actual authored board polygon
+at initial and maximum scroll. No painted header/card/control intersects the label or
+glyphs; BEFORE scene/shell geometry is unchanged. Computed scroll margins are 391.832px
+at 1920, 243.859px at 1366 and zero at 3440. Date contrast is 8.34:1 against both worst-case
+underlays. All 45–50 header/control text targets per faction can be exposed and controls
+hit-tested through scrolling. Last text clears the fade start by 16.25–16.67px. Final
+evidence includes eighteen endpoint images and 77 intermediate readability images;
+`desk39-onboard-final-summary.json` identifies the supplying attempt for every case.
+
+Independent review in `desk39-onboard-review.log` gives final source/image **GO**, after
+inspecting all eighteen endpoint and 77 intermediate screenshots and independently
+checking source/asset identities. The complete UI boundary passes 354 files / 2,988 tests,
+exit 0. The normal local hook and commit remain pending at this entry.
+The existing package remains from product `217c9f70a`;
+this date correction is not packaged by the earlier build. The separate opening Inbox
+blocker/replacement-package decision remains pending. R7 PRE, clean POST-A and dirty
+POST-B retain their recorded eight-artifact/31-input equality; no new run was performed
+or attributed to this correction. Accepted n392 pins and the six-pin/calibration gate
+remain untouched and open.
 
 ## R7 closeout reconciliation — 2026-09-09
 
-The English visual scope in this report is complete. Integrated captures cover 15 required
+The prior closeout claimed the English visual scope complete; the date-placement exception
+above now supersedes that claim. Integrated captures cover 15 required
 surfaces at 1920x1080, 1366x768 and 3440x1440; the final Desk/date proof covers all nine
 RBiH/RS/HRHB by resolution cases at initial and maximum scroll. This supersedes the parent
 plan's earlier statement that 1366x768 and 3440x1440 were uninspected. It remains browser image

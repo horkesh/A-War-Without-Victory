@@ -20,6 +20,104 @@ runtime dependency.
 
 ## 1. Header Contract
 
+### Date must remain on the whiteboard — owner correction, 2026-09-10
+
+The owner correctly identifies that the date is now painted beside the whiteboard. The
+`translateX(min(0px, calc(28vw - 616px)))` workaround in `WarroomDateBoard` moves its
+entire region away from the artwork. The regression test requires that translation, and
+the earlier screenshot review checks visibility/separation without board containment.
+Those receipts do not establish correct date placement; item 3.9 is reopened. Date-only
+acceptance reduced the required visible content, not its intended location on the board.
+
+Continue the already-authorized date/header layout correction in the existing R8 worktree,
+`F:/AWWV-worktrees/r8-decision-command-usability`, from clean tracked
+`52107d35197d5a362f4c2b2a92db4624cb3a7f70`. The original R7 checkout remains clean at
+`bd7b819750d32811738a87143a66bb02807ab867`; intervening R8 changes are preserved. The
+separate Inbox/Desk overlap and its replacement-package question remain pending.
+
+**Question:** can the complete date stay inside the artwork's actual whiteboard in every
+RBiH/RS/HRHB room at 1920x1080, 1366x768 and 3440x1440, while the fixed Desk column and
+artwork remain unchanged and header/cards/controls remain usable? Remove the detached-date
+workaround and correct the necessary date/header/content layout in the existing
+`WarroomShellLayer`, `PresidentDeskShell`, `DeskAuthorityHeader` and affected tests only;
+extend the render-prop handoff only if required for the same geometry. No gameplay/state,
+save, asset, dependency or simulation change. One Sol/medium implementer and an independent
+Sol/medium reviewer cover source and actual images with compact handoffs.
+
+**Commands/cost:** retain distinct `desk39-onboard-*` logs in the original R7 evidence
+directory. Focused `npm run test:vitest -- <affected files>` RED/GREEN takes seconds;
+the corrected nine-case Playwright proof takes a few minutes. Use the retained fixtures
+and adapt the existing proof with actual unshifted whiteboard containment, image inspection,
+card/label intersections, contrast >=4.5:1, header/control readability, fixed scene/column
+bounds and maximum-scroll fade clearance. Inspect both initial and maximum scroll at every
+faction/viewport. Run `npm run test:vitest -- tests/ui` (about ten minutes),
+`npm run typecheck`, `npm run desktop:map:build`, `git diff --check` and the mandatory
+local commit hook on reviewed source. Record exact commands/exits and preserve failures.
+The local proof server uses `npm run dev:map -- --host 127.0.0.1 --port 3258 --strictPort`;
+start/stop its owned process with retained logs. The proof reads original retained fixtures
+by absolute path and writes only exclusive new evidence directories.
+
+Candidate proof command: Node 22.23.2 runs
+`F:/A-War-Without-Victory/logs/r7-english-readability/desk39-onboard-proof.mjs --out F:/A-War-Without-Victory/logs/r7-english-readability/desk39-onboard-browser-attempt1`
+from this worktree, through the existing exclusive `desk39-layout-run-check.mjs` recorder.
+In addition to the eighteen required endpoint screenshots, capture only the intermediate
+scroll positions needed to expose every header text node and rendered Desk control above
+the fade (maximum twelve per case; stop on an unreachable item). Compare shell/scene
+bounds and artwork identity against retained BEFORE geometry, and freeze source/fixture/
+authored-region hashes before and after the run. This remains a nine-case layout proof,
+with no campaign or simulation execution.
+
+Targeted proof correction: attempt 1 exhausts the arbitrary twelve-image traversal cap
+for the long RBiH/RS packets at 1366x768. Date location, paint clearance, fade and contrast
+pass there, but lower controls remain unvisited. The independent reviewer confirms the
+finite remaining scroll targets; this is not evidence of unreachable game controls.
+Preserve attempt 1 and its script. In `desk39-onboard-proof2.mjs`, bound traversal by the
+initial stable target count, retaining the no-progress guard. After attempt 1 completes,
+run only its cap-exhausted cases with `--cases rbih-1366x768,rs-1366x768 --out F:/A-War-Without-Victory/logs/r7-english-readability/desk39-onboard-browser-attempt2`.
+Expected cost: two case loads plus the missing coverage, about two minutes. Pass requires
+all controls covered, no geometry/paint regression and identical protected hashes across
+both attempts. Stop on actual unreachability or any new source concern. Consolidate the
+two corrected cases with the seven unaffected first-attempt cases, keeping both receipts;
+do not rerun successful cases or change game source to satisfy the harness bound.
+
+Artifact identity correction for consolidation: the BEFORE Vite URL embeds the original
+checkout path, while this proof embeds the R8 worktree path. Comparing raw URL pathnames
+therefore flags all nine images despite matching dimensions and fixed scene geometry.
+Keep those flags and both browser receipts. A read-only
+`desk39-onboard-consolidate.mjs` check (seconds) must normalize only the two known checkout
+prefixes, require the same relative asset, and verify original/worktree SHA-256 plus Git
+blob identity against the accepted prior source `88996a23d`. Fail on any actual asset,
+source/fixture hash, geometry or case-coverage drift. This resolves file identity without
+another browser campaign or weakening the fixed-artwork criterion.
+
+**Pass/stop:** the label and every glyph must be visibly on the actual whiteboard, not
+merely inside a translated DOM box. Dates remain complete and clear at both scroll ends;
+header text and controls remain readable/reachable. Reject a fix that only changes the
+test's proxy. Stop on forbidden surface changes or an unresolved physical layout conflict;
+do not silently move artwork/column or waive a visual criterion. Reuse unaffected full-suite,
+package and simulation evidence only for their original inputs. No new package or campaign
+is part of this correction. The PRE/two-POST budget is exhausted; existing clean POST-A
+still proves its recorded revision, and the inherited six-pin/calibration gate remains open.
+
+**Source/image result:** independent review in `desk39-onboard-review.log` gives final
+item 3.9 source/image GO after inspecting all eighteen endpoint and 77 intermediate
+screenshots. The consolidated nine-case proof passes; original and targeted browser
+exit-1 receipts remain intact with their bounded harness/path causes. Source/fixture/
+region hashes are stable, and actual artwork bytes match the accepted prior Git blobs.
+Contrast is 8.34:1 and last text clears the fade by at least 16.25px. At 1366x768 the
+scroll viewport is 266px tall; the lower header and packet are accessed through scrolling.
+The complete UI boundary passes 354 files / 2,988 tests in 848.44 seconds, exit 0
+(`desk39-onboard-ui1.log`). Focused checks pass 75/75; typecheck and map build exit 0.
+The normal commit hook remains required before completion.
+
+Local commit sequence after those checks: stage only the three frozen date source/test
+files and the six existing amended documentation files, then run
+`git commit -m "fix(ui): keep the R7 date on its whiteboard"` with the normal hook enabled.
+Expected cost: about one minute for the required typecheck hook. Stop on a nonzero hook;
+preserve its receipt and correct only a diagnosed cause. A small documentation follow-up
+may record the resulting source commit and hook result; its ordinary docs-only hook still
+runs. No branch integration, push, package or campaign follows from this sequence.
+
 ### Authorized date-layout continuation — 2026-09-09
 
 Starting branch/HEAD verified: `codex/r7-english-readability` /
@@ -88,7 +186,7 @@ identity; coordinate any later shared-build edit through the R9 preparation owne
 | Field | Value |
 |---|---|
 | **Date** | 2026-09-05 |
-| **Status** | ACTIVE — implementation and neutrality proof complete; inherited baseline gate open |
+| **Status** | ACTIVE — date-on-whiteboard correction reopened; inherited baseline gate open |
 | **Owner lane** | **R7 — Content, historical attribution, audio, accessibility, and opening experience** |
 | **Command-board row** | 7 |
 | **Parent plan (amended)** | [Content/history/audio plan](2026-07-31-content-history-localization-audio-plan.md) — this plan executes its **Phase 5** checklist line *"Inspect English at 1920x1080, 1366x768, and 3440x1440 across the required surfaces."* |
@@ -96,7 +194,7 @@ identity; coordinate any later shared-build edit through the R9 preparation owne
 | **Source finding set** | [Showcase screenshot GUI audit](../40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md) (FROZEN, 29 findings) |
 | **Panel record** | [Tier-1 specialist reports](../40_reports/working/20260905_SHOWCASE_AUDIT_PANEL_SPECIALIST_REPORTS.md) |
 | **Collision rules** | §8 of the roadmap: *"Map/Desk English layout strings — R1/R2 layout first; R7 accessibility/readability proof second."* R1/R2 are CLOSED, so their layout pass is complete and this is the open second pass. One file has one owning phase; see §4. |
-| **Current next action** | Desk/date source is committed as `88996a23d`; clean POST-A health/hash checks pass. Retain the failing baseline gate pending calibration/BC settlement and authorized pin reconciliation; no new campaign in this amendment. |
+| **Current next action** | Correct the date's attachment to the actual whiteboard under existing date/header authorization. Earlier source `88996a23d` has clean POST-A proof, but its detached date placement is not accepted. Retain the failing baseline gate; no new simulation campaign. |
 
 **Owner continuation:** date-only whiteboard acceptance is approved, and investigation of
 the six pre-existing baseline mismatches is authorized. This supersedes the full-board

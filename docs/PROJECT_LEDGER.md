@@ -35215,3 +35215,39 @@ harness bypass has been made. RBiH has not advanced beyond turn 0, RS/HRHB have 
 and no 24-turn or full R8 acceptance is claimed. Existing combined-suite/environment receipts,
 source hooks and package proof remain valid for their recorded inputs. All inherited R7 baseline,
 calibration and owner-inspection obligations remain open; no additional baseline campaign ran.
+
+### R7 whiteboard attachment correction — 2026-09-10
+
+The owner correctly identifies that the prior R7 date is detached from its whiteboard. The
+responsive X translation moved the date's entire authored region; its source test required
+that translation, and both screenshot reviews missed the attachment error. Date-only
+acceptance never authorized a date beside the board. Item 3.9 and the existing acceptance
+record are reopened; prior failed or overbroad receipts remain intact.
+
+Read-only `desk39-onboard-prior-audit.log`, exit 0, reproduces six off-board cases from the
+retained evidence: all factions at 1920x1080 and 1366x768. The three ultrawide cases stayed
+on-board. The existing plan records the bounded correction and stronger acceptance question
+before edits. Work continues in the R8 worktree from `52107d351`, preserving all intervening
+R8 changes; the original checkout remains clean at `bd7b81975` with its evidence retained.
+
+The candidate removes the date translation and clears only the opaque Desk scroll content
+below the label at overlapping widths, preserving the fixed column and artwork. A separate
+Sol/medium reviewer catches an early responsive reset and verifies its targeted correction
+to 2048px. Valid RED receipts fail for the old translation and old threshold; the final focused
+GREEN passes 75/75, exit 0. Setup failures are retained and are not counted as behavioral RED.
+The date proof now checks the actual authored whiteboard polygon, painted card intersections,
+text and control reachability through scroll, contrast, fixed BEFORE geometry and fade clearance.
+Final nine-case evidence passes in `desk39-onboard-consolidate1.log`, exit 0. The original
+browser receipt retains exit 1 for two traversal-cap failures plus checkout-path image
+flags; the two-case targeted receipt retains exit 1 for the same path flags. Consolidation
+requires complete control coverage, unchanged source/fixture/region hashes, fixed geometry
+and accepted asset byte/Git identities; neither failed receipt is rewritten. Independent
+source/image review gives GO after all eighteen endpoint and 77 intermediate images.
+Typecheck/map build pass, and the complete UI boundary passes 354 files / 2,988 tests,
+exit 0 (`desk39-onboard-ui1.log`). Normal hook/commit identity follows in the existing report.
+
+The separate opening Inbox/Desk blocker and replacement package remain pending owner scope
+authorization. No package, campaign or simulation run is added for this date correction.
+Historic PRE/POST-A/POST-B equality remains scoped to its recorded revisions; clean POST-A
+at `88996a23d` is not re-labelled as a later run. The exhausted PRE/two-POST budget, accepted
+n392 pins, inherited six-pin baseline failure, calibration and owner inspection remain explicit.

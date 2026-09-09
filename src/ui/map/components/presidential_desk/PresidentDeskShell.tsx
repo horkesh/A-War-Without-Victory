@@ -106,7 +106,14 @@ export function PresidentDeskShell({
       )}
       <div
         data-testid="president-desk-scroll-region"
-        className="min-h-0 flex flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto overscroll-contain pb-3 [-webkit-mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)] [mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)]"
+        // Through 1920px the authored calendar sits behind the fixed Desk
+        // column. Keep the transparent shell and column bounds unchanged, but
+        // begin painted Desk content below the latest faction date label. The
+        // 26.71vw term is the RBiH label centre (735 / 2752 scene width); the
+        // remaining clearance covers half the label, its shadow, and the
+        // scroll region's normal 146px top edge. At 2048px the date label is
+        // fully left of the column, so the normal content position resumes.
+        className="mt-[max(0px,calc(26.71vw_-_7.5625rem))] min-h-0 flex flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto overscroll-contain pb-3 min-[2048px]:mt-0 [-webkit-mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)] [mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)]"
       >
         <div className="shrink-0">
           <DeskAuthorityHeader state={state} />
