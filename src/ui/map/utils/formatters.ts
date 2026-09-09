@@ -146,8 +146,11 @@ export function formatPersonnel(n: number): string {
     return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
 }
 
-/** Compact number: 2400 → "2k", 800 → "800". Integer rounding (for summaries). */
+/** Compact summary number: 2400 → "2k", 1211000 → "1.2M". Thousands round to integers; millions to one decimal. */
 export function fmtK(n: number): string {
+    if (n >= 1_000_000) {
+        return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+    }
     if (n >= 1000) return `${Math.round(n / 1000)}k`;
     return String(Math.round(n));
 }

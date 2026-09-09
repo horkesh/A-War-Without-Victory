@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import React from 'react';
+import { readFileSync } from 'node:fs';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { BrigadeRow } from '../../src/ui/map/components/BrigadeRow.js';
@@ -122,5 +123,17 @@ describe('BrigadeRow supply labels', () => {
     expect(row.getAttribute('title')).not.toContain('Cohesion: 0%');
     expect(row.getAttribute('title')).not.toContain('Fatigue: 0');
     expect(screen.queryByText('RECORDED')).toBeNull();
+  });
+
+  it('formats reported personnel with the shared compact formatter', () => {
+    render(React.createElement(BrigadeRow, {
+      formation: makeFormation({ personnel: 1_250 }),
+    }));
+
+    expect(screen.getByText('1.3k')).toBeTruthy();
+    expect(screen.getByRole('button').getAttribute('aria-label')).toMatch(/1[,.]250 personnel/);
+    const source = readFileSync('src/ui/map/components/BrigadeRow.tsx', 'utf8');
+    expect(source).toContain("import { formatPersonnel, toTitleCase } from '../utils/formatters'");
+    expect(source).toContain('{formatPersonnel(formation.personnel)}');
   });
 });

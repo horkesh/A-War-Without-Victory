@@ -2,6 +2,7 @@
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
+import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { SettlementDetailContent } from '../../src/ui/map/components/SettlementDetailContent.js';
@@ -56,6 +57,26 @@ describe('buildOsidSupplyExplanation (read-model)', () => {
 });
 
 describe('SettlementDetailContent supply status surface', () => {
+  it('formats stationed-unit personnel with the shared compact formatter', () => {
+    render(createElement(SettlementDetailContent, {
+      ...BASE_PROPS,
+      formationsAtOsid: [{
+        id: 'bde_125',
+        faction: 'RBiH',
+        name: '125th Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        personnel: 1_250,
+      }],
+    }));
+
+    expect(screen.getByText('1.3k')).toBeTruthy();
+    expect(screen.queryByText('1250')).toBeNull();
+    const source = readFileSync('src/ui/map/components/SettlementDetailContent.tsx', 'utf8');
+    expect(source).toContain("import { formatPersonnel } from '../utils/formatters'");
+    expect(source).toContain('{formatPersonnel(f.personnel)}');
+  });
+
   it('renders player-legible settlement status without raw ids', () => {
     render(createElement(SettlementDetailContent, {
       ...BASE_PROPS,

@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import type { FormationView } from '../data/types';
 import { FACTION_BG_SUBTLE, FACTION_COLORS } from '../utils/theme';
-import { toTitleCase } from '../utils/formatters';
+import { formatPersonnel, toTitleCase } from '../utils/formatters';
 import { getPrestigeTier, getPrestigeTierColor, getHighestTier, getDecorationName } from '../utils/decorationUtils';
 import { Icon } from './icons/Icon';
 import { t, useLocale, type MessageKey } from '../i18n';
@@ -150,7 +150,7 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
       {formation.personnel != null && (
         <span className="shrink-0 text-xs tabular-nums text-text-secondary flex items-center gap-0.5" title={t('brigadeRow.personnelTitle', { personnel: formation.personnel.toLocaleString() })}>
           <Icon name="personnel" size={9} />
-          {formation.personnel >= 1000 ? `${(formation.personnel / 1000).toFixed(1)}k` : formation.personnel}
+          {formatPersonnel(formation.personnel)}
         </span>
       )}
 

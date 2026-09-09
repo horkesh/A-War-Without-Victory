@@ -21,6 +21,7 @@ import {
 import { t, useLocale } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { buildOsidSupplyExplanation, type OsidSupplyTone } from '../data/osidSupplyExplanation';
+import { formatPersonnel } from '../utils/formatters';
 
 /** Player-legible color per supply tone (no raw enum surfaced). */
 const SUPPLY_TONE_CLASS: Record<OsidSupplyTone, string> = {
@@ -918,7 +919,7 @@ export function SettlementDetailContent({
                     </div>
                     {f.personnel != null && (
                       <span className="text-xs text-text-secondary font-mono tabular-nums flex-shrink-0">
-                        {f.personnel > 1000 ? `${(f.personnel / 1000).toFixed(1)}k` : f.personnel}
+                        {formatPersonnel(f.personnel)}
                       </span>
                     )}
                   </>

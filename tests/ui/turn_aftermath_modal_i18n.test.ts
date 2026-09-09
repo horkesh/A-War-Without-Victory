@@ -83,6 +83,24 @@ describe('TurnAftermathModal localization', () => {
         setLocale('en');
     });
 
+    it('formats friendly turn-cost casualties with the shared personnel formatter', () => {
+        const view = makeView();
+        view.cost = { ...view.cost, friendlyMilitaryCasualties: 1_234 };
+
+        render(createElement(TurnAftermathModal, {
+            isOpen: true,
+            view,
+            onClose: vi.fn(),
+            onOpenInbox: vi.fn(),
+            onOpenSummary: vi.fn(),
+            onOpenRecords: vi.fn(),
+            onOpenChronicle: vi.fn(),
+            onOpenCodex: vi.fn(),
+        }));
+
+        expect(screen.getByText('1.2k')).toBeTruthy();
+    });
+
     it('renders BCS chrome for the turn aftermath modal', () => {
         setLocale('bcs');
         const onClose = vi.fn();

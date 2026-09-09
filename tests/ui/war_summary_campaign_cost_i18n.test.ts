@@ -202,6 +202,8 @@ describe('War Summary campaign cost localization', () => {
         const state = stateWithOperationalSitrep();
         storeState.loadedGameState = {
             ...state,
+            latestTurnSummary: makeSummary({ displacement_total: 1_210_000 }),
+            turnSummaries: [makeSummary({ turn: 7, displacement_total: 1_000 })],
             casualtyLedger: {
                 RBiH: { killed: 12_000, wounded: 17_000, missing_captured: 500 },
             },
@@ -217,15 +219,18 @@ describe('War Summary campaign cost localization', () => {
         render(createElement(WarSummaryContent, { focusSection: 'overview' }));
 
         const campaignCost = screen.getByTestId('war-summary-campaign-cost');
-        expect(campaignCost.textContent).toContain('Campaign cost so far: 12,000 killed / 17,000 wounded / 500 missing or captured');
+        expect(campaignCost.textContent).toContain('Campaign cost so far: 12k killed / 17k wounded / 500 missing or captured');
         expect(within(campaignCost).getByText('29.5k')).toBeTruthy();
+        expect(within(campaignCost).getByText('1.2M')).toBeTruthy();
+        expect((document.body.textContent?.match(/12k/g) ?? [])).toHaveLength(2);
+        expect(document.body.textContent).not.toContain('12,000 killed');
         const sitrep = screen.getByText('Situation Report').parentElement?.textContent ?? '';
         expect(sitrep).toContain('0 critical / 1 strained, 2 permanently collapsed municipalities (cumulative)');
     });
 
     it('renders missing casualty and displacement sources as unreported in the overview', () => {
         storeState.loadedGameState = {
-            ...makeMockLoadedGameState(),
+            ...stateWithCampaignCost(),
             player_faction: 'RBiH',
             casualtyLedger: undefined,
             departedByOsid: undefined,
@@ -239,6 +244,8 @@ describe('War Summary campaign cost localization', () => {
         expect(copy).toMatch(/Wounded\s*No staff report/i);
         expect(copy).toMatch(/Theater-wide displaced\s*No staff report/i);
         expect(copy).toMatch(/Own-side displaced\s*No staff report/i);
+        expect(copy).not.toMatch(/Killed\s*0/i);
+        expect(copy).not.toMatch(/Wounded\s*0/i);
     });
 
     it('preserves explicit zero casualty and displacement records in the overview', () => {
@@ -258,6 +265,20 @@ describe('War Summary campaign cost localization', () => {
         expect(copy).toMatch(/Theater-wide displaced\s*0/i);
         expect(copy).toMatch(/Own-side displaced\s*0/i);
         expect(copy).not.toMatch(/Killed\s*No staff report/i);
+    });
+
+    it('keeps seven-digit civilian deaths exact while displacement remains compact', () => {
+        storeState.loadedGameState = {
+            ...stateWithCampaignCost(),
+            civilianCasualties: {
+                Bosniak: { killed: 1_211_000, fled_abroad: 1_211_000 },
+            },
+        } as LoadedGameState;
+
+        render(createElement(WarSummaryContent, { focusSection: 'overview' }));
+
+        expect(screen.getByText('Killed:').parentElement?.textContent).toContain('1,211,000');
+        expect(screen.getByText('Fled abroad:').parentElement?.textContent).toContain('1.2M');
     });
 
     it('renders four accessible RBiH strategic objectives with canonical owner links', () => {

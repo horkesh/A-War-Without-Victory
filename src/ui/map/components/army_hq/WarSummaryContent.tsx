@@ -231,8 +231,8 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                                 <div className="text-xs text-text-secondary leading-snug">
                                                     {campaignCost.friendlyMilitaryCasualtyScope === 'campaign_ledger'
                                                         ? `${t('records.campaignCostSoFar')}: ${t('situation.casualtyBreakdown', {
-                                                            killed: localizedInteger(casualtyLedger?.[playerFaction]?.killed ?? 0),
-                                                            wounded: localizedInteger(casualtyLedger?.[playerFaction]?.wounded ?? 0),
+                                                            killed: reportedK(casualtyLedger?.[playerFaction]?.killed, casualtyLedgerReported),
+                                                            wounded: reportedK(casualtyLedger?.[playerFaction]?.wounded, casualtyLedgerReported),
                                                             missing: localizedInteger(casualtyLedger?.[playerFaction]?.missing_captured ?? 0),
                                                         })}`
                                                         : campaignCost.windowLabel}
@@ -408,7 +408,7 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                 <div className="flex gap-6 text-[12px]">
                                     <div>
                                         <span className="text-text-secondary">{t('warSummary.label.civilianKilled')} </span>
-                                        <span className="text-red-400 font-semibold tabular-nums">{fmtK(totalKilled)}</span>
+                                        <span className="text-red-400 font-semibold tabular-nums">{localizedInteger(totalKilled)}</span>
                                     </div>
                                     <div>
                                         <span className="text-text-secondary">{t('warSummary.label.fledAbroad')} </span>

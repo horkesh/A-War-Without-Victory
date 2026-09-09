@@ -3,6 +3,7 @@ import { buildTurnAftermathCampaignCost, buildTurnAftermathCampaignPulse, buildT
 import { getDecisionSurfaceForInboxType, type DecisionSurfaceFamilyId } from '../../data/decisionSurfaceRegistry';
 import { useGameStore } from '../../store/gameStore';
 import { t, type MessageKey } from '../../i18n';
+import { formatPersonnel } from '../../utils/formatters';
 
 const RECORD_FILTERS: Array<{ id: TurnAftermathRecordFilter; labelKey: MessageKey }> = [
     { id: 'all', labelKey: 'records.filter.all' },
@@ -183,7 +184,7 @@ function TurnAftermathRecordCard({ view, isLatest, isFocused }: { view: TurnAfte
                 />
                 <RecordMetric
                     label={t('records.metric.cost')}
-                    value={String(view.cost.friendlyMilitaryCasualties)}
+                    value={formatPersonnel(view.cost.friendlyMilitaryCasualties)}
                     detail={t('records.detail.displaced', { count: view.cost.displacedThisTurn })}
                 />
                 <RecordMetric

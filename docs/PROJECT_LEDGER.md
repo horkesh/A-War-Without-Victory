@@ -34889,3 +34889,17 @@ Committed slices (one production file per commit):
 - src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx: fix(ui): separate R7 decision filters and action receipts. Hook receipt: phase3-commit-decision-room.log.
 - src/ui/map/components/army_hq/ArmyHQModal.tsx: fix(ui): pack R7 corps cards against their content. Hook receipt: phase3-commit-army-hq.log.
 - src/ui/map/components/CodexPanel.tsx: fix(ui): signal Codex scrolling without masking final text. Hook receipt: phase3-commit-codex.log.
+
+## R7 Phase 4 number presentation — 2026-09-09
+
+Implemented compact million displacement and shared personnel display formatting, with
+identical compact military casualty counts in War Summary and its campaign breakdown.
+Civilian deaths and missing/captured counts retain exact localized integers; unknowns
+remain No staff report. No source value, aggregation, cost, state or simulation changed.
+Independent review is GO after the civilian-precision correction (`phase4-review.log`).
+Focused checks pass six files/65 tests, exit 0 (`phase4-civilian-precision-green.log`);
+final typecheck passes, exit 0 (`phase4-final-typecheck.log`). Three-resolution War Summary
+screenshots prove both repeated military figures in one frame (`phase4-war-summary.log`).
+The interim full UI run has one known RED-test failure and is not final acceptance;
+the frozen-source full Vitest gate will include the complete UI boundary. Mandatory hook:
+`logs/r7-english-readability/phase4-commit.log`. Whiteboard item 3.9 remains separately held.

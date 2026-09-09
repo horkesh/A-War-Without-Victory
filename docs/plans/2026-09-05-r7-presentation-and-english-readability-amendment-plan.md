@@ -918,3 +918,31 @@ measurement and screenshots remain in `codex-bottom-probe/`. The desk requires n
 change: its last text already clears the fade because of child-card padding
 (`desk-bottom-probe/bottom.json`). Independent review records the initial concern and
 this targeted verification in `phase3-review.log`; the existing 3.9 owner question remains.
+
+## Final integrated validation execution bound
+
+Run against frozen reviewed presentation source. The final `npm.cmd run test:vitest`
+includes the complete `tests/ui` boundary and supersedes a separate final UI-only run;
+this avoids repeating the same ten-minute subset. The Phase 4 interim run completed
+353 files with 2,960 passing tests and one civilian-precision RED failure introduced
+during the run (`phase4-ui.log`, exit 1). Its targeted corrected run passes all 65 tests
+and final typecheck is exit 0. Do not count the interim run as corrected-source acceptance.
+
+Question: does the completed amendment preserve simulation bytes and all existing player
+journeys while rendering the audited English surfaces at all three required resolutions?
+Commands: `npm.cmd run test:vitest` (~31 minutes), `npm.cmd run canon:check`,
+`npm.cmd run qa:player-experience` (nested typecheck, release check, runtime contracts,
+player journeys, first-hour browser, live-surface browser; approximately 10–20 minutes),
+the already declared POST-A 188-week CLI run and POST-B `npm.cmd run test:baselines`,
+then `node tools/engine_health_gate.cjs <POST-A-run-dir> --horizon 188w --json`,
+three-resolution screenshot/geometry checks, and `git diff --check`.
+Use process-local Git Bash PATH precedence on Windows. The umbrella player-experience
+receipt supplies its named nested gates; do not repeat passing nested commands unchanged.
+Keep exact command, exit code and logs under `logs/r7-english-readability/final-*`.
+
+Pass requires all named gates, complete visual evidence, no hidden cost/name/unit,
+and identical PRE/POST-A/POST-B deterministic artifact and consumed-input hashes.
+Stop on forbidden-surface requirements or unexplained drift; do not refresh a baseline,
+start additional campaigns, or silently waive the known pre-existing manifest mismatch.
+The pending whiteboard acceptance question remains separate and must be resolved by the
+owner before claiming item 3.9. No push, merge, packaging or R9 work is part of this run.
