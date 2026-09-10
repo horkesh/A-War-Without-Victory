@@ -145,6 +145,21 @@ and profile. Expected cost under two minutes. Require all five actual route scre
 unchanged raw turn-0 state and no errors; stop on another unexplained failure. No product,
 package or simulation change and no overwritten failed receipt.
 
+`inbox-packaged2.log` also exits 1 on the same detached Acknowledge control, so the
+network-idle hypothesis is rejected. Source diagnosis identifies the exact lifecycle:
+`PeaceWarTransitionOverlay.tsx` mounts `WarHasBegunSplash.tsx` with its default 4,200 ms
+automatic dismissal and 800 ms fade. Its named `WAR HAS STARTED` dialog deliberately
+unmounts during the probe's optional click. This is a probe completion-condition error,
+not evidence of a persistent product blocker. Both failed profiles/images/logs remain.
+**Targeted correction question:** does waiting for that exact dialog's intended dismissal
+produce the required stable home Inbox and actionable Desk? In new proof version 3, replace
+the optional Acknowledge click with `getByRole('dialog', {name:'WAR HAS STARTED', exact:true})`
+hidden within 10 seconds, and require no remaining visible Acknowledge/Begin intro action.
+Keep actual route clicks, all five screenshots and raw-state/source/error assertions.
+Recheck all package bytes and use fresh `inbox-packaged3`; cost under two minutes.
+Stop on a persistent splash, missing Inbox, blocked route, state drift or other failure.
+This is the authorized evidence-route correction; no third build or product change.
+
 ## B7/B5/B8/B1 playability packet — owner scheduled 2026-09-09
 
 The owner approved the four decision-and-command usability fixes and the subsequent three-faction
