@@ -134,6 +134,17 @@
             "command": "bash tools/hooks/guard_scope_drift.sh"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash tools/hooks/guard_stash_pop.sh",
+            "timeout": 5,
+            "statusMessage": "Checking stash safety..."
+          }
+        ]
       }
     ]
   }

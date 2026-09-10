@@ -3379,3 +3379,61 @@ breakage.** The full suite did. Recorded as a limitation rather than patched ove
 containing "Gorazde" — essentially all OSID slugs, formation ids and save keys, which are ASCII BY
 DESIGN. Adding diacritics to an identifier changes a key and breaks lookups, saves and calibration.
 The module now says so explicitly, so a later broadening cannot quietly corrupt identifiers.
+
+## First tier-1 railguard: lessons converted from prose to refusal — 2026-09-10
+
+**The finding that prompted it.** Every hook in this repo was ADVISORY. `guard_pipe_exit_code.sh`
+says so in its own header: "Exit 0 always. Advisory only — never blocks." So the repo held ~320
+written lessons and 13 hooks, and **not one could stop an action**. Today matched that exactly:
+five written rules were violated in one session, including one a previous session had written INTO
+the stash message that was then popped.
+
+**The tier ladder, from today's evidence:**
+
+| tier | mechanism | what it caught today |
+|---|---|---|
+| 0 impossible | failure inexpressible | `execFileSync` arg arrays make shell injection unreachable |
+| 1 refused | blocked at attempt | branch protection caught the broken main; `gate.mjs` exit 2; `--prune` refusing unique work |
+| 2 pre-merge | a test fails | install-contract, CI guardrail, full suite |
+| 3 post-merge | found after landing | main went red, then repaired |
+| 4 prompted | a hook warns | pipe-exit guard fired — and was nearly ignored anyway |
+| 5 written | lesson / napkin / doc | violated same-day, repeatedly |
+
+Everything that saved work today was tier 0-2. Everything violated was tier 4-5.
+
+**The conversion recipe.** (1) State the failure as a predicate over a concrete ACTION, not as
+advice. (2) Find the earliest point that predicate is decidable. (3) Install at the strongest tier
+available there. (4) PROVE it fires by mutation, or it is tier 5 in costume. (5) Record the tier
+reached, so nobody believes a written lesson is protecting them.
+
+**Applied to the stash rule.** `tools/hooks/guard_stash_pop.sh` denies the pop/apply/drop
+subcommands of git-stash without an explicit `stash@{N}` ref, and denies the clear subcommand
+outright. Registered as a PreToolUse Bash hook — the first BLOCKING hook in the repo.
+
+**Two false positives, and the second one is the real lesson.** The first version denied
+`echo 'stash pop is dangerous'` — caught by the guard's own negative test, fixed by stripping
+quoted text. That looked sufficient. It was not: the guard's FIRST REAL USE blocked the commit
+that documents it, because a heredoc body is not quoted, and both the ledger entry and the commit
+message discuss the rule in prose.
+
+So the matching rule changed from "does this text appear?" to **"does this text appear where a
+command would run?"** — the command is split on shell separators and each segment must START with
+the invocation. Prose mentions never sit at the start of a segment; real invocations always do.
+Braces are deliberately NOT separators, because `{`/`}` split `stash@{0}` in half and made the
+guard deny the very explicit-ref form it exists to encourage — caught by the allow-list tests.
+
+**The generalisable part: a guard's false-positive tests are worth more than its true-positive
+tests.** The true positives encode what you already understood well enough to write down. The
+false positives are where a guard silently becomes unusable — and an unusable guard gets switched
+off, after which it protects nothing. All three defects here were found by allow-cases, none by
+deny-cases.
+
+**Verified three ways:** 26 tests in `tests/hook_guard_stash_pop.test.ts` pinning deny cases,
+allow cases, mere mentions, and both heredoc regressions; a live refusal of a bare pop in session;
+and a live PASS of this very commit. The command that damaged the working tree two hours ago is
+now unexecutable, and the commit describing why is not.
+
+**Honest limit.** Most of the ~320 lessons cannot be mechanised — "the owner holds the modelling
+truth" will never be a hook. The value of an audit is separating those from the ones that COULD be
+tier 1 and were left as prose. A lesson left at tier 5 is closer to a record of a failure than a
+defence against one.
