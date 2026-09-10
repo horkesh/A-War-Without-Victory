@@ -15,6 +15,121 @@
 **Collision rule:** This plan does not repair source while a session is running. Findings are routed to the owning plan, verified, then the affected session restarts from a fresh campaign.
 **Activation:** `Execute the master roadmap` authorizes transient local directory packages for this validation, but not installer publication, signing, upload, tag, or release.
 
+## Opening Inbox / package blocker — owner authorized 2026-09-10
+
+The owner now says, "Let's solve the inbox/package blocker." This authorizes the previously
+proposed Inbox/Desk exclusivity repair, one replacement package and resumption of the three
+fresh 24-turn shakedowns. The earlier pending-authorization paragraphs below are historical.
+Human listening remains part of the owner's eventual inspection, not a prerequisite for this
+repair. No broader gameplay, calibration, full-campaign or publication scope is activated.
+
+**Verified start:** original checkout `codex/r7-english-readability` is tracked-clean at
+`bd7b819750d32811738a87143a66bb02807ab867`; active isolated checkout
+`F:/AWWV-worktrees/r8-decision-command-usability` / `codex/r8-decision-command-usability`
+is tracked-clean at `d4544eba4cafe121e37e657ae1c4ea824d424cd5`. No intervening commits.
+Preserve the reviewed R7 whiteboard repair `ea33b23a5`, all R8 work, old package bytes,
+failed profiles, screenshots and receipts. One Sol/medium implementer and a separate
+Sol/medium reviewer cover this bounded repair; root owns package/run provenance and docs.
+
+**Question / scope:** can the opening brief remain on Warroom home, yield while the Desk
+owns that surface, return on Desk close when still pending, and expose the exact first
+required event action without interception? Change only the opening-brief render guard in
+`src/ui/map/App.tsx` and its focused shell/ownership regression. Do not dismiss or consume
+the brief when opening Desk, change event/decision semantics, or modify simulation/state/
+saves, assets, dependencies, date layout, baselines or canon. Reuse the known failing
+`opening-proof4.log` and `06-desk-route.png`; no duplicate root-cause campaign is needed.
+
+**Commands / cost before edits and expensive checks:** use Node 22.23.2 and the existing
+exclusive `desk39-layout-run-check.mjs` recorder, with new `inbox-*`, `package2*` and fresh
+shakedown labels under `F:/A-War-Without-Victory/logs/r8-decision-command-usability/`.
+
+1. Focused `npm run test:vitest -- <exact affected files>` RED/GREEN, plus a bounded actual
+   browser route using the retained turn-0 RBiH save: home Inbox -> Desk without Inbox ->
+   close/restore -> reopen Desk -> exact `rbih_state_identity` response surface. Capture
+   screenshots and actual clicks; do not force-click or remove an overlay in the harness.
+   Optional proof server: `npm run dev:map -- --host 127.0.0.1 --port 3258 --strictPort`.
+   Expected cost: seconds to a few minutes; retain exact fixture/hash and commands.
+2. Independent source/route review, targeted correction verification if needed, then freeze.
+   Run the required complete UI boundary `npm run test:vitest -- tests/ui` once for this
+   changed App render path (last run took about fourteen minutes), `npm run typecheck`,
+   focused documentation checks and `git diff --check`. Reuse unaffected combined-suite
+   receipts and the unchanged R7 nine-case date proof; no second global suite or date campaign.
+   Commit reviewed source locally with the mandatory hook enabled.
+3. Build once with `npm run desktop:package:dir -- --config.directories.output=dist-packaged/inbox-replacement2`.
+   The installed builder accepts nested config overrides; explicit package file lists exclude
+   the previous output. Require the new output to be absent before starting. This preserves
+   the old `dist-packaged/win-unpacked` package and all original manifests. The normal release
+   check supplies map build, chunk-cycle check, simulation bundle and Warroom build; no
+   separate duplicate build. Expected cost: several minutes.
+4. Freeze all replacement files in exclusive `package-manifest2.json` with product/harness
+   commit, executable and ASAR identities; compare every file before each launch using
+   `node <evidence>/package-proof4.mjs check <fresh-label> <faction>` (seconds to a minute).
+   One bounded packaged opening proof, `node <evidence>/inbox-opening-packaged-proof.mjs`,
+   verifies home/Desk/restore and the first exact response surface without choosing an answer
+   or advancing (under two minutes). Keep its profile separate from the three shakedowns.
+5. Resume the existing command, sequentially RBiH -> RS -> HRHB, with new labels:
+   `node tools/ui/paradox_local_qa.cjs --turns=24 --faction=<faction> --label=<fresh-label> --strategic --auto-recruit --historical-choice --final-checkpoint-tour --checkpoint-turns=1,4,8,12,16,20,24 --save-load-proof --packaged-executable=F:/AWWV-worktrees/r8-decision-command-usability/dist-packaged/inbox-replacement2/win-unpacked/A War Without Victory.exe`.
+   Expected total cost: 30–90 minutes depending on route/host latency. Preserve exact commands,
+   exits, checkpoints, action transcript, autosaves/replay and final Save/load identity.
+
+**Pass / stop:** no obscured Desk action; pending brief restoration and semantics preserved;
+focused/UI/typecheck/build/hook checks pass; independent source and visible route GO; the
+replacement package has immutable matching source/assets; each fresh faction reaches exactly
+turn 24 with required route, state, diagnostics and Save/load proof. Stop the affected run on
+crash, missing/mismatched state, ambiguous choice or blocked progress. Diagnose once; targeted
+harness/route correction inside this player loop is already authorized, but no silent bypass,
+unrelated product change, extra replacement package or full campaign. Route a new out-of-scope
+product decision with concrete evidence. Do not change source while a campaign is running.
+
+R7 PRE/POST-A/POST-B equality remains evidence for its recorded revisions; dirty POST-B stays
+disclosed, accepted n392 pins and the six-pin gate remain untouched, and the PRE/two-POST
+budget stays exhausted. No baseline/canon wrapper or standalone regression is authorized.
+Update these existing records and the ledger, then commit locally; no push, merge or publication.
+
+### Inbox candidate verification
+
+The frozen candidate changes only the opening Inbox render guard in `App.tsx` and the
+existing `warroom_shell_ownership.test.ts`. It leaves pending/dismissed state untouched.
+`inbox-focused-red1.log` exits 1 for the intended new regression (23 other passes), and
+`inbox-focused-green1.log` passes 24/24, exit 0. `inbox-browser1.log` exits 0 on the retained
+unmodified turn-0 RBiH save: five screenshots show home Inbox, clear Desk, close/restored
+brief, reopened exact event card and the real `rbih_state_identity` response surface.
+The actual Decide now click and trial response click succeed; no forced click, answer,
+turn advance or DOM removal is used. Source and fixture hashes are stable.
+
+Independent review in `inbox-review.log` gives source and visible-route GO for package
+validation. `inbox-source-freeze.log` binds 29 source/test/harness hashes; the three R7
+date files and all other prior R8 source remain unchanged. The original package's 1,200
+files still match `package-manifest1.json` (`inbox-old-package-before.log`, exit 0).
+Typecheck passes in `inbox-typecheck1.log`, exit 0. Complete UI, commit hook, replacement
+build and packaged checks remain pending at this entry.
+
+**Targeted test-contract correction:** the complete UI run exposes a stale exact-substring
+assertion in `tests/ui/app_boot_main_menu.test.ts:154`: it requires the old opening Inbox
+guard without Desk ownership. The independent reviewer confirms that adding
+`&& !warroomDeskOpen` to this expectation preserves the selected-Warroom/opening-brief
+sequencing assertion and the adjacent Inbox component assertion. The successful actual
+route proves the intended behavior. Let the complete run finish without source/test edits;
+retain its exit and all unaffected results. Then update only this expectation, run
+`npm run test:vitest -- tests/ui/app_boot_main_menu.test.ts tests/ui/warroom_shell_ownership.test.ts`
+(about two seconds), and obtain targeted reviewer confirmation. No production change or
+second broad UI run is justified. Stop on any other unexplained failure; never describe the
+retained exit-1 boundary as a clean broad run. Add this one affected test to the scoped
+file list and bind all thirty final source/test/harness hashes in a new exclusive freeze.
+
+The completed boundary `inbox-ui1.log` exits 1: 353/354 files and 2,988/2,989 tests pass;
+the sole failure is that stale guard assertion. Only its expected substring changed.
+`inbox-focused-correction1.log` then passes both affected files, 45/45 tests, exit 0.
+The App and shell-ownership test hashes remain identical to the reviewed browser candidate.
+These receipts reconcile the boundary's one failure; the original exit-1 receipt is retained,
+and no fresh all-green complete-boundary run is claimed. Final preservation/source binding
+uses `inbox-scope2.mjs freeze` and exclusive `inbox-source-freeze2.json`; package proof version
+4 reads that final thirty-file freeze. The earlier scripts, freeze and receipts remain intact.
+The reviewer also required an explicit browser-proof-to-freeze binding. `inbox-scope3.mjs`
+checks browser before/after hashes, current files and the retained thirty-file freeze for
+equality (`inbox-scope-review-correction1.log`, exit 0); no source or manifest changes.
+Focused documentation checks pass 13/13 in `inbox-docs1.log`, exit 0.
+
 ## B7/B5/B8/B1 playability packet — owner scheduled 2026-09-09
 
 The owner approved the four decision-and-command usability fixes and the subsequent three-faction

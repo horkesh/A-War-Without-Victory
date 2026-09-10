@@ -17,6 +17,11 @@ engineering task. The owner has scheduled the R8 B7/B5/B8/B1 usability repairs a
 three-faction 24-turn packaged shakedowns to improve that readiness. This does not waive audio,
 offline-runtime or baseline acceptance, close R7, or activate full campaigns.
 
+**Owner continuation, 2026-09-10:** the Inbox/Desk blocker and one replacement package are
+now authorized. The replacement will include the reviewed whiteboard repair; its fresh
+three-faction 24-turn evidence is recorded in the existing R8 plan. Earlier package receipts
+retain their original source identity, and human/audio/baseline gates remain open.
+
 ### Bounded closeout audit — authorized 2026-09-09
 
 **Question:** Which R7 acceptance gates are established by retained evidence, and exactly

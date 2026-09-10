@@ -72,8 +72,9 @@ exit 0. The normal local typecheck hook and source commit pass, exit 0. Closeout
 and final hash/scope receipts use the distinct `desk39-onboard-docs2.log`,
 `desk39-onboard-scope2.log`, `desk39-onboard-commit2.log` and `desk39-onboard-final-scope.log`.
 The existing package remains from product `217c9f70a`;
-this date correction is not packaged by the earlier build. The separate opening Inbox
-blocker/replacement-package decision remains pending. R7 PRE, clean POST-A and dirty
+this date correction is not packaged by the earlier build. The owner subsequently authorized
+the opening Inbox repair and one replacement package; that work and its three 24-turn
+checks are recorded in the existing R8 Electron-validation plan. R7 PRE, clean POST-A and dirty
 POST-B retain their recorded eight-artifact/31-input equality; no new run was performed
 or attributed to this correction. Accepted n392 pins and the six-pin/calibration gate
 remain untouched and open.

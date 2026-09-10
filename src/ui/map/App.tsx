@@ -2086,7 +2086,7 @@ function App() {
               }
             }}
           />
-          {!peaceWarTransitionActive && openingBriefPending && (
+          {!peaceWarTransitionActive && openingBriefPending && !warroomDeskOpen && (
             <PresidentialInbox onAction={handlePresidentialInboxAction} eventCatalog={eventCatalogFull} />
           )}
           {warroomDeskOpen && (

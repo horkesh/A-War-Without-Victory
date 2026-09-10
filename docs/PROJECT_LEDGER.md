@@ -35255,3 +35255,40 @@ authorization. No package, campaign or simulation run is added for this date cor
 Historic PRE/POST-A/POST-B equality remains scoped to its recorded revisions; clean POST-A
 at `88996a23d` is not re-labelled as a later run. The exhausted PRE/two-POST budget, accepted
 n392 pins, inherited six-pin baseline failure, calibration and owner inspection remain explicit.
+
+### Opening Inbox blocker authorized and repaired in source — 2026-09-10
+
+The owner says, "Let's solve the inbox/package blocker," authorizing the recorded minimal
+Inbox/Desk fix, one replacement package and resumption of the three fresh 24-turn checks.
+Both tracked checkouts are clean at start: original R7 `bd7b81975`, active R8 worktree
+`d4544eba4`. The existing R8 plan records question, file scope, commands, cost and stopping
+rules before edits. The reviewed whiteboard repair and all prior package/run evidence remain.
+
+One Sol/medium implementer adds `!warroomDeskOpen` only to the standalone opening-brief
+Inbox render condition in `App.tsx`, with its focused shell ownership regression. A separate
+Sol/medium worker reviews the App fix independently; the fresh reviewer thread hit the tool
+limit, so the completed date worker supplies that separate context. No dismissal flag, pending
+brief, event action, gameplay/state/save path, date layout, asset or dependency changes.
+
+`inbox-focused-red1.log` exits 1 for the intended new failure (23 unaffected passes);
+`inbox-focused-green1.log` passes 24/24, exit 0. `inbox-browser1.log` exits 0 and captures
+home Inbox -> clear Desk -> close/restored brief -> reopened Desk/exact event. The real
+Decide now click opens `rbih_state_identity`; a trial response click establishes actionability
+without answering or advancing. The retained turn-0 save and source hashes remain unchanged.
+Independent source and five-image route review gives GO in `inbox-review.log`.
+
+`inbox-source-freeze.log` binds the initial candidate and protected R7/R8 hashes, exit 0.
+The old package still matches all 1,200 files (`inbox-old-package-before.log`, exit 0).
+Complete UI/typecheck and normal source hook precede a single build into the fresh ignored
+`dist-packaged/inbox-replacement2` output, preserving the original package. Package and
+three shakedown results are pending here; no baseline/canon wrapper, new calibration or
+full campaign is run. Historical PRE/POST equality, dirty POST-B, n392 and open gates remain.
+
+The complete UI boundary finishes with one stale render-guard assertion: 353/354 files and
+2,988/2,989 tests pass (`inbox-ui1.log`, exit 1). Its original failure receipt is retained.
+After the immutable run ends, only that exact expected substring is corrected; both affected
+files pass 45/45 (`inbox-focused-correction1.log`, exit 0). Production and browser-proof hashes
+are unchanged. Typecheck and focused documentation checks pass (`inbox-typecheck1.log` and
+`inbox-docs1.log`, exit 0; documentation 13/13). `inbox-source-freeze2.log` binds all thirty final
+source/test/harness hashes and verifies preservation, exit 0. No repeat global/UI campaign
+or claim that the retained complete UI receipt exited 0 is made.
