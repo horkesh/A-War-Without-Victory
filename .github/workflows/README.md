@@ -10,7 +10,8 @@ This directory contains the GitHub Actions workflow definitions for A War Withou
 | Baseline Regression | `baseline-regression.yml` | push to `main`, PR to `main` | Multi-job broad gate: typecheck, focused scenario anchor tests, `test:vitest:fast` (137 fast suites, includes the event-system tests via auto-discovery), `test:vitest:scenario`. The `test`/`scenarios` heavy steps are path-filtered (CODE set) and `scenario-anchors`/`scenarios` (SIM set) via the always-report shim — see "Always-report path-filter shim" below. |
 | Desktop Release Guard | `desktop-release-guard.yml` | push to `main`, PR to `main` | Builds + smoke-tests the Linux AppImage and Windows NSIS desktop packages; uploads the artifacts on every run. The packaging/probe heavy steps are path-filtered (DESKTOP set) via the always-report shim — see below. |
 | Release | `release.yml` | (see file) | Tagged-release publication pipeline. |
-| **Event System CI** | **`event-system-ci.yml`** | **push to `main` / `codex/**` / `feature/**` / `claude/**`, PR to `main`** | **Event subset, explicit strict-canon gate and byte-baseline check on every trigger. Feature-branch pushes also run typecheck; Baseline Regression owns typecheck on main pushes and PRs.** |
+| **Event System CI** | **`event-system-ci.yml`** | **push to `main` / `codex/**` / `feature/**` / `claude/**`, PR to `main`** | **Event subset and explicit strict-canon gate on every trigger. Feature-branch pushes also run typecheck; Baseline Regression owns typecheck on main pushes and PRs. The byte-baseline check moved to Baseline Pins on 2026-09-10.** |
+| Baseline Pins | `baseline-pins.yml` | push to `main` / `codex/**` / `feature/**` / `claude/**`, PR to `main` | **ADVISORY, never gates.** Compares the eight `apr1992_188w` artifact hashes against `data/derived/scenario/baselines/manifest.json`. Red usually means STALE PINS after an accepted input change, not a regression — check the checkpoints against their floors first. Do NOT refresh pins to force green; re-blessing is gated by `docs/plans/2026-09-10-baseline-reblessing-packet.md`. Deliberately excluded from the ten required checks. |
 
 R9 preparation Phase 2 retires the standalone Typecheck workflow. Baseline Regression's
 always-run `typecheck` job owns that same PR/root-lock/Node 22 contract and remains the
@@ -49,6 +50,7 @@ for `pull_request` (not `pull_request_target`) workflows.
 | `scenarios` (Baseline Regression) | no | `sim` | `npm ci` + `test:vitest:scenario` |
 | `desktop-release-check` (Desktop Release Guard) | no | `desktop` | Linux AppImage package + smoke |
 | `desktop-packaged-runtime-probe` (Desktop Release Guard) | yes | `desktop` | Windows NSIS package + runtime probe |
+| `baseline-pins` (Baseline Pins) | **no — advisory** | none (always runs) | `npm ci` + byte-baseline compare |
 
 “Required” describes the intended merge-gate contract above. The Phase 2 read-only
 GitHub inspection reported main unprotected (HTTP 404) and no rulesets. No protection

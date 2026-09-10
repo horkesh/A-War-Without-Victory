@@ -1,0 +1,55 @@
+name: Baseline Pins
+
+# ── ADVISORY. Reports, never gates. ───────────────────────────────────────────────
+#
+# Split out of `event-system-ci.yml` on 2026-09-10 (owner decision), then given its own
+# workflow file the same day for the reason below.
+#
+# WHY ITS OWN FILE: as a job inside Event System CI, a stale pin failed the JOB (correct) but
+# also set the WORKFLOW run conclusion to failure — so `main` showed a permanently red
+# "Event System CI" even though its required job passed. Check-level attribution was right and
+# workflow-level attribution was still wrong. One advisory concern, one workflow, one honest
+# conclusion.
+#
+# WHAT RED MEANS HERE: the eight `apr1992_188w` artifact hashes in
+# data/derived/scenario/baselines/manifest.json no longer match a fresh run. That is usually
+# STALE PINS after an accepted input change, not a regression. Diagnose before reacting — compare
+# the checkpoint scores against their floors via the engine health gate. If the checkpoints still
+# clear their floors, the engine is fine and the pins are behind.
+#
+# WHAT TO DO: do NOT refresh the pins to make this green. Re-blessing is a gated,
+# owner-authorized procedure — see docs/plans/2026-09-10-baseline-reblessing-packet.md and the
+# R7-BASELINE-SIX-PIN row in docs/open_gates.yml.
+#
+# NOT A REQUIRED CHECK, AND THIS IS ENFORCED. `main` gained branch protection on 2026-09-10 with
+# ten required status checks. This one is deliberately not among them; every other check on a PR
+# to main is. Do not add it — a stale pin is not a broken build.
+
+on:
+  push:
+    branches:
+      - main
+      - 'codex/**'
+      - 'feature/**'
+      - 'claude/**'
+  pull_request:
+    branches: [main]
+
+jobs:
+  baseline-pins:
+    name: Baseline pins (advisory, non-blocking)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies (root)
+        run: npm ci --legacy-peer-deps
+
+      - name: Baseline regression
+        run: node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_baseline_regression.ts
