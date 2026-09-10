@@ -12,6 +12,17 @@
  * cleanup was efficiency and dead code.
  */
 
+/**
+ * SCOPE WARNING — player-facing PROSE only, never identifiers.
+ *
+ * OSID slugs (`op:bihac:bihac_2`), formation ids, event ids, save keys and scenario keys are
+ * ASCII BY DESIGN and must never be "corrected". Adding diacritics to an identifier changes a
+ * key and breaks lookups, saves and calibration. A sweep across `tests/` on 2026-09-10 found
+ * ~20 files containing "Bihac" and ~24 containing "Gorazde" — essentially all of them slugs.
+ *
+ * Apply this checker to localized message catalogues and rendered prose. Nothing else.
+ */
+
 export interface BosnianPlaceName {
   /** The ASCII-stripped form that should never appear in player-facing text. */
   ascii: string;

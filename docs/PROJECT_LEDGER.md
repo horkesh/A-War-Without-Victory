@@ -3344,3 +3344,38 @@ tightening that is worth doing before the harness is used unsupervised. And a Wi
 cycle: Python's console encoding here is cp1252, so `print()` of a string containing `ć` raises
 `UnicodeEncodeError` AFTER the file write succeeds — the write landed, the loop aborted, and only
 one of two files was fixed. Keep script output ASCII-only on this shell.
+
+## Branch cleanup, and a stale assertion the narrow gate missed — 2026-09-10
+
+**Item 4 — branch hygiene DONE.** 26 local and 8 remote branches deleted; local 29 -> 10, remote
+13 -> 5. Every branch was independently re-verified at 0 unique commits with `git cherry` before
+deletion, not merely trusted from the tool's report. Pre-deletion list retained at
+`logs/branch-hygiene/pre-clean-landed.txt`.
+
+**`repo:branches:clean` as shipped was UNSAFE at that moment and was not used.** It expands to
+`--remote --archive --prune --push`; `--archive` tags every STRANDED branch and `--prune` then
+deletes anything carrying an archive tag. `feat/local-executor-harness` was STRANDED with 4 unique
+commits and is the head of open PR #510, so the shipped command would have archived and then
+deleted it — including the remote branch — orphaning the PR. Ran `--remote --prune --push
+--keep=feat/local-executor-harness` instead: no archiving, so stranded branches are refused.
+`ci/baseline-pins-own-workflow` was correctly refused (squash-merged, so its patch IDs differ
+forever — the documented false positive).
+
+**Two of my own claims were wrong and are corrected here.** `--keep` is NOT missing from the tool;
+it parses only as `--keep=value`, and I used the space-separated form, which threw
+`Unknown argument` and did nothing. Exit 1 for "crashed" looked identical to the exit 1 I had
+predicted for "refused" — I would have recorded a clean run if I had not read the log. And the tool
+does compare against `origin/main` (`uniqueCommitCount(ref, upstream = 'origin/main')`), not local
+main; the false STRANDED classifications came from my local copy of that ref being 15 commits
+stale, because `git fetch origin main` updates FETCH_HEAD without moving `refs/remotes/origin/main`.
+
+**A stale assertion the gate could not have caught.** `tests/ui/inbox_dedup.test.ts` pinned the
+misspelled BCS opening brief and failed the full suite on PR #510. `gate:local` had passed because
+it runs only the tests the planner declares, and I declared only the new one. That is the gate
+working as designed and also its boundary: **a narrow declared-test set does not catch collateral
+breakage.** The full suite did. Recorded as a limitation rather than patched over.
+
+**Scope warning added to the checker.** A sweep found ~20 test files containing "Bihac" and ~24
+containing "Gorazde" — essentially all OSID slugs, formation ids and save keys, which are ASCII BY
+DESIGN. Adding diacritics to an identifier changes a key and breaks lookups, saves and calibration.
+The module now says so explicitly, so a later broadening cannot quietly corrupt identifiers.

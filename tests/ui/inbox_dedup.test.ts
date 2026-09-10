@@ -183,7 +183,9 @@ describe('Presidential Inbox officer event dedupe', () => {
 
         expect(screen.getByText('Predsjednički brifing')).toBeTruthy();
         expect(screen.getByText('Republika Bosna i Hercegovina')).toBeTruthy();
-        expect(screen.getByText('Držite Sarajevo, Tuzlu, Zenicu, Bihac i druga urbana uporišta dok se armija formira pod vatrom.')).toBeTruthy();
+        // "Bihać", not "Bihac" — the diacritic was restored on 2026-09-10; this assertion had
+        // pinned the misspelling. See tests/ui/bosnian_place_name_diacritics.test.ts.
+        expect(screen.getByText('Držite Sarajevo, Tuzlu, Zenicu, Bihać i druga urbana uporišta dok se armija formira pod vatrom.')).toBeTruthy();
         expect(screen.getByRole('button', { name: /otvori sto/i })).toBeTruthy();
         expect(screen.getByRole('button', { name: /pročitaj kasnije/i })).toBeTruthy();
         expect(screen.queryByText('Presidential Brief')).toBeNull();
