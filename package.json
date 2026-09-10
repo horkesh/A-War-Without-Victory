@@ -47,6 +47,8 @@
     "engine:health:gate": "node tools/engine_health_gate.cjs",
     "gates": "node tools/validate_open_gates.cjs --list",
     "gate:local": "node tools/local_executor/gate.mjs",
+    "local:check": "node tools/local_executor/preflight.mjs",
+    "local:delegate": "node tools/local_executor/delegate.mjs",
     "gates:validate": "node tools/validate_open_gates.cjs",
     "perf:wall-clock:report": "tsx tools/perf/wall_clock_target_report.ts",
     "perf:profile-hotspot:report": "tsx tools/perf/profile_hotspot_report.ts",

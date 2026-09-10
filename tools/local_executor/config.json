@@ -1,0 +1,38 @@
+{
+  "_comment": [
+    "Local executor configuration. DATA, not code — swapping models must not require a code edit.",
+    "Measured on this machine 2026-09-10 (AMD RX 7800 XT 16 GB, Ryzen 7 5700X, DDR4-2400).",
+    "Rule of thumb that produced this choice: pick a model that fits ENTIRELY in VRAM.",
+    "Prompt throughput decides agent usefulness, not generation throughput — an agent spends",
+    "its budget reading. A 30B MoE spilling 6.3 GB to DDR4-2400 measured 8 tok/s prompt,",
+    "which is ~50 minutes to read a 25k-token file. See tools/local_executor/README.md."
+  ],
+  "host": "http://localhost:11434",
+  "model": "qwen3.5:9b",
+  "num_ctx": 32768,
+  "think": false,
+  "measured": {
+    "date": "2026-09-10",
+    "gpu": "AMD Radeon RX 7800 XT 16 GB (ROCm, gfx1101, native Windows — no WSL2)",
+    "generation_tok_s": 47.7,
+    "prompt_tok_s": 351.7,
+    "load_s": 11.2,
+    "note": "think:true measured 3971 tokens/92s for output identical to 136 tokens/3.0s at think:false"
+  },
+  "rejected": [
+    {
+      "model": "qwen3-coder:30b-a3b-q4_K_M",
+      "reason": "18 GB against 15.8 GB VRAM; 6.3 GB spilled to DDR4-2400",
+      "generation_tok_s": 12.0,
+      "prompt_tok_s": 8.0
+    },
+    {
+      "model": "qwen3.5:27b / qwen3.6:27b",
+      "reason": "dense ~16-17 GB exceeds VRAM; a dense spill is worse than an MoE spill because every parameter is active per token"
+    },
+    {
+      "model": "qwen3-coder-next (80B-A3B)",
+      "reason": "needs >45 GB for 4-bit; 44 GB combined ceiling. 2-bit would fit but degrades a code model where it matters most"
+    }
+  ]
+}

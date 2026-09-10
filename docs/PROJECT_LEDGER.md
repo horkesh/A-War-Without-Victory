@@ -3272,3 +3272,38 @@ tests added covering the shape and the flag-order independence.
 **The gate closed the loop:** `npm run gate:local -- --tests tests/open_gates_register.test.ts
 --allow-test-edits` exits 0 and records `test files changed WITH --allow-test-edits
 (planner-authorised)` — the authorisation trail is in the output, not just in someone's memory.
+
+## Local executor made a STANDING harness — 2026-09-10
+
+A tool no session discovers is not a harness. Registered in the four surfaces this repo reads at
+session start, plus a test that fails when any of them decays.
+
+**Model choice is now DATA.** `tools/local_executor/config.json` carries host/model/ctx/think plus
+the measurements behind the choice and the rejected candidates with their reasons. Swapping models
+is a data edit; the wiring test asserts the default is not hardcoded in `delegate.mjs`.
+
+**`preflight.mjs` (`npm run local:check`)** fails loudly and specifically rather than obscurely at
+the moment of use: server reachable, configured model actually pulled (the most likely cause of a
+confusing failure months from now), and whether the ollama build supports the Anthropic Messages
+API. Every failure names the command that fixes it.
+
+**Registered in:** `CLAUDE.md` (a new section — the discovery path, loaded every session), the
+napkin under Execution & Validation, project memory plus its index, and `package.json` as
+`local:check` / `local:delegate` / `gate:local`.
+
+**`tests/local_executor_harness.test.ts` pins the wiring, not the model** — it never calls ollama,
+so it passes in CI where no local model exists. Nine tests: entry points exist; config is data;
+npm scripts registered; the gate refuses with no `--tests` and on a non-existent test; delegate
+refuses with no spec and on a missing `--read` file; the determinism ban list still covers
+`.localeCompare` (the rule actually violated on 2026-09-10); and **CLAUDE.md still points at the
+harness**.
+
+**The discovery guard was proven to bite**, not assumed: removing the CLAUDE.md pointer failed the
+suite with exactly that test named, and restoring it passed. Without that check the harness could
+silently stop existing for every future session while every other test stayed green.
+
+**Method note.** The napkin entry initially concatenated onto the previous line
+(`…#0q)3. **[2026-09-10]…`) because the preceding text lacked a trailing newline — malformed
+markdown, and the entry was not counted by the cap check. Caught by verifying the category count
+afterwards rather than trusting the edit. Repaired; Execution & Validation is at 8 of 10, no
+category over cap, no unbalanced bold.

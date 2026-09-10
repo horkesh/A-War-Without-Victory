@@ -23,18 +23,25 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 
 const args = process.argv.slice(2);
 const opt = (name, fallback = '') => (args.includes(name) ? args[args.indexOf(name) + 1] : fallback);
 
-const model = opt('--model', 'qwen3.5:9b');
-const ctx = Number(opt('--ctx', '32768'));
-const think = args.includes('--think');
+// Defaults are DATA (config.json), so swapping models never requires a code edit.
+// Flags still override, for one-off experiments.
+const here = dirname(fileURLToPath(import.meta.url));
+const config = JSON.parse(readFileSync(join(here, 'config.json'), 'utf8'));
+
+const model = opt('--model', config.model);
+const ctx = Number(opt('--ctx', String(config.num_ctx)));
+const think = args.includes('--think') ? true : Boolean(config.think);
 const specPath = opt('--spec');
 const readList = opt('--read');
 const promptArg = opt('--prompt');
 const outPath = opt('--out', 'proposal.md');
-const host = opt('--host', 'http://localhost:11434');
+const host = opt('--host', config.host);
 
 if (!specPath && !promptArg) {
   console.error('REFUSING: give --spec <file> or --prompt "<text>". The executor needs a bounded request.');

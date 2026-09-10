@@ -44,6 +44,9 @@
 0q. **[2026-08-23] THE HEALTH GATE'S `dead_ops` COUNTS *INVALID* OPS, NOT *INERT* ONES — a green gate is NOT evidence operations ran. And `matched_osids` is NON-INJECTIVE.**
    Do instead: read `engine_health_gate.cjs:260` — `dead_ops: cc.invalid_operation_count`. Measured on the clean 637 baseline: gate reports `dead_ops: 0` while **13 of 42 operations recorded ZERO attacks and 21 captured ZERO objectives**.
    Worked detail: [entry_detail.md](napkin/entry_detail.md#0q)
+3. **[2026-09-10] The local executor drafts; the planner judges — and prompt speed, not generation speed, decides which model**
+   Do instead: run `npm run local:check`, then `npm run local:delegate -- --spec <task> --read <exact files>`, review the proposal, apply what is right, and prove it with `npm run gate:local -- --tests <files>`. The gate REFUSES (exit 2) when no tests are declared, because a gate with nothing to prove is not a passing gate. Measured on this box: a 9B that fits entirely in VRAM does 352 tok/s prompt; a 30B MoE spilling 6.3 GB to DDR4-2400 does 8 tok/s — ~50 minutes to read one 25k-token file, so the better model loses badly. `think:false` is separately a 30x effect. Never hand it a repo to explore: `App.tsx` alone is ~24,350 tokens. Full detail in `tools/local_executor/README.md`.
+
 ## Diagnostic Reasoning
 
 0b. **[2026-08-12] Judge findings mechanism-first, not delta-first**
