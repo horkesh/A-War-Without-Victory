@@ -1086,8 +1086,12 @@ test('turn-zero strategic smoke does not claim staged autonomy should already be
     );
 });
 
-test('strategic runs prove Assisted autonomy is pending at setup and active after the first turn', () => {
+test('strategic setup predicts the Assisted transition from validated pre-click state', () => {
     const harness = readHarness();
+    const predictStrategicAutonomySelection = loadFunction<(
+        priorLevel: unknown,
+        targetLevel: unknown,
+    ) => { autonomyLevel: number; autonomyLevelPending: number | null }>(harness, 'predictStrategicAutonomySelection');
     const assertStrategicAutonomyState = loadFunction<(
         label: string,
         state: { autonomyLevel?: number; autonomyLevelPending?: number | null } | null,
@@ -1095,19 +1099,29 @@ test('strategic runs prove Assisted autonomy is pending at setup and active afte
         expectedPending: number | null,
     ) => Record<string, number | null>>(harness, 'assertStrategicAutonomyState');
 
-    assert.deepEqual(
-        { ...assertStrategicAutonomyState('configured', { autonomyLevel: 0, autonomyLevelPending: 1 }, 0, 1) },
-        { autonomyLevel: 0, autonomyLevelPending: 1 },
+    assert.deepEqual({ ...predictStrategicAutonomySelection(2, 1) }, { autonomyLevel: 1, autonomyLevelPending: null });
+    assert.deepEqual({ ...predictStrategicAutonomySelection(1, 1) }, { autonomyLevel: 1, autonomyLevelPending: null });
+    assert.deepEqual({ ...predictStrategicAutonomySelection(0, 1) }, { autonomyLevel: 0, autonomyLevelPending: 1 });
+    for (const invalidPrior of [undefined, null, Number.NaN, 1.5, -1, 4, '2']) {
+        assert.throws(() => predictStrategicAutonomySelection(invalidPrior, 1), /prior autonomy level.*invalid/i);
+    }
+    assert.throws(
+        () => assertStrategicAutonomyState('wrong active', { autonomyLevel: 2, autonomyLevelPending: null }, 1, null),
+        /wrong active.*level 1/i,
     );
     assert.throws(
-        () => assertStrategicAutonomyState('not staged', { autonomyLevel: 0, autonomyLevelPending: null }, 0, 1),
-        /not staged.*pending 1/i,
+        () => assertStrategicAutonomyState('wrong pending', { autonomyLevel: 1, autonomyLevelPending: 1 }, 1, null),
+        /wrong pending.*pending none/i,
     );
-    assert.throws(
-        () => assertStrategicAutonomyState('not applied', { autonomyLevel: 0, autonomyLevelPending: 1 }, 1, null),
-        /not applied.*level 1/i,
-    );
-    assert.match(extractFunctionSource(harness, 'configureStrategicRun'), /assertStrategicAutonomyState/);
+    const readState = extractFunctionSource(harness, 'readState');
+    assert.match(readState, /autonomyLevel: raw\.meta\?\.autonomy_level \?\? null/);
+    const configureStrategicRun = extractFunctionSource(harness, 'configureStrategicRun');
+    const priorRead = configureStrategicRun.indexOf('const autonomyBeforeSelection');
+    const prediction = configureStrategicRun.indexOf('const autonomyExpectation');
+    const click = configureStrategicRun.indexOf("clickTestId(frame, 'autonomy-level-1'");
+    const observedRead = configureStrategicRun.indexOf('const configuredState');
+    assert.ok(priorRead >= 0 && priorRead < prediction && prediction < click && click < observedRead);
+    assert.match(configureStrategicRun, /assertStrategicAutonomyState/);
     assert.match(extractFunctionSource(harness, 'playTurns'), /after\?\.turn === 1[\s\S]*assertStrategicAutonomyState/);
 });
 

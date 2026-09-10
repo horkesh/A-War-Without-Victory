@@ -1549,7 +1549,7 @@ async function readState(frame) {
     date: raw.meta?.date ?? raw.date ?? null,
     phase: raw.meta?.phase ?? raw.phase ?? null,
     playerFaction,
-    autonomyLevel: raw.meta?.autonomy_level ?? 0,
+    autonomyLevel: raw.meta?.autonomy_level ?? null,
     autonomyLevelPending: raw.meta?.autonomy_level_pending ?? null,
     pendingEventDecisionIds: playerPendingEventDecisions
       .map(({ id }) => id)
@@ -1769,18 +1769,43 @@ function assertStrategicAutonomyState(label, state, expectedLevel, expectedPendi
   return { autonomyLevel, autonomyLevelPending };
 }
 
+function predictStrategicAutonomySelection(priorLevel, targetLevel) {
+  if (!Number.isInteger(priorLevel) || priorLevel < 0 || priorLevel > 3) {
+    throw new Error(`Strategic setup prior autonomy level is invalid: ${priorLevel ?? 'unavailable'}`);
+  }
+  if (!Number.isInteger(targetLevel) || targetLevel < 0 || targetLevel > 3) {
+    throw new Error(`Strategic setup target autonomy level is invalid: ${targetLevel ?? 'unavailable'}`);
+  }
+  if (targetLevel <= priorLevel) {
+    return { autonomyLevel: targetLevel, autonomyLevelPending: null };
+  }
+  return { autonomyLevel: priorLevel, autonomyLevelPending: targetLevel };
+}
+
 async function configureStrategicRun(frame) {
   await clearOpenSurfaces(frame);
   const openedArmyHq = await openArmyHqFromCurrentSurface(frame, 'strategic army hq', { afterMs: 900 });
   if (!openedArmyHq) return { ok: false, error: 'army-hq-route-unavailable' };
   const openedPersonnel = await clickAndMeasure(frame, /^Personnel$|army-hq-tab-personnel/i, 'strategic personnel', { afterMs: 700 });
   const openedAutonomy = await clickTestId(frame, 'personnel-open-autonomy', 'strategic autonomy route', { afterMs: 700 });
+  const assistedAutonomyLevel = 1;
+  const autonomyBeforeSelection = openedAutonomy && !resumeSavePath
+    ? await readState(frame).catch(() => null)
+    : null;
+  const autonomyExpectation = openedAutonomy && !resumeSavePath
+    ? predictStrategicAutonomySelection(autonomyBeforeSelection?.autonomyLevel, assistedAutonomyLevel)
+    : null;
   const selectedAssisted = openedAutonomy
     ? await clickTestId(frame, 'autonomy-level-1', 'strategic autonomy assisted', { afterMs: 900 })
     : false;
   const configuredState = selectedAssisted ? await readState(frame).catch(() => null) : null;
   const autonomyProof = selectedAssisted && !resumeSavePath
-    ? assertStrategicAutonomyState('Strategic setup not staged', configuredState, 0, 1)
+    ? assertStrategicAutonomyState(
+      'Strategic setup transition mismatch',
+      configuredState,
+      autonomyExpectation.autonomyLevel,
+      autonomyExpectation.autonomyLevelPending,
+    )
     : null;
   await closeOpenSurface(frame);
   return {
@@ -1789,6 +1814,8 @@ async function configureStrategicRun(frame) {
     openedPersonnel,
     openedAutonomy,
     selectedAssisted,
+    autonomyBeforeSelection,
+    autonomyExpectation,
     configuredState,
     autonomyProof,
   };

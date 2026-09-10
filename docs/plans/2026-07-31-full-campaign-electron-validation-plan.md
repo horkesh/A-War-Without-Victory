@@ -212,6 +212,34 @@ text/location and accepts source content only when letters or numbers remain aft
 matching label. All packaged source, assets and the thirty-file inventory apart from the
 two approved harness files remain bound to the previous reviewed candidate.
 
+**Fresh RBiH attempt 5 / autonomy setup correction:** source-reader commit `650798fdd`
+and normal hook pass (`inbox-commit-harness1.log`, exit 0); freeze3 and package precheck
+pass. Attempt 5 (`shakedown-rbih5.log`, exit 1) successfully applies the authored civic
+response and reaches 76 initial-tour screenshots, including its recorded Chronicle entry.
+It then stops at turn 0 before command-authority exercises: the legacy setup assertion
+hardcodes current level 0 / pending 1 after selecting Assisted. The fresh campaign starts
+at level 2, and the canonical existing `set-autonomy-level` IPC handler immediately applies
+a downward numeric change to level 1 with no pending value. Increasing delegation stages
+one turn; choosing the current level clears pending. The package behaved consistently with
+that unchanged contract (`src/desktop/electron-main.cjs`, handler around line 3968).
+
+**Question / commands / cost / stop before edits:** can the two-file harness/test correction
+assert the existing contract against the observed valid pre-click autonomy level, instead
+of assuming every start is level 0? Capture pre-click state; predict the required active/
+pending result for target 1 before reading the outcome; reject absent/invalid prior state
+and mismatched active/pending outcomes. Retain first-turn/final Assisted checks, actual UI
+selection, historical policy, route tours and Save/load. Focused RED/GREEN in the existing
+`tests/paradox_local_qa_harness.test.ts` (seconds), independent targeted review, new exclusive
+freeze4, normal local hook and full package comparison precede fresh RBiH attempt 6 with
+the same command and unchanged package. Logs use `autonomy-setup-*`; retain attempt 5 and
+all earlier receipts. No product/autonomy semantics change, second replacement build or
+broad/UI/headless campaign. Stop on another unexplained failure or required product change.
+Focused `autonomy-setup-red1.log` exits 1 for the missing predictor (50 unaffected passes);
+`autonomy-setup-green1.log` passes 51/51, exit 0. The harness records pre-click state and
+predicted outcome, preserves absent autonomy as unknown, and retains both first-turn and
+final level-1 assertions. `inbox-scope5.mjs` pins these reviewed harness/test bytes in
+exclusive freeze4 while retaining the unchanged browser/product/freeze2 chain.
+
 ## B7/B5/B8/B1 playability packet — owner scheduled 2026-09-09
 
 The owner approved the four decision-and-command usability fixes and the subsequent three-faction

@@ -35326,3 +35326,21 @@ reviewer's targeted nonempty-source correction. All RED and failed launcher rece
 preserved; `historical-source-green1-launch-failure.txt` records outer exit 1 and unavailable
 child exit for the failed npm-JavaScript-as-executable invocation. No product change/build
 is needed. The normal hook, final freeze and fresh RBiH retry follow targeted review.
+
+Source-reader commit `650798fdd473e297834956bf526a2adee63c3023`, its normal hook,
+freeze3 and the 1,200-file package precheck pass. Fresh RBiH attempt 5 applies the exact
+authored civic response and completes 76 initial-tour captures, including its visible
+Chronicle receipt, before stopping at autonomy setup (`shakedown-rbih5.log`, exit 1).
+It remains turn 0. The harness assumes every campaign starts at level 0 and must stage
+Assisted level 1. This fresh campaign starts at 2; the unchanged canonical IPC contract
+correctly applies 2 -> 1 immediately with no pending value. The existing plan records
+the next two-file harness/test correction: predict active/pending values from valid
+pre-click state and retain strict first-turn/final Assisted checks. No product or
+autonomy rule changes, new package or baseline run are authorized by that correction.
+
+The bounded autonomy candidate passes 51/51 focused harness tests (`autonomy-setup-green1.log`,
+exit 0); its RED receipt exits 1 for the missing predictor with 50 unaffected passes.
+It captures valid pre-click state, predicts the canonical active/pending result before the
+UI click, then requires that exact outcome. Absent autonomy remains unknown; first-turn
+and final Assisted checks remain mandatory. Scope5/freeze4 and the normal hook follow
+independent targeted review; the same manifest2 package is retained for fresh attempt 6.
