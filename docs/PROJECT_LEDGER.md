@@ -35292,3 +35292,37 @@ are unchanged. Typecheck and focused documentation checks pass (`inbox-typecheck
 `inbox-docs1.log`, exit 0; documentation 13/13). `inbox-source-freeze2.log` binds all thirty final
 source/test/harness hashes and verifies preservation, exit 0. No repeat global/UI campaign
 or claim that the retained complete UI receipt exited 0 is made.
+
+The minimal Inbox fix is committed at `7d97b72fc1ea8d8dbe04a65f7eab77e1507f53a6`
+with the normal typecheck hook, exit 0 (`inbox-commit1.log`). The authorized single
+replacement build passes (`package2.log`, exit 0) in `dist-packaged/inbox-replacement2`.
+Its 1,200-file manifest tree is `0cb25a80c4da25f2be8cc65a34b531a66c563e94f6d18926b2588a30cfad8018`;
+the original 1,200-file package remains byte-identical. Only the emitted tactical UI
+CSS/JS and their index references differ; executable/ASAR and other resources remain
+unchanged (`package2-comparison.json`). The unchanged R7 whiteboard repair is included.
+
+Packaged proof attempts 1/2 exit 1 on an optional Acknowledge click racing the documented
+4.2-second War Has Started auto-dismissal. Network idle alone does not fix it. Evidence-only
+proof3 waits for the exact named splash to disappear, fails a persistent intro, and retains
+all route/state checks. It passes five actual screenshots, pending Inbox restoration, exact
+event response actionability, raw-state equality and zero answers/advances/errors, exit 0.
+Independent review gives GO for the three planned checks (`inbox-review.log`). Failed
+scripts, logs, profiles and images are preserved; no replacement build is repeated.
+
+Fresh RBiH attempt 4 uses the unchanged package and a verified fresh profile, but stops
+before answering/advancing (`shakedown-rbih4.log`, exit 1): the harness requires a historical
+source in the badge tooltip, while the exact event visibly renders it in its Decision
+Context source dossier. The existing plan records the authorized two-file harness/test
+correction, focused RED/GREEN, review, normal hook and fresh attempt 5. No source requirement,
+historical-choice policy, product behavior or package is waived or changed by that correction.
+RS/HRHB have not launched at this checkpoint; baseline, calibration and owner acceptance remain.
+
+The source-reader correction now scopes the historical response and dossier to one visible
+exact event dialog, requires the current player's matching pending event/response, and
+records the rendered source and its location. Same-modal visible dossier fallback scrolls
+into view; hidden, foreign, ambiguous, missing, label-only and punctuation-only sources
+remain failures. Focused `historical-source-green3.log` passes 51/51, exit 0 after the
+reviewer's targeted nonempty-source correction. All RED and failed launcher receipts are
+preserved; `historical-source-green1-launch-failure.txt` records outer exit 1 and unavailable
+child exit for the failed npm-JavaScript-as-executable invocation. No product change/build
+is needed. The normal hook, final freeze and fresh RBiH retry follow targeted review.

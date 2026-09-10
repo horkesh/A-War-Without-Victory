@@ -160,6 +160,58 @@ Recheck all package bytes and use fresh `inbox-packaged3`; cost under two minute
 Stop on a persistent splash, missing Inbox, blocked route, state drift or other failure.
 This is the authorized evidence-route correction; no third build or product change.
 
+**Packaged Inbox proof GO; historical-source route correction:** `inbox-packaged3.log`
+passes all five actual steps, unchanged raw RBiH turn-0 state, zero answers/advances and
+no errors, exit 0. Independent five-image review in `inbox-review.log` gives GO for the
+three planned runs. `package2-before-rbih4.log` passes all 1,200 files and fresh profile.
+The fresh RBiH run (`shakedown-rbih4.log`, exit 1) passes startup and the repaired Desk
+route, then stops before answering/advancing because the harness demands `Source:` in
+the historical badge tooltip. Retained modal text in `inbox-packaged3/result.json` shows
+the same event's authored source under `Decision Context` / `Source dossier:` instead.
+`EventDecisionModal.tsx` renders that player-facing catalog source in
+`decision-context-dossier` within the exact `event-decision-title` dialog; the tooltip
+has only its historical-default explanation for this pending decision. This is a source
+location assumption in the harness, not permission to invent or waive provenance.
+
+**Question / commands / cost / stop before edits:** change only
+`tools/ui/paradox_local_qa.cjs` and `tests/paradox_local_qa_harness.test.ts` so the historical
+policy can read a nonempty rendered source from the exact selected event's visible modal
+dossier as well as its source tooltip. Retain exact player/event/response matching and
+ambiguity failures; record source text/location in the transcript. Test tooltip and
+dossier success, missing/empty/hidden/foreign/ambiguous source failures, and staff fallback
+with focused RED/GREEN `npm run test:vitest -- tests/paradox_local_qa_harness.test.ts`
+(seconds). Independent targeted review and normal commit hook precede a fresh RBiH attempt
+5 with the unchanged manifest2 package; no full UI/build/simulation rerun. Bind the two
+new harness hashes in a new exclusive freeze, while every packaged product hash remains
+fixed. Recheck all package bytes and a fresh profile before the same 24-turn command.
+This is the already-authorized harness/route correction; stop on another unexplained
+failure, absent source, ambiguous choice, package/source drift or a product change need.
+`inbox-scope4.mjs` / exclusive freeze3 bind the corrected harness and compare every other
+file to reviewed freeze2 and browser proof. `package-proof5.mjs` preserves manifest2 and
+the complete package comparison; its sole additional post-package allowance is the existing
+R7 amendment's documentation update, which records that its repaired date is now packaged.
+Use proof5 for subsequent launch checks. No packaged product file is added to that allowance.
+Focused harness candidate receipts are distinct: `historical-source-red1.log` is a test-loader
+syntax failure; `historical-source-red2.log` exposes the missing dossier route; the final
+`historical-source-red3.log` exits 1 with two intended failures and 49 unaffected passes.
+The first GREEN launcher passes npm's JavaScript entry as an executable and fails to launch
+the child; its incomplete `historical-source-green1.log` remains. Corrected Node invocation
+`historical-source-green2.log` passes 51/51, exit 0. `inbox-docs2.log` passes 13/13, exit 0.
+`historical-source-green1-launch-failure.txt` records the exact outer command and exit 1,
+`spawn EFTYPE` error, and unavailable child exit/signal without altering the original receipt.
+Independent targeted review and normal hook remain required before attempt 5.
+The reviewer requires one narrow content correction before freezing: a label-only
+`Source dossier:` is not a citation. Require meaningful text after that English prefix,
+and after tooltip `Source:`, rejecting whitespace/punctuation-only placeholders while
+recording the exact visible source string unchanged. Verify new cases with distinct
+`historical-source-red4.log` / `historical-source-green3.log` in the same focused file;
+cost seconds, stop if valid sources or staff behavior regress. No broader rerun or build.
+The targeted content correction is RED in `historical-source-red4.log` and GREEN in
+`historical-source-green3.log`, exit 0, 51/51 tests. It preserves the exact visible source
+text/location and accepts source content only when letters or numbers remain after the
+matching label. All packaged source, assets and the thirty-file inventory apart from the
+two approved harness files remain bound to the previous reviewed candidate.
+
 ## B7/B5/B8/B1 playability packet — owner scheduled 2026-09-09
 
 The owner approved the four decision-and-command usability fixes and the subsequent three-faction

@@ -44,10 +44,25 @@ function selectHistoricalEventChoice(decision) {
   throw new Error('No ranked authored historical default or explicit staff recommendation');
 }
 
+function hasMeaningfulSourceContent(value, prefix) {
+  if (typeof value !== 'string') return false;
+  const labelIndex = value.toLocaleLowerCase('en-US').lastIndexOf(prefix.toLocaleLowerCase('en-US'));
+  if (labelIndex < 0) return false;
+  const content = value.slice(labelIndex + prefix.length).trim();
+  return /[\p{L}\p{N}]/u.test(content);
+}
+
 async function policyEventResponseControl(surface) {
-  const controls = surface.locator('[data-testid="event-decision-response"]');
-  if (!historicalChoice) return { loc: controls.first(), choice: null };
-  const eventId = await surface.locator('[data-testid="event-decision-response-rail"]').getAttribute('data-event-id');
+  if (!historicalChoice) return { loc: surface.locator('[data-testid="event-decision-response"]').first(), choice: null };
+  const modals = surface.locator('[role="dialog"][aria-labelledby="event-decision-title"]:visible');
+  const modalCount = await modals.count();
+  if (modalCount !== 1) throw new Error('Historical-choice decision modal is absent or ambiguous');
+  const modal = modals.first();
+  const rails = modal.locator('[data-testid="event-decision-response-rail"]');
+  const railCount = await rails.count();
+  if (railCount !== 1) throw new Error('Historical-choice response rail is absent or ambiguous');
+  const eventId = await rails.first().getAttribute('data-event-id');
+  const controls = modal.locator('[data-testid="event-decision-response"]');
   const raw = await surface.evaluate(async () => {
     const value = await window.awwv.getCurrentGameState();
     return typeof value === 'string' ? JSON.parse(value) : value;
@@ -59,11 +74,35 @@ async function policyEventResponseControl(surface) {
   const matching = labels.map((label, index) => label === selected.label ? index : -1).filter(index => index >= 0);
   if (matching.length !== 1) throw new Error(`Historical-choice control is absent or ambiguous: ${eventId}/${selected.id}`);
   const loc = controls.nth(matching[0]);
-  const source = selected.basis === 'staff_recommendation' ? 'none' : await loc.locator('[title]').first().getAttribute('title');
-  if (selected.basis === 'authored_historical_default' && !source?.includes('Source:')) {
-    throw new Error(`Historical-choice source note unavailable: ${eventId}/${selected.id}`);
+  let source = 'none';
+  let sourceLocation = 'not_required';
+  if (selected.basis === 'authored_historical_default') {
+    const tooltip = await loc.locator('[title]').first().getAttribute('title');
+    if (hasMeaningfulSourceContent(tooltip, 'Source:')) {
+      source = tooltip;
+      sourceLocation = 'response_tooltip';
+    } else {
+      const dossiers = modal.locator('[data-testid="decision-context-dossier"]');
+      const visibleDossiers = [];
+      for (let index = 0; index < await dossiers.count(); index += 1) {
+        const dossier = dossiers.nth(index);
+        if (await dossier.isVisible()) visibleDossiers.push(dossier);
+      }
+      if (visibleDossiers.length > 1) throw new Error(`Historical-choice source note is ambiguous: ${eventId}/${selected.id}`);
+      if (visibleDossiers.length === 1) {
+        await visibleDossiers[0].scrollIntoViewIfNeeded();
+        const dossierText = (await visibleDossiers[0].innerText()).trim();
+        if (hasMeaningfulSourceContent(dossierText, 'Source dossier:')) {
+          source = dossierText;
+          sourceLocation = 'decision_context_dossier';
+        }
+      }
+      if (sourceLocation === 'not_required') {
+        throw new Error(`Historical-choice source note unavailable: ${eventId}/${selected.id}`);
+      }
+    }
   }
-  return { loc, choice: { eventId, responseId: selected.id, responseLabel: selected.label, basis: selected.basis, source, turn: raw.meta.turn, faction: raw.meta.player_faction, options: decision.response_options.map(option => ({ id: option.id, label: option.label })), playerInput: true } };
+  return { loc, choice: { eventId, responseId: selected.id, responseLabel: selected.label, basis: selected.basis, source, sourceLocation, turn: raw.meta.turn, faction: raw.meta.player_faction, options: decision.response_options.map(option => ({ id: option.id, label: option.label })), playerInput: true } };
 }
 
 function selectCheckpointTurns(raw, targetTurn, skip) {

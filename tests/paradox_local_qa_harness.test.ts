@@ -39,6 +39,10 @@ function loadFunction<T>(source: string, name: string, context: Record<string, u
     return runInNewContext(`(${extractFunctionSource(source, name)})`, context) as T;
 }
 
+function loadAsyncFunction<T>(source: string, name: string, context: Record<string, unknown> = {}): T {
+    return runInNewContext(`(async ${extractFunctionSource(source, name)})`, context) as T;
+}
+
 test('explicit shakedown checkpoints preserve required visits and reject incomplete or disabled schedules', () => {
     const select = loadFunction<(raw: string | null, target: number, skip: boolean) => Set<number>>(
         readHarness(), 'selectCheckpointTurns',
@@ -64,6 +68,135 @@ test('historical choice uses explicit provenance instead of first option and sto
     assert.throws(() => select({ response_options: options, historical_default_response_id: 'missing' }), /missing/i);
     assert.throws(() => select({ response_options: options.map(o => ({ ...o, historical_marker: 'historical_default' })) }), /ambiguous/i);
     assert.throws(() => select({ response_options: [{ ...options[0], historical_marker: 'historical_default' }, options[1]], historical_default_response_id: 'historical' }), /ambiguous/i);
+});
+
+type HistoricalPolicySurfaceOptions = {
+    basis?: 'authored_historical_default' | 'staff_recommendation';
+    tooltip?: string | null;
+    dossiers?: Array<{ text: string; visible: boolean }>;
+    foreignDossiers?: Array<{ text: string; visible: boolean }>;
+};
+
+function historicalPolicySurface({
+    basis = 'authored_historical_default',
+    tooltip = null,
+    dossiers = [],
+    foreignDossiers = [],
+}: HistoricalPolicySurfaceOptions = {}) {
+    const eventId = 'event-a';
+    const response = { id: basis === 'staff_recommendation' ? 'staff' : 'historical', label: basis === 'staff_recommendation' ? 'Staff' : 'Historical' };
+    const decision = {
+        event_id: eventId,
+        faction: 'RBiH',
+        response_options: [
+            { id: 'historical', label: 'Historical', historical_marker: 'historical_default' },
+            { id: 'staff', label: 'Staff' },
+        ],
+        ...(basis === 'staff_recommendation'
+            ? { staff_recommended_response_id: 'staff', response_options: [{ id: 'first', label: 'First' }, { id: 'staff', label: 'Staff' }] }
+            : {}),
+    };
+    const titleList = {
+        first: () => ({ getAttribute: async (name: string) => name === 'title' ? tooltip : null }),
+    };
+    const dossierScrolls: number[] = [];
+    const responseItems = [response].map((item) => ({
+        ...item,
+        locator: (selector: string) => selector === '[title]' ? titleList : emptyList,
+    }));
+    const responseList = {
+        first: () => responseItems[0],
+        nth: (index: number) => responseItems[index],
+        evaluateAll: async (callback: (nodes: any[]) => unknown) => callback(responseItems.map((item) => ({
+            firstElementChild: { firstElementChild: { textContent: item.label } },
+        }))),
+    };
+    const dossierList = (rows: Array<{ text: string; visible: boolean }>) => ({
+        count: async () => rows.length,
+        nth: (index: number) => ({
+            isVisible: async () => rows[index]?.visible ?? false,
+            scrollIntoViewIfNeeded: async () => { dossierScrolls.push(index); },
+            innerText: async () => rows[index]?.text ?? '',
+        }),
+    });
+    const rail = { getAttribute: async (name: string) => name === 'data-event-id' ? eventId : null };
+    const modal = {
+        locator: (selector: string) => {
+            if (selector === '[data-testid="event-decision-response-rail"]') return { count: async () => 1, first: () => rail };
+            if (selector === '[data-testid="event-decision-response"]') return responseList;
+            if (selector === '[data-testid="decision-context-dossier"]') return dossierList(dossiers);
+            return emptyList;
+        },
+    };
+    const modalList = { count: async () => 1, first: () => modal };
+    const emptyList = { count: async () => 0, first: () => ({ getAttribute: async () => null }) };
+    return {
+        locator: (selector: string) => {
+            if (selector === '[role="dialog"][aria-labelledby="event-decision-title"]:visible') return modalList;
+            if (selector === '[data-testid="event-decision-response-rail"]') return rail;
+            if (selector === '[data-testid="event-decision-response"]') return responseList;
+            if (selector === '[data-testid="decision-context-dossier"]') return dossierList(foreignDossiers);
+            return emptyList;
+        },
+        evaluate: async () => ({
+            meta: { player_faction: 'RBiH', turn: 4 },
+            military: { pending_event_decisions: [decision] },
+        }),
+        dossierScrolls,
+    };
+}
+
+test('historical event policy accepts exact visible tooltip or same-modal dossier provenance and records its location', async () => {
+    const harness = readHarness();
+    const selectHistoricalEventChoice = loadFunction<(decision: any) => any>(harness, 'selectHistoricalEventChoice');
+    const hasMeaningfulSourceContent = loadFunction<(value: unknown, prefix: string) => boolean>(harness, 'hasMeaningfulSourceContent');
+    const policy = loadAsyncFunction<(surface: any) => Promise<any>>(harness, 'policyEventResponseControl', {
+        historicalChoice: true,
+        selectHistoricalEventChoice,
+        hasMeaningfulSourceContent,
+    });
+
+    const tooltip = await policy(historicalPolicySurface({ tooltip: 'Historical default. Source: Archive volume 1' }));
+    assert.equal(tooltip.choice.source, 'Historical default. Source: Archive volume 1');
+    assert.equal(tooltip.choice.sourceLocation, 'response_tooltip');
+
+    const dossierSurface = historicalPolicySurface({ dossiers: [{ text: 'Source dossier: Archive volume 2', visible: true }] });
+    const dossier = await policy(dossierSurface);
+    assert.equal(dossier.choice.source, 'Source dossier: Archive volume 2');
+    assert.equal(dossier.choice.sourceLocation, 'decision_context_dossier');
+    assert.deepEqual(dossierSurface.dossierScrolls, [0]);
+
+    const staff = await policy(historicalPolicySurface({ basis: 'staff_recommendation' }));
+    assert.equal(staff.choice.source, 'none');
+    assert.equal(staff.choice.sourceLocation, 'not_required');
+});
+
+test('historical event policy rejects absent, empty, hidden, foreign, or ambiguous modal provenance', async () => {
+    const harness = readHarness();
+    const selectHistoricalEventChoice = loadFunction<(decision: any) => any>(harness, 'selectHistoricalEventChoice');
+    const hasMeaningfulSourceContent = loadFunction<(value: unknown, prefix: string) => boolean>(harness, 'hasMeaningfulSourceContent');
+    const policy = loadAsyncFunction<(surface: any) => Promise<any>>(harness, 'policyEventResponseControl', {
+        historicalChoice: true,
+        selectHistoricalEventChoice,
+        hasMeaningfulSourceContent,
+    });
+
+    await assert.rejects(policy(historicalPolicySurface()), /source note unavailable/i);
+    await assert.rejects(policy(historicalPolicySurface({ tooltip: 'Historical default. Source:   ' })), /source note unavailable/i);
+    await assert.rejects(policy(historicalPolicySurface({ tooltip: 'Historical default. Source: ...' })), /source note unavailable/i);
+    await assert.rejects(policy(historicalPolicySurface({ dossiers: [{ text: '   ', visible: true }] })), /source note unavailable/i);
+    await assert.rejects(policy(historicalPolicySurface({ dossiers: [{ text: 'Source dossier:   ', visible: true }] })), /source note unavailable/i);
+    await assert.rejects(policy(historicalPolicySurface({ dossiers: [{ text: 'Source dossier: --', visible: true }] })), /source note unavailable/i);
+    await assert.rejects(policy(historicalPolicySurface({ dossiers: [{ text: 'Source dossier: Hidden', visible: false }] })), /source note unavailable/i);
+    await assert.rejects(policy(historicalPolicySurface({ foreignDossiers: [{ text: 'Source dossier: Foreign modal', visible: true }] })), /source note unavailable/i);
+    await assert.rejects(policy(historicalPolicySurface({ dossiers: [
+        { text: 'Source dossier: First', visible: true },
+        { text: 'Source dossier: Second', visible: true },
+    ] })), /ambiguous/i);
+
+    const policySource = extractFunctionSource(harness, 'policyEventResponseControl');
+    assert.match(policySource, /\[role="dialog"\]\[aria-labelledby="event-decision-title"\]:visible/);
+    assert.match(policySource, /decision-context-dossier/);
 });
 
 test('packaged startup waits for the embedded React owner and follows its complete campaign controls', async () => {

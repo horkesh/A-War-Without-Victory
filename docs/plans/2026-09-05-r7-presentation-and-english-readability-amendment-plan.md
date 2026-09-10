@@ -20,6 +20,15 @@ runtime dependency.
 
 ## 1. Header Contract
 
+**Inbox/package continuation — 2026-09-10:** the owner subsequently authorized the
+separate Inbox/Desk repair and one replacement package in the existing R8 worktree.
+Inbox source commit `7d97b72fc` includes the reviewed on-whiteboard correction
+`ea33b23a5`; the replacement build and five-step packaged Inbox route pass. The original
+package and all failed receipts remain preserved. Fresh three-faction 24-turn checks are
+governed by the existing [R8 plan](2026-07-31-full-campaign-electron-validation-plan.md).
+This supersedes the pending Inbox/package decision below, without changing the recorded
+R7 date proof, PRE/POST provenance, consumed run budget or open baseline/acceptance gates.
+
 ### Date must remain on the whiteboard — owner correction, 2026-09-10
 
 The owner correctly identifies that the date is now painted beside the whiteboard. The
@@ -197,7 +206,7 @@ identity; coordinate any later shared-build edit through the R9 preparation owne
 | **Source finding set** | [Showcase screenshot GUI audit](../40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_AUDIT.md) (FROZEN, 29 findings) |
 | **Panel record** | [Tier-1 specialist reports](../40_reports/working/20260905_SHOWCASE_AUDIT_PANEL_SPECIALIST_REPORTS.md) |
 | **Collision rules** | §8 of the roadmap: *"Map/Desk English layout strings — R1/R2 layout first; R7 accessibility/readability proof second."* R1/R2 are CLOSED, so their layout pass is complete and this is the open second pass. One file has one owning phase; see §4. |
-| **Current next action** | Date correction is reviewed, validated and locally committed at `ea33b23a5`. Preserve the existing PRE/POST provenance and failing baseline gate; no new simulation campaign. The separate opening Inbox/replacement-package scope decision and broader R7 acceptance remain open. |
+| **Current next action** | Date correction is reviewed, validated and locally committed at `ea33b23a5`, and included in the owner-authorized replacement package at `7d97b72fc`. Follow the existing R8 plan for the three 24-turn checks. Preserve PRE/POST provenance, the exhausted run budget and failing baseline gate; broader R7 acceptance remains open. |
 
 **Owner continuation:** date-only whiteboard acceptance is approved, and investigation of
 the six pre-existing baseline mismatches is authorized. This supersedes the full-board
