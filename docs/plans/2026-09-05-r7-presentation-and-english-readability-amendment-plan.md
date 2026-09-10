@@ -26,6 +26,11 @@ Inbox source commit `7d97b72fc` includes the reviewed on-whiteboard correction
 `ea33b23a5`; the replacement build and five-step packaged Inbox route pass. The original
 package and all failed receipts remain preserved. Fresh three-faction 24-turn checks are
 governed by the existing [R8 plan](2026-07-31-full-campaign-electron-validation-plan.md).
+RBiH attempt 6 subsequently reaches turn 24 with 577 verified captures, but its final
+readability gate exits 1 on opening/setup sizes and two status colours, before Save/load.
+The on-whiteboard date and Inbox repair remain intact. Runtime request/sector-warning
+dispositions also remain open; RS/HRHB have not launched. A further source/package repair
+is proposed in that R8 record, without waiving R7 acceptance or expanding this build budget.
 This supersedes the pending Inbox/package decision below, without changing the recorded
 R7 date proof, PRE/POST provenance, consumed run budget or open baseline/acceptance gates.
 

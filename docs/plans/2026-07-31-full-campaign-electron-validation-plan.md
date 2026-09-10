@@ -9,7 +9,7 @@
 **Tech stack:** Electron, Playwright/CDP, packaged directory build, `paradox_local_qa.cjs`, deterministic autosave/replay comparison, Markdown diary template.
 
 **Date:** 2026-07-31
-**Status:** READY -- executes after R1-R7 are green
+**Status:** ACTIVE — Inbox repair/package verified; fresh RBiH shakedown blocked at final readability, with runtime disposition also open. Full campaigns remain deferred.
 **Roadmap workstream:** R8
 **Canonical owner:** packaged Electron UI and bound autosave/replay; diary is the product verdict
 **Collision rule:** This plan does not repair source while a session is running. Findings are routed to the owning plan, verified, then the affected session restarts from a fresh campaign.
@@ -239,6 +239,81 @@ Focused `autonomy-setup-red1.log` exits 1 for the missing predictor (50 unaffect
 predicted outcome, preserves absent autonomy as unknown, and retains both first-turn and
 final level-1 assertions. `inbox-scope5.mjs` pins these reviewed harness/test bytes in
 exclusive freeze4 while retaining the unchanged browser/product/freeze2 chain.
+
+### Fresh RBiH attempt 6 — final readability gate, 2026-09-10
+
+Autonomy correction `c31135f35fd66c164e0d9e8baf2756cc6de1e378`, its normal hook
+(`inbox-commit-harness2.log`), freeze4 and `package2-before-rbih6.log` pass, exit 0.
+The unchanged replacement reaches exactly RBiH turn 24 and captures 577 screenshots,
+including the prescribed checkpoints and final tour. `shakedown-rbih6.log` exits 1 at
+the final readability gate, before the Save/load function is called. This is not a
+passing shakedown or a Save/load receipt. RS and HRHB have not launched.
+
+**Read-only triage question / commands / cost / stop:** do the retained 9.3–11.5px
+opening/menu text and two low-contrast label styles represent actual packaged product
+defects, or a harness measurement error? Inspect the existing attempt-6 progress JSON,
+readability JSON and actual PNGs; group diagnostics, verify screenshot/state/harness
+hashes, and trace the exact CSS/measurement sources with `rg` and bounded reads. Use
+exclusive `inbox-readability-triage1.log` and its JSON; no browser/campaign/build rerun.
+Expected cost: a few minutes for evidence reading and independent review. Require a
+specific source/image explanation for each category, honest final-turn/Save-load/runtime
+status and a concrete minimal correction scope. Do not adjust thresholds, waive the
+gate or call turn-24 progress a pass. Stop before a new packaged product correction or
+another replacement build; those exceed this packet's one-line fix/one-build boundary.
+The existing authorized docs/ledger update, focused docs checks, independent disposition
+review and normal local documentation hook still proceed. Preserve all failed evidence.
+
+**Retained-evidence result:** `inbox-readability-triage1.log` exits 0 for the audit,
+not the shakedown. It verifies all 577 screenshot hashes, the frozen harness, both archived
+autosaves and final-tour state stability. Initial RBiH turn-0 autosave SHA-256 is
+`ff02959ce0d1e0d49af0402f11f0986010702ff4afb927f2d777ff2bd999a611`; final turn-24 is
+`f9df42dc5fe09c843ed86a272e1c8c4cc8232a6b3176ab63a1b37f906b887c61`. Six exact choices
+were applied: four authored historical defaults with visible dossier sources and two
+explicit staff recommendations. The final state is Assisted level 1, no pending event
+decisions; final screen tours preserve projection and autosave hashes separately.
+There is no completed QA result, final evidence manifest, Save/load proof or final runtime GO.
+
+All 53 readability findings are retained in the raw JSON: 46 repeated size findings across
+opening/setup captures 000–003, and seven contrast findings across two label styles.
+The opening values are actual authored CSS at a 16px root (`.58`, `.64`, `.68`, `.70`,
+`.72rem` -> 9.3–11.5px), not a zoom error. The relevant nine font declarations are in
+`src/ui/map/styles/globals.css` around lines 202–423. `CorpsFrontPanel.tsx`'s Active
+label uses amber-700 on paper (4.12:1); `playerSafeThreat.ts` supplies red-500 for critical
+pressure on the dark Army HQ panel (4.20:1). Actual screenshots confirm these rendered
+styles. Root also inspected the final Desk: the complete 21 Sep 1992 date remains on its
+whiteboard. The unchanged prior nine-case date proof is reused; no new nine-case claim.
+
+`inbox-runtime-triage1.log` exits 0 for a second non-mutating evidence extraction. There
+are zero observed console/page errors but 19 unclassified local `ERR_ABORTED` requests
+(five hillshade fetches and fourteen ambient-media requests). Every recorded map-navigation
+window is null, so the existing strict classifier does not accept them as expected.
+Capture adjacency alone is not a lifecycle proof or audible-playback acceptance. Main
+stderr contains one canonical final-sector warning for `rs_ajnie_brigade` (910 personnel).
+At turn 24 it is located at `op:visegrad:okrugla`, has no sector assignment and is stranded/
+holding since turn 17. The empty unlocated-combat audit does not resolve sector assignment.
+No warning, request failure, readability threshold or baseline gate is waived.
+
+**Proposed next packet, not activated here:** raise the identified opening/menu fonts to
+at least 12 CSS px and correct the two status colours to the existing 4.5:1 gate, with
+actual responsive screenshots and focused regression checks. First resolve the retained
+request-lifecycle and final-sector-warning disposition so another long run does not merely
+stop at the next known gate. Any simulation repair must be routed separately; this proposal
+does not authorize one. A further product revision requires an explicitly expanded build
+budget, reviewed source, the required UI boundary/hook, one new immutable package, then fresh
+affected shakedowns including Save/load. The current one-line Inbox fix and one replacement
+build are complete, but three-faction shakedown acceptance remains blocked.
+
+Independent final evidence review gives `STOP_PACKET_BLOCKED_REQUIRES_NEW_OWNER_SCOPE`
+in `inbox-review.log`: source/package provenance and partial progress are valid, but
+readability/runtime/Save-load and the three-faction acceptance remain incomplete.
+Focused documentation checks pass 13/13 (`inbox-final-docs1.log`, exit 0), and
+`inbox-final-scope1.log` passes the thirty frozen hashes, preserved evidence, links and
+59,324-character roadmap. Final documentation/source/preservation checks use distinct `inbox-final-docs1.log`, `inbox-final-docs2.log`,
+`inbox-final-scope1.log`, `inbox-final-docs-commit1.log` and `inbox-final-scope2.log`;
+post-commit full package inventories use `inbox-package-final1.log` and
+`inbox-old-package-final1.log`. Independent source/route/correction and final disposition
+reviews share the existing `inbox-review.log`. Exact commands and exit stamps remain in
+each receipt. No further campaign, replacement build, baseline or canon wrapper is run.
 
 ## B7/B5/B8/B1 playability packet — owner scheduled 2026-09-09
 

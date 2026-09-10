@@ -18,9 +18,13 @@ three-faction 24-turn packaged shakedowns to improve that readiness. This does n
 offline-runtime or baseline acceptance, close R7, or activate full campaigns.
 
 **Owner continuation, 2026-09-10:** the Inbox/Desk blocker and one replacement package are
-now authorized. The replacement will include the reviewed whiteboard repair; its fresh
-three-faction 24-turn evidence is recorded in the existing R8 plan. Earlier package receipts
-retain their original source identity, and human/audio/baseline gates remain open.
+now authorized. Product `7d97b72fc` includes the reviewed whiteboard repair; the single
+replacement build and packaged Inbox route pass. Fresh RBiH reaches turn 24 but exits 1
+at final readability (opening/setup sizes and two status colours), before Save/load;
+unclassified local request cancellations and a final-sector warning also remain open.
+RS/HRHB are unlaunched. The [R8 plan](2026-07-31-full-campaign-electron-validation-plan.md)
+records all receipts and the proposed bounded follow-up. Earlier package receipts retain
+their original source identity, and human/audio/baseline gates remain open.
 
 ### Bounded closeout audit — authorized 2026-09-09
 

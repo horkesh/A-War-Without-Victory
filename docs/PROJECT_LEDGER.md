@@ -35344,3 +35344,43 @@ It captures valid pre-click state, predicts the canonical active/pending result 
 UI click, then requires that exact outcome. Absent autonomy remains unknown; first-turn
 and final Assisted checks remain mandatory. Scope5/freeze4 and the normal hook follow
 independent targeted review; the same manifest2 package is retained for fresh attempt 6.
+
+## 2026-09-10 — Inbox/package repair verified; final shakedown gate retained
+
+Autonomy harness commit `c31135f35fd66c164e0d9e8baf2756cc6de1e378` passes its normal
+hook (`inbox-commit-harness2.log`, exit 0). Exclusive freeze4 and all 1,200 package-file
+hashes pass before fresh RBiH attempt 6 (`package2-before-rbih6.log`, exit 0). The package
+remains product `7d97b72fc`; historical-source correction `650798fdd` and autonomy correction
+only change the QA harness/tests. Probe-planning documentation commits `56e407136` and
+`32cba731c` remain separate. No additional build or simulation baseline run is performed.
+
+`shakedown-rbih6.log` exits 1 after exactly turn 24, the prescribed seven checkpoints and
+final tour, with 577 screenshots. It fails the accumulated readability gate before calling
+Save/load. `inbox-readability-triage1.log` exits 0 for a read-only audit of all screenshot
+hashes, the frozen harness, archived initial/final autosaves and final-tour stability.
+The final autosave SHA-256 is `f9df42dc5fe09c843ed86a272e1c8c4cc8232a6b3176ab63a1b37f906b887c61`.
+Six exact decisions were applied (four sourced historical defaults, two staff recommendations),
+Assisted is active, and no event decision remains pending. These facts are progress evidence,
+not a passing shakedown. RS/HRHB have not launched; no final manifest or Save/load proof exists.
+
+Readability has 53 retained findings: 46 repeated opening/setup font-size findings from
+authored 0.58–0.72rem CSS, plus seven low-contrast findings for Active and critical-pressure
+styles. Actual images/source confirm the issue; the final Desk date remains on the whiteboard.
+`inbox-runtime-triage1.log` also exits 0 for non-mutating evidence extraction: 19 unclassified
+local ERR_ABORTED requests (five hillshade, fourteen ambient media), zero console/page errors,
+and one canonical final-sector warning for `rs_ajnie_brigade` at 910 personnel. Its final state
+is located but unassigned, stranded/holding since turn 17. Capture adjacency and an empty
+unlocated-combat audit do not close these runtime findings. No warning or threshold is waived.
+
+The existing R8 plan, R7 parent/amendment/report, board and roadmap now record the actual
+blocked result and a proposed narrow typography/contrast repair plus runtime disposition.
+Another product repair/build exceeds this packet's one-line/one-replacement boundary and
+has not begun. Independent final disposition review is in the existing `inbox-review.log`;
+its verdict is `STOP_PACKET_BLOCKED_REQUIRES_NEW_OWNER_SCOPE`. Final focused docs pass
+13/13 and the frozen-source/evidence/link scope check passes, both exit 0;
+final focused docs, scope, normal local docs hook and package inventories use exclusive
+`inbox-final-*`, `inbox-package-final1.log` and `inbox-old-package-final1.log` receipts.
+All old packages, profiles and failed logs remain. R7 PRE/clean POST-A/dirty POST-B retain
+their recorded eight-artifact/31-input equality; accepted n392, the six-pin gate and exhausted
+one-PRE/two-POST budget remain unchanged. Calibration, audio/sensitivity/offline runtime,
+owner inspection, full-duration campaigns and final diaries remain open. No push/merge/publication.

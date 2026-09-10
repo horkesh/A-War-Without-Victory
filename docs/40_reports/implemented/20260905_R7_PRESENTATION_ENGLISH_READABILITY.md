@@ -8,6 +8,58 @@ Earlier receipts and clean POST-A remain evidence for their original revisions, 
 The inherited baseline gate remains open, so this is not R7 closure.
 Prior global Vitest/player-experience receipts are reused only for unaffected scope.
 
+## Inbox/package continuation — 2026-09-10
+
+The owner authorized the minimal Inbox/Desk repair, one replacement package and the
+previously proposed three fresh 24-turn shakedowns. Product commit
+`7d97b72fc1ea8d8dbe04a65f7eab77e1507f53a6` renders the pending opening Inbox only while
+the Desk is closed. The pending brief returns on close; opening Desk does not dismiss
+or consume it. The real required decision is reachable. The reviewed whiteboard/date
+source is unchanged and included in the replacement.
+
+Evidence below is under `F:/A-War-Without-Victory/logs/r8-decision-command-usability/`.
+
+| Check | Result / receipt |
+|---|---|
+| Focused Inbox regression and actual five-step browser route | 24/24 and route exit 0; `inbox-focused-green1.log`, `inbox-browser1.log` |
+| Complete `npm run test:vitest -- tests/ui` | Exit 1, 353/354 files and 2,988/2,989 tests pass; sole stale boot guard assertion retained in `inbox-ui1.log` |
+| Exact boot/ownership correction | 45/45, exit 0; `inbox-focused-correction1.log`; production remains identical to reviewed route, no second broad run claimed |
+| Typecheck and normal source commit hook | Exit 0; `inbox-typecheck1.log`, `inbox-commit1.log` |
+| `npm run desktop:package:dir -- --config.directories.output=dist-packaged/inbox-replacement2` | Single replacement build, exit 0; `package2.log` |
+| Packaged home -> Desk -> restore -> exact decision proof | Five real screenshots, unchanged turn-0 save, zero answers/advances/errors; `inbox-packaged3.log`, exit 0; attempts 1/2 remain failed receipts |
+| Historical-source and autonomy harness corrections | Independently reviewed; final focused file 51/51, exit 0; `historical-source-green3.log`, `autonomy-setup-green1.log`; normal hooks pass for `650798fdd` and `c31135f35` |
+| Fresh RBiH 24-turn shakedown | Exit 1 at final readability, after exactly turn 24 and 577 captures; `shakedown-rbih6.log`; Save/load and final runtime gate not reached, RS/HRHB unlaunched |
+| Retained screenshot/state/harness and runtime triage | Both audits exit 0 without rerun; `inbox-readability-triage1.log`, `inbox-runtime-triage1.log`; audits do not turn the failed shakedown into a pass |
+
+The immutable package is
+`F:/AWWV-worktrees/r8-decision-command-usability/dist-packaged/inbox-replacement2/win-unpacked/`.
+`package-manifest2.json` binds 1,200 files to product `7d97b72fc`, tree SHA-256
+`0cb25a80c4da25f2be8cc65a34b531a66c563e94f6d18926b2588a30cfad8018`.
+Executable/ASAR and all resources except emitted tactical UI CSS/JS/index references are
+unchanged from the preserved original package (`package2-comparison.json`). Post-package
+source commits change only the authorized harness/tests and continuity documents.
+
+The failed RBiH run has 53 retained readability findings: 46 opening/setup font-size
+findings at 9.3–11.5 CSS px, plus seven repetitions of two insufficient-contrast styles
+(Active 4.12:1 and critical pressure 4.20:1). Actual images and source trace confirm these
+styles. The final Desk capture still shows the complete date on its authored whiteboard.
+The final turn-24 autosave is archived with SHA-256
+`f9df42dc5fe09c843ed86a272e1c8c4cc8232a6b3176ab63a1b37f906b887c61`; the six choices,
+required checkpoints and final-tour stability are recorded, but no manual Save/load proof
+or completed run manifest exists. Nineteen local request cancellations and one final-sector
+assignment warning also need disposition; zero console/page errors does not clear them.
+
+Independent source and actual packaged Inbox-route review are GO in `inbox-review.log`.
+Independent final evidence review gives `STOP_PACKET_BLOCKED_REQUIRES_NEW_OWNER_SCOPE`;
+the current three-faction acceptance remains blocked. Focused final docs pass 13/13 and
+source/evidence preservation passes, both exit 0. The existing
+[R8 plan](../../plans/2026-07-31-full-campaign-electron-validation-plan.md) contains the
+bounded proposed typography/contrast correction and retained-runtime triage. Another
+product revision/build is outside this packet's one-line/one-build authorization; no
+threshold, runtime warning, baseline or calibration gate is waived. Final docs/scope/hook
+and old/new package inventory receipts use the distinct `inbox-final-*`,
+`inbox-package-final1.log` and `inbox-old-package-final1.log` paths listed in that plan.
+
 ## Owner correction: detached date — 2026-09-10
 
 Date-only acceptance requires the date to remain on the whiteboard. The CSS translation
@@ -71,10 +123,10 @@ checking source/asset identities. The complete UI boundary passes 354 files / 2,
 exit 0. The normal local typecheck hook and source commit pass, exit 0. Closeout documentation
 and final hash/scope receipts use the distinct `desk39-onboard-docs2.log`,
 `desk39-onboard-scope2.log`, `desk39-onboard-commit2.log` and `desk39-onboard-final-scope.log`.
-The existing package remains from product `217c9f70a`;
-this date correction is not packaged by the earlier build. The owner subsequently authorized
-the opening Inbox repair and one replacement package; that work and its three 24-turn
-checks are recorded in the existing R8 Electron-validation plan. R7 PRE, clean POST-A and dirty
+The preserved original package remains from product `217c9f70a`;
+this date correction is not packaged by that earlier build. The owner's subsequent Inbox
+authorization produced replacement package `7d97b72fc`, including the date correction;
+its blocked shakedown disposition is recorded above and in the R8 plan. R7 PRE, clean POST-A and dirty
 POST-B retain their recorded eight-artifact/31-input equality; no new run was performed
 or attributed to this correction. Accepted n392 pins and the six-pin/calibration gate
 remain untouched and open.
