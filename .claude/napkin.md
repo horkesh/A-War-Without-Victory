@@ -164,22 +164,18 @@
 
 
 ## Engine Runtime Patterns
-0. **[2026-08-31] Rear-pocket cleanup is consolidation, not enclave expansion**
+1. **[2026-08-31] Rear-pocket cleanup is consolidation, not enclave expansion**
    Do instead: allow paramilitary cleanup inside an authored enclave boundary, but require a CorpsOperation for outward territorial change. Keep the enclave list complete enough that legitimate interior cells are not accidentally blocked.
-0. **[2026-08-31] Operation assembly is not six copies of the brigade attack floor**
+2. **[2026-08-31] Operation assembly is not six copies of the brigade attack floor**
    Do instead: count active, non-disrupted formation presence for an authored assembly contract; let the combined predictor judge strength. Keep the generic 500-person attack floor. Any exceptional operation execution multiplier must be persisted, bounded, applied per participating formation during execution in both prediction and resolution, and must never write control directly. Never derive a whole mixed stack's multiplier from its first attacker.
-1. **[2026-07-13] Terminal lifecycle truth must close live synthetic commands**
+3. **[2026-07-13] Terminal lifecycle truth must close live synthetic commands**
    Do instead: project authoritative event flags through persisted lifecycle state, retire synthetic commands only after spawned subordinates are gone, and hide them from live UI without deleting historical AARs.
-2. **[2026-06-30] War spawn directives run during War turns**
+4. **[2026-06-30] War spawn directives run during War turns**
    Do instead: run deterministic pool-to-formation spawning before reinforcement for spawn-capable directives.
-3. **[2026-06-30] Final geometry can reopen front-sector coverage**
+5. **[2026-06-30] Final geometry can reopen front-sector coverage**
    Do instead: rerun dropped-front recovery after final-save geometry projection and classify no-donor scarcity honestly.
-4. **[2026-06-29] Sector defense cannot suppress local militia floor**
+6. **[2026-06-29] Sector defense cannot suppress local militia floor**
    Do instead: merge physical target defenders first and preserve the shared militia-defense floor.
-5. **[2026-06-23] Same-faction sector edge ownership is singular**
-   Do instead: canonicalize duplicate sector edge ownership deterministically after side-coverage recovery.
-6. **[2026-05-22] COHA expiry must clear combat suppression**
-   Do instead: set coha_active: false on expiry; history flags alone must not suppress late-war combat.
 7. **[2026-07-12] Desktop mutations are serialize-autosave-broadcast transactions**
    Do instead: converge mutating IPC on the canonical helper, roll back in-memory serialization on autosave failure, and broadcast the persisted state to every renderer including the caller.
 8. **[2026-07-12] Recruitment shares eligibility and physical placement truth**

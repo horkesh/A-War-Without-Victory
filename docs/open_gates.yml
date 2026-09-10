@@ -194,19 +194,21 @@ gates:
     opened: 2026-09-10
     blocks: []
     evidence_required: >
-      Every napkin category at or under its stated 10-entry cap, and each life-lessons entry whose
-      text says "see docs/life_lessons/<topic>.md" actually present in that topic file.
+      Each life-lessons entry whose text says "see docs/life_lessons/<topic>.md" is actually present
+      in that topic file, or the pointer is removed.
     evidence_path: null
-    source: .claude/napkin.md
+    source: docs/life_lessons.md
     notes: >
-      Two of three parts are done. docs/life_lessons.md went 146,864 to 39,930 bytes on 2026-09-10:
-      34 older dated sessions moved verbatim to docs/life_lessons/session_archive.md, keeping the
-      three newest plus "Recently Violated" and "Topic Files", which CLAUDE.md mandates reading. The
-      napkin's two orphan session headings were folded into Evidence & Tooling Discipline (6 to 8
-      entries), 64,043 to 63,738 bytes. Still open: Engine Runtime Patterns holds 12 entries against
-      the napkin's stated cap of 10; and 160 life-lessons entries carry a "see
-      docs/life_lessons/<topic>.md" pointer whose body is NOT in that topic file — verified by grep,
-      count 0 for three sampled lessons. Those pointers were already aspirational before the move.
+      The size and cap work is DONE as of 2026-09-10 and only the broken pointers remain.
+      docs/life_lessons.md went 146,864 to 39,930 bytes (34 older dated sessions moved verbatim to
+      docs/life_lessons/session_archive.md, keeping the three newest plus "Recently Violated" and
+      "Topic Files", which CLAUDE.md mandates reading). The napkin went 64,043 to 63,397 bytes: two
+      orphan session headings folded into Evidence & Tooling Discipline, and the two oldest Engine
+      Runtime Patterns entries demoted to .claude/napkin/engine_runtime.md, bringing every category
+      to its stated 10-entry cap with clean numbering. STILL OPEN: 160 of 244 life-lessons entries
+      carry a "see docs/life_lessons/<topic>.md" pointer whose body is NOT in that topic file —
+      grep returns count 0 for sampled titles. The bodies were only ever in the index. Routing 160
+      lessons to their topic files is a curation judgement, not a mechanical move, so it was left.
 
   # ── Closed, retained to prevent re-raising ──────────────────────────────────────
 
