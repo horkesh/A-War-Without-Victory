@@ -3190,3 +3190,53 @@ guardrail was strengthened rather than merely repointed: it asserts the step is 
 `event-system-ci.yml` and PRESENT in `baseline-pins.yml`, plus that the advisory check name (the
 string branch protection excludes by) does not drift. A deliberate mutation confirmed the new
 assertion fails when the step is renamed, so it is not a rubber stamp.
+
+## Local-model executor: installed, benchmarked, harnessed — 2026-09-10
+
+**Owner-directed.** A local model to execute planner-written tasks. Installed and measured on this
+machine rather than recommended from theory — which mattered, because theory was wrong twice.
+
+**Hardware, corrected by inspection.** The owner reported "12 GB VRAM"; the machine has an
+**AMD Radeon RX 7800 XT with 16 GB** (Win32_VideoController's AdapterRAM is a 32-bit field and
+wraps, reporting 4 GB; the true value is in the registry's `qwMemorySize`). RAM is **DDR4-2400 in a
+mismatched 8+16+8 kit**, roughly a third of DDR5 bandwidth. Both facts invert the usual advice.
+
+**Ollama 0.34.0 detects the AMD card through ROCm natively on Windows** — `library=ROCm
+compute=gfx1101`, 16.0 GiB total / 15.8 available. No WSL2, contrary to most current guides.
+
+**Benchmarks, identical prompt and 32K context:**
+
+| model | generation | prompt processing | VRAM |
+|---|---|---|---|
+| `qwen3.5:9b` | 43–48 tok/s | **352 tok/s** | fits entirely |
+| `qwen3-coder:30b-a3b-q4_K_M` | 12 tok/s | **8 tok/s** | 11.8 GB GPU + 6.3 GB spilled to RAM |
+
+**Prompt speed decides it, not generation speed** — an agent spends its budget reading. At 8 tok/s a
+25K-token file costs ~50 minutes; at 352 tok/s it costs ~70 seconds. The 30B MoE is the better model
+and loses decisively here, because MoE offload depends on fast system RAM. There is no useful
+middle size: Ollama's qwen3.5 line jumps 9b to 27b, and a dense 27B spills worse than the MoE.
+
+**`think: false` is a 30x effect.** Same task: 3,971 tokens / ~92 s with thinking on, 136 tokens /
+**3.0 s** with it off. Ollama's default `num_ctx` of 4096 is also unusable for agent work; 32768 is
+the working floor.
+
+**The finding that justified the harness.** Asked for a deterministic comparator, the 30B returned
+`a.id.localeCompare(b.id)` — locale-dependent, violating the first sacred rule, in a repo that has
+`strictCompare` precisely to avoid it. It looked *more* professional than the correct answer, and no
+unit test would have caught it.
+
+**Harness added** under `tools/local_executor/`: `gate.mjs` (acceptance oracle), `README.md`
+(measured numbers and routing rules), `TASK_TEMPLATE.md` (planner-written task contract), and the
+`gate:local` npm script. The gate refuses to run without planner-declared `--tests` (exit 2 — a gate
+with nothing to prove is not a passing gate), rejects edits under `tests/` without explicit
+authorisation, scans added lines in changed `src/` files for `Math.random`/`Date.now`/`new Date()`/
+`.localeCompare(`, then runs typecheck, the declared tests and the open-gates validator.
+
+**Verified in both directions**, not merely that it passes: exit 2 with no `--tests`, exit 2 on a
+non-existent declared test, exit 0 on a clean tree, and exit 1 with the correct message on an
+injected `Math.random` in a tracked src file. The probe was reverted with
+`git checkout HEAD -- <file>`; no stash was used.
+
+**Method note.** All git calls in `gate.mjs` use argument arrays rather than interpolated shell
+strings, after a security hook flagged the initial `execSync` form — paths originate from git output
+and must not reach a shell.
