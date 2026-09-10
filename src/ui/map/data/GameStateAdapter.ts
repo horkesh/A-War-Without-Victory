@@ -100,13 +100,14 @@ export interface FactionStrategicObjectiveView {
     responsibleCommand: string | null;
     currentCommitment: string | null;
     nextLever: {
-        owner: 'army_hq' | 'decision_room';
+        owner: 'army_hq' | 'decision_room' | 'presidential_inbox';
         label: string;
         available: boolean;
         navigationTarget:
             | { kind: 'army-hq-tab'; tab: 'briefing' | 'summary' | 'records' | 'personnel' }
             | { kind: 'army-hq-corps-briefing'; corpsId: string | null }
-            | { kind: 'decision-room'; lens: 'decision' | 'command'; cardId?: string | null };
+            | { kind: 'decision-room'; lens: 'decision' | 'command'; cardId?: string | null }
+            | { kind: 'inbox'; itemId?: string };
     };
     lastConsequence: string | null;
 }
@@ -196,13 +197,36 @@ function objectiveResponsibleOwner(
         : t('warSummary.objective.owner.armyHq');
 }
 
-function hasPendingPoliticalObjectiveDecision(state: LoadedGameState, faction: string): boolean {
-    return (state.pendingEventDecisions ?? []).some((decision) => decision.faction === faction)
-        || Boolean(state.pendingPeacePlan)
+function pendingPoliticalObjectiveEventDecision(
+    state: LoadedGameState,
+    faction: string,
+    dimension: string,
+): NonNullable<LoadedGameState['pendingEventDecisions']>[number] | null {
+    return (state.pendingEventDecisions ?? [])
+        .filter((decision) => decision.faction === faction)
+        .sort((a, b) => strictCompare(a.event_id, b.event_id))
+        .find((decision) => decision.response_options.some((option) => (
+            (option.dimension_shifts ?? []).some((shift) => shift.faction === faction && shift.dimension === dimension)
+            || option.effects.some((effect) => (
+                (dimension === 'internal_cohesion'
+                    && effect.kind === 'alliance_change'
+                    && (faction === 'RBiH' || faction === 'HRHB'))
+                || (dimension === 'patron_confidence' && effect.kind === 'patron_pressure' && effect.faction === faction)
+            ))
+        ))) ?? null;
+}
+
+function hasPendingPoliticalObjectiveDecision(
+    state: LoadedGameState,
+    faction: string,
+    dimension: string,
+): boolean {
+    if (dimension !== 'international_standing') return false;
+    return Boolean(state.pendingPeacePlan)
         || Boolean(state.pendingDayton)
-        || (state.pendingCounterOffers?.length ?? 0) > 0
-        || (state.pendingConvoyDecisions?.length ?? 0) > 0
-        || (state.pendingParamilitaryRequests?.length ?? 0) > 0;
+        || (state.pendingCounterOffers ?? []).some((offer) => !offer.targetFaction || offer.targetFaction === faction)
+        || (state.pendingConvoyDecisions ?? []).some((convoy) => convoy.route_faction === faction && convoy.decision == null)
+        || (state.pendingParamilitaryRequests ?? []).some((request) => request.faction === faction && request.decision == null);
 }
 
 function objectiveCommitment(
@@ -254,12 +278,29 @@ function objectiveLever(
     faction: string,
 ): FactionStrategicObjectiveView['nextLever'] {
     if (!config.militaryOwner) {
-        const available = hasPendingPoliticalObjectiveDecision(state, faction);
+        const eventDecision = pendingPoliticalObjectiveEventDecision(state, faction, config.dimension);
+        const available = Boolean(eventDecision)
+            || hasPendingPoliticalObjectiveDecision(state, faction, config.dimension);
+        const labelKey = config.dimension === 'international_standing'
+            ? available
+                ? 'warSummary.objective.lever.internationalDecision'
+                : 'warSummary.objective.lever.noInternationalDecisionDue'
+            : config.dimension === 'patron_confidence'
+                ? available
+                    ? 'warSummary.objective.lever.patronDecision'
+                    : 'warSummary.objective.lever.noPatronDecisionDue'
+                : available
+                    ? 'warSummary.objective.lever.cohesionDecision'
+                    : 'warSummary.objective.lever.noCohesionDecisionDue';
+        if (eventDecision) return {
+            owner: 'presidential_inbox',
+            label: t(labelKey),
+            available: true,
+            navigationTarget: { kind: 'inbox', itemId: `event:${eventDecision.event_id}` },
+        };
         return {
             owner: 'decision_room',
-            label: t(available
-                ? 'warSummary.objective.lever.politicalDecisions'
-                : 'warSummary.objective.lever.noSignatureDue'),
+            label: t(labelKey),
             available,
             navigationTarget: { kind: 'decision-room', lens: 'decision' },
         };
@@ -2222,6 +2263,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
     const sectorIntelRecords: LoadedGameState['sectorIntel'] = [];
     const rawSectorIntel = state.military.sector_intel as Record<string, Array<Record<string, unknown>>> | undefined;
     const rawCorpsFrontSectors = state.military.corps_front_sectors as Record<string, Record<string, unknown>> | undefined;
+    const playerSectorIntelConfidenceBySector = new Map<string, number>();
     if (playerFaction) {
         const visibleEnemySectorIds = new Set<string>();
         const visibleEnemyOsids = new Set<string>();
@@ -2229,6 +2271,18 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             for (const [friendlySectorId, records] of Object.entries(rawSectorIntel).sort((a, b) => a[0].localeCompare(b[0]))) {
                 const friendlySector = rawCorpsFrontSectors[friendlySectorId];
                 if (!friendlySector || friendlySector.faction !== playerFaction || !Array.isArray(records)) continue;
+                const activeRecords = records.filter((record) => (
+                    typeof record.front_edge_count === 'number'
+                    && Number.isFinite(record.front_edge_count)
+                    && record.front_edge_count > 0
+                ));
+                const activeConfidences = activeRecords
+                    .map((record) => record.confidence)
+                    .filter((confidence): confidence is number => typeof confidence === 'number' && Number.isFinite(confidence))
+                    .map((confidence) => Math.max(0, Math.min(1, confidence)));
+                if (activeConfidences.length > 0 && activeConfidences.length === activeRecords.length) {
+                    playerSectorIntelConfidenceBySector.set(friendlySectorId, Math.min(...activeConfidences));
+                }
                 for (const rec of records) {
                     const enemySectorId = typeof rec.enemy_sector_id === 'string' ? rec.enemy_sector_id : '';
                     if (!enemySectorId) continue;
@@ -2575,7 +2629,9 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 density: typeof s.density === 'number' ? s.density : undefined,
                 threat_ratio: typeof s.threat_ratio === 'number' ? s.threat_ratio : undefined,
                 defensive_power: typeof s.defensive_power === 'number' ? s.defensive_power : undefined,
-                intel_confidence: typeof s.intel_confidence === 'number' ? s.intel_confidence : undefined,
+                intel_confidence: faction === playerFaction
+                    ? playerSectorIntelConfidenceBySector.get(sectorId)
+                    : undefined,
                 offensive_signs: typeof s.offensive_signs === 'boolean' ? s.offensive_signs : undefined,
                 logistics_priority: hasReportedLogisticsPriority && edgeIds.length > 0
                     ? edgeIds.reduce((sum, edgeId) => {

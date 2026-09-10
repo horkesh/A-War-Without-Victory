@@ -21,6 +21,7 @@ import {
 import { getActiveLocale, t, useLocale, type MessageKey } from '../../i18n';
 import { localizedOperationalSitrepCopy } from '../../utils/operationalSitrepCopy';
 import { openPresidentialDecisionRoomNavigationTarget } from '../../utils/presidentialDecisionRoomNavigation';
+import type { PresidentialDecisionRoomNavigationTarget } from '../../data/presidentialDecisionRoom';
 
 const SUMMARY_SECTIONS: Array<[SummaryFocusSection, MessageKey]> = [
     ['overview', 'warSummary.tab.overview'],
@@ -67,9 +68,10 @@ function localizedInteger(value: number): string {
 
 interface WarSummaryContentProps {
     focusSection?: SummaryFocusSection;
+    onNavigateTarget?: (target: PresidentialDecisionRoomNavigationTarget) => boolean | void;
 }
 
-export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryContentProps) {
+export function WarSummaryContent({ focusSection = 'overview', onNavigateTarget }: WarSummaryContentProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const [activeSection, setActiveSection] = useState<SummaryFocusSection>(focusSection);
     const [locale] = useLocale();
@@ -157,7 +159,7 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                     {playerFaction ? (
                         <>
                             {strategicObjectives.length > 0 && (
-                                <StrategicObjectivesSection objectives={strategicObjectives} />
+                                <StrategicObjectivesSection objectives={strategicObjectives} onNavigateTarget={onNavigateTarget} />
                             )}
                             <SummarySection title={t('warSummary.section.territory')}>
                                 <PlayerFactionHeader faction={playerFaction} />
@@ -441,7 +443,13 @@ function objectiveTrendClass(trend: StrategicObjectiveTrend): string {
     return 'text-text-secondary';
 }
 
-function StrategicObjectivesSection({ objectives }: { objectives: FactionStrategicObjectiveView[] }) {
+function StrategicObjectivesSection({
+    objectives,
+    onNavigateTarget,
+}: {
+    objectives: FactionStrategicObjectiveView[];
+    onNavigateTarget?: (target: PresidentialDecisionRoomNavigationTarget) => boolean | void;
+}) {
     const unavailable = t('corpsFront.unreported');
     return (
         <section
@@ -455,7 +463,9 @@ function StrategicObjectivesSection({ objectives }: { objectives: FactionStrateg
                 {objectives.map((objective) => {
                     const owner = objective.nextLever.owner === 'army_hq'
                         ? t('warSummary.objective.owner.armyHq')
-                        : t('warSummary.objective.owner.decisionRoom');
+                        : objective.nextLever.owner === 'presidential_inbox'
+                            ? t('armyHq.returnDesk')
+                            : t('warSummary.objective.owner.decisionRoom');
                     return (
                         <article
                             key={objective.id}
@@ -491,10 +501,12 @@ function StrategicObjectivesSection({ objectives }: { objectives: FactionStrateg
                                         <button
                                             type="button"
                                             data-owner={objective.nextLever.owner}
-                                            onClick={() => openPresidentialDecisionRoomNavigationTarget(
-                                                objective.nextLever.navigationTarget,
-                                                useGameStore.getState(),
-                                            )}
+                                            onClick={() => (onNavigateTarget
+                                                ? onNavigateTarget(objective.nextLever.navigationTarget)
+                                                : openPresidentialDecisionRoomNavigationTarget(
+                                                    objective.nextLever.navigationTarget,
+                                                    useGameStore.getState(),
+                                                ))}
                                             aria-label={`${owner}: ${objective.nextLever.label}`}
                                             className="min-h-7 min-w-0 max-w-prose rounded border border-amber-400/35 bg-amber-400/10 px-2 py-1 text-left text-[12px] font-semibold text-amber-300 hover:bg-amber-400/15"
                                         >

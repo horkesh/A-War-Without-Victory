@@ -19,6 +19,7 @@ const maxTurns = Number(process.argv.find((arg) => arg.startsWith('--turns='))?.
 const runLabel = process.argv.find((arg) => arg.startsWith('--label='))?.split('=')[1] ?? 'run';
 const skipInitialTour = args.has('--skip-initial-tour');
 const skipCheckpointTour = args.has('--no-checkpoint-tour');
+const checkpointTurnsArg = process.argv.find((arg) => arg.startsWith('--checkpoint-turns='))?.slice('--checkpoint-turns='.length) ?? null;
 const lightCheckpointTour = args.has('--light-checkpoint-tour');
 const writeLiveEvents = args.has('--live-events');
 const strategicRun = args.has('--strategic');
@@ -26,6 +27,94 @@ const autoRecruit = args.has('--auto-recruit');
 const requireRecruitment = args.has('--require-recruitment');
 const contextChurnCycles = Number(process.argv.find((arg) => arg.startsWith('--context-churn='))?.split('=')[1] ?? '0');
 const finalCheckpointTour = args.has('--final-checkpoint-tour');
+const saveLoadProof = args.has('--save-load-proof');
+const historicalChoice = args.has('--historical-choice');
+let eventChoiceTranscript = [];
+
+function selectHistoricalEventChoice(decision) {
+  const options = decision?.response_options ?? [];
+  const declared = decision?.historical_default_response_id;
+  const marked = options.filter(option => option.historical_marker === 'historical_default');
+  if (declared && !options.some(option => option.id === declared)) throw new Error('Historical default option is missing');
+  if (marked.length > 1 || (declared && marked.some(option => option.id !== declared))) throw new Error('Ambiguous historical default options');
+  const historical = (declared ? options.find(option => option.id === declared) : null) ?? marked[0];
+  if (historical) return { ...historical, basis: 'authored_historical_default' };
+  const staff = decision?.staff_recommended_response_id ? options.find(option => option.id === decision.staff_recommended_response_id) : null;
+  if (staff) return { ...staff, basis: 'staff_recommendation' };
+  throw new Error('No ranked authored historical default or explicit staff recommendation');
+}
+
+function hasMeaningfulSourceContent(value, prefix) {
+  if (typeof value !== 'string') return false;
+  const labelIndex = value.toLocaleLowerCase('en-US').lastIndexOf(prefix.toLocaleLowerCase('en-US'));
+  if (labelIndex < 0) return false;
+  const content = value.slice(labelIndex + prefix.length).trim();
+  return /[\p{L}\p{N}]/u.test(content);
+}
+
+async function policyEventResponseControl(surface) {
+  if (!historicalChoice) return { loc: surface.locator('[data-testid="event-decision-response"]').first(), choice: null };
+  const modals = surface.locator('[role="dialog"][aria-labelledby="event-decision-title"]:visible');
+  const modalCount = await modals.count();
+  if (modalCount !== 1) throw new Error('Historical-choice decision modal is absent or ambiguous');
+  const modal = modals.first();
+  const rails = modal.locator('[data-testid="event-decision-response-rail"]');
+  const railCount = await rails.count();
+  if (railCount !== 1) throw new Error('Historical-choice response rail is absent or ambiguous');
+  const eventId = await rails.first().getAttribute('data-event-id');
+  const controls = modal.locator('[data-testid="event-decision-response"]');
+  const raw = await surface.evaluate(async () => {
+    const value = await window.awwv.getCurrentGameState();
+    return typeof value === 'string' ? JSON.parse(value) : value;
+  });
+  const decision = (raw.military?.pending_event_decisions ?? []).find(row => row.event_id === eventId && row.faction === raw.meta?.player_faction);
+  if (!decision) throw new Error(`Historical-choice surface lacks exact player event: ${eventId}`);
+  const selected = selectHistoricalEventChoice(decision);
+  const labels = await controls.evaluateAll(nodes => nodes.map(node => node.firstElementChild?.firstElementChild?.textContent?.trim() ?? ''));
+  const matching = labels.map((label, index) => label === selected.label ? index : -1).filter(index => index >= 0);
+  if (matching.length !== 1) throw new Error(`Historical-choice control is absent or ambiguous: ${eventId}/${selected.id}`);
+  const loc = controls.nth(matching[0]);
+  let source = 'none';
+  let sourceLocation = 'not_required';
+  if (selected.basis === 'authored_historical_default') {
+    const tooltip = await loc.locator('[title]').first().getAttribute('title');
+    if (hasMeaningfulSourceContent(tooltip, 'Source:')) {
+      source = tooltip;
+      sourceLocation = 'response_tooltip';
+    } else {
+      const dossiers = modal.locator('[data-testid="decision-context-dossier"]');
+      const visibleDossiers = [];
+      for (let index = 0; index < await dossiers.count(); index += 1) {
+        const dossier = dossiers.nth(index);
+        if (await dossier.isVisible()) visibleDossiers.push(dossier);
+      }
+      if (visibleDossiers.length > 1) throw new Error(`Historical-choice source note is ambiguous: ${eventId}/${selected.id}`);
+      if (visibleDossiers.length === 1) {
+        await visibleDossiers[0].scrollIntoViewIfNeeded();
+        const dossierText = (await visibleDossiers[0].innerText()).trim();
+        if (hasMeaningfulSourceContent(dossierText, 'Source dossier:')) {
+          source = dossierText;
+          sourceLocation = 'decision_context_dossier';
+        }
+      }
+      if (sourceLocation === 'not_required') {
+        throw new Error(`Historical-choice source note unavailable: ${eventId}/${selected.id}`);
+      }
+    }
+  }
+  return { loc, choice: { eventId, responseId: selected.id, responseLabel: selected.label, basis: selected.basis, source, sourceLocation, turn: raw.meta.turn, faction: raw.meta.player_faction, options: decision.response_options.map(option => ({ id: option.id, label: option.label })), playerInput: true } };
+}
+
+function selectCheckpointTurns(raw, targetTurn, skip) {
+  if (raw === null) return skip ? new Set() : new Set([1, 2, 5, 10, 15, 20, 30, 40, targetTurn]);
+  if (skip) throw new Error('Explicit checkpoints cannot be combined with --no-checkpoint-tour');
+  const values = raw.split(',').map((value) => Number(value.trim()));
+  if (values.some((value) => !Number.isSafeInteger(value) || value < 1 || value > targetTurn)
+      || !values.includes(targetTurn)) {
+    throw new Error('Checkpoint turns must be positive integers within the run and include the final turn');
+  }
+  return new Set(values.sort((a, b) => a - b));
+}
 const requiredMapOriginArg = process.argv.find((arg) => arg.startsWith('--require-map-origin='))?.slice('--require-map-origin='.length);
 const requiredMapOrigin = requiredMapOriginArg ? new URL(requiredMapOriginArg).origin : null;
 const resumeSavePathArg = process.argv.find((arg) => arg.startsWith('--resume-save='))?.slice('--resume-save='.length);
@@ -590,11 +679,15 @@ const provenance = {
   resumeSaveSha256,
   packagedExecutablePath,
   packagedExecutableSha256: packagedExecutablePath ? fileSha256(packagedExecutablePath) : null,
+  packagedAsarSha256: packagedExecutablePath ? fileSha256(path.join(path.dirname(packagedExecutablePath), 'resources', 'app.asar')) : null,
   requiredMapOrigin,
   electronMainSha256: fileSha256(path.join(repo, 'src', 'desktop', 'electron-main.cjs')),
   warroomIndexSha256: fileSha256(path.join(repo, 'dist', 'warroom', 'index.html')),
   tacticalMapIndexSha256: fileSha256(path.join(repo, 'dist', 'tactical-map', 'index.html')),
 };
+if (packagedExecutablePath && (!provenance.packagedExecutableSha256 || !provenance.packagedAsarSha256)) {
+  throw new Error('Packaged run requires hashed executable and adjacent resources/app.asar');
+}
 
 function compactText(text, limit = 2200) {
   return String(text ?? '').replace(/\s+/g, ' ').trim().slice(0, limit);
@@ -1160,9 +1253,15 @@ async function clickMatch(surface, pattern, label, options = {}) {
 }
 
 async function clickTestId(surface, testid, label, options = {}) {
-  const loc = surface.locator(`[data-testid="${testid}"]`).first();
+  const selected = testid === 'event-decision-response' && historicalChoice
+    ? await policyEventResponseControl(surface)
+    : { loc: surface.locator(`[data-testid="${testid}"]`).first(), choice: null };
+  const loc = selected.loc;
   const count = await loc.count().catch(() => 0);
   if (!count) return false;
+  const beforeChoice = selected.choice ? await readState(surface) : null;
+  const transcriptRow = selected.choice ? { ...selected.choice, actionLabel: label, status: 'planned' } : null;
+  if (transcriptRow) eventChoiceTranscript.push(transcriptRow);
   await loc.scrollIntoViewIfNeeded().catch(() => {});
   try {
     await loc.click({ timeout: options.timeout ?? 8000, force: options.force ?? false });
@@ -1171,6 +1270,12 @@ async function clickTestId(surface, testid, label, options = {}) {
     return false;
   }
   await sleep(options.afterMs ?? 750);
+  if (transcriptRow) {
+    const afterChoice = await readState(surface);
+    const receipt = assertExactEventDecisionReceipt(transcriptRow.eventId, beforeChoice.eventDecisionReceipts, afterChoice.eventDecisionReceipts);
+    if (receipt.responseId !== transcriptRow.responseId) throw new Error(`Historical-choice receipt selected a different option: ${transcriptRow.eventId}`);
+    Object.assign(transcriptRow, { status: 'applied', receipt });
+  }
   return true;
 }
 
@@ -1444,7 +1549,7 @@ async function readState(frame) {
     date: raw.meta?.date ?? raw.date ?? null,
     phase: raw.meta?.phase ?? raw.phase ?? null,
     playerFaction,
-    autonomyLevel: raw.meta?.autonomy_level ?? 0,
+    autonomyLevel: raw.meta?.autonomy_level ?? null,
     autonomyLevelPending: raw.meta?.autonomy_level_pending ?? null,
     pendingEventDecisionIds: playerPendingEventDecisions
       .map(({ id }) => id)
@@ -1664,18 +1769,43 @@ function assertStrategicAutonomyState(label, state, expectedLevel, expectedPendi
   return { autonomyLevel, autonomyLevelPending };
 }
 
+function predictStrategicAutonomySelection(priorLevel, targetLevel) {
+  if (!Number.isInteger(priorLevel) || priorLevel < 0 || priorLevel > 3) {
+    throw new Error(`Strategic setup prior autonomy level is invalid: ${priorLevel ?? 'unavailable'}`);
+  }
+  if (!Number.isInteger(targetLevel) || targetLevel < 0 || targetLevel > 3) {
+    throw new Error(`Strategic setup target autonomy level is invalid: ${targetLevel ?? 'unavailable'}`);
+  }
+  if (targetLevel <= priorLevel) {
+    return { autonomyLevel: targetLevel, autonomyLevelPending: null };
+  }
+  return { autonomyLevel: priorLevel, autonomyLevelPending: targetLevel };
+}
+
 async function configureStrategicRun(frame) {
   await clearOpenSurfaces(frame);
   const openedArmyHq = await openArmyHqFromCurrentSurface(frame, 'strategic army hq', { afterMs: 900 });
   if (!openedArmyHq) return { ok: false, error: 'army-hq-route-unavailable' };
   const openedPersonnel = await clickAndMeasure(frame, /^Personnel$|army-hq-tab-personnel/i, 'strategic personnel', { afterMs: 700 });
   const openedAutonomy = await clickTestId(frame, 'personnel-open-autonomy', 'strategic autonomy route', { afterMs: 700 });
+  const assistedAutonomyLevel = 1;
+  const autonomyBeforeSelection = openedAutonomy && !resumeSavePath
+    ? await readState(frame).catch(() => null)
+    : null;
+  const autonomyExpectation = openedAutonomy && !resumeSavePath
+    ? predictStrategicAutonomySelection(autonomyBeforeSelection?.autonomyLevel, assistedAutonomyLevel)
+    : null;
   const selectedAssisted = openedAutonomy
     ? await clickTestId(frame, 'autonomy-level-1', 'strategic autonomy assisted', { afterMs: 900 })
     : false;
   const configuredState = selectedAssisted ? await readState(frame).catch(() => null) : null;
   const autonomyProof = selectedAssisted && !resumeSavePath
-    ? assertStrategicAutonomyState('Strategic setup not staged', configuredState, 0, 1)
+    ? assertStrategicAutonomyState(
+      'Strategic setup transition mismatch',
+      configuredState,
+      autonomyExpectation.autonomyLevel,
+      autonomyExpectation.autonomyLevelPending,
+    )
     : null;
   await closeOpenSurface(frame);
   return {
@@ -1684,6 +1814,8 @@ async function configureStrategicRun(frame) {
     openedPersonnel,
     openedAutonomy,
     selectedAssisted,
+    autonomyBeforeSelection,
+    autonomyExpectation,
     configuredState,
     autonomyProof,
   };
@@ -2081,6 +2213,7 @@ async function snapshot(page, frame, faction, events, label, extra = {}) {
     interactions,
     formations,
     ...extra,
+    eventChoices: eventChoiceTranscript.map(row => ({ ...row })),
   };
   events.push(event);
   if (writeLiveEvents) {
@@ -2111,6 +2244,80 @@ async function waitForGamePage(app) {
   throw new Error('Timed out waiting for Electron game window');
 }
 
+async function findCampaignOpeningOwner(page) {
+  for (const frame of page.frames()) {
+    const url = frame.url();
+    if (!url.includes('/index.html') || !url.includes('embedded=1')) continue;
+    const splashVisible = await frame.getByTestId('opening-splash-art').isVisible().catch(() => false);
+    const newWarVisible = await frame.getByRole('button', { name: /^New War$/i }).first().isVisible().catch(() => false);
+    if (splashVisible || newWarVisible) return { kind: 'react', surface: frame };
+  }
+  const legacyNewCampaign = page.locator('#mm-new-campaign');
+  if (await legacyNewCampaign.isVisible().catch(() => false)) return { kind: 'legacy', surface: page };
+  return null;
+}
+
+async function waitForCampaignOpeningOwner(page, timeoutMs = 90000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const opening = await findCampaignOpeningOwner(page);
+    if (opening) return opening;
+    await sleep(250);
+  }
+  const observed = page.frames().map((candidate) => candidate.url()).filter(Boolean);
+  throw new Error(`Timed out waiting for a visible campaign opening owner; observed ${JSON.stringify(observed)}`);
+}
+
+async function startReactCampaign(surface, faction, onStep = async () => {}) {
+  if (await surface.getByTestId('opening-splash-art').isVisible().catch(() => false)) {
+    const enter = surface.locator('[aria-labelledby="opening-splash-title"] button').first();
+    await enter.waitFor({ state: 'visible', timeout: 30000 });
+    await enter.click({ timeout: 10000 });
+  }
+  const newWar = surface.getByRole('button', { name: /^New War$/i }).first();
+  await newWar.waitFor({ state: 'visible', timeout: 60000 });
+  await newWar.click({ timeout: 10000 });
+  await onStep('side-picker');
+  const factionChoice = surface.getByTestId(`main-menu-faction-${faction}`);
+  await factionChoice.waitFor({ state: 'visible', timeout: 30000 });
+  await factionChoice.click({ timeout: 10000 });
+  await onStep('faction-dossier');
+  const takeCommand = surface.getByRole('button', { name: /^Take command$/i }).first();
+  await takeCommand.waitFor({ state: 'visible', timeout: 30000 });
+  await takeCommand.click({ timeout: 10000 });
+  await onStep('command-mode');
+  const begin = surface.getByRole('button', { name: /^Begin$/i }).first();
+  await begin.waitFor({ state: 'visible', timeout: 30000 });
+  await begin.click({ timeout: 10000 });
+  await begin.waitFor({ state: 'hidden', timeout: 120000 });
+}
+
+async function isCampaignCommandSurfaceVisible(frame) {
+  const [warroomVisible, fieldVisible] = await Promise.all([
+    frame.getByTestId('warroom-toolbar').isVisible().catch(() => false),
+    frame.getByTestId('toolbar-route-desk').isVisible().catch(() => false),
+  ]);
+  return warroomVisible || fieldVisible;
+}
+
+async function waitForCampaignCommandReady(frame, faction, timeoutMs = 120000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const [commandSurfaceVisible, factionReady] = await Promise.all([
+      isCampaignCommandSurfaceVisible(frame),
+      frame.evaluate(async (expectedFaction) => {
+      const value = await window.awwv?.getCurrentGameState?.();
+      if (!value) return false;
+      const state = typeof value === 'string' ? JSON.parse(value) : value;
+      return state?.meta?.player_faction === expectedFaction;
+      }, faction).catch(() => false),
+    ]);
+    if (commandSurfaceVisible && factionReady) return;
+    await sleep(250);
+  }
+  throw new Error(`Campaign command surface did not expose current ${faction} state`);
+}
+
 async function waitForEmbeddedFrame(page) {
   const deadline = Date.now() + 90000;
   while (Date.now() < deadline) {
@@ -2128,35 +2335,52 @@ async function waitForEmbeddedFrame(page) {
 }
 
 async function startCampaign(page, faction, events) {
-  await snapshot(page, null, faction, events, 'launch-screen');
-  if (!await clickMatch(page, /New Campaign/i, 'new campaign')) throw new Error('Could not click New Campaign');
-  await snapshot(page, null, faction, events, 'side-picker');
-  const factionPattern = faction === 'RS'
-    ? /Play as RS|RS \(VRS\)|RS\s+STANDARD/i
-    : faction === 'RBiH'
-      ? /Play as RBiH|RBiH|ARBiH|Bosnian Government/i
-      : /Play as HRHB|HRHB|HVO|Croat/i;
-  if (!await clickMatch(page, factionPattern, `play as ${faction}`, { afterMs: 1600 })) {
-    throw new Error(`Could not click faction ${faction}`);
+  const opening = await waitForCampaignOpeningOwner(page);
+  await snapshot(page, opening.kind === 'react' ? opening.surface : null, faction, events, 'launch-screen');
+  let frame;
+  if (opening.kind === 'react') {
+    await startReactCampaign(opening.surface, faction, async (label) => {
+      await snapshot(page, opening.surface, faction, events, label);
+    });
+    frame = opening.surface;
+  } else {
+    if (!await clickMatch(page, /New Campaign/i, 'new campaign')) throw new Error('Could not click New Campaign');
+    await snapshot(page, null, faction, events, 'side-picker');
+    const factionPattern = faction === 'RS'
+      ? /Play as RS|RS \(VRS\)|RS\s+STANDARD/i
+      : faction === 'RBiH'
+        ? /Play as RBiH|RBiH|ARBiH|Bosnian Government/i
+        : /Play as HRHB|HRHB|HVO|Croat/i;
+    if (!await clickMatch(page, factionPattern, `play as ${faction}`, { afterMs: 1600 })) {
+      throw new Error(`Could not click faction ${faction}`);
+    }
+    frame = await waitForEmbeddedFrame(page);
   }
-  const frame = await waitForEmbeddedFrame(page);
   try {
     await frame.waitForLoadState('networkidle', { timeout: 120000 });
   } catch (error) {
     throw new Error(`intro frame did not reach network idle before dismissal: ${error.message}`);
   }
+  await waitForCampaignCommandReady(frame, faction);
   await snapshot(page, frame, faction, events, 'intro-before-dismiss');
   for (let i = 0; i < 10; i += 1) {
-    const text = await bodyText(frame);
-    if (/WAR HAS STARTED|A\s*C\s*K\s*N\s*O\s*W\s*L\s*E\s*D\s*G\s*E|Acknowledge/i.test(text)) {
-      await clickMatch(frame, /A\s*C\s*K\s*N\s*O\s*W\s*L\s*E\s*D\s*G\s*E|Acknowledge/i, 'acknowledge', { afterMs: 1000 });
+    const acknowledge = frame.getByRole('button', { name: /^Acknowledge$/i }).first();
+    if (await acknowledge.isVisible().catch(() => false)) {
+      await acknowledge.click({ timeout: 10000 });
+      await sleep(1000);
       continue;
     }
-    if (/WAR BEGINS|WHO YOU ARE|B\s*E\s*G\s*I\s*N|Begin/i.test(text)) {
-      await clickMatch(frame, /B\s*E\s*G\s*I\s*N|Begin/i, 'begin', { afterMs: 1200 });
+    const begin = frame.getByRole('button', { name: /^Begin$/i }).first();
+    if (await begin.isVisible().catch(() => false)) {
+      await begin.click({ timeout: 10000 });
+      await sleep(1200);
       continue;
     }
     break;
+  }
+  const remainingIntroAction = frame.getByRole('button', { name: /^(?:Acknowledge|Begin)$/i }).first();
+  if (await remainingIntroAction.isVisible().catch(() => false)) {
+    throw new Error('Campaign intro remained visible after bounded dismissal');
   }
   await snapshot(page, frame, faction, events, 'command-post-after-intro');
   return frame;
@@ -4032,7 +4256,7 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     if (!(pendingState?.pendingEventDecisionIds ?? []).includes(responseEventId)) {
       throw new Error(`Visible event decision identity is not pending: ${responseEventId}`);
     }
-    const responseLabel = (await responseControl.getAttribute('aria-label').catch(() => null))
+    const responseLabel = historicalChoice ? (await policyEventResponseControl(frame)).choice.responseLabel : (await responseControl.getAttribute('aria-label').catch(() => null))
       || (await responseControl.getAttribute('title').catch(() => null))
       || (await responseControl.innerText({ timeout: 5000 }).catch(() => ''));
     await snapshot(page, frame, faction, events, 'strategic-pending-event-before-response', {
@@ -4330,7 +4554,7 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     );
     if (!responseEventId) throw new Error('Visible event decision has no exact pending event identity');
     const responseControl = frame.locator('[data-testid="event-decision-response"]').first();
-    const responseLabel = (await responseControl.getAttribute('aria-label').catch(() => null))
+    const responseLabel = historicalChoice ? (await policyEventResponseControl(frame)).choice.responseLabel : (await responseControl.getAttribute('aria-label').catch(() => null))
       || (await responseControl.getAttribute('title').catch(() => null))
       || (await responseControl.innerText({ timeout: 5000 }).catch(() => ''));
     const clicked = await clickTestId(frame, 'event-decision-response', 'required event response', { afterMs: 1400 });
@@ -4534,7 +4758,7 @@ async function resolvePendingEventDecisionsBeforeFreeNavigation(page, frame, fac
     if (!(before?.pendingEventDecisionIds ?? []).includes(responseEventId)) {
       throw new Error(`Pre-tour visible event decision identity is not pending: ${responseEventId}`);
     }
-    const responseLabel = (await response.getAttribute('aria-label').catch(() => null))
+    const responseLabel = historicalChoice ? (await policyEventResponseControl(frame)).choice.responseLabel : (await response.getAttribute('aria-label').catch(() => null))
       || (await response.getAttribute('title').catch(() => null))
       || (await response.innerText({ timeout: 5000 }).catch(() => ''));
     await snapshot(page, frame, faction, events, 'pre-tour-event-before-response', { pendingEventId: responseEventId, responseLabel, before });
@@ -4714,7 +4938,7 @@ async function playTurns(page, frame, faction, events, targetTurn) {
   let stagnantSteps = 0;
   let guard = 0;
   const guardLimit = Math.max(120, targetTurn * 8 + 60);
-  const checkpointTurns = skipCheckpointTour ? new Set() : new Set([1, 2, 5, 10, 15, 20, 30, 40, targetTurn]);
+  const checkpointTurns = selectCheckpointTurns(checkpointTurnsArg, targetTurn, skipCheckpointTour);
   const checkpointTour = lightCheckpointTour ? lightTurnCheckpointTour : turnCheckpointTour;
   while (lastTurn < targetTurn && guard < guardLimit) {
     guard += 1;
@@ -5006,7 +5230,56 @@ function attachPageDiagnostics(page, diagnostics) {
   });
 }
 
+async function exerciseFinalSaveLoad(page, frame, faction, events, userDataDir, expectedTurn) {
+  const beforeState = await readState(frame);
+  if (beforeState?.turn !== expectedTurn || beforeState?.playerFaction !== faction) {
+    throw new Error(`Save/load starting identity mismatch: expected ${faction} turn ${expectedTurn}`);
+  }
+  const beforeStateHash = await readRawStateHash(frame);
+  const beforeAutosaveHash = fileSha256(canonicalAutosavePath);
+  const quicksavePath = path.join(userDataDir, 'saves', 'quicksave.json');
+  const beforeQuicksaveFingerprint = filePersistenceFingerprint(quicksavePath);
+  async function openPause() {
+    await clearOpenSurfaces(frame);
+    const saveButton = frame.getByRole('button', { name: 'Save Game', exact: true });
+    for (let attempt = 0; attempt < 5 && !await saveButton.isVisible(); attempt += 1) {
+      await frame.locator('body').press('Escape');
+      await sleep(200);
+    }
+    await saveButton.waitFor({ state: 'visible', timeout: 5000 });
+  }
+  await openPause();
+  await snapshot(page, frame, faction, events, 'save-load-pause');
+  await frame.getByRole('button', { name: 'Save Game', exact: true }).click();
+  for (let attempt = 0; attempt < 100 && filePersistenceFingerprint(quicksavePath) === beforeQuicksaveFingerprint; attempt += 1) {
+    await sleep(100);
+  }
+  if (!filePersistenceFingerprint(quicksavePath) || filePersistenceFingerprint(quicksavePath) === beforeQuicksaveFingerprint) {
+    throw new Error('Save Game did not persist a fresh quicksave');
+  }
+  const savedEvidence = archiveAutosaveEvidence(quicksavePath, path.join(evidenceDir, safeName(faction), 'manual-quicksave.json'));
+  if (savedEvidence.sha256 !== beforeAutosaveHash) throw new Error('Manual save differs from final canonical autosave');
+  await openPause();
+  await frame.getByRole('button', { name: 'Main Menu', exact: true }).click();
+  await frame.getByRole('button', { name: 'Field Records', exact: true }).click();
+  const resume = frame.getByRole('button', { name: 'Resume quicksave', exact: true });
+  await resume.waitFor({ state: 'visible', timeout: 10000 });
+  await snapshot(page, frame, faction, events, 'save-load-field-records', { savedEvidence });
+  await resume.click();
+  await waitForCampaignCommandReady(frame, faction, 15000);
+  const afterState = await readState(frame);
+  const afterStateHash = await readRawStateHash(frame);
+  const afterAutosaveHash = fileSha256(canonicalAutosavePath);
+  const hashProof = assertStableProjectionAndAutosaveHashes('Final Save Game -> Field Records load', beforeStateHash, beforeAutosaveHash, afterStateHash, afterAutosaveHash);
+  if (afterState?.turn !== expectedTurn || afterState?.playerFaction !== faction) {
+    throw new Error(`Save/load turn or faction mismatch: ${JSON.stringify({ beforeState, afterState })}`);
+  }
+  await snapshot(page, frame, faction, events, 'save-load-restored', { savedEvidence, hashProof });
+  return { route: 'Pause -> Save Game -> Main Menu -> Field Records -> Resume quicksave', savedEvidence, hashProof, beforeState, afterState };
+}
+
 async function runFaction(faction, result) {
+  eventChoiceTranscript = [];
   canonicalAutosavePersistenceAtResumeLoad = null;
   activeMapNavigationAbortWindow = null;
   const userDataDir = path.join(userDataRoot, safeName(`${runSlug}-${faction}`));
@@ -5154,6 +5427,9 @@ async function runFaction(faction, result) {
       }
     }
     const playtest = await playTurns(page, frame, faction, events, maxTurns);
+    if (saveLoadProof) {
+      playtest.saveLoadProof = await exerciseFinalSaveLoad(page, frame, faction, events, userDataDir, maxTurns);
+    }
     if (strategicRun && maxTurns > 0 && playtest.finalState?.autonomyLevel !== 1) {
       throw new Error(`Strategic autonomy did not apply: expected level 1, observed ${playtest.finalState?.autonomyLevel}`);
     }
@@ -5175,6 +5451,7 @@ async function runFaction(faction, result) {
       evidenceManifest,
       events,
       playtest,
+      eventChoiceTranscript,
     };
     result.factions.push(entry);
     writeProgress(result);
@@ -5184,6 +5461,7 @@ async function runFaction(faction, result) {
       failed: true,
       userDataDir,
       error: String(error?.stack ?? error),
+      eventChoiceTranscript,
       initialEvidence,
       consoleMessages,
       pageErrors,

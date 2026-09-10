@@ -9,11 +9,689 @@
 **Tech stack:** Electron, Playwright/CDP, packaged directory build, `paradox_local_qa.cjs`, deterministic autosave/replay comparison, Markdown diary template.
 
 **Date:** 2026-07-31
-**Status:** READY -- executes after R1-R7 are green
+**Status:** ACTIVE — Inbox repair/package verified; fresh RBiH shakedown blocked at final readability, with runtime disposition also open. Full campaigns remain deferred.
 **Roadmap workstream:** R8
 **Canonical owner:** packaged Electron UI and bound autosave/replay; diary is the product verdict
 **Collision rule:** This plan does not repair source while a session is running. Findings are routed to the owning plan, verified, then the affected session restarts from a fresh campaign.
 **Activation:** `Execute the master roadmap` authorizes transient local directory packages for this validation, but not installer publication, signing, upload, tag, or release.
+
+## Opening Inbox / package blocker — owner authorized 2026-09-10
+
+The owner now says, "Let's solve the inbox/package blocker." This authorizes the previously
+proposed Inbox/Desk exclusivity repair, one replacement package and resumption of the three
+fresh 24-turn shakedowns. The earlier pending-authorization paragraphs below are historical.
+Human listening remains part of the owner's eventual inspection, not a prerequisite for this
+repair. No broader gameplay, calibration, full-campaign or publication scope is activated.
+
+**Verified start:** original checkout `codex/r7-english-readability` is tracked-clean at
+`bd7b819750d32811738a87143a66bb02807ab867`; active isolated checkout
+`F:/AWWV-worktrees/r8-decision-command-usability` / `codex/r8-decision-command-usability`
+is tracked-clean at `d4544eba4cafe121e37e657ae1c4ea824d424cd5`. No intervening commits.
+Preserve the reviewed R7 whiteboard repair `ea33b23a5`, all R8 work, old package bytes,
+failed profiles, screenshots and receipts. One Sol/medium implementer and a separate
+Sol/medium reviewer cover this bounded repair; root owns package/run provenance and docs.
+
+**Question / scope:** can the opening brief remain on Warroom home, yield while the Desk
+owns that surface, return on Desk close when still pending, and expose the exact first
+required event action without interception? Change only the opening-brief render guard in
+`src/ui/map/App.tsx` and its focused shell/ownership regression. Do not dismiss or consume
+the brief when opening Desk, change event/decision semantics, or modify simulation/state/
+saves, assets, dependencies, date layout, baselines or canon. Reuse the known failing
+`opening-proof4.log` and `06-desk-route.png`; no duplicate root-cause campaign is needed.
+
+**Commands / cost before edits and expensive checks:** use Node 22.23.2 and the existing
+exclusive `desk39-layout-run-check.mjs` recorder, with new `inbox-*`, `package2*` and fresh
+shakedown labels under `F:/A-War-Without-Victory/logs/r8-decision-command-usability/`.
+
+1. Focused `npm run test:vitest -- <exact affected files>` RED/GREEN, plus a bounded actual
+   browser route using the retained turn-0 RBiH save: home Inbox -> Desk without Inbox ->
+   close/restore -> reopen Desk -> exact `rbih_state_identity` response surface. Capture
+   screenshots and actual clicks; do not force-click or remove an overlay in the harness.
+   Optional proof server: `npm run dev:map -- --host 127.0.0.1 --port 3258 --strictPort`.
+   Expected cost: seconds to a few minutes; retain exact fixture/hash and commands.
+2. Independent source/route review, targeted correction verification if needed, then freeze.
+   Run the required complete UI boundary `npm run test:vitest -- tests/ui` once for this
+   changed App render path (last run took about fourteen minutes), `npm run typecheck`,
+   focused documentation checks and `git diff --check`. Reuse unaffected combined-suite
+   receipts and the unchanged R7 nine-case date proof; no second global suite or date campaign.
+   Commit reviewed source locally with the mandatory hook enabled.
+3. Build once with `npm run desktop:package:dir -- --config.directories.output=dist-packaged/inbox-replacement2`.
+   The installed builder accepts nested config overrides; explicit package file lists exclude
+   the previous output. Require the new output to be absent before starting. This preserves
+   the old `dist-packaged/win-unpacked` package and all original manifests. The normal release
+   check supplies map build, chunk-cycle check, simulation bundle and Warroom build; no
+   separate duplicate build. Expected cost: several minutes.
+4. Freeze all replacement files in exclusive `package-manifest2.json` with product/harness
+   commit, executable and ASAR identities; compare every file before each launch using
+   `node <evidence>/package-proof4.mjs check <fresh-label> <faction>` (seconds to a minute).
+   One bounded packaged opening proof, `node <evidence>/inbox-opening-packaged-proof.mjs`,
+   verifies home/Desk/restore and the first exact response surface without choosing an answer
+   or advancing (under two minutes). Keep its profile separate from the three shakedowns.
+5. Resume the existing command, sequentially RBiH -> RS -> HRHB, with new labels:
+   `node tools/ui/paradox_local_qa.cjs --turns=24 --faction=<faction> --label=<fresh-label> --strategic --auto-recruit --historical-choice --final-checkpoint-tour --checkpoint-turns=1,4,8,12,16,20,24 --save-load-proof --packaged-executable=F:/AWWV-worktrees/r8-decision-command-usability/dist-packaged/inbox-replacement2/win-unpacked/A War Without Victory.exe`.
+   Expected total cost: 30–90 minutes depending on route/host latency. Preserve exact commands,
+   exits, checkpoints, action transcript, autosaves/replay and final Save/load identity.
+
+**Pass / stop:** no obscured Desk action; pending brief restoration and semantics preserved;
+focused/UI/typecheck/build/hook checks pass; independent source and visible route GO; the
+replacement package has immutable matching source/assets; each fresh faction reaches exactly
+turn 24 with required route, state, diagnostics and Save/load proof. Stop the affected run on
+crash, missing/mismatched state, ambiguous choice or blocked progress. Diagnose once; targeted
+harness/route correction inside this player loop is already authorized, but no silent bypass,
+unrelated product change, extra replacement package or full campaign. Route a new out-of-scope
+product decision with concrete evidence. Do not change source while a campaign is running.
+
+R7 PRE/POST-A/POST-B equality remains evidence for its recorded revisions; dirty POST-B stays
+disclosed, accepted n392 pins and the six-pin gate remain untouched, and the PRE/two-POST
+budget stays exhausted. No baseline/canon wrapper or standalone regression is authorized.
+Update these existing records and the ledger, then commit locally; no push, merge or publication.
+
+### Inbox candidate verification
+
+The frozen candidate changes only the opening Inbox render guard in `App.tsx` and the
+existing `warroom_shell_ownership.test.ts`. It leaves pending/dismissed state untouched.
+`inbox-focused-red1.log` exits 1 for the intended new regression (23 other passes), and
+`inbox-focused-green1.log` passes 24/24, exit 0. `inbox-browser1.log` exits 0 on the retained
+unmodified turn-0 RBiH save: five screenshots show home Inbox, clear Desk, close/restored
+brief, reopened exact event card and the real `rbih_state_identity` response surface.
+The actual Decide now click and trial response click succeed; no forced click, answer,
+turn advance or DOM removal is used. Source and fixture hashes are stable.
+
+Independent review in `inbox-review.log` gives source and visible-route GO for package
+validation. `inbox-source-freeze.log` binds 29 source/test/harness hashes; the three R7
+date files and all other prior R8 source remain unchanged. The original package's 1,200
+files still match `package-manifest1.json` (`inbox-old-package-before.log`, exit 0).
+Typecheck passes in `inbox-typecheck1.log`, exit 0. Complete UI, commit hook, replacement
+build and packaged checks remain pending at this entry.
+
+**Targeted test-contract correction:** the complete UI run exposes a stale exact-substring
+assertion in `tests/ui/app_boot_main_menu.test.ts:154`: it requires the old opening Inbox
+guard without Desk ownership. The independent reviewer confirms that adding
+`&& !warroomDeskOpen` to this expectation preserves the selected-Warroom/opening-brief
+sequencing assertion and the adjacent Inbox component assertion. The successful actual
+route proves the intended behavior. Let the complete run finish without source/test edits;
+retain its exit and all unaffected results. Then update only this expectation, run
+`npm run test:vitest -- tests/ui/app_boot_main_menu.test.ts tests/ui/warroom_shell_ownership.test.ts`
+(about two seconds), and obtain targeted reviewer confirmation. No production change or
+second broad UI run is justified. Stop on any other unexplained failure; never describe the
+retained exit-1 boundary as a clean broad run. Add this one affected test to the scoped
+file list and bind all thirty final source/test/harness hashes in a new exclusive freeze.
+
+The completed boundary `inbox-ui1.log` exits 1: 353/354 files and 2,988/2,989 tests pass;
+the sole failure is that stale guard assertion. Only its expected substring changed.
+`inbox-focused-correction1.log` then passes both affected files, 45/45 tests, exit 0.
+The App and shell-ownership test hashes remain identical to the reviewed browser candidate.
+These receipts reconcile the boundary's one failure; the original exit-1 receipt is retained,
+and no fresh all-green complete-boundary run is claimed. Final preservation/source binding
+uses `inbox-scope2.mjs freeze` and exclusive `inbox-source-freeze2.json`; package proof version
+4 reads that final thirty-file freeze. The earlier scripts, freeze and receipts remain intact.
+The reviewer also required an explicit browser-proof-to-freeze binding. `inbox-scope3.mjs`
+checks browser before/after hashes, current files and the retained thirty-file freeze for
+equality (`inbox-scope-review-correction1.log`, exit 0); no source or manifest changes.
+Focused documentation checks pass 13/13 in `inbox-docs1.log`, exit 0.
+
+**Packaged probe timing correction:** reviewed source commit `7d97b72fc` and normal hook
+pass (`inbox-commit1.log`, exit 0); the sole replacement build passes (`package2.log`, exit 0).
+`package2-freeze.log` and `inbox-old-package-after.log` pass full 1,200-file inventories.
+The first packaged proof (`inbox-packaged1.log`, exit 1) reaches the loaded turn-0 Warroom
+but attempts its optional Acknowledge click while that transient button is detaching.
+The preserved failure image shows home Inbox and the date on the whiteboard; no route
+step, response or turn has been applied. The campaign harness already waits for network
+idle before intro dismissal; the small proof omitted that same readiness condition.
+Question: does matching that existing readiness sequence remove this probe-only race?
+Create a new evidence-script version, add the existing bounded network-idle wait before
+intro dismissal, recheck unchanged package bytes and use fresh `inbox-packaged2` evidence
+and profile. Expected cost under two minutes. Require all five actual route screenshots,
+unchanged raw turn-0 state and no errors; stop on another unexplained failure. No product,
+package or simulation change and no overwritten failed receipt.
+
+`inbox-packaged2.log` also exits 1 on the same detached Acknowledge control, so the
+network-idle hypothesis is rejected. Source diagnosis identifies the exact lifecycle:
+`PeaceWarTransitionOverlay.tsx` mounts `WarHasBegunSplash.tsx` with its default 4,200 ms
+automatic dismissal and 800 ms fade. Its named `WAR HAS STARTED` dialog deliberately
+unmounts during the probe's optional click. This is a probe completion-condition error,
+not evidence of a persistent product blocker. Both failed profiles/images/logs remain.
+**Targeted correction question:** does waiting for that exact dialog's intended dismissal
+produce the required stable home Inbox and actionable Desk? In new proof version 3, replace
+the optional Acknowledge click with `getByRole('dialog', {name:'WAR HAS STARTED', exact:true})`
+hidden within 10 seconds, and require no remaining visible Acknowledge/Begin intro action.
+Keep actual route clicks, all five screenshots and raw-state/source/error assertions.
+Recheck all package bytes and use fresh `inbox-packaged3`; cost under two minutes.
+Stop on a persistent splash, missing Inbox, blocked route, state drift or other failure.
+This is the authorized evidence-route correction; no third build or product change.
+
+**Packaged Inbox proof GO; historical-source route correction:** `inbox-packaged3.log`
+passes all five actual steps, unchanged raw RBiH turn-0 state, zero answers/advances and
+no errors, exit 0. Independent five-image review in `inbox-review.log` gives GO for the
+three planned runs. `package2-before-rbih4.log` passes all 1,200 files and fresh profile.
+The fresh RBiH run (`shakedown-rbih4.log`, exit 1) passes startup and the repaired Desk
+route, then stops before answering/advancing because the harness demands `Source:` in
+the historical badge tooltip. Retained modal text in `inbox-packaged3/result.json` shows
+the same event's authored source under `Decision Context` / `Source dossier:` instead.
+`EventDecisionModal.tsx` renders that player-facing catalog source in
+`decision-context-dossier` within the exact `event-decision-title` dialog; the tooltip
+has only its historical-default explanation for this pending decision. This is a source
+location assumption in the harness, not permission to invent or waive provenance.
+
+**Question / commands / cost / stop before edits:** change only
+`tools/ui/paradox_local_qa.cjs` and `tests/paradox_local_qa_harness.test.ts` so the historical
+policy can read a nonempty rendered source from the exact selected event's visible modal
+dossier as well as its source tooltip. Retain exact player/event/response matching and
+ambiguity failures; record source text/location in the transcript. Test tooltip and
+dossier success, missing/empty/hidden/foreign/ambiguous source failures, and staff fallback
+with focused RED/GREEN `npm run test:vitest -- tests/paradox_local_qa_harness.test.ts`
+(seconds). Independent targeted review and normal commit hook precede a fresh RBiH attempt
+5 with the unchanged manifest2 package; no full UI/build/simulation rerun. Bind the two
+new harness hashes in a new exclusive freeze, while every packaged product hash remains
+fixed. Recheck all package bytes and a fresh profile before the same 24-turn command.
+This is the already-authorized harness/route correction; stop on another unexplained
+failure, absent source, ambiguous choice, package/source drift or a product change need.
+`inbox-scope4.mjs` / exclusive freeze3 bind the corrected harness and compare every other
+file to reviewed freeze2 and browser proof. `package-proof5.mjs` preserves manifest2 and
+the complete package comparison; its sole additional post-package allowance is the existing
+R7 amendment's documentation update, which records that its repaired date is now packaged.
+Use proof5 for subsequent launch checks. No packaged product file is added to that allowance.
+Focused harness candidate receipts are distinct: `historical-source-red1.log` is a test-loader
+syntax failure; `historical-source-red2.log` exposes the missing dossier route; the final
+`historical-source-red3.log` exits 1 with two intended failures and 49 unaffected passes.
+The first GREEN launcher passes npm's JavaScript entry as an executable and fails to launch
+the child; its incomplete `historical-source-green1.log` remains. Corrected Node invocation
+`historical-source-green2.log` passes 51/51, exit 0. `inbox-docs2.log` passes 13/13, exit 0.
+`historical-source-green1-launch-failure.txt` records the exact outer command and exit 1,
+`spawn EFTYPE` error, and unavailable child exit/signal without altering the original receipt.
+Independent targeted review and normal hook remain required before attempt 5.
+The reviewer requires one narrow content correction before freezing: a label-only
+`Source dossier:` is not a citation. Require meaningful text after that English prefix,
+and after tooltip `Source:`, rejecting whitespace/punctuation-only placeholders while
+recording the exact visible source string unchanged. Verify new cases with distinct
+`historical-source-red4.log` / `historical-source-green3.log` in the same focused file;
+cost seconds, stop if valid sources or staff behavior regress. No broader rerun or build.
+The targeted content correction is RED in `historical-source-red4.log` and GREEN in
+`historical-source-green3.log`, exit 0, 51/51 tests. It preserves the exact visible source
+text/location and accepts source content only when letters or numbers remain after the
+matching label. All packaged source, assets and the thirty-file inventory apart from the
+two approved harness files remain bound to the previous reviewed candidate.
+
+**Fresh RBiH attempt 5 / autonomy setup correction:** source-reader commit `650798fdd`
+and normal hook pass (`inbox-commit-harness1.log`, exit 0); freeze3 and package precheck
+pass. Attempt 5 (`shakedown-rbih5.log`, exit 1) successfully applies the authored civic
+response and reaches 76 initial-tour screenshots, including its recorded Chronicle entry.
+It then stops at turn 0 before command-authority exercises: the legacy setup assertion
+hardcodes current level 0 / pending 1 after selecting Assisted. The fresh campaign starts
+at level 2, and the canonical existing `set-autonomy-level` IPC handler immediately applies
+a downward numeric change to level 1 with no pending value. Increasing delegation stages
+one turn; choosing the current level clears pending. The package behaved consistently with
+that unchanged contract (`src/desktop/electron-main.cjs`, handler around line 3968).
+
+**Question / commands / cost / stop before edits:** can the two-file harness/test correction
+assert the existing contract against the observed valid pre-click autonomy level, instead
+of assuming every start is level 0? Capture pre-click state; predict the required active/
+pending result for target 1 before reading the outcome; reject absent/invalid prior state
+and mismatched active/pending outcomes. Retain first-turn/final Assisted checks, actual UI
+selection, historical policy, route tours and Save/load. Focused RED/GREEN in the existing
+`tests/paradox_local_qa_harness.test.ts` (seconds), independent targeted review, new exclusive
+freeze4, normal local hook and full package comparison precede fresh RBiH attempt 6 with
+the same command and unchanged package. Logs use `autonomy-setup-*`; retain attempt 5 and
+all earlier receipts. No product/autonomy semantics change, second replacement build or
+broad/UI/headless campaign. Stop on another unexplained failure or required product change.
+Focused `autonomy-setup-red1.log` exits 1 for the missing predictor (50 unaffected passes);
+`autonomy-setup-green1.log` passes 51/51, exit 0. The harness records pre-click state and
+predicted outcome, preserves absent autonomy as unknown, and retains both first-turn and
+final level-1 assertions. `inbox-scope5.mjs` pins these reviewed harness/test bytes in
+exclusive freeze4 while retaining the unchanged browser/product/freeze2 chain.
+
+### Fresh RBiH attempt 6 — final readability gate, 2026-09-10
+
+Autonomy correction `c31135f35fd66c164e0d9e8baf2756cc6de1e378`, its normal hook
+(`inbox-commit-harness2.log`), freeze4 and `package2-before-rbih6.log` pass, exit 0.
+The unchanged replacement reaches exactly RBiH turn 24 and captures 577 screenshots,
+including the prescribed checkpoints and final tour. `shakedown-rbih6.log` exits 1 at
+the final readability gate, before the Save/load function is called. This is not a
+passing shakedown or a Save/load receipt. RS and HRHB have not launched.
+
+**Read-only triage question / commands / cost / stop:** do the retained 9.3–11.5px
+opening/menu text and two low-contrast label styles represent actual packaged product
+defects, or a harness measurement error? Inspect the existing attempt-6 progress JSON,
+readability JSON and actual PNGs; group diagnostics, verify screenshot/state/harness
+hashes, and trace the exact CSS/measurement sources with `rg` and bounded reads. Use
+exclusive `inbox-readability-triage1.log` and its JSON; no browser/campaign/build rerun.
+Expected cost: a few minutes for evidence reading and independent review. Require a
+specific source/image explanation for each category, honest final-turn/Save-load/runtime
+status and a concrete minimal correction scope. Do not adjust thresholds, waive the
+gate or call turn-24 progress a pass. Stop before a new packaged product correction or
+another replacement build; those exceed this packet's one-line fix/one-build boundary.
+The existing authorized docs/ledger update, focused docs checks, independent disposition
+review and normal local documentation hook still proceed. Preserve all failed evidence.
+
+**Retained-evidence result:** `inbox-readability-triage1.log` exits 0 for the audit,
+not the shakedown. It verifies all 577 screenshot hashes, the frozen harness, both archived
+autosaves and final-tour state stability. Initial RBiH turn-0 autosave SHA-256 is
+`ff02959ce0d1e0d49af0402f11f0986010702ff4afb927f2d777ff2bd999a611`; final turn-24 is
+`f9df42dc5fe09c843ed86a272e1c8c4cc8232a6b3176ab63a1b37f906b887c61`. Six exact choices
+were applied: four authored historical defaults with visible dossier sources and two
+explicit staff recommendations. The final state is Assisted level 1, no pending event
+decisions; final screen tours preserve projection and autosave hashes separately.
+There is no completed QA result, final evidence manifest, Save/load proof or final runtime GO.
+
+All 53 readability findings are retained in the raw JSON: 46 repeated size findings across
+opening/setup captures 000–003, and seven contrast findings across two label styles.
+The opening values are actual authored CSS at a 16px root (`.58`, `.64`, `.68`, `.70`,
+`.72rem` -> 9.3–11.5px), not a zoom error. The relevant nine font declarations are in
+`src/ui/map/styles/globals.css` around lines 202–423. `CorpsFrontPanel.tsx`'s Active
+label uses amber-700 on paper (4.12:1); `playerSafeThreat.ts` supplies red-500 for critical
+pressure on the dark Army HQ panel (4.20:1). Actual screenshots confirm these rendered
+styles. Root also inspected the final Desk: the complete 21 Sep 1992 date remains on its
+whiteboard. The unchanged prior nine-case date proof is reused; no new nine-case claim.
+
+`inbox-runtime-triage1.log` exits 0 for a second non-mutating evidence extraction. There
+are zero observed console/page errors but 19 unclassified local `ERR_ABORTED` requests
+(five hillshade fetches and fourteen ambient-media requests). Every recorded map-navigation
+window is null, so the existing strict classifier does not accept them as expected.
+Capture adjacency alone is not a lifecycle proof or audible-playback acceptance. Main
+stderr contains one canonical final-sector warning for `rs_ajnie_brigade` (910 personnel).
+At turn 24 it is located at `op:visegrad:okrugla`, has no sector assignment and is stranded/
+holding since turn 17. The empty unlocated-combat audit does not resolve sector assignment.
+No warning, request failure, readability threshold or baseline gate is waived.
+
+**Proposed next packet, not activated here:** raise the identified opening/menu fonts to
+at least 12 CSS px and correct the two status colours to the existing 4.5:1 gate, with
+actual responsive screenshots and focused regression checks. First resolve the retained
+request-lifecycle and final-sector-warning disposition so another long run does not merely
+stop at the next known gate. Any simulation repair must be routed separately; this proposal
+does not authorize one. A further product revision requires an explicitly expanded build
+budget, reviewed source, the required UI boundary/hook, one new immutable package, then fresh
+affected shakedowns including Save/load. The current one-line Inbox fix and one replacement
+build are complete, but three-faction shakedown acceptance remains blocked.
+
+Independent final evidence review gives `STOP_PACKET_BLOCKED_REQUIRES_NEW_OWNER_SCOPE`
+in `inbox-review.log`: source/package provenance and partial progress are valid, but
+readability/runtime/Save-load and the three-faction acceptance remain incomplete.
+Focused documentation checks pass 13/13 (`inbox-final-docs1.log`, exit 0), and
+`inbox-final-scope1.log` passes the thirty frozen hashes, preserved evidence, links and
+59,324-character roadmap. Final documentation/source/preservation checks use distinct `inbox-final-docs1.log`, `inbox-final-docs2.log`,
+`inbox-final-scope1.log`, `inbox-final-docs-commit1.log` and `inbox-final-scope2.log`;
+post-commit full package inventories use `inbox-package-final1.log` and
+`inbox-old-package-final1.log`. Independent source/route/correction and final disposition
+reviews share the existing `inbox-review.log`. Exact commands and exit stamps remain in
+each receipt. No further campaign, replacement build, baseline or canon wrapper is run.
+
+**Post-commit package gate:** docs commit `c1c382cf9d27c79d0da7833fcbbfddddd52b35be`
+and normal hook pass, exit 0. Final source/preservation and original-package checks pass
+(`inbox-final-scope2.log`, `inbox-old-package-final1.log`, exit 0). The replacement's
+post-run inventory fails (`inbox-package-final1.log`, exit 1): runtime has added
+`resources/data/derived/_debug/c_lane_corps_directive_telemetry.jsonl` inside the package.
+Do not delete it, refresh manifest2, or describe the post-run directory as immutable.
+**Question / commands / cost / stop:** compare every current file with manifest2 in a
+new non-mutating `inbox-package-delta1.mjs` audit; record all additions/removals/changed
+bytes in exclusive `inbox-package-delta1.json` / `.log`, and trace the telemetry writer
+with `rg`. Expected cost seconds to a minute. Pass means a fully explained inventory
+delta and preserved original identities, not package acceptance. Stop before changing
+product, output paths or the frozen manifest. Obtain targeted independent delta review,
+correct these existing docs and commit that disclosure with the normal local hook.
+
+The delta audit exits 0 and preserves a complete post-run inventory: all 1,200 originally
+manifested files remain byte-identical, none are removed or changed, and exactly one
+79,779-byte / 360-line telemetry file is added (SHA-256
+`4faca76e2d3b1fae1a8eace2c7b250b795e3eb1c2e77c98fcc98e3c64348d80f`). Its bytes are also
+copied exclusively to `inbox-runtime-telemetry1.jsonl`; the original stays in place.
+The observed 1,201-file tree SHA-256 is
+`c46db172a99e877860b5a8dd5718a07f2b1517a7cbea0e750b058f3a19e0666b`, distinct from manifest2.
+`army_order_interpretation.ts:300–313` resolves its debug output beneath `process.cwd()`
+and appends JSONL. This explains the added runtime output; it does not clear the strict
+package-directory gate. Output placement/disposition joins the proposed follow-up before
+another package/run. No source or manifest change, deletion, rebuild or rerun occurs.
+Targeted disclosure checks use `inbox-postrun-docs1.log`, `inbox-postrun-scope1.log`,
+`inbox-postrun-docs-commit1.log` and `inbox-postrun-final-scope1.log`; the failed post-run
+package receipt remains authoritative and is not retried unchanged.
+
+## B7/B5/B8/B1 playability packet — owner scheduled 2026-09-09
+
+The owner approved the four decision-and-command usability fixes and the subsequent three-faction
+24-turn packaged shakedowns. This specifically schedules B7, B5, B8 and B1 under D1 while broader
+R7/R8 acceptance remains open. Human listening belongs to the owner's eventual game inspection;
+it does not block this packet. No other registered bug, full campaign, calibration or baseline
+refresh is activated by this scheduling.
+
+**Starting identity:** clean tracked `bd7b819750d32811738a87143a66bb02807ab867` on
+`codex/r7-english-readability`, no intervening commits. Work is isolated at
+`F:/AWWV-worktrees/r8-decision-command-usability`, branch `codex/r8-decision-command-usability`.
+The original checkout, R7 source/date proof and all existing untracked evidence are preserved.
+
+**Question and implementation boundary:** Can the real player routes present each blocking
+decision once, give a consistent current commander-replacement recommendation, expose truthful
+objective actions and display only the player's legitimately available force-balance intelligence?
+Reproduce current behavior before changing it; earlier register descriptions may have been partly
+superseded. One Sol/medium implementer owns minimal UI fixes and failing-first regressions; a
+separate Sol/medium reviewer covers correctness, player experience, faction privacy, determinism
+and scope. The orchestrator owns documentation and actual route/package proof. Preserve existing
+mechanics, simulation/state/save contracts, assets, dependencies, canon and baselines.
+
+Expected production files are the existing `AdvanceTurnModal`, `inboxItems`, `GameStateAdapter`
+and directly affected UI helpers/consumers, with focused tests. Any necessary change to the
+existing `paradox_local_qa.cjs` shakedown harness is limited to opt-in prescribed checkpoints,
+final Save/load proof and attributed historical/staff event selection, with retained evidence.
+The same player is used and legacy defaults remain unchanged; no product gameplay policy changes.
+
+**Save/load evidence gap found before launch:** the existing player preserves and hashes autosaves
+but does not click Save or reload one during a fresh run. Add an opt-in `--save-load-proof` final
+step to that same harness: Escape -> Save Game -> Main Menu -> Field Records -> Resume quicksave.
+Archive the selected save and compare canonical state, autosave and loaded turn/faction before
+and after; fail on absence, mismatch or route failure. This costs under two minutes per faction,
+adds no turns or headless replay campaign, and supplies Phase 1's one load/replay route through
+load. It does not establish deterministic re-execution from a replay stream.
+
+**Historical-choice gap found before launch:** the legacy harness clicks the first event option;
+the renderer preserves authored order, so that is not proof of this plan's policy. Add an opt-in
+`--historical-choice` selector to the existing response route. Use authored default id/marker,
+then explicit staff-recommended id; bind the chosen id to its visible control and record the
+rendered source/basis as player input. Stop before an unranked or ambiguous choice instead of
+inventing doctrine, restraint or a historical source. This introduces no product policy and leaves
+legacy harness defaults unchanged. Focused pure selection cases take seconds; the same planned
+three runs supply integration proof. No additional campaign or package is authorized by this fix.
+
+**Review correction boundary:** B5's `OfficerMatterModal` must share the inbox's incumbent identity
+and deterministic representative ordering. B1 also covers `SituationTab` and `tooltipPlayerSafe`:
+both expose force balance and must obey the existing finite, at-least-0.4 confidence gate. Mixed
+known/unknown active reports withhold aggregate balance; malformed or non-positive edge counts
+cannot establish an active report. These are UI truth/privacy corrections, with targeted tests,
+not changes to the intelligence calculation or simulation. B8's objective-specific copy updates
+both existing English and BCS catalogs.
+
+**B8 actual-route correction:** the advisory cohesion fixture proved that the Decision Room
+intentionally omits non-required event decisions while the inbox retains their response surface.
+A generic room-opening assertion therefore did not prove an actionable lever. Preserve the
+advisory choice and route a matching event through the existing inbox action surface, with a
+truthful President's Desk owner label; retain Decision Room for its other supported families.
+Extend only the affected presentation target/type/callback consumers as necessary. Verify the
+specific matching event can be opened from the objective, not just that a container appeared.
+The earlier host-only route receipt and first source-freeze manifest remain preserved as partial
+evidence. Run one focused correction and actual route proof, then write a new final source freeze
+before the already-authorized combined suite; no expensive gate has yet been consumed.
+
+**Validation sequence and commands:**
+
+1. Use bounded source tracing and failing-first `npm.cmd run test:vitest -- <affected test files>`
+   to reproduce B7/B5/B8/B1, then verify positive and negative cases. Preserve distinct RED/GREEN
+   receipts and record exact file lists. Confirm deduplication retains distinct decisions/events,
+   all four objective cards resolve truthfully, and absent/low-confidence/wrong-faction intel
+   remains redacted without mutating input state.
+2. Exercise the actual four UI routes with retained or explicitly labelled diagnostic fixtures;
+   capture screenshots and resulting actions, not only text/DOM presence. Freeze source for review.
+3. Run `npm.cmd run test:vitest` once on the reviewed candidate; the combined suite includes the
+   complete UI boundary, so do not duplicate it with another UI-only campaign. Run
+   `npm.cmd run typecheck`, the focused documentation checks and `git diff --check`.
+   Run `npm.cmd run desktop:package:dir` once after the reviewed source commit; its
+   `desktop:release:check` includes the required map build, chunk check, simulation bundle and
+   Warroom build. Preserve the mandatory source commit hook separately.
+4. Bind the package's source commit, executable and `app.asar` hashes. Reuse that exact package
+   (including externally emitted renderer/data resources): `node <evidence>/package-proof.mjs freeze`,
+   then `node <evidence>/package-proof.mjs check <unique-label> <faction>` before each launch.
+   This read-only complete file/hash inventory costs seconds to a minute; stop on changed bytes,
+   dirty tracked source or a non-fresh/out-of-worktree profile/archive path.
+   Preserve the manifest outside the package. Reuse the artifact
+   for separate fresh RBiH, RS and HRHB shakedowns, in that order:
+   `node tools/ui/paradox_local_qa.cjs --turns=24 --faction=<faction> --label=<unique-attempt> --strategic --auto-recruit --historical-choice --final-checkpoint-tour --checkpoint-turns=1,4,8,12,16,20,24 --save-load-proof --packaged-executable=<absolute-exe>`.
+   The optional checkpoint selector preserves the previous default schedule. Use checkpoints 1, 4, 8, 12, 16, 20 and 24
+   from Phase 1, and the existing historical-choice, autonomy, save/replay and route contract.
+   Confirm the harness's actual behavior before spending a run; report any uncovered acceptance
+   obligation explicitly. Technical audio/network observations may share this package evidence;
+   they do not provide human listening approval.
+
+**Cost and stopping rule:** Focused tests take seconds to minutes; the combined suite is expected
+to take tens of minutes, packaging several minutes, and three 24-turn runs roughly 30–90 minutes
+depending on host and route latency. Initial allowance is one final combined suite, one package
+and one 24-turn shakedown per faction. Stop an affected run on crash, save mismatch, stale state,
+blocked progress or confirmed bug; preserve its receipt, diagnose and make a targeted correction
+within the authorized player loop before restarting the affected fresh run. Do not launch full
+188-turn campaigns, a headless scenario, baseline/canon wrappers or an unrelated investigation.
+Expand expensive work only for a concrete new question; routine targeted verification is already
+authorized. Stop on a required simulation/canon change or new product decision outside the packet.
+
+**Pass criteria and receipts:** Four defects are repaired and independently reviewed, or a
+superseded premise is disproved by concrete route evidence; all required focused/global/build/hook
+checks pass. Three fresh packaged shakedowns reach exactly turn 24 with attributable screenshots,
+actions, state/autosave/replay and clean required diagnostics. Use distinct logs under
+`F:/A-War-Without-Victory/logs/r8-decision-command-usability/` and the harness's exclusive run
+archives. Existing R7 PRE/POST-A/POST-B receipts establish only their original neutrality scope;
+the inherited six-pin baseline gate, accepted n392 and dirty POST-B remain disclosed. Its
+one-PRE/two-POST budget stays exhausted. No gate is waived and no R7/R8 closure is implied.
+Update this existing plan, board, roadmap and ledger with results, then commit locally. Do not
+push, merge, publish, create a duplicate report, or start BC10/other bugs by implication.
+
+### Reviewed source results — 2026-09-09
+
+The four registered defects have bounded UI repairs and independent source/harness review **GO**
+in `logs/r8-decision-command-usability/review.log` in the original checkout. B7 removes duplicate
+blocker-owned review rows; B5 groups by incumbent and opens the same newest recommendation;
+B8 uses actual objective-specific availability and opens the exact event from both Army HQ and
+tactical Summary; B1 projects only complete, reliable player-owned sector intelligence and gates
+all affected force-balance consumers. The paper-panel threat text measures 7.62:1 contrast at 12 px.
+The register below retains its original defect descriptions as the reproduction record.
+
+All receipts below are under `F:/A-War-Without-Victory/logs/r8-decision-command-usability/`.
+
+| Check | Result and receipt |
+|---|---|
+| Failing-first feature/correction tests | Separate `b1-*`, `b5-*`, `b7-*`, `b8-*` and `reviewer-corrections-*` RED/GREEN receipts retained; exact commands and exits are in each log. |
+| Focused candidate | `final-focused-tests3.log`: exit 0, 225/225 across ten files; subsequent B1 contrast and B8 exact-event route corrections have separate green receipts. |
+| Final tooltip fixture correction | `typecheck1.log`: exit 2, missing required `fogOfWar` in one new fixture. `b1-tooltip-fixture-green1.log`: exit 0, 18/18. Fresh `typecheck2.log`: exit 0. No production change for this correction. |
+| Harness selection | `checkpoints-green1.log`: exit 0, 47/47; `historical-choice-green2.log`: exit 0, 48/48. Earlier RED attempts remain. |
+| Actual B7/B5 routes | `routes-b7-corrected2.log`: exit 0, one row per real blocker and actual peace-proposal modal. B5 matching card/modal screenshots pass within `routes-diagnostic2.log`, whose overall exit 1 belongs to other failed checks. |
+| Actual B8 routes | `routes-b8-final1.log`: exit 0, exact advisory event and reachable answer from both HQ and tactical Summary. Response actionability uses a trial click; it does not claim an applied event response. `routes-b8-corrected1.log` supplies unaffected military/reserve/international and unavailable-card proof; its earlier generic cohesion destination was partial evidence. |
+| Actual B1/privacy/contrast | Known/low/unknown/mixed cases retained in `routes-diagnostic1` and `routes-diagnostic2`; those overall failed attempts are not relabelled green. `routes-b1-contrast1.log`: exit 0, screenshot and measured 7.62:1. Original diagnostic save SHA-256 is unchanged. |
+| Independent correction checks | `independent-review-tests1/2/3.log`: exit 0, respectively 15, 5 and 1 selected tests. Consolidated GO is in `review.log`. |
+| Final freeze and scope | `source-freeze3.json` / `source-freeze3.log`: exit 0, 25 source/test hashes; original tracked checkout and all 870 previously inventoried untracked paths preserved. Earlier freezes remain historical. |
+
+The optional harness flags add explicit checkpoints, real final Save/load proof and attributed
+historical/staff choice selection to the existing player. They do not change gameplay, save
+contracts or default harness policy. `full-vitest1.log` completed all four shards and the final
+51-file serial batch: **exit 1, 13,570 reported passes, four failures and 36 skips**. All four
+failures are the two checkout checks described below; the runner's deliberate child-failure
+fixture is an expected negative control, excluded from these totals. The complete UI boundary
+ran without a failed UI test. Package, mandatory source commit hook and all three fresh
+shakedowns remain pending at this entry.
+Earlier failed browser attempts include corrected fixture assertions and one invalidated HMR
+attempt; all remain separate. Final B8 screenshots were captured after source stopped changing.
+
+**Worktree environment correction question, recorded during `full-vitest1`:** the runtime identity
+guard reports the same React/ReactDOM/Zustand versions through different absolute paths because
+`node_modules` is a shared junction. The release exclusion guard also reports 53,032,794 research
+bytes versus the retained 53,031,799. Audit only those 239 research files against the untouched
+original checkout and inventory local dependency files/links (`environment-audit.mjs`). If the
+research differences are exclusively checkout line endings, restore those worktree copies from
+the same clean original revision; never alter the test expectation or research content. Give the
+worktree a physical copy of the existing dependency tree, preserving the shared junction under
+the evidence directory and rebinding only the npm workspace link to this worktree. Verify all
+copied dependency file hashes and research bytes; no install, version/lockfile or source change.
+Copy into a new contained staging directory, require fresh paths and sufficient disk space, and
+switch only after the full suite has ended. Cost: local inventory/copy roughly 1–5 minutes and
+two focused test files seconds. Stop on a non-line-ending research difference, file/hash mismatch,
+unexpected link or tracked source change. Rerun only
+`npm.cmd run test:vitest -- tests/runtime_dependency_resolution.test.ts tests/release_research_exclusion.test.ts`
+after correction; reuse the completed suite's unaffected tests against unchanged source and
+dependency bytes. Preserve the full failed receipt and each correction receipt. Do not spend a
+second full suite, package or campaign merely to correct checkout environment identity.
+
+The completed full receipt has four failed assertions in those two files and 36 reported skips.
+Five extra skips come from `force_quality_trajectory_diagnostic.test.ts`: this fresh checkout has
+no completed run to read. Its unchanged tool consumes only `brigade_temporal_log.jsonl` and
+`run_summary.json` plus the tracked historical reference. Copy those two inputs from the latest
+retained completed original-checkout run into a clearly labelled, fresh diagnostic-input directory;
+record original paths/hashes and preserve source bytes. Run the unchanged five read-only schema,
+determinism and non-mutation tests with the two environment test files. This costs seconds and
+executes no scenario, replay campaign or baseline gate. Require all five to run and pass and all
+input hashes to remain unchanged; retain the inherited 31 skips separately.
+
+Independent environment review in `review.log` confirms that these are the only real failures
+and approves targeted correction/reuse after byte, topology and test verification. The initial
+read-only audit is `environment-audit1.log`/`.json`; the completed-suite audit is
+`environment-audit2.log`/`.json`, both exit 0. Its 41,708 dependency files total 1,226,418,799 bytes
+(4,626 more than the in-flight audit due to completed test-cache output). All 49 research
+differences are CRLF-only; the original 239 files total exactly 53,031,799 bytes. The partial
+diagnostic copy is explicitly labelled, uses the retained n392 run, and binds both original and
+copied files in `diagnostic-inputs1.json` (`diagnostic-inputs1.log`, exit 0). No simulation ran.
+
+The serial dependency copy exceeded its five-minute estimate before switching the live junction.
+Preserve its script, partial staging directory and exit receipt; stop only the identified copy
+process. Use native `robocopy <original-node_modules> <fresh-stage> /E /MT:16 /COPY:DAT /DCOPY:DAT /XJ /R:1 /W:1 /NFL /NDL /NP`
+for the same physical copy, then verify every source/copy file hash and the reviewed counts,
+research bytes and junction topology. Record Robocopy's raw exit code (0–7 are success statuses)
+separately from wrapper exit. Expected additional copy/verification cost is 1–5 minutes; stop on
+copy errors, unexpected files/links or any byte mismatch. No validation campaign is repeated.
+
+Serial verification also showed the same I/O bottleneck (39,112 reads / 1.03 GB after 4m36s).
+Preserve that script/receipt and stop only its identified process before it writes the manifest.
+Use 16 bounded asynchronous readers for the identical SHA-256 source/copy comparisons, counts,
+extra-file rejection and topology checks; keep every predicate. Expected cost is under two minutes,
+with progress every 5,000 files. This is the same file audit, not another test or campaign.
+
+**Environment correction verified:** `parallel-copy1.log` passes (wrapper exit 0, Robocopy raw 1).
+`materialize-environment3.log` passes, exit 0: every one of 41,708 dependency files matches,
+tree SHA-256 `db69eeb906a0e71b47d72cd79daaa692b5f3fc46aadbd31c7404cddac4798f88`, all 239
+research files match the original and total 53,031,799 bytes, and tracked data is unchanged.
+`switch-dependencies1.log` passes, exit 0, with a physical local dependency tree, preserved original
+junction and local workspace-link target. Interrupted serial attempts 1/2 retain raw exit
+4294967295, their script snapshots and the first partial tree; no failed receipt was overwritten.
+`environment-tests1.log` passes **18/18 across all three targeted files, exit 0**. This resolves
+the four full-run assertions and runs all five added skips; the inherited 31 skips remain.
+It is targeted correction evidence plus unaffected full-run evidence, not a second full-suite
+exit-0 claim. Product source/test hashes, original evidence and diagnostic inputs are checked
+again before the source commit. Package and all three shakedowns remain pending.
+
+### Packaged startup correction — 2026-09-09
+
+Source commit `217c9f70a040d999f7787c08a9283e304c0b0563` and its mandatory hook pass. The commit
+wrapper's post-commit status assertion failed because 49 restored research files retained cached
+CRLF sizes in the index; `index-identity-refresh1.log` proves raw SHA-256 and Git blob SHA-1
+identity, refreshes only those stat entries, stages no content and restores clean status, exit 0.
+`package1.log` passes the complete release build/package command, exit 0. `package-freeze1.log`
+binds its 1,200 files / 1,912,980,288 bytes to tree SHA-256
+`e8ac985ade776c331103b0db49b707c7dcfb5f8f2e358fa8f7af25eed793f8fa` and fresh RBiH paths.
+
+`shakedown-rbih1.log` exits 1 before a campaign or turn: `startCampaign` attempts New Campaign
+immediately after DOM content load. Its retained actual screenshot is still black, with empty
+text/buttons and no recorded console/page/network errors. **Question:** does the packaged opening
+render normally when awaited, and can the same harness enter its actual menu before starting?
+Use one bounded startup-only observation (`node <evidence>/opening-proof.mjs`) on this same frozen
+package, with a fresh contained profile, readiness timeout, screenshots and visible controls.
+Do not advance a turn. Then minimally correct the existing harness's startup readiness/Enter
+route if needed, with focused failing-first tests, independent review and targeted verification.
+Stop on a persistent blank opening or a required product-source change outside this packet.
+Cost: seconds to a minute for observation and focused tests. Preserve attempt 1 and restart only
+the affected fresh RBiH shakedown with a new label; the ordinary stop/restart rule applies.
+
+This is a harness-only correction. Reuse the exact package without rebuilding: bind its product
+source commit separately from the later harness commit, require no changes to packaged source,
+data, assets, dependencies or build configuration, and compare all package file hashes before
+each fresh run. A harness/doc edit does not change the frozen package; record both identities
+explicitly. No second full suite or package is justified by this route correction.
+
+`opening-proof1.log` exits 1 because the diagnostic itself used the old New Campaign label;
+its retained screenshot proves the normal New War menu rendered after splash dismissal, without
+runtime errors. The corrected startup-only `opening-proof2.log` exits 0: actual embedded splash
+-> New War -> faction -> Take command -> Begin, with the current default emergent mode unchanged.
+The four screenshots were visually inspected; no campaign was started and no turn advanced.
+The harness must await this actual frame and controls, then use that route; `--historical-choice`
+continues to govern attributed event responses, not the campaign's mode choice.
+
+After the focused harness correction/review and normal local commit hook, use
+`node <evidence>/package-proof2.mjs check <unique-label> <faction>` for subsequent launches.
+This retained-manifest checker requires clean tracked status, descent from product commit
+`217c9f70a040d999f7787c08a9283e304c0b0563`, differences restricted to the QA harness/test and
+existing five documentation files, and exact equality of all 1,200 package file hashes.
+It prints the product and harness commits separately; it cannot refreeze the package manifest.
+The original checker and both failed startup receipts remain preserved. The question, cost and
+stop rule are unchanged: reuse proven package bytes, stop on any packaged-input change, and
+restart the pre-campaign RBiH failure only after targeted review passes.
+
+Focused startup receipts preserve `startup-readiness-red1.log` and
+`startup-command-ready-red1.log` (exit 1 for the missing behavior) plus the intermediate
+`startup-readiness-green1.log` failure in the test's async function extraction. The corrected
+full harness file passes 49/49 in `startup-harness-full-green2.log`, exit 0. Review additionally
+requires exact visible intro controls instead of whole-body word matching; preserve its targeted
+correction receipt before freeze/commit. `startup-docs1.log` passes all 13 focused documentation
+checks, exit 0. Game source and test hashes outside the two harness files remain bound to freeze 3;
+freeze 4 binds the final harness correction for its local commit and packaged retry.
+`startup-exact-intro-red1.log` exits 1 for the broad selector; the exact visible-control correction
+passes its targeted verification in `startup-exact-intro-green1.log`, exit 0. Unaffected cases
+reuse the preceding complete 49/49 harness-file receipt. Splash dismissal uses the actual button;
+the final readiness check requires the Desk toolbar and matching faction from the live bridge.
+
+### Warroom readiness correction — 2026-09-10
+
+`startup-commit1.log` passes the mandatory hook and local commit, exit 0, at
+`85c7e45c8546d7d00e0f13ca97955f4483db6ddc`. `package-check-rbih2.log` passes all 1,200
+file hashes and separate product/harness provenance, exit 0. `shakedown-rbih2.log` then exits 1
+at turn 0 waiting for `toolbar-route-desk`: that is the field-map toolbar, whereas a new campaign
+opens on the Warroom with `warroom-toolbar`. The opening autosave is RBiH/war/turn 0; no turn
+was advanced. Preserve this failed receipt, profile, screenshots and harness snapshot.
+
+**Question:** can the actual loaded Warroom establish readiness without first visiting the map?
+Correct only the existing readiness helper and its use after Save/load to accept either actual
+Warroom or field toolbar, together with matching live bridge faction. Use a bounded startup-only
+`node <evidence>/opening-proof3.mjs` observation on the same package: click Begin, await the
+Warroom, capture its actual screenshot and require exact RBiH turn 0 in both bridge and save.
+No advance, strategic setup or route tour. Cost: under two minutes. Stop on missing/incorrect
+campaign state or a real product failure; do not lengthen timeouts to mask the wrong selector.
+Run focused failing-first readiness tests and independent targeted correction verification,
+record a new freeze and normal local commit hook, then retry only the affected fresh RBiH run.
+The full suite and package stay reused; no simulation, baseline or calibration work is added.
+
+`opening-proof3.log` exits 0: actual Warroom appears in 11.6 seconds, bridge and save both report
+RBiH/war/turn 0, and runtime errors are empty. Its inspected screenshot includes the real War Has
+Started overlay. Therefore readiness must precede exact intro dismissal: the earlier Begin text
+changes to Opening before the shell/overlay is mounted. The next full retry's command-post
+screenshot must show the dismissed overlay; this probe establishes shell/state identity only.
+
+`command-surface-readiness-red1.log` and `late-intro-order-red1.log` retain the failing cases,
+exit 1. Their separate `*-green1.log` receipts pass, exit 0, covering Warroom/field readiness,
+absence of either toolbar, matching faction, Save/load helper reuse and readiness-before-intro
+ordering. Unaffected harness tests reuse the prior 49/49 file receipt. The 13 focused docs checks
+pass in `warroom-readiness-docs1.log`, exit 0; freeze 5 records the corrected harness candidate.
+
+### First required decision route — 2026-09-10
+
+`warroom-readiness-commit1.log` passes the hook and local commit at
+`fdb5b24b3fd45e455bb49c3bdd6437663ac266e2`, exit 0. The complete focused harness file also
+passes 49/49 in `command-surface-harness-full-green1.log`, exit 0. Package reuse passes in
+`package-check-rbih3.log`, exit 0. `shakedown-rbih3.log` exits 1 at turn 0 trying to open
+`rbih_state_identity` before its first tour. Its command-post screenshot proves the real Warroom
+with the intro dismissed and the required What is Bosnia? inbox card visible. Initial state/save
+evidence is bound; no turn advances or historical responses were applied.
+
+**Question:** does the first required event have an actionable current player route, and where
+does the existing Desk helper fail? Use one bounded `node <evidence>/opening-proof4.mjs` probe
+on the same frozen package and a fresh contained profile, through turn-0 startup only. Capture
+the actual Desk route, card/action identity and matching event modal; inspect the visible inbox
+route if the Desk route fails. Do not choose an answer or advance. Cost: under two minutes.
+Stop on a product defect outside B7/B5/B8/B1, missing identity or ambiguous action. A proved
+harness-only selector/readiness correction remains within the authorized player-loop scope:
+focused RED/GREEN, targeted independent verification, freeze and local hook before a new fresh
+RBiH attempt. Preserve every failed receipt and reuse the unchanged full suite/package.
+
+**Confirmed blocker / owner decision pending:** `opening-proof4.log` exits 1. The Desk opens
+with the correct `desk-card-event_decision` / `event:rbih_state_identity` / `event_modal` identity,
+but the standalone `presidential-inbox` stays above it and intercepts the enabled Decide now
+button. `opening-proof4/06-desk-route.png` and `failure.png` visibly show the Inbox obscuring
+the Desk header and action; the Playwright trace names the intercepting subtree. No answer or
+turn was applied. Independent review records **STOP** in the existing `review.log`: this is a
+product surface-ownership defect outside B7/B5/B8/B1, not another harness selector error.
+
+The minimal proposed fix is one render-condition guard in `App.tsx`: keep the standalone
+opening-brief Inbox hidden while `warroomDeskOpen`. The Desk already renders the same pending
+decision/action handler; closing it would restore the still-pending brief. Proposed regression:
+Inbox present on Warroom home, absent while Desk is open, restored after closing Desk if the
+brief remains pending. Verify the actual first required decision route without interception,
+then review/commit and rebuild once before restarting fresh RBiH -> RS -> HRHB shakedowns.
+Owner authorization for this additional product fix and replacement package is pending; no
+production change or bypass has been made. RBiH has not advanced beyond turn 0, and RS/HRHB
+have not launched. Source review GO for the four repairs does not constitute packaged acceptance.
+
+The blocker documentation passes 13 focused tests (`blocked-docs1.log`, exit 0) and frozen-source,
+protected-path, local-link and original-evidence checks (`blocked-scope1.log`, exit 0). Independent
+documentation review approves it after clarifying that the Inbox physically obscures the decision.
+The normal local documentation commit hook remains required; all failed campaign/probe receipts
+retain their original exits. The pending owner decision is not an authorization by elapsed time.
 
 ---
 

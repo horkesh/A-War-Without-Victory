@@ -401,7 +401,7 @@ describe('decision family modals', () => {
     });
     const onClose = vi.fn();
     render(React.createElement(OfficerMatterModal, {
-      itemId: 'officer:replacement_suggested:second_officer',
+      itemId: 'officer:replacement_suggested:incumbent_officer',
       state: makeState({
         pendingOfficerEvents: [
           {
@@ -449,10 +449,64 @@ describe('decision family modals', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it('opens the current recommendation for an incumbent-keyed replacement card', () => {
+    render(React.createElement(OfficerMatterModal, {
+      itemId: 'officer:replacement_suggested:incumbent_officer',
+      state: makeState({
+        pendingOfficerEvents: [
+          {
+            event_id: 'replacement-old', type: 'replacement_suggested', faction: 'RS', turn: 8,
+            officer_id: 'old-candidate', officer_name: 'Old Candidate', current_commander_id: 'incumbent-officer',
+            current_commander_name: 'Incumbent Officer', officer_competence: 3, officer_aggressiveness: 3,
+            officer_defensive_skill: 3, acknowledged: false,
+          },
+          {
+            event_id: 'replacement-current', type: 'replacement_suggested', faction: 'RS', turn: 9,
+            officer_id: 'current-candidate', officer_name: 'Current Candidate', current_commander_id: 'incumbent-officer',
+            current_commander_name: 'Incumbent Officer', officer_competence: 4, officer_aggressiveness: 3,
+            officer_defensive_skill: 4, acknowledged: false,
+          },
+        ],
+      }),
+      onClose: vi.fn(),
+      onOpenPersonnel: vi.fn(),
+    }));
+
+    expect(screen.getByText('Current Candidate')).toBeTruthy();
+    expect(screen.queryByText('Old Candidate')).toBeNull();
+  });
+
+  it('uses strict event-id order to select a same-turn replacement recommendation', () => {
+    render(React.createElement(OfficerMatterModal, {
+      itemId: 'officer:replacement_suggested:incumbent_officer',
+      state: makeState({
+        pendingOfficerEvents: [
+          {
+            event_id: 'a-event', type: 'replacement_suggested', faction: 'RS', turn: 9,
+            officer_id: 'locale-candidate', officer_name: 'Locale Candidate', current_commander_id: 'incumbent-officer',
+            current_commander_name: 'Incumbent Officer', officer_competence: 3, officer_aggressiveness: 3,
+            officer_defensive_skill: 3, acknowledged: false,
+          },
+          {
+            event_id: 'B-event', type: 'replacement_suggested', faction: 'RS', turn: 9,
+            officer_id: 'strict-candidate', officer_name: 'Strict Candidate', current_commander_id: 'incumbent-officer',
+            current_commander_name: 'Incumbent Officer', officer_competence: 4, officer_aggressiveness: 3,
+            officer_defensive_skill: 4, acknowledged: false,
+          },
+        ],
+      }),
+      onClose: vi.fn(),
+      onOpenPersonnel: vi.fn(),
+    }));
+
+    expect(screen.getByText('Strict Candidate')).toBeTruthy();
+    expect(screen.queryByText('Locale Candidate')).toBeNull();
+  });
+
   it('routes replacement recommendations to the Briefing action that can appoint the successor', () => {
     const onOpenPersonnel = vi.fn();
     render(React.createElement(OfficerMatterModal, {
-      itemId: 'officer:replacement_suggested:successor',
+      itemId: 'officer:replacement_suggested:incumbent',
       state: makeState({
         pendingOfficerEvents: [{
           event_id: 'replacement-event',

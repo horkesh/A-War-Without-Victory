@@ -39,6 +39,231 @@ function loadFunction<T>(source: string, name: string, context: Record<string, u
     return runInNewContext(`(${extractFunctionSource(source, name)})`, context) as T;
 }
 
+function loadAsyncFunction<T>(source: string, name: string, context: Record<string, unknown> = {}): T {
+    return runInNewContext(`(async ${extractFunctionSource(source, name)})`, context) as T;
+}
+
+test('explicit shakedown checkpoints preserve required visits and reject incomplete or disabled schedules', () => {
+    const select = loadFunction<(raw: string | null, target: number, skip: boolean) => Set<number>>(
+        readHarness(), 'selectCheckpointTurns',
+    );
+    assert.deepEqual(Array.from(select(null, 24, false)), [1, 2, 5, 10, 15, 20, 30, 40, 24]);
+    assert.deepEqual(Array.from(select(null, 24, true)), []);
+    assert.deepEqual(Array.from(select('24,1,4,8,12,16,20,4', 24, false)), [1, 4, 8, 12, 16, 20, 24]);
+    for (const invalid of ['', '0,24', '1.5,24', '25,24', '1,4', 'one,24']) {
+        assert.throws(() => select(invalid, 24, false), /checkpoint/i, invalid);
+    }
+    assert.throws(() => select('1,24', 24, true), /checkpoint/i);
+});
+
+test('historical choice uses explicit provenance instead of first option and stops on ambiguity', () => {
+    const select = loadFunction<(decision: any) => { id: string; basis: string }>(readHarness(), 'selectHistoricalEventChoice');
+    const options = [{ id: 'first', label: 'First' }, { id: 'historical', label: 'Historical' }, { id: 'staff', label: 'Staff' }];
+    assert.equal(select({ response_options: options, historical_default_response_id: 'historical', staff_recommended_response_id: 'staff' }).id, 'historical');
+    assert.equal(select({ response_options: [...options].reverse(), historical_default_response_id: 'historical' }).id, 'historical');
+    assert.equal(select({ response_options: options, staff_recommended_response_id: 'staff' }).basis, 'staff_recommendation');
+    assert.equal(select({ response_options: [{ ...options[1], historical_marker: 'historical_default' }] }).basis, 'authored_historical_default');
+    assert.throws(() => select({ response_options: options }), /ranked/i);
+    assert.throws(() => select({ response_options: [{}] }), /ranked/i);
+    assert.throws(() => select({ response_options: options, historical_default_response_id: 'missing' }), /missing/i);
+    assert.throws(() => select({ response_options: options.map(o => ({ ...o, historical_marker: 'historical_default' })) }), /ambiguous/i);
+    assert.throws(() => select({ response_options: [{ ...options[0], historical_marker: 'historical_default' }, options[1]], historical_default_response_id: 'historical' }), /ambiguous/i);
+});
+
+type HistoricalPolicySurfaceOptions = {
+    basis?: 'authored_historical_default' | 'staff_recommendation';
+    tooltip?: string | null;
+    dossiers?: Array<{ text: string; visible: boolean }>;
+    foreignDossiers?: Array<{ text: string; visible: boolean }>;
+};
+
+function historicalPolicySurface({
+    basis = 'authored_historical_default',
+    tooltip = null,
+    dossiers = [],
+    foreignDossiers = [],
+}: HistoricalPolicySurfaceOptions = {}) {
+    const eventId = 'event-a';
+    const response = { id: basis === 'staff_recommendation' ? 'staff' : 'historical', label: basis === 'staff_recommendation' ? 'Staff' : 'Historical' };
+    const decision = {
+        event_id: eventId,
+        faction: 'RBiH',
+        response_options: [
+            { id: 'historical', label: 'Historical', historical_marker: 'historical_default' },
+            { id: 'staff', label: 'Staff' },
+        ],
+        ...(basis === 'staff_recommendation'
+            ? { staff_recommended_response_id: 'staff', response_options: [{ id: 'first', label: 'First' }, { id: 'staff', label: 'Staff' }] }
+            : {}),
+    };
+    const titleList = {
+        first: () => ({ getAttribute: async (name: string) => name === 'title' ? tooltip : null }),
+    };
+    const dossierScrolls: number[] = [];
+    const responseItems = [response].map((item) => ({
+        ...item,
+        locator: (selector: string) => selector === '[title]' ? titleList : emptyList,
+    }));
+    const responseList = {
+        first: () => responseItems[0],
+        nth: (index: number) => responseItems[index],
+        evaluateAll: async (callback: (nodes: any[]) => unknown) => callback(responseItems.map((item) => ({
+            firstElementChild: { firstElementChild: { textContent: item.label } },
+        }))),
+    };
+    const dossierList = (rows: Array<{ text: string; visible: boolean }>) => ({
+        count: async () => rows.length,
+        nth: (index: number) => ({
+            isVisible: async () => rows[index]?.visible ?? false,
+            scrollIntoViewIfNeeded: async () => { dossierScrolls.push(index); },
+            innerText: async () => rows[index]?.text ?? '',
+        }),
+    });
+    const rail = { getAttribute: async (name: string) => name === 'data-event-id' ? eventId : null };
+    const modal = {
+        locator: (selector: string) => {
+            if (selector === '[data-testid="event-decision-response-rail"]') return { count: async () => 1, first: () => rail };
+            if (selector === '[data-testid="event-decision-response"]') return responseList;
+            if (selector === '[data-testid="decision-context-dossier"]') return dossierList(dossiers);
+            return emptyList;
+        },
+    };
+    const modalList = { count: async () => 1, first: () => modal };
+    const emptyList = { count: async () => 0, first: () => ({ getAttribute: async () => null }) };
+    return {
+        locator: (selector: string) => {
+            if (selector === '[role="dialog"][aria-labelledby="event-decision-title"]:visible') return modalList;
+            if (selector === '[data-testid="event-decision-response-rail"]') return rail;
+            if (selector === '[data-testid="event-decision-response"]') return responseList;
+            if (selector === '[data-testid="decision-context-dossier"]') return dossierList(foreignDossiers);
+            return emptyList;
+        },
+        evaluate: async () => ({
+            meta: { player_faction: 'RBiH', turn: 4 },
+            military: { pending_event_decisions: [decision] },
+        }),
+        dossierScrolls,
+    };
+}
+
+test('historical event policy accepts exact visible tooltip or same-modal dossier provenance and records its location', async () => {
+    const harness = readHarness();
+    const selectHistoricalEventChoice = loadFunction<(decision: any) => any>(harness, 'selectHistoricalEventChoice');
+    const hasMeaningfulSourceContent = loadFunction<(value: unknown, prefix: string) => boolean>(harness, 'hasMeaningfulSourceContent');
+    const policy = loadAsyncFunction<(surface: any) => Promise<any>>(harness, 'policyEventResponseControl', {
+        historicalChoice: true,
+        selectHistoricalEventChoice,
+        hasMeaningfulSourceContent,
+    });
+
+    const tooltip = await policy(historicalPolicySurface({ tooltip: 'Historical default. Source: Archive volume 1' }));
+    assert.equal(tooltip.choice.source, 'Historical default. Source: Archive volume 1');
+    assert.equal(tooltip.choice.sourceLocation, 'response_tooltip');
+
+    const dossierSurface = historicalPolicySurface({ dossiers: [{ text: 'Source dossier: Archive volume 2', visible: true }] });
+    const dossier = await policy(dossierSurface);
+    assert.equal(dossier.choice.source, 'Source dossier: Archive volume 2');
+    assert.equal(dossier.choice.sourceLocation, 'decision_context_dossier');
+    assert.deepEqual(dossierSurface.dossierScrolls, [0]);
+
+    const staff = await policy(historicalPolicySurface({ basis: 'staff_recommendation' }));
+    assert.equal(staff.choice.source, 'none');
+    assert.equal(staff.choice.sourceLocation, 'not_required');
+});
+
+test('historical event policy rejects absent, empty, hidden, foreign, or ambiguous modal provenance', async () => {
+    const harness = readHarness();
+    const selectHistoricalEventChoice = loadFunction<(decision: any) => any>(harness, 'selectHistoricalEventChoice');
+    const hasMeaningfulSourceContent = loadFunction<(value: unknown, prefix: string) => boolean>(harness, 'hasMeaningfulSourceContent');
+    const policy = loadAsyncFunction<(surface: any) => Promise<any>>(harness, 'policyEventResponseControl', {
+        historicalChoice: true,
+        selectHistoricalEventChoice,
+        hasMeaningfulSourceContent,
+    });
+
+    await assert.rejects(policy(historicalPolicySurface()), /source note unavailable/i);
+    await assert.rejects(policy(historicalPolicySurface({ tooltip: 'Historical default. Source:   ' })), /source note unavailable/i);
+    await assert.rejects(policy(historicalPolicySurface({ tooltip: 'Historical default. Source: ...' })), /source note unavailable/i);
+    await assert.rejects(policy(historicalPolicySurface({ dossiers: [{ text: '   ', visible: true }] })), /source note unavailable/i);
+    await assert.rejects(policy(historicalPolicySurface({ dossiers: [{ text: 'Source dossier:   ', visible: true }] })), /source note unavailable/i);
+    await assert.rejects(policy(historicalPolicySurface({ dossiers: [{ text: 'Source dossier: --', visible: true }] })), /source note unavailable/i);
+    await assert.rejects(policy(historicalPolicySurface({ dossiers: [{ text: 'Source dossier: Hidden', visible: false }] })), /source note unavailable/i);
+    await assert.rejects(policy(historicalPolicySurface({ foreignDossiers: [{ text: 'Source dossier: Foreign modal', visible: true }] })), /source note unavailable/i);
+    await assert.rejects(policy(historicalPolicySurface({ dossiers: [
+        { text: 'Source dossier: First', visible: true },
+        { text: 'Source dossier: Second', visible: true },
+    ] })), /ambiguous/i);
+
+    const policySource = extractFunctionSource(harness, 'policyEventResponseControl');
+    assert.match(policySource, /\[role="dialog"\]\[aria-labelledby="event-decision-title"\]:visible/);
+    assert.match(policySource, /decision-context-dossier/);
+});
+
+test('packaged startup waits for the embedded React owner and follows its complete campaign controls', async () => {
+    const harness = readHarness();
+    const startReactCampaign = runInNewContext(
+        `(async ${extractFunctionSource(harness, 'startReactCampaign')})`,
+    ) as (surface: any, faction: string) => Promise<void>;
+    const actions: string[] = [];
+    const control = (name: string) => ({
+        waitFor: async ({ state }: { state: string }) => actions.push(`wait:${name}:${state}`),
+        click: async () => actions.push(`click:${name}`),
+        first() { return this; },
+    });
+    const surface = {
+        getByTestId: (testid: string) => testid === 'opening-splash-art'
+            ? { isVisible: async () => true }
+            : control(testid),
+        getByRole: (_role: string, options: { name: RegExp }) => ({
+            first: () => control(String(options.name)),
+        }),
+        locator: (selector: string) => control(selector),
+    };
+
+    await startReactCampaign(surface, 'RBiH');
+
+    assert.deepEqual(actions, [
+        'wait:[aria-labelledby="opening-splash-title"] button:visible',
+        'click:[aria-labelledby="opening-splash-title"] button',
+        'wait:/^New War$/i:visible',
+        'click:/^New War$/i',
+        'wait:main-menu-faction-RBiH:visible',
+        'click:main-menu-faction-RBiH',
+        'wait:/^Take command$/i:visible',
+        'click:/^Take command$/i',
+        'wait:/^Begin$/i:visible',
+        'click:/^Begin$/i',
+        'wait:/^Begin$/i:hidden',
+    ]);
+    const startCampaign = extractFunctionSource(harness, 'startCampaign');
+    assert.match(startCampaign, /waitForCampaignOpeningOwner/);
+    assert.match(startCampaign, /opening\.kind === 'react'/);
+    assert.match(startCampaign, /startReactCampaign\(opening\.surface, faction,/);
+    assert.match(startCampaign, /waitForCampaignCommandReady\(frame, faction\)/);
+    assert.doesNotMatch(startCampaign, /const text = await bodyText\(frame\)/);
+    assert.match(startCampaign, /getByRole\('button', \{ name: \/\^Acknowledge\$\/i \}\)/);
+    assert.match(startCampaign, /getByRole\('button', \{ name: \/\^Begin\$\/i \}\)/);
+    assert.ok(
+        startCampaign.indexOf('waitForCampaignCommandReady(frame, faction)')
+            < startCampaign.indexOf("name: /^Acknowledge$/i"),
+        'campaign state and a real command surface must settle before late intro controls are dismissed',
+    );
+
+    const commandSurfaceVisible = runInNewContext(
+        `(async ${extractFunctionSource(harness, 'isCampaignCommandSurfaceVisible')})`,
+    ) as (frame: any) => Promise<boolean>;
+    const commandFrame = (visibleTestId: string | null) => ({
+        getByTestId: (testid: string) => ({ isVisible: async () => testid === visibleTestId }),
+    });
+    assert.equal(await commandSurfaceVisible(commandFrame('warroom-toolbar')), true);
+    assert.equal(await commandSurfaceVisible(commandFrame('toolbar-route-desk')), true);
+    assert.equal(await commandSurfaceVisible(commandFrame(null)), false);
+
+    const saveLoad = extractFunctionSource(harness, 'exerciseFinalSaveLoad');
+    assert.match(saveLoad, /waitForCampaignCommandReady\(frame, faction/);
+    assert.doesNotMatch(saveLoad, /getByTestId\('toolbar-route-desk'\)\.waitFor/);
+});
+
 test('52-week Electron QA supports bounded major-surface checkpoint tours', () => {
     const harness = readHarness();
 
@@ -861,8 +1086,12 @@ test('turn-zero strategic smoke does not claim staged autonomy should already be
     );
 });
 
-test('strategic runs prove Assisted autonomy is pending at setup and active after the first turn', () => {
+test('strategic setup predicts the Assisted transition from validated pre-click state', () => {
     const harness = readHarness();
+    const predictStrategicAutonomySelection = loadFunction<(
+        priorLevel: unknown,
+        targetLevel: unknown,
+    ) => { autonomyLevel: number; autonomyLevelPending: number | null }>(harness, 'predictStrategicAutonomySelection');
     const assertStrategicAutonomyState = loadFunction<(
         label: string,
         state: { autonomyLevel?: number; autonomyLevelPending?: number | null } | null,
@@ -870,19 +1099,29 @@ test('strategic runs prove Assisted autonomy is pending at setup and active afte
         expectedPending: number | null,
     ) => Record<string, number | null>>(harness, 'assertStrategicAutonomyState');
 
-    assert.deepEqual(
-        { ...assertStrategicAutonomyState('configured', { autonomyLevel: 0, autonomyLevelPending: 1 }, 0, 1) },
-        { autonomyLevel: 0, autonomyLevelPending: 1 },
+    assert.deepEqual({ ...predictStrategicAutonomySelection(2, 1) }, { autonomyLevel: 1, autonomyLevelPending: null });
+    assert.deepEqual({ ...predictStrategicAutonomySelection(1, 1) }, { autonomyLevel: 1, autonomyLevelPending: null });
+    assert.deepEqual({ ...predictStrategicAutonomySelection(0, 1) }, { autonomyLevel: 0, autonomyLevelPending: 1 });
+    for (const invalidPrior of [undefined, null, Number.NaN, 1.5, -1, 4, '2']) {
+        assert.throws(() => predictStrategicAutonomySelection(invalidPrior, 1), /prior autonomy level.*invalid/i);
+    }
+    assert.throws(
+        () => assertStrategicAutonomyState('wrong active', { autonomyLevel: 2, autonomyLevelPending: null }, 1, null),
+        /wrong active.*level 1/i,
     );
     assert.throws(
-        () => assertStrategicAutonomyState('not staged', { autonomyLevel: 0, autonomyLevelPending: null }, 0, 1),
-        /not staged.*pending 1/i,
+        () => assertStrategicAutonomyState('wrong pending', { autonomyLevel: 1, autonomyLevelPending: 1 }, 1, null),
+        /wrong pending.*pending none/i,
     );
-    assert.throws(
-        () => assertStrategicAutonomyState('not applied', { autonomyLevel: 0, autonomyLevelPending: 1 }, 1, null),
-        /not applied.*level 1/i,
-    );
-    assert.match(extractFunctionSource(harness, 'configureStrategicRun'), /assertStrategicAutonomyState/);
+    const readState = extractFunctionSource(harness, 'readState');
+    assert.match(readState, /autonomyLevel: raw\.meta\?\.autonomy_level \?\? null/);
+    const configureStrategicRun = extractFunctionSource(harness, 'configureStrategicRun');
+    const priorRead = configureStrategicRun.indexOf('const autonomyBeforeSelection');
+    const prediction = configureStrategicRun.indexOf('const autonomyExpectation');
+    const click = configureStrategicRun.indexOf("clickTestId(frame, 'autonomy-level-1'");
+    const observedRead = configureStrategicRun.indexOf('const configuredState');
+    assert.ok(priorRead >= 0 && priorRead < prediction && prediction < click && click < observedRead);
+    assert.match(configureStrategicRun, /assertStrategicAutonomyState/);
     assert.match(extractFunctionSource(harness, 'playTurns'), /after\?\.turn === 1[\s\S]*assertStrategicAutonomyState/);
 });
 

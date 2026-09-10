@@ -8,7 +8,7 @@ import { getOperationId, getOperationPhaseBadgeClassForOperation, getOperationPh
 import { getPanelRailStyle } from './panelRail';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { getPlayerSafeOperationBalancePresentation } from '../../../shared/playerSafeOperationBalance';
-import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
+import { getPlayerSafeThreatPresentation, hasReliableThreatIntel } from '../utils/playerSafeThreat';
 import { useIPC } from '../desktop/useIPC';
 import { filterPlayerFacingOperations, findPlayerFacingSectorById, isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import { t, useLocale, type MessageKey } from '../i18n';
@@ -42,11 +42,22 @@ function StrengthBadge({
 }
 
 /** Threat ratio badge with descriptive balance labels. */
+function lightSurfaceThreatToneClass(toneClass: string): string {
+  return toneClass
+    .replace('text-red-500', 'text-red-800')
+    .replace('text-red-400', 'text-red-800')
+    .replace('text-amber-500', 'text-amber-800')
+    .replace('text-emerald-500', 'text-emerald-800')
+    .replace('text-green-500', 'text-green-800')
+    .replace('text-green-400', 'text-green-700');
+}
+
 function ThreatBadge({ ratio }: { ratio: number | undefined | null }) {
   if (typeof ratio !== 'number' || !Number.isFinite(ratio)) {
     return <span className="text-neutral-600 italic">{t('corpsFront.unreported')}</span>;
   }
   const { label, summary, toneClass } = getPlayerSafeThreatPresentation(ratio);
+  const lightToneClass = lightSurfaceThreatToneClass(toneClass);
 
   return (
     <div className="flex flex-col" title={t('corpsFront.forceBalanceTitle', { label, summary })}>
@@ -54,8 +65,8 @@ function ThreatBadge({ ratio }: { ratio: number | undefined | null }) {
         <span>{t('corpsFront.forceBalanceFriendly')}</span>
         <span>{t('corpsFront.forceBalanceHostile')}</span>
       </div>
-      <span className={`${toneClass} text-xs tracking-tighter leading-none mb-0.5`}>{label}</span>
-      <span className={`${toneClass} font-mono text-xs uppercase tracking-tight`}>{summary}</span>
+      <span className={`${lightToneClass} text-xs tracking-tighter leading-none mb-0.5`}>{label}</span>
+      <span className={`${lightToneClass} font-mono text-xs uppercase tracking-tight`}>{summary}</span>
     </div>
   );
 }
@@ -404,7 +415,7 @@ export function CorpsFrontPanel({ railSlot = 'primary', breadcrumb }: CorpsFront
     : t('corpsFront.setOpsecActive');
   const hasReportedIntelConfidence = typeof sector.intel_confidence === 'number' && Number.isFinite(sector.intel_confidence);
   const intelConfidence = hasReportedIntelConfidence ? sector.intel_confidence! : null;
-  const hasReliableThreatIntel = intelConfidence != null && intelConfidence >= 0.4;
+  const hasReliableSectorThreatIntel = hasReliableThreatIntel(intelConfidence);
   const logisticsPriorityTitle = t('corpsFront.logisticsPriorityTitle');
   const commandBridgeUnavailable = t('corpsFront.commandBridgeUnavailable');
   const offensivePowerTitle = typeof displayOffensivePower === 'number' && Number.isFinite(displayOffensivePower)
@@ -623,7 +634,7 @@ export function CorpsFrontPanel({ railSlot = 'primary', breadcrumb }: CorpsFront
                     <div className="flex flex-col">
                       <span className="text-xs uppercase font-bold text-neutral-600">{t('corpsFront.forceBalance')}</span>
                       <div className="pt-0.5">
-                        {!hasReliableThreatIntel ? (
+                        {!hasReliableSectorThreatIntel ? (
                           <span className="text-neutral-600 italic">{t('corpsFront.redacted')}</span>
                         ) : !hasFriendlyLine ? (
                           <span className="text-red-600 font-bold uppercase tracking-tight">{t('corpsFront.noFriendlyLine')}</span>
@@ -1073,7 +1084,7 @@ export function CorpsFrontPanel({ railSlot = 'primary', breadcrumb }: CorpsFront
                             )}
                             {forceBalance && (
                               <div className="text-xs mt-0.5 text-neutral-600 uppercase">
-                                {t('corpsFront.forceBalance')}: <span className={forceBalance.toneClass}>{forceBalance.label}</span> <span className="text-neutral-600">{forceBalance.summary}</span>
+                                {t('corpsFront.forceBalance')}: <span className={lightSurfaceThreatToneClass(forceBalance.toneClass)}>{forceBalance.label}</span> <span className="text-neutral-600">{forceBalance.summary}</span>
                               </div>
                             )}
                             {(op.preparation_sub_phase === 'assessment' || op.preparation_sub_phase === 'ready') && (

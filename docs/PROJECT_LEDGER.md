@@ -2738,6 +2738,303 @@ within them. `closeout-audit-review.log` retains the initial verdict and targete
 `closeout-audit-docs2.log`, `closeout-audit-scope2.log` and `closeout-audit-commit1.log` record final
 checks and the mandatory local hook outcome.
 
+## R8 decision/command usability source packet — 2026-09-09
+
+The owner scheduled B7/B5/B8/B1 and three fresh 24-turn packaged shakedowns, with human listening
+deferred to eventual owner inspection. Work starts from clean tracked `bd7b819750d32811738a87143a66bb02807ab867`
+in the isolated `F:/AWWV-worktrees/r8-decision-command-usability` worktree on
+`codex/r8-decision-command-usability`. The original R7 checkout and 870 inventoried untracked
+paths remain preserved. The existing Electron validation plan records scope, commands, cost,
+pass criteria and stop rules before implementation and expensive gates.
+
+B7 deduplicates blocker-owned review rows; B5 shares deterministic incumbent/current-candidate
+identity between inbox and modal; B8 derives truthful objective levers and routes the exact event
+from HQ and tactical Summary; B1 projects complete player-owned intelligence and withholds low,
+unknown or incomplete force balance across affected consumers. Paper-panel threat text has
+measured 7.62:1 contrast. Canonical input, engine, save contracts, assets and dependencies are unchanged.
+The existing QA harness gains opt-in checkpoints, attributed event choice and final Save/load proof;
+these do not claim deterministic replay re-execution or alter legacy defaults.
+
+One Sol/medium implementer and a separate Sol/medium reviewer produced source/harness **GO**.
+Receipts live in `F:/A-War-Without-Victory/logs/r8-decision-command-usability/`; the existing plan
+contains the result table. Focused candidate tests pass 225/225, with separate green corrections,
+actual route screenshots and independent targeted verification. `typecheck1.log` failed on one
+test fixture's missing `fogOfWar`; the corrected tooltip file passes 18/18 and `typecheck2.log`
+passes, exit 0. Every failed attempt remains retained. `source-freeze3.json` binds the final 25
+source/test hashes. The complete combined suite finishes in `full-vitest1.log`, exit 1: 13,570
+reported passes, four failures and 36 skips. The four failures are checkout-only React/ReactDOM/
+Zustand junction-path identities and a research-file raw-byte assertion; all UI tests pass.
+
+Independent review approves a bounded environment correction. A physical copy of the identical
+dependency files replaces the shared worktree junction, which is preserved under the evidence
+directory. All 41,708 dependency files match; all 239 research files match the original checkout
+at 53,031,799 bytes after restoring 49 CRLF-only differences. No tracked data, dependency version,
+lockfile, source or test expectation changes. Slow serial copy/verification attempts are retained;
+the native parallel copy and parallel SHA-256 verifier pass (`parallel-copy1.log`,
+`materialize-environment3.log`, `switch-dependencies1.log`, wrapper exits 0).
+
+The five added skips came from absent run inputs in this fresh checkout. Two explicitly labelled
+retained n392 files supply only the unchanged read-only diagnostic tests; no simulation or replay
+campaign runs. `environment-tests1.log` passes 18/18 across the two corrected environment checks
+and five diagnostics, exit 0. This resolves the full run's four failures and five added skips;
+31 inherited skips remain. Preserve the full exit-1 receipt and reuse its unaffected results;
+do not describe this as a second clean full-suite run. Mandatory source hook, package and three
+shakedowns remain pending at this entry; no final R8 acceptance is claimed.
+
+R7 PRE/POST-A/POST-B still match their eight artifacts and 31 inputs. Clean POST-A and dirty
+POST-B provenance remain distinct, accepted n392 pins stay unchanged, and the one-PRE/two-POST
+budget is exhausted. The inherited six-pin gate, remaining behavior settlement, calibration,
+full packaged acceptance and owner listening remain open. No baseline wrapper, standalone
+scenario, full campaign, BC10 work, push, merge or publication is authorized by this packet.
+
+### R8 packaged startup handoff — 2026-09-09
+
+Reviewed UI source is committed at `217c9f70a040d999f7787c08a9283e304c0b0563`; its mandatory
+Husky hook and Git commit pass. The commit wrapper's later status assertion fails on stale index
+stat metadata for the 49 byte-restored research files. `index-identity-refresh1.log`, exit 0,
+verifies their unchanged raw and Git-blob hashes, refreshes only those entries, stages no content
+and restores clean status. The single package build passes in `package1.log`, exit 0.
+`package-manifest1.json` binds all 1,200 files / 1,912,980,288 bytes and product commit 217c9f70a.
+
+The first RBiH shakedown stops before a campaign (`shakedown-rbih1.log`, exit 1): the legacy
+harness clicks parent New Campaign before the current embedded opening is ready. The first
+startup-only probe preserves its own obsolete-label failure. `opening-proof2.log`, exit 0, then
+proves the actual splash -> New War -> faction -> Take command -> Begin route in screenshots,
+with no runtime errors, campaign start or advanced turn. The existing plan records a bounded
+harness/test correction, focused verification and independent review before a fresh RBiH retry.
+The current default campaign mode remains unchanged; historical-choice governs only responses.
+
+Reuse the same package after the harness correction: `package-proof2.mjs` separately binds the
+product and later harness commits, requires clean tracked status and only the exact harness/test
+or five existing documentation files to differ, and compares every frozen package file hash.
+No second full suite, rebuild or baseline campaign is spent. The three 24-turn results and final
+R8 acceptance remain outstanding at this entry; inherited calibration/baseline obligations stand.
+
+### R8 Warroom readiness correction — 2026-09-10
+
+The normal harness commit/hook passes at `85c7e45c8546d7d00e0f13ca97955f4483db6ddc`
+(`startup-commit1.log`, exit 0), and `package-check-rbih2.log` passes exact package reuse. RBiH
+attempt 2 stops at turn 0 (`shakedown-rbih2.log`, exit 1) because the added readiness check names
+the map-only Desk button. Fresh campaigns instead open the Warroom; the package itself creates
+the correct RBiH/war/turn-0 save. This failed harness criterion is not a product acceptance result.
+
+The plan records the targeted correction before edits. `opening-proof3.log`, exit 0, captures
+the actual loaded Warroom in 11.6 seconds, with matching bridge/save faction and turn and no
+runtime errors. Its screenshot still includes the real War Has Started overlay; it proves the
+loaded shell, not unobstructed control actionability. Await the real shell before exact intro
+dismissal, accept Warroom or field controls in the shared readiness helper, and reuse that helper
+after Save/load. Focused tests, targeted independent review, a new source freeze and the normal
+local hook precede the next fresh RBiH retry. No game source, package, full-suite, baseline or
+calibration repetition is included. All failed receipts and profiles remain preserved.
+
+### R8 first-decision packaged blocker — 2026-09-10
+
+The Warroom readiness correction is committed at `fdb5b24b3fd45e455bb49c3bdd6437663ac266e2`
+with normal hook/commit exit 0 (`warroom-readiness-commit1.log`). Focused harness verification
+passes 49/49 (`command-surface-harness-full-green1.log`); package bytes still match the original
+product commit 217c9f70a (`package-check-rbih3.log`, exit 0). RBiH attempt 3 now reaches the
+actual command post with the intro dismissed, but stops at turn 0 on the first required decision,
+`rbih_state_identity` (`shakedown-rbih3.log`, exit 1). No historical response was chosen.
+
+`opening-proof4.log`, exit 1, isolates a real product defect: the standalone opening-brief Inbox
+stays over the open President's Desk. The correct event card/action exists, but the Inbox covers
+the header/action and intercepts pointer events. Actual screenshots and the failed click trace
+are retained under `opening-proof4/`. Independent review records STOP in the existing
+`review.log`; this additional surface-ownership defect is outside the four scheduled repairs.
+
+The proposed minimal correction hides the standalone opening-brief Inbox only while the Desk
+is open, preserving its return afterward and using the Desk's existing identical event action.
+Owner scope authorization and one replacement package are pending; no production change or
+harness bypass has been made. RBiH has not advanced beyond turn 0, RS/HRHB have not started,
+and no 24-turn or full R8 acceptance is claimed. Existing combined-suite/environment receipts,
+source hooks and package proof remain valid for their recorded inputs. All inherited R7 baseline,
+calibration and owner-inspection obligations remain open; no additional baseline campaign ran.
+
+### R7 whiteboard attachment correction — 2026-09-10
+
+The owner correctly identifies that the prior R7 date is detached from its whiteboard. The
+responsive X translation moved the date's entire authored region; its source test required
+that translation, and both screenshot reviews missed the attachment error. Date-only
+acceptance never authorized a date beside the board. Item 3.9 and the existing acceptance
+record are reopened; prior failed or overbroad receipts remain intact.
+
+Read-only `desk39-onboard-prior-audit.log`, exit 0, reproduces six off-board cases from the
+retained evidence: all factions at 1920x1080 and 1366x768. The three ultrawide cases stayed
+on-board. The existing plan records the bounded correction and stronger acceptance question
+before edits. Work continues in the R8 worktree from `52107d351`, preserving all intervening
+R8 changes; the original checkout remains clean at `bd7b81975` with its evidence retained.
+
+The candidate removes the date translation and clears only the opaque Desk scroll content
+below the label at overlapping widths, preserving the fixed column and artwork. A separate
+Sol/medium reviewer catches an early responsive reset and verifies its targeted correction
+to 2048px. Valid RED receipts fail for the old translation and old threshold; the final focused
+GREEN passes 75/75, exit 0. Setup failures are retained and are not counted as behavioral RED.
+The date proof now checks the actual authored whiteboard polygon, painted card intersections,
+text and control reachability through scroll, contrast, fixed BEFORE geometry and fade clearance.
+Final nine-case evidence passes in `desk39-onboard-consolidate1.log`, exit 0. The original
+browser receipt retains exit 1 for two traversal-cap failures plus checkout-path image
+flags; the two-case targeted receipt retains exit 1 for the same path flags. Consolidation
+requires complete control coverage, unchanged source/fixture/region hashes, fixed geometry
+and accepted asset byte/Git identities; neither failed receipt is rewritten. Independent
+source/image review gives GO after all eighteen endpoint and 77 intermediate images.
+Typecheck/map build pass, and the complete UI boundary passes 354 files / 2,988 tests,
+exit 0 (`desk39-onboard-ui1.log`). Focused documentation checks pass 13/13 and the scope/
+link/frozen-hash check passes. Source repair and acceptance correction are committed at
+`ea33b23a52d5be6b2a126512fc00ce9062a76a88` with the normal mandatory typecheck hook,
+exit 0 (`desk39-onboard-commit1.log`), and a clean tracked tree afterward. The documentation
+follow-up records that result without another source or broad validation change.
+
+The separate opening Inbox/Desk blocker and replacement package remain pending owner scope
+authorization. No package, campaign or simulation run is added for this date correction.
+Historic PRE/POST-A/POST-B equality remains scoped to its recorded revisions; clean POST-A
+at `88996a23d` is not re-labelled as a later run. The exhausted PRE/two-POST budget, accepted
+n392 pins, inherited six-pin baseline failure, calibration and owner inspection remain explicit.
+
+### Opening Inbox blocker authorized and repaired in source — 2026-09-10
+
+The owner says, "Let's solve the inbox/package blocker," authorizing the recorded minimal
+Inbox/Desk fix, one replacement package and resumption of the three fresh 24-turn checks.
+Both tracked checkouts are clean at start: original R7 `bd7b81975`, active R8 worktree
+`d4544eba4`. The existing R8 plan records question, file scope, commands, cost and stopping
+rules before edits. The reviewed whiteboard repair and all prior package/run evidence remain.
+
+One Sol/medium implementer adds `!warroomDeskOpen` only to the standalone opening-brief
+Inbox render condition in `App.tsx`, with its focused shell ownership regression. A separate
+Sol/medium worker reviews the App fix independently; the fresh reviewer thread hit the tool
+limit, so the completed date worker supplies that separate context. No dismissal flag, pending
+brief, event action, gameplay/state/save path, date layout, asset or dependency changes.
+
+`inbox-focused-red1.log` exits 1 for the intended new failure (23 unaffected passes);
+`inbox-focused-green1.log` passes 24/24, exit 0. `inbox-browser1.log` exits 0 and captures
+home Inbox -> clear Desk -> close/restored brief -> reopened Desk/exact event. The real
+Decide now click opens `rbih_state_identity`; a trial response click establishes actionability
+without answering or advancing. The retained turn-0 save and source hashes remain unchanged.
+Independent source and five-image route review gives GO in `inbox-review.log`.
+
+`inbox-source-freeze.log` binds the initial candidate and protected R7/R8 hashes, exit 0.
+The old package still matches all 1,200 files (`inbox-old-package-before.log`, exit 0).
+Complete UI/typecheck and normal source hook precede a single build into the fresh ignored
+`dist-packaged/inbox-replacement2` output, preserving the original package. Package and
+three shakedown results are pending here; no baseline/canon wrapper, new calibration or
+full campaign is run. Historical PRE/POST equality, dirty POST-B, n392 and open gates remain.
+
+The complete UI boundary finishes with one stale render-guard assertion: 353/354 files and
+2,988/2,989 tests pass (`inbox-ui1.log`, exit 1). Its original failure receipt is retained.
+After the immutable run ends, only that exact expected substring is corrected; both affected
+files pass 45/45 (`inbox-focused-correction1.log`, exit 0). Production and browser-proof hashes
+are unchanged. Typecheck and focused documentation checks pass (`inbox-typecheck1.log` and
+`inbox-docs1.log`, exit 0; documentation 13/13). `inbox-source-freeze2.log` binds all thirty final
+source/test/harness hashes and verifies preservation, exit 0. No repeat global/UI campaign
+or claim that the retained complete UI receipt exited 0 is made.
+
+The minimal Inbox fix is committed at `7d97b72fc1ea8d8dbe04a65f7eab77e1507f53a6`
+with the normal typecheck hook, exit 0 (`inbox-commit1.log`). The authorized single
+replacement build passes (`package2.log`, exit 0) in `dist-packaged/inbox-replacement2`.
+Its 1,200-file manifest tree is `0cb25a80c4da25f2be8cc65a34b531a66c563e94f6d18926b2588a30cfad8018`;
+the original 1,200-file package remains byte-identical. Only the emitted tactical UI
+CSS/JS and their index references differ; executable/ASAR and other resources remain
+unchanged (`package2-comparison.json`). The unchanged R7 whiteboard repair is included.
+
+Packaged proof attempts 1/2 exit 1 on an optional Acknowledge click racing the documented
+4.2-second War Has Started auto-dismissal. Network idle alone does not fix it. Evidence-only
+proof3 waits for the exact named splash to disappear, fails a persistent intro, and retains
+all route/state checks. It passes five actual screenshots, pending Inbox restoration, exact
+event response actionability, raw-state equality and zero answers/advances/errors, exit 0.
+Independent review gives GO for the three planned checks (`inbox-review.log`). Failed
+scripts, logs, profiles and images are preserved; no replacement build is repeated.
+
+Fresh RBiH attempt 4 uses the unchanged package and a verified fresh profile, but stops
+before answering/advancing (`shakedown-rbih4.log`, exit 1): the harness requires a historical
+source in the badge tooltip, while the exact event visibly renders it in its Decision
+Context source dossier. The existing plan records the authorized two-file harness/test
+correction, focused RED/GREEN, review, normal hook and fresh attempt 5. No source requirement,
+historical-choice policy, product behavior or package is waived or changed by that correction.
+RS/HRHB have not launched at this checkpoint; baseline, calibration and owner acceptance remain.
+
+The source-reader correction now scopes the historical response and dossier to one visible
+exact event dialog, requires the current player's matching pending event/response, and
+records the rendered source and its location. Same-modal visible dossier fallback scrolls
+into view; hidden, foreign, ambiguous, missing, label-only and punctuation-only sources
+remain failures. Focused `historical-source-green3.log` passes 51/51, exit 0 after the
+reviewer's targeted nonempty-source correction. All RED and failed launcher receipts are
+preserved; `historical-source-green1-launch-failure.txt` records outer exit 1 and unavailable
+child exit for the failed npm-JavaScript-as-executable invocation. No product change/build
+is needed. The normal hook, final freeze and fresh RBiH retry follow targeted review.
+
+Source-reader commit `650798fdd473e297834956bf526a2adee63c3023`, its normal hook,
+freeze3 and the 1,200-file package precheck pass. Fresh RBiH attempt 5 applies the exact
+authored civic response and completes 76 initial-tour captures, including its visible
+Chronicle receipt, before stopping at autonomy setup (`shakedown-rbih5.log`, exit 1).
+It remains turn 0. The harness assumes every campaign starts at level 0 and must stage
+Assisted level 1. This fresh campaign starts at 2; the unchanged canonical IPC contract
+correctly applies 2 -> 1 immediately with no pending value. The existing plan records
+the next two-file harness/test correction: predict active/pending values from valid
+pre-click state and retain strict first-turn/final Assisted checks. No product or
+autonomy rule changes, new package or baseline run are authorized by that correction.
+
+The bounded autonomy candidate passes 51/51 focused harness tests (`autonomy-setup-green1.log`,
+exit 0); its RED receipt exits 1 for the missing predictor with 50 unaffected passes.
+It captures valid pre-click state, predicts the canonical active/pending result before the
+UI click, then requires that exact outcome. Absent autonomy remains unknown; first-turn
+and final Assisted checks remain mandatory. Scope5/freeze4 and the normal hook follow
+independent targeted review; the same manifest2 package is retained for fresh attempt 6.
+
+## 2026-09-10 — Inbox/package repair verified; final shakedown gate retained
+
+Autonomy harness commit `c31135f35fd66c164e0d9e8baf2756cc6de1e378` passes its normal
+hook (`inbox-commit-harness2.log`, exit 0). Exclusive freeze4 and all 1,200 package-file
+hashes pass before fresh RBiH attempt 6 (`package2-before-rbih6.log`, exit 0). The package
+remains product `7d97b72fc`; historical-source correction `650798fdd` and autonomy correction
+only change the QA harness/tests. Probe-planning documentation commits `56e407136` and
+`32cba731c` remain separate. No additional build or simulation baseline run is performed.
+
+`shakedown-rbih6.log` exits 1 after exactly turn 24, the prescribed seven checkpoints and
+final tour, with 577 screenshots. It fails the accumulated readability gate before calling
+Save/load. `inbox-readability-triage1.log` exits 0 for a read-only audit of all screenshot
+hashes, the frozen harness, archived initial/final autosaves and final-tour stability.
+The final autosave SHA-256 is `f9df42dc5fe09c843ed86a272e1c8c4cc8232a6b3176ab63a1b37f906b887c61`.
+Six exact decisions were applied (four sourced historical defaults, two staff recommendations),
+Assisted is active, and no event decision remains pending. These facts are progress evidence,
+not a passing shakedown. RS/HRHB have not launched; no final manifest or Save/load proof exists.
+
+Readability has 53 retained findings: 46 repeated opening/setup font-size findings from
+authored 0.58–0.72rem CSS, plus seven low-contrast findings for Active and critical-pressure
+styles. Actual images/source confirm the issue; the final Desk date remains on the whiteboard.
+`inbox-runtime-triage1.log` also exits 0 for non-mutating evidence extraction: 19 unclassified
+local ERR_ABORTED requests (five hillshade, fourteen ambient media), zero console/page errors,
+and one canonical final-sector warning for `rs_ajnie_brigade` at 910 personnel. Its final state
+is located but unassigned, stranded/holding since turn 17. Capture adjacency and an empty
+unlocated-combat audit do not close these runtime findings. No warning or threshold is waived.
+
+The existing R8 plan, R7 parent/amendment/report, board and roadmap now record the actual
+blocked result and a proposed narrow typography/contrast repair plus runtime disposition.
+Another product repair/build exceeds this packet's one-line/one-replacement boundary and
+has not begun. Independent final disposition review is in the existing `inbox-review.log`;
+its verdict is `STOP_PACKET_BLOCKED_REQUIRES_NEW_OWNER_SCOPE`. Final focused docs pass
+13/13 and the frozen-source/evidence/link scope check passes, both exit 0;
+final focused docs, scope, normal local docs hook and package inventories use exclusive
+`inbox-final-*`, `inbox-package-final1.log` and `inbox-old-package-final1.log` receipts.
+All old packages, profiles and failed logs remain. R7 PRE/clean POST-A/dirty POST-B retain
+their recorded eight-artifact/31-input equality; accepted n392, the six-pin gate and exhausted
+one-PRE/two-POST budget remain unchanged. Calibration, audio/sensitivity/offline runtime,
+owner inspection, full-duration campaigns and final diaries remain open. No push/merge/publication.
+
+Documentation commit `c1c382cf9d27c79d0da7833fcbbfddddd52b35be` and its normal hook
+pass (`inbox-final-docs-commit1.log`, exit 0); final scope and old-package inventories pass.
+The replacement's post-run strict inventory exits 1 in `inbox-package-final1.log`.
+Runtime added `resources/data/derived/_debug/c_lane_corps_directive_telemetry.jsonl`.
+The planned, non-mutating delta audit (`inbox-package-delta1.log`, exit 0) establishes
+all 1,200 original files remain byte-identical, no removed/changed files, and exactly
+one 79,779-byte / 360-line addition. Its SHA-256 is
+`4faca76e2d3b1fae1a8eace2c7b250b795e3eb1c2e77c98fcc98e3c64348d80f`;
+an exclusive copy is retained as `inbox-runtime-telemetry1.jsonl`. The original remains
+in place and manifest2 is not refreshed. The observed tree has 1,201 files and SHA-256
+`c46db172a99e877860b5a8dd5718a07f2b1517a7cbea0e750b058f3a19e0666b`.
+`army_order_interpretation.ts` writes the debug channel beneath `process.cwd()`; this
+explains the delta without clearing the package-directory gate. Output placement joins
+the proposed follow-up. Independent targeted delta/disclosure review and the normal
+docs hook use new `inbox-postrun-*` receipts; no unchanged package retry or product edit.
+
 ## Open-gates register, doc-truth reconciliation and WR01 scheduling — 2026-09-10
 
 **Scope:** owner-directed continuation of the interrupted documentation sync, plus two additions:

@@ -1229,6 +1229,12 @@ function App() {
     openWarroomDecisionRoomFromField('all');
   };
 
+  const openEventDecisionFromInbox = (itemId: string) => {
+    const eventId = itemId.startsWith('event:') ? itemId.slice('event:'.length) : itemId;
+    setSummaryOpen(false);
+    setActiveEventDecisionId(eventId);
+  };
+
   const reviewPreAdvanceTarget = (target: PresidentialDecisionRoomNavigationTarget) => {
     if (target.kind === 'decision-room') {
       openWarroomDecisionRoomFromField(target.lens, target.cardId ?? null);
@@ -1247,6 +1253,10 @@ function App() {
       return;
     }
     if (target.kind === 'inbox') {
+      if (target.itemId) {
+        openEventDecisionFromInbox(target.itemId);
+        return true;
+      }
       openInboxHome();
       setSummaryOpen(false);
       return;
@@ -1277,6 +1287,10 @@ function App() {
       return true;
     }
     if (target.kind === 'inbox') {
+      if (target.itemId) {
+        openEventDecisionFromInbox(target.itemId);
+        return true;
+      }
       openInboxHome();
       setSummaryOpen(false);
       return true;
@@ -1522,8 +1536,7 @@ function App() {
       leaveWarroomForGame();
     }
     if (action === 'event_modal') {
-      const eventId = itemId.startsWith('event:') ? itemId.slice('event:'.length) : itemId;
-      setActiveEventDecisionId(eventId);
+      openEventDecisionFromInbox(itemId);
     }
     if (action === 'decision_room') {
       if (itemId.startsWith('opportunity:')) {
@@ -1801,6 +1814,7 @@ function App() {
         isOpen={summaryOpen}
         focusSection={summaryFocus}
         onClose={() => setSummaryOpen(false)}
+        onNavigateTarget={openDecisionRoomTarget}
       />
       <TurnAftermathModal
         isOpen={turnAftermathOpen}
@@ -2072,7 +2086,7 @@ function App() {
               }
             }}
           />
-          {!peaceWarTransitionActive && openingBriefPending && (
+          {!peaceWarTransitionActive && openingBriefPending && !warroomDeskOpen && (
             <PresidentialInbox onAction={handlePresidentialInboxAction} eventCatalog={eventCatalogFull} />
           )}
           {warroomDeskOpen && (

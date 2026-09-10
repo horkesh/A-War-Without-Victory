@@ -108,7 +108,7 @@ test('B4 exposes four RBiH strategic objectives with command ownership and spars
         currentCommitment: null,
         nextLever: {
             owner: 'decision_room',
-            label: 'No presidential signature due',
+            label: 'No international-standing decision due',
             available: false,
             navigationTarget: { kind: 'decision-room', lens: 'decision' },
         },
@@ -139,6 +139,91 @@ test('war-summary commitment pluralizes brigade count independently of operation
         .find((view) => view.id === 'military_credibility');
 
     assert.equal(objective?.currentCommitment, '1 active operation committing 1 brigade');
+});
+
+test('strategic-objective levers route only decisions that affect their political dimension', () => {
+    const state = {
+        player_faction: 'RBiH',
+        turn: 20,
+        formations: [],
+        strategicDimensions: { RBiH: {} },
+        pendingEventDecisions: [{
+            event_id: 'coalition_zulu',
+            event_title: 'Coalition choice',
+            faction: 'RBiH',
+            turn_fired: 20,
+            requires_player_response: false,
+            response_options: [{
+                id: 'answer',
+                label: 'Answer',
+                effects: [],
+                dimension_shifts: [{ faction: 'RBiH', dimension: 'internal_cohesion', delta: 5 }],
+            }],
+        }, {
+            event_id: 'coalition_alpha',
+            event_title: 'Earlier coalition choice',
+            faction: 'RBiH',
+            turn_fired: 20,
+            requires_player_response: false,
+            response_options: [{
+                id: 'answer',
+                label: 'Answer',
+                effects: [],
+                dimension_shifts: [{ faction: 'RBiH', dimension: 'internal_cohesion', delta: -2 }],
+            }],
+        }],
+    } as unknown as LoadedGameState;
+
+    const objectives = buildFactionStrategicObjectiveViews(state);
+    const international = objectives.find((objective) => objective.id === 'international_standing');
+    const cohesion = objectives.find((objective) => objective.id === 'internal_cohesion');
+
+    assert.deepEqual(international?.nextLever, {
+        owner: 'decision_room',
+        label: 'No international-standing decision due',
+        available: false,
+        navigationTarget: { kind: 'decision-room', lens: 'decision' },
+    });
+    assert.deepEqual(cohesion?.nextLever, {
+        owner: 'presidential_inbox',
+        label: 'Review internal-cohesion decision',
+        available: true,
+        navigationTarget: { kind: 'inbox', itemId: 'event:coalition_alpha' },
+    });
+});
+
+test('strategic-objective levers do not claim unrelated pending decisions can affect an objective', () => {
+    const state = {
+        player_faction: 'RS',
+        turn: 20,
+        formations: [],
+        strategicDimensions: { RS: {} },
+        pendingEventDecisions: [{
+            event_id: 'unrelated_choice',
+            event_title: 'Unrelated choice',
+            faction: 'RS',
+            turn_fired: 20,
+            response_options: [{ id: 'answer', label: 'Answer', effects: [{ kind: 'alliance_change', delta: -0.1 }] }],
+        }],
+    } as unknown as LoadedGameState;
+
+    const patron = buildFactionStrategicObjectiveViews(state)
+        .find((objective) => objective.id === 'patron_confidence');
+    const cohesion = buildFactionStrategicObjectiveViews(state)
+        .find((objective) => objective.id === 'internal_cohesion');
+
+    assert.deepEqual(patron?.nextLever, {
+        owner: 'decision_room',
+        label: 'No patron-confidence decision due',
+        available: false,
+        navigationTarget: { kind: 'decision-room', lens: 'decision' },
+    });
+    assert.deepEqual(cohesion?.nextLever, {
+        owner: 'decision_room',
+        label: 'No internal-cohesion decision due',
+        available: false,
+        navigationTarget: { kind: 'decision-room', lens: 'decision' },
+    });
 });
 
 test('B4 reserve presentation names the command, sector, candidate, effect, and opportunity cost', () => {
@@ -1235,6 +1320,14 @@ test('parseGameState preserves missing sector tactical and intel metrics as unre
                     offensive_signs: false,
                 },
             },
+            sector_intel: {
+                explicit_zero: [{
+                    enemy_sector_id: 'enemy_sector',
+                    confidence: 1,
+                    front_edge_count: 1,
+                    strength_category: 'dense',
+                }],
+            },
         } as any,
         political: { political_controllers: {} } as any,
     });
@@ -1253,6 +1346,73 @@ test('parseGameState preserves missing sector tactical and intel metrics as unre
     assert.equal(explicit?.defensive_power, 0);
     assert.equal(explicit?.intel_confidence, 1);
     assert.equal(explicit?.offensive_signs, false);
+});
+
+test('parseGameState projects sector intel only from player-owned authoritative reports', () => {
+    const rawState = {
+        meta: { turn: 16, phase: 'war', player_faction: 'RBiH' },
+        factions: [{ id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }],
+        military: {
+            formations: {},
+            militia_pools: {},
+            corps_front_sectors: {
+                own_reliable: {
+                    sector_id: 'own_reliable', corps_id: 'arbih_1st_corps', faction: 'RBiH',
+                    edge_ids: [], assigned_brigade_ids: [], reserve_brigade_ids: [], intel_confidence: 1,
+                },
+                own_low: {
+                    sector_id: 'own_low', corps_id: 'arbih_1st_corps', faction: 'RBiH',
+                    edge_ids: [], assigned_brigade_ids: [], reserve_brigade_ids: [], intel_confidence: 1,
+                },
+                own_unknown: {
+                    sector_id: 'own_unknown', corps_id: 'arbih_1st_corps', faction: 'RBiH',
+                    edge_ids: [], assigned_brigade_ids: [], reserve_brigade_ids: [], intel_confidence: 1,
+                },
+                own_incomplete: {
+                    sector_id: 'own_incomplete', corps_id: 'arbih_1st_corps', faction: 'RBiH',
+                    edge_ids: [], assigned_brigade_ids: [], reserve_brigade_ids: [], intel_confidence: 1,
+                },
+                enemy_sector: {
+                    sector_id: 'enemy_sector', corps_id: 'vrs_1st_corps', faction: 'RS',
+                    edge_ids: [], assigned_brigade_ids: [], reserve_brigade_ids: [], intel_confidence: 1,
+                },
+            },
+            sector_intel: {
+                own_reliable: [
+                    { enemy_sector_id: 'enemy_a', confidence: 0.75, front_edge_count: 2, strength_category: 'dense' },
+                    { enemy_sector_id: 'enemy_b', confidence: 0.6, front_edge_count: 1, strength_category: 'moderate' },
+                    { enemy_sector_id: 'enemy_old', front_edge_count: 0, strength_category: 'unknown' },
+                    { enemy_sector_id: 'enemy_malformed', front_edge_count: Number.NaN, strength_category: 'unknown' },
+                ],
+                own_low: [
+                    { enemy_sector_id: 'enemy_c', confidence: 0.2, front_edge_count: 1, strength_category: 'thin' },
+                ],
+                own_incomplete: [
+                    { enemy_sector_id: 'enemy_d', confidence: 0.8, front_edge_count: 1, strength_category: 'dense' },
+                    { enemy_sector_id: 'enemy_e', front_edge_count: 1, strength_category: 'unknown' },
+                ],
+                enemy_sector: [
+                    { enemy_sector_id: 'own_reliable', confidence: 0.95, front_edge_count: 2, strength_category: 'fortress' },
+                ],
+            },
+        } as any,
+        political: { political_controllers: {} } as any,
+    };
+    const before = structuredClone(rawState);
+
+    const parsed = parseGameState(rawState);
+    const confidenceBySector = Object.fromEntries(
+        (parsed.corpsFrontSectors ?? []).map((sector) => [sector.sector_id, sector.intel_confidence]),
+    );
+
+    assert.deepEqual(confidenceBySector, {
+        own_reliable: 0.6,
+        own_low: 0.2,
+        own_unknown: undefined,
+        own_incomplete: undefined,
+        enemy_sector: undefined,
+    });
+    assert.deepEqual(rawState, before);
 });
 
 test('parseGameState keeps missing sector logistics and opsec truth unreported', () => {
