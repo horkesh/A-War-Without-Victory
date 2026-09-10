@@ -10,6 +10,9 @@
 
 ## New Lessons (2026-09-10) — a stated rule broken one message later, and a truncated search
 
+### [Process] ★★★ NEVER `git stash pop` UNCONDITIONALLY — SECOND OCCURRENCE — see `docs/life_lessons/process.md`
+- A conditional `git stash -- <file>` was a NO-OP (file unmodified), so the unconditional `git stash pop` that followed popped the pre-existing `stash@{0}` — someone else's preserved work, 22 entries deep — and left `UU` on an unrelated sim file. Its own message recorded a previous session doing the identical thing. ⇒ **Bare `git stash pop` pops `stash@{0}`, which is rarely yours.** ⇒ Never pair a conditional stash with an unconditional pop; verify you created it. ⇒ For throwaway experiments use `cp` or a worktree, never stash — stash is shared mutable state in a multi-agent repo.
+
 ### [Process] ★★★ I MERGED ON A PARTIAL SIGNAL ONE MESSAGE AFTER SAYING I WOULD NOT — see `docs/life_lessons/process.md`
 - Wrote "I won't merge on a partial signal", then merged PR #503 with `full-suite` still pending. It failed and the failure landed on `main`. ⇒ **A stated intention is not a control** — gate the merge on something that cannot be talked out of it. ⇒ "Merge it" answers WHETHER, not WHEN; re-confirm the when if your announced precondition is unmet.
 

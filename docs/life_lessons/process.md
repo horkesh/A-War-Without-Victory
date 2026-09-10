@@ -3,6 +3,26 @@
 
 ---
 
+### [Process] ★★★ NEVER `git stash pop` UNCONDITIONALLY — SECOND OCCURRENCE, AND THE WARNING WAS IN THE STASH MESSAGE (2026-09-10) — NEW
+- Ran `git stash -q -- <file>` to shelve one workflow for a throwaway negative test, then
+  `git stash pop -q` to restore it. **The file was unmodified, so the stash was a NO-OP and created
+  nothing** — and the unconditional pop therefore popped the pre-existing `stash@{0}`, which is 22
+  entries deep and belongs to someone else. It conflicted on `src/sim/combat/paramilitary_sweep.ts`
+  and left the tree in `UU`.
+- `stash@{0}`'s own message reads: *"RESTORED-BY-CLAUDE 2026-08-31 ... accidentally popped into
+  lane/desktop-calibration-parity by a stray 'git stash pop' ... Content is NOT mine."* **A previous
+  session made this exact mistake, wrote the warning into the stash itself, and I repeated it.**
+- Recovered losslessly only by luck of mechanics: a conflicted pop KEEPS the stash, and the working
+  copy still matched HEAD, so `git checkout HEAD -- <file>` cleared it. Had the pop succeeded, a
+  foreign 38-line change would have merged into my branch silently.
+- ⇒ **`git stash pop` with no argument pops `stash@{0}`, which is rarely yours.** In a repo with a
+  deep stash stack, treat the bare command as forbidden.
+- ⇒ **Never pair a conditional stash with an unconditional pop.** If the stash may be a no-op, the
+  pop is operating on someone else's entry. Capture `git rev-parse stash@{0}` before and after, or
+  count `git stash list | wc -l`, and only pop what you provably created.
+- ⇒ **For a throwaway experiment, do not use stash at all.** `cp file /tmp/bak` then restore, or
+  `git worktree add`. Stash is shared mutable state in a multi-agent repo.
+
 ### [Process] ★★★ I MERGED ON A PARTIAL SIGNAL ONE MESSAGE AFTER SAYING I WOULD NOT (2026-09-10) — NEW
 - Wrote "I won't merge on a partial signal", then merged PR #503 with `full-suite` still **pending**.
   The check that would have caught the breakage was running at that moment. It failed, and the

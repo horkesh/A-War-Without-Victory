@@ -4,9 +4,10 @@ import { join } from 'node:path';
 import { test } from 'vitest';
 
 const WORKFLOW_INSTALL_COUNTS = [
+    ['baseline-pins.yml', 1],
     ['baseline-regression.yml', 5],
     ['desktop-release-guard.yml', 2],
-    ['event-system-ci.yml', 2],
+    ['event-system-ci.yml', 1],
     ['full-suite-and-fingerprint.yml', 2],
     ['release.yml', 2],
 ] as const;

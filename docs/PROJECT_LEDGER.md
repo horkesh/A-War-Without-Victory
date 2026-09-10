@@ -3122,3 +3122,71 @@ that failure landed on `main` at `bdf8953cb`.
 **Verification.** `ci_dependency_install_contract`, `ci_workflow_test_paths_exist` and
 `test_runner_default_contract` pass 10/10, exit 0. This fix goes through a PR gated by the ten
 required checks added earlier today, so the protection now verifies its own author's repair.
+
+## Baseline pins moved to its own workflow — 2026-09-10
+
+**Finishing a job half-done.** Splitting the baseline regression into its own JOB fixed attribution
+at check level: `Event system validation` went green and the advisory failure was correctly named.
+But the workflow RUN conclusion is the aggregate of its jobs, so `main` still showed
+`Event System CI: failure` — `Event system validation: success`, `Baseline pins: failure`. Check-level
+attribution was right and workflow-level attribution was still wrong, which is the same "looks
+broken" problem one level up.
+
+**Fix:** `baseline-pins` now lives in `.github/workflows/baseline-pins.yml` with the same triggers
+and the same check name, so each workflow's conclusion describes only its own concern. Branch
+protection is unaffected: the required list keys on check names, and this one was never required.
+
+**Install-contract inventory updated with it:** `event-system-ci.yml` back to 1,
+`baseline-pins.yml` added at 1. The contract also asserts that every workflow file appears in the
+table, so a new workflow must be registered there — the same class of miss that broke `main` earlier
+today, this time anticipated rather than discovered.
+
+**Documentation corrected:** the workflows README catalog claimed Event System CI performs a
+"byte-baseline check on every trigger". It no longer does. The catalog now carries a Baseline Pins
+row stating it is advisory, what red means, and that refreshing pins to force green is prohibited;
+the always-report shim table gains a row so the Required? column stays complete.
+
+**Verification.** All six workflow files parse (js-yaml, JSON_SCHEMA). Install counts are 1 and 1.
+`ci_dependency_install_contract`, `ci_workflow_test_paths_exist` and `test_runner_default_contract`
+pass 10/10, exit 0.
+
+**Method note, third instance.** An inline `node -e` again produced no output; this time the cause
+was identified — a helper script written to `/tmp` cannot resolve the repo's `node_modules`, and
+`node -e` inherits the same resolution problem when the cwd is not where the module lives. The check
+was rerun from inside the repo and produced real output. Earlier "silent no-ops" this session were
+very likely the same cause rather than a shell quirk.
+
+## Stray `git stash pop` — second occurrence, recovered losslessly — 2026-09-10
+
+**What happened.** To run a throwaway negative test (rename a workflow step, confirm the assertion
+bites, restore), I ran `git stash -q -- .github/workflows/baseline-pins.yml` followed by
+`git stash pop -q`. The file was unmodified, so **the stash was a no-op and created nothing** — and
+the unconditional pop therefore popped the pre-existing `stash@{0}`, which belongs to someone else.
+It conflicted on `src/sim/combat/paramilitary_sweep.ts` and left the tree `UU`.
+
+**`stash@{0}`'s own message records a previous session doing the identical thing:**
+*"RESTORED-BY-CLAUDE 2026-08-31 ... accidentally popped into lane/desktop-calibration-parity by a
+stray 'git stash pop' ... Content is NOT mine; recover via git stash apply."* The warning was
+written into the stash itself and repeated anyway.
+
+**Nothing was lost, partly by luck of mechanics.** A conflicted pop KEEPS the stash, so `stash@{0}`
+survived intact with its message; the working copy still matched HEAD byte-for-byte (0 diff lines),
+so `git checkout HEAD -- src/sim/combat/paramilitary_sweep.ts` cleared the unmerged entry with no
+content decision to make. Verified after repair: no unmerged entries, `stash@{0}` present, stash
+count unchanged at 22, the legitimate test edit intact. Had the pop applied cleanly, a foreign
+38-line change to a combat file would have merged into this branch silently.
+
+**Recorded as a life lesson** (`docs/life_lessons/process.md`, summarised in the index): bare
+`git stash pop` pops `stash@{0}`, which is rarely yours; never pair a conditional stash with an
+unconditional pop; and for a throwaway experiment use `cp` or a worktree, because stash is shared
+mutable state in a multi-agent repo.
+
+**Separately, the work that occasioned it.** Moving the baseline check to its own workflow broke
+`tests/baseline_regression_ci_guardrails.test.ts`, which asserted the `Baseline regression` step
+lives in `event-system-ci.yml`. This was the SECOND workflow-pinning test to be missed today. An
+exhaustive search — no `head` truncation, matching workflow filenames as well as `.github` — found
+**eight** such tests, not the three a truncated grep had returned. All eight now pass 49/49, and the
+guardrail was strengthened rather than merely repointed: it asserts the step is ABSENT from
+`event-system-ci.yml` and PRESENT in `baseline-pins.yml`, plus that the advisory check name (the
+string branch protection excludes by) does not drift. A deliberate mutation confirmed the new
+assertion fails when the step is renamed, so it is not a rubber stamp.
