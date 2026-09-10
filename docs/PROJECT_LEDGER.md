@@ -3060,3 +3060,37 @@ and the gate remains open on its own terms and still blocks R8.
 **Branch hygiene run per CLAUDE.md.** 19 branches report 0 unique commits (LANDED), 1 ARCHIVED, and
 `codex/r8-decision-command-usability` is genuinely STRANDED with 13 unique commits. No deletion
 performed; `npm run repo:branches:clean` was not run and was not authorized.
+
+## Branch protection added to main — 2026-09-10
+
+**Owner-authorized.** Until today `main` had no branch protection (`/branches/main/protection`
+returned 404) and no rulesets, so no check was a required check and a genuinely broken build could
+have been merged. Protection is now applied and verified by read-back.
+
+**Ten required status checks**, being every check that runs on a PR to `main` except one:
+
+`typecheck`, `scenario-anchors`, `scenarios`, `test`, `engine-health-188w`,
+`desktop-release-check`, `desktop-packaged-runtime-probe`, `Event system validation`,
+`full-suite`, `structural-fingerprint`.
+
+**`Baseline pins (advisory, non-blocking)` is deliberately EXCLUDED.** A stale pin is not a broken
+build; clearing it is the gated procedure in
+`docs/plans/2026-09-10-baseline-reblessing-packet.md`. The workflow comment now records this as
+enforced fact rather than a conditional instruction.
+
+**Verified safe to require before applying.** All three workflows (`baseline-regression.yml`,
+`desktop-release-guard.yml`, `full-suite-and-fingerprint.yml`, `event-system-ci.yml`) trigger on
+`pull_request: branches: [main]` with **no workflow-level path filters**; conditional work is
+handled by step-level green-fast branches inside jobs that always run and always report. A required
+check that can fail to appear would block a PR forever, so this was checked rather than assumed —
+the apparent difference between PR #503 and #504 check sets was job start timing, not path filtering.
+
+**Deliberate settings, each a judgement call:**
+- `strict: false` — a PR need not be rebased onto the latest `main` before merging. `strict: true`
+  would force constant rebases on long-running lanes like the 73-commit R7 branch.
+- `enforce_admins: false` — the owner keeps an override. `gh pr merge` still refuses on failing
+  required checks unless `--admin` is passed explicitly, so bypass is a deliberate, visible act
+  rather than the default path. A solo maintainer locked out by one flaky check is the worse failure.
+- `required_pull_request_reviews: null` — a single-maintainer repo cannot satisfy an approval
+  requirement; enabling it would deadlock every PR.
+- `allow_force_pushes: false`, `allow_deletions: false` — history on `main` is protected.
