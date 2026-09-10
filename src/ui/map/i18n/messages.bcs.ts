@@ -4802,7 +4802,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'inbox.openingBrief.readLater': 'Pročitaj kasnije',
     'inbox.openingBrief.thesis': 'Ovaj rat nema pobjedu osvajanjem. Karta može ostati nepromijenjena dok je zemlja uništena - sudi vam se po ljudskoj cijeni rata, ne po teritoriji.',
     'inbox.openingBrief.RBiH.title': 'Republika Bosna i Hercegovina',
-    'inbox.openingBrief.RBiH.bullet.0': 'Držite Sarajevo, Tuzlu, Zenicu, Bihac i druga urbana uporišta dok se armija formira pod vatrom.',
+    'inbox.openingBrief.RBiH.bullet.0': 'Držite Sarajevo, Tuzlu, Zenicu, Bihać i druga urbana uporišta dok se armija formira pod vatrom.',
     'inbox.openingBrief.RBiH.bullet.1': 'Neka međunarodni zapis ostane vidljiv: diplomatija, civilna šteta i vojni opstanak su povezani.',
     'inbox.openingBrief.RBiH.bullet.2': 'Koristite Štab armije i Sobu odluka da postavite prioritete i odobrite operacije preko komandanata.',
     'inbox.openingBrief.RS.title': 'Republika Srpska',

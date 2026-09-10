@@ -3307,3 +3307,40 @@ silently stop existing for every future session while every other test stayed gr
 markdown, and the entry was not counted by the cap check. Caught by verifying the category count
 afterwards rather than trusting the edit. Repaired; Execution & Validation is at 8 of 10, no
 category over cap, no unbalanced bold.
+
+## First real work through the local-executor harness — 2026-09-10
+
+**The defect was real and player-visible.** `inbox.openingBrief.RBiH.bullet.0` — the first text an
+RBiH player reads — spelled "Bihac" without its diacritic in BOTH locales, while the same files
+spelled "Bihać" correctly four times elsewhere. The 2026-09-03 showcase audit had recorded this
+class (`Ilijaš`/`Ilijas` inside one card); this was a live instance of it. For a game set in Bosnia
+this is correctness, not polish.
+
+**What was delegated.** Not the two-character fix — the durable part: a checker that stops the class
+recurring. `src/ui/shared/bosnianPlaceNames.ts` exports a 22-pair table and
+`findStrippedPlaceNames(text)`. The local model produced 709 tokens at 53.7 tok/s.
+
+**Review verdict: the hard part was right.** Whole-word semantics were correct as proposed —
+verified against the traps in the spec: "Focal" tokenises to `Focal` (not `Foca`), "Samacki" to
+`Samacki` (not `Samac`), and because `\w` excludes diacritics a correct "Bihać" tokenises to "Biha"
+and can never report itself as a violation. All 22 diacritics were correct.
+
+**Three flaws corrected in review:** it kept iterating after a match, running a redundant `findIndex`
+per remaining token; it carried dead code whose own comment admitted it was dead
+(`if (!place.correct) continue`); and it used double quotes against repo style. Rewritten as a
+`Set` lookup with a `filter`, which is both shorter and O(n).
+
+**Both sides of the test proven.** Nine tests pass; reintroducing "Bihac" fails with the exact
+message `"Bihac" should be "Bihać"`; restoring passes. The suite also pins that the checker is not
+vacuous — positive controls, table-order, no-duplicates, correct-forms-do-not-fire, whole-word,
+case-sensitivity and empty input.
+
+**The gate's determinism scan was live**, not trivially empty: `determinism scan covered 2 changed
+src file(s)`. `npm run gate:local -- --tests tests/ui/bosnian_place_name_diacritics.test.ts` exits 0.
+
+**Two limitations recorded rather than hidden.** `--allow-test-edits` does not distinguish a NEW
+test from an EDITED one, so a planner-written new test needs the same flag as a suspicious edit;
+tightening that is worth doing before the harness is used unsupervised. And a Windows gotcha cost a
+cycle: Python's console encoding here is cp1252, so `print()` of a string containing `ć` raises
+`UnicodeEncodeError` AFTER the file write succeeds — the write landed, the loop aborted, and only
+one of two files was fixed. Keep script output ASCII-only on this shell.

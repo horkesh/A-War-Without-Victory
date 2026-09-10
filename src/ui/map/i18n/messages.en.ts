@@ -4900,7 +4900,7 @@ export const enMessages = {
     'inbox.openingBrief.readLater': 'Read later',
     'inbox.openingBrief.thesis': "This war has no conquest victory. The map can hold flat while the country is destroyed - you are judged by the war's human cost, not by territory.",
     'inbox.openingBrief.RBiH.title': 'Republic of Bosnia and Herzegovina',
-    'inbox.openingBrief.RBiH.bullet.0': 'Hold Sarajevo, Tuzla, Zenica, Bihac, and other urban anchors while the army forms under fire.',
+    'inbox.openingBrief.RBiH.bullet.0': 'Hold Sarajevo, Tuzla, Zenica, Bihać, and other urban anchors while the army forms under fire.',
     'inbox.openingBrief.RBiH.bullet.1': 'Keep the international record visible: diplomacy, civilian harm, and military survival are linked.',
     'inbox.openingBrief.RBiH.bullet.2': 'Use Army HQ and the Decision Room to set priorities and approve operations through commanders.',
     'inbox.openingBrief.RS.title': 'Republika Srpska',
