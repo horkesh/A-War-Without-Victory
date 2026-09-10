@@ -2901,3 +2901,40 @@ decision with its own receipts and review, not a documentation one.
 
 No pins were refreshed, no calibration changed, no scenario run, and the R7 one-PRE/two-POST budget
 is untouched.
+
+## Governing-doc compaction, second pass — 2026-09-10
+
+The first pass barely moved the napkin (64,043 -> 63,397) and the roadmap (59,706 -> 58,036). The
+owner asked why. The answer was that both had been curated by the wrong instrument.
+
+**The napkin cap check was blind to most of the file.** Category counts were taken with
+`^[0-9]+\. \*\*`, which cannot match the `0a.`/`0b.`/`0h.` priority-zero entries. That pattern
+reported `Diagnostic Reasoning` as holding ZERO entries when it is the largest category in the file
+at 13,684 bytes. On the correct pattern (`^[0-9]+[a-z]*\. `), `Shell & Command Reliability` held 12
+and `Evidence & Tooling Discipline` held 11 — and the first pass had itself pushed the latter from
+9 to 11 while believing it was moving 6 to 8, and left duplicate `7.`/`8.` numbering behind. Same
+failure shape as `docs/life_lessons/process.md`'s "a measurement can be blind to the failure it is
+cited as disproving".
+
+**Napkin: 64,043 -> 36,146 bytes (44%).** The weight was never entry count; it was a handful of
+mega-entries — `0h` VACUOUS GUARDS alone is 5,421 bytes, and the top 14 entries were roughly half
+the file. The worked detail of 16 oversized entries moved to `.claude/napkin/entry_detail.md`,
+leaving the title and opening rule plus a pointer, which is what the napkin's own contract asks for:
+"read this index every session; read topic archives only when relevant". Three oldest entries were
+demoted for cap, plain-numeric entries renumbered, one unbalanced bold marker closed. Every category
+is now at or under 10, verified on the correct pattern.
+
+**Roadmap: 58,036 -> 49,724 bytes; headroom 412 -> 10,276.** The dated 9,848-byte "Current Execution
+Snapshot (2026-09-07)" moved verbatim to the archive, replaced by a compact current-state block
+carrying only what Section 5 does not already say: live calibration posture, the baseline authority
+pointer with n392's 702/678/672/665 against floors 694/674/668/641, lane order, the open-gates
+pointer, and the publication boundary. `REPO-ROADMAP-CONCISENESS` is CLOSED on that evidence. The
+cap was never raised. Section 10 is now the largest section but is live routing policy plus the
+post-1.0 backlog, not history, so it stays.
+
+**Method note, second instance.** An inline `node -e` silently produced no output and no error for
+the second time this session; the recheck showed the file unchanged. Both were rewritten as script
+files. Inline `node -e` is not reliable in this shell — use a file and verify the result.
+
+**Verification.** Doc guard tests pass 12/12, exit 0 (`docs-tests-3.log`).
+`node tools/validate_open_gates.cjs` exit 0.

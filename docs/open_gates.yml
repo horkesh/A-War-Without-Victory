@@ -176,24 +176,27 @@ gates:
   - id: REPO-ROADMAP-CONCISENESS
     lane: REPO
     title: MASTER_ROADMAP.md is close to its test-enforced size cap
-    status: open
+    status: closed
     kind: propagation
     opened: 2026-09-10
+    closed: 2026-09-10
     blocks: []
     evidence_required: >
       Superseded closed-lane prose moved into MASTER_ROADMAP_ARCHIVE.md until the roadmap has
       at least 4 KB of headroom under the 60,000-byte assertion in
       tests/docs_desktop_v09_truth.test.ts.
-    evidence_path: null
+    evidence_path: docs/plans/MASTER_ROADMAP_ARCHIVE.md
     source: docs/plans/MASTER_ROADMAP.md
     notes: >
-      Measured 59,588 bytes on 2026-09-10 against a 60,000-byte cap — 412 bytes of headroom before
-      any edit. Partially addressed the same day: closed probe-channel prose was compressed and the
-      Status cells of the five closed lanes (R4, R5, R6, RC, RE) were moved verbatim into
-      MASTER_ROADMAP_ARCHIVE.md under "Closed-lane detail moved 2026-09-10", taking the file to
-      58,036 bytes. That is ~1,964 bytes of headroom, still short of the 4 KB target. Section 10
-      (Finding Routing, 11,215 bytes) and the dated Current Execution Snapshot are the next
-      candidates. Raising the cap is the wrong fix.
+      CLOSED 2026-09-10 at 49,724 bytes — 10,276 bytes of headroom against the 60,000-byte
+      assertion in tests/docs_desktop_v09_truth.test.ts, comfortably past the 4 KB target. Measured
+      59,588 bytes at the start of the day (412 bytes of headroom). Three moves, all verbatim into
+      MASTER_ROADMAP_ARCHIVE.md: compressed closed probe-channel prose; the Status cells of the five
+      closed lanes (R4, R5, R6, RC, RE) under "Closed-lane detail moved 2026-09-10"; and the dated
+      9,848-byte "Current Execution Snapshot (2026-09-07)", replaced by a compact current-state
+      block carrying only what Section 5 does not already say. The cap was never raised. Section 10
+      (Finding Routing, 11,215 bytes) is now the largest section but is live routing policy plus the
+      post-1.0 backlog, not history, so it was left alone.
 
   - id: REPO-RUNBOOK-CURATION
     lane: REPO
@@ -211,13 +214,17 @@ gates:
       The size and cap work is DONE as of 2026-09-10 and only the broken pointers remain.
       docs/life_lessons.md went 146,864 to 39,930 bytes (34 older dated sessions moved verbatim to
       docs/life_lessons/session_archive.md, keeping the three newest plus "Recently Violated" and
-      "Topic Files", which CLAUDE.md mandates reading). The napkin went 64,043 to 63,397 bytes: two
-      orphan session headings folded into Evidence & Tooling Discipline, and the two oldest Engine
-      Runtime Patterns entries demoted to .claude/napkin/engine_runtime.md, bringing every category
-      to its stated 10-entry cap with clean numbering. STILL OPEN: 160 of 244 life-lessons entries
-      carry a "see docs/life_lessons/<topic>.md" pointer whose body is NOT in that topic file —
-      grep returns count 0 for sampled titles. The bodies were only ever in the index. Routing 160
-      lessons to their topic files is a curation judgement, not a mechanical move, so it was left.
+      "Topic Files", which CLAUDE.md mandates reading). The napkin went 64,043 to 36,146 bytes: the
+      worked detail of 16 oversized entries moved to .claude/napkin/entry_detail.md leaving the
+      actionable rule plus a pointer, two orphan session headings folded in, three oldest entries
+      demoted, plain-numeric entries renumbered, and one unbalanced bold marker closed. Every
+      category is now at or under the stated 10-entry cap, VERIFIED WITH THE CORRECT PATTERN
+      (^[0-9]+[a-z]*\. ) — an earlier check used ^[0-9]+\. , which matched none of the 0a/0b/0h
+      entries and wrongly reported the largest category as empty. STILL OPEN: 160 of 244
+      life-lessons entries carry a "see docs/life_lessons/<topic>.md" pointer whose body is NOT in
+      that topic file — grep returns count 0 for sampled titles. The bodies were only ever in the
+      index. Routing 160 lessons to their topic files is a curation judgement, not a mechanical
+      move, so it was left.
 
   # ── Closed, retained to prevent re-raising ──────────────────────────────────────
 
