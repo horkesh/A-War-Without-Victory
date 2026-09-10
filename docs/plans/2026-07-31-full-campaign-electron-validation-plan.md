@@ -130,6 +130,21 @@ checks browser before/after hashes, current files and the retained thirty-file f
 equality (`inbox-scope-review-correction1.log`, exit 0); no source or manifest changes.
 Focused documentation checks pass 13/13 in `inbox-docs1.log`, exit 0.
 
+**Packaged probe timing correction:** reviewed source commit `7d97b72fc` and normal hook
+pass (`inbox-commit1.log`, exit 0); the sole replacement build passes (`package2.log`, exit 0).
+`package2-freeze.log` and `inbox-old-package-after.log` pass full 1,200-file inventories.
+The first packaged proof (`inbox-packaged1.log`, exit 1) reaches the loaded turn-0 Warroom
+but attempts its optional Acknowledge click while that transient button is detaching.
+The preserved failure image shows home Inbox and the date on the whiteboard; no route
+step, response or turn has been applied. The campaign harness already waits for network
+idle before intro dismissal; the small proof omitted that same readiness condition.
+Question: does matching that existing readiness sequence remove this probe-only race?
+Create a new evidence-script version, add the existing bounded network-idle wait before
+intro dismissal, recheck unchanged package bytes and use fresh `inbox-packaged2` evidence
+and profile. Expected cost under two minutes. Require all five actual route screenshots,
+unchanged raw turn-0 state and no errors; stop on another unexplained failure. No product,
+package or simulation change and no overwritten failed receipt.
+
 ## B7/B5/B8/B1 playability packet — owner scheduled 2026-09-09
 
 The owner approved the four decision-and-command usability fixes and the subsequent three-faction
