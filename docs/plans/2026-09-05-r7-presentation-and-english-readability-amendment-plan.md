@@ -31,6 +31,9 @@ readability gate exits 1 on opening/setup sizes and two status colours, before S
 The on-whiteboard date and Inbox repair remain intact. Runtime request/sector-warning
 dispositions also remain open; RS/HRHB have not launched. A further source/package repair
 is proposed in that R8 record, without waiving R7 acceptance or expanding this build budget.
+Post-run package identity is also open: 1,200 original file hashes match, but one added
+runtime telemetry file makes the directory differ from its frozen manifest. Both the
+failed check and exact delta are retained in R8; the date source/assets stay unchanged.
 This supersedes the pending Inbox/package decision below, without changing the recorded
 R7 date proof, PRE/POST provenance, consumed run budget or open baseline/acceptance gates.
 

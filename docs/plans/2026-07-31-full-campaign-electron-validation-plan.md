@@ -315,6 +315,35 @@ post-commit full package inventories use `inbox-package-final1.log` and
 reviews share the existing `inbox-review.log`. Exact commands and exit stamps remain in
 each receipt. No further campaign, replacement build, baseline or canon wrapper is run.
 
+**Post-commit package gate:** docs commit `c1c382cf9d27c79d0da7833fcbbfddddd52b35be`
+and normal hook pass, exit 0. Final source/preservation and original-package checks pass
+(`inbox-final-scope2.log`, `inbox-old-package-final1.log`, exit 0). The replacement's
+post-run inventory fails (`inbox-package-final1.log`, exit 1): runtime has added
+`resources/data/derived/_debug/c_lane_corps_directive_telemetry.jsonl` inside the package.
+Do not delete it, refresh manifest2, or describe the post-run directory as immutable.
+**Question / commands / cost / stop:** compare every current file with manifest2 in a
+new non-mutating `inbox-package-delta1.mjs` audit; record all additions/removals/changed
+bytes in exclusive `inbox-package-delta1.json` / `.log`, and trace the telemetry writer
+with `rg`. Expected cost seconds to a minute. Pass means a fully explained inventory
+delta and preserved original identities, not package acceptance. Stop before changing
+product, output paths or the frozen manifest. Obtain targeted independent delta review,
+correct these existing docs and commit that disclosure with the normal local hook.
+
+The delta audit exits 0 and preserves a complete post-run inventory: all 1,200 originally
+manifested files remain byte-identical, none are removed or changed, and exactly one
+79,779-byte / 360-line telemetry file is added (SHA-256
+`4faca76e2d3b1fae1a8eace2c7b250b795e3eb1c2e77c98fcc98e3c64348d80f`). Its bytes are also
+copied exclusively to `inbox-runtime-telemetry1.jsonl`; the original stays in place.
+The observed 1,201-file tree SHA-256 is
+`c46db172a99e877860b5a8dd5718a07f2b1517a7cbea0e750b058f3a19e0666b`, distinct from manifest2.
+`army_order_interpretation.ts:300–313` resolves its debug output beneath `process.cwd()`
+and appends JSONL. This explains the added runtime output; it does not clear the strict
+package-directory gate. Output placement/disposition joins the proposed follow-up before
+another package/run. No source or manifest change, deletion, rebuild or rerun occurs.
+Targeted disclosure checks use `inbox-postrun-docs1.log`, `inbox-postrun-scope1.log`,
+`inbox-postrun-docs-commit1.log` and `inbox-postrun-final-scope1.log`; the failed post-run
+package receipt remains authoritative and is not retried unchanged.
+
 ## B7/B5/B8/B1 playability packet — owner scheduled 2026-09-09
 
 The owner approved the four decision-and-command usability fixes and the subsequent three-faction

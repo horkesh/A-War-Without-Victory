@@ -25,6 +25,9 @@ unclassified local request cancellations and a final-sector warning also remain 
 RS/HRHB are unlaunched. The [R8 plan](2026-07-31-full-campaign-electron-validation-plan.md)
 records all receipts and the proposed bounded follow-up. Earlier package receipts retain
 their original source identity, and human/audio/baseline gates remain open.
+The post-run replacement inventory also fails strict directory identity: all 1,200
+original files match, but runtime added one debug telemetry file. Its retained delta
+and required output-placement disposition are recorded in R8; no manifest refresh.
 
 ### Bounded closeout audit — authorized 2026-09-09
 

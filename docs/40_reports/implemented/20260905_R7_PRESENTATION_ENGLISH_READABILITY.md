@@ -31,13 +31,24 @@ Evidence below is under `F:/A-War-Without-Victory/logs/r8-decision-command-usabi
 | Fresh RBiH 24-turn shakedown | Exit 1 at final readability, after exactly turn 24 and 577 captures; `shakedown-rbih6.log`; Save/load and final runtime gate not reached, RS/HRHB unlaunched |
 | Retained screenshot/state/harness and runtime triage | Both audits exit 0 without rerun; `inbox-readability-triage1.log`, `inbox-runtime-triage1.log`; audits do not turn the failed shakedown into a pass |
 
-The immutable package is
+The replacement package was frozen before execution at
 `F:/AWWV-worktrees/r8-decision-command-usability/dist-packaged/inbox-replacement2/win-unpacked/`.
 `package-manifest2.json` binds 1,200 files to product `7d97b72fc`, tree SHA-256
 `0cb25a80c4da25f2be8cc65a34b531a66c563e94f6d18926b2588a30cfad8018`.
 Executable/ASAR and all resources except emitted tactical UI CSS/JS/index references are
 unchanged from the preserved original package (`package2-comparison.json`). Post-package
 source commits change only the authorized harness/tests and continuity documents.
+
+The final original-package inventory passes, exit 0 (`inbox-old-package-final1.log`).
+The replacement's post-run directory check exits 1 (`inbox-package-final1.log`): runtime
+added `resources/data/derived/_debug/c_lane_corps_directive_telemetry.jsonl`.
+The non-mutating `inbox-package-delta1.log` audit exits 0 and proves all 1,200 original
+files remain byte-identical, with no removals/changes and exactly that one 79,779-byte
+addition. The 360-line file is retained in place and copied to
+`inbox-runtime-telemetry1.jsonl`; manifest2 is unchanged. This is an explained failing
+directory-identity gate, not immutable post-run package acceptance. The debug writer in
+`army_order_interpretation.ts` places output beneath its process working directory;
+output-placement disposition joins the proposed follow-up. No product fix/build follows.
 
 The failed RBiH run has 53 retained readability findings: 46 opening/setup font-size
 findings at 9.3–11.5 CSS px, plus seven repetitions of two insufficient-contrast styles

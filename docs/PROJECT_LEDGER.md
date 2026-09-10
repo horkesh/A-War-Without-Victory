@@ -35384,3 +35384,19 @@ All old packages, profiles and failed logs remain. R7 PRE/clean POST-A/dirty POS
 their recorded eight-artifact/31-input equality; accepted n392, the six-pin gate and exhausted
 one-PRE/two-POST budget remain unchanged. Calibration, audio/sensitivity/offline runtime,
 owner inspection, full-duration campaigns and final diaries remain open. No push/merge/publication.
+
+Documentation commit `c1c382cf9d27c79d0da7833fcbbfddddd52b35be` and its normal hook
+pass (`inbox-final-docs-commit1.log`, exit 0); final scope and old-package inventories pass.
+The replacement's post-run strict inventory exits 1 in `inbox-package-final1.log`.
+Runtime added `resources/data/derived/_debug/c_lane_corps_directive_telemetry.jsonl`.
+The planned, non-mutating delta audit (`inbox-package-delta1.log`, exit 0) establishes
+all 1,200 original files remain byte-identical, no removed/changed files, and exactly
+one 79,779-byte / 360-line addition. Its SHA-256 is
+`4faca76e2d3b1fae1a8eace2c7b250b795e3eb1c2e77c98fcc98e3c64348d80f`;
+an exclusive copy is retained as `inbox-runtime-telemetry1.jsonl`. The original remains
+in place and manifest2 is not refreshed. The observed tree has 1,201 files and SHA-256
+`c46db172a99e877860b5a8dd5718a07f2b1517a7cbea0e750b058f3a19e0666b`.
+`army_order_interpretation.ts` writes the debug channel beneath `process.cwd()`; this
+explains the delta without clearing the package-directory gate. Output placement joins
+the proposed follow-up. Independent targeted delta/disclosure review and the normal
+docs hook use new `inbox-postrun-*` receipts; no unchanged package retry or product edit.
