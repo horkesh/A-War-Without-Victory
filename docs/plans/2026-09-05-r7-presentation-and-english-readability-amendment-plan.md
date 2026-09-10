@@ -1201,3 +1201,51 @@ Final documentation checks pass 13/13 (`desk39-layout-final-docs1.log`, exit 0);
 source hashes, clean POST-A checkout and diff checks pass (`desk39-layout-final-state1.log`,
 exit 0). The targeted final confirmation uses the existing `desk39-layout-review.log`;
 the local documentation-hook outcome is recorded in `desk39-layout-final-docs-commit1.log`.
+
+## WR01 — Warroom whiteboard date and corkboard map presentation packet — 2026-09-10
+
+Owner-raised 2026-09-10: the whiteboard date "was supposed to look like a date scrawled by
+hand with flomaster. Right now it is too artificial", and the corkboard map "still looks
+like it was tacked on, instead of being there organically." Design is written and reviewed
+into [WR01 warroom presentation design](2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.md);
+that document is the task-level detail for this packet and does not create a second active
+R7 plan. This plan remains the executable contract.
+
+**Scheduling.** WR01 is scheduled but NOT started, and it does not gate the current R7
+acceptance set. It must not begin while another lane holds `WarroomShellLayer.tsx`; at the
+time of writing that file is live on this branch. Tracked as `R7-WARROOM-PRESENTATION` in
+[open_gates.yml](../open_gates.yml).
+
+**Scope.** One genuine defect plus bounded presentation work:
+
+| # | Item | Kind |
+|---|---|---|
+| WR01.1 | Date placement: `translateX(min(0px, calc(28vw - 616px)))` puts the date on bare wall at 1920x1080 and on top of the corkboard map at 1366x768 | bug, introduced by `88996a23d` |
+| WR01.2 | Bundle an OFL marker face as `--font-marker`, self-hosted, subset to Latin-1 + Latin Ext-A | friction |
+| WR01.3 | Per-glyph deterministic ink treatment; whole-line tilt; left-anchored placement inside the board | friction |
+| WR01.4 | Ghost of the previous week's date | friction |
+| WR01.5 | Pin the date into `DeskAuthorityHeader`, outside `president-desk-scroll-region` | friction |
+| WR01.6 | Corkboard map: remove letterbox seams, inner frame and drop shadow; pinned-sheet treatment; latitude correction | friction |
+| WR01.7 | Per-plate luminance table as committed data; both overlays read from it | friction |
+
+**Determinism.** All jitter derives from a pure hash over `(turn, glyph index)`. No
+`Math.random()`, no `Date.now()` — the ban covers all of `src/`, not only sim code.
+
+**Tests this packet deliberately reverses.** Four source-string assertions encode the current
+appearance and must be amended with their rationale recorded in-place, not silently deleted:
+`tests/ui/warroom_shell_accessibility.test.ts` (three blocks: the `var(--font-data)` calendar
+assertion, the `preserveAspectRatio` pair, and the physical-object element list) and
+`tests/ui/r7_president_desk_layout_readability.test.ts` (the `translateX` and chip-background
+assertions). Replacements assert intent — sizing tracks the scene plate, the label carries no
+background of its own — rather than pinning literals.
+
+**Acceptance.** A capture matrix of 3 factions x 5 year-plates x 3 viewports (1280x720,
+1920x1080, 3440x1440) reviewed against the criterion recorded in the design document, plus
+typecheck, the full suite and `desktop:map:build` each read from its own exit code. No
+scenario run, no calibration, no pin refresh, no baseline touch; the R7 run budget is not
+reopened by this packet.
+
+**Known risk carried forward.** Board luminance varies from 57 to 167 across the fifteen
+scene plates. On the darkest plates (HRHB 1994/1995, RBiH 1992) legible board writing may not
+be reachable with marker ink alone; that outcome is an art-side question and is surfaced with
+the captures rather than resolved in code.

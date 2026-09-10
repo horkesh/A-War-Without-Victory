@@ -1,8 +1,10 @@
 # AWWV Command Board
 
-**Status:** Derived dispatch view, synchronized 2026-09-09.
+**Status:** Derived dispatch view, synchronized 2026-09-10.
 
 **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole authority for unfinished work and wins if this board differs.
+
+**Open gates:** [open_gates.yml](../open_gates.yml) enumerates every named gate and the evidence that would close it — `npm run gates` lists the open rows, and `tests/open_gates_register.test.ts` fails if a gate is claimed closed without evidence that exists. It is derived like this board; the roadmap still wins.
 
 ## Activation
 
@@ -39,6 +41,8 @@ listening/control and offline audio acceptance described in that plan; this audi
 runtime campaign and gives no audio sign-off. The six-pin baseline gate remains separate and open.
 
 **R7 name correction integrated:** [ARBiH honorific-name packet](2026-09-07-arbih-brigade-honorific-name-correction-plan.md); IDs and mechanical fields preserved, saved/displayed text changed. Remaining R7 gates stay open.
+
+**WR01 scheduled, not started — 2026-09-10:** owner-raised warroom presentation packet (whiteboard date reads as a UI chip rather than marker; corkboard map reads as pasted on). Design recorded in the [WR01 design doc](2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.md) and scheduled inside the [presentation amendment plan](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md#wr01--warroom-whiteboard-date-and-corkboard-map-presentation-packet--2026-09-10). Carries one real defect from `88996a23d` (the date lands on bare wall at 1920x1080 and on the map at 1366x768). Does not gate current R7 acceptance; must not start while another lane holds `WarroomShellLayer.tsx`.
 
 **BC05 scheduled separately (2026-09-07):** bounded NATO deadline/loader repair is
 **implemented and independently reviewed (GO), 115 focused tests pass**. n392 disproves the inherited
