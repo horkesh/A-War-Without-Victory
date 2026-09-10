@@ -8,6 +8,14 @@
 > Older dated sessions live in [life_lessons/session_archive.md](life_lessons/session_archive.md);
 > they are lane reference, not session-start reading.
 
+## New Lessons (2026-09-10) — a stated rule broken one message later, and a truncated search
+
+### [Process] ★★★ I MERGED ON A PARTIAL SIGNAL ONE MESSAGE AFTER SAYING I WOULD NOT — see `docs/life_lessons/process.md`
+- Wrote "I won't merge on a partial signal", then merged PR #503 with `full-suite` still pending. It failed and the failure landed on `main`. ⇒ **A stated intention is not a control** — gate the merge on something that cannot be talked out of it. ⇒ "Merge it" answers WHETHER, not WHEN; re-confirm the when if your announced precondition is unmet.
+
+### [Process] ★★ RE-VIOLATED: A TRUNCATED GREP IS AN INCOMPLETE SEARCH PRESENTED AS A COMPLETE ONE — see `docs/life_lessons/process.md`
+- `grep -rln "\.github/workflows" tests/ | head -5` was used to establish "the tests that guard workflows". The test that pins workflow install counts was excluded by both the pattern and the truncation. ⇒ **Never `head`-truncate a search whose purpose is to establish completeness.** ⇒ Grep for the file's own name, not the directory it lives in.
+
 ## New Lessons (2026-09-06) — three false "success" signals in one session, and an absence claim that was wrong
 
 ### [Process] ★★★ A CHECK BUILT AROUND WHAT SUCCESS LOOKS LIKE WILL REPORT SUCCESS THAT DID NOT HAPPEN — THREE TIMES IN ONE SESSION — see `docs/life_lessons/process.md`
