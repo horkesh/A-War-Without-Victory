@@ -136,9 +136,13 @@ jobs:
   # owner-authorized procedure — see docs/plans/2026-09-10-baseline-reblessing-packet.md
   # and the R7-BASELINE-SIX-PIN row in docs/open_gates.yml.
   #
-  # NON-BLOCKING: `main` currently has no branch protection and no rulesets, so no check
-  # is a required check. If branch protection is ever added, this job must be EXCLUDED
-  # from the required list; every other check here should be included.
+  # NON-BLOCKING, AND THIS IS NOW ENFORCED. `main` gained branch protection on 2026-09-10 with
+  # ten required status checks. This job is deliberately NOT one of them; every other check on
+  # a PR to main is. Do not add it to the required list — a stale pin is not a broken build, and
+  # clearing it is the gated procedure in docs/plans/2026-09-10-baseline-reblessing-packet.md.
+  # Required contexts: typecheck, scenario-anchors, scenarios, test, engine-health-188w,
+  # desktop-release-check, desktop-packaged-runtime-probe, Event system validation, full-suite,
+  # structural-fingerprint.
   baseline-pins:
     name: Baseline pins (advisory, non-blocking)
     runs-on: ubuntu-latest
