@@ -201,8 +201,33 @@ describe('player-safe tooltip models', () => {
 
     expect(model.sectorName).toBe('Tuzla Front');
     expect(model.densityLabel).toBe('Reinforced');
+    expect(model.threatSummary).toBe('balanced pressure');
     expect(model.ownFormationLabels).toEqual(['2nd Tuzla Brigade - Defending']);
     expect(model.enemyContactSummary).toBe('1 enemy contact observed');
+  });
+
+  it('redacts front-tooltip force balance when sector intelligence is below threshold', () => {
+    const formations = [{
+      id: 'own_line', name: 'Line Brigade', faction: 'RBiH', kind: 'brigade', readiness: 'ready',
+      status: 'active', cohesion: 70, fatigue: 0, createdTurn: 1, tags: [], location_osid: 'op:tuzla',
+      posture: 'defend',
+    }] satisfies FormationView[];
+    const model = buildPlayerSafeFrontTooltipModel({
+      edgeId: 'op:tuzla::op:doboj',
+      frontEdgesOsid: [{ edge_id: 'op:tuzla::op:doboj', a: 'op:tuzla', b: 'op:doboj', side_a: 'RBiH', side_b: 'RS' }],
+      frontPressureByEdge: { 'op:tuzla::op:doboj': { value: 0, max_abs: 1 } },
+      formations,
+      fogOfWar: { visibleEnemyOsids: ['op:doboj'], visibleEnemySectorIds: [] },
+      corpsFrontSectors: [{
+        sector_id: 'sector_low_intel', corps_id: 'arbih_2nd_corps', corps_name: '2nd Corps', faction: 'RBiH',
+        display_name: 'Low-intel front', opposing_factions: ['RS'], edge_ids: ['op:tuzla::op:doboj'],
+        sub_segment_count: 1, length_edges: 1, assigned_brigade_ids: ['own_line'], reserve_brigade_ids: [],
+        threat_ratio: 1.7, intel_confidence: 0.2,
+      }],
+      playerFaction: 'RBiH',
+    });
+
+    expect(model.threatSummary).toBeNull();
   });
 
   it('does not count enemy AoR coverage as physical front-edge contact', () => {

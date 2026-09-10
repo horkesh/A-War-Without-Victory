@@ -199,7 +199,7 @@ export type PresidentialDecisionRoomNavigationTarget =
   | { kind: 'decision-room'; lens: PresidentialDecisionRoomLensId; cardId?: string | null }
   | { kind: 'field'; target: FieldInspectionTarget }
   | { kind: 'enclave-dashboard' }
-  | { kind: 'inbox' }
+  | { kind: 'inbox'; itemId?: string }
   | { kind: 'chronicle' }
   | { kind: 'none' };
 

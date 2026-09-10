@@ -23,7 +23,7 @@ import {
   getPlayerSafeMunicipalityName,
 } from '../utils/playerSafeText';
 import { getLocalizedMunicipalitySupportLabel } from '../utils/municipalitySupportLabels';
-import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
+import { getPlayerSafeThreatPresentation, hasReliableThreatIntel } from '../utils/playerSafeThreat';
 import { getOsidDisplayName, humanizeOsid } from '../utils/osidDisplayName';
 import {
     getIvpComponentContributions,
@@ -484,7 +484,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
                   <span className="text-xs uppercase tracking-wide text-accent-gold">{t('situation.opsecActive')}</span>
                 </div>
                 <div className="text-text-secondary">
-                  Pressure {typeof sector.threat_ratio === 'number' && Number.isFinite(sector.threat_ratio) ? getPlayerSafeThreatPresentation(sector.threat_ratio).summary : t('corpsFront.unreported')} · Intel {typeof sector.intel_confidence === 'number' && Number.isFinite(sector.intel_confidence) ? `${(sector.intel_confidence * 100).toFixed(0)}%` : t('corpsFront.unreported')}
+                  Pressure {hasReliableThreatIntel(sector.intel_confidence) && typeof sector.threat_ratio === 'number' && Number.isFinite(sector.threat_ratio) ? getPlayerSafeThreatPresentation(sector.threat_ratio).summary : t('corpsFront.unreported')} · Intel {typeof sector.intel_confidence === 'number' && Number.isFinite(sector.intel_confidence) ? `${(sector.intel_confidence * 100).toFixed(0)}%` : t('corpsFront.unreported')}
                   {sector.offensive_signs ? ' · Offensive signs detected' : ''}
                 </div>
               </div>

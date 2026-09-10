@@ -86,6 +86,85 @@ describe('Presidential Inbox officer event dedupe', () => {
         });
     });
 
+    it('keeps one current replacement recommendation for the same incumbent command', () => {
+        const replacement = (
+            eventId: string,
+            turn: number,
+            candidateId: string,
+            candidateName: string,
+        ) => ({
+            ...officerEvent(eventId, 'replacement_suggested'),
+            turn,
+            officer_id: candidateId,
+            officer_name: candidateName,
+            current_commander_id: 'incumbent_alpha',
+            current_commander_name: 'Incumbent Alpha',
+        });
+        const state = makeLoadedState({
+            pendingOfficerEvents: [
+                replacement('replacement_old', 11, 'candidate_old', 'Old Candidate'),
+                replacement('replacement_current', 12, 'candidate_current', 'Current Candidate'),
+            ],
+        });
+
+        const officerItems = deriveInboxItems(state, null).filter((item) => item.type === 'officer_event');
+
+        expect(officerItems).toHaveLength(1);
+        expect(officerItems[0]).toMatchObject({
+            id: 'officer:replacement_suggested:incumbent_alpha',
+            subtitle: 'Historical staff recommendation: appoint Current Candidate. Leaving this pending keeps Incumbent Alpha in command.',
+            updateCount: 2,
+            sourceIds: ['replacement_current', 'replacement_old'],
+        });
+    });
+
+    it('keeps replacement recommendations for different incumbent commands distinct', () => {
+        const base = officerEvent('replacement_alpha', 'replacement_suggested');
+        const state = makeLoadedState({
+            pendingOfficerEvents: [
+                {
+                    ...base,
+                    officer_id: 'candidate_shared',
+                    officer_name: 'Shared Candidate',
+                    current_commander_id: 'incumbent_alpha',
+                    current_commander_name: 'Incumbent Alpha',
+                },
+                {
+                    ...base,
+                    event_id: 'replacement_bravo',
+                    officer_id: 'candidate_shared',
+                    officer_name: 'Shared Candidate',
+                    current_commander_id: 'incumbent_bravo',
+                    current_commander_name: 'Incumbent Bravo',
+                },
+            ],
+        });
+
+        const officerItems = deriveInboxItems(state, null).filter((item) => item.type === 'officer_event');
+
+        expect(officerItems.map((item) => item.id)).toEqual([
+            'officer:replacement_suggested:incumbent_alpha',
+            'officer:replacement_suggested:incumbent_bravo',
+        ]);
+    });
+
+    it('keeps candidates distinct when a replacement event has no incumbent identity', () => {
+        const base = officerEvent('replacement_alpha', 'replacement_suggested');
+        const state = makeLoadedState({
+            pendingOfficerEvents: [
+                { ...base, officer_id: 'candidate_alpha', officer_name: 'Candidate Alpha', corps_id: 'shared_corps' },
+                { ...base, event_id: 'replacement_bravo', officer_id: 'candidate_bravo', officer_name: 'Candidate Bravo', corps_id: 'shared_corps' },
+            ],
+        });
+
+        const officerItems = deriveInboxItems(state, null).filter((item) => item.type === 'officer_event');
+
+        expect(officerItems.map((item) => item.id)).toEqual([
+            'officer:replacement_suggested:candidate_alpha',
+            'officer:replacement_suggested:candidate_bravo',
+        ]);
+    });
+
     it('renders a +N updates chip for deduped inbox cards', () => {
         const onAction = vi.fn();
         useGameStore.setState({

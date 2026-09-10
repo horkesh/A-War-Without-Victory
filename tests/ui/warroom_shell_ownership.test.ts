@@ -256,6 +256,14 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(app.slice(openCommandStripStart, openCommandStripEnd)).toContain('setWarroomDeskOpen(false);');
     });
 
+    it('keeps the pending opening brief on Warroom home while the President Desk owns its overlay', () => {
+        const app = read('src/ui/map/App.tsx');
+
+        expect(app).toMatch(
+            /\{!peaceWarTransitionActive && openingBriefPending && !warroomDeskOpen && \([\s\S]*?<PresidentialInbox[\s\S]*?\)\}[\s\S]*?\{warroomDeskOpen && \([\s\S]*?<PresidentDeskShell/,
+        );
+    });
+
     it('routes Authored Choices shortcuts to the Records archive spine', () => {
         const app = read('src/ui/map/App.tsx');
 

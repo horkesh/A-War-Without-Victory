@@ -183,6 +183,17 @@ function isCommandInterpretationOfficerEvent(type: OfficerEvent['type']): boolea
 }
 
 function officerEventDedupeKey(evt: OfficerEvent): string {
+    if (evt.type === 'replacement_suggested') {
+        const incumbentKey =
+            normalizeDedupeSubject(evt.current_commander_id)
+            ?? normalizeDedupeSubject(evt.current_commander_name)
+            ?? normalizeDedupeSubject(evt.officer_id)
+            ?? normalizeDedupeSubject(evt.officer_name)
+            ?? normalizeDedupeSubject(evt.corps_id)
+            ?? normalizeDedupeSubject(evt.event_id)
+            ?? 'unknown';
+        return `${evt.type}:${incumbentKey}`;
+    }
     const subjectKey =
         normalizeDedupeSubject(evt.officer_id)
         ?? normalizeDedupeSubject(evt.current_commander_id)
@@ -468,7 +479,10 @@ export function deriveInboxItems(
             else officerGroups.set(key, [evt]);
         }
         for (const [key, events] of officerGroups) {
-            const evt = events[0];
+            const orderedEvents = events[0]?.type === 'replacement_suggested'
+                ? [...events].sort((a, b) => b.turn - a.turn || strictCompare(a.event_id, b.event_id))
+                : events;
+            const evt = orderedEvents[0];
             if (!evt) continue;
             const commandInterpretation = events.some((event) => isCommandInterpretationOfficerEvent(event.type));
             const armyCoOperationProposal = events.some((event) => event.type === 'army_co_proposes_op');
@@ -497,8 +511,8 @@ export function deriveInboxItems(
                         : evt.officer_name
                             ? t('inbox.item.officer.subtitle.regarding', { officer: evt.officer_name })
                             : t('inbox.item.officer.subtitle.fallback'),
-                updateCount: events.length,
-                sourceIds: events.map(event => event.event_id),
+                updateCount: orderedEvents.length,
+                sourceIds: orderedEvents.map(event => event.event_id).sort(strictCompare),
                 action: commandInterpretation ? 'decision_room' : officerSurface.inboxAction,
                 priority: 50,
             });

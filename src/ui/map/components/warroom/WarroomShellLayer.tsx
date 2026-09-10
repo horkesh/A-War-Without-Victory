@@ -478,7 +478,6 @@ function WarroomDateBoard({ region, label }: { region: WarroomRegion; label: str
       style={{
         position: 'absolute',
         ...box,
-        transform: 'translateX(min(0px, calc(28vw - 616px)))',
         pointerEvents: 'none',
         zIndex: 1,
         display: 'flex',

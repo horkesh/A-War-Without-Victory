@@ -416,6 +416,29 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(container.textContent).not.toMatch(/event_decision|paramilitary request|paramilitary_request/i);
   });
 
+  it('lists each blocking decision once in advance clearance', () => {
+    setLoadedState(makeState({
+      pendingPeacePlan: {
+        planId: 'vance_owen',
+        planName: 'Vance-Owen Plan',
+        narrative: 'Proposal text',
+        turnOffered: 40,
+        proposedSplit: { RBiH: 30, RS: 55, HRHB: 15 },
+        institutionalModel: 'cantonized',
+        botResponses: {},
+      },
+      pendingParamilitaryRequests: [
+        { faction: 'RS', target_osid: 'bratunac_1', strength: 120, estimated_civilian_risk: 14 },
+      ],
+    }));
+    useGameStore.setState({ advanceTurnPending: true, osidDisplayNames: { bratunac_1: 'Bratunac' } });
+
+    render(createElement(AdvanceTurnModal, { onResolveBlocker: vi.fn() }));
+
+    expect(screen.getAllByText('Vance-Owen Plan')).toHaveLength(1);
+    expect(screen.getAllByRole('button', { name: 'Review paramilitary' })).toHaveLength(1);
+  });
+
   it('Warroom status dock localizes priority chrome in BCS mode without duplicating Advance', () => {
     setLocale('bcs');
     setLoadedState(makeState());
@@ -449,7 +472,7 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(bcsMessages).toContain("'warroom.severity.warning': 'Upozorenje'");
   });
 
-  it('Advance Clearance modal localizes review severity and blocker chrome in BCS mode', () => {
+  it('Advance Clearance modal localizes blocker chrome in BCS mode', () => {
     setLocale('bcs');
     setLoadedState(makeState({
       presidentialReviewQueue: {
@@ -481,7 +504,7 @@ describe('ADVANCE_TURN gated feedback', () => {
 
     expect(screen.getByText('Riješi prije nastavka')).toBeTruthy();
     expect(screen.getAllByText('Obavezno').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Blokira').length).toBeGreaterThan(0);
+    expect(screen.getByText('Odluka događaja')).toBeTruthy();
     expect(copy).not.toContain('Resolve before advancing');
     expect(copy).not.toContain('Required');
     expect(copy).not.toContain('blocking');

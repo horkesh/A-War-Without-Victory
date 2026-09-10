@@ -1,15 +1,151 @@
 # R7 presentation and English readability
 
-Status: the authorized date-layout implementation passes focused tests and the nine-case
-initial/maximum-scroll browser proof; independent source/image review is GO. Final full UI,
-typecheck, map build and documentation checks pass. Source is committed locally as
-`88996a23d` with its mandatory hook passing. Clean POST-A, health and hash checks pass;
-the inherited baseline gate remains open, so this is not R7 closure.
+Status: date-on-whiteboard correction verified and committed at `ea33b23a52d5be6b2a126512fc00ce9062a76a88`.
+The owner's 2026-09-10 correction exposed an overbroad prior visibility GO. Fresh source,
+image, complete UI, typecheck, build and normal hook evidence now cover the repair below.
+Earlier receipts and clean POST-A remain evidence for their original revisions, including
+`88996a23d`; they are not re-labelled as runs of the repaired source.
+The inherited baseline gate remains open, so this is not R7 closure.
 Prior global Vitest/player-experience receipts are reused only for unaffected scope.
+
+## Inbox/package continuation — 2026-09-10
+
+The owner authorized the minimal Inbox/Desk repair, one replacement package and the
+previously proposed three fresh 24-turn shakedowns. Product commit
+`7d97b72fc1ea8d8dbe04a65f7eab77e1507f53a6` renders the pending opening Inbox only while
+the Desk is closed. The pending brief returns on close; opening Desk does not dismiss
+or consume it. The real required decision is reachable. The reviewed whiteboard/date
+source is unchanged and included in the replacement.
+
+Evidence below is under `F:/A-War-Without-Victory/logs/r8-decision-command-usability/`.
+
+| Check | Result / receipt |
+|---|---|
+| Focused Inbox regression and actual five-step browser route | 24/24 and route exit 0; `inbox-focused-green1.log`, `inbox-browser1.log` |
+| Complete `npm run test:vitest -- tests/ui` | Exit 1, 353/354 files and 2,988/2,989 tests pass; sole stale boot guard assertion retained in `inbox-ui1.log` |
+| Exact boot/ownership correction | 45/45, exit 0; `inbox-focused-correction1.log`; production remains identical to reviewed route, no second broad run claimed |
+| Typecheck and normal source commit hook | Exit 0; `inbox-typecheck1.log`, `inbox-commit1.log` |
+| `npm run desktop:package:dir -- --config.directories.output=dist-packaged/inbox-replacement2` | Single replacement build, exit 0; `package2.log` |
+| Packaged home -> Desk -> restore -> exact decision proof | Five real screenshots, unchanged turn-0 save, zero answers/advances/errors; `inbox-packaged3.log`, exit 0; attempts 1/2 remain failed receipts |
+| Historical-source and autonomy harness corrections | Independently reviewed; final focused file 51/51, exit 0; `historical-source-green3.log`, `autonomy-setup-green1.log`; normal hooks pass for `650798fdd` and `c31135f35` |
+| Fresh RBiH 24-turn shakedown | Exit 1 at final readability, after exactly turn 24 and 577 captures; `shakedown-rbih6.log`; Save/load and final runtime gate not reached, RS/HRHB unlaunched |
+| Retained screenshot/state/harness and runtime triage | Both audits exit 0 without rerun; `inbox-readability-triage1.log`, `inbox-runtime-triage1.log`; audits do not turn the failed shakedown into a pass |
+
+The replacement package was frozen before execution at
+`F:/AWWV-worktrees/r8-decision-command-usability/dist-packaged/inbox-replacement2/win-unpacked/`.
+`package-manifest2.json` binds 1,200 files to product `7d97b72fc`, tree SHA-256
+`0cb25a80c4da25f2be8cc65a34b531a66c563e94f6d18926b2588a30cfad8018`.
+Executable/ASAR and all resources except emitted tactical UI CSS/JS/index references are
+unchanged from the preserved original package (`package2-comparison.json`). Post-package
+source commits change only the authorized harness/tests and continuity documents.
+
+The final original-package inventory passes, exit 0 (`inbox-old-package-final1.log`).
+The replacement's post-run directory check exits 1 (`inbox-package-final1.log`): runtime
+added `resources/data/derived/_debug/c_lane_corps_directive_telemetry.jsonl`.
+The non-mutating `inbox-package-delta1.log` audit exits 0 and proves all 1,200 original
+files remain byte-identical, with no removals/changes and exactly that one 79,779-byte
+addition. The 360-line file is retained in place and copied to
+`inbox-runtime-telemetry1.jsonl`; manifest2 is unchanged. This is an explained failing
+directory-identity gate, not immutable post-run package acceptance. The debug writer in
+`army_order_interpretation.ts` places output beneath its process working directory;
+output-placement disposition joins the proposed follow-up. No product fix/build follows.
+
+The failed RBiH run has 53 retained readability findings: 46 opening/setup font-size
+findings at 9.3–11.5 CSS px, plus seven repetitions of two insufficient-contrast styles
+(Active 4.12:1 and critical pressure 4.20:1). Actual images and source trace confirm these
+styles. The final Desk capture still shows the complete date on its authored whiteboard.
+The final turn-24 autosave is archived with SHA-256
+`f9df42dc5fe09c843ed86a272e1c8c4cc8232a6b3176ab63a1b37f906b887c61`; the six choices,
+required checkpoints and final-tour stability are recorded, but no manual Save/load proof
+or completed run manifest exists. Nineteen local request cancellations and one final-sector
+assignment warning also need disposition; zero console/page errors does not clear them.
+
+Independent source and actual packaged Inbox-route review are GO in `inbox-review.log`.
+Independent final evidence review gives `STOP_PACKET_BLOCKED_REQUIRES_NEW_OWNER_SCOPE`;
+the current three-faction acceptance remains blocked. Focused final docs pass 13/13 and
+source/evidence preservation passes, both exit 0. The existing
+[R8 plan](../../plans/2026-07-31-full-campaign-electron-validation-plan.md) contains the
+bounded proposed typography/contrast correction and retained-runtime triage. Another
+product revision/build is outside this packet's one-line/one-build authorization; no
+threshold, runtime warning, baseline or calibration gate is waived. Final docs/scope/hook
+and old/new package inventory receipts use the distinct `inbox-final-*`,
+`inbox-package-final1.log` and `inbox-old-package-final1.log` paths listed in that plan.
+
+## Owner correction: detached date — 2026-09-10
+
+Date-only acceptance requires the date to remain on the whiteboard. The CSS translation
+introduced in `WarroomDateBoard` moved the entire region left to avoid Desk content, and
+the regression test mandated that workaround. The initial and independent image reviews
+both missed the resulting loss of attachment to the board. Those claims are corrected here.
+
+`logs/r7-english-readability/desk39-onboard-prior-audit.log` exits 0 for the read-only
+reproduction: mapping the retained scene/label geometry onto the unchanged authored board
+polygon finds labels and glyphs outside it for all factions at 1920x1080 and 1366x768.
+All three 3440x1440 cases stay inside. The JSON and original PNGs remain preserved; the
+audit's successful exit means it reproduced the defect, not that the layout passes.
+The existing amendment plan records the correction and new containment/image checks before
+implementation. Column/artwork remain fixed; no simulation or package run is added.
+
+The correction removes the translation from `WarroomDateBoard`. At overlapping widths,
+only opaque Desk scroll content starts lower; the shell bounds, right-column position,
+close control, room image and authored board region stay fixed. The content returns to
+its ordinary position at 2048px. The reviewer caught and corrected an earlier 2001px
+reset that would have left a narrow overlap interval. Header content and controls remain
+intact and scrollable; at 1366x768 the visible scroll region is 266px tall, so the lower
+header and packet require scrolling. This is the explicit cost of the fixed-column layout.
+
+Fresh evidence under `logs/r7-english-readability/`:
+
+| Check / command | Result | Receipt |
+|---|---|---|
+| Focused `npm.cmd run test:vitest -- tests/ui/r7_president_desk_layout_readability.test.ts tests/ui/desk_authority_header.test.ts tests/ui/president_desk_shell.test.ts tests/ui/warroom_shell_accessibility.test.ts tests/ui/warroom_scene_continuity.test.ts tests/ui/warroom_shell_ownership.test.ts` | Exit 0, 75/75 | `desk39-onboard-focused-green3.log` |
+| Original translation and early-breakpoint behavioral RED | Exit 1 as expected; setup failures are separately retained | `desk39-onboard-focused-red3.log`, `desk39-onboard-focused-red4.log`; setup `red.log` has no exit stamp, `red2.log` exits 1 |
+| `node desk39-onboard-proof.mjs --out .../desk39-onboard-browser-attempt1` | Exit 1 retained: seven case passes; two small-screen cases exhaust the proof's twelve-step coverage cap; all nine also flag checkout-specific image URL paths | `desk39-onboard-browser1.log` |
+| `node desk39-onboard-proof2.mjs --cases rbih-1366x768,rs-1366x768 --out .../desk39-onboard-browser-attempt2` | Both targeted cases pass every case criterion; wrapper exit 1 retains the same URL-path identity flags | `desk39-onboard-browser2.log` |
+| `node desk39-onboard-consolidate.mjs` | Exit 0; all nine final cases pass, combining seven original and two corrected results | `desk39-onboard-consolidate1.log`, `desk39-onboard-final-summary.json` |
+| `npm run typecheck` | Exit 0 | `desk39-onboard-typecheck1.log` |
+| `npm run desktop:map:build` | Exit 0 | `desk39-onboard-map-build1.log` |
+| `npm run test:vitest -- tests/ui` | Exit 0; complete UI boundary, 354 files / 2,988 tests, 848.44 seconds | `desk39-onboard-ui1.log` |
+| `node desk39-onboard-scope.mjs freeze` | Exit 0; three date source/test hashes frozen, 25 R8 source/test hashes preserved, 870 prior untracked paths retained | `desk39-onboard-source-freeze.log`, `desk39-onboard-source-freeze.json` |
+| `npm run test:vitest -- tests/docs_desktop_v09_truth.test.ts tests/docs_truth_no_skip_guard.test.ts tests/v092_playtest_package_docs.test.ts` | Exit 0, 13/13 | `desk39-onboard-docs1.log` |
+| `node desk39-onboard-scope.mjs` including `git diff --check`, scope, links and frozen hashes | Exit 0 | `desk39-onboard-scope1.log` |
+| `git commit -m "fix(ui): keep the R7 date on its whiteboard"` with normal mandatory hook | Exit 0; source commit `ea33b23a52d5be6b2a126512fc00ce9062a76a88`, tracked tree clean afterward | `desk39-onboard-commit1.log` |
+
+The corrected traversal is bounded by the stable target count and stops on no progress;
+no source change was needed for that harness correction. Artifact reconciliation strips
+only the two known checkout prefixes, then checks the same relative asset, its natural
+dimensions, original/worktree SHA-256 and Git blob identity against source `88996a23d`.
+It preserves both failed browser receipts and does not re-label the fresh consolidation
+asset hashes as earlier browser snapshots. Source, fixtures and authored-region hashes
+match before/after both browser runs and the final source freeze.
+
+All nine complete labels and glyph bounds stay within the actual authored board polygon
+at initial and maximum scroll. No painted header/card/control intersects the label or
+glyphs; BEFORE scene/shell geometry is unchanged. Computed scroll margins are 391.832px
+at 1920, 243.859px at 1366 and zero at 3440. Date contrast is 8.34:1 against both worst-case
+underlays. All 45–50 header/control text targets per faction can be exposed and controls
+hit-tested through scrolling. Last text clears the fade start by 16.25–16.67px. Final
+evidence includes eighteen endpoint images and 77 intermediate readability images;
+`desk39-onboard-final-summary.json` identifies the supplying attempt for every case.
+
+Independent review in `desk39-onboard-review.log` gives final source/image **GO**, after
+inspecting all eighteen endpoint and 77 intermediate screenshots and independently
+checking source/asset identities. The complete UI boundary passes 354 files / 2,988 tests,
+exit 0. The normal local typecheck hook and source commit pass, exit 0. Closeout documentation
+and final hash/scope receipts use the distinct `desk39-onboard-docs2.log`,
+`desk39-onboard-scope2.log`, `desk39-onboard-commit2.log` and `desk39-onboard-final-scope.log`.
+The preserved original package remains from product `217c9f70a`;
+this date correction is not packaged by that earlier build. The owner's subsequent Inbox
+authorization produced replacement package `7d97b72fc`, including the date correction;
+its blocked shakedown disposition is recorded above and in the R8 plan. R7 PRE, clean POST-A and dirty
+POST-B retain their recorded eight-artifact/31-input equality; no new run was performed
+or attributed to this correction. Accepted n392 pins and the six-pin/calibration gate
+remain untouched and open.
 
 ## R7 closeout reconciliation — 2026-09-09
 
-The English visual scope in this report is complete. Integrated captures cover 15 required
+The prior closeout claimed the English visual scope complete; the date-placement exception
+above now supersedes that claim. Integrated captures cover 15 required
 surfaces at 1920x1080, 1366x768 and 3440x1440; the final Desk/date proof covers all nine
 RBiH/RS/HRHB by resolution cases at initial and maximum scroll. This supersedes the parent
 plan's earlier statement that 1366x768 and 3440x1440 were uninspected. It remains browser image

@@ -9,7 +9,25 @@
 **Tech stack:** JSON data, TypeScript/React i18n, Vitest, Electron visual/audio proof, Balkan Battlegrounds KB, IRMCT/UN sources, Web Audio/OGG assets.
 
 **Date:** 2026-07-31
-**Status:** ACTIVE CURRENT LANE — audio implementation landed at `2d106e5e0`; three-resolution browser English inspection is complete. Human audio/sensitivity, scoped packaged-offline proof, baseline acceptance and final closeout remain open; Phase 3 localization is deferred post-1.0.
+**Status:** ACTIVE CURRENT LANE — audio implementation landed at `2d106e5e0`; the owner's date-on-whiteboard correction is verified and locally committed at `ea33b23a5` with nine-case image review and complete UI/hook checks. Other recorded English checks retain their original scope. Human listening waits for owner inspection; audio/sensitivity, scoped packaged-offline proof, baseline acceptance and final closeout remain open. Phase 3 localization is deferred post-1.0.
+
+**Owner sequencing, 2026-09-09:** Human listening will occur when the owner inspects the game
+after it is acceptably good. Retain the listening checklist as pending inspection, not the next
+engineering task. The owner has scheduled the R8 B7/B5/B8/B1 usability repairs and subsequent
+three-faction 24-turn packaged shakedowns to improve that readiness. This does not waive audio,
+offline-runtime or baseline acceptance, close R7, or activate full campaigns.
+
+**Owner continuation, 2026-09-10:** the Inbox/Desk blocker and one replacement package are
+now authorized. Product `7d97b72fc` includes the reviewed whiteboard repair; the single
+replacement build and packaged Inbox route pass. Fresh RBiH reaches turn 24 but exits 1
+at final readability (opening/setup sizes and two status colours), before Save/load;
+unclassified local request cancellations and a final-sector warning also remain open.
+RS/HRHB are unlaunched. The [R8 plan](2026-07-31-full-campaign-electron-validation-plan.md)
+records all receipts and the proposed bounded follow-up. Earlier package receipts retain
+their original source identity, and human/audio/baseline gates remain open.
+The post-run replacement inventory also fails strict directory identity: all 1,200
+original files match, but runtime added one debug telemetry file. Its retained delta
+and required output-placement disposition are recorded in R8; no manifest refresh.
 
 ### Bounded closeout audit — authorized 2026-09-09
 
