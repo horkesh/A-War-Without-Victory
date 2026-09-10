@@ -1,3 +1,12 @@
+## 2026-09-09 - Measure the text clipping box and the final scroll position
+
+For UI readability proof, wait for fonts and entry animation, compare drawn text with its
+own clipping box rather than the outer card, and check masked scroll regions at maximum
+scroll. A label can fit its card while its inner overflow box clips it; a fade can signal
+scrolling while permanently obscuring the last citation. Keep failed geometry receipts and
+supersede them explicitly after a discriminating correction. R7's metric tracking and Codex
+bottom-padding corrections are recorded in the presentation/readability implementation report.
+
 ## 2026-08-30 - Converging operation axes must share one physical combat truth
 
 **An operation axis is a planning partition, not an independent battle.** When two live axes have the
@@ -1394,6 +1403,8 @@ An authored calendar window may make a historical notification eligible, but it 
 **Codex essay QA methodology (2026-03-25):** 83 essays audited through 3 complete passes with 5 specialized rounds each (historianÃ—4 parallel, operations expert, web/ICTY verification, war-or-game realism, geographic/directional). 24 corrections total. **Key lessons:** (1) First-pass "fixes" can introduce new errors â€” Stupni Do "Apostoli" was incorrectly removed, Sharp Guard predecessors were corrected wrong twice. Always verify fixes in a second pass. (2) Source hierarchy matters: ICTY verdicts > museum primary sources in local language > BB > English Wikipedia. The Sarajevo Tunnel Museum (Bosnian) says 29 January 1993 and 760m; Wikipedia says March and 800m; museum wins. (3) Web verification catches things BB and ICTY don't cover (Djukic fled vs died, Deliberate Force end date 20 Sep not 14 Sep). (4) Geographic/directional checks require map verification, not assumption ("sweeps west" from Bihac is impossible â€” west of Bihac is Croatia). (5) 13 essays in the index have no files â€” all 1992 foundation events. Essay index uses `essay_` prefix but files don't. (6) Parallel historian agents (4Ã—~21 essays) enable full-corpus audit in one session. (7) Tone/framing issues (Round 4) are editorial decisions, not factual errors â€” track separately for user direction.
 
 **Dynamic Codex architecture (2026-03-23):** The Codex is an unlockable encyclopedia that morphs with player decisions. Four essay layers: canonical (ICTY-sourced, immutable), dynamic (game-state paragraphs), divergence notes ("in the real war X, in yours Y"), ghost entries (events that never fired). Four tiers: FIXED (international scaffold, ~29), CONDITIONAL (binary fired/ghost, ~20), SHAPEABLE (dynamic paragraphs, ~33), AHISTORICAL (template-generated, ~14). Event dependency graph: 7 causal chains, Croat-Bosniak war is highest-degree hub (21 dependents). Essay template engine: `dynamic_sections[]` keyed by paragraph index + flag conditions, `ghost_when` for unfired events, `unlock_condition` for prologue vs event-triggered.
+
+**BC03 terminal-owner correction (2026-09-07):** The historical flag-wiring entry below does not authorize event-driven termination. Narrative signing must not replace the horizon Dayton negotiation: only its resolver records the result and freezes the verdict, cost ledger and historical comparison together. A persisted false flag is distinct from an absent key; repair the consuming event condition rather than redefining key-absence semantics globally. See the BC03 entry in [PROJECT_LEDGER](PROJECT_LEDGER.md).
 
 **Event flag wiring COMPLETE (2026-03-25):** All 25 orphan flags now consumed. Phase 4 wired 7 engine flag reads (arms_embargoâ†’supply, corridorâ†’RS aid, drina_cleansing/campsâ†’patron pressure, cohaâ†’combat suppress, daytonâ†’game over). Phase 5 wired 13 orphan flags as pressure modifiers and condition gates on downstream events. 7 endgame events converted FIXEDâ†’CONDITIONAL with pressure systems and requires_events chains. Full endgame chain: Srebrenica (pressure, gated on enclave_formed + demilitarized) â†’ Zepa (requires Srebrenica) â†’ Markale II (pressure, gated on siege + RRF) â†’ Deliberate Force (requires Markale II) â†’ Federation Offensive (requires Deliberate Force + Washington Agreement) â†’ Ceasefire (requires Fed Offensive) â†’ Dayton. **Key design principle**: pressure events accumulate readiness only when ALL prerequisites met (conditions + turn window + requires_events). The requires_events check in `updateEventReadiness()` prevents premature pressure accumulation. Orphan flags are now zero.
 
@@ -4983,6 +4994,14 @@ record byte-identical, proven by a 3-turn RS campaign with an identical sha256 e
 **Do not run that script expecting a no-op.** Reconciling it with the committed file is real,
 unscoped work; it has not been done.
 
+**2026-09-08 BC07 mode qualification:** the stability-copy path above is bypassed by
+`hybrid_1992` and `ethnic_1991`; the normal calibration/desktop startup therefore does
+not establish 227 stability effects. A paired 37/83 sentinel test proves mode-less
+initialization consumes the supplied value while both other modes initialize identical
+states. Preserve the committed values; regeneration remains a separate reviewed change.
+See the [BC07 disposition](plans/2026-07-31-full-campaign-electron-validation-plan.md#bc07-stability-data-disposition--2026-09-08)
+and [dated ledger](PROJECT_LEDGER.md#2026-09-08--bc09-integrated-bc07-retained-data-disposition).
+
 **Still true, unchanged:** do NOT regenerate `operational_settlements.geojson` to 712. The
 geojson keeps 744 by design — rewriting polygon geometry regenerates areas and the contact
 graph and moves calibration. The 32 are *drawn but not simulated*, and that asymmetry is the
@@ -5075,3 +5094,60 @@ control truth for the 23 kolovarice-shaped cells — a bounded Historian task, n
 a clean 712, and finishing the remaining micro-merge is documented separately as CLOSED. Spend it on
 **where the front sits and when the 1995 offensives fire** — see the Vlašić-axis defect, which is
 one visible, fixable instance of exactly that.
+
+
+## 2026-09-07 — Final calibration follows finite behavior settlement
+
+[Ledger decision](PROJECT_LEDGER.md#2026-09-07--finite-behavior-closure-registered-before-final-calibration-planning-only):
+use [MASTER_ROADMAP §4.1](plans/MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07)
+for known pre-freeze dispositions, within existing lanes. Administrative RE closure is not proof that
+all later player-path or event behavior is fixed. Headless parity cannot close player-action defects;
+serialized text changes do not themselves require a calibration re-floor. Keep diagnostic calibration
+open, accept final calibration after behavior settlement, and explicitly reopen affected evidence if
+later packaged play finds a behavior defect. Registration grants no repair authority and does not
+promote post-1.0 debt.
+
+
+## 2026-09-07 — Bounded verification is not an overall-green claim
+
+[BC08 receipt](40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md): retain the raw
+suite exit1 even when an unchanged focused file passes with corrected child-only shell selection.
+Skipped tests and absent transient fields remain coverage gaps. Matching canonical consumed-input
+hashes and unchanged source/runtime supports old-artifact gate reuse, not a fresh campaign claim.
+Keep current entrypoints synchronized while labeling dated failure counts as history; a retired
+assertion passing today does not prove its earlier numeric symptom was repaired. See the
+[2026-09-07 synchronization ledger](PROJECT_LEDGER.md#2026-09-07--entry-point-synchronization-before-bc01-docs-only).
+
+
+## 2026-09-07 - Verify the full renderer boundary and separate mechanism proof from endpoint acceptance
+
+BC01 tests initially proved an unused component; live inspection then exposed dropped owned proposals,
+and the documentation audit exposed a renderer catalog import. Verify raw main-process projection,
+adapter, actual mounted route and persisted state together. Enrich identity-only DTOs outside the
+renderer, never canonical saves, and test missing/ambiguous ownership. Restored launch channels and
+byte-identical canonical POST do not prove a player endpoint-convergence proxy: matched PRE/POST
+controls are necessary, and an unmet expectation stays explicit until owner disposition.
+See [BC01 verification](40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)
+and [dated ledger](PROJECT_LEDGER.md#2026-09-07---bc01-campaign-adjudication-and-implementation-documentation-active).
+
+- **2026-09-07 — Trace the receipt writer before interpreting a calendar helper (corrected by P2 trace).** In the canonical zero-start campaign, `runTurn` pre-increments N−1 to N and records the completed turn as `tN`; the corresponding runner `week_index` is N−1. The completed occurrence interval is `date(N−1)` through `date(N)−1 day`, while current-state headers show `date(N)`. Thus t171 closes 10–16 July and the advanced header shows 17 July; these labels do not require moving the historical event one week. The earlier helper-only diagnosis missed that lifecycle. This is a supported interpretation of the weekly pipeline, not a new persisted interval field. Use completed-week ranges for occurrence receipts, retain boundary dates for current headers, and preserve raw IDs, epoch and P1 turn 54. See [2026-09-07 BC04 reconciliation and review](PROJECT_LEDGER.md#2026-09-07---bc04-opened-for-n392-reconciliation-and-p1p2-planning-only).
+
+- **2026-09-07 — Settle build inputs before final acceptance.** Release-owned dependency and package corrections may need an explicit preparatory slot before campaign/UI acceptance, while freeze remains afterward. Validate the resulting source/lock/data identity; do not change a frozen artifact and reuse older proof. Keep input delivery separate from data-provenance policy so one closure cannot silently waive the other. See [audit integration](plans/MASTER_ROADMAP.md#42-repository-audit-integration-2026-09-07).
+
+- **2026-09-07 — A check wrapper can launch a campaign.** `npm run ci:structural-fingerprint:check` invokes `tools/diagnostics/ci_structural_fingerprint.cjs`, which runs a fresh 40-week scenario before comparing its fingerprint and clears `AWWV_S6_GRADE_RUN` for that diagnostic. Read wrapper entrypoints before selecting checks in a no-campaign task. Use existing receipts or focused semantic/unit checks; this wrapper requires campaign authorization and is not a static verifier. An unintended execution must be recorded, not relabeled as accepted calibration.
+
+- **2026-09-07 — Reconcile a dead-event claim against the accepted receipt before repairing its gate.** Six older runs failed Lukavac's 3/6 Trnovo threshold, but accepted n392 fires it at t70 with the unchanged gate. A temporal replay and decision receipt discharge the dead-gate premise; they do not prove that a municipal proxy substantiates every territorial claim in its narrative. Also distinguish the zero-based runner loop from persisted `weekly_report.week_index`: the latter is assigned `state.meta.turn`, so adding one corrupts receipt dates. See [BC05 reconciliation](plans/2026-07-31-full-campaign-electron-validation-plan.md#bc05-bounded-nato-repair-and-lukavac-disposition--2026-09-07) and the [dated ledger](PROJECT_LEDGER.md#2026-09-07---bc05-nato-window-repair-and-lukavac-reconciliation).
+
+- **2026-09-07 — A political event receipt is not military-operation execution.** Lukavac's political event fired at t70 while Operation Trnovo's AAR recorded zero attacks/captures during t69–79. Name the mechanism and inspect its own receipts before saying an operation "fires" or "works." The owner removed the duplicate event and explicitly kept operation/calibration work outside BC05; do not turn content removal into an operation repair. Preserve historical essays and old-save records without keeping the removed decision live. See [owner disposition](PROJECT_LEDGER.md#2026-09-07---bc05-owner-removes-the-duplicate-lukavac-event).
+
+- **2026-09-08 — Freeze a consolidated lock only after traversing the full dependency graph.** Workspace lock generation can preserve direct runtime versions while re-resolving transitive packages and Storybook tooling. A package-family filter missed `wgsl_reflect` drift and produced a false preservation claim; passing builds and live UI did not prevent a Vitest import failure. Compare the complete reachable graph against the prior production lock, retain intentional root-tooling splits, and have the reviewer confirm that comparison before expensive fresh-build proof. Record invalidated receipts explicitly. See [R9 Phase 1 corrections](plans/2026-09-07-r9-build-validation-preparation-plan.md#phase-1-validation-corrections--2026-09-08).
+
+## 2026-09-09 — Transformed text bounds do not prove painted visibility
+
+The R7 date-label probe reported clear glyph/card rectangles and adequate computed contrast,
+but actual screenshots showed no date. Its ancestor retained the original region `clipPath`:
+a child transform moved measured bounds outside that clipping polygon without freeing its paint.
+Inspect ancestor clipping and stacking, then confirm actual pixels at initial and maximum scroll.
+Keep false-green receipts and record their invalidation; do not replace image review with DOM
+presence, `getClientRects()` or theoretical color ratios. See the existing
+[R7 report](40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md).

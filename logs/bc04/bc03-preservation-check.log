@@ -1,0 +1,7 @@
+data/scenarios/events/war_1995.json	True
+src/sim/turn_pipeline.ts	True
+tests/event_conditions.test.ts	True
+tests/turn_pipeline.test.ts	True
+docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md	True
+docs/PROJECT_LEDGER_KNOWLEDGE.md	True
+.claude/scheduled_tasks.lock	True

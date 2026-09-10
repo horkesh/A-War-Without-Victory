@@ -142,11 +142,11 @@ describe('every vitest config surface stays in sync', () => {
         expect(sliceRunner).toContain('renderSetupFilesLine');
     });
 
-    it('keeps maplibre-gl and the deck.gl family in the shared list', () => {
-        // Named explicitly: these are the ones whose absence produced a silent,
-        // shard-dependent crash rather than a clear failure.
+    it('does not retain map and Deck aliases after workspace resolution is unified', () => {
         for (const pkg of ['maplibre-gl', '@deck.gl/core', '@deck.gl/extensions', '@deck.gl/layers', '@deck.gl/mapbox']) {
-            expect(VITEST_ALIASED_PACKAGES).toContain(pkg);
+            expect(VITEST_ALIASED_PACKAGES).not.toContain(pkg);
+            expect(rootConfig).not.toContain(`'${pkg}':`);
+            expect(generatedBalanced).not.toContain(`'${pkg}':`);
         }
     });
 

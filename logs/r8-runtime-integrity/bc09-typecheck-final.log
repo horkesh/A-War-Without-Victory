@@ -1,0 +1,8 @@
+
+> awwv@0.9.9-beta.1 typecheck
+> tsc --noEmit -p tsconfig.json
+
+tests/shared_turn_inputs_contract.test.ts(117,13): error TS2322: Type 'readonly [{ readonly id: "id"; readonly faction: "RBiH"; readonly name: "Name"; readonly home_mun: "mun-a"; readonly kind: "brigade"; readonly manpower_cost: 1; readonly capital_cost: 1; readonly default_equipment_class: "light"; readonly priority: 1; readonly mandatory: false; readonly available_from: 0; }]' is not assignable to type 'readonly OobBrigade[]'.
+  Type '{ readonly id: "id"; readonly faction: "RBiH"; readonly name: "Name"; readonly home_mun: "mun-a"; readonly kind: "brigade"; readonly manpower_cost: 1; readonly capital_cost: 1; readonly default_equipment_class: "light"; readonly priority: 1; readonly mandatory: false; readonly available_from: 0; }' is not assignable to type 'OobBrigade'.
+    Types of property 'default_equipment_class' are incompatible.
+      Type '"light"' is not assignable to type 'EquipmentClass'.

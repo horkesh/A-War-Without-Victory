@@ -118,14 +118,26 @@ interface RegistryRow {
 }
 
 async function loadRegistryMunIds(baseDir: string): Promise<Set<string>> {
-    const path = resolve(baseDir, 'data/source/municipalities_1990_registry_110.json');
-    const raw = JSON.parse(await readFile(path, 'utf8')) as { rows?: RegistryRow[] };
-    const rows = raw.rows ?? [];
-    const set = new Set<string>();
-    for (const row of rows) {
-        if (typeof row.mun1990_id === 'string') set.add(row.mun1990_id);
+    const relativePath = 'data/source/municipalities_1990_registry_110.json';
+    const path = resolve(baseDir, relativePath);
+    try {
+        const parsed: unknown = JSON.parse(await readFile(path, 'utf8'));
+        if (!isRecord(parsed) || !Array.isArray(parsed.rows) || parsed.rows.length === 0) {
+            throw new Error('expected { rows: non-empty array }');
+        }
+        const rows = parsed.rows as RegistryRow[];
+        const set = new Set<string>();
+        for (const [index, row] of rows.entries()) {
+            if (!isRecord(row) || typeof row.mun1990_id !== 'string' || row.mun1990_id.length === 0) {
+                throw new Error(`row ${index} requires a non-empty mun1990_id`);
+            }
+            set.add(row.mun1990_id);
+        }
+        return set;
+    } catch (error) {
+        const detail = error instanceof Error ? error.message : String(error);
+        throw new Error(`Invalid ${relativePath}: ${detail}`);
     }
-    return set;
 }
 
 // BATCH C §3.4: parseOobBrigadeComposition narrows `unknown` to a typed
@@ -359,10 +371,16 @@ export async function loadOobCorps(baseDir: string): Promise<OobCorps[]> {
 export async function loadMunicipalityHqSettlement(baseDir: string): Promise<Record<string, string>> {
     const path = resolve(baseDir, 'data/derived/municipality_hq_settlement.json');
     const raw: unknown = JSON.parse(await readFile(path, 'utf8'));
-    const byMun = isRecord(raw) && isRecord(raw.by_mun1990_id) ? raw.by_mun1990_id as Record<string, string> : {};
+    if (!isRecord(raw) || !isRecord(raw.by_mun1990_id) || Object.keys(raw.by_mun1990_id).length === 0) {
+        throw new Error('Invalid municipality_hq_settlement.json: expected { by_mun1990_id: non-empty record }');
+    }
+    const byMun = raw.by_mun1990_id;
     const result: Record<string, string> = {};
     for (const [k, v] of Object.entries(byMun)) {
-        if (typeof k === 'string' && typeof v === 'string') result[k] = v;
+        if (k.length === 0 || typeof v !== 'string' || v.length === 0) {
+            throw new Error(`Invalid municipality_hq_settlement.json entry for ${JSON.stringify(k)}: expected non-empty string key/value`);
+        }
+        result[k] = v;
     }
     return result;
 }

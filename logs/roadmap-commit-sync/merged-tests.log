@@ -1,0 +1,15 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/recruitment_engine.test.ts (34 tests) 25ms
+ ✓ tests/integration_event_system.test.ts (9 tests) 42ms
+ ✓ tests/docs_desktop_v09_truth.test.ts (7 tests) 27ms
+ ✓ tests/brigade_name_localization.test.ts (7 tests) 28ms
+ ✓ tests/standing_og_defense.test.ts (1 test) 4ms
+ ✓ tests/docs_truth_no_skip_guard.test.ts (2 tests) 7ms
+
+ Test Files  6 passed (6)
+      Tests  60 passed (60)
+   Start at  21:35:20
+   Duration  4.71s (transform 1.41s, setup 27ms, collect 2.11s, tests 133ms, environment 2ms, prepare 641ms)
+

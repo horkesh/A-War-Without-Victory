@@ -261,7 +261,7 @@ describe('Army HQ sector truth', () => {
     expect(copy).toMatch(/Morale:\s*Partial 70/i);
     expect(copy).toMatch(/Fatigue:\s*Partial 4/i);
     expect(copy).toMatch(/Personnel:\s*Partial 1\.2k/i);
-    expect(copy).toContain('Unreported');
+    expect(copy).toContain('No staff report');
     expect(copy).not.toMatch(/MOR\s*70\s*FAT\s*4\s*PERS\s*1\.2k/i);
   });
 
@@ -462,8 +462,53 @@ describe('Army HQ sector truth', () => {
     expect(container.textContent).toContain('1 on line');
     expect(container.textContent).toContain('1 command-directed');
     expect(container.textContent).toContain('density 0.25');
-    expect(container.textContent).toContain('Brigades per front segment: 0.25');
+    expect(container.textContent).not.toContain('Brigades per front segment: 0.25');
     expect(container.textContent).not.toContain('Troop density: 0.25');
+  });
+
+  it.each([
+    [1, false],
+    [2, true],
+  ])('shows a subsegment count only when operationally useful (%i)', (count, visible) => {
+    const sector = {
+      sector_id: 'sector:arbih_1st_corps:segments', display_name: 'Segmented front', faction: 'RBiH',
+      corps_id: 'arbih_1st_corps', assigned_brigade_ids: [], reserve_brigade_ids: [], rear_brigade_ids: [],
+      length_edges: 2, density: 0, combat_strength_class: 'thin', threat_ratio: 1,
+      intel_confidence: 0.8, offensive_signs: false,
+      sub_segments: Array.from({ length: count }, () => ({ friendly_osids: [], hostile_osids: [] })),
+    } as unknown as CorpsFrontSectorView;
+    useGameStore.setState({ loadedGameState: makeState(sector) });
+
+    const { container } = render(React.createElement(SectorsSection, {
+      corpsId: 'arbih_1st_corps', sectors: [sector], factionBattles: [], defaultOpen: true,
+    }));
+
+    expect(container.textContent?.includes(`Subsegments: ${count}`)).toBe(visible);
+  });
+
+  it('merges missing intel and a reported threat into one styled staff-status sentence', () => {
+    const sector = {
+      sector_id: 'sector:arbih_1st_corps:missing-intel', display_name: 'Unreported front', faction: 'RBiH',
+      corps_id: 'arbih_1st_corps', assigned_brigade_ids: [], reserve_brigade_ids: [], rear_brigade_ids: [],
+      length_edges: 1, density: 0, combat_strength_class: 'thin', sub_segments: [],
+      threat_ratio: 1, intel_confidence: null, offensive_signs: false,
+    } as unknown as CorpsFrontSectorView;
+    useGameStore.setState({ loadedGameState: makeState(sector) });
+
+    const { container } = render(React.createElement(SectorsSection, {
+      corpsId: 'arbih_1st_corps', sectors: [sector], factionBattles: [], defaultOpen: true,
+    }));
+    const sentence = Array.from(container.querySelectorAll('div')).find(
+      (node) => node.textContent === 'No staff report — Enemy picture unconfirmed.' && node.classList.contains('italic'),
+    );
+
+    expect(container.textContent?.match(/No staff report/g)).toHaveLength(1);
+    expect(sentence).toBeTruthy();
+    expect(sentence?.className).toContain('italic');
+    expect(sentence?.className).toContain('text-text-secondary');
+    expect(sentence?.className).not.toMatch(/text-text-secondary\//);
+    expect(sentence?.className).not.toContain('tabular-nums');
+    expect(sentence?.querySelector('span')?.className).toContain('lowercase');
   });
 
   it('does not count lifecycle-free projection overrides as command-directed line force', () => {

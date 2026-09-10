@@ -8,7 +8,6 @@
 
 import type { GameState, FactionId, CausalityLogEntry } from '../../state/game_state.js';
 import type { EdgeRecord } from '../../map/settlements.js';
-import { getEventRegistry } from './event_registry.js';
 import { applyEventEffects } from './apply_effects.js';
 import type { EventDefinition, DimensionShift, EventResponseOption, FiredEvent, PendingEventDecision, Rng } from './event_types.js';
 import { triggerMatches } from './event_types.js';
@@ -438,7 +437,7 @@ export function evaluateEvents(
     state: GameState,
     _rng: Rng,
     currentTurn: number,
-    registry?: EventDefinition[],
+    registry: EventDefinition[],
     edges?: EdgeRecord[]
 ): EventsEvaluationReport {
     const fired: FiredEvent[] = [];
@@ -455,7 +454,7 @@ export function evaluateEvents(
     const firedIds = state.military.fired_event_ids;
     const playerFaction = state.meta.player_faction;
 
-    const events = registry ?? getEventRegistry();
+    const events = registry;
     const canonicalEvents = [...events].sort(compareEventCandidates);
     const eventsById = new Map<string, EventDefinition>();
     for (const def of canonicalEvents) {
@@ -576,8 +575,8 @@ export function evaluateEvents(
     const cappedDecisions = decisionCandidates.slice(0, MAX_EVENTS_PER_TURN);
     const toFire = [...autoCandidates, ...cappedDecisions].sort(compareEventCandidates);
 
-    // Phase 3: Fire selected events
-    for (const def of toFire) {
+    // Phase 3: Fire selected events through one shared effect/receipt writer.
+    const fireEvent = (def: EventDefinition): void => {
         // Collect all effects and apply mechanical ones (primary + additional)
         const effects = collectEffects(def);
         applyEventEffects(state, effects);
@@ -800,11 +799,45 @@ export function evaluateEvents(
         if (def.pressure && state.military.event_readiness) {
             state.military.event_readiness[def.id] = 0;
         }
+    };
+
+    for (const def of toFire) {
+        fireEvent(def);
+    }
+
+    // One bounded post-primary snapshot lets explicitly opted-in automatic rows
+    // observe receipts and flags written above. The snapshot is collected in
+    // canonical order before any of its members fire, so it cannot recurse into
+    // a third level. Readiness is deliberately not updated here.
+    const primaryCandidateIds = new Set(candidates.map((def) => def.id));
+    const occupiedMutexGroups = new Set(
+        toFire.map((def) => def.mutex_group).filter((group): group is string => Boolean(group)),
+    );
+    const followUpSnapshot: EventDefinition[] = [];
+    for (const def of canonicalEvents) {
+        if (def.same_turn_requires_events !== true || primaryCandidateIds.has(def.id)) continue;
+        if (!isCandidateEligible(def, state, currentTurn, edges)) continue;
+        if (def.mutex_group && occupiedMutexGroups.has(def.mutex_group)) {
+            mutexFiltered.mutex_suppressed_ids.push(def.id);
+            recordCausality(state, {
+                turn: currentTurn,
+                from_event: def.id,
+                to_event: null,
+                to_flag: null,
+                kind: 'mutex_suppressed',
+            });
+            continue;
+        }
+        followUpSnapshot.push(def);
+        if (def.mutex_group) occupiedMutexGroups.add(def.mutex_group);
+    }
+    for (const def of followUpSnapshot) {
+        fireEvent(def);
     }
 
     return {
         fired,
-        candidates_considered: candidates.length,
+        candidates_considered: candidates.length + followUpSnapshot.length,
         overflowed: overflowedIds.length > 0,
         overflowed_ids: overflowedIds,
         mutex_suppressed_ids: mutexFiltered.mutex_suppressed_ids,

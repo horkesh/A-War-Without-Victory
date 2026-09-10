@@ -1,0 +1,8 @@
+[
+  "data/derived/municipality_population_1991.json",
+  "data/derived/census_rolled_up_wgs84.json",
+  "data/derived/settlement_ethnicity_data.json",
+  "data/derived/municipality_hq_settlement.json",
+  "data/source/oob_brigades.json",
+  "data/source/municipalities_1990_registry_110.json"
+]

@@ -1,0 +1,19 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/sim/events/event_taxonomy_report.test.ts (27 tests) 1041ms
+ ✓ tests/event_decisions.test.ts (33 tests) 142ms
+stdout | tests/triggered_operations.test.ts > checkTriggeredOperations > persists non-blocking validation warnings in watched-operation traces
+[op-validation] 1 issue(s) at injection: 0 error(s), 1 warning(s)
+  [WARN] Operation Kotor Varos [kotor_varos_siege]: brigade_ineligible — Brigade "rs_1st_kotor_varo_light_infantry" ineligible: kind="brigade", status="inactive"
+
+ ✓ tests/triggered_operations.test.ts (27 tests) 137ms
+ ✓ tests/sim/events/event_acceptance_report.test.ts (17 tests) 844ms
+ ✓ tests/sim/events/event_notification_content_backfill.test.ts (13 tests) 83ms
+ ✓ tests/pressure_system.test.ts (12 tests) 12ms
+ ✓ tests/ui/codex_response_atom.test.ts (7 tests) 30ms
+
+ Test Files  7 passed (7)
+      Tests  136 passed (136)
+   Start at  23:30:05
+   Duration  12.77s (transform 5.55s, setup 31ms, collect 7.61s, tests 2.29s, environment 2ms, prepare 749ms)

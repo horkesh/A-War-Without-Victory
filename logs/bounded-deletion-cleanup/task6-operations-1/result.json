@@ -1,0 +1,17 @@
+{
+  "mode": "operations",
+  "exe": "F:\\A-War-Without-Victory\\dist-packaged\\win-unpacked\\A War Without Victory.exe",
+  "profile": "F:\\A-War-Without-Victory\\dist-packaged\\task6-validation-evidence\\operations-1",
+  "fixtureSource": "F:\\A-War-Without-Victory\\logs\\bc06\\fixture-rs-1.json",
+  "fixtureSourceHash": "5c9d445a08a58fac3bd91bc5b94a99de8707419dd7d647d53e96e84cbd091021",
+  "fixtureHash": "dfcc9de40df3a9e9de974b91bd154764d6a777734e95725fa78257cf52bdfe2e",
+  "exeHash": "1d92189fa8d9cf8c0fc7f24e2a5e5f1a96f910c1881f4a539e8ec224e01d7edc",
+  "appAsarHash": "b0146bd47124439c3659420a7163dbd5bc2ffb8f304872268d43b7b22c782cfd",
+  "limits": [
+    "Isolated synthetic pending historical proposal; validates routes, not campaign timing or outcomes."
+  ],
+  "checks": [],
+  "diagnostics": [],
+  "status": "FAIL",
+  "error": "Error: Visible target absent: \"[data-testid=\\\"warroom-toolbar-command-surface\\\"]\"\n    at find (F:\\A-War-Without-Victory\\logs\\bounded-deletion-cleanup\\task6-packaged-routes.cjs:55:9)\n    at async click (F:\\A-War-Without-Victory\\logs\\bounded-deletion-cleanup\\task6-packaged-routes.cjs:58:17)\n    at async F:\\A-War-Without-Victory\\logs\\bounded-deletion-cleanup\\task6-packaged-routes.cjs:88:5"
+}

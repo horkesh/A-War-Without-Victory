@@ -1,0 +1,33 @@
+
+ RUN  v2.1.9 F:/AWWV-worktrees/bc09-shared-inputs
+
+ ❯ tests/shared_turn_inputs_contract.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/shared_turn_inputs_contract.test.ts [ tests/shared_turn_inputs_contract.test.ts ]
+Error: Transform failed with 1 error:
+F:/AWWV-worktrees/bc09-shared-inputs/src/scenario/turn_inputs.ts:205:97: ERROR: Expected ")" but found ";"
+  Plugin: vite:esbuild
+  File: F:/AWWV-worktrees/bc09-shared-inputs/src/scenario/turn_inputs.ts:205:97
+
+  Expected ")" but found ";"
+  203|      const relativePath = INPUT_PATHS.settlementDataRaw;
+  204|      try {
+  205|          const ethnicityData = await loadSettlementEthnicityData(join(join(baseDir, relativePath));
+     |                                                                                                   ^
+  206|          if (!isRecord(ethnicityData.by_settlement_id) || Object.keys(ethnicityData.by_settlement_id).length === 0) {
+  207|              throw new Error('expected non-empty by_settlement_id record');
+
+ ❯ failureErrorWithLog ../../A-War-Without-Victory/node_modules/vite/node_modules/esbuild/lib/main.js:1472:15
+ ❯ ../../A-War-Without-Victory/node_modules/vite/node_modules/esbuild/lib/main.js:755:50
+ ❯ responseCallbacks.<computed> ../../A-War-Without-Victory/node_modules/vite/node_modules/esbuild/lib/main.js:622:9
+ ❯ handleIncomingPacket ../../A-War-Without-Victory/node_modules/vite/node_modules/esbuild/lib/main.js:677:12
+ ❯ Socket.readFromStdout ../../A-War-Without-Victory/node_modules/vite/node_modules/esbuild/lib/main.js:600:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  06:56:03
+   Duration  897ms (transform 71ms, setup 22ms, collect 0ms, tests 0ms, environment 0ms, prepare 107ms)

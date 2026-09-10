@@ -1,0 +1,2 @@
+PASS: production sources/data unchanged; operational master matches integrated BC09 fingerprint.
+EXIT_CODE=0

@@ -1,0 +1,16 @@
+F:\AWWV-worktrees\bc09-shared-inputs\src\state\serializeGameState.ts:171
+        throw new Error(`serializeGameState: shape validation failed: ${result.errors.join('; ')}`);
+              ^
+
+Error: serializeGameState: shape validation failed: state.political.political_controllers must be a non-null object
+    at toSerializableGameStateInternal (F:\AWWV-worktrees\bc09-shared-inputs\src\state\serializeGameState.ts:171:15)
+    at toSerializableGameState (F:\AWWV-worktrees\bc09-shared-inputs\src\state\serializeGameState.ts:164:12)
+    at serializeGameState (F:\AWWV-worktrees\bc09-shared-inputs\src\state\serializeGameState.ts:197:26)
+    at serializePreparedState (F:\AWWV-worktrees\bc09-shared-inputs\src\state\serialize.ts:37:12)
+    at serializeState (F:\AWWV-worktrees\bc09-shared-inputs\src\state\serialize.ts:14:12)
+    at <anonymous> (F:\AWWV-worktrees\bc09-shared-inputs\logs\r8-runtime-integrity\prepare-live-fixture.ts:39:40)
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v22.23.2

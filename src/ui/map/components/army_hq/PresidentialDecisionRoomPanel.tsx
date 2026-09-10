@@ -87,7 +87,7 @@ function LensButton({
       data-testid={`decision-room-lens-${lens.id}`}
       aria-pressed={active}
       onClick={() => onSelect(lens.id)}
-      className={`flex h-9 min-w-[5.75rem] shrink-0 items-center justify-between gap-2 rounded border px-2 text-left transition ${active
+      className={`flex h-9 ${isAllLens ? 'min-w-[15rem]' : 'min-w-[5.75rem]'} shrink-0 items-center justify-between gap-2 rounded border px-2 text-left transition ${active
         ? 'border-amber-400/45 bg-amber-400/12 text-amber-200'
         : 'border-panel-border/55 bg-[#121820]/90 text-text-secondary hover:border-amber-400/25 hover:bg-white/[0.04]'}`}
     >
@@ -598,10 +598,8 @@ export function PresidentialDecisionRoomPanel({ onNavigateTarget, onInspectField
 
       {actionReceipt && (
         <div
-          role="status"
-          aria-live="polite"
           data-testid="decision-room-action-receipt"
-          className={`mb-2 rounded border px-3 py-2 text-xs font-semibold ${
+          className={`mb-2 flex items-start justify-between gap-3 rounded border px-3 py-2 text-xs font-semibold shadow-[inset_3px_0_0_rgba(251,191,36,0.38)] ${
             actionReceipt.kind === 'error'
               ? 'border-red-500/45 bg-red-500/10 text-red-200'
               : actionReceipt.kind === 'cancelled'
@@ -609,7 +607,16 @@ export function PresidentialDecisionRoomPanel({ onNavigateTarget, onInspectField
                 : 'border-emerald-400/40 bg-emerald-400/10 text-emerald-100'
           }`}
         >
-          {actionReceipt.message}
+          <span role="status" aria-live="polite">{actionReceipt.message}</span>
+          <button
+            type="button"
+            onClick={() => setActionReceipt(null)}
+            aria-label={t('common.close')}
+            title={t('common.close')}
+            className="shrink-0 border border-current/35 bg-black/15 px-2 py-1 text-xs font-bold uppercase tracking-[0.12em] opacity-80 transition-opacity hover:opacity-100"
+          >
+            {t('common.close')}
+          </button>
         </div>
       )}
 

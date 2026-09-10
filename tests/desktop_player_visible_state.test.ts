@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { advanceTurn, startNewCampaign } from '../src/desktop/desktop_sim.js';
+import { advanceTurn, startNewCampaign, getOpportunityOwnershipMetadata } from '../src/desktop/desktop_sim.js';
 import { parsePlayerVisibleWarroomState } from '../src/ui/warroom/data/player_visible_state_adapter.js';
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
 import { buildDecisionConsequenceLedger } from '../src/ui/map/data/decisionConsequenceLedger.js';
@@ -519,9 +519,9 @@ describe('desktop player-visible state projection', () => {
     const source = await readFile(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
 
     expect(source).toContain("require('./player_visible_state.cjs')");
-    expect(source).toContain('const playerVisibleStateJson = projectPlayerVisibleStateJson(stateJson);');
+    expect(source).toContain('const playerVisibleStateJson = projectPlayerVisibleStateJson(stateJson, undefined, getDesktopSim().getOpportunityOwnershipMetadata());');
     expect(source).toContain("registerIpcHandler('get-current-game-state', async () => projectCurrentGameStateForRenderer());");
-    expect(source).toContain('projectPlayerVisibleReplaySequenceJson(sequenceJson, getActivePlayerFaction())');
+    expect(source).toContain('projectPlayerVisibleReplaySequenceJson(sequenceJson, getActivePlayerFaction(), getDesktopSim().getOpportunityOwnershipMetadata())');
 
     const pullHandlers = source.match(/registerIpcHandler\('get-current-game-state',[^\n]+/g) ?? [];
     expect(pullHandlers).toEqual([
@@ -618,5 +618,68 @@ describe('desktop player-visible state projection', () => {
     expect(source).toContain('private syncContinueAvailability(): void');
     expect(applyBlock).toContain('this.syncContinueAvailability();');
     expect(menuBlock).toContain('this.syncContinueAvailability();');
+  });
+});
+
+
+describe('BC01 opportunity ownership projection', () => {
+  it('retains own approver proposals and only uniquely joined receipts without leaking opponents', () => {
+    const state: any = makeState();
+    state.military.operation_opportunities = [
+      { proposal_id: 'own', opportunity_id: 'own-op', approver_faction: 'RS' },
+      { proposal_id: 'enemy', opportunity_id: 'enemy-op', approver_faction: 'RBiH', secret: 'OPPONENT_SECRET' },
+      { proposal_id: 'collision', opportunity_id: 'ambiguous', approver_faction: 'RS' },
+      { proposal_id: 'collision', opportunity_id: 'ambiguous', approver_faction: 'RBiH' },
+    ];
+    state.military.operation_opportunity_resolutions = [
+      { proposal_id: 'own', opportunity_id: 'own-op', executed_op_name: 'Own launch' },
+      { proposal_id: 'enemy', opportunity_id: 'enemy-op', secret: 'OPPONENT_SECRET' },
+      { proposal_id: 'own', opportunity_id: 'enemy-op', secret: 'MISMATCH_SECRET' },
+      { proposal_id: 'unknown', opportunity_id: 'unknown', secret: 'UNKNOWN_SECRET' },
+      { proposal_id: '', opportunity_id: 'own-op', secret: 'UNKNOWN_SECRET' },
+      { proposal_id: 'own', secret: 'UNKNOWN_SECRET' },
+      { proposal_id: 'collision', opportunity_id: 'ambiguous', secret: 'AMBIGUOUS_SECRET' },
+    ];
+    const before = JSON.stringify(state);
+    const projected = loadProjector().projectPlayerVisibleState(state);
+    expect(projected.military.operation_opportunities.map((p: any) => p.proposal_id)).toEqual(['own', 'collision']);
+    expect(projected.military.operation_opportunity_resolutions).toEqual([state.military.operation_opportunity_resolutions[0]]);
+    expect(JSON.stringify(projected)).not.toMatch(/OPPONENT_SECRET|MISMATCH_SECRET|UNKNOWN_SECRET|AMBIGUOUS_SECRET/);
+    expect(JSON.stringify(state)).toBe(before);
+    expect(loadProjector().projectPlayerVisibleState(state)).toEqual(projected);
+  });
+});
+
+
+describe('BC01 renderer ownership metadata boundary', () => {
+  it('enriches only uniquely matched own DTOs without trusting or persisting a raw host', () => {
+    const source: any = makeState();
+    source.military.operation_opportunities = [{ proposal_id: 'own', opportunity_id: 'own-op', approver_faction: 'RS', primary_corps: 'forged' }];
+    const before = JSON.stringify(source);
+    const metadata = [{ opportunity_id: 'own-op', faction: 'RS', primary_corps: 'rs_corps' }];
+    const project = loadProjector().projectPlayerVisibleState as any;
+    expect(project(source, undefined, metadata).military.operation_opportunities[0].primary_corps).toBe('rs_corps');
+    expect(project(source).military.operation_opportunities[0].primary_corps).toBeUndefined();
+    expect(project(source, undefined, [...metadata, ...metadata]).military.operation_opportunities[0].primary_corps).toBeUndefined();
+    expect(project(source, undefined, [{ ...metadata[0], faction: 'RBiH' }]).military.operation_opportunities[0].primary_corps).toBeUndefined();
+    const jsonProjection = (loadProjector().projectPlayerVisibleStateJson as any)(JSON.stringify(source), undefined, metadata);
+    const replayProjection = (loadProjector().projectPlayerVisibleReplaySequenceJson as any)(JSON.stringify([source]), undefined, metadata);
+    expect(JSON.parse(jsonProjection)).toEqual(project(source, undefined, metadata));
+    expect(JSON.parse(replayProjection)).toEqual([JSON.parse(jsonProjection)]);
+    expect(JSON.stringify(source)).toBe(before);
+    expect(project(source, undefined, [{ ...metadata[0], opportunity_id: 'unknown' }]).military.operation_opportunities[0].primary_corps).toBeUndefined();
+    const exported = getOpportunityOwnershipMetadata();
+    expect(exported.length).toBeGreaterThan(0);
+    expect(exported.every(row => Object.keys(row).sort().join(',') === 'faction,opportunity_id,primary_corps'
+      && Object.values(row).every(value => typeof value === 'string'))).toBe(true);
+    expect(getOpportunityOwnershipMetadata()).toEqual(exported);
+  });
+  it('keeps simulation catalog imports outside the renderer adapter and wires every projection path', async () => {
+    const adapter = await readFile(join(process.cwd(), 'src/ui/map/data/operationOpportunityDossiers.ts'), 'utf8');
+    expect(adapter).not.toMatch(/from ['"].*sim\/combat/);
+    const main = await readFile(join(process.cwd(), 'src/desktop/electron-main.cjs'), 'utf8');
+    expect(main).toContain('projectPlayerVisibleStateJson(currentGameStateJson, undefined, getDesktopSim().getOpportunityOwnershipMetadata())');
+    expect(main).toContain('projectPlayerVisibleStateJson(stateJson, undefined, getDesktopSim().getOpportunityOwnershipMetadata())');
+    expect(main).toContain('projectPlayerVisibleReplaySequenceJson(sequenceJson, getActivePlayerFaction(), getDesktopSim().getOpportunityOwnershipMetadata())');
   });
 });

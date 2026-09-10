@@ -8,6 +8,7 @@ import assert from 'node:assert';
 import { test } from 'vitest';
 import { compareEventCandidates, evaluateEvents, filterMutexCandidates } from '../src/sim/events/evaluate_events.js';
 import { loadEventDefinitions } from '../src/sim/events/event_loader.js';
+import { resolveEventDecision } from '../src/sim/events/resolve_decision.js';
 import { updateEventReadiness } from '../src/sim/events/pressure_system.js';
 import type { EventDefinition, Rng } from '../src/sim/events/event_types.js';
 import { triggerMatches } from '../src/sim/events/event_types.js';
@@ -58,6 +59,23 @@ function seedEventReadiness(state: GameState, event: EventDefinition): void {
     assert.ok(event.pressure, `${event.id} should be a pressure-gated event`);
     state.military.event_readiness ??= {};
     state.military.event_readiness[event.id] = event.pressure.threshold;
+}
+
+function makeAhmiciState(turn: number): GameState {
+    const state = minimalState('war', turn);
+    state.military.fired_event_ids = ['croat_bosniak_war_begins_1993'];
+    state.military.event_flags = { hvo_arbih_tensions_rising: true };
+    state.military.negotiation = {
+        capital: {
+            HRHB: {
+                war_crimes_events: 0,
+                international_credibility: 50,
+            } as any,
+        },
+        patron_relationships: {},
+        peace_plan_history: [],
+    } as any;
+    return state;
 }
 
 function expectEventOwnedControl(
@@ -234,6 +252,14 @@ test('evaluateEvents: five eligible same-priority same-turn events fire four and
     assert.ok(!state.military.fired_event_ids?.includes('overflow_e'), 'overflowed event must not be tracked as fired');
 });
 
+test('evaluateEvents: explicit empty definitions produce no catalog events', () => {
+    const state = minimalState('war', 12);
+    const result = evaluateEvents(state, rejectRandomness, 12, []);
+
+    assert.deepStrictEqual(result.fired, []);
+    assert.deepStrictEqual(state.military.fired_event_ids, []);
+});
+
 test('evaluateEvents: auto/flag-setter events bypass the cap; only player-decision events overflow', () => {
     // Silent-drop regression guard: five auto events (no response_options) plus
     // five player-decision events all eligible on the same turn. ALL five autos
@@ -392,7 +418,7 @@ test('compareEventCandidates: loaded catalog preserves current stable priority-o
 test('evaluateEvents: Srebrenica and Zepa falls write event-owned control receipts without operations', () => {
     const srebrenica = loadedEventById('srebrenica_falls_1995');
     const zepa = loadedEventById('zepa_falls_1995');
-    const state = minimalState('war', 160);
+    const state = minimalState('war', 169);
     state.military.event_flags = {
         srebrenica_enclave_formed: true,
         srebrenica_demilitarized: true,
@@ -409,29 +435,29 @@ test('evaluateEvents: Srebrenica and Zepa falls write event-owned control receip
     const srebrenicaResult = evaluateEvents(
         state,
         rejectRandomness,
-        160,
+        169,
         [srebrenica, zepa],
     );
 
     assert.deepStrictEqual(srebrenicaResult.fired.map((event) => event.id), ['srebrenica_falls_1995']);
     assert.ok(state.military.fired_event_ids.includes('srebrenica_falls_1995'));
     assert.strictEqual(state.military.event_flags.srebrenica_fell, true);
-    expectEventOwnedControl(state, SREBRENICA_FALL_OSIDS, 160);
+    expectEventOwnedControl(state, SREBRENICA_FALL_OSIDS, 169);
     assert.strictEqual(state.military.corps_command, undefined);
     assert.strictEqual(state.operation_history, undefined);
 
-    state.meta.turn = 161;
+    state.meta.turn = 170;
     seedEventReadiness(state, zepa);
     const zepaResult = evaluateEvents(
         state,
         rejectRandomness,
-        161,
+        170,
         [srebrenica, zepa],
     );
 
     assert.deepStrictEqual(zepaResult.fired.map((event) => event.id), ['zepa_falls_1995']);
     assert.ok(state.military.fired_event_ids.includes('zepa_falls_1995'));
-    expectEventOwnedControl(state, ZEPA_FALL_OSIDS, 161);
+    expectEventOwnedControl(state, ZEPA_FALL_OSIDS, 170);
     assert.strictEqual(state.military.corps_command, undefined);
     assert.strictEqual(state.operation_history, undefined);
 });
@@ -673,6 +699,58 @@ test('explicitly dated spring 1993 events cannot surface before their first hist
     }
 });
 
+test('Ahmici fires from the HRHB Vitez basing cell at turn 54 and applies its direct effects once', () => {
+    const event = loadedEventById('ahmici_massacre_1993');
+
+    const beforeWindow = makeAhmiciState(53);
+    beforeWindow.political.political_controllers = {
+        'op:vitez:vitez_2': 'HRHB',
+        'op:vitez:kruscica': 'RBiH',
+        'op:vitez:preocica_3': 'RBiH',
+    };
+    assert.deepStrictEqual(evaluateEvents(beforeWindow, rejectRandomness, 53, [event]).fired, []);
+
+    const missingPrerequisite = makeAhmiciState(54);
+    missingPrerequisite.military.fired_event_ids = [];
+    missingPrerequisite.political.political_controllers = {
+        'op:vitez:vitez_2': 'HRHB',
+        'op:vitez:kruscica': 'RBiH',
+        'op:vitez:preocica_3': 'RBiH',
+    };
+    assert.deepStrictEqual(evaluateEvents(missingPrerequisite, rejectRandomness, 54, [event]).fired, []);
+
+    const eligible = makeAhmiciState(54);
+    eligible.political.political_controllers = {
+        'op:vitez:vitez_2': 'HRHB',
+        'op:vitez:kruscica': 'RBiH',
+        'op:vitez:preocica_3': 'RBiH',
+    };
+    assert.deepStrictEqual(
+        evaluateEvents(eligible, rejectRandomness, 54, [event]).fired.map((fired) => fired.id),
+        ['ahmici_massacre_1993'],
+    );
+    assert.strictEqual((eligible.military.negotiation as any).capital.HRHB.war_crimes_events, 3);
+    assert.strictEqual((eligible.military.negotiation as any).capital.HRHB.international_credibility, 25);
+
+    assert.deepStrictEqual(evaluateEvents(eligible, rejectRandomness, 55, [event]).fired, []);
+    assert.strictEqual((eligible.military.negotiation as any).capital.HRHB.war_crimes_events, 3);
+    assert.strictEqual((eligible.military.negotiation as any).capital.HRHB.international_credibility, 25);
+});
+
+test('Ahmici stays blocked when RBiH holds the Vitez basing cell despite HRHB control elsewhere in Vitez', () => {
+    const event = loadedEventById('ahmici_massacre_1993');
+    const state = makeAhmiciState(54);
+    state.political.political_controllers = {
+        'op:vitez:vitez_2': 'RBiH',
+        'op:vitez:kruscica': 'HRHB',
+        'op:vitez:preocica_3': 'HRHB',
+    };
+
+    assert.deepStrictEqual(evaluateEvents(state, rejectRandomness, 54, [event]).fired, []);
+    assert.strictEqual((state.military.negotiation as any).capital.HRHB.war_crimes_events, 0);
+    assert.strictEqual((state.military.negotiation as any).capital.HRHB.international_credibility, 50);
+});
+
 test('the general safe-areas card is the turn-57 Resolution 824 expansion, not a duplicate Resolution 819 card', () => {
     const event = loadedEventById('un_safe_areas_declared_1993');
 
@@ -812,4 +890,224 @@ test('triggerMatches: requires ALL listed events in requires_events (not just on
     };
     const result = evaluateEvents(state, rejectRandomness, 6, [dependent]);
     assert.ok(!result.fired.some(f => f.id === 'multi_dep_event'), 'should not fire with only one of two prerequisites');
+});
+
+test('evaluateEvents: an opted-in automatic dependent observes its parent receipt in the same turn', () => {
+    const state = minimalState('war', 10);
+    const parent: EventDefinition = {
+        id: 'same_turn_parent',
+        trigger: { turn_min: 10, turn_max: 10, phase: 'war' },
+        effect: { kind: 'narrative', text: 'parent' },
+        sets_flags: { same_turn_parent_fired: true },
+        once: true,
+    };
+    const child = {
+        id: 'same_turn_child',
+        trigger: {
+            turn_min: 10,
+            turn_max: 10,
+            phase: 'war',
+            requires_events: ['same_turn_parent'],
+            condition: { type: 'flag_equals', flag: 'same_turn_parent_fired', value: true },
+        },
+        effect: { kind: 'narrative', text: 'child' },
+        once: true,
+        same_turn_requires_events: true,
+    } as EventDefinition;
+
+    const result = evaluateEvents(state, rejectRandomness, 10, [child, parent]);
+
+    assert.deepStrictEqual(result.fired.map((event) => event.id), ['same_turn_parent', 'same_turn_child']);
+    assert.deepStrictEqual(state.military.fired_event_ids, ['same_turn_parent', 'same_turn_child']);
+    assert.strictEqual(state.military.event_fire_counts?.same_turn_child, 1);
+});
+
+test.each(['comply_withdraw_hwez', 'defy_ultimatum_hwez'] as const)(
+    'evaluateEvents: Markale, NATO %s, and the exclusion zone produce chronological receipts and effects',
+    (responseId) => {
+        const markale = loadedEventById('markale_massacre_1994');
+        const ultimatum = loadedEventById('nato_ultimatum_sarajevo_1994');
+        const exclusion = loadedEventById('sarajevo_exclusion_zone_1994');
+        const events = [markale, ultimatum, exclusion];
+        const state = minimalState('war', 96);
+        state.meta.player_faction = 'RS';
+        state.military.event_flags = { sarajevo_siege_active: true };
+        state.military.general_supply_reserve = { RBiH: 20, RS: 20, HRHB: 20 };
+        state.military.formations = {
+            rbih_brigade: {
+                id: 'rbih_brigade',
+                faction: 'RBiH',
+                status: 'active',
+                morale: 50,
+            } as any,
+        };
+        state.military.negotiation = {
+            strategic_dimensions: {
+                RBiH: {},
+                RS: {
+                    international_standing: { base_value: 50, event_modifier: 0 },
+                    patron_confidence: { base_value: 50, event_modifier: 0 },
+                    military_credibility: { base_value: 50, event_modifier: 0 },
+                },
+                HRHB: {},
+            },
+        } as any;
+
+        assert.deepStrictEqual(
+        evaluateEvents(state, rejectRandomness, 96, events).fired.map((event) => event.id),
+        ['markale_massacre_1994'],
+        );
+
+        state.meta.turn = 97;
+        assert.deepStrictEqual(
+        evaluateEvents(state, rejectRandomness, 97, events).fired.map((event) => event.id),
+        ['nato_ultimatum_sarajevo_1994'],
+        );
+        assert.strictEqual(state.military.pending_event_decisions?.[0]?.event_id, 'nato_ultimatum_sarajevo_1994');
+        resolveEventDecision(state, 'nato_ultimatum_sarajevo_1994', responseId);
+        assert.strictEqual(state.military.pending_event_decisions?.length, 0);
+        assert.deepStrictEqual(state.military.event_decision_log?.at(-1), {
+        event_id: 'nato_ultimatum_sarajevo_1994',
+        response_id: responseId,
+        decision_source: 'player',
+        faction: 'RS',
+        turn: 97,
+        });
+        assert.strictEqual(
+        state.military.event_flags?.[
+            responseId === 'comply_withdraw_hwez' ? 'sarajevo_hwez_complied' : 'sarajevo_hwez_defied'
+        ],
+        true,
+        );
+        const rsDimensions = state.military.negotiation?.strategic_dimensions?.RS as any;
+        assert.strictEqual(
+        rsDimensions.international_standing.event_modifier,
+        responseId === 'comply_withdraw_hwez' ? 8 : -12,
+        );
+        assert.strictEqual(
+        rsDimensions.patron_confidence.event_modifier,
+        responseId === 'comply_withdraw_hwez' ? -5 : 4,
+        );
+        assert.strictEqual(
+        rsDimensions.military_credibility.event_modifier,
+        responseId === 'comply_withdraw_hwez' ? -4 : 5,
+        );
+
+        state.meta.turn = 98;
+        assert.deepStrictEqual(
+        evaluateEvents(state, rejectRandomness, 98, events).fired.map((event) => event.id),
+        ['sarajevo_exclusion_zone_1994'],
+        );
+        assert.deepStrictEqual(state.military.fired_event_ids, [
+        'markale_massacre_1994',
+        'nato_ultimatum_sarajevo_1994',
+        'sarajevo_exclusion_zone_1994',
+        ]);
+        assert.strictEqual(state.military.general_supply_reserve.RS, 15);
+        assert.strictEqual(state.military.formations.rbih_brigade?.morale, 55);
+        assert.deepStrictEqual(state.military.event_aggression_modifiers, [
+        { faction: 'RS', delta: -0.1, expires_turn: 110 },
+        ]);
+    },
+);
+
+test('evaluateEvents: extending the NATO window does not bypass the Sarajevo siege condition', () => {
+    const ultimatum = loadedEventById('nato_ultimatum_sarajevo_1994');
+    const state = minimalState('war', 97);
+    state.military.fired_event_ids = ['markale_massacre_1994'];
+
+    assert.deepStrictEqual(evaluateEvents(state, rejectRandomness, 97, [ultimatum]).fired, []);
+    assert.deepStrictEqual(state.military.fired_event_ids, ['markale_massacre_1994']);
+});
+
+test('evaluateEvents: a non-opted exact-window prerequisite remains unavailable after its parent fires', () => {
+    const state = minimalState('war', 10);
+    const parent: EventDefinition = {
+        id: 'ordinary_parent',
+        trigger: { turn_min: 10, turn_max: 10, phase: 'war' },
+        effect: { kind: 'narrative', text: 'parent' },
+        once: true,
+    };
+    const child: EventDefinition = {
+        id: 'ordinary_child',
+        trigger: { turn_min: 10, turn_max: 10, phase: 'war', requires_events: ['ordinary_parent'] },
+        effect: { kind: 'narrative', text: 'child' },
+        once: true,
+    };
+
+    assert.deepStrictEqual(
+        evaluateEvents(state, rejectRandomness, 10, [child, parent]).fired.map((event) => event.id),
+        ['ordinary_parent'],
+    );
+    state.meta.turn = 11;
+    assert.deepStrictEqual(evaluateEvents(state, rejectRandomness, 11, [child, parent]).fired, []);
+});
+
+test('evaluateEvents: an opted-in child stays inert when its required parent receipt is absent', () => {
+    const state = minimalState('war', 10);
+    const child: EventDefinition = {
+        id: 'missing_parent_child',
+        trigger: {
+            turn_min: 10,
+            turn_max: 10,
+            phase: 'war',
+            requires_events: ['missing_parent'],
+        },
+        effect: { kind: 'narrative', text: 'must remain inert' },
+        sets_flags: { missing_parent_child_effect: true },
+        once: true,
+        same_turn_requires_events: true,
+    };
+
+    const result = evaluateEvents(state, rejectRandomness, 10, [child]);
+
+    assert.deepStrictEqual(result.fired, []);
+    assert.deepStrictEqual(state.military.fired_event_ids, []);
+    assert.strictEqual(state.military.event_flags?.missing_parent_child_effect, undefined);
+    assert.strictEqual(state.military.event_fire_counts?.missing_parent_child, undefined);
+});
+
+test('evaluateEvents: the post-primary wave is one canonical snapshot without third-level cascading', () => {
+    const state = minimalState('war', 12);
+    const defs = [
+        {
+            id: 'snapshot_parent',
+            trigger: { turn_min: 12, phase: 'war' },
+            effect: { kind: 'narrative', text: 'parent' },
+            once: true,
+        },
+        {
+            id: 'snapshot_child_b',
+            priority: 20,
+            trigger: { turn_min: 12, phase: 'war', requires_events: ['snapshot_parent'] },
+            effect: { kind: 'narrative', text: 'child b' },
+            once: true,
+            same_turn_requires_events: true,
+        },
+        {
+            id: 'snapshot_child_a',
+            priority: 10,
+            trigger: { turn_min: 12, phase: 'war', requires_events: ['snapshot_parent'] },
+            effect: { kind: 'narrative', text: 'child a' },
+            once: true,
+            same_turn_requires_events: true,
+        },
+        {
+            id: 'snapshot_grandchild',
+            trigger: { turn_min: 12, phase: 'war', requires_events: ['snapshot_child_a'] },
+            effect: { kind: 'narrative', text: 'grandchild' },
+            once: true,
+            same_turn_requires_events: true,
+        },
+    ] as EventDefinition[];
+
+    const result = evaluateEvents(state, rejectRandomness, 12, defs.reverse());
+
+    assert.deepStrictEqual(
+        result.fired.map((event) => event.id),
+        ['snapshot_parent', 'snapshot_child_a', 'snapshot_child_b'],
+    );
+    assert.strictEqual(state.military.event_fire_counts?.snapshot_child_a, 1);
+    assert.strictEqual(state.military.event_fire_counts?.snapshot_child_b, 1);
+    assert.strictEqual(state.military.event_fire_counts?.snapshot_grandchild, undefined);
 });

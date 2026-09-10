@@ -158,6 +158,6 @@ describe('command strain i18n boundary', () => {
 
         const copy = view.container.textContent ?? '';
         expect(copy).toContain('Situation Assessment');
-        expect(copy).toContain('Unreported');
+        expect(copy).toContain('No staff report');
     });
 });

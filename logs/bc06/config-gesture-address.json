@@ -1,0 +1,189 @@
+{
+  "reviewed": true,
+  "caseId": "live-address-final-01",
+  "fixture": "F:\\A-War-Without-Victory\\logs\\bc06\\fixture-gesture-address.json",
+  "loadSteps": [
+    {
+      "buttonName": "Assume responsibility"
+    },
+    {
+      "buttonName": "Field Records"
+    },
+    {
+      "buttonName": "Resume bc06-proof-fixture"
+    }
+  ],
+  "before": [
+    {
+      "path": [
+        "meta",
+        "turn"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    }
+  ],
+  "steps": [
+    {
+      "selector": "[data-testid=\"toolbar-route-desk\"]",
+      "frameUrlIncludes": "http"
+    },
+    {
+      "buttonRegex": "^Command surface$"
+    },
+    {
+      "buttonRegex": "Command & Personnel"
+    },
+    {
+      "selector": "[data-testid=\"decision-room-priority-card-command:address-nation\"] button",
+      "buttonRegex": "^Dossier$"
+    },
+    {
+      "buttonRegex": "^Issue \\(10\\)$"
+    },
+    {
+      "selector": "[data-testid=\"event-decision-response\"][aria-label=\"Choose response: A defiant address — we will not yield\"]"
+    }
+  ],
+  "after": [
+    {
+      "path": [
+        "military",
+        "command_authority",
+        "current"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "event_fire_counts",
+        "address_to_nation_rbih"
+      ],
+      "equals": 1
+    },
+    {
+      "path": [
+        "military",
+        "event_last_fired_turn",
+        "address_to_nation_rbih"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    },
+    {
+      "path": [
+        "military",
+        "event_decision_log"
+      ],
+      "equals": [
+        {
+          "event_id": "address_to_nation_rbih",
+          "response_id": "address_defiance_rbih",
+          "decision_source": "player",
+          "faction": "RBiH",
+          "turn": 90
+        }
+      ]
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "arbih_101st_mountain",
+        "morale"
+      ],
+      "equals": 56
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "arbih_101st_mountain",
+        "cohesion"
+      ],
+      "equals": 53
+    }
+  ],
+  "persisted": [
+    {
+      "path": [
+        "military",
+        "command_authority",
+        "current"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "event_fire_counts",
+        "address_to_nation_rbih"
+      ],
+      "equals": 1
+    },
+    {
+      "path": [
+        "military",
+        "event_last_fired_turn",
+        "address_to_nation_rbih"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    },
+    {
+      "path": [
+        "military",
+        "event_decision_log"
+      ],
+      "equals": [
+        {
+          "event_id": "address_to_nation_rbih",
+          "response_id": "address_defiance_rbih",
+          "decision_source": "player",
+          "faction": "RBiH",
+          "turn": 90
+        }
+      ]
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "arbih_101st_mountain",
+        "morale"
+      ],
+      "equals": 56
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "arbih_101st_mountain",
+        "cohesion"
+      ],
+      "equals": 53
+    }
+  ],
+  "expectsMutation": true,
+  "repeatAction": "initiateAddressNation",
+  "repeatReason": "on_cooldown"
+}

@@ -95,8 +95,8 @@ describe('BCS brigade name localizations', () => {
     expect(getLocalizedFormationName({
       id: 'arbih_503rd_slavna_mountain',
       kind: 'brigade',
-      name: '503rd Slavna Mountain',
-    }, 'bcs')).toBe('503. slavna brdska brigada');
+      name: '503rd Mountain',
+    }, 'bcs')).toBe('503. brdska brigada');
     expect(getLocalizedFormationName({
       id: 'rs_5th_kozara_light_infantry',
       kind: 'brigade',
@@ -115,7 +115,7 @@ describe('BCS brigade name localizations', () => {
   });
 
   test('exposes canonical designation codes and unit types for UI logic', () => {
-    expect(getFormationDesignation('arbih_503rd_slavna_mountain')?.designation_code).toBe('AWWV-BDE-ARBIH-503RD-SLAVNA-MOUNTAIN');
+    expect(getFormationDesignation('arbih_503rd_slavna_mountain')?.designation_code).toBe('AWWV-BDE-ARBIH-503RD-MOUNTAIN');
     expect(getFormationDesignation('rs_skelani_battalion')?.echelon).toBe('battalion');
     expect(getFormationUnitType({
       id: 'rs_1st_sarajevo_mechanized',

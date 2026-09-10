@@ -65,6 +65,7 @@ export const DIRECTIVE_LEVER_TO_ACT_ID: Readonly<Record<DirectiveLever, string>>
   // so the runtime image is unchanged while the wiring is correct.
   address_nation: 'act_address_nation',
   decorate_unit: 'act_decorate_unit',
+  strategic_posture_review: 'act_front_visit',
 };
 
 /**

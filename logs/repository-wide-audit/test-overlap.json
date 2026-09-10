@@ -1,0 +1,9 @@
+{
+  "full": 1348,
+  "fast": 1316,
+  "scenario": 32,
+  "nonVitest": 0,
+  "eventWorkflowExecutableTestFiles": 27,
+  "alreadyInFull": 27,
+  "notInFull": []
+}

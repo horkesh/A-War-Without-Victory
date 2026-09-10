@@ -1,0 +1,55 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ❯ tests/event_conditions.test.ts (16 tests | 1 failed) 39ms
+   × event condition evaluation > narrates Dayton signing only after RBiH accepts the talks 12ms
+     → expected undefined to deeply equal { type: 'flag_equals', …(2) }
+ ❯ tests/turn_pipeline.test.ts (4 tests | 1 failed) 9324ms
+   ✓ runTurn determinism > is deterministic for same state and seed 1208ms
+   ✓ runTurn determinism > does not let the narrated Dayton signing flag preempt the negotiation owner 333ms
+   ✓ runTurn determinism > plays the narrated ceasefire chain before opening and resolving the horizon negotiation 5372ms
+   × runTurn determinism > preserves the horizon negotiation when the player rejects the narrated talks 2410ms
+     → expected [ 'dayton_signed_1995' ] to not include 'dayton_signed_1995'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/event_conditions.test.ts > event condition evaluation > narrates Dayton signing only after RBiH accepts the talks
+AssertionError: expected undefined to deeply equal { type: 'flag_equals', …(2) }
+
+- Expected: 
+Object {
+  "flag": "rbih_dayton_acceptance",
+  "type": "flag_equals",
+  "value": "accept",
+}
+
++ Received: 
+undefined
+
+ ❯ tests/event_conditions.test.ts:198:43
+    196|         const event = catalog.find((entry) => entry.id === 'dayton_sig…
+    197| 
+    198|         expect(event?.trigger?.condition).toEqual({
+       |                                           ^
+    199|             type: 'flag_equals',
+    200|             flag: 'rbih_dayton_acceptance',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/turn_pipeline.test.ts > runTurn determinism > preserves the horizon negotiation when the player rejects the narrated talks
+AssertionError: expected [ 'dayton_signed_1995' ] to not include 'dayton_signed_1995'
+ ❯ tests/turn_pipeline.test.ts:196:37
+    194| 
+    195|     expect(state.military.event_flags?.rbih_dayton_acceptance).toBe('h…
+    196|     expect(firedAfterRejection).not.toContain('dayton_signed_1995');
+       |                                     ^
+    197|     expect(state.military.event_flags?.dayton_signed).not.toBe(true);
+    198|     expect(state.meta.game_over).not.toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  2 failed (2)
+      Tests  2 failed | 18 passed (20)
+   Start at  16:17:02
+   Duration  18.70s (transform 6.28s, setup 24ms, collect 8.00s, tests 9.36s, environment 1ms, prepare 267ms)
+

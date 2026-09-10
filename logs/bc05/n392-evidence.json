@@ -1,0 +1,116 @@
+{
+  "run": "runs/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n392",
+  "provenance": {
+    "git_commit": "c2f6592ec1e2f049d93ade595760c19633bb2ce7",
+    "git_dirty": false,
+    "node_version": "v22.23.2",
+    "consumed_catalog_sha256": "b040fb533dcf61b6ee6d32ecf61e52f3283fffb71b553c4def65047d646662af"
+  },
+  "current_lukavac_row_matches_accepted_source": true,
+  "receipts": [
+    {
+      "id": "operation_lukavac_93",
+      "week_index": 70,
+      "receipt_turn": 70
+    },
+    {
+      "id": "markale_massacre_1994",
+      "week_index": 96,
+      "receipt_turn": 96
+    },
+    {
+      "id": "rbih_nato_ultimatum_compliance_1994",
+      "week_index": 97,
+      "receipt_turn": 97
+    }
+  ],
+  "decisions": [
+    {
+      "decision_source": "bot_ai_default",
+      "event_id": "operation_lukavac_93",
+      "faction": "RS",
+      "response_id": "comply",
+      "turn": 70
+    },
+    {
+      "decision_source": "bot_ai_default",
+      "event_id": "rbih_nato_ultimatum_compliance_1994",
+      "faction": "RBiH",
+      "response_id": "rbih_comply_hwez_regime",
+      "turn": 97
+    }
+  ],
+  "absent": [
+    "nato_ultimatum_sarajevo_1994",
+    "sarajevo_exclusion_zone_1994"
+  ],
+  "trnovo_control_events": [
+    {
+      "attacker_brigade": "rs_1st_romanija_infantry",
+      "battle_id": "25:op:trnovo:kijevo_2:rs_1st_romanija_infantry:arbih_4th_muslim_light",
+      "from": "RBiH",
+      "mechanism": "combat",
+      "mun_id": "trnovo",
+      "settlement_id": "op:trnovo:kijevo_2",
+      "to": "RS",
+      "turn": 25,
+      "index": 113
+    }
+  ],
+  "windows": [
+    {
+      "turn": 68,
+      "controllers": {
+        "op:trnovo:delijas": "RBiH",
+        "op:trnovo:gornja_presjenica": "RS",
+        "op:trnovo:kijevo_2": "RS",
+        "op:trnovo:tosici": "RS",
+        "op:trnovo:trnovo": "RBiH",
+        "op:trnovo:tusila": "RBiH"
+      },
+      "rs_count": 3,
+      "total": 6
+    },
+    {
+      "turn": 69,
+      "controllers": {
+        "op:trnovo:delijas": "RBiH",
+        "op:trnovo:gornja_presjenica": "RS",
+        "op:trnovo:kijevo_2": "RS",
+        "op:trnovo:tosici": "RS",
+        "op:trnovo:trnovo": "RBiH",
+        "op:trnovo:tusila": "RBiH"
+      },
+      "rs_count": 3,
+      "total": 6
+    },
+    {
+      "turn": 70,
+      "controllers": {
+        "op:trnovo:delijas": "RBiH",
+        "op:trnovo:gornja_presjenica": "RS",
+        "op:trnovo:kijevo_2": "RS",
+        "op:trnovo:tosici": "RS",
+        "op:trnovo:trnovo": "RBiH",
+        "op:trnovo:tusila": "RBiH"
+      },
+      "rs_count": 3,
+      "total": 6
+    },
+    {
+      "turn": 71,
+      "controllers": {
+        "op:trnovo:delijas": "RBiH",
+        "op:trnovo:gornja_presjenica": "RS",
+        "op:trnovo:kijevo_2": "RS",
+        "op:trnovo:tosici": "RS",
+        "op:trnovo:trnovo": "RBiH",
+        "op:trnovo:tusila": "RBiH"
+      },
+      "rs_count": 3,
+      "total": 6
+    }
+  ],
+  "siege_flag": true,
+  "caveat": "Read-only accepted artifact. t68 adds pre-event boundary; no Trnovo flip within t69-71, so phase-order ambiguity cannot change its gate. Persisted weekly_report.week_index equals state.meta.turn (scenario_reporting.ts), unlike the zero-based runner loop index. Final flag alone does not prove historical window flag value."
+}

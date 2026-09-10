@@ -77,7 +77,7 @@ describe('PresidentialDecisionRoom supply visibility card', () => {
     const card = view.cards.find((card) => card.id === 'supply:player-visibility');
     expect(card).toBeDefined();
     expect(card!.severity).toBe('warning');
-    expect(card!.evidence.join(' ')).toContain('Unreported');
+    expect(card!.evidence.join(' ')).toContain('No staff report');
     expect(card!.evidence.join(' ')).toContain('1 strained');
   });
 

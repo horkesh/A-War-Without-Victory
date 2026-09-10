@@ -136,7 +136,7 @@ describe('buildPlayerSupplyVisibility', () => {
     expect(view!.severity).toBe('warning');
     expect(view!.corridorAtRisk).toBe(true);
     expect(view!.corridorBrittleCount).toBe(1);
-    expect(view!.evidence.join(' ')).toContain('Unreported');
+    expect(view!.evidence.join(' ')).toContain('No staff report');
     expect(view!.evidence.join(' ')).toContain('1 strained');
     expect(view!.evidence.join(' ')).not.toContain('0 adequate');
     expect(view!.evidence.join(' ')).not.toContain('0 cut');

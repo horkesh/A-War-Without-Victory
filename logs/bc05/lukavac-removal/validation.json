@@ -1,0 +1,113 @@
+{
+  "head": "0690a47eacb133631f32324681c8eb5343afc03a",
+  "source_frozen": true,
+  "runs": [
+    {
+      "name": "red_event_absence",
+      "command": "node node_modules/vitest/vitest.mjs run tests/sim/events/event_acceptance_report.test.ts",
+      "exit": 1,
+      "test_files": {
+        "passed": 0,
+        "failed": 1
+      },
+      "tests": {
+        "passed": 16,
+        "failed": 1
+      },
+      "duration_seconds": 1.86,
+      "log": "logs/bc05/lukavac-removal/red-event-absence.log",
+      "expected_failure": "operation_lukavac_93 was still present before the production removal"
+    },
+    {
+      "name": "affected_green",
+      "command": "node node_modules/vitest/vitest.mjs run tests/event_decisions.test.ts tests/pressure_system.test.ts tests/sim/events/event_acceptance_report.test.ts tests/sim/events/event_taxonomy_report.test.ts tests/sim/events/event_notification_content_backfill.test.ts tests/ui/codex_response_atom.test.ts tests/triggered_operations.test.ts",
+      "exit": 0,
+      "test_files": {
+        "passed": 7,
+        "failed": 0
+      },
+      "tests": {
+        "passed": 136,
+        "failed": 0
+      },
+      "duration_seconds": 12.77,
+      "log": "logs/bc05/lukavac-removal/green-affected-tests.log"
+    },
+    {
+      "name": "announced_focused_initial",
+      "command": "node node_modules/vitest/vitest.mjs run tests/event_decisions.test.ts tests/pressure_system.test.ts tests/sim/events/event_acceptance_report.test.ts tests/sim/events/event_taxonomy_report.test.ts tests/sim/events/event_notification_content_backfill.test.ts tests/event_loader.test.ts tests/event_timeline_integrity.test.ts tests/events_evaluate.test.ts tests/codex_sensitive_claim_inventory.test.ts tests/essay_index_integrity.test.ts tests/ui/codex_response_atom.test.ts tests/triggered_operations.test.ts",
+      "exit": 1,
+      "test_files": {
+        "passed": 10,
+        "failed": 2
+      },
+      "tests": {
+        "passed": 287,
+        "failed": 2
+      },
+      "duration_seconds": 60.51,
+      "log": "logs/bc05/lukavac-removal/final-focused-tests.log",
+      "failures": [
+        "stale total event count expected 159 instead of 158",
+        "safe factual correction inventory still expected the rewritten NATO essay in that risk class"
+      ]
+    },
+    {
+      "name": "targeted_correction",
+      "command": "node node_modules/vitest/vitest.mjs run tests/codex_sensitive_claim_inventory.test.ts tests/event_timeline_integrity.test.ts",
+      "exit": 0,
+      "test_files": {
+        "passed": 2,
+        "failed": 0
+      },
+      "tests": {
+        "passed": 52,
+        "failed": 0
+      },
+      "duration_seconds": 44.04,
+      "log": "logs/bc05/lukavac-removal/correction-tests.log"
+    },
+    {
+      "name": "accepted_focused_union",
+      "status": "passed",
+      "test_files": 12,
+      "tests": 289,
+      "basis": "10 unchanged passing files from announced_focused_initial plus both corrected files from targeted_correction; owner directed no duplicate rerun"
+    },
+    {
+      "name": "typecheck",
+      "command": "node node_modules/typescript/bin/tsc --noEmit -p tsconfig.json",
+      "exit": 0,
+      "log": "logs/bc05/lukavac-removal/typecheck.log"
+    },
+    {
+      "name": "scope",
+      "command": "node logs/bc05/lukavac-removal/verify-scope.cjs",
+      "exit": 0,
+      "checks_passed": 13,
+      "log": "logs/bc05/lukavac-removal/scope.log"
+    },
+    {
+      "name": "diff_check",
+      "command": "git diff --check",
+      "exit": 0,
+      "log": "logs/bc05/lukavac-removal/diff-check.log"
+    }
+  ],
+  "sha256": {
+    "data/scenarios/events/war_1993.json": "76e3ef7be42931de77ac1cce01fed1f58b85fc0c9fedaf3622dcaa917932772e",
+    "data/scenarios/essays/operation_lukavac_93.json": "e4ef427ef1e7c6f3904945283e91ef5174a88385c27f6197c5983d8721d15389",
+    "data/scenarios/essays/nato_air_strike_threat_1993.json": "428d242243e173ce563d4e644b77d160ceb3d059b76d80ffce1179106909271e",
+    "data/scenarios/essays/essay_index.json": "88ab81c88d59a5088fb4cded9e92bd15bfee0f34e533e6b5d632de89a6d91198",
+    "tests/event_decisions.test.ts": "7d94c559663a3115f474fbd40b5f92536db1764446c8930a3f1db9f24deb8573",
+    "tests/pressure_system.test.ts": "7ecac5c9efdfe8bd46c873bf1a793f27cb89ecf6c15fd1ea8c0fc6ab618d2d24",
+    "tests/sim/events/event_acceptance_report.test.ts": "3463a3587bb40073498b486a5245e73f60fb7e8e0caaa44ab6cb3b96646b5994",
+    "tests/sim/events/event_taxonomy_report.test.ts": "422f14c73c945ad8e9812af9a0a30b983dffdb5f2d72f59996f925485ada94e5",
+    "tests/sim/events/event_notification_content_backfill.test.ts": "6423f6c62ec6c71bc4f4877584dda810976de2992e93d6a95d57d453d15a4e52",
+    "tests/codex_sensitive_claim_inventory.test.ts": "da78bbd1082c84c43be1f2a2a72ed0d498f2b26bd31bd1a020db22fd10f89e9d",
+    "tests/event_timeline_integrity.test.ts": "732f4da29cfe6b5195cbe4fc6448597a81c78e6154cb16c18587349dd26fcc6b",
+    "tests/ui/codex_response_atom.test.ts": "c486a931dcceb1408ebaf7aaf0cc30371db8844a033b2f65b8191f0ad0696666",
+    "tests/triggered_operations.test.ts": "a9aa3541262aacd78288d7f1318c83e5845b580453da07afe34e45497e10c002"
+  },
+  "log_storage": "Tracked logs normalize trailing whitespace and terminal blank lines only; original outputs remain in local .raw.log files. Outcomes, counts and text unchanged."
+}

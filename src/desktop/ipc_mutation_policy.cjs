@@ -41,6 +41,7 @@ const READ_ONLY_IPC_CHANNELS = new Set([
   'get-front-visit-availability',
   'get-address-nation-availability',
   'get-decorate-unit-availability',
+  'get-strategic-posture-review-availability',
   'get-settings',
   'save-settings',
   'preview-dayton',

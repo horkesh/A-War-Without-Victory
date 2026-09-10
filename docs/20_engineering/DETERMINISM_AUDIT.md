@@ -177,3 +177,21 @@ return JSON.stringify(obj, Object.keys(obj as Record<string, unknown>).sort(), 2
 - **Authority derivation:** `deriveMunicipalityAuthorityMap` (formation_lifecycle.ts) uses sorted mun IDs; mapping is pure (control → 1 | 0.5 | 0.2). No randomness.
 - **B4 coercion:** `coercion_pressure_by_municipality` is read from state only; threshold reduction is deterministic. No randomness in pressure or flip resolution. B4.4 test in `tests/control_flip.test.ts` verifies that coercion changes flip outcome for a mun when present.
 - **Capability-weighted early-war flip:** Attacker and defender effectiveness in `control-flip` are scaled by `getFactionCapabilityModifier` (doctrine keys fixed by faction: ATTACK for attacker, DEFEND/STATIC_DEFENSE for defender). Capability profiles are updated in `capability-update` (same turn, year-based); read-only during flip. Same state + turn → same flip outcome.
+## BC04 bounded event follow-ups (2026-09-07)
+
+The owner-approved P2 contract adds `same_turn_requires_events` as an explicit catalog
+opt-in, limited to once-only automatic events with nonempty receipt prerequisites, no
+pressure definition and no response options. Only the Srebrenica column breakout and
+Deliberate Force rows opt in. After the ordinary event batch, the evaluator collects one
+snapshot of eligible, unprocessed opted-in rows using the updated receipts and flags.
+It uses the shared firing path and admission limits, preserves canonical ordering, and
+never recursively collects another wave or updates readiness again. Non-opted events
+retain their existing next-turn prerequisite behavior. Tests and candidate validation
+are recorded in the existing BC04 plan and `logs/bc04/p2-implementation`.
+
+Receipt occurrence displays derive the completed interval from the stored turn without
+changing that turn, the epoch or the save schema. Current-state headers retain their
+boundary date. Neither the formatter nor the event follow-up rule introduces wall-clock
+time, randomness or nondeterministic ordering into simulation behavior. The earlier B1
+note above is historical; the current evaluator applies authored effects and records
+receipts in state, so that note's no-mutation description is not the current contract.

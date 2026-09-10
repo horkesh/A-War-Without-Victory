@@ -1,0 +1,17 @@
+diff --git a/src/sim/turn_pipeline.ts b/src/sim/turn_pipeline.ts
+index 5be7c686e..138ca9bee 100644
+--- a/src/sim/turn_pipeline.ts
++++ b/src/sim/turn_pipeline.ts
+@@ -84,12 +84,6 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<TurnR
+         throw new Error(`runTurn: unsupported lifecycle phase "${String(phase)}"; expected 'war'`);
+     }
+ 
+-    // Dayton Agreement ends the war — set game_over and short-circuit (v0.7.0 Phase 4)
+-    if (working.military.event_flags?.dayton_signed === true && !working.meta.game_over) {
+-        working.meta.game_over = true;
+-        working.meta.outcome = 'dayton_agreement';
+-    }
+-
+     // Game over gate: if game_over is set, short-circuit to report-only mode (no combat/movement)
+     if (working.meta.game_over) {
+         working.meta = {

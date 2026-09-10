@@ -2476,7 +2476,6 @@ export interface GameState {
     schema_version: number;
     meta: StateMeta;
     factions: FactionState[];
-    // --- Control change events (Phase 5 GUI: battle markers) ---
     // --- Turn after-action reports (GUI only) ---
     /**
      * Per-turn after-action reports compiled at the end of each war turn.
@@ -3209,12 +3208,35 @@ phase0_relationships?: {
         rbih_rs: number;
         rbih_hrhb: number;
     };
-// --- Control change events (Phase 5 GUI: battle markers) ---
+// --- Control change events (added in Phase 5 for GUI battle markers; now load-bearing for
+// bot priorities, ceasefire preconditions and calibration scoring — see below) ---
 /**
-     * Per-turn log of OSID control changes. Cleared at the start of each attack-resolution step,
-     * then populated by control-flip producers with an explicit mechanism.
-     * Kept for last 3 turns. Sorted by (turn, settlement_id) for determinism.
-     * Used by the GUI battle-markers layer — does not affect simulation logic.
+     * APPEND-ONLY log of OSID control changes for the WHOLE campaign, each carrying an
+     * explicit mechanism. Written by the control-flip producers (`attack_resolution_osid`,
+     * `sector_offensive`, `paramilitary_sweep`, `rear_pocket_consolidation`,
+     * `jna_phantom_brigades`, `events/apply_effects`, `early_war/control_flip`) and sorted
+     * by (turn, settlement_id) after resolution for determinism (`war_phases.ts`). Nothing
+     * truncates it; the only reset is in `desktop_sim.ts`, which starts a NEW desktop
+     * campaign with an empty log.
+     *
+     * DO NOT PRUNE IT. Two independent things need the log complete:
+     *
+     * 1. IT AFFECTS SIMULATION LOGIC. `bot_strategy.priorityAreaTrend` scales each army
+     *    priority's weight by the recent territory trend of that priority's own target area
+     *    and can re-order the argmax within a corps;
+     *    `army_hq_gathering.computeRecentTerritoryChange` feeds corps assessment; and
+     *    `war_phases` derives the bilateral-flip and territorial-incident counts behind
+     *    stalemate turns and ceasefire precondition C4, which gates Washington Agreement
+     *    Path A.
+     * 2. IT IS THE ONLY SOURCE OF CONTROL AT AN INTERMEDIATE WEEK. Replayed over
+     *    `initial_political_controllers` it reconstructs the controller map at any turn,
+     *    which is how `tools/verify_checkpoints.cjs` and `tools/calibration_timeline.mjs`
+     *    produce the four checkpoint scores. Truncating it destroys the calibration floors
+     *    silently.
+     *
+     * Corrected 2026-09-08: this comment previously said the log was cleared each
+     * attack-resolution step, kept for 3 turns, and GUI-only. All three were false —
+     * measured against a persisted save carrying 220 events spanning turns 1→188.
      */
 control_events?: ControlEvent[];
 /** Last computed supply state per OSID. Persisted for supply transition tracking in the settlement timeline. */

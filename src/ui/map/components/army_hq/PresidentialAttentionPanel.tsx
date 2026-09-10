@@ -134,7 +134,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                     </div>
                     {liveReviewCount > 0 && (
                         <div className="grid grid-cols-2 gap-2 min-w-[15rem]">
-                            <CountCard label={t('attention.critical')} value={liveCriticalCount} tone="critical" />
+                            <CountCard label={t('attention.reviewCritical')} value={liveCriticalCount} tone="critical" />
                             <CountCard label={t('attention.eventDecisions')} value={pendingDecisions.length} tone={pendingDecisions.length > 0 ? 'critical' : 'neutral'} />
                             <CountCard label={t('attention.commandReactions')} value={commandReactionCount} tone={commandReactionCount > 0 ? 'warning' : 'neutral'} />
                             <CountCard label={t('attention.personnelDirectives')} value={personnelDirectives.length} tone={personnelDirectives.length > 0 ? 'warning' : 'neutral'} />
@@ -165,7 +165,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                             </div>
                             <div className="grid grid-cols-2 gap-2 min-w-[11rem]">
                                 <CountCard label={t('attention.pending')} value={armyReserveQueue.pendingCount} tone={armyReserveQueue.criticalCount > 0 ? 'warning' : 'neutral'} />
-                                <CountCard label={t('attention.critical')} value={armyReserveQueue.criticalCount} tone="critical" />
+                                <CountCard label={t('attention.reserveCritical')} value={armyReserveQueue.criticalCount} tone="critical" />
                                 <CountCard label={t('attention.defensive')} value={armyReserveQueue.defensiveCount} />
                                 <CountCard label={t('attention.offensive')} value={armyReserveQueue.offensiveCount} />
                             </div>

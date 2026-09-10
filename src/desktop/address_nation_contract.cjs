@@ -27,6 +27,8 @@ const ADDRESS_NATION_EVENT_BY_FACTION = {
   HRHB: 'address_to_nation_hrhb',
 };
 
+const { responseOptionsForFire } = require('./action_cadence_contract.cjs');
+
 /** Returns the authored address-to-nation event id for a faction, or null. */
 function addressNationEventIdForFaction(faction) {
   return ADDRESS_NATION_EVENT_BY_FACTION[faction] ?? null;
@@ -65,6 +67,9 @@ function computeAddressNationAvailability(state, playerFaction, eventDef) {
 
   if (!playerFaction) return { ...base, reason: 'no_player_faction' };
   if (!eventId || !eventDef) return { ...base, reason: 'no_event' };
+  if ((state?.military?.pending_event_decisions ?? []).some((decision) => decision?.event_id === eventId)) {
+    return { ...base, reason: 'already_pending' };
+  }
 
   // ── Cooldown / cap (voluntary desktop action only; engine ignores it) ───────
   const actionCadence = eventDef.action_cadence;
@@ -95,9 +100,9 @@ function computeAddressNationAvailability(state, playerFaction, eventDef) {
 /**
  * Build the pending-event-decision payload that EventDecisionModal consumes,
  * mirroring the push at src/sim/events/evaluate_events.ts:577 (and
- * front_visit_contract.buildFrontVisitPendingDecision). ALL authored
- * response_options are offered (no reachability filter); branches gated by their
- * own authored `available_from_fire` are left to the downstream resolver.
+ * front_visit_contract.buildFrontVisitPendingDecision). Authored response options
+ * are filtered by `available_from_fire` here, before queueing; no reachability
+ * filter is applied to a national address.
  *
  * @returns the PendingEventDecision-shaped object (or null if not buildable).
  */
@@ -112,7 +117,10 @@ function buildAddressNationPendingDecision(state, playerFaction, eventDef, avail
     event_id: eventDef.id,
     event_title: eventDef.title || text,
     turn_fired: currentTurn,
-    response_options: [...(eventDef.response_options || [])],
+    response_options: responseOptionsForFire(
+      eventDef.response_options,
+      (state?.military?.event_fire_counts?.[eventDef.id] ?? 0) + 1,
+    ),
     faction: respondingFaction,
   };
   if (eventDef.narrative) decision.narrative = eventDef.narrative;
@@ -133,6 +141,9 @@ function buildAddressNationPendingDecision(state, playerFaction, eventDef, avail
   }
   if (eventDef.staff_recommended_response_id) {
     decision.staff_recommended_response_id = eventDef.staff_recommended_response_id;
+  }
+  if (eventDef.notifications_to_other_factions) {
+    decision.notifications_to_other_factions = eventDef.notifications_to_other_factions;
   }
   return decision;
 }

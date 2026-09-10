@@ -1,0 +1,11 @@
+
+ RUN  v2.1.9 F:/AWWV-worktrees/bc09-shared-inputs
+
+ ✓ tests/shared_turn_inputs_contract.test.ts (29 tests | 26 skipped) 38ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed | 26 skipped (29)
+   Start at  08:09:50
+   Duration  7.82s (transform 5.22s, setup 18ms, collect 7.02s, tests 38ms, environment 0ms, prepare 104ms)
+
+EXIT_CODE=0

@@ -392,6 +392,9 @@ export interface EventResponseOption {
     historical_marker?: 'historical_default' | 'counterfactual';
     /** Effects applied when this response is chosen. */
     effects: EventEffect[];
+    /** Desktop-authored per-unit decoration target; resolved only for generated
+     * `decorate_steadfast_*__<formationId>` responses. */
+    target_formation_id?: string;
     // v0.6.0 metagame fields
     /** Flags set when this option is chosen. */
     sets_flags?: Record<string, string | number | boolean>;
@@ -507,6 +510,12 @@ export interface EventDefinition {
     probability?: number;
     /** If true, event can fire only once (tracked via fired_event_ids on state). Default: false. */
     once?: boolean;
+    /**
+     * Allow this automatic, once-only event to observe prerequisite receipts written
+     * by the primary event wave in the same turn. Evaluated in one non-recursive
+     * post-primary snapshot; loader validation forbids pressure and response options.
+     */
+    same_turn_requires_events?: boolean;
     /** Player choice options. When present, each affected faction must respond. */
     response_options?: EventResponseOption[];
     /** Explicit response option id used as the historical/default calibration path. */

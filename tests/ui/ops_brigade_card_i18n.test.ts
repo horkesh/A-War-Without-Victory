@@ -91,14 +91,14 @@ describe('ops modal BrigadeCard i18n', () => {
 
     const card = screen.getByRole('button', { name: /1st Test Mechanized Brigade/i });
     expect((card as HTMLButtonElement).disabled).toBe(false);
-    expect(card.getAttribute('title')).toContain('Personnel: Unreported');
-    expect(card.getAttribute('title')).toContain('Tanks: Unreported');
-    expect(card.getAttribute('title')).toContain('Cohesion: Unreported');
-    expect(card.getAttribute('title')).toContain('Fatigue: Unreported');
+    expect(card.getAttribute('title')).toContain('Personnel: No staff report');
+    expect(card.getAttribute('title')).toContain('Tanks: No staff report');
+    expect(card.getAttribute('title')).toContain('Cohesion: No staff report');
+    expect(card.getAttribute('title')).toContain('Fatigue: No staff report');
     expect(card.getAttribute('title')).not.toContain('Personnel: 0');
     expect(card.getAttribute('title')).not.toContain('Cohesion: 50');
     expect(card.getAttribute('title')).not.toContain('Fatigue: 0');
-    expect(card.textContent).toContain('Unreported');
+    expect(card.textContent).toContain('No staff report');
     expect(card.textContent).not.toContain('COMBAT INEFFECTIVE');
     expect(card.textContent).not.toMatch(/\bFRESH\b/i);
   });

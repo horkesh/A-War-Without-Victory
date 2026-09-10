@@ -170,7 +170,7 @@ describe('ArmyReservePanel elite commander identity', () => {
 
     const { container } = render(React.createElement(ArmyReservePanel, { railSlot: 'primary' }));
 
-    expect(container.textContent ?? '').toMatch(/Personnel\s*Unreported/);
+    expect(container.textContent ?? '').toMatch(/Personnel\s*No staff report/);
     expect(container.innerHTML).not.toContain('#d45555');
   });
 

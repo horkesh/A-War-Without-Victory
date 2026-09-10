@@ -149,7 +149,7 @@
   {
     "id": "arbih_111th_vitezka_motorized",
     "faction": "RBiH",
-    "name": "111th Vitezka Motorized",
+    "name": "111th Motorized",
     "corps": "arbih_1st_corps",
     "home_mun": "novi_grad_sarajevo",
     "home_settlement": "Sarajevo Dio - Novi Grad Sarajevo",
@@ -166,7 +166,7 @@
   {
     "id": "arbih_112th_vitezka_motorized",
     "faction": "RBiH",
-    "name": "112th Vitezka Motorized",
+    "name": "112th Motorized",
     "corps": "arbih_1st_corps",
     "home_mun": "novi_grad_sarajevo",
     "home_settlement": "Sarajevo Dio - Novi Grad Sarajevo",
@@ -243,7 +243,7 @@
   {
     "id": "arbih_104th_vitezka_motorized",
     "faction": "RBiH",
-    "name": "104th Vitezka Motorized",
+    "name": "104th Motorized",
     "corps": "arbih_1st_corps",
     "home_mun": "hadzici",
     "home_settlement": "Hrasnica",
@@ -322,7 +322,7 @@
   {
     "id": "arbih_182nd_vitezka_light",
     "faction": "RBiH",
-    "name": "182nd Vitezka Light",
+    "name": "182nd Light",
     "corps": "arbih_1st_corps",
     "home_mun": "hadzici",
     "home_settlement": "Pazarić",
@@ -354,7 +354,7 @@
   {
     "id": "arbih_161st_slavna_olovo_mountain",
     "faction": "RBiH",
-    "name": "161st Slavna Olovo Mountain",
+    "name": "161st Olovo Mountain",
     "corps": "arbih_1st_corps",
     "home_mun": "olovo",
     "home_settlement": "Olovo",
@@ -477,7 +477,7 @@
   {
     "id": "arbih_213th_vitezka_mountain",
     "faction": "RBiH",
-    "name": "213th Vitezka Mountain",
+    "name": "213th Mountain",
     "corps": "arbih_2nd_corps",
     "home_mun": "gradacac",
     "home_settlement": "Gradačac",
@@ -495,7 +495,7 @@
   {
     "id": "arbih_215th_vitezka_mountain",
     "faction": "RBiH",
-    "name": "215th Vitezka Mountain",
+    "name": "215th Mountain",
     "corps": "arbih_2nd_corps",
     "home_mun": "brcko",
     "home_settlement": "Gornji Rahić",
@@ -513,7 +513,7 @@
   {
     "id": "arbih_217th_vitezka_mountain",
     "faction": "RBiH",
-    "name": "217th Vitezka Mountain",
+    "name": "217th Mountain",
     "corps": "arbih_2nd_corps",
     "home_mun": "gradacac",
     "home_settlement": "Gradačac",
@@ -621,7 +621,7 @@
   {
     "id": "arbih_252nd_slavna_mountain",
     "faction": "RBiH",
-    "name": "252nd Slavna Mountain",
+    "name": "252nd Mountain",
     "corps": "arbih_2nd_corps",
     "home_mun": "tuzla",
     "home_settlement": "Tuzla",
@@ -669,7 +669,7 @@
   {
     "id": "arbih_255th_slavna_mountain_hajrudin_mesi",
     "faction": "RBiH",
-    "name": "255th Slavna Mountain \"Hajrudin Mesić\"",
+    "name": "255th Mountain \"Hajrudin Mesić\"",
     "corps": "arbih_2nd_corps",
     "home_mun": "ugljevik",
     "home_settlement": "Teočak",
@@ -692,7 +692,7 @@
   {
     "id": "arbih_7th_vitezka_muslim_liberation",
     "faction": "RBiH",
-    "name": "7th Vitezka Muslim Liberation",
+    "name": "7th Muslim Liberation",
     "corps": "arbih_3rd_corps",
     "home_mun": "zenica",
     "home_settlement": "Zenica",
@@ -710,7 +710,7 @@
   {
     "id": "arbih_303rd_vitezka_mountain",
     "faction": "RBiH",
-    "name": "303rd Vitezka Mountain",
+    "name": "303rd Mountain",
     "corps": "arbih_3rd_corps",
     "home_mun": "zenica",
     "home_settlement": "Zenica",
@@ -728,7 +728,7 @@
   {
     "id": "arbih_314th_slavna_liberation",
     "faction": "RBiH",
-    "name": "314th Slavna Liberation",
+    "name": "314th Liberation",
     "corps": "arbih_3rd_corps",
     "home_mun": "zenica",
     "home_settlement": "Zenica",
@@ -777,7 +777,7 @@
   {
     "id": "arbih_327th_vitezka_mountain",
     "faction": "RBiH",
-    "name": "327th Vitezka Mountain",
+    "name": "327th Mountain",
     "corps": "arbih_3rd_corps",
     "home_mun": "maglaj",
     "home_settlement": "Maglaj",
@@ -841,7 +841,7 @@
   {
     "id": "arbih_372nd_vitezka_mountain",
     "faction": "RBiH",
-    "name": "372nd Vitezka Mountain",
+    "name": "372nd Mountain",
     "corps": "arbih_3rd_corps",
     "home_mun": "tesanj",
     "home_settlement": "Tešanj",
@@ -858,7 +858,7 @@
   {
     "id": "arbih_373rd_slavna_mountain",
     "faction": "RBiH",
-    "name": "373rd Slavna Mountain",
+    "name": "373rd Mountain",
     "corps": "arbih_3rd_corps",
     "home_mun": "tesanj",
     "home_settlement": "Tešanj",
@@ -875,7 +875,7 @@
   {
     "id": "arbih_374th_slavna_light",
     "faction": "RBiH",
-    "name": "374th Slavna Light",
+    "name": "374th Light",
     "corps": "arbih_3rd_corps",
     "home_mun": "tesanj",
     "home_settlement": "Tešanj",
@@ -907,7 +907,7 @@
   {
     "id": "arbih_377th_vitezka_mountain",
     "faction": "RBiH",
-    "name": "377th Vitezka Mountain",
+    "name": "377th Mountain",
     "corps": "arbih_3rd_corps",
     "home_mun": "tesanj",
     "home_settlement": "Tešanj",
@@ -1029,7 +1029,7 @@
   {
     "id": "arbih_441st_vitezka_mountain",
     "faction": "RBiH",
-    "name": "441st Vitezka Mountain",
+    "name": "441st Mountain",
     "corps": "arbih_4th_corps",
     "home_mun": "mostar",
     "home_settlement": "Mostar",
@@ -1091,7 +1091,7 @@
   {
     "id": "arbih_501st_slavna_mountain",
     "faction": "RBiH",
-    "name": "501st Slavna Mountain",
+    "name": "501st Mountain",
     "corps": "arbih_5th_corps",
     "home_mun": "bihac",
     "home_settlement": "Bihać",
@@ -1109,7 +1109,7 @@
   {
     "id": "arbih_502nd_vitezka_mountain",
     "faction": "RBiH",
-    "name": "502nd Vitezka Mountain",
+    "name": "502nd Mountain",
     "corps": "arbih_5th_corps",
     "home_mun": "bihac",
     "home_settlement": "Bihać",
@@ -1126,7 +1126,7 @@
   {
     "id": "arbih_503rd_slavna_mountain",
     "faction": "RBiH",
-    "name": "503rd Slavna Mountain",
+    "name": "503rd Mountain",
     "corps": "arbih_5th_corps",
     "home_mun": "cazin",
     "home_settlement": "Cazin",
@@ -1144,7 +1144,7 @@
   {
     "id": "arbih_505th_vitezka_mountain",
     "faction": "RBiH",
-    "name": "505th Vitezka Mountain",
+    "name": "505th Mountain",
     "corps": "arbih_5th_corps",
     "home_mun": "bosanska_krupa",
     "home_settlement": "Bužim",
@@ -1192,7 +1192,7 @@
   {
     "id": "arbih_511th_slavna_mountain",
     "faction": "RBiH",
-    "name": "511th Slavna Mountain",
+    "name": "511th Mountain",
     "corps": "arbih_5th_corps",
     "home_mun": "bosanska_krupa",
     "home_settlement": "Bosanska Krupa",
@@ -1241,7 +1241,7 @@
   {
     "id": "arbih_17th_vitezka_mountain",
     "faction": "RBiH",
-    "name": "17th Vitezka Mountain",
+    "name": "17th Mountain",
     "corps": "arbih_3rd_corps",
     "home_mun": "travnik",
     "home_settlement": "Travnik",
@@ -1321,7 +1321,7 @@
   {
     "id": "arbih_727th_slavna",
     "faction": "RBiH",
-    "name": "727th Slavna",
+    "name": "727th Brigade",
     "corps": "arbih_3rd_corps",
     "home_mun": "travnik",
     "home_settlement": "Travnik",
@@ -1370,7 +1370,7 @@
   {
     "id": "arbih_705th_slavna_mountain",
     "faction": "RBiH",
-    "name": "705th Slavna Mountain",
+    "name": "705th Mountain",
     "corps": "arbih_3rd_corps",
     "home_mun": "bugojno",
     "home_settlement": "Bugojno",
@@ -1388,7 +1388,7 @@
   {
     "id": "arbih_707th_slavna_mountain",
     "faction": "RBiH",
-    "name": "707th Slavna Mountain",
+    "name": "707th Mountain",
     "corps": "arbih_3rd_corps",
     "home_mun": "bugojno",
     "home_settlement": "Bugojno",
@@ -1406,7 +1406,7 @@
   {
     "id": "arbih_717th_slavna_mountain",
     "faction": "RBiH",
-    "name": "717th Slavna Mountain",
+    "name": "717th Mountain",
     "corps": "arbih_3rd_corps",
     "home_mun": "gornji_vakuf",
     "home_settlement": "Gornji Vakuf-Uskoplje",
@@ -1423,7 +1423,7 @@
   {
     "id": "arbih_770th_slavna_mountain",
     "faction": "RBiH",
-    "name": "770th Slavna Mountain",
+    "name": "770th Mountain",
     "corps": "arbih_3rd_corps",
     "home_mun": "donji_vakuf",
     "home_settlement": "Donji Vakuf",
@@ -1440,7 +1440,7 @@
   {
     "id": "arbih_210th_vitezka_liberation_nesib_maliki",
     "faction": "RBiH",
-    "name": "210th Vitezka Liberation \"Nesib Malikić\"",
+    "name": "210th Liberation \"Nesib Malikić\"",
     "corps": "arbih_2nd_corps",
     "home_mun": "zivinice",
     "home_settlement": "Živinice",
@@ -1547,7 +1547,7 @@
   {
     "id": "arbih_246th_vitezka_mountain",
     "faction": "RBiH",
-    "name": "246th Vitezka Mountain",
+    "name": "246th Mountain",
     "corps": "arbih_2nd_corps",
     "home_mun": "zvornik",
     "home_settlement": "Sapna",
@@ -1816,7 +1816,7 @@
   {
     "id": "arbih_851st_vitezka_liberation",
     "faction": "RBiH",
-    "name": "851st Vitezka Liberation",
+    "name": "851st Liberation",
     "corps": "arbih_1st_corps",
     "home_mun": "gorazde",
     "home_settlement": "Goražde",

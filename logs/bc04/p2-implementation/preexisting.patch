@@ -1,0 +1,414 @@
+diff --git a/.claude/scheduled_tasks.lock b/.claude/scheduled_tasks.lock
+index 3e3e1be9a..1862478a7 100644
+--- a/.claude/scheduled_tasks.lock
++++ b/.claude/scheduled_tasks.lock
+@@ -1 +1 @@
+-{"sessionId":"3eb67de6-83d8-49e4-b734-fe41229ed4cc","pid":5144,"procStart":"134317245861063337","acquiredAt":1787251281248}
+\ No newline at end of file
++{"sessionId":"191321ae-d502-445d-9175-fc324262e0fc","pid":17532,"procStart":"134326258015568926","acquiredAt":1788551848018}
+\ No newline at end of file
+diff --git a/docs/PROJECT_LEDGER.md b/docs/PROJECT_LEDGER.md
+index d8bc1823b..4e3ea8eb5 100644
+--- a/docs/PROJECT_LEDGER.md
++++ b/docs/PROJECT_LEDGER.md
+@@ -33565,4 +33565,89 @@ BC04 remains open, and committing a candidate does not claim campaign or final-c
+ Candidate closeout checks passed: 30 scope/preservation/local-link checks and 9 documentation
+ tests, exit 0 (`logs/bc04/p1/candidate-scope.log`, `candidate-docs.log`). The catalog comparison
+ still proves exactly one changed gate and preserves BC03 bytes and the lock. The mandatory
+-pre-commit typecheck will run normally; no verification hook is bypassed and no campaign is launched.
+\ No newline at end of file
++pre-commit typecheck will run normally; no verification hook is bypassed and no campaign is launched.
++
++## [2026-09-07] Bounded deletion cleanup planned under R8
++
++**Type:** Owner-requested planning and roadmap placement; documentation only.
++
++**Scope:** Registered `docs/plans/2026-09-07-bounded-deletion-cleanup-plan.md` as a subordinate
++R8 packet in master §4.2, after scheduled BC04–BC07 disposition and before final calibration
++acceptance/final packaged acceptance. Four outcomes: remove the unused browser combat runner,
++remove the global event registry, consolidate equivalent pre-advance routing, and trim closed
++history from the derived command board. No implementation started or new workstream created.
++
++**Contract refinement:** Pipeline `eventDefinitions` is optional. The registry deletion must
++preserve no-event inputs explicitly with `?? []` at the two pipeline callers while requiring
++an explicit evaluator array; it must not introduce a broader runtime failure contract. Browser
++campaign retirement, event authoring/quotas, recurrence removal, schemas, canon and baselines
++remain excluded. Supported KEEP dispositions are acceptable. Existing R8/global checks remain;
++the packet commissions no separate campaign or automatic baseline refresh.
++
++**Documents:** New packet, master roadmap, command board, plans index, and R8 controlling plan.
++Focused document verification is recorded in the packet. No production code, data or tests changed.
++
++## 2026-09-07 - BC04 P2 receipt/calendar investigation authorized
++
++The owner authorized the recommended bounded investigation: trace actual event receipt turns
++through simulation advancement and calendar readers, preserve the primary-source historical
++sequence, and produce the smallest coherent implementation decision. Start HEAD:
++`f117fe47536398add3a966d177b3dce54fc820ac` (committed P1 candidate); BC03 remains in `c95e25241`.
++No production edits, campaigns, baseline changes, new broad panel or commit are authorized here.
++P1 acceptance remains deferred to next calibration; its extra repeat/ON requirements stay retired.
++
++One Sol technical investigator traces the relevant pipeline/evaluator/calendar consumers and may
++use bounded in-memory fixtures. A separate Sol reviewer applies the Historian lens to retained
++primary-source dates and reviews the combined technical proposal. Existing panel restrictions and
++distinct seat record are reused; no historical date or receipt target is waived to fit the engine.
++Evidence lives in `logs/bc04/p2-temporal/`; the existing BC04 subsection remains the plan home.
++Concurrent owner-requested deletion-cleanup planning edits appeared in shared documentation during
++this session and are preserved separately from these BC04 findings. Checks are small fixture and
++documentation/scope checks, with no full simulation campaign. Findings and disposition follow.
++P2 trace resolves the calendar interpretation: `runTurn` increments N−1 to N before producing
++receipts/TurnSummary, and runner week_index is N−1 for the canonical zero-start campaign.
++Receipt t171 therefore closes 10–16 July, while the advanced state header shows 17 July.
++The earlier helper-only review correctly noticed different labels but did not establish this
++writer lifecycle; it does not justify shifting the panel's target weeks. Current receipt readers
++use the boundary date directly. A derived completed-week formatter is proposed only for those
++occurrence groups, preserving current headers, raw receipt identities, epoch and save schema.
++This is a well-supported weekly-pipeline interpretation, not a stored interval field.
++
++The isolated real-function fixture (controlled flags, unrelated effects stripped) reproduces
++Srebrenica at171, column172, Žepa173, Markale178 and DeliberateForce179 for the candidate minima.
++Readiness and eligibility both inspect prerequisites before the firing phase appends receipts;
++changing catalog order cannot fix the two one-week dependent lags. Evidence:
++`logs/bc04/p2-temporal/trace.md`, `temporal_fixture.ts`, `fixture-output.json`, `commands.txt`
++(exit0, empty stderr). This establishes timing mechanics, not a new campaign result.
++
++The independent Historian/technical reviewer ratifies completed-week targets
++164/164/171/171/173/178/178 for Tuzla/hostage/Srebrenica/column/Žepa/Markale/DeliberateForce.
++Primary judicial/NATO sources and locally available BB pages are recorded with procedural posture
++in `historical-targets.md`; missing local July pages were not given invented BB citations.
++The smallest proposed correction is one explicit opt-in on column and DeliberateForce, one
++non-recursive snapshot wave after normal firing, once-only automatic pressure-free rows,
++unchanged prerequisites/conditions and no second readiness update. Ordinary events, Žepa's
+++2-week relationship, wide expiry, containment backstop160 and outcomes remain unchanged.
++Exact proposed core/UI files and regression tests are in the existing BC04 subsection.
++
++Review verdict: historical tuple and mechanism supported, but CHANGES NEEDED before implementation
++authorization (`logs/bc04/p2-temporal/review.md`). The existing scenario/calibration seat's
++turn_min-only condition and engine seat's generalized D3+two-sibling lint-first condition were
++not discharged by the technical evidence. The recommended single owner decision is to approve
++the exact narrow packet and explicitly replace those process conditions with the stated opt-in,
++receipt display scope and pre-change regressions covering all three timing failure shapes.
++Until approved, the conditions remain binding; no lint retirement or implementation is claimed.
++No new broad panel or historical-date choice is needed. Existing panel seats remain separate.
++
++The existing plan, roadmap and command board now record this conditional proposal; the calendar
++knowledge entry is corrected in place to prevent repeating the helper-only inference. Concurrent
++cleanup-planning edits are preserved. P1's owner-retired extra runs and deferred acceptance remain
++unchanged; P2's later campaign gates are neither run nor silently waived. No production/test edit,
++commit, campaign, initial-map change, baseline or floor refresh occurred in this investigation.Focused verification: documentation suites passed 9/9 (exit 0), recorded in
++`logs/bc04/p2-temporal/docs-tests.log` and `.exit`. The first check found the roadmap
++53 characters over its existing size limit; shortening only the BC04 summary resolved it.
++`git diff --check` passed (exit 0); production/data/test diff against f117fe475 is empty.
++HEAD remains f117fe47536398add3a966d177b3dce54fc820ac. The pre-existing scheduled-task
++lock SHA256 matches the investigation-start receipt. Concurrent cleanup docs remain intact.
++BC04 and final calibration remain open; the reviewed P2 proposal awaits the explicit owner
++process-condition amendment above before implementation.
+diff --git a/docs/PROJECT_LEDGER_KNOWLEDGE.md b/docs/PROJECT_LEDGER_KNOWLEDGE.md
+index 7ab389a30..4cf1f0174 100644
+--- a/docs/PROJECT_LEDGER_KNOWLEDGE.md
++++ b/docs/PROJECT_LEDGER_KNOWLEDGE.md
+@@ -5113,4 +5113,4 @@ controls are necessary, and an unmet expectation stays explicit until owner disp
+ See [BC01 verification](40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)
+ and [dated ledger](PROJECT_LEDGER.md#2026-09-07---bc01-campaign-adjudication-and-implementation-documentation-active).
+ 
+-- **2026-09-07 — Historical week buckets and runtime turn dates are different contracts.** A one-based historical bucket `wN = floor((date - 1992-04-06)/7)+1` must not be presented as the displayed date for raw receipt `tN`: `turnToDateString` adds `turn*7` days to the epoch, while runner `week_index` is zero-based. Preserve raw receipt turn, displayed date and historical target separately; resolve their intended alignment before retiming events. BC04 preserves Ahmići's authored date/minimum 54 and records the mismatch rather than silently fixing the epoch or UI. See [2026-09-07 BC04 reconciliation and review](PROJECT_LEDGER.md#2026-09-07---bc04-opened-for-n392-reconciliation-and-p1p2-planning-only).
+\ No newline at end of file
++- **2026-09-07 — Trace the receipt writer before interpreting a calendar helper (corrected by P2 trace).** In the canonical zero-start campaign, `runTurn` pre-increments N−1 to N and records the completed turn as `tN`; the corresponding runner `week_index` is N−1. The completed occurrence interval is `date(N−1)` through `date(N)−1 day`, while current-state headers show `date(N)`. Thus t171 closes 10–16 July and the advanced header shows 17 July; these labels do not require moving the historical event one week. The earlier helper-only diagnosis missed that lifecycle. This is a supported interpretation of the weekly pipeline, not a new persisted interval field. Use completed-week ranges for occurrence receipts, retain boundary dates for current headers, and preserve raw IDs, epoch and P1 turn 54. See [2026-09-07 BC04 reconciliation and review](PROJECT_LEDGER.md#2026-09-07---bc04-opened-for-n392-reconciliation-and-p1p2-planning-only).
+\ No newline at end of file
+diff --git a/docs/plans/2026-07-31-full-campaign-electron-validation-plan.md b/docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
+index 047ac9812..a9e6b80cb 100644
+--- a/docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
++++ b/docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
+@@ -17,6 +17,16 @@
+ 
+ ---
+ 
++## Subordinate cleanup packet (2026-09-07)
++
++[Bounded deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) is PLANNED under R8,
++after scheduled BC04–BC07 disposition and before final calibration acceptance/final packaged
++acceptance; [master §4.2](MASTER_ROADMAP.md#42-bounded-deletion-cleanup--r8-2026-09-07) owns this slot.
++It covers the unused browser combat runner, dormant global event registry, duplicate pre-advance
++handler and closed command-board history. Preserve optional no-event pipeline semantics and all
++existing acceptance gates. No implementation started, new lane, browser-mode retirement, or
++independent campaign commission. Next action at the slot: caller/ownership confirmation, Task 1.
++
+ ## 1. Resolved decisions
+ 
+ 1. Validation uses the packaged directory build produced by `npm.cmd run desktop:package:dir`, not a loose Vite/browser session. Package output remains transient and uncommitted.
+@@ -294,15 +304,18 @@ simulation traversal. Existing panel outcome-ownership questions remain outside
+ floors `694/674/668/641`, not a fresh current-HEAD run. Its actual receipts are Ahmići absent; Tuzla
+ Gate `t160`; hostage crisis `t160`; RRF `t168`; Srebrenica `t162`; column `t163`; Žepa `t164`;
+ Markale II `t170`; Deliberate Force `t171`; Storm `t174`; Mistral 2 `t179`.
+-**Calendar convention is unresolved for historical acceptance:** the panel's one-based elapsed
+-week buckets are `w54=12-18 Apr 1993`, `w164=22-28 May 1995`, `w171=10-16 Jul`, and
+-`w178=28 Aug-3 Sep`. They are not runtime dates for the same numbered receipt. Runtime
+-`turnToDateString` (`src/ui/warroom/components/warroom_utils.ts:70-75`) uses 6 Apr 1992 plus
+-`turn*7` days: `t54=19 Apr 1993`, `t164=29 May 1995`, `t171=17 Jul`, `t173=31 Jul`,
+-`t178=4 Sep`, and `t179=11 Sep`. The runner's `week_index` is zero-based
+-(`src/scenario/scenario_runner.ts:3121-3126`). Preserve both raw receipt turns and
+-displayed dates; do not silently repair the epoch, UI, Ahmići date, or historical target to hide
+-this mismatch. The accepted artifact also shows the five 280th-284th
++**Calendar convention resolved by pipeline trace, 2026-09-07:** `runTurn` advances the counter
++from N−1 to N before producing the event receipt and `TurnSummary.turn=N`. With this scenario's
++zero start, runner `week_index=N−1`; receipt `tN` closes the interval from `date(N−1)` through
++`date(N)−1 day`. Thus `t54` completes 12–18 Apr 1993, `t164` completes 22–28 May 1995,
++`t171` completes 10–16 Jul, `t173` completes 24–30 Jul and `t178` completes 28 Aug–3 Sep.
++The current-week header shows the following boundary date (19 Apr, 29 May, 17 Jul, 31 Jul and
++4 Sep respectively). Existing Chronicle/record readers also use that boundary date directly;
++it is not evidence that the event occurred in the following completed week.
++The earlier helper-only review identified different labels but did not trace what the receipt
++closed. Its calendar ambiguity is superseded: the panel's historical week targets remain valid.
++No epoch, P1 date or raw receipt migration is needed. Retain raw turn, completed interval and
++post-advance header date as distinct evidence. The accepted artifact also shows the five 280th-284th
+ East Bosnian Light Brigades displaced at `t162` to `op:zivinice:gracanica_2` with 319 personnel each,
+ then rebuilding to 710 each at `t167`; this is the P2 force-economy blast radius. Evidence and exit 0:
+ `logs/bc04/n392-summary.json` and `logs/bc04/n392-summary.exitcode`; the fuller extraction remains at
+@@ -335,8 +348,9 @@ ON/OFF proof. Do not raise floors or update manifests.
+ Stop P1 on any territory, operation, formation, displacement, or unexplained receipt delta; explain it
+ before acceptance rather than tuning around it.
+ 
+-**P2 — one coherent 1995 chronology packet, after P1 acceptance.** The sole production file proposed is
+-`data/scenarios/events/war_1995.json`. Preserve all event effects, control lists, prerequisites,
++**P2 — one coherent 1995 chronology packet, after P1 acceptance.** The catalog part is
++`data/scenarios/events/war_1995.json`; the bounded temporal investigation below establishes why
++catalog-only changes are insufficient and proposes an explicit evaluator opt-in. Preserve all event effects, control lists, prerequisites,
+ pressure constants, `turn_max:185` for Srebrenica, `turn_max:190` for the column/Žepa/Markale, and
+ `turn_max:195` for Deliberate Force. Preserve `CONTAIN_RELEASE_TURN_BACKSTOP=160` in
+ `src/sim/combat/enclave_resilience.ts`; it is not a BC04 edit. Do not edit Žepa's inert `turn_min:160`,
+@@ -349,42 +363,102 @@ Deliberate Force `turn_min 165→178`. The Srebrenica candidate is based on the
+ `3.5/7.0/10.5` at `t169/t170/t171`; the earlier Historian seat's 3/2.5 discussion omitted the hostage
+ modifier, so the receipt must be proved from current code rather than inferred from that arithmetic.
+ 
+-One bounded historical/owner decision remains before the P2 data edit: obtain new ratification of the
+-complete **receipt tuple and calendar convention**, not merely the `turn_min` labels. The existing
+-panel record is evidence for this decision, not ratification of new acceptance. Current ordering makes a
+-`requires_events` consumer observe a prerequisite on a later turn, as n392's `162→163` column and
+-`170→171` Markale/Deliberate-Force receipts demonstrate. Thus a Srebrenica receipt at `t171` implies
+-the column at earliest `t172`; a Markale receipt at `t178` implies Deliberate Force at earliest `t179`.
+-The complete current-code hypothesis (not accepted history) is:
+-
+-| Receipt | Candidate raw turn | Runtime displayed date |
+-|---|---:|---|
+-| Tuzla Gate / hostage crisis | 164 | 29 May 1995 |
+-| Srebrenica | 171 | 17 Jul 1995 |
+-| Column / `un_safe_areas_fail_1995` | 172 | 24 Jul 1995 |
+-| Žepa, unchanged row; readiness 3 at 172, 6 at 173 | 173 | 31 Jul 1995 |
+-| Markale II | 178 | 4 Sep 1995 |
+-| Deliberate Force | 179 | 11 Sep 1995 |
+-
+-The panel did not authorize changing evaluator semantics to force same-turn chains, nor adopting
+-these displayed dates as historically correct. Preserve its historical targets as unmet until the
+-required Historian/owner disposition explicitly resolves the calendar and dependent-event timing.
+-The concrete decision is what receipt/date tuple is acceptable, and whether satisfying it requires
+-a separately scoped ordering proposal. Do not assume shifting a predecessor can preserve both
+-historical buckets. No P2 production edit proceeds until this is recorded. Reuse the existing panel
+-record; any newly required distinct sign-off seats remain distinct. Do not reopen outcome ownership.
+-
+-Extend `tests/event_timeline_integrity.test.ts` to pin the ratified windows, wide maxima, Žepa's unchanged
+-row, Srebrenica/Žepa event-owned control effects and the absence of response options. Extend
+-`tests/pressure_system.test.ts` with the current four-modifier brake-on accrual and expiry-margin case,
+-and `tests/events_evaluate.test.ts` with a catalog-backed `t164-180` sequence asserting every actual
+-receipt turn and the existing prerequisite lag. A failing fixture is evidence that the tuple needs
+-ratification/correction; it is not authority to alter the evaluator, pressure schema, expiry semantics,
+-containment backstop, or to isolate the Srebrenica edit.
++**P2 temporal investigation — 2026-09-07; implementation still unauthorized.** Source tracing and
++one isolated real-function fixture establish the distinction above. Evidence:
++`logs/bc04/p2-temporal/trace.md`, `temporal_fixture.ts`, `fixture-output.json`, `commands.txt`
++(exit 0; empty stderr). The fixture uses the live loader, readiness and evaluator functions with
++controlled late-war flags and stripped unrelated effects. It establishes eligibility/readiness,
++not full campaign behavior. It measures Srebrenica at 171 (3.5/7/10.5), column at 172, Žepa at
++173 (3 then 6), Markale at 178 (3.3 then 6.6) and Deliberate Force at 179. These last two
++dependent lags agree with the existing n392 receipt relationships. Readiness runs before event
++evaluation; eligibility is collected before the firing phase appends receipts, so catalog order
++or priority cannot make a same-turn prerequisite visible.
++
++The historical targets remain unchanged. Srebrenica fell on 11 July and the column began moving
++around midnight that night ([Krstić Trial Judgment, §§36, 62](https://www.icty.org/x/cases/krstic/tjug/en/krs-tj010802e-1.htm)).
++The existing Žepa target is 25 July; civilian transport began that day
++([Tolimir Trial Judgment, §§640–641](https://www.icty.org/x/cases/tolimir/tjug/en/121212.pdf)),
++without compressing every phase into one date. Markale II on 28 August and Deliberate Force on
++30 August belong to the same completed week ([NATO chronology](https://www.nato.int/en/news-and-events/events/transcripts/2005/07/01/crossing-the-rubicon);
++BB1 printed pp.377/386, local KB pages 414/423). The independently reviewed late-May grouping
++for Tuzla/hostage onset is retained; primary evidence and procedural-posture notes are in
++`logs/bc04/p2-temporal/historical-targets.md`.
++
++| Receipt | Target raw turn | Completed historical week | Current catalog-only fixture |
++|---|---:|---|---|
++| Tuzla Gate / hostage crisis | 164 | 22–28 May 1995 | Window proposals; not a new campaign receipt |
++| Srebrenica | 171 | 10–16 Jul 1995 | 171 |
++| Column departure | 171, after Srebrenica in the report | 10–16 Jul 1995 | 172: one week late |
++| Žepa, unchanged row | 173 | 24–30 Jul 1995 | 173 |
++| Markale II | 178 | 28 Aug–3 Sep 1995 | 178 |
++| Deliberate Force | 178, after Markale in the report | 28 Aug–3 Sep 1995 | 179: one week late |
++
++**Recommended implementation decision:** preserve that tuple and enable same-turn causal
++follow-ups only for `srebrenica_column_breakout_1995` and `nato_deliberate_force_1995`.
++Add an explicit event-definition boolean such as `same_turn_requires_events` in
++`src/sim/events/event_types.ts`, validate it in `src/sim/events/event_loader.ts`, and enable it
++only on those two catalog rows. `true` requires `once:true`, nonempty `trigger.requires_events`,
++no pressure definition and no response options. After the normal firing phase, collect exactly
++one snapshot of still-unprocessed opted-in rows against updated receipts/flags, then fire that
++snapshot through the existing effect/receipt path. Preserve ordinary conditions, priorities,
++stable ordering, shared admission limits and once-only receipts. Do not recurse, rerun readiness, bypass a prerequisite,
++or re-evaluate the entire catalog to a fixed point. Non-opted rows retain existing semantics;
++Žepa still first accrues at 172 and fires at 173. `un_safe_areas_fail_1995` is not opted in and
++retains its next-turn relationship. Missing parent receipts must keep either child blocked.
++
++The exact core edit set is `war_1995.json`, `event_types.ts`, `event_loader.ts` and
++`src/sim/events/evaluate_events.ts`. Add regressions in `tests/events_evaluate.test.ts`
++(ordered same-report parent/child, missing parent, default next-turn behavior, one snapshot
++without third-level cascading, no duplicate effects/receipts), `tests/event_loader.test.ts`
++(invalid opt-in shapes fail closed), `tests/pressure_system.test.ts` (single update and Žepa
++delay retained), `tests/event_timeline_integrity.test.ts` (whole packet and unchanged protected
++fields), and `tests/integration_event_system.test.ts` (whole target sequence). Reuse the existing
++application/receipt writer; do not duplicate its implementation for the follow-up wave.
++
++For player-facing occurrence dates, propose a derived completed-week-range formatter in
++`src/ui/map/utils/formatters.ts`, used only at receipt groups in
++`src/ui/map/components/chronicle/ChronicleOverlay.tsx`,
++`src/ui/map/components/SettlementTimeline.tsx` and
++`src/ui/map/components/army_hq/DecisionConsequenceRecordsPanel.tsx`. Keep current-state headers
++on their boundary date, raw receipt identities unchanged, and no epoch/save-schema migration.
++Pin ranges/localization and safe turn-0 behavior in `tests/ui/settlement_timeline_i18n.test.ts`,
++`tests/ui/chronicle_spine_scrubber.test.ts`, `tests/ui/chronicle_focus_routing.test.ts` and
++`tests/ui/decision_consequence_records_panel.test.ts`. Avoid re-dating unrelated decision
++timestamps or rewriting other calendar surfaces.
++
++This is one bounded proposal for owner authorization, not an implemented feature. Accepting
++late dependent receipts, shifting their parents earlier, removing/duplicating prerequisite
++conditions, or merging distinct event IDs would compromise the retained chronology or causality;
++none is the recommended remedy. The existing panel record and newly reviewed historical date
++evidence remain authoritative; required distinct sign-off seats are not collapsed, and no
++outcome-ownership question is reopened.
++
++**Independent review and exact owner decision.** The independent Historian/technical review
++ratifies `164/164/171/171/173/178/178` as completed-week placement and supports the bounded
++mechanism and receipt-only display correction. Its overall verdict is **CHANGES NEEDED before
++implementation authorization**, because two conditions in the existing panel signature remain:
++
++- [Scenario/calibration seat, condition 2](../40_reports/proposals/20260906_S6_PANEL_SEAT_SCENARIO_CALIBRATION.md):
++  “P2 moves `turn_min` only.”
++- [Engine/systems seat, condition 4](../40_reports/proposals/20260906_S6_PANEL_SEAT_ENGINE_SYSTEMS.md):
++  “Write the D3 loader lint FIRST, with the two P2-derived siblings”.
++
++**Recommended approval:** authorize this exact P2 packet and explicitly amend those two process
++conditions. Permit the two-row opt-in and receipt-only formatter alongside the coherent date
++packet, including the already-proposed same-width hostage-window shift; keep the wide enclave,
++Markale and Deliberate Force maxima unchanged. Replace the generalized lint-first prerequisite
++for this packet with pre-change regressions covering (1) a non-opted same-turn prerequisite's
++unreachable window, (2) a pressure modifier whose writer has not yet fired, and (3) brake-on
++readiness versus expiry. Keep strict loader validation for the new opt-in and the complete
++sequence tests above. This is a proposed scoped exception, not an implemented retirement of
++the general lint work or its BC05 routing. If the owner does not approve the exception, those
++conditions remain binding; do not begin the new implementation shape. No new broad panel or
++change to historical dates is proposed. The review and source notes are in
++`logs/bc04/p2-temporal/review.md` and `historical-targets.md`.
+ 
+ After focused tests and Historian ratification, run one clean Node-22 controlled 188-week P2 POST against
+-the accepted clean P1 run, with the same provenance record and only the ratified `war_1995.json` packet
+-as a consumed production diff. Record receipt dates and readiness at every eligible turn; full
++the accepted clean P1 run, with the same provenance record and the explicitly authorized P2
++catalog/evaluator packet as the only simulation source/input delta. Record receipt dates and readiness at every eligible turn; full
+ `anchor_checks` and all four checkpoint scores; `engine_health_gate`; the complete §6 HOLDS/FALLS and
+ capture-provenance output; final and per-turn control diffs; `op_schedule_diff.cjs` rung 4 plus
+ `operation_aars.json`/`watched_operations.json`; displacement totals/events; and formation/location/
+@@ -480,7 +554,7 @@ desktop simulation/startup-snapshot build and warroom build passed, exit 0 (matc
+ exit-code sidecars). Independent Sol implementation review returned **GO for the bounded P1
+ candidate**, no findings (`logs/bc04/p1/independent-review.md`), using the existing panel record.
+ The owner subsequently authorized committing this locally verified candidate and deferring campaign
+-acceptance under the revised disposition above. P1 campaign acceptance, P2 calendar/receipt disposition
++acceptance under the revised disposition above. P1 campaign acceptance, P2 process-condition approval
+ and final calibration remain open. No P2 code, date, initial control, schema or baseline changed.
+ ### Pre-seeded finding register
+ 
+diff --git a/docs/plans/COMMAND_BOARD.md b/docs/plans/COMMAND_BOARD.md
+index b094aa5bf..74bc9b125 100644
+--- a/docs/plans/COMMAND_BOARD.md
++++ b/docs/plans/COMMAND_BOARD.md
+@@ -28,11 +28,17 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
+ | 8 | R8 | **WAITING ON R7.** RE closed 2026-09-01 and no longer gates this. | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until the final two diaries score 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
+ | 9 | R9 | **WAITING ON R8** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
+ 
++**R8 subordinate cleanup — PLANNED (2026-09-07):** [Master §4.2](MASTER_ROADMAP.md#42-bounded-deletion-cleanup--r8-2026-09-07)
++slots the [four-item deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) after scheduled
++BC04–BC07 disposition, before final calibration acceptance and final packaged acceptance. At that
++slot, confirm callers/ownership and start Task 1. No implementation started, new lane, RE revival,
++browser-mode decision, or separate campaign commission. Preserve applicable R8/global gates.
++
+ ## Current Critical Path
+ 
+-`R7 remaining presentation/audio gates (disjoint work may continue) -> scheduled R8 behavior settlement (§4.1 BC01–BC08) -> final calibration acceptance -> final R8 packaged acceptance -> R9`
++`R7 remaining presentation/audio gates (disjoint work may continue) -> scheduled R8 behavior settlement (§4.1 BC01–BC08) -> bounded deletion cleanup (§4.2) -> final calibration acceptance -> final R8 packaged acceptance -> R9`
+ 
+-**Finite closure register (2026-09-07; BC01 separately scheduled):** [Master §4.1](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) owns BC01 CLOSED (owner accepted verified repair and retired territory similarity, 2026-09-07; [verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)), BC02 CLOSED by the owner-approved verified Electron load/display repair, BC03 CLOSED by verified repair and owner-approved deferrals, BC04–BC07 pending under D1, and BC08 closed by bounded disposition: BC01 opportunity decisions; BC02 sector/rating truth; BC03 narrated Dayton; BC04 chronology/P1/P2; BC05 NATO/Lukavac gates; BC06 posture/gesture controls; BC07 stability-data policy; BC08 inherited tests. FIX means planned disposition when scheduled; VERIFY/DISPOSITION needs bounded evidence. D1 HOLD FOR R8 remains. Registration creates no new lane, RE revival, broader repair authorization, or automatic baseline refresh. BC02 changed no canonical save bytes, campaign result, calibration or baseline. BC03 is closed; BC03 is committed as c95e25241; BC04 P1 is owner-authorized, implemented and independently reviewed; campaign acceptance is deferred to the next calibration, preserving clean before/after attribution; extra P1 repeat/ON runs are owner-retired. P2 calendar/receipt disposition remains unresolved; P2 implementation and campaigns are not authorized. Diagnostic calibration stays open; final calibration follows accepted behavior settlement. n392 is 702/678/672/665 against unchanged floors 694/674/668/641; the older 688 breach is historical, and improvement attribution remains unknown.
++**Finite closure register (2026-09-07; BC01 separately scheduled):** [Master §4.1](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) owns BC01 CLOSED (owner accepted verified repair and retired territory similarity, 2026-09-07; [verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)), BC02 CLOSED by the owner-approved verified Electron load/display repair, BC03 CLOSED by verified repair and owner-approved deferrals, BC04–BC07 pending under D1, and BC08 closed by bounded disposition: BC01 opportunity decisions; BC02 sector/rating truth; BC03 narrated Dayton; BC04 chronology/P1/P2; BC05 NATO/Lukavac gates; BC06 posture/gesture controls; BC07 stability-data policy; BC08 inherited tests. FIX means planned disposition when scheduled; VERIFY/DISPOSITION needs bounded evidence. D1 HOLD FOR R8 remains. Registration creates no new lane, RE revival, broader repair authorization, or automatic baseline refresh. BC02 changed no canonical save bytes, campaign result, calibration or baseline. BC03 is closed; BC03 is committed as c95e25241; BC04 P1 is owner-authorized, implemented and independently reviewed; campaign acceptance is deferred to the next calibration, preserving clean before/after attribution; extra P1 repeat/ON runs are owner-retired. P2 completed-week targets are historically ratified; the narrow same-turn follow-up/display proposal awaits explicit owner amendment of the panel process conditions. P2 implementation and campaigns are not authorized. Diagnostic calibration stays open; final calibration follows accepted behavior settlement. n392 is 702/678/672/665 against unchanged floors 694/674/668/641; the older 688 breach is historical, and improvement attribution remains unknown.
+ 
+ **RE no longer appears on the critical path.** It closed by owner decision on 2026-09-01; the P2B
+ packaged-proof blocker that used to head this line is closed history and gates nothing. Engine
+diff --git a/docs/plans/MASTER_ROADMAP.md b/docs/plans/MASTER_ROADMAP.md
+index 28aaf541f..ea1683dcc 100644
+--- a/docs/plans/MASTER_ROADMAP.md
++++ b/docs/plans/MASTER_ROADMAP.md
+@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
+ their original wording as a record of how decisions were reached; where they say calibration is
+ paused or RE is blocked, they are describing 2026-08-28, not today.
+ 
+-**Last updated:** 2026-09-07 (finite behavior-closure planning; no repair authorization)
++**Last updated:** 2026-09-07 (finite behavior closure and subordinate R8 deletion-cleanup planning)
+ 
+ **Execution branch:** `codex/master-roadmap-execution` (integration target: `main` after all workstreams are green)
+ 
+@@ -210,12 +210,11 @@ These are verification barriers and authority boundaries, not unresolved product
+ ## 4. Program Sequence
+ 
+ **Current sequence (2026-09-07):** R7 presentation may continue on disjoint files; settle the finite
+-behavior register below within existing scheduling authority, then accept final calibration on the
++behavior register below within existing scheduling authority, then disposition the bounded cleanup
++packet in §4.2, then accept final calibration on the
+ settled behavior, then finish R8 packaged acceptance and R9. Diagnostic calibration remains open.
+ Historical packet sequencing is linked below, not reinstated.
+ 
+-Historical RE packet sequencing and rollback evidence remain in the [closed contract](2026-08-26-engine-integrity-plan.md) and [recovery record](2026-08-28-packaged-probe-recovery-plan.md); they impose no live dependency.
+-
+ ### 4.1 Finite behavior-closure register (2026-09-07)
+ 
+ **Current disposition:** BC01 CLOSED by owner approval: verified repair accepted; territory-similarity requirement retired ([verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)); BC02 CLOSED by its verified Electron load/display repair; BC03 CLOSED; BC04–BC07 pending under D1; BC08 closed by verification/disposition.
+@@ -234,7 +233,7 @@ live in the existing R8 plan; its previously proposed B10–B13/F1 are now regis
+ | BC01 player opportunities / R8 | Gameplay/operations + Game Designer + QA | **CLOSED — owner accepted repair and retired territory similarity (2026-09-07).** Verified L0/L1 review, L2 auto-apply/no queue, L3 observer across three factions. |
+ | BC02 B2/B9 sector/rating truth / R8 | Systems + QA | **CLOSED — verified 2026-09-07.** Electron save load rebuilds only transient ratings before player projection; canonical bytes and privacy remain intact. |
+ | BC03 B10 narrated Dayton / R8 | Events/systems + Game Designer + QA | **CLOSED 2026-09-07** — termination owner/COHA/signing repaired and verified; owner deferred post-horizon acceptance/tickers. Working negotiation preserved; no headless change. |
+-| BC04 B11 chronology + P1/P2 / R8/panel | Historian + systems + calibration + independent §6 panel | **P1 IMPLEMENTED/REVIEWED — campaign acceptance deferred to next calibration (clean before/after retained; P1 repeat/ON companion retired); P2/campaigns unauthorized.** Current n392 reconciliation is in the [existing BC04 plan](2026-07-31-full-campaign-electron-validation-plan.md#bc04-bounded-implementation-plan--2026-09-07); exclude landed barracks stagger. P1 and coherent P2 separately controlled later; timing/displacement/NATO outcomes measured. |
++| BC04 B11 chronology + P1/P2 / R8/panel | Historian + systems + calibration + independent §6 panel | **P1 IMPLEMENTED/REVIEWED — campaign acceptance deferred to next calibration (clean before/after retained; P1 repeat/ON companion retired); P2/campaigns unauthorized.** See [BC04 evidence and scope](2026-07-31-full-campaign-electron-validation-plan.md#bc04-bounded-implementation-plan--2026-09-07). Barracks stagger excluded. P2 week targets ratified; same-turn/display proposal awaits owner amendment of panel conditions. |
+ | BC05 B12 NATO/Lukavac gates / R8 | Events/systems + Historian + QA | NATO windows **FIX** after current-baseline confirmation; Lukavac **VERIFY/DISPOSITION** gate versus simulated-war cause. Lint is byte-neutral; enabling events is not. |
+ | BC06 B13 posture/gestures / R8 | Gameplay/desktop + Game Designer + QA | **FIX** bounded handlers/escalation with live player-action effects/receipts proof, not merely headless parity. |
+ | BC07 stability divergence / calibration-data | Asset/data integration + Systems + calibration | **VERIFY/DISPOSITION** consumed mode and retain/regenerate policy. Hybrid/ethnic initialization bypass matters; 227 potential stability rows do not prove 227 effects. No mandated regeneration or control repaint. |
+@@ -252,6 +251,12 @@ orphan-flag debt activation and broad drought authoring. F1 is diary triage with
+ holds, not an event quota. The byte-neutral orphan ratchet may be scheduled separately and gates
+ nothing here. R7 continues disjoint presentation work; publication authority remains separate.
+ 
++### 4.2 Bounded deletion cleanup / R8 (2026-09-07)
++
++**PLANNED:** [Four-item packet](2026-09-07-bounded-deletion-cleanup-plan.md), after BC04–BC07
++and before final calibration/R8 acceptance. Next: verify callers, Task 1. No implementation
++started, new lane or separate campaign; existing gates apply. KEEP with evidence is valid.
++
+ ## 5. Workstream Register
+ 
+ | ID | Workstream | Status | Executable plan | Complete when |
+diff --git a/docs/plans/README.md b/docs/plans/README.md
+index beb7404be..5f3dfac24 100644
+--- a/docs/plans/README.md
++++ b/docs/plans/README.md
+@@ -29,6 +29,11 @@ The former owner-decision and post-D2 residual lists are historical inputs, not
+ | R8 | [Full-campaign packaged-Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) | R7 remaining gates, scheduled finite behavior settlement, final calibration, then final packaged acceptance; RE gates nothing |
+ | R9 | [Release candidate, gold, and publication](2026-07-31-release-candidate-gold-publication-plan.md) | R8 produces two clean 5/5 diaries |
+ 
++**R8 subordinate packet:** [Bounded deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md)
++is planned after scheduled BC04–BC07 disposition and before final calibration/final packaged
++acceptance, per [master §4.2](MASTER_ROADMAP.md#42-bounded-deletion-cleanup--r8-2026-09-07).
++Four items only; implementation has not started and this creates no new workstream.
++
+ Each R1–R9 workstream has exactly one detailed plan that controls its roadmap lane.
+ Its row links the controlling plan and any
+ explicitly subordinate implementation or amendment packets with named files, tests, evidence,

@@ -2,7 +2,7 @@
  * Phase E2: Canonical entry point for preparing a fresh GameState for running.
  *
  * Ensures political control init is invoked exactly once per GameState creation.
- * Both sim_run and dev_runner use this single path.
+ * sim_run and other fresh-state callers use this single path.
  */
 
 import type { LoadedSettlementGraph } from '../map/settlements.js';

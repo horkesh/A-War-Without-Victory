@@ -256,7 +256,8 @@ describe('PersonnelContent player-facing display', () => {
     expect(container.textContent).toContain('Low-loyalty commanders');
     expect(container.textContent).toContain('Review before trusting: Staff Officer');
     expect(container.textContent).toContain('Reserve officers');
-    expect(container.textContent).toContain('Available: Reserve Officer');
+    expect(container.textContent).toContain('See the reserve roster below.');
+    expect(container.textContent).toContain('Reserve Officer');
     expect(container.textContent).toContain('Mobilization strain');
     expect(container.textContent).toContain('450 exhausted pool personnel.');
   });
@@ -338,9 +339,9 @@ describe('PersonnelContent player-facing display', () => {
 
     const { container } = render(React.createElement(PersonnelContent));
 
-    expect(container.textContent ?? '').toMatch(/1[,.]800Fielded personnel now/);
+    expect(container.textContent ?? '').toMatch(/1[,.]800Fielded personnel/);
     expect(container.textContent).toContain('2Active Brigades');
-    expect(container.textContent ?? '').not.toMatch(/2[,.]500Fielded personnel now/);
+    expect(container.textContent ?? '').not.toMatch(/2[,.]500Fielded personnel/);
     expect(container.textContent).not.toContain('3Active Brigades');
   });
 
@@ -390,10 +391,10 @@ describe('PersonnelContent player-facing display', () => {
     const { container } = render(React.createElement(PersonnelContent));
     const copy = container.textContent ?? '';
 
-    expect(copy).toContain('UnreportedSupply Reserve');
-    expect(copy).toContain('UnreportedCommitted');
-    expect(copy).toContain('UnreportedStrategic Reserve');
-    expect(copy).toContain('UnreportedExhaustion');
+    expect(copy).toContain('No staff reportSupply Reserve');
+    expect(copy).toContain('No staff reportCommitted');
+    expect(copy).toContain('No staff reportStrategic Reserve');
+    expect(copy).toContain('No staff reportExhaustion');
     expect(copy).toContain('Banja Luka');
     expect(copy).not.toContain('0Supply Reserve');
     expect(copy).not.toContain('NaN');
@@ -455,7 +456,7 @@ describe('PersonnelContent player-facing display', () => {
     expect(copy).toContain('0Committed');
     expect(copy).toContain('0Strategic Reserve');
     expect(copy).toContain('0.0%Exhaustion');
-    expect(copy).not.toContain('UnreportedSupply Reserve');
+    expect(copy).not.toContain('No staff reportSupply Reserve');
   });
 
   it('renders HQ-assigned brigades and routes them to Army HQ drilldown', () => {
@@ -509,10 +510,10 @@ describe('PersonnelContent player-facing display', () => {
     const { container } = render(React.createElement(PersonnelContent));
 
     expect(container.textContent).toContain('Main Staff reserve/security');
-    expect(container.textContent).toContain('1 brigades - Unreported');
+    expect(container.textContent).toContain('1 brigades - No staff report');
     const hqBrigadeLink = screen.getByRole('button', { name: /Guard Brigade/i });
     expect(hqBrigadeLink.textContent).toContain('Main Staff reserve/security');
-    expect(hqBrigadeLink.textContent).toContain('Unreported');
+    expect(hqBrigadeLink.textContent).toContain('No staff report');
     expect(container.textContent).not.toContain('1 brigades - 0');
   });
 });

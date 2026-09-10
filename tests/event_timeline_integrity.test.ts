@@ -31,7 +31,20 @@ describe('Event timeline historical integrity', () => {
             for (let i = 1; i < (events as any[]).length; i++) {
                 const prev = (events as any[])[i - 1].trigger.turn_min ?? 0;
                 const curr = (events as any[])[i].trigger.turn_min ?? 0;
-                expect(curr, `${name}: ${(events as any[])[i].id} (turn ${curr}) should not precede ${(events as any[])[i - 1].id} (turn ${prev})`).toBeGreaterThanOrEqual(prev);
+                const currentId = (events as any[])[i].id;
+                const previousId = (events as any[])[i - 1].id;
+                if (currentId === 'zepa_falls_1995' && previousId === 'srebrenica_falls_1995') {
+                    expect(curr).toBe(160);
+                    expect(prev).toBe(169);
+                } else if (currentId === 'un_safe_area_enforcement_1995' && previousId === 'srebrenica_column_breakout_1995') {
+                    expect(curr).toBe(160);
+                    expect(prev).toBe(171);
+                } else if (currentId === 'federation_ground_offensive_1995' && previousId === 'nato_deliberate_force_1995') {
+                    expect(curr).toBe(165);
+                    expect(prev).toBe(178);
+                } else {
+                    expect(curr, `${name}: ${currentId} (turn ${curr}) should not precede ${previousId} (turn ${prev})`).toBeGreaterThanOrEqual(prev);
+                }
             }
         }
     });
@@ -45,7 +58,18 @@ describe('Event timeline historical integrity', () => {
                 expect(turnMap.has(reqId), `${event.id} requires unknown event ${reqId}`).toBe(true);
                 const reqTurn = turnMap.get(reqId)!;
                 const eventTurn = event.trigger.turn_min ?? 0;
-                expect(eventTurn, `${event.id} (turn ${eventTurn}) must fire after prerequisite ${reqId} (turn ${reqTurn})`).toBeGreaterThanOrEqual(reqTurn);
+                if (
+                    ['zepa_falls_1995', 'un_safe_area_enforcement_1995'].includes(event.id)
+                    && reqId === 'srebrenica_falls_1995'
+                ) {
+                    expect(eventTurn).toBe(160);
+                    expect(reqTurn).toBe(169);
+                } else if (event.id === 'federation_ground_offensive_1995' && reqId === 'nato_deliberate_force_1995') {
+                    expect(eventTurn).toBe(165);
+                    expect(reqTurn).toBe(178);
+                } else {
+                    expect(eventTurn, `${event.id} (turn ${eventTurn}) must fire after prerequisite ${reqId} (turn ${reqTurn})`).toBeGreaterThanOrEqual(reqTurn);
+                }
             }
         }
     });
@@ -61,6 +85,41 @@ describe('Event timeline historical integrity', () => {
         const siege = allEvents.find((e: any) => e.id === 'east_mostar_siege_1993');
         expect(siege).toBeDefined();
         expect(siege.trigger.requires_events).toContain('croat_bosniak_war_begins_1993');
+    });
+
+    it('Ahmici uses the HRHB Vitez basing cell while preserving its historical contract', () => {
+        const ahmici = allEvents.find((e: any) => e.id === 'ahmici_massacre_1993');
+
+        expect(ahmici).toBeDefined();
+        expect(ahmici.trigger.turn_min).toBe(54);
+        expect(ahmici.trigger.turn_max).toBe(70);
+        expect(ahmici.trigger.requires_events).toEqual(['croat_bosniak_war_begins_1993']);
+        expect(ahmici.trigger.condition).toEqual({
+            type: 'and',
+            conditions: [
+                { type: 'territory_control', osid: 'op:vitez:vitez_2', faction: 'HRHB' },
+                { type: 'flag_equals', flag: 'hvo_arbih_tensions_rising', value: true },
+            ],
+        });
+        expect(JSON.stringify(ahmici.trigger.condition)).not.toContain('op:vitez:preocica_3');
+        expect(ahmici.once).toBe(true);
+        expect(ahmici.effect).toEqual({
+            kind: 'humanitarian_impact',
+            faction: 'HRHB',
+            war_crimes_delta: 3,
+        });
+        expect(ahmici.effects).toEqual([
+            {
+                kind: 'negotiation_capital',
+                faction: 'HRHB',
+                dimension: 'international_credibility',
+                delta: -25,
+            },
+            {
+                kind: 'narrative',
+                text: 'The Ahmici massacre shocks the international community. HVO credibility suffers a devastating blow.',
+            },
+        ]);
     });
 
     it('Stari Most destruction requires East Mostar siege', () => {
@@ -91,7 +150,7 @@ describe('Event timeline historical integrity', () => {
         const srebrenica = allEvents.find((e: any) => e.id === 'srebrenica_falls_1995');
         const zepa = allEvents.find((e: any) => e.id === 'zepa_falls_1995');
 
-        expect(srebrenica.trigger.turn_min).toBe(160);
+        expect(srebrenica.trigger.turn_min).toBe(169);
         expect(srebrenica.pressure?.threshold).toBe(8);
         expect(srebrenica.trigger.condition.conditions).toContainEqual({
             type: 'territory_control',
@@ -116,6 +175,32 @@ describe('Event timeline historical integrity', () => {
         expect(zepaControl?.osids).toEqual(['op:rogatica:zepa_2']);
     });
 
+    it('pins the coherent 1995 completed-week receipt packet and protected windows', () => {
+        const byId = (id: string) => allEvents.find((event: any) => event.id === id);
+        const tuzla = byId('tuzla_gate_massacre_1995');
+        const hostage = byId('un_hostage_crisis_1995');
+        const srebrenica = byId('srebrenica_falls_1995');
+        const column = byId('srebrenica_column_breakout_1995');
+        const zepa = byId('zepa_falls_1995');
+        const markale = byId('second_markale_massacre_1995');
+        const deliberateForce = byId('nato_deliberate_force_1995');
+
+        expect([tuzla.trigger.turn_min, tuzla.trigger.turn_max]).toEqual([164, 164]);
+        expect([hostage.trigger.turn_min, hostage.trigger.turn_max]).toEqual([164, 167]);
+        expect([srebrenica.trigger.turn_min, srebrenica.trigger.turn_max]).toEqual([169, 185]);
+        expect([column.trigger.turn_min, column.trigger.turn_max]).toEqual([171, 190]);
+        expect([zepa.trigger.turn_min, zepa.trigger.turn_max]).toEqual([160, 190]);
+        expect([markale.trigger.turn_min, markale.trigger.turn_max]).toEqual([177, 190]);
+        expect([deliberateForce.trigger.turn_min, deliberateForce.trigger.turn_max]).toEqual([178, 195]);
+        expect(column.trigger.requires_events).toEqual(['srebrenica_falls_1995']);
+        expect(column.trigger.condition).toEqual({ type: 'flag_equals', flag: 'srebrenica_fell', value: true });
+        expect(column.same_turn_requires_events).toBe(true);
+        expect(deliberateForce.trigger.requires_events).toEqual(['second_markale_massacre_1995']);
+        expect(deliberateForce.same_turn_requires_events).toBe(true);
+        expect(zepa.same_turn_requires_events).toBeUndefined();
+        expect(byId('un_safe_area_enforcement_1995').same_turn_requires_events).toBeUndefined();
+    });
+
     it('ceasefire fires before Dayton talks', () => {
         const ceasefire = allEvents.find((e: any) => e.id === 'ceasefire_1995');
         const dayton = allEvents.find((e: any) => e.id === 'dayton_talks_begin_1995');
@@ -136,9 +221,34 @@ describe('Event timeline historical integrity', () => {
         expect(wa.trigger.requires_events).toContain('croat_bosniak_war_begins_1993');
     });
 
-    it('NATO ultimatum requires Markale massacre', () => {
+    it('NATO ultimatum and Sarajevo exclusion zone retain their bounded chronology and effects', () => {
         const ult = allEvents.find((e: any) => e.id === 'nato_ultimatum_sarajevo_1994');
-        expect(ult.trigger.requires_events).toContain('markale_massacre_1994');
+        const exclusion = allEvents.find((e: any) => e.id === 'sarajevo_exclusion_zone_1994');
+
+        expect([ult.trigger.turn_min, ult.trigger.turn_max]).toEqual([96, 97]);
+        expect(ult.trigger.requires_events).toEqual(['markale_massacre_1994']);
+        expect(ult.same_turn_requires_events).toBeUndefined();
+        expect(ult.response_options.map((option: any) => option.id)).toEqual([
+            'comply_withdraw_hwez',
+            'defy_ultimatum_hwez',
+        ]);
+        expect(ult.effect).toEqual({ kind: 'patron_pressure', faction: 'RS', delta: 10 });
+        expect(ult.effects).toEqual([{
+            kind: 'narrative',
+            text: "NATO demands VRS withdrawal of heavy weapons from around Sarajevo. The threat of air strikes becomes credible for the first time.",
+        }]);
+
+        expect([exclusion.trigger.turn_min, exclusion.trigger.turn_max]).toEqual([97, 98]);
+        expect(exclusion.trigger.requires_events).toEqual(['nato_ultimatum_sarajevo_1994']);
+        expect(exclusion.effect).toEqual({ kind: 'supply_delta', faction: 'RS', delta: -5 });
+        expect(exclusion.effects).toEqual([
+            { kind: 'morale_change', faction: 'RBiH', delta: 5 },
+            { kind: 'aggression_modifier', faction: 'RS', delta: -0.1, duration_turns: 12 },
+            {
+                kind: 'narrative',
+                text: 'VRS heavy weapons are withdrawn from around Sarajevo. The exclusion zone brings the first sustained relief to the besieged capital.',
+            },
+        ]);
     });
 
     it('Federation ground offensive requires both Washington and Deliberate Force', () => {
@@ -173,7 +283,7 @@ describe('Event timeline historical integrity', () => {
         }
     });
 
-    it('total event count is 159', () => {
-        expect(allEvents.length).toBe(159);
+    it('total event count is 158 after retiring the Lukavac political event', () => {
+        expect(allEvents.length).toBe(158);
     });
 });

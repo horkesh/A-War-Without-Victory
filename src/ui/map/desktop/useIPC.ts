@@ -394,6 +394,27 @@ interface WindowAwwv {
         eligibleFormationIds?: string[];
         error?: string;
     }>;
+    getStrategicPostureReviewAvailability: () => Promise<{
+        ok: boolean;
+        costCA?: number;
+        available?: boolean;
+        reason?: string | null;
+        eventId?: string | null;
+        currentTurn?: number;
+        firesLeft?: number;
+        maxFires?: number;
+        cooldownUntil?: number | null;
+        onCooldown?: boolean;
+        error?: string;
+    }>;
+    initiateStrategicPostureReview: () => Promise<{
+        ok: boolean;
+        reason?: string;
+        eventId?: string;
+        caCost?: number;
+        offeredBranchIds?: string[];
+        error?: string;
+    }>;
     // v0.8.4 Phase B+C: Autonomy bridge
     getAutonomyState: () => Promise<{ autonomy_level: number; autonomy_level_pending?: number; autonomy_overrides?: Record<string, unknown>; pending_proposal_reviews?: unknown[] }>;
     setAutonomyLevel: (level: number) => Promise<{ ok: boolean; error?: string }>;
@@ -778,6 +799,14 @@ export function useIPC() {
             initiateDecorateUnit: awwv
                 ? () => awwv.initiateDecorateUnit()
                 : makeNoop<{ ok: boolean; reason?: string; eventId?: string; caCost?: number; offeredBranchIds?: string[]; eligibleFormationIds?: string[]; error?: string }>(),
+
+            getStrategicPostureReviewAvailability: awwv
+                ? () => awwv.getStrategicPostureReviewAvailability()
+                : makeNoop<{ ok: boolean; costCA?: number; available?: boolean; reason?: string | null; eventId?: string | null; currentTurn?: number; firesLeft?: number; maxFires?: number; cooldownUntil?: number | null; onCooldown?: boolean; error?: string }>(),
+
+            initiateStrategicPostureReview: awwv
+                ? () => awwv.initiateStrategicPostureReview()
+                : makeNoop<{ ok: boolean; reason?: string; eventId?: string; caCost?: number; offeredBranchIds?: string[]; error?: string }>(),
 
             // v0.8.4 Phase B+C: Autonomy bridge
             getAutonomyState: awwv

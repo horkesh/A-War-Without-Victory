@@ -1,0 +1,3 @@
+TypeError: Cannot read properties of undefined (reading 'push')
+    at mixedInvalidRow (F:\AWWV-worktrees\bc09-shared-inputs\logs\r8-runtime-integrity\live-ipc.cjs:23:64)
+    at main (F:\AWWV-worktrees\bc09-shared-inputs\logs\r8-runtime-integrity\live-ipc.cjs:84:94)

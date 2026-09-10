@@ -4,7 +4,7 @@
  */
 import type { SettlementTimelineEvent, TimelineEventType } from '../utils/buildSettlementTimeline';
 import { t } from '../i18n/index.js';
-import { turnToDateString } from '../utils/formatters.js';
+import { turnToCompletedWeekRange } from '../utils/formatters.js';
 
 const EVENT_STYLES: Record<TimelineEventType, { icon: string; color: string; bg: string }> = {
     control_flip:       { icon: '⚑', color: 'text-amber-400',    bg: 'border-amber-400/40' },
@@ -22,7 +22,7 @@ const EVENT_STYLES: Record<TimelineEventType, { icon: string; color: string; bg:
 };
 
 export function formatSettlementTimelineTurnDate(turn: number): string {
-    return turnToDateString(turn);
+    return turnToCompletedWeekRange(turn);
 }
 
 function formatCasualtyCount(value: number | null): string {

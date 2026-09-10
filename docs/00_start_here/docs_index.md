@@ -50,24 +50,9 @@
 
 ## Planning (docs/plans/)
 
-**Current override (2026-08-28):** engine health precedes further calibration, but RE is finite.
-The original probe channel is closed history at `b711cffa9`; it is not RE. The owner-approved
-[1.0 Engine Integrity contract](../plans/2026-08-26-engine-integrity-plan.md) supersedes the old
-T0–T14 monolith with seven outcomes/eight packets. P1/P2A were accepted; RE CLOSED 2026-09-01 and the P2B blocker is history. Historically, P3
-waits. The auxiliary packaged-proof discovery and prerequisite are terminally closed at
-`NO_VERDICT`; their exact unproven hypothesis was rolled back at `48909e1d6`. No packaged-proof
-route, retry, diagnosis, instrumentation, or successor proof route is active or implied. The
-auxiliary work earns no RE credit or automatic P2B proof, and the calibration pause is unchanged.
-The corrected
-Node-22 baseline at `177882fc2` is deterministic, engine-green, byte-identical outside normalized
-metadata, and save/replay-green. Its `+3.62853%` mandatory-correctness cost is watch-only, not a
-1.0 gate; no further pre-1.0 performance diagnosis is authorized. No packet runs a campaign; one
-final clean A/B pair/profile precedes R8. Active-formation strength, dissolution salvage, enclave
-targeting, hostile breakout, and speculative mechanics are deferred. Broad audit/essay tasks,
-standalone closeout machinery, and repeated full-team review are retired. Historical fit remains
-non-authorizing calibration observation.
+**Current control plane (2026-09-07):** [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md) is the sole authority for unfinished product work; [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md) and [plans index](../plans/README.md) are derived. R1–R5, the accepted R6 slice, and narrow RC are closed. RE closed 2026-09-01 and gates nothing; its [contract](../plans/2026-08-26-engine-integrity-plan.md) and [recovery](../plans/2026-08-28-packaged-probe-recovery-plan.md) remain history, not active packets.
 
-**Current control plane (synchronized 2026-09-01):** [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md) is the sole authority for unfinished product work. R1–R6 and narrow RC are closed. R7 cinematic-opening mechanics, typography, and fallback-art browser proof are complete; required owner splash/neutral art, live packaged acceptance, human listen/sensitivity, broader English accessibility/readability, and closeout remain. RE is CLOSED (owner, 2026-09-01) and gates nothing. The terminal discovery/prerequisite and exact rollback at `48909e1d6` are closed history, not an active queue. [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md) is the derived dispatch view, and the [plans index](../plans/README.md) links the executable contracts. Collapse D-topology and multilingual localization remain post-1.0. Old RE T-tasks, performance-remediation, WP-9/D2/D3/D4, Free War, FORAWWV-decision, Standing-OG-verdict, localization-reviewer, and release-operator queues are historical inputs, not separate authorities.
+R7 owner art and packaged first-paint passed 2026-08-29; [English-readability amendment](../plans/2026-09-05-r7-presentation-and-english-readability-amendment-plan.md), human listen/sensitivity and closeout remain. [Finite behavior register](../plans/MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07): BC01 CLOSED by owner approval; territory-similarity requirement retired ([verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)); BC02–BC07 pending; [BC08](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md) closed by bounded verification/disposition. The historical BC08 suite boundary is superseded for current implementation by [BC01 verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md): raw suite exit 1, five missing BCS keys fixed, 29 focused tests and fresh build pass; no full-suite-green claim. R7 may continue on disjoint files; D1 scheduling remains unchanged. Calibration stays open on accepted n392; final calibration follows accepted behavior settlement, then final R8 packaged acceptance and R9. D-topology/localization and other explicit post-1.0 debt stay excluded; publication authority remains separate.
 
 The remaining files under `docs/30_planning/` are design specifications, not active execution queues: [multi-brigade operations](../30_planning/MULTI_BRIGADE_OPERATION_DESIGN_SPEC.md), [operation reevaluation](../30_planning/OPERATION_REEVALUATION_DESIGN_SPEC.md), and [spatial context](../30_planning/SPATIAL_CONTEXT_DESIGN_SPEC.md). Historical plans removed from that folder remain available through Git history and the ledgers.
 

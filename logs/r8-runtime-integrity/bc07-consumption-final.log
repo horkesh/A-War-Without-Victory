@@ -1,0 +1,17 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+[E5] Political control initialized (initial municipal substrate): 1 canonical graph nodes (SID-keyed), RBiH=1, RS=0, HRHB=0, null=0. Promoted to OSID when operational data present.
+[E5] Political control initialized (initial municipal substrate): 1 canonical graph nodes (SID-keyed), RBiH=1, RS=0, HRHB=0, null=0. Promoted to OSID when operational data present.
+[E5] Political control initialized (ethnic_1991): 1 canonical graph nodes (SID-keyed), RBiH=1, RS=0, HRHB=0. Promoted to OSID when operational data present.
+[E5] Political control initialized (ethnic_1991): 1 canonical graph nodes (SID-keyed), RBiH=1, RS=0, HRHB=0. Promoted to OSID when operational data present.
+[E5] Political control initialized (hybrid_1992, threshold=0.7): 1 canonical graph nodes (SID-keyed), RBiH=1, RS=0, HRHB=0. Promoted to OSID when operational data present.
+[E5] Political control initialized (hybrid_1992, threshold=0.7): 1 canonical graph nodes (SID-keyed), RBiH=1, RS=0, HRHB=0. Promoted to OSID when operational data present.
+ ✓ tests/bc07_operational_initial_master_consumption.test.ts (3 tests) 33ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  08:37:17
+   Duration  1.67s (transform 454ms, setup 20ms, collect 514ms, tests 33ms, environment 0ms, prepare 119ms)
+
+EXIT_CODE=0

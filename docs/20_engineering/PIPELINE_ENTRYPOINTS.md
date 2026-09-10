@@ -61,7 +61,7 @@ Scenario runner (`src/scenario/scenario_runner.ts`) routes to whichever pipeline
 - **Artifact:** `data/derived/political_control_data.json` is the **canonical source** for initial (Turn 0) political control used by warroom and all map viewers.
 - **Produced by:** `npm run map:viewer:political-control-data` (script: `scripts/map/build_political_control_data.ts`).
 - **Contract:** Warroom and map UIs must use this file for initial control display; no alternate source for that purpose. When the artifact includes `control_status` or contested flags, those drive contested overlays (e.g. crosshatch) in map UIs.
-- **OSID-keyed init (dev runner, scenario with operational data):** When the settlement graph is OSID-keyed (712 entries), political control init uses `data/derived/operational/operational_initial_master.json`. **After any OSID merge** run `npm run map:derive:operational-initial-master` so this file matches `operational_settlements.geojson` (see MAP_BUILD_SYSTEM.md §Operational (OSID) layer).
+- **OSID-keyed init (scenario with operational data):** When the settlement graph is OSID-keyed (712 entries), political control init uses `data/derived/operational/operational_initial_master.json`. **After any OSID merge** run `npm run map:derive:operational-initial-master` so this file matches `operational_settlements.geojson` (see MAP_BUILD_SYSTEM.md §Operational (OSID) layer).
 
 ### React player GUI and tactical map
 - **Engineering reference:** `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
@@ -80,8 +80,8 @@ Scenario runner (`src/scenario/scenario_runner.ts`) routes to whichever pipeline
   - Inputs: `docs/50_research/*.pdf`
   - Outputs: `docs/50_research/extracts/*.txt` (agent-readable). See `docs/50_research/README_KNOWLEDGE_BASE.md`.
 
-### War-Phase Browser Advance (Warroom — bounded variant, not co-equal)
-- `src/sim/run_combat_browser.ts` — `runPhaseIITurn(state, input)` — browser-safe war-phase turn advance. No Node/fs. Used only by the warroom (`src/ui/warroom/ClickableRegionManager.ts`) when advancing a turn in war phase. Increments the turn counter; war phase uses location_osid only (no AoR). Does not run supply pressure or exhaustion. This is a bounded UI variant; full war-phase behavior comes from the canonical war pipeline `runTurn()` in `src/sim/turn_pipeline.ts`.
+### Warroom advance ownership
+- `src/ui/warroom/ClickableRegionManager.ts` uses the desktop IPC bridge when present and retains its existing `runPhaseITurn` browser fallback. Full war-phase behavior belongs to canonical `runTurn()` in `src/sim/turn_pipeline.ts`. The unused increment-only browser combat runner was removed in cleanup Task 1 (2026-09-08).
 
 ### War-phase location_osid (AoR removed)
 - AoR init is removed. War-phase brigade location is **location_osid** only; set at formation creation and via `backfillFormationLocationOsid` at war entry. See docs/30_planning/AOR_PHASEOUT_OSID_ZOC_RECONCILIATION.md. Legacy `src/scenario/aor_init.ts` is deprecated and must not be used for war-phase state.
@@ -174,11 +174,6 @@ Replay scale hardening remains separate from replay inspection: large desktop lo
 Desktop calibration comparison is a separate replay-evidence entrypoint: `tools/ai_play/desktop_calibration_compare.ts --electron-log <path> --electron-autosave <path> ...`. It must bind scenario, player faction, requested/final turn, initial control totals, every per-turn control snapshot, and final control totals before comparing Electron against controlled-player and headless branches. It reports per-turn/final control deltas and categorizes Electron-only recruitment, Command Authority, and proposal actions as input divergence rather than nondeterminism. Contract tests: `tests/desktop_calibration_compare.test.ts`.
 
 When changing any of the owners above, update the allow-list or register a migration before landing the change; see the pre-commit doc checklist at the end of this file.
-
-## Demoted / Legacy Harnesses (do not route live behavior through these)
-These exist for smoke and internal checks only. They are not co-equal with the canonical war/peace pipelines named above. Do not add new callers.
-- `src/index.ts` — minimal deterministic smoke entrypoint. Runs a one-shot `executeTurn()` and prints serialized state. Not the game entrypoint.
-- `src/turn/pipeline.ts` — legacy prototype `executeTurn()`; only invoked by `src/index.ts`. Live war behavior belongs in `src/sim/turn_pipeline.ts`.
 
 ## UI / Asset Tooling (Non-Sim, Opt-In)
 These are **not** simulation entrypoints. They are opt-in tooling and must remain isolated from deterministic sim outputs.

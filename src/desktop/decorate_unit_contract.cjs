@@ -7,11 +7,12 @@
  * This module force-queues the ALREADY-AUTHORED `decorate_a_unit_<faction>` event
  * (data/scenarios/events/war_1993.json) into
  * `state.military.pending_event_decisions` so EventDecisionModal surfaces it.
- * ZERO new sim/event code — the event's authored effects (morale / cohesion /
+ * The event's authored effects (morale / cohesion /
  * military_credibility / internal_cohesion shifts, all double-edged), voluntary action cadence
  * (max_fires 5 / cooldown 10t), and branches are reused. This contract ADDS the
  * deterministic per-unit branch expansion so the PLAYER picks WHICH regular
- * formation to honour (we never auto-pick the unit).
+ * formation to honour (we never auto-pick the unit). The decision resolver scopes
+ * morale/cohesion to that selected formation while retaining authored deltas.
  *
  * ⚠ BRIGHT LINE (design §5, non-§6 — keep it that way):
  * ONLY REGULAR MILITARY FORMATIONS are eligible — NEVER paramilitaries, militia,
@@ -50,6 +51,8 @@ const DECORATE_UNIT_EVENT_BY_FACTION = {
   HRHB: 'decorate_a_unit_hrhb',
 };
 
+const { responseOptionsForFire } = require('./action_cadence_contract.cjs');
+
 /** Returns the authored decorate-a-unit event id for a faction, or null. */
 function decorateUnitEventIdForFaction(faction) {
   return DECORATE_UNIT_EVENT_BY_FACTION[faction] ?? null;
@@ -76,7 +79,7 @@ function eligibleRegularFormations(state, playerFaction) {
     const f = formations[id];
     if (!f || typeof f !== 'object') continue;
     if (f.faction !== playerFaction) continue;
-    if (f.status && f.status !== 'active') continue;
+    if (f.status !== 'active') continue;
     const kind = typeof f.kind === 'string' ? f.kind : 'brigade'; // schema default
     if (!ELIGIBLE_REGULAR_KINDS.has(kind)) continue; // bright-line gate
     out.push({ id, name: typeof f.name === 'string' && f.name ? f.name : id, kind });
@@ -126,6 +129,9 @@ function computeDecorateUnitAvailability(state, playerFaction, eventDef) {
 
   if (!playerFaction) return { ...base, reason: 'no_player_faction' };
   if (!eventId || !eventDef) return { ...base, reason: 'no_event' };
+  if ((state?.military?.pending_event_decisions ?? []).some((decision) => decision?.event_id === eventId)) {
+    return { ...base, reason: 'already_pending' };
+  }
 
   const actionCadence = eventDef.action_cadence;
   if (!actionCadence) return { ...base, reason: 'no_action_cadence' };
@@ -177,12 +183,11 @@ function steadfastBranchId(playerFaction) {
  * steadfast template is dropped entirely (only broad/decline offered) — the
  * bright line means there is simply no unit to single out.
  *
- * Each per-unit branch id is `<steadfast>__<formationId>` so the downstream
- * resolver still finds the authored template effects (the resolver should match
- * on the template prefix; the suffix is presentational targeting only). To keep
- * the existing resolver working WITHOUT engine changes, each cloned option also
- * carries the authored `effects` / `dimension_shifts` inline so resolution does
- * not depend on id lookup.
+ * Each per-unit branch id is `<steadfast>__<formationId>`. The authoritative
+ * resolver validates that suffix and applies the cloned morale/cohesion effects
+ * only to the selected active regular formation. Each cloned option carries the
+ * authored `effects` / `dimension_shifts` inline so resolution does not depend
+ * on a second response-option lookup.
  *
  * @returns the PendingEventDecision-shaped object (or null if not buildable).
  */
@@ -192,7 +197,10 @@ function buildDecorateUnitPendingDecision(state, playerFaction, eventDef, availa
   const templateId = steadfastBranchId(playerFaction);
   const eligible = Array.isArray(availability.eligibleFormations) ? availability.eligibleFormations : [];
 
-  const authored = Array.isArray(eventDef.response_options) ? eventDef.response_options : [];
+  const authored = responseOptionsForFire(
+    eventDef.response_options,
+    (state?.military?.event_fire_counts?.[eventDef.id] ?? 0) + 1,
+  );
   const template = authored.find((o) => o && o.id === templateId) || null;
 
   const options = [];
@@ -251,6 +259,20 @@ function buildDecorateUnitPendingDecision(state, playerFaction, eventDef, availa
   }
   if (eventDef.staff_recommended_response_id) {
     decision.staff_recommended_response_id = eventDef.staff_recommended_response_id;
+  }
+  if (eventDef.notifications_to_other_factions) {
+    const notifications = { ...eventDef.notifications_to_other_factions };
+    const templateNotifications = templateId
+      ? eventDef.notifications_to_other_factions[templateId]
+      : null;
+    if (templateNotifications) {
+      for (const option of options) {
+        if (option.id.startsWith(`${templateId}__`)) {
+          notifications[option.id] = templateNotifications;
+        }
+      }
+    }
+    decision.notifications_to_other_factions = notifications;
   }
   return decision;
 }

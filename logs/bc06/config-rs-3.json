@@ -1,0 +1,215 @@
+{
+  "reviewed": true,
+  "caseId": "live-rs-3-final-01",
+  "fixture": "F:\\A-War-Without-Victory\\logs\\bc06\\fixture-rs-3.json",
+  "loadSteps": [
+    {
+      "buttonName": "Assume responsibility"
+    },
+    {
+      "buttonName": "Field Records"
+    },
+    {
+      "buttonName": "Resume bc06-proof-fixture"
+    }
+  ],
+  "before": [
+    {
+      "path": [
+        "meta",
+        "turn"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    }
+  ],
+  "steps": [
+    {
+      "selector": "[data-testid=\"toolbar-route-desk\"]",
+      "frameUrlIncludes": "http"
+    },
+    {
+      "buttonRegex": "^Command surface$"
+    },
+    {
+      "buttonRegex": "Command & Personnel"
+    },
+    {
+      "selector": "[data-testid=\"decision-room-priority-card-command:strategic-posture-review\"] button:first-of-type",
+      "buttonRegex": "Dossier"
+    },
+    {
+      "selector": "[data-testid=\"decision-room-active-dossier\"]",
+      "inspectOnly": true
+    },
+    {
+      "buttonRegex": "^(Issue \\(10\\)|Authorize)$"
+    },
+    {
+      "selector": "[data-testid=\"event-decision-response\"][aria-label=\"Choose response: Accept a partition framework\"]"
+    }
+  ],
+  "after": [
+    {
+      "path": [
+        "military",
+        "event_fire_counts",
+        "strategic_posture_review_rs"
+      ],
+      "equals": 3
+    },
+    {
+      "path": [
+        "military",
+        "command_authority",
+        "current"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "command_authority",
+        "spent_this_turn"
+      ],
+      "equals": 10
+    },
+    {
+      "path": [
+        "military",
+        "event_last_fired_turn",
+        "strategic_posture_review_rs"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    },
+    {
+      "path": [
+        "military",
+        "event_decision_log"
+      ],
+      "equals": [
+        {
+          "event_id": "strategic_posture_review_rs",
+          "response_id": "accept_partition_framework",
+          "decision_source": "player",
+          "faction": "RS",
+          "turn": 90
+        }
+      ]
+    },
+    {
+      "path": [
+        "military",
+        "general_supply_reserve",
+        "RS"
+      ],
+      "equals": 56
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "rs_11th_dubica_infantry",
+        "cohesion"
+      ],
+      "equals": 42
+    }
+  ],
+  "persisted": [
+    {
+      "path": [
+        "military",
+        "event_fire_counts",
+        "strategic_posture_review_rs"
+      ],
+      "equals": 3
+    },
+    {
+      "path": [
+        "military",
+        "command_authority",
+        "current"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "command_authority",
+        "spent_this_turn"
+      ],
+      "equals": 10
+    },
+    {
+      "path": [
+        "military",
+        "event_last_fired_turn",
+        "strategic_posture_review_rs"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    },
+    {
+      "path": [
+        "military",
+        "event_decision_log"
+      ],
+      "equals": [
+        {
+          "event_id": "strategic_posture_review_rs",
+          "response_id": "accept_partition_framework",
+          "decision_source": "player",
+          "faction": "RS",
+          "turn": 90
+        }
+      ]
+    },
+    {
+      "path": [
+        "military",
+        "general_supply_reserve",
+        "RS"
+      ],
+      "equals": 56
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "rs_11th_dubica_infantry",
+        "cohesion"
+      ],
+      "equals": 42
+    },
+    {
+      "path": [
+        "military",
+        "event_flags",
+        "rs_posture"
+      ],
+      "equals": "ceasefire"
+    }
+  ],
+  "expectsMutation": true,
+  "repeatAction": "initiateStrategicPostureReview",
+  "repeatReason": "on_cooldown"
+}

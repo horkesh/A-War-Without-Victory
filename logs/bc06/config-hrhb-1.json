@@ -1,0 +1,218 @@
+{
+  "reviewed": true,
+  "caseId": "live-hrhb-1-final-01",
+  "fixture": "F:\\A-War-Without-Victory\\logs\\bc06\\fixture-hrhb-1.json",
+  "loadSteps": [
+    {
+      "buttonName": "Assume responsibility"
+    },
+    {
+      "buttonName": "Field Records"
+    },
+    {
+      "buttonName": "Resume bc06-proof-fixture"
+    }
+  ],
+  "before": [
+    {
+      "path": [
+        "meta",
+        "turn"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    }
+  ],
+  "steps": [
+    {
+      "selector": "[data-testid=\"toolbar-route-desk\"]",
+      "frameUrlIncludes": "http"
+    },
+    {
+      "buttonRegex": "^Command surface$"
+    },
+    {
+      "buttonRegex": "Command & Personnel"
+    },
+    {
+      "selector": "[data-testid=\"decision-room-priority-card-command:strategic-posture-review\"] button:first-of-type",
+      "buttonRegex": "Dossier"
+    },
+    {
+      "selector": "[data-testid=\"decision-room-active-dossier\"]",
+      "inspectOnly": true
+    },
+    {
+      "buttonRegex": "^(Issue \\(10\\)|Authorize)$"
+    },
+    {
+      "selector": "[data-testid=\"event-decision-response\"][aria-label=\"Choose response: Press Bosnian Croat territorial objectives\"]",
+      "absentSelectors": [
+        "[data-testid=\"event-decision-response\"][aria-label=\"Choose response: Accept the Federation framework\"]"
+      ]
+    }
+  ],
+  "after": [
+    {
+      "path": [
+        "military",
+        "event_fire_counts",
+        "strategic_posture_review_hrhb"
+      ],
+      "equals": 1
+    },
+    {
+      "path": [
+        "military",
+        "command_authority",
+        "current"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "command_authority",
+        "spent_this_turn"
+      ],
+      "equals": 10
+    },
+    {
+      "path": [
+        "military",
+        "event_last_fired_turn",
+        "strategic_posture_review_hrhb"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    },
+    {
+      "path": [
+        "military",
+        "event_decision_log"
+      ],
+      "equals": [
+        {
+          "event_id": "strategic_posture_review_hrhb",
+          "response_id": "press_croat_objectives",
+          "decision_source": "player",
+          "faction": "HRHB",
+          "turn": 90
+        }
+      ]
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "hrhb_101st_oraje_brigade",
+        "morale"
+      ],
+      "equals": 54
+    },
+    {
+      "path": [
+        "military",
+        "general_supply_reserve",
+        "HRHB"
+      ],
+      "equals": 48
+    }
+  ],
+  "persisted": [
+    {
+      "path": [
+        "military",
+        "event_fire_counts",
+        "strategic_posture_review_hrhb"
+      ],
+      "equals": 1
+    },
+    {
+      "path": [
+        "military",
+        "command_authority",
+        "current"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "command_authority",
+        "spent_this_turn"
+      ],
+      "equals": 10
+    },
+    {
+      "path": [
+        "military",
+        "event_last_fired_turn",
+        "strategic_posture_review_hrhb"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    },
+    {
+      "path": [
+        "military",
+        "event_decision_log"
+      ],
+      "equals": [
+        {
+          "event_id": "strategic_posture_review_hrhb",
+          "response_id": "press_croat_objectives",
+          "decision_source": "player",
+          "faction": "HRHB",
+          "turn": 90
+        }
+      ]
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "hrhb_101st_oraje_brigade",
+        "morale"
+      ],
+      "equals": 54
+    },
+    {
+      "path": [
+        "military",
+        "general_supply_reserve",
+        "HRHB"
+      ],
+      "equals": 48
+    },
+    {
+      "path": [
+        "military",
+        "event_flags",
+        "hrhb_posture"
+      ],
+      "equals": "offensive"
+    }
+  ],
+  "expectsMutation": true,
+  "repeatAction": "initiateStrategicPostureReview",
+  "repeatReason": "on_cooldown"
+}

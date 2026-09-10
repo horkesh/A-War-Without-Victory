@@ -86,7 +86,12 @@ function severityLabel(severity: PreAdvanceCommandReviewItem['severity']): strin
 function MetricCell({ label, value, highlighted = false }: { label: string; value: number; highlighted?: boolean }) {
   return (
     <div className="min-w-0 border border-panel-border/60 bg-panel-card/65 px-2 py-1.5">
-      <div className="truncate text-xs font-bold uppercase tracking-[0.14em] text-text-muted">{label}</div>
+      <div
+        title={label}
+        className="line-clamp-2 text-xs font-bold uppercase leading-tight tracking-[0.08em] text-text-muted"
+      >
+        {label}
+      </div>
       <div className={`text-base font-bold tabular-nums ${highlighted ? 'text-amber-300' : 'text-text-primary'}`}>
         {value}
       </div>

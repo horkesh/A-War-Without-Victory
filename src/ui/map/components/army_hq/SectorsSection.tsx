@@ -156,8 +156,15 @@ function SectorExpandedDetail({
             <div className="space-y-2">
                 {isReportedNumber(sector.intel_confidence)
                     ? <IntelBar value={sector.intel_confidence} label={t('sectorsSection.intel')} />
-                    : <div className="text-xs text-text-secondary">{t('corpsFront.unreported')}</div>}
-                {!hasThreatIntel && hasReportedThreat && threatRatio > 0 && (
+                    : (
+                        <div className="text-xs italic text-text-secondary">
+                            {t('corpsFront.unreported')}
+                            {hasReportedThreat && threatRatio > 0 && (
+                                <> — <span className="lowercase">{t('sectorsSection.threatUnconfirmed')}</span>.</>
+                            )}
+                        </div>
+                    )}
+                {isReportedNumber(sector.intel_confidence) && !hasThreatIntel && hasReportedThreat && threatRatio > 0 && (
                     <div className="flex items-center gap-2 text-xs text-text-secondary">
                         {t('sectorsSection.threatUnconfirmed')}
                     </div>
@@ -407,14 +414,7 @@ function SectorExpandedDetail({
 
             <div className="border-t border-panel-border/50 pt-3 flex flex-wrap gap-x-6 gap-y-2 text-text-secondary text-xs uppercase tracking-wider">
                 <span data-testid="army-hq-sector-frontage" data-front-segments={sector.length_edges}>{t('sectorsSection.frontage', { count: sector.length_edges })}</span>
-                {hasCurrentFieldedLine && (
-                    <>
-                        <span>{projectedDensity == null
-                            ? t('sectorsSection.frontageUnreported')
-                            : t('sectorsSection.bdePerFrontSegment', { value: projectedDensity })}</span>
-                    </>
-                )}
-                {sector.sub_segments && <span>{t('sectorsSection.segments', { count: sector.sub_segments.length })}</span>}
+                {(sector.sub_segments?.length ?? 0) > 1 && <span>{t('sectorsSection.segments', { count: sector.sub_segments?.length ?? 0 })}</span>}
             </div>
         </div>
     );

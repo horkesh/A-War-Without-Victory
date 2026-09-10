@@ -106,9 +106,6 @@ jobs:
 
       - run: npm ci --legacy-peer-deps
         if: steps.changes.outputs.relevant == 'true'
-      - run: npm ci --legacy-peer-deps
-        working-directory: src/ui/map
-        if: steps.changes.outputs.relevant == 'true'
 
       - name: Rebuild startup snapshot for this platform
         if: steps.changes.outputs.relevant == 'true'
@@ -182,9 +179,6 @@ jobs:
           cache: npm
 
       - run: npm ci --legacy-peer-deps
-        if: steps.changes.outputs.relevant == 'true'
-      - run: npm ci --legacy-peer-deps
-        working-directory: src/ui/map
         if: steps.changes.outputs.relevant == 'true'
 
       - name: Rebuild startup snapshot for this platform

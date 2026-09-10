@@ -279,7 +279,7 @@ describe('shared operation lifecycle consumers', () => {
         expect(screen.getByTestId('operation-lifecycle-metric-executing').textContent).toContain('Executing3');
         expect(screen.getByTestId('operation-lifecycle-metric-archived').textContent).toContain('Archived13');
         expect(screen.getByTestId('records-operation-exclusion-scope').textContent).toBe(
-            '13 archived operation records are excluded from RBiH detailed AAR review.',
+            '13 archived operations are outside RBiH detailed AAR review.',
         );
         fireEvent.click(screen.getByRole('button', { name: /^History/i }));
         expect(screen.queryByText('No completed operations yet.')).toBeNull();

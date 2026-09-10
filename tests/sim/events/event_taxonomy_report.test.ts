@@ -285,7 +285,12 @@ describe('event taxonomy diagnostic report', () => {
 
     it('includes pressure modifier condition types in taxonomy and validates them against the event vocabulary', () => {
         const rows = loadCatalogRows();
-        const lukavac = rows.find((row) => row.id === 'operation_lukavac_93');
+        const knownFixture = {
+            ...rows[0],
+            id: 'known_pressure_condition_fixture',
+            condition_types: ['territory_control'],
+            findings: [],
+        };
         const fixture = {
             ...rows[0],
             id: 'unknown_pressure_condition_fixture',
@@ -293,9 +298,7 @@ describe('event taxonomy diagnostic report', () => {
             findings: [],
         };
 
-        expect(lukavac).toBeDefined();
-        expect(lukavac!.condition_types).toContain('territory_control');
-        expect(collectCatalogFindings([lukavac!]).filter((finding) => finding.code === 'unknown_condition_type')).toEqual([]);
+        expect(collectCatalogFindings([knownFixture]).filter((finding) => finding.code === 'unknown_condition_type')).toEqual([]);
         expect(collectCatalogFindings([fixture])).toEqual(expect.arrayContaining([
             expect.objectContaining({
                 code: 'unknown_condition_type',
@@ -424,7 +427,6 @@ describe('event taxonomy diagnostic report', () => {
             'hrhb_central_bosnia_defense_1993',
             'rs_assembly_rejects_voplan_1993',
             'hrhb_territorial_scope_1993',
-            'operation_lukavac_93',
             'os_rbih_tactical_acceptance_1993',
             'rbih_arms_embargo_lift_advocacy_1993',
             'hrhb_owen_stoltenberg_response_1993',
@@ -470,7 +472,6 @@ describe('event taxonomy diagnostic report', () => {
         const report = buildEventTaxonomyReport(loadCatalogRows());
 
         for (const [id, expectedDefault] of [
-            ['operation_lukavac_93', 'comply'],
             ['os_rbih_tactical_acceptance_1993', 'reject_via_assembly'],
             ['csq_patron_recovery_offer', 'accept_recovery'],
         ] as const) {

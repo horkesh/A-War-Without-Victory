@@ -390,7 +390,7 @@ describe('OOB and operations panel operation labels', () => {
       onClose: () => {},
     }));
 
-    expect(container.textContent).toContain('Unreported');
+    expect(container.textContent).toContain('No staff report');
     expect(container.textContent).toContain('Readiness reporting incomplete');
     expect(container.textContent).not.toContain('Intelligence at 0%');
     expect(container.textContent).not.toContain('Supply readiness at 0%');
@@ -443,7 +443,7 @@ describe('OOB and operations panel operation labels', () => {
     fireEvent.click(screen.getByRole('button', { name: /Operation Breakthrough/i }));
 
     expect(container.textContent).toContain('Commander record unreported');
-    expect(container.textContent).toContain('Unreported');
+    expect(container.textContent).toContain('No staff report');
     expect(container.textContent).not.toContain('NaN');
     expect(container.textContent).not.toContain(' 0 ');
   });
@@ -536,7 +536,7 @@ describe('OOB and operations panel operation labels', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Operation Breakthrough/i }));
 
-    expect(container.textContent).toContain('Unreported');
+    expect(container.textContent).toContain('No staff report');
     expect(container.textContent).toContain('1 stale unit record');
     expect(container.textContent).toMatch(/UNITS:\s*1/i);
     expect(container.textContent).not.toContain('Intel0%');
@@ -602,7 +602,7 @@ describe('OOB and operations panel operation labels', () => {
     fireEvent.click(screen.getByRole('button', { name: /Operations/i }));
 
     expect(container.textContent).toContain('Supply: --');
-    expect(container.textContent).not.toContain('Supply: Unreported');
+    expect(container.textContent).not.toContain('Supply: No staff report');
     expect(container.textContent).not.toContain('Supply N/A');
   });
 

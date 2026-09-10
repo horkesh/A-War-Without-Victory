@@ -1,0 +1,274 @@
+# Open Gates Register
+#
+# PURPOSE
+#   Answer "what is open right now?" as data rather than prose. Gate state currently
+#   lives in paragraphs across MASTER_ROADMAP.md, COMMAND_BOARD.md and a 35k-line
+#   PROJECT_LEDGER.md, where it can be read but not enumerated.
+#
+# AUTHORITY
+#   This file does NOT outrank the roadmap. MASTER_ROADMAP.md remains the sole authority
+#   for unfinished product work (its Section 5 register), and COMMAND_BOARD.md remains the
+#   derived dispatch view. This register is a third, narrower thing: the list of named
+#   gates and their evidence, in a form a test can check. If this file and the roadmap
+#   disagree, the roadmap wins and this file is the one that gets corrected.
+#
+# WHY IT IS IN-REPO AND NOT AN EXTERNAL TRACKER
+#   Every claim in this project travels with its receipt in the same commit. A gate whose
+#   state lives outside git cannot be amended alongside the change that closes it, cannot
+#   be panel-reviewed, and cannot be diffed. Drift between a prose record and reality has
+#   already happened repeatedly here; a second out-of-repo copy would multiply it.
+#
+# RULES
+#   - A gate is a NAMED thing with a NAMED piece of evidence that would close it.
+#     If you cannot write `evidence_required` as an observable artifact, it is not a gate
+#     yet — it is an intention, and it belongs in the owning plan instead.
+#   - `status: closed` REQUIRES a non-null `evidence_path` that exists in the repo.
+#   - `source` must point at the plan or report that owns the gate. It must exist.
+#   - Lane sequencing (R8 waits on R7, R9 waits on R8) is the roadmap's to state, not
+#     this file's. Use `blocks` to record the dependency, not to restate the sequence.
+#
+# VALIDATION
+#   node tools/validate_open_gates.cjs      (also run by tests/open_gates_register.test.ts)
+#   npm run gates                           prints the currently-open rows
+
+version: 1
+updated: 2026-09-10
+
+lanes: [R1, R2, R3, R4, R5, R6, R7, R8, R9, RC, RE, REPO]
+
+gates:
+  # ── R7 — content, historical attribution, audio, accessibility, opening ──────────
+
+  - id: R7-AUDIO-HUMAN-ACCEPTANCE
+    lane: R7
+    title: Human audio listening and sensitivity acceptance
+    status: open
+    kind: acceptance
+    opened: 2026-09-09
+    blocks: [R8]
+    evidence_required: >
+      A named human listening and sensitivity acceptance receipt covering all 20 supplied
+      cue assets (17 neutral CC0 UI cues, 3 first-party ambient beds), recorded by the
+      review roles named in the parent plan's checklist.
+    evidence_path: null
+    source: docs/plans/2026-07-31-content-history-localization-audio-plan.md
+    notes: >
+      The 2026-09-09 closeout audit searched the retained evidence and did not locate such
+      a receipt. Automated lineage/wiring checks and packaged byte identity do not stand in
+      for human acceptance.
+
+  - id: R7-AUDIO-OFFLINE-RUNTIME
+    lane: R7
+    title: Scoped offline-audio runtime acceptance
+    status: open
+    kind: acceptance
+    opened: 2026-09-09
+    blocks: [R8]
+    evidence_required: >
+      Runtime observations of audio playback and controls, plus a request trace showing
+      zero remote audio requests from the packaged app.
+    evidence_path: null
+    source: docs/plans/2026-07-31-content-history-localization-audio-plan.md
+    notes: >
+      logs/r9-build-preparation/phase3-runtime-probe.json establishes 20 packaged OGGs
+      matching source and a runtime launch at its recorded identity, but records no
+      playback/control observations and no request trace. Reuse it as partial evidence only.
+
+  - id: R7-AUDIO-CUE-WIRING
+    lane: R7
+    title: Runtime-hook state of ten supplied audio cues
+    status: open
+    kind: acceptance
+    opened: 2026-09-09
+    blocks: [R8]
+    evidence_required: >
+      For each of the ten cues with no located non-registry call site, either a demonstrated
+      runtime trigger or an explicit recorded disposition that the cue is registry-only.
+    evidence_path: null
+    source: docs/plans/2026-07-31-content-history-localization-audio-plan.md
+    notes: >
+      A bounded static search located product call sites for ten of the twenty supplied cues
+      and not for the other ten. That is not exhaustive absence and does not authorize a
+      wiring change; it leaves the state unproven.
+
+  - id: R7-BASELINE-SIX-PIN
+    lane: R7
+    title: Inherited six-pin failing baseline gate
+    status: blocked
+    kind: acceptance
+    opened: 2026-09-08
+    blocks: [R8]
+    evidence_required: >
+      BC04/BC05/BC06/BC09/BC10 settled, then the gated sequence in the baseline re-blessing packet:
+      enclave guard verified, merge order settled, one clean owner-authorized 188-week run at HEAD,
+      local/CI reproduction, drift decomposition recorded, manifest re-blessed, independent review.
+    evidence_path: null
+    source: docs/plans/2026-09-05-r7-presentation-and-english-readability-amendment-plan.md
+    notes: >
+      Accepted n392 owns all eight pins. Four consumed inputs changed before R7 and six
+      outputs differ from PRE. The one-PRE/two-POST run budget is exhausted. Do not refresh
+      pins, change calibration, or call current outputs canonical to clear this.
+      2026-09-10: this gate is what makes CI red on PR #503. The Event System CI baseline
+      regression on apr1992_188w reports exactly six mismatched artifacts —
+      activity_summary.json, control_delta.json, end_report.md, final_save.json,
+      run_summary.json, weekly_report.jsonl — with final_save actual e414dc69f6e875fc, the
+      clean POST-A fingerprint. main is green; the branch is not. Scoped fix:
+      docs/plans/2026-09-10-baseline-reblessing-packet.md (NOT authorized to run; entry condition unmet). The owner was offered
+      merge-red or an authorized pin reconciliation and chose to HOLD the merge, so PR #503
+      stays open until this gate is reconciled under calibration authority. Merging is
+      therefore blocked ON THIS GATE and on nothing else: typecheck, structural-fingerprint,
+      desktop-release-check and scenario-anchors all pass.
+      2026-09-10 (owner decision): the baseline regression was split out of the
+      "Event system validation" job into its own advisory job, "Baseline pins (advisory,
+      non-blocking)". It still runs and still reports red on stale pins; it no longer makes the
+      event-system check red, because those are different failures with different owners. main has
+      no branch protection and no rulesets, so no check is a required check; if protection is ever
+      added, this job must be EXCLUDED from the required list and the others included.
+
+  - id: R7-ACCEPTANCE-ALL-GREEN
+    lane: R7
+    title: Broader R7 all-green acceptance gate
+    status: blocked
+    kind: acceptance
+    opened: 2026-09-09
+    blocks: [R8]
+    evidence_required: >
+      Every other R7 gate closed, then the parent plan's all-green acceptance box ticked
+      with its evidence enumerated.
+    evidence_path: null
+    source: docs/plans/2026-07-31-content-history-localization-audio-plan.md
+    notes: >
+      This is the roll-up gate. It cannot close before R7-AUDIO-HUMAN-ACCEPTANCE,
+      R7-AUDIO-OFFLINE-RUNTIME, R7-AUDIO-CUE-WIRING, R7-BASELINE-SIX-PIN and
+      R7-WARROOM-PRESENTATION.
+
+  - id: R7-WARROOM-PRESENTATION
+    lane: R7
+    title: Warroom whiteboard date and corkboard map read as physical objects
+    status: open
+    kind: friction
+    opened: 2026-09-10
+    blocks: []
+    evidence_required: >
+      Capture matrix of 3 factions x 5 year-plates x 3 viewports (1280x720, 1920x1080,
+      3440x1440) in which the date sits inside the board's writing surface with no
+      background/border/shadow of its own, and the map sheet reads as paper pinned to cork
+      with cork visible at the margin, no seams, and brightness tracking the room.
+    evidence_path: null
+    source: docs/plans/2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.md
+    notes: >
+      Owner-raised 2026-09-10. Carries one genuine defect introduced by R7's own commit
+      88996a23d: the date's viewport-driven translateX places it on bare wall at 1920x1080
+      and on top of the corkboard map at 1366x768. Design is written; implementation is not
+      scheduled and must not start while another lane holds WarroomShellLayer.tsx.
+
+  # ── Repo-wide ───────────────────────────────────────────────────────────────────
+
+  - id: REPO-CANON-PROPAGATION
+    lane: REPO
+    title: Stale canon propagation backlog
+    status: open
+    kind: propagation
+    opened: 2026-03-28
+    blocks: []
+    evidence_required: >
+      Each of the ten recorded mechanical changes either propagated into the Systems Manual
+      under Pyrrhic-panel sign-off, or explicitly retired as superseded.
+    evidence_path: null
+    source: docs/CANON_PROPAGATION_NEEDED.md
+    notes: >
+      Open since 2026-03-28 and untouched since. Canon edits require panel sign-off, so this
+      cannot be discharged as routine doc maintenance. Recorded here so it stops being
+      invisible; it does not gate 1.0.
+
+  - id: REPO-ROADMAP-CONCISENESS
+    lane: REPO
+    title: MASTER_ROADMAP.md is close to its test-enforced size cap
+    status: closed
+    kind: propagation
+    opened: 2026-09-10
+    closed: 2026-09-10
+    blocks: []
+    evidence_required: >
+      Superseded closed-lane prose moved into MASTER_ROADMAP_ARCHIVE.md until the roadmap has
+      at least 4 KB of headroom under the 60,000-byte assertion in
+      tests/docs_desktop_v09_truth.test.ts.
+    evidence_path: docs/plans/MASTER_ROADMAP_ARCHIVE.md
+    source: docs/plans/MASTER_ROADMAP.md
+    notes: >
+      CLOSED 2026-09-10 at 49,724 bytes — 10,276 bytes of headroom against the 60,000-byte
+      assertion in tests/docs_desktop_v09_truth.test.ts, comfortably past the 4 KB target. Measured
+      59,588 bytes at the start of the day (412 bytes of headroom). Three moves, all verbatim into
+      MASTER_ROADMAP_ARCHIVE.md: compressed closed probe-channel prose; the Status cells of the five
+      closed lanes (R4, R5, R6, RC, RE) under "Closed-lane detail moved 2026-09-10"; and the dated
+      9,848-byte "Current Execution Snapshot (2026-09-07)", replaced by a compact current-state
+      block carrying only what Section 5 does not already say. The cap was never raised. Section 10
+      (Finding Routing, 11,215 bytes) is now the largest section but is live routing policy plus the
+      post-1.0 backlog, not history, so it was left alone.
+
+  - id: REPO-RUNBOOK-CURATION
+    lane: REPO
+    title: Napkin and life-lessons index exceed their own curation rules
+    status: open
+    kind: propagation
+    opened: 2026-09-10
+    blocks: []
+    evidence_required: >
+      Each life-lessons entry whose text says "see docs/life_lessons/<topic>.md" is actually present
+      in that topic file, or the pointer is removed.
+    evidence_path: null
+    source: docs/life_lessons.md
+    notes: >
+      The size and cap work is DONE as of 2026-09-10 and only the broken pointers remain.
+      docs/life_lessons.md went 146,864 to 39,930 bytes (34 older dated sessions moved verbatim to
+      docs/life_lessons/session_archive.md, keeping the three newest plus "Recently Violated" and
+      "Topic Files", which CLAUDE.md mandates reading). The napkin went 64,043 to 36,146 bytes: the
+      worked detail of 16 oversized entries moved to .claude/napkin/entry_detail.md leaving the
+      actionable rule plus a pointer, two orphan session headings folded in, three oldest entries
+      demoted, plain-numeric entries renumbered, and one unbalanced bold marker closed. Every
+      category is now at or under the stated 10-entry cap, VERIFIED WITH THE CORRECT PATTERN
+      (^[0-9]+[a-z]*\. ) — an earlier check used ^[0-9]+\. , which matched none of the 0a/0b/0h
+      entries and wrongly reported the largest category as empty. STILL OPEN: 160 of 244
+      life-lessons entries carry a "see docs/life_lessons/<topic>.md" pointer whose body is NOT in
+      that topic file — grep returns count 0 for sampled titles. The bodies were only ever in the
+      index. Routing 160 lessons to their topic files is a curation judgement, not a mechanical
+      move, so it was left.
+
+  # ── Closed, retained to prevent re-raising ──────────────────────────────────────
+
+  - id: GUI-OSID-NAME-LEAKAGE
+    lane: R7
+    title: OSID/slug names leaking into player-facing text
+    status: closed
+    kind: bug
+    opened: 2026-09-03
+    closed: 2026-09-09
+    blocks: []
+    evidence_required: >
+      A production helper resolving every scored OSID to a canonical display name, with a
+      test proving full coverage and no merge-suffix leakage.
+    evidence_path: tests/ui/osid_display_name_integrity.test.ts
+    source: docs/40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md
+    notes: >
+      Closed by 684920edc, which added src/ui/map/utils/municipalityDisplayName.ts and
+      applied it in generateChronicleEntries.ts. The test asserts all 712 scored OSIDs
+      resolve to non-empty collision-free names and that none ends in a "(+N)" merge suffix.
+      Verified still closed 2026-09-10.
+
+  - id: GUI-SUSTAINMENT-WORDING
+    lane: R7
+    title: Ambiguous collapsed-municipality sustainment wording
+    status: closed
+    kind: friction
+    opened: 2026-09-03
+    closed: 2026-09-08
+    blocks: []
+    evidence_required: >
+      Player-facing sustainment copy that states what the count means without the reader
+      inferring it.
+    evidence_path: src/ui/map/i18n/messages.en.ts
+    source: docs/40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md
+    notes: >
+      The bare "{count} collapsed" reading is gone; the string now reads
+      "{count} permanently collapsed municipalities (cumulative)". Last changed by edc0c3ea2.
+      Verified still closed 2026-09-10.

@@ -1,0 +1,15 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/event_conditions.test.ts (16 tests) 20ms
+ ✓ tests/turn_pipeline.test.ts (4 tests) 8747ms
+   ✓ runTurn determinism > is deterministic for same state and seed 948ms
+   ✓ runTurn determinism > does not let the narrated Dayton signing flag preempt the negotiation owner 326ms
+   ✓ runTurn determinism > plays the narrated ceasefire chain before opening and resolving the horizon negotiation 5049ms
+   ✓ runTurn determinism > preserves the horizon negotiation when the player rejects the narrated talks 2421ms
+
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+   Start at  16:17:42
+   Duration  17.42s (transform 5.63s, setup 22ms, collect 7.33s, tests 8.77s, environment 1ms, prepare 234ms)
+

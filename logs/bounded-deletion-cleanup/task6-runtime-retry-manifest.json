@@ -1,0 +1,312 @@
+{
+  "probe": "awwv_desktop_runtime_probe",
+  "mode": "packaged",
+  "files": [
+    {
+      "key": "desktopSimBundle",
+      "relative_path": "dist/desktop/desktop_sim.cjs",
+      "size_bytes": 4068273
+    },
+    {
+      "key": "mapIndex",
+      "relative_path": "app/index.html",
+      "size_bytes": 5772
+    },
+    {
+      "key": "startupSnapshot",
+      "relative_path": "data/derived/startup/apr_1992_initial_save.json",
+      "size_bytes": 1371523
+    },
+    {
+      "key": "warroomIndex",
+      "relative_path": "app/warroom/index.html",
+      "size_bytes": 11439
+    }
+  ],
+  "packaged_font_status": {
+    "status": "loaded",
+    "usable": {
+      "IBM Plex Sans Condensed": true,
+      "IBM Plex Mono": true
+    },
+    "faces": [
+      {
+        "family": "IBM Plex Mono",
+        "weight": "400",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "weight": "400",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "weight": "600",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "weight": "600",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Sans Condensed",
+        "weight": "400",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Sans Condensed",
+        "weight": "600",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Sans Condensed",
+        "weight": "700",
+        "status": "loaded"
+      }
+    ]
+  },
+  "map_server_checks": [
+    {
+      "route": "/",
+      "status": 200
+    },
+    {
+      "route": "/data/derived/startup/apr_1992_initial_save.json",
+      "status": 200
+    },
+    {
+      "route": "/data/scenarios/events/war_1992.json",
+      "status": 200
+    },
+    {
+      "route": "/data/scenarios/events/war_1992_hrhb_summer.json",
+      "status": 200
+    },
+    {
+      "route": "/data/scenarios/events/war_1993.json",
+      "status": 200
+    },
+    {
+      "route": "/data/scenarios/events/war_1994.json",
+      "status": 200
+    },
+    {
+      "route": "/data/scenarios/events/war_1995.json",
+      "status": 200
+    },
+    {
+      "route": "/data/scenarios/events/consequences.json",
+      "status": 200
+    }
+  ],
+  "route_inventory_checks": [
+    {
+      "expected_status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": null,
+      "route": "/data/derived/operational/operational_settlements.geojson",
+      "status": 200
+    },
+    {
+      "expected_status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": null,
+      "route": "/data/derived/settlements_wgs84_1990.geojson",
+      "status": 200
+    },
+    {
+      "expected_status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": null,
+      "route": "/data/derived/terrain/settlements_terrain_scalars.json",
+      "status": 200
+    },
+    {
+      "expected_status": 206,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": "bytes=0-15",
+      "route": "/data/derived/tiles/osm.pmtiles",
+      "status": 206
+    },
+    {
+      "expected_status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": null,
+      "route": "/font/Open%20Sans%20Bold/0-255.pbf",
+      "status": 200
+    },
+    {
+      "expected_status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": null,
+      "route": "/font/Open%20Sans%20Bold/256-511.pbf",
+      "status": 200
+    },
+    {
+      "expected_status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": null,
+      "route": "/data/ui/hq_rbih_clickable_regions.json",
+      "status": 200
+    },
+    {
+      "expected_status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": null,
+      "route": "/data/ui/hq_rs_clickable_regions.json",
+      "status": 200
+    },
+    {
+      "expected_status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": null,
+      "route": "/data/ui/hq_hrhb_clickable_regions.json",
+      "status": 200
+    },
+    {
+      "expected_status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": null,
+      "route": "/data/source/settlements_initial_master.json",
+      "status": 200
+    },
+    {
+      "expected_status": 200,
+      "cache_control": "no-cache",
+      "etag_present": true,
+      "range": null,
+      "route": "/assets/ui/icons/icon_warning.svg",
+      "status": 200
+    }
+  ],
+  "runtime_failure_checks": [
+    {
+      "type": "request-failed",
+      "label": "webContents:1",
+      "error": "net::ERR_CACHE_READ_FAILURE",
+      "method": "GET",
+      "resource_type": "xhr",
+      "url": "http://127.0.0.1:50505/data/source/boundaries/bih_adm3_1990.geojson",
+      "intentional_abort": false
+    },
+    {
+      "type": "console-message",
+      "label": "packaged main window",
+      "level": 3,
+      "message": "[MapLibre] map error: [object Object]",
+      "line": 17,
+      "source_id": "http://127.0.0.1:50505/assets/tactical_map-BL8OvX_U.js"
+    }
+  ],
+  "startup": {
+    "phase": "war",
+    "player_faction": "RBiH",
+    "recruitment_ready": true,
+    "turn": 0
+  },
+  "window_checks": [
+    {
+      "route": "awwv://warroom/index.html",
+      "status": "did-finish-load",
+      "title": "AWWV - Warroom"
+    },
+    {
+      "route": "http://127.0.0.1:50505/?desktop_window=operational&disable_pmtiles=1",
+      "status": "did-finish-load",
+      "title": "AWWV Map"
+    },
+    {
+      "route": "http://127.0.0.1:50505/tactical_sandbox.html?desktop_window=sandbox&disable_pmtiles=1",
+      "status": "did-finish-load",
+      "title": "AWWV Map"
+    }
+  ],
+  "tactical_interactions": [
+    {
+      "location_path": "/",
+      "map_server_url": "http://127.0.0.1:50505/",
+      "player_faction": "RBiH",
+      "route_mode": "operational",
+      "turn": 0
+    },
+    {
+      "location_path": "/tactical_sandbox.html",
+      "map_server_url": "http://127.0.0.1:50505/",
+      "player_faction": "RBiH",
+      "route_mode": "sandbox",
+      "turn": 0
+    }
+  ],
+  "tactical_push_checks": [
+    {
+      "player_faction": "RBiH",
+      "route_mode": "operational",
+      "turn": 0
+    },
+    {
+      "player_faction": "RBiH",
+      "route_mode": "sandbox",
+      "turn": 0
+    }
+  ],
+  "turn_report_push_checks": [
+    {
+      "player_faction": "RBiH",
+      "probe": "awwv_turn_report_probe",
+      "route_mode": "operational",
+      "turn": 0
+    },
+    {
+      "player_faction": "RBiH",
+      "probe": "awwv_turn_report_probe",
+      "route_mode": "sandbox",
+      "turn": 0
+    }
+  ],
+  "renderer_reaction_checks": [
+    {
+      "game_state_updated": {
+        "fingerprint_matches_payload": true,
+        "location_path": "/",
+        "payload_length": 523337,
+        "player_faction": "RBiH",
+        "route_mode": "operational",
+        "turn": 0
+      },
+      "route_mode": "operational",
+      "turn_report_updated": {
+        "location_path": "/",
+        "payload_matches_probe": true,
+        "player_faction": "RBiH",
+        "probe": "awwv_turn_report_probe",
+        "route_mode": "operational",
+        "turn": 0
+      }
+    }
+  ],
+  "endgame_checks": {
+    "surface_type": "verdict",
+    "outcome_label": "Exhaustion Stalemate",
+    "has_pyrrhic_score": true,
+    "has_war_cost": true,
+    "has_faction_tabs": true,
+    "has_awwv_title": true,
+    "state_push": {
+      "player_faction": "RBiH",
+      "route_mode": "operational",
+      "game_over_state_pushed": true
+    }
+  }
+}

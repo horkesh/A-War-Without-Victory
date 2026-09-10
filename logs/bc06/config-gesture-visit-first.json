@@ -1,0 +1,192 @@
+{
+  "reviewed": true,
+  "caseId": "live-visit-first-final-01",
+  "fixture": "F:\\A-War-Without-Victory\\logs\\bc06\\fixture-gesture-visit-first.json",
+  "loadSteps": [
+    {
+      "buttonName": "Assume responsibility"
+    },
+    {
+      "buttonName": "Field Records"
+    },
+    {
+      "buttonName": "Resume bc06-proof-fixture"
+    }
+  ],
+  "before": [
+    {
+      "path": [
+        "meta",
+        "turn"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    }
+  ],
+  "steps": [
+    {
+      "selector": "[data-testid=\"toolbar-route-desk\"]",
+      "frameUrlIncludes": "http"
+    },
+    {
+      "buttonRegex": "^Command surface$"
+    },
+    {
+      "buttonRegex": "Command & Personnel"
+    },
+    {
+      "selector": "[data-testid=\"decision-room-priority-card-command:front-visit\"] button",
+      "buttonRegex": "^Dossier$"
+    },
+    {
+      "buttonRegex": "^Issue \\(10\\)$"
+    },
+    {
+      "selector": "[data-testid=\"event-decision-response\"][aria-label=\"Choose response: Visit the Sarajevo front\"]",
+      "absentSelectors": [
+        "[data-testid=\"event-decision-response\"][aria-label=\"Choose response: Visit with international press\"]"
+      ]
+    }
+  ],
+  "after": [
+    {
+      "path": [
+        "military",
+        "command_authority",
+        "current"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "event_fire_counts",
+        "visit_to_front_rbih"
+      ],
+      "equals": 1
+    },
+    {
+      "path": [
+        "military",
+        "event_last_fired_turn",
+        "visit_to_front_rbih"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    },
+    {
+      "path": [
+        "military",
+        "event_decision_log"
+      ],
+      "equals": [
+        {
+          "event_id": "visit_to_front_rbih",
+          "response_id": "visit_sarajevo",
+          "decision_source": "player",
+          "faction": "RBiH",
+          "turn": 90
+        }
+      ]
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "arbih_101st_mountain",
+        "morale"
+      ],
+      "equals": 55
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "arbih_101st_mountain",
+        "cohesion"
+      ],
+      "equals": 53
+    }
+  ],
+  "persisted": [
+    {
+      "path": [
+        "military",
+        "command_authority",
+        "current"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "event_fire_counts",
+        "visit_to_front_rbih"
+      ],
+      "equals": 1
+    },
+    {
+      "path": [
+        "military",
+        "event_last_fired_turn",
+        "visit_to_front_rbih"
+      ],
+      "equals": 90
+    },
+    {
+      "path": [
+        "military",
+        "pending_event_decisions"
+      ],
+      "equals": []
+    },
+    {
+      "path": [
+        "military",
+        "event_decision_log"
+      ],
+      "equals": [
+        {
+          "event_id": "visit_to_front_rbih",
+          "response_id": "visit_sarajevo",
+          "decision_source": "player",
+          "faction": "RBiH",
+          "turn": 90
+        }
+      ]
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "arbih_101st_mountain",
+        "morale"
+      ],
+      "equals": 55
+    },
+    {
+      "path": [
+        "military",
+        "formations",
+        "arbih_101st_mountain",
+        "cohesion"
+      ],
+      "equals": 53
+    }
+  ],
+  "expectsMutation": true,
+  "repeatAction": "initiateFrontVisit",
+  "repeatReason": "on_cooldown"
+}

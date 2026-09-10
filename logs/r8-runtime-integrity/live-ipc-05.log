@@ -1,0 +1,12 @@
+AssertionError [ERR_ASSERTION]: {"ok":false,"error":"Shared turn input data/derived/settlement_ethnicity_data.json: by_settlement_id.S100013.composition must be an object"}
+
+false !== true
+
+    at main (F:\AWWV-worktrees\bc09-shared-inputs\logs\r8-runtime-integrity\live-ipc.cjs:96:77) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: 'strictEqual',
+  diff: 'simple'
+}

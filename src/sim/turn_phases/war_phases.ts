@@ -1057,7 +1057,7 @@ export const warPhases: NamedPhase[] = [
         name: 'evaluate-events',
         run: (context) => {
             const turn = context.state.meta.turn;
-            const result = evaluateEvents(context.state, context.rng, turn, context.input.eventDefinitions, context.input.settlementEdges);
+            const result = evaluateEvents(context.state, context.rng, turn, context.input.eventDefinitions ?? [], context.input.settlementEdges);
             context.report.events_fired = result.fired;
             // Graz Accords: fires at week 4 (6 May 1992), sets state.political.vienna_declaration_turn
             const grazText = checkAndFireGrazAccords(context.state);
@@ -2542,8 +2542,8 @@ export const warPhases: NamedPhase[] = [
     {
         // LANE B Phase 2: bot factions decide their own opportunities synchronously
         // — they never sit in the player review queue. Player faction's opportunities
-        // are skipped here and surfaced via generate-level1-opportunity-proposals
-        // below (autonomy_level === 1 only).
+        // are protected at levels 0/1 and surfaced via the review step below.
+        // Levels 2/3 delegate these military decisions through the same bot path.
         name: 'apply-bot-opportunity-decisions',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -2560,7 +2560,7 @@ export const warPhases: NamedPhase[] = [
     },
     {
         // LANE B Phase 2: surface player-faction opportunities into the autonomy
-        // review queue at autonomy_level=1. Format: proposed_action =
+        // review queue at autonomy levels 0/1. Format: proposed_action =
         // "OPPORTUNITY:<proposal_id>". The accept/reject IPC marks `accepted`;
         // apply-resolved-opportunity-decisions on the next turn applies the
         // decision via applyOpportunityDecision.

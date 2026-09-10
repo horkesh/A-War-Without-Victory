@@ -1,3 +1,4 @@
+import { OPERATION_OPPORTUNITY_CATALOG } from '../sim/combat/operation_opportunities.js';
 /**
  * Desktop (Electron main) sim API: load scenario/state, advance turn.
  * Used by electron-main.cjs via a CJS bundle. No browser/DOM deps; Node fs/path OK.
@@ -23,6 +24,7 @@ import { isSrkStranglePostureEnabled } from '../sim/combat/contain_posture_gate.
 import { buildAdjacencyFromEdges, isSettlementSetContiguous } from '../sim/combat/war_adjacency.js';
 import { estimateAttackCost, type AttackEstimate } from '../sim/combat/combat_estimate.js';
 import { computeFrontWidthMetrics } from '../sim/combat/front_width_metrics.js';
+import { computeSectorCombatRatings } from '../sim/combat/sector_combat_rating.js';
 import { applyRecruitment, evaluateRecruitmentEligibility, initializeRecruitmentResources, recruitBrigade } from '../sim/recruitment_engine.js';
 import { buildRecruitmentContext } from '../sim/recruitment_context.js';
 import { assertTurnSuccess, runTurn } from '../sim/turn_pipeline.js';
@@ -357,7 +359,9 @@ export async function startNewCampaign(
 /** Load a saved state file (final_save.json or any GameState JSON). */
 export async function loadStateFromPath(statePath: string): Promise<{ state: GameState }> {
     const content = await readFile(statePath, 'utf8');
-    return { state: deserializeState(content) };
+    const state = deserializeState(content);
+    computeSectorCombatRatings(state, null);
+    return { state };
 }
 
 /**
@@ -1255,4 +1259,9 @@ export async function redirectReserveLoan(
         return { ok: false, error: `${brigadeId} could not be redirected` };
     }
     return { ok: true };
+}
+
+/** Main-process projection metadata only; never added to canonical saves. */
+export function getOpportunityOwnershipMetadata(): ReadonlyArray<{ opportunity_id: string; faction: string; primary_corps: string }> {
+    return OPERATION_OPPORTUNITY_CATALOG.map(({ opportunity_id, faction, primary_corps }) => ({ opportunity_id, faction, primary_corps }));
 }

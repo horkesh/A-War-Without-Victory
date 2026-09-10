@@ -24,6 +24,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
     OPPORTUNITY_PROPOSAL_ACTION_PREFIX,
+    OPERATION_OPPORTUNITY_CATALOG,
     applyBotOpportunityDecisions,
     applyResolvedOpportunityDecisions,
     autoResolveOpportunityProposalReviews,
@@ -33,7 +34,7 @@ import {
     type AxisPredicate,
     type OperationOpportunityDef,
 } from '../src/sim/combat/operation_opportunities.js';
-import { selectBotBrigadeOrderFactions } from '../src/sim/turn_phases/war_phases.js';
+import { warPhases, selectBotBrigadeOrderFactions } from '../src/sim/turn_phases/war_phases.js';
 import type { CorpsCommandState, FactionId, GameState } from '../src/state/game_state.js';
 
 // ─── Fixtures ───────────────────────────────────────────────────────────────
@@ -209,12 +210,12 @@ describe('operation_opportunities — Phase 2 decision surface', () => {
         expect(r.description.includes('op:')).toBe(false);
     });
 
-    it('player opportunity does NOT surface at autonomy_level=0 (full control)', () => {
+    it('player opportunity surfaces at autonomy_level=0 (full control)', () => {
         const state = buildMinimalState(175, 'RBiH', 0);
         const def = fixtureOpp();
         runOpportunityEvaluationStep(state, 175, [def]);
         const reviews = generateOpportunityProposalReviews(state, 'RBiH', [def]);
-        expect(reviews).toEqual([]);
+        expect(reviews).toHaveLength(1);
     });
 
     it('apply-resolved consumer routes accepted=true → approve, accepted=false → decline', () => {
@@ -451,5 +452,71 @@ describe('operation_opportunities — Phase 2 decision surface', () => {
         runOpportunityEvaluationStep(state, 175, [def]);
         const reviews = generateOpportunityProposalReviews(state, 'RBiH', [def]);
         expect(reviews[0].proposed_action).toBe('OPPORTUNITY:OPP_175_fixture_opp');
+    });
+});
+
+
+describe('BC01 opportunity ownership', () => {
+    it('reoffers a resolved delay when eligible again without retaining a duplicate live review', () => {
+        const state = buildMinimalState(175, 'RBiH', 0);
+        const def = fixtureOpp();
+        runOpportunityEvaluationStep(state, 175, [def]);
+        state.meta.pending_proposal_reviews = generateOpportunityProposalReviews(state, 'RBiH', [def]);
+        const review = state.meta.pending_proposal_reviews[0];
+        review.opportunity_decision = 'delay'; review.resolved_turn = 175;
+        applyResolvedOpportunityDecisions(state, 175, [def]);
+        state.meta.turn = 179;
+        runOpportunityEvaluationStep(state, 179, [def]);
+        const fresh = generateOpportunityProposalReviews(state, 'RBiH', [def]);
+        expect(fresh).toHaveLength(1);
+        expect(fresh[0].id).not.toBe(review.id);
+        state.meta.pending_proposal_reviews.push(...fresh);
+        expect(generateOpportunityProposalReviews(state, 'RBiH', [def])).toEqual([]);
+    });
+
+    it.each([0, 1, 2, 3] as const)('routes level %i once without losing or duplicating decisions', (level) => {
+        const state = buildMinimalState(175, 'RBiH', level);
+        const def = fixtureOpp();
+        runOpportunityEvaluationStep(state, 175, [def]);
+        for (let i = 0; i < 2; i++) {
+            applyBotOpportunityDecisions(state, 175, 'RBiH', [def]);
+            const reviews = generateOpportunityProposalReviews(state, 'RBiH', [def]);
+            (state.meta.pending_proposal_reviews ??= []).push(...reviews);
+        }
+        if (level < 2) {
+            expect(state.military.operation_opportunities![0].status).toBe('eligible_pending_review');
+            expect(state.meta.pending_proposal_reviews).toHaveLength(1);
+            expect(state.military.corps_command![def.primary_corps].active_operations).toHaveLength(0);
+        } else {
+            expect(state.military.operation_opportunities![0].status).toBe('approved');
+            expect(state.meta.pending_proposal_reviews).toHaveLength(0);
+            expect(state.military.corps_command![def.primary_corps].active_operations).toHaveLength(1);
+            expect(state.military.operation_opportunity_resolutions).toHaveLength(1);
+        }
+    });
+
+    it.each([0, 1, 2, 3] as const)('real war routing steps obey level %i', async (level) => {
+        const real = OPERATION_OPPORTUNITY_CATALOG.find(d => d.faction === 'RBiH' && d.staff_recommendation === 'approve')!;
+        const def = fixtureOpp({ opportunity_id: real.opportunity_id });
+        const state = buildMinimalState(175, 'RBiH', level);
+        runOpportunityEvaluationStep(state, 175, [def]);
+        const context = { state, report: {} } as any;
+        for (let repeat = 0; repeat < 2; repeat++) {
+            await warPhases.find(p => p.name === 'apply-bot-opportunity-decisions')!.run(context);
+            await warPhases.find(p => p.name === 'generate-level1-opportunity-proposals')!.run(context);
+        }
+        expect(state.military.operation_opportunities![0].status).toBe(level < 2 ? 'eligible_pending_review' : 'approved');
+        expect(state.meta.pending_proposal_reviews ?? []).toHaveLength(level < 2 ? 1 : 0);
+    });
+
+    it('no selected player preserves automatic decision output across autonomy levels', () => {
+        const snapshots = [0, 1, 2, 3].map(level => {
+            const state = buildMinimalState(175, null, level as 0 | 1 | 2 | 3);
+            const def = fixtureOpp();
+            runOpportunityEvaluationStep(state, 175, [def]);
+            applyBotOpportunityDecisions(state, 175, null, [def]);
+            return JSON.stringify(state.military);
+        });
+        expect(new Set(snapshots).size).toBe(1);
     });
 });

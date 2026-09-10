@@ -102,6 +102,11 @@ describe('DaytonInstitutionalDimensions — render + interaction (EN)', () => {
         );
         const unitaryBtn = screen.getByText('Unitary State').closest('button')! as HTMLButtonElement;
         expect(unitaryBtn.disabled).toBe(true);
+        const lockExplanation = within(unitaryBtn).getByText('Beyond your earned capital — the budget is won in the war, not at the table.');
+        expect(unitaryBtn.textContent).toContain(lockExplanation.textContent);
+        expect(unitaryBtn.className).not.toContain('line-through');
+        expect(screen.getByText('Unitary State').className).toContain('line-through');
+        expect(lockExplanation.className).not.toContain('line-through');
         // Clicking a locked control is a no-op (disabled button fires nothing).
         fireEvent.click(unitaryBtn);
         expect(onChange).not.toHaveBeenCalled();

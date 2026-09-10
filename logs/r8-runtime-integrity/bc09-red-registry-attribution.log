@@ -1,0 +1,32 @@
+
+ RUN  v2.1.9 F:/AWWV-worktrees/bc09-shared-inputs
+
+ ❯ tests/shared_turn_inputs_contract.test.ts (17 tests | 2 failed | 15 skipped) 37ms
+   × shared validated turn input contract > attributes malformed registry failures to the registry file 27ms
+     → expected [Function] to throw error including 'municipalities_1990_registry_110.json' but got 'Shared turn input data/source/oob_bri…'
+   × shared validated turn input contract > attributes structurally invalid registry failures to the registry file 9ms
+     → expected [Function] to throw error including 'municipalities_1990_registry_110.json' but got 'Shared turn input data/source/oob_bri…'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > attributes malformed registry failures to the registry file
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > attributes structurally invalid registry failures to the registry file
+AssertionError: expected [Function] to throw error including 'municipalities_1990_registry_110.json' but got 'Shared turn input data/source/oob_bri…'
+
+Expected: "municipalities_1990_registry_110.json"
+Received: "Shared turn input data/source/oob_brigades.json: Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+
+ ❯ tests/shared_turn_inputs_contract.test.ts:175:9
+    173|         const relativePath = 'data/source/municipalities_1990_registry…
+    174|         await writeFile(join(baseDir, relativePath), contents, 'utf8');
+    175|         await expect(prepareSharedTurnInputs({
+       |         ^
+    176|             baseDir,
+    177|             sids: ['sid_a'],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 15 skipped (17)
+   Start at  07:13:24
+   Duration  1.24s (transform 397ms, setup 18ms, collect 451ms, tests 37ms, environment 0ms, prepare 104ms)

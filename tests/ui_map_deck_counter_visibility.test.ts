@@ -201,17 +201,13 @@ it('falls back to centered camera motion when fitBounds would collapse to a poin
     expect(panEffect).not.toContain('map.fitBounds(');
 });
 
-it('operation map surfaces also guard collapsed fitBounds calls', () => {
+it('the retained operation map guards collapsed fitBounds calls', () => {
     const opsModalSource = readFileSync('src/ui/map/components/ops_modal/OpsMap.tsx', 'utf8');
-    const planRendererSource = readFileSync('src/ui/map/components/plan_ui/OpsMapRenderer.ts', 'utf8');
 
     expect(opsModalSource).toContain('function fitOpsBoundsOrEaseTo');
     expect(opsModalSource).toContain('lngCollapsed || latCollapsed');
     expect(opsModalSource).toContain('fitOpsBoundsOrEaseTo(map, [[minLng, minLat], [maxLng, maxLat]], {');
     expect(opsModalSource).not.toContain('map.fitBounds([[minLng, minLat], [maxLng, maxLat]]');
-    expect(planRendererSource).toContain('function fitOpsBoundsOrEaseTo');
-    expect(planRendererSource).toContain('fitOpsBoundsOrEaseTo(this.map, bounds, { padding: 60, maxZoom: 12 });');
-    expect(planRendererSource).not.toContain('this.map.fitBounds(bounds');
 });
 
 it('deck counter ownership hides native MapLibre formation symbol layers', () => {

@@ -297,11 +297,28 @@ describe('Formation Detail parity display', () => {
   });
 
   it('renders known municipality slugs as player-facing names', () => {
+    useGameStore.setState({
+      osidPropertiesMap: {
+        'op:vogosca:svrake': {
+          mun1990_id: 'vogosca',
+          mun1990_name: 'Vogošća',
+        },
+      },
+    });
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
     const copy = view.container.textContent ?? '';
 
-    expect(copy).toContain('Home municipality: Vogosca');
+    expect(copy).toContain('Home municipality: Vogošća');
     expect(copy).not.toContain('Home municipality: vogosca');
+  });
+
+  it('does not guess a municipality name while canonical properties are unavailable', () => {
+    useGameStore.setState({ osidPropertiesMap: null });
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    const copy = view.container.textContent ?? '';
+
+    expect(copy).toContain('Home municipality: —');
+    expect(copy).not.toContain('Home municipality: Vogosca');
   });
 
   it('shows recent engagements newest first', () => {
@@ -624,9 +641,9 @@ describe('Formation Detail parity display', () => {
 
     const copy = view.container.textContent ?? '';
     expect(copy).toContain('Campaign Losses');
-    expect(copy).toContain('KilledUnreported');
-    expect(copy).toContain('WoundedUnreported');
-    expect(copy).toContain('Missing or capturedUnreported');
+    expect(copy).toContain('KilledNo staff report');
+    expect(copy).toContain('WoundedNo staff report');
+    expect(copy).toContain('Missing or capturedNo staff report');
     expect(copy).toContain('No combat record');
     expect(copy).toContain('No brigade combat record has reached headquarters.');
     expect(copy).not.toMatch(/Killed0|Wounded0|Missing or captured0/);
@@ -768,8 +785,8 @@ describe('Formation Detail parity display', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
 
     const copy = view.container.textContent ?? '';
-    expect(copy).toContain('Power at home (100%)Unreported');
-    expect(copy).toContain('Power here (70%)Unreported');
+    expect(copy).toContain('Power at home (100%)No staff report');
+    expect(copy).toContain('Power here (70%)No staff report');
     expect(copy).not.toContain('Power at home (100%)—');
     expect(copy).not.toContain('Power here (70%)—');
   });

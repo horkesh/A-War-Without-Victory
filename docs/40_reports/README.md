@@ -1,19 +1,10 @@
 # docs/40_reports — Master Index and Structure
 
+**BC01 implementation verification (2026-09-07):** [Report](audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md) records restored catalog launches, neutral canonical POST and observer parity, but **BC01 is CLOSED by owner approval; territory-similarity requirement retired**. Raw suite exit 1 was limited to five missing BCS keys, resolved by a translation-only change with 29 focused tests and fresh build; the raw run is not relabeled green. CSS supplement 222/222 closes the junction scanner difference. [Current roadmap](../plans/MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) controls disposition.
+
 **Purpose:** Single entrypoint for implementation reports, handovers, convenes, investigations, and audits. Use consolidated summaries for quick reference; use individual reports for detail.
 
-**2026-08-28 RE 1.0 engine-integrity execution:** The sole RE authority remains the
-[seven-outcome/eight-packet 1.0 contract](../plans/2026-08-26-engine-integrity-plan.md). The
-original probe channel closed at `b711cffa9` and is historical evidence. The owner-authorized
-[auxiliary packaged-probe recovery](../plans/2026-08-28-packaged-probe-recovery-plan.md) remains
-outside those RE outcomes, but instrumentation stopped at final R2 RED before production and there
-is no R3. Read-only alternate packaged-proof discovery is next after a fresh lock; P2B is HELD and P3 waits. The
-[single living audit](audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md) preserves the evidence
-record, including the terminal R2 receipt; it is not a queue and no new report was created.
-The [original packet](proposals/20260826_ENGINE_INTEGRITY_PACKET.md),
-[frozen discovery record](proposals/20260826_ENGINE_INTEGRITY_DISCOVERY_RECORD.md), and
-[full-team dispositions](proposals/20260826_ENGINE_INTEGRITY_TEAM_DISPOSITIONS.md) are historical
-evidence only.
+**BC08 verification history and control (2026-09-07; current BC01 verification above):** [BC08 audit](audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md) closes only bounded verification/disposition. Full suite remains RED (one Windows Bash-resolution failure); unchanged focused file passes 8/8 with child-scoped Git Bash. [Master §4.1](../plans/MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) retains BC01 CLOSED by owner approval; territory-similarity requirement retired ([verification](audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)); BC02–BC07 remain pending. R7 art/packaged first-paint passed; readability/audio closeout remains. RE closed 2026-09-01 and gates nothing; [old contract](../plans/2026-08-26-engine-integrity-plan.md), [recovery record](../plans/2026-08-28-packaged-probe-recovery-plan.md) and [audit](audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md) are history, with no successor proof route active. Calibration remains open on [n392](CALIBRATION_MASTER.md); final acceptance follows behavior settlement.
 
 **2026-08-14 — root investigation index added; read this before trusting the bulletins below.** The 26 root-level investigation, panel, first-fire, and root-cause reports dated **2026-06-02 → 2026-08-13** appeared in no index in this folder and were reachable only through `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`, or session memory. They are now indexed in **[§1A](#1a-investigations-panels-and-evidence-records-root-level)**, grouped by lane, each carrying **its standing today rather than the status it claimed when written**. The dated bulletins below this line stop at **2026-08-04** and are a historical stack, not a current-state feed — for current state use §1A, [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md), and `docs/PROJECT_LEDGER.md`.
 
@@ -61,6 +52,7 @@ evidence only.
 
 | Need | Go to |
 |------|--------|
+| **Current BC08 verification** | [audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md](audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md) — bounded closure; raw full suite red on one classified shell failure, corrected focused proof and unchanged n392 artifact gates; not an overall-green claim. |
 | **Latest R4 presidential cadence proof** | [implemented/20260801_R4_PHASE2_RUNTIME_CADENCE_PROOF.md](implemented/20260801_R4_PHASE2_RUNTIME_CADENCE_PROOF.md) - three fresh serial turn-104 runs, byte-identical artifacts/reports, actual decisions separated from ordinary activity/notices and eleven exact positive holds, zero optional initiatives or generic Authority-spend content, and green baseline/type/runtime checks. |
 | **Latest seamless Command Room/Tactical Map transition** | [implemented/20260801_SEAMLESS_COMMAND_ROOM_MAP_TRANSITION.md](implemented/20260801_SEAMLESS_COMMAND_ROOM_MAP_TRANSITION.md) - R1 closeout, before/after metrics, lifecycle/cache/protocol contract, independent review, three-launch player-visible evidence, and roadmap handoff. |
 | **Latest D2 owner-play and remediation closeout** | [implemented/20260731_D2_OWNER_DIARY_REMEDIATION_AND_REPOSITORY_CLOSEOUT.md](implemented/20260731_D2_OWNER_DIARY_REMEDIATION_AND_REPOSITORY_CLOSEOUT.md) - seven RBiH/RS/HRHB Electron diaries, preserved evidence, bug-first fixes, open friction lanes, and repository reconciliation. |

@@ -1,14 +1,80 @@
-# The player faction's opportunities are never decided — QUEUED
+# Player opportunity autonomy boundary — BC01 CLOSED
 
-**Date:** 2026-09-01 · **Status:** QUEUED, not started. Located and evidenced; fix not attempted.
+**Date:** 2026-09-01 · **Status:** CLOSED by explicit owner approval, 2026-09-07. Verified operation/decision fixes accepted; similar final territory is retired as a BC01 requirement. Measured gaps remain unchanged; final calibration is open. See [verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md).
 **Corrected:** 2026-09-05 — the fix section was rewritten (see *Correction record* at the end). The
-root-cause trace below is unchanged and still holds.
+root-cause trace below preserves the historical diagnosis, superseded by the dated implementation verification.
 **Corrected again:** 2026-09-05 — the Level-2 open question is RULED (auto-apply, does not queue);
 two factual citation errors fixed; canon-clarification recommendations recorded (see the second
 *Correction record* entry at the end). Still does not authorize implementation.
 **Found by:** the D2 full-campaign set —
 [all three factions](../40_reports/playtests/20260901_d2_full_campaign_all_three_factions.md).
 **Blocks:** ahistorical playthrough experiments. Does NOT block observer parity, which is unaffected.
+
+## Current disposition — 2026-09-07
+
+The owner approved closing and merging BC01 based on verified operation/decision behavior and explicitly retired similar final territory as its acceptance requirement. This does not claim convergence was met. BC02 is next priority only; no further implementation is authorized here. The earlier ACTIVE handoff below is historical.
+
+## Historical implementation handoff — 2026-09-07
+
+**ACTIVE — owner instruction “Start BC01 then”, 2026-09-07.** This schedules BC01 only; BC02–BC07 retain D1. The unchanged-source attribution and clean PRE/POST gates passed; candidate implementation is verified, while endpoint-convergence expectation is unmet. Existing home: [Master BC01](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) / [R8 acceptance detail](2026-07-31-full-campaign-electron-validation-plan.md#behavior-closure-acceptance-detail-2026-09-07). [BC08 verification](../40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md) is closed by bounded disposition, not an overall-green or player-path proof. BC01 is active; BC02–BC07 remain pending under D1. The corrected contract governs this repair.
+
+**Controlling autonomy interpretation:** L0 creates a live human review; L1 preserves existing review; L2 auto-applies military opportunities with **no queue**; L3 retains automatic observer decisions. New campaigns start at L2; the missing-field fallback is L0. Earlier text below saying “default L0” or “Levels 0–2 belong to the human” is historical diagnosis, superseded by the dated corrections and this summary. Do not implement a blanket post-turn player sweep. Acceptance covers all four levels, RBiH/HRHB player-path deficits and RS regression, not headless parity alone. **Attribution gate completed:** unchanged-source probes confirmed six missing RBiH and four missing HRHB catalog launches; territory-deficit magnitude is not thereby proven. Post-repair channel evidence and endpoint disposition are recorded in the verification report. Current acceptance also requires no-player calibration neutrality on the n392 lineage, all-three-player runs and observer parity; the verification section below remains controlling. This handoff introduces no new design.
+
+## Bounded execution plan — 2026-09-07
+
+The sequence below records the authorized implementation plan. Source/desktop/live verification and controlled no-player neutrality are complete; BC01 remains ACTIVE because endpoint convergence is unmet; owner disposition is required. The linked current verification report supersedes in-progress wording below without changing the acceptance expectation.
+
+**Authority and scope:** existing BC01 only. Attribution runs finish on unchanged source first;
+then a clean sibling checkout at `F:/AWWV-worktrees/bc01-player-opportunities`, branch
+`codex/bc01-player-opportunities`, supplies the fresh canonical no-player PRE 188-week baseline
+before any source edits. The dirty root checkout and its unrelated scheduled-task lock stay intact. Gameplay/systems
+implements; independent architecture and QA review. No new lane, mechanics, canon, initial-control,
+scenario, baseline or default-autonomy change. No blanket player post-turn sweep. The earlier
+“not authorized” passages record their September 5 status; the owner scheduling above supersedes
+that timing alone. Use writing-plans and test-driven-development discipline inside this existing home.
+
+1. **Attribution gate (completed; historical plan wording follows).** Preserve exact RBiH/HRHB
+   `op_launch_diff.ts` artifacts and classify missing launches by channel before implementation.
+   A catalog-fix claim about the territorial deficit is allowed only if the evidence supports it.
+   If attribution fails, revise this bounded causal claim before code; do not widen to commander AI.
+2. **Failing engine contracts first.** Extend `tests/operation_opportunities_phase2_decisions.test.ts`
+   and the relevant real war-pipeline test: L0 review actually generated and actionable; L1 preserved;
+   L2 auto-apply/no queue; L3 automatic; non-player and no-player paths unchanged; repeated calls and
+   delayed/resolved proposals do not duplicate decisions or launches. Verify absence of silent expiry
+   caused solely by missing ownership. Run focused tests to observe the intended red before edits.
+3. **Minimal engine routing.** Own `src/sim/combat/operation_opportunities.ts` and
+   `src/sim/turn_phases/war_phases.ts`. Protect a present human only at L0/L1 for opportunity
+   auto-decisions; generate reviews at those levels. Keep existing sorted proposal iteration,
+   eligibility/admission and single decision writer. Preserve no-player inputs by construction;
+   do not change `desktop_sim.advanceTurn` into an unconditional bot sweep.
+4. **L2 dossier rider, with UI tests first.** Own `src/ui/map/data/operationOpportunityDossiers.ts`,
+   its view types in `src/ui/map/data/types.ts`, and
+   `src/ui/map/components/army_hq/OperationOpportunityDossierPanel.tsx`, plus necessary adapter
+   projection/copy and focused tests. Launched opportunities must remain visible with actual staff/
+   commander reasoning and exact live operation/corps identity. Bind through persisted resolution,
+   never normalized display-name similarity. Reuse the existing Stop-op decision/IPC path; no new
+   lever or authorization action. Test wrong-faction/stale/completed operation exclusion, truthful
+   disabled states and a live Stop-op affordance, alongside unchanged L0/L1 five-way review actions.
+   Extend existing `tests/ui/decision_room_stop_op_executing.test.ts` and
+   `tests/ui/directive_card_stop_op_action.test.ts` only if the reused bridge changes.
+5. **Review and proof.** Focused engine/UI tests, typecheck, relevant state/migration/serialization
+   checks if persisted fields change (prefer no schema change), canonical full suite and desktop map
+   build; live UI proof for launched reasoning/Stop-op. Independent review checks singular ownership,
+   deterministic ordering and no authorization leak. Final behavior evidence: fresh controlled
+   no-player 188w neutrality on n392 lineage, all-three player paths, observer parity and the
+   attribution comparison again. One controlled candidate per run; no baseline update. Runs are
+   serial under the root's orchestration, never concurrent with changing source.
+6. **Closeout only on actual evidence.** Update this checklist, master/board/R8, GUI/calibration
+   pointers as affected, report/index and ledger/knowledge; preserve failures and limitations.
+   BC01 is not closed by engine unit tests alone or by headless parity; other BC rows remain pending.
+
+**Canon basis:** War Specification requires deterministic War-only mechanics; Engine Invariants
+§14.10b and Systems Manual's player-automation boundary inform the dated L2 ruling above. Existing
+presidential review and Stop-op paths remain the authority. No new canon design is proposed;
+precise stale-unbuilt-status propagation in §14.10b/Systems Manual requires the independent
+panel disposition before any canon edit. Historical-operation authorization is unchanged at every level.
+
+## Historical diagnosis and correction record
 
 ## The defect
 
@@ -20,8 +86,7 @@ desktop_sim.ts            no post-turn opportunity sweep at all
 ```
 
 The calibration runner sweeps every faction's opportunities after each turn with an explicit `null`.
-The in-pipeline step skips the player faction — which is CORRECT at Levels 0-2, where those
-decisions belong to a present human — and `advanceTurn` never performs the post-turn sweep that
+The in-pipeline step skips the player faction — correct for human review at L0/L1, but incomplete at L2, which must auto-apply military opportunities — and `advanceTurn` never performs the post-turn sweep that
 would resolve them afterwards. The player faction's opportunity-driven operations are therefore
 never decided at all.
 
@@ -109,7 +174,7 @@ presupposes a plan put to them. CLAUDE.md's Sacred Rule on ops-only attacks says
 original document's own parenthetical — that skipping the player is "CORRECT at Levels 0-2" — was
 right, and **this half must not be reverted or unified with bot handling.**
 
-### The real defect: the authorization path is dead at the DEFAULT autonomy level
+### Historical diagnosis: the authorization path is dead at L0 (not the shipped L2 default)
 
 *(Game Designer, 2026-09-05.)* Excluding the player from auto-apply is correct. What is broken is
 that nothing takes its place at the default level.
@@ -135,7 +200,7 @@ that nothing takes its place at the default level.
   **default campaign gets auto-apply**, not a review queue. It changes who each half of the fix
   serves, not either half.)*
 
-Net effect at default settings: **the dossier is fully populated and fully inert.** The uncanonical
+At L0 without a review record, **the dossier is fully populated and fully inert**; the shipped L2 default instead requires auto-application. The uncanonical
 third state this produces is **propose → display → silent expiry** — worse than either full autonomy
 or full consultation, because the player is shown a decision they cannot make and then loses the
 operation without having chosen anything.
@@ -144,12 +209,12 @@ operation without having chosen anything.
 
 | Level | Name | Behaviour | Status |
 |-------|------|-----------|--------|
-| 0 | Full Control (default) | **Staff the desk** — create the review record so the buttons that already exist go live | **Primary fix** |
+| 0 | Full Control (missing-field fallback, not campaign default) | **Staff the desk** — create the review record so the buttons that already exist go live | **Primary fix** |
 | 1 | Strategic | Proposal generator already runs | Already correct, no change |
 | 2 | Political | **Auto-apply through the bot path — does not queue** (Game Designer ruling, 2026-09-05) | **RULED — see below** |
 | 3 | Observer | Sweep decides opportunities like any other faction (pass `null`) | Correct; retained from the original option 2 |
 
-**Level 0 (default) — staff the desk.** Create the review record so the already-built dossier
+**Level 0 (Full Control) — staff the desk.** Create the review record so the already-built dossier
 becomes live. The UI, the five-way decision and the IPC handler all exist; only the review-record
 plumbing is missing. This is the primary fix, and it is a *completion* of LANE B Phase 2, not a
 reversal of it.
@@ -278,14 +343,14 @@ question; settling it needs a run diff.
 RBiH and HRHB and confirm which channel the missing late-1995 operations come from. Do not implement
 against an unconfirmed attribution.
 
-## Verification required
+## Current verification required
 
 - **`tools/ai_play/op_launch_diff.ts` for RBiH and HRHB first** — confirm the attribution above
   before writing any code.
 - Re-run all three D2 campaigns; the RBiH and HRHB deficits should close toward RS's ~2.
 - **188w with `control_delta` diffed.** The change must remain inert on the calibration line — a run
   with no player faction should be untouched by construction, exactly as the auto-authorize change
-  was (n389 vs n390 identical `final_state_hash`). Prove it, do not assume it.
+  was (n389 vs n390 identical `final_state_hash` — historical comparison only; n390 is not current acceptance evidence). Prove a fresh controlled no-player comparison on the accepted n392 lineage when scheduled; do not assume it.
 - Observer parity must still hold at 188 turns.
 
 ## Related, still open

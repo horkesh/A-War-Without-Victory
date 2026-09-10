@@ -1,0 +1,25 @@
+{
+  "source": "runs/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n392/operation_aars.json",
+  "records": [
+    {
+      "operation_id": "vrs_sarajevo_romanija:Operation Trnovo:t69",
+      "operation_name": "Operation Trnovo",
+      "started_turn": 69,
+      "ended_turn": 79,
+      "total_attacks": 0,
+      "objectives_captured": [],
+      "recovery_reason": "zero_eligible_axis",
+      "outcome": "failure",
+      "grade": {
+        "factors": {
+          "exchange_ratio": 0,
+          "objective_completion": 0,
+          "preservation": 97.37394957983193,
+          "tempo": 0
+        },
+        "stars": 1,
+        "verdict": "No Assault Attempted"
+      }
+    }
+  ]
+}

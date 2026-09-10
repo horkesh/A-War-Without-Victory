@@ -421,6 +421,9 @@ function validateEventRow(row: unknown, filename: string, rowIndex: number): voi
     if (hasOwn(row, 'once')) {
         validateOptionalBoolean(row.once, 'once', filename, rowIndex);
     }
+    if (hasOwn(row, 'same_turn_requires_events')) {
+        validateOptionalBoolean(row.same_turn_requires_events, 'same_turn_requires_events', filename, rowIndex);
+    }
     if (row.once === true && hasOwn(row, 'recurrence')) {
         failRow(filename, rowIndex, 'once and recurrence cannot both be set');
     }
@@ -460,6 +463,20 @@ function validateEventRow(row: unknown, filename: string, rowIndex: number): voi
         const requiresEvents = row.trigger.requires_events;
         if (!Array.isArray(requiresEvents) || !requiresEvents.every((id) => typeof id === 'string')) {
             failRow(filename, rowIndex, 'trigger.requires_events must be a string array when present');
+        }
+    }
+    if (row.same_turn_requires_events === true) {
+        if (row.once !== true) {
+            failRow(filename, rowIndex, 'same_turn_requires_events requires once:true');
+        }
+        if (!Array.isArray(row.trigger.requires_events) || row.trigger.requires_events.length === 0) {
+            failRow(filename, rowIndex, 'same_turn_requires_events requires non-empty trigger.requires_events');
+        }
+        if (hasOwn(row, 'pressure')) {
+            failRow(filename, rowIndex, 'same_turn_requires_events must not define pressure');
+        }
+        if (hasOwn(row, 'response_options')) {
+            failRow(filename, rowIndex, 'same_turn_requires_events must not define response_options');
         }
     }
     if (hasOwn(row, 'enables_events')) {
@@ -711,6 +728,48 @@ function validateEventReferences(rows: EventDefinition[]): void {
     ).sort(strictCompare);
     if (missing.length > 0) {
         throw new Error(`Unknown event reference(s) in required event catalog: ${missing.join(', ')}`);
+    }
+}
+
+/**
+ * Reject prerequisite windows that cannot observe a receipt under the event
+ * evaluator's turn ordering. Ordinary prerequisite rows can first observe an
+ * event on the turn after that event's earliest possible turn. The bounded
+ * `same_turn_requires_events` opt-in is the sole exception when both windows
+ * meet on that turn.
+ *
+ * This is intentionally an earliest-bound proof only. Wider overlapping
+ * windows remain valid because their conditions may allow the prerequisite to
+ * fire early enough; the loader must not guess at runtime condition outcomes.
+ */
+function validateImpossiblePrerequisiteWindows(rows: EventDefinition[]): void {
+    const byId = new Map(rows.map((row) => [row.id, row]));
+    const impossible: string[] = [];
+
+    for (const row of rows) {
+        const dependentMax = row.trigger.turn_max;
+        if (typeof dependentMax !== 'number' || !Number.isFinite(dependentMax)) continue;
+
+        for (const prerequisiteId of row.trigger.requires_events ?? []) {
+            const prerequisiteMin = byId.get(prerequisiteId)?.trigger.turn_min;
+            if (typeof prerequisiteMin !== 'number' || !Number.isFinite(prerequisiteMin)) continue;
+
+            const closesBeforePrerequisite = dependentMax < prerequisiteMin;
+            const closesOnPrerequisite = dependentMax === prerequisiteMin;
+            if (
+                closesBeforePrerequisite ||
+                (closesOnPrerequisite && row.same_turn_requires_events !== true)
+            ) {
+                impossible.push(`${row.id}->${prerequisiteId}`);
+            }
+        }
+    }
+
+    if (impossible.length > 0) {
+        impossible.sort(strictCompare);
+        throw new Error(
+            `Impossible prerequisite window(s) in required event catalog: ${impossible.join(', ')}`,
+        );
     }
 }
 
@@ -1112,6 +1171,7 @@ export function loadEventDefinitionsFromDir(scenarioStartWeek: number, eventsDir
     }
     validateUniqueEventIds(allEvents);
     validateEventReferences(allEvents);
+    validateImpossiblePrerequisiteWindows(allEvents);
     // ─── Phase D Packet 44 vocabulary passes. ──────────────────────────────
     // Run vocabulary checks before family/structural causality passes so a
     // typo on `dimension_shifts[].dimension` or `effects[].kind` fails with

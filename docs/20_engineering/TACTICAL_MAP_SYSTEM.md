@@ -1022,3 +1022,13 @@ interface LoadedData {
   municipalityCentroids: Map<string, [number, number]>;
 }
 ```
+
+
+**BC01 implemented opportunity receipts (2026-09-07):** The existing Presidential Decision Room
+receives own resolved opportunity DTOs and their factual staff evidence. Exact host identity is
+enriched in the main-process player-visible projection from the desktop sim bundle, never by a
+renderer catalog import. Snapshot, updates and replay share that boundary. The DTO-only host is
+absent from canonical saves; missing metadata leaves Stop-op unavailable. A uniquely bound own
+executing operation uses the existing DirectiveCard halt route. Resolved receipts do not add a
+pending review or a hard Advance blocker. See [player-visible boundary](PLAYER_VISIBLE_STATE.md)
+and [BC01 acceptance home](../plans/2026-09-01-player-opportunity-sweep-gap.md); implementation is verified and BC01 is closed by owner approval, which retired the unmet territory-similarity requirement. Final calibration stays open.

@@ -15,8 +15,9 @@ Deterministic strategic-level simulation of the 1992-1995 Bosnian War. Negative-
 npm run test:vitest          # whole suite, sharded (same gate CI runs)
 npm run test:vitest -- <file>  # one file / -t pattern (unsharded)
 npx tsc --noEmit             # Typecheck
-npm run sim:scenario:run:40w # 40-week calibration scenario
-npm run sim:scenario:run:default  # 52-week historical scenario
+npm run sim:scenario:run:188w # sole scoring calibration scenario
+npm run sim:scenario:run:40w # 40-week diagnostic scenario
+npm run sim:scenario:run:default  # 52-week diagnostic scenario
 npm run desktop              # Electron app
 npm run dev:map              # Vite tactical map (port 3001)
 npm run desktop:map:build    # Build Electron map → dist/tactical-map/
@@ -78,6 +79,8 @@ npm run repo:branches:clean   # archive unique work as tags, then delete
 - Archive tags are pushed to origin, so recovery never depends on one machine.
 
 ## Shell & Platform
+
+- **Windows test Bash:** unqualified `bash` must resolve to Git Bash for MSYS `/f/...` paths, not the Windows/WSL launcher. Scope PATH adjustment to the test process; no global setting change. See [BC08 receipt](docs/40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md).
 
 - **Windows**: Use `;` not `&&` to chain commands in PowerShell.
 - **tsx**: Use `node_modules/.bin/tsx` directly (not `npx tsx`). Prefer `npm run test:vitest`.

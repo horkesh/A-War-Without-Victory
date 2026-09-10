@@ -13,7 +13,7 @@ import { getDecisionSurfaceForInboxType } from '../data/decisionSurfaceRegistry'
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { t, type MessageKey } from '../i18n';
-import { turnToDateString } from '../utils/formatters';
+import { formatPersonnel, turnToDateString } from '../utils/formatters';
 
 interface TurnAftermathModalProps {
   isOpen: boolean;
@@ -489,7 +489,7 @@ export function TurnAftermathModal({
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-2 p-3 text-sm">
-                <Metric label={t('turnAftermath.metric.ownCasualties')} value={String(view.cost.friendlyMilitaryCasualties)} detail={t('turnAftermath.detail.theater', { count: view.cost.theaterMilitaryCasualties })} compact />
+                <Metric label={t('turnAftermath.metric.ownCasualties')} value={formatPersonnel(view.cost.friendlyMilitaryCasualties)} detail={t('turnAftermath.detail.theater', { count: view.cost.theaterMilitaryCasualties })} compact />
                 <Metric label={t('turnAftermath.metric.displaced')} value={String(view.cost.displacedThisTurn)} detail={t('turnAftermath.detail.thisTurn')} compact />
                 <Metric label={t('turnAftermath.metric.destroyed')} value={String(view.cost.ownFormationsDestroyed)} detail={t('turnAftermath.detail.ownFormations')} compact />
                 <Metric label={t('turnAftermath.metric.supplySpent')} value={String(view.cost.ownSupplySpent + view.cost.ownHeavyMunitionsSpent)} detail={t('turnAftermath.detail.heavy', { count: view.cost.ownHeavyMunitionsSpent })} compact />

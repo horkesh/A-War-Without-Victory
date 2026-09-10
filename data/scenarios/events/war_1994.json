@@ -157,7 +157,7 @@
     "category": "diplomatic",
     "trigger": {
       "turn_min": 96,
-      "turn_max": 96,
+      "turn_max": 97,
       "phase": "war",
       "requires_events": [
         "markale_massacre_1994"

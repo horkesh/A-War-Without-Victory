@@ -443,7 +443,7 @@ describe('Army HQ timing copy', () => {
     expect(copy).toContain('Status pending');
     expect(copy).toContain('Objective progress unreported');
     expect(copy).toContain('Status unreported');
-    expect(copy).toContain('Momentum Unreported');
+    expect(copy).toContain('Momentum No staff report');
     expect(copy).not.toContain('In execution');
     expect(copy).not.toContain('Primary objective');
     expect(copy).not.toContain('Obj. 1 / 2');
@@ -533,7 +533,7 @@ describe('Army HQ timing copy', () => {
     const copy = document.body.textContent ?? '';
     expect(copy).toContain('Required axes unreported');
     expect(copy).toContain('Optional axes unreported');
-    expect(copy).toContain('Unreported');
+    expect(copy).toContain('No staff report');
     expect(copy).not.toContain('0/2 required');
     expect(copy).not.toContain('0/1 optional');
     expect(copy).not.toContain('Blocked');

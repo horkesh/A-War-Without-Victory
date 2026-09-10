@@ -67,11 +67,12 @@ function formatOpportunityResponse(response: string): string {
     return labels[response] ?? t('warCost.response.reviewed');
 }
 
-function formatFindingSeverity(severity: string): string {
+export function formatFindingSeverity(severity: string): string {
     const labels: Record<string, string> = {
         record: t('warCost.findingSeverity.record'),
         grave: t('warCost.findingSeverity.grave'),
         rupture: t('warCost.findingSeverity.rupture'),
+        none: t('warCost.findingSeverity.none'),
     };
     return labels[severity] ?? t('warCost.findingSeverity.record');
 }

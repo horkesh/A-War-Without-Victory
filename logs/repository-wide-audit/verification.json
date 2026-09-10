@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "checks": [
+    "22 absent command paths rechecked",
+    "orphan resolver positive control",
+    "27 event test files in full discovery",
+    "239 research files / 53031799 raw bytes"
+  ],
+  "head": "f117fe47536398add3a966d177b3dce54fc820ac",
+  "limitations": "Source/configuration audit; no runtime campaign/build/test-suite or live branch protection check"
+}

@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { sortRecentEngagements } from '../utils/recentEngagements';
@@ -23,13 +23,13 @@ import {
   getPlayerSafeFormationPostureLabel,
   getPlayerSafeFormationReadinessLabel,
   getPlayerSafeFormationNarrativeArcLabel,
-  getPlayerSafeMunicipalityName,
   getPlayerSafeSectorStanceLabel,
 } from '../utils/playerSafeText';
 import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { inspectOnField } from '../utils/shellNavigation';
 import { resolveCurrentSectorForFormation } from '../utils/sectorUtils';
+import { buildMunicipalityDisplayNameMap, getMunicipalityDisplayName } from '../utils/municipalityDisplayName';
 
 type DetailTab = 'overview' | 'record' | 'orders';
 
@@ -198,9 +198,14 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
+  const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const setLoadError = useGameStore((s) => s.setLoadError);
+  const municipalityDisplayNames = useMemo(
+    () => buildMunicipalityDisplayNameMap(osidPropertiesMap),
+    [osidPropertiesMap],
+  );
 
   useEffect(() => {
     setActiveTab('overview');
@@ -785,7 +790,7 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
               <div className="text-xs min-w-0">
                 <span className="text-text-secondary">{t('formationDetail.homeMunicipality')} </span>
                 <span className="text-text-primary break-all">
-                      {formation.municipalityId ? getPlayerSafeMunicipalityName(formation.municipalityId, '—') : '—'}
+                      {formation.municipalityId ? getMunicipalityDisplayName(formation.municipalityId, municipalityDisplayNames) : '—'}
                 </span>
               </div>
             )}

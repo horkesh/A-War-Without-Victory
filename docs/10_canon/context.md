@@ -76,7 +76,7 @@ When conflicts arise between documents, this is the resolution order. See **`doc
 
 **Officers System â€” Two-Tier (Phases Aâ€“D, 2026-03-03):** Two-tier officer system replacing flat faction-level `getOfficerQualityMult()`. **Tier 2 (brigade):** per-brigade `officer_quality` [0.05, 0.90] on FormationState with combat/frontline growth, casualty loss, faction learning rates (RBiH 1.5Ã—, RS 0.7Ã—, HRHB 1.0Ã—), VRS brain drain after w40. Pipeline step `update-officer-quality`. Module: `officer_quality_update.ts`. **Tier 1 (named officers):** 63 historical corps/army commanders loaded from `data/scenarios/officers/apr1992_officers.json` via `init_officers` scenario field. Per-officer competence/aggressiveness/defensiveness/political_reliability (1â€“5). Corps combat modifier: `0.90 + compÃ—0.03 + ratingÃ—0.01`. Succession from officer pool with faction-specific rules (HVO political_reliability sort + delay, VRS no regeneration, ARBiH pool regeneration every 12 turns). Pipeline step `officer-succession`. Module: `officer_system.ts`. **Bot AI:** corps aggressiveness shift (`bot_corps_ai.ts`), ARBiH warlord friction before w78 (`bot_brigade_ai_osid.ts`), MladiÄ‡ override for VRS general_offensive (`combat_math.ts`). **War timeline:** `officer_config` per faction in `data/scenarios/timelines/apr1992.json`. Three-tier fallback in combat math: named officers â†’ brigade quality â†’ legacy. 63 new tests (19 Tier 2, 44 Tier 1). **Critical fix:** `normalizeScenario()` whitelist expanded â€” `war_timeline` and `init_officers` fields were being stripped (war_timeline was never loading in previous runs). n403: 88.0% OSID match (655/744), calibration guard â‰¥86% satisfied. Canon: Systems Manual Â§4, Â§7.4, Â§7.5. Report: [20260303_OFFICERS_SYSTEM_IMPLEMENTATION.md](../40_reports/implemented/20260303_OFFICERS_SYSTEM_IMPLEMENTATION.md). Design doc: [OFFICERS_SYSTEM_COMPREHENSIVE_PLAN.md](../30_planning/OFFICERS_SYSTEM_COMPREHENSIVE_PLAN.md). **Phase E GUI (2026-03-03):** FormationDetail shows Command block (officer quality, corps/army commander, Acting status) and Recent command changes when turn report includes officer_succession; warroom FactionOverviewPanel COMMAND subsection and NewspaperModal succession lines; desktop sends `turn-report-updated` after advance-turn. See [TACTICAL_MAP_SYSTEM.md](../20_engineering/TACTICAL_MAP_SYSTEM.md) Â§0.
 
-**Area-Weighted Territory & Degenerate OSID Merge (2026-03-03):** Territory control percentages switched from count-based (each OSID = 1 unit) to area-weighted via precomputed `data/derived/operational/osid_areas.json` (51,337 kmÂ² total). Count-based showed RS 55.2% vs actual 65.1% by area â€” a 10pp gap. Area-weighted matches historical consensus (~65% RS territory). New tooling: `tools/generate_osid_areas.cjs` precomputes areas from GeoJSON via `turf.area()`. Runtime: `loadOsidAreas()` in `operational_data.ts`. UI: `useOsidAreas()` React hook in SituationTab, area % primary in FactionOverviewPanel. Comparison tool updated with area-weighted columns. 9 degenerate OSIDs (< 0.01 kmÂ², all graph-isolated geometric artifacts) merged into same-municipality same-ethnicity targets via `merge_progress.json`. OSID count: 753 â†’ 744. A second merge (2026-03-21) removed 32 micro-OSIDs (< 1 kmÂ²) via `tools/merge_micro_osids.cjs`: 744 â†’ 712 OSIDs. Painted targets, OOB, operations, enclave lists, benchmarks, and derived pipeline all updated. **After any OSID merge:** run `npm run map:derive:operational-initial-master` so `data/derived/operational/operational_initial_master.json` matches the settlement graph (712 entries); dev runner and political control init use it when graph is OSID-keyed (avoids "unknown settlement ids" at init). Report: [20260303_AREA_WEIGHTED_TERRITORY_AND_DEGENERATE_MERGE.md](../40_reports/implemented/20260303_AREA_WEIGHTED_TERRITORY_AND_DEGENERATE_MERGE.md).
+**Area-Weighted Territory & Degenerate OSID Merge (2026-03-03):** Territory control percentages switched from count-based (each OSID = 1 unit) to area-weighted via precomputed `data/derived/operational/osid_areas.json` (51,337 kmÂ² total). Count-based showed RS 55.2% vs actual 65.1% by area â€” a 10pp gap. Area-weighted matches historical consensus (~65% RS territory). New tooling: `tools/generate_osid_areas.cjs` precomputes areas from GeoJSON via `turf.area()`. Runtime: `loadOsidAreas()` in `operational_data.ts`. UI: `useOsidAreas()` React hook in SituationTab, area % primary in FactionOverviewPanel. Comparison tool updated with area-weighted columns. 9 degenerate OSIDs (< 0.01 kmÂ², all graph-isolated geometric artifacts) merged into same-municipality same-ethnicity targets via `merge_progress.json`. OSID count: 753 â†’ 744. A second merge (2026-03-21) removed 32 micro-OSIDs (< 1 kmÂ²) via `tools/merge_micro_osids.cjs`: 744 â†’ 712 OSIDs. Painted targets, OOB, operations, enclave lists, benchmarks, and derived pipeline all updated. **After any OSID merge:** run `npm run map:derive:operational-initial-master` so `data/derived/operational/operational_initial_master.json` matches the settlement graph (712 entries); political control init uses it when the graph is OSID-keyed (avoids "unknown settlement ids" at init). Report: [20260303_AREA_WEIGHTED_TERRITORY_AND_DEGENERATE_MERGE.md](../40_reports/implemented/20260303_AREA_WEIGHTED_TERRITORY_AND_DEGENERATE_MERGE.md).
 
 **Corps AI Pocket Targeting (2026-03-08 update; pipeline truth synchronized 2026-07-15):** Rear pocket consolidation is cluster-aware in `rear_pocket_consolidation.ts` (BFS over 1-6 connected enemy OSIDs, post-week-20 auto-flip only when all external neighbors satisfy surrounding-faction rules, no active brigade defends the cluster, and enclave guards pass). Weeks 0-20 are handled by paramilitary sweep; after the fade week, `rear-pocket-consolidation` runs immediately after `paramilitary-advance`. Corps AI excludes active paramilitary target OSIDs from opportunistic targeting. Empty reachable same-corps sectors use explicit reassignment intent and delayed column movement; sectors with no legal donor remain `unstaffed_front`. Report: [20260307_REAR_POCKET_CONSOLIDATION_AND_CORPS_TARGETING.md](../40_reports/implemented/20260307_REAR_POCKET_CONSOLIDATION_AND_CORPS_TARGETING.md).
 
@@ -200,7 +200,7 @@ Refs: docs/PROJECT_LEDGER.md entry [date]
 **Protected Paths (never commit):**
 - `data/derived/_debug/` - Debug outputs
 - `data/derived/settlements_substrate.geojson` - Large derived file (regenerated)
-- `docs/cleanup/cleanup_audit.*` - Audit outputs (regenerated)
+- `docs/cleanup/cleanup_audit.*` - Historical audit outputs (generator retired)
 - `node_modules/` - Dependencies
 - `*.log` - Log files
 
@@ -350,8 +350,6 @@ AWWV/
 â”‚   â””â”€â”€ repo/                     # Repository maintenance
 â”œâ”€â”€ tools/                        # Development tools
 â”‚   â”œâ”€â”€ assistant/                # Ledger/context helpers (no mistake guard)
-â”‚   â”œâ”€â”€ dev_runner/               # Dev server (GameState exposure)
-â”‚   â”œâ”€â”€ dev_viewer/               # HTML viewer (read-only)
 â”‚   â””â”€â”€ docs/                     # Document generation scripts
 â”œâ”€â”€ data/
 â”‚   â”œâ”€â”€ source/                   # Authoritative source data (READ-ONLY)
@@ -382,7 +380,6 @@ npm run map:derive:substrate      # Build canonical settlement substrate
 npm run map:merge:adm3-1990       # Regenerate canonical 1990 municipality polygons (data/source/boundaries/bih_adm3_1990.geojson)
 npm run map:derive:mun1990:boundaries  # Build municipality 1990 boundary overlay (derived MultiLineString for viewers; canonical polygons = bih_adm3_1990.geojson)
 npm run map:derive:contact:phase1 # Build Phase 1 contact graph
-npm run map:derive:continuity:g3_6  # Build continuity graph
 npm run map:contact:enrich2       # Build Phase 2 enriched graph
 npm run map:viewer:substrate:index # Build substrate viewer
 npm run map:viewer:contact:phase1  # Build contact graph viewer
@@ -420,12 +417,10 @@ The unified viewer provides:
 ### Simulation
 ```bash
 npm run phase3:abc_audit          # Run Phase 3A/B/C audit harness
-npm run dev:runner                # Start dev runner (port 3000)
 ```
 
 ### Repository Maintenance
 ```bash
-npm run repo:cleanup:audit        # Audit for orphan files
 npm run typecheck                 # Type check all TypeScript
 npm test                          # Run test suite
 ```
@@ -540,10 +535,8 @@ cat docs/specs/sim/phase3a_pressure_eligibility.md
 - â¸ï¸ Phase 4+: Not yet specified
 
 ### Dev Tools
-- **Dev runner**: Exposes raw GameState via HTTP (port 3000)
-- **Dev viewer**: Read-only HTML viewer, no game logic
 - **Canonical faction IDs**: RBiH, RS, HRHB only (no aliases)
-- **location_osid**: War-phase brigade location; dev/viewer use OSID for formation position
+- **location_osid**: War-phase brigade location
 
 ## Validation Commands
 

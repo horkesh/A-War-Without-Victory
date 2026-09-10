@@ -1,0 +1,42 @@
+{
+  "orphanAuditPositiveControl": {
+    "specifier": "../../sim/run_early_war_browser.js",
+    "importer": "src/ui/warroom/ClickableRegionManager.ts",
+    "actual": "src/sim/run_early_war_browser.ts",
+    "returned": "src/sim/run_early_war_browser.js",
+    "returnedExists": false,
+    "actualExists": true
+  },
+  "lockedVersions": [
+    {
+      "name": "maplibre-gl",
+      "root": "5.24.0",
+      "map": "4.7.1"
+    },
+    {
+      "name": "pmtiles",
+      "root": "4.4.1",
+      "map": "3.2.1"
+    },
+    {
+      "name": "@turf/helpers",
+      "root": "7.3.4",
+      "map": "6.5.0"
+    },
+    {
+      "name": "@turf/bezier-spline",
+      "root": "7.3.4",
+      "map": "6.5.0"
+    },
+    {
+      "name": "@deck.gl/mapbox",
+      "root": "9.3.3",
+      "map": "9.2.11"
+    },
+    {
+      "name": "react",
+      "root": "18.3.1",
+      "map": "18.3.1"
+    }
+  ]
+}

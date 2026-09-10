@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/event_conditions.test.ts (15 tests) 19ms
+
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+   Start at  15:29:25
+   Duration  1.28s (transform 378ms, setup 19ms, collect 421ms, tests 19ms, environment 0ms, prepare 111ms)
+

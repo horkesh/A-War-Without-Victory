@@ -15,6 +15,46 @@ import {
 } from './evaluate_events.js';
 import { emitEventNotifications } from './emit_notifications.js';
 
+const DECORATION_FACTION_BY_SUFFIX = {
+    rbih: 'RBiH',
+    rs: 'RS',
+    hrhb: 'HRHB',
+} as const;
+
+function validateDecorationTarget(
+    state: GameState,
+    eventId: string,
+    decisionFaction: string,
+    chosen: { id: string; target_formation_id?: string },
+): string | undefined {
+    const match = /^decorate_steadfast_(rbih|rs|hrhb)__(.+)$/.exec(chosen.id);
+    if (!match) {
+        if (chosen.target_formation_id != null) {
+            throw new Error(`Invalid decoration target metadata for response "${chosen.id}"`);
+        }
+        return undefined;
+    }
+    const suffix = match[1] as keyof typeof DECORATION_FACTION_BY_SUFFIX;
+    const targetFromId = match[2];
+    const targetId = chosen.target_formation_id;
+    const faction = DECORATION_FACTION_BY_SUFFIX[suffix];
+    const formation = typeof targetId === 'string' ? state.military.formations[targetId] : undefined;
+    const kind = typeof formation?.kind === 'string' ? formation.kind : 'brigade';
+    if (
+        eventId !== `decorate_a_unit_${suffix}`
+        || decisionFaction !== faction
+        || !targetId
+        || targetId !== targetFromId
+        || !formation
+        || formation.faction !== faction
+        || formation.status !== 'active'
+        || (kind !== 'corps' && kind !== 'brigade')
+    ) {
+        throw new Error(`Invalid decoration target for response "${chosen.id}"`);
+    }
+    return targetId;
+}
+
 export function resolveEventDecisionCore(state: GameState, eventId: string, responseId: string): void {
     const pending = state.military.pending_event_decisions;
     if (!pending) {
@@ -32,7 +72,8 @@ export function resolveEventDecisionCore(state: GameState, eventId: string, resp
         throw new Error(`No response option "${responseId}" for event "${eventId}"`);
     }
 
-    applyEventEffects(state, chosen.effects ?? []);
+    const targetFormationId = validateDecorationTarget(state, eventId, decision.faction, chosen);
+    applyEventEffects(state, chosen.effects ?? [], targetFormationId);
     applyDefinitionFlags(state, chosen.sets_flags);
     applyDefinitionDimensionShifts(state, chosen.dimension_shifts);
 

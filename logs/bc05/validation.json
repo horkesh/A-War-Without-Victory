@@ -1,0 +1,64 @@
+{
+  "scope": "BC05 NATO prerequisite-window repair with bounded BC04 same-turn compatibility",
+  "runs": [
+    {
+      "phase": "red",
+      "command": "node node_modules/vitest/vitest.mjs run tests/event_loader.test.ts tests/event_timeline_integrity.test.ts tests/events_evaluate.test.ts --reporter=dot",
+      "exit_code": 1,
+      "test_files_passed": 0,
+      "test_files_failed": 3,
+      "tests_passed": 110,
+      "tests_failed": 3,
+      "vitest_duration_seconds": 4.87,
+      "log": "logs/bc05/red-focused-tests.log"
+    },
+    {
+      "phase": "green",
+      "command": "node node_modules/vitest/vitest.mjs run tests/event_loader.test.ts tests/event_timeline_integrity.test.ts tests/events_evaluate.test.ts --reporter=dot",
+      "exit_code": 0,
+      "test_files_passed": 3,
+      "test_files_failed": 0,
+      "tests_passed": 115,
+      "tests_failed": 0,
+      "vitest_duration_seconds": 4.25,
+      "log": "logs/bc05/green-focused-tests.log"
+    },
+    {
+      "phase": "final",
+      "command": "node node_modules/vitest/vitest.mjs run tests/event_loader.test.ts tests/event_timeline_integrity.test.ts tests/events_evaluate.test.ts --reporter=dot",
+      "exit_code": 0,
+      "test_files_passed": 3,
+      "test_files_failed": 0,
+      "tests_passed": 115,
+      "tests_failed": 0,
+      "vitest_duration_seconds": 4.45,
+      "log": "logs/bc05/final-focused-tests.log"
+    },
+    {
+      "phase": "typecheck",
+      "command": "node node_modules/typescript/bin/tsc --noEmit -p tsconfig.json",
+      "exit_code": 0,
+      "diagnostics": 0,
+      "wall_time_seconds_approx": 71.7,
+      "log": "logs/bc05/typecheck.log"
+    },
+    {
+      "phase": "diff_check",
+      "command": "git diff --check",
+      "exit_code": 0,
+      "errors": 0,
+      "warnings": 3,
+      "warning_scope": "CRLF conversion warnings in concurrently edited root-owned documentation files",
+      "wall_time_seconds": 0.71,
+      "log": "logs/bc05/diff-check.log"
+    }
+  ],
+  "sha256": {
+    "data/scenarios/events/war_1994.json": "AEF6D5321F41224953C311B2194AC71EB8B42E6E63C3A501FDACD79D1CE29449",
+    "src/sim/events/event_loader.ts": "B91AC9EF3236789DAB57F289F68F17842FEB6B88CDD509611069016EE534A26D",
+    "tests/event_loader.test.ts": "208A3753ED2AF8EF6D86F0D1B3CC3E14AE8A4EEB50AAFCCA3A321655D07B75D1",
+    "tests/event_timeline_integrity.test.ts": "B3511A2864B4E38AF56206858106F71F2F225F48D3D087FED546A1AAFF600657",
+    "tests/events_evaluate.test.ts": "39052FD95E967D3014BBF9F0E3626B80C4C827DF12EC5F35DF6CAF2CAE7B0951"
+  },
+  "log_storage": "Tracked Vitest logs normalize trailing whitespace and terminal blank lines only. Original tool output retained locally in corresponding .raw.log files; verdicts/counts/text unchanged."
+}

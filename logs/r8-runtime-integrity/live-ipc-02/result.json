@@ -1,0 +1,39 @@
+{
+  "pass": false,
+  "error": "page.waitForFunction: Timeout 30000ms exceeded.\n    at main (F:\\AWWV-worktrees\\bc09-shared-inputs\\logs\\r8-runtime-integrity\\live-ipc.cjs:87:20)",
+  "results": [
+    {
+      "file": "data/source/municipalities_1990_registry_110.json",
+      "kind": "missing",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/source/oob_brigades.json: Invalid data/source/municipalities_1990_registry_110.json: ENOENT: no such file or directory, open 'F:\\AWWV-worktrees\\bc09-shared-inputs\\logs\\r8-runtime-integrity\\live-ipc-02\\app\\data\\source\\municipalities_1990_registry_110.json'"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/source/municipalities_1990_registry_110.json",
+      "kind": "malformed",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/source/oob_brigades.json: Invalid data/source/municipalities_1990_registry_110.json: Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    },
+    {
+      "file": "data/source/municipalities_1990_registry_110.json",
+      "kind": "structural",
+      "result": {
+        "ok": false,
+        "error": "Shared turn input data/source/oob_brigades.json: Invalid data/source/municipalities_1990_registry_110.json: expected { rows: non-empty array }"
+      },
+      "stateUnchanged": true,
+      "canonicalSaveUnchanged": true,
+      "broadcasts": 0
+    }
+  ]
+}

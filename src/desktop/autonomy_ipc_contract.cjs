@@ -171,6 +171,10 @@ const ADDRESS_NATION_COST = 10;
 // (DECORATE_UNIT_COST = 10) and the initiate-decorate-unit IPC handler.
 // Cooldown/cap use the event's action cadence (max_fires 5 / cooldown 10t).
 const DECORATE_UNIT_COST = 10;
+// STRATEGIC-POSTURE-REVIEW is the fourth authored presidential leadership
+// gesture. It uses the same bounded political-attention price as the other
+// leadership gestures; its authored cadence carries the stronger 8-turn cycle.
+const STRATEGIC_POSTURE_REVIEW_COST = 10;
 const APPROVE_OP_PREFIX = 'APPROVE_OP:';
 
 function parseApproveOpAction(action) {
@@ -546,4 +550,5 @@ module.exports = {
   FRONT_VISIT_COST,
   ADDRESS_NATION_COST,
   DECORATE_UNIT_COST,
+  STRATEGIC_POSTURE_REVIEW_COST,
 };

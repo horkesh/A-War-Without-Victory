@@ -1,0 +1,808 @@
+{
+  "baseHead": "4c419c464adce4e59d9046b37b79d163979d5c7d",
+  "live": [
+    {
+      "case": "live-address-final-01",
+      "pass": true,
+      "error": null,
+      "diagnostics": [],
+      "resultPath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-address-final-01\\result.json",
+      "resultSha256": "d677b6652e79ba0e942461d2d53e2cafbe14e2a7ce69ab08f707ea21a4c77be5",
+      "autosavePath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-address-final-01\\saves\\autosave.json",
+      "autosaveSha256": "e1c65b32da6685bd4840bc50b318fd18206cfb9d1a63fcc217682481e204e925",
+      "receipts": [
+        {
+          "decision_source": "player",
+          "event_id": "address_to_nation_rbih",
+          "faction": "RBiH",
+          "response_id": "address_defiance_rbih",
+          "turn": 90
+        }
+      ],
+      "fireCounts": {
+        "address_to_nation_rbih": 1
+      },
+      "commandAuthority": {
+        "current": 90,
+        "lifetime_spent": 10,
+        "max": 100,
+        "spent_this_turn": 10
+      },
+      "notifications": [
+        {
+          "body": "The RBiH presidency rallies its population over RTV BiH and stiffens the line. Mostar reads a harder posture and narrower room for compromise.",
+          "consumed": false,
+          "event_id": "address_to_nation_rbih",
+          "headline": "Sarajevo broadcasts a defiant address",
+          "notification_id": "address_to_nation_rbih:RBiH:HRHB",
+          "response_id": "address_defiance_rbih",
+          "source_faction": "RBiH",
+          "surfaced_on_turn": 91,
+          "target_faction": "HRHB"
+        },
+        {
+          "body": "The RBiH presidency calls for resistance over the airwaves. Pale sees morale reinforced inside the pocket and a leadership committing itself publicly against any settlement.",
+          "consumed": false,
+          "event_id": "address_to_nation_rbih",
+          "headline": "Sarajevo broadcasts a defiant address",
+          "notification_id": "address_to_nation_rbih:RBiH:RS",
+          "response_id": "address_defiance_rbih",
+          "source_faction": "RBiH",
+          "surfaced_on_turn": 91,
+          "target_faction": "RS"
+        }
+      ],
+      "repeatProof": {
+        "repeatKind": "real preload IPC after visible player action",
+        "method": "initiateAddressNation",
+        "result": {
+          "ok": false,
+          "error": "on_cooldown",
+          "reason": "on_cooldown"
+        },
+        "autosaveUnchanged": true
+      },
+      "proofKind": "development Electron visible action + real IPC + canonical autosave; not packaged campaign acceptance"
+    },
+    {
+      "case": "live-decorate-final-01",
+      "pass": false,
+      "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n\n55 !== 50\n\n    at check (F:\\A-War-Without-Victory\\logs\\bc06\\isolated_electron_rig.cjs:22:41)\n    at main (F:\\A-War-Without-Victory\\logs\\bc06\\isolated_electron_rig.cjs:131:5)",
+      "diagnostics": [],
+      "resultPath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-decorate-final-01\\result.json",
+      "resultSha256": "9aab1700ba61761ef8656b538250f1eaebf5401b9407793bb7223bcbb1811d81",
+      "autosavePath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-decorate-final-01\\saves\\autosave.json",
+      "autosaveSha256": "61ed18d79ed49c7aeabf468c993eb2b3d1b13d0d320ecf0a682bcb2ea6ee1c25",
+      "receipts": [
+        {
+          "decision_source": "player",
+          "event_id": "decorate_a_unit_rbih",
+          "faction": "RBiH",
+          "response_id": "decorate_steadfast_rbih__arbih_101st_mountain",
+          "turn": 90
+        }
+      ],
+      "fireCounts": {
+        "decorate_a_unit_rbih": 1
+      },
+      "commandAuthority": {
+        "current": 90,
+        "lifetime_spent": 10,
+        "max": 100,
+        "spent_this_turn": 10
+      },
+      "notifications": [
+        {
+          "body": "The RBiH presidency honours one of the army's regular formations for steadfast defence. Mostar reads a morale gesture and the politics of favour within the ARBiH.",
+          "consumed": false,
+          "event_id": "decorate_a_unit_rbih",
+          "headline": "Sarajevo decorates a regular formation",
+          "notification_id": "decorate_a_unit_rbih:RBiH:HRHB",
+          "response_id": "decorate_steadfast_rbih__arbih_101st_mountain",
+          "source_faction": "RBiH",
+          "surfaced_on_turn": 91,
+          "target_faction": "HRHB"
+        },
+        {
+          "body": "The RBiH presidency awards a unit citation to a regular formation. Pale sees a morale signal and the internal jockeying it implies.",
+          "consumed": false,
+          "event_id": "decorate_a_unit_rbih",
+          "headline": "Sarajevo decorates a regular formation",
+          "notification_id": "decorate_a_unit_rbih:RBiH:RS",
+          "response_id": "decorate_steadfast_rbih__arbih_101st_mountain",
+          "source_faction": "RBiH",
+          "surfaced_on_turn": 91,
+          "target_faction": "RS"
+        }
+      ],
+      "proofKind": "development Electron visible action + real IPC + canonical autosave; not packaged campaign acceptance"
+    },
+    {
+      "case": "live-decorate-receipt-final-01",
+      "pass": true,
+      "error": null,
+      "diagnostics": [],
+      "resultPath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-decorate-receipt-final-01\\result.json",
+      "resultSha256": "ab4db56ce6a080a65571d28ed043900ff0236f8e5dd2133779b4afbb56c70313",
+      "autosavePath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-decorate-receipt-final-01\\saves\\autosave.json",
+      "autosaveSha256": "61ed18d79ed49c7aeabf468c993eb2b3d1b13d0d320ecf0a682bcb2ea6ee1c25",
+      "receipts": [
+        {
+          "decision_source": "player",
+          "event_id": "decorate_a_unit_rbih",
+          "faction": "RBiH",
+          "response_id": "decorate_steadfast_rbih__arbih_101st_mountain",
+          "turn": 90
+        }
+      ],
+      "fireCounts": {
+        "decorate_a_unit_rbih": 1
+      },
+      "commandAuthority": {
+        "current": 90,
+        "lifetime_spent": 10,
+        "max": 100,
+        "spent_this_turn": 10
+      },
+      "notifications": [
+        {
+          "body": "The RBiH presidency honours one of the army's regular formations for steadfast defence. Mostar reads a morale gesture and the politics of favour within the ARBiH.",
+          "consumed": false,
+          "event_id": "decorate_a_unit_rbih",
+          "headline": "Sarajevo decorates a regular formation",
+          "notification_id": "decorate_a_unit_rbih:RBiH:HRHB",
+          "response_id": "decorate_steadfast_rbih__arbih_101st_mountain",
+          "source_faction": "RBiH",
+          "surfaced_on_turn": 91,
+          "target_faction": "HRHB"
+        },
+        {
+          "body": "The RBiH presidency awards a unit citation to a regular formation. Pale sees a morale signal and the internal jockeying it implies.",
+          "consumed": false,
+          "event_id": "decorate_a_unit_rbih",
+          "headline": "Sarajevo decorates a regular formation",
+          "notification_id": "decorate_a_unit_rbih:RBiH:RS",
+          "response_id": "decorate_steadfast_rbih__arbih_101st_mountain",
+          "source_faction": "RBiH",
+          "surfaced_on_turn": 91,
+          "target_faction": "RS"
+        }
+      ],
+      "repeatProof": {
+        "repeatKind": "real preload IPC after visible player action",
+        "method": "initiateDecorateUnit",
+        "result": {
+          "ok": false,
+          "error": "on_cooldown",
+          "reason": "on_cooldown"
+        },
+        "autosaveUnchanged": true
+      },
+      "proofKind": "development Electron visible action + real IPC + canonical autosave; not packaged campaign acceptance"
+    },
+    {
+      "case": "live-hrhb-1-final-01",
+      "pass": true,
+      "error": null,
+      "diagnostics": [],
+      "resultPath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-hrhb-1-final-01\\result.json",
+      "resultSha256": "312fde871d9f35942b6ba96c223f24f4e6f8ee4c48000a5b5b706a891a95db27",
+      "autosavePath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-hrhb-1-final-01\\saves\\autosave.json",
+      "autosaveSha256": "4d7218f12299cecd03d4f0d18982cde8be82a2c6eebadd13e74e5b036ace4b48",
+      "receipts": [
+        {
+          "decision_source": "player",
+          "event_id": "strategic_posture_review_hrhb",
+          "faction": "HRHB",
+          "response_id": "press_croat_objectives",
+          "turn": 90
+        }
+      ],
+      "fireCounts": {
+        "strategic_posture_review_hrhb": 1
+      },
+      "commandAuthority": {
+        "current": 90,
+        "lifetime_spent": 10,
+        "max": 100,
+        "spent_this_turn": 10
+      },
+      "notifications": [
+        {
+          "body": "Mostar orders HVO leaders to secure current holdings and push for more. Sarajevo reads the posture as another strain on any remaining Bosniak-Croat coordination.",
+          "consumed": false,
+          "event_id": "strategic_posture_review_hrhb",
+          "headline": "Herceg-Bosna presses Croat objectives",
+          "notification_id": "strategic_posture_review_hrhb:HRHB:RBiH",
+          "response_id": "press_croat_objectives",
+          "source_faction": "HRHB",
+          "surfaced_on_turn": 91,
+          "target_faction": "RBiH"
+        },
+        {
+          "body": "Herceg-Bosna prioritizes Croat territorial objectives and accepts greater international pressure. Pale sees the Bosniak-Croat line weakening under competing aims.",
+          "consumed": false,
+          "event_id": "strategic_posture_review_hrhb",
+          "headline": "HVO posture turns more assertive",
+          "notification_id": "strategic_posture_review_hrhb:HRHB:RS",
+          "response_id": "press_croat_objectives",
+          "source_faction": "HRHB",
+          "surfaced_on_turn": 91,
+          "target_faction": "RS"
+        }
+      ],
+      "repeatProof": {
+        "repeatKind": "real preload IPC after visible player action",
+        "method": "initiateStrategicPostureReview",
+        "result": {
+          "ok": false,
+          "reason": "on_cooldown",
+          "error": "on_cooldown"
+        },
+        "autosaveUnchanged": true
+      },
+      "proofKind": "development Electron visible action + real IPC + canonical autosave; not packaged campaign acceptance"
+    },
+    {
+      "case": "live-hrhb-3-final-01",
+      "pass": true,
+      "error": null,
+      "diagnostics": [],
+      "resultPath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-hrhb-3-final-01\\result.json",
+      "resultSha256": "64035e0a11e530a22291deee5a908d1ae0891f26af46d4752ca2eb27b631260d",
+      "autosavePath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-hrhb-3-final-01\\saves\\autosave.json",
+      "autosaveSha256": "c1e21d3779f6336bdfd0cd19f60c7f315e5dbe7fd0b7fd45a16173d93cc6218c",
+      "receipts": [
+        {
+          "decision_source": "player",
+          "event_id": "strategic_posture_review_hrhb",
+          "faction": "HRHB",
+          "response_id": "sue_for_peace_hrhb",
+          "turn": 90
+        }
+      ],
+      "fireCounts": {
+        "strategic_posture_review_hrhb": 3
+      },
+      "commandAuthority": {
+        "current": 90,
+        "lifetime_spent": 10,
+        "max": 100,
+        "spent_this_turn": 10
+      },
+      "notifications": [
+        {
+          "body": "Mostar signals acceptance of a Federation framework with Sarajevo. RBiH leaders see a major alliance opening, despite hardline resistance inside Herceg-Bosna.",
+          "consumed": false,
+          "event_id": "strategic_posture_review_hrhb",
+          "headline": "Herceg-Bosna accepts the Federation path",
+          "notification_id": "strategic_posture_review_hrhb:HRHB:RBiH",
+          "response_id": "sue_for_peace_hrhb",
+          "source_faction": "HRHB",
+          "surfaced_on_turn": 91,
+          "target_faction": "RBiH"
+        },
+        {
+          "body": "HVO leadership accepts a framework for coexistence with Sarajevo and closer Western standing. Pale sees the risk of a stronger unified front.",
+          "consumed": false,
+          "event_id": "strategic_posture_review_hrhb",
+          "headline": "Herceg-Bosna turns toward Federation",
+          "notification_id": "strategic_posture_review_hrhb:HRHB:RS",
+          "response_id": "sue_for_peace_hrhb",
+          "source_faction": "HRHB",
+          "surfaced_on_turn": 91,
+          "target_faction": "RS"
+        }
+      ],
+      "repeatProof": {
+        "repeatKind": "real preload IPC after visible player action",
+        "method": "initiateStrategicPostureReview",
+        "result": {
+          "ok": false,
+          "reason": "on_cooldown",
+          "error": "on_cooldown"
+        },
+        "autosaveUnchanged": true
+      },
+      "proofKind": "development Electron visible action + real IPC + canonical autosave; not packaged campaign acceptance"
+    },
+    {
+      "case": "live-posture-receipt-final-01",
+      "pass": true,
+      "error": null,
+      "diagnostics": [],
+      "resultPath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-posture-receipt-final-01\\result.json",
+      "resultSha256": "c2623b5e6b9ac90d59a340a9655e2748903652cdf27bcf42bf5c67d7b7dc8757",
+      "autosavePath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-posture-receipt-final-01\\saves\\autosave.json",
+      "autosaveSha256": "bb769893b9ffbebe5fa78f0465806215186667abcd8a781857cfea653fe07b14",
+      "receipts": [
+        {
+          "decision_source": "player",
+          "event_id": "strategic_posture_review_rbih",
+          "faction": "RBiH",
+          "response_id": "press_offensive",
+          "turn": 90
+        }
+      ],
+      "fireCounts": {
+        "strategic_posture_review_rbih": 1
+      },
+      "commandAuthority": {
+        "current": 90,
+        "lifetime_spent": 10,
+        "max": 100,
+        "spent_this_turn": 10
+      },
+      "notifications": [
+        {
+          "body": "RBiH commanders are directed to seek forward momentum wherever supply allows. HVO staff see higher Bosnian morale, but also heavier pressure on shared logistics and coordination.",
+          "consumed": false,
+          "event_id": "strategic_posture_review_rbih",
+          "headline": "Sarajevo orders a more aggressive posture",
+          "notification_id": "strategic_posture_review_rbih:RBiH:HRHB",
+          "response_id": "press_offensive",
+          "source_faction": "RBiH",
+          "surfaced_on_turn": 91,
+          "target_faction": "HRHB"
+        },
+        {
+          "body": "RBiH leadership pushes its corps commanders toward renewed attacks. Pale reads the posture as a morale play that may raise pressure along exposed fronts.",
+          "consumed": false,
+          "event_id": "strategic_posture_review_rbih",
+          "headline": "Sarajevo signals offensive intent",
+          "notification_id": "strategic_posture_review_rbih:RBiH:RS",
+          "response_id": "press_offensive",
+          "source_faction": "RBiH",
+          "surfaced_on_turn": 91,
+          "target_faction": "RS"
+        }
+      ],
+      "repeatProof": {
+        "repeatKind": "real preload IPC after visible player action",
+        "method": "initiateStrategicPostureReview",
+        "result": {
+          "ok": false,
+          "reason": "on_cooldown",
+          "error": "on_cooldown"
+        },
+        "autosaveUnchanged": true
+      },
+      "proofKind": "development Electron visible action + real IPC + canonical autosave; not packaged campaign acceptance"
+    },
+    {
+      "case": "live-rbih-1-final-01",
+      "pass": true,
+      "error": null,
+      "diagnostics": [],
+      "resultPath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-rbih-1-final-01\\result.json",
+      "resultSha256": "79e6dc8f718cccb82b4217092313f5b3d7e8fba6ac22140807f382df8f85e58b",
+      "autosavePath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-rbih-1-final-01\\saves\\autosave.json",
+      "autosaveSha256": "bb769893b9ffbebe5fa78f0465806215186667abcd8a781857cfea653fe07b14",
+      "receipts": [
+        {
+          "decision_source": "player",
+          "event_id": "strategic_posture_review_rbih",
+          "faction": "RBiH",
+          "response_id": "press_offensive",
+          "turn": 90
+        }
+      ],
+      "fireCounts": {
+        "strategic_posture_review_rbih": 1
+      },
+      "commandAuthority": {
+        "current": 90,
+        "lifetime_spent": 10,
+        "max": 100,
+        "spent_this_turn": 10
+      },
+      "notifications": [
+        {
+          "body": "RBiH commanders are directed to seek forward momentum wherever supply allows. HVO staff see higher Bosnian morale, but also heavier pressure on shared logistics and coordination.",
+          "consumed": false,
+          "event_id": "strategic_posture_review_rbih",
+          "headline": "Sarajevo orders a more aggressive posture",
+          "notification_id": "strategic_posture_review_rbih:RBiH:HRHB",
+          "response_id": "press_offensive",
+          "source_faction": "RBiH",
+          "surfaced_on_turn": 91,
+          "target_faction": "HRHB"
+        },
+        {
+          "body": "RBiH leadership pushes its corps commanders toward renewed attacks. Pale reads the posture as a morale play that may raise pressure along exposed fronts.",
+          "consumed": false,
+          "event_id": "strategic_posture_review_rbih",
+          "headline": "Sarajevo signals offensive intent",
+          "notification_id": "strategic_posture_review_rbih:RBiH:RS",
+          "response_id": "press_offensive",
+          "source_faction": "RBiH",
+          "surfaced_on_turn": 91,
+          "target_faction": "RS"
+        }
+      ],
+      "repeatProof": {
+        "repeatKind": "real preload IPC after visible player action",
+        "method": "initiateStrategicPostureReview",
+        "result": {
+          "ok": false,
+          "reason": "on_cooldown",
+          "error": "on_cooldown"
+        },
+        "autosaveUnchanged": true
+      },
+      "proofKind": "development Electron visible action + real IPC + canonical autosave; not packaged campaign acceptance"
+    },
+    {
+      "case": "live-rbih-3-final-01",
+      "pass": true,
+      "error": null,
+      "diagnostics": [],
+      "resultPath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-rbih-3-final-01\\result.json",
+      "resultSha256": "9a9e6e72675712d84f810b3db7da282414274041c6ed7066ecab96eda0178bec",
+      "autosavePath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-rbih-3-final-01\\saves\\autosave.json",
+      "autosaveSha256": "02ab2c1fa82c01a42e1179158c91d18c5e9e833b2f522c753a30aa724210091b",
+      "receipts": [
+        {
+          "decision_source": "player",
+          "event_id": "strategic_posture_review_rbih",
+          "faction": "RBiH",
+          "response_id": "accept_ceasefire_terms",
+          "turn": 90
+        }
+      ],
+      "fireCounts": {
+        "strategic_posture_review_rbih": 3
+      },
+      "commandAuthority": {
+        "current": 90,
+        "lifetime_spent": 10,
+        "max": 100,
+        "spent_this_turn": 10
+      },
+      "notifications": [
+        {
+          "body": "RBiH accepts mediation terms to rest and rearm. HVO staff note the logistical benefit for Sarajevo, even as internal critics frame the pause as weakness.",
+          "consumed": false,
+          "event_id": "strategic_posture_review_rbih",
+          "headline": "Sarajevo accepts a ceasefire pause",
+          "notification_id": "strategic_posture_review_rbih:RBiH:HRHB",
+          "response_id": "accept_ceasefire_terms",
+          "source_faction": "RBiH",
+          "surfaced_on_turn": 91,
+          "target_faction": "HRHB"
+        },
+        {
+          "body": "Sarajevo chooses a temporary pause to recover supply and cohesion. Pale reads the lower aggression as useful, but not as a final settlement.",
+          "consumed": false,
+          "event_id": "strategic_posture_review_rbih",
+          "headline": "RBiH accepts ceasefire terms",
+          "notification_id": "strategic_posture_review_rbih:RBiH:RS",
+          "response_id": "accept_ceasefire_terms",
+          "source_faction": "RBiH",
+          "surfaced_on_turn": 91,
+          "target_faction": "RS"
+        }
+      ],
+      "repeatProof": {
+        "repeatKind": "real preload IPC after visible player action",
+        "method": "initiateStrategicPostureReview",
+        "result": {
+          "ok": false,
+          "reason": "on_cooldown",
+          "error": "on_cooldown"
+        },
+        "autosaveUnchanged": true
+      },
+      "proofKind": "development Electron visible action + real IPC + canonical autosave; not packaged campaign acceptance"
+    },
+    {
+      "case": "live-rs-1-final-01",
+      "pass": true,
+      "error": null,
+      "diagnostics": [],
+      "resultPath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-rs-1-final-01\\result.json",
+      "resultSha256": "556aaae66a13a638cfec94337a5530afda90156bc7d64f53c16c1d6f065e3397",
+      "autosavePath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-rs-1-final-01\\saves\\autosave.json",
+      "autosaveSha256": "4bb4d845f26766006f46aae05c22654e0dce09ecafa596b0391923f9ebe3c5be",
+      "receipts": [
+        {
+          "decision_source": "player",
+          "event_id": "strategic_posture_review_rs",
+          "faction": "RS",
+          "response_id": "press_gains",
+          "turn": 90
+        }
+      ],
+      "fireCounts": {
+        "strategic_posture_review_rs": 1
+      },
+      "commandAuthority": {
+        "current": 90,
+        "lifetime_spent": 10,
+        "max": 100,
+        "spent_this_turn": 10
+      },
+      "notifications": [
+        {
+          "body": "RS leadership pushes for further gains and consolidation of key corridors. HVO staff expect higher VRS tempo and greater pressure on contested lines.",
+          "consumed": false,
+          "event_id": "strategic_posture_review_rs",
+          "headline": "Pale orders continued territorial pressure",
+          "notification_id": "strategic_posture_review_rs:RS:HRHB",
+          "response_id": "press_gains",
+          "source_faction": "RS",
+          "surfaced_on_turn": 91,
+          "target_faction": "HRHB"
+        },
+        {
+          "body": "Pale signals that current holdings are not enough for the final map. Sarajevo reads the posture as a renewed push against corridors, enclaves, and buffer zones.",
+          "consumed": false,
+          "event_id": "strategic_posture_review_rs",
+          "headline": "RS presses for more territory",
+          "notification_id": "strategic_posture_review_rs:RS:RBiH",
+          "response_id": "press_gains",
+          "source_faction": "RS",
+          "surfaced_on_turn": 91,
+          "target_faction": "RBiH"
+        }
+      ],
+      "repeatProof": {
+        "repeatKind": "real preload IPC after visible player action",
+        "method": "initiateStrategicPostureReview",
+        "result": {
+          "ok": false,
+          "reason": "on_cooldown",
+          "error": "on_cooldown"
+        },
+        "autosaveUnchanged": true
+      },
+      "proofKind": "development Electron visible action + real IPC + canonical autosave; not packaged campaign acceptance"
+    },
+    {
+      "case": "live-rs-3-final-01",
+      "pass": true,
+      "error": null,
+      "diagnostics": [],
+      "resultPath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-rs-3-final-01\\result.json",
+      "resultSha256": "52de2178920360c659d43ad6eccaebb605fb57edae50076a9bfa91f37f39a36b",
+      "autosavePath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-rs-3-final-01\\saves\\autosave.json",
+      "autosaveSha256": "fb8b10a7982a74be5579c6050a8d113e9e474c817fb35aef9025cbea95d4dda0",
+      "receipts": [
+        {
+          "decision_source": "player",
+          "event_id": "strategic_posture_review_rs",
+          "faction": "RS",
+          "response_id": "accept_partition_framework",
+          "turn": 90
+        }
+      ],
+      "fireCounts": {
+        "strategic_posture_review_rs": 3
+      },
+      "commandAuthority": {
+        "current": 90,
+        "lifetime_spent": 10,
+        "max": 100,
+        "spent_this_turn": 10
+      },
+      "notifications": [
+        {
+          "body": "Pale indicates willingness to accept a territorial settlement for recognition. HVO leaders see lower RS isolation, with a visible risk of hardline backlash.",
+          "consumed": false,
+          "event_id": "strategic_posture_review_rs",
+          "headline": "RS signals openness to partition terms",
+          "notification_id": "strategic_posture_review_rs:RS:HRHB",
+          "response_id": "accept_partition_framework",
+          "source_faction": "RS",
+          "surfaced_on_turn": 91,
+          "target_faction": "HRHB"
+        },
+        {
+          "body": "RS leadership signals that a territorial settlement may be acceptable. Sarajevo sees potential diplomatic movement, but also a bid to legitimize wartime control.",
+          "consumed": false,
+          "event_id": "strategic_posture_review_rs",
+          "headline": "Pale considers a partition framework",
+          "notification_id": "strategic_posture_review_rs:RS:RBiH",
+          "response_id": "accept_partition_framework",
+          "source_faction": "RS",
+          "surfaced_on_turn": 91,
+          "target_faction": "RBiH"
+        }
+      ],
+      "repeatProof": {
+        "repeatKind": "real preload IPC after visible player action",
+        "method": "initiateStrategicPostureReview",
+        "result": {
+          "ok": false,
+          "reason": "on_cooldown",
+          "error": "on_cooldown"
+        },
+        "autosaveUnchanged": true
+      },
+      "proofKind": "development Electron visible action + real IPC + canonical autosave; not packaged campaign acceptance"
+    },
+    {
+      "case": "live-visit-first-final-01",
+      "pass": true,
+      "error": null,
+      "diagnostics": [],
+      "resultPath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-visit-first-final-01\\result.json",
+      "resultSha256": "3b1b3ab1a59c14c625506d54a3963a6c7363a77b8806a62198c7980fd9458ccc",
+      "autosavePath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-visit-first-final-01\\saves\\autosave.json",
+      "autosaveSha256": "9ac4942f6491cfedfbe3181a7137611b402f5f507da0d5fe999bf522cd49a53d",
+      "receipts": [
+        {
+          "decision_source": "player",
+          "event_id": "visit_to_front_rbih",
+          "faction": "RBiH",
+          "response_id": "visit_sarajevo",
+          "turn": 90
+        }
+      ],
+      "fireCounts": {
+        "visit_to_front_rbih": 1
+      },
+      "commandAuthority": {
+        "current": 90,
+        "lifetime_spent": 10,
+        "max": 100,
+        "spent_this_turn": 10
+      },
+      "notifications": [
+        {
+          "body": "The RBiH presidency enters Sarajevo and signals solidarity with 1st Corps under siege conditions. Mostar sees a morale and international-attention move centered on the capital.",
+          "consumed": false,
+          "event_id": "visit_to_front_rbih",
+          "headline": "RBiH leadership visits Sarajevo front",
+          "notification_id": "visit_to_front_rbih:RBiH:HRHB",
+          "response_id": "visit_sarajevo",
+          "source_faction": "RBiH",
+          "surfaced_on_turn": 91,
+          "target_faction": "HRHB"
+        },
+        {
+          "body": "The RBiH presidency appears with 1st Corps in Sarajevo. Pale sees a visible morale signal inside the besieged capital, with international press attention attached.",
+          "consumed": false,
+          "event_id": "visit_to_front_rbih",
+          "headline": "RBiH leadership visits Sarajevo front",
+          "notification_id": "visit_to_front_rbih:RBiH:RS",
+          "response_id": "visit_sarajevo",
+          "source_faction": "RBiH",
+          "surfaced_on_turn": 91,
+          "target_faction": "RS"
+        }
+      ],
+      "repeatProof": {
+        "repeatKind": "real preload IPC after visible player action",
+        "method": "initiateFrontVisit",
+        "result": {
+          "ok": false,
+          "error": "on_cooldown",
+          "reason": "on_cooldown"
+        },
+        "autosaveUnchanged": true
+      },
+      "proofKind": "development Electron visible action + real IPC + canonical autosave; not packaged campaign acceptance"
+    },
+    {
+      "case": "live-visit-third-final-01",
+      "pass": true,
+      "error": null,
+      "diagnostics": [],
+      "resultPath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-visit-third-final-01\\result.json",
+      "resultSha256": "52383b4b0189d16e2e569853330003de1c5b5289fd9aac3d7c58fb3d65c1a8c4",
+      "autosavePath": "F:\\A-War-Without-Victory\\logs\\bc06\\live-visit-third-final-01\\saves\\autosave.json",
+      "autosaveSha256": "91d9f616667cb40f80468b02693e54b6b18734378ddfa80ee93d00f5004ca78b",
+      "receipts": [
+        {
+          "decision_source": "player",
+          "event_id": "visit_to_front_rbih",
+          "faction": "RBiH",
+          "response_id": "visit_press_rbih",
+          "turn": 90
+        }
+      ],
+      "fireCounts": {
+        "visit_to_front_rbih": 3
+      },
+      "commandAuthority": {
+        "current": 90,
+        "lifetime_spent": 10,
+        "max": 100,
+        "spent_this_turn": 10
+      },
+      "notifications": [
+        {
+          "body": "RBiH brings foreign journalists into the visit and emphasizes the human cost of the siege. Mostar sees stronger international messaging, but less pure command presence.",
+          "consumed": false,
+          "event_id": "visit_to_front_rbih",
+          "headline": "Sarajevo turns front visit into press event",
+          "notification_id": "visit_to_front_rbih:RBiH:HRHB",
+          "response_id": "visit_press_rbih",
+          "source_faction": "RBiH",
+          "surfaced_on_turn": 91,
+          "target_faction": "HRHB"
+        },
+        {
+          "body": "RBiH converts the visit into an international media event about siege conditions. Pale sees Sarajevo trading command focus for diplomatic pressure.",
+          "consumed": false,
+          "event_id": "visit_to_front_rbih",
+          "headline": "Sarajevo brings foreign press to front visit",
+          "notification_id": "visit_to_front_rbih:RBiH:RS",
+          "response_id": "visit_press_rbih",
+          "source_faction": "RBiH",
+          "surfaced_on_turn": 91,
+          "target_faction": "RS"
+        }
+      ],
+      "repeatProof": {
+        "repeatKind": "real preload IPC after visible player action",
+        "method": "initiateFrontVisit",
+        "result": {
+          "ok": false,
+          "error": "on_cooldown",
+          "reason": "on_cooldown"
+        },
+        "autosaveUnchanged": true
+      },
+      "proofKind": "development Electron visible action + real IPC + canonical autosave; not packaged campaign acceptance"
+    }
+  ],
+  "reviewedSourceHashes": {
+    "data/scenarios/events/war_1993.json": "1234343036c73a9b274d3fc54ffb679e1032bafa52341c07c834972269d69aac",
+    "package.json": "4ba6ad8862e414b8c35cf0012e397259a5a326304fb5b6a476f3ef01bc850532",
+    "src/desktop/action_cadence_contract.cjs": "bbc23e39c865a1f90314c5a385a866940fd2f8c1b461a935b0a2486f4a847043",
+    "src/desktop/address_nation_contract.cjs": "eb4b689c7642e1df66bd0121c6ac3abe8478ca9fa0eb20b7fe08674e56a08fb6",
+    "src/desktop/autonomy_ipc_contract.cjs": "91de14b489868ba59ac8f65afa2e3fb8cbd54413f3026e0241d3f6045df2dc4d",
+    "src/desktop/decorate_unit_contract.cjs": "a8898f063c39dcc054a73e0364e44a6badc9bcec22ec700808c12124e98e4d31",
+    "src/desktop/electron-main.cjs": "5a86822838b841e000b0987aace86f177ea8073eb5e3e7ffcc05c37289a8ba90",
+    "src/desktop/front_visit_contract.cjs": "1c7ff7adbbbecd2045bb7a31f57540b211c826dbbc42f33c80a3a00f0a07f5fc",
+    "src/desktop/ipc_mutation_policy.cjs": "3b444ea4793061cc07098cdb54dc8bc9f2d1941497dcea2d9be49cd6d894d648",
+    "src/desktop/preload.cjs": "9005220ac06eda985c884e96a035f9f20747b6955e3d1e5d29f0c4e32902d2ac",
+    "src/desktop/strategic_posture_review_contract.cjs": "136a9b478bc3dcc1c9a180e686256acdf9a0fdd04e28a61072770b4a959e04aa",
+    "src/ui/map/components/army_hq/DirectiveCard.tsx": "705722920c48d57f1c8cf19ae7e2f58f5ae98bb0f2721ca15f9fb073a69b341b",
+    "src/ui/map/data/directiveActArt.ts": "c100ab67d8a895f857009c016e371811e54616aef5ae5eaf42be674c164be995",
+    "src/ui/map/data/presidentialDecisionRoom.ts": "4bdab70c698d6a95248a0c1e81e96d64295e6fc12126ef6f0ebbc836446f50be",
+    "src/ui/map/desktop/useIPC.ts": "ab2014e7a1c22271eac953a397b26e73d629f600d957591fdc95d511c7477edf",
+    "src/ui/map/i18n/messages.bcs.ts": "3eb5d96f6d35766a949a5a06c5f62cb924b1b199b6993fd4ea2b8c65320e7f6a",
+    "src/ui/map/i18n/messages.en.ts": "31686ef44af3c996203807c7aae579eb1483684e2deb091a4f64f23006484031",
+    "src/ui/map/utils/commandAuthority.ts": "baaa51b2a7e5a2b5d14e7ba8079b2be77f9a8fcf1ae6123511b8e460d96cebe2",
+    "tests/command_authority_economy.test.ts": "c360357423e94be78c04eaab0412f96add098b2fb828929ee2f9bca1312c8259",
+    "tests/desktop_ipc_mutation_policy.test.ts": "9296da9b55c68e3867d9f07f3e1e79953c65c701045514cb5646580edcc0e662",
+    "tests/desktop_packaging_contract.test.ts": "6249b4b6b4a5f78b8de08a287a9a1b744275b746bdd6ebf3ce8b6841e06ee790",
+    "tests/desktop_persistence_contract.test.ts": "549662fd37c791c30d2bda4f6e64eec4597d89725b733af5b1f992c164bb4eb5",
+    "tests/front_visit_action.test.ts": "3abc309bbb78d44b206e13b9acc57433b9a58a414ecaa89ba1c3c758845a8a3b",
+    "tests/leadership_actions.test.ts": "29a3f33981c1bd062f068f17926a60b17154925de01922e6a11e45634d563bfc",
+    "tests/presidential_cadence_catalog_audit.test.ts": "989f111030d73399ee0ee81c0a13a7e8695389c1da295101ccf6d0cf6e1d347b",
+    "tests/strategic_posture_review_action.test.ts": "056ffcf709eeedd2d3532c50e80b9d0a534a0b6ccc668c919d06d755f70a2e55",
+    "tests/ui/directive_card_act_art.test.ts": "e0ab290355fe6f5bd4dd84ffb732878f46d7907f2132b859e35fca4bb7906646",
+    "tests/ui/directive_card_stop_op_action.test.ts": "bd9f66bf1ce577e55f3046bd29498dc27dcd870d62ef0be29b7e145d04651bbf",
+    "tests/ui/presidential_decision_room.test.ts": "034a52c83f88aa9d665f65bffc4a4248ddb968d4425582e69c57623b8c443cc6"
+  },
+  "localChecks": {
+    "sim-build": {
+      "exit": 0,
+      "log": "logs/bc06/sim-build.log"
+    },
+    "map-build-final": {
+      "exit": 0,
+      "log": "logs/bc06/map-build-final.log"
+    },
+    "map-build-receipt": {
+      "exit": 0,
+      "log": "logs/bc06/map-build-receipt.log"
+    },
+    "typecheck-final": {
+      "exit": 0,
+      "log": "logs/bc06/typecheck-final.log"
+    },
+    "scope-check": {
+      "exit": 0,
+      "log": "logs/bc06/scope-check.log"
+    },
+    "diff-check": {
+      "exit": 0,
+      "log": "logs/bc06/diff-check.log"
+    }
+  }
+}

@@ -1,0 +1,139 @@
+diff --git a/.claude/scheduled_tasks.lock b/.claude/scheduled_tasks.lock
+index 3e3e1be9a..1862478a7 100644
+--- a/.claude/scheduled_tasks.lock
++++ b/.claude/scheduled_tasks.lock
+@@ -1 +1 @@
+-{"sessionId":"3eb67de6-83d8-49e4-b734-fe41229ed4cc","pid":5144,"procStart":"134317245861063337","acquiredAt":1787251281248}
+\ No newline at end of file
++{"sessionId":"191321ae-d502-445d-9175-fc324262e0fc","pid":17532,"procStart":"134326258015568926","acquiredAt":1788551848018}
+\ No newline at end of file
+diff --git a/docs/PROJECT_LEDGER.md b/docs/PROJECT_LEDGER.md
+index d8bc1823b..f1e1ea7b2 100644
+--- a/docs/PROJECT_LEDGER.md
++++ b/docs/PROJECT_LEDGER.md
+@@ -33565,4 +33565,24 @@ BC04 remains open, and committing a candidate does not claim campaign or final-c
+ Candidate closeout checks passed: 30 scope/preservation/local-link checks and 9 documentation
+ tests, exit 0 (`logs/bc04/p1/candidate-scope.log`, `candidate-docs.log`). The catalog comparison
+ still proves exactly one changed gate and preserves BC03 bytes and the lock. The mandatory
+-pre-commit typecheck will run normally; no verification hook is bypassed and no campaign is launched.
+\ No newline at end of file
++pre-commit typecheck will run normally; no verification hook is bypassed and no campaign is launched.
++
++## [2026-09-07] Bounded deletion cleanup planned under R8
++
++**Type:** Owner-requested planning and roadmap placement; documentation only.
++
++**Scope:** Registered `docs/plans/2026-09-07-bounded-deletion-cleanup-plan.md` as a subordinate
++R8 packet in master §4.2, after scheduled BC04–BC07 disposition and before final calibration
++acceptance/final packaged acceptance. Four outcomes: remove the unused browser combat runner,
++remove the global event registry, consolidate equivalent pre-advance routing, and trim closed
++history from the derived command board. No implementation started or new workstream created.
++
++**Contract refinement:** Pipeline `eventDefinitions` is optional. The registry deletion must
++preserve no-event inputs explicitly with `?? []` at the two pipeline callers while requiring
++an explicit evaluator array; it must not introduce a broader runtime failure contract. Browser
++campaign retirement, event authoring/quotas, recurrence removal, schemas, canon and baselines
++remain excluded. Supported KEEP dispositions are acceptable. Existing R8/global checks remain;
++the packet commissions no separate campaign or automatic baseline refresh.
++
++**Documents:** New packet, master roadmap, command board, plans index, and R8 controlling plan.
++Focused document verification is recorded in the packet. No production code, data or tests changed.
+diff --git a/docs/plans/2026-07-31-full-campaign-electron-validation-plan.md b/docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
+index 047ac9812..a78de783e 100644
+--- a/docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
++++ b/docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
+@@ -17,6 +17,16 @@
+ 
+ ---
+ 
++## Subordinate cleanup packet (2026-09-07)
++
++[Bounded deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) is PLANNED under R8,
++after scheduled BC04–BC07 disposition and before final calibration acceptance/final packaged
++acceptance; [master §4.2](MASTER_ROADMAP.md#42-bounded-deletion-cleanup--r8-2026-09-07) owns this slot.
++It covers the unused browser combat runner, dormant global event registry, duplicate pre-advance
++handler and closed command-board history. Preserve optional no-event pipeline semantics and all
++existing acceptance gates. No implementation started, new lane, browser-mode retirement, or
++independent campaign commission. Next action at the slot: caller/ownership confirmation, Task 1.
++
+ ## 1. Resolved decisions
+ 
+ 1. Validation uses the packaged directory build produced by `npm.cmd run desktop:package:dir`, not a loose Vite/browser session. Package output remains transient and uncommitted.
+diff --git a/docs/plans/COMMAND_BOARD.md b/docs/plans/COMMAND_BOARD.md
+index b094aa5bf..7a378e265 100644
+--- a/docs/plans/COMMAND_BOARD.md
++++ b/docs/plans/COMMAND_BOARD.md
+@@ -28,9 +28,15 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
+ | 8 | R8 | **WAITING ON R7.** RE closed 2026-09-01 and no longer gates this. | Run fresh full-duration packaged-Electron RBiH, RS, and HRHB campaigns; fix bugs before friction; repeat until the final two diaries score 5/5. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
+ | 9 | R9 | **WAITING ON R8** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
+ 
++**R8 subordinate cleanup — PLANNED (2026-09-07):** [Master §4.2](MASTER_ROADMAP.md#42-bounded-deletion-cleanup--r8-2026-09-07)
++slots the [four-item deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md) after scheduled
++BC04–BC07 disposition, before final calibration acceptance and final packaged acceptance. At that
++slot, confirm callers/ownership and start Task 1. No implementation started, new lane, RE revival,
++browser-mode decision, or separate campaign commission. Preserve applicable R8/global gates.
++
+ ## Current Critical Path
+ 
+-`R7 remaining presentation/audio gates (disjoint work may continue) -> scheduled R8 behavior settlement (§4.1 BC01–BC08) -> final calibration acceptance -> final R8 packaged acceptance -> R9`
++`R7 remaining presentation/audio gates (disjoint work may continue) -> scheduled R8 behavior settlement (§4.1 BC01–BC08) -> bounded deletion cleanup (§4.2) -> final calibration acceptance -> final R8 packaged acceptance -> R9`
+ 
+ **Finite closure register (2026-09-07; BC01 separately scheduled):** [Master §4.1](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) owns BC01 CLOSED (owner accepted verified repair and retired territory similarity, 2026-09-07; [verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)), BC02 CLOSED by the owner-approved verified Electron load/display repair, BC03 CLOSED by verified repair and owner-approved deferrals, BC04–BC07 pending under D1, and BC08 closed by bounded disposition: BC01 opportunity decisions; BC02 sector/rating truth; BC03 narrated Dayton; BC04 chronology/P1/P2; BC05 NATO/Lukavac gates; BC06 posture/gesture controls; BC07 stability-data policy; BC08 inherited tests. FIX means planned disposition when scheduled; VERIFY/DISPOSITION needs bounded evidence. D1 HOLD FOR R8 remains. Registration creates no new lane, RE revival, broader repair authorization, or automatic baseline refresh. BC02 changed no canonical save bytes, campaign result, calibration or baseline. BC03 is closed; BC03 is committed as c95e25241; BC04 P1 is owner-authorized, implemented and independently reviewed; campaign acceptance is deferred to the next calibration, preserving clean before/after attribution; extra P1 repeat/ON runs are owner-retired. P2 calendar/receipt disposition remains unresolved; P2 implementation and campaigns are not authorized. Diagnostic calibration stays open; final calibration follows accepted behavior settlement. n392 is 702/678/672/665 against unchanged floors 694/674/668/641; the older 688 breach is historical, and improvement attribution remains unknown.
+ 
+diff --git a/docs/plans/MASTER_ROADMAP.md b/docs/plans/MASTER_ROADMAP.md
+index 28aaf541f..c2d5da75f 100644
+--- a/docs/plans/MASTER_ROADMAP.md
++++ b/docs/plans/MASTER_ROADMAP.md
+@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
+ their original wording as a record of how decisions were reached; where they say calibration is
+ paused or RE is blocked, they are describing 2026-08-28, not today.
+ 
+-**Last updated:** 2026-09-07 (finite behavior-closure planning; no repair authorization)
++**Last updated:** 2026-09-07 (finite behavior closure and subordinate R8 deletion-cleanup planning)
+ 
+ **Execution branch:** `codex/master-roadmap-execution` (integration target: `main` after all workstreams are green)
+ 
+@@ -210,12 +210,11 @@ These are verification barriers and authority boundaries, not unresolved product
+ ## 4. Program Sequence
+ 
+ **Current sequence (2026-09-07):** R7 presentation may continue on disjoint files; settle the finite
+-behavior register below within existing scheduling authority, then accept final calibration on the
++behavior register below within existing scheduling authority, then disposition the bounded cleanup
++packet in §4.2, then accept final calibration on the
+ settled behavior, then finish R8 packaged acceptance and R9. Diagnostic calibration remains open.
+ Historical packet sequencing is linked below, not reinstated.
+ 
+-Historical RE packet sequencing and rollback evidence remain in the [closed contract](2026-08-26-engine-integrity-plan.md) and [recovery record](2026-08-28-packaged-probe-recovery-plan.md); they impose no live dependency.
+-
+ ### 4.1 Finite behavior-closure register (2026-09-07)
+ 
+ **Current disposition:** BC01 CLOSED by owner approval: verified repair accepted; territory-similarity requirement retired ([verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)); BC02 CLOSED by its verified Electron load/display repair; BC03 CLOSED; BC04–BC07 pending under D1; BC08 closed by verification/disposition.
+@@ -252,6 +251,12 @@ orphan-flag debt activation and broad drought authoring. F1 is diary triage with
+ holds, not an event quota. The byte-neutral orphan ratchet may be scheduled separately and gates
+ nothing here. R7 continues disjoint presentation work; publication authority remains separate.
+ 
++### 4.2 Bounded deletion cleanup / R8 (2026-09-07)
++
++**PLANNED:** [Four-item packet](2026-09-07-bounded-deletion-cleanup-plan.md), after BC04–BC07
++and before final calibration/R8 acceptance. Next: verify callers, Task 1. No implementation
++started, new lane or separate campaign; existing gates apply. KEEP with evidence is valid.
++
+ ## 5. Workstream Register
+ 
+ | ID | Workstream | Status | Executable plan | Complete when |
+diff --git a/docs/plans/README.md b/docs/plans/README.md
+index beb7404be..5f3dfac24 100644
+--- a/docs/plans/README.md
++++ b/docs/plans/README.md
+@@ -29,6 +29,11 @@ The former owner-decision and post-D2 residual lists are historical inputs, not
+ | R8 | [Full-campaign packaged-Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) | R7 remaining gates, scheduled finite behavior settlement, final calibration, then final packaged acceptance; RE gates nothing |
+ | R9 | [Release candidate, gold, and publication](2026-07-31-release-candidate-gold-publication-plan.md) | R8 produces two clean 5/5 diaries |
+ 
++**R8 subordinate packet:** [Bounded deletion cleanup](2026-09-07-bounded-deletion-cleanup-plan.md)
++is planned after scheduled BC04–BC07 disposition and before final calibration/final packaged
++acceptance, per [master §4.2](MASTER_ROADMAP.md#42-bounded-deletion-cleanup--r8-2026-09-07).
++Four items only; implementation has not started and this creates no new workstream.
++
+ Each R1–R9 workstream has exactly one detailed plan that controls its roadmap lane.
+ Its row links the controlling plan and any
+ explicitly subordinate implementation or amendment packets with named files, tests, evidence,

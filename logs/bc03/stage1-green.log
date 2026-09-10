@@ -1,0 +1,11 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/turn_pipeline.test.ts (2 tests) 1132ms
+   ✓ runTurn determinism > is deterministic for same state and seed 831ms
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  15:28:18
+   Duration  8.28s (transform 4.91s, setup 20ms, collect 6.34s, tests 1.13s, environment 0ms, prepare 115ms)
+

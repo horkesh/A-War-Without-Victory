@@ -71,6 +71,35 @@ describe('TurnAftermathRecordsPanel localization', () => {
         useGameStore.setState(useGameStore.getInitialState());
     });
 
+    it('formats archived friendly casualties with the shared personnel formatter', () => {
+        const state = makeState();
+        state.latestTurnSummary = makeSummary({
+            battles: [{
+                osid: 'op:test:a',
+                attacker_faction: 'RBiH',
+                defender_faction: 'RS',
+                primary_attacker_id: 'rbih_test',
+                primary_defender_id: 'rs_test',
+                all_attacker_ids: ['rbih_test'],
+                outcome: 'repulsed',
+                attacker_casualties: 1_234,
+                defender_casualties: 800,
+                territory_flipped: false,
+                was_concentrated: false,
+            }],
+        });
+        useGameStore.setState({
+            ...useGameStore.getInitialState(),
+            loadedGameState: state,
+            osidDisplayNames: {},
+        });
+
+        const { container } = render(createElement(TurnAftermathRecordsPanel));
+
+        const costMetrics = screen.getAllByText('Cost').map((label) => label.parentElement?.textContent ?? '');
+        expect(costMetrics.some((text) => text.includes('1.2k'))).toBe(true);
+    });
+
     it('renders BCS archive chrome and campaign summaries', () => {
         setLocale('bcs');
         useGameStore.setState({

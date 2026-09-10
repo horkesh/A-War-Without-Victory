@@ -17,7 +17,6 @@ const FORM_FILES = [
   'army_hq/ArmyHQModal.tsx',
   'army_hq/SectorsSection.tsx',
   'ops_modal/PlanParameters.tsx',
-  'plan_ui/CommandTopBar.tsx',
   'replay/ReplayScrubber.tsx',
 ] as const;
 

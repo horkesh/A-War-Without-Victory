@@ -1,0 +1,547 @@
+diff --git a/.claude/scheduled_tasks.lock b/.claude/scheduled_tasks.lock
+index 3e3e1be9a..1862478a7 100644
+--- a/.claude/scheduled_tasks.lock
++++ b/.claude/scheduled_tasks.lock
+@@ -1 +1 @@
+-{"sessionId":"3eb67de6-83d8-49e4-b734-fe41229ed4cc","pid":5144,"procStart":"134317245861063337","acquiredAt":1787251281248}
+\ No newline at end of file
++{"sessionId":"191321ae-d502-445d-9175-fc324262e0fc","pid":17532,"procStart":"134326258015568926","acquiredAt":1788551848018}
+\ No newline at end of file
+diff --git a/data/scenarios/events/war_1995.json b/data/scenarios/events/war_1995.json
+index a7a3aefcc..b3e70149a 100644
+--- a/data/scenarios/events/war_1995.json
++++ b/data/scenarios/events/war_1995.json
+@@ -2075,7 +2075,7 @@
+   {
+     "id": "ceasefire_1995",
+     "title": "General Ceasefire Takes Effect",
+-    "narrative": "A general ceasefire takes effect across Bosnia-Herzegovina, freezing the front lines after 1,340 days of war. The Dayton Agreement establishes Bosnia as a single state composed of two entities — the Federation of Bosnia and Herzegovina and Republika Srpska — with NATO-led IFOR deployed to enforce the peace. The war that killed over 100,000 people and displaced two million is over.",
++    "narrative": "A general ceasefire takes effect across Bosnia-Herzegovina. After three and a half years of fighting, the parties prepare for negotiations intended to turn the military halt into a peace settlement.",
+     "category": "diplomatic",
+     "historical_source": "General Framework Agreement for Peace (Dayton Agreement), 21 November 1995; Richard Holbrooke, To End a War (1998), account of the October 1995 ceasefire negotiations",
+     "source_tier": "corroborated_participant",
+@@ -2088,8 +2088,9 @@
+         "federation_ground_offensive_1995"
+       ],
+       "condition": {
+-        "type": "flag_not_set",
+-        "flag": "coha_active"
++        "type": "flag_equals",
++        "flag": "coha_active",
++        "value": false
+       }
+     },
+     "once": true,
+@@ -2555,7 +2556,12 @@
+       "phase": "war",
+       "requires_events": [
+         "dayton_talks_begin_1995"
+-      ]
++      ],
++      "condition": {
++        "type": "flag_equals",
++        "flag": "rbih_dayton_acceptance",
++        "value": "accept"
++      }
+     },
+     "once": true,
+     "effect": {
+diff --git a/docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md b/docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md
+index e5cbcd5fe..a8e4985a0 100644
+--- a/docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md
++++ b/docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md
+@@ -9,6 +9,12 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
+ - Renderer consumers: `src/ui/warroom/warroom.ts` (outer host/recovery) and `src/ui/map/` (`index.html` → `main.tsx` → `App.tsx`, via embedded iframe)
+ - Sim adapter: `src/desktop/desktop_sim.ts`
+ 
++**Dayton termination ownership (BC03):** The horizon-triggered `pending_dayton` decision
++remains the packaged player's negotiation route. `resolve-dayton` resolves that menu through
++`resolveDaytonNegotiation`, which records `dayton_result`, sets the terminal outcome and freezes
++the complete endgame snapshot. The narrated `dayton_signed` event flag does not terminate the
++turn pipeline or replace the player's negotiation. The signing narrative requires the existing RBiH accepted-talks flag; rejecting those talks suppresses that narrative while leaving the horizon negotiation reachable. See the [bounded BC03 evidence](../plans/2026-07-31-full-campaign-electron-validation-plan.md#bc03-bounded-implementation--2026-09-07).
++
+ **State contract (current player shell):** The same serialized `GameState` is pushed to all renderers via `game-state-updated`. The raw payload may still contain compatibility-era state such as `assignable_front_segments`, `brigade_front_assignment`, `brigade_sector_override`, `theatres`, and `army_theatre_assignment`, but the live tactical-map `LoadedGameState` treats those as compatibility/history or read-only assignment context rather than active presidential controls. The current player shell centers on canonical front edges, corps sectors, presidential directives, and `military.campaign_plans` (read-only; CampaignPlan objects produced by Army HQ Gathering — see `army_hq_gathering.ts`). Electron's canonical save load preserves persisted sectors and recomputes the transient `sector_combat_ratings` cache before runtime serialization; canonical disk serialization still omits the cache, and player projection retains only the player's own sector-rating keys. See [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) §10.4 for current single-source notes.
+ 
+ **Derived adapter fields (not IPC channels):** `GameStateAdapter.ts` derives additional view-model fields from the raw `GameState` payload. Notable: `sectorIntel` (`SectorIntelRecordView[]`) — derived from `state.sector_intel` and `state.military.corps_front_sectors` in a single merged pass (also produces `fogOfWar`). The live player DTO is intentionally reduced: it carries only the friendly-sector threat summary fields the Army HQ shell actually renders (`friendly_sector_id`, `enemy_sector_id`, strength category, posture, offensive signs, confidence, turns-in-contact, visible brigades, front-edge count). Raw enemy faction/corps identity stays engine-side unless and until a player-safe shell explicitly needs it. No IPC round-trip — entirely client-side derivation from the `game-state-updated` payload.
+diff --git a/docs/PROJECT_LEDGER.md b/docs/PROJECT_LEDGER.md
+index d8a0efb83..833d350d1 100644
+--- a/docs/PROJECT_LEDGER.md
++++ b/docs/PROJECT_LEDGER.md
+@@ -33346,3 +33346,89 @@ contract and desktop IPC contract were synchronized. BC02 is CLOSED; BC03 is the
+ closure-register item.
+ 
+ Final documentation checks passed 12/12 after compacting the master summary to its size limit; independent Sol documentation review returned GO and diff hygiene passed.
++
++## 2026-09-07 - BC03 termination ownership and COHA gate repaired; timing disposition pending
++
++Owner scheduled BC03 from verified `be5d7690470e9ce38a6fe98abd08199137bb5386`.
++The pre-existing `.claude/scheduled_tasks.lock` edit is preserved. The corrected investigation
++was confirmed: packaged Electron Dayton negotiation already works; the narrative COHA gate
++was dead, and enabling it exposed an incomplete redundant terminal writer.
++
++Two separate regression-backed steps remove the `dayton_signed` game-over writer from
++`src/sim/turn_pipeline.ts`, then change only `ceasefire_1995` in `war_1995.json` to test
++`flag_equals coha_active false`. Global key-absence semantics, player negotiation resolution,
++headless behavior, initial control, calibration floors and the 188-week horizon are unchanged.
++Stage 1 failed before removal (exit 1), then passed (exit 0); Stage 2 likewise failed before
++the data repair and passed afterward. Combined stage checks passed 18/18. The controlled
++paired late-war pipeline fixture records ceasefire at 181, talks at 184 and signing at 185,
++with deterministic equality and the horizon negotiation still pending at 188. The existing
++n392 final save resolves in memory to a populated Dayton result and verdict/cost/comparison
++snapshot; no campaign ran. Evidence and exit-code sidecars are in `logs/bc03/`.
++
++The existing R8 BC03 plan, master roadmap, command board and desktop IPC contract were
++synchronized. A knowledge correction beside the historical event-wiring entry records the
++terminal-owner distinction and false-versus-absent semantics. No canon rule was changed.
++BC03 remains ACTIVE: the owner must disposition beyond-horizon RS/HRHB acceptance and ticker
++content, and signing after a rejected talks choice, before dependent edits or closure.
++Affected-suite/build evidence and the independent Sol review are pending at this entry's
++initial recording; append their results below before declaring the bounded work verified.
++
++BC03 bounded verification completed: the affected suite passed 111/111 (exit 0), typecheck,
++desktop simulation build plus startup-snapshot check, and warroom build all passed. Independent
++Sol review found that the newly enabled ceasefire copy prematurely announced Dayton/IFOR and
++the war's end. The targeted correction now describes the ceasefire and upcoming negotiations,
++with no new dates/effects; its regression failed before the copy edit and passed 15/15 afterward.
++The retained n392 proof now uses the actual canonical deserialize/resolve/serialize/deserialize
++path, proving the Dayton result and populated verdict, cost ledger and historical comparison
++survive reload at frozen turn 188 (exit 0). Separate production diffs are retained in
++`logs/bc03/stage1-termination.patch` and `stage2-event-data.patch`; the reproducible existing-save
++command is `npx tsx logs/bc03/n392-in-memory-closeout.ts`. The initial chain-development failure
++used the wrong snapshot field name; the corrected paired fixture and affected suite passed.
++
++Independent Sol review returned GO for the bounded patch after that one targeted correction,
++with no remaining review findings. It confirmed negotiated-termination ownership, explicit flag
++semantics, causal narrative and deterministic ordering against the relevant canon. BC03 is still
++ACTIVE pending the owner's acceptance/ticker timing and rejection/signing decisions. Neither
++passing tests nor this review waive those outstanding acceptance items. No fresh packaged Electron
++runtime or full campaign ran; no commit, baseline refresh, headless closeout or lock-file edit was
++made. Documentation truth checks passed 9/9 before final evidence synchronization; final focused
++documentation and diff-hygiene results follow below.
++
++Final documentation truth checks passed 9/9, exit 0 (logs/bc03/docs-final.log).
++
++## 2026-09-07 - BC03 owner disposition: defer post-horizon content; gate signing on acceptance
++
++The owner approved both proposed decisions: defer the turn-190 RS/HRHB acceptance events
++and turn-195–207 Dayton ticker chronology from BC03, and require the existing RBiH accepted-talks
++flag before narrating signing. Deferred content retains its authored dates; neither the campaign
++horizon nor headless closeout changes. This explicitly dispositions those beyond-horizon items
++for BC03 closure rather than claiming they now fire. Signing must be absent for missing/hardline
++responses while the actual horizon Dayton negotiation remains reachable for either choice.
++
++The approved follow-up is limited to the signing event condition and focused branch regressions,
++typecheck, documentation checks and targeted review by the same independent Sol reviewer.
++Implementation and verification results will follow; no additional campaign is authorized or needed.
++
++## 2026-09-07 - BC03 CLOSED: accepted-talks signing gate and explicit content deferral
++
++Implemented the owner's approved exact signing condition:
++`dayton_signed_1995` requires `rbih_dayton_acceptance === 'accept'`. The actual autonomy-0
++player decision test resolves the queued talks response as `hardline`, proves no signing event
++or flag, and reaches turn 188 with the Dayton negotiation still pending. Missing acceptance also
++fails closed. The accepted deterministic branch retains ceasefire/talks/signing at 181/184/185.
++
++Targeted RED reproduced both the absent gate and false hardline signing; GREEN passed 20/20
++(exit 0, `logs/bc03/approval-green.log`). Follow-up typecheck and diff check passed, exit 0.
++The same independent Sol reviewer approved the delta with no findings. The refreshed
++`stage2-event-data.patch` preserves separate reviewability from terminal-writer removal.
++The catalog is loaded at runtime as an Electron resource; no bundle source changed in this delta,
++so the prior passing desktop/warroom builds remain applicable. Earlier 111-test, UI and canonical
++n392 complete-verdict roundtrip evidence stands; no new packaged run or campaign is claimed.
++
++BC03 is CLOSED with the owner's explicit deferral of turn-190 RS/HRHB acceptance events and
++turn-195–207 ticker chronology. Those events retain their dates and are not claimed reachable.
++Headless closeout remains unchanged and separate. The R8 plan, master roadmap, command board
++and desktop IPC contract are synchronized; BC04 is next pending, final calibration remains open,
++and no baseline, horizon, initial control or pre-existing lock-file change was made. No commit.
++
++Closure documentation checks passed 9/9, exit 0 (`logs/bc03/approval-docs.log`).
+diff --git a/docs/PROJECT_LEDGER_KNOWLEDGE.md b/docs/PROJECT_LEDGER_KNOWLEDGE.md
+index 00022e719..c6aec5d8b 100644
+--- a/docs/PROJECT_LEDGER_KNOWLEDGE.md
++++ b/docs/PROJECT_LEDGER_KNOWLEDGE.md
+@@ -1395,6 +1395,8 @@ An authored calendar window may make a historical notification eligible, but it
+ 
+ **Dynamic Codex architecture (2026-03-23):** The Codex is an unlockable encyclopedia that morphs with player decisions. Four essay layers: canonical (ICTY-sourced, immutable), dynamic (game-state paragraphs), divergence notes ("in the real war X, in yours Y"), ghost entries (events that never fired). Four tiers: FIXED (international scaffold, ~29), CONDITIONAL (binary fired/ghost, ~20), SHAPEABLE (dynamic paragraphs, ~33), AHISTORICAL (template-generated, ~14). Event dependency graph: 7 causal chains, Croat-Bosniak war is highest-degree hub (21 dependents). Essay template engine: `dynamic_sections[]` keyed by paragraph index + flag conditions, `ghost_when` for unfired events, `unlock_condition` for prologue vs event-triggered.
+ 
++**BC03 terminal-owner correction (2026-09-07):** The historical flag-wiring entry below does not authorize event-driven termination. Narrative signing must not replace the horizon Dayton negotiation: only its resolver records the result and freezes the verdict, cost ledger and historical comparison together. A persisted false flag is distinct from an absent key; repair the consuming event condition rather than redefining key-absence semantics globally. See the BC03 entry in [PROJECT_LEDGER](PROJECT_LEDGER.md).
++
+ **Event flag wiring COMPLETE (2026-03-25):** All 25 orphan flags now consumed. Phase 4 wired 7 engine flag reads (arms_embargoâ†’supply, corridorâ†’RS aid, drina_cleansing/campsâ†’patron pressure, cohaâ†’combat suppress, daytonâ†’game over). Phase 5 wired 13 orphan flags as pressure modifiers and condition gates on downstream events. 7 endgame events converted FIXEDâ†’CONDITIONAL with pressure systems and requires_events chains. Full endgame chain: Srebrenica (pressure, gated on enclave_formed + demilitarized) â†’ Zepa (requires Srebrenica) â†’ Markale II (pressure, gated on siege + RRF) â†’ Deliberate Force (requires Markale II) â†’ Federation Offensive (requires Deliberate Force + Washington Agreement) â†’ Ceasefire (requires Fed Offensive) â†’ Dayton. **Key design principle**: pressure events accumulate readiness only when ALL prerequisites met (conditions + turn window + requires_events). The requires_events check in `updateEventReadiness()` prevents premature pressure accumulation. Orphan flags are now zero.
+ 
+ **Exhaustion accounting architecture (2026-03-25):** The pool exhaustion system (EXHAUSTION_THRESHOLD=0.25 half-rate, HARD_CAP=0.50 no-mobilization) is the designed demographic plateau mechanism. It works per-municipality: `exhaustionRatio = (available + committed + exhausted) / (censusEligible * 0.28)`. Three accounting bugs were fixed: (1) pool.available was excluded from numerator â€” mobilized-but-unassigned men are still demographically committed, (2) initial OOB brigade personnel never incremented pool.committed â€” 38k RS troops invisible at init, (3) strategic reserve sweeps decremented pool.available but never incremented pool.committed â€” 20-40k leaked. All casualty channels (battle resolution, frontline attrition, siege attrition) now use 75% feedback to pool.exhausted (was 25% for frontline/siege which handles 95% of losses). **Key pattern**: when an exhaustion/threshold system isn't biting, check the numerator accounting before tuning the threshold. The system was designed correctly â€” it just received bad data. **Key finding**: displacement does NOT reduce origin mobilization base (census is frozen at 1991). This is a structural positive feedback loop â€” displacement creates manpower instead of redistributing it. Fix implemented but minimal impact because displacement numbers are small relative to total population. **Pool decay (war weariness, 2026-03-25):** Secondary mechanism added after accounting fixes closed only 10k of 29k RS gap. `pool.available *= (1 - DECAY_RATE)` per turn models desertion, draft evasion, emigration. Faction-differentiated: HRHB 2.5% (exit-to-Croatia pipeline), RS 2.0% (desertion crisis + Belgrade competing demands), RBiH 1.2% (geographic entrapment â€” nowhere to go). Enclave municipalities (Srebrenica, Gorazde, Zepa) exempt â€” no escape route. Decayed men vanish entirely (not added to pool.exhausted â€” they left the war). Pipeline step: after ongoing-mobilization, before reroute-pool-surplus. Combined with A-series accounting fixes: RS w104 149kâ†’124k (target 110-120k, 4k over), HRHB 68kâ†’58k (target 50-55k, 3k over), ARBiH 194kâ†’199k (target 165-180k). 40w calibration: 91.2% (-0.1pp). **Key design insight (game designer)**: pool decay serves the negative-sum identity â€” manpower visibly erodes even when "winning." Connects to v0.8 Command Chain ("no replacements" grounded in real empty pools) and v0.9 Consequences (war crimes displacement destroying your own recruitment base).
+diff --git a/docs/plans/2026-07-31-full-campaign-electron-validation-plan.md b/docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
+index 5c40d3954..e69ad96c3 100644
+--- a/docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
++++ b/docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
+@@ -212,6 +212,64 @@ At the investigated pre-fix commit, the Electron load path did not hydrate these
+ 
+ **Stop/cost:** the load contract is satisfied with tests measured in seconds/minutes. No new engine input or simulation change was required; no campaign or calibration tuning ran. Scope stops here.
+ 
++### BC03 bounded implementation — 2026-09-07
++
++Owner scheduled BC03 from verified main `be5d7690470e9ce38a6fe98abd08199137bb5386`.
++The pre-existing `.claude/scheduled_tasks.lock` change is preserved. BC03 is CLOSED by verified repair and owner-approved deferral;
++BC01/BC02 remain closed and final calibration remains open.
++
++**Question:** can the narrated ceasefire/talks/signing sequence run without preempting
++the working Electron Dayton negotiation, player choice, complete verdict snapshot or receipts?
++The corrected diagnosis in the event investigation §§10–11 is confirmed: COHA expiry writes
++`coha_active: false`, while the ceasefire tests key absence. Enabling it would expose the
++redundant `dayton_signed` terminal writer, which omits the negotiation result and snapshot.
++
++**Separate reviewable steps:** first remove that writer in `src/sim/turn_pipeline.ts`
++with a failing-then-passing regression; then change the ceasefire condition in
++`data/scenarios/events/war_1995.json` to explicit `flag_equals coha_active false`.
++Use existing `tests/turn_pipeline.test.ts` and `tests/event_conditions.test.ts` for late-war ordering,
++absent/false/true COHA, horizon negotiation reachability and complete resolution receipts.
++No global predicate, headless closeout, initial control, scoring horizon or floor changes.
++**Owner disposition (2026-09-07):** defer turn-190 RS/HRHB acceptance events and turn-195–207 ticker chronology from BC03; keep their authored dates and the 188-week horizon unchanged. Require `rbih_dayton_acceptance === 'accept'` before the signing narrative. Absent or hardline responses must not narrate signing; either response retains the mandatory horizon negotiation. This explicitly dispositions the deferred content for BC03 closure, without claiming that content now fires.
++
++**Initial validation budget and stopping rule:** focused RED/GREEN tests take seconds;
++the affected condition/event/Dayton/snapshot/desktop advance-gate suite is expected to
++take 1–3 minutes. Run `npm run typecheck`, `npm run desktop:sim:build` and
++`npm run warroom:build` (approximately 1–3 minutes each), plus focused documentation
++checks and diff hygiene. Use an existing late-war save for in-memory resolution evidence;
++do not launch a campaign. Pass requires no premature termination, reachable negotiation,
++preserved choices, complete verdict/cost/comparison snapshot and receipts, deterministic
++fixture results, and exit 0 from affected checks. Keep logs and exit codes in `logs/bc03/`.
++One independent Sol review covers correctness, canon, determinism and evidence, followed
++only by targeted corrections. Stop when this declared contract and owner dispositions pass;
++additional expensive campaigns and headless changes require a separate owner decision.
++
++**Implementation evidence:** the termination regression failed before removal and passed
++afterward; the COHA regression likewise failed before the data change and passed afterward.
++The paired controlled fixture fires ceasefire at 181, talks at 184 and signing at 185,
++retaining `pending_dayton` at 188 without early termination. Resolving n392's existing final
++save in memory produces a populated `dayton_result`, verdict, cost ledger and historical
++comparison snapshot at 188. This does not change headless closeout or claim campaign parity.
++
++Focused command: `npx vitest run tests/turn_pipeline.test.ts tests/condition_evaluator.test.ts tests/event_conditions.test.ts tests/dayton_negotiation.test.ts tests/endgame_snapshot_freeze.test.ts tests/endgame_save_load_round_trip.test.ts tests/desktop_game_over_advance_gate.test.ts tests/ui/dayton_negotiation_modal.test.ts tests/ui/endgame_snapshot_verdict_fidelity.test.ts`.
++Result: **111/111 passed, exit 0**, `logs/bc03/focused-regression.log` (about 65 seconds).
++Documentation truth checks passed **9/9**, `logs/bc03/docs-check.log`. Typecheck, desktop
++simulation build (including startup-snapshot check), and warroom build passed, with matching
++log names and exit-code sidecars. Independent review identified premature settlement claims
++in the newly enabled ceasefire card. The corrected copy describes upcoming negotiations;
++its targeted RED/GREEN check passed **15/15** (`stage2-narrative-green.log`). No date or
++effect changed. Canonical n392 deserialize/resolve/serialize/deserialize proof passed (exit 0): the result, verdict, cost ledger and historical comparison survive reload. Reproduce with `npx tsx logs/bc03/n392-in-memory-closeout.ts`. Separate production patches are retained as `stage1-termination.patch` and `stage2-event-data.patch`. Independent Sol review returned GO for this bounded patch after the one targeted copy correction, with no remaining review findings. That initial review withheld closure until the owner decisions recorded above were resolved. No fresh packaged Electron runtime or full campaign was run.
++**Approved follow-up validation:** run `npx vitest run tests/turn_pipeline.test.ts tests/event_conditions.test.ts` for absent/accept/hardline gates and accepted/rejected real pipeline branches, plus `npm run typecheck` and documentation truth checks (a few minutes). Reuse the independent Sol reviewer for this delta only. Stop once the approved gate preserves horizon reachability, targeted checks pass, and current documentation records the explicit deferral.
++
++**Owner-approved signing delta:** `dayton_signed_1995` now requires
++`flag_equals rbih_dayton_acceptance accept`. Missing and hardline flags fail closed.
++The autonomy-0 regression queues the real talks decision, resolves `hardline` through
++`resolveEventDecisionCore`, and reaches turn 188 with no signing event/flag and an open
++horizon Dayton negotiation. The accepted branch preserves the deterministic 181/184/185
++sequence. RED reproduced the missing gate and false signing; GREEN passed **20/20**
++(`logs/bc03/approval-green.log`, exit 0). The same independent Sol reviewer returned
++GO on this delta, with no findings. Follow-up typecheck passed (exit 0, `approval-typecheck.log`). BC03 is CLOSED under these explicit dispositions; final calibration remains open. Prior complete-verdict, canonical n392 roundtrip,
++UI, build and 111-test evidence stands; there is no new packaged run or campaign claim.
+ ### Pre-seeded finding register
+ 
+ **R8 remains WAITING ON R7. This register is inert until R8 opens** -- it starts nothing and claims
+@@ -244,7 +302,7 @@ Sources: [frozen audit](../40_reports/working/20260903_SHOWCASE_SCREENSHOT_GUI_A
+ 
+ | ID | Bug / routing | Writer / consumer | Impact and disposition |
+ |---|---|---|---|
+-| B10 | Dead narrated COHA/ceasefire/Dayton chain; mechanical packaged negotiation works | `event_types.ts`, `war_1995.json`, event termination and negotiation paths | BC03 **FIX when scheduled**, before final full-campaign acceptance. One terminal owner, complete verdict/receipts; no global predicate shortcut or horizon extension. See [investigation corrections](../40_reports/20260905_EVENT_FIRING_SATURATION_AND_DEAD_CATALOG.md). |
++| B10 | Dead narrated COHA/ceasefire/Dayton chain; mechanical packaged negotiation works | `event_types.ts`, `war_1995.json`, event termination and negotiation paths | BC03 **CLOSED 2026-09-07**: verified repair; owner deferred post-horizon acceptance/tickers; signing requires accepted talks. One terminal owner, complete verdict/receipts; no global predicate shortcut or horizon extension. See [investigation corrections](../40_reports/20260905_EVENT_FIRING_SATURATION_AND_DEAD_CATALOG.md). |
+ | B11 | Historical chronology findings; sensitive P1 Ahmići/P2 enclave packet retain panel ownership | Catalog gates/dates and downstream displacement/NATO | BC04 **FIX after planning conditions**. Reconcile n392 first, exclude already-landed barracks work. [Conditional panel record](../40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md); no isolated Srebrenica date edit or map repaint. |
+ | B12 | Same-turn prerequisite dead NATO windows; `operation_lukavac_93` control gate | Event loader/catalog and firing pass | BC05: lint is byte-neutral; enabling events is not. NATO **FIX when scheduled**; Lukavac **VERIFY/DISPOSITION** with Historian deciding gate versus simulated-war defect. [Measured sweep](../40_reports/audits/20260906_FACTION_CONTROLS_MUNICIPALITY_THRESHOLD_SWEEP.md). |
+ | B13 | Three posture-review handlers unwired; bounded gesture-escalation gap | Desktop player-action handlers and `action_cadence` | BC06 **FIX when scheduled**; prove live player effects and cooldown/receipts, not only headless parity. No general recurrence redesign. [PM ruling](../40_reports/audits/20260905_EVENT_ROADMAP_FIT_PM_RULING.md). |
+@@ -330,7 +388,7 @@ R1–R5, the accepted R6 slice, RC and RE stay closed; calibration remains ongoi
+ |---|---|---|---|
+ | **BC01 — player opportunity path / R8** | Gameplay/operations + Game Designer; QA | Player campaign territory and operation decisions; observer parity alone cannot test it | **CLOSED — owner accepted verified repair and retired territory similarity, 2026-09-07** ([verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)), using the [corrected contract](2026-09-01-player-opportunity-sweep-gap.md). L0 gets live review, L1 retains review, L2 auto-applies military opportunities without queuing, L3 remains observer. Verify all four modes, no duplicate decision/application, preserved human authorization at L0/L1, and fresh RBiH/HRHB player-path evidence against observer plus RS regression proof; do not copy a blanket post-turn sweep. |
+ | **BC02 — B2/B9 sector/rating truth / R8** | Systems + QA | Canonical saves omit derived ratings; immediate load/display gap, no demonstrated simulation effect | **CLOSED — owner-approved Electron load/display repair verified 2026-09-07.** Loaded saves rebuild only the transient rating cache before runtime/player projection; canonical bytes, other state, privacy, and next-turn simulation ordering remain unchanged. Browser raw-JSON fallback is outside this repair. [Implementation and verification](#bc02-existing-save-investigation--2026-09-07). |
+-| **BC03 — B10 narrated Dayton / R8** | Events/systems + Game Designer + QA | Event effects, termination ordering, receipts and endgame state | **FIX** the dead narrated chain with one coherent terminal owner; preserve the working packaged negotiation. Resolve the redundant event game-over writer first, then the catalog gate/window; verify COHA false-key semantics, firing/termination order and complete packaged verdict snapshot/receipts. The headless terminal contract is VERIFY/DISPOSITION, not a mandate to add a headless closeout. Do not globally redefine `flag_not_set` or extend the 188-week horizon as a shortcut. [Investigation corrections §10–11](../40_reports/20260905_EVENT_FIRING_SATURATION_AND_DEAD_CATALOG.md). |
++| **BC03 — B10 narrated Dayton / R8** | Events/systems + Game Designer + QA | Event effects, termination ordering, receipts and endgame state | **CLOSED 2026-09-07 — verified repair and owner-approved post-horizon deferral.** Repaired the narrated chain with one coherent terminal owner; preserve the working packaged negotiation. Resolve the redundant event game-over writer first, then the catalog gate/window; verify COHA false-key semantics, firing/termination order and complete packaged verdict snapshot/receipts. The headless terminal contract is VERIFY/DISPOSITION, not a mandate to add a headless closeout. Do not globally redefine `flag_not_set` or extend the 188-week horizon as a shortcut. [Investigation corrections §10–11](../40_reports/20260905_EVENT_FIRING_SATURATION_AND_DEAD_CATALOG.md). |
+ | **BC04 — B11 chronology + P1/P2 / R8, panel-owned history** | Historian + events/systems + scenario/calibration + independent §6 panel | Event timing/effects, displacement, personnel, NATO and downstream operations | **FIX after bounded planning conditions**: reconcile what already landed against n392 first; remove the completed barracks stagger from the repair set. P1/P2 follow the [existing conditional panel record](../40_reports/proposals/20260906_S6_PANEL_RECORD_EVENT_FIDELITY.md), which authorizes proceeding to a plan only. P1 preserves the historical date and map; P2 is a coherent chronology packet, measured receipt dates with brakes active, no narrowed expiry/backstop shortcut. Separate P1 and P2 controlled runs, full anchors/health/§6 and displacement/operation diffs; no fresh re-floor until explained and accepted. |
+ | **BC05 — B12 dead event windows/control gates / R8** | Events/systems + Historian + QA | Enabling dormant NATO events can change outcomes; a loader lint alone is byte-neutral | **FIX** the established NATO same-turn prerequisite/window defects after consumed-baseline confirmation; **VERIFY/DISPOSITION** for `operation_lukavac_93`: the [sweep](../40_reports/audits/20260906_FACTION_CONTROLS_MUNICIPALITY_THRESHOLD_SWEEP.md) proves an unreachable gate in measured runs, not whether the gate or simulated war is historically wrong. Resolve that exact question, then fix or justify disposition; never repaint initial control or blanket-lower thresholds. Verify actual event receipts and downstream effects separately from lint coverage. |
+ | **BC06 — B13 posture/gesture controls / R8** | Gameplay/desktop + Game Designer + QA | Player-action decisions/effects; headless neutrality is insufficient | **FIX** the three unwired posture-review handlers and settle bounded gesture escalation per the [PM ruling](../40_reports/audits/20260905_EVENT_ROADMAP_FIT_PM_RULING.md). Verify the live action path, recurrence/cooldown, decision receipts and effects; no general recurrence-system redesign. |
+diff --git a/docs/plans/COMMAND_BOARD.md b/docs/plans/COMMAND_BOARD.md
+index 2f16d2996..f4282f687 100644
+--- a/docs/plans/COMMAND_BOARD.md
++++ b/docs/plans/COMMAND_BOARD.md
+@@ -32,7 +32,7 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
+ 
+ `R7 remaining presentation/audio gates (disjoint work may continue) -> scheduled R8 behavior settlement (§4.1 BC01–BC08) -> final calibration acceptance -> final R8 packaged acceptance -> R9`
+ 
+-**Finite closure register (2026-09-07; BC01 separately scheduled):** [Master §4.1](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) owns BC01 CLOSED (owner accepted verified repair and retired territory similarity, 2026-09-07; [verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)), BC02 CLOSED by the owner-approved verified Electron load/display repair, BC03–BC07 pending under D1, and BC08 closed by bounded disposition: BC01 opportunity decisions; BC02 sector/rating truth; BC03 narrated Dayton; BC04 chronology/P1/P2; BC05 NATO/Lukavac gates; BC06 posture/gesture controls; BC07 stability-data policy; BC08 inherited tests. FIX means planned disposition when scheduled; VERIFY/DISPOSITION needs bounded evidence. D1 HOLD FOR R8 remains. Registration creates no new lane, RE revival, broader repair authorization, or automatic baseline refresh. BC02 changed no canonical save bytes, campaign result, calibration or baseline. BC03 is next pending register item. Diagnostic calibration stays open; final calibration follows accepted behavior settlement. n392 is 702/678/672/665 against unchanged floors 694/674/668/641; the older 688 breach is historical, and improvement attribution remains unknown.
++**Finite closure register (2026-09-07; BC01 separately scheduled):** [Master §4.1](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) owns BC01 CLOSED (owner accepted verified repair and retired territory similarity, 2026-09-07; [verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)), BC02 CLOSED by the owner-approved verified Electron load/display repair, BC03 CLOSED by verified repair and owner-approved deferrals, BC04–BC07 pending under D1, and BC08 closed by bounded disposition: BC01 opportunity decisions; BC02 sector/rating truth; BC03 narrated Dayton; BC04 chronology/P1/P2; BC05 NATO/Lukavac gates; BC06 posture/gesture controls; BC07 stability-data policy; BC08 inherited tests. FIX means planned disposition when scheduled; VERIFY/DISPOSITION needs bounded evidence. D1 HOLD FOR R8 remains. Registration creates no new lane, RE revival, broader repair authorization, or automatic baseline refresh. BC02 changed no canonical save bytes, campaign result, calibration or baseline. BC03 is closed; BC04 is next pending. Diagnostic calibration stays open; final calibration follows accepted behavior settlement. n392 is 702/678/672/665 against unchanged floors 694/674/668/641; the older 688 breach is historical, and improvement attribution remains unknown.
+ 
+ **RE no longer appears on the critical path.** It closed by owner decision on 2026-09-01; the P2B
+ packaged-proof blocker that used to head this line is closed history and gates nothing. Engine
+diff --git a/docs/plans/MASTER_ROADMAP.md b/docs/plans/MASTER_ROADMAP.md
+index 379075432..aebd45f1b 100644
+--- a/docs/plans/MASTER_ROADMAP.md
++++ b/docs/plans/MASTER_ROADMAP.md
+@@ -218,9 +218,9 @@ Historical RE packet sequencing and rollback evidence remain in the [closed cont
+ 
+ ### 4.1 Finite behavior-closure register (2026-09-07)
+ 
+-**Current disposition:** BC01 CLOSED by owner approval: verified repair accepted; territory-similarity requirement retired ([verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)); BC02 CLOSED by its verified Electron load/display repair; BC03–BC07 pending under D1; BC08 closed by verification/disposition.
++**Current disposition:** BC01 CLOSED by owner approval: verified repair accepted; territory-similarity requirement retired ([verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)); BC02 CLOSED by its verified Electron load/display repair; BC03 CLOSED; BC04–BC07 pending under D1; BC08 closed by verification/disposition.
+ 
+-**BC02:** CLOSED 2026-09-07; Electron load/display only. No campaign or calibration change. BC03 is next pending.
++**BC02:** CLOSED 2026-09-07; Electron load/display only. No campaign or calibration change. BC03 CLOSED; BC04 is next pending.
+ 
+ **Register authority only; BC01 separately scheduled above.** These IDs index existing work, not milestones or a new lane.
+ FIX means planned repair **when scheduled**, not authority to implement. VERIFY/DISPOSITION means
+@@ -233,7 +233,7 @@ live in the existing R8 plan; its previously proposed B10–B13/F1 are now regis
+ |---|---|---|
+ | BC01 player opportunities / R8 | Gameplay/operations + Game Designer + QA | **CLOSED — owner accepted repair and retired territory similarity (2026-09-07).** Verified L0/L1 review, L2 auto-apply/no queue, L3 observer across three factions. |
+ | BC02 B2/B9 sector/rating truth / R8 | Systems + QA | **CLOSED — verified 2026-09-07.** Electron save load rebuilds only transient ratings before player projection; canonical bytes and privacy remain intact. |
+-| BC03 B10 narrated Dayton / R8 | Events/systems + Game Designer + QA | **FIX** coherent event/terminal ownership before gate/window activation; preserve working packaged ending. Headless terminal behavior is separate **VERIFY/DISPOSITION**, not a mandated closeout. |
++| BC03 B10 narrated Dayton / R8 | Events/systems + Game Designer + QA | **CLOSED 2026-09-07** — termination owner/COHA/signing repaired and verified; owner deferred post-horizon acceptance/tickers. Working negotiation preserved; no headless change. |
+ | BC04 B11 chronology + P1/P2 / R8/panel | Historian + systems + calibration + independent §6 panel | **FIX after existing conditional planning**, fresh n392 reconciliation first. Exclude landed barracks stagger. P1 and coherent P2 separately controlled; timing/displacement/NATO outcomes measured. |
+ | BC05 B12 NATO/Lukavac gates / R8 | Events/systems + Historian + QA | NATO windows **FIX** after current-baseline confirmation; Lukavac **VERIFY/DISPOSITION** gate versus simulated-war cause. Lint is byte-neutral; enabling events is not. |
+ | BC06 B13 posture/gestures / R8 | Gameplay/desktop + Game Designer + QA | **FIX** bounded handlers/escalation with live player-action effects/receipts proof, not merely headless parity. |
+diff --git a/src/sim/turn_pipeline.ts b/src/sim/turn_pipeline.ts
+index 5be7c686e..138ca9bee 100644
+--- a/src/sim/turn_pipeline.ts
++++ b/src/sim/turn_pipeline.ts
+@@ -84,12 +84,6 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<TurnR
+         throw new Error(`runTurn: unsupported lifecycle phase "${String(phase)}"; expected 'war'`);
+     }
+ 
+-    // Dayton Agreement ends the war — set game_over and short-circuit (v0.7.0 Phase 4)
+-    if (working.military.event_flags?.dayton_signed === true && !working.meta.game_over) {
+-        working.meta.game_over = true;
+-        working.meta.outcome = 'dayton_agreement';
+-    }
+-
+     // Game over gate: if game_over is set, short-circuit to report-only mode (no combat/movement)
+     if (working.meta.game_over) {
+         working.meta = {
+diff --git a/tests/event_conditions.test.ts b/tests/event_conditions.test.ts
+index ed4083ed3..7d0165e0a 100644
+--- a/tests/event_conditions.test.ts
++++ b/tests/event_conditions.test.ts
+@@ -162,4 +162,50 @@ describe('event condition evaluation', () => {
+         });
+         expect(evaluateCondition(event!.trigger!.condition!, corridorState)).toBe(true);
+     });
++
++    it('starts the 1995 general ceasefire only after COHA is explicitly inactive', () => {
++        const catalog = JSON.parse(readFileSync(
++            join(process.cwd(), 'data', 'scenarios', 'events', 'war_1995.json'),
++            'utf8',
++        )) as Array<{ id: string; narrative?: string; trigger?: { condition?: EventCondition } }>;
++        const event = catalog.find((entry) => entry.id === 'ceasefire_1995');
++
++        expect(event?.narrative).toBe(
++            'A general ceasefire takes effect across Bosnia-Herzegovina. After three and a half years of fighting, '
++            + 'the parties prepare for negotiations intended to turn the military halt into a peace settlement.',
++        );
++        expect(event?.trigger?.condition).toEqual({
++            type: 'flag_equals',
++            flag: 'coha_active',
++            value: false,
++        });
++
++        const absent = makeState({ military: { event_flags: {} } });
++        const inactive = makeState({ military: { event_flags: { coha_active: false } } });
++        const active = makeState({ military: { event_flags: { coha_active: true } } });
++        expect(evaluateCondition(event!.trigger!.condition!, absent)).toBe(false);
++        expect(evaluateCondition(event!.trigger!.condition!, inactive)).toBe(true);
++        expect(evaluateCondition(event!.trigger!.condition!, active)).toBe(false);
++    });
++
++    it('narrates Dayton signing only after RBiH accepts the talks', () => {
++        const catalog = JSON.parse(readFileSync(
++            join(process.cwd(), 'data', 'scenarios', 'events', 'war_1995.json'),
++            'utf8',
++        )) as Array<{ id: string; trigger?: { condition?: EventCondition } }>;
++        const event = catalog.find((entry) => entry.id === 'dayton_signed_1995');
++
++        expect(event?.trigger?.condition).toEqual({
++            type: 'flag_equals',
++            flag: 'rbih_dayton_acceptance',
++            value: 'accept',
++        });
++
++        const absent = makeState({ military: { event_flags: {} } });
++        const accepted = makeState({ military: { event_flags: { rbih_dayton_acceptance: 'accept' } } });
++        const hardline = makeState({ military: { event_flags: { rbih_dayton_acceptance: 'hardline' } } });
++        expect(evaluateCondition(event!.trigger!.condition!, absent)).toBe(false);
++        expect(evaluateCondition(event!.trigger!.condition!, accepted)).toBe(true);
++        expect(evaluateCondition(event!.trigger!.condition!, hardline)).toBe(false);
++    });
+ });
+diff --git a/tests/turn_pipeline.test.ts b/tests/turn_pipeline.test.ts
+index 9342c349f..e5ff072c0 100644
+--- a/tests/turn_pipeline.test.ts
++++ b/tests/turn_pipeline.test.ts
+@@ -2,6 +2,12 @@ import { describe, expect, it } from 'vitest';
+ 
+ import { runTurn } from '../src/sim/turn_pipeline.js';
+ import { CURRENT_SCHEMA_VERSION, GameState } from '../src/state/game_state.js';
++import { loadEventDefinitions } from '../src/sim/events/event_loader.js';
++import {
++  buildHistoricalDefaultDaytonProposal,
++  resolveDaytonNegotiation
++} from '../src/sim/negotiation/dayton_negotiation.js';
++import { resolveEventDecisionCore } from '../src/sim/events/resolve_decision_core.js';
+ 
+ const baseState: GameState = {
+   schema_version: CURRENT_SCHEMA_VERSION,
+@@ -37,4 +43,160 @@ describe('runTurn determinism', () => {
+     expect(baseState.meta.turn, 'input state must remain unchanged').toBe(0);
+   });
+ 
++  it('does not let the narrated Dayton signing flag preempt the negotiation owner', async () => {
++    const state: GameState = {
++      ...baseState,
++      meta: { ...baseState.meta, turn: 184 },
++      military: {
++        ...baseState.military,
++        event_flags: { dayton_signed: true }
++      } as any
++    };
++
++    const result = await runTurn(state, { seed: 'dayton-narrative-owner' });
++
++    expect(result.report.phases[0]?.name).not.toBe('game_over_active');
++    expect(result.report.phases.map((phase) => phase.name)).toContain('evaluate-dayton-trigger');
++    expect(result.nextState.meta.turn).toBe(185);
++    expect(result.nextState.meta.game_over).not.toBe(true);
++    expect(result.nextState.meta.outcome).not.toBe('dayton_agreement');
++  });
++
++  it('plays the narrated ceasefire chain before opening and resolving the horizon negotiation', async () => {
++    const chainIds = new Set([
++      'ceasefire_1995',
++      'dayton_talks_begin_1995',
++      'dayton_signed_1995'
++    ]);
++    const eventDefinitions = loadEventDefinitions(0).filter((event) => chainIds.has(event.id));
++    const initialState: GameState = {
++      ...baseState,
++      meta: {
++        ...baseState.meta,
++        turn: 180,
++        player_faction: 'RBiH',
++        autonomy_level: 3
++      },
++      military: {
++        ...baseState.military,
++        fired_event_ids: ['federation_ground_offensive_1995'],
++        event_fire_counts: { federation_ground_offensive_1995: 1 },
++        event_last_fired_turn: { federation_ground_offensive_1995: 172 },
++        event_flags: {
++          coha_active: false,
++          coha_expired: true,
++          rbih_state_identity: 'civic'
++        },
++        enabled_event_ids: ['dayton_talks_begin_1995'],
++        pending_event_decisions: [],
++        event_overflow_queue: []
++      } as any
++    };
++    const playChain = async () => {
++      let state = initialState;
++      const firedInOrder: Array<{ id: string; turn: number }> = [];
++      while (state.meta.turn < 188) {
++        const result = await runTurn(state, {
++          seed: 'dayton-narrative-chain',
++          eventDefinitions,
++          settlementEdges: []
++        });
++        firedInOrder.push(
++          ...(result.report.events_fired ?? [])
++            .map((event) => event.id)
++            .filter((eventId) => chainIds.has(eventId))
++            .map((id) => ({ id, turn: result.nextState.meta.turn }))
++        );
++        state = result.nextState;
++      }
++      return { state, firedInOrder };
++    };
++
++    const first = await playChain();
++    const second = await playChain();
++    const { state, firedInOrder } = first;
++
++    expect(second).toEqual(first);
++
++    expect(firedInOrder).toEqual([
++      { id: 'ceasefire_1995', turn: 181 },
++      { id: 'dayton_talks_begin_1995', turn: 184 },
++      { id: 'dayton_signed_1995', turn: 185 }
++    ]);
++    expect(state.meta.game_over).not.toBe(true);
++    expect(state.military.negotiation?.pending_dayton).toBeDefined();
++    expect(state.military.negotiation?.dayton_result).toBeUndefined();
++
++    resolveDaytonNegotiation(state, buildHistoricalDefaultDaytonProposal());
++
++    expect(state.meta.game_over).toBe(true);
++    expect(state.meta.outcome).toBe('dayton');
++    expect(state.military.negotiation?.pending_dayton).toBeUndefined();
++    expect(state.military.negotiation?.dayton_result).toBeDefined();
++    expect(state.meta.endgame_snapshot).toBeDefined();
++    expect(state.meta.endgame_snapshot?.outcome).toBe('dayton');
++  });
++
++  it('preserves the horizon negotiation when the player rejects the narrated talks', async () => {
++    const chainIds = new Set([
++      'ceasefire_1995',
++      'dayton_talks_begin_1995',
++      'dayton_signed_1995'
++    ]);
++    const eventDefinitions = loadEventDefinitions(0).filter((event) => chainIds.has(event.id));
++    let state: GameState = {
++      ...baseState,
++      meta: {
++        ...baseState.meta,
++        turn: 180,
++        player_faction: 'RBiH',
++        autonomy_level: 0
++      },
++      military: {
++        ...baseState.military,
++        fired_event_ids: ['federation_ground_offensive_1995'],
++        event_fire_counts: { federation_ground_offensive_1995: 1 },
++        event_last_fired_turn: { federation_ground_offensive_1995: 172 },
++        event_flags: {
++          coha_active: false,
++          coha_expired: true,
++          rbih_state_identity: 'civic'
++        },
++        enabled_event_ids: ['dayton_talks_begin_1995'],
++        pending_event_decisions: [],
++        event_overflow_queue: []
++      } as any
++    };
++
++    while (state.meta.turn < 184) {
++      const result = await runTurn(state, {
++        seed: 'dayton-hardline-chain',
++        eventDefinitions,
++        settlementEdges: []
++      });
++      state = result.nextState;
++    }
++    expect(state.military.pending_event_decisions?.map((decision) => decision.event_id)).toContain(
++      'dayton_talks_begin_1995'
++    );
++    resolveEventDecisionCore(state, 'dayton_talks_begin_1995', 'hardline');
++
++    const firedAfterRejection: string[] = [];
++    while (state.meta.turn < 188) {
++      const result = await runTurn(state, {
++        seed: 'dayton-hardline-chain',
++        eventDefinitions,
++        settlementEdges: []
++      });
++      firedAfterRejection.push(...(result.report.events_fired ?? []).map((event) => event.id));
++      state = result.nextState;
++    }
++
++    expect(state.military.event_flags?.rbih_dayton_acceptance).toBe('hardline');
++    expect(firedAfterRejection).not.toContain('dayton_signed_1995');
++    expect(state.military.event_flags?.dayton_signed).not.toBe(true);
++    expect(state.meta.game_over).not.toBe(true);
++    expect(state.military.negotiation?.pending_dayton).toBeDefined();
++  });
++
+ });

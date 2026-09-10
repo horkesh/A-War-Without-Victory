@@ -223,7 +223,7 @@ describe('desktop persistence contract', () => {
 
     expect(handler).toContain('const state = readCanonicalCurrentState(sim);');
     expect(handler).toContain('sim.resolveEventDecision(state, eventId, responseId)');
-    expect(handler).toContain('writeCanonicalCurrentState(sim, state);');
+    expect(handler).toContain('writeCanonicalCurrentState(sim, state, _event.sender);');
     expect(handler).not.toContain("import('../sim/events/resolve_decision.js')");
     expect(desktopSim).toContain("from '../sim/events/resolve_decision.js'");
     expect(desktopSim).toContain('resolveEventDecision');

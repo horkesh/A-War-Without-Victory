@@ -1,5 +1,26 @@
 # Event-System Firing Saturation and Dead Catalog — Investigation
 
+**Current routing, 2026-09-07:** the status below records the original investigation,
+not current implementation authority. BC01–BC03 are CLOSED; BC03's verified Dayton/COHA
+repair is separately committed as `c95e2524176cffee63ea6d45e5b2d357aab75b74`.
+BC04 P1 is owner-authorized, implemented and independently reviewed as a candidate in the
+[existing R8 plan](../plans/2026-07-31-full-campaign-electron-validation-plan.md#bc04-bounded-implementation-plan--2026-09-07).
+That reconciliation distinguishes current code and accepted n392 receipts from older
+diagnoses, excludes the landed barracks stagger, and retains the existing panel's P1/P2
+restrictions as explicitly amended by the owner. P1 and P2 are implemented and independently
+reviewed; focused tests/builds pass. Their campaign acceptance remains deferred, no new
+campaign is authorized by this status update, and final calibration stays open.
+
+**BC05 update, 2026-09-07:** owner-authorized bounded NATO implementation is complete and
+independently reviewed (GO, no findings; 115 focused tests pass);
+[current reconciliation](../plans/2026-07-31-full-campaign-electron-validation-plan.md#bc05-bounded-nato-repair-and-lukavac-disposition--2026-09-07)
+confirms D3's remaining RS ultimatum defect in current code and n392. The previously blocked
+Lukavac event **fires at t70 in n392** (RS `comply`, 3/6 Trnovo cells); its old dead-gate diagnosis
+is superseded for the accepted baseline. **Subsequent owner disposition: remove this separate
+Lukavac event (now removed and independently reviewed GO).** Keep military Operation Trnovo; operation execution is calibration territory outside
+BC05. The earlier abstract-proxy design question is retired. No campaign acceptance or new campaign
+follows from this packet.
+
 **Date:** 2026-09-05
 **Trigger:** Owner observation — *"I noticed the 3 barracks events fire on the same week for some reason."*
 **Scope:** Diagnostic only. **No code, data, or canon was changed by this investigation.**
@@ -262,6 +283,13 @@ deleting changes what those reads see. Fix the predicate.
 Pure authoring, no engine work. See §2. Target ~30 decisions in w139-188 rather than 7.
 
 ### D3 — Two windows dead by construction
+
+**Current scope clarification (2026-09-07):** BC04's explicit bounded same-turn follow-up now permits
+its two authorized 1995 siblings. The ordinary-pass diagnosis below still applies to the RS NATO
+ultimatum, which is a player decision and must retain the ordinary pass. BC05 extends only its
+deadline to 97 and adds direct prerequisite-window validation; it does not broaden that opt-in.
+The exclusion-zone row needs no date edit. See the current BC05 plan above for implementation proof
+and outstanding acceptance.
 
 **`nato_ultimatum_sarajevo_1994`** has `turn_min == turn_max == 96` and `requires_events:
 ["markale_massacre_1994"]`, which fires *at* w96. `triggerMatches` (`event_types.ts:717-719`) reads

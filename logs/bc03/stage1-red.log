@@ -1,0 +1,27 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ❯ tests/turn_pipeline.test.ts (2 tests | 1 failed) 827ms
+   ✓ runTurn determinism > is deterministic for same state and seed 819ms
+   × runTurn determinism > does not let the narrated Dayton signing flag preempt the negotiation owner 7ms
+     → expected 'game_over_active' not to be 'game_over_active' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/turn_pipeline.test.ts > runTurn determinism > does not let the narrated Dayton signing flag preempt the negotiation owner
+AssertionError: expected 'game_over_active' not to be 'game_over_active' // Object.is equality
+ ❯ tests/turn_pipeline.test.ts:52:47
+     50|     const result = await runTurn(state, { seed: 'dayton-narrative-owne…
+     51| 
+     52|     expect(result.report.phases[0]?.name).not.toBe('game_over_active');
+       |                                               ^
+     53|     expect(result.nextState.meta.outcome).not.toBe('dayton_agreement');
+     54|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  15:27:51
+   Duration  7.86s (transform 4.75s, setup 19ms, collect 6.15s, tests 827ms, environment 0ms, prepare 222ms)
+

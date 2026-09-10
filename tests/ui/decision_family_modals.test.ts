@@ -233,7 +233,7 @@ describe('decision family modals', () => {
     expect(screen.queryByText('Priority')).toBeNull();
     expect(screen.getByText('Donor command').parentElement?.textContent).toContain('East Bosnia Corps');
     expect(screen.getByText('Source position').parentElement?.textContent).not.toContain('op:visoko');
-    expect(screen.getByText('Recipient OG').parentElement?.textContent).toContain('Unreported');
+    expect(screen.getByText('Recipient OG').parentElement?.textContent).toContain('No staff report');
     expect(screen.getAllByText('about 2 weeks travel')).toHaveLength(1);
     expect(screen.getByText('Expected effect').parentElement?.textContent).not.toContain('defensive_gap');
     expect(screen.getByText('Weakened position').parentElement?.textContent).toContain('East Bosnia Corps');
@@ -265,7 +265,7 @@ describe('decision family modals', () => {
     expect(screen.queryByText('Source position')).toBeNull();
     expect(screen.queryByText('Weakened position')).toBeNull();
     expect(screen.queryByText('Readiness')).toBeNull();
-    expect(screen.queryByRole('button', { name: /Open Unreported dossier/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Open No staff report dossier/i })).toBeNull();
     expect(screen.getByRole('button', { name: 'Choose from reserve pool' })).toBeTruthy();
   });
 

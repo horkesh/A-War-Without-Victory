@@ -1,0 +1,25 @@
+
+ RUN  v2.1.9 F:/AWWV-worktrees/bc09-shared-inputs
+
+ ❯ tests/data_prereq_check_h1_2.test.ts (5 tests | 1 failed) 92ms
+   × data prerequisite checks > returns production_turn_inputs when shared production resources are absent 14ms
+     → expected undefined to be defined
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/data_prereq_check_h1_2.test.ts > data prerequisite checks > returns production_turn_inputs when shared production resources are absent
+AssertionError: expected undefined to be defined
+ ❯ tests/data_prereq_check_h1_2.test.ts:66:28
+     64|         const result = checkDataPrereqs({ baseDir });
+     65|         const turnInputs = result.missing.find((m) => m.prereq_id === …
+     66|         expect(turnInputs).toBeDefined();
+       |                            ^
+     67|         expect(turnInputs?.missing_paths).toEqual([...RUNTIME_INPUT_PA…
+     68|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 4 passed (5)
+   Start at  07:04:10
+   Duration  940ms (transform 74ms, setup 19ms, collect 63ms, tests 92ms, environment 0ms, prepare 109ms)

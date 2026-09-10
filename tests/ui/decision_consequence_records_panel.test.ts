@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { DecisionConsequenceRecordsPanel } from '../../src/ui/map/components/army_hq/DecisionConsequenceRecordsPanel.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
-import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
+import { turnToCompletedWeekRange, turnToDateString } from '../../src/ui/map/utils/formatters.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 
 function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
@@ -100,6 +100,8 @@ describe('DecisionConsequenceRecordsPanel', () => {
     expect(receiptRow.getAttribute('data-receipt-record-id'))
       .toBe('receipt:source-event::accept::4::downstream-event');
     expect(receiptRow.getAttribute('data-source-record-id')).toBe('decision:source-event::accept::4');
+    expect(receiptRow.textContent).toContain(turnToCompletedWeekRange(7));
+    expect(sourceRow.textContent).toContain(turnToDateString(4));
     fireEvent.click(screen.getByRole('button', { name: 'Back to source decision' }));
     expect(document.activeElement).toBe(sourceRow.querySelector('button'));
   });

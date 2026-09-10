@@ -1,0 +1,5 @@
+
+> awwv@0.9.9-beta.1 typecheck
+> tsc --noEmit -p tsconfig.json
+
+src/ui/map/components/chronicle/ChronicleOverlay.tsx(250,78): error TS2559: Type 'ChronicleChapterEntryRef' has no properties in common with type 'Pick<ChronicleEntry, "metadata">'.

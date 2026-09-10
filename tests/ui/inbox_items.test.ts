@@ -95,10 +95,10 @@ describe('deriveInboxItems — paramilitary requests', () => {
         expect(item?.subtitle).toContain('250 projected civilian casualties');
         expect(item?.subtitle).toContain('+1 war crimes event');
         expect(item?.subtitle).toContain('-10.05 international standing');
-        expect(item?.subtitle).toContain('Population source: 1991 census map data');
+        expect(item?.subtitle).toContain('Population figures draw on 1991 census map data');
         expect(item?.subtitle).toContain('Balkan Battlegrounds, Vol. I');
-        expect(item?.subtitle).toContain('fixed 5,000-person target baseline');
-        expect(item?.subtitle).toContain('not a claim that this exact outcome occurred here');
+        expect(item?.subtitle).toContain('fixed 5,000-person baseline for the target');
+        expect(item?.subtitle).toContain('do not claim that this exact outcome occurred here');
         expect(item?.subtitle).not.toMatch(/utility|risk[- ]reward/i);
     });
 });

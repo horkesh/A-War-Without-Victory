@@ -4,7 +4,6 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const OWNED_SIMULATION_FILES = [
-    'src/turn/pipeline.ts',
     'src/sim/turn_pipeline.ts',
     'src/sim/letter_home.ts',
     'src/sim/events/evaluate_events.ts',

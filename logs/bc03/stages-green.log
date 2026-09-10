@@ -1,0 +1,13 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/event_conditions.test.ts (15 tests) 16ms
+ ✓ tests/turn_pipeline.test.ts (3 tests) 5674ms
+   ✓ runTurn determinism > is deterministic for same state and seed 850ms
+   ✓ runTurn determinism > plays the narrated ceasefire chain before opening and resolving the horizon negotiation 4524ms
+
+ Test Files  2 passed (2)
+      Tests  18 passed (18)
+   Start at  15:35:24
+   Duration  13.04s (transform 4.75s, setup 21ms, collect 6.19s, tests 5.69s, environment 1ms, prepare 213ms)
+

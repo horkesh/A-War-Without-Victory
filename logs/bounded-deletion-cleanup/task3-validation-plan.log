@@ -1,0 +1,31 @@
+Task 3 validation plan — 2026-09-08
+
+Question
+Are the five named UI failures introduced by Task 3, and can the release/package and required local Electron navigation gates be completed without changing unrelated behavior, historical inputs, dependencies, or baselines?
+
+Commands
+1. On unchanged Task 2 commit cdc8659b1, with the same repository dependencies and environment:
+   npx.cmd vitest run tests/ui/pre_advance_command_review.test.ts tests/ui/decision_room_navigation_owner.test.ts tests/ui/warroom_priority_docket.test.ts tests/ui_presidential_decision_room_wiring.test.ts
+2. On Task 3 candidate 61db7e9df under equivalent conditions, run the identical command.
+3. Compare exact failing test names, expected/actual values, stacks, and exit codes.
+4. Verify the previously timed-out source file is readable, inspect the startup-snapshot wrapper/result, then retry only the failed release stage or canonical release command when changed conditions justify it:
+   npm.cmd run desktop:release:check
+5. If release succeeds, build/package with the existing isolated harness and exercise Decision Room, counter-offer, enclave-dashboard, inbox, generic pre-advance, and relevant Decision Room/docket entrypoints.
+
+Expected cost
+Two focused UI runs: minutes each. One justified release retry: tens of minutes. One local packaged interaction pass: tens of minutes. No campaign or baseline refresh.
+
+Pass criteria
+Exact UI outcomes show no Task 3 regression (or a proven Task 3 regression is minimally fixed and passes); release build succeeds without snapshot regeneration; packaged checks prove destination, modal dismissal, return behavior, no console errors, unchanged player-safe content, and distinct openDecisionRoomTarget behavior.
+
+Stopping rule
+Stop expansion if inherited UI failures require unrelated behavior changes, if snapshot drift is actually proven, if source reads repeatedly time out without a changed condition, if the existing packaged harness cannot exercise a required branch, or if any requested action would require baseline/history/dependency changes. Keep Task 3 NO-GO whenever any required criterion remains unmet.
+
+Packaged validation continuation — 2026-09-08
+Question: can a complete, valid Windows package exercise every required Task 3 navigation path?
+Commands: npm.cmd run desktop:package:dir (Node 22.23.2); node tools/desktop_packaged_runtime_probe.mjs with isolated profile; existing isolated packaged navigation harness/fixtures; focused documentation checks and git diff --check.
+Expected cost: packaging tens of minutes; runtime/navigation minutes to tens of minutes. Monitor process CPU/status. Quiet output is not failure.
+Pass: package exit 0, valid PE/launch, all five routes and Decision Room/docket entrypoints prove destination, modal, shell, return, player text and absence of runtime errors; distinct openDecisionRoomTarget behavior retained; one Sol/medium GO before local fast-forward.
+Stop: repeated substantive build failure requiring broader changes, invalid/nonlaunching executable, untested route or regression. No dependency/config/snapshot/baseline/history changes or Task 4. Local Task 3 evidence is not final R8 acceptance.
+Diagnosis: historical retry log reports package/runtime exit 0, but navigation reached no route assertions. Preserve those receipts. Fresh build explicitly requested. Only win-unpacked is targeted; sibling evidence remains.
+Targeted runtime retry: first isolated launch exited 1 on one Chromium ERR_CACHE_READ_FAILURE for tactical_map-CJseegZ6.js. File is readable (2799341 bytes, SHA256 8F84171E5166A04FDADD236F3496FFAFF4B69A7239A2EF961BE3EF4E9E2F6911); C/F NTFS healthy with ample space. One new isolated profile, unchanged probe/cache policy/package, distinguishes transient profile cache I/O. Expected minutes; stop on repeated runtime failure, no broader repair.

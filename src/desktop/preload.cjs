@@ -124,6 +124,8 @@ contextBridge.exposeInMainWorld('awwv', {
   // Presidential DECORATE A UNIT (Command Surface §10): availability + initiate.
   getDecorateUnitAvailability: () => ipcRenderer.invoke('get-decorate-unit-availability'),
   initiateDecorateUnit: () => ipcRenderer.invoke('initiate-decorate-unit'),
+  getStrategicPostureReviewAvailability: () => ipcRenderer.invoke('get-strategic-posture-review-availability'),
+  initiateStrategicPostureReview: () => ipcRenderer.invoke('initiate-strategic-posture-review'),
   // v0.8.4 Phase B: Autonomy bridge
   getAutonomyState: () => ipcRenderer.invoke('get-autonomy-state'),
   setAutonomyLevel: (level) => ipcRenderer.invoke('set-autonomy-level', { level }),

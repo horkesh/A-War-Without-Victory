@@ -33,10 +33,8 @@ jobs:
           cache: npm
 
       - run: npm ci --legacy-peer-deps
-      - run: npm ci --legacy-peer-deps
-        working-directory: src/ui/map
 
-      - run: npx tsc --noEmit
+      - run: npm run typecheck
 
   scenario-anchors:
     needs: typecheck
@@ -78,9 +76,6 @@ jobs:
           cache: npm
 
       - run: npm ci --legacy-peer-deps
-        if: steps.changes.outputs.relevant == 'true'
-      - run: npm ci --legacy-peer-deps
-        working-directory: src/ui/map
         if: steps.changes.outputs.relevant == 'true'
 
       - name: Rebuild startup snapshot for this platform
@@ -136,9 +131,6 @@ jobs:
 
       - run: npm ci --legacy-peer-deps
         if: steps.changes.outputs.relevant == 'true'
-      - run: npm ci --legacy-peer-deps
-        working-directory: src/ui/map
-        if: steps.changes.outputs.relevant == 'true'
 
       - name: Rebuild startup snapshot for this platform
         if: steps.changes.outputs.relevant == 'true'
@@ -190,9 +182,6 @@ jobs:
           cache: npm
 
       - run: npm ci --legacy-peer-deps
-        if: steps.changes.outputs.relevant == 'true'
-      - run: npm ci --legacy-peer-deps
-        working-directory: src/ui/map
         if: steps.changes.outputs.relevant == 'true'
 
       - name: Rebuild startup snapshot for this platform
@@ -266,9 +255,6 @@ jobs:
           cache: npm
 
       - run: npm ci --legacy-peer-deps
-        if: steps.changes.outputs.relevant == 'true'
-      - run: npm ci --legacy-peer-deps
-        working-directory: src/ui/map
         if: steps.changes.outputs.relevant == 'true'
 
       - name: Rebuild startup snapshot for this platform

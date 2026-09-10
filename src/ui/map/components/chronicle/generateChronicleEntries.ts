@@ -58,13 +58,13 @@ import type { EventDefinition } from '../../../../sim/events/event_types.js';
 import type { GameState } from '../../../../state/game_state.js';
 import { turnToDateString } from '../../utils/formatters.js';
 import { playerFactionMatch } from '../../data/playerFactionMatch.js';
+import { getOsidDisplayName } from '../../utils/osidDisplayName.js';
 
 import {
     getPlayerSafeDisplacementGroupLabel,
     getPlayerSafeDisplayLabel,
     getPlayerSafeMilitaryFactionName,
     getPlayerSafeOperationName,
-    getPlayerSafeSettlementName,
 } from '../../utils/playerSafeText.js';
 
 const HEADLINE_EVENT_PATTERNS = ['strategic_goals', 'state_identity', 'political_goal'];
@@ -542,6 +542,7 @@ function shouldSuppressTurnSummaryDecisionEvent(
 export function generateChronicleEntries(
     state: any,
     eventCatalog?: ReadonlyMap<string, EventDefinition>,
+    osidDisplayNames?: Record<string, string> | null,
 ): ChronicleEntry[] {
     if (!state) {
         return [];
@@ -566,7 +567,9 @@ export function generateChronicleEntries(
                     : null;
                 if (!battle.territory_flipped && (totalCasualties ?? 0) <= CASUALTY_THRESHOLD) continue;
 
-                const location = getPlayerSafeSettlementName(battle.osid || '', 'this position');
+                const location = battle.osid
+                    ? getOsidDisplayName(battle.osid, osidDisplayNames ?? null)
+                    : 'this position';
                 entries.push({
                     turn,
                     type: 'combat',

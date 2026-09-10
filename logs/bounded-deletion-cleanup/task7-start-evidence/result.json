@@ -1,0 +1,10 @@
+{
+  "checks": [
+    "npm start reaches desktop Warroom host"
+  ],
+  "diagnostics": [],
+  "hostUrl": "awwv://warroom/index.html",
+  "status": "FAIL",
+  "error": "Error: Visible button absent: Resume task7-start-fixture\n    at findButton (F:\\A-War-Without-Victory\\logs\\bounded-deletion-cleanup\\task7-start-proof.cjs:51:9)\n    at async F:\\A-War-Without-Victory\\logs\\bounded-deletion-cleanup\\task7-start-proof.cjs:65:10",
+  "closeRequested": true
+}

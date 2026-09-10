@@ -1,0 +1,7 @@
+# Disposable copied inputs, build bundles, and isolated Electron runtime payloads.
+# Scripts, manifests, results, fixture state, and exit receipts remain reviewable.
+baseline-desktop.cjs
+live-fixture/data/
+live-ipc-*/app/
+live-ipc-*/profile/
+live-ipc-*/saves/

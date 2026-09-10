@@ -354,7 +354,7 @@ export function DaytonNegotiationModal({ dayton }: DaytonNegotiationModalProps) 
                                 }`}>
                                     <div className="flex items-center justify-between mb-1">
                                         <span className="text-[12px] font-bold text-[#2a2016]">{pkg.name}</span>
-                                        <span className="text-xs px-1.5 py-0.5 rounded font-bold uppercase" style={{
+                                        <span className="text-xs px-1.5 py-0.5 rounded font-bold" style={{
                                             backgroundColor: (HOLDER_COLORS[pkg.defaultHolder] ?? '#888') + '20',
                                             color: HOLDER_COLORS[pkg.defaultHolder] ?? '#888',
                                         }}>

@@ -140,8 +140,8 @@
     "source_tier": "icty_icj_un",
     "source_note": "The listed adjudicative and institutional sources bound the chronology, actors, and findings described. The essay is original synthesis and does not extend individual liability, command responsibility, or institutional findings beyond the cited record.",
     "trigger": {
-      "turn_min": 160,
-      "turn_max": 160,
+      "turn_min": 164,
+      "turn_max": 164,
       "phase": "war"
     },
     "once": true,
@@ -191,8 +191,8 @@
     "source_tier": "icty_icj_un",
     "emergence_class": "compound",
     "trigger": {
-      "turn_min": 160,
-      "turn_max": 163,
+      "turn_min": 164,
+      "turn_max": 167,
       "phase": "war",
       "condition": {
         "type": "or",
@@ -377,7 +377,7 @@
     "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T), Srebrenica genocide findings; ICTY Mladic Trial Judgment (IT-09-92-T), Srebrenica; ICTY Krstic Trial Judgment (IT-98-33-T); ICJ Bosnia v. Serbia (2007), genocide finding; UN Report on Srebrenica (A/54/549, 1999)",
     "source_tier": "icty_icj_un",
     "trigger": {
-      "turn_min": 160,
+      "turn_min": 169,
       "turn_max": 185,
       "phase": "war",
       "condition": {
@@ -575,7 +575,7 @@
     "historical_source": "ICTY Krstic Trial Judgement (IT-98-33-T), paras 546, 598 (the column; genocide finding); ICTY Krstic Appeals Judgement (IT-98-33-A, 2004); ICTY Popovic et al. Trial Judgement (IT-05-88-T); ICTY Mladic Trial Judgement (IT-09-92-T); ICJ Bosnia v. Serbia (2007), genocide finding; UN Report on Srebrenica (A/54/549, 1999)",
     "source_tier": "icty_icj_un",
     "trigger": {
-      "turn_min": 160,
+      "turn_min": 171,
       "turn_max": 190,
       "phase": "war",
       "requires_events": [
@@ -588,6 +588,7 @@
       }
     },
     "once": true,
+    "same_turn_requires_events": true,
     "effect": {
       "kind": "narrative",
       "text": "The column out of Srebrenica is recorded as historical fact. ICTY judgments (Krstic, Popovic et al., Mladic) establish its flight and the killings along the route as part of the genocide."
@@ -631,7 +632,7 @@
     "historical_source": "ICTY Karadzic Trial Judgment (IT-95-5/18-T), second Markale incident; UNPROFOR investigation report, August 1995",
     "source_tier": "icty_icj_un",
     "trigger": {
-      "turn_min": 165,
+      "turn_min": 177,
       "turn_max": 190,
       "phase": "war",
       "condition": {
@@ -706,7 +707,7 @@
     "source_tier": "balkan_battlegrounds",
     "source_note": "NATO operational records establish the alliance operation's authorized chronology and targets; Balkan Battlegrounds Vol. I pp. 386-395 independently situates the air campaign alongside the September 1995 ground offensives. The essay is original synthesis and does not infer a single-cause path to negotiations.",
     "trigger": {
-      "turn_min": 165,
+      "turn_min": 178,
       "turn_max": 195,
       "phase": "war",
       "requires_events": [
@@ -719,6 +720,7 @@
       }
     },
     "once": true,
+    "same_turn_requires_events": true,
     "effect": {
       "kind": "supply_delta",
       "faction": "RS",
@@ -2075,7 +2077,7 @@
   {
     "id": "ceasefire_1995",
     "title": "General Ceasefire Takes Effect",
-    "narrative": "A general ceasefire takes effect across Bosnia-Herzegovina, freezing the front lines after 1,340 days of war. The Dayton Agreement establishes Bosnia as a single state composed of two entities — the Federation of Bosnia and Herzegovina and Republika Srpska — with NATO-led IFOR deployed to enforce the peace. The war that killed over 100,000 people and displaced two million is over.",
+    "narrative": "A general ceasefire takes effect across Bosnia-Herzegovina. After three and a half years of fighting, the parties prepare for negotiations intended to turn the military halt into a peace settlement.",
     "category": "diplomatic",
     "historical_source": "General Framework Agreement for Peace (Dayton Agreement), 21 November 1995; Richard Holbrooke, To End a War (1998), account of the October 1995 ceasefire negotiations",
     "source_tier": "corroborated_participant",
@@ -2088,8 +2090,9 @@
         "federation_ground_offensive_1995"
       ],
       "condition": {
-        "type": "flag_not_set",
-        "flag": "coha_active"
+        "type": "flag_equals",
+        "flag": "coha_active",
+        "value": false
       }
     },
     "once": true,
@@ -2555,7 +2558,12 @@
       "phase": "war",
       "requires_events": [
         "dayton_talks_begin_1995"
-      ]
+      ],
+      "condition": {
+        "type": "flag_equals",
+        "flag": "rbih_dayton_acceptance",
+        "value": "accept"
+      }
     },
     "once": true,
     "effect": {

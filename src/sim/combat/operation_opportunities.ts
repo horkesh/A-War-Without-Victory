@@ -1607,7 +1607,7 @@ export const OPPORTUNITY_PROPOSAL_ACTION_PREFIX = 'OPPORTUNITY:';
 
 /**
  * Apply default bot decisions for any pending opportunity whose
- * `approver_faction` is NOT the player. Runs synchronously after the
+ * `approver_faction` is NOT a human-controlled player (levels 0/1). Runs synchronously after the
  * evaluator so bot opportunities are resolved on the same turn they become
  * eligible — never sitting in the player's review queue.
  *
@@ -1627,7 +1627,8 @@ export function applyBotOpportunityDecisions(
     const targets: Array<{ proposalId: string; def: OperationOpportunityDef; proposal: OperationOpportunityState }> = [];
     for (const p of proposals) {
         if (p.status !== 'eligible_pending_review') continue;
-        if (playerFaction !== null && p.approver_faction === playerFaction) continue;
+        if (playerFaction !== null && p.approver_faction === playerFaction
+            && (state.meta.autonomy_level ?? 0) < 2) continue;
         const def = catalog.find(d => d.opportunity_id === p.opportunity_id);
         if (!def) continue;
         targets.push({ proposalId: p.proposal_id, def, proposal: p });
@@ -1643,8 +1644,8 @@ export function applyBotOpportunityDecisions(
 /**
  * Build `PendingProposalReview` rows for any opportunity whose
  * `approver_faction === playerFaction` AND status is
- * `eligible_pending_review`. Returns an empty array when autonomy is disabled
- * (level 0) or when the player faction is undefined.
+ * `eligible_pending_review`. Levels 0/1 retain human review; levels 2/3
+ * auto-apply military opportunities and therefore produce no review rows.
  *
  * The proposed_action format is `OPPORTUNITY:<proposal_id>`. The accept/reject
  * IPC handlers (electron-main.cjs) simply mark `accepted` on the row; the
@@ -1659,7 +1660,7 @@ export function generateOpportunityProposalReviews(
     playerFaction: FactionId,
     catalog: readonly OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG,
 ): PendingProposalReview[] {
-    if (state.meta.autonomy_level !== 1) return [];
+    if ((state.meta.autonomy_level ?? 0) >= 2) return [];
     const proposals = state.military.operation_opportunities;
     if (!proposals || proposals.length === 0) return [];
 
@@ -1667,9 +1668,14 @@ export function generateOpportunityProposalReviews(
         .filter(p => p.status === 'eligible_pending_review' && p.approver_faction === playerFaction)
         .sort((a, b) => strictCompare(a.proposal_id, b.proposal_id));
 
+    const existingActions = new Set((state.meta.pending_proposal_reviews ?? [])
+        .filter(r => r.faction === playerFaction && r.accepted == null
+            && r.opportunity_decision == null && r.resolved_turn == null)
+        .map(r => r.proposed_action));
     const out: PendingProposalReview[] = [];
     for (let i = 0; i < pending.length; i++) {
         const p = pending[i];
+        if (existingActions.has(`${OPPORTUNITY_PROPOSAL_ACTION_PREFIX}${p.proposal_id}`)) continue;
         const def = catalog.find(d => d.opportunity_id === p.opportunity_id);
         if (!def) continue;
         const recommendation = def.staff_recommendation;

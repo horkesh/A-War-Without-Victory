@@ -1,0 +1,17 @@
+{
+  "id": "review-enclave-dashboard",
+  "frames": [
+    {
+      "pageIndex": 0,
+      "frameIndex": 0,
+      "url": "awwv://warroom/index.html",
+      "body": ""
+    },
+    {
+      "pageIndex": 0,
+      "frameIndex": 1,
+      "url": "http://127.0.0.1:58358/index.html?embedded=1",
+      "body": "PRESIDENT'S DESK\nCOMMAND SURFACE\nDIPLOMACY\nINTELLIGENCE\nARMY HQ\nCHRONICLE\nFACTION\nWAR MAP\nADVANCE\nWAR\nREQUIRED 0\nREVIEW BEFORE ADVANCE\n2\n·\nPENDING 2\n27 Dec 1993"
+    }
+  ]
+}

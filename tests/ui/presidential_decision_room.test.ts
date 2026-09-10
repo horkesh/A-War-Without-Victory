@@ -1914,10 +1914,10 @@ describe('buildPresidentialDecisionRoomView', () => {
     // Missing staff candidate truth remains visible, but no release order can be issued.
     expect(beta).toBeDefined();
     expect(beta?.directive).toBeUndefined();
-    expect(beta?.evidence.join(' ')).toContain('Candidate force: Unreported');
-    expect(beta?.evidence.join(' ')).toContain('Donor command: Unreported');
-    expect(beta?.evidence.join(' ')).toContain('Source position: Unreported');
-    expect(beta?.evidence.join(' ')).toContain('Weakened position: Unreported');
+    expect(beta?.evidence.join(' ')).toContain('Candidate force: No staff report');
+    expect(beta?.evidence.join(' ')).toContain('Donor command: No staff report');
+    expect(beta?.evidence.join(' ')).toContain('Source position: No staff report');
+    expect(beta?.evidence.join(' ')).toContain('Weakened position: No staff report');
     // Enemy-faction reserve requests never surface to the player.
     expect(view.cards.find((c) => c.id === 'command:elite-deploy:reserve_enemy')).toBeUndefined();
   });
@@ -1995,6 +1995,17 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
     // The front-visit directive targets no corps (it targets a front).
     expect(card?.directive?.corpsId).toBeUndefined();
+  });
+
+  it('always emits one strategic-posture-review action for the player faction', () => {
+    const view = buildPresidentialDecisionRoomView({ state: makeState() });
+    const cards = view.cards.filter((card) => card.id === 'command:strategic-posture-review');
+    expect(cards).toHaveLength(1);
+    expect(cards[0]?.directive).toEqual({
+      lever: 'strategic_posture_review',
+      cost: 10,
+      payload: {},
+    });
   });
 
   it('routes Command & Personnel cards into the command lens deterministically', () => {

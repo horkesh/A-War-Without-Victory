@@ -1,0 +1,11 @@
+f117fe475 fix(events): use Vitez basing control for Ahmici
+ data/scenarios/events/war_1993.json                |   7 +-
+ ...905_EVENT_FIRING_SATURATION_AND_DEAD_CATALOG.md |  10 +
+ docs/PROJECT_LEDGER.md                             | 134 +++++++++++++
+ docs/PROJECT_LEDGER_KNOWLEDGE.md                   |   2 +
+ ...07-31-full-campaign-electron-validation-plan.md | 216 ++++++++++++++++++++-
+ docs/plans/COMMAND_BOARD.md                        |   2 +-
+ docs/plans/MASTER_ROADMAP.md                       |   4 +-
+ tests/event_timeline_integrity.test.ts             |  35 ++++
+ tests/events_evaluate.test.ts                      |  69 +++++++
+ 9 files changed, 470 insertions(+), 9 deletions(-)

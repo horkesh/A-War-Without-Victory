@@ -28,6 +28,7 @@ import {
     FRONT_VISIT_COST,
     ADDRESS_NATION_COST,
     DECORATE_UNIT_COST,
+    STRATEGIC_POSTURE_REVIEW_COST,
     COMMAND_AUTHORITY_RECOVERY_PER_TURN,
 } from '../src/ui/map/utils/commandAuthority';
 import {
@@ -94,6 +95,8 @@ describe('CA cost parity (single-host constants stay in sync)', () => {
         expect(ipcContract.FRONT_VISIT_COST).toBe(FRONT_VISIT_COST);
         expect(ipcContract.ADDRESS_NATION_COST).toBe(ADDRESS_NATION_COST);
         expect(ipcContract.DECORATE_UNIT_COST).toBe(DECORATE_UNIT_COST);
+        expect(ipcContract.STRATEGIC_POSTURE_REVIEW_COST).toBe(STRATEGIC_POSTURE_REVIEW_COST);
+        expect(STRATEGIC_POSTURE_REVIEW_COST).toBe(FRONT_VISIT_COST);
     });
 
     it('electron-main.cjs uses the shared force-launch constant instead of a local literal', () => {

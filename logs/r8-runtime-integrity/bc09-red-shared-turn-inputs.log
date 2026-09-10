@@ -1,0 +1,122 @@
+
+ RUN  v2.1.9 F:/AWWV-worktrees/bc09-shared-inputs
+
+ ❯ tests/shared_turn_inputs_contract.test.ts (15 tests | 15 failed) 105ms
+   × shared validated turn input contract > matches the original direct-key transformations without mutating supplied source objects 16ms
+     → prepareSharedTurnInputs is not a function
+   × shared validated turn input contract > preserves the numeric census-key compatibility scheme 6ms
+     → prepareSharedTurnInputs is not a function
+   × shared validated turn input contract > supports only explicitly declared minimal-fixture omissions 3ms
+     → prepareSharedTurnInputs is not a function
+   × shared validated turn input contract > rejects a missing required production input with its path: data/derived/municipality_population_1991.json 6ms
+     → prepareSharedTurnInputs is not a function
+   × shared validated turn input contract > rejects a missing required production input with its path: data/derived/census_rolled_up_wgs84.json 6ms
+     → prepareSharedTurnInputs is not a function
+   × shared validated turn input contract > rejects a missing required production input with its path: data/derived/settlement_ethnicity_data.json 6ms
+     → prepareSharedTurnInputs is not a function
+   × shared validated turn input contract > rejects a missing required production input with its path: data/source/oob_brigades.json 6ms
+     → prepareSharedTurnInputs is not a function
+   × shared validated turn input contract > rejects a missing required production input with its path: data/derived/municipality_hq_settlement.json 6ms
+     → prepareSharedTurnInputs is not a function
+   × shared validated turn input contract > rejects a missing required production input with its path: data/source/municipalities_1990_registry_110.json 7ms
+     → prepareSharedTurnInputs is not a function
+   × shared validated turn input contract > rejects structurally invalid required production input: data/derived/municipality_population_1991.json 8ms
+     → prepareSharedTurnInputs is not a function
+   × shared validated turn input contract > rejects structurally invalid required production input: data/derived/census_rolled_up_wgs84.json 6ms
+     → prepareSharedTurnInputs is not a function
+   × shared validated turn input contract > rejects structurally invalid required production input: data/derived/settlement_ethnicity_data.json 6ms
+     → prepareSharedTurnInputs is not a function
+   × shared validated turn input contract > rejects structurally invalid required production input: data/source/oob_brigades.json 6ms
+     → prepareSharedTurnInputs is not a function
+   × shared validated turn input contract > rejects structurally invalid required production input: data/derived/municipality_hq_settlement.json 6ms
+     → prepareSharedTurnInputs is not a function
+   × shared validated turn input contract > rejects malformed required production JSON with its source path 6ms
+     → prepareSharedTurnInputs is not a function
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 15 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > matches the original direct-key transformations without mutating supplied source objects
+TypeError: prepareSharedTurnInputs is not a function
+ ❯ tests/shared_turn_inputs_contract.test.ts:82:30
+     80|         const sourceHqBefore = structuredClone(sourceHq);
+     81|
+     82|         const inputs = await prepareSharedTurnInputs({
+       |                              ^
+     83|             baseDir,
+     84|             sids,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/15]⎯
+
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > preserves the numeric census-key compatibility scheme
+TypeError: prepareSharedTurnInputs is not a function
+ ❯ tests/shared_turn_inputs_contract.test.ts:115:30
+    113|         });
+    114|
+    115|         const inputs = await prepareSharedTurnInputs({
+       |                              ^
+    116|             baseDir,
+    117|             sids: ['sid_a'],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/15]⎯
+
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > supports only explicitly declared minimal-fixture omissions
+TypeError: prepareSharedTurnInputs is not a function
+ ❯ tests/shared_turn_inputs_contract.test.ts:129:30
+    127|         const baseDir = await makeBase();
+    128|
+    129|         const inputs = await prepareSharedTurnInputs({
+       |                              ^
+    130|             baseDir,
+    131|             sids: ['sid_a'],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/15]⎯
+
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > rejects a missing required production input with its path: data/derived/municipality_population_1991.json
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > rejects a missing required production input with its path: data/derived/census_rolled_up_wgs84.json
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > rejects a missing required production input with its path: data/derived/settlement_ethnicity_data.json
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > rejects a missing required production input with its path: data/source/oob_brigades.json
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > rejects a missing required production input with its path: data/derived/municipality_hq_settlement.json
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > rejects a missing required production input with its path: data/source/municipalities_1990_registry_110.json
+TypeError: prepareSharedTurnInputs is not a function
+ ❯ tests/shared_turn_inputs_contract.test.ts:157:22
+    155|         await rm(join(baseDir, relativePath));
+    156|
+    157|         await expect(prepareSharedTurnInputs({
+       |                      ^
+    158|             baseDir,
+    159|             sids: ['sid_a'],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/15]⎯
+
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > rejects structurally invalid required production input: data/derived/municipality_population_1991.json
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > rejects structurally invalid required production input: data/derived/census_rolled_up_wgs84.json
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > rejects structurally invalid required production input: data/derived/settlement_ethnicity_data.json
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > rejects structurally invalid required production input: data/source/oob_brigades.json
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > rejects structurally invalid required production input: data/derived/municipality_hq_settlement.json
+TypeError: prepareSharedTurnInputs is not a function
+ ❯ tests/shared_turn_inputs_contract.test.ts:174:22
+    172|         await writeJson(baseDir, relativePath, invalid);
+    173|
+    174|         await expect(prepareSharedTurnInputs({
+       |                      ^
+    175|             baseDir,
+    176|             sids: ['sid_a'],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/15]⎯
+
+ FAIL  tests/shared_turn_inputs_contract.test.ts > shared validated turn input contract > rejects malformed required production JSON with its source path
+TypeError: prepareSharedTurnInputs is not a function
+ ❯ tests/shared_turn_inputs_contract.test.ts:186:22
+    184|         await writeFile(join(baseDir, relativePath), '{', 'utf8');
+    185|
+    186|         await expect(prepareSharedTurnInputs({
+       |                      ^
+    187|             baseDir,
+    188|             sids: ['sid_a'],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/15]⎯
+
+ Test Files  1 failed (1)
+      Tests  15 failed (15)
+   Start at  06:53:22
+   Duration  2.29s (transform 422ms, setup 37ms, collect 448ms, tests 105ms, environment 0ms, prepare 850ms)

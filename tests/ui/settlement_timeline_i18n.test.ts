@@ -18,6 +18,13 @@ describe('SettlementTimeline localization', () => {
     setLocale('en');
   });
 
+  it('labels occurrence receipts with their completed week in each locale', () => {
+    setLocale('en');
+    expect(formatSettlementTimelineTurnDate(171)).toBe('10-16 Jul 1995');
+    setLocale('bcs');
+    expect(formatSettlementTimelineTurnDate(178)).toBe('28 aug-3 sep 1995');
+  });
+
   it('keeps English date and empty-state labels by default', () => {
     setLocale('en');
 
@@ -287,7 +294,7 @@ describe('SettlementTimeline localization', () => {
 
     const { container } = render(createElement(SettlementTimeline, { events }));
 
-    expect(container.textContent).toContain('Casualties: Unreported attacker / Unreported defender');
+    expect(container.textContent).toContain('Casualties: No staff report attacker / No staff report defender');
     expect(container.textContent).not.toContain('Casualties: 0 attacker / 0 defender');
   });
 
@@ -319,7 +326,7 @@ describe('SettlementTimeline localization', () => {
 
     const { container } = render(createElement(SettlementTimeline, { events }));
 
-    expect(container.textContent).toContain('Casualties: Unreported attacker / Unreported defender');
+    expect(container.textContent).toContain('Casualties: No staff report attacker / No staff report defender');
     expect(container.textContent).not.toContain('Casualties: 0 attacker / 0 defender');
   });
 

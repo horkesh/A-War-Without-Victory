@@ -194,6 +194,37 @@ describe('Chronicle completed-operation AAR visibility', () => {
     });
   });
 
+  it('renders Chronicle battle titles through the store OSID display-name map', async () => {
+    useGameStore.setState({
+      ...useGameStore.getInitialState(),
+      chronicleOpen: true,
+      osidDisplayNames: { 'op:brcko:brcko_2': 'Brčko' },
+      loadedGameState: {
+        player_faction: 'RBiH',
+        turn: 10,
+        turnSummaries: [{
+          turn: 10,
+          battles: [{
+            osid: 'op:brcko:brcko_2',
+            attacker_faction: 'RS',
+            defender_faction: 'RBiH',
+            outcome: 'decisive_victory',
+            attacker_casualties: 50,
+            defender_casualties: 200,
+            territory_flipped: true,
+          }],
+          territory_net: { RS: 1, RBiH: -1 },
+        }],
+        firedEvents: [],
+      } as any,
+    });
+
+    render(createElement(ChronicleOverlay));
+
+    expect((await screen.findAllByText('Battle of Brčko')).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Brcko 2/)).toBeNull();
+  });
+
   it('keeps Chronicle presidential decision entries focused in Chronicle', async () => {
     useGameStore.setState({
       ...useGameStore.getInitialState(),

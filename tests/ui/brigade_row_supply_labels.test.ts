@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import React from 'react';
+import { readFileSync } from 'node:fs';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { BrigadeRow } from '../../src/ui/map/components/BrigadeRow.js';
@@ -116,11 +117,23 @@ describe('BrigadeRow supply labels', () => {
 
     const row = screen.getByRole('button');
     expect(screen.getByText('UNREPORTED')).toBeTruthy();
-    expect(row.getAttribute('title')).toBe('Supply: Supply unreported | Fatigue: Unreported | Cohesion: Unreported');
-    expect(row.getAttribute('aria-label')).toContain('cohesion Unreported');
-    expect(row.getAttribute('aria-label')).toContain('fatigue Unreported');
+    expect(row.getAttribute('title')).toBe('Supply: Supply unreported | Fatigue: No staff report | Cohesion: No staff report');
+    expect(row.getAttribute('aria-label')).toContain('cohesion No staff report');
+    expect(row.getAttribute('aria-label')).toContain('fatigue No staff report');
     expect(row.getAttribute('title')).not.toContain('Cohesion: 0%');
     expect(row.getAttribute('title')).not.toContain('Fatigue: 0');
     expect(screen.queryByText('RECORDED')).toBeNull();
+  });
+
+  it('formats reported personnel with the shared compact formatter', () => {
+    render(React.createElement(BrigadeRow, {
+      formation: makeFormation({ personnel: 1_250 }),
+    }));
+
+    expect(screen.getByText('1.3k')).toBeTruthy();
+    expect(screen.getByRole('button').getAttribute('aria-label')).toMatch(/1[,.]250 personnel/);
+    const source = readFileSync('src/ui/map/components/BrigadeRow.tsx', 'utf8');
+    expect(source).toContain("import { formatPersonnel, toTitleCase } from '../utils/formatters'");
+    expect(source).toContain('{formatPersonnel(formation.personnel)}');
   });
 });
