@@ -2960,3 +2960,45 @@ exit 0 (`docs-tests.log`, `docs-tests-2.log`, `docs-tests-3.log`).
 CI on the branch: `typecheck`, `structural-fingerprint`, `desktop-release-check` and
 `scenario-anchors` pass. `Event system validation` fails on the inherited six-pin baseline gate and
 nothing else — see the PR #503 hold entry above. `main` is green on that workflow.
+
+## Baseline re-blessing packet scoped; the six-pin gate is stale pins, not a regression — 2026-09-10
+
+**Diagnosis.** The `apr1992_188w` baseline gate is red because the pins are stale by nine accepted
+commits, not because anything regressed. Six of eight artifacts moved and `formation_delta.json` /
+`watched_operations.json` did not — the identical signature `CALIBRATION_MASTER.md` records for the
+`n392` blessing ("6 of 8 pins moved", same two unchanged). Clean POST-A passes every hard check:
+checkpoints 702/678/672/667 against floors 694/674/668/641, `matched_osids` 667 >= 644,
+`consistency_failures` 0, `pass: true`. Three checkpoints equal `n392` exactly; `oct1995` moved
+665 -> 667.
+
+**Cause, decomposed.** Nine commits changed four consumed inputs (`war_1993/94/95.json`,
+`oob_brigades.json`), all deliberate and reviewed: BC05 (`0690a47ea`, `4c419c464`), BC06
+(`d7fb72035`), the ARBiH honorific correction (`878cbb34b`), event PR #502 (`2c2aa72a8`),
+`f117fe475`, `c95e25241`, `558f253a2`. The drift is two things bundled. The rename is COSMETIC:
+`formation.name` is read only into description/label fields (`compile_turn_summary.ts:252,264`
+`formation_name`; `battle_resolution.ts:563/575/587/1062`), so it changes bytes without changing a
+decision. A hypothesis that brigade names fed a sort tie-break was tested and FALSIFIED — all four
+`strictCompare(a.name, b.name)` sites are on `CorpsOperation`/collapse-flag accessors, not
+formations, which is consistent with `formation_delta.json` being byte-identical. The event-catalog
+commits are the real movement: `events_fired` diverges first at w54, `battles` w77, `corps_summary`
+w131, `control_counts` w162 (RBiH 255->268, RS 372->359).
+
+**The packet is scoped but NOT authorized to run,** because its entry condition is unmet. The §4.1
+acceptance boundary requires every BC row settled before final calibration acceptance, and five are
+open: BC04, BC05, BC06 and BC09 are all code-complete and independently reviewed GO, held open by one
+shared thing — none has had a campaign or packaged-Electron acceptance run; BC10 is unstarted. BC05
+and BC06 are two of the commits that moved these pins, so blessing now would adopt a baseline
+mid-settlement and force a second re-bless. The red gate is therefore telling the truth and should
+stay red.
+
+**Gate sequence recorded** in `docs/plans/2026-09-10-baseline-reblessing-packet.md`: Gate 0 enclave
+guard (BLOCKING, §6 — `war_1995.json` is a changed input and carries `srebrenica_falls_1995` and
+`zepa_falls_1995`, and the control swing lands at w162; if the guard moved this stops being a
+re-pin), Gate 1 merge order against `codex/apr1994-operational-corrections` which moves the same
+checkpoints the other way, Gate 2 one clean owner-authorized 188-week run at HEAD (`updateBaselines()`
+calls `runScenarioAndHash`, so the existing POST-A directory cannot simply be pinned), Gate 3
+local/CI reproduction, Gate 4 drift decomposition, Gate 5 re-bless, Gate 6 independent review.
+Floors are NOT raised: 667 must not become a floor any more than 665 was allowed to.
+
+**Consequence flagged for owner decision:** PR #503's merge sits behind this entire chain — several
+BC acceptance campaigns plus an unstarted BC10 — not behind a quick pin refresh.

@@ -99,8 +99,9 @@ gates:
     opened: 2026-09-08
     blocks: [R8]
     evidence_required: >
-      Behavior settlement, final calibration adoption, and an explicit recorded pin
-      reconciliation under existing authority.
+      BC04/BC05/BC06/BC09/BC10 settled, then the gated sequence in the baseline re-blessing packet:
+      enclave guard verified, merge order settled, one clean owner-authorized 188-week run at HEAD,
+      local/CI reproduction, drift decomposition recorded, manifest re-blessed, independent review.
     evidence_path: null
     source: docs/plans/2026-09-05-r7-presentation-and-english-readability-amendment-plan.md
     notes: >
@@ -111,7 +112,8 @@ gates:
       regression on apr1992_188w reports exactly six mismatched artifacts —
       activity_summary.json, control_delta.json, end_report.md, final_save.json,
       run_summary.json, weekly_report.jsonl — with final_save actual e414dc69f6e875fc, the
-      clean POST-A fingerprint. main is green; the branch is not. The owner was offered
+      clean POST-A fingerprint. main is green; the branch is not. Scoped fix:
+      docs/plans/2026-09-10-baseline-reblessing-packet.md (NOT authorized to run; entry condition unmet). The owner was offered
       merge-red or an authorized pin reconciliation and chose to HOLD the merge, so PR #503
       stays open until this gate is reconciled under calibration authority. Merging is
       therefore blocked ON THIS GATE and on nothing else: typecheck, structural-fingerprint,
