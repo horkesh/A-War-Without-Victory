@@ -48,7 +48,26 @@ test('event CI retains development-branch type feedback and every distinct event
     );
     assert.match(workflow, /- name: Event-system \+ Phase E\/F\/H suite\s*\n\s*run: \|/);
     assert.match(workflow, /- name: Phase F2 strict gate \(canon-compliance hard rail\)\s*\n\s*run: \|/);
-    assert.match(workflow, /- name: Baseline regression\s*\n\s*run: node node_modules\/tsx\/dist\/cli\.mjs tools\/scenario_runner\/run_baseline_regression\.ts/);
+    // The byte-baseline check moved OUT of Event System CI on 2026-09-10 into its own advisory
+    // workflow, so a stale pin can no longer set the Event System CI run conclusion to failure.
+    // The command contract is unchanged; only its home moved. Both halves are asserted so the
+    // separation cannot silently regress in either direction — absent here, present there.
+    assert.doesNotMatch(
+        workflow,
+        /- name: Baseline regression/,
+        'Event System CI must not own the byte-baseline check; it lives in baseline-pins.yml',
+    );
+
+    const baselinePins = await readFile(
+        join(process.cwd(), '.github', 'workflows', 'baseline-pins.yml'),
+        'utf8',
+    );
+    assert.match(baselinePins, /- name: Baseline regression\s*\n\s*run: node node_modules\/tsx\/dist\/cli\.mjs tools\/scenario_runner\/run_baseline_regression\.ts/);
+    assert.match(
+        baselinePins,
+        /name: Baseline pins \(advisory, non-blocking\)/,
+        'the advisory check name is what branch protection excludes by name; it must not drift',
+    );
 });
 
 test('always-report engine health fails when its required scenario parent fails', async () => {
