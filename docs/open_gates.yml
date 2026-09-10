@@ -194,17 +194,19 @@ gates:
     opened: 2026-09-10
     blocks: []
     evidence_required: >
-      Every napkin category at or under its stated 10-entry cap, and docs/life_lessons.md reduced
-      to an index whose lesson bodies live in the nine topic files it points at.
+      Every napkin category at or under its stated 10-entry cap, and each life-lessons entry whose
+      text says "see docs/life_lessons/<topic>.md" actually present in that topic file.
     evidence_path: null
     source: .claude/napkin.md
     notes: >
-      The napkin states "Max 10 entries per category" and "Read this index every session; read topic
-      archives only when relevant". On 2026-09-10 Engine Runtime Patterns held 12 entries and two
-      orphan session headings sat at top level; the orphans were folded into Evidence & Tooling
-      Discipline (6 to 8 entries) and the file went 64,043 to 63,738 bytes. Engine Runtime Patterns
-      is still over cap. docs/life_lessons.md is 146,864 bytes for what is documented as an index,
-      because recent-session lesson bodies are inlined rather than filed into the topic files.
+      Two of three parts are done. docs/life_lessons.md went 146,864 to 39,930 bytes on 2026-09-10:
+      34 older dated sessions moved verbatim to docs/life_lessons/session_archive.md, keeping the
+      three newest plus "Recently Violated" and "Topic Files", which CLAUDE.md mandates reading. The
+      napkin's two orphan session headings were folded into Evidence & Tooling Discipline (6 to 8
+      entries), 64,043 to 63,738 bytes. Still open: Engine Runtime Patterns holds 12 entries against
+      the napkin's stated cap of 10; and 160 life-lessons entries carry a "see
+      docs/life_lessons/<topic>.md" pointer whose body is NOT in that topic file — verified by grep,
+      count 0 for three sampled lessons. Those pointers were already aspirational before the move.
 
   # ── Closed, retained to prevent re-raising ──────────────────────────────────────
 

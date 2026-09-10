@@ -2852,3 +2852,25 @@ verified by re-counting. A silent no-op that is never verified reads exactly lik
 **Verification.** `node tools/validate_open_gates.cjs` exit 0. Doc guard tests
 (`docs_desktop_v09_truth`, `v091_endgame_milestone_closure`, `open_gates_register`) pass 28/28,
 exit 0. Full-suite, typecheck and map-build receipts under `logs/doc-sync-merge/`.
+
+## Life-lessons index compaction — 2026-09-10
+
+**docs/life_lessons.md: 146,864 -> 39,930 bytes.** The file is documented as an index but carried 37
+dated `New Lessons` session sections inline, 244 lesson headings in total. 34 older sessions moved
+verbatim to `docs/life_lessons/session_archive.md`; the three newest sessions stay, as do
+"Recently Violated" and "Topic Files", because CLAUDE.md mandates reading those at session start.
+The splitter asserted byte conservation before writing (146,864 in, 146,864 out). The index header
+and topic table now name the archive and state that it is lane reference, not session-start reading.
+
+**A pre-existing doc-truth defect surfaced and was NOT silently fixed.** 160 of the 244 lesson
+entries end with `see docs/life_lessons/<topic>.md`, implying the body lives in that topic file.
+It does not: grep for three sampled lesson titles returns count 0 in the named topic files. The
+bodies were only ever in the index. The move preserves them and the archive header states this
+plainly; the pointers themselves are recorded as open work under `REPO-RUNBOOK-CURATION` rather
+than rewritten by guesswork, because deciding where each of 160 lessons belongs is a curation
+judgement, not a mechanical one.
+
+**Cumulative effect of the 2026-09-10 compaction across governing docs:**
+PROJECT_LEDGER.md 5,157,554 -> 230,761 bytes; life_lessons.md 146,864 -> 39,930;
+MASTER_ROADMAP.md 59,706 -> 58,036; napkin 64,043 -> 63,738. Nothing deleted; every moved byte is
+in an archive, and each move asserted byte conservation before writing.
