@@ -3,6 +3,31 @@
 
 ---
 
+### [Process] ★★★ I MERGED ON A PARTIAL SIGNAL ONE MESSAGE AFTER SAYING I WOULD NOT (2026-09-10) — NEW
+- Wrote "I won't merge on a partial signal", then merged PR #503 with `full-suite` still **pending**.
+  The check that would have caught the breakage was running at that moment. It failed, and the
+  failure landed on `main`. The stated rule and the action were one message apart.
+- The breakage: splitting the baseline regression into its own CI job added a second
+  `npm ci --legacy-peer-deps` to `event-system-ci.yml`, and
+  `tests/ci_dependency_install_contract.test.ts` keeps a per-workflow inventory that had it at 1.
+- ⇒ **A stated intention is not a control.** If "wait for all checks" matters, the merge must be
+  gated by something that cannot be talked out of it — branch protection, or a monitor whose
+  completion signal is the precondition for the merge command.
+- ⇒ An instruction to proceed ("merge it") answers WHETHER, not WHEN. Re-confirm the when if the
+  precondition you announced has not been met yet, rather than silently dropping it.
+
+### [Process] ★★ RE-VIOLATED: A TRUNCATED GREP IS AN INCOMPLETE SEARCH PRESENTED AS A COMPLETE ONE (2026-09-10) — NEW
+- Before changing a CI workflow I ran `grep -rln "\.github/workflows" tests/ | head -5`, ran the
+  three files it returned, and treated that as "the tests that guard workflows". The one test that
+  actually guards workflow install counts was excluded by BOTH the pattern and the `head -5`.
+- The repo's narrow-lookup hook fires on nearly every search and fired here. The warning was present;
+  the habit was not. Same family as the `readiness = 'active'` miss and the field-semantics-from-one-
+  instance miss — an instrument that cannot see the thing it is being cited to rule out.
+- ⇒ **Never `head`-truncate a search whose purpose is to establish completeness.** Truncate when
+  sampling, never when concluding "this is the set".
+- ⇒ Before editing a file that a test might pin, grep for the FILE'S OWN NAME across `tests/`
+  (`grep -rln "event-system-ci" tests/`), not for the directory it lives in.
+
 ---
 
 ### [Process] ★★ A DIFFERENCE BETWEEN TWO COUNTS IS NOT A DEFECT UNTIL YOU KNOW WHAT THE ROWS ARE (2026-09-03) — NEW
