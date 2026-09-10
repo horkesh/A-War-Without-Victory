@@ -3094,3 +3094,31 @@ the apparent difference between PR #503 and #504 check sets was job start timing
 - `required_pull_request_reviews: null` — a single-maintainer repo cannot satisfy an approval
   requirement; enabling it would deadlock every PR.
 - `allow_force_pushes: false`, `allow_deletions: false` — history on `main` is protected.
+
+## main broken and repaired — CI install-contract count — 2026-09-10
+
+**I broke `main` and merged it.** The advisory-split commit `6384a9580` added a second
+`npm ci --legacy-peer-deps` to `event-system-ci.yml` (the new `baseline-pins` job needs its own
+install). `tests/ci_dependency_install_contract.test.ts` carries a per-workflow inventory of expected
+root installs and had `event-system-ci.yml` at 1. The suite failed on PR #503's `full-suite`, and
+that failure landed on `main` at `bdf8953cb`.
+
+**Two process failures, both mine.**
+1. **Merged on a partial signal after stating I would not.** `full-suite` was still pending on #503
+   when the merge went in. The check that would have caught this was running at the time.
+2. **The pre-merge check was too narrow.** Before the split I ran
+   `grep -rln "\.github/workflows" tests/ | head -5` and ran the three files it returned. The
+   truncation and the pattern both excluded `ci_dependency_install_contract.test.ts`. This is the
+   narrow-lookup shape the repo hook warns about on nearly every search — the guard fired, and the
+   habit did not.
+
+**The fix is the count, not the workflow.** The contract is an INVENTORY, not a "must be 1" rule:
+`baseline-regression.yml` expects 5, `desktop-release-guard.yml` 2, `full-suite-and-fingerprint.yml`
+2, `release.yml` 2. Its substantive assertions — every install is exactly
+`npm ci --legacy-peer-deps`, no separate map-workspace install, no lock-mutating `npm install`, no
+`--prefix` — are all satisfied by the new job. Adding a job legitimately raises the count, so
+`event-system-ci.yml` moves 1 -> 2. Reverting the split would have been the wrong repair.
+
+**Verification.** `ci_dependency_install_contract`, `ci_workflow_test_paths_exist` and
+`test_runner_default_contract` pass 10/10, exit 0. This fix goes through a PR gated by the ten
+required checks added earlier today, so the protection now verifies its own author's repair.
