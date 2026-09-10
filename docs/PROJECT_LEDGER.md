@@ -3437,3 +3437,48 @@ now unexecutable, and the commit describing why is not.
 truth" will never be a hook. The value of an audit is separating those from the ones that COULD be
 tier 1 and were left as prose. A lesson left at tier 5 is closer to a record of a failure than a
 defence against one.
+
+## Second tier-1 conversion: the pipe exit-code guard, promoted from advisory — 2026-09-10
+
+**Chosen because it is the strongest possible evidence that tier 4 does not work.** This rule
+already HAD a hook. The lesson recording its third violation says so in its own words:
+*"The repo hook fired both times and I still had to be told by it."* On 2026-09-03,
+`desktop:map:build 2>&1 | tail -5; echo "BUILD_EXIT=$?"` reported 0 for a build that had died
+with MODULE_NOT_FOUND; a stale `dist` was served to a capture rig and the app rendered black
+before the real cause was found. A warning that is read and stepped over is not a guard, it is
+a log entry.
+
+**Promoted narrowly, not wholesale.** Reading the status after a pipe is sometimes exactly
+right: `cmd | grep -q x; if [ $? -eq 0 ]` asks grep a question and reads grep's answer. So the
+DENY covers only pipelines whose LAST stage is a pure display filter — tail, head, sed, cut,
+sort, wc and friends — which carry no meaningful status at all. `grep` is excluded on purpose.
+Everything wider keeps the advisory it always had. **One hook, two strengths**, rather than a
+second hook competing with the first.
+
+**Three false positives, all found by allow-cases, same as the stash guard:**
+1. a heredoc body describing the rule (shared fix: `tools/hooks/lib/strip_heredocs.awk`)
+2. the offending string carried as a SINGLE-QUOTED argument — the guard denied its own probe
+   harness. Single quotes suppress expansion, so `$?` inside them is data, never a status read.
+   Double quotes must survive: `echo "BUILD_EXIT=$?"` is the exact shape being caught.
+3. a backslash-escaped `\$?` inside double quotes — a mention, not a read.
+
+**Why the heredoc stripper is shared but not universal.** The stash guard does NOT use it: its
+command-position rule already handles heredocs, because a prose mention never begins a segment.
+The pipe guard NEEDS it, because `echo "rc=$?"` inside a heredoc body IS at a command position.
+Different guards, different decidability — the stripper goes where the position rule is not
+enough, and nowhere else.
+
+**Ollama's share of this work, honestly.** It drafted the test table and file skeleton
+(1,395 tokens at 53 tok/s) and got the tables right. Three defects made the draft unusable as
+written, and one is worth recording: `catch { return 'quiet' }` in the decision helper, which
+would have made all five QUIET tests pass against a completely crashed hook — a false-green
+generator, the exact failure class this repo keeps hitting. The helper was rewritten to let
+errors propagate. **The model is useful for the mechanical half and cannot be trusted with the
+oracle.** The shell guards themselves were NOT delegated: their entire difficulty is quoting
+semantics, and every bug in both guards was a quoting bug.
+
+**Verified:** 17 tests in `tests/hook_guard_pipe_exit_code.test.ts`, tsc clean, the stash
+guard's 26 tests still green, and the upgraded guard observed firing live in-session.
+
+Hook inventory now: 2 blocking (`guard_stash_pop`, `guard_pipe_exit_code` in its narrow shape),
+3 advisory (`guard_scope_drift`, `guard_lookup_absence`, `guard_dirty_citation`).
