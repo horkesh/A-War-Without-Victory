@@ -118,5 +118,41 @@ jobs:
             tests/sensitive_history_canon_gate_audit_strict_gate.test.ts \
             --reporter=dot
 
+  # ── Baseline pins — ADVISORY, reports but does not gate ────────────────────────
+  #
+  # Split out of `event-system-validation` on 2026-09-10 (owner decision).
+  #
+  # WHY: this step used to be the last step of the event-system job, so a stale PIN
+  # turned "Event system validation" red and read as "the event system is broken".
+  # Those are different failures with different owners and different urgency.
+  #
+  # WHAT RED MEANS HERE: the eight `apr1992_188w` artifact hashes in
+  # data/derived/scenario/baselines/manifest.json no longer match a fresh run. That is
+  # usually STALE PINS after an accepted input change, not a regression. Diagnose before
+  # reacting: check the checkpoint scores against their floors via the engine health gate.
+  # If the checkpoints still clear their floors, the engine is fine and the pins are behind.
+  #
+  # WHAT TO DO: do NOT refresh the pins to make this green. Re-blessing is a gated,
+  # owner-authorized procedure — see docs/plans/2026-09-10-baseline-reblessing-packet.md
+  # and the R7-BASELINE-SIX-PIN row in docs/open_gates.yml.
+  #
+  # NON-BLOCKING: `main` currently has no branch protection and no rulesets, so no check
+  # is a required check. If branch protection is ever added, this job must be EXCLUDED
+  # from the required list; every other check here should be included.
+  baseline-pins:
+    name: Baseline pins (advisory, non-blocking)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies (root)
+        run: npm ci --legacy-peer-deps
+
       - name: Baseline regression
         run: node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_baseline_regression.ts

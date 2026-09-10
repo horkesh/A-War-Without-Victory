@@ -3002,3 +3002,36 @@ Floors are NOT raised: 667 must not become a floor any more than 665 was allowed
 
 **Consequence flagged for owner decision:** PR #503's merge sits behind this entire chain — several
 BC acceptance campaigns plus an unstarted BC10 — not behind a quick pin refresh.
+
+## Baseline check made advisory and separately reported — 2026-09-10
+
+**Owner decision:** keep the baseline check reporting, stop it gating PRs.
+
+**Finding first: nothing was ever gating.** `main` has no branch protection
+(`/branches/main/protection` returns 404) and no rulesets (`[]`). There are no required status
+checks in this repository, so the red baseline check never blocked the merge in GitHub's sense —
+PR #503 reported `mergeStateStatus: UNSTABLE`, not `BLOCKED`. The hold was judgement, not
+enforcement. That also means a genuinely broken build could be merged today; recorded below as a
+separate decision the owner has not been asked to make yet.
+
+**Change made.** The baseline regression was the LAST STEP of the `event-system-validation` job, so
+a stale pin turned "Event system validation" red and read as "the event system is broken". Those are
+different failures with different owners and different urgency. It is now its own job,
+`baseline-pins`, named "Baseline pins (advisory, non-blocking)", with a comment block stating what
+red means there, that stale pins are the usual cause, that the checkpoints-versus-floors comparison
+is the diagnostic, and that refreshing pins to force green is prohibited outside the gated
+re-blessing packet.
+
+**Deliberately NOT used: `continue-on-error`.** It would make the run green while the job failed,
+which is the false-green shape this repo has been bitten by repeatedly. The job reports its true
+result; it simply no longer defames a neighbouring check. Non-blocking comes from the absence of
+required checks, not from hiding the result.
+
+**Verification.** Workflow YAML parses to two jobs with the expected names and step counts
+(6 and 4). `tests/ci_workflow_test_paths_exist.test.ts`, `tests/test_runner_default_contract.test.ts`
+and `tests/ui/first_hour_browser_gate_contract.test.ts` pass 20/20, exit 0
+(`logs/doc-sync-merge/ci-workflow-tests.log`).
+
+**Open decision recorded, not taken:** whether to add branch protection to `main` at all. Today
+nothing is required, so "non-required" is the default rather than a choice. If protection is added,
+`baseline-pins` must be excluded from the required list and the remaining checks included.

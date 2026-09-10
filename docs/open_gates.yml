@@ -118,6 +118,12 @@ gates:
       stays open until this gate is reconciled under calibration authority. Merging is
       therefore blocked ON THIS GATE and on nothing else: typecheck, structural-fingerprint,
       desktop-release-check and scenario-anchors all pass.
+      2026-09-10 (owner decision): the baseline regression was split out of the
+      "Event system validation" job into its own advisory job, "Baseline pins (advisory,
+      non-blocking)". It still runs and still reports red on stale pins; it no longer makes the
+      event-system check red, because those are different failures with different owners. main has
+      no branch protection and no rulesets, so no check is a required check; if protection is ever
+      added, this job must be EXCLUDED from the required list and the others included.
 
   - id: R7-ACCEPTANCE-ALL-GREEN
     lane: R7
