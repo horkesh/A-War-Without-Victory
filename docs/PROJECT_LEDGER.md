@@ -2938,3 +2938,25 @@ files. Inline `node -e` is not reliable in this shell — use a file and verify 
 
 **Verification.** Doc guard tests pass 12/12, exit 0 (`docs-tests-3.log`).
 `node tools/validate_open_gates.cjs` exit 0.
+
+## Verification receipts for the 2026-09-10 documentation session
+
+The smoke triad passes on the final state, each read from the command's own exit code rather than a
+wrapper's, under `logs/doc-sync-merge/final/`:
+
+- `npx tsc --noEmit` — `TSC_EXIT=0` (`typecheck.log`)
+- `npm run test:vitest` — `VITEST_EXIT=0` (`vitest.log`), balanced sharded runner
+- `npm run desktop:map:build` — `BUILD_EXIT=0` (`mapbuild.log`), built in 22.32s
+
+The sharded runner emits a `FAIL` line for `tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts`
+in an isolated child invocation. That is the runner's own control proving it detects a failing child;
+`.fixture.ts` is not matched by the normal `*.test.ts` glob, and the suite exit code is 0. Do not
+read that line as a red suite.
+
+Focused doc guards pass across three rounds as the docs changed: 28/28, then 30/30, then 12/12, each
+exit 0 (`docs-tests.log`, `docs-tests-2.log`, `docs-tests-3.log`).
+`node tools/validate_open_gates.cjs` exit 0.
+
+CI on the branch: `typecheck`, `structural-fingerprint`, `desktop-release-check` and
+`scenario-anchors` pass. `Event system validation` fails on the inherited six-pin baseline gate and
+nothing else — see the PR #503 hold entry above. `main` is green on that workflow.
