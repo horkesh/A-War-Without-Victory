@@ -84,6 +84,17 @@
    Do instead: set the harness viewport to the delivery size (1920x1080) BEFORE a capture run, not after — a 1440x900 set had to be re-shot wholesale. Then actually LOOK at each output: the re-shoot found the Formation Detail exhibit had silently regressed to an OG intel panel and War Summary was a duplicate of the Briefing tab, both "passing" 13/13 steps. A green step count proves navigation, not content. ⇒ **And the re-shoot ITSELF missed a file.** `capture_faction_v2.mjs`'s `05_decision_room` step looks for `OPEN REVIEW`/`REVIEW PRIORITIES` and **skips without failing** when neither is present; HRHB exposes that queue as the `N REVIEWS` toolbar chip, so the step wrote nothing, the stale 1440x900 file from the previous round survived, and it stayed published on BOTH language versions for a day. **A skipped capture is invisible: the old file is still sitting there and looks exactly like a fresh one.** ⇒ A capture step must THROW, not log-and-continue. ⇒ And the standard must be checked against the delivered files (`check_media.mjs`: every page-referenced still is 1920x1080, exit 1 with dimensions), because the capture run is precisely the thing that lied.
 9. **[2026-07-17, twice re-violated 2026-09-03] CI tests cannot depend on local evidence roots — and the half that goes missing is usually the EVIDENCE, not the test**
    Do instead: keep executable QA harnesses under tracked `tools/`; write generated screenshots, saves, and logs under excluded `tmp-*` roots, and prove harness contracts from a clean-checkout path. Broken twice in one day, both caught by Codex, neither by me: a calibration test READ gitignored `runs/` (ENOENT on a clean checkout, P1), and `toolbar_fit_contract.test.ts` CITED its geometric proof at `tmp_gui_observation/verify_toolbar_fit.mjs` — so on a clean checkout the test still passed while the evidence it named did not exist, leaving only source-string assertions that the comment itself calls insufficient. **A test that passes without its evidence is worse than a missing test: it reports coverage it does not have.** ⇒ Any path a test NAMES — in an assertion or in a comment — must be tracked, and `git ls-files <path>` is the check. ⇒ Corollary, learned the same day: **a tracked harness must also declare what it COVERED.** The relocated verifier passed six widths on the tracked save while the two chips that caused the original collision were not on screen at all, because they are state-dependent. It now reports `PASS, PARTIAL COVERAGE` naming what was absent. A harness that cannot say what it measured gets quoted as if it measured everything.
+7. **[2026-08-15] Name actors at the claim boundary**
+   Do instead: resolve generic-symmetry findings (`both sides`/`all sides`) by reading the full
+   claim, naming the actors its evidence supports, and preserving asymmetric responsibility.
+   Recast spatial collisions (`surrounded on all sides`) without changing meaning. Keep the
+   player-facing actor-specificity queue at zero and mirror every essay edit into the runtime index.
+8. **[2026-08-15] A prose source note is not a machine-readable citation**
+   Do instead: give historical event metadata both roles — `historical_source` identifies the cited
+   instrument, `source_note` explains which claims it supports and where the counterfactual
+   boundary begins. Three HRHB decisions had exact pages, judgment sections and a resolved tier in
+   `source_note`, yet all 63 owned claims read as uncited because no recognized citation key was
+   present. When repairing older rows, promote only citations already present in the note.
 
 ## Domain Behavior Guardrails
 0. **[2026-08-12] Painted control has FOUR snapshots — a source comment citing one is a trap**
@@ -151,17 +162,6 @@
 
 > Demoted from Map & UI Shell on 2026-09-03 to keep the 10-cap: the 2026-06-26 focused-control shortcut rule now lives in [map counters](napkin/map_counters.md) — demoted to [map counters], not dropped.
 
-## 2026-08-15 - Name actors at the claim boundary
-
-The sensitive-history inventory's `both sides` / `all sides` pattern found ten genuinely vague combined-party formulations and one spatial phrase (`surrounded on all sides`). All required review, but only the former required actor attribution.
-
-**Reusable rule:** resolve generic-symmetry findings by reading the full claim, naming the political or military actors supported by its evidence, and preserving asymmetric responsibility. Recast spatial collisions without changing meaning. Keep the player-facing actor-specificity queue pinned at zero and mirror every essay edit into the runtime index.
-
-## 2026-08-15 - A prose source note is not a machine-readable citation
-
-Three HRHB decisions had exact pages, judgment sections, a resolved tier, and a careful provenance boundary in `source_note`, yet all 63 owned claims remained uncited because no recognized citation key was present.
-
-**Reusable rule:** historical event metadata needs both roles: `historical_source` identifies the cited instrument, and `source_note` explains which claims it supports and where the counterfactual boundary begins. When repairing older rows, promote only citations already present in the note; do not expand the evidence claim merely to clear the inventory.
 
 ## Engine Runtime Patterns
 0. **[2026-08-31] Rear-pocket cleanup is consolidation, not enclave expansion**

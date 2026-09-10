@@ -115,3 +115,31 @@ R4 is closed after Phase 5 integrated proof. Two independent fresh 104-turn runs
 Phase 5's baseline/engine-health proof surfaced a pre-existing 188-week anchor finding — three named anchors (`op:zvornik:zvornik`, `op:doboj:boljanic_2`, `op:gracanica:petrovo_2`) fall to RBiH by week 188, contrary to history. An 11-probe git-worktree bisection (including one documented false start: `0fd36157b` was wrongly blamed, reverted, found ineffective via a clean-worktree test, and un-reverted — it is confirmed innocent) traced this to two separate, legitimate, already-shipped commits: `3c2e8a47f` (an R7 Section 6 canon-compliance fix removing a prohibited atrocity-reward) and `34edff214` (this same R4 Phase 3's own event-reachability fix, whose 52-week-only validation missed a real 188-week combat-power cascade). Neither is an R4 defect and neither should be reverted. The owner ruled the resulting territorial outcome unacceptable and directed a fix, now tracked as R6 Task 0.3 and explicitly blocked until R5 closes. Full trace: `PROJECT_LEDGER.md` and `CALIBRATION_MASTER.md`, both 2026-08-03.
 
 R5 is next per the dependency sequence and the owner's explicit "finish the engine first" directive. Evidence: [implementation report](../40_reports/implemented/20260731_COMMAND_EVENT_CODEX_CONVERGENCE.md).
+
+
+## Closed-lane detail moved 2026-09-10
+
+Status prose for closed workstreams R4, R5, R6, RC and RE, moved verbatim out of the
+Workstream Register in `MASTER_ROADMAP.md` to keep that file under its 60,000-byte
+conciseness guard. The live register keeps each row, its status verdict and its plan link;
+this is the evidence detail behind those verdicts. Nothing here is current work.
+
+### R4 — Command, event, and Dynamic Codex convergence
+
+**COMPLETE — CLOSED 2026-08-06 (Phase 6 merged, PR #481 → main `40d3c5452`).** Phase 5 integrated proof + Phase 6 regression fixes from the 12-specialist RS-ahistorical-playthrough panel (`docs/40_reports/20260805_RS_PLAYTHROUGH_PYRRHIC_PANEL_SYNTHESIS.md`): 6.1 `pending_dayton` game-over terminal-state deadlock (4-specialist converged), 6.2 `op_directive_rejection` surfaced as a record-band Desk card (+ `OperationAAR.requested_by_president`), 6.3 stop charging CA for unbuildable directives, 6.4 Main Staff (`kind: army_hq`) filtered from corps levers, 6.5 IPC mutation serialization (serialize-by-default mutex, single-point interception). Calibration byte-identical; 232 tests green; independent Code Review + QA both GO (implementer≠reviewer). Non-blocking fast-follow: optional live double-click smoke + narrative-seat CO-voice prose pass.
+
+### R5 — Engine quality, performance, and stability
+
+**COMPLETE — CLOSED 2026-08-05 at the current performance floor (~1,086 ms/turn fresh).** Every self-executable item is done (Phases 0/1/3/4.1, Phase 2e Tasks 1-10, Task 7 baseline gate). Phase 2e's pure-solve/serial-commit extraction was proven correct but FAIL_REVERTED for a 3-7% wall-clock + ~45% heap regression; production uses the direct `buildCorpsFrontSectors` call. **Task 6 (incremental-reuse toward 100 ms/turn) is DECLINED, not deferred:** its only user-facing motivation was the warroom->map delay, which is R1's domain and already solved (~4.3 s -> ~114 ms warm; the map reads pre-computed sectors and never calls the builder). ~1 s/turn sim throughput is acceptable for a strategic game; the 100 ms/turn target is retired as aspirational. The reverted Phase 2e pipeline and its characterization suite are preserved for an optional future re-attempt (its flaky pure-solve `sectors_rebuilt` divergence test is skipped)
+
+### R6 — Historical gameplay depth and final calibration
+
+**PRE-1.0 SCOPE COMPLETE — CLOSED 2026-08-09.** Final R6 re-floor `n163`: 634 matched OSIDs, 30/31 anchors (Brčko debt only), Section 6 correct, 40-week fingerprint `5cfcf1c8` golden-match, and all seven engine-health checks passing. Later RC-base fixes moved current HEAD to 629 matched and 31/31 anchors; do not conflate that newer integration baseline with the R6 closeout snapshot. Remaining Brčko/force-density, exhaustion re-pacing, casualty-grade, combat-earned-cohesion, and institutional-veto work is recorded post-1.0 debt unless explicitly reactivated.
+
+### RC — Pressure → exhaustion → **COLLAPSE** pipeline
+
+**PRE-1.0 NARROW SCOPE COMPLETE — CLOSED 2026-08-15.** Retained v3 selection plus reversible D-shape (`4.0` shock / `0.5` recovery) produced one live non-enclave HRHB write while remaining deterministic and trajectory-flat: hash `70d5e04c6f49e041`, fingerprint `22cf3c5d8884bfb8`, 31/31 anchors, 6/6 benchmarks, 7/7 health gates, and full Section 6 pass. Bucovaca peaked 62 and recovered to 37; Sipovo/Drvar peaks 11/7.5. D-topology is explicitly post-1.0/reserved.
+
+### RE — 1.0 engine integrity: seven outcomes, no general cleanup
+
+**CLOSED — owner, 2026-09-01.** RE no longer gates calibration, R7 or R8. P1/P2A were accepted; the P2B packaged-proof blocker and the terminal-NO_VERDICT auxiliary prerequisite are history, not live constraints. Engine health remains sacrosanct as a standing principle — engine-health defects are fixed before tuning — but it is no longer administered as an RE gate.
