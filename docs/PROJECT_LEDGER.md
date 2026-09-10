@@ -3240,3 +3240,35 @@ injected `Math.random` in a tracked src file. The probe was reverted with
 **Method note.** All git calls in `gate.mjs` use argument arrays rather than interpolated shell
 strings, after a security hook flagged the initial `execSync` form — paths originate from git output
 and must not reach a shell.
+
+## First real delegation to the local executor — 2026-09-10
+
+**`tools/local_executor/delegate.mjs` added**, and the loop was proven on real work rather than a
+toy. The division: the planner writes the spec, names the files and owns the oracle; the local model
+returns TEXT ONLY and never edits a file, runs a command, or decides what "done" means.
+
+**Deliberately not an agent loop.** A 9B is strongest on a bounded prompt and weakest given
+autonomy; handing it file edits and a shell is the failure mode, not the feature. `delegate.mjs`
+emits a proposal to a file; the planner decides whether any of it reaches disk.
+
+**Context-budget guard, measured.** The script refuses when input exceeds `ctx - 2048` rather than
+letting the model silently answer about truncated code. Confirmed against `src/ui/map/App.tsx`:
+**~24,350 tokens**, refused at an 8K context with exit 2. That number also settles the "this repo is
+not explorable at 32K" claim empirically.
+
+**The delegated task:** add a `--json` mode to `tools/validate_open_gates.cjs`. The model returned
+**247 tokens in 4.7 s at 52.3 tok/s**. The proposal was substantively correct — it reused the
+existing `openGates()` helper instead of reimplementing it, produced the right JSON shape, and
+placed `--json` ahead of `--list` so the flags compose rather than depending on order. It carried one
+piece of filler ("update the `require.main` condition", where nothing needed changing), which is the
+review catching noise rather than error.
+
+**Applied with one hardening:** `gate.blocks || []` became `Array.isArray(gate.blocks) ? … : []`.
+
+**Verified:** valid JSON, `total=11 open=8`, array length equals the open count, no closed gate
+leaks, no `open_gates: OK` text contaminating the JSON, and `--list`/default modes unchanged. Two
+tests added covering the shape and the flag-order independence.
+
+**The gate closed the loop:** `npm run gate:local -- --tests tests/open_gates_register.test.ts
+--allow-test-edits` exits 0 and records `test files changed WITH --allow-test-edits
+(planner-authorised)` — the authorisation trail is in the output, not just in someone's memory.
