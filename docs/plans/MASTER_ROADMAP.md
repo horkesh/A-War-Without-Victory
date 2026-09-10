@@ -15,7 +15,7 @@ paused or RE is blocked, they are describing 2026-08-28, not today.
 
 **Last updated:** 2026-09-10 (open-gates register added; WR01 warroom presentation packet scheduled under R7)
 
-**Execution branch:** `codex/r7-english-readability` (integration target: `main` after all workstreams are green)
+**Execution branch:** none active. The R7 readability lane merged to `main` at `bdf8953cb` (2026-09-10, PR #503); merging integrated the work and did NOT close R7.
 
 **Authority:** This file is the sole source of truth for unfinished product work.
 

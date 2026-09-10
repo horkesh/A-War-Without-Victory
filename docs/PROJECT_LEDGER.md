@@ -3035,3 +3035,28 @@ and `tests/ui/first_hour_browser_gate_contract.test.ts` pass 20/20, exit 0
 **Open decision recorded, not taken:** whether to add branch protection to `main` at all. Today
 nothing is required, so "non-required" is the default rather than a choice. If protection is added,
 `baseline-pins` must be excluded from the required list and the remaining checks included.
+
+## R7 readability lane merged to main — 2026-09-10
+
+**PR #503 MERGED at `bdf8953cb`** (73 commits). Merged with a merge commit, not squashed: this
+session's diagnosis of the six-pin drift depended on `git log c2f6592ec..16389f6c9 -- <inputs>` to
+identify the nine responsible commits, and a squash would have destroyed exactly that. The repo
+bisects calibration regularly; per-commit attribution is load-bearing here.
+
+**Merging integrated the work; it did NOT close R7.** Five gates remain open — three audio, the
+six-pin baseline, and the all-green roll-up — plus the WR01 warroom packet. `npm run gates` lists them.
+
+**The advisory CI split is proven in the live run.** Before: the baseline regression was the last
+step of `event-system-validation`, so stale pins made "Event system validation" red. After the split,
+on the same commit: `Event system validation` **pass**, `Baseline pins (advisory, non-blocking)`
+**fail**. Reporting preserved, attribution corrected, nothing gated. `typecheck`,
+`structural-fingerprint`, `desktop-release-check`, `scenario-anchors`, `test` and `scenarios` all pass.
+
+**Post-merge reconciliation.** `MASTER_ROADMAP.md` named the now-merged lane as the execution branch;
+corrected to none-active with the merge commit recorded. `R7-BASELINE-SIX-PIN` said PR #503 stays
+open pending reconciliation; corrected — the hold was superseded the same day by the advisory split,
+and the gate remains open on its own terms and still blocks R8.
+
+**Branch hygiene run per CLAUDE.md.** 19 branches report 0 unique commits (LANDED), 1 ARCHIVED, and
+`codex/r8-decision-command-usability` is genuinely STRANDED with 13 unique commits. No deletion
+performed; `npm run repo:branches:clean` was not run and was not authorized.
