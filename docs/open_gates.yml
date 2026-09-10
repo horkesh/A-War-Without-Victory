@@ -107,6 +107,15 @@ gates:
       Accepted n392 owns all eight pins. Four consumed inputs changed before R7 and six
       outputs differ from PRE. The one-PRE/two-POST run budget is exhausted. Do not refresh
       pins, change calibration, or call current outputs canonical to clear this.
+      2026-09-10: this gate is what makes CI red on PR #503. The Event System CI baseline
+      regression on apr1992_188w reports exactly six mismatched artifacts —
+      activity_summary.json, control_delta.json, end_report.md, final_save.json,
+      run_summary.json, weekly_report.jsonl — with final_save actual e414dc69f6e875fc, the
+      clean POST-A fingerprint. main is green; the branch is not. The owner was offered
+      merge-red or an authorized pin reconciliation and chose to HOLD the merge, so PR #503
+      stays open until this gate is reconciled under calibration authority. Merging is
+      therefore blocked ON THIS GATE and on nothing else: typecheck, structural-fingerprint,
+      desktop-release-check and scenario-anchors all pass.
 
   - id: R7-ACCEPTANCE-ALL-GREEN
     lane: R7

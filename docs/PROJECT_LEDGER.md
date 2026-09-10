@@ -2874,3 +2874,30 @@ judgement, not a mechanical one.
 PROJECT_LEDGER.md 5,157,554 -> 230,761 bytes; life_lessons.md 146,864 -> 39,930;
 MASTER_ROADMAP.md 59,706 -> 58,036; napkin 64,043 -> 63,738. Nothing deleted; every moved byte is
 in an archive, and each move asserted byte conservation before writing.
+
+## PR #503 held on the six-pin baseline gate — 2026-09-10
+
+**Decision (owner, 2026-09-10): HOLD the merge.** PR #503 (68 commits: the R7 readability lane plus
+this session's register, reconciliation and compaction) is `MERGEABLE` with no conflicts, but Event
+System CI is red.
+
+**The red is the inherited six-pin gate, and nothing else.** The `apr1992_188w` baseline regression
+reports exactly six mismatched artifacts — `activity_summary.json`, `control_delta.json`,
+`end_report.md`, `final_save.json`, `run_summary.json`, `weekly_report.jsonl` — with `final_save`
+actual `e414dc69f6e875fc`, which is the clean POST-A fingerprint already recorded for this lane.
+Every other check passes: typecheck, structural-fingerprint, desktop-release-check, scenario-anchors.
+`main` is green on this workflow.
+
+**Attribution is settled, not assumed.** The four commits added this session touch only
+`docs/`, `.claude/`, `docs/open_gates.yml`, `tests/open_gates_register.test.ts`,
+`tools/validate_open_gates.cjs` and two `package.json` script lines. No sim, data, scenario, engine
+or tooling file that feeds a run. Documentation cannot move a 188-week simulation hash.
+
+**The one action that would turn CI green is the one the ledger forbids** — refreshing the pins to
+current outputs. The owner was offered merge-red, hold, or an explicit authorization to reconcile
+the pins, and chose to hold. PR #503 stays open until the gate is reconciled under calibration
+authority; that reconciliation is what closes `R7-BASELINE-SIX-PIN`, and it is a calibration
+decision with its own receipts and review, not a documentation one.
+
+No pins were refreshed, no calibration changed, no scenario run, and the R7 one-PRE/two-POST budget
+is untouched.
