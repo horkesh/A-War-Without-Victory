@@ -3977,3 +3977,32 @@ this wrong is to make "nothing to verify" cover "verified nothing".
 **Worth keeping: a red CI is a list of claims, not a list of defects.** Half of these needed
 explaining rather than fixing, and the one that looked most alarming — a suite reporting a
 deliberate control as failed — was the harness working correctly.
+
+## Two wrong assumptions about the same directory, and a hardcoded date — 2026-09-11
+
+**The manifest check was wrong twice, in opposite directions.** `--check` regenerated a manifest
+and compared it byte-for-byte. That passes only on the machine that wrote it, because what travels
+is a deliberate SUBSET: small text receipts tracked, heavy binaries not. CI caught it.
+
+The first fix assumed the opposite extreme — that a clone sees NOTHING but the manifest — and was
+equally wrong. `logs/bc06/live-decorate-final-01` holds **96 files here and 70 in a clone**. The
+truth was partial, and both fixes were assumptions where a measurement was available.
+
+**The rule that holds in both places is SUPERSET, not equality:** every file visible must appear
+in the manifest. Fewer than listed is expected; MORE means evidence was added and nobody
+regenerated. Verified against `git ls-tree` for all six manifested directories — including
+`logs/r8-decision-command-usability`, where a clone sees 0 of 463 and still passes correctly.
+
+**A hardcoded date in a test is a time bomb with a known fuse.**
+`tests/open_gates_register.test.ts` pinned `today: '2026-09-10'` for determinism. Closing a gate
+on 2026-09-11 then failed the whole suite as "a date in the future" — the test broke on precisely
+the action it exists to permit. It now reads `today` from the register's OWN `updated` field:
+still no wall clock, and it asserts something real — no gate may carry a date later than the
+register claims to have been updated.
+
+**What CI was actually reporting, versus what it looked like.** Four red lines, two real:
+the two receipt tests (mine), the gates test (mine, the date pin), a deliberate failure fixture
+that `run_vitest_balanced.test.ts` spawns ON PURPOSE to prove the runner detects failures, and a
+20-second timeout in an unrelated test that passes locally and on main.
+**A red CI is a list of claims, not a list of defects** — half of these needed explaining rather
+than fixing, and the most alarming-looking one was the harness working correctly.

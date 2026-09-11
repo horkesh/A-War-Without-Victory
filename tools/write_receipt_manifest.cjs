@@ -145,6 +145,29 @@ function renderManifest(relDir, rows) {
   return lines.join('\n') + '\n';
 }
 
+/**
+ * The relative paths a manifest records. Comment lines and blanks are skipped; a row is
+ * `<size>  <relative>` with an optional `  (N files, collapsed)` suffix on directory rows.
+ */
+function parseManifest(text) {
+  const rows = [];
+  for (const line of String(text).split('\n')) {
+    if (line.startsWith('#') || line.trim() === '') continue;
+    const match = /^\s*\d+\s\s(.+?)(?:\s\s\(\d+ files, collapsed\))?\s*$/.exec(line);
+    if (match) rows.push(match[1]);
+  }
+  return rows;
+}
+
+/** Is `relative` recorded by this manifest, directly or inside a collapsed directory row? */
+function coveredBy(listed, relative) {
+  for (const entry of listed) {
+    if (entry === relative) return true;
+    if (entry.endsWith('/') && relative.startsWith(entry)) return true;
+  }
+  return false;
+}
+
 function manifestFor(relDir, repoRoot = REPO_ROOT) {
   const absDir = path.join(repoRoot, relDir);
   if (!fs.existsSync(absDir) || !fs.statSync(absDir).isDirectory()) {
@@ -177,27 +200,36 @@ function main() {
 
     if (check) {
       const current = fs.existsSync(target) ? fs.readFileSync(target, 'utf8') : null;
-
-      // THE EVIDENCE DELIBERATELY DOES NOT TRAVEL. The manifest is tracked; the gigabytes it
-      // describes are not. So in a fresh clone — CI, or anyone else's machine — the directory
-      // holds the manifest and nothing else, and regenerating it can NEVER match. Comparing
-      // anyway turns this check into one that only passes on the machine that wrote it, which
-      // is how a test that cannot pass in CI got written on 2026-09-11.
-      //
-      // Absent evidence is not a stale manifest. It is nothing to verify.
-      if (listFiles(path.join(REPO_ROOT, clean)).length === 0) {
-        if (current === null) {
-          console.error(`manifest: ${clean}/${MANIFEST_NAME} is missing`);
-          stale += 1;
-        } else {
-          console.log(`manifest: ${clean} — evidence not present here; nothing to verify`);
-        }
+      if (current === null) {
+        console.error(`manifest: ${clean}/${MANIFEST_NAME} is missing`);
+        stale += 1;
         continue;
       }
 
-      if (current !== text) {
-        console.error(`manifest: ${clean}/${MANIFEST_NAME} is ${current === null ? 'missing' : 'stale'}`);
+      // THE CHECK IS A SUPERSET RULE, NOT EQUALITY, and getting this wrong twice is instructive.
+      //
+      // What travels is a deliberate SUBSET: small text receipts are tracked, the heavy binaries
+      // are not. So `logs/bc06/live-decorate-final-01` holds 96 files here and 71 in a fresh
+      // clone. Regenerating and comparing byte-for-byte therefore fails everywhere except the
+      // machine that wrote it — which is what shipped on 2026-09-11 and what CI caught.
+      //
+      // The first fix assumed the opposite extreme: that a clone sees NOTHING but the manifest.
+      // Also wrong, for the same reason — the truth is partial, not absent, and an assumption of
+      // either extreme is an assumption rather than a measurement.
+      //
+      // What holds in BOTH: every file visible here must appear in the manifest. Fewer files than
+      // the manifest lists is expected. MORE is a stale manifest — evidence was added and nobody
+      // regenerated it.
+      const listed = parseManifest(current);
+      const visible = listFiles(path.join(REPO_ROOT, clean)).map((row) => row.relative);
+      const unlisted = visible.filter((rel) => !coveredBy(listed, rel)).sort(strictCompare);
+
+      if (unlisted.length > 0) {
+        console.error(`manifest: ${clean}/${MANIFEST_NAME} is stale — ${unlisted.length} file(s) present but not listed:`);
+        for (const rel of unlisted.slice(0, 8)) console.error(`    ${rel}`);
         stale += 1;
+      } else {
+        console.log(`manifest: ${clean} — ${visible.length} visible file(s), all listed`);
       }
       continue;
     }
@@ -216,5 +248,6 @@ if (require.main === module) main();
 
 module.exports = {
   listFiles, renderManifest, manifestFor, subtreeStats, strictCompare,
+  parseManifest, coveredBy,
   MANIFEST_NAME, COLLAPSE_ABOVE,
 };

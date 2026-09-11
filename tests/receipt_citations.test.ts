@@ -255,31 +255,47 @@ describe('write_receipt_manifest', () => {
   // Absent evidence is not a stale manifest — it is nothing to verify. The assertions below hold
   // in BOTH environments, which is the only kind worth having.
 
-  it('--check passes whether or not the evidence is present on this machine', () => {
+  it('--check passes here and would pass in a fresh clone', () => {
     const out = execFileSync('node', [
       'tools/write_receipt_manifest.cjs', '--check',
       'logs/bc06/live-decorate-final-01',
     ], { encoding: 'utf8' });
-    // Either silence (evidence present and matching) or an explicit "nothing to verify".
-    expect(out === '' || out.includes('nothing to verify')).toBe(true);
+    expect(out).toContain('all listed');
   });
 
-  it('--check REPORTS a manifest that is genuinely stale, when the evidence is here', () => {
-    // The check must still be able to fail, or the fix above would have turned it into a
-    // rubber stamp — a check that passes on an absent directory AND on a wrong one.
-    const dir = join(sandbox, 'logs', 'stale-lane');
-    mkdirSync(dir, { recursive: true });
-    writeFileSync(join(dir, 'a.log'), 'one\n');
-    writeFileSync(join(dir, manifest.MANIFEST_NAME), '# deliberately wrong\n');
-    const fresh = manifest.manifestFor('logs/stale-lane', sandbox);
-    expect(fresh).not.toBe('# deliberately wrong\n');
-  });
-
-  it('a tracked manifest matches its directory when the evidence IS present', () => {
+  it('every tracked file under a manifested directory is recorded by that manifest', () => {
+    // THE RULE IS SUPERSET, NOT EQUALITY, and both extremes were assumed wrongly first.
+    // What travels is a deliberate SUBSET — small text receipts tracked, heavy binaries not —
+    // so this directory holds 96 files here and 70 in a clone. Regenerating and comparing
+    // byte-for-byte passes only on the machine that wrote it; assuming a clone sees NOTHING is
+    // equally wrong. Fewer files than the manifest lists is expected; MORE means someone added
+    // evidence and did not regenerate.
     const target = 'logs/bc06/live-decorate-final-01';
-    const present = manifest.listFiles(join(checker.REPO_ROOT, target)).length > 0;
-    if (!present) return; // fresh clone: the bulk was never committed, by design
-    const onDisk = readFileSync(join(checker.REPO_ROOT, target, manifest.MANIFEST_NAME), 'utf8');
-    expect(manifest.manifestFor(target)).toBe(onDisk);
+    const listed = manifest.parseManifest(
+      readFileSync(join(checker.REPO_ROOT, target, manifest.MANIFEST_NAME), 'utf8'),
+    );
+    const tracked = execFileSync('git', ['ls-files', '-z', target], { encoding: 'utf8' })
+      .split('\0')
+      .filter((entry: string) => entry.length > 0)
+      .map((entry: string) => entry.slice(target.length + 1))
+      .filter((rel: string) => rel !== manifest.MANIFEST_NAME);
+
+    expect(tracked.length).toBeGreaterThan(0);
+    const unlisted = tracked.filter((rel: string) => !manifest.coveredBy(listed, rel));
+    expect(unlisted).toEqual([]);
+  });
+
+  it('--check REPORTS a manifest that is genuinely stale', () => {
+    // The superset rule must still be able to FAIL, or the fix would have made --check pass on
+    // an absent directory AND on a wrong one — the rubber stamp this repo keeps almost building.
+    const listed = manifest.parseManifest('   12  a.log\n');
+    expect(manifest.coveredBy(listed, 'a.log')).toBe(true);
+    expect(manifest.coveredBy(listed, 'added-later.log')).toBe(false);
+  });
+
+  it('a collapsed directory row covers the files beneath it', () => {
+    const listed = manifest.parseManifest('  500  vendor/  (1234 files, collapsed)\n');
+    expect(manifest.coveredBy(listed, 'vendor/deep/thing.js')).toBe(true);
+    expect(manifest.coveredBy(listed, 'elsewhere/thing.js')).toBe(false);
   });
 });
