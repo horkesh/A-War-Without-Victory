@@ -228,3 +228,32 @@ success, and every entry would read green.
 Verdicts: **accepted** (used as produced), **edited** (structure kept, substance corrected),
 **rewritten** (discarded). The point is to stop writing routing rules from memory: the claim this
 section corrects twice survived precisely because nothing was counting.
+
+## Verifying quotes is the technique that made it trustworthy (2026-09-11)
+
+The routing rules above say it cannot supply data that must match real state. One change makes a
+large part of that tractable: **require verbatim quotes, then check them mechanically.**
+
+Three dispatches used it. Asked which lane is active, it answered R7 with four supporting quotes —
+all four verbatim at MASTER_ROADMAP lines 7, 10, 44 and 51. Asked to summarise the six guards, it
+classified blocking-vs-advisory **6/6 correctly** and every proof quote was real. Neither result
+required trusting it: the claims were checkable, so they were checked.
+
+That is the practical form of the rule. It cannot be trusted to be right, but it CAN be asked to
+make its claims falsifiable, and a falsifiable claim costs a script to verify.
+
+### The verifier needs allow-cases too, and mine did not have them
+
+Checking those quotes produced **two false accusations of fabrication**, both mine:
+
+1. The model escapes backticks and dollar signs for JSON. `\`$?\`` is not byte-identical to
+   `` `$?` ``, and a strict comparison called a faithful quote invented.
+2. A quote can span two adjacent lines of the source. Stitching them with `\n` and dropping the
+   `**` markers between is still a real quote of a real entry, and a line-at-a-time comparison
+   cannot see it.
+
+Both times the first verdict was "INVENTED" and both times the text was genuinely there. So the
+verifier must strip escaping and compare against the whole entry rather than a single line —
+which is the same lesson the guards taught: **a checker's false positives cost more than its
+misses, because a checker that cries wolf stops being run.** Verify the verifier before scoring
+the tool.
