@@ -126,6 +126,24 @@ function main() {
   }
 
   console.log(`\n${rows.length - bad}/${rows.length} quotes verified`);
+
+  // ── Provenance is not relevance ────────────────────────────────────────────
+  //
+  // On 2026-09-11 a dispatch returned 4/4 quotes that verified perfectly and were entirely
+  // beside the point — extracted from a test about army HQ timing copy when the task was about
+  // the warroom date, because the input files had been chosen with a truncated grep. This check
+  // cannot judge relevance either, but it can surface the SHAPE that failure took: several
+  // sources supplied, every quote drawn from one of them.
+  const sources = new Set(rows.map((row) => row.source).filter(Boolean));
+  if (bad === 0 && sourceField && sources.size === 1 && rows.length >= 3) {
+    console.error(
+      `\nNOTE: all ${rows.length} quotes come from a single source (${[...sources][0]}).\n`
+      + 'That is fine if only one file was relevant. It is also exactly what it looks like when\n'
+      + 'the WRONG files were supplied: verification proves a quote is real, never that it\n'
+      + 'answers the question asked. Check the answer against the question yourself.',
+    );
+  }
+
   process.exit(bad > 0 ? 1 : 0);
 }
 

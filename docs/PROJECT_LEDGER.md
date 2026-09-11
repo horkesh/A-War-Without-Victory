@@ -4117,3 +4117,36 @@ tests tell them apart. That is the fourth distinct way a checker has been wrong 
 second time silence was the symptom.
 
 Hook inventory: **5 blocking, 3 advisory**, all tested. This morning: 0 blocking, none tested.
+
+## Fixing the planner, not the model — 2026-09-11
+
+Thirteen dispatches, all judged: 7 accepted, 4 edited, 2 rewritten. **Of the six imperfect
+results, FOUR were caused by the instruction rather than the executor.** That reframes where the
+work is.
+
+| what went wrong | whose fault | now |
+|---|---|---|
+| field names left to be inferred → 27 of 42 cases inert | the spec | stated contracts; recorded in CLAUDE.md |
+| input files chosen by a truncated grep → 4 verified quotes from an unrelated test | the planner | `guard_truncated_search.sh`, tier 1 |
+| a task the owning plan already answered | the manifest | FORMAT.md discipline; read the plan first |
+| a count asked in prose, ignored | the spec | `delegate` REFUSES a count with no `--schema` |
+| a rule written from an experiment never read | the planner | `delegate` REFUSES past 2 unjudged dispatches |
+| validator returned `true` on its main path | the model | never delegate the oracle |
+| test helper caught every error as success | the model | never delegate the oracle |
+
+**The two model failures are the same failure**: given something that decides pass/fail, it
+produces something that cannot fail. That boundary is now data rather than opinion — `logs/
+local_executor/dispatches.jsonl`, grouped by kind, with no verdict drawn below four judged.
+
+**The new refusals target the planner.** A spec asking for a specific number without a schema is
+refused, because it was measured both ways: 12 asked in prose returned 2, validly; 3 asked in
+prose against `minItems: 8` returned 9. And dispatching is refused past two unjudged results,
+because "put counts in the schema" was written into a README as established fact from an
+experiment whose output was never read. **It turned out to be correct, which is worse than being
+wrong** — an unchecked claim that happens to hold teaches nothing and licenses the next one.
+
+**One limit that cannot be mechanised, now stated in the tool itself.** Quote verification proves
+a quote is REAL, never that it answers the question asked. The irrelevant dispatch verified 4/4.
+`verify_quotes` now flags the SHAPE that failure took — several sources supplied, every quote
+drawn from one — but flagging a shape is not judging relevance, and that judgement stays with the
+planner.

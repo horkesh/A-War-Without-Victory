@@ -14,7 +14,9 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const CONFIG = 'tools/local_executor/config.json';
@@ -118,6 +120,38 @@ describe('local executor harness', () => {
 
   it('REFUSES a flag given no value', () => {
     expect(exitCodeOf(DELEGATE, ['--prompt', 'x', '--out'])).toBe(2);
+  });
+
+  // ── The two refusals that target the PLANNER's failures, not the model's ───────
+  //
+  // Of six imperfect dispatches on 2026-09-11, four were caused by the instruction, not the
+  // executor: field names left to be inferred, input files chosen by a truncated grep, a task
+  // the plan already answered, and a rule written into the README from an experiment whose
+  // output was never read. These two make the last two of those harder to repeat.
+
+  it('REFUSES a spec that asks for a COUNT with no schema to enforce it', () => {
+    // Measured both ways: prose asking for 12 cases against no schema returned 2, validly.
+    // The same prose against `minItems: 8` returned 9. The schema wins, so asking in prose is
+    // asking for disappointment.
+    const spec = join(tmpdir(), `awwv-count-spec-${process.pid}.md`);
+    writeFileSync(spec, 'Propose 12 test cases for the function below.\n');
+    try {
+      expect(exitCodeOf(DELEGATE, ['--spec', spec, '--out', 'unused.md'])).toBe(2);
+      expect(stderrOf(['--spec', spec, '--out', 'unused.md'])).toContain('no --schema');
+    } finally {
+      rmSync(spec, { force: true });
+    }
+  });
+
+  it('does NOT refuse a spec that asks for no particular count', () => {
+    // The allow-case. A refusal that fires on ordinary specs gets the check deleted.
+    const spec = join(tmpdir(), `awwv-plain-spec-${process.pid}.md`);
+    writeFileSync(spec, 'Summarise what this file validates.\n');
+    try {
+      expect(stderrOf(['--spec', spec, '--out', 'unused.md'])).not.toContain('no --schema');
+    } finally {
+      rmSync(spec, { force: true });
+    }
   });
 
   it('REFUSES an --expect value it cannot check', () => {

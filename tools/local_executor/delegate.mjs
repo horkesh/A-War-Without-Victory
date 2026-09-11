@@ -147,6 +147,62 @@ if (!specPath && !promptArg) {
   process.exit(2);
 }
 
+// ── Close the loop before opening another ──────────────────────────────────────
+//
+// On 2026-09-11 a rule — "put counts in the schema, not the prose" — was written into
+// README.md as established fact, from an experiment whose OUTPUT WAS NEVER READ. It turned out
+// to be correct, which is worse than if it had been wrong: an unchecked claim that happens to
+// hold teaches nothing and licenses the next one.
+//
+// The ledger already says an unrecorded outcome is a dispatch that taught nothing. This makes
+// that binding. Two may be in flight (the measured fan-out limit); a third means results are
+// piling up unread, and the routing table is being starved of exactly the data it exists on.
+const UNJUDGED_LIMIT = 2;
+try {
+  const ledgerPath = join(repoRoot, 'logs', 'local_executor', 'dispatches.jsonl');
+  if (existsSync(ledgerPath)) {
+    const unjudged = readFileSync(ledgerPath, 'utf8')
+      .split('\n')
+      .filter((line) => line.trim().length > 0)
+      .map((line) => JSON.parse(line))
+      .filter((row) => !row.verdict);
+    if (unjudged.length > UNJUDGED_LIMIT) {
+      console.error(
+        `REFUSING: ${unjudged.length} earlier dispatches have no recorded outcome.\n\n`
+        + 'A dispatch nobody judged taught nothing, and the routing table runs on those judgements.\n'
+        + 'Record them, then dispatch again:\n'
+        + unjudged.slice(0, 5).map((row) => `  npm run local:verdict -- ${row.id} <accepted|edited|rewritten> "<note>"`).join('\n')
+        + '\n',
+      );
+      process.exit(2);
+    }
+  }
+} catch (error) {
+  // A ledger problem must never block real work; it is bookkeeping, not a gate on correctness.
+  console.error(`  (could not read the dispatch ledger: ${error.message})`);
+}
+
+// ── A count in prose is a suggestion; a count in the schema is enforced ─────────
+//
+// Measured both ways on 2026-09-11. Prose asking for 12 cases against a schema with no minimum
+// returned 2, validly. Prose asking for 3 against `minItems: 8` returned 9. The schema wins, so
+// asking for a number without one is asking for disappointment.
+if (specPath && !schemaPath) {
+  const specText = readFileSync(specPath, 'utf8');
+  const asksForCount = /\b(propose|return|give|list|write)\b[^.\n]{0,40}\b(\d{1,3}|\d+\s*(?:to|-|–)\s*\d+)\b[^.\n]{0,30}\b(cases?|items?|examples?|entries|tests?|rows?)\b/i.test(specText);
+  if (asksForCount) {
+    console.error(
+      'REFUSING: this spec asks for a specific NUMBER of items but gives no --schema.\n\n'
+      + 'A count in prose is ignored often enough to matter: a spec asking for 12 cases returned 2,\n'
+      + 'and the reply was perfectly valid. The same spec against a schema with `minItems` returned\n'
+      + 'more than asked. Put the count where it is enforced.\n\n'
+      + '  --schema tools/local_executor/schemas/test_cases.json   (has minItems)\n'
+      + '  or write one; see tools/local_executor/schemas/README.md\n',
+    );
+    process.exit(2);
+  }
+}
+
 // ── Build the request ──────────────────────────────────────────────────────────
 let prompt = '';
 if (specPath) {
