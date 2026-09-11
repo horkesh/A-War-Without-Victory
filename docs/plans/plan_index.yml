@@ -130,7 +130,7 @@ lanes:
         exists: true
         tokens: 13147
         fits_context: true
-        tasks: null
+        tasks: docs/plans/tasks/2026-07-31-content-history-localization-audio-plan.yml
       - path: docs/plans/2026-08-23-opening-screens-implementation-plan.md
         exists: true
         tokens: 1936
