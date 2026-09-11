@@ -4040,3 +4040,43 @@ perfect — both failures found, both quotes verified verbatim by
 wrong: it marked the deliberate `deliberate_failure.fixture.ts` control as a real failure while
 its own reasoning noted "despite the deliberate name". **Facts yes, verdicts no** — which is
 exactly where the dispatch ledger already said the boundary was.
+
+## The task-manifest pipeline, run end to end — and it answered the warroom question — 2026-09-11
+
+**Format researched, not invented.** Asked to stop deferring the schema to the owner, the format
+was rebuilt from three sources. `TASK_TEMPLATE.md` (this repo, battle-tested) supplied the
+distinction the first draft got wrong: *files you may EDIT* and *files you may READ* are separate
+lists, and merging them invites an executor to rewrite context it was only meant to consult.
+**SWE-bench** supplied two fields that were missing and are load-bearing here:
+
+- `fails_now` (their FAIL_TO_PASS) — a test that currently FAILS. SWE-bench EXCLUDES instances
+  without one: a test that already passes cannot show the change worked. That is this repo's
+  "prove it fires by mutation" rule, reached independently by a different community.
+- `must_not_break` (their PASS_TO_PASS) — the regression set. **The commonest failure in this repo
+  is a change that satisfies its own test and breaks a neighbour** — the CI install-contract test,
+  `inbox_dedup`, `main` going red twice in two days — and the first draft had no field for it.
+
+A 2026 registered report proposing TOML was read and rejected: it has no results yet, and changing
+serialisation for an unevaluated proposal would cost consistency with `open_gates.yml` and
+`plan_index.yml` for nothing.
+
+**The manifest is data; the prompt is rendered from it.** Small models read prose better than
+YAML, and a schema plus a hand-written prompt is two sources of truth that drift — the failure the
+plan index, the gates register and the pointer checker were each built to stop. The hard rules are
+spliced verbatim out of `TASK_TEMPLATE.md` rather than restated, for the same reason.
+
+**Then it was actually run, which is the only thing that validates a format.** `WR01-T1` rendered
+to a 649-token prompt, dispatched, and returned **22 font declarations with 22/22 quotes verified
+against source**, 7 of them `@font-face` entries correctly classified.
+
+**And the result answers the question this whole thread opened with.** Every font in the warroom
+is IBM Plex — Sans Condensed or Mono — and an independent grep found no handwriting, script or
+marker face anywhere in `src/ui`. **The date cannot read as hand-written because there is no
+hand-written font to render it in.** That was the original hypothesis; it now has verified
+evidence behind it rather than an inference.
+
+**Two defects found by the negative tests, both in my own checkers.** The manifest validator
+tested presence with `!value`, so an all-digit commit SHA parsed as `0` and read as missing —
+caught by the POSITIVE control, not by any of the five rejections. And `FORMAT.md` referenced
+`render_task_prompt.cjs` before it existed: a pointer leading nowhere, written the same day a
+checker for exactly that was built and the lesson-pointer backlog was cleared.
