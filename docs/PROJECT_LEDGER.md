@@ -3819,7 +3819,7 @@ not fail — the second delegated artifact in two days whose failure mode was "r
 regardless". **Never delegate the oracle.** But the edge-case dispatch is a pattern worth keeping:
 ask for the CASES only, run them through the real implementation, judge each result, then pin it.
 Its own guesses were wrong on 5 of 9 — and the case list still caught a genuine defect the
-hand-written tests never reached (`logs/a{ x , y }.log` truncated at the first space, then
+hand-written tests never reached (`logs/EXAMPLE/a{ x , y }.log` truncated at the first space, then
 reported as missing under a path nobody wrote). Full routing rules in
 `tools/local_executor/README.md`.
 
@@ -3879,3 +3879,36 @@ the plan has removed the only thing being measured. The declaration is the owner
 
 All six hooks now have tests: 3 blocking, 3 advisory, and the advisory ones are pinned AS
 advisory, so promoting any of them is a decision with a known baseline rather than a guess.
+
+## A rule that cannot be written about is a rule that gets removed — 2026-09-11
+
+Four times in one day, a mechanism fired on prose describing that mechanism:
+
+| mechanism | what tripped it |
+|---|---|
+| `guard_stash_pop` | the commit message documenting it |
+| `guard_pipe_exit_code` | its own probe harness |
+| `guard_scope_drift` | a quoted mention, which then chained the orchestrator hook into demanding an expert analysis of a run that never happened |
+| `validate_receipt_citations` | the ledger entry describing its brace-expansion rule |
+
+Each was found the same way — by trying to document the thing just built — and each fix is the
+same shape: **distinguish the ACT from a mention of the act.** For commands that is command
+position (now owned once, in `tools/hooks/lib/command_segments.sh`, after three hooks derived it
+separately and two got it wrong). For citations it is a reserved `logs/EXAMPLE/` prefix, because
+a backticked path is a CLAIM that evidence exists and an illustration is not a claim.
+
+**The escape hatch is narrow on purpose.** `logs/EXAMPLE/` is ignored, but a real citation sitting
+beside one is still checked — pinned by a test, so the hatch cannot become a way to smuggle
+unverified claims past the checker.
+
+**Two portability defects fell out of writing the registry test.** Two hooks were registered by
+machine-absolute path (`bash F:/A-War-Without-Victory/...`) in a TRACKED settings file — they work
+on exactly one checkout and silently do nothing everywhere else, while still appearing installed.
+And a third was nearly registered via `$CLAUDE_PROJECT_DIR`, which nothing here had ever proven
+expands; had it not, the hook would have been listed, tested in isolation, and never once fired.
+All are now relative, which four working hooks already demonstrated. `tests/hook_registry.test.ts`
+pins it, including an explicit list of which hooks may block — so changing what the harness
+refuses means editing a test and saying why.
+
+**Totals: 152 tests across 9 suites**, all green. Six guards, three blocking, all tested; before
+today none of them had a single test.

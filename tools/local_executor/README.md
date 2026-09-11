@@ -119,7 +119,7 @@ the scaffolding, the wiring, the enumeration of cases.
 **Derive expectations, do not accept them.** The edge-case dispatch is the template worth
 copying: ask the model for the CASES ONLY, run them through the real implementation, print what
 happens, then judge each result by hand before pinning it. That run cost one dispatch and caught
-a genuine defect — a citation like `logs/a{ x , y }.log` truncated at the first space — that the
+a genuine defect — a citation like `logs/EXAMPLE/a{ x , y }.log` truncated at the first space — that the
 hand-written tests never reached. Its own guesses about those same cases were mostly wrong.
 
 **Watch for self-narration.** When a draft starts writing "Re-evaluating...", "Wait, if I have..."

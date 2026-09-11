@@ -57,6 +57,21 @@ describe('extractCitations — only code spans are citations', () => {
     expect(checker.extractCitations('`catalogs/foo.json`')).toEqual([]);
   });
 
+  it('treats `logs/EXAMPLE/...` as an illustration, not a claim', () => {
+    // Documentation about this checker has to show example paths, and a backticked path is
+    // otherwise a claim that the evidence exists. A ledger entry describing the brace-expansion
+    // rule cited `logs/a{ x , y }.log` and broke the build — the fourth time in one day that a
+    // rule tripped over prose describing it. This is the reserved way to write an example.
+    expect(checker.extractCitations('e.g. `logs/EXAMPLE/run-1/typecheck.log`')).toEqual([]);
+    expect(checker.resolveCitation('logs/EXAMPLE/anything.log', sandbox)).toBe(false);
+  });
+
+  it('still catches a real citation sitting beside an example', () => {
+    // The escape hatch must not become a way to smuggle unverified claims past the checker.
+    expect(checker.extractCitations('`logs/EXAMPLE/x.log` versus `logs/lane/typecheck.log`'))
+      .toEqual(['logs/lane/typecheck.log']);
+  });
+
   it('strips trailing sentence punctuation', () => {
     expect(checker.extractCitations('`logs/lane/a.log.`')).toEqual(['logs/lane/a.log']);
   });

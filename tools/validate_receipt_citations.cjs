@@ -68,6 +68,11 @@ function escapeRegex(text) {
 function extractCitations(text) {
   if (typeof text !== 'string') return [];
   const citations = new Set();
+  // A backticked `logs/...` path is a CLAIM that the evidence exists. Documentation about this
+  // checker needs to show example paths, which are not claims — and on 2026-09-11 a ledger entry
+  // describing the brace-expansion rule cited `logs/a{ x , y }.log` and broke the build.
+  // `logs/EXAMPLE/...` is the reserved way to write an illustration. Everything else is a claim.
+  const EXAMPLE_PREFIX = 'logs/EXAMPLE/';
   const codeSpan = /`([^`\n]+)`/g;
   let match;
   while ((match = codeSpan.exec(text)) !== null) {
@@ -82,6 +87,7 @@ function extractCitations(text) {
     const token = /^(?:[A-Za-z0-9._/*,-]|\{[^}]*\})+/.exec(content.slice(from));
     if (!token) continue;
     const cleaned = token[0].replace(/[.,]+$/, '');
+    if (cleaned.startsWith(EXAMPLE_PREFIX)) continue;
     if (cleaned.length > 0) citations.add(cleaned);
   }
   return Array.from(citations).sort(strictCompare);
