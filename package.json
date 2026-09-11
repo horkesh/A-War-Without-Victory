@@ -178,6 +178,8 @@
     "map:merge:adm3-1990": "tsx scripts/map/merge_adm3_to_1990_municipalities.ts",
     "map:reconstruct:muni": "tsx tools/map/reconstruct_municipalities_from_legacy.ts",
     "map:view:reconstructed": "tsx tools/map/build_municipality_reconstructed_viewer_html.ts",
+    "warroom:derive:board-luminance": "node tools/derive_warroom_board_luminance.cjs",
+    "warroom:check:board-luminance": "node tools/derive_warroom_board_luminance.cjs --check",
     "map:derive:muni-from-fabric": "tsx tools/map/derive_municipality_outlines_from_fabric.ts",
     "map:derive:muni-boundaries-from-fabric": "tsx tools/map/derive_municipality_boundaries_from_fabric.ts",
     "map:view-geojson": "tsx tools/map/serve_geography_viewer.ts",
