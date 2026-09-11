@@ -4006,3 +4006,37 @@ that `run_vitest_balanced.test.ts` spawns ON PURPOSE to prove the runner detects
 20-second timeout in an unrelated test that passes locally and on main.
 **A red CI is a list of claims, not a list of defects** — half of these needed explaining rather
 than fixing, and the most alarming-looking one was the harness working correctly.
+
+## A test file absent from the duration table is costed at 1 second — 2026-09-11
+
+**main went red after #511, and the cause was arithmetic, not logic.** The balanced runner
+partitions test files into four duration-matched shards using
+`tools/test/test_duration_baseline.json`. **A file not in that table is assumed to cost 1,000 ms.**
+
+The eleven guard and harness test files added on 2026-09-10/11 spawn roughly ninety `bash`
+subprocesses between them. Measured individually they total **87,078 ms against the 11,000 ms
+assumed — 76 seconds unaccounted**, all of it landing in whichever shards happened to draw them.
+A neighbouring test with a 20-second timeout (`replay_payload_mode_contract`) tipped over: first
+on the branch, where it looked like flake, then on main, where it was reproducible.
+
+**The tell was that it passed locally and on the branch's own full-suite run but failed on main.**
+Same code, same commit — different shard composition. A failure that moves when the *partitioning*
+moves is not a defect in the failing test.
+
+**Fix: measure and record.** The eleven durations are now in the table and the four shards balance
+within 900 ms of each other. No test was weakened and no timeout was raised — raising the neighbour's
+timeout would have treated the symptom and left the imbalance to surface somewhere else.
+
+**The generalisable part.** A default that is *silent and wrong in one direction* accumulates:
+every unmeasured file is free until enough of them arrive together. Adding a test file is
+therefore not cost-free, and a suite that shells out is emphatically not a 1,000 ms file. The
+table's `source` field now says so, because the next person to add a slow test will not read this
+ledger entry.
+
+**Also recorded: what the local model got right and wrong on this.** It was given the trimmed CI
+log (1,755 lines → 24) and asked to extract the failures with verbatim evidence. Extraction was
+perfect — both failures found, both quotes verified verbatim by
+`npm run local:verify-quotes`, both kinds (assertion vs timeout) correct. Its JUDGEMENT was
+wrong: it marked the deliberate `deliberate_failure.fixture.ts` control as a real failure while
+its own reasoning noted "despite the deliberate name". **Facts yes, verdicts no** — which is
+exactly where the dispatch ledger already said the boundary was.
