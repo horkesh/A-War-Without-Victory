@@ -72,6 +72,51 @@ function report(rows) {
   }
   console.log(`  tokens in ${inputTokens.toLocaleString()}, out ${outputTokens.toLocaleString()}`);
 
+  // ── The routing table, DERIVED ────────────────────────────────────────────────
+  //
+  // The routing rules in README.md are prose, and prose is the weakest thing in this repo: the
+  // claim "it enumerates well" survived two corrections because nothing was counting. This is
+  // the same question answered by arithmetic. When a row here disagrees with the README, the
+  // README is the one that is wrong.
+  const byKind = new Map();
+  for (const row of rows) {
+    if (!row.verdict) continue;
+    const key = row.kind ?? 'other';
+    if (!byKind.has(key)) byKind.set(key, { accepted: 0, edited: 0, rewritten: 0, total: 0 });
+    const bucket = byKind.get(key);
+    bucket[row.verdict] += 1;
+    bucket.total += 1;
+  }
+
+  if (byKind.size > 0) {
+    console.log('\nby task kind — send it more of what it is good at, less of what it is not:');
+    console.log('  kind      n   accepted  edited  rewritten');
+    for (const key of [...byKind.keys()].sort(strictCompare)) {
+      const b = byKind.get(key);
+      console.log(
+        `  ${key.padEnd(8)} ${String(b.total).padStart(2)}   `
+        + `${String(b.accepted).padStart(8)}  ${String(b.edited).padStart(6)}  ${String(b.rewritten).padStart(9)}`,
+      );
+    }
+    // A verdict needs enough rows to mean anything. Firing at n=2 would be the same over-claiming
+    // this ledger exists to stop — the README's "it enumerates well" was written from about that
+    // much evidence and did not survive contact with a count.
+    const MIN_FOR_A_VERDICT = 4;
+    const thin = [...byKind.values()].some((b) => b.total < MIN_FOR_A_VERDICT);
+    if (thin) {
+      console.log(`\n  (a kind with fewer than ${MIN_FOR_A_VERDICT} judged dispatches is not evidence yet — no verdict drawn)`);
+    }
+
+    const worst = [...byKind.entries()]
+      .filter(([, b]) => b.total >= MIN_FOR_A_VERDICT && b.rewritten / b.total >= 0.5)
+      .map(([key]) => key)
+      .sort(strictCompare);
+    if (worst.length > 0) {
+      console.log(`\n  STOP DELEGATING: ${worst.join(', ')} — half or more were rewritten.`);
+      console.log('  That is not a prompt problem to iterate on; it is the wrong task for this model.');
+    }
+  }
+
   const unjudged = rows.filter((row) => !row.verdict);
   if (unjudged.length > 0) {
     console.log('\nunjudged — an unrecorded outcome is a dispatch that taught nothing:');

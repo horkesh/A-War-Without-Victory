@@ -257,3 +257,51 @@ verifier must strip escaping and compare against the whole entry rather than a s
 which is the same lesson the guards taught: **a checker's false positives cost more than its
 misses, because a checker that cries wolf stops being run.** Verify the verifier before scoring
 the tool.
+
+## How this page stops being the authority (2026-09-11)
+
+Everything above is PROSE, which is the weakest thing in this repo. The claim "it enumerates
+well" survived two corrections because nothing was counting. So the routing question now has a
+mechanical answer and this page is demoted to commentary:
+
+```
+npm run local:ledger
+```
+
+Every dispatch records its `--kind` (extract / table / wiring / logic / prose). Every outcome is
+recorded afterwards by the planner with `npm run local:verdict`. The report groups accept / edit /
+rewrite by kind. **When a row there disagrees with this page, this page is wrong.**
+
+It already does. The first six dispatches say:
+
+| kind | n | accepted | edited | rewritten |
+|---|---|---|---|---|
+| extract | 3 | 2 | 1 | 0 |
+| table | 2 | 0 | 1 | 1 |
+
+Which inverts the original guess. Extraction from files you supply — *with verbatim quotes* — is
+its strongest measured mode. Enumeration, which this page called its strength, has yet to produce
+an accepted result. Four judged dispatches per kind are required before the report will draw any
+verdict, because firing at n=2 is exactly the over-claiming that produced the sentence it is
+correcting.
+
+### The technique that makes extraction safe
+
+`npm run local:verify-quotes -- <answer.json> --field <prop> --source-field <prop>`
+
+Ask for verbatim quotes, then check them. It cannot be trusted to be right; it CAN be asked to
+make its claims falsifiable, and a falsifiable claim costs one command to check.
+
+The tolerances in that checker were all earned by false accusations — it escapes backticks for
+JSON, and a quote may be stitched from two adjacent lines with `**` dropped. Both were called
+"INVENTED" by a hand-rolled check before the text turned out to be there.
+`tests/local_executor_verify_quotes.test.ts` pins the tolerances AND pins that it still rejects a
+paraphrase, a fabrication, and a quote too short to mean anything — because a tolerant verifier is
+one step from a rubber stamp, and a rubber stamp launders a guess into a fact.
+
+### What is still prose, honestly
+
+The boundaries — never delegate the oracle, it supplies shapes not data, a uniformly silent batch
+means the cases are wrong — are still written rules. They are tier 5. The ledger will eventually
+say whether they hold; until it has the rows, they are the best available guess and should be
+read as such.
