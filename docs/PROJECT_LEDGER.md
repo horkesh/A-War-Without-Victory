@@ -4150,3 +4150,43 @@ a quote is REAL, never that it answers the question asked. The irrelevant dispat
 `verify_quotes` now flags the SHAPE that failure took — several sources supplied, every quote
 drawn from one — but flagging a shape is not judging relevance, and that judgement stays with the
 planner.
+
+---
+
+## 2026-09-11 — Caveat vendored as `--font-marker` (warroom whiteboard date)
+
+The whiteboard date was meant to read as flomaster on a board and did not. The root cause was not
+styling: **no handwriting face was bundled at all**. An inventory of every font declaration in the
+warroom returned 22 results, all IBM Plex. Seven commits of legibility fixes had each retreated
+further toward a UI font because there was nothing else to retreat to.
+
+Vendored per `docs/plans/2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.md` §4.1:
+
+- `assets/ui/fonts/Caveat-Bold-{Latin,LatinExt}.woff2`, pinned to Google Fonts Caveat **v23**
+  weight 700, with URLs and SHA-256s recorded in `assets/ui/fonts/README.md`.
+- `OFL-1.1-Caveat.txt` — Caveat is OFL 1.1 like IBM Plex but under a different copyright holder,
+  so it carries its own license text rather than sheltering under `OFL-1.1.txt`.
+- `--font-marker: "Caveat", var(--font-command);` in `globals.css`.
+
+**Two subsets, not a digits-and-months subset.** `getWarroomBoardDateLabel` can return
+`'Datum čeka'`; č (U+010D) lives in Latin-Ext.
+
+**`--font-marker` is a SEPARATE token, and a test now makes that binding.** The plan forbids
+routing the marker through `--font-data`/`--font-command`, because the next typography-unification
+pass would absorb it exactly as commit 44b42f28b did. There is also no cursive/system-hand
+fallback: if Caveat fails to load the date should look wrong, not quietly wrong.
+
+**Two corrections recorded rather than quietly absorbed.** The plan budgeted "roughly 20–30 KB";
+measured is **70,592 B**, the Latin subset alone being 51,020 — a hand at weight 700 carries
+heavier outlines than the estimate assumed. And glyph coverage is asserted from the upstream
+`unicode-range`, not verified locally: `fonttools` is not installed here. Both are in the README.
+
+**A negative test failed on its own comment.** `expect(css).not.toMatch(/--font-command:[^;]*Caveat/)`
+matched the prose explaining why the marker is separate — the comment contains the literal
+`--font-command:`, and `[^;]*` matches newlines, so it ran from mid-sentence into the declaration
+below. Every "must NOT appear" check in that file now runs on comment-stripped CSS via
+`withoutComments()`, and the assertion was mutation-proved: pointing `--font-command` at Caveat
+makes it fail. Block comments only — stripping `//` would eat `https://` and make the
+external-font check vacuous.
+
+Nothing consumes `--font-marker` yet; the date rendering is the next step in the plan.

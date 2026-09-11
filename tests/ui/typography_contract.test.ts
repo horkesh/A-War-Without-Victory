@@ -31,6 +31,11 @@ const bundledFonts = [
   'IBMPlexMono-Regular-Latin2.woff2',
   'IBMPlexMono-SemiBold-Latin1.woff2',
   'IBMPlexMono-SemiBold-Latin2.woff2',
+  // The marker hand for the whiteboard date. Listing it here puts it under the same existence,
+  // nonempty and SHA-256 checks as everything else — a bundled font whose bytes nobody pins is a
+  // font that can be swapped without anyone noticing.
+  'Caveat-Bold-Latin.woff2',
+  'Caveat-Bold-LatinExt.woff2',
 ] as const;
 
 function escaped(value: string): string {
@@ -45,6 +50,21 @@ function expectNoExternalRuntimeFont(source: string): void {
   expect(source).not.toMatch(/https?:\/\/fonts\.(?:googleapis|gstatic)\.com/i);
   expect(source).not.toMatch(/@import\s+(?:url\()?\s*['"]?https?:\/\//i);
   expect(source).not.toMatch(/@font-face\s*{[^}]*url\(\s*['"]?https?:\/\//is);
+}
+
+/**
+ * CSS with block comments removed.
+ *
+ * A "must NOT appear" assertion over raw CSS reads prose as if it were code. The --font-marker
+ * test failed on its own explanatory comment: that comment contains the literal `--font-command:`,
+ * and `[^;]*` — which matches newlines — then ran from inside the sentence down into the
+ * declaration below it. Every negative token check here runs on stripped CSS for that reason.
+ *
+ * Only block comments. Stripping `//` line comments would also eat `https://`, which would make
+ * expectNoExternalRuntimeFont vacuously pass — a negative test that cannot fail is worse than none.
+ */
+function withoutComments(css: string): string {
+  return css.replace(/\/\*[\s\S]*?\*\//g, '');
 }
 
 function fontFaceFor(css: string, file: string): string {
@@ -219,5 +239,58 @@ describe('canonical UI typography contract', () => {
       expect(existsSync(resolve(fontsDirectory, file)), file).toBe(true);
       expect(readme, `${file} SHA-256`).toContain(`${file}: ${sha256(resolve(fontsDirectory, file))}`);
     }
+  });
+
+  // ── The marker hand ────────────────────────────────────────────────────────────
+  //
+  // The whiteboard date was meant to look scrawled with a flomaster and does not, and the root
+  // cause was that NO handwriting face was bundled: an inventory of every font declaration in the
+  // warroom returned 22 results, all IBM Plex. Seven commits of legibility fixes had each retreated
+  // further toward a UI font because there was nothing else to retreat to.
+  //
+  // These tests exist to stop that happening again, and the separation is the load-bearing part.
+
+  it('bundles Caveat with its own OFL license, since the copyright holder differs', () => {
+    const license = readFileSync(resolve(fontsDirectory, 'OFL-1.1-Caveat.txt'), 'utf8');
+    expect(license).toContain('SIL OPEN FONT LICENSE Version 1.1');
+    expect(license).toContain('Caveat Project Authors');
+  });
+
+  it('declares Caveat at weight 700 across both Latin subsets, locally', () => {
+    const css = readFileSync(globalsPath, 'utf8');
+    for (const file of ['Caveat-Bold-Latin.woff2', 'Caveat-Bold-LatinExt.woff2']) {
+      expect(css, file).toMatch(
+        new RegExp(`@font-face\\s*{[^}]*Caveat[^}]*${escaped(file)}[^}]*font-weight:\\s*700`, 'is'),
+      );
+    }
+  });
+
+  it('routes the Bosnian c-caron through the Caveat Latin-Ext subset', () => {
+    // `getWarroomBoardDateLabel` can return 'Datum čeka'. A digits-and-months subset would drop
+    // the č, which is why the plan requires Latin-1 + Latin Extended-A rather than a glyph list.
+    const css = readFileSync(globalsPath, 'utf8');
+    const face = /@font-face\s*{[^}]*Caveat-Bold-LatinExt\.woff2[^}]*unicode-range:\s*([^;]+);/is.exec(css);
+    expect(face, 'Caveat Latin-Ext @font-face').not.toBeNull();
+    expect(unicodeRangeCovers(face![1], 0x010d), 'U+010D c-caron').toBe(true);
+  });
+
+  it('keeps --font-marker OUT of the command and data tokens', () => {
+    // The plan is explicit: do not route the marker through --font-data or --font-command. Those
+    // are UI tokens, and the next typography-unification pass would absorb the marker face exactly
+    // as commit 44b42f28b did. This assertion is the thing that makes that instruction binding.
+    const css = withoutComments(readFileSync(globalsPath, 'utf8'));
+    expect(css).toMatch(/--font-marker:\s*["']Caveat["']/);
+    expect(css).not.toMatch(/--font-command:[^;]*Caveat/);
+    expect(css).not.toMatch(/--font-data:[^;]*Caveat/);
+  });
+
+  it('never falls back to a system handwriting face', () => {
+    // Falling back to a system hand IS the defect that started this item: the accessibility test
+    // forbids Segoe Print and Comic Sans MS precisely because they were reached for. If Caveat
+    // fails to load the date should look wrong, not quietly wrong.
+    const css = withoutComments(readFileSync(globalsPath, 'utf8'));
+    const marker = /--font-marker:\s*([^;]+);/.exec(css);
+    expect(marker, '--font-marker token').not.toBeNull();
+    expect(marker![1]).not.toMatch(/cursive|Segoe Print|Comic Sans|Bradley|Chalkboard/i);
   });
 });
