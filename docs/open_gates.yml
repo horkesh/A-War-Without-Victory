@@ -32,7 +32,7 @@
 #   npm run gates                           prints the currently-open rows
 
 version: 1
-updated: 2026-09-10
+updated: 2026-09-11
 
 lanes: [R1, R2, R3, R4, R5, R6, R7, R8, R9, RC, RE, REPO]
 
@@ -228,11 +228,21 @@ gates:
       demoted, plain-numeric entries renumbered, and one unbalanced bold marker closed. Every
       category is now at or under the stated 10-entry cap, VERIFIED WITH THE CORRECT PATTERN
       (^[0-9]+[a-z]*\. ) — an earlier check used ^[0-9]+\. , which matched none of the 0a/0b/0h
-      entries and wrongly reported the largest category as empty. STILL OPEN: 160 of 244
-      life-lessons entries carry a "see docs/life_lessons/<topic>.md" pointer whose body is NOT in
-      that topic file — grep returns count 0 for sampled titles. The bodies were only ever in the
-      index. Routing 160 lessons to their topic files is a curation judgement, not a mechanical
-      move, so it was left.
+      entries and wrongly reported the largest category as empty. Cap/size work re-verified
+      2026-09-11: no napkin category exceeds 10, four sit exactly at 10.
+      STILL OPEN, AND THE FIGURE HERE WAS WRONG. This note previously read "160 of 244
+      life-lessons entries carry a broken pointer". Measured 2026-09-11 with
+      tools/validate_lesson_pointers.cjs the index carries 23 pointer lines of which 15 are
+      broken, and at THIS gate's own commit it carried 20 in total — so 160 was never the
+      number, in this file or any ancestor of it. The overstatement was not harmless: it turned
+      a tractable cleanup into something that reads like a week of curation, which is a reliable
+      way to ensure nobody starts it.
+      The substance stands: those bodies only ever lived in the index, and routing them into
+      topic files is a curation judgement rather than a mechanical move, so the 15 remain open.
+      What is now mechanical — tools/lesson_pointer_baseline.json records them as a RATCHET, and
+      tests/lesson_pointer_integrity.test.ts fails if a NEW broken pointer appears, or if a
+      baseline entry quietly starts resolving without the list being trimmed. List them with
+      `npm run lessons:pointers`.
 
   # ── Closed, retained to prevent re-raising ──────────────────────────────────────
 

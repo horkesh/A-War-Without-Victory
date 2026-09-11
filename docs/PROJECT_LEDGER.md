@@ -3912,3 +3912,35 @@ refuses means editing a test and saying why.
 
 **Totals: 152 tests across 9 suites**, all green. Six guards, three blocking, all tested; before
 today none of them had a single test.
+
+## The register's own number was wrong by an order of magnitude — 2026-09-11
+
+**REPO-RUNBOOK-CURATION recorded "160 of 244 life-lessons entries carry a broken pointer".**
+Measured with `tools/validate_lesson_pointers.cjs`: the index carries **23 pointer lines, of
+which 15 are broken**. At that gate's own commit it carried **20 in total** — so 160 was never
+the number, in that file or any ancestor of it.
+
+**The overstatement was not harmless.** It turned a tractable afternoon into something that reads
+like a week of curation, which is a reliable way to ensure nobody starts. The gate had sat open
+since 2026-09-10 with its remaining work described as roughly eleven times larger than it is.
+
+That is the third bad figure found in an evidence file in two days — after `qwen3-coder` recorded
+at 8 prompt tok/s (measures 254) and a napkin cap-check that reported a 13,684-byte category as
+"0 entries". **The common cause is not carelessness, it is that a number written into prose is
+never re-derived.** All three were produced by a pattern that could not match what it was counting,
+and all three survived because nothing recomputed them.
+
+**So the count is now a tool, not a memory.** `npm run lessons:pointers` lists every pointer with
+a verdict. The 15 are recorded in `tools/lesson_pointer_baseline.json` as a **RATCHET, not an
+allowance**: `tests/lesson_pointer_integrity.test.ts` fails if a NEW broken pointer appears, and
+ALSO if a baseline entry quietly starts resolving without the list being trimmed — so the number
+cannot drift back into being something somebody remembers.
+
+**What was deliberately NOT done.** The 15 bodies only ever lived in the index. Making each
+pointer true means moving a lesson into a topic file or dropping the pointer, and that is a
+curation judgement about the corpus rather than a mechanical rewrite. The backlog stands; it
+simply cannot grow now.
+
+**Also re-verified:** no napkin category exceeds its 10-entry cap (four sit exactly at 10), using
+the correct `^[0-9]+[a-z]*\.` pattern — the one whose earlier `^[0-9]+\.` form could not see the
+`0a.`/`0h.` entries at all.

@@ -1,0 +1,79 @@
+{
+  "_comment": [
+    "Life-lessons index pointers that promise a topic file which does not contain them.",
+    "This is a RATCHET, not an allowance: the checker fails if a pointer appears here that is",
+    "not in this list. Fixing one means deleting its line. The list may only ever shrink.",
+    "Recorded 2026-09-11 by: node tools/validate_lesson_pointers.cjs --json",
+    "",
+    "WHY A BASELINE AND NOT A FIX: the bodies were never in the topic files -- they live in the",
+    "index. Making each pointer true means either moving a lesson or dropping its pointer, and",
+    "that is a curation judgement about someone else's corpus, not a mechanical rewrite.",
+    "What IS mechanical is refusing to let the list grow, which is what this does.",
+    "",
+    "The open-gates register said 160 of 244 entries were affected. Measured at that gate's own",
+    "commit the index held TWENTY pointer lines in total. The real number, then and now, is below."
+  ],
+  "count": 15,
+  "broken": [
+    {
+      "topic": "docs/life_lessons/process.md",
+      "title": "A CHECK BUILT AROUND WHAT SUCCESS LOOKS LIKE WILL REPORT SUCCESS THAT DID NOT HAPPEN — THR"
+    },
+    {
+      "topic": "docs/life_lessons/events.md",
+      "title": "A CONDITION THAT IS ALWAYS TRUE CAN BE \"CORRECT\" PURELY BY WINDOW COINCIDENCE"
+    },
+    {
+      "topic": "docs/life_lessons/process.md",
+      "title": "A MEASUREMENT CAN BE BLIND TO THE FAILURE IT IS CITED AS DISPROVING"
+    },
+    {
+      "topic": "docs/life_lessons/architecture.md",
+      "title": "A code path verified by grep but never checked for REACHABILITY — RE-VIOLATED 2026-08-22 ("
+    },
+    {
+      "topic": "docs/life_lessons/process.md",
+      "title": "AN ABSENCE CLAIM IS THE ONE MOST LIKELY TO BE WRONG — TWICE, ON THE SAME DAY"
+    },
+    {
+      "topic": "docs/life_lessons/process.md",
+      "title": "Builder runs only its own test file, misses a full-suite interaction — ACTIVE PATTERN (3× "
+    },
+    {
+      "topic": "docs/life_lessons/calibration.md",
+      "title": "CHECK THE BASELINE'S PROVENANCE FIRST, NOT LAST"
+    },
+    {
+      "topic": "docs/life_lessons/process.md",
+      "title": "I GREPPED FOR THE LINES I EXPECTED AND MISSED THE VERDICT LINE"
+    },
+    {
+      "topic": "docs/life_lessons/process.md",
+      "title": "RE-VIOLATED, AND THE LESSON WAS ALREADY WRITTEN: A FIELD'S SEMANTICS INFERRED FROM ONE INS"
+    },
+    {
+      "topic": "docs/life_lessons/process.md",
+      "title": "RE-VIOLATED: `cmd | tail; echo $?` reads the FILTER's exit code"
+    },
+    {
+      "topic": "docs/life_lessons/calibration.md",
+      "title": "RESOLVED — fix confirmed committed, no longer an active threat. Demoted from active violat"
+    },
+    {
+      "topic": "docs/life_lessons/process.md",
+      "title": "Route decisions to the Pyrrhic panel, not the owner — VIOLATED 2026-06-11 (2nd instance)"
+    },
+    {
+      "topic": "docs/life_lessons/process.md",
+      "title": "Verify PWD before worktree git ops — NEW 2026-06-12 (near-miss)"
+    },
+    {
+      "topic": "docs/life_lessons/architecture.md",
+      "title": "When a guard is added to one pipeline path, audit ALL paths — CONFIRMED STRONG PATTERN (pr"
+    },
+    {
+      "topic": "docs/life_lessons/process.md",
+      "title": "Worktree builders stall mid-task — MITIGATION VALIDATED 2026-06-14 (was ACTIVE 4–5× 2026-0"
+    }
+  ]
+}
