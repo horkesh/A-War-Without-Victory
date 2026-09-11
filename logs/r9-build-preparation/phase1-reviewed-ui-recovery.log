@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Failed React document activates usable legacy recovery menu, lazy WarPlanningMap and side-picker/back",
+    "Late successful React load reclaims opening ownership and disables legacy recovery"
+  ],
+  "output": "F:\\A-War-Without-Victory\\logs\\r9-build-preparation\\phase1-ui-recovery-reviewed"
+}
+EXIT_CODE=0

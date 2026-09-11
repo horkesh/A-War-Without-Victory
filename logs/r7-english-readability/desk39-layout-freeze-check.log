@@ -1,0 +1,18 @@
+COMMAND: compare SHA-256 against desk39-layout-final-freeze.json and prior final-source-inventory.json; git diff --name-only 31823917a -- forbidden surfaces; git diff --check
+{
+  "changedPrior": [
+    {
+      "path": "tests/ui/r7_president_desk_layout_readability.test.ts",
+      "sha256": "0ba45745a5fe9fbe992176e502b12cc9f8b9b3005e0047b4dbc12d8611913189"
+    }
+  ],
+  "changedFrozen": [],
+  "frozenCount": 3,
+  "priorCount": 77,
+  "forbiddenDiff": []
+}
+warning: in the working copy of '.claude/napkin.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/PROJECT_LEDGER.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/PROJECT_LEDGER_KNOWLEDGE.md', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'docs/plans/2026-09-05-r7-presentation-and-english-readability-amendment-plan.md', CRLF will be replaced by LF the next time Git touches it
+EXIT_CODE=0

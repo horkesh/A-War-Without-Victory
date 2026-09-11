@@ -1,0 +1,7 @@
+COMMAND={"cwd":"F:/AWWV-worktrees/r7-readability-post-a","command":"C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe","args":["node_modules/tsx/dist/cli.mjs","tools/data_prereq/check_data.ts"]}
+NODE_PATH=C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2
+RUN_ENV={"AWWV_S6_GRADE_RUN":null,"provenanceOverridePresent":false}
+OK: data prerequisites satisfied.
+
+EXIT_CODE=0
+SIGNAL=null

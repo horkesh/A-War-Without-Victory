@@ -1,0 +1,90 @@
+Phase 3 independent Code Review + QA — 2026-09-09
+
+Scope reviewed
+- Items 3.1–3.8 only: SituationTab.tsx, DirectiveCard.tsx, AdvanceTurnModal.tsx,
+  PresidentialDecisionRoomPanel.tsx, ArmyHQModal.tsx, PresidentDeskShell.tsx,
+  CodexPanel.tsx, and their seven split layout tests plus the Decision Room flat
+  contract update.
+- Item 3.9 is excluded and remains held for owner clarification.
+
+Method
+- Read the final production diff and affected component context.
+- Checked preservation of values, grid structure, action/IPC behavior, receipt
+  lifecycle, keyboard controls, accessible names/live-region semantics, and scope.
+- Inspected the focused/typecheck/full-UI logs and three-viewport geometry JSON.
+- No scenario, browser campaign, test rerun, or production edit was performed by
+  this reviewer.
+
+Passing findings
+- 3.1 adds nowrap/shrink protection only to the two player-faction label spans.
+- 3.2 adds truncation to all four mutually possible action branches and restores
+  the missing full accessible hover title; no handler or disabled-state change.
+- 3.3 final source changes only tracking from 0.14em to 0.08em after the initial
+  browser proof correctly found Recommended exceeded its label clip box. Grid,
+  font size, labels, title, and numeric values are unchanged.
+- 3.4 gives the All lens sufficient width without changing counts, filters, or
+  selection behavior.
+- 3.5 keeps the existing eight-second lifecycle, adds an explicit keyboard button,
+  localised accessible name/title, and distinct in-flow receipt styling. Dismissal
+  only clears local presentation state; directive actions and IPC are untouched.
+- 3.6 adds content-start only; auto-fit/minmax, item order, and corps data are unchanged.
+- 3.7/3.8 add independent CSS mask cues only; no shared component or content mutation.
+- No unsafe rendering, new data flow, schema, store, simulation, or command execution
+  was introduced.
+
+Evidence accepted
+- phase3-split-focused.log: 8 files / 18 tests pass, exit 0.
+- phase3-advance-spacing-green.log: 2 files / 20 tests pass after 0.08em correction.
+- phase3-typecheck.log: exit 0.
+- phase3-ui-final.log: 352 files / 2,951 tests pass, exit 0, but predates the
+  final 0.08em spacing-only correction and therefore is not the final global gate.
+- phase3-geometry/results.json: desk mask, expanded corps row packing, All lens
+  containment pass at 1920x1080, 1366x768, and 3440x1440.
+- phase3-directive-geometry/results.json: three simultaneous buttons have disjoint
+  rectangles, ellipsis, and full titles at all three viewports; inert availability
+  fixture, no IPC action executed.
+- phase3-text-geometry-final is still pending and must supersede the invalid initial
+  3.3 geometry result.
+
+Targeted finding — BLOCK pending correction verification
+- 3.7/3.8 masks fade the final 24px of each scrollport to full transparency. The
+  President Desk provides pb-3 (12px) and Codex py-2 (8px), so at maximum scroll
+  the final content can remain inside the faded band. Existing proof checks that
+  overflow implies mask presence but does not prove the final content can scroll
+  above the mask. Measure at 1366x768 in the existing browser session; if confirmed,
+  add enough internal bottom padding to place the last content above the 24px fade,
+  then verify bottom-scroll containment. This is the sole requested correction.
+
+Remaining gates
+- 3.9 remains unimplemented/unreviewed under owner clarification.
+- Final three-viewport text geometry must pass after settled animation.
+- The final full UI gate on corrected source is owned by the orchestrator and may be
+  combined with the following phase; the earlier 2,951-test run cannot certify the
+  spacing correction.
+
+VERDICT: BLOCK pending the single 3.7/3.8 bottom-scroll containment correction or
+live evidence that the final content clears the fade band. All other 3.1–3.8 review
+checks are GO within the stated remaining global gates.
+
+Targeted correction verification — 2026-09-09
+- The initial BLOCK above is preserved as the review receipt. Live measurement
+  confirmed that the President Desk already clears its fade: at 1366x768 the fade
+  starts at y=632 and the last text ends at y=615.5, so no Desk change was made.
+- Live measurement confirmed the Codex defect: before correction, the fade started
+  at y=265.297 while the last text ended at y=277.797 at maximum scroll.
+- The bounded correction changes Codex campaign-record padding only from py-2 to
+  pt-2 pb-6. The 24px mask, max height, overflow, text, and data flow are unchanged.
+- phase3-codex-padding-green.log: 2 files / 20 tests pass, exit 0. The source guard
+  now requires the mask and 24px bottom padding together.
+- codex-bottom-final.log and the three codex-bottom-final-*/bottom.json receipts:
+  exit 0 at 1920x1080, 1366x768, and 3440x1440. In every viewport, scrollTop=250 is
+  the maximum, paddingBottom=24px, and the final text bottom is 3.5px above the fade
+  start (masked=false). Screenshots are retained beside each JSON receipt.
+- phase3-text-geometry-final.log: the corrected 0.08em MetricCell label, acronym
+  single-line bounds, and Codex fade checks pass at all three viewports, exit 0.
+
+FINAL REVIEW VERDICT: GO for Phase 3 items 3.1–3.8. The single review finding is
+resolved by the measured Codex padding correction; no second unchanged review was
+performed. Item 3.9 remains pending owner clarification and is not certified. The
+final full-UI gate on corrected source remains pending and is owned by the
+orchestrator; this review does not promote the earlier pre-correction full-UI run.

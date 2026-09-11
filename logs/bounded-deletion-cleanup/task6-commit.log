@@ -1,0 +1,16 @@
+[codex/cleanup-unused-ui 1638c7a28] chore: remove unused UI sources and preserve live routes
+ 23 files changed, 982 insertions(+), 832 deletions(-)
+ create mode 100644 logs/bounded-deletion-cleanup/task6-cache-file-integrity.json
+ create mode 100644 logs/bounded-deletion-cleanup/task6-operations-1/result.json
+ create mode 100644 logs/bounded-deletion-cleanup/task6-operations-2/result.json
+ create mode 100644 logs/bounded-deletion-cleanup/task6-packaged-routes.cjs
+ create mode 100644 logs/bounded-deletion-cleanup/task6-recovery-1/result.json
+ create mode 100644 logs/bounded-deletion-cleanup/task6-runtime-passed-manifest.json
+ create mode 100644 logs/bounded-deletion-cleanup/task6-runtime-retry-manifest.json
+ delete mode 100644 src/ui/map/components/plan_ui/AxisAssessmentCard.tsx
+ delete mode 100644 src/ui/map/components/plan_ui/CommandTopBar.tsx
+ delete mode 100644 src/ui/map/components/plan_ui/CommanderAssessmentDoc.tsx
+ delete mode 100644 src/ui/map/components/plan_ui/OpsMapRenderer.ts
+ delete mode 100644 src/ui/map/components/plan_ui/TacticalCard.tsx
+ delete mode 100644 src/ui/warroom/map_viewer_standalone.ts
+Commit/hook exit code: 0

@@ -1,0 +1,29 @@
+REFINEMENT: classify RE text in effective hooks as executable or comment-only
+WORKTREE_COUNT 13
+COMMENT_ONLY C:/Users/User/.codex/worktrees/21d7/A-War-Without-Victory :: .husky\pre-commit:8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+COMMENT_ONLY C:/Users/User/.codex/worktrees/21d7/A-War-Without-Victory :: .husky\pre-commit:9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+COMMENT_ONLY C:/Users/User/.codex/worktrees/40ef/A-War-Without-Victory :: .husky\pre-commit:8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+COMMENT_ONLY C:/Users/User/.codex/worktrees/40ef/A-War-Without-Victory :: .husky\pre-commit:9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+COMMENT_ONLY C:/Users/User/.codex/worktrees/A-War-Without-Victory/bc02-load-ratings :: .husky\pre-commit:8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+COMMENT_ONLY C:/Users/User/.codex/worktrees/A-War-Without-Victory/bc02-load-ratings :: .husky\pre-commit:9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+COMMENT_ONLY C:/Users/User/.codex/worktrees/e1e5/A-War-Without-Victory :: .husky\pre-commit:8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+COMMENT_ONLY C:/Users/User/.codex/worktrees/e1e5/A-War-Without-Victory :: .husky\pre-commit:9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+COMMENT_ONLY F:/AWWV-worktrees/apr1994-calibration-investigation :: .husky\pre-commit:8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+COMMENT_ONLY F:/AWWV-worktrees/apr1994-calibration-investigation :: .husky\pre-commit:9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+COMMENT_ONLY F:/AWWV-worktrees/bc01-player-opportunities :: .husky\pre-commit:8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+COMMENT_ONLY F:/AWWV-worktrees/bc01-player-opportunities :: .husky\pre-commit:9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+COMMENT_ONLY F:/AWWV-worktrees/bc01-pre-controls :: .husky\pre-commit:8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+COMMENT_ONLY F:/AWWV-worktrees/bc01-pre-controls :: .husky\pre-commit:9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+COMMENT_ONLY F:/AWWV-worktrees/bc09-shared-inputs :: .husky\pre-commit:8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+COMMENT_ONLY F:/AWWV-worktrees/bc09-shared-inputs :: .husky\pre-commit:9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+COMMENT_ONLY F:/AWWV-worktrees/calibration-timeline-viewer :: .husky\pre-commit:8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+COMMENT_ONLY F:/AWWV-worktrees/calibration-timeline-viewer :: .husky\pre-commit:9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+COMMENT_ONLY F:/AWWV-worktrees/r7-arbih-honorific-names :: .husky\pre-commit:8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+COMMENT_ONLY F:/AWWV-worktrees/r7-arbih-honorific-names :: .husky\pre-commit:9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+COMMENT_ONLY F:/AWWV-worktrees/task3-parent-check :: .husky\pre-commit:8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+COMMENT_ONLY F:/AWWV-worktrees/task3-parent-check :: .husky\pre-commit:9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+HUSKY_INIT_PRESENT false
+COMMENT_ONLY_REFS 22
+EXECUTABLE_RE_CONSUMERS 0
+DISPOSITION no configured executable RE checker/installer consumer
+EXIT_CODE=0

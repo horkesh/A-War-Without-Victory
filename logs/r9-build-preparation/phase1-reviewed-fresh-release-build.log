@@ -1,0 +1,240 @@
+
+> awwv@0.9.9-beta.1 desktop:release:check
+> npm run desktop:map:build && npm run qa:chunk-cycles && npm run desktop:sim:build && npm run warroom:build
+
+
+> awwv@0.9.9-beta.1 desktop:map:build
+> npm exec --workspace awwv-map -- vite build --config vite.config.ts
+
+vite v5.4.21 building for production...
+transforming...
+✓ 1378 modules transformed.
+rendering chunks...
+computing gzip size...
+../../../dist/tactical-map/assets/ui_hover-B9NIftkw.ogg                                       4.51 kB
+../../../dist/tactical-map/assets/battle_decisive-BJoqCB9H.ogg                                4.85 kB
+../../../dist/tactical-map/assets/ui_click-DTXexl_Y.ogg                                       4.88 kB
+../../../dist/tactical-map/assets/op_launch-CFtNLHIi.ogg                                      5.47 kB
+../../../dist/tactical-map/index.html                                                         5.77 kB │ gzip:   1.63 kB
+../../../dist/tactical-map/assets/turn_review_open-DAIxWdcJ.ogg                               5.86 kB
+../../../dist/tactical-map/assets/battle_catastrophic-Cjw2jRz4.ogg                            6.10 kB
+../../../dist/tactical-map/assets/event_critical-NWGV4Ti6.ogg                                 6.39 kB
+../../../dist/tactical-map/assets/turn_advance-Bft7d0mP.ogg                                   6.75 kB
+../../../dist/tactical-map/assets/tutorial_complete-BApWmXNJ.ogg                              6.77 kB
+../../../dist/tactical-map/assets/battle-z8Jd4fjD.ogg                                         7.37 kB
+../../../dist/tactical-map/assets/game_over-KFWX8M9-.ogg                                      7.68 kB
+../../../dist/tactical-map/assets/event-BHdp5oPQ.ogg                                          8.23 kB
+../../../dist/tactical-map/assets/turn_complete-WWZZgCZQ.ogg                                  8.97 kB
+../../../dist/tactical-map/assets/op_complete-LI4ji67k.ogg                                    9.54 kB
+../../../dist/tactical-map/assets/ui_open-B7lZ0XP4.ogg                                        9.83 kB
+../../../dist/tactical-map/assets/ui_close-C6vIFQji.ogg                                       9.92 kB
+../../../dist/tactical-map/assets/IBMPlexMono-Regular-Latin2-Bx2Zd6oW.woff2                  13.31 kB
+../../../dist/tactical-map/assets/tutorial_05_decide-COpy2R0W.webp                           13.52 kB
+../../../dist/tactical-map/assets/IBMPlexMono-SemiBold-Latin2-Chnj1oVO.woff2                 13.54 kB
+../../../dist/tactical-map/assets/plan_dayton-C1Wr8qa8.webp                                  14.00 kB
+../../../dist/tactical-map/assets/peace_plan-CfXTXBUJ.ogg                                    14.17 kB
+../../../dist/tactical-map/assets/codex_atrocity_essay_header-BdHu5P9_.webp                  14.56 kB
+../../../dist/tactical-map/assets/plan_owen_stoltenberg-DXdIjoZp.webp                        16.46 kB
+../../../dist/tactical-map/assets/IBMPlexMono-Regular-Latin1-BsnL3gsb.woff2                  17.27 kB
+../../../dist/tactical-map/assets/IBMPlexMono-SemiBold-Latin1-iYs1QkgK.woff2                 17.71 kB
+../../../dist/tactical-map/assets/event_patron_relations_RS-DPNR4_nf.webp                    19.07 kB
+../../../dist/tactical-map/assets/event_patron_relations_HRHB-iXHEMYEr.webp                  20.89 kB
+../../../dist/tactical-map/assets/packet_thumb_event_decision-ekbydC_8.webp                  22.04 kB
+../../../dist/tactical-map/assets/event_washington_agreement-C9vwhxNM.webp                   24.76 kB
+../../../dist/tactical-map/assets/tutorial_03_brief-C-th7xIS.webp                            24.92 kB
+../../../dist/tactical-map/assets/tutorial_04_inspect-C_fGwfBD.webp                          26.03 kB
+../../../dist/tactical-map/assets/tutorial_01_welcome-Bo17AbYJ.webp                          26.23 kB
+../../../dist/tactical-map/assets/event_diplomatic_negotiation-ByXCRDmz.webp                 26.64 kB
+../../../dist/tactical-map/assets/plan_contact_group-qUll_Mdo.webp                           27.42 kB
+../../../dist/tactical-map/assets/tutorial_08_judge-fTfUN0cq.webp                            28.28 kB
+../../../dist/tactical-map/assets/cat_conscience_RBiH-dLs-ztDT.webp                          28.77 kB
+../../../dist/tactical-map/assets/event_supply_shortage_HRHB-D6GtvkUZ.webp                   29.42 kB
+../../../dist/tactical-map/assets/packet_thumb_intelligence-Bf6kRYZR.webp                    31.00 kB
+../../../dist/tactical-map/assets/event_patron_relations_RBiH-BKRMjPOr.webp                  31.85 kB
+../../../dist/tactical-map/assets/packet_thumb_peace_plan-BY_aqP7w.webp                      32.41 kB
+../../../dist/tactical-map/assets/packet_thumb_paramilitary-Bj42rbz_.webp                    33.22 kB
+../../../dist/tactical-map/assets/plan_vance_owen-DI0LLjgz.webp                              33.41 kB
+../../../dist/tactical-map/assets/tutorial_07_report-DHzzveRk.webp                           34.05 kB
+../../../dist/tactical-map/assets/event_displacement_column--rZWL-pG.webp                    35.00 kB
+../../../dist/tactical-map/assets/packet_thumb_officer_matter-BhxgVLs3.webp                  35.33 kB
+../../../dist/tactical-map/assets/event_political_session-Aa8PRh3x.webp                      35.90 kB
+../../../dist/tactical-map/assets/event_referendum-DmYvySEy.webp                             36.76 kB
+../../../dist/tactical-map/assets/tutorial_06_execute-BYnRoXOx.webp                          37.00 kB
+../../../dist/tactical-map/assets/event_supply_shortage_RS-7CEovFoX.webp                     38.06 kB
+../../../dist/tactical-map/assets/event_dayton_signed_1995-CW8TzUzX.webp                     38.16 kB
+../../../dist/tactical-map/assets/cat_conscience_HRHB-BngJQA-9.webp                          41.79 kB
+../../../dist/tactical-map/assets/decision_header_personnel-CsPZXeWS.webp                    42.50 kB
+../../../dist/tactical-map/assets/event_supply_shortage_RBiH-BYXraluS.webp                   46.31 kB
+../../../dist/tactical-map/assets/tutorial_02_map-ChRRP1Sa.webp                              46.41 kB
+../../../dist/tactical-map/assets/act_replace_commander_RBiH-qr4dEkP2.webp                   47.32 kB
+../../../dist/tactical-map/assets/event_mobilization_HRHB-CdFWbwVc.webp                      48.19 kB
+../../../dist/tactical-map/assets/cat_command_RS-bjF7AQl-.webp                               50.69 kB
+../../../dist/tactical-map/assets/cat_conscience_RS-CAFW-j0X.webp                            51.18 kB
+../../../dist/tactical-map/assets/consequence_personnel_change-bN9fAcI4.webp                 51.79 kB
+../../../dist/tactical-map/assets/paperclip-Dph4l_D-.webp                                    51.86 kB
+../../../dist/tactical-map/assets/act_patron_relations_RBiH-ChXJMqCt.webp                    53.19 kB
+../../../dist/tactical-map/assets/packet_thumb_reserve_request-btno3VrJ.webp                 53.59 kB
+../../../dist/tactical-map/assets/cat_diplomacy_HRHB-C5sx9hR9.webp                           54.04 kB
+../../../dist/tactical-map/assets/packet_thumb_convoy-DEvRRKZO.webp                          54.11 kB
+../../../dist/tactical-map/assets/decision_header_diplomacy-qpSHljej.webp                    54.14 kB
+../../../dist/tactical-map/assets/consequence_public_pressure-CORnUBfD.webp                  55.88 kB
+../../../dist/tactical-map/assets/event_mobilization_RS-BPm2HYDx.webp                        58.84 kB
+../../../dist/tactical-map/assets/cat_command_HRHB-CqPBc3bD.webp                             58.89 kB
+../../../dist/tactical-map/assets/event_un_presence-CpXwRNVj.webp                            59.49 kB
+../../../dist/tactical-map/assets/decision_header_counter_offer-C74nPhIO.webp                61.47 kB
+../../../dist/tactical-map/assets/event_supply_convoy_RS-DInWpgmy.webp                       62.74 kB
+../../../dist/tactical-map/assets/decision_header_paramilitary-BbLC2rYX.webp                 62.80 kB
+../../../dist/tactical-map/assets/cat_command_RBiH-DnzwH54Y.webp                             62.82 kB
+../../../dist/tactical-map/assets/consequence_negotiated_settlement-Cbfi9wPW.webp            63.30 kB
+../../../dist/tactical-map/assets/cat_diplomacy_RS-DALcrlc9.webp                             63.49 kB
+../../../dist/tactical-map/assets/cat_home_front_RS-CAyflyik.webp                            63.90 kB
+../../../dist/tactical-map/assets/event_ahmici_massacre_1993-C37T3Qpa.webp                   64.07 kB
+../../../dist/tactical-map/assets/event_siege_city_RBiH-CjyGFCQY.webp                        64.15 kB
+../../../dist/tactical-map/assets/cat_diplomacy_RBiH-D0VfxfeV.webp                           65.93 kB
+../../../dist/tactical-map/assets/event_ceasefire-DbnZotYx.webp                              66.49 kB
+../../../dist/tactical-map/assets/decision_header_military_staff-CxLEVRfh.webp               66.59 kB
+../../../dist/tactical-map/assets/event_supply_convoy_RBiH-D4GYC059.webp                     67.26 kB
+../../../dist/tactical-map/assets/consequence_humanitarian_access-B4-g-GSW.webp              68.08 kB
+../../../dist/tactical-map/assets/event_supply_convoy_HRHB-CwW2axLT.webp                     71.82 kB
+../../../dist/tactical-map/assets/event_drina_valley_ethnic_cleansing_1992-CBNHOKfB.webp     73.66 kB
+../../../dist/tactical-map/assets/event_siege_city_RS-Dyy8BWPc.webp                          74.84 kB
+../../../dist/tactical-map/assets/event_zepa_falls_1995-3HwlrICu.webp                        74.87 kB
+../../../dist/tactical-map/assets/act_replace_commander_RS-Do3POEZA.webp                     77.30 kB
+../../../dist/tactical-map/assets/verdict_pyrrhic-E2Wt6Rw4.webp                              77.67 kB
+../../../dist/tactical-map/assets/act_replace_commander_HRHB-_U0F4PKF.webp                   77.86 kB
+../../../dist/tactical-map/assets/act_patron_relations_HRHB-CZqb1__-.webp                    78.84 kB
+../../../dist/tactical-map/assets/event_mobilization_RBiH-qmRwmPKN.webp                      80.42 kB
+../../../dist/tactical-map/assets/consequence_reserve_deployment-Ci_viHIC.webp               81.18 kB
+../../../dist/tactical-map/assets/stamp_secret-lRWMgphk.webp                                 84.24 kB
+../../../dist/tactical-map/assets/event_srebrenica_falls_1995-DclbaMRE.webp                  84.74 kB
+../../../dist/tactical-map/assets/act_address_nation_RS-EAjQEOT3.webp                        85.31 kB
+../../../dist/tactical-map/assets/decision_header_humanitarian_convoy-Bhv0os6M.webp          85.89 kB
+../../../dist/tactical-map/assets/event_siege_city_HRHB-CUNd_AyI.webp                        86.17 kB
+../../../dist/tactical-map/assets/act_address_nation_RBiH-JLQ3PxUH.webp                      93.12 kB
+../../../dist/tactical-map/assets/event_concentration_camps_revealed_1992-Dnbgk8lR.webp      94.13 kB
+../../../dist/tactical-map/assets/decision_header_intelligence-i7zJldWe.webp                 94.70 kB
+../../../dist/tactical-map/assets/cat_war_direction_RBiH-Dq_-rx_R.webp                       96.39 kB
+../../../dist/tactical-map/assets/cat_record_RS-Bk8Z_3j2.webp                                99.59 kB
+../../../dist/tactical-map/assets/cat_home_front_HRHB-Nb03SWB-.webp                          99.85 kB
+../../../dist/tactical-map/assets/cat_war_direction_HRHB-wOnu0NMg.webp                      101.70 kB
+../../../dist/tactical-map/assets/verdict_dayton_close-CH9VWlz8.webp                        101.88 kB
+../../../dist/tactical-map/assets/act_authorize_op_HRHB-ClcTtFCs.webp                       103.07 kB
+../../../dist/tactical-map/assets/event_markale_shelling-D1vR-WFb.webp                      105.67 kB
+../../../dist/tactical-map/assets/cat_war_direction_RS-C4OObkE2.webp                        107.44 kB
+../../../dist/tactical-map/assets/cat_home_front_RBiH-D_htJvXG.webp                         110.99 kB
+../../../dist/tactical-map/assets/cat_record_HRHB-DbgiIEac.webp                             119.33 kB
+../../../dist/tactical-map/assets/act_authorize_op_RS-ZJBG65-m.webp                         120.42 kB
+../../../dist/tactical-map/assets/act_patron_relations_RS-Dh7qO4ph.webp                     121.92 kB
+../../../dist/tactical-map/assets/cat_record_RBiH-DPM-xzX5.webp                             134.55 kB
+../../../dist/tactical-map/assets/act_front_visit_RS-P8fOFEAc.webp                          140.50 kB
+../../../dist/tactical-map/assets/act_decorate_unit_RS-DgSpQuVh.webp                        144.72 kB
+../../../dist/tactical-map/assets/act_address_nation_HRHB-D-sMit6j.webp                     152.45 kB
+../../../dist/tactical-map/assets/act_authorize_op_RBiH-BdrE1UTw.webp                       153.32 kB
+../../../dist/tactical-map/assets/verdict_catastrophic-Co4n6EY5.webp                        154.42 kB
+../../../dist/tactical-map/assets/act_front_visit_RBiH-CyVIKxBB.webp                        154.44 kB
+../../../dist/tactical-map/assets/act_convoy_RBiH-BnxL0X6j.webp                             155.55 kB
+../../../dist/tactical-map/assets/act_decorate_unit_HRHB-DDabFUe8.webp                      159.38 kB
+../../../dist/tactical-map/assets/act_decorate_unit_RBiH-BBtSFVyi.webp                      162.38 kB
+../../../dist/tactical-map/assets/act_front_visit_HRHB-CNKeUGyu.webp                        181.71 kB
+../../../dist/tactical-map/assets/ambient_field-5Mv-hV7p.ogg                                196.08 kB
+../../../dist/tactical-map/assets/ambient_warroom-CO4FPnyV.ogg                              206.42 kB
+../../../dist/tactical-map/assets/act_convoy_HRHB-C6st0K74.webp                             208.96 kB
+../../../dist/tactical-map/assets/ambient_archive-DPQExHNq.ogg                              211.35 kB
+../../../dist/tactical-map/assets/IBMPlexSans_Condensed-Bold-BzFyGlEG.ttf                   218.26 kB
+../../../dist/tactical-map/assets/IBMPlexSans_Condensed-Regular-spO9-HTR.ttf                218.36 kB
+../../../dist/tactical-map/assets/IBMPlexSans_Condensed-SemiBold-NR8JCoFL.ttf               218.37 kB
+../../../dist/tactical-map/assets/act_convoy_RS-WutW9-BF.webp                               219.85 kB
+../../../dist/tactical-map/assets/hq_rs_1995-CKltsahe.webp                                  239.19 kB
+../../../dist/tactical-map/assets/army_crest_ARBiH-CBh70_lN.webp                            261.51 kB
+../../../dist/tactical-map/assets/hq_rbih_1992-CoaLgsVe.webp                                264.67 kB
+../../../dist/tactical-map/assets/army_crest_HVO-DQl11GCf.webp                              301.52 kB
+../../../dist/tactical-map/assets/hq_rs_1994-B8n0_XHP.webp                                  302.83 kB
+../../../dist/tactical-map/assets/hq_rbih_1994-D1MskTxt.webp                                322.03 kB
+../../../dist/tactical-map/assets/hq_hrhb_1995-B4INqCYq.webp                                322.08 kB
+../../../dist/tactical-map/assets/hq_hrhb_1994-BbUlY8Xn.webp                                324.67 kB
+../../../dist/tactical-map/assets/hq_presidential_desk_1992-CA0DU93Z.webp                   326.13 kB
+../../../dist/tactical-map/assets/hq_hrhb_1993-CgcS4fRF.webp                                337.93 kB
+../../../dist/tactical-map/assets/hq_rbih_1991-DcDCBBRo.webp                                348.49 kB
+../../../dist/tactical-map/assets/hq_rbih_1995-DKntnGfH.webp                                358.17 kB
+../../../dist/tactical-map/assets/hq_hrhb_1991-Am0FULRB.webp                                360.15 kB
+../../../dist/tactical-map/assets/hq_rbih_1993-OfnzuFro.webp                                365.87 kB
+../../../dist/tactical-map/assets/army_crest_VRS-BJvk1MFZ.webp                              373.53 kB
+../../../dist/tactical-map/assets/hq_rs_1991-COPd8zFu.webp                                  384.81 kB
+../../../dist/tactical-map/assets/crest_RBiH-CB81dYy6.webp                                  387.13 kB
+../../../dist/tactical-map/assets/crest_RS-LhJ558Ii.webp                                    403.59 kB
+../../../dist/tactical-map/assets/hq_rs_1992-CAQTFEpJ.webp                                  404.05 kB
+../../../dist/tactical-map/assets/crest_HRHB-CJDGh6VF.webp                                  426.17 kB
+../../../dist/tactical-map/assets/hq_rs_1993-DvFlQU1C.webp                                  443.36 kB
+../../../dist/tactical-map/assets/opening_map_portal-Dx04DnZ0.webp                          471.38 kB
+../../../dist/tactical-map/assets/hq_hrhb_1992-CpcEWClM.webp                                514.98 kB
+../../../dist/tactical-map/assets/flag_RS-DsYaumpc.webp                                     573.66 kB
+../../../dist/tactical-map/assets/flag_RBiH-D13oUq6S.webp                                   613.30 kB
+../../../dist/tactical-map/assets/flag_HRHB-CKSpPRr-.webp                                   665.53 kB
+../../../dist/tactical-map/assets/opening_splash_neutral-DyLg9h1c.webp                      701.92 kB
+../../../dist/tactical-map/assets/opening_monitoring_room_neutral-CnVq0PKX.webp           1,045.18 kB
+../../../dist/tactical-map/assets/vendor-maplibre-CuCRB34y.css                               65.48 kB │ gzip:   9.22 kB
+../../../dist/tactical-map/assets/tactical_map-Dgd-r8Hs.css                                 149.78 kB │ gzip:  26.50 kB
+../../../dist/tactical-map/assets/vendor-state-DnO-lVWC.js                                    1.51 kB │ gzip:   0.79 kB
+../../../dist/tactical-map/assets/operational-osid-areas-C2mzGrun.js                         22.74 kB │ gzip:   7.85 kB
+../../../dist/tactical-map/assets/vendor-loaders-BMhlApBR.js                                 27.34 kB │ gzip:   9.49 kB
+../../../dist/tactical-map/assets/event-catalog-war_1992_hrhb_summer-Cmf7JlP5.js             37.32 kB │ gzip:   9.43 kB
+../../../dist/tactical-map/assets/oob-brigade-designations-CsqZnea9.js                       62.97 kB │ gzip:   7.15 kB
+../../../dist/tactical-map/assets/oob-brigades-vuqKn2aa.js                                   83.90 kB │ gzip:   9.51 kB
+../../../dist/tactical-map/assets/vendor-misc-Cei7H_x4.js                                    92.02 kB │ gzip:  32.00 kB
+../../../dist/tactical-map/assets/event-catalog-war_1995-D4dIQsD-.js                        105.62 kB │ gzip:  26.54 kB
+../../../dist/tactical-map/assets/event-catalog-war_1994-BQiyhxrn.js                        133.39 kB │ gzip:  29.76 kB
+../../../dist/tactical-map/assets/vendor-react-DHH8-g4D.js                                  141.96 kB │ gzip:  45.49 kB
+../../../dist/tactical-map/assets/vendor-deck-D2PfOsL6.js                                   283.34 kB │ gzip:  80.69 kB
+../../../dist/tactical-map/assets/event-catalog-war_1992-Cc7XHAre.js                        292.04 kB │ gzip:  60.15 kB
+../../../dist/tactical-map/assets/event-catalog-consequences--WWmogUF.js                    331.82 kB │ gzip:  59.52 kB
+../../../dist/tactical-map/assets/event-catalog-war_1993-CQnrLNHv.js                        343.75 kB │ gzip:  78.03 kB
+../../../dist/tactical-map/assets/vendor-luma-DC5Zdfkk.js                                   431.89 kB │ gzip: 103.76 kB
+../../../dist/tactical-map/assets/vendor-maplibre-CYWXp_5K.js                               801.65 kB │ gzip: 217.61 kB
+../../../dist/tactical-map/assets/codex-essay-index-DZZtcIou.js                             899.24 kB │ gzip: 232.90 kB
+../../../dist/tactical-map/assets/tactical_map-B7GHuvz-.js                                2,795.13 kB │ gzip: 716.10 kB
+✓ built in 35.14s
+
+> awwv@0.9.9-beta.1 qa:chunk-cycles
+> node tools/ui/check_chunk_cycles.cjs
+
+[check-chunk-cycles] OK: 18 chunks, no import cycles.
+
+> awwv@0.9.9-beta.1 desktop:sim:build
+> node tools/desktop_bundle_sim.mjs
+
+[E5] Political control initialized (hybrid_1992, threshold=0.7): 5822 canonical graph nodes (SID-keyed), RBiH=2297, RS=2507, HRHB=1018. Promoted to OSID when operational data present.
+[Recruitment] Mandatory: 182, Elective: 2, Skipped: control=0 manpower=5 capital=0 equipment=0
+  RBiH: capital=400 equipment=100
+  RS: capital=600 equipment=800
+  HRHB: capital=280 equipment=350
+[Placement] Spread 0 brigades to front; 135 front OSIDs now covered
+  HRHB: spread=0 covered=23
+  RBiH: spread=0 covered=51
+  RS: spread=0 covered=61
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+[brigade_assignment] Rehomed arbih_448th_liberation into truthful sector owner sector:arbih_4th_corps:2 (reserve)
+[brigade_assignment] Rehomed arbih_4th_muslim_light into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+Startup snapshot OK: F:\AWWV-worktrees\r9-phase1-install-proof\data\derived\startup\apr_1992_initial_save.json
+desktop:sim:build OK: F:\AWWV-worktrees\r9-phase1-install-proof\dist\desktop\desktop_sim.cjs
+
+> awwv@0.9.9-beta.1 warroom:build
+> node node_modules/vite/bin/vite.js build --config src/ui/warroom/vite.config.ts && tsx tools/ui/warroom_stage_assets.ts
+
+vite v5.4.21 building for production...
+transforming...
+✓ 664 modules transformed.
+rendering chunks...
+computing gzip size...
+../../../dist/warroom/map_viewer_standalone.html                8.95 kB │ gzip:   2.43 kB
+../../../dist/warroom/index.html                               11.43 kB │ gzip:   3.09 kB
+../../../dist/warroom/assets/wall_map_frame_v1-RYnjYstq.webp  292.94 kB
+../../../dist/warroom/assets/game start-Cn-sIyrH.webp         467.77 kB
+../../../dist/warroom/assets/flag_RS-DsYaumpc.webp            573.66 kB
+../../../dist/warroom/assets/flag_RBiH-D13oUq6S.webp          613.30 kB
+../../../dist/warroom/assets/flag_HRHB-CKSpPRr-.webp          665.53 kB
+../../../dist/warroom/assets/main-Ddhk2kXE.css                 39.69 kB │ gzip:   7.29 kB
+../../../dist/warroom/assets/map-viewer-DiAR9XWp.js            15.72 kB │ gzip:   5.80 kB
+../../../dist/warroom/assets/main-hC09qOvf.js                 257.19 kB │ gzip:  54.51 kB
+../../../dist/warroom/assets/playerSafeText-BZ_w7NHt.js       728.01 kB │ gzip: 193.45 kB
+✓ built in 3.72s
+EXIT_CODE=0

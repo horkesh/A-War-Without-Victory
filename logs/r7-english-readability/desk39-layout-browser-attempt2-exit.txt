@@ -1,0 +1,4 @@
+exit_code=0
+cases=9
+initial_screenshots_inspected=9
+max_scroll_screenshots_inspected=9

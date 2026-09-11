@@ -23,12 +23,32 @@
 # Exit 0 always. Advisory only — never blocks.
 set -uo pipefail
 
+HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 payload="$(cat)"
 cmd="$(printf '%s' "$payload" | jq -r '.tool_input.command // empty' 2>/dev/null)"
 [ -z "$cmd" ] && exit 0
 
-# Only expensive lane-consuming work. A cheap grep is not drift.
-printf '%s' "$cmd" | grep -Eq 'sim:scenario:run|run_scenario_with_preflight|engine_health_gate\.cjs .*--update' || exit 0
+# Only expensive lane-consuming work, and only when it is actually being INVOKED.
+#
+# Matching the bare text fired on `echo 'npm run sim:scenario:run:188w is expensive'` — a mention,
+# not a run — and the orchestrator hook chained off that, demanding an expert analysis of a
+# scenario that never executed. A guard that fires on prose about itself trains the reader to
+# ignore it, so the match is now per command POSITION. See lib/command_segments.sh; the stash
+# guard had this same defect on its first day.
+# shellcheck source=lib/command_segments.sh
+. "$HOOK_DIR/lib/command_segments.sh"
+
+spends_a_run=0
+while IFS= read -r seg; do
+  [ -z "$seg" ] && continue
+  if printf '%s' "$seg" | grep -Eq 'sim:scenario:run|run_scenario_with_preflight|engine_health_gate\.cjs .*--update'; then
+    spends_a_run=1
+    break
+  fi
+done <<< "$(command_segments "$cmd" "$HOOK_DIR")"
+
+[ "$spends_a_run" -eq 1 ] || exit 0
 
 repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || exit 0
 [ -z "$repo_root" ] && exit 0

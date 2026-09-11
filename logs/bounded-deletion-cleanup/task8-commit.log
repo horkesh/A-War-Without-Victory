@@ -1,0 +1,7 @@
+[codex/task8-retire-re-hooks d874817eb] chore(repo): retire closed RE hook machinery
+ 12 files changed, 115 insertions(+), 1046 deletions(-)
+ delete mode 100644 scripts/repo/check_re_scope.ps1
+ delete mode 100644 scripts/repo/install_re_scope_hook.ps1
+ delete mode 100644 tests/re_scope_external_hook.test.ps1
+ delete mode 100644 tests/re_scope_guard.test.ps1
+EXIT_CODE=0

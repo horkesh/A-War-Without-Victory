@@ -1,0 +1,6 @@
+COMMAND={"cwd":"F:/A-War-Without-Victory","command":"C:/Windows/System32/cmd.exe","args":["/d","/s","/c","npm.cmd run typecheck"]}
+NODE_PATH=C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2
+The syntax of the command is incorrect.
+
+EXIT_CODE=1
+SIGNAL=null

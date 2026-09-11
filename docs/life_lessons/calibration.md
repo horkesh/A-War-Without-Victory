@@ -582,3 +582,32 @@ Applied retroactively to a seven-item queue, this screen killed **five of seven*
 - **Wrong approach**: Treating the missing objectives as an operation-catalog calibration problem, or reserving every brigade in every future queued operation. The first calibrates around false ownership; the second freezes campaign formations long before their plan can launch.
 - **Right approach**: Test the representation the factory actually creates. End a multi-axis probe after its first resolved contact, and reserve only each corps' head queued operation participants from generic probes. Keep the full-queue reservation only for systems whose existing contract genuinely owns the whole queue.
 - **Do instead**: Whenever a factory changes an object's shape, trace which lifecycle branch that shape selects and add a factory-shaped regression fixture. For shared formations, name the ownership horizon explicitly: active, next queued, or entire future queue are different contracts.
+
+## Migrated from the index (2026-09-11)
+
+> These lessons were cited from `docs/life_lessons.md` as living here, and did not. The
+> bodies are copied verbatim from the index so the citation is true; the index keeps its
+> copy, which CLAUDE.md requires for the newest sessions.
+
+### [Calibration] ★★ CHECK THE BASELINE'S PROVENANCE FIRST, NOT LAST
+- Ran an entire investigation off `…w188_n390`, then discovered at the end it was inadmissible **twice over**: **Node v24.13.0** against a pinned major of 22 (the preflight now refuses this outright — implementation-approximated `pow/exp/log/atan2` in combat hot paths can flip a battle on a V8 major change), **and** a commit that is **not an ancestor of HEAD** because its branch was re-landed under new SHAs. `CALIBRATION_MASTER` had already recorded a *different* run as inadmissible for the same Node reason and nobody had re-checked the others. ⇒ **`git merge-base --is-ancestor` and the `node_version` stamp, on the baseline, before the first measurement.** Two lines. ⇒ Structural counts reproduced across many runs survive this; anything hash- or delta-shaped does not.
+
+### [Calibration] ★ COMPARING RUNS TO EACH OTHER HIDES WHAT BOTH GET WRONG
+- Three runs were diffed pairwise all day. The moment the same cells were scored against the **painted reference** instead, the baseline turned out to carry **four ahistorical eastern gains with the mechanic switched off entirely** — pre-existing, invisible, and never introduced by anything under investigation. **A pairwise diff can only find what CHANGED; it is structurally blind to a shared error.** Score against the reference at least once per lane.
+
+### [Operations] Position in an authored brigade array is SEMANTIC — first = anchor
+
+### [Calibration] A PRE-COMMITTED decision rule plus an inert probe kills a hypothesis for two runs and zero risk — this is the cheapest tool in the box
+- The transient-filter hypothesis (axes silently deleted because `in_transit`/`disrupted` is set earlier in the same turn as participant selection) was mechanically plausible, code-supported, and endorsed by three independent panel seats. It measured **0**. The instrument: an env-gated observation-only probe (live predicates left byte-identical, reasons recomputed in a separate guarded second pass), two 188w runs, and a decision rule — 0-2 close / 3-5 diagnostic / 6+ open a lane — **fixed in writing before either run**. Total cost ~40 min and a deleted file; the counterfactual was a doctrine change at three sites against a hard-gated metric. **Two sub-rules that made it work:** (a) an inertness gate FIRST — run 2 must be byte-identical to run 1 or no count is admissible (verified on 14/15 artifacts; only `run_meta.json`'s `out_dir` string differed); (b) a **positive control** — the single `in_transit` the probe did catch proves the zero means *absent*, not *unmeasured*. A zero from an uninstrumented probe is worthless.
+
+### [Calibration] A UI read-model surface OFF the artifact path is byte-identical (stronger than the in-window event re-bless) — the discriminator is WHERE the code lives, not WHEN it fires
+- All four D2 surfaces (#439 cadence, #440 siege, #441 digest, #442 verdict-test) are imported ONLY by `src/ui/**` — NOT by `src/sim`/`src/scenario`/`src/cli`/`tools/scenario_runner` (the headless artifact path). So even though they "fire" in-window (read mid-1995 state), `run_baseline_regression.ts` = "all scenarios match" BYTE-IDENTICAL, no re-bless — strictly more inert than 2026-06-14's #436 (a sim-fired in-window EVENT that DID move the 52w golden observer artifacts). The clean discriminator for a calibration-inertness claim: **grep where the new module is imported.** UI-only import ⇒ off the artifact path ⇒ byte-identical. A `src/sim`/`src/scenario` import ⇒ on the path ⇒ verify with `test:baselines` and expect a golden move for any persisted/logged field.
+
+### [Calibration] Byte-identical hash from a territory-moving hypothesis means INERT/NO-GO
+- If a calibration lever expected to move control returns the same final-state hash as the floor, stop and trace the code path. Do not interpret match percentages or spend another 188w slot on the same lever.
+
+### [Calibration] Headline metrics undercount — check destroyed_brigades + battles attribution before declaring "no change"
+- Option K Fix A 188w showed HRHB "0 attacks / 1 op" identical to pre-Fix-A. Looked like a no-op. `/war-or-game` audit caught what the metric missed: Vitezovi fought 12 battles, took 2,587 casualties, destroyed turn 122; 5 other HRHB brigades destroyed in real combat. HVO IS fighting via reactive defense / loan / attachment — just not authoring `CorpsOperation` records. Rule: a "0 attacks" headline can mean (a) brigade never engaged, (b) brigade engaged via non-faction-led mechanism. Always cross-reference `destroyed_brigades.json` and per-brigade `battle_outcome_count` before concluding no change.
+
+### [Calibration] Test OOB promotions in scenario before shipping — historical ahistoricalness can be empirical not theoretical
+- Option J's `rs_1st_zvornik: mountain → motorized` looked historically reasonable (Drina Corps ran Srebrenica offensive July 1995). Empirical 188w run showed it caused Srebrenica to fall at w40 (Jan 1993). Reverted. Rule: for any OOB tier change that unblocks a corps, run the scenario once BEFORE committing — theoretical plausibility can hide ahistorical cascade.

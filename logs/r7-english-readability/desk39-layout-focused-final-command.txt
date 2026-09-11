@@ -1,0 +1,1 @@
+npm.cmd run test:vitest -- tests/ui/r7_president_desk_layout_readability.test.ts tests/ui/president_desk_shell.test.ts tests/ui/desk_authority_header.test.ts tests/ui/warroom_shell_accessibility.test.ts

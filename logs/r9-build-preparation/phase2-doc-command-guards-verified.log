@@ -1,0 +1,2 @@
+Manifest present exit=0; missing exit=1 (expected1); simulated canon7 guard exit=1 (expected1); unexpected continuation=False
+EXIT_CODE=0

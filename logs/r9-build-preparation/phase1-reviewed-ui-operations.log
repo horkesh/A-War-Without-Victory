@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Visible operation proposal opens exact dossier",
+    "Real map/Deck owner/counters and PMTiles 206 range header bytes verified",
+    "Exact four objectives visible on live map; objective selection works",
+    "Visible return restores exact proposal dossier"
+  ],
+  "output": "F:\\A-War-Without-Victory\\logs\\r9-build-preparation\\phase1-ui-operations-reviewed"
+}
+EXIT_CODE=0

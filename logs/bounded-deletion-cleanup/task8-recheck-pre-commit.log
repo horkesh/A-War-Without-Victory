@@ -1,0 +1,2 @@
+pre-commit: docs/process-only staged changes; skipping npx tsc --noEmit
+EXIT_CODE=0

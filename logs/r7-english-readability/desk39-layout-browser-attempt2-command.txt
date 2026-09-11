@@ -1,0 +1,2 @@
+npm.cmd run dev:map -- --port 3247
+node logs/r7-english-readability/desk39-layout-proof.mjs --out logs/r7-english-readability/desk39-layout-browser-attempt2

@@ -1,0 +1,4 @@
+pre-commit: docs/process-only staged changes; skipping npx tsc --noEmit
+[codex/r9-dependency-authority f22bcbb63] docs(r9): record runtime dependency graph and handoff
+ 6 files changed, 125 insertions(+), 4 deletions(-)
+EXIT_CODE=0

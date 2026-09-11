@@ -1,0 +1,12 @@
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mF:/A-War-Without-Victory[39m
+
+ [32m✓[39m tests/v091_endgame_milestone_closure.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 25[2mms[22m[39m
+ [32m✓[39m tests/docs_desktop_v09_truth.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 35[2mms[22m[39m
+ [32m✓[39m tests/open_gates_register.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 44[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m28 passed[39m[22m[90m (28)[39m
+[2m   Start at [22m 13:03:10
+[2m   Duration [22m 2.97s[2m (transform 1.21s, setup 26ms, collect 1.44s, tests 103ms, environment 1ms, prepare 323ms)[22m
+

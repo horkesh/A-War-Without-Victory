@@ -1,0 +1,567 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/desktop_release_ci_guardrails.test.ts (8 tests) 8558ms
+   ✓ desktop path detector selects every source root imported by the packaged sim bundle 8533ms
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ❯ tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts (1 test | 1 failed) 12ms
+   × is an intentional child-process failure control 11ms
+     → expected 'failure-control' to be 'unexpected-success' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts > is an intentional child-process failure control
+AssertionError: expected 'failure-control' to be 'unexpected-success' // Object.is equality
+
+Expected: "unexpected-success"
+Received: "failure-control"
+
+ ❯ tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts:4:29
+      2| 
+      3| it('is an intentional child-process failure control', () => {
+      4|   expect('failure-control').toBe('unexpected-success');
+       |                             ^
+      5| });
+      6| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  21:01:56
+   Duration  439ms (transform 41ms, setup 18ms, collect 20ms, tests 12ms, environment 0ms, prepare 107ms)
+
+stdout | tests/run_vitest_balanced.test.ts > balanced Vitest execution plan > returns failure when a planned worker child fails
+[balanced-vitest] workers=1; partitioned files=0; serial files=0
+
+ ✓ tests/run_vitest_balanced.test.ts (13 tests) 1679ms
+   ✓ balanced Vitest execution plan > propagates a deliberately failing real Vitest child 1659ms
+ ✓ tests/ci_workflow_test_paths_exist.test.ts (3 tests) 32ms
+ ✓ tests/test_suite_inventory.test.ts (9 tests) 1988ms
+   ✓ test-suite hazard inventory > discovers every Vitest file exactly once in strict path order 1278ms
+   ✓ test-suite hazard inventory > gives unprofiled files a realistic deterministic weight 700ms
+ ✓ tests/baseline_regression_ci_guardrails.test.ts (4 tests) 6ms
+ ✓ tests/test_runner_contract.test.ts (3 tests) 6ms
+ ❯ tests/ci_dependency_install_contract.test.ts (2 tests | 2 failed) 16ms
+   × CI dependency installs are immutable and workspace-local 12ms
+     → baseline-regression.yml should contain exactly 5 root/map install pairs
+
+5 !== 10
+
+   × workflow documentation states the immutable root and map install convention 3ms
+     → The input did not match the regular expression /working-directory: src\/ui\/map/. Input:
+
+'# GitHub Actions Workflows — AWWV\n' +
+  '\n' +
+  'This directory contains the GitHub Actions workflow definitions for A War Without Victory. Each workflow is a single-purpose CI surface; the README catalogs what exists, what each checks, and the local-equivalent commands a contributor runs before pushing.\n' +
+  '\n' +
+  '## Catalog\n' +
+  '\n' +
+  '| Workflow | File | Trigger | Purpose |\n' +
+  '|---|---|---|---|\n' +
+  '| Full Suite + Structural Fingerprint | `full-suite-and-fingerprint.yml` | push to `main`, PR to `main` | Required full-suite gate: complete `test:vitest:balanced`, then the self-scanning `qa:player-experience` gate on relevant code-contract changes; separate structural fingerprint job compares the fresh 40w platform-stable fingerprint. |\n' +
+  '| Baseline Regression | `baseline-regression.yml` | push to `main`, PR to `main` | Multi-job broad gate: typecheck, focused scenario anchor tests, `test:vitest:fast` (137 fast suites, includes the event-system tests via auto-discovery), `test:vitest:scenario`. The `test`/`scenarios` heavy steps are path-filtered (CODE set) and `scenario-anchors`/`scenarios` (SIM set) via the always-report shim — see "Always-report path-filter shim" below. |\n' +
+  '| Desktop Release Guard | `desktop-release-guard.yml` | push to `main`, PR to `main` | Builds + smoke-tests the Linux AppImage and Windows NSIS desktop packages; uploads the artifacts on every run. The packaging/probe heavy steps are path-filtered (DESKTOP set) via the always-report shim — see below. |\n' +
+  '| Release | `release.yml` | (see file) | Tagged-release publication pipeline. |\n' +
+  '| **Event System CI** | **`event-system-ci.yml`** | **push to `main` / `codex/**` / `feature/**` / `claude/**`, PR to `main`** | **Event subset, explicit strict-canon gate and byte-baseline check on every trigger. Feature-branch pushes also run typecheck; Baseline Regression owns typecheck on main pushes and PRs.** |\n' +
+  '\n' +
+  "R9 preparation Phase 2 retires the standalone Typecheck workflow. Baseline Regression's\n" +
+  'always-run `typecheck` job owns that same PR/root-lock/Node 22 contract and remains the\n' +
+  'dependency parent for its jobs. Event System CI retains branch-push typechecking and\n' +
+  'all 27 named test files (26 in the subset plus the separate strict gate): full-suite\n' +
+  'coverage is not guaranteed on those pushes or when its trusted path detector skips.\n' +
+  '\n' +
+  '## Always-report path-filter shim\n' +
+  '\n' +
+  '`.github/scripts/detect-changed-paths.sh` (task #81, 2026-06-09) lets REQUIRED status\n' +
+  'checks short-circuit their HEAVY steps to a fast success on doc-only PRs while STILL\n' +
+  'ALWAYS reporting their check name. It generalizes the proven full-suite shim\n' +
+  '(`detect-full-suite-changes.sh`, task #76).\n' +
+  '\n' +
+  'Why a step-level gate, not a workflow `paths:` filter: a `paths:` filter on a REQUIRED\n' +
+  'check NEVER reports on a non-matching PR, so GitHub blocks that PR forever on a\n' +
+  '"pending" required check (the "required + path-filtered" gotcha). The shim instead lets\n' +
+  'the workflow ALWAYS trigger and each job ALWAYS report — only the heavy steps are gated.\n' +
+  '\n' +
+  '**Integrity (task #346):** the skip decision runs a TRUSTED copy of the detection\n' +
+  "logic, NOT the PR's working copy. On `pull_request` each detect step first\n" +
+  '`git checkout origin/$GITHUB_BASE_REF -- .github/scripts/detect-*.sh` before running it,\n' +
+  'so a PR that edits a `detect-*.sh` script to always emit `relevant=false` CANNOT\n' +
+  'force-skip a REQUIRED gate — the base-branch logic decides. (On push to `main` the\n' +
+  'checked-out copy already IS the trusted base, so no restore is needed.) The only\n' +
+  'remaining surface is editing the restore line in the workflow YAML itself, which is\n' +
+  'conspicuous in a workflow-file diff at review time — the standard GitHub trust boundary\n' +
+  'for `pull_request` (not `pull_request_target`) workflows.\n' +
+  '\n' +
+  '| Job | Required? | `PATH_SET` | Heavy steps gated |\n' +
+  '|---|---|---|---|\n' +
+  '| `test` (Baseline Regression) | yes | `code` | `npm ci` + `test:vitest:fast` |\n' +
+  '| `full-suite` (Full Suite + Structural Fingerprint) | yes | full-suite set | `npm ci` + startup snapshot rebuild + `test:vitest:balanced` + `qa:player-experience` |\n' +
+  '| `structural-fingerprint` (Full Suite + Structural Fingerprint) | yes | full-suite set | `npm ci` + startup snapshot rebuild + fresh 40w structural-fingerprint compare |\n' +
+  '| `scenario-anchors` (Baseline Regression) | yes | `sim` | `npm ci` + `test:vitest:scenario:anchors` |\n' +
+  '| `scenarios` (Baseline Regression) | no | `sim` | `npm ci` + `test:vitest:scenario` |\n' +
+  '| `desktop-release-check` (Desktop Release Guard) | no | `desktop` | Linux AppImage package + smoke |\n' +
+  '| `desktop-packaged-runtime-probe` (Desktop Release Guard) | yes | `desktop` | Windows NSIS package + runtime probe |\n' +
+  '\n' +
+  '“Required” describes the intended merge-gate contract above. The Phase 2 read-only\n' +
+  'GitHub inspection reported main unprotected (HTTP 404) and no rulesets. No protection\n' +
+  'setting was changed; the surviving gate names and reporting behavior are retained.\n' +
+  '\n' +
+  '`typecheck` is intentionally left ALWAYS-RUN (fast, broad type signal) and is the\n' +
+  '`needs:` parent that keeps the gated Baseline jobs reporting. `full-suite` and\n' +
+  '`structural-fingerprint` use the sibling `detect-full-suite-changes.sh` shim.\n' +
+  'The player-experience gate is intentionally inside the already-required `full-suite`\n' +
+  'job so first-hour, live-surface, shipped-build, warning-signature, and Electron\n' +
+  'runtime regressions block relevant PRs immediately instead of depending on a\n' +
+  "separate branch-protection update. The job installs Puppeteer's Chrome binary\n" +
+  'explicitly before that gate because GitHub-hosted runners do not populate\n' +
+  '`/home/runner/.cache/puppeteer` from dependency installation alone. The\n' +
+  '`full-suite` checkout deliberately does not eager-fetch Git LFS before path\n' +
+  'detection, so the required always-report check can still reach its skip decision\n' +
+  'when repository LFS bandwidth is exhausted. The player-experience gate remains\n' +
+  'inside `full-suite` for relevant code-contract changes. If checkout provides LFS\n' +
+  'pointer stubs instead of PMTiles binaries, the browser-gate launcher sets\n' +
+  '`VITE_AWWV_DISABLE_PMTILES=1` for that proof run only; the tactical map then\n' +
+  'boots without PMTiles basemap sources while preserving the player-flow, routing,\n' +
+  'console-error, and surface-polish assertions.\n' +
+  '\n' +
+  'The balanced Vitest entrypoint preserves complete discovery while reducing wall time.\n' +
+  '`tools/test/test_suite_inventory.mjs` sorts the discovered file inventory, classifies\n' +
+  'cross-process isolation hazards, and assigns ordinary files to four process-isolated\n' +
+  'lanes by deterministic duration-weighted balancing. The property-heavy sector suite is\n' +
+  'partitioned by disjoint deterministic seed ranges; the serial tail owns tracked-save\n' +
+  'writers, ambient-run readers, environment mutators, and fixed-port tests. Run the same\n' +
+  'gate locally with `npm run test:vitest:balanced`; validate its inventory contracts with\n' +
+  '`npm run test:inventory:check`.\n' +
+  '\n' +
+  'Path sets (a changed file matching ANY entry => heavy steps run):\n' +
+  '\n' +
+  '- **code** — `src/ tools/ tests/ data/scenarios/ data/calibration/ scripts/` + `package.json package-lock.json vitest.config.ts tsconfig.json` + the Baseline workflow + the shim script. Identical to the full-suite set, so the `test` slice never shrinks coverage vs the full-vitest gate. `package-lock.json` (task #351) ensures a lockfile-only dep/security bump still runs the full suite.\n' +
+  '- **desktop** — `src/desktop/ src/ui/ src/shared/ src/runtime/ tools/ data/derived/ data/source/ data/reference/ data/ui/ data/scenarios/events/ assets/` + `package.json package-lock.json build/icon.png` + the Desktop Release Guard workflow + the Release workflow + the shim script. Per the 2026-06-05 CI/PR-batching policy ("desktop packaging required only for desktop/package/UI/runtime paths"), packaged runtime resources, shared runtime modules, and lockfile-only desktop dependency changes must also run the package/probe gates.\n' +
+  '\n' +
+  'Packaged runtime probe note (2026-06-26): `desktop:package:probe` verifies renderer/network failure capture plus route inventory for operational GeoJSON, terrain scalars, PMTiles range support, HQ clickable-region JSON, source settlement data, root runtime assets, and bundled MapLibre glyph PBFs. The tactical-map build copies `src/ui/map/public/font` into `dist/tactical-map/font`; CI probe windows may render with `disable_pmtiles=1`, but the PMTiles endpoint itself remains route-inventory checked with HTTP 206.\n' +
+  '- **sim** — `src/sim/ src/state/ src/scenario/ data/scenarios/ data/calibration/` + `package.json package-lock.json vitest.config.ts tsconfig.json` + the Baseline workflow + the shim script + the scenario TEST files the anchor gate executes (`tests/scenario_anchor_contract.test.ts`, `tests/integration_deployment_health.test.ts`, `tests/scenario_harness_contracts.test.ts`, `tests/integration_run_summary.test.ts`). The scenario test files (task #351) ensure a scenario-test-only PR still runs the anchor gate.\n' +
+  '\n' +
+  'Fail-safe: an unresolved PR/push base, or an unknown `PATH_SET`, forces `relevant=true`\n' +
+  '(run the heavy gate) — coverage is never silently dropped.\n' +
+  '\n' +
+  '## Event System CI — what it runs\n' +
+  '\n' +
+  'Phase G Packet 4 (2026-05-28) added `event-system-ci.yml` to automate the canon-compliance defense established by the Phase G3 strict gate test (`tests/sensitive_history_canon_gate_audit_strict_gate.test.ts`). Phase H Packet 10 (2026-05-29) extended the test gate with the seven Phase H suites (74 tests) so PR-time enforcement covers the consequence-visualization layer alongside the Phase B/D/E/F substrate. The `event-system-validation` job runs the three event gates below, preceded by typecheck on feature-branch pushes:\n' +
+  '\n' +
+  '### Gate 1 — TypeScript typecheck\n' +
+  '\n' +
+  '```\n' +
+  'npx tsc --noEmit\n' +
+  '```\n' +
+  '\n' +
+  'Catches loader-vocabulary, event-shape, and substrate-writer typing errors.\n' +
+  'This step runs on `codex/**`, `feature/**` and `claude/**` pushes. On main pushes and\n' +
+  'PRs, Baseline Regression performs the same root typecheck; failure remains visible\n' +
+  'there. Local standalone validation still includes typechecking.\n' +
+  '\n' +
+  '### Gate 2 — Event-system + Phase E/F/H suite (26 test files)\n' +
+  '\n' +
+  'Loader + decisions + evaluation + acceptance reporting:\n' +
+  '\n' +
+  '- `tests/e'... 6415 more characters
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/ci_dependency_install_contract.test.ts > CI dependency installs are immutable and workspace-local
+AssertionError: baseline-regression.yml should contain exactly 5 root/map install pairs
+
+5 !== 10
+
+
+- Expected
++ Received
+
+- 10
++ 5
+
+ ❯ tests/ci_dependency_install_contract.test.ts:40:16
+     38|         ) ?? [];
+     39| 
+     40|         assert.strictEqual(
+       |                ^
+     41|             installCommands.length,
+     42|             expectedPairs * 2,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/ci_dependency_install_contract.test.ts > workflow documentation states the immutable root and map install convention
+AssertionError: The input did not match the regular expression /working-directory: src\/ui\/map/. Input:
+
+'# GitHub Actions Workflows — AWWV\n' +
+  '\n' +
+  'This directory contains the GitHub Actions workflow definitions for A War Without Victory. Each workflow is a single-purpose CI surface; the README catalogs what exists, what each checks, and the local-equivalent commands a contributor runs before pushing.\n' +
+  '\n' +
+  '## Catalog\n' +
+  '\n' +
+  '| Workflow | File | Trigger | Purpose |\n' +
+  '|---|---|---|---|\n' +
+  '| Full Suite + Structural Fingerprint | `full-suite-and-fingerprint.yml` | push to `main`, PR to `main` | Required full-suite gate: complete `test:vitest:balanced`, then the self-scanning `qa:player-experience` gate on relevant code-contract changes; separate structural fingerprint job compares the fresh 40w platform-stable fingerprint. |\n' +
+  '| Baseline Regression | `baseline-regression.yml` | push to `main`, PR to `main` | Multi-job broad gate: typecheck, focused scenario anchor tests, `test:vitest:fast` (137 fast suites, includes the event-system tests via auto-discovery), `test:vitest:scenario`. The `test`/`scenarios` heavy steps are path-filtered (CODE set) and `scenario-anchors`/`scenarios` (SIM set) via the always-report shim — see "Always-report path-filter shim" below. |\n' +
+  '| Desktop Release Guard | `desktop-release-guard.yml` | push to `main`, PR to `main` | Builds + smoke-tests the Linux AppImage and Windows NSIS desktop packages; uploads the artifacts on every run. The packaging/probe heavy steps are path-filtered (DESKTOP set) via the always-report shim — see below. |\n' +
+  '| Release | `release.yml` | (see file) | Tagged-release publication pipeline. |\n' +
+  '| **Event System CI** | **`event-system-ci.yml`** | **push to `main` / `codex/**` / `feature/**` / `claude/**`, PR to `main`** | **Event subset, explicit strict-canon gate and byte-baseline check on every trigger. Feature-branch pushes also run typecheck; Baseline Regression owns typecheck on main pushes and PRs.** |\n' +
+  '\n' +
+  "R9 preparation Phase 2 retires the standalone Typecheck workflow. Baseline Regression's\n" +
+  'always-run `typecheck` job owns that same PR/root-lock/Node 22 contract and remains the\n' +
+  'dependency parent for its jobs. Event System CI retains branch-push typechecking and\n' +
+  'all 27 named test files (26 in the subset plus the separate strict gate): full-suite\n' +
+  'coverage is not guaranteed on those pushes or when its trusted path detector skips.\n' +
+  '\n' +
+  '## Always-report path-filter shim\n' +
+  '\n' +
+  '`.github/scripts/detect-changed-paths.sh` (task #81, 2026-06-09) lets REQUIRED status\n' +
+  'checks short-circuit their HEAVY steps to a fast success on doc-only PRs while STILL\n' +
+  'ALWAYS reporting their check name. It generalizes the proven full-suite shim\n' +
+  '(`detect-full-suite-changes.sh`, task #76).\n' +
+  '\n' +
+  'Why a step-level gate, not a workflow `paths:` filter: a `paths:` filter on a REQUIRED\n' +
+  'check NEVER reports on a non-matching PR, so GitHub blocks that PR forever on a\n' +
+  '"pending" required check (the "required + path-filtered" gotcha). The shim instead lets\n' +
+  'the workflow ALWAYS trigger and each job ALWAYS report — only the heavy steps are gated.\n' +
+  '\n' +
+  '**Integrity (task #346):** the skip decision runs a TRUSTED copy of the detection\n' +
+  "logic, NOT the PR's working copy. On `pull_request` each detect step first\n" +
+  '`git checkout origin/$GITHUB_BASE_REF -- .github/scripts/detect-*.sh` before running it,\n' +
+  'so a PR that edits a `detect-*.sh` script to always emit `relevant=false` CANNOT\n' +
+  'force-skip a REQUIRED gate — the base-branch logic decides. (On push to `main` the\n' +
+  'checked-out copy already IS the trusted base, so no restore is needed.) The only\n' +
+  'remaining surface is editing the restore line in the workflow YAML itself, which is\n' +
+  'conspicuous in a workflow-file diff at review time — the standard GitHub trust boundary\n' +
+  'for `pull_request` (not `pull_request_target`) workflows.\n' +
+  '\n' +
+  '| Job | Required? | `PATH_SET` | Heavy steps gated |\n' +
+  '|---|---|---|---|\n' +
+  '| `test` (Baseline Regression) | yes | `code` | `npm ci` + `test:vitest:fast` |\n' +
+  '| `full-suite` (Full Suite + Structural Fingerprint) | yes | full-suite set | `npm ci` + startup snapshot rebuild + `test:vitest:balanced` + `qa:player-experience` |\n' +
+  '| `structural-fingerprint` (Full Suite + Structural Fingerprint) | yes | full-suite set | `npm ci` + startup snapshot rebuild + fresh 40w structural-fingerprint compare |\n' +
+  '| `scenario-anchors` (Baseline Regression) | yes | `sim` | `npm ci` + `test:vitest:scenario:anchors` |\n' +
+  '| `scenarios` (Baseline Regression) | no | `sim` | `npm ci` + `test:vitest:scenario` |\n' +
+  '| `desktop-release-check` (Desktop Release Guard) | no | `desktop` | Linux AppImage package + smoke |\n' +
+  '| `desktop-packaged-runtime-probe` (Desktop Release Guard) | yes | `desktop` | Windows NSIS package + runtime probe |\n' +
+  '\n' +
+  '“Required” describes the intended merge-gate contract above. The Phase 2 read-only\n' +
+  'GitHub inspection reported main unprotected (HTTP 404) and no rulesets. No protection\n' +
+  'setting was changed; the surviving gate names and reporting behavior are retained.\n' +
+  '\n' +
+  '`typecheck` is intentionally left ALWAYS-RUN (fast, broad type signal) and is the\n' +
+  '`needs:` parent that keeps the gated Baseline jobs reporting. `full-suite` and\n' +
+  '`structural-fingerprint` use the sibling `detect-full-suite-changes.sh` shim.\n' +
+  'The player-experience gate is intentionally inside the already-required `full-suite`\n' +
+  'job so first-hour, live-surface, shipped-build, warning-signature, and Electron\n' +
+  'runtime regressions block relevant PRs immediately instead of depending on a\n' +
+  "separate branch-protection update. The job installs Puppeteer's Chrome binary\n" +
+  'explicitly before that gate because GitHub-hosted runners do not populate\n' +
+  '`/home/runner/.cache/puppeteer` from dependency installation alone. The\n' +
+  '`full-suite` checkout deliberately does not eager-fetch Git LFS before path\n' +
+  'detection, so the required always-report check can still reach its skip decision\n' +
+  'when repository LFS bandwidth is exhausted. The player-experience gate remains\n' +
+  'inside `full-suite` for relevant code-contract changes. If checkout provides LFS\n' +
+  'pointer stubs instead of PMTiles binaries, the browser-gate launcher sets\n' +
+  '`VITE_AWWV_DISABLE_PMTILES=1` for that proof run only; the tactical map then\n' +
+  'boots without PMTiles basemap sources while preserving the player-flow, routing,\n' +
+  'console-error, and surface-polish assertions.\n' +
+  '\n' +
+  'The balanced Vitest entrypoint preserves complete discovery while reducing wall time.\n' +
+  '`tools/test/test_suite_inventory.mjs` sorts the discovered file inventory, classifies\n' +
+  'cross-process isolation hazards, and assigns ordinary files to four process-isolated\n' +
+  'lanes by deterministic duration-weighted balancing. The property-heavy sector suite is\n' +
+  'partitioned by disjoint deterministic seed ranges; the serial tail owns tracked-save\n' +
+  'writers, ambient-run readers, environment mutators, and fixed-port tests. Run the same\n' +
+  'gate locally with `npm run test:vitest:balanced`; validate its inventory contracts with\n' +
+  '`npm run test:inventory:check`.\n' +
+  '\n' +
+  'Path sets (a changed file matching ANY entry => heavy steps run):\n' +
+  '\n' +
+  '- **code** — `src/ tools/ tests/ data/scenarios/ data/calibration/ scripts/` + `package.json package-lock.json vitest.config.ts tsconfig.json` + the Baseline workflow + the shim script. Identical to the full-suite set, so the `test` slice never shrinks coverage vs the full-vitest gate. `package-lock.json` (task #351) ensures a lockfile-only dep/security bump still runs the full suite.\n' +
+  '- **desktop** — `src/desktop/ src/ui/ src/shared/ src/runtime/ tools/ data/derived/ data/source/ data/reference/ data/ui/ data/scenarios/events/ assets/` + `package.json package-lock.json build/icon.png` + the Desktop Release Guard workflow + the Release workflow + the shim script. Per the 2026-06-05 CI/PR-batching policy ("desktop packaging required only for desktop/package/UI/runtime paths"), packaged runtime resources, shared runtime modules, and lockfile-only desktop dependency changes must also run the package/probe gates.\n' +
+  '\n' +
+  'Packaged runtime probe note (2026-06-26): `desktop:package:probe` verifies renderer/network failure capture plus route inventory for operational GeoJSON, terrain scalars, PMTiles range support, HQ clickable-region JSON, source settlement data, root runtime assets, and bundled MapLibre glyph PBFs. The tactical-map build copies `src/ui/map/public/font` into `dist/tactical-map/font`; CI probe windows may render with `disable_pmtiles=1`, but the PMTiles endpoint itself remains route-inventory checked with HTTP 206.\n' +
+  '- **sim** — `src/sim/ src/state/ src/scenario/ data/scenarios/ data/calibration/` + `package.json package-lock.json vitest.config.ts tsconfig.json` + the Baseline workflow + the shim script + the scenario TEST files the anchor gate executes (`tests/scenario_anchor_contract.test.ts`, `tests/integration_deployment_health.test.ts`, `tests/scenario_harness_contracts.test.ts`, `tests/integration_run_summary.test.ts`). The scenario test files (task #351) ensure a scenario-test-only PR still runs the anchor gate.\n' +
+  '\n' +
+  'Fail-safe: an unresolved PR/push base, or an unknown `PATH_SET`, forces `relevant=true`\n' +
+  '(run the heavy gate) — coverage is never silently dropped.\n' +
+  '\n' +
+  '## Event System CI — what it runs\n' +
+  '\n' +
+  'Phase G Packet 4 (2026-05-28) added `event-system-ci.yml` to automate the canon-compliance defense established by the Phase G3 strict gate test (`tests/sensitive_history_canon_gate_audit_strict_gate.test.ts`). Phase H Packet 10 (2026-05-29) extended the test gate with the seven Phase H suites (74 tests) so PR-time enforcement covers the consequence-visualization layer alongside the Phase B/D/E/F substrate. The `event-system-validation` job runs the three event gates below, preceded by typecheck on feature-branch pushes:\n' +
+  '\n' +
+  '### Gate 1 — TypeScript typecheck\n' +
+  '\n' +
+  '```\n' +
+  'npx tsc --noEmit\n' +
+  '```\n' +
+  '\n' +
+  'Catches loader-vocabulary, event-shape, and substrate-writer typing errors.\n' +
+  'This step runs on `codex/**`, `feature/**` and `claude/**` pushes. On main pushes and\n' +
+  'PRs, Baseline Regression performs the same root typecheck; failure remains visible\n' +
+  'there. Local standalone validation still includes typechecking.\n' +
+  '\n' +
+  '### Gate 2 — Event-system + Phase E/F/H suite (26 test files)\n' +
+  '\n' +
+  'Loader + decisions + evaluation + acceptance reporting:\n' +
+  '\n' +
+  '- `tests/e'... 6415 more characters
+
+
+- Expected: 
+/working-directory: src\/ui\/map/
+
++ Received: 
+"# GitHub Actions Workflows — AWWV
+
+This directory contains the GitHub Actions workflow definitions for A War Without Victory. Each workflow is a single-purpose CI surface; the README catalogs what exists, what each checks, and the local-equivalent commands a contributor runs before pushing.
+
+## Catalog
+
+| Workflow | File | Trigger | Purpose |
+|---|---|---|---|
+| Full Suite + Structural Fingerprint | `full-suite-and-fingerprint.yml` | push to `main`, PR to `main` | Required full-suite gate: complete `test:vitest:balanced`, then the self-scanning `qa:player-experience` gate on relevant code-contract changes; separate structural fingerprint job compares the fresh 40w platform-stable fingerprint. |
+| Baseline Regression | `baseline-regression.yml` | push to `main`, PR to `main` | Multi-job broad gate: typecheck, focused scenario anchor tests, `test:vitest:fast` (137 fast suites, includes the event-system tests via auto-discovery), `test:vitest:scenario`. The `test`/`scenarios` heavy steps are path-filtered (CODE set) and `scenario-anchors`/`scenarios` (SIM set) via the always-report shim — see \"Always-report path-filter shim\" below. |
+| Desktop Release Guard | `desktop-release-guard.yml` | push to `main`, PR to `main` | Builds + smoke-tests the Linux AppImage and Windows NSIS desktop packages; uploads the artifacts on every run. The packaging/probe heavy steps are path-filtered (DESKTOP set) via the always-report shim — see below. |
+| Release | `release.yml` | (see file) | Tagged-release publication pipeline. |
+| **Event System CI** | **`event-system-ci.yml`** | **push to `main` / `codex/**` / `feature/**` / `claude/**`, PR to `main`** | **Event subset, explicit strict-canon gate and byte-baseline check on every trigger. Feature-branch pushes also run typecheck; Baseline Regression owns typecheck on main pushes and PRs.** |
+
+R9 preparation Phase 2 retires the standalone Typecheck workflow. Baseline Regression's
+always-run `typecheck` job owns that same PR/root-lock/Node 22 contract and remains the
+dependency parent for its jobs. Event System CI retains branch-push typechecking and
+all 27 named test files (26 in the subset plus the separate strict gate): full-suite
+coverage is not guaranteed on those pushes or when its trusted path detector skips.
+
+## Always-report path-filter shim
+
+`.github/scripts/detect-changed-paths.sh` (task #81, 2026-06-09) lets REQUIRED status
+checks short-circuit their HEAVY steps to a fast success on doc-only PRs while STILL
+ALWAYS reporting their check name. It generalizes the proven full-suite shim
+(`detect-full-suite-changes.sh`, task #76).
+
+Why a step-level gate, not a workflow `paths:` filter: a `paths:` filter on a REQUIRED
+check NEVER reports on a non-matching PR, so GitHub blocks that PR forever on a
+\"pending\" required check (the \"required + path-filtered\" gotcha). The shim instead lets
+the workflow ALWAYS trigger and each job ALWAYS report — only the heavy steps are gated.
+
+**Integrity (task #346):** the skip decision runs a TRUSTED copy of the detection
+logic, NOT the PR's working copy. On `pull_request` each detect step first
+`git checkout origin/$GITHUB_BASE_REF -- .github/scripts/detect-*.sh` before running it,
+so a PR that edits a `detect-*.sh` script to always emit `relevant=false` CANNOT
+force-skip a REQUIRED gate — the base-branch logic decides. (On push to `main` the
+checked-out copy already IS the trusted base, so no restore is needed.) The only
+remaining surface is editing the restore line in the workflow YAML itself, which is
+conspicuous in a workflow-file diff at review time — the standard GitHub trust boundary
+for `pull_request` (not `pull_request_target`) workflows.
+
+| Job | Required? | `PATH_SET` | Heavy steps gated |
+|---|---|---|---|
+| `test` (Baseline Regression) | yes | `code` | `npm ci` + `test:vitest:fast` |
+| `full-suite` (Full Suite + Structural Fingerprint) | yes | full-suite set | `npm ci` + startup snapshot rebuild + `test:vitest:balanced` + `qa:player-experience` |
+| `structural-fingerprint` (Full Suite + Structural Fingerprint) | yes | full-suite set | `npm ci` + startup snapshot rebuild + fresh 40w structural-fingerprint compare |
+| `scenario-anchors` (Baseline Regression) | yes | `sim` | `npm ci` + `test:vitest:scenario:anchors` |
+| `scenarios` (Baseline Regression) | no | `sim` | `npm ci` + `test:vitest:scenario` |
+| `desktop-release-check` (Desktop Release Guard) | no | `desktop` | Linux AppImage package + smoke |
+| `desktop-packaged-runtime-probe` (Desktop Release Guard) | yes | `desktop` | Windows NSIS package + runtime probe |
+
+“Required” describes the intended merge-gate contract above. The Phase 2 read-only
+GitHub inspection reported main unprotected (HTTP 404) and no rulesets. No protection
+setting was changed; the surviving gate names and reporting behavior are retained.
+
+`typecheck` is intentionally left ALWAYS-RUN (fast, broad type signal) and is the
+`needs:` parent that keeps the gated Baseline jobs reporting. `full-suite` and
+`structural-fingerprint` use the sibling `detect-full-suite-changes.sh` shim.
+The player-experience gate is intentionally inside the already-required `full-suite`
+job so first-hour, live-surface, shipped-build, warning-signature, and Electron
+runtime regressions block relevant PRs immediately instead of depending on a
+separate branch-protection update. The job installs Puppeteer's Chrome binary
+explicitly before that gate because GitHub-hosted runners do not populate
+`/home/runner/.cache/puppeteer` from dependency installation alone. The
+`full-suite` checkout deliberately does not eager-fetch Git LFS before path
+detection, so the required always-report check can still reach its skip decision
+when repository LFS bandwidth is exhausted. The player-experience gate remains
+inside `full-suite` for relevant code-contract changes. If checkout provides LFS
+pointer stubs instead of PMTiles binaries, the browser-gate launcher sets
+`VITE_AWWV_DISABLE_PMTILES=1` for that proof run only; the tactical map then
+boots without PMTiles basemap sources while preserving the player-flow, routing,
+console-error, and surface-polish assertions.
+
+The balanced Vitest entrypoint preserves complete discovery while reducing wall time.
+`tools/test/test_suite_inventory.mjs` sorts the discovered file inventory, classifies
+cross-process isolation hazards, and assigns ordinary files to four process-isolated
+lanes by deterministic duration-weighted balancing. The property-heavy sector suite is
+partitioned by disjoint deterministic seed ranges; the serial tail owns tracked-save
+writers, ambient-run readers, environment mutators, and fixed-port tests. Run the same
+gate locally with `npm run test:vitest:balanced`; validate its inventory contracts with
+`npm run test:inventory:check`.
+
+Path sets (a changed file matching ANY entry => heavy steps run):
+
+- **code** — `src/ tools/ tests/ data/scenarios/ data/calibration/ scripts/` + `package.json package-lock.json vitest.config.ts tsconfig.json` + the Baseline workflow + the shim script. Identical to the full-suite set, so the `test` slice never shrinks coverage vs the full-vitest gate. `package-lock.json` (task #351) ensures a lockfile-only dep/security bump still runs the full suite.
+- **desktop** — `src/desktop/ src/ui/ src/shared/ src/runtime/ tools/ data/derived/ data/source/ data/reference/ data/ui/ data/scenarios/events/ assets/` + `package.json package-lock.json build/icon.png` + the Desktop Release Guard workflow + the Release workflow + the shim script. Per the 2026-06-05 CI/PR-batching policy (\"desktop packaging required only for desktop/package/UI/runtime paths\"), packaged runtime resources, shared runtime modules, and lockfile-only desktop dependency changes must also run the package/probe gates.
+
+Packaged runtime probe note (2026-06-26): `desktop:package:probe` verifies renderer/network failure capture plus route inventory for operational GeoJSON, terrain scalars, PMTiles range support, HQ clickable-region JSON, source settlement data, root runtime assets, and bundled MapLibre glyph PBFs. The tactical-map build copies `src/ui/map/public/font` into `dist/tactical-map/font`; CI probe windows may render with `disable_pmtiles=1`, but the PMTiles endpoint itself remains route-inventory checked with HTTP 206.
+- **sim** — `src/sim/ src/state/ src/scenario/ data/scenarios/ data/calibration/` + `package.json package-lock.json vitest.config.ts tsconfig.json` + the Baseline workflow + the shim script + the scenario TEST files the anchor gate executes (`tests/scenario_anchor_contract.test.ts`, `tests/integration_deployment_health.test.ts`, `tests/scenario_harness_contracts.test.ts`, `tests/integration_run_summary.test.ts`). The scenario test files (task #351) ensure a scenario-test-only PR still runs the anchor gate.
+
+Fail-safe: an unresolved PR/push base, or an unknown `PATH_SET`, forces `relevant=true`
+(run the heavy gate) — coverage is never silently dropped.
+
+## Event System CI — what it runs
+
+Phase G Packet 4 (2026-05-28) added `event-system-ci.yml` to automate the canon-compliance defense established by the Phase G3 strict gate test (`tests/sensitive_history_canon_gate_audit_strict_gate.test.ts`). Phase H Packet 10 (2026-05-29) extended the test gate with the seven Phase H suites (74 tests) so PR-time enforcement covers the consequence-visualization layer alongside the Phase B/D/E/F substrate. The `event-system-validation` job runs the three event gates below, preceded by typecheck on feature-branch pushes:
+
+### Gate 1 — TypeScript typecheck
+
+```
+npx tsc --noEmit
+```
+
+Catches loader-vocabulary, event-shape, and substrate-writer typing errors.
+This step runs on `codex/**`, `feature/**` and `claude/**` pushes. On main pushes and
+PRs, Baseline Regression performs the same root typecheck; failure remains visible
+there. Local standalone validation still includes typechecking.
+
+### Gate 2 — Event-system + Phase E/F/H suite (26 test files)
+
+Loader + decisions + evaluation + acceptance reporting:
+
+- `tests/event_loader.test.ts`
+- `tests/event_loader_runtime_substrate.test.ts`
+- `tests/event_decisions.test.ts`
+- `tests/events_evaluate.test.ts`
+- `tests/events_evaluate_b3.test.ts`
+- `tests/event_families.test.ts`
+- `tests/event_state_shape_b2.test.ts`
+- `tests/event_causality_chain.test.ts` (Phase F1)
+- `tests/event_family_graph.test.ts` (Phase F3)
+- `tests/sim/events/event_acceptance_report.test.ts`
+- `tests/sim/events/event_taxonomy_report.test.ts`
+- `tests/sim/events/event_presidential_acceptance.test.ts`
+
+Phase E political-dimension propagation + Phase F diagnostics:
+
+- `tests/political_dimension_propagation_gate.test.ts`
+- `tests/political_dimensions_snapshot.test.ts`
+- `tests/phase_e2_cohesion_caution_bias.test.ts`
+- `tests/phase_e3_combined_activation.test.ts`
+- `tests/sensitive_history_canon_gate_audit.test.ts` (Phase F2 audit unit tests)
+- `tests/phase_d_causality_runtime_integration.test.ts` (Phase F5 runtime integration)
+
+Phase H causality-query API + UI consequence-visualization layer (Packet 10):
+
+- `tests/causality_query.test.ts` (H2 — causality query API)
+- `tests/ui/event_decision_modal_decision_context.test.ts` (H3 — decision-context modal)
+- `tests/ui/faction_branch_tags_badge.test.ts` (H4 — faction-branch badges)
+- `tests/ui/codex_panel_unlock_state.test.ts` (H5 — codex unlock state)
+- `tests/ui/chronicle_causality_slides.test.ts` (H6 — chronicle causality slides)
+- `tests/ui/catalog_wireup_integration.test.ts` (H7 — catalog wire-up)
+- `tests/ui/archive_spine_contract.test.ts` (H8 successor — Army HQ Records → Decision Consequences)
+
+Gate integrity:
+
+- `tests/ci_workflow_test_paths_exist.test.ts` — asserts every `tests/**` path named in this directory resolves on disk.
+
+> **H8 note (2026-08-17).** This list named `tests/ui/decision_history_overlay.test.ts` until today, six weeks after `7ceddab8f` (2026-07-07) deleted it in \"Retire decision history overlay into records\". Vitest treats those arguments as *filters*, so the unmatched name matched nothing and failed nothing — the gate ran one file fewer than it advertised, in silence. The coverage was **migrated, not retired**: `archive_spine_contract.test.ts` is its named successor per the WP-6 ledger entry. Per-file test counts have been dropped from this list; they were hand-maintained, drifted, and are not what a reader needs from a catalog.
+
+### Gate 3 — Phase F2 strict gate (canon-compliance hard rail)
+
+```
+node node_modules/vitest/vitest.mjs run \\
+  tests/sensitive_history_canon_gate_audit_strict_gate.test.ts \\
+  --reporter=dot
+```
+
+Loads the real catalog via `buildSensitiveHistoryAudit` and asserts `CRITICAL + WARNING = 0` violations. `INFO` `reward_risk` violations (e.g. `seek_clandestine_arms`'s §6-reviewed 1.05x `recruitment_modifier`) are permitted and surfaced for visibility but do **not** block CI. See `docs/40_reports/implemented/20260528_PHASE_F_CLOSEOUT.md` G3 amendment for the design call.
+
+### Gate 4 — Baseline regression
+
+```
+node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_baseline_regression.ts
+```
+
+SHA256 comparison of run artifacts against committed baselines. Detects engine-behavior drift via byte-equality.
+
+## Run the same checks locally
+
+```bash
+# Gate 1
+npx tsc --noEmit
+
+# Gate 2 (one shot — Phase E/F substrate + Phase H consequence layer)
+node node_modules/vitest/vitest.mjs run \\
+  tests/event_loader.test.ts \\
+  tests/event_loader_runtime_substrate.test.ts \\
+  tests/event_decisions.test.ts \\
+  tests/events_evaluate.test.ts \\
+  tests/events_evaluate_b3.test.ts \\
+  tests/event_families.test.ts \\
+  tests/event_state_shape_b2.test.ts \\
+  tests/event_causality_chain.test.ts \\
+  tests/event_family_graph.test.ts \\
+  tests/sim/events/event_acceptance_report.test.ts \\
+  tests/sim/events/event_taxonomy_report.test.ts \\
+  tests/sim/events/event_presidential_acceptance.test.ts \\
+  tests/political_dimension_propagation_gate.test.ts \\
+  tests/political_dimensions_snapshot.test.ts \\
+  tests/phase_e2_cohesion_caution_bias.test.ts \\
+  tests/phase_e3_combined_activation.test.ts \\
+  tests/sensitive_history_canon_gate_audit.test.ts \\
+  tests/phase_d_causality_runtime_integration.test.ts \\
+  tests/causality_query.test.ts \\
+  tests/ui/event_decision_modal_decision_context.test.ts \\
+  tests/ui/faction_branch_tags_badge.test.ts \\
+  tests/ui/codex_panel_unlock_state.test.ts \\
+  tests/ui/chronicle_causality_slides.test.ts \\
+  tests/ui/catalog_wireup_integration.test.ts \\
+  tests/ui/archive_spine_contract.test.ts \\
+  tests/ci_workflow_test_paths_exist.test.ts \\
+  --reporter=dot
+
+# Gate 3 (strict canon-compliance gate; the one to run after editing event JSON)
+node node_modules/vitest/vitest.mjs run \\
+  tests/sensitive_history_canon_gate_audit_strict_gate.test.ts \\
+  --reporter=dot
+
+# Gate 4
+node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_baseline_regression.ts
+```
+
+The broader `npm run test:vitest:fast` command also covers Gates 1–3 (it auto-discovers all non-scenario vitest files in `tests/`), but the explicit per-file invocation above is what the CI workflow runs and is the fastest path to triaging a Gate 3 failure locally.
+
+## Convention notes
+
+- Node version: **22** across all workflows. Bumping in one workflow without bumping the rest causes spurious diff between local-dev and CI behaviour.
+- Install command: `npm ci --legacy-peer-deps`.
+- Map workspace: the root `npm ci --legacy-peer-deps` includes `src/ui/map` through the declared npm workspace and sole root lockfile. Do not run a second map install; production and tests share the intended runtime dependency graph.
+- Action versions: `actions/checkout@v5` and `actions/setup-node@v5` (matches `baseline-regression.yml` and `desktop-release-guard.yml`). Pinning to v4 mid-workflow set causes intermittent cache-key drift.
+
+## Cross-references
+
+- Strict gate origin and G3 design call: `docs/40_reports/implemented/20260528_PHASE_F_CLOSEOUT.md` (see the \"G3 amendment\" section near the end).
+- Event-system authoring patterns this CI validates: `docs/20_engineering/EVENT_SYSTEM_AUTHORING_GUIDE.md` (§4 loader validation, §7 diagnostic tools).
+- Sensitive-history canon: `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`.
+- F2 tool source: `tools/diagnostics/sensitive_history_canon_gate_audit.ts`.
+- Strict gate test source: `tests/sensitive_history_canon_gate_audit_strict_gate.test.ts`.
+- Baseline regression source: `tools/scenario_runner/run_baseline_regression.ts`.
+"
+
+ ❯ tests/ci_dependency_install_contract.test.ts:66:12
+     64| 
+     65|     assert.match(readme, /Install command: `npm ci --legacy-peer-deps`…
+     66|     assert.match(readme, /working-directory: src\/ui\/map/);
+       |            ^
+     67|     assert.doesNotMatch(readme, /\bnpm(?:\.cmd)?\s+install\b/);
+     68|     assert.doesNotMatch(readme, /--prefix src\/ui\/map/);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  2 failed | 40 passed (42)
+   Start at  21:01:45
+   Duration  15.36s (transform 143ms, setup 32ms, collect 237ms, tests 12.29s, environment 2ms, prepare 742ms)
+
+EXIT_CODE=1

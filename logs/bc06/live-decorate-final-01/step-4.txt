@@ -1,0 +1,98 @@
+DECISION REQUIRED
+Republic of Bosnia and Herzegovina · 27 Dec 1993
+Decorate a Unit
+PRESIDENTIAL RESPONSE
+Decorate 101st Mountain
+
+You honour the regular formation that has held longest under the heaviest pressure. Its soldiers stand a little taller, and the army takes note — but the formations that bled just as hard and went unmentioned mark the slight.
+
+Republic of Bosnia and Herzegovina morale +5
+Republic of Bosnia and Herzegovina cohesion +2
+Republic of Bosnia and Herzegovina Military Credibility +4
+Republic of Bosnia and Herzegovina Internal Cohesion -2
+Decorate 102nd Motorized
+
+You honour the regular formation that has held longest under the heaviest pressure. Its soldiers stand a little taller, and the army takes note — but the formations that bled just as hard and went unmentioned mark the slight.
+
+Republic of Bosnia and Herzegovina morale +5
+Republic of Bosnia and Herzegovina cohesion +2
+Republic of Bosnia and Herzegovina Military Credibility +4
+Republic of Bosnia and Herzegovina Internal Cohesion -2
+Decorate 104th Motorized
+
+You honour the regular formation that has held longest under the heaviest pressure. Its soldiers stand a little taller, and the army takes note — but the formations that bled just as hard and went unmentioned mark the slight.
+
+Republic of Bosnia and Herzegovina morale +5
+Republic of Bosnia and Herzegovina cohesion +2
+Republic of Bosnia and Herzegovina Military Credibility +4
+Republic of Bosnia and Herzegovina Internal Cohesion -2
+Decorate 105th Motorized
+
+You honour the regular formation that has held longest under the heaviest pressure. Its soldiers stand a little taller, and the army takes note — but the formations that bled just as hard and went unmentioned mark the slight.
+
+Republic of Bosnia and Herzegovina morale +5
+Republic of Bosnia and Herzegovina cohesion +2
+Republic of Bosnia and Herzegovina Military Credibility +4
+Republic of Bosnia and Herzegovina Internal Cohesion -2
+Decorate 109th Mountain
+
+You honour the regular formation that has held longest under the heaviest pressure. Its soldiers stand a little taller, and the army takes note — but the formations that bled just as hard and went unmentioned mark the slight.
+
+Republic of Bosnia and Herzegovina morale +5
+Republic of Bosnia and Herzegovina cohesion +2
+Republic of Bosnia and Herzegovina Military Credibility +4
+Republic of Bosnia and Herzegovina Internal Cohesion -2
+Decorate 10th Mountain Brigade
+
+You honour the regular formation that has held longest under the heaviest pressure. Its soldiers stand a little taller, and the army takes note — but the formations that bled just as hard and went unmentioned mark the slight.
+
+Republic of Bosnia and Herzegovina morale +5
+Republic of Bosnia and Herzegovina cohesion +2
+Republic of Bosnia and Herzegovina Military Credibility +4
+Republic of Bosnia and Herzegovina Internal Cohesion -2
+Issue a broad citation across the regular corps
+
+Rather than single one out, you issue a citation recognising the regular formations of the army together. It avoids the appearance of favouritism, but a medal shared by all is a medal felt by none — the lift is gentler and the gesture thinner.
+
+Republic of Bosnia and Herzegovina morale +3
+Republic of Bosnia and Herzegovina cohesion +3
+Republic of Bosnia and Herzegovina Internal Cohesion +3
+Decline — honours ring hollow amid these losses
+STAFF RECOMMENDATION
+
+Staff recommendation for this abstract command decision. This is not a historical default and does not control bot calibration.
+
+You judge that with casualties this heavy, a decoration would ring hollow or look like spin. You hold the citations back. The deserving go unhonoured, and some read the silence as the leadership looking away from their sacrifice.
+
+Republic of Bosnia and Herzegovina morale -1
+Republic of Bosnia and Herzegovina Internal Cohesion -1
+SITUATION
+
+Your staff brings forward citations for units that have held the line under impossible conditions. A decoration — a unit citation, a streamer for the colours — costs nothing in materiel and can lift a battered formation's spirit and the watching army's morale. But honours are political: the unit you single out is the unit you are seen to favour, and every formation passed over reads the omission. Decorate the wrong unit, or decorate at all amid heavy losses, and the gesture rings hollow or breeds resentment. Which formation will the president honour — and only a regular formation of the armed forces is eligible?
+
+CORPS COMMANDER NEDŽAD AJNADŽIĆ
+
+Staff notes that decorations honouring regular formations can lift morale but are double-edged: the favoured unit gains, the overlooked resent, and honours amid heavy loss can ring hollow. Declining is the conservative course.
+
+TRIGGER EVIDENCE
+Recurring command-presence pressure is active after prolonged front-line strain.
+Eligibility is restricted to regular armed-forces formations; no irregular or paramilitary unit is offered.
+DOSSIER
+CATEGORY
+Command
+FACTION / DATE
+Republic of Bosnia and Herzegovina / 27 Dec 1993
+DECISION CONTEXT
+Source dossier: Abstracted command-decoration action restricted by design to regular military formations; the staff recommendation is a command judgment, not a sourced historical default. No specific decoration or re...
+Historical default source review required. This is not a recommendation; choose the response that matches your policy.
+Record trail: after your response, this decision is filed in the Chronicle decision ledger; Army HQ Records keeps consequences, opportunities, operations, and turn aftermath.
+PRESIDENT'S DESK
+COMMAND SURFACE
+DIPLOMACY
+INTELLIGENCE
+ARMY HQ
+CHRONICLE
+FACTION
+WAR MAP
+ADVANCE
+27 Dec 1993

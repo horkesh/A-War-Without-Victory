@@ -1,0 +1,6 @@
+PACKAGE_JSON_PARSE PASS
+EXACT_RETIRED_ALIAS governance:re:scope PRESENT=false
+EXACT_RETIRED_ALIAS governance:re:hook:install PRESENT=false
+EXACT_RETIRED_ALIAS governance:re:hook:verify PRESENT=false
+ALL_GOVERNANCE_RE_ALIAS_COUNT 0
+EXIT_CODE=0

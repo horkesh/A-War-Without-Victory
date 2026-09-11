@@ -1,0 +1,4 @@
+[codex/r7-english-readability 47eab7ffa] fix(ui): finish R7 severity labels and staff presentation
+ 12 files changed, 145 insertions(+), 24 deletions(-)
+ create mode 100644 tests/ui/r7_officer_tenure.test.ts
+EXIT_CODE=0

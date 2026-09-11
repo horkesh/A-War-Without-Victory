@@ -1,0 +1,10 @@
+COMMAND: New-Item -ItemType Junction -Path F:/AWWV-worktrees/r7-readability-post-a/node_modules -Target F:/A-War-Without-Victory/node_modules; git status --porcelain
+
+    Directory: F:\AWWV-worktrees\r7-readability-post-a
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+l----         9. 9. 2026.    20:42                node_modules -> F:\A-War-Without-Victory\node_modules
+
+
+EXIT_CODE=0

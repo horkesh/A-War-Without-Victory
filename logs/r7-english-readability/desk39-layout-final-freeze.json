@@ -1,0 +1,14 @@
+[
+  {
+    "path": "src/ui/map/components/presidential_desk/PresidentDeskShell.tsx",
+    "sha256": "d721df1fbc535d30219a3d71ec44e9b580a7e3b0ade7d9ba9d02df5e897880b4"
+  },
+  {
+    "path": "src/ui/map/components/warroom/WarroomShellLayer.tsx",
+    "sha256": "87bc02599e4e4131f130c2c196f8503599bda421922fea2515ba9fb861f5da51"
+  },
+  {
+    "path": "tests/ui/r7_president_desk_layout_readability.test.ts",
+    "sha256": "2c245b33a19b73c471018e5ba90f57050f5e34833dbf452d06332734441b3ffe"
+  }
+]

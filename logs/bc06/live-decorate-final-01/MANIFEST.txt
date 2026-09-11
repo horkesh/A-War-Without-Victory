@@ -1,0 +1,108 @@
+# Receipt manifest for logs/bc06/live-decorate-final-01
+#
+# The evidence itself is NOT tracked: it is too large to commit, and committing it would
+# bloat every clone for the benefit of one citation. This file is the tracked record of
+# what was there — the file list and sizes, nothing else. It proves the shape of the
+# evidence, not its contents.
+#
+# Regenerate with: node tools/write_receipt_manifest.cjs logs/bc06/live-decorate-final-01
+# Deterministic: sorted, no timestamps. An unchanged directory yields an identical file.
+#
+# 96 file(s), 28219663 bytes
+
+ 701889  before.json
+      0  failure-window-0-frame-0.txt
+    186  failure-window-0-frame-1.txt
+2021428  failure-window-0.png
+    131  main.stderr.log
+    160  main.stdout.log
+  45056  profile/Cache/Cache_Data/data_0
+ 270336  profile/Cache/Cache_Data/data_1
+   8192  profile/Cache/Cache_Data/data_2
+   8192  profile/Cache/Cache_Data/data_3
+ 524656  profile/Cache/Cache_Data/index
+      4  profile/Cache/No_Vary_Search/journal.baj
+     20  profile/Cache/No_Vary_Search/snapshot.baf
+    216  profile/Code Cache/js/2ed9e56b3b76ac39_0
+    220  profile/Code Cache/js/368e139a45361673_0
+    227  profile/Code Cache/js/45db690da4f75795_0
+    227  profile/Code Cache/js/5313399b731b7049_0
+    229  profile/Code Cache/js/60bfd601f16c1381_0
+    217  profile/Code Cache/js/62334f81066c7e8e_0
+    227  profile/Code Cache/js/6419aa3730ab009f_0
+    217  profile/Code Cache/js/65e1d1eb1bf57bda_0
+    217  profile/Code Cache/js/6f857a08208a8887_0
+    227  profile/Code Cache/js/a660375013ff7694_0
+    219  profile/Code Cache/js/a6979f4002fe17fd_0
+    227  profile/Code Cache/js/a75841a86fc7641e_0
+    231  profile/Code Cache/js/ac9aa289c770dda3_0
+    239  profile/Code Cache/js/aff788ff68450530_0
+    216  profile/Code Cache/js/b35b2a3e51bf5369_0
+    222  profile/Code Cache/js/b6d79f6ca3e59be3_0
+    217  profile/Code Cache/js/d29af40730ccb00e_0
+    216  profile/Code Cache/js/e8f4d4bdcd86ad64_0
+     24  profile/Code Cache/js/index
+    480  profile/Code Cache/js/index-dir/the-real-index
+     24  profile/Code Cache/wasm/index
+     48  profile/Code Cache/wasm/index-dir/the-real-index
+  36864  profile/DIPS
+   8192  profile/DawnGraphiteCache/data_0
+ 270336  profile/DawnGraphiteCache/data_1
+   8192  profile/DawnGraphiteCache/data_2
+   8192  profile/DawnGraphiteCache/data_3
+ 262512  profile/DawnGraphiteCache/index
+   8192  profile/DawnWebGPUCache/data_0
+ 270336  profile/DawnWebGPUCache/data_1
+   8192  profile/DawnWebGPUCache/data_2
+   8192  profile/DawnWebGPUCache/data_3
+ 262512  profile/DawnWebGPUCache/index
+     60  profile/DevToolsActivePort
+  45056  profile/GPUCache/data_0
+ 270336  profile/GPUCache/data_1
+1056768  profile/GPUCache/data_2
+4202496  profile/GPUCache/data_3
+ 262512  profile/GPUCache/index
+    434  profile/Local State
+     30  profile/Local Storage/leveldb/000003.log
+     16  profile/Local Storage/leveldb/CURRENT
+      0  profile/Local Storage/leveldb/LOCK
+    301  profile/Local Storage/leveldb/LOG
+     41  profile/Local Storage/leveldb/MANIFEST-000001
+  20480  profile/Network/Cookies
+      0  profile/Network/Cookies-journal
+    111  profile/Network/Network Persistent State
+      0  profile/Network/NetworkDataMigrated
+  36864  profile/Network/Trust Tokens
+      0  profile/Network/Trust Tokens-journal
+     93  profile/Preferences
+    272  profile/Session Storage/000003.log
+     16  profile/Session Storage/CURRENT
+      0  profile/Session Storage/LOCK
+    289  profile/Session Storage/LOG
+     41  profile/Session Storage/MANIFEST-000001
+     24  profile/Shared Dictionary/cache/index
+     48  profile/Shared Dictionary/cache/index-dir/the-real-index
+  45056  profile/Shared Dictionary/db
+      0  profile/Shared Dictionary/db-journal
+  57093  provenance.json
+   1642  result.json
+1373098  saves/autosave.json
+ 904220  saves/bc06-proof-fixture.json
+ 701889  step-0-state.json
+3189820  step-0.png
+    186  step-0.txt
+ 701889  step-1-state.json
+1959848  step-1.png
+    993  step-1.txt
+ 701889  step-2-state.json
+1236052  step-2.png
+   2051  step-2.txt
+ 701889  step-3-state.json
+1236823  step-3.png
+   2175  step-3.txt
+ 718475  step-4-state.json
+1322189  step-4.png
+   5696  step-4.txt
+ 702185  step-5-state.json
+2021438  step-5.png
+    230  step-5.txt

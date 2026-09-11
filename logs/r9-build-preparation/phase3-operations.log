@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Visible operation proposal opens exact dossier",
+    "Exact four objectives visible on live map; objective selection works",
+    "Visible return restores exact proposal dossier"
+  ],
+  "output": "F:\\A-War-Without-Victory\\logs\\bounded-deletion-cleanup\\task6-operations-phase3-1"
+}
+EXIT_CODE=0

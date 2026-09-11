@@ -23,8 +23,10 @@
     {
       "model": "qwen3-coder:30b-a3b-q4_K_M",
       "reason": "18 GB against 15.8 GB VRAM; 6.3 GB spilled to DDR4-2400",
-      "generation_tok_s": 12.0,
-      "prompt_tok_s": 8.0
+      "generation_tok_s": 12.8,
+      "prompt_tok_s": 253.5,
+      "prompt_tok_s_superseded": 8,
+      "note": "Figures corrected 2026-09-11 by npm run local:benchmark; the superseded prompt figure (8 tok/s) could not be reproduced. Still rejected: 6x slower to read than qwen3.5:9b."
     },
     {
       "model": "qwen3.5:27b / qwen3.6:27b",
@@ -33,6 +35,47 @@
     {
       "model": "qwen3-coder-next (80B-A3B)",
       "reason": "needs >45 GB for 4-bit; 44 GB combined ceiling. 2-bit would fit but degrades a code model where it matters most"
+    },
+    {
+      "model": "gemma4:26b",
+      "reason": "18.6 GB against a 16 GB card; spills to DDR4. Slowest generation measured on this rig.",
+      "prompt_tok_s": 186.2,
+      "generation_tok_s": 9.8,
+      "note": "Present on this machine but not pulled by the harness. Benchmarked 2026-09-11 for completeness; it loses to qwen3.5:9b on both axes."
     }
-  ]
+  ],
+  "keep_alive": "30m",
+  "keep_alive_note": "Measured 2026-09-11: a warm model loads in 3ms, a cold one timed out a dispatch and reported itself as \"ollama not running\". Residency is cheaper than the misdiagnosis.",
+  "max_parallel": 2,
+  "max_parallel_note": "Measured 2026-09-11 on this 16 GB card with a 9B model: two concurrent requests overlapped 12.9s of 27.7s serial work. Slots share VRAM; raise only with a new measurement. (An earlier draft of this note said 12GB — wrong, and corrected: the measured GPU is the 16 GB RX 7800 XT recorded in `measured.gpu`.)",
+  "benchmark_2026_09_11": {
+    "tool": "npm run local:benchmark",
+    "num_ctx": 32768,
+    "sample": "tools/validate_receipt_citations.cjs (~2.3k tok)",
+    "results": [
+      {
+        "model": "qwen3.5:9b",
+        "size_gb": 6.6,
+        "prompt_tok_s": 1508.3,
+        "gen_tok_s": 51.6,
+        "load_s": 19.7
+      },
+      {
+        "model": "qwen3-coder:30b-a3b-q4_K_M",
+        "size_gb": 18.6,
+        "prompt_tok_s": 253.5,
+        "gen_tok_s": 12.8,
+        "load_s": 35.6
+      },
+      {
+        "model": "gemma4:26b",
+        "size_gb": 18.6,
+        "prompt_tok_s": 186.2,
+        "gen_tok_s": 9.8,
+        "load_s": 42.5
+      }
+    ],
+    "conclusion": "qwen3.5:9b holds: 6x the prompt throughput and 4x the generation of either 18.6 GB model, both of which exceed this 16 GB card and spill to DDR4. A code-specialised model does NOT win here — the size penalty dominates the specialisation.",
+    "discrepancy": "The `rejected` entry below recorded qwen3-coder at 8 prompt tok/s. Re-measured at the SAME 32768 context it is 253.5 — a 31x gap that num_ctx does not explain, so the original figure is unsound (most likely taken during a cold load, or with another model still resident). The REJECTION is unaffected: 253 against 1508 is still a 6x loss. The number is corrected rather than quietly kept, because a wrong figure in an evidence file is worse than no figure."
+  }
 }

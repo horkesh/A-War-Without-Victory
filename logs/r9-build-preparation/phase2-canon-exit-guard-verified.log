@@ -1,0 +1,5 @@
+Exception: F:\A-War-Without-Victory\logs\r9-build-preparation\phase2-canon-exit-guard-verified.ps1:2
+Line |
+   2 |  if ($LASTEXITCODE) { throw "canon:check exit $LASTEXITCODE" }
+     |                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | canon:check exit 7

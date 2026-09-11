@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -ExecutionPolicy Bypass -File F:/A-War-Without-Victory/tools/architect/hooks/on_stop.ps1",
+            "command": "powershell -ExecutionPolicy Bypass -File tools/architect/hooks/on_stop.ps1",
             "timeout": 30
           }
         ]
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -ExecutionPolicy Bypass -File F:/A-War-Without-Victory/tools/architect/hooks/on_notification.ps1",
+            "command": "powershell -ExecutionPolicy Bypass -File tools/architect/hooks/on_notification.ps1",
             "timeout": 10
           }
         ]
@@ -61,7 +61,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.command // \"\"' | grep -qiE '(npm(\\.cmd)?[[:space:]]+run[[:space:]]+sim:scenario:run|run_scenario_with_preflight\\.ts|tools/scenario_runner/|runs/[^[:space:]]*(final_save\\.json|run_summary\\.json|control_delta\\.json|end_report\\.md|formation_delta\\.json|destroyed_brigades\\.json|watched_operations\\.json|weekly_report\\.jsonl|operation_aars\\.json))' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"ORCHESTRATOR ENFORCEMENT: This command invokes a scenario run or references its result artifacts. You MUST dispatch /scenario-creator-runner-tester to analyze these results BEFORE presenting any interpretation to the user. Present raw numbers only. All analysis must be attributed to experts.\"}}' || true",
+            "command": "bash tools/hooks/guard_scenario_artifacts.sh",
             "timeout": 5,
             "statusMessage": "Checking orchestrator enforcement..."
           },
@@ -78,7 +78,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "jq -r '.tool_input.command // \"\"' | grep -qiE '(npm(\\.cmd)?[[:space:]]+run[[:space:]]+sim:scenario:run|run_scenario_with_preflight\\.ts|tools/scenario_runner/|runs/[^[:space:]]*(final_save\\.json|run_summary\\.json|control_delta\\.json|end_report\\.md|formation_delta\\.json|destroyed_brigades\\.json|watched_operations\\.json|weekly_report\\.jsonl|operation_aars\\.json))' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostToolUse\",\"additionalContext\":\"ORCHESTRATOR ENFORCEMENT: This command invokes a scenario run or references its result artifacts. You MUST dispatch /scenario-creator-runner-tester to analyze these results BEFORE presenting any interpretation to the user. Present raw numbers only. All analysis must be attributed to experts.\"}}' || true",
+            "command": "bash tools/hooks/guard_scenario_artifacts.sh",
             "timeout": 5,
             "statusMessage": "Checking orchestrator enforcement..."
           }
@@ -100,7 +100,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash F:/A-War-Without-Victory/tools/hooks/guard_lookup_absence.sh",
+            "command": "bash tools/hooks/guard_lookup_absence.sh",
             "timeout": 10
           }
         ]
@@ -110,7 +110,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash F:/A-War-Without-Victory/tools/hooks/guard_dirty_citation.sh",
+            "command": "bash tools/hooks/guard_dirty_citation.sh",
             "timeout": 10
           }
         ]
@@ -141,6 +141,12 @@
           {
             "type": "command",
             "command": "bash tools/hooks/guard_stash_pop.sh",
+            "timeout": 5,
+            "statusMessage": "Checking stash safety..."
+          },
+          {
+            "type": "command",
+            "command": "bash tools/hooks/guard_inline_script.sh",
             "timeout": 5,
             "statusMessage": "Checking stash safety..."
           }

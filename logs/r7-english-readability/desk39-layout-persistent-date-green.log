@@ -1,0 +1,17 @@
+
+> awwv@0.9.9-beta.1 test:vitest
+> node tools/test/run_vitest_default.mjs tests/ui/r7_president_desk_layout_readability.test.ts tests/ui/president_desk_shell.test.ts tests/ui/desk_authority_header.test.ts tests/ui/warroom_shell_accessibility.test.ts
+
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/ui/president_desk_shell.test.ts (21 tests) 491ms
+ ✓ tests/ui/warroom_shell_accessibility.test.ts (15 tests) 710ms
+ ✓ tests/ui/desk_authority_header.test.ts (10 tests) 173ms
+ ✓ tests/ui/r7_president_desk_layout_readability.test.ts (2 tests) 4ms
+
+ Test Files  4 passed (4)
+      Tests  48 passed (48)
+   Start at  20:08:08
+   Duration  10.42s (transform 2.88s, setup 29ms, collect 4.88s, tests 1.38s, environment 2.44s, prepare 414ms)
+

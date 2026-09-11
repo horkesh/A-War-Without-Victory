@@ -1,0 +1,698 @@
+{
+  "probe": "awwv_desktop_runtime_probe",
+  "mode": "packaged",
+  "audio_assets": [
+    {
+      "relative_path": "app/assets/ambient_archive-DPQExHNq.ogg",
+      "sha256": "4ec9ecdd528d4bbf2880713d63846da87daa85565aea544163774f418a236316",
+      "size_bytes": 211346
+    },
+    {
+      "relative_path": "app/assets/ambient_field-5Mv-hV7p.ogg",
+      "sha256": "c7d4bf4537728de6878b77fea0ed28e7bfeb35e26e4f2817ae0d6092cd800dd6",
+      "size_bytes": 196084
+    },
+    {
+      "relative_path": "app/assets/ambient_warroom-CO4FPnyV.ogg",
+      "sha256": "fc757905f285f0cde1274e4fc832a39764bfb11f7053e0cae558c986ac00c82b",
+      "size_bytes": 206420
+    },
+    {
+      "relative_path": "app/assets/battle-z8Jd4fjD.ogg",
+      "sha256": "ca1d2dde5f0b286abac4f070e23edab8f30927c8a533665cdf2ac6492a415e49",
+      "size_bytes": 7369
+    },
+    {
+      "relative_path": "app/assets/battle_catastrophic-Cjw2jRz4.ogg",
+      "sha256": "183eebee20eb0a532b0b85104d139cbf2673eb66d95c3cc733ac9ea98362e7e8",
+      "size_bytes": 6103
+    },
+    {
+      "relative_path": "app/assets/battle_decisive-BJoqCB9H.ogg",
+      "sha256": "d21d0f0b782445db579d11e2506b24cd1ac9d664ee33aeaf807761aa7b6fd710",
+      "size_bytes": 4848
+    },
+    {
+      "relative_path": "app/assets/event-BHdp5oPQ.ogg",
+      "sha256": "00bafc564e29c12e99da584864a750260e7110378251d63d3aa5b3d727836efe",
+      "size_bytes": 8233
+    },
+    {
+      "relative_path": "app/assets/event_critical-NWGV4Ti6.ogg",
+      "sha256": "0b574cea597d96507e782ae9764f88482ce49f46e931e57054bf7150047f2d69",
+      "size_bytes": 6393
+    },
+    {
+      "relative_path": "app/assets/game_over-KFWX8M9-.ogg",
+      "sha256": "e951505044de0d5d87b72ce7f312ac3fbbdde025ec8c10db70f9d2651a2c8947",
+      "size_bytes": 7677
+    },
+    {
+      "relative_path": "app/assets/op_complete-LI4ji67k.ogg",
+      "sha256": "3091bf0be0497f825769ee0733ca7bdc3bcd59bd6c6e8f2ba8f93d580ff38022",
+      "size_bytes": 9535
+    },
+    {
+      "relative_path": "app/assets/op_launch-CFtNLHIi.ogg",
+      "sha256": "aec0c31ea934a35936ae0d2ab8fac8123c93aa5647f935853a58dbaf90278b7a",
+      "size_bytes": 5468
+    },
+    {
+      "relative_path": "app/assets/peace_plan-CfXTXBUJ.ogg",
+      "sha256": "33b17a9a9a2397c62b285c52c33a907fdffb476909c99e42dde603f6a7a8b12c",
+      "size_bytes": 14169
+    },
+    {
+      "relative_path": "app/assets/turn_advance-Bft7d0mP.ogg",
+      "sha256": "3b74efad87f1e69dbd1d05c5ad952ab90859b5a3d11da6ec5bd79b4f03b42afa",
+      "size_bytes": 6753
+    },
+    {
+      "relative_path": "app/assets/turn_complete-WWZZgCZQ.ogg",
+      "sha256": "063564703b6094d70718a3e787a55cc9141611e4ecd6b6637f8828f79b4a8c3a",
+      "size_bytes": 8968
+    },
+    {
+      "relative_path": "app/assets/turn_review_open-DAIxWdcJ.ogg",
+      "sha256": "692ee3a6f1821402ca649ff735bee9591dc4846c8098fc7d6a90fd15fa57c1af",
+      "size_bytes": 5859
+    },
+    {
+      "relative_path": "app/assets/tutorial_complete-BApWmXNJ.ogg",
+      "sha256": "ad09146e4ea33b931b2f5dfb4051a4f1fe4a36f1a48c42c5e9269c292ae21214",
+      "size_bytes": 6767
+    },
+    {
+      "relative_path": "app/assets/ui_click-DTXexl_Y.ogg",
+      "sha256": "ccfb7fa0cccdd9faec0eb16033c732b1e308d139d80f799161495d58f7adcdb9",
+      "size_bytes": 4876
+    },
+    {
+      "relative_path": "app/assets/ui_close-C6vIFQji.ogg",
+      "sha256": "44af8249b933e0fd35ec957a638bb1a0b01f85b53fbe9674bf77bd3ca3168ef4",
+      "size_bytes": 9915
+    },
+    {
+      "relative_path": "app/assets/ui_hover-B9NIftkw.ogg",
+      "sha256": "869442f54214be902ec7437f79e400dc91c1bfd90d18a6dd2d5b7e41ffbf457b",
+      "size_bytes": 4514
+    },
+    {
+      "relative_path": "app/assets/ui_open-B7lZ0XP4.ogg",
+      "sha256": "a27c6bb0df7da1e6af5dd5937593c98bc58b6e513f42fe6a3254cd6a6949c648",
+      "size_bytes": 9834
+    }
+  ],
+  "excluded_research_roots": [
+    {
+      "absent": true,
+      "key": "baselineOpsSensitivity",
+      "relative_path": "data/derived/scenario/baseline_ops_sensitivity"
+    },
+    {
+      "absent": true,
+      "key": "baselineOpsSensitivityRun2",
+      "relative_path": "data/derived/scenario/baseline_ops_sensitivity_run2"
+    },
+    {
+      "absent": true,
+      "key": "recruitmentTestMatrix20260211",
+      "relative_path": "data/derived/scenario/recruitment_test_matrix_2026_02_11"
+    },
+    {
+      "absent": true,
+      "key": "scenarioSweeps",
+      "relative_path": "data/derived/scenario/sweeps"
+    }
+  ],
+  "files": [
+    {
+      "key": "censusRolledUpWgs84",
+      "relative_path": "data/derived/census_rolled_up_wgs84.json",
+      "size_bytes": 882359,
+      "sha256": "6653e75d9dd695bc2b676b1a49635bd51eecf228ec8c58b37ed1ecb773f1e3b2"
+    },
+    {
+      "key": "desktopSimBundle",
+      "relative_path": "dist/desktop/desktop_sim.cjs",
+      "size_bytes": 4068272,
+      "sha256": "06e797c4b6203be7442e98a5b87f04a45842da1efa8a7de868d2adc1cd4cff87"
+    },
+    {
+      "key": "mapIndex",
+      "relative_path": "app/index.html",
+      "size_bytes": 5772,
+      "sha256": "081e806d522954b0eb7732d4b6ee5952be25fef4606c3d9fb42fe588d7ddca78"
+    },
+    {
+      "key": "municipalities1990Registry110",
+      "relative_path": "data/source/municipalities_1990_registry_110.json",
+      "size_bytes": 12113,
+      "sha256": "8ede3d014b0b8694021b79e77e58f07266f647682b23fcd2a793417f16d433cc"
+    },
+    {
+      "key": "municipalityHqSettlement",
+      "relative_path": "data/derived/municipality_hq_settlement.json",
+      "size_bytes": 3276,
+      "sha256": "7ff0af467f4b1fedbe7e2515fc9ca96dde9f3c825724c0bf6333653a08a1801b"
+    },
+    {
+      "key": "municipalityPopulation1991",
+      "relative_path": "data/derived/municipality_population_1991.json",
+      "size_bytes": 52944,
+      "sha256": "b475f88f15b130a626d1699f9d3064a2e64c70e816b67b608d734b10763a7c7b"
+    },
+    {
+      "key": "oobBrigades",
+      "relative_path": "data/source/oob_brigades.json",
+      "size_bytes": 115872,
+      "sha256": "8ce85a115c80d92950d3629318686cb8f3377912437917805564fee1e19b9549"
+    },
+    {
+      "key": "settlementEthnicityData",
+      "relative_path": "data/derived/settlement_ethnicity_data.json",
+      "size_bytes": 1487077,
+      "sha256": "ca1e986d7f1c5e6662c7629a6f970441d1fb5474a48271bb0626194455674104"
+    },
+    {
+      "key": "startupSnapshot",
+      "relative_path": "data/derived/startup/apr_1992_initial_save.json",
+      "size_bytes": 1371523,
+      "sha256": "5a68253b783517b7295d91128f0b80fb85189735747480533287889f7b57e3b7"
+    },
+    {
+      "key": "warroomIndex",
+      "relative_path": "app/warroom/index.html",
+      "size_bytes": 11439,
+      "sha256": "0c762511054eb7f103be4db17bec6a7eadfba50948363a0f8be844ed17d9511d"
+    }
+  ],
+  "packaged_font_status": {
+    "status": "loaded",
+    "usable": {
+      "IBM Plex Sans Condensed": true,
+      "IBM Plex Mono": true
+    },
+    "faces": [
+      {
+        "family": "IBM Plex Mono",
+        "weight": "400",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "weight": "400",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "weight": "600",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "weight": "600",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Sans Condensed",
+        "weight": "400",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Sans Condensed",
+        "weight": "600",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Sans Condensed",
+        "weight": "700",
+        "status": "loaded"
+      }
+    ]
+  },
+  "map_server_checks": [
+    {
+      "route": "/",
+      "status": 200
+    },
+    {
+      "route": "/data/derived/startup/apr_1992_initial_save.json",
+      "status": 200
+    },
+    {
+      "route": "/data/scenarios/events/war_1992.json",
+      "status": 200
+    },
+    {
+      "route": "/data/scenarios/events/war_1992_hrhb_summer.json",
+      "status": 200
+    },
+    {
+      "route": "/data/scenarios/events/war_1993.json",
+      "status": 200
+    },
+    {
+      "route": "/data/scenarios/events/war_1994.json",
+      "status": 200
+    },
+    {
+      "route": "/data/scenarios/events/war_1995.json",
+      "status": 200
+    },
+    {
+      "route": "/data/scenarios/events/consequences.json",
+      "status": 200
+    }
+  ],
+  "route_inventory_checks": [
+    {
+      "expected_status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": null,
+      "route": "/data/derived/operational/operational_settlements.geojson",
+      "status": 200
+    },
+    {
+      "expected_status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": null,
+      "route": "/data/derived/settlements_wgs84_1990.geojson",
+      "status": 200
+    },
+    {
+      "expected_status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": null,
+      "route": "/data/derived/terrain/settlements_terrain_scalars.json",
+      "status": 200
+    },
+    {
+      "expected_status": 206,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": "bytes=0-15",
+      "route": "/data/derived/tiles/osm.pmtiles",
+      "status": 206
+    },
+    {
+      "expected_status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": null,
+      "route": "/font/Open%20Sans%20Bold/0-255.pbf",
+      "status": 200
+    },
+    {
+      "expected_status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": null,
+      "route": "/font/Open%20Sans%20Bold/256-511.pbf",
+      "status": 200
+    },
+    {
+      "expected_status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": null,
+      "route": "/data/ui/hq_rbih_clickable_regions.json",
+      "status": 200
+    },
+    {
+      "expected_status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": null,
+      "route": "/data/ui/hq_rs_clickable_regions.json",
+      "status": 200
+    },
+    {
+      "expected_status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": null,
+      "route": "/data/ui/hq_hrhb_clickable_regions.json",
+      "status": 200
+    },
+    {
+      "expected_status": 200,
+      "cache_control": "public, max-age=0, must-revalidate",
+      "etag_present": true,
+      "range": null,
+      "route": "/data/source/settlements_initial_master.json",
+      "status": 200
+    },
+    {
+      "expected_status": 200,
+      "cache_control": "no-cache",
+      "etag_present": true,
+      "range": null,
+      "route": "/assets/ui/icons/icon_warning.svg",
+      "status": 200
+    }
+  ],
+  "runtime_failure_checks": [],
+  "startup": {
+    "phase": "war",
+    "player_faction": "RBiH",
+    "recruitment_ready": true,
+    "turn": 0
+  },
+  "turn_advance": {
+    "from_turn": 0,
+    "input_state_unchanged": true,
+    "player_faction": "RBiH",
+    "to_turn": 1,
+    "successful": true
+  },
+  "window_checks": [
+    {
+      "route": "awwv://warroom/index.html",
+      "status": "did-finish-load",
+      "title": "AWWV - Warroom"
+    },
+    {
+      "route": "http://127.0.0.1:56332/?desktop_window=operational&disable_pmtiles=1",
+      "status": "did-finish-load",
+      "title": "AWWV Map"
+    },
+    {
+      "route": "http://127.0.0.1:56332/tactical_sandbox.html?desktop_window=sandbox&disable_pmtiles=1",
+      "status": "did-finish-load",
+      "title": "AWWV Map"
+    }
+  ],
+  "tactical_interactions": [
+    {
+      "location_path": "/",
+      "map_server_url": "http://127.0.0.1:56332/",
+      "player_faction": "RBiH",
+      "route_mode": "operational",
+      "turn": 0
+    },
+    {
+      "location_path": "/tactical_sandbox.html",
+      "map_server_url": "http://127.0.0.1:56332/",
+      "player_faction": "RBiH",
+      "route_mode": "sandbox",
+      "turn": 0
+    }
+  ],
+  "tactical_push_checks": [
+    {
+      "player_faction": "RBiH",
+      "route_mode": "operational",
+      "turn": 0
+    },
+    {
+      "player_faction": "RBiH",
+      "route_mode": "sandbox",
+      "turn": 0
+    }
+  ],
+  "turn_report_push_checks": [
+    {
+      "player_faction": "RBiH",
+      "probe": "awwv_turn_report_probe",
+      "route_mode": "operational",
+      "turn": 0
+    },
+    {
+      "player_faction": "RBiH",
+      "probe": "awwv_turn_report_probe",
+      "route_mode": "sandbox",
+      "turn": 0
+    }
+  ],
+  "renderer_reaction_checks": [
+    {
+      "game_state_updated": {
+        "fingerprint_matches_payload": true,
+        "location_path": "/",
+        "payload_length": 523337,
+        "player_faction": "RBiH",
+        "route_mode": "operational",
+        "turn": 0
+      },
+      "route_mode": "operational",
+      "turn_report_updated": {
+        "location_path": "/",
+        "payload_matches_probe": true,
+        "player_faction": "RBiH",
+        "probe": "awwv_turn_report_probe",
+        "route_mode": "operational",
+        "turn": 0
+      }
+    }
+  ],
+  "endgame_checks": {
+    "surface_type": "verdict",
+    "outcome_label": "Exhaustion Stalemate",
+    "has_pyrrhic_score": true,
+    "has_war_cost": true,
+    "has_faction_tabs": true,
+    "has_awwv_title": true,
+    "state_push": {
+      "player_faction": "RBiH",
+      "route_mode": "operational",
+      "game_over_state_pushed": true
+    }
+  },
+  "package_identity": {
+    "app_asar_relative_path": "dist-packaged/win-unpacked/resources/app.asar",
+    "app_asar_sha256": "3720791397c94c12195e2204a8b6efe2addc696cd2cd638eb46546a193ab85f0",
+    "executable_relative_path": "dist-packaged/win-unpacked/A War Without Victory.exe",
+    "executable_sha256": "c7f3c4b4de8e8abaa37c90f1d0466a70a9d3491288ea060a5d7ee37e9d3267e7"
+  },
+  "validation_profile": {
+    "relative_path": "logs/r9-build-preparation/desktop-runtime-profile-phase3-1",
+    "suffix": "phase3-1"
+  },
+  "bc09_byte_identity": [
+    {
+      "byte_identical": true,
+      "key": "censusRolledUpWgs84",
+      "packaged_sha256": "6653e75d9dd695bc2b676b1a49635bd51eecf228ec8c58b37ed1ecb773f1e3b2",
+      "relative_path": "data/derived/census_rolled_up_wgs84.json",
+      "size_bytes": 882359,
+      "source_sha256": "6653e75d9dd695bc2b676b1a49635bd51eecf228ec8c58b37ed1ecb773f1e3b2"
+    },
+    {
+      "byte_identical": true,
+      "key": "municipalities1990Registry110",
+      "packaged_sha256": "8ede3d014b0b8694021b79e77e58f07266f647682b23fcd2a793417f16d433cc",
+      "relative_path": "data/source/municipalities_1990_registry_110.json",
+      "size_bytes": 12113,
+      "source_sha256": "8ede3d014b0b8694021b79e77e58f07266f647682b23fcd2a793417f16d433cc"
+    },
+    {
+      "byte_identical": true,
+      "key": "municipalityHqSettlement",
+      "packaged_sha256": "7ff0af467f4b1fedbe7e2515fc9ca96dde9f3c825724c0bf6333653a08a1801b",
+      "relative_path": "data/derived/municipality_hq_settlement.json",
+      "size_bytes": 3276,
+      "source_sha256": "7ff0af467f4b1fedbe7e2515fc9ca96dde9f3c825724c0bf6333653a08a1801b"
+    },
+    {
+      "byte_identical": true,
+      "key": "municipalityPopulation1991",
+      "packaged_sha256": "b475f88f15b130a626d1699f9d3064a2e64c70e816b67b608d734b10763a7c7b",
+      "relative_path": "data/derived/municipality_population_1991.json",
+      "size_bytes": 52944,
+      "source_sha256": "b475f88f15b130a626d1699f9d3064a2e64c70e816b67b608d734b10763a7c7b"
+    },
+    {
+      "byte_identical": true,
+      "key": "oobBrigades",
+      "packaged_sha256": "8ce85a115c80d92950d3629318686cb8f3377912437917805564fee1e19b9549",
+      "relative_path": "data/source/oob_brigades.json",
+      "size_bytes": 115872,
+      "source_sha256": "8ce85a115c80d92950d3629318686cb8f3377912437917805564fee1e19b9549"
+    },
+    {
+      "byte_identical": true,
+      "key": "settlementEthnicityData",
+      "packaged_sha256": "ca1e986d7f1c5e6662c7629a6f970441d1fb5474a48271bb0626194455674104",
+      "relative_path": "data/derived/settlement_ethnicity_data.json",
+      "size_bytes": 1487077,
+      "source_sha256": "ca1e986d7f1c5e6662c7629a6f970441d1fb5474a48271bb0626194455674104"
+    }
+  ],
+  "audio_identity": {
+    "byte_identical": true,
+    "packaged_hashes": [
+      "00bafc564e29c12e99da584864a750260e7110378251d63d3aa5b3d727836efe",
+      "063564703b6094d70718a3e787a55cc9141611e4ecd6b6637f8828f79b4a8c3a",
+      "0b574cea597d96507e782ae9764f88482ce49f46e931e57054bf7150047f2d69",
+      "183eebee20eb0a532b0b85104d139cbf2673eb66d95c3cc733ac9ea98362e7e8",
+      "3091bf0be0497f825769ee0733ca7bdc3bcd59bd6c6e8f2ba8f93d580ff38022",
+      "33b17a9a9a2397c62b285c52c33a907fdffb476909c99e42dde603f6a7a8b12c",
+      "3b74efad87f1e69dbd1d05c5ad952ab90859b5a3d11da6ec5bd79b4f03b42afa",
+      "44af8249b933e0fd35ec957a638bb1a0b01f85b53fbe9674bf77bd3ca3168ef4",
+      "4ec9ecdd528d4bbf2880713d63846da87daa85565aea544163774f418a236316",
+      "692ee3a6f1821402ca649ff735bee9591dc4846c8098fc7d6a90fd15fa57c1af",
+      "869442f54214be902ec7437f79e400dc91c1bfd90d18a6dd2d5b7e41ffbf457b",
+      "a27c6bb0df7da1e6af5dd5937593c98bc58b6e513f42fe6a3254cd6a6949c648",
+      "ad09146e4ea33b931b2f5dfb4051a4f1fe4a36f1a48c42c5e9269c292ae21214",
+      "aec0c31ea934a35936ae0d2ab8fac8123c93aa5647f935853a58dbaf90278b7a",
+      "c7d4bf4537728de6878b77fea0ed28e7bfeb35e26e4f2817ae0d6092cd800dd6",
+      "ca1d2dde5f0b286abac4f070e23edab8f30927c8a533665cdf2ac6492a415e49",
+      "ccfb7fa0cccdd9faec0eb16033c732b1e308d139d80f799161495d58f7adcdb9",
+      "d21d0f0b782445db579d11e2506b24cd1ac9d664ee33aeaf807761aa7b6fd710",
+      "e951505044de0d5d87b72ce7f312ac3fbbdde025ec8c10db70f9d2651a2c8947",
+      "fc757905f285f0cde1274e4fc832a39764bfb11f7053e0cae558c986ac00c82b"
+    ],
+    "packaged_ogg_count": 20,
+    "source_assets": [
+      {
+        "relative_path": "src/ui/map/assets/audio/ambient/ambient_archive.ogg",
+        "sha256": "4ec9ecdd528d4bbf2880713d63846da87daa85565aea544163774f418a236316",
+        "size_bytes": 211346
+      },
+      {
+        "relative_path": "src/ui/map/assets/audio/ambient/ambient_field.ogg",
+        "sha256": "c7d4bf4537728de6878b77fea0ed28e7bfeb35e26e4f2817ae0d6092cd800dd6",
+        "size_bytes": 196084
+      },
+      {
+        "relative_path": "src/ui/map/assets/audio/ambient/ambient_warroom.ogg",
+        "sha256": "fc757905f285f0cde1274e4fc832a39764bfb11f7053e0cae558c986ac00c82b",
+        "size_bytes": 206420
+      },
+      {
+        "relative_path": "src/ui/map/assets/audio/ui/battle.ogg",
+        "sha256": "ca1d2dde5f0b286abac4f070e23edab8f30927c8a533665cdf2ac6492a415e49",
+        "size_bytes": 7369
+      },
+      {
+        "relative_path": "src/ui/map/assets/audio/ui/battle_catastrophic.ogg",
+        "sha256": "183eebee20eb0a532b0b85104d139cbf2673eb66d95c3cc733ac9ea98362e7e8",
+        "size_bytes": 6103
+      },
+      {
+        "relative_path": "src/ui/map/assets/audio/ui/battle_decisive.ogg",
+        "sha256": "d21d0f0b782445db579d11e2506b24cd1ac9d664ee33aeaf807761aa7b6fd710",
+        "size_bytes": 4848
+      },
+      {
+        "relative_path": "src/ui/map/assets/audio/ui/event.ogg",
+        "sha256": "00bafc564e29c12e99da584864a750260e7110378251d63d3aa5b3d727836efe",
+        "size_bytes": 8233
+      },
+      {
+        "relative_path": "src/ui/map/assets/audio/ui/event_critical.ogg",
+        "sha256": "0b574cea597d96507e782ae9764f88482ce49f46e931e57054bf7150047f2d69",
+        "size_bytes": 6393
+      },
+      {
+        "relative_path": "src/ui/map/assets/audio/ui/game_over.ogg",
+        "sha256": "e951505044de0d5d87b72ce7f312ac3fbbdde025ec8c10db70f9d2651a2c8947",
+        "size_bytes": 7677
+      },
+      {
+        "relative_path": "src/ui/map/assets/audio/ui/op_complete.ogg",
+        "sha256": "3091bf0be0497f825769ee0733ca7bdc3bcd59bd6c6e8f2ba8f93d580ff38022",
+        "size_bytes": 9535
+      },
+      {
+        "relative_path": "src/ui/map/assets/audio/ui/op_launch.ogg",
+        "sha256": "aec0c31ea934a35936ae0d2ab8fac8123c93aa5647f935853a58dbaf90278b7a",
+        "size_bytes": 5468
+      },
+      {
+        "relative_path": "src/ui/map/assets/audio/ui/peace_plan.ogg",
+        "sha256": "33b17a9a9a2397c62b285c52c33a907fdffb476909c99e42dde603f6a7a8b12c",
+        "size_bytes": 14169
+      },
+      {
+        "relative_path": "src/ui/map/assets/audio/ui/turn_advance.ogg",
+        "sha256": "3b74efad87f1e69dbd1d05c5ad952ab90859b5a3d11da6ec5bd79b4f03b42afa",
+        "size_bytes": 6753
+      },
+      {
+        "relative_path": "src/ui/map/assets/audio/ui/turn_complete.ogg",
+        "sha256": "063564703b6094d70718a3e787a55cc9141611e4ecd6b6637f8828f79b4a8c3a",
+        "size_bytes": 8968
+      },
+      {
+        "relative_path": "src/ui/map/assets/audio/ui/turn_review_open.ogg",
+        "sha256": "692ee3a6f1821402ca649ff735bee9591dc4846c8098fc7d6a90fd15fa57c1af",
+        "size_bytes": 5859
+      },
+      {
+        "relative_path": "src/ui/map/assets/audio/ui/tutorial_complete.ogg",
+        "sha256": "ad09146e4ea33b931b2f5dfb4051a4f1fe4a36f1a48c42c5e9269c292ae21214",
+        "size_bytes": 6767
+      },
+      {
+        "relative_path": "src/ui/map/assets/audio/ui/ui_click.ogg",
+        "sha256": "ccfb7fa0cccdd9faec0eb16033c732b1e308d139d80f799161495d58f7adcdb9",
+        "size_bytes": 4876
+      },
+      {
+        "relative_path": "src/ui/map/assets/audio/ui/ui_close.ogg",
+        "sha256": "44af8249b933e0fd35ec957a638bb1a0b01f85b53fbe9674bf77bd3ca3168ef4",
+        "size_bytes": 9915
+      },
+      {
+        "relative_path": "src/ui/map/assets/audio/ui/ui_hover.ogg",
+        "sha256": "869442f54214be902ec7437f79e400dc91c1bfd90d18a6dd2d5b7e41ffbf457b",
+        "size_bytes": 4514
+      },
+      {
+        "relative_path": "src/ui/map/assets/audio/ui/ui_open.ogg",
+        "sha256": "a27c6bb0df7da1e6af5dd5937593c98bc58b6e513f42fe6a3254cd6a6949c648",
+        "size_bytes": 9834
+      }
+    ],
+    "source_hashes": [
+      "00bafc564e29c12e99da584864a750260e7110378251d63d3aa5b3d727836efe",
+      "063564703b6094d70718a3e787a55cc9141611e4ecd6b6637f8828f79b4a8c3a",
+      "0b574cea597d96507e782ae9764f88482ce49f46e931e57054bf7150047f2d69",
+      "183eebee20eb0a532b0b85104d139cbf2673eb66d95c3cc733ac9ea98362e7e8",
+      "3091bf0be0497f825769ee0733ca7bdc3bcd59bd6c6e8f2ba8f93d580ff38022",
+      "33b17a9a9a2397c62b285c52c33a907fdffb476909c99e42dde603f6a7a8b12c",
+      "3b74efad87f1e69dbd1d05c5ad952ab90859b5a3d11da6ec5bd79b4f03b42afa",
+      "44af8249b933e0fd35ec957a638bb1a0b01f85b53fbe9674bf77bd3ca3168ef4",
+      "4ec9ecdd528d4bbf2880713d63846da87daa85565aea544163774f418a236316",
+      "692ee3a6f1821402ca649ff735bee9591dc4846c8098fc7d6a90fd15fa57c1af",
+      "869442f54214be902ec7437f79e400dc91c1bfd90d18a6dd2d5b7e41ffbf457b",
+      "a27c6bb0df7da1e6af5dd5937593c98bc58b6e513f42fe6a3254cd6a6949c648",
+      "ad09146e4ea33b931b2f5dfb4051a4f1fe4a36f1a48c42c5e9269c292ae21214",
+      "aec0c31ea934a35936ae0d2ab8fac8123c93aa5647f935853a58dbaf90278b7a",
+      "c7d4bf4537728de6878b77fea0ed28e7bfeb35e26e4f2817ae0d6092cd800dd6",
+      "ca1d2dde5f0b286abac4f070e23edab8f30927c8a533665cdf2ac6492a415e49",
+      "ccfb7fa0cccdd9faec0eb16033c732b1e308d139d80f799161495d58f7adcdb9",
+      "d21d0f0b782445db579d11e2506b24cd1ac9d664ee33aeaf807761aa7b6fd710",
+      "e951505044de0d5d87b72ce7f312ac3fbbdde025ec8c10db70f9d2651a2c8947",
+      "fc757905f285f0cde1274e4fc832a39764bfb11f7053e0cae558c986ac00c82b"
+    ],
+    "source_import_count": 20
+  },
+  "research_exclusions": [
+    {
+      "absent": true,
+      "manifest_confirmed_absent": true,
+      "relative_path": "data/derived/scenario/baseline_ops_sensitivity"
+    },
+    {
+      "absent": true,
+      "manifest_confirmed_absent": true,
+      "relative_path": "data/derived/scenario/baseline_ops_sensitivity_run2"
+    },
+    {
+      "absent": true,
+      "manifest_confirmed_absent": true,
+      "relative_path": "data/derived/scenario/recruitment_test_matrix_2026_02_11"
+    },
+    {
+      "absent": true,
+      "manifest_confirmed_absent": true,
+      "relative_path": "data/derived/scenario/sweeps"
+    }
+  ]
+}

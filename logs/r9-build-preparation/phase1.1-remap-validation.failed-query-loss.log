@@ -1,0 +1,25 @@
+node --check logs\r9-build-preparation\phase1.1_capture_production_graph.mjs
+exit_code=0
+node logs\r9-build-preparation\phase1.1_capture_production_graph.mjs --offline-probe
+offline_mapper_probes=4
+exit_code=0
+node logs\r9-build-preparation\phase1.1_capture_production_graph.mjs --remap-raw
+raw_module_ids=1378
+resolved_package_rows=8
+F:\A-War-Without-Victory\logs\r9-build-preparation\phase1.1-production-resolved-modules.json
+exit_code=0
+node logs\r9-build-preparation\phase1.1_verify_remap.mjs
+count @deck.gl/core: before=108 after=108 deduplicated=0
+count @deck.gl/layers: before=68 after=68 deduplicated=0
+count @deck.gl/mapbox: before=7 after=7 deduplicated=0
+count maplibre-gl: before=3 after=2 deduplicated=1
+count pmtiles: before=1 after=1 deduplicated=0
+count react: before=8 after=4 deduplicated=4
+count react-dom: before=6 after=3 deduplicated=3
+count zustand: before=2 after=2 deduplicated=0
+package_rows=8
+checked_module_ids=195
+deduplicated_module_ids=8
+identity_and_normalized_sets_match_preserved_capture=true
+relative_nul_free_sorted_unique=true
+exit_code=0

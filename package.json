@@ -302,7 +302,17 @@
     "map:geo:g1:serve": "npx http-server -p 8081 -c-1",
     "prepare": "husky",
     "repo:branches": "node tools/repo/branch_hygiene.mjs --remote",
-    "repo:branches:clean": "node tools/repo/branch_hygiene.mjs --remote --archive --prune --push"
+    "repo:branches:clean": "node tools/repo/branch_hygiene.mjs --remote --archive --prune --push",
+    "receipts": "node tools/validate_receipt_citations.cjs --list",
+    "receipts:validate": "node tools/validate_receipt_citations.cjs",
+    "receipts:validate:strict": "node tools/validate_receipt_citations.cjs --strict",
+    "receipts:manifest": "node tools/write_receipt_manifest.cjs",
+    "local:verdict": "node tools/local_executor/verdict.mjs",
+    "local:ledger": "node tools/local_executor/verdict.mjs --report",
+    "local:fanout": "node tools/local_executor/fanout.mjs",
+    "local:benchmark": "node tools/local_executor/benchmark.mjs",
+    "lessons:pointers": "node tools/validate_lesson_pointers.cjs --list",
+    "lessons:pointers:ratchet": "node tools/validate_lesson_pointers.cjs --ratchet"
   },
   "build": {
     "appId": "com.awwv.desktop",

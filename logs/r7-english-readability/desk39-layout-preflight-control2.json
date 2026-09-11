@@ -1,0 +1,30 @@
+{
+  "checkout": "F:/AWWV-worktrees/r7-readability-pre",
+  "expectedCommit": "16389f6c9c66f13517806bae30ac78165563b66e",
+  "commit": "16389f6c9c66f13517806bae30ac78165563b66e",
+  "status": "",
+  "node": "v22.23.2",
+  "checkedInputs": 31,
+  "mismatches": [],
+  "packageChecks": [
+    {
+      "path": "package.json",
+      "actual": "24307c96c67584fcf28cd571f83625c02e623787a10cd3013996d0522e3c8a12",
+      "expected": "24307c96c67584fcf28cd571f83625c02e623787a10cd3013996d0522e3c8a12",
+      "match": true
+    },
+    {
+      "path": "package-lock.json",
+      "actual": "3bed66fe10b593a7889e90863c3fcb0990bb1ae244dc559ef30e21232c5d8ca5",
+      "expected": "3bed66fe10b593a7889e90863c3fcb0990bb1ae244dc559ef30e21232c5d8ca5",
+      "match": true
+    },
+    {
+      "path": "src/ui/map/package.json",
+      "actual": "39675b091b30e3df7ad3c6efdb404ca556aad89897951899ff6c6a3184eb4ee4",
+      "expected": "39675b091b30e3df7ad3c6efdb404ca556aad89897951899ff6c6a3184eb4ee4",
+      "match": true
+    }
+  ],
+  "pass": true
+}

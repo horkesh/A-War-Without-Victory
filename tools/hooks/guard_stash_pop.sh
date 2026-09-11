@@ -54,6 +54,8 @@
 # Emits a PreToolUse deny. Exit 0 always (the decision is in the JSON, not the exit code).
 set -uo pipefail
 
+HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 payload="$(cat)"
 cmd="$(printf '%s' "$payload" | jq -r '.tool_input.command // empty' 2>/dev/null)"
 [ -z "$cmd" ] && exit 0
@@ -64,21 +66,11 @@ deny() {
   exit 0
 }
 
-# Reduce the command to one candidate-invocation per line:
-#   1. quoted text out first (a mention inside quotes can never be an invocation)
-#   2. every shell separator becomes a line break, so each line is one command position
-#   3. collapse runs of spaces (`git   stash   pop`) and strip a leading indent or `{` group-opener
-#
-# BRACES ARE NOT SEPARATORS, deliberately: `{`/`}` would split `stash@{0}` in half and make the
-# guard deny the very explicit-ref form it is trying to encourage. `{ cmd; }` grouping is still
-# covered, because the `;` inside splits it and the leading `{ ` is stripped below.
-segments="$(printf '%s' "$cmd" \
-  | sed "s/'[^']*'/__SQ__/g" \
-  | sed 's/"[^"]*"/__DQ__/g' \
-  | sed 's/[;&|()]/\n/g' \
-  | sed 's/[[:space:]][[:space:]]*/ /g' \
-  | sed 's/^ //' \
-  | sed 's/^{ *//')"
+# Reduce the command to one candidate-invocation per line. The rule is shared, because three
+# hooks needed it and two got it wrong the same way — see lib/command_segments.sh.
+# shellcheck source=lib/command_segments.sh
+. "$HOOK_DIR/lib/command_segments.sh"
+segments="$(command_segments "$cmd" "$HOOK_DIR")"
 
 while IFS= read -r line; do
   case "$line" in

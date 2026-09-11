@@ -3779,3 +3779,230 @@ guard's 26 tests still green, and the upgraded guard observed firing live in-ses
 
 Hook inventory now: 2 blocking (`guard_stash_pop`, `guard_pipe_exit_code` in its narrow shape),
 3 advisory (`guard_scope_drift`, `guard_lookup_absence`, `guard_dirty_citation`).
+
+## Receipt-citation integrity: the docs' evidence is now checkable — 2026-09-11
+
+**The claim being tested.** The governing docs cite evidence under `logs/`. Nobody could tell a
+real receipt from a plausible-looking path, so a citation was worth exactly the trust you gave it.
+`tools/validate_receipt_citations.cjs` decides it instead, and
+`npm run receipts:validate:strict` is the version with teeth.
+
+**Measured first, and the premise was wrong.** The earlier note said "15 cited receipts, 75 KB".
+That counted file citations only. Counting DIRECTORY citations too: 70 citations, of which
+**30 would break in a fresh clone**, backed by **7.8 GB across 64,994 files** — because
+`logs/r7-english-readability/` alone is 5.4 GB of replay sequences and another cited tree carries
+a bundled 217 MB `electron.exe`. Tracking the cited receipts wholesale was never an option.
+
+**The split that resolved it.** Small text receipts are tracked; bulk is represented by a tracked
+`MANIFEST.txt` inside it. 301 files and ~1.9 MB entered git. The manifest records the file list
+and sizes and NOTHING ELSE — no timestamp, so regenerating an unchanged directory is
+byte-identical and never produces a spurious diff. It is not the evidence; it is proof of what the
+evidence was. A directory of more than 500 files collapses to one summary line: enumerating the
+r8 dependency tree produced a 1.6 MB file of vendored paths that told a reader nothing, and
+collapsing brought it to 23 KB while still reporting the true 18,076 files / 684 MB.
+
+**THE RULE THAT MADE IT USABLE: only backticked paths are citations.** The ledger contains
+"environment, logs/exits and stopping rules" and "logs/run artifacts remain local", where the
+slash means "or" and no file is claimed at all. A naive scan reports both as broken receipts.
+Requiring a markdown code span excludes both with no special case. **A checker that cries wolf
+gets ignored, and an ignored checker proves nothing** — the same lesson the two new hook guards
+taught, arriving a third time from a different direction.
+
+**It proved itself immediately.** Merging #510 brought ledger text citing
+`logs/r8-decision-command-usability/`, and the checker flagged it on the next run — a citation
+that had been unverifiable the moment it was written.
+
+**Ollama's share, and the routing rule it produced.** Four dispatches. It drafted the npm-script
+and CI wiring (accepted with two naming edits) and proposed the edge-case list. Its draft of the
+CHECKER was unusable: `resolveCitation` returned `true` on its main path, so the validator could
+not fail — the second delegated artifact in two days whose failure mode was "reports success
+regardless". **Never delegate the oracle.** But the edge-case dispatch is a pattern worth keeping:
+ask for the CASES only, run them through the real implementation, judge each result, then pin it.
+Its own guesses were wrong on 5 of 9 — and the case list still caught a genuine defect the
+hand-written tests never reached (`logs/EXAMPLE/a{ x , y }.log` truncated at the first space, then
+reported as missing under a path nobody wrote). Full routing rules in
+`tools/local_executor/README.md`.
+
+**Verified:** 39 tests, most of them negative cases, including the two prose strings that must
+NOT be flagged; tsc clean; both checker modes green on the real repo.
+
+## Third tier-1 guard, and the test that shrank its justification — 2026-09-11
+
+**The observation.** A multi-line script passed to `node -e` produces NOTHING in this agent
+harness: exit 0, empty stdout, empty stderr, even with both redirected to files. The single-line
+form of the same script works. It cost three turns in one session before anyone noticed, and each
+time the silence was read as a real result — "the JSON has no cases", "the parse failed". Every
+such conclusion would have been false. Worse, a multi-line `node -e` that WRITES a file writes
+nothing while reporting success, so the next step builds on a file that never changed.
+
+**The correction, which is the point of the entry.** The first version of the guard asserted that
+"the program never runs", and its own test refuted that within minutes: handed to a plain
+`bash -c`, the identical script runs and prints normally. **Node is fine.** The fault is in how
+this harness delivers a multi-line command to the shell. The guard survived; its justification
+shrank to what was actually measured.
+
+This is the mutation-proof rule paying for itself in the other direction. Usually a test proves a
+guard fires. Here it proved the REASON was wrong while the behaviour was real — and a guard
+carrying a false explanation is one that gets removed the first time somebody checks it.
+
+**Consequence for the test file.** It no longer tries to reproduce the harness failure, because it
+cannot from inside `bash -c`. It pins the two portable positive controls instead — the single-line
+form works, the heredoc form works — so the alternatives the guard recommends are known-good. **An
+escape route nobody verified is how a guard ends up switched off.**
+
+`tools/hooks/guard_inline_script.sh`, 16 tests. Hook inventory: 3 blocking, 3 advisory — and the
+three advisory ones now have tests for the first time, so promoting any of them is a decision
+rather than a guess.
+
+## One matching rule, three hooks, same bug — 2026-09-11
+
+**Found by testing the last untested hook.** `guard_scope_drift` matched bare text, so
+`echo 'npm run sim:scenario:run:188w is expensive'` fired it — and the orchestrator hook chained
+off that firing, demanding an expert analysis of a scenario run that never happened. Both were
+answering a question about PROSE.
+
+That is the third hook with this defect: `guard_stash_pop` denied `echo 'git stash pop is
+dangerous'` on its first day, `guard_pipe_exit_code` denied its own probe harness, and now this.
+Three independent derivations of "is this text a command?", two of them wrong the same way.
+
+**So the rule now has one owner:** `tools/hooks/lib/command_segments.sh`. Heredoc bodies removed,
+quoted text blanked, split on shell separators, leading `{` stripped — a real invocation begins a
+segment, a prose mention never does. `guard_stash_pop` was refactored onto it and its 26 tests
+passed unchanged, which is the only reason the refactor was safe to do at all.
+
+**The lane file is deliberately NOT updated to match this session.** `.claude/current-lane.txt`
+still declares the D2 full-campaign lane from 2026-09-01, and this session has been doing
+railguards and harness work — so the guard would, correctly, report drift. **Rewriting the
+declaration to match what the session is actually doing would neuter the guard entirely**: it
+exists to catch the gap between plan and behaviour, and a planner who closes that gap by editing
+the plan has removed the only thing being measured. The declaration is the owner's to set.
+
+All six hooks now have tests: 3 blocking, 3 advisory, and the advisory ones are pinned AS
+advisory, so promoting any of them is a decision with a known baseline rather than a guess.
+
+## A rule that cannot be written about is a rule that gets removed — 2026-09-11
+
+Four times in one day, a mechanism fired on prose describing that mechanism:
+
+| mechanism | what tripped it |
+|---|---|
+| `guard_stash_pop` | the commit message documenting it |
+| `guard_pipe_exit_code` | its own probe harness |
+| `guard_scope_drift` | a quoted mention, which then chained the orchestrator hook into demanding an expert analysis of a run that never happened |
+| `validate_receipt_citations` | the ledger entry describing its brace-expansion rule |
+
+Each was found the same way — by trying to document the thing just built — and each fix is the
+same shape: **distinguish the ACT from a mention of the act.** For commands that is command
+position (now owned once, in `tools/hooks/lib/command_segments.sh`, after three hooks derived it
+separately and two got it wrong). For citations it is a reserved `logs/EXAMPLE/` prefix, because
+a backticked path is a CLAIM that evidence exists and an illustration is not a claim.
+
+**The escape hatch is narrow on purpose.** `logs/EXAMPLE/` is ignored, but a real citation sitting
+beside one is still checked — pinned by a test, so the hatch cannot become a way to smuggle
+unverified claims past the checker.
+
+**Two portability defects fell out of writing the registry test.** Two hooks were registered by
+machine-absolute path (`bash F:/A-War-Without-Victory/...`) in a TRACKED settings file — they work
+on exactly one checkout and silently do nothing everywhere else, while still appearing installed.
+And a third was nearly registered via `$CLAUDE_PROJECT_DIR`, which nothing here had ever proven
+expands; had it not, the hook would have been listed, tested in isolation, and never once fired.
+All are now relative, which four working hooks already demonstrated. `tests/hook_registry.test.ts`
+pins it, including an explicit list of which hooks may block — so changing what the harness
+refuses means editing a test and saying why.
+
+**Totals: 152 tests across 9 suites**, all green. Six guards, three blocking, all tested; before
+today none of them had a single test.
+
+## The register's own number was wrong by an order of magnitude — 2026-09-11
+
+**REPO-RUNBOOK-CURATION recorded "160 of 244 life-lessons entries carry a broken pointer".**
+Measured with `tools/validate_lesson_pointers.cjs`: the index carries **23 pointer lines, of
+which 15 are broken**. At that gate's own commit it carried **20 in total** — so 160 was never
+the number, in that file or any ancestor of it.
+
+**The overstatement was not harmless.** It turned a tractable afternoon into something that reads
+like a week of curation, which is a reliable way to ensure nobody starts. The gate had sat open
+since 2026-09-10 with its remaining work described as roughly eleven times larger than it is.
+
+That is the third bad figure found in an evidence file in two days — after `qwen3-coder` recorded
+at 8 prompt tok/s (measures 254) and a napkin cap-check that reported a 13,684-byte category as
+"0 entries". **The common cause is not carelessness, it is that a number written into prose is
+never re-derived.** All three were produced by a pattern that could not match what it was counting,
+and all three survived because nothing recomputed them.
+
+**So the count is now a tool, not a memory.** `npm run lessons:pointers` lists every pointer with
+a verdict. The 15 are recorded in `tools/lesson_pointer_baseline.json` as a **RATCHET, not an
+allowance**: `tests/lesson_pointer_integrity.test.ts` fails if a NEW broken pointer appears, and
+ALSO if a baseline entry quietly starts resolving without the list being trimmed — so the number
+cannot drift back into being something somebody remembers.
+
+**What was deliberately NOT done.** The 15 bodies only ever lived in the index. Making each
+pointer true means moving a lesson into a topic file or dropping the pointer, and that is a
+curation judgement about the corpus rather than a mechanical rewrite. The backlog stands; it
+simply cannot grow now.
+
+**Also re-verified:** no napkin category exceeds its 10-entry cap (four sit exactly at 10), using
+the correct `^[0-9]+[a-z]*\.` pattern — the one whose earlier `^[0-9]+\.` form could not see the
+`0a.`/`0h.` entries at all.
+
+## The receipts system's author wrote a test that could only pass on his own machine — 2026-09-11
+
+**CI caught what local runs could not, which is the entire point of it.** `write_receipt_manifest
+--check` regenerates a manifest from the directory and compares it to the committed file. That can
+never succeed in a fresh clone, because **the manifest is tracked and the gigabytes it describes
+are deliberately not** — CI sees a directory containing only `MANIFEST.txt`, regenerates an empty
+manifest, and reports the committed one stale.
+
+Two tests asserted that comparison. Both were green locally and **structurally incapable of
+passing in CI**. That is the same defect class this entire receipts system exists to prevent —
+evidence that exists on one machine and nowhere else — committed by the person who had just
+finished writing the tool to prevent it, in the same sitting.
+
+**The fix distinguishes "absent" from "stale".** If the directory holds nothing but its manifest,
+the evidence is not present here and there is nothing to verify; `--check` says so and passes. If
+files ARE present, it compares as before. A companion test proves the check can still FAIL on a
+genuinely wrong manifest, so the fix did not turn it into a rubber stamp — the obvious way to get
+this wrong is to make "nothing to verify" cover "verified nothing".
+
+**What CI reported, versus what was actually wrong.** Four failing lines, two real:
+- two receipt tests — real, mine, fixed here
+- `deliberate_failure.fixture.ts` "× is an intentional child-process failure control" — NOT a
+  failure. `tests/run_vitest_balanced.test.ts` deliberately spawns vitest on that fixture to prove
+  the runner detects failures; the child's output interleaves into the parent log and reads
+  exactly like a real failure
+- `replay_payload_mode_contract` — a 20-second TIMEOUT, not an assertion. It passes locally and on
+  main; this branch adds nine test files spawning ~90 bash subprocesses, which changes shard
+  composition and load. Aggravated by the branch rather than broken by it.
+
+**Worth keeping: a red CI is a list of claims, not a list of defects.** Half of these needed
+explaining rather than fixing, and the one that looked most alarming — a suite reporting a
+deliberate control as failed — was the harness working correctly.
+
+## Two wrong assumptions about the same directory, and a hardcoded date — 2026-09-11
+
+**The manifest check was wrong twice, in opposite directions.** `--check` regenerated a manifest
+and compared it byte-for-byte. That passes only on the machine that wrote it, because what travels
+is a deliberate SUBSET: small text receipts tracked, heavy binaries not. CI caught it.
+
+The first fix assumed the opposite extreme — that a clone sees NOTHING but the manifest — and was
+equally wrong. `logs/bc06/live-decorate-final-01` holds **96 files here and 70 in a clone**. The
+truth was partial, and both fixes were assumptions where a measurement was available.
+
+**The rule that holds in both places is SUPERSET, not equality:** every file visible must appear
+in the manifest. Fewer than listed is expected; MORE means evidence was added and nobody
+regenerated. Verified against `git ls-tree` for all six manifested directories — including
+`logs/r8-decision-command-usability`, where a clone sees 0 of 463 and still passes correctly.
+
+**A hardcoded date in a test is a time bomb with a known fuse.**
+`tests/open_gates_register.test.ts` pinned `today: '2026-09-10'` for determinism. Closing a gate
+on 2026-09-11 then failed the whole suite as "a date in the future" — the test broke on precisely
+the action it exists to permit. It now reads `today` from the register's OWN `updated` field:
+still no wall clock, and it asserts something real — no gate may carry a date later than the
+register claims to have been updated.
+
+**What CI was actually reporting, versus what it looked like.** Four red lines, two real:
+the two receipt tests (mine), the gates test (mine, the date pin), a deliberate failure fixture
+that `run_vitest_balanced.test.ts` spawns ON PURPOSE to prove the runner detects failures, and a
+20-second timeout in an unrelated test that passes locally and on main.
+**A red CI is a list of claims, not a list of defects** — half of these needed explaining rather
+than fixing, and the most alarming-looking one was the harness working correctly.

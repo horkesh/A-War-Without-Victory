@@ -1,0 +1,4 @@
+ACTIVE_SURFACES package.json .husky .githooks scripts tests src tools .github
+ACTIVE_MATCHES 0
+PASS no active external RE consumer remains
+EXIT_CODE=0

@@ -1,0 +1,7 @@
+i: F:\A-War-Without-Victory\logs\r9-build-preparation\phase2-manifest-preflight.ps1:1
+Line |
+   1 |  i
+     |  ~
+     | The term 'i' is not recognized as a name of a cmdlet, function, script file, or executable program. Check the
+     | spelling of the name, or if a path was included, verify that the path is correct and try again.
+PRECHECK_OK

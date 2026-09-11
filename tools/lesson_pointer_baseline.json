@@ -1,0 +1,16 @@
+{
+  "_comment": [
+    "Life-lessons pointers that promise a topic file which does not contain them.",
+    "",
+    "THIS LIST IS NOW EMPTY, and that changes what the check means: with no baseline to",
+    "grandfather, ANY broken pointer fails. It started as a ratchet over a backlog; the backlog",
+    "was cleared on 2026-09-11 by copying each cited lesson into the topic file that cited it.",
+    "",
+    "If entries reappear here, someone has re-introduced a promise the corpus does not keep.",
+    "The list may shrink. It should never grow.",
+    "",
+    "Verify with: npm run lessons:pointers"
+  ],
+  "count": 0,
+  "broken": []
+}

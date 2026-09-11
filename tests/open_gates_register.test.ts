@@ -73,7 +73,16 @@ function validFixture(): Register {
 describe('open gates register', () => {
   it('the committed register parses and validates with no errors', () => {
     const register = loadRegister();
-    const errors = validateRegister(register, { today: '2026-09-10' });
+    // `today` comes from the register's OWN `updated` field, not a hardcoded date.
+    //
+    // It was hardcoded to '2026-09-10', and on 2026-09-11 closing a gate with that day's date
+    // failed the whole suite as "in the future". A literal date in a test is a time bomb with a
+    // known fuse: it passes for exactly as long as nobody does the thing the test exists to
+    // allow. Reading it from the register keeps the run deterministic — no wall clock — while
+    // asserting something genuinely useful: no gate may carry a date later than the register claims to
+    // have been updated.
+    const updated = (register as { updated: string }).updated;
+    const errors = validateRegister(register, { today: updated });
     expect(errors).toEqual([]);
   });
 

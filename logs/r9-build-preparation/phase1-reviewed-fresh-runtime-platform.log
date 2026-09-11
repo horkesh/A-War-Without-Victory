@@ -1,0 +1,19 @@
+
+ RUN  v2.1.9 F:/AWWV-worktrees/r9-phase1-install-proof
+
+ ✓ tests/ui_map_render_smoke.test.ts (25 tests) 39ms
+ ✓ tests/ui_map_deck_counter_visibility.test.ts (34 tests) 46ms
+ ✓ tests/desktop_release_ci_guardrails.test.ts (8 tests) 10277ms
+   ✓ desktop path detector selects every source root imported by the packaged sim bundle 10194ms
+ ✓ tests/runtime_dependency_resolution.test.ts (12 tests) 1793ms
+ ✓ tests/desktop_pmtiles_protocol_route.test.ts (8 tests) 27ms
+ ✓ tests/ci_workflow_test_paths_exist.test.ts (3 tests) 50ms
+ ✓ tests/baseline_regression_ci_guardrails.test.ts (1 test) 4ms
+ ✓ tests/ui/map_production_graphics_cleanup.test.ts (7 tests) 305ms
+
+ Test Files  8 passed (8)
+      Tests  98 passed (98)
+   Start at  20:44:53
+   Duration  39.83s (transform 8.74s, setup 44ms, collect 15.67s, tests 12.54s, environment 7.56s, prepare 1.35s)
+
+EXIT_CODE=0

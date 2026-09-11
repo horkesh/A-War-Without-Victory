@@ -1,0 +1,28 @@
+WORKTREE C:/Users/User/.codex/worktrees/21d7/A-War-Without-Victory
+WORKTREE C:/Users/User/.codex/worktrees/40ef/A-War-Without-Victory
+WORKTREE C:/Users/User/.codex/worktrees/A-War-Without-Victory/bc02-load-ratings
+WORKTREE C:/Users/User/.codex/worktrees/e1e5/A-War-Without-Victory
+WORKTREE F:/A-War-Without-Victory
+WORKTREE F:/AWWV-worktrees/apr1994-calibration-investigation
+WORKTREE F:/AWWV-worktrees/bc01-player-opportunities
+WORKTREE F:/AWWV-worktrees/bc01-pre-controls
+WORKTREE F:/AWWV-worktrees/bc09-shared-inputs
+WORKTREE F:/AWWV-worktrees/calibration-timeline-viewer
+WORKTREE F:/AWWV-worktrees/r7-arbih-honorific-names
+WORKTREE F:/AWWV-worktrees/r9-phase1-install-proof
+.github/workflows/README.md
+.github/workflows/baseline-regression.yml
+.github/workflows/desktop-release-guard.yml
+.github/workflows/event-system-ci.yml
+.github/workflows/full-suite-and-fingerprint.yml
+.github/workflows/release.yml
+.github/workflows/typecheck.yml
+package-lock.json
+package.json
+tests/map_workspace_script_contract.test.ts
+tests/run_vitest_balanced.test.ts
+tests/test_runner_contract.test.ts
+tools/test/run_vitest_balanced.mjs
+tools/test/run_vitest_slice.mjs
+tools/test/vitest_shared_config.mjs
+WORKTREE F:/AWWV-worktrees/task3-parent-check

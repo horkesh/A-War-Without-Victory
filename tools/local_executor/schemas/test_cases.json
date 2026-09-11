@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "cases": {
+      "type": "array",
+      "minItems": 8,
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": { "type": "string" },
+          "input": { "type": "string" },
+          "probes": { "type": "string" }
+        },
+        "required": ["label", "input", "probes"]
+      }
+    }
+  },
+  "required": ["cases"]
+}

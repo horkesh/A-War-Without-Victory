@@ -1,0 +1,11 @@
+COMMAND={"cwd":"F:/A-War-Without-Victory","command":"C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe","args":["logs/r7-english-readability/closeout-audit-check.mjs","start"]}
+NODE_PATH=C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2
+RUN_ENV={"AWWV_S6_GRADE_RUN":null,"provenanceOverridePresent":false}
+{"command":["git","branch","--show-current"],"exitCode":0}
+{"command":["git","rev-parse","HEAD"],"exitCode":0}
+{"command":["git","ls-files","--others","--exclude-standard","-z"],"exitCode":0}
+{"command":["git","status","--short","--untracked-files=no"],"exitCode":0}
+{"branch":"codex/r7-english-readability","head":"997b2fb6c559c933203bae070dfba7b7299660f3","untrackedCount":870,"snapshot":"F:\\A-War-Without-Victory\\logs\\r7-english-readability\\closeout-audit-start.json"}
+
+EXIT_CODE=0
+SIGNAL=null

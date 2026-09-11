@@ -43,3 +43,12 @@
 
 - A 73-minute `vitest` run redirected to a log appeared **frozen at 30,134 bytes for 33 minutes**: `ls -la` reported an mtime 33 minutes stale and `wc -c` reported an unchanged size, twice, seconds apart. The run was perfectly healthy. Two effects stack on this platform: the directory entry's size/mtime are not flushed while the writing process holds the handle open, and `stdout` redirected to a file is **block-buffered**, so content lands in chunks rather than continuously. `cat file | wc -c` does not help — it reads through the same stale metadata path for the length.
 - **Do instead**: to decide whether a long-running job is alive on Windows, sample the **process CPU counter**, not the output file — `(Get-Process -Id <pid>).CPU` twice a few seconds apart; a rising value is proof of work. Cross-check that total CPU seconds ≈ wall-clock seconds for a single-threaded job. Reserve log tailing for *progress*, and even then parse completed-unit markers rather than byte counts. **Corollary, learned the same hour:** do not report "no output for N minutes" as "stalled" — the harness notifies on completion; wait for it, or check CPU.
+
+## Migrated from the index (2026-09-11)
+
+> These lessons were cited from `docs/life_lessons.md` as living here, and did not. The
+> bodies are copied verbatim from the index so the citation is true; the index keeps its
+> copy, which CLAUDE.md requires for the newest sessions.
+
+### [Platform] Integer-valued metrics are platform-stable where byte-hashes aren't — you CAN 188w-gate on them
+- The byte-hash baseline CI gate was deleted 2026-05-04 because full-save hashes (float-serialized fields) diverge between Windows dev and Linux CI. But `matched_osids` (string-equality count), op/brigade counts, and consistency-failure counts are INTEGER-valued → identical cross-platform. That resolved the decisive objection to wiring a 188w engine-health gate to CI (#424): assert on integer metrics (hard-fail) and keep float-derived ones (K:W ratio) advisory. Rule: a metric's platform-stability is determined by whether it's integer/discrete vs float-serialized — classify before deciding what CI can gate on.

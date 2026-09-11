@@ -1,0 +1,39 @@
+R9 Phase 2 independent process/platform/coverage review
+Date: 2026-09-08
+Base HEAD: 38066eec205d6493c8ffe150f0f2220184f1ca79
+Reviewed working-diff hash: 87542cb59507c39e611857ff81abdafdbefcffa6
+Verdict: GO
+
+No critical, suggestion, or nice-to-have findings remain after the single targeted
+precision correction. The surviving Baseline Regression owner and retained Event
+branch-push step both invoke canonical `npm run typecheck`, preserving explicit
+tsconfig/root-lock identity.
+
+Coverage/reporting evidence:
+- Standalone typecheck workflow is deleted only after live read-only evidence showed
+  main unprotected (HTTP 404) and rulesets empty; no remote setting changed.
+- Baseline Regression still runs typecheck on main pushes and pull requests, and its
+  dependent jobs/failure path remain intact.
+- Event typecheck runs on non-main pushes; its 27 active named test paths all exist.
+  The event subset, separate strict-canon step, and byte-baseline step remain on every
+  Event trigger because no same-event owner covers all development-branch pushes.
+- Trusted detector scripts have zero diff lines. Always-report, structural fingerprint,
+  engine-health, package, discovery, and isolation contracts are unchanged.
+- Master section 11 removes only the second baseline invocation. Verified controls:
+  manifest present exits 0; manifest absent exits 1; simulated canon exit 7 produces
+  wrapper exit 1 with no continuation. The earlier malformed extraction receipts are
+  correctly retained as failed diagnostic history.
+
+Validation evidence:
+- phase2-focused-tests-rerun.log: 7 files / 42 tests passed, exit 0, including a real
+  deliberately failing child whose parent correctly reports success only after proving
+  failure propagation.
+- phase2-doc-command-guards-verified.log: all positive/negative controls passed, exit 0.
+- Reviewer static check: 27 active Event paths, 0 missing; typecheck.yml absent;
+  detector diff 0 lines; git diff --check exit 0.
+
+Scope is clean: no runtime, dependency, package, baseline, canon-content, gameplay,
+simulation, save, detector, or remote-configuration edits. Actual Actions behavior and
+final R8/R9 acceptance remain separate. Root may append this verdict and commit-hook
+receipt to the existing plan/ledger, then run focused documentation checks and the
+enabled hook; that closeout text does not require a repeated unchanged review.

@@ -1,0 +1,18 @@
+
+> awwv@0.9.9-beta.1 test:vitest
+> node tools/test/run_vitest_default.mjs tests/ui/r7_president_desk_layout_readability.test.ts tests/ui/president_desk_shell.test.ts tests/ui/desk_authority_header.test.ts tests/ui/warroom_shell_accessibility.test.ts
+
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/ui/president_desk_shell.test.ts (21 tests) 486ms
+ ✓ tests/ui/warroom_shell_accessibility.test.ts (15 tests) 784ms
+   ✓ WarroomShellLayer accessibility proof > exposes hotspots as keyboard-focusable buttons with stable labels 335ms
+ ✓ tests/ui/desk_authority_header.test.ts (10 tests) 172ms
+ ✓ tests/ui/r7_president_desk_layout_readability.test.ts (2 tests) 4ms
+
+ Test Files  4 passed (4)
+      Tests  48 passed (48)
+   Start at  20:17:07
+   Duration  10.70s (transform 2.88s, setup 31ms, collect 4.97s, tests 1.45s, environment 2.47s, prepare 428ms)
+

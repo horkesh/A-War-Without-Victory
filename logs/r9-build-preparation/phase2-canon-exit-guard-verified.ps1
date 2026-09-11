@@ -1,0 +1,3 @@
+$LASTEXITCODE=7
+if ($LASTEXITCODE) { throw "canon:check exit $LASTEXITCODE" }
+Write-Output 'UNEXPECTED_CONTINUATION'

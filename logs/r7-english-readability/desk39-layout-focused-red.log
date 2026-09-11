@@ -1,0 +1,465 @@
+
+> awwv@0.9.9-beta.1 test:vitest
+> node tools/test/run_vitest_default.mjs tests/ui/r7_president_desk_layout_readability.test.ts
+
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ❯ tests/ui/r7_president_desk_layout_readability.test.ts (3 tests | 2 failed) 48ms
+   × R7 President Desk layout readability > reserves a date sightline beside the authority header at narrower viewports 32ms
+     → expected 'import { useEffect, useRef } from \'r…' to contain 'w-[18rem] min-[1600px]:w-[28rem] min-…'
+   × R7 President Desk layout readability > keeps the authority legend readable when its card narrows for the date sightline 12ms
+     → expected '/**\n * DeskAuthorityHeader — the "Au…' to contain 'grid-cols-1 min-[1600px]:grid-cols-2'
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/ui/r7_president_desk_layout_readability.test.ts > R7 President Desk layout readability > reserves a date sightline beside the authority header at narrower viewports
+AssertionError: expected 'import { useEffect, useRef } from \'r…' to contain 'w-[18rem] min-[1600px]:w-[28rem] min-…'
+
+- Expected
++ Received
+
+- w-[18rem] min-[1600px]:w-[28rem] min-[2560px]:w-full
++ import { useEffect, useRef } from 'react';
++ import type { EventDefinition } from '../../../../sim/events/event_types';
++ import type { InboxItem } from '../../data/inboxItems';
++ import { countActionableItems, deriveInboxItems } from '../../data/inboxItems';
++ import { derivePresidentialBlockers } from '../../data/presidentialBlockers';
++ import { buildPreAdvanceCommandReviewView } from '../../data/preAdvanceCommandReview';
++ import type { LoadedGameState } from '../../data/types';
++ import { t } from '../../i18n';
++ import { turnToDateString } from '../../utils/formatters';
++ import { ConsequenceStrip } from './ConsequenceStrip';
++ import { DeskAuthorityHeader } from './DeskAuthorityHeader';
++ import { DeskPacket } from './DeskPacket';
++
++ export interface PresidentDeskShellProps {
++   state: LoadedGameState | null;
++   osidNameMap: Record<string, string> | null;
++   eventCatalog?: ReadonlyMap<string, EventDefinition>;
++   onAction: (action: InboxItem['action'], itemId: string) => void;
++   onAdvance: () => void;
++   onOpenArmyHQ: () => void;
++   onOpenRecords: () => void;
++   onOpenDecisionRecords?: (recordId?: string) => void;
++   onOpenChronicle?: (recordId?: string) => void;
++   onClose?: () => void;
++   /** Open the advance-turn review modal for blockers or recommended staff review. */
++   onReviewAdvance?: () => void;
++   /** Current-session aftermath already presented to the player. */
++   reviewedAftermathTurn?: number | null;
++ }
++
++ function factionTitle(state: LoadedGameState | null): string {
++   if (state?.player_faction === 'RS') return t('desk.faction.rs');
++   if (state?.player_faction === 'HRHB') return t('desk.faction.hrhb');
++   if (state?.player_faction === 'RBiH') return t('desk.faction.rbih');
++   return t('desk.faction.fallback');
++ }
++
++ export function PresidentDeskShell({
++   state,
++   osidNameMap,
++   eventCatalog,
++   onAction,
++   onAdvance,
++   onOpenArmyHQ,
++   onOpenRecords,
++   onOpenDecisionRecords,
++   onOpenChronicle,
++   onClose,
++   onReviewAdvance,
++   reviewedAftermathTurn,
++ }: PresidentDeskShellProps) {
++   const shellRef = useRef<HTMLElement | null>(null);
++   const items = deriveInboxItems(state, osidNameMap, eventCatalog);
++   const actionableCount = countActionableItems(items);
++   const advanceReview = buildPreAdvanceCommandReviewView({
++     state,
++     osidNameMap,
++     reviewedAftermathTurn,
++   });
++   const presidentialBlockers = derivePresidentialBlockers(state, osidNameMap);
++   const requiredItemIds = new Set(presidentialBlockers.map((blocker) => blocker.id));
++   const blocked = advanceReview.status === 'blocked' || presidentialBlockers.length > 0;
++   const reviewRecommended = !blocked && advanceReview.status === 'review';
++   const singleBlocker = presidentialBlockers.length === 1 ? presidentialBlockers[0] : null;
++
++   useEffect(() => {
++     if (onClose) shellRef.current?.focus();
++   }, [onClose]);
++
++   return (
++     <section
++       ref={shellRef}
++       role={onClose ? 'dialog' : 'region'}
++       aria-label={t('desk.region.ariaLabel')}
++       aria-modal={onClose ? 'false' : undefined}
++       tabIndex={onClose ? -1 : undefined}
++       data-testid="president-desk-shell"
++       data-awwv-counter-occluder="true"
++       onKeyDown={(event) => {
++         if (event.key === 'Escape' && onClose) {
++           event.preventDefault();
++           event.stopPropagation();
++           onClose();
++         }
++       }}
++       // Static, generous clearance (not measured) — a prior ResizeObserver-
++       // based dynamic-measurement approach (fc04f2902, reverted a39b29673)
++       // was unit-test-clean but regressed RS's early-game historical-event
++       // determinism in the interactive packaged harness, most likely via the
++       // extra render cycle its mount-time state update introduced. bottom-16
++       // (64px) proved insufficient once WarroomStatusBar's priority docket
++       // wraps to more than one row; bottom-28 (112px) comfortably covers a
++       // multi-row wrap with no additional state, effect, or render.
++       className="pointer-events-none absolute right-3 top-[var(--awwv-toolbar-clearance,5.5rem)] bottom-28 z-[3] flex w-[min(32rem,calc(100vw-1.5rem))] flex-col gap-3 overflow-hidden md:right-6 xl:right-10"
++     >
++       {onClose && (
++         <button
++           type="button"
++           onClick={onClose}
++           aria-label={t('desk.closeOverlayAria')}
++           data-testid="desk-close-overlay"
++           className="pointer-events-auto shrink-0 self-end border border-panel-border/80 bg-[#11141b] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-text-secondary shadow-[0_16px_48px_rgba(0,0,0,0.42)] transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
++         >
++           {t('common.close')}
++         </button>
++       )}
++       <div
++         data-testid="president-desk-scroll-region"
++         className="min-h-0 flex flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto overscroll-contain pb-3 [-webkit-mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)] [mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)]"
++       >
++         <div className="shrink-0">
++           <DeskAuthorityHeader state={state} />
++         </div>
++
++         <div className="pointer-events-auto w-full shrink-0 border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.52)]">
++           <DeskPacket items={items} onAction={onAction} requiredItemIds={requiredItemIds} />
++         </div>
++
++         <aside className="pointer-events-auto w-full shrink-0 border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.46)]">
++         <div className="border-b border-panel-border/70 pb-3">
++           <div className="text-xs font-bold uppercase tracking-[0.22em] text-accent-gold">{t('desk.strategicSituation')}</div>
++           <h2 className="mt-1 text-[18px] font-bold leading-tight text-text-primary">{factionTitle(state)}</h2>
++           <div className="mt-1 text-xs text-text-secondary">
++             {state ? t('desk.situation.dateTurn', { date: turnToDateString(state.turn) }) : t('desk.situation.noCampaign')}
++           </div>
++         </div>
++
++         <div className="mt-3 grid grid-cols-2 gap-2">
++           <div className="border border-panel-border/70 bg-black/20 px-2.5 py-2">
++             <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.items.label')}</div>
++             <div className="mt-1 text-[18px] font-bold text-text-primary">{actionableCount}</div>
++           </div>
++           <div className="border border-panel-border/70 bg-black/20 px-2.5 py-2">
++             <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.advance.label')}</div>
++             <div className={`mt-1 text-[13px] font-bold ${
++               blocked ? 'text-red-200' : reviewRecommended ? 'text-amber-200' : 'text-green-200'
++             }`}>
++               {blocked
++                 ? t('desk.advance.signatureRequired')
++                 : reviewRecommended
++                   ? t('desk.advance.staffReview')
++                   : t('desk.advance.noActRequired')}
++             </div>
++           </div>
++         </div>
++
++         <div className="mt-3 grid grid-cols-2 gap-2">
++           <button
++             type="button"
++             onClick={onOpenArmyHQ}
++             data-testid="desk-action-army-hq"
++             className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-2 text-left text-xs font-bold uppercase tracking-[0.14em] text-accent-gold transition-colors hover:bg-accent-gold/20"
++           >
++             {t('desk.action.callArmyHQ')}
++           </button>
++           <button
++             type="button"
++             onClick={
++               blocked && singleBlocker
++                 ? () => onAction(singleBlocker.action, singleBlocker.id)
++                 : (blocked || reviewRecommended) && onReviewAdvance
++                   ? onReviewAdvance
++                   : onAdvance
++             }
++             data-testid={
++               blocked && singleBlocker
++                 ? 'desk-action-open-required-signature'
++                 : blocked
++                 ? 'desk-action-review-blockers'
++                 : reviewRecommended
++                   ? 'desk-action-review-priorities'
++                   : 'desk-action-advance-clearance'
++             }
++             className={[
++               'border px-3 py-2 text-left text-xs font-bold uppercase tracking-[0.14em] transition-colors',
++               blocked
++                 ? 'border-red-300/45 bg-red-500/12 text-red-100 hover:bg-red-500/20'
++                 : reviewRecommended
++                   ? 'border-amber-300/45 bg-amber-500/12 text-amber-100 hover:bg-amber-500/20'
++                 : 'border-accent-gold/50 bg-accent-gold/14 text-accent-gold hover:bg-accent-gold/22',
++             ].join(' ')}
++           >
++             {blocked
++               ? singleBlocker
++                 ? t('desk.action.openRequiredSignature')
++                 : t('desk.action.reviewBlockers')
++               : reviewRecommended
++                 ? t('desk.action.reviewStaffRecommendation')
++                 : t('desk.action.advanceHoldingPolicy')}
++           </button>
++         </div>
++
++         <div className="mt-4">
++           <ConsequenceStrip
++             state={state}
++             onOpenRecords={onOpenRecords}
++             onOpenDecisionRecords={onOpenDecisionRecords}
++             onOpenChronicle={onOpenChronicle ?? onOpenRecords}
++           />
++         </div>
++         </aside>
++       </div>
++     </section>
++   );
++ }
++
+
+ ❯ tests/ui/r7_president_desk_layout_readability.test.ts:14:20
+     12|     const source = readFileSync('src/ui/map/components/presidential_de…
+     13| 
+     14|     expect(source).toContain('w-[18rem] min-[1600px]:w-[28rem] min-[25…
+       |                    ^
+     15|     expect(source).toContain('gap-8 min-[2560px]:gap-3');
+     16|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/ui/r7_president_desk_layout_readability.test.ts > R7 President Desk layout readability > keeps the authority legend readable when its card narrows for the date sightline
+AssertionError: expected '/**\n * DeskAuthorityHeader — the "Au…' to contain 'grid-cols-1 min-[1600px]:grid-cols-2'
+
+- Expected
++ Received
+
+- grid-cols-1 min-[1600px]:grid-cols-2
++ /**
++  * DeskAuthorityHeader — the "Authority & Directives" band on the Presidential Desk.
++  *
++  * Command-surface design (docs/plans/2026-06-01-presidential-command-surface-design.md §2):
++  * the Desk is the "home of agency". This band ties the player's spendable currency
++  * (Command Authority) to the levers it buys, so the cost of action is legible where
++  * action is taken.
++  *
++  * Pure presentation, faction-agnostic:
++  *  - Reads the current CA balance straight off `state.commandAuthority` (the same
++  *    adapter-owned view-model the PresidentialToolbar gauge reads — current/max/
++  *    spentThisTurn). No new CA source is invented.
++  *  - Renders the lever-cost legend from the canonical constants in
++  *    utils/commandAuthority.ts (never hardcoded numbers).
++  *  - A low-CA cue appears when the balance cannot afford the cheapest override lever.
++  *
++  * The per-turn directive *count* is intentionally NOT shown: there is no clean,
++  * non-fragile source for "directives issued this turn" without invoking the
++  * Decision-Room view-model builder (owned elsewhere). Instead the band surfaces
++  * `spentThisTurn` from the same CA object — a real engine-backed signal that moves
++  * one-for-one with every directive issued.
++  */
++ import type { LoadedGameState } from '../../data/types';
++ import { isPresidentialCadenceHold } from '../../data/presidentialCadenceHold';
++ import { deriveInboxItems } from '../../data/inboxItems';
++ import { t } from '../../i18n';
++ import {
++   AUTHOR_OP_COST,
++   REQUEST_OP_COST,
++   STOP_OP_COST,
++   FORCE_LAUNCH_COST,
++   PROACTIVE_FORCE_LAUNCH_COST,
++   ELITE_DEPLOY_COST,
++   REPLACE_CO_COST,
++   FRONT_VISIT_COST,
++ } from '../../utils/commandAuthority';
++
++ interface LeverCost {
++   /** i18n key for the lever label. */
++   labelKey: Parameters<typeof t>[0];
++   /** CA cost, sourced from the canonical constant. */
++   cost: number;
++ }
++
++ /**
++  * The strategic levers and their CA costs, ordered cheapest-first so the legend
++  * reads as a price ladder. Costs come from utils/commandAuthority.ts constants.
++  */
++ const LEVER_COSTS: LeverCost[] = [
++   { labelKey: 'deskAuthority.lever.frontVisit', cost: FRONT_VISIT_COST },
++   { labelKey: 'deskAuthority.lever.forceLaunch', cost: FORCE_LAUNCH_COST },
++   { labelKey: 'deskAuthority.lever.authorOp', cost: AUTHOR_OP_COST },
++   { labelKey: 'deskAuthority.lever.requestOp', cost: REQUEST_OP_COST },
++   { labelKey: 'deskAuthority.lever.stopOp', cost: STOP_OP_COST },
++   { labelKey: 'deskAuthority.lever.proactiveForceLaunch', cost: PROACTIVE_FORCE_LAUNCH_COST },
++   { labelKey: 'deskAuthority.lever.eliteDeploy', cost: ELITE_DEPLOY_COST },
++   { labelKey: 'deskAuthority.lever.replaceCo', cost: REPLACE_CO_COST },
++ ];
++
++ /** Cheapest lever cost — the threshold below which the player can do nothing. */
++ const MIN_LEVER_COST = Math.min(...LEVER_COSTS.map((l) => l.cost));
++
++ function sourceLabelKey(source: string | undefined): Parameters<typeof t>[0] {
++   switch (source) {
++     case 'international_standing':
++       return 'deskAuthority.source.internationalStanding';
++     case 'patron_confidence':
++       return 'deskAuthority.source.patronConfidence';
++     case 'internal_cohesion':
++       return 'deskAuthority.source.internalCohesion';
++     case 'quiet_front_restraint':
++       return 'deskAuthority.source.quietFront';
++     default:
++       return 'deskAuthority.source.baseRecovery';
++   }
++ }
++
++ export interface DeskAuthorityHeaderProps {
++   state: LoadedGameState | null;
++ }
++
++ export function DeskAuthorityHeader({ state }: DeskAuthorityHeaderProps) {
++   const ca = state?.commandAuthority;
++   // The band is only meaningful with a CA-bearing state (player campaigns). When
++   // CA is absent (e.g. headless/legacy saves) the desk omits the band entirely.
++   if (!ca) return null;
++
++   const { current, max, spentThisTurn } = ca;
++   const reserve = ca.reserve ?? 0;
++   const reserveMax = ca.reserveMax ?? 0;
++   const lastRecovery = ca.lastRecovery ?? 0;
++   const directiveCadence = lastRecovery > 0 ? Math.max(1, Math.ceil(REQUEST_OP_COST / lastRecovery)) : null;
++   const pct = max > 0 ? Math.max(0, Math.min(100, Math.round((current / max) * 100))) : 0;
++   const lowAuthority = current < MIN_LEVER_COST;
++   const atCapacity = max > 0 && current >= max;
++   const nearCapacityQuiet = isPresidentialCadenceHold(state, deriveInboxItems(state, null));
++
++   const gaugeColor = pct >= 60 ? 'bg-emerald-400/70' : pct >= 30 ? 'bg-amber-400/70' : 'bg-red-400/70';
++   const valueColor = pct >= 60 ? 'text-emerald-300' : pct >= 30 ? 'text-amber-300' : 'text-red-300';
++
++   return (
++     <section
++       data-testid="desk-authority-header"
++       aria-label={t('deskAuthority.title')}
++       className="pointer-events-auto border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.46)]"
++     >
++       <div className="flex items-baseline justify-between gap-3 border-b border-panel-border/70 pb-2">
++         <div>
++           <div className="text-xs font-bold uppercase tracking-[0.22em] text-accent-gold">
++             {t('deskAuthority.title')}
++           </div>
++           <div className="mt-0.5 text-xs text-text-secondary">{t('deskAuthority.subtitle')}</div>
++         </div>
++       </div>
++
++       {/* Current Command Authority — compact gauge + value. */}
++       <div className="mt-3">
++         <div className="flex items-center justify-between">
++           <span className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
++             {t('deskAuthority.caLabel')}
++           </span>
++           <span
++             data-testid="desk-authority-ca-value"
++             className={`text-[14px] font-bold tabular-nums ${valueColor}`}
++           >
++             {t('deskAuthority.caValue', { current, max })}
++           </span>
++         </div>
++         <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-white/10">
++           <div className={`h-full ${gaugeColor} transition-all duration-500`} style={{ width: `${pct}%` }} />
++         </div>
++         <div className="mt-1 flex items-center justify-between text-xs text-text-secondary">
++           <span data-testid="desk-authority-spent">{t('deskAuthority.spentThisTurn', { spent: spentThisTurn })}</span>
++           <span data-testid="desk-authority-bank">{t('deskAuthority.bank', { reserve, max: reserveMax })}</span>
++         </div>
++         <div className="mt-1 grid grid-cols-1 gap-0.5 text-xs text-text-secondary">
++           <span data-testid="desk-authority-income-source">
++             {t('deskAuthority.incomeSource', { source: t(sourceLabelKey(ca.lastRecoverySource)) })}
++           </span>
++           {directiveCadence != null && (
++             <span data-testid="desk-authority-cadence">
++               {t('deskAuthority.cadence', { turns: directiveCadence })}
++             </span>
++           )}
++         </div>
++         {lowAuthority && (
++           <div
++             data-testid="desk-authority-low-cue"
++             className="mt-2 border border-red-400/40 bg-red-500/10 px-2 py-1 text-xs font-semibold text-red-200"
++           >
++             {t('deskAuthority.lowHint')}
++           </div>
++         )}
++         {nearCapacityQuiet && (
++           <div
++             role="note"
++             data-testid="desk-authority-cadence-hold"
++             className="mt-2 border border-sky-300/30 bg-sky-500/10 px-2 py-1.5 text-xs leading-relaxed text-sky-100"
++           >
++             {t('deskAuthority.cadenceHold')}
++           </div>
++         )}
++         {atCapacity && (
++           <div
++             data-testid="desk-authority-capacity-cue"
++             className="mt-2 border border-emerald-300/30 bg-emerald-500/10 px-2 py-1.5 text-xs leading-relaxed text-emerald-100"
++           >
++             {t('deskAuthority.capacityHint')}
++           </div>
++         )}
++       </div>
++
++       {/* Lever cost legend — names + CA costs from the canonical constants. */}
++       <div className="mt-3">
++         <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
++           {t('deskAuthority.legendHeading')}
++         </div>
++         <ul className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-1">
++           {LEVER_COSTS.map(({ labelKey, cost }) => {
++             const affordable = current >= cost;
++             return (
++               <li
++                 key={labelKey}
++                 data-testid="desk-authority-lever"
++                 className="flex items-center justify-between gap-2 text-xs"
++               >
++                 <span className={affordable ? 'text-text-secondary' : 'text-text-muted/60'}>
++                   {t(labelKey)}
++                 </span>
++                 <span
++                   className={`shrink-0 font-mono font-bold tabular-nums ${affordable ? 'text-accent-gold' : 'text-red-300/70'}`}
++                 >
++                   {t('deskAuthority.costSuffix', { cost })}
++                 </span>
++               </li>
++             );
++           })}
++         </ul>
++       </div>
++     </section>
++   );
++ }
++
+
+ ❯ tests/ui/r7_president_desk_layout_readability.test.ts:21:20
+     19|     const source = readFileSync('src/ui/map/components/presidential_de…
+     20| 
+     21|     expect(source).toContain('grid-cols-1 min-[1600px]:grid-cols-2');
+       |                    ^
+     22|   });
+     23| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 1 passed (3)
+   Start at  20:00:50
+   Duration  787ms (transform 43ms, setup 17ms, collect 23ms, tests 48ms, environment 0ms, prepare 102ms)
+

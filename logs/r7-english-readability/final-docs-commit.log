@@ -1,0 +1,5 @@
+pre-commit: docs/process-only staged changes; skipping npx tsc --noEmit
+[codex/r7-english-readability b8e16e7c4] docs: record R7 readability evidence and open acceptance gates
+ 7 files changed, 287 insertions(+), 6 deletions(-)
+ create mode 100644 docs/40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md
+EXIT_CODE=0

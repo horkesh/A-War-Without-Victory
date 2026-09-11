@@ -1,0 +1,41 @@
+COMMAND={"cwd":"F:/A-War-Without-Victory","command":"C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe","args":["logs/r7-english-readability/desk39-layout-post-a-preflight.mjs","F:/AWWV-worktrees/r7-readability-pre","F:/A-War-Without-Victory/logs/r7-english-readability/pre-188w-clean/apr1992_definitive_188w__6898d6d2e324c7a3__w188","16389f6c9c66f13517806bae30ac78165563b66e","logs/r7-english-readability/desk39-layout-preflight-control1.json"]}
+NODE_PATH=C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2
+{
+  "checkout": "F:/AWWV-worktrees/r7-readability-pre",
+  "expectedCommit": "16389f6c9c66f13517806bae30ac78165563b66e",
+  "commit": "16389f6c9c66f13517806bae30ac78165563b66e",
+  "status": "",
+  "node": "v22.23.2",
+  "checkedInputs": 31,
+  "mismatches": [
+    {
+      "path": "data/derived/operational/operational_settlements.geojson",
+      "expected": "c03cc9ce4286b779139ce460e5f515d67415fe633e4ed2dbda1764b9440338c8",
+      "actual": "03713c8e80ba7111ff64ad0bd69b70db4c7e2b30e22f23b8c4e2c11be60baa1a"
+    }
+  ],
+  "packageChecks": [
+    {
+      "path": "package.json",
+      "actual": "24307c96c67584fcf28cd571f83625c02e623787a10cd3013996d0522e3c8a12",
+      "expected": "24307c96c67584fcf28cd571f83625c02e623787a10cd3013996d0522e3c8a12",
+      "match": true
+    },
+    {
+      "path": "package-lock.json",
+      "actual": "3bed66fe10b593a7889e90863c3fcb0990bb1ae244dc559ef30e21232c5d8ca5",
+      "expected": "3bed66fe10b593a7889e90863c3fcb0990bb1ae244dc559ef30e21232c5d8ca5",
+      "match": true
+    },
+    {
+      "path": "src/ui/map/package.json",
+      "actual": "39675b091b30e3df7ad3c6efdb404ca556aad89897951899ff6c6a3184eb4ee4",
+      "expected": "39675b091b30e3df7ad3c6efdb404ca556aad89897951899ff6c6a3184eb4ee4",
+      "match": true
+    }
+  ],
+  "pass": false
+}
+
+EXIT_CODE=1
+SIGNAL=null

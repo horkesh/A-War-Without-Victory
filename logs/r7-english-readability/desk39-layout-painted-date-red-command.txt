@@ -1,0 +1,1 @@
+npm.cmd run test:vitest -- tests/ui/r7_president_desk_layout_readability.test.ts
