@@ -90,6 +90,21 @@ const host = opt('--host', config.host);
 // What shape the reply must have. `json` is checked after generation; anything malformed is a
 // loud failure rather than a file that only breaks later, somewhere else.
 const expect = opt('--expect', 'text');
+
+// What KIND of task this is, so the ledger can answer "what is it actually good at?" by
+// arithmetic instead of by recollection. The categories come from what has actually been
+// dispatched, not from theory:
+//   extract   pull facts out of files you supplied (its strongest measured mode)
+//   table     test tables, case lists, enumerations
+//   wiring    scripts, config, small mechanical glue
+//   logic     anything where it must decide behaviour -- historically the rewrites
+//   prose     documentation
+const KINDS = ['extract', 'table', 'wiring', 'logic', 'prose', 'other'];
+const kind = opt('--kind', 'other');
+if (!KINDS.includes(kind)) {
+  console.error(`REFUSING: --kind must be one of ${KINDS.join(' | ')}, got "${kind}".`);
+  process.exit(2);
+}
 if (!['text', 'json'].includes(expect)) {
   console.error(`REFUSING: --expect must be text or json, got "${expect}".`);
   process.exit(2);
@@ -122,7 +137,7 @@ if (stray.length > 0) {
     `REFUSING: unrecognised argument(s): ${stray.join(' ')}\n`
     + 'Nothing is sent unless every argument is understood — an ignored argument means the model\n'
     + 'silently receives less than you think it does, and answers confidently about code it never saw.\n'
-    + 'Flags: --spec --prompt --read --out --model --ctx --host --think --expect\n',
+    + 'Flags: --spec --prompt --read --out --model --ctx --host --think --expect --kind --schema\n',
   );
   process.exit(2);
 }
@@ -300,6 +315,7 @@ try {
     read: files,
     schema: schemaPath || null,
     expect,
+    kind,
     input_tokens: approxTokens,
     output_tokens: response.eval_count,
     tok_per_sec: Number(genTokPerSec.toFixed(1)),

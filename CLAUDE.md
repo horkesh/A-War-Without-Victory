@@ -157,3 +157,24 @@ npm run local:benchmark                                # re-measure before chang
 - Append behavioral/output changes to `docs/PROJECT_LEDGER.md`.
 - Thematic knowledge to `docs/PROJECT_LEDGER_KNOWLEDGE.md`.
 - Edits to `docs/10_canon/FORAWWV.md` require Pyrrhic-panel sign-off (convene the appropriate panel; unanimous GO = signature; BLOCK or split verdict escalates to the owner; implementer ≠ reviewer). §6, the bright line, and the enclave guard are the panel's to rule on — see Sacred Rules above.
+
+## Delegate the reading, not the deciding
+
+`npm run local:ask -- --read <files> "question"` answers a question ABOUT files without the
+planner reading them. It builds the schema, demands verbatim quotes, and **verifies every quote
+before you see the answer** — an unverified quote exits non-zero and the answer is marked unsound.
+
+Measured 2026-09-11: a 12,462-token roadmap answered for ~250 tokens, 3/3 quotes verified.
+
+- **Delegable: reading FOR FACTS.** What does it say, which value is set, what failed, which of
+  these is stale. Extraction from supplied files is the local model's strongest measured mode.
+- **NOT delegable: reading TO CHANGE.** You need the real contents in context to edit a file, and
+  a summary is not a substitute. Delegating a read you need anyway saves nothing and loses
+  precision. Also read directly when you need exact line numbers.
+- `guard_large_read.sh` says this at the moment you are about to read something over ~10k tokens,
+  with the command already filled in. It is advisory and must stay so — it cannot know which of
+  the two you are doing.
+- **Never delegate the oracle.** Anything deciding pass/fail stays with the planner. Both rejected
+  proposals so far failed exactly there.
+- `npm run local:ledger` is the routing authority, not prose. Record every outcome with
+  `npm run local:verdict`. When the ledger disagrees with a README, the README is wrong.

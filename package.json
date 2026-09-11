@@ -312,7 +312,12 @@
     "local:fanout": "node tools/local_executor/fanout.mjs",
     "local:benchmark": "node tools/local_executor/benchmark.mjs",
     "lessons:pointers": "node tools/validate_lesson_pointers.cjs --list",
-    "lessons:pointers:ratchet": "node tools/validate_lesson_pointers.cjs --ratchet"
+    "lessons:pointers:ratchet": "node tools/validate_lesson_pointers.cjs --ratchet",
+    "local:verify-quotes": "node tools/local_executor/verify_quotes.mjs",
+    "local:ask": "node tools/local_executor/ask.mjs",
+    "plans": "node tools/derive_plan_index.cjs --print",
+    "plans:derive": "node tools/derive_plan_index.cjs",
+    "plans:check": "node tools/derive_plan_index.cjs --check"
   },
   "build": {
     "appId": "com.awwv.desktop",
