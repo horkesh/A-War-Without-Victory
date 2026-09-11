@@ -66,3 +66,20 @@ schema and a prompt that drift apart.
 `not_delegable` is required and may not be empty. A manifest that silently omitted the judgement
 work would read as though the whole plan were machine-executable, which is the one claim this
 format exists to avoid making.
+
+## Two disciplines learned by running the first manifest
+
+**A task must not duplicate its own plan.** `WR01-T2` asked the executor to find the tests pinning
+the date. The owning plan already listed all four, with line ranges and current assertions, in a
+table. Two dispatches were spent before anyone checked. The cost is not just the dispatches: a
+re-derivation can DISAGREE with the plan, and then there are two answers and no authority. Before
+writing a task, read the plan for the answer.
+
+**Never put a directory in `read`.** `WR01-T2` originally listed `tests/ui`. The dispatcher then
+chose files with a truncated grep, and the model returned four perfectly verified quotes from a
+test about army HQ timing copy. A directory is an invitation to guess which files matter, and the
+guess is not recorded anywhere. Name the files.
+
+**Quote verification proves provenance, not relevance.** Both of those dispatches verified 100% —
+the quotes were real, in the files named. Verification cannot tell you the answer was to the right
+question. That check remains the planner's.

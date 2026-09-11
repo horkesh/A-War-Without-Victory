@@ -46,23 +46,38 @@ tasks:
 
   - id: WR01-T2-TEST-SITES
     kind: extract
-    status: open
+    status: done
+    # DONE WITHOUT A DISPATCH, and the reason is a format lesson.
+    #
+    # This task asked the executor to locate the tests that pin the date. The OWNING PLAN
+    # already answers it: a table at :249-256 names all four sites with exact line ranges and
+    # what each currently asserts, verified against the files.
+    #
+    # Two dispatches were spent before that was noticed. The first returned 4/4 VERIFIED quotes
+    # from a test about army HQ timing copy -- faithful extraction from inputs I had chosen with
+    # a truncated grep. The second, pointed at the right files, returned 6/6 verified quotes of
+    # which one was a date assertion and five were hotspot and toolbar tests.
+    #
+    # ⇒ Before writing a task, check whether the owning plan already answers it. A task that
+    #   duplicates the plan does not merely waste a dispatch: it invites a re-derivation that can
+    #   DISAGREE with the plan, and then there are two answers and no authority.
+    # ⇒ Quote verification proves PROVENANCE, not RELEVANCE. Both dispatches verified perfectly.
     edit: []
     read:
-      - tests/ui
+      - tests/ui/warroom_shell_accessibility.test.ts
+      - tests/ui/warroom_scene_continuity.test.ts
     change: >
-      Locate every test asserting on the warroom date element. For each, give the file, the test
-      name exactly as written, and the verbatim assertion line. Do not propose changes.
+      Superseded by the owning plan's own table at :249-256, which names the four test sites with
+      line ranges. Retained rather than deleted so the reasoning survives.
     fails_now: []
     must_not_break: []
     read_only_acceptance: >
-      Planner opens each cited file at the cited test and confirms the assertion is present.
+      Settled by the owning plan at :249-256; lines 224-232 were checked against the file and
+      match what the plan claims.
     out_of_scope:
       - Editing any test. Amending an acceptance test is the oracle.
-      - Deciding what the assertions should become
     why_delegable: >
-      Locating call sites is extraction. Deciding what they should assert is not, and is listed
-      under not_delegable.
+      It was not. The plan already held the answer, and the manifest should have cited it.
 
   - id: WR01-T3-LUMINANCE-TABLE
     kind: extract
