@@ -4040,3 +4040,113 @@ perfect — both failures found, both quotes verified verbatim by
 wrong: it marked the deliberate `deliberate_failure.fixture.ts` control as a real failure while
 its own reasoning noted "despite the deliberate name". **Facts yes, verdicts no** — which is
 exactly where the dispatch ledger already said the boundary was.
+
+## The task-manifest pipeline, run end to end — and it answered the warroom question — 2026-09-11
+
+**Format researched, not invented.** Asked to stop deferring the schema to the owner, the format
+was rebuilt from three sources. `TASK_TEMPLATE.md` (this repo, battle-tested) supplied the
+distinction the first draft got wrong: *files you may EDIT* and *files you may READ* are separate
+lists, and merging them invites an executor to rewrite context it was only meant to consult.
+**SWE-bench** supplied two fields that were missing and are load-bearing here:
+
+- `fails_now` (their FAIL_TO_PASS) — a test that currently FAILS. SWE-bench EXCLUDES instances
+  without one: a test that already passes cannot show the change worked. That is this repo's
+  "prove it fires by mutation" rule, reached independently by a different community.
+- `must_not_break` (their PASS_TO_PASS) — the regression set. **The commonest failure in this repo
+  is a change that satisfies its own test and breaks a neighbour** — the CI install-contract test,
+  `inbox_dedup`, `main` going red twice in two days — and the first draft had no field for it.
+
+A 2026 registered report proposing TOML was read and rejected: it has no results yet, and changing
+serialisation for an unevaluated proposal would cost consistency with `open_gates.yml` and
+`plan_index.yml` for nothing.
+
+**The manifest is data; the prompt is rendered from it.** Small models read prose better than
+YAML, and a schema plus a hand-written prompt is two sources of truth that drift — the failure the
+plan index, the gates register and the pointer checker were each built to stop. The hard rules are
+spliced verbatim out of `TASK_TEMPLATE.md` rather than restated, for the same reason.
+
+**Then it was actually run, which is the only thing that validates a format.** `WR01-T1` rendered
+to a 649-token prompt, dispatched, and returned **22 font declarations with 22/22 quotes verified
+against source**, 7 of them `@font-face` entries correctly classified.
+
+**And the result answers the question this whole thread opened with.** Every font in the warroom
+is IBM Plex — Sans Condensed or Mono — and an independent grep found no handwriting, script or
+marker face anywhere in `src/ui`. **The date cannot read as hand-written because there is no
+hand-written font to render it in.** That was the original hypothesis; it now has verified
+evidence behind it rather than an inference.
+
+**Two defects found by the negative tests, both in my own checkers.** The manifest validator
+tested presence with `!value`, so an all-digit commit SHA parsed as `0` and read as missing —
+caught by the POSITIVE control, not by any of the five rejections. And `FORMAT.md` referenced
+`render_task_prompt.cjs` before it existed: a pointer leading nowhere, written the same day a
+checker for exactly that was built and the lesson-pointer backlog was cleared.
+
+## Three findings from one session, converted the same day — 2026-09-11
+
+Standing instruction from the owner: improve after each finding so an error does not happen twice.
+Today's session produced three that had already happened more than twice, so all three were
+promoted from prose to refusal rather than written down again.
+
+**1. A truncated file-listing search.** `grep -rl … | head -5`. The rule was ALREADY a starred
+entry in `docs/life_lessons.md`, and was violated anyway — twice, by the same reader. Once
+establishing "the tests that guard workflows", where the truncation hid the test pinning CI
+install counts (an exhaustive search found EIGHT, not three, and main went red). Again today
+choosing which files a task manifest would read: the five returned did not include the file the
+work was about, and the dispatch produced four perfectly VERIFIED quotes from an unrelated test.
+→ `guard_truncated_search.sh`, tier 1. `-l` is the discriminator: it asks WHICH FILES, which is an
+inventory question by construction. Content greps are untouched.
+
+**2. Writing a repo file from a python/node heredoc.** `'\n'` intended as two characters lands as
+a real newline. FOUR times today: an unterminated string in `delegate.mjs`, a broken `join('` in a
+vitest file, a sed pattern meaning end-of-line instead of a dollar, and an unterminated string in
+`task_manifests.test.ts`. One was committed.
+→ `guard_heredoc_code_edit.sh`, tier 1, narrowly: only heredocs that WRITE a repo file. Reads,
+computation and `/tmp` writes pass. **It blocked its own author within a minute of being
+registered**, on exactly the shape it exists to stop.
+
+**3. A directory in a manifest's `read` list.** → the manifest validator now rejects it, and
+immediately caught a live instance: `WR01-T1` still listed `src/ui/map/styles`. The dispatch that
+produced that task's result had already been handed the two real files by hand — which is exactly
+the guess a directory hides.
+
+**The pattern across all three: the first version of a guard is not the guard.**
+`guard_truncated_search` initially used `lib/command_segments.sh`, which splits on `|` — the very
+character the check depends on. It denied NOTHING while passing every allow-case. **A guard that
+denies nothing looks identical to a guard that is perfectly precise**, and only the deny-side
+tests tell them apart. That is the fourth distinct way a checker has been wrong today and the
+second time silence was the symptom.
+
+Hook inventory: **5 blocking, 3 advisory**, all tested. This morning: 0 blocking, none tested.
+
+## Fixing the planner, not the model — 2026-09-11
+
+Thirteen dispatches, all judged: 7 accepted, 4 edited, 2 rewritten. **Of the six imperfect
+results, FOUR were caused by the instruction rather than the executor.** That reframes where the
+work is.
+
+| what went wrong | whose fault | now |
+|---|---|---|
+| field names left to be inferred → 27 of 42 cases inert | the spec | stated contracts; recorded in CLAUDE.md |
+| input files chosen by a truncated grep → 4 verified quotes from an unrelated test | the planner | `guard_truncated_search.sh`, tier 1 |
+| a task the owning plan already answered | the manifest | FORMAT.md discipline; read the plan first |
+| a count asked in prose, ignored | the spec | `delegate` REFUSES a count with no `--schema` |
+| a rule written from an experiment never read | the planner | `delegate` REFUSES past 2 unjudged dispatches |
+| validator returned `true` on its main path | the model | never delegate the oracle |
+| test helper caught every error as success | the model | never delegate the oracle |
+
+**The two model failures are the same failure**: given something that decides pass/fail, it
+produces something that cannot fail. That boundary is now data rather than opinion — `logs/
+local_executor/dispatches.jsonl`, grouped by kind, with no verdict drawn below four judged.
+
+**The new refusals target the planner.** A spec asking for a specific number without a schema is
+refused, because it was measured both ways: 12 asked in prose returned 2, validly; 3 asked in
+prose against `minItems: 8` returned 9. And dispatching is refused past two unjudged results,
+because "put counts in the schema" was written into a README as established fact from an
+experiment whose output was never read. **It turned out to be correct, which is worse than being
+wrong** — an unchecked claim that happens to hold teaches nothing and licenses the next one.
+
+**One limit that cannot be mechanised, now stated in the tool itself.** Quote verification proves
+a quote is REAL, never that it answers the question asked. The irrelevant dispatch verified 4/4.
+`verify_quotes` now flags the SHAPE that failure took — several sources supplied, every quote
+drawn from one — but flagging a shape is not judging relevance, and that judgement stays with the
+planner.

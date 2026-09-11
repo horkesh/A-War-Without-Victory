@@ -176,5 +176,20 @@ Measured 2026-09-11: a 12,462-token roadmap answered for ~250 tokens, 3/3 quotes
   the two you are doing.
 - **Never delegate the oracle.** Anything deciding pass/fail stays with the planner. Both rejected
   proposals so far failed exactly there.
+- **MOST BAD DISPATCHES ARE BAD INSTRUCTIONS.** Measured over 13: of six imperfect results, FOUR
+  were caused by the prompt, not the executor — field names left to be inferred (27 of 42 cases
+  exercised nothing), input files chosen by a truncated grep (four verified quotes from an
+  unrelated test), a task the owning plan already answered, and a rule written into a README from
+  an experiment whose output was never read. Before blaming the model, re-read what it was told.
+- **Before writing a task, read the plan for the answer.** A task that duplicates its plan does
+  not merely waste a dispatch: a re-derivation can DISAGREE with the plan, and then there are two
+  answers and no authority.
+- **Name files, never directories.** A directory is a request for someone to guess which files
+  matter, and the guess is recorded nowhere. The manifest validator now refuses one.
+- **Verification proves PROVENANCE, not RELEVANCE.** A perfectly verified answer to the wrong
+  question still verifies. Check the answer against the question yourself; no script does that.
+- **Do not write a measured claim you have not read the output of.** `npm run local:verdict` on
+  every dispatch before the next one — `delegate` refuses past two unjudged, because an unchecked
+  claim that happens to be right teaches nothing and licenses the next one.
 - `npm run local:ledger` is the routing authority, not prose. Record every outcome with
   `npm run local:verdict`. When the ledger disagrees with a README, the README is wrong.

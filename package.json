@@ -317,7 +317,9 @@
     "local:ask": "node tools/local_executor/ask.mjs",
     "plans": "node tools/derive_plan_index.cjs --print",
     "plans:derive": "node tools/derive_plan_index.cjs",
-    "plans:check": "node tools/derive_plan_index.cjs --check"
+    "plans:check": "node tools/derive_plan_index.cjs --check",
+    "tasks": "node tools/validate_task_manifests.cjs --list",
+    "tasks:validate": "node tools/validate_task_manifests.cjs"
   },
   "build": {
     "appId": "com.awwv.desktop",

@@ -1,0 +1,67 @@
+# Task manifest — content, historical attribution, audio, accessibility, opening
+#
+# Format and provenance: docs/plans/tasks/FORMAT.md
+# The executor never reads this file; tools/render_task_prompt.cjs renders the prompt.
+#
+# READ THIS FIRST IF YOU CAME LOOKING FOR WORK TO DELEGATE: there is almost none here, and that
+# is the honest answer rather than a gap. Three R7 gates depend on this plan and two of them
+# require a human ear or a packaged runtime. The one delegable piece is an inventory.
+
+version: 2
+owning_plan: docs/plans/2026-07-31-content-history-localization-audio-plan.md
+base_commit: 90da78bdcddb7d93c45fa85eebc2e0b6e711a26f
+lane: R7
+gate: R7-AUDIO-CUE-WIRING
+
+not_delegable:
+  - "R7-AUDIO-HUMAN-ACCEPTANCE, in full. The plan requires a person to PLAY all 20 supplied files
+    and 3 ambient beds and judge them non-silent, non-clipped, and right in tone. No model of any
+    size can listen, and no test encodes 'restrained'. The gate names its own receipt:
+    logs/r7-english-readability/closeout-human-audio-listen.md."
+  - "The four approval lenses — sensitivity, Design/Game Designer tone, License/provenance, and a
+    DISTINCT QA reviewer. The plan requires these be separate people; a dispatch cannot be any of
+    them, and approvals recorded by the implementer are the thing the requirement exists to stop."
+  - "R7-AUDIO-OFFLINE-RUNTIME. It requires launching the PACKAGED app with the network
+    unavailable and capturing a request trace proving zero remote audio fetches. That is a
+    runtime observation on a built artefact, not an inspection of text."
+  - "The DISPOSITION for each unreferenced cue — whether it is deliberately registry-only or a
+    wiring defect. The inventory below supplies the evidence; deciding what each absence MEANS is
+    a design judgement about what the game should sound like."
+
+tasks:
+  - id: R7A-T1-CUE-CALL-SITES
+    kind: extract
+    status: open
+    edit: []
+    # Every file in src/ that references the audio registry, found exhaustively rather than
+    # sampled. A truncated inventory is what produced four verified quotes from the wrong test
+    # on this project's first manifest; guard_truncated_search.sh now refuses that shape.
+    read:
+      - src/ui/map/audio/audioAssets.ts
+      - src/ui/map/audio/sound_manifest.ts
+      - src/ui/map/audio/audio_engine.ts
+      - src/ui/map/audio/audio_event_adapter.ts
+      - src/ui/map/components/AudioCueObserver.tsx
+      - src/ui/map/components/PeacePlanModal.tsx
+      - src/ui/map/components/warroom/AdvanceTurnModal.tsx
+    change: >
+      For every cue key defined in the registry, list every place it is referenced across the
+      files given, with the file and a verbatim line. Mark each reference as REGISTRY (it appears
+      in audioAssets.ts or sound_manifest.ts, which only declare cues) or CALL_SITE (anything
+      else, which actually plays one). Report what is written; do not judge whether a cue with no
+      call site is a defect — that decision is listed under not_delegable.
+    fails_now: []
+    must_not_break: []
+    read_only_acceptance: >
+      Every quoted line verified with: npm run local:verify-quotes -- <answer.json>
+      --field quote --source-field file. Then the planner checks the cue-key list against
+      sound_manifest.ts, because verification proves a quote is REAL, not that the list is
+      COMPLETE — an omitted cue produces no quote to fail.
+    out_of_scope:
+      - Wiring any cue, or editing any audio file or registry
+      - Judging whether a cue should exist, or how it should sound
+      - The 20 asset files themselves; this task reads code, not audio
+    why_delegable: >
+      Inventory over seven named files that fit the context together (~12k tokens). The ledger
+      records extract as the strongest mode. The gate needs exactly this evidence base before any
+      disposition can be recorded, and a bounded static search already covered only half the cues.

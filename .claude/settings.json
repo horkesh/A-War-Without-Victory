@@ -123,6 +123,14 @@
           {
             "type": "command",
             "command": "bash tools/hooks/guard_pipe_exit_code.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash tools/hooks/guard_truncated_search.sh"
+          },
+          {
+            "type": "command",
+            "command": "bash tools/hooks/guard_heredoc_code_edit.sh"
           }
         ]
       },

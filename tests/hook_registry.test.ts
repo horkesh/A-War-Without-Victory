@@ -102,9 +102,22 @@ describe('hook registry', () => {
       .filter((path) => /permissionDecision.*deny/.test(readFileSync(path, 'utf8')))
       .sort();
     expect([...new Set(blocking)]).toEqual([
+      // Added 2026-09-11. Writing a repo file from a python/node heredoc silently eats backslash
+      // escapes: `'\\n'` intended as two characters lands as a real newline. Four occurrences in
+      // one day — an unterminated string in delegate.mjs, a broken join() in a vitest file, a sed
+      // pattern that meant end-of-line instead of a dollar, and an unterminated string in
+      // task_manifests.test.ts. One was committed. Reads and /tmp writes are untouched.
+      'tools/hooks/guard_heredoc_code_edit.sh',
       'tools/hooks/guard_inline_script.sh',
       'tools/hooks/guard_pipe_exit_code.sh',
       'tools/hooks/guard_stash_pop.sh',
+      // Added 2026-09-11. A truncated file-listing search is an incomplete inventory presented
+      // as a complete one. It is tier 1 rather than advisory because the written rule failed
+      // twice on the same reader: once hiding the test that pinned CI install counts (an
+      // exhaustive search found eight, not three, and main went red), and again choosing which
+      // files a task manifest would read, which produced four perfectly verified quotes from an
+      // unrelated test.
+      'tools/hooks/guard_truncated_search.sh',
     ]);
   });
 });
