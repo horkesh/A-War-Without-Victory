@@ -3853,3 +3853,29 @@ escape route nobody verified is how a guard ends up switched off.**
 `tools/hooks/guard_inline_script.sh`, 16 tests. Hook inventory: 3 blocking, 3 advisory — and the
 three advisory ones now have tests for the first time, so promoting any of them is a decision
 rather than a guess.
+
+## One matching rule, three hooks, same bug — 2026-09-11
+
+**Found by testing the last untested hook.** `guard_scope_drift` matched bare text, so
+`echo 'npm run sim:scenario:run:188w is expensive'` fired it — and the orchestrator hook chained
+off that firing, demanding an expert analysis of a scenario run that never happened. Both were
+answering a question about PROSE.
+
+That is the third hook with this defect: `guard_stash_pop` denied `echo 'git stash pop is
+dangerous'` on its first day, `guard_pipe_exit_code` denied its own probe harness, and now this.
+Three independent derivations of "is this text a command?", two of them wrong the same way.
+
+**So the rule now has one owner:** `tools/hooks/lib/command_segments.sh`. Heredoc bodies removed,
+quoted text blanked, split on shell separators, leading `{` stripped — a real invocation begins a
+segment, a prose mention never does. `guard_stash_pop` was refactored onto it and its 26 tests
+passed unchanged, which is the only reason the refactor was safe to do at all.
+
+**The lane file is deliberately NOT updated to match this session.** `.claude/current-lane.txt`
+still declares the D2 full-campaign lane from 2026-09-01, and this session has been doing
+railguards and harness work — so the guard would, correctly, report drift. **Rewriting the
+declaration to match what the session is actually doing would neuter the guard entirely**: it
+exists to catch the gap between plan and behaviour, and a planner who closes that gap by editing
+the plan has removed the only thing being measured. The declaration is the owner's to set.
+
+All six hooks now have tests: 3 blocking, 3 advisory, and the advisory ones are pinned AS
+advisory, so promoting any of them is a decision with a known baseline rather than a guess.

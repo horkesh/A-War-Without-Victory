@@ -85,16 +85,37 @@ only thing that writes to the repo. `npm run local:check` says whether it is usa
 
 ```bash
 npm run local:check                                    # is ollama up, model pulled?
-npm run local:delegate -- --spec <task.md> --read <files> --out <proposal.md>
+npm run local:delegate -- --spec <task.md> --read <a,b> --schema <s.json> --out <proposal.md>
 npm run gate:local -- --tests <test files>             # the acceptance oracle
+npm run local:fanout -- jobs.json                      # independent dispatches, 2 at a time
+npm run local:verdict -- <id> <accepted|edited|rewritten> "note"
+npm run local:ledger                                   # what delegation is actually worth
+npm run local:benchmark                                # re-measure before changing model
 ```
 
+- **NEVER DELEGATE THE ORACLE.** Anything that decides pass/fail — an acceptance predicate, a
+  validator's core, a test's expected value — stays with the planner. Both rejected proposals so
+  far failed this way: one returned `true` on its main path (a validator that could not fail),
+  another caught every error as success (a test group that passed against a crashed hook).
+- **It supplies case SHAPES, not case DATA.** Anything whose truth lives in the repo — paths,
+  identifiers, patterns, expected values — comes from the repo. Twelve schema-valid test cases
+  once named twelve files that do not exist, and all twelve silently exercised nothing.
+- **Derive expectations, never accept them.** Ask for the cases, run them against the real code,
+  judge each result, then pin it. Its own guesses were wrong on 5 of 9 on the same cases.
+- **A batch that comes back uniformly silent means the CASES are wrong**, not the code under
+  test. Silence looks identical whether you measured something or nothing.
 - **The executor never certifies itself.** The planner declares `--tests`; `gate:local` refuses
   (exit 2) if none are given, rejects edits under `tests/`, and scans added `src/` lines for
   `Math.random` / `Date.now` / `new Date()` / `.localeCompare(`.
 - **Not an agent loop, deliberately.** `delegate.mjs` returns TEXT ONLY and never touches disk;
   a small model is strongest on a bounded prompt and weakest given autonomy.
+- **Use `--schema` over `--expect json`** — it constrains decoding, so malformed output is
+  unrepresentable rather than merely detected. Put COUNTS in the schema (`minItems`); prose asking
+  for 12 cases got 2, validly. Ready-made shapes: `tools/local_executor/schemas/`.
 - **Model choice is DATA** — `tools/local_executor/config.json`, with the measurements behind it.
+  Re-measure with `local:benchmark` at the REAL `num_ctx` before changing it: a code-specialised
+  30B loses 6x on prompt throughput here, because exceeding VRAM costs more than specialisation
+  buys.
 - **Context is the binding constraint.** `App.tsx` alone is ~24,350 tokens; at 32K this repo is
   not explorable. Hand it exact file paths, never "go look at".
 - Full detail, benchmarks and routing rules: `tools/local_executor/README.md`.
