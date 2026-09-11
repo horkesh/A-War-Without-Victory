@@ -1,0 +1,149 @@
+[
+  {
+    "id": "rbih-1920x1080",
+    "status": "captured",
+    "problems": [],
+    "pinnedDate": "26 Jul 1993",
+    "caveatLoaded": true,
+    "faces": [
+      {
+        "family": "Caveat",
+        "weight": "700",
+        "status": "loaded",
+        "range": "U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2"
+      },
+      {
+        "family": "Caveat",
+        "weight": "700",
+        "status": "unloaded",
+        "range": "U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2"
+      }
+    ],
+    "boardLstar": "48.8",
+    "inkReachesTarget": "true",
+    "text": "26 Jul 1993",
+    "ghostText": "19 Jul 1993",
+    "fontFamily": "Caveat, \"IBM Plex Sans Condensed\", sans-serif",
+    "fontSize": "29.797px",
+    "color": "rgb(21, 35, 59)",
+    "transform": "matrix(0.999507, -0.0314108, 0.0314108, 0.999507, 0, 0)",
+    "box": {
+      "x": 1237.671875,
+      "y": 450.6875,
+      "width": 212.078125,
+      "height": 132.546875,
+      "top": 450.6875,
+      "right": 1449.75,
+      "bottom": 583.234375,
+      "left": 1237.671875
+    },
+    "lineBox": {
+      "x": 1258.406982421875,
+      "y": 499.92401123046875,
+      "width": 121.42333984375,
+      "height": 33.56866455078125,
+      "top": 499.92401123046875,
+      "right": 1379.830322265625,
+      "bottom": 533.49267578125,
+      "left": 1258.406982421875
+    }
+  },
+  {
+    "id": "rs-1920x1080",
+    "status": "captured",
+    "problems": [],
+    "pinnedDate": "26 Jul 1993",
+    "caveatLoaded": true,
+    "faces": [
+      {
+        "family": "Caveat",
+        "weight": "700",
+        "status": "loaded",
+        "range": "U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2"
+      },
+      {
+        "family": "Caveat",
+        "weight": "700",
+        "status": "unloaded",
+        "range": "U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2"
+      }
+    ],
+    "boardLstar": "58.8",
+    "inkReachesTarget": "true",
+    "text": "26 Jul 1993",
+    "ghostText": "19 Jul 1993",
+    "fontFamily": "Caveat, \"IBM Plex Sans Condensed\", sans-serif",
+    "fontSize": "30.0911px",
+    "color": "rgb(37, 57, 90)",
+    "transform": "matrix(0.999507, -0.0314108, 0.0314108, 0.999507, 0, 0)",
+    "box": {
+      "x": 1264.875,
+      "y": 367.671875,
+      "width": 214.171875,
+      "height": 112.3125,
+      "top": 367.671875,
+      "right": 1479.046875,
+      "bottom": 479.984375,
+      "left": 1264.875
+    },
+    "lineBox": {
+      "x": 1285.80859375,
+      "y": 408.77593994140625,
+      "width": 122.66650390625,
+      "height": 33.904144287109375,
+      "top": 408.77593994140625,
+      "right": 1408.47509765625,
+      "bottom": 442.6800842285156,
+      "left": 1285.80859375
+    }
+  },
+  {
+    "id": "hrhb-1920x1080",
+    "status": "captured",
+    "problems": [],
+    "pinnedDate": "26 Jul 1993",
+    "caveatLoaded": true,
+    "faces": [
+      {
+        "family": "Caveat",
+        "weight": "700",
+        "status": "loaded",
+        "range": "U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2"
+      },
+      {
+        "family": "Caveat",
+        "weight": "700",
+        "status": "unloaded",
+        "range": "U+100-2BA, U+2BD-2C5, U+2C7-2CC, U+2CE-2"
+      }
+    ],
+    "boardLstar": "41.3",
+    "inkReachesTarget": "true",
+    "text": "26 Jul 1993",
+    "ghostText": "19 Jul 1993",
+    "fontFamily": "Caveat, \"IBM Plex Sans Condensed\", sans-serif",
+    "fontSize": "29.797px",
+    "color": "rgb(10, 20, 36)",
+    "transform": "matrix(0.999507, -0.0314108, 0.0314108, 0.999507, 0, 0)",
+    "box": {
+      "x": 1269.0625,
+      "y": 373.25,
+      "width": 212.078125,
+      "height": 124.875,
+      "top": 373.25,
+      "right": 1481.140625,
+      "bottom": 498.125,
+      "left": 1269.0625
+    },
+    "lineBox": {
+      "x": 1289.797607421875,
+      "y": 419.40838623046875,
+      "width": 121.42333984375,
+      "height": 33.568634033203125,
+      "top": 419.40838623046875,
+      "right": 1411.220947265625,
+      "bottom": 452.9770202636719,
+      "left": 1289.797607421875
+    }
+  }
+]
