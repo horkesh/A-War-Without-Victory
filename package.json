@@ -309,7 +309,8 @@
     "receipts:manifest": "node tools/write_receipt_manifest.cjs",
     "local:verdict": "node tools/local_executor/verdict.mjs",
     "local:ledger": "node tools/local_executor/verdict.mjs --report",
-    "local:fanout": "node tools/local_executor/fanout.mjs"
+    "local:fanout": "node tools/local_executor/fanout.mjs",
+    "local:benchmark": "node tools/local_executor/benchmark.mjs"
   },
   "build": {
     "appId": "com.awwv.desktop",
