@@ -20,6 +20,7 @@
  * OPTIONS
  *   --model     default qwen3.5:9b       --ctx     default 32768
  *   --think     enable model thinking (default OFF — measured 30x slower for identical output)
+ *   --expect    text (default) or json; json is parsed after generation and refuses if malformed
  */
 
 import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
@@ -84,6 +85,14 @@ const promptArg = opt('--prompt');
 const outPath = opt('--out', 'proposal.md');
 const host = opt('--host', config.host);
 
+// What shape the reply must have. `json` is checked after generation; anything malformed is a
+// loud failure rather than a file that only breaks later, somewhere else.
+const expect = opt('--expect', 'text');
+if (!['text', 'json'].includes(expect)) {
+  console.error(`REFUSING: --expect must be text or json, got "${expect}".`);
+  process.exit(2);
+}
+
 // Nothing may be silently ignored. A typo'd flag or a file that fell out of --read must stop the
 // dispatch, not quietly shrink it.
 const stray = args.filter((value, index) => !consumed[index]);
@@ -92,7 +101,7 @@ if (stray.length > 0) {
     `REFUSING: unrecognised argument(s): ${stray.join(' ')}\n`
     + 'Nothing is sent unless every argument is understood — an ignored argument means the model\n'
     + 'silently receives less than you think it does, and answers confidently about code it never saw.\n'
-    + 'Flags: --spec --prompt --read --out --model --ctx --host --think\n',
+    + 'Flags: --spec --prompt --read --out --model --ctx --host --think --expect\n',
   );
   process.exit(2);
 }
@@ -201,6 +210,35 @@ const header = [
 ].join('\n');
 
 writeFileSync(outPath, header + response.response, 'utf8');
+
+// ── Shape check ────────────────────────────────────────────────────────────────
+// A malformed answer must not look like a successful dispatch. A 9B model asked for JSON
+// produces JSON that is *nearly* valid often enough to matter: on 2026-09-11 one array element
+// lost its opening brace, and the only symptom was a parse error much later, in a different
+// tool, after the dispatch had been recorded as fine. The tool now says so at the source.
+if (expect === 'json') {
+  const stripped = response.response
+    .trim()
+    .replace(/^```(?:json)?\s*/, '')
+    .replace(/```\s*$/, '');
+  try {
+    JSON.parse(stripped);
+    console.error('  shape: valid JSON');
+  } catch (error) {
+    const position = Number(/position (\d+)/.exec(error.message)?.[1] ?? -1);
+    console.error(`\nMALFORMED: --expect json, but the reply does not parse.\n  ${error.message}`);
+    if (position >= 0) {
+      const from = Math.max(0, position - 90);
+      console.error(`  around: ...${stripped.slice(from, position + 90)}...`);
+    }
+    console.error(
+      `\nThe raw reply is still at ${outPath} for inspection.\n`
+      + 'Do not hand-repair it into the repo: a model that lost the shape may have lost content\n'
+      + 'too. Re-dispatch, or fall back to writing it yourself.\n',
+    );
+    process.exit(3);
+  }
+}
 
 console.error(`\n  output ${response.eval_count} tok at ${genTokPerSec.toFixed(1)} tok/s -> ${outPath}`);
 console.error('  NOT APPLIED. Review it, apply what is correct, then: npm run gate:local -- --tests <files>');

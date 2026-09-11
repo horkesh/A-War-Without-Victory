@@ -120,6 +120,12 @@ describe('local executor harness', () => {
     expect(exitCodeOf(DELEGATE, ['--prompt', 'x', '--out'])).toBe(2);
   });
 
+  it('REFUSES an --expect value it cannot check', () => {
+    // Accepting an unknown shape silently would mean the check never runs while appearing to.
+    expect(exitCodeOf(DELEGATE, ['--prompt', 'x', '--expect', 'yaml', '--out', 'unused.md']))
+      .toBe(2);
+  });
+
   it('the determinism ban list covers the rule that has actually been violated', () => {
     // A 30B model returned .localeCompare() for a "deterministic comparator" on 2026-09-10.
     // It is locale-dependent and looked more professional than the correct answer.

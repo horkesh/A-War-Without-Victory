@@ -156,3 +156,31 @@ reported success while doing less than asked.
 The pattern worth keeping: **a harness that reports success while doing less than asked is the
 same defect class as the delegated code that reports success regardless.** Both were caught the
 same way — by checking what actually happened instead of reading the exit line.
+
+## Correction: "it enumerates well" needs a qualifier (2026-09-11)
+
+A later dispatch tested that claim and it did not survive intact. Asked to propose test cases for
+three hooks — with the instruction to *read each hook's `jq` expressions and use THOSE field
+names* — it produced 42 cases, of which **27 were inert**: they fed `tool_input.command` to a hook
+that reads `tool_input.file_path`, so they exercised nothing and all returned silence.
+
+The silence was the dangerous part. Fourteen quiet results for `guard_dirty_citation` look exactly
+like "this hook is dead" — and the hook is not dead; it had fired on the planner twice that same
+session. **A case that probes the wrong field does not fail, it just proves nothing**, which is
+the same false-green shape as everything else on this page.
+
+So the qualifier: **it enumerates well when it already understands the interface, and it does not
+reliably learn the interface from the source you hand it.** When the cases must match a
+non-obvious contract, state the contract in the spec explicitly — field names, payload shape,
+which key each hook reads — rather than telling it to go and find them.
+
+And verify enumeration the same way as everything else: a batch of cases that all come back
+silent means the CASES are wrong until proven otherwise, not the code under test.
+
+### `--expect json`
+
+Added the same day, for a related reason: a dispatch asked for JSON returned an array whose second
+element had lost its opening brace. Nothing noticed until a parse error surfaced later, in a
+different tool, long after the dispatch had been recorded as successful. `--expect json` parses
+the reply at the source and exits 3 with the offending excerpt. Re-dispatching then produced valid
+JSON on the first retry — the check cost nothing and removed a whole class of silent damage.
