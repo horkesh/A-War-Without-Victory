@@ -128,9 +128,22 @@ function validateManifest(relPath, repoRoot = REPO_ROOT) {
     if (!Array.isArray(task.out_of_scope)) push(`${label}: out_of_scope must be a list`);
 
     for (const file of [...(task.edit ?? []), ...(task.read ?? [])]) {
-      if (!fs.existsSync(path.join(repoRoot, file))) {
+      const abs = path.join(repoRoot, file);
+      if (!fs.existsSync(abs)) {
         push(`${label}: names \`${file}\`, which does not exist`);
-      } else if (changed && changed.has(file)) {
+        continue;
+      }
+
+      // A DIRECTORY IS AN INVITATION TO GUESS. WR01-T2 listed `tests/ui`; the dispatcher then
+      // chose files with a truncated grep and the model returned four perfectly VERIFIED quotes
+      // from a test about army HQ timing copy. The guess about which files mattered was made at
+      // dispatch time and recorded nowhere. Naming files makes that choice reviewable.
+      if (fs.statSync(abs).isDirectory()) {
+        push(`${label}: \`${file}\` is a DIRECTORY — name the exact files, or the dispatcher guesses which ones matter and the guess is recorded nowhere`);
+        continue;
+      }
+
+      if (changed && changed.has(file)) {
         push(`${label}: \`${file}\` changed since base_commit — manifest may be stale, re-derive it`);
       }
     }

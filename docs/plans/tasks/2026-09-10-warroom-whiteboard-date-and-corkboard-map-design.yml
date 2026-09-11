@@ -25,9 +25,14 @@ tasks:
     kind: extract
     status: open
     edit: []
+    # Exact files. `src/ui/map/styles` was listed here as a directory until the validator
+    # rejected it — the same shape that cost three dispatches on T2. The dispatch that produced
+    # this task's result had already been given these two files by hand, which is precisely the
+    # guess a directory hides.
     read:
       - src/ui/map/components/PresidentialInbox.tsx
-      - src/ui/map/styles
+      - src/ui/map/styles/globals.css
+      - src/ui/map/styles/typography.ts
     change: >
       Report every CSS font-family declaration and every @font-face src across the warroom
       surfaces, each with the exact declaration text and the file and line it appears on. Report

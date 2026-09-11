@@ -4080,3 +4080,40 @@ tested presence with `!value`, so an all-digit commit SHA parsed as `0` and read
 caught by the POSITIVE control, not by any of the five rejections. And `FORMAT.md` referenced
 `render_task_prompt.cjs` before it existed: a pointer leading nowhere, written the same day a
 checker for exactly that was built and the lesson-pointer backlog was cleared.
+
+## Three findings from one session, converted the same day — 2026-09-11
+
+Standing instruction from the owner: improve after each finding so an error does not happen twice.
+Today's session produced three that had already happened more than twice, so all three were
+promoted from prose to refusal rather than written down again.
+
+**1. A truncated file-listing search.** `grep -rl … | head -5`. The rule was ALREADY a starred
+entry in `docs/life_lessons.md`, and was violated anyway — twice, by the same reader. Once
+establishing "the tests that guard workflows", where the truncation hid the test pinning CI
+install counts (an exhaustive search found EIGHT, not three, and main went red). Again today
+choosing which files a task manifest would read: the five returned did not include the file the
+work was about, and the dispatch produced four perfectly VERIFIED quotes from an unrelated test.
+→ `guard_truncated_search.sh`, tier 1. `-l` is the discriminator: it asks WHICH FILES, which is an
+inventory question by construction. Content greps are untouched.
+
+**2. Writing a repo file from a python/node heredoc.** `'\n'` intended as two characters lands as
+a real newline. FOUR times today: an unterminated string in `delegate.mjs`, a broken `join('` in a
+vitest file, a sed pattern meaning end-of-line instead of a dollar, and an unterminated string in
+`task_manifests.test.ts`. One was committed.
+→ `guard_heredoc_code_edit.sh`, tier 1, narrowly: only heredocs that WRITE a repo file. Reads,
+computation and `/tmp` writes pass. **It blocked its own author within a minute of being
+registered**, on exactly the shape it exists to stop.
+
+**3. A directory in a manifest's `read` list.** → the manifest validator now rejects it, and
+immediately caught a live instance: `WR01-T1` still listed `src/ui/map/styles`. The dispatch that
+produced that task's result had already been handed the two real files by hand — which is exactly
+the guess a directory hides.
+
+**The pattern across all three: the first version of a guard is not the guard.**
+`guard_truncated_search` initially used `lib/command_segments.sh`, which splits on `|` — the very
+character the check depends on. It denied NOTHING while passing every allow-case. **A guard that
+denies nothing looks identical to a guard that is perfectly precise**, and only the deny-side
+tests tell them apart. That is the fourth distinct way a checker has been wrong today and the
+second time silence was the symptom.
+
+Hook inventory: **5 blocking, 3 advisory**, all tested. This morning: 0 blocking, none tested.

@@ -152,6 +152,14 @@ describe('task manifest validator — it must reject what is not', () => {
       .toMatch(/not_delegable must be a non-empty list/);
   });
 
+  it('REJECTS a DIRECTORY in read — the error that cost three dispatches', () => {
+    // WR01-T2 listed `tests/ui`. The dispatcher then chose files with a truncated grep and the
+    // model returned four perfectly verified quotes from a test about army HQ timing copy. A
+    // directory is an invitation to guess which files matter, and the guess is recorded nowhere.
+    const rel = writeManifest('dir.yml', validBody(READ_ONLY_TASK.replace('src/real.ts', 'src')));
+    expect(validator.validateManifest(rel, sandbox).join('\n')).toMatch(/is a DIRECTORY/);
+  });
+
   it('REJECTS a duplicate task id', () => {
     const rel = writeManifest('dupe.yml', validBody(READ_ONLY_TASK + READ_ONLY_TASK));
     expect(validator.validateManifest(rel, sandbox).join('\n')).toMatch(/duplicate id/);
