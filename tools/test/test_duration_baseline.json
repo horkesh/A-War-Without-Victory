@@ -4,6 +4,7 @@
   "durations_ms": {
     "tests/hook_guard_dirty_citation.test.ts": 6760,
     "tests/hook_guard_inline_script.test.ts": 8118,
+    "tests/hook_guard_large_read.test.ts": 5658,
     "tests/hook_guard_lookup_absence.test.ts": 5788,
     "tests/hook_guard_pipe_exit_code.test.ts": 17700,
     "tests/hook_guard_scope_drift.test.ts": 11510,
@@ -12,7 +13,7 @@
     "tests/integration_deployment_health.test.ts": 43393,
     "tests/lesson_pointer_integrity.test.ts": 5827,
     "tests/local_executor_harness.test.ts": 3646,
-    "tests/local_executor_verify_quotes.test.ts": 2652,
+    "tests/local_executor_verify_quotes.test.ts": 2686,
     "tests/phase_d_causality_runtime_integration.test.ts": 102967,
     "tests/receipt_citations.test.ts": 2958,
     "tests/scenario_anchor_contract.test.ts": 51648,

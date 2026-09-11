@@ -313,7 +313,8 @@
     "local:benchmark": "node tools/local_executor/benchmark.mjs",
     "lessons:pointers": "node tools/validate_lesson_pointers.cjs --list",
     "lessons:pointers:ratchet": "node tools/validate_lesson_pointers.cjs --ratchet",
-    "local:verify-quotes": "node tools/local_executor/verify_quotes.mjs"
+    "local:verify-quotes": "node tools/local_executor/verify_quotes.mjs",
+    "local:ask": "node tools/local_executor/ask.mjs"
   },
   "build": {
     "appId": "com.awwv.desktop",

@@ -151,6 +151,15 @@
             "statusMessage": "Checking stash safety..."
           }
         ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash tools/hooks/guard_large_read.sh"
+          }
+        ]
       }
     ]
   }
