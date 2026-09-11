@@ -3,6 +3,8 @@ import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { withoutComments } from '../helpers/sourceComments';
+import { warroomSceneYear } from '../../src/ui/map/components/warroom/WarroomShellLayer';
+import { turnToDateString } from '../../src/ui/map/utils/formatters';
 import {
   MARKER_BASELINE_DRIFT_PX,
   MARKER_LINE_TILT_DEGREES,
@@ -134,6 +136,41 @@ describe('warroom marker date — ink in the room\'s light', () => {
     // An unknown faction should give ink that is merely unoptimised, never ink that is invisible.
     expect(boardLuminance('NOT_A_FACTION', 1993)).toBe(48.8);
     expect(boardLuminance('RBiH', 1066)).toBe(48.8);
+  });
+});
+
+describe('warroom scene year — the date and the room must agree', () => {
+  // THE DEFECT THIS PINS was found by photographing the room, not by any test, and the reason is
+  // instructive: both halves were independently plausible. The date came from the turn and was
+  // right. The plate came from `metadata.date` and was a real plate. Only the PAIR was wrong, and
+  // nothing in the suite compared them. A turn-68 save showed "26 Jul 1993" written on the 1992
+  // whiteboard.
+
+  it('falls back to the turn when the save carries no metadata date', () => {
+    // Every save the scenario harness writes is this shape: meta.date is simply not a field, so
+    // the adapter stores 'UNKNOWN', and parseInt('NOWN') is NaN. NaN fell to the 1992 branch.
+    expect(warroomSceneYear({ turn: 68, metadata: { turn: 68, date: 'UNKNOWN' } })).toBe(1993);
+    expect(warroomSceneYear({ turn: 68 } as never)).toBe(1993);
+  });
+
+  it('puts every turn of the campaign in the room its own date names', () => {
+    for (const turn of [0, 1, 38, 39, 68, 90, 91, 143, 144, 188]) {
+      const label = turnToDateString(turn);
+      const labelYear = Number.parseInt(label.slice(-4), 10);
+      const expected = labelYear <= 1992 ? 1992 : labelYear;
+      expect(warroomSceneYear({ turn, metadata: { turn, date: 'UNKNOWN' } }), `turn ${turn} (${label})`)
+        .toBe(expected);
+    }
+  });
+
+  it('still prefers an explicit metadata date when the save actually has one', () => {
+    expect(warroomSceneYear({ turn: 0, metadata: { turn: 0, date: 'April 1995' } })).toBe(1995);
+  });
+
+  it('clamps outside the five plates that exist', () => {
+    expect(warroomSceneYear({ turn: 0, metadata: { turn: 0, date: 'April 1991' } })).toBe(1992);
+    expect(warroomSceneYear({ turn: 400, metadata: { turn: 400, date: 'UNKNOWN' } })).toBe(1995);
+    expect(warroomSceneYear(null)).toBe(1992);
   });
 });
 

@@ -288,6 +288,38 @@ export function buildWarroomProjectedMapModel(
   return { outlinePaths, territoryPaths, frontLinePaths };
 }
 
+/**
+ * Which year's scene plate this save should be shown in.
+ *
+ * THE BUG THIS FIXES, found by photographing the room rather than by any test. The year was read
+ * as `parseInt(metadata.date.slice(-4))`. `metadata.date` is `'UNKNOWN'` whenever the save has no
+ * `meta.date` — which is every save produced by the scenario harness, since the field simply is
+ * not written. `'NOWN'` parses as NaN, NaN fell to the 1992 branch, and **every such save rendered
+ * the 1992 room whatever year it was in**. A turn-68 save showed `26 Jul 1993` written on a 1992
+ * whiteboard.
+ *
+ * It went unnoticed because both halves were independently plausible: the date came from the turn
+ * and was right, the plate came from the metadata and was a real plate. Only the pair is wrong,
+ * and nothing compared them.
+ *
+ * The turn is the reliable source — `turnToDateString` is what the date label itself uses — so the
+ * metadata string is now only a hint, and the turn is the fallback that actually answers.
+ */
+export function warroomSceneYear(
+  state: (Pick<LoadedGameState, 'metadata' | 'turn'>) | null | undefined,
+): WarroomSceneYear {
+  const fromMetadata = Number.parseInt(String(state?.metadata?.date ?? '').slice(-4), 10);
+  const fromTurn = typeof state?.turn === 'number'
+    ? Number.parseInt(turnToDateString(state.turn).slice(-4), 10)
+    : Number.NaN;
+  const parsed = Number.isNaN(fromMetadata) ? fromTurn : fromMetadata;
+
+  if (Number.isNaN(parsed) || parsed <= 1992) return 1992;
+  if (parsed === 1993) return 1993;
+  if (parsed === 1994) return 1994;
+  return 1995;
+}
+
 export function getWarroomBoardDateLabel(
   state: (Pick<LoadedGameState, 'metadata' | 'turn'> & Partial<Pick<LoadedGameState, 'label'>>) | null | undefined,
 ): string {
@@ -612,14 +644,22 @@ function WarroomDateBoard({
         ...box,
         pointerEvents: 'none',
         zIndex: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        // Left margin inside the board; the bottom padding lifts the line to upper-middle.
-        paddingLeft: '10%',
-        paddingRight: '4%',
-        paddingBottom: '14%',
-        boxSizing: 'border-box',
+        // NO PERCENTAGE PADDING HERE, and the reason is worth keeping.
+        //
+        // This started as `paddingLeft: '10%'` with `justifyContent: 'flex-start'` to get the
+        // "10% margin inside the region" the design asks for. Percentage padding resolves against
+        // the CONTAINING BLOCK's inline size, not the element's own — and this element is
+        // absolutely positioned on the scene plate, so 10% meant 10% of 1920px, not of the 212px
+        // board. Measured: padding-left became 192px and padding-bottom 268px on a 212px box.
+        //
+        // That did two things, one obvious and one silent. The box inflated to a 269px square,
+        // because a border-box cannot be narrower than its own padding. And the CONTENT box
+        // collapsed to exactly zero inline size — so `cqw`, which resolves against the container's
+        // content box, became 0 and every glyph rendered at font-size: 0px. The date was in the
+        // DOM, correct in every string assertion, and invisible.
+        //
+        // The line is positioned instead, because percentage `left`/`top` on an absolutely
+        // positioned child DO resolve against this element.
       }}
     >
       {ghostLabel ? (
@@ -634,10 +674,16 @@ function WarroomDateBoard({
           testId="warroom-date-board-ghost"
           style={{
             position: 'absolute',
-            left: '8%',
+            // A CLEAR LINE ABOVE, not a few pixels above. Design §4.5 says "offset slightly up
+            // and left", which at this size put the ghost straight through the live date and read
+            // as a double-exposure rather than as last week's entry wiped off. A person writing
+            // the new date does not write it on top of the old one; they write below where the
+            // old one was. Measured on the captures, not reasoned about.
+            left: '6%',
+            top: '5%',
             opacity: 0.12,
             filter: 'blur(0.6px)',
-            transform: `rotate(${MARKER_LINE_TILT_DEGREES}deg) skewX(-6deg) translate(-2%, -14%)`,
+            transform: `rotate(${MARKER_LINE_TILT_DEGREES}deg) skewX(-6deg)`,
           }}
         />
       ) : null}
@@ -647,6 +693,13 @@ function WarroomDateBoard({
         color={ink.color}
         salt="ink"
         testId="warroom-date-board-label"
+        style={{
+          // Left-anchored with a margin inside the board, sitting upper-middle. Writing starts at
+          // the left of the space; `center` is where a layout engine puts a label.
+          position: 'absolute',
+          left: '10%',
+          top: '40%',
+        }}
       />
     </div>
   );
@@ -854,17 +907,7 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker, statusDock }: 
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const playerFaction = getPlayerFacingFaction(loadedGameState);
 
-  // Derive year from metadata.date string (e.g. "April 1992"), clamped to 1992–1995.
-  // metadata is optional and only present when a game is loaded.
-  const dateString = loadedGameState?.metadata?.date ?? '';
-  const parsedYear = parseInt(dateString.slice(-4), 10);
-  const year: WarroomSceneYear = parsedYear <= 1992 || isNaN(parsedYear)
-    ? 1992
-    : parsedYear === 1993
-      ? 1993
-      : parsedYear === 1994
-        ? 1994
-        : 1995;
+  const year = warroomSceneYear(loadedGameState);
 
   const scenePlateUrl = playerFaction
     ? (WARROOM_SCENE_URLS[playerFaction]?.[year] ?? WARROOM_SCENE_URLS[playerFaction]?.[1992])

@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createElement } from 'react';
 import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
 import { setLocale } from '../../src/ui/map/i18n';
+import { withoutComments } from '../helpers/sourceComments';
 
 let storeState: Record<string, any> = { loadedGameState: null };
 
@@ -277,7 +278,13 @@ describe('WarroomShellLayer accessibility proof', () => {
         // The acceptance criterion is "no element of it has a background, border or shadow of its
         // own". A stroke of marker is ink ON the board; anything behind it is a UI label sitting
         // IN FRONT of the board, which is precisely what read as artificial.
-        const source = readFileSync('src/ui/map/components/warroom/WarroomShellLayer.tsx', 'utf8');
+        // Comments stripped: every assertion below is a "must NOT appear", and the prose most
+        // likely to mention a banned construct is the comment explaining why it is banned. The
+        // padding rule below failed on the very comment recording why the padding was removed —
+        // the third time in one session. See tests/helpers/sourceComments.ts.
+        const source = withoutComments(
+          readFileSync('src/ui/map/components/warroom/WarroomShellLayer.tsx', 'utf8'),
+        );
         const start = source.indexOf('function MarkerLine');
         const end = source.indexOf('function WarroomHotspot');
         expect(start).toBeGreaterThan(-1);
@@ -293,8 +300,15 @@ describe('WarroomShellLayer accessibility proof', () => {
 
         // Left-anchored, not centred. Writing starts at the left edge of the space; `center` is
         // where a layout engine puts a label.
-        expect(dateSection).toContain("justifyContent: 'flex-start'");
+        expect(dateSection).toMatch(/left:\s*'10%'/);
         expect(dateSection).not.toContain("justifyContent: 'center'");
+
+        // NO PERCENTAGE PADDING on the board. Percentage padding resolves against the containing
+        // block — the 1920px scene plate — not the 212px board, so `paddingLeft: '10%'` became
+        // 192px, inflated the box to a square, and collapsed the content box to zero inline size.
+        // `cqw` resolves against that content box, so every glyph rendered at font-size: 0px: the
+        // date was in the DOM, passed every string assertion, and was invisible.
+        expect(dateSection).not.toMatch(/padding(?:Left|Right|Top|Bottom)?:\s*'[\d.]+%'/);
     });
 
     it('keeps the Warroom dock and projected map attached to the scene plate', () => {
