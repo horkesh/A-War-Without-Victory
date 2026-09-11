@@ -211,7 +211,21 @@ function main() {
     process.exit(1);
   }
 
-  if (args.includes('--list')) {
+  // --json wins over --list so the two are compatible rather than order-dependent.
+  if (args.includes('--json')) {
+    console.log(JSON.stringify({
+      updated: register.updated,
+      total: register.gates.length,
+      open: openGates(register).length,
+      gates: openGates(register).map((gate) => ({
+        id: gate.id,
+        lane: gate.lane,
+        status: gate.status,
+        title: gate.title,
+        blocks: Array.isArray(gate.blocks) ? gate.blocks : [],
+      })),
+    }));
+  } else if (args.includes('--list')) {
     console.log(formatList(register));
   } else {
     console.log(`open_gates: OK — ${register.gates.length} gate(s), ${openGates(register).length} open`);

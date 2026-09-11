@@ -4,6 +4,8 @@
 - Read this index every session; read topic archives only when relevant.
 - Max 10 entries per category; adding an index entry must evict or demote one from that category.
 - Keep recurring, high-value rules only; each entry includes a date and Do instead action.
+- **A written rule is the WEAKEST form of enforcement — treat every entry here as a candidate for promotion, not a solution.** Tier ladder: 0 impossible (the failure cannot be expressed) > 1 refused (blocked at the attempt) > 2 caught pre-merge (a test fails) > 3 caught post-merge > 4 prompted (a hook warns) > 5 written (here). On 2026-09-10, five rules from tiers 4-5 were violated in a single session, one of them written INTO the stash message that was then popped; everything that actually saved work that day was tier 0-2. **A tier-4 warning does not work: `guard_pipe_exit_code` fired on its violation twice and was stepped over both times.**
+- **To promote an entry:** state the failure as a predicate over a concrete ACTION (not advice); find the earliest point that predicate is decidable; install at the strongest tier available there; PROVE it fires by mutation, or it is tier 5 in costume; record the tier reached. Templates: `tools/hooks/guard_stash_pop.sh` (blocks on command POSITION, so prose mentions stay writable) and `guard_pipe_exit_code.sh` (blocks only the narrow shape that is never intentional, advisory elsewhere). **Write the ALLOW cases first — all six defects across both guards were found by allow-cases, none by deny-cases, and a guard that blocks real work gets switched off.** Most entries here cannot be mechanised; the point is to find the few that can.
 - Full pre-restructure archive: [full_archive_20260708.md](napkin/full_archive_20260708.md).
 - Topic archives: [QA gates](napkin/qa_gates.md), [unreported sparse truth](napkin/unreported.md), [map counters](napkin/map_counters.md), [release process](napkin/release_process.md), [engine runtime](napkin/engine_runtime.md), [Warroom/legacy](napkin/warroom_and_legacy.md).
 
@@ -44,6 +46,9 @@
 0q. **[2026-08-23] THE HEALTH GATE'S `dead_ops` COUNTS *INVALID* OPS, NOT *INERT* ONES — a green gate is NOT evidence operations ran. And `matched_osids` is NON-INJECTIVE.**
    Do instead: read `engine_health_gate.cjs:260` — `dead_ops: cc.invalid_operation_count`. Measured on the clean 637 baseline: gate reports `dead_ops: 0` while **13 of 42 operations recorded ZERO attacks and 21 captured ZERO objectives**.
    Worked detail: [entry_detail.md](napkin/entry_detail.md#0q)
+3. **[2026-09-10] The local executor drafts; the planner judges — and prompt speed, not generation speed, decides which model**
+   Do instead: run `npm run local:check`, then `npm run local:delegate -- --spec <task> --read <exact files>`, review the proposal, apply what is right, and prove it with `npm run gate:local -- --tests <files>`. The gate REFUSES (exit 2) when no tests are declared, because a gate with nothing to prove is not a passing gate. Measured on this box: a 9B that fits entirely in VRAM does 352 tok/s prompt; a 30B MoE spilling 6.3 GB to DDR4-2400 does 8 tok/s — ~50 minutes to read one 25k-token file, so the better model loses badly. `think:false` is separately a 30x effect. Never hand it a repo to explore: `App.tsx` alone is ~24,350 tokens. Full detail in `tools/local_executor/README.md`.
+
 ## Diagnostic Reasoning
 
 0b. **[2026-08-12] Judge findings mechanism-first, not delta-first**

@@ -3487,3 +3487,295 @@ guardrail was strengthened rather than merely repointed: it asserts the step is 
 `event-system-ci.yml` and PRESENT in `baseline-pins.yml`, plus that the advisory check name (the
 string branch protection excludes by) does not drift. A deliberate mutation confirmed the new
 assertion fails when the step is renamed, so it is not a rubber stamp.
+
+## Local-model executor: installed, benchmarked, harnessed — 2026-09-10
+
+**Owner-directed.** A local model to execute planner-written tasks. Installed and measured on this
+machine rather than recommended from theory — which mattered, because theory was wrong twice.
+
+**Hardware, corrected by inspection.** The owner reported "12 GB VRAM"; the machine has an
+**AMD Radeon RX 7800 XT with 16 GB** (Win32_VideoController's AdapterRAM is a 32-bit field and
+wraps, reporting 4 GB; the true value is in the registry's `qwMemorySize`). RAM is **DDR4-2400 in a
+mismatched 8+16+8 kit**, roughly a third of DDR5 bandwidth. Both facts invert the usual advice.
+
+**Ollama 0.34.0 detects the AMD card through ROCm natively on Windows** — `library=ROCm
+compute=gfx1101`, 16.0 GiB total / 15.8 available. No WSL2, contrary to most current guides.
+
+**Benchmarks, identical prompt and 32K context:**
+
+| model | generation | prompt processing | VRAM |
+|---|---|---|---|
+| `qwen3.5:9b` | 43–48 tok/s | **352 tok/s** | fits entirely |
+| `qwen3-coder:30b-a3b-q4_K_M` | 12 tok/s | **8 tok/s** | 11.8 GB GPU + 6.3 GB spilled to RAM |
+
+**Prompt speed decides it, not generation speed** — an agent spends its budget reading. At 8 tok/s a
+25K-token file costs ~50 minutes; at 352 tok/s it costs ~70 seconds. The 30B MoE is the better model
+and loses decisively here, because MoE offload depends on fast system RAM. There is no useful
+middle size: Ollama's qwen3.5 line jumps 9b to 27b, and a dense 27B spills worse than the MoE.
+
+**`think: false` is a 30x effect.** Same task: 3,971 tokens / ~92 s with thinking on, 136 tokens /
+**3.0 s** with it off. Ollama's default `num_ctx` of 4096 is also unusable for agent work; 32768 is
+the working floor.
+
+**The finding that justified the harness.** Asked for a deterministic comparator, the 30B returned
+`a.id.localeCompare(b.id)` — locale-dependent, violating the first sacred rule, in a repo that has
+`strictCompare` precisely to avoid it. It looked *more* professional than the correct answer, and no
+unit test would have caught it.
+
+**Harness added** under `tools/local_executor/`: `gate.mjs` (acceptance oracle), `README.md`
+(measured numbers and routing rules), `TASK_TEMPLATE.md` (planner-written task contract), and the
+`gate:local` npm script. The gate refuses to run without planner-declared `--tests` (exit 2 — a gate
+with nothing to prove is not a passing gate), rejects edits under `tests/` without explicit
+authorisation, scans added lines in changed `src/` files for `Math.random`/`Date.now`/`new Date()`/
+`.localeCompare(`, then runs typecheck, the declared tests and the open-gates validator.
+
+**Verified in both directions**, not merely that it passes: exit 2 with no `--tests`, exit 2 on a
+non-existent declared test, exit 0 on a clean tree, and exit 1 with the correct message on an
+injected `Math.random` in a tracked src file. The probe was reverted with
+`git checkout HEAD -- <file>`; no stash was used.
+
+**Method note.** All git calls in `gate.mjs` use argument arrays rather than interpolated shell
+strings, after a security hook flagged the initial `execSync` form — paths originate from git output
+and must not reach a shell.
+
+## First real delegation to the local executor — 2026-09-10
+
+**`tools/local_executor/delegate.mjs` added**, and the loop was proven on real work rather than a
+toy. The division: the planner writes the spec, names the files and owns the oracle; the local model
+returns TEXT ONLY and never edits a file, runs a command, or decides what "done" means.
+
+**Deliberately not an agent loop.** A 9B is strongest on a bounded prompt and weakest given
+autonomy; handing it file edits and a shell is the failure mode, not the feature. `delegate.mjs`
+emits a proposal to a file; the planner decides whether any of it reaches disk.
+
+**Context-budget guard, measured.** The script refuses when input exceeds `ctx - 2048` rather than
+letting the model silently answer about truncated code. Confirmed against `src/ui/map/App.tsx`:
+**~24,350 tokens**, refused at an 8K context with exit 2. That number also settles the "this repo is
+not explorable at 32K" claim empirically.
+
+**The delegated task:** add a `--json` mode to `tools/validate_open_gates.cjs`. The model returned
+**247 tokens in 4.7 s at 52.3 tok/s**. The proposal was substantively correct — it reused the
+existing `openGates()` helper instead of reimplementing it, produced the right JSON shape, and
+placed `--json` ahead of `--list` so the flags compose rather than depending on order. It carried one
+piece of filler ("update the `require.main` condition", where nothing needed changing), which is the
+review catching noise rather than error.
+
+**Applied with one hardening:** `gate.blocks || []` became `Array.isArray(gate.blocks) ? … : []`.
+
+**Verified:** valid JSON, `total=11 open=8`, array length equals the open count, no closed gate
+leaks, no `open_gates: OK` text contaminating the JSON, and `--list`/default modes unchanged. Two
+tests added covering the shape and the flag-order independence.
+
+**The gate closed the loop:** `npm run gate:local -- --tests tests/open_gates_register.test.ts
+--allow-test-edits` exits 0 and records `test files changed WITH --allow-test-edits
+(planner-authorised)` — the authorisation trail is in the output, not just in someone's memory.
+
+## Local executor made a STANDING harness — 2026-09-10
+
+A tool no session discovers is not a harness. Registered in the four surfaces this repo reads at
+session start, plus a test that fails when any of them decays.
+
+**Model choice is now DATA.** `tools/local_executor/config.json` carries host/model/ctx/think plus
+the measurements behind the choice and the rejected candidates with their reasons. Swapping models
+is a data edit; the wiring test asserts the default is not hardcoded in `delegate.mjs`.
+
+**`preflight.mjs` (`npm run local:check`)** fails loudly and specifically rather than obscurely at
+the moment of use: server reachable, configured model actually pulled (the most likely cause of a
+confusing failure months from now), and whether the ollama build supports the Anthropic Messages
+API. Every failure names the command that fixes it.
+
+**Registered in:** `CLAUDE.md` (a new section — the discovery path, loaded every session), the
+napkin under Execution & Validation, project memory plus its index, and `package.json` as
+`local:check` / `local:delegate` / `gate:local`.
+
+**`tests/local_executor_harness.test.ts` pins the wiring, not the model** — it never calls ollama,
+so it passes in CI where no local model exists. Nine tests: entry points exist; config is data;
+npm scripts registered; the gate refuses with no `--tests` and on a non-existent test; delegate
+refuses with no spec and on a missing `--read` file; the determinism ban list still covers
+`.localeCompare` (the rule actually violated on 2026-09-10); and **CLAUDE.md still points at the
+harness**.
+
+**The discovery guard was proven to bite**, not assumed: removing the CLAUDE.md pointer failed the
+suite with exactly that test named, and restoring it passed. Without that check the harness could
+silently stop existing for every future session while every other test stayed green.
+
+**Method note.** The napkin entry initially concatenated onto the previous line
+(`…#0q)3. **[2026-09-10]…`) because the preceding text lacked a trailing newline — malformed
+markdown, and the entry was not counted by the cap check. Caught by verifying the category count
+afterwards rather than trusting the edit. Repaired; Execution & Validation is at 8 of 10, no
+category over cap, no unbalanced bold.
+
+## First real work through the local-executor harness — 2026-09-10
+
+**The defect was real and player-visible.** `inbox.openingBrief.RBiH.bullet.0` — the first text an
+RBiH player reads — spelled "Bihac" without its diacritic in BOTH locales, while the same files
+spelled "Bihać" correctly four times elsewhere. The 2026-09-03 showcase audit had recorded this
+class (`Ilijaš`/`Ilijas` inside one card); this was a live instance of it. For a game set in Bosnia
+this is correctness, not polish.
+
+**What was delegated.** Not the two-character fix — the durable part: a checker that stops the class
+recurring. `src/ui/shared/bosnianPlaceNames.ts` exports a 22-pair table and
+`findStrippedPlaceNames(text)`. The local model produced 709 tokens at 53.7 tok/s.
+
+**Review verdict: the hard part was right.** Whole-word semantics were correct as proposed —
+verified against the traps in the spec: "Focal" tokenises to `Focal` (not `Foca`), "Samacki" to
+`Samacki` (not `Samac`), and because `\w` excludes diacritics a correct "Bihać" tokenises to "Biha"
+and can never report itself as a violation. All 22 diacritics were correct.
+
+**Three flaws corrected in review:** it kept iterating after a match, running a redundant `findIndex`
+per remaining token; it carried dead code whose own comment admitted it was dead
+(`if (!place.correct) continue`); and it used double quotes against repo style. Rewritten as a
+`Set` lookup with a `filter`, which is both shorter and O(n).
+
+**Both sides of the test proven.** Nine tests pass; reintroducing "Bihac" fails with the exact
+message `"Bihac" should be "Bihać"`; restoring passes. The suite also pins that the checker is not
+vacuous — positive controls, table-order, no-duplicates, correct-forms-do-not-fire, whole-word,
+case-sensitivity and empty input.
+
+**The gate's determinism scan was live**, not trivially empty: `determinism scan covered 2 changed
+src file(s)`. `npm run gate:local -- --tests tests/ui/bosnian_place_name_diacritics.test.ts` exits 0.
+
+**Two limitations recorded rather than hidden.** `--allow-test-edits` does not distinguish a NEW
+test from an EDITED one, so a planner-written new test needs the same flag as a suspicious edit;
+tightening that is worth doing before the harness is used unsupervised. And a Windows gotcha cost a
+cycle: Python's console encoding here is cp1252, so `print()` of a string containing `ć` raises
+`UnicodeEncodeError` AFTER the file write succeeds — the write landed, the loop aborted, and only
+one of two files was fixed. Keep script output ASCII-only on this shell.
+
+## Branch cleanup, and a stale assertion the narrow gate missed — 2026-09-10
+
+**Item 4 — branch hygiene DONE.** 26 local and 8 remote branches deleted; local 29 -> 10, remote
+13 -> 5. Every branch was independently re-verified at 0 unique commits with `git cherry` before
+deletion, not merely trusted from the tool's report. Pre-deletion list retained at
+`logs/branch-hygiene/pre-clean-landed.txt`.
+
+**`repo:branches:clean` as shipped was UNSAFE at that moment and was not used.** It expands to
+`--remote --archive --prune --push`; `--archive` tags every STRANDED branch and `--prune` then
+deletes anything carrying an archive tag. `feat/local-executor-harness` was STRANDED with 4 unique
+commits and is the head of open PR #510, so the shipped command would have archived and then
+deleted it — including the remote branch — orphaning the PR. Ran `--remote --prune --push
+--keep=feat/local-executor-harness` instead: no archiving, so stranded branches are refused.
+`ci/baseline-pins-own-workflow` was correctly refused (squash-merged, so its patch IDs differ
+forever — the documented false positive).
+
+**Two of my own claims were wrong and are corrected here.** `--keep` is NOT missing from the tool;
+it parses only as `--keep=value`, and I used the space-separated form, which threw
+`Unknown argument` and did nothing. Exit 1 for "crashed" looked identical to the exit 1 I had
+predicted for "refused" — I would have recorded a clean run if I had not read the log. And the tool
+does compare against `origin/main` (`uniqueCommitCount(ref, upstream = 'origin/main')`), not local
+main; the false STRANDED classifications came from my local copy of that ref being 15 commits
+stale, because `git fetch origin main` updates FETCH_HEAD without moving `refs/remotes/origin/main`.
+
+**A stale assertion the gate could not have caught.** `tests/ui/inbox_dedup.test.ts` pinned the
+misspelled BCS opening brief and failed the full suite on PR #510. `gate:local` had passed because
+it runs only the tests the planner declares, and I declared only the new one. That is the gate
+working as designed and also its boundary: **a narrow declared-test set does not catch collateral
+breakage.** The full suite did. Recorded as a limitation rather than patched over.
+
+**Scope warning added to the checker.** A sweep found ~20 test files containing "Bihac" and ~24
+containing "Gorazde" — essentially all OSID slugs, formation ids and save keys, which are ASCII BY
+DESIGN. Adding diacritics to an identifier changes a key and breaks lookups, saves and calibration.
+The module now says so explicitly, so a later broadening cannot quietly corrupt identifiers.
+
+## First tier-1 railguard: lessons converted from prose to refusal — 2026-09-10
+
+**The finding that prompted it.** Every hook in this repo was ADVISORY. `guard_pipe_exit_code.sh`
+says so in its own header: "Exit 0 always. Advisory only — never blocks." So the repo held ~320
+written lessons and 13 hooks, and **not one could stop an action**. Today matched that exactly:
+five written rules were violated in one session, including one a previous session had written INTO
+the stash message that was then popped.
+
+**The tier ladder, from today's evidence:**
+
+| tier | mechanism | what it caught today |
+|---|---|---|
+| 0 impossible | failure inexpressible | `execFileSync` arg arrays make shell injection unreachable |
+| 1 refused | blocked at attempt | branch protection caught the broken main; `gate.mjs` exit 2; `--prune` refusing unique work |
+| 2 pre-merge | a test fails | install-contract, CI guardrail, full suite |
+| 3 post-merge | found after landing | main went red, then repaired |
+| 4 prompted | a hook warns | pipe-exit guard fired — and was nearly ignored anyway |
+| 5 written | lesson / napkin / doc | violated same-day, repeatedly |
+
+Everything that saved work today was tier 0-2. Everything violated was tier 4-5.
+
+**The conversion recipe.** (1) State the failure as a predicate over a concrete ACTION, not as
+advice. (2) Find the earliest point that predicate is decidable. (3) Install at the strongest tier
+available there. (4) PROVE it fires by mutation, or it is tier 5 in costume. (5) Record the tier
+reached, so nobody believes a written lesson is protecting them.
+
+**Applied to the stash rule.** `tools/hooks/guard_stash_pop.sh` denies the pop/apply/drop
+subcommands of git-stash without an explicit `stash@{N}` ref, and denies the clear subcommand
+outright. Registered as a PreToolUse Bash hook — the first BLOCKING hook in the repo.
+
+**Two false positives, and the second one is the real lesson.** The first version denied
+`echo 'stash pop is dangerous'` — caught by the guard's own negative test, fixed by stripping
+quoted text. That looked sufficient. It was not: the guard's FIRST REAL USE blocked the commit
+that documents it, because a heredoc body is not quoted, and both the ledger entry and the commit
+message discuss the rule in prose.
+
+So the matching rule changed from "does this text appear?" to **"does this text appear where a
+command would run?"** — the command is split on shell separators and each segment must START with
+the invocation. Prose mentions never sit at the start of a segment; real invocations always do.
+Braces are deliberately NOT separators, because `{`/`}` split `stash@{0}` in half and made the
+guard deny the very explicit-ref form it exists to encourage — caught by the allow-list tests.
+
+**The generalisable part: a guard's false-positive tests are worth more than its true-positive
+tests.** The true positives encode what you already understood well enough to write down. The
+false positives are where a guard silently becomes unusable — and an unusable guard gets switched
+off, after which it protects nothing. All three defects here were found by allow-cases, none by
+deny-cases.
+
+**Verified three ways:** 26 tests in `tests/hook_guard_stash_pop.test.ts` pinning deny cases,
+allow cases, mere mentions, and both heredoc regressions; a live refusal of a bare pop in session;
+and a live PASS of this very commit. The command that damaged the working tree two hours ago is
+now unexecutable, and the commit describing why is not.
+
+**Honest limit.** Most of the ~320 lessons cannot be mechanised — "the owner holds the modelling
+truth" will never be a hook. The value of an audit is separating those from the ones that COULD be
+tier 1 and were left as prose. A lesson left at tier 5 is closer to a record of a failure than a
+defence against one.
+
+## Second tier-1 conversion: the pipe exit-code guard, promoted from advisory — 2026-09-10
+
+**Chosen because it is the strongest possible evidence that tier 4 does not work.** This rule
+already HAD a hook. The lesson recording its third violation says so in its own words:
+*"The repo hook fired both times and I still had to be told by it."* On 2026-09-03,
+`desktop:map:build 2>&1 | tail -5; echo "BUILD_EXIT=$?"` reported 0 for a build that had died
+with MODULE_NOT_FOUND; a stale `dist` was served to a capture rig and the app rendered black
+before the real cause was found. A warning that is read and stepped over is not a guard, it is
+a log entry.
+
+**Promoted narrowly, not wholesale.** Reading the status after a pipe is sometimes exactly
+right: `cmd | grep -q x; if [ $? -eq 0 ]` asks grep a question and reads grep's answer. So the
+DENY covers only pipelines whose LAST stage is a pure display filter — tail, head, sed, cut,
+sort, wc and friends — which carry no meaningful status at all. `grep` is excluded on purpose.
+Everything wider keeps the advisory it always had. **One hook, two strengths**, rather than a
+second hook competing with the first.
+
+**Three false positives, all found by allow-cases, same as the stash guard:**
+1. a heredoc body describing the rule (shared fix: `tools/hooks/lib/strip_heredocs.awk`)
+2. the offending string carried as a SINGLE-QUOTED argument — the guard denied its own probe
+   harness. Single quotes suppress expansion, so `$?` inside them is data, never a status read.
+   Double quotes must survive: `echo "BUILD_EXIT=$?"` is the exact shape being caught.
+3. a backslash-escaped `\$?` inside double quotes — a mention, not a read.
+
+**Why the heredoc stripper is shared but not universal.** The stash guard does NOT use it: its
+command-position rule already handles heredocs, because a prose mention never begins a segment.
+The pipe guard NEEDS it, because `echo "rc=$?"` inside a heredoc body IS at a command position.
+Different guards, different decidability — the stripper goes where the position rule is not
+enough, and nowhere else.
+
+**Ollama's share of this work, honestly.** It drafted the test table and file skeleton
+(1,395 tokens at 53 tok/s) and got the tables right. Three defects made the draft unusable as
+written, and one is worth recording: `catch { return 'quiet' }` in the decision helper, which
+would have made all five QUIET tests pass against a completely crashed hook — a false-green
+generator, the exact failure class this repo keeps hitting. The helper was rewritten to let
+errors propagate. **The model is useful for the mechanical half and cannot be trusted with the
+oracle.** The shell guards themselves were NOT delegated: their entire difficulty is quoting
+semantics, and every bug in both guards was a quoting bug.
+
+**Verified:** 17 tests in `tests/hook_guard_pipe_exit_code.test.ts`, tsc clean, the stash
+guard's 26 tests still green, and the upgraded guard observed firing live in-session.
+
+Hook inventory now: 2 blocking (`guard_stash_pop`, `guard_pipe_exit_code` in its narrow shape),
+3 advisory (`guard_scope_drift`, `guard_lookup_absence`, `guard_dirty_citation`).

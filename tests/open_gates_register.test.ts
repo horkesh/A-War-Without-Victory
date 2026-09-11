@@ -10,6 +10,7 @@
  * repo has been bitten by before.
  */
 
+import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { describe, expect, it } from 'vitest';
 
@@ -183,5 +184,39 @@ describe('open gates register', () => {
 
   it('accepts the valid fixture, so the negative cases are not passing by accident', () => {
     expect(validateRegister(validFixture(), { today: '2026-09-10' })).toEqual([]);
+  });
+
+  // ── --json machine-readable mode ───────────────────────────────────────────────
+  // Added 2026-09-10. Written by the local executor model, reviewed and applied by the
+  // planner — the first end-to-end use of tools/local_executor/. The proposal reused
+  // openGates() rather than reimplementing it, which is what made it acceptable.
+
+  it('--json emits parseable JSON listing only open gates, and nothing else', () => {
+    const out = execFileSync('node', ['tools/validate_open_gates.cjs', '--json'], { encoding: 'utf8' });
+    expect(out).not.toContain('open_gates: OK');
+
+    const parsed = JSON.parse(out) as {
+      updated: string;
+      total: number;
+      open: number;
+      gates: Array<{ id: string; lane: string; status: string; title: string; blocks: string[] }>;
+    };
+
+    const register = loadRegister();
+    expect(parsed.total).toBe(register.gates.length);
+    expect(parsed.open).toBe(openGates(register).length);
+    expect(parsed.gates).toHaveLength(parsed.open);
+    expect(parsed.gates.every((gate) => gate.status !== 'closed')).toBe(true);
+    for (const gate of parsed.gates) {
+      expect(Array.isArray(gate.blocks)).toBe(true);
+      expect(gate.id.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('--json wins over --list rather than being order-dependent', () => {
+    const a = execFileSync('node', ['tools/validate_open_gates.cjs', '--json', '--list'], { encoding: 'utf8' });
+    const b = execFileSync('node', ['tools/validate_open_gates.cjs', '--list', '--json'], { encoding: 'utf8' });
+    expect(() => JSON.parse(a)).not.toThrow();
+    expect(() => JSON.parse(b)).not.toThrow();
   });
 });

@@ -78,6 +78,27 @@ npm run repo:branches:clean   # archive unique work as tags, then delete
   refuses if any branch would lose work.
 - Archive tags are pushed to origin, so recovery never depends on one machine.
 
+## Local Executor (Ollama) — planner/executor split
+
+A local model handles bounded, mechanically-checkable coding; Claude plans, reviews and is the
+only thing that writes to the repo. `npm run local:check` says whether it is usable right now.
+
+```bash
+npm run local:check                                    # is ollama up, model pulled?
+npm run local:delegate -- --spec <task.md> --read <files> --out <proposal.md>
+npm run gate:local -- --tests <test files>             # the acceptance oracle
+```
+
+- **The executor never certifies itself.** The planner declares `--tests`; `gate:local` refuses
+  (exit 2) if none are given, rejects edits under `tests/`, and scans added `src/` lines for
+  `Math.random` / `Date.now` / `new Date()` / `.localeCompare(`.
+- **Not an agent loop, deliberately.** `delegate.mjs` returns TEXT ONLY and never touches disk;
+  a small model is strongest on a bounded prompt and weakest given autonomy.
+- **Model choice is DATA** — `tools/local_executor/config.json`, with the measurements behind it.
+- **Context is the binding constraint.** `App.tsx` alone is ~24,350 tokens; at 32K this repo is
+  not explorable. Hand it exact file paths, never "go look at".
+- Full detail, benchmarks and routing rules: `tools/local_executor/README.md`.
+
 ## Shell & Platform
 
 - **Windows test Bash:** unqualified `bash` must resolve to Git Bash for MSYS `/f/...` paths, not the Windows/WSL launcher. Scope PATH adjustment to the test process; no global setting change. See [BC08 receipt](docs/40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md).
