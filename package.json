@@ -306,7 +306,10 @@
     "receipts": "node tools/validate_receipt_citations.cjs --list",
     "receipts:validate": "node tools/validate_receipt_citations.cjs",
     "receipts:validate:strict": "node tools/validate_receipt_citations.cjs --strict",
-    "receipts:manifest": "node tools/write_receipt_manifest.cjs"
+    "receipts:manifest": "node tools/write_receipt_manifest.cjs",
+    "local:verdict": "node tools/local_executor/verdict.mjs",
+    "local:ledger": "node tools/local_executor/verdict.mjs --report",
+    "local:fanout": "node tools/local_executor/fanout.mjs"
   },
   "build": {
     "appId": "com.awwv.desktop",

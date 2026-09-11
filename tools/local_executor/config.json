@@ -23,8 +23,8 @@
     {
       "model": "qwen3-coder:30b-a3b-q4_K_M",
       "reason": "18 GB against 15.8 GB VRAM; 6.3 GB spilled to DDR4-2400",
-      "generation_tok_s": 12.0,
-      "prompt_tok_s": 8.0
+      "generation_tok_s": 12,
+      "prompt_tok_s": 8
     },
     {
       "model": "qwen3.5:27b / qwen3.6:27b",
@@ -34,5 +34,9 @@
       "model": "qwen3-coder-next (80B-A3B)",
       "reason": "needs >45 GB for 4-bit; 44 GB combined ceiling. 2-bit would fit but degrades a code model where it matters most"
     }
-  ]
+  ],
+  "keep_alive": "30m",
+  "keep_alive_note": "Measured 2026-09-11: a warm model loads in 3ms, a cold one timed out a dispatch and reported itself as \"ollama not running\". Residency is cheaper than the misdiagnosis.",
+  "max_parallel": 2,
+  "max_parallel_note": "Measured 2026-09-11 on 12GB VRAM with a 9B model: two concurrent requests overlapped 12.9s of 27.7s serial work. Slots share VRAM; raise only with a new measurement."
 }

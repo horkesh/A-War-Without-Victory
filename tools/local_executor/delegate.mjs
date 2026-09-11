@@ -23,7 +23,8 @@
  *   --expect    text (default) or json; json is parsed after generation and refuses if malformed
  */
 
-import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs';
+import { readFileSync, writeFileSync, appendFileSync, mkdirSync, existsSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -72,6 +73,7 @@ const optList = (name) => {
 // Defaults are DATA (config.json), so swapping models never requires a code edit.
 // Flags still override, for one-off experiments.
 const here = dirname(fileURLToPath(import.meta.url));
+const repoRoot = join(here, '..', '..');
 const config = JSON.parse(readFileSync(join(here, 'config.json'), 'utf8'));
 
 const model = opt('--model', config.model);
@@ -91,6 +93,25 @@ const expect = opt('--expect', 'text');
 if (!['text', 'json'].includes(expect)) {
   console.error(`REFUSING: --expect must be text or json, got "${expect}".`);
   process.exit(2);
+}
+
+// A JSON SCHEMA is strictly better than checking afterwards: ollama constrains decoding to the
+// schema, so a reply that loses a brace or omits a required field cannot be produced at all.
+// Measured working on ollama 0.34.0 (2026-09-11). --expect json stays as the fallback for specs
+// where a schema would be more trouble to write than the check is worth.
+const schemaPath = opt('--schema');
+let schema = null;
+if (schemaPath) {
+  if (!existsSync(schemaPath)) {
+    console.error(`REFUSING: --schema file not found: ${schemaPath}`);
+    process.exit(2);
+  }
+  try {
+    schema = JSON.parse(readFileSync(schemaPath, 'utf8'));
+  } catch (error) {
+    console.error(`REFUSING: --schema is not valid JSON: ${error.message}`);
+    process.exit(2);
+  }
 }
 
 // Nothing may be silently ignored. A typo'd flag or a file that fell out of --read must stop the
@@ -160,7 +181,19 @@ try {
   const res = await fetch(`${host}/api/generate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model, prompt, stream: false, think, options: { num_ctx: ctx } }),
+    body: JSON.stringify({
+      model,
+      prompt,
+      stream: false,
+      think,
+      // Constrain decoding when a schema is given: malformed structure becomes unrepresentable.
+      ...(schema ? { format: schema } : {}),
+      // Keep the model resident. A cold load costs far more than the generation itself and was
+      // the real cause of a "REQUEST FAILED" that read as "ollama is not running".
+      // Measured 2026-09-11: warm load 3ms.
+      keep_alive: config.keep_alive ?? '30m',
+      options: { num_ctx: ctx },
+    }),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
   response = await res.json();
@@ -240,5 +273,44 @@ if (expect === 'json') {
   }
 }
 
+// ── Dispatch ledger ────────────────────────────────────────────────────────────
+// Routing rules were being written from MEMORY of a handful of dispatches. That is how a claim
+// like "it enumerates well" survives until something finally tests it — and it did not survive.
+// Every dispatch is recorded as data so the routing table can be derived rather than recalled,
+// and so a change to the harness can be shown to have helped rather than assumed to.
+//
+// The verdict is NOT recorded here: whether a proposal was accepted, edited or rewritten is not
+// known at dispatch time, and guessing it would make the ledger flattering. `local:verdict`
+// records it afterwards, against this id.
+const dispatchId = createHash('sha256')
+  .update(`${model}\n${prompt}`)
+  .digest('hex')
+  .slice(0, 12);
+
+try {
+  const ledgerDir = join(repoRoot, 'logs', 'local_executor');
+  mkdirSync(ledgerDir, { recursive: true });
+  appendFileSync(join(ledgerDir, 'dispatches.jsonl'), `${JSON.stringify({
+    id: dispatchId,
+    at: new Date(started).toISOString(),
+    model,
+    ctx,
+    think,
+    spec: specPath || null,
+    read: files,
+    schema: schemaPath || null,
+    expect,
+    input_tokens: approxTokens,
+    output_tokens: response.eval_count,
+    tok_per_sec: Number(genTokPerSec.toFixed(1)),
+    out: outPath,
+    verdict: null,
+  })}\n`, 'utf8');
+} catch (error) {
+  // A ledger that breaks the dispatch would be worse than no ledger.
+  console.error(`  (ledger not written: ${error.message})`);
+}
+
 console.error(`\n  output ${response.eval_count} tok at ${genTokPerSec.toFixed(1)} tok/s -> ${outPath}`);
+console.error(`  dispatch ${dispatchId} — record the outcome with:  npm run local:verdict -- ${dispatchId} <accepted|edited|rewritten> "<note>"`);
 console.error('  NOT APPLIED. Review it, apply what is correct, then: npm run gate:local -- --tests <files>');

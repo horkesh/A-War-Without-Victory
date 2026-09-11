@@ -184,3 +184,47 @@ element had lost its opening brace. Nothing noticed until a parse error surfaced
 different tool, long after the dispatch had been recorded as successful. `--expect json` parses
 the reply at the source and exits 3 with the offending excerpt. Re-dispatching then produced valid
 JSON on the first retry — the check cost nothing and removed a whole class of silent damage.
+
+## Three ways enumeration fails, and the rule that covers all three (2026-09-11)
+
+The "it enumerates well" claim was corrected once already on this page. A second round of testing
+corrected it again, and the three failures together finally name the real boundary.
+
+| attempt | cases | inert | why |
+|---|---|---|---|
+| find the field names yourself | 42 | 27 | fed `command` to a hook that reads `file_path` |
+| field names GIVEN, free-form JSON | 12 | 0 | correct — but produced 2 cases when 12 were asked |
+| field names GIVEN, schema-constrained | 12 | 12 | every `file_path` was invented; none exist in this repo |
+
+The third is the instructive one. Twelve well-formed, plausible cases — `src/main.ts`,
+`src/lib/utils.ts`, `temp/new_experiment.js` — and **not one of those paths exists here**. All
+twelve returned silence, which is indistinguishable from "this hook is dead" for a hook that had
+fired on the planner twice that same session. Fed real paths, the hook is exactly right: it warns
+for untracked-and-existing, warns for tracked-but-modified, stays silent for tracked-and-clean.
+
+**THE RULE: it can supply case SHAPES; it cannot supply case DATA that must correspond to real
+state.** Paths, patterns, identifiers, expected values, anything whose truth lives in the repo
+rather than in the prompt — those come from the repo. Ask for the shape, fill in the data
+yourself, and derive every expectation by execution.
+
+**And a corollary about silence.** A batch of cases that ALL come back quiet means the cases are
+wrong until proven otherwise. Silence is the one result that looks the same whether you measured
+something or nothing.
+
+### Schema notes
+
+`--schema` constrains decoding, so a malformed or incomplete object cannot be produced. It does
+NOT constrain quantity unless you say so: a spec asking for 12 cases against a schema with no
+`minItems` returned 2, and the reply was perfectly valid. **Put the count in the schema
+(`minItems`), not in the prose** — the schema is enforced and the prose is a suggestion.
+
+### The ledger
+
+`logs/local_executor/dispatches.jsonl`, written by every dispatch; `npm run local:ledger` reports
+it. The verdict is set afterwards by the planner (`npm run local:verdict -- <id> <verdict>`),
+never by the dispatch itself — a dispatch that judged its own output would record effort as
+success, and every entry would read green.
+
+Verdicts: **accepted** (used as produced), **edited** (structure kept, substance corrected),
+**rewritten** (discarded). The point is to stop writing routing rules from memory: the claim this
+section corrects twice survived precisely because nothing was counting.
