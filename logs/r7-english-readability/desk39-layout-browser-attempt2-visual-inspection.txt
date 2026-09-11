@@ -1,0 +1,5 @@
+Manual image inspection: PASS.
+
+Inspected all nine initial screenshots and all nine maximum-scroll screenshots in desk39-layout-browser-attempt2. In every RBiH, RS and HRHB case at 1920x1080, 1366x768 and 3440x1440, the complete `26 Jul 1993` paper-backed date is visibly painted, single-line, and separated from the fixed Desk column. The label remains visible and separated after maximum scroll. Header copy and visible controls remain readable; no room image, scene framing, Desk column position, or toolbar layout moved. The last Desk content is visibly above the bottom fade in each maximum-scroll capture. No clipped or intersecting date glyph/card pair was observed.
+
+Attempt1 is excluded: its translated child was clipped by the original date-region polygon and its DOM-only PASS labels were false-green.

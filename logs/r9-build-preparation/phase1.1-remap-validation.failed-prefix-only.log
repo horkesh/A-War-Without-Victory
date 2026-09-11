@@ -1,0 +1,21 @@
+node --check logs\r9-build-preparation\phase1.1_capture_production_graph.mjs
+exit_code=0
+node logs\r9-build-preparation\phase1.1_capture_production_graph.mjs --remap-raw
+raw_module_ids=1378
+resolved_package_rows=8
+F:\A-War-Without-Victory\logs\r9-build-preparation\phase1.1-production-resolved-modules.json
+exit_code=0
+node logs\r9-build-preparation\phase1.1_verify_remap.mjs
+count @deck.gl/core: corrected=108
+file:///F:/A-War-Without-Victory/logs/r9-build-preparation/phase1.1_verify_remap.mjs:44
+    throw new Error(`${row.name} differs from the exact normalized raw module ID set`);
+          ^
+
+Error: @deck.gl/layers differs from the exact normalized raw module ID set
+    at file:///F:/A-War-Without-Victory/logs/r9-build-preparation/phase1.1_verify_remap.mjs:44:11
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+
+Node.js v22.23.2
+exit_code=1

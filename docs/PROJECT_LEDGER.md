@@ -3779,3 +3779,49 @@ guard's 26 tests still green, and the upgraded guard observed firing live in-ses
 
 Hook inventory now: 2 blocking (`guard_stash_pop`, `guard_pipe_exit_code` in its narrow shape),
 3 advisory (`guard_scope_drift`, `guard_lookup_absence`, `guard_dirty_citation`).
+
+## Receipt-citation integrity: the docs' evidence is now checkable — 2026-09-11
+
+**The claim being tested.** The governing docs cite evidence under `logs/`. Nobody could tell a
+real receipt from a plausible-looking path, so a citation was worth exactly the trust you gave it.
+`tools/validate_receipt_citations.cjs` decides it instead, and
+`npm run receipts:validate:strict` is the version with teeth.
+
+**Measured first, and the premise was wrong.** The earlier note said "15 cited receipts, 75 KB".
+That counted file citations only. Counting DIRECTORY citations too: 70 citations, of which
+**30 would break in a fresh clone**, backed by **7.8 GB across 64,994 files** — because
+`logs/r7-english-readability/` alone is 5.4 GB of replay sequences and another cited tree carries
+a bundled 217 MB `electron.exe`. Tracking the cited receipts wholesale was never an option.
+
+**The split that resolved it.** Small text receipts are tracked; bulk is represented by a tracked
+`MANIFEST.txt` inside it. 301 files and ~1.9 MB entered git. The manifest records the file list
+and sizes and NOTHING ELSE — no timestamp, so regenerating an unchanged directory is
+byte-identical and never produces a spurious diff. It is not the evidence; it is proof of what the
+evidence was. A directory of more than 500 files collapses to one summary line: enumerating the
+r8 dependency tree produced a 1.6 MB file of vendored paths that told a reader nothing, and
+collapsing brought it to 23 KB while still reporting the true 18,076 files / 684 MB.
+
+**THE RULE THAT MADE IT USABLE: only backticked paths are citations.** The ledger contains
+"environment, logs/exits and stopping rules" and "logs/run artifacts remain local", where the
+slash means "or" and no file is claimed at all. A naive scan reports both as broken receipts.
+Requiring a markdown code span excludes both with no special case. **A checker that cries wolf
+gets ignored, and an ignored checker proves nothing** — the same lesson the two new hook guards
+taught, arriving a third time from a different direction.
+
+**It proved itself immediately.** Merging #510 brought ledger text citing
+`logs/r8-decision-command-usability/`, and the checker flagged it on the next run — a citation
+that had been unverifiable the moment it was written.
+
+**Ollama's share, and the routing rule it produced.** Four dispatches. It drafted the npm-script
+and CI wiring (accepted with two naming edits) and proposed the edge-case list. Its draft of the
+CHECKER was unusable: `resolveCitation` returned `true` on its main path, so the validator could
+not fail — the second delegated artifact in two days whose failure mode was "reports success
+regardless". **Never delegate the oracle.** But the edge-case dispatch is a pattern worth keeping:
+ask for the CASES only, run them through the real implementation, judge each result, then pin it.
+Its own guesses were wrong on 5 of 9 — and the case list still caught a genuine defect the
+hand-written tests never reached (`logs/a{ x , y }.log` truncated at the first space, then
+reported as missing under a path nobody wrote). Full routing rules in
+`tools/local_executor/README.md`.
+
+**Verified:** 39 tests, most of them negative cases, including the two prose strings that must
+NOT be flagged; tsc clean; both checker modes green on the real repo.

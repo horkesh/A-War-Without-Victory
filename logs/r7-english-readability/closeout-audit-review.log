@@ -1,0 +1,69 @@
+R7 BOUNDED CLOSEOUT DOCUMENTATION REVIEW
+Reviewer: independent Sol/medium documentation review
+Date: 2026-09-09
+Base/HEAD at review: 997b2fb6c559c933203bae070dfba7b7299660f3
+Branch: codex/r7-english-readability
+Reviewed tracked boundary:
+- docs/plans/2026-07-31-content-history-localization-audio-plan.md
+- docs/40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md
+- docs/plans/COMMAND_BOARD.md
+- docs/plans/MASTER_ROADMAP.md
+- docs/PROJECT_LEDGER.md
+
+INITIAL VERDICT: BLOCK — six bounded wording corrections required.
+
+1. The parent-plan top status still described completed three-resolution browser English
+   inspection as open.
+2. "Signed" invented a signature requirement where the inherited contract requires named,
+   attributable role review and approval.
+3. A bounded static call-site search was stated categorically as proving ten cue IDs were
+   registry-only; the evidence supports only that no non-registry call sites were located.
+4. "No click" conflicted with the intentionally authored ui_click cue; the rejection criterion
+   needed to target unintended digital clipping, discontinuities and pops.
+5. Headphones plus speakers, two loops and five minutes per bed were stated as binding gates,
+   although the inherited contract requires human assessment of seams, relative level, fatigue,
+   semantic fit and sensitivity without prescribing that exact protocol.
+6. A fourth distinct provenance-reviewer seat was added. Phase 4 requires distinct Game Designer,
+   Canon Compliance Reviewer and QA Engineer roles, with sensitivity/license/QA lenses; the
+   license/provenance lens may be carried by one of those required reviewers.
+
+TARGETED CORRECTION VERIFICATION: GO.
+
+All six issues are corrected in the frozen five-document diff:
+- The parent status separates completed browser English proof from open human audio/sensitivity,
+  scoped packaged-offline, inherited baseline and final closeout gates.
+- Missing human approvals are described as named/attributable receipts, with no signature gate.
+- The ten-cue call-site statement is explicitly bounded, says runtime-hook state is unproven,
+  and disclaims an exhaustive absence claim in both the plan and report.
+- The direct-listen criterion now rejects unintended digital clipping, discontinuity and pops
+  while explicitly permitting authored click transients.
+- The suggested devices/durations are a recommended observation protocol; an equivalent
+  documented protocol is valid. The actual acceptance qualities remain explicit.
+- Distinct Game Designer, Canon Compliance and QA roles remain. License/provenance is an explicit
+  approval lens assigned within those roles; no fourth reviewer is required.
+
+Evidence accounting verified:
+- docs/audio/AUDIO_ASSET_PROVENANCE.json contains 36 keyed cues: 20 provided and 16
+  missing_optional_placeholder; the provided set is 17 CC0-1.0 and 3 FIRST_PARTY.
+- logs/r9-build-preparation/phase3-runtime-probe.json records 20 packaged OGGs and
+  audio_identity.byte_identical=true, plus packaged runtime activity. It does not record audible
+  decode/playback, gesture/mute/volume observations, a zero-remote-audio request trace, or final
+  R7 readability source attribution. The documents preserve that limitation.
+- Three-resolution browser image proof and clean POST-A neutrality are recorded as complete.
+  Human audio/sensitivity, scoped packaged-offline QA, the accepted-n392 six-pin baseline gate,
+  and final R7 acceptance remain open. Dirty POST-B provenance and the exhausted one-PRE/two-POST
+  budget remain disclosed. No documentation review is represented as human audio approval.
+
+Verification evidence:
+- logs/r7-english-readability/closeout-audit-docs1.log: 3 files / 13 tests, exit 0.
+- logs/r7-english-readability/closeout-audit-scope1.log: exact five tracked documents,
+  added links present, 870 untracked evidence paths preserved, whitespace clean, exit 0.
+- logs/r7-english-readability/closeout-audit-docs2.log: targeted post-correction rerun,
+  3 files / 13 tests, exit 0.
+- logs/r7-english-readability/closeout-audit-scope2.log: targeted post-correction boundary,
+  links, preserved evidence and whitespace check, exit 0.
+- Independent targeted `git diff --check` over the five documents: exit 0.
+
+FINAL VERDICT: GO for the documentation closeout audit. No remaining Critical, Suggestion, or
+Nice-to-have finding within the bounded question. This verdict does not approve audio, close the
+offline-runtime or baseline gates, close R7, or replace the mandatory local hook.

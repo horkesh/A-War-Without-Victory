@@ -1,0 +1,37 @@
+COMMAND={"cwd":"F:/A-War-Without-Victory","command":"C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe","args":["C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node_modules/npm/bin/npm-cli.js","run","test:vitest","--","tests/docs_desktop_v09_truth.test.ts","tests/docs_truth_no_skip_guard.test.ts","tests/v092_playtest_package_docs.test.ts"]}
+NODE_PATH=C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2
+
+> awwv@0.9.9-beta.1 test:vitest
+> node tools/test/run_vitest_default.mjs tests/docs_desktop_v09_truth.test.ts tests/docs_truth_no_skip_guard.test.ts tests/v092_playtest_package_docs.test.ts
+
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ❯ tests/docs_desktop_v09_truth.test.ts (7 tests | 1 failed) 34ms
+   × desktop and roadmap truth docs > defines one authoritative roadmap and one derived command board 8ms
+     → expected 60155 to be less than 60000
+ ✓ tests/docs_truth_no_skip_guard.test.ts (2 tests) 7ms
+ ✓ tests/v092_playtest_package_docs.test.ts (4 tests) 11ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/docs_desktop_v09_truth.test.ts > desktop and roadmap truth docs > defines one authoritative roadmap and one derived command board
+AssertionError: expected 60155 to be less than 60000
+ ❯ tests/docs_desktop_v09_truth.test.ts:35:28
+     33|     expect(plansIndex).toContain('Each R1–R9 workstream has exactly on…
+     34| 
+     35|     expect(roadmap.length).toBeLessThan(60_000);
+       |                            ^
+     36|     expect(board.length).toBeLessThan(20_000);
+     37|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  1 failed | 12 passed (13)
+   Start at  20:27:51
+   Duration  1.54s (transform 75ms, setup 23ms, collect 85ms, tests 52ms, environment 1ms, prepare 321ms)
+
+
+EXIT_CODE=1
+SIGNAL=null

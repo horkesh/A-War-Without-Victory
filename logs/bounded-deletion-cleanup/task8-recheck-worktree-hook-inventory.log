@@ -1,0 +1,371 @@
+QUESTION: Does any registered worktree or active hook surface still consume retired RE machinery?
+WORKTREE_COUNT 13
+WORKTREE C:/Users/User/.codex/worktrees/21d7/A-War-Without-Victory
+HEAD 61db7e9dfe9508a52851d20b1b3e4cd0b1bba697
+BRANCH <detached>
+ACCESSIBLE true
+CORE_HOOKSPATH .husky/_
+CORE_HOOKSPATH_ORIGIN file:F:/A-War-Without-Victory/.git/config	.husky/_
+RESOLVED_HOOKS C:\Users\User\.codex\worktrees\21d7\A-War-Without-Victory\.husky\_
+WORKTREE_CONFIG F:/A-War-Without-Victory/.git/worktrees/A-War-Without-Victory1/config.worktree
+WORKTREE_SCOPE_CONFIG <none>
+HOOK_FILES <none>
+PROJECT_HOOK 43d2729560170f7946e8ce7d7ac62593e02eaed5fa3b68955f4d8406ea237092 1563
+PROJECT_HOOK_REF 8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+PROJECT_HOOK_REF 9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+PROJECT_HOOK_REF 11:# Typecheck code/data commits, but do not block docs-only architecture commits
+PROJECT_HOOK_REF 16:needs_typecheck=0
+PROJECT_HOOK_REF 23:needs_typecheck=1
+PROJECT_HOOK_REF 30:if [ "$needs_typecheck" -eq 0 ]; then
+PROJECT_HOOK_REF 31:echo "pre-commit: docs/process-only staged changes; skipping npx tsc --noEmit"
+PROJECT_HOOK_REF 35:# Typecheck code/data changes (fast fail ~15s)
+PROJECT_HOOK_REF 36:npx tsc --noEmit
+WORKTREE C:/Users/User/.codex/worktrees/40ef/A-War-Without-Victory
+HEAD 2d4efeb6f8f22910e18958cd708a638403bbf503
+BRANCH <detached>
+ACCESSIBLE true
+CORE_HOOKSPATH .husky/_
+CORE_HOOKSPATH_ORIGIN file:F:/A-War-Without-Victory/.git/config	.husky/_
+RESOLVED_HOOKS C:\Users\User\.codex\worktrees\40ef\A-War-Without-Victory\.husky\_
+WORKTREE_CONFIG F:/A-War-Without-Victory/.git/worktrees/A-War-Without-Victory2/config.worktree
+WORKTREE_SCOPE_CONFIG <none>
+HOOK_FILES <none>
+PROJECT_HOOK 43d2729560170f7946e8ce7d7ac62593e02eaed5fa3b68955f4d8406ea237092 1563
+PROJECT_HOOK_REF 8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+PROJECT_HOOK_REF 9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+PROJECT_HOOK_REF 11:# Typecheck code/data commits, but do not block docs-only architecture commits
+PROJECT_HOOK_REF 16:needs_typecheck=0
+PROJECT_HOOK_REF 23:needs_typecheck=1
+PROJECT_HOOK_REF 30:if [ "$needs_typecheck" -eq 0 ]; then
+PROJECT_HOOK_REF 31:echo "pre-commit: docs/process-only staged changes; skipping npx tsc --noEmit"
+PROJECT_HOOK_REF 35:# Typecheck code/data changes (fast fail ~15s)
+PROJECT_HOOK_REF 36:npx tsc --noEmit
+WORKTREE C:/Users/User/.codex/worktrees/A-War-Without-Victory/bc02-load-ratings
+HEAD be5d7690470e9ce38a6fe98abd08199137bb5386
+BRANCH refs/heads/codex/bc02-load-ratings
+ACCESSIBLE true
+CORE_HOOKSPATH .husky/_
+CORE_HOOKSPATH_ORIGIN file:F:/A-War-Without-Victory/.git/config	.husky/_
+RESOLVED_HOOKS C:\Users\User\.codex\worktrees\A-War-Without-Victory\bc02-load-ratings\.husky\_
+WORKTREE_CONFIG F:/A-War-Without-Victory/.git/worktrees/bc02-load-ratings/config.worktree
+WORKTREE_SCOPE_CONFIG <none>
+HOOK .gitignore 684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1 1
+HOOK applypatch-msg 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK commit-msg 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK h 70200b200ca709b0622784f93839a5b2872333a917a09afddefd7dc2d8cdc680 551
+HOOK husky.sh 21122903fca7209a13c991e5be68780636e28f1b8f0ae7ea07ed0065dfe37268 160
+HOOK post-applypatch 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-checkout 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-commit 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-merge 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-rewrite 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-applypatch 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-auto-gc 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-commit 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-merge-commit 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-push 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-rebase 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK prepare-commit-msg 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+PROJECT_HOOK 43d2729560170f7946e8ce7d7ac62593e02eaed5fa3b68955f4d8406ea237092 1563
+PROJECT_HOOK_REF 8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+PROJECT_HOOK_REF 9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+PROJECT_HOOK_REF 11:# Typecheck code/data commits, but do not block docs-only architecture commits
+PROJECT_HOOK_REF 16:needs_typecheck=0
+PROJECT_HOOK_REF 23:needs_typecheck=1
+PROJECT_HOOK_REF 30:if [ "$needs_typecheck" -eq 0 ]; then
+PROJECT_HOOK_REF 31:echo "pre-commit: docs/process-only staged changes; skipping npx tsc --noEmit"
+PROJECT_HOOK_REF 35:# Typecheck code/data changes (fast fail ~15s)
+PROJECT_HOOK_REF 36:npx tsc --noEmit
+WORKTREE C:/Users/User/.codex/worktrees/e1e5/A-War-Without-Victory
+HEAD cdc8659b12c9be141fa0f55f8f6fc9aceab7db7d
+BRANCH <detached>
+ACCESSIBLE true
+CORE_HOOKSPATH .husky/_
+CORE_HOOKSPATH_ORIGIN file:F:/A-War-Without-Victory/.git/config	.husky/_
+RESOLVED_HOOKS C:\Users\User\.codex\worktrees\e1e5\A-War-Without-Victory\.husky\_
+WORKTREE_CONFIG F:/A-War-Without-Victory/.git/worktrees/A-War-Without-Victory/config.worktree
+WORKTREE_SCOPE_CONFIG <none>
+HOOK_FILES <none>
+PROJECT_HOOK 43d2729560170f7946e8ce7d7ac62593e02eaed5fa3b68955f4d8406ea237092 1563
+PROJECT_HOOK_REF 8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+PROJECT_HOOK_REF 9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+PROJECT_HOOK_REF 11:# Typecheck code/data commits, but do not block docs-only architecture commits
+PROJECT_HOOK_REF 16:needs_typecheck=0
+PROJECT_HOOK_REF 23:needs_typecheck=1
+PROJECT_HOOK_REF 30:if [ "$needs_typecheck" -eq 0 ]; then
+PROJECT_HOOK_REF 31:echo "pre-commit: docs/process-only staged changes; skipping npx tsc --noEmit"
+PROJECT_HOOK_REF 35:# Typecheck code/data changes (fast fail ~15s)
+PROJECT_HOOK_REF 36:npx tsc --noEmit
+WORKTREE F:/A-War-Without-Victory
+HEAD 17a40a90323be2f42d194a326aa3149b1e963034
+BRANCH refs/heads/codex/task8-closeout-reconcile
+ACCESSIBLE true
+CORE_HOOKSPATH .husky/_
+CORE_HOOKSPATH_ORIGIN file:.git/config	.husky/_
+RESOLVED_HOOKS F:\A-War-Without-Victory\.husky\_
+WORKTREE_CONFIG F:\A-War-Without-Victory\.git\config.worktree
+WORKTREE_SCOPE_CONFIG <none>
+HOOK .gitignore 684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1 1
+HOOK applypatch-msg 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK commit-msg 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK h 70200b200ca709b0622784f93839a5b2872333a917a09afddefd7dc2d8cdc680 551
+HOOK husky.sh 21122903fca7209a13c991e5be68780636e28f1b8f0ae7ea07ed0065dfe37268 160
+HOOK post-applypatch 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-checkout 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-commit 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-merge 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-rewrite 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-applypatch 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-auto-gc 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-commit 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-merge-commit 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-push 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-rebase 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK prepare-commit-msg 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+PROJECT_HOOK 0021c1c7ce668825355895fd79b406d64428c92329164fb1e93231557d8a6d7b 1016
+PROJECT_HOOK_REF 3:# Typecheck code/data commits, but do not block docs-only architecture commits
+PROJECT_HOOK_REF 8:needs_typecheck=0
+PROJECT_HOOK_REF 15:needs_typecheck=1
+PROJECT_HOOK_REF 22:if [ "$needs_typecheck" -eq 0 ]; then
+PROJECT_HOOK_REF 23:echo "pre-commit: docs/process-only staged changes; skipping npx tsc --noEmit"
+PROJECT_HOOK_REF 27:# Typecheck code/data changes (fast fail ~15s)
+PROJECT_HOOK_REF 28:npx tsc --noEmit
+WORKTREE F:/AWWV-worktrees/apr1994-calibration-investigation
+HEAD f30ce94c858266bd3afc2c82c48d224cff927d12
+BRANCH refs/heads/codex/apr1994-operational-corrections
+ACCESSIBLE true
+CORE_HOOKSPATH .husky/_
+CORE_HOOKSPATH_ORIGIN file:F:/A-War-Without-Victory/.git/config	.husky/_
+RESOLVED_HOOKS F:\AWWV-worktrees\apr1994-calibration-investigation\.husky\_
+WORKTREE_CONFIG F:/A-War-Without-Victory/.git/worktrees/apr1994-calibration-investigation/config.worktree
+WORKTREE_SCOPE_CONFIG <none>
+HOOK .gitignore 684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1 1
+HOOK applypatch-msg 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK commit-msg 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK h 70200b200ca709b0622784f93839a5b2872333a917a09afddefd7dc2d8cdc680 551
+HOOK husky.sh 21122903fca7209a13c991e5be68780636e28f1b8f0ae7ea07ed0065dfe37268 160
+HOOK post-applypatch 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-checkout 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-commit 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-merge 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-rewrite 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-applypatch 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-auto-gc 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-commit 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-merge-commit 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-push 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-rebase 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK prepare-commit-msg 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+PROJECT_HOOK 43d2729560170f7946e8ce7d7ac62593e02eaed5fa3b68955f4d8406ea237092 1563
+PROJECT_HOOK_REF 8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+PROJECT_HOOK_REF 9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+PROJECT_HOOK_REF 11:# Typecheck code/data commits, but do not block docs-only architecture commits
+PROJECT_HOOK_REF 16:needs_typecheck=0
+PROJECT_HOOK_REF 23:needs_typecheck=1
+PROJECT_HOOK_REF 30:if [ "$needs_typecheck" -eq 0 ]; then
+PROJECT_HOOK_REF 31:echo "pre-commit: docs/process-only staged changes; skipping npx tsc --noEmit"
+PROJECT_HOOK_REF 35:# Typecheck code/data changes (fast fail ~15s)
+PROJECT_HOOK_REF 36:npx tsc --noEmit
+WORKTREE F:/AWWV-worktrees/bc01-player-opportunities
+HEAD 01550ac275b1b3b17b91c05043bb82719a65353f
+BRANCH refs/heads/codex/bc01-player-opportunities
+ACCESSIBLE true
+CORE_HOOKSPATH .husky/_
+CORE_HOOKSPATH_ORIGIN file:F:/A-War-Without-Victory/.git/config	.husky/_
+RESOLVED_HOOKS F:\AWWV-worktrees\bc01-player-opportunities\.husky\_
+WORKTREE_CONFIG F:/A-War-Without-Victory/.git/worktrees/bc01-player-opportunities/config.worktree
+WORKTREE_SCOPE_CONFIG <none>
+HOOK .gitignore 684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1 1
+HOOK applypatch-msg 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK commit-msg 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK h 70200b200ca709b0622784f93839a5b2872333a917a09afddefd7dc2d8cdc680 551
+HOOK husky.sh 21122903fca7209a13c991e5be68780636e28f1b8f0ae7ea07ed0065dfe37268 160
+HOOK post-applypatch 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-checkout 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-commit 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-merge 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-rewrite 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-applypatch 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-auto-gc 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-commit 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-merge-commit 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-push 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-rebase 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK prepare-commit-msg 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+PROJECT_HOOK 43d2729560170f7946e8ce7d7ac62593e02eaed5fa3b68955f4d8406ea237092 1563
+PROJECT_HOOK_REF 8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+PROJECT_HOOK_REF 9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+PROJECT_HOOK_REF 11:# Typecheck code/data commits, but do not block docs-only architecture commits
+PROJECT_HOOK_REF 16:needs_typecheck=0
+PROJECT_HOOK_REF 23:needs_typecheck=1
+PROJECT_HOOK_REF 30:if [ "$needs_typecheck" -eq 0 ]; then
+PROJECT_HOOK_REF 31:echo "pre-commit: docs/process-only staged changes; skipping npx tsc --noEmit"
+PROJECT_HOOK_REF 35:# Typecheck code/data changes (fast fail ~15s)
+PROJECT_HOOK_REF 36:npx tsc --noEmit
+WORKTREE F:/AWWV-worktrees/bc01-pre-controls
+HEAD 534d86bd8147ba9f647b2ea598cac161c2d839c0
+BRANCH <detached>
+ACCESSIBLE true
+CORE_HOOKSPATH .husky/_
+CORE_HOOKSPATH_ORIGIN file:F:/A-War-Without-Victory/.git/config	.husky/_
+RESOLVED_HOOKS F:\AWWV-worktrees\bc01-pre-controls\.husky\_
+WORKTREE_CONFIG F:/A-War-Without-Victory/.git/worktrees/bc01-pre-controls/config.worktree
+WORKTREE_SCOPE_CONFIG <none>
+HOOK post-checkout 8d606e58cce98604696a4abcf3ae1ebde6f9f31ac72bb0d44e2444cc39f26030 360
+HOOK post-commit f3eb4d1f62924c09d481a0563a84b158c66eb2feb3431cfdb3e6760aab4d661d 356
+HOOK post-merge cecb594e8fa65831654fc95e96db9f1249e09c52810c6fbb2b428280aac22158 354
+HOOK pre-push a52d0510d0f8c75e27852156ec6f7791f0d8ed65fc58fcc368dd1de0a60a1d74 350
+PROJECT_HOOK 43d2729560170f7946e8ce7d7ac62593e02eaed5fa3b68955f4d8406ea237092 1563
+PROJECT_HOOK_REF 8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+PROJECT_HOOK_REF 9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+PROJECT_HOOK_REF 11:# Typecheck code/data commits, but do not block docs-only architecture commits
+PROJECT_HOOK_REF 16:needs_typecheck=0
+PROJECT_HOOK_REF 23:needs_typecheck=1
+PROJECT_HOOK_REF 30:if [ "$needs_typecheck" -eq 0 ]; then
+PROJECT_HOOK_REF 31:echo "pre-commit: docs/process-only staged changes; skipping npx tsc --noEmit"
+PROJECT_HOOK_REF 35:# Typecheck code/data changes (fast fail ~15s)
+PROJECT_HOOK_REF 36:npx tsc --noEmit
+WORKTREE F:/AWWV-worktrees/bc09-shared-inputs
+HEAD cdc8659b12c9be141fa0f55f8f6fc9aceab7db7d
+BRANCH refs/heads/codex/cleanup-event-registry
+ACCESSIBLE true
+CORE_HOOKSPATH .husky/_
+CORE_HOOKSPATH_ORIGIN file:F:/A-War-Without-Victory/.git/config	.husky/_
+RESOLVED_HOOKS F:\AWWV-worktrees\bc09-shared-inputs\.husky\_
+WORKTREE_CONFIG F:/A-War-Without-Victory/.git/worktrees/bc09-shared-inputs/config.worktree
+WORKTREE_SCOPE_CONFIG <none>
+HOOK post-checkout 8d606e58cce98604696a4abcf3ae1ebde6f9f31ac72bb0d44e2444cc39f26030 360
+HOOK post-commit f3eb4d1f62924c09d481a0563a84b158c66eb2feb3431cfdb3e6760aab4d661d 356
+HOOK post-merge cecb594e8fa65831654fc95e96db9f1249e09c52810c6fbb2b428280aac22158 354
+HOOK pre-push a52d0510d0f8c75e27852156ec6f7791f0d8ed65fc58fcc368dd1de0a60a1d74 350
+PROJECT_HOOK 43d2729560170f7946e8ce7d7ac62593e02eaed5fa3b68955f4d8406ea237092 1563
+PROJECT_HOOK_REF 8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+PROJECT_HOOK_REF 9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+PROJECT_HOOK_REF 11:# Typecheck code/data commits, but do not block docs-only architecture commits
+PROJECT_HOOK_REF 16:needs_typecheck=0
+PROJECT_HOOK_REF 23:needs_typecheck=1
+PROJECT_HOOK_REF 30:if [ "$needs_typecheck" -eq 0 ]; then
+PROJECT_HOOK_REF 31:echo "pre-commit: docs/process-only staged changes; skipping npx tsc --noEmit"
+PROJECT_HOOK_REF 35:# Typecheck code/data changes (fast fail ~15s)
+PROJECT_HOOK_REF 36:npx tsc --noEmit
+WORKTREE F:/AWWV-worktrees/calibration-timeline-viewer
+HEAD 7634c193a88e34f620ac34e44525471c3179ad36
+BRANCH refs/heads/calibration-timeline-viewer
+ACCESSIBLE true
+CORE_HOOKSPATH .husky/_
+CORE_HOOKSPATH_ORIGIN file:F:/A-War-Without-Victory/.git/config	.husky/_
+RESOLVED_HOOKS F:\AWWV-worktrees\calibration-timeline-viewer\.husky\_
+WORKTREE_CONFIG F:/A-War-Without-Victory/.git/worktrees/calibration-timeline-viewer/config.worktree
+WORKTREE_SCOPE_CONFIG <none>
+HOOK .gitignore 684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1 1
+HOOK applypatch-msg 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK commit-msg 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK h 70200b200ca709b0622784f93839a5b2872333a917a09afddefd7dc2d8cdc680 551
+HOOK husky.sh 21122903fca7209a13c991e5be68780636e28f1b8f0ae7ea07ed0065dfe37268 160
+HOOK post-applypatch 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-checkout 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-commit 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-merge 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-rewrite 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-applypatch 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-auto-gc 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-commit 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-merge-commit 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-push 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-rebase 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK prepare-commit-msg 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+PROJECT_HOOK 43d2729560170f7946e8ce7d7ac62593e02eaed5fa3b68955f4d8406ea237092 1563
+PROJECT_HOOK_REF 8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+PROJECT_HOOK_REF 9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+PROJECT_HOOK_REF 11:# Typecheck code/data commits, but do not block docs-only architecture commits
+PROJECT_HOOK_REF 16:needs_typecheck=0
+PROJECT_HOOK_REF 23:needs_typecheck=1
+PROJECT_HOOK_REF 30:if [ "$needs_typecheck" -eq 0 ]; then
+PROJECT_HOOK_REF 31:echo "pre-commit: docs/process-only staged changes; skipping npx tsc --noEmit"
+PROJECT_HOOK_REF 35:# Typecheck code/data changes (fast fail ~15s)
+PROJECT_HOOK_REF 36:npx tsc --noEmit
+WORKTREE F:/AWWV-worktrees/r7-arbih-honorific-names
+HEAD 1ddf6f01a2a4b5cc09bbf32373e4656c71f26969
+BRANCH refs/heads/r7-arbih-honorific-names
+ACCESSIBLE true
+CORE_HOOKSPATH .husky/_
+CORE_HOOKSPATH_ORIGIN file:F:/A-War-Without-Victory/.git/config	.husky/_
+RESOLVED_HOOKS F:\AWWV-worktrees\r7-arbih-honorific-names\.husky\_
+WORKTREE_CONFIG F:/A-War-Without-Victory/.git/worktrees/r7-arbih-honorific-names/config.worktree
+WORKTREE_SCOPE_CONFIG <none>
+HOOK .gitignore 684888c0ebb17f374298b65ee2807526c066094c701bcc7ebbe1c1095f494fc1 1
+HOOK applypatch-msg 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK commit-msg 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK h 70200b200ca709b0622784f93839a5b2872333a917a09afddefd7dc2d8cdc680 551
+HOOK husky.sh 21122903fca7209a13c991e5be68780636e28f1b8f0ae7ea07ed0065dfe37268 160
+HOOK post-applypatch 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-checkout 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-commit 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-merge 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK post-rewrite 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-applypatch 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-auto-gc 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-commit 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-merge-commit 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-push 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK pre-rebase 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+HOOK prepare-commit-msg 34fe496008be71d8fdd446b2cce81e4bb0406109c130eafc583fbd9fe33244e2 39
+PROJECT_HOOK 43d2729560170f7946e8ce7d7ac62593e02eaed5fa3b68955f4d8406ea237092 1563
+PROJECT_HOOK_REF 8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+PROJECT_HOOK_REF 9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+PROJECT_HOOK_REF 11:# Typecheck code/data commits, but do not block docs-only architecture commits
+PROJECT_HOOK_REF 16:needs_typecheck=0
+PROJECT_HOOK_REF 23:needs_typecheck=1
+PROJECT_HOOK_REF 30:if [ "$needs_typecheck" -eq 0 ]; then
+PROJECT_HOOK_REF 31:echo "pre-commit: docs/process-only staged changes; skipping npx tsc --noEmit"
+PROJECT_HOOK_REF 35:# Typecheck code/data changes (fast fail ~15s)
+PROJECT_HOOK_REF 36:npx tsc --noEmit
+WORKTREE F:/AWWV-worktrees/r9-phase1-install-proof
+HEAD f22bcbb63af7c5d017c59cfc3fe29838e3af1508
+BRANCH <detached>
+ACCESSIBLE true
+CORE_HOOKSPATH .husky/_
+CORE_HOOKSPATH_ORIGIN file:F:/A-War-Without-Victory/.git/config	.husky/_
+RESOLVED_HOOKS F:\AWWV-worktrees\r9-phase1-install-proof\.husky\_
+WORKTREE_CONFIG F:/A-War-Without-Victory/.git/worktrees/r9-phase1-install-proof/config.worktree
+WORKTREE_SCOPE_CONFIG <none>
+HOOK post-checkout 8d606e58cce98604696a4abcf3ae1ebde6f9f31ac72bb0d44e2444cc39f26030 360
+HOOK post-commit f3eb4d1f62924c09d481a0563a84b158c66eb2feb3431cfdb3e6760aab4d661d 356
+HOOK post-merge cecb594e8fa65831654fc95e96db9f1249e09c52810c6fbb2b428280aac22158 354
+HOOK pre-push a52d0510d0f8c75e27852156ec6f7791f0d8ed65fc58fcc368dd1de0a60a1d74 350
+PROJECT_HOOK 0021c1c7ce668825355895fd79b406d64428c92329164fb1e93231557d8a6d7b 1016
+PROJECT_HOOK_REF 3:# Typecheck code/data commits, but do not block docs-only architecture commits
+PROJECT_HOOK_REF 8:needs_typecheck=0
+PROJECT_HOOK_REF 15:needs_typecheck=1
+PROJECT_HOOK_REF 22:if [ "$needs_typecheck" -eq 0 ]; then
+PROJECT_HOOK_REF 23:echo "pre-commit: docs/process-only staged changes; skipping npx tsc --noEmit"
+PROJECT_HOOK_REF 27:# Typecheck code/data changes (fast fail ~15s)
+PROJECT_HOOK_REF 28:npx tsc --noEmit
+WORKTREE F:/AWWV-worktrees/task3-parent-check
+HEAD 223d9797003a634402ccdcef03def8837cc7c6aa
+BRANCH <detached>
+ACCESSIBLE true
+CORE_HOOKSPATH .husky/_
+CORE_HOOKSPATH_ORIGIN file:F:/A-War-Without-Victory/.git/config	.husky/_
+RESOLVED_HOOKS F:\AWWV-worktrees\task3-parent-check\.husky\_
+WORKTREE_CONFIG F:/A-War-Without-Victory/.git/worktrees/task3-parent-check/config.worktree
+WORKTREE_SCOPE_CONFIG <none>
+HOOK post-checkout 8d606e58cce98604696a4abcf3ae1ebde6f9f31ac72bb0d44e2444cc39f26030 360
+HOOK post-commit f3eb4d1f62924c09d481a0563a84b158c66eb2feb3431cfdb3e6760aab4d661d 356
+HOOK post-merge cecb594e8fa65831654fc95e96db9f1249e09c52810c6fbb2b428280aac22158 354
+HOOK pre-push a52d0510d0f8c75e27852156ec6f7791f0d8ed65fc58fcc368dd1de0a60a1d74 350
+PROJECT_HOOK 43d2729560170f7946e8ce7d7ac62593e02eaed5fa3b68955f4d8406ea237092 1563
+PROJECT_HOOK_REF 8:# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+PROJECT_HOOK_REF 9:# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+PROJECT_HOOK_REF 11:# Typecheck code/data commits, but do not block docs-only architecture commits
+PROJECT_HOOK_REF 16:needs_typecheck=0
+PROJECT_HOOK_REF 23:needs_typecheck=1
+PROJECT_HOOK_REF 30:if [ "$needs_typecheck" -eq 0 ]; then
+PROJECT_HOOK_REF 31:echo "pre-commit: docs/process-only staged changes; skipping npx tsc --noEmit"
+PROJECT_HOOK_REF 35:# Typecheck code/data changes (fast fail ~15s)
+PROJECT_HOOK_REF 36:npx tsc --noEmit
+HUSKY_INIT C:\Users\User\.config\husky\init.sh
+HUSKY_INIT_PRESENT false
+ACTIVE_RE_CONSUMER_MATCHES 22
+DISPOSITION STOP active RE consumer found
+EXIT_CODE=1

@@ -1,0 +1,57 @@
+{
+  "pass": false,
+  "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n\n55 !== 50\n\n    at check (F:\\A-War-Without-Victory\\logs\\bc06\\isolated_electron_rig.cjs:22:41)\n    at main (F:\\A-War-Without-Victory\\logs\\bc06\\isolated_electron_rig.cjs:131:5)",
+  "events": [
+    {
+      "step": 0,
+      "spec": {
+        "selector": "[data-testid=\"toolbar-route-desk\"]",
+        "frameUrlIncludes": "http"
+      },
+      "url": "http://127.0.0.1:49822/index.html?embedded=1",
+      "visible": true
+    },
+    {
+      "step": 1,
+      "spec": {
+        "buttonRegex": "^Command surface$"
+      },
+      "url": "http://127.0.0.1:49822/index.html?embedded=1",
+      "visible": true
+    },
+    {
+      "step": 2,
+      "spec": {
+        "buttonRegex": "Command & Personnel"
+      },
+      "url": "http://127.0.0.1:49822/index.html?embedded=1",
+      "visible": true
+    },
+    {
+      "step": 3,
+      "spec": {
+        "selector": "[data-testid=\"decision-room-priority-card-command:decorate-unit\"] button",
+        "buttonRegex": "^Dossier$"
+      },
+      "url": "http://127.0.0.1:49822/index.html?embedded=1",
+      "visible": true
+    },
+    {
+      "step": 4,
+      "spec": {
+        "buttonRegex": "^Issue \\(10\\)$"
+      },
+      "url": "http://127.0.0.1:49822/index.html?embedded=1",
+      "visible": true
+    },
+    {
+      "step": 5,
+      "spec": {
+        "selector": "[data-testid=\"event-decision-response\"][aria-label=\"Choose response: Decorate 101st Mountain\"]"
+      },
+      "url": "http://127.0.0.1:49822/index.html?embedded=1",
+      "visible": true
+    }
+  ],
+  "diagnostics": []
+}

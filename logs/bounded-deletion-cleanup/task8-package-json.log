@@ -1,0 +1,2 @@
+PASS package JSON parses, RE aliases/files absent, required hook files retained
+EXIT_CODE=0

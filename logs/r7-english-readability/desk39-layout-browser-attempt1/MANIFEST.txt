@@ -1,0 +1,40 @@
+# Receipt manifest for logs/r7-english-readability/desk39-layout-browser-attempt1
+#
+# The evidence itself is NOT tracked: it is too large to commit, and committing it would
+# bloat every clone for the benefit of one citation. This file is the tracked record of
+# what was there — the file list and sizes, nothing else. It proves the shape of the
+# evidence, not its contents.
+#
+# Regenerate with: node tools/write_receipt_manifest.cjs logs/r7-english-readability/desk39-layout-browser-attempt1
+# Deterministic: sorted, no timestamps. An unchanged directory yields an identical file.
+#
+# 28 file(s), 36177713 bytes
+
+ 876127  hrhb-1366x768-max-scroll.png
+   8648  hrhb-1366x768.json
+ 901706  hrhb-1366x768.png
+2055587  hrhb-1920x1080-max-scroll.png
+   8807  hrhb-1920x1080.json
+2068943  hrhb-1920x1080.png
+4122315  hrhb-3440x1440-max-scroll.png
+   9073  hrhb-3440x1440.json
+4124096  hrhb-3440x1440.png
+ 777815  rbih-1366x768-max-scroll.png
+   8647  rbih-1366x768.json
+ 795429  rbih-1366x768.png
+1472152  rbih-1920x1080-max-scroll.png
+   8649  rbih-1920x1080.json
+1473558  rbih-1920x1080.png
+2547971  rbih-3440x1440-max-scroll.png
+   8923  rbih-3440x1440.json
+2525826  rbih-3440x1440.png
+ 910234  rs-1366x768-max-scroll.png
+   8653  rs-1366x768.json
+ 929485  rs-1366x768.png
+1835221  rs-1920x1080-max-scroll.png
+   8660  rs-1920x1080.json
+1844435  rs-1920x1080.png
+3376621  rs-3440x1440-max-scroll.png
+   8929  rs-3440x1440.json
+3367906  rs-3440x1440.png
+  93297  summary.json

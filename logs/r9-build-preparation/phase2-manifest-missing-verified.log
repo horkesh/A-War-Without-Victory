@@ -1,0 +1,5 @@
+Exception: F:\A-War-Without-Victory\logs\r9-build-preparation\phase2-manifest-preflight-verified.ps1:1
+Line |
+   1 |  … json' -PathType Leaf)) { throw 'Missing required baseline manifest' }
+     |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Missing required baseline manifest

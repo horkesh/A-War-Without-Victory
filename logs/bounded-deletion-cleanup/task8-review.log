@@ -1,0 +1,72 @@
+Task 8 independent process/platform review
+Date: 2026-09-08
+Base: 04da5b7abbcc015832acd00120ea3c3be4d0f077
+Branch: codex/task8-retire-re-hooks
+Scope: RE hook checker/installer, exclusive tests, npm aliases, hook-path inventory,
+      retained Husky/LFS/governance hooks, current documentation, focused receipts
+
+VERDICT: GO for the Task 8 implementation. No critical, suggestion, or nice-to-have
+findings. Integration remains gated only by the root-owned mandatory commit-hook receipt
+required by the controlling plan; the prior full-suite receipt is not treated as a new
+Task 8 run.
+
+Deletion/consumer evidence
+- The recorded ordinal inventory contains 12 WORKTREE rows, 12 ACCESSIBLE=true rows,
+  12 CORE_HOOKSPATH=.husky/_ rows, and 12 WORKTREE_SCOPE_CONFIG=<none> rows.
+- A fresh `git worktree list --porcelain` also returns 12 registered worktrees.
+- A fresh per-worktree `git rev-parse --path-format=absolute --git-path hooks` resolves
+  `.husky/_` beneath each worktree root, including the four C: Codex worktrees and eight
+  F: repository/worktree paths. `git config --show-origin --get core.hooksPath` identifies
+  the shared F:/A-War-Without-Victory/.git/config for linked worktrees; no worktree or
+  `awwv.reScope.*` override was found.
+- Resolved-hook and checked-out project-hook text in task8-worktree-hook-inventory.log
+  accounts for Husky delegates, direct Git LFS hooks, and empty hook directories. The
+  checked project hooks contain the staged-file-aware TypeScript logic and only historical
+  RE comments, with no executable RE checker/installer invocation. Husky's optional
+  C:/Users/User/.config/husky/init.sh is absent, so it supplies no hidden consumer.
+- Current tracked search leaves the retired lock and ledger/plan/report history only.
+  RE_SCOPE_LOCK.json has status=closed and describes its old checker/installer references
+  as an inert historical retirement record. The active lane is D2, not RE.
+- package.json parses with zero governance:re:* aliases. The checker, installer, and two
+  exclusive tests are absent. Base search confirms the two deleted tests exercised those
+  deleted RE mechanisms and no surviving executable or test consumes either script.
+
+Preservation and scope evidence
+- Independent `git diff --quiet 04da5b7a -- <path>` returned 0 for .husky/post-checkout,
+  .husky/post-commit, .husky/post-merge, .husky/pre-push, .githooks/pre-commit, and
+  scripts/repo/check_claude_governance.ps1. This agrees with
+  task8-hook-byte-preservation.log.
+- The .husky/pre-commit diff removes only the eight stale RE comment lines; its executable
+  staged-file selection and `npx tsc --noEmit` logic are unchanged. A raw-byte comparison
+  against the base blob from the first `# Typecheck code/data commits` marker through EOF
+  is exactly equal: both suffixes have SHA-256
+  ae3cc604cec05636fb76156618d9105a63fc1a3573587b2c6cc0568883670cdf, 31 LF endings,
+  zero CRLF endings, and a terminal newline. task8-husky-comment-only-diff.log independently
+  records the same eight-line-only diff. The release guard test changes only the stale
+  installer citation in a comment.
+- .githooks/README.md accurately distinguishes the measured `.husky/_` configuration from
+  the retained, currently unselected `.githooks/pre-commit` compatibility path. The board,
+  master section 4.2, controlling plan, and ledger consistently say implementation is
+  complete while independent review/commit-hook/final R8 acceptance remain open.
+- Diff scope is the 12 planned tracked paths. Untracked Task 6/7 evidence files are unrelated
+  and untouched. No config, installer, worktree deletion, package/campaign, or commit was run
+  by this review.
+
+Validation receipts reviewed
+- task8-docs-tests.log retains the initial 12/13 failure caused by MASTER_ROADMAP exceeding
+  its 60,000-character guard by 78. The concise correction leaves the current file at
+  59,965 characters; task8-docs-tests-rerun.log passes 13/13, exit 0.
+- task8-release-guard-test.log retains the initial 7/8 failure where Windows system Bash
+  could not resolve the Git-Bash `/f/...` path. The process-local Git/bin precedence already
+  established by BC08 passes 8/8 in task8-release-guard-test-git-bash.log, exit 0, without
+  global environment mutation.
+- task8-package-json.log and task8-references.log pass; task8-diff-check.log records exit 0.
+  An independent `git diff --check` also exits 0.
+- The earlier combined-branch receipt remains 13,717 passed / 31 skipped. It is prior health
+  evidence only; no new full test campaign is claimed or warranted for this deletion slice.
+
+Final gate
+- Root must stage the intended Task 8 paths and run the repository's mandatory commit hook.
+  GO becomes integration-ready when that receipt exits 0 and is retained without changing
+  the reviewed implementation. Any post-review code/config/hook change requires targeted
+  correction verification.

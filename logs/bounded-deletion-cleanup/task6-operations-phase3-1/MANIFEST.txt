@@ -1,0 +1,22 @@
+# Receipt manifest for logs/bounded-deletion-cleanup/task6-operations-phase3-1
+#
+# The evidence itself is NOT tracked: it is too large to commit, and committing it would
+# bloat every clone for the benefit of one citation. This file is the tracked record of
+# what was there — the file list and sizes, nothing else. It proves the shape of the
+# evidence, not its contents.
+#
+# Regenerate with: node tools/write_receipt_manifest.cjs logs/bounded-deletion-cleanup/task6-operations-phase3-1
+# Deterministic: sorted, no timestamps. An unchanged directory yields an identical file.
+#
+# 10 file(s), 7852971 bytes
+
+1636430  01-proposal-dossier-0.png
+   2607  01-proposal-dossier.json
+3696209  02-field-inspection-0.png
+   1064  02-field-inspection.json
+1607040  03-returned-dossier-0.png
+   3723  03-returned-dossier.json
+ 904467  fixture.json
+    131  main.stderr.log
+    116  main.stdout.log
+   1184  result.json

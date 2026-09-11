@@ -1,0 +1,8 @@
+COMMAND: git branch --show-current; git rev-parse HEAD; git log 31823917a..HEAD --oneline; git diff --name-only; Get-FileHash over prior 77-file inventory
+INVENTORIED=77
+CHANGED=0
+codex/r7-english-readability
+31823917a057a8933669ad8fb9d8839cc258fdce
+docs/plans/2026-09-05-r7-presentation-and-english-readability-amendment-plan.md
+src/ui/map/components/presidential_desk/PresidentDeskShell.tsx
+EXIT_CODE=0

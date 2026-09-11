@@ -1,0 +1,848 @@
+
+> awwv@0.9.9-beta.1 test:vitest
+> node tools/test/run_vitest_default.mjs
+
+[balanced-vitest] workers=4; partitioned files=1; serial files=51
+
+
+
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mF:/A-War-Without-Victory[39m
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mF:/A-War-Without-Victory[39m
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mF:/A-War-Without-Victory[39m
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mF:/A-War-Without-Victory[39m
+
+
+
+
+ [32m✓[39m tests/paramilitary_sweep.test.ts [2m([22m[2m59 tests[22m[2m)[22m[90m 51[2mms[22m[39m
+ [32m✓[39m tests/save_migration_validator_rejection.test.ts [2m([22m[2m201 tests[22m[2m)[22m[90m 222[2mms[22m[39m
+ [32m✓[39m tests/army_reserve_system.test.ts [2m([22m[2m60 tests[22m[2m)[22m[90m 40[2mms[22m[39m
+ [32m✓[39m tests/ui/presidential_decision_room.test.ts [2m([22m[2m64 tests[22m[2m)[22m[90m 141[2mms[22m[39m
+ [32m✓[39m tests/army_hq_gathering.test.ts [2m([22m[2m68 tests[22m[2m)[22m[90m 46[2mms[22m[39m
+ [32m✓[39m tests/operation_aar.test.ts [2m([22m[2m56 tests[22m[2m)[22m[90m 32[2mms[22m[39m
+ [32m✓[39m tests/brigade_territory_reconciliation.test.ts [2m([22m[2m37 tests[22m[2m)[22m[90m 47[2mms[22m[39m
+ [32m✓[39m tests/strict_null_inventory_progress.test.ts [2m([22m[2m90 tests[22m[2m)[22m[90m 30[2mms[22m[39m
+ [32m✓[39m tests/ui_map_game_state_adapter.test.ts [2m([22m[2m67 tests[22m[2m)[22m[90m 112[2mms[22m[39m
+ [32m✓[39m tests/ui/codex_essay_vocab_integration.test.ts [2m([22m[2m43 tests[22m[2m)[22m[90m 32[2mms[22m[39m
+ [32m✓[39m tests/recruitment_engine.test.ts [2m([22m[2m34 tests[22m[2m)[22m[90m 27[2mms[22m[39m
+ [32m✓[39m tests/ui/inbox_items.test.ts [2m([22m[2m56 tests[22m[2m)[22m[90m 72[2mms[22m[39m
+ [32m✓[39m tests/pre_planned_operations.test.ts [2m([22m[2m59 tests[22m[2m)[22m[90m 72[2mms[22m[39m
+ [32m✓[39m tests/commander/elite_formation_utilization.test.ts [2m([22m[2m39 tests[22m[2m)[22m[90m 43[2mms[22m[39m
+ [32m✓[39m tests/brigade_front_distribution.test.ts [2m([22m[2m30 tests[22m[2m)[22m[90m 26[2mms[22m[39m
+ [32m✓[39m tests/paradox_local_qa_harness.test.ts [2m([22m[2m46 tests[22m[2m)[22m[90m 208[2mms[22m[39m
+ [32m✓[39m tests/save_migration_versioned_steps.test.ts [2m([22m[2m38 tests[22m[2m)[22m[90m 39[2mms[22m[39m
+ [32m✓[39m tests/validate_run_consistency.test.ts [2m([22m[2m22 tests[22m[2m)[22m[90m 289[2mms[22m[39m
+ [32m✓[39m tests/officer_system.test.ts [2m([22m[2m47 tests[22m[2m)[22m[90m 42[2mms[22m[39m
+ [32m✓[39m tests/commander/commander.test.ts [2m([22m[2m55 tests[22m[2m)[22m[90m 46[2mms[22m[39m
+ [32m✓[39m tests/operation_opportunities_catalog.test.ts [2m([22m[2m44 tests[22m[2m)[22m[90m 108[2mms[22m[39m
+ [32m✓[39m tests/sector_frontline_truth.test.ts [2m([22m[2m31 tests[22m[2m)[22m[33m 301[2mms[22m[39m
+ [32m✓[39m tests/events_evaluate.test.ts [2m([22m[2m49 tests[22m[2m)[22m[33m 865[2mms[22m[39m
+ [32m✓[39m tests/consequence_chains.test.ts [2m([22m[2m53 tests[22m[2m)[22m[90m 63[2mms[22m[39m
+ [32m✓[39m tests/dynamic_codex_slice_v1.test.ts [2m([22m[2m35 tests[22m[2m)[22m[90m 73[2mms[22m[39m
+ [32m✓[39m tests/sector_severe_undercoverage_rebalance.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 41[2mms[22m[39m
+ [32m✓[39m tests/sim/events/event_taxonomy_report.test.ts [2m([22m[2m27 tests[22m[2m)[22m[33m 1113[2mms[22m[39m
+ [32m✓[39m tests/sensitive_history_canon_gate_audit.test.ts [2m([22m[2m32 tests[22m[2m)[22m[90m 91[2mms[22m[39m
+ [32m✓[39m tests/codex_sensitive_claim_inventory.test.ts [2m([22m[2m29 tests[22m[2m)[22m[33m 22045[2mms[22m[39m
+   [33m[2m✓[22m[39m real dynamic Codex claims name a non-calendar predicate and rupture tags stay on rupture essays [33m3487[2mms[22m[39m
+   [33m[2m✓[22m[39m inventory-identified safe essay residuals and the rewritten NATO record carry source notes [33m1219[2mms[22m[39m
+   [33m[2m✓[22m[39m unindexed Wave-4 essay deposits remain inventoried without entering the player-facing history queue [33m1249[2mms[22m[39m
+   [33m[2m✓[22m[39m player-facing claims with complete citations and source notes carry a resolved source tier [33m1183[2mms[22m[39m
+   [33m[2m✓[22m[39m inventory reports the 1993 placement/window contract for Neretva, Grabovica, and Uzdol [33m1211[2mms[22m[39m
+   [33m[2m✓[22m[39m inventory documents the sourced 1993 central-Bosnia provenance packet [33m1141[2mms[22m[39m
+   [33m[2m✓[22m[39m inventory documents the summer 1992 Herceg-Bosna posture packet [33m1139[2mms[22m[39m
+   [33m[2m✓[22m[39m inventory documents conditional consequence rows as design counterfactuals [33m1104[2mms[22m[39m
+   [33m[2m✓[22m[39m inventory documents every player-facing essay and dynamic section [33m1137[2mms[22m[39m
+   [33m[2m✓[22m[39m inventory documents event rows paired with player-facing essays [33m1172[2mms[22m[39m
+   [33m[2m✓[22m[39m inventory documents every player-facing historical event claim [33m1083[2mms[22m[39m
+   [33m[2m✓[22m[39m inventory has no unresolved player-facing claim [33m1088[2mms[22m[39m
+   [33m[2m✓[22m[39m inventory clears the source floor for the Jajce-to-final-offensives packet [33m1130[2mms[22m[39m
+   [33m[2m✓[22m[39m inventory documents the state-identity and adjudicated-command provenance packet [33m1131[2mms[22m[39m
+   [33m[2m✓[22m[39m inventory has no player-facing essay below the two-source floor [33m1099[2mms[22m[39m
+   [33m[2m✓[22m[39m inventory has no generic actor-symmetry claim in player-facing history [33m1111[2mms[22m[39m
+   [33m[2m✓[22m[39m inventory covers claim prose without relying on a narrow keyword list [33m1155[2mms[22m[39m
+[E5] Political control initialized (hybrid_1992, threshold=0.7): 5822 canonical graph nodes (SID-keyed), RBiH=2297, RS=2507, HRHB=1018. Promoted to OSID when operational data present.
+ [32m✓[39m tests/sector_offensive_idle_recovery.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 36[2mms[22m[39m
+ [32m✓[39m tests/operation_preparation_force_ratio.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 22[2mms[22m[39m
+ [32m✓[39m tests/ui/turn_aftermath.test.ts [2m([22m[2m25 tests[22m[2m)[22m[90m 34[2mms[22m[39m
+ [32m✓[39m tests/commander/commander_phase3_candidate_competition.test.ts [2m([22m[2m43 tests[22m[2m)[22m[90m 35[2mms[22m[39m
+ [32m✓[39m tests/bot_operation_objective_focus.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 31[2mms[22m[39m
+[E5] Political control initialized (hybrid_1992, threshold=0.7): 5822 canonical graph nodes (SID-keyed), RBiH=2297, RS=2507, HRHB=1018. Promoted to OSID when operational data present.
+ [32m✓[39m tests/scenario_harness_contracts.test.ts [2m([22m[2m22 tests[22m[2m)[22m[33m 64277[2mms[22m[39m
+   [33m[2m✓[22m[39m H1.4 scenario harness smoke[2m > [22mscenario harness smoke: noop scenarios produce expected artifacts [33m12398[2mms[22m[39m
+   [33m[2m✓[22m[39m H1.4 scenario harness smoke[2m > [22mscenario harness smoke: noop_4w determinism (two runs => identical final_save.json) [33m5654[2mms[22m[39m
+   [33m[2m✓[22m[39m H1.4 scenario harness smoke[2m > [22mno-formation startups stay empty and turn-time phantoms require host commands [33m3786[2mms[22m[39m
+   [33m[2m✓[22m[39m scenario end report h1.5[2m > [22mwrites the end-of-run report artifacts [33m2689[2mms[22m[39m
+   [33m[2m✓[22m[39m scenario end report h1.5[2m > [22mkeeps control_delta.json stable and ordered [33m2685[2mms[22m[39m
+   [33m[2m✓[22m[39m scenario failure reporting h1.5.1[2m > [22mstamps the authored anchor contract into run metadata before simulation starts [33m377[2mms[22m[39m
+   [33m[2m✓[22m[39m H1.7 scenario activity diagnostics[2m > [22mscenario activity diagnostics: activity_summary.json and Activity over run in end_report [33m2839[2mms[22m[39m
+   [33m[2m✓[22m[39m H1.7 scenario activity diagnostics[2m > [22mphase ii run_summary includes phase_ii_attack_resolution diagnostics block [33m5435[2mms[22m[39m
+   [33m[2m✓[22m[39m H1.8 scenario probe compare[2m > [22mscenario probe compare: probe_compare.json and probe_compare.md exist with required keys [33m5728[2mms[22m[39m
+   [33m[2m✓[22m[39m H1.9 scenario baseline ops[2m > [22mscenario baseline_ops: run succeeds and emits expected artifacts/metrics [33m3207[2mms[22m[39m
+   [33m[2m✓[22m[39m H1.1 scenario determinism[2m > [22mscenario determinism: same scenario run twice yields identical final_save.json [33m9046[2mms[22m[39m
+   [33m[2m✓[22m[39m H2.4 scenario bots determinism[2m > [22mscenario bots determinism: noop_4w_bots run twice yields identical key artifacts [33m6147[2mms[22m[39m
+   [33m[2m✓[22m[39m H2.4 scenario bots determinism[2m > [22mscenario bots run summary includes deterministic benchmark evaluation contract [33m3023[2mms[22m[39m
+   [33m[2m✓[22m[39m apr1992 must-hold contract[2m > [22mapr1992 definitive must-hold references live corps ids and real operational osids [33m967[2mms[22m[39m
+ [32m✓[39m tests/ui_map_interactions.test.ts [2m([22m[2m27 tests[22m[2m)[22m[90m 42[2mms[22m[39m
+ [32m✓[39m tests/command_authority_assessment_constraints.test.ts [2m([22m[2m51 tests[22m[2m)[22m[90m 25[2mms[22m[39m
+ [32m✓[39m tests/sector_partition_buildCorpsFrontSectors_integration.test.ts [2m([22m[2m12 tests[22m[2m | [22m[33m1 skipped[39m[2m)[22m[33m 732036[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path matches uncached path on the pristine real-save fixture [33m1336[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22minvocation-local front-edge relation matches the independent legacy strategy on the pristine real-save fixture [33m4956[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mconstructs at most one standard/strict relation per used faction, discards them between calls, observes synthetic fallbacks, and keeps unexpected canonical fallback at zero [33m1563[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path matches uncached path on the final-pass real-save fixture [33m981[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path is stable across back-to-back invocations on identical state (no cross-invocation leakage) [33m1040[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path matches uncached path across ≥100 deterministic state variants [33m35798[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path matches uncached path across war-pass + final-pass split [33m2130[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mfixed-point shortcuts preserve every sector field and direct state side effect across production modes and 100 real-save variants [33m142826[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mdense occupancy preserves every sector field and direct state side effect against legacy scans across production modes and 100 real-save variants [33m143679[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22minvocation-local front-edge relations preserve reconciliation reports, sessions, receipts, geometry order, sectors, full state, warnings, bytes, and rerun hashes across production modes and 100 real-save variants [33m397095[2mms[22m[39m
+ [32m✓[39m tests/ui/codex_essay_resolver.test.ts [2m([22m[2m47 tests[22m[2m)[22m[90m 32[2mms[22m[39m
+ [32m✓[39m tests/ui/first_hour_browser_gate_contract.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 171[2mms[22m[39m
+ [32m✓[39m tests/collapse_phase1_disabled.test.ts [2m([22m[2m22 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+ [32m✓[39m tests/attack_equipment_effects.test.ts [2m([22m[2m55 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+ [32m✓[39m tests/map_transition_profile_harness.test.ts [2m([22m[2m31 tests[22m[2m)[22m[33m 1853[2mms[22m[39m
+   [33m[2m✓[22m[39m map transition Electron profile harness contract[2m > [22mkeeps player-visible evidence opt-in and records the complete interaction matrix [33m1719[2mms[22m[39m
+ [32m✓[39m tests/triggered_operations.test.ts [2m([22m[2m27 tests[22m[2m)[22m[90m 151[2mms[22m[39m
+ [32m✓[39m tests/ui/decision_consequence_trail.test.ts [2m([22m[2m27 tests[22m[2m)[22m[90m 26[2mms[22m[39m
+ [32m✓[39m tests/final_sector_truth_reconciliation.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 105[2mms[22m[39m
+ [32m✓[39m tests/probe_territory_flip.test.ts [2m([22m[2m18 tests[22m[2m)[22m[90m 60[2mms[22m[39m
+ [32m✓[39m tests/uncontested_occupation_priority.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+ [32m✓[39m tests/state/displacement_event_log.test.ts [2m([22m[2m22 tests[22m[2m)[22m[33m 526[2mms[22m[39m
+ [32m✓[39m tests/krivaja_roster_and_prestage.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 125[2mms[22m[39m
+ [32m✓[39m tests/operation_reinforcement.test.ts [2m([22m[2m19 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/sector_partition_buildCorpsFrontSectors_integration.test.ts [2m([22m[2m12 tests[22m[2m | [22m[33m1 skipped[39m[2m)[22m[33m 731164[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path matches uncached path on the pristine real-save fixture [33m1221[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22minvocation-local front-edge relation matches the independent legacy strategy on the pristine real-save fixture [33m4693[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mconstructs at most one standard/strict relation per used faction, discards them between calls, observes synthetic fallbacks, and keeps unexpected canonical fallback at zero [33m1579[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path matches uncached path on the final-pass real-save fixture [33m998[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path is stable across back-to-back invocations on identical state (no cross-invocation leakage) [33m1066[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path matches uncached path across ≥100 deterministic state variants [33m35873[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path matches uncached path across war-pass + final-pass split [33m1926[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mfixed-point shortcuts preserve every sector field and direct state side effect across production modes and 100 real-save variants [33m142688[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mdense occupancy preserves every sector field and direct state side effect against legacy scans across production modes and 100 real-save variants [33m143624[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22minvocation-local front-edge relations preserve reconciliation reports, sessions, receipts, geometry order, sectors, full state, warnings, bytes, and rerun hashes across production modes and 100 real-save variants [33m397106[2mms[22m[39m
+ [32m✓[39m tests/commander/commander_phase6_trace_qa.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m tests/event_loader.test.ts [2m([22m[2m44 tests[22m[2m)[22m[33m 730[2mms[22m[39m
+ [32m✓[39m tests/commander/commander_maturity_phase1.test.ts [2m([22m[2m18 tests[22m[2m)[22m[90m 23[2mms[22m[39m
+ [32m✓[39m tests/commander/commander_phase4_lesson_personality.test.ts [2m([22m[2m25 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+ [32m✓[39m tests/brigade_aor_subsegment.test.ts [2m([22m[2m24 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m tests/desktop_packaged_runtime_probe.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 285[2mms[22m[39m
+ [32m✓[39m tests/attack_resolution_osid_intel_friction.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 48[2mms[22m[39m
+ [32m✓[39m tests/sim/political/patron_calls_phase4.test.ts [2m([22m[2m18 tests[22m[2m)[22m[90m 73[2mms[22m[39m
+ [32m✓[39m tests/divergence_events_wave_17.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 46[2mms[22m[39m
+ [32m✓[39m tests/final_sector_reconciliation_session.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 230[2mms[22m[39m
+ [32m✓[39m tests/army_hq_op_lifecycle.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 23[2mms[22m[39m
+ [32m✓[39m tests/commander_override.test.ts [2m([22m[2m32 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+ [32m✓[39m tests/tooth_guard.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/sim/combat/phase3_reliability_decay.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/stranded_brigade_lifecycle.test.ts [2m([22m[2m19 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/militia_casualty_persistence.test.ts [2m([22m[2m20 tests[22m[2m)[22m[90m 37[2mms[22m[39m
+ [32m✓[39m tests/sim/autonomy/autonomy_phase_c.test.ts [2m([22m[2m34 tests[22m[2m)[22m[90m 18[2mms[22m[39m
+ [32m✓[39m tests/wrapped_slides.test.ts [2m([22m[2m29 tests[22m[2m)[22m[90m 25[2mms[22m[39m
+ [32m✓[39m tests/command_authority_friction_stabilization.test.ts [2m([22m[2m49 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m tests/commander/operation_emit_overlap_guards.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+ [32m✓[39m tests/phase_e_activation_simulator.test.ts [2m([22m[2m24 tests[22m[2m)[22m[90m 23[2mms[22m[39m
+ [32m✓[39m tests/sustainability.test.ts [2m([22m[2m18 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/operation_preparation_in_transit_context.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m tests/stupcanica_defender_stack_shape_b.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/scoring.test.ts [2m([22m[2m40 tests[22m[2m)[22m[90m 37[2mms[22m[39m
+ [32m✓[39m tests/sim/political/political_peace_plan.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/leadership_actions.test.ts [2m([22m[2m26 tests[22m[2m)[22m[90m 26[2mms[22m[39m
+ [32m✓[39m tests/event_state_shape_b2.test.ts [2m([22m[2m29 tests[22m[2m)[22m[33m 491[2mms[22m[39m
+   [33m[2m✓[22m[39m Phase B Sub-slice B2 — state shape + save migration[2m > [22mGate 38 — drift audit clean[2m > [22msave_migration_drift_audit.cjs reports no orphan anonymous defaults at v35 [33m449[2mms[22m[39m
+ [32m✓[39m tests/officer_learning_rate_timeline_step_curve.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/command_lever_consequences.test.ts [2m([22m[2m28 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m tests/divergence_events_wave_9.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 48[2mms[22m[39m
+ [32m✓[39m tests/dayton_phase2_dial_bot_verdict.test.ts [2m([22m[2m20 tests[22m[2m)[22m[90m 53[2mms[22m[39m
+ [32m✓[39m tests/trnovo_kalinovik_sector_fix.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/divergence_events_wave_13.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 42[2mms[22m[39m
+ [32m✓[39m tests/run_provenance_input_surface_scan.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 107[2mms[22m[39m
+ [32m✓[39m tests/ui/back_the_officer_read_model.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 47[2mms[22m[39m
+ [32m✓[39m tests/divergence_events_wave_11.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 42[2mms[22m[39m
+ [32m✓[39m tests/divergence_events_wave_5.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 47[2mms[22m[39m
+ [32m✓[39m tests/engine_honesty_legacy_contracts.test.ts [2m([22m[2m23 tests[22m[2m)[22m[33m 674[2mms[22m[39m
+ [32m✓[39m tests/operation_opportunities_federation_western_bosnia_catalog.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 34[2mms[22m[39m
+ [32m✓[39m tests/sector_partition_buildCorpsFrontSectors_integration.test.ts [2m([22m[2m12 tests[22m[2m | [22m[33m1 skipped[39m[2m)[22m[33m 736892[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path matches uncached path on the pristine real-save fixture [33m1259[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22minvocation-local front-edge relation matches the independent legacy strategy on the pristine real-save fixture [33m4762[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mconstructs at most one standard/strict relation per used faction, discards them between calls, observes synthetic fallbacks, and keeps unexpected canonical fallback at zero [33m1515[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path matches uncached path on the final-pass real-save fixture [33m1000[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path is stable across back-to-back invocations on identical state (no cross-invocation leakage) [33m1043[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path matches uncached path across ≥100 deterministic state variants [33m36075[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path matches uncached path across war-pass + final-pass split [33m1985[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mfixed-point shortcuts preserve every sector field and direct state side effect across production modes and 100 real-save variants [33m144815[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mdense occupancy preserves every sector field and direct state side effect against legacy scans across production modes and 100 real-save variants [33m144329[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22minvocation-local front-edge relations preserve reconciliation reports, sessions, receipts, geometry order, sectors, full state, warnings, bytes, and rerun hashes across production modes and 100 real-save variants [33m399709[2mms[22m[39m
+ [32m✓[39m tests/nw_bosnia_oob_correctness.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 69[2mms[22m[39m
+ [32m✓[39m tests/local_truces.test.ts [2m([22m[2m64 tests[22m[2m)[22m[90m 18[2mms[22m[39m
+ [32m✓[39m tests/chronicle_entries.test.ts [2m([22m[2m31 tests[22m[2m)[22m[90m 31[2mms[22m[39m
+ [32m✓[39m tests/causality_query.test.ts [2m([22m[2m28 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m tests/event_decisions.test.ts [2m([22m[2m33 tests[22m[2m)[22m[90m 145[2mms[22m[39m
+ [32m✓[39m tests/war_phase_step_order.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/ui_adapter_boundary.test.ts [2m([22m[2m18 tests[22m[2m)[22m[90m 140[2mms[22m[39m
+ [32m✓[39m tests/ui/warroom_shell_ownership.test.ts [2m([22m[2m23 tests[22m[2m)[22m[90m 283[2mms[22m[39m
+ [32m✓[39m tests/treaty_apply_military.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/desktop_player_visible_state.test.ts [2m([22m[2m21 tests[22m[2m)[22m[33m 5392[2mms[22m[39m
+   [33m[2m✓[22m[39m desktop player-visible state projection[2m > [22mkeeps only the player faction durable proposal receipt through Advance, save/load, and Electron projection [33m5258[2mms[22m[39m
+ [32m✓[39m tests/command_authority_explanation_delegation.test.ts [2m([22m[2m71 tests[22m[2m)[22m[90m 27[2mms[22m[39m
+ [32m✓[39m tests/ui_map_render_smoke.test.ts [2m([22m[2m25 tests[22m[2m)[22m[90m 37[2mms[22m[39m
+ [32m✓[39m tests/calibration.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m tests/attack_morale_absorption.test.ts [2m([22m[2m23 tests[22m[2m)[22m[90m 16[2mms[22m[39m
+ [32m✓[39m tests/alliance_lifecycle.test.ts [2m([22m[2m41 tests[22m[2m)[22m[90m 22[2mms[22m[39m
+ [32m✓[39m tests/phase10_ops_fatigue.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/ui_player_visibility.test.ts [2m([22m[2m19 tests[22m[2m)[22m[90m 54[2mms[22m[39m
+ [32m✓[39m tests/commander/corridor_quality_guard.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/commander_driven_brigade_assignment.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 126[2mms[22m[39m
+ [32m✓[39m tests/negotiation_patron_pressure.test.ts [2m([22m[2m31 tests[22m[2m)[22m[90m 16[2mms[22m[39m
+ [32m✓[39m tests/codex_ghost_entries_wave_2.test.ts [2m([22m[2m40 tests[22m[2m)[22m[90m 23[2mms[22m[39m
+ [32m✓[39m tests/operation_opportunities_phase2_decisions.test.ts [2m([22m[2m27 tests[22m[2m)[22m[90m 26[2mms[22m[39m
+ [32m✓[39m tests/divergence_events_wave_8.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 42[2mms[22m[39m
+ [32m✓[39m tests/dayton_player_agency_smoke.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 58[2mms[22m[39m
+ [32m✓[39m tests/retroactive_tooth_eviction.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/divergence_events_wave_10.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 43[2mms[22m[39m
+ [32m✓[39m tests/corps_level_operations.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+ [32m✓[39m tests/a3_army_order_interpretation.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+ [32m✓[39m tests/sim/political/political_personality.test.ts [2m([22m[2m22 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/free_war_verdict_cost_floor.test.ts [2m([22m[2m33 tests[22m[2m)[22m[90m 18[2mms[22m[39m
+ [32m✓[39m tests/settlement_timeline_provenance.test.ts [2m([22m[2m19 tests[22m[2m)[22m[90m 41[2mms[22m[39m
+ [32m✓[39m tests/divergence_events_wave_14.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 41[2mms[22m[39m
+ [32m✓[39m tests/corridor_heartbeat_overlay_builder.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/refugee_column_overlay_builder.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/free_war_military_priorities.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/freeze_regression.test.ts [2m([22m[2m6 tests[22m[2m | [22m[33m1 skipped[39m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/tg_lifecycle.test.ts [2m([22m[2m27 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+ [32m✓[39m tests/sector_partition_buildCorpsFrontSectors_integration.test.ts [2m([22m[2m12 tests[22m[2m | [22m[33m1 skipped[39m[2m)[22m[33m 738793[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path matches uncached path on the pristine real-save fixture [33m1241[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22minvocation-local front-edge relation matches the independent legacy strategy on the pristine real-save fixture [33m4742[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mconstructs at most one standard/strict relation per used faction, discards them between calls, observes synthetic fallbacks, and keeps unexpected canonical fallback at zero [33m1547[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path matches uncached path on the final-pass real-save fixture [33m982[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path is stable across back-to-back invocations on identical state (no cross-invocation leakage) [33m1033[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path matches uncached path across ≥100 deterministic state variants [33m36207[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mcached path matches uncached path across war-pass + final-pass split [33m1925[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mfixed-point shortcuts preserve every sector field and direct state side effect across production modes and 100 real-save variants [33m144308[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22mdense occupancy preserves every sector field and direct state side effect against legacy scans across production modes and 100 real-save variants [33m145100[2mms[22m[39m
+   [33m[2m✓[22m[39m G1.5: buildCorpsFrontSectors integration property — cache ON vs OFF byte-equality[2m > [22minvocation-local front-edge relations preserve reconciliation reports, sessions, receipts, geometry order, sectors, full state, warnings, bytes, and rerun hashes across production modes and 100 real-save variants [33m401306[2mms[22m[39m
+ [32m✓[39m tests/command_authority_lifecycle.test.ts [2m([22m[2m36 tests[22m[2m)[22m[90m 16[2mms[22m[39m
+ [32m✓[39m tests/sim/events/event_acceptance_report.test.ts [2m([22m[2m17 tests[22m[2m)[22m[33m 995[2mms[22m[39m
+ [32m✓[39m tests/replay_save_emit.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 95[2mms[22m[39m
+ [32m✓[39m tests/events_evaluate_b3.test.ts [2m([22m[2m32 tests[22m[2m)[22m[90m 237[2mms[22m[39m
+ [32m✓[39m tests/officer_oob_provenance.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 89[2mms[22m[39m
+ [32m✓[39m tests/commander/commander_phase5_constraint_preference.test.ts [2m([22m[2m24 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+ [32m✓[39m tests/negotiation_offers.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 86[2mms[22m[39m
+ [32m✓[39m tests/sim/command/phase4_ui_data_layer.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 37[2mms[22m[39m
+ [32m✓[39m tests/sector_split_brigade_assignment.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 43[2mms[22m[39m
+ [32m✓[39m tests/generals_digest_chronicle.test.ts [2m([22m[2m30 tests[22m[2m)[22m[90m 29[2mms[22m[39m
+ [32m✓[39m tests/collapse_s6_run_selection.test.ts [2m([22m[2m47 tests[22m[2m)[22m[90m 63[2mms[22m[39m
+ [32m✓[39m tests/ui_map_tooltip_player_visibility.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 30[2mms[22m[39m
+ [32m✓[39m tests/scenario_operation_diagnostics.test.ts [2m([22m[2m28 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/sim/political/phase7_dayton_plan.test.ts [2m([22m[2m19 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/event_loader_runtime_substrate.test.ts [2m([22m[2m50 tests[22m[2m | [22m[33m5 skipped[39m[2m)[22m[33m 322[2mms[22m[39m
+ [32m✓[39m tests/hv_1995_lifecycle_diagnostic.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 18[2mms[22m[39m
+ [32m✓[39m tests/sim/political/political_event_decision.test.ts [2m([22m[2m26 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/divergence_events_wave_15.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 46[2mms[22m[39m
+ [32m✓[39m tests/probe_preparation.test.ts [2m([22m[2m36 tests[22m[2m)[22m[90m 25[2mms[22m[39m
+ [32m✓[39m tests/krivaja_roster_phase_1_5_shape_de_epsilon.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/sector_topology_detached_state.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 3237[2mms[22m[39m
+   [33m[2m✓[22m[39m buildDetachedNarrowReadState — fidelity against the source GameState[2m > [22mmeta/political/factions round-trip exactly [33m501[2mms[22m[39m
+   [33m[2m✓[22m[39m buildDetachedNarrowReadState — fidelity against the source GameState[2m > [22mcorps_command reshape un-flattens directive.priority_sector_id and preserves axis objectives [33m421[2mms[22m[39m
+   [33m[2m✓[22m[39m buildDetachedNarrowReadState — fidelity against the source GameState[2m > [22mnamed_officers / named_officer_data / campaign_plans / brigade_movement / posture orders round-trip [33m382[2mms[22m[39m
+   [33m[2m✓[22m[39m buildDetachedNarrowReadState — fidelity against the source GameState[2m > [22munresolved_sector_brigades round-trips from live state through capture into the detached state (regression: a prior version silently hardcoded undefined here) [33m386[2mms[22m[39m
+   [33m[2m✓[22m[39m buildDetachedWorkingFormations — fidelity and mutability[2m > [22mevery field matches the source formation for a sample [33m375[2mms[22m[39m
+   [33m[2m✓[22m[39m buildDetachedWorkingFormations — fidelity and mutability[2m > [22mentrenchment_turns round-trips the TRUE source value, not a hardcoded 0 (regression: a prior version assumed a hardcoded 0 starting point was behavior-inert since the field is write-only within this call graph — true for the sectors output, false for the mutation journal's before fidelity, which commitSectorTopologySolve validates against live state) [33m373[2mms[22m[39m
+   [33m[2m✓[22m[39m buildDetachedWorkingFormations — fidelity and mutability[2m > [22mis a genuinely mutable projection independent of the source formations map [33m408[2mms[22m[39m
+   [33m[2m✓[22m[39m buildDetachedWorkingFormations — fidelity and mutability[2m > [22mbuildDetachedNarrowReadState threads a supplied workingFormations object through by reference [33m386[2mms[22m[39m
+ [32m✓[39m tests/settlement_control.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/sensitive_history_status_diagnostic.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 663[2mms[22m[39m
+ [32m✓[39m tests/ui_map_deck_counter_visibility.test.ts [2m([22m[2m34 tests[22m[2m)[22m[90m 44[2mms[22m[39m
+ [32m✓[39m tests/attack_casualty_distribution.test.ts [2m([22m[2m35 tests[22m[2m)[22m[90m 45[2mms[22m[39m
+ [32m✓[39m tests/dayton_negotiation.test.ts [2m([22m[2m39 tests[22m[2m)[22m[90m 62[2mms[22m[39m
+ [32m✓[39m tests/ui/endgame_presentation_proof.test.ts [2m([22m[2m29 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+ [32m✓[39m tests/sim/autonomy/autonomy_phase_d.test.ts [2m([22m[2m40 tests[22m[2m)[22m[90m 22[2mms[22m[39m
+ [32m✓[39m tests/tg_og_promotion.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 130[2mms[22m[39m
+ [32m✓[39m tests/commander/commander_belief_layer.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 30[2mms[22m[39m
+ [32m✓[39m tests/sector_intel.test.ts [2m([22m[2m20 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+ [32m✓[39m tests/corps_operation_readiness.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/siege_mobilization.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/warroom_shell_layer.test.ts [2m([22m[2m40 tests[22m[2m)[22m[90m 45[2mms[22m[39m
+ [32m✓[39m tests/dayton_institutional_expansion.test.ts [2m([22m[2m23 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+ [32m✓[39m tests/operation_opportunities_central_bosnia_catalog.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 40[2mms[22m[39m
+ [32m✓[39m tests/collapse_d_selection_combat_incidence.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+ [32m✓[39m tests/ui/command_strain_interpretation.test.ts [2m([22m[2m58 tests[22m[2m)[22m[90m 26[2mms[22m[39m
+ [32m✓[39m tests/ui/chronicle_causality_slides.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 22[2mms[22m[39m
+[E5] Political control initialized (initial municipal substrate): 5822 canonical graph nodes (SID-keyed), RBiH=2739, RS=1964, HRHB=1119, null=0. Promoted to OSID when operational data present.
+[E5] Political control initialized (initial municipal substrate): 5822 canonical graph nodes (SID-keyed), RBiH=2739, RS=1964, HRHB=1119, null=0. Promoted to OSID when operational data present.
+[E5] Political control initialized (initial municipal substrate): 5822 canonical graph nodes (SID-keyed), RBiH=2739, RS=1964, HRHB=1119, null=0. Promoted to OSID when operational data present.
+ [32m✓[39m tests/shared_turn_inputs_contract.test.ts [2m([22m[2m29 tests[22m[2m)[22m[33m 1936[2mms[22m[39m
+   [33m[2m✓[22m[39m shared validated turn input contract[2m > [22mactual scenario builder and desktop loader prepare identical numeric-key inputs [33m725[2mms[22m[39m
+   [33m[2m✓[22m[39m shared validated turn input contract[2m > [22mactual scenario builder and desktop loader prepare identical direct-key inputs [33m630[2mms[22m[39m
+   [33m[2m✓[22m[39m shared validated turn input contract[2m > [22mactual scenario builder accepts explicitly selected minimal shared-input omissions [33m386[2mms[22m[39m
+ [32m✓[39m tests/sim/political/survivalScore.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/player_decision_manifest.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/sim/command/phase5_interpretation_ux.test.ts [2m([22m[2m25 tests[22m[2m)[22m[90m 33[2mms[22m[39m
+ [32m✓[39m tests/tg_op_lifecycle.test.ts [2m([22m[2m19 tests[22m[2m)[22m[90m 28[2mms[22m[39m
+ [32m✓[39m tests/ui_presidential_decision_room_wiring.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 39[2mms[22m[39m
+ [32m✓[39m tests/divergence_events_wave_4.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 46[2mms[22m[39m
+ [32m✓[39m tests/final_sector_war_front_faction_side_coverage.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/promote_formations.test.ts [2m([22m[2m29 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/treaty.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/engine_truth_checkpoint.test.ts [2m([22m[2m37 tests[22m[2m)[22m[90m 35[2mms[22m[39m
+ [32m✓[39m tests/sector_topology_snapshot.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 1202[2mms[22m[39m
+   [33m[2m✓[22m[39m captureSectorTopologySolveInput — fidelity against a real save[2m > [22mcaptures every section-6 family with strict ID/key ordering and preserved authored array order [33m428[2mms[22m[39m
+   [33m[2m✓[22m[39m captureSectorTopologySolveInput — fidelity against a real save[2m > [22mretains no mutable identity from the source — mutating state/edges/spatial after capture does not change the snapshot [33m409[2mms[22m[39m
+   [33m[2m✓[22m[39m captureSectorTopologySolveInput — fidelity against a real save[2m > [22mObject.freeze blocks mutation of plain-object/array leaves at runtime [33m357[2mms[22m[39m
+ [32m✓[39m tests/cost_ledger_comparison.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 49[2mms[22m[39m
+ [32m✓[39m tests/event_state_shape_validation.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+ [32m✓[39m tests/displacement_takeover.test.ts [2m([22m[2m8 tests[22m[2m | [22m[33m4 skipped[39m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/front_visit_action.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/free_war_ethics_bright_line.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/command_authority_strain_signals.test.ts [2m([22m[2m35 tests[22m[2m)[22m[90m 30[2mms[22m[39m
+ [32m✓[39m tests/divergence_events_wave_12.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 50[2mms[22m[39m
+ [32m✓[39m tests/sector_front_edge_relation.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/divergence_events_wave_16.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 46[2mms[22m[39m
+ [32m✓[39m tests/ui/consequence_receipts.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/ui/map_click_routing_contract.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+ [32m✓[39m tests/sector_offensive_launch_gates.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/ui/pre_advance_command_review.test.ts [2m([22m[2m18 tests[22m[2m)[22m[90m 77[2mms[22m[39m
+ [32m✓[39m tests/sim/events/event_notification_content_backfill.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 92[2mms[22m[39m
+ [32m✓[39m tests/migration_nested_ownership.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 23[2mms[22m[39m
+ [32m✓[39m tests/ui/codex_tier_dependency_graph.test.ts [2m([22m[2m25 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/ui/officer_resentment_receipts.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/operational_tactical_group_audit.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 19[2mms[22m[39m
+ [32m✓[39m tests/jna_phantom_brigades.test.ts [2m([22m[2m22 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/ui/opening_corps_commander_display.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/command_authority_interpretation_review.test.ts [2m([22m[2m49 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+ [32m✓[39m tests/front_edge_ownership_completion.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/hv_integration.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/sector_coverage_truth_preservation.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/sim/combat/order_interpretation.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/essay_index_integrity.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 169[2mms[22m[39m
+ [32m✓[39m tests/negotiation_pressure.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/sarajevo_core_defense.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/ui/gamestore_load_reset.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 295[2mms[22m[39m
+ [32m✓[39m tests/war_termination.test.ts [2m([22m[2m22 tests[22m[2m)[22m[90m 47[2mms[22m[39m
+ [32m✓[39m tests/anomaly_detector_deployment_truth.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 39[2mms[22m[39m
+ [32m✓[39m tests/militia_rework.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/event_causality_chain.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 18[2mms[22m[39m
+ [32m✓[39m tests/supply_reachability_osid.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/seam_a_isolation_guard.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/identity_migration.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+ [32m✓[39m tests/dev_ui_phase18.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+ [32m✓[39m tests/final_sector_reserve_band_truth.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+ [32m✓[39m tests/brigade_reconstitution_corps_territory.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/treaty_brcko.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/turn_pipeline_operational_data_reuse.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/ui_shell_navigation.test.ts [2m([22m[2m21 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m tests/consequence_consumers.test.ts [2m([22m[2m22 tests[22m[2m)[22m[90m 18[2mms[22m[39m
+ [32m✓[39m tests/activate_corps.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m tests/operation_launch_order_consistency_diagnostic.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 1211[2mms[22m[39m
+ [32m✓[39m tests/multi_axis_operations.test.ts [2m([22m[2m19 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/corps_operation_helpers.test.ts [2m([22m[2m30 tests[22m[2m)[22m[90m 16[2mms[22m[39m
+ [32m✓[39m tests/recruitment_turn.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/operation_completion_truth.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/srk_siege_morale_audit.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/dayton_player_budget_enforcement.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 45[2mms[22m[39m
+ [32m✓[39m tests/operation_aar_army_hq_telemetry.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 726[2mms[22m[39m
+   [33m[2m✓[22m[39m Army HQ AAR telemetry (flag ON)[2m > [22msnapshots telemetry at TG dissolution and finalize emits it AFTER the live TG is gone [33m390[2mms[22m[39m
+ [32m✓[39m tests/tg_routing.test.ts [2m([22m[2m13 tests[22m[2m)[22m[33m 906[2mms[22m[39m
+   [33m[2m✓[22m[39m formTgsAtReadyTransition routing (flag-on)[2m > [22moffensive op (full) forms a TG with the anchor [33m309[2mms[22m[39m
+ [32m✓[39m tests/ui/typography_contract.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 219[2mms[22m[39m
+ [32m✓[39m tests/sector_topology_commit.test.ts [2m([22m[2m12 tests[22m[2m)[22m[33m 6598[2mms[22m[39m
+   [33m[2m✓[22m[39m commitSectorTopologySolve — real-save round-trip and deterministic rerun[2m > [22mproduces a live state byte-identical to the imperative oracle [33m2612[2mms[22m[39m
+   [33m[2m✓[22m[39m commitSectorTopologySolve — real-save round-trip and deterministic rerun[2m > [22mis deterministic: two independent capture+solve+commit cycles on identical clones produce identical journals and identical resulting state [33m2869[2mms[22m[39m
+   [33m[2m✓[22m[39m commitSectorTopologySolve — real-save round-trip and deterministic rerun[2m > [22msupports two capture+solve+commit passes against the SAME live state in sequence (regression: a prior version hardcoded the detached unresolved_sector_brigades to undefined AND entrenchment_turns to 0 instead of threading them from the capture, which produced a spurious stale-value error on any second pass within one turn, or on a first pass against any formation with nonzero entrenchment — exactly what final_sector_truth_reconciliation.ts's multi-pass reconciliation session does in production, and exactly what a real 188-week run hit) [33m1107[2mms[22m[39m
+ [32m✓[39m tests/displacement.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/codex_ghost_entries_wave_3_builder.test.ts [2m([22m[2m31 tests[22m[2m)[22m[90m 19[2mms[22m[39m
+ [32m✓[39m tests/emergency_retreat_reachability.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/corps_command.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 19[2mms[22m[39m
+ [32m✓[39m tests/catastrophic_stall.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 18[2mms[22m[39m
+ [32m✓[39m tests/player_knowledge_integrity.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 49[2mms[22m[39m
+ [32m✓[39m tests/ui/chronicle_chapters.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/state.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 39[2mms[22m[39m
+ [32m✓[39m tests/ui/warroom_ticker_event_receipts.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/frontline_density_cold_front_truth.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 157[2mms[22m[39m
+ [32m✓[39m tests/event_effects.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 28[2mms[22m[39m
+ [32m✓[39m tests/scenario_historical_painted_anchors.test.ts [2m([22m[2m49 tests[22m[2m)[22m[90m 29[2mms[22m[39m
+ [32m✓[39m tests/ui/app_boot_main_menu.test.ts [2m([22m[2m21 tests[22m[2m)[22m[90m 39[2mms[22m[39m
+ [32m✓[39m tests/ui/army_hq_readiness_threat_copy.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 27[2mms[22m[39m
+ [32m✓[39m tests/hrhb_events_jul_sep_1992.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/brigade_home_return.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/rupture_silence_when_defended.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/sim/political/phase5a_os_tactical_acceptance.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/ui/map_transition_timing.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 28[2mms[22m[39m
+ [32m✓[39m tests/war_dispatches.test.ts [2m([22m[2m32 tests[22m[2m)[22m[90m 40[2mms[22m[39m
+ [32m✓[39m tests/sector_contiguity_split.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/victory_and_pyrrhic_contract.test.ts [2m([22m[2m20 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/dayton_d1_area_brcko.test.ts [2m([22m[2m18 tests[22m[2m)[22m[90m 63[2mms[22m[39m
+ [32m✓[39m tests/structural_fingerprint.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 72[2mms[22m[39m
+ [32m✓[39m tests/desktop_persistence_contract.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 34[2mms[22m[39m
+ [32m✓[39m tests/war_timeline.test.ts [2m([22m[2m38 tests[22m[2m)[22m[90m 31[2mms[22m[39m
+ [32m✓[39m tests/build_calibration_map_html.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 638[2mms[22m[39m
+ [32m✓[39m tests/ui/field_operation_focus_controller.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 23[2mms[22m[39m
+ [32m✓[39m tests/sector_offensive_planning_objective_reconciliation.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/v093_a11y_lane_d_contrast_reduced_motion.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m tests/fall_1995_hv_depth_priority.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/generate_formations.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 42[2mms[22m[39m
+ [32m✓[39m tests/operation_axis_unreachable_diagnostic.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/mobilization_bot_stance.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/ui_opord_player_safe_labels.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+ [32m✓[39m tests/decision_consequence_telemetry.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/sarajevo_exception.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/operation_opportunity_state_validation.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/troop_balance_lifecycle.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/gorazde_oob_known_divergence.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 42[2mms[22m[39m
+ [32m✓[39m tests/desktop_release_ci_guardrails.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 3798[2mms[22m[39m
+   [33m[2m✓[22m[39m desktop path detector selects every source root imported by the packaged sim bundle [33m3723[2mms[22m[39m
+ [32m✓[39m tests/ui/diplomacy_view.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 16[2mms[22m[39m
+ [32m✓[39m tests/desktop_campaign_start_contract.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 7520[2mms[22m[39m
+   [33m[2m✓[22m[39m initial_save is already in canonical loaded-save form at campaign birth [33m3416[2mms[22m[39m
+   [33m[2m✓[22m[39m startNewCampaign returns canonicalized state before the first manual save [33m607[2mms[22m[39m
+   [33m[2m✓[22m[39m startNewCampaign disables headless auto-control for the selected player faction [33m1136[2mms[22m[39m
+   [33m[2m✓[22m[39m startNewCampaign does not expose startup control provenance as turn-zero territory history [33m366[2mms[22m[39m
+   [33m[2m✓[22m[39m startNewCampaign records historical mode explicitly [33m363[2mms[22m[39m
+   [33m[2m✓[22m[39m startNewCampaign queues the selected faction foundational decision at campaign birth [33m1622[2mms[22m[39m
+ [32m✓[39m tests/oob_t0_spawn_completeness.test.ts [2m([22m[2m1 test[22m[2m)[22m[90m 36[2mms[22m[39m
+ [32m✓[39m tests/replay_player.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/concurrent_operations.test.ts [2m([22m[2m23 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/css_z_index_canonical.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 133[2mms[22m[39m
+ [32m✓[39m tests/integration_deployment_health.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 87845[2mms[22m[39m
+ [32m✓[39m tests/tg_schema_freeze.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 47[2mms[22m[39m
+ [32m✓[39m tests/morale_combat.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/attack_order_staging.test.ts [2m([22m[2m18 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/tg_migration_recon.test.ts [2m([22m[2m18 tests[22m[2m)[22m[33m 375[2mms[22m[39m
+ [32m✓[39m tests/supply_reserves.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/humanitarian_convoy_lifecycle.test.ts [2m([22m[2m18 tests[22m[2m)[22m[90m 28[2mms[22m[39m
+ [32m✓[39m tests/command_briefing.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/brigade_pressure.test.ts [2m([22m[2m20 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m tests/ai_commander_event_decision.test.ts [2m([22m[2m21 tests[22m[2m)[22m[90m 19[2mms[22m[39m
+ [32m✓[39m tests/validate_game_state_shape.test.ts [2m([22m[2m23 tests[22m[2m)[22m[90m 23[2mms[22m[39m
+ [32m✓[39m tests/krivaja_brigade_lifecycle_diagnostic.test.ts [2m([22m[2m4 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m[90m 108[2mms[22m[39m
+ [32m✓[39m tests/multi_corps_operation_visibility.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/force_quality_overlay_builder.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/tg_invariants.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/tutorial_content_v1.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/osid_damage_overlay_builder.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/consequence_pressure_c2_patron_distance.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 40[2mms[22m[39m
+ [32m✓[39m tests/consequence_substrate_ownership.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/sector_truth_audit.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 41[2mms[22m[39m
+ [32m✓[39m tests/ui/decision_surface_registry.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 50[2mms[22m[39m
+ [32m✓[39m tests/supply_reserves_phase_b.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/ui/opportunity_ledger_pulse.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/army_reserve_legibility.test.ts [2m([22m[2m22 tests[22m[2m)[22m[90m 26[2mms[22m[39m
+ [32m✓[39m tests/krivaja_stupcanica_milii_double_roster_audit.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 4[2mms[22m[39m
+ [32m✓[39m tests/competences.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/supply_state_derivation_cache.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/officer_war_crimes_record_guard.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/bot_priority_shift_wiring.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/v092_tutorial_anchor_coverage.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 8671[2mms[22m[39m
+   [33m[2m✓[22m[39m LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-C — anchor coverage regression[2m > [22mT2 — every step target_ui_element has at least one emitter in src/ [33m4025[2mms[22m[39m
+   [33m[2m✓[22m[39m LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-C — anchor coverage regression[2m > [22mT7 — manifest determinism: re-running discovery yields a byte-identical anchor manifest [33m4195[2mms[22m[39m
+ [32m✓[39m tests/officer_quality.test.ts [2m([22m[2m21 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/attack_resource_aftermath.test.ts [2m([22m[2m18 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/krivaja_roster_phase_1.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/tg_identity_commander.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 286[2mms[22m[39m
+ [32m✓[39m tests/dev_ui_phase17.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/save_load_real_roundtrip.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 11206[2mms[22m[39m
+   [33m[2m✓[22m[39m real-save round-trip proof[2m > [22mserialize(deserialize(file)) round-trip is idempotent [33m1630[2mms[22m[39m
+   [33m[2m✓[22m[39m real-save round-trip proof[2m > [22mre-serialized state preserves all top-level keys [33m977[2mms[22m[39m
+   [33m[2m✓[22m[39m real-save round-trip proof[2m > [22mre-serialized state preserves faction count and IDs [33m964[2mms[22m[39m
+   [33m[2m✓[22m[39m real-save round-trip proof[2m > [22mre-serialized state preserves formation count [33m1022[2mms[22m[39m
+   [33m[2m✓[22m[39m real-save round-trip proof[2m > [22mre-serialized state preserves political_controllers count [33m1025[2mms[22m[39m
+   [33m[2m✓[22m[39m real-save round-trip proof[2m > [22mre-serialized state preserves autonomy fields when present [33m986[2mms[22m[39m
+   [33m[2m✓[22m[39m real-save round-trip proof[2m > [22mre-serialized state preserves corps command entries [33m1026[2mms[22m[39m
+   [33m[2m✓[22m[39m real-save round-trip proof[2m > [22mre-serialized state preserves war_exhaustion values [33m994[2mms[22m[39m
+   [33m[2m✓[22m[39m real-save round-trip proof[2m > [22mserializeGameState output is deterministic on the same input [33m890[2mms[22m[39m
+   [33m[2m✓[22m[39m save-load hash preservation[2m > [22mdeserialize-then-reserialize preserves content hash [33m1688[2mms[22m[39m
+ [32m✓[39m tests/sim/political/phase6_per_plan_floors.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/v091_endgame_milestone_closure.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 26[2mms[22m[39m
+ [32m✓[39m tests/morale_victory_feedback.test.ts [2m([22m[2m23 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/emergent_brigade_formation.test.ts [2m([22m[2m20 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/a2_army_co_substrate.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 23[2mms[22m[39m
+ [32m✓[39m tests/integration_run_diagnostics.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 86148[2mms[22m[39m
+ [32m✓[39m tests/ai_commander_prompt.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/front_posture_commitment.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/a1_army_hq_campaign_plan_wired.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 16[2mms[22m[39m
+ [32m✓[39m tests/treaty_apply_territorial.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/ui/codex_essay_localization.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 93[2mms[22m[39m
+ [32m✓[39m tests/army_co_emergent_lifecycle.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/triggered_op_temporal_contract.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 4[2mms[22m[39m
+ [32m✓[39m tests/performance_wall_clock_report.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 97[2mms[22m[39m
+ [32m✓[39m tests/alliance_mobilization.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/early_war_control_flip.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 1001[2mms[22m[39m
+   [33m[2m✓[22m[39m war runTurn default path omits phase_i control-flip report [33m611[2mms[22m[39m
+   [33m[2m✓[22m[39m war runTurn is not gated by war_start_turn in two-phase model [33m379[2mms[22m[39m
+ [32m✓[39m tests/contain_predicate_diagnostic.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/v093_a11y_lane_b_map_landmarks.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 53[2mms[22m[39m
+ [32m✓[39m tests/combat_summary.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mF:/A-War-Without-Victory[39m
+
+ [31m❯[39m tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts [2m([22m[2m1 test[22m[2m | [22m[31m1 failed[39m[2m)[22m[90m 11[2mms[22m[39m
+[31m   [31m×[31m is an intentional child-process failure control[90m 10[2mms[22m[31m[39m
+[31m     → expected 'failure-control' to be 'unexpected-success' // Object.is equality[39m
+ [32m✓[39m tests/pipeline_step_execution_proof.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 1 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts[2m > [22mis an intentional child-process failure control
+[31m[1mAssertionError[22m: expected 'failure-control' to be 'unexpected-success' // Object.is equality[39m
+
+Expected: [32m"unexpected-success"[39m
+Received: [31m"failure-control"[39m
+
+[36m [2m❯[22m tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts:[2m4:29[22m[39m
+    [90m  2| [39m
+    [90m  3| [39m[34mit[39m([32m'is an intentional child-process failure control'[39m[33m,[39m () [33m=>[39m {
+    [90m  4| [39m  [34mexpect[39m([32m'failure-control'[39m)[33m.[39m[34mtoBe[39m([32m'unexpected-success'[39m)[33m;[39m
+    [90m   | [39m                            [31m^[39m
+    [90m  5| [39m})[33m;[39m
+    [90m  6| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m   Start at [22m 13:10:32
+[2m   Duration [22m 444ms[2m (transform 45ms, setup 20ms, collect 22ms, tests 11ms, environment 0ms, prepare 111ms)[22m
+
+ [32m✓[39m tests/run_vitest_balanced.test.ts [2m([22m[2m13 tests[22m[2m)[22m[33m 1709[2mms[22m[39m
+   [33m[2m✓[22m[39m balanced Vitest execution plan[2m > [22mpropagates a deliberately failing real Vitest child [33m1689[2mms[22m[39m
+ [32m✓[39m tests/event_family_graph.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 55[2mms[22m[39m
+ [32m✓[39m tests/territorial_anomaly_sector_coverage_truth.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 31[2mms[22m[39m
+ [32m✓[39m tests/event_effects_nonfinite_guard.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/operational_sitrep_views.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/ongoing_mobilization.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/consequence_breadth_v2.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 29[2mms[22m[39m
+ [32m✓[39m tests/ui/chronicle_decision_ledger.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 18[2mms[22m[39m
+ [32m✓[39m tests/ui/presidential_priority_contract.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 58[2mms[22m[39m
+ [32m✓[39m tests/garrison_pin_must_hold_front_edge.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/early_war_displacement_hooks.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 665[2mms[22m[39m
+   [33m[2m✓[22m[39m war runTurn default path omits phase_i displacement hooks report [33m658[2mms[22m[39m
+ [32m✓[39m tests/brigade_composition.test.ts [2m([22m[2m23 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/z_index_canonical.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 39[2mms[22m[39m
+ [32m✓[39m tests/dev_ui_exports_deterministic.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/peace_dysfunction.test.ts [2m([22m[2m20 tests[22m[2m)[22m[90m 48[2mms[22m[39m
+ [32m✓[39m tests/tg_effective_personnel.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/free_war_army_hq_override_idle_gate.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/h_phase_intelligence_warfare.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/ui/presidential_decision_room_request_force.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+ [32m✓[39m tests/formation_life_packet_inventory.test.ts [2m([22m[2m1 test[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/cohesion_floor_vs_dissolution.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/launch_operator_artifacts.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 287[2mms[22m[39m
+ [32m✓[39m tests/sector_topology_mutation_journal.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 2335[2mms[22m[39m
+   [33m[2m✓[22m[39m sector topology mutation journal — end-to-end characterization against a real save[2m > [22mis behavior-neutral against the un-recorded legacy path and pins the exact live-write order [33m2325[2mms[22m[39m
+ [32m✓[39m tests/desktop_packaging_contract.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/strategic_dimensions.test.ts [2m([22m[2m19 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/ui/forced_op_receipts.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/ui/map_context_lifecycle.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 16[2mms[22m[39m
+ [32m✓[39m tests/economy_production.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/author_op_staging.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/brigade_aor.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/endgame_188w_diagnostics.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 696[2mms[22m[39m
+   [33m[2m✓[22m[39m 188w endgame diagnostics[2m > [22mbuilds deterministic Sarajevo casualty summaries from turn battle records [33m304[2mms[22m[39m
+ [32m✓[39m tests/hrhb_patron_directive_scope.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/op_halt_injection.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/force_quality_checkpoint_windows_diagnostic.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 388[2mms[22m[39m
+   [33m[2m✓[22m[39m force_quality_checkpoint_windows diagnostic[2m > [22memits deterministic checkpoint and window metrics from run artifacts [33m387[2mms[22m[39m
+ [32m✓[39m tests/sector_topology_solver.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 3217[2mms[22m[39m
+   [33m[2m✓[22m[39m solveCorpsFrontSectorsPure — equivalence against the imperative oracle[2m > [22mproduces byte-identical sectors and an equivalent mutation journal against a real save [33m2336[2mms[22m[39m
+   [33m[2m✓[22m[39m solveCorpsFrontSectorsPure — equivalence against the imperative oracle[2m > [22mnever mutates its input — the same SectorTopologySolveInput solved twice yields identical output [33m878[2mms[22m[39m
+ [32m✓[39m tests/force_quality_trajectory_diagnostic.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 9351[2mms[22m[39m
+   [33m[2m✓[22m[39m force_quality_trajectory diagnostic[2m > [22memits valid output schema with required fields [33m2088[2mms[22m[39m
+   [33m[2m✓[22m[39m force_quality_trajectory diagnostic[2m > [22mis deterministic — two invocations produce byte-identical output [33m2317[2mms[22m[39m
+   [33m[2m✓[22m[39m force_quality_trajectory diagnostic[2m > [22mis read-only — does not mutate the run directory [33m1525[2mms[22m[39m
+   [33m[2m✓[22m[39m force_quality_trajectory diagnostic[2m > [22memits officer_quality snapshots and rate-of-change shape [33m1150[2mms[22m[39m
+   [33m[2m✓[22m[39m force_quality_trajectory diagnostic[2m > [22mofficer_quality snapshots are deterministic across invocations [33m2269[2mms[22m[39m
+ [32m✓[39m tests/combat_front_emergence.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/rs_104week_decision_cadence.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 205[2mms[22m[39m
+ [32m✓[39m tests/brigade_deploy_orders.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/desktop_calibration_compare.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 37982[2mms[22m[39m
+   [33m[2m✓[22m[39m desktop calibration comparison provenance[2m > [22mbinds both branches to one current startup snapshot and labels player-choice divergence [33m4042[2mms[22m[39m
+   [33m[2m✓[22m[39m desktop calibration comparison provenance[2m > [22mputs non-player factions in historical mode for a historical-default comparison [33m2596[2mms[22m[39m
+   [33m[2m✓[22m[39m desktop calibration comparison provenance[2m > [22mdistinguishes standing same-turn authorization from between-turn request approval [33m2570[2mms[22m[39m
+   [33m[2m✓[22m[39m desktop calibration comparison provenance[2m > [22memits byte-identical JSON for identical zero-turn inputs [33m5169[2mms[22m[39m
+   [33m[2m✓[22m[39m desktop calibration comparison provenance[2m > [22mrequires the Electron log and autosave inputs as a pair [33m1694[2mms[22m[39m
+   [33m[2m✓[22m[39m desktop calibration comparison provenance[2m > [22mbinds a validated Electron replay and attributes actions outside the controlled policy [33m10354[2mms[22m[39m
+   [33m[2m✓[22m[39m desktop calibration comparison provenance[2m > [22mrejects faction provenance mismatches [33m2003[2mms[22m[39m
+   [33m[2m✓[22m[39m desktop calibration comparison provenance[2m > [22mrejects turn provenance mismatches [33m2019[2mms[22m[39m
+   [33m[2m✓[22m[39m desktop calibration comparison provenance[2m > [22mrejects scenario provenance mismatches [33m1990[2mms[22m[39m
+ [32m✓[39m tests/must_hold_variable_multiplier.test.ts [2m([22m[2m22 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/officer_learning_rate_shape_c.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/hvo_central_bosnia_sectors.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 52[2mms[22m[39m
+ [32m✓[39m tests/audio_ambient_generation.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 99018[2mms[22m[39m
+   [33m[2m✓[22m[39m deterministic ambient-bed generator[2m > [22mrenders deterministic canonical PCM for ambient_archive and rejects digest drift [33m33850[2mms[22m[39m
+   [33m[2m✓[22m[39m deterministic ambient-bed generator[2m > [22mrenders deterministic canonical PCM for ambient_field and rejects digest drift [33m34603[2mms[22m[39m
+   [33m[2m✓[22m[39m deterministic ambient-bed generator[2m > [22mrenders deterministic canonical PCM for ambient_warroom and rejects digest drift [33m30541[2mms[22m[39m
+ [32m✓[39m tests/ui_map_fog_and_operation_contracts.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 39[2mms[22m[39m
+ [32m✓[39m tests/officer_config_consumers.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 637[2mms[22m[39m
+   [33m[2m✓[22m[39m officer_config consumers (issue #25 sub-task D)[2m > [22mevery active officer_config field has at least one consumer in src/ [33m444[2mms[22m[39m
+ [32m✓[39m tests/docs_desktop_v09_truth.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 29[2mms[22m[39m
+ [32m✓[39m tests/combat_state_schema.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+ [32m✓[39m tests/distance_weighted_defense.test.ts [2m([22m[2m21 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/presidential_cadence_provenance.test.ts [2m([22m[2m18 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/integration_run_summary.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 83198[2mms[22m[39m
+ [32m✓[39m tests/historical_checkpoints_contract.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 53[2mms[22m[39m
+ [32m✓[39m tests/early_war_militia_emergence.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 1031[2mms[22m[39m
+   [33m[2m✓[22m[39m RS declared increases militia growth; second runTurn shows higher RS strength in MUN with SDS [33m635[2mms[22m[39m
+   [33m[2m✓[22m[39m war runTurn default path omits phase_i militia emergence report [33m390[2mms[22m[39m
+ [32m✓[39m tests/divergence_events_wave_18.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 38[2mms[22m[39m
+ [32m✓[39m tests/front_assignment.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/supply_bridge_finding_tarjan.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/opportunity_campaign_proof_diagnostic.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 318[2mms[22m[39m
+   [33m[2m✓[22m[39m opportunity campaign proof diagnostic script[2m > [22mfuses proposals, ineligibility diagnostics, AAR delivery, and axis reachability [33m310[2mms[22m[39m
+ [32m✓[39m tests/drift_recall_precedence.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/displacement_pipeline_displacement_triggers.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/sim/autonomy/autonomy_phase_e_enrichment.test.ts [2m([22m[2m20 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/playtest_telemetry.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 29[2mms[22m[39m
+ [32m✓[39m tests/sim/events/two_level_surfacing.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+[E5][INFO] Coerced 744 null start controllers (ethnic_1991 mode; defaults=744).
+[E5] Political control initialized (ethnic_1991): 744 canonical graph nodes (SID-keyed), RBiH=744, RS=0, HRHB=0. Promoted to OSID when operational data present.
+[E5][INFO] Coerced 744 null start controllers (ethnic_1991 mode; defaults=744).
+[E5] Political control initialized (ethnic_1991): 744 canonical graph nodes (SID-keyed), RBiH=744, RS=0, HRHB=0. Promoted to OSID when operational data present.
+[E5] Political control initialized (hybrid_1992, threshold=0.7): 744 canonical graph nodes (SID-keyed), RBiH=293, RS=290, HRHB=161. Promoted to OSID when operational data present.
+[E5] Political control initialized (hybrid_1992, threshold=0.7): 744 canonical graph nodes (SID-keyed), RBiH=293, RS=290, HRHB=161. Promoted to OSID when operational data present.
+ [32m✓[39m tests/init_control_mode_ethnic_hybrid.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 209[2mms[22m[39m
+ [32m✓[39m tests/brigade_name_localization.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 30[2mms[22m[39m
+ [32m✓[39m tests/formations_deterministic.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 31[2mms[22m[39m
+ [32m✓[39m tests/canon_officer_corps_refs.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/ci_workflow_test_paths_exist.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 49[2mms[22m[39m
+ [32m✓[39m tests/logistics_priority_wiring_red.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/ui_front_edge_display_ownership_real_save.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 757[2mms[22m[39m
+   [33m[2m✓[22m[39m real-save front-edge display ownership[2m > [22mgives every visible hover edge a sector id in the live save [33m412[2mms[22m[39m
+ [32m✓[39m tests/scenario_control_change_attribution_contract.test.ts [2m([22m[2m1 test[22m[2m)[22m[33m 4334[2mms[22m[39m
+   [33m[2m✓[22m[39m scenario control change attribution contract[2m > [22memits control-change attribution and no longer writes control_events.jsonl [33m4332[2mms[22m[39m
+ [32m✓[39m tests/operation_delivery_audit_predicate_split.test.ts [2m([22m[2m5 tests[22m[2m | [22m[33m4 skipped[39m[2m)[22m[90m 124[2mms[22m[39m
+ [32m✓[39m tests/supply_bridge_finding_property.test.ts [2m([22m[2m2 tests[22m[2m)[22m[33m 204239[2mms[22m[39m
+   [33m[2m✓[22m[39m Tarjan vs legacy parity — G1 property test (10k trials)[2m > [22m10000 randomized BiH-shape trials: Tarjan bridge-set === legacy bridge-set [33m204038[2mms[22m[39m
+ [32m✓[39m tests/desktop_icon_contract.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 27[2mms[22m[39m
+ [32m✓[39m tests/unstaffed_sibling_sector_absorption.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/srebrenica_diagnostic_v2.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 4[2mms[22m[39m
+ [32m✓[39m tests/ui/objective_target_options.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/bilateral_ceasefire_redeployment.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/browser_campaign_start_fallback.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 286[2mms[22m[39m
+ [32m✓[39m tests/officer_quality_no_calendar_railroad.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/presidential_decision_room_counter_offer.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 27[2mms[22m[39m
+ [32m✓[39m tests/codex_ghost_entries_wave_3.test.ts [2m([22m[2m39 tests[22m[2m)[22m[90m 23[2mms[22m[39m
+ [32m✓[39m tests/ui_map_panel_rail.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/ui/formation_stranded_visibility.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/force_quality_trace_persistence.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/operation_lifecycle_assertion.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/co_replacement_staging.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/ui/r7_english_readability_phase1.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/op_directive_staging.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/free_war_decision_mode.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/operation_progress_replacement_truth.test.ts [2m([22m[2m1 test[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/ui_map_sector_lookup.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/operational_osid_universe_invariant.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 220[2mms[22m[39m
+ [32m✓[39m tests/ui/filed_record_truth.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/ui/map_data_loader_cache.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 29[2mms[22m[39m
+ [32m✓[39m tests/warroom_new_campaign_flow_truth.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/commander/sector_reassignment_emit_truth.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/combat_supply_pressure.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/desktop_start_campaign_authorization.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 19471[2mms[22m[39m
+   [33m[2m✓[22m[39m desktop startNewCampaign historical operation authorization[2m > [22mlaunches selected player-faction historical operations under standing authorization [33m510[2mms[22m[39m
+   [33m[2m✓[22m[39m desktop startNewCampaign historical operation authorization[2m > [22mcarries resolved historical operation receipts through an advance [33m4756[2mms[22m[39m
+   [33m[2m✓[22m[39m desktop startNewCampaign historical operation authorization[2m > [22mlaunches an accepted selected player-faction historical operation on advance [33m3689[2mms[22m[39m
+   [33m[2m✓[22m[39m desktop startNewCampaign historical operation authorization[2m > [22mgives accepted and preserved staged opening operations the same first-advance planning credit [33m7062[2mms[22m[39m
+   [33m[2m✓[22m[39m desktop startNewCampaign historical operation authorization[2m > [22massists only participants of accepted selected player-faction historical operations [33m3449[2mms[22m[39m
+ [32m✓[39m tests/observer_flag_writer.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 74[2mms[22m[39m
+ [32m✓[39m tests/ui/faction_report_mobile_subdivision.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 58[2mms[22m[39m
+ [32m✓[39m tests/tg_determinism.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 48[2mms[22m[39m
+ [32m✓[39m tests/desktop_pmtiles_protocol_route.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 27[2mms[22m[39m
+ [32m✓[39m tests/ui/author_op_eligibility.test.ts [2m([22m[2m17 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m tests/emergence_pipeline_integration.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 1679[2mms[22m[39m
+   [33m[2m✓[22m[39m Pipeline: current emergence steps run in the canonical order [33m541[2mms[22m[39m
+   [33m[2m✓[22m[39m Pipeline: War phase substrate still runs before emergence layers [33m321[2mms[22m[39m
+   [33m[2m✓[22m[39m Pipeline: Phase E derivation is deterministic (same state + edges -> same reports) [33m525[2mms[22m[39m
+ [32m✓[39m tests/pressure_system.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/ui/event_decision_auto_launch_contract.test.ts [2m([22m[2m18 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+ [32m✓[39m tests/balkan_battlegrounds_knowledge_base_artifact_ownership.test.ts [2m([22m[2m1 test[22m[2m)[22m[90m 45[2mms[22m[39m
+ [32m✓[39m tests/dayton_headless_close_out.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 47[2mms[22m[39m
+ [32m✓[39m tests/acceptance_constraints.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/ui/paramilitary_inbox_items.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 61[2mms[22m[39m
+ [32m✓[39m tests/sensitive_history_canon_gate_audit_strict_gate.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 823[2mms[22m[39m
+   [33m[2m✓[22m[39m sensitive_history_canon_gate_audit — strict CI gate[2m > [22mthe actual --strict --violations-only CLI exits zero when only INFO remains [33m699[2mms[22m[39m
+ [32m✓[39m tests/ui/verdict_scene.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/commander/empty_sector_relief_reassignments.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/release_research_exclusion.test.ts [2m([22m[2m1 test[22m[2m)[22m[90m 61[2mms[22m[39m
+ [32m✓[39m tests/late_state_rupture_proof.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/rupture_consequences.test.ts [2m([22m[2m18 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/faction_palette_canonical.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/ui/dayton_institutional_dimensions.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/op_directive_objection.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/refugee_flow_chronicle.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 44[2mms[22m[39m
+ [32m✓[39m tests/triggered_operations_late_1995.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/displacement_pipeline_validation.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 1873[2mms[22m[39m
+   [33m[2m✓[22m[39m Phase F: settlement and municipality displacement both move when triggered [33m609[2mms[22m[39m
+   [33m[2m✓[22m[39m Phase F: displacement is monotonic across turns [33m324[2mms[22m[39m
+   [33m[2m✓[22m[39m Phase F: displacement does not directly flip control [33m336[2mms[22m[39m
+   [33m[2m✓[22m[39m Phase F: deterministic re-run identical [33m602[2mms[22m[39m
+ [32m✓[39m tests/front_sector_player_visibility.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 16[2mms[22m[39m
+ [32m✓[39m tests/graz_faction_block.test.ts [2m([22m[2m23 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/salient_withdrawal.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/emergence_aor_instantiation.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/ui/map_overlay_timing_contract.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 17[2mms[22m[39m
+ [32m✓[39m tests/serialization_attribution_contract.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+ [32m✓[39m tests/ui_decision_room_pushback_explanations.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+ [32m✓[39m tests/rbih_t40_benchmark_reanchor.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/codex_sensitive_history_source_notes.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 4024[2mms[22m[39m
+   [33m[2m✓[22m[39m every inventoried sensitive claim has an explicit status and owner [33m1478[2mms[22m[39m
+   [33m[2m✓[22m[39m production choice classification has no direct refused acts and excludes lexical references [33m1244[2mms[22m[39m
+   [33m[2m✓[22m[39m Neretva, Grabovica, and Uzdol anchors are source-owned September 1993 content [33m1256[2mms[22m[39m
+ [32m✓[39m tests/unstaffed_front_annotation.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/ui/render_churn_guards.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/reconstitution_policy_review.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 27[2mms[22m[39m
+ [32m✓[39m tests/ui/map_loading_state.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+ [32m✓[39m tests/ui/presidential_blockers.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 45[2mms[22m[39m
+ [32m✓[39m tests/final_operation_truth_reconciliation.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/displacement_pipeline_state_schema.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 20[2mms[22m[39m
+ [32m✓[39m tests/political_dimensions_snapshot.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/negotiation_capital.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/collapse_phase1_bfs_disabled_inert.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/bot_corps_corridor.test.ts [2m([22m[2m1 test[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/consequence_identity_completion.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 44[2mms[22m[39m
+ [32m✓[39m tests/ui/directive_outcome_receipts.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/author_op_injection.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/loaned_elite_rescue_reserve_cap.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/fatigue_exhaustion_coupling.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+ [32m✓[39m tests/save_migration_drift_artifact_ownership.test.ts [2m([22m[2m1 test[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/local_front_density_modifier_precedence.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+ [32m✓[39m tests/ui_chronicle_review_tools.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/emergence_front_emergence.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 1307[2mms[22m[39m
+   [33m[2m✓[22m[39m runTurn includes front-emergence and runs exactly once per turn [33m692[2mms[22m[39m
+   [33m[2m✓[22m[39m front_emergence_report: stable ordering and deterministic replay (same state + edges → same descriptor ids) [33m610[2mms[22m[39m
+ [32m✓[39m tests/emergence_validation_suite.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 1398[2mms[22m[39m
+   [33m[2m✓[22m[39m Phase E validation: Phase D invariants still hold (exhaustion monotonic) [33m524[2mms[22m[39m
+   [33m[2m✓[22m[39m Phase E validation: Phase E does not create end-state [33m302[2mms[22m[39m
+   [33m[2m✓[22m[39m Phase E validation: Phase E is deterministic across multiple turns [33m564[2mms[22m[39m
+ [32m✓[39m tests/reserve_request_identity_boundary.test.ts [2m([22m[2m1 test[22m[2m)[22m[90m 16[2mms[22m[39m
+ [32m✓[39m tests/combat_exhaustion.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/elite_loan_recall.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/codex_bijeljina_event_wiring.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/warroom_react_opening_owner.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/ui_shell_frame_contract.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/acceptance_brcko_completeness.test.ts [2m([22m[2m3 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/sector_territory_contiguity_repair.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/collapse_consumer_manifest.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 57[2mms[22m[39m
+ [32m✓[39m tests/phase_e_municipality_support.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/final_sector_truth_reconciliation_cache.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 75[2mms[22m[39m
+ [32m✓[39m tests/ui/codex_a1c_response_morphing.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 238[2mms[22m[39m
+ [32m✓[39m tests/ui/audio_bus.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/brigade_history.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/test_runner_default_contract.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/sector_build_derived_context.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/tg_inv6_zombie_hold.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/integration_event_system.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 45[2mms[22m[39m
+ [32m✓[39m tests/ui/inboxItems.notifications.test.ts [2m([22m[2m1 test[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/elite_loan_return_to_corps.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/presidential_command_convergence_diagnostic.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 122[2mms[22m[39m
+ [32m✓[39m tests/adapter_field_completeness.test.ts [2m([22m[2m18 tests[22m[2m | [22m[33m2 skipped[39m[2m)[22m[90m 29[2mms[22m[39m
+ [32m✓[39m tests/test_discovery_contract.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 2139[2mms[22m[39m
+   [33m[2m✓[22m[39m test discovery contracts[2m > [22mroutes desktop contract guardrails through vitest instead of node:test [33m570[2mms[22m[39m
+   [33m[2m✓[22m[39m test discovery contracts[2m > [22msplits vitest files into fast and scenario slices without overlap [33m596[2mms[22m[39m
+   [33m[2m✓[22m[39m test discovery contracts[2m > [22mfully retires node:test residue from discovery [33m482[2mms[22m[39m
+   [33m[2m✓[22m[39m test discovery contracts[2m > [22mignores helper files under tests that are not test-entrypoints [33m490[2mms[22m[39m
+ [32m✓[39m tests/sensitive_history_semantics.test.ts [2m([22m[2m295 tests[22m[2m)[22m[90m 82[2mms[22m[39m
+ [32m✓[39m tests/desktop_replay_live_wire_smoke.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/stupcanica_w27_trigger_fix.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+ [32m✓[39m tests/desktop_officer_decision_history.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 23[2mms[22m[39m
+ [32m✓[39m tests/sim/perf/heap_profile.test.ts [2m([22m[2m15 tests[22m[2m)[22m[33m 3382[2mms[22m[39m
+   [33m[2m✓[22m[39m heap_profile — ON-path write behaviour (forceWriteForTest)[2m > [22mwrites a snapshot file when turn matches schedule [33m923[2mms[22m[39m
+   [33m[2m✓[22m[39m heap_profile — ON-path write behaviour (forceWriteForTest)[2m > [22mis idempotent per (turn, runId): second call is no-op [33m810[2mms[22m[39m
+   [33m[2m✓[22m[39m heap_profile — ON-path write behaviour (forceWriteForTest)[2m > [22mdifferent runIds produce different files even on the same turn [33m1636[2mms[22m[39m
+ [32m✓[39m tests/commander/primary_sector_operation_objectives.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/operational_group_convergence.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 30[2mms[22m[39m
+ [32m✓[39m tests/integration_scenario_roundtrip.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 13563[2mms[22m[39m
+   [33m[2m✓[22m[39m scenario round-trip[2m > [22m4w scenario run produces final_save.json with expected properties [33m3990[2mms[22m[39m
+   [33m[2m✓[22m[39m scenario round-trip[2m > [22mserialize -> deserialize round-trip preserves state identity [33m3314[2mms[22m[39m
+   [33m[2m✓[22m[39m scenario round-trip[2m > [22msame scenario run twice yields identical final_save hash [33m6257[2mms[22m[39m
+ [32m✓[39m tests/defensive_front_gap_count_cache.test.ts [2m([22m[2m1 test[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/ui/workstream_d_surface_contract.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/postmerge_ghost_sector_prune.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 5[2mms[22m[39m
+ [32m✓[39m tests/phase_d_causality_runtime_integration.test.ts [2m([22m[2m6 tests[22m[2m)[22m[33m 213661[2mms[22m[39m
+   [33m[2m✓[22m[39m Phase D + Phase B causality runtime integration (apr1992_52w)[2m > [22mE. causality log is byte-identical across two scenario runs (determinism invariant) [33m105584[2mms[22m[39m
+ [32m✓[39m tests/event_timeline_integrity.test.ts [2m([22m[2m23 tests[22m[2m)[22m[90m 41[2mms[22m[39m
+ [32m✓[39m tests/sector_counter_attack.test.ts [2m([22m[2m27 tests[22m[2m)[22m[90m 19[2mms[22m[39m
+ [32m✓[39m tests/brigade_stacking_sector_truth.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 142[2mms[22m[39m
+ [32m✓[39m tests/codex_essays_wave_4.test.ts [2m([22m[2m76 tests[22m[2m)[22m[90m 48[2mms[22m[39m
+ [32m✓[39m tests/officer_experience.test.ts [2m([22m[2m22 tests[22m[2m)[22m[90m 14[2mms[22m[39m
+ [32m✓[39m tests/presidential_cadence_report.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 15[2mms[22m[39m
+ [32m✓[39m tests/ui/officer_dossier.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 83[2mms[22m[39m
+ [32m✓[39m tests/brigade_posture.test.ts [2m([22m[2m35 tests[22m[2m)[22m[90m 16[2mms[22m[39m
+ [32m✓[39m tests/tg_fidelity.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 87[2mms[22m[39m
+ [32m✓[39m tests/op_directive_injection.test.ts [2m([22m[2m11 tests[22m[2m)[22m[90m 16[2mms[22m[39m
+ [32m✓[39m tests/competence_valuations.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/rs_six_strategic_goals_foundational.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 16[2mms[22m[39m
+ [32m✓[39m tests/sector_offensive.test.ts [2m([22m[2m13 tests[22m[2m)[22m[33m 416[2mms[22m[39m
+   [33m[2m✓[22m[39m retired operation halt state[2m > [22mloads an old save and advances identically when unknown retired keys are present [33m395[2mms[22m[39m
+ [32m✓[39m tests/desktop_packaging_extraresources_filter.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/consequence_effects.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 18[2mms[22m[39m
+ [32m✓[39m tests/sim/negotiation/compute_combat_effective.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/desktop_autonomy_boundary_truth.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/front_geometry_analysis.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 16[2mms[22m[39m
+ [32m✓[39m tests/tg_telemetry.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/divergence_events_consequences.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 39[2mms[22m[39m
+ [32m✓[39m tests/territorial_valuation.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/dev_ui_phase16.test.ts [2m([22m[2m18 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+ [32m✓[39m tests/real_save_sector_truth_contracts.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 2742[2mms[22m[39m
+   [33m[2m✓[22m[39m real save sector truth contracts[2m > [22mdoes not serialize rebuilt sectors above the hard sector edge cap [33m861[2mms[22m[39m
+   [33m[2m✓[22m[39m real save sector truth contracts[2m > [22mserializes every sector as exactly one contiguous front line [33m371[2mms[22m[39m
+   [33m[2m✓[22m[39m real save sector truth contracts[2m > [22mdoes not leave zero-owner sibling fragments with overlapping same-corps territory in the final save [33m366[2mms[22m[39m
+   [33m[2m✓[22m[39m real save sector truth contracts[2m > [22mkeeps each live front edge side owned by at most one sector per faction and corps after rebuild [33m576[2mms[22m[39m
+   [33m[2m✓[22m[39m real save sector truth contracts[2m > [22mkeeps every live war-edge side owned by a same-faction sector both in the save and after rebuild [33m565[2mms[22m[39m
+ [32m✓[39m tests/proto_brigade_spawn.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/anomaly_detector_sector_subtype.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 153[2mms[22m[39m
+ [32m✓[39m tests/presidential_initiatives.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 631[2mms[22m[39m
+   [33m[2m✓[22m[39m positive-hold Desk projection[2m > [22mkeeps the real turn pipeline report and state free of zero-row registry output [33m616[2mms[22m[39m
+ [32m✓[39m tests/ui/dilemma_spine.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/ui_player_supply_visibility.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/fall_1995_multi_axis_and_cascade.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/enclave_resilience_phase_c.test.ts [2m([22m[2m19 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/seam_b_isolation_guard.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/recruitment_existing_formation_identity.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/sim/autonomy/autonomy_phase_e_block.test.ts [2m([22m[2m14 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/ui/render_proof_real_fixtures.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 40[2mms[22m[39m
+ [32m✓[39m tests/elite_deploy_staging.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 24[2mms[22m[39m
+ [32m✓[39m tests/sector_power_threat_recompute.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 74[2mms[22m[39m
+ [32m✓[39m tests/war_weariness_chronicle.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 18[2mms[22m[39m
+ [32m✓[39m tests/event_phase_ef_foreclosure_causality.test.ts [2m([22m[2m4 tests[22m[2m)[22m[90m 173[2mms[22m[39m
+ [32m✓[39m tests/condition_evaluator.test.ts [2m([22m[2m26 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/mobilization_combat_suppression.test.ts [2m([22m[2m12 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/audio_asset_provenance.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 392[2mms[22m[39m
+   [33m[2m✓[22m[39m audio asset provenance inventory[2m > [22minventories all registered repository cues and routes current gaps explicitly [33m321[2mms[22m[39m
+ [32m✓[39m tests/ui/v47_readability_remediation.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 26[2mms[22m[39m
+ [32m✓[39m tests/oob_early_war_entry.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/sector_false_owner_cleanup.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/baseline_regression_collects_all_failures.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 18[2mms[22m[39m
+ [32m✓[39m tests/event_conditions.test.ts [2m([22m[2m16 tests[22m[2m)[22m[90m 25[2mms[22m[39m
+ [32m✓[39m tests/ui/proactive_force_launch.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/destroyed_brigade_tracking.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 10[2mms[22m[39m
+ [32m✓[39m tests/ui/warroom_priority_docket.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 29[2mms[22m[39m
+ [32m✓[39m tests/corps_dialogue.test.ts [2m([22m[2m25 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/ai_commander_validation.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/teocak_enclave_singleton.test.ts [2m([22m[2m15 tests[22m[2m)[22m[90m 12[2mms[22m[39m
+ [32m✓[39m tests/scenario_continue_from_save_equivalence.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 70606[2mms[22m[39m
+   [33m[2m✓[22m[39m scenario continue-from-save equivalence[2m > [22mmatches uninterrupted 52-week final state when resuming from a canonical weekly save with seed split-proof-alpha [33m33939[2mms[22m[39m
+   [33m[2m✓[22m[39m scenario continue-from-save equivalence[2m > [22mmatches uninterrupted 52-week final state when resuming from a canonical weekly save with seed split-proof-bravo [33m32131[2mms[22m[39m
+   [33m[2m✓[22m[39m scenario continue-from-save equivalence[2m > [22mrejects an explicit resume week that disagrees with the save turn [33m4535[2mms[22m[39m
+ [32m✓[39m tests/save_migration_round_trip_contract.test.ts [2m([22m[2m42 tests[22m[2m)[22m[33m 1172[2mms[22m[39m
+   [33m[2m✓[22m[39m save migration round-trip fixture contract[2m > [22mround-trips absent and present TG exhaustion/AHQ recovery markers without a schema bump [33m491[2mms[22m[39m
+ [32m✓[39m tests/supply_airdrop.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/game_state_field_classification.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 60932[2mms[22m[39m
+   [33m[2m✓[22m[39m GameState field classification diagnostic[2m > [22memits every GameState and MilitaryState field with deterministic lifecycle evidence [33m2956[2mms[22m[39m
+   [33m[2m✓[22m[39m GameState field classification diagnostic[2m > [22mdoes not infer persistence from optionality or misleading legacy prose [33m1090[2mms[22m[39m
+   [33m[2m✓[22m[39m GameState field classification diagnostic[2m > [22mkeeps the live GameState and MilitaryState inventory complete and repo-relative [33m56883[2mms[22m[39m
+ [32m✓[39m tests/ui_decision_room_supply_visibility.test.ts [2m([22m[2m6 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+ [32m✓[39m tests/ui/distance_from_history.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 6[2mms[22m[39m
+ [32m✓[39m tests/tg_donation_readiness_fallback.test.ts [2m([22m[2m13 tests[22m[2m)[22m[90m 11[2mms[22m[39m
+ [32m✓[39m tests/co_replacement_injection.test.ts [2m([22m[2m5 tests[22m[2m)[22m[90m 8[2mms[22m[39m
+ [32m✓[39m tests/consequence_event_11_weapons_embargo_partial_lift.test.ts [2m([22m[2m7 tests[22m[2m)[22m[90m 21[2mms[22m[39m
+ [32m✓[39m tests/save_load_real_roundtrip_adapter.test.ts [2m([22m[2m5 tests[22m[2m)[22m[33m 4713[2mms[22m[39m
+   [33m[2m✓[22m[39m adapter-after-deserialize contract[2m > [22mparseGameState produces consistent field counts on raw vs round-tripped state [33m1291[2mms[22m[39m
+   [33m[2m✓[22m[39m adapter-after-deserialize contract[2m > [22madapter formation IDs match between raw and round-tripped state [33m1151[2mms[22m[39m
+   [33m[2m✓[22m[39m adapter-after-deserialize contract[2m > [22mformation field values spot-check: sample brigade and corps survive roundtrip identically [33m1128[2mms[22m[39m
+   [33m[2m✓[22m[39m adapter-after-deserialize contract[2m > [22mcorps command field values spot-check: sample corps stance and exhaustion survive roundtrip [33m1142[2mms[22m[39m
+ [32m✓[39m tests/displacement_reporting_fix.test.ts [2m([22m[2m10 tests[22m[2m)[22m[90m 9[2mms[22m[39m
+ [32m✓[39m tests/cold_front_sector_suppression.test.ts [2m([22m[2m9 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+ [32m✓[39m tests/command_authority_political_income.test.ts [2m([22m[2m8 tests[22m[2m)[22m[90m 13[2mms[22m[39m
+ [32m✓[39m tests/front_pressure_supply_modulation.test.ts [2m([22m[2m2 tests[22m[2m)[22m[90m 7[2mms[22m[39m
+VITEST_EXIT=1

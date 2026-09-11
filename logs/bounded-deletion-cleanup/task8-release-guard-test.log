@@ -1,0 +1,23 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ❯ tests/desktop_release_ci_guardrails.test.ts (8 tests | 1 failed) 6310ms
+   × desktop path detector selects every source root imported by the packaged sim bundle 6301ms
+     → Command failed: bash /f/A-War-Without-Victory/.github/scripts/detect-changed-paths.sh
+/bin/bash: /f/A-War-Without-Victory/.github/scripts/detect-changed-paths.sh: No such file or directory
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/desktop_release_ci_guardrails.test.ts > desktop path detector selects every source root imported by the packaged sim bundle
+Error: Command failed: bash /f/A-War-Without-Victory/.github/scripts/detect-changed-paths.sh
+/bin/bash: /f/A-War-Without-Victory/.github/scripts/detect-changed-paths.sh: No such file or directory
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 7 passed (8)
+   Start at  17:46:36
+   Duration  7.17s (transform 67ms, setup 18ms, collect 51ms, tests 6.31s, environment 0ms, prepare 109ms)
+
+EXIT_CODE=1

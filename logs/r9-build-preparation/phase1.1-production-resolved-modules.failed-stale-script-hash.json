@@ -1,0 +1,305 @@
+{
+  "schema": "awwv.r9.phase1.1.production-resolved-modules.v1",
+  "git_head": "d874817eb9dea609f89e80debc047d78fd1b046e",
+  "observation_only_deviations": [
+    "build.write=false: Rollup completed without emitting the production bundle",
+    "copy-map-public-fonts plugin disabled because it writes to dist/tactical-map/font in closeBundle",
+    "r9 observer plugin added after production plugins; it only records module IDs in moduleParsed",
+    "package rows regenerated offline from the exact saved raw module IDs; Vite build was not rerun"
+  ],
+  "source_hashes": [
+    {
+      "path": "package.json",
+      "sha256": "e6131e9d42b4315ff8f9d71b43681bbcdeb9d77a7cc8130422a558d23bfb5d4c"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "e0da9916071071195538de5a2af4411f66716e6f208ad759b7a68f8e323215ec"
+    },
+    {
+      "path": "src/ui/map/package.json",
+      "sha256": "f49dabf543af35f4d6ce41c66624d3a7653bae61cfdc4183798161467a127ef5"
+    },
+    {
+      "path": "src/ui/map/package-lock.json",
+      "sha256": "3a3556dc4a3da0cca10f14dfb328b4931129cf25a39ffe8fa8e335c33a9bc24a"
+    },
+    {
+      "path": "src/ui/map/vite.config.ts",
+      "sha256": "b8693b4386b6be48fd3f6f0612a92b2f255b18a5ebed112448d3b562ca795246"
+    },
+    {
+      "path": "vitest.config.ts",
+      "sha256": "3841e322083c5bbf4b7980bd004f6cf54393c5ae03daf2e507832d91641b73e8"
+    },
+    {
+      "path": "tools/test/vitest_shared_config.mjs",
+      "sha256": "df9a1b90f90278d47f6ce9e3abc40fc50ef4fc9c10ea6324c468ae16ba19d725"
+    },
+    {
+      "path": "tools/test/run_vitest_slice.mjs",
+      "sha256": "85f569e21f5621b4513d0f01b66f2550b00c53afc1810d27b2ee65938aa4bd97"
+    },
+    {
+      "path": "tools/test/run_vitest_balanced.mjs",
+      "sha256": "d0b3370882817d26d9c8e37aec07c9abe04d66b69ef221fb30f6bb7e65dff654"
+    },
+    {
+      "path": "logs/r9-build-preparation/phase1.1_capture_production_graph.mjs",
+      "sha256": "c28cafffbad2481632dfa2ad66f114c8c0c1ff200fb29ea2cfca57720af73c70"
+    }
+  ],
+  "resolved_runtime_packages": [
+    {
+      "name": "@deck.gl/core",
+      "version": "9.2.11",
+      "package_json_path": "src/ui/map/node_modules/@deck.gl/core/package.json",
+      "module_ids": [
+        "src/ui/map/node_modules/@deck.gl/core/dist/controllers/controller.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/controllers/first-person-controller.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/controllers/globe-controller.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/controllers/map-controller.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/controllers/orbit-controller.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/controllers/orthographic-controller.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/controllers/transition-manager.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/controllers/view-state.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/debug/index.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/debug/loggers.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/effects/lighting/ambient-light.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/effects/lighting/camera-light.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/effects/lighting/directional-light.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/effects/lighting/lighting-effect.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/effects/lighting/point-light.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/effects/lighting/sun-light.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/effects/post-process-effect.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/index.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/attribute/attribute-manager.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/attribute/attribute-transition-manager.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/attribute/attribute.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/attribute/data-column.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/attribute/gl-utils.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/attribute/transition-settings.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/composite-layer.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/constants.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/deck-picker.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/deck-renderer.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/deck.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/effect-manager.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/init.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/layer-extension.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/layer-manager.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/layer-state.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/layer.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/picking/pick-info.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/picking/query-object.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/resource/resource-manager.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/resource/resource.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/tooltip-widget.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/uniform-transition-manager.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/view-manager.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/widget-manager.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lib/widget.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lifecycle/component-state.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lifecycle/component.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lifecycle/constants.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lifecycle/create-props.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lifecycle/prop-types.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/lifecycle/props.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/passes/draw-layers-pass.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/passes/layers-pass.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/passes/pass.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/passes/pick-layers-pass.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/passes/screen-pass-uniforms.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/passes/screen-pass.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/passes/shadow-pass.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/shaderlib/color/color.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/shaderlib/index.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/shaderlib/misc/geometry.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/shaderlib/misc/layer-uniforms.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/shaderlib/picking/picking.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/shaderlib/project/project-functions.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/shaderlib/project/project.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/shaderlib/project/project.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/shaderlib/project/project.wgsl.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/shaderlib/project/viewport-uniforms.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/shaderlib/project32/project32.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/shaderlib/shadow/shadow.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/transitions/cpu-interpolation-transition.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/transitions/cpu-spring-transition.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/transitions/fly-to-interpolator.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/transitions/gpu-interpolation-transition.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/transitions/gpu-spring-transition.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/transitions/gpu-transition-utils.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/transitions/gpu-transition.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/transitions/linear-interpolator.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/transitions/transition-interpolator.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/transitions/transition.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/utils/apply-styles.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/utils/array-utils.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/utils/assert.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/utils/count.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/utils/deep-equal.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/utils/flatten.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/utils/iterable-utils.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/utils/json-loader.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/utils/log.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/utils/math-utils.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/utils/memoize.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/utils/positions.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/utils/range.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/utils/shader.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/utils/tesselator.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/utils/texture.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/utils/typed-array-manager.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/viewports/first-person-viewport.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/viewports/globe-viewport.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/viewports/orbit-viewport.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/viewports/orthographic-viewport.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/viewports/viewport.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/viewports/web-mercator-viewport.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/views/first-person-view.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/views/globe-view.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/views/map-view.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/views/orbit-view.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/views/orthographic-view.js",
+        "src/ui/map/node_modules/@deck.gl/core/dist/views/view.js"
+      ]
+    },
+    {
+      "name": "@deck.gl/layers",
+      "version": "9.2.11",
+      "package_json_path": "src/ui/map/node_modules/@deck.gl/layers/package.json",
+      "module_ids": [
+        "src/ui/map/node_modules/@deck.gl/layers/dist/arc-layer/arc-layer-fragment.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/arc-layer/arc-layer-uniforms.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/arc-layer/arc-layer-vertex.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/arc-layer/arc-layer.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/bitmap-layer/bitmap-layer-fragment.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/bitmap-layer/bitmap-layer-uniforms.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/bitmap-layer/bitmap-layer-vertex.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/bitmap-layer/bitmap-layer.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/bitmap-layer/create-mesh.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/column-layer/column-geometry.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/column-layer/column-layer-fragment.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/column-layer/column-layer-uniforms.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/column-layer/column-layer-vertex.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/column-layer/column-layer.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/column-layer/grid-cell-layer.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/geojson-layer/geojson-binary.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/geojson-layer/geojson-layer-props.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/geojson-layer/geojson-layer.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/geojson-layer/geojson.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/geojson-layer/sub-layer-map.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/icon-layer/icon-layer-fragment.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/icon-layer/icon-layer-uniforms.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/icon-layer/icon-layer-vertex.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/icon-layer/icon-layer.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/icon-layer/icon-manager.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/index.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/line-layer/line-layer-fragment.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/line-layer/line-layer-uniforms.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/line-layer/line-layer-vertex.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/line-layer/line-layer.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/line-layer/line-layer.wgsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/path-layer/path-layer-fragment.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/path-layer/path-layer-uniforms.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/path-layer/path-layer-vertex.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/path-layer/path-layer.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/path-layer/path-tesselator.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/path-layer/path.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/point-cloud-layer/point-cloud-layer-fragment.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/point-cloud-layer/point-cloud-layer-uniforms.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/point-cloud-layer/point-cloud-layer-vertex.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/point-cloud-layer/point-cloud-layer.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/point-cloud-layer/point-cloud-layer.wgsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/polygon-layer/polygon-layer.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/scatterplot-layer/scatterplot-layer-fragment.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/scatterplot-layer/scatterplot-layer-uniforms.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/scatterplot-layer/scatterplot-layer-vertex.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/scatterplot-layer/scatterplot-layer.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/scatterplot-layer/scatterplot-layer.wgsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/solid-polygon-layer/polygon-tesselator.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/solid-polygon-layer/polygon.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/solid-polygon-layer/solid-polygon-layer-fragment.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/solid-polygon-layer/solid-polygon-layer-uniforms.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/solid-polygon-layer/solid-polygon-layer-vertex-main.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/solid-polygon-layer/solid-polygon-layer-vertex-side.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/solid-polygon-layer/solid-polygon-layer-vertex-top.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/solid-polygon-layer/solid-polygon-layer.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/text-layer/font-atlas-manager.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/text-layer/lru-cache.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/text-layer/multi-icon-layer/multi-icon-layer-fragment.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/text-layer/multi-icon-layer/multi-icon-layer.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/text-layer/multi-icon-layer/sdf-uniforms.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/text-layer/text-background-layer/text-background-layer-fragment.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/text-layer/text-background-layer/text-background-layer-uniforms.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/text-layer/text-background-layer/text-background-layer-vertex.glsl.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/text-layer/text-background-layer/text-background-layer.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/text-layer/text-layer.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/text-layer/utils.js",
+        "src/ui/map/node_modules/@deck.gl/layers/dist/utils.js"
+      ]
+    },
+    {
+      "name": "@deck.gl/mapbox",
+      "version": "9.2.11",
+      "package_json_path": "src/ui/map/node_modules/@deck.gl/mapbox/package.json",
+      "module_ids": [
+        "src/ui/map/node_modules/@deck.gl/mapbox/dist/deck-utils.js",
+        "src/ui/map/node_modules/@deck.gl/mapbox/dist/index.js",
+        "src/ui/map/node_modules/@deck.gl/mapbox/dist/mapbox-layer-group.js",
+        "src/ui/map/node_modules/@deck.gl/mapbox/dist/mapbox-layer.js",
+        "src/ui/map/node_modules/@deck.gl/mapbox/dist/mapbox-overlay.js",
+        "src/ui/map/node_modules/@deck.gl/mapbox/dist/resolve-layer-groups.js",
+        "src/ui/map/node_modules/@deck.gl/mapbox/dist/resolve-layers.js"
+      ]
+    },
+    {
+      "name": "maplibre-gl",
+      "version": "4.7.1",
+      "package_json_path": "src/ui/map/node_modules/maplibre-gl/package.json",
+      "module_ids": [
+        "src/ui/map/node_modules/maplibre-gl/dist/maplibre-gl.css",
+        "src/ui/map/node_modules/maplibre-gl/dist/maplibre-gl.js"
+      ]
+    },
+    {
+      "name": "pmtiles",
+      "version": "3.2.1",
+      "package_json_path": "src/ui/map/node_modules/pmtiles/package.json",
+      "module_ids": [
+        "src/ui/map/node_modules/pmtiles/dist/index.js"
+      ]
+    },
+    {
+      "name": "react",
+      "version": "18.3.1",
+      "package_json_path": "src/ui/map/node_modules/react/package.json",
+      "module_ids": [
+        "src/ui/map/node_modules/react/cjs/react-jsx-runtime.production.min.js",
+        "src/ui/map/node_modules/react/cjs/react.production.min.js",
+        "src/ui/map/node_modules/react/index.js",
+        "src/ui/map/node_modules/react/jsx-runtime.js"
+      ]
+    },
+    {
+      "name": "react-dom",
+      "version": "18.3.1",
+      "package_json_path": "src/ui/map/node_modules/react-dom/package.json",
+      "module_ids": [
+        "src/ui/map/node_modules/react-dom/cjs/react-dom.production.min.js",
+        "src/ui/map/node_modules/react-dom/client.js",
+        "src/ui/map/node_modules/react-dom/index.js"
+      ]
+    },
+    {
+      "name": "zustand",
+      "version": "4.5.7",
+      "package_json_path": "src/ui/map/node_modules/zustand/package.json",
+      "module_ids": [
+        "src/ui/map/node_modules/zustand/esm/index.mjs",
+        "src/ui/map/node_modules/zustand/esm/vanilla.mjs"
+      ]
+    }
+  ]
+}

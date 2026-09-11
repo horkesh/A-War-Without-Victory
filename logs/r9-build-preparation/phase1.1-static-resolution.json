@@ -1,0 +1,532 @@
+{
+  "schema": "awwv.r9.phase1.1.static-resolution.v1",
+  "installed": [
+    {
+      "authority": "node_modules",
+      "name": "@deck.gl/core",
+      "version": "9.3.3",
+      "package_json_path": "node_modules/@deck.gl/core/package.json"
+    },
+    {
+      "authority": "node_modules",
+      "name": "@deck.gl/extensions",
+      "version": "9.3.3",
+      "package_json_path": "node_modules/@deck.gl/extensions/package.json"
+    },
+    {
+      "authority": "node_modules",
+      "name": "@deck.gl/layers",
+      "version": "9.3.3",
+      "package_json_path": "node_modules/@deck.gl/layers/package.json"
+    },
+    {
+      "authority": "node_modules",
+      "name": "@deck.gl/mapbox",
+      "version": "9.3.3",
+      "package_json_path": "node_modules/@deck.gl/mapbox/package.json"
+    },
+    {
+      "authority": "node_modules",
+      "name": "@turf/bezier-spline",
+      "version": "7.3.4",
+      "package_json_path": "node_modules/@turf/bezier-spline/package.json"
+    },
+    {
+      "authority": "node_modules",
+      "name": "@turf/helpers",
+      "version": "7.3.4",
+      "package_json_path": "node_modules/@turf/helpers/package.json"
+    },
+    {
+      "authority": "node_modules",
+      "name": "maplibre-gl",
+      "version": "5.24.0",
+      "package_json_path": "node_modules/maplibre-gl/package.json"
+    },
+    {
+      "authority": "node_modules",
+      "name": "pmtiles",
+      "version": "4.4.1",
+      "package_json_path": "node_modules/pmtiles/package.json"
+    },
+    {
+      "authority": "node_modules",
+      "name": "react",
+      "version": "18.3.1",
+      "package_json_path": "node_modules/react/package.json"
+    },
+    {
+      "authority": "node_modules",
+      "name": "react-dom",
+      "version": "18.3.1",
+      "package_json_path": "node_modules/react-dom/package.json"
+    },
+    {
+      "authority": "node_modules",
+      "name": "zustand",
+      "version": "4.5.7",
+      "package_json_path": "node_modules/zustand/package.json"
+    },
+    {
+      "authority": "src/ui/map/node_modules",
+      "name": "@deck.gl/core",
+      "version": "9.2.11",
+      "package_json_path": "src/ui/map/node_modules/@deck.gl/core/package.json"
+    },
+    {
+      "authority": "src/ui/map/node_modules",
+      "name": "@deck.gl/extensions",
+      "version": "9.2.11",
+      "package_json_path": "src/ui/map/node_modules/@deck.gl/extensions/package.json"
+    },
+    {
+      "authority": "src/ui/map/node_modules",
+      "name": "@deck.gl/layers",
+      "version": "9.2.11",
+      "package_json_path": "src/ui/map/node_modules/@deck.gl/layers/package.json"
+    },
+    {
+      "authority": "src/ui/map/node_modules",
+      "name": "@deck.gl/mapbox",
+      "version": "9.2.11",
+      "package_json_path": "src/ui/map/node_modules/@deck.gl/mapbox/package.json"
+    },
+    {
+      "authority": "src/ui/map/node_modules",
+      "name": "@turf/bezier-spline",
+      "version": "6.5.0",
+      "package_json_path": "src/ui/map/node_modules/@turf/bezier-spline/package.json"
+    },
+    {
+      "authority": "src/ui/map/node_modules",
+      "name": "@turf/helpers",
+      "version": "6.5.0",
+      "package_json_path": "src/ui/map/node_modules/@turf/helpers/package.json"
+    },
+    {
+      "authority": "src/ui/map/node_modules",
+      "name": "maplibre-gl",
+      "version": "4.7.1",
+      "package_json_path": "src/ui/map/node_modules/maplibre-gl/package.json"
+    },
+    {
+      "authority": "src/ui/map/node_modules",
+      "name": "pmtiles",
+      "version": "3.2.1",
+      "package_json_path": "src/ui/map/node_modules/pmtiles/package.json"
+    },
+    {
+      "authority": "src/ui/map/node_modules",
+      "name": "react",
+      "version": "18.3.1",
+      "package_json_path": "src/ui/map/node_modules/react/package.json"
+    },
+    {
+      "authority": "src/ui/map/node_modules",
+      "name": "react-dom",
+      "version": "18.3.1",
+      "package_json_path": "src/ui/map/node_modules/react-dom/package.json"
+    },
+    {
+      "authority": "src/ui/map/node_modules",
+      "name": "zustand",
+      "version": "4.5.7",
+      "package_json_path": "src/ui/map/node_modules/zustand/package.json"
+    }
+  ],
+  "locks": [
+    {
+      "lock": "package-lock.json",
+      "name": "@deck.gl/core",
+      "declared": "^9.3.3",
+      "locked": "9.3.3",
+      "integrity": "sha512-P8IPB0VJyyKBGEUC6wT2sfqNYY/IClzYIqi0iyHBunKTUKQNwiKhPasQLCEfb157KNoCdeZxjnohkyRYqbas+A=="
+    },
+    {
+      "lock": "package-lock.json",
+      "name": "@deck.gl/extensions",
+      "declared": "^9.3.3",
+      "locked": "9.3.3",
+      "integrity": "sha512-e47Lc0s4cEubBSx8oqINl9jtF0PK48vESBufJrojYaTg6SX2TI+ObCBZjyqLWvrJK/B6N9tVntacy/F6kazBWQ=="
+    },
+    {
+      "lock": "package-lock.json",
+      "name": "@deck.gl/layers",
+      "declared": "^9.3.3",
+      "locked": "9.3.3",
+      "integrity": "sha512-sp7rvAe/SM/Ja8sVKF0r5ZFj+W5y1h9HpmFZUGv+knkBhrwWLfxa6p3sycimdLMd22tCguw7ps4klKgZjgYTtw=="
+    },
+    {
+      "lock": "package-lock.json",
+      "name": "@deck.gl/mapbox",
+      "declared": "^9.3.3",
+      "locked": "9.3.3",
+      "integrity": "sha512-aUPqrwF6wkx+EtvKA3SaiK+UROMnZSmgEJWZ1qSKFSiH//kPuo5imbtXyan8sGhOet7NjnfEwJqFA3EBk7zDLA=="
+    },
+    {
+      "lock": "package-lock.json",
+      "name": "@turf/bezier-spline",
+      "declared": "^7.3.4",
+      "locked": "7.3.4",
+      "integrity": "sha512-+iDUeiBKByIs/6K5WW8pG6IDxrRLJHFLM80zSpzk2xBtgy3mq36NZwwt67Pu7EJAkc9GUXKIm9SkspoKue9aYQ=="
+    },
+    {
+      "lock": "package-lock.json",
+      "name": "@turf/helpers",
+      "declared": "^7.3.4",
+      "locked": "7.3.4",
+      "integrity": "sha512-U/S5qyqgx3WTvg4twaH0WxF3EixoTCfDsmk98g1E3/5e2YKp7JKYZdz0vivsS5/UZLJeZDEElOSFH4pUgp+l7g=="
+    },
+    {
+      "lock": "package-lock.json",
+      "name": "maplibre-gl",
+      "declared": "^5.24.0",
+      "locked": "5.24.0",
+      "integrity": "sha512-ALyFxgtd5R+65UqZ/++lOqwWcC0SNho9c27fYSyLmG7AfnAul2o46F05aDJGPbFU57wos9dgcIySHs0Xe6ia3A=="
+    },
+    {
+      "lock": "package-lock.json",
+      "name": "pmtiles",
+      "declared": "^4.4.1",
+      "locked": "4.4.1",
+      "integrity": "sha512-5oTeQc/yX/ft1evbpIlnoCZugQuug/iYIAj/ZTqIqzdGek4uZEho99En890EE6NOSI3JTI3IG8R7r8+SltphxA=="
+    },
+    {
+      "lock": "package-lock.json",
+      "name": "react",
+      "declared": "^18.3.1",
+      "locked": "18.3.1",
+      "integrity": "sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ=="
+    },
+    {
+      "lock": "package-lock.json",
+      "name": "react-dom",
+      "declared": "^18.3.1",
+      "locked": "18.3.1",
+      "integrity": "sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw=="
+    },
+    {
+      "lock": "package-lock.json",
+      "name": "zustand",
+      "declared": "^4.5.7",
+      "locked": "4.5.7",
+      "integrity": "sha512-CHOUy7mu3lbD6o6LJLfllpjkzhHXSBlX8B9+qPddUsIfeF5S/UZ5q0kmCsnRqT1UHFQZchNFDDzMbQsuesHWlw=="
+    },
+    {
+      "lock": "src/ui/map/package-lock.json",
+      "name": "@deck.gl/core",
+      "declared": null,
+      "locked": "9.2.11",
+      "integrity": "sha512-lpdxXQuFSkd6ET7M6QxPI8QMhsLRY6vzLyk83sPGFb7JSb4OhrNHYt9sfIhcA/hxJW7bdBSMWWphf2GvQetVuA=="
+    },
+    {
+      "lock": "src/ui/map/package-lock.json",
+      "name": "@deck.gl/extensions",
+      "declared": null,
+      "locked": "9.2.11",
+      "integrity": "sha512-zlpM4Bg1ifBziW1Juiii9NY5gyW2rEhyVTWnhagH/bpTCZ2E73OhnToYt1ouqmoxL6lMtIjhRXz6LPb7tJbHHQ=="
+    },
+    {
+      "lock": "src/ui/map/package-lock.json",
+      "name": "@deck.gl/layers",
+      "declared": null,
+      "locked": "9.2.11",
+      "integrity": "sha512-2FSb0Qa6YR+Rg6GWhYOGTUug3vtZ4uKcFdnrdiJoVXGyibKJMScKZIsivY0r/yQQZsaBjYqty5QuVJvdtEHxSA=="
+    },
+    {
+      "lock": "src/ui/map/package-lock.json",
+      "name": "@deck.gl/mapbox",
+      "declared": "^9.2.11",
+      "locked": "9.2.11",
+      "integrity": "sha512-5OaFZgjyA4Vq6WjHUdcEdl0Phi8dwj8hSCErej0NetW90mctdbxwMt0gSbqcvWBowwhyj2QAhH0P2FcITjKG/A=="
+    },
+    {
+      "lock": "src/ui/map/package-lock.json",
+      "name": "@turf/bezier-spline",
+      "declared": "^6.5.0",
+      "locked": "6.5.0",
+      "integrity": "sha512-vokPaurTd4PF96rRgGVm6zYYC5r1u98ZsG+wZEv9y3kJTuJRX/O3xIY2QnTGTdbVmAJN1ouOsD0RoZYaVoXORQ=="
+    },
+    {
+      "lock": "src/ui/map/package-lock.json",
+      "name": "@turf/helpers",
+      "declared": "^6.5.0",
+      "locked": "6.5.0",
+      "integrity": "sha512-VbI1dV5bLFzohYYdgqwikdMVpe7pJ9X3E+dlr425wa2/sMJqYDhTO++ec38/pcPvPE6oD9WEEeU3Xu3gza+VPw=="
+    },
+    {
+      "lock": "src/ui/map/package-lock.json",
+      "name": "maplibre-gl",
+      "declared": "^4.0.0",
+      "locked": "4.7.1",
+      "integrity": "sha512-lgL7XpIwsgICiL82ITplfS7IGwrB1OJIw/pCvprDp2dhmSSEBgmPzYRvwYYYvJGJD7fxUv1Tvpih4nZ6VrLuaA=="
+    },
+    {
+      "lock": "src/ui/map/package-lock.json",
+      "name": "pmtiles",
+      "declared": "^3.0.0",
+      "locked": "3.2.1",
+      "integrity": "sha512-3R4fBwwoli5mw7a6t1IGwOtfmcSAODq6Okz0zkXhS1zi9sz1ssjjIfslwPvcWw5TNhdjNBUg9fgfPLeqZlH6ng=="
+    },
+    {
+      "lock": "src/ui/map/package-lock.json",
+      "name": "react",
+      "declared": "^18.2.0",
+      "locked": "18.3.1",
+      "integrity": "sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ=="
+    },
+    {
+      "lock": "src/ui/map/package-lock.json",
+      "name": "react-dom",
+      "declared": "^18.2.0",
+      "locked": "18.3.1",
+      "integrity": "sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw=="
+    },
+    {
+      "lock": "src/ui/map/package-lock.json",
+      "name": "zustand",
+      "declared": "^4.5.0",
+      "locked": "4.5.7",
+      "integrity": "sha512-CHOUy7mu3lbD6o6LJLfllpjkzhHXSBlX8B9+qPddUsIfeF5S/UZ5q0kmCsnRqT1UHFQZchNFDDzMbQsuesHWlw=="
+    }
+  ],
+  "node_resolution": [
+    {
+      "base": ".",
+      "name": "@deck.gl/core",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\@deck.gl\\core\\dist\\index.cjs"
+    },
+    {
+      "base": ".",
+      "name": "@deck.gl/extensions",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\@deck.gl\\extensions\\dist\\index.cjs"
+    },
+    {
+      "base": ".",
+      "name": "@deck.gl/layers",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\@deck.gl\\layers\\dist\\index.cjs"
+    },
+    {
+      "base": ".",
+      "name": "@deck.gl/mapbox",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\@deck.gl\\mapbox\\dist\\index.cjs"
+    },
+    {
+      "base": ".",
+      "name": "@turf/bezier-spline",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\@turf\\bezier-spline\\dist\\cjs\\index.cjs"
+    },
+    {
+      "base": ".",
+      "name": "@turf/helpers",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\@turf\\helpers\\dist\\cjs\\index.cjs"
+    },
+    {
+      "base": ".",
+      "name": "maplibre-gl",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\maplibre-gl\\dist\\maplibre-gl.js"
+    },
+    {
+      "base": ".",
+      "name": "pmtiles",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\pmtiles\\dist\\cjs\\index.cjs"
+    },
+    {
+      "base": ".",
+      "name": "react",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\react\\index.js"
+    },
+    {
+      "base": ".",
+      "name": "react-dom",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\react-dom\\index.js"
+    },
+    {
+      "base": ".",
+      "name": "zustand",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\zustand\\index.js"
+    },
+    {
+      "base": "src/ui/map/layers",
+      "name": "@deck.gl/core",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\@deck.gl\\core\\dist\\index.cjs"
+    },
+    {
+      "base": "src/ui/map/layers",
+      "name": "@deck.gl/extensions",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\@deck.gl\\extensions\\dist\\index.cjs"
+    },
+    {
+      "base": "src/ui/map/layers",
+      "name": "@deck.gl/layers",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\@deck.gl\\layers\\dist\\index.cjs"
+    },
+    {
+      "base": "src/ui/map/layers",
+      "name": "@deck.gl/mapbox",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\@deck.gl\\mapbox\\dist\\index.cjs"
+    },
+    {
+      "base": "src/ui/map/layers",
+      "name": "@turf/bezier-spline",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\@turf\\bezier-spline\\dist\\js\\index.js"
+    },
+    {
+      "base": "src/ui/map/layers",
+      "name": "@turf/helpers",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\@turf\\helpers\\dist\\js\\index.js"
+    },
+    {
+      "base": "src/ui/map/layers",
+      "name": "maplibre-gl",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\maplibre-gl\\dist\\maplibre-gl.js"
+    },
+    {
+      "base": "src/ui/map/layers",
+      "name": "pmtiles",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\pmtiles\\dist\\index.cjs"
+    },
+    {
+      "base": "src/ui/map/layers",
+      "name": "react",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\react\\index.js"
+    },
+    {
+      "base": "src/ui/map/layers",
+      "name": "react-dom",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\react-dom\\index.js"
+    },
+    {
+      "base": "src/ui/map/layers",
+      "name": "zustand",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\zustand\\index.js"
+    },
+    {
+      "base": "src/ui/map/map",
+      "name": "@deck.gl/core",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\@deck.gl\\core\\dist\\index.cjs"
+    },
+    {
+      "base": "src/ui/map/map",
+      "name": "@deck.gl/extensions",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\@deck.gl\\extensions\\dist\\index.cjs"
+    },
+    {
+      "base": "src/ui/map/map",
+      "name": "@deck.gl/layers",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\@deck.gl\\layers\\dist\\index.cjs"
+    },
+    {
+      "base": "src/ui/map/map",
+      "name": "@deck.gl/mapbox",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\@deck.gl\\mapbox\\dist\\index.cjs"
+    },
+    {
+      "base": "src/ui/map/map",
+      "name": "@turf/bezier-spline",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\@turf\\bezier-spline\\dist\\js\\index.js"
+    },
+    {
+      "base": "src/ui/map/map",
+      "name": "@turf/helpers",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\@turf\\helpers\\dist\\js\\index.js"
+    },
+    {
+      "base": "src/ui/map/map",
+      "name": "maplibre-gl",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\maplibre-gl\\dist\\maplibre-gl.js"
+    },
+    {
+      "base": "src/ui/map/map",
+      "name": "pmtiles",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\pmtiles\\dist\\index.cjs"
+    },
+    {
+      "base": "src/ui/map/map",
+      "name": "react",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\react\\index.js"
+    },
+    {
+      "base": "src/ui/map/map",
+      "name": "react-dom",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\react-dom\\index.js"
+    },
+    {
+      "base": "src/ui/map/map",
+      "name": "zustand",
+      "entry": "F:\\A-War-Without-Victory\\src\\ui\\map\\node_modules\\zustand\\index.js"
+    },
+    {
+      "base": "tests",
+      "name": "@deck.gl/core",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\@deck.gl\\core\\dist\\index.cjs"
+    },
+    {
+      "base": "tests",
+      "name": "@deck.gl/extensions",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\@deck.gl\\extensions\\dist\\index.cjs"
+    },
+    {
+      "base": "tests",
+      "name": "@deck.gl/layers",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\@deck.gl\\layers\\dist\\index.cjs"
+    },
+    {
+      "base": "tests",
+      "name": "@deck.gl/mapbox",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\@deck.gl\\mapbox\\dist\\index.cjs"
+    },
+    {
+      "base": "tests",
+      "name": "@turf/bezier-spline",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\@turf\\bezier-spline\\dist\\cjs\\index.cjs"
+    },
+    {
+      "base": "tests",
+      "name": "@turf/helpers",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\@turf\\helpers\\dist\\cjs\\index.cjs"
+    },
+    {
+      "base": "tests",
+      "name": "maplibre-gl",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\maplibre-gl\\dist\\maplibre-gl.js"
+    },
+    {
+      "base": "tests",
+      "name": "pmtiles",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\pmtiles\\dist\\cjs\\index.cjs"
+    },
+    {
+      "base": "tests",
+      "name": "react",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\react\\index.js"
+    },
+    {
+      "base": "tests",
+      "name": "react-dom",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\react-dom\\index.js"
+    },
+    {
+      "base": "tests",
+      "name": "zustand",
+      "entry": "F:\\A-War-Without-Victory\\node_modules\\zustand\\index.js"
+    }
+  ],
+  "vitest_aliased_packages": [
+    "react/jsx-runtime",
+    "react/jsx-dev-runtime",
+    "react-dom/server",
+    "react-dom/client",
+    "react-dom",
+    "react",
+    "use-sync-external-store/shim/with-selector",
+    "use-sync-external-store/shim",
+    "use-sync-external-store",
+    "zustand",
+    "maplibre-gl",
+    "@deck.gl/core",
+    "@deck.gl/extensions",
+    "@deck.gl/layers",
+    "@deck.gl/mapbox"
+  ]
+}

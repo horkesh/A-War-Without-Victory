@@ -1,0 +1,115 @@
+COMMAND={"cwd":"F:/A-War-Without-Victory","command":"C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe","args":["logs/r7-english-readability/compare-simulation.mjs","F:/A-War-Without-Victory/logs/r7-english-readability/pre-188w-clean/apr1992_definitive_188w__6898d6d2e324c7a3__w188","F:/A-War-Without-Victory/logs/r7-english-readability/post-188w/apr1992_definitive_188w__6898d6d2e324c7a3__w188","F:/A-War-Without-Victory/data/derived/scenario/_baseline_tmp/apr1992_188w"]}
+NODE_PATH=C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2
+RUN_ENV={"AWWV_S6_GRADE_RUN":null,"provenanceOverridePresent":false}
+{
+  "complete": true,
+  "runLabels": [
+    "PRE",
+    "POST-A",
+    "POST-B"
+  ],
+  "artifacts": [
+    {
+      "artifact": "activity_summary.json",
+      "pre": "7d10356d0715db21370c3f7d6acc15db7948856c80962363f505641b48bfbd4e",
+      "postA": "7d10356d0715db21370c3f7d6acc15db7948856c80962363f505641b48bfbd4e",
+      "postB": "7d10356d0715db21370c3f7d6acc15db7948856c80962363f505641b48bfbd4e",
+      "availableIdentical": true
+    },
+    {
+      "artifact": "control_delta.json",
+      "pre": "4cb8219cf3b7dcbfdd66476a7af5bbfa0709fdd24e0a37d6900a9b808d6acb85",
+      "postA": "4cb8219cf3b7dcbfdd66476a7af5bbfa0709fdd24e0a37d6900a9b808d6acb85",
+      "postB": "4cb8219cf3b7dcbfdd66476a7af5bbfa0709fdd24e0a37d6900a9b808d6acb85",
+      "availableIdentical": true
+    },
+    {
+      "artifact": "end_report.md",
+      "pre": "fea39f3bf7eda907b290e3bd2579ac050c847ae2f783153117f95f1f94d0cf8d",
+      "postA": "fea39f3bf7eda907b290e3bd2579ac050c847ae2f783153117f95f1f94d0cf8d",
+      "postB": "fea39f3bf7eda907b290e3bd2579ac050c847ae2f783153117f95f1f94d0cf8d",
+      "availableIdentical": true
+    },
+    {
+      "artifact": "final_save.json",
+      "pre": "e414dc69f6e875fcd2a7394582921f20ca03123112baf12e9308c50035c29c50",
+      "postA": "e414dc69f6e875fcd2a7394582921f20ca03123112baf12e9308c50035c29c50",
+      "postB": "e414dc69f6e875fcd2a7394582921f20ca03123112baf12e9308c50035c29c50",
+      "availableIdentical": true
+    },
+    {
+      "artifact": "formation_delta.json",
+      "pre": "bbd7260e219d311bea201053d0d7c913f4b30b83bcead72b05d5f2c957566cb1",
+      "postA": "bbd7260e219d311bea201053d0d7c913f4b30b83bcead72b05d5f2c957566cb1",
+      "postB": "bbd7260e219d311bea201053d0d7c913f4b30b83bcead72b05d5f2c957566cb1",
+      "availableIdentical": true
+    },
+    {
+      "artifact": "run_summary.json",
+      "pre": "b8ebc2c1ff4522fed0651be224ba360fcfeff0da4e6983f27d9df008eeba98cb",
+      "postA": "b8ebc2c1ff4522fed0651be224ba360fcfeff0da4e6983f27d9df008eeba98cb",
+      "postB": "b8ebc2c1ff4522fed0651be224ba360fcfeff0da4e6983f27d9df008eeba98cb",
+      "availableIdentical": true
+    },
+    {
+      "artifact": "watched_operations.json",
+      "pre": "785a073b9312e34d20ba143915478ab768ce7847ad337b121f98491df8325b18",
+      "postA": "785a073b9312e34d20ba143915478ab768ce7847ad337b121f98491df8325b18",
+      "postB": "785a073b9312e34d20ba143915478ab768ce7847ad337b121f98491df8325b18",
+      "availableIdentical": true
+    },
+    {
+      "artifact": "weekly_report.jsonl",
+      "pre": "4c5cb00bde51a15e2f7766d31ececb03e86d81bfcf1f93a4c04c01cbda31b9cf",
+      "postA": "4c5cb00bde51a15e2f7766d31ececb03e86d81bfcf1f93a4c04c01cbda31b9cf",
+      "postB": "4c5cb00bde51a15e2f7766d31ececb03e86d81bfcf1f93a4c04c01cbda31b9cf",
+      "availableIdentical": true
+    }
+  ],
+  "consumedInputsIdentical": true,
+  "inputDigests": [
+    "f8ace65496620fad1c8219a9dcaa8e2c5cdba2f3f541b156c7ba112b4748caaf",
+    "f8ace65496620fad1c8219a9dcaa8e2c5cdba2f3f541b156c7ba112b4748caaf",
+    "f8ace65496620fad1c8219a9dcaa8e2c5cdba2f3f541b156c7ba112b4748caaf"
+  ],
+  "provenance": [
+    {
+      "git_commit": "16389f6c9c66f13517806bae30ac78165563b66e",
+      "git_dirty": false,
+      "node_version": "v22.23.2"
+    },
+    {
+      "git_commit": "88996a23d2441a391b25706c734626b5732e37b5",
+      "git_dirty": false,
+      "node_version": "v22.23.2"
+    },
+    {
+      "git_commit": "f6b1b63d666447476da4b0e8cde5abbc141a4b1b",
+      "git_dirty": true,
+      "node_version": "v22.23.2"
+    }
+  ],
+  "calibrationInputs": [
+    {
+      "path": "data/source/calibration/painted_control_apr1994.json",
+      "sha256": "afacdc25d9eb96344cdb48ccb7122d705fe1a3d9706cce0f43e6e0fdba191a4a"
+    },
+    {
+      "path": "data/source/calibration/painted_control_apr1995.json",
+      "sha256": "c3429f6e4e4afa0778619fcf1f999089ff26068487947e1c5fe3f6b391ba61f7"
+    },
+    {
+      "path": "data/source/calibration/painted_control_jan1993.json",
+      "sha256": "abb4f9d20472016d21be4130a1e555b7c7f82094612e7e1777d9916e10a0ba24"
+    },
+    {
+      "path": "data/source/calibration/painted_control_oct1995.json",
+      "sha256": "54f29d6e7a5158c521a83983476da5d832f9b4a66a83b2d69673f8db04e50429"
+    }
+  ],
+  "availablePassed": true,
+  "passed": true
+}
+
+EXIT_CODE=0
+SIGNAL=null

@@ -1,0 +1,7 @@
+COMMAND={"cwd":"F:/A-War-Without-Victory","command":"C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe","args":["logs/r7-english-readability/desk39-layout-verify-post-a.mjs","F:/A-War-Without-Victory/logs/r7-english-readability/post-188w/apr1992_definitive_188w__6898d6d2e324c7a3__w188","F:/A-War-Without-Victory/logs/r7-english-readability/pre-188w-clean/apr1992_definitive_188w__6898d6d2e324c7a3__w188","88996a23d2441a391b25706c734626b5732e37b5","logs/r7-english-readability/desk39-layout-post-a-provenance1.json"]}
+NODE_PATH=C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2
+RUN_ENV={"AWWV_S6_GRADE_RUN":null,"provenanceOverridePresent":false}
+{"checks":{"clean":true,"commit":true,"node":true,"metaWeeks":true,"summaryWeeks":true,"replayFrames":true,"replayIdentical":true,"finalSaveIdentical":true},"replay":{"sha256":"53444b42084d4ea05b146d67651e0c9b19304b1200fafa5bea7a63775784cb56","bytes":1304620232,"lines":188},"finalStateFingerprint":"e414dc69f6e875fc","pass":true}
+
+EXIT_CODE=0
+SIGNAL=null

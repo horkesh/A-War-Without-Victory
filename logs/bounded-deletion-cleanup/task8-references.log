@@ -1,0 +1,3 @@
+PASS no active package/hook/script/test RE machinery references remain
+Historical ledger, retired-lock artifact, and cleanup-plan references are retained as history/evidence.
+EXIT_CODE=0

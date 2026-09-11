@@ -1,0 +1,38 @@
+R9 PHASE 1 INDEPENDENT BUILD/UI/QA/PROCESS REVIEW
+Date: 2026-09-08
+Base: f22bcbb63af7c5d017c59cfc3fe29838e3af1508
+Verdict: GO — no critical, suggestion, or nice-to-have findings remain for Phase 1.
+
+Reviewed scope
+- One root npm workspace and package-manager-generated lock own the map runtime; the nested lock is deleted.
+- Production versions remain MapLibre 4.7.1, PMTiles 3.2.1, Deck 9.2.11, React/React DOM 18.3.1, and Zustand 4.5.7.
+- React/Zustand singleton and mock aliases remain on direct, sliced, and balanced Vitest surfaces; obsolete MapLibre/Deck aliases are removed.
+- Root workspace Vite commands replace nested binary paths. Six workflows remove only the redundant nested npm ci invocation; triggers, job/check identities, conditions, and remaining gates are preserved.
+- runtime_dependency_resolution uses the production Vite resolver, generated isolated slice/balanced configs, real consumer paths, an intentional mismatch control, exact version/physical identity checks, and the single-lock/workflow contract. Existing MapLibre/Deck mocks and the real Deck importer were exercised.
+
+Dependency and reproducibility evidence
+- phase1-runtime-transitive-final-audit.log: exit 0; 168 prior versus 170 final owned normal/installed-optional nodes; no missing edges; no version-set changes; positive mismatch control detected; wgsl_reflect remains 1.2.3.
+- phase1-core-util-scope.log: map jszip/readable-stream resolves core-util-is 1.0.3 while root verror preserves its exact 1.0.2 contract.
+- phase1-reviewed-input-identity.log: 19 frozen build/test/workflow inputs match the fresh proof tree; the independent final check recomputed all 19 hashes with zero mismatches.
+- phase1-reviewed-fresh-npm-ci.log and phase1-npm-ci-accepted.log: exit 0 with HUSKY=0; hooks path unchanged. The final installed runtime tree is clean and singular for MapLibre, PMTiles, Deck, React, React DOM, and Zustand.
+
+Accepted gates
+- phase1-reviewed-fresh-release-build.log: exit 0; tactical map, chunk-cycle check, desktop sim bundle, and Warroom build pass.
+- phase1-reviewed-fresh-typecheck.log and phase1-typecheck-accepted.log: exit 0.
+- phase1-reviewed-fresh-runtime-platform.log: 8 files / 98 tests pass, including production resolution, actual Deck counter imports, current MapLibre/Deck mocks, PMTiles route behavior, render smoke, and CI guardrails.
+- phase1-final-focused-direct-accepted.log, phase1-final-runtime-deck-sliced-accepted.log, phase1-final-runtime-balanced-accepted.log, and phase1-final-deck-balanced-accepted.log: direct, sliced, and balanced runner checks pass; the balanced runner's deliberate failing child is correctly propagated and contained by its parent control.
+- phase1-reviewed-ui-operations.log: live corrected build proves map ready, Deck ownership/counters, real PMTiles 206 range bytes, four objectives, selection, and exact dossier return.
+- phase1-reviewed-ui-recovery.log: live corrected build proves usable legacy recovery and later React ownership reclamation.
+- Independent final evidence audit: 14 required logs had exit 0, closure audit passed with zero changes, 8/98 fresh platform tests were present, all runner proofs were green, all 19 hashes matched, and git diff --check exited 0.
+
+Resolved failures retained as evidence
+- Initial typecheck errors were corrected with the tuple annotation and typed slice-runner declaration.
+- Storybook direct drift from 10.2.13 to 10.6.0 was rejected; all four direct Storybook packages remain 10.2.13.
+- wgsl_reflect 1.6.0 caused the real Deck suite to fail collection. The scoped @luma.gl/shadertools override restores prior production 1.2.3, and the actual importer passes on all three runner surfaces.
+- Fourteen further runtime closure drifts were rejected and restored through scoped/package-specific overrides. Superseded failed receipts remain under logs/r9-build-preparation/ and are not acceptance evidence.
+
+Disclosed residual boundaries
+- The old nested lock auto-installed @arcgis/core for the dormant deck.gl ArcGIS subpackage. Under the repository's legacy-peer-deps install contract it is now an explicitly recorded unsupplied peer; no repository import or captured production module consumes deck.gl or @deck.gl/arcgis. The ArcGIS ecosystem is outside the observed production closure.
+- @types-only branches are excluded from runtime traversal and remain governed by unchanged root direct tooling versions plus the clean typecheck. Storybook's react-docgen 8.0.2 to 8.0.3 move is tooling-only; direct Storybook versions are preserved.
+- npm reports existing dependency vulnerability debt during install. No audit-fix, runtime upgrade, Phase 2/3 work, full-suite claim, campaign, publication, or remote operation is part of this Phase 1 verdict.
+

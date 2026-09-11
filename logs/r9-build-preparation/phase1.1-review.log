@@ -1,0 +1,39 @@
+R9 Phase 1.1 dependency-graph evidence — independent Sol process/build review
+Date: 2026-09-08
+Branch/base: codex/r9-dependency-authority @ d874817eb9dea609f89e80debc047d78fd1b046e
+Verdict: GO for the bounded dependency-graph evidence slice only.
+
+Question reviewed
+- Does the no-write production capture identify the actual resolved runtime package graph,
+  preserve deterministic/attributable evidence, avoid source or distribution mutation, and
+  support only the documented Phase 1.1 handoff without claiming Phase 1 acceptance?
+
+Evidence
+- Final captured raw graph contains 1,378 sorted, unique Rollup module IDs.
+- Corrected projection contains 8 package identities and 208 sorted, unique, repo-relative,
+  NUL-free module IDs; the verifier proves the exact normalized projection from the raw IDs.
+- Production resolves nested MapLibre 4.7.1, PMTiles 3.2.1, Deck core/layers/mapbox 9.2.11,
+  React/DOM 18.3.1, and Zustand 4.5.7. Package paths are under src/ui/map/node_modules.
+- All 10 recorded source hashes match current bytes, including the final capture script, and
+  git_head matches the fixed base.
+- build.write=false disables Rollup output; the only config plugin with a distribution writer,
+  copy-map-public-fonts, was disabled. Existing dist files predate the capture. No tracked
+  package, lockfile, Vite, test-runner, workflow, source, or distribution change is present.
+- Static/config inspection confirms direct, sliced, and balanced Vitest force root MapLibre
+  5.24.0 and Deck 9.3.3, while the unaliased PMTiles source import resolves nested 3.2.1.
+- phase1.1-remap-validation.log is green: capture script syntax 0; offline remap 0; verifier 0;
+  exact raw projection true; relative/NUL-free/sorted/unique true; capture-script hash true.
+
+Correction review
+- Initial review found 8 emitted module IDs with a retained Rollup NUL prefix and absolute
+  F:/ paths. The preserved malformed receipt remains diagnostic history. The targeted offline
+  remap uses the exact saved raw IDs, preserves query-distinct Rollup IDs, and required no
+  duplicate production build. Targeted verification is now green. No further finding remains.
+
+Scope and residuals
+- This GO closes graph evidence/review only. It does not complete Phase 1 or certify a future
+  consolidated graph, packaged UI, RC, freeze, signing, publication, or R8 acceptance.
+- The mismatch contract, root workspace/install/lock consolidation, runner checks, and UI,
+  PMTiles/resource, clean-install, and packaged acceptance remain open.
+- Cleanup Task 8 supplied its script handoff, but Task 8 is not merged here. R7 declares no new
+  dependency and remains active; its formal build handoff is still required before install edits.

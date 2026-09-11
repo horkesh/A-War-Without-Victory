@@ -1,0 +1,12 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/desktop_release_ci_guardrails.test.ts (8 tests) 8657ms
+   ✓ desktop path detector selects every source root imported by the packaged sim bundle 8648ms
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  17:47:43
+   Duration  9.51s (transform 67ms, setup 18ms, collect 52ms, tests 8.66s, environment 0ms, prepare 108ms)
+
+EXIT_CODE=0

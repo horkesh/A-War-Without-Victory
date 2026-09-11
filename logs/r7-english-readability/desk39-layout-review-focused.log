@@ -1,0 +1,23 @@
+COMMAND={"cwd":"F:/A-War-Without-Victory","command":"C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe","args":["C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node_modules/npm/bin/npm-cli.js","run","test:vitest","--","tests/ui/r7_president_desk_layout_readability.test.ts","tests/ui/president_desk_shell.test.ts","tests/ui/desk_authority_header.test.ts","tests/ui/warroom_shell_accessibility.test.ts"]}
+NODE_PATH=C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2
+
+> awwv@0.9.9-beta.1 test:vitest
+> node tools/test/run_vitest_default.mjs tests/ui/r7_president_desk_layout_readability.test.ts tests/ui/president_desk_shell.test.ts tests/ui/desk_authority_header.test.ts tests/ui/warroom_shell_accessibility.test.ts
+
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/ui/president_desk_shell.test.ts (21 tests) 564ms
+ ✓ tests/ui/warroom_shell_accessibility.test.ts (15 tests) 835ms
+   ✓ WarroomShellLayer accessibility proof > exposes hotspots as keyboard-focusable buttons with stable labels 362ms
+ ✓ tests/ui/desk_authority_header.test.ts (10 tests) 216ms
+ ✓ tests/ui/r7_president_desk_layout_readability.test.ts (2 tests) 6ms
+
+ Test Files  4 passed (4)
+      Tests  48 passed (48)
+   Start at  20:25:16
+   Duration  12.33s (transform 3.65s, setup 35ms, collect 6.10s, tests 1.62s, environment 2.70s, prepare 465ms)
+
+
+EXIT_CODE=0
+SIGNAL=null

@@ -1,0 +1,10 @@
+BASE=d874817eb9dea609f89e80debc047d78fd1b046e
+node logs/r9-build-preparation/phase1.1_capture_production_graph.mjs --offline-probe: reported EXIT_CODE=0; 4/4 offline controls
+node logs/r9-build-preparation/phase1.1_capture_production_graph.mjs: reported EXIT_CODE=0; 1378 raw module IDs; 8 target package rows
+node logs/r9-build-preparation/phase1.1_capture_static_resolution.mjs: reported EXIT_CODE=0
+Production output disabled: build.write=false; copy-map-public-fonts disabled; observer does not alter resolution.
+Initial capture failed evidence acceptance despite process exit 0 (empty package rows).
+Second capture EXIT_CODE=1 at positive liveness/package mapping assertion (Windows path normalization).
+Final capture corrected path mapping; prior failures retained.
+No package/lock/config/runtime edits; no install, package, campaign, baseline refresh or full suite.
+

@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "checks": [
+    "Failed React document activates usable legacy recovery menu, lazy WarPlanningMap and side-picker/back",
+    "Late successful React load reclaims opening ownership and disables legacy recovery"
+  ],
+  "output": "F:\\A-War-Without-Victory\\logs\\bounded-deletion-cleanup\\task6-recovery-phase3-1"
+}
+EXIT_CODE=0

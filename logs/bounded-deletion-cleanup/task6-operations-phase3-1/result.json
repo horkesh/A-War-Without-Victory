@@ -1,0 +1,27 @@
+{
+  "mode": "operations",
+  "exe": "F:\\A-War-Without-Victory\\dist-packaged\\win-unpacked\\A War Without Victory.exe",
+  "profile": "F:\\A-War-Without-Victory\\dist-packaged\\task6-validation-evidence\\operations-phase3-1",
+  "fixtureSource": "F:\\A-War-Without-Victory\\logs\\bc06\\fixture-rs-1.json",
+  "fixtureSourceHash": "5c9d445a08a58fac3bd91bc5b94a99de8707419dd7d647d53e96e84cbd091021",
+  "fixtureHash": "dfcc9de40df3a9e9de974b91bd154764d6a777734e95725fa78257cf52bdfe2e",
+  "exeHash": "c7f3c4b4de8e8abaa37c90f1d0466a70a9d3491288ea060a5d7ee37e9d3267e7",
+  "appAsarHash": "3720791397c94c12195e2204a8b6efe2addc696cd2cd638eb46546a193ab85f0",
+  "limits": [
+    "Isolated synthetic pending historical proposal; validates routes, not campaign timing or outcomes."
+  ],
+  "checks": [
+    "Visible operation proposal opens exact dossier",
+    "Exact four objectives visible on live map; objective selection works",
+    "Visible return restores exact proposal dossier"
+  ],
+  "diagnostics": [],
+  "objectives": [
+    "op:srebrenica:osmace_2",
+    "op:srebrenica:radovcici",
+    "op:srebrenica:sulice_2",
+    "op:vlasenica:cerska_2"
+  ],
+  "expectedDiagnostics": [],
+  "status": "PASS"
+}

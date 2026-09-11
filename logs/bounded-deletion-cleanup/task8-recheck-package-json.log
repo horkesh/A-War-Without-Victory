@@ -1,0 +1,12 @@
+PACKAGE_JSON_PARSE PASS
+ALIAS governance:re:check PRESENT=false
+ALIAS governance:re:install PRESENT=false
+ALIAS governance:re:test PRESENT=false
+FILE scripts/repo/check_re_scope.ps1 PRESENT=false
+FILE scripts/repo/install_re_scope_hook.ps1 PRESENT=false
+FILE tests/re_scope_guard.test.ps1 PRESENT=false
+FILE tests/re_scope_external_hook.test.ps1 PRESENT=false
+RETAINED .husky/pre-commit PRESENT=true
+RETAINED .githooks/pre-commit PRESENT=true
+RETAINED scripts/repo/check_claude_governance.ps1 PRESENT=true
+EXIT_CODE=0

@@ -1,0 +1,97 @@
+COMMAND={"cwd":"F:/A-War-Without-Victory","command":"C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe","args":["logs/r7-english-readability/closeout-audit-check.mjs","check"]}
+NODE_PATH=C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2
+RUN_ENV={"AWWV_S6_GRADE_RUN":null,"provenanceOverridePresent":false}
+{"command":["git","branch","--show-current"],"exitCode":0}
+{"command":["git","rev-parse","HEAD"],"exitCode":0}
+{"command":["git","ls-files","--others","--exclude-standard","-z"],"exitCode":0}
+{"command":["git","merge-base","--is-ancestor","997b2fb6c559c933203bae070dfba7b7299660f3","HEAD"],"exitCode":0}
+{"command":["git","status","--short","--untracked-files=no"],"exitCode":0}
+{"command":["git","diff","--name-only","997b2fb6c559c933203bae070dfba7b7299660f3"],"exitCode":0}
+{"command":["git","diff","--check","997b2fb6c559c933203bae070dfba7b7299660f3"],"exitCode":0}
+{"command":["git","diff","--unified=0","997b2fb6c559c933203bae070dfba7b7299660f3","--","docs/40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md"],"exitCode":0}
+{"command":["git","diff","--unified=0","997b2fb6c559c933203bae070dfba7b7299660f3","--","docs/PROJECT_LEDGER.md"],"exitCode":0}
+{"command":["git","diff","--unified=0","997b2fb6c559c933203bae070dfba7b7299660f3","--","docs/plans/2026-07-31-content-history-localization-audio-plan.md"],"exitCode":0}
+{"command":["git","diff","--unified=0","997b2fb6c559c933203bae070dfba7b7299660f3","--","docs/plans/COMMAND_BOARD.md"],"exitCode":0}
+{"command":["git","diff","--unified=0","997b2fb6c559c933203bae070dfba7b7299660f3","--","docs/plans/MASTER_ROADMAP.md"],"exitCode":0}
+{
+  "branch": "codex/r7-english-readability",
+  "head": "bd7b819750d32811738a87143a66bb02807ab867",
+  "base": "997b2fb6c559c933203bae070dfba7b7299660f3",
+  "trackedStatus": "",
+  "changed": [
+    "docs/40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md",
+    "docs/PROJECT_LEDGER.md",
+    "docs/plans/2026-07-31-content-history-localization-audio-plan.md",
+    "docs/plans/COMMAND_BOARD.md",
+    "docs/plans/MASTER_ROADMAP.md"
+  ],
+  "unexpected": [],
+  "missingPreservedEvidence": [],
+  "addedLocalLinks": [
+    {
+      "file": "docs/40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md",
+      "target": "../../plans/2026-07-31-content-history-localization-audio-plan.md",
+      "exists": true
+    },
+    {
+      "file": "docs/plans/2026-07-31-content-history-localization-audio-plan.md",
+      "target": "2026-09-05-r7-presentation-and-english-readability-amendment-plan.md",
+      "exists": true
+    },
+    {
+      "file": "docs/plans/2026-07-31-content-history-localization-audio-plan.md",
+      "target": "../40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md",
+      "exists": true
+    },
+    {
+      "file": "docs/plans/COMMAND_BOARD.md",
+      "target": "2026-07-31-content-history-localization-audio-plan.md",
+      "exists": true
+    },
+    {
+      "file": "docs/plans/COMMAND_BOARD.md",
+      "target": "2026-08-23-opening-screens-implementation-plan.md",
+      "exists": true
+    },
+    {
+      "file": "docs/plans/COMMAND_BOARD.md",
+      "target": "2026-08-28-cinematic-opening-typography-implementation-plan.md",
+      "exists": true
+    },
+    {
+      "file": "docs/plans/COMMAND_BOARD.md",
+      "target": "2026-09-05-r7-presentation-and-english-readability-amendment-plan.md",
+      "exists": true
+    },
+    {
+      "file": "docs/plans/MASTER_ROADMAP.md",
+      "target": "2026-07-31-content-history-localization-audio-plan.md",
+      "exists": true
+    },
+    {
+      "file": "docs/plans/MASTER_ROADMAP.md",
+      "target": "2026-08-23-opening-screens-implementation-plan.md",
+      "exists": true
+    },
+    {
+      "file": "docs/plans/MASTER_ROADMAP.md",
+      "target": "2026-08-28-cinematic-opening-typography-implementation-plan.md",
+      "exists": true
+    },
+    {
+      "file": "docs/plans/MASTER_ROADMAP.md",
+      "target": "2026-09-05-r7-presentation-and-english-readability-amendment-plan.md",
+      "exists": true
+    },
+    {
+      "file": "docs/plans/MASTER_ROADMAP.md",
+      "target": "2026-09-07-arbih-brigade-honorific-name-correction-plan.md",
+      "exists": true
+    }
+  ],
+  "whitespaceClean": true,
+  "roadmapChars": 59345
+}
+
+EXIT_CODE=0
+SIGNAL=null

@@ -1,0 +1,9 @@
+rbih-1920x1080: PASS contrast=8.34 initial=clear maxScroll=clear fade=clear
+rs-1920x1080: PASS contrast=8.34 initial=clear maxScroll=clear fade=clear
+hrhb-1920x1080: PASS contrast=8.34 initial=clear maxScroll=clear fade=clear
+rbih-1366x768: PASS contrast=8.34 initial=clear maxScroll=clear fade=clear
+rs-1366x768: PASS contrast=8.34 initial=clear maxScroll=clear fade=clear
+hrhb-1366x768: PASS contrast=8.34 initial=clear maxScroll=clear fade=clear
+rbih-3440x1440: PASS contrast=8.34 initial=clear maxScroll=clear fade=clear
+rs-3440x1440: PASS contrast=8.34 initial=clear maxScroll=clear fade=clear
+hrhb-3440x1440: PASS contrast=8.34 initial=clear maxScroll=clear fade=clear

@@ -1,0 +1,165 @@
+{
+  "run": "F:/A-War-Without-Victory/logs/r7-english-readability/post-188w/apr1992_definitive_188w__6898d6d2e324c7a3__w188",
+  "pre": "F:/A-War-Without-Victory/logs/r7-english-readability/pre-188w-clean/apr1992_definitive_188w__6898d6d2e324c7a3__w188",
+  "expectedCommit": "88996a23d2441a391b25706c734626b5732e37b5",
+  "provenance": {
+    "collapse_enabled": false,
+    "consumed_inputs": {
+      "digest": "f8ace65496620fad1c8219a9dcaa8e2c5cdba2f3f541b156c7ba112b4748caaf",
+      "files": [
+        {
+          "path": "data/derived/census_rolled_up_wgs84.json",
+          "sha256": "6653e75d9dd695bc2b676b1a49635bd51eecf228ec8c58b37ed1ecb773f1e3b2"
+        },
+        {
+          "path": "data/derived/municipality_hq_settlement.json",
+          "sha256": "7ff0af467f4b1fedbe7e2515fc9ca96dde9f3c825724c0bf6333653a08a1801b"
+        },
+        {
+          "path": "data/derived/municipality_political_controllers_1990.json",
+          "sha256": "5fb60e0d3b7ec22da487c720c5256a58c3c8a95c2114c3ecaa2d13ed8cccfdd4"
+        },
+        {
+          "path": "data/derived/municipality_population_1991.json",
+          "sha256": "b475f88f15b130a626d1699f9d3064a2e64c70e816b67b608d734b10763a7c7b"
+        },
+        {
+          "path": "data/derived/operational/operational_contact_graph.json",
+          "sha256": "f7f9aaeea51710fda376234d79945b51dfea31a16ebca948ffd8dc54f3ce0c46"
+        },
+        {
+          "path": "data/derived/operational/operational_political_control.json",
+          "sha256": "309af26381cb36126f5c80b2327035865b4ac9c467cda66211f35516949a0a3d"
+        },
+        {
+          "path": "data/derived/operational/operational_settlements.geojson",
+          "sha256": "c03cc9ce4286b779139ce460e5f515d67415fe633e4ed2dbda1764b9440338c8"
+        },
+        {
+          "path": "data/derived/settlement_edges.json",
+          "sha256": "69073545ddac46395019b63295cd0de3a79920771b417178eb06cc38aa9a7cb7"
+        },
+        {
+          "path": "data/derived/settlement_ethnicity_data.json",
+          "sha256": "ca1e986d7f1c5e6662c7629a6f970441d1fb5474a48271bb0626194455674104"
+        },
+        {
+          "path": "data/scenarios/apr1992_definitive_188w.json",
+          "sha256": "7db056062b0b60a93be8e4f9df7940d91bbcc29f14bedaf7e30cd4c70ad71445"
+        },
+        {
+          "path": "data/scenarios/events/consequences.json",
+          "sha256": "2fac4889d39066a9263aba121b0bc93cf3195a4fda4da5a6985ca4b28fdfdce5"
+        },
+        {
+          "path": "data/scenarios/events/war_1992.json",
+          "sha256": "7596df56b934be4334ab8bffe51cf92f439c1fec238d6b82c21e68f25c61162a"
+        },
+        {
+          "path": "data/scenarios/events/war_1992_hrhb_summer.json",
+          "sha256": "de9bfc484847caa911d6921424b80ddcf8754219fffc016bdd346f80028d99e2"
+        },
+        {
+          "path": "data/scenarios/events/war_1993.json",
+          "sha256": "1234343036c73a9b274d3fc54ffb679e1032bafa52341c07c834972269d69aac"
+        },
+        {
+          "path": "data/scenarios/events/war_1994.json",
+          "sha256": "aef6d5321f41224953c311b2194ac71eb8b42e6e63c3a501fdacd79d1ce29449"
+        },
+        {
+          "path": "data/scenarios/events/war_1995.json",
+          "sha256": "b16b52e0a25c4312c2dc146e824c46fe3b5d8b567907d443304bb8dbb4958dc4"
+        },
+        {
+          "path": "data/scenarios/initial_formations/initial_formations_apr1992.json",
+          "sha256": "37832ee7aad72e8a99aaf21ec66d92d0161477902e8db42bf1579d77314008f4"
+        },
+        {
+          "path": "data/scenarios/officers/apr1992_officers.json",
+          "sha256": "1a4565169fc90b119da7bd5624587078a42b935dd16d241ecb93b8e0a29524d0"
+        },
+        {
+          "path": "data/scenarios/political_leader_data.json",
+          "sha256": "6affed383f92f9786fa112c1fedc2b6a9c4dc5193c750c822c1ccf114b643474"
+        },
+        {
+          "path": "data/scenarios/presidential_initiatives/apr1992.json",
+          "sha256": "f26279f708514b5b237ba71f915d43131db2663660de44d27b23684f5f415cfb"
+        },
+        {
+          "path": "data/scenarios/timelines/apr1992.json",
+          "sha256": "c966086e3195fdae585106cc9d50349ff6a497a02cb8f46643220ad766dd1c8c"
+        },
+        {
+          "path": "data/source/calibration/painted_control_apr1994.json",
+          "sha256": "afacdc25d9eb96344cdb48ccb7122d705fe1a3d9706cce0f43e6e0fdba191a4a"
+        },
+        {
+          "path": "data/source/calibration/painted_control_apr1995.json",
+          "sha256": "c3429f6e4e4afa0778619fcf1f999089ff26068487947e1c5fe3f6b391ba61f7"
+        },
+        {
+          "path": "data/source/calibration/painted_control_jan1993.json",
+          "sha256": "abb4f9d20472016d21be4130a1e555b7c7f82094612e7e1777d9916e10a0ba24"
+        },
+        {
+          "path": "data/source/calibration/painted_control_oct1995.json",
+          "sha256": "54f29d6e7a5158c521a83983476da5d832f9b4a66a83b2d69673f8db04e50429"
+        },
+        {
+          "path": "data/source/municipalities_1990_initial_political_controllers_apr1992.json",
+          "sha256": "dcbf9ec5a73a0d8b86588851e5ca7a83fab7f37aa9f1513e27eebb11b5802f6d"
+        },
+        {
+          "path": "data/source/municipalities_1990_registry_110.json",
+          "sha256": "8ede3d014b0b8694021b79e77e58f07266f647682b23fcd2a793417f16d433cc"
+        },
+        {
+          "path": "data/source/oob_brigades.json",
+          "sha256": "8ce85a115c80d92950d3629318686cb8f3377912437917805564fee1e19b9549"
+        },
+        {
+          "path": "data/source/oob_corps.json",
+          "sha256": "bce056408d0b7fcaeda20c3f847c4cc36f054ae2355d740708c83f139d76149c"
+        },
+        {
+          "path": "data/source/settlement_political_controllers_overrides.json",
+          "sha256": "0eb42921290f1812adc5fc4a008113483840d7d2ab2e2d382ea7582ca4659a33"
+        },
+        {
+          "path": "data/source/settlements_initial_master.json",
+          "sha256": "0a4fa946436ed525e38d94df0d3afe98ad2cfdd1e0f26f4cad2ae32bc894535d"
+        }
+      ]
+    },
+    "git_commit": "88996a23d2441a391b25706c734626b5732e37b5",
+    "git_dirty": false,
+    "harness": "headless",
+    "node_version": "v22.23.2",
+    "schema_version": 2
+  },
+  "checks": {
+    "clean": true,
+    "commit": true,
+    "node": true,
+    "metaWeeks": true,
+    "summaryWeeks": true,
+    "replayFrames": true,
+    "replayIdentical": true,
+    "finalSaveIdentical": true
+  },
+  "replay": {
+    "sha256": "53444b42084d4ea05b146d67651e0c9b19304b1200fafa5bea7a63775784cb56",
+    "bytes": 1304620232,
+    "lines": 188
+  },
+  "preReplay": {
+    "sha256": "53444b42084d4ea05b146d67651e0c9b19304b1200fafa5bea7a63775784cb56",
+    "bytes": 1304620232,
+    "lines": 188
+  },
+  "finalSaveSha256": "e414dc69f6e875fcd2a7394582921f20ca03123112baf12e9308c50035c29c50",
+  "finalStateFingerprint": "e414dc69f6e875fc",
+  "pass": true
+}

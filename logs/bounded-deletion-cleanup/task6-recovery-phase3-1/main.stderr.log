@@ -1,0 +1,4 @@
+(node:50704) electron: Failed to load URL: http://127.0.0.1:55837/index.html?embedded=1 with error: ERR_BLOCKED_BY_CLIENT
+(Use `A War Without Victory --trace-warnings ...` to show where the warning was created)
+Debugger ending on ws://127.0.0.1:55833/4de8172f-0847-45bd-9c38-395f0b6caf08
+For help, see: https://nodejs.org/en/docs/inspector

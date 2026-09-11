@@ -1,0 +1,48 @@
+PRESIDENT'S DESK
+COMMAND SURFACE
+DIPLOMACY
+INTELLIGENCE
+ARMY HQ
+CHRONICLE
+FACTION
+WAR MAP
+ADVANCE
+WAR
+REQUIRED 0
+NO SOURCED INITIATIVE · POLICY HOLDS
+REVIEW BEFORE ADVANCE
+0
+27 Dec 1993
+COMMAND SURFACE
+Where will you direct the war?
+CLOSE
+ACT
+0
+War Direction
+Operations, opportunities, and the front situation.
+0 REQUIRED · 0 RECOMMENDED · 0 MONITOR · 0 RECORD
+ACT
+0
+Diplomacy & Patrons
+Peace plans, counter-offers, and patron relations.
+0 REQUIRED · 0 RECOMMENDED · 0 MONITOR · 0 RECORD
+INSPECT
+0
+Home Front
+Mobilization, logistics, and municipal support.
+0 REQUIRED · 0 RECOMMENDED · 0 MONITOR · 0 RECORD
+ACT
+4
+Command & Personnel
+Commanders, elite units, and officer matters.
+0 REQUIRED · 4 RECOMMENDED · 0 MONITOR · 0 RECORD
+ACT
+0
+Conscience & Atrocity
+Paramilitary requests — the bright line.
+0 REQUIRED · 0 RECOMMENDED · 0 MONITOR · 0 RECORD
+MONITOR
+0
+The War's Record
+Costly turns, campaign cost, and the chronicle.
+0 REQUIRED · 0 RECOMMENDED · 0 MONITOR · 0 RECORD

@@ -1,0 +1,9 @@
+COMMAND={"cwd":"F:/A-War-Without-Victory","command":"git","args":["commit","-m","docs: reconcile R7 closeout and audio acceptance checklist"]}
+NODE_PATH=C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2
+RUN_ENV={"AWWV_S6_GRADE_RUN":null,"provenanceOverridePresent":false}
+pre-commit: docs/process-only staged changes; skipping npx tsc --noEmit
+[codex/r7-english-readability bd7b81975] docs: reconcile R7 closeout and audio acceptance checklist
+ 5 files changed, 301 insertions(+), 15 deletions(-)
+
+EXIT_CODE=0
+SIGNAL=null

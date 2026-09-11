@@ -1,0 +1,24 @@
+node --check logs\r9-build-preparation\phase1.1_capture_production_graph.mjs
+exit_code=0
+node logs\r9-build-preparation\phase1.1_capture_production_graph.mjs --remap-raw
+raw_module_ids=1378
+resolved_package_rows=8
+F:\A-War-Without-Victory\logs\r9-build-preparation\phase1.1-production-resolved-modules.json
+exit_code=0
+node logs\r9-build-preparation\phase1.1_verify_remap.mjs
+count @deck.gl/core: corrected=108
+count @deck.gl/layers: corrected=68
+count @deck.gl/mapbox: corrected=7
+count maplibre-gl: corrected=3
+count pmtiles: corrected=1
+count react: corrected=11
+count react-dom: corrected=8
+count zustand: corrected=2
+package_rows=8
+checked_module_ids=208
+raw_module_ids=1378
+package_identities_match_preserved_capture=true
+module_ids_match_exact_normalized_raw_set=true
+relative_nul_free_sorted_unique=true
+exit_code=0
+capture_script_hash_match=true

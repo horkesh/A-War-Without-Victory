@@ -1,0 +1,122 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ❯ tests/ui/pre_advance_command_review.test.ts (18 tests | 1 failed) 77ms
+   × buildPreAdvanceCommandReviewView > projects the Advance Clearance list with direct Desk routing for presidential decisions 32ms
+     → expected { priorityCounts: { …(4) }, …(4) } to match object { priorityCounts: { …(4) }, …(3) }
+(1 matching property omitted from actual)
+ ✓ tests/ui_presidential_decision_room_wiring.test.ts (15 tests) 40ms
+ ❯ tests/ui/warroom_priority_docket.test.ts (5 tests | 4 failed) 38ms
+   × buildWarroomPriorityDocketView > projects the top pre-advance priorities into a deterministic Warroom docket 29ms
+     → expected '1 advance item / 0 required / 5 recom…' to be '1 advance item / 0 required / 4 recom…' // Object.is equality
+   × buildWarroomPriorityDocketView > keeps a quiet clear state available without inventing docket rows 2ms
+     → expected '0 advance items / 0 required / 4 reco…' to be '0 advance items / 0 required / 3 reco…' // Object.is equality
+   × buildWarroomPriorityDocketView > uses weighted grouped-decision counts in the docket summary 3ms
+     → expected '2 advance items / 2 required / 4 reco…' to be '2 advance items / 2 required / 3 reco…' // Object.is equality
+   × buildWarroomPriorityDocketView > localizes Warroom docket summary chrome in BCS mode 3ms
+     → expected '1 stavka za napredovanje / 0 obavezno…' to be '1 stavka za napredovanje / 0 obavezno…' // Object.is equality
+ ✓ tests/ui/decision_room_navigation_owner.test.ts (1 test) 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/ui/pre_advance_command_review.test.ts > buildPreAdvanceCommandReviewView > projects the Advance Clearance list with direct Desk routing for presidential decisions
+AssertionError: expected { priorityCounts: { …(4) }, …(4) } to match object { priorityCounts: { …(4) }, …(3) }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  Object {
+    "advanceReviewCount": 2,
+    "opportunities": 1,
+    "pendingReviews": 2,
+    "priorityCounts": Object {
+      "monitor": 1,
+-     "recommended": 5,
++     "recommended": 6,
+      "record": 3,
+      "required": 0,
+    },
+  }
+
+ ❯ tests/ui/pre_advance_command_review.test.ts:172:26
+    170|     expect(view.headline).toBe('Recommended before advance');
+    171|     expect(view.canReviewPriorities).toBe(true);
+    172|     expect(view.metrics).toMatchObject({
+       |                          ^
+    173|       priorityCounts: { required: 0, recommended: 5, monitor: 1, recor…
+    174|       pendingReviews: 2,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/ui/warroom_priority_docket.test.ts > buildWarroomPriorityDocketView > projects the top pre-advance priorities into a deterministic Warroom docket
+AssertionError: expected '1 advance item / 0 required / 5 recom…' to be '1 advance item / 0 required / 4 recom…' // Object.is equality
+
+Expected: "1 advance item / 0 required / 4 recommended / 1 monitor / 3 record / 1 pending"
+Received: "1 advance item / 0 required / 5 recommended / 1 monitor / 3 record / 1 pending"
+
+ ❯ tests/ui/warroom_priority_docket.test.ts:166:27
+    164|     expect(first.headline).toBe('Recommended before advance');
+    165|     expect(first.blockingDecisionCount).toBe(0);
+    166|     expect(first.summary).toBe('1 advance item / 0 required / 4 recomm…
+       |                           ^
+    167|     expect(first.items.map((item) => item.id)).toEqual([
+    168|       'opportunity:opp_docket',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/ui/warroom_priority_docket.test.ts > buildWarroomPriorityDocketView > keeps a quiet clear state available without inventing docket rows
+AssertionError: expected '0 advance items / 0 required / 4 reco…' to be '0 advance items / 0 required / 3 reco…' // Object.is equality
+
+Expected: "0 advance items / 0 required / 3 recommended / 0 monitor / 0 record / 0 pending"
+Received: "0 advance items / 0 required / 4 recommended / 0 monitor / 0 record / 0 pending"
+
+ ❯ tests/ui/warroom_priority_docket.test.ts:196:26
+    194|     expect(view.tone).toBe('clear');
+    195|     expect(view.headline).toBe('Clear to advance');
+    196|     expect(view.summary).toBe('0 advance items / 0 required / 3 recomm…
+       |                          ^
+    197|     expect(view.items).toEqual([]);
+    198|     expect(view.sourceHandoffs).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/ui/warroom_priority_docket.test.ts > buildWarroomPriorityDocketView > uses weighted grouped-decision counts in the docket summary
+AssertionError: expected '2 advance items / 2 required / 4 reco…' to be '2 advance items / 2 required / 3 reco…' // Object.is equality
+
+Expected: "2 advance items / 2 required / 3 recommended / 0 monitor / 0 record / 2 pending"
+Received: "2 advance items / 2 required / 4 recommended / 0 monitor / 0 record / 2 pending"
+
+ ❯ tests/ui/warroom_priority_docket.test.ts:218:26
+    216|     expect(view.metrics.priorityCounts.required).toBe(2);
+    217|     expect(view.metrics.advanceReviewCount).toBe(2);
+    218|     expect(view.summary).toBe('2 advance items / 2 required / 3 recomm…
+       |                          ^
+    219|   });
+    220| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/ui/warroom_priority_docket.test.ts > buildWarroomPriorityDocketView > localizes Warroom docket summary chrome in BCS mode
+AssertionError: expected '1 stavka za napredovanje / 0 obavezno…' to be '1 stavka za napredovanje / 0 obavezno…' // Object.is equality
+
+Expected: "1 stavka za napredovanje / 0 obavezno / 4 preporučeno / 1 praćenje / 3 zapis / 1 na čekanju"
+Received: "1 stavka za napredovanje / 0 obavezno / 5 preporučeno / 1 praćenje / 3 zapis / 1 na čekanju"
+
+ ❯ tests/ui/warroom_priority_docket.test.ts:258:26
+    256|     setLocale('en');
+    257| 
+    258|     expect(view.summary).toBe('1 stavka za napredovanje / 0 obavezno /…
+       |                          ^
+    259|     expect(view.sourceHandoffSummary).toBe('1 izvorni prijenos / 0 oba…
+    260|     expect(view.openBoardLabel).toBe('Otvori sobu odluka');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  2 failed | 2 passed (4)
+      Tests  5 failed | 34 passed (39)
+   Start at  09:49:40
+   Duration  30.96s (transform 8.71s, setup 49ms, collect 12.21s, tests 161ms, environment 16.71s, prepare 421ms)
+
+
+EXIT_CODE=1

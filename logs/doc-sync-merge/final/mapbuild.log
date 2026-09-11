@@ -1,0 +1,192 @@
+
+> awwv@0.9.9-beta.1 desktop:map:build
+> npm exec --workspace awwv-map -- vite build --config vite.config.ts
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+[32m✓[39m 1379 modules transformed.
+rendering chunks...
+computing gzip size...
+[2m../../../dist/tactical-map/[22m[32massets/ui_hover-B9NIftkw.ogg                                   [39m[1m[2m    4.51 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/battle_decisive-BJoqCB9H.ogg                            [39m[1m[2m    4.85 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/ui_click-DTXexl_Y.ogg                                   [39m[1m[2m    4.88 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/op_launch-CFtNLHIi.ogg                                  [39m[1m[2m    5.47 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32mindex.html                                                     [39m[1m[2m    5.77 kB[22m[1m[22m[2m │ gzip:   1.64 kB[22m
+[2m../../../dist/tactical-map/[22m[32massets/turn_review_open-DAIxWdcJ.ogg                           [39m[1m[2m    5.86 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/battle_catastrophic-Cjw2jRz4.ogg                        [39m[1m[2m    6.10 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_critical-NWGV4Ti6.ogg                             [39m[1m[2m    6.39 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/turn_advance-Bft7d0mP.ogg                               [39m[1m[2m    6.75 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/tutorial_complete-BApWmXNJ.ogg                          [39m[1m[2m    6.77 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/battle-z8Jd4fjD.ogg                                     [39m[1m[2m    7.37 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/game_over-KFWX8M9-.ogg                                  [39m[1m[2m    7.68 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event-BHdp5oPQ.ogg                                      [39m[1m[2m    8.23 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/turn_complete-WWZZgCZQ.ogg                              [39m[1m[2m    8.97 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/op_complete-LI4ji67k.ogg                                [39m[1m[2m    9.54 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/ui_open-B7lZ0XP4.ogg                                    [39m[1m[2m    9.83 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/ui_close-C6vIFQji.ogg                                   [39m[1m[2m    9.92 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/IBMPlexMono-Regular-Latin2-Bx2Zd6oW.woff2               [39m[1m[2m   13.31 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/tutorial_05_decide-COpy2R0W.webp                        [39m[1m[2m   13.52 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/IBMPlexMono-SemiBold-Latin2-Chnj1oVO.woff2              [39m[1m[2m   13.54 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/plan_dayton-C1Wr8qa8.webp                               [39m[1m[2m   14.00 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/peace_plan-CfXTXBUJ.ogg                                 [39m[1m[2m   14.17 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/codex_atrocity_essay_header-BdHu5P9_.webp               [39m[1m[2m   14.56 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/plan_owen_stoltenberg-DXdIjoZp.webp                     [39m[1m[2m   16.46 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/IBMPlexMono-Regular-Latin1-BsnL3gsb.woff2               [39m[1m[2m   17.27 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/IBMPlexMono-SemiBold-Latin1-iYs1QkgK.woff2              [39m[1m[2m   17.71 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_patron_relations_RS-DPNR4_nf.webp                 [39m[1m[2m   19.07 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_patron_relations_HRHB-iXHEMYEr.webp               [39m[1m[2m   20.89 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/packet_thumb_event_decision-ekbydC_8.webp               [39m[1m[2m   22.04 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_washington_agreement-C9vwhxNM.webp                [39m[1m[2m   24.76 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/tutorial_03_brief-C-th7xIS.webp                         [39m[1m[2m   24.92 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/tutorial_04_inspect-C_fGwfBD.webp                       [39m[1m[2m   26.03 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/tutorial_01_welcome-Bo17AbYJ.webp                       [39m[1m[2m   26.23 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_diplomatic_negotiation-ByXCRDmz.webp              [39m[1m[2m   26.64 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/plan_contact_group-qUll_Mdo.webp                        [39m[1m[2m   27.42 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/tutorial_08_judge-fTfUN0cq.webp                         [39m[1m[2m   28.28 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/cat_conscience_RBiH-dLs-ztDT.webp                       [39m[1m[2m   28.77 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_supply_shortage_HRHB-D6GtvkUZ.webp                [39m[1m[2m   29.42 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/packet_thumb_intelligence-Bf6kRYZR.webp                 [39m[1m[2m   31.00 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_patron_relations_RBiH-BKRMjPOr.webp               [39m[1m[2m   31.85 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/packet_thumb_peace_plan-BY_aqP7w.webp                   [39m[1m[2m   32.41 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/packet_thumb_paramilitary-Bj42rbz_.webp                 [39m[1m[2m   33.22 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/plan_vance_owen-DI0LLjgz.webp                           [39m[1m[2m   33.41 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/tutorial_07_report-DHzzveRk.webp                        [39m[1m[2m   34.05 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_displacement_column--rZWL-pG.webp                 [39m[1m[2m   35.00 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/packet_thumb_officer_matter-BhxgVLs3.webp               [39m[1m[2m   35.33 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_political_session-Aa8PRh3x.webp                   [39m[1m[2m   35.90 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_referendum-DmYvySEy.webp                          [39m[1m[2m   36.76 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/tutorial_06_execute-BYnRoXOx.webp                       [39m[1m[2m   37.00 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_supply_shortage_RS-7CEovFoX.webp                  [39m[1m[2m   38.06 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_dayton_signed_1995-CW8TzUzX.webp                  [39m[1m[2m   38.16 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/cat_conscience_HRHB-BngJQA-9.webp                       [39m[1m[2m   41.79 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/decision_header_personnel-CsPZXeWS.webp                 [39m[1m[2m   42.50 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_supply_shortage_RBiH-BYXraluS.webp                [39m[1m[2m   46.31 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/tutorial_02_map-ChRRP1Sa.webp                           [39m[1m[2m   46.41 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_replace_commander_RBiH-qr4dEkP2.webp                [39m[1m[2m   47.32 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_mobilization_HRHB-CdFWbwVc.webp                   [39m[1m[2m   48.19 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/cat_command_RS-bjF7AQl-.webp                            [39m[1m[2m   50.69 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/cat_conscience_RS-CAFW-j0X.webp                         [39m[1m[2m   51.18 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/consequence_personnel_change-bN9fAcI4.webp              [39m[1m[2m   51.79 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/paperclip-Dph4l_D-.webp                                 [39m[1m[2m   51.86 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_patron_relations_RBiH-ChXJMqCt.webp                 [39m[1m[2m   53.19 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/packet_thumb_reserve_request-btno3VrJ.webp              [39m[1m[2m   53.59 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/cat_diplomacy_HRHB-C5sx9hR9.webp                        [39m[1m[2m   54.04 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/packet_thumb_convoy-DEvRRKZO.webp                       [39m[1m[2m   54.11 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/decision_header_diplomacy-qpSHljej.webp                 [39m[1m[2m   54.14 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/consequence_public_pressure-CORnUBfD.webp               [39m[1m[2m   55.88 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_mobilization_RS-BPm2HYDx.webp                     [39m[1m[2m   58.84 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/cat_command_HRHB-CqPBc3bD.webp                          [39m[1m[2m   58.89 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_un_presence-CpXwRNVj.webp                         [39m[1m[2m   59.49 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/decision_header_counter_offer-C74nPhIO.webp             [39m[1m[2m   61.47 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_supply_convoy_RS-DInWpgmy.webp                    [39m[1m[2m   62.74 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/decision_header_paramilitary-BbLC2rYX.webp              [39m[1m[2m   62.80 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/cat_command_RBiH-DnzwH54Y.webp                          [39m[1m[2m   62.82 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/consequence_negotiated_settlement-Cbfi9wPW.webp         [39m[1m[2m   63.30 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/cat_diplomacy_RS-DALcrlc9.webp                          [39m[1m[2m   63.49 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/cat_home_front_RS-CAyflyik.webp                         [39m[1m[2m   63.90 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_ahmici_massacre_1993-C37T3Qpa.webp                [39m[1m[2m   64.07 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_siege_city_RBiH-CjyGFCQY.webp                     [39m[1m[2m   64.15 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/cat_diplomacy_RBiH-D0VfxfeV.webp                        [39m[1m[2m   65.93 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_ceasefire-DbnZotYx.webp                           [39m[1m[2m   66.49 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/decision_header_military_staff-CxLEVRfh.webp            [39m[1m[2m   66.59 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_supply_convoy_RBiH-D4GYC059.webp                  [39m[1m[2m   67.26 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/consequence_humanitarian_access-B4-g-GSW.webp           [39m[1m[2m   68.08 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_supply_convoy_HRHB-CwW2axLT.webp                  [39m[1m[2m   71.82 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_drina_valley_ethnic_cleansing_1992-CBNHOKfB.webp  [39m[1m[2m   73.66 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_siege_city_RS-Dyy8BWPc.webp                       [39m[1m[2m   74.84 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_zepa_falls_1995-3HwlrICu.webp                     [39m[1m[2m   74.87 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_replace_commander_RS-Do3POEZA.webp                  [39m[1m[2m   77.30 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/verdict_pyrrhic-E2Wt6Rw4.webp                           [39m[1m[2m   77.67 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_replace_commander_HRHB-_U0F4PKF.webp                [39m[1m[2m   77.86 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_patron_relations_HRHB-CZqb1__-.webp                 [39m[1m[2m   78.84 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_mobilization_RBiH-qmRwmPKN.webp                   [39m[1m[2m   80.42 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/consequence_reserve_deployment-Ci_viHIC.webp            [39m[1m[2m   81.18 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/stamp_secret-lRWMgphk.webp                              [39m[1m[2m   84.24 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_srebrenica_falls_1995-DclbaMRE.webp               [39m[1m[2m   84.74 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_address_nation_RS-EAjQEOT3.webp                     [39m[1m[2m   85.31 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/decision_header_humanitarian_convoy-Bhv0os6M.webp       [39m[1m[2m   85.89 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_siege_city_HRHB-CUNd_AyI.webp                     [39m[1m[2m   86.17 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_address_nation_RBiH-JLQ3PxUH.webp                   [39m[1m[2m   93.12 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_concentration_camps_revealed_1992-Dnbgk8lR.webp   [39m[1m[2m   94.13 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/decision_header_intelligence-i7zJldWe.webp              [39m[1m[2m   94.70 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/cat_war_direction_RBiH-Dq_-rx_R.webp                    [39m[1m[2m   96.39 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/cat_record_RS-Bk8Z_3j2.webp                             [39m[1m[2m   99.59 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/cat_home_front_HRHB-Nb03SWB-.webp                       [39m[1m[2m   99.85 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/cat_war_direction_HRHB-wOnu0NMg.webp                    [39m[1m[2m  101.70 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/verdict_dayton_close-CH9VWlz8.webp                      [39m[1m[2m  101.88 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_authorize_op_HRHB-ClcTtFCs.webp                     [39m[1m[2m  103.07 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/event_markale_shelling-D1vR-WFb.webp                    [39m[1m[2m  105.67 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/cat_war_direction_RS-C4OObkE2.webp                      [39m[1m[2m  107.44 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/cat_home_front_RBiH-D_htJvXG.webp                       [39m[1m[2m  110.99 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/cat_record_HRHB-DbgiIEac.webp                           [39m[1m[2m  119.33 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_authorize_op_RS-ZJBG65-m.webp                       [39m[1m[2m  120.42 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_patron_relations_RS-Dh7qO4ph.webp                   [39m[1m[2m  121.92 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/cat_record_RBiH-DPM-xzX5.webp                           [39m[1m[2m  134.55 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_front_visit_RS-P8fOFEAc.webp                        [39m[1m[2m  140.50 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_decorate_unit_RS-DgSpQuVh.webp                      [39m[1m[2m  144.72 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_address_nation_HRHB-D-sMit6j.webp                   [39m[1m[2m  152.45 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_authorize_op_RBiH-BdrE1UTw.webp                     [39m[1m[2m  153.32 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/verdict_catastrophic-Co4n6EY5.webp                      [39m[1m[2m  154.42 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_front_visit_RBiH-CyVIKxBB.webp                      [39m[1m[2m  154.44 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_convoy_RBiH-BnxL0X6j.webp                           [39m[1m[2m  155.55 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_decorate_unit_HRHB-DDabFUe8.webp                    [39m[1m[2m  159.38 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_decorate_unit_RBiH-BBtSFVyi.webp                    [39m[1m[2m  162.38 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_front_visit_HRHB-CNKeUGyu.webp                      [39m[1m[2m  181.71 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/ambient_field-5Mv-hV7p.ogg                              [39m[1m[2m  196.08 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/ambient_warroom-CO4FPnyV.ogg                            [39m[1m[2m  206.42 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_convoy_HRHB-C6st0K74.webp                           [39m[1m[2m  208.96 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/ambient_archive-DPQExHNq.ogg                            [39m[1m[2m  211.35 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/IBMPlexSans_Condensed-Bold-BzFyGlEG.ttf                 [39m[1m[2m  218.26 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/IBMPlexSans_Condensed-Regular-spO9-HTR.ttf              [39m[1m[2m  218.36 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/IBMPlexSans_Condensed-SemiBold-NR8JCoFL.ttf             [39m[1m[2m  218.37 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/act_convoy_RS-WutW9-BF.webp                             [39m[1m[2m  219.85 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/hq_rs_1995-CKltsahe.webp                                [39m[1m[2m  239.19 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/army_crest_ARBiH-CBh70_lN.webp                          [39m[1m[2m  261.51 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/hq_rbih_1992-CoaLgsVe.webp                              [39m[1m[2m  264.67 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/army_crest_HVO-DQl11GCf.webp                            [39m[1m[2m  301.52 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/hq_rs_1994-B8n0_XHP.webp                                [39m[1m[2m  302.83 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/hq_rbih_1994-D1MskTxt.webp                              [39m[1m[2m  322.03 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/hq_hrhb_1995-B4INqCYq.webp                              [39m[1m[2m  322.08 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/hq_hrhb_1994-BbUlY8Xn.webp                              [39m[1m[2m  324.67 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/hq_presidential_desk_1992-CA0DU93Z.webp                 [39m[1m[2m  326.13 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/hq_hrhb_1993-CgcS4fRF.webp                              [39m[1m[2m  337.93 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/hq_rbih_1991-DcDCBBRo.webp                              [39m[1m[2m  348.49 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/hq_rbih_1995-DKntnGfH.webp                              [39m[1m[2m  358.17 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/hq_hrhb_1991-Am0FULRB.webp                              [39m[1m[2m  360.15 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/hq_rbih_1993-OfnzuFro.webp                              [39m[1m[2m  365.87 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/army_crest_VRS-BJvk1MFZ.webp                            [39m[1m[2m  373.53 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/hq_rs_1991-COPd8zFu.webp                                [39m[1m[2m  384.81 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/crest_RBiH-CB81dYy6.webp                                [39m[1m[2m  387.13 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/crest_RS-LhJ558Ii.webp                                  [39m[1m[2m  403.59 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/hq_rs_1992-CAQTFEpJ.webp                                [39m[1m[2m  404.05 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/crest_HRHB-CJDGh6VF.webp                                [39m[1m[2m  426.17 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/hq_rs_1993-DvFlQU1C.webp                                [39m[1m[2m  443.36 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/opening_map_portal-Dx04DnZ0.webp                        [39m[1m[2m  471.38 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/hq_hrhb_1992-CpcEWClM.webp                              [39m[1m[2m  514.98 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/flag_RS-DsYaumpc.webp                                   [39m[1m[2m  573.66 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/flag_RBiH-D13oUq6S.webp                                 [39m[1m[2m  613.30 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/flag_HRHB-CKSpPRr-.webp                                 [39m[1m[2m  665.53 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/opening_splash_neutral-DyLg9h1c.webp                    [39m[1m[2m  701.92 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[32massets/opening_monitoring_room_neutral-CnVq0PKX.webp           [39m[1m[2m1,045.18 kB[22m[1m[22m
+[2m../../../dist/tactical-map/[22m[35massets/vendor-maplibre-CuCRB34y.css                            [39m[1m[2m   65.48 kB[22m[1m[22m[2m │ gzip:   9.22 kB[22m
+[2m../../../dist/tactical-map/[22m[35massets/tactical_map-BodvkjIG.css                               [39m[1m[2m  150.54 kB[22m[1m[22m[2m │ gzip:  26.60 kB[22m
+[2m../../../dist/tactical-map/[22m[36massets/vendor-state-DnO-lVWC.js                                [39m[1m[2m    1.51 kB[22m[1m[22m[2m │ gzip:   0.79 kB[22m
+[2m../../../dist/tactical-map/[22m[36massets/operational-osid-areas-C2mzGrun.js                      [39m[1m[2m   22.74 kB[22m[1m[22m[2m │ gzip:   7.85 kB[22m
+[2m../../../dist/tactical-map/[22m[36massets/vendor-loaders-BMhlApBR.js                              [39m[1m[2m   27.34 kB[22m[1m[22m[2m │ gzip:   9.49 kB[22m
+[2m../../../dist/tactical-map/[22m[36massets/event-catalog-war_1992_hrhb_summer-Cmf7JlP5.js          [39m[1m[2m   37.32 kB[22m[1m[22m[2m │ gzip:   9.43 kB[22m
+[2m../../../dist/tactical-map/[22m[36massets/oob-brigade-designations-CsqZnea9.js                    [39m[1m[2m   62.97 kB[22m[1m[22m[2m │ gzip:   7.15 kB[22m
+[2m../../../dist/tactical-map/[22m[36massets/oob-brigades-vuqKn2aa.js                                [39m[1m[2m   83.90 kB[22m[1m[22m[2m │ gzip:   9.51 kB[22m
+[2m../../../dist/tactical-map/[22m[36massets/vendor-misc-Cei7H_x4.js                                 [39m[1m[2m   92.02 kB[22m[1m[22m[2m │ gzip:  32.00 kB[22m
+[2m../../../dist/tactical-map/[22m[36massets/event-catalog-war_1995-D4dIQsD-.js                      [39m[1m[2m  105.62 kB[22m[1m[22m[2m │ gzip:  26.54 kB[22m
+[2m../../../dist/tactical-map/[22m[36massets/event-catalog-war_1994-BQiyhxrn.js                      [39m[1m[2m  133.39 kB[22m[1m[22m[2m │ gzip:  29.76 kB[22m
+[2m../../../dist/tactical-map/[22m[36massets/vendor-react-DHH8-g4D.js                                [39m[1m[2m  141.96 kB[22m[1m[22m[2m │ gzip:  45.49 kB[22m
+[2m../../../dist/tactical-map/[22m[36massets/vendor-deck-D2PfOsL6.js                                 [39m[1m[2m  283.34 kB[22m[1m[22m[2m │ gzip:  80.69 kB[22m
+[2m../../../dist/tactical-map/[22m[36massets/event-catalog-war_1992-Cc7XHAre.js                      [39m[1m[2m  292.04 kB[22m[1m[22m[2m │ gzip:  60.15 kB[22m
+[2m../../../dist/tactical-map/[22m[36massets/event-catalog-consequences--WWmogUF.js                  [39m[1m[2m  331.82 kB[22m[1m[22m[2m │ gzip:  59.52 kB[22m
+[2m../../../dist/tactical-map/[22m[36massets/event-catalog-war_1993-CQnrLNHv.js                      [39m[1m[2m  343.75 kB[22m[1m[22m[2m │ gzip:  78.03 kB[22m
+[2m../../../dist/tactical-map/[22m[36massets/vendor-luma-DC5Zdfkk.js                                 [39m[1m[2m  431.89 kB[22m[1m[22m[2m │ gzip: 103.76 kB[22m
+[2m../../../dist/tactical-map/[22m[36massets/vendor-maplibre-CYWXp_5K.js                             [39m[1m[2m  801.65 kB[22m[1m[22m[2m │ gzip: 217.61 kB[22m
+[2m../../../dist/tactical-map/[22m[36massets/codex-essay-index-DZZtcIou.js                           [39m[1m[2m  899.24 kB[22m[1m[22m[2m │ gzip: 232.90 kB[22m
+[2m../../../dist/tactical-map/[22m[36massets/tactical_map-BO6ILq8b.js                                [39m[1m[2m2,797.35 kB[22m[1m[22m[2m │ gzip: 716.76 kB[22m
+[32m✓ built in 22.32s[39m
+BUILD_EXIT=0

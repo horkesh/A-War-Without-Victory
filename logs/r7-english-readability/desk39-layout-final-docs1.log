@@ -1,0 +1,22 @@
+COMMAND={"cwd":"F:/A-War-Without-Victory","command":"C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe","args":["C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node_modules/npm/bin/npm-cli.js","run","test:vitest","--","tests/docs_desktop_v09_truth.test.ts","tests/docs_truth_no_skip_guard.test.ts","tests/v092_playtest_package_docs.test.ts"]}
+NODE_PATH=C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2
+RUN_ENV={"AWWV_S6_GRADE_RUN":null,"provenanceOverridePresent":false}
+
+> awwv@0.9.9-beta.1 test:vitest
+> node tools/test/run_vitest_default.mjs tests/docs_desktop_v09_truth.test.ts tests/docs_truth_no_skip_guard.test.ts tests/v092_playtest_package_docs.test.ts
+
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/docs_desktop_v09_truth.test.ts (7 tests) 28ms
+ ✓ tests/docs_truth_no_skip_guard.test.ts (2 tests) 6ms
+ ✓ tests/v092_playtest_package_docs.test.ts (4 tests) 11ms
+
+ Test Files  3 passed (3)
+      Tests  13 passed (13)
+   Start at  20:54:53
+   Duration  1.48s (transform 79ms, setup 22ms, collect 84ms, tests 45ms, environment 1ms, prepare 314ms)
+
+
+EXIT_CODE=0
+SIGNAL=null

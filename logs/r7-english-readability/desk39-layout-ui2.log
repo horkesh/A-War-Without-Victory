@@ -1,0 +1,478 @@
+COMMAND={"cwd":"F:/A-War-Without-Victory","command":"C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe","args":["C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node_modules/npm/bin/npm-cli.js","run","test:vitest","--","tests/ui"]}
+NODE_PATH=C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2
+
+> awwv@0.9.9-beta.1 test:vitest
+> node tools/test/run_vitest_default.mjs tests/ui
+
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/ui_map_game_state_adapter.test.ts (67 tests) 99ms
+ ✓ tests/ui/presidential_decision_room.test.ts (64 tests) 138ms
+ ✓ tests/ui/codex_essay_vocab_integration.test.ts (43 tests) 30ms
+ ✓ tests/ui/inbox_items.test.ts (56 tests) 72ms
+ ✓ tests/ui/turn_aftermath.test.ts (25 tests) 36ms
+ ✓ tests/ui_map_interactions.test.ts (27 tests) 38ms
+ ✓ tests/ui/codex_essay_resolver.test.ts (47 tests) 28ms
+ ✓ tests/ui/first_hour_browser_gate_contract.test.ts (12 tests) 109ms
+ ✓ tests/ui_map_render_smoke.test.ts (25 tests) 40ms
+ ✓ tests/ui_map_deck_counter_visibility.test.ts (34 tests) 45ms
+ ✓ tests/ui/decision_consequence_trail.test.ts (27 tests) 25ms
+ ✓ tests/ui_player_visibility.test.ts (19 tests) 56ms
+ ✓ tests/ui/command_strain_interpretation.test.ts (58 tests) 27ms
+ ✓ tests/ui/chronicle_causality_slides.test.ts (15 tests) 22ms
+ ✓ tests/ui_map_tooltip_player_visibility.test.ts (17 tests) 25ms
+ ✓ tests/ui/back_the_officer_read_model.test.ts (17 tests) 48ms
+ ✓ tests/ui/consequence_receipts.test.ts (14 tests) 15ms
+ ✓ tests/ui/pre_advance_command_review.test.ts (18 tests) 83ms
+ ✓ tests/ui_adapter_boundary.test.ts (18 tests) 155ms
+ ✓ tests/ui/officer_resentment_receipts.test.ts (16 tests) 14ms
+ ✓ tests/ui/warroom_shell_ownership.test.ts (23 tests) 296ms
+stdout | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSave — post-load UI state reset > resets all selection state after loading a save
+[gameStore] Loaded save: 11 May 1992 (war) — 0 formations, 0 control entries
+
+stdout | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSave — post-load UI state reset > resets openingBriefDismissed after first loading a save
+[gameStore] Loaded save: 11 May 1992 (war) — 0 formations, 0 control entries
+
+stdout | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSave — post-load UI state reset > preserves openingBriefDismissed across same-faction save refreshes
+[gameStore] Loaded save: 11 May 1992 (war) — 0 formations, 0 control entries
+
+stdout | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSave — post-load UI state reset > preserves openingBriefDismissed across same-faction save refreshes
+[gameStore] Loaded save: 18 May 1992 (war) — 0 formations, 0 control entries
+
+stdout | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSave — post-load UI state reset > resets openingBriefDismissed when loading a different player faction
+[gameStore] Loaded save: 11 May 1992 (war) — 0 formations, 0 control entries
+
+stdout | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSave — post-load UI state reset > resets openingBriefDismissed when loading a different player faction
+[gameStore] Loaded save: 18 May 1992 (war) — 0 formations, 0 control entries
+
+stdout | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSave — post-load UI state reset > sets loadedGameState and clears loadError on successful load
+[gameStore] Loaded save: 11 May 1992 (war) — 0 formations, 0 control entries
+
+stdout | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSave — post-load UI state reset > consumes replay sidecars once and clears them after later plain loads
+[gameStore] Loaded save: 11 Jan 1993 (war) — 0 formations, 0 control entries
+
+stdout | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSave — post-load UI state reset > consumes replay sidecars once and clears them after later plain loads
+[gameStore] Loaded save: 18 Jan 1993 (war) — 0 formations, 0 control entries
+
+stderr | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSave — post-load UI state reset > clears pending replay sidecars after a malformed load attempt
+[gameStore] Failed to parse save: SyntaxError: Unexpected token 'o', "not json at all" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at F:\A-War-Without-Victory\src\ui\map\store\gameStore.ts:838:22
+    at Timeout.run [as _onTimeout] (F:\A-War-Without-Victory\src\ui\map\store\gameStore.ts:818:11)
+    at listOnTimeout (node:internal/timers:585:17)
+    at processTimers (node:internal/timers:521:7)
+
+stdout | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSave — post-load UI state reset > updates lastLoadedStateFingerprint on each load
+[gameStore] Loaded save: 11 May 1992 (war) — 0 formations, 0 control entries
+
+stdout | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSave — post-load UI state reset > updates lastLoadedStateFingerprint on each load
+[gameStore] Loaded save: 15 Jun 1992 (war) — 0 formations, 0 control entries
+
+stdout | tests/ui/gamestore_load_reset.test.ts > gameStore replay inspection - read-only map frame swap > swaps loadedGameState to a selected replay frame and restores the final state
+[gameStore] Loaded save: 11 Jan 1993 (war) — 0 formations, 0 control entries
+
+stderr | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSave — error handling for malformed input > sets loadError for non-JSON string input
+[gameStore] Failed to parse save: SyntaxError: Unexpected token 'o', "not json at all" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at F:\A-War-Without-Victory\src\ui\map\store\gameStore.ts:838:22
+    at Timeout.run [as _onTimeout] (F:\A-War-Without-Victory\src\ui\map\store\gameStore.ts:818:11)
+    at listOnTimeout (node:internal/timers:585:17)
+    at processTimers (node:internal/timers:521:7)
+
+stderr | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSave — error handling for malformed input > sets loadError for object without meta block
+[gameStore] Failed to parse save: Error: Save file is missing required game data (no meta block). Ensure this is a valid AWWV save.
+    at F:\A-War-Without-Victory\src\ui\map\store\gameStore.ts:847:19
+    at Timeout.run [as _onTimeout] (F:\A-War-Without-Victory\src\ui\map\store\gameStore.ts:818:11)
+    at listOnTimeout (node:internal/timers:585:17)
+    at processTimers (node:internal/timers:521:7)
+
+stderr | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSave — error handling for malformed input > sets loadError for null input
+[gameStore] Failed to parse save: Error: Save file does not contain a valid game state object.
+    at F:\A-War-Without-Victory\src\ui\map\store\gameStore.ts:843:19
+    at Timeout.run [as _onTimeout] (F:\A-War-Without-Victory\src\ui\map\store\gameStore.ts:818:11)
+    at listOnTimeout (node:internal/timers:585:17)
+    at processTimers (node:internal/timers:521:7)
+
+stderr | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSave — error handling for malformed input > sets loadError for array input
+[gameStore] Failed to parse save: Error: Save file does not contain a valid game state object.
+    at F:\A-War-Without-Victory\src\ui\map\store\gameStore.ts:843:19
+    at Timeout.run [as _onTimeout] (F:\A-War-Without-Victory\src\ui\map\store\gameStore.ts:818:11)
+    at listOnTimeout (node:internal/timers:585:17)
+    at processTimers (node:internal/timers:521:7)
+
+stdout | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSave — error handling for malformed input > does not clear previous loadedGameState on error
+[gameStore] Loaded save: 11 May 1992 (war) — 0 formations, 0 control entries
+
+stderr | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSave — error handling for malformed input > does not clear previous loadedGameState on error
+[gameStore] Failed to parse save: SyntaxError: Unexpected token 'b', "broken" is not valid JSON
+    at JSON.parse (<anonymous>)
+    at F:\A-War-Without-Victory\src\ui\map\store\gameStore.ts:838:22
+    at Timeout.run [as _onTimeout] (F:\A-War-Without-Victory\src\ui\map\store\gameStore.ts:818:11)
+    at listOnTimeout (node:internal/timers:585:17)
+    at processTimers (node:internal/timers:521:7)
+
+stdout | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSaveIfChanged — deduplication > returns false when fingerprint matches (no reload)
+[gameStore] Loaded save: 11 May 1992 (war) — 0 formations, 0 control entries
+
+stdout | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSaveIfChanged — deduplication > loads a matching fingerprint when replay sidecars are pending
+[gameStore] Loaded save: 11 Jan 1993 (war) — 0 formations, 0 control entries
+
+stdout | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSaveIfChanged — deduplication > loads a matching fingerprint when replay sidecars are pending
+[gameStore] Loaded save: 11 Jan 1993 (war) — 0 formations, 0 control entries
+
+stdout | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSaveIfChanged — deduplication > returns true when fingerprint differs (new load)
+[gameStore] Loaded save: 11 May 1992 (war) — 0 formations, 0 control entries
+
+ ✓ tests/ui/gamestore_load_reset.test.ts (17 tests) 307ms
+stdout | tests/ui/gamestore_load_reset.test.ts > gameStore.loadSaveIfChanged — deduplication > returns true when fingerprint differs (new load)
+[gameStore] Loaded save: 15 Jun 1992 (war) — 0 formations, 0 control entries
+
+ ✓ tests/ui/endgame_presentation_proof.test.ts (29 tests) 20ms
+ ✓ tests/ui_shell_navigation.test.ts (21 tests) 16ms
+ ✓ tests/ui_presidential_decision_room_wiring.test.ts (15 tests) 34ms
+ ✓ tests/ui/army_hq_readiness_threat_copy.test.ts (13 tests) 27ms
+ ✓ tests/ui/officer_dossier.test.ts (11 tests) 80ms
+ ✓ tests/ui/map_click_routing_contract.test.ts (13 tests) 24ms
+ ✓ tests/ui/codex_tier_dependency_graph.test.ts (25 tests) 15ms
+ ✓ tests/ui/opening_corps_commander_display.test.ts (10 tests) 9ms
+ ✓ tests/ui/field_operation_focus_controller.test.ts (14 tests) 22ms
+ ✓ tests/ui/presidential_priority_contract.test.ts (9 tests) 49ms
+ ✓ tests/ui_opord_player_safe_labels.test.ts (7 tests) 21ms
+ ✓ tests/ui/dilemma_spine.test.ts (13 tests) 8ms
+ ✓ tests/ui_player_supply_visibility.test.ts (10 tests) 12ms
+ ✓ tests/ui/author_op_eligibility.test.ts (17 tests) 15ms
+ ✓ tests/ui/render_proof_real_fixtures.test.ts (15 tests) 41ms
+ ✓ tests/ui/event_decision_auto_launch_contract.test.ts (18 tests) 21ms
+ ✓ tests/ui/diplomacy_view.test.ts (8 tests) 18ms
+ ✓ tests/ui_decision_room_pushback_explanations.test.ts (7 tests) 23ms
+ ✓ tests/ui/typography_contract.test.ts (7 tests) 115ms
+ ✓ tests/ui/chronicle_chapters.test.ts (11 tests) 14ms
+ ✓ tests/ui/warroom_ticker_event_receipts.test.ts (12 tests) 15ms
+ ✓ tests/ui/v47_readability_remediation.test.ts (16 tests) 25ms
+ ✓ tests/ui/app_boot_main_menu.test.ts (21 tests) 15ms
+ ✓ tests/ui/map_transition_timing.test.ts (11 tests) 24ms
+ ✓ tests/ui/proactive_force_launch.test.ts (13 tests) 13ms
+ ✓ tests/ui/decision_surface_registry.test.ts (12 tests) 52ms
+ ✓ tests/ui/opportunity_ledger_pulse.test.ts (8 tests) 8ms
+ ✓ tests/ui/warroom_priority_docket.test.ts (5 tests) 29ms
+ ✓ tests/ui/codex_essay_localization.test.ts (9 tests) 1719ms
+   ✓ Codex essay localization coverage > keeps indexed Codex core fields synced to standalone source essays 1680ms
+ ✓ tests/ui/distance_from_history.test.ts (8 tests) 6ms
+ ✓ tests/ui/chronicle_endgame_mount.test.ts (6 tests) 23ms
+ ✓ tests/ui_map_officers_phase_e.test.ts (2 tests) 25ms
+ ✓ tests/ui/endgame_live_store_proof.test.ts (9 tests) 689ms
+   ✓ Zustand store — endgame state acceptance > accepts endgame LoadedGameState via setState 683ms
+ ✓ tests/ui/chronicle_decision_ledger.test.ts (6 tests) 17ms
+ ✓ tests/ui/map_data_loader_cache.test.ts (5 tests) 26ms
+ ✓ tests/ui/presidential_decision_room_request_force.test.ts (5 tests) 23ms
+ ✓ tests/ui/faction_report_mobile_subdivision.test.ts (7 tests) 54ms
+ ✓ tests/ui/command_surface_repurpose_panels.test.ts (7 tests) 26ms
+ ✓ tests/ui/paramilitary_inbox_items.test.ts (5 tests) 55ms
+ ✓ tests/ui/verdict_scene.test.ts (3 tests) 6ms
+ ✓ tests/ui/dayton_preview_ipc.test.ts (5 tests) 44ms
+ ✓ tests/ui/sector_staged_order_map_feedback.test.ts (5 tests) 26ms
+ ✓ tests/ui/forced_op_receipts.test.ts (9 tests) 10ms
+ ✓ tests/ui/map_context_lifecycle.test.ts (12 tests) 17ms
+ ✓ tests/ui/dayton_institutional_dimensions.test.ts (9 tests) 9ms
+ ✓ tests/ui/presidential_blockers.test.ts (8 tests) 41ms
+ ✓ tests/ui_shell_frame_contract.test.ts (9 tests) 12ms
+ ✓ tests/ui/codex_a1c_response_morphing.test.ts (4 tests) 180ms
+ ✓ tests/ui_map_fog_and_operation_contracts.test.ts (4 tests) 38ms
+ ✓ tests/ui/historical_operation_map_focus.test.ts (5 tests) 22ms
+ ✓ tests/ui/toolbar_fit_contract.test.ts (8 tests) 8ms
+ ✓ tests/ui_decision_room_supply_visibility.test.ts (6 tests) 24ms
+ ✓ tests/ui/codex_response_atom.test.ts (7 tests) 35ms
+ ✓ tests/ui_i18n.test.ts (13 tests) 38ms
+ ✓ tests/ui_map_battle_casualty_truth.test.ts (8 tests) 12ms
+ ✓ tests/ui/control_geojson_merged_children.test.ts (7 tests) 8ms
+ ✓ tests/ui_army_hq_war_summary_visibility.test.ts (8 tests) 8ms
+ ✓ tests/ui_map_operations_mode.test.ts (4 tests) 6ms
+ ✓ tests/ui/paramilitary_review_modal_i18n.test.ts (3 tests) 7ms
+ ✓ tests/ui_front_edge_display_ownership_real_save.test.ts (3 tests) 641ms
+   ✓ real-save front-edge display ownership > gives every visible hover edge a sector id in the live save 343ms
+ ✓ tests/ui/objective_target_options.test.ts (6 tests) 10ms
+ ✓ tests/ui_map_panel_rail.test.ts (6 tests) 6ms
+ ✓ tests/ui/first_hour_fired_event_labels.test.ts (4 tests) 26ms
+ ✓ tests/ui/formation_stranded_visibility.test.ts (7 tests) 6ms
+ ✓ tests/ui/r7_english_readability_phase1.test.ts (7 tests) 9ms
+ ✓ tests/ui_map_sector_lookup.test.ts (5 tests) 7ms
+ ✓ tests/ui/verdict_visibility.test.ts (22 tests) 9ms
+ ✓ tests/ui_map_contested_bands.test.ts (4 tests) 7ms
+ ✓ tests/ui/filed_record_truth.test.ts (4 tests) 8ms
+ ✓ tests/ui/dayton_readouts.test.ts (13 tests) 8ms
+ ✓ tests/ui_map_order_actions.test.ts (3 tests) 16ms
+ ✓ tests/ui/map_overlay_timing_contract.test.ts (6 tests) 15ms
+ ✓ tests/ui/audio_event_adapter.test.ts (2 tests) 5ms
+ ✓ tests/ui/ops_modal_auto_propose.test.ts (11 tests) 9ms
+ ✓ tests/ui/render_churn_guards.test.ts (7 tests) 6ms
+ ✓ tests/ui/command_briefing_banner_contract.test.ts (5 tests) 8ms
+ ✓ tests/ui_map_sector_frontline_fills.test.ts (4 tests) 7ms
+ ✓ tests/ui/map_loading_state.test.ts (2 tests) 23ms
+ ✓ tests/ui/desktop_load_error_classification.test.ts (10 tests) 8ms
+ ✓ tests/ui/warroom_tactical_map_lifecycle.test.ts (5 tests) 7ms
+ ✓ tests/ui/army_hq_role_clarity.test.ts (7 tests) 7ms
+ ✓ tests/ui/directive_outcome_receipts.test.ts (5 tests) 7ms
+ ✓ tests/ui_map_selection_store.test.ts (7 tests) 9ms
+ ✓ tests/ui_chronicle_review_tools.test.ts (5 tests) 6ms
+ ✓ tests/ui/tactical_map_chunking_contract.test.ts (3 tests) 15ms
+ ✓ tests/ui/audio_preferences.test.ts (8 tests) 10ms
+ ✓ tests/ui/command_briefing_consolidation.test.ts (4 tests) 23ms
+ ✓ tests/ui/audio_bus.test.ts (6 tests) 11ms
+ ✓ tests/ui/inboxItems.notifications.test.ts (1 test) 7ms
+ ✓ tests/ui/panel_rail_ownership.test.ts (5 tests) 6ms
+ ✓ tests/ui/workstream_d_surface_contract.test.ts (4 tests) 7ms
+ ✓ tests/ui/embedded_bridge_parent_source.test.ts (2 tests) 103ms
+ ✓ tests/ui_map_build_warning_contract.test.ts (3 tests) 6ms
+ ✓ tests/ui/modal_stack_priority.test.ts (5 tests) 8ms
+ ✓ tests/ui_map_ethnic_truth.test.ts (5 tests) 7ms
+ ✓ tests/ui_presidential_toolbar_summary_click.test.ts (4 tests) 9ms
+ ✓ tests/ui/map_critical_first_init.test.ts (3 tests) 7ms
+ ✓ tests/ui/stale_state_resets.test.ts (5 tests) 9ms
+ ✓ tests/ui/osid_display_name_integrity.test.ts (3 tests) 31ms
+ ✓ tests/ui/accessibility_clickable_controls.test.ts (3 tests) 20ms
+ ✓ tests/ui_map_corps_selection_highlight.test.ts (3 tests) 19ms
+ ✓ tests/ui_map_political_metrics.test.ts (3 tests) 7ms
+ ✓ tests/ui/audio_manifest.test.ts (4 tests) 34ms
+ ✓ tests/ui_map_front_stability.test.ts (4 tests) 5ms
+ ✓ tests/ui/bottom_status_strip_overflow.test.ts (4 tests) 6ms
+ ✓ tests/ui_map_supply_reach.test.ts (3 tests) 7ms
+ ✓ tests/ui_sector_glow_continuity.test.ts (2 tests) 7ms
+ ✓ tests/ui/peace_war_transition.test.ts (6 tests) 5ms
+ ✓ tests/ui/inboxItems.faction_scope.test.ts (1 test) 7ms
+ ✓ tests/ui/chronicle_chapter_guardrails.test.ts (3 tests) 8ms
+ ✓ tests/ui/field_operation_plan_r1_contract.test.ts (4 tests) 8ms
+ ✓ tests/ui/accessibility_form_labels.test.ts (1 test) 7ms
+ ✓ tests/ui_map_desktop_bridge.test.ts (6 tests) 9ms
+ ✓ tests/ui/map_context_menu_i18n.test.ts (5 tests) 11ms
+ ✓ tests/ui/presidential_toolbar_severity_pip.test.ts (6 tests) 5ms
+ ✓ tests/ui/chronicle_wrapped_setup_provenance.test.ts (1 test) 6ms
+ ✓ tests/ui/presidential_command_model_surface.test.ts (3 tests) 11ms
+ ✓ tests/ui/peace_plan_dismissal_scope.test.ts (3 tests) 5ms
+ ✓ tests/ui/force_quality_overlay_coord_validity.test.ts (1 test) 6ms
+ ✓ tests/ui/accessibility_contrast_tokens.test.ts (2 tests) 5ms
+ ✓ tests/ui/ops_planning_draft_guard.test.ts (3 tests) 5ms
+ ✓ tests/ui/interactive_text_floor.test.ts (3 tests) 114ms
+ ✓ tests/ui/command_briefing_priority_count.test.ts (3 tests) 4ms
+ ✓ tests/ui/osid_damage_overlay_coord_validity.test.ts (1 test) 6ms
+ ✓ tests/ui/map_modes_no_duplicate_labels.test.ts (3 tests) 4ms
+ ✓ tests/ui_map_front_lines_phase_a.test.ts (1 test) 6ms
+ ✓ tests/ui/lever_single_host_guard.test.ts (1 test) 306ms
+   ✓ presidential lever IPC single-host guard > keeps Level-3 lever calls hosted by DirectiveCard only 304ms
+ ✓ tests/ui/recruitment_autonomy_routes.test.ts (4 tests) 6ms
+ ✓ tests/ui/combat_effectiveness_sparse_data.test.ts (3 tests) 6ms
+ ✓ tests/ui/gui_polish_typography_floor.test.ts (2 tests) 10ms
+ ✓ tests/ui/tactical_frame_trust.test.ts (3 tests) 4ms
+ ✓ tests/ui/error_copy_contract.test.ts (5 tests) 6ms
+ ✓ tests/ui_map_camera_constraints.test.ts (4 tests) 5ms
+ ✓ tests/ui/surface_backdrop_readability.test.ts (3 tests) 7ms
+ ✓ tests/ui_chronicle_turn_record_link.test.ts (2 tests) 4ms
+ ✓ tests/ui/warroom_date_i18n.test.ts (3 tests) 6ms
+ ✓ tests/ui/event_decision_advisor_label.test.ts (5 tests) 5ms
+ ✓ tests/ui/main_menu_responsive_layout.test.ts (3 tests) 4ms
+ ✓ tests/ui/tutorial_persistence.test.ts (3 tests) 21ms
+ ✓ tests/ui/warroom_desktop_state_ownership.test.ts (4 tests) 4ms
+ ✓ tests/ui/army_hq_presidential_handoff.test.ts (2 tests) 19ms
+ ✓ tests/ui_map_enclave_visibility.test.ts (1 test) 19ms
+ ✓ tests/ui/event_modal_effect_labels.test.ts (2 tests) 5ms
+ ✓ tests/ui_map_browser_safe_imports.test.ts (1 test) 73ms
+ ✓ tests/ui/gui_audit_polish_cleanup.test.ts (4 tests) 6ms
+ ✓ tests/ui/warroom_launch_screen_contract.test.ts (1 test) 5ms
+ ✓ tests/ui/accessibility_reduced_motion.test.ts (2 tests) 4ms
+ ✓ tests/ui/personnel_text_readability.test.ts (2 tests) 4ms
+ ✓ tests/ui_map_maplibre_dasharray_contract.test.ts (2 tests) 4ms
+ ✓ tests/ui/oob_corps_card_responsive.test.ts (2 tests) 6ms
+ ✓ tests/ui/decision_room_header_contrast.test.ts (2 tests) 4ms
+ ✓ tests/ui/ops_view_right_panel_exclusivity.test.ts (3 tests) 3ms
+ ✓ tests/ui/packaged_font_network_contract.test.ts (7 tests) 27ms
+ ✓ tests/ui/r7_president_desk_layout_readability.test.ts (3 tests) 4ms
+ ✓ tests/ui/modal_palette_unification.test.ts (2 tests) 5ms
+ ✓ tests/ui/warroom_player_faction.test.ts (1 test) 4ms
+ ✓ tests/ui/ai_advisor_panel.test.ts (1 test) 11ms
+ ✓ tests/ui/dev_host_consistency.test.ts (2 tests) 4ms
+ ✓ tests/ui/autonomy_panel_route_retirement.test.ts (1 test) 5ms
+ ✓ tests/ui/formation_counter_viewport_sync.test.ts (1 test) 5ms
+ ✓ tests/ui/retired_chrome_imports.test.ts (2 tests) 4ms
+ ✓ tests/ui/direct_brigade_move_affordance_retired.test.ts (1 test) 6ms
+ ✓ tests/ui/retired_chrome_removed.test.ts (1 test) 5ms
+ ✓ tests/ui/r7_advance_turn_layout_readability.test.ts (1 test) 4ms
+ ✓ tests/ui/no_crt_command_surfaces.test.ts (1 test) 4ms
+ ✓ tests/ui/war_planning_map_date_i18n.test.ts (2 tests) 4ms
+ ✓ tests/ui/no_unicode_escapes_in_rendered_text.test.ts (1 test) 3ms
+ ✓ tests/ui/r7_codex_layout_readability.test.ts (1 test) 3ms
+ ✓ tests/ui/r7_officer_tenure.test.ts (5 tests) 5ms
+ ✓ tests/ui/r7_directive_card_layout_readability.test.ts (1 test) 4ms
+ ✓ tests/ui/presidential_toolbar_error_copy.test.ts (1 test) 3ms
+ ✓ tests/ui_map_modes.test.ts (1 test) 4ms
+ ✓ tests/ui_map_no_sector_demarcation_overlay.test.ts (1 test) 5ms
+ ✓ tests/ui/app_primary_command_quick_select_cleanup.test.ts (1 test) 4ms
+ ✓ tests/ui_map_no_corridor_heartbeat_default_overlay.test.ts (1 test) 4ms
+ ✓ tests/ui/r7_decision_room_layout_readability.test.ts (1 test) 3ms
+ ✓ tests/ui/r7_number_formatters.test.ts (5 tests) 5ms
+ ✓ tests/ui/r7_situation_tab_layout_readability.test.ts (1 test) 4ms
+ ✓ tests/ui/r7_army_hq_layout_readability.test.ts (1 test) 3ms
+ ✓ tests/ui/gui_audit_label_discipline.test.ts (41 tests) 859ms
+ ✓ tests/ui/corps_front_panel_routing.test.ts (43 tests) 1121ms
+ ✓ tests/ui/operation_aar_records_review.test.ts (30 tests) 1060ms
+ ✓ tests/ui/endgame_verdict_screen_mount.test.ts (52 tests) 176ms
+ ✓ tests/ui/ops_planning_target_discovery.test.ts (31 tests) 1714ms
+   ✓ ops planning target discovery > localizes OpsMap compact legend chrome in BCS mode 903ms
+ ✓ tests/ui/formation_detail_parity.test.ts (40 tests) 744ms
+ ✓ tests/ui/directive_card_stop_op_action.test.ts (28 tests) 674ms
+ ✓ tests/ui/codex_panel_dynamic_mount.test.ts (19 tests) 1092ms
+ ✓ tests/ui/army_hq_timing_copy.test.ts (18 tests) 440ms
+ ✓ tests/ui/event_decision_modal_phase3.test.ts (17 tests) 405ms
+ ✓ tests/ui/decision_family_modals.test.ts (17 tests) 397ms
+ ✓ tests/ui/map_shell_persistence.test.ts (17 tests) 170ms
+ ✓ tests/ui/oob_operations_panel.test.ts (30 tests) 845ms
+ ✓ tests/ui/army_hq_sector_truth.test.ts (14 tests) 230ms
+ ✓ tests/ui/chief_of_staff_briefing_i18n.test.ts (11 tests) 56ms
+ ✓ tests/ui/advance_turn_button_gated_feedback.test.ts (19 tests) 500ms
+ ✓ tests/ui/oob_drilldown_routing.test.ts (16 tests) 622ms
+ ✓ tests/ui/endgame_snapshot_verdict_fidelity.test.ts (13 tests) 115ms
+ ✓ tests/ui/turn_aftermath_modal_i18n.test.ts (14 tests) 424ms
+ ✓ tests/ui/personnel_player_safe_display.test.ts (16 tests) 396ms
+ ✓ tests/ui/settlement_supply_status.test.ts (23 tests) 357ms
+ ✓ tests/ui/president_desk_shell.test.ts (21 tests) 467ms
+ ✓ tests/ui/endgame_interaction_proof.test.ts (19 tests) 996ms
+ ✓ tests/ui/presidential_decision_room_panel_i18n.test.ts (16 tests) 1158ms
+   ✓ PresidentialDecisionRoomPanel i18n > groups six opening operation authorizations into one packet with one historical authorization action 517ms
+ ✓ tests/ui/codex_panel_unlock_state.test.ts (14 tests) 140ms
+ ✓ tests/ui/war_summary_campaign_cost_i18n.test.ts (11 tests) 497ms
+ ✓ tests/ui/opening_transition.test.ts (25 tests) 160ms
+ ✓ tests/ui/decision_room_flat_contract.test.ts (11 tests) 471ms
+ ✓ tests/ui/presidential_categories.test.ts (17 tests) 24ms
+ ✓ tests/ui/gui_audit_dead_controls.test.ts (10 tests) 384ms
+ ✓ tests/ui/decision_consequence_records_panel.test.ts (9 tests) 368ms
+ ✓ tests/ui/operation_lifecycle_projection.test.ts (10 tests) 215ms
+ ✓ tests/ui/command_drilldown_routing.test.ts (11 tests) 380ms
+ ✓ tests/ui/warroom_shell_accessibility.test.ts (15 tests) 670ms
+ ✓ tests/ui/aar_tooltip_friction_labels.test.ts (12 tests) 243ms
+ ✓ tests/ui/diplomacy_panel.test.ts (10 tests) 284ms
+ ✓ tests/ui/catalog_wireup_integration.test.ts (8 tests) 166ms
+ ✓ tests/ui/map_production_graphics_cleanup.test.ts (7 tests) 274ms
+ ✓ tests/ui/settlement_timeline_i18n.test.ts (14 tests) 124ms
+ ✓ tests/ui/jna_synthetic_command_presentation.test.ts (7 tests) 378ms
+ ✓ tests/ui/army_reserve_elite_commander.test.ts (8 tests) 286ms
+ ✓ tests/ui/event_decision_modal_catalog.test.ts (1 test) 3167ms
+   ✓ production modal-ready event catalog rendering > renders every accepted ready row as a complete player-facing decision modal 3165ms
+ ✓ tests/ui/inbox_dedup.test.ts (11 tests) 262ms
+ ✓ tests/ui/shell_navigation_ownership.test.ts (13 tests) 448ms
+ ✓ tests/ui_chronicle_operation_aar_link.test.ts (8 tests) 385ms
+ ✓ tests/ui/situation_briefing_progressive_disclosure.test.ts (9 tests) 95ms
+ ✓ tests/ui/main_menu_opening_flow.test.ts (11 tests) 752ms
+ ✓ tests/ui/decision_room_review_proposal.test.ts (10 tests) 263ms
+ ✓ tests/ui/faction_branch_tags_badge.test.ts (7 tests) 155ms
+ ✓ tests/ui/peace_plan_modal.test.ts (9 tests) 399ms
+ ✓ tests/ui/event_decision_modal_decision_context.test.ts (7 tests) 136ms
+ ✓ tests/ui/ui_copy_raw_id_fallbacks.test.ts (6 tests) 347ms
+ ✓ tests/ui/corps_detail_sector_truth.test.ts (7 tests) 278ms
+ ✓ tests/ui/map_mode_shortcut_contract.test.ts (10 tests) 94ms
+ ✓ tests/ui/onboarding_track_d_consolidation.test.ts (14 tests) 278ms
+ ✓ tests/ui/officer_mini_bio.test.ts (8 tests) 283ms
+ ✓ tests/ui/endgame_verdict_replay_tab_live.test.ts (5 tests) 59ms
+ ✓ tests/ui/stack_expansion_overlay_viewport.test.ts (6 tests) 257ms
+ ✓ tests/ui/war_cost_summary.test.ts (15 tests) 65ms
+ ✓ tests/ui/own_force_report_gap.test.ts (6 tests) 201ms
+ ✓ tests/ui/commander_read_model_surfaces.test.ts (6 tests) 161ms
+ ✓ tests/ui/directive_card_act_art.test.ts (12 tests) 14ms
+ ✓ tests/ui/turn_aftermath_quiet_digest.test.ts (11 tests) 158ms
+ ✓ tests/ui/qualitative_effectiveness_display.test.ts (4 tests) 230ms
+ ✓ tests/ui/decision_room_stop_op_executing.test.ts (5 tests) 170ms
+ ✓ tests/ui/formation_counter_dom_overlay.test.ts (5 tests) 108ms
+ ✓ tests/ui/command_strain_i18n_boundary.test.ts (6 tests) 48ms
+ ✓ tests/ui/records_button_behavior.test.ts (5 tests) 198ms
+ ✓ tests/ui/turn_aftermath_records_panel_i18n.test.ts (5 tests) 180ms
+ ✓ tests/ui/paramilitary_review_modal.test.ts (4 tests) 299ms
+ ✓ tests/ui/supply_intelligence_mobilization.test.ts (8 tests) 34ms
+ ✓ tests/ui/desktop_campaign_replacement_ownership.test.ts (5 tests) 585ms
+ ✓ tests/ui/game_start_intro.test.ts (13 tests) 262ms
+ ✓ tests/ui/bottom_status_strip_labels.test.ts (7 tests) 277ms
+ ✓ tests/ui/replay_scrubber_autoplay.test.ts (6 tests) 237ms
+ ✓ tests/ui/command_relationship_campaign_drag_proof.test.ts (6 tests) 61ms
+ ✓ tests/ui/orbatpanel_drilldown_routing.test.ts (4 tests) 206ms
+ ✓ tests/ui/verdict_and_tutorial_art.test.ts (9 tests) 8ms
+ ✓ tests/ui/desk_authority_header.test.ts (10 tests) 168ms
+ ✓ tests/ui/supply_fallbacks.test.ts (10 tests) 93ms
+ ✓ tests/ui/dayton_negotiation_modal.test.ts (5 tests) 488ms
+ ✓ tests/ui/verdict_share_summary.test.ts (3 tests) 7ms
+ ✓ tests/ui/cinematic_verdict.test.ts (6 tests) 22ms
+ ✓ tests/ui/panel_rail_exclusivity.test.ts (5 tests) 134ms
+ ✓ tests/ui/dayton_institutional_dimensions_render.test.ts (5 tests) 261ms
+ ✓ tests/ui/brigade_row_supply_labels.test.ts (7 tests) 182ms
+ ✓ tests/ui/archive_spine_contract.test.ts (3 tests) 69ms
+ ✓ tests/ui/codex_panel_tier_graph.test.ts (5 tests) 117ms
+ ✓ tests/ui/audio_ambient_floor.test.ts (5 tests) 34ms
+ ✓ tests/ui/field_operation_focus_viewport.test.ts (2 tests) 106ms
+ ✓ tests/ui/army_reserve_hook_order.test.ts (3 tests) 201ms
+ ✓ tests/ui/pause_escape_shortcuts.test.ts (6 tests) 93ms
+ ✓ tests/ui/ops_brigade_card_i18n.test.ts (3 tests) 263ms
+ ✓ tests/ui/gamestore_field_inspection.test.ts (7 tests) 13ms
+ ✓ tests/ui/chronicle_focus_routing.test.ts (3 tests) 210ms
+ ✓ tests/ui/bottom_status_active_paths.test.ts (9 tests) 157ms
+ ✓ tests/ui/error_boundary_isolation.test.ts (4 tests) 128ms
+ ✓ tests/ui/army_hq_ultrawide_layout.test.ts (9 tests) 136ms
+ ✓ tests/ui/onboarding_automount_edge_cases.test.ts (5 tests) 137ms
+ ✓ tests/ui/sarajevo_lifeline_panel.test.ts (6 tests) 69ms
+ ✓ tests/ui/event_illustration_art.test.ts (5 tests) 144ms
+ ✓ tests/ui/order_interpretation_panel_i18n.test.ts (1 test) 47ms
+ ✓ tests/ui/president_desk_decision_card_fallback.test.ts (3 tests) 63ms
+ ✓ tests/ui/aar_panel_drilldown_routing.test.ts (2 tests) 133ms
+ ✓ tests/ui/warroom_activity_art.test.ts (7 tests) 7ms
+ ✓ tests/ui/field_operation_plan_context_card.test.ts (3 tests) 129ms
+ ✓ tests/ui_settings_telemetry_controls.test.ts (3 tests) 333ms
+ ✓ tests/ui/warroom_scene_continuity.test.ts (4 tests) 113ms
+ ✓ tests/ui/order_queue_player_copy.test.ts (2 tests) 138ms
+ ✓ tests/ui/peace_plan_art.test.ts (8 tests) 6ms
+ ✓ tests/ui/command_card_strip_accessibility.test.ts (3 tests) 251ms
+ ✓ tests/ui/war_summary_empty_states.test.ts (8 tests) 196ms
+ ✓ tests/ui/war_summary_personnel_label.test.ts (3 tests) 133ms
+ ✓ tests/ui/onboarding_persistence_replacement.test.ts (3 tests) 124ms
+ ✓ tests/ui/commander_selection_modal_copy.test.ts (1 test) 55ms
+ ✓ tests/ui/game_over_i18n.test.ts (2 tests) 156ms
+ ✓ tests/ui/event_modal_dismissal.test.ts (4 tests) 198ms
+ ✓ tests/ui/emergency_posture_confirm.test.ts (2 tests) 254ms
+ ✓ tests/ui/directive_rejection_inbox.test.ts (3 tests) 56ms
+ ✓ tests/ui/presidential_desk_assets.test.ts (5 tests) 7ms
+ ✓ tests/ui/opening_splash.test.ts (7 tests) 167ms
+ ✓ tests/ui/main_menu_i18n.test.ts (4 tests) 316ms
+ ✓ tests/ui/territory_over_time_chart_timing.test.ts (3 tests) 62ms
+ ✓ tests/ui/audio_hook_points.test.ts (2 tests) 133ms
+ ✓ tests/ui/war_summary_opsec_reconciliation.test.ts (2 tests) 73ms
+ ✓ tests/ui/diplomacy_player_truth.test.ts (1 test) 50ms
+ ✓ tests/ui/supply_legend_overlap_contract.test.ts (4 tests) 72ms
+ ✓ tests/ui/chronicle_spine_scrubber.test.ts (4 tests) 102ms
+ ✓ tests/ui/audio_cue_observer.test.ts (1 test) 24ms
+ ✓ tests/ui/convoy_decision_modal.test.ts (4 tests) 238ms
+ ✓ tests/ui/event_modal_effect_filter.test.ts (2 tests) 170ms
+ ✓ tests/ui/chronicle_chapter_ui.test.ts (3 tests) 138ms
+ ✓ tests/ui/recruitment_modal_player_copy.test.ts (2 tests) 164ms
+ ✓ tests/ui/ghost_entry_prose.test.ts (5 tests) 5ms
+ ✓ tests/ui/side_picker_i18n.test.ts (3 tests) 272ms
+ ✓ tests/ui/settings_screen_shell_cleanup.test.ts (4 tests) 228ms
+ ✓ tests/ui/officer_event_time_truth.test.ts (1 test) 116ms
+ ✓ tests/ui/pause_menu_i18n.test.ts (3 tests) 160ms
+ ✓ tests/ui/convoy_decision_modal_i18n.test.ts (1 test) 145ms
+ ✓ tests/ui/main_menu_field_records.test.ts (1 test) 222ms
+ ✓ tests/ui/peace_status_panel_copy.test.ts (1 test) 80ms
+ ✓ tests/ui/settings_screen_i18n.test.ts (3 tests) 237ms
+ ✓ tests/ui/peace_war_transition_overlay.test.ts (3 tests) 139ms
+ ✓ tests/ui/main_menu_language.test.ts (2 tests) 240ms
+ ✓ tests/ui/map_mode_counter_legend.test.ts (2 tests) 79ms
+ ✓ tests/ui/app_global_shortcut_focus_contract.test.ts (2 tests) 20ms
+ ✓ tests/ui/settings_audio_preferences.test.ts (2 tests) 196ms
+ ✓ tests/ui/credits_screen_i18n.test.ts (2 tests) 142ms
+ ✓ tests/ui/autonomy_panel_levels.test.ts (1 test) 207ms
+ ✓ tests/ui/tactical_card_sparse_truth.test.ts (1 test) 70ms
+ ✓ tests/ui/coachmark_layer.test.ts (1 test) 118ms
+ ✓ tests/ui/decision_room_navigation_owner.test.ts (1 test) 5ms
+ ✓ tests/ui/warroom_settings_modal_i18n.test.ts (1 test) 76ms
+
+ Test Files  354 passed (354)
+      Tests  2975 passed (2975)
+   Start at  20:03:34
+   Duration  493.96s (transform 27.85s, setup 722ms, collect 215.86s, tests 49.19s, environment 118.82s, prepare 36.23s)
+
+
+EXIT_CODE=0
+SIGNAL=null

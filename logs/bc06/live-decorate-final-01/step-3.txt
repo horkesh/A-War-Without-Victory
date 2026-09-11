@@ -1,0 +1,85 @@
+PRESIDENT'S DESK
+COMMAND SURFACE
+DIPLOMACY
+INTELLIGENCE
+ARMY HQ
+CHRONICLE
+FACTION
+WAR MAP
+ADVANCE
+WAR
+REQUIRED 0
+NO SOURCED INITIATIVE · POLICY HOLDS
+REVIEW BEFORE ADVANCE
+0
+27 Dec 1993
+COMMAND SURFACE
+Decision Room
+CLOSE
+STRATEGIC PRIORITIES
+Decisions, staff reports, and campaign records.
+CLEAR TO ADVANCE
+ALL
+4 ITEMS
+REQ 0 · REC 4 · MON 0 · RECORD 0
+COMMAND
+4 ITEMS
+REQ 0 · REC 4 · MON 0 · RECORD 0
+Filtered by Command & Personnel
+CLEAR CATEGORY FILTER
+INFO
+COMMAND
+DOSSIER
+Visit the front
+Travel to the line as a leadership and morale gesture. The president cannot reach a cut-off enclave.
+REVIEW
+Morale / leadership gesture
+COMMAND & PERSONNEL / PRESIDENTIAL LEADERSHIP
+INFO
+COMMAND
+DOSSIER
+Address the nation
+Speak to the people over the airwaves. It can rally morale — but it is double-edged: defiance hardens the lines, an appeal abroad irritates the patron, and raised expectations can later curdle.
+REVIEW
+Morale / leadership gesture
+COMMAND & PERSONNEL / PRESIDENTIAL LEADERSHIP
+INFO
+COMMAND
+DOSSIER
+Decorate a unit
+Honour a regular formation for its service. It lifts one unit — but favouring one can breed resentment in others, and honours amid heavy loss can ring hollow. Only regular formations are eligible.
+CURRENT DOSSIER
+Morale / leadership gesture (regular formations only)
+COMMAND & PERSONNEL / PRESIDENTIAL LEADERSHIP
+INFO
+COMMAND
+DOSSIER
+Review strategic posture
+Convene the presidency and set the faction’s strategic direction. Later reviews offer additional settlement choices.
+REVIEW
+Repeated strategic leadership decision
+COMMAND & PERSONNEL / PRESIDENTIAL STRATEGY
+PRIORITY DOSSIER
+Decorate a unit
+COMMAND
+Honour a regular formation for its service. It lifts one unit — but favouring one can breed resentment in others, and honours amid heavy loss can ring hollow. Only regular formations are eligible.
+SOURCE
+Command & Personnel
+PRESIDENTIAL LEADERSHIP
+ADVANCE
+Does not block advance
+EVIDENCE
+Morale / leadership gesture (regular formations only)
+SAME SURFACE
+Visit the front
+COMMAND
+Address the nation
+COMMAND
+Review strategic posture
+COMMAND
+ISSUE DIRECTIVE
+Decorate a unit
+10 AUTHORITY
+ISSUE (10)
+CANCEL DIRECTIVE
+OPEN PERSONNEL

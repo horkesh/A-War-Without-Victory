@@ -1,0 +1,52 @@
+2026-09-09T20:27:18+02:00 — Independent bounded review, R7 item 3.9 date layout
+
+VERDICT: GO for the bounded Desk/date source and evidence. This is not R7 closure and does not waive the open six-pin baseline gate or pending clean POST-A.
+
+Resolved critical findings preserved during review:
+1. Retained desk39-feasibility.mjs was not sufficient final proof: it reused a non-exclusive output directory, inferred cards through child indexes, and omitted complete-date, ancestor-clipping, label/card, contrast, fixed-layout, header/control, and current max-scroll checks.
+2. Browser attempt1 was a false green. The translated label's DOM rect moved, but WarroomDateBoard's region clip-path clipped the pixels at constrained widths. Root/manual image inspection caught the absent RBiH/RS dates despite per-case DOM PASS labels. Attempt1 evidence and its invalidation receipt remain preserved.
+3. A transient correction put the date testid/transform on WarroomProjectedMap. Review caught it before a second browser run. Final source restores WarroomProjectedMap exactly and scopes the transform to WarroomDateBoard.
+4. The initial whole-file source test would have accepted that wrong-target edit. Final test slices WarroomProjectedMap and WarroomDateBoard, requires the outer date-board transform/backing, rejects those markers in ProjectedMap, and rejects translating the clipped label child.
+
+Final source review:
+- PresidentDeskShell.tsx differs from HEAD only by the previously reviewed 24px bottom fade; fixed right-column position and dimensions are unchanged.
+- WarroomShellLayer.tsx differs from HEAD only inside WarroomDateBoard: an outer-board testid and responsive horizontal transform, plus a single-line paper-backed label. WarroomProjectedMap, scene plate, room artwork selection, toolbar, Desk authority header, and controls are unchanged.
+- The transform is CSS-only and viewport-derived; it introduces no state, effect, timing, simulation, or ordering path.
+- Frozen hashes match desk39-layout-final-freeze.json: PresidentDeskShell d721df1fbc535d30219a3d71ec44e9b580a7e3b0ade7d9ba9d02df5e897880b4; WarroomShellLayer 87bc02599e4e4131f130c2c196f8503599bda421922fea2515ba9fb861f5da51; focused test 2c245b33a19b73c471018e5ba90f57050f5e34833dbf452d06332734441b3ffe.
+
+Independent validation:
+- desk39-layout-review-focused.log: pinned Node 22.23.2; 4 files, 48 tests passed; exit 0.
+- desk39-layout-browser-attempt2: exclusive directory and explicit command/exit receipts; summary passed all 9 faction/viewport cases.
+- Independently inspected all 9 initial PNGs and all 9 maximum-scroll PNGs. Every image visibly shows the complete single-line `26 Jul 1993`; no glyph, backing, card, header, control, or viewport clipping/occlusion was observed. The placement remains readable within each room composition.
+- Geometry: zero glyph/card and label/card intersections; zero ancestor clips; all dates one glyph range and in viewport; fixed Desk/scene bounds agree across factions at each viewport.
+- Contrast: conservative minimum 8.34:1 in every case, above 4.5:1.
+- Max scroll: all 9 reached scrollHeight - clientHeight exactly; the date remained outside the Desk shell; final Desk text cleared the computed 24px fade start by 16.25–16.5px. The screenshots confirm the visible clearance.
+- Header and visible controls remained at least 12px, contained, and visually legible in all initial and max-scroll captures.
+- git diff --check over the two production files and focused test: exit 0.
+
+Tooling review:
+- desk39-layout-proof.mjs attempt2 closes the attempt1 false-green paths with exclusive output, loaded image/fonts, a complete-date regex, outer label/card checks, ancestor clip detection, root text containment, all-nine summary, contrast bounds, fixed per-viewport shell/scene invariants, and actual image inspection. Its computed contrast uses worst-case black/white underlays for the 94%-opaque backing; image inspection confirms the rendered result.
+- desk39-layout-post-a-preflight.mjs correctly corrected its preserved control1 raw-byte false failure by matching run_provenance.ts CRLF-to-LF normalization. Control2 checks all 31 retained PRE consumed inputs, clean expected commit, Node 22.23.2, and package/lock identity. Artifact comparisons remain raw bytes.
+- desk39-layout-verify-post-a.mjs checks clean commit/Node/weeks, exactly 188 replay lines, full replay SHA equality, full final-save SHA equality, and reports the SHA prefix explicitly as a display fingerprint. It must remain paired with compare-simulation.mjs and the consumed-input preflight; it does not establish clean POST-B.
+
+Source stability declaration: the three frozen hashes above are the reviewed source/test identity. Any later source or focused-test hash change invalidates this GO and requires targeted re-review. Documentation and final gate receipts may update without reopening the source review.
+
+2026-09-09 documentation reconciliation addendum:
+- GO after targeted status/heading corrections. Plan, designated report, COMMAND_BOARD, MASTER_ROADMAP, dated ledger, knowledge ledger, and napkin agree on the bounded implementation and evidence.
+- Final UI3 is recorded as 354 files/2,974 tests, exit 0; typecheck3, map-build3, docs3 and independent review are recorded passed. The coupled local commit and clean POST-A remain pending.
+- The inherited six-pin gate, dirty POST-B, calibration authority, no-pin-refresh rule, and no R7/R8/R9 closure remain explicit.
+- The ancestor-clip lesson appears once in PROJECT_LEDGER_KNOWLEDGE.md and is indexed from the existing napkin section; heading spacing is valid.
+- Documentation tests pass 13/13 (`desk39-layout-docs3.log`); exactly ten expected source/test/docs files are staged; staged `git diff --check` exits 0; no unrelated or forbidden tracked surface is included.
+
+2026-09-09 targeted clean POST-A and final-status addendum
+
+VERDICT: GO for the bounded POST-A proof and the five final documentation status edits. This confirms item 3.9 evidence only; the inherited six-pin baseline gate remains open and R7 is not closed.
+
+- Reviewed source is committed at `88996a23d2441a391b25706c734626b5732e37b5`; the mandatory local hook exited 0 in `desk39-layout-commit1.log`. No production source differs from that commit.
+- `desk39-layout-post-a-preflight1.log`/JSON prove a clean detached checkout at the expected commit, Node `v22.23.2`, all 31 consumed inputs matching retained PRE hashes, and package/package-lock/UI-map package identity; exit 0.
+- `desk39-layout-post-a-run1.log` records the authorized 188-week full replay command with `AWWV_S6_GRADE_RUN=true`, no provenance override, and exit 0.
+- `desk39-layout-post-a-health1.log` passes with 667/712 matched OSIDs and zero consistency failures; its existing advisories remain disclosed rather than promoted to failures.
+- `desk39-layout-post-a-comparison1.log` and `final-simulation-comparison.json` pass: all eight raw artifacts and all 31 consumed-input rows/digests are identical across retained PRE, clean POST-A, and dirty POST-B. The comparison accurately preserves POST-B's dirty provenance.
+- `desk39-layout-post-a-provenance1.log`/JSON pass every clean-POST-A check. The 188-line replay is byte-identical to PRE at 1,304,620,232 bytes and SHA-256 `53444b42084d4ea05b146d67651e0c9b19304b1200fafa5bea7a63775784cb56`; the final save SHA-256 is `e414dc69f6e875fcd2a7394582921f20ca03123112baf12e9308c50035c29c50` (display prefix `e414dc69f6e875fc`).
+- The working diff from `88996a23...` contains only the designated plan, report, COMMAND_BOARD, MASTER_ROADMAP, and PROJECT_LEDGER status updates; `git diff --check` reports no errors (only line-ending notices). The edits accurately mark the visual and zero-R7-drift acceptance checks complete, reuse the explicitly unaffected prior evidence without claiming a new campaign, and do not waive the baseline gate.
+- The fixed PRE/POST-B/POST-A campaign budget is exhausted. The n392 pins remain retained; calibration/BC settlement and adoption plus explicit pin reconciliation are still required. Final documentation checks, freeze verification, and the documentation-only hook/commit remain root-owned receipts after this review.

@@ -1,0 +1,9 @@
+COMMAND={"cwd":"F:/A-War-Without-Victory","command":"C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe","args":["C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node_modules/npm/bin/npm-cli.js","run","typecheck"]}
+NODE_PATH=C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2
+
+> awwv@0.9.9-beta.1 typecheck
+> tsc --noEmit -p tsconfig.json
+
+
+EXIT_CODE=0
+SIGNAL=null

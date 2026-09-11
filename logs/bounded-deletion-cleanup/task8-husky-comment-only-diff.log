@@ -1,0 +1,20 @@
+diff --git a/.husky/pre-commit b/.husky/pre-commit
+index 5d04dfbfe..c47ad6456 100644
+--- a/.husky/pre-commit
++++ b/.husky/pre-commit
+@@ -1,13 +1,5 @@
+ #!/bin/sh
+ 
+-# RE scope lock RETIRED 2026-08-31 by owner direction ("Close the lock, not
+-# needed any more"). The RE-PLANNING-DURATION-BUDGET packet had already recorded
+-# terminal_receipt.status=complete_by_owner_guard_bypass, but the lock stayed
+-# status=active pinned to a base 23 commits behind the line, so the checker
+-# rejected every file-changing commit while its SEALED branch passed only on a
+-# clean tree. scripts/repo/check_re_scope.ps1 is retained; reinstate the lane
+-# with scripts/repo/install_re_scope_hook.ps1 and a fresh RE_SCOPE_LOCK.json.
+-
+ # Typecheck code/data commits, but do not block docs-only architecture commits
+ # on unrelated WIP in a shared Claude/Codex checkout.
+ staged_file_list="${TMPDIR:-/tmp}/awwv-precommit-staged-$$.txt"
+PASS exactly eight stale RE comment/blank lines removed; normalized executable suffix byte sequence unchanged
+EXIT_CODE=0

@@ -1,0 +1,13 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+ ✓ tests/docs_desktop_v09_truth.test.ts (7 tests) 401ms
+ ✓ tests/docs_truth_no_skip_guard.test.ts (2 tests) 7ms
+ ✓ tests/v092_playtest_package_docs.test.ts (4 tests) 113ms
+
+ Test Files  3 passed (3)
+      Tests  13 passed (13)
+   Start at  18:49:57
+   Duration  2.99s (transform 108ms, setup 35ms, collect 102ms, tests 521ms, environment 1ms, prepare 1.06s)
+
+EXIT_CODE=0

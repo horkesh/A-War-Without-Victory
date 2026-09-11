@@ -1,0 +1,455 @@
+{
+  "id": "hrhb-3440x1440",
+  "status": "passed",
+  "checks": {
+    "fullSingleLineDate": true,
+    "visuallyUnclipped": true,
+    "initialCardClear": true,
+    "maxScrollCardClear": true,
+    "dateContrast": true,
+    "readableHeaderAndControls": true,
+    "fadeClear": true,
+    "sceneLoaded": true,
+    "maskPresent": true
+  },
+  "initialIntersections": [],
+  "labelIntersections": [],
+  "badText": [],
+  "contrastRatios": [
+    {
+      "underlay": "black",
+      "ratio": 8.336384339704454
+    },
+    {
+      "underlay": "white",
+      "ratio": 9.362288536463634
+    }
+  ],
+  "minContrast": 8.336384339704454,
+  "initial": {
+    "dateText": "26 Jul 1993",
+    "label": {
+      "left": 2223.376220703125,
+      "top": 567.4173583984375,
+      "right": 2332.233154296875,
+      "bottom": 592.2701416015625,
+      "width": 108.85693359375,
+      "height": 24.852783203125
+    },
+    "glyphRects": [
+      {
+        "left": 2233.4072265625,
+        "top": 571.4957885742188,
+        "right": 2322.2099609375,
+        "bottom": 589.191650390625,
+        "width": 88.802734375,
+        "height": 17.69586181640625
+      }
+    ],
+    "glyphBounds": {
+      "left": 2233.4072265625,
+      "top": 571.4957885742188,
+      "right": 2322.2099609375,
+      "bottom": 589.191650390625,
+      "width": 88.802734375,
+      "height": 17.69586181640625
+    },
+    "glyphContained": true,
+    "glyphInViewport": true,
+    "dateBoard": {
+      "left": 2135.3125,
+      "top": 495.9375,
+      "right": 2420.3125,
+      "bottom": 663.75,
+      "width": 285,
+      "height": 167.8125
+    },
+    "ancestorClips": [],
+    "shell": {
+      "left": 2888,
+      "top": 104,
+      "right": 3400,
+      "bottom": 1328,
+      "width": 512,
+      "height": 1224
+    },
+    "scroll": {
+      "left": 2888,
+      "top": 146,
+      "right": 3400,
+      "bottom": 1328,
+      "width": 512,
+      "height": 1182
+    },
+    "scene": {
+      "left": 430,
+      "top": 0,
+      "right": 3010,
+      "bottom": 1440,
+      "width": 2580,
+      "height": 1440
+    },
+    "sceneImage": {
+      "src": "http://127.0.0.1:3247/@fs/F:/A-War-Without-Victory/src/ui/warroom/assets/hq_hrhb_1992.webp",
+      "naturalWidth": 2752,
+      "naturalHeight": 1536
+    },
+    "namedOccluders": [
+      {
+        "name": "desk-shell",
+        "rect": {
+          "left": 2888,
+          "top": 104,
+          "right": 3400,
+          "bottom": 1328,
+          "width": 512,
+          "height": 1224
+        }
+      },
+      {
+        "name": "authority-header",
+        "rect": {
+          "left": 2888,
+          "top": 146,
+          "right": 3400,
+          "bottom": 499,
+          "width": 512,
+          "height": 353
+        }
+      },
+      {
+        "name": "decision-packet",
+        "rect": {
+          "left": 2888,
+          "top": 511,
+          "right": 3400,
+          "bottom": 3596.25,
+          "width": 512,
+          "height": 3085.25
+        }
+      },
+      {
+        "name": "situation-card",
+        "rect": {
+          "left": 2888,
+          "top": 3608.25,
+          "right": 3400,
+          "bottom": 3979.75,
+          "width": 512,
+          "height": 371.5
+        }
+      },
+      {
+        "name": "close-control",
+        "rect": {
+          "left": 3332.328125,
+          "top": 104,
+          "right": 3400,
+          "bottom": 134,
+          "width": 67.671875,
+          "height": 30
+        }
+      }
+    ],
+    "textMetrics": [
+      {
+        "group": "header",
+        "text": "Authority & Directives",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "The currency of command — and what it buys",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "Command Authority",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "100 / 100",
+        "fontSize": 14,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "Spent this turn: 0",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "Banked: 15 / 15",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "Authority is flowing from: patron confidence",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "At this pace: one directive every 5 turns",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "At capacity. Authority is reserve power, not a weekly quota. Overflow recovery banks only to the displayed reserve limit; spend only when a deliberate directive is warranted.",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "Lever costs",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "Visit the front",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "10 CA",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "Force-launch (held plan)",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "15 CA",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "Author operation",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "25 CA",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "Request operation",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "25 CA",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "Halt operation",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "25 CA",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "Force-launch (no proposal)",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "25 CA",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "Release elite reserve",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "25 CA",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "Replace commander",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "header",
+        "text": "25 CA",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "control",
+        "text": "Close",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "control",
+        "text": "Review proposal",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "control",
+        "text": "Review reserve",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "control",
+        "text": "Review officer",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "control",
+        "text": "Review officer",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      },
+      {
+        "group": "control",
+        "text": "Acknowledge",
+        "fontSize": 12,
+        "contained": true,
+        "rootContained": true,
+        "drawn": true
+      }
+    ],
+    "labelColors": {
+      "color": "rgba(21, 35, 58, 0.88)",
+      "background": "rgba(236, 232, 216, 0.94)"
+    },
+    "transform": "matrix(0.999969, -0.0078539, 0.0078539, 0.999969, 0, 0)",
+    "maskImage": "linear-gradient(rgb(0, 0, 0) calc(100% - 24px), rgba(0, 0, 0, 0))",
+    "scrollHeight": 3846,
+    "clientHeight": 1182
+  },
+  "maxScroll": {
+    "scrollTop": 2664,
+    "scrollHeight": 3846,
+    "clientHeight": 1182,
+    "date": {
+      "left": 2233.4072265625,
+      "top": 571.4957885742188,
+      "right": 2322.2099609375,
+      "bottom": 589.191650390625
+    },
+    "label": {
+      "left": 2223.376220703125,
+      "top": 567.4173583984375,
+      "right": 2332.233154296875,
+      "bottom": 592.2701416015625,
+      "width": 108.85693359375,
+      "height": 24.852783203125
+    },
+    "shell": {
+      "left": 2888,
+      "top": 104,
+      "right": 3400,
+      "bottom": 1328,
+      "width": 512,
+      "height": 1224
+    },
+    "dateIntersectsShell": false,
+    "labelIntersectsShell": false,
+    "reachedMaximum": true,
+    "lastText": "0",
+    "lastTextBottom": 1287.75,
+    "fadeStart": 1304,
+    "fadeClear": true
+  }
+}

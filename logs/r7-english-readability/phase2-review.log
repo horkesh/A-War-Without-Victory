@@ -1,0 +1,38 @@
+R7 Phase 2 independent implementation review
+Date: 2026-09-09
+Seats/lenses: Historian; code correctness; determinism
+Reviewed base: 46961f056 on codex/r7-english-readability
+Verdict: GO after one targeted correction pass
+
+Historical/source fidelity
+- The implementation consumes the existing tactical-map `osidDisplayNames` and `osidPropertiesMap`; it introduces no second fetch, state owner, schema, transliteration table, or authored place-name list.
+- Chronicle battle titles now resolve through `getOsidDisplayName` using the store map. The source precheck at `phase2-source-precheck.log` measured 712/712 scored OSIDs present, 0 missing, and 0 display collisions against the current operational GeoJSON.
+- Home municipality names are copied from `mun1990_name` in the same operational GeoJSON properties. The source precheck measured 110 municipality IDs, 0 conflicting mappings, and byte agreement with the canonical 1990 municipality boundary source.
+- Supplied diacritics survive unchanged. Focused coverage exercises `Brčko`, `Vogošća`, and `Čajniče`; the implementation performs no diacritic reconstruction.
+- Existing source-defined `Mostar Istok` and `Mostar Zapad` operational split labels remain untouched.
+
+Task mapping
+- 2.1: `generateChronicleEntries` adds an optional third `osidDisplayNames` argument, preserving every existing two-argument caller. `ChronicleOverlay` reads the existing store map, passes it to the generator, and includes it in the memo dependency list, so a late map load refreshes displayed titles.
+- 2.2: the existing production slug branch already strips terminal `_N`, while authored names without underscore continue unchanged. Added coverage proves `probe_arbih_1st_corps_2 -> Probe — 1st Corps` and preserves `Operation Mistral 2`.
+- 2.3: `buildMunicipalityDisplayNameMap` derives the 1990 municipality lookup from the existing full OSID property map. `FormationDetail` memoizes that derived lookup and displays the canonical value for `formation.municipalityId`.
+- 2.4: the invariant reads the current production helper plus the explicit 712-row `operational_initial_master.json` denominator. It asserts 712 unique scored IDs, complete non-empty resolution, 712 unique display names, no surviving `(+N)` annotations, the two documented Mostar partitions, 110 municipality mappings, stable key order, representative diacritics, and agreement for every operational row.
+
+Correction pass
+- Initial BLOCK: `getMunicipalityDisplayName` fell back to `getPlayerSafeMunicipalityName`, recreating the old ASCII/title-case guess when the canonical map was null, stale, or missing an ID (`vogosca -> Vogosca`). This violated the plan's no-diacritic-guessing rule.
+- Corrected: lookup misses now return the explicit caller fallback (`—`). The heuristic import was removed. Helper coverage and rendered FormationDetail coverage prove unavailable properties do not reconstruct `Vogosca`.
+
+Code and determinism
+- The municipality map iterates OSID keys with a platform-independent lexical comparator and has no randomness, timestamp, locale-dependent sorting, mutation of source data, or persisted output.
+- The full-dataset invariant fails on a conflicting municipality name instead of allowing a silent first-row choice on current data.
+- Chronicle behavior for an absent battle OSID retains the existing `this position` fallback. Existing callers that do not supply the optional map remain source-compatible; the live Chronicle owner supplies it.
+- No sim, state schema, save, scenario, calibration, OSID key, or locale-contract file changed.
+- `git diff --check` is clean for the reviewed Phase 2 files.
+
+Evidence
+- `logs/r7-english-readability/phase2-review-red.log`: expected pre-correction failures for helper and rendered null-map behavior.
+- `logs/r7-english-readability/phase2-review-green.log`: exit 0; 5 files passed; 90 tests passed.
+- `logs/r7-english-readability/phase2-invariant.log`: earlier invariant run exit 0; the correction suite contains the expanded three-test invariant file.
+- `logs/r7-english-readability/phase2-source-precheck.log`: source hashes, stable denominators, coverage and collision measurements.
+
+Blockers: none.
+Limit: the plan's long 188-week enumeration of every actually emitted Chronicle, operation-history, and formation OSID remains an integration gate. This review does not certify that pending campaign evidence, the root-owned full UI suite, typecheck, map build, or Phase 6 visual acceptance.
