@@ -2,19 +2,21 @@
  * The life-lessons index promises topic files it does not always deliver.
  *
  * An entry reading `see docs/life_lessons/process.md` is a promise that the full lesson is there.
- * For 15 of 23 pointers it is not — the bodies only ever lived in the index. A pointer that leads
- * nowhere costs more than no pointer: the reader follows it, finds nothing, concludes the lesson
- * does not exist, and trusts every other pointer on the page a little less.
+ * A pointer that leads nowhere costs more than no pointer: the reader follows it, finds nothing,
+ * concludes the lesson does not exist, and trusts every other pointer on the page a little less.
  *
- * THE NUMBER THIS CORRECTS. `docs/open_gates.yml` recorded the backlog as "160 of 244 entries".
- * Measured at that gate's own commit, the index contained TWENTY pointer lines in total. The
- * figure was wrong by an order of magnitude when written, and it turned a tractable cleanup into
- * something that looked like a week of work — so nobody started it.
+ * THE BACKLOG IS CLEARED. All 164 pointers across the index and the session archive now resolve;
+ * each cited lesson was copied verbatim into the topic file that cited it. The baseline file is
+ * therefore EMPTY, which changes what these tests mean: with nothing grandfathered, any broken
+ * pointer fails outright.
  *
- * WHY THIS IS A RATCHET AND NOT A FIX. Making each pointer true means moving a lesson into a
- * topic file or dropping the pointer, and that is a curation judgement about the corpus, not a
- * mechanical rewrite. The backlog stands. What is mechanical — and what these tests enforce — is
- * that it may not GROW, and that it must shrink when someone fixes one.
+ * TWO WRONG NUMBERS GOT THIS FAR, AND BOTH HAD ONE CAUSE — nobody recomputed them.
+ *   `docs/open_gates.yml` said "160 of 244 entries" are broken.
+ *   A first pass here scanned ONLY the index, found 23 pointers, and concluded 160 was invented.
+ * Both were wrong. The archive holds another 141, so 164 pointers exist: the register was
+ * counting the right corpus and overstating the breakage (49, not 160), while the correction
+ * checked half the corpus and called the rest a phantom. Checking half and declaring the other
+ * half imaginary is the same error facing the other way.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -23,15 +25,32 @@ import { describe, expect, it } from 'vitest';
 const pointers = require('../tools/validate_lesson_pointers.cjs');
 
 describe('life-lessons pointer integrity', () => {
-  it('no NEW broken pointer has been added', () => {
-    // The only failure mode that should ever block a commit.
+  it('no pointer is broken', () => {
+    // The baseline is empty, so this is now absolute rather than a ratchet over a backlog.
     expect(pointers.newlyBroken()).toEqual([]);
+  });
+
+  it('every pointer in BOTH the index and the archive resolves', () => {
+    // Scanning only the index was how a 141-pointer file got overlooked entirely.
+    expect(pointers.validatePointers()).toEqual([]);
+  });
+
+  it('scans the archive, not just the index', () => {
+    const files = new Set(pointers.collectPointers().map((r: { file: string }) => r.file));
+    expect(files.has('docs/life_lessons.md')).toBe(true);
+    expect(files.has('docs/life_lessons/session_archive.md')).toBe(true);
   });
 
   it('the baseline contains no entry that now resolves', () => {
     // If someone fixes a pointer, its baseline line must go, or the recorded count drifts back
     // into being a number nobody has checked — which is how the 160 got there.
     expect(pointers.staleBaseline()).toEqual([]);
+  });
+
+  it('the baseline is empty, and stays a mechanism rather than a parking space', () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const baseline = require('../tools/lesson_pointer_baseline.json') as { broken: unknown[] };
+    expect(baseline.broken).toEqual([]);
   });
 
   it('the baseline count matches the list it describes', () => {

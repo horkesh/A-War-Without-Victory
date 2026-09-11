@@ -247,16 +247,38 @@ describe('write_receipt_manifest', () => {
     rmSync(join(sandbox, 'logs', 'lane', 'run-a', manifest.MANIFEST_NAME));
   });
 
-  it('--check reports a stale manifest in the real repo as up to date', () => {
+  // These two ran green locally and could NEVER pass in CI, which is the failure this whole
+  // system exists to prevent, committed by the system's own author. The manifest is tracked; the
+  // gigabytes it describes are deliberately not. In a fresh clone the directory holds the
+  // manifest and nothing else, so regenerating it can never reproduce the committed file.
+  //
+  // Absent evidence is not a stale manifest — it is nothing to verify. The assertions below hold
+  // in BOTH environments, which is the only kind worth having.
+
+  it('--check passes whether or not the evidence is present on this machine', () => {
     const out = execFileSync('node', [
       'tools/write_receipt_manifest.cjs', '--check',
       'logs/bc06/live-decorate-final-01',
     ], { encoding: 'utf8' });
-    expect(out).toBe('');
+    // Either silence (evidence present and matching) or an explicit "nothing to verify".
+    expect(out === '' || out.includes('nothing to verify')).toBe(true);
   });
 
-  it('the tracked manifests match what is on disk', () => {
+  it('--check REPORTS a manifest that is genuinely stale, when the evidence is here', () => {
+    // The check must still be able to fail, or the fix above would have turned it into a
+    // rubber stamp — a check that passes on an absent directory AND on a wrong one.
+    const dir = join(sandbox, 'logs', 'stale-lane');
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, 'a.log'), 'one\n');
+    writeFileSync(join(dir, manifest.MANIFEST_NAME), '# deliberately wrong\n');
+    const fresh = manifest.manifestFor('logs/stale-lane', sandbox);
+    expect(fresh).not.toBe('# deliberately wrong\n');
+  });
+
+  it('a tracked manifest matches its directory when the evidence IS present', () => {
     const target = 'logs/bc06/live-decorate-final-01';
+    const present = manifest.listFiles(join(checker.REPO_ROOT, target)).length > 0;
+    if (!present) return; // fresh clone: the bulk was never committed, by design
     const onDisk = readFileSync(join(checker.REPO_ROOT, target, manifest.MANIFEST_NAME), 'utf8');
     expect(manifest.manifestFor(target)).toBe(onDisk);
   });

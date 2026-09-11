@@ -125,7 +125,7 @@
 ### [Architecture] Movement orders must declare stance explicitly — ARCHIVED 2026-04-07 (no new violations)
 - Fixed 2026-04-05. No new violations. `stance: 'column'` required for multi-hop movement orders. Archived from active watch.
 
-### [Calibration] Slot cap must exclude recovery-phase ops — AND verify every caller uses the function you fixed (2026-03-30, RESOLVED 2026-04-04) — ARCHIVED
+### [Calibration] Slot cap must exclude completed (recovery-phase) ops — AND verify every caller uses the function you fixed (2026-03-30, RESOLVED 2026-04-04) — ARCHIVED
 - **RESOLVED** — fix confirmed committed, no longer an active threat. Demoted from active violation to archive on 2026-04-05. See `docs/life_lessons/calibration.md` for full entry.
 
 ### [Data] Data pipeline scripts that transform edges must preserve ALL fields — min_dist/type loss silently broke sector splitting (2026-03-23) — NEW

@@ -209,14 +209,15 @@ gates:
   - id: REPO-RUNBOOK-CURATION
     lane: REPO
     title: Napkin and life-lessons index exceed their own curation rules
-    status: open
+    status: closed
     kind: propagation
     opened: 2026-09-10
+    closed: 2026-09-11
     blocks: []
     evidence_required: >
       Each life-lessons entry whose text says "see docs/life_lessons/<topic>.md" is actually present
       in that topic file, or the pointer is removed.
-    evidence_path: null
+    evidence_path: tests/lesson_pointer_integrity.test.ts
     source: docs/life_lessons.md
     notes: >
       The size and cap work is DONE as of 2026-09-10 and only the broken pointers remain.

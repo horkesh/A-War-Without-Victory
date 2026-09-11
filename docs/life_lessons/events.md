@@ -18,3 +18,12 @@
 - **Wrong approach**: Adding a pipeline step and only checking calibration % — not diffing the event firing list. The event dropout was caught by the event_timing test, not by manual review.
 - **Right approach**: Before adding any pipeline step that runs in weeks 0-12, run a 40w scenario and diff the event firing list against baseline. If an event drops out, investigate whether its flag is consumed downstream.
 - **Do instead**: After any sim-affecting change, run `node -e "... baseline.events_fired.map(e => e.id).sort()"` and compare to the new run. Missing events = broken flag cascade.
+
+## Migrated from the index (2026-09-11)
+
+> These lessons were cited from `docs/life_lessons.md` as living here, and did not. The
+> bodies are copied verbatim from the index so the citation is true; the index keeps its
+> copy, which CLAUDE.md requires for the newest sessions.
+
+### [Events] ★ A CONDITION THAT IS ALWAYS TRUE CAN BE "CORRECT" PURELY BY WINDOW COINCIDENCE
+- `csq_enclave_held_alt_intervention` gated on `srebrenica_fallen` / `zepa_fallen` / `gorazde_fallen`. **Nothing writes any of them** — the writer exists as `srebrenica_fell`, and `zepa_falls_1995` set no flags at all. All three checks were permanently true, so the event was really "week 145 plus a resilience check". It produced the right answer **only** because its window is `145-145` and Srebrenica falls at w162. Widen the window past 162 and it silently asserts the enclaves are standing after they have fallen. ⇒ A passing condition is not evidence the condition works. ⇒ When a flag name reads like a near-miss of another (`_fallen` vs `_fell`), check the writer before trusting either.

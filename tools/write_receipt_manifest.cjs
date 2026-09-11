@@ -177,6 +177,24 @@ function main() {
 
     if (check) {
       const current = fs.existsSync(target) ? fs.readFileSync(target, 'utf8') : null;
+
+      // THE EVIDENCE DELIBERATELY DOES NOT TRAVEL. The manifest is tracked; the gigabytes it
+      // describes are not. So in a fresh clone — CI, or anyone else's machine — the directory
+      // holds the manifest and nothing else, and regenerating it can NEVER match. Comparing
+      // anyway turns this check into one that only passes on the machine that wrote it, which
+      // is how a test that cannot pass in CI got written on 2026-09-11.
+      //
+      // Absent evidence is not a stale manifest. It is nothing to verify.
+      if (listFiles(path.join(REPO_ROOT, clean)).length === 0) {
+        if (current === null) {
+          console.error(`manifest: ${clean}/${MANIFEST_NAME} is missing`);
+          stale += 1;
+        } else {
+          console.log(`manifest: ${clean} — evidence not present here; nothing to verify`);
+        }
+        continue;
+      }
+
       if (current !== text) {
         console.error(`manifest: ${clean}/${MANIFEST_NAME} is ${current === null ? 'missing' : 'stale'}`);
         stale += 1;

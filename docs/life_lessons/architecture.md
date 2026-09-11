@@ -499,3 +499,27 @@
 - **Measured**: `arbih_115th_mountain` — a Stari Grad garrison, same OSID at t0 and t188, personnel 800 to 1800, **morale 100, cohesion 100, TWO battles in 188 weeks** — launched **26 probes, 25 with zero attack attempts**, and accounted for 19 of 21 no-contact `probe_complete` probes.
 - **The loop**: a brigade that never fights keeps full strength, perfect cohesion and zero fatigue, so it is PERMANENTLY the fittest thing in the pool. **Not doing the thing is what kept it looking best qualified to do the thing.**
 - **Do instead**: **the tell is a selector whose input is degraded BY the activity it selects for.** Ask whether the winner's score is high *because* it has never been used. Same shape anywhere fitness, readiness or freshness ranks candidates for a task that consumes exactly those properties.
+
+## Migrated from the index (2026-09-11)
+
+> These lessons were cited from `docs/life_lessons.md` as living here, and did not. The
+> bodies are copied verbatim from the index so the citation is true; the index keeps its
+> copy, which CLAUDE.md requires for the newest sessions.
+
+### [Architecture] A code path verified by grep but never checked for REACHABILITY — RE-VIOLATED 2026-08-22 (2nd instance, opposite direction)
+- 2026-08-14: a "sole write site" guard was deleted and 21 tests stayed green because a loop-skip short-circuited before it — live-looking guard, dead in practice. 2026-08-22: the inverse — `brigade_movement.ts:167/198/219` was written into a handoff as a fatal second movement wall on the strength of three correct grep hits, but its pipeline step early-returns via `if (getOperationalData(context)) return;` on every OSID scenario. **TELL: a fatality claim whose entire support is grep output.** Walk up to the call site and read the guard on the invoking step before naming any path a cause or a blocker.
+
+### [Architecture] ★ RE-VIOLATION of "right PLACE is not REACHED" — a handoff named `brigade_movement.ts:167/198/219` a fatal wall; the step early-returns on every OSID scenario
+- Line numbers right, exclusion real, module never runs: `if (getOperationalData(context)) return;` guards its pipeline step. A `grep` hit proves a line exists, not that control reaches it. Same error as the 2026-08-14 dead-guard lesson, opposite direction.
+
+### [Architecture] The same quantity persisted at two pipeline stages will disagree — identify which stage the consumer reads
+- `force_assessment.total_surplus` (assess-stage, `force_eval.ts:246-249`) reads 5 while `zone_assessments[].surplus_brigades` (allocate-stage, after `allocate.ts:277` applies the must-hold multiplier) reads `[]`, for the same corps in the same save. Both are persisted; only the allocate-stage one governs substitution. I read the assess-stage figure and used it to wrongly "correct" a correct agent report. **Two tells:** the field was nested inside `zone_assessments[]` so a top-level key listing did not show it, and the arithmetic reconciles exactly (`ceil(43 edges/20) = 3`; `8 − 3 = 5`) once you know the stage. Related live suspicion, untested: `plan.ts:275/:392/:659` reason on the stale assess-stage figure while `emit.ts:1658` gates on allocate-stage `can_launch_ops`.
+
+### [Architecture] State already persists what you'd otherwise instrument — check before writing diagnostic scripts
+- Option K experts recommended writing instrumentation to dump `briefing.campaign_offensive_targets`, `decision_trace.hard_constraints`, etc. per-corps per-turn. State already does this: `state.military.corps_command[corpsId].commander_state.decision_trace` persists between turns; `state.military.campaign_plans[faction].front_priorities` persists across plan-validity windows. Reading `final_save.json` directly answered the diagnostic without a single line of new instrumentation code. Rule: before extending `commander_debug.ts` or writing a one-shot tracer, search for `decision_trace`, `force_assessment`, `commander_state` in saved state — the data is probably already there.
+
+### [Architecture] One gate may hide another — confirm the full causal chain before closing "unblocks X" issues
+- Issue #13 diagnosis framed N1297 organizational readiness gate as THE blocker for HRHB offensives. Option J unblocked N1297 correctly, but HRHB still produced 0 attacks / 1 op in 188w. The real blocker is downstream in campaign-plan target generation. Rule: before declaring an issue closed, verify the binding constraint hasn't just moved.
+
+### [Architecture] Validator exemptions that suppress real sim failures are always wrong — fix the sim
+- bb454db4 exempted army HQ brigades from unresolved-sector validator. Hid a real sim gap (65th genuinely unresolved). dc742d9e fixed the actual sim. Pattern: when a validator fails, fix the system under test, not the test harness.

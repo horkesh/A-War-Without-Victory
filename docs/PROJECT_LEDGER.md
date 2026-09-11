@@ -3944,3 +3944,36 @@ simply cannot grow now.
 **Also re-verified:** no napkin category exceeds its 10-entry cap (four sit exactly at 10), using
 the correct `^[0-9]+[a-z]*\.` pattern — the one whose earlier `^[0-9]+\.` form could not see the
 `0a.`/`0h.` entries at all.
+
+## The receipts system's author wrote a test that could only pass on his own machine — 2026-09-11
+
+**CI caught what local runs could not, which is the entire point of it.** `write_receipt_manifest
+--check` regenerates a manifest from the directory and compares it to the committed file. That can
+never succeed in a fresh clone, because **the manifest is tracked and the gigabytes it describes
+are deliberately not** — CI sees a directory containing only `MANIFEST.txt`, regenerates an empty
+manifest, and reports the committed one stale.
+
+Two tests asserted that comparison. Both were green locally and **structurally incapable of
+passing in CI**. That is the same defect class this entire receipts system exists to prevent —
+evidence that exists on one machine and nowhere else — committed by the person who had just
+finished writing the tool to prevent it, in the same sitting.
+
+**The fix distinguishes "absent" from "stale".** If the directory holds nothing but its manifest,
+the evidence is not present here and there is nothing to verify; `--check` says so and passes. If
+files ARE present, it compares as before. A companion test proves the check can still FAIL on a
+genuinely wrong manifest, so the fix did not turn it into a rubber stamp — the obvious way to get
+this wrong is to make "nothing to verify" cover "verified nothing".
+
+**What CI reported, versus what was actually wrong.** Four failing lines, two real:
+- two receipt tests — real, mine, fixed here
+- `deliberate_failure.fixture.ts` "× is an intentional child-process failure control" — NOT a
+  failure. `tests/run_vitest_balanced.test.ts` deliberately spawns vitest on that fixture to prove
+  the runner detects failures; the child's output interleaves into the parent log and reads
+  exactly like a real failure
+- `replay_payload_mode_contract` — a 20-second TIMEOUT, not an assertion. It passes locally and on
+  main; this branch adds nine test files spawning ~90 bash subprocesses, which changes shard
+  composition and load. Aggravated by the branch rather than broken by it.
+
+**Worth keeping: a red CI is a list of claims, not a list of defects.** Half of these needed
+explaining rather than fixing, and the one that looked most alarming — a suite reporting a
+deliberate control as failed — was the harness working correctly.
