@@ -1,0 +1,178 @@
+# Plan Index — which plan owns which lane, as data
+#
+# DERIVED from docs/plans/MASTER_ROADMAP.md. Do not hand-edit: `tests/plan_index.test.ts`
+# regenerates it and fails if this file differs. Change the roadmap, then run
+#   node tools/derive_plan_index.cjs
+#
+# The roadmap remains the single authority for lane state. This file only makes it
+# enumerable, which it was not: 292 plan documents exist and 264 are unlinked history.
+#
+# FIELDS
+#   lane_open   the lane is not marked COMPLETE/CLOSED in the register
+#   tokens      approximate, size/4 — whether the plan fits a 32,768-token context at all
+#   tasks       path to a machine-readable task manifest, or null if none exists yet
+
+version: 1
+source: docs/plans/MASTER_ROADMAP.md
+
+lanes:
+  - lane: R1
+    title: "Seamless Command Room ↔ Tactical Map"
+    lane_open: false
+    status: "COMPLETE — CLOSED 2026-08-01"
+    plans:
+      - path: docs/plans/2026-07-31-seamless-command-room-map-transition-plan.md
+        exists: true
+        tokens: 14386
+        fits_context: true
+        tasks: null
+  - lane: R2
+    title: "RS Desk → Decision → Advance friction"
+    lane_open: false
+    status: "COMPLETE — CLOSED 2026-08-03 (v14 clean pass)"
+    plans:
+      - path: docs/plans/2026-07-31-rs-104week-friction-remediation-plan.md
+        exists: true
+        tokens: 8084
+        fits_context: true
+        tasks: null
+  - lane: R3
+    title: "Operational/Tactical Group convergence"
+    lane_open: false
+    status: "COMPLETE"
+    plans:
+      - path: docs/plans/2026-07-31-operational-tactical-group-closeout-implementation-plan.md
+        exists: true
+        tokens: 13809
+        fits_context: true
+        tasks: null
+  - lane: R4
+    title: "Command, event, and Dynamic Codex convergence"
+    lane_open: false
+    status: "COMPLETE — CLOSED 2026-08-06 (Phase 6 merged, PR #481 → main `40d3c5452`). Twelve-specialist panel fixes 6.1–6.5 landed; calibration byte-identical, independent"
+    plans:
+      - path: docs/plans/2026-07-31-command-event-codex-convergence-plan.md
+        exists: true
+        tokens: 12148
+        fits_context: true
+        tasks: null
+  - lane: R5
+    title: "Engine quality, performance, and stability"
+    lane_open: false
+    status: "COMPLETE — CLOSED 2026-08-05 at the ~1,086 ms/turn floor. Every self-executable item done; Phase 2e reverted on a measured regression; Task 6 DECLINED, not defe"
+    plans:
+      - path: docs/plans/2026-07-31-engine-quality-performance-stability-plan.md
+        exists: true
+        tokens: 6740
+        fits_context: true
+        tasks: null
+      - path: docs/plans/2026-08-01-r5-phase2c-amortized-sector-topology-plan.md
+        exists: true
+        tokens: 16289
+        fits_context: true
+        tasks: null
+      - path: docs/plans/2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md
+        exists: true
+        tokens: 42138
+        fits_context: false
+        tasks: null
+  - lane: R6
+    title: "Historical gameplay depth and final calibration"
+    lane_open: false
+    status: "PRE-1.0 SCOPE COMPLETE — CLOSED 2026-08-09 (`n163`: 634 matched, 30/31 anchors, Section 6 correct, 40w fingerprint golden). Do not conflate the later 629/31-of-"
+    plans:
+      - path: docs/plans/2026-07-31-historical-gameplay-depth-calibration-plan.md
+        exists: true
+        tokens: 20303
+        fits_context: true
+        tasks: null
+      - path: docs/plans/2026-08-06-exhaustion-scoring-redesign-plan.md
+        exists: true
+        tokens: 8528
+        fits_context: true
+        tasks: null
+  - lane: RC
+    title: "Pressure → exhaustion → **COLLAPSE** pipeline"
+    lane_open: false
+    status: "PRE-1.0 NARROW SCOPE COMPLETE — CLOSED 2026-08-15. Retained v3 selection plus reversible D-shape; deterministic and trajectory-flat, 31/31 anchors, 6/6 benchmar"
+    plans:
+      - path: docs/plans/2026-08-15-collapse-d-selection-measurement-plan.md
+        exists: true
+        tokens: 4216
+        fits_context: true
+        tasks: null
+      - path: docs/plans/2026-08-15-collapse-d-shape-design.md
+        exists: true
+        tokens: 1489
+        fits_context: true
+        tasks: null
+  - lane: RE
+    title: "1.0 engine integrity: seven outcomes, no general cleanup"
+    lane_open: false
+    status: "CLOSED — owner, 2026-09-01. RE gates nothing: not calibration, not R7, not R8. P2B and the auxiliary prerequisite are retired history. Engine health remains sac"
+    plans:
+      - path: docs/plans/2026-08-26-engine-integrity-plan.md
+        exists: true
+        tokens: 6061
+        fits_context: true
+        tasks: null
+      - path: docs/plans/2026-08-28-packaged-probe-recovery-plan.md
+        exists: true
+        tokens: 11709
+        fits_context: true
+        tasks: null
+  - lane: R7
+    title: "Content, historical attribution, audio, accessibility, and opening experience"
+    lane_open: true
+    status: "ACTIVE — DATE REPAIR PACKAGED; ACCEPTANCE OPEN. `ea33b23a5` retains nine-case image/UI/hook GO, fixed column/artwork; included in Inbox package `7d97b72fc`. Fre"
+    plans:
+      - path: docs/plans/2026-07-31-content-history-localization-audio-plan.md
+        exists: true
+        tokens: 13147
+        fits_context: true
+        tasks: null
+      - path: docs/plans/2026-08-23-opening-screens-implementation-plan.md
+        exists: true
+        tokens: 1936
+        fits_context: true
+        tasks: null
+      - path: docs/plans/2026-08-28-cinematic-opening-typography-implementation-plan.md
+        exists: true
+        tokens: 8893
+        fits_context: true
+        tasks: null
+      - path: docs/plans/2026-09-05-r7-presentation-and-english-readability-amendment-plan.md
+        exists: true
+        tokens: 25493
+        fits_context: true
+        tasks: null
+      - path: docs/plans/2026-09-07-arbih-brigade-honorific-name-correction-plan.md
+        exists: true
+        tokens: 2054
+        fits_context: true
+        tasks: null
+      - path: docs/plans/2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.md
+        exists: true
+        tokens: 4842
+        fits_context: true
+        tasks: docs/plans/tasks/2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.yml
+  - lane: R8
+    title: "Full-campaign packaged-Electron validation and diaries"
+    lane_open: true
+    status: "WAITING ON R7. INBOX REPAIRED; PACKAGE/SHAKEDOWN GATES OPEN — 2026-09-10. `7d97b72fc` route/build/hook GO; sole stale UI assertion reconciled by 45/45 tests, ex"
+    plans:
+      - path: docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
+        exists: true
+        tokens: 40387
+        fits_context: false
+        tasks: null
+  - lane: R9
+    title: "Release candidate, gold, and publication"
+    lane_open: true
+    status: "Build preparation passes (§4.2); freeze/readiness after R8"
+    plans:
+      - path: docs/plans/2026-07-31-release-candidate-gold-publication-plan.md
+        exists: true
+        tokens: 4937
+        fits_context: true
+        tasks: null
