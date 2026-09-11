@@ -1,84 +1,80 @@
-# Task manifest — 2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.md
+# Task manifest — warroom whiteboard date and corkboard map
 #
-# WHAT A TASK MANIFEST IS, AND IS NOT.
-#
-# The plan document is for the planner: it carries the diagnosis, the rejected options and the
-# reasoning, and none of that should be handed to a 9B model. This file carries only the parts
-# that are DELEGABLE, in the form the local executor has been measured to handle.
-#
-# It is not a rewrite of the plan and never replaces it. `owning_plan` below is the authority; if
-# the two disagree, the plan wins and this file is the one that gets corrected.
-#
-# THE FORM COMES FROM WHAT WAS MEASURED (tools/local_executor/README.md):
-#   - `reads` lists EXACT paths. "Go and look at the UI code" is how a dispatch returns an answer
-#     about files it never saw. Every path is checked to exist.
-#   - `contract` states field names, shapes and constants EXPLICITLY. Told to infer them from
-#     source, it produced 42 test cases of which 27 fed the wrong field and exercised nothing.
-#   - `kind` matches the ledger's categories, so outcomes accumulate per type and routing stays
-#     derived rather than remembered.
-#   - `acceptance` is the planner's, always. Both rejected proposals so far failed by being
-#     handed the thing that decides pass/fail.
-#   - `not_delegable` is listed on purpose. A manifest that silently omits the judgement work
-#     reads as if the whole plan were machine-executable, which is the lie to avoid.
+# Format and its provenance: docs/plans/tasks/FORMAT.md
+# The executor never reads this file; tools/render_task_prompt.cjs renders it into the prose
+# shape of TASK_TEMPLATE.md, which is what gets dispatched.
 
-version: 1
+version: 2
 owning_plan: docs/plans/2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.md
+base_commit: 8dc8614f1880c4275c9f21436646377c629e66f7
 lane: R7
 gate: R7-WARROOM-PRESENTATION
 
-# Work that must NOT be dispatched. Named so the manifest cannot be mistaken for the whole plan.
+# Required, and may not be empty. A manifest that omitted this would read as though the whole
+# plan were machine-executable.
 not_delegable:
-  - "Whether the date READS as hand-written. That is the owner's judgement about the artefact's
-    feel, it is the entire point of the item, and no test encodes it."
-  - "Choosing the occlusion geometry. It depends on the luminance survey and on what the room is
-    supposed to look like, which is design, not extraction."
-  - "Any change to the four tests the plan says must be amended. Amending an acceptance test is
-    the oracle, and the oracle is never delegated."
+  - "Whether the date READS as hand-written. That is the owner's judgement about how the artefact
+    feels, it is the entire point of the item, and no test encodes it."
+  - "Choosing the occlusion geometry. It follows from the luminance survey and from what the room
+    is meant to look like — design, not extraction."
+  - "Amending any of the four tests the plan says must change. Amending an acceptance test IS the
+    oracle, and the oracle is never delegated."
 
 tasks:
   - id: WR01-T1-FONT-INVENTORY
-    title: Inventory every font family the warroom surfaces reference
     kind: extract
     status: open
-    reads:
+    edit: []
+    read:
       - src/ui/map/components/PresidentialInbox.tsx
       - src/ui/map/styles
-    contract: >
-      Report every CSS font-family declaration and every @font-face src. For each, give the exact
-      declaration text and the file and line it appears on. Do not judge whether a family is
-      bundled or system-provided; report what is written.
-    output_shape: tools/local_executor/schemas/test_cases.json
-    acceptance: "Planner checks each quoted declaration with npm run local:verify-quotes."
+    change: >
+      Report every CSS font-family declaration and every @font-face src across the warroom
+      surfaces, each with the exact declaration text and the file and line it appears on. Report
+      what is written; do not judge whether a family is bundled or system-provided.
+    fails_now: []
+    must_not_break: []
+    read_only_acceptance: >
+      Every quoted declaration verified with: npm run local:verify-quotes -- <answer.json>
+      --field quote --source-field file
+    out_of_scope:
+      - Changing any font, style or asset
+      - The corkboard map, which is a separate task
     why_delegable: >
-      Pure extraction from named files, with verbatim quotes that a script can check. This is the
-      mode the ledger records as strongest: 3 dispatches, 2 accepted, 0 rewritten.
+      Pure extraction from named files with verbatim quotes a script can check. The ledger records
+      this as the strongest mode: 4 extract dispatches, 3 accepted, 0 rewritten.
 
   - id: WR01-T2-TEST-SITES
-    title: Locate the four tests that pin the current date rendering
     kind: extract
     status: open
-    reads:
+    edit: []
+    read:
       - tests/ui
-    contract: >
-      Find every test that asserts on the warroom date element. For each, give the file, the test
-      name exactly as written, and the verbatim assertion line. Report only what asserts on the
-      date; do not propose changes and do not judge whether an assertion is correct.
-    output_shape: tools/local_executor/schemas/test_cases.json
-    acceptance: "Planner opens each cited file at the cited test and confirms the assertion is there."
+    change: >
+      Locate every test asserting on the warroom date element. For each, give the file, the test
+      name exactly as written, and the verbatim assertion line. Do not propose changes.
+    fails_now: []
+    must_not_break: []
+    read_only_acceptance: >
+      Planner opens each cited file at the cited test and confirms the assertion is present.
+    out_of_scope:
+      - Editing any test. Amending an acceptance test is the oracle.
+      - Deciding what the assertions should become
     why_delegable: >
-      Locating call sites is extraction. DECIDING what those assertions should become is not, and
-      is listed under not_delegable above.
+      Locating call sites is extraction. Deciding what they should assert is not, and is listed
+      under not_delegable.
 
   - id: WR01-T3-LUMINANCE-TABLE
-    title: Re-derive the per-plate luminance figures the plan cites
     kind: extract
     status: blocked
-    blocked_by: "The 15 plate images are not tracked; only their manifest is. Needs the evidence present."
-    reads: []
-    contract: >
-      Not dispatchable until the plates are available locally. Recorded so the gap is visible
-      rather than rediscovered.
-    output_shape: null
-    acceptance: "Planner re-runs the survey and compares against the figures in the owning plan."
-    why_delegable: >
-      It is not, today. Listed to keep the manifest honest about what it cannot cover.
+    blocked_by: >
+      The 15 plate images are not tracked — only their manifest is — so the evidence is not
+      present in a fresh clone. Recorded so the gap stays visible instead of being rediscovered.
+    edit: []
+    read: []
+    change: "Not dispatchable until the plates are available locally."
+    fails_now: []
+    must_not_break: []
+    read_only_acceptance: "Planner re-runs the survey and compares against the owning plan."
+    out_of_scope: []
+    why_delegable: "It is not, today. Listed to keep the manifest honest about its own coverage."
