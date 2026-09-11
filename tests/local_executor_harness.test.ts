@@ -81,6 +81,45 @@ describe('local executor harness', () => {
     expect(exitCodeOf(DELEGATE, ['--prompt', 'x', '--read', 'src/nope_not_real.ts'])).toBe(2);
   });
 
+  // ── Argument parsing ───────────────────────────────────────────────────────────
+  //
+  // On 2026-09-11 `--read a.sh b.sh c.sh` sent ONE file and silently dropped two, because
+  // --read took a single value and the rest became stray argv. The dispatch reported success,
+  // and the model answered confidently about code it had never been shown. Nothing in the
+  // output said so. These pin both halves of the fix: every file arrives, and anything the
+  // parser does not understand stops the dispatch.
+
+  /** stderr of a delegate run, pointed at a dead host so it never reaches a real model. */
+  function stderrOf(args: string[]): string {
+    try {
+      execFileSync('node', [DELEGATE, ...args, '--host', 'http://127.0.0.1:1'], { stdio: 'pipe' });
+      return '';
+    } catch (error) {
+      return String((error as { stderr?: Buffer }).stderr ?? '');
+    }
+  }
+
+  it.each([
+    ['space-separated', [CONFIG, DELEGATE, GATE]],
+    ['comma-separated', [[CONFIG, DELEGATE, GATE].join(',')]],
+  ])('--read sends EVERY file when %s', (_label, readArgs) => {
+    const stderr = stderrOf(['--prompt', 'x', '--read', ...readArgs, '--out', 'unused.md']);
+    for (const file of [CONFIG, DELEGATE, GATE]) {
+      expect(stderr, `${file} should have been included`).toContain(`including ${file}`);
+    }
+  });
+
+  it('REFUSES an argument it does not understand rather than ignoring it', () => {
+    expect(exitCodeOf(DELEGATE, ['--prompt', 'x', '--reed', 'typo.ts', '--out', 'unused.md']))
+      .toBe(2);
+    expect(stderrOf(['--prompt', 'x', '--reed', 'typo.ts', '--out', 'unused.md']))
+      .toContain('unrecognised argument');
+  });
+
+  it('REFUSES a flag given no value', () => {
+    expect(exitCodeOf(DELEGATE, ['--prompt', 'x', '--out'])).toBe(2);
+  });
+
   it('the determinism ban list covers the rule that has actually been violated', () => {
     // A 30B model returned .localeCompare() for a "deterministic comparator" on 2026-09-10.
     // It is locale-dependent and looked more professional than the correct answer.

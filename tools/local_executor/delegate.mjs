@@ -27,7 +27,46 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const args = process.argv.slice(2);
-const opt = (name, fallback = '') => (args.includes(name) ? args[args.indexOf(name) + 1] : fallback);
+
+// Every argument must be accounted for. An argument this parser silently ignores is a
+// FALSE GREEN: on 2026-09-11 `--read a.sh b.sh c.sh` sent ONE file and dropped two, because
+// --read took a single value and the rest became stray argv. The dispatch looked successful and
+// the model answered about code it had never seen. The same shape cost a session earlier when a
+// space-separated `--keep` threw "Unknown argument" and did nothing, which was indistinguishable
+// from the refusal that had been predicted.
+const consumed = new Array(args.length).fill(false);
+
+const opt = (name, fallback = '') => {
+  const index = args.indexOf(name);
+  if (index === -1) return fallback;
+  consumed[index] = true;
+  const value = args[index + 1];
+  if (value === undefined || value.startsWith('--')) {
+    console.error(`REFUSING: ${name} needs a value.`);
+    process.exit(2);
+  }
+  consumed[index + 1] = true;
+  return value;
+};
+
+/**
+ * A repeatable value. `--read a b c` and `--read a,b,c` both mean three files, because guessing
+ * which one the caller meant is exactly how the two files went missing.
+ */
+const optList = (name) => {
+  const index = args.indexOf(name);
+  if (index === -1) return [];
+  consumed[index] = true;
+  const values = [];
+  for (let cursor = index + 1; cursor < args.length && !args[cursor].startsWith('--'); cursor += 1) {
+    consumed[cursor] = true;
+    for (const part of args[cursor].split(',')) {
+      const trimmed = part.trim();
+      if (trimmed) values.push(trimmed);
+    }
+  }
+  return values;
+};
 
 // Defaults are DATA (config.json), so swapping models never requires a code edit.
 // Flags still override, for one-off experiments.
@@ -36,12 +75,27 @@ const config = JSON.parse(readFileSync(join(here, 'config.json'), 'utf8'));
 
 const model = opt('--model', config.model);
 const ctx = Number(opt('--ctx', String(config.num_ctx)));
-const think = args.includes('--think') ? true : Boolean(config.think);
+const thinkIndex = args.indexOf('--think');
+if (thinkIndex !== -1) consumed[thinkIndex] = true;
+const think = thinkIndex !== -1 ? true : Boolean(config.think);
 const specPath = opt('--spec');
-const readList = opt('--read');
+const readFiles = optList('--read');
 const promptArg = opt('--prompt');
 const outPath = opt('--out', 'proposal.md');
 const host = opt('--host', config.host);
+
+// Nothing may be silently ignored. A typo'd flag or a file that fell out of --read must stop the
+// dispatch, not quietly shrink it.
+const stray = args.filter((value, index) => !consumed[index]);
+if (stray.length > 0) {
+  console.error(
+    `REFUSING: unrecognised argument(s): ${stray.join(' ')}\n`
+    + 'Nothing is sent unless every argument is understood — an ignored argument means the model\n'
+    + 'silently receives less than you think it does, and answers confidently about code it never saw.\n'
+    + 'Flags: --spec --prompt --read --out --model --ctx --host --think\n',
+  );
+  process.exit(2);
+}
 
 if (!specPath && !promptArg) {
   console.error('REFUSING: give --spec <file> or --prompt "<text>". The executor needs a bounded request.');
@@ -58,7 +112,7 @@ if (promptArg) prompt += `## Task\n\n${promptArg}\n`;
 
 // Context budget guard. At 32K this repo is not explorable; oversized input silently
 // truncates and the model answers confidently about code it never saw.
-const files = readList ? readList.split(',').map((f) => f.trim()).filter(Boolean) : [];
+const files = readFiles;
 let approxTokens = Math.ceil(prompt.length / 4);
 for (const file of files) {
   if (!existsSync(file)) { console.error(`REFUSING: --read file not found: ${file}`); process.exit(2); }
@@ -102,7 +156,38 @@ try {
   if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
   response = await res.json();
 } catch (error) {
-  console.error(`\nREQUEST FAILED: ${error.message}\nIs ollama running?  ollama list\n`);
+  // Do not guess at the cause. On 2026-09-11 this printed "Is ollama running?" while ollama WAS
+  // running and `local:check` reported READY one command later — the model was simply cold and
+  // the first request timed out. A wrong diagnosis costs more than no diagnosis, so ask the
+  // server itself before saying anything about it.
+  let serverUp = false;
+  try {
+    const probe = await fetch(`${host}/api/tags`, { signal: AbortSignal.timeout(3000) });
+    serverUp = probe.ok;
+  } catch (probeError) {
+    serverUp = false;
+  }
+
+  console.error(`\nREQUEST FAILED: ${error.message}`);
+  if (!serverUp) {
+    console.error(`ollama is NOT reachable at ${host}.  Check with:  npm run local:check\n`);
+  } else if (error.message.includes('HTTP 404')) {
+    // The server answered; it simply has no such model. Saying "cold load" here would be the
+    // same wrong-diagnosis failure this branch exists to prevent.
+    console.error(
+      `ollama is reachable, but it has no model named "${model}".\n`
+      + `  ollama list          see what is installed\n`
+      + `  ollama pull ${model}\n`
+      + 'Or fix the name: the default lives in tools/local_executor/config.json.\n',
+    );
+  } else {
+    console.error(
+      `ollama IS reachable at ${host}, so this is not a "server down" problem.\n`
+      + `Most likely ${model} was cold and the first load exceeded the timeout — loading it from\n`
+      + 'disk takes far longer than generating with it. Run the same command again; the second\n'
+      + 'attempt hits a warm model.\n',
+    );
+  }
   process.exit(1);
 }
 

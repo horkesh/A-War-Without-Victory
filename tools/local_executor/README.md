@@ -130,3 +130,29 @@ salvageable by editing.
 **Do not delegate shell.** Both hook guards were written by the planner. Every bug in them was a
 quoting bug — single vs double quotes, heredoc bodies, `stash@{0}` split by a brace separator.
 That is the worst possible fit for a small model, and the review cost would exceed writing it.
+
+## Harness defects found by using it (2026-09-11)
+
+Three, all found within an hour of dispatching in earnest. Each was a FALSE GREEN — the dispatch
+reported success while doing less than asked.
+
+1. **`--read a.sh b.sh c.sh` sent one file and silently dropped two.** `--read` took a single
+   value; the rest became stray argv and were ignored. `CLAUDE.md` documented `--read <files>`,
+   plural, so the documented interface and the implementation disagreed. The model then answered
+   confidently about two hooks it had never seen, and nothing in the output said so.
+   → Both forms now work, and **any argument the parser does not understand refuses the
+   dispatch.** Nothing is sent unless every argument is understood.
+
+2. **"Is ollama running?" was printed while ollama was running.** `local:check` reported READY one
+   command later; the model had simply been cold and the first load timed out. A wrong diagnosis
+   costs more than no diagnosis.
+   → On failure the tool now probes `/api/tags` and says which of three things actually happened:
+   server unreachable, model not installed (HTTP 404 — `ollama pull`), or a cold-load timeout
+   (retry, the second attempt hits a warm model).
+
+3. **A 404 was being reported as a cold load.** The first version of fix 2 blamed the cold model
+   for a missing one — repeating the exact failure it existed to prevent, one branch down.
+
+The pattern worth keeping: **a harness that reports success while doing less than asked is the
+same defect class as the delegated code that reports success regardless.** Both were caught the
+same way — by checking what actually happened instead of reading the exit line.
