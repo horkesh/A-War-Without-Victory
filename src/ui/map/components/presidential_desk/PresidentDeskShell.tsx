@@ -104,16 +104,34 @@ export function PresidentDeskShell({
           {t('common.close')}
         </button>
       )}
+      {/*
+        THE DATE, PINNED. Outside the scroll region on purpose: everything below scrolls, and the
+        Strategic Situation card that used to be the Desk's only date scrolls away with it.
+
+        This is what discharges R7's "the date is always visible" requirement. It used to be
+        discharged by sliding the whiteboard date along the wall until it cleared this column —
+        which put it on bare wall at 1920px and on top of the corkboard map at 1366px. Design §2
+        and §3 accept the occlusion instead: at the 1280x720 design minimum the board is entirely
+        behind this panel and no placement rule recovers it, so the date is read from here and the
+        board is written on properly.
+
+        Not folded into DeskAuthorityHeader, which §4.6 suggested: that component returns null
+        without commandAuthority, so the date would disappear on exactly the saves carrying the
+        least context.
+      */}
+      <div
+        data-testid="desk-pinned-date"
+        className="pointer-events-auto shrink-0 border border-panel-border/80 bg-[#11141b] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-text-secondary shadow-[0_16px_48px_rgba(0,0,0,0.42)]"
+      >
+        {state ? turnToDateString(state.turn) : t('desk.situation.noCampaign')}
+      </div>
       <div
         data-testid="president-desk-scroll-region"
-        // Through 1920px the authored calendar sits behind the fixed Desk
-        // column. Keep the transparent shell and column bounds unchanged, but
-        // begin painted Desk content below the latest faction date label. The
-        // 26.71vw term is the RBiH label centre (735 / 2752 scene width); the
-        // remaining clearance covers half the label, its shadow, and the
-        // scroll region's normal 146px top edge. At 2048px the date label is
-        // fully left of the column, so the normal content position resumes.
-        className="mt-[max(0px,calc(26.71vw_-_7.5625rem))] min-h-0 flex flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto overscroll-contain pb-3 min-[2048px]:mt-0 [-webkit-mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)] [mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)]"
+        // No top clearance. This used to carry mt-[max(0px,calc(26.71vw-7.5625rem))], which pushed
+        // every painted Desk card down by up to a quarter of the viewport so the authored
+        // whiteboard date stayed visible past this column. With the date pinned above and
+        // occlusion accepted (§2), that clearance is cost with no remaining purpose.
+        className="min-h-0 flex flex-1 flex-col gap-3 overflow-x-hidden overflow-y-auto overscroll-contain pb-3 [-webkit-mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)] [mask-image:linear-gradient(to_bottom,black_calc(100%_-_1.5rem),transparent)]"
       >
         <div className="shrink-0">
           <DeskAuthorityHeader state={state} />

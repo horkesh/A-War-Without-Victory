@@ -3,6 +3,8 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
+import { withoutBlockComments } from '../helpers/sourceComments';
+
 const repoRoot = resolve(__dirname, '../..');
 const fontsDirectory = resolve(repoRoot, 'assets/ui/fonts');
 const globalsPath = resolve(repoRoot, 'src/ui/map/styles/globals.css');
@@ -52,20 +54,10 @@ function expectNoExternalRuntimeFont(source: string): void {
   expect(source).not.toMatch(/@font-face\s*{[^}]*url\(\s*['"]?https?:\/\//is);
 }
 
-/**
- * CSS with block comments removed.
- *
- * A "must NOT appear" assertion over raw CSS reads prose as if it were code. The --font-marker
- * test failed on its own explanatory comment: that comment contains the literal `--font-command:`,
- * and `[^;]*` — which matches newlines — then ran from inside the sentence down into the
- * declaration below it. Every negative token check here runs on stripped CSS for that reason.
- *
- * Only block comments. Stripping `//` line comments would also eat `https://`, which would make
- * expectNoExternalRuntimeFont vacuously pass — a negative test that cannot fail is worse than none.
- */
-function withoutComments(css: string): string {
-  return css.replace(/\/\*[\s\S]*?\*\//g, '');
-}
+// Block comments only: in CSS `//` is not a comment, and stripping it would eat `https://` and
+// make expectNoExternalRuntimeFont vacuous. See tests/helpers/sourceComments.ts for why every
+// negative token check in this file runs on stripped CSS.
+const withoutComments = withoutBlockComments;
 
 function fontFaceFor(css: string, file: string): string {
   return css.match(new RegExp(`@font-face\\s*{[^}]*${escaped(file)}[^}]*}`, 's'))?.[0] ?? '';
@@ -179,8 +171,21 @@ describe('canonical UI typography contract', () => {
 
   it('allows only the canonical two families across discovered active UI sources', () => {
     const offenders: string[] = [];
+    const markerUses: string[] = [];
     const allowedFamilyAssignment =
       /^fontFamily\s*(?::|=)\s*(?:['"]var\(--font-(?:command|data)\)['"]|\{?UI_(?:COMMAND|DATA)_FONT_FAMILY\}?)\s*(?=[,}\r\n]|\/?>)/;
+    // THE MARKER IS A DIEGETIC EXCEPTION, AND A DELIBERATELY NARROW ONE.
+    //
+    // This test is the typography-unification sweep in permanent form, and a sweep exactly like it
+    // is what ate the handwriting the first time: commit 44b42f28b folded the whiteboard date into
+    // `var(--font-data)` under a general "unify active interface typography" pass, and the date has
+    // read as machine text ever since.
+    //
+    // So `--font-marker` is allowed — but only in the warroom shell, and only once. It is not a
+    // third UI family; it is ink on a physical object in a painted room. A second use anywhere is
+    // the beginning of it becoming a UI font, and fails here.
+    const markerAssignment = /^fontFamily\s*(?::|=)\s*['"]var\(--font-marker\)['"]\s*(?=[,}\r\n]|\/?>)/;
+    const markerOwner = 'src/ui/map/components/warroom/WarroomShellLayer.tsx';
 
     for (const relativePath of discoverActiveTypographySources()) {
       const source = readFileSync(resolve(repoRoot, relativePath), 'utf8');
@@ -188,6 +193,10 @@ describe('canonical UI typography contract', () => {
         const assignment = source.slice(match.index, match.index + 180);
         if (allowedFamilyAssignment.test(assignment)) continue;
         const line = source.slice(0, match.index).split('\n').length;
+        if (markerAssignment.test(assignment) && relativePath === markerOwner) {
+          markerUses.push(`${relativePath}:${line}`);
+          continue;
+        }
         offenders.push(`${relativePath}:${line}: ${assignment.split(/\r?\n/, 1)[0]}`);
       }
       for (const match of source.matchAll(/\b[A-Za-z_$][\w$]*\.font\s*=/g)) {
@@ -215,6 +224,9 @@ describe('canonical UI typography contract', () => {
     }
 
     expect(offenders, offenders.join('\n')).toEqual([]);
+    // Exactly one marker surface. Zero means the handwriting was absorbed again; more than one
+    // means it is spreading into the interface.
+    expect(markerUses, markerUses.join('\n')).toHaveLength(1);
   });
 
   it('records the pinned upstream revision, raw paths, and font hashes', () => {

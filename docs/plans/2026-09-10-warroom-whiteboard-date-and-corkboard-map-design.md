@@ -209,8 +209,12 @@ Two corrections to the paragraph above, both from this measurement:
 - **"at HRHB 1995 the board is L57" was wrong.** HRHB 1995 is the DARKEST plate in the game at
   **L\*24.5**; L\*57.9 is HRHB *1992*. The estimate understated the problem by more than half the
   usable range, and the dark-plate case is correspondingly worse than the plan assumed.
-- **The dark list was incomplete.** HRHB 1993 (41.3) sits alongside RBiH 1992 (42.3) and belongs on
-  it. The four plates below L\*45 are HRHB 1993/1994/1995 and RBiH 1992.
+- **The dark list named the wrong plates.** Four plates sit below L\*45 — HRHB 1993/1994/1995 and
+  RBiH 1992 — but "too dark to reach target" is a different question, and it depends on the target.
+  The target is anchored at a **35-point L\* gap**, because that is what the design already signed
+  off on: §4.4 calls `rgba(21,35,58,0.88)` (L\*13.63) reasonable on RBiH 1993 (L\*48.8). Against
+  that target only **HRHB 1994 (gap 31) and HRHB 1995 (gap 24.5)** fall short. RBiH 1992 reaches it
+  comfortably at 35.1.
 
 The spread is **L\*24.5 → 69.8, 45 points**, which is the evidence that a single hard-coded ink
 colour cannot work: it is legible on roughly a third of the game.

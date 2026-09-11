@@ -107,6 +107,39 @@
 }
 
 /*
+ * ─── Warroom whiteboard date — marker sizing ──────────────────────────────
+ *
+ * WHY SIZING LIVES IN CSS AND NOT IN THE COMPONENT. It needs an `@supports`
+ * fallback, and a React inline style cannot express one. The component supplies
+ * BOTH candidate sizes as custom properties and sets no `font-size` of its own,
+ * because an inline `font-size` would beat these rules and the fallback would be
+ * unreachable.
+ *
+ * WHY CONTAINER UNITS. The previous sizing was `clamp(7px, 1.05vw, 18px)`, and a
+ * test banned `vw` in this font-size for good reason: the text tracked the
+ * VIEWPORT while the board tracks the PLATE, and the plate letterboxes
+ * independently on both axes. `cqw` against the board element tracks the board
+ * itself, which is the surface the writing has to fit inside — one step better
+ * than tracking the plate.
+ *
+ * The fallback reproduces the plate's own `min(100%, 100vh * aspect)` in vw/vh,
+ * scaled by the board's share of the plate. Same intent, no container queries.
+ */
+.warroom-date-board {
+  container-type: inline-size;
+}
+
+.warroom-date-ink {
+  font-size: var(--warroom-marker-size-fallback);
+}
+
+@supports (container-type: inline-size) {
+  .warroom-date-ink {
+    font-size: var(--warroom-marker-size-cq);
+  }
+}
+
+/*
  * ─── A11y: prefers-reduced-motion (LANE-NIGHTSHIFT-V093-A11Y-LANE-D) ──────
  * Vestibular-sensitive and seizure-prone users need motion suppressed. The
  * media query catches OS-level preference (Windows / macOS / Linux DEs);
