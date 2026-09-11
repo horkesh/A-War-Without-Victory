@@ -23,7 +23,13 @@ not_delegable:
 tasks:
   - id: WR01-T1-FONT-INVENTORY
     kind: extract
-    status: open
+    status: done
+    # DONE, 2026-09-11. The inventory returned 22 font declarations across the warroom surfaces,
+    # every one of them IBM Plex — which is the finding the whole item rests on. The date was not
+    # styled wrong; no handwriting face was bundled at all, so each of seven legibility fixes had
+    # retreated further toward a UI font because there was nothing else to retreat to.
+    #
+    # Caveat 700 is now vendored and the date is written in it.
     edit: []
     # Exact files. `src/ui/map/styles` was listed here as a directory until the validator
     # rejected it — the same shape that cost three dispatches on T2. The dispatch that produced
@@ -86,15 +92,41 @@ tasks:
 
   - id: WR01-T3-LUMINANCE-TABLE
     kind: extract
-    status: blocked
-    blocked_by: >
-      The 15 plate images are not tracked — only their manifest is — so the evidence is not
-      present in a fresh clone. Recorded so the gap stays visible instead of being rediscovered.
+    status: done
+    # WAS BLOCKED ON A CLAIM THAT WAS SIMPLY FALSE, and that is the lesson worth keeping.
+    #
+    # The recorded reason was: "The 15 plate images are not tracked — only their manifest is — so
+    # the evidence is not present in a fresh clone." All fifteen ARE tracked, and so are the three
+    # regions files. `git ls-files src/ui/warroom/assets/` says so, and always did.
+    #
+    # ⇒ `blocked_by` is an unverified assertion. The validator checks that files NAMED in `read`
+    #   and `edit` exist; a blocked task has neither, so nothing in the format can contradict its
+    #   stated reason. This one sat unchallenged, and the work was later done anyway without
+    #   anyone noticing the manifest still called it impossible.
+    # ⇒ Before accepting a block, run the one command that would refute it. Here that was a single
+    #   `git ls-files`.
+    #
+    # DONE, 2026-09-11: tools/derive_warroom_board_luminance.cjs measures the median CIE L* of the
+    # wall_calendar_area region on all fifteen plates into
+    # src/ui/warroom/assets/warroom_board_luminance.json. Range L*24.5 (HRHB 1995) to L*69.8
+    # (RBiH 1995). It also corrected three figures in the owning plan.
     edit: []
-    read: []
-    change: "Not dispatchable until the plates are available locally."
+    read:
+      - src/ui/warroom/assets/hq_rbih_regions.json
+      - src/ui/warroom/assets/hq_rs_regions.json
+      - src/ui/warroom/assets/hq_hrhb_regions.json
+    change: >
+      Measure the whiteboard's lightness on every faction x year plate and commit it as data, so
+      the overlay ink can be derived from the room's light rather than hard-coded per plate.
     fails_now: []
     must_not_break: []
-    read_only_acceptance: "Planner re-runs the survey and compares against the owning plan."
-    out_of_scope: []
-    why_delegable: "It is not, today. Listed to keep the manifest honest about its own coverage."
+    read_only_acceptance: >
+      tests/ui/warroom_board_luminance.test.ts — the committed table must be reproduced
+      byte-for-byte by its generating script, and its recorded source digest must still match the
+      art it was derived from.
+    out_of_scope:
+      - Choosing the ink colour, which is design and follows from the table
+      - The corkboard map overlay, which shares the table but is a separate step
+    why_delegable: >
+      It was not, and it was not delegated. Reading pixels needs a script, not a language model,
+      and the acceptance test is the oracle.
