@@ -3825,3 +3825,31 @@ reported as missing under a path nobody wrote). Full routing rules in
 
 **Verified:** 39 tests, most of them negative cases, including the two prose strings that must
 NOT be flagged; tsc clean; both checker modes green on the real repo.
+
+## Third tier-1 guard, and the test that shrank its justification — 2026-09-11
+
+**The observation.** A multi-line script passed to `node -e` produces NOTHING in this agent
+harness: exit 0, empty stdout, empty stderr, even with both redirected to files. The single-line
+form of the same script works. It cost three turns in one session before anyone noticed, and each
+time the silence was read as a real result — "the JSON has no cases", "the parse failed". Every
+such conclusion would have been false. Worse, a multi-line `node -e` that WRITES a file writes
+nothing while reporting success, so the next step builds on a file that never changed.
+
+**The correction, which is the point of the entry.** The first version of the guard asserted that
+"the program never runs", and its own test refuted that within minutes: handed to a plain
+`bash -c`, the identical script runs and prints normally. **Node is fine.** The fault is in how
+this harness delivers a multi-line command to the shell. The guard survived; its justification
+shrank to what was actually measured.
+
+This is the mutation-proof rule paying for itself in the other direction. Usually a test proves a
+guard fires. Here it proved the REASON was wrong while the behaviour was real — and a guard
+carrying a false explanation is one that gets removed the first time somebody checks it.
+
+**Consequence for the test file.** It no longer tries to reproduce the harness failure, because it
+cannot from inside `bash -c`. It pins the two portable positive controls instead — the single-line
+form works, the heredoc form works — so the alternatives the guard recommends are known-good. **An
+escape route nobody verified is how a guard ends up switched off.**
+
+`tools/hooks/guard_inline_script.sh`, 16 tests. Hook inventory: 3 blocking, 3 advisory — and the
+three advisory ones now have tests for the first time, so promoting any of them is a decision
+rather than a guess.

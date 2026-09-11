@@ -143,6 +143,12 @@
             "command": "bash tools/hooks/guard_stash_pop.sh",
             "timeout": 5,
             "statusMessage": "Checking stash safety..."
+          },
+          {
+            "type": "command",
+            "command": "bash tools/hooks/guard_inline_script.sh",
+            "timeout": 5,
+            "statusMessage": "Checking stash safety..."
           }
         ]
       }
