@@ -153,7 +153,7 @@ lanes:
         tasks: null
       - path: docs/plans/2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.md
         exists: true
-        tokens: 6280
+        tokens: 6611
         fits_context: true
         tasks: docs/plans/tasks/2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.yml
   - lane: R8

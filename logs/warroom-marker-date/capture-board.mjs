@@ -18,31 +18,61 @@ const port = process.argv[2] ?? '3247';
 const out = 'logs/warroom-marker-date/shots';
 fs.mkdirSync(out, { recursive: true });
 
+/**
+ * What to capture, and why these and not the design's full 3x5x3 matrix.
+ *
+ * §8 asks for 45 shots. Most would be redundant: the ink and sheet are derived from two measured
+ * numbers per plate, so a shot mainly proves what those numbers already say. These are the ones
+ * carrying risk the numbers CANNOT settle.
+ *
+ * `turn` overrides the save's own turn. The scene year is derived from the turn, so this is how a
+ * 1994 or 1995 room is reached from a 1993 save. TERRITORY IS STILL THE SAVE'S — these shots prove
+ * ink-against-board contrast, not history, and must not be read as a historical state.
+ */
 const PLATES = [
-  ['rbih', 'rbih_w68.json'],
-  ['rs', 'rs_w68.json'],
-  ['hrhb', 'hrhb_w68.json'],
+  // The three plates the owner reviewed and accepted.
+  { faction: 'rbih', save: 'rbih_w68.json' },
+  { faction: 'rs', save: 'rs_w68.json' },
+  { faction: 'hrhb', save: 'hrhb_w68.json' },
+
+  // THE TWO DARK PLATES. §4.4 predicts ink cannot reach the 35-point target here: HRHB 1994 board
+  // L*31.0 (gap 31) and HRHB 1995 L*24.5 (gap 24.5), the darkest in the game. Whether that is
+  // acceptable or an art request is the owner's call and needs a picture.
+  { faction: 'hrhb', save: 'hrhb_w68.json', turn: 117, label: 'hrhb-1994' },
+  { faction: 'hrhb', save: 'hrhb_w68.json', turn: 170, label: 'hrhb-1995' },
+
+  // THE DESIGN MINIMUM. §3 says the board is entirely behind the Desk column at 1280x720 and no
+  // placement rule recovers it — which is the whole argument for accepting occlusion and pinning
+  // the date in the panel. One shot proves that claim; it does not need repeating per plate.
+  { faction: 'rbih', save: 'rbih_w68.json', viewport: { width: 1280, height: 720 }, label: 'rbih-1280x720' },
 ];
 
 const browser = await chromium.launch({ headless: true });
 const results = [];
 
 try {
-  for (const [faction, saveFile] of PLATES) {
-    const id = `${faction}-1920x1080`;
+  for (const plate of PLATES) {
+    const { faction, save: saveFile, turn, viewport, label } = plate;
+    const view = viewport ?? { width: 1920, height: 1080 };
+    const id = label ?? `${faction}-${view.width}x${view.height}`;
     const page = await browser.newPage({
-      viewport: { width: 1920, height: 1080 },
-      deviceScaleFactor: 3,
+      viewport: view,
+      // 3x on the full-HD shots; 2x at the design minimum, which is already a small frame.
+      deviceScaleFactor: view.width >= 1920 ? 3 : 2,
     });
     try {
       await page.goto(`http://127.0.0.1:${port}/?dev=1`, { waitUntil: 'domcontentloaded' });
       await page.waitForTimeout(3000);
       await page.keyboard.press('Enter');
       await page.waitForFunction(() => typeof window.handleManualSaveLoad === 'function');
-      await page.evaluate(
-        async (save) => window.handleManualSaveLoad(save),
-        JSON.parse(fs.readFileSync(`tmp_gui_observation/pitch_saves/${saveFile}`, 'utf8')),
-      );
+      const saveJson = JSON.parse(fs.readFileSync(`tmp_gui_observation/pitch_saves/${saveFile}`, 'utf8'));
+      if (typeof turn === 'number') {
+        // The scene year is derived from the turn, so moving the turn moves the room. Territory is
+        // untouched and stays the save's own — see the PLATES comment.
+        saveJson.meta = { ...saveJson.meta, turn };
+        if ('turn' in saveJson) saveJson.turn = turn;
+      }
+      await page.evaluate(async (save) => window.handleManualSaveLoad(save), saveJson);
       await page.getByRole('button', { name: /^continue$/i }).click();
       await page.waitForTimeout(1500);
 
@@ -132,8 +162,8 @@ try {
           clip: {
             x: Math.max(0, mb.x - mpad),
             y: Math.max(0, mb.y - mpad),
-            width: Math.min(1920 - Math.max(0, mb.x - mpad), mb.width + mpad * 2),
-            height: Math.min(1080 - Math.max(0, mb.y - mpad), mb.height + mpad * 2),
+            width: Math.min(view.width - Math.max(0, mb.x - mpad), mb.width + mpad * 2),
+            height: Math.min(view.height - Math.max(0, mb.y - mpad), mb.height + mpad * 2),
           },
         });
       }
@@ -147,8 +177,8 @@ try {
         clip: {
           x: Math.max(0, b.x - padX),
           y: Math.max(0, b.y - padY),
-          width: Math.min(1920, b.width + padX * 2),
-          height: Math.min(1080, b.height + padY * 2),
+          width: Math.min(view.width - Math.max(0, b.x - padX), b.width + padX * 2),
+          height: Math.min(view.height - Math.max(0, b.y - padY), b.height + padY * 2),
         },
       });
 
