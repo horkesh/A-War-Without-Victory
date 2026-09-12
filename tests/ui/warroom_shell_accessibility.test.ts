@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createElement } from 'react';
 import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
 import { setLocale } from '../../src/ui/map/i18n';
+import { withoutComments } from '../helpers/sourceComments';
 
 let storeState: Record<string, any> = { loadedGameState: null };
 
@@ -221,14 +222,93 @@ describe('WarroomShellLayer accessibility proof', () => {
         })).toMatch(/\d{1,2} \w{3} 1993/);
     });
 
-    it('renders the Warroom calendar in the canonical data family without ellipsis truncation', () => {
+    it('writes the Warroom date in the bundled marker hand, sized to the board', () => {
+        // A DELIBERATE REVERSAL, and the rationale belongs here because this test is the memory of
+        // it. This assertion used to REQUIRE `var(--font-data)` — IBM Plex Mono. That was the last
+        // step of a seven-commit retreat: the date was authored as handwriting, depended on
+        // `Segoe Print` (a Windows-only system font absent from many SKUs and from the capture
+        // rig), silently rendered as Arial, and was replaced with something guaranteed. Monospace
+        // is the most machine-like class available, and the owner's complaint was that the date
+        // "is too artificial".
+        //
+        // The fix was not styling: no handwriting face was bundled at all. One is now, so the
+        // requirement flips from "the UI data font" to "the bundled marker font".
         const source = readFileSync('src/ui/map/components/warroom/WarroomShellLayer.tsx', 'utf8');
+        const css = readFileSync('src/ui/map/styles/globals.css', 'utf8');
+
+        // The bare id, not `data-testid="..."`: the attribute is now applied through a `testId`
+        // prop on the shared MarkerLine, since the live date and its ghost are the same component.
+        expect(source).toContain('"warroom-date-board-label"');
+        expect(source).toContain("fontFamily: 'var(--font-marker)'");
+        expect(source).not.toContain("textOverflow: 'ellipsis'");
+
+        // Scoped to the date, not the file. `var(--font-data)` is correct everywhere else in this
+        // component — the toolbar and status dock are interface and should stay interface. The
+        // claim is only that the WRITING ON THE BOARD is no longer a UI font.
+        const markerStart = source.indexOf('function MarkerLine');
+        const markerEnd = source.indexOf('function WarroomHotspot');
+        expect(markerStart).toBeGreaterThan(-1);
+        expect(markerEnd).toBeGreaterThan(markerStart);
+        expect(source.slice(markerStart, markerEnd)).not.toContain("fontFamily: 'var(--font-data)'");
+
+        // STILL FORBIDDEN, and this half does not flip. Depending on a system handwriting face is
+        // the defect that started the whole retreat, so a bundled font replaces it — it does not
+        // license reaching for `cursive` again as a fallback.
         expect(source).not.toContain('Comic Sans MS');
         expect(source).not.toContain('Segoe Print');
-        expect(source).not.toContain("textOverflow: 'ellipsis'");
-        expect(source).not.toMatch(/fontSize:\s*['"][^'"]*vw/i);
-        expect(source).toContain('data-testid="warroom-date-board-label"');
-        expect(source).toContain("fontFamily: 'var(--font-data)'");
+        expect(source).not.toMatch(/font-family:[^;}]*cursive/i);
+        expect(css).not.toMatch(/--font-marker:[^;]*cursive/i);
+
+        // The old ban was on `vw` in this fontSize, and its intent was right: the text tracked the
+        // VIEWPORT while the board tracks the PLATE, and the plate letterboxes independently on
+        // both axes. The intent is now stated positively — sizing must track the board — and the
+        // component must not pin a fontSize at all, because doing so inline would beat the
+        // stylesheet and make the no-container-queries fallback unreachable.
+        expect(source.slice(markerStart, markerEnd)).not.toMatch(/fontSize:\s*['"]/);
+        expect(source).toContain('--warroom-marker-size-cq');
+        expect(source).toContain('--warroom-marker-size-fallback');
+        expect(css).toMatch(/\.warroom-date-board\s*{[^}]*container-type:\s*inline-size/s);
+        expect(css).toMatch(/@supports\s*\(container-type:\s*inline-size\)/);
+        // The fallback path still has to track the plate rather than the viewport alone: the
+        // component emits `min(<n>vw, <n>vh)`, which is the plate's own min() in miniature.
+        expect(source).toMatch(/min\(\$\{[^}]+\}vw,\s*\$\{[^}]+\}vh\)/);
+    });
+
+    it('paints the date as ink on the board, with nothing behind it', () => {
+        // The acceptance criterion is "no element of it has a background, border or shadow of its
+        // own". A stroke of marker is ink ON the board; anything behind it is a UI label sitting
+        // IN FRONT of the board, which is precisely what read as artificial.
+        // Comments stripped: every assertion below is a "must NOT appear", and the prose most
+        // likely to mention a banned construct is the comment explaining why it is banned. The
+        // padding rule below failed on the very comment recording why the padding was removed —
+        // the third time in one session. See tests/helpers/sourceComments.ts.
+        const source = withoutComments(
+          readFileSync('src/ui/map/components/warroom/WarroomShellLayer.tsx', 'utf8'),
+        );
+        const start = source.indexOf('function MarkerLine');
+        const end = source.indexOf('function WarroomHotspot');
+        expect(start).toBeGreaterThan(-1);
+        expect(end).toBeGreaterThan(start);
+        const dateSection = source.slice(start, end);
+
+        expect(dateSection).not.toMatch(/background:\s*['"]rgba?\(/);
+        expect(dateSection).not.toMatch(/border:\s*['"][^'"]*px/);
+        expect(dateSection).not.toMatch(/boxShadow:\s*['"][^'"]*px/);
+        expect(dateSection).toContain("background: 'none'");
+        expect(dateSection).toContain("border: 'none'");
+        expect(dateSection).toContain("boxShadow: 'none'");
+
+        // Left-anchored, not centred. Writing starts at the left edge of the space; `center` is
+        // where a layout engine puts a label.
+        expect(dateSection).toMatch(/left:\s*'10%'/);
+        expect(dateSection).not.toContain("justifyContent: 'center'");
+
+        // NO PERCENTAGE PADDING on the board. Percentage padding resolves against the containing
+        // block — the 1920px scene plate — not the 212px board, so `paddingLeft: '10%'` became
+        // 192px, inflated the box to a square, and collapsed the content box to zero inline size.
+        // `cqw` resolves against that content box, so every glyph rendered at font-size: 0px: the
+        // date was in the DOM, passed every string assertion, and was invisible.
+        expect(dateSection).not.toMatch(/padding(?:Left|Right|Top|Bottom)?:\s*'[\d.]+%'/);
     });
 
     it('keeps the Warroom dock and projected map attached to the scene plate', () => {

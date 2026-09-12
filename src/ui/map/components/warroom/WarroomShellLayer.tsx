@@ -12,7 +12,7 @@
  * Canonical owner: src/ui/map/components/warroom/WarroomShellLayer.tsx
  */
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import type { Feature, FeatureCollection, Geometry, LineString, MultiPolygon, Polygon } from 'geojson';
 import { getPlayerFacingFaction } from '../../../shared/playerFacingLabels';
 import { loadOperationalSettlements } from '../../data/DataLoader';
@@ -30,10 +30,16 @@ import {
 import { t } from '../../i18n';
 import { WARROOM_SCENE_URLS, type WarroomSceneYear } from './warroom-asset-urls';
 import {
+  WARROOM_SCENE_ASPECT,
   WARROOM_SCENE_HEIGHT,
   WARROOM_SCENE_WIDTH,
   WarroomScenePlate,
 } from './WarroomScenePlate';
+import {
+  MARKER_LINE_TILT_DEGREES,
+  markerGlyphJitter,
+  markerInk,
+} from './warroomMarkerInk';
 import fallbackRbihRegions from '../../../warroom/assets/hq_rbih_regions.json';
 import fallbackRsRegions from '../../../warroom/assets/hq_rs_regions.json';
 import fallbackHrhbRegions from '../../../warroom/assets/hq_hrhb_regions.json';
@@ -282,6 +288,38 @@ export function buildWarroomProjectedMapModel(
   return { outlinePaths, territoryPaths, frontLinePaths };
 }
 
+/**
+ * Which year's scene plate this save should be shown in.
+ *
+ * THE BUG THIS FIXES, found by photographing the room rather than by any test. The year was read
+ * as `parseInt(metadata.date.slice(-4))`. `metadata.date` is `'UNKNOWN'` whenever the save has no
+ * `meta.date` — which is every save produced by the scenario harness, since the field simply is
+ * not written. `'NOWN'` parses as NaN, NaN fell to the 1992 branch, and **every such save rendered
+ * the 1992 room whatever year it was in**. A turn-68 save showed `26 Jul 1993` written on a 1992
+ * whiteboard.
+ *
+ * It went unnoticed because both halves were independently plausible: the date came from the turn
+ * and was right, the plate came from the metadata and was a real plate. Only the pair is wrong,
+ * and nothing compared them.
+ *
+ * The turn is the reliable source — `turnToDateString` is what the date label itself uses — so the
+ * metadata string is now only a hint, and the turn is the fallback that actually answers.
+ */
+export function warroomSceneYear(
+  state: (Pick<LoadedGameState, 'metadata' | 'turn'>) | null | undefined,
+): WarroomSceneYear {
+  const fromMetadata = Number.parseInt(String(state?.metadata?.date ?? '').slice(-4), 10);
+  const fromTurn = typeof state?.turn === 'number'
+    ? Number.parseInt(turnToDateString(state.turn).slice(-4), 10)
+    : Number.NaN;
+  const parsed = Number.isNaN(fromMetadata) ? fromTurn : fromMetadata;
+
+  if (Number.isNaN(parsed) || parsed <= 1992) return 1992;
+  if (parsed === 1993) return 1993;
+  if (parsed === 1994) return 1994;
+  return 1995;
+}
+
 export function getWarroomBoardDateLabel(
   state: (Pick<LoadedGameState, 'metadata' | 'turn'> & Partial<Pick<LoadedGameState, 'label'>>) | null | undefined,
 ): string {
@@ -469,46 +507,200 @@ function WarroomProjectedMap({ region, model, playerFaction }: {
   );
 }
 
-function WarroomDateBoard({ region, label }: { region: WarroomRegion; label: string }) {
+/**
+ * Board width as a fraction of the scene plate.
+ *
+ * `wall_calendar_area` is 304–307 of the plate's 2752 across all three factions, so one constant
+ * covers them. It exists only to express the no-container-queries fallback size, which has to be
+ * stated in plate units because there is no board element to measure against in that path.
+ */
+const BOARD_WIDTH_FRACTION_OF_PLATE = 0.11;
+
+/** Text width to aim for, as a percentage of the board. Design §4.3: "roughly 60–70%". */
+const MARKER_TARGET_WIDTH_PERCENT = 68;
+
+/** Mean advance width of Caveat Bold, in em. Estimated from the face, not measured. */
+const MARKER_MEAN_ADVANCE_EM = 0.44;
+
+/**
+ * Font size for a date, as a percentage of the board's width.
+ *
+ * Sized from the string rather than fixed, because the label is not a fixed width: short-month
+ * dates run 10–11 characters ("6 Apr 1992"), `metadata.date` can carry a full month name, and
+ * `t('warroomShell.datePending')` is 'Date Pending' or 'Datum čeka'. A single size would either
+ * overrun the board on the long ones or leave the short ones looking timid. Holding the WIDTH
+ * constant instead is what a person writing on a board actually does.
+ */
+function markerFontSizeCqw(labelLength: number): number {
+  const raw = MARKER_TARGET_WIDTH_PERCENT / (Math.max(1, labelLength) * MARKER_MEAN_ADVANCE_EM);
+  return Math.round(Math.min(16, Math.max(8, raw)) * 100) / 100;
+}
+
+/** One line of marker writing: per-glyph jitter over a whole-line uphill tilt. */
+function MarkerLine({
+  label,
+  turn,
+  color,
+  salt,
+  testId,
+  style,
+}: {
+  label: string;
+  turn: number;
+  color: string;
+  salt: string;
+  testId: string;
+  style?: CSSProperties;
+}) {
+  const sizeCqw = markerFontSizeCqw(label.length);
+  const platePercent = sizeCqw * BOARD_WIDTH_FRACTION_OF_PLATE;
+
+  return (
+    <div
+      className="warroom-date-ink"
+      data-testid={testId}
+      style={{
+        // Both candidate sizes, so globals.css can choose between them with @supports. Setting
+        // fontSize here instead would beat the stylesheet and make the fallback unreachable.
+        ['--warroom-marker-size-cq' as string]: `${sizeCqw}cqw`,
+        ['--warroom-marker-size-fallback' as string]:
+          `min(${platePercent.toFixed(3)}vw, ${(platePercent * WARROOM_SCENE_ASPECT).toFixed(3)}vh)`,
+        color,
+        fontFamily: 'var(--font-marker)',
+        fontWeight: 700,
+        lineHeight: 1,
+        whiteSpace: 'nowrap',
+        // People write slightly uphill. Anchored left because that is where the writing started.
+        transform: `rotate(${MARKER_LINE_TILT_DEGREES}deg)`,
+        transformOrigin: 'left center',
+        // No background, border or shadow. A marker stroke is ink on the board; anything behind it
+        // is a UI label sitting in front of the board, which is the defect this replaces.
+        background: 'none',
+        border: 'none',
+        boxShadow: 'none',
+        textShadow: 'none',
+        ...style,
+      }}
+    >
+      {Array.from(label).map((glyph, index) => {
+        const jitter = markerGlyphJitter(turn, index, salt);
+        return (
+          <span
+            // Index-keyed deliberately: this is a fixed-length render of one string, glyphs are not
+            // reordered, and repeated characters would collide on any content-derived key.
+            key={`${salt}-${index}`}
+            style={{
+              display: 'inline-block',
+              // A space with a transform still collapses; leave it alone and it holds its width.
+              transform: glyph === ' '
+                ? undefined
+                : `translateY(${jitter.baselineDriftPx}px) rotate(${jitter.rotationDegrees}deg)`,
+              opacity: jitter.opacity,
+              whiteSpace: 'pre',
+            }}
+          >
+            {glyph}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * The date, written on the whiteboard.
+ *
+ * Not centred and not boxed. Design §4.2: writing starts at the left with a margin inside the
+ * region and sits upper-middle, because that is where a hand starts on a board — `center` is where
+ * a layout engine puts a label.
+ */
+function WarroomDateBoard({
+  region,
+  label,
+  ghostLabel,
+  turn,
+  faction,
+  year,
+}: {
+  region: WarroomRegion;
+  label: string;
+  ghostLabel: string | null;
+  turn: number;
+  faction: string | null;
+  year: number;
+}) {
   const box = getWarroomRegionBoxStyle(region);
+  const ink = markerInk(faction, year);
+
   return (
     <div
       aria-hidden="true"
+      className="warroom-date-board"
       data-testid="warroom-date-board"
+      data-board-lstar={ink.boardLstar}
+      data-ink-reaches-target={String(ink.reachesTarget)}
       style={{
         position: 'absolute',
         ...box,
         pointerEvents: 'none',
         zIndex: 1,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+        // NO PERCENTAGE PADDING HERE, and the reason is worth keeping.
+        //
+        // This started as `paddingLeft: '10%'` with `justifyContent: 'flex-start'` to get the
+        // "10% margin inside the region" the design asks for. Percentage padding resolves against
+        // the CONTAINING BLOCK's inline size, not the element's own — and this element is
+        // absolutely positioned on the scene plate, so 10% meant 10% of 1920px, not of the 212px
+        // board. Measured: padding-left became 192px and padding-bottom 268px on a 212px box.
+        //
+        // That did two things, one obvious and one silent. The box inflated to a 269px square,
+        // because a border-box cannot be narrower than its own padding. And the CONTENT box
+        // collapsed to exactly zero inline size — so `cqw`, which resolves against the container's
+        // content box, became 0 and every glyph rendered at font-size: 0px. The date was in the
+        // DOM, correct in every string assertion, and invisible.
+        //
+        // The line is positioned instead, because percentage `left`/`top` on an absolutely
+        // positioned child DO resolve against this element.
       }}
     >
-      <div
-        data-testid="warroom-date-board-label"
+      {ghostLabel ? (
+        // Last week's date, wiped. Wiped marker leaves a faint DARKER residue, so the ghost is the
+        // same hue at low opacity — never a lighter colour. Texture, not information: aria-hidden
+        // and excluded from every accessible name.
+        <MarkerLine
+          label={ghostLabel}
+          turn={turn - 1}
+          color={ink.color}
+          salt="ghost"
+          testId="warroom-date-board-ghost"
+          style={{
+            position: 'absolute',
+            // A CLEAR LINE ABOVE, not a few pixels above. Design §4.5 says "offset slightly up
+            // and left", which at this size put the ghost straight through the live date and read
+            // as a double-exposure rather than as last week's entry wiped off. A person writing
+            // the new date does not write it on top of the old one; they write below where the
+            // old one was. Measured on the captures, not reasoned about.
+            left: '6%',
+            top: '5%',
+            opacity: 0.12,
+            filter: 'blur(0.6px)',
+            transform: `rotate(${MARKER_LINE_TILT_DEGREES}deg) skewX(-6deg)`,
+          }}
+        />
+      ) : null}
+      <MarkerLine
+        label={label}
+        turn={turn}
+        color={ink.color}
+        salt="ink"
+        testId="warroom-date-board-label"
         style={{
-          // Darker, smaller, less aggressive — reads as a scribbled marker
-          // note rather than a billboarded UI label. Less luminous blue
-          // (was rgba(28,84,172,0.86)) → dark navy ink at higher opacity.
-          color: 'rgba(21, 35, 58, 0.88)',
-          fontFamily: 'var(--font-data)',
-          fontSize: '13px',
-          fontWeight: 600,
-          letterSpacing: '0.02em',
-          lineHeight: 1,
-          transform: 'rotate(-0.45deg)',
-          textShadow: 'none',
-          whiteSpace: 'nowrap',
-          textAlign: 'center',
-          background: 'rgba(236, 232, 216, 0.94)',
-          border: '1px solid rgba(78, 68, 52, 0.35)',
-          padding: '5px 9px 4px',
-          boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)',
+          // Left-anchored with a margin inside the board, sitting upper-middle. Writing starts at
+          // the left of the space; `center` is where a layout engine puts a label.
+          position: 'absolute',
+          left: '10%',
+          top: '40%',
         }}
-      >
-        {label}
-      </div>
+      />
     </div>
   );
 }
@@ -715,17 +907,7 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker, statusDock }: 
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const playerFaction = getPlayerFacingFaction(loadedGameState);
 
-  // Derive year from metadata.date string (e.g. "April 1992"), clamped to 1992–1995.
-  // metadata is optional and only present when a game is loaded.
-  const dateString = loadedGameState?.metadata?.date ?? '';
-  const parsedYear = parseInt(dateString.slice(-4), 10);
-  const year: WarroomSceneYear = parsedYear <= 1992 || isNaN(parsedYear)
-    ? 1992
-    : parsedYear === 1993
-      ? 1993
-      : parsedYear === 1994
-        ? 1994
-        : 1995;
+  const year = warroomSceneYear(loadedGameState);
 
   const scenePlateUrl = playerFaction
     ? (WARROOM_SCENE_URLS[playerFaction]?.[year] ?? WARROOM_SCENE_URLS[playerFaction]?.[1992])
@@ -851,6 +1033,10 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker, statusDock }: 
   const deskMapRegion = activeRegions.find((region) => region.id === 'desk_map' || region.id === 'wall_cork_board');
   const dateBoardRegion = activeRegions.find((region) => region.id === 'wall_calendar_area' || region.id === 'wall_calendar');
   const dateLabel = getWarroomBoardDateLabel(loadedGameState);
+  const dateTurn = typeof loadedGameState?.turn === 'number' ? loadedGameState.turn : 0;
+  // Last week's date, wiped but not gone. Suppressed at turn 0: nothing preceded the first week,
+  // and a ghost there would be inventing a history the save does not have.
+  const ghostDateLabel = dateTurn > 0 ? turnToDateString(dateTurn - 1) : null;
 
   return (
     <div
@@ -873,7 +1059,14 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker, statusDock }: 
           />
         ) : null}
         {dateBoardRegion ? (
-          <WarroomDateBoard region={dateBoardRegion} label={dateLabel} />
+          <WarroomDateBoard
+            region={dateBoardRegion}
+            label={dateLabel}
+            ghostLabel={ghostDateLabel}
+            turn={dateTurn}
+            faction={playerFaction}
+            year={year}
+          />
         ) : null}
         {activeRegions.map((region) => (
           <WarroomHotspot

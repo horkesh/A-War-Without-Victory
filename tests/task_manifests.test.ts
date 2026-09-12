@@ -18,6 +18,7 @@
  * repo has taught: a checker's false positives cost more than its misses.
  */
 
+import { execFileSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -168,6 +169,81 @@ describe('task manifest validator — it must reject what is not', () => {
   it('REJECTS an unknown kind', () => {
     const rel = writeManifest('kind.yml', validBody(READ_ONLY_TASK.replace('kind: extract', 'kind: vibes')));
     expect(validator.validateManifest(rel, sandbox).join('\n')).toMatch(/kind must be one of/);
+  });
+});
+
+describe('staleness is measured against base_commit, and does not apply to finished work', () => {
+  // A REAL GIT SANDBOX, because the staleness check asks git what changed and the main sandbox
+  // above is not a repository — there, `changedSince` returns null and this rule never fires. A
+  // test that cannot reach the code it names is worse than no test.
+  let repo: string;
+  let baseCommit: string;
+
+  const git = (...args: string[]): string =>
+    execFileSync('git', ['-C', repo, ...args], { encoding: 'utf8' }).trim();
+
+  const manifestFor = (status: string): string => validBody(
+    `  - id: T1\n`
+    + `    kind: extract\n`
+    + `    status: ${status}\n`
+    + `    edit: []\n`
+    + `    read:\n`
+    + `      - src/real.ts\n`
+    + `    change: "Report every exported symbol in the named file, verbatim."\n`
+    + `    fails_now: []\n`
+    + `    must_not_break: []\n`
+    + `    read_only_acceptance: "Quotes verified against the source file by script."\n`
+    + `    out_of_scope:\n`
+    + `      - Editing anything\n`,
+  );
+
+  beforeAll(() => {
+    repo = mkdtempSync(join(tmpdir(), 'awwv-stale-'));
+    mkdirSync(join(repo, 'docs/plans/tasks'), { recursive: true });
+    mkdirSync(join(repo, 'src'), { recursive: true });
+    writeFileSync(join(repo, 'docs/plans/plan.md'), '# plan\n');
+    writeFileSync(join(repo, 'src/real.ts'), 'export const x = 1;\n');
+
+    git('init', '-q');
+    git('config', 'user.email', 'test@example.invalid');
+    git('config', 'user.name', 'test');
+    git('add', '-A');
+    git('commit', '-q', '-m', 'base');
+    baseCommit = git('rev-parse', 'HEAD');
+
+    // Now move the repo on, exactly as landing the work would.
+    writeFileSync(join(repo, 'src/real.ts'), 'export const x = 2;\n');
+    git('add', '-A');
+    git('commit', '-q', '-m', 'the work lands');
+  });
+
+  afterAll(() => {
+    rmSync(repo, { recursive: true, force: true });
+  });
+
+  it('FLAGS an open task whose input moved — the manifest may be describing code that is gone', () => {
+    const body = manifestFor('open').replace(
+      'base_commit: 0000000000000000000000000000000000000000',
+      `base_commit: ${baseCommit}`,
+    );
+    writeFileSync(join(repo, 'docs/plans/tasks/open.yml'), body);
+    const errors = validator.validateManifest('docs/plans/tasks/open.yml', repo);
+    expect(errors.join('\n')).toMatch(/changed since base_commit/);
+  });
+
+  it('does NOT flag a done task whose input moved — that is what finishing the work looks like', () => {
+    // THE TIME BOMB THIS RULE SHIPPED WITH. WR01-T2 named a test file, the work landed, the file
+    // changed, and CI went red on a manifest that was describing completed work perfectly
+    // accurately. The check was measuring "has the repo moved on" and reporting it as "is this
+    // manifest wrong". A finished task's inputs are SUPPOSED to have moved.
+    const body = manifestFor('done').replace(
+      'base_commit: 0000000000000000000000000000000000000000',
+      `base_commit: ${baseCommit}`,
+    );
+    writeFileSync(join(repo, 'docs/plans/tasks/done.yml'), body);
+    const errors = validator.validateManifest('docs/plans/tasks/done.yml', repo);
+    expect(errors.join('\n')).not.toMatch(/changed since base_commit/);
+    expect(errors).toEqual([]);
   });
 });
 

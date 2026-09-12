@@ -1,0 +1,72 @@
+# Fixture manifest for tests/render_task_prompt.test.ts.
+#
+# WHY A FIXTURE AND NOT THE REAL MANIFEST. These tests used to render tasks out of the live
+# warroom manifest, which meant the test's MEANING depended on project state: the "refuses a
+# blocked task" case needed a task to still be blocked, and the "renders an open task" case needed
+# one to still be open. Finishing the work turned four passing tests red without anything being
+# wrong with the renderer.
+#
+# A test of a renderer should own its inputs. Live manifests are still exercised, but only by the
+# assertion that is actually status-independent: every dispatchable task in every committed
+# manifest renders.
+#
+# Deliberately NOT under docs/plans/tasks/, so tools/validate_task_manifests.cjs does not pick it
+# up as real work.
+
+version: 2
+owning_plan: docs/plans/tasks/FORMAT.md
+base_commit: 0000000000000000000000000000000000000000
+lane: TEST
+gate: TEST-RENDER-FIXTURE
+
+not_delegable:
+  - "Nothing. This manifest is a test fixture and describes no real work."
+
+tasks:
+  - id: FIX-T1-OPEN-READ-ONLY
+    kind: extract
+    status: open
+    edit: []
+    read:
+      - src/ui/map/styles/globals.css
+      - src/ui/map/styles/typography.ts
+    change: >
+      Report every font-family declaration in the named files, with the exact declaration text and
+      the file it appears in. Report what is written; judge nothing.
+    fails_now: []
+    must_not_break: []
+    read_only_acceptance: >
+      Every quoted declaration verified with: npm run local:verify-quotes -- <answer.json>
+      --field quote --source-field file
+    out_of_scope:
+      - Changing any font, style or asset
+    why_delegable: >
+      Pure extraction from named files with verbatim quotes a script can check.
+
+  - id: FIX-T2-BLOCKED
+    kind: extract
+    status: blocked
+    blocked_by: >
+      Fixture task, permanently blocked so the renderer's refusal path has something stable to
+      refuse. It describes no real work and can never become unblocked.
+    edit: []
+    read: []
+    change: "Fixture only — exists to exercise the blocked-task refusal."
+    fails_now: []
+    must_not_break: []
+    read_only_acceptance: "Not applicable; this task is never dispatched."
+    out_of_scope: []
+    why_delegable: "It is not. It is a fixture."
+
+  - id: FIX-T3-DONE
+    kind: extract
+    status: done
+    edit: []
+    read:
+      - src/ui/map/styles/globals.css
+    change: "Fixture only — exists to exercise the already-done refusal."
+    fails_now: []
+    must_not_break: []
+    read_only_acceptance: "Not applicable; this task is never dispatched."
+    out_of_scope: []
+    why_delegable: "It is not. It is a fixture."

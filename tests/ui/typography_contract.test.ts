@@ -3,6 +3,8 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
+import { withoutBlockComments } from '../helpers/sourceComments';
+
 const repoRoot = resolve(__dirname, '../..');
 const fontsDirectory = resolve(repoRoot, 'assets/ui/fonts');
 const globalsPath = resolve(repoRoot, 'src/ui/map/styles/globals.css');
@@ -31,6 +33,11 @@ const bundledFonts = [
   'IBMPlexMono-Regular-Latin2.woff2',
   'IBMPlexMono-SemiBold-Latin1.woff2',
   'IBMPlexMono-SemiBold-Latin2.woff2',
+  // The marker hand for the whiteboard date. Listing it here puts it under the same existence,
+  // nonempty and SHA-256 checks as everything else — a bundled font whose bytes nobody pins is a
+  // font that can be swapped without anyone noticing.
+  'Caveat-Bold-Latin.woff2',
+  'Caveat-Bold-LatinExt.woff2',
 ] as const;
 
 function escaped(value: string): string {
@@ -46,6 +53,11 @@ function expectNoExternalRuntimeFont(source: string): void {
   expect(source).not.toMatch(/@import\s+(?:url\()?\s*['"]?https?:\/\//i);
   expect(source).not.toMatch(/@font-face\s*{[^}]*url\(\s*['"]?https?:\/\//is);
 }
+
+// Block comments only: in CSS `//` is not a comment, and stripping it would eat `https://` and
+// make expectNoExternalRuntimeFont vacuous. See tests/helpers/sourceComments.ts for why every
+// negative token check in this file runs on stripped CSS.
+const withoutComments = withoutBlockComments;
 
 function fontFaceFor(css: string, file: string): string {
   return css.match(new RegExp(`@font-face\\s*{[^}]*${escaped(file)}[^}]*}`, 's'))?.[0] ?? '';
@@ -159,8 +171,21 @@ describe('canonical UI typography contract', () => {
 
   it('allows only the canonical two families across discovered active UI sources', () => {
     const offenders: string[] = [];
+    const markerUses: string[] = [];
     const allowedFamilyAssignment =
       /^fontFamily\s*(?::|=)\s*(?:['"]var\(--font-(?:command|data)\)['"]|\{?UI_(?:COMMAND|DATA)_FONT_FAMILY\}?)\s*(?=[,}\r\n]|\/?>)/;
+    // THE MARKER IS A DIEGETIC EXCEPTION, AND A DELIBERATELY NARROW ONE.
+    //
+    // This test is the typography-unification sweep in permanent form, and a sweep exactly like it
+    // is what ate the handwriting the first time: commit 44b42f28b folded the whiteboard date into
+    // `var(--font-data)` under a general "unify active interface typography" pass, and the date has
+    // read as machine text ever since.
+    //
+    // So `--font-marker` is allowed — but only in the warroom shell, and only once. It is not a
+    // third UI family; it is ink on a physical object in a painted room. A second use anywhere is
+    // the beginning of it becoming a UI font, and fails here.
+    const markerAssignment = /^fontFamily\s*(?::|=)\s*['"]var\(--font-marker\)['"]\s*(?=[,}\r\n]|\/?>)/;
+    const markerOwner = 'src/ui/map/components/warroom/WarroomShellLayer.tsx';
 
     for (const relativePath of discoverActiveTypographySources()) {
       const source = readFileSync(resolve(repoRoot, relativePath), 'utf8');
@@ -168,6 +193,10 @@ describe('canonical UI typography contract', () => {
         const assignment = source.slice(match.index, match.index + 180);
         if (allowedFamilyAssignment.test(assignment)) continue;
         const line = source.slice(0, match.index).split('\n').length;
+        if (markerAssignment.test(assignment) && relativePath === markerOwner) {
+          markerUses.push(`${relativePath}:${line}`);
+          continue;
+        }
         offenders.push(`${relativePath}:${line}: ${assignment.split(/\r?\n/, 1)[0]}`);
       }
       for (const match of source.matchAll(/\b[A-Za-z_$][\w$]*\.font\s*=/g)) {
@@ -195,6 +224,9 @@ describe('canonical UI typography contract', () => {
     }
 
     expect(offenders, offenders.join('\n')).toEqual([]);
+    // Exactly one marker surface. Zero means the handwriting was absorbed again; more than one
+    // means it is spreading into the interface.
+    expect(markerUses, markerUses.join('\n')).toHaveLength(1);
   });
 
   it('records the pinned upstream revision, raw paths, and font hashes', () => {
@@ -219,5 +251,58 @@ describe('canonical UI typography contract', () => {
       expect(existsSync(resolve(fontsDirectory, file)), file).toBe(true);
       expect(readme, `${file} SHA-256`).toContain(`${file}: ${sha256(resolve(fontsDirectory, file))}`);
     }
+  });
+
+  // ── The marker hand ────────────────────────────────────────────────────────────
+  //
+  // The whiteboard date was meant to look scrawled with a flomaster and does not, and the root
+  // cause was that NO handwriting face was bundled: an inventory of every font declaration in the
+  // warroom returned 22 results, all IBM Plex. Seven commits of legibility fixes had each retreated
+  // further toward a UI font because there was nothing else to retreat to.
+  //
+  // These tests exist to stop that happening again, and the separation is the load-bearing part.
+
+  it('bundles Caveat with its own OFL license, since the copyright holder differs', () => {
+    const license = readFileSync(resolve(fontsDirectory, 'OFL-1.1-Caveat.txt'), 'utf8');
+    expect(license).toContain('SIL OPEN FONT LICENSE Version 1.1');
+    expect(license).toContain('Caveat Project Authors');
+  });
+
+  it('declares Caveat at weight 700 across both Latin subsets, locally', () => {
+    const css = readFileSync(globalsPath, 'utf8');
+    for (const file of ['Caveat-Bold-Latin.woff2', 'Caveat-Bold-LatinExt.woff2']) {
+      expect(css, file).toMatch(
+        new RegExp(`@font-face\\s*{[^}]*Caveat[^}]*${escaped(file)}[^}]*font-weight:\\s*700`, 'is'),
+      );
+    }
+  });
+
+  it('routes the Bosnian c-caron through the Caveat Latin-Ext subset', () => {
+    // `getWarroomBoardDateLabel` can return 'Datum čeka'. A digits-and-months subset would drop
+    // the č, which is why the plan requires Latin-1 + Latin Extended-A rather than a glyph list.
+    const css = readFileSync(globalsPath, 'utf8');
+    const face = /@font-face\s*{[^}]*Caveat-Bold-LatinExt\.woff2[^}]*unicode-range:\s*([^;]+);/is.exec(css);
+    expect(face, 'Caveat Latin-Ext @font-face').not.toBeNull();
+    expect(unicodeRangeCovers(face![1], 0x010d), 'U+010D c-caron').toBe(true);
+  });
+
+  it('keeps --font-marker OUT of the command and data tokens', () => {
+    // The plan is explicit: do not route the marker through --font-data or --font-command. Those
+    // are UI tokens, and the next typography-unification pass would absorb the marker face exactly
+    // as commit 44b42f28b did. This assertion is the thing that makes that instruction binding.
+    const css = withoutComments(readFileSync(globalsPath, 'utf8'));
+    expect(css).toMatch(/--font-marker:\s*["']Caveat["']/);
+    expect(css).not.toMatch(/--font-command:[^;]*Caveat/);
+    expect(css).not.toMatch(/--font-data:[^;]*Caveat/);
+  });
+
+  it('never falls back to a system handwriting face', () => {
+    // Falling back to a system hand IS the defect that started this item: the accessibility test
+    // forbids Segoe Print and Comic Sans MS precisely because they were reached for. If Caveat
+    // fails to load the date should look wrong, not quietly wrong.
+    const css = withoutComments(readFileSync(globalsPath, 'utf8'));
+    const marker = /--font-marker:\s*([^;]+);/.exec(css);
+    expect(marker, '--font-marker token').not.toBeNull();
+    expect(marker![1]).not.toMatch(/cursive|Segoe Print|Comic Sans|Bradley|Chalkboard/i);
   });
 });

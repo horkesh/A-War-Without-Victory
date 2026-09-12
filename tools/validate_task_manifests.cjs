@@ -143,7 +143,14 @@ function validateManifest(relPath, repoRoot = REPO_ROOT) {
         continue;
       }
 
-      if (changed && changed.has(file)) {
+      // STALENESS DOES NOT APPLY TO A FINISHED TASK. A done task's inputs having changed is the
+      // EXPECTED outcome of doing the work, not a warning that the manifest drifted.
+      //
+      // This was a time bomb, and it went off: WR01-T2 named
+      // `tests/ui/warroom_shell_accessibility.test.ts`, the work landed, the test changed, and CI
+      // went red on a manifest that was describing completed work perfectly accurately. The check
+      // was measuring "has the repo moved on" and reporting it as "is this manifest wrong".
+      if (changed && changed.has(file) && task.status !== 'done') {
         push(`${label}: \`${file}\` changed since base_commit — manifest may be stale, re-derive it`);
       }
     }

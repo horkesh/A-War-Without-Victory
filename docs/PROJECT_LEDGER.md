@@ -4150,3 +4150,105 @@ a quote is REAL, never that it answers the question asked. The irrelevant dispat
 `verify_quotes` now flags the SHAPE that failure took — several sources supplied, every quote
 drawn from one — but flagging a shape is not judging relevance, and that judgement stays with the
 planner.
+
+---
+
+## 2026-09-11 — Caveat vendored as `--font-marker` (warroom whiteboard date)
+
+The whiteboard date was meant to read as flomaster on a board and did not. The root cause was not
+styling: **no handwriting face was bundled at all**. An inventory of every font declaration in the
+warroom returned 22 results, all IBM Plex. Seven commits of legibility fixes had each retreated
+further toward a UI font because there was nothing else to retreat to.
+
+Vendored per `docs/plans/2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.md` §4.1:
+
+- `assets/ui/fonts/Caveat-Bold-{Latin,LatinExt}.woff2`, pinned to Google Fonts Caveat **v23**
+  weight 700, with URLs and SHA-256s recorded in `assets/ui/fonts/README.md`.
+- `OFL-1.1-Caveat.txt` — Caveat is OFL 1.1 like IBM Plex but under a different copyright holder,
+  so it carries its own license text rather than sheltering under `OFL-1.1.txt`.
+- `--font-marker: "Caveat", var(--font-command);` in `globals.css`.
+
+**Two subsets, not a digits-and-months subset.** `getWarroomBoardDateLabel` can return
+`'Datum čeka'`; č (U+010D) lives in Latin-Ext.
+
+**`--font-marker` is a SEPARATE token, and a test now makes that binding.** The plan forbids
+routing the marker through `--font-data`/`--font-command`, because the next typography-unification
+pass would absorb it exactly as commit 44b42f28b did. There is also no cursive/system-hand
+fallback: if Caveat fails to load the date should look wrong, not quietly wrong.
+
+**Two corrections recorded rather than quietly absorbed.** The plan budgeted "roughly 20–30 KB";
+measured is **70,592 B**, the Latin subset alone being 51,020 — a hand at weight 700 carries
+heavier outlines than the estimate assumed. And glyph coverage is asserted from the upstream
+`unicode-range`, not verified locally: `fonttools` is not installed here. Both are in the README.
+
+**A negative test failed on its own comment.** `expect(css).not.toMatch(/--font-command:[^;]*Caveat/)`
+matched the prose explaining why the marker is separate — the comment contains the literal
+`--font-command:`, and `[^;]*` matches newlines, so it ran from mid-sentence into the declaration
+below. Every "must NOT appear" check in that file now runs on comment-stripped CSS via
+`withoutComments()`, and the assertion was mutation-proved: pointing `--font-command` at Caveat
+makes it fail. Block comments only — stripping `//` would eat `https://` and make the
+external-font check vacuous.
+
+Nothing consumes `--font-marker` yet; the date rendering is the next step in the plan.
+
+---
+
+## 2026-09-11 — The whiteboard date is written, not labelled
+
+Steps 4–6 of `docs/plans/2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.md`. The map
+(step 7) is untouched.
+
+**Ink is derived from the room, not chosen.** `tools/derive_warroom_board_luminance.cjs` measures
+the median CIE L\* of the `wall_calendar_area` pixels on all fifteen plates and commits the table.
+The board spans **L\*24.5 (HRHB 1995) to L\*69.8 (RBiH 1995)** — a 45-point range, which is why one
+hard-coded colour was legible on about a third of the game. Ink lightness is derived to hold a
+constant 35-point gap. That target is not taste: §4.4 calls `rgba(21,35,58,0.88)` (L\*13.63)
+reasonable on RBiH 1993 (L\*48.8), so the gap the design already approved is 35. Feeding RBiH 1993
+back through the derivation returns `rgb(21, 35, 59)` — the original navy to within one 8-bit step.
+
+**Two plates cannot reach it**: HRHB 1994 (gap 31) and HRHB 1995 (gap 24.5). Per §4.4 the ink bottoms
+out at black and the shortfall is recorded rather than engineered away — inverting to a light
+"chalk" ink would stop reading as a marker. `dimBoardPlates()` is that list, and a test pins it.
+
+**Jitter is hashed, never random.** Per-glyph baseline drift, rotation and ink opacity come from
+FNV-1a over `${turn}:${index}:${channel}`. `Math.random()` is banned across `src/`, and here it
+would also mean the date visibly redrew itself on every React re-render. Same turn, same scrawl;
+new turn, new scrawl — a person rewrote the board. The ghost line carries a different salt, or it
+would be the same scrawl twice and read as a drop shadow.
+
+**Sizing tracks the board, not the viewport.** The old `clamp(7px, 1.05vw, 18px)` tracked the
+viewport while the board tracks the plate, and the plate letterboxes on both axes. Sizing now lives
+in `globals.css` as `cqw` against the board element, with a `min(vw,vh)` fallback under `@supports`
+— in CSS because a React inline style cannot express a fallback, and the component deliberately
+sets no `fontSize` at all, since an inline one would beat the stylesheet and make the fallback
+unreachable. The size is computed from the label's length so the writing holds ~68% of the board
+whether it reads `6 Apr 1992` or `Datum čeka`.
+
+**Occlusion is now accepted, and R7's requirement is discharged honestly.** Two hacks are gone: the
+viewport-driven `translateX` that put the date on bare wall at 1920 and on the corkboard at 1366,
+and `mt-[max(0px,calc(26.71vw_-_7.5625rem))]`, which pushed every Desk card down by up to a quarter
+of the viewport to keep the board in view. At the 1280×720 design minimum the board is entirely
+behind the Desk column and no placement rule recovers it. A pinned date now sits **outside**
+`president-desk-scroll-region`. Not folded into `DeskAuthorityHeader` as §4.6 suggested: that
+component returns `null` without `commandAuthority`, so the date would vanish on exactly the saves
+carrying the least context.
+
+**Three plan figures corrected against measurement**, all recorded in the plan itself: "at HRHB 1995
+the board is L57" was wrong (it is the darkest plate at L\*24.5; L\*57.9 is HRHB *1992*); the
+too-dark list named RBiH 1992, which reaches target comfortably at 35.1; and §10's worry that the
+region overruns the board's right edge on RBiH did not reproduce — the column profile falls 53 → 46
+smoothly, and a middle-60% inset moves the median by at most 0.6 L\*, so there is no inset parameter.
+
+**A negative-assertion bug, found twice in one day, is now one shared helper.** A "must NOT appear"
+check over raw source reads prose as code, and the prose most likely to mention a banned construct
+is the comment explaining the ban. It hit the CSS `--font-command` check in the morning and the
+`Math.random()` check here. `tests/helpers/sourceComments.ts` owns the stripping, and documents the
+opposite trap: naively stripping `//` also eats `https://`, which would leave the external-font
+check passing against a file full of remote URLs.
+
+**The typography contract now allows `--font-marker` exactly once, in the warroom shell.** That test
+is the unification sweep in permanent form, and a sweep just like it is what ate the handwriting the
+first time (`44b42f28b`). Zero uses means it was absorbed again; two means it is becoming a UI font.
+
+**Not verified visually.** §8's acceptance is a 3 factions × 5 years × 3 viewports capture matrix
+and owner review. None of that has been done; what is proved here is mechanical.
