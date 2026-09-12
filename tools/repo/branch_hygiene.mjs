@@ -49,6 +49,24 @@ function git(args, { allowFail = false } = {}) {
     }
 }
 
+/**
+ * Run a git command for its EXIT STATUS. True if it succeeded.
+ *
+ * Deliberately separate from `git()` rather than making that return null on failure. `git()`
+ * returns `''` when `allowFail` swallows an error, and `hasArchiveTag` tests the result with
+ * `!== ''` — so a null-on-failure contract would make a MISSING archive tag read as present, and
+ * this tool would delete unique work believing it had been archived. The safe change is a new
+ * helper, not a new meaning for the old one.
+ */
+function gitOk(args) {
+    try {
+        execFileSync('git', args, { encoding: 'utf8', stdio: 'pipe' });
+        return true;
+    } catch {
+        return false;
+    }
+}
+
 function strictCompare(a, b) {
     return a < b ? -1 : a > b ? 1 : 0;
 }
@@ -142,11 +160,43 @@ function main(argv) {
 
         const localDel = deletable.filter((r) => !r.remote).map((r) => r.branch);
         const remoteDel = deletable.filter((r) => r.remote).map((r) => r.name);
-        for (const b of localDel) git(['branch', '-D', b], { allowFail: true });
-        if (localDel.length > 0) console.log(`deleted ${localDel.length} local branch(es)`);
+        // COUNT OUTCOMES, NOT INTENTIONS. This reported `deleted ${localDel.length}` after firing
+        // the deletes through `allowFail`, which swallows the error — so on 2026-09-12 it printed
+        // "deleted 7 local branch(es)" while all seven had failed with "cannot delete branch 'x'
+        // used by worktree at ...". Every branch was still there. A hygiene tool that reports
+        // success without acting is worse than no tool, which this file already knew.
+        const deletedLocal = [];
+        const heldByWorktree = [];
+        for (const b of localDel) {
+            if (gitOk(['branch', '-D', b])) deletedLocal.push(b);
+            else heldByWorktree.push(b);
+        }
+        if (deletedLocal.length > 0) console.log(`deleted ${deletedLocal.length} local branch(es)`);
+        if (heldByWorktree.length > 0) {
+            console.log(`${heldByWorktree.length} local branch(es) still checked out in a worktree, left alone:`);
+            for (const b of heldByWorktree) console.log(`  ${b}`);
+            console.log('  (remove the worktree first: git worktree remove <path>)');
+        }
         if (opts.push && remoteDel.length > 0) {
-            git(['push', 'origin', '--delete', ...remoteDel]);
-            console.log(`deleted ${remoteDel.length} remote branch(es)`);
+            // ONE AT A TIME, and a missing ref is success rather than failure.
+            //
+            // This was a single batched `push origin --delete a b c`, and git aborts the WHOLE
+            // push if any one ref is already gone: "unable to delete 'x': remote ref does not
+            // exist" → nothing deleted, non-zero exit, stack trace. That is not a rare case, it is
+            // the normal one — `gh pr merge --delete-branch` removes the remote branch, so every
+            // branch cleaned up straight after its own merge is already absent from origin while
+            // the local listing still names it. Measured 2026-09-12: three live branches survived
+            // because a fourth had already been deleted by the merge.
+            let deleted = 0;
+            const gone = [];
+            for (const branch of remoteDel) {
+                if (gitOk(['push', 'origin', '--delete', branch])) deleted += 1;
+                else gone.push(branch);
+            }
+            if (deleted > 0) console.log(`deleted ${deleted} remote branch(es)`);
+            if (gone.length > 0) {
+                console.log(`${gone.length} remote branch(es) already absent: ${gone.join(', ')}`);
+            }
         }
         if (refused.length > 0) {
             console.error(`\n${refused.length} branch(es) refused: run with --archive first.`);
