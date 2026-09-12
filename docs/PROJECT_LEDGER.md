@@ -4315,3 +4315,46 @@ which is what SVG `<path>` siblings are and a MapLibre layer is not. So the tran
 **"independently-composited elements sharing edges"**, not "translucent faction colours". Recorded
 in the napkin and memory in that corrected form; the original phrasing would have sent the next
 reader hunting a non-problem in the wrong place.
+
+---
+
+## 2026-09-12 — 188-week baseline pins refreshed (owner-authorised)
+
+`Baseline Pins` had been red on `main` for three runs, since the R7 lane landed: 6 of 8 pinned
+artifacts disagreed. Everything else passed — `scenario-anchors`, `engine-health-188w`,
+`Baseline Regression`, `full-suite` — which is the signature of stale pins rather than behaviour
+drift. Owner authorised the re-pin, as its own change, signed off by diffing `matched_osids` **and**
+the full anchor list.
+
+**Blocked first, and the block was correct.** The gated 188w entrypoint refuses a dirty tree and
+measures dirtiness whole-tree on purpose. 320 untracked files under `logs/` were enough to stop it.
+They are 6.1 GB of run evidence cited by path from ~20 tracked docs, so they were **gitignored, not
+removed** — every file still on disk, 332 tracked evidence files still tracked.
+
+Run `2a8eb4244`, `git_dirty:false`, Node 22.23.2, exit 0, turn 188, `FINAL_SEAL unresolved=0`.
+
+**Checkpoints: 702 / 678 / 672 / 667** against unchanged floors 694 / 674 / 668 / 641. Three of four
+identical to `n392`; only oct1995 moved, 665 → 667. **That +2 is not a floor and not an improvement
+claim** — `n392`'s own 665 was explicitly unattributed and so is this.
+
+**Anchor diff against `n392`: none.** All 31 identical in controller and pass state, checked
+per-anchor because the net count masks flips. Enclave guard 9/9 — seven hold, Srebrenica and Žepa
+fall on schedule. Eastern provenance CLEAN. Cascade 38 → 40, the gain entirely `sanski_most`
+8/10 → 10/10, nothing fell.
+
+**Two independent reproductions.** The same 6 of 8 artifacts moved as at the previous re-bless, with
+the same two (`formation_delta`, `watched_operations`) unchanged — and CI's reported "actual" hashes
+on #515/#516/#517 match this machine exactly.
+
+**`verify_checkpoints.cjs` still exits 1, and that is expected.** It is the carved-out Farz P-A
+discriminator, identical to `n392` down to the cell, turn (`t168`) and brigade
+(`arbih_327th_vitezka_mountain`, 3rd corps). Two tracked statements say that output is not a §6
+breach. `mrkonjic_grad 0/6` is identical across `n388`, `n392` and this run — pre-existing, proven by
+re-scoring both prior runs with the same tool rather than assumed.
+
+**MERGE-ORDER CAUTION RE-ARMED.** `codex/apr1994-operational-corrections` moves these same numbers
+the opposite way and is still live (archived locally, 20 unique commits). This refresh resets the
+reference again: whichever lands second must re-measure and must not carry its own run forward.
+
+Assessed in the scenario-tester role against live tracked sources, per the repo's orchestrator rule
+that scenario artifacts are not interpreted by the implementer.
