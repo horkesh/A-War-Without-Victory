@@ -108,6 +108,43 @@ They do not close the present calibration program. The sole scoring scenario rem
 
 
 
+> **PIN REFRESH, 2026-09-12 — manifest re-blessed at `2a8eb4244`; `n392` remains the blessed
+> MEASUREMENT and the floors are untouched.** The `n392` pins had gone stale on `main` when the R7
+> lane landed: 6 of 8 artifacts disagreed and `Baseline Pins` had been red on `main` for three runs.
+> The manifest now records a clean owner-authorised re-run at `2a8eb4244`
+> (`git_dirty:false`, Node 22.23.2, `UPDATE_BASELINES=1 npm run test:baselines`, exit 0, turn 188,
+> `FINAL_SEAL unresolved=0`), run dir `data/derived/scenario/_baseline_tmp/apr1992_188w`.
+>
+> | checkpoint | `n392` | re-pin | floor (UNCHANGED) |
+> |---|---:|---:|---:|
+> | jan1993 | 702 | **702** | 694 |
+> | apr1994 | 678 | **678** | 674 |
+> | apr1995 | 672 | **672** | 668 |
+> | oct1995 | 665 | **667** | 641 |
+>
+> Three of four identical to `n392`; only oct1995 moved, +2. **That +2 is NOT a floor and NOT an
+> improvement claim** — `n392`'s own 665 was explicitly unattributed, and so is this.
+>
+> **Anchor diff against `n392`: NONE.** All 31 identical in controller *and* pass state — checked
+> per-anchor, because the net count masks flips. Health gate PASS (matched 667 ≥ 644, dead_ops 1,
+> stranded 13, consistency 0, K:W 3.759). Enclave guard 9/9: seven hold, Srebrenica and Žepa fall on
+> schedule. Eastern provenance CLEAN. Cascade 38 → **40**, the gain entirely `sanski_most` 8/10 →
+> 10/10; nothing in the profile fell.
+>
+> **The same 6 of 8 moved as at the last re-bless, with `formation_delta.json` and
+> `watched_operations.json` again unchanged** — and CI's reported "actual" hashes on #515/#516/#517
+> match this machine exactly. Two independent reproductions of the same output.
+>
+> `verify_checkpoints.cjs` still exits 1 on the **carved-out Farz P-A discriminator** — identical to
+> `n392`, same cell, same `t168`, same `arbih_327th_vitezka_mountain (3rd corps)`. Per the notes
+> below that is **not** a §6 breach. `mrkonjic_grad 0/6` is identical in `n388`, `n392` and this run;
+> `op:kalesija:seher_2` remains the known-open initial-control disagreement.
+>
+> **THE MERGE-ORDER CAUTION BELOW IS RE-ARMED, NOT DISCHARGED.**
+> `codex/apr1994-operational-corrections` moves these same numbers the other way and is still live
+> (archived locally, 20 unique commits). This refresh resets the reference again: **whichever lands
+> second must re-measure and must not carry its own run forward.**
+
 **Supersedes `n388` below**, which stood 34 commits stale. `n388` remains the lineage record and the
 provenance of the floors; it is no longer the measurement.
 
