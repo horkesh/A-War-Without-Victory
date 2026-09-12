@@ -1,11 +1,11 @@
 # Warroom whiteboard date + corkboard map — design
 
 **Date:** 2026-09-10
-**Status:** **IMPLEMENTED, 2026-09-12.** Steps 3–8 shipped (PR #515, plus the corkboard branch).
-Step 9 — the 3×5×3 capture matrix — is PARTIAL: one viewport (1920×1080) at one turn (t68, 1993) for
-all three factions, reviewed and accepted by the owner. The other two viewports and the other four
-years remain uncaptured. Measured corrections and defects found during the build are recorded inline
-below, each next to the claim it corrects.
+**Status:** **CLOSED, 2026-09-12.** Steps 3–9 all done — shipped as PR #515 (font + date) and #516
+(corkboard map). Step 9's capture matrix was narrowed from 45 shots to 6 and **satisfied by
+exception**; the reasoning is in §9. Measured corrections and defects found during the build are
+recorded inline below, each next to the claim it corrects — §5.1 in particular, where three of this
+document's own assumptions turned out to be false.
 **Owner brief:** the whiteboard date "was supposed to look like a date scrawled by hand with flomaster.
 Right now it is too artificial"; the corkboard map "still looks like it was tacked on, instead of being
 there organically." Whatever blocks the fix — tests included — gets changed.
@@ -384,10 +384,30 @@ refresh, no baseline touch.
 7. ~~Map: viewBox, margin, pins, shadow, texture, latitude, light (§5).~~ **DONE** — see §5.1 for the
    three assumptions that had to be corrected on the way.
 8. ~~Test rewrites (§6) alongside each step.~~ **DONE.**
-9. **Capture matrix + owner review (§8) — PARTIAL.** One viewport (1920×1080) at t68/1993, all three
-   factions, owner-reviewed and accepted. **Outstanding: 1280×720 and 3440×1440, and the other four
-   years** — including HRHB 1994/1995, the two plates §4.4 flags as too dark to reach ink contrast,
-   which are exactly the ones worth an owner's eye.
+9. **Capture matrix + owner review (§8) — SATISFIED BY EXCEPTION, narrowed from 45 shots to 6.**
+
+   §8 asks for 3 factions × 5 years × 3 viewports. Most of those 45 would prove what two measured
+   numbers per plate already say — the ink and the sheet are *derived* from board and cork
+   luminance, so a shot mostly re-reads the table. The six captured are the ones carrying risk the
+   numbers cannot settle:
+
+   - **RBiH / RS / HRHB at 1920×1080, t68 (1993)** — owner-reviewed and accepted.
+   - **HRHB 1994 (board L\*31.0) and HRHB 1995 (L\*24.5)** — the two plates §4.4 predicts cannot
+     reach the 35-point target. Confirmed: ink bottoms out at `rgb(0, 0, 0)` on both, gaps 31.0 and
+     24.5. Owner-reviewed; **accepted as honest for a dim room, no art request raised.**
+   - **1280×720, the design minimum** — which is what §3's whole argument rests on.
+
+   These two override the turn to reach a later room from a 1993 save, so **territory in those two
+   shots is t68 and must not be read as history.** They prove ink-against-board, nothing else.
+
+   **§3's claim is confirmed at the design minimum**, and more precisely than it was stated: the
+   WHITEBOARD is entirely behind the Desk column at 1280×720, the pinned Desk date carries the
+   legibility exactly as §4.6 intends — and the CORKBOARD MAP remains fully visible and reads
+   correctly at that size, which §3 did not predict either way.
+
+   Not captured, deliberately: 3440×1440 (the most generous case — §3's own table shows the board
+   fully clear there, so it is the least likely to fail), and the eight remaining plates whose ink
+   is interpolated between figures already sampled.
 
 **Step 3 should not have been a separate PR.** Splitting the font off produced a stale-manifest
 failure on a branch that could not see the work resolving it, and a bundled font nothing uses is not

@@ -4305,3 +4305,13 @@ consumers, not a side effect of a rendering change.
 
 **Still not done:** §8's capture matrix is one viewport at one turn. 1280×720, 3440×1440 and the
 other four years are uncaptured — including HRHB 1994/1995, the dark plates flagged for owner review.
+
+**Follow-up, same day — the tactical-map concern is CLOSED, and the rule was wrong.** The warroom
+entry above flagged the main tactical map as likely carrying the same reprinted-mesh artefact.
+Audited: it does not. `osid-control-fill` uses the same translucent values
+(`rgba(180,50,50,0.25)` for RS) but is a MapLibre `fill` layer — one tessellated mesh composited
+once, with `"fill-antialias": false`. The artefact needs ~600 INDEPENDENTLY COMPOSITED elements,
+which is what SVG `<path>` siblings are and a MapLibre layer is not. So the transferable rule is
+**"independently-composited elements sharing edges"**, not "translucent faction colours". Recorded
+in the napkin and memory in that corrected form; the original phrasing would have sent the next
+reader hunting a non-problem in the wrong place.

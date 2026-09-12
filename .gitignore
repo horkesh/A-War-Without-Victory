@@ -124,3 +124,9 @@ storybook-static
 .worktrees/
 *.pre-harmonize.bak
 tmp-toolbar-fit/
+
+# Full-scene warroom captures are working artefacts, not evidence.
+# At deviceScaleFactor 3 a 1920x1080 scene is ~8-10 MB, and the -board / -map crops
+# already carry every claim the scene shot would. Three of them were tracked briefly
+# (PR #516) and account for 30 MB that every clone would have carried.
+logs/**/shots/*-scene.png
