@@ -92,6 +92,24 @@ export function isContainSuppressionActiveFor(faction: FactionId): boolean {
 
 /** Minimum surplus brigades required to create a plan. */
 export const MIN_BRIGADES_FOR_PLAN = 3;
+const BILATERAL_MIN_BRIGADES_FOR_PLAN = 2;
+export const EMERGENT_OPERATION_MAX_BRIGADES = 6;
+
+export function capEmergentOperationBrigades(requiredBrigades: number, bilateralOffensive: boolean): number {
+    return bilateralOffensive
+        ? requiredBrigades
+        : Math.min(EMERGENT_OPERATION_MAX_BRIGADES, requiredBrigades);
+}
+
+export function isBilateralOpponentTarget(targetOsid: string, briefing: CommanderBriefing): boolean {
+    const opponent = briefing.faction === 'RBiH'
+        ? 'HRHB'
+        : briefing.faction === 'HRHB'
+            ? 'RBiH'
+            : null;
+    if (opponent === null) return false;
+    return briefing.state_ref?.political.political_controllers?.[targetOsid] === opponent;
+}
 
 /**
  * Number of turns an OSID from a failed operation stays on cooldown.
@@ -936,6 +954,26 @@ export function managePlan(
         };
     }
 
+    // A designated ARBiH bilateral attacker has already received a bounded,
+    // front-derived target list from corps diversion. Try to turn that explicit
+    // intent into a canonical opportunity plan before generic intent competition;
+    // all normal force, reachability, fatigue, exhaustion, and operation-slot
+    // gates above and inside tryCreateFromOpportunity still apply.
+    if (briefing.bilateral_offensive && briefing.campaign_offensive_targets.length > 0) {
+        const bilateralDecision = tryCreateFromOpportunity(briefing, zones, forces, surplusPool, turn);
+        if (bilateralDecision) {
+            const gated = applyForceQualitySoftGates(bilateralDecision, briefing);
+            const stagedPlan = gated.plan?.concentration_progress === 1
+                ? { ...gated.plan, status: 'ready' as const, target_ready_turn: turn }
+                : gated.plan;
+            return {
+                ...gated,
+                plan: stagedPlan,
+                reason: `bilateral offensive directive: ${gated.reason}`,
+            };
+        }
+    }
+
     // v0.8.1 Phase 3: Candidate intent competition.
     // Run the competition to determine what the commander *wants* to do this turn.
     // The existing stance/exhaustion/fatigue/role guards above already enforce the same
@@ -994,6 +1032,19 @@ function advanceExistingPlan(
     plan: CommanderPlan,
     turn: number,
 ): PlanDecision {
+    if (plan.bilateral_offensive) {
+        const bilateralState = briefing.state_ref?.political.rbih_hrhb_state;
+        if (bilateralState?.ceasefire_active || bilateralState?.washington_signed) {
+            return {
+                plan: { ...plan, status: 'abandoned' },
+                action: 'abandoned',
+                reason: bilateralState.washington_signed
+                    ? 'Washington Agreement ended bilateral offensive authority'
+                    : 'bilateral ceasefire ended offensive authority',
+            };
+        }
+    }
+
     // Clear already-abandoned plans so new plans can be created next turn.
     // Abandoned plans are stored in state for one turn to allow EMIT to see the reason,
     // but on the NEXT advance they must be cleared rather than re-evaluated.
@@ -1239,7 +1290,10 @@ function tryCreateFromOpportunity(
     surplusPool: BrigadeEvaluation[],
     turn: number,
 ): PlanDecision | null {
-    if (surplusPool.length < MIN_BRIGADES_FOR_PLAN) return null;
+    const minimumBrigades = briefing.bilateral_offensive
+        ? BILATERAL_MIN_BRIGADES_FOR_PLAN
+        : MIN_BRIGADES_FOR_PLAN;
+    if (!briefing.bilateral_offensive && surplusPool.length < minimumBrigades) return null;
 
     // Find projecting or balanced zones (surplus check is already done at corps level above).
     // Issue #13 Option H: besieged zones with surplus brigades AND an enemy front are
@@ -1273,11 +1327,21 @@ function tryCreateFromOpportunity(
         // Besieged corps can only do local ops
         // Still allow opportunity within hop limit
         const bestZone = eligibleZones[0]!;
-        return createOpportunityPlan(briefing, bestZone, surplusPool, forces.tier_counts.main_effort, turn, true);
+        const planningPool = briefing.bilateral_offensive
+            ? (forces.by_zone[bestZone.zone_id] ?? []).filter(ev => !ev.is_on_loan)
+            : surplusPool;
+        return createOpportunityPlan(briefing, bestZone, planningPool, forces.tier_counts.main_effort, turn, true);
     }
 
     const bestZone = eligibleZones[0]!;
-    return createOpportunityPlan(briefing, bestZone, surplusPool, forces.tier_counts.main_effort, turn, false);
+    // A bilateral corps attacks from an already continuous front; its assault
+    // group therefore comes from combat-ready brigades assigned to that front,
+    // not only from the allocation layer's residual "surplus" label. Ordinary
+    // opportunity operations retain the stricter surplus-only contract.
+    const planningPool = briefing.bilateral_offensive
+        ? (forces.by_zone[bestZone.zone_id] ?? []).filter(ev => !ev.is_on_loan)
+        : surplusPool;
+    return createOpportunityPlan(briefing, bestZone, planningPool, forces.tier_counts.main_effort, turn, false);
 }
 
 function createOpportunityPlan(
@@ -1288,6 +1352,9 @@ function createOpportunityPlan(
     turn: number,
     isLocal: boolean,
 ): PlanDecision | null {
+    const minimumBrigades = briefing.bilateral_offensive
+        ? BILATERAL_MIN_BRIGADES_FOR_PLAN
+        : MIN_BRIGADES_FOR_PLAN;
     // ── Reachability-aware selection (Fix A) ───────────────────────────
     // Pre-filter surplus to brigades that can actually reach at least one
     // enemy objective approach OSID within MAX_REACHABILITY_HOPS.
@@ -1299,7 +1366,7 @@ function createOpportunityPlan(
     );
 
     // Use the reachable pool if it can form a plan; otherwise the plan truly cannot form.
-    if (reachableSurplus.length < MIN_BRIGADES_FOR_PLAN) {
+    if (reachableSurplus.length < minimumBrigades) {
         return null;
     }
 
@@ -1313,13 +1380,27 @@ function createOpportunityPlan(
     // it has reachable main_effort-capable brigades. When no main_effort are reachable,
     // allow a bounded fallback at MIN_BRIGADES_FOR_PLAN scale only.
     const effectiveMainEffortCap = reachableMainEffort > 0 ? reachableMainEffort : 0;
-    const naturalRequired = Math.min(reachableSurplus.length, stagingZone.surplus_brigades.length);
-    const mainEffortLimit = effectiveMainEffortCap > 0 ? effectiveMainEffortCap : MIN_BRIGADES_FOR_PLAN;
-    const baseRequiredBrigades = Math.max(
-        MIN_BRIGADES_FOR_PLAN,
+    const naturalRequired = briefing.bilateral_offensive
+        ? reachableSurplus.length
+        : Math.min(reachableSurplus.length, stagingZone.surplus_brigades.length);
+    const mainEffortLimit = effectiveMainEffortCap > 0 ? effectiveMainEffortCap : minimumBrigades;
+    const uncappedRequiredBrigades = Math.max(
+        minimumBrigades,
         Math.min(mainEffortLimit, naturalRequired),
     );
-    const requiredBrigades = baseRequiredBrigades + getEnemyEquipmentBrigadeBump(briefing);
+    // Corps-created opportunities are bounded local operations. Larger force
+    // concentrations belong to authored or Army-HQ operations, which carry
+    // explicit objectives and reserve authority. The bilateral HVO-war path
+    // remains uncapped because it represents an assigned theatre offensive.
+    const baseRequiredBrigades = capEmergentOperationBrigades(
+        uncappedRequiredBrigades,
+        briefing.bilateral_offensive === true,
+    );
+    // ARBiH historically accepted unfavorable heavy-equipment ratios when attacking
+    // HVO. The designated bilateral attacker still needs the normal reachable force
+    // floor, but does not wait for a tank/artillery matching increment it cannot meet.
+    const equipmentBump = briefing.bilateral_offensive ? 0 : getEnemyEquipmentBrigadeBump(briefing);
+    const requiredBrigades = baseRequiredBrigades + equipmentBump;
     if (requiredBrigades > naturalRequired) {
         return null;
     }
@@ -1333,8 +1414,15 @@ function createOpportunityPlan(
         stagingZone.enemy_adjacent_osids,
     );
 
+    const scopedReachableEnemyOsids = briefing.bilateral_offensive
+        ? reachableEnemyOsids.filter(osid =>
+            briefing.campaign_offensive_targets.includes(osid)
+            && isBilateralOpponentTarget(osid, briefing),
+        )
+        : reachableEnemyOsids;
+
     // If no enemy objectives survive the reachability filter, this plan cannot be created.
-    if (reachableEnemyOsids.length === 0) {
+    if (scopedReachableEnemyOsids.length === 0) {
         return null;
     }
 
@@ -1342,8 +1430,8 @@ function createOpportunityPlan(
     // Fall back to the full reachable set if every candidate is on cooldown (avoids
     // indefinite planning freeze when the corps has only one axis of advance).
     const cooldownSet = buildCatastrophicOsidCooldownSet(briefing, briefing.turn);
-    const cooledCandidates = reachableEnemyOsids.filter(osid => !cooldownSet.has(osid));
-    const effectiveOsids = cooledCandidates.length > 0 ? cooledCandidates : reachableEnemyOsids;
+    const cooledCandidates = scopedReachableEnemyOsids.filter(osid => !cooldownSet.has(osid));
+    const effectiveOsids = cooledCandidates.length > 0 ? cooledCandidates : scopedReachableEnemyOsids;
 
     // contain Lane V (§6 VRS strangle-not-capture, DEFAULT-OFF): withhold the
     // bot's OWN organic assault target-generation against CONTAINED enclave OSIDs
@@ -1387,13 +1475,15 @@ function createOpportunityPlan(
     const brigadesAlreadyAtStaging = countBrigadesInZone(assignedBrigades, surplusPool, stagingZone.zone_id);
     const brigadesToMove = Math.max(0, requiredBrigades - brigadesAlreadyAtStaging);
     const concentrationTurns = Math.ceil(brigadesToMove / PLAN_CONCENTRATION_RATE);
+    const selectedTargets = selectOpportunityTargets(filteredZone, requiredBrigades, briefing);
+    if (selectedTargets.length === 0) return null;
 
     const plan: CommanderPlan = {
         plan_id: `plan_${briefing.corps_id}_t${turn}_opportunity`,
         objective_description: isLocal
             ? `local opportunity from ${stagingZone.zone_id}`
             : `offensive opportunity from ${stagingZone.zone_id}`,
-        target_osids: selectOpportunityTargets(filteredZone, requiredBrigades, briefing),
+        target_osids: selectedTargets,
         required_brigades: requiredBrigades,
         assigned_brigades: assignedBrigades,
         staging_zone: stagingZone.zone_id,
@@ -1405,6 +1495,7 @@ function createOpportunityPlan(
             : 0,
         viability_score: isFallback ? 0.55 : 0.8,  // Fallback plans (no reachable main_effort) start weaker
         source: 'opportunity',
+        bilateral_offensive: briefing.bilateral_offensive || undefined,
     };
 
     return {
@@ -1420,12 +1511,104 @@ function createOpportunityPlan(
 // Helper: select opportunity targets from zone's enemy adjacency
 // ═══════════════════════════════════════════════════════════════════════════
 
+export type OpportunityTargetPurpose =
+    | 'campaign_objective'
+    | 'recent_recapture'
+    | 'reduce_isolated_position'
+    | 'cut_enemy_salient'
+    | 'relieve_must_hold';
+
+const RECENT_RECAPTURE_WINDOW_TURNS = 8;
+const MAX_ISOLATED_POSITION_OSIDS = 6;
+
+export function isBoundedIsolatedEnemyPosition(
+    targetOsid: string,
+    briefing: CommanderBriefing,
+): boolean {
+    const controllers = briefing.state_ref?.political.political_controllers;
+    const adjacency = briefing.spatial.sharedBoundaryAdjacency ?? briefing.spatial.adjacency;
+    const targetController = controllers?.[targetOsid];
+    if (!controllers || !adjacency || !targetController || targetController === briefing.faction) return false;
+
+    const cluster = new Set<string>([targetOsid]);
+    const queue = [targetOsid];
+    for (let head = 0; head < queue.length; head++) {
+        const current = queue[head];
+        if (!current) break;
+        for (const neighbor of [...(adjacency.get(current) ?? [])].sort(strictCompare)) {
+            if (cluster.has(neighbor) || controllers[neighbor] !== targetController) continue;
+            cluster.add(neighbor);
+            if (cluster.size > MAX_ISOLATED_POSITION_OSIDS) return false;
+            queue.push(neighbor);
+        }
+    }
+
+    let externalBoundaryCount = 0;
+    for (const member of [...cluster].sort(strictCompare)) {
+        for (const neighbor of [...(adjacency.get(member) ?? [])].sort(strictCompare)) {
+            if (cluster.has(neighbor)) continue;
+            externalBoundaryCount++;
+            if (controllers[neighbor] !== briefing.faction) return false;
+        }
+    }
+    return externalBoundaryCount > 0;
+}
+
 /**
- * n1301: Select opportunity targets ranked by approach count (strength-based).
- * Enemy OSIDs with more friendly-zone neighbors are more exposed and thus
- * preferred attack vectors. Secondary sort: lexicographic for determinism.
+ * Return the state-derived reason that can justify an occupying corps
+ * operation. Exposure and force ratio are feasibility facts, not purposes.
  */
-function selectOpportunityTargets(
+export function deriveOpportunityTargetPurpose(
+    targetOsid: string,
+    stagingZone: ZoneAssessment,
+    briefing: CommanderBriefing,
+): OpportunityTargetPurpose | null {
+    if (getPriorityTargetSet(briefing).has(targetOsid)) {
+        return 'campaign_objective';
+    }
+
+    const recentLossFloor = Math.max(0, briefing.turn - RECENT_RECAPTURE_WINDOW_TURNS);
+    const wasRecentlyLost = (briefing.state_ref?.political.control_events ?? []).some((event) =>
+        event.settlement_id === targetOsid
+        && event.turn >= recentLossFloor
+        && event.turn <= briefing.turn
+        && event.from === briefing.faction
+        && event.to !== briefing.faction,
+    );
+    if (wasRecentlyLost) return 'recent_recapture';
+
+    if (isBoundedIsolatedEnemyPosition(targetOsid, briefing)) {
+        return 'reduce_isolated_position';
+    }
+
+    const isEnemySalientNeck = (briefing.front_geometry?.enemy_salients ?? []).some((salient) =>
+        salient.neck_osids.includes(targetOsid),
+    );
+    if (isEnemySalientNeck) return 'cut_enemy_salient';
+
+    const zoneOsids = new Set(stagingZone.osids);
+    const threatensMustHold = (briefing.must_hold_osids ?? []).some((holdOsid) =>
+        zoneOsids.has(holdOsid)
+        && (briefing.spatial.sharedBoundaryAdjacency?.get(targetOsid) ?? []).includes(holdOsid),
+    );
+    if (threatensMustHold) return 'relieve_must_hold';
+
+    return null;
+}
+
+const PURPOSE_PRIORITY: Readonly<Record<OpportunityTargetPurpose, number>> = {
+    recent_recapture: 4,
+    campaign_objective: 3,
+    reduce_isolated_position: 2,
+    cut_enemy_salient: 2,
+    relieve_must_hold: 1,
+};
+
+/**
+ * Select purpose-qualified targets. Physical exposure ranks candidates only
+ * after the commander has a reason to occupy them.
+ */
+export function selectOpportunityTargets(
     stagingZone: ZoneAssessment,
     requiredBrigades: number,
     briefing: CommanderBriefing,
@@ -1433,8 +1616,6 @@ function selectOpportunityTargets(
     const enemyOsids = stagingZone.enemy_adjacent_osids;
     if (enemyOsids.length === 0) return [];
     const maxObjectives = Math.max(1, Math.min(6, Math.floor(requiredBrigades * 0.5)));
-    const campaignTargetSet = getPriorityTargetSet(briefing);
-
     // Rank by number of staging-zone OSIDs adjacent to each enemy OSID.
     // More approach vectors = more exposed target = higher priority.
     // Guard: adjacency may be absent in unit tests — fall back to lex sort.
@@ -1460,11 +1641,36 @@ function selectOpportunityTargets(
         return !(neighbors as readonly string[]).some(n => factionFriendlyOsids.has(n));
     };
 
-    return [...enemyOsids]
-        .filter(osid => !isIsolatedCapture(osid))
+    const tacticallyRanked = [...enemyOsids]
+        // Bilateral objectives already passed the stricter friendly-approach BFS
+        // filter above. Do not let the secondary shared-boundary representation
+        // erase that verified HVO objective and leave an empty plan that later
+        // falls back onto an unrelated VRS target.
+        .filter(osid => briefing.bilateral_offensive || !isIsolatedCapture(osid))
         .sort((a, b) => {
+            const campaignTargetSet = getPriorityTargetSet(briefing);
             const campaignDiff = Number(campaignTargetSet.has(b)) - Number(campaignTargetSet.has(a));
             if (campaignDiff !== 0) return campaignDiff;
+            const diff = approachCount(b) - approachCount(a); // descending
+            return diff !== 0 ? diff : strictCompare(a, b);
+        });
+
+    // Purpose is a command veto, not a front-wide target-search service. If the
+    // commander's primary tactical proposal has no operational reason, end this
+    // planning cycle instead of silently redirecting the same assembled force
+    // to a distant target that merely happens to satisfy another predicate.
+    const primaryProposal = tacticallyRanked[0];
+    if (!primaryProposal || deriveOpportunityTargetPurpose(primaryProposal, stagingZone, briefing) === null) {
+        return [];
+    }
+
+    return tacticallyRanked
+        .filter(osid => deriveOpportunityTargetPurpose(osid, stagingZone, briefing) !== null)
+        .sort((a, b) => {
+            const purposeA = deriveOpportunityTargetPurpose(a, stagingZone, briefing)!;
+            const purposeB = deriveOpportunityTargetPurpose(b, stagingZone, briefing)!;
+            const purposeDiff = PURPOSE_PRIORITY[purposeB] - PURPOSE_PRIORITY[purposeA];
+            if (purposeDiff !== 0) return purposeDiff;
             const diff = approachCount(b) - approachCount(a); // descending
             return diff !== 0 ? diff : strictCompare(a, b);
         })
@@ -1649,10 +1855,17 @@ function checkAbandonConditions(
         return 'staging zone is now besieged';
     }
 
-    // Required brigades no longer achievable — check assigned brigade availability,
-    // not raw surplus pool size (which fluctuates with garrison budgets).
+    // Required brigades no longer achievable — an assigned brigade remains
+    // available when a later allocation pass garrison-locks it in the same zone.
+    // Raw surplus membership fluctuates with front-edge budgets and must not
+    // make an otherwise active concentrating/ready plan evaporate.
     const abandonAssignedIds = new Set(plan.assigned_brigades);
-    const abandonAvailable = surplusPool.filter(ev => abandonAssignedIds.has(ev.brigade_id)).length;
+    const knownBrigadeIds = new Set<string>();
+    for (const ev of surplusPool) knownBrigadeIds.add(ev.brigade_id);
+    for (const zone of zones) {
+        for (const brigadeId of zone.assigned_brigades) knownBrigadeIds.add(brigadeId);
+    }
+    const abandonAvailable = [...abandonAssignedIds].filter(id => knownBrigadeIds.has(id)).length;
     if (abandonAvailable < Math.ceil(plan.required_brigades * 0.5)) {
         return `assigned brigades depleted: ${abandonAvailable}/${plan.required_brigades}`;
     }

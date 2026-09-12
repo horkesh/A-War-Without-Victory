@@ -201,6 +201,11 @@ export function correctTransitStates(state: GameState, adjacency: Map<string, st
         const transitState = moveStates[bid];
         if (!transitState || transitState.status !== 'in_transit') continue;
 
+        // Dated historical concentrations can begin while their operation is
+        // still queued behind another authored operation. They outrank the
+        // brigade's routine front assignment until that concentration ends.
+        if (transitState.owner === 'authored_preplanned') continue;
+
         const loc = f.location_osid;
         if (!loc) continue;
 

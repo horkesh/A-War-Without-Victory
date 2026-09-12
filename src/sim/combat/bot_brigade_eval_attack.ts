@@ -285,6 +285,19 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 '.sectorAttack.executionTacticalAdjacency',
                 () => getTacticalAdjacentOsids(state, loc as Osid, adjacency).includes(currentObjective)
             );
+            const operationAxis = getBrigadeAxis(activeOp, brigade.id);
+            const minimumForwardBrigades = operationAxis?.minimum_forward_brigades;
+            const forwardAssaultGroupReady = minimumForwardBrigades == null || operationAxis == null
+                || operationAxis.assigned_brigades.filter((brigadeId) => {
+                    const axisBrigade = state.military.formations?.[brigadeId];
+                    const axisLocation = axisBrigade?.location_osid as Osid | undefined;
+                    if (!axisLocation) return false;
+                    const locationController = getPoliticalControllerOSID(state, axisLocation, reverseMap);
+                    if (locationController !== faction && !isFriendlyFaction(locationController, faction, state)) {
+                        return false;
+                    }
+                    return getTacticalAdjacentOsids(state, axisLocation, adjacency).includes(currentObjective);
+                }).length >= minimumForwardBrigades;
             const avoidedOsidsForFaction = state.meta?.avoided_osids_by_faction?.[faction];
             const directObjectiveAttack = tacticallyAdjacentToObjective
                 ? sectorAttackProfileTime('.sectorAttack.executionDirectObjective', () => {
@@ -359,10 +372,11 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                         additionalAttackers
                     )
                     : null;
-                const canDirectAttackObjective =
+                const canDirectAttackObjective = forwardAssaultGroupReady && (
                     isOutcomeSufficientForAttack(predictedOutcome, probeThreshold) ||
                     (concentratedOutcome != null &&
-                        isOutcomeSufficientForAttack(concentratedOutcome, probeThreshold));
+                        isOutcomeSufficientForAttack(concentratedOutcome, probeThreshold))
+                );
                 directAttackSufficient = canDirectAttackObjective;
                 directConcentratedOutcome = concentratedOutcome;
                 if (canDirectAttackObjective && brigade.corps_id) {

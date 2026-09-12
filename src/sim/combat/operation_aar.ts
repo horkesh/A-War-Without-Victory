@@ -80,7 +80,7 @@ export interface AxisAAR {
      *  this axis never attacks. Surfaced on AAR so post-mortem tools see it. */
     unreachable_at_launch?: boolean;
     /** Typed launch blocker for axes that never had an executable opening attack. */
-    launch_blocker?: 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective' | 'insufficient_donation';
+    launch_blocker?: 'participants_below_attack_floor' | 'participants_below_assembly_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective' | 'insufficient_donation';
     /**
      * REASON-CODE INSTRUMENTATION, topic `axis_reject` — item 3. Carryover of
      * `OperationAxis.launch_blocker_detail`, which is written only when
@@ -705,6 +705,18 @@ export function finalizeOperationAAR(
         }
         for (const osid of entry.objectives_lost_this_turn ?? []) {
             causalCaptureSet.delete(osid);
+        }
+    }
+    // Weekly operation entries are written before some same-turn battle capture
+    // receipts are folded back into the operation log. Brigade engagement
+    // history is the canonical resolved-combat record, including whether that
+    // battle actually flipped territory, so use it to close that telemetry gap.
+    for (const brigadeId of op.participating_brigades) {
+        const engagements = state.military.formations[brigadeId as FormationId]?.brigade_history?.engagements ?? [];
+        for (const engagement of engagements) {
+            if (engagement.turn < op.started_turn || engagement.turn > state.meta.turn) continue;
+            if (engagement.role !== 'attacker' || engagement.territory_flipped !== true) continue;
+            if (objectives.includes(engagement.osid)) causalCaptureSet.add(engagement.osid);
         }
     }
     const objectivesLoggedCaptured = objectives.filter((osid) => loggedCaptureSet.has(osid));

@@ -4359,6 +4359,350 @@ reference again: whichever lands second must re-measure and must not carry its o
 Assessed in the scenario-tester role against live tracked sources, per the repo's orchestrator rule
 that scenario artifacts are not interpreted by the implementer.
 
+### 2026-09-01 — April 1994 operational corrections: ARBiH initiative and VRS Main Staff elites
+
+**Behavior.** Open RBiH-HRHB war now assigns the bilateral offensive directive to ARBiH and a
+targetless defensive directive to HVO. Enemy objectives are filtered by actual opposing political
+control. ARBiH corps selection prefers operationally ready corps before mixed-front overlap, and
+the commander can form a bilateral sector plan from reachable campaign targets without the generic
+heavy-equipment size increment or low-intelligence probe conversion. Ceasefire/Washington state
+abandons the designation. This changes planning and order emission only; no combat-resolution or
+direct-control mechanism changed.
+
+**Historical operations.** Cerska–Kamenica and Zvezda 94 explicitly roster
+`rs_1st_guards_motorized` and `rs_65th_protection_motorized_regiment`. Triggered operations admit
+those explicit Army-HQ formations only through the canonical elite availability and deployment
+helpers. BB2 p.406 is unit-specific evidence for Cerska. BB2 p.480 establishes Main Staff/higher-HQ
+involvement at Zvezda but not these exact units; the latter is therefore a declared scenario
+allocation.
+
+**Measured result.** Full run
+`apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0`, final hash
+`6c00e419e8248c97`: April 1994 **678/712**, October 1995 **661/712**, **31/31** anchors, and all
+hard 188-week engine-health checks pass. HVO makes zero post-breakdown territorial gains against
+ARBiH. ARBiH gains ten HVO OSIDs via existing consolidation/abandonment at turn 52, not battle
+capture; a pre-Washington occupying ARBiH sector attack still does not form. Cerska launches at
+t40 with the 1st Guards and records one combat capture; Zvezda launches at t100 with the 1st Guards
+and fails at Goražde. The 65th is rostered but unavailable under its live loan state in this seed.
+
+**Files and verification.** Implementation is in `bot_corps_ai.ts`, `bot_corps_stance.ts`, the
+commander briefing/plan/emit state path, `triggered_operations.ts`, and
+`pre_planned_operations.ts`, with focused regressions in the corresponding bilateral, commander,
+triggered, and pre-planned test files. TypeScript, focused Vitest suites, scenario tests, diff
+checks, and the 188-week engine-health gate are the acceptance surface. No calibration-authored
+control event was introduced.
+
+### 2026-09-01 — CORRECTION: bilateral territory is operations-only
+
+The preceding entry's ten turn-52 RBiH gains are **rejected** as a calibration result. They were
+three `consolidation` and seven `abandoned` transfers, not operations, and therefore answered the
+map while violating the owner's explicit mechanism requirement. RBiH-HVO rear-pocket resolution
+now skips passive transfer in either direction. This does not disable those mechanisms for any
+other faction pair.
+
+The traced commander failure had three linked boundaries: the designated 4th Corps could not form
+a plan from only two residual-surplus brigades; front repartition then garrison-locked its reserved
+group; and the target's sub-sector did not own those same brigade IDs at emission. Bilateral plans
+now use a minimum two-brigade combat-ready group from their assigned continuous front, retain that
+reserved group through allocation churn, and admit it across sub-sector bookkeeping when it remains
+combat-ready and can reach the objective. Ordinary opportunity operations retain the generic
+three-brigade, surplus-only, sector-scoped rules.
+
+The corrected 104-week run
+`apr1992_definitive_188w__1db784e85c2e6de0__w104_n0`, hash
+`601b642d55a43fcd`, scores **669/712 (93.96%)** at April 1994 with **31/32** anchors. RBiH 4th Corps
+captures Buturović Polje (t56), Doljani (t62), and Ljubunci (t67) in three named sector operations;
+all three control events are `combat`. HVO captures zero RBiH OSIDs, and there are zero bilateral
+non-combat transfers. The lower score versus 678/712 is accepted as the honest cost of removing the
+wrong mechanism. Focused verification passes 85/85 tests; TypeScript typecheck passes. The run has
+408 attack orders, 280 battles, zero invalid operations, zero zero-eligible operations, and zero
+recovery-without-attempt rows. No attack-resolution constant or direct-control event was added.
+
+### 2026-09-01 — Operation Zvezda 94 closes the Goražde corridor through combat
+
+The Goražde lane is now an authored VRS operation rather than a control correction. Operation
+Zvezda 94 becomes available at turn 96 and pre-stages its named five-formation assault group from
+turn 88. The roster includes both Main Staff elite formations (`rs_1st_guards_motorized` and
+`rs_65th_protection_motorized_regiment`) alongside the Višegrad, 1st Podrinje, and 5th Podrinje
+brigades. The single axis requires four formations staged and two forward before launch. Its only
+objectives are Slatina, Sopotnica, and Ustiprača; Goražde town is deliberately excluded.
+
+The supporting engine correction is narrow: an elite reserved for a future historical operation
+cannot be borrowed by an unrelated operation; deferred bot-controlled operations may march their
+explicit elite roster toward staging before availability; and a named elite already at its
+authored staging point is admitted even if the generic reserve system still carries a home-return
+transit order. Pre-staging clears `dig_in`, which otherwise rejected the historical march order.
+No direct-control, consolidation, abandonment, or battle-resolution rule was added.
+
+Fresh 104-week proof run
+`apr1992_definitive_188w__1db784e85c2e6de0__w104_n0`, hash
+`909b150792131228`: Zvezda plans at t96, executes at t99, and completes at t103 with all five
+formations. It wins and captures Slatina (t99), Sopotnica (t102), and Ustiprača (t103) in three
+battles. All **17/17** painted Goražde-area cells match; Goražde remains RBiH and its 15-cell RBiH
+component has only RS-controlled external neighbours, so the enclave is fully cut off. Focused
+Vitest suites and TypeScript typecheck are the regression surface.
+
+### 2026-09-01 — April 1994 three-lane operations calibration
+
+The April checkpoint is now driven by named operations in all three requested lanes. Operation
+Cerska-Kamenica captures all seven authored pocket/cutoff objectives in ten attacks while the 1st
+Guards Motorized Brigade and 65th Protection Motorized Regiment are present in the live operation
+from t40 through t50. Operation Zvezda 94 is a two-axis Main Staff attack: the 1st Guards takes
+Slatina and Sopotnica while the 65th takes Ustiprača. Its AAR records success, three attacks, three
+combat captures, and both elite formations. Goražde town remains RBiH while its corridor is cut.
+
+The RBiH-HRHB lane contains the Central Bosnia Counteroffensive, Battle of Bugojno, Operation
+Neretva '93, Operacija Naprijed, and Operacija Rijeka. Together they account for all **17**
+HRHB-to-RBiH control changes through logged combat capture. There are **zero** RBiH-to-HRHB gains
+and no passive bilateral transfer. Lug and Paroš remain the two deliberate April target
+exceptions: both start RBiH in the January calibration but are painted HRHB in April, and matching
+them would require the post-breakdown HVO territorial gain the historical contract forbids.
+
+The integrated proof is
+`runs/apr1994_three_lanes_final_v21/apr1992_definitive_188w__1db784e85c2e6de0__w104`, final hash
+`5a04c481b3e4c74c`. It matches **688/712 (96.63%)** April OSIDs, including **379/398 RS**,
+**241/243 RBiH**, and **68/71 HRHB**. Supporting corrections prevent a stale prior-turn
+catastrophic engagement from stalling a current objective, return dated elite reserves to Army HQ
+between authored commitments, keep attacker victories from consuming the failure budget merely
+because occupation resolves later, and let AAR causality consume canonical `territory_flipped`
+battle receipts when weekly telemetry lags. No direct-control, consolidation, or abandonment
+calibration mechanism was added.
+
+### 2026-09-02 — Goražde–Trnovo lane completed through named operations
+
+The eastern April 1994 lane is now produced by two VRS operations rather than passive control
+logic. Operation Lukavac 93 concentrates the Sarajevo–Romanija local group and the two Army-HQ
+elites to seize Trnovo and sever the surviving land corridor. Operation Zvezda 94 then attacks on
+two Drina Corps axes: the 1st Guards-led northern column contracts the enclave through Sopotnica
+and Slatina, while the cutoff column takes Ustiprača and continues through Kolovariće. Goražde town
+is deliberately excluded and remains RBiH. The 1st Guards Motorized Brigade and 65th Protection
+Motorized Regiment are explicitly present in both operations through their execution phases; the
+weekly battle ledger records the 65th leading Lukavac's corridor attacks and the 1st Guards leading
+Zvezda's northern breakthrough.
+
+The supporting implementation is operational only: dated bot pre-staging, explicit historical
+elite reservations, admission of assembled Army-HQ loans, and retention of an authored elite during
+the receiving operation's planning phase. No direct-control event, consolidation, abandonment, or
+special capture rule was added. Every calibrated OSID still requires a battle, and one attack can
+capture at most one OSID.
+
+The 104-week proof run is
+`runs/apr1994_gorazde_trnovo_v44/apr1992_definitive_188w__1db784e85c2e6de0__w104_n0`, final hash
+`d5aac65186ad550f`. Zvezda starts at t93, executes at t96, and completes successfully at t98 with
+four decisive attacks and four logged combat captures: Sopotnica, Slatina, Ustiprača, and
+Kolovariće. The Trnovo corridor targets are RS, Goražde town is RBiH, and the April comparator rises
+from the integrated **688/712** baseline to **699/712 (98.17%)**. The relevant regression surface is
+green at **352/352** tests across 11 suites, with `git diff --check` clean.
+
+### 2026-09-02 — Srebrenica lane completed through named-operation combat
+
+Root-cause tracing against the v44 battle ledger showed that the January ARBiH
+Srebrenica–Cerska Link-Up captured Pobuđe and Ježeštica, while the later VRS Cerska-pocket axis
+ended immediately after taking Cerska. The operational contact graph confirms a contiguous route
+from Cerska through Pobuđe to Ježeštica. The existing Operation Cerska–Kamenica objective chain was
+extended along that route; no strength constant, battle resolver, direct-control event,
+consolidation, or abandonment mechanism changed.
+
+Fresh proof run
+`runs/apr1994_srebrenica_v45/apr1992_definitive_188w__1db784e85c2e6de0__w104`, hash
+`29338a032c484801`: the 1st Birač Brigade wins decisive battles at Cerska (t45), Pobuđe (t46), and
+Ježeštica (t47). Operation Cerska–Kamenica completes successfully with all nine objectives
+captured. Both Army-HQ elites are present in the live operation through execution, and the 1st
+Guards leads the Skelani-cutoff axis. April rises from **699/712** to **701/712 (98.46%)**; the
+controller diff is exactly the two repaired cells and there are no added mismatches. Combat
+causality remains valid with zero invalid or zero-eligible operations.
+
+Changed files: `src/sim/combat/triggered_operations.ts`,
+`tests/triggered_operations.test.ts`, `docs/40_reports/CALIBRATION_MASTER.md`, and this ledger.
+Verification: the new catalog assertion failed before implementation, then the full neighboring
+surface passed **302/302** tests across 11 suites; TypeScript typecheck and `git diff --check`
+passed. Canon propagation found no stale structural Cerska references in `docs/10_canon`,
+`docs/20_engineering`, active planning documents, or role skills; the timeline's historical
+February–March 1993 statement already agrees with the implementation. Zero structural references
+were changed and no uncertain references remain.
+
+### 2026-09-02 — CORRECTION: Pomol completes the Srebrenica lane
+
+The v45 map exposed one remaining Srebrenica-area residual at
+`op:vlasenica:pomol_2`. Trace evidence showed that Pomol began and remained RBiH because no
+operation ever named or attacked it. It is directly adjacent to the elite Skelani axis staging
+point at RS-held Sebiočina and to the next objective at Luka. Pomol is therefore now the first
+objective of that existing axis. No combat-power or control-resolution rule changed.
+
+Fresh proof run
+`runs/apr1994_srebrenica_v46/apr1992_definitive_188w__1db784e85c2e6de0__w104`, hash
+`1f6674ac395a1616`: the 1st Guards Motorized Brigade decisively captures Pomol at turn 45, Luka at
+turn 46, and Ljeskovik at turn 50. Operation Cerska–Kamenica completes successfully with all ten
+objectives captured. The full April comparison improves from **701/712** to **702/712 (98.60%)**;
+the controller diff is exactly Pomol and no mismatch is added. Combat causality remains valid with
+zero invalid, zero-eligible, or recovery-without-attempt operations.
+
+Changed files: `src/sim/combat/triggered_operations.ts`,
+`tests/triggered_operations.test.ts`, `docs/40_reports/CALIBRATION_MASTER.md`, and this ledger.
+The definition assertion was observed red before implementation. Canon propagation found no stale
+structural Pomol references in `docs/10_canon`, `docs/20_engineering`, active planning documents,
+or role skills; zero structural references required changes and no uncertain references remain.
+
+### 2026-09-02 — Purposeful emergent operations and reserved historical names
+
+**Problem:** ARBiH 2nd Corps used the catalog-owned name `Farz` for a generic operation and captured
+Lopare Selo solely because it was exposed. The same emission path could silently grow a planned
+local operation through sector attachments, and the HVO-war bilateral path did not independently
+prove that its objective was held by the bilateral opponent.
+
+**Change:** Added semantic historical-name ownership with fictional, slot-count-preserving emergent
+replacements; added a four-purpose command veto (campaign objective, recent recapture, salient cut,
+must-hold relief); capped ordinary opportunity plans and emitted rosters at six brigades; and scoped
+bilateral targets to current opponent control. No painted controller, direct control effect,
+consolidation mechanism, or combat-result override was added.
+
+**Evidence:** Focused RED/GREEN tests cover the Lopare rejection, purposeful alternatives, primary-
+proposal veto, name collisions across all active catalogs, stable pool cardinality, participant cap,
+and bilateral opponent scope. The 104-week run
+`runs/apr1994_purpose_v52/apr1992_definitive_188w__1db784e85c2e6de0__w104_n0` has hash
+`27f3e651cf7a29ee`, scores **696/712**, leaves Lopare Selo RS, and emits no generic `Farz`.
+Remaining Brčko and Zvezda/Goražde differences are recorded as calibration debt rather than hidden
+with target-specific prohibitions.
+
+### 2026-09-02 — CORRECTION: Brčko requires an operation; Zvezda retains its Main Staff group
+
+The v52 Brčko city change is rejected. RBiH 2nd Corps first received every hostile OSID in the
+Brčko municipality as a generic campaign objective, then the post-fade rear-pocket phase changed
+the city from RS to RBiH without combat after its three neighbours became RBiH. The production
+war pipeline no longer runs `rear-pocket-consolidation`; this restores the War Specification rule
+that control changes only through attacks or operations. The late `Tuzla Expansion` priority now
+names only `op:brcko:brka_2`. An explicit authored or Army-HQ operation may still attack Brčko, so
+this is command-scope discipline rather than an immutable controller lock.
+
+Operation Zvezda 94 remains the authored two-axis Goražde offensive. Its two Main Staff formations
+are reserved through turn 113, covering the catalogued operation window, and authored elite loans
+remain attached through the operation's recovery phase. Permanent degradation still forces
+recall; ordinary loans retain the standard lifecycle.
+
+Fresh 104-week evidence:
+`runs/apr1994_fix_v56/apr1992_definitive_188w__1db784e85c2e6de0__w104_n0`, hash
+`8b7f2246c7c2d27b`, April score **684/712**. Brčko city, Donji Rahić, and Potočari remain RS;
+Brka remains RBiH. Zvezda starts t93 and completes successfully t98 with seven formations,
+including the 1st Guards Motorized Brigade and 65th Protection Motorized Regiment. Its four
+logged battles capture Sopotnica, Slatina, Ustiprača, and Kolovariće; Goražde remains RBiH. The
+entire 104-week run contains zero `consolidation` or `abandoned` control changes. Focused tests
+were observed red before implementation and cover the removed pipeline phase, Brčko objective
+scope, reservation window, and authored recovery retention.
+
+### 2026-09-02 — CORRECTION: April hover map applies controller colors after OSID initialization
+
+The first published corrected-April map embedded the right v56 controller data but executed its
+SVG color-overlay loop before declaring `osids`. The resulting browser error left the older v46
+background visible, making RS-held Lopare Selo appear RBiH. The generator now declares the updated
+OSID dataset before applying controller fills. A focused regression test was observed red on the
+old ordering and green after the correction. This is visualization-only: the accepted simulation
+already had `op:lopare:lopare_selo_2` as RS initially, finally, and in the April painted target.
+
+### 2026-09-02 — CORRECTION: isolated positions require operations, not passive flips
+
+The removal of post-fade rear-pocket consolidation revealed that several April matches in Krajina,
+Vareš, Zavidovići, and Foča had depended on either passive control or cancelled historical staging.
+The commander now recognizes only fully bounded hostile positions of at most six connected OSIDs as
+a legitimate reduction purpose. It may escalate its probe into a normal sector attack only after the
+existing intelligence threshold and with two reachable, combat-ready same-corps brigades. This rule
+does not consult painted control and does not make mixed-boundary targets such as Čardak or unpurposed
+targets such as Lopare Selo eligible.
+
+Pre-planned staging movement now carries `authored_preplanned` ownership and survives routine march
+correction while queued. Authored operation data adds the Višegrad bridgehead to Operation Pracha
+River and Čardak to the Central Bosnia Counteroffensive, extends the latter's assembly budget, and
+applies scoped execution concentration to Cerska–Kamenica and Donji Vakuf. Focused tests were written
+red first and now pass. Two independent 104-week runs have identical hash `270709e4d303deed`; the
+accepted v63 run scores **701/712 (98.46%)**, with **127/127 Krajina** and **112/112 Drina**. All
+named regressions are repaired through logged combat; Brčko and Lopare Selo remain RS, Brka and
+Goražde town remain RBiH, and the run contains zero `consolidation` or `abandoned` transfers.
+The focused change surface passes **166/166** tests, TypeScript typecheck passes, run-consistency
+validation passes, and `git diff --check` passes. The repository-wide suite separately reports its
+pre-existing enclave-fixture drift: the simulation includes Obadi in the Srebrenica enclave list
+while `tools/validate_run_consistency.cjs` does not; neither file is changed by this correction.
+
+### 2026-09-02 — April Derventa, Liše, and Prozor operational corrections
+
+The approved three-part correction is complete. Operation Corridor retains the 1st Prnjavor Light
+Infantry Brigade on its main east axis and gives the 27th Derventa Motorized Brigade a parallel
+one-objective Derventa-pocket axis, so `op:derventa:zivinice` changes from HRHB to RS through the
+authored operation. During open RBiH–HRHB war, a combat-ready HVO brigade tagged
+`placement:fixed_home_osid` receives deterministic first assignment to its friendly contacted home
+OSID only when an active opposing operation names that home as an objective; the calibrated case is
+the open RBiH–HRHB war. The rule is assignment
+only: it changes no controller, attack power, battle result, movement authority, or operation
+membership. A bounded Prozor–Rama Line Counterattack uses the Rama Brigade to capture Lug at turn 54
+and Paros at turn 55 in two logged battles.
+
+The initial apparent rerun nondeterminism was traced to an experimental source-state difference:
+the bad run omitted 1st Prnjavor from Operation Corridor. The successful roster is now asserted
+directly in `tests/pre_planned_operations.test.ts`. Independent 104-week runs
+`apr1994_three_fixes_v72` and `apr1994_three_fixes_v73` have identical final SHA-256
+`d6095cb8408ddfa8` and zero unresolved assignment-seal violations. April scores **703/712
+(98.74%)**; Živinice is RS, Liše/Lug/Paros are HRHB, and there are zero painted-HRHB OSIDs held by
+RBiH. Brčko and Lopare Selo remain RS, while Goražde town remains RBiH. The two visible offsets
+against the preceding accepted run are Donji Vakuf and Korenići, retained as calibration debt.
+
+Changed repository files: `src/sim/combat/pre_planned_operations.ts`,
+`src/sim/combat/subsegment_assignment.ts`, `tests/pre_planned_operations.test.ts`,
+`tests/brigade_aor_subsegment.test.ts`, `docs/10_canon/Systems_Manual_v0_9_0.md`,
+`docs/20_engineering/DETERMINISM_TEST_MATRIX.md`, `docs/40_reports/CALIBRATION_MASTER.md`, the
+implementation plan, and this ledger. Focused operation/assignment suites pass **97/97** and
+TypeScript typecheck passes; the hover-map generator regression and final diff checks are the
+remaining release gates. Canon propagation changed two structural descriptions and left no
+uncertain references.
+
+Release-gate follow-up: all three focused suites pass **98/98**, TypeScript typecheck passes,
+`git diff --check` passes, and `tools/validate_run_consistency.cjs` reports **PASS** for the v73
+artifact. The generated interactive map contains all 744 hover regions, reports 703/712, and was
+published as version 4 of the existing remote April 1994 calibration map.
+
+### 2026-09-02 — April 1994 documentation and authority synchronization
+
+The complete September 1–2 April-calibration sequence is now consolidated in
+`docs/40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md`. The report records the
+three requested lanes, the Lopare and Brčko mechanism corrections, isolated-position recovery,
+Derventa/Liše/Prozor corrections, candidate score/hash progression, final regional comparison,
+all nine remaining mismatches, control-change attribution, determinism evidence, runtime owners,
+and the authenticated interactive-map URL.
+
+`CALIBRATION_MASTER.md` now exposes v72/v73 as the current week-104 April measurement while keeping
+the clean 188-week baseline and floors distinct. The Systems Manual's displacement note no longer
+lists the retired rear-pocket phase or null-OSID auto-claim as active control owners; the War
+Specification now names the April operations-only contract. Engineering synchronization adds the
+hover-map entrypoint, actual emergent name-pool cardinalities,
+historical-name reservation owner, HVO contacted-home assignment rule, and the production-versus-
+legacy rear-pocket test distinction. The reports index, consolidated implemented index, docs index,
+five completed plan records, and thematic knowledge base now link to the consolidated report. The
+Master Roadmap, Command Board, and plans index now reflect the owner's 2026-08-31 reopening of
+calibration while preserving the separate blocked RE status.
+
+Fresh artifact inspection confirms the v72/v73 initial-save SHA-256 is
+`a536e7bbb8e9de7b30abf979ce5f5e8c720473006c851df5ba30891c99effd0a` and final-save SHA-256 is
+`d6095cb8408ddfa85a52223cc6c4c5eb7ae46165cbb2b25fbe438d88c7245148`; both run summaries report
+final-state hash `d6095cb8408ddfa8`. The earlier ledger shorthand calling the 16-character value a
+SHA-256 should be read as the final-state hash; this entry supplies the full file digest without
+rewriting append-only history. Final v73 comparison is 703/712 with the exact nine-cell residual
+list in the report. One transparent diagnostic caveat is retained: Prozor-Rama's turn-41 injection
+attempt is rejected because both objectives are then friendly, after which the operation starts at
+turn 52 and captures both objectives through logged combat.
+
+Documentation files updated: 20 existing documents plus one new implemented report. Structural
+stale references corrected: six classes (current April authority, retired control owner, April
+canon contract, interactive-map entrypoint, operation-name ownership/cardinality, and active
+governance status), plus plan/report indexing. The operational initial master was re-counted and
+remains correctly documented at 744 entries; the painted scorer evaluates 712 OSIDs. No uncertain
+structural reference remains in the audited April scope.
+`docs/10_canon/FORAWWV.md` was not edited. The unrelated modified
+`data/derived/latest_run_final_save.json` remains untouched and unstaged.
+
+Fresh closeout verification: the three focused suites pass **98/98**; TypeScript typecheck exits
+0; v73 run-consistency validation reports **PASS**; the painted comparator independently reproduces
+**703/712**, **98.9%** area-weighted, and the same nine residuals; `git diff --check` passes. All new
+relative links to the consolidated report resolve. A broad link scan also surfaced older unrelated
+missing report/source links already present in the long-lived Calibration Master and reports index;
+none is introduced or relied on by this April synchronization.
+
 ## 2026-09-12 — Agent setup modernization prepared in isolation; not activated
 
 The owner authorized implementation of the [agent setup modernization plan](plans/2026-09-12-agent-setup-modernization-plan.md), superseding its planning-only status while retaining the coordinated live-activation boundary. Work is isolated on `codex/agent-setup-modernization` at `F:/AWWV-worktrees/agent-setup-modernization`, from inspected base `8913cca6f714e07acf59785ce526c19dc5fc9973`. Claude's shared checkout and all live user skills/settings remain untouched; this entry is prepared for later integration.

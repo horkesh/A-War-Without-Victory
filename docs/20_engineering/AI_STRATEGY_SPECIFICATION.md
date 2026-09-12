@@ -160,6 +160,21 @@ Authored synchronization uses `minimum_assembled_participants`; it counts active
 
 **Bot integration:** Bot-launched operations automatically receive a commander via `selectOperationCommander()`. Preparation proceeds without player input; bot operations auto-launch when ready.
 
+### Emergent operation intent and naming
+
+Commander-created opportunity operations require a purpose beyond local exposure: campaign objective, recent recapture (eight-turn window), enemy-salient cut, or direct must-hold relief. Purpose is evaluated after deterministic tactical ranking; if the first tactical proposal lacks purpose, the corps declines the cycle instead of searching unrelated front sectors for a qualifying fallback. Purpose-qualified targets rank recent recapture first, then campaign objective, salient cut, and must-hold relief.
+
+Ordinary emergent operations are capped at six planned and emitted participants. Authored operations keep their authored roster rules, and the designated ARBiH–HVO bilateral path keeps its theatre assignment but filters objectives to OSIDs currently controlled by the opposing bilateral faction. Launch-time attachments may not expand an opportunity beyond its planned `required_brigades`.
+
+`historical_operation_names.ts` owns the semantic reservation set for catalog names. Emergent naming normalizes accents, punctuation, year suffixes, and `Operation` / `Operacija` prefixes before rejecting a collision. Fictional replacement entries preserve each faction pool's prior length, keeping the modulo-based deterministic picker stable.
+
+**HVO contacted-home defense (2026-09-02):** During open RBiH-HRHB war, a combat-ready HVO
+formation tagged `placement:fixed_home_osid` receives deterministic first subsegment assignment to
+its friendly home OSID only when the home lies on that contacted subsegment and an active opposing
+operation names it as an objective. This is an assignment preference, not a control lock, combat
+modifier, movement prohibition, or operation-membership override. Quiet homes and other factions
+retain ordinary widest-front assignment.
+
 **Tests:** `tests/probe_preparation.test.ts` — 30 tests covering personality formulas, intel confidence, probe selection, state machine lifecycle, probe resolution, constants validation.
 
 **Full spec:** Systems Manual §7.6.

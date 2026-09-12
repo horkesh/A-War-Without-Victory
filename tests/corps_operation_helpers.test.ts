@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+    buildCorpsOperation,
     buildEmergencyDefenseOperation,
     buildProbeOperation,
     derivePrimarySectorForBrigades,
@@ -13,6 +14,28 @@ import {
     countAxisConcentrationSupport,
 } from '../src/sim/combat/corps_operation_helpers.js';
 import { makeFormation, makeSector } from './test_factories.js';
+
+describe('buildCorpsOperation', () => {
+    it('preserves an Army HQ operation link from a pre-planned operation', () => {
+        const operation = buildCorpsOperation(
+            {
+                name: "Operation Neretva '93",
+                staging_osid: 'op:konjic:konjic_2',
+                army_hq_op_id: 'ahq:RBiH:1993:neretva_93',
+            },
+            [{
+                axis_id: 'upper_neretva',
+                name: 'Upper Neretva',
+                objectives: ['op:konjic:turija'],
+                assigned_brigades: ['arbih_441st_vitezka_mountain'],
+            }] as any,
+            ['arbih_441st_vitezka_mountain'],
+            70,
+        );
+
+        expect(operation.army_hq_op_id).toBe('ahq:RBiH:1993:neretva_93');
+    });
+});
 
 describe('getMaxOperationSlots', () => {
     it('returns 1 for small corps (8 brigades)', () => {

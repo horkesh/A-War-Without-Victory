@@ -4,6 +4,13 @@
 
 **Purpose:** Single entrypoint for implementation reports, handovers, convenes, investigations, and audits. Use consolidated summaries for quick reference; use individual reports for detail.
 
+**2026-09-02 April 1994 operational calibration history:**
+[implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md)
+consolidates the three requested lanes, Lopare/Brčko mechanism corrections, deterministic v72/v73
+branch evidence, 703/712 week-104 measurement, nine remaining OSID mismatches, and the authenticated
+interactive map publication. The integrated tree must be measured afresh; `CALIBRATION_MASTER.md`
+remains the living baseline authority.
+
 **BC08 verification history and control (2026-09-07; current BC01 verification above):** [BC08 audit](audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md) closes only bounded verification/disposition. Full suite remains RED (one Windows Bash-resolution failure); unchanged focused file passes 8/8 with child-scoped Git Bash. [Master §4.1](../plans/MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) retains BC01 CLOSED by owner approval; territory-similarity requirement retired ([verification](audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)); BC02–BC07 remain pending. R7 art/packaged first-paint passed; readability/audio closeout remains. RE closed 2026-09-01 and gates nothing; [old contract](../plans/2026-08-26-engine-integrity-plan.md), [recovery record](../plans/2026-08-28-packaged-probe-recovery-plan.md) and [audit](audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md) are history, with no successor proof route active. Calibration remains open on [n392](CALIBRATION_MASTER.md); final acceptance follows behavior settlement.
 
 **2026-08-14 — root investigation index added; read this before trusting the bulletins below.** The 26 root-level investigation, panel, first-fire, and root-cause reports dated **2026-06-02 → 2026-08-13** appeared in no index in this folder and were reachable only through `docs/plans/MASTER_ROADMAP.md`, `docs/PROJECT_LEDGER.md`, or session memory. They are now indexed in **[§1A](#1a-investigations-panels-and-evidence-records-root-level)**, grouped by lane, each carrying **its standing today rather than the status it claimed when written**. The dated bulletins below this line stop at **2026-08-04** and are a historical stack, not a current-state feed — for current state use §1A, [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md), and `docs/PROJECT_LEDGER.md`.

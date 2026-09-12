@@ -24,6 +24,7 @@ import {
     createEliteLoanState,
     ELITE_LOAN_MIN_DURATION,
     ELITE_CASUALTY_THRESHOLD,
+    ELITE_COHESION_RECALL,
     ELITE_MORALE_RECALL,
     MAX_AUTO_DEPLOY_HOPS,
 } from '../src/state/elite_loan_types.js';
@@ -884,6 +885,81 @@ describe('elite loan per-turn reconciliation and tick', () => {
         expect(brigade.elite_loan_state!.on_loan).toBe(false);
     });
 
+    it('does not immediately recall a combat-capable elite rostered in its authored historical operation', () => {
+        const brigade = makeOnLoanBrigade('rs_1st_guards_motorized', { loanStartTurn: 93 });
+        brigade.cohesion = ELITE_COHESION_RECALL - 1;
+        const state = makeState({
+            formations: { rs_1st_guards_motorized: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: 'Operation Zvezda 94',
+                        phase: 'planning',
+                        participating_brigades: ['rs_1st_guards_motorized'],
+                    }],
+                },
+            },
+            turn: 93,
+        });
+
+        tickEliteLoans(state, 93);
+
+        expect(brigade.elite_loan_state!.on_loan).toBe(true);
+        expect(brigade.elite_loan_state!.last_recall_turn).toBeNull();
+    });
+
+    it('retains a still-combat-capable elite through an authored operation execution', () => {
+        const brigade = makeOnLoanBrigade('rs_65th_protection_motorized_regiment', { loanStartTurn: 93 });
+        brigade.personnel = Math.ceil((brigade.elite_loan_state!.loan_start_personnel ?? 1000) * 0.6);
+        brigade.cohesion = ELITE_COHESION_RECALL - 1;
+        const state = makeState({
+            formations: { rs_65th_protection_motorized_regiment: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: 'Operation Zvezda 94',
+                        phase: 'execution',
+                        participating_brigades: ['rs_65th_protection_motorized_regiment'],
+                        axes: [{
+                            axis_id: 'gorazde_encirclement',
+                            assigned_brigades: ['rs_65th_protection_motorized_regiment'],
+                            objectives: ['op:gorazde:sopotnica'],
+                        }],
+                    }],
+                },
+            },
+            turn: 100,
+        });
+
+        tickEliteLoans(state, 100);
+
+        expect(brigade.elite_loan_state!.on_loan).toBe(true);
+        expect(brigade.elite_loan_state!.last_recall_turn).toBeNull();
+    });
+
+    it('retains an authored elite through recovery so the operation AAR keeps its assault group', () => {
+        const brigade = makeOnLoanBrigade('rs_1st_guards_motorized', { loanStartTurn: 93 });
+        const state = makeState({
+            formations: { rs_1st_guards_motorized: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: 'Operation Zvezda 94',
+                        phase: 'recovery',
+                        participating_brigades: ['rs_1st_guards_motorized'],
+                    }],
+                },
+            },
+            corps_front_sectors: {},
+            turn: 100,
+        });
+
+        tickEliteLoans(state, 100);
+
+        expect(brigade.elite_loan_state!.on_loan).toBe(true);
+        expect(brigade.elite_loan_state!.last_recall_turn).toBeNull();
+    });
+
     it('does NOT recall before min duration even if op ended', () => {
         const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: 8 });
         const state = makeState({
@@ -934,6 +1010,96 @@ describe('elite loan per-turn reconciliation and tick', () => {
 
         expect(brigade.elite_loan_state!.on_loan).toBe(true);
         expect(brigade.elite_loan_state!.last_recall_turn).toBeNull();
+    });
+
+    it('does not attach a historically reserved Zvezda elite to an unrelated executing operation', () => {
+        const brigade = makeOnLoanBrigade('rs_1st_guards_motorized', { loanStartTurn: 40 });
+        brigade.elite_loan_state!.loaned_to_corps = 'vrs_drina';
+        const state = makeState({
+            formations: { rs_1st_guards_motorized: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: 'Operation Pracha River',
+                        phase: 'execution',
+                        participating_brigades: ['rs_1st_podrinje'],
+                        axes: [{
+                            axis_id: 'pracha_encirclement',
+                            assigned_brigades: ['rs_1st_podrinje'],
+                            objectives: ['op:rogatica:brcigovo'],
+                        }],
+                    }],
+                },
+            },
+            corps_front_sectors: {},
+            turn: 54,
+        });
+
+        generateArmyReserveRequests(state);
+        tickEliteLoans(state, 54);
+
+        const operation = state.military.corps_command!.vrs_drina!.active_operations[0]!;
+        expect(operation.participating_brigades).not.toContain('rs_1st_guards_motorized');
+        expect(operation.axes?.[0]!.assigned_brigades).not.toContain('rs_1st_guards_motorized');
+        expect(brigade.elite_loan_state!.on_loan).toBe(false);
+    });
+
+    it('recalls a Zvezda-reserved elite between operations even while the receiving front is threatened', () => {
+        const brigade = makeOnLoanBrigade('rs_65th_protection_motorized_regiment', { loanStartTurn: 40 });
+        brigade.elite_loan_state!.loaned_to_corps = 'vrs_drina';
+        const state = makeState({
+            formations: { rs_65th_protection_motorized_regiment: brigade },
+            corps_command: { vrs_drina: { active_operations: [] } },
+            corps_front_sectors: {
+                drina_front: {
+                    corps_id: 'vrs_drina',
+                    threat_ratio: 2,
+                    assigned_brigade_ids: ['rs_65th_protection_motorized_regiment'],
+                },
+            },
+            turn: 54,
+        });
+
+        tickEliteLoans(state, 54);
+
+        expect(brigade.elite_loan_state!.on_loan).toBe(false);
+        expect(brigade.elite_loan_state!.last_recall_turn).toBe(54);
+    });
+
+    it('does not issue generic reserve routing for an active-operation participant', () => {
+        const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: 0 });
+        brigade.location_osid = 'op:mun:o0';
+        const state = makeState({
+            formations: { rs_1st_guards: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: 'active_operation',
+                        phase: 'execution',
+                        participating_brigades: ['rs_1st_guards'],
+                    }],
+                },
+            },
+            corps_front_sectors: {
+                sector_a: {
+                    corps_id: 'vrs_drina',
+                    territory_osids: ['op:mun:o2'],
+                    threat_ratio: 2,
+                    assigned_brigade_ids: ['rs_1st_guards'],
+                },
+            },
+            turn: 10,
+        });
+        state.political.political_controllers = {
+            'op:mun:o0': 'RS',
+            'op:mun:o1': 'RS',
+            'op:mun:o2': 'RS',
+        } as any;
+        state.military.brigade_movement_orders = {};
+
+        tickEliteLoans(state, 10, chainAdj(3));
+
+        expect(state.military.brigade_movement_orders.rs_1st_guards).toBeUndefined();
     });
 
     it('voluntary recalls after min duration when op ended and threat low', () => {

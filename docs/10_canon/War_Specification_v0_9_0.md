@@ -162,6 +162,16 @@ Srebrenica–Zvornik, and the Goražde/Upper Drina/Trnovo belt. Its accepted run
 mismatches, and deferred 706th retreat debt are maintained in
 `docs/40_reports/CALIBRATION_MASTER.md`.
 
+The current April package continues that same trajectory to week 104. Srebrenica contraction,
+the Trnovo/Goražde cutoff, the RBiH-HRHB war, and bounded residual-position reductions are owned by
+named or live-state-purpose operations and normal attack resolution. After the week-20
+paramilitary window, topology may justify an operation but cannot transfer control. Historical
+operation names are reserved to their authored catalogs; ordinary commander opportunities require
+a campaign objective, recent recapture, salient cut, or must-hold relief purpose. The current
+accepted April result, complete residual list, and evidence paths are maintained in
+`docs/40_reports/CALIBRATION_MASTER.md` and
+`docs/40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md`.
+
 ---
 
 *War Specification v0.9.0 — Single war phase; v0.6 lifecycle baseline + v0.9 substrate amendments (must_hold variable multiplier, divergence event substrate, equipment_quality_modifier, reconstitution policy step curve, sensitive-history Ring 1 substrate, officer-quality observability) integrated.*

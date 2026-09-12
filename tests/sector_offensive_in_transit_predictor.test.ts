@@ -1120,6 +1120,46 @@ function prepTwoAxisState(state: GameState): GameState {
 }
 
 describe('2026-08-12 multi-axis veto narrowing: approaching means ACTUALLY in transit', () => {
+    it('holds a synchronized authored operation until every live axis is executable', () => {
+        const state = prepTwoAxisState(buildState({
+            synth_alpha: { location_osid: 'op:test:approach_a', personnel: 1200 },
+            synth_bravo: { location_osid: 'op:test:approach_b', personnel: 100 },
+        }));
+        const op = makeTwoAxisOp(['synth_alpha' as FormationId], ['synth_bravo' as FormationId]);
+        op.require_all_axes_ready = true;
+
+        const result = evaluateOpeningAttackReadiness(
+            state,
+            'synth_corps' as FormationId,
+            'TEST_FACTION' as never,
+            op,
+            TWO_AXIS_ADJACENCY,
+        );
+
+        assert.equal(result.executable, false);
+    });
+
+    it('enforces an authored physical assembly floor on an otherwise executable axis', () => {
+        const state = prepTwoAxisState(buildState({
+            synth_alpha: { location_osid: 'op:test:approach_a', personnel: 1200 },
+            synth_bravo: { location_osid: 'op:test:approach_b', personnel: 1200 },
+        }));
+        const op = makeTwoAxisOp(['synth_alpha' as FormationId], ['synth_bravo' as FormationId]);
+        op.axes![1]!.minimum_staged_brigades = 2;
+        op.require_all_axes_ready = true;
+
+        const result = evaluateOpeningAttackReadiness(
+            state,
+            'synth_corps' as FormationId,
+            'TEST_FACTION' as never,
+            op,
+            TWO_AXIS_ADJACENCY,
+        );
+
+        assert.equal(result.executable, false);
+        assert.equal(result.blocker, 'participants_below_assembly_floor');
+    });
+
     it('an axis with no current objective reports approaching:false and cannot hold the operation', () => {
         // Regression pin for the SECOND site the narrowing changed (determinism
         // review NOTE B). An axis with no objective has nothing to march toward,

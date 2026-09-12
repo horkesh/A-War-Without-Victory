@@ -68,6 +68,10 @@ import {
 } from '../../state/elite_loan_types.js';
 import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants.js';
 import { computeOsidGraphDistance } from './home_distance.js';
+import {
+    isEliteAuthoredForHistoricalOperation,
+    isEliteReservedForHistoricalOperation,
+} from './historical_elite_reservations.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getPrimaryOperation } from './corps_operation_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -799,6 +803,7 @@ export function generateArmyReserveRequests(
         // demands are known so one brigade cannot be promised more than once.
         const standingHoldOverride = standingHoldOverrideApplies(bestReason, commanderNeed?.priority);
         const availableElites = getAvailableElites(state, corpsFaction, turn)
+            .filter((brigadeId) => !isEliteReservedForHistoricalOperation(brigadeId, turn))
             .filter((brigadeId) => standingHoldOverride || !standingHoldBrigadeIds.has(brigadeId));
         if (availableElites.length === 0) continue;
 
@@ -1077,6 +1082,12 @@ export function retaskEliteLoan(
     travelHops: number,
     turn: number,
     adjacency?: Map<Osid, Osid[]>,
+    options?: {
+        approvalBy?: 'army_ai' | 'player';
+        approvalReason?: string;
+        requestDialogue?: { purpose: ReserveRequestPurpose; why_needed: string; how_to_use: string };
+        autoJoinOperation?: boolean;
+    },
 ): boolean {
     const f = state.military.formations?.[brigadeId];
     const ls = f?.elite_loan_state;
@@ -1100,10 +1111,11 @@ export function retaskEliteLoan(
         reason,
         travelHops,
         turn,
-        undefined,
-        'Army CO redirected an active elite commitment.',
-        'player',
+        options?.requestDialogue,
+        options?.approvalReason ?? 'Army CO redirected an active elite commitment.',
+        options?.approvalBy ?? 'player',
         adjacency,
+        { auto_join_operation: options?.autoJoinOperation },
     );
     ls.last_recall_turn = previousRecallTurn;
     return deployed;
@@ -1264,6 +1276,12 @@ function reconcileEliteLoanOperationCommitments(state: GameState): Set<string> {
         const targetCommand = corpsCommand[loan.loaned_to_corps];
         if (!targetCommand || alreadyCommitted) continue;
 
+        // A live loan left over from an earlier authored operation must not be
+        // absorbed by whichever unrelated corps offensive happens to execute
+        // next. Keep dated Main Staff assault formations free for their next
+        // historical commitment; tickEliteLoans will recall the stale loan.
+        if (isEliteReservedForHistoricalOperation(bid as FormationId, state.meta.turn)) continue;
+
         const operation = (targetCommand.active_operations ?? []).find((candidate) => candidate.phase === 'execution');
         if (operation) attachEliteToOperation(operation, bid);
     }
@@ -1297,6 +1315,25 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
         const turnsSinceLoan = ls.loan_start_turn != null ? turn - ls.loan_start_turn : 0;
         const personnel = f.personnel ?? 0;
         const startPersonnel = ls.loan_start_personnel ?? personnel;
+        const receivingCommand = corpsCommand[ls.loaned_to_corps];
+        const committedToActiveOperation = !!receivingCommand?.active_operations?.some((operation) =>
+            (operation.phase === 'planning' || operation.phase === 'execution')
+            && (
+                operation.participating_brigades.includes(bid)
+                || (operation.axes ?? []).some((axis) => axis.assigned_brigades.includes(bid))
+            ));
+        const reservedForHistoricalOperation = isEliteReservedForHistoricalOperation(bid as FormationId, turn);
+        const authoredOperationStillLive = !!receivingCommand?.active_operations?.some((operation) =>
+            (operation.phase === 'planning' || operation.phase === 'execution' || operation.phase === 'recovery')
+            && isEliteAuthoredForHistoricalOperation(bid as FormationId, operation.name));
+        // A dated Main Staff commitment owns the interval between operations as
+        // well as its launch turn. Once the current operation releases an
+        // earmarked formation, return it to Army HQ instead of leaving it on a
+        // threatened corps front where generic demand can consume its strength.
+        if (reservedForHistoricalOperation && !committedToActiveOperation && !authoredOperationStillLive) {
+            recallEliteLoan(state, bid, 'op_complete', turn);
+            continue;
+        }
         // ── Force recall checks (in priority order) ──
 
         // Permanent degradation — > 50% personnel loss
@@ -1307,19 +1344,23 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
         }
 
         // Casualty threshold — > 30% personnel loss
-        if (startPersonnel > 0 && personnel < startPersonnel * (1 - ELITE_CASUALTY_THRESHOLD)) {
+        if (
+            !authoredOperationStillLive
+            && startPersonnel > 0
+            && personnel < startPersonnel * (1 - ELITE_CASUALTY_THRESHOLD)
+        ) {
             recallEliteLoan(state, bid, 'casualty_threshold', turn);
             continue;
         }
 
         // Morale collapse
-        if ((f.morale ?? 60) < ELITE_MORALE_RECALL) {
+        if (!authoredOperationStillLive && (f.morale ?? 60) < ELITE_MORALE_RECALL) {
             recallEliteLoan(state, bid, 'morale_collapse', turn);
             continue;
         }
 
         // Cohesion collapse
-        if ((f.cohesion ?? 50) < ELITE_COHESION_RECALL) {
+        if ((f.cohesion ?? 50) < ELITE_COHESION_RECALL && !authoredOperationStillLive) {
             recallEliteLoan(state, bid, 'cohesion_collapse', turn);
             continue;
         }
@@ -1343,13 +1384,20 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
         }
 
         if (turnsSinceLoan < ELITE_LOAN_MIN_DURATION) {
-            ensureActiveEliteDeploymentOrder(state, f, bid, ls.loaned_to_corps, adjacency);
+            // Once an operation owns the elite, its axis movement is
+            // authoritative. Generic reserve routing would otherwise pull a
+            // spearhead back toward a corps sector after each captured OSID.
+            if (!committedToActiveOperation) {
+                ensureActiveEliteDeploymentOrder(state, f, bid, ls.loaned_to_corps, adjacency);
+            }
             continue;
         }
 
         const corpsId = ls.loaned_to_corps;
         const cmd = corpsCommand[corpsId];
-        const hasActiveOp = !!(cmd?.active_operations?.some(op => op.phase === 'execution'));
+        const hasActiveOp = committedToActiveOperation
+            || authoredOperationStillLive
+            || (!reservedForHistoricalOperation && !!cmd?.active_operations?.some(op => op.phase === 'execution'));
         const cfs = state.military.corps_front_sectors ?? {};
         const sector = Object.keys(cfs).sort(strictCompare).map(k => cfs[k]).find(s => s.corps_id === corpsId);
         const threatHigh = sector ? sector.threat_ratio >= 1.5 : false;
@@ -1365,7 +1413,9 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
             continue;
         }
 
-        ensureActiveEliteDeploymentOrder(state, f, bid, corpsId, adjacency);
+        if (!committedToActiveOperation) {
+            ensureActiveEliteDeploymentOrder(state, f, bid, corpsId, adjacency);
+        }
 
     }
 }

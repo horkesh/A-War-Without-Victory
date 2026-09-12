@@ -224,10 +224,10 @@ export function generateCorpsStanceOrders(
             if (rhsRBiH && !rhsRBiH.washington_signed) {
                 const allianceVal = state.political.war_alliance_rbih_hrhb ?? 1.0;
                 if (allianceVal < 0.0) {
-                    // Open war with HRHB: central Bosnia corps balanced (defend mixed municipalities)
+                    // Open war with HRHB: ARBiH carries the offensive in central Bosnia.
                     const CENTRAL_BOSNIA_MUNS = new Set(['travnik', 'bugojno', 'vitez', 'novi_travnik', 'busovaca', 'kiseljak', 'zenica']);
                     if (corpsHomeMun && CENTRAL_BOSNIA_MUNS.has(corpsHomeMun)) {
-                        if (stance !== 'reorganize') stance = 'balanced';
+                        if (stance !== 'reorganize') stance = 'offensive';
                     }
                 }
             }
@@ -250,9 +250,9 @@ export function generateCorpsStanceOrders(
             if (rhs && !rhs.washington_signed) {
                 const allianceValue = state.political.war_alliance_rbih_hrhb ?? 1.0;
                 if (allianceValue < 0.0) {
-                    // Open war: central Bosnia corps go offensive, Herzegovina stays defensive
+                    // Open war: HVO holds its central Bosnia enclaves while ARBiH attacks.
                     if (!HERZEGOVINA_MUNS.has(corpsHomeMun ?? '')) {
-                        if (avgPers >= 0.5 && avgCoh >= 40) stance = 'offensive';
+                        if (stance !== 'reorganize') stance = 'defensive';
                     }
                 } else if (allianceValue < 0.2) {
                     // Strained: central Bosnia corps at least balanced

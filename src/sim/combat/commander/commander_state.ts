@@ -190,6 +190,8 @@ export interface CommanderPlan {
     /** Turn when the plan was first suspended. Used for MAX_SUSPENSION_TURNS timeout. */
     readonly suspended_since_turn?: number;
     readonly source: 'pre_planned' | 'reactive' | 'opportunity';
+    /** Plan originated from the open Croat-Bosniak-war ARBiH directive. */
+    readonly bilateral_offensive?: boolean;
     /** Phase 4 (Force Quality Foundation): true when force-quality readiness gated this plan
      *  (operation_readiness < threshold). The plan is downgraded — concentration window extended,
      *  axis count capped — but not deleted. See `../corps_operation_readiness.ts`. */
@@ -525,6 +527,8 @@ export interface CommanderBriefing {
     readonly campaign_role: FrontPriority['role'] | null;
     /** Army HQ offensive target shortlist for this corps. */
     readonly campaign_offensive_targets: readonly string[];
+    /** Open Croat-Bosniak war: this ARBiH corps is the designated bilateral attacker. */
+    readonly bilateral_offensive?: boolean;
     /** Army HQ hold-at-all-costs targets for this corps. */
     readonly campaign_hold_targets: readonly string[];
     /** Army HQ stance ceiling for this corps from doctrine override. */

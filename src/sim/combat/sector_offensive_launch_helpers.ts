@@ -1010,6 +1010,17 @@ function classifyAxisOpeningAttack(
         return { executable: false, blocker: 'no_approach_osid' };
     }
 
+    if (axis.minimum_staged_brigades != null) {
+        const required = Math.max(1, Math.trunc(axis.minimum_staged_brigades));
+        const staged = countAdjacentStagedParticipants(state, axis.assigned_brigades, adjacency, objective);
+        if (staged < required) {
+            const approaching = axis.assigned_brigades.some((brigadeId) =>
+                isCommittedInTransitTo(state, brigadeId, approachOsids));
+            axis.launch_blocker = 'participants_below_assembly_floor';
+            return { executable: false, blocker: 'participants_below_assembly_floor', approaching };
+        }
+    }
+
     // TG v1 (ADR-0005): when the tactical-group flag is on, the attack-floor
     // gate is anchor-aware (main_brigade or viable assigned fallback).
     // Non-anchor brigades stay in assigned_brigades for downstream combat math
@@ -1272,6 +1283,7 @@ export function evaluateOpeningAttackReadiness(
     if (isMultiAxis(op) && op.axes) {
         const blockers: OpeningAttackBlocker[] = [];
         let anyExecutable = false;
+        let allLiveAxesExecutable = true;
         // True when any non-terminal axis has brigades ACTUALLY mid-march toward
         // its own approach OSIDs. A fast-assembling sibling must not drag a slow
         // axis into execution before its brigades arrive — hold while someone is
@@ -1322,12 +1334,17 @@ export function evaluateOpeningAttackReadiness(
             if (result.executable) {
                 anyExecutable = true;
             } else {
+                allLiveAxesExecutable = false;
                 if (result.blocker) blockers.push(result.blocker);
                 if (result.approaching === true) anyApproaching = true;
             }
         }
         // TEMPORARY DIAGNOSTIC — see src/sim/combat/axis_readiness_debug.ts.
         emitOperationReadinessTrace(state, corpsId, op, anyExecutable, anyApproaching);
+        if (op.require_all_axes_ready === true) {
+            if (anyExecutable && allLiveAxesExecutable) return { executable: true };
+            return { executable: false, blocker: rankOpeningAttackBlocker(blockers) };
+        }
         if (anyExecutable && !anyApproaching) return { executable: true };
         return { executable: false, blocker: rankOpeningAttackBlocker(blockers) };
     }

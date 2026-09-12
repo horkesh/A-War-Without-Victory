@@ -32,7 +32,7 @@
 - Authored operation identity: `tests/operation_formation_resolver.test.ts` proves exact-key precedence, unique `oob:<authored id>` resolution, sorted ambiguity rejection, and true-missing classification; triggered and pre-planned suites prove those paths store the resolved live ID and do not emit an alias-backed missing warning.
 - Historical peace gate: `tests/peace_plans.test.ts` and the real `runTurn` regression in `tests/turn_pipeline.test.ts` pin normalized historical faction dispositions, one-time Cutileiro catch-up at the first War turn, and the dedicated Dayton resolver boundary.
 - Commander/HV gate: `tests/commander/primary_sector_operation_objectives.test.ts` pins primary-sector objective/fallback selection and stale-target validation; `tests/hv_integration.test.ts` and `tests/fall_1995_hv_depth_priority.test.ts` pin all-or-nothing legal stationing, stable placement order, and station/home truth.
-- Bilateral-war timing gate: `tests/rear_pocket_consolidation_alliance_gate.test.ts` proves rear-pocket consolidation cannot bypass the centralized RBiH-HRHB combat gate before the canonical turn-40 floor. `tests/alliance_lifecycle.test.ts` pins the shared runtime default, and `tests/scenario_sister_parity.test.ts` requires every active definitive April 1992 scenario to carry that same floor.
+- Bilateral-war timing gate: `tests/rear_pocket_consolidation_alliance_gate.test.ts` characterizes the retained legacy helper and proves it cannot bypass the centralized RBiH-HRHB combat gate before the canonical turn-40 floor. `tests/war_phase_paramilitary_canon_contract.test.ts` separately pins that `rear-pocket-consolidation` is absent from the production pipeline. `tests/alliance_lifecycle.test.ts` pins the shared runtime default, and `tests/scenario_sister_parity.test.ts` requires every active definitive April 1992 scenario to carry that same floor.
 
 ### Historical calibration authority and January contracts
 
@@ -42,6 +42,11 @@
 - `tests/pre_planned_operations.test.ts` pins the Višegrad objective exclusions, Donji Vakuf
   and Vlašić pocket axes, Srebrenica high-water exclusion, and the Operation
   Circle/Kijevo/Upper Drina combat package.
+- `tests/pre_planned_operations.test.ts` also pins the Operation Corridor Derventa-pocket axis
+  and retained east-axis roster, plus the bounded Prozor–Rama counterattack's exact HVO roster,
+  timing, objectives, and execution multiplier. `tests/brigade_aor_subsegment.test.ts` pins the
+  deterministic HVO fixed-home local-contact assignment preference and proves it is inactive for
+  quiet homes and other factions.
 - `tests/gorazde_pocket_event_state_truth.test.ts`,
   `tests/srebrenica_linkup_event_state_truth.test.ts`, and
   `tests/upper_drina_front_event_state_truth.test.ts` forbid calibration-authored

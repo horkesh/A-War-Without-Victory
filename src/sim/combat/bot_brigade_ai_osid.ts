@@ -943,7 +943,12 @@ export function generateAllBotOrdersOsid(
         const preservedMovementOrders: Record<FormationId, BrigadeMovementOrder> = {};
         if (!options.mergeWithExistingOrders) {
             for (const [bid, order] of Object.entries(state.military.brigade_movement_orders ?? {})) {
-                if (order != null && isUnprocessedFactionOrder(bid)) {
+                // Replacement mode owns only its own tagged discretionary
+                // routing. Untagged orders come from player/operation/reserve
+                // systems and remain authoritative even for a processed bot
+                // faction; otherwise the next bot pass silently erases an
+                // authored operation's staging march.
+                if (order != null && (order.owner !== 'bot_discretionary' || isUnprocessedFactionOrder(bid))) {
                     preservedMovementOrders[bid as FormationId] = order as BrigadeMovementOrder;
                 }
             }

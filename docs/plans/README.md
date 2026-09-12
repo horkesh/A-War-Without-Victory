@@ -29,6 +29,8 @@ The former owner-decision and post-D2 residual lists are historical inputs, not 
 | R8 | [Full-campaign packaged-Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) | R7 remaining gates, scheduled finite behavior settlement, final calibration, then final packaged acceptance; RE gates nothing |
 | R9 | [Release candidate, gold, and publication](2026-07-31-release-candidate-gold-publication-plan.md) | Freeze follows two clean 5/5 R8 diaries; limited build preparation runs earlier under master §4.2 |
 
+**Completed April 1994 calibration packets:** [operational corrections design](2026-09-01-apr1994-operational-corrections-design.md), [operational corrections implementation](2026-09-01-apr1994-operational-corrections.md), [Derventa/Liše/Prozor corrections](2026-09-02-april-1994-derventa-lise-prozor-corrections.md), [operation purpose and name ownership](2026-09-02-emergent-operation-purpose-and-name-ownership.md), and [isolated-position operations](2026-09-02-isolated-position-operations-design.md). Their v72/v73 measurement is historical branch evidence pending fresh combined-tree acceptance.
+
 **R7 name correction integrated:** [ARBiH honorific-name packet](2026-09-07-arbih-brigade-honorific-name-correction-plan.md); IDs/mechanical fields preserved, saved/displayed text changed. This does not close R7.
 
 **Development instrumentation, not a roadmap lane:** [calibration control timeline viewer](2026-09-08-calibration-control-timeline-viewer-plan.md) — `tools/calibration_timeline.mjs`, same category as `engine_health_gate.cjs` and `verify_checkpoints.cjs`. It claims no roadmap authority and gates nothing.

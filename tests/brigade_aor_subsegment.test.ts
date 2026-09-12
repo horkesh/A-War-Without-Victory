@@ -131,6 +131,116 @@ describe('brigade AoR sub-segment assignment', () => {
         expect(all).toContain('brig_2');
     });
 
+    it('assigns a fixed-home brigade to its friendly contacted home before wider-front allocation', () => {
+        const wide = makeSubSeg('wide', ['osid_a', 'osid_b'], 6);
+        const homeContact = makeSubSeg('home_contact', ['osid_c', 'osid_home'], 3);
+        const sector = makeSector('sec1', [wide, homeContact], ['fixed_home', 'local_other']);
+        sector.faction = 'HRHB';
+        sector.corps_id = 'hvo_southeast_herzegovina';
+        const state = {
+            military: {
+                formations: {
+                    fixed_home: makeFormation({
+                        id: 'fixed_home', faction: 'HRHB',
+                        location_osid: 'osid_a',
+                        home_osid: 'osid_home',
+                        tags: ['placement:fixed_home_osid'],
+                    }),
+                    local_other: makeFormation({ id: 'local_other', faction: 'HRHB', location_osid: 'osid_home' }),
+                    enemy_brigade: makeFormation({
+                        id: 'enemy_brigade', faction: 'RBiH', location_osid: 'enemy_home_contact',
+                    }),
+                },
+                corps_command: {
+                    enemy_corps: {
+                        active_operations: [{
+                            name: 'Enemy operation',
+                            participating_brigades: ['enemy_brigade'],
+                            objectives: ['osid_home'],
+                        }],
+                    },
+                },
+            },
+            political: {
+                political_controllers: {
+                    osid_a: 'HRHB',
+                    osid_b: 'HRHB',
+                    osid_c: 'HRHB',
+                    osid_home: 'HRHB',
+                },
+            },
+        } as unknown as GameState;
+
+        const adj = makeAdjacency([
+            ['osid_a', 'osid_b'],
+            ['osid_b', 'osid_c'],
+            ['osid_c', 'osid_home'],
+        ]);
+        assignBrigadesToSubSegments(state, [sector], adj);
+
+        expect(homeContact.primary_brigade_ids).toContain('fixed_home');
+        expect(wide.primary_brigade_ids).toContain('local_other');
+    });
+
+    it('does not displace normal widest-front allocation when a fixed home is not under operation threat', () => {
+        const wide = makeSubSeg('wide', ['osid_a', 'osid_b'], 6);
+        const quietHome = makeSubSeg('quiet_home', ['osid_c', 'osid_home'], 3);
+        const sector = makeSector('sec1', [wide, quietHome], ['fixed_home', 'local_other']);
+        sector.faction = 'HRHB';
+        sector.corps_id = 'hvo_southeast_herzegovina';
+        const state = {
+            military: {
+                formations: {
+                    fixed_home: makeFormation({
+                        id: 'fixed_home', faction: 'HRHB',
+                        location_osid: 'osid_a',
+                        home_osid: 'osid_home',
+                        tags: ['placement:fixed_home_osid'],
+                    }),
+                    local_other: makeFormation({ id: 'local_other', faction: 'HRHB', location_osid: 'osid_home' }),
+                },
+            },
+            political: {
+                political_controllers: {
+                    osid_a: 'HRHB', osid_b: 'HRHB', osid_c: 'HRHB', osid_home: 'HRHB',
+                },
+            },
+        } as unknown as GameState;
+
+        const adj = makeAdjacency([
+            ['osid_a', 'osid_b'], ['osid_b', 'osid_c'], ['osid_c', 'osid_home'],
+        ]);
+        assignBrigadesToSubSegments(state, [sector], adj);
+
+        expect(wide.primary_brigade_ids).toContain('fixed_home');
+        expect(quietHome.primary_brigade_ids).toContain('local_other');
+    });
+
+    it('does not apply HVO local-defense doctrine to another faction', () => {
+        const wide = makeSubSeg('wide', ['osid_a', 'osid_b'], 6);
+        const homeContact = makeSubSeg('home_contact', ['osid_c', 'osid_home'], 3);
+        const sector = makeSector('sec1', [wide, homeContact], ['fixed_home', 'local_other']);
+        sector.faction = 'RS';
+        sector.corps_id = 'vrs_test_corps';
+        const state = {
+            military: {
+                formations: {
+                    fixed_home: makeFormation({ id: 'fixed_home', faction: 'RS', location_osid: 'osid_a', home_osid: 'osid_home', tags: ['placement:fixed_home_osid'] }),
+                    local_other: makeFormation({ id: 'local_other', faction: 'RS', location_osid: 'osid_home' }),
+                    enemy_brigade: makeFormation({ id: 'enemy_brigade', faction: 'RBiH', location_osid: 'enemy_home_contact' }),
+                },
+                corps_command: { enemy_corps: { active_operations: [{ name: 'Enemy operation', participating_brigades: ['enemy_brigade'], objectives: ['osid_home'] }] } },
+            },
+            political: { political_controllers: { osid_a: 'RS', osid_b: 'RS', osid_c: 'RS', osid_home: 'RS' } },
+        } as unknown as GameState;
+        const adj = makeAdjacency([['osid_a', 'osid_b'], ['osid_b', 'osid_c'], ['osid_c', 'osid_home']]);
+
+        assignBrigadesToSubSegments(state, [sector], adj);
+
+        expect(wide.primary_brigade_ids).toContain('fixed_home');
+        expect(homeContact.primary_brigade_ids).toContain('local_other');
+    });
+
     it('wide sub-segments get 2+ brigades when available', () => {
         // ss1 has 6 edges (> WIDE_SEGMENT_THRESHOLD=5), ss2 has 2
         const ss1 = makeSubSeg('ss1', ['osid_a', 'osid_b', 'osid_c'], 6);

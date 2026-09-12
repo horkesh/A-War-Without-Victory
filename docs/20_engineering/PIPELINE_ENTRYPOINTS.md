@@ -38,6 +38,10 @@ Scenario runner (`src/scenario/scenario_runner.ts`) routes to whichever pipeline
   `node tools/build_calibration_map_html.mjs <map.png> <out.html> <title> <score> [footer]`.
   The map must be north-up; amber marks actual/painted disagreement, and outline plus center
   circle denote the painted faction.
+- Interactive April hover comparator:
+  `node tools/generate_apr1994_hover_map.cjs <template.html> <run-dir> <painted.json> <out.html>`.
+  It embeds the accepted run's controller map after OSID initialization, preserves hover names and
+  controller details, and remains a derived visualization rather than calibration authority.
 - Living authority: `docs/40_reports/CALIBRATION_MASTER.md`.
 
 ### Scenario CLI (Scripted)
@@ -194,7 +198,7 @@ These are **not** simulation entrypoints. They are opt-in tooling and must remai
 
 This section supersedes older details in the broad War-phase OSID paragraph where they conflict:
 
-- `paramilitary-detect` and `paramilitary-advance` run after sector partitioning. `rear-pocket-consolidation` follows `paramilitary-advance` and is active only after `PARAMILITARY_FADE_WEEK`; it consolidates only deterministic undefended fully surrounded clusters of one to six OSIDs that pass enclave guards.
+- `paramilitary-detect` and `paramilitary-advance` run after sector partitioning through `PARAMILITARY_FADE_WEEK`. No post-fade passive consolidation phase changes political control; later pockets require attack/operation resolution.
 - Sector partitioning promotes only roster-eligible, legally reachable formations. It does not guarantee paper staffing when enclave rules, connectivity, or donor commitments make relief impossible; those sectors carry `unstaffed_front: true`.
 - During `generate-bot-corps-orders`, commander decision/emit may write a same-corps `sector_reassignment_order` for an empty staffable front. `generate-bot-brigade-orders` translates that T1 intent into a T2 column order, and a later T3 movement pass changes physical location. No assignment or final reconciliation step teleports a formation.
 

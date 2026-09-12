@@ -1850,17 +1850,35 @@ function updateMultiAxisResults(
             });
 
             if (anyResolvedObjectiveBattle) {
-                // Direct attack on current objective — standard failure tracking
+                // Direct attack on current objective. A resolved attacker win
+                // can reduce defender resistance without crossing the political
+                // occupation threshold in the same turn; that is continued
+                // operational progress, not a failed assault.
                 axis.attack_attempt_count += 1;
                 axis.idle_execution_turn_streak = 0;
                 // Only reset movement_only counter when no brigades are also marching.
                 // If some axis brigades are in transit while others attack, the marching
                 // signal must persist — stranded brigades cycling attack/march never reset.
                 if (!anyMoved) axis.movement_only_execution_turns = 0;
-                axis.last_result = 'failed';
+                const hadSuccessfulObjectiveBattle = axis.assigned_brigades.some(bid => {
+                    const b = state.military.formations?.[bid];
+                    if (!b?.brigade_history?.engagements?.length) return false;
+                    const lastEng = b.brigade_history.engagements[b.brigade_history.engagements.length - 1];
+                    return lastEng.turn === turn
+                        && lastEng.osid === currentObjective
+                        && lastEng.role === 'attacker'
+                        && (lastEng.outcome === 'costly_victory'
+                            || lastEng.outcome === 'victory'
+                            || lastEng.outcome === 'decisive_victory');
+                });
+                axis.last_result = hadSuccessfulObjectiveBattle ? 'approach' : 'failed';
                 axis.momentum = 0;
-                axis.failure_count += 1;
-                axis.consecutive_failures_on_current += 1;
+                if (hadSuccessfulObjectiveBattle) {
+                    axis.consecutive_failures_on_current = 0;
+                } else {
+                    axis.failure_count += 1;
+                    axis.consecutive_failures_on_current += 1;
+                }
                 fullyRevealProbeSectorIntel(state, op);
 
                 // ── Catastrophic outcome stall ──
@@ -1871,7 +1889,10 @@ function updateMultiAxisResults(
                     const b = state.military.formations?.[bid];
                     if (!b?.brigade_history?.engagements?.length) return false;
                     const lastEng = b.brigade_history.engagements[b.brigade_history.engagements.length - 1];
-                    return lastEng.role === 'attacker' && lastEng.outcome === 'catastrophic';
+                    return lastEng.turn === turn
+                        && lastEng.osid === currentObjective
+                        && lastEng.role === 'attacker'
+                        && lastEng.outcome === 'catastrophic';
                 });
                 if (wasCatastrophic) {
                     axis.consecutive_catastrophic_on_current = (axis.consecutive_catastrophic_on_current ?? 0) + 1;
@@ -1883,7 +1904,8 @@ function updateMultiAxisResults(
                     continue;
                 }
 
-                if (axis.consecutive_failures_on_current >= MAX_CONSECUTIVE_FAILURES_ON_CURRENT) {
+                if (!hadSuccessfulObjectiveBattle
+                    && axis.consecutive_failures_on_current >= MAX_CONSECUTIVE_FAILURES_ON_CURRENT) {
                     axis.current_objective_index = currentIdx + 1;
                     axis.consecutive_failures_on_current = 0;
                     axis.consecutive_catastrophic_on_current = 0; // reset on objective change

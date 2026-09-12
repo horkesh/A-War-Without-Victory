@@ -166,11 +166,51 @@ describe('triggered operations definitions', () => {
     it('targets the canonical Cerska OSID instead of unrelated Srebrenica settlements', () => {
         const operation = _TRIGGERED_OPS.find((def) => def.name === 'Operation Cerska-Kamenica')!;
         const cerskaAxis = operation.axes.find((axis) => axis.axis_id === 'cerska_pocket')!;
+        const kamenicaAxis = operation.axes.find((axis) => axis.axis_id === 'kamenica')!;
+        const skelaniAxis = operation.axes.find((axis) => axis.axis_id === 'skelani_cutoff')!;
 
-        assert.deepEqual(cerskaAxis.objectives, ['op:vlasenica:cerska_2']);
+        assert.equal(operation.planning_duration, 20);
+        assert.equal(operation.min_attack_outcome, 'repulsed');
+        assert.equal(operation.execution_attack_power_mult, 2.5);
+        assert.equal(operation.require_all_axes_ready, true);
+        assert.deepEqual(cerskaAxis.objectives, [
+            'op:vlasenica:cerska_2',
+            'op:bratunac:pobudje_2',
+            'op:bratunac:jezestica_2',
+        ]);
         assert.equal(cerskaAxis.staging_osid, 'op:vlasenica:grabovica');
+        assert.equal(cerskaAxis.minimum_staged_brigades, 2);
         assert.ok(!cerskaAxis.objectives.includes('op:srebrenica:brezovice_2'));
         assert.ok(!cerskaAxis.objectives.includes('op:srebrenica:mala_daljegosta_2'));
+        assert.ok(!cerskaAxis.brigades.includes('rs_1st_guards_motorized'));
+        assert.ok(!cerskaAxis.brigades.includes('rs_65th_protection_motorized_regiment'));
+        assert.ok(!kamenicaAxis.brigades.includes('rs_1st_guards_motorized'));
+        assert.ok(!kamenicaAxis.brigades.includes('rs_65th_protection_motorized_regiment'));
+        assert.ok(kamenicaAxis.brigades.includes('rs_5th_podrinje'));
+        assert.ok(kamenicaAxis.brigades.includes('rs_1st_podrinje'));
+        assert.ok(kamenicaAxis.brigades.includes('rs_visegrad_brigade'));
+        assert.equal(kamenicaAxis.staging_osid, 'op:srebrenica:brezovice_2');
+        assert.equal(kamenicaAxis.minimum_staged_brigades, 3);
+        assert.deepEqual(kamenicaAxis.objectives, [
+            'op:srebrenica:osmace_2',
+            'op:srebrenica:radovcici',
+            'op:srebrenica:sulice_2',
+            'op:srebrenica:obadi',
+        ]);
+        assert.deepEqual(skelaniAxis.brigades, [
+            'rs_1st_guards_motorized',
+            'rs_65th_protection_motorized_regiment',
+        ]);
+        assert.equal(skelaniAxis.minimum_staged_brigades, 2);
+        assert.equal(skelaniAxis.minimum_forward_brigades, 2);
+        assert.equal(skelaniAxis.staging_osid, 'op:vlasenica:sebiocina');
+        assert.equal(skelaniAxis.minimum_staged_brigades, 2);
+        assert.equal(skelaniAxis.minimum_forward_brigades, 2);
+        assert.deepEqual(skelaniAxis.objectives, [
+            'op:vlasenica:pomol_2',
+            'op:srebrenica:luka_2',
+            'op:srebrenica:ljeskovik_2',
+        ]);
     });
 });
 
@@ -440,8 +480,8 @@ describe('checkTriggeredOperations', () => {
 
     it('injects Cerska-Kamenica at turn 40', () => {
         const state = makeState(40);
-        state.military.corps_command!['vrs_herzegovina']!.active_operations = [{ name: 'x' } as any];
-        state.military.corps_command!['vrs_1st_krajina']!.active_operations = [{ name: 'y' } as any];
+        state.military.corps_command!['vrs_herzegovina']!.active_operations = [{ name: 'x', participating_brigades: [] } as any];
+        state.military.corps_command!['vrs_1st_krajina']!.active_operations = [{ name: 'y', participating_brigades: [] } as any];
         const injected = checkTriggeredOperations(state);
         assert.ok(injected.includes('Operation Cerska-Kamenica'));
 
@@ -458,6 +498,144 @@ describe('checkTriggeredOperations', () => {
             blocker_code: '',
             typed_blocker: '',
             turn: 40,
+        });
+    });
+
+    it('pre-stages reserved Cerska-Kamenica elites before the operation activates', () => {
+        const state = makeState(28);
+        for (const brigadeId of ['rs_1st_guards_motorized', 'rs_65th_protection_motorized_regiment']) {
+            state.military.formations![brigadeId] = makeFormation(brigadeId, 'vrs_main_staff', {
+                location_osid: 'op:hanpijesak:han_pijesak_2',
+                elite_loan_state: {
+                    on_loan: false,
+                    loaned_to_corps: null,
+                    loan_start_turn: null,
+                    loan_start_personnel: null,
+                    last_recall_turn: null,
+                    permanently_degraded: false,
+                    current_episode_id: null,
+                },
+            });
+        }
+        const injected = checkTriggeredOperations(state);
+
+        assert.ok(!injected.includes('Operation Cerska-Kamenica'));
+        assert.deepEqual(state.military.brigade_movement_orders?.rs_1st_guards_motorized, {
+            destination_sids: ['op:vlasenica:sebiocina'],
+            stance: 'column',
+        });
+        assert.deepEqual(state.military.brigade_movement_orders?.rs_65th_protection_motorized_regiment, {
+            destination_sids: ['op:vlasenica:sebiocina'],
+            stance: 'column',
+        });
+    });
+
+    it('loans explicitly rostered Army Main Staff elites into Cerska-Kamenica', () => {
+        const state = makeState(40);
+        state.military.corps_command!['vrs_herzegovina']!.active_operations = [{ name: 'x', participating_brigades: [] } as any];
+        state.military.corps_command!['vrs_1st_krajina']!.active_operations = [{ name: 'y', participating_brigades: [] } as any];
+        const cerska = _TRIGGERED_OPS.find((def) => def.name === 'Operation Cerska-Kamenica')!;
+        const staging = cerska.axes.find((axis) => axis.axis_id === 'cerska_pocket')!.staging_osid!;
+        for (const brigadeId of ['rs_1st_guards_motorized', 'rs_65th_protection_motorized_regiment']) {
+            state.military.formations![brigadeId] = makeFormation(brigadeId, 'vrs_main_staff', {
+                location_osid: staging,
+                elite_loan_state: {
+                    on_loan: false,
+                    loaned_to_corps: null,
+                    loan_start_turn: null,
+                    last_recall_turn: null,
+                    loan_start_personnel: null,
+                    permanently_degraded: false,
+                    current_episode_id: null,
+                },
+            });
+        }
+        state.military.brigade_movement_state = {
+            rs_1st_guards_motorized: {
+                status: 'in_transit',
+                stance: 'column',
+                destination_sids: ['op:hanpijesak:han_pijesak_2'],
+                path: ['op:srebrenica:brezovice_2', 'op:hanpijesak:han_pijesak_2'],
+                path_index: 0,
+            } as any,
+        };
+
+        const injected = checkTriggeredOperations(state);
+
+        assert.ok(injected.includes('Operation Cerska-Kamenica'));
+        const operation = state.military.corps_command!.vrs_drina!.active_operations[0]!;
+        for (const brigadeId of ['rs_1st_guards_motorized', 'rs_65th_protection_motorized_regiment']) {
+            assert.ok(operation.participating_brigades.includes(brigadeId));
+            assert.equal(state.military.formations![brigadeId]!.elite_loan_state?.on_loan, true);
+            assert.equal(state.military.formations![brigadeId]!.elite_loan_state?.loaned_to_corps, 'vrs_drina');
+        }
+    });
+
+    it('retasks an idle Army Main Staff elite loan into Cerska-Kamenica', () => {
+        const state = makeState(40);
+        state.military.corps_command!['vrs_herzegovina']!.active_operations = [{ name: 'x', participating_brigades: [] } as any];
+        state.military.corps_command!['vrs_1st_krajina']!.active_operations = [{ name: 'y', participating_brigades: [] } as any];
+        const brigadeId = 'rs_65th_protection_motorized_regiment';
+        state.military.formations![brigadeId] = makeFormation(brigadeId, 'vrs_main_staff', {
+            location_osid: 'op:ilidza:rakovica_2',
+            elite_loan_state: {
+                on_loan: true,
+                loaned_to_corps: 'vrs_sarajevo_romanija',
+                loan_start_turn: 1,
+                last_recall_turn: null,
+                loan_start_personnel: 1000,
+                permanently_degraded: false,
+                current_episode_id: null,
+            },
+        });
+        state.military.brigade_movement_state = {
+            [brigadeId]: {
+                status: 'in_transit',
+                stance: 'column',
+                destination_sids: ['op:ilidza:rakovica_2'],
+                path: ['op:ilidza:rakovica_2'],
+                path_index: 0,
+            } as any,
+        };
+
+        const injected = checkTriggeredOperations(state);
+
+        assert.ok(injected.includes('Operation Cerska-Kamenica'));
+        const operation = state.military.corps_command!.vrs_drina!.active_operations[0]!;
+        assert.ok(operation.participating_brigades.includes(brigadeId));
+        assert.ok(operation.axes!.find((axis) => axis.axis_id === 'skelani_cutoff')!.assigned_brigades.includes(brigadeId));
+        assert.ok(!operation.axes!.find((axis) => axis.axis_id === 'cerska_pocket')!.assigned_brigades.includes(brigadeId));
+        assert.equal(state.military.formations![brigadeId]!.elite_loan_state?.on_loan, true);
+        assert.equal(state.military.formations![brigadeId]!.elite_loan_state?.loaned_to_corps, 'vrs_drina');
+    });
+
+    it('restages an idle same-corps Army Main Staff elite for its authored Cerska axis', () => {
+        const state = makeState(40);
+        state.military.corps_command!['vrs_herzegovina']!.active_operations = [{ name: 'x', participating_brigades: [] } as any];
+        state.military.corps_command!['vrs_1st_krajina']!.active_operations = [{ name: 'y', participating_brigades: [] } as any];
+        const brigadeId = 'rs_1st_guards_motorized';
+        state.military.formations![brigadeId] = makeFormation(brigadeId, 'vrs_main_staff', {
+            location_osid: 'op:vlasenica:grabovica',
+            elite_loan_state: {
+                on_loan: true,
+                loaned_to_corps: 'vrs_drina',
+                loan_start_turn: 1,
+                loan_start_personnel: 1200,
+                last_recall_turn: null,
+                permanently_degraded: false,
+                current_episode_id: null,
+            },
+        });
+        state.military.brigade_movement_orders = {
+            [brigadeId]: { destination_sids: ['op:vlasenica:grabovica'], stance: 'column' },
+        };
+
+        const injected = checkTriggeredOperations(state);
+
+        assert.ok(injected.includes('Operation Cerska-Kamenica'));
+        assert.deepEqual(state.military.brigade_movement_orders?.[brigadeId], {
+            destination_sids: ['op:vlasenica:sebiocina'],
+            stance: 'column',
         });
     });
 
@@ -623,9 +801,15 @@ describe('checkTriggeredOperations', () => {
 
     it('filters already-controlled objectives without dropping a viable triggered axis', () => {
         const state = makeState(40);
-        state.military.corps_command!['vrs_herzegovina']!.active_operations = [{ name: 'x' } as any];
-        state.military.corps_command!['vrs_1st_krajina']!.active_operations = [{ name: 'y' } as any];
-        state.political.political_controllers!['op:vlasenica:cerska_2'] = 'RS';
+        state.military.corps_command!['vrs_herzegovina']!.active_operations = [{ name: 'x', participating_brigades: [] } as any];
+        state.military.corps_command!['vrs_1st_krajina']!.active_operations = [{ name: 'y', participating_brigades: [] } as any];
+        for (const osid of [
+            'op:vlasenica:cerska_2',
+            'op:bratunac:pobudje_2',
+            'op:bratunac:jezestica_2',
+        ]) {
+            state.political.political_controllers![osid] = 'RS';
+        }
 
         const injected = checkTriggeredOperations(state);
         assert.ok(injected.includes('Operation Cerska-Kamenica'));
@@ -638,9 +822,15 @@ describe('checkTriggeredOperations', () => {
 
     it('does not warn for a triggered axis whose objectives are already controlled when another axis remains viable', () => {
         const state = makeState(40);
-        state.military.corps_command!['vrs_herzegovina']!.active_operations = [{ name: 'x' } as any];
-        state.military.corps_command!['vrs_1st_krajina']!.active_operations = [{ name: 'y' } as any];
-        state.political.political_controllers!['op:vlasenica:cerska_2'] = 'RS';
+        state.military.corps_command!['vrs_herzegovina']!.active_operations = [{ name: 'x', participating_brigades: [] } as any];
+        state.military.corps_command!['vrs_1st_krajina']!.active_operations = [{ name: 'y', participating_brigades: [] } as any];
+        for (const osid of [
+            'op:vlasenica:cerska_2',
+            'op:bratunac:pobudje_2',
+            'op:bratunac:jezestica_2',
+        ]) {
+            state.political.political_controllers![osid] = 'RS';
+        }
 
         const injected = checkTriggeredOperations(state);
 

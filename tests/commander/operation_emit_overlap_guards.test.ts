@@ -19,7 +19,10 @@ import type { AllocationResult } from '../../src/sim/combat/commander/allocate.j
 import type { PlanDecision } from '../../src/sim/combat/commander/plan.js';
 import type { DecisionResult } from '../../src/sim/combat/commander/decide.js';
 import type { SpatialContext } from '../../src/sim/spatial_context.js';
-import { emitCommanderOutput } from '../../src/sim/combat/commander/emit.js';
+import {
+    capOpportunityOperationParticipants,
+    emitCommanderOutput,
+} from '../../src/sim/combat/commander/emit.js';
 import { applyCommanderOutput } from '../../src/sim/combat/commander/commander_loop.js';
 import { CURRENT_SCHEMA_VERSION } from '../../src/state/game_state.js';
 
@@ -31,6 +34,14 @@ const defaultPersonality: OfficerPersonality = {
     initiative: 0.8,
     competence: 0.6,
 };
+
+describe('opportunity operation force contract', () => {
+    it('does not let launch-time sector attachments exceed the planned force', () => {
+        const assembled = Array.from({ length: 11 }, (_, index) => `b${index + 1}`);
+        expect(capOpportunityOperationParticipants(assembled, 'opportunity', 6)).toEqual(assembled.slice(0, 6));
+        expect(capOpportunityOperationParticipants(assembled, 'pre_planned', 6)).toEqual(assembled);
+    });
+});
 
 function makeBrigade(id: string, locationOsid: string, overrides: Partial<FormationState> = {}): FormationState {
     return {
@@ -298,6 +309,84 @@ function makePlanDecision(): PlanDecision {
 }
 
 describe('commander emission overlap guards', () => {
+    it('emits a bilateral operation from plan-reserved brigades even when the new allocation garrison-locks them', () => {
+        const briefing = { ...makeBriefing(), bilateral_offensive: true } as CommanderBriefing;
+        const planDecision = makePlanDecision();
+        planDecision.plan = {
+            ...planDecision.plan!,
+            assigned_brigades: ['b1', 'b2'] as FormationId[],
+            bilateral_offensive: true,
+        } as any;
+        const allocation: AllocationResult = {
+            ...makeAllocation(),
+            surplus_pool: [],
+            garrison_locks: [
+                { brigade_id: 'b1' as FormationId, zone_id: 'zone:test:0' as ZoneId },
+                { brigade_id: 'b2' as FormationId, zone_id: 'zone:test:0' as ZoneId },
+            ] as any,
+        };
+
+        const output = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            allocation,
+            planDecision,
+            makeDecisions(),
+            makeThreats(),
+        );
+
+        expect(output.operations).toHaveLength(1);
+        expect(output.operations[0]).toMatchObject({
+            type: 'sector_attack',
+            participating_brigades: ['b1', 'b2'],
+        });
+    });
+
+    it('emits a bilateral operation when its reserved group is elsewhere in the same corps zone', () => {
+        const targetSector = {
+            ...makeSector(),
+            assigned_brigade_ids: ['b3'] as FormationId[],
+            reserve_brigade_ids: [],
+            sub_segments: [{
+                ...makeSector().sub_segments[0]!,
+                primary_brigade_ids: ['b3'] as FormationId[],
+            }],
+        } as CorpsFrontSector;
+        const briefing = {
+            ...makeBriefing([], [
+                makeBrigade('b1', 'op:test:approach'),
+                makeBrigade('b2', 'op:test:approach'),
+                makeBrigade('b3', 'op:test:approach'),
+            ]),
+            bilateral_offensive: true,
+            sectors: [targetSector],
+        } as CommanderBriefing;
+        const planDecision = makePlanDecision();
+        planDecision.plan = {
+            ...planDecision.plan!,
+            assigned_brigades: ['b1', 'b2'] as FormationId[],
+            bilateral_offensive: true,
+        } as any;
+        const allocation: AllocationResult = {
+            ...makeAllocation(),
+            surplus_pool: [],
+        };
+
+        const output = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            allocation,
+            planDecision,
+            makeDecisions(),
+            makeThreats(),
+        );
+
+        expect(output.operations).toHaveLength(1);
+        expect(output.operations[0]?.participating_brigades).toEqual(['b1', 'b2']);
+    });
+
     it('does not emit a new commander op that overlaps a live operation by sector/objective/brigades', () => {
         const briefing = makeBriefing([{
             name: 'Existing Main Effort',
@@ -380,6 +469,26 @@ describe('commander emission overlap guards', () => {
         expect(output.operations[0]!.type).toBe('sector_attack');
     });
 
+    it('commits the designated ARBiH bilateral attacker despite low intel', () => {
+        const briefing = {
+            ...makeIntelBriefing([0]),
+            bilateral_offensive: true,
+        };
+
+        const output = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            makeAllocation(),
+            makePlanDecision(),
+            makeDecisions(),
+            makeThreats(),
+        );
+
+        expect(output.operations).toHaveLength(1);
+        expect(output.operations[0]!.type).toBe('sector_attack');
+    });
+
     it('forces a full commitment after two accepted probes', () => {
         const briefing = makeIntelBriefing([0], { consecutiveProbes: 2 });
 
@@ -395,6 +504,45 @@ describe('commander emission overlap guards', () => {
 
         expect(output.operations).toHaveLength(1);
         expect(output.operations[0]!.type).toBe('sector_attack');
+    });
+
+    it('escalates fallback probing into an occupying operation against a bounded isolated position', () => {
+        const briefing = makeBriefing();
+        briefing.state_ref!.political.political_controllers = {
+            'op:test:approach': FACTION,
+            'op:test:objective': 'RBiH',
+        } as any;
+        briefing.state_ref!.military.corps_command![CORPS_ID]!.consecutive_probes = 2;
+        const noPlan: PlanDecision = {
+            plan: null,
+            action: 'none',
+            reason: 'no major plan',
+            decision_trace: {
+                turn: briefing.turn,
+                winning_intent_id: null,
+                candidates: [],
+                hard_constraints: [],
+                lessons_applied: [],
+                relationships_applied: [],
+            },
+        };
+
+        const output = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            makeAllocation(),
+            noPlan,
+            makeDecisions(),
+            makeThreats(),
+        );
+
+        expect(output.operations).toHaveLength(1);
+        expect(output.operations[0]).toMatchObject({
+            type: 'sector_attack',
+            objectives: ['op:test:objective'],
+            participating_brigades: ['b1', 'b2'],
+        });
     });
 
     it('emits byte-identical intel-gated operations for identical inputs', () => {

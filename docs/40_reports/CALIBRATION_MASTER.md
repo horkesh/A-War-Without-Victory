@@ -100,6 +100,21 @@ that say a particular R6, late-war, or pre-1.0 scope was "closed" remain phase-l
 They do not close the present calibration program. The sole scoring scenario remains
 `data/scenarios/apr1992_definitive_188w.json`.
 
+### Current April 1994 checkpoint — operational calibration at week 104
+
+The current accepted April checkpoint is the deterministic v72/v73 pair at commit `4167d2bd4`.
+Both runs use identical initial saves and produce identical final saves with SHA-256
+`d6095cb8408ddfa85a52223cc6c4c5eb7ae46165cbb2b25fbe438d88c7245148` and final-state hash
+`d6095cb8408ddfa8`. The result is **703/712 (98.74%)**, area-weighted **98.9%**. Krajina,
+Posavina NE, Drina, and Sarajevo are exact; the remaining nine mismatches are enumerated in
+[the consolidated April implementation report](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md).
+
+This week-104 acceptance supersedes older April candidates as the current April territorial
+measurement. It does **not** replace the clean 188-week whole-campaign baseline below, re-floor
+later checkpoints, or reconcile golden artifacts. The accepted run has zero `consolidation` and
+zero `abandoned` control changes. Brčko and Lopare Selo remain RS, Goražde town remains RBiH,
+and no painted-HRHB OSID is held by RBiH.
+
 ### ★ CURRENT CANONICAL BASELINE — `n392`, owner-blessed 2026-09-06
 
 **BC08 historical verification boundary (2026-09-07; subsequent BC01 proof below):** [BC08 audit](audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md) reapplies current unchanged gates to n392: 31/31 normalized consumed inputs match and source/runtime equivalence is established. This is not a fresh HEAD 188-week run or player-path/transient-state proof. n392 and floors remain accepted unchanged; final calibration acceptance follows [BC01–BC07 settlement](../plans/MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07). BC08 alone is closed; raw full suite remains red on one classified shell failure, unchanged focused file 8/8 passes.
@@ -4173,3 +4188,173 @@ Three focus mismatches remain explicitly visible: `op:foca:donje_zesce` and
 `op:gorazde:podkozara_donja_2` flips to RBiH through the ordinary paramilitary system instead
 of remaining RS. No direct control-change event was added. A zero-gain late reserve-operation
 candidate was removed rather than retained as calibration clutter.
+
+## 2026-09-01 — April 1994 bilateral doctrine and VRS Army-HQ allocation ADOPTED
+
+The open Croat–Bosniak-war doctrine was inverted in the live bilateral diversion: HVO now
+defends and receives no bilateral offensive objectives, while ARBiH receives the operational
+initiative against only HVO-controlled objectives on the selected mixed front. The diagnosed
+ARBiH failure was cumulative rather than a combat-strength constant: the directive exposed no
+offensive targets, corps selection preferred the heavily exhausted 3rd Corps over an available
+4th Corps, the heavy-equipment force-size increment rejected the three reachable surplus
+brigades, and low intelligence converted commitments back into probes. Commander planning now
+recognizes the designated bilateral attacker and its canonical reachable objectives, while
+ceasefire/Washington state removes that designation.
+
+The operations-only April checkpoint is **669/712 (93.96%)**, with **31/32** April anchors
+passing (`op:vares:vares_2` remains HVO instead of RBiH). HVO captures no ARBiH territory after
+bilateral war begins. ARBiH 4th Corps launches three occupying sector attacks before Washington:
+Operacija Proljeće captures `op:konjic:buturovic_polje_2` at turn 56, Operacija Odbrana captures
+`op:jablanica:doljani_2` at turn 62, and Operacija Čelik captures
+`op:prozor:ljubunci_2` at turn 67. All three transfers are logged combat captures. Passive
+`consolidation` and `abandoned` changes are forbidden in either direction between RBiH and HVO;
+the previous ten-cell passive result is rejected rather than retained for its higher score.
+
+The corrected run is
+`apr1992_definitive_188w__1db784e85c2e6de0__w104_n0`, hash
+`601b642d55a43fcd`. Its combat-causality report is valid: 408 attack orders, 280 battles,
+zero invalid operations, zero zero-eligible operations, and zero recovery-without-attempt rows.
+
+Operation Cerska–Kamenica and Operation Zvezda 94 now explicitly roster the VRS 1st Guards
+Motorized Brigade and 65th Protection Motorized Regiment, with admission governed by the shared
+Army-HQ elite availability, reachability, deployment, and loan lifecycle. Balkan Battlegrounds
+II p.406 specifically supports both formations at Cerska. Its Zvezda account (p.480) supports
+Main Staff direction and higher-HQ concentration but not those exact two unit identities, so
+their Zvezda roster is recorded as a scenario allocation rather than exact-order-of-battle fact.
+
+The earlier full verification run
+`apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0`, hash
+`6c00e419e8248c97`, remains evidence for the VRS elite allocations but is superseded for bilateral
+territorial calibration because it contains the rejected passive transfers. Cerska launches
+at turn 40 with the 1st Guards, captures `op:vlasenica:cerska_2` by logged combat, and ends
+partial. Zvezda launches at turn 100 with the 1st Guards but fails to capture its Goražde
+objectives. The 65th remains roster-eligible but is unavailable to these two operations in this
+run under the ordinary loan lifecycle; focused tests prove its admission when canonically
+available. No attack-resolution rule or direct control authority changed.
+
+## 2026-09-02 — Srebrenica lane completed through Operation Cerska–Kamenica
+
+The January ARBiH Srebrenica–Cerska Link-Up captures Pobuđe and Ježeštica through ordinary
+operation combat, but the February VRS counteroffensive previously stopped after its first
+Cerska-pocket objective. The operational contact graph provides the contiguous historical axis
+`op:vlasenica:cerska_2` → `op:bratunac:pobudje_2` →
+`op:bratunac:jezestica_2`. Its elite Skelani axis has a second graph-valid chain from RS-held
+Sebiočina through `op:vlasenica:pomol_2` to Luka and Ljeskovik. Operation Cerska–Kamenica now
+carries both complete contractions. No combat multiplier, control event, consolidation rule, or
+special capture authority was added.
+
+The 104-week proof run is
+`runs/apr1994_srebrenica_v46/apr1992_definitive_188w__1db784e85c2e6de0__w104`, final hash
+`1f6674ac395a1616`. The operation starts at turn 40 with both Army-HQ elites in its nine-formation
+live roster. The 1st Birač Brigade decisively captures Cerska at turn 45, Pobuđe at turn 46, and
+Ježeštica at turn 47. The 1st Guards decisively captures Pomol at turn 45, Luka at turn 46, and
+Ljeskovik at turn 50. The operation completes successfully after ten total combat captures and
+both elite formations remain committed through execution.
+
+All three former Srebrenica-lane residuals now match the painted April map, with no added mismatch
+anywhere else. The April comparator improves from **699/712 (98.17%)** to **702/712 (98.60%)**, leaving 10
+residuals outside this lane. Combat causality remains valid: 426 attack orders, 288 battles, zero
+invalid operations, zero zero-eligible operations, and zero recovery-without-attempt rows. The
+neighboring operation/elite regression surface passes **302/302** tests across 11 suites;
+TypeScript typecheck and `git diff --check` pass.
+
+## 2026-09-02 — Emergent operation purpose and historical-name ownership ADOPTED
+
+The April v46 trace exposed `arbih_2nd_corps:Operacija Farz:t70` taking
+`op:lopare:lopare_selo_2` at turn 71. The target was neither a campaign objective nor a recent
+loss, salient neck, or must-hold relief position; high exposure was its only recommendation.
+That is now insufficient operational intent. The commander's first tactical proposal must carry
+one of those four purposes or the corps declines that planning cycle. This does not compare the
+proposal with the painted map and does not force a historical controller.
+
+Historical catalog names are now semantically reserved for authored operations. Prefix, accent,
+punctuation, and year variants collide deliberately, so `Farz` cannot be emitted from a generic
+name pool while its catalog operation remains available to the authored system. Fictional
+replacement slots preserve the old faction-pool lengths and therefore avoid globally reseeding
+the modulo-based deterministic name picker.
+
+Ordinary corps opportunities are also bounded to six planned and emitted participants, preventing
+launch-time sector attachments from turning a local opportunity into an undeclared army offensive.
+The HVO-war bilateral path retains its explicit theatre authority but may select only OSIDs held by
+the actual bilateral opponent.
+
+The retained 104-week evidence run is
+`runs/apr1994_purpose_v52/apr1992_definitive_188w__1db784e85c2e6de0__w104_n0`, hash
+`27f3e651cf7a29ee`. Lopare Selo remains RS and no emergent operation uses `Farz`. The April
+comparison is **696/712 (97.75%)**. Seven v46 matches become open calibration debt rather than
+being suppressed by target-specific rules: ARBiH legitimately captures three Brčko campaign
+positions, while the changed operational sequence leaves four Goražde contraction objectives
+RBiH because Zvezda 94 does not launch. The latter is a historical-operation scheduling/force-flow
+problem and must be solved in that subsystem; it is not grounds for weakening the purpose rule or
+adding passive control changes.
+
+## 2026-09-02 — Brčko and Zvezda regression correction ADOPTED
+
+The v52 Brčko result was not a combat capture. Generic RBiH 2nd Corps priorities expanded the
+whole Brčko municipality into campaign objectives; after three southern cells changed hands, the
+post-fade rear-pocket phase awarded `op:brcko:brcko` without a battle. That phase contradicted the
+War Specification's operations-only control rule and has been removed from the production
+pipeline. `Tuzla Expansion` now names only the southern approach at `op:brcko:brka_2`; Brčko city
+remains available to an explicit authored or Army-HQ operation rather than being hard-locked.
+
+The same run showed that Zvezda 94 was queued but could not retain its Main Staff assault group.
+Authored elite reservations now cover the complete historical execution window, and an elite
+committed to an authored operation remains attached through recovery so the completed AAR retains
+the formations that actually fought. Ordinary elite loans still use the usual recall rules;
+permanent degradation remains an immediate recall condition.
+
+The accepted 104-week proof is
+`runs/apr1994_fix_v56/apr1992_definitive_188w__1db784e85c2e6de0__w104_n0`, hash
+`8b7f2246c7c2d27b`. Brčko, Donji Rahić, and Potočari remain RS; Brka remains RBiH. Operation
+Zvezda 94 starts at turn 93 and completes successfully at turn 98 with both the 1st Guards and
+65th Protection Regiment in its seven-formation roster. Four logged battles capture Sopotnica,
+Slatina, Ustiprača, and Kolovariće, while Goražde town remains RBiH. The run contains zero
+`consolidation` or `abandoned` control changes and scores **684/712** at April 1994. The lower
+national score is the visible cost of removing a non-canonical global auto-flip mechanism.
+
+## 2026-09-02 — Isolated-position operations and April regression recovery ADOPTED
+
+Removing rear-pocket auto-flips correctly protected Brčko but exposed positions that had only
+matched because topology silently awarded control. The replacement is operational: a commander may
+classify a connected hostile position of at most six OSIDs as a reduction objective only when its
+entire external shared-boundary ring belongs to the commander's faction. Low intelligence still
+requires probes, and escalation requires a reachable, combat-ready two-brigade same-corps group.
+Lopare Selo is not a commander objective and remains RS; Brčko is not a bounded hostile position.
+
+Authored pre-planned staging now has explicit movement ownership, preventing routine march correction
+from cancelling a historical concentration while its operation waits in the corps queue. This
+recovers Operation Foca's southern axis. Operation Cerska–Kamenica receives its documented Main Staff
+concentration and completes the Kamenica and Skelani axes. Operation Pracha River uses a separate
+Višegrad-bridgehead axis; the Central Bosnia Counteroffensive explicitly attacks the mixed-boundary
+Čardak position and has enough assembly time for its Vareš column; Operation Donji Vakuf completes
+its authored sweep through Korenići. Every recovered OSID is taken in a logged battle.
+
+The accepted 104-week run is
+`runs/apr1994_isolated_ops_v63/apr1992_definitive_188w__1db784e85c2e6de0__w104`, hash
+`270709e4d303deed`. An independent rerun in `apr1994_isolated_ops_v64` produced the same hash. The
+April comparison is **701/712 (98.46%)**, area-weighted **98.48%**. Krajina is **127/127** and Drina
+is **112/112**. Brčko city, Donji Rahić, and Potočari remain RS; Brka remains RBiH; Lopare Selo
+remains RS; Goražde town remains RBiH. There are zero `consolidation` or `abandoned` transfers.
+
+## 2026-09-02 — Derventa, Liše, and Prozor corrections ADOPTED
+
+Three bounded operational corrections replace the remaining errors identified in the Derventa and
+HVO-war review. Operation Corridor now retains the 1st Prnjavor Light Infantry Brigade on its east
+axis while the 27th Derventa Motorized Brigade runs a parallel one-objective pocket axis against
+`op:derventa:zivinice`. During the open RBiH–HRHB war, a threatened combat-ready HVO fixed-home
+brigade is assigned first to its contacted home position only when an active opposing operation
+names that OSID; this preserves Liše without a controller lock or a combat modifier. The bounded
+Prozor–Rama Line Counterattack uses the Rama Brigade to attack Lug and Paros after bilateral war
+opens. Its AAR records two attacks and two logged combat captures at turns 54 and 55.
+
+Independent runs `apr1994_three_fixes_v72` and `apr1994_three_fixes_v73` are byte-identical at final
+hash `d6095cb8408ddfa8`, with zero unresolved assignment-seal violations. April matches
+**703/712 (98.74%)**. Živinice is RS; Liše, Lug, and Paros are HRHB; no painted-HRHB OSID is
+overcaptured by RBiH. Brčko and Lopare Selo remain RS, and Goražde town remains RBiH. Relative to
+the preceding accepted run, the four corrected OSIDs are offset by visible regressions at Donji
+Vakuf and Korenići; these remain calibration debt rather than receiving passive or direct-control
+corrections.
+
+The complete April lane chronology, implementation ownership, final nine-cell residual list,
+combat attribution, determinism receipts, and interactive-map publication are consolidated in
+[`implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md`](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md).

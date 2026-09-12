@@ -25,6 +25,12 @@ paused or RE is blocked, they are describing 2026-08-28, not today.
 
 **Open gates:** [open_gates.yml](../open_gates.yml) — named gates and their evidence, checked by `npm run gates`. Derived; this roadmap wins.
 
+**Calibration integration note — 2026-09-12:** the April 1994 operational-corrections history is
+now present in the integration candidate. Its v72/v73 703/712 result remains branch-local evidence;
+the combined tree must pass the full suite and two identical canonical 188-week runs before the
+checkpoint can supersede current baseline authority. The 2026-09-12 manifest refresh and unchanged
+floors remain authoritative in the meantime. See the [dated implementation report](../40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md).
+
 ## ★ PROBE CHANNEL — CLOSED 2026-08-26. Scope: `docs/plans/2026-08-26-probe-channel-scope.md`
 
 **Owner rulings, both of which bind downstream work:**

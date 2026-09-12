@@ -30,6 +30,12 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 8 | R8 | **INBOX REPAIRED; PACKAGE/SHAKEDOWN GATES OPEN — 2026-09-10.** | Product `7d97b72fc`, route/build/hook pass; sole UI-boundary failure reconciled by 45/45 targeted checks, exit 1 retained. Harness `c31135f35` reaches RBiH turn 24/577 captures, then fails readability before Save/load. Nineteen local aborts and one final-sector warning need disposition; RS/HRHB unlaunched. Post-run package adds telemetry: all 1,200 original files match, directory gate fails. Narrow follow-up proposed only; old package/evidence preserved, full campaigns/acceptance open. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
 | 9 | R9 | **FREEZE WAITING ON R8; LIMITED PREPARATION AT §4.2** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
+**April 1994 integration candidate — 2026-09-12:** the completed operational-corrections packet and
+its dated v72/v73 branch evidence are integrated for fresh validation. Its historical 703/712
+week-104 result does not replace the n392/2026-09-12 baseline authority until the combined tree
+passes the required full suite and two identical canonical 188-week runs. No floor or manifest
+refresh is implied. [Implementation report](../40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md).
+
 **R7 readability execution — 2026-09-09:** The authorized date-label expansion now has nine-case initial/maximum-scroll proof, preserving the fixed Desk column, header and artwork. Final UI/typecheck/build checks and independent review pass; Desk/date commit `88996a23d` and its hook pass. Clean POST-A completes 188 weeks with health/hash checks passing; PRE/POST-A/POST-B match all eight artifacts and inputs. The fixed run budget is consumed. Earlier phases and unaffected global Vitest/player-experience receipts remain reviewed. Baseline investigation is GO: pins match accepted n392, while four consumed inputs changed before R7; PRE/POST-B match all eight artifacts. Retain the six-pin failing baseline gate and dirty POST-B disclosure. No R7 closure or downstream lane is claimed. See the amendment and designated report.
 
 **R7 closeout audit — 2026-09-09:** The existing parent plan now carries the listening/approval
