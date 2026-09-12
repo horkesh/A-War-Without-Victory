@@ -1,0 +1,11 @@
+{
+  "owner_authorization": "Claude completed his work in the meantime, repo is all yours.",
+  "packet_root": "F:\\AWWV-worktrees\\agent-setup-activation",
+  "packet_commit": "7d8b75f8a13c2cbf73063c7315c946f33cf0f874",
+  "repository_commit": "7d8b75f8a13c2cbf73063c7315c946f33cf0f874",
+  "manifest_sha256": "3F875CB21E6BFC7FF1F8A1D1E99BCAFBB7B33FE12FABFD83C0909ECE5F661DDB",
+  "helper_sha256": "DAE2F146E62C0881252EB07E5978232AE1F55ECFFB2E758E73CB463CD653AB3F",
+  "apply_receipt": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/live-apply-receipt.json",
+  "rollback_packet": "Retain this exact integration worktree and commit unchanged; it produced the applied candidates.",
+  "captured_utc": "2026-09-12T20:34:49.2619821Z"
+}

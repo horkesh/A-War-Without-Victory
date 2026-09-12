@@ -1,0 +1,388 @@
+{
+  "checked_utc": "2026-09-12T20:36:17.325Z",
+  "repository_commit": "7d8b75f8a13c2cbf73063c7315c946f33cf0f874",
+  "repository_status": "",
+  "installed_pairs": [
+    {
+      "name": "architect",
+      "mode": "preserved original",
+      "sha256": "C14FB392FC248AD4056516F4921FB6E507A63B9837E9D1EA9BB75E4FC98CD83D",
+      "pass": true
+    },
+    {
+      "name": "asset-integration",
+      "mode": "preserved original",
+      "sha256": "526D1DE70E45C36FA8CE017B25FA1760F905C69DA4692AD2EA28EFC14623C107",
+      "pass": true
+    },
+    {
+      "name": "awwv-ledger-entry",
+      "mode": "preserved original",
+      "sha256": "6431C42D162B56F0CCDFC82D5B66F3C245A7FD98BB144F63C98A8DE8D82EF840",
+      "pass": true
+    },
+    {
+      "name": "awwv-make-cursor-prompt",
+      "mode": "activated adapter",
+      "sha256": "A45CE8471BEA4480ADAE6DF1953B6C2C2951AEE99A19749BC0ABDC7D3224F790",
+      "pass": true
+    },
+    {
+      "name": "awwv-plan-change",
+      "mode": "preserved original",
+      "sha256": "8C34BE87560E82F41669091B2EE6CAD705E3C97962680DAAF099C3C91B9682F6",
+      "pass": true
+    },
+    {
+      "name": "awwv-pre-commit-check",
+      "mode": "preserved original",
+      "sha256": "CF747F7C81F26B7BF06A778592D03B7A9B633A7F8A09CB5EF4794113755DB82F",
+      "pass": true
+    },
+    {
+      "name": "awwv-read-first",
+      "mode": "activated adapter",
+      "sha256": "0B3CFF9F919E90F1B537BAF0C552EDBEB77C356FA76BAD81B9F29E68B7B50AF1",
+      "pass": true
+    },
+    {
+      "name": "balkan-battlegrounds-historical-extractor",
+      "mode": "preserved original",
+      "sha256": "2F436E46417948B6EDF12883731F4EF4C6B97966D8091F8FE7F60038F5C7AD2B",
+      "pass": true
+    },
+    {
+      "name": "brainstorming",
+      "mode": "activated adapter",
+      "sha256": "40A957F8C50725B7234735CD71BCF769934F79124B9820A25691D3910AC8C6AB",
+      "pass": true
+    },
+    {
+      "name": "build-engineer",
+      "mode": "preserved original",
+      "sha256": "CACB0379FDFE79F24D51B11EFBCC9E0A4A3F424756D54447CC54F96C9553D39D",
+      "pass": true
+    },
+    {
+      "name": "canon-compliance-review",
+      "mode": "preserved original",
+      "sha256": "4A835ED0CCCD844008F729042E78D08CCBC94D33AAC6B97CE95AE1219A948B0A",
+      "pass": true
+    },
+    {
+      "name": "canon-compliance-reviewer",
+      "mode": "preserved original",
+      "sha256": "496D3FA995F0BB2846A9710C020D085F91CD15FDC90A48CA0874C9DFF5D14E5B",
+      "pass": true
+    },
+    {
+      "name": "code-review",
+      "mode": "preserved original",
+      "sha256": "29B416D179F31D9BD30712E3EB972C34F37A5EA91E34A71841A840524410D43B",
+      "pass": true
+    },
+    {
+      "name": "code-simplifier",
+      "mode": "preserved original",
+      "sha256": "D9EB913BC6C666483EF0DE74DBC58CADC585470E411B49E2C553D3347A551AA7",
+      "pass": true
+    },
+    {
+      "name": "create-report",
+      "mode": "preserved original",
+      "sha256": "4638307028B480E5CB8D52C6D464DF777B670ED50CECFF47E29A822881DA9E17",
+      "pass": true
+    },
+    {
+      "name": "determinism-auditor",
+      "mode": "preserved original",
+      "sha256": "A9641D548B4EE30B5AED3A86290A2D342B205C57416A234EEC63AE4761830A4A",
+      "pass": true
+    },
+    {
+      "name": "deterministic-script-implementation",
+      "mode": "preserved original",
+      "sha256": "975DD252CA7F88687F0E8811B107C4D228231690D90829A23ECEC39021F5F363",
+      "pass": true
+    },
+    {
+      "name": "devops-specialist",
+      "mode": "preserved original",
+      "sha256": "3ABE23FE7633CDA960D82B6BDDFA7BE0F658C7ACAAE96E97700EDC0DC3680A27",
+      "pass": true
+    },
+    {
+      "name": "dispatching-parallel-agents",
+      "mode": "preserved original",
+      "sha256": "C628917689CCC12CE9991615DB6824D44C4FE71F8427CD959560AEBE6A1A6476",
+      "pass": true
+    },
+    {
+      "name": "docs-only-ledger-handling",
+      "mode": "preserved original",
+      "sha256": "EB394B5A54C4357DEFD6B193F3EAFEC234DCF2BFD345F7C7B1296B3451C15286",
+      "pass": true
+    },
+    {
+      "name": "documentation-specialist",
+      "mode": "preserved original",
+      "sha256": "806821FB42C7EA1716FF04BE67969C0D9E64D3609E6DB89504985A6D4BDB4EEC",
+      "pass": true
+    },
+    {
+      "name": "executing-plans",
+      "mode": "activated adapter",
+      "sha256": "314E9850D68F97B332C69CBBA775BB5466B397D571B6D6DF5F7460811F0022F6",
+      "pass": true
+    },
+    {
+      "name": "finishing-a-development-branch",
+      "mode": "preserved original",
+      "sha256": "DD2F82C6DC8582B621F9EB57FCB65F557F88EADF872727AC81D0840AE12C504E",
+      "pass": true
+    },
+    {
+      "name": "formation-expert",
+      "mode": "preserved original",
+      "sha256": "B19008176D4F5925BB7600A3B2DD222E336F20C9984471BDF0B5544888F46F36",
+      "pass": true
+    },
+    {
+      "name": "frontend-design",
+      "mode": "preserved original",
+      "sha256": "E161F0147E8001B771EA41A2C4CC0B0B5B018C769BB797E7FC862BCF31A7B421",
+      "pass": true
+    },
+    {
+      "name": "game-designer",
+      "mode": "preserved original",
+      "sha256": "10680E506B87E6895D015B9C546E1E57A0CD526CA2336E02524C04F08B087F42",
+      "pass": true
+    },
+    {
+      "name": "gameplay-programmer",
+      "mode": "preserved original",
+      "sha256": "CF323119336FEDEB08CF6C681D79C7738AD47118BC5A1E9B4D1E38DFB09A48FC",
+      "pass": true
+    },
+    {
+      "name": "graphics-programmer",
+      "mode": "preserved original",
+      "sha256": "AA93467C15F53442A4CF3441CBA504B29670B57E4B3C01A57A01F51DD2B29045",
+      "pass": true
+    },
+    {
+      "name": "historian",
+      "mode": "preserved original",
+      "sha256": "58E1EC05BB462933B29A1029E788D2AA674BA2C97A27A21FCEEEC4B631F12C04",
+      "pass": true
+    },
+    {
+      "name": "ledger-process-scribe",
+      "mode": "preserved original",
+      "sha256": "19CEAEFC0D7677AFB388EACD6AD16441BED61EA6DAE1BE11E232D04F10FEEC17",
+      "pass": true
+    },
+    {
+      "name": "lua-scripting",
+      "mode": "preserved original",
+      "sha256": "60717AE2A4823342CC6034D3551145CF63810775BC90B53E9BE676C3C84F3B1F",
+      "pass": true
+    },
+    {
+      "name": "map-geometry-integrity-reviewer",
+      "mode": "preserved original",
+      "sha256": "0F603EC727187858E65A9B2A8F190298BE74F2DB49A4074C29552C793F90687B",
+      "pass": true
+    },
+    {
+      "name": "modern-wargame-expert",
+      "mode": "preserved original",
+      "sha256": "3DD817D2B1A311BE2A0EC004ED911E4355F548FA6DA20215AAAE7F571A54543A",
+      "pass": true
+    },
+    {
+      "name": "napkin",
+      "mode": "activated adapter",
+      "sha256": "1C99DD4CFCA2B7EE3C0E8B82D748273666499E3131AEE5A4C612D802A31430D1",
+      "pass": true
+    },
+    {
+      "name": "orchestrator",
+      "mode": "preserved original",
+      "sha256": "BBD36DBF36E41EF83DE639CF2CB3B6ED0F736E9E83B53FF8B02B3FEA769BE960",
+      "pass": true
+    },
+    {
+      "name": "performance-engineer",
+      "mode": "preserved original",
+      "sha256": "036548863539050F1189F16FB5798E6D49268D33079115C005A160D5C8CBB850",
+      "pass": true
+    },
+    {
+      "name": "platform-specialist",
+      "mode": "preserved original",
+      "sha256": "58BAB1A76499D400AC97FFE8F215758746CD76C9DEA8961F478CCB49BEA3168A",
+      "pass": true
+    },
+    {
+      "name": "product-manager",
+      "mode": "preserved original",
+      "sha256": "C42CBBCEC6DC1D32CF1B34F6CA93EDC62CC2E65CCEB35480C22A3B73CCED4FA7",
+      "pass": true
+    },
+    {
+      "name": "prompt-construction",
+      "mode": "activated adapter",
+      "sha256": "3B96DB5187928BA15C7D4EF9B2631A8BB0913409F0FA6F7EC19A1AF566E0DD4C",
+      "pass": true
+    },
+    {
+      "name": "propagate-to-canon",
+      "mode": "preserved original",
+      "sha256": "AC27FEA2F2D52111A1A843FCFEE21938FC2205BE5413E711948C02596A02D15D",
+      "pass": true
+    },
+    {
+      "name": "qa-engineer",
+      "mode": "preserved original",
+      "sha256": "AD9AB82444423DC71F95D8B66CC1F3B14739240F089E295D24BDE3F35EA425D0",
+      "pass": true
+    },
+    {
+      "name": "quality-assurance-process",
+      "mode": "preserved original",
+      "sha256": "4C6E4B2414EE21708008B2C6637188A47BED255485D14CC10E5F20756F158431",
+      "pass": true
+    },
+    {
+      "name": "receiving-code-review",
+      "mode": "preserved original",
+      "sha256": "C9382E92B8F32363566068ECFED19D3B2651EAF40D3942B24840F839DEDFC406",
+      "pass": true
+    },
+    {
+      "name": "refactor-pass",
+      "mode": "preserved original",
+      "sha256": "A63C272EA7A3D521C111036E239368C435C0593C2BBF4AA13D1B90093DC068B2",
+      "pass": true
+    },
+    {
+      "name": "reports-custodian",
+      "mode": "preserved original",
+      "sha256": "D9B28E8EFFC0291DC248007E05F1C190C76ACE60673A97EC54FF2316F1A288BD",
+      "pass": true
+    },
+    {
+      "name": "requesting-code-review",
+      "mode": "preserved original",
+      "sha256": "2DA31AF22A58938AB78F3EE6D5B4687FCCA062B923B646459EB52BA72117EF97",
+      "pass": true
+    },
+    {
+      "name": "retrospective-analyst",
+      "mode": "preserved original",
+      "sha256": "E9D49C8C8EA9C033386C49CBF5A90ADE099B4745276B043122E02DC7FCA635F2",
+      "pass": true
+    },
+    {
+      "name": "scenario-creator-runner-tester",
+      "mode": "preserved original",
+      "sha256": "B3DA933A4F6B2B214C01092AE2980A022144F164EE3751728FBE1739D56C5022",
+      "pass": true
+    },
+    {
+      "name": "scenario-harness-engineer",
+      "mode": "preserved original",
+      "sha256": "C8B712E56D3AFA6154CAC772FD23F8C5846D115401A9F17AD27D50DE11B722E1",
+      "pass": true
+    },
+    {
+      "name": "scenario-report",
+      "mode": "preserved original",
+      "sha256": "700F0E11FD72444582FB4D9FCA7CFFEF4D3AD3A6723E5819B85CF418692ABA7A",
+      "pass": true
+    },
+    {
+      "name": "subagent-driven-development",
+      "mode": "preserved original",
+      "sha256": "994B89A5D294EADD6A1611EDB51377BAC748D5F5FB7F4139D3C736B616B3A46A",
+      "pass": true
+    },
+    {
+      "name": "systematic-debugging",
+      "mode": "preserved original",
+      "sha256": "4999CB851360485ECA5074E727BBDD62EF20549C5D5B01216FCBF5831BADB473",
+      "pass": true
+    },
+    {
+      "name": "systems-programmer",
+      "mode": "preserved original",
+      "sha256": "45BC56CFF01C207CE24A9298DB71F931ACC334044E54F9414FF7DD733974C96D",
+      "pass": true
+    },
+    {
+      "name": "technical-architect",
+      "mode": "preserved original",
+      "sha256": "4BE75CAD08C8C271F701F85447B00C9245C5521D8396C75FB1076078CA83A6CF",
+      "pass": true
+    },
+    {
+      "name": "test-driven-development",
+      "mode": "preserved original",
+      "sha256": "7DEE67B4AF6BDCCC7A914CA34533184D64592D0F5B23AEAE631538168DB14994",
+      "pass": true
+    },
+    {
+      "name": "ui-ux-developer",
+      "mode": "preserved original",
+      "sha256": "03079EF14D2F504290F72A40DB5B9D46AE3F0C6AF86F384376B11398E2AA1637",
+      "pass": true
+    },
+    {
+      "name": "using-git-worktrees",
+      "mode": "preserved original",
+      "sha256": "7BCD36E73EE7FEA2F7BBD42497E6F5F94A6E55438729F2AE9D6E6421E15C0FAA",
+      "pass": true
+    },
+    {
+      "name": "using-superpowers",
+      "mode": "activated adapter",
+      "sha256": "A705BD742BBCC18D3A98CBA66ACF29967D29C99B5DCF86323BBFD8E2BBF2F1BB",
+      "pass": true
+    },
+    {
+      "name": "verification-before-completion",
+      "mode": "activated adapter",
+      "sha256": "1791FE2E6DCC813810936CCB944475A4B84652FC2ED1793C52CA13FF3CA42442",
+      "pass": true
+    },
+    {
+      "name": "visual-explainer",
+      "mode": "preserved original",
+      "sha256": "9BD22B1A409048B4A160AB51266513E9285171A9EB893201CA6378E3C7958C5A",
+      "pass": true
+    },
+    {
+      "name": "writing-plans",
+      "mode": "activated adapter",
+      "sha256": "41C42E3838C3A51A8C02676975BB4D9AE57E36C0B8A4AB6CFDA09C065C20C66D",
+      "pass": true
+    },
+    {
+      "name": "writing-skills",
+      "mode": "preserved original",
+      "sha256": "3286310AA84F3E37CD98766AE0A1D4DB664E46CC3B98DD0E73A19A92BAD3BC92",
+      "pass": true
+    }
+  ],
+  "activated_adapters": 9,
+  "preserved_installed_originals": 53,
+  "protected_files": 32,
+  "shared_user_files": 2,
+  "support_inventory_preserved": true,
+  "repository_changed_paths": 124,
+  "hook_selection": ".husky/_",
+  "failures": [],
+  "exit": 0
+}

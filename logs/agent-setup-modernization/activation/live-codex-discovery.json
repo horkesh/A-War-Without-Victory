@@ -1,0 +1,141 @@
+{
+  "executable": "C:/Users/User/AppData/Local/OpenAI/Codex/bin/bffc5354119c8421/codex.exe",
+  "cwd": "F:/A-War-Without-Victory",
+  "mode": "fresh desktop app-server using actual installed user profile, read-only ephemeral Sol/medium routing",
+  "activated_catalog": true,
+  "initialization": {
+    "userAgent": "Codex Desktop/0.154.0-alpha.6.2 (Windows 10.0.26200; x86_64) dumb (awwv_live_activation_verify; 1.0.0)",
+    "codexHome": "C:\\Users\\User\\.codex",
+    "platformFamily": "windows",
+    "platformOs": "windows"
+  },
+  "catalog": [
+    {
+      "name": "awwv-make-cursor-prompt",
+      "entries": [
+        {
+          "name": "awwv-make-cursor-prompt",
+          "description": "Use when the user requests an AWWV prompt for Cursor or another coding agent.",
+          "path": "C:\\Users\\User\\.codex\\skills\\awwv-make-cursor-prompt\\SKILL.md",
+          "scope": "user",
+          "enabled": true,
+          "pluginId": null
+        }
+      ],
+      "pass": true
+    },
+    {
+      "name": "awwv-read-first",
+      "entries": [
+        {
+          "name": "awwv-read-first",
+          "description": "Use when an AWWV reading guide is requested or subsystem ownership cannot be established from the repository entrypoint.",
+          "path": "C:\\Users\\User\\.codex\\skills\\awwv-read-first\\SKILL.md",
+          "scope": "user",
+          "enabled": true,
+          "pluginId": null
+        }
+      ],
+      "pass": true
+    },
+    {
+      "name": "brainstorming",
+      "entries": [
+        {
+          "name": "brainstorming",
+          "description": "Use when material product or technical design choices remain unsettled before implementation.",
+          "path": "C:\\Users\\User\\.codex\\skills\\brainstorming\\SKILL.md",
+          "scope": "user",
+          "enabled": true,
+          "pluginId": null
+        }
+      ],
+      "pass": true
+    },
+    {
+      "name": "executing-plans",
+      "entries": [
+        {
+          "name": "executing-plans",
+          "description": "Use when carrying out an authorized implementation plan through its required checks and closeout.",
+          "path": "C:\\Users\\User\\.codex\\skills\\executing-plans\\SKILL.md",
+          "scope": "user",
+          "enabled": true,
+          "pluginId": null
+        }
+      ],
+      "pass": true
+    },
+    {
+      "name": "napkin",
+      "entries": [
+        {
+          "name": "napkin",
+          "description": "Use when a repository napkin or runbook index needs curation because verified recurring knowledge or an explicit maintenance request warrants it.",
+          "path": "C:\\Users\\User\\.codex\\skills\\napkin\\SKILL.md",
+          "scope": "user",
+          "enabled": true,
+          "pluginId": null
+        }
+      ],
+      "pass": true
+    },
+    {
+      "name": "prompt-construction",
+      "entries": [
+        {
+          "name": "prompt-construction",
+          "description": "Use when drafting a task prompt, agent handoff, or instructions for another coding environment.",
+          "path": "C:\\Users\\User\\.codex\\skills\\prompt-construction\\SKILL.md",
+          "scope": "user",
+          "enabled": true,
+          "pluginId": null
+        }
+      ],
+      "pass": true
+    },
+    {
+      "name": "using-superpowers",
+      "entries": [
+        {
+          "name": "using-superpowers",
+          "description": "Use when skill discovery or workflow selection is unclear, or the user explicitly requests this skill.",
+          "path": "C:\\Users\\User\\.codex\\skills\\using-superpowers\\SKILL.md",
+          "scope": "user",
+          "enabled": true,
+          "pluginId": null
+        }
+      ],
+      "pass": true
+    },
+    {
+      "name": "verification-before-completion",
+      "entries": [
+        {
+          "name": "verification-before-completion",
+          "description": "Use before claiming work is complete, fixed, passing, or ready for integration.",
+          "path": "C:\\Users\\User\\.codex\\skills\\verification-before-completion\\SKILL.md",
+          "scope": "user",
+          "enabled": true,
+          "pluginId": null
+        }
+      ],
+      "pass": true
+    },
+    {
+      "name": "writing-plans",
+      "entries": [
+        {
+          "name": "writing-plans",
+          "description": "Use when a multi-step implementation needs a written plan or the user asks for an implementation plan.",
+          "path": "C:\\Users\\User\\.codex\\skills\\writing-plans\\SKILL.md",
+          "scope": "user",
+          "enabled": true,
+          "pluginId": null
+        }
+      ],
+      "pass": true
+    }
+  ],
+  "catalog_errors": []
+}

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "prepared; not activated",
+  "status": "activated locally after owner handoff; Codex/Claude routing verified; Cursor runtime acceptance open",
   "base_commit": "8913cca6f714e07acf59785ce526c19dc5fc9973",
   "maintained_project_source": ".claude/skills",
   "location_strategy": "Keep existing repo and installed skill locations. No .agents same-name exposure; staged adapters update only the nine named installed SKILL.md entrypoints after handoff.",
@@ -31,7 +31,7 @@
       "original_sha256": "29B668CC6F040B2224308BC4C1893F43CFA1E816220BA01BF560E03F70E354F8",
       "original_backup": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/user-originals/awwv-make-cursor-prompt/SKILL.md",
       "diff": "logs/agent-setup-modernization/user-diffs/awwv-make-cursor-prompt.diff",
-      "disposition": "Reviewed generic Codex entrypoint; routes AWWV to its current repo source; preserves support files and generic use outside AWWV; pending coordinated activation"
+      "disposition": "Applied after owner handoff; AWWV routes to current repo source; generic use and support files preserved; rollback bound to integration packet 7d8b75f8a13c2cbf73063c7315c946f33cf0f874"
     },
     {
       "name": "awwv-read-first",
@@ -43,7 +43,7 @@
       "original_sha256": "600FA34C46176DC9D336BE418A384A0CFDB45043C8E8968DA39051CA7185AEFD",
       "original_backup": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/user-originals/awwv-read-first/SKILL.md",
       "diff": "logs/agent-setup-modernization/user-diffs/awwv-read-first.diff",
-      "disposition": "Reviewed generic Codex entrypoint; routes AWWV to its current repo source; preserves support files and generic use outside AWWV; pending coordinated activation"
+      "disposition": "Applied after owner handoff; AWWV routes to current repo source; generic use and support files preserved; rollback bound to integration packet 7d8b75f8a13c2cbf73063c7315c946f33cf0f874"
     },
     {
       "name": "brainstorming",
@@ -55,7 +55,7 @@
       "original_sha256": "206C63E80D38C57E6AFC657296332B1D0FF75572435D75C079E7407B26762ECD",
       "original_backup": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/user-originals/brainstorming/SKILL.md",
       "diff": "logs/agent-setup-modernization/user-diffs/brainstorming.diff",
-      "disposition": "Reviewed generic Codex entrypoint; routes AWWV to its current repo source; preserves support files and generic use outside AWWV; pending coordinated activation"
+      "disposition": "Applied after owner handoff; AWWV routes to current repo source; generic use and support files preserved; rollback bound to integration packet 7d8b75f8a13c2cbf73063c7315c946f33cf0f874"
     },
     {
       "name": "executing-plans",
@@ -67,7 +67,7 @@
       "original_sha256": "D099FA42FD7518F4DAFA9F2D51C1C08FCE970490D57682B6ACD3E7A57BB55B52",
       "original_backup": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/user-originals/executing-plans/SKILL.md",
       "diff": "logs/agent-setup-modernization/user-diffs/executing-plans.diff",
-      "disposition": "Reviewed generic Codex entrypoint; routes AWWV to its current repo source; preserves support files and generic use outside AWWV; pending coordinated activation"
+      "disposition": "Applied after owner handoff; AWWV routes to current repo source; generic use and support files preserved; rollback bound to integration packet 7d8b75f8a13c2cbf73063c7315c946f33cf0f874"
     },
     {
       "name": "napkin",
@@ -79,7 +79,7 @@
       "original_sha256": "C63508F893CCFFFF0603C08894ADE93376581DDDCD9230E5945EC9B7FCBB9B4F",
       "original_backup": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/user-originals/napkin/SKILL.md",
       "diff": "logs/agent-setup-modernization/user-diffs/napkin.diff",
-      "disposition": "Reviewed generic Codex entrypoint; routes AWWV to its current repo source; preserves support files and generic use outside AWWV; pending coordinated activation"
+      "disposition": "Applied after owner handoff; AWWV routes to current repo source; generic use and support files preserved; rollback bound to integration packet 7d8b75f8a13c2cbf73063c7315c946f33cf0f874"
     },
     {
       "name": "prompt-construction",
@@ -91,7 +91,7 @@
       "original_sha256": "A80B37A0B8BAF101E14B4895A6FCA11C1307B9BBE0AFA0AF95AC9AACED507F5C",
       "original_backup": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/user-originals/prompt-construction/SKILL.md",
       "diff": "logs/agent-setup-modernization/user-diffs/prompt-construction.diff",
-      "disposition": "Reviewed generic Codex entrypoint; routes AWWV to its current repo source; preserves support files and generic use outside AWWV; pending coordinated activation"
+      "disposition": "Applied after owner handoff; AWWV routes to current repo source; generic use and support files preserved; rollback bound to integration packet 7d8b75f8a13c2cbf73063c7315c946f33cf0f874"
     },
     {
       "name": "using-superpowers",
@@ -103,7 +103,7 @@
       "original_sha256": "81D921B16502091F44E8669BBCFAE74B87BBF4295D03FFF70A98E81D73AF60A6",
       "original_backup": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/user-originals/using-superpowers/SKILL.md",
       "diff": "logs/agent-setup-modernization/user-diffs/using-superpowers.diff",
-      "disposition": "Reviewed generic Codex entrypoint; routes AWWV to its current repo source; preserves support files and generic use outside AWWV; pending coordinated activation"
+      "disposition": "Applied after owner handoff; AWWV routes to current repo source; generic use and support files preserved; rollback bound to integration packet 7d8b75f8a13c2cbf73063c7315c946f33cf0f874"
     },
     {
       "name": "verification-before-completion",
@@ -115,7 +115,7 @@
       "original_sha256": "EA52D15AABAF72BC6B558EFE2C126F161B53961090DDCD712000273BFE8C7B6C",
       "original_backup": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/user-originals/verification-before-completion/SKILL.md",
       "diff": "logs/agent-setup-modernization/user-diffs/verification-before-completion.diff",
-      "disposition": "Reviewed generic Codex entrypoint; routes AWWV to its current repo source; preserves support files and generic use outside AWWV; pending coordinated activation"
+      "disposition": "Applied after owner handoff; AWWV routes to current repo source; generic use and support files preserved; rollback bound to integration packet 7d8b75f8a13c2cbf73063c7315c946f33cf0f874"
     },
     {
       "name": "writing-plans",
@@ -127,7 +127,16 @@
       "original_sha256": "8A9198D4D9EFBCAD6E019B17C422C182113062C864B6154EC2A3BA2ED0B6B9D0",
       "original_backup": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/user-originals/writing-plans/SKILL.md",
       "diff": "logs/agent-setup-modernization/user-diffs/writing-plans.diff",
-      "disposition": "Reviewed generic Codex entrypoint; routes AWWV to its current repo source; preserves support files and generic use outside AWWV; pending coordinated activation"
+      "disposition": "Applied after owner handoff; AWWV routes to current repo source; generic use and support files preserved; rollback bound to integration packet 7d8b75f8a13c2cbf73063c7315c946f33cf0f874"
     }
-  ]
+  ],
+  "activation": {
+    "repository_commit": "7d8b75f8a13c2cbf73063c7315c946f33cf0f874",
+    "rollback_packet": "F:/AWWV-worktrees/agent-setup-activation",
+    "boundary_receipt": "logs/agent-setup-modernization/activation/boundary-receipt.json",
+    "apply_receipt": "logs/agent-setup-modernization/activation/live-apply-receipt.json",
+    "codex_discovery": "9 intended enabled entries; no duplicates or catalog errors",
+    "routing": "fresh actual-profile Codex/Sol-medium and Claude passed",
+    "cursor": "files installed; runtime acceptance open"
+  }
 }

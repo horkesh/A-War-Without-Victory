@@ -1,0 +1,62 @@
+﻿{
+    "mode":  "Apply",
+    "status":  "completed",
+    "files":  [
+                  {
+                      "name":  "awwv-make-cursor-prompt",
+                      "path":  "C:\\Users\\User\\.codex\\skills\\awwv-make-cursor-prompt\\SKILL.md",
+                      "before_sha256":  "29B668CC6F040B2224308BC4C1893F43CFA1E816220BA01BF560E03F70E354F8",
+                      "after_sha256":  "A45CE8471BEA4480ADAE6DF1953B6C2C2951AEE99A19749BC0ABDC7D3224F790"
+                  },
+                  {
+                      "name":  "awwv-read-first",
+                      "path":  "C:\\Users\\User\\.codex\\skills\\awwv-read-first\\SKILL.md",
+                      "before_sha256":  "600FA34C46176DC9D336BE418A384A0CFDB45043C8E8968DA39051CA7185AEFD",
+                      "after_sha256":  "0B3CFF9F919E90F1B537BAF0C552EDBEB77C356FA76BAD81B9F29E68B7B50AF1"
+                  },
+                  {
+                      "name":  "brainstorming",
+                      "path":  "C:\\Users\\User\\.codex\\skills\\brainstorming\\SKILL.md",
+                      "before_sha256":  "206C63E80D38C57E6AFC657296332B1D0FF75572435D75C079E7407B26762ECD",
+                      "after_sha256":  "40A957F8C50725B7234735CD71BCF769934F79124B9820A25691D3910AC8C6AB"
+                  },
+                  {
+                      "name":  "executing-plans",
+                      "path":  "C:\\Users\\User\\.codex\\skills\\executing-plans\\SKILL.md",
+                      "before_sha256":  "D099FA42FD7518F4DAFA9F2D51C1C08FCE970490D57682B6ACD3E7A57BB55B52",
+                      "after_sha256":  "314E9850D68F97B332C69CBBA775BB5466B397D571B6D6DF5F7460811F0022F6"
+                  },
+                  {
+                      "name":  "napkin",
+                      "path":  "C:\\Users\\User\\.codex\\skills\\napkin\\SKILL.md",
+                      "before_sha256":  "C63508F893CCFFFF0603C08894ADE93376581DDDCD9230E5945EC9B7FCBB9B4F",
+                      "after_sha256":  "1C99DD4CFCA2B7EE3C0E8B82D748273666499E3131AEE5A4C612D802A31430D1"
+                  },
+                  {
+                      "name":  "prompt-construction",
+                      "path":  "C:\\Users\\User\\.codex\\skills\\prompt-construction\\SKILL.md",
+                      "before_sha256":  "A80B37A0B8BAF101E14B4895A6FCA11C1307B9BBE0AFA0AF95AC9AACED507F5C",
+                      "after_sha256":  "3B96DB5187928BA15C7D4EF9B2631A8BB0913409F0FA6F7EC19A1AF566E0DD4C"
+                  },
+                  {
+                      "name":  "using-superpowers",
+                      "path":  "C:\\Users\\User\\.codex\\skills\\using-superpowers\\SKILL.md",
+                      "before_sha256":  "81D921B16502091F44E8669BBCFAE74B87BBF4295D03FFF70A98E81D73AF60A6",
+                      "after_sha256":  "A705BD742BBCC18D3A98CBA66ACF29967D29C99B5DCF86323BBFD8E2BBF2F1BB"
+                  },
+                  {
+                      "name":  "verification-before-completion",
+                      "path":  "C:\\Users\\User\\.codex\\skills\\verification-before-completion\\SKILL.md",
+                      "before_sha256":  "EA52D15AABAF72BC6B558EFE2C126F161B53961090DDCD712000273BFE8C7B6C",
+                      "after_sha256":  "1791FE2E6DCC813810936CCB944475A4B84652FC2ED1793C52CA13FF3CA42442"
+                  },
+                  {
+                      "name":  "writing-plans",
+                      "path":  "C:\\Users\\User\\.codex\\skills\\writing-plans\\SKILL.md",
+                      "before_sha256":  "8A9198D4D9EFBCAD6E019B17C422C182113062C864B6154EC2A3BA2ED0B6B9D0",
+                      "after_sha256":  "41C42E3838C3A51A8C02676975BB4D9AE57E36C0B8A4AB6CFDA09C065C20C66D"
+                  }
+              ],
+    "user_root":  "C:\\Users\\User\\.codex\\skills",
+    "runtime_reload":  "owner must start a fresh session and verify discovery/routing; this script does not restart any session"
+}

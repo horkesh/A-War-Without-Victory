@@ -1,6 +1,6 @@
 # Agent Setup Modernization Plan
 
-**Status:** IMPLEMENTED AND INDEPENDENTLY REVIEWED IN ISOLATION. **NOT ACTIVATED.**
+**Status:** ACTIVATED LOCALLY after owner handoff. Fresh Codex and Claude routing verified; Cursor runtime acceptance remains open. No remote push.
 **Owner request:** On 2026-09-12 the owner authorized implementation of P0–P5 preparation, superseding this document's original planning-only status. Coordinated live-activation, merge/push, and scope safeguards remain in force. See the execution and activation receipt below.
 **Goal:** Reduce conflicting instructions and unnecessary context loading while preserving project safeguards and reliable completion across Astra, Sol, Luna, and Claude.
 **Architecture:** A short shared project contract, small tool-specific entrypoints, and task-scoped skills with conditional references. Keep runtime-specific model and tool policy separate from domain rules.
@@ -8,7 +8,7 @@
 
 ## 1. Authority and parallel-work boundary
 
-This is an owner-authorized process-maintenance packet, outside the active product critical path. It neither changes R6-R9 priorities nor closes any existing acceptance gate. Implementation is prepared in an isolated worktree; live instruction activation still requires a coordinated handoff with affected sessions.
+This is an owner-authorized process-maintenance packet, outside the active product critical path. It neither changes R6-R9 priorities nor closes any existing product acceptance gate. Implementation was prepared in isolation. The owner subsequently confirmed Claude had completed and released the repository; the final live-activation receipt below records the authorized handoff and checks.
 
 At the planning inspection on 2026-09-12, the shared checkout was on `chore/repin-188w-baselines`, HEAD `2a8eb4244c230b803094f9329f5d088193dcba7d`, with an unstaged change to `data/derived/scenario/baselines/manifest.json`. This is an observation, not a baseline or an assertion about Claude's entire workload. Recheck before implementation.
 
@@ -152,8 +152,9 @@ Example descriptions to adapt, not copy across unrelated skills:
 
 - [x] Complete the focused checks in section 5 and one independent review of authority preservation, instruction contradictions, paths, and mixed-model suitability. Independent Sol/medium verdict: GO for the isolated commit and owner-controlled handoff.
 - [x] Correct specific findings and verify only affected checks. A second failed correction requires one consolidated diagnosis and revised approach, not another unchanged review cycle.
-- [ ] At the agreed handoff, reconcile current files with the recorded bases. Activate repository changes separately from user-level changes so each can be checked and reverted independently.
-- [ ] Apply approved user-level updates only when affected sessions are ready. Preserve unrelated settings and skills. Verify discovery in a fresh session without interrupting Claude's running work.
+- [x] At the agreed handoff, reconcile current files with the recorded bases. Repository changes activated separately from user-level changes; both can be reverted independently.
+- [x] Apply approved user-level updates after owner handoff, preserving unrelated settings and skills. Fresh Codex discovery and Codex/Claude routing passed without interrupting an existing session.
+- [ ] Verify Cursor routing in an actual fresh Cursor session. Files and metadata are installed and checked; neither `cursor` nor `cursor-agent` is available on PATH for a bounded runtime check here. This remaining host criterion is not waived.
 - [x] Prepare the batched ledger entry in isolation after evidence settles, recording actual scope and residuals in existing documents. Live application waits for file release with repository activation above. No board/roadmap update is necessary; no product priority or acceptance gate changed.
 - [x] Record the tested source versions, activation state per host, evidence paths, and disposable rollback receipt in the activation-receipt section of this plan, referencing `logs/agent-setup-modernization/inventory.json` and the saved originals. Unavailable host verification and the future live receipt remain explicit residuals, not claims of activation.
 
@@ -198,7 +199,7 @@ The original first-slice recommendation was P0 plus P1 and P2. The subsequent ow
 - Independent Sol/medium review: GO, no blocking findings. Reviewed actionability, parallel-work protection, mixed-model/cost controls, canon-seat preservation, bounded validation, discovery, and rollback. The nonblocking receipt-location clarification is incorporated above.
 - Concurrent activity advanced the shared HEAD and updated the ledger during preparation. Those updates were observed and left intact; the initial SHA above remains a dated observation. No shared state was restored or frozen to make the planning checks pass.
 
-## Execution and activation receipt — 2026-09-12
+## Preparation receipt — 2026-09-12 (historical; superseded by live receipt below)
 
 **State:** Implementation is complete in isolation and independent Sol/medium review returned GO. No live repository instructions, user skills, settings or ongoing Claude session were changed. Live activation remains an unmet P5 criterion, not an implied result of preparation.
 
@@ -275,4 +276,19 @@ powershell -NoProfile -ExecutionPolicy Bypass -File logs/agent-setup-modernizati
 - If reverting removes the three newly tracked Cursor paths, reconcile and restore only their exact previously ignored originals from the external backup after checking for newer edits. Preserve both versions if they differ. No other Cursor file is part of rollback.
 - Affected owners reload their own sessions and record discovery/routing after rollback. No home-directory restore, global skill sync, recursive worktree cleanup, settings restoration or hook change is part of this packet.
 
-**Remaining handoff:** All safely preparable work is delivered in this isolated packet. Shared integration, live user-file application and fresh-session acceptance remain owner-controlled P5 activation work. No approval has been inferred.
+**State at preparation closeout:** All safely preparable work was delivered in isolation; live activation awaited owner handoff. The subsequent handoff and actual activation are recorded below.
+
+## Live activation receipt — 2026-09-12
+
+The owner confirmed: “Claude completed his work in the meantime, repo is all yours.” This supplies the requested coordinated release for the reviewed local activation. No remote push was requested or performed.
+
+- Released repository: `F:/A-War-Without-Victory`, `main`, `e607508bc65dad1950d560d8b5b628da89674360`. Its tracked tree and all 46 reviewed candidate files matched the inspected packet. The untracked planning document and three ignored Cursor originals were backed up and moved individually into the external activation backup; no cleanup/reset or unrelated-file restoration occurred.
+- Final reviewed integration packet: `F:/AWWV-worktrees/agent-setup-activation`, branch `codex/agent-setup-activation`, commit `7d8b75f8a13c2cbf73063c7315c946f33cf0f874`. Its tree exactly matches independently reviewed migration commit `23e26d2b41373825e722c5a40231dd8b2414eb88`; existing independent GO and unaffected importer/hook/test evidence are reused. Local `main` fast-forwarded to that integration commit, exit 0.
+- Nine installed entrypoints were applied with the reviewed hash-guarded helper, exit 0. All 53 other audited installed originals, shared settings and 32 protected repository files remain unchanged. The exact user-file inventory is preserved. See [release reconciliation](../../logs/agent-setup-modernization/activation/release-reconciliation.json), [boundary binding](../../logs/agent-setup-modernization/activation/boundary-receipt.json), [apply receipt](../../logs/agent-setup-modernization/activation/live-apply-receipt.json), and [preservation check](../../logs/agent-setup-modernization/activation/activation-preservation.json).
+- Fresh actual desktop discovery loaded `C:/Users/User/.codex` and returned exactly one enabled, correctly described entry at each of the nine intended installed paths, with zero catalog errors. A new read-only ephemeral Codex/Sol-medium turn read the installed adapters and current-checkout sources and passed all four routing cases plus plan-only/first-failure variants, exit 0. See [Codex receipt](../../logs/agent-setup-modernization/activation/live-codex-receipt.json) and retained transcript.
+- A fresh Claude session used actual default instructions, skills and settings, with only Read/Skill tools and no persistence/MCP access. All four routing cases and both variants passed, exit 0. Four observed SessionStart hook responses succeeded; this does not claim every hook path was exercised or cross-host hook parity. See [Claude receipt](../../logs/agent-setup-modernization/activation/live-claude-receipt.json). Existing sessions were not restarted or messaged.
+- Integration static checks, staged governance and pre-apply user preflight each exited 0. The initial cherry-pick hit this task's still-running worktree checkout lock (exit 128); after the checkout completed, the targeted retry succeeded without deleting a lock or interrupting any process. Both logs are retained.
+
+**Host state:** repository instructions and nine Codex user entrypoints are active locally; fresh Codex and Claude acceptance passed. Cursor files are installed, with runtime acceptance still open. The three deferred domain differences and two format-only classifications remain unchanged; no bulk skill synchronization or relocation occurred.
+
+**Rollback binding:** retain the unchanged integration packet at `7d8b75f8a13c2cbf73063c7315c946f33cf0f874` and external originals. From that worktree, run the reviewed `user-skill-handoff.ps1 -Mode Rollback -SessionBoundaryConfirmed -ReceiptPath F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/live-rollback-receipt.json` using the full command in the rollback section above. It refuses newer installed edits. Repository rollback is a separately authorized reviewed revert of `7d8b75f8a13c2cbf73063c7315c946f33cf0f874`, preserving later work. The complete previous local Cursor and plan files remain under `F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/activation/released-local-originals` and `released-files-aside` for individual reconciliation. The later activation-record commit changes only documentation, distribution status and retained evidence, so it does not replace the bound rollback packet.

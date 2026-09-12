@@ -1,0 +1,166 @@
+{
+  "executable": "C:/Users/User/AppData/Local/OpenAI/Codex/bin/bffc5354119c8421/codex.exe",
+  "cwd": "F:/A-War-Without-Victory",
+  "mode": "fresh desktop app-server using actual installed user profile, read-only ephemeral Sol/medium routing",
+  "activated_catalog": true,
+  "initialization": {
+    "userAgent": "Codex Desktop/0.154.0-alpha.6.2 (Windows 10.0.26200; x86_64) dumb (awwv_live_activation_verify; 1.0.0)",
+    "codexHome": "C:\\Users\\User\\.codex",
+    "platformFamily": "windows",
+    "platformOs": "windows"
+  },
+  "catalog": [
+    {
+      "name": "awwv-make-cursor-prompt",
+      "entries": [
+        {
+          "name": "awwv-make-cursor-prompt",
+          "description": "Use when the user requests an AWWV prompt for Cursor or another coding agent.",
+          "path": "C:\\Users\\User\\.codex\\skills\\awwv-make-cursor-prompt\\SKILL.md",
+          "scope": "user",
+          "enabled": true,
+          "pluginId": null
+        }
+      ],
+      "pass": true
+    },
+    {
+      "name": "awwv-read-first",
+      "entries": [
+        {
+          "name": "awwv-read-first",
+          "description": "Use when an AWWV reading guide is requested or subsystem ownership cannot be established from the repository entrypoint.",
+          "path": "C:\\Users\\User\\.codex\\skills\\awwv-read-first\\SKILL.md",
+          "scope": "user",
+          "enabled": true,
+          "pluginId": null
+        }
+      ],
+      "pass": true
+    },
+    {
+      "name": "brainstorming",
+      "entries": [
+        {
+          "name": "brainstorming",
+          "description": "Use when material product or technical design choices remain unsettled before implementation.",
+          "path": "C:\\Users\\User\\.codex\\skills\\brainstorming\\SKILL.md",
+          "scope": "user",
+          "enabled": true,
+          "pluginId": null
+        }
+      ],
+      "pass": true
+    },
+    {
+      "name": "executing-plans",
+      "entries": [
+        {
+          "name": "executing-plans",
+          "description": "Use when carrying out an authorized implementation plan through its required checks and closeout.",
+          "path": "C:\\Users\\User\\.codex\\skills\\executing-plans\\SKILL.md",
+          "scope": "user",
+          "enabled": true,
+          "pluginId": null
+        }
+      ],
+      "pass": true
+    },
+    {
+      "name": "napkin",
+      "entries": [
+        {
+          "name": "napkin",
+          "description": "Use when a repository napkin or runbook index needs curation because verified recurring knowledge or an explicit maintenance request warrants it.",
+          "path": "C:\\Users\\User\\.codex\\skills\\napkin\\SKILL.md",
+          "scope": "user",
+          "enabled": true,
+          "pluginId": null
+        }
+      ],
+      "pass": true
+    },
+    {
+      "name": "prompt-construction",
+      "entries": [
+        {
+          "name": "prompt-construction",
+          "description": "Use when drafting a task prompt, agent handoff, or instructions for another coding environment.",
+          "path": "C:\\Users\\User\\.codex\\skills\\prompt-construction\\SKILL.md",
+          "scope": "user",
+          "enabled": true,
+          "pluginId": null
+        }
+      ],
+      "pass": true
+    },
+    {
+      "name": "using-superpowers",
+      "entries": [
+        {
+          "name": "using-superpowers",
+          "description": "Use when skill discovery or workflow selection is unclear, or the user explicitly requests this skill.",
+          "path": "C:\\Users\\User\\.codex\\skills\\using-superpowers\\SKILL.md",
+          "scope": "user",
+          "enabled": true,
+          "pluginId": null
+        }
+      ],
+      "pass": true
+    },
+    {
+      "name": "verification-before-completion",
+      "entries": [
+        {
+          "name": "verification-before-completion",
+          "description": "Use before claiming work is complete, fixed, passing, or ready for integration.",
+          "path": "C:\\Users\\User\\.codex\\skills\\verification-before-completion\\SKILL.md",
+          "scope": "user",
+          "enabled": true,
+          "pluginId": null
+        }
+      ],
+      "pass": true
+    },
+    {
+      "name": "writing-plans",
+      "entries": [
+        {
+          "name": "writing-plans",
+          "description": "Use when a multi-step implementation needs a written plan or the user asks for an implementation plan.",
+          "path": "C:\\Users\\User\\.codex\\skills\\writing-plans\\SKILL.md",
+          "scope": "user",
+          "enabled": true,
+          "pluginId": null
+        }
+      ],
+      "pass": true
+    }
+  ],
+  "catalog_errors": [],
+  "thread_id": "01a09754-be8b-78a0-99ee-3846ce174a55",
+  "completion": {
+    "threadId": "01a09754-be8b-78a0-99ee-3846ce174a55",
+    "turn": {
+      "id": "01a09754-bf03-7f93-b2b8-587ca512a406",
+      "items": [
+        {
+          "type": "agentMessage",
+          "id": "msg_05024e90a0ce6e90016aa5b7e8929087d2824db6bfc39cf7c6",
+          "text": "Routing is governed by [AGENTS.md](F:/A-War-Without-Victory/AGENTS.md), [AGENT_WORKFLOW.md](F:/A-War-Without-Victory/docs/20_engineering/AGENT_WORKFLOW.md), and the task-specific authorities below.\n\n1. **README spelling fix:** `documentation-specialist` + `docs-only-ledger-handling`. This is a small reversible administrative edit that may be handled directly. It cannot change code or canon; a pure spelling correction needs no ledger entry. Verification is the final diff plus focused spelling, Markdown, link, whitespace, and any README-specific validator—no general smoke suite.\n\n2. **Agreed clipped-footer modal bug:** `systematic-debugging` → `test-driven-development` → `ui-ux-developer`, with `verification-before-completion`. Sources are the relevant GUI/warroom master, `PLAYER_VISIBLE_STATE.md`, `UI_OWNERSHIP_MATRIX.md`, affected UI code/tests, and the real rendered route. A fix request authorizes the bounded implementation, but not canon or unspecified UX changes. Verify the regression test fails correctly before implementation, then affected tests/static checks and the actual viewport: fonts and animation settled, footer measured against its clipping box, maximum-scroll behavior, accessibility, and clean runtime/network output. As a player-visible output change, it also requires a ledger entry and, if nontrivial, independent review.\n\n3. **Territory-moving simulation rule:** `gameplay-programmer`, `canon-compliance-reviewer`, `determinism-auditor`, TDD, ledger handling, and completion verification. Authority comes from `CANON.md`, the affected phase/system specifications, `Engine_Invariants_v0_9_0.md`, and `DETERMINISM_TEST_MATRIX.md`; implementation cannot invent or override canon. Silence or conflict requires an owner decision. Required proof includes focused tests, full suite, authoritative 188-week run, protected anchors, deterministic artifact/provenance checks, one change per measured run, ledger entry, and independent review. Short runs cannot waive those gates.\n\n4. **Sensitive-history canon change without a panel receipt:** blocked. Route through [SENSITIVE_HISTORY_DESIGN_GATE.md](F:/A-War-Without-Victory/docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md), governing historical sources, canon compliance, and the applicable Pyrrhic panel. A normal implementation request is insufficient authority. `FORAWWV.md` requires either the exact four-seat §6 unanimous receipt or, for a bright-line change, the eight independent unanimous seats plus owner surfacing; the implementer cannot approve it. Without that receipt, no canon mutation may begin.\n\nA plan-only request authorizes reading and a reviewable plan only; it ends without implementation. On the first unexpected in-scope test failure, retain the evidence, inspect all visible failure categories, diagnose root cause, correct the smallest established cause, and prove that correction with the cheapest meaningful check before rerunning an expensive gate. Escalate only if diagnosis remains unresolved or authority/acceptance scope must change.\n\nFor this acceptance request, `awwv-read-first` applies because you explicitly requested a task-specific authority and verification map. `using-superpowers` was relevant only because you explicitly named it; it is not the default when routing is already clear. `brainstorming` does not apply by default because no material design choice is open—and it cannot substitute for a missing canon-panel receipt.",
+          "phase": "final_answer",
+          "memoryCitation": null,
+          "delivery": null,
+          "questions": null
+        }
+      ],
+      "itemsView": "summary",
+      "status": "completed",
+      "error": null,
+      "startedAt": 1789245308,
+      "completedAt": 1789245432,
+      "durationMs": 123997
+    }
+  },
+  "exit": 0
+}
