@@ -40,6 +40,7 @@ import {
   markerGlyphJitter,
   markerInk,
 } from './warroomMarkerInk';
+import { corkBox, corkSheet, makeProjection } from './warroomCorkSheet';
 import fallbackRbihRegions from '../../../warroom/assets/hq_rbih_regions.json';
 import fallbackRsRegions from '../../../warroom/assets/hq_rs_regions.json';
 import fallbackHrhbRegions from '../../../warroom/assets/hq_hrhb_regions.json';
@@ -77,6 +78,23 @@ interface WarroomMapOverlayModel {
   outlinePaths: string[];
   territoryPaths: string[];
   frontLinePaths: string[];
+  /**
+   * The viewBox the paths were projected into, derived from the ground shape of the country.
+   *
+   * Carried on the model rather than fixed at `0 0 100 100` in the SVG, because the correct aspect
+   * is a property of the projection and only the projection knows it.
+   */
+  viewWidth: number;
+  viewHeight: number;
+  /**
+   * Whole-degree meridians and parallels, spanning the ENTIRE sheet rather than just the country.
+   *
+   * A staff map is printed paper, and the print does not stop where the land does. Running the
+   * graticule edge to edge is also what gives the blank margins either side something to be: the
+   * country is roughly square and the sheet is not, so those bands are unavoidable, and empty
+   * paper reads as an oversight where ruled paper reads as a map.
+   */
+  graticulePaths: string[];
 }
 
 // Authoring canvas dimensions (schema v2.1)
@@ -185,20 +203,10 @@ function computeMapBounds(features: Feature[]): { minX: number; minY: number; ma
   return { minX, minY, maxX, maxY };
 }
 
-function makeProjector(bounds: { minX: number; minY: number; maxX: number; maxY: number }) {
-  const rangeX = Math.max(0.000001, bounds.maxX - bounds.minX);
-  const rangeY = Math.max(0.000001, bounds.maxY - bounds.minY);
-  const scale = Math.min(98 / rangeX, 94 / rangeY);
-  const projectedW = rangeX * scale;
-  const projectedH = rangeY * scale;
-  const offsetX = (100 - projectedW) / 2;
-  const offsetY = (100 - projectedH) / 2;
-
-  return ([x, y]: [number, number]): [number, number] => [
-    offsetX + (x - bounds.minX) * scale,
-    offsetY + (bounds.maxY - y) * scale,
-  ];
-}
+// The projector moved to warroomCorkSheet.ts as `makeProjection`. It used to fit raw lon/lat into
+// a fixed 100x100 box, which stretched the country east-west by about 39% (a degree of longitude
+// at 44°N is only ~0.72 of a degree of latitude on the ground) and forced a square viewBox that
+// produced the seam bands. Both are corrected there, together, because they are one problem.
 
 function fmtSvg(value: number): string {
   return Number.isFinite(value) ? value.toFixed(3).replace(/\.?0+$/, '') : '0';
@@ -260,7 +268,7 @@ export function buildWarroomProjectedMapModel(
   const bounds = computeMapBounds(baseGeoJson.features as Feature[]);
   if (!bounds) return null;
 
-  const project = makeProjector(bounds);
+  const { project, viewWidth, viewHeight } = makeProjection(bounds);
   const controlledGeoJson = buildControlGeoJSON(baseGeoJson, controlBySettlement);
   const sortedControlFeatures = [...controlledGeoJson.features].sort((a, b) => featureSortKey(a).localeCompare(featureSortKey(b)));
 
@@ -285,7 +293,19 @@ export function buildWarroomProjectedMapModel(
     .filter(Boolean)
     .sort((a, b) => a.localeCompare(b));
 
-  return { outlinePaths, territoryPaths, frontLinePaths };
+  // Whole-degree graticule, extended to the sheet edges. `project` gives the position of a
+  // meridian or parallel; the line itself then runs the full height or width of the viewBox.
+  const graticulePaths: string[] = [];
+  for (let lon = Math.ceil(bounds.minX); lon <= Math.floor(bounds.maxX); lon += 1) {
+    const [x] = project([lon, bounds.maxY]);
+    graticulePaths.push(`M${fmtSvg(x)} 0 L${fmtSvg(x)} ${fmtSvg(viewHeight)}`);
+  }
+  for (let lat = Math.ceil(bounds.minY); lat <= Math.floor(bounds.maxY); lat += 1) {
+    const [, y] = project([bounds.minX, lat]);
+    graticulePaths.push(`M0 ${fmtSvg(y)} L${fmtSvg(viewWidth)} ${fmtSvg(y)}`);
+  }
+
+  return { outlinePaths, territoryPaths, frontLinePaths, viewWidth, viewHeight, graticulePaths };
 }
 
 /**
@@ -344,129 +364,148 @@ function factionInkColor(faction: string | null): string {
   return 'rgba(35, 112, 63, 0.72)';
 }
 
-function WarroomProjectedMap({ region, model, playerFaction }: {
+/**
+ * The staff map: a paper sheet pinned to the corkboard.
+ *
+ * WHAT IT WAS, AND WHY IT READ AS "TACKED ON". Design §1.3 and §1.4 found four independent causes,
+ * and none of them was the map drawing itself:
+ *
+ *   1. A square `viewBox="0 0 100 100"` inside a ~1.85:1 board, with an OPAQUE backing rect that
+ *      covered only the square. The sheet texture showed through in two side bands with hard
+ *      vertical seams. Fixed by construction: the viewBox is now derived from the ground shape of
+ *      the country, the SVG is transparent, and the paper is painted by the element beneath it, so
+ *      there is nothing left to seam.
+ *   2. A second frame drawn inside the frame the ART already has — a 3px border, an outline, a
+ *      `0 0 0 7px` ring and an 18px drop shadow. All removed. Paper on cork casts a tight contact
+ *      shadow of a few pixels, and nothing else.
+ *   3. Ruled notebook paper (`repeating-linear-gradient`) as the texture, which is what showed in
+ *      the seam bands. Gone.
+ *   4. No latitude correction, so the country rendered about 39% too wide. Corrected in
+ *      `makeProjection`.
+ *
+ * And the cause §1.4 named as mattering most: the overlay ignored the room's light. The sheet was a
+ * constant cream at roughly L*90 while the cork beneath it ranges L*20.4 to L*63.6 across the
+ * fifteen plates. A sheet seventy points brighter than the board it sits on is not paper in a dim
+ * room, it is a light source — and no amount of border removal fixes that. The paper now holds a
+ * constant lift above the measured cork instead.
+ */
+function WarroomProjectedMap({ region, model, playerFaction, year }: {
   region: WarroomRegion;
   model: WarroomMapOverlayModel | null;
   playerFaction: string | null;
+  year: WarroomSceneYear;
 }) {
-  const box = getWarroomRegionBoxStyle(region);
-  const playerInk = factionInkColor(playerFaction);
+  // The MEASURED cork, not the click target. See corkBox() for why they differ per faction. The
+  // hotspot box remains the fallback for anything the measurement does not cover.
+  const measured = corkBox(playerFaction);
+  const box = measured
+    ? {
+      left: `${measured.left * 100}%`,
+      top: `${measured.top * 100}%`,
+      width: `${measured.width * 100}%`,
+      height: `${measured.height * 100}%`,
+    }
+    : getWarroomRegionBoxStyle(region);
+  const sheet = corkSheet(playerFaction, year);
+
+  // Pins at the sheet corners, inset slightly so the head sits ON the paper rather than off its
+  // edge. Colours are the pin heads themselves, not faction coding — a staff officer's pins are
+  // whatever was in the tin.
+  const pinPositions = [
+    { left: '4%', top: '5%' },
+    { left: '95%', top: '4%' },
+    { left: '5%', top: '95%' },
+    { left: '94%', top: '96%' },
+  ];
+  const pins = pinPositions.map((position, index) => ({ ...position, head: sheet.pinHeads[index] }));
+
   return (
     <div
       aria-hidden="true"
+      data-testid="warroom-wall-map"
+      data-cork-lstar={sheet.corkLstar}
+      data-sheet-lstar={sheet.sheetLstar}
       style={{
         position: 'absolute',
         ...box,
         pointerEvents: 'none',
         zIndex: 1,
-        padding: '0.74%',
       }}
     >
       <div
         data-testid="warroom-wall-map-paper"
         style={{
-          position: 'relative',
-          width: '100%',
-          height: '100%',
-          background: [
-            'radial-gradient(circle at 12% 18%, rgba(255,255,255,0.26), transparent 18%)',
-            'radial-gradient(circle at 82% 78%, rgba(95,62,32,0.13), transparent 24%)',
-            'repeating-linear-gradient(0deg, rgba(78,58,38,0.05) 0 1px, transparent 1px 9px)',
-            'linear-gradient(135deg, rgba(242,232,198,0.98), rgba(212,194,150,0.96))',
-          ].join(', '),
-          border: '3px solid rgba(83,55,31,0.78)',
-          outline: '1px solid rgba(236,204,143,0.42)',
-          boxShadow: [
-            '0 9px 18px rgba(0,0,0,0.46)',
-            '0 1px 0 rgba(255,236,184,0.42) inset',
-            '0 0 0 7px rgba(129,85,45,0.28)',
-            '0 0 22px rgba(20,12,6,0.28) inset',
-          ].join(', '),
-          transform: 'perspective(700px) rotateX(0.8deg) rotateY(-1.1deg) rotate(-0.55deg)',
-          transformOrigin: '52% 45%',
-          overflow: 'hidden',
+          // THE MARGIN IS THE DESIGN. Cork shows all round because a real staff sheet does not
+          // reach the frame. The old side bands were an accident of the square viewBox; this is
+          // deliberate and equal on every side.
+          position: 'absolute',
+          inset: '7%',
+          background: sheet.background,
+          // A CONTACT shadow: paper lying on cork, a few pixels, tight and soft. Not a drop
+          // shadow, which is what a cut-out floating above a background casts.
+          boxShadow: `0 1px 2px ${sheet.contactShadow}, 0 2px 4px ${sheet.contactShadow}`,
+          // The sheet is not pinned perfectly square. One degree, not five.
+          transform: 'rotate(-0.6deg)',
+          transformOrigin: '50% 50%',
         }}
       >
-        <div
-          data-testid="warroom-wall-map-hanging-hardware"
-          style={{
-            position: 'absolute',
-            inset: '2.5% 2.2% auto 2.2%',
-            height: '5.6%',
-            zIndex: 3,
-            borderTop: '1px solid rgba(79,49,24,0.44)',
-            boxShadow: '0 1px 0 rgba(255,242,198,0.22) inset',
-          }}
-        >
-          {[
-            ['5%', 'rgba(115,48,38,0.92)'],
-            ['35%', 'rgba(54,91,61,0.92)'],
-            ['64%', 'rgba(128,96,42,0.9)'],
-            ['93%', 'rgba(115,48,38,0.92)'],
-          ].map(([left, color]) => (
-            <span
-              key={left}
-              style={{
-                position: 'absolute',
-                left,
-                top: '-5px',
-                width: 9,
-                height: 9,
-                borderRadius: '50%',
-                background: color,
-                border: '1px solid rgba(31,20,13,0.68)',
-                boxShadow: '0 2px 5px rgba(0,0,0,0.38), 0 0 0 1px rgba(255,235,185,0.18) inset',
-              }}
-            />
-          ))}
-        </div>
         {model ? (
           <svg
-            viewBox="0 0 100 100"
+            data-testid="warroom-wall-map-svg"
+            viewBox={`0 0 ${model.viewWidth} ${model.viewHeight}`}
             preserveAspectRatio="xMidYMid meet"
             style={{
               display: 'block',
               width: '100%',
               height: '100%',
-              filter: 'sepia(0.16) saturate(0.92) contrast(1.03)',
             }}
           >
-            <defs>
-              <filter id="warroom-wall-map-roughen">
-                <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="12" result="noise" />
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.18" />
-              </filter>
-              <pattern id="warroom-wall-map-fold-grid" width="12.5" height="12.5" patternUnits="userSpaceOnUse">
-                <path d="M12.5 0H0V12.5" fill="none" stroke="rgba(75,58,40,0.08)" strokeWidth="0.16" />
-              </pattern>
-            </defs>
-            <rect x="0" y="0" width="100" height="100" fill="rgba(233,222,190,0.9)" />
-            <rect x="0" y="0" width="100" height="100" fill="url(#warroom-wall-map-fold-grid)" />
-            <path d="M49.8 0V100" stroke="rgba(84,62,39,0.16)" strokeWidth="0.34" />
-            <path d="M0 50.1H100" stroke="rgba(84,62,39,0.11)" strokeWidth="0.28" />
-            <g fill="none" stroke="rgba(66,58,45,0.26)" strokeWidth="0.22">
+            {/*
+              NO BACKING RECT. The paper is the div behind this SVG, which fills the sheet
+              completely, so `meet` letterboxing simply shows more paper instead of showing a seam.
+              That is the whole fix for §1.3.1 — it is a deletion, not an addition.
+            */}
+            {/*
+              NO MUNICIPALITY BORDERS. These used to be stroked, drawing every one of ~600 OSID
+              outlines as a fine black mesh over the whole country — administrative data on an
+              operational map. Owner, 2026-09-12: "map should not show OSID or municipality
+              borders, just fronts".
+
+              The paths are still drawn, but FILLED and unstroked, so the country keeps its
+              silhouette — without it the map would be a coloured blob and some dashes floating on
+              blank paper — while every internal line disappears. Adjacent fills of one colour read
+              as a single landmass.
+            */}
+            {/*
+              Each group is stroked in ITS OWN FILL COLOUR at a hairline width. That is not a
+              border: adjacent polygons sharing an edge leave a one-pixel antialiasing seam where
+              neither covers the boundary fully, and with `stroke="none"` those seams drew the
+              municipality mesh back in as pale hairlines — visible on RS, whose large contiguous
+              red area showed it most. Stroking in the fill colour closes the gap and stays
+              invisible.
+            */}
+            {/*
+              Graticule UNDER the land, so the country prints over it the way it would on a real
+              sheet, and edge to edge so the margins are map paper rather than blank paper.
+            */}
+            <g fill="none" stroke={sheet.graticuleInk} strokeWidth="0.16">
+              {model.graticulePaths.map((path, index) => <path key={`grat-${index}`} d={path} />)}
+            </g>
+            <g fill={sheet.landTint} stroke={sheet.landTint} strokeWidth="0.22" strokeLinejoin="round">
               {model.outlinePaths.map((path, index) => <path key={`outline-${index}`} d={path} />)}
             </g>
-            <g fill={playerInk} stroke="rgba(48,40,31,0.32)" strokeWidth="0.16" filter="url(#warroom-wall-map-roughen)">
+            <g fill={sheet.territoryInk} stroke={sheet.territoryInk} strokeWidth="0.22" strokeLinejoin="round">
               {model.territoryPaths.map((path, index) => <path key={`territory-${index}`} d={path} />)}
             </g>
-            <g fill="none" stroke="rgba(26,22,18,0.9)" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="1.7 1.1">
-              {model.frontLinePaths.map((path, index) => <path key={`front-${index}`} d={path} />)}
-            </g>
             <g
-              data-testid="warroom-wall-map-staff-marks"
               fill="none"
+              stroke={sheet.outlineInk}
+              strokeWidth="0.75"
               strokeLinecap="round"
               strokeLinejoin="round"
-              style={{ mixBlendMode: 'multiply' }}
+              strokeDasharray="1.7 1.1"
             >
-              <path d="M27 31C36 26 44 28 51 36" stroke="rgba(91,37,32,0.62)" strokeWidth="0.62" strokeDasharray="1.4 1.3" />
-              <path d="M52 42C62 46 68 54 73 66" stroke="rgba(41,74,58,0.54)" strokeWidth="0.54" strokeDasharray="2 1.5" />
-              <path d="M36 72C47 69 55 72 64 79" stroke="rgba(39,51,88,0.42)" strokeWidth="0.46" strokeDasharray="1.1 1.2" />
-              <circle cx="27" cy="31" r="1.2" fill="rgba(115,48,38,0.88)" stroke="rgba(39,23,18,0.5)" strokeWidth="0.2" />
-              <circle cx="51" cy="36" r="1.05" fill="rgba(115,48,38,0.82)" stroke="rgba(39,23,18,0.5)" strokeWidth="0.2" />
-              <circle cx="73" cy="66" r="1.15" fill="rgba(49,93,61,0.82)" stroke="rgba(39,23,18,0.5)" strokeWidth="0.2" />
-              <circle cx="64" cy="79" r="1" fill="rgba(42,71,130,0.7)" stroke="rgba(39,23,18,0.46)" strokeWidth="0.2" />
+              {model.frontLinePaths.map((path, index) => <path key={`front-${index}`} d={path} />)}
             </g>
           </svg>
         ) : (
@@ -480,28 +519,44 @@ function WarroomProjectedMap({ region, model, playerFaction }: {
               fontFamily: 'var(--font-data)',
               fontSize: '12px',
               letterSpacing: '0.12em',
-              color: 'rgba(55,45,34,0.58)',
+              color: sheet.outlineInk,
               textTransform: 'uppercase',
             }}
           >
             {t('warroomShell.mapUpdating')}
           </div>
         )}
-        <div
-          data-testid="warroom-wall-map-glare"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            zIndex: 4,
-            pointerEvents: 'none',
-            background: [
-              'linear-gradient(92deg, transparent 0 38%, rgba(255,255,255,0.2) 47%, rgba(255,255,255,0.05) 55%, transparent 68%)',
-              'radial-gradient(ellipse at 42% 8%, rgba(255,247,210,0.22), transparent 35%)',
-              'linear-gradient(180deg, rgba(30,18,8,0.13), transparent 22%, transparent 76%, rgba(58,35,16,0.14))',
-            ].join(', '),
-            mixBlendMode: 'screen',
-          }}
-        />
+
+        {/*
+          PINS, NOT DOTS. The old strip was a horizontal rule with four flat circles hanging off it
+          — hardware for a wall chart, which is not what this object is. A pin head is a small
+          sphere: a radial gradient with the highlight off-centre, and a short shadow offset DOWN
+          AND RIGHT onto the paper, because the room's key light is the window at frame-left.
+        */}
+        {pins.map((pin) => (
+          <span
+            key={`${pin.left}-${pin.top}`}
+            data-testid="warroom-wall-map-pin"
+            style={{
+              position: 'absolute',
+              left: pin.left,
+              top: pin.top,
+              // Smaller and flat. A faint light edge at the top-left is the only modelling — the
+              // window is at frame-left — and there is no specular highlight, because a bright
+              // white dot is what made these read as rendered spheres rather than plastic.
+              width: '2.3%',
+              aspectRatio: '1',
+              transform: 'translate(-50%, -50%)',
+              borderRadius: '50%',
+              background: pin.head,
+              boxShadow: [
+                `inset 0.5px 0.5px 0 rgba(255,255,255,0.22)`,
+                `inset -0.5px -0.5px 0 rgba(0,0,0,0.18)`,
+                `0.5px 1px 1.5px ${sheet.pinShadow}`,
+              ].join(', '),
+            }}
+          />
+        ))}
       </div>
     </div>
   );
@@ -1056,6 +1111,7 @@ export function WarroomShellLayer({ onNavigate, onOpenSidePicker, statusDock }: 
             region={deskMapRegion}
             model={projectedMapModel}
             playerFaction={playerFaction}
+            year={year}
           />
         ) : null}
         {dateBoardRegion ? (

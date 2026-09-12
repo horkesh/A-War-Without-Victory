@@ -308,7 +308,22 @@ describe('warroom region data contract', () => {
     expect(model?.territoryPaths).toHaveLength(1);
     expect(model?.frontLinePaths).toHaveLength(1);
     expect(model?.outlinePaths).toHaveLength(2);
-    expect(model?.outlinePaths.join(' ')).toContain('M1 74.5');
+    // LATITUDE CORRECTION. The fixture is two 1°x1° squares at 44°N. A degree of longitude there
+    // is about 80.2 km against 111.1 km for a degree of latitude, so each square is 0.722 as wide
+    // as it is tall ON THE GROUND. The old projector fitted raw lon/lat into a fixed 100x100 box
+    // and rendered them 49x49 — square, stretching the country east-west by about 39%.
+    //
+    // Asserting the RATIO rather than a coordinate literal: the ratio is the thing that is true
+    // about the world, and pinning literals is what made the old map tests an obstacle.
+    const square = model!.outlinePaths[0];
+    const xs = [...square.matchAll(/[ML](-?[\d.]+) (-?[\d.]+)/g)].map((m) => Number(m[1]));
+    const ys = [...square.matchAll(/[ML](-?[\d.]+) (-?[\d.]+)/g)].map((m) => Number(m[2]));
+    const renderedRatio = (Math.max(...xs) - Math.min(...xs)) / (Math.max(...ys) - Math.min(...ys));
+    expect(renderedRatio).toBeGreaterThan(0.70);
+    expect(renderedRatio).toBeLessThan(0.74);
+
+    // And the viewBox follows the same correction rather than being a fixed square.
+    expect(model!.viewWidth).toBeGreaterThan(model!.viewHeight);
   });
 
   it('formats the whiteboard date from loaded game metadata', () => {

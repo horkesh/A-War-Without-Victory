@@ -42,10 +42,32 @@ describe('warroom board luminance table', () => {
     }
   });
 
-  it('describes the region the date overlay actually writes on', () => {
-    // If this drifts from the region id the component looks up, the table is measuring one
-    // rectangle and the ink is being painted in another.
-    expect(table.region).toBe('wall_calendar_area');
+  it('describes the regions the overlays actually sit on', () => {
+    // If either drifts from the region id the component looks up, the table is measuring one
+    // rectangle and the overlay is being painted in another.
+    expect(table.regions.board).toBe('wall_calendar_area');
+    expect(table.regions.cork).toBe('desk_map');
+  });
+
+  it('measures the corkboard as well as the whiteboard, for all fifteen plates', () => {
+    // The map overlay has the same problem the date had, for the same reason: the room's light
+    // varies across the campaign and the overlay did not.
+    for (const faction of factions) {
+      for (const year of years) {
+        const value = (table.cork as Boards)[faction]?.[year];
+        expect(typeof value, `cork ${faction} ${year}`).toBe('number');
+        expect(value, `cork ${faction} ${year}`).toBeGreaterThan(0);
+        expect(value, `cork ${faction} ${year}`).toBeLessThan(100);
+      }
+    }
+  });
+
+  it('does not assume cork tracks the board — on RS they invert', () => {
+    // RS 1991-93 cork is BRIGHTER than that faction's own whiteboard. Deriving the sheet from the
+    // board figure would be wrong there, which is why there are two measurements and not one.
+    const corkTable = table.cork as Boards;
+    expect(corkTable.RS['1991']).toBeGreaterThan(boards.RS['1991']);
+    expect(corkTable.HRHB['1995']).toBeLessThan(boards.HRHB['1995']);
   });
 
   it('records a real spread, so a degenerate table cannot pass as a measurement', () => {
