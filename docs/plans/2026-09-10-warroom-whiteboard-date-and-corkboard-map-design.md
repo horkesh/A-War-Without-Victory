@@ -1,13 +1,18 @@
 # Warroom whiteboard date + corkboard map — design
 
 **Date:** 2026-09-10
-**Status:** DESIGN — not implemented, not scheduled. Owner brief captured; awaiting a build slot.
+**Status:** **IMPLEMENTED, 2026-09-12.** Steps 3–8 shipped (PR #515, plus the corkboard branch).
+Step 9 — the 3×5×3 capture matrix — is PARTIAL: one viewport (1920×1080) at one turn (t68, 1993) for
+all three factions, reviewed and accepted by the owner. The other two viewports and the other four
+years remain uncaptured. Measured corrections and defects found during the build are recorded inline
+below, each next to the claim it corrects.
 **Owner brief:** the whiteboard date "was supposed to look like a date scrawled by hand with flomaster.
 Right now it is too artificial"; the corkboard map "still looks like it was tacked on, instead of being
 there organically." Whatever blocks the fix — tests included — gets changed.
-**Surface:** `src/ui/map/components/warroom/WarroomShellLayer.tsx`
-**Conflict:** Codex is live in this same file on `codex/r7-english-readability`. Nothing here starts
-until that lane lands. See §9.
+**Surface:** `src/ui/map/components/warroom/WarroomShellLayer.tsx`, plus the two pure modules the
+build split out: `warroomMarkerInk.ts` (date) and `warroomCorkSheet.ts` (map).
+**Conflict:** ~~Codex is live in this same file on `codex/r7-english-readability`.~~ RESOLVED — that
+lane landed on `main` before any of this started, so the conflict §9.1 guarded against never arose.
 
 ---
 
@@ -267,6 +272,42 @@ Deliberately **not** doing: a title block, legend, or scale bar. They would fill
 attractively but each is new localized copy, and the sheet-with-margin already solves the dead space.
 Post-1.0 enrichment at most.
 
+### 5.1 What this section got wrong — measured during the build, 2026-09-12
+
+Three of the assumptions above are false. Each was found by photographing the room, not by any test.
+
+**"Tint and dim the sheet from the same per-plate luminance table as §4.4" — the cork is not a light
+meter.** Paper has a near-fixed reflectance; cork does not, because the art uses *different cork*. RS
+1993 cork is L\*59.5 and RBiH 1993 cork is L\*28.1, and both rooms are brightly lit — the RBiH wall
+behind the board is pale cream. Keying the sheet to cork therefore produced proper cream paper on RS
+(`rgb(235,225,197)`) and a dead grey card on RBiH (`rgb(146,139,122)`) from the same rule. The
+**whiteboard** is the usable probe: near-white and near-constant-albedo in every plate, so its L\*
+moves with the illumination. The sheet is keyed to that, with cork setting only a floor.
+
+**Removing the borders did not remove the borders.** `factionInkColor` returns `rgba(…, 0.72)`, and
+~600 adjacent municipality polygons double-blend along every shared edge, so the mesh reprinted as
+darker lines with no stroke at all. Widening a same-colour stroke to close it made it *worse*, which
+is what identified alpha as the cause. The fill is opaque now, and the faction hues are pre-muted
+toward paper — they only ever looked muted because that alpha blended them with cream.
+
+**"Inset the sheet ~6–8% so cork shows all round" assumes the region IS the board. It is not.**
+`desk_map` is a click target, and the three rectangles were authored to different standards:
+
+| | hotspot vs. measured cork |
+|---|---|
+| RBiH | within **1%** |
+| RS | **9%** short |
+| HRHB | **15%** short in width, **35%** short in height |
+
+So the same overlay at the same inset filled the RBiH board and floated small on the HRHB one. The
+sheet is now positioned from cork measured out of the art by
+`tools/derive_warroom_board_luminance.cjs` (hotspot colour as reference, walk each edge to the
+frame), committed per faction as the median across all five years.
+
+**Still open, and deliberately not fixed here:** the hotspot rectangles remain what the CLICK uses,
+so on HRHB the clickable area is now smaller than the board appears. Correcting the region files is
+authored-data work with other consumers, not a side effect of a rendering change.
+
 ---
 
 ## 6. Tests that must change
@@ -331,19 +372,31 @@ refresh, no baseline touch.
 
 ## 9. Sequencing
 
-1. **Wait for Codex.** `WarroomShellLayer.tsx` is live on `codex/r7-english-readability`. Starting now
-   guarantees a conflict in the exact function both lanes edit.
-2. Branch fresh from the landed R7 tip.
-3. Font vendoring + `--font-marker` + packaging proof (§7) — independently verifiable, lands first.
-4. Luminance table + generator script (§4.4) — shared by both overlays, so it precedes them.
-5. Date: placement, marker typography, ink, ghost (§4.1–4.5).
-6. Desk-header pinned date (§4.6).
-7. Map: viewBox, margin, pins, shadow, texture, latitude, light (§5).
-8. Test rewrites (§6) alongside each step, not batched at the end.
-9. Capture matrix + owner review (§8).
+1. ~~**Wait for Codex.**~~ **DONE** — the R7 lane had already landed on `main`; no conflict arose.
+2. ~~Branch fresh from the landed R7 tip.~~ **DONE.**
+3. ~~Font vendoring + `--font-marker` + packaging proof (§7).~~ **DONE** — PR #515.
+4. ~~Luminance table + generator script (§4.4).~~ **DONE**, and extended: it also measures the cork
+   surface and the cork's painted extent, both of which §5 turned out to need.
+5. ~~Date: placement, marker typography, ink, ghost (§4.1–4.5).~~ **DONE** — PR #515.
+6. ~~Desk-header pinned date (§4.6).~~ **DONE**, though not where §4.6 put it: `DeskAuthorityHeader`
+   returns `null` without `commandAuthority`, so the date would vanish on the sparsest saves. It is
+   pinned in `PresidentDeskShell` above the scroll region instead.
+7. ~~Map: viewBox, margin, pins, shadow, texture, latitude, light (§5).~~ **DONE** — see §5.1 for the
+   three assumptions that had to be corrected on the way.
+8. ~~Test rewrites (§6) alongside each step.~~ **DONE.**
+9. **Capture matrix + owner review (§8) — PARTIAL.** One viewport (1920×1080) at t68/1993, all three
+   factions, owner-reviewed and accepted. **Outstanding: 1280×720 and 3440×1440, and the other four
+   years** — including HRHB 1994/1995, the two plates §4.4 flags as too dark to reach ink contrast,
+   which are exactly the ones worth an owner's eye.
 
-Steps 5 and 7 are separable and could run in parallel once step 4 lands, but they share a file, so serial is
-simpler than coordinating.
+**Step 3 should not have been a separate PR.** Splitting the font off produced a stale-manifest
+failure on a branch that could not see the work resolving it, and a bundled font nothing uses is not
+independently reviewable anyway — which was the stated reason for landing it first. #514 was closed
+and superseded by #515 carrying both.
+
+**§10's "typography unification eats it again" risk is now mechanically guarded**, not just noted:
+`tests/ui/typography_contract.test.ts` permits `--font-marker` exactly once, in the warroom shell.
+Zero uses means it was absorbed again; two means it is spreading into the interface.
 
 ---
 

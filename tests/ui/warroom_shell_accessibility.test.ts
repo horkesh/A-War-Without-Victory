@@ -312,7 +312,12 @@ describe('WarroomShellLayer accessibility proof', () => {
     });
 
     it('keeps the Warroom dock and projected map attached to the scene plate', () => {
-        const source = readFileSync('src/ui/map/components/warroom/WarroomShellLayer.tsx', 'utf8');
+        // Comments stripped: the negative assertion below failed on the component's own comment
+        // recording that the square viewBox was removed and why. Fourth time in two sessions that
+        // a "must NOT appear" check has read its own explanation as code.
+        const source = withoutComments(
+            readFileSync('src/ui/map/components/warroom/WarroomShellLayer.tsx', 'utf8'),
+        );
         const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
         const statusSource = readFileSync('src/ui/map/components/warroom/WarroomStatusBar.tsx', 'utf8');
         const sceneFrameIndex = source.indexOf('<WarroomScenePlate src={scenePlateUrl}>');
@@ -334,20 +339,75 @@ describe('WarroomShellLayer accessibility proof', () => {
         expect(statusSource).toContain("aria-label={t('warroom.priorityDocketAria')}");
         expect(statusSource).toContain("if (category === 'command') return t('warroom.status.category.command')");
         expect(statusSource).toContain("if (category === 'counter_offer') return t('warroom.status.category.counterOffer')");
-        expect(source).toMatch(/<svg[\s\S]*viewBox="0 0 100 100"[\s\S]*preserveAspectRatio="xMidYMid meet"/);
+        // A DELIBERATE REVERSAL. This used to REQUIRE `viewBox="0 0 100 100"`, and that square box
+        // was half of the "tacked on" defect: inside a ~1.85:1 board it left the map occupying
+        // about 54% of the width, and the SVG's opaque backing rect covered only that square, so
+        // the sheet texture showed through in two side bands with hard vertical seams.
+        //
+        // The viewBox is now DERIVED from the ground shape of the country, which is a property of
+        // the projection and not a constant. Pinning a literal here is what made the old test an
+        // obstacle instead of a safety net, so this asserts the derivation instead.
+        expect(source).not.toContain('viewBox="0 0 100 100"');
+        expect(source).toContain('viewBox={`0 0 ${model.viewWidth} ${model.viewHeight}`}');
         expect(source).not.toContain('preserveAspectRatio="xMidYMid slice"');
     });
 
-    it('renders the projected wall map as a physical staff-room object', () => {
-        const source = readFileSync('src/ui/map/components/warroom/WarroomShellLayer.tsx', 'utf8');
+    it('renders the projected map as paper pinned to cork', () => {
+        // THE INTENT OF THIS TEST IS RIGHT; ITS ELEMENT LIST WAS NOT.
+        //
+        // It required `hanging-hardware`, `staff-marks`, `glare`, `fold-grid`, `feTurbulence` and
+        // a `perspective(700px)` tilt — a wall chart hung on brackets, drawn in perspective, under
+        // a generic sheen. The object is a paper sheet pinned flat to a corkboard, and each of
+        // those elements was pulling it away from that. They are replaced, not dropped: the
+        // vocabulary changes, the requirement that it read as a physical object does not.
+        const source = withoutComments(
+            readFileSync('src/ui/map/components/warroom/WarroomShellLayer.tsx', 'utf8'),
+        );
+        const start = source.indexOf('function WarroomProjectedMap');
+        expect(start).toBeGreaterThan(-1);
+        const map = source.slice(start);
 
-        expect(source).toContain('data-testid="warroom-wall-map-paper"');
-        expect(source).toContain('data-testid="warroom-wall-map-hanging-hardware"');
-        expect(source).toContain('data-testid="warroom-wall-map-staff-marks"');
-        expect(source).toContain('data-testid="warroom-wall-map-glare"');
-        expect(source).toContain('perspective(700px) rotateX(0.8deg) rotateY(-1.1deg)');
-        expect(source).toContain('feTurbulence');
-        expect(source).toContain('warroom-wall-map-fold-grid');
+        expect(map).toContain('data-testid="warroom-wall-map-paper"');
+        expect(map).toContain('data-testid="warroom-wall-map-pin"');
+
+        // Gone with the wall-chart reading.
+        expect(map).not.toContain('hanging-hardware');
+        expect(map).not.toContain('feTurbulence');
+        expect(map).not.toContain('fold-grid');
+        expect(map).not.toContain('perspective(700px)');
+
+        // NO SECOND FRAME. The art already paints a frame; drawing another inside it is what read
+        // as a sticker. A contact shadow is the only thing paper on cork actually casts.
+        expect(map).not.toMatch(/border:\s*'3px/);
+        expect(map).not.toMatch(/outline:\s*'1px/);
+        expect(map).not.toContain('0 0 0 7px');
+        expect(map).not.toContain('0 9px 18px');
+        expect(map).toContain('contactShadow');
+
+        // NO RULED NOTEBOOK PAPER. This gradient was the texture that showed through the seams.
+        expect(map).not.toContain('repeating-linear-gradient');
+
+        // THE MARGIN IS THE DESIGN: cork visible on all four sides, not two accidental bands.
+        expect(map).toMatch(/inset:\s*'7%'/);
+    });
+
+    it('lights the map sheet from the same measured table as the room', () => {
+        // The cause design §1.4 called the one that matters most. The sheet was a constant cream
+        // at roughly L*90 while the cork under it ranges L*20.4 to L*63.6 across the fifteen
+        // plates. A sheet seventy points brighter than the board it sits on is not paper in a dim
+        // room, it is a light source, and no amount of border removal fixes that.
+        const source = withoutComments(
+            readFileSync('src/ui/map/components/warroom/WarroomShellLayer.tsx', 'utf8'),
+        );
+        const start = source.indexOf('function WarroomProjectedMap');
+        const map = source.slice(start);
+
+        expect(map).toContain('corkSheet(playerFaction, year)');
+        expect(map).toContain('sheet.background');
+        expect(map).toContain('sheet.outlineInk');
+        // No hard-coded paper colour survives.
+        expect(map).not.toMatch(/rgba\(242,232,198/);
+        expect(map).not.toMatch(/rgba\(233,222,190/);
     });
 
     it('opens command-surface cards into a Warroom-native Decision Room host, not generic Army HQ briefing', () => {

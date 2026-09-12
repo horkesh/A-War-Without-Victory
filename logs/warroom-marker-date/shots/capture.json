@@ -4,6 +4,35 @@
     "status": "captured",
     "problems": [],
     "pinnedDate": "26 Jul 1993",
+    "map": {
+      "corkLstar": "28.1",
+      "sheetLstar": "76.8",
+      "viewBox": "0 0 108 104.593",
+      "paperBackground": "radial-gradient(48% 62% at 19% 24%, rgba(162, 125, 67, 0.07), rgba(0, 0, 0, 0) 62%) repeat",
+      "paperBoxShadow": "rgba(0, 0, 0, 0.2) 0px 1px 2px 0px, rgba(0, 0, 0, 0.2) 0px 2px 4px 0px",
+      "paperBorder": "0px solid rgb(229, 231, 235)",
+      "pinCount": 4,
+      "boardBox": {
+        "x": 591.625,
+        "y": 401.15625,
+        "width": 424.171875,
+        "height": 237.203125,
+        "top": 401.15625,
+        "right": 1015.796875,
+        "bottom": 638.359375,
+        "left": 591.625
+      },
+      "paperBox": {
+        "x": 620.2542724609375,
+        "y": 415.8455505371094,
+        "width": 366.913330078125,
+        "height": 207.82449340820312,
+        "top": 415.8455505371094,
+        "right": 987.1676025390625,
+        "bottom": 623.6700439453125,
+        "left": 620.2542724609375
+      }
+    },
     "caveatLoaded": true,
     "faces": [
       {
@@ -53,6 +82,35 @@
     "status": "captured",
     "problems": [],
     "pinnedDate": "26 Jul 1993",
+    "map": {
+      "corkLstar": "59.5",
+      "sheetLstar": "86.8",
+      "viewBox": "0 0 108 104.593",
+      "paperBackground": "radial-gradient(48% 62% at 19% 24%, rgba(193, 150, 82, 0.07), rgba(0, 0, 0, 0) 62%) repeat",
+      "paperBoxShadow": "rgba(0, 0, 0, 0.243) 0px 1px 2px 0px, rgba(0, 0, 0, 0.243) 0px 2px 4px 0px",
+      "paperBorder": "0px solid rgb(229, 231, 235)",
+      "pinCount": 4,
+      "boardBox": {
+        "x": 634.1875,
+        "y": 332.78125,
+        "width": 394.1875,
+        "height": 263.015625,
+        "top": 332.78125,
+        "right": 1028.375,
+        "bottom": 595.796875,
+        "left": 634.1875
+      },
+      "paperBox": {
+        "x": 660.5905151367188,
+        "y": 349.4185791015625,
+        "width": 341.38140869140625,
+        "height": 229.740966796875,
+        "top": 349.4185791015625,
+        "right": 1001.971923828125,
+        "bottom": 579.1595458984375,
+        "left": 660.5905151367188
+      }
+    },
     "caveatLoaded": true,
     "faces": [
       {
@@ -102,6 +160,35 @@
     "status": "captured",
     "problems": [],
     "pinnedDate": "26 Jul 1993",
+    "map": {
+      "corkLstar": "34.4",
+      "sheetLstar": "69.3",
+      "viewBox": "0 0 108 104.593",
+      "paperBackground": "radial-gradient(48% 62% at 19% 24%, rgba(139, 107, 57, 0.07), rgba(0, 0, 0, 0) 62%) repeat",
+      "paperBoxShadow": "rgba(0, 0, 0, 0.208) 0px 1px 2px 0px, rgba(0, 0, 0, 0.208) 0px 2px 4px 0px",
+      "paperBorder": "0px solid rgb(229, 231, 235)",
+      "pinCount": 4,
+      "boardBox": {
+        "x": 752.09375,
+        "y": 341.15625,
+        "width": 369.765625,
+        "height": 251.859375,
+        "top": 341.15625,
+        "right": 1121.859375,
+        "bottom": 593.015625,
+        "left": 752.09375
+      },
+      "paperBox": {
+        "x": 776.8433227539062,
+        "y": 357.1221008300781,
+        "width": 320.26654052734375,
+        "height": 219.92770385742188,
+        "top": 357.1221008300781,
+        "right": 1097.10986328125,
+        "bottom": 577.0498046875,
+        "left": 776.8433227539062
+      }
+    },
     "caveatLoaded": true,
     "faces": [
       {

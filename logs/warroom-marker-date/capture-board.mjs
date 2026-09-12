@@ -102,7 +102,41 @@ try {
         };
       });
 
+      // The corkboard map: same treatment, same hard checks. Design §5.
+      const mapEl = page.getByTestId('warroom-wall-map');
+      const mapInfo = await mapEl.evaluate((el) => {
+        const paper = el.querySelector('[data-testid="warroom-wall-map-paper"]');
+        const svg = el.querySelector('[data-testid="warroom-wall-map-svg"]');
+        const pins = [...el.querySelectorAll('[data-testid="warroom-wall-map-pin"]')];
+        const pcs = paper ? getComputedStyle(paper) : null;
+        return {
+          corkLstar: el.getAttribute('data-cork-lstar'),
+          sheetLstar: el.getAttribute('data-sheet-lstar'),
+          viewBox: svg?.getAttribute('viewBox') ?? null,
+          paperBackground: pcs?.background?.slice(0, 90) ?? null,
+          paperBoxShadow: pcs?.boxShadow ?? null,
+          paperBorder: pcs?.border ?? null,
+          pinCount: pins.length,
+          boardBox: el.getBoundingClientRect().toJSON(),
+          paperBox: paper?.getBoundingClientRect().toJSON() ?? null,
+        };
+      }).catch(() => null);
+
       await page.screenshot({ path: `${out}/${id}-scene.png` });
+
+      if (mapInfo?.boardBox) {
+        const mb = mapInfo.boardBox;
+        const mpad = Math.max(mb.width, mb.height) * 0.12;
+        await page.screenshot({
+          path: `${out}/${id}-map.png`,
+          clip: {
+            x: Math.max(0, mb.x - mpad),
+            y: Math.max(0, mb.y - mpad),
+            width: Math.min(1920 - Math.max(0, mb.x - mpad), mb.width + mpad * 2),
+            height: Math.min(1080 - Math.max(0, mb.y - mpad), mb.height + mpad * 2),
+          },
+        });
+      }
 
       // Padded crop of the board. Clip is in CSS pixels; deviceScaleFactor does the upscaling.
       const b = info.box;
@@ -134,13 +168,52 @@ try {
         if (overflowRight > 2) problems.push(`writing overruns the board by ${overflowRight.toFixed(1)}px`);
         if (info.lineBox.x < info.box.x - 2) problems.push('writing starts left of the board');
       }
+      // Map checks. The sheet's whole point is that it sits IN the room's light and INSIDE the
+      // board, so those are the two things worth failing on.
+      if (!mapInfo) {
+        problems.push('the corkboard map did not render at all');
+      } else {
+        if (mapInfo.pinCount !== 4) problems.push(`expected 4 pins, found ${mapInfo.pinCount}`);
+        if (!mapInfo.viewBox || mapInfo.viewBox === '0 0 100 100') {
+          problems.push(`viewBox is ${mapInfo.viewBox} — the square box is the seam defect`);
+        }
+        // NON-ZERO width only. `0px solid rgb(229,231,235)` is Tailwind's preflight default and is
+        // not a border; matching any "<n>px" flagged all three plates for a border that is not
+        // drawn. A checker's false positives cost more than its misses.
+        if (/(?:^|\s)(?!0(?:px|\b))\d+(?:\.\d+)?px/.test(mapInfo.paperBorder ?? '')) {
+          problems.push(`sheet has a border (${mapInfo.paperBorder}) — the art already has a frame`);
+        }
+        const sheetL = Number.parseFloat(mapInfo.sheetLstar ?? 'NaN');
+        const corkL = Number.parseFloat(mapInfo.corkLstar ?? 'NaN');
+        const roomL = Number.parseFloat(info.boardLstar ?? 'NaN');
+
+        // The sheet must be lighter than the board it is pinned to, or it stops being a sheet.
+        if (!(sheetL > corkL)) problems.push(`sheet L*${sheetL} is not above cork L*${corkL}`);
+
+        // "Glowing" is measured against the ROOM, not the cork. This check used to compare with
+        // cork and fired on RBiH 1993 — cork L*28.1 under a sheet at L*76.8 — which is a 48-point
+        // gap and entirely correct: that room is brightly lit and simply has dark cork. The check
+        // had the same false premise the sheet colour did, that cork reports the light.
+        if (Number.isFinite(roomL) && sheetL - roomL > 34) {
+          problems.push(`sheet is ${(sheetL - roomL).toFixed(1)} L* above the room light — reads as a light source`);
+        }
+        if (mapInfo.paperBox && mapInfo.boardBox) {
+          const p = mapInfo.paperBox; const b = mapInfo.boardBox;
+          const marginL = p.x - b.x;
+          const marginR = (b.x + b.width) - (p.x + p.width);
+          if (marginL < 2 || marginR < 2) {
+            problems.push(`sheet has no cork margin (left ${marginL.toFixed(1)}px, right ${marginR.toFixed(1)}px)`);
+          }
+        }
+      }
+
       if (problems.length > 0) {
         console.error(`${id}: ${problems.length} PROBLEM(S)`);
         for (const p of problems) console.error(`  - ${p}`);
         process.exitCode = 1;
       }
 
-      results.push({ id, status: problems.length ? 'captured-with-problems' : 'captured', problems, pinnedDate, ...fontCheck, ...info });
+      results.push({ id, status: problems.length ? "captured-with-problems" : "captured", problems, pinnedDate, map: mapInfo, ...fontCheck, ...info });
       console.log(`${id}: captured  "${info.text}"  ghost="${info.ghostText}"  `
         + `font=${info.fontFamily}  size=${info.fontSize}  ink=${info.color}  `
         + `boardL*=${info.boardLstar}  caveatLoaded=${fontCheck.caveatLoaded}`);

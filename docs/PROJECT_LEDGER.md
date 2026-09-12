@@ -4252,3 +4252,56 @@ first time (`44b42f28b`). Zero uses means it was absorbed again; two means it is
 
 **Not verified visually.** §8's acceptance is a 3 factions × 5 years × 3 viewports capture matrix
 and owner review. None of that has been done; what is proved here is mechanical.
+
+---
+
+## 2026-09-12 — The corkboard map is paper pinned to cork
+
+Step 7 of `docs/plans/2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.md`, closing the
+warroom presentation item. The four causes design §1.3 named are gone, and none of them was the map
+drawing itself:
+
+- **Seams**, fixed by deletion. A square `viewBox="0 0 100 100"` inside a ~1.85:1 board with an
+  opaque backing rect covering only the square. The viewBox is now derived from the ground shape of
+  the country and the SVG is transparent, so the paper beneath shows through and there is nothing to
+  seam.
+- **A second frame** inside the frame the art already paints — 3px border, outline, `0 0 0 7px` ring,
+  18px drop shadow. Removed; paper on cork casts a contact shadow and nothing else.
+- **Ruled notebook paper**, which was the texture showing in the seams. Gone.
+- **No latitude correction** — the country rendered ~39% too wide. Longitude is scaled by
+  cos(43.9°). Two 1°×1° squares at 44°N now render at 0.7206 against a true ground ratio of 0.722.
+
+**Three things only the photograph found.** Every one of them passed the whole test suite first.
+
+1. **The cork is not a light meter.** Paper reflectance is near-fixed; cork's is not, because the art
+   uses different cork. RS 1993 cork L\*59.5, RBiH 1993 cork L\*28.1, both rooms lit. Keying the
+   sheet to cork gave proper cream on RS and a dead grey card on RBiH from one rule. The whiteboard —
+   near-white, near-constant albedo — is the usable probe for illumination; the sheet keys to that,
+   cork sets only a floor.
+2. **Removing the borders did not remove the borders.** `factionInkColor` is `rgba(…, 0.72)`, and
+   ~600 adjacent polygons double-blend along shared edges, reprinting the municipality mesh as darker
+   lines with no stroke at all. Widening a same-colour stroke made it worse, which is what identified
+   the alpha. Opaque fill now, with faction hues pre-muted toward paper since they only looked muted
+   through that alpha in the first place.
+3. **`desk_map` is a click target, not the board.** RBiH's rectangle is within 1% of the painted
+   cork; RS's is 9% short; HRHB's is 15% short in width and 35% in height. The same overlay at the
+   same inset filled one board and floated small on another — which is what the owner noticed. The
+   generator now measures cork extent from the art and commits it per faction.
+
+**Owner-directed during review:** no OSID or municipality borders, fronts only; warmer stock with
+texture; flat matte pins rather than gloss-rendered spheres; a whole-degree graticule. The graticule
+is printed under the land and runs edge to edge, which also gives the side margins something to be —
+a roughly square country on a 1.85:1 sheet leaves bands either way, and ruled paper reads as a map
+where blank paper read as an oversight.
+
+**A guard of mine encoded a premise I had just disproved.** The capture rig failed the corrected
+sheet, because its "reads as a light source" check measured distance above the CORK. Re-pointed at
+the room. Second time in two days that one of my own checks carried a false assumption — the checks
+need auditing as much as the code does.
+
+**Left open deliberately:** the hotspot rectangles still drive the CLICK, so on HRHB the clickable
+area is now smaller than the board appears. Fixing the region files is authored-data work with other
+consumers, not a side effect of a rendering change.
+
+**Still not done:** §8's capture matrix is one viewport at one turn. 1280×720, 3440×1440 and the
+other four years are uncaptured — including HRHB 1994/1995, the dark plates flagged for owner review.
