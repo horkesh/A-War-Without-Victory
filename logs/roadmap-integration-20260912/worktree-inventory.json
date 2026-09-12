@@ -1,0 +1,121 @@
+[
+  {
+    "path": "C:\\Users\\User\\.codex\\worktrees\\21d7\\A-War-Without-Victory",
+    "head": "61db7e9dfe9508a52851d20b1b3e4cd0b1bba697",
+    "unique_commits_vs_original_main": 0,
+    "dirty_path_count": 0,
+    "branch": "detached"
+  },
+  {
+    "path": "C:\\Users\\User\\.codex\\worktrees\\40ef\\A-War-Without-Victory",
+    "head": "2d4efeb6f8f22910e18958cd708a638403bbf503",
+    "unique_commits_vs_original_main": 0,
+    "dirty_path_count": 0,
+    "branch": "detached"
+  },
+  {
+    "path": "C:\\Users\\User\\.codex\\worktrees\\A-War-Without-Victory\\bc02-load-ratings",
+    "head": "be5d7690470e9ce38a6fe98abd08199137bb5386",
+    "unique_commits_vs_original_main": 0,
+    "dirty_path_count": 0,
+    "branch": "refs/heads/codex/bc02-load-ratings"
+  },
+  {
+    "path": "C:\\Users\\User\\.codex\\worktrees\\e1e5\\A-War-Without-Victory",
+    "head": "cdc8659b12c9be141fa0f55f8f6fc9aceab7db7d",
+    "unique_commits_vs_original_main": 0,
+    "dirty_path_count": 0,
+    "branch": "detached"
+  },
+  {
+    "path": "F:\\AWWV-worktrees\\agent-setup-activation",
+    "head": "7d8b75f8a13c2cbf73063c7315c946f33cf0f874",
+    "unique_commits_vs_original_main": 0,
+    "dirty_path_count": 0,
+    "branch": "refs/heads/codex/agent-setup-activation"
+  },
+  {
+    "path": "F:\\AWWV-worktrees\\agent-setup-modernization",
+    "head": "23e26d2b41373825e722c5a40231dd8b2414eb88",
+    "unique_commits_vs_original_main": 3,
+    "dirty_path_count": 0,
+    "branch": "refs/heads/codex/agent-setup-modernization"
+  },
+  {
+    "path": "F:\\AWWV-worktrees\\apr1994-calibration-investigation",
+    "head": "f30ce94c858266bd3afc2c82c48d224cff927d12",
+    "unique_commits_vs_original_main": 20,
+    "dirty_path_count": 1,
+    "branch": "refs/heads/codex/apr1994-operational-corrections"
+  },
+  {
+    "path": "F:\\AWWV-worktrees\\bc01-player-opportunities",
+    "head": "01550ac275b1b3b17b91c05043bb82719a65353f",
+    "unique_commits_vs_original_main": 0,
+    "dirty_path_count": 0,
+    "branch": "refs/heads/codex/bc01-player-opportunities"
+  },
+  {
+    "path": "F:\\AWWV-worktrees\\bc01-pre-controls",
+    "head": "534d86bd8147ba9f647b2ea598cac161c2d839c0",
+    "unique_commits_vs_original_main": 0,
+    "dirty_path_count": 0,
+    "branch": "detached"
+  },
+  {
+    "path": "F:\\AWWV-worktrees\\bc09-shared-inputs",
+    "head": "cdc8659b12c9be141fa0f55f8f6fc9aceab7db7d",
+    "unique_commits_vs_original_main": 0,
+    "dirty_path_count": 0,
+    "branch": "refs/heads/codex/cleanup-event-registry"
+  },
+  {
+    "path": "F:\\AWWV-worktrees\\calibration-timeline-viewer",
+    "head": "7634c193a88e34f620ac34e44525471c3179ad36",
+    "unique_commits_vs_original_main": 0,
+    "dirty_path_count": 0,
+    "branch": "refs/heads/calibration-timeline-viewer"
+  },
+  {
+    "path": "F:\\AWWV-worktrees\\r7-arbih-honorific-names",
+    "head": "1ddf6f01a2a4b5cc09bbf32373e4656c71f26969",
+    "unique_commits_vs_original_main": 0,
+    "dirty_path_count": 0,
+    "branch": "refs/heads/r7-arbih-honorific-names"
+  },
+  {
+    "path": "F:\\AWWV-worktrees\\r7-readability-post-a",
+    "head": "88996a23d2441a391b25706c734626b5732e37b5",
+    "unique_commits_vs_original_main": 0,
+    "dirty_path_count": 0,
+    "branch": "detached"
+  },
+  {
+    "path": "F:\\AWWV-worktrees\\r7-readability-pre",
+    "head": "16389f6c9c66f13517806bae30ac78165563b66e",
+    "unique_commits_vs_original_main": 0,
+    "dirty_path_count": 0,
+    "branch": "detached"
+  },
+  {
+    "path": "F:\\AWWV-worktrees\\r8-decision-command-usability",
+    "head": "e659a6b63e760340f5b842485c18846354a8862d",
+    "unique_commits_vs_original_main": 0,
+    "dirty_path_count": 7,
+    "branch": "refs/heads/codex/r8-decision-command-usability"
+  },
+  {
+    "path": "F:\\AWWV-worktrees\\r9-phase1-install-proof",
+    "head": "f22bcbb63af7c5d017c59cfc3fe29838e3af1508",
+    "unique_commits_vs_original_main": 0,
+    "dirty_path_count": 20,
+    "branch": "detached"
+  },
+  {
+    "path": "F:\\AWWV-worktrees\\task3-parent-check",
+    "head": "223d9797003a634402ccdcef03def8837cc7c6aa",
+    "unique_commits_vs_original_main": 0,
+    "dirty_path_count": 0,
+    "branch": "detached"
+  }
+]

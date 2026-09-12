@@ -14,6 +14,87 @@
 
 **Implementation commit:** `4167d2bd4` and its April-calibration ancestors beginning at `09273025a`
 
+## Integration audit — 2026-09-12
+
+**Current verdict: candidate committed; promotion to main and calibration acceptance held.**
+The owner asked to integrate calibration work and reach a clean branchable point. Candidate
+`7382f26f8` on `codex/roadmap-calibration-integration-20260912` merges `9588876bc` and
+`f30ce94c8`, retaining all 20 unique calibration commits. The ten conflicts are resolved;
+newer main history and the owner-authorized #518 baseline refresh are preserved. Main itself
+remains `9588876bc` pending the decisions and checks below. No remote push occurred.
+
+Two higher-precedence conflicts require explicit owner disposition before expensive validation:
+
+| Clause | Existing invariant | Candidate behavior / proposed amendment |
+|---|---|---|
+| Engine Invariants §14.8b | Post-fade passive rear-pocket consolidation is a production phase. | Retire passive consolidation; topology may supply operational purpose, while attack/operation resolution and existing guards own capture. |
+| Engine Invariants §16.2 | Casualty/morale thresholds force elite recall. | Defer casualty, morale and cohesion recalls for an authored historical operation during planning/execution/recovery; below 50% personnel still forces immediate degradation/recall. |
+
+The exact [two-clause proposal](../../../logs/roadmap-integration-20260912/proposed-engine-invariant.patch)
+is unapplied. It states the current strict below-70%/below-50% code thresholds precisely; it does
+not silently change comparison operators. The independent
+[calibration/canon review](../../../logs/roadmap-integration-20260912/calibration-review.md)
+confirms these two conflicts, coherent merge adaptations and no third material conflict.
+FORAWWV is untouched. The two owner questions are pending; no canon criterion is retired here.
+
+**Verified cheap evidence:** Typecheck exit 0. Initial six-suite run was 221/222, exit 1;
+the sole failure expected 191 pipeline phases where combined source has 190 (one prestaging
+phase added and consolidation removed). Corrected targeted rerun 6/6, exit 0. The initial failure
+is retained in `logs/roadmap-integration-20260912/cheap-merge-tests.log`; the correction and
+normal commit hook pass. Changed-source diff check passes. The historical-name reservation implementation is preserved;
+its only merge adaptation removes a trailing blank line.
+
+**Evidence limits:** v72/v73 are identical at week 104 (initial SHA-256
+`a536e7bbb8e9de7b30abf979ce5f5e8c720473006c851df5ba30891c99effd0a`, final SHA-256
+`d6095cb8408ddfa85a52223cc6c4c5eb7ae46165cbb2b25fbe438d88c7245148`), but both record
+`git_dirty:true` at `68e5d22e8`, before final implementation `4167d2bd4`. Their 703/712 April
+result and 32/32 April-anchor count are branch-local history. Each has one critical HVO Central
+Bosnia understrength anomaly and two warnings. This does not establish clean-tip attribution,
+full-horizon historical safety or current-main acceptance. The nine mismatches below remain
+historical debt, with Donji Vakuf/Korenići first to revisit only after combined measurement.
+
+**Fixed next validation, after canon disposition:** use Node 22.23.2, clean committed source,
+unchanged scenario/input files, manifest, floors and protected anchors. Run the balanced full
+suite once (`npm.cmd run test:vitest:balanced`, child-local Git Bash; estimated 10–20 minutes). Run the
+canonical 188-week preflight entrypoint without `--map`, with `AWWV_S6_GRADE_RUN=true` and
+explicit ignored output (estimated 5–10 minutes). Check its own exit, engine health, run
+consistency, engine-truth seals/console binding, four checkpoints and historical guards. Inspect
+all failures, including the retained branch anomaly, before deciding a repeat. Only if the first
+run satisfies its hard criteria, obtain the second clean 188-week reproduction and compare all
+corresponding nonmetadata deterministic artifacts (14 in the retained branch pair), not just the final save. The required `canon:check`
+baseline run may supply that second reproduction if its source/input/runtime contract matches;
+preserve existing `_baseline_tmp` evidence first. Expected changed pins remain reported against
+the unchanged manifest, never refreshed automatically. The inherited Farz P-A discriminator is
+an allowed historical carve-out only when its exact cell/turn/brigade remains identical; other
+new failures stop the sequence. Full suite, canon, provenance, anchors and campaign acceptance
+are unrun/unmet at this checkpoint. No package or wider campaign is authorized by this record.
+
+**Workspace preservation:** all 18 registered trees were inventoried. The timeline viewer and
+other completed product branches are ancestral to main. The three agent-modernization commits
+are reissued/squashed history whose final tree matches the activated packet. R8's seven dirty
+docs are an old synchronization draft; R9's 20 paths are retained install-proof work whose
+implementation substantially landed in `38066eec2`. They are preserved, not blindly reapplied.
+The only dirty calibration path is generated `data/derived/latest_run_final_save.json`; it is
+not a production input to merge. All 28 dirty paths were backed up with binary patches, bytes
+and a SHA-256 manifest at `F:/AWWV-worktrees/_preserved/roadmap-integration-20260912/`;
+original trees and all 22 stashes remain intact. No tree, branch, run evidence or draft was
+pruned or restored. These retained dirty historical trees do not imply a dirty candidate.
+
+**Roadmap reconciliation:** WR01 is closed by #517's accepted six-capture exception; #518
+closed the inherited stale-pin defect on its measured main source. R7 audio/offline/cue
+acceptance, R8 readability/runtime/Save-load/package issues, BC10, final behavior/calibration
+settlement, packaged three-faction campaigns/diaries and R9 readiness remain open. Earlier
+R1–R5/RC/RE and BC01/02/03/08 closures and BC07 retention remain intact. The roadmap,
+board, calibration authority and open-gate register now distinguish these from integration.
+
+**Final documentation/preservation checks:** 32/32 tests across desktop-document truth, open
+register and derived plan index pass, exit 0; 26 added links/anchors resolve. The register is
+valid (16 total gates, 10 open); derived open lanes are exactly R6/R7/R8/R9. All 28 backed-up
+paths and 22 ordered stash object IDs match; protected invariant/FORAWWV/manifest/health-floor/
+latest-save bytes remain unchanged. Initial stash-subject comparison differed through text
+encoding only; object-ID comparison verifies preservation. Receipts are retained alongside the
+review; these checks do not clear the two canon decisions or the unrun campaign/full-suite gates.
+
 ## Summary
 
 The April 1994 calibration was rebuilt around operations, force allocation, and defensive

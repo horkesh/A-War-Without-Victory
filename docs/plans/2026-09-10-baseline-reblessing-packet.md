@@ -1,5 +1,13 @@
 # Baseline Re-blessing Packet — apr1992_188w six-pin reconciliation
 
+**Authority reconciliation — 2026-09-12:** the owner separately authorized the scoped pin
+refresh that landed as #518 (`e607508bc`), measured at clean `2a8eb4244`. The
+[calibration authority](../40_reports/CALIBRATION_MASTER.md) records 702/678/672/667, unchanged
+floors, full n392 anchor identity and reproduction. This resolves the inherited six stale pins
+for that source; it does not claim BC10, final calibration, R7 or R8 acceptance. Older unactivated
+entry conditions below describe the original broader packet. The April integration candidate
+lands second and must be remeasured under its own recorded canon/verification gates.
+
 **Date:** 2026-09-10
 **Status:** SCOPED — NOT AUTHORIZED TO RUN. Entry condition unmet (§3).
 **Authority:** [CALIBRATION_MASTER.md](../40_reports/CALIBRATION_MASTER.md) is the calibration

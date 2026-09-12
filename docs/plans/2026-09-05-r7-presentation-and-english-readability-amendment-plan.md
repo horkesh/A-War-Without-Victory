@@ -1,5 +1,12 @@
 # R7 Presentation and English-Readability Amendment Plan
 
+**Current reconciliation — 2026-09-12:** WR01 is delivered by #515–#517, with its six-case
+owner-accepted capture exception recorded in the [design](2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.md#9-sequencing).
+#518 subsequently reconciled the inherited stale pins under separate owner authority; this did
+not reuse the exhausted PRE/two-POST budget or close R7. The April integration candidate needs
+new canon and 188-week acceptance. Distinct R8 readability/runtime/package failures and R7 audio
+acceptance remain open; see the [master roadmap](MASTER_ROADMAP.md).
+
 > **For Claude:** REQUIRED SUB-SKILL: Use `executing-plans` to implement this plan task-by-task.
 
 **Goal:** Discharge the located, in-scope half of the 2026-09-03 showcase GUI audit as R7 Phase 5's

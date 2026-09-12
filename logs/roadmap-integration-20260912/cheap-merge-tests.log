@@ -1,0 +1,75 @@
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+stdout | tests/pre_planned_operations.test.ts > pre-planned operations > admits an authored mandatory brigade that forms at the staging area during planning
+[op-validation] 1 issue(s) at injection: 0 error(s), 1 warning(s)
+  [WARN] Srebrenica–Cerska Link-Up [srebrenica_cerska_link]: brigade_missing — Brigade "arbih_1st_cerska" not found in formations
+
+stdout | tests/pre_planned_operations.test.ts > pre-planned operations > loans Zvezda elites already assembled at authored staging even when detached from current corps sectors
+[op-validation] 2 issue(s) at injection: 0 error(s), 2 warning(s)
+  [WARN] Operation Zvezda 94 [gorazde_encirclement]: brigade_missing — Brigade "rs_5th_podrinje" not found in formations
+  [WARN] Operation Zvezda 94 [ustipraca_cutoff]: brigade_missing — Brigade "rs_visegrad_brigade" not found in formations
+
+stdout | tests/pre_planned_operations.test.ts > pre-planned operations > keeps the link-up in planning until its authored columns are assembled
+[op-validation] 1 issue(s) at injection: 0 error(s), 1 warning(s)
+  [WARN] Srebrenica–Cerska Link-Up [srebrenica_convergence]: brigade_ineligible — Brigade "arbih_283rd_east_bosnian_light" ineligible: kind="brigade", status="destroyed"
+
+stdout | tests/pre_planned_operations.test.ts > pre-planned operations > still validates queued operations at runtime when brigades are truly missing
+[op-validation] 1 issue(s) at injection: 0 error(s), 1 warning(s)
+  [WARN] Operation Foca [kalinovik]: brigade_missing — Brigade "rs_gacko_brigade" not found in formations
+
+stdout | tests/pre_planned_operations.test.ts > pre-planned operations > keeps a queued operation queued when live operations already claim every objective
+[op-validation] 1 issue(s) at injection: 0 error(s), 1 warning(s)
+  [WARN] Operation Foca: participants_below_attack_floor — Queued operation has 1 viable participant(s); 2 required
+
+stdout | tests/pre_planned_operations.test.ts > pre-planned operations > does not inject a queued operation when fewer than two viable participants remain
+[op-validation] 1 issue(s) at injection: 0 error(s), 1 warning(s)
+  [WARN] Operation Foca [kalinovik]: brigade_ineligible — Brigade "jna_kalinovik_to_tg" ineligible: kind="jna_phantom", status="inactive"
+[op-validation] 1 issue(s) at injection: 0 error(s), 1 warning(s)
+  [WARN] Operation Foca: participants_below_attack_floor — Queued operation has 1 viable participant(s); 2 required
+
+stdout | tests/pre_planned_operations.test.ts > pre-planned operations > records a typed Corridor status when the queued operation is moot because all objectives are already held
+[op-validation] 1 issue(s) at injection: 0 error(s), 1 warning(s)
+  [WARN] Operation Corridor: all_objectives_owned — Queued operation skipped because all 10 objective(s) are already controlled by RS
+
+stdout | tests/pre_planned_operations.test.ts > pre-planned operations > preserves brigade-level warning detail when collecting multiple missing brigades on one axis
+[op-validation] 2 issue(s) at injection: 0 error(s), 2 warning(s)
+  [WARN] Operation Test [axis_1]: brigade_missing — Brigade "a" not found in formations
+  [WARN] Operation Test [axis_1]: brigade_missing — Brigade "b" not found in formations
+
+ ✓ tests/pre_planned_operations.test.ts (70 tests) 78ms
+ ✓ tests/strict_null_inventory_progress.test.ts (90 tests) 29ms
+ ❯ tests/war_phase_step_order.test.ts (6 tests | 1 failed) 26ms
+   × war-phase step ordering > step count is stable 10ms
+     → expected 190 to be 191 // Object.is equality
+ ✓ tests/validate_game_state_shape.test.ts (23 tests) 20ms
+ ✓ tests/corps_operation_helpers.test.ts (31 tests) 13ms
+ ✓ tests/war_phase_paramilitary_canon_contract.test.ts (2 tests) 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/war_phase_step_order.test.ts > war-phase step ordering > step count is stable
+AssertionError: expected 190 to be 191 // Object.is equality
+
+- Expected
++ Received
+
+- 191
++ 190
+
+ ❯ tests/war_phase_step_order.test.ts:280:34
+    278|         // +1 from prestage-deferred-historical-elites: emits the date…
+    279|         // concentration march before column movement consumes it.
+    280|         expect(stepNames.length).toBe(191);
+       |                                  ^
+    281|     });
+    282| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed | 5 passed (6)
+      Tests  1 failed | 221 passed (222)
+   Start at  23:01:27
+   Duration  12.23s (transform 4.62s, setup 42ms, collect 8.60s, tests 170ms, environment 2ms, prepare 1.33s)
+
+EXIT_CODE=1

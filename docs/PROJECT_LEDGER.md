@@ -4722,3 +4722,43 @@ The owner confirmed Claude had completed and released the repository. The review
 Fresh actual-profile Codex discovery found exactly the nine intended entries without duplicates or catalog errors. Fresh read-only Codex/Sol-medium and Claude sessions passed the four routing cases and plan-only/first-failure variants. All 53 other audited installed originals, shared settings and 32 protected repository files remain unchanged. Focused integration/static/governance/preflight checks passed; unchanged tests and independent-review GO were reused. No simulation, build, campaign, baseline refresh, hook change or remote push occurred.
 
 The [plan's live receipt](plans/2026-09-12-agent-setup-modernization-plan.md) binds the exact applied packet, backups and guarded rollback. Raw receipts/transcripts are retained under `logs/agent-setup-modernization/activation/`. Cursor files are installed and statically checked, but runtime acceptance remains open because no Cursor CLI is available here. Deferred domain-skill classifications remain preserved; no product gate or canon authority changed.
+
+## 2026-09-12 — Roadmap and calibration worktree integration checkpoint
+
+The owner requested remaining-roadmap status and complete calibration-tree integration for a
+clean branchable point. Merge candidate `7382f26f8` on
+`codex/roadmap-calibration-integration-20260912` combines local main `9588876bc` with
+`f30ce94c8` and retains all 20 unique April calibration commits. Ten conflicts were resolved
+while preserving newer main history, all calibration append-only records and the #518 baseline
+refresh. The timeline viewer was already ancestral; other completed product trees are also
+integrated. Agent modernization's older unique commit identities have the same final tree as
+the activated replacement packet.
+
+Independent Sol/medium review found two unresolved higher-precedence conflicts: §14.8b
+requires the passive consolidation phase removed by the candidate; §16.2 requires early elite
+recalls deferred by authored operations. Exact amendments are proposed and unapplied, with two
+owner decisions pending. Main is not promoted. Typecheck passes; initial focused merge checks
+passed 221/222, then the sole phase-count expectation was corrected and its six tests passed.
+The initial exit 1 is retained. Full suite/canonical 188-week pair remain unrun, because the
+cheaper canon gate already rejects acceptance. Historical v72/v73 are identical at week 104
+but dirty at an earlier source commit, so no clean/full-horizon claim follows.
+
+The roadmap, board, calibration master, owning R7/baseline plans, derived plan index and open
+register now reflect WR01's #517 accepted closeout and #518's scoped pin refresh, while retaining
+R7 audio, R8 readability/runtime/Save-load/package, BC10, final calibration/campaign/diary and
+R9 readiness work. The R6/R7 rows explicitly remain open in the generated dispatch index.
+No baseline/floor, initial-control data, save schema, FORAWWV, release state or remote ref changed.
+
+All 18 worktrees and 22 stashes were inventoried. The calibration generated save, seven R8
+synchronization documents and 20 R9 install-proof paths remain in their original trees, with
+28-path byte/hash/binary-patch backup at
+`F:/AWWV-worktrees/_preserved/roadmap-integration-20260912/`. No draft, branch, tree or local run
+was pruned or overwritten. The [existing April report](40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#integration-audit--2026-09-12)
+contains the fixed verification/cost/stop plan, independent review, receipts and remaining debt.
+Focused documentation validation and preservation checks are retained in
+`logs/roadmap-integration-20260912/`; only evidence-backed integration status is claimed.
+
+Checkpoint verification: 32/32 focused documentation tests, 26 added links/anchors, gate/index
+validation and diff checks pass. All 28 backup paths and 22 ordered stash object IDs match;
+protected files and main remain unchanged. Initial stash-subject text decoding differed; exact
+object identity proves preservation. The two canon decisions and expensive gates remain open.

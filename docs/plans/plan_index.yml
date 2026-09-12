@@ -78,8 +78,8 @@ lanes:
         tasks: null
   - lane: R6
     title: "Historical gameplay depth and final calibration"
-    lane_open: false
-    status: "PRE-1.0 SCOPE COMPLETE — CLOSED 2026-08-09 (`n163`: 634 matched, 30/31 anchors, Section 6 correct, 40w fingerprint golden). Do not conflate the later 629/31-of-"
+    lane_open: true
+    status: "CALIBRATION OPEN — CANDIDATE HELD. The accepted n163 pre-1.0 slice remains historical evidence. April candidate `7382f26f8` integrates 20 commits but is held on"
     plans:
       - path: docs/plans/2026-07-31-historical-gameplay-depth-calibration-plan.md
         exists: true
@@ -124,11 +124,11 @@ lanes:
   - lane: R7
     title: "Content, historical attribution, audio, accessibility, and opening experience"
     lane_open: true
-    status: "ACTIVE — DATE REPAIR PACKAGED; ACCEPTANCE OPEN. `ea33b23a5` retains nine-case image/UI/hook GO, fixed column/artwork; included in Inbox package `7d97b72fc`. Fre"
+    status: "ACTIVE — AUDIO AND BROADER ACCEPTANCE OPEN. WR01 delivered in #517; stale-pin refresh landed in #518. Human listening/sensitivity, offline playback/controls and"
     plans:
       - path: docs/plans/2026-07-31-content-history-localization-audio-plan.md
         exists: true
-        tokens: 13147
+        tokens: 13466
         fits_context: true
         tasks: docs/plans/tasks/2026-07-31-content-history-localization-audio-plan.yml
       - path: docs/plans/2026-08-23-opening-screens-implementation-plan.md
@@ -143,7 +143,7 @@ lanes:
         tasks: null
       - path: docs/plans/2026-09-05-r7-presentation-and-english-readability-amendment-plan.md
         exists: true
-        tokens: 25493
+        tokens: 25984
         fits_context: true
         tasks: null
       - path: docs/plans/2026-09-07-arbih-brigade-honorific-name-correction-plan.md
