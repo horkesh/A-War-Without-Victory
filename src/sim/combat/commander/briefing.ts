@@ -573,14 +573,14 @@ function collectCampaignIntent(
     // before the commander replaces it with its emitted per-turn directive.
     const corpsCommand = state.military.corps_command?.[corpsId];
     if (corpsCommand?.status_reason === 'rbih_hrhb_bilateral_front_diversion') {
-        const bilateralTargets = faction === 'RBiH'
-            ? [...(corpsCommand.directive?.offensive_targets ?? [])].sort(strictCompare)
-            : [];
+        const bilateralTargets = [...(corpsCommand.directive?.offensive_targets ?? [])]
+            .sort(strictCompare);
+        const isBilateralAttacker = bilateralTargets.length > 0;
         return {
-            role: faction === 'RBiH' ? 'primary' : 'contain',
+            role: isBilateralAttacker ? 'primary' : 'contain',
             offensiveTargets: bilateralTargets,
             holdTargets: [...(corpsCommand.directive?.hold_osids ?? [])].sort(strictCompare),
-            stanceCeiling: faction === 'RBiH' ? 'offensive' : 'defensive',
+            stanceCeiling: isBilateralAttacker ? 'offensive' : 'defensive',
             syncRole: null,
             syncTargets: [],
             deviationReason,
@@ -851,8 +851,8 @@ export function buildBriefing(
         must_hold_osids: mustHoldOsids,
         campaign_role: campaignIntent.role,
         campaign_offensive_targets: campaignIntent.offensiveTargets,
-        bilateral_offensive: faction === 'RBiH'
-            && corpsCmd?.status_reason === 'rbih_hrhb_bilateral_front_diversion',
+        bilateral_offensive: corpsCmd?.status_reason === 'rbih_hrhb_bilateral_front_diversion'
+            && campaignIntent.offensiveTargets.length > 0,
         campaign_hold_targets: campaignIntent.holdTargets,
         campaign_stance_ceiling: campaignIntent.stanceCeiling,
         campaign_sync_role: campaignIntent.syncRole,

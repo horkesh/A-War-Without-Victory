@@ -4775,3 +4775,31 @@ Systems Manual §7.7, PIPELINE_ENTRYPOINTS and the current context note carry th
 Historical backups/reports and FORAWWV remain untouched. Both prior canon holds are resolved by
 this explicit authority; full-suite and clean 188-week integration acceptance remain required.
 The existing April report owns the already-recorded cost, commands and first-failure stop plan.
+
+## 2026-09-13 — Integrated calibration validation and coverage-contract hold
+
+Following owner-approved canon commit `933132e90`, the clean candidate's complete balanced suite
+ran once in 32m24s: 13,935 passed, 9 failed, 43 skipped tests, exit 1. All six failure categories
+were retained and diagnosed. The Cerska field-focus expectations were synchronized with the
+accepted authored definition; the hover-map reader was pointed at main's relocated governed
+merge map; and the startup snapshot was regenerated through its canonical writer to the
+independently predicted normalized SHA `45bcfd9746aabaa85e49d2ce2a44efffdd36ecb7a53966edd450ed419f67a3bf`.
+These corrections pass 39/39 focused tests and independent review. Briefing now consumes the
+approved bilateral target data without redundant faction literals, preserving doctrine and the
+unchanged Q2 guard. Its group passes 40/40; the reviewed fixture-stance correction passes 26/26.
+The unchanged runtime-dependency test passes 12/12 in isolation; no timeout was raised. Typecheck
+and data integrity pass. Unaffected full-suite evidence is reused.
+
+The two remaining coverage assertions retain their accepted cap of two. A preserved clean
+40-week diagnostic at `933132e90` finds nine explicitly unstaffed, graph-disconnected pockets,
+with no reachable legal same-corps donor. Independent review confirms the engine's staffability
+contract. The exact proposed replacement tests require zero staffable gaps and visible isolation
+truth; the patch is unapplied because retiring the numeric acceptance threshold needs the owner.
+No 188-week run or pin refresh proceeds past this unresolved gate. All 20 calibration commits
+remain integrated; local main is still `9588876bc`, with no remote push.
+
+All 28 original dirty paths/backups and 22 ordered stash objects remain intact. Current accepted
+baseline output bytes were preserved, with their dirty metadata disclosed; normalized inputs
+match all 31 recorded hashes. The existing April implementation report, calibration master,
+roadmap, board and gate register are synchronized to this evidence. Full details and the proposed
+coverage decision are in [the current checkpoint](40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#current-checkpoint--2026-09-13).

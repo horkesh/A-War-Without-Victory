@@ -1,0 +1,2616 @@
+[
+  {
+    "sector": "sector:arbih_1st_corps:6",
+    "faction": "RBiH",
+    "corps": "arbih_1st_corps",
+    "edges": 14,
+    "territory": [
+      "op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
+      "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
+      "op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
+      "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
+      "op:vogosca:hotonj"
+    ],
+    "candidates": 34,
+    "legal_before_reach": 25,
+    "classified": [
+      {
+        "id": "arbih_101st_mountain",
+        "location": "op:hadzici:binjezevo",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:10",
+          "assigned": 16,
+          "edges": 5,
+          "threat": 0.8761976634589578
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_102nd_motorized",
+        "location": "op:trnovo:tosici",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:4",
+          "assigned": 2,
+          "edges": 15,
+          "threat": 3.764793192443198
+        },
+        "reasons": [
+          "dig_in",
+          "line_at_minimum_2_of_2"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_104th_vitezka_motorized",
+        "location": "op:hadzici:tarcin_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:10",
+          "assigned": 16,
+          "edges": 5,
+          "threat": 0.8761976634589578
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_105th_motorized",
+        "location": "op:hadzici:binjezevo",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:10",
+          "assigned": 16,
+          "edges": 5,
+          "threat": 0.8761976634589578
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_109th_mountain",
+        "location": "op:trnovo:delijas",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:5",
+          "assigned": 2,
+          "edges": 7,
+          "threat": 28.676900777072714
+        },
+        "reasons": [
+          "dig_in"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_10th_mountain",
+        "location": "op:hadzici:binjezevo",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:10",
+          "assigned": 16,
+          "edges": 5,
+          "threat": 0.8761976634589578
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_111th_vitezka_motorized",
+        "location": "op:hadzici:binjezevo",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:10",
+          "assigned": 16,
+          "edges": 5,
+          "threat": 0.8761976634589578
+        },
+        "reasons": [
+          "active_operation_participant",
+          "disrupted"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_112th_vitezka_motorized",
+        "location": "op:hadzici:binjezevo",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:10",
+          "assigned": 16,
+          "edges": 5,
+          "threat": 0.8761976634589578
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_115th_mountain",
+        "location": "op:hadzici:binjezevo",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:10",
+          "assigned": 16,
+          "edges": 5,
+          "threat": 0.8761976634589578
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_123rd_light",
+        "location": "op:kiseljak:bilalovac_2",
+        "placement": {
+          "tier": 0,
+          "sector": "sector:arbih_1st_corps:7",
+          "assigned": 1,
+          "edges": 4,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_124th_light_king_tvrtko",
+        "location": "op:hadzici:binjezevo",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:10",
+          "assigned": 16,
+          "edges": 5,
+          "threat": 0.8761976634589578
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_131st_light",
+        "location": "op:fojnica:turkovici",
+        "placement": {
+          "tier": 0,
+          "sector": "sector:arbih_1st_corps:7",
+          "assigned": 1,
+          "edges": 4,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_141st_light",
+        "location": "op:hadzici:binjezevo",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:10",
+          "assigned": 16,
+          "edges": 5,
+          "threat": 0.8761976634589578
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_143rd_light",
+        "location": "op:hadzici:binjezevo",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:10",
+          "assigned": 16,
+          "edges": 5,
+          "threat": 0.8761976634589578
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_146th_light",
+        "location": "op:visoko:gornja_vratnica_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 1,
+          "sector": "sector:arbih_1st_corps:0",
+          "assigned": 2,
+          "edges": 5,
+          "threat": 6.625971951458659
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_147th_light",
+        "location": "op:vares:budozelje_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:0",
+          "assigned": 2,
+          "edges": 5,
+          "threat": 6.625971951458659
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_152nd_mountain",
+        "location": "op:hadzici:binjezevo",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:10",
+          "assigned": 16,
+          "edges": 5,
+          "threat": 0.8761976634589578
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_155th_motorized",
+        "location": "op:hadzici:binjezevo",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:10",
+          "assigned": 16,
+          "edges": 5,
+          "threat": 0.8761976634589578
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_161st_slavna_olovo_mountain",
+        "location": "op:olovo:gurdici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:9",
+          "assigned": 1,
+          "edges": 5,
+          "threat": 24.918249882269457
+        },
+        "reasons": [
+          "movement_order",
+          "line_at_minimum_1_of_1"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_162nd_mountain",
+        "location": "op:vares:ravne",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:8",
+          "assigned": 1,
+          "edges": 4,
+          "threat": 63.29236874279309
+        },
+        "reasons": [
+          "movement_order",
+          "line_at_minimum_1_of_1"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_164th_mountain",
+        "location": "op:breza:mahala",
+        "posture": "defend",
+        "placement": {
+          "tier": 0,
+          "sector": "sector:arbih_1st_corps:0",
+          "assigned": 2,
+          "edges": 5,
+          "threat": 6.625971951458659
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_165th_mountain",
+        "location": "op:visoko:rajcici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:7",
+          "assigned": 1,
+          "edges": 4,
+          "threat": 0
+        },
+        "reasons": [
+          "line_at_minimum_1_of_1"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_17th_muslim_light",
+        "location": "op:hadzici:budmolici",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:4",
+          "assigned": 2,
+          "edges": 15,
+          "threat": 3.764793192443198
+        },
+        "reasons": [
+          "line_at_minimum_2_of_2"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_181st_mountain",
+        "location": "op:hadzici:lokve",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:3",
+          "assigned": 1,
+          "edges": 3,
+          "threat": 8.352529399110855
+        },
+        "reasons": [
+          "movement_order",
+          "line_at_minimum_1_of_1"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_182nd_vitezka_light",
+        "location": "op:hadzici:hadzici",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:10",
+          "assigned": 16,
+          "edges": 5,
+          "threat": 0.8761976634589578
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_185th_light",
+        "location": "op:vares:budozelje_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:0",
+          "assigned": 2,
+          "edges": 5,
+          "threat": 6.625971951458659
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_1st_mountain",
+        "location": "op:trnovo:trnovo",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:1",
+          "assigned": 1,
+          "edges": 5,
+          "threat": 46.70941135660539
+        },
+        "reasons": [
+          "dig_in",
+          "line_at_minimum_1_of_1"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_2nd_mountain",
+        "location": "op:hadzici:binjezevo",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:10",
+          "assigned": 16,
+          "edges": 5,
+          "threat": 0.8761976634589578
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_801st_light",
+        "location": "op:gorazde:gorazde_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:2",
+          "assigned": 4,
+          "edges": 19,
+          "threat": 19.623831267666883
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_802nd_light",
+        "location": "op:gorazde:osjecani_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:5",
+          "assigned": 2,
+          "edges": 7,
+          "threat": 28.676900777072714
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_808th_liberation",
+        "location": "op:gorazde:ustipraca_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:2",
+          "assigned": 4,
+          "edges": 19,
+          "threat": 19.623831267666883
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_843rd_light",
+        "location": "op:gorazde:kola",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:2",
+          "assigned": 4,
+          "edges": 19,
+          "threat": 19.623831267666883
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_851st_vitezka_liberation",
+        "location": "op:gorazde:faocici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:2",
+          "assigned": 4,
+          "edges": 19,
+          "threat": 19.623831267666883
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_hvo_kralj_tvrtko",
+        "location": "op:hadzici:binjezevo",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_1st_corps:10",
+          "assigned": 16,
+          "edges": 5,
+          "threat": 0.8761976634589578
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      }
+    ]
+  },
+  {
+    "sector": "sector:arbih_3rd_corps:7",
+    "faction": "RBiH",
+    "corps": "arbih_3rd_corps",
+    "edges": 6,
+    "territory": [
+      "op:sipovo:volari_2"
+    ],
+    "candidates": 27,
+    "legal_before_reach": 18,
+    "classified": [
+      {
+        "id": "arbih_17th_vitezka_mountain",
+        "location": "op:travnik:gluha_bukovica",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:3",
+          "assigned": 2,
+          "edges": 4,
+          "threat": 3.282727063906297
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_303rd_vitezka_mountain",
+        "location": "op:zenica:gornja_vraca",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:2",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_314th_slavna_liberation",
+        "location": "op:zavidovici:hajderovici_2",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:4",
+          "assigned": 3,
+          "edges": 5,
+          "threat": 2.3230437291365598
+        },
+        "reasons": [
+          "dig_in"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_319th_liberation",
+        "location": "op:kakanj:brnjic_2",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:2",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 0
+        },
+        "reasons": [
+          "dig_in"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_327th_vitezka_mountain",
+        "location": "op:maglaj:jablanica",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:5",
+          "assigned": 8,
+          "edges": 15,
+          "threat": 12.034486847498073
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_328th_mountain",
+        "location": "op:maglaj:kosova_2",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:5",
+          "assigned": 8,
+          "edges": 15,
+          "threat": 12.034486847498073
+        },
+        "reasons": [
+          "dig_in"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_329th_mountain",
+        "location": "op:zavidovici:zavidovici_2",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:2",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 0
+        },
+        "reasons": [
+          "dig_in"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_330th_liberation",
+        "location": "op:kakanj:vukanovici",
+        "posture": "defend",
+        "placement": {
+          "tier": 1,
+          "sector": "sector:arbih_3rd_corps:2",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_351st_liberation",
+        "location": "op:zavidovici:cinovici",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:4",
+          "assigned": 3,
+          "edges": 5,
+          "threat": 2.3230437291365598
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_372nd_vitezka_mountain",
+        "location": "op:maglaj:cobe_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:5",
+          "assigned": 8,
+          "edges": 15,
+          "threat": 12.034486847498073
+        },
+        "reasons": [
+          "active_operation_participant"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_373rd_slavna_mountain",
+        "location": "op:tesanj:lepenica",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:5",
+          "assigned": 8,
+          "edges": 15,
+          "threat": 12.034486847498073
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_374th_slavna_light",
+        "location": "op:tesanj:novi_miljanovci_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:5",
+          "assigned": 8,
+          "edges": 15,
+          "threat": 12.034486847498073
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_375th_liberation",
+        "location": "op:tesanj:radusa_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:5",
+          "assigned": 8,
+          "edges": 15,
+          "threat": 12.034486847498073
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_377th_vitezka_mountain",
+        "location": "op:tesanj:ularice_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:5",
+          "assigned": 8,
+          "edges": 15,
+          "threat": 12.034486847498073
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_705th_slavna_mountain",
+        "location": "op:bugojno:vrpec",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:0",
+          "assigned": 4,
+          "edges": 7,
+          "threat": 12.972063764634438
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_706th_muslim_mountain",
+        "location": "op:travnik:paklarevo",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:1",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 10.21569211766563
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_707th_slavna_mountain",
+        "location": "op:donji_vakuf:korenici",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:6",
+          "assigned": 2,
+          "edges": 8,
+          "threat": 30.765419829678713
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_708th_mountain",
+        "location": "op:bugojno:vesela_2",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:0",
+          "assigned": 4,
+          "edges": 7,
+          "threat": 12.972063764634438
+        },
+        "reasons": [
+          "dig_in"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_712th_mountain",
+        "location": "op:travnik:turbe_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:1",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 10.21569211766563
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_717th_slavna_mountain",
+        "location": "op:gornji_vakuf:jagnjid_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:0",
+          "assigned": 4,
+          "edges": 7,
+          "threat": 12.972063764634438
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_725th_light",
+        "location": "op:gornji_vakuf:jagnjid_2",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:0",
+          "assigned": 4,
+          "edges": 7,
+          "threat": 12.972063764634438
+        },
+        "reasons": [
+          "dig_in"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_727th_slavna",
+        "location": "op:zenica:serici_2",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:3",
+          "assigned": 2,
+          "edges": 4,
+          "threat": 3.282727063906297
+        },
+        "reasons": [
+          "dig_in"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_733rd_mountain",
+        "location": "op:busovaca:dobraljevo_2",
+        "placement": {
+          "tier": 0,
+          "sector": "sector:arbih_3rd_corps:2",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_737th_muslim_light",
+        "location": "op:travnik:paklarevo",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:1",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 10.21569211766563
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_7th_vitezka_muslim_liberation",
+        "location": "op:zavidovici:hajderovici_2",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:4",
+          "assigned": 3,
+          "edges": 5,
+          "threat": 2.3230437291365598
+        },
+        "reasons": [
+          "dig_in"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "F_RBiH_0001",
+        "location": "op:donji_vakuf:donji_vakuf_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:6",
+          "assigned": 2,
+          "edges": 8,
+          "threat": 30.765419829678713
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_110th_usora_brigade",
+        "location": "op:tesanj:kalosevic_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:5",
+          "assigned": 8,
+          "edges": 15,
+          "threat": 12.034486847498073
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      }
+    ]
+  },
+  {
+    "sector": "sector:arbih_3rd_corps:8",
+    "faction": "RBiH",
+    "corps": "arbih_3rd_corps",
+    "edges": 4,
+    "territory": [
+      "op:teslic:donji_ruzevic"
+    ],
+    "candidates": 27,
+    "legal_before_reach": 18,
+    "classified": [
+      {
+        "id": "arbih_17th_vitezka_mountain",
+        "location": "op:travnik:gluha_bukovica",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:3",
+          "assigned": 2,
+          "edges": 4,
+          "threat": 3.282727063906297
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_303rd_vitezka_mountain",
+        "location": "op:zenica:gornja_vraca",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:2",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_314th_slavna_liberation",
+        "location": "op:zavidovici:hajderovici_2",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:4",
+          "assigned": 3,
+          "edges": 5,
+          "threat": 2.3230437291365598
+        },
+        "reasons": [
+          "dig_in"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_319th_liberation",
+        "location": "op:kakanj:brnjic_2",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:2",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 0
+        },
+        "reasons": [
+          "dig_in"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_327th_vitezka_mountain",
+        "location": "op:maglaj:jablanica",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:5",
+          "assigned": 8,
+          "edges": 15,
+          "threat": 12.034486847498073
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_328th_mountain",
+        "location": "op:maglaj:kosova_2",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:5",
+          "assigned": 8,
+          "edges": 15,
+          "threat": 12.034486847498073
+        },
+        "reasons": [
+          "dig_in"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_329th_mountain",
+        "location": "op:zavidovici:zavidovici_2",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:2",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 0
+        },
+        "reasons": [
+          "dig_in"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_330th_liberation",
+        "location": "op:kakanj:vukanovici",
+        "posture": "defend",
+        "placement": {
+          "tier": 1,
+          "sector": "sector:arbih_3rd_corps:2",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_351st_liberation",
+        "location": "op:zavidovici:cinovici",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:4",
+          "assigned": 3,
+          "edges": 5,
+          "threat": 2.3230437291365598
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_372nd_vitezka_mountain",
+        "location": "op:maglaj:cobe_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:5",
+          "assigned": 8,
+          "edges": 15,
+          "threat": 12.034486847498073
+        },
+        "reasons": [
+          "active_operation_participant"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_373rd_slavna_mountain",
+        "location": "op:tesanj:lepenica",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:5",
+          "assigned": 8,
+          "edges": 15,
+          "threat": 12.034486847498073
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_374th_slavna_light",
+        "location": "op:tesanj:novi_miljanovci_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:5",
+          "assigned": 8,
+          "edges": 15,
+          "threat": 12.034486847498073
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_375th_liberation",
+        "location": "op:tesanj:radusa_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:5",
+          "assigned": 8,
+          "edges": 15,
+          "threat": 12.034486847498073
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_377th_vitezka_mountain",
+        "location": "op:tesanj:ularice_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:5",
+          "assigned": 8,
+          "edges": 15,
+          "threat": 12.034486847498073
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_705th_slavna_mountain",
+        "location": "op:bugojno:vrpec",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:0",
+          "assigned": 4,
+          "edges": 7,
+          "threat": 12.972063764634438
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_706th_muslim_mountain",
+        "location": "op:travnik:paklarevo",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:1",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 10.21569211766563
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_707th_slavna_mountain",
+        "location": "op:donji_vakuf:korenici",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:6",
+          "assigned": 2,
+          "edges": 8,
+          "threat": 30.765419829678713
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_708th_mountain",
+        "location": "op:bugojno:vesela_2",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:0",
+          "assigned": 4,
+          "edges": 7,
+          "threat": 12.972063764634438
+        },
+        "reasons": [
+          "dig_in"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_712th_mountain",
+        "location": "op:travnik:turbe_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:1",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 10.21569211766563
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_717th_slavna_mountain",
+        "location": "op:gornji_vakuf:jagnjid_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:0",
+          "assigned": 4,
+          "edges": 7,
+          "threat": 12.972063764634438
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_725th_light",
+        "location": "op:gornji_vakuf:jagnjid_2",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:0",
+          "assigned": 4,
+          "edges": 7,
+          "threat": 12.972063764634438
+        },
+        "reasons": [
+          "dig_in"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_727th_slavna",
+        "location": "op:zenica:serici_2",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:3",
+          "assigned": 2,
+          "edges": 4,
+          "threat": 3.282727063906297
+        },
+        "reasons": [
+          "dig_in"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "arbih_733rd_mountain",
+        "location": "op:busovaca:dobraljevo_2",
+        "placement": {
+          "tier": 0,
+          "sector": "sector:arbih_3rd_corps:2",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_737th_muslim_light",
+        "location": "op:travnik:paklarevo",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:1",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 10.21569211766563
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_7th_vitezka_muslim_liberation",
+        "location": "op:zavidovici:hajderovici_2",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:4",
+          "assigned": 3,
+          "edges": 5,
+          "threat": 2.3230437291365598
+        },
+        "reasons": [
+          "dig_in"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "F_RBiH_0001",
+        "location": "op:donji_vakuf:donji_vakuf_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:6",
+          "assigned": 2,
+          "edges": 8,
+          "threat": 30.765419829678713
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_110th_usora_brigade",
+        "location": "op:tesanj:kalosevic_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_3rd_corps:5",
+          "assigned": 8,
+          "edges": 15,
+          "threat": 12.034486847498073
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      }
+    ]
+  },
+  {
+    "sector": "sector:arbih_5th_corps:0",
+    "faction": "RBiH",
+    "corps": "arbih_5th_corps",
+    "edges": 4,
+    "territory": [
+      "op:bihac:orasac_2"
+    ],
+    "candidates": 10,
+    "legal_before_reach": 10,
+    "classified": [
+      {
+        "id": "arbih_501st_slavna_mountain",
+        "location": "op:bihac:bihac_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_5th_corps:1",
+          "assigned": 7,
+          "edges": 3,
+          "threat": 1.983795659769962
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_502nd_vitezka_mountain",
+        "location": "op:bihac:brekovica_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_5th_corps:1",
+          "assigned": 7,
+          "edges": 3,
+          "threat": 1.983795659769962
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_503rd_slavna_mountain",
+        "location": "op:bihac:brekovica_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_5th_corps:1",
+          "assigned": 7,
+          "edges": 3,
+          "threat": 1.983795659769962
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_504th_cazin_light",
+        "location": "op:bihac:brekovica_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_5th_corps:1",
+          "assigned": 7,
+          "edges": 3,
+          "threat": 1.983795659769962
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_505th_vitezka_mountain",
+        "location": "op:bosanska_krupa:otoka_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_5th_corps:2",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 7.418653458825126
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_506th_mountain",
+        "location": "op:bosanska_krupa:jezerski_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_5th_corps:2",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 7.418653458825126
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_510th_bosnian_liberation",
+        "location": "op:bihac:bihac_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_5th_corps:1",
+          "assigned": 7,
+          "edges": 3,
+          "threat": 1.983795659769962
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_511th_slavna_mountain",
+        "location": "op:bosanska_krupa:jezerski_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_5th_corps:2",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 7.418653458825126
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "arbih_517th_light",
+        "location": "op:bihac:bihac_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_5th_corps:1",
+          "assigned": 7,
+          "edges": 3,
+          "threat": 1.983795659769962
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hvo_101st_bihac",
+        "location": "op:bihac:bihac_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:arbih_5th_corps:1",
+          "assigned": 7,
+          "edges": 3,
+          "threat": 1.983795659769962
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      }
+    ]
+  },
+  {
+    "sector": "sector:hvo_central_bosnia:0",
+    "faction": "HRHB",
+    "corps": "hvo_central_bosnia",
+    "edges": 5,
+    "territory": [
+      "op:mrkonjic_grad:baljvine_2"
+    ],
+    "candidates": 12,
+    "legal_before_reach": 9,
+    "classified": [
+      {
+        "id": "hrhb_111th_brigade",
+        "location": "op:zepce:viniste_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:9",
+          "assigned": 1,
+          "edges": 1,
+          "threat": 0
+        },
+        "reasons": [
+          "line_at_minimum_1_of_1"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "hrhb_94th_brigade",
+        "location": "op:kiseljak:azapovici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:4",
+          "assigned": 6,
+          "edges": 2,
+          "threat": 1.7377768343593012
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_95th_brigade",
+        "location": "op:kiseljak:azapovici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:4",
+          "assigned": 6,
+          "edges": 2,
+          "threat": 1.7377768343593012
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_ban_jelai_brigade",
+        "location": "op:kiseljak:azapovici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:4",
+          "assigned": 6,
+          "edges": 2,
+          "threat": 1.7377768343593012
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_jure_franceti_brigade",
+        "location": "op:busovaca:bare_2",
+        "placement": {
+          "tier": 0,
+          "sector": "sector:hvo_central_bosnia:3",
+          "assigned": 1,
+          "edges": 1,
+          "threat": 15.164240388204556
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_kiseljak_brigade",
+        "location": "op:kiseljak:azapovici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:4",
+          "assigned": 6,
+          "edges": 2,
+          "threat": 1.7377768343593012
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_kreevo_brigade",
+        "location": "op:kiseljak:azapovici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:4",
+          "assigned": 6,
+          "edges": 2,
+          "threat": 1.7377768343593012
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_stjepan_tomaevi_brigade",
+        "location": "op:novi_travnik:rankovici_2",
+        "placement": {
+          "tier": 0,
+          "sector": "sector:hvo_central_bosnia:3",
+          "assigned": 1,
+          "edges": 1,
+          "threat": 15.164240388204556
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_travnik_brigade",
+        "location": "op:novi_travnik:rat_2",
+        "placement": null,
+        "reasons": [
+          "no_sector_placement"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "hrhb_vitezovi_brigade_vitez",
+        "location": "op:vitez:vitez_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 0,
+          "sector": "sector:hvo_central_bosnia:3",
+          "assigned": 1,
+          "edges": 1,
+          "threat": 15.164240388204556
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hvo_ante_starcevic_brigade",
+        "location": "op:kiseljak:azapovici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:4",
+          "assigned": 6,
+          "edges": 2,
+          "threat": 1.7377768343593012
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hvo_nikola_subic_zrinski_brigade",
+        "location": "op:bugojno:medini",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:3",
+          "assigned": 1,
+          "edges": 1,
+          "threat": 15.164240388204556
+        },
+        "reasons": [
+          "dig_in",
+          "line_at_minimum_1_of_1"
+        ],
+        "legal_before_reach": false
+      }
+    ]
+  },
+  {
+    "sector": "sector:hvo_central_bosnia:5",
+    "faction": "HRHB",
+    "corps": "hvo_central_bosnia",
+    "edges": 4,
+    "territory": [
+      "op:jajce:lupnica"
+    ],
+    "candidates": 12,
+    "legal_before_reach": 9,
+    "classified": [
+      {
+        "id": "hrhb_111th_brigade",
+        "location": "op:zepce:viniste_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:9",
+          "assigned": 1,
+          "edges": 1,
+          "threat": 0
+        },
+        "reasons": [
+          "line_at_minimum_1_of_1"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "hrhb_94th_brigade",
+        "location": "op:kiseljak:azapovici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:4",
+          "assigned": 6,
+          "edges": 2,
+          "threat": 1.7377768343593012
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_95th_brigade",
+        "location": "op:kiseljak:azapovici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:4",
+          "assigned": 6,
+          "edges": 2,
+          "threat": 1.7377768343593012
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_ban_jelai_brigade",
+        "location": "op:kiseljak:azapovici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:4",
+          "assigned": 6,
+          "edges": 2,
+          "threat": 1.7377768343593012
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_jure_franceti_brigade",
+        "location": "op:busovaca:bare_2",
+        "placement": {
+          "tier": 0,
+          "sector": "sector:hvo_central_bosnia:3",
+          "assigned": 1,
+          "edges": 1,
+          "threat": 15.164240388204556
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_kiseljak_brigade",
+        "location": "op:kiseljak:azapovici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:4",
+          "assigned": 6,
+          "edges": 2,
+          "threat": 1.7377768343593012
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_kreevo_brigade",
+        "location": "op:kiseljak:azapovici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:4",
+          "assigned": 6,
+          "edges": 2,
+          "threat": 1.7377768343593012
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_stjepan_tomaevi_brigade",
+        "location": "op:novi_travnik:rankovici_2",
+        "placement": {
+          "tier": 0,
+          "sector": "sector:hvo_central_bosnia:3",
+          "assigned": 1,
+          "edges": 1,
+          "threat": 15.164240388204556
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_travnik_brigade",
+        "location": "op:novi_travnik:rat_2",
+        "placement": null,
+        "reasons": [
+          "no_sector_placement"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "hrhb_vitezovi_brigade_vitez",
+        "location": "op:vitez:vitez_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 0,
+          "sector": "sector:hvo_central_bosnia:3",
+          "assigned": 1,
+          "edges": 1,
+          "threat": 15.164240388204556
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hvo_ante_starcevic_brigade",
+        "location": "op:kiseljak:azapovici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:4",
+          "assigned": 6,
+          "edges": 2,
+          "threat": 1.7377768343593012
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hvo_nikola_subic_zrinski_brigade",
+        "location": "op:bugojno:medini",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:3",
+          "assigned": 1,
+          "edges": 1,
+          "threat": 15.164240388204556
+        },
+        "reasons": [
+          "dig_in",
+          "line_at_minimum_1_of_1"
+        ],
+        "legal_before_reach": false
+      }
+    ]
+  },
+  {
+    "sector": "sector:hvo_central_bosnia:6",
+    "faction": "HRHB",
+    "corps": "hvo_central_bosnia",
+    "edges": 9,
+    "territory": [
+      "op:skender_vakuf:donji_koricani"
+    ],
+    "candidates": 12,
+    "legal_before_reach": 9,
+    "classified": [
+      {
+        "id": "hrhb_111th_brigade",
+        "location": "op:zepce:viniste_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:9",
+          "assigned": 1,
+          "edges": 1,
+          "threat": 0
+        },
+        "reasons": [
+          "line_at_minimum_1_of_1"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "hrhb_94th_brigade",
+        "location": "op:kiseljak:azapovici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:4",
+          "assigned": 6,
+          "edges": 2,
+          "threat": 1.7377768343593012
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_95th_brigade",
+        "location": "op:kiseljak:azapovici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:4",
+          "assigned": 6,
+          "edges": 2,
+          "threat": 1.7377768343593012
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_ban_jelai_brigade",
+        "location": "op:kiseljak:azapovici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:4",
+          "assigned": 6,
+          "edges": 2,
+          "threat": 1.7377768343593012
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_jure_franceti_brigade",
+        "location": "op:busovaca:bare_2",
+        "placement": {
+          "tier": 0,
+          "sector": "sector:hvo_central_bosnia:3",
+          "assigned": 1,
+          "edges": 1,
+          "threat": 15.164240388204556
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_kiseljak_brigade",
+        "location": "op:kiseljak:azapovici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:4",
+          "assigned": 6,
+          "edges": 2,
+          "threat": 1.7377768343593012
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_kreevo_brigade",
+        "location": "op:kiseljak:azapovici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:4",
+          "assigned": 6,
+          "edges": 2,
+          "threat": 1.7377768343593012
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_stjepan_tomaevi_brigade",
+        "location": "op:novi_travnik:rankovici_2",
+        "placement": {
+          "tier": 0,
+          "sector": "sector:hvo_central_bosnia:3",
+          "assigned": 1,
+          "edges": 1,
+          "threat": 15.164240388204556
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_travnik_brigade",
+        "location": "op:novi_travnik:rat_2",
+        "placement": null,
+        "reasons": [
+          "no_sector_placement"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "hrhb_vitezovi_brigade_vitez",
+        "location": "op:vitez:vitez_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 0,
+          "sector": "sector:hvo_central_bosnia:3",
+          "assigned": 1,
+          "edges": 1,
+          "threat": 15.164240388204556
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hvo_ante_starcevic_brigade",
+        "location": "op:kiseljak:azapovici_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:4",
+          "assigned": 6,
+          "edges": 2,
+          "threat": 1.7377768343593012
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hvo_nikola_subic_zrinski_brigade",
+        "location": "op:bugojno:medini",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_central_bosnia:3",
+          "assigned": 1,
+          "edges": 1,
+          "threat": 15.164240388204556
+        },
+        "reasons": [
+          "dig_in",
+          "line_at_minimum_1_of_1"
+        ],
+        "legal_before_reach": false
+      }
+    ]
+  },
+  {
+    "sector": "sector:hvo_northwest_bosnia:0",
+    "faction": "HRHB",
+    "corps": "hvo_northwest_bosnia",
+    "edges": 7,
+    "territory": [
+      "op:odzak:donja_dubica",
+      "op:odzak:potocani_2"
+    ],
+    "candidates": 4,
+    "legal_before_reach": 3,
+    "classified": [
+      {
+        "id": "hrhb_101st_oraje_brigade",
+        "location": "op:orasje:donja_mahala",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_northwest_bosnia:1",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 23.406812777684827
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hrhb_102nd_brigade",
+        "location": "op:novi_travnik:rat_2",
+        "posture": "defend",
+        "placement": null,
+        "reasons": [
+          "no_sector_placement"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "hrhb_106th_bosanska_posavina_brigade",
+        "location": "op:orasje:donja_mahala",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_northwest_bosnia:1",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 23.406812777684827
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "hvo_hrvoje_vukcic_brigade",
+        "location": "op:orasje:orasje",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:hvo_northwest_bosnia:1",
+          "assigned": 3,
+          "edges": 4,
+          "threat": 23.406812777684827
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      }
+    ]
+  },
+  {
+    "sector": "sector:vrs_1st_krajina:4",
+    "faction": "RS",
+    "corps": "vrs_1st_krajina",
+    "edges": 5,
+    "territory": [
+      "op:zavidovici:cardak_2"
+    ],
+    "candidates": 35,
+    "legal_before_reach": 25,
+    "classified": [
+      {
+        "id": "rs_11th_dubica_infantry",
+        "location": "op:banja_luka:rekavice_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:0",
+          "assigned": 4,
+          "edges": 5,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_11th_mrkonji_light_infantry",
+        "location": "op:jajce:jajce_3",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:8",
+          "assigned": 1,
+          "edges": 4,
+          "threat": 0
+        },
+        "reasons": [
+          "line_at_minimum_1_of_1"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "rs_12th_kotorsko_light_infantry",
+        "location": "op:teslic:buletic_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:3",
+          "assigned": 5,
+          "edges": 18,
+          "threat": 188.38575296744338
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_16th_krajina_motorized",
+        "location": "op:skender_vakuf:knezevo_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:10",
+          "assigned": 2,
+          "edges": 2,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_19th_krajina_light_infantry",
+        "location": "op:donji_vakuf:babin_potok_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:2",
+          "assigned": 2,
+          "edges": 8,
+          "threat": 124.02991722077323
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_1st_armored",
+        "location": "op:jajce:barevo_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:0",
+          "assigned": 4,
+          "edges": 5,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_1st_banja_luka_light_infantry",
+        "location": "op:travnik:gornje_krcevine",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:9",
+          "assigned": 4,
+          "edges": 9,
+          "threat": 32.56484556531476
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_1st_celinac_light_infantry",
+        "location": "op:skender_vakuf:knezevo_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:10",
+          "assigned": 2,
+          "edges": 2,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_1st_doboj_light_infantry",
+        "location": "op:orasje:ostra_luka",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:5",
+          "assigned": 1,
+          "edges": 2,
+          "threat": 24.34929932820976
+        },
+        "reasons": [
+          "line_at_minimum_1_of_1"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "rs_1st_gradika_light_infantry",
+        "location": "op:jajce:bravnice",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:11",
+          "assigned": 4,
+          "edges": 6,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_1st_kotor_varo_light_infantry",
+        "location": "op:skender_vakuf:imljani_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:3",
+          "assigned": 5,
+          "edges": 18,
+          "threat": 188.38575296744338
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_1st_krnjin_light_infantry",
+        "location": "op:gracanica:petrovo_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:1",
+          "assigned": 3,
+          "edges": 20,
+          "threat": 809.0428559721612
+        },
+        "reasons": [
+          "line_at_minimum_3_of_3",
+          "threat_809.0428559721612"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "rs_1st_novigrad_infantry",
+        "location": "op:sipovo:sipovo_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:11",
+          "assigned": 4,
+          "edges": 6,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_1st_ozren_light_infantry",
+        "location": "op:doboj:boljanic_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:13",
+          "assigned": 3,
+          "edges": 11,
+          "threat": 157.93708431193218
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_1st_prnjavor_light_infantry",
+        "location": "op:bosanski_samac:domaljevac_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 1,
+          "sector": "sector:vrs_1st_krajina:5",
+          "assigned": 1,
+          "edges": 2,
+          "threat": 24.34929932820976
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_1st_sipovo_light_infantry",
+        "location": "op:donji_vakuf:pribraca_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:6",
+          "assigned": 1,
+          "edges": 1,
+          "threat": 0
+        },
+        "reasons": [
+          "movement_order",
+          "line_at_minimum_1_of_1"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "rs_1st_srbac_light_infantry",
+        "location": "op:teslic:cecava_2",
+        "posture": "dig_in",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:3",
+          "assigned": 5,
+          "edges": 18,
+          "threat": 188.38575296744338
+        },
+        "reasons": [
+          "dig_in"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "rs_1st_tesli_infantry",
+        "location": "op:teslic:blatnica_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:3",
+          "assigned": 5,
+          "edges": 18,
+          "threat": 188.38575296744338
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_1st_trebava_infantry",
+        "location": "op:bosanski_samac:domaljevac_2",
+        "posture": "attack",
+        "placement": {
+          "tier": 0,
+          "sector": "sector:vrs_1st_krajina:5",
+          "assigned": 1,
+          "edges": 2,
+          "threat": 24.34929932820976
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_1st_vujak_light_infantry",
+        "location": "op:modrica:skugric_gornji_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:7",
+          "assigned": 1,
+          "edges": 3,
+          "threat": 41.12722515753786
+        },
+        "reasons": [
+          "line_at_minimum_1_of_1"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "rs_22nd_krajina_infantry",
+        "location": "op:donji_vakuf:komar_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:9",
+          "assigned": 4,
+          "edges": 9,
+          "threat": 32.56484556531476
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_27th_derventa_motorized",
+        "location": "op:modrica:garevac_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:12",
+          "assigned": 2,
+          "edges": 5,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_2nd_armored",
+        "location": "op:doboj:makljenovac",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:13",
+          "assigned": 3,
+          "edges": 11,
+          "threat": 157.93708431193218
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_2nd_banja_luka_light_infantry",
+        "location": "op:jajce:jezero_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:11",
+          "assigned": 4,
+          "edges": 6,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_2nd_krajina_infantry",
+        "location": "op:skender_vakuf:imljani_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:3",
+          "assigned": 5,
+          "edges": 18,
+          "threat": 188.38575296744338
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_2nd_ozren_light_infantry",
+        "location": "op:lukavac:brijesnica_donja_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:1",
+          "assigned": 3,
+          "edges": 20,
+          "threat": 809.0428559721612
+        },
+        "reasons": [
+          "line_at_minimum_3_of_3",
+          "threat_809.0428559721612"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "rs_2nd_tesli_light_infantry",
+        "location": "op:doboj:bukovica_velika_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:13",
+          "assigned": 3,
+          "edges": 11,
+          "threat": 157.93708431193218
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_3rd_banja_luka_light_infantry",
+        "location": "op:jajce:prisoje",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:0",
+          "assigned": 4,
+          "edges": 5,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_3rd_ozren_light_infantry",
+        "location": "op:modrica:garevac_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:12",
+          "assigned": 2,
+          "edges": 5,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_43rd_prijedor_motorized",
+        "location": "op:jajce:grdovo",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:9",
+          "assigned": 4,
+          "edges": 9,
+          "threat": 32.56484556531476
+        },
+        "reasons": [
+          "active_operation_participant"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "rs_4th_banja_luka_light_infantry",
+        "location": "op:jajce:divicani_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:9",
+          "assigned": 4,
+          "edges": 9,
+          "threat": 32.56484556531476
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "rs_4th_ozren_light_infantry",
+        "location": "op:zavidovici:vozuca_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:1",
+          "assigned": 3,
+          "edges": 20,
+          "threat": 809.0428559721612
+        },
+        "reasons": [
+          "line_at_minimum_3_of_3",
+          "threat_809.0428559721612"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "rs_5th_kozara_light_infantry",
+        "location": "op:donji_vakuf:komar_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:2",
+          "assigned": 2,
+          "edges": 8,
+          "threat": 124.02991722077323
+        },
+        "reasons": [
+          "movement_order"
+        ],
+        "legal_before_reach": false
+      },
+      {
+        "id": "rs_6th_sanske_infantry",
+        "location": "op:mrkonjic_grad:majdan_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:11",
+          "assigned": 4,
+          "edges": 6,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      },
+      {
+        "id": "vrs_1st_laktasi",
+        "location": "op:skender_vakuf:javorani_2",
+        "posture": "defend",
+        "placement": {
+          "tier": 2,
+          "sector": "sector:vrs_1st_krajina:0",
+          "assigned": 4,
+          "edges": 5,
+          "threat": 0
+        },
+        "reasons": [],
+        "legal_before_reach": true
+      }
+    ]
+  }
+]

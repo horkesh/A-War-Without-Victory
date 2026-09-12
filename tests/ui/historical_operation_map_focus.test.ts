@@ -47,20 +47,32 @@ describe('historical operation dossier -> field plan contract', () => {
     const details = buildHistoricalOperationAuthorizationDetails(makeState(), historicalOp!);
     expect(details.corpsId).toBe('vrs_drina');
     expect(details.objectiveOsids).toEqual([
+      'op:bratunac:jezestica_2',
+      'op:bratunac:pobudje_2',
+      'op:srebrenica:ljeskovik_2',
+      'op:srebrenica:luka_2',
+      'op:srebrenica:obadi',
       'op:srebrenica:osmace_2',
       'op:srebrenica:radovcici',
       'op:srebrenica:sulice_2',
       'op:vlasenica:cerska_2',
+      'op:vlasenica:pomol_2',
     ]);
     expect(details.stagingOsids).toEqual([
-      'op:srebrenica:osmace_2',
+      'op:srebrenica:brezovice_2',
       'op:vlasenica:grabovica',
+      'op:vlasenica:sebiocina',
     ]);
     expect(details.formationIds).toEqual([
       'rs_1st_birac',
       'rs_1st_bratunac',
+      'rs_1st_guards_motorized',
       'rs_1st_milii',
+      'rs_1st_podrinje',
       'rs_1st_zvornik',
+      'rs_5th_podrinje',
+      'rs_65th_protection_motorized_regiment',
+      'rs_visegrad_brigade',
     ]);
   });
 
@@ -150,13 +162,29 @@ describe('historical operation dossier -> field plan contract', () => {
       proposalId: 'review-cerska',
       corpsId: 'vrs_drina',
       objectiveOsids: [
+        'op:bratunac:jezestica_2',
+        'op:bratunac:pobudje_2',
+        'op:srebrenica:ljeskovik_2',
+        'op:srebrenica:luka_2',
+        'op:srebrenica:obadi',
         'op:srebrenica:osmace_2',
         'op:srebrenica:radovcici',
         'op:srebrenica:sulice_2',
         'op:vlasenica:cerska_2',
+        'op:vlasenica:pomol_2',
       ],
-      stagingOsids: ['op:srebrenica:osmace_2', 'op:vlasenica:grabovica'],
-      formationIds: ['rs_1st_birac', 'rs_1st_bratunac', 'rs_1st_milii', 'rs_1st_zvornik'],
+      stagingOsids: ['op:srebrenica:brezovice_2', 'op:vlasenica:grabovica', 'op:vlasenica:sebiocina'],
+      formationIds: [
+        'rs_1st_birac',
+        'rs_1st_bratunac',
+        'rs_1st_guards_motorized',
+        'rs_1st_milii',
+        'rs_1st_podrinje',
+        'rs_1st_zvornik',
+        'rs_5th_podrinje',
+        'rs_65th_protection_motorized_regiment',
+        'rs_visegrad_brigade',
+      ],
     });
   });
 });

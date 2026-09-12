@@ -1,0 +1,81 @@
+{
+  "source": "data\\derived\\scenario\\_baseline_tmp\\apr1992_188w",
+  "backup": "F:\\AWWV-worktrees\\_preserved\\roadmap-integration-20260912\\main-baseline-before-integration",
+  "files": [
+    {
+      "path": "activity_summary.json",
+      "sha256": "7d10356d0715db21370c3f7d6acc15db7948856c80962363f505641b48bfbd4e",
+      "bytes": 453
+    },
+    {
+      "path": "brigade_temporal_log.jsonl",
+      "sha256": "dbb6e97283abd2e0316eb879938c8a58a2abc60491d015dbd165b2c62fbce001",
+      "bytes": 24081794
+    },
+    {
+      "path": "control_delta.json",
+      "sha256": "4cb8219cf3b7dcbfdd66476a7af5bbfa0709fdd24e0a37d6900a9b808d6acb85",
+      "bytes": 31557
+    },
+    {
+      "path": "destroyed_brigades.json",
+      "sha256": "d1852428301168d48d5bdad89c6a67c80f0447bcb8ce38cfa6a5560ec81f66a4",
+      "bytes": 6684
+    },
+    {
+      "path": "displacement_event_log.jsonl",
+      "sha256": "efce9ba7835fd3f1c168817f98f32c7e046b590096d2befd22e17d8cee666b36",
+      "bytes": 16091489
+    },
+    {
+      "path": "end_report.md",
+      "sha256": "fea39f3bf7eda907b290e3bd2579ac050c847ae2f783153117f95f1f94d0cf8d",
+      "bytes": 49569
+    },
+    {
+      "path": "final_save.json",
+      "sha256": "e414dc69f6e875fcd2a7394582921f20ca03123112baf12e9308c50035c29c50",
+      "bytes": 9008240
+    },
+    {
+      "path": "formation_delta.json",
+      "sha256": "bbd7260e219d311bea201053d0d7c913f4b30b83bcead72b05d5f2c957566cb1",
+      "bytes": 3849
+    },
+    {
+      "path": "initial_save.json",
+      "sha256": "5a68253b783517b7295d91128f0b80fb85189735747480533287889f7b57e3b7",
+      "bytes": 1371523
+    },
+    {
+      "path": "operation_aars.json",
+      "sha256": "a7f1e33be0c69cae5e78025a7af52cb1c8419503cfe4962992ec46fc5150e74a",
+      "bytes": 559857
+    },
+    {
+      "path": "replay_save_manifest.json",
+      "sha256": "834ec8254469a1937a4178e5e964b0beb0270bc8e452b7d2b6ca80381b426fae",
+      "bytes": 37173
+    },
+    {
+      "path": "run_meta.json",
+      "sha256": "f6f094ce59b148f9902466be575d678360188da45a9ca2ab64c2456a15e3f4c6",
+      "bytes": 10523
+    },
+    {
+      "path": "run_summary.json",
+      "sha256": "b8ebc2c1ff4522fed0651be224ba360fcfeff0da4e6983f27d9df008eeba98cb",
+      "bytes": 625800
+    },
+    {
+      "path": "watched_operations.json",
+      "sha256": "785a073b9312e34d20ba143915478ab768ce7847ad337b121f98491df8325b18",
+      "bytes": 5299
+    },
+    {
+      "path": "weekly_report.jsonl",
+      "sha256": "4c5cb00bde51a15e2f7766d31ececb03e86d81bfcf1f93a4c04c01cbda31b9cf",
+      "bytes": 2012188
+    }
+  ]
+}

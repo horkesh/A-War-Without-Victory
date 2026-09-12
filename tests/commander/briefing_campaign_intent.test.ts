@@ -170,6 +170,71 @@ function withCommanderFrontGeometryEnv<T>(
 }
 
 describe('commander briefing campaign intent', () => {
+    it('derives bilateral attacker and defender briefing roles from governed directive targets', () => {
+        const buildBilateralBriefing = (
+            faction: FactionId,
+            offensiveTargets: string[],
+        ): CommanderBriefing => {
+            const corpsId = `${faction}_bilateral_corps` as FormationId;
+            const state = {
+                meta: { turn: 10 },
+                military: {
+                    formations: {},
+                    corps_front_sectors: {},
+                    corps_command: {
+                        [corpsId]: {
+                            stance: offensiveTargets.length > 0 ? 'offensive' : 'defensive',
+                            status_reason: 'rbih_hrhb_bilateral_front_diversion',
+                            active_operations: [],
+                            directive: {
+                                offensive_targets: offensiveTargets,
+                                hold_osids: ['op:test:hold_b', 'op:test:hold_a'],
+                            },
+                        },
+                    },
+                    must_hold_osids_by_corps: {},
+                    sector_intel: {},
+                    opsec_sectors: [],
+                },
+            } as unknown as GameState;
+
+            return buildBriefing(
+                state,
+                corpsId,
+                faction,
+                {
+                    adjacency: new Map(),
+                    friendlyOsidsByFaction: new Map([[faction, new Set()]]),
+                } as any,
+                [],
+                null,
+                null,
+                null,
+                null,
+            );
+        };
+
+        const attacker = buildBilateralBriefing('RBiH' as FactionId, [
+            'op:test:target_b',
+            'op:test:target_a',
+        ]);
+        expect(attacker.campaign_role).toBe('primary');
+        expect(attacker.campaign_stance_ceiling).toBe('offensive');
+        expect(attacker.campaign_offensive_targets).toEqual([
+            'op:test:target_a',
+            'op:test:target_b',
+        ]);
+        expect(attacker.campaign_hold_targets).toEqual(['op:test:hold_a', 'op:test:hold_b']);
+        expect(attacker.bilateral_offensive).toBe(true);
+
+        const defender = buildBilateralBriefing('HRHB' as FactionId, []);
+        expect(defender.campaign_role).toBe('contain');
+        expect(defender.campaign_stance_ceiling).toBe('defensive');
+        expect(defender.campaign_offensive_targets).toEqual([]);
+        expect(defender.campaign_hold_targets).toEqual(['op:test:hold_a', 'op:test:hold_b']);
+        expect(defender.bilateral_offensive).toBe(false);
+    });
+
     it('skips front geometry briefing analysis unless diagnostics opt in', () => {
         const corpsId = 'test_corps' as FormationId;
         const faction = 'RBiH' as FactionId;

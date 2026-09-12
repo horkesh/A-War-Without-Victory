@@ -1,0 +1,101 @@
+[
+  {
+    "sector": "sector:arbih_1st_corps:6",
+    "faction": "RBiH",
+    "corps": "arbih_1st_corps",
+    "edges": 14,
+    "assigned": 0,
+    "reserve": 0,
+    "rear": 0,
+    "unstaffed": true,
+    "territory": "op:centar_sarajevo:sarajevo_dio_centar_sajarevo,op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo,op:novo_sarajevo:sarajevo_dio_novo_sarajevo,op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo,op:vogosca:hotonj"
+  },
+  {
+    "sector": "sector:arbih_3rd_corps:7",
+    "faction": "RBiH",
+    "corps": "arbih_3rd_corps",
+    "edges": 6,
+    "assigned": 0,
+    "reserve": 0,
+    "rear": 0,
+    "unstaffed": true,
+    "territory": "op:sipovo:volari_2"
+  },
+  {
+    "sector": "sector:arbih_3rd_corps:8",
+    "faction": "RBiH",
+    "corps": "arbih_3rd_corps",
+    "edges": 4,
+    "assigned": 0,
+    "reserve": 0,
+    "rear": 0,
+    "unstaffed": true,
+    "territory": "op:teslic:donji_ruzevic"
+  },
+  {
+    "sector": "sector:arbih_5th_corps:0",
+    "faction": "RBiH",
+    "corps": "arbih_5th_corps",
+    "edges": 4,
+    "assigned": 0,
+    "reserve": 0,
+    "rear": 0,
+    "unstaffed": true,
+    "territory": "op:bihac:orasac_2"
+  },
+  {
+    "sector": "sector:hvo_central_bosnia:0",
+    "faction": "HRHB",
+    "corps": "hvo_central_bosnia",
+    "edges": 5,
+    "assigned": 0,
+    "reserve": 0,
+    "rear": 0,
+    "unstaffed": true,
+    "territory": "op:mrkonjic_grad:baljvine_2"
+  },
+  {
+    "sector": "sector:hvo_central_bosnia:5",
+    "faction": "HRHB",
+    "corps": "hvo_central_bosnia",
+    "edges": 4,
+    "assigned": 0,
+    "reserve": 0,
+    "rear": 0,
+    "unstaffed": true,
+    "territory": "op:jajce:lupnica"
+  },
+  {
+    "sector": "sector:hvo_central_bosnia:6",
+    "faction": "HRHB",
+    "corps": "hvo_central_bosnia",
+    "edges": 9,
+    "assigned": 0,
+    "reserve": 0,
+    "rear": 0,
+    "unstaffed": true,
+    "territory": "op:skender_vakuf:donji_koricani"
+  },
+  {
+    "sector": "sector:hvo_northwest_bosnia:0",
+    "faction": "HRHB",
+    "corps": "hvo_northwest_bosnia",
+    "edges": 7,
+    "assigned": 0,
+    "reserve": 0,
+    "rear": 0,
+    "unstaffed": true,
+    "territory": "op:odzak:donja_dubica,op:odzak:potocani_2"
+  },
+  {
+    "sector": "sector:vrs_1st_krajina:4",
+    "faction": "RS",
+    "corps": "vrs_1st_krajina",
+    "edges": 5,
+    "assigned": 0,
+    "reserve": 0,
+    "rear": 0,
+    "unstaffed": true,
+    "territory": "op:zavidovici:cardak_2"
+  }
+]

@@ -12,7 +12,7 @@ const readJson = (file) => JSON.parse(fs.readFileSync(file, 'utf8'));
 const finalSave = readJson(path.join(runDir, 'final_save.json'));
 const initialSave = readJson(path.join(runDir, 'initial_save.json'));
 const paintedFile = readJson(paintedPath);
-const mergeMap = readJson(path.resolve(__dirname, 'micro_osid_merge_map.json'));
+const mergeMap = readJson(path.resolve(__dirname, '../data/derived/operational/micro_osid_merge_map.json'));
 const finalControl = finalSave.political.political_controllers;
 const initialControl = initialSave.political.political_controllers;
 const painted = paintedFile.by_settlement_id;

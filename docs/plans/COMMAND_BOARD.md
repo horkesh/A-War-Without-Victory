@@ -1,6 +1,6 @@
 # AWWV Command Board
 
-**Status:** Derived dispatch view, synchronized 2026-09-12.
+**Status:** Derived dispatch view, synchronized 2026-09-13.
 
 **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole authority for unfinished work and wins if this board differs.
 
@@ -23,18 +23,20 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 3 | R3 | **COMPLETE** | None. | [TG convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) |
 | 4 | R4 | **COMPLETE** | None; Phase 6 and its packaging follow-up are closed. | [Command/event/Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) |
 | 5 | R5 | **COMPLETE -- CLOSED 2026-08-05** | None. The accepted performance floor is approximately 1.09 seconds per turn; the 100 ms target and incremental-reuse Task 6 are retired from 1.0 scope. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
-| 6 | R6 | **CALIBRATION CANDIDATE HELD — 2026-09-12** | Resolve two canon decisions, verify the combined source with full suite and clean 188-week pair, then promote. Historical 104-week evidence and all floors remain preserved. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
+| 6 | R6 | **CALIBRATION CANDIDATE HELD — 2026-09-13** | Canon amendments are approved and integration corrections verified. Resolve the coverage-cap decision, verify the affected tests, then run the clean 188-week pair conditionally before promotion. Historical evidence and all floors remain preserved. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
 | 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
 | 7 | R7 | **WR01/PIN REFRESH LANDED; AUDIO/ACCEPTANCE OPEN** | Finish offline audio and ten-cue disposition; human listening waits for owner inspection. WR01 closed in #517 and pins refreshed in #518; April combined-source acceptance is separate. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [accepted functional opening](2026-08-23-opening-screens-implementation-plan.md) / [cinematic opening and typography amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md) / [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) |
 | 7.5 | RE | **CLOSED — owner, 2026-09-01** | None. RE gates nothing; engine-health defects are still fixed before tuning. | [Closed recovery record](2026-08-28-packaged-probe-recovery-plan.md) / [closed RE contract](2026-08-26-engine-integrity-plan.md) |
 | 8 | R8 | **INBOX REPAIRED; PACKAGE/SHAKEDOWN GATES OPEN — 2026-09-10.** | Product `7d97b72fc`, route/build/hook pass; sole UI-boundary failure reconciled by 45/45 targeted checks, exit 1 retained. Harness `c31135f35` reaches RBiH turn 24/577 captures, then fails readability before Save/load. Nineteen local aborts and one final-sector warning need disposition; RS/HRHB unlaunched. Post-run package adds telemetry: all 1,200 original files match, directory gate fails. Narrow follow-up proposed only; old package/evidence preserved, full campaigns/acceptance open. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
 | 9 | R9 | **FREEZE WAITING ON R8; LIMITED PREPARATION AT §4.2** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
-**Calibration integration — 2026-09-12:** all 20 April branch commits are in candidate
-`7382f26f8` on `codex/roadmap-calibration-integration-20260912`; main remains `9588876bc`.
-Typecheck and targeted merge correction pass. Two Engine Invariants decisions (§14.8b passive
-capture; §16.2 elite recall) hold promotion and expensive verification. The old 104-week dirty
-pair is not full-horizon acceptance. [Receipt](../40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#integration-audit--2026-09-12).
+**Calibration integration — 2026-09-13:** all 20 April branch commits are in candidate
+`7382f26f8`; owner-approved canon amendments are committed at `933132e90`. Main remains
+`9588876bc`. Full suite: 13,935 passed, 9 failed, 43 skipped, exit 1. Integration corrections
+pass focused checks; two assertions still reject nine lawful isolated fronts against the old
+two-front cap. A reviewed zero-staffable-gap replacement is proposed but unapplied. That owner
+decision precedes coverage retests and the clean 188-week pair. The old dirty week-104 pair is
+not full-horizon acceptance. [Receipt](../40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#integration-audit--2026-09-12).
 
 **R7 readability execution — 2026-09-09:** The authorized date-label expansion now has nine-case initial/maximum-scroll proof, preserving the fixed Desk column, header and artwork. Final UI/typecheck/build checks and independent review pass; Desk/date commit `88996a23d` and its hook pass. Clean POST-A completes 188 weeks with health/hash checks passing; PRE/POST-A/POST-B match all eight artifacts and inputs. The fixed run budget is consumed. Earlier phases and unaffected global Vitest/player-experience receipts remain reviewed. Baseline investigation is GO: pins match accepted n392, while four consumed inputs changed before R7; PRE/POST-B match all eight artifacts. Retain the six-pin failing baseline gate and dirty POST-B disclosure. No R7 closure or downstream lane is claimed. See the amendment and designated report.
 
@@ -92,7 +94,7 @@ no execution authority or new workstream; D1 and separately authorized BC04 work
 
 ## Current Critical Path
 
-`Calibration integration canon decisions/verification + R7 audio + R8 usability/runtime repairs -> BC10 and remaining behavior settlement -> final calibration -> packaged campaigns/diaries and owner inspection -> R9`
+`Calibration integration coverage decision/verification + R7 audio + R8 usability/runtime repairs -> BC10 and remaining behavior settlement -> final calibration -> packaged campaigns/diaries and owner inspection -> R9`
 
 **Finite closure register (2026-09-07; BC01 separately scheduled):** [Master §4.1](MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07) owns BC01 CLOSED (owner accepted verified repair and retired territory similarity, 2026-09-07; [verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md)), BC02 CLOSED by the owner-approved verified Electron load/display repair, BC03 CLOSED by verified repair and owner-approved deferrals, BC04 campaign acceptance and BC05–BC06 remain open; BC07 retention is settled; BC09 Phase 1 is locally reviewed GO with final acceptance deferred, BC10 remains planned, and BC08 is closed by bounded disposition: BC01 opportunity decisions; BC02 sector/rating truth; BC03 narrated Dayton; BC04 chronology/P1/P2; BC05 NATO/Lukavac gates; BC06 posture/gesture controls; BC07 stability-data policy; BC08 inherited tests. FIX means planned disposition when scheduled; VERIFY/DISPOSITION needs bounded evidence. D1 HOLD FOR R8 remains. Registration creates no new lane, RE revival, broader repair authorization, or automatic baseline refresh. BC02 changed no canonical save bytes, campaign result, calibration or baseline. BC03 is closed; BC03 is committed as c95e25241; BC04 P1 is owner-authorized, implemented and independently reviewed; campaign acceptance is deferred to the next calibration, preserving clean before/after attribution; extra P1 repeat/ON runs are owner-retired. P2 completed-week targets are historically ratified; the owner approved the bounded same-turn follow-up/display packet and scoped panel-condition amendment. P2 is implemented, focused checks passed, and independent review returned GO; campaign acceptance remains deferred. Diagnostic calibration stays open; final calibration follows accepted behavior settlement. n392 is 702/678/672/665 against unchanged floors 694/674/668/641; the older 688 breach is historical, and improvement attribution remains unknown.
 

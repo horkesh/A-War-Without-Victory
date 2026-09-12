@@ -1134,6 +1134,22 @@
     "assignable_front_segments": [],
     "bot_priority_shifts": [],
     "brigade_front_assignment": {},
+    "brigade_movement_orders": {
+      "rs_bilea_brigade": {
+        "destination_sids": [
+          "op:gacko:izgori"
+        ],
+        "owner": "authored_preplanned",
+        "stance": "column"
+      },
+      "rs_gacko_brigade": {
+        "destination_sids": [
+          "op:kalinovik:kalinovik_2"
+        ],
+        "owner": "authored_preplanned",
+        "stance": "column"
+      }
+    },
     "cascade_penalties": [],
     "closed_event_ids": [],
     "command_authority": {
@@ -1176,7 +1192,9 @@
         "corps_exhaustion": 0,
         "og_slots": 2,
         "queued_operations": [
-          "Maglaj Local Counterattack"
+          "Maglaj Local Counterattack",
+          "Central Bosnia Counteroffensive",
+          "Battle of Bugojno"
         ],
         "stance": "balanced",
         "subordinate_count": 12
@@ -1187,6 +1205,9 @@
         "command_span": 5,
         "corps_exhaustion": 0,
         "og_slots": 2,
+        "queued_operations": [
+          "Operation Neretva '93"
+        ],
         "stance": "balanced",
         "subordinate_count": 10
       },
@@ -1235,6 +1256,9 @@
         "command_span": 5,
         "corps_exhaustion": 0,
         "og_slots": 1,
+        "queued_operations": [
+          "Prozor–Rama Line Counterattack"
+        ],
         "stance": "balanced",
         "subordinate_count": 2
       },
@@ -1931,7 +1955,7 @@
         "og_slots": 1,
         "queued_operations": [
           "Operation Kijevo",
-          "Operation Trnovo"
+          "Operation Lukavac 93"
         ],
         "stance": "offensive",
         "subordinate_count": 11

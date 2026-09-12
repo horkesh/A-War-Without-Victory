@@ -1,0 +1,56 @@
+{
+  "sha256": "45bcfd9746aabaa85e49d2ce2a44efffdd36ecb7a53966edd450ed419f67a3bf",
+  "changes": [
+    {
+      "path": ".military.brigade_movement_orders",
+      "before": null,
+      "after": {
+        "rs_bilea_brigade": {
+          "destination_sids": [
+            "op:gacko:izgori"
+          ],
+          "owner": "authored_preplanned",
+          "stance": "column"
+        },
+        "rs_gacko_brigade": {
+          "destination_sids": [
+            "op:kalinovik:kalinovik_2"
+          ],
+          "owner": "authored_preplanned",
+          "stance": "column"
+        }
+      }
+    },
+    {
+      "path": ".military.corps_command.arbih_3rd_corps.queued_operations",
+      "before": [
+        "Maglaj Local Counterattack"
+      ],
+      "after": [
+        "Maglaj Local Counterattack",
+        "Central Bosnia Counteroffensive",
+        "Battle of Bugojno"
+      ]
+    },
+    {
+      "path": ".military.corps_command.arbih_4th_corps.queued_operations",
+      "before": null,
+      "after": [
+        "Operation Neretva '93"
+      ]
+    },
+    {
+      "path": ".military.corps_command.hvo_tomislavgrad.queued_operations",
+      "before": null,
+      "after": [
+        "Prozor\u2013Rama Line Counterattack"
+      ]
+    },
+    {
+      "path": ".military.corps_command.vrs_sarajevo_romanija.queued_operations[1]",
+      "before": "Operation Trnovo",
+      "after": "Operation Lukavac 93"
+    }
+  ],
+  "verification": "Pass: exact independently predicted normalized SHA and five grouped structural paths. Initial count-only assertion expected seven recursive changes but this comparator groups changed-length arrays; the grouping difference required no artifact change."
+}

@@ -1,18 +1,22 @@
 # AWWV Calibration Master Reference
 
-**Current delivery status (2026-09-12):** current-main manifest authority is the owner-authorized
+**Current delivery status (2026-09-13):** current-main manifest authority is the owner-authorized
 #518 refresh at clean `2a8eb4244` (702/678/672/667; unchanged floors and all 31 n392 anchors).
 Candidate `7382f26f8` integrates the 20 April-calibration commits with `9588876bc`; it is not
-promoted to main. Engine Invariants §14.8b and §16.2 decisions are pending. Typecheck and the
-targeted merge correction pass; full suite and clean 188-week pair remain required. Branch-local
-v72/v73 has 703/712 at week 104 with dirty provenance and cannot certify the candidate.
+promoted to main. Engine Invariants §14.8b and §16.2 are owner-approved at `933132e90`. The full
+suite ran once: 13,935 passed, 9 failed, 43 skipped, exit 1. Integration corrections and isolated
+timeout verification pass; two coverage assertions remain red because the old cap rejects nine
+lawful disconnected pockets. The reviewed zero-staffable-gap replacement requires owner approval.
+Typecheck and data integrity pass. Clean 188-week acceptance remains unrun while that criterion
+is unresolved. Branch-local v72/v73 has 703/712 at week 104 with dirty provenance and cannot
+certify the candidate.
 [Integration receipt](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#integration-audit--2026-09-12).
 
 BC04 P1/P2, BC05, BC06 and BC09 retain their campaign/packaged acceptance boundaries; BC07
 retention is settled. Cleanup and R9 build preparation are integrated/reviewed, BC10 remains
 planned. [Master §§4.1–4.2](../plans/MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07)
 owns final settlement before final calibration and packaged acceptance. No new baseline refresh,
-floor change, canon amendment or campaign verdict is implied by this integration candidate.
+floor change or campaign verdict is implied by this integration candidate.
 
 ## ⚠ Casualty accounting regime changed 2026-09-01 — militia losses are now recorded
 

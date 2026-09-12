@@ -1,0 +1,116 @@
+diff --git a/tests/integration_deployment_health.test.ts b/tests/integration_deployment_health.test.ts
+index 96cc50651..6b2ff445b 100644
+--- a/tests/integration_deployment_health.test.ts
++++ b/tests/integration_deployment_health.test.ts
+@@ -5,0 +6 @@ import { runScenario } from '../src/scenario/scenario_runner.js';
++import { annotateUnstaffedFrontSectors } from '../src/sim/combat/corps_front_sectors.js';
+@@ -30,0 +32,16 @@ function getMunicipality(osid: string): string {
++async function loadContactGraph(): Promise<Map<string, string[]>> {
++    const graphPath = join(process.cwd(), 'data', 'derived', 'operational', 'operational_contact_graph.json');
++    const raw = JSON.parse(await readFile(graphPath, 'utf8'));
++    const adjacency = new Map<string, string[]>();
++    const edges: Array<{ a: string; b: string }> = raw.edges ?? [];
++    for (const edge of edges) {
++        const aNeighbors = adjacency.get(edge.a) ?? [];
++        aNeighbors.push(edge.b);
++        adjacency.set(edge.a, aNeighbors);
++        const bNeighbors = adjacency.get(edge.b) ?? [];
++        bNeighbors.push(edge.a);
++        adjacency.set(edge.b, bNeighbors);
++    }
++    return adjacency;
++}
++
+@@ -32,0 +50 @@ describe('deployment health (40w)', () => {
++    let adj: Map<string, string[]>;
+@@ -45,0 +64 @@ describe('deployment health (40w)', () => {
++        adj = await loadContactGraph();
+@@ -208 +227 @@ describe('deployment health (40w)', () => {
+-        it('at most two large sectors are empty and each is explicitly unstaffable', () => {
++        it('every large empty sector is explicitly and reproducibly unstaffable', () => {
+@@ -211 +230,2 @@ describe('deployment health (40w)', () => {
+-            const gaps: string[] = [];
++            const gapIds: string[] = [];
++            const gapLines: string[] = [];
+@@ -218 +238,2 @@ describe('deployment health (40w)', () => {
+-                    gaps.push(`${sectorId}: ${edgeCount} edges, 0 brigades (faction=${sector.faction}, corps=${sector.corps_id})`);
++                    gapIds.push(sectorId);
++                    gapLines.push(`${sectorId}: ${edgeCount} edges, 0 brigades (faction=${sector.faction}, corps=${sector.corps_id})`);
+@@ -223,3 +244,18 @@ describe('deployment health (40w)', () => {
+-            if (gaps.length > 0) {
+-                console.log(`Sectors with front gaps (${gaps.length}):`);
+-                for (const line of gaps) console.log(`  ${line}`);
++            expect(adj.size, 'Operational contact graph is required for staffability proof').toBeGreaterThan(0);
++            const recomputedSectors = structuredClone(sectors);
++            for (const sector of Object.values(recomputedSectors)) delete sector.unstaffed_front;
++            annotateUnstaffedFrontSectors(
++                recomputedSectors,
++                state,
++                state.military.formations,
++                adj as Map<any, any>,
++            );
++            const staffableGaps = gapIds.filter((sectorId) =>
++                recomputedSectors[sectorId]?.unstaffed_front !== true);
++
++            console.log(`Sectors with >3-edge front gaps (${gapLines.length}):`);
++            for (const [index, line] of gapLines.entries()) {
++                const reason = recomputedSectors[gapIds[index]!]?.unstaffed_front === true
++                    ? 'no_reachable_legal_same_corps_donor'
++                    : 'reachable_or_staffable_violation';
++                console.log(`  ${line}; reason=${reason}`);
+@@ -231,3 +267,3 @@ describe('deployment health (40w)', () => {
+-            expect(gaps.length,
+-                `${gaps.length} sectors with >3 edges have zero brigades — expected no more than the two legally isolated fronts`
+-            ).toBeLessThanOrEqual(2);
++            expect(staffableGaps,
++                `Large empty sectors that production staffability can legally reach: ${staffableGaps.join(', ')}`
++            ).toEqual([]);
+diff --git a/tests/integration_run_diagnostics.test.ts b/tests/integration_run_diagnostics.test.ts
+index 5443ab992..cf8519599 100644
+--- a/tests/integration_run_diagnostics.test.ts
++++ b/tests/integration_run_diagnostics.test.ts
+@@ -5,0 +6 @@ import { runScenario } from '../src/scenario/scenario_runner.js';
++import { annotateUnstaffedFrontSectors } from '../src/sim/combat/corps_front_sectors.js';
+@@ -235 +236 @@ describe('run diagnostics (40w)', () => {
+-        it('at most two large sectors are empty and each is explicitly unstaffable', () => {
++        it('every large empty sector is explicitly and reproducibly unstaffable', () => {
+@@ -238 +239,2 @@ describe('run diagnostics (40w)', () => {
+-            const gaps: string[] = [];
++            const gapIds: string[] = [];
++            const gapLines: string[] = [];
+@@ -245 +247,2 @@ describe('run diagnostics (40w)', () => {
+-                    gaps.push(`${sid}: ${edgeCount} edges, 0 brigades (faction=${sec.faction}, corps=${sec.corps_id})`);
++                    gapIds.push(sid);
++                    gapLines.push(`${sid}: ${edgeCount} edges, 0 brigades (faction=${sec.faction}, corps=${sec.corps_id})`);
+@@ -250,3 +253,21 @@ describe('run diagnostics (40w)', () => {
+-            if (gaps.length > 0) {
+-                console.log(`Empty sectors with front edges (${gaps.length}):`);
+-                for (const line of gaps) console.log(`  ${line}`);
++            // Do not trust the saved advisory marker alone. Delete and recompute it
++            // from the final state's live formations, command ownership, donor
++            // eligibility, enclave restrictions, and faction-controlled paths.
++            expect(adj.size, 'Operational contact graph is required for staffability proof').toBeGreaterThan(0);
++            const recomputedSectors = structuredClone(sectors);
++            for (const sector of Object.values(recomputedSectors)) delete sector.unstaffed_front;
++            annotateUnstaffedFrontSectors(
++                recomputedSectors,
++                state,
++                state.military.formations,
++                adj as Map<any, any>,
++            );
++            const staffableGaps = gapIds.filter((sid) =>
++                recomputedSectors[sid]?.unstaffed_front !== true);
++
++            console.log(`Empty sectors with >3 front edges (${gapLines.length}):`);
++            for (const [index, line] of gapLines.entries()) {
++                const reason = recomputedSectors[gapIds[index]!]?.unstaffed_front === true
++                    ? 'no_reachable_legal_same_corps_donor'
++                    : 'reachable_or_staffable_violation';
++                console.log(`  ${line}; reason=${reason}`);
+@@ -258,3 +279,3 @@ describe('run diagnostics (40w)', () => {
+-            expect(gaps.length,
+-                `${gaps.length} sectors with >3 edges have 0 brigades — expected no more than the two legally isolated fronts`
+-            ).toBeLessThanOrEqual(2);
++            expect(staffableGaps,
++                `Large empty sectors that production staffability can legally reach: ${staffableGaps.join(', ')}`
++            ).toEqual([]);

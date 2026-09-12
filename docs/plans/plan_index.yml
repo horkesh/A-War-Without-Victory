@@ -79,7 +79,7 @@ lanes:
   - lane: R6
     title: "Historical gameplay depth and final calibration"
     lane_open: true
-    status: "CALIBRATION OPEN — CANDIDATE HELD. The accepted n163 pre-1.0 slice remains historical evidence. April candidate `7382f26f8` integrates 20 commits but is held on"
+    status: "CALIBRATION OPEN — CANDIDATE HELD. All 20 April commits are integrated and both canon amendments approved. Integration corrections pass focused checks; the cove"
     plans:
       - path: docs/plans/2026-07-31-historical-gameplay-depth-calibration-plan.md
         exists: true
