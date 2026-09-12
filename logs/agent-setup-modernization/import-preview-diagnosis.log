@@ -1,0 +1,51 @@
+
+> awwv@0.9.9-beta.1 test:vitest
+> node tools/test/run_vitest_default.mjs tests/agent_skill_import.test.ts -t previews a named
+
+
+ RUN  v2.1.9 F:/AWWV-worktrees/agent-setup-modernization
+
+ ❯ tests/agent_skill_import.test.ts (12 tests | 1 failed | 11 skipped) 684ms
+   × explicit skill import in disposable paths > previews a named import without writing any destination 683ms
+     → C:\Users\User\AppData\Local\Temp\awwv-skill-import-P98S3h\tools\install_superpowers.ps1 : The term 'Get-FileHash' is no
+t recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if
+ a path was included, verify that the path is correct and try again.
+    + CategoryInfo          : ObjectNotFound: (Get-FileHash:String) [install_superpowers.ps1], CommandNotFoundExceptio 
+   n
+    + FullyQualifiedErrorId : CommandNotFoundException,install_superpowers.ps1
+ 
+: expected 1 to be +0 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > previews a named import without writing any destination
+AssertionError: C:\Users\User\AppData\Local\Temp\awwv-skill-import-P98S3h\tools\install_superpowers.ps1 : The term 'Get-FileHash' is no
+t recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if
+ a path was included, verify that the path is correct and try again.
+    + CategoryInfo          : ObjectNotFound: (Get-FileHash:String) [install_superpowers.ps1], CommandNotFoundExceptio 
+   n
+    + FullyQualifiedErrorId : CommandNotFoundException,install_superpowers.ps1
+ 
+: expected 1 to be +0 // Object.is equality
+
+- Expected
++ Received
+
+- 0
++ 1
+
+ ❯ tests/agent_skill_import.test.ts:49:58
+     47|     const f = fixture();
+     48|     const result = f.run();
+     49|     expect(result.status, result.stdout + result.stderr).toBe(0);
+       |                                                          ^
+     50|     expect(readdirSync(f.target)).toEqual([]);
+     51|     expect(readdirSync(join(f.root, '.claude/skills'))).toEqual([]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 11 skipped (12)
+   Start at  21:34:32
+   Duration  1.45s (transform 57ms, setup 17ms, collect 57ms, tests 684ms, environment 0ms, prepare 98ms)
+

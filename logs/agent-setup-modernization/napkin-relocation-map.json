@@ -1,0 +1,22 @@
+{
+  "source": ".claude/napkin.md at base 8913cca6f714e07acf59785ce526c19dc5fc9973",
+  "method": "Each listed section, including its heading and all entry text, was copied to the destination under a dated HTML marker before the index was replaced. Index-relative napkin/ link prefixes were rebased for the topic-file location; linked targets and prose were preserved.",
+  "records": [
+    {"section":"Curation Rules","destination":".claude/napkin/qa_gates.md","entries":0,"retained_lessons":3,"workflow_status":"automatic session reading and fixed caps superseded; enforcement/count/predicate lessons active"},
+    {"section":"Current Release State","destination":".claude/napkin/release_process.md","entries":8},
+    {"section":"Execution & Validation","destination":".claude/napkin/qa_gates.md","entries":8},
+    {"section":"Diagnostic Reasoning","destination":".claude/napkin/entry_detail.md","entries":9},
+    {"section":"Evidence & Tooling Discipline","destination":".claude/napkin/qa_gates.md","entries":12},
+    {"section":"Domain Behavior Guardrails","destination":".claude/napkin/entry_detail.md","entries":6},
+    {"section":"Player & Runtime Truth","destination":".claude/napkin/engine_runtime.md","entries":8},
+    {"section":"Operations & Narrative Truth","destination":".claude/napkin/engine_runtime.md","entries":3},
+    {"section":"Map & UI Shell","destination":".claude/napkin/map_counters.md","entries":15},
+    {"section":"Engine Runtime Patterns","destination":".claude/napkin/engine_runtime.md","entries":10},
+    {"section":"Shell & Command Reliability","destination":".claude/napkin/qa_gates.md","entries":10},
+    {"section":"User Directives","destination":".claude/napkin/entry_detail.md","entries":3},
+    {"section":"Visual Art Direction","destination":".claude/napkin/warroom_and_legacy.md","entries":1}
+  ],
+  "entry_total": 93,
+  "curation_lessons": 3,
+  "preservation": "No source section was dropped. All 93 numbered entry texts plus the three high-value Curation Rules lessons, dates, citations and targets were retained; only relative link paths changed. Superseded automatic-reading/cap directives are labeled historical rather than active. Existing topic content was retained and relocation markers make duplicate detection deterministic."
+}

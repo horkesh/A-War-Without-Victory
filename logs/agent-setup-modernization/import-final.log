@@ -1,0 +1,26 @@
+
+> awwv@0.9.9-beta.1 test:vitest
+> node tools/test/run_vitest_default.mjs tests/agent_skill_import.test.ts
+
+
+ RUN  v2.1.9 F:/AWWV-worktrees/agent-setup-modernization
+
+ ✓ tests/agent_skill_import.test.ts (12 tests) 17653ms
+   ✓ explicit skill import in disposable paths > previews a named import without writing any destination 966ms
+   ✓ explicit skill import in disposable paths > requires a preview receipt before applying 902ms
+   ✓ explicit skill import in disposable paths > applies only the named skill after review, including its support files 1874ms
+   ✓ explicit skill import in disposable paths > refuses replacement of locally edited skills by default 1930ms
+   ✓ explicit skill import in disposable paths > requires a backup for explicit replacement 1816ms
+   ✓ explicit skill import in disposable paths > replaces with a reviewed diff and preserves the full old directory 1810ms
+   ✓ explicit skill import in disposable paths > rejects source drift after preview 1766ms
+   ✓ explicit skill import in disposable paths > rejects target drift after preview 1780ms
+   ✓ explicit skill import in disposable paths > rejects a modified review diff 1791ms
+   ✓ explicit skill import in disposable paths > rejects nested source/destination trees 599ms
+   ✓ explicit skill import in disposable paths > refuses reused backup paths without losing local edits 1816ms
+   ✓ explicit skill import in disposable paths > rejects linked source directories before traversing them 602ms
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  21:37:33
+   Duration  18.45s (transform 61ms, setup 17ms, collect 61ms, tests 17.65s, environment 0ms, prepare 97ms)
+

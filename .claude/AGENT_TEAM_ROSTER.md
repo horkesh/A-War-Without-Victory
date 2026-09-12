@@ -2,15 +2,30 @@
 
 **Collective identity:** Pyrrhic. The specialists listed below are the Pyrrhic team for this repo. Individual role names are unchanged.
 
-**Purpose:** Single source of truth for when and whom the main agent invokes. Pyrrhic specialists focus on different aspects; tension between roles produces better results. Do not collapse roles (e.g. use both Code Review and QA Engineer before merge).
+**Purpose:** Maintained project role map, consulted for relevant domain ownership. Skill bodies under `.claude/skills/` own detailed semantics; the [shared workflow](../docs/20_engineering/AGENT_WORKFLOW.md) owns execution policy. A separate implementer and reviewer are required for nontrivial implementation. One reviewer may cover multiple ordinary review lenses; mandatory canon panels and distinct seats remain separate.
 
-**Process QA:** All Pyrrhic roles are **subject to Process QA** (quality-assurance-process). Process QA validates that others followed established process (context, ledger, napkin at session start, commit discipline). Invoking Process QA after handoffs or execution eliminates the need for micromanagement—others follow process, Process QA verifies.
+**Process QA:** Preserve process compliance as a review lens. Consult `quality-assurance-process` for an explicit process audit or a disputed compliance question; a routine handoff does not automatically require an additional worker.
 
 ## Main agent instruction
 
-**For every non-trivial task:** Consult this Pyrrhic roster; invoke the listed skill(s) for the relevant role(s) by reading and following the corresponding `.claude/skills/<name>/SKILL.md`. Use clarification-first for high-risk items; document handoffs when passing between roles.
+Use the runtime catalog and the relevant rows below. Resolve available tools on the current host and read the selected `.claude/skills/<name>/SKILL.md`; a listed role is not evidence of a callable tool enum. Document bounded handoffs. Task-specific consultation duties apply even when the lead performs other integration work.
 
-**Dispatch-first rule:** When the task spans 2+ domains, the Orchestrator should dispatch specialists before synthesizing. Use `.claude/commands/orchestrator.md` or pair with `.claude/agents/orchestrator-dispatcher.md` to keep the role from sliding into solo investigation.
+The lead owns framing, evidence interpretation, and integration. Delegate bounded independent work using the adopted model-cost policy. Claude's scenario-result specialist routing remains required where its unchanged hooks apply; see the shared workflow's host coverage.
+
+## Mandatory consultation gates
+
+Consultation means reading the applicable skill and covering its domain duties with qualified implementation/review. It does not automatically create another worker: the existing team can cover compatible lenses. Add a specialist for a distinct expertise gap, and keep every canon-panel or explicitly required review seat independent.
+
+| Skill | Trigger |
+|---|---|
+| operations-expert | Any operation change, including preparation, objectives, brigades, staging, timing and corps command |
+| historian | Any historical claim about the Bosnian War; preserve BB1/BB2 and applicable source requirements |
+| war-or-game | Any calibration run; mandatory realism sign-off |
+| formation-expert | Any OOB, brigade or militia-pool change |
+| ui-ux-developer | Any new UI component, modal or panel; consult for UI/UX changes |
+| data-pipeline-engineer | Changes to tools that write derived data |
+
+Exact four-seat and eight-seat membership is retained in [the shared workflow's canon boundary](../docs/20_engineering/AGENT_WORKFLOW.md#canon-and-protected-boundaries). Apply [SENSITIVE_HISTORY_DESIGN_GATE.md](../docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md), [FORAWWV.md](../docs/10_canon/FORAWWV.md), and [canon-compliance-reviewer](skills/canon-compliance-reviewer/SKILL.md) for the operative canon requirements. Similar names do not make `canon-compliance-review` and `canon-compliance-reviewer` interchangeable seats.
 
 ---
 
@@ -20,7 +35,7 @@
 
 | Role | Skill path | When to invoke |
 |------|------------|----------------|
-| Orchestrator | orchestrator | Big-picture direction, team coordination, strategic priority, convening Pyrrhic, aligning roadmap and ledger; resolves cross-role conflicts. **Deputy:** Product Manager. **Default mode:** dispatch-first, synthesis second. |
+| Orchestrator | orchestrator | Big-picture direction, bounded team coordination, evidence interpretation, integration and cross-role decisions. **Deputy:** Product Manager. |
 | Product Manager | product-manager | Roadmap, MVP, sequencing work, handoff to dev; reports to Orchestrator for big-picture alignment. References awwv-plan-change, awwv-make-cursor-prompt. |
 
 ### Planning
@@ -75,7 +90,7 @@
 
 | Role | Skill path | When to invoke |
 |------|------------|----------------|
-| **Process QA** | quality-assurance-process | **Validates that other Pyrrhic roles followed process** (context, ledger, napkin at session start, commit discipline). Single checkpoint—invoke after handoffs, after Orchestrator/PM execution, or before merge. *Process QA changes everything: eliminates micromanagement.* |
+| **Process QA** | quality-assurance-process | Explicit process audits or disputed compliance; ordinary review covers this lens without automatically adding a worker. |
 | Retrospective Analyst | retrospective-analyst | After major milestone or comprehensive review; gaps, spec/code discrepancies, performance. |
 
 ---
@@ -87,9 +102,9 @@
 - **Historical events / scenario plausibility / "what does the record say?"** → **Historian** (historian). Historian holds all Balkan Battlegrounds–derived knowledge; invoke for citation-backed BiH war facts, control/holdouts/enclaves/JNA, scenario design.
 - **Product architecture / cross-system** → Architect (UI/UX architecture, cross-system integration, feasibility assessment, vision documents). Architect delegates implementation to relevant Dev roles.
 - **Implementation** → Relevant Dev role: Gameplay, Systems, UI/UX, Graphics, Lua, Asset.
-- **Pre-merge** → Code Review (code-review and/or canon-compliance-reviewer) + QA Engineer (qa-engineer, determinism-auditor as needed). **Process QA** (quality-assurance-process) validates that process was followed—invoke to avoid micromanagement.
+- **Pre-merge** → Independent review covering relevant code, canon, QA, determinism and process guidance. Separately mandated panel seats remain mandatory; final merge still needs its own authorization.
 - **Release** → Build Engineer, DevOps Specialist, Documentation Specialist.
-- **Process validation** → **Process QA** (quality-assurance-process). Validates that other roles followed context, napkin at session start, ledger, commit discipline. Invoke after handoffs or after Orchestrator/PM execution.
+- **Process validation** → **Process QA** (quality-assurance-process) when an explicit audit or disputed compliance question warrants it.
 - **After major milestone** → Retrospective Analyst (retrospective-analyst).
 
 Document handoffs when passing between roles (e.g. "Handoff: Orchestrator → Product Manager for Phase 4 sequencing"; "Handoff: Product Manager → Gameplay Programmer for Phase X implementation").
@@ -109,7 +124,7 @@ Use the formal roster above as the base authority, then fit dispatch to the actu
 | Live operation behavior, dead fronts, zero-attack patterns | Scenario Creator / Runner / Tester, Gameplay Programmer, operations-reality-checker | Technical Architect for root-cause framing; Historian when the question is "bug or plausible quiet?" |
 | Player-facing command truth, shell ownership drift, duplicate UI authority | UI/UX Developer, Architect, Technical Architect, ui-truth-keeper, authority-auditor | Modern Wargame Expert for comparative UX; Code Review (canon/specs) when mechanics meaning may drift |
 | Roadmap slotting, phase sequencing, report placement | Product Manager, Technical Architect, roadmap-slotter, Documentation Specialist | Reports Custodian when report structure/retirement is part of the work |
-| Cross-role implementation with built-in challenge loop | self-correcting-implementer plus the actual domain owner | Process QA before merge or handoff |
+| Cross-role implementation with built-in challenge loop | self-correcting-implementer plus the actual domain owner | Independent review includes process compliance |
 
 ### Repo taskforce briefs
 
@@ -126,20 +141,9 @@ Use them to sharpen dispatch and synthesis, but keep a real domain owner on ever
 
 ---
 
-## Clarification-first (high-risk)
+## Decision boundaries
 
-For the following, require **questions with examples**, **documented assumptions with risk levels**, and **STOP AND ASK** before proceeding. This Pyrrhic roster is the checkpoint list for when to escalate.
-
-**High-risk triggers:**
-
-- Cross-phase changes.
-- Changes touching canon (mechanics, phase specs, invariants).
-- Architecture or entrypoint changes.
-- Determinism, ordering, or serialization changes.
-- Ledger or process rule changes.
-- FORAWWV or canonical doc scope unclear.
-
-**Required:** State assumptions, give 1–2 concrete examples, label risk (high/medium/low), then STOP AND ASK for confirmation.
+Continue authorized implementation and targeted failure correction. Resolve routine choices from evidence. Ask for an unresolved authority conflict, changed acceptance criterion, or costly scope outside the agreed plan. Plan-only and review-only requests remain read-only. Cross-phase, canon, determinism, architecture and protected data/save work retain their specific governing requirements; generic review cannot supply missing canon approval. Remote push, final merge, publication and shared live-instruction activation require their established authorization.
 
 ---
 

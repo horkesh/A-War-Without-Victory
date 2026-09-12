@@ -1,21 +1,10 @@
 ---
 name: awwv-make-cursor-prompt
-description: Generate a structured prompt for Cursor or subagents. Use when the user runs /awwv_make_cursor_prompt or asks for a prompt to guide an agent.
+description: Use when the user runs /awwv_make_cursor_prompt or asks for a structured prompt for Cursor or another agent.
 ---
 
-# /awwv_make_cursor_prompt
+# AWWV Make Cursor Prompt
 
-## Trigger
-Generating a prompt for Cursor or subagents.
+Compatibility entrypoint: use `prompt-construction` as the maintained template.
 
-## Inputs
-- Role, task, relevant files, constraints.
-
-## Output
-- A structured prompt with STOP AND ASK clauses.
-
-## Determinism safeguards
-- Include explicit determinism constraints and canon list.
-
-## STOP AND ASK
-- If canon scope is unclear.
+Supply the target role/runtime, outcome, exact files, constraints, evidence, checks, authority, and done condition. Preserve applicable canon, determinism, ordering, data/control/save, historical-source, ledger, and acceptance boundaries without adding unrelated requirements.

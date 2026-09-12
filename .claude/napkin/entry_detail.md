@@ -117,3 +117,61 @@ no longer session-start reading.
    Do instead: use local package entrypoints or repo wrappers; do not rely on PATH/.bin luck.
 - **[2026-02-21] Avoid giant expanded path lists**
    Do instead: run rg on roots or use targeted file lists when the repo has huge generated/vendor directories.
+
+
+<!-- relocated-from-index-2026-09-12:Diagnostic Reasoning -->
+## Diagnostic Reasoning
+
+0b. **[2026-08-12] Judge findings mechanism-first, not delta-first**
+   Do instead: state conclusions as a traced causal chain (this brigade, this turn, this roster) — those survived a session that refuted four separate delta-based readings. Distinguish real cost from op-stream churn by whether damage is CONTIGUOUS with a named mechanism's home region or scattered.
+0c. **[2026-08-12] Check the inert-lever list before spending a probe run**
+   Do instead: `planning_duration` is inert for ANY op whose brigades are already pre-staged (`stagedEarly` short-circuits the launch gate) — not just event-trigger-bound ops. See `docs/life_lessons/calibration.md:361`. A run was wasted rediscovering this.
+0d. **[2026-08-12] Never background a run inside an already-backgrounded call**
+   Do instead: one `run_in_background` per run. Chaining `cmd &` inside it orphans the run — the notification fires on the wrapper and the scenario dies mid-flight.
+0e. **[2026-08-12] `matched_osids` is HARD-GATED at 622 — it is NOT advisory, whatever a packet says**
+   Do instead: read `engine_health_gate.cjs:345-357` before quoting acceptance criteria. SIX hard checks (all integer) + ONE advisory float (`kw_ratio`, `soft()`); `fail = hardFail || (strict && softFail)`, so never pass `--strict`. The 622 floor is the ONLY criterion that would have caught EH-3's −39 (it passed 30/30 anchors and every §6 invariant). Cross-platform authority = the structural fingerprint, NOT the health gate.
+0f. **[2026-08-12] Two persisted numbers can be the SAME quantity at different pipeline stages — check which stage governs**
+   Do instead: `force_assessment.total_surplus` (assess-stage, `force_eval.ts:246-249`) vs `zone_assessments[].surplus_brigades` (allocate-stage, after `allocate.ts:277` applies the must-hold multiplier) disagree by construction — 5 vs `[]` for `vrs_drina`. I read the wrong one and wrongly "corrected" a correct agent report. Also: `surplus_brigades` is nested INSIDE `zone_assessments[]`, so a top-level key listing will not show it. Ask which stage the consumer reads.
+0g. **[2026-08-12] "Arbitrary" is not "nondeterministic" — and a tolerance band in a comparator creates the latter**
+   Do instead: catalog-order selection is fully deterministic (same input ⇒ same output); it is *sensitive*, not nondeterministic. Never use a tolerance band as an equality predicate in a sort comparator — non-transitive ⇒ implementation-defined `Array.prototype.sort` (measured: 9 distinct outputs from 120 permutations of one real 5-brigade axis), and local Node is v24 vs CI 22. Use integer bucketing `Math.floor(x / BAND)` as a PRIMARY sort key, terminating in `strictCompare(id)`.
+0h. **[2026-08-14, merged 2026-08-16 with 0i/0k] VACUOUS GUARDS — a guard can be GREEN WHILE ASSERTING NOTHING. Three shapes, all shipped here.**
+   Do instead: never accept "mutation-verified" as a fact; treat it as a claim to TEST. Ask three separate questions, because each shape survives the other two's checks.
+   Worked detail: [entry_detail.md](entry_detail.md#0h)
+0n. **[2026-08-16] A DERIVED ARTIFACT'S FRESHNESS IS A CONTENT QUESTION, NOT A CLOCK QUESTION — and a bare `ls` time is not a timestamp**
+   Do instead: prove a rebuild by reading the value you changed OUT of the baked artifact, then by the contract suite that pins it (`startup_snapshot_contract` 18/18 — "baked April 1992 startup artifact matches canonical builder truth after checkout normalization" + "validator reports the committed artifact as current").
+   Worked detail: [entry_detail.md](entry_detail.md#0n)
+0m. **[2026-08-16, generalised 2026-08-26] A LOOKUP THAT COULD NOT HAVE FOUND X IS NOT EVIDENCE THAT X IS ABSENT — this is a rule about ALL lookups, not just historical ones**
+   Do instead: before recording an absence, name WHICH lookup you ran and what it could not have seen. **⇒ CODE SEARCH IS THE SAME RULE, and it was missed on 2026-08-26 precisely BECAUSE every example below is a historical-source lookup: a grep for the literal `readiness = 'active'` returned 2 hits and produced "nothing in the war pipeline restores readiness".**
+   Worked detail: [entry_detail.md](entry_detail.md#0m)
+
+
+<!-- relocated-from-index-2026-09-12:Domain Behavior Guardrails -->
+## Domain Behavior Guardrails
+1. **[2026-08-12] Painted control has FOUR snapshots — a source comment citing one is a trap**
+   Do instead: check `jan1993`/`apr1994`/`apr1995`/`oct1995` before acting on any "painted = X" comment. Objective removals justified as "painted RBiH" were true only at oct1995 and made the other three wrong. Objective STRIPPING keys on LIVE control (`buildAxesFromDef` → `getPoliticalControllerOSID`, at INJECTION), never on painted — that confusion sent a 4-specialist panel to a two-thirds-wrong diagnosis.
+0b. **[2026-08-12] The BB corpus is local — do not reach for external sources**
+   Do instead: `docs/Balkan_Battlegrounds{I,II}.pdf` plus the 406-page extraction at `data/derived/knowledge_base/balkan_battlegrounds/pages`. BB **is** the CIA product.
+   Worked detail: [entry_detail.md](entry_detail.md#0b)
+0d. **[2026-08-24] AN ICTY PARAGRAPH NUMBER IS NOT EDITION-INDEPENDENT — carry the edition, or two correct readers will disagree by three**
+   Do instead: cite as `IT-98-33-T, Trial Judgement, 2 Aug 2001, ¶¶48-49 (PDF edition, krs-tj010802e.pdf, sha256 e8899445…)`. **ICTY publishes TWO editions of the Krstić Trial Judgement whose numbering differs by exactly +3 in the Potočari section**, both internally consistent: the HTML's ¶48/¶49 are the PDF's ¶45/¶46.
+   Worked detail: [entry_detail.md](entry_detail.md#0d)
+0e. **[2026-08-24] A WON BATTLE DOES NOT FLIP THE OSID — screen the DEFENDER before adding any objective**
+   Do instead: check defender faction × morale vs floor (`combat_math.ts:305` — RBiH **50** / RS **55** / HRHB **60**) and `coEthnicShare` BEFORE proposing an objective.
+   Worked detail: [entry_detail.md](entry_detail.md#0e)
+0f. **[2026-08-24] "The engine at January 1993" IS NOT ONE MAP — pick the scenario that actually SCORES the reference, or your delta is fiction**
+   Do instead: `pickHistoricalReferenceKey` (scenario_runner.ts) routes weeks <=56 to `jan1993`, <=108 apr1994, <=160 apr1995, else oct1995 — so **40w and 52w are scored against jan1993; a 188w run is scored against oct1995 ALONE and its week-39 state is never compared to jan1993 by the harness.** Reconstructing week 39 out of a 188w run to reason about jan1993 is reading an unscored intermediate.
+   Worked detail: [entry_detail.md](entry_detail.md#0f)
+0g. **[2026-08-24] An Artifact hands data back through its PAGE, never through its data files**
+   Do instead: `Artifact action:"read"` returns only `index.html` — a file written by the page's `publish({files})` is NOT retrievable that way, so a tool whose whole point is returning JSON to a session must embed that JSON in the page it republishes.
+   Worked detail: [entry_detail.md](entry_detail.md#0g)
+
+
+<!-- relocated-from-index-2026-09-12:User Directives -->
+## User Directives
+1. **[2026-08-15] Do not stop for routine implementation decisions**
+   Do instead: decide from canon/evidence or convene the Pyrrhic panel; continue until a genuine authority/safety blocker or the active roadmap outcome is complete.
+
+2. **[2026-06-20] Do not edit FORAWWV automatically**
+   Do instead: flag design insights for a Pyrrhic panel; only edit canon with explicit approval.
+3. **[2026-06-26] Packaging remains paused until owner satisfaction**
+   Do instead: use release checks/probes as verification, but do not create installer/release artifacts as product work before D2/D3 gates.

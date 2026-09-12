@@ -1,0 +1,205 @@
+{
+  "observed_at": "2026-09-12",
+  "base_commit": "8913cca6f714e07acf59785ce526c19dc5fc9973",
+  "repo_skill_root": ".claude/skills",
+  "runtime_skill_root": "C:/Users/User/.codex/skills",
+  "classification_method": "Compared YAML frontmatter and Markdown bodies. Classification concerns semantic authority, not hash equality. No runtime skill was modified or selected as a global replacement.",
+  "counts": {
+    "paired": 62,
+    "unequal": 27,
+    "intentional_host_specialization": 4,
+    "stale_copy": 18,
+    "unresolved": 5
+  },
+  "pairs": [
+    {
+      "name": "architect",
+      "classification": "stale copy",
+      "stale_side": "runtime user copy",
+      "preserve": "Preserve the repo copy as the project semantic source and retain the user original for later reviewed import work.",
+      "rationale": "Frontmatter matches. The repo body uses the current Pyrrhic team name and the current split war-phase pipeline; the runtime body retains the older Paradox name and an older pipeline description."
+    },
+    {
+      "name": "awwv-pre-commit-check",
+      "classification": "stale copy",
+      "stale_side": "repo copy",
+      "preserve": "Keep both originals; retire the repo body's obsolete life_lessons.md checklist only in a separately owned process-skill packet.",
+      "rationale": "The repo frontmatter/body still makes the retired life-lessons checklist a pre-commit gate. The runtime copy has the narrower current canon/determinism/test/ledger scope."
+    },
+    {
+      "name": "balkan-battlegrounds-historical-extractor",
+      "classification": "stale copy",
+      "stale_side": "repo copy",
+      "preserve": "Preserve the runtime relationship text for a future reviewed repo reconciliation; do not replace either file automatically.",
+      "rationale": "Frontmatter and extraction rules match, but the runtime body adds the maintained boundary between new BB extraction and querying the Historian knowledge base."
+    },
+    {
+      "name": "canon-compliance-reviewer",
+      "classification": "stale copy",
+      "stale_side": "runtime user copy",
+      "preserve": "Preserve the repo canon-panel and sensitive-history rules; retain the user original as backup evidence.",
+      "rationale": "The repo body carries current canon precedence, FORAWWV panel authority, faction IDs, sensitive-history and endgame routing. The runtime body omits those safeguards and duplicates an old phase-spec reference while naming retired V0.4/Phase A documents."
+    },
+    {
+      "name": "code-review",
+      "classification": "stale copy",
+      "stale_side": "runtime user copy",
+      "preserve": "Preserve the repo's production, determinism, 188-week and provenance gates; later reconcile them through the shared change-specific validation policy.",
+      "rationale": "Frontmatter matches. The runtime body lacks the repo's current combat horizon, full-suite calibration, determinism and pushed-commit integrity requirements."
+    },
+    {
+      "name": "code-simplifier",
+      "classification": "intentional host specialization",
+      "stale_side": null,
+      "preserve": "Keep separate copies.",
+      "rationale": "The bodies are otherwise the same; the runtime copy says active developer instructions while the repo-shipped Claude copy says repo instructions. This is a valid host authority distinction."
+    },
+    {
+      "name": "formation-expert",
+      "classification": "unresolved",
+      "stale_side": null,
+      "preserve": "Preserve both until a domain owner reconciles current pipeline/OOB facts and relocates session lessons to maintained knowledge.",
+      "rationale": "The repo body has newer pipeline routing and movement lessons; the runtime body has additional OOB totals and corps-mapping policy. Each contains unique project semantics, so neither can safely replace the other."
+    },
+    {
+      "name": "frontend-design",
+      "classification": "unresolved",
+      "stale_side": null,
+      "preserve": "Keep both; normalize line endings only when each owner next edits its file.",
+      "rationale": "Frontmatter and normalized body text are identical; the unequal hash is line-ending/byte representation only and does not establish a stale semantic copy."
+    },
+    {
+      "name": "game-designer",
+      "classification": "stale copy",
+      "stale_side": "runtime user copy",
+      "preserve": "Preserve the repo's current calibration and sensitive-history routing.",
+      "rationale": "The runtime copy lacks the repo's live-source routing, calibration-last guardrail and atrocity consequence boundary."
+    },
+    {
+      "name": "gameplay-programmer",
+      "classification": "stale copy",
+      "stale_side": "runtime user copy",
+      "preserve": "Preserve current repo invariants and session lessons, relocating conditional detail rather than discarding it.",
+      "rationale": "The runtime body omits current determinism, ops-only, protected-control, 188-week and one-change-per-run rules plus movement authority lessons; it also duplicates a phase-spec link."
+    },
+    {
+      "name": "historian",
+      "classification": "stale copy",
+      "stale_side": "runtime user copy",
+      "preserve": "Preserve the repo source hierarchy, OOB authority and settled-modeling facts; retain the runtime original for later audited import.",
+      "rationale": "Both preserve judicial procedural posture, but the runtime copy omits current live routing, the full judicial/BB/OOB hierarchy and settled cohesion-floor history carried by the repo copy."
+    },
+    {
+      "name": "ledger-process-scribe",
+      "classification": "stale copy",
+      "stale_side": "repo copy",
+      "preserve": "Adopt the runtime copy's more discriminating trigger when this skill is next owned; bodies are otherwise equivalent.",
+      "rationale": "Only frontmatter differs materially. The runtime trigger covers explicit commit, validation and ledger/process requests; the repo description is narrower and process-summary shaped."
+    },
+    {
+      "name": "map-geometry-integrity-reviewer",
+      "classification": "stale copy",
+      "stale_side": "repo copy",
+      "preserve": "Keep the runtime's scoped canon/determinism reads; route historical lessons through the napkin/topic index.",
+      "rationale": "The repo body alone mandates broad life-lessons files. The runtime body otherwise matches and reflects the adopted conditional-reading policy."
+    },
+    {
+      "name": "orchestrator",
+      "classification": "intentional host specialization",
+      "stale_side": "repo shared-policy sections before P1 reconciliation",
+      "preserve": "Keep separate host entrypoints. Reconcile shared authority/cost/review semantics in the repo copy without copying Codex model or tool syntax into Claude.",
+      "rationale": "The runtime copy contains Codex-specific Astra/Sol/Luna and collaboration-tool policy. The repo copy contains Claude-oriented dispatch concepts and current project routes, but its dispatcher-only ban on analysis/synthesis and mandatory twelve-role post-run loop conflict with the adopted policy."
+    },
+    {
+      "name": "propagate-to-canon",
+      "classification": "unresolved",
+      "stale_side": null,
+      "preserve": "Preserve both and require an authority decision before reconciling FORAWWV wording; do not edit FORAWWV in this packet.",
+      "rationale": "The runtime body adds host-specific skill paths but says never auto-edit FORAWWV, while the repo body permits edits after mandatory panel sign-off. The current user directive and delegated panel authority need explicit wording together; neither file alone is a safe replacement."
+    },
+    {
+      "name": "qa-engineer",
+      "classification": "stale copy",
+      "stale_side": "runtime user copy",
+      "preserve": "Preserve the repo's production/calibration/determinism gates while moving the unconditional smoke triad to change-specific validation in P1.",
+      "rationale": "The runtime body lacks current 188-week, full-suite calibration, determinism and one-change-per-run requirements. The repo also contains an overbroad every-change triad, so reconciliation must narrow applicability without deleting production gates."
+    },
+    {
+      "name": "quality-assurance-process",
+      "classification": "stale copy",
+      "stale_side": "runtime user copy",
+      "preserve": "Preserve the repo's current Pyrrhic identity and active routing, then simplify duplicated startup policy through P1.",
+      "rationale": "The runtime body retains the older Paradox team name and removes current command-board routing. The repo body has the current identity but still duplicates broad read requirements."
+    },
+    {
+      "name": "refactor-pass",
+      "classification": "unresolved",
+      "stale_side": null,
+      "preserve": "Keep both; normalize line endings only during an owned edit.",
+      "rationale": "Frontmatter and normalized body text are identical; the hash difference is non-semantic."
+    },
+    {
+      "name": "retrospective-analyst",
+      "classification": "stale copy",
+      "stale_side": "repo copy",
+      "preserve": "Use the runtime frontmatter trigger on the next owned update; bodies are equivalent.",
+      "rationale": "The runtime description is a concise trigger for milestone/comprehensive/periodic review. The repo description mixes trigger and workflow summary."
+    },
+    {
+      "name": "scenario-creator-runner-tester",
+      "classification": "unresolved",
+      "stale_side": null,
+      "preserve": "Preserve both; reconcile current calibration safeguards with the runtime's explicit Historian boundary under domain ownership.",
+      "rationale": "The repo body has current protected-control, source hierarchy, 188-week and calibration-last constraints plus session lessons. The runtime body uniquely adds explicit Historian invocation. Neither side is a complete replacement."
+    },
+    {
+      "name": "scenario-harness-engineer",
+      "classification": "stale copy",
+      "stale_side": "runtime user copy",
+      "preserve": "Preserve repo pipeline determinism, byte-identity, 188-week and direct-tool fallback rules.",
+      "rationale": "Frontmatter matches; the runtime body omits the repo's current live sources and durable harness constraints."
+    },
+    {
+      "name": "scenario-report",
+      "classification": "intentional host specialization",
+      "stale_side": "runtime team-name wording only",
+      "preserve": "Keep separate tool-specific instructions; update the stale Paradox label only during a future owned runtime import.",
+      "rationale": "The runtime copy correctly describes its Task/mcp_task/generalPurpose enum and discovery behavior, while the repo copy uses Claude's Task wording. The runtime's Paradox label is stale, but the principal semantic difference is host tool specialization."
+    },
+    {
+      "name": "systems-programmer",
+      "classification": "stale copy",
+      "stale_side": "runtime user copy",
+      "preserve": "Preserve the repo engine invariants, baseline provenance and worktree safeguards.",
+      "rationale": "The runtime body omits current live-source, determinism, byte-identical refactor and worktree rules."
+    },
+    {
+      "name": "technical-architect",
+      "classification": "stale copy",
+      "stale_side": "runtime user copy",
+      "preserve": "Preserve the repo current-state, determinism and worktree-routing text while consolidating shared process in P1.",
+      "rationale": "The runtime body lacks the repo's current live sources and durable architecture/worktree constraints."
+    },
+    {
+      "name": "ui-ux-developer",
+      "classification": "stale copy",
+      "stale_side": "runtime user copy",
+      "preserve": "Preserve the repo UI review seat, player-safe information boundary, MapLibre constraint and current GUI authorities.",
+      "rationale": "The runtime copy is substantially older and generic: it omits mandatory UI consultation, current GUI/WARROOM sources, player information-control rules, palette/design language and concrete accessibility review duties."
+    },
+    {
+      "name": "visual-explainer",
+      "classification": "stale copy",
+      "stale_side": "runtime user copy",
+      "preserve": "Preserve the repo v0.4.2 metadata and current design/accessibility rules; later import only through reviewed preview/backup flow.",
+      "rationale": "The repo copy is the newer upstream-shaped body with slide/prose modes, stronger Mermaid/layout checks and explicit anti-template guidance. The runtime copy allows aesthetics the repo version explicitly retired and lacks metadata."
+    },
+    {
+      "name": "writing-skills",
+      "classification": "intentional host specialization",
+      "stale_side": null,
+      "preserve": "Keep separate path wording.",
+      "rationale": "The only semantic difference is which active skill root is foregrounded: repo-shipped Claude skills versus desktop Codex custom skills. Both explicitly require verifying the live path."
+    }
+  ]
+}

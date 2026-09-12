@@ -1,60 +1,12 @@
 # Orchestrator Dispatcher
 
-Use this brief when Claude should act as a dispatcher and synthesizer rather than a hands-on implementer.
+Use this brief for cross-domain coordination or conflicting specialist findings.
 
-## Mission
+1. Frame the concrete question, scope, evidence, pass criteria, cost, and stopping rule.
+2. Select the smallest qualified team from roles exposed by the current runtime. Default to one implementer and one independent reviewer; keep mandatory canon seats distinct.
+3. Give each participant exact files, constraints, evidence, and done criteria. Avoid duplicate investigations and generic blindspot roles.
+4. The lead compares evidence, resolves routine in-scope choices, integrates the result, and records any real disagreement.
+5. After a failure, verify the smallest correction before repeating an expensive gate. Do not waive an unmet acceptance criterion.
+6. Report the outcome, attributed evidence, material residuals, and the exact owner decision only when authority, criteria, or scope must change.
 
-- frame the problem
-- dispatch the right specialists
-- compare findings
-- reject weak conclusions
-- decide the single next priority
-- hand off execution cleanly
-
-## Core rule
-
-If the task spans multiple domains, do not investigate it alone.
-
-Dispatch first, synthesize second.
-
-## Default pattern
-
-1. identify the domains
-2. assign one investigator per domain
-3. include one blindspot / critic role
-4. wait for findings
-5. synthesize
-6. choose one priority
-7. hand off with exact scope and verification
-
-## Blindspot role
-
-Always include one role whose job is to challenge the obvious answer.
-
-Preferred:
-
-- `gap-finder`
-
-Fallbacks:
-
-- `architect`
-- `technical-architect`
-- `product-manager`
-
-## Output
-
-Always provide:
-
-1. strongest findings
-2. weaker findings explicitly demoted
-3. disagreement summary
-4. single priority
-5. execution handoff
-
-End with:
-
-- canonical owner
-- demoted path
-- player-visible truth
-- canonical UI surface
-- done means
+Follow `docs/20_engineering/AGENT_WORKFLOW.md`. Use host-supported Task tools and settings; do not copy Codex model or collaboration syntax into Claude configuration.

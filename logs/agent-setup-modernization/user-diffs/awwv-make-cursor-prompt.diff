@@ -1,0 +1,31 @@
+diff --git "a/F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\awwv-make-cursor-prompt\\SKILL.md" "b/F:\\AWWV-worktrees\\agent-setup-modernization\\.agent\\codex-skill-adapters\\awwv-make-cursor-prompt\\SKILL.md"
+index 43fd3b2e4..4de863cc1 100644
+--- "a/F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\awwv-make-cursor-prompt\\SKILL.md"
++++ "b/F:\\AWWV-worktrees\\agent-setup-modernization\\.agent\\codex-skill-adapters\\awwv-make-cursor-prompt\\SKILL.md"
+@@ -1,21 +1,12 @@
+ ---
+ name: awwv-make-cursor-prompt
+-description: Generate a structured prompt for Cursor or subagents. Use when the user runs /awwv_make_cursor_prompt or asks for a prompt to guide an agent.
++description: Use when the user requests an AWWV prompt for Cursor or another coding agent.
+ ---
+ 
+-# /awwv_make_cursor_prompt
++# AWWV Make Cursor Prompt
+ 
+-## Trigger
+-Generating a prompt for Cursor or subagents.
++This is an AWWV compatibility entrypoint. In an AWWV checkout, read `.claude/skills/awwv-make-cursor-prompt/SKILL.md` and `.claude/skills/prompt-construction/SKILL.md` there as the maintained project sources. Also read repository `AGENTS.md` and relevant Codex runtime instructions.
+ 
+-## Inputs
+-- Role, task, relevant files, constraints.
++Produce a target-runtime-compatible prompt containing the outcome, exact files, evidence, constraints, authority, checks, stopping rule, and done condition. Preserve applicable canon, determinism, ordering, data/control/save, historical-source, ledger, provenance, and acceptance boundaries without adding unrelated requirements.
+ 
+-## Output
+-- A structured prompt with STOP AND ASK clauses.
+-
+-## Determinism safeguards
+-- Include explicit determinism constraints and canon list.
+-
+-## STOP AND ASK
+-- If canon scope is unclear.
++Outside AWWV, use `prompt-construction` for the current project rather than imposing AWWV paths or policy.

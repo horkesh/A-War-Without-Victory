@@ -1,0 +1,7 @@
+Apply/rollback requires an authorized coordinated session boundary. Verify is read-only.
+At F:\AWWV-worktrees\agent-setup-modernization\logs\agent-setup-modernization\user-skill-handoff.ps1:27 char:63
++ ... onfirmed) { throw 'Apply/rollback requires an authorized coordinated  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Apply/rollback ...y is read-only.:String) [], RuntimeException
+    + FullyQualifiedErrorId : Apply/rollback requires an authorized coordinated session boundary. Verify is read-only.
+ 

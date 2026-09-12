@@ -1,0 +1,498 @@
+SOURCE: AGENTS.md
+# Repository Agent Entry Points
+
+Use the runtime-provided `orchestrator` skill for cross-domain coordination and efficiency policy. Resolve it through the active skill catalog rather than a machine-specific path. The shared execution contract is [AGENT_WORKFLOW.md](docs/20_engineering/AGENT_WORKFLOW.md); load its task-specific references only when they apply.
+
+Preserve canon, determinism, data integrity, protected control/data/save boundaries, and every check required by affected production behavior. Canon hierarchy and approval panels remain authoritative. Required canon panels and distinct review seats are mandatory exceptions to the default small-team policy.
+
+For an authorized implementation task, continue through implementation, required checks, diagnosis of failures caused by the change, targeted correction, and independent review where required. Small reversible administrative work may be handled directly. Resolve routine reversible choices from project evidence. Ask when authority, acceptance criteria, or costly scope must change; report an unresolved blocker accurately. A request for a plan or review alone does not authorize implementation.
+
+More specific `AGENTS.md` files override this entrypoint within their directories.
+
+Read only the entry points relevant to the task:
+
+- simulation/state: canon index, affected phase/system specs, engine invariants, determinism matrix
+- map/UI: GUI or map master, player-visible-state and UI-ownership authorities
+- calibration/history: calibration master, scenario provenance, governing historical sources
+- release: release plan, packaging/build authority, open gates
+- documentation/process: `.claude/napkin.md`, active plan/board/roadmap, and ledger only where continuity matters
+
+Documentation and process-only changes use focused documentation checks instead of the general smoke triad; genuinely specific repository checks still apply. Use existing reports and the project ledger rather than creating duplicate process artifacts.
+
+
+SOURCE: CLAUDE.md
+# CLAUDE.md — A War Without Victory
+
+AWWV is a deterministic strategic simulation of the 1992–1995 Bosnian War. It is a negative-sum wargame about exhaustion, political collapse, and constrained agency. Canonical factions are `RBiH`, `RS`, and `HRHB`.
+
+Read [AGENT_WORKFLOW.md](docs/20_engineering/AGENT_WORKFLOW.md) for the shared execution contract and [CLAUDE_EXECUTION_STANDARD.md](docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md) for Claude-specific routing. Read `.claude/napkin.md` as an index, then load only relevant topic files.
+
+## Hard boundaries
+
+- Canon precedence: Engine Invariants > Phase Specifications > Systems Manual > Rulebook > Game Bible > `context.md`.
+- Determinism: no `Math.random()`, wall-clock time, timestamps, or unstable ordering in deterministic simulation state/artifacts; use `strictCompare` where ordered output requires it.
+- `src/state/game_state.ts` owns GameState truth. Preserve serialization, save compatibility, and protected data/control boundaries.
+- Never override initial OSID control or use `avoided_osids_by_faction`; resolve the underlying engine, OOB, operation, or scenario issue.
+- Brigades attack only through `CorpsOperation`.
+- Calibration changes remain one change per measured run. Preserve required full-suite, 188-week, anchor, provenance, and acceptance gates.
+- FORAWWV and sensitive-history changes retain their applicable unanimous Pyrrhic panels, independent seats, §6/enclave delegation, broader bright-line panel, same-change canon record, and owner proposal visibility described in `AGENT_WORKFLOW.md` and canon.
+- Packaging remains paused until its recorded owner gates permit product package work.
+
+## Task routing
+
+- Simulation/state: affected canon/specs, invariants, determinism matrix, code and tests.
+- Map/UI: relevant GUI/map/warroom master, player-visible-state, UI ownership, and rendered evidence for presentation changes.
+- Calibration/history: calibration master, active scenario plan/provenance, source hierarchy, protected anchors.
+- Release: active release plan, open gates, build/package/provenance authorities.
+- Documentation/process: active plan or board/roadmap as needed; ledger only when continuity or an entry is required.
+- Prior failure patterns: consult `docs/life_lessons.md` and only its relevant topic when the task could repeat a recorded mistake; this is not a blanket startup read.
+- Repository/branch maintenance: use the safeguards below when branch inventory, cleanup, or post-merge hygiene is requested.
+
+## Key Commands
+
+```bash
+npm run test:vitest
+npm run test:vitest -- <file>
+npx tsc --noEmit
+npm run sim:scenario:run:188w
+npm run sim:scenario:run:40w
+npm run desktop
+npm run dev:map
+npm run desktop:map:build
+```
+
+Select commands from the changed behavior; the smoke triad is not a documentation-only gate. Before long work, verify runtime prerequisites and success/failure selectors, retain logs, and use the command's own exit status. On this Windows host, scenario/release Bash checks require Git Bash where their paths use MSYS syntax.
+
+## Host-specific enforcement and tools
+
+`.claude/settings.json` scenario hooks enforce Claude-specific specialist attribution/routing. Preserve them unchanged. Their presence does not establish Codex or Cursor parity.
+
+The local executor is a bounded proposal tool. Claude owns repository writes, repo-derived expectations, verification, and verdicts. Use `npm run local:check` for availability. Prove applied proposals with `npm run gate:local -- --tests <files>`; see [tools/local_executor/README.md](tools/local_executor/README.md) for procedures, schemas, context limits, ledger use, and benchmark evidence.
+
+Architecture entrypoints: simulation `src/sim/`; state `src/state/`; scenarios `src/scenario/`; desktop `src/desktop/`; tactical map `src/ui/map/`; canon `docs/10_canon/`; engineering `docs/20_engineering/`; reports `docs/40_reports/`.
+
+## Repository and Branch Maintenance
+
+When branch inventory, cleanup, or post-merge hygiene is in scope, use `npm run repo:branches` to classify and `npm run repo:branches:clean` for the guarded cleanup route.
+
+- Classify squash-landed work with `git cherry`, not `--no-merged` or `git diff main..branch`; ancestry and main's later changes misclassify squash merges.
+- Delete a branch only when it has zero unique commits or an `archive/<branch>` recovery tag.
+- Restore archived work with `git switch -c <branch> archive/<branch>`; keep archive tags on the remote so recovery does not depend on one machine.
+- A guarded prune must refuse rather than lose unique work.
+
+
+SOURCE: docs/20_engineering/AGENT_WORKFLOW.md
+# Agent Workflow
+
+This is the detailed shared execution policy for Codex, Claude, Cursor, and other project agents. Host entrypoints may add model, tool, or hook instructions, but may not weaken this contract.
+
+## Authority and completion
+
+Classify the request before acting:
+
+- A request to plan, explain, diagnose, review, or report status authorizes read-only investigation and that deliverable.
+- A request to change, build, fix, or implement authorizes the in-scope implementation steps, checks, targeted corrections, documentation, and any independent review required by risk or project rules.
+- Release, publish, push, merge, live activation, canon-authority changes, acceptance-criterion changes, and costly scope expansion require the authority recorded for that action.
+
+For an authorized implementation task, continue through implementation, required checks, diagnosis of failures caused by the change, targeted correction, and independent review where required. Resolve routine reversible choices from project evidence. Ask when authority, acceptance criteria, or costly scope must change; report an unresolved blocker accurately.
+
+## Read by task
+
+Start with the repository entrypoint and runtime skill catalog. Read `.claude/napkin.md` as a routing index and open only the relevant topic archive.
+
+| Task | Governing sources |
+|---|---|
+| Simulation, state, serialization, AI, combat | `docs/10_canon/CANON.md`; affected phase/system specs; `Engine_Invariants_v0_9_0.md`; `DETERMINISM_TEST_MATRIX.md`; affected code/tests |
+| Map, UI, player information | `GUI_MASTER.md` or the relevant map/warroom master; `PLAYER_VISIBLE_STATE.md`; `UI_OWNERSHIP_MATRIX.md`; affected UI tests and real rendered route where presentation changes |
+| Calibration, scenario, history | `CALIBRATION_MASTER.md`; scenario plan and provenance; relevant historical source hierarchy; protected anchors and acceptance criteria |
+| Release, package, deployment | active release plan; build/package authority; open-gate validator; release and provenance checks |
+| Documentation, process, roadmap | active plan when one exists; `COMMAND_BOARD.md` for current priority; `MASTER_ROADMAP.md` for roadmap history; ledger only when dated continuity or a required entry matters |
+
+Do not load all sources for every task. More specific `AGENTS.md` files, canon documents, active plans, and explicit owner instructions take precedence within their scope.
+
+## Canon and protected boundaries
+
+Canon precedence is Engine Invariants > Phase Specifications > Systems Manual > Rulebook > Game Bible > `context.md`. Canonical faction IDs are `RBiH`, `RS`, and `HRHB`.
+
+Preserve deterministic ordering and serialization, GameState ownership, initial-control and authored-data boundaries, save compatibility, campaign provenance, and existing acceptance criteria. No `Math.random()`, wall-clock time, or unstable iteration may enter deterministic simulation state or artifacts.
+
+Edits to `docs/10_canon/FORAWWV.md` require the applicable Pyrrhic panel. The standard §6 panel is exactly Historian, scenario-tester/calibration, Engine/systems, and Red-team. The broader bright-line panel is those four seats plus Game Designer, Narrative Designer, Canon Compliance Reviewer, and War-or-Game: eight independent unanimous seats, with the implementer excluded. See `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` for the operative §6 gate and `docs/10_canon/FORAWWV.md` for the thesis it protects. The panel rules on the delegated §6/enclave questions. A proposal to cross the bright line must still be surfaced to the owner while it is a proposal and must amend the canon statement in the same authorized change.
+
+## Team and review
+
+Use the smallest qualified team. Small reversible administrative work may be handled directly. For nontrivial implementation, default to one implementer and one independent reviewer, with the reviewer covering all relevant lenses. Add a specialist only for a distinct question; required canon seats remain separate.
+
+The lead may inspect evidence, integrate, synthesize, and make routine in-scope decisions. When independent review is required, the implementer must not approve the same implementation. Runtime model names, agent APIs, and concurrency limits belong in host-specific instructions.
+
+The project team is Pyrrhic. Use roles exposed by the current runtime and repo briefs in `.claude/agents/`; do not invent unavailable role or tool identifiers.
+
+## Validation and cost control
+
+Before a long test, build, package, or campaign, state the question, command, pass criteria, expected cost, and stopping rule. Run the cheapest prerequisite checks first. After an unexpected failure, inspect retained evidence, reproduce and correct cheaply, then rerun only the affected expensive gate when it answers a new question.
+
+Choose checks from changed behavior:
+
+- documentation/process-only: focused references, links, Markdown/whitespace and applicable governance checks
+- implementation: affected tests, type/static checks and runtime proof proportionate to the change
+- territory-moving or calibration-affecting simulation behavior: required full suite, authoritative 188-week run, protected anchors, deterministic artifact/provenance checks, and one change per measured run; focused or shorter runs do not waive these gates
+- release/package: required build, inventory, runtime, save-preservation and provenance checks from the active release authority
+
+Reuse unaffected evidence. Passing another check never retires an unmet acceptance criterion.
+
+## Failure, documentation, and closeout
+
+Diagnose the first unexpected failure across all visible categories. Correct the smallest established cause and verify it with the cheapest meaningful check before broadening. Escalate only after a consolidated unresolved diagnosis or when authority must change.
+
+Update `docs/PROJECT_LEDGER.md` for behavioral/output/scenario or adopted process changes when required by repository policy. Put reusable technical knowledge in the existing knowledge ledger or napkin topic; do not create parallel task journals such as `tasks/todo.md` or `tasks/lessons.md`.
+
+Before claiming completion, inspect the final diff, verify every applicable requirement with fresh evidence, report exits/counts/evidence paths, and obtain independent review where required. Keep previous failures and residual gates visible.
+
+## Host enforcement coverage
+
+Repository instructions describe policy; host hooks enforce only where installed and invoked. `.claude/settings.json` currently applies Claude-specific scenario hook checks, including specialist attribution/routing. Codex and Cursor do not acquire that enforcement merely because the file exists. Preserve the hook and its tests unchanged; each active host must document and verify its actual coverage before claiming parity.
+
+
+SOURCE: docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md
+# Claude Execution Standard
+
+This is Claude's short operational entrypoint. The shared authority, reading, review, validation, failure, and closeout rules live in [AGENT_WORKFLOW.md](AGENT_WORKFLOW.md).
+
+## Claude-specific use
+
+- Use `.claude/skills/` and `.claude/agents/` as the repo-shipped role and handoff layer.
+- Use the host's available Task tooling and supported model settings; do not translate Codex model names or collaboration APIs into Claude configuration.
+- `.claude/settings.json` hooks apply only to Claude sessions that load them. They currently check scenario-related specialist attribution/routing; they do not prove equivalent enforcement in Codex or Cursor.
+- Keep those hooks and their blocking sets unchanged unless a separately authorized hook task owns them.
+
+## Working standard
+
+For cross-domain work, frame the question and dispatch only the specialists needed. The lead remains responsible for evidence, synthesis, integration, scope, and owner decisions. Keep implementer and reviewer separate; preserve mandatory canon seats.
+
+Use the task-to-document map in `AGENT_WORKFLOW.md`. The napkin is an index: read the index, then only the topic files relevant to the task. Current roadmap, ledger, GUI, calibration, release, and local-executor detail remain in their maintained authorities rather than being duplicated here.
+
+For authorized implementation, continue through applicable checks, targeted correction, documentation, and independent review where required. Small reversible administrative work may be handled directly. Stop for a change in authority, acceptance criteria, or costly scope, or for a consolidated blocker that project evidence cannot resolve.
+
+## Evidence
+
+Run checks proportionate to changed behavior. Documentation/process-only work uses focused documentation checks. Production, deterministic, calibration, 188-week, package, save-preservation, provenance, and canon gates remain mandatory when their trigger applies.
+
+Use `tools/local_executor/README.md` for the local planner/executor workflow and measured routing rules. The local executor proposes text; Claude owns repository writes and the acceptance oracle.
+
+## Long-running work
+
+For a long Claude-hosted command, use background execution and a `Monitor` so completion or failure wakes the session; do not end a turn merely to narrate waiting. Arm selectors for both success and failure signatures because silence cannot distinguish a running job from a crash. Do useful independent work while it runs.
+
+Judge the result from the command's actual exit status, not a background wrapper, partial log, or happy-path phrase. Capture the command status before piping when necessary and retain the log used for the verdict.
+
+
+SOURCE: .claude/AGENT_TEAM_ROSTER.md
+# Pyrrhic — Agent Team Roster (AWWV)
+
+**Collective identity:** Pyrrhic. The specialists listed below are the Pyrrhic team for this repo. Individual role names are unchanged.
+
+**Purpose:** Maintained project role map, consulted for relevant domain ownership. Skill bodies under `.claude/skills/` own detailed semantics; the [shared workflow](../docs/20_engineering/AGENT_WORKFLOW.md) owns execution policy. A separate implementer and reviewer are required for nontrivial implementation. One reviewer may cover multiple ordinary review lenses; mandatory canon panels and distinct seats remain separate.
+
+**Process QA:** Preserve process compliance as a review lens. Consult `quality-assurance-process` for an explicit process audit or a disputed compliance question; a routine handoff does not automatically require an additional worker.
+
+## Main agent instruction
+
+Use the runtime catalog and the relevant rows below. Resolve available tools on the current host and read the selected `.claude/skills/<name>/SKILL.md`; a listed role is not evidence of a callable tool enum. Document bounded handoffs. Task-specific consultation duties apply even when the lead performs other integration work.
+
+The lead owns framing, evidence interpretation, and integration. Delegate bounded independent work using the adopted model-cost policy. Claude's scenario-result specialist routing remains required where its unchanged hooks apply; see the shared workflow's host coverage.
+
+## Mandatory consultation gates
+
+Consultation means reading the applicable skill and covering its domain duties with qualified implementation/review. It does not automatically create another worker: the existing team can cover compatible lenses. Add a specialist for a distinct expertise gap, and keep every canon-panel or explicitly required review seat independent.
+
+| Skill | Trigger |
+|---|---|
+| operations-expert | Any operation change, including preparation, objectives, brigades, staging, timing and corps command |
+| historian | Any historical claim about the Bosnian War; preserve BB1/BB2 and applicable source requirements |
+| war-or-game | Any calibration run; mandatory realism sign-off |
+| formation-expert | Any OOB, brigade or militia-pool change |
+| ui-ux-developer | Any new UI component, modal or panel; consult for UI/UX changes |
+| data-pipeline-engineer | Changes to tools that write derived data |
+
+Exact four-seat and eight-seat membership is retained in [the shared workflow's canon boundary](../docs/20_engineering/AGENT_WORKFLOW.md#canon-and-protected-boundaries). Apply [SENSITIVE_HISTORY_DESIGN_GATE.md](../docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md), [FORAWWV.md](../docs/10_canon/FORAWWV.md), and [canon-compliance-reviewer](skills/canon-compliance-reviewer/SKILL.md) for the operative canon requirements. Similar names do not make `canon-compliance-review` and `canon-compliance-reviewer` interchangeable seats.
+
+---
+
+## Role → skill mapping
+
+### Leadership
+
+| Role | Skill path | When to invoke |
+|------|------------|----------------|
+| Orchestrator | orchestrator | Big-picture direction, bounded team coordination, evidence interpretation, integration and cross-role decisions. **Deputy:** Product Manager. |
+| Product Manager | product-manager | Roadmap, MVP, sequencing work, handoff to dev; reports to Orchestrator for big-picture alignment. References awwv-plan-change, awwv-make-cursor-prompt. |
+
+### Planning
+
+| Role | Skill path | When to invoke |
+|------|------------|----------------|
+| Game Designer | game-designer | Design questions, mechanic changes, canon interpretation, balance, narrative. |
+| Technical Architect | technical-architect | New systems, refactors, cross-cutting concerns, tech choices, architecture. |
+| Architect | architect | Holistic product architecture: cross-system integration design, UI/UX architecture, feature feasibility across engine+UI+data, industry research, vision documents. Operates above Technical Architect. |
+| **Historian** | historian | Bosnian war historical authority; holds BB KB (pages, facts, extractions). Citation-backed answers for historical events, scenarios, plausibility; always cite BB1/BB2. Invoke when discussing historical events, scenario design, or "what does the record say?" |
+
+### Development
+
+| Role | Skill path | When to invoke |
+|------|------------|----------------|
+| Gameplay Programmer | gameplay-programmer | Implementing or changing phase/sim logic, state, simulation behavior. |
+| Systems Programmer | systems-programmer | Engine core, ordering, serialization, invariants, determinism. |
+| Formation Expert | formation-expert | Militia spawning, brigade formation, militia pools, formation lifecycle, formation-driven availability questions. |
+| UI/UX Developer | ui-ux-developer | UI components, flows, UX changes, accessibility. |
+| Graphics Programmer | graphics-programmer | Rendering, shaders, map visuals, map rendering pipeline. |
+| Lua Scripting | lua-scripting | Lua APIs, scriptable behavior, bindings. |
+| Asset Integration | asset-integration | Integrating art, map data, external content; can use map-geometry where relevant. |
+
+### Testing
+
+| Role | Skill path | When to invoke |
+|------|------------|----------------|
+| Code Review (canon/specs) | canon-compliance-reviewer | Behavioral changes, gameplay logic, state schemas, phase rules, outputs; before merge for canon alignment. |
+| Code Review (general) | code-review | PR review, pre-merge review, style, correctness, security; for canon defer to canon-compliance-reviewer. |
+| QA Engineer | qa-engineer | Test plans, QA sign-off, regression; use determinism-auditor for determinism. |
+| QA / determinism | determinism-auditor | Ordering, nondeterminism, pipelines, stable output. |
+| Performance Engineer | performance-engineer | Performance concerns, optimization, profiling. |
+| Platform Specialist | platform-specialist | Platform bugs, packaging, Windows/platform constraints. |
+| Scenario / harness | scenario-harness-engineer | Scenario runner, preflight, diagnostics, pipeline code. |
+
+### Release
+
+| Role | Skill path | When to invoke |
+|------|------------|----------------|
+| Build Engineer | build-engineer | Build config, CI build steps, reproducible builds. |
+| DevOps Specialist | devops-specialist | Pipeline changes, deployment, CI/CD. |
+| Documentation Specialist | documentation-specialist | Docs updates, release notes; respect docs-only-ledger-handling; edits to FORAWWV.md require Pyrrhic-panel sign-off. |
+
+### Process and ledger
+
+| Role | Skill path | When to invoke |
+|------|------------|----------------|
+| Process / ledger | ledger-process-scribe, awwv-ledger-entry, awwv-pre-commit-check | Ledger updates, pre-commit checks, commit discipline, phase scope. |
+| Map / geometry | map-geometry-integrity-reviewer | Map toolchain, GeoJSON, geometry, spatial outputs. |
+
+### Meta
+
+| Role | Skill path | When to invoke |
+|------|------------|----------------|
+| **Process QA** | quality-assurance-process | Explicit process audits or disputed compliance; ordinary review covers this lens without automatically adding a worker. |
+| Retrospective Analyst | retrospective-analyst | After major milestone or comprehensive review; gaps, spec/code discrepancies, performance. |
+
+---
+
+## Handoff workflow
+
+- **Big-picture / team** → Orchestrator (strategic priority, convening Pyrrhic, aligning roadmap and ledger). Orchestrator delegates scope and sequencing to Product Manager (deputy).
+- **Design/scope** → Game Designer, Technical Architect, or Product Manager (by question type).
+- **Historical events / scenario plausibility / "what does the record say?"** → **Historian** (historian). Historian holds all Balkan Battlegrounds–derived knowledge; invoke for citation-backed BiH war facts, control/holdouts/enclaves/JNA, scenario design.
+- **Product architecture / cross-system** → Architect (UI/UX architecture, cross-system integration, feasibility assessment, vision documents). Architect delegates implementation to relevant Dev roles.
+- **Implementation** → Relevant Dev role: Gameplay, Systems, UI/UX, Graphics, Lua, Asset.
+- **Pre-merge** → Independent review covering relevant code, canon, QA, determinism and process guidance. Separately mandated panel seats remain mandatory; final merge still needs its own authorization.
+- **Release** → Build Engineer, DevOps Specialist, Documentation Specialist.
+- **Process validation** → **Process QA** (quality-assurance-process) when an explicit audit or disputed compliance question warrants it.
+- **After major milestone** → Retrospective Analyst (retrospective-analyst).
+
+Document handoffs when passing between roles (e.g. "Handoff: Orchestrator → Product Manager for Phase 4 sequencing"; "Handoff: Product Manager → Gameplay Programmer for Phase X implementation").
+
+---
+
+## Specialist bench for recurring AWWV problem shapes
+
+Use the formal roster above as the base authority, then fit dispatch to the actual problem shape instead of reusing a generic fixed team block.
+
+### Common dispatch patterns
+
+| Problem shape | Primary specialists | Add when needed |
+|------|------------|----------------|
+| Formation spawning, militia pools, formation lifecycle | Formation Expert, Gameplay Programmer, Scenario Creator / Runner / Tester | Systems Programmer for invariants; Historian when historical plausibility is contested |
+| Sector / frontline truth, brigade-to-sector ownership, reachability, front segmentation | Systems Programmer, Gameplay Programmer, Scenario Creator / Runner / Tester, operations-reality-checker | Map / geometry when spatial integrity is implicated; Historian only when historical plausibility is actually in question |
+| Live operation behavior, dead fronts, zero-attack patterns | Scenario Creator / Runner / Tester, Gameplay Programmer, operations-reality-checker | Technical Architect for root-cause framing; Historian when the question is "bug or plausible quiet?" |
+| Player-facing command truth, shell ownership drift, duplicate UI authority | UI/UX Developer, Architect, Technical Architect, ui-truth-keeper, authority-auditor | Modern Wargame Expert for comparative UX; Code Review (canon/specs) when mechanics meaning may drift |
+| Roadmap slotting, phase sequencing, report placement | Product Manager, Technical Architect, roadmap-slotter, Documentation Specialist | Reports Custodian when report structure/retirement is part of the work |
+| Cross-role implementation with built-in challenge loop | self-correcting-implementer plus the actual domain owner | Independent review includes process compliance |
+
+### Repo taskforce briefs
+
+The repo also ships task-focused coordination briefs in `.claude/agents/`. These are combinators and challenge roles, not replacements for domain ownership:
+
+- `authority-auditor.md`
+- `operations-reality-checker.md`
+- `orchestrator-dispatcher.md`
+- `roadmap-slotter.md`
+- `self-correcting-implementer.md`
+- `ui-truth-keeper.md`
+
+Use them to sharpen dispatch and synthesis, but keep a real domain owner on every task.
+
+---
+
+## Decision boundaries
+
+Continue authorized implementation and targeted failure correction. Resolve routine choices from evidence. Ask for an unresolved authority conflict, changed acceptance criterion, or costly scope outside the agreed plan. Plan-only and review-only requests remain read-only. Cross-phase, canon, determinism, architecture and protected data/save work retain their specific governing requirements; generic review cannot supply missing canon approval. Remote push, final merge, publication and shared live-instruction activation require their established authorization.
+
+---
+
+## Periodic Pyrrhic team review
+
+For a **comprehensive review**, invoke in sequence or combined: **Game Designer**, **Technical Architect**, **Code Review** (canon-compliance-reviewer), **QA Engineer** (qa-engineer). Produce a consolidated list of:
+
+- Code discrepancies
+- Spec gaps
+- Performance issues
+
+Retrospective Analyst can consume this output for post-milestone review.
+
+
+SOURCE: .claude/skills/using-superpowers/SKILL.md
+---
+name: using-superpowers
+description: Use when skill discovery or workflow selection is unclear, or the user explicitly requests this skill.
+---
+
+# Using Skills
+
+Use this meta-skill when the catalog does not make the relevant workflow clear or when the user requests it explicitly. Ordinary tasks can select a clearly described domain skill directly without loading this meta-skill.
+
+Use skills that materially improve the current task. An explicit user request for a named skill routes to it. Otherwise, select by the frontmatter trigger and read the full skill before applying it.
+
+Prefer the smallest set that covers the work. Domain and safety rules still apply when triggered; generic process skills do not activate merely because they could be tangentially relevant.
+
+Follow the user's authorized scope and `docs/20_engineering/AGENT_WORKFLOW.md`. If multiple skills conflict, preserve the more specific repository/canon authority and report a conflict only when it changes scope, authority, acceptance criteria, or safety.
+
+
+SOURCE: .claude/skills/brainstorming/SKILL.md
+---
+name: brainstorming
+description: Resolve open product or technical design choices before implementation. Use when material requirements or tradeoffs remain unsettled.
+---
+
+# Brainstorming
+
+Clarify a design only when the requested outcome leaves material choices open. Read the relevant product, canon, architecture, and existing implementation sources before proposing alternatives.
+
+Identify the unresolved decision, constraints, and evidence. Present two or three viable approaches when alternatives materially differ, recommend one, and record the tradeoff that matters. Ask the user only for a choice that changes scope, authority, acceptance criteria, or the product outcome.
+
+When requirements and authority are already settled, proceed with implementation rather than reopening design or requesting section-by-section approval. A plan-only request ends with a reviewable plan; it does not imply implementation.
+
+
+SOURCE: .claude/skills/awwv-read-first/SKILL.md
+---
+name: awwv-read-first
+description: Map a named AWWV subsystem to its governing docs and tests when a reading guide is requested or ownership is unclear.
+---
+
+# AWWV Read First
+
+Use this workflow when the user runs `/awwv_read_first`, asks what governs a target area, or ownership cannot be established from the repository entrypoint.
+
+Return a short task-specific map:
+
+- canonical authority and precedence
+- active plan or current-state source, when relevant
+- implementation entrypoints and tests
+- deterministic, player-information, save, history, or release boundaries triggered by the target
+- unresolved ownership or source conflicts
+
+Do not make a universal reading list or require this workflow before every nontrivial edit. If authority remains genuinely ambiguous, name the conflicting sources and the decision required.
+
+
+SOURCE: .claude/skills/writing-plans/SKILL.md
+---
+name: writing-plans
+description: Use when a multi-step implementation needs a written plan or the user asks for an implementation plan.
+---
+
+# Writing Plans
+
+Create a plan that another qualified engineer can execute without rediscovering authority or scope.
+
+Include:
+
+- intended outcome and explicit non-goals
+- exact files or surfaces owned by each task
+- governing sources and dependencies
+- implementation sequence where dependencies require it
+- change-specific checks with pass criteria and evidence paths
+- authority boundaries, expensive-run question/cost/stopping rule, and completion conditions
+- documentation, review, integration, and activation ownership
+
+Use steps large enough to represent meaningful deliverables. Include code snippets only when they clarify a non-obvious contract; do not require complete implementation code, artificial two-minute steps, or a commit after every action.
+
+A plan-only request produces the plan for review and stops. Do not force an execution-choice question. If implementation is already authorized, continue under the applicable execution workflow.
+
+
+SOURCE: .claude/skills/executing-plans/SKILL.md
+---
+name: executing-plans
+description: Execute an authorized implementation plan through its required checks and closeout, preserving its scope and decision boundaries.
+---
+
+# Executing Plans
+
+Read the plan and its governing sources. Confirm the current base, owned files, dependencies, authority, acceptance criteria, and validation cost before changing files.
+
+Execute in dependency order. Continue through all authorized tasks, affected documentation, required checks, diagnosis of failures caused by the change, targeted correction, and independent review where required. Small reversible administrative steps may be handled directly. Use checkpoints only when the plan or owner requests them or when a dependency must be reviewed before later work can be valid.
+
+On failure, retain evidence, inspect all visible failure categories, and verify the smallest correction cheaply. Escalate after a consolidated unresolved diagnosis, when the plan conflicts with higher authority, or when acceptance criteria or costly scope must change. Do not stop automatically after a fixed task count or at the first test failure.
+
+Finish with actual results, exits/counts, evidence paths, unresolved gates, and integration/activation status. Do not infer authority to merge, publish, release, or activate live instructions.
+
+
+SOURCE: .claude/skills/prompt-construction/SKILL.md
+---
+name: prompt-construction
+description: Use when drafting a task prompt, Cursor instruction, or agent handoff.
+---
+
+# Prompt Construction
+
+This is the maintained prompt template. Compatibility entrypoints should point here rather than duplicate it.
+
+Write a compact handoff containing:
+
+1. role and concrete outcome
+2. exact files/surfaces and evidence already established
+3. governing sources and applicable canon/determinism/data/save/history boundaries
+4. authorization, non-goals, and actions that still require owner approval
+5. required checks, pass criteria, evidence paths, and expensive-run stopping rule
+6. done condition and requested output
+
+Add STOP/ASK conditions only for a real decision: conflicting or silent authority, inability to preserve determinism or protected boundaries, changed acceptance criteria, destructive/external action without authority, or scope expansion. Routine reversible implementation choices should be resolved from project evidence.
+
+Use role and tool names supported by the target runtime. Do not embed host-specific model names or APIs in a cross-host prompt.
+
+
+SOURCE: .claude/skills/awwv-make-cursor-prompt/SKILL.md
+---
+name: awwv-make-cursor-prompt
+description: Use when the user runs /awwv_make_cursor_prompt or asks for a structured prompt for Cursor or another agent.
+---
+
+# AWWV Make Cursor Prompt
+
+Compatibility entrypoint: use `prompt-construction` as the maintained template.
+
+Supply the target role/runtime, outcome, exact files, constraints, evidence, checks, authority, and done condition. Preserve applicable canon, determinism, ordering, data/control/save, historical-source, ledger, and acceptance boundaries without adding unrelated requirements.
+
+
+SOURCE: .claude/skills/verification-before-completion/SKILL.md
+---
+name: verification-before-completion
+description: Use before claiming work is complete, fixed, passing, or ready for integration.
+---
+
+# Verification Before Completion
+
+Base completion claims on fresh, relevant evidence.
+
+1. Re-read the request, plan, and final diff; list the claims that require proof.
+2. Select the smallest commands or observations that directly prove those claims and every triggered repository gate.
+3. Run them on the final changed state, read their own exit status and failure counts, and retain evidence paths.
+4. Report the actual result, including inherited or unresolved failures and gates not run.
+
+Fresh means after the last change that could affect the evidence. Reuse unaffected evidence explicitly; do not rerun an unchanged expensive suite or campaign for reassurance. A focused check cannot waive a separately required full-suite, 188-week, package, runtime, provenance, save-preservation, or canon gate.
+
+For documentation/process-only work, focused reference, link, Markdown/whitespace, and applicable governance checks are sufficient unless the changed document has a specific validator.

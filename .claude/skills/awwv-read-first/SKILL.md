@@ -1,22 +1,18 @@
 ---
 name: awwv-read-first
-description: Produce required reading list and a short compliance checklist before nontrivial changes. Use when the user runs /awwv_read_first or asks what to read first for a target area.
+description: Map a named AWWV subsystem to its governing docs and tests when a reading guide is requested or ownership is unclear.
 ---
 
-# /awwv_read_first
+# AWWV Read First
 
-## Trigger
-Before any nontrivial change.
+Use this workflow when the user runs `/awwv_read_first`, asks what governs a target area, or ownership cannot be established from the repository entrypoint.
 
-## Inputs
-- Target area (phase, system, or script).
+Return a short task-specific map:
 
-## Output
-- Required reading list (docs and tests).
-- Short compliance checklist.
+- canonical authority and precedence
+- active plan or current-state source, when relevant
+- implementation entrypoints and tests
+- deterministic, player-information, save, history, or release boundaries triggered by the target
+- unresolved ownership or source conflicts
 
-## Determinism safeguards
-- Always include determinism docs and stable ordering reminders.
-
-## STOP AND ASK
-- If the target area cannot be mapped to canon docs.
+Do not make a universal reading list or require this workflow before every nontrivial edit. If authority remains genuinely ambiguous, name the conflicting sources and the decision required.

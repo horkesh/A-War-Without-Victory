@@ -4358,3 +4358,15 @@ reference again: whichever lands second must re-measure and must not carry its o
 
 Assessed in the scenario-tester role against live tracked sources, per the repo's orchestrator rule
 that scenario artifacts are not interpreted by the implementer.
+
+## 2026-09-12 — Agent setup modernization prepared in isolation; not activated
+
+The owner authorized implementation of the [agent setup modernization plan](plans/2026-09-12-agent-setup-modernization-plan.md), superseding its planning-only status while retaining the coordinated live-activation boundary. Work is isolated on `codex/agent-setup-modernization` at `F:/AWWV-worktrees/agent-setup-modernization`, from inspected base `8913cca6f714e07acf59785ce526c19dc5fc9973`. Claude's shared checkout and all live user skills/settings remain untouched; this entry is prepared for later integration.
+
+The shared contract and host entrypoints now use task-scoped reading, proportionate review and continued authorized implementation. Eight generic process skills have narrowed triggers and decision boundaries. All 93 napkin entries plus three opening curation lessons remain in 13 mapped sections of existing topics; the index is 437 words versus 6,214 before. Active discovery references and counts are repaired. The importer now previews an explicit name, rejects silent overwrite, binds apply to reviewed before/after state and saves the replaced tree. Canon hierarchy, distinct four/eight-seat panels, historical sources, deterministic/control/data/save boundaries, 188-week/full-suite/provenance gates and the adopted model-cost policy remain in force.
+
+Inventory classified 27 unequal skill pairs without bulk synchronization. Nine Codex host adapters and exact original/candidate diffs are staged for existing user skill locations. Actual desktop discovery found both same-name repo/user entries, so no duplicate `.agents/skills` exposure or relocation is proposed. Original files and metadata are retained outside the repository; user activation and rollback helpers were rehearsed only in disposable paths.
+
+Validation: importer 12/12, hook registry 6/6, command contract 5/5 and the applicable local-executor documentation case 1/1 pass, each exit 0. Focused YAML/reference/preservation and governed-document checks pass. Astra/Sol tabletop and a tool-free, nonpersistent Claude candidate-snapshot trial retain initial findings and targeted corrections; no build, suite campaign, simulation, baseline refresh or release ran. One independent Sol/medium reviewer returned GO for the isolated commit and owner-controlled P5 handoff after concrete findings were corrected and verified. Exact evidence, the review verdict, remaining host/discovery compatibility dispositions and activation/rollback steps are in the plan and `logs/agent-setup-modernization/`.
+
+No product roadmap/board gate is closed or changed. Repository integration, applying the nine live entrypoints and fresh-session acceptance remain unactivated P5 handoff work. Settings, hook enforcement, remote push, final merge and publication are not performed or implicitly authorized by this receipt.

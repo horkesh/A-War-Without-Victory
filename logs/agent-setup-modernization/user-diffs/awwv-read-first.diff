@@ -1,0 +1,31 @@
+diff --git "a/F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\awwv-read-first\\SKILL.md" "b/F:\\AWWV-worktrees\\agent-setup-modernization\\.agent\\codex-skill-adapters\\awwv-read-first\\SKILL.md"
+index cb2995f22..3c5d7962c 100644
+--- "a/F:\\AWWV-agent-setup-modernization-backup\\20260912-8913cca6\\user-originals\\awwv-read-first\\SKILL.md"
++++ "b/F:\\AWWV-worktrees\\agent-setup-modernization\\.agent\\codex-skill-adapters\\awwv-read-first\\SKILL.md"
+@@ -1,22 +1,10 @@
+ ---
+ name: awwv-read-first
+-description: Produce required reading list and a short compliance checklist before nontrivial changes. Use when the user runs /awwv_read_first or asks what to read first for a target area.
++description: Use when an AWWV reading guide is requested or subsystem ownership cannot be established from the repository entrypoint.
+ ---
+ 
+-# /awwv_read_first
++# AWWV Read First
+ 
+-## Trigger
+-Before any nontrivial change.
++This skill is project-specific. In an AWWV checkout, read `.claude/skills/awwv-read-first/SKILL.md` there as the maintained workflow, then read repository `AGENTS.md` and relevant Codex runtime instructions. Return the smallest task-specific map of authority, implementation, tests, and triggered boundaries.
+ 
+-## Inputs
+-- Target area (phase, system, or script).
+-
+-## Output
+-- Required reading list (docs and tests).
+-- Short compliance checklist.
+-
+-## Determinism safeguards
+-- Always include determinism docs and stable ordering reminders.
+-
+-## STOP AND ASK
+-- If the target area cannot be mapped to canon docs.
++Outside AWWV, explain that no AWWV subsystem is active and use the current project's own entrypoint if the user intended a general reading map. Do not impose AWWV canon or paths on another repository.

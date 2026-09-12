@@ -1,0 +1,11 @@
+---
+description: Use UI/UX ownership guidance for tactical map, Warroom, components, modals, flows, accessibility and visual changes.
+globs: src/ui/**/*
+alwaysApply: false
+---
+
+# UI/GUI ownership
+
+When the task changes UI or GUI behavior or appearance, read and follow `.claude/skills/ui-ux-developer/SKILL.md`. Consult that role for new components, modals and panels; retain its design, accessibility and ownership duties.
+
+Read the relevant `docs/40_reports/GUI_MASTER.md` guidance and update it with verified changes when required by the UI workflow. Use `docs/20_engineering/MAP_UI_MASTER.md` and `docs/20_engineering/TACTICAL_MAP_SYSTEM.md` for the affected map surface. An agreed bug fix proceeds without a generic design interview, through relevant checks and rendered visual proof. See `AGENTS.md` and the relevant section of `docs/20_engineering/AGENT_WORKFLOW.md` for shared authority.

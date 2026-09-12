@@ -1,0 +1,8 @@
+{
+  "diff_check_exit": 0,
+  "governance_exit": 0,
+  "static_validation_exit": 0,
+  "live_user_preflight_exit": 0,
+  "independent_review": "GO; isolated commit and owner-controlled handoff",
+  "activated": false
+}

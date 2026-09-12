@@ -1,0 +1,18 @@
+{
+  "checks": {
+    "files": 45,
+    "skillMetadata": 19,
+    "cursorMetadata": 2,
+    "links": 94,
+    "protectedFiles": 32,
+    "napkinSections": 12
+  },
+  "failures": [
+    "Protected file drift: .githooks/pre-commit",
+    "Protected file drift: tools/architect/hooks/notify.ps1",
+    "Protected file drift: tools/architect/hooks/on_stop.ps1",
+    "Protected file drift: tools/hooks/whowrites.mjs"
+  ],
+  "preexisting_broken_links": [],
+  "exit": 1
+}

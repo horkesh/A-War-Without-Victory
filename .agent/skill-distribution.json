@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "status": "prepared; not activated",
+  "base_commit": "8913cca6f714e07acf59785ce526c19dc5fc9973",
+  "maintained_project_source": ".claude/skills",
+  "location_strategy": "Keep existing repo and installed skill locations. No .agents same-name exposure; staged adapters update only the nine named installed SKILL.md entrypoints after handoff.",
+  "discovery": {
+    "cli": "0.130.0",
+    "desktop": "0.154.0-alpha.6.2",
+    "supported": ".agents/skills discovered via skills/list in disposable project/profile",
+    "duplicates": "repo and user entries with identical names were both returned; no merge or unambiguous selection assumed",
+    "evidence": "logs/agent-setup-modernization/duplicate-discovery-receipt.json"
+  },
+  "installed_root_observed": "C:/Users/User/.codex/skills",
+  "settings_changes": [],
+  "preserved_host_skills": [
+    "orchestrator",
+    "code-simplifier",
+    "scenario-report",
+    "writing-skills"
+  ],
+  "other_pairs": "Keep all other installed files. Per-pair semantic classifications/dispositions are retained in inventory.json; unresolved domain reconciliations are deferred, not silently selected.",
+  "adapters": [
+    {
+      "name": "awwv-make-cursor-prompt",
+      "project_source": ".claude/skills/awwv-make-cursor-prompt/SKILL.md",
+      "project_source_sha256": "441BE59C1DA977EE2CCB091D0854877F8DD85C3E8A785DB635342492D6E0F55D",
+      "adapter": ".agent/codex-skill-adapters/awwv-make-cursor-prompt/SKILL.md",
+      "adapter_sha256": "A45CE8471BEA4480ADAE6DF1953B6C2C2951AEE99A19749BC0ABDC7D3224F790",
+      "installed_relative": "awwv-make-cursor-prompt/SKILL.md",
+      "original_sha256": "29B668CC6F040B2224308BC4C1893F43CFA1E816220BA01BF560E03F70E354F8",
+      "original_backup": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/user-originals/awwv-make-cursor-prompt/SKILL.md",
+      "diff": "logs/agent-setup-modernization/user-diffs/awwv-make-cursor-prompt.diff",
+      "disposition": "Reviewed generic Codex entrypoint; routes AWWV to its current repo source; preserves support files and generic use outside AWWV; pending coordinated activation"
+    },
+    {
+      "name": "awwv-read-first",
+      "project_source": ".claude/skills/awwv-read-first/SKILL.md",
+      "project_source_sha256": "1A0F4209101BA8C54F5E85E5B6187877EC47356D930C9AF5A889A13E0971FC24",
+      "adapter": ".agent/codex-skill-adapters/awwv-read-first/SKILL.md",
+      "adapter_sha256": "0B3CFF9F919E90F1B537BAF0C552EDBEB77C356FA76BAD81B9F29E68B7B50AF1",
+      "installed_relative": "awwv-read-first/SKILL.md",
+      "original_sha256": "600FA34C46176DC9D336BE418A384A0CFDB45043C8E8968DA39051CA7185AEFD",
+      "original_backup": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/user-originals/awwv-read-first/SKILL.md",
+      "diff": "logs/agent-setup-modernization/user-diffs/awwv-read-first.diff",
+      "disposition": "Reviewed generic Codex entrypoint; routes AWWV to its current repo source; preserves support files and generic use outside AWWV; pending coordinated activation"
+    },
+    {
+      "name": "brainstorming",
+      "project_source": ".claude/skills/brainstorming/SKILL.md",
+      "project_source_sha256": "7135D7D147980AE381C53EB98C59E71294D5350D5AE352E80B435A84D525F33C",
+      "adapter": ".agent/codex-skill-adapters/brainstorming/SKILL.md",
+      "adapter_sha256": "40A957F8C50725B7234735CD71BCF769934F79124B9820A25691D3910AC8C6AB",
+      "installed_relative": "brainstorming/SKILL.md",
+      "original_sha256": "206C63E80D38C57E6AFC657296332B1D0FF75572435D75C079E7407B26762ECD",
+      "original_backup": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/user-originals/brainstorming/SKILL.md",
+      "diff": "logs/agent-setup-modernization/user-diffs/brainstorming.diff",
+      "disposition": "Reviewed generic Codex entrypoint; routes AWWV to its current repo source; preserves support files and generic use outside AWWV; pending coordinated activation"
+    },
+    {
+      "name": "executing-plans",
+      "project_source": ".claude/skills/executing-plans/SKILL.md",
+      "project_source_sha256": "5778D99DA5F7317D62BE2F250A953C0ADFAC143356E6EE8D4E9513788EB73F0C",
+      "adapter": ".agent/codex-skill-adapters/executing-plans/SKILL.md",
+      "adapter_sha256": "314E9850D68F97B332C69CBBA775BB5466B397D571B6D6DF5F7460811F0022F6",
+      "installed_relative": "executing-plans/SKILL.md",
+      "original_sha256": "D099FA42FD7518F4DAFA9F2D51C1C08FCE970490D57682B6ACD3E7A57BB55B52",
+      "original_backup": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/user-originals/executing-plans/SKILL.md",
+      "diff": "logs/agent-setup-modernization/user-diffs/executing-plans.diff",
+      "disposition": "Reviewed generic Codex entrypoint; routes AWWV to its current repo source; preserves support files and generic use outside AWWV; pending coordinated activation"
+    },
+    {
+      "name": "napkin",
+      "project_source": ".claude/skills/napkin/SKILL.md",
+      "project_source_sha256": "E34590A8EBA63C928F64725EE8DD43ED8EA46DA0ED3CA03BBE58E711C02B7D54",
+      "adapter": ".agent/codex-skill-adapters/napkin/SKILL.md",
+      "adapter_sha256": "1C99DD4CFCA2B7EE3C0E8B82D748273666499E3131AEE5A4C612D802A31430D1",
+      "installed_relative": "napkin/SKILL.md",
+      "original_sha256": "C63508F893CCFFFF0603C08894ADE93376581DDDCD9230E5945EC9B7FCBB9B4F",
+      "original_backup": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/user-originals/napkin/SKILL.md",
+      "diff": "logs/agent-setup-modernization/user-diffs/napkin.diff",
+      "disposition": "Reviewed generic Codex entrypoint; routes AWWV to its current repo source; preserves support files and generic use outside AWWV; pending coordinated activation"
+    },
+    {
+      "name": "prompt-construction",
+      "project_source": ".claude/skills/prompt-construction/SKILL.md",
+      "project_source_sha256": "BAFFC1BBB8B492AA04F1D4940A14CEE1D3E89E117C5B88884D3C524CD2830E4A",
+      "adapter": ".agent/codex-skill-adapters/prompt-construction/SKILL.md",
+      "adapter_sha256": "3B96DB5187928BA15C7D4EF9B2631A8BB0913409F0FA6F7EC19A1AF566E0DD4C",
+      "installed_relative": "prompt-construction/SKILL.md",
+      "original_sha256": "A80B37A0B8BAF101E14B4895A6FCA11C1307B9BBE0AFA0AF95AC9AACED507F5C",
+      "original_backup": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/user-originals/prompt-construction/SKILL.md",
+      "diff": "logs/agent-setup-modernization/user-diffs/prompt-construction.diff",
+      "disposition": "Reviewed generic Codex entrypoint; routes AWWV to its current repo source; preserves support files and generic use outside AWWV; pending coordinated activation"
+    },
+    {
+      "name": "using-superpowers",
+      "project_source": ".claude/skills/using-superpowers/SKILL.md",
+      "project_source_sha256": "E562A9917C6B6D51CDD8ED31727611E6D362751A6B3272701A5EBEDB77D5B61D",
+      "adapter": ".agent/codex-skill-adapters/using-superpowers/SKILL.md",
+      "adapter_sha256": "A705BD742BBCC18D3A98CBA66ACF29967D29C99B5DCF86323BBFD8E2BBF2F1BB",
+      "installed_relative": "using-superpowers/SKILL.md",
+      "original_sha256": "81D921B16502091F44E8669BBCFAE74B87BBF4295D03FFF70A98E81D73AF60A6",
+      "original_backup": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/user-originals/using-superpowers/SKILL.md",
+      "diff": "logs/agent-setup-modernization/user-diffs/using-superpowers.diff",
+      "disposition": "Reviewed generic Codex entrypoint; routes AWWV to its current repo source; preserves support files and generic use outside AWWV; pending coordinated activation"
+    },
+    {
+      "name": "verification-before-completion",
+      "project_source": ".claude/skills/verification-before-completion/SKILL.md",
+      "project_source_sha256": "A6995BD77EA12282061FF0D9106107771B07D1A761A4AF961659D287883932ED",
+      "adapter": ".agent/codex-skill-adapters/verification-before-completion/SKILL.md",
+      "adapter_sha256": "1791FE2E6DCC813810936CCB944475A4B84652FC2ED1793C52CA13FF3CA42442",
+      "installed_relative": "verification-before-completion/SKILL.md",
+      "original_sha256": "EA52D15AABAF72BC6B558EFE2C126F161B53961090DDCD712000273BFE8C7B6C",
+      "original_backup": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/user-originals/verification-before-completion/SKILL.md",
+      "diff": "logs/agent-setup-modernization/user-diffs/verification-before-completion.diff",
+      "disposition": "Reviewed generic Codex entrypoint; routes AWWV to its current repo source; preserves support files and generic use outside AWWV; pending coordinated activation"
+    },
+    {
+      "name": "writing-plans",
+      "project_source": ".claude/skills/writing-plans/SKILL.md",
+      "project_source_sha256": "127E09A1E8FB5BDAF4F2B5023F7F70C68A79F99F760DAE028AFD07EBABBF421A",
+      "adapter": ".agent/codex-skill-adapters/writing-plans/SKILL.md",
+      "adapter_sha256": "41C42E3838C3A51A8C02676975BB4D9AE57E36C0B8A4AB6CFDA09C065C20C66D",
+      "installed_relative": "writing-plans/SKILL.md",
+      "original_sha256": "8A9198D4D9EFBCAD6E019B17C422C182113062C864B6154EC2A3BA2ED0B6B9D0",
+      "original_backup": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/user-originals/writing-plans/SKILL.md",
+      "diff": "logs/agent-setup-modernization/user-diffs/writing-plans.diff",
+      "disposition": "Reviewed generic Codex entrypoint; routes AWWV to its current repo source; preserves support files and generic use outside AWWV; pending coordinated activation"
+    }
+  ]
+}

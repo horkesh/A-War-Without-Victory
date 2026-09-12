@@ -1,0 +1,11 @@
+---
+description: Route repository work through the curated napkin index and only the topics relevant to the task.
+globs:
+alwaysApply: true
+---
+
+# Repository runbook routing
+
+For repository work, use the short `.claude/napkin.md` index when its task guidance applies, then follow only relevant topic links. Reading the runbook does not authorize rewriting it. Curate when verified reusable knowledge or an explicit maintenance task warrants a change, following `.claude/skills/napkin/SKILL.md`.
+
+Preserve directives, source citations and provenance. Confirm ownership before editing a live shared napkin; prepare changes in isolation while another session owns it. Follow `AGENTS.md` and the shared workflow for authority, evidence and completion.

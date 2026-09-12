@@ -1,195 +1,58 @@
-# CLAUDE.md — A War Without Victory (AWWV)
+# CLAUDE.md — A War Without Victory
 
-Deterministic strategic-level simulation of the 1992-1995 Bosnian War. Negative-sum wargame: exhaustion, political collapse, constrained agency — not conquest. Three factions: **RBiH** (ARBiH), **RS** (VRS), **HRHB** (HVO).
+AWWV is a deterministic strategic simulation of the 1992–1995 Bosnian War. It is a negative-sum wargame about exhaustion, political collapse, and constrained agency. Canonical factions are `RBiH`, `RS`, and `HRHB`.
 
-## Session Startup (MANDATORY — before any work)
+Read [AGENT_WORKFLOW.md](docs/20_engineering/AGENT_WORKFLOW.md) for the shared execution contract and [CLAUDE_EXECUTION_STANDARD.md](docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md) for Claude-specific routing. Read `.claude/napkin.md` as an index, then load only relevant topic files.
 
-1. Read `.claude/napkin.md` — curated runbook. Internalize silently, curate on read (re-prioritize, merge dupes, cap 10/category). Update during work.
-2. Read `docs/PROJECT_LEDGER.md` (latest 80 lines — current state).
-3. Read `docs/life_lessons.md` (index) — always read "Recently Violated" and "New Lessons" sections. Then load the topic file(s) relevant to your current task (e.g. `docs/life_lessons/calibration.md` for calibration work, `docs/life_lessons/ui_map.md` for UI work). If about to violate an active lesson, STOP and flag it.
-4. If `working-on.md` exists at project root, read it (interrupted task from previous session). Delete after reading.
+## Hard boundaries
+
+- Canon precedence: Engine Invariants > Phase Specifications > Systems Manual > Rulebook > Game Bible > `context.md`.
+- Determinism: no `Math.random()`, wall-clock time, timestamps, or unstable ordering in deterministic simulation state/artifacts; use `strictCompare` where ordered output requires it.
+- `src/state/game_state.ts` owns GameState truth. Preserve serialization, save compatibility, and protected data/control boundaries.
+- Never override initial OSID control or use `avoided_osids_by_faction`; resolve the underlying engine, OOB, operation, or scenario issue.
+- Brigades attack only through `CorpsOperation`.
+- Calibration changes remain one change per measured run. Preserve required full-suite, 188-week, anchor, provenance, and acceptance gates.
+- FORAWWV and sensitive-history changes retain their applicable unanimous Pyrrhic panels, independent seats, §6/enclave delegation, broader bright-line panel, same-change canon record, and owner proposal visibility described in `AGENT_WORKFLOW.md` and canon.
+- Packaging remains paused until its recorded owner gates permit product package work.
+
+## Task routing
+
+- Simulation/state: affected canon/specs, invariants, determinism matrix, code and tests.
+- Map/UI: relevant GUI/map/warroom master, player-visible-state, UI ownership, and rendered evidence for presentation changes.
+- Calibration/history: calibration master, active scenario plan/provenance, source hierarchy, protected anchors.
+- Release: active release plan, open gates, build/package/provenance authorities.
+- Documentation/process: active plan or board/roadmap as needed; ledger only when continuity or an entry is required.
+- Prior failure patterns: consult `docs/life_lessons.md` and only its relevant topic when the task could repeat a recorded mistake; this is not a blanket startup read.
+- Repository/branch maintenance: use the safeguards below when branch inventory, cleanup, or post-merge hygiene is requested.
 
 ## Key Commands
 
 ```bash
-npm run test:vitest          # whole suite, sharded (same gate CI runs)
-npm run test:vitest -- <file>  # one file / -t pattern (unsharded)
-npx tsc --noEmit             # Typecheck
-npm run sim:scenario:run:188w # sole scoring calibration scenario
-npm run sim:scenario:run:40w # 40-week diagnostic scenario
-npm run sim:scenario:run:default  # 52-week diagnostic scenario
-npm run desktop              # Electron app
-npm run dev:map              # Vite tactical map (port 3001)
-npm run desktop:map:build    # Build Electron map → dist/tactical-map/
+npm run test:vitest
+npm run test:vitest -- <file>
+npx tsc --noEmit
+npm run sim:scenario:run:188w
+npm run sim:scenario:run:40w
+npm run desktop
+npm run dev:map
+npm run desktop:map:build
 ```
 
-Smoke-test triad after every change: `tsc --noEmit` + `vitest run` + `desktop:map:build`.
+Select commands from the changed behavior; the smoke triad is not a documentation-only gate. Before long work, verify runtime prerequisites and success/failure selectors, retain logs, and use the command's own exit status. On this Windows host, scenario/release Bash checks require Git Bash where their paths use MSYS syntax.
 
-## Sacred Rules
+## Host-specific enforcement and tools
 
-- **Determinism is sacred**: No `Math.random()`, no timestamps, no `Date.now()` in sim code. Sorted iteration via `strictCompare`.
-- **NEVER override initial OSIDs**: Initial OSID control from census/referendum is sacrosanct. Fix engine, OOB, operations, or scenario params instead.
-- **NEVER use `avoided_osids_by_faction`**: Banned. Fix bot targeting, OOB stats, or painted targets instead.
-- **Canon hierarchy**: Engine Invariants > Phase Specs > Systems Manual > Rulebook > Game Bible > context.md
-- **Canonical faction IDs**: `RBiH`, `RS`, `HRHB` only.
-- **One change per calibration run**: Change ONE thing, run scenario, compare, sign off. Never bundle.
-- **GameState is single source of truth**: `src/state/game_state.ts`.
-- **Ops-only attacks**: Brigades NEVER attack independently. All attacks flow through CorpsOperation.
-- **Canon edits (incl. `docs/10_canon/FORAWWV.md`) require Pyrrhic-panel sign-off** — convene the appropriate panel (for §6: Historian + scenario-tester/calibration + Engine/systems + Red-team); a unanimous GO is the signature; a BLOCK or split verdict escalates to the owner. Implementer ≠ reviewer.
-- **§6, the §6 bright line, and the ENCLAVE GUARD are the panel's to rule on** (owner, 2026-08-12: *"Hand over the enclave guard and bright line to panel as well."* — completing the 2026-06-11 delegation, which had left the enclave guard carved out). The panel rules; it does not escalate these. It decides whether a change touches §6, whether the guard holds (Srebrenica/Žepa fall; Goražde/Bihać/Teočak/Sarajevo core hold), and whether the evidence suffices. Ordinary §6 verdicts are **COMPLIANT / NON-COMPLIANT**; a breach does not merge.
-- **Crossing the bright line is possible, and requires a BROADER PANEL** (owner, 2026-08-12: *"Hand over the option to cross it as well, but that requires broader panel."*). The bright line — atrocity is never rewarded; enclave outcomes event-owned per canon **H1.8**; the canon hierarchy — is no longer beyond reach, but it is deliberately expensive to move:
-  - **Broader panel = the standard §6 four** (Historian + scenario-tester/calibration + Engine/systems + Red-team) **plus the four seats that own the game's ethic and player experience**: Game Designer, Narrative Designer, Canon Compliance Reviewer, War-or-Game. **Eight seats, unanimous, implementer excluded**, each polled independently rather than briefed toward a conclusion. Anything short of unanimous is a NO.
-  - **A crossing must be recorded where the thesis is stated**, not only where the code changed — the relevant canon doc (`docs/10_canon/FORAWWV.md` §IX.6 — H1.8/H1.9/H2.1/H2.4; FORAWWV has no "§6", its headings are roman numerals / `SENSITIVE_HISTORY_DESIGN_GATE.md`, which is where the operative §6 lives / `VICTORY_AND_PYRRHIC_SCORING.md`) is amended in the same change, with the panel's reasoning. A thesis that moves silently in engine behaviour while canon still claims otherwise is the one outcome this rule exists to prevent.
-  - **Surface it to the owner as a decision, not as a completed panel outcome.** The delegation makes it *possible* without the owner; it does not make it routine. AWWV's stated thesis is that atrocity is never rewarded and the war is negative-sum — a proposal to change that is a change to what the game is about, and the owner should know it is happening while it is still a proposal.
+`.claude/settings.json` scenario hooks enforce Claude-specific specialist attribution/routing. Preserve them unchanged. Their presence does not establish Codex or Cursor parity.
 
-## Long-Running Work — never idle-wait
+The local executor is a bounded proposal tool. Claude owns repository writes, repo-derived expectations, verification, and verdicts. Use `npm run local:check` for availability. Prove applied proposals with `npm run gate:local -- --tests <files>`; see [tools/local_executor/README.md](tools/local_executor/README.md) for procedures, schemas, context limits, ledger use, and benchmark evidence.
 
-- **Never end a turn to narrate waiting.** The owner must not have to ask "status?" for work
-  to continue. Background Bash (`run_in_background`) fires a completion notification and
-  `Monitor` fires per event — both wake you unprompted.
-- **Arm a `Monitor` for anything long**, and grep for BOTH success and failure signatures:
-  a filter that matches only the happy path is silent through a crash, and silence is
-  indistinguishable from "still running".
-- **Do other work while it runs.** If there is none, end the turn silently. Return to the
-  owner only for a result, a decision that is genuinely theirs, or completion.
-- **Never call a job green from a wrapper's exit code or a partial log.** Read the
-  command's own status (`${PIPESTATUS[0]}`, or capture `rc=$?` before piping).
-- **Check what CI actually runs before spending hours locally.** `npm run test:vitest`
-  routes to the sharded runner CI uses; the unsharded `test:vitest:serial` is ~4x slower
-  for identical coverage.
+Architecture entrypoints: simulation `src/sim/`; state `src/state/`; scenarios `src/scenario/`; desktop `src/desktop/`; tactical map `src/ui/map/`; canon `docs/10_canon/`; engineering `docs/20_engineering/`; reports `docs/40_reports/`.
 
-## Branch Hygiene (run after every merge)
+## Repository and Branch Maintenance
 
-Lanes create branches; nothing deletes them. On 2026-09-01 this had reached **40 local /
-50 remote** branches, mostly abandoned pointers whose work had already landed by
-squash-merge — indistinguishable from genuinely stranded work without an audit.
+When branch inventory, cleanup, or post-merge hygiene is in scope, use `npm run repo:branches` to classify and `npm run repo:branches:clean` for the guarded cleanup route.
 
-```bash
-npm run repo:branches         # report: STRANDED / ARCHIVED / LANDED
-npm run repo:branches:clean   # archive unique work as tags, then delete
-```
-
-- **Classify with `git cherry`, never `--no-merged` or `git diff`.** `--no-merged` compares
-  ancestry, so a squash-merged branch looks unmerged forever. `git diff main..branch`
-  counts *main's own progress* as the branch's differences (it reported 300-1200 changed
-  files for branches that had fully landed). Only `git cherry` compares patch IDs.
-- **Nothing is deleted unless it has zero unique commits or an `archive/<branch>` tag.**
-  Restore with `git switch -c <branch> archive/<branch>`. `--prune` exits non-zero and
-  refuses if any branch would lose work.
-- Archive tags are pushed to origin, so recovery never depends on one machine.
-
-## Local Executor (Ollama) — planner/executor split
-
-A local model handles bounded, mechanically-checkable coding; Claude plans, reviews and is the
-only thing that writes to the repo. `npm run local:check` says whether it is usable right now.
-
-```bash
-npm run local:check                                    # is ollama up, model pulled?
-npm run local:delegate -- --spec <task.md> --read <a,b> --schema <s.json> --out <proposal.md>
-npm run gate:local -- --tests <test files>             # the acceptance oracle
-npm run local:fanout -- jobs.json                      # independent dispatches, 2 at a time
-npm run local:verdict -- <id> <accepted|edited|rewritten> "note"
-npm run local:ledger                                   # what delegation is actually worth
-npm run local:benchmark                                # re-measure before changing model
-```
-
-- **NEVER DELEGATE THE ORACLE.** Anything that decides pass/fail — an acceptance predicate, a
-  validator's core, a test's expected value — stays with the planner. Both rejected proposals so
-  far failed this way: one returned `true` on its main path (a validator that could not fail),
-  another caught every error as success (a test group that passed against a crashed hook).
-- **It supplies case SHAPES, not case DATA.** Anything whose truth lives in the repo — paths,
-  identifiers, patterns, expected values — comes from the repo. Twelve schema-valid test cases
-  once named twelve files that do not exist, and all twelve silently exercised nothing.
-- **Derive expectations, never accept them.** Ask for the cases, run them against the real code,
-  judge each result, then pin it. Its own guesses were wrong on 5 of 9 on the same cases.
-- **A batch that comes back uniformly silent means the CASES are wrong**, not the code under
-  test. Silence looks identical whether you measured something or nothing.
-- **The executor never certifies itself.** The planner declares `--tests`; `gate:local` refuses
-  (exit 2) if none are given, rejects edits under `tests/`, and scans added `src/` lines for
-  `Math.random` / `Date.now` / `new Date()` / `.localeCompare(`.
-- **Not an agent loop, deliberately.** `delegate.mjs` returns TEXT ONLY and never touches disk;
-  a small model is strongest on a bounded prompt and weakest given autonomy.
-- **Use `--schema` over `--expect json`** — it constrains decoding, so malformed output is
-  unrepresentable rather than merely detected. Put COUNTS in the schema (`minItems`); prose asking
-  for 12 cases got 2, validly. Ready-made shapes: `tools/local_executor/schemas/`.
-- **Model choice is DATA** — `tools/local_executor/config.json`, with the measurements behind it.
-  Re-measure with `local:benchmark` at the REAL `num_ctx` before changing it: a code-specialised
-  30B loses 6x on prompt throughput here, because exceeding VRAM costs more than specialisation
-  buys.
-- **Context is the binding constraint.** `App.tsx` alone is ~24,350 tokens; at 32K this repo is
-  not explorable. Hand it exact file paths, never "go look at".
-- Full detail, benchmarks and routing rules: `tools/local_executor/README.md`.
-
-## Shell & Platform
-
-- **Windows test Bash:** unqualified `bash` must resolve to Git Bash for MSYS `/f/...` paths, not the Windows/WSL launcher. Scope PATH adjustment to the test process; no global setting change. See [BC08 receipt](docs/40_reports/audits/20260907_BC08_CURRENT_ENGINE_HEALTH_VERIFICATION.md).
-
-- **Windows**: Use `;` not `&&` to chain commands in PowerShell.
-- **tsx**: Use `node_modules/.bin/tsx` directly (not `npx tsx`). Prefer `npm run test:vitest`.
-- **Test runner**: `npm run test:vitest` with NO arguments runs the balanced sharded suite —
-  the same gate `.github/workflows/full-suite-and-fingerprint.yml` runs, ~4x faster than
-  unsharded for identical coverage. Passing a file or `-t` pattern runs it unsharded, because
-  the balanced runner gives each shard an explicit file list and a filter would leave the other
-  shards with no tests. `npm run test:vitest:serial` is the unsharded whole-suite escape hatch.
-- **Paths**: Always use absolute paths for tool calls.
-
-## Architecture (pointers)
-
-- Sim core: `src/sim/` | State: `src/state/` | Scenarios: `src/scenario/`
-- Combat: `src/sim/combat/` | Bot AI: `bot_strategy.ts`, `bot_corps_ai.ts`, `bot_brigade_ai_osid.ts`
-- Commander: `src/sim/combat/commander/` (v0.8 corps commander intelligence, 10 files)
-- War pipeline: `src/sim/turn_phases/war_phases.ts` (151 steps)
-- Desktop: `src/desktop/` | Tactical map: `src/ui/map/`
-- Canon: `docs/10_canon/` | Engineering: `docs/20_engineering/` | Reports: `docs/40_reports/`
-- Skills: `.claude/skills/` (60+ Pyrrhic team roles)
-
-## Deep Reference (read as needed)
-
-- **Napkin** (runbook): `.claude/napkin.md` — curated rules, backlog, patterns
-- **Memory** (project knowledge): `.claude/projects/.../memory/MEMORY.md` — indexed topic files
-- **Ledger** (changelog): `docs/PROJECT_LEDGER.md` + `docs/PROJECT_LEDGER_KNOWLEDGE.md`
-- **Life lessons**: `docs/life_lessons.md` — hard-won development rules
-- **Calibration**: `docs/40_reports/CALIBRATION_MASTER.md`
-- **Canon docs**: `docs/10_canon/` — Game Bible, Rulebook, Systems Manual, Phase Specs
-
-## Ledger Protocol
-
-- Append behavioral/output changes to `docs/PROJECT_LEDGER.md`.
-- Thematic knowledge to `docs/PROJECT_LEDGER_KNOWLEDGE.md`.
-- Edits to `docs/10_canon/FORAWWV.md` require Pyrrhic-panel sign-off (convene the appropriate panel; unanimous GO = signature; BLOCK or split verdict escalates to the owner; implementer ≠ reviewer). §6, the bright line, and the enclave guard are the panel's to rule on — see Sacred Rules above.
-
-## Delegate the reading, not the deciding
-
-`npm run local:ask -- --read <files> "question"` answers a question ABOUT files without the
-planner reading them. It builds the schema, demands verbatim quotes, and **verifies every quote
-before you see the answer** — an unverified quote exits non-zero and the answer is marked unsound.
-
-Measured 2026-09-11: a 12,462-token roadmap answered for ~250 tokens, 3/3 quotes verified.
-
-- **Delegable: reading FOR FACTS.** What does it say, which value is set, what failed, which of
-  these is stale. Extraction from supplied files is the local model's strongest measured mode.
-- **NOT delegable: reading TO CHANGE.** You need the real contents in context to edit a file, and
-  a summary is not a substitute. Delegating a read you need anyway saves nothing and loses
-  precision. Also read directly when you need exact line numbers.
-- `guard_large_read.sh` says this at the moment you are about to read something over ~10k tokens,
-  with the command already filled in. It is advisory and must stay so — it cannot know which of
-  the two you are doing.
-- **Never delegate the oracle.** Anything deciding pass/fail stays with the planner. Both rejected
-  proposals so far failed exactly there.
-- **MOST BAD DISPATCHES ARE BAD INSTRUCTIONS.** Measured over 13: of six imperfect results, FOUR
-  were caused by the prompt, not the executor — field names left to be inferred (27 of 42 cases
-  exercised nothing), input files chosen by a truncated grep (four verified quotes from an
-  unrelated test), a task the owning plan already answered, and a rule written into a README from
-  an experiment whose output was never read. Before blaming the model, re-read what it was told.
-- **Before writing a task, read the plan for the answer.** A task that duplicates its plan does
-  not merely waste a dispatch: a re-derivation can DISAGREE with the plan, and then there are two
-  answers and no authority.
-- **Name files, never directories.** A directory is a request for someone to guess which files
-  matter, and the guess is recorded nowhere. The manifest validator now refuses one.
-- **Verification proves PROVENANCE, not RELEVANCE.** A perfectly verified answer to the wrong
-  question still verifies. Check the answer against the question yourself; no script does that.
-- **Do not write a measured claim you have not read the output of.** `npm run local:verdict` on
-  every dispatch before the next one — `delegate` refuses past two unjudged, because an unchecked
-  claim that happens to be right teaches nothing and licenses the next one.
-- `npm run local:ledger` is the routing authority, not prose. Record every outcome with
-  `npm run local:verdict`. When the ledger disagrees with a README, the README is wrong.
+- Classify squash-landed work with `git cherry`, not `--no-merged` or `git diff main..branch`; ancestry and main's later changes misclassify squash merges.
+- Delete a branch only when it has zero unique commits or an `archive/<branch>` recovery tag.
+- Restore archived work with `git switch -c <branch> archive/<branch>`; keep archive tags on the remote so recovery does not depend on one machine.
+- A guarded prune must refuse rather than lose unique work.

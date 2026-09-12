@@ -1,0 +1,51 @@
+{
+  "checks": {
+    "files": 46,
+    "skillMetadata": 19,
+    "cursorMetadata": 2,
+    "links": 129,
+    "protectedFiles": 32,
+    "numberedNapkinSections": 12,
+    "curationSections": 1,
+    "curationLessons": 3
+  },
+  "failures": [
+    "diff --check: .agent/codex-skill-adapters/awwv-make-cursor-prompt/SKILL.md:13: new blank line at EOF.\n.agent/codex-skill-adapters/awwv-read-first/SKILL.md:11: new blank line at EOF.\n.agent/codex-skill-adapters/brainstorming/SKILL.md:15: new blank line at EOF.\n.agent/codex-skill-adapters/napkin/SKILL.md:15: new blank line at EOF.\n.agent/codex-skill-adapters/prompt-construction/SKILL.md:15: new blank line at EOF.\n.agent/codex-skill-adapters/verification-before-completion/SKILL.md:15: new blank line at EOF.\n"
+  ],
+  "preexisting_broken_links": [],
+  "checkout_line_ending_differences": [
+    {
+      "path": ".githooks/pre-commit",
+      "raw_inventory_hash": "AC96C63B6603629DC11D67483BA504F82C992EE704F084102A80D78CD9EC9690",
+      "raw_worktree_hash": "08E2C530A15FFBAFD71C4E62EA2325E58DC9C0A02C78C895C5383CEAD2A37BA0",
+      "normalized_blob": "016bb2d6a97d37d500a3086c7ae69a7cc948b0ee",
+      "base_blob": "016bb2d6a97d37d500a3086c7ae69a7cc948b0ee",
+      "only_line_endings": true
+    },
+    {
+      "path": "tools/architect/hooks/notify.ps1",
+      "raw_inventory_hash": "5D25F95CCEF923D1B90303539B77309A86253C3B6FCD6431372A25450993388A",
+      "raw_worktree_hash": "87D7DBDB170CFA5AE24CD03175B72C67CC6E012A2C085B04DFD5F3EE5A168D5E",
+      "normalized_blob": "13c0285113c2a0d61fc9dc7cacec33ef52dccfbd",
+      "base_blob": "13c0285113c2a0d61fc9dc7cacec33ef52dccfbd",
+      "only_line_endings": true
+    },
+    {
+      "path": "tools/architect/hooks/on_stop.ps1",
+      "raw_inventory_hash": "4E77F389B8248441A2BE123294DE2D7FE1821FD555C191646C80489AC4AAE955",
+      "raw_worktree_hash": "BCC2894F55BBA4EC6A1AB30B275227FE21868E3F0BF53AAF43798946D210D7A6",
+      "normalized_blob": "5d451763b113a7e58ec949ed74d869f65a220dac",
+      "base_blob": "5d451763b113a7e58ec949ed74d869f65a220dac",
+      "only_line_endings": true
+    },
+    {
+      "path": "tools/hooks/whowrites.mjs",
+      "raw_inventory_hash": "690803DF8774DC60C801198180F78147F99ACDB15F8EC0C3AEA9A3A0F719AE23",
+      "raw_worktree_hash": "B304BA269E4B13317088E4D4A2590134236B9EA04A7AD7BA2518FD68D4502229",
+      "normalized_blob": "d766ee2cacb029684ce3a6578d40f74bce466ed8",
+      "base_blob": "d766ee2cacb029684ce3a6578d40f74bce466ed8",
+      "only_line_endings": true
+    }
+  ],
+  "exit": 1
+}
