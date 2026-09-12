@@ -474,7 +474,9 @@ being rejected wholesale.
 **Loan lifecycle:** Op-tied (no hard timer). A brigade stays on loan until:
 - Operation concludes and need evaporates → `op_complete` or `need_expired`.
 - Player manually recalls → `player_recall`.
-- Force-recall conditions → `casualty_threshold` (≥30% personnel lost), `morale_collapse` (morale < 35), `cohesion_collapse` (cohesion < 25), or `permanent_degradation` (≥50% personnel lost — elite status permanently revoked).
+- Ordinary force-recall conditions → `casualty_threshold` (personnel below 70% of loan-start strength), `morale_collapse` (morale < 35), or `cohesion_collapse` (cohesion < 25).
+- While an elite is authored for a historical operation in planning, execution, or recovery in the receiving corps, these three recalls are deferred until the operation releases it.
+- `permanent_degradation` (personnel below 50% of loan-start strength) always recalls immediately and permanently removes elite-loan eligibility; authored operations cannot defer it.
 
 Elapsed turns alone are not a recall condition. A healthy brigade supporting an active operation remains loaned beyond turn 12 or any other fixed duration; only the lifecycle conditions above may end the episode.
 
@@ -487,10 +489,10 @@ Elapsed turns alone are not a recall condition. A healthy brigade supporting an 
 **Constants:**
 - `ELITE_LOAN_MIN_DURATION = 6` — minimum turns before voluntary recall (prevents thrash).
 - `ELITE_LOAN_COOLDOWN = 4` — turns between loans for the same brigade.
-- `ELITE_CASUALTY_THRESHOLD = 0.30` — fraction of loan-start personnel lost triggers forced recall.
+- `ELITE_CASUALTY_THRESHOLD = 0.30` — loss beyond this fraction triggers ordinary forced recall, subject to the authored-operation exception above.
 - `ELITE_MORALE_RECALL = 35` — morale floor for forced recall.
 - `ELITE_COHESION_RECALL = 25` — cohesion floor for forced recall.
-- `ELITE_DEGRADATION_THRESHOLD = 0.50` — fraction of personnel lost that permanently degrades elite status.
+- `ELITE_DEGRADATION_THRESHOLD = 0.50` — loss beyond this fraction permanently degrades elite-loan eligibility and forces immediate recall.
 - `ELITE_REINFORCEMENT_RATE = 0.50` — reinforcement rate when returned to army HQ pool.
 
 **Tracking:** Per-brigade `EliteBrigadeTracker` records cumulative loan episodes (`EliteLoanEpisode`) with corps, reason, turns deployed, casualties taken, battles fought, OSIDs captured, and KIA inflicted. `EliteLoanState` on each eligible formation tracks current loan status, start personnel, and degradation.

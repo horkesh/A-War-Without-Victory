@@ -434,9 +434,9 @@ Paramilitary formations (`kind: 'paramilitary'`) are autonomous short-lived unit
 10. If organized defense occupies the target after dispatch but before arrival, the paramilitary formation takes retreat casualties, dissolves, and does not change control or inflict defender casualties. Every dissolution sets `status: 'inactive'`, `lifecycle_status: 'disbanded'`, `readiness: 'degraded'`, and personnel to zero.
 11. Civilian killings from a paramilitary capture are recorded once in `civilian_casualties`, `displacement_event_log`, and the target municipality's `displacement_state.lost_population`; `last_updated_turn` advances with the population write.
 
-### 14.8b Post-paramilitary rear-pocket consolidation
+### 14.8b Post-paramilitary isolated positions
 
-After the paramilitary lifecycle ends, the War pipeline runs deterministic rear-pocket consolidation immediately after `paramilitary-advance`. A candidate is a connected cluster of one to six same-controller operational OSIDs whose external neighbors are all controlled by one surrounding faction or its permitted co-belligerent. The cluster must have no active brigade, must pass enclave-protection guards, and must pass the same centralized RBiH-HRHB combat-permission gate used by regular combat and paramilitary capture. Consolidation can never transfer territory between RBiH and HRHB before the scenario's bilateral-war floor, during mobilization or ceasefire, or after Washington. Active definitive April 1992 scenarios and metadata-free runtime fallbacks use turn 40 as that earliest floor. Larger clusters, defended positions, mixed-surrounding control, protected enclaves, and politically blocked territory require military action and do not auto-flip. Each legal flip emits a control event with `mechanism: 'consolidation'` and seeds the normal hostile-takeover displacement timer. Candidate discovery, cluster ordering, and flip ordering are deterministic.
+After the paramilitary lifecycle ends, topology alone must not transfer political control. The production War pipeline does not run `rear-pocket-consolidation`. Isolated enemy positions may inform an ordinary corps operation, but control changes require the existing attack or operation resolver. Operational-purpose classification cannot itself flip control or bypass organized-defense, enclave-protection, centralized RBiH-HRHB combat-permission, timing, or ceasefire guards. Candidate discovery and ordering remain deterministic. The legacy `rear_pocket_consolidation.ts` helper is not a production control writer.
 
 ### 14.9 War movement pipeline order
 
@@ -509,8 +509,10 @@ Elite brigades maintain `is_elite: true` on the formation definition. Elite stat
 ### 16.2 Loan Lifecycle
 
 Loan state is tracked via `EliteLoanState` on the formation:
-- Loans are op-tied (no fixed expiry). Brigade stays until operation concludes, player recalls, or forced recall triggers. Elapsed turns alone must never recall a healthy brigade while its supported operation remains active.
-- Forced recall triggers: >= 30% casualties from loan start, morale < 35, or >= 50% personnel loss.
+- Loans are operation-tied and have no fixed expiry: a healthy brigade remains until its supported operation concludes, the player recalls it, or a recall trigger applies.
+- For ordinary loans, recall triggers are personnel falling below 70% of loan-start strength, morale below 35, or cohesion below 25.
+- While an elite is authored for a historical operation in planning, execution, or recovery in its receiving corps, those casualty, morale, and cohesion recalls are deferred until that operation releases it.
+- Personnel falling below 50% of loan-start strength is never deferred: it immediately sets `permanently_degraded` and recalls the brigade. A permanently degraded brigade cannot be loaned again.
 - Cooldown of `ELITE_LOAN_COOLDOWN = 4` turns between loans.
 - Minimum loan duration: `ELITE_LOAN_MIN_DURATION = 6` turns before voluntary recall.
 

@@ -4762,3 +4762,16 @@ Checkpoint verification: 32/32 focused documentation tests, 26 added links/ancho
 validation and diff checks pass. All 28 backup paths and 22 ordered stash object IDs match;
 protected files and main remain unchanged. Initial stash-subject text decoding differed; exact
 object identity proves preservation. The two canon decisions and expensive gates remain open.
+
+## 2026-09-12 — Owner authorizes calibration Engine Invariants amendments
+
+The owner's follow-up, "Also amend the engine invariants doc too", approves the two exact
+amendments proposed at the integration checkpoint. Engine Invariants §14.8b now excludes the
+passive post-paramilitary consolidation phase and reserves isolated-position captures to ordinary
+attack/operation resolution. §16.2 defers the ordinary casualty/morale/cohesion recall thresholds
+for live authored historical operations while preserving immediate below-50% permanent degradation
+and recall. The strict below-70%/below-50% comparisons match existing code; no operator changed.
+Systems Manual §7.7, PIPELINE_ENTRYPOINTS and the current context note carry the same contract.
+Historical backups/reports and FORAWWV remain untouched. Both prior canon holds are resolved by
+this explicit authority; full-suite and clean 188-week integration acceptance remain required.
+The existing April report owns the already-recorded cost, commands and first-failure stop plan.
