@@ -130,3 +130,25 @@ tmp-toolbar-fit/
 # already carry every claim the scene shot would. Three of them were tracked briefly
 # (PR #516) and account for 30 MB that every clone would have carried.
 logs/**/shots/*-scene.png
+
+# ── Generated run evidence under logs/ ────────────────────────────────────────
+# These directories hold scenario-run and capture artefacts: 6.1 GB of them, with
+# logs/r7-english-readability alone at 5.3 GB. They are cited BY PATH from ~20 tracked
+# docs and must be preserved on disk — ignoring them changes nothing about the files.
+#
+# WHY IT MATTERS THAT THE TREE BE CLEAN: the gated 188-week entrypoint REFUSES to run on a
+# dirty tree, and deliberately measures dirtiness whole-tree ("its one unique job is
+# catching engine changes the consumed-input hashes structurally cannot see"). 320 untracked
+# log files were therefore enough to block a baseline re-pin outright.
+#
+# Each of these already contains TRACKED files. gitignore does not untrack anything, so
+# those stay versioned and keep showing up in diffs; only the untracked spill goes quiet.
+# CONSEQUENCE TO KNOW: a genuinely new piece of evidence in one of these needs `git add -f`.
+# That is the trade — and it matches the repo's own rule that generated logs live in
+# excluded roots while executable harnesses live in tracked tools/.
+logs/bounded-deletion-cleanup/
+logs/r7-english-readability/
+logs/r8-decision-command-usability/
+logs/r9-build-preparation/
+logs/branch-hygiene/
+logs/local-llm/
