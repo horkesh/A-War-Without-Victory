@@ -179,6 +179,7 @@
     "map:reconstruct:muni": "tsx tools/map/reconstruct_municipalities_from_legacy.ts",
     "map:view:reconstructed": "tsx tools/map/build_municipality_reconstructed_viewer_html.ts",
     "test:affected": "node tools/affected_tests.cjs",
+    "lint:negative-assertions": "node tools/scan_negative_source_assertions.cjs",
     "test:affected:cmd": "node tools/affected_tests.cjs --command",
     "warroom:derive:board-luminance": "node tools/derive_warroom_board_luminance.cjs",
     "warroom:check:board-luminance": "node tools/derive_warroom_board_luminance.cjs --check",
