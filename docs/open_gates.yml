@@ -32,7 +32,7 @@
 #   npm run gates                           prints the currently-open rows
 
 version: 1
-updated: 2026-09-12
+updated: 2026-09-13
 
 lanes: [R1, R2, R3, R4, R5, R6, R7, R8, R9, RC, RE, REPO]
 
@@ -152,7 +152,7 @@ gates:
 
   - id: R6-CALIBRATION-INTEGRATION
     lane: R6
-    title: April calibration integrated-source coverage contract and full-horizon acceptance
+    title: April calibration integrated-source regressions and full-horizon acceptance
     status: blocked
     kind: acceptance
     opened: 2026-09-12
@@ -167,11 +167,12 @@ gates:
     notes: >
       The April branch's v72/v73 pair is 104 weeks and git_dirty:true at 68e5d22e8;
       it cannot certify the later final branch or combined source. Its reported 703/712
-      April result is retained as historical evidence. Both canon amendments are approved
-      at 933132e90. Full suite exit 1 is retained; integration corrections pass focused
-      checks. Two coverage assertions reject nine legally isolated fronts against the
-      old two-front cap. A reviewed zero-staffable-gap replacement is proposed but needs
-      owner approval. Coverage retests and clean 188-week acceptance precede promotion.
+      April result is retained as historical evidence. Canon amendments and the coverage
+      contract are owner-approved; coverage passes 17/17 at 51fe49415. Clean POST-A completes
+      188 weeks at 692/698/694/665 but fails January floor 694, western cascade 33 versus
+      minimum 38, Prozor op_empty injection and Farz timing. All anchors, enclave guards,
+      consistency and assignment seals pass. No conditional repeat or pin refresh followed.
+      Bounded repair and additional measurement scope remain proposed before promotion.
 
   - id: R8-OPTIONAL-AI-OWNERSHIP
     lane: R8

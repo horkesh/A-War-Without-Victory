@@ -79,7 +79,7 @@ lanes:
   - lane: R6
     title: "Historical gameplay depth and final calibration"
     lane_open: true
-    status: "CALIBRATION OPEN — CANDIDATE HELD. All 20 April commits are integrated and both canon amendments approved. Integration corrections pass focused checks; the cove"
+    status: "CALIBRATION OPEN — MEASURED CANDIDATE HELD. All 20 April commits, canon amendments and approved coverage contract are integrated. Clean POST-A scores 692/698/69"
     plans:
       - path: docs/plans/2026-07-31-historical-gameplay-depth-calibration-plan.md
         exists: true

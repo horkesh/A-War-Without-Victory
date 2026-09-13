@@ -1,0 +1,978 @@
+{
+  "scope": "read-only comparison of retained artifacts; no new run, source edit, floor change, or historical assertion",
+  "baseline": {
+    "path": "F:\\AWWV-worktrees\\_preserved\\roadmap-integration-20260912\\main-baseline-before-integration",
+    "git_commit": "e607508bc65dad1950d560d8b5b628da89674360",
+    "git_dirty": true,
+    "final_state_hash": "e414dc69f6e875fc",
+    "accepted_pin_bytes": "8/8",
+    "normalized_consumed_inputs": "31/31",
+    "caveat": "Usable accepted-output comparator, but metadata is dirty and does not prove a clean immediate-base run."
+  },
+  "candidate": {
+    "path": "F:\\A-War-Without-Victory\\runs\\roadmap_integration_20260912\\post_a\\apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0",
+    "git_commit": "51fe494151397c1cc6521b54006b0f8da70705e5",
+    "git_dirty": false,
+    "final_state_hash": "5d6f8378dbf433fc",
+    "consumed_input_digest": "f8ace65496620fad1c8219a9dcaa8e2c5cdba2f3f541b156c7ba112b4748caaf"
+  },
+  "checkpoint_comparison": {
+    "jan1993": {
+      "week": 39,
+      "baseline_matches": 702,
+      "candidate_matches": 692,
+      "delta": -10,
+      "newly_wrong": [
+        "op:bihac:orasac_2",
+        "op:donji_vakuf:donji_vakuf_2",
+        "op:donji_vakuf:prusac_2",
+        "op:jajce:jezero_2",
+        "op:jajce:lupnica",
+        "op:maglaj:jablanica",
+        "op:mostar:vranjevici_2",
+        "op:mrkonjic_grad:baljvine_2",
+        "op:skender_vakuf:donji_koricani",
+        "op:zavidovici:cardak_2"
+      ],
+      "recovered": [],
+      "changed_control": [
+        "op:bihac:orasac_2",
+        "op:donji_vakuf:donji_vakuf_2",
+        "op:donji_vakuf:prusac_2",
+        "op:jajce:jezero_2",
+        "op:jajce:lupnica",
+        "op:maglaj:jablanica",
+        "op:mostar:vranjevici_2",
+        "op:mrkonjic_grad:baljvine_2",
+        "op:skender_vakuf:donji_koricani",
+        "op:zavidovici:cardak_2"
+      ]
+    },
+    "apr1994": {
+      "week": 104,
+      "baseline_matches": 678,
+      "candidate_matches": 698,
+      "delta": 20,
+      "newly_wrong": [
+        "op:bugojno:udurlije",
+        "op:donji_vakuf:donji_vakuf_2",
+        "op:konjic:bijela_2",
+        "op:maglaj:jablanica",
+        "op:mostar:vranjevici_2",
+        "op:mrkonjic_grad:baljvine_2",
+        "op:zepce:ozimica_2"
+      ],
+      "recovered": [
+        "op:bratunac:jezestica_2",
+        "op:bratunac:pobudje_2",
+        "op:foca:mazlina",
+        "op:fojnica:bakovici_2",
+        "op:gorazde:slatina_2",
+        "op:gorazde:sopotnica",
+        "op:gorazde:ustipraca_2",
+        "op:gornji_vakuf:zdrimci",
+        "op:jablanica:doljani_2",
+        "op:konjic:buturovic_polje_2",
+        "op:novi_travnik:rat_2",
+        "op:novi_travnik:ruda_2",
+        "op:pale:podgrab",
+        "op:prozor:lug_2",
+        "op:prozor:paros",
+        "op:rogatica:brcigovo",
+        "op:srebrenica:ljeskovik_2",
+        "op:srebrenica:luka_2",
+        "op:srebrenica:obadi",
+        "op:srebrenica:osmace_2",
+        "op:srebrenica:radovcici",
+        "op:srebrenica:sulice_2",
+        "op:trnovo:delijas",
+        "op:trnovo:trnovo",
+        "op:visegrad:drinsko",
+        "op:visegrad:medjedja_2",
+        "op:vlasenica:pomol_2"
+      ],
+      "changed_control": [
+        "op:bratunac:jezestica_2",
+        "op:bratunac:pobudje_2",
+        "op:bugojno:udurlije",
+        "op:donji_vakuf:donji_vakuf_2",
+        "op:foca:mazlina",
+        "op:fojnica:bakovici_2",
+        "op:gorazde:slatina_2",
+        "op:gorazde:sopotnica",
+        "op:gorazde:ustipraca_2",
+        "op:gornji_vakuf:zdrimci",
+        "op:jablanica:doljani_2",
+        "op:konjic:bijela_2",
+        "op:konjic:buturovic_polje_2",
+        "op:maglaj:jablanica",
+        "op:mostar:vranjevici_2",
+        "op:mrkonjic_grad:baljvine_2",
+        "op:novi_travnik:rat_2",
+        "op:novi_travnik:ruda_2",
+        "op:pale:podgrab",
+        "op:prozor:lug_2",
+        "op:prozor:paros",
+        "op:rogatica:brcigovo",
+        "op:srebrenica:ljeskovik_2",
+        "op:srebrenica:luka_2",
+        "op:srebrenica:obadi",
+        "op:srebrenica:osmace_2",
+        "op:srebrenica:radovcici",
+        "op:srebrenica:sulice_2",
+        "op:trnovo:delijas",
+        "op:trnovo:trnovo",
+        "op:visegrad:drinsko",
+        "op:visegrad:medjedja_2",
+        "op:vlasenica:pomol_2",
+        "op:zepce:ozimica_2"
+      ]
+    },
+    "apr1995": {
+      "week": 156,
+      "baseline_matches": 672,
+      "candidate_matches": 694,
+      "delta": 22,
+      "newly_wrong": [
+        "op:bugojno:udurlije",
+        "op:donji_vakuf:donji_vakuf_2",
+        "op:maglaj:jablanica",
+        "op:mostar:vranjevici_2",
+        "op:mrkonjic_grad:baljvine_2",
+        "op:travnik:paklarevo",
+        "op:zepce:ozimica_2"
+      ],
+      "recovered": [
+        "op:bratunac:jezestica_2",
+        "op:bratunac:pobudje_2",
+        "op:foca:mazlina",
+        "op:fojnica:bakovici_2",
+        "op:gorazde:slatina_2",
+        "op:gorazde:sopotnica",
+        "op:gorazde:ustipraca_2",
+        "op:gornji_vakuf:zdrimci",
+        "op:jablanica:doljani_2",
+        "op:konjic:buturovic_polje_2",
+        "op:konjic:sitnik",
+        "op:nevesinje:hrusta_2",
+        "op:novi_travnik:rat_2",
+        "op:novi_travnik:ruda_2",
+        "op:pale:podgrab",
+        "op:prozor:lug_2",
+        "op:prozor:paros",
+        "op:rogatica:brcigovo",
+        "op:srebrenica:ljeskovik_2",
+        "op:srebrenica:luka_2",
+        "op:srebrenica:obadi",
+        "op:srebrenica:osmace_2",
+        "op:srebrenica:radovcici",
+        "op:srebrenica:sulice_2",
+        "op:trnovo:delijas",
+        "op:trnovo:trnovo",
+        "op:visegrad:drinsko",
+        "op:visegrad:medjedja_2",
+        "op:vlasenica:pomol_2"
+      ],
+      "changed_control": [
+        "op:bratunac:jezestica_2",
+        "op:bratunac:pobudje_2",
+        "op:bugojno:udurlije",
+        "op:donji_vakuf:donji_vakuf_2",
+        "op:foca:mazlina",
+        "op:fojnica:bakovici_2",
+        "op:gorazde:slatina_2",
+        "op:gorazde:sopotnica",
+        "op:gorazde:ustipraca_2",
+        "op:gornji_vakuf:zdrimci",
+        "op:jablanica:doljani_2",
+        "op:konjic:buturovic_polje_2",
+        "op:konjic:sitnik",
+        "op:maglaj:jablanica",
+        "op:mostar:vranjevici_2",
+        "op:mrkonjic_grad:baljvine_2",
+        "op:nevesinje:hrusta_2",
+        "op:novi_travnik:rat_2",
+        "op:novi_travnik:ruda_2",
+        "op:pale:podgrab",
+        "op:prozor:lug_2",
+        "op:prozor:paros",
+        "op:rogatica:brcigovo",
+        "op:srebrenica:ljeskovik_2",
+        "op:srebrenica:luka_2",
+        "op:srebrenica:obadi",
+        "op:srebrenica:osmace_2",
+        "op:srebrenica:radovcici",
+        "op:srebrenica:sulice_2",
+        "op:travnik:paklarevo",
+        "op:trnovo:delijas",
+        "op:trnovo:trnovo",
+        "op:visegrad:drinsko",
+        "op:visegrad:medjedja_2",
+        "op:vlasenica:pomol_2",
+        "op:zepce:ozimica_2"
+      ]
+    },
+    "oct1995": {
+      "week": 188,
+      "baseline_matches": 667,
+      "candidate_matches": 665,
+      "delta": -2,
+      "newly_wrong": [
+        "op:bihac:trubar",
+        "op:bosanska_krupa:veliki_badic",
+        "op:bosanski_petrovac:jasenovac_2",
+        "op:bosansko_grahovo:ugarci",
+        "op:bugojno:udurlije",
+        "op:donji_vakuf:babin_potok_2",
+        "op:donji_vakuf:jemanlici",
+        "op:donji_vakuf:komar_2",
+        "op:donji_vakuf:kutanja",
+        "op:donji_vakuf:oborci_2",
+        "op:donji_vakuf:pribraca_2",
+        "op:donji_vakuf:prusac_2",
+        "op:donji_vakuf:torlakovac_2",
+        "op:kljuc:hadzici",
+        "op:kljuc:kljuc_2",
+        "op:maglaj:jablanica",
+        "op:sanski_most:ilidza_2",
+        "op:sanski_most:jelasinovci",
+        "op:sanski_most:kljevci",
+        "op:sanski_most:lusci_palanka_2",
+        "op:sanski_most:ostra_luka",
+        "op:sanski_most:sanski_most_2",
+        "op:sanski_most:skucani_vakuf_2",
+        "op:sanski_most:stari_majdan",
+        "op:travnik:gornje_krcevine",
+        "op:travnik:paklarevo",
+        "op:travnik:varosluk",
+        "op:zepce:ozimica_2"
+      ],
+      "recovered": [
+        "op:foca:mazlina",
+        "op:fojnica:bakovici_2",
+        "op:gorazde:slatina_2",
+        "op:gorazde:sopotnica",
+        "op:gorazde:ustipraca_2",
+        "op:gornji_vakuf:zdrimci",
+        "op:hadzici:misevici_2",
+        "op:ilidza:sarajevo_dio_ilidza_2",
+        "op:jablanica:doljani_2",
+        "op:konjic:buturovic_polje_2",
+        "op:mrkonjic_grad:baljvine_2",
+        "op:mrkonjic_grad:gerzovo_2",
+        "op:mrkonjic_grad:majdan_2",
+        "op:mrkonjic_grad:mrkonjic_grad_2",
+        "op:mrkonjic_grad:podrasnica_2",
+        "op:nevesinje:hrusta_2",
+        "op:novi_travnik:rat_2",
+        "op:novi_travnik:ruda_2",
+        "op:pale:podgrab",
+        "op:prozor:lug_2",
+        "op:prozor:paros",
+        "op:rogatica:brcigovo",
+        "op:trnovo:delijas",
+        "op:trnovo:trnovo",
+        "op:visegrad:drinsko",
+        "op:visegrad:medjedja_2"
+      ],
+      "changed_control": [
+        "op:bihac:trubar",
+        "op:bosanska_krupa:veliki_badic",
+        "op:bosanski_petrovac:jasenovac_2",
+        "op:bosansko_grahovo:ugarci",
+        "op:bugojno:udurlije",
+        "op:donji_vakuf:babin_potok_2",
+        "op:donji_vakuf:jemanlici",
+        "op:donji_vakuf:komar_2",
+        "op:donji_vakuf:kutanja",
+        "op:donji_vakuf:oborci_2",
+        "op:donji_vakuf:pribraca_2",
+        "op:donji_vakuf:prusac_2",
+        "op:donji_vakuf:torlakovac_2",
+        "op:foca:mazlina",
+        "op:fojnica:bakovici_2",
+        "op:gorazde:slatina_2",
+        "op:gorazde:sopotnica",
+        "op:gorazde:ustipraca_2",
+        "op:gornji_vakuf:zdrimci",
+        "op:hadzici:misevici_2",
+        "op:ilidza:sarajevo_dio_ilidza_2",
+        "op:jablanica:doljani_2",
+        "op:kljuc:hadzici",
+        "op:kljuc:kljuc_2",
+        "op:konjic:buturovic_polje_2",
+        "op:maglaj:jablanica",
+        "op:mrkonjic_grad:baljvine_2",
+        "op:mrkonjic_grad:gerzovo_2",
+        "op:mrkonjic_grad:majdan_2",
+        "op:mrkonjic_grad:mrkonjic_grad_2",
+        "op:mrkonjic_grad:podrasnica_2",
+        "op:nevesinje:hrusta_2",
+        "op:novi_travnik:rat_2",
+        "op:novi_travnik:ruda_2",
+        "op:pale:podgrab",
+        "op:prozor:lug_2",
+        "op:prozor:paros",
+        "op:rogatica:brcigovo",
+        "op:sanski_most:ilidza_2",
+        "op:sanski_most:jelasinovci",
+        "op:sanski_most:kljevci",
+        "op:sanski_most:lusci_palanka_2",
+        "op:sanski_most:ostra_luka",
+        "op:sanski_most:sanski_most_2",
+        "op:sanski_most:skucani_vakuf_2",
+        "op:sanski_most:stari_majdan",
+        "op:travnik:gornje_krcevine",
+        "op:travnik:paklarevo",
+        "op:travnik:varosluk",
+        "op:trnovo:delijas",
+        "op:trnovo:trnovo",
+        "op:visegrad:drinsko",
+        "op:visegrad:medjedja_2",
+        "op:zepce:ozimica_2"
+      ]
+    }
+  },
+  "january_attribution": [
+    {
+      "osid": "op:bihac:orasac_2",
+      "reference": "RS",
+      "baseline_controller": "RS",
+      "candidate_controller": "RBiH",
+      "baseline_history": [
+        {
+          "turn": 21,
+          "mechanism": "consolidation",
+          "from": "RBiH",
+          "to": "RS"
+        }
+      ],
+      "candidate_history": [],
+      "classification": "supported_removed_passive_transfer"
+    },
+    {
+      "osid": "op:donji_vakuf:donji_vakuf_2",
+      "reference": "RS",
+      "baseline_controller": "RS",
+      "candidate_controller": "RBiH",
+      "baseline_history": [
+        {
+          "turn": 29,
+          "mechanism": "combat",
+          "from": "RBiH",
+          "to": "RS",
+          "attacker_brigade": "rs_19th_krajina_light_infantry",
+          "battle_id": "29:op:donji_vakuf:donji_vakuf_2:rs_19th_krajina_light_infantry:arbih_708th_mountain"
+        }
+      ],
+      "candidate_history": [],
+      "classification": "supported_changed_authored_operation_execution"
+    },
+    {
+      "osid": "op:donji_vakuf:prusac_2",
+      "reference": "RS",
+      "baseline_controller": "RS",
+      "candidate_controller": "RBiH",
+      "baseline_history": [
+        {
+          "turn": 33,
+          "mechanism": "combat",
+          "from": "RBiH",
+          "to": "RS",
+          "attacker_brigade": "rs_31st_light_infantry",
+          "battle_id": "33:op:donji_vakuf:prusac_2:rs_31st_light_infantry:arbih_707th_slavna_mountain"
+        }
+      ],
+      "candidate_history": [],
+      "classification": "supported_changed_authored_operation_execution"
+    },
+    {
+      "osid": "op:jajce:jezero_2",
+      "reference": "RS",
+      "baseline_controller": "RS",
+      "candidate_controller": "RBiH",
+      "baseline_history": [
+        {
+          "turn": 21,
+          "mechanism": "consolidation",
+          "from": "RBiH",
+          "to": "RS"
+        }
+      ],
+      "candidate_history": [],
+      "classification": "supported_removed_passive_transfer"
+    },
+    {
+      "osid": "op:jajce:lupnica",
+      "reference": "RS",
+      "baseline_controller": "RS",
+      "candidate_controller": "HRHB",
+      "baseline_history": [
+        {
+          "turn": 21,
+          "mechanism": "abandoned",
+          "from": "HRHB",
+          "to": "RS"
+        }
+      ],
+      "candidate_history": [],
+      "classification": "supported_removed_passive_transfer"
+    },
+    {
+      "osid": "op:maglaj:jablanica",
+      "reference": "RBiH",
+      "baseline_controller": "RBiH",
+      "candidate_controller": "RS",
+      "baseline_history": [
+        {
+          "turn": 24,
+          "mechanism": "combat",
+          "from": "RS",
+          "to": "RBiH",
+          "attacker_brigade": "arbih_327th_vitezka_mountain",
+          "battle_id": "24:op:maglaj:jablanica:arbih_327th_vitezka_mountain:rs_1st_ozren_light_infantry"
+        }
+      ],
+      "candidate_history": [],
+      "classification": "supported_changed_authored_operation_execution"
+    },
+    {
+      "osid": "op:mostar:vranjevici_2",
+      "reference": "RBiH",
+      "baseline_controller": "RBiH",
+      "candidate_controller": "RS",
+      "baseline_history": [],
+      "candidate_history": [
+        {
+          "turn": 2,
+          "mechanism": "combat",
+          "from": "RBiH",
+          "to": "RS",
+          "attacker_brigade": "jna_nevesinje_garrison",
+          "battle_id": "2:op:mostar:vranjevici_2:jna_nevesinje_garrison:arbih_445th_mountain"
+        }
+      ],
+      "classification": "supported_new_authored_operation_capture"
+    },
+    {
+      "osid": "op:mrkonjic_grad:baljvine_2",
+      "reference": "RS",
+      "baseline_controller": "RS",
+      "candidate_controller": "HRHB",
+      "baseline_history": [
+        {
+          "turn": 21,
+          "mechanism": "abandoned",
+          "from": "HRHB",
+          "to": "RS"
+        }
+      ],
+      "candidate_history": [],
+      "classification": "supported_removed_passive_transfer"
+    },
+    {
+      "osid": "op:skender_vakuf:donji_koricani",
+      "reference": "RS",
+      "baseline_controller": "RS",
+      "candidate_controller": "HRHB",
+      "baseline_history": [
+        {
+          "turn": 21,
+          "mechanism": "abandoned",
+          "from": "HRHB",
+          "to": "RS"
+        }
+      ],
+      "candidate_history": [],
+      "classification": "supported_removed_passive_transfer"
+    },
+    {
+      "osid": "op:zavidovici:cardak_2",
+      "reference": "RBiH",
+      "baseline_controller": "RBiH",
+      "candidate_controller": "RS",
+      "baseline_history": [
+        {
+          "turn": 21,
+          "mechanism": "consolidation",
+          "from": "RS",
+          "to": "RBiH"
+        }
+      ],
+      "candidate_history": [],
+      "classification": "supported_removed_passive_transfer"
+    }
+  ],
+  "january_category_counts": {
+    "supported_removed_passive_transfer": 6,
+    "supported_changed_authored_operation_execution": 3,
+    "supported_new_authored_operation_capture": 1
+  },
+  "operation_evidence": {
+    "january": [
+      {
+        "name": "Operation Donji Vakuf",
+        "baseline": "started 23, ended 37, captures Donji Vakuf t29 and Prusac t33 before checkpoint",
+        "candidate": "started 30, ended 50; Prusac captured t44 and Donji Vakuf never captured"
+      },
+      {
+        "name": "Maglaj Local Counterattack",
+        "baseline": "started 14, success ended 25, Jablanica captured t24",
+        "candidate": "started 14, max_failures ended 29, Jablanica not captured"
+      },
+      {
+        "name": "Operation Herzegovina",
+        "baseline": "started 0, failed ended 8, 5 attacks, no objectives captured",
+        "candidate": "started 0, partial ended 8, 7 attacks, Vranjevici captured t2"
+      }
+    ],
+    "cascade": [
+      {
+        "name": "Operation Sana",
+        "shared": "same start t175, 32 objectives, 10 participants",
+        "baseline": "28 late 5th-Corps captures; third axis advanced through 9 objectives and supplied 8 Sanski Most matches; second axis reached index 12 and supplied 2 Ključ matches",
+        "candidate": "19 late 5th-Corps captures; third axis captured only Budimlić Japra t183 then remained at index 0; second axis stopped at index 10; 11 baseline matches lost across Petrovac/Ključ/Sanski Most"
+      },
+      {
+        "name": "Operation Southern Move",
+        "baseline": "started t185, still planning; no late combat recoveries",
+        "candidate": "started t182, execution; four Mrkonjić Grad combat recoveries t185-t188"
+      }
+    ]
+  },
+  "western_cascade": {
+    "baseline_matches": 40,
+    "candidate_matches": 33,
+    "net_delta": -7,
+    "lost_matches": [
+      {
+        "osid": "op:bosanski_petrovac:jasenovac_2",
+        "reference": "RBiH",
+        "baseline_controller": "RBiH",
+        "candidate_controller": "HRHB",
+        "baseline_history": [
+          {
+            "turn": 186,
+            "mechanism": "combat",
+            "from": "RS",
+            "to": "RBiH",
+            "attacker_brigade": "arbih_501st_slavna_mountain",
+            "battle_id": "186:op:bosanski_petrovac:jasenovac_2:arbih_501st_slavna_mountain:rs_17th_klju_light_infantry"
+          }
+        ],
+        "candidate_history": [
+          {
+            "turn": 178,
+            "mechanism": "combat",
+            "from": "RS",
+            "to": "HRHB",
+            "attacker_brigade": "hv_4th_guards_split",
+            "battle_id": "178:op:bosanski_petrovac:jasenovac_2:hv_4th_guards_split:rs_3rd_petrovac_light_infantry"
+          }
+        ],
+        "classification": "supported_missing_operation_sana_capture_plus_new_hrhb_combat_capture"
+      },
+      {
+        "osid": "op:bosansko_grahovo:ugarci",
+        "reference": "HRHB",
+        "baseline_controller": "HRHB",
+        "candidate_controller": "RS",
+        "baseline_history": [
+          {
+            "turn": 170,
+            "mechanism": "consolidation",
+            "from": "RS",
+            "to": "HRHB"
+          }
+        ],
+        "candidate_history": [],
+        "classification": "supported_removed_passive_transfer"
+      },
+      {
+        "osid": "op:kljuc:hadzici",
+        "reference": "RBiH",
+        "baseline_controller": "RBiH",
+        "candidate_controller": "RS",
+        "baseline_history": [
+          {
+            "turn": 5,
+            "mechanism": "paramilitary",
+            "from": "RBiH",
+            "to": "RS"
+          },
+          {
+            "turn": 187,
+            "mechanism": "combat",
+            "from": "RS",
+            "to": "RBiH",
+            "attacker_brigade": "arbih_501st_slavna_mountain",
+            "battle_id": "187:op:kljuc:hadzici:arbih_501st_slavna_mountain:rs_3rd_petrovac_light_infantry"
+          }
+        ],
+        "candidate_history": [
+          {
+            "turn": 5,
+            "mechanism": "paramilitary",
+            "from": "RBiH",
+            "to": "RS"
+          }
+        ],
+        "classification": "supported_missing_operation_sana_late_capture"
+      },
+      {
+        "osid": "op:kljuc:kljuc_2",
+        "reference": "RBiH",
+        "baseline_controller": "RBiH",
+        "candidate_controller": "RS",
+        "baseline_history": [
+          {
+            "turn": 7,
+            "mechanism": "paramilitary",
+            "from": "RBiH",
+            "to": "RS"
+          },
+          {
+            "turn": 188,
+            "mechanism": "combat",
+            "from": "RS",
+            "to": "RBiH",
+            "attacker_brigade": "arbih_501st_slavna_mountain",
+            "battle_id": "188:op:kljuc:kljuc_2:arbih_501st_slavna_mountain:rs_17th_klju_light_infantry"
+          }
+        ],
+        "candidate_history": [
+          {
+            "turn": 9,
+            "mechanism": "paramilitary",
+            "from": "RBiH",
+            "to": "RS"
+          }
+        ],
+        "classification": "supported_missing_operation_sana_late_capture"
+      },
+      {
+        "osid": "op:sanski_most:ilidza_2",
+        "reference": "RBiH",
+        "baseline_controller": "RBiH",
+        "candidate_controller": "RS",
+        "baseline_history": [
+          {
+            "turn": 3,
+            "mechanism": "combat",
+            "from": "RBiH",
+            "to": "RS",
+            "attacker_brigade": "rs_6th_sanske_infantry",
+            "battle_id": "3:op:sanski_most:ilidza_2:rs_6th_sanske_infantry:null"
+          },
+          {
+            "turn": 187,
+            "mechanism": "combat",
+            "from": "RS",
+            "to": "RBiH",
+            "attacker_brigade": "arbih_517th_light",
+            "battle_id": "187:op:sanski_most:ilidza_2:arbih_517th_light:rs_3rd_petrovac_light_infantry"
+          }
+        ],
+        "candidate_history": [
+          {
+            "turn": 3,
+            "mechanism": "combat",
+            "from": "RBiH",
+            "to": "RS",
+            "attacker_brigade": "rs_6th_sanske_infantry",
+            "battle_id": "3:op:sanski_most:ilidza_2:rs_6th_sanske_infantry:null"
+          }
+        ],
+        "classification": "supported_missing_operation_sana_late_capture"
+      },
+      {
+        "osid": "op:sanski_most:jelasinovci",
+        "reference": "RBiH",
+        "baseline_controller": "RBiH",
+        "candidate_controller": "RS",
+        "baseline_history": [
+          {
+            "turn": 182,
+            "mechanism": "combat",
+            "from": "RS",
+            "to": "RBiH",
+            "attacker_brigade": "arbih_517th_light",
+            "battle_id": "182:op:sanski_most:jelasinovci:arbih_517th_light:rs_17th_klju_light_infantry"
+          }
+        ],
+        "candidate_history": [],
+        "classification": "supported_missing_operation_sana_late_capture"
+      },
+      {
+        "osid": "op:sanski_most:kljevci",
+        "reference": "RBiH",
+        "baseline_controller": "RBiH",
+        "candidate_controller": "RS",
+        "baseline_history": [
+          {
+            "turn": 188,
+            "mechanism": "combat",
+            "from": "RS",
+            "to": "RBiH",
+            "attacker_brigade": "arbih_517th_light",
+            "battle_id": "188:op:sanski_most:kljevci:arbih_517th_light:rs_15th_biha_infantry"
+          }
+        ],
+        "candidate_history": [],
+        "classification": "supported_missing_operation_sana_late_capture"
+      },
+      {
+        "osid": "op:sanski_most:lusci_palanka_2",
+        "reference": "RBiH",
+        "baseline_controller": "RBiH",
+        "candidate_controller": "RS",
+        "baseline_history": [
+          {
+            "turn": 181,
+            "mechanism": "combat",
+            "from": "RS",
+            "to": "RBiH",
+            "attacker_brigade": "arbih_517th_light",
+            "battle_id": "181:op:sanski_most:lusci_palanka_2:arbih_517th_light:rs_17th_klju_light_infantry"
+          }
+        ],
+        "candidate_history": [],
+        "classification": "supported_missing_operation_sana_late_capture"
+      },
+      {
+        "osid": "op:sanski_most:ostra_luka",
+        "reference": "RBiH",
+        "baseline_controller": "RBiH",
+        "candidate_controller": "RS",
+        "baseline_history": [
+          {
+            "turn": 186,
+            "mechanism": "combat",
+            "from": "RS",
+            "to": "RBiH",
+            "attacker_brigade": "arbih_517th_light",
+            "battle_id": "186:op:sanski_most:ostra_luka:arbih_517th_light:rs_11th_krupa_light_infantry"
+          }
+        ],
+        "candidate_history": [],
+        "classification": "supported_missing_operation_sana_late_capture"
+      },
+      {
+        "osid": "op:sanski_most:sanski_most_2",
+        "reference": "RBiH",
+        "baseline_controller": "RBiH",
+        "candidate_controller": "RS",
+        "baseline_history": [
+          {
+            "turn": 2,
+            "mechanism": "combat",
+            "from": "RBiH",
+            "to": "RS",
+            "attacker_brigade": "rs_6th_sanske_infantry",
+            "battle_id": "2:op:sanski_most:sanski_most_2:rs_6th_sanske_infantry:null"
+          },
+          {
+            "turn": 185,
+            "mechanism": "combat",
+            "from": "RS",
+            "to": "RBiH",
+            "attacker_brigade": "arbih_517th_light",
+            "battle_id": "185:op:sanski_most:sanski_most_2:arbih_517th_light:rs_3rd_petrovac_light_infantry"
+          }
+        ],
+        "candidate_history": [
+          {
+            "turn": 2,
+            "mechanism": "combat",
+            "from": "RBiH",
+            "to": "RS",
+            "attacker_brigade": "rs_6th_sanske_infantry",
+            "battle_id": "2:op:sanski_most:sanski_most_2:rs_6th_sanske_infantry:null"
+          }
+        ],
+        "classification": "supported_missing_operation_sana_late_capture"
+      },
+      {
+        "osid": "op:sanski_most:skucani_vakuf_2",
+        "reference": "RBiH",
+        "baseline_controller": "RBiH",
+        "candidate_controller": "RS",
+        "baseline_history": [
+          {
+            "turn": 14,
+            "mechanism": "paramilitary",
+            "from": "RBiH",
+            "to": "RS"
+          },
+          {
+            "turn": 183,
+            "mechanism": "combat",
+            "from": "RS",
+            "to": "RBiH",
+            "attacker_brigade": "arbih_517th_light",
+            "battle_id": "183:op:sanski_most:skucani_vakuf_2:arbih_517th_light:null"
+          }
+        ],
+        "candidate_history": [
+          {
+            "turn": 14,
+            "mechanism": "paramilitary",
+            "from": "RBiH",
+            "to": "RS"
+          }
+        ],
+        "classification": "supported_missing_operation_sana_late_capture"
+      },
+      {
+        "osid": "op:sanski_most:stari_majdan",
+        "reference": "RBiH",
+        "baseline_controller": "RBiH",
+        "candidate_controller": "RS",
+        "baseline_history": [
+          {
+            "turn": 1,
+            "mechanism": "combat",
+            "from": "HRHB",
+            "to": "RS",
+            "attacker_brigade": "rs_6th_sanske_infantry",
+            "battle_id": "1:op:sanski_most:stari_majdan:rs_6th_sanske_infantry:null"
+          },
+          {
+            "turn": 184,
+            "mechanism": "combat",
+            "from": "RS",
+            "to": "RBiH",
+            "attacker_brigade": "arbih_517th_light",
+            "battle_id": "184:op:sanski_most:stari_majdan:arbih_517th_light:rs_17th_klju_light_infantry"
+          }
+        ],
+        "candidate_history": [
+          {
+            "turn": 1,
+            "mechanism": "combat",
+            "from": "HRHB",
+            "to": "RS",
+            "attacker_brigade": "rs_6th_sanske_infantry",
+            "battle_id": "1:op:sanski_most:stari_majdan:rs_6th_sanske_infantry:null"
+          }
+        ],
+        "classification": "supported_missing_operation_sana_late_capture"
+      }
+    ],
+    "recovered_matches": [
+      {
+        "osid": "op:mrkonjic_grad:baljvine_2",
+        "reference": "HRHB",
+        "baseline_controller": "RS",
+        "candidate_controller": "HRHB",
+        "baseline_history": [
+          {
+            "turn": 21,
+            "mechanism": "abandoned",
+            "from": "HRHB",
+            "to": "RS"
+          }
+        ],
+        "candidate_history": [],
+        "classification": "supported_removed_abandonment_preserves_initial_hrhb"
+      },
+      {
+        "osid": "op:mrkonjic_grad:gerzovo_2",
+        "reference": "HRHB",
+        "baseline_controller": "RS",
+        "candidate_controller": "HRHB",
+        "baseline_history": [],
+        "candidate_history": [
+          {
+            "turn": 185,
+            "mechanism": "combat",
+            "from": "RS",
+            "to": "HRHB",
+            "attacker_brigade": "hrhb_kralj_petar_kreimir_iv_brigade",
+            "battle_id": "185:op:mrkonjic_grad:gerzovo_2:hrhb_kralj_petar_kreimir_iv_brigade:rs_1st_gradika_light_infantry"
+          }
+        ],
+        "classification": "supported_operation_southern_move_capture"
+      },
+      {
+        "osid": "op:mrkonjic_grad:majdan_2",
+        "reference": "HRHB",
+        "baseline_controller": "RS",
+        "candidate_controller": "HRHB",
+        "baseline_history": [],
+        "candidate_history": [
+          {
+            "turn": 186,
+            "mechanism": "combat",
+            "from": "RS",
+            "to": "HRHB",
+            "attacker_brigade": "hrhb_kralj_petar_kreimir_iv_brigade",
+            "battle_id": "186:op:mrkonjic_grad:majdan_2:hrhb_kralj_petar_kreimir_iv_brigade:null"
+          }
+        ],
+        "classification": "supported_operation_southern_move_capture"
+      },
+      {
+        "osid": "op:mrkonjic_grad:mrkonjic_grad_2",
+        "reference": "HRHB",
+        "baseline_controller": "RS",
+        "candidate_controller": "HRHB",
+        "baseline_history": [],
+        "candidate_history": [
+          {
+            "turn": 188,
+            "mechanism": "combat",
+            "from": "RS",
+            "to": "HRHB",
+            "attacker_brigade": "hrhb_kralj_petar_kreimir_iv_brigade",
+            "battle_id": "188:op:mrkonjic_grad:mrkonjic_grad_2:hrhb_kralj_petar_kreimir_iv_brigade:rs_22nd_krajina_infantry"
+          }
+        ],
+        "classification": "supported_operation_southern_move_capture"
+      },
+      {
+        "osid": "op:mrkonjic_grad:podrasnica_2",
+        "reference": "HRHB",
+        "baseline_controller": "RS",
+        "candidate_controller": "HRHB",
+        "baseline_history": [],
+        "candidate_history": [
+          {
+            "turn": 187,
+            "mechanism": "combat",
+            "from": "RS",
+            "to": "HRHB",
+            "attacker_brigade": "hrhb_kralj_petar_kreimir_iv_brigade",
+            "battle_id": "187:op:mrkonjic_grad:podrasnica_2:hrhb_kralj_petar_kreimir_iv_brigade:rs_1st_novigrad_infantry"
+          }
+        ],
+        "classification": "supported_operation_southern_move_capture"
+      }
+    ],
+    "accounting": {
+      "lost": 12,
+      "recovered": 5,
+      "net": -7
+    }
+  },
+  "supported_causes": [
+    "Six January losses directly replace baseline consolidation/abandoned transfers with no candidate transfer after the approved passive-phase removal.",
+    "The other four January losses are explained by changed outcomes/timing of three already-authored operations: Donji Vakuf, Maglaj Local Counterattack, and Operation Herzegovina.",
+    "Eleven cascade lost matches follow missing late Operation Sana captures even though its start turn, objective list, and participant list match; retained brigade logs show its Sanski Most/Ključ axes advance later or stall.",
+    "The twelfth cascade loss, Bosansko Grahovo/Ugarci, is the absent baseline consolidation transfer.",
+    "Five candidate cascade recoveries offset those twelve losses: one retained initial HRHB cell because abandonment is absent, and four Operation Southern Move combat captures."
+  ],
+  "unresolved": [
+    "Artifacts establish the affected operation stage and routing differences, but do not isolate one source-level function as the cause without a focused code trace or diagnostic reproduction.",
+    "The candidate HRHB capture of Bosanski Petrovac/Jasenovac at t178 has no matching completed AAR; its exact operation/sector-offensive owner is unresolved from retained AARs."
+  ],
+  "smallest_plausible_correction_scope": [
+    "For January, preserve the approved removal of global passive control and correct only the existing authored-operation execution/timing for Donji Vakuf, Maglaj Local Counterattack, and Operation Herzegovina; the six former passive outcomes need a separate bounded authored/event representation only if the accepted painted outcomes remain required.",
+    "For the cascade, inspect and correct Operation Sana axis routing/progression for its existing roster and objectives, preserving Operation Southern Move gains. Recovering at least five net matches reaches the unchanged >=38 gate; no new objective, global combat tuning, or floor edit is supported by this attribution."
+  ],
+  "acceptance": {
+    "jan1993_floor": 694,
+    "western_cascade_minimum": 38,
+    "status": "unmet"
+  }
+}

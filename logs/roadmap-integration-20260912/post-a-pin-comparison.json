@@ -1,0 +1,59 @@
+{
+  "run": "runs\\roadmap_integration_20260912\\post_a\\apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0",
+  "candidate_source": "51fe494151397c1cc6521b54006b0f8da70705e5",
+  "read_only_comparison": true,
+  "canon_check_run": false,
+  "pins_updated": false,
+  "matched": 0,
+  "total": 8,
+  "artifacts": [
+    {
+      "artifact": "activity_summary.json",
+      "expected": "7d10356d0715db21370c3f7d6acc15db7948856c80962363f505641b48bfbd4e",
+      "actual": "ff6b90345917fd9a0cde4ecaf12adf84a865c4309c1a5b723493597c640e57be",
+      "matches": false
+    },
+    {
+      "artifact": "control_delta.json",
+      "expected": "4cb8219cf3b7dcbfdd66476a7af5bbfa0709fdd24e0a37d6900a9b808d6acb85",
+      "actual": "accbefc2735fc842e70344c52ee2f2da687f63260c532c7cbd1f9fa6a99754d8",
+      "matches": false
+    },
+    {
+      "artifact": "end_report.md",
+      "expected": "fea39f3bf7eda907b290e3bd2579ac050c847ae2f783153117f95f1f94d0cf8d",
+      "actual": "850a963cd47ae025d0c4cf510c55812f317a0405c25c93e2d74ea71d1f331073",
+      "matches": false
+    },
+    {
+      "artifact": "final_save.json",
+      "expected": "e414dc69f6e875fcd2a7394582921f20ca03123112baf12e9308c50035c29c50",
+      "actual": "5d6f8378dbf433fc4bb81ea46824648a846b4ce1a8d01c7585d72964af81f85c",
+      "matches": false
+    },
+    {
+      "artifact": "formation_delta.json",
+      "expected": "bbd7260e219d311bea201053d0d7c913f4b30b83bcead72b05d5f2c957566cb1",
+      "actual": "86df2d06bd749651bba810b489e14e5a9cfcb2121e6cf48a4efc0a6f570b17f0",
+      "matches": false
+    },
+    {
+      "artifact": "run_summary.json",
+      "expected": "b8ebc2c1ff4522fed0651be224ba360fcfeff0da4e6983f27d9df008eeba98cb",
+      "actual": "9d33e40884cf2786dc9a83e5280bc776d4ca621476ddf47939017fbf05dec9b8",
+      "matches": false
+    },
+    {
+      "artifact": "watched_operations.json",
+      "expected": "785a073b9312e34d20ba143915478ab768ce7847ad337b121f98491df8325b18",
+      "actual": "edbb10bf9a565c4fddc2c0f9f4dba1347bdacaae77bd59215f5b98d5cd65c29f",
+      "matches": false
+    },
+    {
+      "artifact": "weekly_report.jsonl",
+      "expected": "4c5cb00bde51a15e2f7766d31ececb03e86d81bfcf1f93a4c04c01cbda31b9cf",
+      "actual": "e49c8ab115858fc1f64d713d275a39822eb4133b5c312d304418cd3c09b647ff",
+      "matches": false
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "measured_source": "51fe494151397c1cc6521b54006b0f8da70705e5",
+  "checked_dirty_paths": 28,
+  "preservation_failures": [],
+  "stash_count": 22,
+  "ordered_stashes_preserved": true,
+  "worktree_count": 18,
+  "worktree_inventory_preserved": true,
+  "main": "9588876bc58b09adea89e48d9520be427e270f20",
+  "protected_drift": [],
+  "production_drift_since_measurement": [],
+  "calibration_tip_integrated": true,
+  "new_or_changed_local_links_checked": 11,
+  "link_failures": [],
+  "documentation_tests": {
+    "files": 3,
+    "passed": 32,
+    "exit": 0,
+    "log": "post-a-docs-tests.log"
+  },
+  "evidence": [
+    {
+      "path": "logs/roadmap-integration-20260912/approved-coverage-tests.log",
+      "bytes": 13982,
+      "sha256": "2bfb801de73c1fa5b9594850ced763c8c4608a4368f2d75e9204d3f3575987cb"
+    },
+    {
+      "path": "logs/roadmap-integration-20260912/approved-coverage-unit-control.log",
+      "bytes": 307,
+      "sha256": "09aa71c866e4ffd4047b97be6f45890d1797f9ce46abf7b6160e1ff11e60f2ab"
+    },
+    {
+      "path": "logs/roadmap-integration-20260912/post-a-188w.log",
+      "bytes": 658726,
+      "sha256": "8608c1100784f58f22e45d7446cf9cc8b3fe31d5f96511933f94f7ba5bba0937"
+    },
+    {
+      "path": "logs/roadmap-integration-20260912/post-a-docs-tests.log",
+      "bytes": 587,
+      "sha256": "aac9dba277bf8334476d307e84fa89c9c1338ba90c4d9a30ced6fc2cb2774c55"
+    },
+    {
+      "path": "logs/roadmap-integration-20260912/post-a-gates.log",
+      "bytes": 1254,
+      "sha256": "399b719e592f65d5476f63412176d979d62aee04d92882617f1284f984059ad8"
+    },
+    {
+      "path": "logs/roadmap-integration-20260912/post-a-final-gates.log",
+      "bytes": 1178,
+      "sha256": "db182dea1e9d8074f9208f5295f89154b656106050fd19bff169dd0b1008398f"
+    }
+  ],
+  "worktree_inventory_source": "worktrees-before.txt (all 18 entries; worktree-inventory.json lists only the 17 other trees)",
+  "gates": {
+    "exit": 0,
+    "open": 10,
+    "log": "post-a-final-gates.log"
+  }
+}

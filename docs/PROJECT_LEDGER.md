@@ -4828,3 +4828,35 @@ staffability discriminator controls pass 4/4, including reachable and disconnect
 The applied diff matches the reviewed proposal. Raw evidence is retained in
 `logs/roadmap-integration-20260912/approved-coverage-tests.log` and
 `approved-coverage-unit-control.log`; the original full-suite failure remains historical evidence.
+
+## 2026-09-13 — Clean integrated 188-week measurement; repeat stopped
+
+POST-A measures clean `51fe494151397c1cc6521b54006b0f8da70705e5` on Node 22.23.2 through the
+canonical preflight with no override or `--map`. It completes 188 weeks in 288.63 seconds,
+exit 0, final hash `5d6f8378dbf433fc`. Validator child exits are health 1, consistency 0,
+checkpoints 1 and truth 1; the collection driver's exit 0 is not acceptance. Checkpoints are
+692/698/694/665 against unchanged 694/674/668/641 floors. January fails by two and western
+cascade 33 fails the permitted minimum 38. All 31 anchors, nine enclave guards, eastern
+provenance, 188 turn seals and final-save seal pass with zero unresolved assignments.
+
+Truth fails on a Prozor `op_empty` injection at t41. Direct control-event inspection disproves
+the validator's misleading already-HRHB text: Lug/Paros remain RBiH until their t54/t55 HVO
+combat captures. The queue validates politically unavailable targets rather than deferring them.
+Farz uses the same Briješnica cell, 327th brigade and 3rd Corps as the accepted reference, but
+at t169 instead of t168, with a different defender/battle. Earlier Stari Majdan wording was a
+handoff error and is explicitly corrected in the final evidence. The changed timing cannot
+silently inherit the exact reference exception.
+
+Existing-artifact attribution finds ten January regressions (six removed passive transfers,
+four changed authored-operation outcomes) and western twelve losses offset by five recoveries.
+Eleven western losses track missing Sana combat captures, with its authored roster/objectives
+unchanged. HVO Central Bosnia remains 6/12 below 400 at weeks 104/188; the Travnik unassigned
+brigade is retained as residual truth. No source tuning, second 188-week run or pin refresh was
+performed after the failed first run. All eight 188-week pins differ read-only; the retained
+older clean 40-week lineage artifact also differs from the CI fingerprint, without establishing
+fresh current-source CI provenance.
+
+The existing April report and roadmap record the smallest proposed next repair surfaces and
+a bounded additional measurement allowance requiring owner scope approval. All thresholds and
+protected data remain intact; main stays `9588876bc`. The integrated candidate and approved
+coverage correction are preserved as committed, branchable work, while acceptance is NO-GO.

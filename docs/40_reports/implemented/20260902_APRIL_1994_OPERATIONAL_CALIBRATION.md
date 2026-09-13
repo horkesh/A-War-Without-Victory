@@ -18,6 +18,102 @@
 
 ### Current checkpoint — 2026-09-13
 
+**Coverage is approved, implemented and verified. All calibration work is integrated in the
+candidate, but clean full-horizon acceptance is NO-GO and main remains `9588876bc`.** The measured
+source is `51fe494151397c1cc6521b54006b0f8da70705e5`; no second 188-week run, pin refresh or
+remote push followed the failure.
+
+The owner explicitly approved the staffability rule after its plain-language explanation.
+Both affected 40-week tests pass once: **2 files, 17/17 tests, exit 0**, 161.44 seconds. Both
+report nine verified isolated gaps and zero staffable gaps. Positive/negative classifier controls
+pass 4/4 and independent review is GO. The rule retains raw counts, saved isolation markers,
+nonempty graph validation and recomputation from legal donors; it retires only the approved raw
+two-gap limit. [Coverage review](../../../logs/roadmap-integration-20260912/approved-coverage-review.md).
+
+**POST-A** ran through the canonical preflight with `AWWV_S6_GRADE_RUN=true`, Node 22.23.2,
+clean Git state and no override, using a new directory and omitting `--map`:
+`runs/roadmap_integration_20260912/post_a/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0`.
+It completed 188 weeks in 288.63 seconds, scenario exit 0, final hash `5d6f8378dbf433fc`.
+All 31 consumed inputs match the preserved reference's normalized digest. The complete
+[verdict](../../../logs/roadmap-integration-20260912/post-a-verdict.json) and
+[independent review](../../../logs/roadmap-integration-20260912/post-a-integration-review.md)
+bind the actual artifacts and validator results.
+
+| Checkpoint | Accepted reference output | POST-A | Unchanged floor | Verdict |
+|---|---:|---:|---:|---|
+| January 1993 | 702 | 692 | 694 | FAIL |
+| April 1994 | 678 | 698 | 674 | PASS |
+| April 1995 | 672 | 694 | 668 | PASS |
+| October 1995 | 667 | 665 | 641 | PASS |
+
+Additional unmet conditions:
+
+- **Western cascade:** 33 against reference 40 and permitted minimum 38. Twelve lost matches
+  are offset by five recoveries; this is not seven uniquely lost settlements.
+- **Prozor injection:** truth reports one `op_empty` error at t41. Lug and Paros were RBiH-held
+  then, not HVO-held: their first HVO captures are t54/t55. The validator incorrectly labels
+  targets blocked by bilateral combat permission as `all_objectives_owned`. The queue's actual
+  ownership test is correct, but validation proceeds before a legal hostile objective exists.
+  The proposed correction is permission-aware deferral with retained retry and truthful wording,
+  preserving the blocking error gate. [Source diagnosis](../../../logs/roadmap-integration-20260912/post-a-prozor-diagnosis.md).
+- **Farz:** the reference capture is Briješnica Donja at t168 by the 327th Viteška Mountain
+  Brigade, 3rd Corps. POST-A uses the same cell, brigade and corps at t169, with a different
+  defender/battle. The exact t168 exception does not establish acceptance of that changed
+  timing. An earlier handoff incorrectly named Stari Majdan; direct control-event comparison
+  disproved that claim and the final review explicitly corrects it.
+
+Passing evidence remains visible: all 31 historical anchors, all nine enclave guards, eastern
+capture provenance, direct consistency (0 failures), 188 turn seals plus one final-save seal
+with zero unresolved assignments, and the other nine truth domains. Child exits are health 1,
+consistency 0, checkpoints 1 and truth 1. The validator driver's exit 0 only means it collected
+evidence; it is not an aggregate acceptance result. HVO Central Bosnia has 6/12 brigades below
+400 at weeks 104 and 188, improved from the branch's 7/12 but still substantive understrength.
+The unchanged 1,500-person Travnik brigade remains unreachable and unassigned. These residuals
+are retained even though that critical-ratio threshold no longer fires.
+
+**Bounded attribution:** January has ten newly wrong cells and zero recoveries. Six directly
+lose retired passive transfers; four come from changed execution of existing operations
+(Donji Vakuf/Prusac, Maglaj–Jablanica and Vranjevići). Do not restore passive captures to meet
+the floor. Eleven western losses lack earlier Operation Sana combat captures; its start, roster
+and objective list are unchanged, but the Sanski Most/Ključ axis stalls. The remaining loss is
+Ugarci's retired consolidation. Preserve five recoveries, including Southern Move's late combat
+gains. [Exact per-cell comparison](../../../logs/roadmap-integration-20260912/post-a-regression-attribution.md).
+
+**Baseline status:** all eight 188-week pins differ in a read-only comparison; `canon:check` was
+not launched because the first run failed. The retained clean `933132e90` 40-week artifact also
+fails the CI structural fingerprint (expected `cd5582f4a945842e`, actual `6af86b2c1012c243`). It
+establishes lineage drift, not exact `51fe49415` fresh-40-week provenance. No extra scenario was
+run for that check and no pins were replaced. The preserved main comparator still matches its
+eight accepted pins, with its dirty metadata qualification unchanged.
+
+**Proposed next scope, not activated:** repair permission-aware Prozor deferral; diagnose and
+correct existing January operation timing/execution and Sana axis progression; explicitly
+resolve the Farz timing/attribution difference. Retain all floors, existing historical objectives,
+control protections, the approved coverage rule and Southern Move gains. Start with focused
+reproductions and one independent review; keep one change per measured run. A bounded allowance
+of at most four additional 188-week runs (roughly 20–40 minutes total, including a final repeat
+only after hard gates pass) plus one required full suite (roughly 30–40 minutes) is proposed.
+Implementation time is additional. Any new unexplained hard failure or exhausted run allowance
+stops the packet; do not broaden tuning or refresh baselines automatically. This exceeds the
+completed one-run-plus-conditional-repeat plan and requires the owner's scope decision.
+
+All 18 worktrees remain registered. All 28 original dirty paths and their backups, all 22 ordered
+stash objects, protected scenario/source/operational data, FORAWWV, baseline pins and main were
+rechecked without drift before this report update. Final calibration, R7/R8 acceptance and R9
+readiness remain separate open roadmap work.
+
+Final documentation checks pass **32/32** across three files; the register validates with
+**10 open gates**, and the regenerated index retains four open roadmap lanes. Added or changed
+local links resolve. The [closeout receipt](../../../logs/roadmap-integration-20260912/post-a-closeout-checks.json)
+records unchanged production source since POST-A, the preserved 18-tree inventory, 28 original
+dirty paths and 22 ordered stashes. This checkpoint records failed acceptance without altering
+its measured source.
+
+### Earlier checkpoint — before coverage approval
+
+The following retains the preceding checkpoint. Its pending-approval and unrun-188-week status
+is superseded by the current measurement above.
+
 **All 20 calibration commits are integrated; canon amendments and bounded corrections are
 complete. Promotion to main and calibration acceptance remain held on the coverage criterion
 and subsequent full-horizon proof.** The execution branch remains

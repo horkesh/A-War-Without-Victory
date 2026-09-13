@@ -3,13 +3,15 @@
 **Current delivery status (2026-09-13):** current-main manifest authority is the owner-authorized
 #518 refresh at clean `2a8eb4244` (702/678/672/667; unchanged floors and all 31 n392 anchors).
 Candidate `7382f26f8` integrates the 20 April-calibration commits with `9588876bc`; it is not
-promoted to main. Engine Invariants §14.8b and §16.2 are owner-approved at `933132e90`. The full
-suite ran once: 13,935 passed, 9 failed, 43 skipped, exit 1. Integration corrections and isolated
-timeout verification pass; two coverage assertions remain red because the old cap rejects nine
-lawful disconnected pockets. The reviewed zero-staffable-gap replacement requires owner approval.
-Typecheck and data integrity pass. Clean 188-week acceptance remains unrun while that criterion
-is unresolved. Branch-local v72/v73 has 703/712 at week 104 with dirty provenance and cannot
-certify the candidate.
+promoted to main. Engine Invariants §14.8b and §16.2 are owner-approved at `933132e90`; the
+coverage contract is owner-approved at `51fe49415` (17/17 tests; nine verified isolated gaps,
+zero staffable gaps; independent review GO). Earlier full-suite evidence and focused corrections
+are retained. Clean POST-A at `51fe49415` completes 188 weeks at **692/698/694/665**. Acceptance
+fails on January 692 below floor 694, western cascade 33 below 38, one Prozor injection error,
+and Farz t169 outside the exact t168 exception. All 31 anchors, nine enclave guards, consistency
+and assignment seals pass. The planned second run is stopped; no pins or floors were refreshed.
+Existing January operation execution, Sana progression and Prozor deferral are the proposed
+repair surfaces. Branch-local v72/v73 remains dirty week-104 history, not candidate acceptance.
 [Integration receipt](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#integration-audit--2026-09-12).
 
 BC04 P1/P2, BC05, BC06 and BC09 retain their campaign/packaged acceptance boundaries; BC07
