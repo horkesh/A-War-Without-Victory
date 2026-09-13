@@ -4860,3 +4860,28 @@ The existing April report and roadmap record the smallest proposed next repair s
 a bounded additional measurement allowance requiring owner scope approval. All thresholds and
 protected data remain intact; main stays `9588876bc`. The integrated candidate and approved
 coverage correction are preserved as committed, branchable work, while acceptance is NO-GO.
+
+## 2026-09-13 — Publish the calibration timeline for remote inspection
+
+The owner explicitly requested GitHub HTML publication after the inline viewer's orange
+mismatch fill was mistaken for RS ownership and small cells could not be tapped remotely.
+The standalone viewer is live at <https://horkesh.github.io/A-War-Without-Victory/> on
+`gh-pages` commit `50b927492896af185c99894cd07df997371d9036`. That branch contains only
+`index.html`, `.nojekyll` and `README.md`; the source integration branch was not pushed.
+
+Faction fill now always represents actual control. Optional checkpoint mismatch outlines
+default off, and settlement search exposes persistent controller, historical owner and last
+change details. Independent review corrected 320px overflow and dark search contrast; HTTP
+preflight added an embedded tab icon to keep browser requests self-contained. Real touchscreen
+selection, desktop/mobile/dark layout, four-checkpoint restrictions and Ozimica ownership all
+pass. The live HTTPS route returns 200, reproduces those browser checks without console/page
+errors or external assets, and serves the exact reviewed 682,100 bytes, SHA-256
+`5fdedb62e19db8c8980f948aba3534bb3885bb3c58e7c335843da2e55ed05bb4`.
+
+The existing clean POST-A save is reused unchanged: source `51fe49415`, final-state hash
+`5d6f8378dbf433fc`. All five embedded datasets remain identical, with 744 drawn / 712 scored
+cells, 223 flips and scores 692/698/694/665. No scenario rerun, engine change, protected data
+edit, baseline refresh or main promotion occurred. Local main remains `9588876bc`, remote
+main remains `e607508bc`, and the full-horizon acceptance remains NO-GO. The existing
+[viewer plan](plans/2026-09-08-calibration-control-timeline-viewer-plan.md) owns the deployment
+receipt and evidence paths; publication is permission to inspect this run, not baseline adoption.

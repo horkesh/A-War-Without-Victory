@@ -45,7 +45,7 @@
 
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -291,10 +291,12 @@ const cells = features.map((f) => {
 // Emit
 
 const provenance = {
-    run_dir: runDir.replace(/\\/g, '/'),
-    run_commit: runMeta?.git_commit ?? runMeta?.commit ?? null,
-    run_dirty: runMeta?.git_dirty ?? null,
-    run_node: runMeta?.node_version ?? null,
+    run_name: basename(runDir),
+    run_id: runMeta?.run_id ?? null,
+    run_fingerprint: runMeta?.run_id?.match(/__([a-f0-9]{16})__/i)?.[1] ?? sha256(readFileSync(savePath)).slice(0, 16),
+    run_commit: runMeta?.git_commit ?? runMeta?.commit ?? runMeta?.provenance?.git_commit ?? null,
+    run_dirty: runMeta?.git_dirty ?? runMeta?.provenance?.git_dirty ?? null,
+    run_node: runMeta?.node_version ?? runMeta?.provenance?.node_version ?? null,
     scenario: runMeta?.scenario_id ?? runMeta?.scenario ?? null,
     weeks: maxWeek,
     events: events.length,
@@ -329,13 +331,14 @@ const esc = (s) => String(s).replaceAll('&', '&amp;').replaceAll('<', '&lt;').re
 const payload = (obj) => JSON.stringify(obj).replaceAll('<', '\\u003c');
 
 const scoreRows = scores.map((s) => `<tr${s.reached ? '' : ' class="unreached"'}>
-<td class="cp" data-week="${s.week}">${esc(s.label)}</td><td class="wk">w${s.week}</td>
+<td><button class="cp" data-week="${s.week}"${s.reached ? '' : ' disabled'}>${esc(s.label)}</button></td><td class="wk">w${s.week}</td>
 <td class="num">${s.reached ? s.matched : '—'}</td><td class="den">/ ${s.total}</td>
 <td class="num miss">${s.reached ? s.mismatches.length : '—'}</td></tr>`).join('');
 
 const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
 <title>Control timeline — ${esc(provenance.scenario ?? 'run')}</title><style>
 :root{--ink:#29261f;--dim:#70695d;--line:rgba(54,45,31,.18);--panel:rgba(255,255,255,.5);--amber:#c98e26}
 *{box-sizing:border-box}html,body{margin:0;height:100%}
@@ -348,11 +351,15 @@ body{color:var(--ink);font:14px/1.5 Georgia,'Times New Roman',serif;background:l
 .mapbox{position:relative;flex:1;min-height:0;background:#0a0e14;overflow:hidden;box-shadow:0 14px 40px rgba(42,34,22,.22)}
 svg{width:100%;height:100%;display:block}
 .cell{stroke:#0a0e14;stroke-width:.6;cursor:pointer}
-.cell.sel{stroke:#fff;stroke-width:2.4}
-.mismatch{fill:var(--amber)!important}
+.cell.mismatch{stroke:var(--amber);stroke-width:3;vector-effect:non-scaling-stroke}
+.hide-mismatch .cell.mismatch{stroke:#0a0e14;stroke-width:.6;vector-effect:none}
+.cell.sel{stroke:#fff;stroke-width:3;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 3px #fff)}
+.cell.mismatch.sel{stroke:var(--amber);stroke-width:5;filter:drop-shadow(0 0 3px #fff)}
+.hide-mismatch .cell.mismatch.sel{stroke:#fff;stroke-width:3;vector-effect:non-scaling-stroke}
 .bar{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--panel);border:1px solid var(--line)}
 input[type=range]{flex:1;min-width:0}
-button{font:inherit;padding:4px 10px;border:1px solid var(--line);background:rgba(255,255,255,.6);cursor:pointer}
+button,input[type=search]{font:inherit;border:1px solid var(--line);background:rgba(255,255,255,.6);color:inherit}
+button{min-height:44px;padding:7px 10px;cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}
 button:hover{background:#fff}
 .side{display:flex;flex-direction:column;gap:10px;overflow:auto;min-height:0}
 .panel{background:var(--panel);border:1px solid var(--line);padding:10px}
@@ -361,9 +368,11 @@ table{width:100%;border-collapse:collapse;font-family:ui-monospace,monospace;fon
 td{padding:2px 3px}.num{text-align:right;font-weight:700}.den,.wk{color:var(--dim)}
 .miss{color:#b03636}tr.unreached{opacity:.42}
 tr.active td{background:rgba(201,142,38,.22)}
-td.cp{cursor:pointer;text-decoration:underline dotted}
+.cp{width:100%;min-height:40px;padding:4px 3px;border:0;background:transparent;text-align:left;text-decoration:underline dotted}
 .legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-family:ui-monospace,monospace;font-size:11px}
 .legend i{display:inline-block;width:9px;height:9px;margin-right:4px;vertical-align:baseline}
+.mismatch-key{display:inline-block;width:12px;height:12px;margin-right:5px;vertical-align:-2px;border:3px solid var(--amber);background:transparent}
+.toggle{display:flex;align-items:center;min-height:44px;cursor:pointer}.toggle input{width:20px;height:20px;margin:0 7px 0 0}
 .list{max-height:230px;overflow:auto;font-family:ui-monospace,monospace;font-size:11px;line-height:1.55}
 .list div{cursor:pointer;padding:1px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .list div:hover{background:rgba(201,142,38,.22)}
@@ -372,16 +381,21 @@ td.cp{cursor:pointer;text-decoration:underline dotted}
 .warn{border-left:3px solid #b03636;padding-left:8px;color:#b03636;font-size:12px}
 .note{color:var(--dim);font-size:11.5px;line-height:1.45}
 .prov{font-family:ui-monospace,monospace;font-size:10.5px;color:var(--dim);line-height:1.5;word-break:break-all}
+.runid{margin:0;font-family:ui-monospace,monospace;font-size:11px;overflow-wrap:anywhere}
+.search-label{display:block;margin-bottom:5px;color:var(--dim);font-size:12px}.search{width:100%;min-height:44px;padding:8px 10px}
+.search-results{display:grid;gap:3px;max-height:220px;overflow:auto;margin-top:5px}.search-results button{text-align:left;line-height:1.25}
+.detail{margin-top:10px;padding-top:9px;border-top:1px solid var(--line)}.detail-name{font-weight:700}.detail-row{margin-top:3px;font-family:ui-monospace,monospace;font-size:11.5px}
 .tip{position:absolute;display:none;pointer-events:none;z-index:5;padding:8px 10px;background:rgba(8,12,17,.95);color:#fff;border-radius:5px;
 font-family:ui-monospace,monospace;font-size:11.5px;line-height:1.45;max-width:290px}
 .tip[data-open=true]{display:block}
-@media(max-width:1000px){.wrap{grid-template-columns:1fr;height:auto}.mapbox{height:62vh}}
+@media(max-width:1000px){.wrap{grid-template-columns:minmax(0,1fr);height:auto}.mapbox{height:62vh}.side{overflow:visible}}
+@media(max-width:480px){.wrap{padding:6px;gap:8px}.timelinebar{display:grid;grid-template-columns:1fr 1fr}.timelinebar input{grid-column:1/-1;grid-row:1;min-height:44px}.timelinebar #prev{grid-column:1}.timelinebar #next{grid-column:2}.timelinebar #weeklabel{grid-column:1/-1;text-align:center}.mapbox{height:55vh}.bar{padding:6px;gap:6px}.legend{gap:2px 10px}.panel{padding:9px}}
 @media(prefers-color-scheme:dark){:root{--ink:#eee5d6;--dim:#aaa092;--line:rgba(255,255,255,.14);--panel:rgba(255,255,255,.05)}
-body{background:linear-gradient(145deg,#17140f,#211d17 68%,#15120e)}button{background:rgba(255,255,255,.08);color:inherit}button:hover{background:rgba(255,255,255,.16)}}
-</style></head><body>
+body{background:linear-gradient(145deg,#17140f,#211d17 68%,#15120e)}button,input[type=search]{background:rgba(255,255,255,.08);color:inherit}button:hover{background:rgba(255,255,255,.16)}}
+</style></head><body class="hide-mismatch">
 <div class="wrap">
 <div class="mapcol">
-  <div class="bar">
+  <div class="bar timelinebar">
     <button id="prev" title="Previous week with a flip">◀ flip</button>
     <input type="range" id="week" min="0" max="${maxWeek}" value="${maxWeek}" step="1">
     <button id="next" title="Next week with a flip">flip ▶</button>
@@ -395,11 +409,22 @@ body{background:linear-gradient(145deg,#17140f,#211d17 68%,#15120e)}button{backg
     <span><i style="background:${FACTION_COLOR.RBiH}"></i>RBiH</span>
     <span><i style="background:${FACTION_COLOR.RS}"></i>RS</span>
     <span><i style="background:${FACTION_COLOR.HRHB}"></i>HRHB</span>
-    <span><i style="background:${'#c98e26'}"></i>mismatch vs painted (checkpoints only)</span>
-    <span style="opacity:.7">merged sub-1km² cells draw with their parent, so amber polygons can exceed the scored mismatch count — the panel number is the score</span>
+    <label class="toggle"><input id="showmismatch" type="checkbox"><span class="mismatch-key"></span>Show mismatch outlines (checkpoints only)</label>
+    <span style="opacity:.7">Fill always means actual controller. Merged sub-1km² cells draw with their parent, so outlined polygons can exceed the scored mismatch count — the panel number is the score.</span>
   </div>
 </div>
 <div class="side">
+  <div class="panel">
+    <h2>Source run</h2>
+    <p class="runid">${esc(provenance.run_name)} · ${esc(provenance.run_fingerprint)}</p>
+  </div>
+  <div class="panel">
+    <h2>Settlement selection</h2>
+    <label class="search-label" for="settlement-search">Search by settlement, municipality, or OSID</label>
+    <input class="search" id="settlement-search" type="search" autocomplete="off" placeholder="Type a name or OSID">
+    <div class="search-results" id="search-results" role="listbox"></div>
+    <div class="detail" id="selection-detail" aria-live="polite"></div>
+  </div>
   <div class="panel">
     <h2>Checkpoint scores</h2>
     <table><tbody id="scores">${scoreRows}</tbody></table>
@@ -416,8 +441,8 @@ body{background:linear-gradient(145deg,#17140f,#211d17 68%,#15120e)}button{backg
     <div class="list" id="fliplist"></div>
   </div>
   <div class="panel">
-    <h2>Provenance</h2>
-    ${admissibility.length ? `<p class="warn">${admissibility.map(esc).join('<br>')}</p>` : ''}
+    <h2>Provenance</h2>${admissibility.length ? `
+    <p class="warn">${admissibility.map(esc).join('<br>')}</p>` : ''}
     <div class="prov" id="prov"></div>
   </div>
 </div>
@@ -460,7 +485,25 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 
 function stateAt(w){const st=Object.assign({},INIT);for(const e of EVENTS){if(e.t>w)break;st[e.o]=e.x}return st}
 
-let week=MAXWEEK,selected=null;
+const SCORED_META=new Map();
+for(const c of CELLS)if(!SCORED_META.has(c.s)||c.o===c.s)SCORED_META.set(c.s,c);
+const SEARCHABLE=[...SCORED_META.entries()].map(([osid,c])=>({osid,n:c.n||'',u:c.u||''}))
+  .sort((a,b)=>(a.n||a.osid).localeCompare(b.n||b.osid)||a.osid.localeCompare(b.osid));
+let week=MAXWEEK,selected=SEARCHABLE[0]?.osid||null;
+function renderSelection(st,cp){
+  const box=document.getElementById('selection-detail');
+  if(!selected){box.innerHTML='<div class="note">Choose a settlement from search, the map, a mismatch, or a flip.</div>';return}
+  const c=SCORED_META.get(selected),controller=st[selected]||'—';
+  const hasReference=Boolean(cp&&cp.reached&&Object.prototype.hasOwnProperty.call(PAINTED[cp.key],selected));
+  const historical=hasReference?PAINTED[cp.key][selected]:null;
+  const last=[...EVENTS].reverse().find(e=>e.o===selected&&e.t<=week);
+  box.innerHTML='<div class="detail-name">'+esc(c?.n||selected)+'</div>'
+    +(c?.u?'<div class="note">'+esc(c.u)+'</div>':'')
+    +'<div class="detail-row">OSID: '+esc(selected)+'</div>'
+    +'<div class="detail-row">Controller: <strong>'+esc(controller)+'</strong></div>'
+    +'<div class="detail-row">Historical owner: '+(hasReference?'<strong>'+esc(historical)+'</strong>':'no reference at week '+esc(week))+'</div>'
+    +'<div class="detail-row">Last change week: '+(last?'week '+esc(last.t):'none (initial control)')+'</div>';
+}
 function render(){
   const st=stateAt(week);
   for(const [osid,p] of nodes){
@@ -474,7 +517,7 @@ function render(){
     for(const m of cp.mismatches){const arr=byScored.get(m.osid);if(arr)for(const p of arr)p.classList.add('mismatch')}
     mmwhen.textContent='· '+cp.label+' (w'+cp.week+')';
     mmnote.textContent=cp.mismatches.length+' of '+cp.total+' OSIDs differ from painted control.';
-    mmlist.innerHTML=cp.mismatches.map(m=>'<div data-o="'+esc(m.osid)+'">'+esc(m.osid)+' — sim '+esc(m.sim||'—')+' · want '+esc(m.want)+'</div>').join('');
+    mmlist.innerHTML=cp.mismatches.map(m=>'<div data-o="'+esc(m.osid)+'">'+esc(m.osid)+' — controller '+esc(m.sim||'—')+' · historical '+esc(m.want)+'</div>').join('');
   }else{
     mmwhen.textContent='';
     // Deliberate: painted truth exists at four weeks only. Comparing any other week
@@ -491,25 +534,27 @@ function render(){
     ?fl.map(e=>'<div class="flip" data-o="'+esc(e.o)+'"><span style="color:'+(MCOLOR[e.m]||'#888')+'">■</span> '+esc(e.o)+' — '+esc(e.f||'—')+' → '+esc(e.x||'—')+' <span style="opacity:.65">('+esc(e.m)+')</span></div>').join('')
     :'<div class="note">No control changes this week.</div>';
   document.getElementById('weeklabel').textContent='week '+week+(cp?' · '+cp.label:'');
-  if(selected)highlight(selected);
+  if(selected)highlight(selected);else renderSelection(st,cp);
 }
 function highlight(osid){
   document.querySelectorAll('.cell.sel').forEach(p=>p.classList.remove('sel'));
   const arr=byScored.get(osid)||(nodes.has(osid)?[nodes.get(osid)]:[]);
   for(const p of arr)p.classList.add('sel');
   selected=osid;
+  renderSelection(stateAt(week),CPBYWEEK.get(week));
 }
 const slider=document.getElementById('week');
 slider.addEventListener('input',()=>{week=Number(slider.value);render()});
 document.getElementById('prev').onclick=()=>{const c=[...flipWeeks].reverse().find(w=>w<week);if(c!==undefined){week=c;slider.value=week;render()}};
 document.getElementById('next').onclick=()=>{const c=flipWeeks.find(w=>w>week);if(c!==undefined){week=c;slider.value=week;render()}};
 document.addEventListener('keydown',e=>{
+  if(e.target.matches('input,button'))return;
   if(e.key==='ArrowLeft'&&week>0){week-=1;slider.value=week;render()}
   if(e.key==='ArrowRight'&&week<MAXWEEK){week+=1;slider.value=week;render()}
 });
 document.getElementById('scores').addEventListener('click',e=>{
-  const td=e.target.closest('td.cp');if(!td)return;
-  week=Number(td.dataset.week);slider.value=week;render();
+  const control=e.target.closest('button.cp');if(!control)return;
+  week=Number(control.dataset.week);slider.value=week;render();
 });
 for(const id of ['mmlist','fliplist'])document.getElementById(id).addEventListener('click',e=>{
   const el=e.target.closest('[data-o]');if(!el)return;highlight(el.dataset.o);
@@ -535,8 +580,23 @@ svg.addEventListener('mousemove',e=>{
 svg.addEventListener('mouseleave',()=>{tip.dataset.open='false'});
 svg.addEventListener('click',e=>{const p=e.target.closest('.cell');if(p)highlight(p.dataset.s)});
 
+document.getElementById('showmismatch').addEventListener('change',e=>{
+  document.body.classList.toggle('hide-mismatch',!e.target.checked);
+});
+const search=document.getElementById('settlement-search'),searchResults=document.getElementById('search-results');
+function renderSearchResults(){
+  const q=search.value.trim().toLocaleLowerCase();
+  if(!q){searchResults.innerHTML='';return}
+  const hits=SEARCHABLE.filter(c=>(c.n+' '+c.u+' '+c.osid).toLocaleLowerCase().includes(q)).slice(0,12);
+  searchResults.innerHTML=hits.length?hits.map(c=>'<button type="button" role="option" data-o="'+esc(c.osid)+'">'+esc(c.n||c.osid)+(c.u?' · '+esc(c.u):'')+'<br><span class="note">'+esc(c.osid)+'</span></button>').join(''):'<div class="note">No matching settlement.</div>';
+}
+search.addEventListener('input',renderSearchResults);
+search.addEventListener('keydown',e=>{if(e.key==='Enter'){const first=searchResults.querySelector('[data-o]');if(first){e.preventDefault();highlight(first.dataset.o)}}});
+searchResults.addEventListener('click',e=>{const choice=e.target.closest('[data-o]');if(choice)highlight(choice.dataset.o)});
+
 document.getElementById('prov').innerHTML=[
-  'run: '+esc(PROV.run_dir),
+  'run: '+esc(PROV.run_name),
+  'run id: '+esc(PROV.run_id||'—')+' · fingerprint '+esc(PROV.run_fingerprint),
   'scenario: '+esc(PROV.scenario||'—')+' · weeks '+esc(PROV.weeks)+' · '+esc(PROV.events)+' flips',
   'run commit: '+esc(PROV.run_commit||'—')+(PROV.run_dirty===true?' (DIRTY)':'')+' · node '+esc(PROV.run_node||'—'),
   'geojson: '+esc(PROV.geojson_features)+' drawn / '+esc(PROV.scored_osids)+' scored',
