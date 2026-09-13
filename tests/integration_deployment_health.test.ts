@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs';
 import { readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { runScenario } from '../src/scenario/scenario_runner.js';
+import { annotateUnstaffedFrontSectors } from '../src/sim/combat/corps_front_sectors.js';
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
 import type { GameState, FormationState, CorpsFrontSector } from '../src/state/game_state.js';
 import { HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992 } from '../src/scenario/historical_anchors.js';
@@ -28,8 +29,25 @@ function getMunicipality(osid: string): string {
     return osid.split(':')[1] ?? '';
 }
 
+async function loadContactGraph(): Promise<Map<string, string[]>> {
+    const graphPath = join(process.cwd(), 'data', 'derived', 'operational', 'operational_contact_graph.json');
+    const raw = JSON.parse(await readFile(graphPath, 'utf8'));
+    const adjacency = new Map<string, string[]>();
+    const edges: Array<{ a: string; b: string }> = raw.edges ?? [];
+    for (const edge of edges) {
+        const aNeighbors = adjacency.get(edge.a) ?? [];
+        aNeighbors.push(edge.b);
+        adjacency.set(edge.a, aNeighbors);
+        const bNeighbors = adjacency.get(edge.b) ?? [];
+        bNeighbors.push(edge.a);
+        adjacency.set(edge.b, bNeighbors);
+    }
+    return adjacency;
+}
+
 describe('deployment health (40w)', () => {
     let state: GameState;
+    let adj: Map<string, string[]>;
     let skipped = false;
 
     beforeAll(async () => {
@@ -43,6 +61,7 @@ describe('deployment health (40w)', () => {
         const result = await runScenario({ scenarioPath: SCENARIO_40W, outDirBase: OUT_DIR });
         const json = await readFile(result.paths.final_save, 'utf8');
         state = JSON.parse(json);
+        adj = await loadContactGraph();
     }, 600_000);
 
     // ─── Sarajevo siege deployment ───────────────────────────────────
@@ -205,32 +224,49 @@ describe('deployment health (40w)', () => {
     // ─── Frontline coverage ──────────────────────────────────────────
 
     describe('frontline coverage', () => {
-        it('at most two large sectors are empty and each is explicitly unstaffable', () => {
+        it('every large empty sector is explicitly and reproducibly unstaffable', () => {
             if (skipped) return;
             const sectors = (state as any).military.corps_front_sectors as Record<string, CorpsFrontSector> ?? {};
-            const gaps: string[] = [];
+            const gapIds: string[] = [];
+            const gapLines: string[] = [];
             const unclassifiedGaps: string[] = [];
 
             for (const [sectorId, sector] of Object.entries(sectors)) {
                 const edgeCount = (sector.edge_ids ?? []).length;
                 const brigadeCount = (sector.assigned_brigade_ids ?? []).length;
                 if (edgeCount > 3 && brigadeCount === 0) {
-                    gaps.push(`${sectorId}: ${edgeCount} edges, 0 brigades (faction=${sector.faction}, corps=${sector.corps_id})`);
+                    gapIds.push(sectorId);
+                    gapLines.push(`${sectorId}: ${edgeCount} edges, 0 brigades (faction=${sector.faction}, corps=${sector.corps_id})`);
                     if (sector.unstaffed_front !== true) unclassifiedGaps.push(sectorId);
                 }
             }
 
-            if (gaps.length > 0) {
-                console.log(`Sectors with front gaps (${gaps.length}):`);
-                for (const line of gaps) console.log(`  ${line}`);
+            expect(adj.size, 'Operational contact graph is required for staffability proof').toBeGreaterThan(0);
+            const recomputedSectors = structuredClone(sectors);
+            for (const sector of Object.values(recomputedSectors)) delete sector.unstaffed_front;
+            annotateUnstaffedFrontSectors(
+                recomputedSectors,
+                state,
+                state.military.formations,
+                adj as Map<any, any>,
+            );
+            const staffableGaps = gapIds.filter((sectorId) =>
+                recomputedSectors[sectorId]?.unstaffed_front !== true);
+
+            console.log(`Sectors with >3-edge front gaps (${gapLines.length}):`);
+            for (const [index, line] of gapLines.entries()) {
+                const reason = recomputedSectors[gapIds[index]!]?.unstaffed_front === true
+                    ? 'no_reachable_legal_same_corps_donor'
+                    : 'reachable_or_staffable_violation';
+                console.log(`  ${line}; reason=${reason}`);
             }
 
             expect(unclassifiedGaps,
                 `Large empty sectors without explicit unstaffed-front truth: ${unclassifiedGaps.join(', ')}`
             ).toEqual([]);
-            expect(gaps.length,
-                `${gaps.length} sectors with >3 edges have zero brigades — expected no more than the two legally isolated fronts`
-            ).toBeLessThanOrEqual(2);
+            expect(staffableGaps,
+                `Large empty sectors that production staffability can legally reach: ${staffableGaps.join(', ')}`
+            ).toEqual([]);
         });
 
         it('reserve brigades are <30% of total sector-assigned forces', () => {

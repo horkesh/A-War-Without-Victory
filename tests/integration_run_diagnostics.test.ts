@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs';
 import { readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { runScenario } from '../src/scenario/scenario_runner.js';
+import { annotateUnstaffedFrontSectors } from '../src/sim/combat/corps_front_sectors.js';
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
 import type { GameState, FormationState, CorpsFrontSector } from '../src/state/game_state.js';
 
@@ -232,32 +233,52 @@ describe('run diagnostics (40w)', () => {
     // ─── 3. Empty Sectors ─────────────────────────────────────────────────
 
     describe('empty sectors', () => {
-        it('at most two large sectors are empty and each is explicitly unstaffable', () => {
+        it('every large empty sector is explicitly and reproducibly unstaffable', () => {
             if (skipped) return;
             const sectors = (state as any).military.corps_front_sectors as Record<string, CorpsFrontSector> ?? {};
-            const gaps: string[] = [];
+            const gapIds: string[] = [];
+            const gapLines: string[] = [];
             const unclassifiedGaps: string[] = [];
 
             for (const [sid, sec] of Object.entries(sectors)) {
                 const edgeCount = (sec.edge_ids ?? []).length;
                 const brigCount = (sec.assigned_brigade_ids ?? []).length;
                 if (edgeCount > 3 && brigCount === 0) {
-                    gaps.push(`${sid}: ${edgeCount} edges, 0 brigades (faction=${sec.faction}, corps=${sec.corps_id})`);
+                    gapIds.push(sid);
+                    gapLines.push(`${sid}: ${edgeCount} edges, 0 brigades (faction=${sec.faction}, corps=${sec.corps_id})`);
                     if (sec.unstaffed_front !== true) unclassifiedGaps.push(sid);
                 }
             }
 
-            if (gaps.length > 0) {
-                console.log(`Empty sectors with front edges (${gaps.length}):`);
-                for (const line of gaps) console.log(`  ${line}`);
+            // Do not trust the saved advisory marker alone. Delete and recompute it
+            // from the final state's live formations, command ownership, donor
+            // eligibility, enclave restrictions, and faction-controlled paths.
+            expect(adj.size, 'Operational contact graph is required for staffability proof').toBeGreaterThan(0);
+            const recomputedSectors = structuredClone(sectors);
+            for (const sector of Object.values(recomputedSectors)) delete sector.unstaffed_front;
+            annotateUnstaffedFrontSectors(
+                recomputedSectors,
+                state,
+                state.military.formations,
+                adj as Map<any, any>,
+            );
+            const staffableGaps = gapIds.filter((sid) =>
+                recomputedSectors[sid]?.unstaffed_front !== true);
+
+            console.log(`Empty sectors with >3 front edges (${gapLines.length}):`);
+            for (const [index, line] of gapLines.entries()) {
+                const reason = recomputedSectors[gapIds[index]!]?.unstaffed_front === true
+                    ? 'no_reachable_legal_same_corps_donor'
+                    : 'reachable_or_staffable_violation';
+                console.log(`  ${line}; reason=${reason}`);
             }
 
             expect(unclassifiedGaps,
                 `Large empty sectors without explicit unstaffed-front truth: ${unclassifiedGaps.join(', ')}`
             ).toEqual([]);
-            expect(gaps.length,
-                `${gaps.length} sectors with >3 edges have 0 brigades — expected no more than the two legally isolated fronts`
-            ).toBeLessThanOrEqual(2);
+            expect(staffableGaps,
+                `Large empty sectors that production staffability can legally reach: ${staffableGaps.join(', ')}`
+            ).toEqual([]);
         });
     });
 

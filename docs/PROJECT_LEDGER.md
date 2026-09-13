@@ -4803,3 +4803,28 @@ baseline output bytes were preserved, with their dirty metadata disclosed; norma
 match all 31 recorded hashes. The existing April implementation report, calibration master,
 roadmap, board and gate register are synchronized to this evidence. Full details and the proposed
 coverage decision are in [the current checkpoint](40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#current-checkpoint--2026-09-13).
+
+## 2026-09-13 — Owner approves staffability-based coverage acceptance
+
+After the plain-language explanation, the owner explicitly approved replacing the raw limit of
+two large empty fronts with verified staffability. The reviewed patch is applied to
+`integration_deployment_health` and `integration_run_diagnostics`: every large gap remains
+reported, its saved isolation marker is required, the nonempty contact graph and live donor
+legality recompute that marker, and any legally staffable empty front fails. No production
+behavior, canon, control, baseline pin or historical floor changes in this acceptance amendment.
+
+The fixed continuation is the two affected 40-week test files (estimated 2–5 minutes, all
+assertions and zero staffable gaps required), independent correction verification, then a clean
+source commit before the already authorized first canonical 188-week run (estimated 5–10
+minutes). Preserve every hard health, provenance, anchor and historical gate; inspect all
+failure categories before any expensive retry. Only a passing first run licenses the second
+188-week reproduction through `canon:check`; no automatic pin refresh. Unaffected full-suite
+and correction evidence remains reused. Final roadmap/report synchronization follows measured
+results. The prior pending-approval checkpoint is superseded by this explicit owner decision.
+
+Coverage verification passed once: 2/2 files, 17/17 tests, exit 0 in 161.44 seconds; both
+fixtures report nine verified unstaffable fronts and zero staffable gaps. The existing
+staffability discriminator controls pass 4/4, including reachable and disconnected cases.
+The applied diff matches the reviewed proposal. Raw evidence is retained in
+`logs/roadmap-integration-20260912/approved-coverage-tests.log` and
+`approved-coverage-unit-control.log`; the original full-suite failure remains historical evidence.
