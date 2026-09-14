@@ -2,12 +2,46 @@
 
 **Date:** 2026-09-08
 **Lane:** Development instrumentation (`tools/`) — NOT product surface, NOT a roadmap workstream
-**Status:** IMPLEMENTED 2026-09-08; integrated before `68e8917e8`; published and verified on GitHub Pages 2026-09-13.
+**Status:** IMPLEMENTED 2026-09-08; integrated before `68e8917e8`; latest saved run published and verified on GitHub Pages 2026-09-14.
 **Branch/worktree:** `calibration-timeline-viewer` at `F:/AWWV-worktrees/calibration-timeline-viewer`, isolated from the concurrent `codex/*` branches and from `r7-arbih-honorific-names`
 **Live viewer:** <https://horkesh.github.io/A-War-Without-Victory/>
-**Publication:** `gh-pages` commit `50b927492896af185c99894cd07df997371d9036`; source follow-up on `codex/roadmap-calibration-integration-20260912`.
+**Publication:** `gh-pages` commit `469b4cba3e576d0452e642137cf02d6143994137`; latest dataset from simulation source `8db3055962143af8f272ef7cf5d95414e6c5a601`.
 
 ## Why
+
+### 2026-09-14 latest-run publication
+
+The owner requested the latest measured run for remote inspection. The unchanged renderer
+now publishes the saved local-occupation POST-A campaign: 188 weeks, 232 control events,
+744 drawn / 712 scored cells, and checkpoint scores **696 / 690 / 687 / 659**. Baljvine,
+Jezero, Donji Korićani and Lupnica change to RS at weeks 32, 33, 36 and 37. The source is clean
+`8db3055962143af8f272ef7cf5d95414e6c5a601`, Node 22.23.2; final-save SHA-256 remains
+`c41dad9c3dba6a8486397096f8b485a3ed4ab7d1c43e1ac5039271c26702d661`.
+
+[Open the latest published run](https://horkesh.github.io/A-War-Without-Victory/?run=8db305596).
+The query separates this link from previously cached page requests. GitHub Pages reports
+`built` for `469b4cba3e576d0452e642137cf02d6143994137`. The live HTTPS page returns 200 and
+exactly matches the verified 683,738-byte HTML, SHA-256
+`e8d6c7a86fd1f0e671c838affd2298a7994aa475dae790ae4c17af8ff69e244b`.
+Only `index.html` and its README changed on the existing three-file publication branch.
+
+Payload checks verify all initial controllers and 232 embedded events against the saved run,
+the four scores, unchanged geometry/references, and absence of absolute local paths. Local HTTP
+and live browser checks pass at desktop 1440px, touch 320px and dark touch 320px. They verify
+actual controller fills against replay, exact checkpoint mismatch counts, the four Jajce
+capture details, an actual phone tap on Lupnica, unchanged fills when mismatch outlines are
+toggled, and no horizontal overflow, console errors, failed requests or external assets.
+The earlier browser fixture expected the old run's Ozimica transition at week 71 and failed;
+the retained correction checks the new run's actual replay rather than retaining old ownership
+expectations. No renderer or simulation change was needed. Earlier independent renderer review
+remains applicable; this publication refresh uses focused payload and rendered checks.
+
+Evidence is retained under `logs/roadmap-integration-20260912/github-pages-latest-20260914/`:
+payload audit, preflight/live browser audits, live byte audit, screenshots, Pages build and
+publication commit/push logs. No simulation was rerun. Protected data, references, baseline pins,
+source save and source code remain unchanged. Local main remains `9588876bc`; remote main remains
+`e607508bc`. This publication supersedes the previous viewer dataset only. Overall calibration
+acceptance remains **NO-GO** for the western cascade, Prozor injection and Farz attribution.
 
 ### 2026-09-13 publication follow-up
 

@@ -4937,3 +4937,22 @@ backups, 22 ordered stashes and 17 other worktree heads remain intact. Local mai
 `9588876bc`. Protected data, pins, remote source branches and the published viewer dataset are
 unchanged; the public tool still shows the earlier `51fe49415` run. The roadmap, command board,
 calibration master and open gate remain explicit about the outstanding full-horizon acceptance.
+
+## 2026-09-14 — Public calibration viewer refreshed to the latest measured run
+
+At the owner's request, the unchanged viewer generator now publishes the saved local occupation
+run from clean simulation source `8db3055962143af8f272ef7cf5d95414e6c5a601`. The 188-week map
+contains 232 control events and scores 696/690/687/659, including the four Jajce captures at
+weeks 32/33/36/37. Publication commit `469b4cba3e576d0452e642137cf02d6143994137` changes only
+the HTML and README on `gh-pages`. GitHub Pages reports built; the live route returns 200 with
+the verified 683,738-byte artifact, SHA-256
+`e8d6c7a86fd1f0e671c838affd2298a7994aa475dae790ae4c17af8ff69e244b`.
+
+Saved-run payload checks and local/live desktop, touch-mobile and dark-mobile browser checks
+pass, including controller colors, checkpoint counts and actual settlement selection by tap.
+The old run's Ozimica fixture expectation was corrected to validate the new saved replay;
+the renderer did not change. No simulation rerun, protected-data change, pin refresh or main
+push occurred. Overall calibration remains NO-GO. The existing
+[viewer plan and publication receipt](plans/2026-09-08-calibration-control-timeline-viewer-plan.md#2026-09-14-latest-run-publication)
+retain provenance and verification details; roadmap and calibration status now identify the
+published latest dataset.

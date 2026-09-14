@@ -36,7 +36,8 @@ cases through military captures and scores 696/690/687/659 over 188 weeks. Healt
 31 anchors, nine enclave guards and assignment seals pass. Western cascade 25 below 38,
 Prozor injection and Farz attribution retain overall NO-GO. The full suite's two assertions and
 one setup timeout are retained; 62/62 targeted correction checks and independent review pass.
-Main remains `9588876bc`; no repeat, pin refresh or public viewer replacement followed.
+Main remains `9588876bc`; no repeat or pin refresh followed. The owner subsequently requested
+the public viewer refresh, now published and verified with this `8db305596` dataset.
 [Receipt](../40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-local-occupation-repair--2026-09-14).
 
 **R7 readability execution — 2026-09-09:** The authorized date-label expansion now has nine-case initial/maximum-scroll proof, preserving the fixed Desk column, header and artwork. Final UI/typecheck/build checks and independent review pass; Desk/date commit `88996a23d` and its hook pass. Clean POST-A completes 188 weeks with health/hash checks passing; PRE/POST-A/POST-B match all eight artifacts and inputs. The fixed run budget is consumed. Earlier phases and unaffected global Vitest/player-experience receipts remain reviewed. Baseline investigation is GO: pins match accepted n392, while four consumed inputs changed before R7; PRE/POST-B match all eight artifacts. Retain the six-pin failing baseline gate and dirty POST-B disclosure. No R7 closure or downstream lane is claimed. See the amendment and designated report.

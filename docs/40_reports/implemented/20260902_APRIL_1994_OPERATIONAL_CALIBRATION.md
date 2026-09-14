@@ -236,7 +236,9 @@ and [western attribution](../../../logs/roadmap-integration-20260912/local-occup
 bind the retained evidence and its limits. All 28 original dirty paths/backups, 22 ordered
 stashes and 17 other worktree heads remain intact. Local main remains `9588876bc`; no protected
 data, baseline pin, remote source branch or public viewer dataset changed. The published viewer
-still shows the preceding `51fe49415` run, not this measured candidate.
+still showed the preceding `51fe49415` run at repair closeout. The owner subsequently requested
+publication of the latest run: the [viewer refresh receipt](../../plans/2026-09-08-calibration-control-timeline-viewer-plan.md#2026-09-14-latest-run-publication)
+records the live `8db305596` dataset and verification, without changing calibration acceptance.
 
 ### Earlier checkpoint — before coverage approval
 

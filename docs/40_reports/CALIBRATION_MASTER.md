@@ -15,8 +15,9 @@ Engine Invariants §14.8b and Systems Manual §6.4 include the approved occupati
 
 All 20 April commits and the approved coverage contract remain ancestors of this branch.
 Main's manifest authority remains #518 at clean `2a8eb4244` (702/678/672/667); local main
-remains `9588876bc`. No pins, floors, protected data or public viewer dataset were replaced.
-The published viewer still shows `51fe49415` (692/698/694/665). Branch-local v72/v73 remains
+remains `9588876bc`. No pins, floors or protected data were replaced. At the owner's subsequent
+request, the [public viewer](https://horkesh.github.io/A-War-Without-Victory/?run=8db305596)
+now shows `8db305596` (696/690/687/659), published and verified on 2026-09-14. Branch-local v72/v73 remains
 dirty week-104 history, not candidate acceptance.
 [Current repair receipt](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-local-occupation-repair--2026-09-14).
 

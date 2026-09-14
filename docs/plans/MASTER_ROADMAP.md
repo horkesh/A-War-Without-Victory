@@ -43,7 +43,8 @@ changed Mistral 2 objectives and delayed Southern Move. These broader scheduling
 repairs require their own bounded scope; no speculative tuning or additional campaign follows
 this local packet. Preserve all floors, authored/control boundaries and the approved coverage
 rule. The conditional repeat, main promotion and pin refresh remain held. The public viewer
-still shows the prior `51fe49415` run.
+was separately refreshed at the owner's request to show this `8db305596` run on 2026-09-14;
+publication does not accept the remaining calibration failures.
 See the [repair receipt](../40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-local-occupation-repair--2026-09-14).
 
 ## ★ PROBE CHANNEL — CLOSED 2026-08-26. Scope: `docs/plans/2026-08-26-probe-channel-scope.md`
