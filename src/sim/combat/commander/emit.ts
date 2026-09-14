@@ -86,6 +86,7 @@ import { augmentOffensiveTargetsWithShifts } from './bot_priority_shift_augmenta
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 import { shouldLaunchProbeInstead } from '../bot_corps_directives.js';
 import { getStalestSectorIntelConfidence } from '../sector_intel.js';
+import { computePlanningDuration } from '../sector_offensive_axis_helpers.js';
 
 export function capOpportunityOperationParticipants(
     participantIds: readonly string[],
@@ -247,6 +248,8 @@ type LocalOccupationCandidate = {
     target_osid: string;
     prediction: CombatPrediction;
     participating_brigade_ids: FormationId[];
+    /** Planning may begin while the sector still requires an operation-owned intelligence probe. */
+    prepare_before_intel: boolean;
 };
 
 function predictDirectEnemyTargets(
@@ -411,6 +414,7 @@ function findLocalOccupationCandidate(
                 target_osid: target,
                 prediction,
                 participating_brigade_ids: [brigade.brigade_id],
+                prepare_before_intel: false,
             };
         }
     }
@@ -445,13 +449,13 @@ function findLocalOccupationCandidate(
     for (const sector of corpsSectors) {
         const commandState = briefing.state_ref.military.corps_command?.[briefing.corps_id];
         const sectorIntelConfidence = getStalestSectorIntelConfidence(briefing.state_ref, sector.sector_id);
-        if (shouldLaunchProbeInstead(
+        const prepareBeforeIntel = shouldLaunchProbeInstead(
             briefing.faction,
             sectorIntelConfidence,
             commandState?.consecutive_probes ?? 0,
             briefing.turn,
             briefing.state_ref.military.war_timeline,
-        )) continue;
+        );
         const sectorParticipantIds = new Set<FormationId>([
             ...(sector.reserve_brigade_ids ?? []),
             ...(sector.rear_brigade_ids ?? []),
@@ -597,7 +601,7 @@ function findLocalOccupationCandidate(
                     return !!location && approaches.includes(location);
                 })
                 .slice(0, ISOLATED_POSITION_OPERATION_MAX_BRIGADES);
-            if (stagedPrimaryParticipants.length >= ISOLATED_POSITION_OPERATION_MIN_BRIGADES) {
+            if (!prepareBeforeIntel && stagedPrimaryParticipants.length >= ISOLATED_POSITION_OPERATION_MIN_BRIGADES) {
                 const stagedPrediction = predictParticipants(stagedPrimaryParticipants, false);
                 const stagedLead = stagedPrimaryParticipants.find((brigadeId) => evaluationById.has(brigadeId));
                 if (
@@ -612,6 +616,7 @@ function findLocalOccupationCandidate(
                         target_osid: target,
                         prediction: stagedPrediction,
                         participating_brigade_ids: stagedPrimaryParticipants,
+                        prepare_before_intel: false,
                     };
                 }
             }
@@ -637,6 +642,11 @@ function findLocalOccupationCandidate(
                 ...donors.brigade_ids.slice(0, ISOLATED_POSITION_OPERATION_MAX_BRIGADES - primaryParticipants.length),
             ] as FormationId[];
             if (participants.length < ISOLATED_POSITION_OPERATION_MIN_BRIGADES) continue;
+            // Before launch-grade intelligence exists, preparation must own the
+            // complete bounded roster from birth. Preparation cannot add a donor
+            // later, so a weak pair must remain a probe instead of reserving an
+            // under-strength assault.
+            if (prepareBeforeIntel && participants.length !== ISOLATED_POSITION_OPERATION_MAX_BRIGADES) continue;
             const prediction = predictParticipants(participants, true);
             if (!prediction || prediction.defender_has_reachable_brigade) continue;
             if (!isOutcomeSufficientForAttack(prediction.predicted_outcome, 'stalemate')) continue;
@@ -649,6 +659,7 @@ function findLocalOccupationCandidate(
                 target_osid: target,
                 prediction,
                 participating_brigade_ids: participants,
+                prepare_before_intel: prepareBeforeIntel,
             };
         }
     }
@@ -1892,13 +1903,16 @@ function buildOperations(
                             reductionParticipants.length >= ISOLATED_POSITION_OPERATION_MIN_BRIGADES
                             || singleBrigadeOccupationIsSufficient
                         )
-                        && !shouldLaunchProbeInstead(
-                        briefing.faction,
-                        sectorIntelConfidence,
-                        commandState?.consecutive_probes ?? 0,
-                        briefing.turn,
-                        briefing.state_ref?.military.war_timeline,
-                    );
+                        && (
+                            localOccupationCandidate?.prepare_before_intel === true
+                            || !shouldLaunchProbeInstead(
+                                briefing.faction,
+                                sectorIntelConfidence,
+                                commandState?.consecutive_probes ?? 0,
+                                briefing.turn,
+                                briefing.state_ref?.military.war_timeline,
+                            )
+                        );
                     const probeOp = botOrdersPerfTime(
                         escalateToOperation
                             ? `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.buildIsolatedPositionOperation`
@@ -1945,7 +1959,9 @@ function buildOperations(
                             for (const axis of operation.axes ?? []) {
                                 axis.minimum_staged_brigades = reductionParticipants.length;
                             }
-                            operation.preparation_sub_phase = 'ready';
+                            if (!singleBrigadeOccupationIsSufficient) {
+                                operation.planning_duration = computePlanningDuration(operation.objectives?.length ?? 0);
+                            }
                             const primarySectorBrigades = reductionParticipants
                                 .filter((brigadeId) => sameSectorParticipants.has(brigadeId));
                             const attachedBrigades = reductionParticipants
@@ -1969,6 +1985,7 @@ function buildOperations(
                                 operation.minimum_viable_participants = 1;
                                 operation.minimum_assembled_participants = 1;
                                 operation.min_attack_outcome = 'costly_victory';
+                                operation.preparation_sub_phase = 'ready';
                             }
                             return operation;
                         },

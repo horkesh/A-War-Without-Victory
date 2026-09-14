@@ -30,6 +30,7 @@ import { evaluateOpeningAttackReadiness } from '../../src/sim/combat/sector_offe
 import { predictCombatOutcome } from '../../src/sim/combat/combat_predictor.js';
 import { isOutcomeSufficientForAttack } from '../../src/sim/combat/bot_brigade_targeting.js';
 import { generateAllBotOrdersOsid } from '../../src/sim/combat/bot_brigade_ai_osid.js';
+import { autoResolveProbe, tickPreparation } from '../../src/sim/combat/operation_preparation.js';
 
 const FACTION: FactionId = 'RS';
 const CORPS_ID = 'vrs_test_corps' as FormationId;
@@ -630,8 +631,9 @@ describe('commander emission overlap guards', () => {
             participating_brigades: ['b1', 'b2'],
             minimum_viable_participants: 2,
             minimum_assembled_participants: 2,
-            preparation_sub_phase: 'ready',
+            planning_duration: 3,
         });
+        expect(output.operations[0]?.preparation_sub_phase).toBeUndefined();
 
         const operation = output.operations[0]!;
         briefing.state_ref!.military.formations = Object.fromEntries(
@@ -1131,7 +1133,7 @@ describe('commander emission overlap guards', () => {
             },
         } as CommanderBriefing);
 
-        doesNotSelectBoundedTarget({
+        const lowIntelPreparation = emitCommanderOutput({
             ...briefing,
             state_ref: {
                 ...state,
@@ -1154,7 +1156,18 @@ describe('commander emission overlap guards', () => {
                     } as any,
                 },
             },
-        } as CommanderBriefing);
+        } as CommanderBriefing, [], makeForces(), allocation, {
+            ...makePlanDecision(),
+            plan: null,
+            action: 'none',
+        }, makeDecisions(), makeThreats());
+        expect(lowIntelPreparation.operations[0]).toMatchObject({
+            type: 'sector_attack',
+            objectives: ['op:test:objective'],
+            participating_brigades: ['b1', 'b2', 'b3'],
+            planning_duration: 3,
+        });
+        expect(lowIntelPreparation.operations[0]?.preparation_sub_phase).toBeUndefined();
     });
 
     it('uses an already-staged primary garrison brigade without pulling a travelling donor', () => {
@@ -1375,6 +1388,179 @@ describe('commander emission overlap guards', () => {
             },
         });
         excludesPrimaryGarrison(soloGarrison);
+
+        const lowIntelState = {
+            ...state,
+            military: {
+                ...state.military,
+                brigade_attack_orders: {},
+                brigade_movement_orders: {},
+                corps_command: {
+                    ...state.military.corps_command,
+                    [CORPS_ID]: {
+                        ...state.military.corps_command![CORPS_ID]!,
+                        consecutive_probes: 0,
+                        active_operations: [],
+                    },
+                },
+                sector_intel: {
+                    [primary.sector_id]: [{
+                        enemy_sector_id: 'sector:enemy:test',
+                        confidence: 0,
+                        front_edge_count: 1,
+                        last_updated_turn: 30,
+                        sources: ['passive_contact'],
+                    }],
+                } as any,
+            },
+        } as GameState;
+        const lowIntelBriefing = {
+            ...briefing,
+            state_ref: lowIntelState,
+            active_operations: [],
+        } as CommanderBriefing;
+        const earlyOutput = emitCommanderOutput(
+            lowIntelBriefing,
+            [],
+            makeForces(),
+            allocation,
+            { ...makePlanDecision(), plan: null, action: 'none' },
+            makeDecisions(),
+            makeThreats(),
+        );
+        expect(earlyOutput.operations[0]).toMatchObject({
+            type: 'sector_attack',
+            phase: 'planning',
+            objectives: ['op:test:objective'],
+            participating_brigades: ['b1', 'garrison', 'b3'],
+            primary_sector_brigades: ['b1', 'garrison'],
+            attached_brigades: ['b3'],
+            reinforcement_source: 'adjacent_sector',
+            minimum_viable_participants: 3,
+            minimum_assembled_participants: 3,
+            planning_duration: 3,
+        });
+        expect(earlyOutput.operations[0]?.preparation_sub_phase).toBeUndefined();
+
+        const understrengthLowIntel = emitCommanderOutput(
+            lowIntelBriefing,
+            [],
+            makeForces(),
+            { ...allocation, surplus_pool: [makeEval('b1')] },
+            { ...makePlanDecision(), plan: null, action: 'none' },
+            makeDecisions(),
+            makeThreats(),
+        );
+        expect(understrengthLowIntel.operations.some((candidate) => (
+            candidate.type === 'sector_attack'
+            && candidate.objectives?.includes('op:test:objective')
+        ))).toBe(false);
+
+        applyCommanderOutput(lowIntelState, CORPS_ID, earlyOutput);
+        const preparingOperation = lowIntelState.military.corps_command![CORPS_ID]!.active_operations[0]!;
+        const preparation = tickPreparation(
+            lowIntelState,
+            preparingOperation,
+            CORPS_ID,
+            FACTION,
+            1,
+            undefined,
+            {},
+            adjacency as Map<string, string[]>,
+        );
+        expect(preparation).toMatchObject({
+            sub_phase: 'intel_gathering',
+            ready: false,
+            probe_ordered: true,
+        });
+        expect(preparingOperation.phase).toBe('planning');
+        expect(preparingOperation.active_probe).toMatchObject({
+            target_osid: 'op:test:objective',
+            resolved: false,
+        });
+
+        generateAllBotOrdersOsid(lowIntelState, [FACTION], {
+            edges: [
+                { a: 'op:test:approach', b: 'op:test:objective' },
+                { a: 'op:test:approach', b: 'op:test:donor' },
+            ] as any,
+            reverseMap: briefing.reverse_map!,
+            supplyStateByOsid: {} as any,
+            osidPopulationMap: briefing.osid_population_map,
+        });
+        expect(lowIntelState.military.brigade_attack_orders?.b1).toBeUndefined();
+        expect(lowIntelState.military.brigade_attack_orders?.garrison).toBeUndefined();
+        expect(lowIntelState.military.brigade_attack_orders?.b3).toBeUndefined();
+        expect(lowIntelState.military.brigade_movement_orders?.b3?.destination_sids?.[0])
+            .toBe('op:test:approach');
+        expect(lowIntelState.military.brigade_movement_orders?.garrison).toBeUndefined();
+
+        expect(evaluateOpeningAttackReadiness(
+            lowIntelState,
+            CORPS_ID,
+            FACTION,
+            preparingOperation,
+            undefined,
+            {
+                adjacency: adjacency as Map<any, any>,
+                reverseMap: briefing.reverse_map!,
+                terrainMultByOsid: {},
+                osidPopulationMap: briefing.osid_population_map,
+            },
+        )).toEqual({
+            executable: false,
+            blocker: 'participants_below_assembly_floor',
+        });
+
+        const preparationTimeline = [preparation];
+        for (let step = 0; step < 6 && preparationTimeline.at(-1)?.ready !== true; step++) {
+            autoResolveProbe(lowIntelState, preparingOperation, FACTION);
+            lowIntelState.meta.turn += 1;
+            preparationTimeline.push(tickPreparation(
+                lowIntelState,
+                preparingOperation,
+                CORPS_ID,
+                FACTION,
+                1,
+                undefined,
+                {},
+                adjacency as Map<string, string[]>,
+            ));
+        }
+        expect(preparationTimeline.map((step) => ({
+            sub_phase: step.sub_phase,
+            ready: step.ready,
+            probe_ordered: step.probe_ordered,
+        }))).toEqual([
+            { sub_phase: 'intel_gathering', ready: false, probe_ordered: true },
+            { sub_phase: 'intel_gathering', ready: false, probe_ordered: true },
+            { sub_phase: 'intel_gathering', ready: false, probe_ordered: true },
+            { sub_phase: 'intel_gathering', ready: false, probe_ordered: true },
+            { sub_phase: 'ready', ready: true, probe_ordered: false },
+        ]);
+        expect(preparingOperation.preparation_turns_elapsed).toBe(5);
+        expect(preparationTimeline.at(-1)?.ready).toBe(true);
+        expect(preparingOperation.preparation_sub_phase).toBe('ready');
+        expect(preparingOperation.phase).toBe('planning');
+
+        lowIntelState.military.formations!.b3 = {
+            ...lowIntelState.military.formations!.b3!,
+            location_osid: 'op:test:approach',
+        };
+        delete lowIntelState.military.brigade_movement_orders!.b3;
+        expect(evaluateOpeningAttackReadiness(
+            lowIntelState,
+            CORPS_ID,
+            FACTION,
+            preparingOperation,
+            undefined,
+            {
+                adjacency: adjacency as Map<any, any>,
+                reverseMap: briefing.reverse_map!,
+                terrainMultByOsid: {},
+                osidPopulationMap: briefing.osid_population_map,
+            },
+        )).toEqual({ executable: true });
 
         applyCommanderOutput(state, CORPS_ID, output);
         state.military.corps_command![CORPS_ID]!.active_operations[0]!.phase = 'execution';

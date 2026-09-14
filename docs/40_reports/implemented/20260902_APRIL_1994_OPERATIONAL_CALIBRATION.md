@@ -110,6 +110,29 @@ independent review and typecheck precede one approximately 75-second diagnostic 
 unchanged January capture/score/no-regression criteria remain the stopping gate; no force,
 militia, control, historical-reservation or protected-data edits are part of this scope.
 
+**Diagnostic E and normal-preparation correction:** clean `f39768f23` remains 699/712.
+Prodor uses the two already-staged primary brigades at week 27 and attacks at 28/29, but the
+resolved ratios 0.81/0.71 are stalemates; it recovers after two failures. Thus primary admission
+and order generation work, but the pair is insufficient. Systems Manual §7.6 already permits
+owned operation planning before launch-grade intelligence: normal preparation gathers intel
+with operation-owned probes and stages the committed force before final launch assessment.
+The bounded emitter currently prevents that preparation by rejecting before creation and
+forcing the operation directly to ready. Correct multi-brigade bounded operations to own the
+full legal force (up to the existing three-brigade cap, including a qualified target-facing
+primary garrison and at most one existing-helper donor) from creation and enter normal intel
+gathering/preparation. Retain solo occupation's surplus/costly/ready exception unchanged.
+Before the ordinary probe gate permits commitment, require the normal three-brigade force
+minimum for this new early-planning path; do not reserve an understrength pair that cannot
+receive the available donor later. The existing two-brigade path remains available once its
+ordinary admission gates pass. The saved week-23 legal trio forecasts 1.26449 and its two-hop
+donor can stage while operation-owned intelligence work proceeds; this is a planning rationale,
+not capture evidence.
+Preparation, real movement, intelligence, full assembly and canonical opening combat checks
+remain the only launch authority; no new reinforcement subsystem, force bonus, militia change,
+elite reservation change or control writer is included. Verify low-intel planning and actual
+probe/staging/launch holds with focused regressions and independent review/typecheck before
+one approximately 75-second diagnostic 39. Stop if the unchanged January criteria fail.
+
 **Latest checkpoint — 2026-09-14:** the owner-approved local occupation repair is implemented
 at clean `8db305596`. All four Jajce cases pass by week 39; the full campaign scores
 696/690/687/659. Engine health passes, while western cascade 25, Prozor injection and Farz
