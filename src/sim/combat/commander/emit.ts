@@ -1580,11 +1580,18 @@ function buildOperations(
                                     briefing.state_ref,
                                 ),
                             );
+                            // A bounded reduction plan is already the commander's
+                            // full-operation answer to the isolated position. Preserve
+                            // its selected concentration as the launch assembly floor.
+                            // The normal adjacency, prediction, combat and control-change
+                            // gates still decide whether an attack occurs and succeeds.
+                            operation.minimum_viable_participants = reductionParticipants.length;
+                            operation.minimum_assembled_participants = reductionParticipants.length;
+                            operation.preparation_sub_phase = 'ready';
                             if (singleBrigadeOccupationIsSufficient) {
                                 operation.minimum_viable_participants = 1;
                                 operation.minimum_assembled_participants = 1;
                                 operation.min_attack_outcome = 'costly_victory';
-                                operation.preparation_sub_phase = 'ready';
                             }
                             return operation;
                         },

@@ -25,6 +25,7 @@ import {
 } from '../../src/sim/combat/commander/emit.js';
 import { applyCommanderOutput } from '../../src/sim/combat/commander/commander_loop.js';
 import { CURRENT_SCHEMA_VERSION } from '../../src/state/game_state.js';
+import { evaluateOpeningAttackReadiness } from '../../src/sim/combat/sector_offensive_launch_helpers.js';
 
 const FACTION: FactionId = 'RS';
 const CORPS_ID = 'vrs_test_corps' as FormationId;
@@ -542,6 +543,35 @@ describe('commander emission overlap guards', () => {
             type: 'sector_attack',
             objectives: ['op:test:objective'],
             participating_brigades: ['b1', 'b2'],
+            minimum_viable_participants: 2,
+            minimum_assembled_participants: 2,
+            preparation_sub_phase: 'ready',
+        });
+
+        const operation = output.operations[0]!;
+        briefing.state_ref!.military.formations = Object.fromEntries(
+            briefing.brigades.map((brigade) => [brigade.id, brigade]),
+        );
+        briefing.state_ref!.military.war_front_edges_osid = [{
+            a: 'op:test:approach',
+            b: 'op:test:objective',
+        } as any];
+        expect(evaluateOpeningAttackReadiness(
+            briefing.state_ref!,
+            CORPS_ID,
+            FACTION,
+            operation,
+        ).executable).toBe(true);
+
+        briefing.state_ref!.military.formations.b2!.disrupted_turns = 1;
+        expect(evaluateOpeningAttackReadiness(
+            briefing.state_ref!,
+            CORPS_ID,
+            FACTION,
+            operation,
+        )).toEqual({
+            executable: false,
+            blocker: 'participants_below_assembly_floor',
         });
     });
 

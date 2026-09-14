@@ -16,6 +16,37 @@
 
 ## Integration audit — 2026-09-12
 
+### Owner-authorized January-only operations repair — 2026-09-14
+
+The owner authorized implementation after the Orašac/Donji Vakuf diagnosis and explicitly
+limited the calibration concern to January 1993: later checkpoint offsets are acceptable for
+this task. Branch `codex/january-1993-operations-20260914` begins at clean `42d0f574d`.
+This replaces later calibration scores and dated ownership outcomes as acceptance blockers
+for this bounded repair; it does not relax engine invariants, protected data, legal capture,
+militia defense, player authority, political permissions or enclave protections.
+
+**Question and scope:** repair ordinary early operation assembly/execution so Orašac,
+Donji Vakuf town, Prusac and Korenići are RS-held by week 39. Preserve the four verified
+Jajce local captures and improve January from 696 to at least 700/712 without introducing
+new January mismatches. Investigate the failed Orašac two-brigade axis and Donji Vakuf's
+missing heavy formation, readiness and follow-through. No passive flips, painted-control
+edits, defense weakening, new scripted control events or later-front tuning.
+
+**Validation and stopping rule:** reproduce each established mechanism defect in focused
+tests before implementation; run affected tests, static/type, canonical-data and startup
+checks before scenario work. Use the definitive 188-week scenario truncated at week 39
+as a cheap rejection check (approximately one minute, diagnostic only). After that passes,
+measure the canonical 188-week run (approximately five minutes) and required full suite
+(approximately thirty minutes), with independent implementation review and source/input
+provenance. Inspect January target captures, all January changes and guard/control receipts.
+Report later checkpoints and inherited full-horizon calibration failures without tuning them.
+On an unexpected failure, stop expensive retries, diagnose retained evidence, make the
+smallest established correction and verify it cheaply before repeating the affected check.
+Reuse unaffected evidence. Broader systems or later-campaign work requires separate scope.
+Close with synchronized governing documentation, ledger and a clean local checkpoint; no
+main merge or baseline refresh is implied. Refresh the existing public diagnostic viewer
+with the verified result under the owner's standing request to inspect the latest run.
+
 **Latest checkpoint — 2026-09-14:** the owner-approved local occupation repair is implemented
 at clean `8db305596`. All four Jajce cases pass by week 39; the full campaign scores
 696/690/687/659. Engine health passes, while western cascade 25, Prozor injection and Farz

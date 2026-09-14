@@ -1778,6 +1778,46 @@ describe('pre-planned operations', () => {
         assert.ok(injectedSweep?.assigned_brigades.includes('rs_31st_light_infantry'));
     });
 
+    it('pre-stages the Donji Vakuf follow-through force before its queued slot opens', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 21;
+        state.meta.player_faction = 'RBiH';
+        state.military.formations.rs_16th_krajina_motorized!.location_osid = 'op:test:remote_16th';
+
+        prestageDeferredPrePlannedElites(state);
+
+        const definition = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Donji Vakuf');
+        assert.equal(definition?.prestage_from, 21);
+        assert.equal(
+            state.military.formations.rs_16th_krajina_motorized!.location_osid,
+            'op:test:remote_16th',
+            'pre-staging must issue a march rather than teleporting the formation',
+        );
+        assert.deepEqual(
+            state.military.brigade_movement_orders?.rs_16th_krajina_motorized,
+            {
+                destination_sids: ['op:sipovo:pribeljci_2'],
+                stance: 'column',
+                owner: 'authored_preplanned',
+            },
+        );
+
+        state.military.brigade_movement_state = {
+            ...(state.military.brigade_movement_state ?? {}),
+            rs_16th_krajina_motorized: {
+                status: 'in_transit',
+                destination_sids: ['op:test:other_authored_commitment'],
+                owner: 'authored_preplanned',
+            } as any,
+        };
+        prestageDeferredPrePlannedElites(state);
+        assert.deepEqual(
+            state.military.brigade_movement_state!.rs_16th_krajina_motorized.destination_sids,
+            ['op:test:other_authored_commitment'],
+            'a live non-discretionary movement commitment must not be stolen',
+        );
+    });
+
     it('keeps Trnovo kijevo_2 as a friendly approach waypoint after stripping it as a capture objective', () => {
         const state = makeMinimalState();
         state.meta.turn = 69;
