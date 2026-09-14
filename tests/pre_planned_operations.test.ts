@@ -940,7 +940,7 @@ describe('pre-planned operations', () => {
         assert.equal(command.active_operations[0]?.is_pre_planned, true);
     });
 
-    it('finishes the 1992 Donji Vakuf sweep at Korenici after Prusac', () => {
+    it('follows the Donji Vakuf town capture through Korenici before Prusac', () => {
         const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Donji Vakuf');
         assert.ok(operation);
         const sweep = operation.axes.find((axis) => axis.axis_id === 'donji_vakuf_sweep');
@@ -948,7 +948,7 @@ describe('pre-planned operations', () => {
 
         assert.deepEqual(
             sweep.objectives.slice(-2),
-            ['op:donji_vakuf:prusac_2', 'op:donji_vakuf:korenici'],
+            ['op:donji_vakuf:korenici', 'op:donji_vakuf:prusac_2'],
         );
         assert.ok(sweep.brigades.includes('rs_22nd_krajina_infantry'));
         assert.ok(sweep.brigades.includes('rs_5th_kozara_light_infantry'));

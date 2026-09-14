@@ -575,6 +575,51 @@ describe('commander emission overlap guards', () => {
         });
     });
 
+    it('concentrates a third available brigade against a bounded position without raising the two-brigade formation minimum', () => {
+        const briefing = makeBriefing([], [
+            makeBrigade('b1', 'op:test:approach'),
+            makeBrigade('b2', 'op:test:approach'),
+            makeBrigade('b3', 'op:test:approach'),
+        ]);
+        briefing.state_ref!.political.political_controllers = {
+            'op:test:approach': FACTION,
+            'op:test:objective': 'RBiH',
+        } as any;
+        briefing.state_ref!.military.corps_command![CORPS_ID]!.consecutive_probes = 2;
+        const noPlan: PlanDecision = {
+            plan: null,
+            action: 'none',
+            reason: 'no major plan',
+            decision_trace: {
+                turn: briefing.turn,
+                winning_intent_id: null,
+                candidates: [],
+                hard_constraints: [],
+                lessons_applied: [],
+                relationships_applied: [],
+            },
+        };
+
+        const output = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            makeAllocation(),
+            noPlan,
+            makeDecisions(),
+            makeThreats(),
+        );
+
+        expect(output.operations).toHaveLength(1);
+        expect(output.operations[0]).toMatchObject({
+            type: 'sector_attack',
+            participating_brigades: ['b1', 'b2', 'b3'],
+            minimum_viable_participants: 3,
+            minimum_assembled_participants: 3,
+            min_attack_outcome: 'stalemate',
+        });
+    });
+
     it('emits byte-identical intel-gated operations for identical inputs', () => {
         const briefing = makeIntelBriefing([0.24]);
         const emit = () => emitCommanderOutput(

@@ -112,7 +112,8 @@ const MAX_SECTOR_ACTIVITY_LOG = 20;
 const MAX_OPERATION_HISTORY_ENTRIES = 20;
 
 /** Minimal local group for reducing a bounded position without stripping the corps front. */
-const ISOLATED_POSITION_OPERATION_BRIGADES = 2;
+const ISOLATED_POSITION_OPERATION_MIN_BRIGADES = 2;
+const ISOLATED_POSITION_OPERATION_MAX_BRIGADES = 3;
 
 /** Max BFS hops from brigade location to first objective OSID (through friendly territory). */
 const MAX_REACHABILITY_HOPS = 8;
@@ -1529,12 +1530,12 @@ function buildOperations(
                                 const distanceDiff = distanceToReduction(left) - distanceToReduction(right);
                                 return distanceDiff !== 0 ? distanceDiff : strictCompare(left, right);
                             })
-                            .slice(0, ISOLATED_POSITION_OPERATION_BRIGADES);
+                            .slice(0, ISOLATED_POSITION_OPERATION_MAX_BRIGADES);
                     const singleBrigadeOccupationIsSufficient = localOccupationCandidate != null
                         && reductionParticipants.length === 1;
                     const escalateToOperation = targetIsBoundedPosition
                         && (
-                            reductionParticipants.length >= ISOLATED_POSITION_OPERATION_BRIGADES
+                            reductionParticipants.length >= ISOLATED_POSITION_OPERATION_MIN_BRIGADES
                             || singleBrigadeOccupationIsSufficient
                         )
                         && !shouldLaunchProbeInstead(

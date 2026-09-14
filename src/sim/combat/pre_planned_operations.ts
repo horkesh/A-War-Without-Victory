@@ -1012,10 +1012,10 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         // torlakovac_2 — first objective in the sweep. grdovo (Jajce) would also be
         // adjacent but starts HRHB; pribeljci_2 is always RS and safe.
         //
-        // Objectives: the six-settlement historical sweep south through Prusac,
-        // then Korenići.  Korenići is the terminal Donji Vakuf pocket: leaving it
-        // friendly after the town and Prusac fall causes 3rd Corps to march brigades
-        // into the exposed cell several turns later instead of holding the Bugojno line.
+        // Objectives: the six-settlement sweep follows the town breakthrough directly
+        // into Korenići before turning to Prusac. This preserves the heavy spearhead's
+        // ordinary town–Korenići combat edge instead of leaving the terminal defender
+        // four turns to recover while the spearhead marches through Prusac.
         // Removed from triggered Op Jajce (vrs_2nd_krajina) — 1KK handles DV.
         corps: 'vrs_1st_krajina',
         faction: 'RS',
@@ -1041,14 +1041,14 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 ],
                 // pribeljci_2 (RS) is adjacent to torlakovac_2 — valid staging → first obj chain.
                 // torlakovac_2 → babin_potok_2 → oborci_2 → donji_vakuf_2 →
-                // prusac_2; Korenići is adjacent to the secured Donji Vakuf/Jemanlići line.
+                // korenici; Jemanlići then provides the shared approach to Prusac.
                 objectives: [
                     'op:donji_vakuf:torlakovac_2',
                     'op:donji_vakuf:babin_potok_2',
                     'op:donji_vakuf:oborci_2',
                     'op:donji_vakuf:donji_vakuf_2',
-                    'op:donji_vakuf:prusac_2',
                     'op:donji_vakuf:korenici',
+                    'op:donji_vakuf:prusac_2',
                 ],
                 staging_osid: 'op:sipovo:pribeljci_2',
             },
