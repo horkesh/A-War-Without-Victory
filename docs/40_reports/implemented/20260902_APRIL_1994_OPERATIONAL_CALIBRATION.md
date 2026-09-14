@@ -16,6 +16,12 @@
 
 ## Integration audit — 2026-09-12
 
+**Latest checkpoint — 2026-09-14:** the owner-approved local occupation repair is implemented
+at clean `8db305596`. All four Jajce cases pass by week 39; the full campaign scores
+696/690/687/659. Engine health passes, while western cascade 25, Prozor injection and Farz
+attribution keep overall acceptance **NO-GO**. The [local occupation result](#owner-authorized-local-occupation-repair--2026-09-14)
+below supersedes the earlier next-action proposal. Main and baseline pins remain unchanged.
+
 ### Current checkpoint — 2026-09-13
 
 **Coverage is approved, implemented and verified. All calibration work is integrated in the
@@ -158,6 +164,79 @@ the latter occurs only after required hard gates pass. No further campaign or so
 outside this local occupation question proceeds under this packet. Reuse unaffected evidence.
 Batch final canon/report/roadmap/ledger synchronization after measured results. No main merge,
 remote source push or public viewer replacement is part of this repair.
+
+**Measured result:** local occupation acceptance **PASS**; integrated calibration acceptance
+**NO-GO**. Source `8db3055962143af8f272ef7cf5d95414e6c5a601` is clean, Node 22.23.2,
+with the same 31 consumed inputs as the preceding clean POST-A. The canonical 188-week run
+completed in 286.98 seconds, exit 0, at
+`runs/local_occupation_20260914/post_a/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0`.
+Final-save SHA-256 is `c41dad9c3dba6a8486397096f8b485a3ed4ab7d1c43e1ac5039271c26702d661`.
+
+| Pocket | Previous capture | New capture | Brigade | Owning operation |
+|---|---:|---:|---|---|
+| Baljvine | Never through 188 | 32 | 1st Gradiška Light Infantry | Bastion, started 31 |
+| Jezero | 43 | 33 | 2nd Banja Luka Light Infantry | Stjena, started 32 |
+| Donji Korićani | 54 | 36 | 12th Kotorsko Light Infantry | Javor, started 35 |
+| Lupnica | 50 | 37 | 3rd Banja Luka Light Infantry | Zaslon, started 36 |
+
+Each has an exact brigade, battle and operation-owned combat capture receipt. January's
+four-point gain consists exactly of these four cells. There are zero passive transfers.
+The implementation searches legal nearby donor–target pairs, verifies real OSID-population
+militia defense and reachable organized defense, and issues a one-brigade ordinary operation.
+It still waits one planning turn and uses normal launch, attack and capture gates. The generic
+three-brigade offensive and defended isolated two-brigade paths remain unchanged. Engine
+Invariants §14.8b, Systems Manual §6.4 and the determinism matrix are synchronized.
+
+| Checkpoint | Previous POST-A | Local occupation | Unchanged floor |
+|---|---:|---:|---:|
+| January 1993 | 692 | 696 | 694 |
+| April 1994 | 698 | 690 | 674 |
+| April 1995 | 694 | 687 | 668 |
+| October 1995 | 665 | 659 | 641 |
+
+Health and consistency pass. All 31 historical anchors, nine enclave guards, eastern capture
+provenance, 188 turn seals and the final-save seal pass, with zero unresolved assignments.
+Validator child exits are health 0, consistency 0, checkpoints 1 and truth 1. Truth's sole
+failing domain is the inherited Prozor `op_empty` injection at turn 41.
+
+The western score falls 33→25: eleven lost matches offset by three gains. Three Glamoč losses
+follow Mistral 1 losing two historical participants to simultaneous four-brigade Guja; three
+Drvar losses follow omitted Mistral 2 objectives; four Mrkonjić losses follow delayed Southern
+Move. Baljvine is the direct additional loss at October because its earlier RS occupation now
+requires a later military recapture. Sana gains two matches with its roster and start unchanged.
+No new local operation directly uses the HVO/HV historical participants. The exact causal chain
+from earlier battlefield changes to the generic-operation collision is not isolated by saved
+artifacts, so no speculative source correction or additional campaign followed.
+
+Farz uses 3rd Corps at turn 169 in **both** runs; the capturing brigade changes from 327th to
+328th. The earlier progress-message implication that the corps newly changed is corrected.
+None of the six attributable local occupations uses a 2nd Corps or Farz participant. The
+accepted reference's exact t168 exception does not cover this result. Western minimum 38,
+Prozor correctness and Farz attribution remain unwaived. Broader operation scheduling and
+calibration repairs are outside this local packet; the conditional exact-source repeat is held.
+
+**Verification:** 113/113 focused implementation/guard tests and independent review GO;
+six additional static/provenance tests pass. The required full suite completed in 29m32s:
+13,945 passed, two failed assertions and 43 skipped, including twelve blocked by one setup
+timeout. Its three failure categories are fully retained: a previously cited but untracked
+coverage receipt, the stale startup movement-order key literal, and the unchanged dependency
+setup hook exceeding 10 seconds under suite load. The existing receipt is now tracked; the
+strict key literal includes the already-supported field deliberately added by `c126ddec3`;
+schema/data/code are unchanged. All three affected files pass **62/62** in the focused rerun,
+including all twelve dependency tests without increasing the timeout. Independent correction
+review is GO. This is reused full-suite evidence plus targeted corrections, not a claim of a
+fresh all-green full-suite rerun. Normal source commit typecheck passes; post-measurement edits
+are confined to tests, evidence and documentation.
+
+The [verification receipt](../../../logs/roadmap-integration-20260912/local-occupation/verification.json),
+[implementation review](../../../logs/roadmap-integration-20260912/local-occupation/independent-review.md),
+[correction review](../../../logs/roadmap-integration-20260912/local-occupation/independent-review-addendum.md),
+[local/Farz diagnosis](../../../logs/roadmap-integration-20260912/local-occupation/measurement-diagnosis.md)
+and [western attribution](../../../logs/roadmap-integration-20260912/local-occupation/western-attribution.md)
+bind the retained evidence and its limits. All 28 original dirty paths/backups, 22 ordered
+stashes and 17 other worktree heads remain intact. Local main remains `9588876bc`; no protected
+data, baseline pin, remote source branch or public viewer dataset changed. The published viewer
+still shows the preceding `51fe49415` run, not this measured candidate.
 
 ### Earlier checkpoint — before coverage approval
 

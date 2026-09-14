@@ -1,0 +1,441 @@
+{
+  "run": "F:\\A-War-Without-Victory\\runs\\local_occupation_20260914\\post_a\\apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0",
+  "console": "F:\\A-War-Without-Victory\\logs\\roadmap-integration-20260912\\local-occupation\\post_a-188w.log",
+  "meta": {
+    "anchor_contract": {
+      "anchors": [
+        {
+          "anchor_id": "op:banja_luka:banja_luka_2",
+          "anchor_type": "osid",
+          "expected_controller": "RS"
+        },
+        {
+          "anchor_id": "op:bihac:bihac_2",
+          "anchor_type": "osid",
+          "expected_controller": "RBiH"
+        },
+        {
+          "anchor_id": "op:bijeljina:bijeljina_2",
+          "anchor_type": "osid",
+          "expected_controller": "RS"
+        },
+        {
+          "anchor_id": "op:bosanski_brod:brod",
+          "anchor_type": "osid",
+          "expected_controller": "RS"
+        },
+        {
+          "anchor_id": "op:brcko:brcko",
+          "anchor_type": "osid",
+          "expected_controller": "RS"
+        },
+        {
+          "anchor_id": "op:bugojno:kopcic_2",
+          "anchor_type": "osid",
+          "expected_controller": "RBiH"
+        },
+        {
+          "anchor_id": "op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
+          "anchor_type": "osid",
+          "expected_controller": "RBiH"
+        },
+        {
+          "anchor_id": "op:derventa:derventa_2",
+          "anchor_type": "osid",
+          "expected_controller": "RS"
+        },
+        {
+          "anchor_id": "op:doboj:boljanic_2",
+          "anchor_type": "osid",
+          "expected_controller": "RS"
+        },
+        {
+          "anchor_id": "op:foca:foca_3",
+          "anchor_type": "osid",
+          "expected_controller": "RS"
+        },
+        {
+          "anchor_id": "op:gorazde:bacci",
+          "anchor_type": "osid",
+          "expected_controller": "RBiH"
+        },
+        {
+          "anchor_id": "op:gorazde:citluk_2",
+          "anchor_type": "osid",
+          "expected_controller": "RBiH"
+        },
+        {
+          "anchor_id": "op:gorazde:gorazde_2",
+          "anchor_type": "osid",
+          "expected_controller": "RBiH"
+        },
+        {
+          "anchor_id": "op:gracanica:petrovo_2",
+          "anchor_type": "osid",
+          "expected_controller": "RS"
+        },
+        {
+          "anchor_id": "op:gradacac:gradacac_2",
+          "anchor_type": "osid",
+          "expected_controller": "RBiH"
+        },
+        {
+          "anchor_id": "op:lukavac:brijesnica_donja_2",
+          "anchor_type": "osid",
+          "expected_controller": "RBiH"
+        },
+        {
+          "anchor_id": "op:mostar:mostar_zapad_2",
+          "anchor_type": "osid",
+          "expected_controller": "HRHB"
+        },
+        {
+          "anchor_id": "op:orasje:orasje",
+          "anchor_type": "osid",
+          "expected_controller": "HRHB"
+        },
+        {
+          "anchor_id": "op:prijedor:prijedor_2",
+          "anchor_type": "osid",
+          "expected_controller": "RS"
+        },
+        {
+          "anchor_id": "op:rogatica:zepa_2",
+          "anchor_type": "osid",
+          "expected_controller": "RS"
+        },
+        {
+          "anchor_id": "op:srebrenica:srebrenica_2",
+          "anchor_type": "osid",
+          "expected_controller": "RS"
+        },
+        {
+          "anchor_id": "op:travnik:travnik_2",
+          "anchor_type": "osid",
+          "expected_controller": "RBiH"
+        },
+        {
+          "anchor_id": "op:tuzla:tuzla_2",
+          "anchor_type": "osid",
+          "expected_controller": "RBiH"
+        },
+        {
+          "anchor_id": "op:ugljevik:teocak_krstac_2",
+          "anchor_type": "osid",
+          "expected_controller": "RBiH"
+        },
+        {
+          "anchor_id": "op:velika_kladusa:velika_kladusa_2",
+          "anchor_type": "osid",
+          "expected_controller": "RBiH"
+        },
+        {
+          "anchor_id": "op:visegrad:visegrad_2",
+          "anchor_type": "osid",
+          "expected_controller": "RS"
+        },
+        {
+          "anchor_id": "op:zavidovici:vozuca_2",
+          "anchor_type": "osid",
+          "expected_controller": "RBiH"
+        },
+        {
+          "anchor_id": "op:zenica:zenica_2",
+          "anchor_type": "osid",
+          "expected_controller": "RBiH"
+        },
+        {
+          "anchor_id": "op:zvornik:sapna",
+          "anchor_type": "osid",
+          "expected_controller": "RBiH"
+        },
+        {
+          "anchor_id": "op:zvornik:zvornik",
+          "anchor_type": "osid",
+          "expected_controller": "RS"
+        },
+        {
+          "anchor_id": "brcko_corridor_jan1993",
+          "anchor_type": "control_band",
+          "expected_controller": "rs_corridor>=4/6;federation_southern_shoulder>=4/7"
+        }
+      ],
+      "epoch": "oct1995",
+      "scenario_id": "apr1992_definitive_188w",
+      "schema_version": 1,
+      "source": "src/scenario/historical_anchors.ts#canonical-anchor-contract-v1",
+      "weeks": 188
+    },
+    "out_dir": "runs/local_occupation_20260914/post_a/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0",
+    "provenance": {
+      "collapse_enabled": false,
+      "consumed_inputs": {
+        "digest": "f8ace65496620fad1c8219a9dcaa8e2c5cdba2f3f541b156c7ba112b4748caaf",
+        "files": [
+          {
+            "path": "data/derived/census_rolled_up_wgs84.json",
+            "sha256": "6653e75d9dd695bc2b676b1a49635bd51eecf228ec8c58b37ed1ecb773f1e3b2"
+          },
+          {
+            "path": "data/derived/municipality_hq_settlement.json",
+            "sha256": "7ff0af467f4b1fedbe7e2515fc9ca96dde9f3c825724c0bf6333653a08a1801b"
+          },
+          {
+            "path": "data/derived/municipality_political_controllers_1990.json",
+            "sha256": "5fb60e0d3b7ec22da487c720c5256a58c3c8a95c2114c3ecaa2d13ed8cccfdd4"
+          },
+          {
+            "path": "data/derived/municipality_population_1991.json",
+            "sha256": "b475f88f15b130a626d1699f9d3064a2e64c70e816b67b608d734b10763a7c7b"
+          },
+          {
+            "path": "data/derived/operational/operational_contact_graph.json",
+            "sha256": "f7f9aaeea51710fda376234d79945b51dfea31a16ebca948ffd8dc54f3ce0c46"
+          },
+          {
+            "path": "data/derived/operational/operational_political_control.json",
+            "sha256": "309af26381cb36126f5c80b2327035865b4ac9c467cda66211f35516949a0a3d"
+          },
+          {
+            "path": "data/derived/operational/operational_settlements.geojson",
+            "sha256": "c03cc9ce4286b779139ce460e5f515d67415fe633e4ed2dbda1764b9440338c8"
+          },
+          {
+            "path": "data/derived/settlement_edges.json",
+            "sha256": "69073545ddac46395019b63295cd0de3a79920771b417178eb06cc38aa9a7cb7"
+          },
+          {
+            "path": "data/derived/settlement_ethnicity_data.json",
+            "sha256": "ca1e986d7f1c5e6662c7629a6f970441d1fb5474a48271bb0626194455674104"
+          },
+          {
+            "path": "data/scenarios/apr1992_definitive_188w.json",
+            "sha256": "7db056062b0b60a93be8e4f9df7940d91bbcc29f14bedaf7e30cd4c70ad71445"
+          },
+          {
+            "path": "data/scenarios/events/consequences.json",
+            "sha256": "2fac4889d39066a9263aba121b0bc93cf3195a4fda4da5a6985ca4b28fdfdce5"
+          },
+          {
+            "path": "data/scenarios/events/war_1992.json",
+            "sha256": "7596df56b934be4334ab8bffe51cf92f439c1fec238d6b82c21e68f25c61162a"
+          },
+          {
+            "path": "data/scenarios/events/war_1992_hrhb_summer.json",
+            "sha256": "de9bfc484847caa911d6921424b80ddcf8754219fffc016bdd346f80028d99e2"
+          },
+          {
+            "path": "data/scenarios/events/war_1993.json",
+            "sha256": "1234343036c73a9b274d3fc54ffb679e1032bafa52341c07c834972269d69aac"
+          },
+          {
+            "path": "data/scenarios/events/war_1994.json",
+            "sha256": "aef6d5321f41224953c311b2194ac71eb8b42e6e63c3a501fdacd79d1ce29449"
+          },
+          {
+            "path": "data/scenarios/events/war_1995.json",
+            "sha256": "b16b52e0a25c4312c2dc146e824c46fe3b5d8b567907d443304bb8dbb4958dc4"
+          },
+          {
+            "path": "data/scenarios/initial_formations/initial_formations_apr1992.json",
+            "sha256": "37832ee7aad72e8a99aaf21ec66d92d0161477902e8db42bf1579d77314008f4"
+          },
+          {
+            "path": "data/scenarios/officers/apr1992_officers.json",
+            "sha256": "1a4565169fc90b119da7bd5624587078a42b935dd16d241ecb93b8e0a29524d0"
+          },
+          {
+            "path": "data/scenarios/political_leader_data.json",
+            "sha256": "6affed383f92f9786fa112c1fedc2b6a9c4dc5193c750c822c1ccf114b643474"
+          },
+          {
+            "path": "data/scenarios/presidential_initiatives/apr1992.json",
+            "sha256": "f26279f708514b5b237ba71f915d43131db2663660de44d27b23684f5f415cfb"
+          },
+          {
+            "path": "data/scenarios/timelines/apr1992.json",
+            "sha256": "c966086e3195fdae585106cc9d50349ff6a497a02cb8f46643220ad766dd1c8c"
+          },
+          {
+            "path": "data/source/calibration/painted_control_apr1994.json",
+            "sha256": "afacdc25d9eb96344cdb48ccb7122d705fe1a3d9706cce0f43e6e0fdba191a4a"
+          },
+          {
+            "path": "data/source/calibration/painted_control_apr1995.json",
+            "sha256": "c3429f6e4e4afa0778619fcf1f999089ff26068487947e1c5fe3f6b391ba61f7"
+          },
+          {
+            "path": "data/source/calibration/painted_control_jan1993.json",
+            "sha256": "abb4f9d20472016d21be4130a1e555b7c7f82094612e7e1777d9916e10a0ba24"
+          },
+          {
+            "path": "data/source/calibration/painted_control_oct1995.json",
+            "sha256": "54f29d6e7a5158c521a83983476da5d832f9b4a66a83b2d69673f8db04e50429"
+          },
+          {
+            "path": "data/source/municipalities_1990_initial_political_controllers_apr1992.json",
+            "sha256": "dcbf9ec5a73a0d8b86588851e5ca7a83fab7f37aa9f1513e27eebb11b5802f6d"
+          },
+          {
+            "path": "data/source/municipalities_1990_registry_110.json",
+            "sha256": "8ede3d014b0b8694021b79e77e58f07266f647682b23fcd2a793417f16d433cc"
+          },
+          {
+            "path": "data/source/oob_brigades.json",
+            "sha256": "8ce85a115c80d92950d3629318686cb8f3377912437917805564fee1e19b9549"
+          },
+          {
+            "path": "data/source/oob_corps.json",
+            "sha256": "bce056408d0b7fcaeda20c3f847c4cc36f054ae2355d740708c83f139d76149c"
+          },
+          {
+            "path": "data/source/settlement_political_controllers_overrides.json",
+            "sha256": "0eb42921290f1812adc5fc4a008113483840d7d2ab2e2d382ea7582ca4659a33"
+          },
+          {
+            "path": "data/source/settlements_initial_master.json",
+            "sha256": "0a4fa946436ed525e38d94df0d3afe98ad2cfdd1e0f26f4cad2ae32bc894535d"
+          }
+        ]
+      },
+      "git_commit": "8db3055962143af8f272ef7cf5d95414e6c5a601",
+      "git_dirty": false,
+      "harness": "headless",
+      "node_version": "v22.23.2",
+      "schema_version": 2
+    },
+    "run_id": "apr1992_definitive_188w__6898d6d2e324c7a3__w188",
+    "scenario_id": "apr1992_definitive_188w",
+    "scenario_path": "data/scenarios/apr1992_definitive_188w.json",
+    "weeks": 188
+  },
+  "checks": [
+    {
+      "check": "health",
+      "exit": 0,
+      "log": "logs\\roadmap-integration-20260912\\local-occupation\\post_a-health.log",
+      "command": [
+        "node",
+        "tools/engine_health_gate.cjs",
+        "F:\\A-War-Without-Victory\\runs\\local_occupation_20260914\\post_a\\apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0",
+        "--horizon",
+        "188w"
+      ]
+    },
+    {
+      "check": "consistency",
+      "exit": 0,
+      "log": "logs\\roadmap-integration-20260912\\local-occupation\\post_a-consistency.log",
+      "command": [
+        "node",
+        "tools/validate_run_consistency.cjs",
+        "F:\\A-War-Without-Victory\\runs\\local_occupation_20260914\\post_a\\apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0"
+      ]
+    },
+    {
+      "check": "checkpoints",
+      "exit": 1,
+      "log": "logs\\roadmap-integration-20260912\\local-occupation\\post_a-checkpoints.log",
+      "command": [
+        "node",
+        "tools/verify_checkpoints.cjs",
+        "F:\\A-War-Without-Victory\\runs\\local_occupation_20260914\\post_a\\apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0",
+        "--base",
+        "jan=694,apr94=674,apr95=668,oct=641",
+        "--cascade-base",
+        "40"
+      ]
+    },
+    {
+      "check": "truth",
+      "exit": 1,
+      "log": "logs\\roadmap-integration-20260912\\local-occupation\\post_a-truth.log",
+      "command": [
+        "node",
+        "tools/diagnostics/engine_truth_checkpoint.cjs",
+        "F:\\A-War-Without-Victory\\runs\\local_occupation_20260914\\post_a\\apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0",
+        "--assignment-log",
+        "F:\\A-War-Without-Victory\\logs\\roadmap-integration-20260912\\local-occupation\\post_a-188w.log",
+        "--out",
+        "logs\\roadmap-integration-20260912\\local-occupation\\post_a-truth.json"
+      ]
+    }
+  ],
+  "files": [
+    {
+      "path": "activity_summary.json",
+      "sha256": "5b0aba726de73bb3e5c15b10e819980df69d815dab69a0345bb7511c8e8cee0a",
+      "bytes": 453
+    },
+    {
+      "path": "brigade_temporal_log.jsonl",
+      "sha256": "c0fc559410197c120847d56dc26db04dc9a679421b20c16df52ab1bf0872e2f8",
+      "bytes": 24030138
+    },
+    {
+      "path": "control_delta.json",
+      "sha256": "30967d1991a32695205cd6c117610cf70b11238fcb62d073d0f6a9942a7e9853",
+      "bytes": 33693
+    },
+    {
+      "path": "destroyed_brigades.json",
+      "sha256": "0f1e425190369a05326175541ecc75dde822b46c601a652f97543bcfb7c03416",
+      "bytes": 8365
+    },
+    {
+      "path": "displacement_event_log.jsonl",
+      "sha256": "e57f06f69e234119a08d884b1e590bb8802d29330a2ec8d94f41ddda918e7704",
+      "bytes": 16221604
+    },
+    {
+      "path": "end_report.md",
+      "sha256": "e78de2da378063d5929e4eac8d2c4fc9886e35c492f5fa0d8944fee4e977b111",
+      "bytes": 52026
+    },
+    {
+      "path": "final_save.json",
+      "sha256": "c41dad9c3dba6a8486397096f8b485a3ed4ab7d1c43e1ac5039271c26702d661",
+      "bytes": 9262499
+    },
+    {
+      "path": "formation_delta.json",
+      "sha256": "86df2d06bd749651bba810b489e14e5a9cfcb2121e6cf48a4efc0a6f570b17f0",
+      "bytes": 3790
+    },
+    {
+      "path": "initial_save.json",
+      "sha256": "45bcfd9746aabaa85e49d2ce2a44efffdd36ecb7a53966edd450ed419f67a3bf",
+      "bytes": 1372160
+    },
+    {
+      "path": "operation_aars.json",
+      "sha256": "33c67177a3d8961620454c80026e5b131c0e32068439efe1ff9e0a68e49c0f47",
+      "bytes": 780095
+    },
+    {
+      "path": "replay_save_manifest.json",
+      "sha256": "1b96fa70884554feb3d19b0ba1c869e871b9b392183af6b2930c4bf14d62001a",
+      "bytes": 37173
+    },
+    {
+      "path": "run_meta.json",
+      "sha256": "dfcfc85ab2c92f8ee1f040d1832eefaab3a6e985685752e666c347efad76a48f",
+      "bytes": 10504
+    },
+    {
+      "path": "run_summary.json",
+      "sha256": "720eb4f18487a6fcf6d623d8ddac91c077e1f04f16d751e1ad8d751a0f9bcbcf",
+      "bytes": 636192
+    },
+    {
+      "path": "watched_operations.json",
+      "sha256": "c9bd06df99763247008ee0c3b54024b5b8286ee48fa9df39a746636af140c802",
+      "bytes": 5701
+    },
+    {
+      "path": "weekly_report.jsonl",
+      "sha256": "69b2e5d847bc2f36c072e6168ae36f6f1c4ce94ce28ec4d6060f3f2cd92c8154",
+      "bytes": 2121999
+    }
+  ]
+}

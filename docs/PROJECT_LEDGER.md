@@ -4885,3 +4885,55 @@ edit, baseline refresh or main promotion occurred. Local main remains `9588876bc
 main remains `e607508bc`, and the full-horizon acceptance remains NO-GO. The existing
 [viewer plan](plans/2026-09-08-calibration-control-timeline-viewer-plan.md) owns the deployment
 receipt and evidence paths; publication is permission to inspect this run, not baseline adoption.
+
+## 2026-09-14 — Jajce local occupation repaired; broader calibration held
+
+The owner approved the proposed regular-army occupation path after finding isolated empty
+Jajce-area cells in January 1993. Branch `codex/jajce-local-occupation-20260914` starts from
+clean integration checkpoint `9ac9f11da`; all April-calibration work remains integrated.
+The measured implementation is `8db3055962143af8f272ef7cf5d95414e6c5a601`.
+
+The commander now considers legal nearby surplus brigade–target pairs after week 20, verifies
+a bounded all-attacker boundary, actual reachable organized defense and population-based militia,
+and admits a sufficient single brigade through an ordinary owned operation. Missing population
+or prediction inputs fail closed. Existing readiness, commitment, frontage, enclave, political
+and player-authority boundaries remain; reconnaissance cooldown does not suppress this separate
+occupation task. Ordinary offensive and defended isolated force minima are unchanged. The task
+still waits one planning turn and uses normal generated attack orders and combat capture receipts.
+Engine Invariants §14.8b, Systems Manual §6.4 and the determinism matrix are synchronized.
+
+The clean Node 22.23.2 canonical 188-week run completes in 286.98 seconds, exit 0, with the same
+31 consumed inputs as the preceding POST-A. Final-save hash is
+`c41dad9c3dba6a8486397096f8b485a3ed4ab7d1c43e1ac5039271c26702d661`.
+Baljvine/Jezero/Donji Korićani/Lupnica receive exact operation-owned combat captures at turns
+32/33/36/37, improving January 692→696. Scores are 696/690/687/659, above unchanged floors.
+Zero passive transfers; health, consistency, all 31 anchors, nine enclave guards and all 189
+assignment seals pass. The four-case local repair is verified.
+
+Overall calibration remains NO-GO. Western cascade falls 33→25 against minimum 38: eleven
+lost matches offset by three gains. Retained evidence shows generic Guja competing with
+Mistral 1, changed Mistral 2 objectives and delayed Southern Move; no local-route donor violation
+was demonstrated. One October loss is Baljvine itself, which now needs a later military
+recapture. Prozor still has the inherited turn-41 injection error. Farz remains a 3rd Corps
+turn-169 capture in both runs; the capturing brigade changes 327th→328th. The earlier progress
+message suggesting a newly changed corps is corrected. The exact accepted t168 exception does
+not apply. No speculative wider fix, second campaign, baseline refresh or conditional repeat
+was performed; broader scheduling/calibration repairs remain separate work.
+
+Focused implementation/guard verification passes 113/113 and independent review is GO.
+The required full suite ran once in 29m32s: 13,945 passed, two failed assertions, 43 skipped,
+with twelve skips caused by one 10-second setup-hook timeout. All three failure categories
+were diagnosed: an earlier untracked coverage receipt, a stale strict startup-key literal,
+and dependency setup timing under suite load. The existing coverage log is now tracked;
+the exact-key test includes the already-supported movement orders introduced into the accepted
+startup artifact by `c126ddec3`. No schema/data/engine change or timeout increase was made.
+The three affected files pass 62/62 in the focused rerun; independent correction review is GO.
+Unaffected full-suite evidence is reused; no fresh all-green full-suite rerun is claimed.
+
+The [verification receipt](../logs/roadmap-integration-20260912/local-occupation/verification.json)
+and [updated implementation report](40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-local-occupation-repair--2026-09-14)
+retain the measured results, reviews and failure attribution. All 28 original dirty paths and
+backups, 22 ordered stashes and 17 other worktree heads remain intact. Local main remains
+`9588876bc`. Protected data, pins, remote source branches and the published viewer dataset are
+unchanged; the public tool still shows the earlier `51fe49415` run. The roadmap, command board,
+calibration master and open gate remain explicit about the outstanding full-horizon acceptance.

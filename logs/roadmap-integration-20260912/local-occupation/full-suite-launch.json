@@ -1,0 +1,9 @@
+{
+  "head": "8db3055962143af8f272ef7cf5d95414e6c5a601",
+  "branch": "codex/jajce-local-occupation-20260914",
+  "node": "v22.23.2",
+  "command": "npm.cmd run test:vitest:balanced",
+  "started_at": "2026-09-14T11:41:27.6716032+02:00",
+  "finished_at": "2026-09-14T12:10:59.4041452+02:00",
+  "exit": 1
+}

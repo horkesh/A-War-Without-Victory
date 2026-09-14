@@ -1,18 +1,24 @@
 # AWWV Calibration Master Reference
 
-**Current delivery status (2026-09-13):** current-main manifest authority is the owner-authorized
-#518 refresh at clean `2a8eb4244` (702/678/672/667; unchanged floors and all 31 n392 anchors).
-Candidate `7382f26f8` integrates the 20 April-calibration commits with `9588876bc`; it is not
-promoted to main. Engine Invariants §14.8b and §16.2 are owner-approved at `933132e90`; the
-coverage contract is owner-approved at `51fe49415` (17/17 tests; nine verified isolated gaps,
-zero staffable gaps; independent review GO). Earlier full-suite evidence and focused corrections
-are retained. Clean POST-A at `51fe49415` completes 188 weeks at **692/698/694/665**. Acceptance
-fails on January 692 below floor 694, western cascade 33 below 38, one Prozor injection error,
-and Farz t169 outside the exact t168 exception. All 31 anchors, nine enclave guards, consistency
-and assignment seals pass. The planned second run is stopped; no pins or floors were refreshed.
-Existing January operation execution, Sana progression and Prozor deferral are the proposed
-repair surfaces. Branch-local v72/v73 remains dirty week-104 history, not candidate acceptance.
-[Integration receipt](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#integration-audit--2026-09-12).
+**Current delivery status (2026-09-14):** the owner-approved local occupation repair at clean
+`8db305596` captures Baljvine/Jezero/Donji Korićani/Lupnica at turns 32/33/36/37 through ordinary
+owned operations. January improves 692→696 with zero passive transfers. The full 188-week
+scores are **696/690/687/659**, above unchanged 694/674/668/641 floors. Health, consistency,
+all 31 anchors, nine enclave guards and all assignment seals pass. Overall acceptance remains
+**NO-GO**: western cascade worsens 33→25 against minimum 38; Prozor still has its turn-41
+injection error; Farz is a 3rd Corps turn-169 capture in both runs, now by the 328th instead
+of the 327th, outside the exact reference exception. Saved evidence shows no local donor theft;
+larger-operation scheduling and attribution need separate repair. No extra campaign or
+conditional repeat followed. The full suite's two assertions and one setup timeout are retained
+and reconciled by 62/62 targeted checks and independent review; unaffected evidence is reused.
+Engine Invariants §14.8b and Systems Manual §6.4 include the approved occupation contract.
+
+All 20 April commits and the approved coverage contract remain ancestors of this branch.
+Main's manifest authority remains #518 at clean `2a8eb4244` (702/678/672/667); local main
+remains `9588876bc`. No pins, floors, protected data or public viewer dataset were replaced.
+The published viewer still shows `51fe49415` (692/698/694/665). Branch-local v72/v73 remains
+dirty week-104 history, not candidate acceptance.
+[Current repair receipt](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-local-occupation-repair--2026-09-14).
 
 BC04 P1/P2, BC05, BC06 and BC09 retain their campaign/packaged acceptance boundaries; BC07
 retention is settled. Cleanup and R9 build preparation are integrated/reviewed, BC10 remains

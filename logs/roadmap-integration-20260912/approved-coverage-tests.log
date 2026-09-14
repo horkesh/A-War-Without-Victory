@@ -1,0 +1,168 @@
+
+> awwv@0.9.9-beta.1 test:vitest
+> node tools/test/run_vitest_default.mjs tests/integration_deployment_health.test.ts tests/integration_run_diagnostics.test.ts --reporter=dot
+
+
+ RUN  v2.1.9 F:/A-War-Without-Victory
+
+stdout | tests/integration_deployment_health.test.ts > deployment health (40w)
+[op-validation] 2 issue(s) at injection: 0 error(s), 2 warning(s)
+  [WARN] Operation Foca [foca_south]: all_objectives_owned — All 4 objectives already controlled by RS
+  [WARN] Operation Foca [foca_south]: axis_empty — Axis would be empty: 0 valid objectives
+
+stdout | tests/integration_deployment_health.test.ts > deployment health (40w)
+[op-validation] 6 issue(s) at injection: 0 error(s), 6 warning(s)
+  [WARN] Srebrenica–Cerska Link-Up [srebrenica_cerska_link]: brigade_missing — Brigade "arbih_1st_cerska" not found in formations
+  [WARN] Srebrenica–Cerska Link-Up [srebrenica_cerska_link]: brigade_missing — Brigade "arbih_1st_kamenica" not found in formations
+  [WARN] Srebrenica–Cerska Link-Up [srebrenica_convergence]: brigade_missing — Brigade "arbih_281st_east_bosnian_light" not found in formations
+  [WARN] Srebrenica–Cerska Link-Up [srebrenica_convergence]: brigade_missing — Brigade "arbih_282nd_east_bosnian_light" not found in formations
+  [WARN] Srebrenica–Cerska Link-Up [srebrenica_convergence]: brigade_missing — Brigade "arbih_283rd_east_bosnian_light" not found in formations
+  [WARN] Srebrenica–Cerska Link-Up [srebrenica_convergence]: brigade_missing — Brigade "arbih_284th_east_bosnian_light" not found in formations
+[op-validation] 1 issue(s) at injection: 0 error(s), 1 warning(s)
+  [WARN] Srebrenica–Cerska Link-Up: participants_below_attack_floor — Queued operation has 0 viable participant(s); 1 required
+
+stdout | tests/integration_deployment_health.test.ts > deployment health (40w)
+[op-validation] 1 issue(s) at injection: 0 error(s), 1 warning(s)
+  [WARN] Visoko–Breza Line Clearing [visoko_breza_perimeter]: brigade_missing — Brigade "arbih_guards_brigade" not found in formations
+
+stdout | tests/integration_deployment_health.test.ts > deployment health (40w)
+[op-validation] 4 issue(s) at injection: 0 error(s), 4 warning(s)
+  [WARN] Operation Circle [gorazde_perimeter]: all_objectives_owned — All 3 objectives already controlled by RBiH
+  [WARN] Operation Circle [gorazde_perimeter]: axis_empty — Axis would be empty: 0 valid objectives
+  [WARN] Operation Circle [foca_corridor]: all_objectives_owned — All 1 objectives already controlled by RBiH
+  [WARN] Operation Circle [foca_corridor]: axis_empty — Axis would be empty: 0 valid objectives
+
+stdout | tests/integration_deployment_health.test.ts > deployment health (40w)
+[op-validation] 1 issue(s) at injection: 0 error(s), 1 warning(s)
+  [WARN] Operation Kijevo: participants_below_attack_floor — Queued operation has 1 viable participant(s); 2 required
+
+stdout | tests/integration_deployment_health.test.ts > deployment health (40w)
+[op-validation] 1 issue(s) at injection: 0 error(s), 1 warning(s)
+  [WARN] Operation Bosanski Novi: all_objectives_owned — Queued operation skipped because all 3 objective(s) are already controlled by RS
+
+stdout | tests/integration_deployment_health.test.ts > deployment health (40w) > Sarajevo siege deployment > SRK has at least 4 brigades near Sarajevo
+SRK brigades near Sarajevo (9):
+  F_RS_0001 @ op:ilijas:medojevici (personnel=3000)
+  F_RS_0002 @ op:ilidza:sarajevo_dio_novi_grad_sarajevo (personnel=3000)
+  rs_1st_romanija_infantry @ op:trnovo:kijevo_2 (personnel=1523)
+  rs_1st_sarajevo_mechanized @ op:centar_sarajevo:radava (personnel=870)
+  rs_2nd_sarajevo_light_infantry @ op:ilidza:kasindo (personnel=1707)
+  rs_3rd_sarajevo_infantry @ op:hadzici:misevici_2 (personnel=691)
+  rs_igman_brigade @ op:hadzici:misevici_2 (personnel=537)
+  rs_ilidza_brigade @ op:ilijas:srednje (personnel=774)
+  rs_trnovo_brigade @ op:ilidza:sarajevo_dio_ilidza_2 (personnel=497)
+
+stdout | tests/integration_deployment_health.test.ts > deployment health (40w) > Sarajevo siege deployment > siege counters for Sarajevo-area OSIDs (diagnostic — optional at w40 snapshot)
+Siege counters for Sarajevo (0):
+  (none — final w40 state may no longer have Sarajevo critical supply)
+
+stdout | tests/integration_deployment_health.test.ts > deployment health (40w) > frontline coverage > every large empty sector is explicitly and reproducibly unstaffable
+Sectors with >3-edge front gaps (9):
+  sector:arbih_1st_corps:6: 14 edges, 0 brigades (faction=RBiH, corps=arbih_1st_corps); reason=no_reachable_legal_same_corps_donor
+  sector:arbih_3rd_corps:7: 6 edges, 0 brigades (faction=RBiH, corps=arbih_3rd_corps); reason=no_reachable_legal_same_corps_donor
+  sector:arbih_3rd_corps:8: 4 edges, 0 brigades (faction=RBiH, corps=arbih_3rd_corps); reason=no_reachable_legal_same_corps_donor
+  sector:arbih_5th_corps:0: 4 edges, 0 brigades (faction=RBiH, corps=arbih_5th_corps); reason=no_reachable_legal_same_corps_donor
+  sector:hvo_central_bosnia:0: 5 edges, 0 brigades (faction=HRHB, corps=hvo_central_bosnia); reason=no_reachable_legal_same_corps_donor
+  sector:hvo_central_bosnia:5: 4 edges, 0 brigades (faction=HRHB, corps=hvo_central_bosnia); reason=no_reachable_legal_same_corps_donor
+  sector:hvo_central_bosnia:6: 9 edges, 0 brigades (faction=HRHB, corps=hvo_central_bosnia); reason=no_reachable_legal_same_corps_donor
+  sector:hvo_northwest_bosnia:0: 7 edges, 0 brigades (faction=HRHB, corps=hvo_northwest_bosnia); reason=no_reachable_legal_same_corps_donor
+  sector:vrs_1st_krajina:4: 5 edges, 0 brigades (faction=RS, corps=vrs_1st_krajina); reason=no_reachable_legal_same_corps_donor
+
+stdout | tests/integration_deployment_health.test.ts > deployment health (40w) > frontline coverage > reserve brigades are <30% of total sector-assigned forces
+Front: 219, Reserve: 6, Rate: 2.7%
+
+stdout | tests/integration_deployment_health.test.ts > deployment health (40w) > stacking analysis > <10 OSIDs have >3 brigades stacked
+OSIDs with >3 brigades stacked (3):
+  op:hadzici:binjezevo [14]: arbih_101st_mountain(RBiH,arbih_1st_corps), arbih_105th_motorized(RBiH,arbih_1st_corps), arbih_10th_mountain(RBiH,arbih_1st_corps), arbih_111th_vitezka_motorized(RBiH,arbih_1st_corps), arbih_112th_vitezka_motorized(RBiH,arbih_1st_corps), arbih_115th_mountain(RBiH,arbih_1st_corps), arbih_124th_light_king_tvrtko(RBiH,arbih_1st_corps), arbih_141st_light(RBiH,arbih_1st_corps), arbih_143rd_light(RBiH,arbih_1st_corps), arbih_152nd_mountain(RBiH,arbih_1st_corps), arbih_155th_motorized(RBiH,arbih_1st_corps), arbih_2nd_mountain(RBiH,arbih_1st_corps), arbih_guards_brigade(RBiH,arbih_general_staff), arbih_hvo_kralj_tvrtko(RBiH,arbih_1st_corps)
+  op:bihac:bihac_2 [4]: arbih_501st_slavna_mountain(RBiH,arbih_5th_corps), arbih_510th_bosnian_liberation(RBiH,arbih_5th_corps), arbih_517th_light(RBiH,arbih_5th_corps), hvo_101st_bihac(RBiH,arbih_5th_corps)
+  op:kiseljak:azapovici_2 [6]: hrhb_94th_brigade(HRHB,hvo_central_bosnia), hrhb_95th_brigade(HRHB,hvo_central_bosnia), hrhb_ban_jelai_brigade(HRHB,hvo_central_bosnia), hrhb_kiseljak_brigade(HRHB,hvo_central_bosnia), hrhb_kreevo_brigade(HRHB,hvo_central_bosnia), hvo_ante_starcevic_brigade(HRHB,hvo_central_bosnia)
+
+stdout | tests/integration_deployment_health.test.ts > deployment health (40w) > stacking analysis > no OSID has >6 brigades stacked (extreme stacking)
+Non-siege/urban stacking warnings (1):
+  op:kiseljak:azapovici_2 (kiseljak) [6 brigades]
+
+ ✓ tests/integration_deployment_health.test.ts (11 tests) 72837ms
+stdout | tests/integration_run_diagnostics.test.ts > run diagnostics (40w)
+[op-validation] 2 issue(s) at injection: 0 error(s), 2 warning(s)
+  [WARN] Operation Foca [foca_south]: all_objectives_owned — All 4 objectives already controlled by RS
+  [WARN] Operation Foca [foca_south]: axis_empty — Axis would be empty: 0 valid objectives
+
+stdout | tests/integration_run_diagnostics.test.ts > run diagnostics (40w)
+[op-validation] 6 issue(s) at injection: 0 error(s), 6 warning(s)
+  [WARN] Srebrenica–Cerska Link-Up [srebrenica_cerska_link]: brigade_missing — Brigade "arbih_1st_cerska" not found in formations
+  [WARN] Srebrenica–Cerska Link-Up [srebrenica_cerska_link]: brigade_missing — Brigade "arbih_1st_kamenica" not found in formations
+  [WARN] Srebrenica–Cerska Link-Up [srebrenica_convergence]: brigade_missing — Brigade "arbih_281st_east_bosnian_light" not found in formations
+  [WARN] Srebrenica–Cerska Link-Up [srebrenica_convergence]: brigade_missing — Brigade "arbih_282nd_east_bosnian_light" not found in formations
+  [WARN] Srebrenica–Cerska Link-Up [srebrenica_convergence]: brigade_missing — Brigade "arbih_283rd_east_bosnian_light" not found in formations
+  [WARN] Srebrenica–Cerska Link-Up [srebrenica_convergence]: brigade_missing — Brigade "arbih_284th_east_bosnian_light" not found in formations
+[op-validation] 1 issue(s) at injection: 0 error(s), 1 warning(s)
+  [WARN] Srebrenica–Cerska Link-Up: participants_below_attack_floor — Queued operation has 0 viable participant(s); 1 required
+
+stdout | tests/integration_run_diagnostics.test.ts > run diagnostics (40w)
+[op-validation] 1 issue(s) at injection: 0 error(s), 1 warning(s)
+  [WARN] Visoko–Breza Line Clearing [visoko_breza_perimeter]: brigade_missing — Brigade "arbih_guards_brigade" not found in formations
+
+stdout | tests/integration_run_diagnostics.test.ts > run diagnostics (40w)
+[op-validation] 4 issue(s) at injection: 0 error(s), 4 warning(s)
+  [WARN] Operation Circle [gorazde_perimeter]: all_objectives_owned — All 3 objectives already controlled by RBiH
+  [WARN] Operation Circle [gorazde_perimeter]: axis_empty — Axis would be empty: 0 valid objectives
+  [WARN] Operation Circle [foca_corridor]: all_objectives_owned — All 1 objectives already controlled by RBiH
+  [WARN] Operation Circle [foca_corridor]: axis_empty — Axis would be empty: 0 valid objectives
+
+stdout | tests/integration_run_diagnostics.test.ts > run diagnostics (40w)
+[op-validation] 1 issue(s) at injection: 0 error(s), 1 warning(s)
+  [WARN] Operation Kijevo: participants_below_attack_floor — Queued operation has 1 viable participant(s); 2 required
+
+stdout | tests/integration_run_diagnostics.test.ts > run diagnostics (40w)
+[op-validation] 1 issue(s) at injection: 0 error(s), 1 warning(s)
+  [WARN] Operation Bosanski Novi: all_objectives_owned — Queued operation skipped because all 3 objective(s) are already controlled by RS
+
+stdout | tests/integration_run_diagnostics.test.ts > run diagnostics (40w) > brigade drift > <20% of active brigades are >4 hops from home_osid (excluding ops participants and sector-front line)
+Brigade drift (3/173 checked):
+  arbih_446th_light (arbih_4th_corps) at kresevo — home prozor (5 hops)
+  hrhb_102nd_brigade (hvo_northwest_bosnia) at novi_travnik — home odzak (6 hops)
+  rs_1st_prnjavor_light_infantry (vrs_1st_krajina) at bosanski_samac — home prnjavor (6 hops)
+
+stdout | tests/integration_run_diagnostics.test.ts > run diagnostics (40w) > siege health > SRK has >=4 brigades near Sarajevo municipalities
+SRK brigades near Sarajevo (10):
+  F_RS_0001 @ ilijas (pers=3000)
+  F_RS_0002 @ ilidza (pers=3000)
+  rs_1st_romanija_infantry @ trnovo (pers=1523)
+  rs_1st_sarajevo_mechanized @ centar_sarajevo (pers=870)
+  rs_2nd_sarajevo_light_infantry @ ilidza (pers=1707)
+  rs_3rd_sarajevo_infantry @ hadzici (pers=691)
+  rs_4th_sarajevo_light_infantry @ pale (pers=2200)
+  rs_igman_brigade @ hadzici (pers=537)
+  rs_ilidza_brigade @ ilijas (pers=774)
+  rs_trnovo_brigade @ ilidza (pers=497)
+
+stdout | tests/integration_run_diagnostics.test.ts > run diagnostics (40w) > siege health > Drina/Herzegovina corps have >=2 brigades near Gorazde municipalities
+Drina/Herzegovina brigades near Gorazde (4):
+  rs_ajnie_brigade @ cajnice (pers=637)
+  rs_foa_brigade @ gorazde (pers=106)
+  rs_kalinovik_brigade @ kalinovik (pers=191)
+  rs_visegrad_brigade @ rogatica (pers=673)
+
+stdout | tests/integration_run_diagnostics.test.ts > run diagnostics (40w) > empty sectors > every large empty sector is explicitly and reproducibly unstaffable
+Empty sectors with >3 front edges (9):
+  sector:arbih_1st_corps:6: 14 edges, 0 brigades (faction=RBiH, corps=arbih_1st_corps); reason=no_reachable_legal_same_corps_donor
+  sector:arbih_3rd_corps:7: 6 edges, 0 brigades (faction=RBiH, corps=arbih_3rd_corps); reason=no_reachable_legal_same_corps_donor
+  sector:arbih_3rd_corps:8: 4 edges, 0 brigades (faction=RBiH, corps=arbih_3rd_corps); reason=no_reachable_legal_same_corps_donor
+  sector:arbih_5th_corps:0: 4 edges, 0 brigades (faction=RBiH, corps=arbih_5th_corps); reason=no_reachable_legal_same_corps_donor
+  sector:hvo_central_bosnia:0: 5 edges, 0 brigades (faction=HRHB, corps=hvo_central_bosnia); reason=no_reachable_legal_same_corps_donor
+  sector:hvo_central_bosnia:5: 4 edges, 0 brigades (faction=HRHB, corps=hvo_central_bosnia); reason=no_reachable_legal_same_corps_donor
+  sector:hvo_central_bosnia:6: 9 edges, 0 brigades (faction=HRHB, corps=hvo_central_bosnia); reason=no_reachable_legal_same_corps_donor
+  sector:hvo_northwest_bosnia:0: 7 edges, 0 brigades (faction=HRHB, corps=hvo_northwest_bosnia); reason=no_reachable_legal_same_corps_donor
+  sector:vrs_1st_krajina:4: 5 edges, 0 brigades (faction=RS, corps=vrs_1st_krajina); reason=no_reachable_legal_same_corps_donor
+
+stdout | tests/integration_run_diagnostics.test.ts > run diagnostics (40w) > combat ineffective concentration > no corps has >50% of brigades below 400 personnel
+Total combat ineffective: 11/235 across all corps
+
+ ✓ tests/integration_run_diagnostics.test.ts (6 tests) 72092ms
+
+ Test Files  2 passed (2)
+      Tests  17 passed (17)
+   Start at  08:07:16
+   Duration  161.44s (transform 12.14s, setup 19ms, collect 14.45s, tests 144.93s, environment 1ms, prepare 869ms)
+
+EXIT_CODE=0

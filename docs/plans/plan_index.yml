@@ -79,7 +79,7 @@ lanes:
   - lane: R6
     title: "Historical gameplay depth and final calibration"
     lane_open: true
-    status: "CALIBRATION OPEN — MEASURED CANDIDATE HELD. All 20 April commits, canon amendments and approved coverage contract are integrated. Clean POST-A scores 692/698/69"
+    status: "JAJCE REPAIR VERIFIED; CALIBRATION HELD. All April work remains integrated. Local occupation source `8db305596` scores 696/690/687/659, with all four pockets ca"
     plans:
       - path: docs/plans/2026-07-31-historical-gameplay-depth-calibration-plan.md
         exists: true

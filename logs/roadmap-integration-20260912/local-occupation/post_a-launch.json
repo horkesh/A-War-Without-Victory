@@ -1,0 +1,14 @@
+{
+  "head": "8db3055962143af8f272ef7cf5d95414e6c5a601",
+  "branch": "codex/jajce-local-occupation-20260914",
+  "git_clean": true,
+  "node": "v22.23.2",
+  "out": "runs/local_occupation_20260914/post_a",
+  "provenance_override": false,
+  "update_baselines": false,
+  "grade_run": true,
+  "started_at": "2026-09-14T11:29:20.7761585+02:00",
+  "command": "npm.cmd run sim:scenario:run -- --scenario data/scenarios/apr1992_definitive_188w.json --weeks 188 --out runs/local_occupation_20260914/post_a --unique",
+  "finished_at": "2026-09-14T11:34:07.7526774+02:00",
+  "exit": 0
+}
