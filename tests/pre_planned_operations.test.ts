@@ -1818,6 +1818,51 @@ describe('pre-planned operations', () => {
         );
     });
 
+    it('does not pre-stage a Donji Vakuf brigade away from another active operation', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 21;
+        state.meta.player_faction = 'RBiH';
+        const command = state.military.corps_command!.vrs_1st_krajina!;
+        command.active_operations = [{
+            name: 'Operation Jajce',
+            type: 'sector_attack',
+            phase: 'recovery',
+            started_turn: 19,
+            phase_started_turn: 21,
+            participating_brigades: ['rs_22nd_krajina_infantry'],
+            objectives: ['op:jajce:jajce_2'],
+        } as any];
+        state.military.formations.rs_22nd_krajina_infantry!.location_osid = 'op:jajce:jajce_2';
+
+        prestageDeferredPrePlannedElites(state);
+
+        assert.equal(state.military.brigade_movement_orders?.rs_22nd_krajina_infantry, undefined);
+    });
+
+    it('continues a Donji Vakuf concentration while that operation is planning', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 30;
+        state.meta.player_faction = 'RBiH';
+        const command = state.military.corps_command!.vrs_1st_krajina!;
+        command.active_operations = [{
+            name: 'Operation Donji Vakuf',
+            type: 'sector_attack',
+            phase: 'planning',
+            started_turn: 30,
+            phase_started_turn: 30,
+            participating_brigades: ['rs_16th_krajina_motorized'],
+            objectives: ['op:donji_vakuf:torlakovac_2'],
+        } as any];
+        state.military.formations.rs_16th_krajina_motorized!.location_osid = 'op:test:remote_16th';
+
+        prestageDeferredPrePlannedElites(state);
+
+        assert.deepEqual(
+            state.military.brigade_movement_orders?.rs_16th_krajina_motorized?.destination_sids,
+            ['op:sipovo:pribeljci_2'],
+        );
+    });
+
     it('keeps Trnovo kijevo_2 as a friendly approach waypoint after stripping it as a capture objective', () => {
         const state = makeMinimalState();
         state.meta.turn = 69;

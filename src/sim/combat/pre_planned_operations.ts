@@ -1865,6 +1865,22 @@ function deployPrePlannedEliteLoans(
 }
 
 /** Begin an authored concentration march before a deferred or queued operation opens. */
+function hasConflictingOperationCommitment(
+    state: GameState,
+    brigadeId: FormationId,
+    operationName: string,
+): boolean {
+    const commands = state.military.corps_command ?? {};
+    for (const corpsId of Object.keys(commands).sort(strictCompare)) {
+        for (const operation of commands[corpsId]?.active_operations ?? []) {
+            if (!operation.participating_brigades?.includes(brigadeId)) continue;
+            if (operation.name === operationName && operation.phase === 'planning') continue;
+            return true;
+        }
+    }
+    return false;
+}
+
 function prestageReservedPrePlannedElites(state: GameState, def: PrePlannedOp, turn: number): void {
     if (def.prestage_from == null || turn < def.prestage_from) return;
     if (state.meta.player_faction === def.faction) return;
@@ -1879,6 +1895,7 @@ function prestageReservedPrePlannedElites(state: GameState, def: PrePlannedOp, t
         for (const brigadeId of [...axis.brigades].sort(strictCompare)) {
             const formation = formations[brigadeId];
             if (!formation) continue;
+            if (hasConflictingOperationCommitment(state, brigadeId, def.name)) continue;
             if (formation.elite_loan_state?.on_loan) continue;
             if (formation.location_osid === axis.staging_osid) {
                 const transit = movementState[brigadeId];
