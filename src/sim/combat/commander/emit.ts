@@ -570,7 +570,7 @@ function findLocalOccupationCandidate(
                 officerCombatLookup,
             );
             if (!prediction || prediction.defender_has_reachable_brigade) continue;
-            if (!isOutcomeSufficientForAttack(prediction.predicted_outcome, 'costly_victory')) continue;
+            if (!isOutcomeSufficientForAttack(prediction.predicted_outcome, 'stalemate')) continue;
             const brigade = evaluationById.get(participants[0]!);
             if (!brigade) continue;
             return {

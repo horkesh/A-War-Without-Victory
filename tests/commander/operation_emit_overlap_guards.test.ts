@@ -765,12 +765,12 @@ describe('commander emission overlap guards', () => {
 
     it('prefers a bounded position that only the lawful projected concentration can reduce over a fitter generic probe', () => {
         const brigades = [
-            makeBrigade('b1', 'op:test:approach', { personnel: 700 }),
-            makeBrigade('b2', 'op:test:approach', { personnel: 700 }),
+            makeBrigade('b1', 'op:test:approach', { personnel: 500 }),
+            makeBrigade('b2', 'op:test:approach', { personnel: 500 }),
             makeBrigade('line', 'op:test:donor'),
             makeBrigade('line2', 'op:test:donor'),
             makeBrigade('line3', 'op:test:donor'),
-            makeBrigade('b3', 'op:test:donor', { personnel: 700 }),
+            makeBrigade('b3', 'op:test:donor', { personnel: 500 }),
             makeBrigade('probe', 'op:test:other-approach', { personnel: 1600 }),
         ];
         const primary = makeSector();
@@ -918,8 +918,10 @@ describe('commander emission overlap guards', () => {
         const combined = predict('b1' as FormationId, ['b2', 'b3'] as FormationId[]);
         expect(isOutcomeSufficientForAttack(soloOne!.predicted_outcome, 'costly_victory')).toBe(false);
         expect(isOutcomeSufficientForAttack(soloTwo!.predicted_outcome, 'costly_victory')).toBe(false);
-        expect(combined!.predicted_outcome).toBe('costly_victory');
-        expect(isOutcomeSufficientForAttack(combined!.predicted_outcome, 'costly_victory')).toBe(true);
+        expect(combined!.predicted_outcome).toBe('stalemate');
+        expect(isOutcomeSufficientForAttack(combined!.predicted_outcome, 'stalemate')).toBe(true);
+        expect(isOutcomeSufficientForAttack(combined!.predicted_outcome, 'costly_victory')).toBe(false);
+        expect(localPair!.predicted_outcome).toBe('repulsed');
         expect(isOutcomeSufficientForAttack(localPair!.predicted_outcome, 'costly_victory')).toBe(false);
 
         const output = emitCommanderOutput(
@@ -941,6 +943,84 @@ describe('commander emission overlap guards', () => {
         });
         expect(Object.fromEntries(brigades.map((brigade) => [brigade.id, brigade.location_osid])))
             .toEqual(sourceLocations);
+
+        const repulsedOutput = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            {
+                ...makeAllocation(),
+                surplus_pool: [
+                    { ...makeEval('probe'), fitness_offense: 0.99 },
+                    makeEval('b1'),
+                    makeEval('b2'),
+                ],
+            },
+            { ...makePlanDecision(), plan: null, action: 'none' },
+            makeDecisions(),
+            makeThreats(),
+        );
+        expect(repulsedOutput.operations.every(
+            (candidate) => candidate.objectives?.includes('op:test:objective') !== true,
+        )).toBe(true);
+
+        const soloBrigades = brigades.map((brigade) => brigade.id === 'b1'
+            ? { ...brigade, personnel: 1_200 }
+            : brigade);
+        const soloPrimary = {
+            ...primary,
+            assigned_brigade_ids: ['b1'] as FormationId[],
+            sub_segments: primary.sub_segments.map((subSegment) => ({
+                ...subSegment,
+                primary_brigade_ids: ['b1'] as FormationId[],
+            })),
+        } as CorpsFrontSector;
+        const soloState = {
+            ...state,
+            military: {
+                ...state.military,
+                formations: Object.fromEntries(soloBrigades.map((brigade) => [brigade.id, brigade])),
+                corps_front_sectors: Object.fromEntries(
+                    [soloPrimary, donor, probeSector].map((sector) => [sector.sector_id, sector]),
+                ),
+            },
+        } as GameState;
+        const soloPrediction = predictCombatOutcome(
+            soloState,
+            'b1' as FormationId,
+            'op:test:objective',
+            adjacency as Map<any, any>,
+            briefing.reverse_map!,
+            {},
+            'attack',
+            undefined,
+            undefined,
+            briefing.osid_population_map,
+        );
+        expect(soloPrediction!.predicted_outcome).toBe('stalemate');
+        const soloOutput = emitCommanderOutput(
+            {
+                ...briefing,
+                brigades: soloBrigades,
+                sectors: [soloPrimary, donor, probeSector],
+                state_ref: soloState,
+            },
+            [],
+            makeForces(),
+            {
+                ...makeAllocation(),
+                surplus_pool: [
+                    { ...makeEval('probe'), fitness_offense: 0.99 },
+                    makeEval('b1'),
+                ],
+            },
+            { ...makePlanDecision(), plan: null, action: 'none' },
+            makeDecisions(),
+            makeThreats(),
+        );
+        expect(soloOutput.operations.every(
+            (candidate) => candidate.objectives?.includes('op:test:objective') !== true,
+        )).toBe(true);
 
         const operation = output.operations[0]!;
         const marchingState = {

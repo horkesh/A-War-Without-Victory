@@ -77,6 +77,22 @@ control authority. The verified donor contract, three-participant cap and Januar
 unchanged. Source review settled that operation mobilization may replace dig-in posture;
 automatic empty-front reassignment restrictions are a separate authority.
 
+**Diagnostic C and predicate correction:** clean `61214d0f1` remains at 699/712 with the
+same seven required captures, no January regressions, no passive transfers and 40 resolved
+assignment seals. One unchanged 39-week full-replay diagnostic retained weekly states; its
+final save, weekly reports and brigade history are byte-identical to C. A reconstructed
+post-turn week-39 control reproduces the full-context selected-force ratio 0.67022 (repulsed).
+Earlier snapshots show a legal two-brigade opportunity after week 23: 17th Ključ with 11th
+Krupa, two friendly hops away, predicts stalemate at 0.87002. Drvar remains garrison-locked
+through week 34. These snapshots do not claim exact same-turn commander admission or capture.
+Authority review confirms the costly-victory floor governs the single-brigade exception;
+multi-brigade bounded operations retain the ordinary stalemate admission threshold. Correct
+only that combined-force predicate, retain the solo floor and all staffing/ownership guards,
+verify the focused regression and typecheck, then run one approximately 75-second diagnostic
+39 to test earlier lawful assembly and actual January capture. Stop before the full campaign
+if the unchanged January criteria fail. No brigade-cap, elite-reservation, militia-defense,
+initial-control or authored-data change is authorized by this correction.
+
 **Latest checkpoint — 2026-09-14:** the owner-approved local occupation repair is implemented
 at clean `8db305596`. All four Jajce cases pass by week 39; the full campaign scores
 696/690/687/659. Engine health passes, while western cascade 25, Prozor injection and Farz
