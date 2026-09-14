@@ -29,6 +29,7 @@ import { CURRENT_SCHEMA_VERSION } from '../../src/state/game_state.js';
 import { evaluateOpeningAttackReadiness } from '../../src/sim/combat/sector_offensive_launch_helpers.js';
 import { predictCombatOutcome } from '../../src/sim/combat/combat_predictor.js';
 import { isOutcomeSufficientForAttack } from '../../src/sim/combat/bot_brigade_targeting.js';
+import { generateAllBotOrdersOsid } from '../../src/sim/combat/bot_brigade_ai_osid.js';
 
 const FACTION: FactionId = 'RS';
 const CORPS_ID = 'vrs_test_corps' as FormationId;
@@ -1154,6 +1155,241 @@ describe('commander emission overlap guards', () => {
                 },
             },
         } as CommanderBriefing);
+    });
+
+    it('uses an already-staged primary garrison brigade without pulling a travelling donor', () => {
+        const brigades = [
+            makeBrigade('b1', 'op:test:approach', { personnel: 500 }),
+            makeBrigade('garrison', 'op:test:approach', { personnel: 1_200 }),
+            makeBrigade('line', 'op:test:donor'),
+            makeBrigade('line2', 'op:test:donor'),
+            makeBrigade('line3', 'op:test:donor'),
+            makeBrigade('b3', 'op:test:donor', { personnel: 1_200 }),
+        ];
+        const primary = {
+            ...makeSector(),
+            assigned_brigade_ids: ['b1', 'garrison'] as FormationId[],
+            sub_segments: makeSector().sub_segments.map((subSegment) => ({
+                ...subSegment,
+                primary_brigade_ids: ['b1', 'garrison'] as FormationId[],
+            })),
+        } as CorpsFrontSector;
+        const donor = {
+            ...makeSector(),
+            sector_id: `sector:${CORPS_ID}:1`,
+            edge_ids: ['donor-edge'],
+            length_edges: 4,
+            territory_osids: ['op:test:donor'],
+            assigned_brigade_ids: ['line', 'line2', 'line3', 'b3'] as FormationId[],
+            reserve_brigade_ids: [],
+            sub_segments: [],
+        } as CorpsFrontSector;
+        const adjacency = new Map<string, readonly string[]>([
+            ['op:test:approach', ['op:test:objective', 'op:test:donor']],
+            ['op:test:donor', ['op:test:approach']],
+            ['op:test:objective', ['op:test:approach']],
+        ]);
+        const base = makeBriefing([], brigades);
+        const state = {
+            ...base.state_ref!,
+            military: {
+                ...base.state_ref!.military,
+                formations: Object.fromEntries(brigades.map((brigade) => [brigade.id, brigade])),
+                corps_front_sectors: Object.fromEntries(
+                    [primary, donor].map((sector) => [sector.sector_id, sector]),
+                ),
+                war_front_edges_osid: [{ a: 'op:test:approach', b: 'op:test:objective' } as any],
+            },
+            political: {
+                ...base.state_ref!.political,
+                political_controllers: {
+                    'op:test:approach': FACTION,
+                    'op:test:donor': FACTION,
+                    'op:test:objective': 'RBiH',
+                },
+            },
+        } as GameState;
+        state.meta.turn = 30;
+        state.military.corps_command![CORPS_ID]!.consecutive_probes = 2;
+        const briefing: CommanderBriefing = {
+            ...base,
+            turn: 30,
+            state_ref: state,
+            sectors: [primary, donor],
+            reverse_map: new Map<string, string[]>([
+                ['op:test:approach', ['S1']],
+                ['op:test:donor', ['S2']],
+                ['op:test:objective', ['S3']],
+            ]),
+            osid_population_map: new Map([['op:test:objective', 40_000]]),
+            spatial: {
+                ...makeSpatial(),
+                adjacency,
+                sharedBoundaryAdjacency: adjacency,
+                friendlyOsidsByFaction: new Map([
+                    [FACTION, new Set(['op:test:approach', 'op:test:donor'])],
+                    ['RBiH' as FactionId, new Set(['op:test:objective'])],
+                    ['HRHB' as FactionId, new Set()],
+                ]),
+            } as SpatialContext,
+        };
+        const allocation: AllocationResult = {
+            ...makeAllocation(),
+            garrison_locks: [{
+                brigade_id: 'garrison' as FormationId,
+                zone_id: 'zone:test:0' as ZoneId,
+                reason: 'projecting garrison',
+            }],
+            surplus_pool: [makeEval('b1'), makeEval('b3')],
+        };
+
+        const output = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            allocation,
+            { ...makePlanDecision(), plan: null, action: 'none' },
+            makeDecisions(),
+            makeThreats(),
+        );
+
+        expect(output.operations[0]).toMatchObject({
+            type: 'sector_attack',
+            objectives: ['op:test:objective'],
+            participating_brigades: ['b1', 'garrison'],
+            primary_sector_brigades: ['b1', 'garrison'],
+            minimum_viable_participants: 2,
+            minimum_assembled_participants: 2,
+        });
+        expect(output.operations[0]?.attached_brigades).toBeUndefined();
+        expect(state.military.brigade_movement_orders?.garrison).toBeUndefined();
+        expect(state.military.formations!.garrison!.location_osid).toBe('op:test:approach');
+
+        const emitVariant = ({
+            garrisonOverrides = {},
+            primaryOverride = primary,
+            activeOperations = [],
+            movementState,
+            candidateAllocation = allocation,
+        }: {
+            garrisonOverrides?: Partial<FormationState>;
+            primaryOverride?: CorpsFrontSector;
+            activeOperations?: any[];
+            movementState?: GameState['military']['brigade_movement_state'];
+            candidateAllocation?: AllocationResult;
+        }) => {
+            const candidateBrigades = brigades.map((brigade) => brigade.id === 'garrison'
+                ? { ...brigade, ...garrisonOverrides }
+                : brigade);
+            const candidateState = {
+                ...state,
+                military: {
+                    ...state.military,
+                    formations: Object.fromEntries(candidateBrigades.map((brigade) => [brigade.id, brigade])),
+                    corps_front_sectors: Object.fromEntries(
+                        [primaryOverride, donor].map((sector) => [sector.sector_id, sector]),
+                    ),
+                    brigade_movement_state: movementState ?? {},
+                    corps_command: {
+                        ...state.military.corps_command,
+                        [CORPS_ID]: {
+                            ...state.military.corps_command![CORPS_ID]!,
+                            active_operations: activeOperations,
+                        },
+                    },
+                },
+            } as GameState;
+            return emitCommanderOutput(
+                {
+                    ...briefing,
+                    brigades: candidateBrigades,
+                    sectors: [primaryOverride, donor],
+                    state_ref: candidateState,
+                    active_operations: activeOperations,
+                },
+                [],
+                makeForces(),
+                candidateAllocation,
+                { ...makePlanDecision(), plan: null, action: 'none' },
+                makeDecisions(),
+                makeThreats(),
+            );
+        };
+        const excludesPrimaryGarrison = (guarded: ReturnType<typeof emitCommanderOutput>) => {
+            expect(guarded.operations.every(
+                (candidate) => candidate.participating_brigades.includes('garrison' as FormationId) !== true,
+            )).toBe(true);
+        };
+
+        const otherFrontPrimary = {
+            ...primary,
+            sub_segments: primary.sub_segments.map((subSegment) => ({
+                ...subSegment,
+                enemy_osids: [...subSegment.enemy_osids, 'op:test:other-front'],
+            })),
+        } as CorpsFrontSector;
+        excludesPrimaryGarrison(emitVariant({ primaryOverride: otherFrontPrimary }));
+        excludesPrimaryGarrison(emitVariant({
+            primaryOverride: { ...primary, sub_segments: [] } as CorpsFrontSector,
+        }));
+        excludesPrimaryGarrison(emitVariant({
+            garrisonOverrides: { location_osid: 'op:test:donor' as any },
+        }));
+        excludesPrimaryGarrison(emitVariant({
+            movementState: {
+                garrison: {
+                    status: 'in_transit',
+                    stance: 'column',
+                    destination_sids: ['op:test:approach'],
+                    turns_remaining: 1,
+                },
+            },
+        }));
+        for (const phase of ['execution', 'recovery'] as const) {
+            excludesPrimaryGarrison(emitVariant({
+                activeOperations: [{
+                    name: 'Other operation',
+                    type: 'sector_attack',
+                    phase,
+                    started_turn: 29,
+                    participating_brigades: ['garrison'],
+                    objectives: ['op:test:other-front'],
+                }],
+            }));
+        }
+
+        const inadequatePair = emitVariant({
+            garrisonOverrides: { personnel: 500 },
+        });
+        expect(inadequatePair.operations[0]).toMatchObject({
+            objectives: ['op:test:objective'],
+            participating_brigades: ['b1', 'garrison', 'b3'],
+            attached_brigades: ['b3'],
+            reinforcement_source: 'adjacent_sector',
+        });
+
+        const soloGarrison = emitVariant({
+            candidateAllocation: {
+                ...allocation,
+                surplus_pool: [makeEval('b3')],
+            },
+        });
+        excludesPrimaryGarrison(soloGarrison);
+
+        applyCommanderOutput(state, CORPS_ID, output);
+        state.military.corps_command![CORPS_ID]!.active_operations[0]!.phase = 'execution';
+        generateAllBotOrdersOsid(state, [FACTION], {
+            edges: [
+                { a: 'op:test:approach', b: 'op:test:objective' },
+                { a: 'op:test:approach', b: 'op:test:donor' },
+            ] as any,
+            reverseMap: briefing.reverse_map!,
+            supplyStateByOsid: {} as any,
+            osidPopulationMap: briefing.osid_population_map,
+        });
+        expect(state.military.brigade_attack_orders?.garrison).toBe('op:test:objective');
+        expect(state.military.brigade_movement_orders?.garrison).toBeUndefined();
+        expect(state.military.formations!.garrison!.location_osid).toBe('op:test:approach');
     });
 
     it.each(['committed', 'recovery', 'packing', 'transit', 'pending_move', 'unpacking', 'off_sector'] as const)(

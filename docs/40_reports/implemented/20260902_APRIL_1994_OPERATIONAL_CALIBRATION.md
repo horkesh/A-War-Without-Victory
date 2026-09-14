@@ -93,6 +93,23 @@ verify the focused regression and typecheck, then run one approximately 75-secon
 if the unchanged January criteria fail. No brigade-cap, elite-reservation, militia-defense,
 initial-control or authored-data change is authorized by this correction.
 
+**Diagnostic D and primary-front correction:** clean `e053dcaff` still scores 699/712.
+Prodor now selects Orašac at week 27, but its attached brigade arrives only at week 30,
+when the opening remains ineligible; it records no attacks or captures. The next scope is a
+bounded primary-line admission correction: a ready, uncommitted, sector-assigned brigade
+already on the friendly approach to that sector's isolated enemy position may join its own
+front's multi-brigade operation despite an allocator garrison label, provided no pre-attack
+march or non-pocket front gap is introduced. Physical active operation participants remain
+valid primary-front staff under the existing coverage classifiers; the earlier proposed
+noncommitted primary residual requirement was unsupported and withdrawn in the independent
+authority reconciliation. Cross-sector donor residual floors remain binding. Prefer an already
+staged viable primary group of at least two before adding a travelling donor, and retain the
+three-brigade cap and normal full-roster launch checks. The single-brigade exception still
+requires surplus and costly victory. Focused positive/negative coverage and assembly tests,
+independent review and typecheck precede one approximately 75-second diagnostic 39. The
+unchanged January capture/score/no-regression criteria remain the stopping gate; no force,
+militia, control, historical-reservation or protected-data edits are part of this scope.
+
 **Latest checkpoint — 2026-09-14:** the owner-approved local occupation repair is implemented
 at clean `8db305596`. All four Jajce cases pass by week 39; the full campaign scores
 696/690/687/659. Engine health passes, while western cascade 25, Prozor injection and Farz
