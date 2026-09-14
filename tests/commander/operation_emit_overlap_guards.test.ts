@@ -22,6 +22,7 @@ import type { SpatialContext } from '../../src/sim/spatial_context.js';
 import {
     capOpportunityOperationParticipants,
     emitCommanderOutput,
+    selectBoundedPositionDonorAttachments,
 } from '../../src/sim/combat/commander/emit.js';
 import { applyCommanderOutput } from '../../src/sim/combat/commander/commander_loop.js';
 import { CURRENT_SCHEMA_VERSION } from '../../src/state/game_state.js';
@@ -41,6 +42,87 @@ describe('opportunity operation force contract', () => {
         const assembled = Array.from({ length: 11 }, (_, index) => `b${index + 1}`);
         expect(capOpportunityOperationParticipants(assembled, 'opportunity', 6)).toEqual(assembled.slice(0, 6));
         expect(capOpportunityOperationParticipants(assembled, 'pre_planned', 6)).toEqual(assembled);
+    });
+
+    it('uses one aggregate adjacent-sector attachment budget while preserving each donor density floor', () => {
+        const primary = makeSector();
+        const donor = (id: number, lengthEdges: number, brigadeIds: string[]) => ({
+            ...makeSector(),
+            sector_id: `sector:${CORPS_ID}:${id}`,
+            territory_osids: [`op:test:donor-${id}`],
+            length_edges: lengthEdges,
+            assigned_brigade_ids: brigadeIds as FormationId[],
+        } as CorpsFrontSector);
+        const sectors = [
+            primary,
+            donor(1, 3, ['sole']),
+            donor(2, 4, ['b3', 'line-2']),
+            donor(3, 16, ['b4', 'line-3a', 'line-3b']),
+        ];
+        const adjacency = new Map<string, readonly string[]>([
+            ['op:test:approach', ['op:test:objective', 'op:test:donor-1', 'op:test:donor-2', 'op:test:donor-3']],
+        ]);
+
+        expect(selectBoundedPositionDonorAttachments(
+            primary,
+            sectors,
+            ['sole', 'b3', 'b4'],
+            new Map([
+                [`sector:${CORPS_ID}:1`, new Set(['sole'])],
+                // b3 is already packing for the operation; line-2 alone retains the floor.
+                [`sector:${CORPS_ID}:2`, new Set(['line-2'])],
+                [`sector:${CORPS_ID}:3`, new Set(['b4', 'line-3a', 'line-3b'])],
+            ]),
+            adjacency,
+            3,
+        )).toEqual({ brigade_ids: ['b3'], sector_ids: [`sector:${CORPS_ID}:2`] });
+
+        const fullyStaffedLongFront = { ...sectors[3]!, length_edges: 17 } as CorpsFrontSector;
+        expect(selectBoundedPositionDonorAttachments(
+            primary,
+            [...sectors.slice(0, 3), fullyStaffedLongFront],
+            ['b4'],
+            new Map([
+                [`sector:${CORPS_ID}:1`, new Set(['sole'])],
+                [`sector:${CORPS_ID}:2`, new Set(['b3', 'line-2'])],
+                [`sector:${CORPS_ID}:3`, new Set(['b4', 'line-3a', 'line-3b'])],
+            ]),
+            adjacency,
+            3,
+        )).toEqual({ brigade_ids: [], sector_ids: [] });
+    });
+
+    it('fails closed for missing donor length and excludes candidates outside the surplus pool', () => {
+        const primary = makeSector();
+        const missingLength = {
+            ...makeSector(),
+            sector_id: `sector:${CORPS_ID}:1`,
+            territory_osids: ['op:test:donor-1'],
+            length_edges: undefined,
+            assigned_brigade_ids: ['b3', 'line'] as FormationId[],
+        } as unknown as CorpsFrontSector;
+        const adjacency = new Map<string, readonly string[]>([
+            ['op:test:approach', ['op:test:objective', 'op:test:donor-1']],
+        ]);
+
+        expect(selectBoundedPositionDonorAttachments(
+            primary,
+            [primary, missingLength],
+            ['b3'],
+            new Map([[`sector:${CORPS_ID}:1`, new Set(['b3', 'line'])]]),
+            adjacency,
+            3,
+        )).toEqual({ brigade_ids: [], sector_ids: [] });
+
+        const validDonor = { ...missingLength, length_edges: 4 } as CorpsFrontSector;
+        expect(selectBoundedPositionDonorAttachments(
+            primary,
+            [primary, validDonor],
+            [],
+            new Map([[`sector:${CORPS_ID}:1`, new Set(['b3', 'line'])]]),
+            adjacency,
+            3,
+        )).toEqual({ brigade_ids: [], sector_ids: [] });
     });
 });
 
@@ -576,11 +658,62 @@ describe('commander emission overlap guards', () => {
     });
 
     it('concentrates a third available brigade against a bounded position without raising the two-brigade formation minimum', () => {
-        const briefing = makeBriefing([], [
+        const baseBriefing = makeBriefing([], [
             makeBrigade('b1', 'op:test:approach'),
             makeBrigade('b2', 'op:test:approach'),
-            makeBrigade('b3', 'op:test:approach'),
+            makeBrigade('a0', 'op:test:donor'),
+            makeBrigade('b3', 'op:test:donor', { posture: 'dig_in', dig_in_progress: 1 }),
+            makeBrigade('b5', 'op:test:sole'),
+            makeBrigade('b6', 'op:test:long'),
+            makeBrigade('b7', 'op:test:long'),
+            makeBrigade('b8', 'op:test:long'),
         ]);
+        const donorSector = {
+            ...makeSector(),
+            sector_id: `sector:${CORPS_ID}:1`,
+            edge_ids: ['e2', 'e3', 'e4', 'e5'],
+            length_edges: 4,
+            territory_osids: ['op:test:donor'],
+            assigned_brigade_ids: ['a0', 'b3'] as FormationId[],
+            sub_segments: [],
+        } as CorpsFrontSector;
+        const soleSector = {
+            ...donorSector,
+            sector_id: `sector:${CORPS_ID}:2`,
+            edge_ids: ['e6', 'e7', 'e8'],
+            length_edges: 3,
+            territory_osids: ['op:test:sole'],
+            assigned_brigade_ids: ['b5'] as FormationId[],
+        } as CorpsFrontSector;
+        const longSector = {
+            ...donorSector,
+            sector_id: `sector:${CORPS_ID}:3`,
+            edge_ids: Array.from({ length: 16 }, (_, index) => `long-${index}`),
+            length_edges: 16,
+            territory_osids: ['op:test:long'],
+            assigned_brigade_ids: ['b6', 'b7', 'b8'] as FormationId[],
+        } as CorpsFrontSector;
+        const adjacency = new Map<string, readonly string[]>([
+            ['op:test:approach', ['op:test:objective', 'op:test:donor', 'op:test:sole', 'op:test:long']],
+            ['op:test:donor', ['op:test:approach']],
+            ['op:test:sole', ['op:test:approach']],
+            ['op:test:long', ['op:test:approach']],
+            ['op:test:objective', ['op:test:approach']],
+        ]);
+        const briefing: CommanderBriefing = {
+            ...baseBriefing,
+            sectors: [makeSector(), donorSector, soleSector, longSector],
+            spatial: {
+                ...makeSpatial(),
+                adjacency,
+                sharedBoundaryAdjacency: adjacency,
+                friendlyOsidsByFaction: new Map<FactionId, ReadonlySet<string>>([
+                    [FACTION, new Set(['op:test:approach', 'op:test:donor', 'op:test:sole', 'op:test:long'])],
+                    ['RBiH' as FactionId, new Set(['op:test:objective'])],
+                    ['HRHB' as FactionId, new Set()],
+                ]),
+            } as SpatialContext,
+        };
         briefing.state_ref!.political.political_controllers = {
             'op:test:approach': FACTION,
             'op:test:objective': 'RBiH',
@@ -604,7 +737,10 @@ describe('commander emission overlap guards', () => {
             briefing,
             [],
             makeForces(),
-            makeAllocation(),
+            {
+                ...makeAllocation(),
+                surplus_pool: [makeEval('b1'), makeEval('b2'), makeEval('b3')],
+            },
             noPlan,
             makeDecisions(),
             makeThreats(),
@@ -617,8 +753,108 @@ describe('commander emission overlap guards', () => {
             minimum_viable_participants: 3,
             minimum_assembled_participants: 3,
             min_attack_outcome: 'stalemate',
+            supporting_sector_ids: [`sector:${CORPS_ID}:1`],
+            primary_sector_brigades: ['b1', 'b2'],
+            attached_brigades: ['b3'],
+            reinforcement_source: 'adjacent_sector',
         });
     });
+
+    it.each(['committed', 'recovery', 'packing', 'transit', 'pending_move', 'unpacking', 'off_sector'] as const)(
+        'does not count %s staff toward a donor residual',
+        (blockedState) => {
+            const blockedLocation = blockedState === 'off_sector' ? 'op:test:approach' : 'op:test:donor';
+            const brigades = [
+                makeBrigade('b1', 'op:test:approach'),
+                makeBrigade('b2', 'op:test:approach'),
+                makeBrigade('b3', 'op:test:donor'),
+                makeBrigade('blocked', blockedLocation),
+                makeBrigade('line1', 'op:test:long'),
+                makeBrigade('line2', 'op:test:long'),
+                makeBrigade('line3', 'op:test:long'),
+            ];
+            const committedOperation = blockedState === 'recovery' || blockedState === 'committed' ? [{
+                name: 'Recovering operation',
+                type: 'probe',
+                phase: blockedState === 'recovery' ? 'recovery' : 'execution',
+                sector_id: `sector:${CORPS_ID}:9`,
+                objectives: ['op:test:other'],
+                participating_brigades: ['blocked'],
+            } as any] : [];
+            const baseBriefing = makeBriefing(committedOperation, brigades);
+            const donor = {
+                ...makeSector(),
+                sector_id: `sector:${CORPS_ID}:1`,
+                territory_osids: ['op:test:donor'],
+                length_edges: 4,
+                assigned_brigade_ids: ['b3', 'blocked'] as FormationId[],
+                sub_segments: [],
+            } as CorpsFrontSector;
+            const longFront = {
+                ...donor,
+                sector_id: `sector:${CORPS_ID}:2`,
+                territory_osids: ['op:test:long'],
+                length_edges: 16,
+                assigned_brigade_ids: ['line1', 'line2', 'line3'] as FormationId[],
+            } as CorpsFrontSector;
+            const adjacency = new Map<string, readonly string[]>([
+                ['op:test:approach', ['op:test:objective', 'op:test:donor', 'op:test:long']],
+                ['op:test:donor', ['op:test:approach']],
+                ['op:test:long', ['op:test:approach']],
+                ['op:test:objective', ['op:test:approach']],
+            ]);
+            const briefing: CommanderBriefing = {
+                ...baseBriefing,
+                sectors: [makeSector(), donor, longFront],
+                spatial: {
+                    ...makeSpatial(),
+                    adjacency,
+                    sharedBoundaryAdjacency: adjacency,
+                    friendlyOsidsByFaction: new Map<FactionId, ReadonlySet<string>>([
+                        [FACTION, new Set(['op:test:approach', 'op:test:donor', 'op:test:long'])],
+                        ['RBiH' as FactionId, new Set(['op:test:objective'])],
+                        ['HRHB' as FactionId, new Set()],
+                    ]),
+                } as SpatialContext,
+            };
+            briefing.state_ref!.political.political_controllers = {
+                'op:test:approach': FACTION,
+                'op:test:donor': FACTION,
+                'op:test:long': FACTION,
+                'op:test:objective': 'RBiH',
+            } as any;
+            briefing.state_ref!.military.corps_command![CORPS_ID]!.consecutive_probes = 2;
+            if (blockedState === 'packing' || blockedState === 'transit' || blockedState === 'unpacking') {
+                briefing.state_ref!.military.brigade_movement_state = {
+                    blocked: { status: blockedState === 'transit' ? 'in_transit' : blockedState } as any,
+                };
+            }
+            if (blockedState === 'pending_move') {
+                briefing.state_ref!.military.brigade_movement_orders = {
+                    blocked: { destination_sids: ['op:test:approach'] } as any,
+                };
+            }
+            const noPlan = { ...makePlanDecision(), plan: null, action: 'none' as const };
+            const output = emitCommanderOutput(
+                briefing,
+                [],
+                makeForces(),
+                { ...makeAllocation(), surplus_pool: [makeEval('b1'), makeEval('b2'), makeEval('b3')] },
+                noPlan,
+                makeDecisions(),
+                makeThreats(),
+            );
+
+            if (blockedState === 'committed') {
+                expect(output.operations).toHaveLength(0);
+            } else if (blockedState === 'unpacking') {
+                expect(output.operations[0]?.participating_brigades).toEqual(['b1', 'b2', 'b3']);
+            } else {
+                expect(output.operations[0]?.participating_brigades).toEqual(['b1', 'b2']);
+                expect(output.operations[0]?.attached_brigades).toBeUndefined();
+            }
+        },
+    );
 
     it('emits byte-identical intel-gated operations for identical inputs', () => {
         const briefing = makeIntelBriefing([0.24]);

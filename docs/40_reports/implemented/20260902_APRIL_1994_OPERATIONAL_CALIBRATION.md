@@ -47,6 +47,25 @@ Close with synchronized governing documentation, ledger and a clean local checkp
 main merge or baseline refresh is implied. Refresh the existing public diagnostic viewer
 with the verified result under the owner's standing request to inspect the latest run.
 
+**Revised approach after Diagnostic A:** clean `374235fb8` reaches 698/712 with no new
+January mismatches: Donji Vakuf town and Prusac fall, but Orašac and Korenići remain open.
+An unchanged short trace identifies inadequate combined attacking strength at Orašac;
+Korenići follow-through is delayed by the authored objective sequence. Candidate `10791b6a9`
+is rejected before a scenario because its proposed third brigade is the sole staff of another
+front sector. Before another measured candidate, apply the existing donor-sector budget and
+residual staffing rules to bounded-position selection, prove those rules with a realistic donor
+fixture, and establish a legal concentration path from retained evidence. Independent authority
+review established that the older per-sector 33% formula is implementation policy, while the
+binding donor floor is `max(1, ceil(length_edges / 8))`. The revised bounded-position policy may
+share a 33% allowance across territory-adjacent sectors only when each donor keeps that computed
+floor and the ordinary surplus, readiness, commitment, path, enclave and explicit attachment
+checks pass; ordinary operation attachment policy remains unchanged. Keep the bounded
+Donji Vakuf objective reorder. The January acceptance criteria are unchanged; no full campaign
+or full suite has yet been launched for this packet. Retain the inherited short-run Drina
+geometry warning and 13-versus-3 stranded-unit health failure without changing their thresholds;
+the required full-horizon gates remain separate. Detailed receipts are under
+`logs/roadmap-integration-20260912/january-operations/`.
+
 **Latest checkpoint — 2026-09-14:** the owner-approved local occupation repair is implemented
 at clean `8db305596`. All four Jajce cases pass by week 39; the full campaign scores
 696/690/687/659. Engine health passes, while western cascade 25, Prozor injection and Farz

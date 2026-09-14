@@ -34,6 +34,7 @@
  */
 
 import type {
+    CorpsFrontSector,
     CorpsDirective,
     CorpsOperation,
     FormationId,
@@ -122,6 +123,65 @@ const MAX_REACHABILITY_HOPS = 8;
 const ADJACENT_SECTOR_ATTACH_RATE = 0.33;
 /** Minimum brigades that must remain in an adjacent sector after attachment. */
 const ADJACENT_SECTOR_MIN_RESIDUAL = 1;
+
+/** Front density floor shared with sector staffing: one brigade per eight edges. */
+const FRONT_DENSITY_EDGES_PER_BRIGADE = 8;
+
+export function selectBoundedPositionDonorAttachments(
+    primarySector: CorpsFrontSector,
+    corpsSectors: readonly CorpsFrontSector[],
+    rankedCandidateIds: readonly string[],
+    stationaryLineStaffBySector: ReadonlyMap<string, ReadonlySet<string>>,
+    adjacencyMap: ReadonlyMap<string, readonly string[]>,
+    maxParticipants: number,
+): { brigade_ids: string[]; sector_ids: string[] } {
+    const primaryNeighborSet = new Set<string>();
+    for (const osid of primarySector.territory_osids) {
+        for (const neighbor of adjacencyMap.get(osid) ?? []) primaryNeighborSet.add(neighbor);
+    }
+    const donors = corpsSectors
+        .filter((sector) => sector.corps_id === primarySector.corps_id && sector.sector_id !== primarySector.sector_id)
+        .filter((sector) => sector.territory_osids.some((osid) => primaryNeighborSet.has(osid)))
+        .filter((sector) => Number.isFinite(sector.length_edges) && sector.length_edges > 0)
+        .sort((left, right) => strictCompare(left.sector_id, right.sector_id));
+
+    const donorByBrigade = new Map<string, CorpsFrontSector>();
+    const lineStaffBySector = new Map<string, ReadonlySet<string>>();
+    const minimumLineBySector = new Map<string, number>();
+    const selectedLineStaffBySector = new Map<string, number>();
+    let aggregateActiveStaff = 0;
+    for (const donor of donors) {
+        const stationaryLineStaff = stationaryLineStaffBySector.get(donor.sector_id) ?? new Set<string>();
+        const activeAssigned = donor.assigned_brigade_ids.filter((id) => stationaryLineStaff.has(id));
+        const minimumLine = Math.max(1, Math.ceil(donor.length_edges / FRONT_DENSITY_EDGES_PER_BRIGADE));
+        aggregateActiveStaff += activeAssigned.length;
+        lineStaffBySector.set(donor.sector_id, stationaryLineStaff);
+        minimumLineBySector.set(donor.sector_id, minimumLine);
+        selectedLineStaffBySector.set(donor.sector_id, 0);
+        for (const brigadeId of donor.assigned_brigade_ids) donorByBrigade.set(brigadeId, donor);
+    }
+
+    const aggregateBudget = Math.min(
+        Math.max(0, maxParticipants - 1),
+        Math.floor(aggregateActiveStaff * ADJACENT_SECTOR_ATTACH_RATE),
+    );
+    const brigadeIds: string[] = [];
+    const sectorIds = new Set<string>();
+    for (const brigadeId of rankedCandidateIds) {
+        if (brigadeIds.length >= aggregateBudget) break;
+        const donor = donorByBrigade.get(brigadeId);
+        if (!donor) continue;
+        const lineStaff = lineStaffBySector.get(donor.sector_id) ?? new Set<string>();
+        const selectedLineStaff = selectedLineStaffBySector.get(donor.sector_id) ?? 0;
+        const candidateUsesLineStaff = lineStaff.has(brigadeId) ? 1 : 0;
+        const retainedLineStaff = lineStaff.size - selectedLineStaff - candidateUsesLineStaff;
+        if (retainedLineStaff < (minimumLineBySector.get(donor.sector_id) ?? Number.POSITIVE_INFINITY)) continue;
+        brigadeIds.push(brigadeId);
+        sectorIds.add(donor.sector_id);
+        selectedLineStaffBySector.set(donor.sector_id, selectedLineStaff + candidateUsesLineStaff);
+    }
+    return { brigade_ids: brigadeIds, sector_ids: [...sectorIds].sort(strictCompare) };
+}
 
 /** Min attack outcome by zone posture (most restrictive → least). */
 const POSTURE_MIN_OUTCOME: Record<ZonePosture, CorpsDirective['min_attack_outcome']> = {
@@ -1504,33 +1564,81 @@ function buildOperations(
                         ...(probeSector?.rear_brigade_ids ?? []),
                         ...(probeSector?.assigned_brigade_ids ?? []),
                     ]);
+                    const surplusParticipantIds = new Set(
+                        allocation.surplus_pool.map((entry) => entry.brigade_id),
+                    );
+                    const activeOperationParticipants = new Set(
+                        briefing.active_operations
+                            .flatMap((operation) => operation.participating_brigades ?? []),
+                    );
+                    const formationById = new Map(briefing.brigades.map((brigade) => [brigade.id, brigade]));
+                    const stationaryLineStaffBySector = new Map<string, ReadonlySet<string>>();
+                    for (const sector of briefing.sectors) {
+                        const staff = new Set<string>();
+                        for (const brigadeId of sector.assigned_brigade_ids) {
+                            const brigade = formationById.get(brigadeId);
+                            if (!brigade || brigade.status !== 'active' || !isEligibleOperationFormation(brigade)) continue;
+                            if (!brigade.location_osid || !sector.territory_osids.includes(brigade.location_osid)) continue;
+                            if (activeOperationParticipants.has(brigadeId)) continue;
+                            const movementStatus = briefing.state_ref?.military.brigade_movement_state?.[brigadeId]?.status;
+                            if (movementStatus === 'packing' || movementStatus === 'in_transit') continue;
+                            if (briefing.state_ref?.military.brigade_movement_orders?.[brigadeId]) continue;
+                            staff.add(brigadeId);
+                        }
+                        stationaryLineStaffBySector.set(sector.sector_id, staff);
+                    }
+                    const rankedReductionCandidates = [
+                        probeBrigade.brigade_id,
+                        ...(probeSector?.reserve_brigade_ids ?? []),
+                        ...(probeSector?.rear_brigade_ids ?? []),
+                        ...(probeSector?.assigned_brigade_ids ?? []),
+                        ...briefing.brigades.map((entry) => entry.id),
+                    ]
+                        .filter((brigadeId, index, all) => all.indexOf(brigadeId) === index)
+                        .filter((brigadeId) => surplusParticipantIds.has(brigadeId))
+                        .filter((brigadeId) => !queuedHistoricalParticipants.has(brigadeId))
+                        .filter((brigadeId) => !activeOperationParticipants.has(brigadeId))
+                        .filter((brigadeId) => isCombatReadyParticipant(briefing, brigadeId))
+                        .filter((brigadeId) => {
+                            const brigade = briefing.brigades.find((entry) => entry.id === brigadeId);
+                            return brigade?.corps_id === briefing.corps_id
+                                && brigade.elite_loan_state?.on_loan !== true
+                                && isBrigadeEligibleForOperationObjectives(brigade, probeObjectives)
+                                && Number.isFinite(distanceToReduction(brigadeId));
+                        })
+                        .sort((left, right) => {
+                            if (left === probeBrigade.brigade_id) return -1;
+                            if (right === probeBrigade.brigade_id) return 1;
+                            const sectorDiff = Number(sameSectorParticipants.has(right)) - Number(sameSectorParticipants.has(left));
+                            if (sectorDiff !== 0) return sectorDiff;
+                            const distanceDiff = distanceToReduction(left) - distanceToReduction(right);
+                            return distanceDiff !== 0 ? distanceDiff : strictCompare(left, right);
+                        });
                     const reductionParticipants = localOccupationCandidate
                         ? [probeBrigade.brigade_id]
-                        : [
-                            probeBrigade.brigade_id,
-                            ...(probeSector?.reserve_brigade_ids ?? []),
-                            ...(probeSector?.rear_brigade_ids ?? []),
-                            ...(probeSector?.assigned_brigade_ids ?? []),
-                            ...briefing.brigades.map((entry) => entry.id),
-                        ]
-                            .filter((brigadeId, index, all) => all.indexOf(brigadeId) === index)
-                            .filter((brigadeId) => !queuedHistoricalParticipants.has(brigadeId))
-                            .filter((brigadeId) => isCombatReadyParticipant(briefing, brigadeId))
-                            .filter((brigadeId) => {
-                                const brigade = briefing.brigades.find((entry) => entry.id === brigadeId);
-                                return brigade?.corps_id === briefing.corps_id
-                                    && isBrigadeEligibleForOperationObjectives(brigade, probeObjectives)
-                                    && Number.isFinite(distanceToReduction(brigadeId));
-                            })
-                            .sort((left, right) => {
-                                if (left === probeBrigade.brigade_id) return -1;
-                                if (right === probeBrigade.brigade_id) return 1;
-                                const sectorDiff = Number(sameSectorParticipants.has(right)) - Number(sameSectorParticipants.has(left));
-                                if (sectorDiff !== 0) return sectorDiff;
-                                const distanceDiff = distanceToReduction(left) - distanceToReduction(right);
-                                return distanceDiff !== 0 ? distanceDiff : strictCompare(left, right);
-                            })
-                            .slice(0, ISOLATED_POSITION_OPERATION_MAX_BRIGADES);
+                        : (() => {
+                            const primaryParticipants = rankedReductionCandidates
+                                .filter((brigadeId) => sameSectorParticipants.has(brigadeId))
+                                .slice(0, ISOLATED_POSITION_OPERATION_MAX_BRIGADES);
+                            if (!probeSector || primaryParticipants.length >= ISOLATED_POSITION_OPERATION_MAX_BRIGADES) {
+                                return primaryParticipants;
+                            }
+                            const donors = selectBoundedPositionDonorAttachments(
+                                probeSector,
+                                briefing.sectors,
+                                rankedReductionCandidates.filter((brigadeId) => !sameSectorParticipants.has(brigadeId)),
+                                stationaryLineStaffBySector,
+                                briefing.spatial.adjacency,
+                                ISOLATED_POSITION_OPERATION_MAX_BRIGADES,
+                            );
+                            return [
+                                ...primaryParticipants,
+                                ...donors.brigade_ids.slice(
+                                    0,
+                                    ISOLATED_POSITION_OPERATION_MAX_BRIGADES - primaryParticipants.length,
+                                ),
+                            ];
+                        })();
                     const singleBrigadeOccupationIsSufficient = localOccupationCandidate != null
                         && reductionParticipants.length === 1;
                     const escalateToOperation = targetIsBoundedPosition
@@ -1589,6 +1697,25 @@ function buildOperations(
                             operation.minimum_viable_participants = reductionParticipants.length;
                             operation.minimum_assembled_participants = reductionParticipants.length;
                             operation.preparation_sub_phase = 'ready';
+                            const primarySectorBrigades = reductionParticipants
+                                .filter((brigadeId) => sameSectorParticipants.has(brigadeId));
+                            const attachedBrigades = reductionParticipants
+                                .filter((brigadeId) => !sameSectorParticipants.has(brigadeId));
+                            if (primarySectorBrigades.length > 0) {
+                                operation.primary_sector_brigades = primarySectorBrigades;
+                            }
+                            if (attachedBrigades.length > 0) {
+                                operation.attached_brigades = attachedBrigades;
+                                operation.reinforcement_source = 'adjacent_sector';
+                            }
+                            const supportingSectorIds = briefing.sectors
+                                .filter((sector) => sector.sector_id !== probeSectorId)
+                                .filter((sector) => sector.assigned_brigade_ids.some((id) => reductionParticipants.includes(id)))
+                                .map((sector) => sector.sector_id)
+                                .sort(strictCompare);
+                            if (supportingSectorIds.length > 0) {
+                                operation.supporting_sector_ids = supportingSectorIds;
+                            }
                             if (singleBrigadeOccupationIsSufficient) {
                                 operation.minimum_viable_participants = 1;
                                 operation.minimum_assembled_participants = 1;
