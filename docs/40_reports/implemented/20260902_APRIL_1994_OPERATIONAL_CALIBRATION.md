@@ -133,6 +133,29 @@ elite reservation change or control writer is included. Verify low-intel plannin
 probe/staging/launch holds with focused regressions and independent review/typecheck before
 one approximately 75-second diagnostic 39. Stop if the unchanged January criteria fail.
 
+**Diagnostic F and operation-command ownership correction:** clean `fca9dc98e` remains at
+699/712 with all seven prior captures, no new January mismatches, no passive transfers and
+40 resolved assignment seals. Bunar is created at week 25 with the full legal trio; its donor
+arrives at 28, but five preparation turns defer execution to 30. Actual battles at 30/31/33
+resolve at 0.84/0.67/0.71 and fail. Retained predictor terms identify the seasonal boundary:
+attack changes from 0.95 to 0.75 and defense from 1.00 to 1.05 at week 30. Earlier post-turn
+week-23 feasibility does not establish availability at that week's commander decision.
+
+Before launching the proposed admission trace, source inspection established a narrower
+contract defect: `applyCommanderOutput` admits new operations without calling the existing
+`assignOperationCommander` lifecycle writer. Systems Manual §7.5 explicitly requires a
+reserve commander on creation of named bot operations. Bunar therefore uses unnamed 3/3
+preparation defaults. The existing selector chooses available home-corps Samardžija (4/4)
+in retained post-turn 24/25 states; F's final state also leaves him reserve/unassigned. This
+supports restoring ordinary assignment, not hardcoding that officer or promising capture.
+The unused diagnostic instrumentation was preserved outside tracked source and removed;
+no additional trace campaign ran. Correct assignment only after actual new admission,
+preserving approval, conflict, retry, explicit-command and completion-release ownership.
+Verify those boundaries and normal preparation in focused tests and independent review,
+then use the normal typecheck and one approximately 75-second diagnostic 39. Keep every
+January acceptance criterion unchanged and stop larger validation if it fails. No selector,
+preparation formula, officer data, force-stat, seasonal or militia-defense tuning is included.
+
 **Latest checkpoint — 2026-09-14:** the owner-approved local occupation repair is implemented
 at clean `8db305596`. All four Jajce cases pass by week 39; the full campaign scores
 696/690/687/659. Engine health passes, while western cascade 25, Prozor injection and Farz

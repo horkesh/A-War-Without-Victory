@@ -37,6 +37,7 @@ import { emitCommanderOutput } from './emit.js';
 import { assembleBeliefState } from './belief.js';
 import type { CorpsOperation } from '../../../state/game_state.js';
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
+import { assignOperationCommander } from '../officer_system.js';
 
 function operationsConflict(
     left: Pick<CorpsOperation, 'name' | 'sector_id' | 'objectives' | 'participating_brigades'>,
@@ -249,6 +250,12 @@ export function applyCommanderOutput(
             const existing = corps.active_operations.find(active => operationsConflict(active, candidate));
             if (!existing) {
                 corps.active_operations.push(candidate);
+                if (!candidate.commander_officer_id) {
+                    const hostFaction = state.military.formations?.[corpsId]?.faction;
+                    if (hostFaction === 'RS' || hostFaction === 'RBiH' || hostFaction === 'HRHB') {
+                        assignOperationCommander(state, candidate, corpsId, hostFaction);
+                    }
+                }
                 activatedOperations.push(candidate);
                 if (op.type === 'probe') {
                     corps.consecutive_probes = (corps.consecutive_probes ?? 0) + 1;
