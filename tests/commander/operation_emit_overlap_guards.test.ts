@@ -27,6 +27,8 @@ import {
 import { applyCommanderOutput } from '../../src/sim/combat/commander/commander_loop.js';
 import { CURRENT_SCHEMA_VERSION } from '../../src/state/game_state.js';
 import { evaluateOpeningAttackReadiness } from '../../src/sim/combat/sector_offensive_launch_helpers.js';
+import { predictCombatOutcome } from '../../src/sim/combat/combat_predictor.js';
+import { isOutcomeSufficientForAttack } from '../../src/sim/combat/bot_brigade_targeting.js';
 
 const FACTION: FactionId = 'RS';
 const CORPS_ID = 'vrs_test_corps' as FormationId;
@@ -758,6 +760,320 @@ describe('commander emission overlap guards', () => {
             attached_brigades: ['b3'],
             reinforcement_source: 'adjacent_sector',
         });
+        expect(output.operations[0]?.axes?.[0]?.minimum_staged_brigades).toBe(3);
+    });
+
+    it('prefers a bounded position that only the lawful projected concentration can reduce over a fitter generic probe', () => {
+        const brigades = [
+            makeBrigade('b1', 'op:test:approach', { personnel: 700 }),
+            makeBrigade('b2', 'op:test:approach', { personnel: 700 }),
+            makeBrigade('line', 'op:test:donor'),
+            makeBrigade('line2', 'op:test:donor'),
+            makeBrigade('line3', 'op:test:donor'),
+            makeBrigade('b3', 'op:test:donor', { personnel: 700 }),
+            makeBrigade('probe', 'op:test:other-approach', { personnel: 1600 }),
+        ];
+        const primary = makeSector();
+        const donor = {
+            ...makeSector(),
+            sector_id: `sector:${CORPS_ID}:1`,
+            edge_ids: ['donor-edge'],
+            length_edges: 4,
+            territory_osids: ['op:test:donor'],
+            assigned_brigade_ids: ['line', 'line2', 'line3', 'b3'] as FormationId[],
+            reserve_brigade_ids: [],
+            sub_segments: [],
+        } as CorpsFrontSector;
+        const probeSector = {
+            ...makeSector(),
+            sector_id: `sector:${CORPS_ID}:2`,
+            edge_ids: ['probe-edge'],
+            territory_osids: ['op:test:other-approach'],
+            assigned_brigade_ids: ['probe'] as FormationId[],
+            reserve_brigade_ids: [],
+            sub_segments: [{
+                ...makeSector().sub_segments[0]!,
+                sub_segment_id: `subseg:${CORPS_ID}:2`,
+                edge_ids: ['probe-edge'],
+                friendly_osids: ['op:test:other-approach'],
+                enemy_osids: ['op:test:other-target'],
+                primary_brigade_ids: ['probe'] as FormationId[],
+            }],
+        } as CorpsFrontSector;
+        const adjacency = new Map<string, readonly string[]>([
+            ['op:test:approach', ['op:test:objective', 'op:test:donor']],
+            ['op:test:donor', ['op:test:approach']],
+            ['op:test:objective', ['op:test:approach']],
+            ['op:test:other-approach', ['op:test:other-target']],
+            ['op:test:other-target', [
+                'op:test:other-approach',
+                'op:test:enemy-depth-1',
+                'op:test:enemy-depth-2',
+                'op:test:enemy-depth-3',
+                'op:test:enemy-depth-4',
+                'op:test:enemy-depth-5',
+                'op:test:enemy-depth-6',
+            ]],
+            ...Array.from({ length: 6 }, (_, index) => [
+                `op:test:enemy-depth-${index + 1}`,
+                ['op:test:other-target'],
+            ] as const),
+        ]);
+        const base = makeBriefing([], brigades);
+        const state = {
+            ...base.state_ref!,
+            military: {
+                ...base.state_ref!.military,
+                formations: Object.fromEntries(brigades.map((brigade) => [brigade.id, brigade])),
+                corps_front_sectors: Object.fromEntries(
+                    [primary, donor, probeSector].map((sector) => [sector.sector_id, sector]),
+                ),
+            },
+            political: {
+                ...base.state_ref!.political,
+                political_controllers: {
+                    'op:test:approach': FACTION,
+                    'op:test:donor': FACTION,
+                    'op:test:other-approach': FACTION,
+                    'op:test:objective': 'RBiH',
+                    'op:test:other-target': 'RBiH',
+                    ...Object.fromEntries(
+                        Array.from({ length: 6 }, (_, index) => [`op:test:enemy-depth-${index + 1}`, 'RBiH']),
+                    ),
+                },
+            },
+        } as GameState;
+        state.meta.turn = 30;
+        state.military.corps_command![CORPS_ID]!.consecutive_probes = 2;
+        const briefing: CommanderBriefing = {
+            ...base,
+            turn: 30,
+            state_ref: state,
+            sectors: [primary, donor, probeSector],
+            reverse_map: new Map<string, string[]>([
+                ['op:test:approach', ['S1']],
+                ['op:test:donor', ['S2']],
+                ['op:test:objective', ['S3']],
+                ['op:test:other-approach', ['S4']],
+                ['op:test:other-target', ['S5']],
+                ...Array.from({ length: 6 }, (_, index): [string, string[]] => [
+                    `op:test:enemy-depth-${index + 1}`,
+                    [`S${index + 6}`],
+                ]),
+            ]),
+            osid_population_map: new Map([
+                ['op:test:objective', 40_000],
+                ['op:test:other-target', 10_000],
+            ]),
+            spatial: {
+                ...makeSpatial(),
+                adjacency,
+                sharedBoundaryAdjacency: adjacency,
+                friendlyOsidsByFaction: new Map([
+                    [FACTION, new Set(['op:test:approach', 'op:test:donor', 'op:test:other-approach'])],
+                    ['RBiH' as FactionId, new Set([
+                        'op:test:objective',
+                        'op:test:other-target',
+                        ...Array.from({ length: 6 }, (_, index) => `op:test:enemy-depth-${index + 1}`),
+                    ])],
+                    ['HRHB' as FactionId, new Set()],
+                ]),
+            } as SpatialContext,
+        };
+        const allocation = {
+            ...makeAllocation(),
+            surplus_pool: [
+                { ...makeEval('probe'), fitness_offense: 0.99 },
+                makeEval('b1'),
+                makeEval('b2'),
+                makeEval('b3'),
+            ],
+        };
+        const sourceLocations = Object.fromEntries(brigades.map((brigade) => [brigade.id, brigade.location_osid]));
+        const projectedState = {
+            ...state,
+            military: {
+                ...state.military,
+                formations: {
+                    ...state.military.formations,
+                    b3: { ...state.military.formations!.b3!, location_osid: 'op:test:approach' },
+                },
+            },
+        } as GameState;
+        const predict = (attacker: FormationId, support: FormationId[] = []) => predictCombatOutcome(
+            projectedState,
+            attacker,
+            'op:test:objective',
+            adjacency as Map<any, any>,
+            briefing.reverse_map!,
+            {},
+            'attack',
+            support,
+            undefined,
+            briefing.osid_population_map,
+        );
+        const soloOne = predict('b1' as FormationId);
+        const soloTwo = predict('b2' as FormationId);
+        const localPair = predict('b1' as FormationId, ['b2'] as FormationId[]);
+        const combined = predict('b1' as FormationId, ['b2', 'b3'] as FormationId[]);
+        expect(isOutcomeSufficientForAttack(soloOne!.predicted_outcome, 'costly_victory')).toBe(false);
+        expect(isOutcomeSufficientForAttack(soloTwo!.predicted_outcome, 'costly_victory')).toBe(false);
+        expect(combined!.predicted_outcome).toBe('costly_victory');
+        expect(isOutcomeSufficientForAttack(combined!.predicted_outcome, 'costly_victory')).toBe(true);
+        expect(isOutcomeSufficientForAttack(localPair!.predicted_outcome, 'costly_victory')).toBe(false);
+
+        const output = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            allocation,
+            { ...makePlanDecision(), plan: null, action: 'none' },
+            makeDecisions(),
+            makeThreats(),
+        );
+
+        expect(output.operations[0]).toMatchObject({
+            type: 'sector_attack',
+            objectives: ['op:test:objective'],
+            participating_brigades: ['b1', 'b2', 'b3'],
+            attached_brigades: ['b3'],
+            reinforcement_source: 'adjacent_sector',
+        });
+        expect(Object.fromEntries(brigades.map((brigade) => [brigade.id, brigade.location_osid])))
+            .toEqual(sourceLocations);
+
+        const operation = output.operations[0]!;
+        const marchingState = {
+            ...state,
+            military: {
+                ...state.military,
+                war_front_edges_osid: [{ a: 'op:test:approach', b: 'op:test:objective' } as any],
+                brigade_movement_state: {
+                    b3: {
+                        status: 'in_transit',
+                        stance: 'column',
+                        destination_sids: ['op:test:approach'],
+                        turns_remaining: 1,
+                    },
+                },
+            },
+        } as GameState;
+        expect(evaluateOpeningAttackReadiness(
+            marchingState,
+            CORPS_ID,
+            FACTION,
+            operation,
+            undefined,
+            {
+                adjacency: adjacency as Map<any, any>,
+                reverseMap: briefing.reverse_map!,
+                terrainMultByOsid: {},
+                osidPopulationMap: briefing.osid_population_map,
+            },
+        )).toEqual({
+            executable: false,
+            blocker: 'participants_below_assembly_floor',
+        });
+        const arrivedState = {
+            ...projectedState,
+            military: {
+                ...projectedState.military,
+                war_front_edges_osid: [{ a: 'op:test:approach', b: 'op:test:objective' } as any],
+            },
+        } as GameState;
+        expect(evaluateOpeningAttackReadiness(
+            arrivedState,
+            CORPS_ID,
+            FACTION,
+            operation,
+            undefined,
+            {
+                adjacency: adjacency as Map<any, any>,
+                reverseMap: briefing.reverse_map!,
+                terrainMultByOsid: {},
+                osidPopulationMap: briefing.osid_population_map,
+            },
+        )).toEqual({ executable: true });
+
+        const doesNotSelectBoundedTarget = (candidateBriefing: CommanderBriefing = briefing) => {
+            const guarded = emitCommanderOutput(
+                candidateBriefing,
+                [],
+                makeForces(),
+                allocation,
+                { ...makePlanDecision(), plan: null, action: 'none' },
+                makeDecisions(),
+                makeThreats(),
+            );
+            expect(guarded.operations.every(
+                (candidate) => candidate.objectives?.includes('op:test:objective') !== true,
+            )).toBe(true);
+        };
+
+        briefing.osid_population_map!.set('op:test:objective', 100_000);
+        doesNotSelectBoundedTarget();
+        briefing.osid_population_map!.set('op:test:objective', 40_000);
+
+        const guardedBrigadeBriefing = (overrides: Partial<FormationState>): CommanderBriefing => {
+            const guardedBrigades = brigades.map((brigade) => brigade.id === 'b3' ? { ...brigade, ...overrides } : brigade);
+            return {
+                ...briefing,
+                brigades: guardedBrigades,
+                state_ref: {
+                    ...state,
+                    military: {
+                        ...state.military,
+                        formations: Object.fromEntries(guardedBrigades.map((brigade) => [brigade.id, brigade])),
+                    },
+                },
+            } as CommanderBriefing;
+        };
+        doesNotSelectBoundedTarget(guardedBrigadeBriefing({ elite_loan_state: { on_loan: true } as any }));
+        doesNotSelectBoundedTarget(guardedBrigadeBriefing({ tags: ['enclave'] }));
+
+        doesNotSelectBoundedTarget({
+            ...briefing,
+            state_ref: { ...state, meta: { ...state.meta, autonomy_level: 1 } },
+        } as CommanderBriefing);
+
+        doesNotSelectBoundedTarget({
+            ...briefing,
+            state_ref: {
+                ...state,
+                political: {
+                    ...state.political,
+                    political_controllers: {
+                        ...state.political.political_controllers,
+                        'op:test:objective': FACTION,
+                    },
+                },
+            },
+        } as CommanderBriefing);
+
+        doesNotSelectBoundedTarget({
+            ...briefing,
+            state_ref: {
+                ...state,
+                military: {
+                    ...state.military,
+                    corps_command: {
+                        ...state.military.corps_command,
+                        [CORPS_ID]: {
+                            ...state.military.corps_command![CORPS_ID]!,
+                            consecutive_probes: 0,
+                        },
+                    },
+                    sector_intel: {
+                        [primary.sector_id]: [{
+                            enemy_sector_id: 'sector:enemy:test',
+                            confidence: 0,
+                            last_updated_turn: 30,
+                            sources: ['passive_contact'],
+                        }],
+                    } as any,
+                },
+            },
+        } as CommanderBriefing);
     });
 
     it.each(['committed', 'recovery', 'packing', 'transit', 'pending_move', 'unpacking', 'off_sector'] as const)(

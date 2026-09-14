@@ -66,6 +66,17 @@ geometry warning and 13-versus-3 stranded-unit health failure without changing t
 the required full-horizon gates remain separate. Detailed receipts are under
 `logs/roadmap-integration-20260912/january-operations/`.
 
+**Diagnostic B and remaining selection defect:** clean `bbdb6b615` reaches 699/712 with no
+new January mismatches. Donji Vakuf town/Korenići/Prusac fall at 35/36/39 and all four Jajce
+captures remain. Orašac's attached force reaches its approach by 39, but its opening attack
+still fails. Bounded priority currently sees targets one brigade can defeat and misses a
+position requiring concentration until the late generic-probe path selects it. The next bounded
+correction evaluates a legal combined force with complete prediction inputs before routine
+probes; any projected concentration is read-only and grants no actual movement, launch or
+control authority. The verified donor contract, three-participant cap and January criteria remain
+unchanged. Source review settled that operation mobilization may replace dig-in posture;
+automatic empty-front reassignment restrictions are a separate authority.
+
 **Latest checkpoint — 2026-09-14:** the owner-approved local occupation repair is implemented
 at clean `8db305596`. All four Jajce cases pass by week 39; the full campaign scores
 696/690/687/659. Engine health passes, while western cascade 25, Prozor injection and Farz
