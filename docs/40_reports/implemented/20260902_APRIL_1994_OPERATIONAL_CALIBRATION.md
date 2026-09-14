@@ -109,6 +109,56 @@ records unchanged production source since POST-A, the preserved 18-tree inventor
 dirty paths and 22 ordered stashes. This checkpoint records failed acceptance without altering
 its measured source.
 
+### Owner-authorized local occupation repair — 2026-09-14
+
+The owner approved the concrete regular-army occupation proposal after inspecting January
+1993 around Jajce. Branch `codex/jajce-local-occupation-20260914` starts at clean `9ac9f11da`.
+The saved POST-A evidence identifies Jezero, Lupnica, Baljvine and Donji Korićani as isolated
+singletons at week 39, each with an all-RS shared-boundary ring and no physically recorded
+brigade. Nearby RS formations exist, but the temporal log alone does not establish legal donor
+availability or absence of militia/reactive defense. POST-A captures three only at weeks
+43/50/54; Baljvine never changes through week 188.
+
+**Authorized scope:** reproduce actual local planning/execution; let a sufficient nearby
+available regular brigade receive a bounded occupation task after the paramilitary lifecycle;
+retain the ordinary movement, attack and CorpsOperation authority. Preserve actual defense and
+militia checks, legal same-corps access, readiness, commitments, frontage staffing, player order
+and authorization boundaries, enclave protections, alliance timing and ceasefires. The ordinary
+offensive minimum remains unchanged. No topology-driven control writer, historical force-result
+event, target-specific calibration list, protected-data edit or baseline refresh is authorized.
+The single-brigade exception is the owner's approved scope; the Systems Manual's older generic
+two-brigade sentence will be synchronized to the final reviewed implementation.
+
+**Fixed checks and stopping rule:** one implementer and one independent reviewer. First prove
+the missing behavior with a failing focused regression, then the real order-to-capture path and
+negative controls. Compute affected tests with `node tools/affected_tests.cjs 9ac9f11da`; use
+the focused cases as the cheap preflight and cover the resulting set in the required full suite
+(`npm.cmd run test:vitest:balanced`, approximately 30–40 minutes). Check syntax/types, canonical
+data prerequisites, startup assumptions and protected-file preservation before expensive runs.
+After a clean source commit, run the sole definitive scenario through
+`npm.cmd run sim:scenario:run -- --scenario data/scenarios/apr1992_definitive_188w.json --weeks 188 --out <fresh-root> --unique`
+on Node 22 with `AWWV_S6_GRADE_RUN=true`, no provenance override and no `--map` (about 5–10
+minutes). Inspect all health, consistency, checkpoint, assignment, anchor and truth results;
+the collection driver's exit is not acceptance.
+
+Run the first full-horizon measurement after the focused/static preflight and independent
+review, before the longer full suite: its four-case outcome can reject an insufficient repair
+in 5–10 minutes. The required full suite still covers the final implementation candidate;
+this ordering does not waive it or permit a second campaign without a diagnosed correction.
+
+Success requires the four Jajce cases to receive ordinary military captures by week 39 when
+the reproduced legal availability conditions hold, with traceable forces/actions and no passive
+transfers. Preserve the existing floors, 31 anchors, enclave guards and deterministic ordering;
+inspect every changed checkpoint and all new failure categories. A failed case remains open
+until repaired or explicitly dispositioned by the owner. Existing Prozor, Farz and western
+campaign debts remain separate and cannot be silently waived or broaden this packet. Stop an
+expensive retry until the cause is identified and its correction passes a focused reproduction.
+At most one corrected 188-week measurement and one exact-source reproduction are reserved;
+the latter occurs only after required hard gates pass. No further campaign or source tuning
+outside this local occupation question proceeds under this packet. Reuse unaffected evidence.
+Batch final canon/report/roadmap/ledger synchronization after measured results. No main merge,
+remote source push or public viewer replacement is part of this repair.
+
 ### Earlier checkpoint — before coverage approval
 
 The following retains the preceding checkpoint. Its pending-approval and unrun-188-week status

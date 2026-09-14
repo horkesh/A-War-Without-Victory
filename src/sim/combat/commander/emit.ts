@@ -65,6 +65,7 @@ import type {
     CommanderOutput,
     CommanderPlanStatus,
     CommanderState,
+    BrigadeEvaluation,
     ForceAssessment,
     OfficerPersonality,
     OperationHistoryEntry,
@@ -178,12 +179,20 @@ type PredictedProbeTarget = {
     prediction: CombatPrediction;
 };
 
+type LocalOccupationCandidate = {
+    brigade: BrigadeEvaluation;
+    sector_id: string;
+    target_osid: string;
+    prediction: CombatPrediction;
+};
+
 function predictDirectEnemyTargets(
     briefing: CommanderBriefing,
     probeBrigadeId: string,
     directEnemyTargets: ReadonlySet<string>,
     adjacency: Map<any, any>,
     terrainCache: Record<string, number> | null,
+    osidPopulationMap?: CommanderBriefing['osid_population_map'],
 ): PredictedProbeTarget[] {
     if (directEnemyTargets.size === 0 || !briefing.state_ref || !briefing.reverse_map) {
         return [];
@@ -218,7 +227,7 @@ function predictDirectEnemyTargets(
             'attack',
             undefined,
             briefing.supply_by_osid ?? undefined,
-            undefined,
+            osidPopulationMap,
             undefined,
             briefing.ethnic_map ?? undefined,
             profilePrefix,
@@ -230,6 +239,113 @@ function predictDirectEnemyTargets(
     }
 
     return predictedTargets;
+}
+
+/**
+ * Find a surplus brigade that is already adjacent to a bounded enemy pocket it
+ * can defeat by itself. This is deliberately evaluated before the generic
+ * highest-fitness probe choice: fitness elsewhere on the front must not hide a
+ * legal local occupation opportunity.
+ */
+function findLocalOccupationCandidate(
+    briefing: CommanderBriefing,
+    allocation: AllocationResult,
+): LocalOccupationCandidate | null {
+    if (!briefing.state_ref || !briefing.reverse_map || !briefing.osid_population_map) {
+        return null;
+    }
+    if (briefing.turn <= 20) return null;
+    // A standalone local opportunity has no proposal identity for the Level-1
+    // approval flow. Fail closed instead of admitting it around player authority.
+    if ((briefing.state_ref.meta?.autonomy_level ?? 0) === 1) return null;
+    const queuedHistoricalParticipants = getHeadQueuedPrePlannedBrigadeIds(briefing.state_ref);
+    const activeOperationParticipants = new Set(
+        briefing.active_operations
+            .filter((operation) => operation.phase !== 'recovery')
+            .flatMap((operation) => operation.participating_brigades ?? []),
+    );
+    const corpsSectors = briefing.sectors
+        .filter((sector) => sector.corps_id === briefing.corps_id)
+        .sort((left, right) => strictCompare(left.sector_id, right.sector_id));
+    const formationById = Object.fromEntries(briefing.brigades.map((brigade) => [brigade.id, brigade]));
+    const terrainCache = buildTerrainCache(briefing.reverse_map);
+    const candidates = allocation.surplus_pool
+        .filter((evaluation) => evaluation.is_combat_effective && !evaluation.is_disrupted)
+        .filter((evaluation) => !queuedHistoricalParticipants.has(evaluation.brigade_id))
+        .filter((evaluation) => !activeOperationParticipants.has(evaluation.brigade_id))
+        .filter((evaluation) => isCombatReadyParticipant(briefing, evaluation.brigade_id))
+        .filter((evaluation) => formationById[evaluation.brigade_id]?.elite_loan_state?.on_loan !== true)
+        .sort((left, right) => {
+            const fitnessDiff = right.fitness_offense - left.fitness_offense;
+            return fitnessDiff !== 0
+                ? fitnessDiff
+                : strictCompare(left.brigade_id, right.brigade_id);
+        });
+
+    for (const brigade of candidates) {
+        const formation = formationById[brigade.brigade_id];
+        const location = formation?.location_osid;
+        if (!location || formation?.corps_id !== briefing.corps_id) continue;
+        const sectorId = derivePrimarySectorForBrigades(
+            corpsSectors,
+            briefing.corps_id,
+            [brigade.brigade_id],
+            formationById,
+        );
+        if (!sectorId) continue;
+        const sector = corpsSectors.find((entry) => entry.sector_id === sectorId);
+        if (!sector) continue;
+        const commandState = briefing.state_ref.military.corps_command?.[briefing.corps_id];
+        const sectorIntelConfidence = getStalestSectorIntelConfidence(briefing.state_ref, sectorId);
+        if (shouldLaunchProbeInstead(
+            briefing.faction,
+            sectorIntelConfidence,
+            commandState?.consecutive_probes ?? 0,
+            briefing.turn,
+            briefing.state_ref.military.war_timeline,
+        )) continue;
+
+        const directTargets = new Set<string>();
+        for (const subSegment of sector.sub_segments ?? []) {
+            for (const target of subSegment.enemy_osids ?? []) {
+                if ((briefing.spatial.adjacency.get(target) ?? []).includes(location)) {
+                    directTargets.add(target);
+                }
+            }
+        }
+        for (const target of [...directTargets].sort(strictCompare)) {
+            const targetPopulation = briefing.osid_population_map.get(target);
+            if (!Number.isFinite(targetPopulation)) continue;
+            if ((briefing.failed_offensive_objectives?.[target]?.cooldown_until_turn ?? 0) > briefing.turn) continue;
+            if (!isBoundedIsolatedEnemyPosition(target, briefing)) continue;
+            if (!isBrigadeEligibleForOperationObjectives(formation, [target])) continue;
+            const targetController = getPoliticalControllerOSID(
+                briefing.state_ref,
+                target,
+                briefing.reverse_map,
+            );
+            if (targetController == null || targetController === briefing.faction) continue;
+            if (shouldGrazBlockAttack(
+                briefing.state_ref,
+                briefing.corps_id,
+                briefing.faction,
+                target,
+                targetController,
+            )) continue;
+            const prediction = predictDirectEnemyTargets(
+                briefing,
+                brigade.brigade_id,
+                new Set([target]),
+                briefing.spatial.adjacency as Map<any, any>,
+                terrainCache,
+                briefing.osid_population_map,
+            )[0]?.prediction;
+            if (!prediction || prediction.defender_has_reachable_brigade) continue;
+            if (!isOutcomeSufficientForAttack(prediction.predicted_outcome, 'costly_victory')) continue;
+            return { brigade, sector_id: sectorId, target_osid: target, prediction };
+        }
+    }
+    return null;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1144,21 +1260,28 @@ function buildOperations(
         },
     );
 
-    // If no plan but surplus and high-initiative commander: probe weak positions
-    if (
+    const canConsiderLocalOpportunity =
         ops.length === 0 &&
-        !probeOnCooldown &&
         allocation.can_launch_ops &&
         allocation.surplus_pool.length > 0 &&
         personality.initiative > 0.3 &&
-        briefing.active_operations.filter(op => op.phase !== 'recovery').length < getMaxOperationSlots(briefing.brigades.length)
-    ) {
-        // Probe operations use a single surplus brigade on the weakest enemy position.
-        // The actual probe target selection is left to sector_offensive downstream;
-        // we just create the shell operation so the pipeline knows to attempt it.
+        briefing.active_operations.filter(op => op.phase !== 'recovery').length < getMaxOperationSlots(briefing.brigades.length);
+    const localOccupationCandidate = canConsiderLocalOpportunity
+        ? botOrdersPerfTime(
+            `${BUILD_OPERATIONS_PROFILE_PREFIX}.localOccupation.selectCandidate`,
+            () => findLocalOccupationCandidate(briefing, allocation),
+        )
+        : null;
+
+    // If no plan but surplus and high-initiative commander: occupy a verified
+    // local pocket, or retain the cooldown-governed generic probe fallback.
+    if (canConsiderLocalOpportunity && (localOccupationCandidate != null || !probeOnCooldown)) {
+
+        // A verified local occupation pair takes precedence. If there is none,
+        // retain the existing highest-fitness probe selection unchanged.
         const probeBrigade = botOrdersPerfTime(
             `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.selectBrigade`,
-            () => {
+            () => localOccupationCandidate?.brigade ?? (() => {
                 const queuedHistoricalParticipants = briefing.state_ref
                     ? getHeadQueuedPrePlannedBrigadeIds(briefing.state_ref)
                     : new Set<FormationId>();
@@ -1171,22 +1294,26 @@ function buildOperations(
                         if (fitDiff !== 0) return fitDiff;
                         return strictCompare(a.brigade_id, b.brigade_id);
                     })[0];
-            },
+            })(),
         );
 
         if (probeBrigade) {
-            const probeSectorId = derivePrimarySectorForBrigades(
-                briefing.sectors.filter((sector) => sector.corps_id === briefing.corps_id),
-                briefing.corps_id,
-                [probeBrigade.brigade_id],
-                Object.fromEntries(briefing.brigades.map((brigade) => [brigade.id, brigade])),
-            );
+            const probeSectorId = localOccupationCandidate?.sector_id
+                ?? derivePrimarySectorForBrigades(
+                    briefing.sectors.filter((sector) => sector.corps_id === briefing.corps_id),
+                    briefing.corps_id,
+                    [probeBrigade.brigade_id],
+                    Object.fromEntries(briefing.brigades.map((brigade) => [brigade.id, brigade])),
+                );
 
             // Derive probe objective: first enemy-adjacent OSID in the probe sector.
             // Without objectives the probe op has no axis targets and would be ZEA.
             const probeObjectives: string[] = botOrdersPerfTime(
                 `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives`,
                 () => {
+                    if (localOccupationCandidate) {
+                        return [localOccupationCandidate.target_osid];
+                    }
                     let probeObjectives: string[] = [];
                     if (probeSectorId) {
                         const sector = briefing.sectors.find(s => s.sector_id === probeSectorId);
@@ -1376,33 +1503,40 @@ function buildOperations(
                         ...(probeSector?.rear_brigade_ids ?? []),
                         ...(probeSector?.assigned_brigade_ids ?? []),
                     ]);
-                    const reductionParticipants = [
-                        probeBrigade.brigade_id,
-                        ...(probeSector?.reserve_brigade_ids ?? []),
-                        ...(probeSector?.rear_brigade_ids ?? []),
-                        ...(probeSector?.assigned_brigade_ids ?? []),
-                        ...briefing.brigades.map((entry) => entry.id),
-                    ]
-                        .filter((brigadeId, index, all) => all.indexOf(brigadeId) === index)
-                        .filter((brigadeId) => !queuedHistoricalParticipants.has(brigadeId))
-                        .filter((brigadeId) => isCombatReadyParticipant(briefing, brigadeId))
-                        .filter((brigadeId) => {
-                            const brigade = briefing.brigades.find((entry) => entry.id === brigadeId);
-                            return brigade?.corps_id === briefing.corps_id
-                                && isBrigadeEligibleForOperationObjectives(brigade, probeObjectives)
-                                && Number.isFinite(distanceToReduction(brigadeId));
-                        })
-                        .sort((left, right) => {
-                            if (left === probeBrigade.brigade_id) return -1;
-                            if (right === probeBrigade.brigade_id) return 1;
-                            const sectorDiff = Number(sameSectorParticipants.has(right)) - Number(sameSectorParticipants.has(left));
-                            if (sectorDiff !== 0) return sectorDiff;
-                            const distanceDiff = distanceToReduction(left) - distanceToReduction(right);
-                            return distanceDiff !== 0 ? distanceDiff : strictCompare(left, right);
-                        })
-                        .slice(0, ISOLATED_POSITION_OPERATION_BRIGADES);
+                    const reductionParticipants = localOccupationCandidate
+                        ? [probeBrigade.brigade_id]
+                        : [
+                            probeBrigade.brigade_id,
+                            ...(probeSector?.reserve_brigade_ids ?? []),
+                            ...(probeSector?.rear_brigade_ids ?? []),
+                            ...(probeSector?.assigned_brigade_ids ?? []),
+                            ...briefing.brigades.map((entry) => entry.id),
+                        ]
+                            .filter((brigadeId, index, all) => all.indexOf(brigadeId) === index)
+                            .filter((brigadeId) => !queuedHistoricalParticipants.has(brigadeId))
+                            .filter((brigadeId) => isCombatReadyParticipant(briefing, brigadeId))
+                            .filter((brigadeId) => {
+                                const brigade = briefing.brigades.find((entry) => entry.id === brigadeId);
+                                return brigade?.corps_id === briefing.corps_id
+                                    && isBrigadeEligibleForOperationObjectives(brigade, probeObjectives)
+                                    && Number.isFinite(distanceToReduction(brigadeId));
+                            })
+                            .sort((left, right) => {
+                                if (left === probeBrigade.brigade_id) return -1;
+                                if (right === probeBrigade.brigade_id) return 1;
+                                const sectorDiff = Number(sameSectorParticipants.has(right)) - Number(sameSectorParticipants.has(left));
+                                if (sectorDiff !== 0) return sectorDiff;
+                                const distanceDiff = distanceToReduction(left) - distanceToReduction(right);
+                                return distanceDiff !== 0 ? distanceDiff : strictCompare(left, right);
+                            })
+                            .slice(0, ISOLATED_POSITION_OPERATION_BRIGADES);
+                    const singleBrigadeOccupationIsSufficient = localOccupationCandidate != null
+                        && reductionParticipants.length === 1;
                     const escalateToOperation = targetIsBoundedPosition
-                        && reductionParticipants.length >= ISOLATED_POSITION_OPERATION_BRIGADES
+                        && (
+                            reductionParticipants.length >= ISOLATED_POSITION_OPERATION_BRIGADES
+                            || singleBrigadeOccupationIsSufficient
+                        )
                         && !shouldLaunchProbeInstead(
                         briefing.faction,
                         sectorIntelConfidence,
@@ -1429,7 +1563,7 @@ function buildOperations(
                             const personnelById = new Map(
                                 briefing.brigades.map((entry) => [entry.id, entry.personnel ?? 0]),
                             );
-                            return buildCommanderOperation(
+                            const operation = buildCommanderOperation(
                                 briefing.corps_id,
                                 briefing.turn,
                                 reductionParticipants,
@@ -1446,6 +1580,13 @@ function buildOperations(
                                     briefing.state_ref,
                                 ),
                             );
+                            if (singleBrigadeOccupationIsSufficient) {
+                                operation.minimum_viable_participants = 1;
+                                operation.minimum_assembled_participants = 1;
+                                operation.min_attack_outcome = 'costly_victory';
+                                operation.preparation_sub_phase = 'ready';
+                            }
+                            return operation;
                         },
                     );
                     const conflictingOp = briefing.active_operations.find((existing) => operationsOverlap(existing, probeOp));

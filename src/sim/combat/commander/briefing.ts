@@ -667,6 +667,7 @@ export function buildBriefing(
     ethnicMap: OsidEthnicComposition | null,
     corpsSubordinatesByCorps?: CorpsSubordinatesByCorps,
     enemyEquipmentSummaryContext?: EnemyEquipmentSummaryContext,
+    osidPopulationMap?: import('../../../data/operational_data.js').OsidPopulationMap,
 ): CommanderBriefing {
     const turn = state.meta?.turn ?? 0;
 
@@ -830,6 +831,7 @@ export function buildBriefing(
         brigades,
         state_ref: state,
         reverse_map: reverseMap,
+        osid_population_map: osidPopulationMap,
         supply_by_osid: supplyByOsid,
         ethnic_map: ethnicMap,
         graph_analysis: graphAnalysis,

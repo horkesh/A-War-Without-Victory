@@ -2454,9 +2454,12 @@ export const warPhases: NamedPhase[] = [
             const corpsReport: CorpsAiReportEntry[] = [];
             const corpsSpatial = getSpatialContextCache(context);
             const corpsAdjacency = corpsSpatial?.preCombat.adjacency;
+            const corpsOsidPopulationMap = reverseMap && context.input.municipalityPopulation1991
+                ? computeOsidPopulation(reverseMap, context.input.municipalityPopulation1991)
+                : undefined;
             for (const faction of factions) {
                 const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
-                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid, corpsEthnicMap, corpsAdjacency, corpsSpatial?.preCombat);
+                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid, corpsEthnicMap, corpsAdjacency, corpsSpatial?.preCombat, corpsOsidPopulationMap);
                 corpsReport.push(...extractCorpsAiReport(context.state, faction));
             }
             if (corpsReport.length > 0) {

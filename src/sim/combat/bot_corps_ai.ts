@@ -25,7 +25,7 @@ import type {
     GameState,
     SettlementId
 } from '../../state/game_state.js';
-import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
+import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../data/operational_data.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import type { SpatialContext } from '../spatial_context.js';
 import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
@@ -375,6 +375,7 @@ export function generateAllCorpsOrders(
     ethnicMap?: OsidEthnicComposition | null,
     preComputedAdjacency?: ReadonlyMap<string, readonly string[]>,
     spatial?: SpatialContext | null,
+    osidPopulationMap?: OsidPopulationMap,
 ): void {
     // 0. Generate army HQ overrides for this turn (merge with any existing from gathering)
     const armyOverrides = generateArmyHQOverrides(state, faction);
@@ -443,6 +444,7 @@ export function generateAllCorpsOrders(
                 ethnicMap ?? null,
                 corpsSubordinatesByCorps,
                 enemyEquipmentSummaryContext,
+                osidPopulationMap,
             );
             applyCommanderOutput(state, corps.id, output);
         }

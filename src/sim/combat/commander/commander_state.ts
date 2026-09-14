@@ -18,7 +18,7 @@ import type {
     CorpsFrontSector,
     SectorIntelRecord,
 } from '../../../state/game_state.js';
-import type { OperationalToCanonicalReverseMap } from '../../../data/operational_data.js';
+import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../../data/operational_data.js';
 
 import type { SpatialContext } from '../../spatial_context.js';
 import type { FactionGraphAnalysis } from '../osid_graph_analysis.js';
@@ -491,6 +491,8 @@ export interface CommanderBriefing {
     readonly state_ref?: GameState;
     /** Optional reverse map for OSID combat prediction at emit time. */
     readonly reverse_map?: OperationalToCanonicalReverseMap | null;
+    /** Population input consumed by the normal combat predictor's local-militia defense. */
+    readonly osid_population_map?: OsidPopulationMap;
     readonly supply_by_osid: SupplyStateByOsidReport | null;
     readonly ethnic_map: OsidEthnicComposition | null;
     readonly graph_analysis: FactionGraphAnalysis | null;

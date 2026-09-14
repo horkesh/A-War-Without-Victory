@@ -11,6 +11,9 @@ import { describe, expect, it } from 'vitest';
 import { managePlan, MIN_BRIGADES_FOR_PLAN } from '../../src/sim/combat/commander/plan.js';
 import { buildPrepositioningOrders } from '../../src/sim/combat/commander/emit.js';
 import { applyCommanderOutput } from '../../src/sim/combat/commander/commander_loop.js';
+import { resolveAttackOrdersOsid } from '../../src/sim/combat/attack_resolution_osid.js';
+import { advanceSectorOffensives } from '../../src/sim/combat/sector_offensive.js';
+import { generateAllBotOrdersOsid } from '../../src/sim/combat/bot_brigade_ai_osid.js';
 
 import type {
     FactionId,
@@ -1460,6 +1463,451 @@ describe('empty-objective probe guard', () => {
         expect(probeOps[0]!.axes).toBeDefined();
         expect(probeOps[0]!.axes!.length).toBe(1);
         expect(probeOps[0]!.axes![0]!.objectives).toContain('op:enemy:target');
+    });
+
+    it('commits one available same-corps brigade and captures a viable isolated position through the ordinary resolver', () => {
+        const corpsId = 'vrs_test_corps' as FormationId;
+        const brigadeId = 'rs_local_reserve' as FormationId;
+        const sectorId = 'sector:vrs_test_corps:0';
+        const target = 'op:test:isolated_position';
+        const approach = 'op:test:approach';
+        const ring = 'op:test:ring';
+        const otherFront = 'op:test:other_front';
+        const otherTarget = 'op:test:other_target';
+        const enemyDepth = 'op:test:enemy_depth';
+        const adjacency = new Map<string, string[]>([
+            [approach, [target, ring]],
+            [target, [approach, ring]],
+            [ring, [approach, target]],
+            [otherFront, [otherTarget]],
+            [otherTarget, [otherFront, enemyDepth]],
+            [enemyDepth, [otherTarget]],
+        ]);
+        const brigade = {
+            id: brigadeId,
+            faction: 'RS' as FactionId,
+            corps_id: corpsId,
+            kind: 'brigade',
+            status: 'active',
+            personnel: 1800,
+            cohesion: 80,
+            morale: 75,
+            fatigue: 0,
+            experience: 1,
+            location_osid: approach,
+            name: 'Local Reserve',
+            created_turn: 1,
+            hq_sid: 'S1',
+            assignment: null,
+            tags: [],
+        } as FormationState;
+        const higherFitnessElsewhere = {
+            ...brigade,
+            id: 'rs_higher_fitness_elsewhere' as FormationId,
+            location_osid: otherFront,
+            personnel: 2200,
+            name: 'Higher Fitness Elsewhere',
+        } as FormationState;
+        const remoteDefender = {
+            id: 'rbih_remote_defender' as FormationId,
+            faction: 'RBiH' as FactionId,
+            corps_id: 'rbih_test_corps' as FormationId,
+            kind: 'brigade',
+            status: 'active',
+            personnel: 1000,
+            cohesion: 70,
+            morale: 70,
+            location_osid: 'op:test:remote_enemy_rear',
+        } as FormationState;
+        const state = {
+            meta: { turn: 30, phase: 'war', seed: 'local-occupation' },
+            political: {
+                political_controllers: {
+                    [approach]: 'RS',
+                    [ring]: 'RS',
+                    [otherFront]: 'RS',
+                    [otherTarget]: 'RBiH',
+                    [enemyDepth]: 'HRHB',
+                    [target]: 'RBiH',
+                },
+                control_events: [],
+            },
+            military: {
+                formations: {
+                    [corpsId]: {
+                        id: corpsId,
+                        faction: 'RS',
+                        kind: 'corps',
+                        status: 'active',
+                        personnel: 0,
+                        name: 'Test Corps',
+                        created_turn: 1,
+                        hq_sid: 'S1',
+                        tags: [],
+                    },
+                    [brigadeId]: brigade,
+                    [higherFitnessElsewhere.id]: higherFitnessElsewhere,
+                    [remoteDefender.id]: remoteDefender,
+                },
+                corps_command: {
+                    [corpsId]: { active_operations: [], consecutive_probes: 0 },
+                },
+                corps_front_sectors: {
+                    'sector:rbih_test_corps:0': {
+                        sector_id: 'sector:rbih_test_corps:0',
+                        corps_id: 'rbih_test_corps',
+                        faction: 'RBiH',
+                        territory_osids: [target, 'op:test:remote_enemy_rear'],
+                        assigned_brigade_ids: [remoteDefender.id],
+                        reserve_brigade_ids: [],
+                        rear_brigade_ids: [],
+                        sub_segments: [{
+                            sub_segment_id: 'subseg:rbih_test_corps:0:0',
+                            edge_ids: ['e1'],
+                            friendly_osids: [target],
+                            enemy_osids: [approach],
+                            length_edges: 1,
+                            primary_brigade_ids: [remoteDefender.id],
+                        }],
+                        edge_ids: ['e1'],
+                        length_edges: 1,
+                        opposing_factions: ['RS'],
+                        density: 1,
+                        defensive_power: 1000,
+                        threat_ratio: 1,
+                        sector_stance: 'defend',
+                        stance_source: 'bot',
+                    },
+                },
+                sector_intel: {
+                    [sectorId]: [{ enemy_sector_id: 'sector:enemy:0', confidence: 0.8 }],
+                },
+                war_front_edges_osid: [
+                    { edge_id: 'e1', a: approach, b: target, side_a: 'RS', side_b: 'RBiH' },
+                    { edge_id: 'e2', a: otherFront, b: otherTarget, side_a: 'RS', side_b: 'RBiH' },
+                    { edge_id: 'e3', a: target, b: ring, side_a: 'RBiH', side_b: 'RS' },
+                ],
+            },
+        } as unknown as GameState;
+        const briefing = makeBriefing({
+            corps_id: corpsId,
+            faction: 'RS',
+            turn: 30,
+            spatial: {
+                adjacency,
+                sharedBoundaryAdjacency: adjacency,
+                friendlyOsidsByFaction: new Map([['RS', new Set([approach, ring, otherFront])]]),
+                componentsByFaction: new Map([['RS', new Map([[approach, 0], [ring, 0], [otherFront, 1]])]]),
+            } as any,
+            sectors: [{
+                sector_id: sectorId,
+                corps_id: corpsId,
+                faction: 'RS',
+                sub_segments: [{
+                    sub_segment_id: 'subseg:vrs_test_corps:0:0',
+                    edge_ids: ['e1'],
+                    friendly_osids: [approach],
+                    enemy_osids: [target],
+                    length_edges: 1,
+                    primary_brigade_ids: [],
+                }],
+                edge_ids: ['e1'],
+                territory_osids: [approach, ring],
+                length_edges: 1,
+                assigned_brigade_ids: [brigadeId],
+                reserve_brigade_ids: [brigadeId],
+                rear_brigade_ids: [],
+                opposing_factions: ['RBiH'],
+                density: 1,
+                defensive_power: 1800,
+                threat_ratio: 0.2,
+                sector_stance: 'balanced',
+                stance_source: 'bot',
+            }, {
+                sector_id: 'sector:vrs_test_corps:1',
+                corps_id: corpsId,
+                faction: 'RS',
+                sub_segments: [{
+                    sub_segment_id: 'subseg:vrs_test_corps:1:0',
+                    edge_ids: ['e2'],
+                    friendly_osids: [otherFront],
+                    enemy_osids: [otherTarget],
+                    length_edges: 1,
+                    primary_brigade_ids: [],
+                }],
+                edge_ids: ['e2'],
+                territory_osids: [otherFront],
+                length_edges: 1,
+                assigned_brigade_ids: [higherFitnessElsewhere.id],
+                reserve_brigade_ids: [higherFitnessElsewhere.id],
+                rear_brigade_ids: [],
+                opposing_factions: ['RBiH'],
+                density: 1,
+                defensive_power: 2200,
+                threat_ratio: 0.2,
+                sector_stance: 'balanced',
+                stance_source: 'bot',
+            }] as any,
+            brigades: [brigade, higherFitnessElsewhere],
+            state_ref: state,
+            reverse_map: new Map([
+                [approach, ['S1']],
+                [ring, ['S2']],
+                [target, ['S3']],
+                [otherFront, ['S4']],
+                [otherTarget, ['S5']],
+                [enemyDepth, ['S6']],
+            ]),
+            osid_population_map: new Map([[target, 10000]]),
+            active_operations: [],
+            officer_personality: { aggression: 0.6, caution: 0.3, initiative: 0.5, competence: 0.7 },
+        });
+        state.military.corps_front_sectors![sectorId] = briefing.sectors[0] as any;
+        state.military.corps_front_sectors!['sector:vrs_test_corps:1'] = briefing.sectors[1] as any;
+        const evaluation = makeEval({
+            brigade_id: brigadeId,
+            tier: 'active_defense',
+            fitness_offense: 0.8,
+        });
+        const higherFitnessEvaluation = makeEval({
+            brigade_id: higherFitnessElsewhere.id,
+            tier: 'main_effort',
+            fitness_offense: 0.95,
+        });
+
+        const output = emitCommanderOutput(
+            briefing,
+            [makeZone({ corps_id: corpsId, faction: 'RS', osids: [approach, ring], enemy_adjacent_osids: [target] })],
+            makeForces([higherFitnessEvaluation, evaluation]),
+            {
+                zones: [],
+                garrison_locks: [],
+                surplus_pool: [higherFitnessEvaluation, evaluation],
+                total_garrison_budget: 1,
+                can_launch_ops: true,
+            },
+            makeNullPlanDecision(),
+            makePassiveDecisions(),
+            makeNoThreats(),
+        );
+
+        expect(output.operations).toHaveLength(1);
+        expect(output.operations[0]).toMatchObject({
+            type: 'sector_attack',
+            participating_brigades: [brigadeId],
+            objectives: [target],
+            preparation_sub_phase: 'ready',
+            minimum_viable_participants: 1,
+            minimum_assembled_participants: 1,
+            min_attack_outcome: 'costly_victory',
+        });
+
+        state.meta.turn = 20;
+        const turn20Output = emitCommanderOutput(
+            { ...briefing, turn: 20 },
+            [makeZone({ corps_id: corpsId, faction: 'RS', osids: [approach, ring], enemy_adjacent_osids: [target] })],
+            makeForces([evaluation]),
+            { zones: [], garrison_locks: [], surplus_pool: [evaluation], total_garrison_budget: 1, can_launch_ops: true },
+            makeNullPlanDecision(), makePassiveDecisions(), makeNoThreats(),
+        );
+        expect(turn20Output.operations.every((operation) => operation.type !== 'sector_attack')).toBe(true);
+        state.meta.turn = 21;
+        const turn21Output = emitCommanderOutput(
+            { ...briefing, turn: 21 },
+            [makeZone({ corps_id: corpsId, faction: 'RS', osids: [approach, ring], enemy_adjacent_osids: [target] })],
+            makeForces([evaluation]),
+            { zones: [], garrison_locks: [], surplus_pool: [evaluation], total_garrison_budget: 1, can_launch_ops: true },
+            makeNullPlanDecision(), makePassiveDecisions(), makeNoThreats(),
+        );
+        expect(turn21Output.operations[0]).toMatchObject({ type: 'sector_attack', objectives: [target] });
+        state.meta.turn = 30;
+
+        briefing.osid_population_map!.delete(target);
+        const missingPopulationOutput = emitCommanderOutput(
+            briefing,
+            [makeZone({ corps_id: corpsId, faction: 'RS', osids: [approach, ring], enemy_adjacent_osids: [target] })],
+            makeForces([evaluation]),
+            { zones: [], garrison_locks: [], surplus_pool: [evaluation], total_garrison_budget: 1, can_launch_ops: true },
+            makeNullPlanDecision(), makePassiveDecisions(), makeNoThreats(),
+        );
+        expect(missingPopulationOutput.operations.every((operation) => operation.type !== 'sector_attack')).toBe(true);
+        briefing.osid_population_map!.set(target, Number.NaN);
+        const nonfinitePopulationOutput = emitCommanderOutput(
+            briefing,
+            [makeZone({ corps_id: corpsId, faction: 'RS', osids: [approach, ring], enemy_adjacent_osids: [target] })],
+            makeForces([evaluation]),
+            { zones: [], garrison_locks: [], surplus_pool: [evaluation], total_garrison_budget: 1, can_launch_ops: true },
+            makeNullPlanDecision(), makePassiveDecisions(), makeNoThreats(),
+        );
+        expect(nonfinitePopulationOutput.operations.every((operation) => operation.type !== 'sector_attack')).toBe(true);
+        briefing.osid_population_map!.set(target, 10000);
+
+        const cooldownOutput = emitCommanderOutput(
+            { ...briefing, previous_state: { operation_history: [{ type: 'probe', started_turn: 29 }] } as any },
+            [makeZone({ corps_id: corpsId, faction: 'RS', osids: [approach, ring], enemy_adjacent_osids: [target] })],
+            makeForces([evaluation]),
+            { zones: [], garrison_locks: [], surplus_pool: [evaluation], total_garrison_budget: 1, can_launch_ops: true },
+            makeNullPlanDecision(), makePassiveDecisions(), makeNoThreats(),
+        );
+        expect(cooldownOutput.operations[0]).toMatchObject({ type: 'sector_attack', objectives: [target] });
+
+        state.meta.autonomy_level = 1;
+        const playerAuthorityOutput = emitCommanderOutput(
+            briefing,
+            [makeZone({ corps_id: corpsId, faction: 'RS', osids: [approach, ring], enemy_adjacent_osids: [target] })],
+            makeForces([evaluation]),
+            {
+                zones: [],
+                garrison_locks: [],
+                surplus_pool: [evaluation],
+                total_garrison_budget: 1,
+                can_launch_ops: true,
+            },
+            makeNullPlanDecision(),
+            makePassiveDecisions(),
+            makeNoThreats(),
+        );
+        expect(playerAuthorityOutput.operations.every((operation) => operation.type !== 'sector_attack')).toBe(true);
+        state.meta.autonomy_level = 0;
+
+        briefing.osid_population_map!.set(target, 200000);
+        const militiaDefendedOutput = emitCommanderOutput(
+            briefing,
+            [makeZone({ corps_id: corpsId, faction: 'RS', osids: [approach, ring], enemy_adjacent_osids: [target] })],
+            makeForces([evaluation]),
+            {
+                zones: [],
+                garrison_locks: [],
+                surplus_pool: [evaluation],
+                total_garrison_budget: 1,
+                can_launch_ops: true,
+            },
+            makeNullPlanDecision(),
+            makePassiveDecisions(),
+            makeNoThreats(),
+        );
+        expect(militiaDefendedOutput.operations.every((operation) => operation.type !== 'sector_attack')).toBe(true);
+        briefing.osid_population_map!.set(target, 10000);
+
+        remoteDefender.location_osid = target;
+        const defendedOutput = emitCommanderOutput(
+            briefing,
+            [makeZone({ corps_id: corpsId, faction: 'RS', osids: [approach, ring], enemy_adjacent_osids: [target] })],
+            makeForces([evaluation]),
+            {
+                zones: [],
+                garrison_locks: [],
+                surplus_pool: [evaluation],
+                total_garrison_budget: 1,
+                can_launch_ops: true,
+            },
+            makeNullPlanDecision(),
+            makePassiveDecisions(),
+            makeNoThreats(),
+        );
+        expect(defendedOutput.operations).toHaveLength(1);
+        expect(defendedOutput.operations[0]?.type).toBe('probe');
+
+        brigade.elite_loan_state = {
+            on_loan: true,
+            loaned_to_corps: 'vrs_other_corps' as FormationId,
+        } as FormationState['elite_loan_state'];
+        const loanedOutput = emitCommanderOutput(
+            briefing,
+            [makeZone({ corps_id: corpsId, faction: 'RS', osids: [approach, ring], enemy_adjacent_osids: [target] })],
+            makeForces([evaluation]),
+            {
+                zones: [],
+                garrison_locks: [],
+                surplus_pool: [evaluation],
+                total_garrison_budget: 1,
+                can_launch_ops: true,
+            },
+            makeNullPlanDecision(),
+            makePassiveDecisions(),
+            makeNoThreats(),
+        );
+        expect(loanedOutput.operations.every((operation) => operation.type !== 'sector_attack')).toBe(true);
+        brigade.elite_loan_state = undefined;
+
+        state.military.brigade_movement_state = {
+            [brigadeId]: {
+                status: 'in_transit',
+                destination_sids: [ring],
+            } as any,
+        };
+        const transitOutput = emitCommanderOutput(
+            briefing,
+            [makeZone({ corps_id: corpsId, faction: 'RS', osids: [approach, ring], enemy_adjacent_osids: [target] })],
+            makeForces([evaluation]),
+            {
+                zones: [],
+                garrison_locks: [],
+                surplus_pool: [evaluation],
+                total_garrison_budget: 1,
+                can_launch_ops: true,
+            },
+            makeNullPlanDecision(),
+            makePassiveDecisions(),
+            makeNoThreats(),
+        );
+        expect(transitOutput.operations).toHaveLength(0);
+        state.military.brigade_movement_state = {};
+
+        const frontStaffingOutput = emitCommanderOutput(
+            briefing,
+            [makeZone({ corps_id: corpsId, faction: 'RS', osids: [approach, ring], enemy_adjacent_osids: [target] })],
+            makeForces([evaluation]),
+            {
+                zones: [],
+                garrison_locks: [{ brigade_id: brigadeId, zone_id: 'zone:test:0' as ZoneId, reason: 'front floor' }],
+                surplus_pool: [],
+                total_garrison_budget: 1,
+                can_launch_ops: false,
+            },
+            makeNullPlanDecision(),
+            makePassiveDecisions(),
+            makeNoThreats(),
+        );
+        expect(frontStaffingOutput.operations).toHaveLength(0);
+
+        remoteDefender.location_osid = 'op:test:remote_enemy_rear';
+        const operation = output.operations[0]!;
+        state.military.corps_command![corpsId]!.active_operations = [operation];
+        state.meta.turn = 31;
+        advanceSectorOffensives(state);
+        expect(operation).toMatchObject({ phase: 'execution', recovery_reason: undefined });
+        expect(operation.phase_started_turn).toBe(31);
+        generateAllBotOrdersOsid(state, ['RS'], {
+            edges: state.military.war_front_edges_osid as any,
+            reverseMap: briefing.reverse_map!,
+            adjacency,
+            osidPopulationMap: briefing.osid_population_map,
+        });
+        expect(state.military.brigade_attack_orders?.[brigadeId]).toBe(target);
+        const combat = resolveAttackOrdersOsid(
+            state,
+            [{ a: approach, b: target }, { a: target, b: ring }] as any,
+            briefing.reverse_map!,
+            undefined,
+            undefined,
+            briefing.osid_population_map,
+            undefined,
+            adjacency,
+        );
+        expect(combat.orders_seen_by_brigade?.[brigadeId]).toBe(target);
+        expect(combat.battles[0]).toMatchObject({
+            attacker_brigades: [brigadeId],
+            attacker_won: true,
+        });
+        expect(combat.flips_applied).toBe(1);
+        expect(state.political.political_controllers?.[target]).toBe('RS');
+        expect(state.political.control_events?.at(-1)).toMatchObject({
+            settlement_id: target,
+            from: 'RBiH',
+            to: 'RS',
+            mechanism: 'combat',
+        });
     });
 
     it('does not assign a queued historical-operation participant to a probe', () => {

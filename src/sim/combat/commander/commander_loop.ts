@@ -170,6 +170,7 @@ export function runCommanderForCorps(
     ethnicMap: OsidEthnicComposition | null,
     corpsSubordinatesByCorps?: CorpsSubordinatesByCorps,
     enemyEquipmentSummaryContext?: EnemyEquipmentSummaryContext,
+    osidPopulationMap?: import('../../../data/operational_data.js').OsidPopulationMap,
 ): CommanderOutput {
     return botOrdersPerfTime('commander.runCommanderForCorps.total', () => {
         const briefing = botOrdersPerfTime(
@@ -179,6 +180,7 @@ export function runCommanderForCorps(
                 reverseMap, graphAnalysis, supplyByOsid, ethnicMap,
                 corpsSubordinatesByCorps,
                 enemyEquipmentSummaryContext,
+                osidPopulationMap,
             ),
         );
         const previousState: CommanderState | null =
