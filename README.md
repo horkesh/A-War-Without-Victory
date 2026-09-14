@@ -8,8 +8,10 @@ available only at the four reference checkpoints. Settlement selection works wit
 small map polygons.
 
 The published snapshot is the 188-week POST-A run from simulation source
-`51fe494151397c1cc6521b54006b0f8da70705e5`, final-state hash `5d6f8378dbf433fc`.
-Its checkpoint scores are 692 / 698 / 694 / 665. This candidate has unresolved calibration
+`8db3055962143af8f272ef7cf5d95414e6c5a601`, final-state hash `c41dad9c3dba6a84`.
+Updated on 2026-09-14 after the local occupation repair: Baljvine, Jezero, Donji Korićani
+and Lupnica are captured at weeks 32, 33, 36 and 37 through ordinary military operations.
+Its checkpoint scores are 696 / 690 / 687 / 659. This candidate has unresolved calibration
 acceptance failures; publication of this diagnostic viewer is not acceptance of the engine run.
 
 The viewer is generated with `tools/calibration_timeline.mjs` in the project checkout:
