@@ -5026,8 +5026,17 @@ attribution repair needs its own bounded scope. No determinism risk was introduc
 commits add no `Math.random`, `Date.now`, `new Date` or `performance.now` anywhere under `src/`.
 
 Local `main` remains `9588876bc`; no promotion, baseline refresh, pin replacement or remote push
-followed. The public viewer still shows the earlier `8db305596` dataset published on 2026-09-14
-and is stale relative to this run; no republication is implied. Decisive receipts are now tracked
+to `main` followed. **Correction to an earlier reading in this session:** the public viewer was
+first recorded here as still showing `8db305596` and stale. It is not. The interrupted session
+had already published this run — `gh-pages` commit `3096f4e0b`, "Publish verified January 1993
+operations run", 2026-09-14 18:35, superseding `469b4cba3` — roughly twelve minutes before it
+was cut off, which is why it never wrote the publication down. Verified live on 2026-09-16:
+<https://horkesh.github.io/A-War-Without-Victory/?run=ac3e5e152> returns 200 with 681,592 bytes,
+SHA-256 `d38d81eb29deee1531cf6ed36bc93cb99dc3c20ea9bb5cee09b18ef02fe905c9`, byte-identical to
+the locally generated artifact and to the blob on `gh-pages`, embedding
+`ac3e5e1524558d2dc4e4fc40924306fc2873735a`. No republication was needed or performed. Publication
+is permission to inspect this run, not acceptance of the remaining calibration failures.
+Decisive receipts are now tracked
 under `logs/roadmap-integration-20260912/january-operations/`, including the checkpoint, health,
 consistency and audit logs, the January checker output, the independent evidence review, the
 Diagnostic G Orašac diagnosis, the 2026-09-16 checkpoint re-verification and the suite launch

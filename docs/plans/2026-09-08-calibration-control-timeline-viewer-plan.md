@@ -2,12 +2,40 @@
 
 **Date:** 2026-09-08
 **Lane:** Development instrumentation (`tools/`) — NOT product surface, NOT a roadmap workstream
-**Status:** IMPLEMENTED 2026-09-08; integrated before `68e8917e8`; latest saved run published and verified on GitHub Pages 2026-09-14.
+**Status:** IMPLEMENTED 2026-09-08; integrated before `68e8917e8`; latest saved run published and verified on GitHub Pages 2026-09-14, publication record completed 2026-09-16.
 **Branch/worktree:** `calibration-timeline-viewer` at `F:/AWWV-worktrees/calibration-timeline-viewer`, isolated from the concurrent `codex/*` branches and from `r7-arbih-honorific-names`
 **Live viewer:** <https://horkesh.github.io/A-War-Without-Victory/>
-**Publication:** `gh-pages` commit `469b4cba3e576d0452e642137cf02d6143994137`; latest dataset from simulation source `8db3055962143af8f272ef7cf5d95414e6c5a601`.
+**Publication:** `gh-pages` commit `3096f4e0b26bde8b98ee5262b602c57f9fd17868`; latest dataset from simulation source `ac3e5e1524558d2dc4e4fc40924306fc2873735a`.
 
 ## Why
+
+### 2026-09-16 publication record completed (no republication)
+
+The 2026-09-14 session published the January-1993 operations run and was interrupted before it
+could record the fact, so the roadmap, command board and calibration master briefly described the
+viewer as still serving `8db305596`. That description was wrong and is corrected here and in
+those documents.
+
+`gh-pages` commit `3096f4e0b26bde8b98ee5262b602c57f9fd17868` — *"Publish verified January 1993
+operations run"*, 2026-09-14 18:35:05 +0200 — supersedes `469b4cba3` on the same three-file
+branch (`index.html`, `.nojekyll`, `README.md`). It serves the saved POST-A campaign from clean
+`ac3e5e152`: 188 weeks, 230 flips, 744 drawn / 712 scored cells, checkpoint scores
+**700 / 702 / 697 / 667** with 12/10/15/45 mismatches. Final-save SHA-256 is
+`8e80eca07cf0317fd8775ab818bb10adade8230076b6bde99d2b3a0a082fecee`.
+
+[Open the latest published run](https://horkesh.github.io/A-War-Without-Victory/?run=ac3e5e152).
+Verified live on 2026-09-16: HTTP 200, 681,592 bytes, SHA-256
+`d38d81eb29deee1531cf6ed36bc93cb99dc3c20ea9bb5cee09b18ef02fe905c9`, byte-identical to both the
+locally generated artifact under
+`logs/roadmap-integration-20260912/january-operations/viewer/` and the blob on `gh-pages`, and
+embedding `ac3e5e1524558d2dc4e4fc40924306fc2873735a`. The retained browser audit records desktop
+and touch checks passing against this dataset, including the eight January capture selections at
+weeks 28/29/32/34/35/36/36/39.
+
+No simulation was rerun, no artifact regenerated and no republication performed on 2026-09-16;
+only the written record changed. Publication supersedes the previous viewer dataset only. Overall
+calibration acceptance remains **NO-GO** for the western cascade and Farz attribution, with the
+Prozor injection inherited.
 
 ### 2026-09-14 latest-run publication
 

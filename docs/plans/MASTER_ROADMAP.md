@@ -52,8 +52,9 @@ inherited. Saved artifacts expose generic Guja competing with Mistral 1, changed
 objectives and delayed Southern Move. These broader scheduling/attribution repairs require
 their own bounded scope; no speculative tuning or additional campaign follows this packet.
 Preserve all floors, authored/control boundaries and the approved coverage rule. Main promotion
-and pin refresh remain held. The public viewer still shows the earlier `8db305596` run
-published on 2026-09-14 and is stale relative to this measurement; no republication is implied.
+and pin refresh remain held. The [public viewer](https://horkesh.github.io/A-War-Without-Victory/?run=ac3e5e152)
+already publishes this run at `gh-pages` commit `3096f4e0b` (2026-09-14), re-verified live on
+2026-09-16; publication permits inspection and does not accept the remaining failures.
 See the [repair receipt](../40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-january-only-operations-repair--2026-09-14).
 
 ## ★ PROBE CHANNEL — CLOSED 2026-08-26. Scope: `docs/plans/2026-08-26-probe-channel-scope.md`

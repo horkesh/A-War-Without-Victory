@@ -39,8 +39,9 @@ cells taken through operation-owned combat and zero passive transfers. Root caus
 bot operations on unnamed 3/3 preparation defaults. Health, consistency, 31 anchors, nine enclave
 guards and assignment seals pass; independent evidence review is GO on the January contract.
 Western cascade 30 below 38 (recovered from 25), Farz attribution and the inherited Prozor
-injection retain overall NO-GO. Main remains `9588876bc`; no pin refresh followed. The public
-viewer still shows the earlier `8db305596` dataset and is stale relative to this run.
+injection retain overall NO-GO. Main remains `9588876bc`; no pin refresh followed. The
+[public viewer](https://horkesh.github.io/A-War-Without-Victory/?run=ac3e5e152) already
+publishes this run (`gh-pages` `3096f4e0b`, re-verified live 2026-09-16).
 [Receipt](../40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-january-only-operations-repair--2026-09-14).
 
 **R7 readability execution — 2026-09-09:** The authorized date-label expansion now has nine-case initial/maximum-scroll proof, preserving the fixed Desk column, header and artwork. Final UI/typecheck/build checks and independent review pass; Desk/date commit `88996a23d` and its hook pass. Clean POST-A completes 188 weeks with health/hash checks passing; PRE/POST-A/POST-B match all eight artifacts and inputs. The fixed run budget is consumed. Earlier phases and unaffected global Vitest/player-experience receipts remain reviewed. Baseline investigation is GO: pins match accepted n392, while four consumed inputs changed before R7; PRE/POST-B match all eight artifacts. Retain the six-pin failing baseline gate and dirty POST-B disclosure. No R7 closure or downstream lane is claimed. See the amendment and designated report.

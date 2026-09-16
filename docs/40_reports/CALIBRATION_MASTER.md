@@ -30,10 +30,14 @@ approved occupation contract; no pins, floors or protected data were replaced.
 
 All 20 April commits and the approved coverage contract remain ancestors of this branch. Main's
 manifest authority remains #518 at clean `2a8eb4244` (702/678/672/667); local main remains
-`9588876bc`. The [public viewer](https://horkesh.github.io/A-War-Without-Victory/?run=8db305596)
-still shows `8db305596` (696/690/687/659) as published on 2026-09-14 and is **stale relative to
-this run**; no republication is implied here. Branch-local v72/v73 remains dirty week-104
-history, not candidate acceptance.
+`9588876bc`. The [public viewer](https://horkesh.github.io/A-War-Without-Victory/?run=ac3e5e152)
+**already shows this run**: `gh-pages` commit `3096f4e0b` ("Publish verified January 1993
+operations run", 2026-09-14 18:35) serves `ac3e5e152` at 700/702/697/667, superseding
+`469b4cba3`. Re-verified 2026-09-16: the live HTTPS page returns 200 with 681,592 bytes,
+SHA-256 `d38d81eb29deee1531cf6ed36bc93cb99dc3c20ea9bb5cee09b18ef02fe905c9`, byte-identical
+to the locally generated artifact, and embeds `ac3e5e1524558d2dc4e4fc40924306fc2873735a`.
+Publication is permission to inspect this run, not acceptance of the remaining calibration
+failures. Branch-local v72/v73 remains dirty week-104 history, not candidate acceptance.
 [Current repair receipt](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-january-only-operations-repair--2026-09-14)
 · [preceding local occupation step](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-local-occupation-repair--2026-09-14).
 
