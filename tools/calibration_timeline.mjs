@@ -80,6 +80,9 @@ const CHECKPOINTS = [
 ];
 
 const FACTION_COLOR = { RBiH: '#4a7c54', RS: '#b03636', HRHB: '#486ebe' };
+// Two-letter marker labels. The circle is colour-keyed to the legend; the letters
+// are there so colour is not the only channel carrying the expected owner.
+const FACTION_SHORT = { RBiH: 'RB', RS: 'RS', HRHB: 'HR' };
 const MECHANISM_COLOR = {
     combat: '#c98e26',
     paramilitary: '#8b3fa8',
@@ -274,6 +277,83 @@ const geometryPath = (g) => {
     return polys.flatMap((poly) => poly.map(ringPath)).join('');
 };
 
+// --- Mismatch marker anchors -----------------------------------------------
+// Each mismatched cell gets a circle naming the faction that SHOULD hold it, so
+// the expected owner is readable without selecting the cell. The anchor must lie
+// INSIDE the polygon: an area centroid falls outside a crescent-shaped or
+// two-lobed municipality, which would park the circle on a neighbour and assert
+// something false about that neighbour. So the centroid is tested, and when it
+// lands outside it is replaced by the midpoint of the widest interior span at
+// that height — always inside, and stable for a fixed ring.
+// Computed here in projected SVG units; the client does no geometry maths.
+const outerRingsOf = (g) => (g.type === 'Polygon' ? [g.coordinates] : g.coordinates)
+    .map((poly) => poly[0]).filter((r) => Array.isArray(r) && r.length >= 4);
+const projectRing = (ring) => ring.map((pt) => project(pt).map(Number));
+function ringArea(r) {
+    let a = 0;
+    for (let i = 0, j = r.length - 1; i < r.length; j = i++) a += r[j][0] * r[i][1] - r[i][0] * r[j][1];
+    return a / 2;
+}
+function ringCentroid(r) {
+    let cx = 0, cy = 0, a = 0;
+    for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+        const f = r[j][0] * r[i][1] - r[i][0] * r[j][1];
+        a += f; cx += (r[j][0] + r[i][0]) * f; cy += (r[j][1] + r[i][1]) * f;
+    }
+    if (a === 0) return null;
+    return [cx / (3 * a), cy / (3 * a)];
+}
+function pointInRing([px, py], r) {
+    let inside = false;
+    for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+        const [xi, yi] = r[i], [xj, yj] = r[j];
+        if ((yi > py) !== (yj > py) && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+}
+// Midpoint of the widest run of interior at height y: the x-crossings of the
+// ring at y, paired off, longest pair wins.
+function widestSpanMidpoint(r, y) {
+    const xs = [];
+    for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+        const [xi, yi] = r[i], [xj, yj] = r[j];
+        if ((yi > y) !== (yj > y)) xs.push(((xj - xi) * (y - yi)) / (yj - yi) + xi);
+    }
+    xs.sort((a, b) => a - b);
+    let best = null, bestW = -1;
+    for (let k = 0; k + 1 < xs.length; k += 2) {
+        const w = xs[k + 1] - xs[k];
+        if (w > bestW) { bestW = w; best = (xs[k] + xs[k + 1]) / 2; }
+    }
+    return best === null ? null : [best, y];
+}
+function representativePoint(r) {
+    const c = ringCentroid(r);
+    if (c && pointInRing(c, r)) return c;
+    const ys = r.map((p) => p[1]);
+    const mid = c ? c[1] : (Math.min(...ys) + Math.max(...ys)) / 2;
+    return widestSpanMidpoint(r, mid) ?? c;
+}
+
+// One anchor per SCORED cell, taken from its largest outer ring. A scored cell
+// may be drawn as several paths (merged sub-1km² children); the marker belongs
+// to the parent that is actually scored, drawn once on its biggest body.
+const bestRingByScored = new Map();
+for (const f of features) {
+    const scored = mergeMap[f.properties.osid] ?? f.properties.osid;
+    for (const ring of outerRingsOf(f.geometry)) {
+        const projected = projectRing(ring);
+        const area = Math.abs(ringArea(projected));
+        const current = bestRingByScored.get(scored);
+        if (!current || area > current.area) bestRingByScored.set(scored, { area, ring: projected });
+    }
+}
+const markers = {};
+for (const scored of [...bestRingByScored.keys()].sort()) {
+    const point = representativePoint(bestRingByScored.get(scored).ring);
+    if (point) markers[scored] = [Number(point[0].toFixed(1)), Number(point[1].toFixed(1))];
+}
+
 const cells = features.map((f) => {
     const osid = f.properties.osid;
     const mergedInto = mergeMap[osid] ?? null;
@@ -356,6 +436,17 @@ svg{width:100%;height:100%;display:block}
 .cell.sel{stroke:#fff;stroke-width:3;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 3px #fff)}
 .cell.mismatch.sel{stroke:var(--amber);stroke-width:5;filter:drop-shadow(0 0 3px #fff)}
 .hide-mismatch .cell.mismatch.sel{stroke:#fff;stroke-width:3;vector-effect:non-scaling-stroke}
+/* Expected-owner markers. pointer-events:none so a circle never steals the click
+   from the cell under it — the polygon stays the click target it always was. */
+#markers{pointer-events:none}
+.hide-mismatch #markers{display:none}
+.mk circle{stroke:var(--amber);stroke-width:2;vector-effect:non-scaling-stroke}
+/* No font-size here on purpose: it is set per-render in user units so the label
+   holds a constant on-screen size. A CSS font shorthand would override it. */
+.mk text{fill:#fff;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:700;
+text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:rgba(8,12,17,.55);stroke-width:2.5px}
+.marker-key{display:inline-block;width:13px;height:13px;margin-right:5px;vertical-align:-2px;border-radius:50%;
+border:2px solid var(--amber);background:${FACTION_COLOR.RS}}
 .bar{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--panel);border:1px solid var(--line)}
 input[type=range]{flex:1;min-width:0}
 button,input[type=search]{font:inherit;border:1px solid var(--line);background:rgba(255,255,255,.6);color:inherit}
@@ -388,11 +479,14 @@ tr.active td{background:rgba(201,142,38,.22)}
 .tip{position:absolute;display:none;pointer-events:none;z-index:5;padding:8px 10px;background:rgba(8,12,17,.95);color:#fff;border-radius:5px;
 font-family:ui-monospace,monospace;font-size:11.5px;line-height:1.45;max-width:290px}
 .tip[data-open=true]{display:block}
-@media(max-width:1000px){.wrap{grid-template-columns:minmax(0,1fr);height:auto}.mapbox{height:62vh}.side{overflow:visible}}
+@media(max-width:1000px){.wrap{grid-template-columns:minmax(0,1fr);height:auto}.mapbox{height:62vh}.side{overflow:visible}
+/* Below this width the map is too small for a legible two-letter label. The
+   amber-ringed colour dot still names the expected owner against the legend. */
+.mk text{display:none}}
 @media(max-width:480px){.wrap{padding:6px;gap:8px}.timelinebar{display:grid;grid-template-columns:1fr 1fr}.timelinebar input{grid-column:1/-1;grid-row:1;min-height:44px}.timelinebar #prev{grid-column:1}.timelinebar #next{grid-column:2}.timelinebar #weeklabel{grid-column:1/-1;text-align:center}.mapbox{height:55vh}.bar{padding:6px;gap:6px}.legend{gap:2px 10px}.panel{padding:9px}}
 @media(prefers-color-scheme:dark){:root{--ink:#eee5d6;--dim:#aaa092;--line:rgba(255,255,255,.14);--panel:rgba(255,255,255,.05)}
 body{background:linear-gradient(145deg,#17140f,#211d17 68%,#15120e)}button,input[type=search]{background:rgba(255,255,255,.08);color:inherit}button:hover{background:rgba(255,255,255,.16)}}
-</style></head><body class="hide-mismatch">
+</style></head><body>
 <div class="wrap">
 <div class="mapcol">
   <div class="bar timelinebar">
@@ -409,8 +503,8 @@ body{background:linear-gradient(145deg,#17140f,#211d17 68%,#15120e)}button,input
     <span><i style="background:${FACTION_COLOR.RBiH}"></i>RBiH</span>
     <span><i style="background:${FACTION_COLOR.RS}"></i>RS</span>
     <span><i style="background:${FACTION_COLOR.HRHB}"></i>HRHB</span>
-    <label class="toggle"><input id="showmismatch" type="checkbox"><span class="mismatch-key"></span>Show mismatch outlines (checkpoints only)</label>
-    <span style="opacity:.7">Fill always means actual controller. Merged sub-1km² cells draw with their parent, so outlined polygons can exceed the scored mismatch count — the panel number is the score.</span>
+    <label class="toggle"><input id="showmismatch" type="checkbox" checked><span class="mismatch-key"></span><span class="marker-key"></span>Show mismatches (checkpoints only)</label>
+    <span style="opacity:.7">Fill always means actual controller. An amber outline marks a mismatch, and its circle is the faction that <em>should</em> hold the cell — the circle is painted historical truth, never simulated control. Merged sub-1km² cells draw with their parent, so outlined polygons can exceed the scored mismatch count — the panel number is the score.</span>
   </div>
 </div>
 <div class="side">
@@ -456,6 +550,8 @@ const SCORES=${payload(scores.map((s) => ({ key: s.key, week: s.week, label: s.l
 const PROV=${payload(provenance)};
 const FCOLOR=${payload(FACTION_COLOR)};
 const MCOLOR=${payload(MECHANISM_COLOR)};
+const MARKERS=${payload(markers)};
+const FSHORT=${payload(FACTION_SHORT)};
 const MAXWEEK=${maxWeek};
 
 const svg=document.getElementById('map'),tip=document.getElementById('tip');
@@ -472,6 +568,29 @@ for(const c of CELLS){
   frag.appendChild(p);
 }
 svg.appendChild(frag);
+// Markers ride above every cell, so a circle is never buried under a neighbour
+// drawn later. Appended after the cell fragment for that reason.
+const markerLayer=document.createElementNS(NS,'g');
+markerLayer.setAttribute('id','markers');
+svg.appendChild(markerLayer);
+
+// Marker size is specified in SCREEN pixels and converted to user units per
+// render. A fixed user-unit radius measured correct in the payload and rendered
+// as a 2px sliver of fill inside a 6px amber ring: the faction colour, which is
+// the whole point of the marker, was invisible. Constant screen size also keeps
+// the circles usable as the map is resized.
+const MK_R=10,MK_FONT=11;
+function mapScale(){
+  const box=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;
+  if(!box.width||!box.height||!vb.width||!vb.height)return 1;
+  return Math.min(box.width/vb.width,box.height/vb.height)||1;
+}
+function sizeMarkers(){
+  const s=mapScale(),r=(MK_R/s).toFixed(1),f=(MK_FONT/s).toFixed(1);
+  for(const c of markerLayer.querySelectorAll('circle'))c.setAttribute('r',r);
+  for(const t of markerLayer.querySelectorAll('text'))t.setAttribute('font-size',f);
+}
+addEventListener('resize',sizeMarkers);
 const META=new Map(CELLS.map(c=>[c.o,c]));
 
 // Weeks that actually contain a flip — the map is static between them, so the
@@ -513,8 +632,30 @@ function render(){
   }
   const cp=CPBYWEEK.get(week);
   const mmlist=document.getElementById('mmlist'),mmnote=document.getElementById('mmnote'),mmwhen=document.getElementById('mmwhen');
+  markerLayer.textContent='';
   if(cp&&cp.reached){
     for(const m of cp.mismatches){const arr=byScored.get(m.osid);if(arr)for(const p of arr)p.classList.add('mismatch')}
+    // One circle per MISMATCH, not per drawn polygon: merged children share the
+    // parent's anchor, so a scored cell is named once rather than once per lobe.
+    const mfrag=document.createDocumentFragment();
+    for(const m of cp.mismatches){
+      const pt=MARKERS[m.osid];if(!pt)continue;
+      const g=document.createElementNS(NS,'g');g.setAttribute('class','mk');
+      const ci=document.createElementNS(NS,'circle');
+      ci.setAttribute('cx',pt[0]);ci.setAttribute('cy',pt[1]);
+      ci.setAttribute('fill',FCOLOR[m.want]||'#3a3f47');
+      g.appendChild(ci);
+      const tx=document.createElementNS(NS,'text');
+      tx.setAttribute('x',pt[0]);tx.setAttribute('y',pt[1]);
+      tx.textContent=FSHORT[m.want]||'?';
+      g.appendChild(tx);
+      const ttl=document.createElementNS(NS,'title');
+      ttl.textContent=(META.get(m.osid)?.n||m.osid)+' — should be '+(m.want||'—')+', is '+(m.sim||'—');
+      g.appendChild(ttl);
+      mfrag.appendChild(g);
+    }
+    markerLayer.appendChild(mfrag);
+    sizeMarkers();
     mmwhen.textContent='· '+cp.label+' (w'+cp.week+')';
     mmnote.textContent=cp.mismatches.length+' of '+cp.total+' OSIDs differ from painted control.';
     mmlist.innerHTML=cp.mismatches.map(m=>'<div data-o="'+esc(m.osid)+'">'+esc(m.osid)+' — controller '+esc(m.sim||'—')+' · historical '+esc(m.want)+'</div>').join('');

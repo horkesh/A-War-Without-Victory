@@ -2,12 +2,51 @@
 
 **Date:** 2026-09-08
 **Lane:** Development instrumentation (`tools/`) — NOT product surface, NOT a roadmap workstream
-**Status:** IMPLEMENTED 2026-09-08; integrated before `68e8917e8`; latest saved run published and verified on GitHub Pages 2026-09-14, publication record completed 2026-09-16.
+**Status:** IMPLEMENTED 2026-09-08; integrated before `68e8917e8`; latest saved run published and verified on GitHub Pages 2026-09-14; publication record completed and expected-owner mismatch markers published 2026-09-16.
 **Branch/worktree:** `calibration-timeline-viewer` at `F:/AWWV-worktrees/calibration-timeline-viewer`, isolated from the concurrent `codex/*` branches and from `r7-arbih-honorific-names`
 **Live viewer:** <https://horkesh.github.io/A-War-Without-Victory/>
-**Publication:** `gh-pages` commit `3096f4e0b26bde8b98ee5262b602c57f9fd17868`; latest dataset from simulation source `ac3e5e1524558d2dc4e4fc40924306fc2873735a`.
+**Publication:** `gh-pages` commit `c1a292500`, superseding `3096f4e0b26bde8b98ee5262b602c57f9fd17868`; latest dataset from simulation source `ac3e5e1524558d2dc4e4fc40924306fc2873735a`.
 
 ## Why
+
+### 2026-09-16 expected-owner markers on mismatches
+
+The owner asked to see mismatches directly on the map, with a circle naming the faction each
+cell should belong to. A mismatched cell was already outlined in amber but said nothing about
+its expected owner, so reading the map meant selecting cells one at a time.
+
+Each mismatch now carries a circle filled in the colour of the faction that *should* hold it,
+labelled `RB` / `RS` / `HR`, inside the retained amber ring. **The circle is painted historical
+truth; the fill beneath it is still the actual controller**, and the legend now states both.
+That separation is deliberate: the viewer exists because an orange mismatch fill was once
+misread as RS control at Ozimica, and nothing here repeats that conflation. The overlay is now
+on by default, and still appears only at weeks 39, 104, 156 and 188 — the four-snapshot rule is
+unchanged, because at any other week a "mismatch" is only the war not having happened yet.
+
+Two failure modes were designed out rather than discovered later:
+
+- **Anchors are interior representative points, not bounding-box or area centroids.** An area
+  centroid falls outside a crescent-shaped or two-lobed municipality, which would park the
+  circle on a neighbour and assert something false about that neighbour. The centroid is
+  tested for containment and replaced, where it fails, by the midpoint of the widest interior
+  span at that height. Verified: 712 of 712 scored cells resolve an anchor, and all 56
+  mismatch anchors across the four checkpoints lie inside their own polygon.
+- **Marker size is computed in screen pixels per render, not fixed in user units.** The first
+  implementation passed every payload check and then rendered as a 2.1px sliver of faction
+  colour inside a 6px amber ring — measured in the browser, the colour carrying the entire
+  meaning of the feature was invisible. Circles now hold a constant 20px on screen (16px of
+  visible faction fill), confirmed unchanged at 1200px, 640px and 320px map widths. Below
+  1000px the two-letter label is hidden and the colour dot carries the reading.
+
+Verified in the browser on the published URL: 12 markers at w39 (RB 7 / RS 4 / HR 1), 10 at
+w104, 15 at w156, 45 at w188; zero markers and the correct explanatory note at w73; the toggle
+hides both markers and outlines; no console errors. Markers are `pointer-events:none`, so the
+polygon under a circle remains the click target it always was.
+
+Published as `gh-pages` commit `c1a292500`, superseding `3096f4e0b`. Live artifact SHA-256
+`b97c388688bdf7cb7710031c1d001213009118cb026cedfb98a3da8a437da197`, 712,622 bytes, HTTP 200.
+**No simulation change**: the same saved POST-A run from `ac3e5e152`, the same 700/702/697/667
+scores, the same final-save hash. Generator change is in `tools/calibration_timeline.mjs`.
 
 ### 2026-09-16 publication record completed (no republication)
 
@@ -24,7 +63,8 @@ branch (`index.html`, `.nojekyll`, `README.md`). It serves the saved POST-A camp
 `8e80eca07cf0317fd8775ab818bb10adade8230076b6bde99d2b3a0a082fecee`.
 
 [Open the latest published run](https://horkesh.github.io/A-War-Without-Victory/?run=ac3e5e152).
-Verified live on 2026-09-16: HTTP 200, 681,592 bytes, SHA-256
+Verified live on 2026-09-16 **before the marker publication later the same day**: HTTP 200,
+681,592 bytes, SHA-256
 `d38d81eb29deee1531cf6ed36bc93cb99dc3c20ea9bb5cee09b18ef02fe905c9`, byte-identical to both the
 locally generated artifact under
 `logs/roadmap-integration-20260912/january-operations/viewer/` and the blob on `gh-pages`, and
