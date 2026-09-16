@@ -5041,3 +5041,54 @@ under `logs/roadmap-integration-20260912/january-operations/`, including the che
 consistency and audit logs, the January checker output, the independent evidence review, the
 Diagnostic G Orašac diagnosis, the 2026-09-16 checkpoint re-verification and the suite launch
 records with their bash-resolution diagnosis.
+
+## 2026-09-16 — Calibration viewer names the expected owner on every mismatch
+
+**Change.** The public calibration viewer outlined a mismatched cell in amber but never said
+what the cell should have been, so reading the map meant selecting cells one at a time. Each
+mismatch now carries a circle filled in the colour of the faction that *should* hold it,
+labelled `RB` / `RS` / `HR`, inside the retained amber ring, and the overlay is on by default.
+The circle is painted historical truth; the fill beneath it remains the actual controller, and
+the legend now states both. That separation is deliberate rather than stylistic — this viewer
+was built partly because an orange mismatch *fill* was once misread as RS control at Ozimica,
+and an amber-filled circle would have rebuilt exactly that confusion. Markers still appear only
+at weeks 39, 104, 156 and 188, preserving the four-snapshot rule; at any other week a
+"mismatch" would only be the war not having happened yet.
+
+**Two failure modes were closed before publication rather than after.**
+
+Marker anchors are interior representative points, not bounding-box or area centroids. An area
+centroid falls outside a crescent-shaped or two-lobed municipality, which would park a circle on
+a *neighbour* and assert something false about that cell. The centroid is tested for containment
+and, where it fails, replaced by the midpoint of the widest interior span at that height.
+`tools/verify_viewer_markers.cjs` checks this against a generated page and is retained:
+712/712 scored cells resolve an anchor, and all 56 mismatch anchors across the four checkpoints
+lie inside their own polygon.
+
+Marker size is computed in screen pixels per render rather than fixed in user units. The first
+implementation passed every payload check and then rendered as a **2.1px** sliver of faction
+colour inside a 6px amber ring — the colour carrying the entire meaning of the feature was
+invisible, and only a browser measurement showed it. Circles now hold a constant 20px on screen
+with 16px of visible fill, unchanged at 1200px, 640px and 320px map widths; below 1000px the
+two-letter label is hidden and the colour dot carries the reading.
+
+**Verification.** Driven in a real browser against the published URL, not only locally: 12
+markers at w39 (RB 7 / RS 4 / HR 1), 10 at w104, 15 at w156, 45 at w188; zero markers and the
+correct explanatory note at w73; the toggle hides both markers and outlines; no console errors
+or messages on load. Markers are `pointer-events:none`, so the polygon under a circle remains
+the click target it always was.
+
+**Determinism.** Anchors are derived from committed geometry with sorted, insertion-stable
+iteration; no RNG, wall-clock or unstable ordering is introduced. Regenerating the viewer reads
+existing artifacts and does not run the simulation.
+
+**No simulation change.** The same saved POST-A run from clean `ac3e5e152`, the same
+700/702/697/667 checkpoint scores, the same final-save hash. Published as `gh-pages`
+`c1a292500`, superseding `3096f4e0b`; live artifact 712,622 bytes, SHA-256
+`b97c388688bdf7cb7710031c1d001213009118cb026cedfb98a3da8a437da197`, HTTP 200 and confirmed
+matching the local artifact. Overall calibration acceptance is unaffected and remains NO-GO.
+
+**Files.** `tools/calibration_timeline.mjs` (generator), `tools/verify_viewer_markers.cjs`
+(new checker), [viewer plan](plans/2026-09-08-calibration-control-timeline-viewer-plan.md#2026-09-16-expected-owner-markers-on-mismatches),
+regenerated artifact and receipts under
+`logs/roadmap-integration-20260912/january-operations/viewer/`.

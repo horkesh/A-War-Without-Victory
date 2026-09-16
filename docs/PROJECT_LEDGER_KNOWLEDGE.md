@@ -5174,3 +5174,27 @@ Inspect ancestor clipping and stacking, then confirm actual pixels at initial an
 Keep false-green receipts and record their invalidation; do not replace image review with DOM
 presence, `getClientRects()` or theoretical color ratios. See the existing
 [R7 report](40_reports/implemented/20260905_R7_PRESENTATION_ENGLISH_READABILITY.md).
+
+## 2026-09-16 — Canon can describe a behavior correctly while one creation path never calls it
+
+Systems Manual §7.5 has specified since 2026-03-07 that named operations receive a reserve
+commander on creation, and it names all four creation paths: pre-planned, triggered,
+**bot-generated**, and queued injection. Three of them called `assignOperationCommander`.
+`applyCommanderOutput` — the bot-generated path — pushed the admitted operation straight into
+`corps.active_operations` and never did, so every emergent bot operation ran on the unnamed
+3/3 preparation default instead of its officer-derived value.
+
+The cost was not a missing feature but a silently wrong number: five preparation turns where
+the selected officer's competence 4 gives four. At Orašac that one turn moved the opening from
+turn 30 to turn 29, across the week-30 seasonal boundary (attack 0.95→0.75, defense 1.00→1.05),
+which is the difference between three failed attacks at 0.84/0.67/0.71 and a `costly_victory`
+at 1.17. Six earlier diagnostics (A–F) had read the failure as insufficient attacking strength
+and spent their scope on force selection, admission predicates and staging.
+
+Two things follow. **A canon statement is not evidence the code implements it** — §7.5 read as
+a description of working behavior for six months and was really a specification the bot path
+had never satisfied; the enumerated list of creation paths was the thing worth grepping.
+**When a lifecycle writer exists, check every admission site calls it**, rather than treating a
+persistent wrong-looking constant as a tuning target: the 3/3 default was visible in saved
+operations the whole time and read as "the officer selector chose poorly" rather than "no
+selector ran". See the [January-1993 repair record](40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-january-only-operations-repair--2026-09-14).

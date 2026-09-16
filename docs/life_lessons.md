@@ -1,12 +1,20 @@
 # Life Lessons — Index
 
-> Last compacted: 2026-09-10 (146,864 → 39,471 bytes). 320 lessons across 9 topic files
-> (count verified 2026-09-03), plus 34 archived session sections.
+> Last compacted: 2026-09-10 (146,864 → 39,471 bytes). 322 lessons across 9 topic files
+> (count verified 2026-09-03; +2 on 2026-09-16), plus 34 archived session sections.
 > **Read this index every session:** the three newest sessions below, then "Recently Violated".
 > Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 > Older dated sessions live in [life_lessons/session_archive.md](life_lessons/session_archive.md);
 > they are lane reference, not session-start reading.
+
+## New Lessons (2026-09-16) — a red suite that was the shell, and a stale claim about a live page
+
+### [Process] ★★★ A RED SUITE CAN BE THE SHELL YOU LAUNCHED IT FROM — CHECK WHICH `bash` RESOLVED — see `docs/life_lessons/process.md`
+- The full suite exited 1 with **50 failures across 10 files** on a calibration branch that had touched none of them. Launched from PowerShell without Git Bash on `PATH`, `bash` resolved to WSL, which cannot see MSYS paths like `/f/...`; the guard scripts emitted nothing and the tests fell back to `allow`. With Git Bash on `PATH` the suite passes 13,982 across 1,389 files, exit 0, with no repo change. ⇒ **Run `(Get-Command bash).Source` before blaming the branch.** ⇒ Tell: `/bin/bash: /f/...: No such file or directory`, or `expected 'allow' to be 'deny'` plus `Unexpected end of JSON input`. ⇒ Confirm with `git diff --quiet main..HEAD -- <file>` and record the resolved bash path in the launch JSON.
+
+### [Process] ★★ I DECLARED A PUBLICATION STALE WITHOUT LOOKING AT THE PUBLICATION TARGET — see `docs/life_lessons/process.md`
+- An interrupted session published the viewer to `gh-pages` and died before recording it. Reading only our own notes, I wrote "the viewer is stale" into `CALIBRATION_MASTER`, `MASTER_ROADMAP`, `COMMAND_BOARD` and a ledger entry. `git ls-remote origin gh-pages` — one command — showed the publish had happened and the live page already matched. ⇒ **An absence claim about an external system must be checked against that system.** A missing record means the record is missing, not that the action did not happen. ⇒ The remote ref is the authority on what is published; the plan file is only a description of it. Third occurrence of the absence-claim pattern.
 
 ## New Lessons (2026-09-10) — a stated rule broken one message later, and a truncated search
 
