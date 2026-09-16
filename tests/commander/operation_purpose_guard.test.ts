@@ -244,15 +244,64 @@ describe('emergent operation purpose guard', () => {
         expect(deriveOpportunityTargetPurpose(TARGET, makeZone(), briefing)).toBe('reduce_isolated_position');
     });
 
-    it('does not call an enemy cluster isolated when it has an external boundary not held by the faction', () => {
+    it('does not call an enemy cluster isolated when a hostile third party holds part of its ring', () => {
+        // Same geometry as the co-belligerent case below, but the RBiH–HRHB war is
+        // live: Croat-held ground on the ring is now an enemy flank, so the position
+        // is a contested three-way front rather than a pocket this corps can invest.
         const briefing = makeBriefing({
             state_ref: {
+                meta: { turn: 70 },
+                political: {
+                    war_alliance_rbih_hrhb: 0,
+                    rbih_hrhb_state: {},
+                    political_controllers: {
+                        [TARGET]: 'RS',
+                        ...Object.fromEntries(FRIENDLY.map((osid) => [osid, FACTION])),
+                        'op:lopare:lopare_2': 'HRHB',
+                        'op:lopare:priboj_2': FACTION,
+                    },
+                },
+            } as unknown as CommanderBriefing['state_ref'],
+        });
+
+        expect(deriveOpportunityTargetPurpose(TARGET, makeZone(), briefing)).toBeNull();
+    });
+
+    it('still calls a cut-off position isolated when a co-belligerent holds a minority of its ring', () => {
+        // 1992 central-Bosnia shape: a VRS island whose envelope is ours except for one
+        // HVO-held cell, while the ARBiH–HVO alliance holds. The defender cannot be
+        // relieved across allied ground any more than across ours, and six of the seven
+        // ring cells are ours, so this corps is the one investing the position.
+        const briefing = makeBriefing({
+            state_ref: {
+                meta: { turn: 20 },
                 political: {
                     political_controllers: {
                         [TARGET]: 'RS',
                         ...Object.fromEntries(FRIENDLY.map((osid) => [osid, FACTION])),
                         'op:lopare:lopare_2': 'HRHB',
                         'op:lopare:priboj_2': FACTION,
+                    },
+                },
+            } as unknown as CommanderBriefing['state_ref'],
+        });
+
+        expect(deriveOpportunityTargetPurpose(TARGET, makeZone(), briefing)).toBe('reduce_isolated_position');
+    });
+
+    it('does not call a position isolated when the co-belligerent, not this corps, dominates the ring', () => {
+        // An ally's map colour is not our siege line. With five of seven ring cells in
+        // Croat hands the HVO, not this corps, has the position invested.
+        const briefing = makeBriefing({
+            state_ref: {
+                meta: { turn: 20 },
+                political: {
+                    political_controllers: {
+                        [TARGET]: 'RS',
+                        ...Object.fromEntries(FRIENDLY.slice(0, 2).map((osid) => [osid, FACTION])),
+                        ...Object.fromEntries(FRIENDLY.slice(2).map((osid) => [osid, 'HRHB'])),
+                        'op:lopare:lopare_2': 'HRHB',
+                        'op:lopare:priboj_2': 'HRHB',
                     },
                 },
             } as unknown as CommanderBriefing['state_ref'],

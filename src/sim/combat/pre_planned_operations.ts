@@ -1424,10 +1424,16 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                 brigades: [
                     'arbih_7th_vitezka_muslim_liberation',
                 ],
-                // Čardak is a mixed-boundary VRS position, so it is not eligible
-                // for the generic isolated-position operation. The 3rd Corps
-                // counteroffensive attacks it explicitly from adjacent, ARBiH-held
-                // Hajderovići.
+                // Čardak historically fell in November–December 1992, when the
+                // Gostović valley was cleared, so this axis is a late backstop rather
+                // than the intended route. The position IS now eligible for the
+                // generic isolated-position operation — its HVO-held Vinište edge no
+                // longer disqualifies it, see `isBoundedIsolatedEnemyPosition` — but
+                // on the calibration scenario the corps commander does not reach it,
+                // because the head entry of this corps' `queued_operations` reserves
+                // its whole roster and this very operation holds sixteen brigades in
+                // that state from t14 to t60. Until that changes, this axis is what
+                // actually takes the position, from adjacent ARBiH-held Hajderovići.
                 objectives: ['op:zavidovici:cardak_2'],
                 staging_osid: 'op:zavidovici:hajderovici_2',
             },
