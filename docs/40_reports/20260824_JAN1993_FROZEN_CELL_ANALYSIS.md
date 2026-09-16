@@ -206,3 +206,54 @@ already fully subscribed, and every one of them costs more elsewhere than it gai
 
 **Reverted.** `jna_uzice_cajnice_tg`, `jna_cajnice_to_tg` and the `cajnice_sweep` axis are
 removed. HEAD stays at the n287 line: 677 / 663 / 662 / 647.
+
+---
+
+## Addendum — Stolac `pjesivac_kula_2` objective coverage closed (2026-09-16)
+
+The sole `[RS->HRHB]` cell in the frozen list, `op:stolac:pjesivac_kula_2`, was reached by the
+sanctioned operation-objective lever. Operation Jackal (`hvo_southeast_herzegovina`, staging
+`op:capljina:capljina_2`, `available_from` 8) already swept
+`tasovcici_2 → hodbina_2 → rotimlja_2 → stolac_2`; the only change is appending
+`op:stolac:pjesivac_kula_2` as the fifth and last objective (contact-adjacent to `stolac_2`). Hatelji
+(`op:stolac:hatelji_2`, painted RS at all four checkpoints) remains excluded. No roster, strength,
+timing, truce or initial-control change.
+
+**Naming.** "Čagalj" is the operation under discussion, represented here by Operation Jackal; it is not
+an OSID requirement, and it is not the same as Operation Tigar. Do not infer nomenclature from a
+unit/OOB reference. The only OSID involved is `op:stolac:pjesivac_kula_2`.
+
+**Result, measured at the January horizon.** On `apr1992_definitive_188w` truncated at t39, the
+objective addition captures `op:stolac:pjesivac_kula_2` for HRHB at **t15 = 20 July 1992** (simulated
+capture date; not independently verified historical dating of every constituent settlement), combat,
+operation-owned by `hvo_southeast_herzegovina:Operation Jackal:t8`, attacker
+`hrhb_1st_brigade_mostar`, decisive victory. jan1993 moves **700 → 701/712**: one cell fixed and
+**zero new** January mismatches. Hatelji stays RS; `zavidovici:cardak_2` keeps its t23 RBiH capture
+(separate reservation lane); `donji_vakuf:prusac_2` remains **OPEN**.
+
+**The battle receipt is correct, not anomalous.** The 55.33 ratio is the militia-only denominator: the
+RS sector (`sector:vrs_herzegovina:3`) had no standing-OG-available brigade at t15, so `defender_kind`
+is `militia` with `defender_brigade: null`, and defence power is `computeMilitiaDefensePower` =
+`max(5000, 3169) × 0.05 × 0.25 = 62.5`. The numerator is one regular HVO brigade with equipment under
+the ordinary attacker modifiers and low confidence (`stale_intel`). No combat value was adjusted and no
+correctness defect was established. The approach is legal: the objective is contact-adjacent to the
+previously taken `stolac_2`. Ordering: the RS↔HRHB truce was declared at t4, i.e. **before** Operation
+Jackal (t8–t15); authored operations are not gated by the truce's bot target filter, no truce break is
+recorded, and the capture (t15) coincides with the operation's `completed` recovery at t15.
+
+**Provenance and scope.** Two independent executions of one candidate (n401/n402) are byte-identical:
+`final_state_hash e3b6b2d34dd1101c`, final-save SHA-256
+`e3b6b2d34dd1101c601b11abd30c2c060717995a0fe748f662214d4ebecf6899`, on parent commit `772a67808` plus
+the hashed patch, scenario `apr1992_definitive_188w.json`, `--weeks 39`, Node v22.23.2, input digest
+`f8ace65496620fad1c8219a9dcaa8e2c5cdba2f3f541b156c7ba112b4748caaf`. Artifacts compared:
+`initial_save.json`, `final_save.json`, `run_summary.json`, `control_delta.json`, `weekly_report.jsonl`,
+`formation_delta.json`, `activity_summary.json` — all identical.
+
+**Not reached.** The candidate stops at t39. April 1994, April 1995 and October 1995 are **NOT
+REACHED**. Later-checkpoint figures a checker prints come from replaying the t39 control log against the
+later painted references (`tools/verify_checkpoints.cjs::stateAt`), not from simulating those weeks.
+The t39-state scores against those references (666/658/569) must not be read as later-checkpoint
+results.
+
+**Scope of the close.** This closes the bounded objective-omission correction for one cell, not overall
+January calibration. There is no Prusac waiver and no baseline/push/viewer action.

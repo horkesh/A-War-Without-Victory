@@ -5150,3 +5150,54 @@ Zavidovići-area OOB anachronisms; `operational_initial_master.json` contradicti
 
 **docs/10_canon/FORAWWV.md may require an addendum** about queue-head reservation horizon. Convene the
 appropriate Pyrrhic panel before editing canon.
+
+## 2026-09-16 — Operation Jackal objective coverage closes the Stolac Pješivac-Kula January mismatch
+
+**Change (scenario definition — operation objectives).** `Operation Jackal`
+(`hvo_southeast_herzegovina`) gained one objective: `op:stolac:pjesivac_kula_2`, appended after
+`op:stolac:stolac_2` in the `stolac_sweep` axis. Roster, strength, timing, truce rules, staging, initial
+control and all other objectives are unchanged. `op:stolac:hatelji_2` (painted RS at every checkpoint)
+stays excluded. This is the frozen-cell analysis's sanctioned operation-objective-coverage lever applied
+to the list's only `[RS->HRHB]` cell.
+
+**Naming.** "Čagalj" is the operation under discussion, represented by Operation Jackal; it is not an
+OSID requirement and is not Operation Tigar. Do not infer nomenclature from a unit/OOB reference. The
+OSID is `op:stolac:pjesivac_kula_2` (bundles Borojevići, Pješivac-Greda, Pješivac-Kula, Poprati,
+Ljubljenica, Barane, Dabrica).
+
+**Result.** On `apr1992_definitive_188w` truncated at t39: jan1993 **701/712** (700 → 701), one cell
+fixed (`pjesivac_kula_2` RS→HRHB at t15 = 20 July 1992, combat, operation-owned
+`hvo_southeast_herzegovina:Operation Jackal:t8`, attacker `hrhb_1st_brigade_mostar`), **zero new**
+January mismatches. Hatelji retained RS; `zavidovici:cardak_2` keeps its t23 RBiH capture;
+`donji_vakuf:prusac_2` remains **OPEN**.
+
+**Battle receipt.** 55.33 is a militia-only denominator: no standing-OG-available RS brigade defended at
+t15 (`defender_kind: militia`, `defender_brigade: null`), so defence =
+`max(5000, 3169) × 0.05 × 0.25 = 62.5`; the attacker is one regular HVO brigade. No combat value was
+adjusted and no correctness defect was found. The objective is contact-adjacent to the previously
+captured `stolac_2`. The RS↔HRHB truce was declared at t4, before Jackal t8–t15; authored operations are
+not gated by the truce's bot target filter, and no truce break is recorded.
+
+**Provenance.** Two independent executions of one candidate (n401/n402) are byte-identical:
+`final_state_hash e3b6b2d34dd1101c`, final-save SHA-256
+`e3b6b2d34dd1101c601b11abd30c2c060717995a0fe748f662214d4ebecf6899`; parent commit `772a67808` plus patch
+`FA3B5BEB216B02E23A954AB9020F2AEFC2552C3E7431AC1D357BEA4D8336C0E7`; scenario
+`apr1992_definitive_188w.json`, `--weeks 39`, Node v22.23.2, input digest `f8ace654…`. Compared
+identical: `initial_save`, `final_save`, `run_summary`, `control_delta`, `weekly_report.jsonl`,
+`formation_delta`, `activity_summary`.
+
+**Not reached.** The candidate stops at t39: April 1994, April 1995 and October 1995 are **NOT
+REACHED**. The 666/658/569 a checker prints are the t39 state replayed against the later painted
+references, not later runs. No 188-week run was taken.
+
+**Checks.** `npx tsc --noEmit` exit 0; `tests/pre_planned_operations.test.ts` 76/76 (new objective
+ordering/Hatelji-exclusion test); adjacent pre-planned, commander, truce, snapshot and operation suites
+694/694; anchor + reporting contracts 9/9.
+
+**Scope.** Closes the bounded objective-omission correction for one cell, not overall January
+calibration. No implicit Prusac waiver. No push, `main` merge, baseline replacement or viewer
+publication. Unrelated work and the `preserve/n396-predicate-only` / `preserve/january-candidate-n399`
+tags are preserved.
+
+**Files.** `src/sim/combat/pre_planned_operations.ts`, `tests/pre_planned_operations.test.ts`,
+[frozen-cell analysis addendum](40_reports/20260824_JAN1993_FROZEN_CELL_ANALYSIS.md#addendum--stolac-pjesivac_kula_2-objective-coverage-closed-2026-09-16).

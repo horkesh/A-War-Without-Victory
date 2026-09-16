@@ -621,6 +621,25 @@ describe('pre-planned operations', () => {
         assert.ok(!reserved.has('rs_trnovo_brigade'));
     });
 
+    it('keeps Pjesivac-Kula as the last Jackal objective and Hatelji excluded', () => {
+        const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Jackal');
+        assert.ok(operation);
+        const axis = operation.axes.find((candidate) => candidate.axis_id === 'stolac_sweep');
+        assert.ok(axis);
+        // Ordering is load-bearing: the sweep reaches the inland Stolac cell only after
+        // Stolac town is taken, from which it is contact-adjacent.
+        assert.deepEqual(axis.objectives, [
+            'op:capljina:tasovcici_2',
+            'op:mostar:hodbina_2',
+            'op:stolac:rotimlja_2',
+            'op:stolac:stolac_2',
+            'op:stolac:pjesivac_kula_2',
+        ]);
+        // Hatelji is painted RS at every checkpoint and must not be swept into.
+        assert.ok(!axis.objectives.includes('op:stolac:hatelji_2'));
+        assert.equal(axis.staging_osid, 'op:capljina:capljina_2');
+    });
+
     it('treats a head operation with no available_from as due from the start', () => {
         const state = makeMinimalState();
         state.military.corps_command!.vrs_east_bosnian!.queued_operations = ['Operation Koridor'];
