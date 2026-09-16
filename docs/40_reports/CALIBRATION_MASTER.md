@@ -1,25 +1,41 @@
 # AWWV Calibration Master Reference
 
-**Current delivery status (2026-09-14):** the owner-approved local occupation repair at clean
-`8db305596` captures Baljvine/Jezero/Donji Korićani/Lupnica at turns 32/33/36/37 through ordinary
-owned operations. January improves 692→696 with zero passive transfers. The full 188-week
-scores are **696/690/687/659**, above unchanged 694/674/668/641 floors. Health, consistency,
-all 31 anchors, nine enclave guards and all assignment seals pass. Overall acceptance remains
-**NO-GO**: western cascade worsens 33→25 against minimum 38; Prozor still has its turn-41
-injection error; Farz is a 3rd Corps turn-169 capture in both runs, now by the 328th instead
-of the 327th, outside the exact reference exception. Saved evidence shows no local donor theft;
-larger-operation scheduling and attribution need separate repair. No extra campaign or
-conditional repeat followed. The full suite's two assertions and one setup timeout are retained
-and reconciled by 62/62 targeted checks and independent review; unaffected evidence is reused.
-Engine Invariants §14.8b and Systems Manual §6.4 include the approved occupation contract.
+**Current delivery status (2026-09-16):** the owner-authorized January-only operations repair at
+clean `ac3e5e152` closes its contract. Diagnostics A–G established that `applyCommanderOutput`
+admitted new bot operations without calling the `assignOperationCommander` lifecycle writer that
+Systems Manual §7.5 requires, so named bot operations ran on unnamed 3/3 preparation defaults.
+Restoring ordinary assignment gives `Operacija Bunar` its available home-corps reserve officer,
+shortening preparation five turns to four; the unchanged three-brigade force opens on turn 29
+instead of 30, ahead of the week-30 seasonal boundary, and takes Orašac at ratio 1.17
+`costly_victory`. January reaches **700/712**, meeting the authorized floor of 700, with all
+eight required cells taken through operation-owned combat and zero passive transfers.
 
-All 20 April commits and the approved coverage contract remain ancestors of this branch.
-Main's manifest authority remains #518 at clean `2a8eb4244` (702/678/672/667); local main
-remains `9588876bc`. No pins, floors or protected data were replaced. At the owner's subsequent
-request, the [public viewer](https://horkesh.github.io/A-War-Without-Victory/?run=8db305596)
-now shows `8db305596` (696/690/687/659), published and verified on 2026-09-14. Branch-local v72/v73 remains
-dirty week-104 history, not candidate acceptance.
-[Current repair receipt](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-local-occupation-repair--2026-09-14).
+The canonical 188-week run scores **700/712 jan1993, 702 apr1994, 697 apr1995, 667 oct1995**
+against unchanged 694/674/668/641 floors — an improvement on every checkpoint over the
+`8db305596` local occupation source (696/690/687/659). The engine health gate passes all eleven
+gated conditions, run consistency passes, all 31 anchors match, nine enclave guards hold, and
+the audit records 188 turn seals plus the final seal with zero unresolved seals. Independent
+evidence review is GO on the January contract.
+
+Overall acceptance remains **NO-GO**. The checkpoint validator exits 1 with
+`GUARD BREACHED — §6 panel matter`: western cascade is **30 against base 40, below its floor of
+38** — recovered from 25 at `8db305596`, still short — and the Farz P-A discriminator records
+the t168 capture by `arbih_327th_vitezka_mountain` (3rd Corps) where a 2nd Corps capture at
+t>=160 is required. Prozor retains its turn-41 `op_empty` injection error, present identically
+in the `8db305596` reference and therefore inherited, not introduced. Both later-checkpoint
+offsets fall under the owner's explicit January-only waiver for this packet; they remain visible
+and support no checkpoint-clean or merge claim. Larger-operation scheduling and Farz attribution
+still need their own bounded scope. Engine Invariants §14.8b and Systems Manual §6.4 retain the
+approved occupation contract; no pins, floors or protected data were replaced.
+
+All 20 April commits and the approved coverage contract remain ancestors of this branch. Main's
+manifest authority remains #518 at clean `2a8eb4244` (702/678/672/667); local main remains
+`9588876bc`. The [public viewer](https://horkesh.github.io/A-War-Without-Victory/?run=8db305596)
+still shows `8db305596` (696/690/687/659) as published on 2026-09-14 and is **stale relative to
+this run**; no republication is implied here. Branch-local v72/v73 remains dirty week-104
+history, not candidate acceptance.
+[Current repair receipt](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-january-only-operations-repair--2026-09-14)
+· [preceding local occupation step](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-local-occupation-repair--2026-09-14).
 
 BC04 P1/P2, BC05, BC06 and BC09 retain their campaign/packaged acceptance boundaries; BC07
 retention is settled. Cleanup and R9 build preparation are integrated/reviewed, BC10 remains

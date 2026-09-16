@@ -4956,3 +4956,79 @@ push occurred. Overall calibration remains NO-GO. The existing
 [viewer plan and publication receipt](plans/2026-09-08-calibration-control-timeline-viewer-plan.md#2026-09-14-latest-run-publication)
 retain provenance and verification details; roadmap and calibration status now identify the
 published latest dataset.
+
+## 2026-09-16 — January-1993 operations repair meets its contract at 700/712; calibration still held
+
+The owner-authorized January-only operations repair is complete and measured at clean
+`ac3e5e1524558d2dc4e4fc40924306fc2873735a` on branch `codex/january-1993-operations-20260914`.
+All 20 April commits, the Jajce local occupation step and the approved coverage contract remain
+ancestors. The work was carried out on 2026-09-14 by the preceding session, which was interrupted
+before it could record the result; this entry records the measurement and the completed
+verification, and adds no new implementation.
+
+**Root cause, found at Diagnostic G after six earlier candidates.** Diagnostics A through F moved
+January 696 to 699 and got the full legal three-brigade force assembled at Orašac, but every
+opening attack failed: the force reached its approach only in time to attack on turn 30, one turn
+past the seasonal boundary where attack moves 0.95 to 0.75 and defense 1.00 to 1.05, resolving at
+0.84/0.67/0.71. Source inspection then established a narrower contract defect rather than a
+strength problem: `applyCommanderOutput` pushed newly admitted operations into
+`corps.active_operations` without ever calling the `assignOperationCommander` lifecycle writer
+that Systems Manual §7.5 requires for named bot operations. Those operations therefore ran on
+unnamed 3/3 preparation defaults. Restoring ordinary assignment — guarded on an absent
+`commander_officer_id` and on a canonical faction, so explicit command, approval, conflict, retry
+and completion-release ownership are untouched — gives `Operacija Bunar` its available home-corps
+reserve officer at competence 4, shortening preparation from five turns to four. The unchanged
+roster of 11th Krupa, 17th Ključ and 1st Drvar, with the same real donor march from Veliki Badić
+to Račić arriving turn 28, then opens on turn 29 and resolves one combined battle as
+`costly_victory` at ratio 1.17 with `logged_capture`. Orašac flips to RS. Commander assignment
+does not change combat strength; the material difference is the one-turn-earlier opening.
+
+**Measurement.** The clean canonical 188-week run at `ac3e5e152` completes in 291 seconds, exit 0,
+`git_dirty: false`, Node v22.23.2, final-save SHA-256
+`8e80eca07cf0317fd8775ab818bb10adade8230076b6bde99d2b3a0a082fecee` (independently recomputed from
+`final_save.json` and matching `post_a-january.json`). Scores are **700/712 jan1993, 702 apr1994,
+697 apr1995, 667 oct1995** against unchanged 694/674/668/641 floors, improving every checkpoint
+over the `8db305596` local occupation source (696/690/687/659). January meets its authorized
+minimum of 700 exactly, with zero regressions and four recoveries. All eight required cells are
+taken through operation-owned combat with zero passive transfers: Baljvine t28, Orašac t29,
+Jezero t32, Donji Korićani t34, Donji Vakuf town t35, Korenići t36, Lupnica t36, Prusac t39. The
+engine health gate passes all eleven gated conditions, run consistency passes, all 31 anchors
+match, nine enclave guards hold, and the audit records 188 turn seals, one final seal and zero
+unresolved seals. Independent evidence review is GO on the January contract. The scores were
+re-verified on 2026-09-16 by replaying `tools/verify_checkpoints.cjs` against the current painted
+references, returning the identical 700/702/697/667 rather than a stale run-time figure.
+
+**Full suite: PASS.** `npm run test:vitest:balanced` at clean `ac3e5e152` with an unmodified
+`src/` and `tests/` tree records **13,982 passed across 1,389 files, 31 tests and 4 files skipped,
+exit 0**. The sole reported FAIL is
+`tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts`, the intentional child-process
+failure control asserted by `tests/run_vitest_balanced.test.ts`, which passes 13/13. This
+supersedes an earlier same-day rerun that exited 1 with 50 failures across ten files; that run was
+invalid and its cause is recorded rather than erased. Nine of those files failed because the
+suite was launched from a shell where `bash` resolved to `C:\Windows\system32\bash.exe` (WSL),
+which cannot resolve the MSYS-form paths the hook-guard and CI-guardrail tests pass to it; the
+tenth, `tests/runtime_dependency_resolution.test.ts`, hit the separate known 10-second setup-hook
+timeout under suite load. All ten files are byte-identical to `main` and the branch touches
+nothing under `tools/hooks/`, `.claude/` or `.github/scripts/`. No source, test or configuration
+file was changed to obtain the green; only the invoking `PATH` differed. Both logs are retained
+and the authoritative one records its resolved bash path on its first line.
+
+**Overall calibration remains NO-GO; this evidence supports no merge.** The checkpoint validator
+exits 1 with `GUARD BREACHED — §6 panel matter`. The western-Bosnia cascade is **30 against base
+40, below its floor of 38** — recovered from 25 at `8db305596`, still short — and the Farz P-A
+discriminator records the t168 capture by `arbih_327th_vitezka_mountain` (3rd Corps) where a
+2nd Corps capture at t>=160 is required. The truth command exits 1 solely on
+`Prozor–Rama Line Counterattack` emitting `op_empty` at t41, present identically in the
+`8db305596` reference and therefore inherited rather than introduced. Both later-checkpoint
+offsets fall under the owner's explicit January-only waiver for this packet; they remain visible
+and warrant no further Farz investigation inside this scope. Larger-operation scheduling and
+attribution repair needs its own bounded scope. No determinism risk was introduced: the nine
+commits add no `Math.random`, `Date.now`, `new Date` or `performance.now` anywhere under `src/`.
+
+Local `main` remains `9588876bc`; no promotion, baseline refresh, pin replacement or remote push
+followed. The public viewer still shows the earlier `8db305596` dataset published on 2026-09-14
+and is stale relative to this run; no republication is implied. Decisive receipts are now tracked
+under `logs/roadmap-integration-20260912/january-operations/`, including the checkpoint, health,
+consistency and audit logs, the January checker output, the independent evidence review, the
+Diagnostic G Orašac diagnosis, the 2026-09-16 checkpoint re-verification and the suite launch
+records with their bash-resolution diagnosis.

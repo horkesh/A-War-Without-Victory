@@ -156,11 +156,46 @@ then use the normal typecheck and one approximately 75-second diagnostic 39. Kee
 January acceptance criterion unchanged and stop larger validation if it fails. No selector,
 preparation formula, officer data, force-stat, seasonal or militia-defense tuning is included.
 
-**Latest checkpoint — 2026-09-14:** the owner-approved local occupation repair is implemented
-at clean `8db305596`. All four Jajce cases pass by week 39; the full campaign scores
-696/690/687/659. Engine health passes, while western cascade 25, Prozor injection and Farz
-attribution keep overall acceptance **NO-GO**. The [local occupation result](#owner-authorized-local-occupation-repair--2026-09-14)
-below supersedes the earlier next-action proposal. Main and baseline pins remain unchanged.
+**Diagnostic G result — the corrected contract, measured:** clean `ac3e5e152` restores the
+canonical commander assignment on admission and **meets the January contract at 700/712**.
+`Operacija Bunar` is still emitted at turn 25 with the unchanged three-brigade roster — 11th
+Krupa, 17th Ključ and 1st Drvar — and the donor still marches Veliki Badić to Račić, arriving
+turn 28. The difference is ownership: the admitted operation now records commander
+`vrs_samardzija` (competence 4, aggressiveness 4), whose officer-derived preparation is four
+turns rather than the unnamed 3/3 default's five. The same assembled force therefore opens on
+turn 29 instead of turn 30, ahead of the week-30 seasonal boundary where attack moves 0.95 to
+0.75 and defense 1.00 to 1.05. One combined battle against RBiH militia resolves as
+`costly_victory` at ratio 1.17 with `logged_capture`, 115 RS and 35 militia casualties, and
+Orašac flips to RS. This establishes the timing and the realized battle result. It does not
+claim that commander assignment changes combat strength, and it does not predetermine capture.
+
+All eight required January cells are taken through operation-owned combat with zero passive
+transfers: Baljvine t28, Orašac t29, Jezero t32, Donji Korićani t34, Donji Vakuf town t35,
+Korenići t36, Lupnica t36 and Prusac t39 — the four repaired cells and the four retained Jajce
+cells. For each, an independent lookup in `weekly_report.jsonl` found the exact battle ID and
+target, an RS winning attacker and the same non-null operation ID recorded by the checker.
+Receipts: `logs/roadmap-integration-20260912/january-operations/diagnostic_g-orasac-diagnosis.md`.
+
+**Latest checkpoint — 2026-09-16:** the January-only operations repair is implemented and
+measured at clean `ac3e5e152`. The canonical 188-week run scores **700/712 jan1993, 702 apr1994,
+697 apr1995 and 667 oct1995**, improving every checkpoint over the `8db305596` local occupation
+source (696/690/687/659). The engine health gate passes on all eleven gated conditions, run
+consistency passes, all nine enclave guards hold, all 31 anchors match, and the audit reports
+188 turn seals plus the final seal with zero unresolved seals. Independent evidence review is
+**GO on the January contract**.
+
+Overall acceptance remains **NO-GO** and this evidence supports no merge. The checkpoint
+validator exits 1 and records `GUARD BREACHED — §6 panel matter`: the western-Bosnia cascade is
+**30 against base 40, below its floor of 38** — improved from 25 at `8db305596` but still short —
+and the Farz P-A discriminator records the t168 capture by `arbih_327th_vitezka_mountain`
+(3rd Corps) where a 2nd Corps capture at t>=160 is required. The truth command exits 1 solely on
+`Prozor–Rama Line Counterattack` emitting `op_empty` at t41; the retained `8db305596` reference
+contains the same operation, error and turn, so it is inherited rather than introduced here.
+Both later-checkpoint offsets fall under the owner's explicit January-only waiver for this
+packet, must remain visible, and do not support a checkpoint-clean or main-merge claim.
+Main stays `9588876bc` and the baseline pins are unchanged. The
+[local occupation result](#owner-authorized-local-occupation-repair--2026-09-14) below records
+the preceding step.
 
 ### Current checkpoint — 2026-09-13
 

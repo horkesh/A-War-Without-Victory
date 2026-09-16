@@ -1,6 +1,6 @@
 # AWWV Command Board
 
-**Status:** Derived dispatch view, synchronized 2026-09-14.
+**Status:** Derived dispatch view, synchronized 2026-09-16.
 
 **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole authority for unfinished work and wins if this board differs.
 
@@ -23,22 +23,25 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 3 | R3 | **COMPLETE** | None. | [TG convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) |
 | 4 | R4 | **COMPLETE** | None; Phase 6 and its packaging follow-up are closed. | [Command/event/Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) |
 | 5 | R5 | **COMPLETE -- CLOSED 2026-08-05** | None. The accepted performance floor is approximately 1.09 seconds per turn; the 100 ms target and incremental-reuse Task 6 are retired from 1.0 scope. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
-| 6 | R6 | **JAJCE REPAIR VERIFIED; CALIBRATION HELD — 2026-09-14** | All four pockets captured by week 37; January 696 passes. Western cascade 25/38, Prozor injection and Farz attribution remain open. Set the separate operation-scheduling/calibration repair scope; preserve floors and hold the repeat. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
+| 6 | R6 | **JANUARY OPERATIONS CONTRACT MET; CALIBRATION HELD — 2026-09-16** | All eight required cells captured by week 39; January meets its authorized 700/712 and every checkpoint improves (700/702/697/667). Western cascade 30/38, Farz attribution and the inherited Prozor injection remain open. Set the separate operation-scheduling/attribution repair scope; preserve floors and hold the repeat. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
 | 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
 | 7 | R7 | **WR01/PIN REFRESH LANDED; AUDIO/ACCEPTANCE OPEN** | Finish offline audio and ten-cue disposition; human listening waits for owner inspection. WR01 closed in #517 and pins refreshed in #518; April combined-source acceptance is separate. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [accepted functional opening](2026-08-23-opening-screens-implementation-plan.md) / [cinematic opening and typography amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md) / [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) |
 | 7.5 | RE | **CLOSED — owner, 2026-09-01** | None. RE gates nothing; engine-health defects are still fixed before tuning. | [Closed recovery record](2026-08-28-packaged-probe-recovery-plan.md) / [closed RE contract](2026-08-26-engine-integrity-plan.md) |
 | 8 | R8 | **INBOX REPAIRED; PACKAGE/SHAKEDOWN GATES OPEN — 2026-09-10.** | Product `7d97b72fc`, route/build/hook pass; sole UI-boundary failure reconciled by 45/45 targeted checks, exit 1 retained. Harness `c31135f35` reaches RBiH turn 24/577 captures, then fails readability before Save/load. Nineteen local aborts and one final-sector warning need disposition; RS/HRHB unlaunched. Post-run package adds telemetry: all 1,200 original files match, directory gate fails. Narrow follow-up proposed only; old package/evidence preserved, full campaigns/acceptance open. | [Electron validation](2026-07-31-full-campaign-electron-validation-plan.md) |
 | 9 | R9 | **FREEZE WAITING ON R8; LIMITED PREPARATION AT §4.2** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
-**Calibration integration — 2026-09-14:** all 20 April commits, canon amendments and approved
-coverage remain integrated. The new local occupation source `8db305596` passes all four Jajce
-cases through military captures and scores 696/690/687/659 over 188 weeks. Health, consistency,
-31 anchors, nine enclave guards and assignment seals pass. Western cascade 25 below 38,
-Prozor injection and Farz attribution retain overall NO-GO. The full suite's two assertions and
-one setup timeout are retained; 62/62 targeted correction checks and independent review pass.
-Main remains `9588876bc`; no repeat or pin refresh followed. The owner subsequently requested
-the public viewer refresh, now published and verified with this `8db305596` dataset.
-[Receipt](../40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-local-occupation-repair--2026-09-14).
+**Calibration integration — 2026-09-16:** all 20 April commits, the Jajce local occupation step,
+canon amendments and approved coverage remain integrated. The January operations source
+`ac3e5e152` scores **700/712, 702, 697, 667** over 188 weeks, improving every checkpoint over
+`8db305596` (696/690/687/659). January meets its authorized 700 contract with all eight required
+cells taken through operation-owned combat and zero passive transfers. Root cause was a missing
+`assignOperationCommander` call on operation admission (Systems Manual §7.5), which left named
+bot operations on unnamed 3/3 preparation defaults. Health, consistency, 31 anchors, nine enclave
+guards and assignment seals pass; independent evidence review is GO on the January contract.
+Western cascade 30 below 38 (recovered from 25), Farz attribution and the inherited Prozor
+injection retain overall NO-GO. Main remains `9588876bc`; no pin refresh followed. The public
+viewer still shows the earlier `8db305596` dataset and is stale relative to this run.
+[Receipt](../40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-january-only-operations-repair--2026-09-14).
 
 **R7 readability execution — 2026-09-09:** The authorized date-label expansion now has nine-case initial/maximum-scroll proof, preserving the fixed Desk column, header and artwork. Final UI/typecheck/build checks and independent review pass; Desk/date commit `88996a23d` and its hook pass. Clean POST-A completes 188 weeks with health/hash checks passing; PRE/POST-A/POST-B match all eight artifacts and inputs. The fixed run budget is consumed. Earlier phases and unaffected global Vitest/player-experience receipts remain reviewed. Baseline investigation is GO: pins match accepted n392, while four consumed inputs changed before R7; PRE/POST-B match all eight artifacts. Retain the six-pin failing baseline gate and dirty POST-B disclosure. No R7 closure or downstream lane is claimed. See the amendment and designated report.
 

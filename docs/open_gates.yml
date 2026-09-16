@@ -32,7 +32,7 @@
 #   npm run gates                           prints the currently-open rows
 
 version: 1
-updated: 2026-09-13
+updated: 2026-09-16
 
 lanes: [R1, R2, R3, R4, R5, R6, R7, R8, R9, RC, RE, REPO]
 
@@ -169,13 +169,25 @@ gates:
       it cannot certify the later final branch or combined source. Its reported 703/712
       April result is retained as historical evidence. Canon amendments and the coverage
       contract are owner-approved; coverage passes 17/17 at 51fe49415. The authorized local
-      occupation repair at clean 8db305596 captures all four Jajce pockets by week 37 and
-      completes 188 weeks at 696/690/687/659. All checkpoint floors, health, anchors, enclave
-      guards, consistency and assignment seals pass. Western cascade worsens 33 to 25 versus
-      minimum 38; Prozor op_empty injection and Farz attribution remain unmet. Full-suite
-      failures are retained and reconciled by 62/62 targeted checks and independent review;
-      no fresh all-green full-suite rerun is claimed. Broader operation scheduling needs
-      separate repair scope. No conditional repeat, promotion or pin refresh followed.
+      occupation repair at clean 8db305596 captured all four Jajce pockets and completed
+      188 weeks at 696/690/687/659. The January-only operations repair at clean ac3e5e152
+      supersedes it: 188 weeks at 700/712, 702, 697, 667, improving every checkpoint, with
+      all eight required January cells taken through operation-owned combat by week 39 and
+      zero passive transfers. Root cause was a missing assignOperationCommander call on
+      operation admission (Systems Manual 7.5), not tuning. All checkpoint floors, health,
+      anchors, enclave guards, consistency and assignment seals pass; independent evidence
+      review is GO on the January contract, and the scores were re-verified on 2026-09-16
+      against current painted references. The full suite now PASSES at this source:
+      13,982 passed across 1,389 files, 31 tests and 4 files skipped, exit 0, the sole
+      reported FAIL being the intentional deliberate_failure control fixture whose parent
+      test passes. An earlier same-day rerun exiting 1 was invalid on bash resolution
+      (WSL instead of Git Bash) and is retained with its diagnosis, not erased. Two gate
+      conditions remain unmet: western cascade is 30 versus minimum 38 (recovered from 25),
+      and the Farz discriminator still records a 3rd Corps t168 capture where 2nd Corps at
+      t>=160 is required. The Prozor op_empty injection is inherited identically from the
+      8db305596 reference. Two clean identical 188-week runs on the combined source are
+      still outstanding. Broader operation scheduling and attribution need separate repair
+      scope. No conditional repeat, promotion or pin refresh followed.
 
   - id: R8-OPTIONAL-AI-OWNERSHIP
     lane: R8
