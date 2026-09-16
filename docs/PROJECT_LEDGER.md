@@ -5092,3 +5092,61 @@ matching the local artifact. Overall calibration acceptance is unaffected and re
 (new checker), [viewer plan](plans/2026-09-08-calibration-control-timeline-viewer-plan.md#2026-09-16-expected-owner-markers-on-mismatches),
 regenerated artifact and receipts under
 `logs/roadmap-integration-20260912/january-operations/viewer/`.
+
+## 2026-09-16 — Command-selection reservation bounded; Čardak taken in 1992 at an unchanged January 700
+
+**What changed.** `getHeadQueuedPrePlannedBrigadeIds` (`src/sim/combat/pre_planned_operations.ts`)
+reserved the whole roster of each corps' `queued_operations[0]` regardless of when that plan was due.
+On the calibration scenario the ARBiH 3rd Corps head from t14 to t60 was the Central Bosnia
+Counteroffensive (`available_from` 60), so sixteen brigades were frozen for 46 turns and the corps
+launched nothing but probes through the second half of 1992. The helper now reserves a head roster only
+once `(available_from ?? 0) <= state.meta.turn`; `emit.ts` (its only caller) already passes the full
+`GameState`. No lookahead constant and no `planning_duration` subtraction were introduced; missing
+timing defaults to due (0), matching `getReservedPrePlannedBrigadeIds`. Task-group donor protection
+(`getReservedPrePlannedBrigadeIds`), full-queue routing protection (`getQueuedPrePlannedBrigadeIds`) and
+recruitment assembly placement (`getActiveAuthoredAssemblyOsid`) are untouched.
+
+**Alliance predicate corrected (separately attributable).** The mixed-perimeter repair in
+`isBoundedIsolatedEnemyPosition` (`src/sim/combat/commander/plan.ts`) now reads co-belligerency from
+`areRbihHrhbAllied` (alliance above `ALLIED_THRESHOLD`) instead of `isRbihHrhbCombatBlocked`, which also
+covers mobilization, temporary ceasefire and the earliest-war turn — none of which is co-belligerency.
+There is no calendar cutoff; the alliance is floored at 0.40 until turn 40, so the correction is
+behaviour-identical for t0–t39.
+
+**Result (emergent, not authored).** On the definitive `apr1992_definitive_188w` scenario truncated at
+t39, the 3rd Corps built `Operacija Izlaz` (`sector_attack`, created t21) and captured
+`op:zavidovici:cardak_2` by combat at **t23 = 1992-09-14**, RBiH at t39. No authored operation and no
+override. jan1993 unchanged at **700/712**. Two independent executions of one candidate (n399/n400) are
+byte-identical: `final_state_hash 31b0388ecdacd0c4`, final-save SHA-256
+`31b0388ecdacd0c42702ccc64e0239f64059bc4445715c164c38e75757ac5c48`.
+
+**January map is not preserved.** One cell fixed (`cardak_2`) and one new mismatch introduced:
+`op:donji_vakuf:prusac_2` (reference RS; RBiH at t39 in n399). Diagnosed as RS running late through the
+documented Donji Vakuf/Šipovo cascade — the attacker's `korenici` advance met a rotating defence and a
+lower w36 power ratio. The candidate ends at t39, so `prusac_2` is described as **not captured by the
+checkpoint**, with no eventual capture or date asserted. **`prusac_2` is OPEN**, not an accepted
+exception; there is no owner waiver. **Overall January calibration: OPEN.**
+
+**Verification.** `npx tsc --noEmit` exit 0; changed suites 93/93 and adjacent
+reservation/commander/routing/recruitment suites 604/604. `npm run test:vitest` returned top-level exit
+**1**: the intentional `tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts` child control
+(expected; its parent `tests/run_vitest_balanced.test.ts` passes) and a real load-sensitive
+`Error: Hook timed out in 10000ms` in `tests/runtime_dependency_resolution.test.ts` (shard 3), which
+passes **12/12 in isolation** — the known suite-load hook timeout already recorded on 2026-09-16 above.
+No wholesale rerun was taken.
+
+**Process.** n396 starting snapshot preserved as local tag `preserve/n396-predicate-only`; the final
+production patch and the report preserved outside the tree. Scoped local checkpoint commit only — no
+push, no `main` merge, no baseline replacement, no viewer publication. Local `main` remains `9588876bc`.
+
+**Still open, separate items.** Pješivac-Kula / Čagalj (the next bounded January case); three
+Zavidovići-area OOB anachronisms; `operational_initial_master.json` contradicting
+`operational_political_control.json`; the Gostović operation absent from `HISTORICAL_TIMELINE_MASTER.md`.
+
+**Files.** `src/sim/combat/pre_planned_operations.ts`, `src/sim/combat/commander/plan.ts`,
+`tests/pre_planned_operations.test.ts`, `tests/commander/operation_purpose_guard.test.ts`,
+`tests/commander/elite_formation_utilization.test.ts`,
+[Čardak diagnosis report](40_reports/20260916_CARDAK_1992_GOSTOVIC_VALLEY_DIAGNOSIS.md).
+
+**docs/10_canon/FORAWWV.md may require an addendum** about queue-head reservation horizon. Convene the
+appropriate Pyrrhic panel before editing canon.

@@ -1424,10 +1424,16 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                 brigades: [
                     'arbih_7th_vitezka_muslim_liberation',
                 ],
-                // Čardak is a mixed-boundary VRS position, so it is not eligible
-                // for the generic isolated-position operation. The 3rd Corps
-                // counteroffensive attacks it explicitly from adjacent, ARBiH-held
-                // Hajderovići.
+                // Čardak historically fell in November–December 1992, when the
+                // Gostović valley was cleared. The position is eligible for the
+                // generic isolated-position operation — its HVO-held Vinište edge no
+                // longer disqualifies it, see `isBoundedIsolatedEnemyPosition` — and on
+                // the calibration scenario the 3rd Corps commander now reaches it once
+                // this operation stops freezing its roster before it is due, see
+                // `getHeadQueuedPrePlannedBrigadeIds`. This axis remains a fallback: it
+                // attacks Čardak explicitly from adjacent ARBiH-held Hajderovići if the
+                // position is still held when the Central Bosnia counteroffensive
+                // finally injects.
                 objectives: ['op:zavidovici:cardak_2'],
                 staging_osid: 'op:zavidovici:hajderovici_2',
             },
@@ -2432,13 +2438,32 @@ export function getQueuedPrePlannedBrigadeIds(state: Pick<GameState, 'military'>
 }
 
 /**
- * Formation identities owned by each corps' next queued historical operation.
+ * Formation identities owned by each corps' next queued historical operation
+ * once that operation is due for preparation.
  *
- * Probe selection needs the narrower reservation: protect the plan that can
- * inject next without freezing formations authored only for later campaigns.
- * Other generic-routing owners deliberately use the full-queue helper above.
+ * Command selection must not consume the roster of the plan that can inject now:
+ * a due-but-deferred head keeps its formations excluded from new
+ * commander-generated operations, and active-operation ownership is handled
+ * separately by the caller.
+ *
+ * The exclusion is bounded by the plan's own timing. `available_from` is the
+ * earliest preparation/injection point, not an attack deadline, so a queue head
+ * whose `available_from` is still in the future is not preparing and must not
+ * freeze its roster merely because it is first in line. Reserving the whole
+ * future roster is what held sixteen ARBiH 3rd Corps brigades out of the
+ * commander's hands from t14 to t60 while the Central Bosnia Counteroffensive
+ * waited its turn. No lookahead constant is introduced: the plan's own
+ * `available_from` is the bound, and missing timing defaults to due (0), matching
+ * `getReservedPrePlannedBrigadeIds`.
+ *
+ * Probe selection needs this narrower reservation than the full-queue helper
+ * above: protect the plan that can inject next without freezing formations
+ * authored only for later campaigns.
  */
-export function getHeadQueuedPrePlannedBrigadeIds(state: Pick<GameState, 'military'>): Set<FormationId> {
+export function getHeadQueuedPrePlannedBrigadeIds(
+    state: Pick<GameState, 'military' | 'meta'>,
+): Set<FormationId> {
+    const currentTurn = state.meta?.turn ?? 0;
     const reserved = new Set<FormationId>();
     const corpsCommand = state.military.corps_command ?? {};
     for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
@@ -2448,6 +2473,7 @@ export function getHeadQueuedPrePlannedBrigadeIds(state: Pick<GameState, 'milita
             candidate.corps === corpsId && candidate.name === operationName
         ));
         if (!def) continue;
+        if ((def.available_from ?? 0) > currentTurn) continue;
         for (const axis of def.axes) {
             for (const brigadeId of axis.brigades) reserved.add(brigadeId);
         }

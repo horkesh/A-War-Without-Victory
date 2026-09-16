@@ -1915,7 +1915,10 @@ describe('empty-objective probe guard', () => {
         const corpsId = 'vrs_sarajevo_romanija' as FormationId;
         const briefing = makeBriefing({
             corps_id: corpsId,
-            turn: 23,
+            // Operation Kijevo has available_from 24: from that turn it is preparing, so
+            // its roster is reserved from probes. Before it is due the reservation does
+            // not apply — that is the bounded policy this turn exercises.
+            turn: 24,
             active_operations: [],
             sectors: [{
                 sector_id: 'sector:vrs_sarajevo_romanija:0',
@@ -1952,6 +1955,7 @@ describe('empty-objective probe guard', () => {
                 location_osid: 'op:near:b',
             }] as any[],
             state_ref: {
+                meta: { turn: 24 },
                 military: {
                     corps_command: {
                         [corpsId]: {

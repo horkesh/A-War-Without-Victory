@@ -589,7 +589,11 @@ describe('pre-planned operations', () => {
         ]);
     });
 
-    it('reserves probe participants only for the head queued historical operation', () => {
+    it('does not reserve a distant head operation roster against new commander operations', () => {
+        // The existing queue is the case: Kijevo (available_from 24) is head from the
+        // start, with Lukavac 93 (69) behind it. At turn 0 neither plan is preparing, so
+        // command selection must not be excluded from either roster. The old helper
+        // reserved the whole head roster unconditionally, which is the defect.
         const state = makeMinimalState();
         state.military.corps_command!.vrs_sarajevo_romanija!.queued_operations = [
             'Operation Kijevo',
@@ -598,8 +602,32 @@ describe('pre-planned operations', () => {
 
         const reserved = getHeadQueuedPrePlannedBrigadeIds(state);
 
-        assert.ok(reserved.has('rs_4th_sarajevo_light_infantry'));
+        assert.ok(!reserved.has('rs_4th_sarajevo_light_infantry'));
         assert.ok(!reserved.has('rs_trnovo_brigade'));
+    });
+
+    it('reserves the head operation roster once its available_from is due', () => {
+        const state = makeMinimalState();
+        state.military.corps_command!.vrs_sarajevo_romanija!.queued_operations = [
+            'Operation Kijevo',
+            'Operation Lukavac 93',
+        ];
+        state.meta.turn = 24;
+
+        const reserved = getHeadQueuedPrePlannedBrigadeIds(state);
+
+        assert.ok(reserved.has('rs_4th_sarajevo_light_infantry'));
+        // Still only the head plan, not the later one.
+        assert.ok(!reserved.has('rs_trnovo_brigade'));
+    });
+
+    it('treats a head operation with no available_from as due from the start', () => {
+        const state = makeMinimalState();
+        state.military.corps_command!.vrs_east_bosnian!.queued_operations = ['Operation Koridor'];
+
+        const reserved = getHeadQueuedPrePlannedBrigadeIds(state);
+
+        assert.ok(reserved.has('rs_1st_semberija_light_infantry'));
     });
 
     it('authors the April Bosanska Krupa takeover as a narrow 2KK operation', () => {

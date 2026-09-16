@@ -37,6 +37,7 @@
 import type { FactionId, FormationId } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { spatialFriendlyDistance, spatialSameComponent } from '../../spatial_context.js';
+import { areRbihHrhbAllied } from '../../early_war/alliance_update.js';
 
 import type {
     CommanderBriefing,
@@ -1521,6 +1522,14 @@ export type OpportunityTargetPurpose =
 const RECENT_RECAPTURE_WINDOW_TURNS = 8;
 const MAX_ISOLATED_POSITION_OSIDS = 6;
 
+/**
+ * Share of a bounded position's external ring the attacking corps must hold itself
+ * before a co-belligerent-held minority segment counts as sealed. Mirrors
+ * `ABANDONMENT_DOMINANCE_SHARE` in `rear_pocket_consolidation.ts`: an ally's map
+ * colour does not invest a position — the attacker's own line does.
+ */
+const ISOLATED_POSITION_RING_DOMINANCE_SHARE = 2 / 3;
+
 export function isBoundedIsolatedEnemyPosition(
     targetOsid: string,
     briefing: CommanderBriefing,
@@ -1543,15 +1552,47 @@ export function isBoundedIsolatedEnemyPosition(
         }
     }
 
-    let externalBoundaryCount = 0;
+    // A position is isolated when nothing on its ring can relieve it. The BFS above
+    // has already absorbed every same-controller neighbour, so the ring holds no
+    // ground belonging to the defender's own side by construction.
+    //
+    // The ring need not be entirely ours. Ground held by a current co-belligerent is
+    // closed to the defender exactly as ours is, so a minority allied segment does not
+    // make a cut-off position relievable — it only means the envelope is shared. That
+    // is the ordinary 1992 shape in central Bosnia, where ARBiH reduced VRS islands
+    // that stood partly against HVO-held ground while the alliance held.
+    //
+    // Two limits keep this from becoming a licence. Our corps must still be the one
+    // investing the position, so we must hold the dominant share of the ring; an ally's
+    // map colour is not our siege line. And co-belligerency is read from the live
+    // alliance value, not from the combat gate: a temporary ceasefire or a mobilization
+    // window is a hostile or arming third party, and the position is then a contested
+    // front, not a pocket. The alliance is the relationship itself; no calendar cutoff
+    // is involved, and it lapses only when the alliance value actually falls.
+    const ring = new Map<string, string | null | undefined>();
     for (const member of [...cluster].sort(strictCompare)) {
         for (const neighbor of [...(adjacency.get(member) ?? [])].sort(strictCompare)) {
             if (cluster.has(neighbor)) continue;
-            externalBoundaryCount++;
-            if (controllers[neighbor] !== briefing.faction) return false;
+            ring.set(neighbor, controllers[neighbor]);
         }
     }
-    return externalBoundaryCount > 0;
+    if (ring.size === 0) return false;
+
+    let heldByFaction = 0;
+    for (const ringOsid of [...ring.keys()].sort(strictCompare)) {
+        const ringController = ring.get(ringOsid);
+        if (ringController === briefing.faction) {
+            heldByFaction++;
+            continue;
+        }
+        if (!briefing.state_ref) return false;
+        const isCobelligerent = (
+            (ringController === 'RBiH' && briefing.faction === 'HRHB')
+            || (ringController === 'HRHB' && briefing.faction === 'RBiH')
+        );
+        if (!isCobelligerent || !areRbihHrhbAllied(briefing.state_ref)) return false;
+    }
+    return heldByFaction / ring.size >= ISOLATED_POSITION_RING_DOMINANCE_SHARE;
 }
 
 /**
