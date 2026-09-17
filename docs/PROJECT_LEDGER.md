@@ -5762,7 +5762,13 @@ geometry, checkpoint thresholds, baseline pins, preservation tags, the skipped b
 capture and the closed Pješivac-Kula correction stay preserved; Vranjevići/Kružanj remains UNRESOLVED and
 was outside this task.**
 
-## 2026-09-17 — Donji Vakuf early sequence corrected: the town's takeover moves from a post-Jajce sweep to May 1992; jan1993 701 → 702/712
+## 2026-09-17 — ⛔ SUPERSEDED BY WITHDRAWAL. Donji Vakuf early sequence corrected: the town's takeover moves from a post-Jajce sweep to May 1992; jan1993 701 → 702/712
+
+> **This entry records a change that was WITHDRAWN the same day.** Its mechanism — three event rows
+> carrying `control_change` grants — is prohibited by owner rule. See the withdrawal entry at the end of
+> this file. The measurement below is retained as the record of a rejected experiment; **702/712 is not a
+> baseline and not a floor**, and `n403` (701/712) remains the January comparison. Original text follows.
+
 
 **Task.** Correct the misplaced early Donji Vakuf sequence using specific historical evidence and existing
 simulation mechanisms. Owner packet with three new ICTY sources. Full record:
@@ -5866,3 +5872,65 @@ later, so `t0 = RBiH` is correct and stays), any checkpoint reference, attack mu
 reservation policy, probe behaviour, the 1KK queue order, Op Jajce's definition, operational-cell geometry,
 OOB, baseline pins, preservation tags, `main`, `gh-pages` and the viewer. **The January minimum stays 700;
 702/712 meets it and meeting it is not acceptance. Overall January calibration remains OPEN.**
+
+## 2026-09-17 — WITHDRAWN: the Donji Vakuf event takeover is removed; ownership transfer is not a calibration lever
+
+**Owner rule, recorded as standing calibration authority.** *Calibrate military capability and behaviour.
+Do not author the territorial result.* No new or expanded event-driven OSID ownership transfer is
+authorized: `control_change` effects in events or response options, event flags that trigger an equivalent
+assignment elsewhere, scripted capture/surrender/withdrawal/defender-removal that guarantees the required
+owner, direct writes to `political_controllers` in calibration code or run artifacts, initial-control
+repainting used to bypass an in-campaign action, and target-specific immunity, guaranteed victory or a
+checkpoint ownership fix. **A date plus a condition is still prohibited when it assigns the outcome** —
+"institutional takeover", "historical correction", "existing writer" and "substantive predicate" are not
+exemptions. **A historical citation, a passing suite, a higher score, an expert's approval, or an existing
+event elsewhere cannot supply missing owner authorization**; only a separate explicit owner instruction
+naming the exception can. Previously authorized exceptions are grandfathered and are **not precedent**.
+
+**Withdrawn.** The three event rows added in `c3c14985c` — `donji_vakuf_serb_takeover_1992`,
+`donji_vakuf_korenici_1992`, `donji_vakuf_torlakovac_1992` — with their `control_change` grants, flags,
+narratives and strategic-dimension shifts. `data/scenarios/events/war_1992.json` is **byte-identical** to
+its pre-experiment state at `379427522`. The event-count pin returns **161 → 158**.
+`tests/donji_vakuf_early_sequence.test.ts` is deleted.
+
+**Restored.** `op:donji_vakuf:donji_vakuf_2` is back as the fourth objective of the `donji_vakuf_sweep`
+axis, in its authored position. The **executable** configuration of `pre_planned_operations.ts` is
+identical to `379427522`; only comments differ. This recovers the comparison configuration and **does not
+endorse the chronology** — the engine again captures the town at t35 (7 December 1992) against a
+documented 17 April 1992 institutional takeover, and that defect is now recorded as OPEN in the
+operation's own block comment.
+
+**Guard.** New `tests/donji_vakuf_no_authored_takeover.test.ts`, 8 assertions: no event in any catalogue
+file may grant `donji_vakuf_2`, `korenici`, `torlakovac_2` or `prusac_2` to any faction through a primary
+effect, an additional effect or a response option; none of the three withdrawn ids or flags may reappear;
+no guarded cell may be mentioned in any effect kind; the restored objective list, staging and combat
+inputs are pinned; and no target-specific victory multiplier may be attached. **Falsified before being
+trusted** — re-applying the three rows fails 4 of 8; removing them passes 8 of 8. No generic event
+behaviour and no grandfathered exception was touched.
+
+**Superseded guidance.** `docs/life_lessons/calibration.md`: the "event-based `control_change` is
+cascade-safe for historically datable territorial changes" and "pre-Storm HRHB `control_change` → use a
+post-Storm vehicle" entries are marked **⛔ SUPERSEDED GUIDANCE**. Their cascade observations remain true;
+their recipes ("just add a `control_change` effect", "find or create a post-Storm vehicle") are withdrawn
+and are no longer actionable for ordinary calibration. A new entry records why a substantive predicate does
+not make an authored ownership write legitimate: when every available writer is an ownership writer, the
+conclusion is that **no** authored write is permitted, not that the least-bad one is.
+
+**Preserved.** All historical research — the ICTY findings, the `HISTORICAL_TIMELINE_MASTER.md` entries,
+the corrected BB citation (the "BB1 p.498" scan index is printed folio 461, Appendix G, a **July 1995**
+table), the dead-writer inventory, and the Prusac negative finding (the 17 August 1992 attack **failed**;
+no 1992 Serb capture of Prusac is established). The `n404`/`n405` evidence is retained under
+`logs/donji-vakuf-early-sequence-20260917/` with a `REJECTED.md` marker; it is **not** an acceptance
+baseline. **Čardak** (t23), **Pješivac-Kula** (t15), the head-of-queue **reservation repair** and the
+**parser repair** are untouched.
+
+**Label correction.** The 188-week HRHB western-Bosnia cascade site was called "accepted-unmeasured".
+That label is withdrawn: later effects are **NOT MEASURED / DEFERRED**, never "accepted".
+
+**Baselines.** `n403` (**701/712**) is the January comparison baseline. The **702/712** figure is
+withdrawn with its mechanism — it was never an acceptance and is not a floor. The January minimum stays
+**700**. No reset, no history rewrite, no tag movement, no baseline refresh, no `main` merge.
+
+**Still open.** The town's capture date; Korenići and Torlakovac on the same defect; Prusac's 1992–93
+ownership; Vranjevići/Kružanj. A replacement must come from the military-capability side.
+Full record: [Prusac/Donji Vakuf report §10](40_reports/20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md).

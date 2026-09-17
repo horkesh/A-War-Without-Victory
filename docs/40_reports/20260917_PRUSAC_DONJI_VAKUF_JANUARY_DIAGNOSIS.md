@@ -8,11 +8,24 @@
 **Authority:** [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md).
 
 **Sections 0–8 are a read-only diagnosis** and change no simulation behavior, operation data, reference,
-floor or threshold. **[Section 9](#9-the-correction--implemented-measured-and-what-it-does-not-prove-2026-09-17)
-is different**: the owner packet of 2026-09-17 authorized the correction §8 identified, with new ICTY
-sources, and §9 records the change that was implemented, tested and measured (`n404`, reproduced as
-`n405`). Section 9 changes **no reference, floor or threshold** either — the January minimum stays 700 and
-`prusac_2`'s January reference is untouched.
+floor or threshold.
+
+> ### ⛔ §9 IS A REJECTED IMPLEMENTATION EXPERIMENT — WITHDRAWN 2026-09-17
+>
+> §9 records a change that was implemented, tested and measured (`n404`, reproduced as `n405`,
+> jan1993 701 → 702/712). **It was withdrawn in full the same day** and is retained only as the record of
+> what was tried. Its **mechanism** — three event rows carrying `control_change` grants of Donji Vakuf
+> cells to RS — is prohibited: the owner's rule is *calibrate military capability and behaviour; do not
+> author the territorial result*. A date plus a substantive condition is still prohibited when it assigns
+> the outcome, and a historical citation, a passing suite, a higher score or an expert's approval cannot
+> supply the missing authorization. See
+> [CALIBRATION_MASTER.md § OWNER RULE](CALIBRATION_MASTER.md) and
+> [§10](#10-withdrawal--what-was-removed-what-was-kept-and-what-stays-open-2026-09-17).
+>
+> **The history in §9 is sound and is kept.** The ICTY findings, the citation corrections, the dead-writer
+> inventory and the Prusac negative finding all remain valid research. **The implementation is not.** The
+> `n404`/`n405` runs are **not** an acceptance baseline; `n403` (701/712) remains the January comparison.
+> The historical defect §8 identified is **still open**.
 
 ---
 
@@ -479,7 +492,12 @@ preserved, and Vranjevići/Kružanj remains UNRESOLVED and outside this task.
 
 ---
 
-## 9. The correction — implemented, measured, and what it does not prove (2026-09-17)
+## 9. ⛔ REJECTED EXPERIMENT — the attempted correction, measured, then withdrawn (2026-09-17)
+
+> **This section is retained as a record of a rejected implementation, not as an accepted result.** The
+> mechanism it describes was withdrawn the same day; see [§10](#10-withdrawal--what-was-removed-what-was-kept-and-what-stays-open-2026-09-17).
+> Read its history as valid and its implementation as prohibited. Original text follows.
+
 
 §8 established that the town's placement in a post-Jajce sweep was contradicted and left the correction
 unimplemented because it lay outside that task. The owner packet of 2026-09-17 authorized it with new
@@ -658,3 +676,104 @@ and is the first thing to check if this lane reopens at full duration.
 
 **January acceptance is unchanged.** The minimum stays **700**; 702/712 meets it, and meeting it is not
 acceptance. Overall January calibration remains **OPEN** unless separately accepted.
+
+---
+
+## 10. Withdrawal — what was removed, what was kept, and what stays open (2026-09-17)
+
+**The owner rejected the §9 mechanism.** The rule, recorded in full at
+[CALIBRATION_MASTER.md § OWNER RULE](CALIBRATION_MASTER.md):
+
+> Calibrate military capability and behaviour. Do not author the territorial result.
+
+No new or expanded event-driven OSID ownership transfer is authorized — `control_change` effects in events
+or response options, event flags that trigger an equivalent assignment elsewhere, scripted
+capture/surrender/withdrawal/defender-removal that guarantees the owner, direct `political_controllers`
+writes, initial-control repainting used to bypass an in-campaign action, or target-specific immunity,
+guaranteed victory or checkpoint ownership fixes. **A date plus a condition is still prohibited when it
+assigns the outcome.** Naming it an "institutional takeover", a "historical correction", an "existing
+writer" or a "substantive predicate" changes nothing. A historical citation, a passing suite, a higher
+score, an expert's approval or an existing event elsewhere **cannot** supply the missing authorization;
+only a separate explicit owner instruction naming the exception can.
+
+**Where §9's reasoning went wrong.** §9.2 established that the alternative writers are dead
+(`detectOffensiveParamilitaryTargets` has no production call site; the early-control-flip step is stubbed;
+the JNA-phantom path writes unconditionally) and concluded that the event catalogue was therefore the
+remaining home. The correct conclusion from those same facts is the opposite: when **every** available
+writer is an ownership writer, no authored write is permitted at all. The predicate gating
+(`faction_controls_municipality`, then `territory_control` of the town) made the rows *conditional on
+state the scenario already guarantees*; it did not make the outcome contingent. The operation could not
+fail, be delayed, or not launch, because there was no operation — only an assignment.
+
+### 10.1 What was removed
+
+| Removed | Detail |
+|---|---|
+| `donji_vakuf_serb_takeover_1992` | Row, `control_change` grant of `op:donji_vakuf:donji_vakuf_2`, narrative, two `dimension_shifts`, flag `donji_vakuf_serb_sjb_control` |
+| `donji_vakuf_korenici_1992` | Row, grant of `op:donji_vakuf:korenici`, narrative, flag `donji_vakuf_korenici_taken` |
+| `donji_vakuf_torlakovac_1992` | Row, grant of `op:donji_vakuf:torlakovac_2`, narrative, one `dimension_shift`, flag `donji_vakuf_torlakovac_taken` |
+| `tests/donji_vakuf_early_sequence.test.ts` | Deleted; its Prusac and objective assertions are re-expressed in the new guard |
+
+`data/scenarios/events/war_1992.json` is now **byte-identical** to its pre-experiment state at
+`379427522`. The event-count pin in `tests/event_timeline_integrity.test.ts` returns **161 → 158**.
+
+### 10.2 What was restored, and what that does not mean
+
+`op:donji_vakuf:donji_vakuf_2` is restored as the **fourth** objective of the `donji_vakuf_sweep` axis, in
+its authored position (`torlakovac_2 → babin_potok_2 → oborci_2 → donji_vakuf_2 → korenici → prusac_2`).
+The executable configuration of `src/sim/combat/pre_planned_operations.ts` is **identical** to
+`379427522`; only comments differ.
+
+**This restores the comparison configuration. It does not endorse the chronology.** The engine again
+captures the town at **t35 (7 December 1992)** against a documented **17 April 1992** institutional
+takeover — the VRS conquering its own Vrbas-92 springboard five months late. **The historical defect
+§8 identified remains OPEN** and is now recorded as such in the operation's own block comment.
+
+### 10.3 What was preserved
+
+- **All historical research**, including the ICTY findings in §9.1, the `HISTORICAL_TIMELINE_MASTER.md`
+  entries (17 April, 6–7 May, 21 May, 3 June, 13 June, 17 August 1992), the corrected BB citation
+  (the "BB1 p.498" scan index is printed folio 461, Appendix G — a **July 1995** table, not a 1992
+  roster), and the dead-writer inventory.
+- **The `n404`/`n405` evidence** under `logs/donji-vakuf-early-sequence-20260917/`, retained as the
+  measurement record of a rejected experiment. It is **not** an acceptance baseline. `n403` (701/712)
+  remains the January comparison.
+- **The Prusac negative finding**: the 17 August 1992 attack **failed** (Stanišić TJ §242; Exhibit P1757:
+  "not successful because of poor command and preparation"), and no 1992 Serb capture of Prusac is
+  established anywhere. The 702nd cell was a **coincidental** agreement with an unvouched reference, and
+  it disappears with the withdrawal. Prusac's own historical ownership question is **separate and still
+  open**; matching its current reference would not have answered it.
+- **Čardak** (t23, 1992-09-14), **Pješivac-Kula** (t15 RS→HRHB), the head-of-queue **reservation repair**
+  and the **parser repair** are all untouched by this withdrawal — none of them is part of the rejected
+  experiment.
+
+### 10.4 The standing guard
+
+`tests/donji_vakuf_no_authored_takeover.test.ts` (8 assertions) fails if any event in any catalogue file
+grants `donji_vakuf_2`, `korenici`, `torlakovac_2` or `prusac_2` to any faction — via the primary effect,
+an additional effect, or a response option — if any of the three withdrawn ids or flags reappears, or if
+any guarded cell is mentioned in **any** effect kind. It also pins the restored objective list, the
+staging and combat inputs, and the absence of a target-specific victory multiplier. **The guard was
+falsified before being trusted**: re-applying the three rows makes 4 of its 8 assertions fail; removing
+them makes all 8 pass. It changes no generic event behaviour and touches no grandfathered exception.
+
+### 10.5 Label correction
+
+§9.6 called the 188-week HRHB western-Bosnia cascade site **"accepted-unmeasured"**. That label is
+withdrawn — later effects are **NOT MEASURED / DEFERRED**, never "accepted". The point is moot for this
+change, since the change is gone and the operation's completion turn returns to t43, but the labelling
+rule stands for any future experiment on this lane.
+
+### 10.6 What stays open
+
+1. **The town's capture date.** t35 vs 17 April 1992. No sound replacement exists yet. A repair must come
+   from the military-capability side: an early, contingent, ordinary action path by forces that can
+   actually reach the town in April–June 1992. See §11 for the specialist findings on whether such a path
+   exists at all.
+2. **Korenići (21 May 1992) and Torlakovac (3 June 1992)** carry the same defect and are back in the
+   post-Jajce sweep for the same reason.
+3. **Prusac's 1992–93 ownership** — the reference says RS in January; the evidence establishes a failed
+   August attack and nothing more.
+4. **Vranjevići / Kružanj** — unchanged, unresolved, outside this lane.
+5. **Op Jajce's chronology** — `jajce_3` returns to its pre-experiment turn with the withdrawal; the
+   underlying ~17-day error against 29 October 1992 predates this lane and is unaffected.

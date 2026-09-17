@@ -1001,25 +1001,32 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
-        // Operation Donji Vakuf — 1KK pressure in the Vrbas valley south of Jajce.
+        // Operation Donji Vakuf — 1KK secures the Vrbas valley south of Jajce.
         //
-        // THE TOWN IS NOT AN OBJECTIVE OF THIS OPERATION, AND MUST NOT BE READDED.
-        // `op:donji_vakuf:donji_vakuf_2` carries the town of Donji Vakuf, and the town was
-        // Serb-held from 17 April 1992 — five months before this operation can even inject.
-        // The Serb SJB was set up that day and "took control of the entire town the same
-        // day" (ICTY Stanišić & Župljanin TJ Vol I §238; Krajišnik TJ §438, both resting on
-        // the SJB Srbobran report to the Banja Luka CSB of 4 October 1993). Balkan
-        // Battlegrounds independently has Vrbas 92's southern axis running "from the
-        // direction of Serb-held Donji Vakuf (Srbobran)" with "the 19th at Donji Vakuf"
-        // guarding its flank (BB2 printed p.330) — the town was this corps' OWN springboard
-        // for Jajce, not a prize taken afterwards. Listing it here had the VRS capture its
-        // own rear area in December 1992. The takeover now runs on its documented dates
-        // through the event catalogue (`donji_vakuf_serb_takeover_1992` and the two village
-        // rows that require it) in `data/scenarios/events/war_1992.json`.
+        // OPEN HISTORICAL DEFECT — the town's capture date is wrong, and no sound fix exists yet.
+        // `op:donji_vakuf:donji_vakuf_2` carries the town of Donji Vakuf and is captured here at
+        // t35 (7 December 1992). The town was in fact Serb-held from 17 April 1992: the Serb SJB
+        // was set up that day and "took control of the entire town the same day" (ICTY Stanišić &
+        // Župljanin TJ Vol I §238; Krajišnik TJ §438, both resting on the SJB Srbobran report to
+        // the Banja Luka CSB of 4 October 1993). Balkan Battlegrounds independently has Vrbas 92's
+        // southern axis running "from the direction of Serb-held Donji Vakuf (Srbobran)" with "the
+        // 19th at Donji Vakuf" guarding its flank (BB2 printed p.330) — the town was this corps'
+        // OWN springboard for Jajce, not a prize taken afterwards. The engine therefore has the
+        // VRS conquer its own rear area five months late.
+        //
+        // The 2026-09-17 attempt to repair this with three event `control_change` rows was
+        // WITHDRAWN: authoring a territorial result through an ownership writer is prohibited by
+        // the owner rule recorded in docs/40_reports/CALIBRATION_MASTER.md. The objective is
+        // restored to its pre-experiment configuration so the comparison baseline holds. That
+        // restoration does NOT endorse the December chronology — the defect stays OPEN until a
+        // replacement is found on the military-capability side: an early, contingent, ordinary
+        // action path by forces that can actually reach the town in April–June 1992. The research
+        // and the rejected experiment are preserved in
+        // docs/40_reports/20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md.
         //
         // The 1KK/30th Division halted on 18 November 1992 after erasing the Karaula
         // salient — "Here the VRS halted, apparently content with its gains" (BB2 p.332).
-        // Nothing here should grow back into a post-Jajce conquest sweep.
+        // Nothing here should grow into a wider post-Jajce conquest sweep.
         //
         // ROSTER. The 19th and 31st were organic to Donji Vakuf — HQ Srbobran (Donji Vakuf)
         // in the June 1992–October 1995 order of battle at BB2 printed p.277-279, and the
@@ -1039,14 +1046,15 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         //
         // Fires after Op Jajce completes (queued 4th in 1KK chain).
         // Staging pribeljci_2: Sipovo municipality (RS initial + RS painted), adjacent to
-        // torlakovac_2 — first objective in the chain. grdovo (Jajce) would also be
+        // torlakovac_2 — first objective in the sweep. grdovo (Jajce) would also be
         // adjacent but starts HRHB; pribeljci_2 is always RS and safe.
         //
-        // Torlakovac and Korenići stay listed as a fallback only. Their documented captures
-        // are 3 June and 21 May 1992 (Stanišić TJ §242) and the event rows resolve them
-        // then; when they do, this operation auto-advances past them exactly as it already
-        // does past babin_potok_2, which starts RS. Consecutive objectives are not required
-        // to be adjacent — korenici→prusac_2 already routes through RS-held Jemanlići.
+        // Objectives: the six-settlement sweep follows the town breakthrough directly
+        // into Korenići before turning to Prusac. This preserves the heavy spearhead's
+        // ordinary town–Korenići combat edge instead of leaving the terminal defender
+        // four turns to recover while the spearhead marches through Prusac. Torlakovac
+        // (3 June 1992) and Korenići (21 May 1992) carry the same date defect as the town
+        // (Stanišić TJ §242); they too are listed here only until a sound replacement exists.
         // Removed from triggered Op Jajce (vrs_2nd_krajina) — 1KK handles DV.
         corps: 'vrs_1st_krajina',
         faction: 'RS',
@@ -1071,14 +1079,13 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'rs_16th_krajina_motorized' as FormationId,
                 ],
                 // pribeljci_2 (RS) is adjacent to torlakovac_2 — valid staging → first obj chain.
-                // torlakovac_2 → babin_potok_2 → oborci_2 → korenici; Jemanlići then
-                // provides the shared approach to Prusac. The town cell is deliberately
-                // absent — see the block comment above; it is Serb-held from April 1992 and
-                // the brigades traverse it, they do not take it.
+                // torlakovac_2 → babin_potok_2 → oborci_2 → donji_vakuf_2 →
+                // korenici; Jemanlići then provides the shared approach to Prusac.
                 objectives: [
                     'op:donji_vakuf:torlakovac_2',
                     'op:donji_vakuf:babin_potok_2',
                     'op:donji_vakuf:oborci_2',
+                    'op:donji_vakuf:donji_vakuf_2',
                     'op:donji_vakuf:korenici',
                     'op:donji_vakuf:prusac_2',
                 ],

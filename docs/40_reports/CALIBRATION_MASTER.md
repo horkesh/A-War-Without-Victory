@@ -177,9 +177,51 @@ Oborci and Korenići appear in neither volume; their 1992–93 ownership is insu
 source. The 188-week artifacts remain matched weekly records and faction-total frames, **not** a
 reconstructed per-OSID t39 state — authoritative t39 ownership and the eleven-cell set stay **n403's**.
 
-**J. Donji Vakuf early sequence CORRECTED and measured — jan1993 701 → 702/712, one cell, zero
-introduced (added 2026-09-17).** The correction §I identified was authorized by owner packet with new ICTY
-sources and is now implemented. Full record:
+> ### ★ OWNER RULE — ownership transfer is not a calibration lever (recorded 2026-09-17, standing)
+>
+> **Calibrate military capability and behaviour. Do not author the territorial result.**
+>
+> No new or expanded event-driven OSID ownership transfer is authorized. This includes: `control_change`
+> effects in events or response options; event flags that trigger an equivalent ownership assignment
+> elsewhere; scripted capture, surrender, withdrawal or defender removal that guarantees the required
+> owner; direct writes to `political_controllers` in calibration code or run artifacts; initial-control
+> repainting used to bypass an in-campaign action; and target-specific immunity, guaranteed victory or a
+> checkpoint ownership fix. **A date plus a condition is still prohibited when it assigns the outcome** —
+> calling it an "institutional takeover", a "historical correction", an "existing writer" or a
+> "substantive predicate" does not change this.
+>
+> **A historical citation, a passing suite, a higher score, an expert's approval, or an existing event
+> elsewhere CANNOT supply missing owner authorization.** Only a separate, explicit owner instruction
+> approving the named exception can. Previously authorized exceptions (Srebrenica/Žepa receipts, the
+> Storm-era rows, the Tuzla barracks) are **grandfathered and are not precedent for adding another.**
+>
+> The default calibration tools are existing force-level and operational inputs: personnel, actual
+> equipment, readiness and other supported parameters whose live effects a specialist can demonstrate.
+> **Outcomes remain contingent.** When ordinary forces cannot produce the desired outcome, investigate
+> the forces, orders and model — do not write the desired outcome into state.
+>
+> Conflicting recipes in `docs/life_lessons/calibration.md` (the "event-based `control_change` is
+> cascade-safe" and "use a post-Storm vehicle" entries) are marked **SUPERSEDED GUIDANCE** and are no
+> longer actionable for ordinary calibration.
+
+**J. Donji Vakuf early sequence — implementation WITHDRAWN 2026-09-17; research and measurement retained
+as a REJECTED EXPERIMENT.** This entry previously recorded the correction as implemented and measured
+(jan1993 701 → 702/712). The **mechanism** was three event rows carrying `control_change` grants, and the
+owner rule above prohibits it: the change authored the territorial result instead of the military
+capability that should produce it. The three rows, their flags, narratives and dimension shifts were
+removed, the `op:donji_vakuf:donji_vakuf_2` objective was restored to its pre-experiment position, the
+event-count pin returned 161 → 158, and a standing guard
+(`tests/donji_vakuf_no_authored_takeover.test.ts`) now fails if any event grants a Donji Vakuf cell.
+
+**The historical defect §I identified is NOT repaired and stays OPEN.** The engine still captures the town
+at t35 (7 December 1992) against a documented 17 April 1992 institutional takeover. Restoring the old
+objective recovers the comparison configuration; it does not endorse that chronology. **`n403` remains the
+January comparison baseline. `n404`/`n405` are the rejected experiment's runs and are NOT an acceptance
+baseline.** A replacement must come from the military-capability side — an early, contingent, ordinary
+action path by forces that can actually reach the town.
+
+Everything below in this section is retained **as the record of a rejected implementation experiment**,
+not as an accepted result. Full record:
 [Prusac diagnosis §9](20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md); change specification (written
 before any edit) and evidence `logs/donji-vakuf-early-sequence-20260917/`.
 
@@ -191,7 +233,12 @@ late. Village anchors likewise: **Korenići 21 May 1992** (18 Donji Vakuf Serb p
 "no great resistance"), **Torlakovac 3 June 1992** (Serb police and VRS, "no serious resistance", villagers
 fled) — Stanišić **¶242**.
 
-**Mechanism — the event catalogue, because the alternatives are dead.** `detectOffensiveParamilitaryTargets`
+**Mechanism — REJECTED. Retained only to record what was tried and why it is not allowed.** The reasoning
+below concluded that because the alternative writers are dead, the event catalogue was the remaining home.
+That conclusion is wrong under the owner rule: when every available writer is an ownership writer, the
+answer is that **no authored write is permitted at all**, not that the least-bad one is. A substantive
+predicate does not convert an assignment into a contingency. Original text follows.
+`detectOffensiveParamilitaryTargets`
 has **no production call site** (tests only), and the `early-control-flip` pipeline step is **stubbed**
 ("Peace phase no longer performs control flips") — both were rejected on that basis, and the JNA-phantom
 `capture_osids` path was rejected because it writes control unconditionally. Used instead: three additive
@@ -250,8 +297,9 @@ must not grow. (3) **The documented HRHB western-Bosnia cascade site is unmeasur
 completes t32 instead of t43, freeing five 1KK brigades ~11 turns early, and that damage is visible only at
 188 weeks. The packet waived a new campaign, so the site is **accepted-unmeasured, not cleared**.
 
-**January minimum stays 700; 702/712 meets it and meeting it is not acceptance. Overall January calibration
-remains OPEN unless separately accepted.**
+**January minimum stays 700. The 702/712 figure is WITHDRAWN with its mechanism** — it was never an
+acceptance, and it is not a floor. The current January comparison baseline is **`n403`, 701/712**, which is
+the pre-experiment configuration now restored in the tree. **January calibration remains OPEN.**
 
 **Scope correction to F (added 2026-09-17).** The advisory closeout's conclusions are bounded as follows:
 reproducibility was observed **for the tested scenario, artifacts and environments** (`apr1992_188w`, the
