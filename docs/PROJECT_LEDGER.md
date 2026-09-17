@@ -5349,3 +5349,135 @@ real `runtime_dependency_resolution.test.ts` hook timeout (12/12 in isolation) �
 `41a148bf9`, `c8fdc370a`, `0893bfa50` and this synchronization commit) and the three lightweight
 preservation tags `preserve/n396-predicate-only`, `preserve/january-candidate-n399`,
 `preserve/january-candidate-n401`. No `main`/`gh-pages` push, no force, no merge.
+
+## 2026-09-17 — Advisory Baseline Pins failure diagnosed: reproducible stale-pin drift, engine healthy, pins left alone
+
+**Task.** Diagnose the failed advisory **Baseline Pins** check on
+`codex/january-1993-operations-20260914` and close it out on evidence, without reopening calibration,
+touching pins, changing mechanics, merging to `main` or publishing the viewer. Bounded maintenance and
+documentation only.
+
+**Conclusion: intentional, reproducible advisory drift. No code change warranted, and none was made.**
+Evidence: [`logs/baseline-pins-advisory-20260917/EVIDENCE_RECORD.md`](../logs/baseline-pins-advisory-20260917/EVIDENCE_RECORD.md).
+
+**Identifier correction (the brief was wrong; the run was real).** Run `35190324522` and job
+`105101245112` are correct. The job is *"Baseline pins (advisory, non-blocking)"*, the failed step is #5
+**"Baseline regression"**, and the command is
+`node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_baseline_regression.ts`. There is **no**
+`baseline-verify` job, no *"Verify baseline report signature"* step and no `sim:baseline:verify` script —
+`package.json` defines none of `sim:baseline:verify`, `sim:baseline:record` or `sim:baseline:pin`. The check
+is a **byte-for-byte SHA-256 artifact comparison, not a signature check**; nothing in this path signs
+anything. The failed log **was** retrievable with the repository's authorized `gh` CLI; the earlier HTTP 403
+was a limitation of the external connector, not of access. No credential value appears in any committed
+evidence.
+
+**Verifier contract established.** One scenario, `apr1992_188w` →
+`data/scenarios/apr1992_definitive_188w.json`, at its own declared **188 weeks** — `runScenarioAndHash`
+passes no `weeksOverride`, so the manifest's `weeks` field is recorded metadata, not the driver. Eight whole
+artifacts are hashed; expected values come from `manifest.json`, written only under `UPDATE_BASELINES=1`,
+which was **not** set in CI and **not** set anywhere in this task. Failure kind is `mismatch` x8 — not a
+missing artifact, execution error or invalid metadata. **This is not equivalent to `--weeks 39`:** the
+advisory run reaches all four checkpoints; the January candidate runs reach only jan1993.
+
+**Cause — a 50-commit window, and `main` has not moved.** The pins were written by `e607508bc` (#518,
+owner-authorised, measured at clean `2a8eb4244`). **`origin/main` is still `e607508bc`**, which is both the
+blessing commit and the last **green** Baseline Pins run (`34715162775`, 2026-09-12). `HEAD` is **50 commits
+ahead, 0 behind**. That window carries **29 `src/sim`/`src/state` commits** — `commander/emit.ts` +729,
+`pre_planned_operations.ts` +635, `commander/plan.ts` +302, `triggered_operations.ts` +250 among them — plus
+one consumed-input change to `data/derived/startup/apr_1992_initial_save.json` (`c126ddec3`). The pinned
+manifest itself is **untouched** in that window. Both runs this branch has ever had were red; it has never
+been green on this check and could not have been.
+
+**Why 8 of 8 moved where the last accepted drift moved 6 of 8.** The re-blessing packet records the
+previous drift as six artifacts, with `formation_delta.json` and `watched_operations.json` unchanged — the
+signature of a consumed-**input** change. This window changes engine **code** governing formation lifecycle,
+reserves and operations, so the two artifacts that held still last time are exactly the ones it touches.
+Corroborating: `formation_delta.json` is byte-identical (`d761d665...`) across both red runs while the other
+seven moved; the only executable commits between them create and destroy no formations.
+
+**Determinism — refuted as a cause, by cross-platform identity.** The exact CI command was reproduced
+locally at clean `0033517b6` on Node **v22.23.2** (CI resolved `node-version: 22` to the **same**
+v22.23.2 — the version-specificity question in the brief is answered and is **not** a factor), npm 10.9.8,
+`lockfileVersion: 3` unmodified, `UPDATE_BASELINES` unset. Exit **1**, same eight artifacts, and **all eight
+actual hashes byte-identical to the Linux CI run**. Two independent executions on different operating
+systems, hardware and dependency installs agreeing byte-for-byte is a stronger determinism result than two
+runs on one machine, which is why a second same-machine run was not performed. Recorded in passing: the
+`test.skip` rationale on `tests/scenario_golden_baselines_h2_3.test.ts:42` ("platform-bound ... Windows
+produces different SHA-256 than Linux CI") is **contradicted** at this commit. The skip is **left
+untouched** — un-skipping changes what CI guarantees and needs its own proposal.
+
+**Engine health — the workflow's own prescribed diagnosis.**
+`node tools/engine_health_gate.cjs data/derived/scenario/_baseline_tmp/apr1992_188w --horizon 188w`
+→ **exit 0, PASS**, no `--update`, no `--force`. All ten hard checks pass; **anchors 31/31**;
+`matched_osids` 668 >= 644; `consistency_failures` 0; `kw_ratio` 3.72 in band. Checkpoints against
+**unchanged** floors 694/674/668/641:
+
+| checkpoint | pin `n392`/#518 | last recorded 188w (`ac3e5e152`) | **this reproduction (`0033517b6`)** | floor |
+|---|---:|---:|---:|---:|
+| jan1993 | 702 | 700 | **701** | 694 |
+| apr1994 | 678 | 702 | **706** | 674 |
+| apr1995 | 672 | 697 | **701** | 668 |
+| oct1995 | 667 | 667 | **668** | 641 |
+
+Every checkpoint **improved** on the most recent full-horizon evidence (+1/+4/+4/+1). Against the stale pin,
+three of four improved substantially and jan1993 is -1, still 7 above its floor and 1 above the January
+packet's recorded minimum of 700. An accepted-change drift profile, not a regression profile. The
+`dead_ops` / `planning_deaths` / `hollow_ratio` advisories are reported, not gated, and are pre-existing.
+
+**Incidental new datum — recorded, NOT accepted.** `git diff 41a148bf9..0033517b6 -- src/ data/ tools/`
+returns two hunks, both **wholly inside `//` comment blocks**; the "comment-only" claim was checked against
+the diff rather than taken on trust. HEAD is therefore **executably identical** to the January production
+candidate `41a148bf9`, so the verifier's required 188-week run is also the first full-duration measurement
+of that source. CALIBRATION_MASTER section C records apr1994/apr1995/oct1995 as **NOT REACHED**; this run
+reaches them at **706 / 701 / 668**, and its jan1993 **701** matches n403's **701/712** at `--weeks 39` —
+the same January score by two different durations on the same executable source. **This is a measurement,
+not an acceptance:** it closes, promotes and validates nothing, alters no floor, pin, reference or gate, and
+is no owner sign-off. The eleven January mismatches stand; **Prusac OPEN**; **Vranjevići/Kružanj
+UNRESOLVED**; Čardak and Pješivac-Kula remain closed as previously recorded and were not reopened.
+
+**Verification path — no defect, therefore no regression test.**
+`npx vitest run tests/baseline_regression_ci_guardrails.test.ts
+tests/baseline_regression_collects_all_failures.test.ts tests/scenario_golden_baselines_h2_3.test.ts
+tests/baseline_artifact_ownership.test.ts` (Git Bash ahead of WSL `bash` on `PATH`) → **exit 0, 14 passed,
+1 skipped**; the single skip is the platform-bound one above and was skipped before and after. No focused
+regression test was added: there is no defect for one to demonstrate, and a test here would assert current
+behavior rather than a repaired contract.
+
+**Pins deliberately NOT refreshed.** `open_gates.yml` `R7-BASELINE-SIX-PIN` states the later calibration
+candidate *"must be measured separately under R6-CALIBRATION-INTEGRATION; its pins are not refreshed."*
+Re-blessing is owner-gated via `docs/plans/2026-09-10-baseline-reblessing-packet.md`, and the workflow
+header is explicit: *"do NOT refresh the pins to make this green."* **The advisory check remains RED and
+that is the correct outcome** — it is advisory by design and deliberately excluded from `main`'s required
+status checks. It is expected to stay red until this work reaches `main` and the pins are re-blessed under
+their own owner gate. **No green result is claimed or manufactured.**
+
+**Validation, including two PRE-EXISTING failures this task did not cause and did not fix.**
+`npm run receipts:validate` **OK**; `npm run tasks:validate` **OK**; `npm run gates:validate` **OK**.
+
+- `npm run plans:check` → **exit 1, "plan index: STALE"**, and `tests/plan_index.test.ts` → **3 failed**
+  ("the committed file matches a fresh derivation", "--check agrees, so CI can enforce it without a diff",
+  "the parser actually reads statuses"). Targeted docs tests are therefore **74 passed / 3 failed of 77**,
+  not the 77/77 the preceding ledger entry recorded. **Correction to that entry, not a silent rewrite of
+  it:** its "`plans:check` up to date" and "77/77" claims do not hold at `0033517b6`.
+- **Not caused here.** The plan index derives solely from `docs/plans/MASTER_ROADMAP.md` into
+  `docs/plans/plan_index.yml` (`tools/derive_plan_index.cjs`). **Both files are unmodified in this task's
+  working tree** (`git status --short docs/plans/` is empty), so running the check now is equivalent to
+  running it at `0033517b6`. All three failures share one root cause — `plan_index.yml` is stale against the
+  roadmap edit made by the preceding commit — and all three are pre-existing.
+- **Not fixed here.** Regenerating the index (`node tools/derive_plan_index.cjs`) is unrelated to this
+  advisory-baseline closeout, and this branch push is scoped to exclude unrelated work. Flagged for the next
+  task or the owner.
+
+**Files changed (documentation and evidence only).** New
+`logs/baseline-pins-advisory-20260917/` — `EVIDENCE_RECORD.md`, `ci_failure_excerpt.txt` (paths sanitized),
+`ci_runtime_provenance.txt`, `local_repro_excerpt.txt`, `engine_health_gate.txt`, `hash_comparison.txt`,
+`compare_baseline_hashes.cjs`, `MANIFEST.txt` (committed-blob SHA-256). This ledger entry, and an appended
+advisory-status note in `docs/40_reports/CALIBRATION_MASTER.md`. Earlier evidence was **appended to, never
+rewritten**; `logs/january-1993-operations-20260917/` is untouched.
+
+**Not changed by this task.** Baseline pins, the three `preserve/*` tags, `main`, `gh-pages`, the published
+viewer, any floor, threshold, checkpoint reference, initial ownership, OSID aggregation, historical
+operation objective or test assertion. No simulation, verification or reporting source file was modified.
+No baseline-recording or pin-refresh command was run and `UPDATE_BASELINES` was never set. Pushed to
+`codex/january-1993-operations-20260914` only — no force, no merge, no history rewrite. **January
+calibration remains open.**

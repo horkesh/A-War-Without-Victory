@@ -1,0 +1,11 @@
+artifact                   pinned   ci_actual local_act ci==local vs_pin
+activity_summary.json      7d10356d fe8f0198 fe8f0198 YES       DRIFT
+control_delta.json         4cb8219c e50d6ab6 e50d6ab6 YES       DRIFT
+end_report.md              fea39f3b 31e0eff8 31e0eff8 YES       DRIFT
+final_save.json            e414dc69 1c332850 1c332850 YES       DRIFT
+formation_delta.json       bbd7260e d761d665 d761d665 YES       DRIFT
+run_summary.json           b8ebc2c1 559856bb 559856bb YES       DRIFT
+watched_operations.json    785a073b 41d0d2a6 41d0d2a6 YES       DRIFT
+weekly_report.jsonl        4c5cb00b 0d33e38c 0d33e38c YES       DRIFT
+
+artifacts: 8  ci==local: 8  ci!=local: 0  drifted-from-pin: 8

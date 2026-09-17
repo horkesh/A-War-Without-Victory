@@ -1,0 +1,16 @@
+# Durable evidence backup — Baseline Pins (advisory) failure diagnosis, 2026-09-17
+#
+# Investigated: workflow run 35190324522, job 105101245112, commit 0033517b6.
+# SHA-256 below are of the COMMITTED BLOBS (`git cat-file blob :<path>`), which are the durable bytes.
+# .gitattributes normalizes .cjs/.md/.txt to LF on commit, so an on-disk CRLF copy can differ from its
+# committed blob. Verify against these blob hashes, not the working-tree copies.
+#
+# No credential, token or secret value appears in any file listed here.
+
+5fff0beb5df8b13bc6fa841de07a635dc4165831b0ba3e0e4f5fbc9f8755f27f  EVIDENCE_RECORD.md
+5972dddb224456f4a0fc14dbef0f7c263b5f627fe8a78a10e39efc0ef999251a  ci_failure_excerpt.txt
+09d00d178d5f9b2d98e03d0097397f92f7e2621eb85da2a768b5b7a7b1de4138  ci_runtime_provenance.txt
+923d2db128b221b4b7bdf0bff90b23ed3cea8a45d0be6bff20ac6821ef42be99  compare_baseline_hashes.cjs
+a0a1867465b590bb801361507401482c1f21423b0429a8ae96676eb12f1278a3  engine_health_gate.txt
+fb1a098fa25a68d36ec24bf8e11d0b7754c65e933ae6d24d1f353d83ef9b1bc5  hash_comparison.txt
+4e24378fce0f4466bbbf378cb11dcd4632fd82fc7e6d4d977c0eb9232995540c  local_repro_excerpt.txt

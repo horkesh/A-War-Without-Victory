@@ -38,6 +38,43 @@ population accounting, political permissions, or command ownership.
 **Floors.** The packet's **January minimum of 700** is distinct from the older general checkpoint floors
 (188-week 694/674/668/641). Neither is altered by this synchronization.
 
+**F. Advisory baseline pins — RED on this branch, explained, pins NOT refreshed (added 2026-09-17).** The
+advisory `Baseline Pins` workflow fails on `0033517b6` (run `35190324522`, job `105101245112`, step
+"Baseline regression", exit 1) with all **8 of 8** `apr1992_188w` artifact hashes mismatched. Diagnosed as
+**stale pins, not a regression**: `origin/main` is still `e607508bc` — the commit that blessed the pins and
+the last green run of this check — and `HEAD` is 50 commits ahead of it, carrying 29 `src/sim`/`src/state`
+commits plus one consumed-input change. The pinned manifest is untouched in that window. The exact CI
+command reproduced locally at clean `0033517b6` on Node `v22.23.2` (the same version CI's `node-version: 22`
+resolves to) gave exit 1 with **all eight actual hashes byte-identical to the Linux CI run**, which rules
+out nondeterminism. The verifier's own focused tests pass (14 passed, 1 pre-existing skip), so there is no
+verification defect. **No pin, floor, reference or gate was changed, and `UPDATE_BASELINES` was never set**
+— re-blessing stays owner-gated under `R7-BASELINE-SIX-PIN` /
+[the re-blessing packet](../plans/2026-09-10-baseline-reblessing-packet.md), which already records that this
+candidate's *"pins are not refreshed"*. The check is expected to stay red until this work reaches `main`.
+Evidence: [`logs/baseline-pins-advisory-20260917/EVIDENCE_RECORD.md`](../../logs/baseline-pins-advisory-20260917/EVIDENCE_RECORD.md).
+
+**G. Later checkpoints REACHED on the candidate's source — measured, NOT accepted (added 2026-09-17).**
+This qualifies, and does not overturn, **C** and **D** above. `git diff 41a148bf9..0033517b6 -- src/ data/
+tools/` is two hunks, both wholly inside `//` comment blocks, so **HEAD is executably identical to the
+January production candidate `41a148bf9`**. The advisory verifier's required run is therefore a full
+**188-week** measurement of that source — the duration **C** could not reach at `--weeks 39`. Engine health
+gate: **exit 0, PASS**, ten of ten hard checks, **anchors 31/31**, `matched_osids` 668, `consistency_failures`
+0, `kw_ratio` 3.72 in band.
+
+| checkpoint | pin `n392`/#518 | `ac3e5e152` (D) | **`0033517b6`, executably `41a148bf9`** | floor (UNCHANGED) |
+|---|---:|---:|---:|---:|
+| jan1993 | 702 | 700 | **701** | 694 |
+| apr1994 | 678 | 702 | **706** | 674 |
+| apr1995 | 672 | 697 | **701** | 668 |
+| oct1995 | 667 | 667 | **668** | 641 |
+
+Every checkpoint improves on **D** (+1/+4/+4/+1). The jan1993 **701** equals n403's 701/712 at `--weeks 39`
+— the same January score by two durations on one executable source. **This is a measurement, not an
+acceptance.** It is not a floor, not a re-pin, not a promotion and not an owner sign-off; floors stay
+694/674/668/641 and the packet's January minimum stays 700. The eleven January mismatches stand, **Prusac
+remains OPEN**, and the **Vranjevići/Kružanj** reference and aggregation question remains **UNRESOLVED**.
+Adoption belongs to `R6-CALIBRATION-INTEGRATION` and its own gates.
+
 **Current January backlog — 11 mismatches (observed history, n403/t39).** Observed control only; a missing
 control event is **not** by itself a missing-operation diagnosis:
 
