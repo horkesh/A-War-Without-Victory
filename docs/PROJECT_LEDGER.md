@@ -5475,6 +5475,17 @@ their own owner gate. **No green result is claimed or manufactured.**
 advisory-status note in `docs/40_reports/CALIBRATION_MASTER.md`. Earlier evidence was **appended to, never
 rewritten**; `logs/january-1993-operations-20260917/` is untouched.
 
+**Post-push CI confirmation — a third agreeing run.** The diagnosis commit `0b9966621`
+(documentation and evidence only) pushed to `codex/january-1993-operations-20260914` as a fast-forward;
+the three `preserve/*` tags are unmoved, `origin/main` is still `e607508bc` and `gh-pages` is untouched.
+Its CI: **Event System CI `35195075253` success** — steps genuinely ran (TypeScript typecheck, Event-system
++ Phase E/F/H suite, Phase F2 strict gate), none skipped — and **Baseline Pins `35195075252` failure**, 8 of
+8, exactly as predicted. `0b9966621` changes no simulation source, so its actual hashes must equal
+`0033517b6`'s, and **they do, all eight byte-for-byte**. That is **three independent runs in agreement** —
+two Linux CI runs plus the Windows local run — confirming the determinism conclusion rather than inferring
+it. **The advisory check remains RED and is expected to stay red**; any further commit on this branch
+reproduces it for the same reason, so no further CI documentation cycle follows.
+
 **Not changed by this task.** Baseline pins, the three `preserve/*` tags, `main`, `gh-pages`, the published
 viewer, any floor, threshold, checkpoint reference, initial ownership, OSID aggregation, historical
 operation objective or test assertion. No simulation, verification or reporting source file was modified.

@@ -347,7 +347,31 @@ node tools/engine_health_gate.cjs data/derived/scenario/_baseline_tmp/apr1992_18
 node logs/baseline-pins-advisory-20260917/compare_baseline_hashes.cjs <ci_failed_log> <local_run_log>
 ```
 
-## 11. What this task did not change
+## 11. Post-push CI confirmation (observed) — a third agreeing run
+
+The diagnosis commit `0b9966621` (documentation and evidence only) was pushed to
+`codex/january-1993-operations-20260914`. Its CI:
+
+| workflow | run | result |
+|---|---|---|
+| Event System CI | `35195075253` | **success** — steps genuinely ran: TypeScript typecheck, Event-system + Phase E/F/H suite, Phase F2 strict gate. No skipped step. |
+| Baseline Pins (advisory) | `35195075252` | **failure** — 8 of 8, exactly as predicted |
+
+`0b9966621` changes no simulation source, so its actual hashes must equal those of `0033517b6`. **They
+do — all eight, byte-for-byte**, re-verified with `compare_baseline_hashes.cjs`.
+
+That makes **three independent runs** in agreement: two Linux CI runs (`0033517b6`, `0b9966621`) and one
+Windows local run, all producing the same eight SHA-256 values. The determinism conclusion in §4a is
+confirmed, not merely inferred.
+
+**The advisory check is still RED on the branch, by design, and this record does not claim otherwise.**
+Any further commit here will reproduce the same red for the same reason; that is the expected steady state
+until the branch reaches `main` and the pins are re-blessed under their owner gate. No further CI
+documentation cycle follows.
+
+---
+
+## 12. What this task did not change
 
 Baseline pins (`data/derived/scenario/baselines/manifest.json`), the three `preserve/*` tags, `main`,
 `gh-pages` and the published viewer are **all unchanged**. No baseline-recording or pin-refresh command was
