@@ -5178,13 +5178,16 @@ adjusted and no correctness defect was found. The objective is contact-adjacent 
 captured `stolac_2`. The RS↔HRHB truce was declared at t4, before Jackal t8–t15; authored operations are
 not gated by the truce's bot target filter, and no truce break is recorded.
 
-**Provenance.** Two independent executions of one candidate (n401/n402) are byte-identical:
-`final_state_hash e3b6b2d34dd1101c`, final-save SHA-256
+**Provenance.** Three independent executions are byte-identical: n401/n402 on the candidate's
+uncommitted working tree and **n403 on the committed source** (`git_commit 41a148bf9`, `git_dirty false`).
+All share `final_state_hash e3b6b2d34dd1101c`, final-save SHA-256
 `e3b6b2d34dd1101c601b11abd30c2c060717995a0fe748f662214d4ebecf6899`; parent commit `772a67808` plus patch
-`FA3B5BEB216B02E23A954AB9020F2AEFC2552C3E7431AC1D357BEA4D8336C0E7`; scenario
-`apr1992_definitive_188w.json`, `--weeks 39`, Node v22.23.2, input digest `f8ace654…`. Compared
-identical: `initial_save`, `final_save`, `run_summary`, `control_delta`, `weekly_report.jsonl`,
-`formation_delta`, `activity_summary`.
+`FA3B5BEB216B02E23A954AB9020F2AEFC2552C3E7431AC1D357BEA4D8336C0E7` (committed as `41a148bf9`); scenario
+`apr1992_definitive_188w.json`, `--weeks 39`, Node v22.23.2, input digest `f8ace654…`; run dirs
+`runs/apr1992_definitive_188w__9137f75e9f35be20__w39_n401`, `…_n402`, `…_n403`. Compared identical:
+`initial_save`, `final_save`, `run_summary`, `control_delta`, `weekly_report.jsonl`, `formation_delta`,
+`activity_summary`. n403 also reproduced the expected lifecycle: Čardak t23 RBiH preserved, Pješivac-Kula
+HRHB at t15, Hatelji RS, `prusac_2` OPEN.
 
 **Not reached.** The candidate stops at t39: April 1994, April 1995 and October 1995 are **NOT
 REACHED**. The 666/658/569 a checker prints are the t39 state replayed against the later painted
@@ -5201,3 +5204,50 @@ tags are preserved.
 
 **Files.** `src/sim/combat/pre_planned_operations.ts`, `tests/pre_planned_operations.test.ts`,
 [frozen-cell analysis addendum](40_reports/20260824_JAN1993_FROZEN_CELL_ANALYSIS.md#addendum--stolac-pjesivac_kula_2-objective-coverage-closed-2026-09-16).
+
+---
+
+## 2026-09-17 — Vranjevići (`op:mostar:vranjevici_2`) January mismatch: read-only diagnosis
+
+**No production change; no additional campaign run for this case.** Diagnosis only, reproduced from the
+preserved n401 candidate (`preserve/january-candidate-n401`, commit `41a148bf9`) and its independent
+repeats n402/n403 (byte-identical; final-save SHA-256
+`e3b6b2d34dd1101c601b11abd30c2c060717995a0fe748f662214d4ebecf6899`).
+
+**Residual set.** The candidate's `historical_fit.checkpoints[0]` (week 39, jan1993) records **701/712**
+and names exactly **11** mismatches: ten **frozen turn-0 discrepancies with no control event** and one
+combat-touched cell, `op:mostar:vranjevici_2`. (`prusac_2` is one of the ten — initial RBiH, zero control
+events; the earlier "RS running late through the Donji Vakuf cascade" narrative in the n399 entry is
+**not reproduced** by the n399/n401 artifacts and is flagged, not fixed.)
+
+**Reproduced cause.** `op:mostar:vranjevici_2` starts **RBiH** (matching the reference) and is taken
+**RS at t2** by the pre-planned `Operation Herzegovina` (`jna_herzegovina_command`) axis
+`mostar_heights`, brigade `jna_nevesinje_garrison`, battle
+`2:op:mostar:vranjevici_2:jna_nevesinje_garrison:arbih_445th_mountain`, `decisive_victory` ratio 3.27.
+No RBiH recovery follows. `op:mostar:kruzanj_2` is the comparison: same axis, same RBiH start, attacked
+to a `costly_victory` (ratio 1.36) that was **absorbed** — no control event — so it still matches. The
+mechanism is the RS operation targeting two cells the reference now holds RBiH; the two cells differ only
+by outcome tier.
+
+**Stale comment vs reference.** Four code comments assert the cells were "painted RS in Jan 1993". The
+reference is **RBiH**: `painted_control_jan1993.json` revision 4, changelog **RS → RBiH on 2026-08-24,
+commit `51e2862ea`**, recorded as an **owner determination** with no documentary source and explicit
+override of Pyrrhic-panel review (`CALIBRATION_MASTER.md` 2026-08-24 entry). The comments predate the
+correction and are stale; **a stale comment is not authority to alter the reference.**
+
+**Classification.** Not an initial-state discrepancy (initial RBiH = reference RBiH) and not a missing
+recovery. It is an **inappropriate early loss relative to the current reference**, but because that
+reference is an unsourced owner override that contradicts the documentary basis of the axis (BB1 p.193,
+Mostar hills held by VRS; historian audit "mixed — needs per-OSID look"), the disposition is a
+**reference question requiring explicit review**, with a least-invasive engine correction available if
+RBiH is confirmed.
+
+**Proposal (not implemented).** If the RBiH reference stands: remove `op:mostar:vranjevici_2` and
+`op:mostar:kruzanj_2` from the `mostar_heights` objectives of the pre-planned `Operation Herzegovina`
+and from the triggered `Operation Herzegovina Consolidation` waypoint list, and correct the stale
+comments. **Do not** append Vranjevići to HVO `Operation Jackal`/HRHB — the January target is RBiH. No
+combat value to be touched; no combat defect established.
+
+**Scope.** Read-only. Overall January calibration and `prusac_2` remain **OPEN**; no waiver. No push,
+`main` merge, baseline replacement or viewer publication. Report:
+[Vranjevići diagnosis](40_reports/20260917_VRANJEVICI_MOSTAR_JANUARY_DIAGNOSIS.md).

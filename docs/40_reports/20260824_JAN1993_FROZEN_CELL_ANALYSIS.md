@@ -241,13 +241,19 @@ previously taken `stolac_2`. Ordering: the RS↔HRHB truce was declared at t4, i
 Jackal (t8–t15); authored operations are not gated by the truce's bot target filter, no truce break is
 recorded, and the capture (t15) coincides with the operation's `completed` recovery at t15.
 
-**Provenance and scope.** Two independent executions of one candidate (n401/n402) are byte-identical:
-`final_state_hash e3b6b2d34dd1101c`, final-save SHA-256
-`e3b6b2d34dd1101c601b11abd30c2c060717995a0fe748f662214d4ebecf6899`, on parent commit `772a67808` plus
-the hashed patch, scenario `apr1992_definitive_188w.json`, `--weeks 39`, Node v22.23.2, input digest
-`f8ace65496620fad1c8219a9dcaa8e2c5cdba2f3f541b156c7ba112b4748caaf`. Artifacts compared:
-`initial_save.json`, `final_save.json`, `run_summary.json`, `control_delta.json`, `weekly_report.jsonl`,
-`formation_delta.json`, `activity_summary.json` — all identical.
+**Provenance and scope.** Three independent executions are byte-identical: two on the candidate's
+uncommitted working tree (n401/n402, `git_commit 772a67808`, `git_dirty true`) and a third (n403) taken
+on the committed source (`git_commit 41a148bf9`, `git_dirty false`) — proving the committed production
+patch is the source the artifacts describe. All three share `final_state_hash e3b6b2d34dd1101c` and
+final-save SHA-256 `e3b6b2d34dd1101c601b11abd30c2c060717995a0fe748f662214d4ebecf6899`; scenario
+`apr1992_definitive_188w.json`, `--weeks 39`, Node v22.23.2, input digest
+`f8ace65496620fad1c8219a9dcaa8e2c5cdba2f3f541b156c7ba112b4748caaf`; run dirs
+`runs/apr1992_definitive_188w__9137f75e9f35be20__w39_n401`, `…_n402`, `…_n403`. Artifacts compared
+identical across all three: `initial_save.json`, `final_save.json`, `run_summary.json`,
+`control_delta.json`, `weekly_report.jsonl`, `formation_delta.json`, `activity_summary.json`. The n403
+re-run also reproduced the expected lifecycle: `pjesivac_kula_2` RS→HRHB at t15 (`hrhb_1st_brigade_mostar`),
+`cardak_2` RS→RBiH at t23 (`arbih_303rd_vitezka_mountain`) with January RBiH control retained, Hatelji RS,
+`prusac_2` RBiH (mismatch) unchanged.
 
 **Not reached.** The candidate stops at t39. April 1994, April 1995 and October 1995 are **NOT
 REACHED**. Later-checkpoint figures a checker prints come from replaying the t39 control log against the
@@ -257,3 +263,18 @@ results.
 
 **Scope of the close.** This closes the bounded objective-omission correction for one cell, not overall
 January calibration. There is no Prusac waiver and no baseline/push/viewer action.
+
+---
+
+## Addendum — Vranjevići (`op:mostar:vranjevici_2`) read-only diagnosis (2026-09-17)
+
+With `pjesivac_kula_2` closed, the residual January mismatch set is **11 cells**: ten frozen turn-0
+discrepancies with no control event, and one combat-touched cell, `op:mostar:vranjevici_2`. The cell
+starts **RBiH** (matching the reference) and is captured **RS at t2** by the pre-planned
+`Operation Herzegovina` `mostar_heights` axis (JNA phantom `jna_nevesinje_garrison`), with no recovery;
+`kruzanj_2` survives the same axis because its `costly_victory` is absorbed. The source comments calling
+both cells "painted RS in Jan 1993" are stale — the reference was changed **RS → RBiH on 2026-08-24,
+commit `51e2862ea`**, recorded as an owner determination and summarised in `CALIBRATION_MASTER.md`. Full
+reproduction, the 11-row list, and the (unimplemented) smallest correction proposal are in
+[the Vranjevići diagnosis](20260917_VRANJEVICI_MOSTAR_JANUARY_DIAGNOSIS.md). No production change and no
+additional campaign run were made for that diagnosis.
