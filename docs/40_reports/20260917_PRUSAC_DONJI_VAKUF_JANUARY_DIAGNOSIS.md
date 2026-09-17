@@ -1016,12 +1016,18 @@ it; `verify_checkpoints` jan1993 = **701 / 712**; a cell-by-cell comparison agai
 byte-identical to `n403`. The town is still captured at **t35** by the authored operation. The only state
 difference is the `watched_operations` trace the never-firing def writes in t2–6.
 
-**Root cause, from retained evidence.** The trigger is true and the slot free from t2, but
-`rs_19th_krajina_light_infantry` is **persistently `in_transit` to `op:donji_vakuf:pribraca_2`** (from t1,
-location never leaving `jemanlici` through t16+). `buildOperation` excludes in-transit brigades, so only the
+**Root cause, from retained evidence — CORRECTED 2026-09-17.** The trigger is true and the slot free from
+t2. The earlier wording "persistently `in_transit`" was **wrong**: there is no persistent transit state at
+any turn boundary. `rs_19th_krajina_light_infantry` carries a **re-issued pending order** to
+`op:donji_vakuf:pribraca_2` every turn and is `in_transit` only **intra-turn** — created by
+`processOsidColumnMovement` Pass 2 (`war_phases.ts:1537`), cancelled by `correctTransitStates`
+(`war_phases.ts:2591`) because the destination is outside its assigned sub-segment front (`jemanlici`), then
+re-issued by the bot (`:2625`). During the admission step (`check-triggered-operations`, `:2075`) the
+transient is present, so `buildOperation` excludes the brigade (`triggered_operations.ts:976-981`); only the
 31st survives the axis and `allParticipating < MIN_OPERATION_PARTICIPANTS (2)` →
-`build_insufficient_participants`; at t5 the t4 probe on the same objective yields `objective_overlap`
-first. The stale order is **pre-existing in the unmodified baseline** (`pribraca_2` appears nowhere in
+`build_insufficient_participants`; at t5 the t4 probe on the same objective additionally yields
+`objective_overlap` first. The order is **pre-existing in the unmodified baseline** (`pribraca_2` appears
+nowhere in
 `src/` except the late-war RBiH opportunity catalog), i.e. a movement/availability blocker, not an
 offer-definition one.
 

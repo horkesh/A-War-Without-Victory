@@ -349,11 +349,19 @@ mismatches, FIXED 0, NEWLY INTRODUCED 0); `anchor_checks`/`behavioral_health`/`a
 `takeover_displacement` byte-identical to `n403`. The town is still captured at t35 by the authored
 operation — the historical defect is unrepaired.
 
-**Root cause (from evidence).** `rs_19th_krajina_light_infantry` is persistently `in_transit` to
-`op:donji_vakuf:pribraca_2` from t1 while never leaving `jemanlici`; `buildOperation` excludes in-transit
-brigades, so only the 31st survives and `allParticipating < MIN_OPERATION_PARTICIPANTS (2)` →
-`build_insufficient_participants` (at t5, `objective_overlap` with the t4 probe first). The stale order is
-**pre-existing in the baseline** — a movement/availability blocker, not an offer-definition one.
+**Root cause (from evidence) — CORRECTED 2026-09-17.** The earlier text said the 19th is "persistently
+`in_transit`". That was **wrong** — there is no persistent transit state at any turn boundary. The 19th
+carries a **re-issued pending order** to `op:donji_vakuf:pribraca_2` every turn and is `in_transit` only
+**intra-turn**: created by `processOsidColumnMovement` Pass 2 (`war_phases.ts:1537`), cancelled by
+`correctTransitStates` (`:2591`) because the destination is outside its assigned sub-segment front
+(`jemanlici`), then re-issued by the bot (`:2625`). The transient **is** present at the admission step
+(`check-triggered-operations`, `:2075`), so `buildOperation` excludes the brigade and only the 31st survives
+→ `build_insufficient_participants` (at t5, `objective_overlap` with the t4 probe first). The root cause is
+a **T2/T6 destination-scope contradiction with an ordering coupling** — a real, reproduced defect whose only
+repairs are precedence/scope policy choices, so it is returned as an **EXTENSION, not implemented**. Full
+findings: [`logs/donji-vakuf-19th-transit-20260917/FINDINGS.md`](../../logs/donji-vakuf-19th-transit-20260917/FINDINGS.md);
+the signature is map-wide (10 formations across four factions). The order is **pre-existing in the
+baseline**; this is a movement/availability blocker, not an offer-definition one.
 
 **Disposition: reverted before commit.** An operation that cannot fire in the only scoring scenario is
 inert, which the packet forbids shipping; the definition, the catalogue-pin reconciliation and the focused

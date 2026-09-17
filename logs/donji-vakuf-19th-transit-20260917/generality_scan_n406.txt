@@ -1,0 +1,11 @@
+zero-progress pending-order runs >= 5 turns (n406, mv_state null each turn, location unchanged): 10
+ 20  t20-t39  hrhb_mostar_brigade  at op:trebinje:trebimlja_2 -> op:neum:gornje_hrasno_2
+ 20  t1-t20  rs_19th_krajina_light_infantry  at op:donji_vakuf:jemanlici -> op:donji_vakuf:pribraca_2
+ 17  t10-t26  arbih_443rd_mountain  at op:trnovo:trnovo -> op:konjic:ljuta
+ 16  t10-t25  hvo_nikola_subic_zrinski_brigade  at op:bugojno:medini -> op:skender_vakuf:donji_koricani
+ 10  t5-t14  rs_3rd_sarajevo_infantry  at op:visoko:gornja_vratnica_2 -> op:ilijas:podlugovi
+  9  t17-t25  hrhb_ljubuki_brigade  at op:citluk:citluk_2 -> op:mostar:hodbina_2
+  9  t17-t25  vrs_1st_laktasi  at op:derventa:cerani_2 -> op:doboj:bukovica_velika_2
+  9  t27-t35  vrs_1st_laktasi  at op:derventa:velika_socanica_2 -> op:doboj:boljanic_2
+  7  t1-t7  hrhb_1st_herzegovina_brigade_knez_domagoj  at op:trebinje:trebimlja_2 -> op:neum:gornje_hrasno_2
+  5  t14-t18  rs_11th_mrkonji_light_infantry  at op:donji_vakuf:kutanja -> op:donji_vakuf:pribraca_2

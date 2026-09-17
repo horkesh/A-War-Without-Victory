@@ -6021,14 +6021,16 @@ mismatches, **FIXED 0, NEWLY INTRODUCED 0**; `anchor_checks`, `behavioral_health
 Operation Donji Vakuf. The only state difference is the `watched_operations` trace the never-firing def
 writes in t2–6.
 
-**Root cause, from retained evidence, not inferred.** The trigger is true and the slot free from t2 (36
-brigades → 3 slots; only Prijedor active), but `rs_19th_krajina_light_infantry` is **persistently
-`in_transit` to `op:donji_vakuf:pribraca_2`** from t1 while never physically leaving `jemanlici` (unchanged
-through t16+). `buildOperation` excludes in-transit brigades, so only the 31st survives the axis and
-`allParticipating < MIN_OPERATION_PARTICIPANTS (2)` → `build_insufficient_participants`; at t5 the t4 probe
-on the same objective yields `objective_overlap` first. The stale order is **pre-existing in the unmodified
-baseline** (`pribraca_2` appears nowhere in `src/` except the late-war RBiH opportunity catalog) — a
-movement/availability blocker, not an offer-definition one.
+**Root cause, from retained evidence, not inferred — CORRECTED 2026-09-17.** The earlier wording
+"persistently `in_transit`" was **wrong**: no persistent transit state exists at any turn boundary. The 19th
+carries a **re-issued pending order** to `op:donji_vakuf:pribraca_2` every turn and is `in_transit` only
+**intra-turn** — created by `processOsidColumnMovement` Pass 2 (`war_phases.ts:1537`), cancelled by
+`correctTransitStates` (`:2591`) because the destination is outside its assigned sub-segment front
+(`jemanlici`), then re-issued by the bot (`:2625`). The transient is present at the admission step
+(`check-triggered-operations`, `:2075`), so `buildOperation` excludes the brigade and only the 31st survives
+→ `build_insufficient_participants`; at t5 the t4 probe on the same objective yields `objective_overlap`
+first. The root cause is a **T2/T6 destination-scope contradiction with an ordering coupling** — see the
+investigation entry below.
 
 **Disposition — reverted before commit.** An operation that cannot fire in the only scoring scenario is an
 inert operation, which the packet forbids shipping. The definition, the catalogue-pin reconciliation and the
@@ -6048,3 +6050,54 @@ change needing separate authorization, not a fallback.
 **Push status.** Scoped documentation and evidence committed and pushed to
 `codex/january-1993-operations-20260914`. No force, `main` merge, baseline refresh, tag movement or viewer
 publication; `data/derived/latest_run_final_save.json` stays uncommitted.
+
+## 2026-09-17 — 19th Brigade transit investigated: the "persistent transit" claim was wrong; a real T2/T6 scope defect remains, returned as an EXTENSION (not implemented)
+
+**Task.** Investigate, and repair only if demonstrated, the reported persistent transit of
+`rs_19th_krajina_light_infantry` toward `op:donji_vakuf:pribraca_2` while at `op:donji_vakuf:jemanlici`.
+Three independent specialists (Gameplay/Systems, Operations/Formation, and a separate reviewer) examined the
+writer/consumer chain and retained state. Read-only until a contract violation was reproduced; no code
+shipped. Full findings: [`logs/donji-vakuf-19th-transit-20260917/FINDINGS.md`](../logs/donji-vakuf-19th-transit-20260917/FINDINGS.md).
+
+**The claim was wrong and is corrected.** There is **no persistent transit state at any turn boundary**.
+`buildBrigadeTemporalRows` (`brigade_temporal_emit.ts:185-192, 212`) shows `mv_state=null` with a pending
+order every turn t1–t20. The `in_transit` status is **intra-turn only**: `processOsidColumnMovement` Pass 2
+(`war_phases.ts:1537`) creates it from the previous turn's bot order; `correctTransitStates` (`:2591`)
+deletes it (destination outside the assigned sub-segment front `["…jemanlici"]`); `generate-bot-brigade-orders`
+(`:2625`) re-issues the same order. Pass 1 (`osid_column_movement.ts:383-418`, the only `turns_remaining`
+decrementer) always runs before Pass 2 and the state never survives to the next Pass 1, so progress is
+permanently zero.
+
+**Classification.** The isolated T6 cancellation is **(B)** — rejecting an out-of-sub-segment destination and
+holding the assigned front is the existing contract. The composition is **(C)** a reproduced lifecycle/
+ordering defect: T2's target scope is broader than T6's validation (`getEffectiveCorpsFrontTargets` pools the
+whole corps, `bot_brigade_movement_ai.ts:320-337`; tooth eviction uses a corps-wide `safeFront`,
+`bot_brigade_eval_front.ts:~328-378`; T6 validates only `assigned_sub_segment_id`,
+`commander_march_correction.ts:89-96,173-180,197-198`). `MOVEMENT_AUTHORITY.md` §2/§4 does not settle
+sub-segment vs sector, and the code header asserts sub-segment — two tests pin opposite behaviours.
+
+**Not a Donji Vakuf-only artefact.** 10 formations show the ≥5-turn zero-progress pending-order signature
+across four factions (`generality_scan_n406.txt`) — including the structurally identical HVO
+`trebimlja_2`→`gornje_hrasno_2` pair.
+
+**Disposition — EXTENSION, not implemented.** Every candidate fix is a precedence/scope **policy** choice
+(align T6 to T2's scope; move the correction after the T2 writer; narrow T2 to the sub-segment; or resolve at
+T1 by not assigning a line brigade to a single-OSID risky tooth). The packet authorizes only the restoration
+of an existing contract, so the precise proposal — decision needed, affected callers and a failing-first
+focused test — is returned in `FINDINGS.md` §4 without implementation. No ownership writer, reference,
+baseline or threshold was touched; `src/` and `tests/` are byte-identical to `26342bcc8`.
+
+**Operation-admission question, not prejudged.** In the t2–6 window the 19th is transiently `in_transit`
+during admission, so `buildOperation` drops it → `build_insufficient_participants` (blocker 1). The t5
+`objective_overlap` with `probe_vrs_1st_krajina_t4` is **blocker 2, separate**. Fixing the transit scope would
+not by itself clear blocker 2, launch the offer, or capture anything. No measurement run was made because no
+repair was implemented. `n403` (701/712) remains the January comparison; January calibration stays **OPEN**.
+
+**Source identity.** The withdrawn `Donji Vakuf Local Action` patch and its admission tests are **not
+recoverable** from this branch (never committed, reverted/deleted); only `CHANGE_SPEC.md` survives, so any
+re-derivation is a reconstruction. The `prefix_diag.txt` trace came from temporary instrumentation that was
+**reverted before commit** (recorded as absent in `FINDINGS.md` §5).
+
+**Push status.** Documentation and evidence committed and pushed to
+`codex/january-1993-operations-20260914`. No force, `main` merge, baseline refresh, tag movement or viewer
+publication; `data/derived/latest_run_final_save.json` untouched and uncommitted.

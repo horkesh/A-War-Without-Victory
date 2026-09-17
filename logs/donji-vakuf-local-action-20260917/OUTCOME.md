@@ -46,13 +46,17 @@ The trace shows only two rows (`evidence_n406_watched_operations.json`):
 short run (`n407`, `--weeks 7`) showed the trigger itself is **true** from t2 and the slot is **free**
 (1KK has 36 brigades → 3 slots; only Operation Prijedor active). The failure is in participant assembly:
 
-> **`rs_19th_krajina_light_infantry` is persistently `in_transit` to `op:donji_vakuf:pribraca_2`** from t1
-> onward, while it never physically leaves `op:donji_vakuf:jemanlici` (location unchanged through t16+).
-> `buildOperation` excludes any brigade whose `brigade_movement_state.status === 'in_transit'`
-> (`triggered_operations.ts`, the movement-state guard in the axis builder), so only `rs_31st_light_infantry`
-> survives the axis → `allParticipating.length (1) < MIN_OPERATION_PARTICIPANTS (2)` →
-> `build_insufficient_participants`. At t5 the t4 probe `probe_vrs_1st_krajina_t4` is also active on the
-> same objective, producing `objective_overlap` first.
+> **CORRECTED 2026-09-17 (see `logs/donji-vakuf-19th-transit-20260917/FINDINGS.md`).** The original text said
+> "persistently `in_transit`". That was **wrong**: there is **no persistent transit state at any turn
+> boundary**. The 19th carries a re-issued pending order to `op:donji_vakuf:pribraca_2` every turn, and is
+> `in_transit` only **intra-turn** — created by `processOsidColumnMovement` Pass 2 (`war_phases.ts:1537`),
+> then cancelled by `correctTransitStates` (`war_phases.ts:2591`) before the bot re-issues the same order
+> (:2625). During the admission step (`check-triggered-operations`, :2075) the transient **is** present, so
+> `buildOperation` excludes the 19th (movement-state guard, `triggered_operations.ts:976-981`); only
+> `rs_31st_light_infantry` survives → `build_insufficient_participants`. At t5 the t4 probe
+> `probe_vrs_1st_krajina_t4` is also active on the same objective, producing `objective_overlap` first.
+> The root cause is a **T2/T6 destination-scope contradiction with an ordering coupling** — a real defect
+> whose only repairs are precedence-policy choices, returned as an EXTENSION (not implemented).
 
 - **Pre-existing, not introduced.** The 19th's stale `in_transit` order to `pribraca_2` is present in the
   unmodified baseline; the predecessor diagnosis already recorded the 19th "sat at jemanlici t1–18 carrying

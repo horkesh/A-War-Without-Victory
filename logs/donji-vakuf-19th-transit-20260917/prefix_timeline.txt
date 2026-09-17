@@ -1,0 +1,1 @@
+t1 loc=op:donji_vakuf:jemanlici mv=null dest=["op:donji_vakuf:pribraca_2"] ss=subseg:sector:vrs_1st_krajina:16:0
