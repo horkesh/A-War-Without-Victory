@@ -8,7 +8,8 @@
 # enumerable, which it was not: 292 plan documents exist and 264 are unlinked history.
 #
 # FIELDS
-#   lane_open   the lane is not marked COMPLETE/CLOSED in the register
+#   lane_open   the bold status head of the register row does not assert COMPLETE/CLOSED.
+#               Prose after the head explains sub-items and never decides the lane.
 #   tokens      approximate, size/4 — whether the plan fits a 32,768-token context at all
 #   tasks       path to a machine-readable task manifest, or null if none exists yet
 
@@ -79,7 +80,7 @@ lanes:
   - lane: R6
     title: "Historical gameplay depth and final calibration"
     lane_open: true
-    status: "JANUARY OPERATIONS CONTRACT MET; CALIBRATION HELD. All April and Jajce work remains integrated. January operations source `ac3e5e152` scores 700/712, 702, 697, "
+    status: "JANUARY OBJECTIVE CORRECTIONS MEASURED; CALIBRATION HELD. All April and Jajce work remains integrated. On clean candidate `41a148bf9` January measures 701/712 a"
     plans:
       - path: docs/plans/2026-07-31-historical-gameplay-depth-calibration-plan.md
         exists: true

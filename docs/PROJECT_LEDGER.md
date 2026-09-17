@@ -5608,3 +5608,54 @@ thresholds, baseline hashes, test assertions, the skipped golden-baseline test, 
 the three `preserve/*` tags, `main`, `gh-pages` and the published viewer. **January calibration is not
 closed and the candidate is not promoted. `prusac_2` remains OPEN with no waiver; Vranjevići/Kružanj
 remains UNRESOLVED and was outside this task.**
+
+## 2026-09-17 — Plan-index parser repair: lane state is the status head, not words in its prose
+
+**Task.** Fix the semantic defect that made `plans:check` and `tests/plan_index.test.ts` unrunnable:
+regenerating `docs/plans/plan_index.yml` retired **R6**, an open calibration lane. Tooling correction only.
+**No simulation behavior, operation data, reference, floor, threshold or roadmap decision changed, and no
+simulation was executed.** Committed separately from the Prusac historical work.
+
+**The defect.** `tools/derive_plan_index.cjs` decided lane closure with
+`CLOSED_MARKERS.some(m => status.toUpperCase().includes(m))` over the **whole** register status cell. Every
+cell in §5 is written as a bold status head followed by explanatory prose, and prose discusses sub-items.
+R6's cell reads `**JANUARY OBJECTIVE CORRECTIONS MEASURED; CALIBRATION HELD.** … the Pješivac-Kula
+objective correction is CLOSED.` The substring search read that sub-item's closure as the workstream
+finishing, so a fresh derivation flipped `lane_open: true → false` for the one lane a dispatcher most needs
+to see. The committed index was therefore knowingly left stale — `plans:check` exit 1 and 3 failing tests —
+because stale-but-correct beat fresh-but-wrong. Both are now green.
+
+**The repair.** Closure is read from the **status head** — the leading `**…**` span — or it is not read at
+all. Prose after the head never decides the lane. Within the head, closure words match on **whole words**
+(`\b(?:COMPLETED?|CLOSED)\b`, so `INCOMPLETE` is not `COMPLETE`) and a closure word denied or qualified
+within the preceding three words (`NOT`, `NO`, `NEVER`, `YET`, `PARTIALLY`, `PARTIAL`, `PARTLY`, `NEARLY`,
+`ALMOST`, `MOSTLY`) does not certify closure. Unestablished closure stays **live**: a cell with no bold head
+asserts no lane-level status and reads open, and any cell whose wording leaves closure unestablished emits
+a named stderr diagnostic rather than silently certifying a finish. No lane ID is hard-coded, no generated
+value is hand-edited, no second source of lane status exists, and `MASTER_ROADMAP.md` remains the sole
+authority — **it was not edited**; the register's existing formatting already represents every lane
+unambiguously, so no formatting clarification was needed.
+
+**Every lane re-derived and inspected, not just R6.** R1 / R2 / R3 / R4 / R5 / RC / RE **CLOSED**;
+**R6 / R7 / R8 / R9 OPEN** (11 lanes, 4 open, 10 plans on open lanes). R9 is the one cell with no bold head
+— its plain status carries no closure word, so it reads open with no diagnostic. This matches the committed
+index exactly; the only `lane_open` value the repair changes is the one a fresh derivation would have got
+wrong.
+
+**Tests.** Six fixtures added to `tests/plan_index.test.ts`, written failing first: an open lane whose prose
+closes a sub-item; genuine whole-lane `COMPLETE`/`CLOSED` heads; a closed lane whose explanation recalls
+formerly open work; `NOT CLOSED` / `NOT COMPLETE` / `NOT YET COMPLETE` / `INCOMPLETE` / `partially complete`
+/ a head that both claims and denies closure; a headless cell; and the **real** register read back through
+`parseRegister()` for all eleven lanes. `classifyLaneStatus` is exported for them.
+
+**Validation.** `tests/plan_index.test.ts` **13/13 pass** (was 9 failing). `plans:check` **exit 0**.
+`npx tsc --noEmit` clean. The full `affected_tests.cjs HEAD` selection — **48 test files, 48 passed**.
+Regeneration is idempotent: an immediate second `node tools/derive_plan_index.cjs` produced no further diff.
+
+**Files changed.** `tools/derive_plan_index.cjs` (parser + diagnostics + export),
+`tests/plan_index.test.ts` (fixtures), `docs/plans/plan_index.yml` (regenerated: the `lane_open` field
+comment, and R6's `status` string catching up to roadmap prose it could not be regenerated for), this entry.
+
+**Not changed.** `docs/plans/MASTER_ROADMAP.md` and every roadmap decision in it, all `lane_open` values,
+the generated-index schema, simulation code, calibration state, checkpoint thresholds, baseline pins,
+preservation tags, `main`, `gh-pages` and the viewer. **Prusac remains OPEN with no waiver.**

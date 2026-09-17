@@ -39,8 +39,69 @@ const INDEX = 'docs/plans/plan_index.yml';
 const LANE_ROW = /^\|\s*(R[1-9]|RC|RE|REPO)\s*\|/;
 const PLAN_LINK = /\]\(([0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+\.md)\)/g;
 
-/** A lane is CLOSED when its status cell says so. Anything else is treated as still live. */
-const CLOSED_MARKERS = ['COMPLETE', 'CLOSED', 'SCOPE COMPLETE'];
+/**
+ * LANE STATE IS THE STATUS HEAD, NOT THE WHOLE CELL.
+ *
+ * Every register status cell is written the same way: a bold head that states the lane's status,
+ * then prose explaining it — `**ACTIVE — AUDIO AND BROADER ACCEPTANCE OPEN.** WR01 delivered…`.
+ * The prose talks about sub-items, and sub-items close while their lane stays open. R6's cell
+ * records that the Pješivac-Kula objective correction is CLOSED inside a lane whose head reads
+ * `**JANUARY OBJECTIVE CORRECTIONS MEASURED; CALIBRATION HELD.**`, and a substring search over
+ * the whole cell therefore retired a live calibration lane — the one state a dispatcher reads
+ * this index to learn. So closure is taken from the head or it is not taken at all.
+ *
+ * Unestablished closure stays LIVE. A cell with no bold head asserts no lane-level status, and
+ * a head that qualifies its own closure word ("NOT CLOSED", "partially complete") asserts the
+ * opposite of one. Both read open and say why on stderr; neither silently certifies a finish.
+ */
+const STATUS_HEAD = /^\s*\*\*([\s\S]+?)\*\*/;
+/** Whole words only: `INCOMPLETE` is not `COMPLETE`, and never was. */
+const CLOSURE_WORD = /\b(?:COMPLETED?|CLOSED)\b/g;
+/** Words that turn a following closure word into a denial or a part-claim. */
+const CLOSURE_QUALIFIERS = new Set([
+  'NOT', 'NO', 'NEVER', 'YET', 'PARTIALLY', 'PARTIAL', 'PARTLY', 'NEARLY', 'ALMOST', 'MOSTLY',
+]);
+
+/** Every closure word in `text`, each flagged with whether a nearby word denies it. */
+function closureClaims(text) {
+  const upper = text.toUpperCase();
+  const claims = [];
+  CLOSURE_WORD.lastIndex = 0;
+  let match;
+  while ((match = CLOSURE_WORD.exec(upper)) !== null) {
+    const preceding = (upper.slice(0, match.index).match(/[A-Z]+/g) ?? []).slice(-3);
+    claims.push({ word: match[0], negated: preceding.some((word) => CLOSURE_QUALIFIERS.has(word)) });
+  }
+  return claims;
+}
+
+/**
+ * Read one register status cell. Returns the lane-level verdict, the head it was read from, and
+ * any diagnostic explaining a refusal to certify closure.
+ */
+function classifyLaneStatus(cell) {
+  const raw = String(cell ?? '');
+  const head = STATUS_HEAD.exec(raw);
+
+  if (head === null) {
+    const diagnostics = closureClaims(raw).some((claim) => !claim.negated)
+      ? ['no bold status head; closure wording appears only in prose — read as live']
+      : [];
+    return { closed: false, head: null, diagnostics };
+  }
+
+  const text = head[1].trim();
+  const claims = closureClaims(text);
+  if (claims.length === 0) return { closed: false, head: text, diagnostics: [] };
+  if (claims.some((claim) => claim.negated)) {
+    return {
+      closed: false,
+      head: text,
+      diagnostics: [`status head qualifies its own closure ("${text}") — read as live`],
+    };
+  }
+  return { closed: true, head: text, diagnostics: [] };
+}
 
 function strictCompare(a, b) {
   if (a < b) return -1;
@@ -60,6 +121,7 @@ function parseRegister(repoRoot = REPO_ROOT) {
     const lane = LANE_ROW.exec(line);
     if (!lane) continue;
     const cells = line.split('|').map((cell) => cell.trim());
+    const verdict = classifyLaneStatus(cells[3] ?? '');
     const status = (cells[3] ?? '').replace(/\*\*/g, '');
     const plans = [];
     PLAN_LINK.lastIndex = 0;
@@ -70,8 +132,10 @@ function parseRegister(repoRoot = REPO_ROOT) {
     rows.push({
       lane: lane[1],
       title: cells[2] ?? '',
-      closed: CLOSED_MARKERS.some((marker) => status.toUpperCase().includes(marker)),
+      closed: verdict.closed,
       status: status.slice(0, 160),
+      head: verdict.head,
+      diagnostics: verdict.diagnostics,
       plans: plans.slice().sort(strictCompare),
     });
   }
@@ -92,7 +156,8 @@ function renderIndex(repoRoot = REPO_ROOT) {
     '# enumerable, which it was not: 292 plan documents exist and 264 are unlinked history.',
     '#',
     '# FIELDS',
-    '#   lane_open   the lane is not marked COMPLETE/CLOSED in the register',
+    '#   lane_open   the bold status head of the register row does not assert COMPLETE/CLOSED.',
+    '#               Prose after the head explains sub-items and never decides the lane.',
     '#   tokens      approximate, size/4 — whether the plan fits a 32,768-token context at all',
     '#   tasks       path to a machine-readable task manifest, or null if none exists yet',
     '',
@@ -129,6 +194,13 @@ function renderIndex(repoRoot = REPO_ROOT) {
   return `${lines.join('\n')}\n`;
 }
 
+/** Report every cell whose wording left closure unestablished, so it is visible and not silent. */
+function reportDiagnostics(rows) {
+  for (const row of rows) {
+    for (const note of row.diagnostics) console.error(`plan index: ${row.lane}: ${note}`);
+  }
+}
+
 function main() {
   const args = process.argv.slice(2);
   const text = renderIndex();
@@ -152,6 +224,7 @@ function main() {
 
   fs.writeFileSync(target, text);
   const rows = parseRegister();
+  reportDiagnostics(rows);
   const open = rows.filter((row) => !row.closed);
   const openPlans = open.reduce((sum, row) => sum + row.plans.length, 0);
   console.log(`plan index: ${rows.length} lane(s), ${open.length} open, ${openPlans} plan(s) on open lanes`);
@@ -160,4 +233,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { parseRegister, renderIndex, strictCompare, ROADMAP, INDEX };
+module.exports = { classifyLaneStatus, parseRegister, renderIndex, strictCompare, ROADMAP, INDEX };
