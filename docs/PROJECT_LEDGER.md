@@ -5934,3 +5934,64 @@ withdrawn with its mechanism — it was never an acceptance and is not a floor. 
 **Still open.** The town's capture date; Korenići and Torlakovac on the same defect; Prusac's 1992–93
 ownership; Vranjevići/Kružanj. A replacement must come from the military-capability side.
 Full record: [Prusac/Donji Vakuf report §10](40_reports/20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md).
+
+## 2026-09-17 — Donji Vakuf specialist consultation: the bottleneck is operation configuration, not force inputs; no new calibration edit
+
+**Task.** The owner packet requires actual specialist answers **before** any new calibration edit, then a
+single predeclared force-input experiment **if** an in-scope lever reaches the bottleneck. Read-only
+consultation; no calibration edit, no simulation run, no ownership write. Full receipt (functions,
+evidence, unresolved points):
+[Prusac/Donji Vakuf report §11](40_reports/20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md);
+[CALIBRATION_MASTER §K](40_reports/CALIBRATION_MASTER.md).
+
+**Host note, stated plainly.** The host exposes only general-purpose subagents, not named Pyrrhic role
+agents. Each consultation was an independent subagent that loaded the relevant `.claude/skills/<role>/`
+body and examined the current source and preserved artifacts itself; the independent War-or-Game reviewer
+was a separate subagent and did not author the conclusion it reviews.
+
+**The load-bearing new finding — the prior "single sequential slot" claim is half-wrong.** At **w5** a 1KK
+**probe** (`vrs_1st_krajina:probe_vrs_1st_krajina_t4`, brigade `rs_11th_mrkonji_light_infantry`) attacked
+`op:donji_vakuf:donji_vakuf_2` at **`decisive_victory`, power ratio 6.94**, and took **no ground**, because
+`buildProbeOperation` sets `occupies_on_victory: false` (`corps_operation_helpers.ts:460`) and the resolver
+honours it (`attack_resolution_osid.ts:1450-1454`). Independently re-read by the integrator from
+`runs/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n396/weekly_report.jsonl` week 5. So force, position
+and combat capability are **not** the constraint. `bot_strategy` 'Krajina Sweep' (45) and '1KK
+Consolidation' (35) are below the `army_hq_overrides` probe threshold (50) and generate no attack; no
+triggered op targets a Donji Vakuf cell; local-occupation returns null for `turn <= 20`.
+
+**Bottleneck classification.** **Incorrect scenario/operation configuration** — no capture-capable operation
+is routed at this frontage in April–June 1992 — **compounded by force not selected/committed**. Not combat
+capability (w5 disproves it). Not implementation defect. Not insufficient historical force: n403 t35 live
+strengths are 824 / 856 / 1482 / 888 / 2200; the 19th (~824) and 31st (~856) are within or below their
+bounded historical band, and Donji Vakuf's 9,364 Serbs already carry a seeded 2,000.
+
+**Force levers considered and excluded — all of them, with reasons.** Personnel: the 16th is at its 2,200
+cap (a grant is excluded unless the cap changes) and is historically misplaced here (BB2 printed p.330 names
+**"the 19th at Donji Vakuf and the 22nd at Mount Vlašić"**; the 16th is a Banja Luka formation used only for
+engine availability after Corridor); raising the 19th/31st is locally infeasible and historically
+unsupported. Equipment quantity/condition, readiness, cohesion, experience, officer quality: none creates a
+capturing operation, and personnel affects only `basePower` margin (`combat_math.ts:1116-1124`) plus the
+casualty cap — not the capture decision (w35 was already `decisive_victory`) or the objective chaining.
+Adding personnel changes no equipment/composition ratio. The 17 April event is a **police (SJB) takeover**,
+which military force parameters structurally cannot model. **No force value was changed.**
+
+**Decision.** No in-scope force-level lever reaches this bottleneck, so **no new calibration edit is made**
+and no predeclared experiment is run. The packet's required replacement is reported, not implemented: a
+contingent, **capturing** operation for this frontage available Apr–Jun 1992 on an existing channel — a new
+triggered/pre-planned operation definition, or a change making the existing opportunity-plan branch
+(`plan.ts:1287-1345`) viable there. That is an operation/configuration change and needs separate
+authorization.
+
+**Independent review.** Every load-bearing claim CONFIRMED except two immaterial phrasings: the 19th/31st
+are inert by **non-participation** (`active_op_id=null`), not by non-adjacency; and "no capture-capable
+operation configured" is too strong — emergent capture-capable `sector_attack`s exist (Kotor Varoš t10, Bor
+t27, Sjever t29), they simply were not routed at this frontage. Reviewer's residual, recorded not fixed:
+`tests/donji_vakuf_no_authored_takeover.test.ts` covers the event catalogue but **not** `init_control`
+repainting or a newly authored operation targeting the town.
+
+**Verification.** Focused set 9 files / 151 tests green including the guard and the event-catalogue
+integrity suite; `npx tsc --noEmit` clean; `git diff 41a148bf9 HEAD -- src/ data/scenarios/ data/source/`
+filtered to non-comment lines is **empty**. **No fresh run was made and none is claimed**; `n403`'s recorded
+**701/712** remains the January comparison, January calibration remains **OPEN**, and the town's December
+capture date remains an OPEN historical defect. No reset, no tag movement, no baseline refresh, no `main`
+merge; `data/derived/latest_run_final_save.json` stays uncommitted.

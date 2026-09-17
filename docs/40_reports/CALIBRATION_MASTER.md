@@ -301,6 +301,40 @@ completes t32 instead of t43, freeing five 1KK brigades ~11 turns early, and tha
 acceptance, and it is not a floor. The current January comparison baseline is **`n403`, 701/712**, which is
 the pre-experiment configuration now restored in the tree. **January calibration remains OPEN.**
 
+**K. Donji Vakuf specialist consultation completed — no in-scope force lever; no new calibration edit (added
+2026-09-17).** The packet required actual specialist answers before any new calibration edit. The host
+exposes only general-purpose subagents, not named Pyrrhic roles; each consultation was an independent
+subagent that loaded the relevant skill body and examined the current source and preserved artifacts itself,
+and the independent reviewer was a separate seat. Full receipt with functions, evidence and unresolved
+points: [Prusac/Donji Vakuf report §11](20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md).
+
+- **Bottleneck: incorrect scenario/operation configuration** — no capture-capable operation is routed at the
+  Donji Vakuf frontage in April–June 1992 — **compounded by force not selected/committed.** It is **not**
+  combat capability: at **w5** a 1KK probe (`probe_vrs_1st_krajina_t4`, `rs_11th_mrkonji_light_infantry`)
+  attacked `op:donji_vakuf:donji_vakuf_2` at **`decisive_victory`, ratio 6.94** and took no ground, because
+  probes set `occupies_on_victory: false` (`corps_operation_helpers.ts:460`). It is **not** an implementation
+  defect, and the local force inputs are **not** understrength: the 19th (824) and 31st (856) sit within or
+  below their bounded historical band, and Donji Vakuf's 9,364 Serbs already carry a seeded 2,000.
+- **Correction to the record.** §9.2's "single sequential slot" claim is half-wrong: slot 0 sequences the
+  authored chain, but the **commander probe path is not blocked** and fought the town at w5. `bot_strategy`
+  'Krajina Sweep' (45) and '1KK Consolidation' (35) are below the army-HQ override probe threshold (50) and
+  create no attacks.
+- **Legitimate levers considered and excluded:** personnel, equipment quantity/condition, readiness,
+  cohesion, experience, officer quality. None creates a capturing operation; a `rs_16th_krajina_motorized`
+  grant is capped at 2,200 and the formation is historically misplaced here (BB2 p.330 names the 19th and
+  22nd); raising the 19th/31st is locally infeasible and historically unsupported. **No force value was
+  changed.** The 17 April event is a **police (SJB) takeover**, which military force parameters cannot model.
+- **Required change (reported, not implemented, out of scope):** a contingent, **capturing** operation for
+  this frontage available Apr–Jun 1992 on an existing channel — a new triggered/pre-planned operation
+  definition, or making the existing opportunity-plan branch viable there. This needs separate authorization.
+- **Residual (recorded, not fixed).** The guard covers the event catalogue but not `init_control` initial
+  repainting or a newly authored operation targeting the town. Aggregation (the cell is a scalar over six
+  settlements) and reference (Prusac jan1993 unattested) questions remain separate and open.
+
+**No fresh run was made and none is claimed.** `n403`'s recorded **701/712** remains the January comparison;
+the withdrawn tree's executable identity to `41a148bf9` is independently re-confirmed (non-comment diff
+empty). January calibration remains **OPEN**.
+
 **Scope correction to F (added 2026-09-17).** The advisory closeout's conclusions are bounded as follows:
 reproducibility was observed **for the tested scenario, artifacts and environments** (`apr1992_188w`, the
 eight pinned artifacts, Linux CI ×2 and Windows local); **no verification defect was found**; the

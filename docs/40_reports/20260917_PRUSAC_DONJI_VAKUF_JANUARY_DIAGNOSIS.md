@@ -724,6 +724,16 @@ its authored position (`torlakovac_2 → babin_potok_2 → oborci_2 → donji_va
 The executable configuration of `src/sim/combat/pre_planned_operations.ts` is **identical** to
 `379427522`; only comments differ.
 
+**Provenance check — the restored tree is `n403`'s configuration, by inspection not by measurement.**
+`n403` ran at `41a148bf9` with `git_dirty: false`. Diffing the simulation inputs from that commit to the
+withdrawal commit (`git diff 41a148bf9 HEAD -- src/ data/scenarios/ data/source/`) leaves exactly two
+files, `pre_planned_operations.ts` and `triggered_operations.ts`, and **every differing line in both is a
+comment** — verified by filtering the diff to non-comment lines, which is empty. So the executable
+configuration that produced `n403` is what is in the tree now.
+
+**This is a provenance argument, not a measurement. No fresh run was made, and 701/712 is not re-claimed
+as a new result** — it is `n403`'s recorded figure, on the configuration now restored.
+
 **This restores the comparison configuration. It does not endorse the chronology.** The engine again
 captures the town at **t35 (7 December 1992)** against a documented **17 April 1992** institutional
 takeover — the VRS conquering its own Vrbas-92 springboard five months late. **The historical defect
@@ -777,3 +787,184 @@ rule stands for any future experiment on this lane.
 4. **Vranjevići / Kružanj** — unchanged, unresolved, outside this lane.
 5. **Op Jajce's chronology** — `jajce_3` returns to its pre-experiment turn with the withdrawal; the
    underlying ~17-day error against 29 October 1992 predates this lane and is unaffected.
+
+---
+
+## 11. Specialist consultation — the bottleneck, the authority boundary, and the decision (2026-09-17)
+
+Status: **read-only.** No calibration edit was made, no simulation was executed, no ownership writer was
+touched, and no force value was changed. This section is the consultation receipt the packet requires
+**before** any new calibration edit, and the record of the decision that follows from it.
+
+### 11.0 Host note — how the consultation was actually run
+
+The host exposes the `Task` tool with general-purpose subagents; it does **not** expose named Pyrrhic role
+agents. Each consultation below was dispatched as an independent subagent that read the relevant
+`.claude/skills/<role>/SKILL.md` body and examined the current source and the preserved artifacts itself.
+The independent reviewer (D) was a separate subagent and did **not** author the conclusion it reviews.
+This is the closest capability the host supports. It is stated plainly, per the packet's instruction to
+report the limitation rather than present a single author's synthesis as independent consultation.
+
+Every specialist below examined commit `5a6cd19d0`. Each response is summarised with its functions/files,
+its evidence, its conclusion and its unresolved points. Disagreements were returned to evidence and are
+recorded in 11.D.
+
+### 11.A Gameplay / Systems Programmer — what determines the fight?
+
+Traced the production path orders → battle → control, from the current code.
+
+- **Attackers** — `generateAllBotOrdersOsid` (`bot_brigade_ai_osid.ts:703`) → `executeFactionDirectivesImpl`
+  (`:458`) → `evaluateSectorAttack` (`bot_brigade_eval_attack.ts:176`), which writes the order
+  (`:397`). Hard gates: `MIN_ATTACK_PERSONNEL` ≥ 500 (`formation_constants.ts:82`), tactical adjacency
+  (`bot_brigade_eval_attack.ts:284-287`), predicted outcome ≥ the op threshold (`:375-379`),
+  `MAX_ATTACKERS_PER_TARGET` 12 (`bot_brigade_targeting.ts:34`), per-corps share trim (`:772-793`).
+  **Brigades never attack independently** — all attack flows through a `CorpsOperation`.
+- **Defenders** — sector responsible via `findSectorForEnemyOsid` (`sector_utils.ts:118`), roster via
+  `getStandingOgDefenseBrigadeIds` (`standing_og_defense.ts:13`), physical/reactive split and stacking in
+  `rankDefendersByPower` (`attack_resolution_osid.ts:764,847,872`; `combat_math.ts:1874`), final assembly
+  `:809-869`.
+- **Personnel** enters `basePower` **linearly and once**:
+  `personnel × equipmentRatio × (0.6 + 0.4·clamp(experience,0,1)) × (cohesion/100) × honorMult`
+  (`combat_math.ts:1116-1124`). Its only other entry is casualty engagement
+  (`attack_casualty_distribution.ts:53-73`; `DEFENDER_CASUALTY_ENGAGEMENT_CAP=1.5`,
+  `combat_math.ts:301`). Personnel is **not** in `getEquipmentRatio`, composition, concentration
+  (count-based), or the attack-decision threshold.
+- **Outcome bands / floors.** decisive ≥2.0, victory ≥1.5, costly ≥1.0, stalemate ≥0.7, repulsed ≥0.5
+  (`combat_math.ts:124-128`). Op Donji Vakuf's `min_attack_outcome: 'repulsed'` (`pre_planned_operations.ts:1064`)
+  means **only `catastrophic` fails the attack gate** — the attack is effectively unconditional once an
+  eligible participant exists.
+- **Control writer.** On an occupying win, `state.political.political_controllers[targetOsid] = attackerFaction`
+  (`attack_resolution_osid.ts:1477`) with `ControlEvent mechanism:'combat'` (`:1480-1489`). No event writer
+  on this path.
+- **Predictor vs resolver.** `execution_attack_power_mult` (Op Donji Vakuf = **1.65**) is applied in **both**
+  (`combat_predictor.ts:503`; `attack_resolution_osid.ts:983`). The predictor omits concentration, tempo,
+  firepower-deficit, intel friction, last-stand and donor power, and adds a fog discount plus a
+  `costly_victory → stalemate` downgrade — decision-time only, not resolution.
+- **Receipt reconstruction (n396 w35, town).** Resolved: attacker `rs_16th_krajina_motorized`, defender
+  `arbih_705th_slavna_mountain`, `decisive_victory`, **ratio 3.97**. Predicted operands are **not
+  recoverable** (`power_breakdown`/`axis_reject` instrumentation is off in n396/n403/n404/n405), so only the
+  resolved ratio is receipted; the defender personnel base invert to ≈1,600 — reported as bounded, not as a
+  measured decomposition.
+- **Would +personnel matter?** `rs_16th_krajina_motorized` is at its 2,200 cap in these fights, so a grant is
+  **excluded** unless the cap changes. `rs_19th`/`rs_31st` are **not participants** at t34 (the operation's
+  receipts list 16th/22nd/5th/1st_banja_luka; the 19th/31st carry `active_op_id=null`), so their personnel is
+  inert for the w35 battle. The w35 town capture was already `decisive_victory`, so personnel changes the
+  **margin**, not the capture decision or the sequential objective chaining.
+
+Unresolved: predicted-vs-actual decomposition is not in any relevant run (instrumentation off); the exact
+w35 attacker set is not serialized.
+
+### 11.B Operations Expert — do the available forces actually get to fight?
+
+**The prior §9.2 "single sequential slot" claim is half-wrong and is corrected here.**
+
+- The authored 1KK chain does occupy pre-planned slot 0: Prijedor → Corridor → Jajce → Donji Vakuf, and
+  `injectQueuedOperation` (`pre_planned_operations.ts:2205`) fires only when `isSlot0AvailableForQueue`
+  (`corps_operation_helpers.ts:193`) is true, so Op Donji Vakuf injects at **w30**.
+- **But slot 0 does not exclude the commander paths.** At **w5** a 1KK **probe**
+  (`vrs_1st_krajina:probe_vrs_1st_krajina_t4`, brigade `rs_11th_mrkonji_light_infantry`) attacked
+  `op:donji_vakuf:donji_vakuf_2` with **`decisive_victory`, ratio 6.94, `attacker_won true`** — independently
+  re-read from `runs/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n396/weekly_report.jsonl` week 5 by the
+  integrator. **No control change followed**, because `buildProbeOperation` sets
+  `occupies_on_victory: false` (`corps_operation_helpers.ts:460`) and the resolver honours it
+  (`attack_resolution_osid.ts:1450-1454`). So **force, position and combat capability are not the
+  constraint.**
+- `bot_strategy.ts:486` 'Krajina Sweep' (weight **45**, w12-30, targets `donji_vakuf`) and `:501` '1KK
+  Consolidation' (weight **35**, w40+) are **below** the `army_hq_overrides.ts:11-13` probe threshold **50**,
+  so they can never emit an override; they only bias brigade concentration. They generate no attack.
+- No `triggered_operations.ts` entry targets `op:donji_vakuf:*`. Commander local-occupation returns null for
+  `turn <= 20` (`commander/emit.ts:324`). `sector_offensive.ts`'s launch function has **no production call
+  site** (`bot_corps_directives.ts:56` is an unused import). The opportunity-plan branch (`plan.ts`) needs a
+  free corps and ≥3 reachable surplus brigades (`plan.ts:95`) and did not form here.
+- Local formations are genuinely available: `rs_19th` sits at `op:donji_vakuf:jemanlici` (RS, adjacent to the
+  town) and `rs_31st` is on the Jajce frontage; the 19th and 31st are **not roster-reserved before w19**
+  (`getHeadQueuedPrePlannedBrigadeIds` bounds only the queue head). They are simply never selected for a
+  **capturing** operation before w30.
+
+Conclusion: bottleneck is **incorrect scenario/operation configuration** (no capture-capable operation
+routed at this frontage in April–June 1992) **compounded by force not selected/committed**. Not combat
+capability (disproved by the w5 probe at 6.94); not an implementation defect (`occupies_on_victory:false` and
+slot-0 sequencing are explicit, documented behaviour). This is the same shape the calibration life lessons
+already record — "FROZEN meant never-flipped, not never-attacked" (`docs/life_lessons/calibration.md`,
+2026-08-25) — so no new lesson is added; the existing entry is cited rather than duplicated.
+
+Unresolved: why the w4–5 intent competition produced no opportunity plan for this zone — no decision trace
+survives.
+
+### 11.C Formation Expert, with Historian — which force inputs are credible?
+
+Traced `data/source/oob_brigades.json` → `oob_loader.ts:187,228` → `buildRecruitedFormation`
+(`recruitment_engine.ts:217-268`) → live state → battle.
+
+- Authored `initial_personnel` are 1000/1000/1000/1200/1200 for 19th/31st/22nd/5th/16th; live t35 in n403 are
+  **824 / 856 / 1482 / 888 / 2200**.
+- The 19th (~824) and 31st (~856) are **within or below** their bounded historical band (~800–1,500 and
+  ~600–1,200) — labelled calibration estimates, not citations.
+- **Local capacity is already spent.** Donji Vakuf had **9,364 Serbs** in 1991; the engine force-seeds
+  **2,000** men for the 19th+31st — roughly all military-age Serb males of the municipality. An upward
+  personnel adjustment is **not credible from local capacity** and would not survive the spawning contract
+  without importing men from elsewhere.
+- `rs_16th_krajina_motorized` is a **Banja Luka** formation, not placed in this sector in 1992: BB2 printed
+  p.330 names **"the 19th at Donji Vakuf and the 22nd at Mount Vlašić"** as Vrbas 92's flank brigades. The
+  16th is the actual t35 taker only because of engine availability after Corridor — the operation's own
+  comment concedes this (`pre_planned_operations.ts:1036-1039`).
+- Personnel does **not** alter composition or equipment ratio: `buildBrigadeComposition`
+  (`recruitment_engine.ts:174-197`) is a function of equipment class × faction only.
+
+Conclusion: **a personnel adjustment is not the credible lever for this defect** — the local inputs are
+already at or below the record's band, and the load-bearing authoring problems are operational (roster
+composition, the authored `execution_attack_power_mult: 1.65`, queue timing), which the owner rule treats as
+operational/territorial authoring, not force inputs.
+
+Unresolved: no direct 1992 strength figure exists in the repo knowledge base for the 19th/31st; whether the
+31st was a formed brigade in April 1992 is not established; the exact 1992 role of the 22nd/5th is not
+attested.
+
+### 11.D Independent War-or-Game / Canon Reviewer — challenge
+
+The reviewer independently re-verified the load-bearing claims against the current runtime and the
+preserved artifacts. Verdicts: every load-bearing claim **CONFIRMED** except two immaterial phrasings —
+11.A's reason for the 19th/31st being inert (it said "not adjacent"; the correct reason is
+**non-participation**, `active_op_id=null`) and 11.B's "no capture-capable operation configured" (too
+strong: emergent capture-capable `sector_attack`s — Kotor Varoš t10, Bor t27, Sjever t29 — exist; none was
+routed **at this frontage** in the window). The reviewer's packet checks: no edit dictates control; the
+identified direction (a contingent capturing operation) could fail, be delayed or not launch; costs and
+defensive obligations are preserved; the historical question is not a painted-map target (the jan1993
+reference already matches at t39; the defect is chronological/realism); the reference/aggregation issues are
+documented, not concealed.
+
+**Missed lever: none that is genuinely in-scope.** The only force-sensitive alternative path,
+`tryCreateFromOpportunity` (`plan.ts:1287-1345`), is blocked by a live major op (`plan.ts:939-956`), loses
+to authored ops (`plan.ts:991-1006`) and empirically never chose this frontage early. A global VRS
+force buff to make it fire would be untargeted, unmeasured at 188w, would still misrepresent a **police
+(SJB) takeover** — which force parameters structurally cannot model — and would grant the cell's five
+Bosniak-majority settlements unsupported months.
+
+**Residual the reviewer flagged (recorded, not fixed):** `tests/donji_vakuf_no_authored_takeover.test.ts`
+robustly covers the **event catalogue** (all files, primary/additional/response effects, plus any effect
+mentioning a guarded cell) but does **not** cover `init_control` / `osid_control_overrides` initial-controller
+repainting, nor a newly authored operation targeting the town. If this lane reopens, that is the uncovered
+surface.
+
+### 11.E Decision — bottleneck, lever, and authority boundary
+
+| | |
+|---|---|
+| **Bottleneck** | Incorrect scenario/operation configuration: no capture-capable operation routed at the Donji Vakuf frontage in April–June 1992, compounded by force not selected/committed. |
+| **Not** | Combat capability (w5 probe 6.94), implementation defect, or insufficient historical force (local inputs at/below band). |
+| **In-scope force-level lever** | **None exists.** Personnel/equipment/readiness/cohesion/experience/officer-quality cannot create an operation; the 19th/31st are already at or below their credible strength; the 16th is capped and historically misplaced here. |
+| **Decision** | **No new calibration edit.** The withdrawal and its documentation stand. |
+| **Required change (reported, not implemented)** | A contingent, capturing operation for this frontage available Apr–Jun 1992 on an existing channel — a new triggered/pre-planned operation definition, or a change making the existing opportunity-plan branch viable there. This is an operation/configuration change, is **out of scope**, and needs separate authorization. |
+
+This is the packet's anticipated outcome: "do not try to represent an April action by strengthening a force
+that cannot act there until November … If the current configuration cannot provide one, report the precise
+operation/configuration change needed rather than forcing ownership or inflating troops in the wrong
+period."
+
+### 11.F Measurement disposition
+
+No candidate was produced, so **no fresh run was made and none is claimed.** `n403`'s recorded **701/712**
+remains the January comparison. The withdrawn tree's executable identity to `41a148bf9` (which produced
+`n403` clean) is confirmed independently: `git diff 41a148bf9 HEAD -- src/ data/scenarios/ data/source/`
+filtered to non-comment lines is **empty**. January calibration remains **OPEN**; 701/712 is a recorded
+figure on the restored configuration, not a new measurement, and meeting the minimum is not acceptance.
