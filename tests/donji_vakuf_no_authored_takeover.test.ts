@@ -146,6 +146,52 @@ describe('Donji Vakuf 1992 — the withdrawn takeover rows stay withdrawn', () =
     });
 });
 
+describe('Donji Vakuf 1992 — initial control is not repainted to bypass the action', () => {
+    // The owner rule bans "initial-control repainting used to bypass an in-campaign action" as
+    // explicitly as it bans an event grant, and `osid_control_overrides` is that route. The 2026-09-17
+    // closeout recorded this as an open residual: the event guard above does not cover it. It does now.
+    //
+    // SCOPED BY START DATE, not by file name. A scenario painted `apr1992` begins at or before the
+    // 17 April 1992 takeover, so the town must be RBiH at t0 and any RS repaint there would be the
+    // prohibited shortcut. Scenarios painted `jan1993` or `apr1995` begin after it, where RS ownership
+    // is correct history and an override is legitimate — those are not guarded here.
+    const SCENARIO_DIR = resolve(__dirname, '..', 'data', 'scenarios');
+
+    const apr1992Scenarios = readdirSync(SCENARIO_DIR)
+        .filter((f) => f.endsWith('.json'))
+        .sort()
+        .map((file) => {
+            try {
+                return { file, parsed: JSON.parse(readFileSync(resolve(SCENARIO_DIR, file), 'utf-8')) };
+            } catch {
+                return null;
+            }
+        })
+        .filter((entry): entry is { file: string; parsed: any } => entry !== null)
+        .filter((entry) => entry.parsed?.init_control === 'apr1992');
+
+    it('there are April-1992 scenarios to guard, so this suite cannot pass vacuously', () => {
+        expect(apr1992Scenarios.length).toBeGreaterThan(0);
+    });
+
+    it('no April-1992 scenario pre-paints a guarded Donji Vakuf cell through osid_control_overrides', () => {
+        const offenders: string[] = [];
+        for (const { file, parsed } of apr1992Scenarios) {
+            const overrides = parsed?.osid_control_overrides;
+            if (!overrides || typeof overrides !== 'object') continue;
+            for (const cell of GUARDED_CELLS) {
+                if (cell in overrides) {
+                    offenders.push(`${file} repaints ${cell} to ${overrides[cell]}`);
+                }
+            }
+        }
+        expect(
+            offenders,
+            'the town must be taken in campaign, not painted RS at t0 to close the mismatch',
+        ).toEqual([]);
+    });
+});
+
 describe('Operation Donji Vakuf — the pre-experiment configuration is restored', () => {
     const op = ALL_PRE_PLANNED.find((candidate) => candidate.name === 'Operation Donji Vakuf');
     const sweep = op?.axes?.find((axis) => axis.axis_id === 'donji_vakuf_sweep');

@@ -940,11 +940,34 @@ force buff to make it fire would be untargeted, unmeasured at 188w, would still 
 (SJB) takeover** — which force parameters structurally cannot model — and would grant the cell's five
 Bosniak-majority settlements unsupported months.
 
-**Residual the reviewer flagged (recorded, not fixed):** `tests/donji_vakuf_no_authored_takeover.test.ts`
-robustly covers the **event catalogue** (all files, primary/additional/response effects, plus any effect
-mentioning a guarded cell) but does **not** cover `init_control` / `osid_control_overrides` initial-controller
-repainting, nor a newly authored operation targeting the town. If this lane reopens, that is the uncovered
-surface.
+**Residual the reviewer flagged — the repainting half is now CLOSED (2026-09-17).**
+`tests/donji_vakuf_no_authored_takeover.test.ts` robustly covers the **event catalogue** (all files,
+primary/additional/response effects, plus any effect mentioning a guarded cell). The reviewer noted it did
+**not** cover `init_control` / `osid_control_overrides` initial-controller repainting, nor a newly authored
+operation targeting the town.
+
+**Repainting is now guarded.** The owner rule bans "initial-control repainting used to bypass an
+in-campaign action" as explicitly as it bans an event grant, and `osid_control_overrides` is that route —
+the 188-week scenario already carries 28 such overrides, one of them in this municipality
+(`op:donji_vakuf:jemanlici`, a cell that legitimately starts RS and is not guarded). Two assertions were
+added: no scenario whose map is painted `apr1992` may name `donji_vakuf_2`, `korenici`, `torlakovac_2` or
+`prusac_2` in `osid_control_overrides`, plus a non-vacuity check that such scenarios exist.
+
+**Scoped by start date, not by file name.** `init_control === 'apr1992'` means the scenario begins at or
+before the 17 April 1992 takeover, so the town must be RBiH at t0 and an RS repaint there is the prohibited
+shortcut. `jan1993_to_dayton.json` (`init_control: 'jan1993'`) and `apr1995_start.json` begin **after** it,
+where RS ownership is correct history and an override would be legitimate — those are deliberately not
+guarded. Seven `apr1992` scenarios are covered; none repaints a guarded cell today.
+
+**Falsified before being trusted**: injecting `"op:donji_vakuf:donji_vakuf_2": "RS"` into
+`apr1992_definitive_188w.json` fails the assertion by name, and the scenario file was restored to a clean
+diff afterwards. No simulation behaviour, scenario data or ownership writer was changed — this is a
+test-only guard.
+
+**Still uncovered:** a newly authored operation targeting the town. That one is deliberately left open,
+because an operation that *attempts* the town is exactly the legitimate repair this lane is looking for —
+guarding against it would forbid the fix along with the shortcut. The distinction that matters there is
+whether the operation can fail, and no static test can assert that; it belongs to review.
 
 ### 11.E Decision — bottleneck, lever, and authority boundary
 
