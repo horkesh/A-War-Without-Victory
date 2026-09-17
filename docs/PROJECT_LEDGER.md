@@ -5761,3 +5761,108 @@ geometry, checkpoint thresholds, baseline pins, preservation tags, the skipped b
 `gh-pages` and the viewer. **The January candidate remains 701/712 with eleven mismatches; Čardak's 1992
 capture and the closed Pješivac-Kula correction stay preserved; Vranjevići/Kružanj remains UNRESOLVED and
 was outside this task.**
+
+## 2026-09-17 — Donji Vakuf early sequence corrected: the town's takeover moves from a post-Jajce sweep to May 1992; jan1993 701 → 702/712
+
+**Task.** Correct the misplaced early Donji Vakuf sequence using specific historical evidence and existing
+simulation mechanisms. Owner packet with three new ICTY sources. Full record:
+[Prusac/Donji Vakuf report §9](40_reports/20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md);
+[CALIBRATION_MASTER §J](40_reports/CALIBRATION_MASTER.md); change specification (written **before** any
+edit) and evidence [`logs/donji-vakuf-early-sequence-20260917/`](../logs/donji-vakuf-early-sequence-20260917/).
+
+**The premise that was wrong.** `op:donji_vakuf:donji_vakuf_2` — the cell carrying the town — was the
+fourth objective of a six-objective post-Jajce sweep and was captured at **t35 (7 December 1992)**. The
+town was Serb-held from **17 April 1992**: "The Serb SJB of Donji Vakuf was set up on 17 April 1992 and
+took control of the entire town the same day" (ICTY **Stanišić & Župljanin** TJ Vol I **¶238**;
+**Krajišnik** TJ **¶438**). Balkan Battlegrounds independently has Vrbas 92's southern axis running "from
+the direction of **Serb-held** Donji Vakuf (Srbobran)" with "the **19th at Donji Vakuf**" guarding its
+flank (BB2 printed p.330) — the town was the corps' own springboard, and the engine had the VRS conquer
+its own rear area five months late.
+
+**All four packet anchors verified against the sources themselves.** Town **17 April** (¶238/¶438);
+**Korenići 21 May** — 18 Donji Vakuf Serb police + 12 Banja Luka CSB, Šatara: "no great resistance" (¶242);
+**Torlakovac 3 June** — Serb police and VRS, "no serious resistance", villagers fled (¶242);
+**Prusac 17 August — FAILED**: "by nightfall, after hand-to-hand combat, the Serbs had to return to their
+original positions" (¶242), with the RS MUP's own admission in Exhibit **P1757** (4 October 1993) read into
+the **Brđanin** transcript of 3 March 2003, pp. 15031–15034: "not successful because of poor command and
+preparation."
+
+**Source independence checked, and the answer is no.** Krajišnik ¶438 (fn 986 = P758.F), Stanišić ¶238
+(fn 580–581 = P1799) and Brđanin P1757 all trace to the **same** SJB Srbobran letter to the Banja Luka CSB
+of **4 October 1993** — one document carried by three judicial vehicles, **not** three corroborations. The
+village dates rest on a different record (Šatara's CSB reports; Adjudicated Facts 1154/1155 with P1929).
+The municipality-wide summary ("took control of the territory of Donji Vakuf", May–September) is the SJB's
+**own report** and is contradicted at village level, inside the same paragraph, by the failed Prusac
+attack; the village-specific finding governs.
+
+**Mechanism — the event catalogue, because the obvious alternatives are DEAD.** Established by
+`tools/hooks/whowrites.mjs political_controllers` plus call-site checks, not inference:
+`detectOffensiveParamilitaryTargets` has **no production call site** (tests only — the
+`offensive-paramilitary-detect` step named in `SPATIAL_CONTEXT_DESIGN_SPEC.md` does not exist in
+`war_phases.ts`), and `early-control-flip` is **stubbed** ("Peace phase no longer performs control flips";
+`runControlFlip` is never called). The JNA-phantom `capture_osids` path is wired but writes control
+**unconditionally** — rejected, as it would guarantee an outcome on a date and mean inventing a formation
+for a police takeover. **Used instead:** three additive rows in `data/scenarios/events/war_1992.json` on
+the existing `control_change` effect (`mechanism: 'event'`), following the `battle_of_the_barracks_tuzla`
+precedent, each with a **substantive predicate** — so none is a calendar event manufacturing control.
+
+**Two limitations stated, not worked around.** (1) A *contingent* April-1992 capture by 1KK regulars is
+unschedulable: brigades attack only through a `CorpsOperation` and the corps' single sequential slot is
+held by Prijedor → Corridor → Jajce across the whole window; moving DV up the queue is the reverted
+`n1145` regression. (2) `donji_vakuf_2` is one scalar over **six** settlements and only the **town** carries
+the 17 April date, so the row opens at **turn 5** — the start of the documented municipality-wide
+May–September window — rather than granting Blagaj, Ponjavići, Rastičevo, Rudina and Vlađevići four
+unsupported months. **The town's own 17 April date is still not represented exactly; that is a residual of
+the scalar cell, not a fix.**
+
+**Changed.** `data/scenarios/events/war_1992.json` — `donji_vakuf_serb_takeover_1992` (turn 5–25,
+`faction_controls_municipality RS donji_vakuf 0.5`), `donji_vakuf_korenici_1992` (turn 7–25) and
+`donji_vakuf_torlakovac_1992` (turn 9–25), the latter two requiring the first **and** `territory_control` of
+the town; each carries its `control_change` in the primary `effect` slot only, because `collectEffects()`
+applies `[effect, ...effects]`. `src/sim/combat/pre_planned_operations.ts` — `op:donji_vakuf:donji_vakuf_2`
+removed from the `donji_vakuf_sweep` objective list and the block comment corrected (its roster authority
+"BB1 p.498" is printed folio **461**, Appendix G, *"Skeleton Bosnian Serb Army Order of Battle, JULY
+1995"*). `tests/event_timeline_integrity.test.ts` — pinned catalogue count 158 → **161**, reason in the
+test name; the file-sorted-by-`turn_min` invariant caught the append and the rows were **moved into sorted
+position rather than the rule relaxed**. New `tests/donji_vakuf_early_sequence.test.ts`, 12 assertions,
+including a standing guard that **no event anywhere may grant `prusac_2` to RS**.
+
+**Measured sequence (n404).** `donji_vakuf_2` **t5** [event] · `korenici` **t7** [event] · `torlakovac_2`
+**t9** [event] · `oborci_2` **t15** [paramilitary rear-pocket — **emergent, not authored**: the cell became
+a surrounded pocket once its neighbours flipped] · `prusac_2` **t32** [combat,
+`rs_19th_krajina_light_infantry`]. Control events by mechanism: n403 121 (33/87/1) → n404 122 (35/83/4).
+
+**Results.** `n404`, reproduced **byte-identically** as `n405` (`weekly_report.jsonl` and `final_save.json`
+`cmp`-identical; identical `verify_checkpoints` output). **jan1993 701 → 702/712**; anchors **31/31**;
+`consistency_failures` **0**; `kw_ratio` 3.931 → 3.957 (in band); `stranded_brigades` 15 in both.
+**Cell by cell, not net: FIXED 1** (`op:donji_vakuf:prusac_2`) · **NEWLY INTRODUCED 0** · **CARRIED 10**.
+Preserved exactly: **Čardak** t23 = 1992-09-14, **Pješivac-Kula** t15 RS→HRHB, **Hatelji** RS — all MATCH;
+**Vranjevići** t2 unchanged, still UNRESOLVED. 31 consumed inputs, **exactly one differs**
+(`war_1992.json`); n404/n405 ran `git_dirty: true`.
+
+**What it does NOT prove — three residuals, none hidden.** (1) **The Prusac +1 is a coincidental match,
+not validation.** The 17 August attack failed and no 1992 Serb capture is established; the model now agrees
+with a reference the evidence does not vouch for. It was **not engineered** — no Prusac event, objective,
+multiplier or date. The January reference is **unchanged** and **no reference correction is proposed**: a
+failed August attack is not proof of January ownership either way, and nothing is established for Fakići,
+Guvna or Potkraj. The 1994 Prusac question stays with its later checkpoint. (2) **Op Jajce shifted one turn
+earlier** — `jajce_3` t26 (1992-10-05) against the historical **29 October 1992**, error ~17 → ~24 days.
+Emergent, not authored; Jajce's definition, timing and queue position are untouched, and the Prusac result
+does not depend on it. Recorded as a residual that must not grow. (3) **The documented HRHB western-Bosnia
+cascade site is unmeasured** — the operation completes t32 instead of t43, freeing five 1KK brigades ~11
+turns early, and `life_lessons/calibration.md` records that this shape damaged Šipovo/Glamoč/Grahovo/
+Mrkonjić/Drvar **visibly only at 188 weeks**. The packet waived a new campaign, so the site is
+**accepted-unmeasured, not cleared**. A knock-on also exists at `op:kotor_varos:kotor_varos_2` (combat t13
+→ paramilitary t14, same end owner, still matching).
+
+**Validation.** Definitive 188-week scenario with a duration override **through t39** (not the 40-week
+scenario), twice. Focused pre-campaign set 10 files / 115 tests green, including the new
+`donji_vakuf_early_sequence` (12) and the event-catalogue integrity suite. `npx tsc --noEmit` clean.
+`§8.7`'s proposed all-four-checkpoint validation requirement was **replaced by this packet's scope
+clarification**, with its historical text preserved.
+
+**Not changed.** Initial control (the town was legally RBiH on 6 April 1992 — the takeover is 11 days
+later, so `t0 = RBiH` is correct and stays), any checkpoint reference, attack multipliers, combat values,
+reservation policy, probe behaviour, the 1KK queue order, Op Jajce's definition, operational-cell geometry,
+OOB, baseline pins, preservation tags, `main`, `gh-pages` and the viewer. **The January minimum stays 700;
+702/712 meets it and meeting it is not acceptance. Overall January calibration remains OPEN.**

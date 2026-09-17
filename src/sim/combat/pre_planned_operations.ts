@@ -1001,10 +1001,36 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
-        // Operation Donji Vakuf — 1KK secures the Vrbas valley south of Jajce.
-        // Historically the 19th and 31st Krajina brigades were organic to Donji Vakuf
-        // and the 16th Krajina Motorized was a 1KK formation (BB1 p.498). The 16th
-        // supplies the heavy follow-through after its preceding Corridor commitment.
+        // Operation Donji Vakuf — 1KK pressure in the Vrbas valley south of Jajce.
+        //
+        // THE TOWN IS NOT AN OBJECTIVE OF THIS OPERATION, AND MUST NOT BE READDED.
+        // `op:donji_vakuf:donji_vakuf_2` carries the town of Donji Vakuf, and the town was
+        // Serb-held from 17 April 1992 — five months before this operation can even inject.
+        // The Serb SJB was set up that day and "took control of the entire town the same
+        // day" (ICTY Stanišić & Župljanin TJ Vol I §238; Krajišnik TJ §438, both resting on
+        // the SJB Srbobran report to the Banja Luka CSB of 4 October 1993). Balkan
+        // Battlegrounds independently has Vrbas 92's southern axis running "from the
+        // direction of Serb-held Donji Vakuf (Srbobran)" with "the 19th at Donji Vakuf"
+        // guarding its flank (BB2 printed p.330) — the town was this corps' OWN springboard
+        // for Jajce, not a prize taken afterwards. Listing it here had the VRS capture its
+        // own rear area in December 1992. The takeover now runs on its documented dates
+        // through the event catalogue (`donji_vakuf_serb_takeover_1992` and the two village
+        // rows that require it) in `data/scenarios/events/war_1992.json`.
+        //
+        // The 1KK/30th Division halted on 18 November 1992 after erasing the Karaula
+        // salient — "Here the VRS halted, apparently content with its gains" (BB2 p.332).
+        // Nothing here should grow back into a post-Jajce conquest sweep.
+        //
+        // ROSTER. The 19th and 31st were organic to Donji Vakuf — HQ Srbobran (Donji Vakuf)
+        // in the June 1992–October 1995 order of battle at BB2 printed p.277-279, and the
+        // 19th is placed there in 1992 by BB2 p.330. (The previous citation, "BB1 p.498",
+        // is a scan index whose printed folio is 461: Appendix G, "Skeleton Bosnian Serb
+        // Army Order of Battle, JULY 1995" — a 1995 table standing in for a 1992
+        // deployment. Do not date 1992 rosters from it.) The 16th Krajina Motorized is a
+        // Banja Luka formation (same table) and supplies the heavy follow-through after its
+        // preceding Corridor commitment; that is engine availability, not a sourced 1992
+        // posting for this sector.
+        //
         // Reserve the authored group while Jajce is still resolving so the distant
         // 16th can complete its measured eight-hop concentration before this queued
         // slot opens; control still changes only through the ordinary battle resolver.
@@ -1013,13 +1039,14 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         //
         // Fires after Op Jajce completes (queued 4th in 1KK chain).
         // Staging pribeljci_2: Sipovo municipality (RS initial + RS painted), adjacent to
-        // torlakovac_2 — first objective in the sweep. grdovo (Jajce) would also be
+        // torlakovac_2 — first objective in the chain. grdovo (Jajce) would also be
         // adjacent but starts HRHB; pribeljci_2 is always RS and safe.
         //
-        // Objectives: the six-settlement sweep follows the town breakthrough directly
-        // into Korenići before turning to Prusac. This preserves the heavy spearhead's
-        // ordinary town–Korenići combat edge instead of leaving the terminal defender
-        // four turns to recover while the spearhead marches through Prusac.
+        // Torlakovac and Korenići stay listed as a fallback only. Their documented captures
+        // are 3 June and 21 May 1992 (Stanišić TJ §242) and the event rows resolve them
+        // then; when they do, this operation auto-advances past them exactly as it already
+        // does past babin_potok_2, which starts RS. Consecutive objectives are not required
+        // to be adjacent — korenici→prusac_2 already routes through RS-held Jemanlići.
         // Removed from triggered Op Jajce (vrs_2nd_krajina) — 1KK handles DV.
         corps: 'vrs_1st_krajina',
         faction: 'RS',
@@ -1044,13 +1071,14 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'rs_16th_krajina_motorized' as FormationId,
                 ],
                 // pribeljci_2 (RS) is adjacent to torlakovac_2 — valid staging → first obj chain.
-                // torlakovac_2 → babin_potok_2 → oborci_2 → donji_vakuf_2 →
-                // korenici; Jemanlići then provides the shared approach to Prusac.
+                // torlakovac_2 → babin_potok_2 → oborci_2 → korenici; Jemanlići then
+                // provides the shared approach to Prusac. The town cell is deliberately
+                // absent — see the block comment above; it is Serb-held from April 1992 and
+                // the brigades traverse it, they do not take it.
                 objectives: [
                     'op:donji_vakuf:torlakovac_2',
                     'op:donji_vakuf:babin_potok_2',
                     'op:donji_vakuf:oborci_2',
-                    'op:donji_vakuf:donji_vakuf_2',
                     'op:donji_vakuf:korenici',
                     'op:donji_vakuf:prusac_2',
                 ],

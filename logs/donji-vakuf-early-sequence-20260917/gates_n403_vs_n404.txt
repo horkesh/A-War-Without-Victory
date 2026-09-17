@@ -1,0 +1,138 @@
+# verify_checkpoints + engine_health_gate, both runs. NOTE: apr1994/apr1995/oct1995 on a 39-week
+# run are the t39 state replayed against later references — NOT REACHED, not measurements.
+
+===== n403 verify =====
+CHECKPOINT SCORES  (replayed against CURRENT painted references)
+  jan1993   701 / 712
+  apr1994   666 / 712
+  apr1995   658 / 712
+  oct1995   569 / 712
+
+ENCLAVE GUARD (canon H1.8) — holds
+  Gorazde               RBiH RBiH RBiH RBiH ** HOLDS **
+                                            UNCONTESTED (0 battles as target)
+  Bihac                 RBiH RBiH RBiH RBiH ** HOLDS **
+                                            UNCONTESTED (0 battles as target)
+  Teocak                RBiH RBiH RBiH RBiH ** HOLDS **
+                                            CONTESTED-AND-HELD (2 battles)
+  Sarajevo-centar       RBiH RBiH RBiH RBiH ** HOLDS **
+                                            UNCONTESTED (0 battles as target)
+  Sarajevo-stari grad   RBiH RBiH RBiH RBiH ** HOLDS **
+                                            UNCONTESTED (0 battles as target)
+  Sarajevo-novo         RBiH RBiH RBiH RBiH ** HOLDS **
+                                            UNCONTESTED (0 battles as target)
+  Sarajevo-novi grad    RBiH RBiH RBiH RBiH ** HOLDS **
+                                            UNCONTESTED (0 battles as target)
+
+ENCLAVE GUARD (canon H1.8) — falls (two-sided: RBiH through w156, RS at w188)
+  Srebrenica            RBiH RBiH RBiH RBiH *** DID NOT FALL — event-owned outcome suppressed; panel matter ***
+  Zepa                  RBiH RBiH RBiH RBiH *** DID NOT FALL — event-owned outcome suppressed; panel matter ***
+
+  guard cells compared: 9 (7 holds + 2 falls)
+
+EASTERN CAPTURE PROVENANCE — Birač / Majevica / north Podrinje
+  no unattributed/off-operation capture stops across 9 municipalities ** CLEAN **
+  1 operation-owned eastern capture(s) — CALIBRATION VARIANCE, not by itself an engine defect:
+      op:bratunac:jezestica_2  t14  arbih_2nd_corps:Srebrenica–Cerska Link-Up:t4
+  4 never-captured cell(s) still RBiH at w188 — CALIBRATION (1995 window), not an engine defect:
+      op:bratunac:pobudje_2   jan1993 reference: RBiH  <- engine is CORRECT for the active checkpoint
+      op:kalesija:seher_2   jan1993 reference: RS
+      op:vlasenica:cerska_2   jan1993 reference: RBiH  <- engine is CORRECT for the active checkpoint
+      op:vlasenica:pomol_2   jan1993 reference: RBiH  <- engine is CORRECT for the active checkpoint
+
+OPERATION FARZ / "Uragan 95" — the positive half; a fix that breaks this is the WRONG fix
+  P1 cells — all four Ozren cells must be RBiH by w188
+    Vozuća (13 Sep 1995)       RS  *** NOT TAKEN — 2nd/3rd Corps suppressed; this is not a pass ***
+    Maglaj — donja bočinja     RS  *** NOT TAKEN — 2nd/3rd Corps suppressed; this is not a pass ***
+    Maglaj — gornja bočinja    RS  *** NOT TAKEN — 2nd/3rd Corps suppressed; this is not a pass ***
+    Spreča / north Ozren       RS  *** NOT TAKEN — 2nd/3rd Corps suppressed; this is not a pass ***
+  P-A discriminator — the 2nd-Corps signature cell, captured by 2nd Corps, in the window
+    never captured  *** FAIL — needs an arbih_2nd_corps capture at t>=160 ***
+  P-B universal guard — EVERY late 2nd-Corps capture must be reference-warranted
+    0 late 2nd-Corps capture(s) examined
+    (none — P-A is what requires 2nd Corps to act at all)
+  compared: 9 municipalities (negative) + 4 cells (positive)
+
+HRHB WESTERN-BOSNIA CASCADE (documented regression site) — at oct1995
+  bosansko_grahovo 0/4  sipovo 0/5  glamoc 0/6  titov_drvar 0/3  bosanski_petrovac 0/8  mrkonjic_grad 0/6  kljuc 2/7  sanski_most 1/10
+  cascade matched: 3 across 8 municipalities
+  (no --cascade-base supplied — reported, not gated)
+
+RESULT: GUARD BREACHED — §6 panel matter. Do not merge.
+
+===== n404 verify =====
+CHECKPOINT SCORES  (replayed against CURRENT painted references)
+  jan1993   702 / 712
+  apr1994   667 / 712
+  apr1995   659 / 712
+  oct1995   568 / 712
+
+ENCLAVE GUARD (canon H1.8) — holds
+  Gorazde               RBiH RBiH RBiH RBiH ** HOLDS **
+                                            UNCONTESTED (0 battles as target)
+  Bihac                 RBiH RBiH RBiH RBiH ** HOLDS **
+                                            UNCONTESTED (0 battles as target)
+  Teocak                RBiH RBiH RBiH RBiH ** HOLDS **
+                                            CONTESTED-AND-HELD (2 battles)
+  Sarajevo-centar       RBiH RBiH RBiH RBiH ** HOLDS **
+                                            UNCONTESTED (0 battles as target)
+  Sarajevo-stari grad   RBiH RBiH RBiH RBiH ** HOLDS **
+                                            UNCONTESTED (0 battles as target)
+  Sarajevo-novo         RBiH RBiH RBiH RBiH ** HOLDS **
+                                            UNCONTESTED (0 battles as target)
+  Sarajevo-novi grad    RBiH RBiH RBiH RBiH ** HOLDS **
+                                            UNCONTESTED (0 battles as target)
+
+ENCLAVE GUARD (canon H1.8) — falls (two-sided: RBiH through w156, RS at w188)
+  Srebrenica            RBiH RBiH RBiH RBiH *** DID NOT FALL — event-owned outcome suppressed; panel matter ***
+  Zepa                  RBiH RBiH RBiH RBiH *** DID NOT FALL — event-owned outcome suppressed; panel matter ***
+
+  guard cells compared: 9 (7 holds + 2 falls)
+
+EASTERN CAPTURE PROVENANCE — Birač / Majevica / north Podrinje
+  no unattributed/off-operation capture stops across 9 municipalities ** CLEAN **
+  1 operation-owned eastern capture(s) — CALIBRATION VARIANCE, not by itself an engine defect:
+      op:bratunac:jezestica_2  t14  arbih_2nd_corps:Srebrenica–Cerska Link-Up:t4
+  4 never-captured cell(s) still RBiH at w188 — CALIBRATION (1995 window), not an engine defect:
+      op:bratunac:pobudje_2   jan1993 reference: RBiH  <- engine is CORRECT for the active checkpoint
+      op:kalesija:seher_2   jan1993 reference: RS
+      op:vlasenica:cerska_2   jan1993 reference: RBiH  <- engine is CORRECT for the active checkpoint
+      op:vlasenica:pomol_2   jan1993 reference: RBiH  <- engine is CORRECT for the active checkpoint
+
+OPERATION FARZ / "Uragan 95" — the positive half; a fix that breaks this is the WRONG fix
+  P1 cells — all four Ozren cells must be RBiH by w188
+    Vozuća (13 Sep 1995)       RS  *** NOT TAKEN — 2nd/3rd Corps suppressed; this is not a pass ***
+    Maglaj — donja bočinja     RS  *** NOT TAKEN — 2nd/3rd Corps suppressed; this is not a pass ***
+    Maglaj — gornja bočinja    RS  *** NOT TAKEN — 2nd/3rd Corps suppressed; this is not a pass ***
+    Spreča / north Ozren       RS  *** NOT TAKEN — 2nd/3rd Corps suppressed; this is not a pass ***
+  P-A discriminator — the 2nd-Corps signature cell, captured by 2nd Corps, in the window
+    never captured  *** FAIL — needs an arbih_2nd_corps capture at t>=160 ***
+  P-B universal guard — EVERY late 2nd-Corps capture must be reference-warranted
+    0 late 2nd-Corps capture(s) examined
+    (none — P-A is what requires 2nd Corps to act at all)
+  compared: 9 municipalities (negative) + 4 cells (positive)
+
+HRHB WESTERN-BOSNIA CASCADE (documented regression site) — at oct1995
+  bosansko_grahovo 0/4  sipovo 0/5  glamoc 0/6  titov_drvar 0/3  bosanski_petrovac 0/8  mrkonjic_grad 0/6  kljuc 2/7  sanski_most 1/10
+  cascade matched: 3 across 8 municipalities
+  (no --cascade-base supplied — reported, not gated)
+
+RESULT: GUARD BREACHED — §6 panel matter. Do not merge.
+
+===== n403 health (gate lines) =====
+  [PASS] zero_eligible_ops  0 <= 4
+  [PASS] invalid_op_weeks   0 <= 4
+  [PASS] ghost_destroyed    0 <= 4
+  [FAIL] stranded_brigades  15 <= 3
+  [FAIL] matched_osids      569 >= 655
+  [PASS] consistency_failures 0 <= 3 (validate_run_consistency)
+  [PASS] kw_ratio           3.931 in [3.369, 4.559]
+
+===== n404 health (gate lines) =====
+  [PASS] zero_eligible_ops  0 <= 4
+  [PASS] invalid_op_weeks   0 <= 4
+  [PASS] ghost_destroyed    0 <= 4
+  [FAIL] stranded_brigades  15 <= 3
+  [FAIL] matched_osids      568 >= 655
+  [PASS] consistency_failures 0 <= 3 (validate_run_consistency)
+  [PASS] kw_ratio           3.957 in [3.369, 4.559]

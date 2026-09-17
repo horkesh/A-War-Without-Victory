@@ -283,7 +283,10 @@ describe('Event timeline historical integrity', () => {
         }
     });
 
-    it('total event count is 158 after retiring the Lukavac political event', () => {
-        expect(allEvents.length).toBe(158);
+    it('total event count is 161 after adding the three Donji Vakuf 1992 takeover rows', () => {
+        // 158 after retiring the Lukavac political event; +3 for the ICTY-sourced Donji Vakuf
+        // sequence (town / Korenići / Torlakovac), which moved that municipality's takeover out
+        // of the post-Jajce operation sweep and onto its documented 1992 dates.
+        expect(allEvents.length).toBe(161);
     });
 });

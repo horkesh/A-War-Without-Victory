@@ -3772,6 +3772,55 @@
     }
   },
   {
+    "id": "donji_vakuf_serb_takeover_1992",
+    "title": "Donji Vakuf — the Serb SJB takes the town",
+    "narrative": "The municipality's police station has been splitting since January. The Serb half of the force signs its own solemn declaration, the Banja Luka CSB backs the project, and the separate Serb SJB stands up and takes the town in a single day. There is no battle for it. A general Serb mobilisation follows in May, the Muslim population is told to hand in its weapons, and a flag goes up over the municipality building. Donji Vakuf becomes Srbobran, and the Vrbas valley road north to Jajce becomes a Serb road.",
+    "source_note": "Dates and institutional sequence follow the ICTY trial-chamber findings cited below. The row records an institutional takeover of the town only; it asserts no casualty figures, no equipment quantities and no claim about the surrounding villages, whose evidence is separate.",
+    "historical_source": "ICTY Prosecutor v. Stanisic & Zupljanin (IT-08-91-T), Trial Judgment 27 March 2013, Volume I, paras 235-239 and 242; ICTY Prosecutor v. Krajisnik (IT-00-39-T), Trial Judgment 27 September 2006, paras 438-439. Both rest on the SJB Srbobran report to the Banja Luka CSB of 4 October 1993 (P1799 / P758.F) and are one documentary source, not two.",
+    "source_tier": "icty_icj_un",
+    "category": "military",
+    "trigger": {
+      "turn_min": 5,
+      "turn_max": 25,
+      "phase": "war",
+      "condition": {
+        "type": "faction_controls_municipality",
+        "faction": "RS",
+        "municipality": "donji_vakuf",
+        "threshold": 0.5
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "control_change",
+      "faction": "RS",
+      "osids": [
+        "op:donji_vakuf:donji_vakuf_2"
+      ]
+    },
+    "effects": [
+      {
+        "kind": "narrative",
+        "text": "The Serb SJB of Donji Vakuf takes over the town. The municipality is renamed Srbobran and attached to the Autonomous Region of Krajina."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RS",
+        "dimension": "military_credibility",
+        "delta": 2
+      },
+      {
+        "faction": "RBiH",
+        "dimension": "internal_cohesion",
+        "delta": -3
+      }
+    ],
+    "sets_flags": {
+      "donji_vakuf_serb_sjb_control": true
+    }
+  },
+  {
     "id": "battle_of_the_barracks_tuzla",
     "title": "Battle of the Barracks — Tuzla",
     "narrative": "The Tuzla column incident: JNA's 92nd Motorized Brigade is ambushed on Brčanska Malta while withdrawing from the city. In the chaos, TDF forces seize the barracks complex with its armored vehicles and artillery depot. Over 50 JNA soldiers are killed — the bloodiest barracks seizure in Bosnia. The captured equipment transforms 2nd Corps capability.",
@@ -4064,6 +4113,45 @@
     }
   },
   {
+    "id": "donji_vakuf_korenici_1992",
+    "title": "Donji Vakuf — the police move on Korenići",
+    "narrative": "Eighteen men of the Donji Vakuf Serb police and twelve from the Banja Luka security centre go up to Korenići. The station commander's report back to Banja Luka is brief and satisfied: there was no great resistance. It is the first of the outlying villages to change hands, and it does not take a brigade to do it.",
+    "source_note": "The attack, its date, its composition and the reporting officer are taken from the trial-chamber finding cited below. No casualty figures are asserted.",
+    "historical_source": "ICTY Prosecutor v. Stanisic & Zupljanin (IT-08-91-T), Trial Judgment 27 March 2013, Volume I, para 242 (21 May 1992; 18 Donji Vakuf Serb police and 12 Banja Luka CSB members; Jovan Satara reporting 'no great resistance by Muslim extremists').",
+    "source_tier": "icty_icj_un",
+    "category": "military",
+    "trigger": {
+      "turn_min": 7,
+      "turn_max": 25,
+      "phase": "war",
+      "requires_events": [
+        "donji_vakuf_serb_takeover_1992"
+      ],
+      "condition": {
+        "type": "territory_control",
+        "osid": "op:donji_vakuf:donji_vakuf_2",
+        "faction": "RS"
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "control_change",
+      "faction": "RS",
+      "osids": [
+        "op:donji_vakuf:korenici"
+      ]
+    },
+    "effects": [
+      {
+        "kind": "narrative",
+        "text": "Korenići changes hands to a police action, not a brigade assault. The report to Banja Luka records no great resistance."
+      }
+    ],
+    "sets_flags": {
+      "donji_vakuf_korenici_taken": true
+    }
+  },
+  {
     "id": "drina_cleansing_decision_1992",
     "title": "The Drina Valley Question",
     "narrative": "Your forces control much of the Drina valley. Reports from the field describe paramilitary units conducting operations against the civilian population. Zvornik, Višegrad, Foča — the names are becoming synonymous with displacement and worse. Your commanders await guidance. How the Drina valley is secured will define how the world sees your cause.",
@@ -4246,6 +4334,52 @@
     ],
     "sets_flags": {
       "drina_cleansing_occurred": true
+    }
+  },
+  {
+    "id": "donji_vakuf_torlakovac_1992",
+    "title": "Donji Vakuf — Torlakovac and the outlying villages",
+    "narrative": "Serb police and army go into Torlakovac together. Again the report says no serious resistance; the villagers leave. Through the summer the same pattern works its way round the municipality — Sokolina's mosque burns in June, and by late summer an armed formation is moving village to village, Doganovci among them, firing into houses that no one defends.",
+    "source_note": "The 3 June attack and its characterisation are the trial-chamber finding cited below; Doganovci and Sokolina are named in the same judgment and fall inside this operational cell. The row records the change of hands only.",
+    "historical_source": "ICTY Prosecutor v. Stanisic & Zupljanin (IT-08-91-T), Trial Judgment 27 March 2013, Volume I, para 242 (3 June 1992, Torlakovac attacked by Serb police and the VRS, 'no serious resistance' by villagers who fled; late summer 1992, armed Bosnian Serb formation at Doganovci) and para 249 (Sokolina mosque set on fire, June 1992).",
+    "source_tier": "icty_icj_un",
+    "category": "military",
+    "trigger": {
+      "turn_min": 9,
+      "turn_max": 25,
+      "phase": "war",
+      "requires_events": [
+        "donji_vakuf_serb_takeover_1992"
+      ],
+      "condition": {
+        "type": "territory_control",
+        "osid": "op:donji_vakuf:donji_vakuf_2",
+        "faction": "RS"
+      }
+    },
+    "once": true,
+    "effect": {
+      "kind": "control_change",
+      "faction": "RS",
+      "osids": [
+        "op:donji_vakuf:torlakovac_2"
+      ]
+    },
+    "effects": [
+      {
+        "kind": "narrative",
+        "text": "Torlakovac is taken and its people leave. The villages along the valley follow through the summer."
+      }
+    ],
+    "dimension_shifts": [
+      {
+        "faction": "RBiH",
+        "dimension": "internal_cohesion",
+        "delta": -2
+      }
+    ],
+    "sets_flags": {
+      "donji_vakuf_torlakovac_taken": true
     }
   },
   {

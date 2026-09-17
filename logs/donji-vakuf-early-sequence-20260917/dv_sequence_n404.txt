@@ -1,0 +1,25 @@
+# Donji Vakuf local sequence, April 1992 -> January checkpoint — candidate n404
+# Reproduced byte-identically as n405. Turn N boundary = 1992-04-06 + 7N days.
+
+=== event rows fired (from weekly_report) ===
+  t  5 1992-05-11  donji_vakuf_serb_takeover_1992
+  t  7 1992-05-25  donji_vakuf_korenici_1992
+  t  9 1992-06-08  donji_vakuf_torlakovac_1992
+
+=== control history, all op:donji_vakuf cells ===
+  op:donji_vakuf:babin_potok_2       t0=RS    (no control events)
+  op:donji_vakuf:donji_vakuf_2       t0=RBiH  t5 1992-05-11 RBiH->RS [event]
+  op:donji_vakuf:jemanlici           t0=RS    (no control events)
+  op:donji_vakuf:komar_2             t0=RS    (no control events)
+  op:donji_vakuf:korenici            t0=RBiH  t7 1992-05-25 RBiH->RS [event]
+  op:donji_vakuf:kutanja             t0=RS    (no control events)
+  op:donji_vakuf:oborci_2            t0=RBiH  t15 1992-07-20 RBiH->RS [paramilitary]
+  op:donji_vakuf:pribraca_2          t0=RS    (no control events)
+  op:donji_vakuf:prusac_2            t0=RBiH  t32 1992-11-16 RBiH->RS [combat rs_19th_krajina_light_infantry]
+  op:donji_vakuf:torlakovac_2        t0=RBiH  t9 1992-06-08 RBiH->RS [event]
+
+=== Operation Donji Vakuf diagnostics ===
+  t 29 1992-10-26 phase=planning   obj=op:donji_vakuf:prusac_2          atk=0 bat=0 elig=0 caps=0 rec=null skipped=[] invalid=[]
+  t 30 1992-11-02 phase=execution  obj=op:donji_vakuf:prusac_2          atk=2 bat=1 elig=2 caps=1 rec=null skipped=[] invalid=[]
+  t 31 1992-11-09 phase=execution  obj=op:donji_vakuf:prusac_2          atk=0 bat=0 elig=0 caps=1 rec=null skipped=[] invalid=[]
+  t 32 1992-11-16 phase=recovery   obj=null                             atk=1 bat=1 elig=1 caps=2 rec=completed skipped=[] invalid=[]
