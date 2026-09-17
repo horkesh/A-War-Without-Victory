@@ -5216,9 +5216,30 @@ repeats n402/n403 (byte-identical; final-save SHA-256
 
 **Residual set.** The candidate's `historical_fit.checkpoints[0]` (week 39, jan1993) records **701/712**
 and names exactly **11** mismatches: ten **frozen turn-0 discrepancies with no control event** and one
-combat-touched cell, `op:mostar:vranjevici_2`. (`prusac_2` is one of the ten — initial RBiH, zero control
-events; the earlier "RS running late through the Donji Vakuf cascade" narrative in the n399 entry is
-**not reproduced** by the n399/n401 artifacts and is flagged, not fixed.)
+combat-touched cell, `op:mostar:vranjevici_2`.
+
+**Prusac.** `op:donji_vakuf:prusac_2`: **Open January non-capture; earlier comparative timing explanation
+requires independent verification.** Zero control events do not refute a delay in the preceding
+operation. No separate Prusac investigation in this task.
+
+**Historical verification (read-only; completed 2026-09-17).** The operation comments are wrong on two
+counts. (1) **Page:** the Mostar passage is **printed p.156** (repo KB `BB1_p0192.json`, **PDF page 192**;
+BB1 printed = PDF − 36) and printed p.157 (`BB1_p0193.json`, PDF 193) covers the June clearance — NOT
+"BB1 p.193". The supplied "image 193" carries printed p.156 content; its index runs one ahead of the repo
+PDF index. (2) **Actor:** BB1 p.156 says the JNA/Bosnian Serbs **occupied** Mt. Hum, and the **Bosnian
+Croats captured Mt. Hum on 23 May 1992**; the comment "JNA garrison seizes Podveležje/Hum" reverses the
+actor, and "Podveležje" appears in BB only in a 1994 Nevesinje context (`BB2_p0515`, printed p.496). The
+"held throughout war" claim (`triggered_operations.ts:223-225`) is unsupported: BB2 printed pp.360–361
+records HVO/ARBiH taking **Mt. Velež on 16 June 1992**, the VRS **retaking it on 24 June**, then
+indecisive fighting through the summer and early November.
+
+**Geography.** `op:mostar:vranjevici_2` (76.5 km², 2,345 pop; Vranjevići, Kamena, Kokorina, Rabina, Žulja)
+lies SE of Mostar around/east of Blagaj toward the Nevesinje plateau. `op:mostar:kruzanj_2` (207.4 km²,
+2,002 pop; Banjdol, Kružanj, Podvelež, Hrušta, Zijemlje) spans the eastern city fringe (Banjdol, 43.35 N)
+to the remote Nevesinje-side plateau (Zijemlje, 43.46 N, Serb-majority). **Both aggregates straddle areas
+whose later controllers differed** — a single painted controller is an oversimplification regardless of
+colour. **No settlement-level source exists**: BB names none of the ten constituent settlements, so all
+control statements are area-level.
 
 **Reproduced cause.** `op:mostar:vranjevici_2` starts **RBiH** (matching the reference) and is taken
 **RS at t2** by the pre-planned `Operation Herzegovina` (`jna_herzegovina_command`) axis
@@ -5235,18 +5256,24 @@ commit `51e2862ea`**, recorded as an **owner determination** with no documentary
 override of Pyrrhic-panel review (`CALIBRATION_MASTER.md` 2026-08-24 entry). The comments predate the
 correction and are stale; **a stale comment is not authority to alter the reference.**
 
-**Classification.** Not an initial-state discrepancy (initial RBiH = reference RBiH) and not a missing
-recovery. It is an **inappropriate early loss relative to the current reference**, but because that
-reference is an unsourced owner override that contradicts the documentary basis of the axis (BB1 p.193,
-Mostar hills held by VRS; historian audit "mixed — needs per-OSID look"), the disposition is a
-**reference question requiring explicit review**, with a least-invasive engine correction available if
-RBiH is confirmed.
+**Classification (four-way).** **[SIM]** initial RBiH, t2 combat loss to RS, no recovery. **[HIST]** the
+early May seizure is plausible at area level (JNA/RS held the eastern high ground), and a June 1992
+HVO/ARBiH recovery is documented — but that recovery was **HVO/HV-led** ("ARBiH … at most a secondary
+role", BB1 printed p.157), so its post-recovery controller was HRHB, not RBiH; a 1992 recovery alone does
+not produce the reference. **[OPEN]** the two aggregates straddle areas whose later controllers differed
+(§Geography), and no source assigns control to any constituent settlement, so the check does not
+distinguish "missing recovery" from "aggregate/reference oversimplification". Not an initial-state
+discrepancy. Disposition: **reference question requiring explicit review.**
 
-**Proposal (not implemented).** If the RBiH reference stands: remove `op:mostar:vranjevici_2` and
-`op:mostar:kruzanj_2` from the `mostar_heights` objectives of the pre-planned `Operation Herzegovina`
-and from the triggered `Operation Herzegovina Consolidation` waypoint list, and correct the stale
-comments. **Do not** append Vranjevići to HVO `Operation Jackal`/HRHB — the January target is RBiH. No
-combat value to be touched; no combat defect established.
+**Proposal (withdrawn, not implemented).** The earlier proposal to remove the two objectives from
+`Operation Herzegovina` / the triggered `Operation Herzegovina Consolidation` is **withdrawn**: it would
+delete a plausible early RS phase without creating RBiH ownership, and would not address the aggregate
+span. Do not retain Kružanj to keep the axis non-empty, do not retire the JNA Mostar role, and do not
+append the cells to HRHB/Jackal. **No correction is ready.** The exact missing fact is a
+**settlement-level, sourced January 1993 control determination for each of the ten constituent
+settlements**, plus a decision on whether a cell may bundle settlements under different controllers
+(split/retarget vs delete). No reference, initial control, geometry, OOB, objective or combat value to be
+changed; no combat defect established.
 
 **Scope.** Read-only. Overall January calibration and `prusac_2` remain **OPEN**; no waiver. No push,
 `main` merge, baseline replacement or viewer publication. Report:
