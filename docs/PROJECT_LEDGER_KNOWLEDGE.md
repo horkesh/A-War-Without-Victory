@@ -5198,3 +5198,31 @@ had never satisfied; the enumerated list of creation paths was the thing worth g
 persistent wrong-looking constant as a tuning target: the 3/3 default was visible in saved
 operations the whole time and read as "the officer selector chose poorly" rather than "no
 selector ran". See the [January-1993 repair record](40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-january-only-operations-repair--2026-09-14).
+
+## 2026-09-17 — Keep the measured candidate distinct from the documentation HEAD
+
+Synchronizing records after a calibration change makes it easy to blur three different things: the
+**measured production source**, the **documentation commit**, and the **evidence**. A docs commit is not a
+new simulation measurement. State them separately — production candidate (e.g. `41a148bf9`), documentation
+HEAD (e.g. `0893bfa50` plus the sync commit), and the run that actually measured it (n403, `--weeks 39`,
+final-save SHA-256 `e3b6…`). Do not let a later documentation edit imply a re-measurement, and do not
+attribute a full-duration campaign's later-checkpoint outcomes to a candidate that was never run past its
+checkpoint.
+
+Three traps recurred here:
+- **A truncated candidate has NO later checkpoints.** `tools/verify_checkpoints.cjs` replays the terminal
+  control log against the later painted references and prints numbers (e.g. 666/658/569) that look like
+  later results. They are the t39 map scored against later references, not those weeks. Record the later
+  periods as **NOT REACHED**. Do not "fix" the tool for this; document the limitation.
+- **A stale source comment can reverse an actor and a page.** The Mostar comment said the JNA "seizes Hum"
+  and cited "BB1 p.193"; the printed folio is p.156, and BB records the *Croats* capturing Hum (23 May
+  1992) while the JNA/Serbs merely occupied it. Cite printed folios; keep repository PDF/KB indices
+  separate; do not apply one scan's page offset universally.
+- **A documentation-only change can still fail a check.** A live guard caps `COMMAND_BOARD.md` under
+  20,000 characters; an over-long status paragraph tripped it. Trim the prose — never raise the threshold
+  or bypass the check.
+
+Owner direction recorded in the calibration record: **later territorial outcomes do not veto a January
+correction** — without waiving determinism, valid state, legal movement/capture, population accounting,
+political permissions or command ownership. Evidence should live in the repo (`logs/<lane>/` for raw
+patches/logs plus a compact record), not only in chat or `%TEMP%`.

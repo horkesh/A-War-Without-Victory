@@ -221,9 +221,12 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
     },
     {
         // Herzegovina Consolidation — VRS secures Mostar hills + southern Konjic
-        // after Op Višegrad + Op Foča complete. Historically held throughout war
-        // (BB1 p.193 Mostar hills, BB2 p.514 Glavatičevo). Two separate axes
-        // with dedicated brigades (no sharing with Op Foča brigades).
+        // after Op Višegrad + Op Foča complete. Historical control of the Mostar
+        // hills is contested (Mt. Velež changed hands on 16 and 24 June 1992;
+        // BB1 printed pp.156–157, BB2 printed pp.360–361) and is under review —
+        // see docs/40_reports/20260917_VRANJEVICI_MOSTAR_JANUARY_DIAGNOSIS.md.
+        // Glavatičevo: BB2 p.514. Two separate axes with dedicated brigades
+        // (no sharing with Op Foča brigades).
         name: 'Operation Herzegovina Consolidation',
         faction: 'RS',
         primary_corps: 'vrs_herzegovina',

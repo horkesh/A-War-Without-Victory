@@ -1,5 +1,90 @@
 # AWWV Calibration Master Reference
 
+## Current status (2026-09-17) — January-1993 operations packet (SINGLE CURRENT SUMMARY)
+
+This block is the single current summary. The 2026-09-16 delivery status below is retained as history and is
+**superseded** where it reports the January score (700 → **701**) and the candidate commit.
+
+**A. Current production candidate — `41a148bf9`.** Verified against `git log` and its production diff:
+`772a67808` (bounded isolated-position predicate + head-of-queue reservation timing) followed by `41a148bf9`
+(Operation Jackal gains the `op:stolac:pjesivac_kula_2` objective). Executable surface:
+`src/sim/combat/commander/plan.ts`, `src/sim/combat/pre_planned_operations.ts`, and their tests. No data,
+reference, geometry, OOB, initial-control or baseline change is in either commit.
+
+**B. Current documentation HEAD — `0893bfa50`** plus this task's synchronization commit. A documentation
+commit is not a new simulation measurement; the measured production source stays `41a148bf9`.
+
+**C. Latest measured January evidence — n403.** Independent execution on the **clean committed** source
+`41a148bf9` (`git_dirty false`), reproducing n401/n402 byte-for-byte. Run
+`runs/apr1992_definitive_188w__9137f75e9f35be20__w39_n403`; scenario
+`data/scenarios/apr1992_definitive_188w.json`; duration override `--weeks 39`; checkpoint **t39 = 4 January
+1993**; Node `v22.23.2`; input digest `f8ace65496620fad1c8219a9dcaa8e2c5cdba2f3f541b156c7ba112b4748caaf`;
+final-save SHA-256 `e3b6b2d34dd1101c601b11abd30c2c060717995a0fe748f662214d4ebecf6899`. Result
+**701/712**, **11 mismatches**. April 1994, April 1995 and October 1995 are **NOT REACHED** by this candidate.
+
+**D. Last full-duration campaign evidence (separate source).** The canonical 188-week run at `ac3e5e152`
+(2026-09-16) scores **700/712 jan1993, 702 apr1994, 697 apr1995, 667 oct1995** over unchanged
+694/674/668/641 floors. Its source, results and limitations stand as recorded below. Its later-checkpoint
+outcomes are **not** attributable to the January candidate `41a148bf9`, which was not run past t39.
+
+**E. Published viewer (unchanged by this task).** The public viewer
+(`https://horkesh.github.io/A-War-Without-Victory/?run=ac3e5e152`) displays the **`ac3e5e152` 188-week**
+dataset, as recorded below. It is **not** updated here and does **not** show n403 or `41a148bf9`.
+
+**Owner direction (recorded).** Later territorial outcomes do **not** veto a January correction. This is a
+scoring-priority direction only and does not waive determinism, valid state, legal movement/capture,
+population accounting, political permissions, or command ownership.
+
+**Floors.** The packet's **January minimum of 700** is distinct from the older general checkpoint floors
+(188-week 694/674/668/641). Neither is altered by this synchronization.
+
+**Current January backlog — 11 mismatches (observed history, n403/t39).** Observed control only; a missing
+control event is **not** by itself a missing-operation diagnosis:
+
+| OSID | expected (jan1993) | actual (t39) |
+|---|---|---|
+| `op:donji_vakuf:prusac_2` | RS | RBiH |
+| `op:foca:donje_zesce` | RBiH | RS |
+| `op:ilijas:krivajevici` | RS | RBiH |
+| `op:jablanica:doljani_2` | RBiH | HRHB |
+| `op:kalesija:seher_2` | RS | RBiH |
+| `op:konjic:glavaticevo_2` | RS | RBiH |
+| `op:konjic:ljuta` | RS | RBiH |
+| `op:maglaj:jablanica` | RBiH | RS |
+| `op:mostar:vranjevici_2` | RBiH | RS |
+| `op:trnovo:tosici` | RBiH | RS |
+| `op:vlasenica:sebiocina` | RBiH | RS |
+
+Ten of the eleven are frozen turn-0 discrepancies with no control event through t39; only
+`op:mostar:vranjevici_2` is combat-touched (RS at t2 via the pre-planned Operation Herzegovina
+`mostar_heights` axis).
+
+**Closed / preserved this packet.** Čardak year-level requirement met (operation-owned combat capture t23 =
+1992-09-14, `arbih_3rd_corps:Operacija Izlaz:t21`, RBiH at t39 — receipt in the Čardak diagnosis).
+Pješivac-Kula bounded objective-omission correction **CLOSED** (Operation Jackal combat capture t15 =
+20 July 1992, HRHB at t39; Hatelji remains RS; militia-only 55.33 defence explanation retained).
+
+**Still open (not investigated here).** Overall January calibration **OPEN**; overall campaign calibration
+**OPEN**. `op:donji_vakuf:prusac_2` OPEN (no exception, no waiver). `op:mostar:vranjevici_2`/`kružanj_2`
+historical-geographic interpretation **UNRESOLVED** (objective-deletion proposal **withdrawn**). Western
+cascade and Farz attribution remain for the campaign gate. Also separately retained: Zavidovići/Gostović
+OOB questions; the `operational_initial_master.json` vs derive-script initial-data contradiction; the
+mixed-control aggregation policy question; the outstanding truce-scope/design interpretation; and the
+checkpoint reporter scoring unreached periods against the terminal map (documented limitation — do not
+modify `tools/verify_checkpoints.cjs` for it).
+
+Supporting reports:
+[Čardak 1992 diagnosis](20260916_CARDAK_1992_GOSTOVIC_VALLEY_DIAGNOSIS.md) ·
+[Vranjevići/Mostar diagnosis](20260917_VRANJEVICI_MOSTAR_JANUARY_DIAGNOSIS.md) ·
+[frozen-cell analysis + Pješivac-Kula addendum](20260824_JAN1993_FROZEN_CELL_ANALYSIS.md) ·
+[April-1994 operational calibration receipts](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md) ·
+[durable evidence record](../../logs/january-1993-operations-20260917/EVIDENCE_RECORD.md) ·
+[ledger 2026-09-17](../PROJECT_LEDGER.md).
+
+---
+
+### Superseded status for reference (2026-09-16) — January score now 701/712
+
 **Current delivery status (2026-09-16):** the owner-authorized January-only operations repair at
 clean `ac3e5e152` closes its contract. Diagnostics A–G established that `applyCommanderOutput`
 admitted new bot operations without calling the `assignOperationCommander` lifecycle writer that

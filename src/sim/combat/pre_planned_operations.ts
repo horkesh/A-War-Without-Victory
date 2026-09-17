@@ -686,9 +686,13 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         min_attack_outcome: 'repulsed',
         axes: [
             {
-                // Mostar heights — JNA garrison seizes Podveležje/Hum positions
-                // overlooking Mostar from east (BB1 p.193). JNA phantom only —
-                // VRS brigades follow their own corps' op (vrs_herzegovina → Op Višegrad).
+                // Mostar heights — JNA/Bosnian Serb forces occupied the high ground
+                // east and north of Mostar; the Croats captured Mt. Hum to the south on
+                // 23 May 1992 (BB1 printed p.156; the repo KB carries that folio at PDF
+                // page 192, `BB1_p0192.json`). JNA phantom only — VRS brigades follow
+                // their own corps' op (vrs_herzegovina → Op Višegrad). Historical
+                // control of the objectives below is under review; see
+                // docs/40_reports/20260917_VRANJEVICI_MOSTAR_JANUARY_DIAGNOSIS.md.
                 axis_id: 'mostar_heights',
                 name: 'Mostar Heights',
                 brigades: [

@@ -139,9 +139,14 @@ inferred from ethnicity, and the ethnic column is context only.
 | Hrušta | 1992 | far E plateau; no population in 1991; no mention | — | very high |
 | Zijemlje | 1992–1995 | far NE high plateau toward VRS-held Nevesinje; **Serb-majority** (95/153) | area-level only | high — plausibly VRS-held, but not sourced |
 
-## 5. Do the aggregates span territory held by different forces? [OPEN]
+## 5. Do the aggregates span territory held by different forces? [OPEN] — assessment
 
-**Yes — this is a real confound, and it is the strongest single finding of the check.**
+**Assessment (not a confirmed, dated boundary).** The breadth is mapped evidence: constituent centroids
+come from the 1990 census settlement polygons (`data/derived/settlements_wgs84_1990.geojson`), giving cell
+extents of 76.5 km² (`vranjevici_2`) and 207.4 km² (`kruzanj_2`). That each aggregate is geographically
+broad and spans from the city fringe to the high plateau is measured; that its constituents therefore had
+different controllers in January 1993 is an **assessment**, because no source or dataset here provides a
+dated settlement-level control boundary through either cell.
 
 - `op:mostar:kruzanj_2` (207 km²) joins the **immediate eastern-bank fringe** (`Banjdol`, 43.35 N) with
   the **remote Nevesinje-side plateau** (`Zijemlje` 43.46 N; `Hrušta` 43.38 N) across ~20 km of the
@@ -171,7 +176,7 @@ This is consistent with `CALIBRATION_MASTER.md:3933-3939`, which records these c
 |---|---|
 | **Initial attack mapped to the wrong geography** | **Weakened but not excluded.** BB confirms JNA/RS forces held the high ground east and north of Mostar in May 1992, so an RS attack on eastern cells is geographically plausible. But the attack is launched on the **whole aggregate**, including constituents that were not on the RS-held line. |
 | **Early loss plausible, later 1992 recovery missing** | **Supported at area level.** BB documents the June 1992 HVO/ARBiH offensive retaking the eastern bank, Buna/Blagaj, the airport (17 Jun) and Velež (16 Jun), and clearing the VRS from Mostar by 21 Jun. The sim models the May seizure and no recovery. **Caveat:** the recovery was **HVO/HV-led** (ARBiH "secondary") and its post-recovery controller was HRHB, not RBiH — so a 1992 recovery alone would not produce the RBiH reference. |
-| **Aggregate combines historically different control areas** | **Confirmed** (§5). |
+| **Aggregate combines historically different control areas** | **Assessment, not confirmed** (§5): the geographic breadth is mapped (1990 polygons), but the mixed-control inference is not a dated settlement-level boundary — settlement-level uncertainty stands. |
 | **New evidence warrants review of the existing reference** | **Partly.** The owner's 2026-08-24 RBiH determination (`51e2862ea`) is not contradicted for the western constituents, but the eastern constituents were plausibly not RBiH. The single-cell paint is questionable for both. |
 | **Evidence insufficient** | **Applies to every constituent** (§4): the sources are area-level and name none of the ten settlements. |
 
@@ -183,9 +188,17 @@ applies directly: *the forces participating in combat* (HVO/HV, with ARBiH secon
 
 The check **does not** distinguish between "missing recovery" and "reference/aggregate oversimplification"
 for the RBiH value, because (a) no source assigns control to any of the ten constituent settlements, and
-(b) the aggregates demonstrably straddle the Mostar front. RBiH at initialization and RBiH at January
+(b) the aggregates appear to straddle the Mostar front. RBiH at initialization and RBiH at January
 does **not** establish continuous RBiH control, and the absence of a modelled recovery does **not**
 establish that no recovery should be modelled.
+
+**Two evidence qualifications (do not lose these during synchronization):**
+
+- HVO/HV leadership of the June 1992 offensive does **not** by itself establish the post-recovery
+  controller of every constituent settlement.
+- Geographic breadth and area-level history do **not** by themselves establish a dated settlement-level
+  control boundary through a cell. The "mixed-control aggregate" finding in §5 is an **assessment**, not
+  a confirmed boundary.
 
 ## 9. Recommendation and smallest justified correction [PROPOSED]
 

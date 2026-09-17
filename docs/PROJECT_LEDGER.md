@@ -5278,3 +5278,74 @@ changed; no combat defect established.
 **Scope.** Read-only. Overall January calibration and `prusac_2` remain **OPEN**; no waiver. No push,
 `main` merge, baseline replacement or viewer publication. Report:
 [Vranjevići diagnosis](40_reports/20260917_VRANJEVICI_MOSTAR_JANUARY_DIAGNOSIS.md).
+
+---
+
+## 2026-09-17 — January-1993 records synchronized; calibration branch and preservation tags published
+
+**Task.** Reconcile project records with the implemented January changes, measured results and open
+questions, then push the calibration branch and the three preservation tags (authorized here). No `main`
+merge, baseline replacement, reference edit, viewer publication, release, new mechanic or calibration
+change.
+
+**Current status — single summary lives in
+[CALIBRATION_MASTER](40_reports/CALIBRATION_MASTER.md#current-status-2026-09-17--january-1993-operations-packet-single-current-summary).**
+
+- **A. Production candidate `41a148bf9`** (`772a67808` predicate/reservation, then `41a148bf9` Pješivac-Kula
+  objective), verified against `git log` and its production diff.
+- **B. Documentation HEAD `0893bfa50`** plus the synchronization commit containing this entry. A
+  documentation commit is **not** a new simulation measurement.
+- **C. Latest January evidence — n403**, independent on the clean committed source, reproducing n401/n402;
+  `--weeks 39`, t39 = 4 January 1993, **701/712**, 11 mismatches; final-save SHA-256
+  `e3b6b2d34dd1101c601b11abd30c2c060717995a0fe748f662214d4ebecf6899`. April 1994, April 1995 and October
+  1995 **NOT REACHED**.
+- **D. Last full-duration campaign evidence — `ac3e5e152`** (188w: 700/702/697/667). Separate source;
+  its later-checkpoint outcomes are **not** attributable to the January candidate `41a148bf9`.
+- **E. Published viewer** displays the **`ac3e5e152`** dataset; it is not updated here and does not show
+  n403.
+- **Owner direction recorded:** later territorial outcomes do not veto a January correction — without
+  waiving determinism, valid state, legal movement/capture, population accounting, political permissions or
+  command ownership. The January minimum **700** is kept distinct from the 188-week floors
+  **694/674/668/641**.
+
+**Acceptance boundaries recorded.** Čardak: year-level requirement met — operation-owned combat capture
+t23 = 1992-09-14 by `arbih_303rd_vitezka_mountain` under `arbih_3rd_corps:Operacija Izlaz:t21`; RBiH at
+t39; simulated September ≠ the diagnosis's Nov–Dec historical window; local OOB questions remain open.
+Pješivac-Kula: bounded objective-omission correction **CLOSED** — Jackal combat capture t15 = 20 July 1992;
+HRHB at t39; Hatelji RS; militia-only 55.33 explanation retained; truce-scope interpretation retained
+separately. Prusac: **OPEN** (no exception, no waiver; comparative timing explanation needs independent
+verification). Vranjevići/Kružanj: **UNRESOLVED**; the objective-deletion proposal is **withdrawn**.
+
+**Files updated (documentation only).** `docs/40_reports/CALIBRATION_MASTER.md` (new current-status block;
+the 2026-09-16 status marked superseded), `working-on.md`, `docs/plans/COMMAND_BOARD.md` (R6 row +
+calibration paragraph, trimmed under the 20,000-char docs guard), `docs/plans/MASTER_ROADMAP.md`
+(last-updated, execution branch, 188w evidence block, new January-corrections block, R6 row),
+`docs/knowledge/HISTORICAL_OPERATIONS_CATALOGUE.md` (Jackal objective; corrected stale "ARBiH pre-planned —
+NONE"; corrected folio; conditional-waypoint definition), `docs/10_canon/Systems_Manual_v0_9_0.md` (§6.4
+isolated-position note; §7.5 head-queue reservation note), `docs/10_canon/Engine_Invariants_v0_9_0.md`
+(§14.8b ring test), `docs/40_reports/20260916_CARDAK_1992_GOSTOVIC_VALLEY_DIAGNOSIS.md` (status update),
+`docs/40_reports/20260917_VRANJEVICI_MOSTAR_JANUARY_DIAGNOSIS.md` (§5 assessment; two evidence
+qualifications), `docs/PROJECT_LEDGER_KNOWLEDGE.md` (knowledge entry). Reviewed and already accurate:
+`docs/40_reports/20260824_JAN1993_FROZEN_CELL_ANALYSIS.md`; prior ledger entries (preserved, not rewritten);
+`docs/open_gates.yml`. **Comment-only source edits** (no executable change): `pre_planned_operations.ts`
+Mostar-heights comment (actor/citation) and `triggered_operations.ts` Mostar comment (citation; unsupported
+"held throughout war" replaced with a neutral pointer) — identified explicitly here.
+
+**Evidence made durable.** `logs/january-1993-operations-20260917/` now holds the production patches
+(including `n401_pjesivac.patch`, whose SHA-256 `fa3b5beb216b02e23a954ab9020f2aefc2552c3e7431ac1d357bea4d8336c0e7`
+equals the recorded patch hash), the extraction/comparison scripts, `full_suite.log`, `MANIFEST.txt` and
+[EVIDENCE_RECORD.md](../logs/january-1993-operations-20260917/EVIDENCE_RECORD.md). Raw runs remain
+local-only under `runs/` (gitignored) and are listed in that record.
+
+**Validation.** `npm run receipts:validate` OK; `npm run plans:check` up to date; `npm run tasks:validate`
+OK; `npm run gates:validate` OK (16 gates, 10 open); targeted docs tests
+(`docs_desktop_v09_truth`, `open_gates_register`, `plan_index`, `receipt_citations`,
+`docs_truth_no_skip_guard`) **77/77**. `repo:eol:check` remains at its pre-existing **24** mixed-ending
+files (none introduced by this change). No executable, scenario, geometry, OOB, initial-control, reference
+or baseline change. Full-suite qualification retained: the reported full invocation exited **1** on the
+real `runtime_dependency_resolution.test.ts` hook timeout (12/12 in isolation) — not "entirely green".
+
+**Publication.** Pushed `codex/january-1993-operations-20260914` (fast-forward, commits `772a67808`,
+`41a148bf9`, `c8fdc370a`, `0893bfa50` and this synchronization commit) and the three lightweight
+preservation tags `preserve/n396-predicate-only`, `preserve/january-candidate-n399`,
+`preserve/january-candidate-n401`. No `main`/`gh-pages` push, no force, no merge.

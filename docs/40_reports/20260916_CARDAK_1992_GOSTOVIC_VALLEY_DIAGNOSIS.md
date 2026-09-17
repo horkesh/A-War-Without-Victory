@@ -5,6 +5,16 @@
 **Outcome:** root cause found and repaired; **acceptance NOT yet met on the calibration scenario**.
 A second, independent blocker is identified and measured but not fixed here.
 
+**Status update (2026-09-17, record synchronization):** the **year-level requirement is met and preserved**
+in the later production candidate `41a148bf9`. Čardak is captured through operation-owned combat
+(`arbih_3rd_corps:Operacija Izlaz:t21`, battle `23:op:zavidovici:cardak_2:arbih_303rd_vitezka_mountain:null`,
+t23 = 1992-09-14) and is **RBiH at t39**. The current candidate measures **701/712**; this report's own
+n399/n400 measurements below (700/712) are retained as history and are not rewritten. Simulated September
+timing stays distinct from the historian's November–December 1992 window. Čardak also still appears as an
+authored **fallback axis** (`zavidovici_position`) in the 3rd Corps Central Bosnia pre-planned operation; its
+successful 1992 capture does **not** depend on that later definition, and that objective is not removed.
+Local OOB questions and overall January/campaign calibration remain open.
+
 ---
 
 ## 1. What Čardak actually is

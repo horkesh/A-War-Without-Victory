@@ -1,0 +1,37 @@
+# Durable evidence backup — January-1993 operations packet
+# Copied 2026-09-17 from %TEMP%\opencode\n396_preserve (created 2026-09-16).
+#
+# SHA-256 below are of the COMMITTED BLOBS (`git cat-file blob :<path>`), which are the durable bytes.
+# ..gitattributes normalizes .cjs/.md/.txt to LF on commit, so an on-disk CRLF copy can differ from its
+# committed blob; the `.patch` files are stored byte-for-byte (git treats them as binary). Use the blob
+# hashes to verify the committed evidence, not the working-tree copies.
+
+4a6b3587b3641c016e9272539e07d9ad3f05f60d58348e2e0c3798ad302f76cd  cardak_prov.cjs
+39a3efab3c23239c3e7de3a7a04458c68300a9ff6871089bc02543aa8e56b4e5  compare_n401_n402.cjs
+f51ba218bed006853c08344d9154cff857d65646bdd94fa9728a2281721c47a9  defender_sector.cjs
+ba05e3c005ba62794e9f9ebdde37c102f9ea562a87b8f64a7679c75f9dbfeb8f  final_candidate_production.patch
+6dc799226f57ed1eae89eb866744ba6fb5e4d91b87c407740fdc9be65b8ab083  full_suite.log
+3ac030375bab1d9f2f6fc9f5b8cba2dd6455932b9bb320dc8b41262dc704b7a9  izlaz.cjs
+be8248b6ea490d19b8d4071c79417735b15248df42f738ea8f2e303d6a284ae5  january_candidate_worktree.patch
+d971f36118e474d5a7015f9a41b7e2c1feedb4931573269583c35cfc63015ee8  n396_worktree.patch
+fa3b5beb216b02e23a954ab9020f2aefc2552c3e7431ac1d357bea4d8336c0e7  n401_pjesivac.patch
+a4043a80cb6633769b4c4c13297de2418de1cff1ca2bdaf4037c461ddf9f89a6  pjesivac_explain.cjs
+61686d8aec46c7ec7fd2963a05faabb411a5e9e78d72f381e2aa5f605748ad35  stolac_geo.cjs
+d7473227679ae578183b50e44f9c93b4ed422efebd1c1e44b1361ea3a03b15e1  vranjevici.cjs
+
+# Provenance
+# - n396_worktree.patch             : working-tree production patch for the n399/n400 candidate
+#                                     (isolated-position predicate correction only), source e9024b61a.
+# - january_candidate_worktree.patch: full working-tree diff for the n401/n402 candidate.
+# - final_candidate_production.patch: production-only diff for the n401 candidate.
+# - n401_pjesivac.patch             : the Pjesivac-Kula objective hunk. Its SHA-256 equals the patch hash
+#                                     recorded in PROJECT_LEDGER.md / CALIBRATION_MASTER provenance
+#                                     (FA3B5BEB216B02E23A954AB9020F2AEFC2552C3E7431AC1D357BEA4D8336C0E7).
+# - full_suite.log                  : the reported full-suite invocation (exit 1; qualified in EVIDENCE_RECORD.md).
+#                                     Deliberately force-added once, because `*.log` is gitignored by policy.
+# - *.cjs                           : extraction/comparison scripts used to build the receipts.
+#
+# Canonical source of the production change is committed history:
+#   772a67808  predicate + reservation
+#   41a148bf9  Pjesivac-Kula objective
+# Raw run artifacts remain local-only under runs/ (gitignored); see EVIDENCE_RECORD.md.
