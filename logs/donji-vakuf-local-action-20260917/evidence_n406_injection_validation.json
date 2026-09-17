@@ -1,0 +1,70 @@
+{
+  "count": 8,
+  "errors": 1,
+  "issues": [
+    {
+      "axis_id": "srebrenica_cerska_link",
+      "check": "brigade_missing",
+      "detail": "Brigade \"arbih_1st_cerska\" not found in formations",
+      "op_name": "Srebrenica–Cerska Link-Up",
+      "severity": "warning",
+      "turn": 4
+    },
+    {
+      "axis_id": "srebrenica_cerska_link",
+      "check": "brigade_missing",
+      "detail": "Brigade \"arbih_1st_kamenica\" not found in formations",
+      "op_name": "Srebrenica–Cerska Link-Up",
+      "severity": "warning",
+      "turn": 4
+    },
+    {
+      "axis_id": "srebrenica_convergence",
+      "check": "brigade_missing",
+      "detail": "Brigade \"arbih_281st_east_bosnian_light\" not found in formations",
+      "op_name": "Srebrenica–Cerska Link-Up",
+      "severity": "warning",
+      "turn": 4
+    },
+    {
+      "axis_id": "srebrenica_convergence",
+      "check": "brigade_missing",
+      "detail": "Brigade \"arbih_282nd_east_bosnian_light\" not found in formations",
+      "op_name": "Srebrenica–Cerska Link-Up",
+      "severity": "warning",
+      "turn": 4
+    },
+    {
+      "axis_id": "srebrenica_convergence",
+      "check": "brigade_missing",
+      "detail": "Brigade \"arbih_283rd_east_bosnian_light\" not found in formations",
+      "op_name": "Srebrenica–Cerska Link-Up",
+      "severity": "warning",
+      "turn": 4
+    },
+    {
+      "axis_id": "srebrenica_convergence",
+      "check": "brigade_missing",
+      "detail": "Brigade \"arbih_284th_east_bosnian_light\" not found in formations",
+      "op_name": "Srebrenica–Cerska Link-Up",
+      "severity": "warning",
+      "turn": 4
+    },
+    {
+      "check": "objective_overlap",
+      "detail": "Objective \"op:donji_vakuf:donji_vakuf_2\" already targeted by active operation \"probe_vrs_1st_krajina_t4\"",
+      "op_name": "Donji Vakuf Local Action",
+      "severity": "error",
+      "turn": 5
+    },
+    {
+      "axis_id": "visoko_breza_perimeter",
+      "check": "brigade_missing",
+      "detail": "Brigade \"arbih_guards_brigade\" not found in formations",
+      "op_name": "Visoko–Breza Line Clearing",
+      "severity": "warning",
+      "turn": 8
+    }
+  ],
+  "warnings": 7
+}

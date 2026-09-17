@@ -968,3 +968,50 @@ remains the January comparison. The withdrawn tree's executable identity to `41a
 `n403` clean) is confirmed independently: `git diff 41a148bf9 HEAD -- src/ data/scenarios/ data/source/`
 filtered to non-comment lines is **empty**. January calibration remains **OPEN**; 701/712 is a recorded
 figure on the restored configuration, not a new measurement, and meeting the minimum is not acceptance.
+
+---
+
+## 12. Bounded operation-configuration experiment — the triggered offer was INERT; reverted (2026-09-17)
+
+A separate owner packet authorized **one** bounded local operation-configuration experiment through an
+existing live operation-admission path — an *attempt* to take and hold `op:donji_vakuf:donji_vakuf_2`, not a
+guaranteed capture — while the event-flip prohibition and every owner boundary stayed in force. Full record:
+[`logs/donji-vakuf-local-action-20260917/`](../../logs/donji-vakuf-local-action-20260917/) (predeclared
+`CHANGE_SPEC.md`, `OUTCOME.md`, evidence).
+
+**Candidate.** One new `TriggeredOpDef` (`Donji Vakuf Local Action`) on `vrs_1st_krajina`: objective
+`op:donji_vakuf:donji_vakuf_2`, participants `rs_19th_krajina_light_infantry` (anchor, adjacent at
+`op:donji_vakuf:jemanlici`) + `rs_31st_light_infantry`, window `turn >= 2 && turn <= 6 &&
+hasEnemyObjective(...)`, `planning_duration: 2`, no `execution_attack_power_mult`. The Operations Expert and
+Gameplay/Systems specialist confirmed the path, and the independent reviewer **APPROVED** the spec. In
+isolation the definition admitted correctly (11 focused assertions via `checkTriggeredOperations`).
+
+**Measured: it never launched.** Run `n406` (`--weeks 39`) — `triggered_operations_accepted` has no entry for
+it; `verify_checkpoints` jan1993 = **701 / 712**; a cell-by-cell comparison against
+`painted_control_jan1993.json` is **identical to `n403`** (same 11 mismatches, **FIXED 0, NEWLY INTRODUCED
+0**); `anchor_checks`, `behavioral_health`, `attack_resolution` and `takeover_displacement` are
+byte-identical to `n403`. The town is still captured at **t35** by the authored operation. The only state
+difference is the `watched_operations` trace the never-firing def writes in t2–6.
+
+**Root cause, from retained evidence.** The trigger is true and the slot free from t2, but
+`rs_19th_krajina_light_infantry` is **persistently `in_transit` to `op:donji_vakuf:pribraca_2`** (from t1,
+location never leaving `jemanlici` through t16+). `buildOperation` excludes in-transit brigades, so only the
+31st survives the axis and `allParticipating < MIN_OPERATION_PARTICIPANTS (2)` →
+`build_insufficient_participants`; at t5 the t4 probe on the same objective yields `objective_overlap`
+first. The stale order is **pre-existing in the unmodified baseline** (`pribraca_2` appears nowhere in
+`src/` except the late-war RBiH opportunity catalog), i.e. a movement/availability blocker, not an
+offer-definition one.
+
+**Disposition.** Reverted before commit — the definition, the catalogue-pin reconciliation and the focused
+test are removed, because an operation that cannot fire in the only scoring scenario is an inert operation,
+which the packet forbids shipping. `src/sim/combat/triggered_operations.ts` and
+`tests/triggered_operations.test.ts` are byte-identical to `b9024b97b`; no ownership writer, baseline,
+reference or threshold was touched. The historical defect stays **OPEN**.
+
+**Next proposed change — separate, not implemented.** (1) Re-select participants from 1KK brigades actually
+free at t2–6 (the 31st plus the 11th Mrkonji, the brigade that already attacked this cell as a probe at w5,
+and/or the 22nd Krajina) under its own predeclared spec; settle first whether such an op can open an attack
+inside the window. (2) Investigate why the 19th never clears its `in_transit` state — a movement-layer
+question that would also restore the historically correct Donji Vakuf formation. (3) Reserving non-elite
+triggered participants before the generic movement router runs is a broader admission/reservation-policy
+change requiring separate authorization; it is not proposed as a fallback.

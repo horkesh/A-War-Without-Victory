@@ -335,6 +335,38 @@ points: [Prusac/Donji Vakuf report §11](20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIA
 the withdrawn tree's executable identity to `41a148bf9` is independently re-confirmed (non-comment diff
 empty). January calibration remains **OPEN**.
 
+**L. Donji Vakuf bounded operation-configuration experiment — INERT, reverted, no code shipped (added
+2026-09-17).** A separate owner packet authorized ONE local operation-configuration experiment through an
+existing live admission path. Candidate: one new `TriggeredOpDef` (`Donji Vakuf Local Action`) on
+`vrs_1st_krajina`, objective `op:donji_vakuf:donji_vakuf_2`, participants `rs_19th_krajina_light_infantry`
+(anchor, adjacent at `op:donji_vakuf:jemanlici`) + `rs_31st_light_infantry`, window turn 2–6,
+`planning_duration: 2`, no `execution_attack_power_mult`. Operations Expert + Gameplay/Systems confirmed the
+path; the independent reviewer APPROVED the spec; it admitted correctly in isolation (11 focused assertions).
+
+**Measured `n406` (`--weeks 39`): it never launched.** `verify_checkpoints` jan1993 **701/712**; the
+cell-by-cell January set against `painted_control_jan1993.json` is **identical to `n403`** (same 11
+mismatches, FIXED 0, NEWLY INTRODUCED 0); `anchor_checks`/`behavioral_health`/`attack_resolution`/
+`takeover_displacement` byte-identical to `n403`. The town is still captured at t35 by the authored
+operation — the historical defect is unrepaired.
+
+**Root cause (from evidence).** `rs_19th_krajina_light_infantry` is persistently `in_transit` to
+`op:donji_vakuf:pribraca_2` from t1 while never leaving `jemanlici`; `buildOperation` excludes in-transit
+brigades, so only the 31st survives and `allParticipating < MIN_OPERATION_PARTICIPANTS (2)` →
+`build_insufficient_participants` (at t5, `objective_overlap` with the t4 probe first). The stale order is
+**pre-existing in the baseline** — a movement/availability blocker, not an offer-definition one.
+
+**Disposition: reverted before commit.** An operation that cannot fire in the only scoring scenario is
+inert, which the packet forbids shipping; the definition, the catalogue-pin reconciliation and the focused
+test were removed. `src/sim/combat/triggered_operations.ts` and `tests/triggered_operations.test.ts` are
+byte-identical to `b9024b97b`. No ownership writer, baseline, reference or threshold touched. Evidence:
+[`logs/donji-vakuf-local-action-20260917/`](../../logs/donji-vakuf-local-action-20260917/). The historical
+defect stays **OPEN**.
+
+**Next proposed change (separate, not implemented).** Re-select participants from 1KK brigades actually free
+at t2–6 (the 31st plus the 11th Mrkonji, which attacked this cell as a probe at w5, and/or the 22nd
+Krajina); or investigate the 19th's stale `in_transit` order (movement layer); or extend the
+reservation/prestage contract to non-elite triggered participants (broader — needs separate authorization).
+
 **Scope correction to F (added 2026-09-17).** The advisory closeout's conclusions are bounded as follows:
 reproducibility was observed **for the tested scenario, artifacts and environments** (`apr1992_188w`, the
 eight pinned artifacts, Linux CI ×2 and Windows local); **no verification defect was found**; the

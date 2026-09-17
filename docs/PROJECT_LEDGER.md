@@ -5995,3 +5995,56 @@ filtered to non-comment lines is **empty**. **No fresh run was made and none is 
 **701/712** remains the January comparison, January calibration remains **OPEN**, and the town's December
 capture date remains an OPEN historical defect. No reset, no tag movement, no baseline refresh, no `main`
 merge; `data/derived/latest_run_final_save.json` stays uncommitted.
+
+## 2026-09-17 — Donji Vakuf bounded operation-configuration experiment: the triggered offer was INERT; reverted, no code shipped
+
+**Task.** A separate owner packet authorized ONE bounded local operation-configuration experiment through an
+existing live admission path — an attempt to take and hold `op:donji_vakuf:donji_vakuf_2`, not a guaranteed
+capture, with the event-flip ban and every owner boundary in force. Full record:
+[`logs/donji-vakuf-local-action-20260917/`](../logs/donji-vakuf-local-action-20260917/) (predeclared
+`CHANGE_SPEC.md`, `OUTCOME.md`, evidence); [report §12](40_reports/20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md);
+[CALIBRATION_MASTER §L](40_reports/CALIBRATION_MASTER.md).
+
+**Candidate.** One new `TriggeredOpDef` (`Donji Vakuf Local Action`) on `vrs_1st_krajina`: objective the town,
+participants `rs_19th_krajina_light_infantry` (anchor, adjacent at `op:donji_vakuf:jemanlici`) +
+`rs_31st_light_infantry`, window turn 2–6, `planning_duration: 2`, no `execution_attack_power_mult`. The
+Operations Expert and Gameplay/Systems specialist confirmed the path and the independent reviewer APPROVED
+the spec. In isolation the definition admitted correctly — 11 focused assertions via the production entry
+point `checkTriggeredOperations`, plus refusals for friendly target / below-floor force / in-transit
+participant / strong defence and intact player authorization.
+
+**Measured — it never launched.** Run `n406` (`--weeks 39`, `final_state_hash bdea1bd6e172da6b`):
+`triggered_operations_accepted` has no entry for it; `verify_checkpoints` jan1993 **701 / 712**; the
+cell-by-cell January set against `painted_control_jan1993.json` is **identical to `n403`** — same 11
+mismatches, **FIXED 0, NEWLY INTRODUCED 0**; `anchor_checks`, `behavioral_health`, `attack_resolution` and
+`takeover_displacement` are byte-identical to `n403`. The town is still captured at **t35** by the authored
+Operation Donji Vakuf. The only state difference is the `watched_operations` trace the never-firing def
+writes in t2–6.
+
+**Root cause, from retained evidence, not inferred.** The trigger is true and the slot free from t2 (36
+brigades → 3 slots; only Prijedor active), but `rs_19th_krajina_light_infantry` is **persistently
+`in_transit` to `op:donji_vakuf:pribraca_2`** from t1 while never physically leaving `jemanlici` (unchanged
+through t16+). `buildOperation` excludes in-transit brigades, so only the 31st survives the axis and
+`allParticipating < MIN_OPERATION_PARTICIPANTS (2)` → `build_insufficient_participants`; at t5 the t4 probe
+on the same objective yields `objective_overlap` first. The stale order is **pre-existing in the unmodified
+baseline** (`pribraca_2` appears nowhere in `src/` except the late-war RBiH opportunity catalog) — a
+movement/availability blocker, not an offer-definition one.
+
+**Disposition — reverted before commit.** An operation that cannot fire in the only scoring scenario is an
+inert operation, which the packet forbids shipping. The definition, the catalogue-pin reconciliation and the
+focused test were removed; `src/sim/combat/triggered_operations.ts` and
+`tests/triggered_operations.test.ts` are byte-identical to `b9024b97b`, and all temporary instrumentation was
+removed. No ownership writer, baseline, reference or threshold was touched. The finding is kept as an
+unsuccessful bounded experiment; the town's December capture date remains an **OPEN** historical defect.
+
+**Next proposed change — separate, NOT implemented.** (1) Re-select participants from 1KK brigades actually
+free at t2–6 — the 31st plus the 11th Mrkonji (which attacked this cell as a probe at w5) and/or the 22nd
+Krajina — under its own predeclared spec, settling first whether an op anchored on a brigade several hops
+away can open an attack inside the window. (2) Investigate why the 19th never clears its `in_transit` state
+(movement layer), which would also restore the historically correct Donji Vakuf formation. (3) Extending the
+reservation/prestage contract to non-elite triggered participants is a broader admission/reservation-policy
+change needing separate authorization, not a fallback.
+
+**Push status.** Scoped documentation and evidence committed and pushed to
+`codex/january-1993-operations-20260914`. No force, `main` merge, baseline refresh, tag movement or viewer
+publication; `data/derived/latest_run_final_save.json` stays uncommitted.
