@@ -1,0 +1,24 @@
+# Operation Donji Vakuf — per-week operation diagnostics
+
+=== n396 ===
+  w 33 phase=execution  obj=op:donji_vakuf:oborci_2        atk_attempts=0 battles=0 elig_attackers=0 skipped=[] recovery=null invalid=[]
+  w 34 phase=execution  obj=op:donji_vakuf:donji_vakuf_2   atk_attempts=2 battles=1 elig_attackers=2 skipped=[] recovery=null invalid=[]
+  w 35 phase=execution  obj=op:donji_vakuf:korenici        atk_attempts=2 battles=1 elig_attackers=2 skipped=[] recovery=null invalid=[]
+  w 36 phase=execution  obj=op:donji_vakuf:prusac_2        atk_attempts=1 battles=1 elig_attackers=1 skipped=[] recovery=null invalid=[]
+  w 37 phase=execution  obj=op:donji_vakuf:prusac_2        atk_attempts=0 battles=0 elig_attackers=0 skipped=[] recovery=null invalid=[]
+  w 38 phase=execution  obj=op:donji_vakuf:prusac_2        atk_attempts=0 battles=0 elig_attackers=0 skipped=[] recovery=null invalid=[]
+  w 39 phase=recovery   obj=null                           atk_attempts=1 battles=1 elig_attackers=1 skipped=[] recovery=completed invalid=[]
+  w 40 phase=recovery   obj=null                           atk_attempts=0 battles=0 elig_attackers=0 skipped=[] recovery=completed invalid=[]
+  w 41 phase=recovery   obj=null                           atk_attempts=0 battles=0 elig_attackers=0 skipped=[] recovery=completed invalid=[]
+
+=== 188w reproduction ===
+  w 33 phase=execution  obj=op:donji_vakuf:oborci_2        atk_attempts=0 battles=0 elig_attackers=0 skipped=[] recovery=null invalid=[]
+  w 34 phase=execution  obj=op:donji_vakuf:donji_vakuf_2   atk_attempts=2 battles=1 elig_attackers=2 skipped=[] recovery=null invalid=[]
+  w 35 phase=execution  obj=op:donji_vakuf:korenici        atk_attempts=2 battles=1 elig_attackers=2 skipped=[] recovery=null invalid=[]
+  w 36 phase=execution  obj=op:donji_vakuf:korenici        atk_attempts=1 battles=1 elig_attackers=1 skipped=[] recovery=null invalid=[]
+  w 37 phase=execution  obj=op:donji_vakuf:korenici        atk_attempts=1 battles=1 elig_attackers=1 skipped=[] recovery=null invalid=[]
+  w 38 phase=execution  obj=op:donji_vakuf:prusac_2        atk_attempts=3 battles=1 elig_attackers=3 skipped=[] recovery=null invalid=[]
+  w 39 phase=execution  obj=op:donji_vakuf:prusac_2        atk_attempts=0 battles=0 elig_attackers=0 skipped=[] recovery=null invalid=[]
+  w 40 phase=execution  obj=op:donji_vakuf:prusac_2        atk_attempts=0 battles=0 elig_attackers=0 skipped=[] recovery=null invalid=[]
+  w 41 phase=recovery   obj=null                           atk_attempts=3 battles=1 elig_attackers=3 skipped=[] recovery=completed invalid=[]
+  w 42 phase=recovery   obj=null                           atk_attempts=0 battles=0 elig_attackers=0 skipped=[] recovery=completed invalid=[]

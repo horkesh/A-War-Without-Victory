@@ -5492,3 +5492,119 @@ operation objective or test assertion. No simulation, verification or reporting 
 No baseline-recording or pin-refresh command was run and `UPDATE_BASELINES` was never set. Pushed to
 `codex/january-1993-operations-20260914` only — no force, no merge, no history rewrite. **January
 calibration remains open.**
+
+## 2026-09-17 — Prusac diagnosed: the pre-repair match was bought by the defect; OPEN, no correction proposed
+
+**Task.** Diagnose the remaining January mismatch `op:donji_vakuf:prusac_2` from preserved evidence and
+identify the smallest justified next action. Bounded diagnostics and mechanical documentation maintenance;
+no new mechanics and no production simulation change. Full report:
+[Prusac diagnosis](40_reports/20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md); evidence
+[`logs/prusac-january-diagnosis-20260917/`](../logs/prusac-january-diagnosis-20260917/).
+
+**Classification: C — a legitimate consequence of the repaired command-selection policy that remains a
+calibration discrepancy.** Not an implementation-contract violation, not an engine defect, not a
+scenario-data defect established here. **No production correction is proposed.**
+
+**The load-bearing finding.** The pre-repair Prusac *match* was purchased by the defect the reservation
+repair removed. In `n396` `arbih_705th_slavna_mountain` was committed to `probe_arbih_3rd_corps_t32`
+against `op:donji_vakuf:babin_potok_2` — the second objective of the VRS sweep it was attacking into — and
+lost **1800 → 1126 → 650** personnel at a **0.30** power ratio. That self-destruction is what left Korenići
+weakly held and let the VRS spearhead reach Prusac before t39. **Reverting the repair to restore this cell
+would restore that behaviour, and must not be done.**
+
+**Provenance and prefix bound before the 188-week evidence was used.** The advisory reproduction's
+artifacts were confirmed to belong to the recorded run (all eight re-hash to the recorded values, nothing
+overwritten). Binding was established from the run-affecting inputs, **not** from the comment-only source
+diff: `git_commit 0033517b6` / `git_dirty false`, Node `v22.23.2`, `headless`, `collapse_enabled false`,
+and **all 31 consumed inputs byte-identical** to n403 (digest `f8ace65496620fad…4748caaf`, the digest
+CALIBRATION_MASTER §C records for n403). Prefix equivalence is **measured**: `weekly_report.jsonl` weeks
+1–39 are **39 of 39 byte-identical** to n403 and the replay frames **39 of 39 identical**, turn-39 control
+totals HRHB 86 / RBiH 251 / RS 375 on both. No week-188 artifact was compared against a week-39 artifact
+as a determinism test. **n403's NOT REACHED labels are unchanged** — they describe that 39-week execution,
+and the 666/658/569 figures a checker prints for later references remain the t39 state replayed, not
+measurements.
+
+**The observation the truncated evidence could not supply.** §10.6 correctly refused to assert any later
+capture. With provenance and prefix established, the 188-week continuation shows **RS captures `prusac_2`
+at t41** — `decisive_victory`, ratio 9.89, target undefended, `recovery: completed`. The cell is **two
+turns late against a checkpoint boundary**, not unreachable, dead-opped or blocked.
+
+**Causal chain.** *(A)* First divergence is t32 probe target selection — `op:donji_vakuf:babin_potok_2`
+pre-repair versus `op:vares:gornja_borovica_2` repaired (an authored Central Bosnia objective; t30 probes
+`op:bugojno:medini`, an authored Bugojno objective). *(B)* Writer: `emit.ts:1595-1616`, where a verified
+local-occupation candidate **takes precedence** over the generic probe, both gated by
+`getHeadQueuedPrePlannedBrigadeIds` (`pre_planned_operations.ts:2478`). Pre-repair the reservation left no
+candidate, so the generic fallback spent the 705th; repaired, the candidate exists and the fallback is
+never reached. *(C)* Korenići: one strike (`decisive`, **2.03**) becomes three (`costly` **1.32** →
+`stalemate` **0.79** → `decisive` **2.65**), captured **t38** instead of **t36**; the same brigade defends
+at 3.97 when gutted and **0.79** when intact. `execution_friction` is identical (`stale_intel`, low
+confidence) in both, so no intel/supply/modifier difference is in play. *(D)* `Operation Donji Vakuf` is a
+strict six-objective sequential sweep with no slack, and its **post-Korenići tempo is identical in both
+runs** — capture, two turns at `eligible_attacker_count` 0, capture on the third. The two idle turns are
+present in the run that *matched*, so they are not a defect. The whole discrepancy is the two-turn
+Korenići delay.
+
+**Correction to the predecessor record.** §10.6's "`arbih_705th` is on the released Central Bosnia roster"
+is **wrong**, verified against `pre_planned_operations.ts`: the 705th and 707th are on the **Battle of
+Bugojno** roster (`available_from` 66), which sits *behind* Central Bosnia in the same corps queue and was
+**never reserved by the head-queue helper in either version**; the 770th is on no pre-planned roster. The
+effect on them is **indirect** — releasing a different operation's roster changes which branch the probe
+selector takes. Roster membership and formation-ID mappings were read from source and state, not inferred
+from the report. The Čardak §10.6 paragraph is **preserved** with an appended correction; nothing was
+rewritten.
+
+**Plan-index housekeeping — regeneration REVERTED, and why.** `plans:check` was still stale, so
+`node tools/derive_plan_index.cjs` (the repository's own documented generator, discovered from the
+`plans:check` script) was run and **its diff reviewed**. It flips **R6 to `lane_open: false`**. Root cause:
+`derive_plan_index.cjs:43` substring-matches `CLOSED_MARKERS` across the whole status cell, and the R6 row
+says *"the Pješivac-Kula objective correction is CLOSED"* — a **sub-item**, while the same row states that
+cascade, Farz attribution and the Prozor injection *"remain unresolved"* and that repair scope *"precedes
+promotion"*. Committing the regeneration would encode a **wrong gate decision** and close the R6
+calibration lane in the dispatch index. It would also not achieve a green gate: after regeneration
+`plans:check` passes but `plan_index.test.ts` **still fails** its substantive assertion ("a closed lane is
+detected as closed"), because the stored status is truncated before the marker. **The committed index is
+stale but correct on the load-bearing field (`lane_open: true`); regenerating makes it fresh but wrong**,
+so the regeneration was reverted and `plan_index.yml` is unchanged. Recorded as a bounded **parser defect**
+in `derive_plan_index.cjs` for its own task; not fixed here, because changing which lanes classify as
+closed is a gate-classification change and out of scope. The three `plan_index.test.ts` failures and the
+stale `plans:check` therefore **remain**, pre-existing and unchanged.
+
+**Scope correction to the advisory closeout.** Its conclusions are bounded: reproducibility was observed
+**for the tested scenario, artifacts and environments**; **no verification defect was found**; the
+**measured health checks passed**. Those findings do **not** refute existing calibration regressions — the
+eleven January mismatches, the cascade shortfall, Farz attribution and the inherited Prozor injection all
+stand as recorded. A passing health gate is not a calibration acceptance.
+
+**Smallest justified next action: none in code.** No defect is established, so nothing is proposed to fix.
+The residual question is the authored **launch timing** of the Op Jajce → Op Donji Vakuf 1KK queue chain
+(`prestage_from: 21`, `planning_duration: 7`, queued fourth) — a scenario/operational-data and
+historical-review matter for `R6-CALIBRATION-INTEGRATION`, **not** a combat or reservation question, and
+**not** proposed or scoped here. If the owner wants it pursued, the minimal evidence is that queue timing
+chain read from the **existing** 188-week reproduction: no new campaign, no parameter search, no fresh
+January run.
+
+**Method.** Read-only. **No simulation was executed** — preserved runs `n396`/`n397`/`n398`/`n399`/`n401`/
+`n403` and the existing advisory reproduction supplied every figure. No instrumentation was added to
+production source. The reverted n397/n398 authored-operation experiments were read for control history
+only and not recreated. Stated limit: `control_delta.json` is a final aggregate and replay frames carry
+only faction totals, so a complete per-OSID t39 ownership set **cannot** be reconstructed from the
+188-week artifacts alone — the authoritative t39 ownership and eleven-cell mismatch set remain **n403's**,
+which is why n403 was used for them.
+
+**Validation.** `receipts:validate` OK; `tasks:validate` OK; `gates:validate` OK. `plans:check` **exit 1
+(STALE)** and `plan_index.test.ts` **3 failed / 4 passed** — both **pre-existing and deliberately left**,
+per the reverted regeneration above. `verify_checkpoints.cjs` on n403 reproduces **jan1993 701/712**.
+
+**Files changed (documentation and evidence only).** New
+`docs/40_reports/20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md`; new
+`logs/prusac-january-diagnosis-20260917/` (battle timeline, operation diagnostics, 705th force condition,
+provenance/prefix, control events, the seven extraction scripts, `MANIFEST.txt`); appended correction in
+`docs/40_reports/20260916_CARDAK_1992_GOSTOVIC_VALLEY_DIAGNOSIS.md`; new section H plus the F scope
+correction in `docs/40_reports/CALIBRATION_MASTER.md`; this entry.
+
+**Not changed by this task.** Simulation behavior, combat values, reservation policy, historical operation
+objectives, formation data, initial ownership, checkpoint references, aggregation, floors, acceptance
+thresholds, baseline hashes, test assertions, the skipped golden-baseline test, `docs/plans/plan_index.yml`,
+the three `preserve/*` tags, `main`, `gh-pages` and the published viewer. **January calibration is not
+closed and the candidate is not promoted. `prusac_2` remains OPEN with no waiver; Vranjevići/Kružanj
+remains UNRESOLVED and was outside this task.**

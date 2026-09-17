@@ -75,6 +75,46 @@ acceptance.** It is not a floor, not a re-pin, not a promotion and not an owner 
 remains OPEN**, and the **Vranjevići/Kružanj** reference and aggregation question remains **UNRESOLVED**.
 Adoption belongs to `R6-CALIBRATION-INTEGRATION` and its own gates.
 
+**H. Prusac (`op:donji_vakuf:prusac_2`) diagnosed — OPEN, no defect, no correction proposed (added
+2026-09-17).** Full report:
+[Prusac diagnosis](20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md); evidence
+`logs/prusac-january-diagnosis-20260917/`. **Classification: a legitimate consequence of the repaired
+command-selection policy that remains a calibration discrepancy** — not an implementation-contract
+violation and not an engine defect.
+
+The cell starts **RBiH**, has **no control event through t39**, and the reference expects **RS**; the
+mismatch is RS not arriving. The 188-week advisory reproduction — bound to this candidate by an
+**identical 31-input digest** and a **byte-identical weeks-1–39 prefix** (39/39 weekly records, 39/39
+replay frames) — shows **RS captures `prusac_2` at t41**, undefended, ratio 9.89, with `Operation Donji
+Vakuf` reaching `recovery: completed`. The cell is **two turns late**, not unreachable.
+
+Cause, traced to the call site: pre-repair, the ARBiH 3rd Corps head-queue reservation left no
+local-occupation candidate, so `emit.ts:1595-1616` fell through to the generic probe and spent
+`arbih_705th_slavna_mountain` against `op:donji_vakuf:babin_potok_2` at a **0.30** power ratio
+(**1800 → 1126 → 650** personnel). Repaired, a local-occupation candidate **takes precedence**, the 705th
+is never spent, and it defends Korenići intact at ratio **0.79** — turning one strike into three and
+delaying Korenići **t36 → t38**. Post-Korenići tempo is *identical* in both runs (capture, two idle turns,
+capture), so the two-turn Korenići delay is the entire discrepancy. **The pre-repair Prusac match was
+purchased by the defect the repair removed; the repair must not be reverted to restore it**, and no
+location-specific hold, capture date or target-specific bonus may be introduced for it.
+
+Corrected in the predecessor record: `arbih_705th`/`707th` are **not** on the released Central Bosnia
+roster — they are on the Battle of Bugojno roster (`available_from` 66) and were never reserved by the
+head-queue helper in either version; the effect on them is indirect. The Čardak §10.6 paragraph is
+preserved with an appended correction.
+
+**`prusac_2` remains OPEN with no waiver.** The residual question — the authored **launch timing** of the
+Op Jajce → Op Donji Vakuf 1KK queue chain — is a scenario/operational-data and historical-review matter
+for `R6-CALIBRATION-INTEGRATION`, is **not** proposed or scoped here, and is not a combat or reservation
+question.
+
+**Scope correction to F (added 2026-09-17).** The advisory closeout's conclusions are bounded as follows:
+reproducibility was observed **for the tested scenario, artifacts and environments** (`apr1992_188w`, the
+eight pinned artifacts, Linux CI ×2 and Windows local); **no verification defect was found**; the
+**measured health checks passed**. Those findings do **not** refute existing calibration regressions —
+the eleven January mismatches, the cascade shortfall, Farz attribution and the inherited Prozor injection
+all stand exactly as recorded. A passing health gate is not a calibration acceptance.
+
 **Current January backlog — 11 mismatches (observed history, n403/t39).** Observed control only; a missing
 control event is **not** by itself a missing-operation diagnosis:
 

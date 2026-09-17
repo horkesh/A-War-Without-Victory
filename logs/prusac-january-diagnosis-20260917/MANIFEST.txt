@@ -1,0 +1,27 @@
+# Durable evidence — Prusac (op:donji_vakuf:prusac_2) January diagnosis, 2026-09-17
+#
+# Read-only diagnosis at 651799e14 (production source executably 41a148bf9). NO simulation was executed;
+# every figure is extracted from runs that already existed:
+#   runs/..._w188_n396 / n397 / n398   (188w, e9024b61a + working patches)
+#   runs/..._w39_n399 / n401 / n403    (39w; n403 clean at 41a148bf9)
+#   data/derived/scenario/_baseline_tmp/apr1992_188w  (188w advisory reproduction, clean 0033517b6)
+# Those raw run directories are gitignored and local-only; only these compact extracts are committed.
+#
+# SHA-256 below are of the COMMITTED BLOBS (`git cat-file blob :<path>`), which are the durable bytes.
+# .gitattributes normalizes .cjs/.md/.txt to LF on commit, so an on-disk CRLF copy can differ from its
+# committed blob. Verify against these blob hashes, not the working-tree copies.
+#
+# No credential, token or secret value appears in any file listed here.
+
+9e7bdf570b385cbeb2dcde36abb311655aa3c2654dbaaa35684c0d5db27fee58  battle_timeline.txt
+403a08c87e1c683ce23fca1c991327e8a7a84e3957b8e29497a7a7b26cc01f4c  battles.cjs
+dea27b11f2a333c5abc52f6ed0229350af526a81a59ba41e93e2cb43fb11f27d  brigade_705th_condition.txt
+335aee75b9f605c711c20d0d9d4705828934de864b95c3818975c619f82ff079  cond.cjs
+423dcd19000fd4a0484a1f2990b2c8a13a0cb0691f19667c817fac67ff0d159d  control_events.txt
+6613b88044ea1bbcd927a04ddbda1a75ba997721bdabcc37a3b907315edb945e  dvops.cjs
+4739224cc409474f489266336acf1c3efcf42a3f9b9990f5ee2991ec5dbf059c  frames.cjs
+22b4242c51152a7ce77191cb7daeb2efa6ad05bceaeb93cf96e7fe36f831dd2f  operation_diagnostics.txt
+b3688badb3fd05f4ea629a664e9bd123e79f7471dd04d3d02bda1375046bd28d  prefix.cjs
+bb0d9effc6756d916473663c7db9e5352d8e26a81822df2241fa133e7b7682f9  provcmp.cjs
+0b48ed6d7cd4e01f7cfd723e63291095a4971477b515b0735933e84f8d3fc902  provenance_and_prefix.txt
+3bca1f29b7bfebbe48b42bc0c2bbd9a659b85d011a067b25a2e7b9a2a75aa6f1  prusac_events.cjs

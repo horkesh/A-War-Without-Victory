@@ -1,0 +1,30 @@
+# arbih_705th_slavna_mountain — per-turn force condition
+
+=== n396 (probe committed t32) : arbih_705th_slavna_mountain ===
+  turn  pers  coh  mor  fat  status   location                          active_op
+  t 29  1800 51.38461538461539   78    0  active   op:bugojno:kula_2                  null
+  t 30  1800 53.55   78    0  active   op:bugojno:kula_2                  null
+  t 31  1800 52.75   78    0  active   op:bugojno:kula_2                  null
+  t 32  1800 52.76923076923077   78    0  active   op:donji_vakuf:donji_vakuf_2       arbih_3rd_corps:probe_arbih_3rd_corps_t32:t32
+  t 33  1126 34.8   68    4  active   op:donji_vakuf:donji_vakuf_2       arbih_3rd_corps:probe_arbih_3rd_corps_t32:t32
+  t 34  1186 53.69230769230769   65    3  active   op:donji_vakuf:donji_vakuf_2       null
+  t 35   650 41.7   60    5  active   op:donji_vakuf:korenici            null
+  t 36   642 54.61538461538461   57    4  active   op:bugojno:prijaci                 null
+  t 37   712 55.07692307692308   57    4  active   op:bugojno:prijaci                 null
+  t 38   781 55.53846153846154   57    3  active   op:bugojno:prijaci                 null
+  t 39   850   56   63    3  active   op:bugojno:prijaci                 null
+  t 40   918 56.46153846153846   57    2  active   op:bugojno:prijaci                 null
+  t 41   986 56.92307692307692   57    2  active   op:bugojno:prijaci                 null
+=== n403 (no probe) : arbih_705th_slavna_mountain ===
+  turn  pers  coh  mor  fat  status   location                          active_op
+  t 29  1800 51.38461538461539   78    0  active   op:bugojno:kula_2                  null
+  t 30  1800 53.55   78    0  active   op:bugojno:kula_2                  null
+  t 31  1800 52.75   78    0  active   op:bugojno:kula_2                  null
+  t 32  1800 52.76923076923077   78    0  active   op:donji_vakuf:oborci_2            null
+  t 33  1800 53.23076923076923   78    0  active   op:donji_vakuf:oborci_2            null
+  t 34   968 38.7   73    2  active   op:donji_vakuf:donji_vakuf_2       null
+  t 35   934 54.15384615384615   70    2  active   op:donji_vakuf:korenici            null
+  t 36   897 54.61538461538461   70    1  active   op:donji_vakuf:korenici            null
+  t 37   890 52.6   71    3  active   op:donji_vakuf:korenici            null
+  t 38   957 55.53846153846154   72    2  active   op:bugojno:kula_2                  null
+  t 39  1024   56   78    2  active   op:bugojno:kula_2                  null

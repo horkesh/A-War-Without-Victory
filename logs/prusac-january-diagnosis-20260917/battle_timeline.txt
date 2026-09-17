@@ -1,0 +1,26 @@
+# Donji Vakuf sweep — battle timeline (Operation Donji Vakuf, vrs_1st_krajina)
+
+=== n396  (pre-repair, 188w, e9024b61a dirty) ===
+  w 31 decisive_victory ratio=17.32   rs_16th_krajina_motorized -> (undefended)  @op:donji_vakuf:torlakovac_2  op=Operation Donji Vakuf
+  w 33 catastrophic   ratio=0.3     arbih_705th_slavna_mountain -> rs_4th_banja_luka_light_infantry  @op:donji_vakuf:babin_potok_2  op=probe_arbih_3rd_corps_t32
+  w 34 decisive_victory ratio=5.74    rs_16th_krajina_motorized -> arbih_770th_slavna_mountain  @op:donji_vakuf:oborci_2  op=Operation Donji Vakuf
+  w 35 decisive_victory ratio=3.97    rs_16th_krajina_motorized -> arbih_705th_slavna_mountain  @op:donji_vakuf:donji_vakuf_2  op=Operation Donji Vakuf
+  w 36 decisive_victory ratio=2.03    rs_16th_krajina_motorized -> arbih_707th_slavna_mountain  @op:donji_vakuf:korenici  op=Operation Donji Vakuf
+  w 39 decisive_victory ratio=7.91    rs_16th_krajina_motorized -> (undefended)  @op:donji_vakuf:prusac_2  op=Operation Donji Vakuf
+
+=== 188w reproduction  (repaired, 0033517b6 clean) ===
+  w 31 decisive_victory ratio=18.73   rs_16th_krajina_motorized -> (undefended)  @op:donji_vakuf:torlakovac_2  op=Operation Donji Vakuf
+  w 34 decisive_victory ratio=4.87    rs_16th_krajina_motorized -> arbih_705th_slavna_mountain  @op:donji_vakuf:oborci_2  op=Operation Donji Vakuf
+  w 35 decisive_victory ratio=2.05    rs_16th_krajina_motorized -> arbih_770th_slavna_mountain  @op:donji_vakuf:donji_vakuf_2  op=Operation Donji Vakuf
+  w 36 costly_victory ratio=1.32    rs_16th_krajina_motorized -> arbih_707th_slavna_mountain  @op:donji_vakuf:korenici  op=Operation Donji Vakuf
+  w 37 stalemate      ratio=0.79    rs_16th_krajina_motorized -> arbih_705th_slavna_mountain  @op:donji_vakuf:korenici  op=Operation Donji Vakuf
+  w 38 decisive_victory ratio=2.65    rs_16th_krajina_motorized -> arbih_770th_slavna_mountain  @op:donji_vakuf:korenici  op=Operation Donji Vakuf
+  w 41 decisive_victory ratio=9.89    rs_16th_krajina_motorized -> (undefended)  @op:donji_vakuf:prusac_2  op=Operation Donji Vakuf
+
+=== n403  (repaired, w39, 41a148bf9 clean) ===
+  w 31 decisive_victory ratio=18.73   rs_16th_krajina_motorized -> (undefended)  @op:donji_vakuf:torlakovac_2  op=Operation Donji Vakuf
+  w 34 decisive_victory ratio=4.87    rs_16th_krajina_motorized -> arbih_705th_slavna_mountain  @op:donji_vakuf:oborci_2  op=Operation Donji Vakuf
+  w 35 decisive_victory ratio=2.05    rs_16th_krajina_motorized -> arbih_770th_slavna_mountain  @op:donji_vakuf:donji_vakuf_2  op=Operation Donji Vakuf
+  w 36 costly_victory ratio=1.32    rs_16th_krajina_motorized -> arbih_707th_slavna_mountain  @op:donji_vakuf:korenici  op=Operation Donji Vakuf
+  w 37 stalemate      ratio=0.79    rs_16th_krajina_motorized -> arbih_705th_slavna_mountain  @op:donji_vakuf:korenici  op=Operation Donji Vakuf
+  w 38 decisive_victory ratio=2.65    rs_16th_krajina_motorized -> arbih_770th_slavna_mountain  @op:donji_vakuf:korenici  op=Operation Donji Vakuf

@@ -390,6 +390,34 @@ Jajce / Skender Vakuf / Donji Vakuf / Šipovo frontage. **No location-specific h
 strength changes were added**, per the packet, and nothing here is to be tuned to restore `prusac_2`. The
 cell remains an **open January mismatch**; the January numerical minimum is still met at 700.
 
+> **CORRECTION and completion, appended 2026-09-17 — see
+> [Prusac diagnosis](20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md).** The paragraph above is preserved
+> as written; two of its statements are corrected and its open lead is now closed out.
+>
+> 1. **Roster membership — wrong as written.** "`arbih_705th` is on the released Central Bosnia roster" is
+>    **incorrect**, verified against `pre_planned_operations.ts`. The Central Bosnia roster is the sixteen
+>    brigades enumerated in §10.3; `arbih_705th_slavna_mountain` and `arbih_707th_slavna_mountain` are on
+>    the **Battle of Bugojno** roster (`available_from` 66), which sits *behind* Central Bosnia in the same
+>    corps queue and was therefore never reserved by the head-queue helper in either version.
+>    `arbih_770th_slavna_mountain` is on no pre-planned roster. The 705th's changed behaviour is
+>    **indirect**: releasing a different operation's roster changes which branch the probe selector takes.
+> 2. **The complete mechanism, which this paragraph correctly declined to claim.** The 707th vacating
+>    Korenići is *not* load-bearing. The decisive event is that in `n396` the 705th was committed to
+>    `probe_arbih_3rd_corps_t32` against `op:donji_vakuf:babin_potok_2` and lost **1800 → 1126 → 650**
+>    personnel at a **0.30** power ratio; post-repair a local-occupation candidate takes precedence over
+>    the generic probe (`emit.ts:1595-1616`), the 705th is never spent, and it defends Korenići intact at
+>    ratio **0.79**. That is what turns one strike into three and delays Korenići t36 → t38.
+> 3. **"Does not assert that RS takes `prusac_2` later" — correctly scoped then, now answered.** The
+>    advisory 188-week reproduction at `0033517b6`, bound to this candidate by an identical 31-input
+>    digest and a byte-identical weeks-1–39 prefix, shows **RS captures `prusac_2` at t41**, undefended,
+>    with the operation reaching `recovery: completed`. The post-Korenići tempo is *identical* in both runs
+>    (capture, two idle turns, capture), so the whole discrepancy is the two-turn Korenići delay.
+>
+> **Verdict unchanged in substance and now classified:** `prusac_2` is a **legitimate consequence of the
+> repaired policy** that remains an open calibration discrepancy — **not** an engine defect. The
+> pre-repair match was purchased by the defect the repair removed, so the repair must not be reverted to
+> restore it. The instruction above that nothing here is to be tuned to restore `prusac_2` **stands**.
+
 ### 10.7 Verdicts
 
 **A. Reservation-policy repair — SUPPORTED by the implementation audit and passing tests.** The defect
