@@ -108,6 +108,75 @@ Op Jajce → Op Donji Vakuf 1KK queue chain — is a scenario/operational-data a
 for `R6-CALIBRATION-INTEGRATION`, is **not** proposed or scoped here, and is not a combat or reservation
 question.
 
+**I. Op Jajce → Op Donji Vakuf chronology reviewed — an authored premise is CONTRADICTED; nothing
+corrected, nothing proposed for adoption (added 2026-09-17).** The residual H left open is now answered.
+Read-only: no simulation executed, no source instrumented, no timing, objective, queue order, reference,
+initial control or threshold changed. Report:
+[Prusac diagnosis §8](20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md); evidence
+`logs/jajce-donji-vakuf-chronology-20260917/`.
+
+**Runtime is clean; no unexplained wait exists.** The 1KK queue advances when slot 0 holds no
+`is_pre_planned` operation (`corps_operation_helpers.ts:193`, `war_phases.ts:1938-1954`) — measured three
+times as *two turns of `recovery: completed`, injection on the third*: Prijedor→Corridor w6,
+Corridor→Jajce w19, Jajce→**Donji Vakuf w30**. Jajce's six planning turns are brigades marching
+(`movement_order_count` 3,3,3,3,2,2), not an authored delay; Donji Vakuf's single planning turn is
+`prestage_from: 21` having already marched them, and its `planning_duration: 7` is inert because
+pre-planned ops bypass the preparation state machine (`operation_preparation.ts:828-842`). The
+post-Korenići `eligible_attacker_count = 0` pause at w39/w40 carries `movement_order_count = 3` on both
+turns — repositioning through Jemanlići, a legal movement constraint, identical in `n396` at w37/w38.
+
+**The historical finding.** Simulated: `torlakovac_2` w31 (1992-11-09), `oborci_2` w34 (11-30),
+**`donji_vakuf_2` w35 (1992-12-07)**, `korenici` w38 (12-28), `prusac_2` w41 (1993-01-18) — a post-Jajce
+VRS sweep that *captures* Donji Vakuf town (the cell's member settlements are Blagaj, **Donji Vakuf**,
+Ponjavići, Rastičevo, Rudina, Vlađevići). The record says the opposite, in terms:
+
+- **BB2 p.465** (Annex 50): "The Bosnian Serbs, however, **took over the town early in 1992** … renamed
+  the town '**Srbobran**'." BB2 p.277–279's order of battle, dated **from June 1992**, already carries
+  "HQ Srbobran (Donji Vakuf)" for the 19th and 31st.
+- **BB2 p.330** (Annex 29, *Vrbas 92*): the Jajce operation's third axis ran "along the Vrbas River valley
+  **from the direction of Serb-held Donji Vakuf (Srbobran)**", and "the **19th at Donji Vakuf** and the
+  22nd at Mount Vlašić … protected the flanks of the assault forces."
+- **BB2 p.332**: after erasing the Karaula salient 12–18 November 1992, "**Here the VRS halted, apparently
+  content with its gains.**" The simulated sweep runs 2 Nov 1992 – 18 Jan 1993, entirely past that halt.
+- **BB1 p.198**: Bugojno was "jointly defended **from the Bosnian Serbs**" by the HVO Eugen Kvaternik and
+  ARBiH 307th Brigades until mid-1993 — a static confrontation line north of Bugojno, not a VRS advance.
+
+So the **grouping** (Donji Vakuf town as a sweep's fourth objective) is contradicted, the **dependency**
+("fires after Op Jajce completes") is slot-0 queue ordering rather than history — the causal arrow runs the
+other way, Serb-held Donji Vakuf enabling the Jajce attack — and the **timing** sits wholly after the
+documented halt. The roster comment's authority, "BB1 p.498", is **Appendix G, "Skeleton Bosnian Serb Army
+Order of Battle, July 1995"** (printed folio 461): a 1995 table standing in for a 1992 deployment. The
+19th's 1992 location survives on BB2 p.330 independently; the **16th Krajina Motorized** as this sector's
+spearhead does not.
+
+**"Start two turns earlier" is affirmatively ruled out.** The sweep is bounded by Jajce's recovery, and the
+sim already takes Jajce town on **1992-10-12** against a historical fall of **29 October 1992** — ~2.5
+weeks early. Pulling the queue forward would make an already-fast, anchor-relevant date worse to move one
+checkpoint cell.
+
+**Citation convention, stated.** Three page indexes disagree and the gap is not constant. The repository
+cites **scan/KB indexes**: `HISTORICAL_TIMELINE_MASTER.md`'s "BB1 p.183" is printed folio **147**; the
+operation comment's "BB1 p.498" is printed folio **461**. KB `page_number` equals the `pdftotext` index for
+BB1 from ~450 on but is one lower in the chapter range. **No offset may be applied blindly**; every folio
+above was read off its own page.
+
+**Disposition: no correction applied and none proposed for adoption.** A correction is justified in
+principle, but every repair the evidence implies lands on protected surfaces — initial control, operation
+objectives, queue order and timing, references — all outside this task. The scope it would have, if ever
+authorized, is recorded in §8.7 of the report, together with a validation plan that diffs `matched_osids`
+across all four checkpoints rather than reading a net count, because this municipality's cascade has
+produced net-neutral scores hiding different cells before (`n462`/`n463`/`n464`).
+
+**January is unchanged: 701/712, eleven mismatches, floors 694/674/668/641, packet minimum 700.**
+`prusac_2` remains **OPEN with no waiver** — BB is silent on Prusac in 1992–93, so the jan1993 = RS
+expectation is *consistent* with the record but **not attested**, and this review neither supports nor
+impeaches it. Recorded and **not pursued**, as a later-checkpoint matter for the calibration/historian
+lanes: the **apr1994** reference marks `prusac_2` RS while BB2 p.466 twice places the ARBiH there in 1994 —
+advancing "from Prusac" in April and unable to "push past Prusac" in November. Torlakovac, Babin Potok,
+Oborci and Korenići appear in neither volume; their 1992–93 ownership is insufficiently evidenced by this
+source. The 188-week artifacts remain matched weekly records and faction-total frames, **not** a
+reconstructed per-OSID t39 state — authoritative t39 ownership and the eleven-cell set stay **n403's**.
+
 **Scope correction to F (added 2026-09-17).** The advisory closeout's conclusions are bounded as follows:
 reproducibility was observed **for the tested scenario, artifacts and environments** (`apr1992_188w`, the
 eight pinned artifacts, Linux CI ×2 and Windows local); **no verification defect was found**; the

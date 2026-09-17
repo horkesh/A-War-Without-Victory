@@ -5659,3 +5659,105 @@ comment, and R6's `status` string catching up to roadmap prose it could not be r
 **Not changed.** `docs/plans/MASTER_ROADMAP.md` and every roadmap decision in it, all `lane_open` values,
 the generated-index schema, simulation code, calibration state, checkpoint thresholds, baseline pins,
 preservation tags, `main`, `gh-pages` and the viewer. **Prusac remains OPEN with no waiver.**
+
+## 2026-09-17 — Jajce → Donji Vakuf chronology reviewed: an authored premise is contradicted; no correction applied
+
+**Task.** Answer the residual the Prusac diagnosis left open — whether Torlakovac, Babin Potok, Oborci,
+Donji Vakuf, Korenići and Prusac are appropriately represented as one sequential VRS operation after
+Jajce. Read-only historical/scenario clarification. **No simulation was executed**, no production source
+was instrumented, and no timing, objective, queue order, reference, initial control, floor or threshold
+changed. Findings amended into
+[Prusac diagnosis §8](40_reports/20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md) and
+[CALIBRATION_MASTER §I](40_reports/CALIBRATION_MASTER.md); evidence
+[`logs/jajce-donji-vakuf-chronology-20260917/`](../logs/jajce-donji-vakuf-chronology-20260917/).
+
+**Conclusion: an authored grouping and dependency premise is specifically contradicted by the record** —
+not merely unsupported. The Prusac two-turn delay is contingent campaign timing downstream of it.
+
+**The runtime is clean and no unexplained wait exists.** The 1KK queue advances when slot 0 holds no
+`is_pre_planned` operation (`corps_operation_helpers.ts:193`; `war_phases.ts:1938-1954`), measured three
+times as *two turns of `recovery: completed`, injection on the third* — Prijedor→Corridor w6,
+Corridor→Jajce w19, Jajce→Donji Vakuf w30. Every interval classified: Jajce's six planning turns are
+brigades marching (`movement_order_count` 3,3,3,3,2,2) — a legal movement/readiness constraint; Donji
+Vakuf's single planning turn is `prestage_from: 21` having already marched them during Jajce, and its
+`planning_duration: 7` is inert because pre-planned ops bypass the preparation state machine
+(`operation_preparation.ts:828-842`); the post-Korenići `eligible_attacker_count = 0` pause at w39/w40
+carries `movement_order_count = 3` on both turns — repositioning through Jemanlići, identical in `n396` at
+w37/w38. No authored delay, no scheduling defect.
+
+**The contradiction.** Simulated: `torlakovac_2` w31 (1992-11-09), `oborci_2` w34, **`donji_vakuf_2` w35
+(1992-12-07)**, `korenici` w38, `prusac_2` w41 (1993-01-18) — a post-Jajce VRS sweep that *captures* Donji
+Vakuf town. The cell's member settlements are Blagaj, **Donji Vakuf**, Ponjavići, Rastičevo, Rudina,
+Vlađevići: it is the town, not a suburb. The record, by printed folio:
+
+- **BB2 p.465:** "The Bosnian Serbs, however, **took over the town early in 1992** … renamed the town
+  '**Srbobran**'." BB2 p.277–279's order of battle, dated **from June 1992**, already reads "HQ Srbobran
+  (Donji Vakuf)" for the 19th and 31st.
+- **BB2 p.330:** the Jajce operation's own third axis ran "along the Vrbas River valley **from the
+  direction of Serb-held Donji Vakuf (Srbobran)**"; "the **19th at Donji Vakuf** and the 22nd at Mount
+  Vlašić … protected the flanks of the assault forces."
+- **BB2 p.332:** after erasing the Karaula salient 12–18 November 1992, "**Here the VRS halted, apparently
+  content with its gains.**" The simulated sweep runs 2 Nov 1992 – 18 Jan 1993, wholly past that halt.
+- **BB1 p.198:** Bugojno was "jointly defended **from the Bosnian Serbs**" by the HVO Eugen Kvaternik and
+  ARBiH 307th Brigades until mid-1993 — a static line north of Bugojno, not a VRS advance.
+
+The **grouping** is therefore contradicted, the **dependency** ("fires after Op Jajce completes") is slot-0
+queue ordering rather than history — the causal arrow runs the other way, Serb-held Donji Vakuf enabling
+the Jajce attack — and the **timing** sits entirely after the documented halt.
+
+**A cited authority is a later table.** The operation comment's "BB1 p.498", offered for the 1992 roster,
+is **Appendix G, "Skeleton Bosnian Serb Army Order of Battle, July 1995"** (printed folio 461). The 19th's
+1992 location survives independently on BB2 p.330; the **16th Krajina Motorized** as this sector's
+spearhead does not, and the comment itself gives engine availability after Corridor as its reason.
+
+**"Start two turns earlier" is affirmatively the wrong answer.** The sweep is bounded by Jajce's recovery
+and the sim already takes Jajce town **1992-10-12** against a historical fall of **29 October 1992** —
+~2.5 weeks early. Advancing the queue would make an already-fast, documented, anchor-relevant date worse
+in order to move one checkpoint cell.
+
+**Citation convention, identified rather than assumed.** Three page indexes disagree and the gap is not
+constant. The repository cites **scan/KB indexes**: `HISTORICAL_TIMELINE_MASTER.md`'s "BB1 p.183" is
+printed folio **147**; the operation comment's "BB1 p.498" is printed folio **461**. KB `page_number`
+equals the `pdftotext` index for BB1 from ~450 on but is one lower in the chapter range. **No offset may be
+applied blindly**; every folio cited was read off its own page, reproducibly via `bbfolio.cjs`.
+
+**Disposition: no correction applied, and none proposed for adoption.** A correction is justified in
+principle, but every repair the evidence implies lands on surfaces this task protects — initial control,
+operation objectives, queue order and timing, references. Report §8.7 records the scope it would have
+(the `Operation Donji Vakuf` definition and its queue position; the `vlasic_pocket` axis, which on this
+evidence belongs with the historical Karaula/Turbe action; and the premise to settle first — whether
+`donji_vakuf_2` belongs to the spring-1992 takeover phase), plus a validation plan that diffs
+`matched_osids` across all four checkpoints rather than reading a net count, because this municipality's
+cascade has produced net-neutral scores hiding different cells before (`n462`/`n463`/`n464`). No
+target-specific bonus, capture date, scripted capture, forced surrender, location-specific hold or
+checkpoint exception is proposed, and the reservation repair stays unreverted.
+
+**Residuals and evidence limits.** `prusac_2` stays **OPEN with no waiver**: BB is silent on Prusac in
+1992–93, so jan1993 = RS is *consistent* with the record but **not attested**, and this review neither
+supports nor impeaches it. Recorded and **not pursued** as a later-checkpoint matter: the **apr1994**
+reference marks `prusac_2` RS while BB2 p.466 twice places the ARBiH there in 1994 — advancing "from
+Prusac" in April, unable to "push past Prusac" in November. Torlakovac, Babin Potok, Oborci and Korenići
+appear in neither volume. The 188-week artifacts remain matched weekly records and faction-total replay
+frames, **not** a reconstructed per-OSID t39 state; authoritative t39 ownership and the eleven-cell
+mismatch set stay **n403's**, and nothing here is relabelled as n403 output.
+
+**Validation.** Documentation and evidence only, so the applicable checks are the tooling/documentation
+ones, not a campaign. `receipts:validate` **OK — 85 citations across 2 docs**; `gates:validate` **OK — 16
+gates, 10 open**; `plans:check` **exit 0**; `tests/receipt_citations.test.ts` + `tests/plan_index.test.ts`
+**56/56 pass**. `repo:eol:check` **exits 1 — pre-existing and unrelated**: all 24 tracked files it names
+have mixed working-tree line endings from an earlier checkout on this host, and **none** of them is touched
+by this branch (`git diff --name-only 23aae8cc4..HEAD` and the working tree share zero paths with that
+list). No scenario run and no full simulation-suite cycle was performed, as scoped.
+
+**Files changed (documentation and evidence only).** §8 appended to
+`docs/40_reports/20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md`; section I inserted in
+`docs/40_reports/CALIBRATION_MASTER.md`; new `logs/jajce-donji-vakuf-chronology-20260917/` (1KK queue
+timeline, cell/reference extract, printed-folio citations, four extraction scripts, `MANIFEST.txt` with
+committed-blob hashes); this entry.
+
+**Not changed by this task.** Simulation code, operation objectives, queue order, timing, attack
+multipliers, combat values, reservation policy, initial control, references, OOB, operational-cell
+geometry, checkpoint thresholds, baseline pins, preservation tags, the skipped baseline test, `main`,
+`gh-pages` and the viewer. **The January candidate remains 701/712 with eleven mismatches; Čardak's 1992
+capture and the closed Pješivac-Kula correction stay preserved; Vranjevići/Kružanj remains UNRESOLVED and
+was outside this task.**
