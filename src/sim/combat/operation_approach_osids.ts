@@ -19,7 +19,7 @@
  * MUST NOT: mutate state.
  */
 
-import type { CorpsOperation, FactionId, FormationId, GameState, OperationAxis } from '../../state/game_state.js';
+import type { CorpsOperation, FormationId, GameState, OperationAxis } from '../../state/game_state.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import type { Osid } from './osid_adjacency.js';
 import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
@@ -45,7 +45,13 @@ export function isOperationParticipant(op: CorpsOperation, brigadeId: FormationI
 export function getSectorOffensiveApproachOsids(
     state: GameState,
     activeOp: CorpsOperation,
-    faction: FactionId,
+    // Declared `string`, not the narrower faction id type: this value is only compared against
+    // a controller and passed to `isFriendlyFaction`, which itself takes a string. Because
+    // `FormationState.faction` is declared `string`, narrowing here would force a type
+    // assertion at the caller — a new strict-null escape, which
+    // `tests/strict_null_inventory_progress.test.ts` ratchets against. The narrower type is
+    // assignable to `string`, so every existing caller is unaffected.
+    faction: string,
     adjacency: Map<Osid, Osid[]>,
     reverseMap: OperationalToCanonicalReverseMap,
     brigadeId?: FormationId,

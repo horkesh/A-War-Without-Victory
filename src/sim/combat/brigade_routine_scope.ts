@@ -47,7 +47,6 @@
 
 import type {
     CorpsOperation,
-    FactionId,
     FormationState,
     GameState,
     OperationAxis,
@@ -275,7 +274,7 @@ export function isDestinationAuthorizedByOperation(
         const approaches = getSectorOffensiveApproachOsids(
             state,
             op,
-            formation.faction as FactionId,
+            formation.faction,
             adjacency as Map<Osid, Osid[]>,
             // `getPoliticalControllerOSID` treats a missing reverse map as "direct lookup
             // only", which is what T6 (no reverse map in its signature) already relied on.

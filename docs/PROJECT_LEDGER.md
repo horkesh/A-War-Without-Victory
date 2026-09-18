@@ -6101,3 +6101,86 @@ re-derivation is a reconstruction. The `prefix_diag.txt` trace came from tempora
 **Push status.** Documentation and evidence committed and pushed to
 `codex/january-1993-operations-20260914`. No force, `main` merge, baseline refresh, tag movement or viewer
 publication; `data/derived/latest_run_final_save.json` untouched and uncommitted.
+
+---
+
+## 2026-09-18 — Movement authority: the routine-movement scope contradiction RESOLVED; candidate UNACCEPTED at jan1993 696/712
+
+**Packet.** "Resolve the discretionary-routing / assignment-scope contradiction." The 2026-09-17
+EXTENSION returned a T2/T6 destination-scope contradiction as a policy choice and implemented
+nothing. This packet chose the policy and authorized the implementation.
+
+**Policy selected — a NEW precedence rule, not the restoration of one.** For an ordinary line
+brigade with a valid current `assigned_sub_segment_id`, discretionary front repositioning is
+limited to the friendly front destinations of that assigned sub-segment; tactical routing does
+not implicitly reassign the brigade to another sub-segment, sector or corps. Recorded in
+`MOVEMENT_AUTHORITY.md` §2a and identified there as the choice made in this packet, not as
+something that had always been settled.
+
+**Defect removed.** T2 pooled the whole corps while T6 validated only the assigned sub-segment,
+so on a single-OSID sub-segment the two never converged: T2 issued a destination T6 rejected, T3
+built an intra-turn transit, T6 cancelled it, T2 reissued it. `turns_remaining` never decremented,
+and the spurious transit made the brigade look unavailable to operation admission.
+
+**Implementation.** `src/sim/combat/brigade_routine_scope.ts` is one side-effect-free decision
+consumed by T2, T3 (`osid_column_movement`, before operation admission) and T6
+(`commander_march_correction`), making the packet's three distinctions: routine movement under a
+valid assignment is restricted; movement backed by an actual existing higher-priority authority is
+exempt; missing/stale assignments, reserves and other established special cases keep their prior
+behaviour (`RoutineScopeConsumer` keeps T6 behaviour-identical to HEAD). `getBrigadeAxis` /
+`isOperationParticipant` / `getSectorOffensiveApproachOsids` moved verbatim into the leaf module
+`operation_approach_osids.ts` (re-exported; no import path changed) so the scope decision uses the
+attack evaluator's own approach predicate rather than a narrower copy of it.
+
+**Three blockers in the inherited working-tree candidate, found and fixed before measurement**,
+each with failing-before/passing-after evidence at the producer tier:
+1. Rule 5b intersected ENEMY offensive targets with the FRIENDLY scope — empty by construction,
+   inverting the gate and disabling the rule. Now scoped by adjacency.
+2. `eval_movement` scope-checked a FIRST STEP and returned true regardless, freezing interior
+   brigades out of their own assigned front and suppressing the rules below it.
+3. `owner: 'bot_discretionary'` marks BOT output, not ROUTINE output — the aggregator stamps it on
+   every evaluator alike, so operation approach marches and corps reassignments were being deleted.
+
+**MEASUREMENT — BELOW THE FLOOR, candidate UNACCEPTED.**
+`n419` vs baseline `n403`, both replayed against current painted references: **jan1993 701 -> 696
+(-5)**, floor 700. Five cells, all losses, all RS->RBiH where the reference wants RS, zero gains:
+`op:bihac:orasac_2`, `op:donji_vakuf:{donji_vakuf_2,korenici,oborci_2}`, `op:pale:praca`. Nothing
+was tuned to recover them. Only `jan1993` is meaningful for a 39-week run; the tool's
+"GUARD BREACHED" line comes from the 104/156/188-week sections and appears for the baseline too.
+
+**Mechanism — a tempo cost, not a blocked authority (confirmed for 2 of 3 attackers).** Operation
+AARs are 29 in both runs; RS combat captures fall 87 -> 81. `rs_11th_krupa_light_infantry` marches
+to `op:bihac:racic` AS AN OPERATION PARTICIPANT in both runs and the march completes both times —
+only the operation differs (`Operacija Bunar:t25` -> arrives t28 -> takes orasac_2 t29, versus
+`Operacija Prodor:t27` -> arrives t30, too late). `rs_4th_sarajevo_light_infantry`: the baseline
+runs `Operation Kijevo:t24` and takes praca at t26; the candidate spends the slot on
+`probe_vrs_sarajevo_romanija_t23` and Kijevo never launches — and probes cannot capture. So
+restricted routine positioning changes brigade availability, which changes which operations the
+corps AI selects and when. `rs_16th_krajina_motorized` (the three Donji Vakuf cells) was NOT traced
+to the same depth; its mechanism is INFERRED. `routine_destination_out_of_scope` rejections could
+not be counted — the reason code is gated behind a debug topic and is absent from the artifacts.
+
+**OPEN — owner decision.** The policy removes the only mechanism that evicts a brigade from a risky
+single-OSID tooth: T2 trap reroute and retroactive eviction are now inert for any assigned brigade,
+pinned by two tests. No existing tier replaces it — `sector_reassignment_orders` moves brigades
+between SECTORS, not between sub-segments of one sector, and no T1 path can see the risk signal at
+all (it lives only in `graphAnalysis`, a T2 input). A replacement would have to be BUILT: a risk
+term in sub-segment affinity, or a corps-level tooth-relief channel. This is a capability the
+policy costs, not one that relocates.
+
+**Validation.** `npx tsc --noEmit` clean; balanced full-suite gate; 30 tests in
+`tests/brigade_routine_scope.test.ts` including producer-tier cases that fail on the pre-fix
+sources; 210 tests across 12 adjacent suites; three independent review passes.
+`tests/runtime_dependency_resolution.test.ts` failed once under machine contention and passes
+12/12 re-run idle — it touches only vite/deck.gl/react resolution, nothing in `sim/combat`.
+
+**Not touched.** No personnel, equipment, cohesion, morale or combat multiplier; no operation
+definition, roster, window, objective or admission floor; no probe policy or t5 probe-overlap
+check; no recruitment, reserve or pre-staging policy; no movement speed, terrain cost or timeout
+constant; no initial control, checkpoint reference or operational-cell geometry; no event-driven
+ownership transfer, scripted surrender, defender deletion or ownership override. The withdrawn
+Donji Vakuf Local Action stays withdrawn. `data/derived/latest_run_final_save.json` left dirty and
+uncommitted. No 188-week campaign; later territorial effects NOT MEASURED / DEFERRED.
+
+**Evidence.** `logs/routine-scope-20260918/CANDIDATE_REVIEW.md` (review across three passes) and
+`logs/routine-scope-20260918/MEASUREMENT.md` (this measurement, with its stated limits).
