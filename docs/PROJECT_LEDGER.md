@@ -6296,3 +6296,70 @@ phase-less T2 movement guard, which preserves HEAD for sector_attack/probe). Com
 `logs/routine-scope-20260918/MEASUREMENT.md` (authoritative synopsis + Prodor diagnosis),
 `CALIBRATION_MASTER.md` addendum. `data/derived/latest_run_final_save.json` left dirty and
 uncommitted. January remains OPEN; the 700 floor is unchanged.
+
+## 2026-09-18 (3) — P-A time-bounded commander participant admission: contract PASS, January unchanged
+
+**Owner decision.** P-A authorized only; P-B not authorized; P-C rejected. P-A = commander-generated
+offensive operations must not admit a formation to their initial participant roster when, using the
+operation builder's existing movement/reachability model and the operation's actual assembly horizon,
+that formation cannot plausibly reach the required staging/approach area in time. Explicitly NOT:
+lower the assembly floor, extend planning/grace, add op slots, change combat power or movement speed,
+force a local brigade, guarantee launch.
+
+**Implemented (commit `30e2793ed`).** `canFormationReachAssemblyInTime`
+(`sector_offensive_launch_helpers.ts`) computes production column transit
+`N = max(1, ceil(totalCost / getOsidColumnRate))` over `dijkstraFriendlyPath` with the same
+corps-boundary restriction, friendly/allied/unoccupied traversal and real terrain scalars the
+execution step uses, to the union of the operation's objective approaches and the objective's live
+war-front-edge neighbours, filtered to legally occupiable cells. Admission holds only when
+`N <= planning_duration + PLANNING_INVALIDATION_GRACE_TURNS`, which is exactly the lifecycle
+deadline (order written after the movement step on turn T; transit starts T+1; arrival T+1+N; the
+requirement is fatal at `elapsed > planning_duration + grace`, and the movement step runs before
+`advanceSectorOffensives` on that turn). `PLANNING_INVALIDATION_GRACE_TURNS` moved to
+`sector_offensive_axis_helpers.ts` as the single source; `buildCorpsAllowedOsids` exported; terrain
+scalars threaded war_phases -> generateAllCorpsOrders -> runCommanderForCorps -> buildBriefing ->
+CommanderBriefing (additive/optional; the briefing is ephemeral). Applied ONLY at commander roster
+admission in `emit.ts` (`eligibleSurplusIds`, the escalation `rankedReductionCandidates`, the
+plan-driven `canReach`); pre-planned/triggered rosters untouched; rejected formations are not
+reserved, their orders are not cancelled, no substitute is manufactured; too few feasible
+participants declines the operation under the existing creator contract.
+
+**Source-bound Prodor diagnosis (t27, before the campaign).** Temporary env-gated trace (since
+removed), 28-week prefix `runs/...w28_n421`, consumed-input digest identical to n420.
+`rs_7th_krajina_motorized` at `op:kupres:bucovaca` = feasible=false; `rs_5th_glamo`,
+`rs_17th_klju`, `rs_11th_krupa`, `rs_15th_biha` = feasible. Resulting roster
+`rs_11th_krupa + rs_5th_glamo` (**outcome A** — a different feasible roster; no infeasible
+participant). No mutation from the feasibility calculation.
+
+**Campaign (run `n422`, `--weeks 39`, consumed-input digest `f8ace654…` identical to n419/n420;
+`final_state_hash b670cb7f159f6815`).** jan1993 **696 / 712** (n403 701; n419/n420 696).
+- vs n420: **zero** jan1993 control-cell differences (same 16 mismatches; same five vs n403). The
+  state hash differs because exactly one operation changed.
+- vs n403: same five introductions, none new, none removed: `op:bihac:orasac_2`,
+  `op:donji_vakuf:{donji_vakuf_2,korenici,oborci_2}`, `op:pale:praca`.
+- AAR count 29 -> 29, types `{sector_attack:29}` -> same. The only AAR change is
+  `vrs_2nd_krajina:Operacija Prodor:t27`: `[rs_11th_krupa, rs_7th_krajina]`
+  rr=`participants_below_assembly_floor` -> `[rs_11th_krupa, rs_5th_glamo]` rr=`zero_eligible_axis`
+  (failure -> failure, 0 attacks).
+- Admission failures: `participants_below_assembly_floor` **1 -> 0**; `zero_eligible_axis` **4 -> 5**.
+  Probe rows 163 -> 163; sector_attack rows 202 -> 202.
+- Prodor assembly: `rs_5th_glamo` ordered to `op:bihac:trubar` t27, **arrives t31** (transit t28-30);
+  `rs_11th_krupa` arrives `op:bihac:racic` t30. The staged floor (2) is met; the op fails later at
+  attack eligibility. Orašac remains RBiH.
+- Anchors: Čardak, Pješivac-Kula, Hatelji and all 11 Jajce cells match; Donji Vakuf six of eight
+  match; `prusac_2`, the three carried Donji Vakuf cells and Prača unchanged from n420.
+
+**Verdicts.** (A) P-A contract correctness: **PASS** — the targeted assembly failure is eliminated
+and the admitted roster physically assembles; no floor/deadline/power/speed/objective/reference
+change; deterministic; side-effect free. (B) January: **UNCHANGED, below the floor** — candidate
+stays UNACCEPTED, the 700 minimum is unchanged, no waiver. (C) Historical fidelity: unchanged;
+Orašac still RBiH; reference not edited.
+
+**New queued operation-system question (not bundled):** after a correct in-time assembly, why does
+Prodor still report `zero_eligible_axis` when both participants reach objective-adjacent cells by
+t31? An attack-eligibility/threshold question, distinct from P-A and from the already-queued Donji
+Vakuf/Kijevo/Kotor Varoš items.
+
+**Evidence.** `logs/routine-scope-20260918/MEASUREMENT.md` ("P-A MEASUREMENT"); this entry;
+`CALIBRATION_MASTER.md` addendum. `data/derived/latest_run_final_save.json` left dirty and
+uncommitted. No 188-week run; later territorial outcomes NOT MEASURED / DEFERRED.

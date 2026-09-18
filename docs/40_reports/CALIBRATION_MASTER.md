@@ -16,12 +16,21 @@ test on this branch.
   attack consumers on the narrow sector-attack flag. Run `n420` reproduces n419 exactly:
   `jan1993 696/712`, `final_state_hash b02b13f68127ed98` — byte-identical to n419. The gap did not
   fire (operation-type inventory is `{probe, sector_attack}` only). Committed separately.
-- **Prodor selection diagnosed, no code change.** `vrs_2nd_krajina:Operacija Prodor:t27` aborted
-  with zero attacks because commander-path participant admission has no time budget while the
-  assembly floor demands the whole roster be physically staged inside the planning window. The
-  idle `rs_1st_drvar_light_infantry` was correctly withheld under its sector-0 defensive obligation,
-  not overlooked. Fixing this needs a NEW capability and is returned as a bounded owner proposal
-  (see `logs/routine-scope-20260918/MEASUREMENT.md`), not implemented as a bug fix.
+- **P-A implemented and measured (commit `30e2793ed`; run `n422`).** Time-bounded commander
+  participant admission: a formation is admitted to an initial commander-generated roster only if the
+  production terrain-weighted column model says it can reach the operation's assembly/approach area
+  within `planning_duration + PLANNING_INVALIDATION_GRACE_TURNS`. Prodor's infeasible
+  `rs_7th_krajina_motorized` is dropped; the roster becomes `rs_11th_krupa + rs_5th_glamo`, which
+  **actually assembles** (`rs_5th_glamo` arrives `op:bihac:trubar` t31, `rs_11th_krupa` `op:bihac:racic`
+  t30). `participants_below_assembly_floor` **1 -> 0**; `zero_eligible_axis` **4 -> 5**. January is
+  **unchanged** (`696/712`, zero control-cell delta vs n420, same five vs n403) — the op now fails at
+  attack eligibility instead of assembly, so Orašac stays RBiH. Contract PASS; calibration UNCHANGED
+  and below floor; source remains UNACCEPTED. Full evidence:
+  `logs/routine-scope-20260918/MEASUREMENT.md` "P-A MEASUREMENT".
+- **Prodor selection diagnosed (no personnel/equipment experiment).** The defect was
+  reachability-vs-time, not strength: the idle `rs_1st_drvar_light_infantry` was correctly withheld
+  under its sector-0 defensive obligation, and `rs_7th_krajina_motorized` was admitted on an 8-hop
+  check with no time budget. See the P-A bullet above for the authorized correction.
 - **`op:donji_vakuf:prusac_2` remains OPEN** (existing mismatch/reference question; not repaired).
   Equal January ownership does not establish equal capture chronology. No threshold waiver.
 

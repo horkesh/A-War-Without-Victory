@@ -583,3 +583,91 @@ obligations (the Donji Vakuf/Drvar withholding stands), and the possibility of a
 No brigade/OSID/operation is hard-coded. The three queued operation questions (Donji Vakuf uncreated
 after the t31 arrival; Kijevo's handling of an unavailable axis; the Kotor Varoš timing difference)
 remain **queued, not bundled**.
+
+---
+
+# P-A MEASUREMENT — time-bounded participant admission (2026-09-18 second session, owner-authorized)
+
+**Source:** commit `30e2793ed` on `codex/january-1993-operations-20260914`. Run
+`runs/apr1992_definitive_188w__9137f75e9f35be20__w39_n422` (`--weeks 39`, exit 0, consumed-input
+digest `f8ace654…` identical to n419/n420). `final_state_hash b670cb7f159f6815`.
+
+## P-A rule implemented
+
+A formation may be admitted as an INITIAL participant in a commander-generated offensive only if,
+from its current physical state and under the existing legal movement rules, it can reach the
+operation's required assembly/approach area within the time the operation actually provides before
+assembly failure. `canFormationReachAssemblyInTime` computes production column transit
+`N = max(1, ceil(totalCost / getOsidColumnRate))` via `dijkstraFriendlyPath` (same corps-boundary
+restriction, friendly/allied/unoccupied traversal, real terrain scalars) to the union of the
+operation's objective approaches and the objective's live war-front-edge neighbours, and admits only
+when `N <= planning_duration + PLANNING_INVALIDATION_GRACE_TURNS`. That bound is exactly the
+lifecycle deadline (order written after the movement step on turn T; transit starts T+1; arrival
+T+1+N; the assembly requirement is fatal at `elapsed > planning_duration + grace`, and the movement
+step runs before `advanceSectorOffensives` on the fatal turn). Not a floor/deadline/slot/power/speed
+change; not a guarantee of launch. Applied only at commander roster admission in `emit.ts`
+(`eligibleSurplusIds`, the escalation `rankedReductionCandidates`, the plan-driven `canReach`);
+pre-planned/triggered rosters untouched.
+
+## Source-bound Prodor diagnosis (t27), before the campaign
+
+A temporary, env-gated `[PA]` trace (since removed from source; transcript preserved in this
+session's notes) on a 28-week prefix (`runs/...w28_n421`, same consumed-input digest):
+
+| candidate | location at t27 | feasible under P-A |
+|---|---|---|
+| `rs_7th_krajina_motorized` | `op:kupres:bucovaca` | **false** |
+| `rs_5th_glamo_light_infantry` | `op:glamoc:glamoc_2` | true |
+| `rs_17th_klju_light_infantry` | `op:glamoc:vidimlije_2` | true |
+| `rs_11th_krupa_light_infantry` | `op:bosanska_krupa:veliki_badic` | true |
+| `rs_15th_biha_infantry` | `op:bosanska_krupa:ivanjska_2` | true |
+
+Resulting roster: `rs_11th_krupa_light_infantry + rs_5th_glamo_light_infantry`
+(`minimum_staged_brigades 2`). **Outcome A** — a different feasible roster; no infeasible
+participant admitted.
+
+## Campaign result — n422
+
+`jan1993 696 / 712` (baseline n403 701, candidate n419/n420 696). Compared separately:
+
+- **n422 vs n420:** **zero** jan1993 control-cell differences — the same 16 mismatches, the same
+  five introduced versus n403. The state hash still differs, and exactly **one** operation changed.
+- **n422 vs n403:** the same five introductions as n419/n420, no new and no removed:
+  `op:bihac:orasac_2`, `op:donji_vakuf:{donji_vakuf_2,korenici,oborci_2}`, `op:pale:praca`.
+
+Operation AAR differences (n420 -> n422): AAR count 29 -> 29; types `{sector_attack: 29}` -> same.
+The only AAR change is `vrs_2nd_krajina:Operacija Prodor:t27`:
+`pax=[rs_11th_krupa, rs_7th_krajina] rr=participants_below_assembly_floor` ->
+`pax=[rs_11th_krupa, rs_5th_glamo] rr=zero_eligible_axis` (outcome failure -> failure, 0 attacks).
+
+Admission failures: `participants_below_assembly_floor` **1 -> 0** (the defect P-A targets is
+eliminated); `zero_eligible_axis` **4 -> 5** (weekly op-diag; AAR 0 -> 1). Probe rows 163 -> 163 and
+sector_attack rows 202 -> 202 are unchanged.
+
+**Prodor lifecycle / Orašac outcome.** `Operacija Prodor:t27` still fails, now via
+`zero_eligible_axis`, and `op:bihac:orasac_2` remains RBiH (mismatch vs the RS reference). But the
+roster it did assemble is physically correct: `rs_5th_glamo` is ordered to `op:bihac:trubar` at t27
+and **arrives t31** (in transit t28-30), `rs_11th_krupa` arrives `op:bihac:racic` t30 — the staged
+floor (2) is met. The remaining failure is therefore an attack-eligibility/threshold outcome, not an
+assembly-of-an-infeasible-roster outcome. `rs_7th_krajina` is no longer admitted (it sits at Kupres
+and is later picked up by a probe), exactly as the diagnosis predicted.
+
+**Anchors (24 cells).** Čardak (`op:zavidovici:cardak_2`), Pješivac-Kula, Hatelji and all 11 Jajce
+cells match; Donji Vakuf `jemanlici/pribraca_2/komar_2/kutanja/babin_potok_2/torlakovac_2` match;
+`prusac_2` and the three carried Donji Vakuf cells and Prača are unchanged from n420. No defensive
+commitment moved.
+
+## Verdict
+
+- **A. P-A contract correctness — PASS.** The diagnosed `participants_below_assembly_floor` failure
+  is eliminated; the admitted roster actually assembles on schedule; no floor/deadline/power/speed
+  change; no hard-coding; deterministic; side-effect free.
+- **B. January calibration — UNCHANGED, below the floor.** 696/712, no new mismatch, none removed.
+  The movement candidate remains **UNACCEPTED**; the 700 floor is unchanged; no waiver.
+- **C. Historical fidelity — unchanged.** Orašac still RBiH; the anchor set is unchanged; the
+  reference is not edited.
+
+**New operation-system question (queued, not bundled):** after a correct in-time assembly, why does
+Prodor still report `zero_eligible_axis` at t34 when both participants reach objective-adjacent
+cells (trubar/racic) by t31? That is an attack-eligibility/threshold question, distinct from P-A and
+distinct from the already-queued Donji Vakuf/Kijevo/Kotor Varoš items.
