@@ -482,6 +482,82 @@ describe('evaluateSectorMarch — tooth guard', () => {
         expect(ctx.result.column_march_orders['brig_test']).toBe(safe);
     });
 
+    it('Test 1c (policy 2026-09-17): an ASSIGNED brigade is not trap-rerouted outside its sub-segment', () => {
+        // Same topology as Test 1, but the brigade carries a valid `assigned_sub_segment_id`
+        // for the sole-OSID tooth sub-segment. Under the chosen policy, discretionary front
+        // repositioning is confined to the assigned sub-segment, so the corps-wide trap reroute
+        // to `safe` (a different sub-segment) is not a legal routine destination: no march is
+        // issued and the brigade holds at its current position.
+        //
+        // RECONCILIATION: this supersedes Test 1/Test 1b's cross-sub-segment reroute expectation
+        // FOR AN ASSIGNED brigade. Test 1/Test 1b remain valid for the missing-assignment
+        // (unrestricted) special case.
+        const tooth = 'op:kalinovik:sela_2' as Osid;
+        const safe = 'op:kalinovik:safe_2' as Osid;
+        const loc = 'op:jablanica:jablanica_2' as Osid;
+
+        const assignedSubSegments: CorpsFrontSector['sub_segments'] = [{
+            sub_segment_id: 'subseg:vrs_test_corps:0',
+            edge_ids: ['e1'],
+            enemy_osids: ['op:rbih:enemy_1'],
+            friendly_osids: [tooth],
+            primary_brigade_ids: [],
+            length_edges: 1,
+        }];
+        const safeSubSegments: CorpsFrontSector['sub_segments'] = [{
+            sub_segment_id: 'subseg:vrs_test_corps:1',
+            edge_ids: ['e2'],
+            enemy_osids: ['op:rbih:enemy_2'],
+            friendly_osids: [safe],
+            primary_brigade_ids: [],
+            length_edges: 1,
+        }];
+
+        const adjacency = new Map<Osid, Osid[]>();
+        adjacency.set(loc, [safe, tooth]);
+        adjacency.set(tooth, [loc]);
+        adjacency.set(safe, [loc]);
+
+        const state = makeState('brig_test', loc, assignedSubSegments, {
+            [loc]: FACTION,
+            [tooth]: FACTION,
+            [safe]: FACTION,
+        });
+        state.military.corps_front_sectors![`sector:${CORPS_ID}:1`] = {
+            sector_id: `sector:${CORPS_ID}:1`,
+            corps_id: CORPS_ID as any,
+            faction: FACTION,
+            opposing_factions: ['RBiH' as FactionId],
+            edge_ids: ['e2'],
+            sub_segments: safeSubSegments,
+            length_edges: 1,
+            territory_osids: [safe],
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+            density: 0,
+            threat_ratio: 1.0,
+            defensive_power: 0,
+            sector_stance: 'defend',
+            stance_source: 'bot',
+        };
+
+        const riskyAnalysis = makeOsidAnalysis(
+            tooth,
+            ['op:rbih:e1', 'op:rbih:e2', 'op:rbih:e3', 'op:rbih:e4', 'op:rbih:e5', 'op:rbih:e6', 'op:rbih:e7'],
+            ['op:rs:friendly_1']
+        );
+        const safeAnalysis = makeOsidAnalysis(safe, ['op:rbih:e1'], ['op:rs:f1', 'op:rs:f2', 'op:rs:f3']);
+        const graphAnalysis = makeGraphAnalysis([[tooth, riskyAnalysis], [safe, safeAnalysis]]);
+
+        const ctx = makeCtx({ loc, subSegments: assignedSubSegments, state, adjacency, graphAnalysis });
+        ctx.brigade.assigned_sub_segment_id = 'subseg:vrs_test_corps:0' as never;
+
+        const returned = evaluateSectorMarch(ctx);
+
+        expect(returned).toBe(false);
+        expect(ctx.result.column_march_orders['brig_test']).toBeUndefined();
+    });
+
     it('Test 2: single-tooth NON-risky (1 enemy, 3 friendly) → march IS issued, returns true', () => {
         // Same topology but the tooth is safe: only 1 enemy neighbor and 3 friendly.
         // Guard must NOT fire; march proceeds normally.

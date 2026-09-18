@@ -25,6 +25,8 @@ Every writer of `sector_reassignment_orders`, `brigade_movement_orders`, `brigad
 | `src/sim/combat/commander/decide.ts` | T1 | Computes commander intent, including one legal same-corps donor for each empty staffable front sector. |
 | `src/sim/combat/commander/emit.ts` | T1 | Emits `sector_reassignment_orders`; direct empty-sector relief has precedence over generic reserve shifts and is deduplicated by brigade. |
 | `src/sim/combat/bot_corps_ai.ts` | T1 | Produces corps directives and invokes the commander loop from `generate-bot-corps-orders`. |
+| `src/sim/combat/brigade_routine_scope.ts` | T2/T3/T6 shared | Single side-effect-free routine-movement scope and authority decision consumed by all three tiers (see section 2a). Decides nothing strategic and mutates nothing. |
+| `src/sim/combat/operation_approach_osids.ts` | Shared predicate | Operation approach/staging geometry (`getSectorOffensiveApproachOsids`), used by both the attack evaluator and the scope decision so the two cannot diverge. |
 | `src/sim/combat/bot_brigade_ai_osid.ts` | T2 | Converts sector reassignments and other legal staff intent into movement orders during `generate-bot-brigade-orders`. |
 | `src/sim/combat/bot_brigade_eval_front.ts` | T2 | Chooses a reachable destination on the assigned sector front. |
 | `src/sim/combat/bot_brigade_eval_movement.ts` | T2 | Handles rear-area repositioning within legal friendly connectivity. |
@@ -39,6 +41,54 @@ Every writer of `sector_reassignment_orders`, `brigade_movement_orders`, `brigad
 | `src/sim/combat/brigade_front_distribution.ts` | T6 | Performs bounded local front distribution without paper transfers. |
 | `src/sim/combat/brigade_home_return.ts` | T6 | Routes eligible idle displaced brigades home. |
 | `src/sim/combat/corps_front_sectors.ts` | Derived truth | Classifies only roster-eligible, legally reachable formations as potential sector staff and marks a sector `unstaffed_front` when no legal donor exists. |
+
+## 2a. Routine movement scope (selected 2026-09-18)
+
+Canon previously did not settle whether the legal march scope of a non-operation line brigade
+was its **assigned sub-segment**, its **sector**, or its **corps**. Section 2 said T2 chooses "on
+the assigned sector front"; section 4 let T6 repair inside "assignment bounds"; the T2 code pooled
+every sub-segment of the corps while T6 validated only `assigned_sub_segment_id`. The two tiers
+therefore never converged on a brigade whose assigned sub-segment was a single OSID: T2 issued a
+destination T6 rejected, T3 created a transit, T6 cancelled it and T2 reissued it, indefinitely —
+and the spurious intra-turn transit made the brigade look unavailable to operation admission.
+This section records the choice made to end that contradiction. It was a policy decision, not the
+restoration of an existing rule.
+
+**Policy.** For an ordinary line brigade with a valid current `assigned_sub_segment_id`,
+discretionary front repositioning is limited to the friendly front destinations of that assigned
+sub-segment. Tactical routing does not implicitly reassign the brigade to another sub-segment,
+sector or corps.
+
+**Single owner.** `src/sim/combat/brigade_routine_scope.ts` is the one side-effect-free decision;
+T2 (order production), T3 (`osid_column_movement` pending-order → transit revalidation) and T6
+(`commander_march_correction`) all consult it rather than each approximating the boundary.
+
+**Three distinctions it must keep making:**
+
+1. *Routine discretionary movement* under a valid line assignment — restricted.
+2. *Movement backed by an actual existing higher-priority authority* — exempt. This covers active
+   operation staging and approach OSIDs, and any sector the corps commander names for the brigade
+   via `sector_reassignment_orders`, `priority_sector_id` or `reinforce_sector_ids`, as well as
+   authored pre-planned pre-staging, player orders and reserve/loan lifecycle movement.
+3. *Missing or stale assignments, reserves and other established special cases* — unrestricted,
+   with their prior behaviour preserved.
+
+**This policy is not a garrison rule.** A restricted brigade may still cross intermediate cells:
+the restriction applies to the routine **destination**, never to every node of a permitted route.
+Several movement helpers return the *first step* of a multi-hop path rather than a destination;
+scope-checking such a return value forbids legal journeys and is a defect, not an enforcement of
+this policy. Likewise `friendly_osids` and `enemy_osids` are disjoint, so a set of enemy offensive
+targets is scoped by **adjacency** to a legally occupiable cell, never by intersection.
+
+**`owner: 'bot_discretionary'` does not mean "routine."** The T2 aggregator stamps that tag on
+every evaluator's output alike, so it distinguishes bot orders from authored ones and nothing
+more. Authority exemptions, not the tag, decide whether the T3 revalidation applies.
+
+**Single-cell assignment.** When a brigade's assigned sub-segment contains only its current
+location and no authorized alternative destination exists, no discretionary relocation is emitted.
+The brigade stays physically where it is; no transit or completed move is fabricated, and its
+staffed position is not reported unstaffed. This is not a statement that the position should be
+held forever — leaving requires an authorized order or a combat consequence.
 
 ## 3. Empty-sector relief lifecycle
 

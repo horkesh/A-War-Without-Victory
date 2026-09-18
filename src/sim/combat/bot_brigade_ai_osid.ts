@@ -26,13 +26,11 @@ import type {
     BrigadeMovementOrder,
     BrigadePosture,
     CorpsFrontSector,
-    CorpsOperation,
     CorpsStance,
     FactionId,
     FormationId,
     FormationState,
     GameState,
-    OperationAxis,
 } from '../../state/game_state.js';
 import { getFormationTier, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -53,7 +51,7 @@ import {
     type Osid
 } from './osid_adjacency.js';
 import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
-import { areRbihHrhbAllied, isFriendlyFaction } from '../early_war/alliance_update.js';
+import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
 import { shouldGrazBlockAttack, isGrazAccordsActive, isEastHerzegovinaPair } from '../local_truces.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { getEffectiveSupplyState } from '../../state/supply_reserves.js';
@@ -239,21 +237,17 @@ interface BrigadeContext {
 // Operation helpers (private to orchestrator)
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Find the axis a brigade belongs to, or null if flat/not found. */
-export function getBrigadeAxis(op: CorpsOperation, brigadeId: FormationId): OperationAxis | null {
-    const axes = op.axes;
-    if (!Array.isArray(axes) || axes.length === 0) return null;
-    return axes.find(a => a.assigned_brigades.includes(brigadeId)) ?? null;
-}
-
-/** Check if a brigade participates in the operation (axis-aware). */
-export function isOperationParticipant(op: CorpsOperation, brigadeId: FormationId): boolean {
-    const axes = op.axes;
-    if (Array.isArray(axes) && axes.length > 0) {
-        return axes.some(a => a.assigned_brigades.includes(brigadeId));
-    }
-    return op.participating_brigades.includes(brigadeId);
-}
+// `getBrigadeAxis`, `isOperationParticipant` and `getSectorOffensiveApproachOsids` now live in
+// the leaf module `operation_approach_osids.ts`, so that `brigade_routine_scope.ts` can share the
+// SAME operation-approach predicate the attack evaluator uses without creating an import cycle
+// (this file imports the evaluators, and the evaluators import the scope module).
+// Owner packet 2026-09-18. Re-exported here so every existing import path is unchanged.
+import {
+    getBrigadeAxis,
+    isOperationParticipant,
+    getSectorOffensiveApproachOsids,
+} from './operation_approach_osids.js';
+export { getBrigadeAxis, isOperationParticipant, getSectorOffensiveApproachOsids };
 
 export function isPinnedActiveOperationAttacker(state: GameState, brigadeId: FormationId): boolean {
     // Joint and enclave operations are stored only on the hosting corps. A
@@ -304,55 +298,6 @@ export function getSectorOffensiveCurrentObjective(
         : null;
 }
 
-export function getSectorOffensiveApproachOsids(
-    state: GameState,
-    activeOp: import('../../state/game_state.js').CorpsOperation,
-    faction: FactionId,
-    adjacency: Map<Osid, Osid[]>,
-    reverseMap: OperationalToCanonicalReverseMap,
-    brigadeId?: FormationId,
-): Set<Osid> {
-    const axis = brigadeId ? getBrigadeAxis(activeOp, brigadeId) : null;
-    const objectives = axis ? axis.objectives : (activeOp.objectives ?? []);
-    const currentIdx = axis ? axis.current_objective_index : (activeOp.current_objective_index ?? 0);
-    const approachOsids = new Set<Osid>();
-    for (const objective of objectives.slice(currentIdx)) {
-        for (const neighbor of getTacticalAdjacentOsids(state, objective as Osid, adjacency)) {
-            const neighborController = getPoliticalControllerOSID(state, neighbor, reverseMap);
-            if (neighborController === faction || isFriendlyFaction(neighborController, faction, state)) {
-                approachOsids.add(neighbor);
-            }
-        }
-        if (approachOsids.size > 0) {
-            break;
-        }
-    }
-    // Wave 10 fallback: tactical_adjacency ∪ war_front_edges_osid is under-authored
-    // for HVO–VRS deep targets (Kupres / Glamoč / Jajce zones). When the stricter
-    // graph yields no friendly approach OSIDs, fall through to the corps's front
-    // sector sub-segment scan — the permissive check used by the launch gate
-    // (sector_offensive.ts collectAdjacentFriendlyOsids). Without this fallback
-    // the launch gate passes but per-turn brigade brain stalls, producing
-    // spawned-no-attack ops with no_logged_attempt recovery_reason.
-    if (approachOsids.size === 0 && state.military.corps_front_sectors && brigadeId) {
-        const corpsId = state.military.formations?.[brigadeId]?.corps_id;
-        if (corpsId) {
-            for (const objective of objectives.slice(currentIdx)) {
-                for (const sector of Object.values(state.military.corps_front_sectors)) {
-                    if (sector.corps_id !== corpsId) continue;
-                    for (const subSegment of sector.sub_segments) {
-                        if (!subSegment.enemy_osids.includes(objective as string)) continue;
-                        for (const fo of subSegment.friendly_osids) {
-                            approachOsids.add(fo as Osid);
-                        }
-                    }
-                }
-                if (approachOsids.size > 0) break;
-            }
-        }
-    }
-    return approachOsids;
-}
 
 export function getSectorOffensiveProbeThreshold(
     activeOp: import('../../state/game_state.js').CorpsOperation,

@@ -299,6 +299,10 @@ describe('evaluateSectorMarch — retroactive tooth eviction guard', () => {
         // No pendingMove, not disrupted, not must_hold.
         // Safe OSID in same corps, directly adjacent.
         // Expected: eviction fires, column_march_orders set to safe, returns true.
+        //
+        // NOTE (policy 2026-09-17): this fixture has NO `assigned_sub_segment_id`, so it exercises
+        // the established missing-assignment (unrestricted) special case. For an ASSIGNED brigade
+        // the eviction is confined to the assigned sub-segment — see Test 8.
 
         const ctx = makeEvictionCtx();
         const returned = evaluateSectorMarch(ctx);
@@ -544,6 +548,26 @@ describe('evaluateSectorMarch — retroactive tooth eviction guard', () => {
 
         expect(returned).toBe(true);
         expect(ctx.result.column_march_orders['brig_evict_test']).toBe(SAFE_OSID);
+    });
+
+    it('Test 8 (policy 2026-09-17): an ASSIGNED brigade is not evicted outside its sub-segment', () => {
+        // POLICY (owner packet 2026-09-17): for an ordinary line brigade with a valid current
+        // `assigned_sub_segment_id`, discretionary front repositioning is limited to the friendly
+        // front destinations of THAT sub-segment. Here the brigade is assigned to the sole-OSID
+        // tooth sub-segment, so SAFE (a different sub-segment) is out of scope and NO eviction
+        // order may be emitted — the brigade holds at its assigned front.
+        //
+        // RECONCILIATION: this supersedes Test 1/Test 7's cross-sub-segment expectation FOR AN
+        // ASSIGNED brigade. Those tests stay valid as the established special case where no
+        // assignment exists (missing assignment ⇒ unrestricted, the production default for
+        // reservists/orphans). See brigade_routine_scope.test.ts for the composed pipeline.
+        const ctx = makeEvictionCtx({
+            brigadeOverrides: { assigned_sub_segment_id: `subseg:${CORPS_ID}:0` },
+        });
+        const returned = evaluateSectorMarch(ctx);
+
+        expect(returned).toBe(false);
+        expect(ctx.result.column_march_orders['brig_evict_test']).toBeUndefined();
     });
 
 });

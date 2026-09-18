@@ -40,6 +40,7 @@ import type { OperationalToCanonicalReverseMap } from '../../data/operational_da
 import type { Osid } from './osid_adjacency.js';
 import type { FactionGraphAnalysis } from './osid_graph_analysis.js';
 import { isMovementDestinationRisky, countFactionBrigadesAtOsid } from './bot_brigade_context.js';
+import { filterToRoutineScope, resolveRoutineMovementScope } from './brigade_routine_scope.js';
 
 /** Subset of OsidBotOrdersResult used by movement functions (avoids circular import). */
 interface MovementOrdersAccumulator {
@@ -360,7 +361,16 @@ export function issueInteriorMovement(
 ): boolean {
     const hopsToFront = computeHopsToFront(loc, faction, adjacency, state, reverseMap, graphAnalysis);
     const corpsFrontTargets = getEffectiveCorpsFrontTargets(state, brigade);
-    const restrictedTargets = corpsFrontTargets.size > 0 ? corpsFrontTargets : undefined;
+    // ROUTINE SCOPE (owner packet 2026-09-17): discretionary front repositioning is limited to
+    // the formation's assigned sub-segment front when it has a valid assignment. Unassigned /
+    // reserve / stale / non-line formations keep the corps-wide reach. When restricted and the
+    // intersection is empty we pass the empty set (never `undefined`) so the caller cannot fall
+    // back to a faction-wide hunt.
+    const routineScope = resolveRoutineMovementScope(state, brigade);
+    const scopedCorpsFrontTargets = filterToRoutineScope(routineScope, corpsFrontTargets);
+    const restrictedTargets = routineScope.restricted
+        ? scopedCorpsFrontTargets
+        : (corpsFrontTargets.size > 0 ? corpsFrontTargets : undefined);
 
     // Anti-oscillation: if brigade is only 1 hop from front but has been at this location
     // for multiple turns (entrenchment_turns > 0), use column march instead of 1-hop.

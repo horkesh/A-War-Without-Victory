@@ -35,65 +35,20 @@
  * Deterministic: sorted iteration via strictCompare, no Math.random(), no timestamps.
  */
 
-import type { CorpsOperation, FactionId, FormationId, GameState, OperationAxis } from '../../state/game_state.js';
+import type { FactionId, FormationId, GameState } from '../../state/game_state.js';
 import { bfsDistance } from './sector_utils.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
-
-function axisForBrigade(op: CorpsOperation, brigadeId: FormationId): OperationAxis | undefined {
-    return op.axes?.find((axis) => axis.assigned_brigades.includes(brigadeId));
-}
-
-function activeOperationRelevantDestination(
-    state: GameState,
-    brigadeId: FormationId,
-    destinationOsid: string,
-    adjacency: Map<string, string[]>,
-): boolean {
-    const formation = state.military.formations?.[brigadeId];
-    const corpsId = formation?.corps_id;
-    if (!corpsId) return false;
-    const cmd = state.military.corps_command?.[corpsId];
-    if (!cmd) return false;
-
-    const pc = state.political?.political_controllers ?? {};
-    for (const op of cmd.active_operations ?? []) {
-        if (op.phase !== 'planning' && op.phase !== 'execution') continue;
-        const axis = axisForBrigade(op, brigadeId);
-        const participates = axis
-            ? true
-            : op.participating_brigades.includes(brigadeId);
-        if (!participates) continue;
-
-        const stagingOsid = axis?.staging_osid ?? op.staging_osid;
-        if (stagingOsid === destinationOsid) return true;
-
-        const objectives = axis?.objectives ?? op.objectives ?? [];
-        const currentIndex = axis?.current_objective_index ?? op.current_objective_index ?? 0;
-        for (const objective of objectives.slice(currentIndex)) {
-            if (!adjacency.get(objective)?.includes(destinationOsid)) continue;
-            const controller = pc[destinationOsid];
-            if (controller === formation.faction) return true;
-        }
-    }
-    return false;
-}
+import {
+    isDestinationAuthorizedByOperation,
+    isMovementAuthorizedByCorpsReassignment,
+    resolveRoutineMovementScope,
+} from './brigade_routine_scope.js';
 
 export function correctMarchOrders(state: GameState, adjacency: Map<string, string[]>): void {
     const formations = state.military.formations ?? {};
     const moveOrders = state.military.brigade_movement_orders ?? {};
     const moveStates = state.military.brigade_movement_state ?? {};
-    const sectors = state.military.corps_front_sectors ?? {};
-
-    // Build sub-segment lookup: sub_segment_id → friendly_osids
-    const subSegFrontOsids = new Map<string, string[]>();
-    for (const sector of Object.values(sectors)) {
-        for (const ss of sector.sub_segments ?? []) {
-            if (ss.friendly_osids.length > 0) {
-                subSegFrontOsids.set(ss.sub_segment_id, ss.friendly_osids);
-            }
-        }
-    }
 
     // Build friendly OSID set per faction for BFS pathing
     const friendlyByFaction = new Map<FactionId, Set<string>>();
@@ -107,26 +62,26 @@ export function correctMarchOrders(state: GameState, adjacency: Map<string, stri
 
     for (const [bid, f] of Object.entries(formations).sort(([a], [b]) => strictCompare(a, b))) {
         if (!f || f.status === 'inactive') continue;
-        const ssId = f.assigned_sub_segment_id;
-        if (!ssId) continue;
-
-        const frontOsids = subSegFrontOsids.get(ssId);
-        if (!frontOsids || frontOsids.length === 0) continue;
+        // Shared authority decision: only a valid assigned sub-segment restricts routine scope.
+        const scope = resolveRoutineMovementScope(state, f, 'correction');
+        if (!scope.restricted) continue;
+        const frontOsids = scope.destinations;
 
         const loc = f.location_osid;
         if (!loc) continue;
 
         // Being on the assigned front only proves the current location is valid;
         // a stale order can still drag the brigade away next turn.
-        const atAssignedFront = frontOsids.includes(loc);
+        const atAssignedFront = frontOsids.has(loc);
 
         // Check if there's a march order pointing to wrong destination
         const order = moveOrders[bid];
         if (!order) continue;
         const dest = order.destination_sids?.[0];
         if (!dest) continue;
-        if (frontOsids.includes(dest)) continue; // Destination already correct
-        if (activeOperationRelevantDestination(state, bid as FormationId, dest, adjacency)) continue;
+        if (frontOsids.has(dest)) continue; // Destination already correct
+        if (isDestinationAuthorizedByOperation(state, bid, dest, adjacency)
+            || isMovementAuthorizedByCorpsReassignment(state, f, dest, adjacency)) continue;
         if (atAssignedFront) {
             delete state.military.brigade_movement_orders?.[bid];
             continue;
@@ -167,17 +122,6 @@ export function correctMarchOrders(state: GameState, adjacency: Map<string, stri
 export function correctTransitStates(state: GameState, adjacency: Map<string, string[]>): void {
     const formations = state.military.formations ?? {};
     const moveStates = state.military.brigade_movement_state ?? {};
-    const sectors = state.military.corps_front_sectors ?? {};
-
-    // Build sub-segment lookup: sub_segment_id → friendly_osids
-    const subSegFrontOsids = new Map<string, string[]>();
-    for (const sector of Object.values(sectors)) {
-        for (const ss of sector.sub_segments ?? []) {
-            if (ss.friendly_osids.length > 0) {
-                subSegFrontOsids.set(ss.sub_segment_id, ss.friendly_osids);
-            }
-        }
-    }
 
     // Build friendly OSID set per faction for BFS pathing
     const friendlyByFaction = new Map<string, Set<string>>();
@@ -191,11 +135,9 @@ export function correctTransitStates(state: GameState, adjacency: Map<string, st
 
     for (const [bid, f] of Object.entries(formations).sort(([a], [b]) => strictCompare(a, b))) {
         if (!f || f.status === 'inactive') continue;
-        const ssId = f.assigned_sub_segment_id;
-        if (!ssId) continue;
-
-        const frontOsids = subSegFrontOsids.get(ssId);
-        if (!frontOsids || frontOsids.length === 0) continue;
+        const scope = resolveRoutineMovementScope(state, f, 'correction');
+        if (!scope.restricted) continue;
+        const frontOsids = scope.destinations;
 
         // Only act on brigades currently in transit
         const transitState = moveStates[bid];
@@ -211,8 +153,8 @@ export function correctTransitStates(state: GameState, adjacency: Map<string, st
 
         const transitDest = transitState.destination_sids?.[0];
         if (!transitDest) continue;
-        const brigadeAlreadyAtValidFront = frontOsids.includes(loc);
-        if (frontOsids.includes(transitDest)) {
+        const brigadeAlreadyAtValidFront = frontOsids.has(loc);
+        if (frontOsids.has(transitDest)) {
             // Destination is in assigned front OSIDs, but check if it is now an isolated island.
             // A corridor collapse can leave the destination with 0 friendly-controlled neighbors;
             // continuing transit would strand the brigade on an unreachable island.
@@ -225,13 +167,14 @@ export function correctTransitStates(state: GameState, adjacency: Map<string, st
         // Wrong transit destination — cancel transit state first, then issue corrected order
         if (
             brigadeAlreadyAtValidFront
-            && !frontOsids.includes(transitDest)
-            && activeOperationRelevantDestination(state, bid as FormationId, transitDest, adjacency)
+            && !frontOsids.has(transitDest)
+            && (isDestinationAuthorizedByOperation(state, bid, transitDest, adjacency)
+                || isMovementAuthorizedByCorpsReassignment(state, f, transitDest, adjacency))
         ) {
             continue;
         }
 
-        if (brigadeAlreadyAtValidFront && !frontOsids.includes(transitDest)) {
+        if (brigadeAlreadyAtValidFront && !frontOsids.has(transitDest)) {
             delete moveStates[bid];
             delete state.military.brigade_movement_orders?.[bid];
             continue;

@@ -55,6 +55,9 @@ import { buildOsidAdjacency, type Osid } from './osid_adjacency.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { whenReasonCodeTopic } from './reason_code_debug.js';
+import {
+    isRoutineScopeEnforcedForOrder,
+} from './brigade_routine_scope.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Corps boundary helpers
@@ -311,6 +314,7 @@ export interface OsidColumnMovementReport {
             | 'missing_location'
             | 'invalid_destination'
             | 'destination_equals_location'
+            | 'routine_destination_out_of_scope'
             | 'no_friendly_path';
         location_osid: string | null;
         destination_osid: string | null;
@@ -493,6 +497,25 @@ export function processOsidColumnMovement(
         }
         if (destOsid === loc) {
             recordRejection(formationId, 'destination_equals_location', f, loc, destOsid);
+            delete movementOrders[formationId];
+            continue;
+        }
+
+        // ROUTINE SCOPE REVALIDATION (movement authority, owner packet 2026-09-17/18). At the
+        // transition from pending order to transit, a ROUTINE discretionary order must still
+        // satisfy its formation's current assigned sub-segment scope before any
+        // brigade_movement_state is written — so a prohibited routine journey never creates the
+        // transit that would falsely make the brigade unavailable to operation admission
+        // (`check-triggered-operations` runs later this same turn).
+        //
+        // `isRoutineScopeEnforcedForOrder` is the shared decision and is the ONLY thing that
+        // decides applicability: `owner: 'bot_discretionary'` marks bot output rather than
+        // routine output, so it exempts destinations backed by an active operation or by a
+        // corps directive that names a sector. Accept/reject only — this never chooses a new
+        // destination and never relocates anyone.
+        if (isRoutineScopeEnforcedForOrder(state, f, order, adjacency, reverseMap)) {
+            report.column_blocked += 1;
+            recordRejection(formationId, 'routine_destination_out_of_scope', f, loc, destOsid);
             delete movementOrders[formationId];
             continue;
         }

@@ -1,6 +1,12 @@
 import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
 import { findNearestFriendlyOsidInSet, isMovementDestinationRisky } from './bot_brigade_context.js';
 import { issueInteriorMovement, findNearestOffensiveTarget } from './bot_brigade_movement_ai.js';
+import {
+    filterOffensiveTargetsToRoutineScope,
+    filterToRoutineScope,
+    isDestinationInRoutineScope,
+    resolveRoutineMovementScope,
+} from './brigade_routine_scope.js';
 import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
 
 const INTERIOR_MOVEMENT_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval.interiorMovement';
@@ -29,6 +35,9 @@ function interiorMovementProfileTime<T>(labelSuffix: string, fn: () => T): T {
  */
 export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, loc, faction, adjacency, state, reverseMap, graphAnalysis, directive, result, columnAssignments } = ctx;
+    // Shared routine-movement scope: discretionary repositioning is limited to the assigned
+    // sub-segment front. Unassigned/reserve/stale formations keep the corps-wide reach.
+    const routineScope = resolveRoutineMovementScope(state, brigade);
 
     // First: if directive has a priority sector, march toward it (offensive concentration).
     if (interiorMovementProfileTime('.prioritySector', () => {
@@ -39,6 +48,13 @@ export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean
             for (const ss of prioritySec.sub_segments) {
                 for (const o of ss.friendly_osids) priorityOsids.add(o);
             }
+            // NOT routine-scoped: `priority_sector_id` is the corps commander naming a sector for
+            // offensive concentration — an existing higher-priority authority, like Rule 5b2 and
+            // Rule 5c. Narrowing it would empty the set whenever the priority sector is not the
+            // brigade's own (the normal case) and leave a full-component BFS running for nothing.
+            // This rule writes a single-hop `movement_order`, which T3 never revalidates (it skips
+            // anything without `stance:'column'`) and which does not survive to T6, so it needs no
+            // authority exemption downstream.
             if (!priorityOsids.has(loc)) {
                 const dest = findNearestFriendlyOsidInSet(
                     state, faction, loc, adjacency, reverseMap, priorityOsids
@@ -55,7 +71,16 @@ export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean
 
     if (interiorMovementProfileTime('.offensiveTarget', () => {
         if (!directive || directive.offensive_targets.length === 0) return false;
-        const targetSet = new Set(directive.offensive_targets);
+        // Scope the ENEMY goal set by adjacency to a legally occupiable cell — never the value
+        // `findNearestOffensiveTarget` returns, which is the FIRST STEP of an up-to-30-hop path.
+        // Scope-checking that first step forbids every legal multi-hop journey (including a
+        // brigade simply walking out of the interior toward its own assigned front) and, because
+        // this block returns true regardless, also suppressed the `.ownCorpsFront` and
+        // `.fallback` rules below it — freezing the formation outright.
+        const targetSet = filterOffensiveTargetsToRoutineScope(
+            routineScope, new Set(directive.offensive_targets), adjacency,
+        );
+        if (targetSet.size === 0) return false;
         const directiveTarget = findNearestOffensiveTarget(state, faction, loc, targetSet, adjacency, reverseMap, 30);
         if (directiveTarget) {
             if (!isMovementDestinationRisky(directiveTarget, graphAnalysis)) {
@@ -81,10 +106,11 @@ export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean
                 for (const osid of subSegment.friendly_osids ?? []) ownCorpsFrontOsids.add(osid);
             }
         }
-        if (insideOwnCorpsTerritory && ownCorpsFrontOsids.size > 0) {
-            if (!ownCorpsFrontOsids.has(loc)) {
+        const scopedOwnCorpsFrontOsids = filterToRoutineScope(routineScope, ownCorpsFrontOsids);
+        if (insideOwnCorpsTerritory && scopedOwnCorpsFrontOsids.size > 0) {
+            if (!scopedOwnCorpsFrontOsids.has(loc)) {
                 const dest = findNearestFriendlyOsidInSet(
-                    state, faction, loc, adjacency, reverseMap, ownCorpsFrontOsids,
+                    state, faction, loc, adjacency, reverseMap, scopedOwnCorpsFrontOsids,
                 );
                 if (dest && !isMovementDestinationRisky(dest, graphAnalysis)) {
                     result.movement_orders[brigade.id] = dest;
