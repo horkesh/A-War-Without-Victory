@@ -6227,3 +6227,72 @@ uncommitted. No 188-week campaign; later territorial effects NOT MEASURED / DEFE
 
 **Evidence.** `logs/routine-scope-20260918/CANDIDATE_REVIEW.md` (review across three passes) and
 `logs/routine-scope-20260918/MEASUREMENT.md` (this measurement, with its stated limits).
+
+
+## 2026-09-18 (2) — Operation-authority type gap closed; Prodor selection diagnosed (no correction; bounded proposal)
+
+**Packet.** Resume the movement candidate; close its operation-authority type gap separately; diagnose
+Prodor's participant selection. Movement candidate retained as the working DEVELOPMENT candidate,
+still UNACCEPTED; no revert, no floor change, no waiver, no new risky-tooth mechanism.
+
+**A. Operation-authority type gap — REPRODUCED and FIXED (separate commit `8f5998595`).**
+`isActiveSectorOperationParticipant` (`bot_brigade_ai_osid.ts:514-516`) is true only for
+`sector_attack`/`probe`, but T3/T6 `isDestinationAuthorizedByOperation` authorises any active
+planning/execution operation's staging/approach destinations. A `general_offensive` or `feint`
+participant could therefore have movement narrowed at T2 while T3/T6 would have allowed it, violating
+the selected rule that valid operation movement retains its authority. Fixed by adding
+`hasActiveOperationCommitment` (any-type membership), a shared `getOperationAuthorizedDestinations`
+builder and `withOperationAuthorizedDestinations` in `brigade_routine_scope.ts`, switching ONLY the
+movement consumers (`evaluateSectorMarch`, `evaluateReturnToCorps`, `evaluatePocketEvacuation`,
+`evaluateReserve`, plus the two T2 scope sites `evaluateFrontCoverage` / `evaluateInteriorMovement`).
+Attack consumers keep the narrow flag, so no `feint`/`strategic_defense`/`reorganization` formation
+gains attack-evaluator behaviour. `isDestinationAuthorizedByOperation` now shares the builder,
+behaviour-identical at T3/T6. Failing-before/passing-after: new producer-to-executor cases I3-I8 in
+`tests/brigade_routine_scope.test.ts` fail on HEAD src (I3/I4/I8) and pass after; no assertion
+weakened; two fixtures that set only the old boolean now also set a real `activeOp`. Independent
+review found one strict-null error in the new test, fixed pre-commit. Not a cause of the -5:
+operation-type inventory is `{probe, sector_attack}` in n403/n419.
+
+**B. Prodor selection — exact causal explanation (no personnel/equipment/combat experiment; the input
+was reachability-vs-time, not strength).** `vrs_2nd_krajina:Operacija Prodor:t27` is a
+commander-generated op (`findLocalOccupationCandidate`, `commander/emit.ts:316,422-664` →
+`buildCommanderOperation`, `:1935`); it has NO `staging_osid`. Roster comes from
+`allocation.surplus_pool`; `rs_1st_drvar_light_infantry` was correctly withheld — garrison-locked as
+the front holder of `sector:vrs_2nd_krajina:0`, whose front contains the objective's own approach
+cells, so donating it would have left its front unstaffed (it is not categorically ineligible: the
+baseline Bunar:t25 selected it from the same front). `rs_7th_krajina_motorized` ranked first among
+eligible donors by `fitness_offense` (personnel 1112 motorized vs 854 mountain), with distance a
+lower-order key. The creator admits participants on an 8-hop BFS (`MAX_REACHABILITY_HOPS`,
+`emit.ts:1803-1864`), PROJECTS unstaged participants onto approach OSIDs for its prediction
+(`:557-596`), and sets `minimum_staged_brigades = reductionParticipants.length` (`:1957-1961`); the
+executor's floor counts only brigades CURRENTLY adjacent to the objective
+(`countAdjacentStagedParticipants`, `sector_offensive_launch_helpers.ts:609-623,1013-1021`).
+`bucovaca → trubar` is 8 hops at motorized column rate 2 and cannot complete inside
+`planning_duration 3 + grace 2`; `rs_11th` reached `racic` at t30 (staged 1), `rs_7th` never arrived,
+and at t33 the elapsed>5 early invalidation aborted the op (`participants_below_assembly_floor`, zero
+attacks). Not a blocked march: T3/T6 exempted the operation-authorized transit throughout
+planning/execution; the transit was cleared only after the op entered recovery. The pre-existing T6
+hazard (exemption gated behind `brigadeAlreadyAtValidFront`, `commander_march_correction.ts:168-181`)
+is confirmed but did not fire.
+
+**C. Existing-contract correction vs policy proposal.** The Prodor trace follows the current
+policy/structure — the floor, the garrison lock and the donor ranking all behave as specified. The
+defect is structural (selection with no time budget vs a whole-roster staged floor). This requires a
+NEW capability, so it is returned as a bounded owner proposal (P-A: time-bounded participant
+admission mirroring the pre-planned `canReachAxisStaging` contract; P-B: conditional staged floor;
+P-C rejected: lower the floor / extend the deadline). NOT implemented; no brigade/OSID/operation
+hard-coded; defensive obligations, friction and the possibility of a failed operation preserved.
+
+**D. Measured January changes.** Run `n420` (focused correction): jan1993 **696/712**, final-state
+hash `b02b13f68127ed98` — **byte-identical to n419**. No fixed/new/carried mismatch changes; n419
+remains the measurement of record. The five n403-relative mismatches are unchanged and not claimed
+fixed. No 188-week run; later territorial outcomes NOT MEASURED / DEFERRED.
+
+**E. Validation and identifiers.** `npm run typecheck` clean; 68 focused tests + 145 adjacent
+operation/sector tests green; independent review (verdict: sound-with-caveats — no consumer
+misclassified, T3/T6 refactor equivalent, tests not weakened; the only new behaviour is the
+phase-less T2 movement guard, which preserves HEAD for sector_attack/probe). Commits: `8f5998595`
+(authority fix + tests + `MOVEMENT_AUTHORITY.md` §2a). Docs: this entry,
+`logs/routine-scope-20260918/MEASUREMENT.md` (authoritative synopsis + Prodor diagnosis),
+`CALIBRATION_MASTER.md` addendum. `data/derived/latest_run_final_save.json` left dirty and
+uncommitted. January remains OPEN; the 700 floor is unchanged.

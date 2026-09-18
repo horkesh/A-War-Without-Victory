@@ -1,5 +1,34 @@
 # AWWV Calibration Master Reference
 
+## Current status addendum (2026-09-18) — routine-movement-scope candidate on the calibration branch
+
+**Scope.** This addendum is for branch `codex/january-1993-operations-20260914` (calibration branch),
+not for `main`. It does not supersede the `main`-facing status below; it records the candidate under
+test on this branch.
+
+- **Movement-scope development candidate `a7cdc88f3` is UNACCEPTED.** It removes a confirmed T2/T3/T6
+  routine-movement churn defect but measures **jan1993 696/712** (run `n419`) against baseline
+  **`n403` 701/712** — below the unchanged **700** January floor. Five cells regress (all
+  RS→RBiH where the reference wants RS, zero gains); the mechanism is an operation-assembly/timing
+  cost, not a blocked authority. Later checkpoints are NOT REACHED (39-week run) / NOT MEASURED.
+- **Operation-authority type-gap repair `8f5998595` is behaviourally inert.** It makes T2 recognise
+  every active operation type for movement authority, matching the T3/T6 predicate, while leaving
+  attack consumers on the narrow sector-attack flag. Run `n420` reproduces n419 exactly:
+  `jan1993 696/712`, `final_state_hash b02b13f68127ed98` — byte-identical to n419. The gap did not
+  fire (operation-type inventory is `{probe, sector_attack}` only). Committed separately.
+- **Prodor selection diagnosed, no code change.** `vrs_2nd_krajina:Operacija Prodor:t27` aborted
+  with zero attacks because commander-path participant admission has no time budget while the
+  assembly floor demands the whole roster be physically staged inside the planning window. The
+  idle `rs_1st_drvar_light_infantry` was correctly withheld under its sector-0 defensive obligation,
+  not overlooked. Fixing this needs a NEW capability and is returned as a bounded owner proposal
+  (see `logs/routine-scope-20260918/MEASUREMENT.md`), not implemented as a bug fix.
+- **`op:donji_vakuf:prusac_2` remains OPEN** (existing mismatch/reference question; not repaired).
+  Equal January ownership does not establish equal capture chronology. No threshold waiver.
+
+**Evidence:** `logs/routine-scope-20260918/MEASUREMENT.md` (authoritative current-status synopsis and
+Prodor diagnosis); `logs/routine-scope-20260918/CANDIDATE_REVIEW.md`; `PROJECT_LEDGER.md` 2026-09-18
+entries.
+
 ## Current status (2026-09-17) — January-1993 operations packet (SINGLE CURRENT SUMMARY)
 
 This block is the single current summary. The 2026-09-16 delivery status below is retained as history and is

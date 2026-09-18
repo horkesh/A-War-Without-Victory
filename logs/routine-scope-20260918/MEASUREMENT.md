@@ -1,5 +1,49 @@
 # MEASUREMENT — routine movement scope, 39-week definitive run
 
+## AUTHORITATIVE CURRENT STATUS (added 2026-09-18, second session)
+
+This block is the current synopsis. Later sections of this file are working evidence and early
+drafts; where they contradict this block, **this block governs**. Specifically, the two mechanism
+traces in "Mechanism — CONFIRMED for two of the three attackers" (the Praça/"Kijevo never launches"
+claim) and "Mechanism" are **SUPERSEDED** by the CORRECTION and INDEPENDENT VERIFICATION sections
+below. The original evidence is preserved, not deleted.
+
+- **Movement churn removed in the two confirmed cases.** `rs_19th_krajina_light_infantry` and
+  `hrhb_mostar_brigade` no longer emit the unexecutable pending order; the T2/T3/T6 contradiction
+  that produced it is closed. The fix is a real defect removal, confirmed directly on both cases.
+- **January is 696/712 — 16 mismatches, of which five are introduced versus n403** (baseline 701).
+  The candidate remains **UNACCEPTED**; the 700 floor is unchanged and no waiver exists.
+- **Kijevo launched in BOTH runs.** `Operation Kijevo:t24` starts, succeeds, grades 5-star in both.
+  The candidate's Kijevo is built **without the `praca_approach` axis**, so `op:pale:praca` is never
+  targeted. The axis is dropped because its only brigade `rs_4th_sarajevo_light_infantry` was held
+  by `probe_vrs_sarajevo_romanija` on the single build turn (t24) — a probe held the brigade, not a
+  slot and not a blocked march. (This corrects the earlier "Kijevo never launches" account.)
+- **Prodor was created but aborted with zero attacks.** `vrs_2nd_krajina:Operacija Prodor:t27` is
+  a commander-generated sector_attack that admitted `rs_7th_krajina_motorized` from Kupres and
+  `rs_11th_krupa_light_infantry`, never assembled its 2-brigade floor, and ended t34 with
+  `total_attacks: 0`, `recovery_reason: participants_below_assembly_floor`. See "Prodor selection —
+  diagnosis" below. It is a selection-vs-assembly structural mismatch, NOT a blocked march.
+- **The late `Operation Donji Vakuf` was not created in the candidate.** `vrs_1st_krajina`'s t30
+  operation never exists; `rs_16th_krajina_motorized` reaches the staging OSID `op:sipovo:pribeljci_2`
+  one turn late (t31 vs t30) and its `active_op_id` is null for the whole run. Three cells follow.
+- **Kotor Varoš (t10) is the earliest identified operational divergence** — identical 3-brigade
+  roster in both runs, split by a one-turn arrival difference. It is the earliest *operational*
+  divergence; it is **not** claimed to be the first state difference anywhere (force-wide
+  assignment/sub-segment drift begins at the opening turns).
+- **Prusac remains an existing mismatch/reference question, not a completed repair.** The
+  2026-09-17 match at `op:donji_vakuf:prusac_2` still holds in both runs; it is not newly fixed here.
+- **Equal January ownership does not establish equal capture chronology.** The candidate captures
+  ten further cells as well, several earlier, by different brigades; the -5 is a net reshuffle.
+- **`column_blocked` bounds T3 rejections only, not T2 candidates filtered out.** It fell 53 -> 19,
+  so at most 19 routine orders were rejected by the new scope across 39 weeks; it says nothing about
+  destinations the T2 producer never emitted.
+- **Authority-gap repair is behaviorally inert.** The operation-authority type-gap correction
+  (commit `8f5998595`) was measured as run `n420`: `jan1993 696/712`, `final_state_hash`
+  `b02b13f68127ed98` — **byte-identical to n419**. The gap did not fire in either run (operation-type
+  inventory is `{probe, sector_attack}` only), so closing it neither explains nor repairs the five
+  mismatches. n419 remains the measurement of record.
+- **No new January acceptance and no threshold waiver.** January stays OPEN.
+
 **Candidate source:** commit `a7cdc88f3` on `codex/january-1993-operations-20260914`
 (plus the two post-commit strict-null fixes recorded at the end of this file; the RUN was
 executed on the tree as committed at `a7cdc88f3`).
@@ -59,6 +103,12 @@ Operation admission is NOT failing: the same number of operations ran. The loss 
 captures, and it is confined to RS.
 
 ## Mechanism — CONFIRMED for two of the three attackers
+
+> **SUPERSEDED IN PART.** The two traces below were corrected by the CORRECTION and INDEPENDENT
+> VERIFICATION sections. The Praça trace ("Kijevo never launches") is **wrong** — Kijevo launched
+> in both runs and lost its `praca_approach` axis instead. The Bihać/orasac trace's conclusion
+> (Prodor aborted) is right, but "Nothing was rejected" is not the mechanism: Prodor selected an
+> unfit roster. Read the authoritative synopsis at the top. Evidence preserved for provenance.
 
 The regression is **not** a blocked authorized movement. Two cases traced in
 `brigade_temporal_log.jsonl`:
@@ -445,3 +495,91 @@ most interesting thing left in this packet:
   `participants_below_assembly_floor`;
 - (c) **why `Prodor:t27` admitted `rs_7th_krajina_motorized` from Kupres while
   `rs_1st_drvar_light_infantry` stood idle ON the staging OSID.**
+
+---
+
+# Prodor selection — diagnosis (2026-09-18, second session)
+
+Two independent traces (Operations; Formation/Systems) were reconciled. Identifiers and
+observations were re-verified from `runs/..._n419` and `_n403`.
+
+## Corrections to the record
+
+- Prodor has **no `staging_osid`**. It is a commander-generated op
+  (`final_save.json → vrs_2nd_krajina.last_completed_operation` carries
+  `minimum_viable_participants: 2`, `minimum_assembled_participants: 2`,
+  `axes[0].minimum_staged_brigades: 2`, and no `staging_osid` / `primary_sector_brigades`).
+  `op:bihac:trubar` is `rs_7th_krajina_motorized`'s per-brigade **approach destination**
+  (`bot_brigade_eval_attack.ts:429-458`), not an operation staging cell. So "drvar stood on the
+  staging OSID" is looser than the code: drvar stood on an objective-adjacent cell **inside its own
+  assigned sub-segment**.
+
+## Exact causal explanation
+
+1. **Creator.** `findLocalOccupationCandidate` (concentration branch, `commander/emit.ts:316,
+   422-664`) selected the bounded-isolated RBiH cell `op:bihac:orasac_2` (its whole ring is
+   RS-controlled) and built the op with `buildCommanderOperation` (`corps_operation_helpers.ts:316`)
+   at `emit.ts:1935`; the name is drawn from the bot pool (`operation_names.ts`). No authored
+   definition exists for it (`rg Prodor` finds only the name pool).
+2. **Ordering.** Objective → approach geometry → roster → movement orders. The roster is not
+   chosen before the objective, and there is no shared operation staging point.
+3. **Roster source.** Participants come from `allocation.surplus_pool`
+   (`commander/emit.ts:338-349`). `rs_1st_drvar_light_infantry` was **not in it**: it was
+   garrison-locked as the front holder of `sector:vrs_2nd_krajina:0` /
+   `subseg:sector:vrs_2nd_krajina:0:0`, whose `friendly_osids` are
+   `[racic, trubar, prkosi, vrtoce]` — the objective's own front. It is not on loan, not disrupted,
+   not below the attack floor, not an enclave; the only surviving exclusion is the garrison lock
+   (`allocate.ts:326-357`). It is therefore **correctly withheld**, not overlooked: donating it
+   would have left its own front unstaffed. It is not categorically ineligible — the baseline
+   `Operacija Bunar:t25` did select it from the same front.
+4. **Ranking.** Among the eligible donors, `rs_7th_krajina_motorized` ranks first by
+   `fitness_offense` (personnel 1112 motorized vs `rs_11th_krupa`'s 854 mountain; `force_eval.ts:114-117`),
+   with distance only a lower-order donor key. Personnel/equipment/cohesion are explicitly **not**
+   the failure inputs; the failure is reachability-versus-time.
+5. **Planner/executor mismatch.** The creator admits participants on a hop-count predicate
+   (`distanceToReduction` / `spatialFriendlyDistance`, `MAX_REACHABILITY_HOPS = 8`,
+   `commander/emit.ts:1803-1864`) and then sets `minimum_staged_brigades = reductionParticipants.length`
+   (`emit.ts:1957-1961`). It also **projects** unstaged participants onto their approach OSID for the
+   prediction (`emit.ts:557-596`). The executor's assembly floor counts only brigades whose
+   `location_osid` is **currently adjacent to the objective** (`countAdjacentStagedParticipants`,
+   `sector_offensive_launch_helpers.ts:609-623`), with no transit credit
+   (`sector_offensive_launch_helpers.ts:1013-1021`). Nothing reconciles the 8-hop admission with the
+   `planning_duration (3) + PLANNING_INVALIDATION_GRACE_TURNS (2) = 5`-turn window.
+   `bucovaca → trubar` is 8 graph hops and the motorized column rate is 2
+   (`osid_column_movement.ts:192-200`), so the journey cannot complete inside the window.
+6. **Movement and abort.** `rs_7th` is ordered to `trubar` at t27 and reported `in_transit`
+   t28-32 with an unchanged location (the designed multi-hop abstraction — location updates only on
+   arrival). `rs_11th` arrives `racic` at t30 (staged = 1). At t33 elapsed 6 > 5, the early
+   invalidation runs, the floor (2) is unmet, and the op enters recovery with
+   `participants_below_assembly_floor`; AAR ends t34 with `total_attacks: 0`.
+7. **Not a movement-scope regression.** T3 (`osid_column_movement.ts:516`) and T6
+   (`commander_march_correction.ts:83,168-175`) exempted the operation-authorized order/transit
+   throughout planning/execution; the transit was cleared only at t33 **after** the op entered
+   recovery — a consequence of the abort, not its cause. The pre-existing T6 hazard (authority
+   exemption gated behind `brigadeAlreadyAtValidFront`, `commander_march_correction.ts:168-181`)
+   is confirmed but did **not** fire here.
+
+## Verdict and bounded proposal (NOT implemented)
+
+The trace follows the **current policy/structure**. The assembly floor, the garrison lock and the
+donor ranking each behave as specified. The defect is structural: **selection admits a roster on
+reachability with no time budget, then demands the whole roster be physically staged inside the
+planning window.** Improving it requires a NEW capability (a time-bounded reachability test, or a
+staged-floor derived from expected arrivals, or replanning), which the packet forbids implementing
+under the label "bug fix." Bounded proposal, owner decision required:
+
+- **P-A (preferred, smallest):** give the commander path's participant admission a time budget
+  mirroring the pre-planned contract's `canReachAxisStaging` (`pre_planned_operations.ts:1623-1651`):
+  estimate column transit (`ceil(cost / columnRate)`) from the brigade to the nearest approach OSID
+  and admit only formations whose ETA fits `planning_duration + grace`. No floor change; a smaller
+  roster yields a smaller `minimum_staged_brigades` naturally, and an unfillable operation still
+  fails.
+- **P-B:** derive `minimum_staged_brigades` from the count of participants whose ETA fits the
+  window (a conditional floor). This changes an authored/derived floor and must be panel-reviewed.
+- **P-C (rejected here):** lower the floor or extend the deadline to obtain a launch — prohibited.
+
+Explicitly preserved by any accepted option: imperfect information, command friction, defensive
+obligations (the Donji Vakuf/Drvar withholding stands), and the possibility of a failed operation.
+No brigade/OSID/operation is hard-coded. The three queued operation questions (Donji Vakuf uncreated
+after the t31 arrival; Kijevo's handling of an unavailable axis; the Kotor Varoš timing difference)
+remain **queued, not bundled**.
