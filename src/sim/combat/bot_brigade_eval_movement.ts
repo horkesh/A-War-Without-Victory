@@ -6,6 +6,7 @@ import {
     filterToRoutineScope,
     isDestinationInRoutineScope,
     resolveRoutineMovementScope,
+    withOperationAuthorizedDestinations,
 } from './brigade_routine_scope.js';
 import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
 
@@ -34,10 +35,14 @@ function interiorMovementProfileTime<T>(labelSuffix: string, fn: () => T): T {
  * MOVEMENT TIER: T2 - Tactical Routing (Interior Reposition) (see MOVEMENT_AUTHORITY.md)
  */
 export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, loc, faction, adjacency, state, reverseMap, graphAnalysis, directive, result, columnAssignments } = ctx;
+    const { brigade, loc, faction, adjacency, state, reverseMap, activeOp, graphAnalysis, directive, result, columnAssignments } = ctx;
     // Shared routine-movement scope: discretionary repositioning is limited to the assigned
-    // sub-segment front. Unassigned/reserve/stale formations keep the corps-wide reach.
-    const routineScope = resolveRoutineMovementScope(state, brigade);
+    // sub-segment front. Unassigned/reserve/stale formations keep the corps-wide reach. An
+    // active operation the brigade participates in additionally authorizes its own
+    // staging/approach OSIDs (see `withOperationAuthorizedDestinations`).
+    const routineScope = withOperationAuthorizedDestinations(
+        resolveRoutineMovementScope(state, brigade), state, brigade.id, activeOp, adjacency, reverseMap,
+    );
 
     // First: if directive has a priority sector, march toward it (offensive concentration).
     if (interiorMovementProfileTime('.prioritySector', () => {

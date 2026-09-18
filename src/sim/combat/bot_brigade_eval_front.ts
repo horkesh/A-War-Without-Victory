@@ -7,8 +7,10 @@ import { issueInteriorMovement } from './bot_brigade_movement_ai.js';
 import {
     filterOffensiveTargetsToRoutineScope,
     filterToRoutineScope,
+    hasActiveOperationCommitment,
     isDestinationInRoutineScope,
     resolveRoutineMovementScope,
+    withOperationAuthorizedDestinations,
 } from './brigade_routine_scope.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import {
@@ -121,7 +123,10 @@ export function isCurrentSectorRetroactiveTooth(sector: CorpsFrontSector, loc: s
 }
 
 export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, state, faction, loc, adjacency, reverseMap, isActiveSectorOperationParticipant, result, graphAnalysis, columnAssignments, directive, sectorAssignment, assignedSectorFrontOsids, corpsBrigadeCountsByOsid } = ctx;
+    const { brigade, state, faction, loc, adjacency, reverseMap, activeOp, result, graphAnalysis, columnAssignments, directive, sectorAssignment, assignedSectorFrontOsids, corpsBrigadeCountsByOsid } = ctx;
+    // Movement authority is "has an operational commitment" (ANY active op type), not the
+    // narrower sector-attack-evaluator flag. See `hasActiveOperationCommitment`.
+    const hasOperationCommitment = hasActiveOperationCommitment(activeOp, brigade.id);
     // Shared routine-movement scope (owner packet 2026-09-17): discretionary front
     // repositioning is limited to the brigade's assigned sub-segment front. Authorized
     // movement (operation, authored/triggered pre-staging, explicit reassignment, lifecycle)
@@ -138,7 +143,7 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
     // Must be checked BEFORE "stay on sector" logic, otherwise a brigade already
     // on its current sector's front returns true and evaluateFrontCoverage (which
     // also processes sector_reassignment_orders) never runs.
-    if (!isActiveSectorOperationParticipant && sectorMarchProfileTime('.sectorReassignment', () => {
+    if (!hasOperationCommitment && sectorMarchProfileTime('.sectorReassignment', () => {
         if (directive?.sector_reassignment_orders && state.military.corps_front_sectors) {
             const reassign = directive.sector_reassignment_orders.find(r => r.brigade_id === brigade.id);
             if (reassign) {
@@ -169,7 +174,7 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
     // The old `|| offAssignedFront` caused oscillation — op participants advancing off-sector
     // were rerouted back to sector front every turn, producing ZEA and recovery-no-attempt.
     const sectors = state.military.corps_front_sectors;
-    if (sectors && !isActiveSectorOperationParticipant) {
+    if (sectors && !hasOperationCommitment) {
         const { assignedSector, isReserve, cachedFrontSet } = sectorMarchProfileTime('.sectorAssignmentContext', () => {
             let resolvedSector = sectorAssignment?.sector ?? null;
             let resolvedIsReserve = sectorAssignment?.isReserve ?? false;
@@ -464,7 +469,7 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
             }
         }
     }
-    if (!isActiveSectorOperationParticipant && getFormationEnclaveForMovement(brigade, loc)) {
+    if (!hasOperationCommitment && getFormationEnclaveForMovement(brigade, loc)) {
         result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
         return true;
     }
@@ -481,9 +486,9 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
  * assigned to a sector through the normal pipeline.
  */
 export function evaluateReturnToCorps(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, state, loc, adjacency, result, sectorAssignment, corpsTerritoryOsidsByCorps, isActiveSectorOperationParticipant } = ctx;
+    const { brigade, state, loc, adjacency, result, sectorAssignment, corpsTerritoryOsidsByCorps, activeOp } = ctx;
 
-    if (isActiveSectorOperationParticipant) return false;
+    if (hasActiveOperationCommitment(activeOp, brigade.id)) return false;
 
     // Only fires for brigades NOT in any sector
     if (!state.military.corps_front_sectors) return false;
@@ -590,9 +595,9 @@ const POCKET_EVACUATION_MAX_TERRITORY = 2;
  * Placed after evaluateReturnToCorps and before hold/defense evaluations.
  */
 export function evaluatePocketEvacuation(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, state, loc, result, sectorAssignment, isActiveSectorOperationParticipant, cmd } = ctx;
+    const { brigade, state, loc, result, sectorAssignment, activeOp, cmd } = ctx;
 
-    if (isActiveSectorOperationParticipant) return false;
+    if (hasActiveOperationCommitment(activeOp, brigade.id)) return false;
     const isOperationStagingCell = (cmd?.active_operations ?? []).some(operation => (
         (operation.phase === 'planning' || operation.phase === 'execution')
         && (
@@ -662,11 +667,15 @@ export function evaluatePocketEvacuation(ctx: BrigadeEvaluationContext): boolean
 }
 
 export function evaluateFrontCoverage(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, state, faction, loc, adjacency, reverseMap, graphAnalysis, directive, corpsStance, adjEnemy, result, columnAssignments } = ctx;
+    const { brigade, state, faction, loc, adjacency, reverseMap, activeOp, graphAnalysis, directive, corpsStance, adjEnemy, result, columnAssignments } = ctx;
     // Shared routine-movement scope: discretionary front repositioning is limited to the
     // assigned sub-segment front. Explicit `sector_reassignment_orders` (Rule 5b2) keep their
-    // own authority and are not narrowed here.
-    const routineScope = resolveRoutineMovementScope(state, brigade);
+    // own authority and are not narrowed here. An active operation the brigade participates in
+    // additionally authorizes its own staging/approach OSIDs, so operation movement is not
+    // narrowed at T2 while T3/T6 would allow it (see `withOperationAuthorizedDestinations`).
+    const routineScope = withOperationAuthorizedDestinations(
+        resolveRoutineMovementScope(state, brigade), state, brigade.id, activeOp, adjacency, reverseMap,
+    );
 
     // --- Rule 5b: Redeploy toward offensive target ---
     // On front but no offensive_target adjacent and there are excess brigades here:

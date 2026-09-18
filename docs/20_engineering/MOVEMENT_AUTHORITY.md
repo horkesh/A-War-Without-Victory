@@ -84,6 +84,20 @@ targets is scoped by **adjacency** to a legally occupiable cell, never by inters
 every evaluator's output alike, so it distinguishes bot orders from authored ones and nothing
 more. Authority exemptions, not the tag, decide whether the T3 revalidation applies.
 
+**Operation movement authority is type-agnostic; the sector-attack evaluator flag is not.**
+`isActiveSectorOperationParticipant` means "this formation's attack behaviour is owned by the
+sector-attack evaluator" and is deliberately restricted to `sector_attack` / `probe`. It must not
+be used as the movement-authority reading: T3/T6 (`isDestinationAuthorizedByOperation`) authorise
+an operation's staging/approach destinations for ANY active operation type in
+planning/execution. The T2 movement guards therefore use `hasActiveOperationCommitment`
+(any-type membership) and the T2 destination scope is unioned with
+`getOperationAuthorizedDestinations` for the brigade's active operation, so `general_offensive`,
+`feint` and the other operation types retain their movement authority at every tier. Attack
+consumers (home defense, supply gate, off-front gate, sector-attack execution) keep the narrower
+flag; broadening it would hand those types the attack evaluator's gates. Destination authority
+remains phase-gated to planning/execution exactly as at T3/T6; the guard predicate preserves its
+pre-existing treatment of recovery-phase participants.
+
 **Single-cell assignment.** When a brigade's assigned sub-segment contains only its current
 location and no authorized alternative destination exists, no discretionary relocation is emitted.
 The brigade stays physically where it is; no transit or completed move is fabricated, and its

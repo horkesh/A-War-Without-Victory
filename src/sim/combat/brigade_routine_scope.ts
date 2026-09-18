@@ -237,8 +237,30 @@ function axisForBrigade(op: CorpsOperation, brigadeId: string): OperationAxis | 
 }
 
 /**
- * True when `destinationOsid` is supported by an ACTIVE operation the brigade participates in
- * — its staging OSID, or one of the operation's approach OSIDs.
+ * True when the formation is committed to a live operation of ANY type. This is the
+ * movement-authority reading of "has an operational commitment"; it is NOT the same thing as
+ * `isActiveSectorOperationParticipant`, which additionally means "this formation's attack
+ * behaviour is owned by the sector-attack evaluator" and is restricted to
+ * `sector_attack` / `probe` (`bot_brigade_ai_osid.ts`). The two must not be conflated:
+ * broadening the sector-attack boolean would hand `general_offensive` / `feint` /
+ * `strategic_defense` formations the attack evaluator's gates, whereas this predicate is used
+ * only where the question is whether an operation already owns the brigade's movement.
+ *
+ * The aggregator resolves `activeOp` via `findBrigadeOperation` / `findBrigadeOperationAnywhere`,
+ * both of which require membership, so `activeOp != null` already implies membership; the
+ * explicit membership check keeps callers safe against fixtures that set one without the other.
+ */
+export function hasActiveOperationCommitment(
+    activeOp: CorpsOperation | null | undefined,
+    brigadeId: string,
+): boolean {
+    return activeOp != null && isOperationParticipant(activeOp, brigadeId as never);
+}
+
+/**
+ * Staging + approach OSIDs an ACTIVE operation authorizes for this brigade. Empty when the
+ * operation is not in planning/execution, the brigade is not a participant, or it has no
+ * formation record.
  *
  * The approach set is computed by `getSectorOffensiveApproachOsids`, the SAME predicate the
  * attack evaluator uses to pick approach marches (`bot_brigade_eval_attack.ts`). Using a
@@ -247,6 +269,44 @@ function axisForBrigade(op: CorpsOperation, brigadeId: string): OperationAxis | 
  * adjacency, accepts ALLIED control rather than own-faction control only, and has a
  * documented Wave-10 sub-segment fallback for deep HVO targets whose absence reproduces the
  * `spawned-no-attack` / `no_logged_attempt` failure mode.
+ */
+export function getOperationAuthorizedDestinations(
+    state: GameState,
+    brigadeId: string,
+    activeOp: CorpsOperation | null | undefined,
+    adjacency: Map<string, string[]>,
+    reverseMap?: OperationalToCanonicalReverseMap | null,
+): Set<string> {
+    const out = new Set<string>();
+    if (!activeOp) return out;
+    if (activeOp.phase !== 'planning' && activeOp.phase !== 'execution') return out;
+    const formation = state.military.formations?.[brigadeId];
+    if (!formation) return out;
+
+    const axis = axisForBrigade(activeOp, brigadeId);
+    const participates = axis ? true : isOperationParticipant(activeOp, brigadeId as never);
+    if (!participates) return out;
+
+    const stagingOsid = axis?.staging_osid ?? activeOp.staging_osid;
+    if (stagingOsid) out.add(stagingOsid);
+
+    const approaches = getSectorOffensiveApproachOsids(
+        state,
+        activeOp,
+        formation.faction,
+        adjacency as Map<Osid, Osid[]>,
+        // `getPoliticalControllerOSID` treats a missing reverse map as "direct lookup
+        // only", which is what T6 (no reverse map in its signature) already relied on.
+        (reverseMap ?? new Map()) as OperationalToCanonicalReverseMap,
+        brigadeId as never,
+    );
+    for (const osid of approaches) out.add(osid);
+    return out;
+}
+
+/**
+ * True when `destinationOsid` is supported by an ACTIVE operation the brigade participates in
+ * — its staging OSID, or one of the operation's approach OSIDs.
  */
 export function isDestinationAuthorizedByOperation(
     state: GameState,
@@ -263,27 +323,43 @@ export function isDestinationAuthorizedByOperation(
     if (!cmd) return false;
 
     for (const op of cmd.active_operations ?? []) {
-        if (op.phase !== 'planning' && op.phase !== 'execution') continue;
-        const axis = axisForBrigade(op, brigadeId);
-        const participates = axis ? true : isOperationParticipant(op, brigadeId as never);
-        if (!participates) continue;
-
-        const stagingOsid = axis?.staging_osid ?? op.staging_osid;
-        if (stagingOsid === destinationOsid) return true;
-
-        const approaches = getSectorOffensiveApproachOsids(
-            state,
-            op,
-            formation.faction,
-            adjacency as Map<Osid, Osid[]>,
-            // `getPoliticalControllerOSID` treats a missing reverse map as "direct lookup
-            // only", which is what T6 (no reverse map in its signature) already relied on.
-            (reverseMap ?? new Map()) as OperationalToCanonicalReverseMap,
-            brigadeId as never,
-        );
-        if (approaches.has(destinationOsid as Osid)) return true;
+        if (getOperationAuthorizedDestinations(state, brigadeId, op, adjacency, reverseMap).has(destinationOsid)) {
+            return true;
+        }
     }
     return false;
+}
+
+/**
+ * T2 side of the same contract `isDestinationAuthorizedByOperation` enforces at T3/T6: when a
+ * restricted brigade is an operation participant, its operation's own staging/approach OSIDs
+ * are legal destinations even when they lie outside the assigned sub-segment. The type
+ * restriction that used to sit on the T2 producer's guard — `sector_attack` / `probe` only —
+ * is removed here by construction: this accepts any active operation type, but only its own
+ * authorized destinations, so no unrelated routine movement gains a waiver.
+ *
+ * The assigned-sub-segment destinations are UNIONS with, not replaced by, the operation set.
+ * Unrestricted scopes are returned unchanged so callers keep their own set identity.
+ */
+export function withOperationAuthorizedDestinations(
+    scope: RoutineMovementScope,
+    state: GameState,
+    brigadeId: string,
+    activeOp: CorpsOperation | null | undefined,
+    adjacency: Map<string, string[]>,
+    reverseMap?: OperationalToCanonicalReverseMap | null,
+): RoutineMovementScope {
+    if (!scope.restricted) return scope;
+    const authorized = getOperationAuthorizedDestinations(state, brigadeId, activeOp, adjacency, reverseMap);
+    if (authorized.size === 0) return scope;
+    const destinations = new Set(scope.destinations);
+    for (const destination of authorized) destinations.add(destination);
+    return {
+        restricted: true,
+        assignedSubSegmentId: scope.assignedSubSegmentId,
+        destinations,
+        source: scope.source,
+    };
 }
 
 /**

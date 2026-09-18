@@ -24,6 +24,7 @@ import { processOsidColumnMovement } from '../src/sim/combat/osid_column_movemen
 import { correctTransitStates } from '../src/sim/combat/commander_march_correction.js';
 import {
     filterToRoutineScope,
+    isDestinationAuthorizedByOperation,
     isDestinationInRoutineScope,
     isRoutineScopeEnforcedForOrder,
     resolveRoutineMovementScope,
@@ -539,6 +540,118 @@ describe('T2 producer — the scope must not forbid lawful movement', () => {
         const ctx = makeInteriorCtx({ offensiveTargets: ['UNREACHABLE'] });
         evaluateInteriorMovement(ctx);
         expect(ctx.result.movement_orders.b1).toBe('M');
+    });
+});
+
+// ── Operation-authority TYPE gap — T2 recognises every active operation type ──────────────
+//
+// `isActiveSectorOperationParticipant` means "this formation's ATTACK behaviour is owned by the
+// sector-attack evaluator" and is deliberately restricted to `sector_attack` / `probe`. It must
+// not be used as the movement-authority reading, because T3/T6 (`isDestinationAuthorizedByOperation`)
+// authorise an operation's staging/approach destinations for ANY active operation type. A
+// `general_offensive` or `feint` participant used to be restricted at T2 while T3/T6 would have
+// allowed the same move. These cases pin the corrected contract.
+
+function makeOperationMovementCtx(opts: {
+    opType: string;
+    phase: string;
+    member?: boolean;
+}): BrigadeEvaluationContext {
+    const brigade = {
+        id: 'b1', faction: 'RS', corps_id: 'c', status: 'active', kind: 'brigade',
+        location_osid: 'A', assigned_sub_segment_id: 'ss:A',
+    };
+    const op = {
+        name: 'Test Op', type: opts.opType, phase: opts.phase,
+        started_turn: 0, phase_started_turn: 0,
+        participating_brigades: opts.member === false ? ['other'] : ['b1', 'b2'],
+        objectives: ['X'],
+    };
+    return {
+        state: {
+            political: { political_controllers: { A: 'RS', B: 'RS', D: 'RS', X: 'RBiH', Y: 'RBiH' } },
+            military: {
+                corps_front_sectors: {
+                    'sector:c:0': sector({
+                        sectorId: 'sector:c:0', corpsId: 'c', subSegmentId: 'ss:A',
+                        friendlyOsids: ['A'], enemyOsids: ['X', 'Y'],
+                        territoryOsids: ['A'], assigned: ['b1', 'b2'],
+                    }),
+                },
+                formations: { b1: brigade, b2: { ...brigade, id: 'b2' } },
+                corps_command: { c: { active_operations: [op] } },
+            },
+        } as any,
+        faction: 'RS' as any,
+        brigade: brigade as any,
+        loc: 'A' as Osid, corpsId: 'c' as any, cmd: null,
+        directive: { offensive_targets: ['X'] } as any,
+        corpsStance: 'offensive' as any,
+        activeOp: op as any, isActiveSectorOperationParticipant: false,
+        adjEnemy: ['Y'], isAlliedWithRBiH: false, targetAdjacentCount: new Map(),
+        corpsReserve: new Map(), chosenTargets: new Map(), columnAssignments: new Map(),
+        counterAttackTarget: null, brigadeSupplyState: 'adequate', isHoldBrigade: false,
+        sectorRecentRetreats: new Map(), sectorCounterAttackCount: new Map(),
+        adjacency: new Map<Osid, Osid[]>([
+            ['A' as Osid, ['B' as Osid, 'Y' as Osid]],
+            ['B' as Osid, ['A' as Osid, 'D' as Osid]],
+            ['D' as Osid, ['B' as Osid, 'X' as Osid]],
+            ['X' as Osid, ['D' as Osid]],
+            ['Y' as Osid, ['A' as Osid]],
+        ]),
+        reverseMap: null as any, terrainCache: {},
+        graphAnalysis: { osid_analysis: new Map() } as any,
+        supplyStateByOsid: null, ethnicMap: undefined, osidPopulationMap: undefined,
+        result: emptyResult(),
+    } as any;
+}
+
+describe('T2/T3/T6 — operation authority is type-agnostic for movement', () => {
+    // Fixture: b1 is assigned to sub-segment front {A} only. The operation's objective X is
+    // approached from D, which lies OUTSIDE the assigned sub-segment. Adjacency A-B-D-X.
+    it('I3. a general_offensive participant may move toward its operation objective outside its sub-segment', () => {
+        const ctx = makeOperationMovementCtx({ opType: 'general_offensive', phase: 'planning' });
+        evaluateFrontCoverage(ctx);
+        expect(ctx.result.movement_orders.b1).toBe('B');
+    });
+
+    it('I4. the same holds for a feint participant', () => {
+        const ctx = makeOperationMovementCtx({ opType: 'feint', phase: 'planning' });
+        evaluateFrontCoverage(ctx);
+        expect(ctx.result.movement_orders.b1).toBe('B');
+    });
+
+    it('I5. the same geometry WITHOUT operation membership stays restricted', () => {
+        const ctx = makeOperationMovementCtx({ opType: 'general_offensive', phase: 'planning', member: false });
+        evaluateFrontCoverage(ctx);
+        expect(ctx.result.movement_orders.b1).not.toBe('B');
+    });
+
+    it('I6. an operation in recovery/proposed confers no movement authority', () => {
+        const ctx = makeOperationMovementCtx({ opType: 'general_offensive', phase: 'recovery' });
+        expect(isDestinationAuthorizedByOperation(ctx.state, 'b1', 'D', ctx.adjacency)).toBe(false);
+        evaluateFrontCoverage(ctx);
+        expect(ctx.result.movement_orders.b1).not.toBe('B');
+    });
+
+    it('I7. a sector_attack participant is unchanged (the attack-evaluator flag still gate its own path)', () => {
+        const ctx = makeOperationMovementCtx({ opType: 'sector_attack', phase: 'planning' });
+        expect(ctx.isActiveSectorOperationParticipant).toBe(false); // fixture does not derive it
+        expect(isDestinationAuthorizedByOperation(ctx.state, 'b1', 'D', ctx.adjacency)).toBe(true);
+        evaluateFrontCoverage(ctx);
+        expect(ctx.result.movement_orders.b1).toBe('B');
+    });
+
+    it('I8. T3/T6 authorise the SAME destination T2 now produces', () => {
+        const ctx = makeOperationMovementCtx({ opType: 'general_offensive', phase: 'planning' });
+        expect(isDestinationAuthorizedByOperation(ctx.state, 'b1', 'D', ctx.adjacency)).toBe(true);
+        // An out-of-sub-segment order to the operation's approach is not routine, so T3 must
+        // not revalidate/delete it.
+        const order = { destination_sids: ['D'], stance: 'column', owner: 'bot_discretionary' };
+        ctx.state.military.brigade_movement_orders = { b1: order } as any;
+        expect(isRoutineScopeEnforcedForOrder(
+            ctx.state, ctx.state.military.formations!.b1, order, ctx.adjacency,
+        )).toBe(false);
     });
 });
 

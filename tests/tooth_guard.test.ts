@@ -254,6 +254,13 @@ describe('evaluateSectorMarch — tooth guard', () => {
             ]),
         });
         ctx.isActiveSectorOperationParticipant = true;
+        // Movement authority is read from a live operation commitment, of any type.
+        ctx.activeOp = {
+            name: 'Test Op', type: 'sector_attack', phase: 'planning',
+            started_turn: 0, phase_started_turn: 0,
+            participating_brigades: ['brig_test'],
+            axes: [],
+        } as any;
         ctx.directive = {
             sector_reassignment_orders: [{ brigade_id: 'brig_test', to_sector_id: `sector:${CORPS_ID}:1` }],
         } as any;
@@ -785,6 +792,13 @@ describe('evaluatePocketEvacuation', () => {
         const ctx = makeCtx({ loc, state, subSegments });
         ctx.brigade.home_osid = home;
         ctx.isActiveSectorOperationParticipant = true;
+        // Movement authority is read from a live operation commitment, of any type.
+        ctx.activeOp = {
+            name: 'Test Op', type: 'sector_attack', phase: 'planning',
+            started_turn: 0, phase_started_turn: 0,
+            participating_brigades: ['brig_test'],
+            axes: [],
+        } as any;
 
         expect(evaluatePocketEvacuation(ctx)).toBe(false);
         expect(state.military.brigade_movement_orders?.brig_test).toBeUndefined();

@@ -3,6 +3,7 @@ import { getFormationTier, MIN_ATTACK_PERSONNEL } from '../../state/formation_co
 import { predictAllAdjacentTargets } from './combat_predictor.js';
 import { isOutcomeSufficientForAttack } from './bot_brigade_targeting.js';
 import { assignedBrigadeNotOnSectorFrontOsids } from './bot_brigade_eval_front.js';
+import { hasActiveOperationCommitment } from './brigade_routine_scope.js';
 
 export function evaluateGarrisonAndDetachments(ctx: BrigadeEvaluationContext): boolean {
     const { brigade, state, loc, result, assignedSectorFrontOsids } = ctx;
@@ -36,12 +37,13 @@ export function evaluateGarrisonAndDetachments(ctx: BrigadeEvaluationContext): b
 }
 
 export function evaluateReserve(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, corpsId, directive, adjEnemy, corpsReserve, graphAnalysis, loc, adjacency, result, isActiveSectorOperationParticipant } = ctx;
+    const { brigade, corpsId, directive, adjEnemy, corpsReserve, graphAnalysis, loc, adjacency, result, activeOp } = ctx;
 
     // --- Operation participants bypass reserve ---
     // Brigades committed to a sector offensive have explicit march orders toward an objective.
     // Holding them as corps reserve prevents them from reaching the front — entirely wrong.
-    if (isActiveSectorOperationParticipant) return false;
+    // Authority here is the movement reading (ANY active op type), not the sector-attack flag.
+    if (hasActiveOperationCommitment(activeOp, brigade.id)) return false;
 
     // --- Reserve check: should this brigade be in reserve? ---
     if (directive && corpsId) {
