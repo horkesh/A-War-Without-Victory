@@ -6152,11 +6152,18 @@ was tuned to recover them. Only `jan1993` is meaningful for a 39-week run; the t
 AARs are 29 in both runs; RS combat captures fall 87 -> 81. `rs_11th_krupa_light_infantry` marches
 to `op:bihac:racic` AS AN OPERATION PARTICIPANT in both runs and the march completes both times —
 only the operation differs (`Operacija Bunar:t25` -> arrives t28 -> takes orasac_2 t29, versus
-`Operacija Prodor:t27` -> arrives t30, too late). `rs_4th_sarajevo_light_infantry`: the baseline
-runs `Operation Kijevo:t24` and takes praca at t26; the candidate spends the slot on
-`probe_vrs_sarajevo_romanija_t23` and Kijevo never launches — and probes cannot capture. So
-restricted routine positioning changes brigade availability, which changes which operations the
-corps AI selects and when. `rs_16th_krajina_motorized` (the three Donji Vakuf cells) was NOT traced
+`Operacija Prodor:t27` -> arrives t30, too late). `rs_4th_sarajevo_light_infantry`: `Operation Kijevo:t24`
+launches in BOTH runs (`outcome: success`, 5-star) — an earlier draft of this entry said it did
+not, which the operations specialist refuted and which is withdrawn. What differs is the
+operation's SHAPE AT BUILD TIME: the baseline builds two axes and targets
+`[op:trnovo:kijevo_2, op:pale:praca]`, the candidate builds only `kijevo_shoulder` and targets
+`[op:trnovo:kijevo_2]`. The `praca_approach` axis is dropped because its only brigade,
+`rs_4th_sarajevo_light_infantry`, was committed to `probe_vrs_sarajevo_romanija` — which fires at
+t23 in the candidate and t27 in the baseline — exactly when Kijevo was assembled at t24.
+`buildAxesFromDef` filters brigades and objectives in two independent passes, so the axis loses
+its brigade and the objective goes with it. `praca` is RBiH at t24 in both runs, so this is not
+an already-owned omission. So restricted routine positioning changes brigade availability, which
+changes the shape and timing of the operations the corps assembles. `rs_16th_krajina_motorized` (the three Donji Vakuf cells) was NOT traced
 to the same depth; its mechanism is INFERRED. `routine_destination_out_of_scope` rejections could
 not be counted — the reason code is gated behind a debug topic and is absent from the artifacts.
 

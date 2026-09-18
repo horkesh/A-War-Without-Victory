@@ -223,3 +223,51 @@ the reserve-roster test was restored to its own pass specifically so classificat
 on sector key order. The run completed with exit 0 and its own preflight, and RBiH (11) and HRHB
 (5) capture counts are byte-identical between the runs, which is what a movement-only change in
 RS-contested space should look like.
+
+---
+
+# CORRECTION — the Prača mechanism, precisely (my first account was wrong)
+
+I first wrote that "the candidate spends the slot on `probe_vrs_sarajevo_romanija_t23` and
+Operation Kijevo never launches." **That is wrong and is withdrawn.** The operations specialist
+challenged it and supplied two discriminating checks; both refute the original claim.
+
+`Operation Kijevo:t24` **launched in BOTH runs**, started t24, `outcome: success`,
+`recovery_reason: completed`, graded 5-star "Brilliant Victory" in both. It appears in both AAR
+sets. Nothing was deferred and no slot was consumed.
+
+What actually differs is the operation's SHAPE AT BUILD TIME:
+
+```
+  n403  Operation Kijevo:t24   objectives_targeted = [op:trnovo:kijevo_2, op:pale:praca]
+        axis kijevo_shoulder   brigades = [rs_1st_romanija_infantry, rs_2nd_sarajevo_light_infantry]
+        axis praca_approach    brigades = [rs_4th_sarajevo_light_infantry]
+                               staging  = op:pale:bulozi   -> captures op:pale:praca
+
+  n419  Operation Kijevo:t24   objectives_targeted = [op:trnovo:kijevo_2]
+        axis kijevo_shoulder   brigades = [rs_1st_romanija_infantry, rs_2nd_sarajevo_light_infantry]
+        (the praca_approach axis does not exist; praca is never even targeted)
+```
+
+The chain, confirmed from artifacts:
+
+1. Divergent routine positioning shifts probe timing: `probe_vrs_sarajevo_romanija` fires at
+   **t23** in the candidate and at **t27** in the baseline.
+2. At t23-24 `rs_4th_sarajevo_light_infantry` is therefore committed to the probe — exactly when
+   Kijevo is built at t24.
+3. `buildAxesFromDef` filters brigades and objectives in two independent passes, so the
+   `praca_approach` axis loses its only brigade and is dropped at build time.
+4. `op:pale:praca` is never targeted, so it is never captured. `praca` is RBiH at t24 in BOTH
+   runs, so this is not an already-owned omission.
+
+Note the shape of the error I made: the probe did **not** take the operation's slot, and it did
+not trim Kijevo's objectives by overlap — `hasNonCapturingObjectiveOverlap` *defers* a whole
+injection when a probe overlaps rather than trimming it, which is a different code path and is
+not what happened here. The probe took the **brigade**, and the axis that needed that brigade was
+dropped. The corrected account is more specific and does not depend on the probe/capture rule at
+all.
+
+**This strengthens, rather than weakens, the central conclusion.** No authorized movement was
+blocked in the Prača case either: the brigade was simply committed elsewhere when the operation
+was assembled. The regression remains an operation-assembly and timing effect downstream of
+routine repositioning, not a suppressed authority.
