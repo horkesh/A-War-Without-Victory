@@ -6148,11 +6148,25 @@ each with failing-before/passing-after evidence at the producer tier:
 was tuned to recover them. Only `jan1993` is meaningful for a 39-week run; the tool's
 "GUARD BREACHED" line comes from the 104/156/188-week sections and appears for the baseline too.
 
-**Mechanism — a tempo cost, not a blocked authority (confirmed for 2 of 3 attackers).** Operation
-AARs are 29 in both runs; RS combat captures fall 87 -> 81. `rs_11th_krupa_light_infantry` marches
-to `op:bihac:racic` AS AN OPERATION PARTICIPANT in both runs and the march completes both times —
-only the operation differs (`Operacija Bunar:t25` -> arrives t28 -> takes orasac_2 t29, versus
-`Operacija Prodor:t27` -> arrives t30, too late). `rs_4th_sarajevo_light_infantry`: `Operation Kijevo:t24`
+**Mechanism — an operation-assembly and timing cost, not a blocked authority.** Independently
+verified; all three attackers traced. Operation AARs are 29 in both runs; RS combat captures fall
+87 -> 81. Note the five cells are a RESHUFFLE, not a subtraction: ten further cells are captured in
+BOTH runs by a different brigade or at a different turn, several of them EARLIER in the candidate
+(`sipovo:volari_2` -4 turns, `skender_vakuf:donji_koricani` -4, `jajce:lupnica` -2,
+`trnovo:kijevo_2` -1), so the -5 is a net and the candidate is not uniformly slower. Force-wide
+mobility actually RISES (relocations 470 -> 474) while column starts fall 20% and arrivals rise —
+the restriction suppresses churn, not movement. `column_blocked` falls 53 -> 19, which bounds
+scope rejections at **at most 19 across the whole 39-week run**.
+Per cell: **Bihac/orasac_2** — `Operacija Prodor:t27` did not merely launch late, it launched with
+an unfit roster and ABORTED (`total_attacks: 0`, outcome failure,
+`recovery_reason: participants_below_assembly_floor`) after admitting `rs_7th_krajina_motorized`
+from Kupres while `rs_1st_drvar_light_infantry` — a baseline participant — sat idle ON the staging
+OSID `op:bihac:trubar` t25-t33 in BOTH runs. **Donji Vakuf (3 cells)** —
+`Operation Donji Vakuf:t30` NEVER EXISTS in the candidate; `rs_16th_krajina_motorized` reaches the
+staging OSID one turn late (t31 vs t30) and the operation is never created. **Kotor Varos t10** —
+the earliest divergence, identical 3-brigade roster in both, decided by a one-turn arrival
+difference; the cell flips by paramilitary at t14 instead, which is the -6 combat/+1 paramilitary
+reconciliation. `rs_4th_sarajevo_light_infantry`: `Operation Kijevo:t24`
 launches in BOTH runs (`outcome: success`, 5-star) — an earlier draft of this entry said it did
 not, which the operations specialist refuted and which is withdrawn. What differs is the
 operation's SHAPE AT BUILD TIME: the baseline builds two axes and targets
@@ -6163,9 +6177,31 @@ t23 in the candidate and t27 in the baseline — exactly when Kijevo was assembl
 `buildAxesFromDef` filters brigades and objectives in two independent passes, so the axis loses
 its brigade and the objective goes with it. `praca` is RBiH at t24 in both runs, so this is not
 an already-owned omission. So restricted routine positioning changes brigade availability, which
-changes the shape and timing of the operations the corps assembles. `rs_16th_krajina_motorized` (the three Donji Vakuf cells) was NOT traced
-to the same depth; its mechanism is INFERRED. `routine_destination_out_of_scope` rejections could
-not be counted — the reason code is gated behind a debug topic and is absent from the artifacts.
+changes the shape and timing of the operations the corps assembles.
+
+**Defect hunt — NONE FOUND, checked structurally.** T3 and T6 route every decision through the
+authority exemptions before rejecting; T2 needs none because all three scoped filters sit inside
+`!isActiveSectorOperationParticipant`, and the two unguarded scoped evaluators run at chain
+positions 13-14, after `evaluateSectorAttack` at position 8. **One GENUINE RESIDUAL HOLE, which did
+not fire here and should be ticketed:** `isActiveSectorOperationParticipant` admits only operation
+types `sector_attack` and `probe`, but `CorpsOperation.type` also includes `general_offensive`,
+`feint`, `strategic_defense` and `reorganization` — so a `general_offensive`/`feint` participant
+gets NO guard in `evaluateSectorMarch` at chain position 2, while `isDestinationAuthorizedByOperation`
+at T3/T6 has no type restriction. This change makes that asymmetry consequential because T2 now
+restricts where it did not before. Operation-type counts are `{probe, sector_attack}` only in both
+runs, so it is not the cause of the -5. Separately and PRE-EXISTING (identical in the baseline):
+`correctTransitStates` gates its authority exemption behind `brigadeAlreadyAtValidFront`, so a
+mid-journey operation transit falls through to an unconditional cancel — its own ticket.
+
+**HISTORICAL REFRAMING — how the -5 should be read.** ICTY-cited canon says Donji Vakuf town was
+taken by the Serb SJB on 17 April 1992 ("took control of the entire town the same day", renamed
+Srbobran; Stanisic & Zupljanin TJ Vol I para 238, Krajisnik TJ para 438) — an INSTITUTIONAL
+TAKEOVER, not a battle — and Korenici by a police action on 21 May 1992 (para 242). The candidate's
+RBiH is historically wrong at both. But the BASELINE buys those matches with brigade assaults at
+t35 and t38, roughly EIGHT MONTHS LATE and by the wrong mechanism — the same shape as the recorded
+Prusac finding, a match that is coincidental rather than vouched. The -5 is real against the
+reference and the candidate is the worse run, but the 701 is NOT a high-fidelity 701 at this site.
+`op:bihac:orasac_2` and `op:pale:praca` have no canon-timeline entry and were not guessed at.
 
 **OPEN — owner decision.** The policy removes the only mechanism that evicts a brigade from a risky
 single-OSID tooth: T2 trap reroute and retroactive eviction are now inert for any assigned brigade,
