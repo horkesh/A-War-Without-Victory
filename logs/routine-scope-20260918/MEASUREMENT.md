@@ -132,3 +132,94 @@ The balanced full-suite gate (`npm run test:vitest`) surfaced two failures after
 
 Neither correction changes simulation behaviour, so `n419` remains the measurement of record
 for this candidate. Both are type/comment-level only.
+
+---
+
+# The 19th Brigade — the defect this branch existed to fix is GONE (confirmed)
+
+`rs_19th_krajina_light_infantry`, from `brigade_temporal_log.jsonl` (only rows where the
+location / assignment / order / transit signature CHANGES are listed):
+
+**Baseline `n403` — the documented pathology, visible in full:**
+
+```
+  t1 .. t20  loc=op:donji_vakuf:jemanlici   mv=["op:donji_vakuf:pribraca_2"]  st=null
+             (the same pending order, re-issued every turn, never executing —
+              assigned_sub_segment_id churns across 10+ different sub-segments while
+              the brigade never moves)
+  t21,24,25,27,28  st=in_transit   (spurious intra-turn transits)
+  t29        loc=op:donji_vakuf:pribraca_2  (the unattributed t29 arrival)
+```
+
+**Candidate `n419` — the order is never issued at all:**
+
+```
+  t1 .. t20  loc=op:donji_vakuf:jemanlici   mv=null   st=null
+  t21        mv=["op:sipovo:pribeljci_2"]   st=in_transit   (a real, legal journey)
+  t23        loc=op:sipovo:pribeljci_2      (ARRIVES — travel actually progresses)
+  t25        loc=op:jajce:bravnice
+  t31        loc=op:donji_vakuf:kutanja
+```
+
+Four things are confirmed by this, all of them packet objectives:
+
+1. **The create/cancel/reissue churn is removed.** The prohibited `pribraca_2` order is not
+   produced in the first place, so there is nothing for T6 to cancel and nothing to re-issue.
+   `mv=null` replaces twenty turns of an unexecutable pending order.
+2. **The single-cell case behaves as specified.** `jemanlici` is the brigade's whole assigned
+   sub-segment front. The brigade emits no discretionary relocation, stays physically where it
+   is, and no transit or completed move is fabricated. That is §3 of the packet exactly.
+3. **The false unavailability is gone.** Through t1-t20 the brigade carries no movement state,
+   so operation admission sees an available formation — where the baseline showed it
+   intermittently `in_transit`. This is the admission exclusion the original investigation traced.
+4. **It is NOT a garrison.** The brigade leaves under a legal journey at t21, ARRIVES at t23
+   (travel progresses; `turns_remaining` is being decremented), and continues to Jajce and
+   Kutanja. The policy did not freeze it.
+
+**The confirmed HVO comparison** — `hrhb_mostar_brigade` is byte-identical between the runs
+through t19, including `Operation Jackal:t8` and its Mostar -> Čapljina -> Stolac march (operation
+authority passes through the new scope untouched). The divergence is exactly the pathology: at t20
+the baseline acquires the stuck pending order `mv=["op:neum:gornje_hrasno_2"]` at
+`trebimlja_2` — the second single-OSID-tooth case in the generality scan — and in the candidate
+that order is never issued.
+
+So on the packet's four questions the split is clean:
+
+- **A. policy implemented correctly** — yes.
+- **B. create/cancel/reissue defect removed** — YES, confirmed directly on both named cases.
+- **C. January calibration** — NO: 696/712, below the 700 floor, five new mismatches.
+- **D. Donji Vakuf's historical sequence** — still unresolved.
+
+B is achieved and C is failed by the same change. That is the honest result: the defect is real
+and is fixed, and fixing it costs five January cells through operation scheduling, not through any
+blocked authority.
+
+---
+
+# Named anchors and chronology the packet asked for
+
+24 reference cells matching Čardak / Pješivac-Kula / Hatelji / Jajce / Donji Vakuf were compared
+between the two runs at week 39. **Only three differ, and all three are the already-reported
+Donji Vakuf losses.**
+
+| anchor | reference | n403 | n419 |
+|---|---|---|---|
+| `op:zavidovici:cardak_2` (Čardak, 1992 capture) | RBiH | unchanged | unchanged |
+| `op:stolac:pjesivac_kula_2` | HRHB | unchanged | unchanged |
+| `op:stolac:hatelji_2` | RS | unchanged | unchanged |
+| Jajce — all 11 cells (`jajce_3`, `vinac_2`, `bravnice`, `divicani_2`, `barevo_2`, `grdovo`, `jezero_2`, `kruscica`, `lupnica`, `prisoje`, …) | RS | unchanged | unchanged |
+| Donji Vakuf — 8 of 11 cells (`jemanlici`, `pribraca_2`, `komar_2`, `kutanja`, `prusac_2`, `babin_potok_2`, `torlakovac_2`, …) | RS | unchanged | unchanged |
+| Donji Vakuf — `donji_vakuf_2`, `korenici`, `oborci_2` | RS | RS (match) | **RBiH (mismatch)** |
+
+So the **Jajce chronology is untouched**, and `prusac_2` — the 2026-09-17 repair that must never
+be reverted — still matches. No defensive commitment elsewhere in those municipalities changed.
+The Donji Vakuf chronology is changed only in the direction of the three lost cells; the town's
+own historical sequence remains unresolved, as it was before this packet.
+
+**Determinism / accounting.** No `Math.random`, wall-clock or timestamp was introduced (verified
+independently in review). The two sorts removed from the shared decision were provably
+order-irrelevant (a pure OR over sectors, and a lookup keyed by a unique `sub_segment_id`), and
+the reserve-roster test was restored to its own pass specifically so classification cannot depend
+on sector key order. The run completed with exit 0 and its own preflight, and RBiH (11) and HRHB
+(5) capture counts are byte-identical between the runs, which is what a movement-only change in
+RS-contested space should look like.
