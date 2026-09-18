@@ -172,6 +172,7 @@ export function runCommanderForCorps(
     corpsSubordinatesByCorps?: CorpsSubordinatesByCorps,
     enemyEquipmentSummaryContext?: EnemyEquipmentSummaryContext,
     osidPopulationMap?: import('../../../data/operational_data.js').OsidPopulationMap,
+    terrainData?: import('../../../map/terrain_scalars.js').TerrainScalarsData | null,
 ): CommanderOutput {
     return botOrdersPerfTime('commander.runCommanderForCorps.total', () => {
         const briefing = botOrdersPerfTime(
@@ -182,6 +183,7 @@ export function runCommanderForCorps(
                 corpsSubordinatesByCorps,
                 enemyEquipmentSummaryContext,
                 osidPopulationMap,
+                terrainData,
             ),
         );
         const previousState: CommanderState | null =

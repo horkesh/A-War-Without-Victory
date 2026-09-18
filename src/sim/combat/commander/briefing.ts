@@ -29,6 +29,7 @@
  */
 
 import type { EdgeRecord } from '../../../map/settlements.js';
+import type { TerrainScalarsData } from '../../../map/terrain_scalars.js';
 import type {
     FactionId,
     FormationId,
@@ -668,6 +669,7 @@ export function buildBriefing(
     corpsSubordinatesByCorps?: CorpsSubordinatesByCorps,
     enemyEquipmentSummaryContext?: EnemyEquipmentSummaryContext,
     osidPopulationMap?: import('../../../data/operational_data.js').OsidPopulationMap,
+    terrainData?: TerrainScalarsData | null,
 ): CommanderBriefing {
     const turn = state.meta?.turn ?? 0;
 
@@ -831,6 +833,7 @@ export function buildBriefing(
         brigades,
         state_ref: state,
         reverse_map: reverseMap,
+        terrain_data: terrainData ?? null,
         osid_population_map: osidPopulationMap,
         supply_by_osid: supplyByOsid,
         ethnic_map: ethnicMap,

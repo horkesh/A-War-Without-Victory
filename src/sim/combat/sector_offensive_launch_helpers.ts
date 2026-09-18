@@ -31,7 +31,19 @@ import { predictAllAdjacentTargets, predictCombatOutcome, type PredictedOutcome 
 import { estimateConcentratedOutcome, isOutcomeSufficientForAttack } from './bot_brigade_targeting.js';
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
-import { getAllAxisObjectives, getCurrentLaunchObjectives, isMultiAxis } from './sector_offensive_axis_helpers.js';
+import type { TerrainScalarsData } from '../../map/terrain_scalars.js';
+import type { Osid } from './osid_adjacency.js';
+import {
+    buildCorpsAllowedOsids,
+    dijkstraFriendlyPath,
+    getOsidColumnRate,
+} from './osid_column_movement.js';
+import {
+    getAllAxisObjectives,
+    getCurrentLaunchObjectives,
+    isMultiAxis,
+    PLANNING_INVALIDATION_GRACE_TURNS,
+} from './sector_offensive_axis_helpers.js';
 import { getStandingOgDefenseBrigadeIds } from './standing_og_defense.js';
 import { ENABLE_TACTICAL_GROUPS, ENABLE_TG_FORMATION, DONATION_READINESS_FRACTION, DONATION_READINESS_FRACTION_HRHB, getAnchorBrigade } from './tactical_group_config.js';
 // ADR-0005 v2.2c #3: donation-readiness gate recomputes the donor pool here.
@@ -457,6 +469,105 @@ export function collectObjectiveApproachOsids(
         if (staticApproachOsids.size > 0) break;
     }
     return staticApproachOsids;
+}
+
+/**
+ * P-A — TIME-BOUNDED PARTICIPANT ADMISSION (owner packet 2026-09-18).
+ *
+ * CONTRACT. A formation may be admitted as an INITIAL participant in a commander-generated
+ * offensive only if, from its CURRENT physical state and under the existing legal movement rules,
+ * it can reach the operation's required assembly/approach area within the time the operation
+ * actually provides before assembly failure.
+ *
+ * WHY. `findLocalOccupationCandidate` / the emit roster paths admitted participants on an 8-hop
+ * BFS (`MAX_REACHABILITY_HOPS`) with no time budget, then set `minimum_staged_brigades` to the
+ * whole roster. The lifecycle demands those brigades be physically objective-adjacent by
+ * `planning_duration + PLANNING_INVALIDATION_GRACE_TURNS`; a participant admitted within 8 hops
+ * but unable to march that far in time (e.g. Kupres -> Trubar over mountains) guaranteed
+ * `participants_below_assembly_floor` and a zero-attack abort. This makes the admission test use
+ * the same physical-feasibility assumptions the lifecycle will later enforce.
+ *
+ * REQUIRED AREA. The union of the operation's objective approaches
+ * (`collectObjectiveApproachOsids` — what `areParticipantsReadyForExecution` consumes) and the
+ * objective's live war-front-edge neighbours (`buildOsidAdjacencyFromFrontEdges(...).get(objective)`
+ * — exactly what `countAdjacentStagedParticipants` counts for the staged assembly floor). A
+ * brigade that reaches either area in time is physically plausible.
+ *
+ * BUDGET. `N <= planning_duration + PLANNING_INVALIDATION_GRACE_TURNS`, where `N` is the
+ * production column transit (`Math.max(1, ceil(totalCost / getOsidColumnRate(formation)))`). Turn
+ * semantics: the order is written after the movement step on turn T, transit starts on T+1, so
+ * arrival is `T + 1 + N`; the assembly requirement becomes fatal at `T + planning_duration +
+ * grace + 1`. Because the movement step runs before `advanceSectorOffensives` in the same turn,
+ * arrival on the fatal turn still satisfies the floor, giving `N <= planning_duration + grace`.
+ *
+ * THIS IS AN ADMISSION SANITY CHECK, NOT CLAIRVOYANCE. It uses the live terrain, front-edge
+ * geometry and formation composition available to the commander this turn. It does not promise
+ * successful assembly after conditions change, and it does not force a launch: a valid roster may
+ * still fail later for combat, attrition, changed control, route collapse or disruption. It does
+ * not lower any floor, extend any deadline, or reserve/reorder the rejected formation.
+ *
+ * Read-only and deterministic: pure reads of current state + the passed-in terrain data. It never
+ * mutates movement state, never chooses a destination, and is only consulted to decide whether a
+ * candidate belongs in THIS operation's initial roster.
+ */
+export function canFormationReachAssemblyInTime(
+    state: GameState,
+    brigadeId: FormationId,
+    corpsId: FormationId,
+    faction: FactionId,
+    objective: string,
+    planningDuration: number,
+    adjacency: Map<string, string[]>,
+    reverseMap: OperationalToCanonicalReverseMap | null | undefined,
+    terrainData: TerrainScalarsData | null | undefined,
+): boolean {
+    const formation = state.military.formations?.[brigadeId];
+    const location = formation?.location_osid;
+    // Fail open when the inputs needed to judge physical plausibility are absent: this is an
+    // admission sanity check and must not suppress a valid operation merely because the creator
+    // lacks a reverse map/terrain snapshot.
+    if (!formation || !location || !reverseMap) return true;
+    if (typeof objective !== 'string' || objective.length === 0) return true;
+
+    const targets = new Set<string>(collectObjectiveApproachOsids(state, corpsId, faction, [objective]));
+    for (const neighbor of buildOsidAdjacencyFromFrontEdges(state).get(objective) ?? []) {
+        // Only cells the formation may legally occupy — a brigade cannot stage on an enemy OSID,
+        // and `dijkstraFriendlyPath` exempts the destination from its controller check, so an
+        // unfiltered enemy neighbour would validate an unreachable assembly cell.
+        const controller = getPoliticalControllerOSID(state, neighbor, reverseMap);
+        if (controller === null || controller === faction || isFriendlyFactionCtrl(controller, faction, state)) {
+            targets.add(neighbor);
+        }
+    }
+    if (targets.size === 0) return false;
+
+    const allowedOsids = buildCorpsAllowedOsids(corpsId, state);
+    // Shallow copy: `getOsidColumnRate` -> `ensureBrigadeComposition` lazily materializes the
+    // formation's derived equipment composition. Passing a copy keeps this feasibility check
+    // strictly side-effect free with respect to the caller's formation (the rate is a pure
+    // function of faction/kind when composition is absent, which is the same derivation the
+    // engine would cache) and never mutates movement state.
+    const columnRate = getOsidColumnRate({ ...formation });
+    const budget = Math.max(0, Math.trunc(planningDuration)) + PLANNING_INVALIDATION_GRACE_TURNS;
+    const terrain = terrainData ?? { by_sid: {} };
+
+    for (const target of [...targets].sort(strictCompare)) {
+        if (target === location) return true;
+        const route = dijkstraFriendlyPath(
+            location as Osid,
+            target as Osid,
+            faction,
+            adjacency as Map<Osid, Osid[]>,
+            state,
+            reverseMap,
+            terrain,
+            allowedOsids,
+        );
+        if (!route || route.path.length <= 1) continue;
+        const transitTurns = Math.max(1, Math.ceil(route.totalCost / columnRate));
+        if (transitTurns <= budget) return true;
+    }
+    return false;
 }
 
 export function buildOpeningAttackAdjacency(

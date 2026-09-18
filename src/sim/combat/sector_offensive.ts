@@ -107,6 +107,7 @@ import {
     assignBrigadeRoles,
     computeMultiAxisPlanningDuration,
     computePlanningDuration,
+    PLANNING_INVALIDATION_GRACE_TURNS,
     createSingleAxis,
     getAllAxisBrigades,
     getAllAxisObjectives,
@@ -620,7 +621,6 @@ const EARLY_LAUNCH_COHESION_PENALTY = 15;
 const ALL_OUT_EXTRA_COHESION_COST = 1;
 const BOMBARDMENT_PREP_COST = 2;
 const FEINT_PLANNING_TURNS = 2;
-const PLANNING_INVALIDATION_GRACE_TURNS = 2;
 
 /**
  * Synthesis §3 E-B2: Operation Una negative-control combat-power cap.

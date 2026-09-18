@@ -72,7 +72,7 @@ import {
  * callers can safely pass `undefined` to dijkstraFriendlyPath and get
  * faction-wide BFS (graceful degradation for orphan brigades).
  */
-function buildCorpsAllowedOsids(corpsId: string, state: GameState): Set<string> | undefined {
+export function buildCorpsAllowedOsids(corpsId: string, state: GameState): Set<string> | undefined {
     const allowed = new Set<string>();
     for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
         if (sector.corps_id !== corpsId) continue;

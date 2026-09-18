@@ -376,6 +376,7 @@ export function generateAllCorpsOrders(
     preComputedAdjacency?: ReadonlyMap<string, readonly string[]>,
     spatial?: SpatialContext | null,
     osidPopulationMap?: OsidPopulationMap,
+    terrainData?: import('../../map/terrain_scalars.js').TerrainScalarsData | null,
 ): void {
     // 0. Generate army HQ overrides for this turn (merge with any existing from gathering)
     const armyOverrides = generateArmyHQOverrides(state, faction);
@@ -445,6 +446,7 @@ export function generateAllCorpsOrders(
                 corpsSubordinatesByCorps,
                 enemyEquipmentSummaryContext,
                 osidPopulationMap,
+                terrainData,
             );
             applyCommanderOutput(state, corps.id, output);
         }

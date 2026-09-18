@@ -177,6 +177,16 @@ export const PLANNING_MARCH_BUFFER = 2;
 /** Hard cap preventing long idle planning periods for large operations. */
 export const MAX_PLANNING_DURATION = 4;
 
+/**
+ * Turns of grace beyond a commander-generated operation's `planning_duration` before an
+ * unexecutable plan is invalidated. Single source of truth for the assembly deadline: a
+ * participant that has not physically satisfied the operation's assembly requirement by
+ * `planning_duration + PLANNING_INVALIDATION_GRACE_TURNS` causes the abort. See
+ * `sector_offensive.ts` (the enforcement sites) and `canFormationReachAssemblyInTime`
+ * (`sector_offensive_launch_helpers.ts`), which derives the admission budget from the same value.
+ */
+export const PLANNING_INVALIDATION_GRACE_TURNS = 2;
+
 /** Compute a planning window from objective count, including the march buffer. */
 export function computePlanningDuration(objectiveCount: number): number {
     let base: number;

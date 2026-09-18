@@ -87,6 +87,7 @@ import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
 import { shouldLaunchProbeInstead } from '../bot_corps_directives.js';
 import { getStalestSectorIntelConfidence } from '../sector_intel.js';
 import { computePlanningDuration } from '../sector_offensive_axis_helpers.js';
+import { canFormationReachAssemblyInTime } from '../sector_offensive_launch_helpers.js';
 
 export function capOpportunityOperationParticipants(
     participantIds: readonly string[],
@@ -308,6 +309,33 @@ function predictDirectEnemyTargets(
 }
 
 /**
+ * P-A admission sanity check (owner packet 2026-09-18): can this formation physically reach the
+ * commander operation's required assembly/approach area inside the operation's own assembly
+ * budget? Delegates to `canFormationReachAssemblyInTime`, which uses the production
+ * terrain-weighted column model. Fail-open when the briefing lacks the state/terrain needed to
+ * judge — this must not suppress an operation for missing data.
+ */
+function canReachAssemblyInTime(
+    briefing: CommanderBriefing,
+    brigadeId: FormationId,
+    objective: string,
+    planningDuration: number,
+): boolean {
+    if (!briefing.state_ref) return true;
+    return canFormationReachAssemblyInTime(
+        briefing.state_ref,
+        brigadeId,
+        briefing.corps_id,
+        briefing.faction,
+        objective,
+        planningDuration,
+        briefing.spatial.adjacency as Map<string, string[]>,
+        briefing.reverse_map ?? null,
+        briefing.terrain_data ?? null,
+    );
+}
+
+/**
  * Find a surplus brigade that is already adjacent to a bounded enemy pocket it
  * can defeat by itself. This is deliberately evaluated before the generic
  * highest-fitness probe choice: fitness elsewhere on the front must not hide a
@@ -511,7 +539,13 @@ function findLocalOccupationCandidate(
                     return formation?.corps_id === briefing.corps_id
                         && formation.elite_loan_state?.on_loan !== true
                         && isBrigadeEligibleForOperationObjectives(formation, [target])
-                        && Number.isFinite(distanceToTarget(brigadeId));
+                        && Number.isFinite(distanceToTarget(brigadeId))
+                        // P-A: an admitted brigade must be able to physically reach the
+                        // objective's assembly/approach area inside the operation's own
+                        // assembly budget (planning_duration + grace). The escalation path
+                        // builds a multi-brigade op with planning_duration =
+                        // computePlanningDuration(objectiveCount).
+                        && canReachAssemblyInTime(briefing, brigadeId, target, computePlanningDuration(1));
                 });
             const primaryEnemyTargets = new Set(
                 (sector.sub_segments ?? []).flatMap((subSegment) => subSegment.enemy_osids ?? []),
@@ -1248,7 +1282,13 @@ function buildOperations(
             if (!locationOsid) return false;
             for (const approachOsid of friendlyApproachOsids) {
                 const dist = spatialFriendlyDistance(briefing.spatial, briefing.faction, locationOsid, approachOsid, MAX_REACHABILITY_HOPS);
-                if (dist >= 0) return true;
+                if (dist >= 0) {
+                    // P-A: 8-hop reachability is necessary but not sufficient — the brigade must
+                    // also be able to physically arrive inside this operation's own assembly
+                    // budget. A plan-driven commander op carries the factory-default
+                    // planning_duration of 1.
+                    return canReachAssemblyInTime(briefing, brigadeId, reachabilityObjectiveOsid, 1);
+                }
             }
             return false;
         };
@@ -1861,7 +1901,14 @@ function buildOperations(
                             return brigade?.corps_id === briefing.corps_id
                                 && brigade.elite_loan_state?.on_loan !== true
                                 && isBrigadeEligibleForOperationObjectives(brigade, probeObjectives)
-                                && Number.isFinite(distanceToReduction(brigadeId));
+                                && Number.isFinite(distanceToReduction(brigadeId))
+                                // P-A: same time-bounded admission as the local-occupation path.
+                                && canReachAssemblyInTime(
+                                    briefing,
+                                    brigadeId,
+                                    probeObjectives[0]!,
+                                    computePlanningDuration(probeObjectives.length),
+                                );
                         })
                         .sort((left, right) => {
                             if (left === probeBrigade.brigade_id) return -1;

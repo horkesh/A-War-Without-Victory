@@ -662,6 +662,69 @@ describe('commander emission overlap guards', () => {
         });
     });
 
+    it('P-A: does not create an operation whose only second brigade cannot reach assembly in time', () => {
+        // b1 is at the objective's approach (staged). b2 is 8 friendly hops away — WITHIN the
+        // existing MAX_REACHABILITY_HOPS=8 reachability check, so the pre-P-A creator admitted
+        // it — but 8 terrain-weighted edges at the RS column rate of 2 need 4 transit turns,
+        // while this plan-driven op provides only planning_duration 1 + grace 2 = 3. P-A drops
+        // b2; one brigade is below the two-brigade anchor minimum, so no operation is created.
+        // The minimum is NOT lowered and no participant is manufactured.
+        const farIds = Array.from({ length: 8 }, (_, i) => `op:test:far${i}`);
+        const adjacency = new Map<string, readonly string[]>([
+            ['op:test:approach', ['op:test:objective', 'op:test:far7']],
+            ['op:test:objective', ['op:test:approach']],
+        ]);
+        for (let i = 0; i < farIds.length; i += 1) {
+            const cur = farIds[i]!;
+            const next = i === farIds.length - 1 ? 'op:test:approach' : farIds[i + 1]!;
+            const prev = i === 0 ? null : farIds[i - 1]!;
+            adjacency.set(cur, prev ? [prev, next] : [next]);
+        }
+        const friendlyCells = new Set(['op:test:approach', ...farIds]);
+        const briefing: CommanderBriefing = {
+            ...makeBriefing([], [
+                makeBrigade('b1', 'op:test:approach'),
+                makeBrigade('b2', 'op:test:far0'),
+            ]),
+            spatial: {
+                ...makeSpatial(),
+                adjacency,
+                sharedBoundaryAdjacency: adjacency,
+                friendlyOsidsByFaction: new Map<FactionId, ReadonlySet<string>>([
+                    [FACTION, friendlyCells],
+                    ['RBiH' as FactionId, new Set(['op:test:objective'])],
+                    ['HRHB' as FactionId, new Set()],
+                ]),
+            } as SpatialContext,
+            reverse_map: new Map() as any,
+        };
+        const state = briefing.state_ref!;
+        state.military.formations = Object.fromEntries(
+            briefing.brigades.map((brigade) => [brigade.id, brigade]),
+        );
+        state.military.war_front_edges_osid = [{
+            a: 'op:test:approach',
+            b: 'op:test:objective',
+        } as any];
+        state.political.political_controllers = {
+            ['op:test:approach']: FACTION,
+            ['op:test:objective']: 'RBiH',
+            ...Object.fromEntries(farIds.map((id) => [id, FACTION])),
+        } as any;
+
+        const output = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            makeAllocation(),
+            makePlanDecision(),
+            makeDecisions(),
+            makeThreats(),
+        );
+
+        expect(output.operations).toHaveLength(0);
+    });
+
     it('concentrates a third available brigade against a bounded position without raising the two-brigade formation minimum', () => {
         const baseBriefing = makeBriefing([], [
             makeBrigade('b1', 'op:test:approach'),

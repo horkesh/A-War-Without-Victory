@@ -2457,9 +2457,18 @@ export const warPhases: NamedPhase[] = [
             const corpsOsidPopulationMap = reverseMap && context.input.municipalityPopulation1991
                 ? computeOsidPopulation(reverseMap, context.input.municipalityPopulation1991)
                 : undefined;
+            // Terrain scalars for the P-A time-bounded participant-admission check: the creator
+            // must estimate column transit with the same terrain-weighted model the execution
+            // step uses. Non-fatal — falls back to default terrain.
+            let corpsTerrainData;
+            try {
+                corpsTerrainData = await loadTerrainScalars();
+            } catch {
+                corpsTerrainData = { by_sid: {} };
+            }
             for (const faction of factions) {
                 const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
-                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid, corpsEthnicMap, corpsAdjacency, corpsSpatial?.preCombat, corpsOsidPopulationMap);
+                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid, corpsEthnicMap, corpsAdjacency, corpsSpatial?.preCombat, corpsOsidPopulationMap, corpsTerrainData);
                 corpsReport.push(...extractCorpsAiReport(context.state, faction));
             }
             if (corpsReport.length > 0) {
