@@ -7,7 +7,7 @@
  * compiled into a full OperationAAR and stored in GameState.operation_history.
  */
 
-import type { AxisRejectionDetail, GameState, CorpsOperation, FormationId, CommanderAssessment, TacticalGroup } from '../../state/game_state.js';
+import type { AxisRejectionDetail, GameState, CorpsOperation, FormationId, CommanderAssessment, TacticalGroup, TgFormationDeclineDetail } from '../../state/game_state.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -89,6 +89,15 @@ export interface AxisAAR {
      * that only says THAT something did.
      */
     launch_blocker_detail?: AxisRejectionDetail;
+    /**
+     * REASON-CODE INSTRUMENTATION, topic `tg_formation` — ENGINE-HEALTH B3 (2026-09-19).
+     * Carryover of `OperationAxis.tg_formation_decline`: why this axis's Tactical Group
+     * augmentation was declined, and the statement that declining it did NOT refuse the
+     * operation. Without this carryover the record dies with the live operation and never
+     * reaches an artifact — measured on run n425, where four fewer TGs formed and not one
+     * decline survived to `final_save.json`.
+     */
+    tg_formation_decline?: TgFormationDeclineDetail;
 }
 
 // ─── Grading ────────────────────────────────────────────────────────────────
@@ -863,6 +872,15 @@ export function finalizeOperationAAR(
             // blocker is dropped rather than published next to the wrong verdict.
             if (axis.launch_blocker_detail && axis.launch_blocker === 'zero_eligible_axis') {
                 axisSummary.launch_blocker_detail = axis.launch_blocker_detail;
+            }
+            // REASON-CODE INSTRUMENTATION (topic `tg_formation`) — ENGINE-HEALTH B3.
+            // Present on the axis only when the topic is on, so this carryover is inert by
+            // construction, exactly like the one above. NOT guarded on a blocker: a declined
+            // TG augmentation is not a blocker at all — the operation went on to fight — so
+            // there is no verdict for it to outlive. It is the one place a reader can see
+            // that a Tactical Group was considered and refused.
+            if (axis.tg_formation_decline) {
+                axisSummary.tg_formation_decline = axis.tg_formation_decline;
             }
             axisSummaries.push(axisSummary);
         }

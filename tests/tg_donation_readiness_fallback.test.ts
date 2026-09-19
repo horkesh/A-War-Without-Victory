@@ -128,6 +128,20 @@ describe('tgDonationMeetsReadiness — TG augmentation viability', () => {
         expect(preparationSource.match(/recordTgFormationDecline\(/g)).toHaveLength(3); // 1 def + 2 calls
     });
 
+    it('B3: a declined augmentation is carried into the AAR, unguarded by any blocker', () => {
+        // The decline record lives on the live operation and dies with it. Measured on run
+        // n425: four fewer TGs formed and not one decline survived to final_save.json. The
+        // AAR carryover is what puts it in an artifact a reader will actually open. It must
+        // NOT be guarded on a launch_blocker the way launch_blocker_detail is — a declined
+        // augmentation is not a blocker, the operation went on to fight.
+        const aarSource = readFileSync(resolve('src/sim/combat/operation_aar.ts'), 'utf8');
+        expect(aarSource).toContain('tg_formation_decline?: TgFormationDeclineDetail');
+        expect(aarSource).toMatch(
+            /if \(axis\.tg_formation_decline\) \{\s*\n\s*axisSummary\.tg_formation_decline = axis\.tg_formation_decline;/,
+        );
+        expect(aarSource).not.toMatch(/axis\.tg_formation_decline && axis\.launch_blocker/);
+    });
+
     it('B3: the launch gate no longer carries a donation check', () => {
         // The readiness rule has ONE owner. If a donation check reappears in the
         // opening-attack path, the non-monotonicity is back. Asserted against CODE
