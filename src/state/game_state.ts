@@ -309,8 +309,23 @@ export interface OperationAxis {
      *  never attacks. Persists through to AxisAAR for post-mortem visibility.
      *  See LATE_WAR_OPERATION_COMBAT_DELIVERY_MEGA_LANE Phase C, sector_offensive_launch_helpers.ts. */
     unreachable_at_launch?: boolean;
-    /** Typed diagnostic for axes that fail the opening-attack launch gate. */
+    /** Typed diagnostic for axes that fail the opening-attack launch gate.
+     *  ENGINE-HEALTH B3 (2026-09-19): `'insufficient_donation'` is RETIRED — nothing
+     *  writes it any more. Inadequate donor support now declines the Tactical Group
+     *  augmentation (see `tg_formation_decline`) instead of refusing the axis. The
+     *  literal is retained so saves and run artifacts written before the repair still
+     *  load and read back correctly. */
     launch_blocker?: 'participants_below_attack_floor' | 'participants_below_assembly_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective' | 'insufficient_donation';
+    /**
+     * REASON-CODE INSTRUMENTATION, topic `tg_formation` — ENGINE-HEALTH B3 (2026-09-19).
+     * Written ONLY when `AWWV_DEBUG_REASON_CODES` requests it, so a default run never
+     * carries this field and the save hash is unmoved.
+     *
+     * Why this axis's Tactical Group AUGMENTATION was declined. A decline is not an
+     * operation failure: the axis continues under the ordinary opening-attack gates with
+     * its own participants at their real strength, and no donor cost is paid.
+     */
+    tg_formation_decline?: TgFormationDeclineDetail;
     /**
      * REASON-CODE INSTRUMENTATION, topic `axis_reject` — item 3. Written ONLY
      * when `AWWV_DEBUG_REASON_CODES` requests it, so a default run never carries
@@ -343,6 +358,35 @@ export interface OperationAxis {
     objective_battles_this_turn?: number;
     /** Total battles conducted by this axis since operation start. */
     total_battles?: number;
+}
+
+/**
+ * REASON-CODE INSTRUMENTATION (topic `tg_formation`) — ENGINE-HEALTH B3 (2026-09-19).
+ *
+ * Why a Tactical Group augmentation was declined at `formTgsAtReadyTransition`. Replaces
+ * the retired `insufficient_donation` launch blocker, which reported an OPERATION failure
+ * for what is only a declined augmentation — hence `operation_remains_executable`, which
+ * is the fact the old reason code got wrong.
+ *
+ * Every field is a value the formation path already computes. Nothing here is read by any
+ * predicate, and the whole object is absent on a default run.
+ */
+export interface TgFormationDeclineDetail {
+    declined: true;
+    /** `no_eligible_donors` = the pool was empty; `donation_below_readiness` = it was too weak. */
+    reason: 'no_eligible_donors' | 'donation_below_readiness';
+    anchor_brigade_id: string;
+    anchor_personnel: number;
+    faction: string | null;
+    donor_count: number;
+    /** Sum of `personnel_lent` over the candidate pool (falloff/cap/floor already applied). */
+    donated_personnel: number;
+    /** Faction's readiness fraction — the HRHB band is visible here rather than implied. */
+    readiness_fraction: number;
+    /** `readiness_fraction * anchor_personnel`. */
+    required_donation: number;
+    /** Always true: a declined augmentation never refuses the underlying operation. */
+    operation_remains_executable: true;
 }
 
 /**
@@ -560,8 +604,18 @@ export interface CorpsOperation {
     force_launch_consequence_applied?: boolean;
     /** Internal consumption flag for artillery preparation. */
     artillery_preparation_consumed?: boolean;
-    /** Reason the operation entered recovery. */
+    /** Reason the operation entered recovery.
+     *  ENGINE-HEALTH B3 (2026-09-19): `'insufficient_donation'` is RETIRED as a producible
+     *  reason — it reached this union only by being propagated from the removed
+     *  opening-attack donation gate. Retained so pre-repair saves and run artifacts still
+     *  load and read back correctly. */
     recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high' | 'participants_below_attack_floor' | 'participants_below_assembly_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'insufficient_donation' | 'offensive_ops_suppressed' | 'tg_cohesion_exhausted' | 'tg_max_lifecycle';
+    /**
+     * REASON-CODE INSTRUMENTATION, topic `tg_formation` — ENGINE-HEALTH B3 (2026-09-19).
+     * Legacy single-axis counterpart of `OperationAxis.tg_formation_decline`. Absent on a
+     * default run.
+     */
+    tg_formation_decline?: TgFormationDeclineDetail;
     /** Named officer commanding this operation (if any). */
     commander_officer_id?: string;
     /** Named tactical_commander leading this op's Tactical Group anchor assault (ADR-0006 Phase 3A).

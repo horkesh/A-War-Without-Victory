@@ -269,11 +269,20 @@ describe('Phase 4 flag-on integration — formTgsAtReadyTransition', () => {
         // Two axes in DIFFERENT corps (so a prior axis's donor pull — same-corps only — can't
         // consume the other axis's candidates). Each axis has a phantom that OUTRANKS its
         // resident; the resident must anchor. Distinct staging keeps donor pools disjoint.
+        // ENGINE-HEALTH B3 (2026-09-19): each corps carries one extra donor so its pool
+        // satisfies TG donation readiness (0.6 x 1400 = 840). At 0 hops the phantom lends
+        // floor(min(2000, 0.30x2000, 2000-800)) = 600 and the extra lends 0.30x1300 = 390,
+        // so 990 >= 840. The extras are NOT on either axis, so anchor selection — what this
+        // test is about — is untouched; they are below the residents' power in any case.
+        // Before B3 the formation site had no readiness check and a lone 600 pledge formed
+        // a TG that the launch gate would then have refused the whole operation for.
         const state = stateWith([
             phantom('jna_uzice_corps_tg', { corps_id: 'vrs_a', location_osid: 'op:a:s0' }),
             brigade('rs_resident_a', { corps_id: 'vrs_a', location_osid: 'op:a:s0', personnel: 1400 }),
+            brigade('rs_extra_a', { corps_id: 'vrs_a', location_osid: 'op:a:s0', personnel: 1300 }),
             phantom('jna_4th_corps_tg', { corps_id: 'vrs_b', location_osid: 'op:b:s0' }),
             brigade('rs_resident_b', { corps_id: 'vrs_b', location_osid: 'op:b:s0', personnel: 1400 }),
+            brigade('rs_extra_b', { corps_id: 'vrs_b', location_osid: 'op:b:s0', personnel: 1300 }),
         ]);
 
         const op: any = {
@@ -315,15 +324,26 @@ describe('Phase 4 flag-on integration — formTgsAtReadyTransition', () => {
         // de-conflict to its own resident rs_nextbest (rs_shared already reserved) and
         // pull rs_donor_b. Codex P2 #46: a TG only forms when selectDonors yields ≥1
         // donor, so each axis needs its own donor to exercise the de-confliction path.
+        // ENGINE-HEALTH B3 (2026-09-19): each corps now carries THREE donors rather than one,
+        // because TG donation readiness demands a genuine multi-donor pool. A donor lends at
+        // most DONATION_CAP_FRACTION (30%) of its own personnel, so reaching
+        // DONATION_READINESS_FRACTION (60%) of an anchor with donors weaker than that anchor
+        // needs three of them. Axis A: 3 x 0.30 x 1800 = 1620 >= 0.6 x 2200 = 1320.
+        // Axis B: 3 x 0.30 x 1200 = 1080 >= 0.6 x 1500 = 900. Every donor stays below its
+        // anchor's power, so resolveTgAnchor still prefers rs_shared (axis A) / rs_nextbest
+        // (axis B) — the de-confliction this test is about is unchanged.
         const state = stateWith([
             // Donor personnel must clear the residual floor: at 0 hops a donor gives 30%
             // (DONATION_CAP_FRACTION), so it must keep ≥ MIN_BRIGADE_PERSONNEL_AFTER_DONATION
-            // (800) → ≥ ~1143 personnel. 1200 passes while staying below each anchor's power
-            // so resolveTgAnchor still prefers rs_shared (axis A) / rs_nextbest (axis B).
+            // (800) → ≥ ~1143 personnel.
             brigade('rs_shared', { corps_id: 'vrs_a', location_osid: 'op:a:s0', personnel: 2200 }),
-            brigade('rs_donor_a', { corps_id: 'vrs_a', location_osid: 'op:a:s0', personnel: 1200 }),
+            brigade('rs_donor_a', { corps_id: 'vrs_a', location_osid: 'op:a:s0', personnel: 1800 }),
+            brigade('rs_donor_a2', { corps_id: 'vrs_a', location_osid: 'op:a:s0', personnel: 1800 }),
+            brigade('rs_donor_a3', { corps_id: 'vrs_a', location_osid: 'op:a:s0', personnel: 1800 }),
             brigade('rs_nextbest', { corps_id: 'vrs_b', location_osid: 'op:b:s0', personnel: 1500 }),
             brigade('rs_donor_b', { corps_id: 'vrs_b', location_osid: 'op:b:s0', personnel: 1200 }),
+            brigade('rs_donor_b2', { corps_id: 'vrs_b', location_osid: 'op:b:s0', personnel: 1200 }),
+            brigade('rs_donor_b3', { corps_id: 'vrs_b', location_osid: 'op:b:s0', personnel: 1200 }),
         ]);
         const op: any = {
             name: 'OpDual', type: 'sector_attack', staging_osid: 'op:a:s0',

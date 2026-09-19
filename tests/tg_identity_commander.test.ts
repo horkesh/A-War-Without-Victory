@@ -231,7 +231,12 @@ describe('formTgsAtReadyTransition — TG identity (flag-on)', () => {
         };
         const state = stateWith({
             brigades: [
-                brigade('anchor', { location_osid: 'zavidovici_1' }),
+                // ENGINE-HEALTH B3 (2026-09-19): anchor 1000 rather than the 2000 default so
+                // this single donor satisfies TG donation readiness. A donor lends at most
+                // 30% of its own personnel, so one donor can never reach 60% of an
+                // equally-sized anchor. d1 lends 600 = 0.6 x 1000. Commander assignment and
+                // sector naming, which is what this test is about, are unchanged.
+                brigade('anchor', { location_osid: 'zavidovici_1', personnel: 1000 }),
                 brigade('d1', { location_osid: 'zavidovici_1' }),
             ],
             officerData: [tacticalOfficer('tc')],

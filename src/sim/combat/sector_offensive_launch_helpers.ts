@@ -45,12 +45,10 @@ import {
     PLANNING_INVALIDATION_GRACE_TURNS,
 } from './sector_offensive_axis_helpers.js';
 import { getStandingOgDefenseBrigadeIds } from './standing_og_defense.js';
-import { ENABLE_TACTICAL_GROUPS, ENABLE_TG_FORMATION, DONATION_READINESS_FRACTION, DONATION_READINESS_FRACTION_HRHB, getAnchorBrigade } from './tactical_group_config.js';
-// ADR-0005 v2.2c #3: donation-readiness gate recomputes the donor pool here.
-import { selectDonors } from './tactical_group_selection.js';
-// ADR-0005 Phase 4: phantom-aware anchor (gate must score donors against the SAME
-// persistent anchor that formTgsAtReadyTransition will actually use, not a phantom).
-import { resolveTgAnchor } from './tactical_group_anchor.js';
+import { ENABLE_TACTICAL_GROUPS, getAnchorBrigade } from './tactical_group_config.js';
+// ENGINE-HEALTH B3 (2026-09-19): the donation-readiness gate no longer runs here, so this
+// module no longer selects donors or resolves a TG anchor. Readiness is evaluated once, at
+// the site that actually forms a Tactical Group (`formTgsAtReadyTransition`).
 import { getOperationBrigadesAtCurrentObjective } from './corps_operation_helpers.js';
 
 // BATCH C: launch-readiness probes call `predictAllAdjacentTargets(...)` only
@@ -923,12 +921,22 @@ export interface AxisRejectionFactsOut {
     brigades: BrigadePredictionFact[];
 }
 
+/**
+ * Blockers this module can PRODUCE.
+ *
+ * ENGINE-HEALTH B3 (2026-09-19): `'insufficient_donation'` was removed from this union
+ * and is no longer producible. Inadequate donor support declines the Tactical Group
+ * augmentation instead of refusing the operation (see `tgDonationMeetsReadiness`). The
+ * literal is RETAINED in the persisted `OperationAxis['launch_blocker']` and
+ * `CorpsOperation['recovery_reason']` unions in `game_state.ts` so that saves and run
+ * artifacts written before this repair still load and still read back correctly. Nothing
+ * writes it any more; do not reintroduce it here.
+ */
 export type OpeningAttackBlocker =
     | 'participants_below_attack_floor'
     | 'participants_below_assembly_floor'
     | 'no_approach_osid'
     | 'zero_eligible_axis'
-    | 'insufficient_donation'
     | 'no_launch_readiness';
 
 export interface OpeningAttackReadinessResult {
@@ -1078,7 +1086,9 @@ function classifyAxisOpeningAttack(
     adjacency: Map<string, string[]>,
     threshold: PredictedOutcome,
     staticAdjacency?: Map<string, string[]>,
-    armyHqOpId?: CorpsOperation['army_hq_op_id'],
+    // ENGINE-HEALTH B3 (2026-09-19): the `armyHqOpId` parameter was dropped here. Its only
+    // reader was the removed donation gate's `selectDonors` call; the Army-HQ donor scope
+    // is now consulted only where a Tactical Group actually forms.
     // TEMPORARY DIAGNOSTIC — remove with axis_readiness_debug.ts.
     debugOpName?: string,
     predictionContext?: OpeningAttackPredictionContext,
@@ -1267,27 +1277,26 @@ function classifyAxisOpeningAttack(
         return { executable: false, blocker: 'zero_eligible_axis', approaching };
     }
 
-    // ADR-0005 v2.2c #3: donation-readiness gate. With TG formation on, the anchor must be
-    // backed by donors pledging ≥ DONATION_READINESS_FRACTION (60%) of its personnel; otherwise
-    // it is a lone-anchor suicide attack and the axis is blocked. selectDonors is recomputed here
-    // (deterministic; a donor lost since planning naturally drops out) rather than reading a cached
-    // op.donor_pool — functionally the same gate, no persisted schema field. Flag-off: skipped, so
-    // byte-identical. The flag-on magnitude (how many ops this blocks) is validated at the 188w smoke.
-    if (ENABLE_TG_FORMATION) {
-        // Phase 4: score donors against the persistent anchor (phantom-filtered). An
-        // all-phantom axis resolves to null → no TG forms there, so the donation gate is
-        // moot; skip it (the legacy anchor-only path handles the phantom axis).
-        const anchorId = resolveTgAnchor(state, axis, new Set());
-        const stagingOsid = axis.staging_osid;
-        if (anchorId && stagingOsid) {
-            const anchorPersonnel = state.military.formations?.[anchorId]?.personnel ?? 0;
-            const donors = selectDonors(state, { anchor_brigade_id: anchorId, staging_osid: stagingOsid, army_hq_op_id: armyHqOpId });
-            if (donationReadinessBlocksAxis(donors, anchorPersonnel, faction)) {
-                axis.launch_blocker = 'insufficient_donation';
-                return { executable: false, blocker: 'insufficient_donation' };
-            }
-        }
-    }
+    // ══ ENGINE-HEALTH B3 (2026-09-19) — THE DONATION GATE USED TO LIVE HERE ══
+    //
+    // ADR-0005 v2.2c #3 placed a donation-readiness gate at this point: if the anchor was
+    // not backed by donors pledging ≥ DONATION_READINESS_FRACTION of its personnel, the
+    // axis was refused with `insufficient_donation`. That gate sat AFTER
+    // `axisHasExecutableOpeningAttack` had already judged the attack winnable, so it could
+    // only ever remove attacks the engine had already approved — and it was non-monotonic:
+    // an EMPTY donor pool passed ("degrade to lone-anchor") while a pool one man above
+    // empty but below the fraction cancelled the operation. Adding a small amount of
+    // available support turned an executable axis into a blocked one.
+    //
+    // Donor support is optional AUGMENTATION. Readiness now decides only whether the
+    // Tactical Group forms, and it is evaluated at the single place that forms one:
+    // `formTgsAtReadyTransition` (operation_preparation.ts), via
+    // `tgDonationMeetsReadiness` (tactical_group_selection.ts). An inadequate pool
+    // declines the augmentation and costs the donors nothing; the operation continues
+    // under every ordinary opening-attack gate above.
+    //
+    // DO NOT REINSTATE A DONATION CHECK IN THIS FUNCTION. The readiness rule has one
+    // owner. See tests/tg_donation_augmentation_monotonic.test.ts.
 
     delete axis.launch_blocker;
     // REASON-CODE INSTRUMENTATION (topic `axis_reject`): the detail must not outlive
@@ -1299,52 +1308,13 @@ function classifyAxisOpeningAttack(
 }
 
 /**
- * PHASE 1.5 DONOR-READINESS FALLBACK (operations-expert + sector-expert, 2026-05-30).
- *
- * Pure decision for the ADR-0005 v2.2c #3 donation-readiness gate. Returns true iff
- * the gate should BLOCK the axis with `insufficient_donation`.
- *
- * The 60% gate's real intent is to refuse an under-committed *multi-donor* TG (a lone
- * anchor masquerading as a tactical group). It must NEVER cancel an otherwise-valid
- * offensive when the corps simply has NO eligible donors to muster: an isolated /
- * encircled, donor-poor corps (e.g. the ARBiH 5th Corps in the Bihać pocket — no
- * adjacent donor corps; candidates blocked by distance / cohesion / residual-floor)
- * had its anchor-only relief / defensive ops gated out, which dropped the Bihać enclave
- * RBiH→RS wholesale (measured 188w 615→569). With zero donors no TG would form anyway
- * (`formTgsAtReadyTransition` is a no-op with an empty donor pool → legacy lone-anchor
- * combat), so blocking degrades a valid lone-anchor op into a cancellation.
- *
- * Rule:
- *   - donors.length === 0 → DO NOT block (degrade to lone-anchor, exactly as flag-off).
- *   - donors exist but pledge < readinessFraction × anchorPersonnel → BLOCK.
- *
- * Phase 1.6 HVO Mistral-2 westward-reach lever (operations-expert, 2026-05-30): the
- * readiness fraction is faction-specific. HRHB (HVO) axes use the relaxed
- * DONATION_READINESS_FRACTION_HRHB; all other factions use the standard
- * DONATION_READINESS_FRACTION. RATIONALE: the HVO Mistral-2 westward axes (Livno →
- * Drvar/Grahovo/Šipovo) stage for a long reach where BFS distance-falloff trims the few
- * eligible local donors below the 60% floor, so the gate cancelled an axis the flag-off
- * engine prosecuted. Historically the HV (Croatian Army) spearhead — absorbed into the HVO
- * anchor, no separate HV corps in OOB — supplied the westward mass, so a lower local-donor
- * floor is doctrinally correct. This is NOT force inflation (the anchor + qualifying donors
- * still fight at real strength) and NOT a new global gate or distance cap.
- *
- * Deterministic: `selectDonors` is deterministic, so `donors.length === 0` is a stable
- * function of the turn's state. Caller only invokes this under ENABLE_TG_FORMATION, so
- * flag-off never reaches it → byte-identical.
+ * ENGINE-HEALTH B3 (2026-09-19): `donationReadinessBlocksAxis` lived here and has been
+ * REPLACED by `tgDonationMeetsReadiness` in `tactical_group_selection.ts`, which owns the
+ * donor model. It is no longer a veto on an axis — it is the test for whether the Tactical
+ * Group augmentation forms. The full before/after rationale, including the Phase-1.5
+ * lone-anchor fallback and the Phase-1.6 HRHB band this repair reinterprets, is on that
+ * function.
  */
-export function donationReadinessBlocksAxis(
-    donors: ReadonlyArray<{ personnel_lent: number }>,
-    anchorPersonnel: number,
-    faction?: FactionId,
-): boolean {
-    if (donors.length === 0) return false; // donor-poor corps: lone-anchor fallback, never block
-    const donated = donors.reduce((sum, d) => sum + d.personnel_lent, 0);
-    const readinessFraction = faction === 'HRHB'
-        ? DONATION_READINESS_FRACTION_HRHB
-        : DONATION_READINESS_FRACTION;
-    return donated < readinessFraction * anchorPersonnel;
-}
 
 /**
  * Whether an authored operation has assembled the usable formations required
@@ -1434,7 +1404,6 @@ export function evaluateOpeningAttackReadiness(
                 adjacency,
                 threshold,
                 operationStaticAdjacency,
-                op.army_hq_op_id,
                 op.name,
                 predictionContext,
                 convergingBrigades,

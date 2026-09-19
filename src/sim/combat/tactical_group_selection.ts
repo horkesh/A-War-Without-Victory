@@ -46,6 +46,8 @@ import { bfsDistance } from './sector_utils.js';
 // ADR-0005 v2.2c (issue #40): exclude brigades reserved by not-yet-injected pre-planned ops.
 import { getReservedPrePlannedBrigadeIds } from './pre_planned_operations.js';
 import {
+    DONATION_READINESS_FRACTION,
+    DONATION_READINESS_FRACTION_HRHB,
     ENABLE_TG_ARMY_HQ_OPS,
     ENABLE_TG_COHESION_BLEED,
     MAX_DONATIONS_PER_SCENARIO,
@@ -85,11 +87,87 @@ const DONATION_CAP_FRACTION = 0.30;
 const MAX_DONORS_PER_TG = 3;
 
 /**
+ * Readiness fraction that a prospective TG's donor pledge must reach, by faction.
+ *
+ * HRHB (HVO) axes use the relaxed `DONATION_READINESS_FRACTION_HRHB`; everyone else uses
+ * the standard `DONATION_READINESS_FRACTION`. See the constants' own doc-comments for the
+ * doctrinal rationale and for what the ENGINE-HEALTH B3 repair changed about its scope.
+ */
+export function tgDonationReadinessFraction(faction?: string): number {
+    // Declared `string`, not the narrower faction-id union: `FormationState.faction` is
+    // itself declared `string`, so narrowing here would force a type assertion at every
+    // caller — a new strict-null escape that
+    // `tests/strict_null_inventory_progress.test.ts` ratchets against. Same precedent as
+    // `getSectorOffensiveApproachOsids`. The value is only compared against a literal.
+    return faction === 'HRHB' ? DONATION_READINESS_FRACTION_HRHB : DONATION_READINESS_FRACTION;
+}
+
+/**
+ * Total personnel a candidate donor pool actually pledges.
+ * Distance falloff, the donation cap and the residual-personnel floor are already applied
+ * by `selectDonors`, so this is a plain sum over the returned contributions.
+ */
+export function totalPledgedPersonnel(donors: ReadonlyArray<{ personnel_lent: number }>): number {
+    return donors.reduce((sum, d) => sum + d.personnel_lent, 0);
+}
+
+/**
+ * ADR-0005 v2.2c #3 donation readiness — IS THE TACTICAL GROUP AUGMENTATION VIABLE?
+ *
+ * Returns true when the candidate donor pool pledges at least the faction's readiness
+ * fraction of the anchor's personnel, i.e. when a genuine multi-donor Tactical Group can
+ * form rather than a lone anchor wearing a TG costume.
+ *
+ * ══ ENGINE-HEALTH B3 (2026-09-19) — THIS IS A FORMATION TEST, NOT AN OPERATION VETO ══
+ *
+ * This predicate previously lived in `sector_offensive_launch_helpers.ts` as
+ * `donationReadinessBlocksAxis`, and `classifyAxisOpeningAttack` used it to REFUSE the
+ * whole axis with `insufficient_donation` — after `axisHasExecutableOpeningAttack` had
+ * already judged the attack winnable. It was also non-monotonic: an EMPTY donor pool was
+ * explicitly allowed through ("degrade to lone-anchor"), while a pool one man above empty
+ * but below the fraction blocked the operation outright. Adding a small amount of
+ * available support therefore turned an executable axis into a cancelled one.
+ *
+ * The Phase-1.5 rationale for the zero-donor branch — *with no donors no TG would form
+ * anyway, so blocking degrades a valid lone-anchor op into a cancellation* — applies
+ * verbatim to the weak-donor case. It had simply been applied at one boundary instead of
+ * to the whole predicate.
+ *
+ * THE CONTRACT NOW: donor support is optional augmentation. This predicate decides only
+ * whether the TG forms. An inadequate pool declines the augmentation; the underlying
+ * operation continues to be governed by the ordinary opening-attack readiness gates, and
+ * fights with its own participants at their real strength. No donor personnel, equipment,
+ * cohesion cost or per-scenario donation credit is consumed by a declined augmentation,
+ * because `formTacticalGroup` is simply never called.
+ *
+ * MONOTONIC: adding an eligible donor with a non-negative contribution can never turn an
+ * executable operation into a blocked one. Pinned by
+ * `tests/tg_donation_augmentation_monotonic.test.ts`.
+ *
+ * Deterministic: `selectDonors` is deterministic and side-effect free, so this is a stable
+ * pure function of the turn's state.
+ */
+export function tgDonationMeetsReadiness(
+    donors: ReadonlyArray<{ personnel_lent: number }>,
+    anchorPersonnel: number,
+    faction?: string,
+): boolean {
+    // No donors: nothing to augment with. The caller forms no TG and the anchor fights
+    // alone — the same outcome as an inadequate pool, reached one step earlier.
+    if (donors.length === 0) return false;
+    return totalPledgedPersonnel(donors) >= tgDonationReadinessFraction(faction) * anchorPersonnel;
+}
+
+/**
  * Select donor contributions for a prospective TG (ADR-0005 full donor model).
  *
  * Returns empty array if anchor not found or no eligible donors. The returned
  * contributions carry frozen `distance_hops`, falloff-scaled `personnel_lent`,
  * and falloff-scaled `heavy_equipment_lent` (pro-rata equipment slice).
+ *
+ * PURE: reads state, returns contributions, mutates nothing. Callers may therefore ask
+ * "would a TG be viable?" without committing any donor cost — the B3 contract depends on
+ * that (see `tgDonationMeetsReadiness`).
  */
 export function selectDonors(
     state: GameState,

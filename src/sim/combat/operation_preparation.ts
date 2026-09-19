@@ -78,8 +78,17 @@ import {
     classifyOpDonorPolicy,
     donorCapForPolicy,
 } from './tactical_group_config.js';
-import { selectDonors } from './tactical_group_selection.js';
+import {
+    selectDonors,
+    // ENGINE-HEALTH B3 (2026-09-19): donation readiness is a TG-FORMATION test owned by the
+    // donor module. It used to veto the axis from `classifyAxisOpeningAttack`.
+    tgDonationMeetsReadiness,
+    tgDonationReadinessFraction,
+    totalPledgedPersonnel,
+} from './tactical_group_selection.js';
 import { formTacticalGroup } from './tactical_group_lifecycle.js';
+// REASON-CODE INSTRUMENTATION (topic `tg_formation`): env-gated, absent by default.
+import { whenReasonCodeTopic } from './reason_code_debug.js';
 // ADR-0005 Phase 4: phantom-aware anchor resolution + dual-anchor de-confliction. Flag-gated.
 import { resolveTgAnchor, collectActiveAnchorIds } from './tactical_group_anchor.js';
 import { getReservedPrePlannedBrigadeIds } from './pre_planned_operations.js';
@@ -636,6 +645,49 @@ function getOpsCommander(
  * selects + forms at ready; selectDonors is deterministic, so the readiness-gate
  * pool and this formation pool agree for a given turn's state.
  */
+/**
+ * REASON-CODE INSTRUMENTATION (topic `tg_formation`) — ENGINE-HEALTH B3 (2026-09-19).
+ *
+ * Records WHY a Tactical Group augmentation was declined, on the axis (multi-axis ops) or
+ * on the operation (legacy single-axis). This is the diagnostic that the retired
+ * `insufficient_donation` launch blocker used to stand in for — except that a decline is
+ * no longer an operation failure, so the record also states that the underlying operation
+ * continues under ordinary readiness.
+ *
+ * Absent when the topic is off: `whenReasonCodeTopic` spreads an EMPTY object, so a
+ * default run neither computes nor serializes anything and the save hash is unmoved. The
+ * payload is a thunk for the same reason.
+ */
+function recordTgFormationDecline(
+    target: { tg_formation_decline?: unknown },
+    anchorId: FormationId,
+    anchorPersonnel: number,
+    // `string`, not the narrower faction-id union — `FormationState.faction` is declared
+    // `string`, and narrowing here would need a type assertion at both call sites
+    // (a strict-null escape the inventory ratchet counts).
+    faction: string | undefined,
+    donors: ReadonlyArray<{ personnel_lent: number }>,
+): void {
+    const detail = whenReasonCodeTopic('tg_formation', () => {
+        const fraction = tgDonationReadinessFraction(faction);
+        return {
+            declined: true as const,
+            reason: (donors.length === 0 ? 'no_eligible_donors' : 'donation_below_readiness') as
+                'no_eligible_donors' | 'donation_below_readiness',
+            anchor_brigade_id: anchorId,
+            anchor_personnel: anchorPersonnel,
+            faction: faction ?? null,
+            donor_count: donors.length,
+            donated_personnel: totalPledgedPersonnel(donors),
+            readiness_fraction: fraction,
+            required_donation: fraction * anchorPersonnel,
+            // The whole point of B3: declining the augmentation is not an operation failure.
+            operation_remains_executable: true as const,
+        };
+    });
+    if (Object.keys(detail).length > 0) target.tg_formation_decline = detail;
+}
+
 export function formTgsAtReadyTransition(
     state: GameState,
     op: CorpsOperation,
@@ -684,7 +736,20 @@ export function formTgsAtReadyTransition(
             // intended behavior is the legacy lone-anchor (no-TG) attack, exactly as
             // flag-off: the op still launches via the sector/operation path with just the
             // anchor brigade. Skip TG formation for this axis.
-            if (donors.length === 0) continue;
+            //
+            // ENGINE-HEALTH B3 (2026-09-19): an INADEQUATE pool now takes the same exit as
+            // an empty one. `tgDonationMeetsReadiness` is false for both, so a pool below
+            // the faction's readiness fraction declines the augmentation instead of
+            // refusing the operation — which is what the old `insufficient_donation` gate
+            // in `classifyAxisOpeningAttack` did. `formTacticalGroup` is never reached, so
+            // no donor personnel, equipment, cohesion bleed, cooldown or per-scenario
+            // donation credit is consumed by a declined augmentation.
+            const anchorPersonnel = state.military?.formations?.[anchorId]?.personnel ?? 0;
+            const anchorFaction = state.military?.formations?.[anchorId]?.faction;
+            if (!tgDonationMeetsReadiness(donors, anchorPersonnel, anchorFaction)) {
+                recordTgFormationDecline(axis, anchorId, anchorPersonnel, anchorFaction, donors);
+                continue;
+            }
             const formed = formTacticalGroup(state, {
                 op_id: op.name,
                 anchor_brigade_id: anchorId,
@@ -717,7 +782,15 @@ export function formTgsAtReadyTransition(
     // identity/commander + TG-only dissolution/revert). With no donors the intended
     // behavior is the legacy lone-anchor (no-TG) attack, exactly as flag-off: the op still
     // launches via the sector/operation path with just the anchor brigade. Skip TG formation.
-    if (donors.length === 0) return;
+    //
+    // ENGINE-HEALTH B3 (2026-09-19): same exit for an inadequate pool. See the multi-axis
+    // branch above for the full rationale.
+    const anchorPersonnel = state.military?.formations?.[anchorId]?.personnel ?? 0;
+    const anchorFaction = state.military?.formations?.[anchorId]?.faction;
+    if (!tgDonationMeetsReadiness(donors, anchorPersonnel, anchorFaction)) {
+        recordTgFormationDecline(op, anchorId, anchorPersonnel, anchorFaction, donors);
+        return;
+    }
     const formed = formTacticalGroup(state, {
         op_id: op.name,
         anchor_brigade_id: anchorId,

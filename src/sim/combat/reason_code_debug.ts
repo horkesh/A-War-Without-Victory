@@ -92,6 +92,12 @@ import { strictCompare } from '../../state/validateGameState.js';
  *                      and routing scope, emitted on the movement report.
  *  opportunity_roster — item 9. Why each catalog-authored brigade was admitted
  *                       to or rejected from an opportunity operation axis.
+ *  tg_formation      — item 10 (ENGINE-HEALTH B3, 2026-09-19). Why a Tactical Group
+ *                      AUGMENTATION was declined: anchor, donor count, pledged
+ *                      personnel, readiness fraction and the donation it required.
+ *                      Replaces the retired `insufficient_donation` launch blocker,
+ *                      which reported an operation failure for what is now only a
+ *                      declined augmentation.
  */
 export type ReasonCodeTopic =
     | 'battle_stack'
@@ -102,7 +108,8 @@ export type ReasonCodeTopic =
     | 'formation_lifecycle'
     | 'movement_reject'
     | 'objective_filter'
-    | 'opportunity_roster';
+    | 'opportunity_roster'
+    | 'tg_formation';
 
 const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'axis_reject',
@@ -114,6 +121,7 @@ const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'movement_reject',
     'objective_filter',
     'opportunity_roster',
+    'tg_formation',
 ];
 
 /**
