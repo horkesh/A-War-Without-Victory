@@ -128,6 +128,22 @@ them.** The earlier 39-week audit numbers WERE independently verified and all he
 B2 assembly floors stale after roster shrink; B4 validator/builder eligibility mismatch silently
 drops participants and axes. No dependency on any of the three was encountered.
 
+**POST-PUSH CI** (`de4ddf12e..dd6af1ada`). **Event System CI — SUCCESS**, and its steps were
+listed rather than its conclusion trusted: checkout, setup-node, install, *TypeScript typecheck*,
+*Event-system + Phase E/F/H suite*, *Phase F2 strict gate (canon-compliance hard rail)* — all ran,
+none skipped. **Baseline Pins — FAILURE, pre-existing and advisory.** It failed identically on the
+two preceding pushes, and the mismatched-artifact SET is unchanged by this work: the same eight
+(`activity_summary.json`, `control_delta.json`, `end_report.md`, `final_save.json`,
+`formation_delta.json`, `run_summary.json`, `watched_operations.json`, `weekly_report.jsonl`)
+before and after. This is the stale-pin drift already diagnosed at `0b9966621`.
+
+⚠ **THIS IS NOT MERGE-READY UNDER THE REPO'S OWN RULE.** B3 is a combat-behaviour change, and the
+standing rule is that *40w GO + CI green is a FALSE-GREEN for combat behaviour* — a 188-week run
+is required before merge. The B3 packet explicitly forbade one, so it was not run. The Baseline
+Pins job does confirm the 188-week artifacts moved, but it cannot say whether they moved for the
+better, because the pins were already stale before this change. **A 188-week validation is
+OUTSTANDING and must precede any merge to main.**
+
 **January calibration is untouched and remains 696/712, below the 700 floor. No 188-week run.**
 
 ## ★ PANEL INTEGRATION — four seats, polled independently, reconciled by the orchestrator
