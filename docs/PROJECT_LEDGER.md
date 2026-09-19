@@ -9,6 +9,127 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-09-19 — ENGINE-HEALTH B3: TG donation readiness is augmentation, not an operation veto
+
+**Branch** `codex/january-1993-operations-20260914`. **Commits** `9cdb14b99` (engine fix + tests),
+`3c5302f7a` (type-check the decline record against its persisted interface), `8bc7703fb` (carry
+the decline into the AAR). Source of the finding:
+`docs/40_reports/20260919_OPERATION_LIFECYCLE_ENGINE_HEALTH_AUDIT.md` (B3). Contract recorded in
+ADR-0005 **r3.7**. Owner packet: engine health above calibration; January untouched.
+
+**THE DEFECT.** The ADR-0005 v2.2c #3 donation gate sat inside `classifyAxisOpeningAttack`,
+*after* `axisHasExecutableOpeningAttack` had already judged the attack winnable, so it could only
+ever remove approved attacks. And it was **non-monotonic**: `donationReadinessBlocksAxis` returned
+false for an EMPTY donor pool (the Phase-1.5 lone-anchor fallback) and true for a pool one man
+above empty and below the readiness fraction. **Adding a small amount of available support turned
+an executable axis into `insufficient_donation`, and the whole operation went to recovery.** It
+never read the axis's own roster, so a fully-assembled 3-brigade authored axis could be held inert
+by a shortfall in a separate selection mechanism. It was the most frequent terminal axis blocker
+in the retained 39-week run (6 of 10).
+
+**FAILING-BEFORE PROOF.** `tests/tg_donation_augmentation_monotonic.test.ts`, written against the
+corrected contract and run on the pre-fix tree: **9 of 22 failed.** Case A (zero donors) returned
+`executable=true`; case B — the same operation plus ONE eligible donor pledging 200 — returned
+`executable=false, blocker='insufficient_donation'`.
+
+**THE CONTRACT.** Donor support is optional augmentation. Readiness decides only whether the TG
+forms. For otherwise identical state, adding an eligible donor with a non-negative contribution
+can never change `executable` → `blocked`. `DONATION_READINESS_FRACTION` is **unchanged at 0.6** —
+the decision moved, the bar did not. No threshold, floor, deadline, movement, power or participant
+change; no hard-coded operation, faction or OSID. A decline costs the donors nothing:
+`selectDonors` is pure and `formTacticalGroup` is never reached.
+
+**Because a single donor lends at most 30% of its own personnel, the 60% standard inherently
+requires a genuine multi-donor pool** — exactly its stated intent. Four existing TG fixtures had
+silently depended on the formation site having no readiness check; they were corrected in
+scaffolding only (anchor size / donor count), never by lowering the constant.
+
+**DIAGNOSTICS.** `insufficient_donation` retired as a producible blocker. The literal is RETAINED
+in the persisted unions because saved games and `docs/40_reports/playtests/evidence/*.json` carry
+it. Replacement: `tg_formation_decline` (anchor id/personnel, faction, donor count, donated
+personnel, readiness fraction, required donation, decline reason, and `operation_remains_executable`
+— the fact the old reason code asserted the opposite of) under the new reason-code topic
+`tg_formation`, env-gated and ABSENT on a default run.
+
+**A diagnostic that never reached an artifact, caught by measuring it.** The decline record first
+shipped on the live `OperationAxis` only. Run n425 proved that useless: four fewer TGs formed, so
+declines certainly occurred, and **not one survived to `final_save.json`** — the record dies with
+the operation. `8bc7703fb` carries it into `AxisAAR` the way `launch_blocker_detail` is carried,
+deliberately UNGUARDED by any `launch_blocker` (that guard exists so a rejection detail is never
+published next to the wrong verdict; a declined augmentation is not a verdict on the operation at
+all). `operation_aars.json` is now the one place a reader sees that a TG was considered and
+refused, and on what numbers.
+
+**MEASURED, 40-week A/B** — same scenario, same consumed-input digest `21b49604f90cfc2f`.
+`n426` = pre-fix source, `n425` = B3.
+
+```
+                              n426 (pre-B3)   n425 (B3)
+  terminal axis blockers      zea 3 / insuf 4  zea 4 / insuf 0
+  operation AARs              31               34
+  total attacks               89               97
+  tg_formations_by_corps      11               7
+  control cells differing     —                3
+```
+
+**⚠ IT EXPOSED A PRE-EXISTING ANCHOR VULNERABILITY, AND THAT IS THE REAL FINDING.**
+`tests/integration_deployment_health.test.ts` and `tests/integration_run_summary.test.ts` are now
+RED on one anchor: `op:centar_sarajevo:sarajevo_dio_centar_sajarevo` expected RBiH, got RS.
+Attribution is clean — reverting only the six B3 source files gives 21/21 PASS; restoring them
+gives the failure. **But the pre-B3 run's own anomaly detector already reports the cause:**
+`[adjacent_uncontested_territory] … op:centar_sarajevo:sarajevo_dio_centar_sajarevo (RBiH, no
+defenders) adj to op:centar_sarajevo:radava (RS brigade present)` — four of five Sarajevo city
+cells stand undefended with RS brigades adjacent, in BOTH runs. The capture is a walkover:
+`battle_id 34:…:rs_1st_romanija_infantry:null`, the trailing `null` being the defender slot.
+What B3 changed is *which operations exist* (the commander-op sets are wholesale different, and
+`Operacija Usjek:t29`, which took the cell, is absent from the pre-B3 run entirely).
+
+**So: the donation gate was doing calibration work under an engine-health name** — protecting a
+historical anchor by suppressing operations rather than by defending the position, accidentally,
+non-monotonically and invisibly. Of the three cells that moved, only one is an anchor breach;
+`op:odzak:potocani_2` HRHB→RS moves **toward** the painted reference (pre-B3 end_report lists it
+under `[undefended_painted_mismatch] … painted=RS`), and `op:travnik:gornje_krcevine` is a
+recorded worth-0 cell.
+
+**NOT ACTED ON.** The packet forbids tuning against checkpoints, lowering the fraction and adding
+faction exceptions; the standing owner instruction is that a sound engine fix is not reverted for
+a calibration cell. The fix stands, the two anchor tests are left RED **and documented**, and the
+underlying defect — **ARBiH 1st Corps leaves the Sarajevo city cells with zero defending brigades
+while RS brigades stand adjacent** — is returned as a NEW P1 for owner decision. It is a
+garrison/sector-coverage defect, not a donation defect, and it is the same shape as the
+`sector:arbih_5th_corps:0` density-0.000 case already recorded against `op:bihac:orasac_2`.
+
+**HRHB BAND.** `DONATION_READINESS_FRACTION_HRHB = 0.25` KEPT, with its documentation retargeted.
+Its original rationale ("the gate cancelled an axis the flag-off engine prosecuted") is now dead
+for every faction; what survives is a TG-**formation-quality** lever — an HVO axis forms a TG on a
+smaller local pledge. That remaining effect is unmeasured and concentrates in the 1995 Mistral-2
+window, which no run permitted under this packet reaches, and the packet forbids a calibration
+exercise to settle it. **Removal returned as a bounded proposal.** Case H pins the corrected
+behaviour so no faction exception survives by accident.
+
+**VERIFICATION.** `npx tsc --noEmit` clean. `tg_` slice 212/212. operation/sector_offensive/launch/
+reason_code slice 1021 passed + 4 skipped across 87 files. strict-null + determinism + schema
+ratchets 118/118 (`optional_fields_game_state` 546 → 548, fully attributed, no new type escape).
+
+**Full `npm run test:vitest` on the committed tree: `SUITE_EXIT=1`, and the ONLY failures are the
+two documented anchor tests.** Shard totals: 3591 + 3063 + 2967 + 3627 + 836 passed, 31 skipped,
+**2 failed** across 1,397 test files. (The third `FAIL` line in the log is
+`tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts` — the harness's own intentional
+child-process failure control, not a regression.)
+
+⚠ **ATTRIBUTION CAVEAT — the 40-week A/B is MY measurement, not independently verified.** A
+second seat was dispatched to verify the n426/n425 comparison and the pre-existing-vulnerability
+claim; it hit a session limit before reporting and produced nothing. The numbers above are
+reproducible from the two retained run directories, and the decisive A/B (revert the six source
+files → 21/21 PASS; restore → 1 anchor fails) was run twice, but **no independent seat has checked
+them.** The earlier 39-week audit numbers WERE independently verified and all held.
+
+**QUEUED, NOT BUNDLED** (packet §9): B1 no concentration/adaptation capability after assembly;
+B2 assembly floors stale after roster shrink; B4 validator/builder eligibility mismatch silently
+drops participants and axes. No dependency on any of the three was encountered.
+
+**January calibration is untouched and remains 696/712, below the 700 floor. No 188-week run.**
+
 ## ★ PANEL INTEGRATION — four seats, polled independently, reconciled by the orchestrator
 
 **ON THE REVERT: KEEP HEAD, BUT DO NOT CALL IT RESEARCHED.** Three seats support keeping the current tree by three different routes — realism (the Jajce placement is an unkillable object: 79 battles lost at up to 54:1, ends larger than it started), calibration (`6ba916fae` STANDS, high confidence; ~13 of the 25 cells the revert gives up need the disqualified placement, and the `brijesnica_donja_2` anchor **reverses at the 188w gating horizon**, where HEAD captures it by combat at turn 169). The Historian does not contradict this and does not endorse the data: **both HEAD values are unresearched, and the correct answers — Višegrad and Tomislavgrad (`duvno`) — are options neither side of the argument proposed.** These reconcile without a split: keep the tree because the alternative is worse and partly false, and open the correct placements as new work with their own evidence.

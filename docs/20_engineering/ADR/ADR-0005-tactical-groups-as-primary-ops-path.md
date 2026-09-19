@@ -19,6 +19,7 @@ treat its "NOT activated / flag-OFF" language as current.
 **ADR-0006: Sectors as Standing Operational Groups** — naming-layer reconciliation establishing that the engine's `corps_front_sectors` ARE the canonical standing-OG implementation. ADR-0005 (this doc) handles **temporary** OGs / TGs for offensive operations; ADR-0006 handles the **standing** OGs that own defensive AORs. Read together for the complete operational-group picture.
 
 ## Revision history
+- **r3.7 (2026-09-19)** — **ENGINE-HEALTH B3: the v2.2c #3 donation gate is no longer part of the launch gate.** §Op lifecycle integration's `gate = anchorReady && donationReady` is SUPERSEDED. The conjunction was non-monotonic — zero donors passed (Phase-1.5 lone-anchor fallback) while one sub-60% donor refused the operation with `insufficient_donation`, so adding available support could cancel an executable axis — and it ran after the opening-attack predictor had already approved the attack, so it could only remove approved attacks. **Donor support is optional augmentation:** donation readiness now decides only whether the Tactical Group forms, evaluated once at `formTgsAtReadyTransition` via `tgDonationMeetsReadiness` (`tactical_group_selection.ts`). An inadequate pool declines the augmentation and the operation continues under ordinary opening-attack readiness. `DONATION_READINESS_FRACTION` is UNCHANGED at 0.6 — the decision moved, the bar did not. `insufficient_donation` retired as a producible blocker (literal retained for save compatibility); replaced by the `tg_formation_decline` record under reason-code topic `tg_formation`. `DONATION_READINESS_FRACTION_HRHB` (0.25) survives as a formation-quality lever only — its original cancellation rationale is dead, and its removal is returned as a bounded proposal rather than decided here. Source: audit finding B3 in `docs/40_reports/20260919_OPERATION_LIFECYCLE_ENGINE_HEALTH_AUDIT.md`.
 - **r1 (2026-05-28, AM)** — initial proposal. 6 decisions ratified; 3 open questions.
 - **r2 (2026-05-28, AM)** — Hard Invariants section added after lead constraint discussion (one-TG-per-brigade, cooldown, per-brigade casualty).
 - **r3 (2026-05-28, PM)** — major sync. Pyrrhic specialists convened (Historian, Game Designer, Technical Architect, Ops Expert + Gameplay Programmer). All open questions resolved. Army HQ Operations added as a major new section. v2 sub-staging reordered per risk analysis. Status promoted to Accepted.
@@ -246,18 +247,64 @@ Maps onto existing `operation_preparation.ts` phases:
 | `assessment` | commander go/no-go | unchanged; now also gates on donor pool size |
 | `ready` | transition to execution | **donor decrement fires here AND cohesion bleed locks in.** `donor.personnel_lent_by_tg[tg_id]` populated. Avoids paying cost if op aborts in planning |
 
-The readiness gate (`areParticipantsReadyForExecution` in `sector_offensive.ts`, more precisely `axisHasExecutableOpeningAttack` in `sector_offensive_launch_helpers.ts`) becomes:
+The readiness gate (`areParticipantsReadyForExecution` in `sector_offensive.ts`, more precisely `axisHasExecutableOpeningAttack` in `sector_offensive_launch_helpers.ts`) was originally specified as:
 
 ```ts
 anchorReady     = anchor.location_osid === axis.staging_osid
                   || isCommittedInTransitTo(anchor, axis.staging_osid)
 donationReady   = sum(d.personnel_lent for d in pledged_donors) >= 0.6 * anchor.personnel
-gate            = anchorReady && donationReady
+gate            = anchorReady && donationReady     // ← SUPERSEDED, see r3.7 below
 ```
 
-Donors are "ready" instantly (no march). The donation threshold prevents lone-anchor suicide attacks.
+Donors are "ready" instantly (no march).
 
-**Edge case — donor destroyed between `intel_gathering` and `ready`:** proceed minus that donor. No re-selection (would introduce nondeterminism dependent on which donor died and when). No cancel (would make late-prep ops brittle). The 60% donation gate at `assessment` re-evaluates after silent skip; if below 60%, op aborts naturally with `recovery_reason = "insufficient_force"`.
+#### ⚠ SUPERSEDED BY ENGINE-HEALTH B3 (r3.7, 2026-09-19) — donation is NOT part of the launch gate
+
+**`donationReady` is no longer a term in the launch gate.** The conjunction above made donor
+support a precondition for attacking, which produced a NON-MONOTONIC contract: an operation
+with ZERO eligible donors was explicitly allowed through (the Phase-1.5 lone-anchor fallback),
+while an operation with one donor pledging below 60% was refused outright with
+`insufficient_donation`. Adding a small amount of available support turned an executable axis
+into a cancelled one. The gate also ran AFTER `axisHasExecutableOpeningAttack` had already
+judged the attack winnable, so it could only ever remove attacks the engine had approved.
+
+**The corrected contract:**
+
+```ts
+// Launch gate — donation is absent from it entirely.
+gate            = anchorReady && openingAttackExecutable
+
+// Augmentation, decided separately at the one site that forms a Tactical Group:
+augmentation    = donationReady ? formTacticalGroup(...) : declineAndContinue()
+```
+
+**DONOR SUPPORT IS OPTIONAL AUGMENTATION.** An operation that is executable without a Tactical
+Group does not become non-executable because a donor pool exists but is too weak. Donation
+readiness decides only whether the TG forms. An inadequate pool declines the augmentation and
+the operation proceeds under ordinary opening-attack readiness with its own participants at
+their real strength — the same outcome the zero-donor fallback already produced, reached by the
+same reasoning.
+
+The 60% threshold and its intent are unchanged: it still refuses an under-committed multi-donor
+TG (a lone anchor wearing a TG costume). Because a single donor lends at most
+`DONATION_CAP_FRACTION` (30%) of its own personnel, the standard inherently requires a genuine
+multi-donor pool — which is precisely what it was written to mean.
+
+**No donor cost is paid by a declined augmentation.** `selectDonors` is pure and
+`formTacticalGroup` performs every mutation only after all of its rejection checks, so a
+decline consumes no personnel, no equipment, no cohesion bleed, no dissolution cooldown and no
+per-scenario donation credit.
+
+Owner: `tgDonationMeetsReadiness` in `tactical_group_selection.ts`, consumed only by
+`formTgsAtReadyTransition` in `operation_preparation.ts`. Pinned by
+`tests/tg_donation_augmentation_monotonic.test.ts` and
+`tests/tg_donation_readiness_fallback.test.ts`. `insufficient_donation` is RETIRED as a
+producible `launch_blocker` / `recovery_reason`; the literal is retained in the persisted unions
+in `game_state.ts` because saved games and playtest artifacts under
+`docs/40_reports/playtests/evidence/` carry it. The replacement diagnostic is
+`tg_formation_decline`, under reason-code topic `tg_formation`.
+
+**Edge case — donor destroyed between `intel_gathering` and `ready`:** proceed minus that donor. No re-selection (would introduce nondeterminism dependent on which donor died and when). No cancel (would make late-prep ops brittle). Under the corrected contract a pool that drops below 60% no longer aborts the operation — the TG simply does not form and the operation continues as an ordinary one.
 
 **Edge case — anchor destroyed between `intel_gathering` and `ready`:** op cancels immediately (anchor exclusivity, no fallback). `recovery_reason = "anchor_destroyed"`. All donor pool refs cleared. No cohesion bleed (never paid).
 
