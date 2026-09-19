@@ -804,19 +804,30 @@ is therefore input-driven, not a mechanics divergence.
 engine-contract violation. The engine obeys the sector-defense and relief contracts; the
 canonical scenario keeps the anchor.
 
-**Exact unresolved question (owner decision).** The turn-1 relocation of the 16-brigade
-Sarajevo garrison to binjezevo is unattributed. The prime suspect is
-`ensureMinimumSectorCoverage` (`brigade_assignment.ts:1734-1751`, direct `location_osid`
-write, `LOCAL_FRONT_RELIEF_MAX_HOPS = 3`) invoked from `buildCorpsFrontSectors` during the
-`partition-corps-front-sectors` step. Two questions remain, and both are design decisions,
-not contract repairs:
+**Unresolved movement-authority question (not a proven defect, not cleared).** The turn-1
+relocation of the 16-brigade Sarajevo garrison to binjezevo is **unattributed**: no mechanism
+has been proven to have moved them. The prime suspect remains `ensureMinimumSectorCoverage`
+(`brigade_assignment.ts:1734-1751`, a direct `location_osid` write,
+`LOCAL_FRONT_RELIEF_MAX_HOPS = 3`) invoked from `buildCorpsFrontSectors` during the
+`partition-corps-front-sectors` step, but that is a hypothesis, not a finding.
 
-1. Should a sector-build coverage-repair pass be permitted to rewrite `location_osid`
-   directly (as opposed to §14.9's movement-authority route) when relocating a sector's
-   garrison — and should it be able to drain a capital/must-hold cell entirely?
-2. Should the 40w fixture's anchor expectations be re-derived against canonical inputs, or
-   the fixture retired/aligned? Either action changes acceptance criteria and requires owner
-   authority; it must not be done silently.
+It is recorded here as an **open movement-authority question**, deliberately neither a proven
+defect nor a cleared/design-only finding:
+
+1. May a sector-build coverage-repair pass rewrite `location_osid` directly, outside §14.9's
+   movement-authority route, when relocating a sector's garrison — and may it drain a
+   capital/must-hold cell entirely?
+
+The companion question — whether to re-derive the 40w fixture's anchor expectations — was
+**resolved by the owner on 2026-09-19**: the standalone 40w fixtures are retired, their
+meaningful assertions migrated to the canonical `apr1992_definitive_188w.json`, and protected
+anchor expectations were not re-derived to obtain green.
+
+**Evidence preserved (no re-run required).**
+`runs/apr1992_definitive_40w__21b49604f90cfc2f__w40_n425` and the bounded diagnostic prefix
+`runs/diag_relief_20260919` (35-week `apr1992_definitive_40w.json` prefix; its
+`brigade_temporal_log.jsonl` is byte-identical to `n425` through the capture). Investigating or
+repairing the movement-authority question is **outside the retirement packet**.
 
 **No repair was made.** No B1/B2/B4, no calibration tuning, no threshold/anchor change, no
 per-cell garrison, no second relief system, no main merge.

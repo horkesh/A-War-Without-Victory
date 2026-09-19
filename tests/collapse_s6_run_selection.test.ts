@@ -81,7 +81,7 @@ describe('S6 run-dir pattern', () => {
     });
 
     it('rejects unrelated run dirs', () => {
-        expect(S6_RUN_DIR_PATTERN.test('apr1992_definitive_40w__deadbeef__w40_n3')).toBe(false);
+        expect(S6_RUN_DIR_PATTERN.test('apr1992_definitive_188w__deadbeef__w40_n3')).toBe(false);
         expect(S6_RUN_DIR_PATTERN.test('_canon188_a_20260717.log')).toBe(false);
     });
 

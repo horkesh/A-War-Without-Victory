@@ -84,7 +84,7 @@ lanes:
     plans:
       - path: docs/plans/2026-07-31-historical-gameplay-depth-calibration-plan.md
         exists: true
-        tokens: 20303
+        tokens: 20383
         fits_context: true
         tasks: null
       - path: docs/plans/2026-08-06-exhaustion-scoring-redesign-plan.md

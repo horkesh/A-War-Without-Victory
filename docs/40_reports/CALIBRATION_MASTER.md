@@ -1,5 +1,82 @@
 # AWWV Calibration Master Reference
 
+## Current status addendum (2026-09-19) — B3-candidate January reconciliation from `n427`; 40w fixtures retired
+
+**Scope and method.** Branch `codex/january-1993-operations-20260914`. This addendum reconciles
+**existing** evidence from the retained full-duration run
+`runs/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n427`; **no new simulation was run**. The
+40w standalone fixtures were retired the same day (see `PROJECT_LEDGER.md`); the retirement changed
+**no canonical calibration input, reference, floor or evidence**, so `n427` remains the candidate
+measurement. Migration status, January acceptance and full-campaign acceptance are kept separate.
+
+**January-1993 (t39), `n427`: 701/712.** The `run_summary` jan1993 checkpoint and a
+`tools/verify_checkpoints.cjs` replay agree. The packet's January minimum is **700**, so the raw
+floor is met — but a floor is not a contract (below).
+
+**Exact remaining mismatch set (`n427`, painted→sim):**
+
+| OSID | expected (jan1993) | actual (t39) |
+|---|---|---|
+| `op:bihac:orasac_2` | RS | RBiH |
+| `op:donji_vakuf:jemanlici` | RS | RBiH |
+| `op:donji_vakuf:prusac_2` | RS | RBiH |
+| `op:ilijas:krivajevici` | RS | RBiH |
+| `op:jablanica:doljani_2` | RBiH | HRHB |
+| `op:kalesija:seher_2` | RS | RBiH |
+| `op:konjic:glavaticevo_2` | RS | RBiH |
+| `op:konjic:ljuta` | RS | RBiH |
+| `op:mostar:vranjevici_2` | RBiH | RS |
+| `op:sipovo:volari_2` | RS | RBiH |
+| `op:vlasenica:sebiocina` | RBiH | RS |
+
+**Contract assessment — the named-capture / no-new-mismatch contract does NOT hold on `n427`.**
+Against the January comparison baseline `n403` (`41a148bf9`, 701/712, the same 11-count): **8 cells
+carried**, **3 newly wrong** (the RS→RBiH trio `op:bihac:orasac_2`, `op:donji_vakuf:jemanlici`,
+`op:sipovo:volari_2`), **3 newly right** (`op:foca:donje_zesce`, `op:maglaj:jablanica`,
+`op:trnovo:tosici`). Net 11 unchanged — the recorded "net-neutral score hiding different cells"
+hazard. The **named captures** likewise miss: the eight required cells must be operation-owned
+combat captures by t39. Baljvine `op:mrkonjic_grad:baljvine_2` slips t28→t33; Jezero
+`op:jajce:jezero_2` t31→t28; Donji Korićani `op:skender_vakuf:donji_koricani` t39 (same); Lupnica
+`op:jajce:lupnica` t35→t37; **Orašac `op:bihac:orasac_2` loses its t29 capture entirely — not
+flipped until t54**; Donji Vakuf town t35→t34; Korenići t38→t37; Prusac `op:donji_vakuf:prusac_2`
+is uncaptured by t39 on both (t40 on `n427`). All logged captures remain combat-mechanism, zero
+passive transfers. **The 700 floor is met; the contract is not.**
+
+**Western-Bosnia cascade (oct1995), `n427`:** 23 matched across the eight documented municipalities
+(`bosansko_grahovo` 0/4, `sipovo` 5/5, `glamoc` 3/6, `titov_drvar` 0/3, `bosanski_petrovac` 8/8,
+`mrkonjic_grad` 1/6, `kljuc` 4/7, `sanski_most` 2/10) — still far below the recorded base 40 /
+floor 38, and reported by `verify_checkpoints` (not gated without `--cascade-base`).
+
+**Farz attribution, `n427` (P-A discriminator): FAIL.** The signature cell is taken **t167 by
+`arbih_328th_mountain` (`arbih_3rd_corps`)** where a 2nd-Corps capture at t≥160 is required
+(earlier local-occupation run: t169, brigade 327th→328th). The four positive Ozren cells are all
+taken; eastern capture provenance is **CLEAN**; the enclave guard **holds**; `matched_osids`
+oct1995 = 651.
+
+**Prozor injection, `n427`:** `Prozor–Rama Line Counterattack` still emits the **inherited turn-41
+`op_empty` error** ("All 1 axes would be dropped — operation cannot execute"), present identically
+in the `8db305596` reference → inherited, not introduced.
+
+**Blocker disposition.** *Still demonstrated:* western cascade short; Farz P-A; Prozor inherited
+injection; `op:donji_vakuf:prusac_2` OPEN (no waiver); Vranjevići/Kružanj interpretation
+UNRESOLVED; Donji Vakuf 17-April historical defect OPEN. *Resolved / clean:* engine-health gate
+PASS on `n427`; enclave guard holds; eastern capture provenance CLEAN; anchors 31/31. *Unverified:*
+whether the three newly-wrong January cells and the lost t29 Orašac capture are a consequence of
+B3 / P-A / routine-movement-scope or an independent regression — **not attributable from existing
+artifacts**.
+
+**Exactly one next task.** A **bounded January re-attribution** on the settled candidate:
+determine whether the three newly-wrong cells (`op:bihac:orasac_2`, `op:donji_vakuf:jemanlici`,
+`op:sipovo:volari_2`) and the lost `t29` Orašac named capture are caused by B3 (`9cdb14b99`),
+P-A (`30e2793ed`), or routine-movement scope (`a7cdc88f3`), then re-measure the January mismatch
+set. If the delta is not attributable from retained artifacts, the minimum admissible evidence is
+one bounded January-only `--weeks 39` run. **This is not a January closeout:** the raw floor is
+met but the named-capture / no-new-mismatch contract is unmet.
+
+**Acceptance separation.** Migration/retirement status: **done** (ledger). January acceptance:
+**OPEN** (contract unmet). Full-campaign acceptance: **NO-GO** (`verify_checkpoints` =
+`GUARD BREACHED — §6 panel matter`). No readiness is claimed.
+
 ## Current status addendum (2026-09-18) — routine-movement-scope candidate on the calibration branch
 
 **Scope.** This addendum is for branch `codex/january-1993-operations-20260914` (calibration branch),

@@ -6,10 +6,11 @@ import { runScenario } from '../src/scenario/scenario_runner.js';
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
 import type { GameState, MilitiaPoolState } from '../src/state/game_state.js';
 
-const SCENARIO_40W = join(process.cwd(), 'data', 'scenarios', 'apr1992_definitive_40w.json');
+const SCENARIO_188W = join(process.cwd(), 'data', 'scenarios', 'apr1992_definitive_188w.json');
+const WEEKS_OVERRIDE = 40;
 const OUT_DIR = join(process.cwd(), '.tmp_integration_pool_integrity');
 
-describe('pool/mobilization integrity (40w)', () => {
+describe('pool/mobilization integrity (canonical 188w @40w)', () => {
     let state: GameState;
     let skipped = false;
 
@@ -21,7 +22,7 @@ describe('pool/mobilization integrity (40w)', () => {
         }
         if (existsSync(OUT_DIR)) await rm(OUT_DIR, { recursive: true });
 
-        const result = await runScenario({ scenarioPath: SCENARIO_40W, outDirBase: OUT_DIR });
+        const result = await runScenario({ scenarioPath: SCENARIO_188W, outDirBase: OUT_DIR, weeksOverride: WEEKS_OVERRIDE });
         const json = await readFile(result.paths.final_save, 'utf8');
         state = JSON.parse(json);
     }, 600_000); // 10 min timeout for 40w scenario

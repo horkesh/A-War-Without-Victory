@@ -8,6 +8,8 @@
 
 **Tech stack:** TypeScript simulation, JSON events/scenarios, Vitest, deterministic 40/104/188-turn runners, engine-health/calibration diagnostics, React read models.
 
+> **2026-09-19 retirement note:** the standalone `apr1992_definitive_40w*.json` scenario files are deleted. The `sim:scenario:run:40w` command still exists but now runs the canonical `apr1992_definitive_188w.json` with `--weeks 40`. Historical command lines below remain as the record of what was executed at the time.
+
 **Date:** 2026-07-31
 **Status:** READY -- begins after R3 Tactical Group convergence
 **Roadmap workstream:** R6

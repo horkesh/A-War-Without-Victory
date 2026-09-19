@@ -3,7 +3,9 @@
 /**
  * CI driver for the platform-stable structural fingerprint (C1, 2026-06-09).
  *
- * 1. Runs a fresh 40w scenario (the calibration-flat horizon) via the preflight runner.
+ * 1. Runs a fresh canonical 188w scenario SHORTENED to the calibration-flat 40-week
+ *    horizon (`--weeks 40`) via the preflight runner. There is one scenario definition;
+ *    the short horizon is a duration override, not a separate fixture.
  * 2. Parses the `outDir: <path>` line the runner prints to stdout to locate the artifacts.
  * 3. Runs tools/diagnostics/structural_fingerprint.cjs in --check (default) or --update mode
  *    against the committed expected file.
@@ -24,9 +26,10 @@ const { existsSync } = require('node:fs');
 const { join, isAbsolute } = require('node:path');
 
 const REPO_ROOT = process.cwd();
-const SCENARIO = 'data/scenarios/apr1992_definitive_40w.json';
+const SCENARIO = 'data/scenarios/apr1992_definitive_188w.json';
+const SCENARIO_WEEKS = '40';
 const OUT_ROOT = 'runs';
-const EXPECTED = join('data', 'calibration', 'structural_fingerprint_40w.json');
+const EXPECTED = join('data', 'calibration', 'structural_fingerprint_188w.json');
 const FINGERPRINT_TOOL = join('tools', 'diagnostics', 'structural_fingerprint.cjs');
 
 function runScenario() {
@@ -34,12 +37,12 @@ function runScenario() {
   const runner = join(REPO_ROOT, 'tools', 'scenario_runner', 'run_scenario_with_preflight.ts');
   const result = spawnSync(
     process.execPath,
-    [tsxCli, runner, '--scenario', SCENARIO, '--unique', '--out', OUT_ROOT],
+    [tsxCli, runner, '--scenario', SCENARIO, '--weeks', SCENARIO_WEEKS, '--unique', '--out', OUT_ROOT],
     {
       cwd: REPO_ROOT,
       encoding: 'utf8',
       maxBuffer: 64 * 1024 * 1024,
-      // The 40w structural fingerprint is a calibration check, NOT a §6 differential, so it
+      // The short-horizon structural fingerprint is a calibration check, NOT a §6 differential, so it
       // must never trip the preflight's §6-grade cleanliness gate. Cleared explicitly rather
       // than left to inheritance: a developer with AWWV_S6_GRADE_RUN exported in their shell
       // would otherwise find this tool refusing to run on a dirty tree, which is precisely

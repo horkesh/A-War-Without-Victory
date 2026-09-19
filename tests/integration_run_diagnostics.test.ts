@@ -7,7 +7,8 @@ import { annotateUnstaffedFrontSectors } from '../src/sim/combat/corps_front_sec
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
 import type { GameState, FormationState, CorpsFrontSector } from '../src/state/game_state.js';
 
-const SCENARIO_40W = join(process.cwd(), 'data', 'scenarios', 'apr1992_definitive_40w.json');
+const SCENARIO_188W = join(process.cwd(), 'data', 'scenarios', 'apr1992_definitive_188w.json');
+const WEEKS_OVERRIDE = 40;
 const OUT_DIR = join(process.cwd(), '.tmp_integration_run_diagnostics');
 
 /** Extract municipality slug from an OSID like "op:municipality:slug" */
@@ -76,7 +77,7 @@ function bfsDistance(adj: Map<string, string[]>, from: string, to: string, maxHo
     return maxHops + 1;
 }
 
-describe('run diagnostics (40w)', () => {
+describe('run diagnostics (canonical 188w @40w)', () => {
     let state: GameState;
     let adj: Map<string, string[]>;
     let skipped = false;
@@ -89,7 +90,7 @@ describe('run diagnostics (40w)', () => {
         }
         if (existsSync(OUT_DIR)) await rm(OUT_DIR, { recursive: true });
 
-        const result = await runScenario({ scenarioPath: SCENARIO_40W, outDirBase: OUT_DIR });
+        const result = await runScenario({ scenarioPath: SCENARIO_188W, outDirBase: OUT_DIR, weeksOverride: WEEKS_OVERRIDE });
         const json = await readFile(result.paths.final_save, 'utf8');
         state = JSON.parse(json);
         adj = await loadContactGraph();

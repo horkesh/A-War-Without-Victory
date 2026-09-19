@@ -71,19 +71,25 @@
   `final_save.json` byte-hash and per-faction brigade/formation counts (the latter vary
   run-to-run even at identical territory, so they are a run-snapshot artifact, not
   territory truth).
-- **Anchor authority (RE-0D2):** the 40-week fixture is not a painted-control scoring scenario and
-  therefore must not emit top-level or `historical_fit.anchor_checks`. Its run summary instead
-  carries the distinct non-scoring `anchor_contract_evaluation`, derived from the existing
-  canonical anchor contract. The fingerprint consumes that evaluation and fails closed when it is
-  absent, empty, malformed, or has duplicate/missing anchor IDs; missing coverage is never 0/0.
+- **Anchor authority (RE-0D2, updated 2026-09-19):** the short structural-fingerprint run is the
+  canonical 188w scenario shortened with `--weeks 40`, so it IS a painted-control scoring scenario
+  and legitimately emits `anchor_checks` alongside the non-scoring `anchor_contract_evaluation`.
+  The fingerprint consumes that evaluation and fails closed when it is absent, empty, malformed,
+  or has duplicate/missing anchor IDs; missing coverage is never 0/0.
 - **Gate:** CI job `structural-fingerprint` in `.github/workflows/full-suite-and-fingerprint.yml`
-  runs a fresh 40w and compares against committed `data/calibration/structural_fingerprint_40w.json`
-  via `npm run ci:structural-fingerprint:check`. A structural move without a deliberate
-  `npm run ci:structural-fingerprint:update` fails the gate.
+  runs a fresh canonical 188w at `--weeks 40` and compares against committed
+  `data/calibration/structural_fingerprint_188w.json` via `npm run ci:structural-fingerprint:check`.
+  A structural move without a deliberate `npm run ci:structural-fingerprint:update` fails the gate.
+  **Provenance status (2026-09-19):** the committed `structural_fingerprint_188w.json` is
+  **PROPOSED, NOT ACCEPTED** — it was generated from a dirty tree at HEAD `20eb1c806`
+  (`git_dirty: true`, consumed-input digest `ac81d9f025d19017…`). The gate remains enabled and its
+  status is reported **UNMET** until the golden is regenerated on a clean accepted commit. A
+  passing anchor count does not make a dirty-tree fingerprint an accepted baseline.
 - **Tool self-test:** `tests/structural_fingerprint.test.ts` (determinism, order-independence,
   formation-exclusion, fail-closed anchor coverage, and positive sensitivity to
   control-count/OSID-flip/anchor/benchmark changes). `tests/integration_run_summary.test.ts`
-  proves the live 40-week contract while preserving the sole 188-week scorer.
+  proves the live short-horizon contract on the canonical scenario while preserving the sole
+  188-week scorer.
 - **Reference platform = Linux/Node 22 (DoD C2):** Windows==Linux byte-hashes are NOT
   promised; the structural fingerprint IS the cross-platform determinism authority.
 

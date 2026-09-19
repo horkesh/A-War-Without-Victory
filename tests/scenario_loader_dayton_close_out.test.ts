@@ -17,8 +17,8 @@
  * that coverage gap.
  *
  * CALIBRATION SAFETY: the flag is default-absent on all calibration scenarios
- * (40w/52w/188w never set it). These tests also assert the calibration scenarios
- * normalize WITHOUT the field (it stays `undefined`), so the 40w/52w/188w
+ * (52w/188w never set it). These tests also assert the calibration scenarios
+ * normalize WITHOUT the field (it stays `undefined`), so the 52w/188w
  * baselines remain byte-identical.
  */
 import { describe, it, expect } from 'vitest';
@@ -29,7 +29,6 @@ import { loadScenario, normalizeScenario } from '../src/scenario/scenario_loader
 const REPO_ROOT = resolve(__dirname, '..');
 const CLOSE_OUT_PATH = resolve(REPO_ROOT, 'data/scenarios/apr1992_definitive_188w_dayton_close.json');
 const CAL_188W_PATH = resolve(REPO_ROOT, 'data/scenarios/apr1992_definitive_188w.json');
-const CAL_40W_PATH = resolve(REPO_ROOT, 'data/scenarios/apr1992_definitive_40w.json');
 const CAL_52W_PATH = resolve(REPO_ROOT, 'data/scenarios/apr1992_definitive_52w.json');
 
 /** Minimal valid scenario stub the normalizer accepts (war phase, 1+ weeks). */
@@ -80,8 +79,8 @@ describe('Codex #342 P1 — end-to-end loadScenario from disk', () => {
         expect(loaded.dayton_close_out).toBe(true);
     });
 
-    it('calibration scenarios (40w/52w/188w) normalize WITHOUT the flag — byte-identity guard', async () => {
-        for (const p of [CAL_40W_PATH, CAL_52W_PATH, CAL_188W_PATH]) {
+    it('calibration scenarios (52w/188w) normalize WITHOUT the flag — byte-identity guard', async () => {
+        for (const p of [CAL_52W_PATH, CAL_188W_PATH]) {
             const loaded = await loadScenario(p);
             expect(loaded.dayton_close_out).toBeUndefined();
         }

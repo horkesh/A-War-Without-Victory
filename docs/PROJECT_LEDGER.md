@@ -6619,15 +6619,19 @@ violation. The 40w and 188w definitions differ in ≥11 material keys
 while the shared formation/OOB/operational-control inputs are hash-identical. The 40w family
 is retired for calibration truth (CONTEXT.md).
 
-**Exact unresolved question (owner decision, no repair made).** The turn-1 relocation of the
-16-brigade Sarajevo garrison to binjezevo is unattributed. Prime suspect:
-`ensureMinimumSectorCoverage` (`brigade_assignment.ts:1734-1751`, direct `location_osid`
-write, `LOCAL_FRONT_RELIEF_MAX_HOPS = 3`) invoked from `buildCorpsFrontSectors` in the
-`partition-corps-front-sectors` step. (1) Should a sector-build coverage-repair pass be
-allowed to rewrite `location_osid` directly rather than through §14.9 movement authority, and
-to drain a capital/must-hold cell entirely? (2) Should the 40w fixture's anchor expectations
-be re-derived against canonical inputs, or the fixture retired/aligned? Both are design /
-acceptance-criteria decisions requiring owner authority; neither is done silently.
+**Unresolved movement-authority question (owner decision, no repair made).** The turn-1
+relocation of the 16-brigade Sarajevo garrison to binjezevo is **unattributed** — an open
+movement-authority question, neither a proven defect nor a cleared/design-only finding. Prime
+suspect (hypothesis, not a finding): `ensureMinimumSectorCoverage`
+(`brigade_assignment.ts:1734-1751`, direct `location_osid` write,
+`LOCAL_FRONT_RELIEF_MAX_HOPS = 3`) invoked from `buildCorpsFrontSectors` in the
+`partition-corps-front-sectors` step. The open question: should a sector-build coverage-repair
+pass be allowed to rewrite `location_osid` directly rather than through §14.9 movement
+authority, and to drain a capital/must-hold cell entirely? Evidence preserved:
+`runs/apr1992_definitive_40w__21b49604f90cfc2f__w40_n425` and the bounded prefix
+`runs/diag_relief_20260919`; no re-run required. The companion "re-derive vs retire the 40w
+fixture" question was resolved on 2026-09-19 by the fixture retirement (see the next entry);
+protected anchor expectations were not re-derived.
 
 **Overclaims corrected in the audit.** (a) "walkover"/"nobody was holding it"/zero effective
 defense → the cell had militia defense and the attacker won a costly victory. (b) "ARBiH 1st
@@ -6657,3 +6661,168 @@ retained); `runs/apr1992_definitive_40w__21b49604f90cfc2f__w40_n425` (40w, retai
 `data/derived/latest_run_final_save.json` and the pre-existing env-gated LOC trace in
 `src/sim/combat/commander/emit.ts` remain uncommitted and preserved.
 
+## 2026-09-19 — Retire the standalone 40w scenario fixtures; migrate to canonical 188w with a duration override
+
+**Summary.** Deleted both standalone 40w scenario definitions and retired every live consumer,
+migrating meaningful assertions (including the protected-anchor checks) to the canonical
+`apr1992_definitive_188w.json` via its duration override. No protected anchor expectation was
+re-derived to obtain green.
+
+**Change.** (1) **Scenario definitions:** deleted `data/scenarios/apr1992_definitive_40w.json`
+and `data/scenarios/apr1992_definitive_40w_emergent.json`; removed the `apr1992_definitive_40w`
+entry from `src/scenario/scenario_registry.ts`. (2) **Runner (default-off):** `runScenario` now
+derives the scoring-reference epoch and reached checkpoints from the *effective* scenario
+(`weeksOverride` applied), so `--weeks 40` on the canonical 188w scores the jan1993 epoch. With no
+override the effective scenario is the loaded scenario **by reference**, so duration-derived
+selection is unchanged by construction (a source-path argument; no separate byte-hash measurement
+is claimed).
+(3) **Commands:** `sim:scenario:run:40w` / `:timed` now run the canonical 188w with `--weeks 40`;
+removed `calibrate:40w` / `calibrate:freeze` and `tools/calibrate_40w.cjs` /
+`tools/freeze_baseline.cjs`; simplified `recovery:check:full`. (4) **CI fingerprint:** migrated
+`tools/diagnostics/ci_structural_fingerprint.cjs` to the canonical 188w at `--weeks 40` and
+committed `data/calibration/structural_fingerprint_188w.json` (fingerprint `87c7a9b1ca4072f9`);
+removed `structural_fingerprint_40w.json`; updated the artifact inventory, ownership matrix, and
+determinism matrix. (5) **Tests:** migrated the seven standalone `tests/integration_*` suites to
+the canonical scenario with `weeksOverride: 40`; repointed `scenario_guardrails`,
+`scenario_harness_contracts`, `scenario_loader_dayton_close_out`, `scenario_sister_parity`
+(now 188w vs desktop 52w), `apr1992_doboj_initial_control_truth`, `gorazde_enclave_contract`;
+updated perf-report string fixtures (`performance_wall_clock_report`, `profile_hotspot_report`,
+`wall_clock_target_report`, `heap_profile`) and launch tools (`tools/claude_plays_vrs/*`,
+`tools/perf/profile_scenario.ts`); updated active docs/skills/CI notes.
+(6) **Preserved:** historical run-dir references (`sarajevo_real_save_contracts`,
+`sector_front_role_truth_real_save`, `sector_drina_frontline_integrity`,
+`supply_sensitive_history_smoke`, `osid_damage_seed_builder`) and the frozen historical artifact
+`data/calibration/baseline_40w.json` (still read by `tests/event_timing.test.ts`).
+
+**Evidence.** Canonical `188w` @ `--weeks 40` run `runs/apr1992_definitive_188w__7c3a0f299a8c80e9__w40_n428`,
+`final_state_hash 95128f8180eafa44`: `anchor_contract_evaluation` epoch **jan1993, 31/31 passed**;
+week-39 checkpoint **31/31**; bot benchmarks **6/6**; 163 battles.
+
+**Observation (recorded, not acted on).** The retired 40w definition pre-painted the Drina
+seizure corridor RS through its 712-entry `initial_osid_controllers`; canonical 188w has no such
+map and starts the corridor RBiH (only `op:rudo:gornja_strmica` overridden RS), earning the
+seizure through operations. The migrated initial-control tests pin the canonical truth.
+
+**Preserved / unresolved.** The `n425` and `diag_relief_20260919` evidence for the unattributed
+turn-1 relocation of 16 brigades is preserved; it remains an **open movement-authority question**
+(neither a proven defect nor cleared). Investigating/repairing it is outside this packet. The
+uncommitted Sarajevo audit/ledger correction sections remain separate from this migration.
+
+**Verification.** `npm run typecheck` clean. Migrated suites:
+`integration_deployment_health` + `integration_run_summary` 21/21 (anchors 31/31, benchmarks 6/6);
+`integration_anomaly` + `integration_state_assertions` + `integration_formation_integrity` +
+`integration_pool_integrity` + `integration_run_diagnostics` + `scenario_harness_contracts` 43/43;
+fast migrated/guard tests 96/96; contract/guard batch 78/83 — the 5 failures are the known Windows
+`hook_guard_scope_drift` host/WSL-bash issue (they also fail for the unchanged `sim:scenario:run:188w`),
+not caused by this change.
+
+**Residuals flagged (not edited here).** `docs/10_canon/context.md` and
+`docs/10_canon/Systems_Manual_v0_9_0.md` still contain historical implementation-notes naming the
+retired 40w scenario (e.g. `supply_reserves_enabled` default); `ADR-0005` cites retired 40w flag-off
+gold hashes. These are canon/ADR statements and require the appropriate panel before correction.
+
+**Failure mode prevented:** a short-horizon false-green produced by a divergent standalone
+fixture, and a silent acceptance-criteria change (re-deriving protected anchors) to force green.
+
+**FORAWWV note:** none — no canon change proposed or made.
+
+**Files modified.** `data/scenarios/apr1992_definitive_40w.json` (deleted),
+`data/scenarios/apr1992_definitive_40w_emergent.json` (deleted),
+`data/calibration/structural_fingerprint_188w.json` (new),
+`data/calibration/structural_fingerprint_40w.json` (deleted),
+`tools/calibrate_40w.cjs` (deleted), `tools/freeze_baseline.cjs` (deleted),
+`src/scenario/scenario_registry.ts`, `src/scenario/scenario_runner.ts`, `package.json`,
+`tools/diagnostics/ci_structural_fingerprint.cjs`, `tools/diagnostics/generated_artifact_inventory.ts`,
+`tools/perf/profile_scenario.ts`, `tools/claude_plays_vrs/run_commander.ts`,
+`tools/claude_plays_vrs/run_three_commanders.ts`, the seven `tests/integration_*.test.ts` suites,
+`tests/scenario_guardrails.test.ts`, `tests/scenario_harness_contracts.test.ts`,
+`tests/scenario_loader_dayton_close_out.test.ts`, `tests/scenario_sister_parity.test.ts`,
+`tests/apr1992_doboj_initial_control_truth.test.ts`, `tests/gorazde_enclave_contract.test.ts`,
+`tests/performance_wall_clock_report.test.ts`, `tests/profile_hotspot_report.test.ts`,
+`tests/wall_clock_target_report.test.ts`, `tests/sim/perf/heap_profile.test.ts`,
+`tests/collapse_s6_run_selection.test.ts`, `tests/scenario_latest_run_final_save_artifact_ownership.test.ts`,
+`tests/army_hq_gathering.test.ts`, `.github/workflows/full-suite-and-fingerprint.yml`,
+`.github/workflows/README.md`, `README.md`,
+`docs/20_engineering/CODE_CANON.md`, `docs/20_engineering/DETERMINISM_TEST_MATRIX.md`,
+`docs/20_engineering/REPO_MAP.md`, `docs/20_engineering/SCENARIO_PAINTER_TOOL.md`,
+`docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md`,
+`docs/plans/2026-07-31-historical-gameplay-depth-calibration-plan.md`,
+`.claude/skills/anomaly-triage/SKILL.md`, `.claude/skills/data-pipeline-engineer/SKILL.md`,
+`docs/40_reports/20260919_OPERATION_LIFECYCLE_ENGINE_HEALTH_AUDIT.md` (unresolved-question
+classification), `docs/PROJECT_LEDGER.md` (this entry).
+
+## 2026-09-19 — Retirement closeout: fingerprint provenance, duration coverage, hook prerequisite, independent review, full suite, January reconciliation
+
+**1. Fingerprint provenance — PROPOSED, gate UNMET.** `data/calibration/structural_fingerprint_188w.json`
+(fingerprint `87c7a9b1ca4072f9`) was produced by `npm run ci:structural-fingerprint:update` from run
+`runs/apr1992_definitive_188w__7c3a0f299a8c80e9__w40_n428`. That run's `run_meta.provenance` records
+`git_commit 20eb1c806f7b28a47680e9adb6446a49d5fe4968` (== HEAD) with **`git_dirty: true`**,
+consumed-input digest `ac81d9f025d19017e3323898ca8ad38b5e13c9c0ec7a2b306ae8cab9864486a7`, and scenario
+`data/scenarios/apr1992_definitive_188w.json` sha256 `7db056062b0b60a93be8e4f9df7940d91bbcc29f14bedaf7e30cd4c70ad71445`.
+It therefore reflects an **uncommitted candidate**, not an accepted commit. It is retained as a
+**proposed** golden and the fingerprint gate is reported **UNMET**; authoritative adoption requires a
+clean-tree regeneration (`git_dirty: false`) on an accepted commit. The gate was **not** disabled and no
+other pin, floor or reference was refreshed. Labeling updated in
+`docs/20_engineering/GENERATED_ARTIFACT_OWNERSHIP.md` and `DETERMINISM_TEST_MATRIX.md`.
+**Residual:** the frozen documentation manifest `data/calibration/c3_freeze_manifest.json` still carries
+the retired `calibration_40w` row (deleted `structural_fingerprint_40w.json`, stale fingerprint
+`4fcdb21ab4bcff14`); its own header requires deliberate `--update` + panel sign-off, so it was left
+untouched and is recorded here rather than silently edited.
+
+**2. Duration-derived reporting — regression coverage (no 188-week run).** New
+`tests/scenario_duration_reporting_contract.test.ts` (5 tests): no override → epoch `oct1995` and all four
+checkpoints; 40-week override → `jan1993` and week-39 only; 104/156/1-week overrides → `apr1994`/`apr1995`/
+`jan1993` with the reached checkpoint set; plus a cheap `initialStateOnly` run asserting
+`run_meta.anchor_contract.epoch === 'jan1993'` and that consumed inputs include
+`painted_control_jan1993.json` but not `painted_control_oct1995.json`. All 5 pass.
+
+**3. No-override equivalence wording corrected.** The runner comment and the retirement entry now state
+explicitly that with no override the effective scenario **is** the loaded scenario *by reference*
+(source-path argument), so duration-derived selection is unchanged by construction — **not** a measured
+byte-hash identity claim.
+
+**4. Windows Bash prerequisite resolved (environment only).** `bash` resolved to
+`C:\Windows\system32\bash.exe` (WSL), which cannot read the MSYS-form `/f/...` paths the hook tests pass.
+Prepending `C:\Program Files\Git\bin` made `Get-Command bash` resolve to
+`C:\Program Files\Git\bin\bash.exe`; `tests/hook_guard_scope_drift.test.ts` then passed **14/14**. No
+test was weakened or skipped and no hook/test/config file was changed to obtain the green; only the
+invoking `PATH` differed. The full suite was run with that PATH.
+
+**5. Independent migration review.** One independent reviewer covered preserved assertions, duration
+handling, fingerprint provenance, retired consumers, and unchanged production mechanics/canonical inputs.
+Corrected findings: (a) `tests/scenario_harness_contracts.test.ts`'s must-hold loop was vacuously
+satisfiable by an empty map — added an explicit non-empty `must_hold_osids_by_corps` assertion before
+entry checks; (b) `tests/scenario_sister_parity.test.ts` now documents its one-directional
+"desktop default ⊆ definitive" scope plus the separate must-hold guard; (c) the duration test's describe
+now names `run_meta` coverage rather than overstating end-to-end scoring. The reviewer's asserted 188w
+must-hold content was **inverted** (188w = `vrs_drina: [op:zvornik:zvornik]`, verified). Residuals
+recorded, not acted on: historical plan docs still name the deleted 40w file; the frozen c3 manifest
+(row above); the generated save; the pre-existing `emit.ts` trace.
+
+**6. Full suite — run 3 of 3 green.** `npm run test:vitest` (balanced, 4 shards), Git Bash on PATH, Node
+`22.23.2`. Run 1: **exit 1** — `tests/plan_index.test.ts` (2 assertions); cause was my R6 plan-doc edit
+changing the plan's token count, so the derived `docs/plans/plan_index.yml` was stale. Regenerated
+(`tokens` 20303 → 20383) and verified `plan_index.test.ts` **13/13**. Run 2: **exit 1** —
+`tests/runtime_dependency_resolution.test.ts` `Error: Hook timed out in 10000ms`, the known separate
+setup-timing flake (verified passing **12/12 in isolation**), unrelated to this change. Run 3:
+**exit 0** — test files **1,394 passed / 4 skipped (1,398)**; tests **14,088 passed / 31 skipped
+(14,119)**; the only printed FAIL is the intentional
+`tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts` control, asserted by the passing
+`tests/run_vitest_balanced.test.ts` (**13/13**). Logs retained at `logs/retirement-closeout-20260919/`
+(gitignored `*.log`).
+
+**7. January-1993 reconciliation from `n427` (no new simulation).** Full reconciliation recorded at the
+top of `docs/40_reports/CALIBRATION_MASTER.md` (2026-09-19 addendum): `n427` January **701/712**,
+11-cell mismatch set listed; the **named-capture / no-new-mismatch contract does NOT hold** (3 newly
+wrong: `op:bihac:orasac_2`, `op:donji_vakuf:jemanlici`, `op:sipovo:volari_2`; 3 newly right:
+`op:foca:donje_zesce`, `op:maglaj:jablanica`, `op:trnovo:tosici`; lost t29 Orašac capture). Western
+cascade 23 matched (below the recorded base 40 / floor 38); Farz P-A **FAIL** (t167 by
+`arbih_328th_mountain`, 3rd Corps); Prozor turn-41 `op_empty` **inherited**; eastern capture provenance
+CLEAN; enclave guard holds. **One next task:** bounded January re-attribution of the three newly-wrong
+cells and the lost Orašac capture (B3 vs P-A vs routine-movement scope); if not attributable from
+retained artifacts, one bounded `--weeks 39` run. **Not** a January closeout. Migration status is
+separate from January acceptance (OPEN) and full-campaign acceptance (NO-GO).
+
+**Scope hygiene.** `data/derived/latest_run_final_save.json` and the pre-existing env-gated LOC trace in
+`src/sim/combat/commander/emit.ts` remain uncommitted and preserved; they are excluded from this
+closeout's commits.

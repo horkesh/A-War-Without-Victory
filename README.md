@@ -27,7 +27,7 @@ npm run test:engine              # engine slice
 npm run test:all                 # alias for canonical balanced full suite
 npx tsc --noEmit
 npm run sim:scenario:run:188w    # sole scoring calibration scenario
-npm run sim:scenario:run:40w     # short diagnostic scenario
+npm run sim:scenario:run:40w     # canonical 188w scenario, short 40-week diagnostic horizon
 npm run sim:scenario:run:default # 52-week diagnostic scenario
 npm run dev:map
 npm run desktop

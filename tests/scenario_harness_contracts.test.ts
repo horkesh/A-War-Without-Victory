@@ -759,12 +759,13 @@ describe('apr1992_definitive family — timeline & officer-config binding agreem
 
     it('discovers at least the known family members', () => {
         expect(files.length).toBeGreaterThanOrEqual(3);
-        // 104w retired 2026-09-08 as the last drifted scored-intermediate fork; the family
-        // is now the development loop (40w), the default (52w) and the definitive line (188w).
+        // 104w retired 2026-09-08 as the last drifted scored-intermediate fork; the 40w
+        // family retired 2026-09-19 (short diagnostics now override the 188w duration).
+        // What remains is the default (52w) and the definitive line (188w + its close-out).
         for (const expected of [
-            'apr1992_definitive_40w.json',
             'apr1992_definitive_52w.json',
             'apr1992_definitive_188w.json',
+            'apr1992_definitive_188w_dayton_close.json',
         ]) {
             expect(files).toContain(expected);
         }
@@ -889,14 +890,22 @@ describe('apr1992 must-hold contract', () => {
         const prereq = checkDataPrereqs({ baseDir: process.cwd() });
         if (!prereq.ok) return;
 
-        const scenarioPath = path.resolve(process.cwd(), 'data/scenarios/apr1992_definitive_40w.json');
+        const scenarioPath = path.resolve(process.cwd(), 'data/scenarios/apr1992_definitive_188w.json');
         const scenario = await loadScenario(scenarioPath);
         const startup = await buildScenarioStartupState(scenario, process.cwd());
         const operationalData = await loadOperationalData(process.cwd());
         const liveCorpsIds = new Set(Object.keys(startup.state.military.corps_command ?? {}));
         const realOsids = new Set(operationalData.operationalToCanonical.keys());
 
-        for (const [corpsId, osids] of Object.entries(scenario.must_hold_osids_by_corps ?? {})) {
+        // Guard the vacuum: the loop below is satisfiable by an empty map, so assert the
+        // definitive scenario actually declares must-hold wiring before checking its entries.
+        const mustHold = scenario.must_hold_osids_by_corps ?? {};
+        expect(
+            Object.keys(mustHold).length,
+            'apr1992_definitive_188w.json must declare a non-empty must_hold_osids_by_corps',
+        ).toBeGreaterThan(0);
+
+        for (const [corpsId, osids] of Object.entries(mustHold)) {
             expect(liveCorpsIds.has(corpsId), `must_hold references unknown corps "${corpsId}"`).toBe(true);
             for (const osid of osids) {
                 expect(realOsids.has(osid), `must_hold references unknown OSID "${osid}"`).toBe(true);
