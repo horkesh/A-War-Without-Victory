@@ -193,6 +193,14 @@ runs. The capture is a walkover: `control_events` records
 the trailing `null` is the defender slot. Central Sarajevo did not fall because the attacker
 got stronger; it fell because nobody was holding it and, this time, an operation walked in.
 
+> **CORRECTION (2026-09-19, sector-relief verification).** "Nobody was holding it" is true
+> only in the narrow sense of *no regular brigade*. The battle record carries
+> `defender_kind: militia`, `defender_militia_pool_key: centar_sarajevo:RBiH`,
+> `defender_casualties: 40`, `power_ratio: 1`, `outcome: costly_victory`. The cell was **not**
+> at zero effective defense: §6.5's population-militia fallback defended it and the attacker
+> won a *costly* victory, not a free walk-in. The claim that the position was literally
+> undefended is an overclaim. See "Sarajevo sector-relief verification" below.
+
 **What B3 actually changed is which operations exist.** The commander-generated operation sets
 are wholesale different between the runs (BEFORE: Bastion, Bedem, Bunar, Gvožđe, Izlaz, Munja,
 Odmazda, Straža, Tvrđava, Vihor, Vijak — AFTER: Bedem, Grab, Hrast, Izlaz, Obruč, Odmazda,
@@ -223,6 +231,16 @@ fix stands, the two anchor tests are left RED and documented, and the real defec
 brigades stand adjacent** — is returned as a new finding for owner decision. It is a garrison
 / sector-coverage defect, not a donation defect, and it is the same shape as the
 `sector:arbih_5th_corps:0` density-0.000 case already recorded against `op:bihac:orasac_2`.
+
+> **CORRECTION (2026-09-19, sector-relief verification).** The "real defect" framing is
+> **not established**. Under canonical 188w inputs (`n427`) the cell is physically held by
+> `arbih_105th_motorized` on every turn t1–t188 and the anchor passes 31/31. In the 40w
+> fixture the owning sector is genuinely **isolated** by t33 (a 5-OSID RBiH pocket with no
+> brigade inside and every external edge on RS), so `unstaffed_front: true` is the
+> §14.9-required state and `computeEmptySectorReliefReassignments` correctly declines relief
+> (no reachable legal donor). No sector-defense or relief **contract** was violated. The
+> 40w anchor failure is better classified as **scenario/test drift** — the 40w definition
+> differs from canonical in ≥11 material keys. See "Sarajevo sector-relief verification".
 
 ### B4 (P1) — The injection validator and the operation builder use different eligibility predicates
 
@@ -630,6 +648,11 @@ The two RED anchor tests are the **40w** tests; the 188w anchor holds. Traced fr
 - **Why no brigade occupied or reacted:** the sector was never staffed, so no formation was
   physically present; the adjacent RS brigade entered an empty cell. Nothing in the engine re-garrisons
   a zero-assigned sector while the rest of the corps is concentrated elsewhere.
+
+  > **CORRECTION (2026-09-19):** "never staffed" is false for the 40w run at t0 — the pocket held
+  > 16 active RBiH brigades and lost them at turn 1 (see "Sarajevo sector-relief verification").
+  > The correct statement is that by t33 the sector was **isolated** (no reachable legal donor),
+  > which §14.9 requires to be `unstaffed_front: true`; relief is correctly declined, not missing.
 - **Same signature as `sector:arbih_5th_corps:0`?** Yes — a frontline sector adjacent to the enemy
   with zero assigned brigades while the responsible corps has units available. The old Bihać
   density-0.000 case is now staffed in the candidate (`arbih_5th_corps:0` density 0.2 with assigned +
@@ -694,6 +717,10 @@ corps), run over the 188w candidate final state:
   run at three of four checkpoints (net −35), the comparison is confounded by the intermediate
   commits, `stranded_brigades` sits at 15/16, and the Sarajevo/garrison structural vulnerability
   persists (masked in 188w, fatal in 40w). Not a FAIL; not a clean PASS.
+  *(Corrected 2026-09-19: the Sarajevo 40w loss is scenario/test drift, not a demonstrated
+  engine-contract violation; the canonical 188w anchor holds. The residual concern is a design
+  decision about capital/must-hold garrisons, not a contract repair. See "Sarajevo sector-relief
+  verification".)*
 - **C. MERGE READINESS — NO.** Required anchor tests are red; full-campaign health needs follow-up;
   Baseline Pins remains advisory/stale.
 
@@ -707,6 +734,92 @@ one-brigade-covers-a-whole-sector masking. This is the only candidate that alrea
 protected anchor. B1 (no concentration step after assembly) is the next-most-evidenced (candidate
 `zero_eligible_axis` 6), then B2 (stale assembly floors), then B4 (validator/builder mismatch). B2
 and B4 are unchanged by B3 and not implicated in any 188w integrity metric.
+
+> **CORRECTION (2026-09-19, sector-relief verification).** The premise of this "Next P1" is
+> not established for Sarajevo. The 40w sector is zero-assigned because it is **isolated**
+> (no reachable legal donor), which §14.9 requires to be `unstaffed_front: true`; relief is
+> correctly declined. The canonical 188w run keeps a brigade on the cell every turn and the
+> anchor holds. The remaining candidate is a **design decision** (whether a capital/must-hold
+> cell should require a minimum physical garrison, or whether sector-wide defense + relief is
+> sufficient), not a demonstrated contract violation. See the section below.
+
+## Sarajevo sector-relief verification — 2026-09-19
+
+**Question.** Why did central Sarajevo lack effective defense at its turn-34 capture in
+`n425`? Repair only a demonstrated violation of the existing sector-defense or relief
+contract.
+
+**Method and evidence.** Retained artifacts first; one bounded diagnostic prefix
+(`runs/diag_relief_20260919`, `apr1992_definitive_40w.json`, 35 weeks, `emitEvery: 1`,
+`outDirOverride`, no `--map`) because the retained weekly saves carry an **empty**
+`corps_front_sectors` map and so cannot show pre-capture sector rosters. The prefix's
+`brigade_temporal_log.jsonl` is byte-identical to `n425`'s through the capture (0/7993 lines
+differ) and its week-34 battle row matches `n425` exactly. No GameState-mutating tracing was
+used. The 40w fixture is retired for calibration truth; its outcomes are diagnostic only.
+
+**Causal chain (40w fixture).**
+
+1. **t0:** `op:centar_sarajevo:sarajevo_dio_centar_sajarevo` is RBiH and 16 active RBiH 1st
+   Corps brigades sit in the four Sarajevo city cells (`initial_save.json`). The RBiH
+   connected component containing centar is 161 OSIDs and includes `op:hadzici:binjezevo`
+   and `op:ilidza:sarajevo_dio_ilidza_2`.
+2. **turn 1:** RS takes `op:ilidza:sarajevo_dio_ilidza_2` (`jna_4th_corps_tg`). The component
+   collapses 161 → 5 (centar, novi_grad, novo, stari_grad, `op:vogosca:hotonj`). In the same
+   turn every one of those brigades is recorded at `op:hadzici:binjezevo` — a relocation
+   **within the then-connected component**, not a cross-component teleport.
+3. **t1–t33:** the 5-cell pocket stays RBiH, physically empty of regular brigades; the
+   owning sector's roster sits at binjezevo, now unreachable. Every external edge of the
+   pocket terminates on RS.
+4. **t33 (pre-capture):** `annotateUnstaffedFrontSectors` →
+   `isSectorUnstaffableByFaction` finds no same-corps legal donor that can reach the pocket
+   front (faction-only reachability), so the derived sector carries `unstaffed_front: true`.
+5. **t34:** `computeEmptySectorReliefReassignments` skips the unstaffed sector
+   (`decide.ts:270`). `attack_resolution_osid.ts` computes sector-wide defense from
+   `assigned_brigade_ids`; unreachable members contribute 0 and never become the physical
+   defender (`:829-844`), and `findEmptySectorAdjacentDefenders` finds none, so the militia
+   fallback defends. `rs_1st_romanija_infantry` (Operacija Usjek, t29) wins a *costly*
+   victory (`power_ratio 1`, 40 defender casualties, `defender_kind: militia`).
+
+**Contract assessment.** No violation of Engine Invariants §6.5 or §14.9 was found. §14.9
+requires exactly the observed state for an unreachable empty sector ("When no legal donor can
+reach the sector, the derived sector must carry `unstaffed_front: true`; legal isolation is
+advisory truth, not a teleport exception"). §6.5's sector-wide defense was applied and
+correctly degraded to the militia fallback once the roster became unreachable. The
+`computeEmptySectorReliefReassignments` / `sector_reassignment_emit_truth` /
+`sector_coverage_defense` suites pass 18/18, and the relief path's donor, enclave, dig-in and
+in-transit guards are intact.
+
+**Canonical control.** Under the canonical 188w definition (`n427`),
+`arbih_105th_motorized` is at `op:centar_sarajevo:sarajevo_dio_centar_sajarevo` on every turn
+t1–t188, the anchor passes 31/31, and the same empty-sector class appears only as RS-owned
+voids. The 40w and 188w definitions differ in ≥11 material keys
+(`initial_osid_controllers` only in 40w; `supply_reserves_enabled` only in 40w;
+`firepower_deficit_penalty_enabled` and `calibration_scenario` only in 188w;
+`max_recruits_per_faction_per_turn` 4 vs 2; different `recruitment_capital`,
+`must_hold_osids_by_corps`, `osid_control_overrides`, `coercion_pressure_by_municipality`),
+while the shared formation/OOB/operational-control inputs are hash-identical. The divergence
+is therefore input-driven, not a mechanics divergence.
+
+**Classification.** The 40w anchor failure is **scenario/test drift**, not a demonstrated
+engine-contract violation. The engine obeys the sector-defense and relief contracts; the
+canonical scenario keeps the anchor.
+
+**Exact unresolved question (owner decision).** The turn-1 relocation of the 16-brigade
+Sarajevo garrison to binjezevo is unattributed. The prime suspect is
+`ensureMinimumSectorCoverage` (`brigade_assignment.ts:1734-1751`, direct `location_osid`
+write, `LOCAL_FRONT_RELIEF_MAX_HOPS = 3`) invoked from `buildCorpsFrontSectors` during the
+`partition-corps-front-sectors` step. Two questions remain, and both are design decisions,
+not contract repairs:
+
+1. Should a sector-build coverage-repair pass be permitted to rewrite `location_osid`
+   directly (as opposed to §14.9's movement-authority route) when relocating a sector's
+   garrison — and should it be able to drain a capital/must-hold cell entirely?
+2. Should the 40w fixture's anchor expectations be re-derived against canonical inputs, or
+   the fixture retired/aligned? Either action changes acceptance criteria and requires owner
+   authority; it must not be done silently.
+
+**No repair was made.** No B1/B2/B4, no calibration tuning, no threshold/anchor change, no
+per-cell garrison, no second relief system, no main merge.
 
 **Not done here:** no fix, no tuning, no B1/B2/B4, no baseline refresh, no tag movement, no main
 merge.

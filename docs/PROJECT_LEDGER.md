@@ -6569,3 +6569,91 @@ breaching a protected anchor, confirmed by both the 40w trace and the 188w scan;
 gitignored `runs/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n427`. No code change; `runs/`
 untracked; `data/derived/latest_run_final_save.json` and the pre-existing LOC trace left
 uncommitted.
+
+## 2026-09-19 — Sarajevo sector-relief verification: no contract violation; 40w anchor failure is scenario/test drift
+
+**Summary.** Verified whether central Sarajevo's turn-34 capture in `n425` was a violation of
+the existing sector-defense or relief contract. It was not. Corrected the earlier
+"garrison/sector-coverage defect" overclaim in the operation-lifecycle audit.
+
+**Question and method.** Explain why central Sarajevo lacked effective canonical defense at
+its t34 capture and repair only a demonstrated contract violation. Retained artifacts first
+(`n427` canonical 188w, `n425` 40w); one bounded diagnostic prefix
+(`runs/diag_relief_20260919`, `apr1992_definitive_40w.json`, 35 weeks, `emitEvery: 1`, no
+`--map`) because retained weekly saves carry an empty `corps_front_sectors` map. Prefix
+`brigade_temporal_log.jsonl` is byte-identical to `n425` through the capture (0/7993 lines
+differ) and its week-34 battle row matches `n425` exactly. No GameState-mutating tracing.
+
+**Causal chain (40w fixture).** t0: centar RBiH with 16 active RBiH 1st Corps brigades in the
+four Sarajevo cells; RBiH component containing centar is 161 OSIDs and includes
+`op:hadzici:binjezevo` and `op:ilidza:sarajevo_dio_ilidza_2`. Turn 1: RS takes
+`op:ilidza:sarajevo_dio_ilidza_2` (`jna_4th_corps_tg`); component collapses 161→5
+(centar, novi_grad, novo, stari_grad, `op:vogosca:hotonj`); the 16 brigades are recorded at
+`op:hadzici:binjezevo` — a relocation **within the then-connected component**, not a
+cross-component teleport. t1–t33: the 5-cell pocket stays RBiH, physically empty of regular
+brigades; the owning sector roster is at binjezevo, now unreachable; every external edge of
+the pocket is RS. t33: `annotateUnstaffedFrontSectors` → `isSectorUnstaffableByFaction` finds
+no same-corps legal donor able to reach the pocket front, so the sector carries
+`unstaffed_front: true`. t34: `computeEmptySectorReliefReassignments` correctly skips the
+unstaffed sector (`decide.ts:270`); `attack_resolution_osid.ts` computes sector-wide defense
+from `assigned_brigade_ids`, unreachable members contribute 0 and never become the physical
+defender (`:829-844`); `findEmptySectorAdjacentDefenders` finds none; the population-militia
+fallback defends. `rs_1st_romanija_infantry` (Operacija Usjek, t29) wins a **costly**
+victory (`power_ratio 1`, 40 defender casualties, `defender_kind: militia`).
+
+**Contract assessment.** No violation of Engine Invariants §6.5 or §14.9. §14.9 requires
+exactly the observed state for an unreachable empty sector ("When no legal donor can reach
+the sector, the derived sector must carry `unstaffed_front: true`; legal isolation is
+advisory truth, not a teleport exception"). §6.5 sector-wide defense applied and correctly
+degraded to militia once the roster became unreachable. `computeEmptySectorReliefReassignments`
+/ `sector_reassignment_emit_truth` / `sector_coverage_defense` suites pass 18/18; donor,
+enclave, dig-in and in-transit guards intact. Canonical control: in `n427`,
+`arbih_105th_motorized` sits at centar on every turn t1–t188 and the anchor passes 31/31.
+
+**Classification.** The 40w anchor failure is **scenario/test drift**, not an engine-contract
+violation. The 40w and 188w definitions differ in ≥11 material keys
+(`initial_osid_controllers` only in 40w; `supply_reserves_enabled` only in 40w;
+`firepower_deficit_penalty_enabled`/`calibration_scenario` only in 188w;
+`max_recruits_per_faction_per_turn` 4 vs 2; different `recruitment_capital`,
+`must_hold_osids_by_corps`, `osid_control_overrides`, `coercion_pressure_by_municipality`),
+while the shared formation/OOB/operational-control inputs are hash-identical. The 40w family
+is retired for calibration truth (CONTEXT.md).
+
+**Exact unresolved question (owner decision, no repair made).** The turn-1 relocation of the
+16-brigade Sarajevo garrison to binjezevo is unattributed. Prime suspect:
+`ensureMinimumSectorCoverage` (`brigade_assignment.ts:1734-1751`, direct `location_osid`
+write, `LOCAL_FRONT_RELIEF_MAX_HOPS = 3`) invoked from `buildCorpsFrontSectors` in the
+`partition-corps-front-sectors` step. (1) Should a sector-build coverage-repair pass be
+allowed to rewrite `location_osid` directly rather than through §14.9 movement authority, and
+to drain a capital/must-hold cell entirely? (2) Should the 40w fixture's anchor expectations
+be re-derived against canonical inputs, or the fixture retired/aligned? Both are design /
+acceptance-criteria decisions requiring owner authority; neither is done silently.
+
+**Overclaims corrected in the audit.** (a) "walkover"/"nobody was holding it"/zero effective
+defense → the cell had militia defense and the attacker won a costly victory. (b) "ARBiH 1st
+Corps leaves the Sarajevo city cells with zero defending brigades" as a defect → the sector
+was legally isolated and relief was correctly declined. (c) "Next P1 urban/front staffing and
+garrison integrity" → premise not established for Sarajevo; residual is a design decision,
+not a contract repair.
+
+**Files modified.** `docs/40_reports/20260919_OPERATION_LIFECYCLE_ENGINE_HEALTH_AUDIT.md`
+(correction sections), `docs/PROJECT_LEDGER.md` (this entry). No source, test, scenario,
+threshold, anchor or baseline change. Independent review: a separate reader independently
+confirmed all seven evidence claims and the no-violation classification (see the audit's
+"Sarajevo sector-relief verification" section).
+
+**Mistake guard:** "sector-wide defense and legal isolation are not a garrison defect."
+
+**Failure mode prevented:** manufacturing a per-cell garrison or second relief system to
+recover a non-canonical 40w anchor, which would have masked the real (design) question and
+changed acceptance criteria without authority.
+
+**FORAWWV note:** none — no canon change proposed. The residual is a design decision about
+capital/must-hold physical garrisons under the existing §6.5/§14.9 contract.
+
+**Evidence paths.** `runs/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n427` (canonical,
+retained); `runs/apr1992_definitive_40w__21b49604f90cfc2f__w40_n425` (40w, retained);
+`runs/diag_relief_20260919` (gitignored diagnostic prefix, 35w). Dirty tree unchanged:
+`data/derived/latest_run_final_save.json` and the pre-existing env-gated LOC trace in
+`src/sim/combat/commander/emit.ts` remain uncommitted and preserved.
+
