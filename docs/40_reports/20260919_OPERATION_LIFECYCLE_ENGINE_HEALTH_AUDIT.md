@@ -467,3 +467,246 @@ capability, and the real answer to the owner's core question).
   against `planning_duration 3 + grace 2`; its deadline had not yet passed.
 - No 188-week effect is measured. Territorial consequences of any proposal above are unknown.
 - January calibration is untouched and remains at 696/712, below the 700 floor.
+
+---
+
+# 188-week B3 validation — run `n427` (2026-09-19)
+
+**Why this exists.** B3 changes combat/operation behaviour, and this repo's standing rule is that a
+shorter run plus CI green is a FALSE-GREEN for combat behaviour — a 188-week run is required before
+merge. This is that run, and it is the only 188-week run of the B3 candidate. No engine fix, no
+calibration tuning, no reference edit, no baseline refresh, no B1/B2/B4.
+
+## Source identity (verified before the run)
+
+- `HEAD = d58b55c4f` == `origin/codex/january-1993-operations-20260914`; branch up to date.
+- **B3 production commits:** `9cdb14b99` (donation readiness is augmentation, not a veto),
+  `3c5302f7a` (typed `tg_formation_decline` record), `8bc7703fb` (decline carried into `AxisAAR`).
+  Documentation-only: `dd6af1ada`, `d58b55c4f`.
+- **Tree:** clean except `data/derived/latest_run_final_save.json` **and** a pre-existing
+  env-gated LOC trace in `src/sim/combat/commander/emit.ts`. The trace was stashed for the run
+  (stash `9acc10f9f43bcc43652c8045229e7b45809cfd6c`), restored after; it is inert
+  (`AWWV_LOC_TRACE` unset), so the run used the exact committed source.
+- **Runtime:** Node `v22.23.2` (pin 22), npm `10.9.8`. `tsc --noEmit` clean before the run.
+- **Scenario:** `data/scenarios/apr1992_definitive_188w.json`, sha256
+  `7db056062b0b60a93be8e4f9df7940d91bbcc29f14bedaf7e30cd4c70ad71445`.
+- **Consumed inputs:** digest `f8ace65496620fad1c8219a9dcaa8e2c5cdba2f3f541b156c7ba112b4748caaf`,
+  byte-identical to baseline n398. Three inputs (`operational_settlements.geojson`,
+  `political_leader_data.json`, `settlement_political_controllers_overrides.json`) had drifted to
+  CRLF on disk despite `.gitattributes eol=lf`; LF-normalized (content-identical — LF-normalized
+  SHA256 equals n398's recorded hashes) so the run's digest matches.
+
+## Run and baseline
+
+- **Candidate:** `npm run sim:scenario:run:188w` (ordinary production harness: `--unique --map`,
+  default env, no debug topic, no flag changes). Output
+  `runs/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n427`, `final_state_hash
+  8f4dda27cd8d1410`, exit 0. Run artifacts live under gitignored `runs/`.
+- **Baseline:** the best valid pre-B3 full run is `...__w188_n398` (commit `e9024b61a`, same
+  consumed-input digest). n396/n397/n398 share commit and digest yet score differently (dirty-tree
+  states); n398 is the strongest by net and terminal (oct1995 674).
+- **⚠ Comparison caveat:** n398 predates P-A (`30e2793ed`), routine-movement scope (`a7cdc88f3`)
+  and op-movement authority (`8f5998595`). No full run of the immediate B3 parent exists. This is
+  therefore a full-campaign health contrast, **not** a clean B3-only A/B; per-commit attribution is
+  not available from these two runs.
+
+### Checkpoint scores (replayed vs current painted references)
+
+| checkpoint | candidate n427 | baseline n398 | Δ |
+|---|---|---|---|
+| jan1993 | 701 / 712 | 698 / 712 | **+3** |
+| apr1994 | 697 / 712 | 704 / 712 | −7 |
+| apr1995 | 691 / 712 | 699 / 712 | −8 |
+| oct1995 | 651 / 712 | 674 / 712 | **−23** |
+| **net** | | | **−35** |
+
+Every candidate checkpoint is above the rebaselined 188w floor (`694/674/668/641`).
+
+### Engine-health gate (`tools/engine_health_gate.cjs --horizon 188w`)
+
+Candidate **PASS**. Baseline also **PASS**.
+
+| metric | candidate | baseline | band |
+|---|---|---|---|
+| zero_eligible_ops | 0 | 0 | ≤3 |
+| ghost_destroyed | 0 | 0 | ≤3 |
+| stranded_brigades | 15 | 12 | ≤16 |
+| matched_osids (oct1995) | 651 | 674 | ≥644 |
+| consistency_failures | 0 | 0 | ≤3 |
+| kw_ratio | 3.733 | 3.764 | 3.221–4.358 |
+| dead_ops (corrected, advisory) | 6/59 ops, 8/89 axes | 8/56 ops, 9/90 axes | reported |
+| planning_deaths (advisory) | probe 281/283, sector 30/63 (346 ops) | probe 335/335, sector 22/59 (394 ops) | reported |
+
+### Anchors
+
+- **188w candidate: 31/31 anchors PASS** (baseline 31/31). `op:centar_sarajevo` holds RBiH at all
+  four checkpoints in the candidate and in n398. The two RED anchors are **40-week** tests — see
+  "Test status" below.
+
+### Producible-signature inventory (raw occurrences across the run dir)
+
+| signature | candidate | baseline |
+|---|---|---|
+| `insufficient_donation` | **0** | 14 |
+| `participants_below_assembly_floor` | 0 | 0 |
+| `zero_eligible_axis` | 23 | 35 |
+| `tg_formation_decline` | 0 (env-gated; absent on default) | 0 |
+
+Terminal axis blockers, from `operation_aars.json` `axis_summaries`:
+
+| blocker | candidate | baseline |
+|---|---|---|
+| `insufficient_donation` | **0** | 7 |
+| `zero_eligible_axis` | 6 | 2 |
+| `recent_catastrophic_losses_at_objective` | 3 | 4 |
+| `no_approach_osid` | 1 | 1 |
+
+The retired blocker is gone; the operations it used to strand now reach the opening-attack gate and
+terminate honestly on `zero_eligible_axis` (the same 40w A/B shape: `insufficient_donation` 4→0,
+`zero_eligible_axis` 3→4).
+
+### Operations, combat, control
+
+| metric | candidate | baseline |
+|---|---|---|
+| operations created (advisory) | 346 | 394 |
+| executed AARs | 59 | 56 |
+| AAR outcomes | success 42 / partial 6 / failure 11 | 37 / 7 / 12 |
+| AAR recovery reasons | completed 44, max_failures 8, brigade_attrition 2, defender_power_too_high 2, zero_eligible_axis 2, political_blocked 1 | completed 39, max_failures 9, defender_power_too_high 5, brigade_attrition 2, political_blocked 1 |
+| attack orders / battles | 649 / 453 | 686 / 506 |
+| control flips applied | 169 | 186 |
+| AAR attacks / captures | 182 / 138 | 192 / 155 |
+| objective attempts / captures | 1395 / 862 | 1388 / 915 |
+| terminal control (RS / RBiH / HRHB) | 350 / 279 / 83 | 341 / 277 / 94 |
+
+### Tactical Groups
+
+- Candidate total **30** across 10 corps; baseline **39**. Per corps: `arbih_1st` 1, `arbih_3rd` 9,
+  `arbih_4th` 1, `arbih_5th` 5, `hvo_main_staff` 1, `hvo_southeast_herzegovina` 1,
+  `hvo_tomislavgrad` 6, `vrs_1st_krajina` 4, `vrs_east_bosnian` 1, `vrs_herzegovina` 1.
+- The 39→30 drop mirrors the 40w A/B (11→7). Direct **decline** counts are unavailable on a default
+  run: `tg_formation_decline` is written only under `AWWV_DEBUG_REASON_CODES=tg_formation`, and the
+  packet forbade changing flags between comparison and candidate. The contract is instead pinned by
+  the `tg_donation_augmentation_monotonic` suite (all green).
+
+## B3 questions (A–E)
+
+- **A — Can weak donor support block an operation? NO.** `insufficient_donation` occurs **zero**
+  times in the entire candidate run (baseline 14; baseline AAR terminal axes 7). No operation is
+  blocked by a shortfall in a separate donor pool.
+- **B — Do inadequate donor pools fall back without consuming donor resources? Yes, by
+  construction.** `tgDonationMeetsReadiness` is consumed only at `formTgsAtReadyTransition`; zero-
+  and weak-donor cases take the same exit, `formTacticalGroup` is never reached on a decline, and
+  `selectDonors` is pure. Full-run evidence: operations continue (59 AARs, more than baseline) and
+  no `insufficient_donation` is produced. The default run does not persist decline records.
+- **C — Do sufficient donor pools still form TGs? Yes.** 30 TGs formed across 10 corps, including
+  all HRHB corps (`hvo_tomislavgrad` 6, unchanged from baseline).
+- **D — Does HRHB's 0.25 threshold materially affect 1995 now that it no longer gates permission?**
+  **Not measurably.** HRHB TG totals are identical to baseline (`hvo_tomislavgrad` 6,
+  `hvo_main_staff` 1, `hvo_southeast_herzegovina` 1), and no 188w artifact shows the threshold
+  changing an operation outcome. Its only remaining channel is TG-formation quality, concentrated in
+  the 1995 Mistral-2 window. Removal remains a bounded proposal; not tuned here.
+- **E — Runaway offensive activity / operation spam / donor exhaustion / control instability? NO.**
+  The candidate is slightly *less* active than baseline (orders 686→649, battles 506→453, flips
+  186→169, captures 915→862; created ops 394→346, probes 335→283); no donor exhaustion; terminal
+  control is close (RS 341→350, RBiH 277→279, HRHB 94→83). No spam, no runaway, no collapse.
+
+## Sarajevo anchor — engine evidence (diagnosis only, not fixed)
+
+The two RED anchor tests are the **40w** tests; the 188w anchor holds. Traced from the 40w B3 run
+`n425` and the 188w candidate `n427`:
+
+- **Were the affected cells undefended when captured?** Yes. `op:centar_sarajevo:
+  sarajevo_dio_centar_sajarevo` fell t34 to `rs_1st_romanija_infantry` with battle id
+  `34:op:centar_sarajevo:sarajevo_dio_centar_sajarevo:rs_1st_romanija_infantry:null` — the trailing
+  `null` is the defender slot. A walkover.
+- **Were defenders available elsewhere in 1st Corps?** Yes. 1st Corps held 34 active brigades at w40
+  (most stacked at `op:hadzici:binjezevo`, with `sector:arbih_1st_corps:2` alone holding 16).
+- **Which sector owns the cells?** `sector:arbih_1st_corps:0` (10 Sarajevo front edges;
+  `subseg:sector:arbih_1st_corps:0:0`) and `sector:arbih_1st_corps:9` (4 edges).
+- **Derived staffing/density:** both sectors had `assigned_brigade_ids = []`, `rear = []`,
+  `reserve = []`, **density 0.000**, stance `defend`, opposing `RS`. The corps' other sectors were
+  over-stacked (density 2.0).
+- **Why no brigade occupied or reacted:** the sector was never staffed, so no formation was
+  physically present; the adjacent RS brigade entered an empty cell. Nothing in the engine re-garrisons
+  a zero-assigned sector while the rest of the corps is concentrated elsewhere.
+- **Same signature as `sector:arbih_5th_corps:0`?** Yes — a frontline sector adjacent to the enemy
+  with zero assigned brigades while the responsible corps has units available. The old Bihać
+  density-0.000 case is now staffed in the candidate (`arbih_5th_corps:0` density 0.2 with assigned +
+  rear + reserve); the same class persists, currently on the RS side (see below).
+
+**Full-run scan for the same signature** (frontline cell + zero physical defending formation +
+hostile formation adjacent on a live war front + friendly formations available in the responsible
+corps), run over the 188w candidate final state:
+
+- **68 frontline cells** match the strict signature. **Of these, 65 belong to a responsible sector
+  with ≥1 assigned brigade and only 3 belong to a sector with zero assigned brigades.**
+- The 3 genuine coverage voids are RS-owned: `op:bosanska_krupa:veliki_badic`
+  (`sector:vrs_1st_krajina:0`), `op:donji_vakuf:pribraca_2` and `op:donji_vakuf:prusac_2`
+  (`sector:vrs_1st_krajina:4`) — exactly the repo's own `adjacent_uncontested_territory` list.
+  Baseline n398 reports 5 such voids.
+- **Sarajevo at 188w:** `stari_grad`, `novo` and `novi_grad` city cells are physically undefended
+  with RS brigades adjacent, but `sector:arbih_1st_corps:0` holds one assigned brigade
+  (`arbih_105th_motorized`, sitting at `centar`) — so the detector's `hasCanonicalDefense` treats the
+  whole sector as covered and the cells never appear in the anomaly list. The 40w run differs only in
+  that the sector had **zero** assigned brigades, which is why three of its four voids were Sarajevo
+  cells and the anchor broke.
+- **Classification:** the *true voids* (zero-assigned sector) are **local** (3 cells), same class and
+  order as baseline. The *masked physical gaps* (65 covered-sector cells) are **structural** — one
+  assigned brigade makes an entire sector read as defended. That masking is the mechanism behind the
+  40w anchor breach; it is not, by itself, a defect for every undefended cell (brigades are meant to
+  concentrate at sector hubs), so no cell was reclassified as a defect merely for lacking a garrison.
+
+## Test status (the branch is NOT merge-ready while any required test is red)
+
+- **Event System CI — SUCCESS (local replication of `.github/workflows/event-system-ci.yml`):**
+  `npm run typecheck` exit 0; event-system + Phase E/F/H suite **26 files, 500 passed, 5 skipped,
+  exit 0**; Phase F2 strict canon gate **1 file, 3 passed, exit 0**. Recorded separately from the
+  full suite.
+- **Full suite (`npm run test:vitest:balanced`) — EXIT nonzero.** 1397 test files; shard totals
+  3597 / 3074 / 2976 / 3634 + serial 836; **52 failing tests**:
+  - **The two known anchor failures, exact:**
+    1. `tests/integration_deployment_health.test.ts > deployment health (40w) > anchor strongpoints
+       (40w) > critical OSID anchors are controlled by expected faction` → *1 anchor(s) failed:
+       `op:centar_sarajevo:sarajevo_dio_centar_sajarevo`: expected RBiH, got RS*.
+    2. `tests/integration_run_summary.test.ts > run summary diagnostics (40w) > emits the complete
+       non-scoring anchor contract evaluation` → *expected 30 to be 31* (the same single anchor).
+  - **50 host/tooling failures, not attributable to B3:** 49 across
+    `tests/hook_guard_{stash_pop,inline_script,pipe_exit_code,lookup_absence,scope_drift,dirty_citation,large_read,truncated_search}.test.ts`
+    plus 1 in `tests/desktop_release_ci_guardrails.test.ts`. Cause is verified: on this Windows host
+    `bash` resolves to WSL (`C:\Windows\system32\bash.exe`), which cannot see the `/f/...` path, so
+    the spawned guards/scripts emit empty output (`expected 'allow' to be 'deny'`, `Unexpected end
+    of JSON input`, `No such file or directory`). None of these files or hooks were touched by B3;
+    they pass on the reference Linux/Node-22 CI. The `vitest_balanced` deliberate-failure fixture is
+    the runner's own control, not a test failure.
+- **Baseline Pins — FAILURE, advisory/stale, signature unchanged.** All **8/8** pinned
+  `apr1992_188w` artifacts mismatch (`data/derived/scenario/baselines/manifest.json`) — the same
+  eight artifacts as the pre-existing advisory failure. Engine-health gates still clear; the pins
+  are behind, not a new regression signal. Not refreshed (owner-gated).
+
+## Acceptance classification
+
+- **A. B3 ENGINE CONTRACT — PASS.** The non-monotonic donor veto is gone on the full campaign
+  (`insufficient_donation` zero), donor support is augmentation only, sufficient pools still form
+  TGs, and no threshold/floor/speed/power changed. Not decided by checkpoint score.
+- **B. FULL-CAMPAIGN ENGINE HEALTH — NEEDS FOLLOW-UP.** Gate PASS, determinism/P0 clean,
+  consistency 0, no runaway/spam/exhaustion. But the candidate is below the best valid pre-B3 full
+  run at three of four checkpoints (net −35), the comparison is confounded by the intermediate
+  commits, `stranded_brigades` sits at 15/16, and the Sarajevo/garrison structural vulnerability
+  persists (masked in 188w, fatal in 40w). Not a FAIL; not a clean PASS.
+- **C. MERGE READINESS — NO.** Required anchor tests are red; full-campaign health needs follow-up;
+  Baseline Pins remains advisory/stale.
+
+## Next P1 (exactly one)
+
+**Urban/front staffing and garrison integrity.** Full-run evidence confirms it: the 40w anchor breach
+is a zero-assigned frontline sector (Sarajevo) while 1st Corps has 34 available brigades; the
+`adjacent_uncontested_territory` anomaly is produced by exactly the zero-assigned-sector class in
+both the candidate (3) and baseline (5); and at 188w the same class is merely hidden by the
+one-brigade-covers-a-whole-sector masking. This is the only candidate that already breaches a
+protected anchor. B1 (no concentration step after assembly) is the next-most-evidenced (candidate
+`zero_eligible_axis` 6), then B2 (stale assembly floors), then B4 (validator/builder mismatch). B2
+and B4 are unchanged by B3 and not implicated in any 188w integrity metric.
+
+**Not done here:** no fix, no tuning, no B1/B2/B4, no baseline refresh, no tag movement, no main
+merge.

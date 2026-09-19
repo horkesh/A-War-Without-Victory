@@ -6500,3 +6500,72 @@ Vakuf/Kijevo/Kotor Varoš items.
 **Evidence.** `logs/routine-scope-20260918/MEASUREMENT.md` ("P-A MEASUREMENT"); this entry;
 `CALIBRATION_MASTER.md` addendum. `data/derived/latest_run_final_save.json` left dirty and
 uncommitted. No 188-week run; later territorial outcomes NOT MEASURED / DEFERRED.
+
+## 2026-09-19 — B3 full-campaign (188-week) validation, run `n427`
+
+**Packet.** ONE 188-week validation of the B3 candidate; no new engine fix, no B1/B2/B4, no
+calibration tuning, no reference edit, no baseline refresh, no main merge.
+
+**Source.** `HEAD d58b55c4f` == `origin/codex/january-1993-operations-20260914`. B3 production
+commits `9cdb14b99` (donation readiness is augmentation, not a veto), `3c5302f7a` (typed decline
+record), `8bc7703fb` (decline carried into `AxisAAR`). Pre-run tree matched the known state except
+that `commander/emit.ts` also carried the pre-existing env-gated LOC trace; it was stashed for the
+run (`9acc10f9f43bcc43652c8045229e7b45809cfd6c`) and restored after. Node `v22.23.2`; typecheck
+clean. Scenario sha256 `7db05606…`; consumed-input digest `f8ace654…`, byte-identical to baseline
+(three inputs had CRLF drift only and were LF-normalized first).
+
+**Run.** `npm run sim:scenario:run:188w` (ordinary production harness, `--unique --map`, default
+env). Result `runs/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n427`,
+`final_state_hash 8f4dda27cd8d1410`, exit 0. Baseline: best valid pre-B3 full run
+`...__w188_n398` (`e9024b61a`, same input digest). ⚠ n398 predates P-A, routine-scope and
+op-movement-authority, and no full run of the immediate B3 parent exists — the comparison is a
+full-campaign health contrast, NOT a clean B3-only A/B.
+
+**Comparison.** Checkpoints candidate/baseline: jan1993 701/698, apr1994 697/704, apr1995 691/699,
+oct1995 651/674 — **net −35**, all above the rebaselined 188w floors. Engine-health gate **PASS**
+on both (candidate matched_osids 651 ≥ 644; stranded 15 ≤ 16 vs baseline 12; consistency 0;
+zero_eligible_ops 0; ghost 0; kw 3.733). Anchors 31/31 at 188w (both); the two RED anchors are the
+40w tests. `insufficient_donation` **0 in the candidate** (baseline 14; baseline AAR terminal axes
+7); `participants_below_assembly_floor` 0/0; AAR `zero_eligible_axis` 6 vs 2. TGs 30 vs 39
+(HRHB unchanged: `hvo_tomislavgrad` 6). Combat slightly *lower* than baseline: orders 649 vs 686,
+battles 453 vs 506, flips 169 vs 186, AAR captures 138 vs 155; created ops 346 vs 394. Terminal
+control RS/RBiH/HRHB 350/279/83 vs 341/277/94. No runaway, spam, donor exhaustion or instability.
+
+**B3 questions.** A NO (no weak-donor veto survives). B yes by construction (`formTacticalGroup`
+unreached on decline; `selectDonors` pure) and by the run. C yes (30 TGs, all HRHB corps). D HRHB
+0.25 not measurably material — HRHB TG totals identical to baseline; still a bounded removal
+proposal. E no.
+
+**Sarajevo anchor (diagnosis only).** 40w `op:centar_sarajevo` fell t34 by walkover (defender slot
+`null`) from a **zero-assigned** `sector:arbih_1st_corps:0` (density 0.000, `assigned=[]`) while
+1st Corps held 34 active brigades elsewhere. Same signature as the old `sector:arbih_5th_corps:0`
+case (now staffed). 188w full-run scan: 68 frontline cells lack a physical garrison with an enemy
+adjacent and friendly brigades available; **only 3 are zero-assigned-sector voids** (all RS,
+`sector:vrs_1st_krajina:0/:4`) — exactly the repo's `adjacent_uncontested_territory` list (baseline
+5). At 188w the three remaining Sarajevo city cells are physically undefended but masked because
+`sector:arbih_1st_corps:0` has one assigned brigade (`arbih_105th_motorized` at `centar`), so
+`hasCanonicalDefense` treats the whole sector as covered. True voids are local; the masking is
+structural and is the mechanism behind the 40w breach.
+
+**Tests.** Event System CI **SUCCESS** (typecheck + 26-file event suite 500 passed/5 skipped +
+F2 strict gate 3 passed), recorded separately. Full `npm run test:vitest:balanced` **nonzero**:
+52 failing tests = the **two known anchor failures** (`integration_deployment_health` and
+`integration_run_summary`, both on `op:centar_sarajevo:sarajevo_dio_centar_sajarevo` expected RBiH
+got RS at 40w) **plus 50 host/tooling failures** — 49 `hook_guard_*` and 1
+`desktop_release_ci_guardrails`, all because this Windows host's `bash` is WSL and cannot see
+`/f/...` paths; not touched by B3, green on the Linux reference CI. Baseline Pins **FAILURE**,
+advisory/stale, signature unchanged (8/8 pinned `apr1992_188w` artifacts mismatch; not refreshed).
+
+**Verdicts.** (A) B3 engine contract **PASS**. (B) Full-campaign engine health **NEEDS FOLLOW-UP**
+(net −35 vs the best valid pre-B3 full run, confounded comparison; stranded 15/16; Sarajevo
+garrison vulnerability persisting). (C) Merge readiness **NO**.
+
+**Next P1 (one): urban/front staffing and garrison integrity** — the only candidate already
+breaching a protected anchor, confirmed by both the 40w trace and the 188w scan; then B1
+(concentration), B2 (stale floors), B4 (validator/builder mismatch). **Not implemented.**
+
+**Evidence.** Audit section "188-week B3 validation — run n427" in
+`docs/40_reports/20260919_OPERATION_LIFECYCLE_ENGINE_HEALTH_AUDIT.md`; run artifacts under
+gitignored `runs/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n427`. No code change; `runs/`
+untracked; `data/derived/latest_run_final_save.json` and the pre-existing LOC trace left
+uncommitted.
