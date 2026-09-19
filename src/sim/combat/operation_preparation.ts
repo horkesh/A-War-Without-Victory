@@ -51,6 +51,7 @@ import type {
     GameState,
     PreparationSubPhase,
     CommanderAssessment,
+    TgFormationDeclineDetail,
 } from '../../state/game_state.js';
 import type { NamedOfficer, NamedOfficerState } from '../../state/officer_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -88,7 +89,7 @@ import {
 } from './tactical_group_selection.js';
 import { formTacticalGroup } from './tactical_group_lifecycle.js';
 // REASON-CODE INSTRUMENTATION (topic `tg_formation`): env-gated, absent by default.
-import { whenReasonCodeTopic } from './reason_code_debug.js';
+import { isReasonCodeTopicEnabled } from './reason_code_debug.js';
 // ADR-0005 Phase 4: phantom-aware anchor resolution + dual-anchor de-confliction. Flag-gated.
 import { resolveTgAnchor, collectActiveAnchorIds } from './tactical_group_anchor.js';
 import { getReservedPrePlannedBrigadeIds } from './pre_planned_operations.js';
@@ -659,7 +660,7 @@ function getOpsCommander(
  * payload is a thunk for the same reason.
  */
 function recordTgFormationDecline(
-    target: { tg_formation_decline?: unknown },
+    target: { tg_formation_decline?: TgFormationDeclineDetail },
     anchorId: FormationId,
     anchorPersonnel: number,
     // `string`, not the narrower faction-id union — `FormationState.faction` is declared
@@ -668,24 +669,27 @@ function recordTgFormationDecline(
     faction: string | undefined,
     donors: ReadonlyArray<{ personnel_lent: number }>,
 ): void {
-    const detail = whenReasonCodeTopic('tg_formation', () => {
-        const fraction = tgDonationReadinessFraction(faction);
-        return {
-            declined: true as const,
-            reason: (donors.length === 0 ? 'no_eligible_donors' : 'donation_below_readiness') as
-                'no_eligible_donors' | 'donation_below_readiness',
-            anchor_brigade_id: anchorId,
-            anchor_personnel: anchorPersonnel,
-            faction: faction ?? null,
-            donor_count: donors.length,
-            donated_personnel: totalPledgedPersonnel(donors),
-            readiness_fraction: fraction,
-            required_donation: fraction * anchorPersonnel,
-            // The whole point of B3: declining the augmentation is not an operation failure.
-            operation_remains_executable: true as const,
-        };
-    });
-    if (Object.keys(detail).length > 0) target.tg_formation_decline = detail;
+    // Direct gate rather than the `whenReasonCodeTopic` spread helper: that helper requires a
+    // `Record<string, unknown>` payload, which an interface does not satisfy, so it would cost
+    // the structural check. Same precedent as `AxisRejectionDetail` in
+    // `sector_offensive_launch_helpers.ts`. When the topic is off nothing is computed and the
+    // key stays ABSENT — not present-and-null — which is the byte-identity guarantee.
+    if (!isReasonCodeTopicEnabled('tg_formation')) return;
+    const fraction = tgDonationReadinessFraction(faction);
+    const detail: TgFormationDeclineDetail = {
+        declined: true,
+        reason: donors.length === 0 ? 'no_eligible_donors' : 'donation_below_readiness',
+        anchor_brigade_id: anchorId,
+        anchor_personnel: anchorPersonnel,
+        faction: faction ?? null,
+        donor_count: donors.length,
+        donated_personnel: totalPledgedPersonnel(donors),
+        readiness_fraction: fraction,
+        required_donation: fraction * anchorPersonnel,
+        // The whole point of B3: declining the augmentation is not an operation failure.
+        operation_remains_executable: true,
+    };
+    target.tg_formation_decline = detail;
 }
 
 export function formTgsAtReadyTransition(
