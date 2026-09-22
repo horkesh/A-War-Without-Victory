@@ -14,19 +14,23 @@ controller, so the two readings cannot be confused. The overlay is on by default
 switched off. It appears only at weeks 39, 104, 156 and 188, because painted historical truth
 exists only there; at any other week a "mismatch" would just be the war not having happened yet.
 
-The published snapshot is the 188-week POST-A run from simulation source
-`ac3e5e1524558d2dc4e4fc40924306fc2873735a`, final-save SHA-256
-`8e80eca07cf0317fd8775ab818bb10adade8230076b6bde99d2b3a0a082fecee`.
-Published 2026-09-14 after the January 1993 operations repair; the mismatch overlay above was
-added on 2026-09-16 with no change to the underlying run. Orašac is captured at
-week 29; Donji Vakuf town, Korenići and Prusac at weeks 35, 36 and 39. The four Jajce
-captures remain: Baljvine 28, Jezero 32, Donji Korićani 34 and Lupnica 36. All eight are
-ordinary operation-owned combat captures.
-Its checkpoint scores are 700 / 702 / 697 / 667. January's repair contract passes with
-no new January mismatches; later calibration acceptance remains separate. This diagnostic
-publication does not refresh the baseline or approve a main-branch merge.
+The published snapshot is the clean 188-week Prusac candidate from simulation source
+`efa53f55c34e4e9fe8ec8d4fe99ec01502ba1ed1`, final-save SHA-256
+`575254183566bf2c7b4db3946217ddcce014317eb2232997e003964919cf10c3`.
+Published 2026-09-22 from retained run artifacts, without another simulation.
+Prusac falls at week 30 through Operation Donji Vakuf; the town and Korenići fall
+at weeks 34 and 35. The four Jajce captures remain by week 39. Orašac falls at
+week 53 and still misses the January deadline.
 
-[Open this dataset](https://horkesh.github.io/A-War-Without-Victory/?run=ac3e5e152).
+Checkpoint scores are **702 / 694 / 689 / 651** with **10 / 18 / 23 / 61** mismatches.
+Engine health and all 31 anchors pass. January acceptance remains open (7/8 named
+captures), and full-campaign acceptance remains NO-GO for the western cascade,
+Farz attribution and inherited Prozor issue. The full suite exited nonzero with a
+documentation length failure and a setup timeout; both categories passed targeted
+verification. Publishing this measured candidate does not adopt a baseline or
+approve a main-branch merge.
+
+[Open this dataset](https://horkesh.github.io/A-War-Without-Victory/?run=efa53f55c).
 
 The viewer is generated with `tools/calibration_timeline.mjs` in the project checkout:
 
