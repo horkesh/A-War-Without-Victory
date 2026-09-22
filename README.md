@@ -7,6 +7,10 @@ Faction colors always mean actual control. Historical mismatches are a separate 
 available only at the four reference checkpoints. Settlement selection works without tapping
 small map polygons.
 
+Use the + and - map buttons or mouse wheel to zoom; drag to pan. On a touch screen,
+pinch with two fingers. Reset fits the whole map. When the map has keyboard focus,
++ / - zoom and 0 resets. Changing weeks preserves the map view and selection.
+
 A mismatched cell is outlined in amber and carries a circle naming the faction that *should*
 hold it, in that faction's color with a two-letter label (RB, RS, HR). The circle is painted
 historical truth and never simulated control — the fill under it remains the actual
