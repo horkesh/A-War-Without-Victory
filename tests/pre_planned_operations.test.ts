@@ -987,19 +987,27 @@ describe('pre-planned operations', () => {
         assert.equal(command.active_operations[0]?.is_pre_planned, true);
     });
 
-    it('follows the Donji Vakuf town capture through Korenici before Prusac', () => {
+    it('assigns the Donji Vakuf local and sweep forces to separate axes', () => {
         const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Donji Vakuf');
         assert.ok(operation);
         const sweep = operation.axes.find((axis) => axis.axis_id === 'donji_vakuf_sweep');
+        const prusac = operation.axes.find((axis) => axis.axis_id === 'prusac_local');
         assert.ok(sweep);
+        assert.ok(prusac);
 
-        assert.deepEqual(
-            sweep.objectives.slice(-2),
-            ['op:donji_vakuf:korenici', 'op:donji_vakuf:prusac_2'],
-        );
-        assert.ok(sweep.brigades.includes('rs_22nd_krajina_infantry'));
-        assert.ok(sweep.brigades.includes('rs_5th_kozara_light_infantry'));
-        assert.ok(sweep.brigades.includes('rs_16th_krajina_motorized'));
+        assert.equal(sweep.objectives.at(-1), 'op:donji_vakuf:korenici');
+        assert.deepEqual(sweep.brigades, [
+            'rs_22nd_krajina_infantry',
+            'rs_5th_kozara_light_infantry',
+            'rs_16th_krajina_motorized',
+        ]);
+        assert.deepEqual(prusac, {
+            axis_id: 'prusac_local',
+            name: 'Prusac Local Axis',
+            brigades: ['rs_19th_krajina_light_infantry', 'rs_31st_light_infantry'],
+            objectives: ['op:donji_vakuf:prusac_2'],
+            staging_osid: 'op:donji_vakuf:pribraca_2',
+        });
         assert.equal(operation.execution_attack_power_mult, 1.65);
     });
 
@@ -1790,7 +1798,7 @@ describe('pre-planned operations', () => {
         assert.deepEqual(injectedEastAxis?.assigned_brigades, eastAxis.brigades);
     });
 
-    it('keeps the displaced 31st Brigade eligible for the Donji Vakuf sweep', () => {
+    it('keeps the displaced 31st Brigade eligible for the Prusac local axis', () => {
         const state = makeMinimalState();
         state.meta.turn = 27;
         const command = state.military.corps_command!.vrs_1st_krajina!;
@@ -1798,8 +1806,8 @@ describe('pre-planned operations', () => {
         command.queued_operations = ['Operation Donji Vakuf'];
 
         const donjiVakuf = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Donji Vakuf')!;
-        const sweep = donjiVakuf.axes.find((axis) => axis.axis_id === 'donji_vakuf_sweep')!;
-        const staging = sweep.staging_osid ?? donjiVakuf.staging_osid;
+        const prusac = donjiVakuf.axes.find((axis) => axis.axis_id === 'prusac_local')!;
+        const staging = prusac.staging_osid ?? donjiVakuf.staging_osid;
         const route = [
             'op:test:displaced_31st_start',
             'op:test:displaced_31st_route_1',
@@ -1821,14 +1829,20 @@ describe('pre-planned operations', () => {
         assert.equal(injected, true);
         const operation = command.active_operations.find((op) => op.name === 'Operation Donji Vakuf');
         assert.ok(operation);
-        const injectedSweep = operation!.axes?.find((axis) => axis.axis_id === 'donji_vakuf_sweep');
-        assert.ok(injectedSweep?.assigned_brigades.includes('rs_31st_light_infantry'));
+        const injectedPrusac = operation!.axes?.find((axis) => axis.axis_id === 'prusac_local');
+        assert.deepEqual(injectedPrusac?.assigned_brigades, [
+            'rs_19th_krajina_light_infantry',
+            'rs_31st_light_infantry',
+        ]);
+        assert.deepEqual(injectedPrusac?.objectives, ['op:donji_vakuf:prusac_2']);
     });
 
     it('pre-stages the Donji Vakuf follow-through force before its queued slot opens', () => {
         const state = makeMinimalState();
         state.meta.turn = 21;
         state.meta.player_faction = 'RBiH';
+        state.military.formations.rs_19th_krajina_light_infantry!.location_osid = 'op:donji_vakuf:jemanlici';
+        state.military.formations.rs_31st_light_infantry!.location_osid = 'op:donji_vakuf:babin_potok_2';
         state.military.formations.rs_16th_krajina_motorized!.location_osid = 'op:test:remote_16th';
 
         prestageDeferredPrePlannedElites(state);
@@ -1848,6 +1862,16 @@ describe('pre-planned operations', () => {
                 owner: 'authored_preplanned',
             },
         );
+        for (const brigadeId of ['rs_19th_krajina_light_infantry', 'rs_31st_light_infantry']) {
+            assert.deepEqual(
+                state.military.brigade_movement_orders?.[brigadeId],
+                {
+                    destination_sids: ['op:donji_vakuf:pribraca_2'],
+                    stance: 'column',
+                    owner: 'authored_preplanned',
+                },
+            );
+        }
 
         state.military.brigade_movement_state = {
             ...(state.military.brigade_movement_state ?? {}),

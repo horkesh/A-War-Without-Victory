@@ -192,36 +192,52 @@ describe('Donji Vakuf 1992 — initial control is not repainted to bypass the ac
     });
 });
 
-describe('Operation Donji Vakuf — the pre-experiment configuration is restored', () => {
+describe('Operation Donji Vakuf — ordinary combat configuration stays bounded', () => {
     const op = ALL_PRE_PLANNED.find((candidate) => candidate.name === 'Operation Donji Vakuf');
     const sweep = op?.axes?.find((axis) => axis.axis_id === 'donji_vakuf_sweep');
+    const prusac = op?.axes?.find((axis) => axis.axis_id === 'prusac_local');
 
-    it('the operation and both authored axes still exist', () => {
+    it('keeps Prusac inside the existing operation on a local parallel axis', () => {
         expect(op, 'Operation Donji Vakuf must exist').toBeTruthy();
         expect(op!.corps).toBe('vrs_1st_krajina');
         expect(op!.faction).toBe('RS');
-        expect(op!.axes.length).toBe(2);
+        expect(op!.axes.length).toBe(3);
         expect(sweep, 'the donji_vakuf_sweep axis must exist').toBeTruthy();
+        expect(prusac, 'the prusac_local axis must exist').toBeTruthy();
+        expect(prusac).toMatchObject({
+            brigades: ['rs_19th_krajina_light_infantry', 'rs_31st_light_infantry'],
+            objectives: [PRUSAC],
+            staging_osid: 'op:donji_vakuf:pribraca_2',
+        });
     });
 
-    it('the sweep axis carries its six pre-experiment objectives in their authored order', () => {
-        // Restored on withdrawal solely to recover the comparison configuration. The town's
-        // December capture date remains an open historical defect — see the block comment in
-        // src/sim/combat/pre_planned_operations.ts. This pin exists so that a later repair is a
-        // deliberate, reviewed change rather than silent drift.
+    it('preserves every objective and brigade exactly once while the main sweep ends at Korenici', () => {
         expect(sweep!.objectives).toEqual([
             'op:donji_vakuf:torlakovac_2',
             'op:donji_vakuf:babin_potok_2',
             'op:donji_vakuf:oborci_2',
             TOWN,
             KORENICI,
-            PRUSAC,
         ]);
+        expect(sweep!.brigades).toEqual([
+            'rs_22nd_krajina_infantry',
+            'rs_5th_kozara_light_infantry',
+            'rs_16th_krajina_motorized',
+        ]);
+
+        const objectiveOccurrences = op!.axes.flatMap((axis) => axis.objectives);
+        const brigadeOccurrences = op!.axes.flatMap((axis) => axis.brigades);
+        expect(objectiveOccurrences).toHaveLength(7);
+        expect(new Set(objectiveOccurrences).size).toBe(7);
+        expect(objectiveOccurrences).toContain(PRUSAC);
+        expect(brigadeOccurrences).toHaveLength(7);
+        expect(new Set(brigadeOccurrences).size).toBe(7);
     });
 
-    it('combat inputs and staging are untouched by the withdrawal', () => {
+    it('preserves operation-level combat inputs and gives each combat axis its authored staging', () => {
         expect(op!.staging_osid).toBe('op:sipovo:pribeljci_2');
         expect(sweep!.staging_osid).toBe('op:sipovo:pribeljci_2');
+        expect(prusac!.staging_osid).toBe('op:donji_vakuf:pribraca_2');
         expect(op!.execution_attack_power_mult).toBe(1.65);
         expect(op!.planning_duration).toBe(7);
         expect(op!.prestage_from).toBe(21);

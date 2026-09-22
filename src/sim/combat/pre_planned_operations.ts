@@ -1049,11 +1049,11 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         // torlakovac_2 — first objective in the sweep. grdovo (Jajce) would also be
         // adjacent but starts HRHB; pribeljci_2 is always RS and safe.
         //
-        // Objectives: the six-settlement sweep follows the town breakthrough directly
-        // into Korenići before turning to Prusac. This preserves the heavy spearhead's
-        // ordinary town–Korenići combat edge instead of leaving the terminal defender
-        // four turns to recover while the spearhead marches through Prusac. Torlakovac
-        // (3 June 1992) and Korenići (21 May 1992) carry the same date defect as the town
+        // Objectives: the main sweep follows the town breakthrough directly into Korenići,
+        // preserving the heavy spearhead's ordinary town–Korenići combat edge. Prusac is
+        // not adjacent to that chain, so the local 19th and 31st approach it on a parallel
+        // axis from RS-held Pribrača instead of making a lateral transfer after Korenići.
+        // Torlakovac (3 June 1992) and Korenići (21 May 1992) carry the same date defect as the town
         // (Stanišić TJ §242); they too are listed here only until a sound replacement exists.
         // Removed from triggered Op Jajce (vrs_2nd_krajina) — 1KK handles DV.
         corps: 'vrs_1st_krajina',
@@ -1069,27 +1069,32 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 axis_id: 'donji_vakuf_sweep',
                 name: 'Donji Vakuf Sweep',
                 brigades: [
-                    'rs_19th_krajina_light_infantry' as FormationId,
-                    'rs_31st_light_infantry' as FormationId,
-                    // Both are already deployed in the Donji Vakuf sector when the
-                    // queued operation injects; reserving them here prevents unrelated
-                    // same-corps probes from consuming the local follow-through force.
                     'rs_22nd_krajina_infantry' as FormationId,
                     'rs_5th_kozara_light_infantry' as FormationId,
                     'rs_16th_krajina_motorized' as FormationId,
                 ],
                 // pribeljci_2 (RS) is adjacent to torlakovac_2 — valid staging → first obj chain.
-                // torlakovac_2 → babin_potok_2 → oborci_2 → donji_vakuf_2 →
-                // korenici; Jemanlići then provides the shared approach to Prusac.
+                // torlakovac_2 → babin_potok_2 → oborci_2 → donji_vakuf_2 → korenici.
                 objectives: [
                     'op:donji_vakuf:torlakovac_2',
                     'op:donji_vakuf:babin_potok_2',
                     'op:donji_vakuf:oborci_2',
                     'op:donji_vakuf:donji_vakuf_2',
                     'op:donji_vakuf:korenici',
-                    'op:donji_vakuf:prusac_2',
                 ],
                 staging_osid: 'op:sipovo:pribeljci_2',
+            },
+            {
+                // Pribrača is RS-held and directly adjacent to Prusac. Keeping the local
+                // brigades on this axis avoids sending them to the main sweep and back again.
+                axis_id: 'prusac_local',
+                name: 'Prusac Local Axis',
+                brigades: [
+                    'rs_19th_krajina_light_infantry' as FormationId,
+                    'rs_31st_light_infantry' as FormationId,
+                ],
+                objectives: ['op:donji_vakuf:prusac_2'],
+                staging_osid: 'op:donji_vakuf:pribraca_2',
             },
             {
                 // Gornje Krčevine is a separate Vlašić-side pocket, not graph-adjacent
