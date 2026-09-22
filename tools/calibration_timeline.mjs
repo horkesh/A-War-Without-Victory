@@ -429,7 +429,13 @@ body{color:var(--ink);font:14px/1.5 Georgia,'Times New Roman',serif;background:l
 .wrap{display:grid;grid-template-columns:minmax(0,1fr) 340px;grid-template-rows:minmax(0,1fr);gap:14px;height:100%;padding:12px}
 .mapcol{display:flex;flex-direction:column;min-width:0;gap:8px}
 .mapbox{position:relative;flex:1;min-height:0;background:#0a0e14;overflow:hidden;box-shadow:0 14px 40px rgba(42,34,22,.22)}
-svg{width:100%;height:100%;display:block}
+svg{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+svg.dragging{cursor:grabbing}svg:focus-visible{outline:3px solid var(--amber);outline-offset:-3px}
+.mapcontrols{position:absolute;z-index:4;top:8px;right:8px;display:flex;gap:4px;align-items:center;padding:4px;
+background:rgba(8,12,17,.84);border:1px solid rgba(255,255,255,.2);border-radius:5px;color:#fff;font-family:ui-monospace,monospace}
+.mapcontrols button{min-width:44px;min-height:44px;padding:4px 9px;border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font:700 18px/1 ui-monospace,monospace}
+.mapcontrols button:hover{background:rgba(255,255,255,.24)}.mapcontrols button:disabled{opacity:.4}
+.mapcontrols .reset{font-size:12px}.zoomlevel{min-width:48px;text-align:center;font-size:11px}
 .cell{stroke:#0a0e14;stroke-width:.6;cursor:pointer}
 .cell.mismatch{stroke:var(--amber);stroke-width:3;vector-effect:non-scaling-stroke}
 .hide-mismatch .cell.mismatch{stroke:#0a0e14;stroke-width:.6;vector-effect:none}
@@ -496,7 +502,13 @@ body{background:linear-gradient(145deg,#17140f,#211d17 68%,#15120e)}button,input
     <strong class="mono" id="weeklabel"></strong>
   </div>
   <div class="mapbox">
-    <svg id="map" viewBox="0 0 ${WIDTH} ${HEIGHT}" preserveAspectRatio="xMidYMid meet"></svg>
+    <svg id="map" viewBox="0 0 ${WIDTH} ${HEIGHT}" preserveAspectRatio="xMidYMid meet" tabindex="0" role="img" aria-label="Control map. Use plus and minus to zoom, or drag to pan."></svg>
+    <div class="mapcontrols" aria-label="Map zoom controls">
+      <button id="zoomout" type="button" aria-label="Zoom out" title="Zoom out">−</button>
+      <span id="zoomlevel" class="zoomlevel" aria-live="polite">100%</span>
+      <button id="zoomin" type="button" aria-label="Zoom in" title="Zoom in">+</button>
+      <button id="zoomreset" class="reset" type="button" aria-label="Reset map view" title="Reset map view">Reset</button>
+    </div>
     <div class="tip" id="tip"></div>
   </div>
   <div class="bar legend">
@@ -591,6 +603,111 @@ function sizeMarkers(){
   for(const t of markerLayer.querySelectorAll('text'))t.setAttribute('font-size',f);
 }
 addEventListener('resize',sizeMarkers);
+
+// Bounded viewBox camera. It changes only the viewport: paths, replay state and
+// reference data remain untouched. Pointer math accounts for the letterboxing
+// introduced by preserveAspectRatio="xMidYMid meet".
+const BASE_VIEW={x:0,y:0,w:${WIDTH},h:${HEIGHT}},MIN_ZOOM=1,MAX_ZOOM=12;
+let camera={...BASE_VIEW,zoom:1};
+const zoomIn=document.getElementById('zoomin'),zoomOut=document.getElementById('zoomout');
+const zoomReset=document.getElementById('zoomreset'),zoomLevel=document.getElementById('zoomlevel');
+const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
+function constrainedCamera(next){
+  const zoom=clamp(next.zoom,MIN_ZOOM,MAX_ZOOM),w=BASE_VIEW.w/zoom,h=BASE_VIEW.h/zoom;
+  return {zoom,w,h,x:clamp(next.x,BASE_VIEW.x,BASE_VIEW.x+BASE_VIEW.w-w),y:clamp(next.y,BASE_VIEW.y,BASE_VIEW.y+BASE_VIEW.h-h)};
+}
+function applyCamera(next){
+  camera=constrainedCamera(next);
+  svg.setAttribute('viewBox',camera.x+' '+camera.y+' '+camera.w+' '+camera.h);
+  zoomLevel.textContent=Math.round(camera.zoom*100)+'%';
+  zoomIn.disabled=camera.zoom>=MAX_ZOOM-.001;
+  zoomOut.disabled=camera.zoom<=MIN_ZOOM+.001;
+  zoomReset.disabled=camera.zoom<=MIN_ZOOM+.001;
+  sizeMarkers();
+}
+function viewportMetrics(cam=camera){
+  const box=svg.getBoundingClientRect(),scale=Math.min(box.width/cam.w,box.height/cam.h)||1;
+  return {box,scale,offsetX:(box.width-cam.w*scale)/2,offsetY:(box.height-cam.h*scale)/2};
+}
+function clientToMap(clientX,clientY,cam=camera){
+  const m=viewportMetrics(cam);
+  return {x:cam.x+(clientX-m.box.left-m.offsetX)/m.scale,y:cam.y+(clientY-m.box.top-m.offsetY)/m.scale};
+}
+function zoomAt(nextZoom,clientX,clientY,anchor=clientToMap(clientX,clientY)){
+  const zoom=clamp(nextZoom,MIN_ZOOM,MAX_ZOOM),w=BASE_VIEW.w/zoom,h=BASE_VIEW.h/zoom;
+  const box=svg.getBoundingClientRect(),scale=Math.min(box.width/w,box.height/h)||1;
+  const offsetX=(box.width-w*scale)/2,offsetY=(box.height-h*scale)/2;
+  applyCamera({zoom,w,h,x:anchor.x-(clientX-box.left-offsetX)/scale,y:anchor.y-(clientY-box.top-offsetY)/scale});
+}
+function zoomFromCenter(factor){
+  const box=svg.getBoundingClientRect();
+  zoomAt(camera.zoom*factor,box.left+box.width/2,box.top+box.height/2);
+}
+zoomIn.addEventListener('click',()=>zoomFromCenter(1.5));
+zoomOut.addEventListener('click',()=>zoomFromCenter(1/1.5));
+zoomReset.addEventListener('click',()=>applyCamera({...BASE_VIEW,zoom:1}));
+svg.addEventListener('wheel',e=>{
+  e.preventDefault();tip.dataset.open='false';
+  const delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?svg.clientHeight:1);
+  zoomAt(camera.zoom*Math.exp(-delta*.002),e.clientX,e.clientY);
+},{passive:false});
+svg.addEventListener('keydown',e=>{
+  if(e.key==='+'||e.key==='='){e.preventDefault();zoomFromCenter(1.5)}
+  else if(e.key==='-'){e.preventDefault();zoomFromCenter(1/1.5)}
+  else if(e.key==='0'){e.preventDefault();applyCamera({...BASE_VIEW,zoom:1})}
+});
+applyCamera(camera);
+
+const activePointers=new Map();
+let gesture=null,gestureHadMovement=false,suppressClickUntil=0;
+const midpoint=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
+const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+function beginSingle(pointer){gesture={kind:'pan',start:pointer,startCamera:{...camera},moved:false,tapOsid:gestureHadMovement?null:pointer.osid}}
+function beginPinch(){
+  const [a,b]=[...activePointers.values()],mid=midpoint(a,b);
+  gesture={kind:'pinch',startDistance:Math.max(1,distance(a,b)),startCamera:{...camera},anchor:clientToMap(mid.x,mid.y),moved:true};
+  gestureHadMovement=true;
+  tip.dataset.open='false';
+}
+svg.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  if(activePointers.size===0)gestureHadMovement=false;
+  activePointers.set(e.pointerId,{x:e.clientX,y:e.clientY,osid:e.target.closest('.cell')?.dataset.s||null});
+  svg.setPointerCapture(e.pointerId);svg.classList.add('dragging');
+  if(activePointers.size===1)beginSingle(activePointers.get(e.pointerId));
+  else if(activePointers.size===2)beginPinch();
+});
+svg.addEventListener('pointermove',e=>{
+  if(!activePointers.has(e.pointerId))return;
+  activePointers.set(e.pointerId,{...activePointers.get(e.pointerId),x:e.clientX,y:e.clientY});
+  if(activePointers.size>=2){
+    if(gesture?.kind!=='pinch')beginPinch();
+    const [a,b]=[...activePointers.values()],mid=midpoint(a,b);
+    zoomAt(gesture.startCamera.zoom*distance(a,b)/gesture.startDistance,mid.x,mid.y,gesture.anchor);
+    return;
+  }
+  if(gesture?.kind!=='pan')beginSingle(activePointers.get(e.pointerId));
+  const pointer=activePointers.get(e.pointerId),dx=pointer.x-gesture.start.x,dy=pointer.y-gesture.start.y;
+  if(Math.hypot(dx,dy)>4){gesture.moved=true;gestureHadMovement=true;tip.dataset.open='false'}
+  if(gesture.moved){
+    const scale=viewportMetrics(gesture.startCamera).scale;
+    applyCamera({...gesture.startCamera,x:gesture.startCamera.x-dx/scale,y:gesture.startCamera.y-dy/scale});
+  }
+});
+function endPointer(e){
+  if(!activePointers.has(e.pointerId))return;
+  const tapOsid=e.type==='pointerup'&&!gestureHadMovement&&gesture?.tapOsid;
+  activePointers.delete(e.pointerId);
+  if(activePointers.size===1)beginSingle([...activePointers.values()][0]);
+  else if(activePointers.size===0){
+    if(gestureHadMovement)suppressClickUntil=performance.now()+350;
+    else if(tapOsid)highlight(tapOsid);
+    gesture=null;gestureHadMovement=false;svg.classList.remove('dragging');
+  }
+  else beginPinch();
+}
+svg.addEventListener('pointerup',endPointer);
+svg.addEventListener('pointercancel',endPointer);
 const META=new Map(CELLS.map(c=>[c.o,c]));
 
 // Weeks that actually contain a flip — the map is static between them, so the
@@ -701,6 +818,7 @@ for(const id of ['mmlist','fliplist'])document.getElementById(id).addEventListen
   const el=e.target.closest('[data-o]');if(!el)return;highlight(el.dataset.o);
 });
 svg.addEventListener('mousemove',e=>{
+  if(activePointers.size){tip.dataset.open='false';return}
   const p=e.target.closest('.cell');
   if(!p){tip.dataset.open='false';return}
   const c=META.get(p.dataset.o),st=stateAt(week),cp=CPBYWEEK.get(week);
@@ -719,7 +837,10 @@ svg.addEventListener('mousemove',e=>{
   tip.style.left=x+'px';tip.style.top=y+'px';
 });
 svg.addEventListener('mouseleave',()=>{tip.dataset.open='false'});
-svg.addEventListener('click',e=>{const p=e.target.closest('.cell');if(p)highlight(p.dataset.s)});
+svg.addEventListener('click',e=>{
+  if(activePointers.size||performance.now()<suppressClickUntil){e.preventDefault();return}
+  const p=e.target.closest('.cell');if(p)highlight(p.dataset.s);
+});
 
 document.getElementById('showmismatch').addEventListener('change',e=>{
   document.body.classList.toggle('hide-mismatch',!e.target.checked);
