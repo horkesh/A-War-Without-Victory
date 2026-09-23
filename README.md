@@ -18,18 +18,18 @@ controller, so the two readings cannot be confused. The overlay is on by default
 switched off. It appears only at weeks 39, 104, 156 and 188, because painted historical truth
 exists only there; at any other week a "mismatch" would just be the war not having happened yet.
 
-The published snapshot is the local 188-week Orašac operation candidate generated
+The published snapshot is the local 188-week Jemanlići operation candidate generated
 2026-09-23 from retained run artifacts. Its source checkout is marked dirty, so
 the viewer is **not an adopted calibration baseline**. The saved run SHA-256 is
-`0c86638f9e2042d5c00452d15f69877e72cdf041c29cdbd1e17c7768f424d303`.
-Orašac falls at week 1 through the Bosanska Krupa Takeover operation.
+`60d3f5732705ef90a6965e84363013bb2e9178c6341ca82154e1c33948a762a8`.
+Jemanlići changes to RS at week 31 through Operation Donji Vakuf.
 
-Checkpoint scores are **703 / 692 / 688 / 654** with **9 / 20 / 24 / 58**
+Checkpoint scores are **704 / 697 / 692 / 657** with **8 / 15 / 20 / 55**
 mismatches. All eight named January captures occur by week 39. Full-campaign
 acceptance remains NO-GO on the Farz attribution and western cascade gates.
 Publishing this map does not adopt a baseline or approve a main-branch merge.
 
-[Open this dataset](https://horkesh.github.io/A-War-Without-Victory/?run=orasac-axis-20260923).
+[Open this dataset](https://horkesh.github.io/A-War-Without-Victory/?run=jemanlici-axis-20260923).
 
 The viewer is generated with `tools/calibration_timeline.mjs` in the project checkout:
 
