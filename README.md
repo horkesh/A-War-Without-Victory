@@ -18,23 +18,18 @@ controller, so the two readings cannot be confused. The overlay is on by default
 switched off. It appears only at weeks 39, 104, 156 and 188, because painted historical truth
 exists only there; at any other week a "mismatch" would just be the war not having happened yet.
 
-The published snapshot is the clean 188-week Prusac candidate from simulation source
-`efa53f55c34e4e9fe8ec8d4fe99ec01502ba1ed1`, final-save SHA-256
-`575254183566bf2c7b4db3946217ddcce014317eb2232997e003964919cf10c3`.
-Published 2026-09-22 from retained run artifacts, without another simulation.
-Prusac falls at week 30 through Operation Donji Vakuf; the town and Korenići fall
-at weeks 34 and 35. The four Jajce captures remain by week 39. Orašac falls at
-week 53 and still misses the January deadline.
+The published snapshot is the local 188-week Orašac operation candidate generated
+2026-09-23 from retained run artifacts. Its source checkout is marked dirty, so
+the viewer is **not an adopted calibration baseline**. The saved run SHA-256 is
+`0c86638f9e2042d5c00452d15f69877e72cdf041c29cdbd1e17c7768f424d303`.
+Orašac falls at week 1 through the Bosanska Krupa Takeover operation.
 
-Checkpoint scores are **702 / 694 / 689 / 651** with **10 / 18 / 23 / 61** mismatches.
-Engine health and all 31 anchors pass. January acceptance remains open (7/8 named
-captures), and full-campaign acceptance remains NO-GO for the western cascade,
-Farz attribution and inherited Prozor issue. The full suite exited nonzero with a
-documentation length failure and a setup timeout; both categories passed targeted
-verification. Publishing this measured candidate does not adopt a baseline or
-approve a main-branch merge.
+Checkpoint scores are **703 / 692 / 688 / 654** with **9 / 20 / 24 / 58**
+mismatches. All eight named January captures occur by week 39. Full-campaign
+acceptance remains NO-GO on the Farz attribution and western cascade gates.
+Publishing this map does not adopt a baseline or approve a main-branch merge.
 
-[Open this dataset](https://horkesh.github.io/A-War-Without-Victory/?run=efa53f55c).
+[Open this dataset](https://horkesh.github.io/A-War-Without-Victory/?run=orasac-axis-20260923).
 
 The viewer is generated with `tools/calibration_timeline.mjs` in the project checkout:
 
