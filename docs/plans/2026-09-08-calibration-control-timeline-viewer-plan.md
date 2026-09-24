@@ -2,10 +2,113 @@
 
 **Date:** 2026-09-08
 **Lane:** Development instrumentation (`tools/`) — NOT product surface, NOT a roadmap workstream
-**Status:** IMPLEMENTED 2026-09-08; integrated before `68e8917e8`; latest saved run published and verified on GitHub Pages 2026-09-14; publication record completed and expected-owner mismatch markers published 2026-09-16.
+**Status:** IMPLEMENTED 2026-09-08; expected-owner markers published 2026-09-16; Vranjevići RS reference update published and verified on GitHub Pages 2026-09-24.
 **Branch/worktree:** `calibration-timeline-viewer` at `F:/AWWV-worktrees/calibration-timeline-viewer`, isolated from the concurrent `codex/*` branches and from `r7-arbih-honorific-names`
-**Live viewer:** <https://horkesh.github.io/A-War-Without-Victory/>
-**Publication:** `gh-pages` commit `c1a292500`, superseding `3096f4e0b26bde8b98ee5262b602c57f9fd17868`; latest dataset from simulation source `ac3e5e1524558d2dc4e4fc40924306fc2873735a`.
+**Live viewer:** <https://horkesh.github.io/A-War-Without-Victory/?run=vranjevici-rs-20260924>
+**Publication:** `gh-pages` commit `b66e6da43`, superseding `a29e6c855`; latest dataset is the dirty local Sebiočina candidate against the corrected Vranjevići references, not an adopted baseline (2026-09-24).
+
+## 2026-09-24 — Vranjevići RS reference update published
+
+The owner directed `op:mostar:vranjevici_2` to RS in all four painted
+references. The unchanged Sebiočina run replays at **707/697/690/662**, exactly
+one higher per checkpoint. The viewer's 232 control events, initial owners,
+geometry, markers and simulation run are unchanged; only the Vranjevići
+painted entry differs in each checkpoint payload. This is an owner reference
+decision; constituent-level historical uncertainty remains.
+
+The generated map passes syntax, payload-delta and marker checks (712/712
+anchors; all 57 distinct mismatch anchors inside their cells). Local desktop
+and touch checks show actual and painted RS at all four checkpoints, with
+Sebiočina still RBiH in January. Only the viewer HTML and README were
+published to `gh-pages`; source/main and baseline acceptance are unchanged.
+Full-campaign acceptance remains NO-GO.
+
+Pages reports `b66e6da43` built. The live HTTP 200 HTML matches the generated
+and committed artifact byte-for-byte (720,280 bytes, SHA-256
+`046372ce689b94d002488df57d7c1a9d9db15615162c3115a690a1791cedd10a`).
+Live desktop and touch checks pass all four checkpoint states, scores,
+selection and zoom/reset without errors or horizontal overflow.
+
+[Publication evidence](../../logs/vranjevici-reference-20260924/receipt.txt).
+
+## 2026-09-24 — Sebiočina candidate published
+
+At the owner's request, the unchanged viewer now serves the retained corrected
+188-week Sebiočina run. Scores are **706/696/689/661** with **6/16/23/51**
+mismatches, 232 control events, 744 drawn and 712 scored OSIDs. Sebiočina is
+RBiH from t15 through January and RS again from t45; Brčko and Donji Rahić
+remain RS throughout. The current January reference paints Doljani HRHB.
+
+The embedded initial owners, events and painted references match the saved run
+and files on disk. Embedded script syntax, 712/712 markers and all 58 distinct
+mismatch anchors pass. Local and live desktop/touch checks pass selection,
+zoom/reset and checkpoint behavior without browser errors or overflow. Pages
+reports `a29e6c855` built; the live HTTP 200 HTML is byte-identical to the
+generated and committed file (720,524 bytes, SHA-256
+`07d9e574006e0e6e5639a602358675ffa0537ff942fab3e63f1f2cab1724b07d`).
+Only `index.html` and `README.md` changed on `gh-pages`. Publication changes
+no simulation source, main branch, painted reference or adopted baseline.
+Full-campaign acceptance remains NO-GO on the inherited Farz and Prozor gates;
+the full test suite has not been rerun after the snapshot correction.
+
+[Publication evidence](../../logs/sebiocina-trial-20260923/receipt.txt).
+
+## 2026-09-23 — Jemanlići candidate published
+
+At the owner's request, the unchanged viewer now serves the retained 188-week
+Jemanlići candidate. Its scores are **704/697/692/657**, with **8/15/20/55**
+mismatches, 224 control events, 744 drawn and 712 scored OSIDs. Jemanlići
+changes to RS at t31 through Operation Donji Vakuf. All embedded initial owners
+and control events match the saved run; geometry, painted references, markers
+and colors match the preceding Orašac viewer. The saved run is dirty local
+evidence, and full-campaign acceptance remains NO-GO. Publication changes no
+simulation, source branch, reference, or baseline.
+Pages reports `649b2b18e` built; the live HTTP 200 response is byte-identical
+to the generated and committed HTML (720,075 bytes, SHA-256
+`60f98d545ce43bdd62f6913fb94e05cd5af22c9c291609c372e7a8b1839a02c8`).
+All 712 scored cells have markers; all 63 distinct mismatch anchors lie inside
+their cells. Local and live desktop/touch/dark-touch browser checks find the
+January score 704/712, Jemanlići RS at t31, working zoom/reset and no console
+errors, failed requests or horizontal overflow. Only HTML and README changed
+on `gh-pages`.
+
+[Publication evidence](../../logs/jemanlici-op-probe-20260923/receipt.txt).
+
+## 2026-09-22 — Map zoom and pan
+
+Owner requested a way to zoom the published map. Scope is the standalone viewer:
+accessible +/−/Reset controls, pointer-centered wheel zoom, drag pan and touch
+navigation, preserving settlement selection, timeline controls and marker readability.
+The same retained Prusac campaign remains the publication input.
+Validation: syntax and focused interaction checks; equality of embedded campaign/map
+payloads; local browser zoom/reset/pan/selection and mobile-size controls; independent
+review; published-page byte/render verification. Expected cost: minutes, no simulation
+or full suite. Correct any reproduced UI regression before publication.
+
+**Completed:** local source commit `ac73f166f`; published `c31a9a2ed`. Buttons,
+wheel, drag, reset, selection, timeline preservation and focused-map keyboard
+controls pass browser checks; controls fit a 320px viewport. Pointer-capture click
+regression corrected and independently re-reviewed GO. Touch pinch is implemented
+and source-reviewed; a physical two-finger gesture was not tested. Syntax, marker,
+payload-equality and commit-hook typecheck pass. Nine embedded payloads and scores
+702/694/689/651 are unchanged. Live HTTP200/720220 bytes match the generated SHA256
+`d7867c1ea15b0e2615160593082b630e0aaf321fb0c3701dc728a24607a95198`;
+live zoom/reset work with zero browser errors. No new simulation or acceptance change.
+[Portable receipt](../../logs/viewer-zoom-20260922/receipt.txt).
+
+## 2026-09-22 — Prusac candidate published
+
+Owner requested publication of the latest measured map. The unchanged renderer now
+serves the retained 188-week candidate: **702/694/689/651**, 10/18/23/61 mismatches,
+216 flips, 744 drawn/712 scored cells. Prusac is RS from week30 through Donji Vakuf.
+Pages reports built for `224bfd0f6`; live HTTP200/713283 bytes match generated HTML
+SHA256 `3e80eacf3d98e05e7088ec404f43b89e5c98a3dfb2028b16c0f9048cbd2fb02a`.
+Payloads exactly match the saved run; geometry, references and renderer are unchanged.
+All712 marker anchors exist; all71 distinct mismatch anchors are interior. Local/live
+browser checks confirm January702/712,10mismatches and Prusac lastchange30, with no
+live console errors/warnings. Only HTML/README changed on gh-pages. No new simulation,
+source/main push, pin refresh or baseline adoption. January/full-campaign acceptance
+remain open. Earlier publication entries below describe the prior datasets.
 
 ## Why
 

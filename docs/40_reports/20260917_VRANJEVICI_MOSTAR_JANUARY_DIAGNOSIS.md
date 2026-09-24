@@ -1,11 +1,37 @@
 # Vranjevići / Kružanj (Mostar) — historical and geographic verification, and the smallest justified correction
 
 **Date:** 2026-09-17
-**Target:** `op:mostar:vranjevici_2` (January 1993 reference **RBiH**; candidate reads **RS** at t39) and the
+**Target as analyzed on 2026-09-17:** `op:mostar:vranjevici_2` (January 1993 reference then **RBiH**; candidate reads **RS** at t39) and the
 comparison cell `op:mostar:kruzanj_2` (reference RBiH; candidate reads RBiH).
-**Status:** **read-only analysis.** No production edit, reference edit, OOB/geometry/combat change, or
+**Status of the 2026-09-17 work:** **read-only analysis.** No production edit, reference edit, OOB/geometry/combat change, or
 campaign run was made. The earlier proposal to delete the objectives is **not** implemented and is
 **withdrawn** (§9).
+
+**2026-09-24 owner decision, superseding the reference recommendation below.**
+The owner directed `op:mostar:vranjevici_2` to be painted **RS** at all four
+calibration checkpoints. The four reference files have been changed, with the
+earlier owner-authored RBiH entries retained in their changelogs. This does
+not add settlement-level evidence or remove the mixed-aggregate concern in §5.
+The 2026-09-17 analysis below remains a record of what its evidence supported
+at the time; its advice against a reference flip is no longer the operative
+calibration decision. [Current calibration status](CALIBRATION_MASTER.md).
+
+**2026-09-23 supplementary research lead (not a control determination).** The BB search below
+still establishes that BB does not name the constituent settlements. A later
+[University of Sarajevo article](https://ejournals.ff.unsa.ba/index.php/radovihhua/article/download/379/304/1728)
+(Mesud Šadinlija, original research, pp. 417–421) cites wartime Herzegovina Corps
+and Nevesinje Brigade reports and places Kamena, Žulja, Rabina, and *Gornji*
+Vranjevići in the depth of the VRS defensive zone after the June 1992 withdrawal.
+It also records a 1 July brigade report from the Rabina area. The separate
+[Republika Srpska memorial account](https://memorijalni-centar.rs/en/istorijski-kontekst/prva-mitrovdanska-ofanziva/)
+describes VRS positions on a Kamena–Rabina attack line in November 1992 and
+says the front remained largely unchanged. These are leads toward constituent
+control, with source standpoint and name/geography to verify; neither supplies
+a complete, independently confirmed January 1993 controller for this five-part
+OSID. *Gornji Vranjevići* must not be silently equated to the mapped
+*Vranjevići* constituent. At the time, these leads did not change the
+recommendation against an immediate operation or reference flip. The later
+owner reference decision above supersedes that recommendation.
 
 **Evidence base.** The preserved n401 candidate (`preserve/january-candidate-n401`, commit `41a148bf9`)
 and its independent repeats n402/n403, byte-identical (final-save SHA-256

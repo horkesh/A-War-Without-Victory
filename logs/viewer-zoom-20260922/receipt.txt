@@ -1,0 +1,21 @@
+2026-09-22 - Published calibration map zoom and pan
+Viewer source commit: ac73f166f (local only); ordinary commit hook npx tsc --noEmit exit 0.
+GitHub Pages commit: c31a9a2ed94d06d50b9172ee3e8bc63376bf1079; build status built.
+URL: https://horkesh.github.io/A-War-Without-Victory/?run=efa53f55c&viewer=zoom
+Scope: accessible + / - / Reset, mouse-wheel zoom, drag pan, touch pinch, focused-map keyboard + / - / 0. Zoom range 1x to 12x.
+Source and embedded-script syntax, generator, payload equality and diff checks: exit 0.
+Generator input: .worktrees/prusac-validation-20260922/runs/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0
+Simulation source efa53f55c; no new simulation. All nine campaign, geometry and reference payloads equal the preceding publication.
+Scores unchanged: 702 / 694 / 689 / 651.
+Marker verifier exit 0: 712/712 markers; all 71 distinct mismatch anchors interior; zero missing.
+Local browser: + control 100% -> 150%; wheel 150% -> 267%; drag changed viewBox without selection change; January week switch preserved viewBox/selection; Reset and keyboard 0 restore 0 0 1600 1500; keyboard + zooms.
+Selection regression found and corrected: SVG pointer capture retargeted cell clicks. Final real click selects op:bugojno:kopcic_2; subsequent drag retains it.
+320x740 viewport: controls all fit, target heights 44px, no horizontal overflow, + and Reset work. Viewport override reset afterward. Two-finger pinch source-reviewed; not physically gesture-tested.
+Independent reviewer: initial HOLD for click regression; targeted final recheck GO, no material residual.
+Live browser: + zoom and Reset confirmed, zero console errors/warnings.
+HTTP verification exit 0: status 200, 720220 bytes, SHA256 d7867c1ea15b0e2615160593082b630e0aaf321fb0c3701dc728a24607a95198, identical to generated artifact.
+Preserved n427 save SHA256 8f4dda27cd8d14103093a5c9be79d9b4af20f51aa8d44e5ef574ca1cbe93d3f2.
+Preserved emit.ts trace SHA256 d542e7700b64c029b6dd82c745f724b14ce1a364fa0abee1b69218b0e761a4b9.
+Raw checks: logs/viewer-zoom-20260922/{generate.log,embedded-script-check.log,payload-comparison.log,source-commit.log,live-publication.json}.
+No full suite, campaign, simulation input, historical reference, baseline, pin, source/main push or acceptance change.
+Final focused documentation checks: plan index --check, open-gates validation, strict receipt validation and scoped git diff --check all exit 0.

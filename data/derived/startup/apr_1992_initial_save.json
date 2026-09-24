@@ -1475,6 +1475,27 @@
                 ],
                 "staging_osid": "op:bosanska_krupa:ivanjska_2",
                 "status": "executing"
+              },
+              {
+                "assigned_brigades": [
+                  "rs_1st_drvar_light_infantry"
+                ],
+                "attack_attempt_count": 0,
+                "axis_id": "orasac",
+                "consecutive_failures_on_current": 0,
+                "current_objective_index": 0,
+                "failure_count": 0,
+                "idle_execution_turn_streak": 0,
+                "main_brigade": "rs_1st_drvar_light_infantry",
+                "momentum": 0,
+                "movement_only_execution_turns": 0,
+                "name": "Orašac",
+                "objective_capture_count": 0,
+                "objectives": [
+                  "op:bihac:orasac_2"
+                ],
+                "staging_osid": "op:bihac:trubar",
+                "status": "executing"
               }
             ],
             "commander_officer_id": "vrs_samardzija",
@@ -1487,10 +1508,12 @@
             "momentum": 0,
             "name": "Bosanska Krupa Takeover",
             "objectives": [
-              "op:bosanska_krupa:veliki_badic"
+              "op:bosanska_krupa:veliki_badic",
+              "op:bihac:orasac_2"
             ],
             "participating_brigades": [
-              "rs_11th_krupa_light_infantry"
+              "rs_11th_krupa_light_infantry",
+              "rs_1st_drvar_light_infantry"
             ],
             "phase": "planning",
             "phase_started_turn": 0,
@@ -31242,6 +31265,10 @@
     "must_hold_osids_by_corps": {
       "vrs_drina": [
         "op:zvornik:zvornik"
+      ],
+      "vrs_east_bosnian": [
+        "op:brcko:brcko",
+        "op:brcko:donji_rahic"
       ]
     },
     "named_officer_data": [

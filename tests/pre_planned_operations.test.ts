@@ -658,13 +658,22 @@ describe('pre-planned operations', () => {
         assert.equal(operation.minimum_viable_participants, 1);
         assert.equal(operation.planning_duration, 2);
         assert.equal(operation.staging_osid, 'op:bosanska_krupa:ivanjska_2');
-        assert.deepEqual(operation.axes, [{
-            axis_id: 'krupa_town',
-            name: 'Bosanska Krupa',
-            brigades: ['rs_11th_krupa_light_infantry'],
-            objectives: ['op:bosanska_krupa:veliki_badic'],
-            staging_osid: 'op:bosanska_krupa:ivanjska_2',
-        }]);
+        assert.deepEqual(operation.axes, [
+            {
+                axis_id: 'krupa_town',
+                name: 'Bosanska Krupa',
+                brigades: ['rs_11th_krupa_light_infantry'],
+                objectives: ['op:bosanska_krupa:veliki_badic'],
+                staging_osid: 'op:bosanska_krupa:ivanjska_2',
+            },
+            {
+                axis_id: 'orasac',
+                name: 'Orašac',
+                brigades: ['rs_1st_drvar_light_infantry'],
+                objectives: ['op:bihac:orasac_2'],
+                staging_osid: 'op:bihac:trubar',
+            },
+        ]);
     });
 
     it('defines the summer 1992 Srebrenica-Cerska link-up as ordinary combat', () => {
@@ -707,7 +716,10 @@ describe('pre-planned operations', () => {
                     'arbih_283rd_east_bosnian_light',
                     'arbih_284th_east_bosnian_light',
                 ],
-                objectives: ['op:bratunac:jezestica_2'],
+                objectives: [
+                    'op:bratunac:jezestica_2',
+                    'op:vlasenica:sebiocina',
+                ],
                 staging_osid: 'op:srebrenica:bostahovine_2',
             },
         ]);
@@ -1005,7 +1017,7 @@ describe('pre-planned operations', () => {
             axis_id: 'prusac_local',
             name: 'Prusac Local Axis',
             brigades: ['rs_19th_krajina_light_infantry', 'rs_31st_light_infantry'],
-            objectives: ['op:donji_vakuf:prusac_2'],
+            objectives: ['op:donji_vakuf:prusac_2', 'op:donji_vakuf:jemanlici'],
             staging_osid: 'op:donji_vakuf:pribraca_2',
         });
         assert.equal(operation.execution_attack_power_mult, 1.65);
@@ -1834,7 +1846,7 @@ describe('pre-planned operations', () => {
             'rs_19th_krajina_light_infantry',
             'rs_31st_light_infantry',
         ]);
-        assert.deepEqual(injectedPrusac?.objectives, ['op:donji_vakuf:prusac_2']);
+        assert.deepEqual(injectedPrusac?.objectives, ['op:donji_vakuf:prusac_2', 'op:donji_vakuf:jemanlici']);
     });
 
     it('pre-stages the Donji Vakuf follow-through force before its queued slot opens', () => {

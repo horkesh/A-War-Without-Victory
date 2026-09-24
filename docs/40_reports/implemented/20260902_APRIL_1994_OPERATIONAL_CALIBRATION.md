@@ -18,6 +18,25 @@
 
 ### Owner-authorized January-only operations repair — 2026-09-14
 
+**Owner amendment — 2026-09-22 (takes precedence over the historical no-regression
+wording below).** The owner retired the blanket no-new-January-mismatches
+criterion versus `n403`. The minimum remains **700/712**, and all eight named
+operation-owned combat captures by t39, protected anchors, legal movement and
+capture, determinism and engine-health requirements remain binding. Full mismatch
+inventories and causal explanations for changed cells remain required. This is
+not a reference correction, baseline refresh or full-campaign waiver. Codex is
+authorized to handle the next bounded, historically justified operational
+calibration directly; see the current plan and stopping rule in
+[CALIBRATION_MASTER.md](../CALIBRATION_MASTER.md#owner-approved-january-acceptance-amendment--2026-09-22).
+Earlier runtime estimates below are historical: the owner now reports full-suite
+runs exceeding one hour on this host.
+
+The earlier January-only allowance below remains limited to judging that bounded
+January repair: later-horizon offsets do not decide the January gate. It does not
+constitute full-campaign acceptance or waive western cascade, Farz, Prozor,
+canonical 188-week, determinism or final two-clean-run requirements. This
+amendment grants no new later-horizon waiver.
+
 The owner authorized implementation after the Orašac/Donji Vakuf diagnosis and explicitly
 limited the calibration concern to January 1993: later checkpoint offsets are acceptable for
 this task. Branch `codex/january-1993-operations-20260914` begins at clean `42d0f574d`.

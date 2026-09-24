@@ -1,0 +1,15 @@
+January 1993 calibration session closeout — 2026-09-24
+
+Source branch: codex/january-1993-operations-20260914
+Candidate: Orašac RS t1; Prusac RS t30; Jemanlići RS t31; Doljani painted HRHB in January; Sebiočina RBiH t15 and RS t45; Brčko city and Donji Rahić RS must-hold priority; Mostar Vranjevići painted RS at all four reference checkpoints.
+Retained corrected 188-week candidate: two identical dirty runs, final-save SHA-256 8262413bcf258e15e4e8a7dfc2853cc75d776230f49241e546afd31016f47d73, final hash 8262413bcf258e15. Revised-reference scores: 707/697/690/662. April 1994: 697/712, 15 exact mismatches in logs/vranjevici-reference-20260924/apr1994-mismatches.json.
+External map: https://horkesh.github.io/A-War-Without-Victory/?run=vranjevici-rs-20260924 ; gh-pages b66e6da43d7de960cfe45ad51a6fe5a39d287c17. Live HTML 720280 bytes, SHA-256 046372ce689b94d002488df57d7c1a9d9db15615162c3115a690a1791cedd10a.
+
+Pre-suite checks: npm run desktop:startup-snapshot:check exit 0; npm run sim:data:check exit 0; npm run typecheck exit 0; npm run plans:check exit 0; focused seven-file Vitest 215/215; git diff --check exit 0. Logs in this directory.
+Full suite: npm run test:all exit 1 on the single post-snapshot run. Four balanced shards plus 52-test tail: 14075 tests passed. Two actionable categories: tests/docs_desktop_v09_truth.test.ts board-length assertion (20115 versus <20000) and tests/runtime_dependency_resolution.test.ts 10-second setup hook timeout. The deliberate_failure.fixture child exit is the harness's expected self-test.
+Corrections/targeted checks: board shortened to 19864 characters; tests/docs_desktop_v09_truth.test.ts 7/7 exit 0. Runtime dependency resolution passes alone 12/12 exit 0 without timeout modification. No second full suite. npm run receipts:validate:strict exit 0 (91 citations); npm run gates:validate exit 0 (16 gates, 10 open); npm run plans:check exit 0.
+
+Verdict: January numeric and named captures are met locally. Full-campaign acceptance NO-GO: inherited Farz/Uragan 95 wrong-corps attribution, Prozor operation injection, red full-suite exit and clean-source 188-week provenance remain unresolved. No baseline/pin adoption or main merge.
+Next session: April 1994 calibration from the exact 15-cell mismatch list. Diagnose historical controller and operation mechanism for each, then propose a bounded correction. Source branch push is authorized by owner for this session; remote SHA is verified after commit.
+
+Portable evidence tracked with this receipt: Prusac, Orašac, Jemanlići, Sebiočina and Vranjevići receipts; compact January, must-hold and viewer audits; April mismatch JSON. Raw logs, generated HTML, screenshots and backups remain host-local under their logs directories and are ignored by git.

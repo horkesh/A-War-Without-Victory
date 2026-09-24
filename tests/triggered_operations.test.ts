@@ -203,10 +203,9 @@ describe('triggered operations definitions', () => {
         ]);
         assert.equal(skelaniAxis.minimum_staged_brigades, 2);
         assert.equal(skelaniAxis.minimum_forward_brigades, 2);
-        assert.equal(skelaniAxis.staging_osid, 'op:vlasenica:sebiocina');
-        assert.equal(skelaniAxis.minimum_staged_brigades, 2);
-        assert.equal(skelaniAxis.minimum_forward_brigades, 2);
+        assert.equal(skelaniAxis.staging_osid, 'op:vlasenica:milici_2');
         assert.deepEqual(skelaniAxis.objectives, [
+            'op:vlasenica:sebiocina',
             'op:vlasenica:pomol_2',
             'op:srebrenica:luka_2',
             'op:srebrenica:ljeskovik_2',
@@ -487,6 +486,14 @@ describe('checkTriggeredOperations', () => {
 
         const op = state.military.corps_command!['vrs_drina']!.active_operations[0];
         assert.equal(op?.sector_id, 'sector:vrs_drina:0');
+        const skelaniAxis = op?.axes?.find((axis) => axis.axis_id === 'skelani_cutoff');
+        assert.equal(skelaniAxis?.staging_osid, 'op:vlasenica:milici_2');
+        assert.deepEqual(skelaniAxis?.objectives, [
+            'op:vlasenica:sebiocina',
+            'op:vlasenica:pomol_2',
+            'op:srebrenica:luka_2',
+            'op:srebrenica:ljeskovik_2',
+        ]);
         assert.deepEqual(state.military.watched_operations?.find((row: any) => row.operation_name === 'Operation Cerska-Kamenica'), {
             operation_id: 'Operation Cerska-Kamenica',
             operation_name: 'Operation Cerska-Kamenica',
@@ -521,11 +528,11 @@ describe('checkTriggeredOperations', () => {
 
         assert.ok(!injected.includes('Operation Cerska-Kamenica'));
         assert.deepEqual(state.military.brigade_movement_orders?.rs_1st_guards_motorized, {
-            destination_sids: ['op:vlasenica:sebiocina'],
+            destination_sids: ['op:vlasenica:milici_2'],
             stance: 'column',
         });
         assert.deepEqual(state.military.brigade_movement_orders?.rs_65th_protection_motorized_regiment, {
-            destination_sids: ['op:vlasenica:sebiocina'],
+            destination_sids: ['op:vlasenica:milici_2'],
             stance: 'column',
         });
     });
@@ -634,7 +641,7 @@ describe('checkTriggeredOperations', () => {
 
         assert.ok(injected.includes('Operation Cerska-Kamenica'));
         assert.deepEqual(state.military.brigade_movement_orders?.[brigadeId], {
-            destination_sids: ['op:vlasenica:sebiocina'],
+            destination_sids: ['op:vlasenica:milici_2'],
             stance: 'column',
         });
     });

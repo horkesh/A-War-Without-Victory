@@ -3872,7 +3872,7 @@
     "corps": "arbih_2nd_corps",
     "home_mun": "vlasenica",
     "home_settlement": "Cerska",
-    "home_osid": "op:vlasenica:sebiocina",
+    "home_osid": "op:vlasenica:cerska_2",
     "kind": "brigade",
     "default_equipment_class": "light_infantry",
     "available_from": 4,

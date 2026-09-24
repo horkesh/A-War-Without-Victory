@@ -1,0 +1,69 @@
+Retained retirement-closeout test evidence
+
+Extracted on 2026-09-22 from the three existing local logs; no tests were rerun.
+Full raw logs remain local and ignored. This receipt preserves their hashes,
+runner summary lines and failure-category lines for a fresh clone.
+ANSI styling and trailing whitespace removed; source line numbers refer to the decoded UTF-16 raw files.
+The previous closeout reported process exits 1, 1, 0 respectively;
+the raw logs do not contain a separate process-exit receipt.
+Nested deliberate_failure summaries are harness controls, not top-level failures.
+
+full-suite.log
+sha256 f21f6cf4aed1641a4a9fb49517741639d9a2f495defdc00600c0dc7af0196b50
+bytes 521388
+686:    ├ù plan index > the committed file matches a fresh derivation 18ms
+687:      ΓåÆ expected '# Plan Index ΓÇö which plan owns which ΓÇª' to be '# Plan Index ΓÇö which plan owns which ΓÇª' // Object.is equality
+688:    ├ù plan index > --check agrees, so CI can enforce it without a diff 99ms
+991:  FAIL  tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts > is an intent
+1010:  Test Files  1 failed (1)
+1011:       Tests  1 failed (1)
+1396:  Test Files  338 passed | 1 skipped (339)
+1397:       Tests  3645 passed | 6 skipped (3651)
+1664:  Test Files  332 passed | 1 skipped (333)
+1665:       Tests  2689 passed | 12 skipped (2701)
+1713:  FAIL  tests/plan_index.test.ts > plan index > the committed file matches
+1715: AssertionError: expected '# Plan Index ΓÇö which plan owns which ΓÇª' to be '# Plan Index ΓÇö which plan
+1721:   # Plan Index ΓÇö which plan owns which lane, as data
+1910:  Test Files  1 failed | 335 passed | 1 skipped (337)
+1911:       Tests  2 failed | 3381 passed | 6 skipped (3389)
+1926:  FAIL  tests/plan_index.test.ts > plan index > --check agrees, so CI can
+2101:  Test Files  336 passed | 1 skipped (337)
+2102:       Tests  3535 passed | 7 skipped (3542)
+2174:  Test Files  52 passed (52)
+2175:       Tests  836 passed (836)
+
+full-suite-rerun.log
+sha256 0780cdd38993a8c60a0eaae8cd24cb12201dc34d2baf91ba3f1edade1fa0a4a9
+bytes 501484
+984:  FAIL  tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts > is an intent
+1003:  Test Files  1 failed (1)
+1004:       Tests  1 failed (1)
+1446:  Test Files  338 passed | 1 skipped (339)
+1447:       Tests  3645 passed | 6 skipped (3651)
+1645:  Test Files  332 passed | 1 skipped (333)
+1646:       Tests  2689 passed | 12 skipped (2701)
+1717:  FAIL  tests/runtime_dependency_resolution.test.ts [ tests/runtime_dependency_resolutio
+1719: Error: Hook timed out in 10000ms.
+1724:  Test Files  1 failed | 335 passed | 1 skipped (337)
+1725:       Tests  3371 passed | 18 skipped (3389)
+1882:  Test Files  336 passed | 1 skipped (337)
+1883:       Tests  3535 passed | 7 skipped (3542)
+1956:  Test Files  52 passed (52)
+1957:       Tests  836 passed (836)
+
+full-suite-rerun2.log
+sha256 2444ad0e12e75a5501a976c8eb835c648113d24a6ef1d67f245244dc84cb646a
+bytes 497634
+1005:  FAIL  tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts > is an intent
+1024:  Test Files  1 failed (1)
+1025:       Tests  1 failed (1)
+1441:  Test Files  338 passed | 1 skipped (339)
+1442:       Tests  3645 passed | 6 skipped (3651)
+1626:  Test Files  332 passed | 1 skipped (333)
+1627:       Tests  2689 passed | 12 skipped (2701)
+1704:  Test Files  336 passed | 1 skipped (337)
+1705:       Tests  3383 passed | 6 skipped (3389)
+1864:  Test Files  336 passed | 1 skipped (337)
+1865:       Tests  3535 passed | 7 skipped (3542)
+1938:  Test Files  52 passed (52)
+1939:       Tests  836 passed (836)

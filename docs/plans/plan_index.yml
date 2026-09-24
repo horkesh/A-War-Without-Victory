@@ -80,7 +80,7 @@ lanes:
   - lane: R6
     title: "Historical gameplay depth and final calibration"
     lane_open: true
-    status: "JANUARY OBJECTIVE CORRECTIONS MEASURED; CALIBRATION HELD. All April and Jajce work remains integrated. On clean candidate `41a148bf9` January measures 701/712 a"
+    status: "JANUARY CANDIDATE; FULL CAMPAIGN NO-GO (2026-09-24). Sebiočina RBiH t15, RS t45; Brčko corridor holds. Vranjevići reference RS at all checkpoints. Retained 188w"
     plans:
       - path: docs/plans/2026-07-31-historical-gameplay-depth-calibration-plan.md
         exists: true

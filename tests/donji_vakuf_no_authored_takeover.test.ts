@@ -33,6 +33,7 @@ const TOWN = 'op:donji_vakuf:donji_vakuf_2';
 const KORENICI = 'op:donji_vakuf:korenici';
 const TORLAKOVAC = 'op:donji_vakuf:torlakovac_2';
 const PRUSAC = 'op:donji_vakuf:prusac_2';
+const JEMANLICI = 'op:donji_vakuf:jemanlici';
 
 /** The four cells the withdrawn experiment touched, plus the cell it was careful not to. */
 const GUARDED_CELLS = [TOWN, KORENICI, TORLAKOVAC, PRUSAC];
@@ -197,7 +198,7 @@ describe('Operation Donji Vakuf — ordinary combat configuration stays bounded'
     const sweep = op?.axes?.find((axis) => axis.axis_id === 'donji_vakuf_sweep');
     const prusac = op?.axes?.find((axis) => axis.axis_id === 'prusac_local');
 
-    it('keeps Prusac inside the existing operation on a local parallel axis', () => {
+    it('keeps Prusac and Jemanlići inside the existing operation on a local parallel axis', () => {
         expect(op, 'Operation Donji Vakuf must exist').toBeTruthy();
         expect(op!.corps).toBe('vrs_1st_krajina');
         expect(op!.faction).toBe('RS');
@@ -206,7 +207,7 @@ describe('Operation Donji Vakuf — ordinary combat configuration stays bounded'
         expect(prusac, 'the prusac_local axis must exist').toBeTruthy();
         expect(prusac).toMatchObject({
             brigades: ['rs_19th_krajina_light_infantry', 'rs_31st_light_infantry'],
-            objectives: [PRUSAC],
+            objectives: [PRUSAC, JEMANLICI],
             staging_osid: 'op:donji_vakuf:pribraca_2',
         });
     });
@@ -227,9 +228,10 @@ describe('Operation Donji Vakuf — ordinary combat configuration stays bounded'
 
         const objectiveOccurrences = op!.axes.flatMap((axis) => axis.objectives);
         const brigadeOccurrences = op!.axes.flatMap((axis) => axis.brigades);
-        expect(objectiveOccurrences).toHaveLength(7);
-        expect(new Set(objectiveOccurrences).size).toBe(7);
+        expect(objectiveOccurrences).toHaveLength(8);
+        expect(new Set(objectiveOccurrences).size).toBe(8);
         expect(objectiveOccurrences).toContain(PRUSAC);
+        expect(objectiveOccurrences).toContain(JEMANLICI);
         expect(brigadeOccurrences).toHaveLength(7);
         expect(new Set(brigadeOccurrences).size).toBe(7);
     });

@@ -57,11 +57,12 @@ describe('historical operation dossier -> field plan contract', () => {
       'op:srebrenica:sulice_2',
       'op:vlasenica:cerska_2',
       'op:vlasenica:pomol_2',
+      'op:vlasenica:sebiocina',
     ]);
     expect(details.stagingOsids).toEqual([
       'op:srebrenica:brezovice_2',
       'op:vlasenica:grabovica',
-      'op:vlasenica:sebiocina',
+      'op:vlasenica:milici_2',
     ]);
     expect(details.formationIds).toEqual([
       'rs_1st_birac',
@@ -172,8 +173,9 @@ describe('historical operation dossier -> field plan contract', () => {
         'op:srebrenica:sulice_2',
         'op:vlasenica:cerska_2',
         'op:vlasenica:pomol_2',
+        'op:vlasenica:sebiocina',
       ],
-      stagingOsids: ['op:srebrenica:brezovice_2', 'op:vlasenica:grabovica', 'op:vlasenica:sebiocina'],
+      stagingOsids: ['op:srebrenica:brezovice_2', 'op:vlasenica:grabovica', 'op:vlasenica:milici_2'],
       formationIds: [
         'rs_1st_birac',
         'rs_1st_bratunac',

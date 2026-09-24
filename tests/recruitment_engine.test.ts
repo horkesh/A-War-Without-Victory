@@ -449,7 +449,7 @@ describe('runBotRecruitment', () => {
             faction: 'RBiH',
             name: '1st Cerska Brigade',
             home_mun: 'vlasenica',
-            home_osid: 'op:vlasenica:sebiocina',
+            home_osid: 'op:vlasenica:cerska_2',
             corps: 'arbih_2nd_corps',
             available_from: 4,
             mandatory: true,

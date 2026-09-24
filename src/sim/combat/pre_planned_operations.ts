@@ -831,10 +831,9 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         // approaches; Jezerski and Otoka remain outside this operation because
         // the Bosniak-held hills and suburbs survived the initial takeover.
         //
-        // The 11th Krupa Light Infantry is the engine's local organized-force
-        // abstraction for this opening action. Keep the operation single-axis,
-        // single-objective, and locally sourced so it cannot pull 2KK forces
-        // away from the Bihać-pocket frontage.
+        // The 11th Krupa Light Infantry handles the town. The 1st Drvar Light
+        // Infantry is already at Trubar, adjacent to the isolated Orašac OSID,
+        // and handles that objective on a separate axis within the same corps op.
         corps: 'vrs_2nd_krajina',
         faction: 'RS',
         name: 'Bosanska Krupa Takeover',
@@ -850,6 +849,13 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 brigades: ['rs_11th_krupa_light_infantry'],
                 objectives: ['op:bosanska_krupa:veliki_badic'],
                 staging_osid: 'op:bosanska_krupa:ivanjska_2',
+            },
+            {
+                axis_id: 'orasac',
+                name: 'Orašac',
+                brigades: ['rs_1st_drvar_light_infantry'],
+                objectives: ['op:bihac:orasac_2'],
+                staging_osid: 'op:bihac:trubar',
             },
         ],
     },
@@ -1053,6 +1059,8 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         // preserving the heavy spearhead's ordinary town–Korenići combat edge. Prusac is
         // not adjacent to that chain, so the local 19th and 31st approach it on a parallel
         // axis from RS-held Pribrača instead of making a lateral transfer after Korenići.
+        // Jemanlići is adjacent to Prusac, so the local axis can contest its
+        // RBiH-held position after taking Prusac through ordinary combat.
         // Torlakovac (3 June 1992) and Korenići (21 May 1992) carry the same date defect as the town
         // (Stanišić TJ §242); they too are listed here only until a sound replacement exists.
         // Removed from triggered Op Jajce (vrs_2nd_krajina) — 1KK handles DV.
@@ -1093,7 +1101,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'rs_19th_krajina_light_infantry' as FormationId,
                     'rs_31st_light_infantry' as FormationId,
                 ],
-                objectives: ['op:donji_vakuf:prusac_2'],
+                objectives: ['op:donji_vakuf:prusac_2', 'op:donji_vakuf:jemanlici'],
                 staging_osid: 'op:donji_vakuf:pribraca_2',
             },
             {
@@ -1353,7 +1361,10 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                     'arbih_283rd_east_bosnian_light',
                     'arbih_284th_east_bosnian_light',
                 ],
-                objectives: ['op:bratunac:jezestica_2'],
+                objectives: [
+                    'op:bratunac:jezestica_2',
+                    'op:vlasenica:sebiocina',
+                ],
                 staging_osid: 'op:srebrenica:bostahovine_2',
             },
         ],

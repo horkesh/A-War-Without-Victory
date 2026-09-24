@@ -1,6 +1,6 @@
 # AWWV Command Board
 
-**Status:** Derived dispatch view, synchronized 2026-09-17.
+**Status:** Derived dispatch view, synchronized 2026-09-24 (R6).
 
 **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole authority for unfinished work and wins if this board differs.
 
@@ -23,7 +23,7 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 3 | R3 | **COMPLETE** | None. | [TG convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) |
 | 4 | R4 | **COMPLETE** | None; Phase 6 and its packaging follow-up are closed. | [Command/event/Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) |
 | 5 | R5 | **COMPLETE -- CLOSED 2026-08-05** | None. The accepted performance floor is approximately 1.09 seconds per turn; the 100 ms target and incremental-reuse Task 6 are retired from 1.0 scope. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
-| 6 | R6 | **JANUARY OBJECTIVE CORRECTIONS LANDED; CALIBRATION HELD — 2026-09-17** | Čardak year-level capture (t23) and the Pješivac-Kula correction (t15) measured at **701/712** on clean `41a148bf9` (n403). 11 mismatches remain; Prusac and Vranjevići open. Western cascade 30/38, Farz attribution and the inherited Prozor injection remain open. Scope the operation-scheduling/attribution repair; preserve floors. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
+| 6 | R6 | **JANUARY CANDIDATE; FULL CAMPAIGN NO-GO** | Sebiočina RBiH t15, RS t45; Brčko/Donji Rahić hold RS. Vranjevići reference RS throughout; **707/697/690/662**. Next: April 1994. Farz, Prozor and suite gates open. [Map](https://horkesh.github.io/A-War-Without-Victory/?run=vranjevici-rs-20260924). | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
 | 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
 | 7 | R7 | **WR01/PIN REFRESH LANDED; AUDIO/ACCEPTANCE OPEN** | Finish offline audio and ten-cue disposition; human listening waits for owner inspection. WR01 closed in #517 and pins refreshed in #518; April combined-source acceptance is separate. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [accepted functional opening](2026-08-23-opening-screens-implementation-plan.md) / [cinematic opening and typography amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md) / [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) |
 | 7.5 | RE | **CLOSED — owner, 2026-09-01** | None. RE gates nothing; engine-health defects are still fixed before tuning. | [Closed recovery record](2026-08-28-packaged-probe-recovery-plan.md) / [closed RE contract](2026-08-26-engine-integrity-plan.md) |
@@ -31,17 +31,16 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 9 | R9 | **FREEZE WAITING ON R8; LIMITED PREPARATION AT §4.2** | Freeze an immutable RC, produce reproducible clean-machine evidence, and prepare publication inputs. | [Release candidate/gold](2026-07-31-release-candidate-gold-publication-plan.md) |
 
 **Full-duration campaign evidence (188w) — `ac3e5e152`, 2026-09-16:** all 20 April commits, the Jajce
-local occupation step, canon amendments and approved coverage remain integrated. The January operations
-source `ac3e5e152` scores **700/712, 702, 697, 667** over 188 weeks, improving every checkpoint over
-`8db305596` (696/690/687/659). January meets its authorized 700 contract with all eight required cells
-taken through operation-owned combat and zero passive transfers. Root cause was a missing
-`assignOperationCommander` call on operation admission (Systems Manual §7.5), which left named bot
-operations on unnamed 3/3 preparation defaults. Health, consistency, 31 anchors, nine enclave guards and
-assignment seals pass; independent evidence review is GO on the January contract. Western cascade 30 below
-38 (recovered from 25), Farz attribution and the inherited Prozor injection retain overall NO-GO. Main
-remains `9588876bc`; no pin refresh followed. The
-[public viewer](https://horkesh.github.io/A-War-Without-Victory/?run=ac3e5e152) publishes **this**
-188-week run (`gh-pages` `3096f4e0b`) and is not updated by the January corrections below.
+occupation step, canon amendments and coverage remain integrated. Source `ac3e5e152` scores
+**700/712, 702, 697, 667**, improving every checkpoint over `8db305596` (696/690/687/659).
+January meets its 700 contract: all eight required cells taken through operation combat, with no
+passive transfers. A missing `assignOperationCommander` on admission had left named bot operations
+on unnamed 3/3 preparation defaults (Systems Manual §7.5). Health, consistency, 31 anchors, nine
+enclave guards and assignment seals pass; independent review is GO on January. Western cascade 30/38,
+Farz attribution and inherited Prozor injection retain overall NO-GO. Main remains `9588876bc`;
+no pin refresh followed. The public viewer published **this** run then (`gh-pages` `3096f4e0b`).
+The [current viewer](https://horkesh.github.io/A-War-Without-Victory/?run=vranjevici-rs-20260924)
+shows the later Sebiočina candidate with the Vranjevići reference correction.
 [Receipt](../40_reports/implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-january-only-operations-repair--2026-09-14).
 
 **January objective corrections — 2026-09-17 (candidate `41a148bf9`; detail in CALIBRATION_MASTER):**

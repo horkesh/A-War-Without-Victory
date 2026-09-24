@@ -1,0 +1,16 @@
+Calibration viewer publication — 2026-09-22
+Owner instruction: "Publish it" (the latest 702/712 Prusac campaign map).
+Publication commit: 224bfd0f6aad396dade4692913106cdaeef86178 on gh-pages.
+URL: https://horkesh.github.io/A-War-Without-Victory/?run=efa53f55c
+Only index.html and README.md changed; .nojekyll retained. No main/source branch push.
+Generator and marker checker exited0; all 712 scored cells have markers; all71 distinct mismatch anchors are inside their cells.
+All initial owners and216 events match saved run; geometry/references/colors unchanged from previous viewer.
+Pages build: built. Live HTTP200,713283 bytes, SHA2563e80eacf3d98e05e7088ec404f43b89e5c98a3dfb2028b16c0f9048cbd2fb02a; exact generated/committed artifact match.
+Local and live browser: scores702/694/689/651; January10mismatches; Prusac selected at39 showsRS, historicalRS, lastchange30. Localweek30 showsRS and correctly suppresses mismatches without a historical checkpoint. Live console warnings/errors:0.
+Source efa53f55c34e4e9fe8ec8d4fe99ec01502ba1ed1, git_dirtyfalse, finalsaveSHA575254183566bf2c7b4db3946217ddcce014317eb2232997e003964919cf10c3.
+Original latest save and LOC trace preserved; no new simulation, reference/pin changes or baseline adoption. January OPEN; full-campaign NO-GO remains.
+Host-local raw evidence follows (SHA256 bytes path):
+1253321f3f74eabbda94d120a2253bd72b394d531c01174ed15e589ff46588e5 520 logs/prusac-viewer-publication-20260922/generate.log
+e3a622a65ca80953dd6c0d6989b35704f87af5e2130157b2d7fe66c73ad914a8 195 logs/prusac-viewer-publication-20260922/markers.log
+50c7dc5086d50e9c06ae6edc70249fb04a3a0918831b999ed81b3d73986241a8 747 logs/prusac-viewer-publication-20260922/payload-audit.json
+365586a67df4ac5be1d3d5bef05d6db2d5b6fbbc445ec7ba9f6f110d1a9f40b2 2015 logs/prusac-viewer-publication-20260922/publication-receipt.json
