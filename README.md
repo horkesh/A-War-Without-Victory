@@ -18,18 +18,22 @@ controller, so the two readings cannot be confused. The overlay is on by default
 switched off. It appears only at weeks 39, 104, 156 and 188, because painted historical truth
 exists only there; at any other week a "mismatch" would just be the war not having happened yet.
 
-The published snapshot is the local 188-week Jemanlići operation candidate generated
-2026-09-23 from retained run artifacts. Its source checkout is marked dirty, so
+The published snapshot is the local 188-week Sebiočina operation and Brčko defense
+candidate generated 2026-09-24 from retained run artifacts. Its source checkout is marked dirty, so
 the viewer is **not an adopted calibration baseline**. The saved run SHA-256 is
-`60d3f5732705ef90a6965e84363013bb2e9178c6341ca82154e1c33948a762a8`.
-Jemanlići changes to RS at week 31 through Operation Donji Vakuf.
+`8262413bcf258e15e4e8a7dfc2853cc75d776230f49241e546afd31016f47d73`.
+RBiH captures Sebiočina at week 15 through Srebrenica–Cerska Link-Up; VRS
+retakes it at week 45 through Operation Cerska–Kamenica. Brčko and Donji Rahić
+remain RS-held throughout the run. The January painted reference includes
+Doljani as HRHB.
 
-Checkpoint scores are **704 / 697 / 692 / 657** with **8 / 15 / 20 / 55**
-mismatches. All eight named January captures occur by week 39. Full-campaign
-acceptance remains NO-GO on the Farz attribution and western cascade gates.
+Checkpoint scores are **706 / 696 / 689 / 661** with **6 / 16 / 23 / 51**
+mismatches. Full-campaign acceptance remains NO-GO on inherited Farz attribution
+and Prozor operation-injection gates; the required full test suite has not been
+rerun after the corrected startup snapshot.
 Publishing this map does not adopt a baseline or approve a main-branch merge.
 
-[Open this dataset](https://horkesh.github.io/A-War-Without-Victory/?run=jemanlici-axis-20260923).
+[Open this dataset](https://horkesh.github.io/A-War-Without-Victory/?run=sebiocina-20260924).
 
 The viewer is generated with `tools/calibration_timeline.mjs` in the project checkout:
 
