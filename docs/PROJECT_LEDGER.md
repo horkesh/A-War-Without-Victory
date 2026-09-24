@@ -7328,3 +7328,19 @@ wrong-corps attribution, Prozor injection, full-suite exit and clean-source
 188-week proof remain open. April 1994 calibration begins from the revised
 697/712 checkpoint, checking historical control and operation mechanisms for
 each mismatch before making changes. [Closeout receipt](../logs/session-closeout-20260924/receipt.txt).
+
+### 2026-09-24 — R8 documentation draft reconciliation
+
+Seven uncommitted R8 documentation edits were compared with the current January
+candidate. Their September 10 branch-push and status text is historical or
+superseded by the current board and roadmap. Three passages cite a
+`documentation-sync-manifest.json` that is absent from both checkouts, so the
+draft was not applied wholesale. The active Electron validation plan's headline
+was corrected to distinguish the verified replacement build from the failed
+post-run package-directory identity gate. RBiH readability, Save/load, runtime
+disposition, RS/HRHB and full campaigns remain open. No product behavior,
+acceptance gate or calibration result changed. The derived plan index was
+regenerated for the edited plan's token count. The original R8 worktree and its
+ignored package/run evidence remain preserved; its exact tracked diff is saved
+locally under `logs/branch-hygiene/20260924-parallel-audit/r8-uncommitted.patch`
+(SHA-256 `E0252CEB2A3C108AFB1CDCF6E86A862772F7F4B8E8E6B2BD1E5F0C436679E888`).
