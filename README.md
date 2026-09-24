@@ -18,25 +18,23 @@ controller, so the two readings cannot be confused. The overlay is on by default
 switched off. It appears only at weeks 39, 104, 156 and 188, because painted historical truth
 exists only there; at any other week a "mismatch" would just be the war not having happened yet.
 
-The published snapshot is the local 188-week Sebiočina operation and Brčko defense
-candidate, replayed on 2026-09-24 against the latest painted references. Its
+The published snapshot is the local 188-week Lukavac 93 military calibration
+candidate, replayed on 2026-09-24 against the current painted references. Its
 source checkout is marked dirty, so the viewer is **not an adopted calibration
 baseline**. The saved run SHA-256 is
-`8262413bcf258e15e4e8a7dfc2853cc75d776230f49241e546afd31016f47d73`.
-RBiH captures Sebiočina at week 15 through Srebrenica–Cerska Link-Up; VRS
-retakes it at week 45 through Operation Cerska–Kamenica. Brčko and Donji Rahić
-remain RS-held throughout the run. The January painted reference includes
-Doljani as HRHB. An owner-directed reference correction paints the Mostar
-Vranjevići operational cell RS at all four checkpoints; the constituent-level
-historical boundary remains uncertain.
+`a4079d59934a55cff78c0e3054c209f8810b34166ff719137662a4d31fec9bf2`.
+The northern and southern VRS groups jointly take Trnovo through combat at
+week 73; the southern Guards take Tošići at week 74, and the northern corridor
+takes Delijaš, Mazlina and Podgrab. Brčko city and Donji Rahić remain RS-held.
 
-Checkpoint scores are **707 / 697 / 690 / 662** with **5 / 15 / 22 / 50**
-mismatches. Full-campaign acceptance remains NO-GO on inherited Farz attribution
-and Prozor operation-injection gates; the required full test suite has not been
-rerun after the corrected startup snapshot.
+Checkpoint scores are **707 / 702 / 697 / 664** with **5 / 10 / 15 / 48**
+mismatches. Full-campaign acceptance remains NO-GO: the inherited Farz 95
+corps-attribution guard and the Windows full-suite gate remain red. The ungated
+western Bosnia cascade declines from 32 to 28 matched cells. Publication changes
+no simulation source, reference, baseline pin or source branch.
 Publishing this map does not adopt a baseline or approve a main-branch merge.
 
-[Open this dataset](https://horkesh.github.io/A-War-Without-Victory/?run=vranjevici-rs-20260924).
+[Open this dataset](https://horkesh.github.io/A-War-Without-Victory/?run=lukavac-93-20260924).
 
 The viewer is generated with `tools/calibration_timeline.mjs` in the project checkout:
 
