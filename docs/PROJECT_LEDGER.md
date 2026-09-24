@@ -7344,3 +7344,20 @@ regenerated for the edited plan's token count. The original R8 worktree and its
 ignored package/run evidence remain preserved; its exact tracked diff is saved
 locally under `logs/branch-hygiene/20260924-parallel-audit/r8-uncommitted.patch`
 (SHA-256 `E0252CEB2A3C108AFB1CDCF6E86A862772F7F4B8E8E6B2BD1E5F0C436679E888`).
+
+### 2026-09-24 — Local worktree and branch housekeeping
+
+The clean agent-setup modernization and calibration timeline viewer worktrees
+were retired through Git after checking their ignored files and junctions. The
+agent-setup branch remains because it has distinct ancestry; the integrated
+timeline viewer branch was deleted locally. The clean R7 honorific checkout was
+retired after its 301 ignored run, build and diagnostic files were archived and
+hash-verified at
+`F:/AWWV-worktree-archives/r7-arbih-honorific-evidence-20260924.zip`
+(SHA-256 `fdca355721c88283485725b046cb62d9944d98be1d25c6b2609321238d7a1ae3`);
+its integrated local branch was deleted. The local `gh-pages` ref was
+fast-forwarded to the fetched published remote tip; `main` was not changed or
+pushed. Other worktrees retain active ownership, uncommitted changes, cited
+evidence or dependency junctions. Automatic approval review blocked recursive
+deletion of unregistered external folders, so they remain. No source, scenario,
+canon, baseline, acceptance gate or release state changed.
