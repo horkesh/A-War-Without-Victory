@@ -19,21 +19,24 @@ switched off. It appears only at weeks 39, 104, 156 and 188, because painted his
 exists only there; at any other week a "mismatch" would just be the war not having happened yet.
 
 The published snapshot is the local 188-week Sebiočina operation and Brčko defense
-candidate generated 2026-09-24 from retained run artifacts. Its source checkout is marked dirty, so
-the viewer is **not an adopted calibration baseline**. The saved run SHA-256 is
+candidate, replayed on 2026-09-24 against the latest painted references. Its
+source checkout is marked dirty, so the viewer is **not an adopted calibration
+baseline**. The saved run SHA-256 is
 `8262413bcf258e15e4e8a7dfc2853cc75d776230f49241e546afd31016f47d73`.
 RBiH captures Sebiočina at week 15 through Srebrenica–Cerska Link-Up; VRS
 retakes it at week 45 through Operation Cerska–Kamenica. Brčko and Donji Rahić
 remain RS-held throughout the run. The January painted reference includes
-Doljani as HRHB.
+Doljani as HRHB. An owner-directed reference correction paints the Mostar
+Vranjevići operational cell RS at all four checkpoints; the constituent-level
+historical boundary remains uncertain.
 
-Checkpoint scores are **706 / 696 / 689 / 661** with **6 / 16 / 23 / 51**
+Checkpoint scores are **707 / 697 / 690 / 662** with **5 / 15 / 22 / 50**
 mismatches. Full-campaign acceptance remains NO-GO on inherited Farz attribution
 and Prozor operation-injection gates; the required full test suite has not been
 rerun after the corrected startup snapshot.
 Publishing this map does not adopt a baseline or approve a main-branch merge.
 
-[Open this dataset](https://horkesh.github.io/A-War-Without-Victory/?run=sebiocina-20260924).
+[Open this dataset](https://horkesh.github.io/A-War-Without-Victory/?run=vranjevici-rs-20260924).
 
 The viewer is generated with `tools/calibration_timeline.mjs` in the project checkout:
 
