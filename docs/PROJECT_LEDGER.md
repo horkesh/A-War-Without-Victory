@@ -9,6 +9,41 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-09-27 — Patron-border isolated-position candidate measured; April gate remains red
+
+The owner chose option A in channel [063], authorizing derived HRV/SRB/MNE
+exterior-border data, the narrow commander isolation exclusion, tests, and the
+Systems Manual change. Commit `612602883` on
+`codex/april1995-hv-integration-20260927` contains the reproducible 744→712
+geometry fold, pinned source metadata and hashes, 108 attributed active border
+OSIDs, the commander guard, and the canon/design note. Focused commander tests
+passed 26/26, the schema/determinism tests 5/5, typecheck and startup snapshot
+checks exited 0. Independent geometry review accepted the fold, attribution,
+tolerances and source lineage but found a shallow-schema NO-GO; the schema was
+then corrected and verified with strict nested Ajv validation and an invalid
+provenance case. Independent operations/canon review accepted the rule and
+tests; its premature report-claim blocker was removed before measurement.
+Git source line endings were pinned to LF so the committed boundary bytes
+match provenance hashes.
+
+The single authorized 188-week run `w188_n1` exited 0 from a byte-identical
+initial save to retained `w188_n0`. Donja Mahala stayed HRHB at w156 and w188,
+and the old VRS `Operacija Bedem` targeting it at t117 did not appear. However,
+the checkpoint scores were **707/707/704/653** versus **707/707/704/669**.
+At w156, Donja improved and Paklarevo regressed by one turn; at w188 there
+were 22 changed cells, including nineteen new mismatches concentrated in
+western Bosnia.
+The same one critical anomaly and inherited Farz P-A wrong-corps failure remain.
+Full control-cell differences, campaign output and checkpoint evidence are in
+`logs/border-patron-063-20260927/`. The candidate fails the April ≥705 and
+October ≥669 gates, so no full suite, retry, retune, merge, map publication or
+baseline adoption was performed. April 1995 stays open; October calibration
+remains paused pending Claude's next bounded instruction.
+The focused post-run plan-index check initially found a stale derived index;
+regeneration made `plans:check` pass. An attempted `canon:check` passed its
+static determinism scan, then unexpectedly launched baseline regression; it
+was interrupted at turn 13 under the no-extra-run rule and supplies no result.
+
 ## 2026-09-27 — April 1995 reopened: Gornja Presjenica reference and Orašje diagnosis
 
 The owner determined `op:trnovo:gornja_presjenica` should be painted RS at April

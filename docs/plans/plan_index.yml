@@ -80,7 +80,7 @@ lanes:
   - lane: R6
     title: "Historical gameplay depth and final calibration"
     lane_open: true
-    status: "PROVISIONAL DOLJANI CANDIDATE; FULL CAMPAIGN NO-GO (2026-09-27). Retained 188w 707/707/701/664; Doljani RBiH by combat at t57 and the Prozor trio HRHB at w104. "
+    status: "APRIL 1995 REOPENED; NO MERGE (2026-09-27). Retained delay-30 run replays 707/707/704/669 after the owner corrected Gornja Presjenica's 1995 painted references "
     plans:
       - path: docs/plans/2026-07-31-historical-gameplay-depth-calibration-plan.md
         exists: true

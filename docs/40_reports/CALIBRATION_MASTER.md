@@ -1,5 +1,42 @@
 # AWWV Calibration Master Reference
 
+## April 1995 patron-border candidate measurement — 2026-09-27
+
+The owner authorized a derived exterior-border exclusion for the existing
+`reduce_isolated_position` purpose only: a connected HRHB position touching
+Croatia, or an RS position touching Serbia or Montenegro, is eligible for
+exterior relief. The candidate is committed on
+`codex/april1995-hv-integration-20260927` as `612602883`, with pinned
+geoBoundaries provenance, 108 attributed active border OSIDs, a deterministic
+generator, focused data/commander tests, and Systems Manual text. The April
+1995 painted Donja Mahala value remains HRHB; no direct control change was
+introduced.
+
+One authorized 188-week run, `runs/apr1992_definitive_188w__6deb5845c150c196__w188_n1`,
+used the same byte-identical initial save as retained `n0` and exited 0. Donja
+Mahala remains **HRHB at weeks 156 and 188**; the `n0` VRS `Operacija Bedem`
+at t117 is absent from the new AAR. The AAR does not serialize target purpose,
+so the winning old purpose is reconstructed from the retained predicate and
+cannot be asserted directly. January 1993 and April 1994 stay 707/712 with
+identical mismatch sets; Doljani is RBiH and the Prozor trio HRHB at week 104.
+April 1995 remains **704/712**, because the Donja gain is offset by a one-turn
+delay of the Paklarevo combat capture to t157. October falls **669→653/712**;
+the 31/31 final anchors and the same one Central Bosnia critical anomaly hold,
+but nineteen previously matched cells become mismatches, concentrated in
+western Bosnia; Donja and two Travnik cells become matches.
+The 188-week artifact does not separately emit the April 40-anchor contract;
+that gate was not rerun after the score failure.
+The inherited Farz P-A wrong-corps guard still fails. The full 22-cell endpoint
+and two-cell week-156 comparison is retained in
+`logs/border-patron-063-20260927/control_comparison.json`; the checkpoint and
+campaign logs are alongside it.
+
+**Acceptance: NO-GO.** April is below the required 705, October below the
+required 669, and the Farz §6 no-merge gate remains open. The stop rule ended
+work after this one campaign; no retry, retune, full suite, external-map
+publication, merge, or baseline adoption followed. Claude decides the next
+bounded April 1995 step. October calibration remains paused.
+
 ## April 1995 reopened: Gornja Presjenica reference and Donja Mahala — 2026-09-27
 
 The owner directed `op:trnovo:gornja_presjenica` to be painted **RS** at the
