@@ -4,7 +4,7 @@
 
 **Purpose:** Single entrypoint for implementation reports, handovers, convenes, investigations, and audits. Use consolidated summaries for quick reference; use individual reports for detail.
 
-**2026-09-27 April 1995 draft:** [Delay-30 owner handover](handovers/20260927_APRIL_1995_DELAY30_CLOSEOUT_DRAFT.md) records the isolated improvement and open acceptance/governance gates; no baseline adoption.
+**2026-09-27 April 1995 reopened:** [Delay-30 owner handover](handovers/20260927_APRIL_1995_DELAY30_CLOSEOUT_DRAFT.md) records the Gornja reference correction, unchanged-run 704/712 score, and reopened Donja Mahala anomaly; no baseline adoption.
 
 **2026-09-02 April 1994 operational calibration history:**
 [implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md)

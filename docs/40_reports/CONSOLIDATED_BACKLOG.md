@@ -6,7 +6,7 @@
 
 **Scope:** Post-MVP (Phase 7) unless otherwise noted. MVP scope remains frozen per Executive Roadmap.
 
-**2026-09-27 draft calibration handover:** [April 1995 delay-30 closeout packet](handovers/20260927_APRIL_1995_DELAY30_CLOSEOUT_DRAFT.md) records the isolated 703/712 measurement, green full suite, parked cells, and still-open Vidimlije/Farz/owner-adoption gates. It is not an adopted baseline.
+**2026-09-27 April calibration reopened:** [Delay-30 handover](handovers/20260927_APRIL_1995_DELAY30_CLOSEOUT_DRAFT.md) records the original 703/712 run, the owner-corrected Gornja Presjenica reference (unchanged run now 704/712), and the reopened Donja Mahala anomaly. Vidimlije and Farz remain open; no baseline is adopted.
 
 **R7 Phase 0 accepted 2026-08-02:** [20260801_R7_HISTORICAL_CLAIM_LOCALIZATION_INVENTORIES.md](audits/20260801_R7_HISTORICAL_CLAIM_LOCALIZATION_INVENTORIES.md) supersedes the earlier censuses. Historical remediation starts from 1,574 source-note rows, 489 source-tier rows, 108 source-floor rows, and 14 actor-specificity rows; the genuine direct-choice rows are remediated and the strict canon CLI is 0 CRITICAL / 0 WARNING / 1 nonblocking INFO. Localization starts from one EN fallback, 575 embedded-English candidates, eight concatenation candidates, 388 dynamic-key candidates, and 599 layout-length candidates across 385 player-surface files. September-1993 chronology passes while both authored-provenance anchors remain blocked. Independent committee review accepts the diagnostic contract; the remaining entries are owner-routed remediation queues, not accepted content or automatic bug claims.
 

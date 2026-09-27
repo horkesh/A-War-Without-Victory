@@ -1,6 +1,39 @@
 # AWWV Calibration Master Reference
 
-## September 2026 session handoff — provisional Doljani candidate
+## April 1995 reopened: Gornja Presjenica reference and Donja Mahala — 2026-09-27
+
+The owner directed `op:trnovo:gornja_presjenica` to be painted **RS** at the
+April and October 1995 checkpoints. The January 1993 and April 1994 references
+already say RS. The two 1995 files now carry an owner-decision changelog entry,
+revision 6 and reconciled 712-OSID counts. No exact constituent-level source was
+established for this correction; it is recorded as the owner's reference
+determination, without changing the simulation or geometry. The retained
+delay-30 run already holds this cell RS with no control event. Replaying that
+unchanged run against the corrected references gives **707/707/704/669**, one
+more matching cell at each 1995 checkpoint. The Farz P-A §6 guard still fails
+and forbids merge. The score gain is a reference correction, not a new combat
+result or resolution of the Vidimlije mismatch.
+
+The owner reopened the April 1995 lane to investigate `op:orasje:donja_mahala`.
+In the retained run, a generic VRS 1st Krajina Corps sector operation starts at
+t117. At t116–117, replayed control and the operational contact graph make
+Donja Mahala and Orašje town a two-cell HRHB cluster whose three outer neighbours
+are all RS. This qualifies as `reduce_isolated_position` under the generic
+opportunity predicate (`plan.ts`); the retained trace does not record which
+target-purpose predicate won. Its 1st Doboj Light Infantry Brigade defeats the
+101st Orašje Brigade at t118, then the 106th Bosanska Posavina Brigade at t119; the second battle
+transfers the cell **HRHB→RS by ordinary combat**. Both HVO brigades were present
+before the assault. The operation is a simulation-generated `Operacija Bedem`,
+not a sourced historical offensive. The painted April 1995 value stays HRHB.
+BB1 p.182 places the next VRS attempt on the Orašje pocket in May 1995, and
+[Oršolić's archival study](https://hrcak.srce.hr/en/file/281893) reports the
+May–June 1995 offensive was repelled with no lasting line change. This supports
+the pocket-level anomaly, without proving the boundary of this aggregate OSID.
+The earlier must-hold and forced 4th Guards proposals remain withdrawn. No
+operation retiming, combat tuning, direct flip or new campaign is authorized by
+this diagnosis; the April lane stays open for a sourced, bounded decision.
+
+## Prior September 2026 session handoff — provisional Doljani candidate (historical)
 
 The latest retained 188-week candidate is `w188_n13`, **707/707/701/664**.
 Doljani becomes RBiH by ordinary combat at turn 57 and stays RBiH at week 104;

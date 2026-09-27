@@ -6,13 +6,20 @@
     "description": "Painted control target: October 1995",
     "total_osids": 712,
     "counts": {
-      "RS": 308,
-      "RBiH": 295,
+      "RS": 309,
+      "RBiH": 294,
       "HRHB": 109
     },
     "source": "painted_control_targets",
-    "revision": 5,
+    "revision": 6,
     "changelog": [
+      {
+        "date": "2026-09-27",
+        "osid": "op:trnovo:gornja_presjenica",
+        "from": "RBiH",
+        "to": "RS",
+        "rationale": "Owner determination, 2026-09-27: paint the Gornja Presjenica operational cell RS at the October 1995 checkpoint. The constituent-level historical boundary has not been independently established; this is a reference correction, not a simulation or geometry change."
+      },
       {
         "date": "2026-09-24",
         "osid": "op:mostar:vranjevici_2",
@@ -758,7 +765,7 @@
     "op:trebinje:velicani": "RS",
     "op:trebinje:zakovo_2": "RS",
     "op:trnovo:delijas": "RS",
-    "op:trnovo:gornja_presjenica": "RBiH",
+    "op:trnovo:gornja_presjenica": "RS",
     "op:trnovo:kijevo_2": "RS",
     "op:trnovo:tosici": "RS",
     "op:trnovo:trnovo": "RS",

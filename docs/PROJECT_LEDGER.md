@@ -9,6 +9,31 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-09-27 — April 1995 reopened: Gornja Presjenica reference and Orašje diagnosis
+
+The owner determined `op:trnovo:gornja_presjenica` should be painted RS at April
+and October 1995. Only those two 1995 calibration references changed from RBiH
+to RS; both retain 712 OSIDs, increment to revision 6, and reconcile faction
+counts. This is recorded as an owner reference determination because no exact
+constituent-level historical source was established. No simulation, geometry,
+initial control, or earlier painted checkpoint changed. Replaying the retained
+delay-30 run gives 707/707/704/669 (prior 707/707/703/668); the simulation had
+already kept Gornja Presjenica RS. The inherited Farz P-A §6 guard still fails,
+so there is no merge or baseline adoption.
+
+The owner held the April 1995 lane open over Donja Mahala. Retained AAR and
+battle logs show a simulation-generated 1st Krajina Corps sector operation
+targeted the cell at t117. Replayed t116–117 control and the contact graph show
+a two-cell HRHB Orašje pocket with a three-cell, all-RS outer ring; this
+qualifies for the generic `reduce_isolated_position` purpose, although the
+winning target-purpose predicate was not retained. The 1st Doboj Light Infantry
+Brigade beat the physically present 101st Orašje Brigade at t118 and 106th Bosanska Posavina
+Brigade at t119. The second battle transferred HRHB→RS. BB1 p.182 and
+[Oršolić's archival study](https://hrcak.srce.hr/en/file/281893) contradict a
+lasting fall of the Orašje pocket, but do not establish this aggregate cell's
+exact boundary. The previous must-hold and forced 4th Guards proposals remain
+withdrawn; no combat/operation edit or new campaign was made for Donja Mahala.
+
 ## 2026-09-19 — ENGINE-HEALTH B3: TG donation readiness is augmentation, not an operation veto
 
 **Branch** `codex/january-1993-operations-20260914`. **Commits** `9cdb14b99` (engine fix + tests),
