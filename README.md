@@ -2,7 +2,7 @@
 
 [Open the Doljani candidate map](https://horkesh.github.io/A-War-Without-Victory/?run=doljani-20260927).
 
-[Open the April 1995 delay-30 inspection map](https://horkesh.github.io/A-War-Without-Victory/?run=april1995-delay30-20260927). This retained 188-week run is an **inspection candidate, not the adopted baseline**. It scores 707/712 in January 1993, 707/712 in April 1994, 703/712 in April 1995 (anchors 40/40), and 668/712 in October 1995. Vidimlije and the other listed cells remain parked; the Central Bosnia anomaly and Farz P-A §6 gate remain open. The published artifact is `april1995-delay30-20260927.html`; the query link selects it while keeping the Doljani entry available.
+[Open the April 1995 delay-30 inspection map](https://horkesh.github.io/A-War-Without-Victory/?run=april1995-delay30-20260927). This retained 188-week run is an **inspection candidate, not the adopted baseline**. It scores 707/712 in January 1993, 707/712 in April 1994, 704/712 in April 1995 (anchors 40/40), and 669/712 in October 1995. Gornja Presjenica is painted RS at the April and October 1995 checkpoints and the retained simulation is RS. Vidimlije and the other listed cells remain parked; the Central Bosnia anomaly and Farz P-A §6 gate remain open. The published artifact is `april1995-delay30-20260927.html`; the query link selects it while keeping the Doljani entry available.
 
 This page replays the saved **188-week Doljani timing candidate** from `apr1992_definitive_188w__6deb5845c150c196__w188_n13`. The run came from a dirty local worktree and is **not an adopted baseline**. Its saved final state has SHA-256 `ee5dbfb8f42e7d147e046ad7ffe1b494ded34eec45d3d84f69069d586a347558`.
 
