@@ -7329,6 +7329,38 @@ wrong-corps attribution, Prozor injection, full-suite exit and clean-source
 697/712 checkpoint, checking historical control and operation mechanisms for
 each mismatch before making changes. [Closeout receipt](../logs/session-closeout-20260924/receipt.txt).
 
+### 2026-09-24 — R8 documentation draft reconciliation
+
+Seven uncommitted R8 documentation edits were compared with the current January
+candidate. Their September 10 branch-push and status text is historical or
+superseded by the current board and roadmap. Three passages cite a
+`documentation-sync-manifest.json` that is absent from both checkouts, so the
+draft was not applied wholesale. The active Electron validation plan's headline
+was corrected to distinguish the verified replacement build from the failed
+post-run package-directory identity gate. RBiH readability, Save/load, runtime
+disposition, RS/HRHB and full campaigns remain open. No product behavior,
+acceptance gate or calibration result changed. The derived plan index was
+regenerated for the edited plan's token count. The original R8 worktree and its
+ignored package/run evidence remain preserved; its exact tracked diff is saved
+locally under `logs/branch-hygiene/20260924-parallel-audit/r8-uncommitted.patch`
+(SHA-256 `E0252CEB2A3C108AFB1CDCF6E86A862772F7F4B8E8E6B2BD1E5F0C436679E888`).
+
+### 2026-09-24 — Local worktree and branch housekeeping
+
+The clean agent-setup modernization and calibration timeline viewer worktrees
+were retired through Git after checking their ignored files and junctions. The
+agent-setup branch remains because it has distinct ancestry; the integrated
+timeline viewer branch was deleted locally. The clean R7 honorific checkout was
+retired after its 301 ignored run, build and diagnostic files were archived and
+hash-verified at
+`F:/AWWV-worktree-archives/r7-arbih-honorific-evidence-20260924.zip`
+(SHA-256 `fdca355721c88283485725b046cb62d9944d98be1d25c6b2609321238d7a1ae3`);
+its integrated local branch was deleted. The local `gh-pages` ref was
+fast-forwarded to the fetched published remote tip; `main` was not changed or
+pushed. Other worktrees retain active ownership, uncommitted changes, cited
+evidence or dependency junctions. Automatic approval review blocked recursive
+deletion of unregistered external folders, so they remain. No source, scenario,
+canon, baseline, acceptance gate or release state changed.
 ### 2026-09-24 — Lukavac 93 military candidate validated; checkpoint gate open
 
 The post-auto-flip `n396` succeeded through combat; later Lukavac runs failed as
@@ -7470,3 +7502,16 @@ event/termination/desktop packet passed 360 focused tests with five skips, but
 its effect assertion checks only positivity. A separate §6-approved correction,
 exact-effect tests, and measured proof are required before merge/adoption.
 The closeout candidate remains a review vehicle with red gates, not promotion.
+
+### 2026-09-27 — January-branch documentation integrated into closeout
+
+The two outstanding January-branch documentation commits were merged without
+touching that branch's active worktree. Both append-only ledger histories and
+the R8 Electron validation-plan correction are preserved. The older ledger
+cited an R8 draft patch that existed only in the other worktree; its exact
+12,371-byte file is now tracked at
+`logs/branch-hygiene/20260924-parallel-audit/r8-uncommitted.patch` as an
+unchanged archival artifact with the recorded SHA-256
+`E0252CEB2A3C108AFB1CDCF6E86A862772F7F4B8E8E6B2BD1E5F0C436679E888`.
+Plan-index, open-gates and strict receipt-citation checks pass. This is
+evidence preservation, not R8 acceptance or R6 merge clearance.

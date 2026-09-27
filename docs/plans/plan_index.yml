@@ -164,7 +164,7 @@ lanes:
     plans:
       - path: docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
         exists: true
-        tokens: 40387
+        tokens: 40408
         fits_context: false
         tasks: null
   - lane: R9
