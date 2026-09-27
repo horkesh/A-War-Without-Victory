@@ -1,0 +1,7 @@
+JSON_OK count=3
+FRONTMATTER_OK count=10
+NAPKIN_PRESERVE_OK sections=12 entries=93
+NAPKIN_WORDS before=6214 after=437
+REFERENCE_OK files=25
+DIFF_CHECK_OK
+BOUNDARY_OK settings_and_ledger_unchanged

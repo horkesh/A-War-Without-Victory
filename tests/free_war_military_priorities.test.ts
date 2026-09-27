@@ -160,6 +160,18 @@ describe('Free War Slice A — territory-trend priority multiplier', () => {
     });
 });
 
+describe('RBiH 2nd Corps Brcko objective scope', () => {
+    it('keeps the late-1993 priority on the southern approach instead of the whole municipality', () => {
+        const expansion = getCorpsArmyPriorities('RBiH', 'arbih_2nd_corps', 74)
+            .find(priority => priority.name === 'Tuzla Expansion');
+
+        expect(expansion).toBeDefined();
+        expect(expansion!.target_municipalities).not.toContain('brcko');
+        expect(expansion!.target_osids).toEqual(['op:brcko:brka_2']);
+        expect(expansion!.target_osids).not.toContain('op:brcko:brcko');
+    });
+});
+
 // ── A2a — supply + campaign-plan signal modulators ────────────────────────────
 
 describe('Free War A2a — supply + campaign-plan priority modulators', () => {

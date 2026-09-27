@@ -1,105 +1,28 @@
-# Claude Code Skills
+# Project skills and Claude entrypoints
 
-This directory contains the repo’s shared skills (Cursor-style skill structure) for use with Claude Code.
+[AGENTS.md](../AGENTS.md) is the shared contract. [CLAUDE.md](../CLAUDE.md) adds Claude-specific routing; consult the relevant section of [AGENT_WORKFLOW.md](../docs/20_engineering/AGENT_WORKFLOW.md) for execution details.
 
-## Skills Available (53 total)
+Project skill semantics are maintained in `skills/<name>/SKILL.md`. Use the runtime catalog to select relevant skills, then read their bodies and conditional references. The [role map](AGENT_TEAM_ROSTER.md) preserves domain consultation gates and distinct canon seats. It is a routing reference, not a mandatory startup read or a request to launch every role.
 
-### Core Development Skills
-- **systematic-debugging** - Comprehensive debugging methodology with 4-phase process
-- **test-driven-development** - TDD process with red-green-refactor cycle
-- **verification-before-completion** - Evidence-based completion verification
-- **code-review** - Code review process and standards
-- **refactor-pass** - Post-implementation simplification pass
+Derive the available names from the actual files instead of trusting a roster count:
 
-### Project-Specific Skills (AWWV)
-- **awwv-ledger-entry** - PROJECT_LEDGER.md entry creation
-- **awwv-read-first** - Required reading list before changes
-- **awwv-pre-commit-check** - Pre-commit verification checklist
-- **awwv-plan-change** - Planning workflow for changes
-- **awwv-make-cursor-prompt** - Generate Cursor AI prompts
+```powershell
+Get-ChildItem -LiteralPath .claude/skills -Directory |
+    Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName 'SKILL.md') } |
+    Select-Object -ExpandProperty Name
+```
 
-### Domain-Specific Skills
-- **balkan-battlegrounds-historical-extractor** - Historical data extraction
-- **canon-compliance-review** - Canon compliance verification
-- **canon-compliance-reviewer** - Canon review process
-- **determinism-auditor** - Determinism verification
-- **deterministic-script-implementation** - Deterministic scripting
-- **formation-expert** - Military formation expertise
-- **map-geometry-integrity-reviewer** - Map geometry validation
-- **scenario-creator-runner-tester** - Scenario management
-- **scenario-harness-engineer** - Scenario harness development
+Supporting files remain beside each skill. [Agent briefs](agents/) and [commands](commands/) compose roles; they do not add runtime tool enum values. Use only the agent tools and model identifiers exposed by the current host.
 
-### Role-Based Skills
-- **asset-integration** - Asset integration workflows
-- **build-engineer** - Build system management
-- **devops-specialist** - DevOps practices
-- **documentation-specialist** - Documentation standards
-- **game-designer** - Game design processes
-- **gameplay-programmer** - Gameplay implementation
-- **graphics-programmer** - Graphics programming
-- **lua-scripting** - Lua scripting standards
-- **performance-engineer** - Performance optimization
-- **platform-specialist** - Platform-specific development
-- **product-manager** - Product management workflows
-- **qa-engineer** - QA processes
-- **systems-programmer** - Systems programming
-- **technical-architect** - Architecture decisions
-- **ui-ux-developer** - UI/UX development
+`settings.json` registers Claude hooks. Git-hook coverage depends on the configured `core.hooksPath`; inspect `git config --show-origin --get core.hooksPath` and the [Git-hook documentation](../.githooks/README.md). Source presence alone proves neither activation nor Codex/Cursor parity. The modernization does not change hook enforcement.
 
-### Process Skills
-- **brainstorming** - Structured brainstorming
-- **dispatching-parallel-agents** - Parallel agent coordination
-- **executing-plans** - Plan execution methodology
-- **finishing-a-development-branch** - Branch completion checklist
-- **ledger-process-scribe** - Ledger maintenance
-- **orchestrator** - Multi-agent orchestration
-- **prompt-construction** - Effective prompt creation
-- **quality-assurance-process** - QA workflow
-- **receiving-code-review** - Code review reception
-- **requesting-code-review** - Code review requests
-- **subagent-driven-development** - Subagent-based development
-- **using-git-worktrees** - Git worktree workflows
-- **using-superpowers** - Meta-skill usage
-- **writing-plans** - Plan creation standards
-- **writing-skills** - Skill authoring guide
+The [distribution manifest](../.agent/skill-distribution.json) records source ownership and staged host adapters. Existing locations stay in place. Same-name skills are not a merge mechanism; do not expose a second copy without checking the actual runtime catalog and the installed version.
 
-### Documentation & Compliance
-- **docs-only-ledger-handling** - Documentation-only ledger updates
-- **retrospective-analyst** - Retrospective analysis
+The [legacy importer](../tools/install_superpowers.ps1) now previews one explicit name. Keep the review receipt outside both trees, inspect its `.diff`, then repeat the same command with `-Apply`. An existing skill is refused by default. Intentional replacement requires `-Replace` on preview and apply, plus a fresh `-BackupRoot` on apply; source/destination drift invalidates the preview. Reconcile host-specific differences first. Never run a bulk copy over the project or installed skill tree.
 
-### Other
-- **code-simplifier** - Code simplification strategies
-- **frontend-design** - Frontend design patterns
+```powershell
+# Example only: supply reviewed source/destination and a disposable receipt path.
+./tools/install_superpowers.ps1 -Name example -SourceRoot <source> -DestinationRoot <destination> -ReviewPath <receipt.json>
+```
 
-## Usage
-
-These skills are available to Claude Code when working in this repository. They provide:
-- Best practices and methodologies
-- Project-specific workflows
-- Domain knowledge
-- Process standards
-
-## Structure
-
-Each skill directory contains:
-- `SKILL.md` - Main skill definition with metadata and instructions
-- Supporting files (*.md, *.ts, *.sh, *.dot) - Additional documentation and examples
-
-Additional shared Claude CLI support lives in:
-
-- `agents/` - reusable agent briefs for taskforce-style work
-- `commands/` - slash-command prompts for repeatable workflows such as checkpoints and taskforce mode
-- `settings.json` - shared hook reminders and orchestration guardrails
-- `.githooks/` - local git hooks for governance enforcement
-
-Important governance docs also live in:
-
-- `docs/20_engineering/ROADMAP_GOVERNANCE.md`
-- `docs/20_engineering/COMMAND_AUTHORITY_GATES.md`
-- `docs/30_planning/_task_artifacts/ACTIVE_TASK_GOVERNANCE.md`
-
-## Notes
-
-- Skills maintain the same structure as Cursor skills for consistency
-- All supporting files (examples, utilities, documentation) have been preserved
-- Skills are version-controlled with the project for team-wide availability
+Governed work retains [roadmap governance](../docs/20_engineering/ROADMAP_GOVERNANCE.md), [command authority gates](../docs/20_engineering/COMMAND_AUTHORITY_GATES.md), and the [existing task governance artifact](../docs/30_planning/_task_artifacts/ACTIVE_TASK_GOVERNANCE.md). Use focused checks for documentation/process changes; preserve checks required by affected production behavior.

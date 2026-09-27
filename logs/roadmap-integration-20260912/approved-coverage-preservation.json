@@ -1,0 +1,12 @@
+{
+  "source": "51fe494151397c1cc6521b54006b0f8da70705e5",
+  "clean": true,
+  "checked_dirty_paths": 28,
+  "preservation_failures": [],
+  "stash_count": 22,
+  "stashes_preserved": true,
+  "protected_drift": [],
+  "main": "9588876bc58b09adea89e48d9520be427e270f20",
+  "calibration_ancestry": true,
+  "worktree_count": 18
+}

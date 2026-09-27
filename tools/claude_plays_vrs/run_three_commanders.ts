@@ -489,7 +489,8 @@ async function main(): Promise<void> {
     const mode = process.argv.includes('--mode') ? process.argv[process.argv.indexOf('--mode') + 1] : 'reactive';
     const corpsApi = process.argv.includes('--corps-api');
     const apiModel = process.argv.includes('--model') ? process.argv[process.argv.indexOf('--model') + 1] : 'claude-haiku-4-5-20251001';
-    const scenarioPath = 'data/scenarios/apr1992_definitive_40w.json';
+    const scenarioPath = 'data/scenarios/apr1992_definitive_188w.json';
+    const scenarioWeeks = 40;
     const outDir = join(baseDir, 'runs/three_commanders');
     await mkdir(outDir, { recursive: true });
 
@@ -535,7 +536,7 @@ async function main(): Promise<void> {
 
     // Initialize scenario
     console.log('Initializing scenario...');
-    const initResult = await runScenario({ scenarioPath, outDirBase: join(baseDir, 'runs'), uniqueRunFolder: true, initialStateOnly: true, baseDir });
+    const initResult = await runScenario({ scenarioPath, outDirBase: join(baseDir, 'runs'), uniqueRunFolder: true, initialStateOnly: true, baseDir, weeksOverride: scenarioWeeks });
     let state = deserializeState(await readFile(initResult.paths.initial_save, 'utf8'));
     console.log(`State loaded. Phase: ${state.meta.phase}. Turn: ${state.meta.turn}. OSIDs: ${Object.keys(state.political?.political_controllers ?? {}).length}`);
 

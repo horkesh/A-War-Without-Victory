@@ -6,13 +6,20 @@
     "description": "Painted control target: October 1995",
     "total_osids": 712,
     "counts": {
-      "RS": 307,
-      "RBiH": 296,
+      "RS": 308,
+      "RBiH": 295,
       "HRHB": 109
     },
     "source": "painted_control_targets",
-    "revision": 4,
+    "revision": 5,
     "changelog": [
+      {
+        "date": "2026-09-24",
+        "osid": "op:mostar:vranjevici_2",
+        "from": "RBiH",
+        "to": "RS",
+        "rationale": "Owner determination, 2026-09-24: paint the Mostar Vranjevići operational cell RS at every calibration checkpoint. This supersedes the owner-authored RBiH paint of 2026-08-24 for this reference only. The aggregate's constituent-level historical boundary remains uncertain; this is a reference decision, not a simulation or geometry change."
+      },
       {
         "date": "2026-08-12",
         "osid": "op:gorazde:kolovarice",
@@ -570,7 +577,7 @@
     "op:mostar:mostar_istok_2": "RBiH",
     "op:mostar:mostar_zapad_2": "HRHB",
     "op:mostar:potoci": "RBiH",
-    "op:mostar:vranjevici_2": "RBiH",
+    "op:mostar:vranjevici_2": "RS",
     "op:mrkonjic_grad:baljvine_2": "HRHB",
     "op:mrkonjic_grad:bjelajce_2": "HRHB",
     "op:mrkonjic_grad:gerzovo_2": "HRHB",

@@ -1438,6 +1438,59 @@ describe('finalizeOperationAAR', () => {
         expect(aar.grade.stars).toBeLessThan(5);
     });
 
+    it('uses a same-operation battle flip receipt when weekly attack telemetry lags', () => {
+        const op = makeFinalizableOp({
+            objectives: ['op:visegrad:center'],
+            participating_brigades: ['bde_1'],
+            weekly_log: [{
+                turn: 6,
+                phase: 'execution',
+                attacks_this_turn: 0,
+                objectives_captured_this_turn: ['op:visegrad:center'],
+                objectives_lost_this_turn: [],
+                casualties_suffered: { killed: 0, wounded: 0 },
+                casualties_inflicted: { killed: 0, wounded: 0 },
+                equipment_lost: { tanks: 0, artillery: 0 },
+                equipment_destroyed: { tanks: 0, artillery: 0 },
+                equipment_captured: { tanks: 0, artillery: 0 },
+                brigade_count: 1,
+                momentum: 1,
+                notable_events: [],
+            }],
+        });
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: {
+                    personnel: 1300,
+                    faction: 'RS',
+                    status: 'active',
+                    brigade_history: {
+                        engagements: [{
+                            battle_id: '6:op:visegrad:center:bde_1:defender',
+                            turn: 6,
+                            osid: 'op:visegrad:center',
+                            role: 'attacker',
+                            outcome: 'decisive_victory',
+                            enemy_faction: 'RBiH',
+                            casualties_taken: 0,
+                            casualties_inflicted: 10,
+                            equipment_destroyed: { tanks: 0, artillery: 0 },
+                            equipment_captured: { tanks: 0, artillery: 0 },
+                            territory_flipped: true,
+                        }],
+                    },
+                } as any,
+            },
+            { 'op:visegrad:center': 'RS' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        expect(state.operation_history[0].objectives_captured).toEqual(['op:visegrad:center']);
+        expect(state.operation_history[0].outcome).toBe('success');
+    });
+
     it('builds axis_summaries for multi-axis ops', () => {
         const op = makeFinalizableOp({
             objectives: undefined,

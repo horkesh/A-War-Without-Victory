@@ -8,8 +8,10 @@
 
 **Tech stack:** TypeScript simulation, JSON events/scenarios, Vitest, deterministic 40/104/188-turn runners, engine-health/calibration diagnostics, React read models.
 
+> **2026-09-19 retirement note:** the standalone `apr1992_definitive_40w*.json` scenario files are deleted. The `sim:scenario:run:40w` command still exists but now runs the canonical `apr1992_definitive_188w.json` with `--weeks 40`. Historical command lines below remain as the record of what was executed at the time.
+
 **Date:** 2026-07-31
-**Status:** READY -- begins after R3 Tactical Group convergence
+**Status:** ACTIVE R6; provisional Doljani 188-week candidate, full-campaign acceptance NO-GO (2026-09-27). Historical phase checkboxes below retain their original execution context; current results and gates are in `docs/40_reports/CALIBRATION_MASTER.md` and `docs/plans/MASTER_ROADMAP.md`.
 **Roadmap workstream:** R6
 **Canonical owner:** combat lifecycle for mechanics; current-state predicates for history; Decision Room/map for explanation only
 **Collision rule:** Phases 4 and 5 own `attack_resolution_osid.ts` serially. No other combat-math lane may overlap them.

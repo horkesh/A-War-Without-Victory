@@ -1,0 +1,7 @@
+Newer installed edit: awwv-make-cursor-prompt; preserve it and reconcile manually
+At F:\AWWV-worktrees\agent-setup-modernization\logs\agent-setup-modernization\user-skill-handoff.ps1:49 char:98
++ ... l_sha256) { throw "Newer installed edit: $($adapter.name); preserve i ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Newer installed...oncile manually:String) [], RuntimeException
+    + FullyQualifiedErrorId : Newer installed edit: awwv-make-cursor-prompt; preserve it and reconcile manually
+ 

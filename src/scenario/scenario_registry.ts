@@ -53,17 +53,6 @@ export const SCENARIO_REGISTRY: ScenarioEntry[] = [
         available: true,
     },
     {
-        key: 'apr1992_definitive_40w',
-        name: 'First 40 Weeks',
-        description: 'Calibration scenario: the decisive opening 40 weeks of the war. Shorter format for testing strategies and learning the systems.',
-        startDate: 'April 1992',
-        startWeek: 0,
-        durationWeeks: 40,
-        difficulty: { RBiH: 'hard', RS: 'easy', HRHB: 'medium' },
-        scenarioFile: 'apr1992_definitive_40w.json',
-        available: true,
-    },
-    {
         key: 'jan1993_to_dayton',
         name: 'Mid-War: Shifting Alliances',
         description: 'January 1993: the front lines have stabilized. The RBiH-HVO alliance fractures, enclaves are besieged, and international pressure mounts. Navigate the war to Dayton.',

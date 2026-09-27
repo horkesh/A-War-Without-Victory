@@ -768,18 +768,34 @@ describe('strict null inventory progress', () => {
             // new type escape. All three land in the `sim` domain (343 -> 346); `state`
             // is unchanged at 187, because classifyDomain routes MilitiaPoolState by its
             // interface-name rule rather than by the file it lives in.
-            optional_fields_game_state: 543,
+            // April-1994 operation calibration adds three absent-safe operation fields on
+            // top of the mainline 543 count: all-axis synchronization, assembly floors,
+            // and per-objective forward floors. 543 -> 546; no type escapes.
+            // ENGINE-HEALTH B3 (2026-09-19) adds +2: `tg_formation_decline` on
+            // `OperationAxis` and on `CorpsOperation` — the reason-code record for a
+            // declined Tactical Group augmentation, replacing the retired
+            // `insufficient_donation` launch blocker. Both are OPTIONAL and written ONLY
+            // under `AWWV_DEBUG_REASON_CODES=tg_formation`, so they are absent on every
+            // default run and on every legacy save; the save hash is unmoved by
+            // construction (`whenReasonCodeTopic` spreads an empty object when the topic
+            // is off, so the keys are absent rather than present-and-null). 546 -> 548.
+            // as_any / as_factionid / as_unknown / non_null_assertions are ALL unchanged
+            // at 0 / 3 / 5 / 7 — no new type escape. `classifyDomain` routes both to `sim`
+            // on the /Corps|Operation/ interface-name rule, so sim 349 -> 351 and `state`
+            // is unchanged at 187.
+            // Lukavac calibration adds optional CorpsOperation.coordinated_advance.
+            optional_fields_game_state: 549,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
         // so sim 335->336 and state is UNCHANGED at 186. Gated by
         // `AWWV_DEBUG_REASON_CODES=axis_reject`; absent on every default run.
-        expect(current.optional_field_domains.total).toBe(543);
+        expect(current.optional_field_domains.total).toBe(549);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 346,
+            sim: 352,
             state: 187,
             ui_adapter: 0,
             unknown: 0,

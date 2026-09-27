@@ -1,0 +1,7 @@
+{"timestamp":"2026-09-12T20:35:08.470373Z","level":"WARN","fields":{"message":"ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/"},"target":"codex_skills::interface"}
+{"timestamp":"2026-09-12T20:35:08.470434Z","level":"WARN","fields":{"message":"ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/"},"target":"codex_skills::interface"}
+{"timestamp":"2026-09-12T20:35:08.560570Z","level":"WARN","fields":{"message":"Failed to create shell snapshot for powershell: Shell snapshot not supported yet for PowerShell"},"target":"codex_core::shell_snapshot"}
+{"timestamp":"2026-09-12T20:35:08.667975Z","level":"WARN","fields":{"message":"MCP server startup failed","server_name":"pencil","error":"The system cannot find the path specified. (os error 3)"},"target":"codex_mcp::rmcp_client"}
+{"timestamp":"2026-09-12T20:35:09.229317Z","level":"WARN","fields":{"message":"ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/"},"target":"codex_skills::interface"}
+{"timestamp":"2026-09-12T20:35:09.229388Z","level":"WARN","fields":{"message":"ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/"},"target":"codex_skills::interface"}
+{"timestamp":"2026-09-12T20:35:09.324782Z","level":"WARN","fields":{"message":"MCP server startup failed","server_name":"pencil","error":"The system cannot find the path specified. (os error 3)"},"target":"codex_mcp::rmcp_client"}

@@ -27,6 +27,30 @@ const AGGRESSIVE_COMMANDER_CONCENTRATION_BONUS = 1.4;
 /** Cautious commander spread bonus: brigades get extra affinity for under-covered sub-segments. */
 const CAUTIOUS_COMMANDER_SPREAD_BONUS = 1.25;
 
+const FIXED_HOME_OSID_TAG = 'placement:fixed_home_osid';
+
+function opposingOperationObjectives(state: GameState, defendingFaction: FactionId): Set<string> {
+    const formations = state.military.formations ?? {};
+    const objectives = new Set<string>();
+    const commands = state.military.corps_command ?? {};
+    for (const corpsId of Object.keys(commands).sort(strictCompare)) {
+        const operations = [...(commands[corpsId]?.active_operations ?? [])]
+            .sort((a, b) => strictCompare(a.name, b.name) || a.started_turn - b.started_turn);
+        for (const operation of operations) {
+            const attackerFaction = [...(operation.participating_brigades ?? [])]
+                .sort(strictCompare)
+                .map((brigadeId) => formations[brigadeId]?.faction)
+                .find((faction): faction is FactionId => !!faction);
+            if (!attackerFaction || attackerFaction === defendingFaction) continue;
+            const operationObjectives = operation.axes?.flatMap((axis) => axis.objectives ?? [])
+                ?? operation.objectives
+                ?? [];
+            for (const osid of operationObjectives) objectives.add(osid);
+        }
+    }
+    return objectives;
+}
+
 /**
  * Assign front-line brigades to sub-segments within each sector.
  * Each brigade gets exactly one sub-segment (their AoR). Each sub-segment
@@ -169,9 +193,38 @@ export function assignBrigadesToSubSegments(
 
         const assignedBrigades = new Set<string>();
         const brigadesPerSubSeg: Map<number, string[]> = new Map();
+        // HVO's 1993 posture was locally defensive: home-raised brigades stayed
+        // tied to threatened community fronts while ARBiH carried the offensive.
+        // Do not project that institution-specific behavior onto VRS or ARBiH.
+        const threatenedByOpposingOperation = sector.faction === 'HRHB'
+            ? opposingOperationObjectives(state, sector.faction)
+            : new Set<string>();
+
+        // A brigade explicitly raised for one home OSID should cover that home
+        // contact before the generic widest-front pass can export it elsewhere
+        // in the same corps sector. This is assignment priority, not immunity:
+        // the brigade remains a normal defender and can still be committed to
+        // operations by the operation lifecycle.
+        for (const { idx } of ssOrder) {
+            const ss = sector.sub_segments[idx]!;
+            if (ss.enemy_osids.length === 0) continue;
+            const homeDefender = frontBrigadeIds
+                .filter((bid) => !assignedBrigades.has(bid))
+                .map((bid) => ({ bid, formation: formations[bid] }))
+                .filter((entry): entry is { bid: string; formation: FormationState } => !!entry.formation)
+                .filter(({ formation }) => formation.tags?.includes(FIXED_HOME_OSID_TAG) === true)
+                .filter(({ formation }) => !!formation.home_osid && ss.friendly_osids.includes(formation.home_osid))
+                .filter(({ formation }) => pc[formation.home_osid!] === sector.faction)
+                .filter(({ formation }) => threatenedByOpposingOperation.has(formation.home_osid!))
+                .sort((a, b) => strictCompare(a.bid, b.bid))[0];
+            if (!homeDefender) continue;
+            assignedBrigades.add(homeDefender.bid);
+            brigadesPerSubSeg.set(idx, [homeDefender.bid]);
+        }
 
         // First pass: assign one brigade to each sub-segment (widest first)
         for (const { idx } of ssOrder) {
+            if ((brigadesPerSubSeg.get(idx)?.length ?? 0) > 0) continue;
             const candidates = affinities
                 .filter(a => a.ssIdx === idx && !assignedBrigades.has(a.bid))
                 .sort((a, b) => b.score - a.score || strictCompare(a.bid, b.bid));

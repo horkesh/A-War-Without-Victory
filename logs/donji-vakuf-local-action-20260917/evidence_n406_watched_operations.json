@@ -1,0 +1,62 @@
+[
+  {
+    "blocker_code": "objective_overlap",
+    "canonical_window": "5",
+    "catalog_status": "present",
+    "delivery_status": "blocked",
+    "eligibility_status": "not_eligible",
+    "launch_status": "blocked",
+    "operation_id": "",
+    "operation_name": "Donji Vakuf Local Action",
+    "turn": 5,
+    "typed_blocker": "objective_overlap"
+  },
+  {
+    "blocker_code": "build_insufficient_participants",
+    "canonical_window": "6",
+    "catalog_status": "present",
+    "delivery_status": "unknown",
+    "eligibility_status": "unknown",
+    "launch_status": "not_launched",
+    "operation_id": "",
+    "operation_name": "Donji Vakuf Local Action",
+    "turn": 6,
+    "typed_blocker": "build_insufficient_participants"
+  },
+  {
+    "blocker_code": "",
+    "canonical_window": "10",
+    "catalog_status": "present",
+    "delivery_status": "unknown",
+    "eligibility_status": "eligible",
+    "launch_status": "launched",
+    "operation_id": "Operation Kotor Varos",
+    "operation_name": "Operation Kotor Varos",
+    "turn": 10,
+    "typed_blocker": ""
+  },
+  {
+    "blocker_code": "",
+    "canonical_window": "16",
+    "catalog_status": "present",
+    "delivery_status": "unknown",
+    "eligibility_status": "eligible",
+    "launch_status": "launched",
+    "operation_id": "Operation Herzegovina Consolidation",
+    "operation_name": "Operation Herzegovina Consolidation",
+    "turn": 16,
+    "typed_blocker": ""
+  },
+  {
+    "blocker_code": "",
+    "canonical_window": "19",
+    "catalog_status": "present",
+    "delivery_status": "unknown",
+    "eligibility_status": "eligible",
+    "launch_status": "launched",
+    "operation_id": "Operation Posavina Corridor",
+    "operation_name": "Operation Posavina Corridor",
+    "turn": 19,
+    "typed_blocker": ""
+  }
+]

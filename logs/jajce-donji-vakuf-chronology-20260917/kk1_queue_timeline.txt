@@ -1,0 +1,51 @@
+# 1st Krajina Corps queue — every pre-planned operation, 188-week advisory reproduction
+# Source: data/derived/scenario/_baseline_tmp/apr1992_188w (clean 0033517b6; weeks 1-39 byte-identical to n403)
+# Turn N boundary date = 1992-04-06 + 7N days. Probe/sector rows are filtered out.
+
+w  1 Operation Prijedor       type=sector_attack phase=execution  obj=op:prijedor:kozarac_2            atk=4 bat=2 elig=4 mv=1 mvonly=0 idle=0 caps=2 rec=null brig=5
+w  2 Operation Prijedor       type=sector_attack phase=execution  obj=op:prijedor:kamicani             atk=3 bat=2 elig=3 mv=2 mvonly=0 idle=0 caps=4 rec=null brig=5
+w  3 Operation Prijedor       type=sector_attack phase=execution  obj=op:prijedor:raljas               atk=2 bat=2 elig=2 mv=3 mvonly=0 idle=0 caps=6 rec=null brig=5
+w  4 Operation Prijedor       type=sector_attack phase=recovery   obj=null                             atk=1 bat=1 elig=1 mv=3 mvonly=0 idle=0 caps=7 rec=completed brig=5
+w  5 Operation Prijedor       type=sector_attack phase=recovery   obj=null                             atk=0 bat=0 elig=0 mv=1 mvonly=0 idle=0 caps=7 rec=completed brig=5
+w  6 Operation Corridor       type=sector_attack phase=planning   obj=op:derventa:zivinice             atk=0 bat=0 elig=0 mv=4 mvonly=0 idle=0 caps=0 rec=null brig=6
+w  7 Operation Corridor       type=sector_attack phase=planning   obj=op:derventa:zivinice             atk=0 bat=0 elig=0 mv=4 mvonly=0 idle=0 caps=0 rec=null brig=6
+w  8 Operation Corridor       type=sector_attack phase=planning   obj=op:derventa:zivinice             atk=0 bat=0 elig=0 mv=2 mvonly=0 idle=0 caps=0 rec=null brig=6
+w  9 Operation Corridor       type=sector_attack phase=execution  obj=op:modrica:garevac_2             atk=5 bat=3 elig=5 mv=1 mvonly=0 idle=0 caps=3 rec=null brig=6
+w 10 Operation Corridor       type=sector_attack phase=execution  obj=op:bosanski_samac:novo_selo_2    atk=3 bat=2 elig=3 mv=2 mvonly=0 idle=0 caps=5 rec=null brig=6
+w 10 Operation Kotor Varos    type=sector_attack phase=planning   obj=op:kotor_varos:kotor_varos_2     atk=0 bat=0 elig=0 mv=3 mvonly=0 idle=0 caps=0 rec=null brig=3
+w 11 Operation Corridor       type=sector_attack phase=execution  obj=op:bosanski_samac:novo_selo_2    atk=0 bat=0 elig=0 mv=5 mvonly=0 idle=0 caps=5 rec=null brig=6
+w 11 Operation Kotor Varos    type=sector_attack phase=planning   obj=op:kotor_varos:kotor_varos_2     atk=0 bat=0 elig=0 mv=3 mvonly=0 idle=0 caps=0 rec=null brig=3
+w 12 Operation Corridor       type=sector_attack phase=execution  obj=op:bosanski_samac:novo_selo_2    atk=0 bat=0 elig=0 mv=5 mvonly=0 idle=0 caps=5 rec=null brig=6
+w 12 Operation Kotor Varos    type=sector_attack phase=planning   obj=op:kotor_varos:kotor_varos_2     atk=0 bat=0 elig=0 mv=2 mvonly=0 idle=0 caps=0 rec=null brig=3
+w 13 Operation Corridor       type=sector_attack phase=execution  obj=op:derventa:misinci_2            atk=2 bat=2 elig=2 mv=3 mvonly=0 idle=0 caps=7 rec=null brig=6
+w 13 Operation Kotor Varos    type=sector_attack phase=recovery   obj=null                             atk=2 bat=1 elig=2 mv=1 mvonly=0 idle=0 caps=1 rec=completed brig=3
+w 14 Operation Corridor       type=sector_attack phase=execution  obj=op:bosanski_brod:novo_selo_2     atk=3 bat=1 elig=3 mv=1 mvonly=0 idle=0 caps=8 rec=null brig=6
+w 15 Operation Corridor       type=sector_attack phase=execution  obj=op:bosanski_brod:brod            atk=2 bat=1 elig=2 mv=2 mvonly=0 idle=0 caps=9 rec=null brig=6
+w 16 Operation Corridor       type=sector_attack phase=recovery   obj=null                             atk=1 bat=1 elig=1 mv=3 mvonly=0 idle=0 caps=10 rec=completed brig=6
+w 17 Operation Corridor       type=sector_attack phase=recovery   obj=null                             atk=0 bat=0 elig=0 mv=2 mvonly=0 idle=0 caps=10 rec=completed brig=6
+w 18 Operation Corridor       type=sector_attack phase=recovery   obj=null                             atk=0 bat=0 elig=0 mv=0 mvonly=0 idle=0 caps=10 rec=completed brig=6
+w 19 Operation Jajce          type=sector_attack phase=planning   obj=op:jajce:divicani_2              atk=0 bat=0 elig=0 mv=3 mvonly=0 idle=0 caps=0 rec=null brig=3
+w 20 Operation Jajce          type=sector_attack phase=planning   obj=op:jajce:divicani_2              atk=0 bat=0 elig=0 mv=3 mvonly=0 idle=0 caps=0 rec=null brig=3
+w 21 Operation Jajce          type=sector_attack phase=planning   obj=op:jajce:divicani_2              atk=0 bat=0 elig=0 mv=3 mvonly=0 idle=0 caps=0 rec=null brig=3
+w 22 Operation Jajce          type=sector_attack phase=planning   obj=op:jajce:divicani_2              atk=0 bat=0 elig=0 mv=3 mvonly=0 idle=0 caps=0 rec=null brig=3
+w 23 Operation Jajce          type=sector_attack phase=planning   obj=op:jajce:divicani_2              atk=0 bat=0 elig=0 mv=2 mvonly=0 idle=0 caps=0 rec=null brig=3
+w 24 Operation Jajce          type=sector_attack phase=planning   obj=op:jajce:divicani_2              atk=0 bat=0 elig=0 mv=2 mvonly=0 idle=0 caps=0 rec=null brig=3
+w 25 Operation Jajce          type=sector_attack phase=execution  obj=op:jajce:barevo_2                atk=3 bat=2 elig=3 mv=0 mvonly=0 idle=0 caps=2 rec=null brig=3
+w 26 Operation Jajce          type=sector_attack phase=execution  obj=op:jajce:jajce_3                 atk=2 bat=1 elig=2 mv=1 mvonly=0 idle=0 caps=3 rec=null brig=3
+w 27 Operation Jajce          type=sector_attack phase=execution  obj=op:jajce:vinac_2                 atk=1 bat=1 elig=1 mv=2 mvonly=0 idle=0 caps=4 rec=null brig=3
+w 28 Operation Jajce          type=sector_attack phase=recovery   obj=null                             atk=1 bat=1 elig=1 mv=0 mvonly=0 idle=0 caps=5 rec=completed brig=3
+w 29 Operation Jajce          type=sector_attack phase=recovery   obj=null                             atk=0 bat=0 elig=0 mv=0 mvonly=0 idle=0 caps=5 rec=completed brig=3
+w 30 Operation Donji Vakuf    type=sector_attack phase=planning   obj=op:donji_vakuf:torlakovac_2      atk=0 bat=0 elig=0 mv=1 mvonly=0 idle=0 caps=0 rec=null brig=4
+w 31 Operation Donji Vakuf    type=sector_attack phase=execution  obj=op:donji_vakuf:oborci_2          atk=3 bat=2 elig=3 mv=1 mvonly=0 idle=0 caps=2 rec=null brig=4
+w 32 Operation Donji Vakuf    type=sector_attack phase=execution  obj=op:donji_vakuf:oborci_2          atk=0 bat=0 elig=0 mv=3 mvonly=0 idle=0 caps=2 rec=null brig=4
+w 33 Operation Donji Vakuf    type=sector_attack phase=execution  obj=op:donji_vakuf:oborci_2          atk=0 bat=0 elig=0 mv=3 mvonly=0 idle=0 caps=2 rec=null brig=4
+w 34 Operation Donji Vakuf    type=sector_attack phase=execution  obj=op:donji_vakuf:donji_vakuf_2     atk=2 bat=1 elig=2 mv=1 mvonly=0 idle=0 caps=3 rec=null brig=4
+w 35 Operation Donji Vakuf    type=sector_attack phase=execution  obj=op:donji_vakuf:korenici          atk=2 bat=1 elig=2 mv=1 mvonly=0 idle=0 caps=4 rec=null brig=4
+w 36 Operation Donji Vakuf    type=sector_attack phase=execution  obj=op:donji_vakuf:korenici          atk=1 bat=1 elig=1 mv=2 mvonly=0 idle=0 caps=4 rec=null brig=4
+w 37 Operation Donji Vakuf    type=sector_attack phase=execution  obj=op:donji_vakuf:korenici          atk=1 bat=1 elig=1 mv=2 mvonly=0 idle=0 caps=4 rec=null brig=4
+w 38 Operation Donji Vakuf    type=sector_attack phase=execution  obj=op:donji_vakuf:prusac_2          atk=3 bat=1 elig=3 mv=0 mvonly=0 idle=0 caps=5 rec=null brig=4
+w 39 Operation Donji Vakuf    type=sector_attack phase=execution  obj=op:donji_vakuf:prusac_2          atk=0 bat=0 elig=0 mv=3 mvonly=0 idle=0 caps=5 rec=null brig=4
+w 40 Operation Donji Vakuf    type=sector_attack phase=execution  obj=op:donji_vakuf:prusac_2          atk=0 bat=0 elig=0 mv=3 mvonly=0 idle=0 caps=5 rec=null brig=4
+w 41 Operation Donji Vakuf    type=sector_attack phase=recovery   obj=null                             atk=3 bat=1 elig=3 mv=0 mvonly=0 idle=0 caps=6 rec=completed brig=4
+w 42 Operation Donji Vakuf    type=sector_attack phase=recovery   obj=null                             atk=0 bat=0 elig=0 mv=0 mvonly=0 idle=0 caps=6 rec=completed brig=4
+w 43 Operation Donji Vakuf    type=sector_attack phase=recovery   obj=null                             atk=0 bat=0 elig=0 mv=0 mvonly=0 idle=0 caps=6 rec=completed brig=4

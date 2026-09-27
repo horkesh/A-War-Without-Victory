@@ -1,5 +1,12 @@
 # Content, Historical Attribution, Audio, and Accessibility Implementation Plan
 
+**Current reconciliation — 2026-09-12:** WR01 is delivered with the owner-accepted six-capture
+exception in its [design closeout](2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.md#9-sequencing).
+The inherited six stale pins were refreshed by owner-authorized #518 on its measured main source;
+older no-refresh statements below are dated history. This does not close R7: human audio/sensitivity,
+offline playback/controls, ten-cue disposition and broader acceptance remain open. The later April
+calibration candidate has separate canon/full-horizon gates in the [master roadmap](MASTER_ROADMAP.md).
+
 > **For implementation:** REQUIRED SUB-SKILL: use `executing-plans` and execute one phase at a time.
 
 **Goal:** Finish the sensitive-event, officer/OOB attribution, English accessibility/readability, and soundscape lanes with explicit evidence/licensing rules and no unresolved 1.0 content gate.

@@ -51,8 +51,9 @@ If you are changing war behavior, start at `src/sim/turn_pipeline.ts`. If you ar
   October 1995, each scored against `data/source/calibration/painted_control_<key>.json`.
 - `tests/historical_checkpoints_contract.test.ts` enforces checkpoint availability, loader
   preservation of `calibration_scenario`, and exactly one scoring scenario.
-- The 40-week scenario family and `tools/calibrate_40w.cjs` are legacy diagnostics, not a
-  calibration authority.
+- The 40-week scenario family and `tools/calibrate_40w.cjs` are RETIRED (2026-09-19): the
+  scenario files are deleted and short diagnostics run the canonical 188w scenario with a
+  `--weeks 40` duration override. No separate short scenario definition may be reintroduced.
 - Current accepted evidence and debt: `docs/40_reports/CALIBRATION_MASTER.md`.
 
 ### Bounded variant (not co-equal with canonical pipelines)

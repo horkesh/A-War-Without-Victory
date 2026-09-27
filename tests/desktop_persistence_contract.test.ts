@@ -224,6 +224,12 @@ describe('desktop persistence contract', () => {
     expect(handler).toContain('const state = readCanonicalCurrentState(sim);');
     expect(handler).toContain('sim.resolveEventDecision(state, eventId, responseId)');
     expect(handler).toContain('writeCanonicalCurrentState(sim, state, _event.sender);');
+    // Every war-ending IPC path saves through this choke point, which writes owed
+    // no-choice records before the snapshot/autosave.
+    const writerStart = electronMain.indexOf('function writeCanonicalCurrentState(');
+    const writer = electronMain.slice(writerStart, electronMain.indexOf('\n}\n', writerStart));
+    expect(writer).toContain('if (state?.meta?.game_over === true) sim.writeOwedTerminationRecords(state, getBaseDir());');
+    expect(writer.indexOf('sim.writeOwedTerminationRecords(')).toBeLessThan(writer.indexOf('setCurrentStateSnapshots(sim, state);'));
     expect(handler).not.toContain("import('../sim/events/resolve_decision.js')");
     expect(desktopSim).toContain("from '../sim/events/resolve_decision.js'");
     expect(desktopSim).toContain('resolveEventDecision');

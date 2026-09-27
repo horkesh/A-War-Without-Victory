@@ -32,6 +32,7 @@ import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
 import type { SectorTopologyMutationRecorder } from './sector_topology_mutation_journal.js';
 import type { SectorTopologyDiagnosticCollector } from './sector_topology_diagnostic.js';
 import type { SectorTopologyNarrowReadState } from './sector_topology_narrow_reads.js';
+import { getQueuedDatedPrestageBrigadeIds } from './pre_planned_operations.js';
 import type { SectorTopologyWorkingFormation } from './sector_topology_narrow_formation.js';
 
 const REAR_GUARD_CORPS = new Set<string>(['vrs_1st_krajina', 'vrs_2nd_krajina']);
@@ -265,6 +266,7 @@ export function buildOperationParticipantSet(state: SectorTopologyNarrowReadStat
             }
         }
     }
+    for (const brigadeId of getQueuedDatedPrestageBrigadeIds(state)) participants.add(brigadeId);
     return participants;
 }
 

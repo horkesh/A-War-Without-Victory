@@ -1,0 +1,22 @@
+# January (t39) mismatch diff, n403 baseline vs n404 candidate, against the CURRENT painted jan1993
+
+painted jan1993 cells: 712
+BASE  runs/apr1992_definitive_188w__9137f75e9f35be20__w39_n403  matched 701/712  mismatches 11
+CAND  runs/apr1992_definitive_188w__9137f75e9f35be20__w39_n404  matched 702/712  mismatches 10
+
+FIXED by the candidate (1):
+   op:donji_vakuf:prusac_2  expected RS, base had RBiH
+
+NEWLY INTRODUCED by the candidate (0):
+
+CARRIED (mismatched in both) (10):
+   op:foca:donje_zesce  expected RBiH, candidate has RS
+   op:ilijas:krivajevici  expected RS, candidate has RBiH
+   op:jablanica:doljani_2  expected RBiH, candidate has HRHB
+   op:kalesija:seher_2  expected RS, candidate has RBiH
+   op:konjic:glavaticevo_2  expected RS, candidate has RBiH
+   op:konjic:ljuta  expected RS, candidate has RBiH
+   op:maglaj:jablanica  expected RBiH, candidate has RS
+   op:mostar:vranjevici_2  expected RBiH, candidate has RS
+   op:trnovo:tosici  expected RBiH, candidate has RS
+   op:vlasenica:sebiocina  expected RBiH, candidate has RS

@@ -1134,6 +1134,22 @@
     "assignable_front_segments": [],
     "bot_priority_shifts": [],
     "brigade_front_assignment": {},
+    "brigade_movement_orders": {
+      "rs_bilea_brigade": {
+        "destination_sids": [
+          "op:gacko:izgori"
+        ],
+        "owner": "authored_preplanned",
+        "stance": "column"
+      },
+      "rs_gacko_brigade": {
+        "destination_sids": [
+          "op:kalinovik:kalinovik_2"
+        ],
+        "owner": "authored_preplanned",
+        "stance": "column"
+      }
+    },
     "cascade_penalties": [],
     "closed_event_ids": [],
     "command_authority": {
@@ -1176,7 +1192,9 @@
         "corps_exhaustion": 0,
         "og_slots": 2,
         "queued_operations": [
-          "Maglaj Local Counterattack"
+          "Maglaj Local Counterattack",
+          "Central Bosnia Counteroffensive",
+          "Battle of Bugojno"
         ],
         "stance": "balanced",
         "subordinate_count": 12
@@ -1187,6 +1205,10 @@
         "command_span": 5,
         "corps_exhaustion": 0,
         "og_slots": 2,
+        "queued_operations": [
+          "Jablanica–Doljani Local Attack",
+          "Operation Neretva '93"
+        ],
         "stance": "balanced",
         "subordinate_count": 10
       },
@@ -1235,6 +1257,9 @@
         "command_span": 5,
         "corps_exhaustion": 0,
         "og_slots": 1,
+        "queued_operations": [
+          "Prozor–Rama Line Counterattack"
+        ],
         "stance": "balanced",
         "subordinate_count": 2
       },
@@ -1451,6 +1476,27 @@
                 ],
                 "staging_osid": "op:bosanska_krupa:ivanjska_2",
                 "status": "executing"
+              },
+              {
+                "assigned_brigades": [
+                  "rs_1st_drvar_light_infantry"
+                ],
+                "attack_attempt_count": 0,
+                "axis_id": "orasac",
+                "consecutive_failures_on_current": 0,
+                "current_objective_index": 0,
+                "failure_count": 0,
+                "idle_execution_turn_streak": 0,
+                "main_brigade": "rs_1st_drvar_light_infantry",
+                "momentum": 0,
+                "movement_only_execution_turns": 0,
+                "name": "Orašac",
+                "objective_capture_count": 0,
+                "objectives": [
+                  "op:bihac:orasac_2"
+                ],
+                "staging_osid": "op:bihac:trubar",
+                "status": "executing"
               }
             ],
             "commander_officer_id": "vrs_samardzija",
@@ -1463,10 +1509,12 @@
             "momentum": 0,
             "name": "Bosanska Krupa Takeover",
             "objectives": [
-              "op:bosanska_krupa:veliki_badic"
+              "op:bosanska_krupa:veliki_badic",
+              "op:bihac:orasac_2"
             ],
             "participating_brigades": [
-              "rs_11th_krupa_light_infantry"
+              "rs_11th_krupa_light_infantry",
+              "rs_1st_drvar_light_infantry"
             ],
             "phase": "planning",
             "phase_started_turn": 0,
@@ -1931,7 +1979,7 @@
         "og_slots": 1,
         "queued_operations": [
           "Operation Kijevo",
-          "Operation Trnovo"
+          "Operation Lukavac 93"
         ],
         "stance": "offensive",
         "subordinate_count": 11
@@ -29025,7 +29073,7 @@
         "wounded_pending": 0
       },
       "gornji_vakuf:HRHB": {
-        "available": 499,
+        "available": 663,
         "committed": 0,
         "exhausted": 0,
         "faction": "HRHB",
@@ -31218,6 +31266,11 @@
     "must_hold_osids_by_corps": {
       "vrs_drina": [
         "op:zvornik:zvornik"
+      ],
+      "vrs_east_bosnian": [
+        "op:brcko:brcko",
+        "op:brcko:donji_rahic",
+        "op:lopare:lopare_selo_2"
       ]
     },
     "named_officer_data": [
@@ -39047,7 +39100,7 @@
         "RS": 28.7
       },
       "gornji_vakuf": {
-        "HRHB": 34.2,
+        "HRHB": 45.4,
         "RBiH": 25,
         "RS": 25.9
       },
@@ -39745,6 +39798,27 @@
             "rogatica",
             "prijedor"
           ]
+        },
+        {
+          "combat_multiplier": 1.6,
+          "end_turn": 79,
+          "faction": "RS",
+          "municipalities": [
+            "trnovo"
+          ],
+          "osid_attack_support": true,
+          "role": "attack",
+          "start_turn": 69
+        },
+        {
+          "combat_multiplier": 1.75,
+          "end_turn": 104,
+          "faction": "RS",
+          "municipalities": [
+            "brcko"
+          ],
+          "role": "defend",
+          "start_turn": 70
         }
       ],
       "id": "apr1992",
@@ -41974,8 +42048,8 @@
         "control": "consolidated",
         "control_status": "SECURE",
         "organizational_penetration": {
-          "hdz_penetration": 40,
-          "paramilitary_hrhb": 25,
+          "hdz_penetration": 50,
+          "paramilitary_hrhb": 60,
           "paramilitary_rs": 5,
           "patriotska_liga": 25,
           "police_loyalty": "mixed",

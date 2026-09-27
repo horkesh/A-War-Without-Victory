@@ -4,6 +4,14 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { findAdjacentFrontGap, computeHopsToFront, COLUMN_MARCH_MIN_HOPS, findNearestOffensiveTarget } from './bot_brigade_movement_ai.js';
 import { countFactionBrigadesAtOsid, countCorpsBrigadesAtOsid, MAX_CORPS_BRIGADES_PER_OSID } from './bot_brigade_context.js';
 import { issueInteriorMovement } from './bot_brigade_movement_ai.js';
+import {
+    filterOffensiveTargetsToRoutineScope,
+    filterToRoutineScope,
+    hasActiveOperationCommitment,
+    isDestinationInRoutineScope,
+    resolveRoutineMovementScope,
+    withOperationAuthorizedDestinations,
+} from './brigade_routine_scope.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import {
     ENCLAVE_DEFINITIONS,
@@ -115,7 +123,15 @@ export function isCurrentSectorRetroactiveTooth(sector: CorpsFrontSector, loc: s
 }
 
 export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, state, faction, loc, adjacency, reverseMap, isActiveSectorOperationParticipant, result, graphAnalysis, columnAssignments, directive, sectorAssignment, assignedSectorFrontOsids, corpsBrigadeCountsByOsid } = ctx;
+    const { brigade, state, faction, loc, adjacency, reverseMap, activeOp, result, graphAnalysis, columnAssignments, directive, sectorAssignment, assignedSectorFrontOsids, corpsBrigadeCountsByOsid } = ctx;
+    // Movement authority is "has an operational commitment" (ANY active op type), not the
+    // narrower sector-attack-evaluator flag. See `hasActiveOperationCommitment`.
+    const hasOperationCommitment = hasActiveOperationCommitment(activeOp, brigade.id);
+    // Shared routine-movement scope (owner packet 2026-09-17): discretionary front
+    // repositioning is limited to the brigade's assigned sub-segment front. Authorized
+    // movement (operation, authored/triggered pre-staging, explicit reassignment, lifecycle)
+    // is produced elsewhere and is not narrowed here.
+    const routineScope = resolveRoutineMovementScope(state, brigade);
     const countCorpsAt = (osid: Osid): number => corpsBrigadeCountsByOsid
         ? getCorpsBrigadeCountAtOsid(corpsBrigadeCountsByOsid, brigade.corps_id, osid)
         : countCorpsBrigadesAtOsid(state, faction, brigade.corps_id, osid);
@@ -127,7 +143,7 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
     // Must be checked BEFORE "stay on sector" logic, otherwise a brigade already
     // on its current sector's front returns true and evaluateFrontCoverage (which
     // also processes sector_reassignment_orders) never runs.
-    if (!isActiveSectorOperationParticipant && sectorMarchProfileTime('.sectorReassignment', () => {
+    if (!hasOperationCommitment && sectorMarchProfileTime('.sectorReassignment', () => {
         if (directive?.sector_reassignment_orders && state.military.corps_front_sectors) {
             const reassign = directive.sector_reassignment_orders.find(r => r.brigade_id === brigade.id);
             if (reassign) {
@@ -158,7 +174,7 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
     // The old `|| offAssignedFront` caused oscillation — op participants advancing off-sector
     // were rerouted back to sector front every turn, producing ZEA and recovery-no-attempt.
     const sectors = state.military.corps_front_sectors;
-    if (sectors && !isActiveSectorOperationParticipant) {
+    if (sectors && !hasOperationCommitment) {
         const { assignedSector, isReserve, cachedFrontSet } = sectorMarchProfileTime('.sectorAssignmentContext', () => {
             let resolvedSector = sectorAssignment?.sector ?? null;
             let resolvedIsReserve = sectorAssignment?.isReserve ?? false;
@@ -205,7 +221,10 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                 }
                 return resolvedFrontSet;
             });
-            const offSectorFront = sectorMarchProfileTime('.frontMembership', () => !frontSet.has(loc));
+            // Routine scope: only the assigned sub-segment front is a legal discretionary
+            // destination. Unrestricted (unassigned/reserve/stale) leaves the set unchanged.
+            const scopedFrontSet = filterToRoutineScope(routineScope, frontSet);
+            const offSectorFront = sectorMarchProfileTime('.frontMembership', () => !scopedFrontSet.has(loc));
             if (offSectorFront) {
                 // Reserve brigades only column march if deep rear (2+ hops).
                 // 1-hop reserves stay put when the sector already has line holders. If the
@@ -222,10 +241,10 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                 // for multi-hop Dijkstra pathfinding, not just first step)
                 // Enclave brigades must NOT march outside their enclave — they defend their pocket.
                 // Without this, Goražde brigades march to Visoko via temporary corridors.
-                if (frontSet.size > 0) {
+                if (scopedFrontSet.size > 0) {
                     if (isEnclaveBrigade(brigade)) {
                         const hasEnclaveTarget = sectorMarchProfileTime('.enclaveGuard', () =>
-                            [...frontSet].some(f => isOsidInSameEnclave(loc, f))
+                            [...scopedFrontSet].some(f => isOsidInSameEnclave(loc, f))
                         );
                         if (!hasEnclaveTarget) {
                             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
@@ -233,7 +252,7 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                         }
                     }
                     const allowedFrontSet = sectorMarchProfileTime('.enclaveDestinationGuard', () =>
-                        restrictSectorMarchDestinations(brigade, loc, frontSet)
+                        restrictSectorMarchDestinations(brigade, loc, scopedFrontSet)
                     );
                     if (allowedFrontSet.size === 0) {
                         result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
@@ -285,8 +304,9 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                                     }
                                 }
                             }
+                            const scopedReachableCorpsFront = filterToRoutineScope(routineScope, reachableCorpsFront);
                             const allowedCorpsFront = restrictSectorMarchDestinations(
-                                brigade, loc, reachableCorpsFront,
+                                brigade, loc, scopedReachableCorpsFront,
                             );
                             if (allowedCorpsFront.size > 0) {
                                 const rerouteDest = findNearestFriendlyOsidDestination(
@@ -357,8 +377,9 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                                         }
                                     }
                                 }
+                                const scopedSafeFront = filterToRoutineScope(routineScope, safeFront);
                                 const allowedSafeFront = restrictSectorMarchDestinations(
-                                    brigade, loc, safeFront,
+                                    brigade, loc, scopedSafeFront,
                                 );
                                 if (allowedSafeFront.size > 0) {
                                     const evictDest = findNearestFriendlyOsidDestination(
@@ -393,14 +414,14 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                             countCorpsAt(loc)
                             + Math.min(0, plannedDepartures) // departures reduce count
                         );
-                        return effectiveCountHere > MAX_CORPS_BRIGADES_PER_OSID && frontSet.size > 1;
+                        return effectiveCountHere > MAX_CORPS_BRIGADES_PER_OSID && scopedFrontSet.size > 1;
                     });
                     if (overstackGate) {
                         // Find least-covered other sector front OSID (prefer undefended, then lightly defended)
                         // ENCLAVE GUARD: enclave brigades must not redistribute to front OSIDs outside their
                         // enclave. Without this guard, Goražde brigades (tagged 'enclave') end up at Foča
                         // front OSIDs in the same sector when those OSIDs have fewer brigades.
-                        const allowedFronts = restrictSectorMarchDestinations(brigade, loc, frontSet);
+                        const allowedFronts = restrictSectorMarchDestinations(brigade, loc, scopedFrontSet);
                         const otherFronts = sectorMarchProfileTime('.overstackRedistribution.rankCandidates', () =>
                             [...allowedFronts]
                                 .filter(o => o !== loc)
@@ -448,7 +469,7 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
             }
         }
     }
-    if (!isActiveSectorOperationParticipant && getFormationEnclaveForMovement(brigade, loc)) {
+    if (!hasOperationCommitment && getFormationEnclaveForMovement(brigade, loc)) {
         result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
         return true;
     }
@@ -465,9 +486,9 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
  * assigned to a sector through the normal pipeline.
  */
 export function evaluateReturnToCorps(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, state, loc, adjacency, result, sectorAssignment, corpsTerritoryOsidsByCorps, isActiveSectorOperationParticipant } = ctx;
+    const { brigade, state, loc, adjacency, result, sectorAssignment, corpsTerritoryOsidsByCorps, activeOp } = ctx;
 
-    if (isActiveSectorOperationParticipant) return false;
+    if (hasActiveOperationCommitment(activeOp, brigade.id)) return false;
 
     // Only fires for brigades NOT in any sector
     if (!state.military.corps_front_sectors) return false;
@@ -574,9 +595,9 @@ const POCKET_EVACUATION_MAX_TERRITORY = 2;
  * Placed after evaluateReturnToCorps and before hold/defense evaluations.
  */
 export function evaluatePocketEvacuation(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, state, loc, result, sectorAssignment, isActiveSectorOperationParticipant, cmd } = ctx;
+    const { brigade, state, loc, result, sectorAssignment, activeOp, cmd } = ctx;
 
-    if (isActiveSectorOperationParticipant) return false;
+    if (hasActiveOperationCommitment(activeOp, brigade.id)) return false;
     const isOperationStagingCell = (cmd?.active_operations ?? []).some(operation => (
         (operation.phase === 'planning' || operation.phase === 'execution')
         && (
@@ -646,14 +667,29 @@ export function evaluatePocketEvacuation(ctx: BrigadeEvaluationContext): boolean
 }
 
 export function evaluateFrontCoverage(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, state, faction, loc, adjacency, reverseMap, graphAnalysis, directive, corpsStance, adjEnemy, result, columnAssignments } = ctx;
+    const { brigade, state, faction, loc, adjacency, reverseMap, activeOp, graphAnalysis, directive, corpsStance, adjEnemy, result, columnAssignments } = ctx;
+    // Shared routine-movement scope: discretionary front repositioning is limited to the
+    // assigned sub-segment front. Explicit `sector_reassignment_orders` (Rule 5b2) keep their
+    // own authority and are not narrowed here. An active operation the brigade participates in
+    // additionally authorizes its own staging/approach OSIDs, so operation movement is not
+    // narrowed at T2 while T3/T6 would allow it (see `withOperationAuthorizedDestinations`).
+    const routineScope = withOperationAuthorizedDestinations(
+        resolveRoutineMovementScope(state, brigade), state, brigade.id, activeOp, adjacency, reverseMap,
+    );
 
     // --- Rule 5b: Redeploy toward offensive target ---
     // On front but no offensive_target adjacent and there are excess brigades here:
     // Move along front toward the nearest offensive_target through friendly territory.
     if (adjEnemy.length > 0 && directive && directive.offensive_targets.length > 0 &&
         (corpsStance === 'offensive' || corpsStance === 'balanced')) {
-        const redeployTargetSet = new Set(directive.offensive_targets);
+        // Offensive targets are ENEMY OSIDs and the scope holds FRIENDLY front OSIDs; the two
+        // are disjoint, so intersecting them would empty the set, invert `hasAdjacentTarget`
+        // below and disable this rule outright. Scope them by ADJACENCY instead: a target is
+        // in scope when the brigade can press it from a cell it may legally occupy. The value
+        // `findNearestOffensiveTarget` returns is a first step and is NOT scope-checked.
+        const redeployTargetSet = filterOffensiveTargetsToRoutineScope(
+            routineScope, new Set(directive.offensive_targets), adjacency,
+        );
         const hasAdjacentTarget = adjEnemy.some(o => redeployTargetSet.has(o));
         const factionHere = countFactionBrigadesAtOsid(state, faction, loc);
         if (!hasAdjacentTarget && factionHere >= 2) {
@@ -714,6 +750,14 @@ export function evaluateFrontCoverage(ctx: BrigadeEvaluationContext): boolean {
                 for (const o of ss.friendly_osids) targetOsids.add(o);
             }
         }
+        // NOT routine-scoped: `reinforce_sector_ids` is the corps commander naming under-density
+        // sectors for this brigade — an existing higher-priority authority, on the same footing
+        // as Rule 5b2's `sector_reassignment_orders`. Those sectors are by construction OTHER
+        // sectors, so narrowing them to the brigade's own sub-segment would empty the set in
+        // exactly the case this rule exists for and kill corps density equalization.
+        // This rule writes single-hop `movement_orders`, which T3 never revalidates (it skips
+        // anything without `stance:'column'`) and which do not survive to T6, so it needs no
+        // authority exemption downstream.
         if (targetOsids.size > 0 && !targetOsids.has(loc)) {
             const dest = findNearestFriendlyOsidInSet(state, faction, loc, adjacency, reverseMap, targetOsids);
             if (dest && !isMovementDestinationRisky(dest, graphAnalysis)) {
@@ -730,7 +774,7 @@ export function evaluateFrontCoverage(ctx: BrigadeEvaluationContext): boolean {
         const factionHere = countFactionBrigadesAtOsid(state, faction, loc);
         if (factionHere >= 2) {
             const gap = findAdjacentFrontGap(state, loc, faction, adjacency, reverseMap, graphAnalysis);
-            if (gap) {
+            if (gap && isDestinationInRoutineScope(routineScope, gap)) {
                 result.movement_orders[brigade.id] = gap;
                 result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                 return true;

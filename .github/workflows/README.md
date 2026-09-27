@@ -6,7 +6,7 @@ This directory contains the GitHub Actions workflow definitions for A War Withou
 
 | Workflow | File | Trigger | Purpose |
 |---|---|---|---|
-| Full Suite + Structural Fingerprint | `full-suite-and-fingerprint.yml` | push to `main`, PR to `main` | Required full-suite gate: complete `test:vitest:balanced`, then the self-scanning `qa:player-experience` gate on relevant code-contract changes; separate structural fingerprint job compares the fresh 40w platform-stable fingerprint. |
+| Full Suite + Structural Fingerprint | `full-suite-and-fingerprint.yml` | push to `main`, PR to `main` | Required full-suite gate: complete `test:vitest:balanced`, then the self-scanning `qa:player-experience` gate on relevant code-contract changes; separate structural fingerprint job compares the fresh canonical-188w-at-40-weeks platform-stable fingerprint. |
 | Baseline Regression | `baseline-regression.yml` | push to `main`, PR to `main` | Multi-job broad gate: typecheck, focused scenario anchor tests, `test:vitest:fast` (137 fast suites, includes the event-system tests via auto-discovery), `test:vitest:scenario`. The `test`/`scenarios` heavy steps are path-filtered (CODE set) and `scenario-anchors`/`scenarios` (SIM set) via the always-report shim — see "Always-report path-filter shim" below. |
 | Desktop Release Guard | `desktop-release-guard.yml` | push to `main`, PR to `main` | Builds + smoke-tests the Linux AppImage and Windows NSIS desktop packages; uploads the artifacts on every run. The packaging/probe heavy steps are path-filtered (DESKTOP set) via the always-report shim — see below. |
 | Release | `release.yml` | (see file) | Tagged-release publication pipeline. |
@@ -45,7 +45,7 @@ for `pull_request` (not `pull_request_target`) workflows.
 |---|---|---|---|
 | `test` (Baseline Regression) | yes | `code` | `npm ci` + `test:vitest:fast` |
 | `full-suite` (Full Suite + Structural Fingerprint) | yes | full-suite set | `npm ci` + startup snapshot rebuild + `test:vitest:balanced` + `qa:player-experience` |
-| `structural-fingerprint` (Full Suite + Structural Fingerprint) | yes | full-suite set | `npm ci` + startup snapshot rebuild + fresh 40w structural-fingerprint compare |
+| `structural-fingerprint` (Full Suite + Structural Fingerprint) | yes | full-suite set | `npm ci` + startup snapshot rebuild + fresh canonical-188w-at-40-weeks structural-fingerprint compare |
 | `scenario-anchors` (Baseline Regression) | yes | `sim` | `npm ci` + `test:vitest:scenario:anchors` |
 | `scenarios` (Baseline Regression) | no | `sim` | `npm ci` + `test:vitest:scenario` |
 | `desktop-release-check` (Desktop Release Guard) | no | `desktop` | Linux AppImage package + smoke |

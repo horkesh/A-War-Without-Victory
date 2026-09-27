@@ -1,0 +1,298 @@
+{
+  "run": "runs\\apr1992_definitive_188w__9137f75e9f35be20__w39_n430",
+  "january_matched": 702,
+  "reference_count": 712,
+  "named": [
+    {
+      "osid": "op:mrkonjic_grad:baljvine_2",
+      "owner39": "RS",
+      "passed": true,
+      "captures": [
+        {
+          "turn": 28,
+          "operation": "Operacija Bor",
+          "operation_id": "vrs_1st_krajina:Operacija Bor:t27",
+          "brigade": "rs_1st_armored",
+          "ratio": 16.46,
+          "lawful_owned_combat": true
+        }
+      ]
+    },
+    {
+      "osid": "op:jajce:jezero_2",
+      "owner39": "RS",
+      "passed": true,
+      "captures": [
+        {
+          "turn": 30,
+          "operation": "Operacija Sjever",
+          "operation_id": "vrs_1st_krajina:Operacija Sjever:t29",
+          "brigade": "rs_1st_gradika_light_infantry",
+          "ratio": 2.6,
+          "lawful_owned_combat": true
+        }
+      ]
+    },
+    {
+      "osid": "op:skender_vakuf:donji_koricani",
+      "owner39": "RS",
+      "passed": true,
+      "captures": [
+        {
+          "turn": 39,
+          "operation": "Operacija Zaslon",
+          "operation_id": "vrs_1st_krajina:Operacija Zaslon:t36",
+          "brigade": "rs_12th_kotorsko_light_infantry",
+          "ratio": 6.39,
+          "lawful_owned_combat": true
+        }
+      ]
+    },
+    {
+      "osid": "op:jajce:lupnica",
+      "owner39": "RS",
+      "passed": true,
+      "captures": [
+        {
+          "turn": 35,
+          "operation": "Operacija Bastion",
+          "operation_id": "vrs_1st_krajina:Operacija Bastion:t31",
+          "brigade": "rs_11th_mrkonji_light_infantry",
+          "ratio": 5.96,
+          "lawful_owned_combat": true
+        }
+      ]
+    },
+    {
+      "osid": "op:bihac:orasac_2",
+      "owner39": "RBiH",
+      "passed": false,
+      "captures": []
+    },
+    {
+      "osid": "op:donji_vakuf:donji_vakuf_2",
+      "owner39": "RS",
+      "passed": true,
+      "captures": [
+        {
+          "turn": 34,
+          "operation": "Operation Donji Vakuf",
+          "operation_id": "vrs_1st_krajina:Operation Donji Vakuf:t29",
+          "brigade": "rs_16th_krajina_motorized",
+          "ratio": 5.38,
+          "lawful_owned_combat": true
+        }
+      ]
+    },
+    {
+      "osid": "op:donji_vakuf:korenici",
+      "owner39": "RS",
+      "passed": true,
+      "captures": [
+        {
+          "turn": 35,
+          "operation": "Operation Donji Vakuf",
+          "operation_id": "vrs_1st_krajina:Operation Donji Vakuf:t29",
+          "brigade": "rs_16th_krajina_motorized",
+          "ratio": 2.04,
+          "lawful_owned_combat": true
+        }
+      ]
+    },
+    {
+      "osid": "op:donji_vakuf:prusac_2",
+      "owner39": "RS",
+      "passed": true,
+      "captures": [
+        {
+          "turn": 30,
+          "operation": "Operation Donji Vakuf",
+          "operation_id": "vrs_1st_krajina:Operation Donji Vakuf:t29",
+          "brigade": "rs_19th_krajina_light_infantry",
+          "ratio": 8.11,
+          "lawful_owned_combat": true
+        }
+      ]
+    }
+  ],
+  "mismatches": [
+    {
+      "osid": "op:bihac:orasac_2",
+      "expected": "RS",
+      "actual": "RBiH"
+    },
+    {
+      "osid": "op:donji_vakuf:jemanlici",
+      "expected": "RS",
+      "actual": "RBiH"
+    },
+    {
+      "osid": "op:ilijas:krivajevici",
+      "expected": "RS",
+      "actual": "RBiH"
+    },
+    {
+      "osid": "op:jablanica:doljani_2",
+      "expected": "RBiH",
+      "actual": "HRHB"
+    },
+    {
+      "osid": "op:kalesija:seher_2",
+      "expected": "RS",
+      "actual": "RBiH"
+    },
+    {
+      "osid": "op:konjic:glavaticevo_2",
+      "expected": "RS",
+      "actual": "RBiH"
+    },
+    {
+      "osid": "op:konjic:ljuta",
+      "expected": "RS",
+      "actual": "RBiH"
+    },
+    {
+      "osid": "op:maglaj:jablanica",
+      "expected": "RBiH",
+      "actual": "RS"
+    },
+    {
+      "osid": "op:mostar:vranjevici_2",
+      "expected": "RBiH",
+      "actual": "RS"
+    },
+    {
+      "osid": "op:vlasenica:sebiocina",
+      "expected": "RBiH",
+      "actual": "RS"
+    }
+  ],
+  "changed_vs_n427": [
+    {
+      "osid": "op:donji_vakuf:prusac_2",
+      "expected": "RS",
+      "baseline": "RBiH",
+      "candidate": "RS"
+    },
+    {
+      "osid": "op:maglaj:jablanica",
+      "expected": "RBiH",
+      "baseline": "RBiH",
+      "candidate": "RS"
+    },
+    {
+      "osid": "op:sipovo:volari_2",
+      "expected": "RS",
+      "baseline": "RBiH",
+      "candidate": "RS"
+    }
+  ],
+  "anchors_passed": 31,
+  "anchors_total": 31,
+  "behavioral_health": {
+    "battleless_weeks": [
+      31,
+      35,
+      37
+    ],
+    "combat_causality": {
+      "invalid_operation_count": 0,
+      "invalidation_reasons": [],
+      "movement_only_execution_turns": 0,
+      "recovery_without_logged_attempt_count": 0,
+      "total_attack_orders": 248,
+      "total_battles": 169,
+      "total_objective_attempts": 549,
+      "total_objective_captures": 418,
+      "total_orders_by_faction": {
+        "HRHB": 28,
+        "RBiH": 62,
+        "RS": 158
+      },
+      "valid_for_combat_calibration": true,
+      "zero_eligible_attacker_operation_count": 0
+    },
+    "control_change_attribution": {
+      "abandoned": 0,
+      "combat": 90,
+      "consolidation": 0,
+      "init_overrides": 23,
+      "other": 1,
+      "paramilitary": 33,
+      "total_changes": 147
+    },
+    "valid_for_combat_calibration": true
+  },
+  "op_injection_validation": {
+    "count": 8,
+    "errors": 0,
+    "issues": [
+      {
+        "axis_id": "srebrenica_cerska_link",
+        "check": "brigade_missing",
+        "detail": "Brigade \"arbih_1st_cerska\" not found in formations",
+        "op_name": "Srebrenica\u2013Cerska Link-Up",
+        "severity": "warning",
+        "turn": 4
+      },
+      {
+        "axis_id": "srebrenica_cerska_link",
+        "check": "brigade_missing",
+        "detail": "Brigade \"arbih_1st_kamenica\" not found in formations",
+        "op_name": "Srebrenica\u2013Cerska Link-Up",
+        "severity": "warning",
+        "turn": 4
+      },
+      {
+        "axis_id": "srebrenica_convergence",
+        "check": "brigade_missing",
+        "detail": "Brigade \"arbih_281st_east_bosnian_light\" not found in formations",
+        "op_name": "Srebrenica\u2013Cerska Link-Up",
+        "severity": "warning",
+        "turn": 4
+      },
+      {
+        "axis_id": "srebrenica_convergence",
+        "check": "brigade_missing",
+        "detail": "Brigade \"arbih_282nd_east_bosnian_light\" not found in formations",
+        "op_name": "Srebrenica\u2013Cerska Link-Up",
+        "severity": "warning",
+        "turn": 4
+      },
+      {
+        "axis_id": "srebrenica_convergence",
+        "check": "brigade_missing",
+        "detail": "Brigade \"arbih_283rd_east_bosnian_light\" not found in formations",
+        "op_name": "Srebrenica\u2013Cerska Link-Up",
+        "severity": "warning",
+        "turn": 4
+      },
+      {
+        "axis_id": "srebrenica_convergence",
+        "check": "brigade_missing",
+        "detail": "Brigade \"arbih_284th_east_bosnian_light\" not found in formations",
+        "op_name": "Srebrenica\u2013Cerska Link-Up",
+        "severity": "warning",
+        "turn": 4
+      },
+      {
+        "axis_id": "visoko_breza_perimeter",
+        "check": "brigade_missing",
+        "detail": "Brigade \"arbih_guards_brigade\" not found in formations",
+        "op_name": "Visoko\u2013Breza Line Clearing",
+        "severity": "warning",
+        "turn": 8
+      },
+      {
+        "check": "all_objectives_owned",
+        "detail": "Queued operation skipped because all 3 objective(s) are already controlled by RS",
+        "op_name": "Operation Bosanski Novi",
+        "severity": "warning",
+        "turn": 37
+      }
+    ],
+    "warnings": 8
+  },
+  "final_state_hash": "99c3680fb7fcfcf9",
+  "prusac_candidate_gate_pass": true
+}

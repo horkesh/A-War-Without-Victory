@@ -1,0 +1,15 @@
+
+> awwv@0.9.9-beta.1 test:vitest
+> node tools/test/run_vitest_default.mjs tests/hook_registry.test.ts
+
+
+ RUN  v2.1.9 F:/AWWV-worktrees/agent-setup-modernization
+
+ ✓ tests/hook_registry.test.ts (6 tests) 6445ms
+   ✓ hook registry > every hook script survives an empty payload without erroring 6425ms
+
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+   Start at  21:37:33
+   Duration  7.23s (transform 57ms, setup 19ms, collect 39ms, tests 6.45s, environment 0ms, prepare 106ms)
+

@@ -13,6 +13,7 @@ import { EdgeRecord, loadSettlementGraph } from '../map/settlements.js';
 import { cloneGameState } from '../state/clone.js';
 import { GameState } from '../state/game_state.js';
 import { maybeWriteHeapSnapshot } from './perf/heap_profile.js';
+import { writeOwedRecordsAtTermination } from './endgame/owed_termination_records.js';
 import { earlyWarPhases } from './turn_phases/early_war_phases.js';
 import { warPhases } from './turn_phases/war_phases.js';
 import { runPostTurnInvariantBarrier } from './turn_phases/war_phase_reconciliation_steps.js';
@@ -163,6 +164,13 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<TurnR
     }
 
     await refreshFrontEdgeSnapshot(context.state, context.input);
+
+    // A war that ended during this turn gets no later event evaluation (the next turn
+    // short-circuits above), so write the no-choice records it already owes.
+    if (working.meta.game_over === true && input.eventDefinitions) {
+        const owed = writeOwedRecordsAtTermination(working, input.eventDefinitions, input.settlementEdges);
+        if (owed.length > 0) report.events_fired = [...(report.events_fired ?? []), ...owed];
+    }
 
     const issues = runPostTurnInvariantBarrier(context);
     if (issues.length > 0) {

@@ -36,6 +36,7 @@ import {
     applyDefinitionDimensionShifts,
     applyDefinitionFlags,
 } from '../sim/events/evaluate_events.js';
+import { writeOwedRecordsAtTermination } from '../sim/endgame/owed_termination_records.js';
 import type { EventDefinition, EventEffect, PendingEventDecision } from '../sim/events/event_types.js';
 import {
     queryMovementPath as computeMovementPathQuery,
@@ -770,6 +771,16 @@ export async function getPlayerRecruitmentCatalog(state: GameState, baseDir: str
             };
         }),
     };
+}
+
+/**
+ * Once play has ended (decision, peace plan or Dayton IPC), no further turn runs, so
+ * write the no-choice records play already owes before the terminal state is saved.
+ * Idempotent (once-only rows); a no-op while the war continues. Returns ids written.
+ */
+export function writeOwedTerminationRecords(state: GameState, baseDir: string): string[] {
+    return writeOwedRecordsAtTermination(state, loadDesktopEventDefinitions(baseDir))
+        .map((fired) => fired.id);
 }
 
 /** Re-export for main process (serialize/deserialize state for IPC). */

@@ -9,7 +9,7 @@
  *
  * Usage:
  *   npx tsx tools/perf/profile_scenario.ts \
- *       --scenario data/scenarios/apr1992_definitive_40w.json \
+ *       --scenario data/scenarios/apr1992_definitive_188w.json --weeks 40 \
  *       --out /tmp/awwv_profile/out \
  *       --report /tmp/awwv_profile/report.json
  *

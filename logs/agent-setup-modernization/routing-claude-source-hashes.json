@@ -1,0 +1,54 @@
+[
+  {
+    "path": "AGENTS.md",
+    "sha256": "58ccab35547ec1422f66f09048408284c0aa9b5b4dfb4f081747c66fa5825938"
+  },
+  {
+    "path": "CLAUDE.md",
+    "sha256": "b9d0d19c5cbd0324819bc153cb951b4a8635defb4963a7ff18b94e5f8cbccb38"
+  },
+  {
+    "path": "docs/20_engineering/AGENT_WORKFLOW.md",
+    "sha256": "ef032aaecf729f218cb78c7c9f0040ec121dbf63d3178690a62d0670b12a83ac"
+  },
+  {
+    "path": "docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md",
+    "sha256": "9d90b460cbbfb9c4115b4addc20d33501660b91f19641da23fcb66a1e0e7ee90"
+  },
+  {
+    "path": ".claude/AGENT_TEAM_ROSTER.md",
+    "sha256": "13f54a4750eeae254312ef6ff8f65efe5724dc599ddccf4c2da0e1a9e730542d"
+  },
+  {
+    "path": ".claude/skills/using-superpowers/SKILL.md",
+    "sha256": "ff4431aa253ed032678aeecfbf8203bddc791d0f920fc6e474da4b0e3c997093"
+  },
+  {
+    "path": ".claude/skills/brainstorming/SKILL.md",
+    "sha256": "7135d7d147980ae381c53eb98c59e71294d5350d5ae352e80b435a84d525f33c"
+  },
+  {
+    "path": ".claude/skills/awwv-read-first/SKILL.md",
+    "sha256": "1a0f4209101ba8c54f5e85e5b6187877ec47356d930c9af5a889a13e0971fc24"
+  },
+  {
+    "path": ".claude/skills/writing-plans/SKILL.md",
+    "sha256": "127e09a1e8fb5bdaf4f2b5023f7f70c68a79f99f760dae028afd07ebabbf421a"
+  },
+  {
+    "path": ".claude/skills/executing-plans/SKILL.md",
+    "sha256": "5778d99da5f7317d62be2f250a953c0adfac143356e6ee8d4e9513788eb73f0c"
+  },
+  {
+    "path": ".claude/skills/prompt-construction/SKILL.md",
+    "sha256": "baffc1bbb8b492aa04f1d4940a14cee1d3e89e117c5b88884d3c524cd2830e4a"
+  },
+  {
+    "path": ".claude/skills/awwv-make-cursor-prompt/SKILL.md",
+    "sha256": "441be59c1da977ee2ccb091d0854877f8dd85c3e8a785db635342492d6e0f55d"
+  },
+  {
+    "path": ".claude/skills/verification-before-completion/SKILL.md",
+    "sha256": "a6995bd77ea12282061ff0d9106107771b07d1a761a4af961659d287883932ed"
+  }
+]

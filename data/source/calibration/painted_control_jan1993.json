@@ -6,14 +6,28 @@
     "description": "Painted control state",
     "total_osids": 712,
     "counts": {
-      "RS": 375,
-      "RBiH": 254,
-      "HRHB": 83
+      "RS": 376,
+      "RBiH": 250,
+      "HRHB": 86
     },
     "source": "painted_control_targets",
     "painted_at": "2026-03-17T10:04:59.555Z",
-    "revision": 4,
+    "revision": 6,
     "changelog": [
+      {
+        "date": "2026-09-24",
+        "osid": "op:mostar:vranjevici_2",
+        "from": "RBiH",
+        "to": "RS",
+        "rationale": "Owner determination, 2026-09-24: paint the Mostar Vranjevići operational cell RS at every calibration checkpoint. This supersedes the owner-authored RBiH paint of 2026-08-24 for this reference only. The aggregate's constituent-level historical boundary remains uncertain; this is a reference decision, not a simulation or geometry change."
+      },
+      {
+        "date": "2026-09-23",
+        "osid": "op:jablanica:doljani_2",
+        "from": "RBiH",
+        "to": "HRHB",
+        "rationale": "Owner determination, 2026-09-23: Doljani should be painted HRHB in the January 1993 reference. This changes the reference only, not initial control or simulation behavior. Metadata counts are reconciled with all 712 entries; the prior counts were already stale by two RBiH/HRHB cells."
+      },
       {
         "date": "2026-08-24",
         "osid": "op:kladanj:kladanj_3",
@@ -400,7 +414,7 @@
     "op:ilijas:sirovine": "RS",
     "op:ilijas:srednje": "RS",
     "op:ilijas:visojevica": "RS",
-    "op:jablanica:doljani_2": "RBiH",
+    "op:jablanica:doljani_2": "HRHB",
     "op:jablanica:jablanica_2": "RBiH",
     "op:jablanica:ostrozac_2": "RBiH",
     "op:jablanica:slatina_2": "RBiH",
@@ -547,7 +561,7 @@
     "op:mostar:mostar_istok_2": "RBiH",
     "op:mostar:mostar_zapad_2": "HRHB",
     "op:mostar:potoci": "RBiH",
-    "op:mostar:vranjevici_2": "RBiH",
+    "op:mostar:vranjevici_2": "RS",
     "op:mrkonjic_grad:baljvine_2": "RS",
     "op:mrkonjic_grad:bjelajce_2": "RS",
     "op:mrkonjic_grad:gerzovo_2": "RS",

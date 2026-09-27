@@ -1,0 +1,13 @@
+{
+  "exit": 0,
+  "timedOut": false,
+  "executable": "C:/Users/User/.local/bin/claude.exe",
+  "version": "2.1.269",
+  "requestedModel": "sonnet",
+  "effort": "medium",
+  "cwd": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/claude-routing-project",
+  "tools": [],
+  "settingSources": [],
+  "sessionPersistence": false,
+  "mode": "targeted case 3 correction verification; original transcript retained"
+}

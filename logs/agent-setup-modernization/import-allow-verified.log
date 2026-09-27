@@ -1,0 +1,17 @@
+
+> awwv@0.9.9-beta.1 test:vitest
+> node tools/test/run_vitest_default.mjs tests/agent_skill_import.test.ts -t previews a named|applies only|replaces with
+
+
+ RUN  v2.1.9 F:/AWWV-worktrees/agent-setup-modernization
+
+ ✓ tests/agent_skill_import.test.ts (12 tests | 9 skipped) 4485ms
+   ✓ explicit skill import in disposable paths > previews a named import without writing any destination 945ms
+   ✓ explicit skill import in disposable paths > applies only the named skill after review, including its support files 1750ms
+   ✓ explicit skill import in disposable paths > replaces with a reviewed diff and preserves the full old directory 1789ms
+
+ Test Files  1 passed (1)
+      Tests  3 passed | 9 skipped (12)
+   Start at  21:37:03
+   Duration  5.31s (transform 61ms, setup 17ms, collect 60ms, tests 4.48s, environment 0ms, prepare 108ms)
+

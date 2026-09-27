@@ -1,0 +1,71 @@
+{
+  "source": "efa53f55c34e4e9fe8ec8d4fe99ec01502ba1ed1",
+  "run_dirty": false,
+  "scores": [
+    702,
+    694,
+    689,
+    651
+  ],
+  "mismatches": [
+    10,
+    18,
+    23,
+    61
+  ],
+  "events": 216,
+  "all_initial_owners_and_events_match": true,
+  "geometry_markers_references_colors_unchanged": true,
+  "no_absolute_host_paths": true,
+  "no_external_assets": true,
+  "prusac": [
+    {
+      "t": 30,
+      "o": "op:donji_vakuf:prusac_2",
+      "f": "RBiH",
+      "x": "RS",
+      "m": "combat"
+    }
+  ],
+  "html_sha256": "3e80eacf3d98e05e7088ec404f43b89e5c98a3dfb2028b16c0f9048cbd2fb02a",
+  "html_bytes": 713283,
+  "source_save_sha256": "575254183566bf2c7b4db3946217ddcce014317eb2232997e003964919cf10c3",
+  "publication_commit": "224bfd0f6aad396dade4692913106cdaeef86178",
+  "url": "https://horkesh.github.io/A-War-Without-Victory/?run=efa53f55c",
+  "published_files": [
+    "index.html",
+    "README.md"
+  ],
+  "branch_inventory": [
+    ".nojekyll",
+    "README.md",
+    "index.html"
+  ],
+  "local_browser_verified": {
+    "january": 702,
+    "mismatches": 10,
+    "prusac_controller_at30": "RS",
+    "prusac_last_change": 30,
+    "non_checkpoint_mismatch_hidden": true
+  },
+  "preserved_files": {
+    "data/derived/latest_run_final_save.json": "8f4dda27cd8d14103093a5c9be79d9b4af20f51aa8d44e5ef574ca1cbe93d3f2",
+    "src/sim/combat/commander/emit.ts": "d542e7700b64c029b6dd82c745f724b14ce1a364fa0abee1b69218b0e761a4b9"
+  },
+  "live_http": {
+    "http_status": 200,
+    "bytes": 713283,
+    "sha256": "3e80eacf3d98e05e7088ec404f43b89e5c98a3dfb2028b16c0f9048cbd2fb02a",
+    "matches_published_artifact": true
+  },
+  "pages_build_status": "built",
+  "live_browser_verified": {
+    "january": 702,
+    "january_mismatches": 10,
+    "source_commit": "efa53f55c34e4e9fe8ec8d4fe99ec01502ba1ed1",
+    "prusac_controller": "RS",
+    "prusac_historical_owner": "RS",
+    "prusac_last_change_week": 30,
+    "console_errors_or_warnings": 0
+  }
+}

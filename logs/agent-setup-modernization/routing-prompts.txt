@@ -1,0 +1,8 @@
+Evaluate these independent requests using the supplied candidate AWWV instructions. Do not execute any task, edit files, run commands, invoke simulations, publish, or send messages. For each, state which sources you would select, what is authorized, what validation is required, when you continue, and what would require a decision. Keep each case under 120 words. Do not assume live activation has occurred.
+
+1. Correct a spelling error in the root README.md.
+2. Repair the named operation briefing modal's clipped footer. The agreed behavior is that the commit button remains visible while the body scrolls.
+3. Change a territory-moving CorpsOperation rule, with implementation authorized within a bounded plan and its current acceptance criteria.
+4. Change a sensitive-history rule in FORAWWV. There is no panel receipt.
+5. Prepare only an implementation plan for a new UI panel; do not implement it.
+6. During an already authorized UI bug repair, the first targeted test fails. Explain your next action and whether you need routine approval to continue.

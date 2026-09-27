@@ -1,0 +1,25 @@
+{
+  "run_name": "apr1992_definitive_188w__6898d6d2e324c7a3__w188_n1",
+  "run_dirty": true,
+  "scores": [
+    704,
+    697,
+    692,
+    657
+  ],
+  "mismatches": [
+    8,
+    15,
+    20,
+    55
+  ],
+  "events": 224,
+  "initial_owners_and_events_match_save": true,
+  "geometry_references_markers_colors_match_prior_published_viewer": true,
+  "jemanlici_t31_combat_to_rs": true,
+  "jemanlici_matches_january_reference": true,
+  "no_absolute_host_paths_or_external_assets": true,
+  "html_bytes": 720075,
+  "html_sha256": "60f98d545ce43bdd62f6913fb94e05cd5af22c9c291609c372e7a8b1839a02c8",
+  "source_save_sha256": "60d3f5732705ef90a6965e84363013bb2e9178c6341ca82154e1c33948a762a8"
+}

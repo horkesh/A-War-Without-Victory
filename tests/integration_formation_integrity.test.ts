@@ -11,10 +11,11 @@ import {
 } from '../src/sim/combat/brigade_dissolution.js';
 import type { FormationState, GameState } from '../src/state/game_state.js';
 
-const SCENARIO_40W = join(process.cwd(), 'data', 'scenarios', 'apr1992_definitive_40w.json');
+const SCENARIO_188W = join(process.cwd(), 'data', 'scenarios', 'apr1992_definitive_188w.json');
+const WEEKS_OVERRIDE = 40;
 const OUT_DIR = join(process.cwd(), '.tmp_integration_formation_integrity');
 
-describe('formation integrity (40w)', () => {
+describe('formation integrity (canonical 188w @40w)', () => {
     let state: GameState;
     let skipped = false;
 
@@ -26,7 +27,7 @@ describe('formation integrity (40w)', () => {
         }
         if (existsSync(OUT_DIR)) await rm(OUT_DIR, { recursive: true });
 
-        const result = await runScenario({ scenarioPath: SCENARIO_40W, outDirBase: OUT_DIR });
+        const result = await runScenario({ scenarioPath: SCENARIO_188W, outDirBase: OUT_DIR, weeksOverride: WEEKS_OVERRIDE });
         const json = await readFile(result.paths.final_save, 'utf8');
         state = JSON.parse(json);
     }, 600_000);

@@ -1,0 +1,37 @@
+# prusac_2 / korenici control-event history across preserved runs
+
+=== apr1992_definitive_188w__6898d6d2e324c7a3__w188_n396 ===  total control_events: 230
+  op:donji_vakuf:prusac_2  init=RBiH  events=2
+      turn 39 -> {"attacker_brigade":"rs_16th_krajina_motorized","battle_id":"39:op:donji_vakuf:prusac_2:rs_16th_krajina_motorized:null","from":"RBiH","mechanism":"combat","mun_id":"donji_vakuf","settlement_id":"op:donji_vakuf:prusac_2","to":"RS","turn":39}
+      turn 184 -> {"attacker_brigade":"arbih_705th_slavna_mountain","battle_id":"184:op:donji_vakuf:prusac_2:arbih_705th_slavna_mountain:rs_19th_krajina_light_infantry","from":"RS","mechanism":"combat","mun_id":"donji_vakuf","settlement_id":"op:donji_vakuf:prusac_2","to":"RBiH","turn":184}
+  op:donji_vakuf:korenici  init=RBiH  events=2
+      turn 36 -> {"attacker_brigade":"rs_16th_krajina_motorized","battle_id":"36:op:donji_vakuf:korenici:rs_16th_krajina_motorized:arbih_707th_slavna_mountain","from":"RBiH","mechanism":"combat","mun_id":"donji_vakuf","settlement_id":"op:donji_vakuf:korenici","to":"RS","turn":36}
+      turn 186 -> {"attacker_brigade":"arbih_705th_slavna_mountain","battle_id":"186:op:donji_vakuf:korenici:arbih_705th_slavna_mountain:rs_19th_krajina_light_infantry","from":"RS","mechanism":"combat","mun_id":"donji_vakuf","settlement_id":"op:donji_vakuf:korenici","to":"RBiH","turn":186}
+=== apr1992_definitive_188w__6898d6d2e324c7a3__w188_n397 ===  total control_events: 229
+  op:donji_vakuf:prusac_2  init=RBiH  events=2
+      turn 41 -> {"attacker_brigade":"rs_16th_krajina_motorized","battle_id":"41:op:donji_vakuf:prusac_2:rs_16th_krajina_motorized:null","from":"RBiH","mechanism":"combat","mun_id":"donji_vakuf","settlement_id":"op:donji_vakuf:prusac_2","to":"RS","turn":41}
+      turn 188 -> {"attacker_brigade":"arbih_727th_slavna","battle_id":"188:op:donji_vakuf:prusac_2:arbih_727th_slavna:null","from":"RS","mechanism":"combat","mun_id":"donji_vakuf","settlement_id":"op:donji_vakuf:prusac_2","to":"RBiH","turn":188}
+  op:donji_vakuf:korenici  init=RBiH  events=1
+      turn 38 -> {"attacker_brigade":"rs_16th_krajina_motorized","battle_id":"38:op:donji_vakuf:korenici:rs_16th_krajina_motorized:arbih_770th_slavna_mountain","from":"RBiH","mechanism":"combat","mun_id":"donji_vakuf","settlement_id":"op:donji_vakuf:korenici","to":"RS","turn":38}
+=== apr1992_definitive_188w__6898d6d2e324c7a3__w188_n398 ===  total control_events: 233
+  op:donji_vakuf:prusac_2  init=RBiH  events=1
+      turn 41 -> {"attacker_brigade":"rs_16th_krajina_motorized","battle_id":"41:op:donji_vakuf:prusac_2:rs_16th_krajina_motorized:null","from":"RBiH","mechanism":"combat","mun_id":"donji_vakuf","settlement_id":"op:donji_vakuf:prusac_2","to":"RS","turn":41}
+  op:donji_vakuf:korenici  init=RBiH  events=0
+=== apr1992_definitive_188w__9137f75e9f35be20__w39_n399 ===  total control_events: 120
+  op:donji_vakuf:prusac_2  init=RBiH  events=0
+  op:donji_vakuf:korenici  init=RBiH  events=1
+      turn 38 -> {"attacker_brigade":"rs_16th_krajina_motorized","battle_id":"38:op:donji_vakuf:korenici:rs_16th_krajina_motorized:arbih_770th_slavna_mountain","from":"RBiH","mechanism":"combat","mun_id":"donji_vakuf","settlement_id":"op:donji_vakuf:korenici","to":"RS","turn":38}
+=== apr1992_definitive_188w__9137f75e9f35be20__w39_n401 ===  total control_events: 121
+  op:donji_vakuf:prusac_2  init=RBiH  events=0
+  op:donji_vakuf:korenici  init=RBiH  events=1
+      turn 38 -> {"attacker_brigade":"rs_16th_krajina_motorized","battle_id":"38:op:donji_vakuf:korenici:rs_16th_krajina_motorized:arbih_770th_slavna_mountain","from":"RBiH","mechanism":"combat","mun_id":"donji_vakuf","settlement_id":"op:donji_vakuf:korenici","to":"RS","turn":38}
+=== apr1992_definitive_188w__9137f75e9f35be20__w39_n403 ===  total control_events: 121
+  op:donji_vakuf:prusac_2  init=RBiH  events=0
+  op:donji_vakuf:korenici  init=RBiH  events=1
+      turn 38 -> {"attacker_brigade":"rs_16th_krajina_motorized","battle_id":"38:op:donji_vakuf:korenici:rs_16th_krajina_motorized:arbih_770th_slavna_mountain","from":"RBiH","mechanism":"combat","mun_id":"donji_vakuf","settlement_id":"op:donji_vakuf:korenici","to":"RS","turn":38}
+=== apr1992_188w ===  total control_events: 229
+  op:donji_vakuf:prusac_2  init=RBiH  events=2
+      turn 41 -> {"attacker_brigade":"rs_16th_krajina_motorized","battle_id":"41:op:donji_vakuf:prusac_2:rs_16th_krajina_motorized:null","from":"RBiH","mechanism":"combat","mun_id":"donji_vakuf","settlement_id":"op:donji_vakuf:prusac_2","to":"RS","turn":41}
+      turn 188 -> {"attacker_brigade":"arbih_707th_slavna_mountain","battle_id":"188:op:donji_vakuf:prusac_2:arbih_707th_slavna_mountain:null","from":"RS","mechanism":"combat","mun_id":"donji_vakuf","settlement_id":"op:donji_vakuf:prusac_2","to":"RBiH","turn":188}
+  op:donji_vakuf:korenici  init=RBiH  events=1
+      turn 38 -> {"attacker_brigade":"rs_16th_krajina_motorized","battle_id":"38:op:donji_vakuf:korenici:rs_16th_krajina_motorized:arbih_770th_slavna_mountain","from":"RBiH","mechanism":"combat","mun_id":"donji_vakuf","settlement_id":"op:donji_vakuf:korenici","to":"RS","turn":38}

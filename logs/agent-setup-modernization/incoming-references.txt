@@ -1,0 +1,29 @@
+docs/20_engineering/CLAUDE_EXECUTION_STANDARD.md:7:- Use `.claude/skills/` and `.claude/agents/` as the repo-shipped role and handoff layer.
+docs/20_engineering/AGENT_WORKFLOW.md:63:Update `docs/PROJECT_LEDGER.md` for behavioral/output/scenario or adopted process changes when required by repository policy. Put reusable technical knowledge in the existing knowledge ledger or napkin topic; do not create parallel task journals such as `tasks/todo.md` or `tasks/lessons.md`.
+.agent/skills-catalog.md:5:**Source:** `.claude/skills/*/SKILL.md`. Regenerate this catalog when skills are added or removed.
+.agent/skills-catalog.md:30:| **executing-plans** | Written implementation plan to execute in a separate session with review checkpoints |
+.agent/skills-catalog.md:38:| **using-superpowers** | Always at start; invoke relevant skills before responding |
+.agent/skills-catalog.md:39:| **awwv-read-first** | Before nontrivial changes; produce required reading list and compliance checklist |
+.agent/skills-catalog.md:41:| **brainstorming** | Before any creative work (features, components, functionality) |
+.agent/skills-catalog.md:53:| **orchestrator** | Strategic direction, convening team, resolving cross-role conflicts |
+.agent/skills-catalog.md:114:| **prompt-construction** | Drafting prompts for Cursor or subagents |
+.cursor/AGENT_TEAM_ROSTER.md:13:**For every non-trivial task:** Consult this Pyrrhic roster; invoke the listed skill(s) for the relevant role(s) by reading and following the corresponding `.claude/skills/<name>/SKILL.md`. Use clarification-first for high-risk items; document handoffs when passing between roles.
+.cursor/AGENT_TEAM_ROSTER.md:38:| Orchestrator | orchestrator | Big-picture direction, team coordination, strategic priority, convening Pyrrhic, aligning roadmap and ledger; resolves cross-role conflicts. **Deputy:** Product Manager. |
+.cursor/AGENT_TEAM_ROSTER.md:115:Skill directories retained (`.claude/skills/<name>/`) for future reactivation if needed.
+.claude/skills.md:3:Repo-shipped Claude skills live under `.claude/skills/<name>/SKILL.md`. Select them by task relevance or explicit user request. The active runtime catalog determines which skills and agent types are actually callable; this file is not a hand-maintained count or roster.
+.claude/skills.md:7:Use the established plan, command board, roadmap, project ledger, knowledge ledger, and napkin topic files for durable work tracking and lessons. Do not create parallel `tasks/todo.md` or `tasks/lessons.md` workflows.
+.claude/AGENT_TEAM_ROSTER.md:11:**For every non-trivial task:** Consult this Pyrrhic roster; invoke the listed skill(s) for the relevant role(s) by reading and following the corresponding `.claude/skills/<name>/SKILL.md`. Use clarification-first for high-risk items; document handoffs when passing between roles.
+.claude/AGENT_TEAM_ROSTER.md:13:**Dispatch-first rule:** When the task spans 2+ domains, the Orchestrator should dispatch specialists before synthesizing. Use `.claude/commands/orchestrator.md` or pair with `.claude/agents/orchestrator-dispatcher.md` to keep the role from sliding into solo investigation.
+.claude/AGENT_TEAM_ROSTER.md:23:| Orchestrator | orchestrator | Big-picture direction, team coordination, strategic priority, convening Pyrrhic, aligning roadmap and ledger; resolves cross-role conflicts. **Deputy:** Product Manager. **Default mode:** dispatch-first, synthesis second. |
+.claude/AGENT_TEAM_ROSTER.md:120:- `orchestrator-dispatcher.md`
+F:\AWWV-worktrees\agent-setup-modernization\.claude\commands\orchestrator.md:1:Run this task using the repo `orchestrator` skill and the shared contract in `docs/20_engineering/AGENT_WORKFLOW.md`.
+.claude/README.md:16:- **awwv-read-first** - Required reading list before changes
+.claude/README.md:50:- **brainstorming** - Structured brainstorming
+.claude/README.md:52:- **executing-plans** - Plan execution methodology
+.claude/README.md:55:- **orchestrator** - Multi-agent orchestration
+.claude/README.md:56:- **prompt-construction** - Effective prompt creation
+.claude/README.md:62:- **using-superpowers** - Meta-skill usage
+AGENTS.md:3:Use the runtime-provided `orchestrator` skill for cross-domain coordination and efficiency policy. Resolve it through the active skill catalog rather than a machine-specific path. The shared execution contract is [AGENT_WORKFLOW.md](docs/20_engineering/AGENT_WORKFLOW.md); load its task-specific references only when they apply.
+F:\AWWV-worktrees\agent-setup-modernization\.claude\agents\README.md:26:6. `orchestrator-dispatcher.md`
+F:\AWWV-worktrees\agent-setup-modernization\.claude\agents\README.md:56:- "Use `.claude/commands/orchestrator.md`"
+F:\AWWV-worktrees\agent-setup-modernization\.claude\agents\README.md:57:- "Pair it with `.claude/agents/orchestrator-dispatcher.md`"

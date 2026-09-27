@@ -1,0 +1,83 @@
+{
+  "checkpoint": "apr1994",
+  "week": 104,
+  "matched": 697,
+  "total": 712,
+  "mismatches": [
+    {
+      "osid": "op:foca:donje_zesce",
+      "sim": "RBiH",
+      "want": "RS"
+    },
+    {
+      "osid": "op:foca:mazlina",
+      "sim": "RBiH",
+      "want": "RS"
+    },
+    {
+      "osid": "op:gorazde:slatina_2",
+      "sim": "RBiH",
+      "want": "RS"
+    },
+    {
+      "osid": "op:gorazde:sopotnica",
+      "sim": "RBiH",
+      "want": "RS"
+    },
+    {
+      "osid": "op:gorazde:ustipraca_2",
+      "sim": "RBiH",
+      "want": "RS"
+    },
+    {
+      "osid": "op:ilijas:krivajevici",
+      "sim": "RBiH",
+      "want": "RS"
+    },
+    {
+      "osid": "op:kalesija:seher_2",
+      "sim": "RBiH",
+      "want": "RS"
+    },
+    {
+      "osid": "op:konjic:glavaticevo_2",
+      "sim": "RBiH",
+      "want": "RS"
+    },
+    {
+      "osid": "op:konjic:ljuta",
+      "sim": "RBiH",
+      "want": "RS"
+    },
+    {
+      "osid": "op:maglaj:jablanica",
+      "sim": "RS",
+      "want": "RBiH"
+    },
+    {
+      "osid": "op:pale:podgrab",
+      "sim": "RBiH",
+      "want": "RS"
+    },
+    {
+      "osid": "op:rogatica:brcigovo",
+      "sim": "RBiH",
+      "want": "RS"
+    },
+    {
+      "osid": "op:trnovo:delijas",
+      "sim": "RBiH",
+      "want": "RS"
+    },
+    {
+      "osid": "op:trnovo:tosici",
+      "sim": "RBiH",
+      "want": "RS"
+    },
+    {
+      "osid": "op:trnovo:trnovo",
+      "sim": "RBiH",
+      "want": "RS"
+    }
+  ]
+}

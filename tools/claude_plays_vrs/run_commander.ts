@@ -291,7 +291,8 @@ function formatSummary(s: TurnSummary): string {
 
 async function main(): Promise<void> {
     const baseDir = process.cwd();
-    const scenarioPath = 'data/scenarios/apr1992_definitive_40w.json';
+    const scenarioPath = 'data/scenarios/apr1992_definitive_188w.json';
+    const scenarioWeeks = 40;
     const strategyPath = join(baseDir, 'tools/claude_plays_vrs/mladic_strategy.json');
     const outDir = join(baseDir, 'runs/claude_plays_vrs');
 
@@ -317,6 +318,7 @@ async function main(): Promise<void> {
         uniqueRunFolder: true,
         initialStateOnly: true,
         baseDir,
+        weeksOverride: scenarioWeeks,
     });
 
     // Load the initial state

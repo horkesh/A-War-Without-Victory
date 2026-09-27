@@ -362,6 +362,42 @@ describe('catastrophic outcome stall (#39)', () => {
         expect(axis.consecutive_catastrophic_on_current).toBe(0); // reset
     });
 
+    it('does not reuse another participant\'s stale catastrophic engagement', () => {
+        const stale = makeBrigade('stale', 'op:front:approach', {
+            posture: 'attack',
+            lastOutcome: 'catastrophic',
+            lastOsid: 'op:target:obj',
+            lastTurn: 9,
+        });
+        const current = makeBrigade('current', 'op:front:approach', {
+            posture: 'attack',
+            lastOutcome: 'repulsed',
+            lastOsid: 'op:target:obj',
+            lastTurn: 10,
+        });
+        const state = makeState({
+            brigades: { stale, current },
+            turn: 10,
+            axes: [{
+                axis_id: 'a1', name: 'Main', assigned_brigades: ['stale', 'current'],
+                objectives: ['op:target:obj'], current_objective_index: 0,
+                status: 'executing', failure_count: 1,
+                consecutive_failures_on_current: 1, momentum: 0,
+                consecutive_catastrophic_on_current: 1,
+                battles_this_turn: 1,
+                objective_battles_this_turn: 1,
+                attack_attempt_count: 1, objective_capture_count: 0,
+                movement_only_execution_turns: 0, idle_execution_turn_streak: 0,
+            }],
+        });
+
+        updateSectorOffensiveResults(state);
+
+        const axis = (state.military.corps_command as any).arbih_corps.active_operations[0].axes[0];
+        expect(axis.status).toBe('executing');
+        expect(axis.consecutive_catastrophic_on_current).toBe(0);
+    });
+
     it('capture resets the catastrophic counter', () => {
         // Brigade is on the objective, which was just captured
         const b1 = makeBrigade('b1', 'op:front:approach', { posture: 'attack' });

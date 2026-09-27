@@ -1,0 +1,13 @@
+{
+  "backup_paths": 28,
+  "preservation_failures": [],
+  "stashes_preserved": true,
+  "stash_count": 22,
+  "protected_drift": [],
+  "main": "9588876bc58b09adea89e48d9520be427e270f20",
+  "candidate": "7382f26f835b06122ebc01c65e675274028d32e8",
+  "calibration_ancestry": true,
+  "added_links_checked": 26,
+  "link_failures": [],
+  "stash_check": "Exact ordered stash object IDs; initial subject comparison differed only through shell/Python text decoding."
+}

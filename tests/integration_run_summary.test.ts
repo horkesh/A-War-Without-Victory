@@ -6,7 +6,8 @@ import { createRequire } from 'node:module';
 import { runScenario } from '../src/scenario/scenario_runner.js';
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
 
-const SCENARIO_40W = join(process.cwd(), 'data', 'scenarios', 'apr1992_definitive_40w.json');
+const SCENARIO_188W = join(process.cwd(), 'data', 'scenarios', 'apr1992_definitive_188w.json');
+const WEEKS_OVERRIDE = 40;
 const OUT_DIR = join(process.cwd(), '.tmp_integration_run_summary');
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -21,7 +22,7 @@ const structuralFingerprint = require('../tools/diagnostics/structural_fingerpri
     buildStructuralFields: (outputDir: string) => Record<string, unknown>;
 };
 
-describe('run summary diagnostics (40w)', () => {
+describe('run summary diagnostics (canonical 188w @40w)', () => {
     beforeAll(async () => {
         const prereq = checkDataPrereqs({ baseDir: process.cwd() });
         if (!prereq.ok) {
@@ -30,7 +31,7 @@ describe('run summary diagnostics (40w)', () => {
         }
         if (existsSync(OUT_DIR)) await rm(OUT_DIR, { recursive: true });
 
-        const result = await runScenario({ scenarioPath: SCENARIO_40W, outDirBase: OUT_DIR });
+        const result = await runScenario({ scenarioPath: SCENARIO_188W, outDirBase: OUT_DIR, weeksOverride: WEEKS_OVERRIDE });
         runDir = result.outDir;
         const summaryJson = await readFile(result.paths.run_summary, 'utf8');
         summary = JSON.parse(summaryJson);
@@ -129,8 +130,11 @@ describe('run summary diagnostics (40w)', () => {
             anchor_type: anchor.anchor_type,
             expected_controller: anchor.expected_controller,
         }))).toEqual(runMeta.anchor_contract.anchors);
-        expect(summary.anchor_checks).toBeUndefined();
-        expect(summary.historical_fit?.anchor_checks).toBeUndefined();
+        // The canonical calibration scenario also exposes the terminal fit's own
+        // anchor checks at top level and under historical_fit. They are the same
+        // computation as the contract evaluation and must agree with it.
+        expect(summary.anchor_checks).toEqual(evaluation.anchor_checks);
+        expect(summary.historical_fit?.anchor_checks).toEqual(evaluation.anchor_checks);
 
         let passCount = 0;
         let failCount = 0;

@@ -144,8 +144,16 @@ describe('formTgsAtReadyTransition routing (flag-on)', () => {
 
     it('uses the canonical rear-area adjacency supplied by the war pipeline', async () => {
         const { formTgsAtReadyTransition } = await withFormationFlagOn();
+        // ENGINE-HEALTH B3 (2026-09-19): the anchor is 1000 rather than the 2000 default so
+        // this ONE donor satisfies TG donation readiness. A donor lends at most
+        // DONATION_CAP_FRACTION (30%) of its own personnel, so a single donor can never
+        // reach DONATION_READINESS_FRACTION (60%) of an equally-sized anchor — that is the
+        // standard's stated intent (refuse an under-committed pool), and before B3 the
+        // formation site simply had no readiness check to enforce it. d1 at 2 hops lends
+        // floor(min(0.70x2000, 0.30x2000, 2000-800)) = 600 = 0.6 x 1000. Routing and hop
+        // count, which is what this test is about, are unchanged.
         const state = stateWith([
-            brigade('anchor', { location_osid: 'op:m:front' }),
+            brigade('anchor', { location_osid: 'op:m:front', personnel: 1000 }),
             brigade('d1', { location_osid: 'op:m:rear' }),
         ]);
         state.political = {
@@ -204,8 +212,10 @@ describe('formTgsAtReadyTransition routing (flag-on)', () => {
 
     it('is idempotent — a second call does not double-form the TG', async () => {
         const { formTgsAtReadyTransition } = await withFormationFlagOn();
+        // ENGINE-HEALTH B3: anchor 1000 so the single donor clears donation readiness.
+        // See the rear-area-adjacency case above for the arithmetic.
         const state = stateWith([
-            brigade('anchor', { location_osid: 'op:m:s0' }),
+            brigade('anchor', { location_osid: 'op:m:s0', personnel: 1000 }),
             brigade('d1', { location_osid: 'op:m:s0' }),
         ]);
         const op = baseOp({ type: 'sector_attack', participating_brigades: ['anchor'] });

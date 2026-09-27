@@ -64,7 +64,7 @@ describe('heap_profile — env-flag default-OFF discipline', () => {
         // Calling the hook with valid turns/scenario/runId must NOT write.
         const tmpDir = mkdtempSync(join(tmpdir(), 'heap-prof-off-'));
         try {
-            const wrote = maybeWriteHeapSnapshot(60, 'apr1992_definitive_40w', 'run-test-off', tmpDir);
+            const wrote = maybeWriteHeapSnapshot(60, 'apr1992_definitive_188w', 'run-test-off', tmpDir);
             expect(wrote).toBe(false);
             // Directory may or may not exist; either way it must contain
             // no .heapsnapshot files since the flag was OFF.
@@ -124,12 +124,12 @@ describe('heap_profile — snapshot path computation', () => {
     it('produces canonical filename', () => {
         const p = computeHeapSnapshotPath(
             60,
-            'apr1992_definitive_40w',
+            'apr1992_definitive_188w',
             'n1728-abc',
             'data/derived/_debug'
         );
         // Path separator is OS-dependent; we assert the tail filename only.
-        expect(p.endsWith('heap_60_apr1992_definitive_40w_n1728-abc.heapsnapshot')).toBe(true);
+        expect(p.endsWith('heap_60_apr1992_definitive_188w_n1728-abc.heapsnapshot')).toBe(true);
     });
 
     it('sanitizes filesystem-unsafe characters in slug and runId', () => {

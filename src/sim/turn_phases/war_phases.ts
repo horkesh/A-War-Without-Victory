@@ -31,6 +31,7 @@ import { applyGuerrillaAttrition } from '../combat/guerrilla_attrition.js';
 import { cleanupExpiredEventModifiers } from '../events/active_modifiers.js';
 import { attributeOperationCasualties } from '../combat/operation_casualty_attribution.js';
 import { recordOperationWeeklyEntries } from '../combat/operation_aar.js';
+import { operationExecutedAttackCount } from '../combat/operation_attack_count.js';
 import { buildAdjacencyMapCached } from '../../map/adjacency_map.js';
 import { computeFrontEdges, computeFrontEdgesOsid } from '../../map/front_edges.js';
 import { computeFrontRegions } from '../../map/front_regions.js';
@@ -170,6 +171,7 @@ import {
     admitAuthoredPrePlannedReinforcements,
     injectPrePlannedOperations,
     injectQueuedOperation,
+    prestageDeferredPrePlannedElites,
 } from '../combat/pre_planned_operations.js';
 import { isSlot0AvailableForQueue, hasAvailableSlot, getAvailableBrigades, buildCorpsOperation, findBrigadeOperationAnywhere, removeOperation } from '../combat/corps_operation_helpers.js';
 import { validateOpAtInjection, hasBlockingOpInjectionWarnings } from '../combat/operation_validation.js';
@@ -202,11 +204,10 @@ import {
     updateSupplyReserves
 } from '../../state/supply_reserves.js';
 import type { Osid } from '../combat/osid_adjacency.js';
-import { generateArmyReserveRequests, evaluateArmyReserveAssignments, tickEliteLoans } from '../combat/army_reserve_system.js';
+import { enforceGuardsEnclaveBoundary, generateArmyReserveRequests, evaluateArmyReserveAssignments, tickEliteLoans } from '../combat/army_reserve_system.js';
 import { buildHomeDistanceCache } from '../combat/home_distance.js';
 import { computeSectorCombatRatings } from '../combat/sector_combat_rating.js';
 import { detectParamilitaryTargets, advanceParamilitaries } from '../combat/paramilitary_sweep.js';
-import { consolidateRearPockets } from '../combat/rear_pocket_consolidation.js';
 import { updateStrandedBrigadeLifecycle } from '../combat/stranded_brigade_lifecycle.js';
 import {
     PARAMILITARY_FADE_WEEK,
@@ -485,7 +486,15 @@ function applyOpHalts(state: GameState): void {
             removeOperation(cmd, op);
 
             // Append the halt record (op_name + turn) for the UI / follow-up consequence.
-            const record = { op_name: op.name ?? staged.op_name ?? 'Operation', turn };
+            // The halt writes no AAR, so the record keeps the op's identity and executed
+            // attacks (read by the `operation_attacked` event condition).
+            const opName = op.name ?? staged.op_name ?? 'Operation';
+            const record = {
+                op_name: opName,
+                turn,
+                operation_id: `${corpsId}:${opName}:t${op.started_turn}`,
+                executed_attacks: operationExecutedAttackCount(op),
+            };
             if (Array.isArray(cmd.halted_op_record)) cmd.halted_op_record.push(record);
             else cmd.halted_op_record = [record];
 
@@ -1527,11 +1536,24 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        name: 'prestage-deferred-historical-elites',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            prestageDeferredPrePlannedElites(context.state);
+        }
+    },
+    {
         name: 'osid-column-movement',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
+            const moveSpatial = getSpatialContextCache(context);
+            enforceGuardsEnclaveBoundary(
+                context.state,
+                context.state.meta.turn,
+                moveSpatial?.preCombat.adjacency as Map<Osid, Osid[]> | undefined,
+            );
             let terrainData;
             try {
                 terrainData = await loadTerrainScalars();
@@ -1712,24 +1734,6 @@ export const warPhases: NamedPhase[] = [
                 } else {
                     context.report.paramilitary_sweep = report;
                 }
-            }
-        }
-    },
-    {
-        name: 'rear-pocket-consolidation',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            if ((context.state.meta?.turn ?? 0) <= PARAMILITARY_FADE_WEEK) return;
-            const od = getOperationalData(context);
-            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
-
-            const report = consolidateRearPockets(
-                context.state,
-                od.edges,
-                od.opData.operationalToCanonical,
-            );
-            if (report.total_flipped > 0) {
-                context.report.rear_pocket_consolidation = report;
             }
         }
     },
@@ -2465,9 +2469,21 @@ export const warPhases: NamedPhase[] = [
             const corpsReport: CorpsAiReportEntry[] = [];
             const corpsSpatial = getSpatialContextCache(context);
             const corpsAdjacency = corpsSpatial?.preCombat.adjacency;
+            const corpsOsidPopulationMap = reverseMap && context.input.municipalityPopulation1991
+                ? computeOsidPopulation(reverseMap, context.input.municipalityPopulation1991)
+                : undefined;
+            // Terrain scalars for the P-A time-bounded participant-admission check: the creator
+            // must estimate column transit with the same terrain-weighted model the execution
+            // step uses. Non-fatal — falls back to default terrain.
+            let corpsTerrainData;
+            try {
+                corpsTerrainData = await loadTerrainScalars();
+            } catch {
+                corpsTerrainData = { by_sid: {} };
+            }
             for (const faction of factions) {
                 const supplyByOsid = context.report.supply_resolution?.supply_state_by_osid;
-                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid, corpsEthnicMap, corpsAdjacency, corpsSpatial?.preCombat);
+                generateAllCorpsOrders(context.state, faction, edges, sidToMun, reverseMap, osidEdges, supplyByOsid, corpsEthnicMap, corpsAdjacency, corpsSpatial?.preCombat, corpsOsidPopulationMap, corpsTerrainData);
                 corpsReport.push(...extractCorpsAiReport(context.state, faction));
             }
             if (corpsReport.length > 0) {
@@ -2941,6 +2957,12 @@ export const warPhases: NamedPhase[] = [
         name: 'resolve-attack-orders',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
+            const attackSpatial = getSpatialContextCache(context);
+            enforceGuardsEnclaveBoundary(
+                context.state,
+                context.state.meta.turn,
+                attackSpatial?.preCombat.adjacency as Map<Osid, Osid[]> | undefined,
+            );
             const od = getOperationalData(context);
             if (od?.opData?.operationalToCanonical && od?.edges?.length) {
                 let terrainData: Awaited<ReturnType<typeof loadTerrainScalars>> | undefined;
@@ -2962,7 +2984,6 @@ export const warPhases: NamedPhase[] = [
                 }
                 // Control events are persisted for the full game — no trimming.
                 // They feed the settlement timeline ("The Story of This Place").
-                const attackSpatial = getSpatialContextCache(context);
                 context.report.attack_resolution_osid = resolveAttackOrdersOsid(
                     context.state,
                     od.edges,
@@ -4449,6 +4470,16 @@ export function recallDriftedBrigades(state: GameState, adjacency?: Map<string, 
         if (f.kind !== 'brigade' && f.kind !== 'og') continue;
         if (!f.home_osid || !f.location_osid) continue;
         if (f.home_osid === f.location_osid) continue;
+        const transit = state.military.brigade_movement_state?.[fid];
+        if (transit?.status === 'in_transit' && transit.owner === 'authored_preplanned') {
+            const order = moveOrders[fid];
+            if (order && order.owner !== 'authored_preplanned'
+                && order.destination_sids?.[0] !== transit.destination_sids?.[0]) {
+                delete moveOrders[fid];
+            }
+            continue;
+        }
+        if (moveOrders[fid]?.owner === 'authored_preplanned') continue;
         if (inOp.has(fid)) continue;
         if ((f.disrupted_turns ?? 0) > 0) continue;
         if (sectorOwned.has(fid) || f.assignment?.kind === 'sector') {

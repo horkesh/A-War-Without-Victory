@@ -1,0 +1,166 @@
+{
+  "run": "./runs/apr1992_definitive_188w__6deb5845c150c196__w188_n13/",
+  "finalStateHash": "ee5dbfb8f42e7d14",
+  "states": [
+    {
+      "id": "op:jablanica:doljani_2",
+      "initial": "HRHB",
+      "week104": "RBiH",
+      "final": "RBiH",
+      "events": [
+        {
+          "attacker_brigade": "arbih_449th_eastern_herzegovina_mountain",
+          "battle_id": "57:op:jablanica:doljani_2:arbih_449th_eastern_herzegovina_mountain:null",
+          "from": "HRHB",
+          "mechanism": "combat",
+          "mun_id": "jablanica",
+          "settlement_id": "op:jablanica:doljani_2",
+          "to": "RBiH",
+          "turn": 57
+        }
+      ]
+    },
+    {
+      "id": "op:prozor:ljubunci_2",
+      "initial": "HRHB",
+      "week104": "HRHB",
+      "final": "HRHB",
+      "events": []
+    },
+    {
+      "id": "op:prozor:lug_2",
+      "initial": "RBiH",
+      "week104": "HRHB",
+      "final": "HRHB",
+      "events": [
+        {
+          "attacker_brigade": "F_HRHB_0001",
+          "battle_id": "73:op:prozor:lug_2:F_HRHB_0001:arbih_449th_eastern_herzegovina_mountain",
+          "from": "RBiH",
+          "mechanism": "combat",
+          "mun_id": "prozor",
+          "settlement_id": "op:prozor:lug_2",
+          "to": "HRHB",
+          "turn": 73
+        }
+      ]
+    },
+    {
+      "id": "op:prozor:paros",
+      "initial": "RBiH",
+      "week104": "HRHB",
+      "final": "HRHB",
+      "events": [
+        {
+          "attacker_brigade": "hvo_rama_brigade",
+          "battle_id": "73:op:prozor:paros:hvo_rama_brigade:arbih_445th_mountain",
+          "from": "RBiH",
+          "mechanism": "combat",
+          "mun_id": "prozor",
+          "settlement_id": "op:prozor:paros",
+          "to": "HRHB",
+          "turn": 73
+        }
+      ]
+    }
+  ],
+  "checkpoints": [
+    {
+      "label": "January 1993",
+      "week": 39,
+      "matched": 707,
+      "total": 712,
+      "anchorsPassed": 31,
+      "anchorsTotal": 31,
+      "mismatchOsids": [
+        "op:ilijas:krivajevici",
+        "op:kalesija:seher_2",
+        "op:konjic:glavaticevo_2",
+        "op:konjic:ljuta",
+        "op:maglaj:jablanica"
+      ]
+    },
+    {
+      "label": "April 1994",
+      "week": 104,
+      "matched": 707,
+      "total": 712,
+      "anchorsPassed": 32,
+      "anchorsTotal": 32,
+      "mismatchOsids": [
+        "op:ilijas:krivajevici",
+        "op:kalesija:seher_2",
+        "op:konjic:glavaticevo_2",
+        "op:konjic:ljuta",
+        "op:maglaj:jablanica"
+      ]
+    },
+    {
+      "label": "April 1995",
+      "week": 156,
+      "matched": 701,
+      "total": 712,
+      "anchorsPassed": 39,
+      "anchorsTotal": 40,
+      "mismatchOsids": [
+        "op:brcko:brka_2",
+        "op:glamoc:glamoc_2",
+        "op:glamoc:pribelja",
+        "op:glamoc:vidimlije_2",
+        "op:ilijas:krivajevici",
+        "op:kalesija:seher_2",
+        "op:konjic:bijela_2",
+        "op:maglaj:jablanica",
+        "op:orasje:donja_mahala",
+        "op:travnik:gornje_krcevine",
+        "op:trnovo:gornja_presjenica"
+      ]
+    },
+    {
+      "label": "October 1995",
+      "week": 188,
+      "matched": 664,
+      "total": 712,
+      "anchorsPassed": 31,
+      "anchorsTotal": 31,
+      "mismatchOsids": [
+        "op:bihac:trubar",
+        "op:bosanska_krupa:veliki_badic",
+        "op:bosanski_novi:krslje_2",
+        "op:bosanski_novi:matavazi_2",
+        "op:bosanski_petrovac:dobro_selo_2",
+        "op:bosanski_petrovac:jasenovac_2",
+        "op:bosansko_grahovo:malesevci",
+        "op:bosansko_grahovo:ugarci",
+        "op:brcko:brka_2",
+        "op:donji_vakuf:jemanlici",
+        "op:donji_vakuf:korenici",
+        "op:donji_vakuf:oborci_2",
+        "op:donji_vakuf:pribraca_2",
+        "op:donji_vakuf:prusac_2",
+        "op:donji_vakuf:torlakovac_2",
+        "op:jajce:barevo_2",
+        "op:jajce:bravnice",
+        "op:jajce:grdovo",
+        "op:jajce:jajce_3",
+        "op:jajce:jezero_2"
+      ]
+    }
+  ],
+  "criticalReports": [
+    {
+      "category": "combat",
+      "description": "Corps hvo_central_bosnia (HRHB): 7/11 brigades (64%) are below combat effectiveness (personnel < 400).",
+      "entities": [
+        "hvo_central_bosnia"
+      ],
+      "severity": "critical",
+      "type": "combat_ineffective_concentration"
+    }
+  ],
+  "anomalyCounts": {
+    "critical": 1,
+    "warning": 7,
+    "info": 20
+  }
+}

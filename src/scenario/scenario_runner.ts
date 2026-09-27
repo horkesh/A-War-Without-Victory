@@ -2120,8 +2120,15 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     if (weeks < 1 || !Number.isInteger(weeks)) {
         throw new Error('weeks must be an integer >= 1');
     }
-    const scenarioForId = weeksOverride !== undefined ? { ...scenario, weeks } : scenario;
-    const run_id = computeRunId(scenarioForId);
+    // The effective scenario carries the overridden duration. Duration-derived
+    // selection (scoring-reference epoch, reached checkpoints) MUST read this,
+    // not the declared file duration: otherwise a canonical 188w run shortened
+    // with `--weeks 40` would still grade a week-40 state against the oct1995
+    // anchors. When no override is supplied this object IS `scenario` by reference,
+    // so duration-derived selection is unchanged by construction. That is a
+    // source-path argument, not a measured byte-hash comparison.
+    const effectiveScenario = weeksOverride !== undefined ? { ...scenario, weeks } : scenario;
+    const run_id = computeRunId(effectiveScenario);
     let runDirName: string;
     if (uniqueRunFolder) {
         await mkdir(outDirBase, { recursive: true });
@@ -2162,9 +2169,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             // checkpoint it reaches, so this is a set, not the terminal key alone.
             paintedReferenceKeys: Array.from(
                 new Set([
-                    ...checkpointsForScenario(scenario).map((c) => c.key),
-                    ...(usesPaintedControlReference(scenario)
-                        ? [pickHistoricalReferenceKey(scenario)]
+                    ...checkpointsForScenario(effectiveScenario).map((c) => c.key),
+                    ...(usesPaintedControlReference(effectiveScenario)
+                        ? [pickHistoricalReferenceKey(effectiveScenario)]
                         : []),
                 ])
             ).sort(strictCompare),
@@ -2177,7 +2184,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     );
     const usesHistoricalAnchorContract = scenario.init_control === 'apr1992'
         || (scenario.init_control_mode === 'ethnic_1991' && scenario.scenario_id.includes('apr1992'));
-    const anchorEpoch = pickHistoricalReferenceKey(scenario);
+    const anchorEpoch = pickHistoricalReferenceKey(effectiveScenario);
     const run_meta = {
         scenario_id: scenario.scenario_id,
         run_id,
@@ -2480,7 +2487,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
 
         // Checkpoints this run will reach, and the control snapshot captured at each.
         // Keyed by absolute week so ordering is the table's, not insertion order.
-        const activeCheckpoints = checkpointsForScenario(scenario);
+        const activeCheckpoints = checkpointsForScenario(effectiveScenario);
         const checkpointSnapshots = new Map<number, ReturnType<typeof extractSettlementControlSnapshot>>();
 
         for (let week_index = startWeekIndex; week_index < weeks; week_index++) {
@@ -3260,11 +3267,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         let historicalControlAlignment: HistoricalControlAlignmentDiagnostics | undefined;
         let osidPairMatch: OsidPairMatchDiagnostics | undefined;
         let historicalAnchorChecks: HistoricalAnchorCheck[] | undefined;
-        if (usesPaintedControlReference(scenario)) {
+        if (usesPaintedControlReference(effectiveScenario)) {
             // Wave 15: pick the painted reference matching scenario duration.
             // Loads the OSID-keyed painted_control_{key}.json directly, skipping
             // the createInitialGameState detour used by the legacy mun1990 path.
-            const referenceKey = pickHistoricalReferenceKey(scenario);
+            const referenceKey = pickHistoricalReferenceKey(effectiveScenario);
             const historicalReferenceSnapshot = await loadPaintedControlReferenceSnapshot(referenceKey, baseDir);
             historicalControlAlignment = computeHistoricalControlAlignmentDiagnostics(
                 finalControlSnapshot,

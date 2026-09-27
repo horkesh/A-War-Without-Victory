@@ -17,7 +17,8 @@ import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
 import { assertFormationsInFriendlyTerritory } from '../src/sim/combat/assert_formation_territory.js';
 import type { GameState } from '../src/state/game_state.js';
 
-const SCENARIO_40W = join(process.cwd(), 'data', 'scenarios', 'apr1992_definitive_40w.json');
+const SCENARIO_188W = join(process.cwd(), 'data', 'scenarios', 'apr1992_definitive_188w.json');
+const WEEKS_OVERRIDE = 40;
 const OUT_DIR = join(process.cwd(), '.tmp_integration_state_assertions');
 
 /** Invariant violation prefixes emitted by the assertion functions. */
@@ -28,7 +29,7 @@ const VIOLATION_PREFIXES = [
     'FORMATION IN ENEMY TERRITORY',
 ];
 
-describe('state invariant assertions (40w)', () => {
+describe('state invariant assertions (canonical 188w @40w)', () => {
     let state: GameState;
     let skipped = false;
     let errorCalls: string[] = [];
@@ -46,7 +47,7 @@ describe('state invariant assertions (40w)', () => {
         // The spy still calls through so normal logging is preserved.
         errorSpy = vi.spyOn(console, 'error');
 
-        const result = await runScenario({ scenarioPath: SCENARIO_40W, outDirBase: OUT_DIR });
+        const result = await runScenario({ scenarioPath: SCENARIO_188W, outDirBase: OUT_DIR, weeksOverride: WEEKS_OVERRIDE });
 
         // Collect all console.error calls that match violation prefixes
         errorCalls = errorSpy.mock.calls

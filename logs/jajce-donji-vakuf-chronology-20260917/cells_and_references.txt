@@ -1,0 +1,90 @@
+# Jajce / Donji Vakuf operational cells — members, initial control, control history, painted references
+# Run: data/derived/scenario/_baseline_tmp/apr1992_188w. Turn N boundary = 1992-04-06 + 7N days.
+
+op:donji_vakuf:babin_potok_2
+    settlements : Babin Potok, Babino Selo, Barice, Brda, Grič, Makitani, Prisika, Sandžak, Silajdževina
+    t0          : RS   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=RBiH
+    control     : t184 1995-10-16  RS -> RBiH  attacker=arbih_705th_slavna_mountain  mechanism=combat
+op:donji_vakuf:donji_vakuf_2
+    settlements : Blagaj, Donji Vakuf, Ponjavići, Rastičevo, Rudina, Vlađevići
+    t0          : RBiH   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=RBiH
+    control     : t35 1992-12-07  RBiH -> RS  attacker=rs_16th_krajina_motorized  mechanism=combat
+    control     : t183 1995-10-09  RS -> RBiH  attacker=arbih_705th_slavna_mountain  mechanism=combat
+op:donji_vakuf:jemanlici
+    settlements : Brezičani, Jemanlići, Karići, Sultanovići, Ćehajići, Ćemalovići, Šutkovići
+    t0          : RS   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=RBiH
+    control     : (no control events)
+op:donji_vakuf:komar_2
+    settlements : Dolovi, Fonjge, Grabantići, Gredina, Komar, Kovačevići, Vrljaj, Šatare
+    t0          : RS   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=RBiH
+    control     : t182 1995-10-02  RS -> RBiH  attacker=arbih_705th_slavna_mountain  mechanism=combat
+op:donji_vakuf:korenici
+    settlements : Brdo, Keže, Korenići, Pobrđani, Đulovići, Šahmani
+    t0          : RBiH   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=RBiH
+    control     : t38 1992-12-28  RBiH -> RS  attacker=rs_16th_krajina_motorized  mechanism=combat
+op:donji_vakuf:kutanja
+    settlements : Donji Rasavci, Kutanja, Novo Selo, Orahovljani, Rasavci, Ruska Pilana, Semin, Vrbas
+    t0          : RS   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=RBiH
+    control     : t185 1995-10-23  RS -> RBiH  attacker=arbih_705th_slavna_mountain  mechanism=combat
+op:donji_vakuf:oborci_2
+    settlements : Galešići, Hemići, Oborci, Piljužići, Suhodol, Šeherdžik
+    t0          : RBiH   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=RBiH
+    control     : t34 1992-11-30  RBiH -> RS  attacker=rs_16th_krajina_motorized  mechanism=combat
+op:donji_vakuf:pribraca_2
+    settlements : Daljan, Jablan, Košćani, Pribraća, Slatina, Urija
+    t0          : RS   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=RBiH
+    control     : t187 1995-11-06  RS -> RBiH  attacker=arbih_707th_slavna_mountain  mechanism=combat
+op:donji_vakuf:prusac_2
+    settlements : Fakići, Guvna, Potkraj, Prusac
+    t0          : RBiH   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=RBiH
+    control     : t41 1993-01-18  RBiH -> RS  attacker=rs_16th_krajina_motorized  mechanism=combat
+    control     : t188 1995-11-13  RS -> RBiH  attacker=arbih_707th_slavna_mountain  mechanism=combat
+op:donji_vakuf:torlakovac_2
+    settlements : Bavar, Dobro Brdo, Doganovci, Krivače, Sokolina, Staro Selo, Torlakovac
+    t0          : RBiH   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=RBiH
+    control     : t31 1992-11-09  RBiH -> RS  attacker=rs_16th_krajina_motorized  mechanism=combat
+    control     : t186 1995-10-30  RS -> RBiH  attacker=arbih_705th_slavna_mountain  mechanism=combat
+op:jajce:barevo_2
+    settlements : Barevo, Carevo Polje, Cvitović, Mile, Pšenik, Vlasinje, Vrbica, Zdaljevac
+    t0          : HRHB   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=HRHB
+    control     : t26 1992-10-05  HRHB -> RS  attacker=rs_11th_mrkonji_light_infantry  mechanism=combat
+op:jajce:bravnice
+    settlements : Bravnice, Drenov Do, Kamenice, Ćusine
+    t0          : RS   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=HRHB
+    control     : (no control events)
+op:jajce:divicani_2
+    settlements : Bistrica, Divičani, Doribaba, Gornji Bešpelj, Kuprešani, Seoci, Smionica, Vukičevci
+    t0          : HRHB   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=RS
+    control     : t25 1992-09-28  HRHB -> RS  attacker=rs_11th_mrkonji_light_infantry  mechanism=combat
+op:jajce:grdovo
+    settlements : Božikovac, Brvanci, Dubrave, Grdovo, Kokići, Krezluk, Selići
+    t0          : RS   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=RBiH
+    control     : (no control events)
+op:jajce:jajce_3
+    settlements : Biokovina, Bulići, Jajce, Klimenta, Lučina, Prudi, Rika, Šibenica
+    t0          : RBiH   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=HRHB
+    control     : t27 1992-10-12  RBiH -> RS  attacker=rs_11th_mrkonji_light_infantry  mechanism=combat
+op:jajce:jezero_2
+    settlements : Jezero, Čerkazovići, Žaovine
+    t0          : RBiH   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=HRHB
+    control     : t31 1992-11-09  RBiH -> RS  attacker=rs_1st_gradika_light_infantry  mechanism=combat
+op:jajce:kruscica
+    settlements : Bučići, Dogani, Kruščica, Lendići, Podlipci
+    t0          : RBiH   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=RS
+    control     : t25 1992-09-28  RBiH -> RS  attacker=rs_1st_sipovo_light_infantry  mechanism=combat
+op:jajce:lupnica
+    settlements : Bare, Karići, Lupnica, Magarovci, Peratovci, Podmilačje
+    t0          : HRHB   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=HRHB
+    control     : t35 1992-12-07  HRHB -> RS  attacker=rs_11th_dubica_infantry  mechanism=combat
+op:jajce:prisoje
+    settlements : Borci, Kovačevac, Majdan, Perućica, Prisoje, Stupna, Đumezlije
+    t0          : RS   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=HRHB
+    control     : (no control events)
+op:jajce:vinac_2
+    settlements : Grabanta, Ipota, Kasumi, Selište, Stare Kuće, Vinac, Šerići
+    t0          : RBiH   jan1993=RS  apr1994=RS  apr1995=RS  oct1995=HRHB
+    control     : t28 1992-10-19  RBiH -> RS  attacker=rs_1st_sipovo_light_infantry  mechanism=combat
+op:travnik:gornje_krcevine
+    settlements : Donje Krčevine, Gornje Krčevine, Gradina, Hamandžići, Sažići, Seferi, Vitovlje, Vukovići, Čosići, Šešići
+    t0          : RBiH   jan1993=RS  apr1994=RS  apr1995=RBiH  oct1995=RBiH
+    control     : t31 1992-11-09  RBiH -> RS  attacker=rs_1st_banja_luka_light_infantry  mechanism=combat

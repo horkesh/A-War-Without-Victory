@@ -1,0 +1,18 @@
+  [ADVISORY] dead_ops_corrected  11/60 operations and 13/94 axes recorded ZERO attacks   <- reported not gated; gating today's figure would ratchet the defect in as the floor (REAL_WAR_MASTER #40)
+  [ADVISORY] planning_deaths   probe 347/347  sector_attack 28/63  of 410 distinct ops   <- created, never executed; INVISIBLE to every other counter
+  [ADVISORY]                   top reasons: probe_complete 287, political_blocked 45, completed 21
+[engine_health_gate] horizon=188w weeks=188
+  [PASS] zero_eligible_ops  0 <= 3
+  [PASS] invalid_op_weeks   0 <= 3
+  [PASS] ghost_destroyed    0 <= 3
+  [PASS] stranded_brigades  10 <= 16
+  [PASS] matched_osids      667 >= 644
+  [PASS] checkpoint_apr1994 702 >= 674
+  [PASS] checkpoint_apr1995 697 >= 668
+  [PASS] checkpoint_jan1993 700 >= 694
+  [PASS] checkpoint_oct1995 667 >= 641
+  [PASS] consistency_failures 0 <= 3 (validate_run_consistency)
+  [PASS] kw_ratio           3.742 in [3.221, 4.358]
+  [ADVISORY] hollow_ratio     HRHB 0.71 (27/38)  RBiH 0.99 (121/122)  RS 0.37 (23/62)   <- combat-effective / active; falling while active rises = hollow ledger
+  metrics: {"horizon":"188w","weeks":188,"zero_eligible_ops":0,"dead_ops":0,"ghost_destroyed":0,"stranded_brigades":10,"consistency_failures":0,"matched_osids":667,"checkpoint_matched":{"jan1993":700,"apr1994":702,"apr1995":697,"oct1995":667},"kw_ratio":3.742,"total_killed":47915,"total_wounded":179292,"exhaustion_curve":{"weeks":188,"first_saturation_week":null,"dead_weeks_pct":0.5,"terminal_min_gap_pct":3.26,"terminal_by_faction":{"RBiH":8738,"RS":9775,"HRHB":8412}},"mean_morale_by_faction":{"RBiH":98.3,"RS":36.6,"HRHB":71.8},"combat_effective_by_faction":{"RBiH":121,"RS":23,"HRHB":27},"active_brigades_by_faction":{"RBiH":122,"RS":62,"HRHB":38},"hollow_ratio_by_faction":{"HRHB":0.711,"RBiH":0.992,"RS":0.371}}
+[engine_health_gate] PASS

@@ -1,0 +1,39 @@
+# Durable evidence — Operation Jajce -> Operation Donji Vakuf chronology review, 2026-09-17
+#
+# Read-only review at c78f38cc4 (production source executably 41a148bf9). NO simulation was executed
+# and no production source was instrumented. Every simulation figure is extracted from a run that
+# already existed:
+#   data/derived/scenario/_baseline_tmp/apr1992_188w  (188w advisory reproduction, clean 0033517b6;
+#   weeks 1-39 measured byte-identical to n403 — see the Prusac diagnosis section 2)
+# Historical figures come from docs/Balkan_BattlegroundsI.pdf and docs/Balkan_BattlegroundsII.pdf,
+# read as printed folios and quoted in bb_citations.txt.
+#
+# That raw run directory is gitignored and local-only; only these compact extracts are committed.
+#
+# SHA-256 below are of the COMMITTED BLOBS (`git cat-file blob :<path>`), which are the durable
+# bytes. .gitattributes normalizes .cjs/.txt to LF on commit, so an on-disk CRLF copy can differ
+# from its committed blob. Verify against these blob hashes, not the working-tree copies.
+#
+# No credential, token or secret value appears in any file listed here.
+
+1b96c7eeda0f7e39cb13bb6490a3b6cceb208d9fe82c4d628368fcb0644e9cd8  bb_citations.txt
+9a6a416c0002a72f8b9349918b90214da5ed18964ca5a9154ec240e48f8b9f6f  bbfolio.cjs
+ee316a04a13b97a228ac08ab014c50887de72012adce7c74f231825e9772ffe8  bbpage.cjs
+105e03df5b4d039d10b1fa0f08cb56a5fb7ff58c8812342e364a4bac480555ca  cells.cjs
+24ff2c37c85dbc9fbce1a2bc066c2c80986817327094e160924a242de4c1925b  cells_and_references.txt
+24defd79622a275a07e8bf86cea7a1b84c24627a4dafbc89434a703242599ccd  kk1_queue.cjs
+43e918800f3ce531c8e983b0d32185bc3332aa893bd9c7950b839ce9719d6dc7  kk1_queue_timeline.txt
+
+# WHAT EACH FILE IS
+#   kk1_queue_timeline.txt    every 1st Krajina Corps pre-planned operation, w1-w45: injection turn,
+#                             planning/execution/recovery phase, current objective, attack attempts,
+#                             eligible attackers, movement orders, captures. The queue-head evidence.
+#   cells_and_references.txt  for each Jajce / Donji Vakuf operational cell: the settlements it
+#                             contains, its t0 controller, every control event with its calendar
+#                             date, and all four painted references.
+#   bb_citations.txt          the historical record, quoted, with PRINTED FOLIOS verified page by
+#                             page — plus the scan/KB indexing convention, which is not a constant
+#                             offset and must not be applied blindly.
+#   kk1_queue.cjs             regenerates kk1_queue_timeline.txt from a run directory.
+#   cells.cjs                 regenerates cells_and_references.txt from a run directory.
+#   bbfolio.cjs / bbpage.cjs  resolve a phrase to its scan page and the folio printed on it.

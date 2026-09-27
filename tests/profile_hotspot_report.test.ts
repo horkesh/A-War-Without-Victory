@@ -10,7 +10,7 @@ describe('profile hotspot report', () => {
         const report = buildProfileHotspotReport({
             profilePath: 'data/derived/_debug/profile.json',
             profile: {
-                scenario: 'data/scenarios/apr1992_definitive_40w.json',
+                scenario: 'data/scenarios/apr1992_definitive_188w.json',
                 totalWallMs: 100_000,
                 totalWallS: 100,
                 phaseTotals: [

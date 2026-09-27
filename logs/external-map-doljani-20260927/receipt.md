@@ -1,0 +1,11 @@
+# Doljani external map publication — 2026-09-27
+
+Owner request: update the external control timeline so the measured Doljani candidate can be inspected. Publication uses the retained 188-week run; it does not rerun the simulation or adopt a baseline.
+
+- Source: `runs/apr1992_definitive_188w__6deb5845c150c196__w188_n13/final_save.json`, SHA-256 `ee5dbfb8f42e7d147e046ad7ffe1b494ded34eec45d3d84f69069d586a347558`.
+- Generator: `node tools/calibration_timeline.mjs runs/apr1992_definitive_188w__6deb5845c150c196__w188_n13 --out logs/external-map-doljani-20260927/index.html`, exit 0. A deterministic publication-only `add_gate_banner.cjs` insertion, exit 0, places the inspection/red-gate warning in the Source run panel. The generator, simulation, geometry, and painted files are unchanged.
+- Page: 188 weeks; 235 control events; 744 drawn polygons; 712 scored OSIDs. Checkpoints 707/712, 707/712, 701/712, 664/712. April w104 shows Doljani RBiH/reference RBiH, Ljubunci/Lug/Paroš HRHB, and parked Maglaj Jablanica RS/reference RBiH. Dirty run and red full-suite/Farz gates are visibly disclosed.
+- Generated publication HTML SHA-256 `e64c53aa53e3a2e176f5e1c656d0c8961ae16c698c3903653e967be7451b548f`, 719,464 bytes. Embedded script syntax exit 0; marker check exit 0, 712 markers, 54 distinct mismatch anchors inside cells; local browser check exit 0 at 1280 and 390 pixels, no overflow or browser errors. Independent Sol reviewer gave GO after the visible gate warning correction.
+- Existing clean `gh-pages` worktree started at `948029d0ae40e1eaea3ffb79974d4758d2942056`. Only `index.html` and `README.md` changed; `.nojekyll` stayed byte-identical. Publication commit `6c1655eb3a2d8cd47d932c175fc13e43bdd9027d`; push exit 0; GitHub Pages API reports that commit **built**.
+- Live URL: https://horkesh.github.io/A-War-Without-Victory/?run=doljani-20260927 . HTTP 200; live SHA-256 equals the publication HTML hash above. Live browser check exit 0 at 1280 and 390 pixels for Doljani, trio, Maglaj, warning, provenance and layout.
+- The full Vitest suite and Farz P-A checkpoint verifier remain red; the candidate has one HVO Central Bosnia critical anomaly. Publication changes inspection output only. No reference repaint, baseline refresh, main-branch merge, or additional campaign occurred.

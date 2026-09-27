@@ -131,8 +131,9 @@ jobs:
   # replaces the removed byte-hash baselines job. Fingerprints only MEANINGFUL,
   # platform-stable fields (per-faction OSID control map + anchor pass/fail + bot
   # benchmark tallies — all integers/strings/booleans, verified identical across
-  # same-territory runs) of a fresh 40w run and compares against the committed expected
-  # (data/calibration/structural_fingerprint_40w.json). A structural move without a
+  # same-territory runs) of a fresh canonical 188w run shortened to 40 weeks and compares
+  # against the committed expected
+  # (data/calibration/structural_fingerprint_188w.json). A structural move without a
   # deliberate `npm run ci:structural-fingerprint:update` fails the gate.
   #
   # Reference platform = Linux/Node 22 (DoD C2). Windows==Linux byte-hashes are NOT

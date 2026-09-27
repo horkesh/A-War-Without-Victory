@@ -31,15 +31,25 @@ import { predictAllAdjacentTargets, predictCombatOutcome, type PredictedOutcome 
 import { estimateConcentratedOutcome, isOutcomeSufficientForAttack } from './bot_brigade_targeting.js';
 import { findSectorForEnemyOsid } from './corps_front_sectors.js';
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
-import { getAllAxisObjectives, getCurrentLaunchObjectives, isMultiAxis } from './sector_offensive_axis_helpers.js';
+import type { TerrainScalarsData } from '../../map/terrain_scalars.js';
+import type { Osid } from './osid_adjacency.js';
+import {
+    buildCorpsAllowedOsids,
+    dijkstraFriendlyPath,
+    getOsidColumnRate,
+} from './osid_column_movement.js';
+import {
+    getAllAxisObjectives,
+    getCurrentLaunchObjectives,
+    isMultiAxis,
+    PLANNING_INVALIDATION_GRACE_TURNS,
+} from './sector_offensive_axis_helpers.js';
 import { getStandingOgDefenseBrigadeIds } from './standing_og_defense.js';
-import { ENABLE_TACTICAL_GROUPS, ENABLE_TG_FORMATION, DONATION_READINESS_FRACTION, DONATION_READINESS_FRACTION_HRHB, getAnchorBrigade } from './tactical_group_config.js';
-// ADR-0005 v2.2c #3: donation-readiness gate recomputes the donor pool here.
-import { selectDonors } from './tactical_group_selection.js';
-// ADR-0005 Phase 4: phantom-aware anchor (gate must score donors against the SAME
-// persistent anchor that formTgsAtReadyTransition will actually use, not a phantom).
-import { resolveTgAnchor } from './tactical_group_anchor.js';
-import { getOperationBrigadesAtCurrentObjective } from './corps_operation_helpers.js';
+import { ENABLE_TACTICAL_GROUPS, getAnchorBrigade } from './tactical_group_config.js';
+// ENGINE-HEALTH B3 (2026-09-19): the donation-readiness gate no longer runs here, so this
+// module no longer selects donors or resolves a TG anchor. Readiness is evaluated once, at
+// the site that actually forms a Tactical Group (`formTgsAtReadyTransition`).
+import { getSynchronizedOperationBrigadesAtObjective } from './corps_operation_helpers.js';
 
 // BATCH C: launch-readiness probes call `predictAllAdjacentTargets(...)` only
 // to query whether the brigade has a direct-objective adjacency entry; they do
@@ -459,6 +469,105 @@ export function collectObjectiveApproachOsids(
     return staticApproachOsids;
 }
 
+/**
+ * P-A — TIME-BOUNDED PARTICIPANT ADMISSION (owner packet 2026-09-18).
+ *
+ * CONTRACT. A formation may be admitted as an INITIAL participant in a commander-generated
+ * offensive only if, from its CURRENT physical state and under the existing legal movement rules,
+ * it can reach the operation's required assembly/approach area within the time the operation
+ * actually provides before assembly failure.
+ *
+ * WHY. `findLocalOccupationCandidate` / the emit roster paths admitted participants on an 8-hop
+ * BFS (`MAX_REACHABILITY_HOPS`) with no time budget, then set `minimum_staged_brigades` to the
+ * whole roster. The lifecycle demands those brigades be physically objective-adjacent by
+ * `planning_duration + PLANNING_INVALIDATION_GRACE_TURNS`; a participant admitted within 8 hops
+ * but unable to march that far in time (e.g. Kupres -> Trubar over mountains) guaranteed
+ * `participants_below_assembly_floor` and a zero-attack abort. This makes the admission test use
+ * the same physical-feasibility assumptions the lifecycle will later enforce.
+ *
+ * REQUIRED AREA. The union of the operation's objective approaches
+ * (`collectObjectiveApproachOsids` — what `areParticipantsReadyForExecution` consumes) and the
+ * objective's live war-front-edge neighbours (`buildOsidAdjacencyFromFrontEdges(...).get(objective)`
+ * — exactly what `countAdjacentStagedParticipants` counts for the staged assembly floor). A
+ * brigade that reaches either area in time is physically plausible.
+ *
+ * BUDGET. `N <= planning_duration + PLANNING_INVALIDATION_GRACE_TURNS`, where `N` is the
+ * production column transit (`Math.max(1, ceil(totalCost / getOsidColumnRate(formation)))`). Turn
+ * semantics: the order is written after the movement step on turn T, transit starts on T+1, so
+ * arrival is `T + 1 + N`; the assembly requirement becomes fatal at `T + planning_duration +
+ * grace + 1`. Because the movement step runs before `advanceSectorOffensives` in the same turn,
+ * arrival on the fatal turn still satisfies the floor, giving `N <= planning_duration + grace`.
+ *
+ * THIS IS AN ADMISSION SANITY CHECK, NOT CLAIRVOYANCE. It uses the live terrain, front-edge
+ * geometry and formation composition available to the commander this turn. It does not promise
+ * successful assembly after conditions change, and it does not force a launch: a valid roster may
+ * still fail later for combat, attrition, changed control, route collapse or disruption. It does
+ * not lower any floor, extend any deadline, or reserve/reorder the rejected formation.
+ *
+ * Read-only and deterministic: pure reads of current state + the passed-in terrain data. It never
+ * mutates movement state, never chooses a destination, and is only consulted to decide whether a
+ * candidate belongs in THIS operation's initial roster.
+ */
+export function canFormationReachAssemblyInTime(
+    state: GameState,
+    brigadeId: FormationId,
+    corpsId: FormationId,
+    faction: FactionId,
+    objective: string,
+    planningDuration: number,
+    adjacency: Map<string, string[]>,
+    reverseMap: OperationalToCanonicalReverseMap | null | undefined,
+    terrainData: TerrainScalarsData | null | undefined,
+): boolean {
+    const formation = state.military.formations?.[brigadeId];
+    const location = formation?.location_osid;
+    // Fail open when the inputs needed to judge physical plausibility are absent: this is an
+    // admission sanity check and must not suppress a valid operation merely because the creator
+    // lacks a reverse map/terrain snapshot.
+    if (!formation || !location || !reverseMap) return true;
+    if (typeof objective !== 'string' || objective.length === 0) return true;
+
+    const targets = new Set<string>(collectObjectiveApproachOsids(state, corpsId, faction, [objective]));
+    for (const neighbor of buildOsidAdjacencyFromFrontEdges(state).get(objective) ?? []) {
+        // Only cells the formation may legally occupy — a brigade cannot stage on an enemy OSID,
+        // and `dijkstraFriendlyPath` exempts the destination from its controller check, so an
+        // unfiltered enemy neighbour would validate an unreachable assembly cell.
+        const controller = getPoliticalControllerOSID(state, neighbor, reverseMap);
+        if (controller === null || controller === faction || isFriendlyFactionCtrl(controller, faction, state)) {
+            targets.add(neighbor);
+        }
+    }
+    if (targets.size === 0) return false;
+
+    const allowedOsids = buildCorpsAllowedOsids(corpsId, state);
+    // Shallow copy: `getOsidColumnRate` -> `ensureBrigadeComposition` lazily materializes the
+    // formation's derived equipment composition. Passing a copy keeps this feasibility check
+    // strictly side-effect free with respect to the caller's formation (the rate is a pure
+    // function of faction/kind when composition is absent, which is the same derivation the
+    // engine would cache) and never mutates movement state.
+    const columnRate = getOsidColumnRate({ ...formation });
+    const budget = Math.max(0, Math.trunc(planningDuration)) + PLANNING_INVALIDATION_GRACE_TURNS;
+    const terrain = terrainData ?? { by_sid: {} };
+
+    for (const target of [...targets].sort(strictCompare)) {
+        if (target === location) return true;
+        const route = dijkstraFriendlyPath(
+            location as Osid,
+            target as Osid,
+            faction,
+            adjacency as Map<Osid, Osid[]>,
+            state,
+            reverseMap,
+            terrain,
+            allowedOsids,
+        );
+        if (!route || route.path.length <= 1) continue;
+        const transitTurns = Math.max(1, Math.ceil(route.totalCost / columnRate));
+        if (transitTurns <= budget) return true;
+    }
+    return false;
+}
+
 export function buildOpeningAttackAdjacency(
     _state: GameState,
     _corpsId: FormationId,
@@ -812,12 +921,22 @@ export interface AxisRejectionFactsOut {
     brigades: BrigadePredictionFact[];
 }
 
+/**
+ * Blockers this module can PRODUCE.
+ *
+ * ENGINE-HEALTH B3 (2026-09-19): `'insufficient_donation'` was removed from this union
+ * and is no longer producible. Inadequate donor support declines the Tactical Group
+ * augmentation instead of refusing the operation (see `tgDonationMeetsReadiness`). The
+ * literal is RETAINED in the persisted `OperationAxis['launch_blocker']` and
+ * `CorpsOperation['recovery_reason']` unions in `game_state.ts` so that saves and run
+ * artifacts written before this repair still load and still read back correctly. Nothing
+ * writes it any more; do not reintroduce it here.
+ */
 export type OpeningAttackBlocker =
     | 'participants_below_attack_floor'
     | 'participants_below_assembly_floor'
     | 'no_approach_osid'
     | 'zero_eligible_axis'
-    | 'insufficient_donation'
     | 'no_launch_readiness';
 
 export interface OpeningAttackReadinessResult {
@@ -967,7 +1086,9 @@ function classifyAxisOpeningAttack(
     adjacency: Map<string, string[]>,
     threshold: PredictedOutcome,
     staticAdjacency?: Map<string, string[]>,
-    armyHqOpId?: CorpsOperation['army_hq_op_id'],
+    // ENGINE-HEALTH B3 (2026-09-19): the `armyHqOpId` parameter was dropped here. Its only
+    // reader was the removed donation gate's `selectDonors` call; the Army-HQ donor scope
+    // is now consulted only where a Tactical Group actually forms.
     // TEMPORARY DIAGNOSTIC — remove with axis_readiness_debug.ts.
     debugOpName?: string,
     predictionContext?: OpeningAttackPredictionContext,
@@ -1008,6 +1129,17 @@ function classifyAxisOpeningAttack(
         axis.unreachable_at_launch = true;
         axis.launch_blocker = 'no_approach_osid';
         return { executable: false, blocker: 'no_approach_osid' };
+    }
+
+    if (axis.minimum_staged_brigades != null) {
+        const required = Math.max(1, Math.trunc(axis.minimum_staged_brigades));
+        const staged = countAdjacentStagedParticipants(state, axis.assigned_brigades, adjacency, objective);
+        if (staged < required) {
+            const approaching = axis.assigned_brigades.some((brigadeId) =>
+                isCommittedInTransitTo(state, brigadeId, approachOsids));
+            axis.launch_blocker = 'participants_below_assembly_floor';
+            return { executable: false, blocker: 'participants_below_assembly_floor', approaching };
+        }
     }
 
     // TG v1 (ADR-0005): when the tactical-group flag is on, the attack-floor
@@ -1145,27 +1277,26 @@ function classifyAxisOpeningAttack(
         return { executable: false, blocker: 'zero_eligible_axis', approaching };
     }
 
-    // ADR-0005 v2.2c #3: donation-readiness gate. With TG formation on, the anchor must be
-    // backed by donors pledging ≥ DONATION_READINESS_FRACTION (60%) of its personnel; otherwise
-    // it is a lone-anchor suicide attack and the axis is blocked. selectDonors is recomputed here
-    // (deterministic; a donor lost since planning naturally drops out) rather than reading a cached
-    // op.donor_pool — functionally the same gate, no persisted schema field. Flag-off: skipped, so
-    // byte-identical. The flag-on magnitude (how many ops this blocks) is validated at the 188w smoke.
-    if (ENABLE_TG_FORMATION) {
-        // Phase 4: score donors against the persistent anchor (phantom-filtered). An
-        // all-phantom axis resolves to null → no TG forms there, so the donation gate is
-        // moot; skip it (the legacy anchor-only path handles the phantom axis).
-        const anchorId = resolveTgAnchor(state, axis, new Set());
-        const stagingOsid = axis.staging_osid;
-        if (anchorId && stagingOsid) {
-            const anchorPersonnel = state.military.formations?.[anchorId]?.personnel ?? 0;
-            const donors = selectDonors(state, { anchor_brigade_id: anchorId, staging_osid: stagingOsid, army_hq_op_id: armyHqOpId });
-            if (donationReadinessBlocksAxis(donors, anchorPersonnel, faction)) {
-                axis.launch_blocker = 'insufficient_donation';
-                return { executable: false, blocker: 'insufficient_donation' };
-            }
-        }
-    }
+    // ══ ENGINE-HEALTH B3 (2026-09-19) — THE DONATION GATE USED TO LIVE HERE ══
+    //
+    // ADR-0005 v2.2c #3 placed a donation-readiness gate at this point: if the anchor was
+    // not backed by donors pledging ≥ DONATION_READINESS_FRACTION of its personnel, the
+    // axis was refused with `insufficient_donation`. That gate sat AFTER
+    // `axisHasExecutableOpeningAttack` had already judged the attack winnable, so it could
+    // only ever remove attacks the engine had already approved — and it was non-monotonic:
+    // an EMPTY donor pool passed ("degrade to lone-anchor") while a pool one man above
+    // empty but below the fraction cancelled the operation. Adding a small amount of
+    // available support turned an executable axis into a blocked one.
+    //
+    // Donor support is optional AUGMENTATION. Readiness now decides only whether the
+    // Tactical Group forms, and it is evaluated at the single place that forms one:
+    // `formTgsAtReadyTransition` (operation_preparation.ts), via
+    // `tgDonationMeetsReadiness` (tactical_group_selection.ts). An inadequate pool
+    // declines the augmentation and costs the donors nothing; the operation continues
+    // under every ordinary opening-attack gate above.
+    //
+    // DO NOT REINSTATE A DONATION CHECK IN THIS FUNCTION. The readiness rule has one
+    // owner. See tests/tg_donation_augmentation_monotonic.test.ts.
 
     delete axis.launch_blocker;
     // REASON-CODE INSTRUMENTATION (topic `axis_reject`): the detail must not outlive
@@ -1177,52 +1308,13 @@ function classifyAxisOpeningAttack(
 }
 
 /**
- * PHASE 1.5 DONOR-READINESS FALLBACK (operations-expert + sector-expert, 2026-05-30).
- *
- * Pure decision for the ADR-0005 v2.2c #3 donation-readiness gate. Returns true iff
- * the gate should BLOCK the axis with `insufficient_donation`.
- *
- * The 60% gate's real intent is to refuse an under-committed *multi-donor* TG (a lone
- * anchor masquerading as a tactical group). It must NEVER cancel an otherwise-valid
- * offensive when the corps simply has NO eligible donors to muster: an isolated /
- * encircled, donor-poor corps (e.g. the ARBiH 5th Corps in the Bihać pocket — no
- * adjacent donor corps; candidates blocked by distance / cohesion / residual-floor)
- * had its anchor-only relief / defensive ops gated out, which dropped the Bihać enclave
- * RBiH→RS wholesale (measured 188w 615→569). With zero donors no TG would form anyway
- * (`formTgsAtReadyTransition` is a no-op with an empty donor pool → legacy lone-anchor
- * combat), so blocking degrades a valid lone-anchor op into a cancellation.
- *
- * Rule:
- *   - donors.length === 0 → DO NOT block (degrade to lone-anchor, exactly as flag-off).
- *   - donors exist but pledge < readinessFraction × anchorPersonnel → BLOCK.
- *
- * Phase 1.6 HVO Mistral-2 westward-reach lever (operations-expert, 2026-05-30): the
- * readiness fraction is faction-specific. HRHB (HVO) axes use the relaxed
- * DONATION_READINESS_FRACTION_HRHB; all other factions use the standard
- * DONATION_READINESS_FRACTION. RATIONALE: the HVO Mistral-2 westward axes (Livno →
- * Drvar/Grahovo/Šipovo) stage for a long reach where BFS distance-falloff trims the few
- * eligible local donors below the 60% floor, so the gate cancelled an axis the flag-off
- * engine prosecuted. Historically the HV (Croatian Army) spearhead — absorbed into the HVO
- * anchor, no separate HV corps in OOB — supplied the westward mass, so a lower local-donor
- * floor is doctrinally correct. This is NOT force inflation (the anchor + qualifying donors
- * still fight at real strength) and NOT a new global gate or distance cap.
- *
- * Deterministic: `selectDonors` is deterministic, so `donors.length === 0` is a stable
- * function of the turn's state. Caller only invokes this under ENABLE_TG_FORMATION, so
- * flag-off never reaches it → byte-identical.
+ * ENGINE-HEALTH B3 (2026-09-19): `donationReadinessBlocksAxis` lived here and has been
+ * REPLACED by `tgDonationMeetsReadiness` in `tactical_group_selection.ts`, which owns the
+ * donor model. It is no longer a veto on an axis — it is the test for whether the Tactical
+ * Group augmentation forms. The full before/after rationale, including the Phase-1.5
+ * lone-anchor fallback and the Phase-1.6 HRHB band this repair reinterprets, is on that
+ * function.
  */
-export function donationReadinessBlocksAxis(
-    donors: ReadonlyArray<{ personnel_lent: number }>,
-    anchorPersonnel: number,
-    faction?: FactionId,
-): boolean {
-    if (donors.length === 0) return false; // donor-poor corps: lone-anchor fallback, never block
-    const donated = donors.reduce((sum, d) => sum + d.personnel_lent, 0);
-    const readinessFraction = faction === 'HRHB'
-        ? DONATION_READINESS_FRACTION_HRHB
-        : DONATION_READINESS_FRACTION;
-    return donated < readinessFraction * anchorPersonnel;
-}
 
 /**
  * Whether an authored operation has assembled the usable formations required
@@ -1272,6 +1364,7 @@ export function evaluateOpeningAttackReadiness(
     if (isMultiAxis(op) && op.axes) {
         const blockers: OpeningAttackBlocker[] = [];
         let anyExecutable = false;
+        let allLiveAxesExecutable = true;
         // True when any non-terminal axis has brigades ACTUALLY mid-march toward
         // its own approach OSIDs. A fast-assembling sibling must not drag a slow
         // axis into execution before its brigades arrive — hold while someone is
@@ -1301,7 +1394,7 @@ export function evaluateOpeningAttackReadiness(
             if (axis.status === 'complete' || axis.status === 'stalled') continue;
             const objective = axis.objectives[axis.current_objective_index ?? 0];
             const convergingBrigades = typeof objective === 'string'
-                ? getOperationBrigadesAtCurrentObjective(op, objective)
+                ? getSynchronizedOperationBrigadesAtObjective(state, op, faction, objective)
                 : axis.assigned_brigades;
             const result = classifyAxisOpeningAttack(
                 state,
@@ -1311,7 +1404,6 @@ export function evaluateOpeningAttackReadiness(
                 adjacency,
                 threshold,
                 operationStaticAdjacency,
-                op.army_hq_op_id,
                 op.name,
                 predictionContext,
                 convergingBrigades,
@@ -1322,12 +1414,17 @@ export function evaluateOpeningAttackReadiness(
             if (result.executable) {
                 anyExecutable = true;
             } else {
+                allLiveAxesExecutable = false;
                 if (result.blocker) blockers.push(result.blocker);
                 if (result.approaching === true) anyApproaching = true;
             }
         }
         // TEMPORARY DIAGNOSTIC — see src/sim/combat/axis_readiness_debug.ts.
         emitOperationReadinessTrace(state, corpsId, op, anyExecutable, anyApproaching);
+        if (op.require_all_axes_ready === true) {
+            if (anyExecutable && allLiveAxesExecutable) return { executable: true };
+            return { executable: false, blocker: rankOpeningAttackBlocker(blockers) };
+        }
         if (anyExecutable && !anyApproaching) return { executable: true };
         return { executable: false, blocker: rankOpeningAttackBlocker(blockers) };
     }

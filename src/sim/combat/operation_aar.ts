@@ -7,10 +7,11 @@
  * compiled into a full OperationAAR and stored in GameState.operation_history.
  */
 
-import type { AxisRejectionDetail, GameState, CorpsOperation, FormationId, CommanderAssessment, TacticalGroup } from '../../state/game_state.js';
+import type { AxisRejectionDetail, GameState, CorpsOperation, FormationId, CommanderAssessment, TacticalGroup, TgFormationDeclineDetail } from '../../state/game_state.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { recordedOperationAttackCount } from './operation_attack_count.js';
 import { resolveTacticalGroupIdsForOperation } from '../../state/operation_lifecycle_reconciliation.js';
 import { ENABLE_TG_ARMY_HQ_OPS } from './tactical_group_config.js';
 
@@ -80,7 +81,7 @@ export interface AxisAAR {
      *  this axis never attacks. Surfaced on AAR so post-mortem tools see it. */
     unreachable_at_launch?: boolean;
     /** Typed launch blocker for axes that never had an executable opening attack. */
-    launch_blocker?: 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective' | 'insufficient_donation';
+    launch_blocker?: 'participants_below_attack_floor' | 'participants_below_assembly_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective' | 'insufficient_donation';
     /**
      * REASON-CODE INSTRUMENTATION, topic `axis_reject` — item 3. Carryover of
      * `OperationAxis.launch_blocker_detail`, which is written only when
@@ -89,6 +90,15 @@ export interface AxisAAR {
      * that only says THAT something did.
      */
     launch_blocker_detail?: AxisRejectionDetail;
+    /**
+     * REASON-CODE INSTRUMENTATION, topic `tg_formation` — ENGINE-HEALTH B3 (2026-09-19).
+     * Carryover of `OperationAxis.tg_formation_decline`: why this axis's Tactical Group
+     * augmentation was declined, and the statement that declining it did NOT refuse the
+     * operation. Without this carryover the record dies with the live operation and never
+     * reaches an artifact — measured on run n425, where four fewer TGs formed and not one
+     * decline survived to `final_save.json`.
+     */
+    tg_formation_decline?: TgFormationDeclineDetail;
 }
 
 // ─── Grading ────────────────────────────────────────────────────────────────
@@ -350,19 +360,7 @@ function collectObjectives(op: CorpsOperation): string[] {
 }
 
 function canonicalOperationAttackCount(op: CorpsOperation, weeklyFallback: number): number {
-    if (op.axes && op.axes.length > 0) {
-        let total = 0;
-        let hasAxisCounter = false;
-        for (const axis of op.axes) {
-            if (typeof axis.attack_attempt_count === 'number') {
-                total += axis.attack_attempt_count;
-                hasAxisCounter = true;
-            }
-        }
-        if (hasAxisCounter) return total;
-    }
-    if (typeof op.attack_attempt_count === 'number') return op.attack_attempt_count;
-    return weeklyFallback;
+    return recordedOperationAttackCount(op) ?? weeklyFallback;
 }
 
 function canonicalAxisAttackCount(
@@ -707,6 +705,18 @@ export function finalizeOperationAAR(
             causalCaptureSet.delete(osid);
         }
     }
+    // Weekly operation entries are written before some same-turn battle capture
+    // receipts are folded back into the operation log. Brigade engagement
+    // history is the canonical resolved-combat record, including whether that
+    // battle actually flipped territory, so use it to close that telemetry gap.
+    for (const brigadeId of op.participating_brigades) {
+        const engagements = state.military.formations[brigadeId as FormationId]?.brigade_history?.engagements ?? [];
+        for (const engagement of engagements) {
+            if (engagement.turn < op.started_turn || engagement.turn > state.meta.turn) continue;
+            if (engagement.role !== 'attacker' || engagement.territory_flipped !== true) continue;
+            if (objectives.includes(engagement.osid)) causalCaptureSet.add(engagement.osid);
+        }
+    }
     const objectivesLoggedCaptured = objectives.filter((osid) => loggedCaptureSet.has(osid));
     const causallyCapturedObjectives = objectives.filter((osid) => causalCaptureSet.has(osid));
     const objectivesHeldWithoutLoggedCapture = heldObjectives.filter((osid) => !loggedCaptureSet.has(osid));
@@ -851,6 +861,15 @@ export function finalizeOperationAAR(
             // blocker is dropped rather than published next to the wrong verdict.
             if (axis.launch_blocker_detail && axis.launch_blocker === 'zero_eligible_axis') {
                 axisSummary.launch_blocker_detail = axis.launch_blocker_detail;
+            }
+            // REASON-CODE INSTRUMENTATION (topic `tg_formation`) — ENGINE-HEALTH B3.
+            // Present on the axis only when the topic is on, so this carryover is inert by
+            // construction, exactly like the one above. NOT guarded on a blocker: a declined
+            // TG augmentation is not a blocker at all — the operation went on to fight — so
+            // there is no verdict for it to outlive. It is the one place a reader can see
+            // that a Tactical Group was considered and refused.
+            if (axis.tg_formation_decline) {
+                axisSummary.tg_formation_decline = axis.tg_formation_decline;
             }
             axisSummaries.push(axisSummary);
         }

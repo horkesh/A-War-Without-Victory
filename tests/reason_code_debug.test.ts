@@ -43,6 +43,8 @@ const ALL_TOPICS: ReasonCodeTopic[] = [
     'movement_reject',
     'objective_filter',
     'opportunity_roster',
+    // ENGINE-HEALTH B3 (2026-09-19): TG augmentation declines.
+    'tg_formation',
 ];
 
 function setFlag(value: string | undefined): void {

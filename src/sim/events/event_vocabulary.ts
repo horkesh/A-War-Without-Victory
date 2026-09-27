@@ -49,6 +49,7 @@ export const KNOWN_EVENT_CONDITION_TYPES = [
     'metric_compare_factions',
     'morale_average_below',
     'not',
+    'operation_attacked',
     'operation_completed',
     'or',
     'paramilitary_mode_equals',

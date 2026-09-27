@@ -1514,6 +1514,27 @@ function getExternalDefenseSupportMultiplier(
     return support.combat_multiplier;
 }
 
+/** Dated theater support also applies to OSID attacks and their launch forecasts. */
+function getExternalAttackSupportMultiplier(
+    state: GameState,
+    attackerFaction: string,
+    targetOsid?: string,
+): number {
+    if (!targetOsid) return 1.0;
+    const turn = state.meta.turn ?? 0;
+    const mun = munFromOsid(targetOsid);
+    if (!mun) return 1.0;
+    const support = state.military.war_timeline?.external_support?.find(s =>
+        s.faction === attackerFaction
+        && s.role === 'attack'
+        && s.osid_attack_support === true
+        && turn >= (s.start_turn ?? 0)
+        && turn < s.end_turn
+        && s.municipalities.includes(mun)
+    );
+    return support?.combat_multiplier ?? 1.0;
+}
+
 export function computeAttackerPower(
     state: GameState,
     formation: FormationState,
@@ -1546,6 +1567,8 @@ export function computeAttackerPower(
     // recruitment_modifier hash-neutral on 40w.
     const eqMult = getActiveEquipmentQualityMultiplier(state, formation.faction, state.meta.turn ?? 0);
     if (eqMult !== 1.0) power *= eqMult;
+    const theaterSupportMult = getExternalAttackSupportMultiplier(state, formation.faction, targetOsid);
+    if (theaterSupportMult !== 1.0) power *= theaterSupportMult;
     return power;
 }
 

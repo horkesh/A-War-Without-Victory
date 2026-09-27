@@ -1,0 +1,189 @@
+
+> awwv@0.9.9-beta.1 test:vitest
+> node tools/test/run_vitest_default.mjs tests/agent_skill_import.test.ts
+
+
+ RUN  v2.1.9 F:/AWWV-worktrees/agent-setup-modernization
+
+ ❯ tests/agent_skill_import.test.ts (12 tests | 12 failed) 11700ms
+   × explicit skill import in disposable paths > previews a named import without writing any destination 676ms
+     → expected false to be true // Object.is equality
+   × explicit skill import in disposable paths > requires a preview receipt before applying 622ms
+     → expected +0 not to be +0 // Object.is equality
+   × explicit skill import in disposable paths > applies only the named skill after review, including its support files 1197ms
+     → expected [] to deeply equal [ 'sample' ]
+   × explicit skill import in disposable paths > refuses replacement of locally edited skills by default 1220ms
+     → expected +0 not to be +0 // Object.is equality
+   × explicit skill import in disposable paths > requires a backup for explicit replacement 1217ms
+     → expected +0 not to be +0 // Object.is equality
+   × explicit skill import in disposable paths > replaces with a reviewed diff and preserves the full old directory 621ms
+     → ENOENT: no such file or directory, open 'C:\Users\User\AppData\Local\Temp\awwv-skill-import-jW2Krl\review.json.diff'
+   × explicit skill import in disposable paths > rejects source drift after preview 1225ms
+     → expected +0 not to be +0 // Object.is equality
+   × explicit skill import in disposable paths > rejects target drift after preview 1255ms
+     → expected +0 not to be +0 // Object.is equality
+   × explicit skill import in disposable paths > rejects a modified review diff 1197ms
+     → expected +0 not to be +0 // Object.is equality
+   × explicit skill import in disposable paths > rejects nested source/destination trees 615ms
+     → expected +0 not to be +0 // Object.is equality
+   × explicit skill import in disposable paths > refuses reused backup paths without losing local edits 1239ms
+     → expected +0 not to be +0 // Object.is equality
+   × explicit skill import in disposable paths > rejects linked source directories before traversing them 615ms
+     → expected +0 not to be +0 // Object.is equality
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 12 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > previews a named import without writing any destination
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/agent_skill_import.test.ts:50:34
+     48|     expect(readdirSync(f.target)).toEqual([]);
+     49|     expect(readdirSync(join(f.root, '.claude/skills'))).toEqual([]);
+     50|     expect(existsSync(f.review)).toBe(true);
+       |                                  ^
+     51|     expect(readFileSync(`${f.review}.diff`, 'utf8')).toContain('New in…
+     52|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/12]⎯
+
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > requires a preview receipt before applying
+AssertionError: expected +0 not to be +0 // Object.is equality
+ ❯ tests/agent_skill_import.test.ts:55:40
+     53|   it('requires a preview receipt before applying', () => {
+     54|     const f = fixture();
+     55|     expect(f.run('-Apply').status).not.toBe(0);
+       |                                        ^
+     56|     expect(readdirSync(f.target)).toEqual([]);
+     57|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/12]⎯
+
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > applies only the named skill after review, including its support files
+AssertionError: expected [] to deeply equal [ 'sample' ]
+
+- Expected
++ Received
+
+- Array [
+-   "sample",
+- ]
++ Array []
+
+ ❯ tests/agent_skill_import.test.ts:65:35
+     63|     const result = f.run('-Apply');
+     64|     expect(result.status, result.stderr).toBe(0);
+     65|     expect(readdirSync(f.target)).toEqual(['sample']);
+       |                                   ^
+     66|     expect(readFileSync(join(f.target, 'sample/references/detail.md'),…
+     67|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/12]⎯
+
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > refuses replacement of locally edited skills by default
+AssertionError: expected +0 not to be +0 // Object.is equality
+ ❯ tests/agent_skill_import.test.ts:71:40
+     69|     const f = fixture(true);
+     70|     f.run();
+     71|     expect(f.run('-Apply').status).not.toBe(0);
+       |                                        ^
+     72|     expect(readFileSync(join(f.target, 'sample/SKILL.md'), 'utf8')).to…
+     73|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/12]⎯
+
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > requires a backup for explicit replacement
+AssertionError: expected +0 not to be +0 // Object.is equality
+ ❯ tests/agent_skill_import.test.ts:77:52
+     75|     const f = fixture(true);
+     76|     expect(f.run('-Replace').status).toBe(0);
+     77|     expect(f.run('-Apply', '-Replace').status).not.toBe(0);
+       |                                                    ^
+     78|     expect(readFileSync(join(f.target, 'sample/local-only.md'), 'utf8'…
+     79|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/12]⎯
+
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > replaces with a reviewed diff and preserves the full old directory
+Error: ENOENT: no such file or directory, open 'C:\Users\User\AppData\Local\Temp\awwv-skill-import-jW2Krl\review.json.diff'
+ ❯ tests/agent_skill_import.test.ts:83:18
+     81|     const f = fixture(true);
+     82|     expect(f.run('-Replace').status).toBe(0);
+     83|     const diff = readFileSync(`${f.review}.diff`, 'utf8');
+       |                  ^
+     84|     expect(diff).toContain('Locally edited instructions.');
+     85|     expect(diff).toContain('New instructions.');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/12]⎯
+
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > rejects source drift after preview
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > rejects target drift after preview
+AssertionError: expected +0 not to be +0 // Object.is equality
+ ❯ tests/agent_skill_import.test.ts:97:77
+     95|     expect(f.run('-Replace').status).toBe(0);
+     96|     writeFileSync(join(f[side], 'sample/SKILL.md'), 'Intervening edit.…
+     97|     expect(f.run('-Apply', '-Replace', '-BackupRoot', f.backup).status…
+       |                                                                             ^
+     98|     expect(existsSync(f.backup)).toBe(false);
+     99|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/12]⎯
+
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > rejects a modified review diff
+AssertionError: expected +0 not to be +0 // Object.is equality
+ ❯ tests/agent_skill_import.test.ts:104:40
+    102|     expect(f.run().status).toBe(0);
+    103|     writeFileSync(`${f.review}.diff`, 'Unreviewed replacement.');
+    104|     expect(f.run('-Apply').status).not.toBe(0);
+       |                                        ^
+    105|     expect(readdirSync(f.target)).toEqual([]);
+    106|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/12]⎯
+
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > rejects nested source/destination trees
+AssertionError: expected +0 not to be +0 // Object.is equality
+ ❯ tests/agent_skill_import.test.ts:110:31
+    108|     const f = fixture();
+    109|     const result = f.run('-DestinationRoot', join(f.source, 'nested'));
+    110|     expect(result.status).not.toBe(0);
+       |                               ^
+    111|     expect(existsSync(join(f.source, 'nested'))).toBe(false);
+    112|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/12]⎯
+
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > refuses reused backup paths without losing local edits
+AssertionError: expected +0 not to be +0 // Object.is equality
+ ❯ tests/agent_skill_import.test.ts:118:77
+    116|     mkdirSync(join(f.backup, 'sample'), { recursive: true });
+    117|     writeFileSync(join(f.backup, 'sample/prior.md'), 'Retained backup.…
+    118|     expect(f.run('-Apply', '-Replace', '-BackupRoot', f.backup).status…
+       |                                                                             ^
+    119|     expect(readFileSync(join(f.target, 'sample/SKILL.md'), 'utf8')).to…
+    120|     expect(readFileSync(join(f.backup, 'sample/prior.md'), 'utf8')).to…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/12]⎯
+
+ FAIL  tests/agent_skill_import.test.ts > explicit skill import in disposable paths > rejects linked source directories before traversing them
+AssertionError: expected +0 not to be +0 // Object.is equality
+ ❯ tests/agent_skill_import.test.ts:126:32
+    124|     mkdirSync(join(f.root, 'external'));
+    125|     symlinkSync(join(f.root, 'external'), join(f.source, 'sample/linke…
+    126|     expect(f.run().status).not.toBe(0);
+       |                                ^
+    127|     expect(readdirSync(f.target)).toEqual([]);
+    128|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/12]⎯
+
+ Test Files  1 failed (1)
+      Tests  12 failed (12)
+   Start at  21:29:20
+   Duration  12.88s (transform 89ms, setup 31ms, collect 45ms, tests 11.70s, environment 0ms, prepare 431ms)
+

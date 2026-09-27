@@ -213,11 +213,22 @@ export const ARMY_HQ_COHESION_BLEED_MULT = 2.0;
 export const MAX_DONATIONS_PER_SCENARIO = 3;
 
 /**
- * v2.2c #3 donation-readiness gate (ADR-0005 §Op lifecycle integration). The
- * anchor's pledged donors must contribute at least this fraction of the anchor's
- * personnel for the op to clear the opening-attack readiness gate; otherwise it is
- * a lone-anchor suicide attack and the axis is blocked (`insufficient_donation`).
- * Only enforced when ENABLE_TG_FORMATION is on (donors only exist then).
+ * v2.2c #3 donation readiness (ADR-0005 §Op lifecycle integration). The anchor's pledged
+ * donors must contribute at least this fraction of the anchor's personnel for a Tactical
+ * Group to form; below it the pool is a lone anchor wearing a TG costume and no TG forms.
+ * Only consulted when ENABLE_TG_FORMATION is on (donors only exist then).
+ *
+ * ══ ENGINE-HEALTH B3 (2026-09-19) — SCOPE NARROWED, VALUE UNCHANGED ══
+ *
+ * This fraction used to be a veto: `classifyAxisOpeningAttack` refused the whole axis with
+ * `insufficient_donation` when the pledge fell short, AFTER the opening-attack predictor
+ * had already judged the attack winnable — and it let an EMPTY donor pool through while
+ * blocking a pool one man above empty, so adding support could cancel an operation.
+ *
+ * It is now a FORMATION test only, evaluated once at `formTgsAtReadyTransition` through
+ * `tgDonationMeetsReadiness`. An inadequate pool declines the augmentation; the operation
+ * proceeds under ordinary readiness with its own participants. The value is unchanged —
+ * B3 moved the decision, it did not lower the bar.
  */
 export const DONATION_READINESS_FRACTION = 0.6;
 
@@ -246,6 +257,29 @@ export const DONATION_READINESS_FRACTION = 0.6;
  *
  * Flag-on-only: only consulted inside the ENABLE_TG_FORMATION donation-readiness branch, so
  * flag-off stays byte-identical (40w e6b5187eaf320c57). Tunable per calibration.
+ *
+ * ══ ENGINE-HEALTH B3 (2026-09-19) — DISPOSITION ══
+ *
+ * The rationale above is preserved as history, but ITS ORIGINAL PURPOSE IS RETIRED. The
+ * failure it was introduced to prevent — "the gate cancelled an axis the flag-off engine
+ * prosecuted" — is now impossible for EVERY faction: donation readiness no longer cancels
+ * anything, it only decides whether a Tactical Group forms. A sub-readiness HVO pool would
+ * fall back to the lone-anchor operation exactly as the flag-off engine did, with or
+ * without this constant.
+ *
+ * WHAT IT STILL DOES, and why it is kept rather than deleted: it is now purely a FORMATION
+ * QUALITY lever. An HVO axis forms a TG on a smaller local pledge than the other factions,
+ * which is the doctrinally-argued shape above (the HV spearhead absorbed into the HVO
+ * anchor supplied the westward mass, so local donor mustering is not the real constraint).
+ * That is a legitimate, explainable per-faction difference in when an augmentation is
+ * worth forming — not an operation-level exception, and not a checkpoint band-aid any more.
+ *
+ * QUEUED, NOT DECIDED HERE: whether that remaining formation-quality difference earns its
+ * keep is unmeasured. Its effect concentrates in the 1995 Mistral-2 window, which no run
+ * permitted under the B3 packet reaches, and the packet forbids running a calibration
+ * exercise to settle it. Removal is returned as a bounded proposal. The corrected behaviour
+ * is pinned explicitly by tests/tg_donation_augmentation_monotonic.test.ts (case H) so no
+ * faction exception can survive here by accident.
  */
 export const DONATION_READINESS_FRACTION_HRHB = 0.25;
 

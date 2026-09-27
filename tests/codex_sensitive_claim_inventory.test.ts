@@ -739,9 +739,9 @@ test('inventory reports the 1993 placement/window contract for Neretva, Grabovic
     ]);
     assert.deepStrictEqual(anchors.map((row: { chronology_status: string }) => row.chronology_status), ['pass', 'pass']);
     assert.deepStrictEqual(anchors.map((row: { provenance_status: string }) => row.provenance_status), ['pass', 'pass']);
+    assert.deepStrictEqual(anchors.map((row: { event_window: string }) => row.event_window), ['turn 77', 'turn 76']);
     for (const row of anchors) {
         assert.strictEqual(row.event_file, 'data/scenarios/events/war_1993.json');
-        assert.strictEqual(row.event_window, 'turns 74-76');
         assert.strictEqual(row.essay_file.endsWith('_1993.json'), true);
         assert.strictEqual(row.status, 'pass');
         assert.ok(row.authored_provenance);

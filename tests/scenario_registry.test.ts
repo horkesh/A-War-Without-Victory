@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { SCENARIO_REGISTRY, getScenarioEntry, getAvailableScenarios } from '../src/scenario/scenario_registry';
 
 describe('scenario_registry', () => {
-    it('has exactly 6 entries', () => {
-        expect(SCENARIO_REGISTRY.length).toBe(6);
+    it('has exactly 5 entries', () => {
+        expect(SCENARIO_REGISTRY.length).toBe(5);
     });
 
     it('each entry has all required fields', () => {
@@ -56,7 +56,7 @@ describe('scenario_registry', () => {
     it('getAvailableScenarios excludes unavailable', () => {
         const available = getAvailableScenarios();
         expect(available.every(e => e.available)).toBe(true);
-        expect(available.length).toBe(4);
+        expect(available.length).toBe(3);
     });
 
     it('all three factions have difficulty ratings', () => {

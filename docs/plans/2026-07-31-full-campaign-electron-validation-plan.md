@@ -9,7 +9,7 @@
 **Tech stack:** Electron, Playwright/CDP, packaged directory build, `paradox_local_qa.cjs`, deterministic autosave/replay comparison, Markdown diary template.
 
 **Date:** 2026-07-31
-**Status:** ACTIVE — Inbox repair/package verified; fresh RBiH shakedown blocked at final readability, with runtime disposition also open. Full campaigns remain deferred.
+**Status:** ACTIVE — Inbox repair and replacement build verified; package-directory identity fails after runtime telemetry was added. The RBiH shakedown failed final readability before Save/load; runtime disposition, RS/HRHB and full campaigns remain open.
 **Roadmap workstream:** R8
 **Canonical owner:** packaged Electron UI and bound autosave/replay; diary is the product verdict
 **Collision rule:** This plan does not repair source while a session is running. Findings are routed to the owning plan, verified, then the affected session restarts from a fresh campaign.

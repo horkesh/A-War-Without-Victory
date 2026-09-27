@@ -1,0 +1,193 @@
+{
+  "target": "https://horkesh.github.io/A-War-Without-Victory/?run=ac3e5e152",
+  "pass": true,
+  "checks": [
+    {
+      "mode": "desktop",
+      "weeks": [
+        0,
+        31,
+        32,
+        33,
+        36,
+        37,
+        39,
+        104,
+        156,
+        188,
+        73
+      ],
+      "selection": [
+        {
+          "osid": "op:bihac:orasac_2",
+          "captured": 29,
+          "detail": "Orašac (+7)\nBihać\nOSID: op:bihac:orasac_2\nController: RS\nHistorical owner: no reference at week 29\nLast change week: week 29"
+        },
+        {
+          "osid": "op:donji_vakuf:donji_vakuf_2",
+          "captured": 35,
+          "detail": "Donji Vakuf (+5)\nDonji Vakuf\nOSID: op:donji_vakuf:donji_vakuf_2\nController: RS\nHistorical owner: no reference at week 35\nLast change week: week 35"
+        },
+        {
+          "osid": "op:donji_vakuf:prusac_2",
+          "captured": 39,
+          "detail": "Prusac (+3)\nDonji Vakuf\nOSID: op:donji_vakuf:prusac_2\nController: RS\nHistorical owner: RS\nLast change week: week 39"
+        },
+        {
+          "osid": "op:donji_vakuf:korenici",
+          "captured": 36,
+          "detail": "Korenići (+5)\nDonji Vakuf\nOSID: op:donji_vakuf:korenici\nController: RS\nHistorical owner: no reference at week 36\nLast change week: week 36"
+        },
+        {
+          "osid": "op:mrkonjic_grad:baljvine_2",
+          "captured": 28,
+          "detail": "Baljvine (+2)\nMrkonjić Grad\nOSID: op:mrkonjic_grad:baljvine_2\nController: RS\nHistorical owner: no reference at week 28\nLast change week: week 28"
+        },
+        {
+          "osid": "op:jajce:jezero_2",
+          "captured": 32,
+          "detail": "Jezero (+3)\nJajce\nOSID: op:jajce:jezero_2\nController: RS\nHistorical owner: no reference at week 32\nLast change week: week 32"
+        },
+        {
+          "osid": "op:skender_vakuf:donji_koricani",
+          "captured": 34,
+          "detail": "Donji Korićani (+19)\nSkender Vakuf\nOSID: op:skender_vakuf:donji_koricani\nController: RS\nHistorical owner: no reference at week 34\nLast change week: week 34"
+        },
+        {
+          "osid": "op:jajce:lupnica",
+          "captured": 36,
+          "detail": "Lupnica (+5)\nJajce\nOSID: op:jajce:lupnica\nController: RS\nHistorical owner: no reference at week 36\nLast change week: week 36"
+        }
+      ],
+      "layout": {
+        "width": 1440,
+        "scroll": 1440,
+        "bodyScroll": 1440,
+        "searchHeight": 44
+      }
+    },
+    {
+      "mode": "mobile",
+      "weeks": [
+        39
+      ],
+      "selection": [
+        {
+          "osid": "op:bihac:orasac_2",
+          "captured": 29,
+          "detail": "Orašac (+7)\nBihać\nOSID: op:bihac:orasac_2\nController: RS\nHistorical owner: no reference at week 29\nLast change week: week 29"
+        },
+        {
+          "osid": "op:donji_vakuf:donji_vakuf_2",
+          "captured": 35,
+          "detail": "Donji Vakuf (+5)\nDonji Vakuf\nOSID: op:donji_vakuf:donji_vakuf_2\nController: RS\nHistorical owner: no reference at week 35\nLast change week: week 35"
+        },
+        {
+          "osid": "op:donji_vakuf:prusac_2",
+          "captured": 39,
+          "detail": "Prusac (+3)\nDonji Vakuf\nOSID: op:donji_vakuf:prusac_2\nController: RS\nHistorical owner: RS\nLast change week: week 39"
+        },
+        {
+          "osid": "op:donji_vakuf:korenici",
+          "captured": 36,
+          "detail": "Korenići (+5)\nDonji Vakuf\nOSID: op:donji_vakuf:korenici\nController: RS\nHistorical owner: no reference at week 36\nLast change week: week 36"
+        },
+        {
+          "osid": "op:mrkonjic_grad:baljvine_2",
+          "captured": 28,
+          "detail": "Baljvine (+2)\nMrkonjić Grad\nOSID: op:mrkonjic_grad:baljvine_2\nController: RS\nHistorical owner: no reference at week 28\nLast change week: week 28"
+        },
+        {
+          "osid": "op:jajce:jezero_2",
+          "captured": 32,
+          "detail": "Jezero (+3)\nJajce\nOSID: op:jajce:jezero_2\nController: RS\nHistorical owner: no reference at week 32\nLast change week: week 32"
+        },
+        {
+          "osid": "op:skender_vakuf:donji_koricani",
+          "captured": 34,
+          "detail": "Donji Korićani (+19)\nSkender Vakuf\nOSID: op:skender_vakuf:donji_koricani\nController: RS\nHistorical owner: no reference at week 34\nLast change week: week 34"
+        },
+        {
+          "osid": "op:jajce:lupnica",
+          "captured": 36,
+          "detail": "Lupnica (+5)\nJajce\nOSID: op:jajce:lupnica\nController: RS\nHistorical owner: no reference at week 36\nLast change week: week 36"
+        }
+      ],
+      "layout": {
+        "width": 320,
+        "scroll": 320,
+        "bodyScroll": 320,
+        "searchHeight": 44
+      }
+    },
+    {
+      "mode": "dark-mobile",
+      "weeks": [
+        39
+      ],
+      "selection": [
+        {
+          "osid": "op:bihac:orasac_2",
+          "captured": 29,
+          "detail": "Orašac (+7)\nBihać\nOSID: op:bihac:orasac_2\nController: RS\nHistorical owner: no reference at week 29\nLast change week: week 29"
+        },
+        {
+          "osid": "op:donji_vakuf:donji_vakuf_2",
+          "captured": 35,
+          "detail": "Donji Vakuf (+5)\nDonji Vakuf\nOSID: op:donji_vakuf:donji_vakuf_2\nController: RS\nHistorical owner: no reference at week 35\nLast change week: week 35"
+        },
+        {
+          "osid": "op:donji_vakuf:prusac_2",
+          "captured": 39,
+          "detail": "Prusac (+3)\nDonji Vakuf\nOSID: op:donji_vakuf:prusac_2\nController: RS\nHistorical owner: RS\nLast change week: week 39"
+        },
+        {
+          "osid": "op:donji_vakuf:korenici",
+          "captured": 36,
+          "detail": "Korenići (+5)\nDonji Vakuf\nOSID: op:donji_vakuf:korenici\nController: RS\nHistorical owner: no reference at week 36\nLast change week: week 36"
+        },
+        {
+          "osid": "op:mrkonjic_grad:baljvine_2",
+          "captured": 28,
+          "detail": "Baljvine (+2)\nMrkonjić Grad\nOSID: op:mrkonjic_grad:baljvine_2\nController: RS\nHistorical owner: no reference at week 28\nLast change week: week 28"
+        },
+        {
+          "osid": "op:jajce:jezero_2",
+          "captured": 32,
+          "detail": "Jezero (+3)\nJajce\nOSID: op:jajce:jezero_2\nController: RS\nHistorical owner: no reference at week 32\nLast change week: week 32"
+        },
+        {
+          "osid": "op:skender_vakuf:donji_koricani",
+          "captured": 34,
+          "detail": "Donji Korićani (+19)\nSkender Vakuf\nOSID: op:skender_vakuf:donji_koricani\nController: RS\nHistorical owner: no reference at week 34\nLast change week: week 34"
+        },
+        {
+          "osid": "op:jajce:lupnica",
+          "captured": 36,
+          "detail": "Lupnica (+5)\nJajce\nOSID: op:jajce:lupnica\nController: RS\nHistorical owner: no reference at week 36\nLast change week: week 36"
+        }
+      ],
+      "layout": {
+        "width": 320,
+        "scroll": 320,
+        "bodyScroll": 320,
+        "searchHeight": 44
+      }
+    }
+  ],
+  "errors": [],
+  "requests": [
+    {
+      "url": "https://horkesh.github.io/A-War-Without-Victory/?run=ac3e5e152",
+      "type": "document"
+    },
+    {
+      "url": "https://horkesh.github.io/A-War-Without-Victory/?run=ac3e5e152",
+      "type": "document"
+    },
+    {
+      "url": "https://horkesh.github.io/A-War-Without-Victory/?run=ac3e5e152",
+      "type": "document"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "fixture": "F:/AWWV-agent-setup-modernization-backup/20260912-8913cca6/handoff-rehearsal",
+  "results": [
+    {
+      "name": "verify",
+      "exit": 0,
+      "expected": 0,
+      "pass": true
+    },
+    {
+      "name": "boundary-refusal",
+      "exit": 1,
+      "expected": "refuse",
+      "pass": true
+    },
+    {
+      "name": "drift-refusal",
+      "exit": 1,
+      "expected": "refuse",
+      "pass": true
+    },
+    {
+      "name": "apply",
+      "exit": 0,
+      "expected": 0,
+      "pass": true
+    },
+    {
+      "name": "rollback-drift-refusal",
+      "exit": 1,
+      "expected": "refuse",
+      "pass": true
+    },
+    {
+      "name": "rollback",
+      "exit": 0,
+      "expected": 0,
+      "pass": true
+    }
+  ],
+  "restored": 9,
+  "unrelatedSupportFilesPreserved": true,
+  "liveFilesTouched": false
+}

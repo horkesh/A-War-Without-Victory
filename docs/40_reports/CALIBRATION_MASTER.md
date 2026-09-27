@@ -1,15 +1,868 @@
 # AWWV Calibration Master Reference
 
-**Current delivery status (2026-09-07):** accepted n392 evidence and unchanged checkpoint floors
-remain controlling; the reviewed BC04 P1/P2 chronology repairs have not received campaign
-acceptance. Preserve separate before/after source attribution as specified in the
-[BC04 plan](../plans/2026-07-31-full-campaign-electron-validation-plan.md#bc04-bounded-implementation-plan--2026-09-07).
-BC09 shared-input repair is locally reviewed and integrated (`fa900ba89`); its final
-acceptance remains open. BC07 retention is verified and independently reviewed (GO). Cleanup,
-optional-AI work and build preparation remain planned;
-[master §§4.1–4.2](../plans/MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07)
-owns their sequence before final calibration and packaged acceptance. No baseline refresh
-or campaign result is implied by committing these repairs and plans.
+## September 2026 session handoff — provisional Doljani candidate
+
+The latest retained 188-week candidate is `w188_n13`, **707/707/701/664**.
+Doljani becomes RBiH by ordinary combat at turn 57 and stays RBiH at week 104;
+Ljubunci, Lug and Paroš are HRHB. The January and April checkpoints retain the
+same five parked mismatches, including Maglaj. The owner accepted the turn-71
+Prozor–Rama timing and its measured week-105 Central Bosnia trade provisionally,
+not final adoption. The 188-week candidate still has one Central Bosnia critical
+anomaly, the Farz P-A checkpoint guard exits 1, and the Git-Bash full suite
+exits 1. The 1995 difference against `n8` is not attributable to this one timing
+field because the initial saves and operation layouts differ. Clean-source
+campaign proof and final acceptance remain open. The
+[external map](https://horkesh.github.io/A-War-Without-Victory/?run=doljani-20260927)
+is an inspection view of this dirty candidate; the detailed receipt is in the
+2026-09-27 entry below.
+
+## Mostar Vranjevići reference correction — 2026-09-24
+
+The owner directed `op:mostar:vranjevici_2` to be painted **RS** in all four
+calibration references: January 1993, April 1994, April 1995 and October 1995.
+Each was previously RBiH. The four files now carry this single-cell change,
+reconciled 712-OSID faction counts, a revision increment and an owner-decision
+changelog entry. This supersedes the earlier owner-authored RBiH paint; it does
+not resolve the [constituent-level geographic uncertainty](20260917_VRANJEVICI_MOSTAR_JANUARY_DIAGNOSIS.md)
+or change initial control, geometry, operations or simulation behavior.
+
+Replaying the retained Sebiočina 188-week run against the revised references
+scores **707/697/690/662**, up by one at each checkpoint from
+**706/696/689/661**. The unchanged saved run holds this cell RS at all four
+points. The [external map](https://horkesh.github.io/A-War-Without-Victory/?run=vranjevici-rs-20260924)
+shows the revised reference and the same dirty local candidate. April 1994
+calibration is the next work item. Full-campaign acceptance remains **NO-GO**;
+the Farz, Prozor and full-suite gates remain open.
+
+## Sebiočina recapture and Brčko corridor defense — 2026-09-24
+
+**Local candidate:** the RBiH Srebrenica–Cerska Link-Up now attacks
+`op:vlasenica:sebiocina` after Ježeštica. The 280th East Bosnian Light Brigade
+captures it at t15 through operation-owned combat, so the January 1993 control
+is RBiH. VRS Operation Cerska–Kamenica starts its Skelani axis at Milići,
+retakes Sebiočina at t45 with the 1st Guards Motorized, then proceeds toward
+Pomol, Luka and Ljeskovik. Neither change writes control directly.
+
+The first 188-week trial gained the January cell but lost Donji Rahić at t72
+and Brčko city at t102, failing the protected Brčko anchors. A controlled
+188-week run with only the Sebiočina operation edits removed, using identical
+simulation inputs and initial save, kept Brčko RS. The scenario now marks
+Brčko city and Donji Rahić as must-hold positions for the RS East Bosnian
+Corps. This invokes the existing garrison and defense mechanism; it does not
+lock political control. The corrected 105-week and 188-week runs keep both RS.
+
+Against the exact-input control, the corrected 188-week scores are
+**706/696/689/661** versus **705/697/692/657** at January 1993, April 1994,
+April 1995 and October 1995. Sebiočina is the sole January control difference.
+All six RS corridor cells and all ten Bijeljina cells hold at the checkpoints;
+neither Brčko city nor Donji Rahić has a control-change event in the full run,
+and no new protected anchor fails. The nine enclave guards and engine-health gate
+pass. Two full corrected runs have identical final save and weekly artifacts,
+with final hash `8262413bcf258e15`. A cell-level comparison records the small
+later non-anchor losses and six October gains in the
+[trial receipt](../../logs/sebiocina-trial-20260923/receipt.txt).
+
+**Full-campaign acceptance remains NO-GO.** The inherited Farz/Uragan 95
+wrong-corps attribution and Prozor operation-injection error persist. The
+stale startup snapshot was rebuilt and its check passes. A 2026-09-24 full-suite
+rerun exited 1: the command board exceeded its 20,000-character contract and
+`runtime_dependency_resolution` timed out during its 10-second setup hook.
+The shortened board passes its focused test 7/7; the runtime test passes alone
+12/12. This corrects both observed failure categories, but no second full-suite
+run or clean-source 188-week proof has been taken. No baseline was adopted.
+
+**External map:** the [current viewer](https://horkesh.github.io/A-War-Without-Victory/?run=vranjevici-rs-20260924)
+replays this run against the later Vranjevići RS reference correction. The
+**706/696/689/661** scores above describe the references before that repaint.
+Publication does not adopt the candidate or close the inherited gates.
+
+## January 1993 Doljani reference correction — 2026-09-23
+
+The owner directed `op:jablanica:doljani_2` to be painted **HRHB** in the
+January 1993 reference. Only `data/source/calibration/painted_control_jan1993.json`
+changes; the initial controller, other checkpoints, and simulation operation
+definitions are unchanged. The reference remains 712 OSIDs. Actual faction
+counts are now RS 375, RBiH 251, HRHB 86. The prior file's metadata was
+already stale by two RBiH/HRHB cells before this correction, so its counts were
+reconciled with the full `by_settlement_id` map.
+
+Rescoring the retained Jemanlići 39-week and 188-week January checkpoints
+against this single-cell correction gives **705/712**, up from the recorded
+**704/712**. The seven remaining January mismatches include Vranjevići, whose
+historical control and aggregate geometry remain unresolved. These are static
+rescoring calculations, not new simulation or updated viewer artifacts. The
+later checkpoints and full-campaign NO-GO verdict remain as recorded below.
+
+## Jemanlići operation objective — 2026-09-23
+
+**Current local January candidate:** Jemanlići is retaken by the RS 19th Krajina
+at t31 through `Operation Donji Vakuf`, after the same local axis takes Prusac
+at t30. Jemanlići is adjacent to Prusac. The 19th/31st brigade roster, staging,
+main sweep, planning budget and combat parameters are unchanged; control moves
+through the normal battle resolver. The t31 battle is against RBiH militia.
+
+The 39-week and 188-week runs both score **704/712** in January, versus
+**703/712** for the Orašac candidate; Jemanlići is the sole t39 control
+change. All eight named captures occur by t39 and all 31 January anchors pass.
+The 188-week scores are **704/697/692/657**, versus **703/692/688/654**;
+engine health and nine enclave guards hold. The first 39 weekly records match
+the shorter probe exactly.
+
+**Full-campaign acceptance remains NO-GO.** The inherited Farz wrong-corps
+attribution persists; the western cascade is 26/38, down from 28/38. The
+required full suite exits 1: two catalog expectations and the generated plan
+index were corrected and verified with focused tests; an isolated runtime
+dependency test passes after its full-suite setup timeout. The measured result,
+remaining gates and test exits are in the
+[validation receipt](../../logs/jemanlici-op-probe-20260923/receipt.txt).
+**Updated external map:** [Open the Jemanlići calibration viewer](https://horkesh.github.io/A-War-Without-Victory/?run=jemanlici-axis-20260923).
+It displays this 188-week dirty local candidate for inspection; publication does
+not adopt a baseline or change the full-campaign verdict.
+
+## Orašac operation axis — 2026-09-23
+
+**Previously published map:** [Open the Orašac calibration viewer](https://horkesh.github.io/A-War-Without-Victory/?run=orasac-axis-20260923).
+
+**Current local January candidate:** Orašac is captured at t1 by ordinary,
+operation-owned combat. The existing `Bosanska Krupa Takeover` operation now has
+a second axis: the 1st Drvar Light Infantry attacks `op:bihac:orasac_2` from
+RS-held Trubar. Its Bosanska Krupa town axis is unchanged. The derived April
+1992 desktop startup snapshot was refreshed to include this operation.
+
+The 39-week probe scores **703/712** in January 1993, versus **702/712** before
+this axis. All **8/8 named captures** occur by t39; Orašac is the sole control
+change at that checkpoint. The 188-week run scores **703/692/688/654** at the
+four checkpoints, with engine health, 31 January anchors and nine enclave
+guards passing. The first 39 weekly records match the 39-week probe exactly.
+
+**Acceptance remains open.** The checkpoint validator exits 1 on the inherited
+Farz wrong-corps attribution gate; the western cascade is 28/38. The full test
+suite exits 1 on Windows shell/hook and runtime setup failures, plus a stale
+startup snapshot found during the run. The snapshot was rebuilt; its check and
+the two affected test files then pass 20/20. No full-suite retry or merge was
+performed. Later control divergence is documented in the
+[validation receipt](../../logs/orasac-op-probe-20260923/receipt.txt).
+
+## Owner-approved January acceptance amendment — 2026-09-22
+
+**Published viewer (2026-09-22):** [Open the Prusac candidate with zoom/pan](https://horkesh.github.io/A-War-Without-Victory/?run=efa53f55c&viewer=zoom).
+GitHub Pages commit `c31a9a2ed` adds zoom/pan to the same retained clean 188-week run below;
+live bytes match the generated artifact and the browser confirms January702/712,
+10 mismatches and Prusac's t30 capture. Publication does not change acceptance.
+
+**Current result: Prusac captured at t30 through Operation Donji Vakuf.** The owner
+confirmed that Prusac belongs in this operation; the suspension proposal was not
+adopted. Local commit `efa53f55c` keeps the existing 19th/31st brigades on a parallel
+`prusac_local` axis from RS-held Pribrača. The 16th/22nd/5th keep the main sweep;
+the Vlašić axis, seven-brigade roster, seven objectives, planning budget and combat
+parameters are preserved. No new control writer, force input or reference change.
+
+Retained n427 evidence showed the 19th/31st leaving their local frontage for
+Pribeljci from t21, then returning after Korenići to take Prusac at t40. Pribrača
+is directly adjacent to Prusac; the town and Korenići are not. Correcting that
+operation routing meets the owner's requirement through ordinary combat.
+
+**Acceptance authority.** The owner retired only the blanket no-new-January-
+mismatches veto versus n403. January still requires >=700/712 and all eight named
+operation-owned captures by t39, protected anchors, lawful movement/assembly/capture,
+engine health, determinism and a complete mismatch inventory. The bounded January
+allowance for later checkpoint offsets does not waive full-campaign acceptance.
+
+| Checkpoint | n427 | Prusac candidate | Delta |
+|---|---:|---:|---:|
+| January 1993 | 701 | **702** | +1 |
+| April 1994 | 697 | 694 | -3 |
+| April 1995 | 691 | 689 | -2 |
+| October 1995 | 651 | 651 | 0 |
+
+**Named captures.** Baljvine t28, Jezero t30, Donji Korićani t39, Lupnica t35;
+Donji Vakuf town t34, Korenići t35 and Prusac t30, all operation-owned combat.
+Prusac's receipt is the 19th Krajina under `Operation Donji Vakuf:t29`, decisive
+victory, ratio 8.11. Orašac falls t53 under Bedem and still misses t39: **January
+remains OPEN (7/8 named captures); full-campaign acceptance remains NO-GO.**
+
+**Complete January mismatch inventory (10/712).**
+
+| OSID | Expected | Candidate |
+|---|---|---|
+| `op:bihac:orasac_2` | RS | RBiH |
+| `op:donji_vakuf:jemanlici` | RS | RBiH |
+| `op:ilijas:krivajevici` | RS | RBiH |
+| `op:jablanica:doljani_2` | RBiH | HRHB |
+| `op:kalesija:seher_2` | RS | RBiH |
+| `op:konjic:glavaticevo_2` | RS | RBiH |
+| `op:konjic:ljuta` | RS | RBiH |
+| `op:maglaj:jablanica` | RBiH | RS |
+| `op:mostar:vranjevici_2` | RBiH | RS |
+| `op:vlasenica:sebiocina` | RBiH | RS |
+
+Exactly three January cells change versus n427: Prusac and Volari improve;
+Maglaj:Jablanica worsens. Volari falls through Stjena at t33 (1st Gradiška,
+ratio 2.48). Jablanica begins RS in both runs: the baseline ARBiH counterattack
+captures it t23; the candidate's t25 attack does not capture and the operation
+subsequently fails. This is retained initial RS control, not a new passive takeover.
+The isolated source change acts from prestaging t21; the later command trajectories
+are observed consequences, not a complete causal decomposition of every state change.
+
+**Campaign checks.** Engine-health PASS; all 31 anchors and nine enclave guards pass;
+consistency/ghost/zero-eligible-operation counts 0/0/0; stranded brigades 15→11.
+Western cascade improves 23→27 but remains below 38. Farz still fails wrong-corps
+attribution (351st, 3rd Corps, t173). The sole Prozor t41 `op_empty` error is identical
+to n427. Eastern capture provenance is CLEAN. Checkpoint validator exit **1** is
+retained, not waived. A candidate-only Zvezda 94 t93 warning records an inactive
+65th Protection Regiment as ineligible; Zvezda injects and fails `max_failures`
+after five attacks, versus seven attacks and the same outcome in n427.
+
+**Validation and provenance.** One canonical 39-week prefix n430 exited 0 (hash
+`99c3680fb7fcfcf9`), followed by one ordinary canonical 188-week run in a clean
+validation checkout at `efa53f55c` (local run suffix n0, hash `575254183566bf2c`).
+All 31 consumed inputs match n427 byte for byte; Node v22.23.2; `git_dirty:false`;
+digest `f8ace65496620fad1c8219a9dcaa8e2c5cdba2f3f541b156c7ba112b4748caaf`.
+All first 39 weekly records exactly match n430. This is not a two-full-run
+determinism proof. Source tests 86/86, typecheck and startup/static contracts 22/22
+pass. Independent source review is GO; independent campaign review says RETAIN
+this bounded candidate with all disclosed residuals.
+
+The required full suite ran once: exit **1**, 1,392 passed / 2 failed / 4 skipped
+file results; 14,075 passed / 1 failed / 43 skipped tests. The two real categories
+were a command-board length overflow (20,025 versus <20,000) and the known
+10-second runtime-dependency setup timeout. The board is shortened; the dependency
+suite passes 12/12 in isolation. The intentional child-process failure is a passing
+parent control, not a third failure. Targeted documentation verification is retained
+in the [portable validation receipt](../../logs/donji-vakuf-prusac-axis-20260922/receipt.txt).
+No unchanged full-suite retry was spent; a clean full-suite pass is not claimed.
+
+**Scope and next decision.** The Prusac change is retained locally. The bounded
+Orašac review found no demonstrated alternative legal roster in current-source
+artifacts; its disproved one-axis `anyApproaching` veto stays closed. Do not infer
+an Orašac repair from this result. No additional campaign, final acceptance pair,
+reference/pin/fingerprint adoption, push or merge was performed. The generated
+n427 save and pre-existing five-line LOC trace remain preserved. Historical
+Prusac source uncertainty remains documented in the prior diagnosis; the owner's
+operation instruction governs this bounded implementation and changes no reference.
+
+## Current status addendum (2026-09-19) — B3-candidate January reconciliation from `n427`; 40w fixtures retired
+
+**Scope and method.** Branch `codex/january-1993-operations-20260914`. This addendum reconciles
+**existing** evidence from the retained full-duration run
+`runs/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n427`; **no new simulation was run**. The
+40w standalone fixtures were retired the same day (see `PROJECT_LEDGER.md`); the retirement changed
+**no canonical calibration input, reference, floor or evidence**, so `n427` remains the candidate
+measurement. Migration status, January acceptance and full-campaign acceptance are kept separate.
+
+**January-1993 (t39), `n427`: 701/712.** The `run_summary` jan1993 checkpoint and a
+`tools/verify_checkpoints.cjs` replay agree. The packet's January minimum is **700**, so the raw
+floor is met — but a floor is not a contract (below).
+
+**Exact remaining mismatch set (`n427`, painted→sim):**
+
+| OSID | expected (jan1993) | actual (t39) |
+|---|---|---|
+| `op:bihac:orasac_2` | RS | RBiH |
+| `op:donji_vakuf:jemanlici` | RS | RBiH |
+| `op:donji_vakuf:prusac_2` | RS | RBiH |
+| `op:ilijas:krivajevici` | RS | RBiH |
+| `op:jablanica:doljani_2` | RBiH | HRHB |
+| `op:kalesija:seher_2` | RS | RBiH |
+| `op:konjic:glavaticevo_2` | RS | RBiH |
+| `op:konjic:ljuta` | RS | RBiH |
+| `op:mostar:vranjevici_2` | RBiH | RS |
+| `op:sipovo:volari_2` | RS | RBiH |
+| `op:vlasenica:sebiocina` | RBiH | RS |
+
+**Contract assessment — the named-capture / no-new-mismatch contract does NOT hold on `n427`.**
+Against the January comparison baseline `n403` (`41a148bf9`, 701/712, the same 11-count): **8 cells
+carried**, **3 newly wrong** (the RS→RBiH trio `op:bihac:orasac_2`, `op:donji_vakuf:jemanlici`,
+`op:sipovo:volari_2`), **3 newly right** (`op:foca:donje_zesce`, `op:maglaj:jablanica`,
+`op:trnovo:tosici`). Net 11 unchanged — the recorded "net-neutral score hiding different cells"
+hazard. The **named captures** likewise miss: the eight required cells must be operation-owned
+combat captures by t39. Baljvine `op:mrkonjic_grad:baljvine_2` slips t28→t33; Jezero
+`op:jajce:jezero_2` t31→t28; Donji Korićani `op:skender_vakuf:donji_koricani` t39 (same); Lupnica
+`op:jajce:lupnica` t35→t37; **Orašac `op:bihac:orasac_2` loses its t29 capture entirely — not
+flipped until t54**; Donji Vakuf town t35→t34; Korenići t38→t37; Prusac `op:donji_vakuf:prusac_2`
+is uncaptured by t39 on both (t40 on `n427`). All logged captures remain combat-mechanism, zero
+passive transfers. **The 700 floor is met; the contract is not.**
+
+**Western-Bosnia cascade (oct1995), `n427`:** 23 matched across the eight documented municipalities
+(`bosansko_grahovo` 0/4, `sipovo` 5/5, `glamoc` 3/6, `titov_drvar` 0/3, `bosanski_petrovac` 8/8,
+`mrkonjic_grad` 1/6, `kljuc` 4/7, `sanski_most` 2/10) — still far below the recorded base 40 /
+floor 38, and reported by `verify_checkpoints` (not gated without `--cascade-base`).
+
+**Farz attribution, `n427` (P-A discriminator): FAIL.** The signature cell is taken **t167 by
+`arbih_328th_mountain` (`arbih_3rd_corps`)** where a 2nd-Corps capture at t≥160 is required
+(earlier local-occupation run: t169, brigade 327th→328th). The four positive Ozren cells are all
+taken; eastern capture provenance is **CLEAN**; the enclave guard **holds**; `matched_osids`
+oct1995 = 651.
+
+**Prozor injection, `n427`:** `Prozor–Rama Line Counterattack` still emits the **inherited turn-41
+`op_empty` error** ("All 1 axes would be dropped — operation cannot execute"), present identically
+in the `8db305596` reference → inherited, not introduced.
+
+**Blocker disposition.** *Still demonstrated:* western cascade short; Farz P-A; Prozor inherited
+injection; `op:donji_vakuf:prusac_2` OPEN (no waiver); Vranjevići/Kružanj interpretation
+UNRESOLVED; Donji Vakuf 17-April historical defect OPEN. *Resolved / clean:* engine-health gate
+PASS on `n427`; enclave guard holds; eastern capture provenance CLEAN; anchors 31/31. *Attributed:*
+the three newly-wrong January cells and the lost `t29` Orašac capture — see the attribution
+addendum below.
+
+**January regression attribution (added 2026-09-20, retained evidence; ZERO new simulations).**
+`n403`, `n419`, `n420`, `n422`, `n427` share a byte-identical consumed-input set (31 files, same
+SHA-256s, digest `f8ace654…`); the directory-fingerprint difference is only the duration/reporting
+inventory. Effective source deltas: `n403→n419` = routine-movement scope `a7cdc88f3` plus
+comment-only `pre_planned`/`triggered` edits; `n419=n420`; `n422` adds only P-A (`30e2793ed`) with
+no January control-cell change; `n422→n427` = exactly B3 (`9cdb14b99`, `3c5302f7a`, `8bc7703fb`).
+Run duration is a loop bound / reporting selector only (no sim mechanic reads `scenario.weeks`), so
+the 39w↔188w difference is not a behavioral confound.
+
+| cell | init | n403 t39 | n419/420/422 t39 | n427 t39 | first divergent turn | responsible decision/path | classification |
+|---|---|---|---|---|---|---|---|
+| `op:bihac:orasac_2` | RBiH | RS (`Operacija Bunar:t25`, T29) | RBiH (`Prodor:t27` aborts `participants_below_assembly_floor`) | RBiH (T54 via `Krov:t50`) | `n403→n419`; op generated t25 | routine-movement scope changed donor availability → Bunar replaced by Prodor; P-A drops the infeasible donor but the op still dies `zero_eligible_axis` | consequence of repaired contract (`a7cdc88f3`) + missing capability |
+| `op:donji_vakuf:jemanlici` | RS | RS (no event) | RS (no event) | RBiH (`Operacija Džihad:t32`, T33) | `n422→n427`; op created t32 | B3 operation-set reshuffle (ARBiH 3rd Corps generated a new local op) | consequence of repaired contract (B3) |
+| `op:sipovo:volari_2` | RBiH | RS (`Munja:t33`, T34) | RS (`Sjever:t29`, T30) | RBiH until T43 (`Oklop:t40`) | `n422→n427`; ops t27–29 | B3 reshuffle retargeted `Bor:t27`, delaying the volari axis to `Oklop:t40` past t39 | consequence of repaired contract (B3) |
+
+The newly-right cells (`donje_zesce`, `tosici`, `jablanica`) corroborate the same B3 mechanism:
+axes that `n422` terminated on `insufficient_donation` now capture. **No cell is a demonstrated
+contract violation; `a7cdc88f3`, P-A and B3 are not to be reverted, and no floor/reference is
+touched.** Prodor's `zero_eligible_axis` is **not** an `anyApproaching` launch veto — for a
+one-axis operation that veto is unreachable — and **no launch-veto defect is demonstrated** (n429
+addendum below). **This is not a January closeout:** the raw floor is met but the
+named-capture / no-new-mismatch contract remains unmet.
+
+**Prodor creation-vs-launch addendum (n429, corrected 2026-09-22; no new simulation).** The
+env-gated LOC trace on `n429` records the t27 creation candidate: `vrs_2nd_krajina`, target
+`op:bihac:orasac_2`, `pred=stalemate`, participants `rs_5th_glamo` + `rs_11th_krupa`. Creation
+(`findLocalOccupationCandidate` → `predictParticipants(…, projectUnstaged=true)`) projects
+unassembled brigades onto their nearest friendly approaches and evaluates one concentrated attack;
+launch readiness evaluates actual positions with only physically staged supporters. That
+projection-vs-actual gap is the whole structural difference, and it closes as the brigades march —
+on `n427`/`n428` both reached the projected approaches (krupa→`op:bihac:racic` t30,
+glamo→`op:bihac:trubar` t31) and the operation still expired `zero_eligible_axis`. **No launch-veto
+defect is demonstrated:** `anyApproaching` is set only on the non-executable branch, so for a
+one-axis operation `held_by_approaching` cannot be true and it did not abort Prodor. Reinforcement
+and morale drift, and `Krov`'s later capture of the same objective after the brigades reached
+~2000 each, are **supporting evidence for a state-change reading, not a measured causal
+decomposition**; `STATE_2` vs `STATE_3` on `n427` remains unobserved. **No engine repair is
+recommended from this evidence** — the projected attack became unviable before the planning
+deadline and the operation expired by the ordinary rule; the unresolved details and the unmet
+January acceptance criteria are preserved.
+
+**Acceptance separation.** Migration/retirement status: **done** (ledger). January acceptance:
+**OPEN** (contract unmet). Full-campaign acceptance: **NO-GO** (`verify_checkpoints` =
+`GUARD BREACHED — §6 panel matter`). No readiness is claimed.
+
+## Current status addendum (2026-09-18) — routine-movement-scope candidate on the calibration branch
+
+**Scope.** This addendum is for branch `codex/january-1993-operations-20260914` (calibration branch),
+not for `main`. It does not supersede the `main`-facing status below; it records the candidate under
+test on this branch.
+
+- **Movement-scope development candidate `a7cdc88f3` is UNACCEPTED.** It removes a confirmed T2/T3/T6
+  routine-movement churn defect but measures **jan1993 696/712** (run `n419`) against baseline
+  **`n403` 701/712** — below the unchanged **700** January floor. Five cells regress (all
+  RS→RBiH where the reference wants RS, zero gains); the mechanism is an operation-assembly/timing
+  cost, not a blocked authority. Later checkpoints are NOT REACHED (39-week run) / NOT MEASURED.
+- **Operation-authority type-gap repair `8f5998595` is behaviourally inert.** It makes T2 recognise
+  every active operation type for movement authority, matching the T3/T6 predicate, while leaving
+  attack consumers on the narrow sector-attack flag. Run `n420` reproduces n419 exactly:
+  `jan1993 696/712`, `final_state_hash b02b13f68127ed98` — byte-identical to n419. The gap did not
+  fire (operation-type inventory is `{probe, sector_attack}` only). Committed separately.
+- **P-A implemented and measured (commit `30e2793ed`; run `n422`).** Time-bounded commander
+  participant admission: a formation is admitted to an initial commander-generated roster only if the
+  production terrain-weighted column model says it can reach the operation's assembly/approach area
+  within `planning_duration + PLANNING_INVALIDATION_GRACE_TURNS`. Prodor's infeasible
+  `rs_7th_krajina_motorized` is dropped; the roster becomes `rs_11th_krupa + rs_5th_glamo`, which
+  **actually assembles** (`rs_5th_glamo` arrives `op:bihac:trubar` t31, `rs_11th_krupa` `op:bihac:racic`
+  t30). `participants_below_assembly_floor` **1 -> 0**; `zero_eligible_axis` **4 -> 5**. January is
+  **unchanged** (`696/712`, zero control-cell delta vs n420, same five vs n403) — the op now fails at
+  attack eligibility instead of assembly, so Orašac stays RBiH. Contract PASS; calibration UNCHANGED
+  and below floor; source remains UNACCEPTED. Full evidence:
+  `logs/routine-scope-20260918/MEASUREMENT.md` "P-A MEASUREMENT".
+- **Prodor selection diagnosed (no personnel/equipment experiment).** The defect was
+  reachability-vs-time, not strength: the idle `rs_1st_drvar_light_infantry` was correctly withheld
+  under its sector-0 defensive obligation, and `rs_7th_krajina_motorized` was admitted on an 8-hop
+  check with no time budget. See the P-A bullet above for the authorized correction.
+- **`op:donji_vakuf:prusac_2` remains OPEN** (existing mismatch/reference question; not repaired).
+  Equal January ownership does not establish equal capture chronology. No threshold waiver.
+
+**Evidence:** `logs/routine-scope-20260918/MEASUREMENT.md` (authoritative current-status synopsis and
+Prodor diagnosis); `logs/routine-scope-20260918/CANDIDATE_REVIEW.md`; `PROJECT_LEDGER.md` 2026-09-18
+entries.
+
+## Current status (2026-09-17) — January-1993 operations packet (SINGLE CURRENT SUMMARY)
+
+This block is the single current summary. The 2026-09-16 delivery status below is retained as history and is
+**superseded** where it reports the January score (700 → **701**) and the candidate commit.
+
+**A. Current production candidate — `41a148bf9`.** Verified against `git log` and its production diff:
+`772a67808` (bounded isolated-position predicate + head-of-queue reservation timing) followed by `41a148bf9`
+(Operation Jackal gains the `op:stolac:pjesivac_kula_2` objective). Executable surface:
+`src/sim/combat/commander/plan.ts`, `src/sim/combat/pre_planned_operations.ts`, and their tests. No data,
+reference, geometry, OOB, initial-control or baseline change is in either commit.
+
+**B. Current documentation HEAD — `0893bfa50`** plus this task's synchronization commit. A documentation
+commit is not a new simulation measurement; the measured production source stays `41a148bf9`.
+
+**C. Latest measured January evidence — n403.** Independent execution on the **clean committed** source
+`41a148bf9` (`git_dirty false`), reproducing n401/n402 byte-for-byte. Run
+`runs/apr1992_definitive_188w__9137f75e9f35be20__w39_n403`; scenario
+`data/scenarios/apr1992_definitive_188w.json`; duration override `--weeks 39`; checkpoint **t39 = 4 January
+1993**; Node `v22.23.2`; input digest `f8ace65496620fad1c8219a9dcaa8e2c5cdba2f3f541b156c7ba112b4748caaf`;
+final-save SHA-256 `e3b6b2d34dd1101c601b11abd30c2c060717995a0fe748f662214d4ebecf6899`. Result
+**701/712**, **11 mismatches**. April 1994, April 1995 and October 1995 are **NOT REACHED** by this candidate.
+
+**D. Last full-duration campaign evidence (separate source).** The canonical 188-week run at `ac3e5e152`
+(2026-09-16) scores **700/712 jan1993, 702 apr1994, 697 apr1995, 667 oct1995** over unchanged
+694/674/668/641 floors. Its source, results and limitations stand as recorded below. Its later-checkpoint
+outcomes are **not** attributable to the January candidate `41a148bf9`, which was not run past t39.
+
+**E. Published viewer (unchanged by this task).** The public viewer
+(`https://horkesh.github.io/A-War-Without-Victory/?run=ac3e5e152`) displays the **`ac3e5e152` 188-week**
+dataset, as recorded below. It is **not** updated here and does **not** show n403 or `41a148bf9`.
+
+**Owner direction (recorded).** Later territorial outcomes do **not** veto a January correction. This is a
+scoring-priority direction only and does not waive determinism, valid state, legal movement/capture,
+population accounting, political permissions, or command ownership.
+
+**Floors.** The packet's **January minimum of 700** is distinct from the older general checkpoint floors
+(188-week 694/674/668/641). Neither is altered by this synchronization.
+
+**F. Advisory baseline pins — RED on this branch, explained, pins NOT refreshed (added 2026-09-17).** The
+advisory `Baseline Pins` workflow fails on `0033517b6` (run `35190324522`, job `105101245112`, step
+"Baseline regression", exit 1) with all **8 of 8** `apr1992_188w` artifact hashes mismatched. Diagnosed as
+**stale pins, not a regression**: `origin/main` is still `e607508bc` — the commit that blessed the pins and
+the last green run of this check — and `HEAD` is 50 commits ahead of it, carrying 29 `src/sim`/`src/state`
+commits plus one consumed-input change. The pinned manifest is untouched in that window. The exact CI
+command reproduced locally at clean `0033517b6` on Node `v22.23.2` (the same version CI's `node-version: 22`
+resolves to) gave exit 1 with **all eight actual hashes byte-identical to the Linux CI run**, which rules
+out nondeterminism. The verifier's own focused tests pass (14 passed, 1 pre-existing skip), so there is no
+verification defect. **No pin, floor, reference or gate was changed, and `UPDATE_BASELINES` was never set**
+— re-blessing stays owner-gated under `R7-BASELINE-SIX-PIN` /
+[the re-blessing packet](../plans/2026-09-10-baseline-reblessing-packet.md), which already records that this
+candidate's *"pins are not refreshed"*. The check is expected to stay red until this work reaches `main`.
+Evidence: [`logs/baseline-pins-advisory-20260917/EVIDENCE_RECORD.md`](../../logs/baseline-pins-advisory-20260917/EVIDENCE_RECORD.md).
+
+**G. Later checkpoints REACHED on the candidate's source — measured, NOT accepted (added 2026-09-17).**
+This qualifies, and does not overturn, **C** and **D** above. `git diff 41a148bf9..0033517b6 -- src/ data/
+tools/` is two hunks, both wholly inside `//` comment blocks, so **HEAD is executably identical to the
+January production candidate `41a148bf9`**. The advisory verifier's required run is therefore a full
+**188-week** measurement of that source — the duration **C** could not reach at `--weeks 39`. Engine health
+gate: **exit 0, PASS**, ten of ten hard checks, **anchors 31/31**, `matched_osids` 668, `consistency_failures`
+0, `kw_ratio` 3.72 in band.
+
+| checkpoint | pin `n392`/#518 | `ac3e5e152` (D) | **`0033517b6`, executably `41a148bf9`** | floor (UNCHANGED) |
+|---|---:|---:|---:|---:|
+| jan1993 | 702 | 700 | **701** | 694 |
+| apr1994 | 678 | 702 | **706** | 674 |
+| apr1995 | 672 | 697 | **701** | 668 |
+| oct1995 | 667 | 667 | **668** | 641 |
+
+Every checkpoint improves on **D** (+1/+4/+4/+1). The jan1993 **701** equals n403's 701/712 at `--weeks 39`
+— the same January score by two durations on one executable source. **This is a measurement, not an
+acceptance.** It is not a floor, not a re-pin, not a promotion and not an owner sign-off; floors stay
+694/674/668/641 and the packet's January minimum stays 700. The eleven January mismatches stand, **Prusac
+remains OPEN**, and the **Vranjevići/Kružanj** reference and aggregation question remains **UNRESOLVED**.
+Adoption belongs to `R6-CALIBRATION-INTEGRATION` and its own gates.
+
+**H. Prusac (`op:donji_vakuf:prusac_2`) diagnosed — OPEN, no defect, no correction proposed (added
+2026-09-17).** Full report:
+[Prusac diagnosis](20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md); evidence
+`logs/prusac-january-diagnosis-20260917/`. **Classification: a legitimate consequence of the repaired
+command-selection policy that remains a calibration discrepancy** — not an implementation-contract
+violation and not an engine defect.
+
+The cell starts **RBiH**, has **no control event through t39**, and the reference expects **RS**; the
+mismatch is RS not arriving. The 188-week advisory reproduction — bound to this candidate by an
+**identical 31-input digest** and a **byte-identical weeks-1–39 prefix** (39/39 weekly records, 39/39
+replay frames) — shows **RS captures `prusac_2` at t41**, undefended, ratio 9.89, with `Operation Donji
+Vakuf` reaching `recovery: completed`. The cell is **two turns late**, not unreachable.
+
+Cause, traced to the call site: pre-repair, the ARBiH 3rd Corps head-queue reservation left no
+local-occupation candidate, so `emit.ts:1595-1616` fell through to the generic probe and spent
+`arbih_705th_slavna_mountain` against `op:donji_vakuf:babin_potok_2` at a **0.30** power ratio
+(**1800 → 1126 → 650** personnel). Repaired, a local-occupation candidate **takes precedence**, the 705th
+is never spent, and it defends Korenići intact at ratio **0.79** — turning one strike into three and
+delaying Korenići **t36 → t38**. Post-Korenići tempo is *identical* in both runs (capture, two idle turns,
+capture), so the two-turn Korenići delay is the entire discrepancy. **The pre-repair Prusac match was
+purchased by the defect the repair removed; the repair must not be reverted to restore it**, and no
+location-specific hold, capture date or target-specific bonus may be introduced for it.
+
+Corrected in the predecessor record: `arbih_705th`/`707th` are **not** on the released Central Bosnia
+roster — they are on the Battle of Bugojno roster (`available_from` 66) and were never reserved by the
+head-queue helper in either version; the effect on them is indirect. The Čardak §10.6 paragraph is
+preserved with an appended correction.
+
+**`prusac_2` remains OPEN with no waiver.** The residual question — the authored **launch timing** of the
+Op Jajce → Op Donji Vakuf 1KK queue chain — is a scenario/operational-data and historical-review matter
+for `R6-CALIBRATION-INTEGRATION`, is **not** proposed or scoped here, and is not a combat or reservation
+question.
+
+**I. Op Jajce → Op Donji Vakuf chronology reviewed — an authored premise is CONTRADICTED; nothing
+corrected, nothing proposed for adoption (added 2026-09-17).** The residual H left open is now answered.
+Read-only: no simulation executed, no source instrumented, no timing, objective, queue order, reference,
+initial control or threshold changed. Report:
+[Prusac diagnosis §8](20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md); evidence
+`logs/jajce-donji-vakuf-chronology-20260917/`.
+
+**Runtime is clean; no unexplained wait exists.** The 1KK queue advances when slot 0 holds no
+`is_pre_planned` operation (`corps_operation_helpers.ts:193`, `war_phases.ts:1938-1954`) — measured three
+times as *two turns of `recovery: completed`, injection on the third*: Prijedor→Corridor w6,
+Corridor→Jajce w19, Jajce→**Donji Vakuf w30**. Jajce's six planning turns are brigades marching
+(`movement_order_count` 3,3,3,3,2,2), not an authored delay; Donji Vakuf's single planning turn is
+`prestage_from: 21` having already marched them, and its `planning_duration: 7` is inert because
+pre-planned ops bypass the preparation state machine (`operation_preparation.ts:828-842`). The
+post-Korenići `eligible_attacker_count = 0` pause at w39/w40 carries `movement_order_count = 3` on both
+turns — repositioning through Jemanlići, a legal movement constraint, identical in `n396` at w37/w38.
+
+**The historical finding.** Simulated: `torlakovac_2` w31 (1992-11-09), `oborci_2` w34 (11-30),
+**`donji_vakuf_2` w35 (1992-12-07)**, `korenici` w38 (12-28), `prusac_2` w41 (1993-01-18) — a post-Jajce
+VRS sweep that *captures* Donji Vakuf town (the cell's member settlements are Blagaj, **Donji Vakuf**,
+Ponjavići, Rastičevo, Rudina, Vlađevići). The record says the opposite, in terms:
+
+- **BB2 p.465** (Annex 50): "The Bosnian Serbs, however, **took over the town early in 1992** … renamed
+  the town '**Srbobran**'." BB2 p.277–279's order of battle, dated **from June 1992**, already carries
+  "HQ Srbobran (Donji Vakuf)" for the 19th and 31st.
+- **BB2 p.330** (Annex 29, *Vrbas 92*): the Jajce operation's third axis ran "along the Vrbas River valley
+  **from the direction of Serb-held Donji Vakuf (Srbobran)**", and "the **19th at Donji Vakuf** and the
+  22nd at Mount Vlašić … protected the flanks of the assault forces."
+- **BB2 p.332**: after erasing the Karaula salient 12–18 November 1992, "**Here the VRS halted, apparently
+  content with its gains.**" The simulated sweep runs 2 Nov 1992 – 18 Jan 1993, entirely past that halt.
+- **BB1 p.198**: Bugojno was "jointly defended **from the Bosnian Serbs**" by the HVO Eugen Kvaternik and
+  ARBiH 307th Brigades until mid-1993 — a static confrontation line north of Bugojno, not a VRS advance.
+
+So the **grouping** (Donji Vakuf town as a sweep's fourth objective) is contradicted, the **dependency**
+("fires after Op Jajce completes") is slot-0 queue ordering rather than history — the causal arrow runs the
+other way, Serb-held Donji Vakuf enabling the Jajce attack — and the **timing** sits wholly after the
+documented halt. The roster comment's authority, "BB1 p.498", is **Appendix G, "Skeleton Bosnian Serb Army
+Order of Battle, July 1995"** (printed folio 461): a 1995 table standing in for a 1992 deployment. The
+19th's 1992 location survives on BB2 p.330 independently; the **16th Krajina Motorized** as this sector's
+spearhead does not.
+
+**"Start two turns earlier" is affirmatively ruled out.** The sweep is bounded by Jajce's recovery, and the
+sim already takes Jajce town on **1992-10-12** against a historical fall of **29 October 1992** — ~2.5
+weeks early. Pulling the queue forward would make an already-fast, anchor-relevant date worse to move one
+checkpoint cell.
+
+**Citation convention, stated.** Three page indexes disagree and the gap is not constant. The repository
+cites **scan/KB indexes**: `HISTORICAL_TIMELINE_MASTER.md`'s "BB1 p.183" is printed folio **147**; the
+operation comment's "BB1 p.498" is printed folio **461**. KB `page_number` equals the `pdftotext` index for
+BB1 from ~450 on but is one lower in the chapter range. **No offset may be applied blindly**; every folio
+above was read off its own page.
+
+**Disposition: no correction applied and none proposed for adoption.** A correction is justified in
+principle, but every repair the evidence implies lands on protected surfaces — initial control, operation
+objectives, queue order and timing, references — all outside this task. The scope it would have, if ever
+authorized, is recorded in §8.7 of the report, together with a validation plan that diffs `matched_osids`
+across all four checkpoints rather than reading a net count, because this municipality's cascade has
+produced net-neutral scores hiding different cells before (`n462`/`n463`/`n464`).
+
+**January is unchanged: 701/712, eleven mismatches, floors 694/674/668/641, packet minimum 700.**
+`prusac_2` remains **OPEN with no waiver** — BB is silent on Prusac in 1992–93, so the jan1993 = RS
+expectation is *consistent* with the record but **not attested**, and this review neither supports nor
+impeaches it. Recorded and **not pursued**, as a later-checkpoint matter for the calibration/historian
+lanes: the **apr1994** reference marks `prusac_2` RS while BB2 p.466 twice places the ARBiH there in 1994 —
+advancing "from Prusac" in April and unable to "push past Prusac" in November. Torlakovac, Babin Potok,
+Oborci and Korenići appear in neither volume; their 1992–93 ownership is insufficiently evidenced by this
+source. The 188-week artifacts remain matched weekly records and faction-total frames, **not** a
+reconstructed per-OSID t39 state — authoritative t39 ownership and the eleven-cell set stay **n403's**.
+
+> ### ★ OWNER RULE — ownership transfer is not a calibration lever (recorded 2026-09-17, standing)
+>
+> **Calibrate military capability and behaviour. Do not author the territorial result.**
+>
+> No new or expanded event-driven OSID ownership transfer is authorized. This includes: `control_change`
+> effects in events or response options; event flags that trigger an equivalent ownership assignment
+> elsewhere; scripted capture, surrender, withdrawal or defender removal that guarantees the required
+> owner; direct writes to `political_controllers` in calibration code or run artifacts; initial-control
+> repainting used to bypass an in-campaign action; and target-specific immunity, guaranteed victory or a
+> checkpoint ownership fix. **A date plus a condition is still prohibited when it assigns the outcome** —
+> calling it an "institutional takeover", a "historical correction", an "existing writer" or a
+> "substantive predicate" does not change this.
+>
+> **A historical citation, a passing suite, a higher score, an expert's approval, or an existing event
+> elsewhere CANNOT supply missing owner authorization.** Only a separate, explicit owner instruction
+> approving the named exception can. Previously authorized exceptions (Srebrenica/Žepa receipts, the
+> Storm-era rows, the Tuzla barracks) are **grandfathered and are not precedent for adding another.**
+>
+> The default calibration tools are existing force-level and operational inputs: personnel, actual
+> equipment, readiness and other supported parameters whose live effects a specialist can demonstrate.
+> **Outcomes remain contingent.** When ordinary forces cannot produce the desired outcome, investigate
+> the forces, orders and model — do not write the desired outcome into state.
+>
+> Conflicting recipes in `docs/life_lessons/calibration.md` (the "event-based `control_change` is
+> cascade-safe" and "use a post-Storm vehicle" entries) are marked **SUPERSEDED GUIDANCE** and are no
+> longer actionable for ordinary calibration.
+
+**J. Donji Vakuf early sequence — implementation WITHDRAWN 2026-09-17; research and measurement retained
+as a REJECTED EXPERIMENT.** This entry previously recorded the correction as implemented and measured
+(jan1993 701 → 702/712). The **mechanism** was three event rows carrying `control_change` grants, and the
+owner rule above prohibits it: the change authored the territorial result instead of the military
+capability that should produce it. The three rows, their flags, narratives and dimension shifts were
+removed, the `op:donji_vakuf:donji_vakuf_2` objective was restored to its pre-experiment position, the
+event-count pin returned 161 → 158, and a standing guard
+(`tests/donji_vakuf_no_authored_takeover.test.ts`) now fails if any event grants a Donji Vakuf cell.
+
+**The historical defect §I identified is NOT repaired and stays OPEN.** The engine still captures the town
+at t35 (7 December 1992) against a documented 17 April 1992 institutional takeover. Restoring the old
+objective recovers the comparison configuration; it does not endorse that chronology. **`n403` remains the
+January comparison baseline. `n404`/`n405` are the rejected experiment's runs and are NOT an acceptance
+baseline.** A replacement must come from the military-capability side — an early, contingent, ordinary
+action path by forces that can actually reach the town.
+
+Everything below in this section is retained **as the record of a rejected implementation experiment**,
+not as an accepted result. Full record:
+[Prusac diagnosis §9](20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md); change specification (written
+before any edit) and evidence `logs/donji-vakuf-early-sequence-20260917/`.
+
+**Premise corrected.** The town of Donji Vakuf was Serb-held from **17 April 1992** — "The Serb SJB of
+Donji Vakuf was set up on 17 April 1992 and took control of the entire town the same day" (ICTY Stanišić &
+Župljanin TJ Vol I **¶238**; Krajišnik TJ **¶438**). The engine had it captured at **t35 (7 Dec 1992)** as
+the fourth objective of a post-Jajce sweep — the VRS conquering its own Vrbas-92 springboard five months
+late. Village anchors likewise: **Korenići 21 May 1992** (18 Donji Vakuf Serb police + 12 Banja Luka CSB,
+"no great resistance"), **Torlakovac 3 June 1992** (Serb police and VRS, "no serious resistance", villagers
+fled) — Stanišić **¶242**.
+
+**Mechanism — REJECTED. Retained only to record what was tried and why it is not allowed.** The reasoning
+below concluded that because the alternative writers are dead, the event catalogue was the remaining home.
+That conclusion is wrong under the owner rule: when every available writer is an ownership writer, the
+answer is that **no authored write is permitted at all**, not that the least-bad one is. A substantive
+predicate does not convert an assignment into a contingency. Original text follows.
+`detectOffensiveParamilitaryTargets`
+has **no production call site** (tests only), and the `early-control-flip` pipeline step is **stubbed**
+("Peace phase no longer performs control flips") — both were rejected on that basis, and the JNA-phantom
+`capture_osids` path was rejected because it writes control unconditionally. Used instead: three additive
+rows in `data/scenarios/events/war_1992.json` on the existing `control_change` effect (`mechanism: 'event'`),
+following the `battle_of_the_barracks_tuzla` precedent — each with a **substantive predicate**
+(`faction_controls_municipality RS donji_vakuf 0.5`; the two village rows additionally require the town row
+to have fired **and** `territory_control` of the town), so none is a calendar event manufacturing control.
+Plus one subtractive op change: `op:donji_vakuf:donji_vakuf_2` removed from the `donji_vakuf_sweep`
+objective list. Both match the recorded lessons that **event-based `control_change` is cascade-safe for
+historically datable changes** and that **subtractive op changes are the productive lane**.
+
+**Two limitations recorded, not worked around.** (1) A *contingent* April-1992 capture by 1KK regulars is
+not schedulable — brigades attack only through a `CorpsOperation` and the corps' single sequential slot is
+occupied by Prijedor → Corridor → Jajce for the whole window; moving DV up the queue is the reverted
+`n1145` regression. (2) `donji_vakuf_2` is one scalar over six settlements, and only the **town** carries
+the 17 April date, so the row opens at **turn 5** — the start of the documented municipality-wide
+May–September window — rather than granting Blagaj, Ponjavići, Rastičevo, Rudina and Vlađevići four
+unsupported months. **The town's own 17 April date is still not represented exactly.**
+
+**Sequence measured (n404):** `donji_vakuf_2` **t5** [event] · `korenici` **t7** [event] · `torlakovac_2`
+**t9** [event] · `oborci_2` **t15** [paramilitary rear-pocket — **emergent, not authored**: the cell became
+a surrounded pocket once its neighbours flipped] · `prusac_2` **t32** [combat, `rs_19th_krajina_light_infantry`].
+
+**Results.** `n404`, reproduced **byte-identically** as `n405` (`weekly_report.jsonl` and `final_save.json`
+`cmp`-identical; identical `verify_checkpoints` output).
+
+| | n403 | **n404 / n405** |
+|---|---:|---:|
+| jan1993 | 701/712 | **702/712** |
+| mismatches | 11 | **10** |
+| anchors | 31/31 | **31/31** |
+| `consistency_failures` | 0 | **0** |
+| `kw_ratio` | 3.931 | **3.957** (in band) |
+| `stranded_brigades` | 15 | **15** |
+
+**Cell-by-cell, not net: FIXED 1** (`op:donji_vakuf:prusac_2`) · **NEWLY INTRODUCED 0** · **CARRIED 10**
+(`foca:donje_zesce`, `ilijas:krivajevici`, `jablanica:doljani_2`, `kalesija:seher_2`, `konjic:glavaticevo_2`,
+`konjic:ljuta`, `maglaj:jablanica`, `mostar:vranjevici_2`, `trnovo:tosici`, `vlasenica:sebiocina`).
+Preserved exactly: **Čardak** t23 = 1992-09-14, **Pješivac-Kula** t15 RS→HRHB, **Hatelji** RS — all MATCH;
+**Vranjevići** t2 unchanged and still UNRESOLVED. Provenance: 31 consumed inputs, **exactly one differs**
+(`war_1992.json`); `n404`/`n405` ran `git_dirty: true`. apr1994/apr1995/oct1995 figures on a 39-week run are
+**NOT REACHED**, and the engine-health and `verify_checkpoints` verdicts are **identical** to n403 apart
+from the score lines.
+
+**What it does not prove — three residuals.** (1) **The Prusac +1 is a coincidental match, not
+validation.** The 17 August 1992 attack **failed** ("the Serbs had to return to their original positions",
+Stanišić ¶242; RS MUP Exhibit P1757: "not successful because of poor command and preparation") and **no**
+1992 Serb capture of Prusac is established. The model now agrees with a reference the evidence does not
+vouch for. It was **not engineered** — no Prusac event, objective, multiplier or date, and a standing test
+forbids any event granting the cell. **The January reference is unchanged and no reference correction is
+proposed**; a failed August attack is not proof of January ownership either way, and nothing is established
+for Fakići, Guvna or Potkraj. (2) **Op Jajce shifted one turn earlier** — `jajce_3` t26 (1992-10-05) against
+the historical **29 October 1992**, error growing ~17 → ~24 days. Emergent, not authored (Jajce's definition
+and queue position are untouched), and the Prusac result does not depend on it. Recorded as a residual that
+must not grow. (3) **The documented HRHB western-Bosnia cascade site is unmeasured** — the operation now
+completes t32 instead of t43, freeing five 1KK brigades ~11 turns early, and that damage is visible only at
+188 weeks. The packet waived a new campaign, so the site is **accepted-unmeasured, not cleared**.
+
+**January minimum stays 700. The 702/712 figure is WITHDRAWN with its mechanism** — it was never an
+acceptance, and it is not a floor. The current January comparison baseline is **`n403`, 701/712**, which is
+the pre-experiment configuration now restored in the tree. **January calibration remains OPEN.**
+
+**K. Donji Vakuf specialist consultation completed — no in-scope force lever; no new calibration edit (added
+2026-09-17).** The packet required actual specialist answers before any new calibration edit. The host
+exposes only general-purpose subagents, not named Pyrrhic roles; each consultation was an independent
+subagent that loaded the relevant skill body and examined the current source and preserved artifacts itself,
+and the independent reviewer was a separate seat. Full receipt with functions, evidence and unresolved
+points: [Prusac/Donji Vakuf report §11](20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md).
+
+- **Bottleneck: incorrect scenario/operation configuration** — no capture-capable operation is routed at the
+  Donji Vakuf frontage in April–June 1992 — **compounded by force not selected/committed.** It is **not**
+  combat capability: at **w5** a 1KK probe (`probe_vrs_1st_krajina_t4`, `rs_11th_mrkonji_light_infantry`)
+  attacked `op:donji_vakuf:donji_vakuf_2` at **`decisive_victory`, ratio 6.94** and took no ground, because
+  probes set `occupies_on_victory: false` (`corps_operation_helpers.ts:460`). It is **not** an implementation
+  defect, and the local force inputs are **not** understrength: the 19th (824) and 31st (856) sit within or
+  below their bounded historical band, and Donji Vakuf's 9,364 Serbs already carry a seeded 2,000.
+- **Correction to the record.** §9.2's "single sequential slot" claim is half-wrong: slot 0 sequences the
+  authored chain, but the **commander probe path is not blocked** and fought the town at w5. `bot_strategy`
+  'Krajina Sweep' (45) and '1KK Consolidation' (35) are below the army-HQ override probe threshold (50) and
+  create no attacks.
+- **Legitimate levers considered and excluded:** personnel, equipment quantity/condition, readiness,
+  cohesion, experience, officer quality. None creates a capturing operation; a `rs_16th_krajina_motorized`
+  grant is capped at 2,200 and the formation is historically misplaced here (BB2 p.330 names the 19th and
+  22nd); raising the 19th/31st is locally infeasible and historically unsupported. **No force value was
+  changed.** The 17 April event is a **police (SJB) takeover**, which military force parameters cannot model.
+- **Required change (reported, not implemented, out of scope):** a contingent, **capturing** operation for
+  this frontage available Apr–Jun 1992 on an existing channel — a new triggered/pre-planned operation
+  definition, or making the existing opportunity-plan branch viable there. This needs separate authorization.
+- **Residual (recorded, not fixed).** The guard covers the event catalogue but not `init_control` initial
+  repainting or a newly authored operation targeting the town. Aggregation (the cell is a scalar over six
+  settlements) and reference (Prusac jan1993 unattested) questions remain separate and open.
+
+**No fresh run was made and none is claimed.** `n403`'s recorded **701/712** remains the January comparison;
+the withdrawn tree's executable identity to `41a148bf9` is independently re-confirmed (non-comment diff
+empty). January calibration remains **OPEN**.
+
+**L. Donji Vakuf bounded operation-configuration experiment — INERT, reverted, no code shipped (added
+2026-09-17).** A separate owner packet authorized ONE local operation-configuration experiment through an
+existing live admission path. Candidate: one new `TriggeredOpDef` (`Donji Vakuf Local Action`) on
+`vrs_1st_krajina`, objective `op:donji_vakuf:donji_vakuf_2`, participants `rs_19th_krajina_light_infantry`
+(anchor, adjacent at `op:donji_vakuf:jemanlici`) + `rs_31st_light_infantry`, window turn 2–6,
+`planning_duration: 2`, no `execution_attack_power_mult`. Operations Expert + Gameplay/Systems confirmed the
+path; the independent reviewer APPROVED the spec; it admitted correctly in isolation (11 focused assertions).
+
+**Measured `n406` (`--weeks 39`): it never launched.** `verify_checkpoints` jan1993 **701/712**; the
+cell-by-cell January set against `painted_control_jan1993.json` is **identical to `n403`** (same 11
+mismatches, FIXED 0, NEWLY INTRODUCED 0); `anchor_checks`/`behavioral_health`/`attack_resolution`/
+`takeover_displacement` byte-identical to `n403`. The town is still captured at t35 by the authored
+operation — the historical defect is unrepaired.
+
+**Root cause (from evidence) — CORRECTED 2026-09-17.** The earlier text said the 19th is "persistently
+`in_transit`". That was **wrong** — there is no persistent transit state at any turn boundary. The 19th
+carries a **re-issued pending order** to `op:donji_vakuf:pribraca_2` every turn and is `in_transit` only
+**intra-turn**: created by `processOsidColumnMovement` Pass 2 (`war_phases.ts:1537`), cancelled by
+`correctTransitStates` (`:2591`) because the destination is outside its assigned sub-segment front
+(`jemanlici`), then re-issued by the bot (`:2625`). The transient **is** present at the admission step
+(`check-triggered-operations`, `:2075`), so `buildOperation` excludes the brigade and only the 31st survives
+→ `build_insufficient_participants` (at t5, `objective_overlap` with the t4 probe first). The root cause is
+a **T2/T6 destination-scope contradiction with an ordering coupling** — a real, reproduced defect whose only
+repairs are precedence/scope policy choices, so it is returned as an **EXTENSION, not implemented**. Full
+findings: [`logs/donji-vakuf-19th-transit-20260917/FINDINGS.md`](../../logs/donji-vakuf-19th-transit-20260917/FINDINGS.md);
+the signature is map-wide (10 formations across four factions). The order is **pre-existing in the
+baseline**; this is a movement/availability blocker, not an offer-definition one.
+
+**Disposition: reverted before commit.** An operation that cannot fire in the only scoring scenario is
+inert, which the packet forbids shipping; the definition, the catalogue-pin reconciliation and the focused
+test were removed. `src/sim/combat/triggered_operations.ts` and `tests/triggered_operations.test.ts` are
+byte-identical to `b9024b97b`. No ownership writer, baseline, reference or threshold touched. Evidence:
+[`logs/donji-vakuf-local-action-20260917/`](../../logs/donji-vakuf-local-action-20260917/). The historical
+defect stays **OPEN**.
+
+**Next proposed change (separate, not implemented).** Re-select participants from 1KK brigades actually free
+at t2–6 (the 31st plus the 11th Mrkonji, which attacked this cell as a probe at w5, and/or the 22nd
+Krajina); or investigate the 19th's stale `in_transit` order (movement layer); or extend the
+reservation/prestage contract to non-elite triggered participants (broader — needs separate authorization).
+
+**Scope correction to F (added 2026-09-17).** The advisory closeout's conclusions are bounded as follows:
+reproducibility was observed **for the tested scenario, artifacts and environments** (`apr1992_188w`, the
+eight pinned artifacts, Linux CI ×2 and Windows local); **no verification defect was found**; the
+**measured health checks passed**. Those findings do **not** refute existing calibration regressions —
+the eleven January mismatches, the cascade shortfall, Farz attribution and the inherited Prozor injection
+all stand exactly as recorded. A passing health gate is not a calibration acceptance.
+
+**Current January backlog — 11 mismatches (observed history, n403/t39).** Observed control only; a missing
+control event is **not** by itself a missing-operation diagnosis:
+
+| OSID | expected (jan1993) | actual (t39) |
+|---|---|---|
+| `op:donji_vakuf:prusac_2` | RS | RBiH |
+| `op:foca:donje_zesce` | RBiH | RS |
+| `op:ilijas:krivajevici` | RS | RBiH |
+| `op:jablanica:doljani_2` | RBiH | HRHB |
+| `op:kalesija:seher_2` | RS | RBiH |
+| `op:konjic:glavaticevo_2` | RS | RBiH |
+| `op:konjic:ljuta` | RS | RBiH |
+| `op:maglaj:jablanica` | RBiH | RS |
+| `op:mostar:vranjevici_2` | RBiH | RS |
+| `op:trnovo:tosici` | RBiH | RS |
+| `op:vlasenica:sebiocina` | RBiH | RS |
+
+Ten of the eleven are frozen turn-0 discrepancies with no control event through t39; only
+`op:mostar:vranjevici_2` is combat-touched (RS at t2 via the pre-planned Operation Herzegovina
+`mostar_heights` axis).
+
+**Closed / preserved this packet.** Čardak year-level requirement met (operation-owned combat capture t23 =
+1992-09-14, `arbih_3rd_corps:Operacija Izlaz:t21`, RBiH at t39 — receipt in the Čardak diagnosis).
+Pješivac-Kula bounded objective-omission correction **CLOSED** (Operation Jackal combat capture t15 =
+20 July 1992, HRHB at t39; Hatelji remains RS; militia-only 55.33 defence explanation retained).
+
+**Still open (not investigated here).** Overall January calibration **OPEN**; overall campaign calibration
+**OPEN**. `op:donji_vakuf:prusac_2` OPEN (no exception, no waiver). `op:mostar:vranjevici_2`/`kružanj_2`
+historical-geographic interpretation **UNRESOLVED** (objective-deletion proposal **withdrawn**). Western
+cascade and Farz attribution remain for the campaign gate. Also separately retained: Zavidovići/Gostović
+OOB questions; the `operational_initial_master.json` vs derive-script initial-data contradiction; the
+mixed-control aggregation policy question; the outstanding truce-scope/design interpretation; and the
+checkpoint reporter scoring unreached periods against the terminal map (documented limitation — do not
+modify `tools/verify_checkpoints.cjs` for it).
+
+Supporting reports:
+[Čardak 1992 diagnosis](20260916_CARDAK_1992_GOSTOVIC_VALLEY_DIAGNOSIS.md) ·
+[Vranjevići/Mostar diagnosis](20260917_VRANJEVICI_MOSTAR_JANUARY_DIAGNOSIS.md) ·
+[frozen-cell analysis + Pješivac-Kula addendum](20260824_JAN1993_FROZEN_CELL_ANALYSIS.md) ·
+[April-1994 operational calibration receipts](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md) ·
+[durable evidence record](../../logs/january-1993-operations-20260917/EVIDENCE_RECORD.md) ·
+[ledger 2026-09-17](../PROJECT_LEDGER.md).
+
+---
+
+### Superseded status for reference (2026-09-16) — January score now 701/712
+
+**Current delivery status (2026-09-16):** the owner-authorized January-only operations repair at
+clean `ac3e5e152` closes its contract. Diagnostics A–G established that `applyCommanderOutput`
+admitted new bot operations without calling the `assignOperationCommander` lifecycle writer that
+Systems Manual §7.5 requires, so named bot operations ran on unnamed 3/3 preparation defaults.
+Restoring ordinary assignment gives `Operacija Bunar` its available home-corps reserve officer,
+shortening preparation five turns to four; the unchanged three-brigade force opens on turn 29
+instead of 30, ahead of the week-30 seasonal boundary, and takes Orašac at ratio 1.17
+`costly_victory`. January reaches **700/712**, meeting the authorized floor of 700, with all
+eight required cells taken through operation-owned combat and zero passive transfers.
+
+The canonical 188-week run scores **700/712 jan1993, 702 apr1994, 697 apr1995, 667 oct1995**
+against unchanged 694/674/668/641 floors — an improvement on every checkpoint over the
+`8db305596` local occupation source (696/690/687/659). The engine health gate passes all eleven
+gated conditions, run consistency passes, all 31 anchors match, nine enclave guards hold, and
+the audit records 188 turn seals plus the final seal with zero unresolved seals. Independent
+evidence review is GO on the January contract.
+
+Overall acceptance remains **NO-GO**. The checkpoint validator exits 1 with
+`GUARD BREACHED — §6 panel matter`: western cascade is **30 against base 40, below its floor of
+38** — recovered from 25 at `8db305596`, still short — and the Farz P-A discriminator records
+the t168 capture by `arbih_327th_vitezka_mountain` (3rd Corps) where a 2nd Corps capture at
+t>=160 is required. Prozor retains its turn-41 `op_empty` injection error, present identically
+in the `8db305596` reference and therefore inherited, not introduced. Both later-checkpoint
+offsets fall under the owner's explicit January-only waiver for this packet; they remain visible
+and support no checkpoint-clean or merge claim. Larger-operation scheduling and Farz attribution
+still need their own bounded scope. Engine Invariants §14.8b and Systems Manual §6.4 retain the
+approved occupation contract; no pins, floors or protected data were replaced.
+
+All 20 April commits and the approved coverage contract remain ancestors of this branch. Main's
+manifest authority remains #518 at clean `2a8eb4244` (702/678/672/667); local main remains
+`9588876bc`. The [public viewer](https://horkesh.github.io/A-War-Without-Victory/?run=ac3e5e152)
+**already shows this run**: `gh-pages` commit `3096f4e0b` ("Publish verified January 1993
+operations run", 2026-09-14 18:35) serves `ac3e5e152` at 700/702/697/667, superseding
+`469b4cba3`. Re-verified 2026-09-16: the live HTTPS page returns 200 with 681,592 bytes,
+SHA-256 `d38d81eb29deee1531cf6ed36bc93cb99dc3c20ea9bb5cee09b18ef02fe905c9`, byte-identical
+to the locally generated artifact, and embeds `ac3e5e1524558d2dc4e4fc40924306fc2873735a`.
+Publication is permission to inspect this run, not acceptance of the remaining calibration
+failures. Branch-local v72/v73 remains dirty week-104 history, not candidate acceptance.
+[Current repair receipt](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-january-only-operations-repair--2026-09-14)
+· [preceding local occupation step](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md#owner-authorized-local-occupation-repair--2026-09-14).
+
+BC04 P1/P2, BC05, BC06 and BC09 retain their campaign/packaged acceptance boundaries; BC07
+retention is settled. Cleanup and R9 build preparation are integrated/reviewed, BC10 remains
+planned. [Master §§4.1–4.2](../plans/MASTER_ROADMAP.md#41-finite-behavior-closure-register-2026-09-07)
+owns final settlement before final calibration and packaged acceptance. No new baseline refresh,
+floor change or campaign verdict is implied by this integration candidate.
 
 ## ⚠ Casualty accounting regime changed 2026-09-01 — militia losses are now recorded
 
@@ -99,6 +952,21 @@ rejected experiments or convert historical RE evidence into current authority. O
 that say a particular R6, late-war, or pre-1.0 scope was "closed" remain phase-lineage records only.
 They do not close the present calibration program. The sole scoring scenario remains
 `data/scenarios/apr1992_definitive_188w.json`.
+
+### Current April 1994 checkpoint — operational calibration at week 104
+
+The current accepted April checkpoint is the deterministic v72/v73 pair at commit `4167d2bd4`.
+Both runs use identical initial saves and produce identical final saves with SHA-256
+`d6095cb8408ddfa85a52223cc6c4c5eb7ae46165cbb2b25fbe438d88c7245148` and final-state hash
+`d6095cb8408ddfa8`. The result is **703/712 (98.74%)**, area-weighted **98.9%**. Krajina,
+Posavina NE, Drina, and Sarajevo are exact; the remaining nine mismatches are enumerated in
+[the consolidated April implementation report](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md).
+
+This week-104 acceptance supersedes older April candidates as the current April territorial
+measurement. It does **not** replace the clean 188-week whole-campaign baseline below, re-floor
+later checkpoints, or reconcile golden artifacts. The accepted run has zero `consolidation` and
+zero `abandoned` control changes. Brčko and Lopare Selo remain RS, Goražde town remains RBiH,
+and no painted-HRHB OSID is held by RBiH.
 
 ### ★ CURRENT CANONICAL BASELINE — `n392`, owner-blessed 2026-09-06
 
@@ -4173,3 +5041,367 @@ Three focus mismatches remain explicitly visible: `op:foca:donje_zesce` and
 `op:gorazde:podkozara_donja_2` flips to RBiH through the ordinary paramilitary system instead
 of remaining RS. No direct control-change event was added. A zero-gain late reserve-operation
 candidate was removed rather than retained as calibration clutter.
+
+## 2026-09-01 — April 1994 bilateral doctrine and VRS Army-HQ allocation ADOPTED
+
+The open Croat–Bosniak-war doctrine was inverted in the live bilateral diversion: HVO now
+defends and receives no bilateral offensive objectives, while ARBiH receives the operational
+initiative against only HVO-controlled objectives on the selected mixed front. The diagnosed
+ARBiH failure was cumulative rather than a combat-strength constant: the directive exposed no
+offensive targets, corps selection preferred the heavily exhausted 3rd Corps over an available
+4th Corps, the heavy-equipment force-size increment rejected the three reachable surplus
+brigades, and low intelligence converted commitments back into probes. Commander planning now
+recognizes the designated bilateral attacker and its canonical reachable objectives, while
+ceasefire/Washington state removes that designation.
+
+The operations-only April checkpoint is **669/712 (93.96%)**, with **31/32** April anchors
+passing (`op:vares:vares_2` remains HVO instead of RBiH). HVO captures no ARBiH territory after
+bilateral war begins. ARBiH 4th Corps launches three occupying sector attacks before Washington:
+Operacija Proljeće captures `op:konjic:buturovic_polje_2` at turn 56, Operacija Odbrana captures
+`op:jablanica:doljani_2` at turn 62, and Operacija Čelik captures
+`op:prozor:ljubunci_2` at turn 67. All three transfers are logged combat captures. Passive
+`consolidation` and `abandoned` changes are forbidden in either direction between RBiH and HVO;
+the previous ten-cell passive result is rejected rather than retained for its higher score.
+
+The corrected run is
+`apr1992_definitive_188w__1db784e85c2e6de0__w104_n0`, hash
+`601b642d55a43fcd`. Its combat-causality report is valid: 408 attack orders, 280 battles,
+zero invalid operations, zero zero-eligible operations, and zero recovery-without-attempt rows.
+
+Operation Cerska–Kamenica and Operation Zvezda 94 now explicitly roster the VRS 1st Guards
+Motorized Brigade and 65th Protection Motorized Regiment, with admission governed by the shared
+Army-HQ elite availability, reachability, deployment, and loan lifecycle. Balkan Battlegrounds
+II p.406 specifically supports both formations at Cerska. Its Zvezda account (p.480) supports
+Main Staff direction and higher-HQ concentration but not those exact two unit identities, so
+their Zvezda roster is recorded as a scenario allocation rather than exact-order-of-battle fact.
+
+The earlier full verification run
+`apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0`, hash
+`6c00e419e8248c97`, remains evidence for the VRS elite allocations but is superseded for bilateral
+territorial calibration because it contains the rejected passive transfers. Cerska launches
+at turn 40 with the 1st Guards, captures `op:vlasenica:cerska_2` by logged combat, and ends
+partial. Zvezda launches at turn 100 with the 1st Guards but fails to capture its Goražde
+objectives. The 65th remains roster-eligible but is unavailable to these two operations in this
+run under the ordinary loan lifecycle; focused tests prove its admission when canonically
+available. No attack-resolution rule or direct control authority changed.
+
+## 2026-09-02 — Srebrenica lane completed through Operation Cerska–Kamenica
+
+The January ARBiH Srebrenica–Cerska Link-Up captures Pobuđe and Ježeštica through ordinary
+operation combat, but the February VRS counteroffensive previously stopped after its first
+Cerska-pocket objective. The operational contact graph provides the contiguous historical axis
+`op:vlasenica:cerska_2` → `op:bratunac:pobudje_2` →
+`op:bratunac:jezestica_2`. Its elite Skelani axis has a second graph-valid chain from RS-held
+Sebiočina through `op:vlasenica:pomol_2` to Luka and Ljeskovik. Operation Cerska–Kamenica now
+carries both complete contractions. No combat multiplier, control event, consolidation rule, or
+special capture authority was added.
+
+The 104-week proof run is
+`runs/apr1994_srebrenica_v46/apr1992_definitive_188w__1db784e85c2e6de0__w104`, final hash
+`1f6674ac395a1616`. The operation starts at turn 40 with both Army-HQ elites in its nine-formation
+live roster. The 1st Birač Brigade decisively captures Cerska at turn 45, Pobuđe at turn 46, and
+Ježeštica at turn 47. The 1st Guards decisively captures Pomol at turn 45, Luka at turn 46, and
+Ljeskovik at turn 50. The operation completes successfully after ten total combat captures and
+both elite formations remain committed through execution.
+
+All three former Srebrenica-lane residuals now match the painted April map, with no added mismatch
+anywhere else. The April comparator improves from **699/712 (98.17%)** to **702/712 (98.60%)**, leaving 10
+residuals outside this lane. Combat causality remains valid: 426 attack orders, 288 battles, zero
+invalid operations, zero zero-eligible operations, and zero recovery-without-attempt rows. The
+neighboring operation/elite regression surface passes **302/302** tests across 11 suites;
+TypeScript typecheck and `git diff --check` pass.
+
+## 2026-09-02 — Emergent operation purpose and historical-name ownership ADOPTED
+
+The April v46 trace exposed `arbih_2nd_corps:Operacija Farz:t70` taking
+`op:lopare:lopare_selo_2` at turn 71. The target was neither a campaign objective nor a recent
+loss, salient neck, or must-hold relief position; high exposure was its only recommendation.
+That is now insufficient operational intent. The commander's first tactical proposal must carry
+one of those four purposes or the corps declines that planning cycle. This does not compare the
+proposal with the painted map and does not force a historical controller.
+
+Historical catalog names are now semantically reserved for authored operations. Prefix, accent,
+punctuation, and year variants collide deliberately, so `Farz` cannot be emitted from a generic
+name pool while its catalog operation remains available to the authored system. Fictional
+replacement slots preserve the old faction-pool lengths and therefore avoid globally reseeding
+the modulo-based deterministic name picker.
+
+Ordinary corps opportunities are also bounded to six planned and emitted participants, preventing
+launch-time sector attachments from turning a local opportunity into an undeclared army offensive.
+The HVO-war bilateral path retains its explicit theatre authority but may select only OSIDs held by
+the actual bilateral opponent.
+
+The retained 104-week evidence run is
+`runs/apr1994_purpose_v52/apr1992_definitive_188w__1db784e85c2e6de0__w104_n0`, hash
+`27f3e651cf7a29ee`. Lopare Selo remains RS and no emergent operation uses `Farz`. The April
+comparison is **696/712 (97.75%)**. Seven v46 matches become open calibration debt rather than
+being suppressed by target-specific rules: ARBiH legitimately captures three Brčko campaign
+positions, while the changed operational sequence leaves four Goražde contraction objectives
+RBiH because Zvezda 94 does not launch. The latter is a historical-operation scheduling/force-flow
+problem and must be solved in that subsystem; it is not grounds for weakening the purpose rule or
+adding passive control changes.
+
+## 2026-09-02 — Brčko and Zvezda regression correction ADOPTED
+
+The v52 Brčko result was not a combat capture. Generic RBiH 2nd Corps priorities expanded the
+whole Brčko municipality into campaign objectives; after three southern cells changed hands, the
+post-fade rear-pocket phase awarded `op:brcko:brcko` without a battle. That phase contradicted the
+War Specification's operations-only control rule and has been removed from the production
+pipeline. `Tuzla Expansion` now names only the southern approach at `op:brcko:brka_2`; Brčko city
+remains available to an explicit authored or Army-HQ operation rather than being hard-locked.
+
+The same run showed that Zvezda 94 was queued but could not retain its Main Staff assault group.
+Authored elite reservations now cover the complete historical execution window, and an elite
+committed to an authored operation remains attached through recovery so the completed AAR retains
+the formations that actually fought. Ordinary elite loans still use the usual recall rules;
+permanent degradation remains an immediate recall condition.
+
+The accepted 104-week proof is
+`runs/apr1994_fix_v56/apr1992_definitive_188w__1db784e85c2e6de0__w104_n0`, hash
+`8b7f2246c7c2d27b`. Brčko, Donji Rahić, and Potočari remain RS; Brka remains RBiH. Operation
+Zvezda 94 starts at turn 93 and completes successfully at turn 98 with both the 1st Guards and
+65th Protection Regiment in its seven-formation roster. Four logged battles capture Sopotnica,
+Slatina, Ustiprača, and Kolovariće, while Goražde town remains RBiH. The run contains zero
+`consolidation` or `abandoned` control changes and scores **684/712** at April 1994. The lower
+national score is the visible cost of removing a non-canonical global auto-flip mechanism.
+
+## 2026-09-02 — Isolated-position operations and April regression recovery ADOPTED
+
+Removing rear-pocket auto-flips correctly protected Brčko but exposed positions that had only
+matched because topology silently awarded control. The replacement is operational: a commander may
+classify a connected hostile position of at most six OSIDs as a reduction objective only when its
+entire external shared-boundary ring belongs to the commander's faction. Low intelligence still
+requires probes, and escalation requires a reachable, combat-ready two-brigade same-corps group.
+Lopare Selo is not a commander objective and remains RS; Brčko is not a bounded hostile position.
+
+Authored pre-planned staging now has explicit movement ownership, preventing routine march correction
+from cancelling a historical concentration while its operation waits in the corps queue. This
+recovers Operation Foca's southern axis. Operation Cerska–Kamenica receives its documented Main Staff
+concentration and completes the Kamenica and Skelani axes. Operation Pracha River uses a separate
+Višegrad-bridgehead axis; the Central Bosnia Counteroffensive explicitly attacks the mixed-boundary
+Čardak position and has enough assembly time for its Vareš column; Operation Donji Vakuf completes
+its authored sweep through Korenići. Every recovered OSID is taken in a logged battle.
+
+The accepted 104-week run is
+`runs/apr1994_isolated_ops_v63/apr1992_definitive_188w__1db784e85c2e6de0__w104`, hash
+`270709e4d303deed`. An independent rerun in `apr1994_isolated_ops_v64` produced the same hash. The
+April comparison is **701/712 (98.46%)**, area-weighted **98.48%**. Krajina is **127/127** and Drina
+is **112/112**. Brčko city, Donji Rahić, and Potočari remain RS; Brka remains RBiH; Lopare Selo
+remains RS; Goražde town remains RBiH. There are zero `consolidation` or `abandoned` transfers.
+
+## 2026-09-02 — Derventa, Liše, and Prozor corrections ADOPTED
+
+Three bounded operational corrections replace the remaining errors identified in the Derventa and
+HVO-war review. Operation Corridor now retains the 1st Prnjavor Light Infantry Brigade on its east
+axis while the 27th Derventa Motorized Brigade runs a parallel one-objective pocket axis against
+`op:derventa:zivinice`. During the open RBiH–HRHB war, a threatened combat-ready HVO fixed-home
+brigade is assigned first to its contacted home position only when an active opposing operation
+names that OSID; this preserves Liše without a controller lock or a combat modifier. The bounded
+Prozor–Rama Line Counterattack uses the Rama Brigade to attack Lug and Paros after bilateral war
+opens. Its AAR records two attacks and two logged combat captures at turns 54 and 55.
+
+Independent runs `apr1994_three_fixes_v72` and `apr1994_three_fixes_v73` are byte-identical at final
+hash `d6095cb8408ddfa8`, with zero unresolved assignment-seal violations. April matches
+**703/712 (98.74%)**. Živinice is RS; Liše, Lug, and Paros are HRHB; no painted-HRHB OSID is
+overcaptured by RBiH. Brčko and Lopare Selo remain RS, and Goražde town remains RBiH. Relative to
+the preceding accepted run, the four corrected OSIDs are offset by visible regressions at Donji
+Vakuf and Korenići; these remain calibration debt rather than receiving passive or direct-control
+corrections.
+
+The complete April lane chronology, implementation ownership, final nine-cell residual list,
+combat attribution, determinism receipts, and interactive-map publication are consolidated in
+[`implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md`](implemented/20260902_APRIL_1994_OPERATIONAL_CALIBRATION.md).
+
+## 2026-09-24 — Lukavac 93 military calibration candidate
+
+Rear-pocket auto-flip removal did not itself break Lukavac: post-removal 188-week `n396`
+(`apr1992_definitive_188w__6898d6d2e324c7a3__w188_n396`) captured Delijaš, Trnovo,
+Mazlina, and Podgrab through combat. Later `n427` captured two; September 23 `n2` captured
+none. These dirty-source runs are observations, not a clean bisect. At launch, generated 2nd
+Romanija had moved from 3,000 personnel/68 cohesion near Lukavica to Hotočina at 33.55
+cohesion and did not attack; the Guards and 65th were weaker, while Delijaš's defender changed
+from the weak 843rd Light to the full 181st Mountain. The northern assault exhausted itself
+before transferring control. A staging-alias-only probe did not recover the operation; a
+Foča/Gacko-only southern probe had just 1,425 personnel and a catastrophic 0.086 attack ratio.
+
+The candidate resolves the generated Romanija OOB identity for staging, reinforces the
+Sarajevo–Romanija corridor, and gives the 1st Guards, Kalinovik, Bileća, Gacko, and Foča to a
+separately queued Herzegovina Corps TG Kalinovik. This follows *Balkan Battlegrounds II*,
+printed p.391 (`data/derived/knowledge_base/balkan_battlegrounds/pages/BB2_p0410.json`).
+Donje Žešće remains a separate April residual; it is not a Lukavac corridor detour. No
+passive controller change or combat-rule change was added.
+
+The 188-week candidate run is
+`F:/A-War-Without-Victory/runs/lukavac-staging-20260924/final188/apr1992_definitive_188w__d7c3009709288b27__w188_n0`,
+hash `a4079d59934a55cf`, final seal unresolved 0. The north captures Delijaš at turn 73,
+Mazlina at turn 77, and Podgrab at turn 78; the northern and southern formations jointly
+take Trnovo at turn 73, and the southern Guards take Tošići at turn 74. All five control
+transfers are `combat`. Both command AARs report success. The serialized Trnovo battle row
+names the first northern attacker, but its contributing-operation IDs, five southern attack
+orders, and brigade engagement receipts confirm southern participation. The southern AAR's
+weekly attack count omits joint attacks; its final capture credit is causally correct.
+Week-90 and 188-week weekly reports are byte-identical through turn 90.
+
+Checkpoints are **707/712** January, **702/712** April 1994, **697/712** April 1995, and
+**664/712** October 1995, versus `n2` at 707/697/690/662. Engine health and dedicated anchor
+tests pass. Brčko city, Donji Rahić, Potočari, and Lopare Selo remain RS; Brka and Goražde
+town remain RBiH. The checkpoint verifier still exits 1 on the **unchanged** Farz 95 P-A
+attribution failure (3rd rather than 2nd Corps at turn 166). The reported, ungated western
+Bosnia cascade falls from 32 to 28 matched cells; Bosanski Petrovac loses five while Sanski
+Most gains three. These debts remain visible; this candidate is not merge-ready under the
+full checkpoint gate. The full suite has environment-specific failures on Windows Bash
+resolution, checkout-byte counting, stale plan index, and dependency junction identity;
+the 78 Git-Bash-targeted tests, 82 focused operation tests, and typecheck pass.
+
+The [external control timeline](https://horkesh.github.io/A-War-Without-Victory/?run=lukavac-93-20260924)
+was published on `gh-pages` at `40aeaf57e`. It displays 744 drawn/712 scored
+OSIDs, 232 saved control events, and the four checkpoint scores above. The live
+HTTP 200 HTML is byte-identical to the verified local artifact (SHA-256
+`a7d9b8184a97ec6360d4e43593062d2e1ae69def510487105b838109323ef8f7`).
+Publication does not adopt the candidate or close the open gates.
+
+## 2026-09-24 — Goražde and Sana follow-on calibration candidate
+
+The Lukavac candidate left four upper-Drina cells in RBiH hands too long. The
+Prača River assault now uses a second Sopotnica–Slatina axis, increased authored
+concentration, and coordinated advance after a decisive breach. Brćigovo and
+Sopotnica fall at turn 62; Ustiprača and Slatina fall at turn 63, before Lukavac
+starts at turn 69. Operation Zvezda 94 moves the Foča southern flank to its own
+axis and takes Donje Žešće at turn 95. The VRS Guards no longer enter that
+operation through an eastern staging assignment; the ARBiH General Staff Guards
+are excluded from distant enclave assignments, with ordinary movement required
+for any safe return. Operation Sana's third axis now stages at Ivanjska and
+advances through Donji Dubovik; Oborci falls at turn 187 and Škucani Vakuf at
+turn 188. All seven requested transfers have saved `combat` events. No
+surrounded-OSID or passive control flip is used.
+
+The from-scratch 188-week run is
+`F:/A-War-Without-Victory/runs/gorazde-placement-20260924/final-candidate-188w/apr1992_definitive_188w__d7c3009709288b27__w188_n0`,
+final hash `ca5d585c54ff23e0`, assignment seal unresolved 0. Scores are
+**707/712 January 1993, 707/712 April 1994, 700/712 April 1995, and 668/712
+October 1995**. Both Lukavac commands, Prača River, Cerska–Kamenica, and
+Zvezda 94 succeed; the Guards temporal trace has zero forbidden enclave
+locations. Compared with the prior from-scratch stage candidate, the sole
+final-controller change is Škucani Vakuf RS → RBiH. All 31 protected anchors,
+run consistency, input provenance, 290 focused tests, typecheck, and the
+post-suite 110 startup/bundle/inventory tests pass. The generated startup save
+adds only the authored Trnovo support window.
+
+The required full suite ran once and exited 1. Its two top-level failures caused
+by this calibration (optional-field count and desktop bundle's stale startup
+snapshot) pass targeted correction checks. The other 56 top-level failures
+include 49 Windows Git-Bash hook tests plus plan-index token counts for unchanged
+files, dependency path identity, research checkout bytes, and desktop CI path
+resolution. The suite was not repeated. The checkpoint verifier still exits 1:
+Farz 95 P-A is attributed to the wrong corps. This dirty-source candidate is
+not an adopted baseline. *Balkan Battlegrounds II*, printed p.391 supports the
+Lukavac timing and Main Staff concentration; the 1.6 Trnovo support factor is
+a measured scenario abstraction, not a figure from that source.
+
+The [updated external map](https://horkesh.github.io/A-War-Without-Victory/?run=gorazde-lukavac-20260924)
+replays 238 saved combat/control events, 744 drawn/712 scored OSIDs and these
+four checkpoint scores. `gh-pages` commit `eda6c82c1` reports built; the live
+HTTP 200 artifact matches the generated file byte-for-byte (SHA-256
+`3b10e48c13cf6feea4bcd22c812bed7247c098439d26f92d7342254405397334`).
+
+## 2026-09-27 — Doljani turn-71 timing candidate, owner-approved scenario inference
+
+The owner provisionally accepted delaying only `Prozor–Rama Line Counterattack.available_from`
+from 41 to 71. This is **scenario inference**: no dated source establishes an August–September
+1993 Lug/Paroš counterattack. The authored HVO roster, objectives, ordinary combat rules,
+painted references and 712-cell denominator are unchanged. `tests/pre_planned_operations.test.ts`
+pins the new availability and injection fixture. The independent operations review gave GO
+after one comment correction (`logs/codex-claude-channel.md` [037]); the same-tree 105-week
+turn-41 control and turn-71 candidate establish the causal trade at turn 105
+(`logs/doljani-040-20260927/control_comparison.json`).
+
+The authoritative turn-71 run `runs/apr1992_definitive_188w__6deb5845c150c196__w188_n13`
+completed 188 weeks with final seal unresolved 0 and final-state hash `ee5dbfb8f42e7d14`.
+Its initial-save SHA-256 is `413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1`,
+the same as the two 105-week measurements; the operation source SHA-256 is
+`534ffcdcd63947d557ab86c6c14852f9055b9143317a62b06aafd814e03ff222`.
+At turn 57, `Operacija Zamah` won a decisive ordinary battle at
+`op:jablanica:doljani_2` with `arbih_449th_eastern_herzegovina_mountain` (power ratio 3.32),
+and the saved `mechanism=combat` event transferred HRHB to RBiH. No later control event
+reverses it. At week 104 Doljani is RBiH while Ljubunci, Lug and Paroš are HRHB.
+January 1993 and April 1994 each score **707/712** with **31/31** and **32/32** anchors;
+the same five parked mismatches remain, including Maglaj Jablanica. April 1995 is
+**701/712**, **39/40** anchors; October 1995 is **664/712**, **31/31** anchors.
+Evidence: `logs/doljani-042-20260927/campaign.log`, `acceptance_extract.json`.
+
+The candidate is **not an adopted baseline or merge clearance**. The required full Vitest
+suite ran once and exited 1: the four main shards reported 15, 20, 12 and 7 failures.
+The failures span eight Windows Bash/Claude-hook guard files, a dependency-resolution
+setup timeout, plan-index drift, a separate Neretva/Grabovica/Uzdol event-window assertion,
+desktop Bash path resolution and a release research byte inventory. Focused operations
+tests passed 87/87; typecheck, startup snapshot and diff check passed. The 188-week
+`verify_checkpoints.cjs` also exited 1: Farz P-A's t169 capture was by the 3rd Corps,
+while the guard requires a 2nd-Corps capture at t160 or later. This wrong-corps gate
+was already open before the Doljani timing change. The run reports one critical
+`combat_ineffective_concentration` anomaly: HVO Central Bosnia 7/11 brigades (64%)
+below 400 personnel at t188. A same-tree turn-41 control had no critical anomaly
+at t105 while the turn-71 candidate did, establishing a timing cost at that horizon.
+The 188-week run shows the candidate still has the anomaly; no 188-week turn-41
+control was run. The owner provisionally accepted the week-105 trade, not final
+adoption of the 188-week result. The detector and threshold are unchanged. Raw gate evidence:
+`logs/doljani-042-20260927/full_vitest.log`, `verify_checkpoints.log`, and their `.exit`
+files. At this point there was one full-suite run and one 188-week run, with no
+automatic retry. The later suite run below tests a corrected Bash environment;
+it is a separate question, not a repeat of the same invocation.
+
+**2026-09-27 integration follow-up, no new campaign:** With
+`C:\Program Files\Git\bin\bash.exe` first on PATH, `npm run test:vitest` ran once
+on the same source tree and exited **1** after 14,127 passed, eight real failed,
+and 31 skipped tests (four balanced shards plus the serial group). The intentional
+child-process failure fixture was correctly observed by its passing parent test.
+This removes the prior WSL-Bash failure pattern. The eight failures are two
+plan-index drift assertions, one stale uniform Neretva/Grabovica window
+assertion (the authored windows are t76 and t77), one citation to a locally
+present but untracked map receipt, three path-identity assertions where this
+worktree's `node_modules` junction and its physical `F:` target name the same
+React/React-DOM/Zustand packages, and one release research-byte assertion
+counting CRLF-expanded checkout bytes rather than tracked blob bytes. These
+categories were inspected before bounded corrections; the full suite was not
+repeated. The five affected test files then passed 74/74 focused tests; the
+derived plan index and open-gates validators passed. This targeted evidence
+does not turn the recorded full-suite exit green. The Farz verifier and Central Bosnia critical anomaly remain separate
+open gates. See the tracked closeout receipt at
+`logs/integration-closeout-20260927/receipt.md` for commands, exits, targeted
+checks, and remaining failures.
+
+The retained `w188_n8` comparison is **not a same-tree retiming control**:
+its initial-save SHA-256 is `679f0321b5c1e686a1ba0754636b6254c2c8820d7c6166a2d1deacc176c56fb0`
+versus `413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1`
+for `n13`. `n8` lacks the local Jablanica–Doljani queued operation and has the
+older combined Prozor axis; `n13` has the local operation and split Lug/Paroš
+axes. At October 1995 `n8` is 666/712 and `n13` is 664/712, but the net −2
+cannot be assigned to `available_from` alone. `n8` has zero critical anomalies
+at t188 with Central Bosnia 6/11 below 400; `n13` has 7/11. The exact changed
+OSIDs at April/October 1995 are in the closeout receipt. No comparator campaign
+was launched for this extraction.
+
+At the owner's request, the retained 188-week candidate was published for inspection
+at the [external control timeline](https://horkesh.github.io/A-War-Without-Victory/?run=doljani-20260927).
+Only `index.html` and `README.md` changed on `gh-pages`, commit `6c1655eb3`.
+The page visibly labels the dirty run as an inspection candidate, states the red
+full-suite/Farz gates and Central Bosnia anomaly, and retains the current painted
+references. GitHub Pages reports built; live HTTP 200 HTML matches the reviewed
+publication artifact SHA-256 `e64c53aa53e3a2e176f5e1c656d0c8961ae16c698c3903653e967be7451b548f`.
+Desktop and phone browser checks pass for Doljani, the Prozor trio, Maglaj and layout.
+Publication does not adopt the candidate. Receipt: `logs/external-map-doljani-20260927/receipt.md`.
+
+**Independent closeout review, 2026-09-27:** The prior event-system packet passed
+360 focused tests with five skips across 15 affected files, including event
+evaluation, owed terminal follow-ups and desktop persistence (coordination
+report [025]); the corrected Git Bash full suite exercised those files as well.
+The reviewer confirmed two previously recorded, separate §6 defects in the
+Grabovica/Uzdol row: `war_crimes_delta: 2` is present in both singular `effect`
+and `effects[0]`, so the generic collector writes +4, and a
+`negotiation_capital international_credibility -10` target is absent from the
+negotiation capital state, so that effect is skipped. The distinct
+`international_standing -10` dimension shift remains live. The new t77 and
+terminal persistence path makes the existing row fire reliably but does not
+correct these effects; current focused tests assert only a positive impact.
+They require their own §6-approved correction, exact-effect tests and measured
+proof before merge/adoption. The independent review verdict is BLOCK merge;
+the Doljani combat result and published map remain provisional evidence.

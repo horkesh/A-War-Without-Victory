@@ -1,0 +1,88 @@
+Prusac / Donji Vakuf validation — 2026-09-22
+Source: efa53f55c34e4e9fe8ec8d4fe99ec01502ba1ed1 (local commit only)
+Scope: operation configuration and two focused test files; no engine/control/reference change.
+Commands and actual process exits:
+- Focused source tests: 86/86, exit0 (red phase6 intended failures before implementation).
+- npm run typecheck: exit0. Startup/static contracts:22/22, exit0.
+- npm run sim:scenario:run:188w -- --weeks 39 --full-replay-save-sequence: exit0.
+- npm run sim:scenario:run:188w: exit0, clean checkout, Nodev22.23.2.
+- node tools/engine_health_gate.cjs <full-run> --horizon 188w --json: exit0.
+- node tools/verify_checkpoints.cjs <full-run> --base jan=701,apr94=697,apr95=691,oct=651 --cascade-base 40: exit1.
+- npm run test:vitest: exit1. Git Bash on PATH. 1392passed/2failed/4skipped file results;14075passed/1failed/43skipped tests.
+  Real categories: docs_desktop_v09_truth boardlength20025>19999; runtime_dependency_resolution beforeAll10s timeout.
+  The nested deliberate_failure fixture is an intentional child control, not an additional suite defect.
+- Targeted runtime_dependency_resolution:12/12, exit0, without timeout/test changes.
+- Board shortened. Final targeted documentation checks recorded below after execution.
+
+Candidate scores jan1993/apr1994/apr1995/oct1995:702/694/689/651; baseline n427:701/697/691/651.
+Prusac t30 /19thKrajina /OperationDonjiVakuf:t29 /ratio8.11; town34/Korenici35; Jajce targets28/30/39/35.
+Orasac53 remains late. January7/8 named ->OPEN. FullcampaignNO-GO.
+Changed January cells exactly3: Prusac and Volari improve; Maglaj:Jablanica worsens (failed ARBiH counterattack; initialRS retained).
+HealthPASS,31/31anchors,9enclaveguards; consistency/ghost/zeroeligible0; stranded11vs15.
+Cascade27vs23 but required38; Farz351st3rdCorpst173wrongcorps; soleProzort41op_empty identical.
+Zvezda94t93 candidate-only inactive65thwarning; operation failsmax_failures inboth,5attacks vs7.
+Independent source reviewGO; separate final-evidence reviewRETAIN withall residuals (Solmedium /root/prusac_axis_review).
+No full-suite exit0, no two-full-run determinism proof, no overallacceptance, no push/merge/pin/reference adoption.
+
+Preserved original saveSHA256:8f4dda27cd8d14103093a5c9be79d9b4af20f51aa8d44e5ef574ca1cbe93d3f2
+Preserved traceSHA256:d542e7700b64c029b6dd82c745f724b14ce1a364fa0abee1b69218b0e761a4b9
+
+Full-run provenance and prefix equivalence:
+{
+  "run": ".worktrees\\prusac-validation-20260922\\runs\\apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0",
+  "commit": "efa53f55c34e4e9fe8ec8d4fe99ec01502ba1ed1",
+  "git_dirty": false,
+  "consumed_inputs_digest": "f8ace65496620fad1c8219a9dcaa8e2c5cdba2f3f541b156c7ba112b4748caaf",
+  "all31_inputs_identical_to_n427": true,
+  "node": "v22.23.2",
+  "final_hash": "575254183566bf2c",
+  "final_save_sha256": "575254183566bf2c7b4db3946217ddcce014317eb2232997e003964919cf10c3",
+  "prefix_weekly_report_count": 39,
+  "full_weekly_report_count": 188,
+  "all_prefix_weekly_records_equal": true,
+  "differing_prefix_weekly_rows": [],
+  "injection_errors_identical": true,
+  "health_exit": 0,
+  "checkpoint_exit": 1,
+  "source_commit_only_files": [
+    "src/sim/combat/pre_planned_operations.ts",
+    "tests/pre_planned_operations.test.ts",
+    "tests/donji_vakuf_no_authored_takeover.test.ts"
+  ]
+}
+
+Host-local raw evidence inventory (SHA256,bytes,path):
+5f5009fe9725fec3b98ac77025d657055496324488961f916126e65941dfd23e 3654 logs/donji-vakuf-prusac-axis-20260922/final-focused-tests.log
+025017ea5dc29eb540825da9ff5c7b5c7d6db81cfd98633b026692edf3831584 68 logs/donji-vakuf-prusac-axis-20260922/typecheck.log
+6b12cafcb83ae0f2e7aa405ec51b3df3d286bc5c2e15ca28a22ab211bc191576 443 logs/donji-vakuf-prusac-axis-20260922/startup-static.log
+f53fd0bc9fe319fa3901cbc89567455a6b4f14c108fce28dcdcc20470ffe9c67 114647 logs/donji-vakuf-prusac-axis-20260922/candidate-39.log
+028d582a3837e1894a399be64bc40378df07d8cf9c705deb739cd94106606d18 606 logs/donji-vakuf-prusac-axis-20260922/candidate-39-launch.json
+c726d7842f3aeb505d2fc8b9fccbc727d4391f312e373961c578ac081dc90e99 8092 logs/donji-vakuf-prusac-axis-20260922/candidate-january.json
+75d0422778b5b94e8e9d43ef437a1b605f042ed7ac7254cf775fb5170f45b403 788242 logs/donji-vakuf-prusac-axis-20260922/candidate-188.log
+6e77589a9aca40c01883334cddaf7651cebcd83abce399135c3149f78c054297 418 logs/donji-vakuf-prusac-axis-20260922/candidate-188-launch.json
+ba9e3830c16464d5af60326946ebc2611a90d7bc55ef0024635d4ce315fc1602 915 logs/donji-vakuf-prusac-axis-20260922/candidate-188-evidence.json
+b0044e0dca49fc2f9f380d0dbd7c413bd2e2f5743a399dc85ab88c4453db8dfd 11992 logs/donji-vakuf-prusac-axis-20260922/candidate-188-january.json
+b374e639a4c347840c8501338935324f9b94a29cb1778241c025a28359e07e3f 3094 logs/donji-vakuf-prusac-axis-20260922/checkpoints-188.log
+d3e689b26647316f257aa30a9fc6cf950d7ae1a7d721b1eb9d89b569afc8c29d 2308 logs/donji-vakuf-prusac-axis-20260922/health-188.log
+f78d5c6caeec63ffce7cdab153184b5df79b4f0fb27b41db6643f674be7a92cc 151945 logs/donji-vakuf-prusac-axis-20260922/full-suite.log
+5289e984372db83fff62367d62302d41f71bdc73ecdd8e19a9cda0550bae6701 295 logs/donji-vakuf-prusac-axis-20260922/full-suite-launch.json
+2c067abfe7885fcf9440441aaf68e69c69b763b06f332c73b9bcb8163d0ff9ef 303 logs/donji-vakuf-prusac-axis-20260922/runtime-dependency-targeted.log
+926f728014b2d1c3c2ab477f25740d33fcd91a6a86bc16d0bf7846335fee09c3 1734 logs/donji-vakuf-prusac-axis-20260922/independent-evidence-review.txt
+
+Raw run artifacts (host-local, not portable):
+runs/apr1992_definitive_188w__9137f75e9f35be20__w39_n430
+.worktrees/prusac-validation-20260922/runs/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0
+
+Final targeted correction verification (actual exits, 2026-09-22):
+- npx vitest run tests/docs_desktop_v09_truth.test.ts tests/plan_index.test.ts tests/open_gates_register.test.ts tests/receipt_citations.test.ts --reporter=dot: exit0,81/81 tests,4/4 files.
+  docs_desktop_v09_truth7/7; plan_index13/13; open_gates_register18/18; receipt_citations43/43.
+- Runtime dependency isolation12/12: exit0 (recorded above).
+- plans check, open-gates validator, strict receipt validator and scoped git diff --check: exits0/0/0/0.
+- Board measured19,931 characters (<20,000); roadmap55,999 (<60,000).
+- Both full-suite failure categories are covered by targeted verification. Original full-suite exit1 remains; no full-suite exit0 is claimed.
+- No production change followed the clean188 run or source review.
+3a2c403f13f5e87789169dde854cb3d310c1c1c3b7448f080e0baab14375f3eb 454 logs/donji-vakuf-prusac-axis-20260922/final-doc-tests.log
+8e7de6e1277dce3016d735414fea5000f31039919d81d8bb95cf6ce8c36f14bd 52 logs/donji-vakuf-prusac-axis-20260922/plans-final.log
+1c53f4904bb7d316d64f9c404b9779ea0893e0d0ac6585f3456b82b3d6d9fb83 40 logs/donji-vakuf-prusac-axis-20260922/gates-final.log
+f8e11757dacf0cc082f34a7d6031db95a917192775d2ed727a6ac2bd6eae6b33 81 logs/donji-vakuf-prusac-axis-20260922/receipts-final.log
+986156ee7a2c7a6938d5a09645fbfd34a77ed097e4a2b4799d516c631dd487c7 658 logs/donji-vakuf-prusac-axis-20260922/diff-final.log

@@ -20,7 +20,7 @@
  * ═══════════════════════════════════════════════════════════════
  */
 
-import type { CorpsCommandState, CorpsFrontSector, CorpsOperation, FormationId, FormationState, GameState, OperationAxis } from '../../state/game_state.js';
+import type { CorpsCommandState, CorpsFrontSector, CorpsOperation, FactionId, FormationId, FormationState, GameState, OperationAxis } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 // ─── Minimal type for pre-planned op fields consumed by buildCorpsOperation ──
@@ -29,7 +29,11 @@ interface PrePlannedOpDef {
     planning_duration?: number;
     minimum_viable_participants?: number;
     minimum_assembled_participants?: number;
+    require_all_axes_ready?: boolean;
     execution_attack_power_mult?: number;
+    coordinated_advance?: boolean;
+    sync_operation_name?: string;
+    army_hq_op_id?: string;
     staging_osid: string;
     min_attack_outcome?: CorpsOperation['min_attack_outcome'];
 }
@@ -82,6 +86,32 @@ export function getOperationBrigadesAtCurrentObjective(
         .filter((axis) => axis.objectives[axis.current_objective_index ?? 0] === objective)
         .flatMap((axis) => axis.assigned_brigades))]
         .sort(strictCompare);
+}
+
+/**
+ * Include executing partner commands in a named synchronized assault forecast.
+ * Planning peers are deliberately excluded: they have not committed to the attack.
+ */
+export function getSynchronizedOperationBrigadesAtObjective(
+    state: GameState,
+    op: CorpsOperation,
+    faction: FactionId,
+    objective: string,
+): FormationId[] {
+    const brigadeIds = new Set(getOperationBrigadesAtCurrentObjective(op, objective));
+    if (!op.sync_operation_name) return [...brigadeIds].sort(strictCompare);
+    const commands = state.military.corps_command ?? {};
+    for (const corpsId of Object.keys(commands).sort(strictCompare)) {
+        if (state.military.formations?.[corpsId]?.faction !== faction) continue;
+        const command = commands[corpsId];
+        for (const peer of [...(command?.active_operations ?? [])].sort((a, b) => strictCompare(a.name, b.name))) {
+            if (peer === op || peer.phase !== 'execution' || peer.sync_operation_name !== op.sync_operation_name) continue;
+            for (const brigadeId of getOperationBrigadesAtCurrentObjective(peer, objective)) {
+                brigadeIds.add(brigadeId);
+            }
+        }
+    }
+    return [...brigadeIds].sort(strictCompare);
 }
 
 /**
@@ -145,7 +175,7 @@ export function getBrigadeExecutionAttackPowerMult(
 ): number {
     const match = findBrigadeOperationAnywhere(state, brigadeId);
     if (!match || match.op.phase !== 'execution') return 1;
-    return Math.max(0.5, Math.min(2, match.op.execution_attack_power_mult ?? 1));
+    return Math.max(0.5, Math.min(3, match.op.execution_attack_power_mult ?? 1));
 }
 
 /** Find a brigade's planning/execution commitment anywhere in corps command. */
@@ -290,9 +320,13 @@ export function buildCorpsOperation(
         ...(def.minimum_assembled_participants != null
             ? { minimum_assembled_participants: Math.max(1, Math.trunc(def.minimum_assembled_participants)) }
             : {}),
+        ...(def.require_all_axes_ready === true ? { require_all_axes_ready: true } : {}),
         ...(def.execution_attack_power_mult != null
-            ? { execution_attack_power_mult: Math.max(0.5, Math.min(2, def.execution_attack_power_mult)) }
+            ? { execution_attack_power_mult: Math.max(0.5, Math.min(3, def.execution_attack_power_mult)) }
             : {}),
+        ...(def.coordinated_advance === true ? { coordinated_advance: true } : {}),
+        ...(def.sync_operation_name ? { sync_operation_name: def.sync_operation_name } : {}),
+        ...(def.army_hq_op_id ? { army_hq_op_id: def.army_hq_op_id } : {}),
         supply_readiness: 1.0,
         momentum: 0,
         failure_count: 0,

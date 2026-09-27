@@ -215,6 +215,8 @@ export interface CombatPrediction {
     /** Number of neighbors of the target that would be friendly after capture (1 = salient tip, 0 = would be surrounded). Used to avoid cut-off risk. */
     friendly_neighbors_after_capture: number;
     defender_has_brigade: boolean;
+    /** True only when an organized defender can physically or reactively contribute at this target. */
+    defender_has_reachable_brigade: boolean;
     defender_disrupted: boolean;
     defender_cohesion: number;
     /** Phase B: sub-segment responsible for defending this OSID (undefined if no sub-segment found). */
@@ -303,6 +305,7 @@ export function predictCombatOutcome(
     let defenderPower: number;
     let defenderFormation: FormationState | null = null;
     let defenderHasBrigade = false;
+    let defenderHasReachableBrigade = false;
     let defenderDisrupted = false;
     let defenderCohesion = 60;
     let sectorDefBrigades: FormationState[] | null = null;
@@ -403,6 +406,7 @@ export function predictCombatOutcome(
                     return { physicalPower, effectiveReserves, contributingBrigadeCount };
                 }
             );
+            defenderHasReachableBrigade = contributingBrigadeCount > 0;
 
             // Apply sector stance reactive bonus (Layer B)
             const stanceReactiveBonus = SECTOR_STANCE_REACTIVE_BONUS[sector?.sector_stance ?? 'defend'];
@@ -440,6 +444,7 @@ export function predictCombatOutcome(
                 // Brigade at OSID but not in any sector (enclave/garrison edge case)
                 // No sector → no intel → blind (confidence 0)
                 defenderHasBrigade = true;
+                defenderHasReachableBrigade = true;
                 const { primary, totalPower } = predictorPerfTime(
                     profilePrefix,
                     '.rankDefendersByPower',
@@ -460,6 +465,7 @@ export function predictCombatOutcome(
         if (fallbackDefenders.length > 0) {
             // Not enemy-controlled territory but enemy brigade present — no sector intel available
             defenderHasBrigade = true;
+            defenderHasReachableBrigade = true;
             const { primary, totalPower } = predictorPerfTime(
                 profilePrefix,
                 '.rankDefendersByPower',
@@ -567,6 +573,7 @@ export function predictCombatOutcome(
         overextension_risk: enemyAdj,
         friendly_neighbors_after_capture: friendlyNeighborsAfterCapture,
         defender_has_brigade: defenderHasBrigade,
+        defender_has_reachable_brigade: defenderHasReachableBrigade,
         defender_disrupted: defenderDisrupted,
         defender_cohesion: defenderCohesion,
         defending_sub_segment_id: defendingSubSegmentId,

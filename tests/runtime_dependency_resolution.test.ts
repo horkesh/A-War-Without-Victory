@@ -1,5 +1,5 @@
 import { createRequire } from 'node:module';
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -68,7 +68,7 @@ function packageIdentityFromResolvedPath(packageName: string, resolvedPath: stri
     if (existsSync(packageJsonPath)) {
       const document = JSON.parse(readFileSync(packageJsonPath, 'utf8')) as { name?: string; version?: string };
       if (document.name === packageName && typeof document.version === 'string') {
-        return { packageName, packageRoot: resolve(cursor), version: document.version };
+        return { packageName, packageRoot: realpathSync.native(resolve(cursor)), version: document.version };
       }
     }
     cursor = dirname(cursor);

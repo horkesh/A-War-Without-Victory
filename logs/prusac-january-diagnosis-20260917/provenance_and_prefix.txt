@@ -1,0 +1,25 @@
+# Provenance binding — 188w reproduction vs preserved January runs
+
+run_id           apr1992_definitive_188w__6898d6d2e324c7a3__w188  |  apr1992_definitive_188w__9137f75e9f35be20__w39  |  apr1992_definitive_188w__9137f75e9f35be20__w39  |  apr1992_definitive_188w__6898d6d2e324c7a3__w188
+weeks            188  |  39  |  39  |  188
+git_commit       0033517b6724a7f05763c079cbddd323e9ee749e  |  41a148bf928b073322692142ae86d06e7dcf7943  |  e9024b61a392a500c019b4d6b017d8d15a1b3a1e  |  e9024b61a392a500c019b4d6b017d8d15a1b3a1e
+git_dirty        false  |  false  |  true  |  true
+node_version     v22.23.2  |  v22.23.2  |  v22.23.2  |  v22.23.2
+harness          headless  |  headless  |  headless  |  headless
+collapse_enabled false  |  false  |  false  |  false
+schema_version   2  |  2  |  2  |  2
+digest           f8ace65496620fad  |  f8ace65496620fad  |  f8ace65496620fad  |  f8ace65496620fad
+input_count      31  |  31  |  31  |  31
+inputs differing [apr1992_188w vs apr1992_definitive_188w__9137f75e9f35be20__w39_n403]: 0 (none)
+inputs differing [apr1992_188w vs apr1992_definitive_188w__9137f75e9f35be20__w39_n399]: 0 (none)
+inputs differing [apr1992_188w vs apr1992_definitive_188w__6898d6d2e324c7a3__w188_n396]: 0 (none)
+
+# Prefix equivalence — weekly_report weeks 1..39 (188w reproduction vs n403)
+lines A(188w)=188  B(n403 w39)=39
+compared weeks 1..39 : identical=39  differing=0
+
+# Prefix equivalence — replay frames turns 1..39
+frames A=188 B=39
+turns 1..39: identical=39 differing=0
+turn39 A: {"turn":39,"date":null,"activeFormations":253,"totalCasualties":0,"totalDisplaced":0,"controlByFaction":[{"faction":"HRHB","osids":86},{"faction":"RBiH","osids":251},{"faction":"RS","osids":375}]}
+turn39 B: {"turn":39,"date":null,"activeFormations":253,"totalCasualties":0,"totalDisplaced":0,"controlByFaction":[{"faction":"HRHB","osids":86},{"faction":"RBiH","osids":251},{"faction":"RS","osids":375}]}

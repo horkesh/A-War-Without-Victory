@@ -64,7 +64,10 @@ const DOCUMENTED_T0_ABSENCES: ReadonlyArray<{ id: string; cause: 'pool_below_cos
     {
         id: 'hvo_ante_starcevic_brigade',
         cause: 'pool_below_cost',
-        note: 'Kiseljak HRHB pool exhausted by earlier draws. Recovers on turn 1 and ends the campaign active.',
+        note:
+            'Gornji Vakuf HRHB pool 663 at t0 against the 800 default manpower_cost. Recovers on ' +
+            'turn 1 (live id F_HRHB_0002 at op:gornji_vakuf:pajic_polje_2) and holds the Gornji ' +
+            'Vakuf front. Home per ICTY Prlić TJ Vol. 2 paras 317-321.',
     },
     {
         id: 'hvo_hrvoje_vukcic_brigade',

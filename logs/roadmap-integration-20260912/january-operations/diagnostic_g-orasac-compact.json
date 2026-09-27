@@ -1,0 +1,78 @@
+{
+  "run": "diagnostic_g",
+  "commit": "ac3e5e152",
+  "target": "op:bihac:orasac_2",
+  "controller_by_turn_29": "RS",
+  "capture_turn": 29,
+  "operation": {
+    "id": "vrs_2nd_krajina:Operacija Bunar:t25",
+    "started_turn": 25,
+    "recovery_turn": 29,
+    "ended_turn": 30,
+    "participants": [
+      "rs_11th_krupa_light_infantry",
+      "rs_17th_klju_light_infantry",
+      "rs_1st_drvar_light_infantry"
+    ],
+    "primary_sector_brigades": [
+      "rs_17th_klju_light_infantry",
+      "rs_1st_drvar_light_infantry"
+    ],
+    "attached_brigades": ["rs_11th_krupa_light_infantry"],
+    "commander": {
+      "id": "vrs_samardzija",
+      "name": "Drago Samardžija",
+      "competence": 4,
+      "aggressiveness": 4,
+      "preparation_turns_elapsed": 4,
+      "preparation_max_turns": 4,
+      "assessment": "launch",
+      "intel_confidence_at_assessment": 0.445,
+      "supply_readiness_at_assessment": 1
+    },
+    "donor_movement": {
+      "brigade": "rs_11th_krupa_light_infantry",
+      "from": "op:bosanska_krupa:veliki_badic",
+      "destination": "op:bihac:racic",
+      "order_turn": 25,
+      "transit_turns": [26, 27],
+      "arrival_turn": 28
+    }
+  },
+  "battle": {
+    "turn": 29,
+    "eligible_attackers": 3,
+    "attack_orders": 3,
+    "battles": 1,
+    "outcome": "costly_victory",
+    "power_ratio": 1.17,
+    "attacker_casualties_weekly": 115,
+    "defender_casualties_weekly": 35,
+    "defender_kind": "militia",
+    "execution_friction": ["stale_intel"],
+    "captured": true
+  },
+  "aar": {
+    "outcome": "success",
+    "grade": "Solid Victory",
+    "total_attacks": 1,
+    "initial_strength": 2821,
+    "final_strength": 2693,
+    "casualties_suffered": { "killed": 25, "wounded": 85 },
+    "casualties_inflicted": { "killed": 8, "wounded": 26 },
+    "capture_provenance": "logged_capture"
+  },
+  "comparison_to_f": {
+    "same_emission_turn": 25,
+    "same_roster": true,
+    "same_donor_arrival_turn": 28,
+    "f_preparation_max_turns": 5,
+    "g_preparation_max_turns": 4,
+    "f_first_attack_turn": 30,
+    "g_first_attack_turn": 29,
+    "f_first_ratio": 0.84,
+    "g_first_ratio": 1.17,
+    "result": "The assigned 4/4 commander shortened normal preparation by one turn; the unchanged assembled roster attacked on turn 29 and captured Orašac."
+  }
+}
+

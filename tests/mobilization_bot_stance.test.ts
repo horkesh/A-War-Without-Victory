@@ -321,3 +321,45 @@ describe('mobilization bot stance — reversion after mobilization expires', () 
         expect(stance).not.toBe('defensive');
     });
 });
+
+describe('open RBiH-HRHB war doctrine', () => {
+    it('makes a central Bosnia RBiH corps offensive', () => {
+        const corpsId = 'arbih_3rd_corps';
+        const state = makeState({
+            turn: 50,
+            allianceValue: -0.2,
+            mobilizationStartedTurn: 35,
+            warStartedTurn: 40,
+            formations: {
+                [corpsId]: { id: corpsId, faction: 'RBiH', kind: 'corps', status: 'active', tags: ['mun:travnik'] } as any,
+                arbih_brig_1: makeBrigade('arbih_brig_1', corpsId, 'RBiH'),
+            },
+            corpsCommand: { [corpsId]: makeCorpsCommand('balanced') },
+            corpsFrontSectors: { [`sector:${corpsId}`]: makeSector(corpsId, 'RBiH', ['HRHB']) },
+        });
+
+        generateCorpsStanceOrders(state, 'RBiH', [], new Map());
+
+        expect(state.military.corps_command![corpsId].stance).toBe('offensive');
+    });
+
+    it('keeps a central Bosnia HVO corps defensive', () => {
+        const corpsId = 'hvo_central_bosnia';
+        const state = makeState({
+            turn: 50,
+            allianceValue: -0.2,
+            mobilizationStartedTurn: 35,
+            warStartedTurn: 40,
+            formations: {
+                [corpsId]: { id: corpsId, faction: 'HRHB', kind: 'corps', status: 'active', tags: ['mun:travnik'] } as any,
+                hvo_brig_1: makeBrigade('hvo_brig_1', corpsId, 'HRHB'),
+            },
+            corpsCommand: { [corpsId]: makeCorpsCommand('balanced') },
+            corpsFrontSectors: { [`sector:${corpsId}`]: makeSector(corpsId, 'HRHB', ['RBiH']) },
+        });
+
+        generateCorpsStanceOrders(state, 'HRHB', [], new Map());
+
+        expect(state.military.corps_command![corpsId].stance).toBe('defensive');
+    });
+});

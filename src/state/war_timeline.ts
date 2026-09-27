@@ -79,6 +79,8 @@ export interface ExternalSupportWindow {
     faction: string;
     /** Optional: 'attack' (default) or 'defend'. See interface doc above. */
     role?: 'attack' | 'defend';
+    /** Explicitly apply this dated attack window to OSID combat and forecasts. Legacy entries remain on their original path. */
+    osid_attack_support?: boolean;
     /** Optional: window start (default 0 — active from scenario start). */
     start_turn?: number;
     end_turn: number;
@@ -394,6 +396,9 @@ export function validateWarTimeline(raw: unknown): WarTimeline {
         if (typeof s.combat_multiplier !== 'number') throw new Error(`WarTimeline: external_support[${i}].combat_multiplier must be a number`);
         if (s.role !== undefined && s.role !== 'attack' && s.role !== 'defend') {
             throw new Error(`WarTimeline: external_support[${i}].role must be 'attack' or 'defend' when present`);
+        }
+        if (s.osid_attack_support !== undefined && typeof s.osid_attack_support !== 'boolean') {
+            throw new Error(`WarTimeline: external_support[${i}].osid_attack_support must be boolean when present`);
         }
         if (s.start_turn !== undefined && typeof s.start_turn !== 'number') {
             throw new Error(`WarTimeline: external_support[${i}].start_turn must be a number when present`);

@@ -33,6 +33,11 @@ function areCobelligerent(state: GameState, factionA: string, factionB: string):
     return isRbihHrhbCombatBlocked(state, factionA, factionB);
 }
 
+function isRbihHrhbPair(factionA: string, factionB: string): boolean {
+    return (factionA === 'RBiH' && factionB === 'HRHB')
+        || (factionA === 'HRHB' && factionB === 'RBiH');
+}
+
 /**
  * Prefix-wide enclave definitions are too broad for passive rear-pocket cleanup.
  * They are appropriate for resilience and siege behavior, but not for freezing
@@ -200,6 +205,10 @@ export function consolidateRearPockets(
         }
 
         if (!surroundingFaction || surroundingFaction === controller) continue;
+        // Croat-Bosniak territorial change must be earned by an operation. The
+        // bilateral war is a contested front, not an administrative rear pocket;
+        // passive consolidation/abandonment must never resolve it in either direction.
+        if (isRbihHrhbPair(surroundingFaction, controller)) continue;
         if (isRbihHrhbCombatBlocked(state, surroundingFaction, controller)) continue;
 
         // Enclave guard: siege geometry produces topologically surrounded clusters.

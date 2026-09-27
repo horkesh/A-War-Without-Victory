@@ -19,13 +19,15 @@ import { createRequire } from 'node:module';
 import { describe, expect, it } from 'vitest';
 
 const require = createRequire(import.meta.url);
-const { parseRegister, renderIndex, INDEX } = require('../tools/derive_plan_index.cjs') as {
-  parseRegister: (repoRoot?: string) => Array<{
-    lane: string; title: string; closed: boolean; status: string; plans: string[];
-  }>;
-  renderIndex: (repoRoot?: string) => string;
-  INDEX: string;
-};
+const { classifyLaneStatus, parseRegister, renderIndex, INDEX } =
+  require('../tools/derive_plan_index.cjs') as {
+    classifyLaneStatus: (cell: string) => { closed: boolean; head: string | null; diagnostics: string[] };
+    parseRegister: (repoRoot?: string) => Array<{
+      lane: string; title: string; closed: boolean; status: string; plans: string[];
+    }>;
+    renderIndex: (repoRoot?: string) => string;
+    INDEX: string;
+  };
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const yaml = require('js-yaml');
@@ -96,6 +98,76 @@ describe('plan index', () => {
   it('names a task manifest only when the file is really there', () => {
     for (const plan of loadIndex().lanes.flatMap((lane) => lane.plans)) {
       if (plan.tasks !== null) expect(existsSync(plan.tasks), plan.tasks).toBe(true);
+    }
+  });
+});
+
+/**
+ * THE DEFECT THIS PINS. The register's status cell is a bold head followed by explanatory prose:
+ * `**ACTIVE — GATES OPEN.** WR01 delivered…`. A substring search over the whole cell cannot tell
+ * the two apart, so R6 — an open calibration lane whose prose records that one sub-item, the
+ * Pješivac-Kula objective correction, is CLOSED — derived as a finished workstream. Reading lane
+ * state off incidental words in an explanation is how a live lane disappears from the index a
+ * dispatcher uses to decide what is worth touching.
+ *
+ * The rule these fixtures hold the parser to: closure is asserted by the bold status head or it
+ * is not asserted at all, and wording that qualifies or negates a closure word never certifies it.
+ */
+describe('lane status is read from the status head, not from its prose', () => {
+  const closedOf = (cell: string) => classifyLaneStatus(cell).closed;
+
+  it('an open lane stays open when its prose closes a sub-item', () => {
+    expect(
+      closedOf(
+        '**JANUARY OBJECTIVE CORRECTIONS MEASURED; CALIBRATION HELD.** All April work remains ' +
+          'integrated; the Pješivac-Kula objective correction is CLOSED. Cascade 30 below 38.',
+      ),
+    ).toBe(false);
+  });
+
+  it('a whole-lane COMPLETE/CLOSED head closes the lane', () => {
+    expect(closedOf('**COMPLETE**')).toBe(true);
+    expect(closedOf('**COMPLETE — CLOSED 2026-08-01**')).toBe(true);
+    expect(closedOf('**PRE-1.0 NARROW SCOPE COMPLETE — CLOSED 2026-08-15.** Retained v3 selection.')).toBe(true);
+    expect(closedOf('**CLOSED — owner, 2026-09-01.** RE gates nothing: not calibration, not R7.')).toBe(true);
+  });
+
+  it('a closed lane stays closed when its explanation recalls work that was once open', () => {
+    expect(
+      closedOf(
+        '**COMPLETE — CLOSED 2026-08-05** at the ~1,086 ms/turn floor. Phase 2e was reverted on a ' +
+          'measured regression and Task 6 is DECLINED, not deferred; the 100 ms/turn target is retired.',
+      ),
+    ).toBe(true);
+  });
+
+  it('negated and partial closure never certifies closure', () => {
+    expect(closedOf('**NOT CLOSED**')).toBe(false);
+    expect(closedOf('**NOT COMPLETE**')).toBe(false);
+    expect(closedOf('**NOT YET COMPLETE — two gates open.**')).toBe(false);
+    expect(closedOf('**INCOMPLETE**')).toBe(false);
+    expect(closedOf('**Partially complete; audio acceptance open.**')).toBe(false);
+    expect(closedOf('**COMPLETE, but the packaged gate is NOT CLOSED.**')).toBe(false);
+  });
+
+  it('a cell with no status head is live, and says why rather than certifying closure', () => {
+    const verdict = classifyLaneStatus('Build preparation passes (§4.2); freeze/readiness after R8');
+    expect(verdict.closed).toBe(false);
+    expect(verdict.diagnostics).toEqual([]);
+
+    const prose = classifyLaneStatus('The sub-item is CLOSED; the lane is not.');
+    expect(prose.closed).toBe(false);
+    expect(prose.diagnostics.length).toBeGreaterThan(0);
+  });
+
+  it('the real register reads R6 open and the genuinely finished lanes closed', () => {
+    const byLane = new Map(parseRegister().map((row) => [row.lane, row]));
+    expect(byLane.get('R6')?.closed, 'R6 is an open calibration lane').toBe(false);
+    expect(byLane.get('R7')?.closed).toBe(false);
+    expect(byLane.get('R8')?.closed).toBe(false);
+    expect(byLane.get('R9')?.closed).toBe(false);
+    for (const lane of ['R1', 'R2', 'R3', 'R4', 'R5', 'RC', 'RE']) {
+      expect(byLane.get(lane)?.closed, `${lane} is closed history`).toBe(true);
     }
   });
 });

@@ -85,7 +85,7 @@ function normalizeArtifactCell(value: string): string {
 
 const ARTIFACT_POLICY_GROUPS = {
     'committed-golden-output': [
-        'data/calibration/structural_fingerprint_40w.json',
+        'data/calibration/structural_fingerprint_188w.json',
         'data/derived/scenario/baselines/manifest.json',
         'data/derived/startup/apr_1992_initial_save.json',
         'data/derived/tiles/hillshade.pmtiles',
@@ -330,7 +330,7 @@ function inferredOwnerForDynamicWrite(relativePath: string, argumentText: string
         return 'data/derived/scenario/sweeps/h2_4/h2_4_sweep/';
     }
     if (relativePath === 'tools/diagnostics/structural_fingerprint.cjs') {
-        return 'data/calibration/structural_fingerprint_40w.json';
+        return 'data/calibration/structural_fingerprint_188w.json';
     }
     if (relativePath === 'tools/diagnostics/sarajevo_constant_inventory.cjs') {
         return 'docs/40_reports/working/SARAJEVO_CONSTANT_INVENTORY.md';

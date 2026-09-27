@@ -1,0 +1,65 @@
+{
+  "candidate_root": ".agent/codex-skill-adapters",
+  "classification": "deliberately reviewed Codex host wrappers; not a bulk synchronization or maintained project source",
+  "live_user_skill_changes": false,
+  "runtime_orchestrator_changed": false,
+  "supporting_files_copied": false,
+  "adapters": [
+    {
+      "name": "using-superpowers",
+      "description": "Use when skill discovery or workflow selection is unclear, or the user explicitly requests this skill.",
+      "generic_behavior": "normal relevance and explicit user selection",
+      "awwv_source": ".claude/skills/using-superpowers/SKILL.md"
+    },
+    {
+      "name": "brainstorming",
+      "description": "Use when material product or technical design choices remain unsettled before implementation.",
+      "generic_behavior": "resolve only material open design choices",
+      "awwv_source": ".claude/skills/brainstorming/SKILL.md"
+    },
+    {
+      "name": "awwv-read-first",
+      "description": "Use when an AWWV reading guide is requested or subsystem ownership cannot be established from the repository entrypoint.",
+      "generic_behavior": "project-specific; defers to another repository's own entrypoint outside AWWV",
+      "awwv_source": ".claude/skills/awwv-read-first/SKILL.md"
+    },
+    {
+      "name": "writing-plans",
+      "description": "Use when a multi-step implementation needs a written plan or the user asks for an implementation plan.",
+      "generic_behavior": "outcome/scope/authority/check based planning without forced execution",
+      "awwv_source": ".claude/skills/writing-plans/SKILL.md"
+    },
+    {
+      "name": "executing-plans",
+      "description": "Use when carrying out an authorized implementation plan through its required checks and closeout.",
+      "generic_behavior": "complete authorized dependency-ordered work without fixed feedback stops",
+      "awwv_source": ".claude/skills/executing-plans/SKILL.md"
+    },
+    {
+      "name": "prompt-construction",
+      "description": "Use when drafting a task prompt, agent handoff, or instructions for another coding environment.",
+      "generic_behavior": "runtime-compatible bounded handoffs",
+      "awwv_source": ".claude/skills/prompt-construction/SKILL.md"
+    },
+    {
+      "name": "awwv-make-cursor-prompt",
+      "description": "Use when the user requests an AWWV prompt for Cursor or another coding agent.",
+      "generic_behavior": "uses generic prompt-construction outside AWWV",
+      "awwv_source": ".claude/skills/awwv-make-cursor-prompt/SKILL.md"
+    },
+    {
+      "name": "verification-before-completion",
+      "description": "Use before claiming work is complete, fixed, passing, or ready for integration.",
+      "generic_behavior": "fresh relevant evidence and explicit reuse of unaffected checks",
+      "awwv_source": ".claude/skills/verification-before-completion/SKILL.md"
+    },
+    {
+      "name": "napkin",
+      "description": "Use when a repository napkin or runbook index needs curation because verified recurring knowledge or an explicit maintenance request warrants it.",
+      "generic_behavior": "conditional runbook-index curation with no edit-on-read",
+      "awwv_source": ".claude/skills/napkin/SKILL.md"
+    }
+  ],
+  "shared_host_rule": "In AWWV, each wrapper reads the matching repo skill, repository AGENTS.md, and relevant active Codex runtime instructions. Codex tool/model/permission policy remains host-owned; Claude hook coverage is not inferred.",
+  "deployment_owner": "Parent owns original-to-candidate diffs, hash-gated deployment/rollback, distribution manifest, importer and tests."
+}

@@ -18,6 +18,7 @@ import type {
     FormationState,
     GameState,
     OperationAxis,
+    SettlementId,
 } from '../../state/game_state.js';
 import { munFromOsid, type Osid } from './osid_adjacency.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -46,10 +47,12 @@ import {
 import {
     ensureHistoricalOperationAuthorizationReview,
     getAcceptedHistoricalOperationAuthorizationTurn,
+    historicalOperationAuthorizationAction,
 } from './historical_operation_authorization.js';
 import { resolveOperationFormation } from './operation_formation_resolver.js';
 import { isOperationObjectiveHostile } from './operation_objective_hostility.js';
 import { computeMultiAxisPlanningDuration } from './sector_offensive_axis_helpers.js';
+import { isEliteAuthoredForHistoricalOperation } from './historical_elite_reservations.js';
 // Graz truce imports removed: east Herzegovina truce is handled by sector_offensive
 // on operation completion (graz_east_herzegovina_active_turn), not by injection.
 
@@ -63,6 +66,8 @@ export interface AxisDef {
     brigades: FormationId[];
     objectives: string[];
     staging_osid?: string;
+    minimum_staged_brigades?: number;
+    minimum_forward_brigades?: number;
 }
 
 export interface PrePlannedOp {
@@ -74,6 +79,10 @@ export interface PrePlannedOp {
     staging_osid: string;
     /** Minimum turn before this op can be injected (default: 0). */
     available_from?: number;
+    /** Turn from which reserved Army-HQ formations begin their concentration march. */
+    prestage_from?: number;
+    /** Turn on which this dated plan enters its corps queue. */
+    enqueue_from?: number;
     /** Override attack threshold — brigades attack even at worse predicted outcomes. */
     min_attack_outcome?: CorpsOperation['min_attack_outcome'];
     /** Planning duration override — gives brigades time to march to staging. */
@@ -83,6 +92,10 @@ export interface PrePlannedOp {
     /** Active, attack-capable authored formations required before planning may transition to execution. */
     minimum_assembled_participants?: number;
     execution_attack_power_mult?: number;
+    coordinated_advance?: boolean;
+    sync_operation_name?: string;
+    /** Optional faction-wide Army HQ donor pool for a historically HQ-directed operation. */
+    army_hq_op_id?: string;
 }
 
 export interface PrePlannedOperationInjectionOptions {
@@ -320,26 +333,61 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         staging_osid: 'op:rogatica:stara_gora',
         available_from: 41,
         min_attack_outcome: 'repulsed',
+        // The May-June tactical group concentrated enough force to reduce both
+        // the Prača corridor and the small Višegrad bridgehead. These remain
+        // ordinary attacks; the multiplier represents the authored operational
+        // concentration, not a control transfer.
+        execution_attack_power_mult: 2.75,
+        coordinated_advance: true,
+        // The Main Staff's 1st Guards joined TG Višegrad after Cerska and
+        // before Lukavac (BB2 printed p.390). Begin its concentration as the
+        // Cerska operation ends; a live commitment still owns its movement.
+        prestage_from: 56,
+        planning_duration: 10,
         axes: [
             {
                 axis_id: 'pracha_encirclement',
                 name: 'Prača Encirclement',
                 brigades: [
-                    'rs_1st_podrinje',
+                    'rs_1st_zvornik',
                     'rs_5th_podrinje',
                 ],
-                // BB2 p.409: May–Jun 1993 TG "Višegrad" (Drina Corps), Prača River offensive.
-                // Staging stara_gora (RS init) adj brcigovo ✓; brcigovo adj sopotnica ✓; sopotnica adj ustipraca_2 ✓
+                // BB2 p.390: May–Jun 1993 TG "Višegrad" (Drina Corps), Prača River offensive.
+                // Staging stara_gora (RS init) adj brcigovo; brcigovo adj sopotnica;
+                // sopotnica adj ustipraca_2.
                 // All three objectives painted RBiH Jan 1993. ustipraca_2 terminus: non-chain neighbors RS-painted.
                 // slatina_2 excluded — adj gorazde_2, cascade risk (belongs to Op Zvezda 94, Apr 1994).
-                // available_from=41: gates past 40w calibration window (all objectives RBiH-painted at Jan 1993;
-                // VRS temporarily holds this corridor in mid-1993, ARBiH recovers before ceasefire).
+                // available_from=41: gates past the January 1993 checkpoint;
+                // shared Cerska formations defer the assembled assault to May.
                 objectives: [
                     'op:rogatica:brcigovo',
-                    'op:gorazde:sopotnica',
                     'op:gorazde:ustipraca_2',
                 ],
                 staging_osid: 'op:rogatica:stara_gora',
+            },
+            {
+                axis_id: 'sopotnica_pressure',
+                name: 'Sopotnica Pressure',
+                brigades: ['rs_1st_guards_motorized', 'rs_1st_birac', 'rs_1st_podrinje'],
+                objectives: ['op:gorazde:sopotnica', 'op:gorazde:slatina_2'],
+                staging_osid: 'op:rogatica:varosiste_2',
+            },
+            {
+                axis_id: 'visegrad_bridgehead',
+                name: 'Višegrad Bridgehead',
+                brigades: [
+                    'rs_visegrad_brigade',
+                    'rs_1st_bratunac',
+                ],
+                // Both cells were still in the ARBiH bridgehead at the January
+                // checkpoint and were reduced during the later Prača campaign.
+                // Stara Gora directly adjoins Medjedja; Medjedja adjoins Drinsko.
+                objectives: [
+                    'op:visegrad:medjedja_2',
+                    'op:visegrad:drinsko',
+                ],
+                staging_osid: 'op:rogatica:stara_gora',
+                minimum_staged_brigades: 2,
             },
         ],
     },
@@ -347,45 +395,88 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         // Operation Zvezda 94 — VRS Drina Corps spring 1994 offensive on Goražde safe area.
         // Historically: Drina Corps tactical groups pressed from the east and south, reaching
         // outskirts of Goražde town (BB2 p.289). Fires after Op Pracha River (w41) completes
-        // and frees brigades. Available w100 (~April 1994, contemporaneous with Washington Agreement).
+        // and frees brigades. Planning authority opens at w93 so the columns can
+        // assemble before the late-March offensive and the w104 April checkpoint.
         //
-        // Staging: podkozara_donja_2 (RS-painted from init, adj slatina_2 ✓)
+        // Staging: the Main Staff group and Drina locals assemble on the
+        // northern Rogatica shoulder. Fresh Drina Corps formations provide
+        // the mass on the cutoff and western axes while the Army-HQ group
+        // drives the principal contraction of the enclave.
         // Objectives: slatina_2 (RBiH-painted, adj gorazde_2 — encirclement approach);
-        //             sopotnica (RBiH-painted, adj slatina_2 — tighten pocket; skipped if already RS)
+        //             sopotnica (RBiH-painted, adj slatina_2 — pocket tightener; skipped if already RS);
+        //             ustipraca_2 (RBiH-painted, adj sopotnica — closes the remaining corridor)
         // gorazde_2 excluded: cascade risk documented in Op Pracha River comment (line 233).
         // Sacred Rule checks: staging adj first objective ✓; no painted-opposite objectives ✓;
-        //   1st/5th Podrinje finish Op Pracha River ~w55-60, then ~40w gap before Zvezda 94 fires at w100 ✓.
+        //   1st/5th Podrinje finish Op Pracha River ~w55-60, then ~36w gap before Zvezda 94 opens at w96 ✓.
         //   They end Op Pracha River in the Prača corridor, 2-3 hops from podkozara_donja_2 staging ✓.
         corps: 'vrs_drina',
         faction: 'RS',
         name: 'Operation Zvezda 94',
         staging_osid: 'op:gorazde:podkozara_donja_2',
-        available_from: 100,
+        available_from: 93,
+        prestage_from: 79,
         min_attack_outcome: 'repulsed',
-        // planning_duration: 10 — extended to allow brigades time to march 6+ hops to staging.
-        // ENGINE LIMITATION (documented 2026-05-28): all vrs_drina brigades are sector-pinned by
-        // bot AI after w46 and do not execute march orders (sector assignment > op march priority).
-        // Op injects at w100 (3 brigades ≥ MIN_OPERATION_PARTICIPANTS=2), issues movement_orders
-        // each planning turn, but eligible_attacker_count stays 0 for all 13 turns → aborts w113
-        // with zero_eligible_axis. Single-brigade variant (1 < MIN=2) never injects at all —
-        // keeping 3-brigade for observability. Requires engine fix: march priority for op-assigned
-        // brigades must override sector defensive assignment. Assign to gameplay-programmer.
+        // Main Staff artillery, engineering, and command concentration. This
+        // modifies combat power only; every objective still requires a battle.
+        execution_attack_power_mult: 3,
+        // The two Main Staff assault formations are the irreducible attack
+        // group. Local Drina Corps formations join when the live front and
+        // route state permit, but their absence must not cancel the offensive.
+        minimum_viable_participants: 2,
+        minimum_assembled_participants: 3,
+        // The formations pre-stage before the Drina command slot opens; the
+        // preparation budget lets both converging columns assemble.
         planning_duration: 10,
         axes: [
             {
                 axis_id: 'gorazde_encirclement',
                 name: 'Goražde Encirclement',
                 brigades: [
-                    'rs_visegrad_brigade',
-                    'rs_1st_podrinje',
+                    // Main Staff allocation for scenario balance. BB2 supports
+                    // higher-HQ concentration at Zvezda, not these exact unit names.
+                    'rs_65th_protection_motorized_regiment',
                     'rs_5th_podrinje',
                 ],
-                // podkozara_donja_2 adj slatina_2 ✓; slatina_2 adj sopotnica ✓
+                // The northern shoulder presses south through Sopotnica to
+                // Slatina instead of routing the Army-HQ reserve around the
+                // eastern side of the enclave before the attack begins.
                 objectives: [
-                    'op:gorazde:slatina_2',   // RBiH-painted; adj gorazde_2 — encirclement chokepoint
                     'op:gorazde:sopotnica',   // RBiH-painted; adj slatina_2 — pocket tightener
+                    'op:gorazde:slatina_2',   // RBiH-painted; adj gorazde_2 — encirclement chokepoint
                 ],
-                staging_osid: 'op:gorazde:podkozara_donja_2',
+                staging_osid: 'op:rogatica:brcigovo',
+                minimum_staged_brigades: 1,
+                minimum_forward_brigades: 1,
+            },
+            {
+                axis_id: 'ustipraca_cutoff',
+                name: 'Ustiprača Cutoff',
+                brigades: [
+                    'rs_1st_bratunac',
+                    'rs_1st_podrinje',
+                    'rs_visegrad_brigade',
+                ],
+                objectives: [
+                    'op:gorazde:ustipraca_2',
+                    'op:gorazde:kolovarice',
+                ],
+                staging_osid: 'op:rogatica:brcigovo',
+                minimum_staged_brigades: 1,
+                minimum_forward_brigades: 1,
+            },
+            {
+                axis_id: 'foca_southern_flank',
+                name: 'Foča Southern Flank',
+                brigades: [
+                    'rs_1st_guards_motorized',
+                    'rs_1st_birac',
+                    'rs_1st_zvornik',
+                    'rs_1st_milii',
+                ],
+                objectives: ['op:foca:donje_zesce'],
+                staging_osid: 'op:foca:izbisno',
+                minimum_staged_brigades: 2,
+                minimum_forward_brigades: 2,
             },
         ],
     },
@@ -516,80 +607,57 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
-        // Operation Trnovo — VRS Sarajevo-Romanija Corps (SRK) secures the Trnovo cluster
-        // south of Sarajevo. Historically, SRK held the Trnovo area throughout the war
-        // (BB2 p.289). rs_trnovo_brigade home OSID is gornja_presjenica (RS from init).
-        //
-        // Painted control (Sacred Rule 4):
-        //   gornja_presjenica = RS (staging — not an objective)
-        //   kijevo_2         = RS in ALL FOUR painted snapshots. CAUTION (2026-08-12): these
-        //     lines state PAINTED control; the strip at execution keys on LIVE control
-        //     (`buildAxesFromDef` → `getPoliticalControllerOSID`). In practice kijevo_2 is
-        //     RBiH-held in-engine for the entire war, so it does NOT strip and IS a real
-        //     (enemy) first objective for this axis — the opposite of what this comment block
-        //     implied for years, and the specific error that sent a 4-specialist panel to a
-        //     two-thirds-wrong diagnosis. Read live control, never these comments, when
-        //     reasoning about stripping.
-        //   delijas          = RBiH (painted) — valid RS attack objective
-        //   trnovo           = RBiH (painted) — valid RS attack objective
-        //   praca/podgrab    = RS/RBiH but not adjacent to any RS staging — excluded
-        //
-        // Adjacency (verified in operational_contact_graph.json):
-        //   gornja_presjenica adj kijevo_2  ✓
-        //   gornja_presjenica adj trnovo    ✓
-        //   kijevo_2          adj delijas   ✓
-        //   trnovo adj pale:praca/podgrab   ✗ — pale cluster excluded (broken chain)
-        //
-        // available_from: 6 — injects right after Op Prsten recovery (~w4).
-        // SRK queue is explicit (see queue block below): Prsten → Trnovo.
-        // Two brigades, both home gornja_presjenica → eligible at injection, no march needed:
-        //   rs_trnovo_brigade:       home gornja_presjenica — east axis (delijas)
-        //   rs_1st_romanija_infantry: home gornja_presjenica — town axis (trnovo)
-        // Historically: Tactical Group Trnovo (Lukavac 93) drew from multiple SRK formations
-        // including Romanija-area brigades pre-positioned south of Sarajevo (BB2 p.289).
+        // Lukavac 93 northern assault: Sarajevo–Romanija formations advance from
+        // Gornja Presjenica through Kijevo/Delijaš and the eastern corridor. The
+        // separate Herzegovina Corps TG Kalinovik attacks Trnovo from Golubići.
+        // The execution-time objective strip uses LIVE political control, not
+        // painted snapshots; Kijevo remains an enemy first objective in this run.
+        // Operational_contact_graph.json confirms Mazlina ↔ Podgrab adjacency.
         corps: 'vrs_sarajevo_romanija',
         faction: 'RS',
-        name: 'Operation Trnovo',
+        name: 'Operation Lukavac 93',
+        sync_operation_name: 'sync_lukavac_93',
         staging_osid: 'op:trnovo:gornja_presjenica',
         // available_from: 69 — historical Lukavac 93 = August 1993 (~w69). Earlier firing
         // would capture trnovo/delijas before Jan 1993, breaking the 40w calibration target.
         available_from: 69,
+        prestage_from: 62,
         min_attack_outcome: 'repulsed',
         // 3 hops from rs_igman_brigade's home (hadzici:misevici_2) to the staging OSID.
         // Same reasoning as Operation Foca's planning_duration:6 -- the default anti-paralysis
         // window fires before a marching brigade arrives and produces zero_eligible_axis.
         planning_duration: 6,
+        minimum_viable_participants: 3,
+        minimum_assembled_participants: 3,
+        execution_attack_power_mult: 3,
         axes: [
             {
-                // gornja_presjenica → kijevo_2 (RS waypoint, strips) → delijas (RBiH-painted)
-                axis_id: 'trnovo_east',
-                name: 'Trnovo East — Delijas',
-                // rs_igman_brigade ADDED 2026-08-24. WHY LUKAVAC 93 NEVER FIRED ON TIME:
-                // rs_trnovo_brigade is authored mandatory with available_from 6, but it does not
-                // enter the war until t140 -- canFormEmergentBrigade gates a later-forming
-                // mandatory brigade on its home municipality's militia pool, and Trnovo's RS pool
-                // sits at available:0 / committed:4428 because rs_1st_romanija_infantry (same
-                // home_mun) absorbs it. So at t69, when available_from makes this op eligible,
-                // trnovo_east had zero valid brigades -> axis_empty -> the operation had 1 viable
-                // participant against a floor of 2 -> deferred. It finally injected at t141,
-                // seventy-two turns late, and captured nothing.
-                //
-                // The Igman Brigade is the historically correct second formation: Lukavac 93
-                // (July-August 1993) took Trnovo, Mt Igman and Bjelasnica. It spawns t29, is alive
-                // at t69, and is committed to no other operation. Keeping rs_trnovo_brigade in the
-                // list costs nothing -- it simply joins if and when it exists.
-                brigades: ['rs_trnovo_brigade', 'rs_igman_brigade'],
+                axis_id: 'trnovo_corridor',
+                name: 'Trnovo–Goražde Corridor',
+                // The authored Trnovo Brigade can form much later than the August
+                // 1993 launch; the standing SRK brigades supply the viable assault.
+                brigades: [
+                    'rs_65th_protection_motorized_regiment',
+                    'rs_1st_sarajevo_mechanized',
+                    'rs_2nd_sarajevo_light_infantry',
+                    'rs_igman_brigade',
+                    'rs_trnovo_brigade',
+                ],
                 objectives: [
-                    'op:trnovo:kijevo_2',   // RS waypoint (painted RS, strips at execution)
-                    'op:trnovo:delijas',     // RBiH-painted, persistent RBiH mismatch
+                    'op:trnovo:kijevo_2',
+                    'op:trnovo:delijas',
+                    'op:foca:mazlina',
+                    'op:pale:podgrab',
                 ],
                 staging_osid: 'op:trnovo:gornja_presjenica',
             },
             {
-                // gornja_presjenica → trnovo (RBiH-painted, directly adjacent)
                 axis_id: 'trnovo_town',
                 name: 'Trnovo Town',
-                brigades: ['rs_1st_romanija_infantry'],
+                brigades: [
+                    'rs_2nd_romanija_brigade',
+                    'rs_1st_romanija_infantry',
+                ],
                 objectives: [
                     'op:trnovo:trnovo',     // RBiH-painted, persistent RBiH mismatch
                 ],
@@ -611,9 +679,13 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         min_attack_outcome: 'repulsed',
         axes: [
             {
-                // Mostar heights — JNA garrison seizes Podveležje/Hum positions
-                // overlooking Mostar from east (BB1 p.193). JNA phantom only —
-                // VRS brigades follow their own corps' op (vrs_herzegovina → Op Višegrad).
+                // Mostar heights — JNA/Bosnian Serb forces occupied the high ground
+                // east and north of Mostar; the Croats captured Mt. Hum to the south on
+                // 23 May 1992 (BB1 printed p.156; the repo KB carries that folio at PDF
+                // page 192, `BB1_p0192.json`). JNA phantom only — VRS brigades follow
+                // their own corps' op (vrs_herzegovina → Op Višegrad). Historical
+                // control of the objectives below is under review; see
+                // docs/40_reports/20260917_VRANJEVICI_MOSTAR_JANUARY_DIAGNOSIS.md.
                 axis_id: 'mostar_heights',
                 name: 'Mostar Heights',
                 brigades: [
@@ -668,6 +740,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         faction: 'RS',
         name: 'Operation Foca',
         staging_osid: 'op:foca:foca_3',
+        prestage_from: 0,
         // planning_duration:6 — kalinovik axis brigades take 5 elapsed turns to reach vlaholje
         // (adjacent to golubici_2). Default aggressiveness anti-paralysis fires at elapsed=5 (t10=w09),
         // 1 turn before brigades arrive → zero_eligible_axis. Extending to 6 shifts anti-paralysis
@@ -744,6 +817,39 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         ],
     },
     {
+        // BB2 printed p.391: the 1st Guards led TG Kalinovik from the south,
+        // with Gacko and Foča covering the flanks. SRK attacked from the north.
+        // This is a separate corps operation so the sector owner can retain its
+        // own brigades through final operation-truth reconciliation.
+        corps: 'vrs_herzegovina',
+        faction: 'RS',
+        name: 'Lukavac 93 — TG Kalinovik',
+        sync_operation_name: 'sync_lukavac_93',
+        staging_osid: 'op:kalinovik:golubici_2',
+        available_from: 69,
+        prestage_from: 58,
+        enqueue_from: 58,
+        planning_duration: 10,
+        minimum_viable_participants: 3,
+        minimum_assembled_participants: 3,
+        execution_attack_power_mult: 3,
+        min_attack_outcome: 'repulsed',
+        axes: [{
+            axis_id: 'kalinovik_trnovo',
+            name: 'Kalinovik–Trnovo Southern Thrust',
+            brigades: [
+                'rs_1st_guards_motorized',
+                'rs_bilea_brigade',
+                'rs_kalinovik_brigade',
+                'rs_gacko_brigade',
+                'rs_foa_brigade',
+            ],
+            objectives: ['op:trnovo:trnovo', 'op:trnovo:tosici'],
+            staging_osid: 'op:kalinovik:golubici_2',
+            minimum_staged_brigades: 3,
+        }],
+    },
+    {
         // Bosanska Krupa was surrounded on 22 April 1992 and local Serb
         // territorials, supported by a battalion of the JNA 6th Partisan
         // Brigade, occupied most of the town by 23 April (BB1 p.185). The
@@ -751,10 +857,9 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         // approaches; Jezerski and Otoka remain outside this operation because
         // the Bosniak-held hills and suburbs survived the initial takeover.
         //
-        // The 11th Krupa Light Infantry is the engine's local organized-force
-        // abstraction for this opening action. Keep the operation single-axis,
-        // single-objective, and locally sourced so it cannot pull 2KK forces
-        // away from the Bihać-pocket frontage.
+        // The 11th Krupa Light Infantry handles the town. The 1st Drvar Light
+        // Infantry is already at Trubar, adjacent to the isolated Orašac OSID,
+        // and handles that objective on a separate axis within the same corps op.
         corps: 'vrs_2nd_krajina',
         faction: 'RS',
         name: 'Bosanska Krupa Takeover',
@@ -770,6 +875,13 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 brigades: ['rs_11th_krupa_light_infantry'],
                 objectives: ['op:bosanska_krupa:veliki_badic'],
                 staging_osid: 'op:bosanska_krupa:ivanjska_2',
+            },
+            {
+                axis_id: 'orasac',
+                name: 'Orašac',
+                brigades: ['rs_1st_drvar_light_infantry'],
+                objectives: ['op:bihac:orasac_2'],
+                staging_osid: 'op:bihac:trubar',
             },
         ],
     },
@@ -844,12 +956,11 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                 axis_id: 'corridor_east',
                 name: 'Corridor East',
                 brigades: [
-                    'rs_27th_derventa_motorized',   // spearhead — named for Derventa, fighting for home ground
                     'rs_16th_krajina_motorized',     // redeployed from Op Prijedor (Sanski Most axis) — historically at Derventa
                     'rs_1st_trebava_infantry',       // homed at Modriča — local knowledge, natural staging
                     'rs_1st_krnjin_light_infantry',  // local — home: Doboj area
                     'rs_3rd_ozren_light_infantry',   // local — home: Doboj area
-                    'rs_1st_prnjavor_light_infantry', // nearby — home: Prnjavor (~4 hops)
+                    'rs_1st_prnjavor_light_infantry', // retained on the main east axis while 27th Derventa clears its home pocket
                 ],
                 objectives: [
                     'op:modrica:modrica',
@@ -860,6 +971,15 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'op:bosanski_brod:brod',
                 ],
                 staging_osid: 'op:modrica:skugric_gornji_2',
+            },
+            {
+                // The 27th Derventa Motorized clears the residual pocket from
+                // its own home ground while the main effort keeps moving east.
+                axis_id: 'derventa_pocket',
+                name: 'Derventa Pocket',
+                brigades: ['rs_27th_derventa_motorized'],
+                objectives: ['op:derventa:zivinice'],
+                staging_osid: 'op:derventa:cerani_2',
             },
             {
                 // Southern prong toward Odžak — historically fell 12 July (BB1 p.182)
@@ -914,10 +1034,45 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
     },
     {
         // Operation Donji Vakuf — 1KK secures the Vrbas valley south of Jajce.
-        // Historically the 19th and 31st Krajina brigades were organic to Donji Vakuf
-        // and the 16th Krajina Motorized was a 1KK formation (BB1 p.498). The 16th
-        // supplies the heavy follow-through after its preceding Corridor commitment;
-        // in the measured handoff it is rested and already on the Donji Vakuf front.
+        //
+        // OPEN HISTORICAL DEFECT — the town's capture date is wrong, and no sound fix exists yet.
+        // `op:donji_vakuf:donji_vakuf_2` carries the town of Donji Vakuf and is captured here at
+        // t35 (7 December 1992). The town was in fact Serb-held from 17 April 1992: the Serb SJB
+        // was set up that day and "took control of the entire town the same day" (ICTY Stanišić &
+        // Župljanin TJ Vol I §238; Krajišnik TJ §438, both resting on the SJB Srbobran report to
+        // the Banja Luka CSB of 4 October 1993). Balkan Battlegrounds independently has Vrbas 92's
+        // southern axis running "from the direction of Serb-held Donji Vakuf (Srbobran)" with "the
+        // 19th at Donji Vakuf" guarding its flank (BB2 printed p.330) — the town was this corps'
+        // OWN springboard for Jajce, not a prize taken afterwards. The engine therefore has the
+        // VRS conquer its own rear area five months late.
+        //
+        // The 2026-09-17 attempt to repair this with three event `control_change` rows was
+        // WITHDRAWN: authoring a territorial result through an ownership writer is prohibited by
+        // the owner rule recorded in docs/40_reports/CALIBRATION_MASTER.md. The objective is
+        // restored to its pre-experiment configuration so the comparison baseline holds. That
+        // restoration does NOT endorse the December chronology — the defect stays OPEN until a
+        // replacement is found on the military-capability side: an early, contingent, ordinary
+        // action path by forces that can actually reach the town in April–June 1992. The research
+        // and the rejected experiment are preserved in
+        // docs/40_reports/20260917_PRUSAC_DONJI_VAKUF_JANUARY_DIAGNOSIS.md.
+        //
+        // The 1KK/30th Division halted on 18 November 1992 after erasing the Karaula
+        // salient — "Here the VRS halted, apparently content with its gains" (BB2 p.332).
+        // Nothing here should grow into a wider post-Jajce conquest sweep.
+        //
+        // ROSTER. The 19th and 31st were organic to Donji Vakuf — HQ Srbobran (Donji Vakuf)
+        // in the June 1992–October 1995 order of battle at BB2 printed p.277-279, and the
+        // 19th is placed there in 1992 by BB2 p.330. (The previous citation, "BB1 p.498",
+        // is a scan index whose printed folio is 461: Appendix G, "Skeleton Bosnian Serb
+        // Army Order of Battle, JULY 1995" — a 1995 table standing in for a 1992
+        // deployment. Do not date 1992 rosters from it.) The 16th Krajina Motorized is a
+        // Banja Luka formation (same table) and supplies the heavy follow-through after its
+        // preceding Corridor commitment; that is engine availability, not a sourced 1992
+        // posting for this sector.
+        //
+        // Reserve the authored group while Jajce is still resolving so the distant
+        // 16th can complete its measured eight-hop concentration before this queued
+        // slot opens; control still changes only through the ordinary battle resolver.
         // Seven turns cover the 31st's measured six-hop displacement plus the mandatory
         // planning turn, preserving the authored march-budget semantics.
         //
@@ -926,43 +1081,54 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         // torlakovac_2 — first objective in the sweep. grdovo (Jajce) would also be
         // adjacent but starts HRHB; pribeljci_2 is always RS and safe.
         //
-        // Objectives: the six-settlement historical sweep south through Prusac,
-        // then Korenići.  Korenići is the terminal Donji Vakuf pocket: leaving it
-        // friendly after the town and Prusac fall causes 3rd Corps to march brigades
-        // into the exposed cell several turns later instead of holding the Bugojno line.
+        // Objectives: the main sweep follows the town breakthrough directly into Korenići,
+        // preserving the heavy spearhead's ordinary town–Korenići combat edge. Prusac is
+        // not adjacent to that chain, so the local 19th and 31st approach it on a parallel
+        // axis from RS-held Pribrača instead of making a lateral transfer after Korenići.
+        // Jemanlići is adjacent to Prusac, so the local axis can contest its
+        // RBiH-held position after taking Prusac through ordinary combat.
+        // Torlakovac (3 June 1992) and Korenići (21 May 1992) carry the same date defect as the town
+        // (Stanišić TJ §242); they too are listed here only until a sound replacement exists.
         // Removed from triggered Op Jajce (vrs_2nd_krajina) — 1KK handles DV.
         corps: 'vrs_1st_krajina',
         faction: 'RS',
         name: 'Operation Donji Vakuf',
         staging_osid: 'op:sipovo:pribeljci_2',
+        prestage_from: 21,
         min_attack_outcome: 'repulsed',
+        execution_attack_power_mult: 1.65,
         planning_duration: 7,
         axes: [
             {
                 axis_id: 'donji_vakuf_sweep',
                 name: 'Donji Vakuf Sweep',
                 brigades: [
-                    'rs_19th_krajina_light_infantry' as FormationId,
-                    'rs_31st_light_infantry' as FormationId,
-                    // Both are already deployed in the Donji Vakuf sector when the
-                    // queued operation injects; reserving them here prevents unrelated
-                    // same-corps probes from consuming the local follow-through force.
                     'rs_22nd_krajina_infantry' as FormationId,
                     'rs_5th_kozara_light_infantry' as FormationId,
                     'rs_16th_krajina_motorized' as FormationId,
                 ],
                 // pribeljci_2 (RS) is adjacent to torlakovac_2 — valid staging → first obj chain.
-                // torlakovac_2 → babin_potok_2 → oborci_2 → donji_vakuf_2 →
-                // prusac_2; Korenići is adjacent to the secured Donji Vakuf/Jemanlići line.
+                // torlakovac_2 → babin_potok_2 → oborci_2 → donji_vakuf_2 → korenici.
                 objectives: [
                     'op:donji_vakuf:torlakovac_2',
                     'op:donji_vakuf:babin_potok_2',
                     'op:donji_vakuf:oborci_2',
                     'op:donji_vakuf:donji_vakuf_2',
-                    'op:donji_vakuf:prusac_2',
                     'op:donji_vakuf:korenici',
                 ],
                 staging_osid: 'op:sipovo:pribeljci_2',
+            },
+            {
+                // Pribrača is RS-held and directly adjacent to Prusac. Keeping the local
+                // brigades on this axis avoids sending them to the main sweep and back again.
+                axis_id: 'prusac_local',
+                name: 'Prusac Local Axis',
+                brigades: [
+                    'rs_19th_krajina_light_infantry' as FormationId,
+                    'rs_31st_light_infantry' as FormationId,
+                ],
+                objectives: ['op:donji_vakuf:prusac_2', 'op:donji_vakuf:jemanlici'],
+                staging_osid: 'op:donji_vakuf:pribraca_2',
             },
             {
                 // Gornje Krčevine is a separate Vlašić-side pocket, not graph-adjacent
@@ -1021,9 +1187,19 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
             {
                 axis_id: 'stolac_sweep',
                 name: 'Stolac-Čapljina Sweep',
-                // Main effort: Čapljina → Tasovčići → Hodbina → Rotimlja → Stolac
-                // HVO sweeps VRS from east Neretva bank, then takes Stolac town.
-                // Pješivac Kula and Hatelji excluded — VRS retains inland positions.
+                // Main effort: Čapljina → Tasovčići → Hodbina → Rotimlja → Stolac →
+                // Pješivac-Kula. HVO sweeps VRS from the east Neretva bank, takes Stolac
+                // town, then consolidates the inland Stolac-municipality cells.
+                //
+                // Pješivac-Kula is INCLUDED: the painted reference holds it HRHB at all
+                // four checkpoints, so it must change hands under HVO combat rather than
+                // remain on the VRS turn-0 controller. The OSID bundles Borojevići,
+                // Pješivac-Greda, Pješivac-Kula, Poprati, Ljubljenica, Barane and Dabrica.
+                // It is contact-adjacent to Stolac and Rotimlja, so the sweep reaches it
+                // legally at the end of the sequence.
+                //
+                // Hatelji remains EXCLUDED — it is painted RS at all four checkpoints, and
+                // this operation must not spill into it.
                 // Mostar Hills axis REMOVED: vranjevići/kružanj painted RS in Jan 1993
                 // (VRS held those positions; HVO did not take them in Op Jackal)
                 brigades: [
@@ -1042,8 +1218,50 @@ const HRHB_PRE_PLANNED: PrePlannedOp[] = [
                     'op:mostar:hodbina_2',
                     'op:stolac:rotimlja_2',
                     'op:stolac:stolac_2',
+                    'op:stolac:pjesivac_kula_2',
                 ],
                 staging_osid: 'op:capljina:capljina_2',
+            },
+        ],
+    },
+    {
+        // The January 1993 control paint leaves Lug and Paroš in RBiH hands,
+        // while the April 1994 paint places both on the HVO side of the Prozor
+        // line. This local Rama Brigade counterattack owns that bounded change;
+        // it is not permission for a general HVO offensive in Herzegovina.
+        // SCENARIO INFERENCE, owner-approved measurement 2026-09-27; no dated
+        // source places an HVO Lug/Paroš counterattack in Aug–Sep 1993.
+        corps: 'hvo_tomislavgrad',
+        faction: 'HRHB',
+        name: 'Prozor–Rama Line Counterattack',
+        staging_osid: 'op:prozor:prozor_2',
+        available_from: 71,
+        min_attack_outcome: 'repulsed',
+        execution_attack_power_mult: 1.8,
+        planning_duration: 4,
+        minimum_viable_participants: 1,
+        minimum_assembled_participants: 1,
+        axes: [
+            {
+                // BB1 printed p.159 describes the 23 October 1992 Prozor shelling
+                // (t29), not this inferred action. The authored Lug axis meets
+                // an entrenched 4th Corps brigade at a 0.49 power ratio.
+                axis_id: 'prozor_lug',
+                name: 'Prozor Lug',
+                brigades: ['hrhb_kralj_tomislav_brigade'],
+                objectives: ['op:prozor:lug_2'],
+                staging_osid: 'op:prozor:prozor_2',
+            },
+            {
+                // The local Rama Brigade takes Paroš from its own headquarters, so
+                // the Tomislavgrad reinforcement does not end on the Jablanica
+                // shoulder next to Doljani. This is tactical operation authoring; no
+                // source assigns each village to a named unit.
+                axis_id: 'prozor_paros',
+                name: 'Prozor Paroš',
+                brigades: ['hvo_rama_brigade'],
+                objectives: ['op:prozor:paros'],
+                staging_osid: 'op:prozor:jaklici',
             },
         ],
     },
@@ -1182,7 +1400,10 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                     'arbih_283rd_east_bosnian_light',
                     'arbih_284th_east_bosnian_light',
                 ],
-                objectives: ['op:bratunac:jezestica_2'],
+                objectives: [
+                    'op:bratunac:jezestica_2',
+                    'op:vlasenica:sebiocina',
+                ],
                 staging_osid: 'op:srebrenica:bostahovine_2',
             },
         ],
@@ -1214,6 +1435,306 @@ const ARBIH_PRE_PLANNED: PrePlannedOp[] = [
                 ],
                 objectives: ['op:maglaj:jablanica'],
                 staging_osid: 'op:maglaj:maglaj_2',
+            },
+        ],
+    },
+    {
+        // ARBiH 3rd Corps summer 1993 counteroffensive in Central Bosnia. The
+        // Travnik, Fojnica, Gornji Vakuf, Kakanj, and Novi Travnik fighting was
+        // one operational theater, but not one magical territorial transfer:
+        // each axis below must assemble, attack, win, and occupy its own cells.
+        // The selected objectives are the HVO-held peripheral positions that
+        // changed hands during the campaign; the Vitez/Busovača/Kiseljak and
+        // Žepče enclave cores are deliberately outside the operation.
+        corps: 'arbih_3rd_corps',
+        faction: 'RBiH',
+        name: 'Central Bosnia Counteroffensive',
+        available_from: 60,
+        staging_osid: 'op:travnik:travnik_2',
+        min_attack_outcome: 'repulsed',
+        execution_attack_power_mult: 1.35,
+        // The Zavidovići column is geographically dispersed; this budget lets
+        // the authored axes assemble before the campaign opens.
+        planning_duration: 12,
+        axes: [
+            {
+                axis_id: 'fojnica_periphery',
+                name: 'Fojnica Periphery',
+                brigades: [
+                    'arbih_17th_vitezka_mountain',
+                    'arbih_733rd_mountain',
+                    'arbih_737th_muslim_light',
+                ],
+                objectives: ['op:fojnica:bakovici_2'],
+                staging_osid: 'op:fojnica:fojnica_2',
+            },
+            {
+                // The four Kakanj positions form two graph-valid approaches from
+                // Kakanj town. Running them as parallel columns preserves every
+                // combat objective without serializing the whole summer campaign
+                // behind one four-cell axis.
+                axis_id: 'kakanj_slapnica_poljani',
+                name: 'Kakanj Slapnica–Poljani',
+                brigades: [
+                    'arbih_303rd_vitezka_mountain',
+                    'arbih_319th_liberation',
+                ],
+                objectives: [
+                    'op:kakanj:slapnica_2',
+                    'op:kakanj:poljani_2',
+                ],
+                staging_osid: 'op:kakanj:kakanj_2',
+            },
+            {
+                axis_id: 'kakanj_bukovlje_seoce',
+                name: 'Kakanj Bukovlje–Seoce',
+                brigades: ['arbih_329th_mountain'],
+                objectives: [
+                    'op:kakanj:bukovlje_2',
+                    'op:kakanj:seoce_2',
+                ],
+                staging_osid: 'op:kakanj:kakanj_2',
+            },
+            {
+                axis_id: 'gornji_vakuf_novi_travnik',
+                name: 'Gornji Vakuf–Novi Travnik',
+                brigades: [
+                    'arbih_314th_slavna_liberation',
+                    'arbih_330th_liberation',
+                    'arbih_717th_slavna_mountain',
+                ],
+                objectives: [
+                    'op:gornji_vakuf:zdrimci',
+                    'op:novi_travnik:rat_2',
+                ],
+                staging_osid: 'op:gornji_vakuf:drazev_dolac',
+            },
+            {
+                axis_id: 'novi_travnik_northern_approach',
+                name: 'Novi Travnik Northern Approach',
+                brigades: [
+                    'arbih_708th_mountain',
+                    'arbih_712th_mountain',
+                    'arbih_727th_slavna',
+                ],
+                objectives: ['op:novi_travnik:ruda_2'],
+                staging_osid: 'op:novi_travnik:novi_travnik_2',
+            },
+            {
+                axis_id: 'zavidovici_position',
+                name: 'Zavidovići Position',
+                brigades: [
+                    'arbih_7th_vitezka_muslim_liberation',
+                ],
+                // Čardak historically fell in November–December 1992, when the
+                // Gostović valley was cleared. The position is eligible for the
+                // generic isolated-position operation — its HVO-held Vinište edge no
+                // longer disqualifies it, see `isBoundedIsolatedEnemyPosition` — and on
+                // the calibration scenario the 3rd Corps commander now reaches it once
+                // this operation stops freezing its roster before it is due, see
+                // `getHeadQueuedPrePlannedBrigadeIds`. This axis remains a fallback: it
+                // attacks Čardak explicitly from adjacent ARBiH-held Hajderovići if the
+                // position is still held when the Central Bosnia counteroffensive
+                // finally injects.
+                objectives: ['op:zavidovici:cardak_2'],
+                staging_osid: 'op:zavidovici:hajderovici_2',
+            },
+        ],
+    },
+    {
+        // Battle of Bugojno, 18–28 July 1993. The local 3rd Corps group attacks
+        // the remaining HVO positions from the ARBiH-held town approaches. This
+        // is a follow-on to the wider Central Bosnia fighting and therefore sits
+        // behind it in the same corps queue.
+        corps: 'arbih_3rd_corps',
+        faction: 'RBiH',
+        name: 'Battle of Bugojno',
+        available_from: 66,
+        staging_osid: 'op:bugojno:kula_2',
+        min_attack_outcome: 'repulsed',
+        execution_attack_power_mult: 1.4,
+        planning_duration: 6,
+        axes: [
+            {
+                axis_id: 'bugojno_southern_positions',
+                name: 'Bugojno Southern Positions',
+                brigades: [
+                    'arbih_705th_slavna_mountain',
+                    'arbih_707th_slavna_mountain',
+                    'arbih_725th_light',
+                    'arbih_7th_vitezka_muslim_liberation',
+                ],
+                objectives: [
+                    'op:bugojno:vucipolje_3',
+                    'op:bugojno:udurlije',
+                    'op:gornji_vakuf:pajic_polje_2',
+                ],
+                staging_osid: 'op:bugojno:kula_2',
+            },
+            {
+                axis_id: 'bugojno_northern_positions',
+                name: 'Bugojno Northern Positions',
+                brigades: [
+                    'arbih_708th_mountain',
+                    'arbih_712th_mountain',
+                    'arbih_727th_slavna',
+                ],
+                objectives: ['op:bugojno:medini'],
+                staging_osid: 'op:bugojno:brizina',
+            },
+        ],
+    },
+    {
+        // The HVO held Vareš through the 23 October Stupni Do massacre. The
+        // subsequent ARBiH advance into Vareš belongs to its own November
+        // operation rather than the summer Central Bosnia counteroffensive.
+        // The force concentrates after Bugojno and still has to take both
+        // positions through ordinary operation combat.
+        corps: 'arbih_3rd_corps',
+        faction: 'RBiH',
+        name: 'Vareš November Offensive',
+        available_from: 81,
+        enqueue_from: 74,
+        prestage_from: 74,
+        staging_osid: 'op:vares:budozelje_2',
+        min_attack_outcome: 'repulsed',
+        execution_attack_power_mult: 1.35,
+        planning_duration: 6,
+        axes: [
+            {
+                axis_id: 'vares_approach',
+                name: 'Vareš Approach',
+                brigades: [
+                    'arbih_327th_vitezka_mountain',
+                    'arbih_328th_mountain',
+                    'arbih_351st_liberation',
+                ],
+                objectives: [
+                    'op:vares:gornja_borovica_2',
+                    'op:vares:vares_2',
+                ],
+                staging_osid: 'op:vares:budozelje_2',
+            },
+        ],
+    },
+    {
+        // LOCAL Jablanica–Doljani attack, late July 1993. ŽK Mostar case
+        // K-06-000 017 (Marijanović & Buhovac, 10 April 2007) records that the
+        // ARBiH "ušla u" (entered) the village of Doljani in late July / early
+        // August 1993; the 28/29 August "oslobođeno" date in that record is a
+        // witness claim the court did not adopt. BB1 printed p.206 (pdf_idx 242),
+        // in its 12 November 1993 passage, has the HVO holding Doljani again, and
+        // BB2 printed p.450 (1-based PDF page 469) records only that HVO forces
+        // south of Konjic and west of Jablanica shelled Muslim-held positions in
+        // late January/February 1994 while neither side made significant gains —
+        // shelling, not a control statement. So this operation owns the summer
+        // 1993 entry only — NOT a sustained ARBiH hold to April 1994.
+        //
+        // SOURCE LIMITS (deliberately narrow):
+        //  - The 44th Mountain attribution to this attack is LOW CONFIDENCE. It
+        //    is a Jablanica-area 4th Corps mountain brigade; no retained source
+        //    names it for Doljani. BB2 printed p.435 does place a named ARBiH
+        //    44th "Neretva" Brigade pushing the confrontation line west between
+        //    Prozor and Jablanica on 18 September 1993 — after this operation's
+        //    window, and naming neither Doljani nor this attack. The 27–28 July
+        //    1993 date is the HRW (Sep 1993) report of an ARBiH attack on Doljani.
+        //    The court file does NOT find the month misremembered: it records the
+        //    late-July/early-August entry and leaves the 28/29 August witness
+        //    claim unadopted. Reading the late-July battle as that same episode
+        //    the witnesses dated to August is OUR INFERENCE, not a court finding,
+        //    and no retained source establishes a continuous ARBiH hold
+        //    afterwards. Who held Doljani at the turn-104 (7–13 April 1994)
+        //    checkpoint is UNKNOWN in the retained record, not established either
+        //    way.
+        //  - This is an unnamed local action. It carries no Army-HQ identity, no
+        //    attack-power multiplier, no timed ownership change and no
+        //    guaranteed result: Doljani changes hands only through ordinary
+        //    operation combat, and `repulsed` lets the attack launch even at a
+        //    poor predicted ratio.
+        //
+        // It must precede Operation Neretva '93 in this array: at scenario load
+        // `injectPrePlannedOperations` seeds each corps' slot-0 queue in catalog
+        // order, so authoring it first is what puts a t66 launch ahead of the
+        // September Neretva plan. Array order fixes the queue slot, NOT the
+        // attack turn: the measured t75 candidate injected at t66 but its first
+        // three Doljani battles fell at t70, t71 and t72, all stalemates, because
+        // `planning_duration: 3` was spent marching the 444th from
+        // `op:konjic:celebici_2`. A t69 opening attack is NOT established by this
+        // definition, and no capture of Doljani is guaranteed by it.
+        corps: 'arbih_4th_corps',
+        faction: 'RBiH',
+        name: 'Jablanica–Doljani Local Attack',
+        staging_osid: 'op:jablanica:jablanica_2',
+        available_from: 66,
+        min_attack_outcome: 'repulsed',
+        planning_duration: 3,
+        minimum_viable_participants: 1,
+        minimum_assembled_participants: 1,
+        axes: [
+            {
+                axis_id: 'jablanica_doljani',
+                name: 'Jablanica–Doljani',
+                brigades: ['arbih_444th_mountain'],
+                objectives: ['op:jablanica:doljani_2'],
+                staging_osid: 'op:jablanica:jablanica_2',
+            },
+        ],
+    },
+    {
+        // Operation Neretva '93, September 1993. BB2 pp.434–435 describes a
+        // sizeable but bounded offensive east of Prozor and along the Neretva,
+        // not the seizure of Prozor itself. The operation therefore attacks only
+        // the exposed Turija position from the Konjic bridgehead and excludes the
+        // HVO-held Prozor core and its immediate shoulder.
+        corps: 'arbih_4th_corps',
+        faction: 'RBiH',
+        name: "Operation Neretva '93",
+        // Planning opens four weeks before the dated September attack so the
+        // 4th Corps group is assembled—and not borrowed by an unrelated local
+        // operation—when the historical execution window begins.
+        available_from: 70,
+        staging_osid: 'op:konjic:konjic_2',
+        min_attack_outcome: 'repulsed',
+        execution_attack_power_mult: 1.2,
+        // The operation was directed by the ARBiH General Staff. Marking that
+        // command relationship opens the canonical faction-wide donor pool; it
+        // does not grant control or bypass the opening-attack readiness check.
+        army_hq_op_id: 'ahq:RBiH:1993:neretva_93',
+        planning_duration: 6,
+        axes: [
+            {
+                axis_id: 'upper_neretva',
+                name: 'Upper Neretva',
+                brigades: [
+                    'arbih_441st_vitezka_mountain',
+                    'arbih_443rd_mountain',
+                    'arbih_450th_light',
+                    'arbih_4th_muslim_light',
+                ],
+                objectives: ['op:konjic:turija'],
+                staging_osid: 'op:konjic:konjic_2',
+            },
+            {
+                axis_id: 'konjic_western_approach',
+                name: 'Konjic Western Approach',
+                brigades: [
+                    'arbih_442nd_mountain',
+                    'arbih_448th_liberation',
+                    'arbih_4th_muslim_light',
+                ],
+                objectives: ['op:konjic:buturovic_polje_2'],
+                staging_osid: 'op:konjic:celebici_2',
+            },
+            {
+                axis_id: 'jablanica_approach',
+                name: 'Jablanica Approach',
+                brigades: [
+                    'arbih_444th_mountain',
+                    'arbih_447th_liberation',
+                    'arbih_448th_liberation',
+                ],
+                objectives: ['op:jablanica:doljani_2'],
+                staging_osid: 'op:jablanica:jablanica_2',
             },
         ],
     },
@@ -1345,6 +1866,20 @@ function recordPrePlannedSatisfiedByStart(state: GameState, def: PrePlannedOp): 
     );
 }
 
+function hasDeclinedPrePlannedAuthorization(state: GameState, def: PrePlannedOp): boolean {
+    const authorizationAction = historicalOperationAuthorizationAction({
+        kind: 'preplanned',
+        faction: def.faction,
+        corpsId: def.corps,
+        operationName: def.name,
+    });
+    return (state.meta.pending_proposal_reviews ?? []).some((review) =>
+        review.proposed_action === authorizationAction
+        && review.faction === def.faction
+        && review.accepted === false
+    );
+}
+
 function prePlannedOperationAlreadyResolved(state: GameState, def: PrePlannedOp): boolean {
     if ((state.operation_history ?? []).some((entry) =>
         entry.corps_id === def.corps
@@ -1413,11 +1948,26 @@ function buildAxesFromDef(
             if (!fid || !formation) return [];
             if (!isEligibleOperationFormation(formation)) return [];
             if ((formation.disrupted_turns ?? 0) > 0) return [];
+            const isArmyHqElite = isSectorAssignmentExemptCorpsId(formation.corps_id)
+                && formation.elite_loan_state != null;
+            const isAuthoredEliteAtStaging = isArmyHqElite
+                && isForwardDeployedOnAxis(formation, axisDef);
+            const isAlreadyLoanedToHost = isArmyHqElite
+                && formation.elite_loan_state?.on_loan === true
+                && formation.elite_loan_state.loaned_to_corps === def.corps
+                && isEliteAuthoredForHistoricalOperation(fid, def.name);
             // Existing movement owners retain authority. Injection cannot prove
             // whether transit is player-, recall-, loan-, or bot-authored, so it
-            // must not claim or reset a brigade already in column movement.
+            // must not claim or reset a brigade already in column movement. The
+            // one exception is a named Army-HQ elite already at this authored
+            // axis's staging OSID: its generic home-return transit is superseded
+            // by the operation it physically assembled for.
             if (movementState[fid]?.status === 'in_transit') {
-                if (movementState[fid]?.owner !== 'bot_discretionary') return [];
+                if (
+                    movementState[fid]?.owner !== 'bot_discretionary'
+                    && !isAuthoredEliteAtStaging
+                    && !isAlreadyLoanedToHost
+                ) return [];
             }
             // Already fighting for someone else — see collectCommittedFormationIds.
             if (committedElsewhere.has(fid)) return [];
@@ -1436,15 +1986,23 @@ function buildAxesFromDef(
             // if explicitly named in a pre-planned op — they get an elite loan
             // to the operation's corps at injection time.
             const corpsId = getFormationCorpsId(formation);
-            if (isSectorAssignmentExemptCorpsId(corpsId)) {
+            if (isArmyHqElite || isSectorAssignmentExemptCorpsId(corpsId)) {
                 if (!formation.elite_loan_state) return []; // non-elite exempt = skip
                 const ls = formation.elite_loan_state;
-                if (ls.on_loan) return [];
-                if (!isEliteAvailableForLoan(formation, state.meta.turn)) return [];
-                if (adjacency && !canEliteLoanReachCorpsTerritory(state, fid, def.corps, adjacency)) return [];
-                eliteLoans.push({ brigadeId: fid, corpsId: def.corps });
+                if (ls.on_loan && !isAlreadyLoanedToHost) return [];
+                if (!isAlreadyLoanedToHost) {
+                    if (!isEliteAvailableForLoan(formation, state.meta.turn)) return [];
+                    if (
+                        !isAuthoredEliteAtStaging
+                        && adjacency
+                        && !canEliteLoanReachCorpsTerritory(state, fid, def.corps, adjacency)
+                    ) return [];
+                    eliteLoans.push({ brigadeId: fid, corpsId: def.corps });
+                }
             }
-            if (movementState[fid]?.status === 'in_transit') reclaimedBotTransit.push(fid);
+            if (movementState[fid]?.status === 'in_transit' || isAuthoredEliteAtStaging) {
+                reclaimedBotTransit.push(fid);
+            }
             if ((formation.personnel ?? 0) >= MIN_ATTACK_PERSONNEL) viableParticipating += 1;
             return [fid];
         });
@@ -1466,6 +2024,12 @@ function buildAxesFromDef(
         const lastAxis = builtAxes[builtAxes.length - 1]!;
         lastAxis.axis_id = axisDef.axis_id;
         lastAxis.name = axisDef.name;
+        if (axisDef.minimum_staged_brigades != null) {
+            lastAxis.minimum_staged_brigades = Math.max(1, Math.trunc(axisDef.minimum_staged_brigades));
+        }
+        if (axisDef.minimum_forward_brigades != null) {
+            lastAxis.minimum_forward_brigades = Math.max(1, Math.trunc(axisDef.minimum_forward_brigades));
+        }
         allParticipating.push(...axisBrigades);
     }
 
@@ -1488,7 +2052,16 @@ function deployPrePlannedEliteLoans(
     adjacency?: Map<Osid, Osid[]>,
 ): void {
     for (const loan of eliteLoans) {
-        if (adjacency && !canEliteLoanReachCorpsTerritory(state, loan.brigadeId, loan.corpsId, adjacency)) {
+        const formation = state.military.formations?.[loan.brigadeId];
+        const assembledAtAuthoredStaging = def.axes.some((axis) =>
+            axis.brigades.includes(loan.brigadeId)
+            && formation?.location_osid === axis.staging_osid
+        );
+        if (
+            adjacency
+            && !assembledAtAuthoredStaging
+            && !canEliteLoanReachCorpsTerritory(state, loan.brigadeId, loan.corpsId, adjacency)
+        ) {
             continue;
         }
         deployEliteLoan(
@@ -1506,6 +2079,109 @@ function deployPrePlannedEliteLoans(
             `Pre-planned elite loan for ${def.name}`,
             'army_ai',
         );
+    }
+}
+
+/** Begin an authored concentration march before a deferred or queued operation opens. */
+function hasConflictingOperationCommitment(
+    state: GameState,
+    brigadeId: FormationId,
+    operationName: string,
+): boolean {
+    const commands = state.military.corps_command ?? {};
+    for (const corpsId of Object.keys(commands).sort(strictCompare)) {
+        for (const operation of commands[corpsId]?.active_operations ?? []) {
+            if (!operation.participating_brigades?.includes(brigadeId)) continue;
+            if (operation.name === operationName && operation.phase === 'planning') continue;
+            return true;
+        }
+    }
+    return false;
+}
+
+function prestageReservedPrePlannedElites(state: GameState, def: PrePlannedOp, turn: number): void {
+    if (def.prestage_from == null || turn < def.prestage_from) return;
+    if (state.meta.player_faction === def.faction) return;
+    const command = state.military.corps_command?.[def.corps];
+    const liveOperation = command?.active_operations?.find((operation) => operation.name === def.name);
+    if (liveOperation && liveOperation.phase !== 'planning') return;
+    if (prePlannedOperationAlreadyResolved(state, def)) return;
+    const formations = state.military.formations ?? {};
+    const movementState = state.military.brigade_movement_state ?? {};
+    for (const axis of def.axes) {
+        if (!axis.staging_osid) continue;
+        for (const authoredFormationId of [...axis.brigades].sort(strictCompare)) {
+            const resolved = resolveOperationFormation(formations, authoredFormationId);
+            const brigadeId = resolved.formation_id;
+            const formation = resolved.formation;
+            if (!brigadeId || !formation) continue;
+            if (hasConflictingOperationCommitment(state, brigadeId, def.name)) continue;
+            // A Main Staff loan may pass directly from one completed dated
+            // operation to another in the same receiving corps. The active-op
+            // check above still protects a live earlier commitment.
+            if (formation.elite_loan_state?.on_loan
+                && (formation.elite_loan_state.loaned_to_corps !== def.corps
+                    || !isEliteAuthoredForHistoricalOperation(brigadeId, def.name))) continue;
+            if (formation.location_osid === axis.staging_osid) {
+                const transit = movementState[brigadeId];
+                const order = state.military.brigade_movement_orders?.[brigadeId];
+                const destinations = transit?.destination_sids ?? order?.destination_sids ?? [];
+                const orderedAway = destinations.length > 0 && !destinations.includes(axis.staging_osid as SettlementId);
+                const reclaimable = transit?.owner === 'bot_discretionary'
+                    || order?.owner === 'bot_discretionary'
+                    || isSectorAssignmentExemptCorpsId(formation.corps_id);
+                if (orderedAway && reclaimable) {
+                    delete state.military.brigade_movement_state?.[brigadeId];
+                    delete state.military.brigade_movement_orders?.[brigadeId];
+                }
+                continue;
+            }
+            if (movementState[brigadeId]?.status === 'in_transit') {
+                if (movementState[brigadeId]?.destination_sids?.includes(axis.staging_osid as SettlementId)) continue;
+                const authoredHistoricalElite = isSectorAssignmentExemptCorpsId(formation.corps_id)
+                    && isEliteAuthoredForHistoricalOperation(brigadeId, def.name);
+                if (movementState[brigadeId]?.owner !== 'bot_discretionary' && !authoredHistoricalElite) continue;
+                delete state.military.brigade_movement_state?.[brigadeId];
+                delete state.military.brigade_movement_orders?.[brigadeId];
+            }
+            if (formation.posture === 'dig_in') {
+                formation.posture = 'defend';
+                formation.dig_in_progress = 0;
+            }
+            if (!state.military.brigade_movement_orders) state.military.brigade_movement_orders = {};
+            // This dated authored commitment owns the movement slot over
+            // discretionary sector routing and later march correction, including
+            // while the operation is queued behind an earlier authored operation.
+            const concentrationOrder = {
+                destination_sids: [axis.staging_osid as SettlementId],
+                stance: 'column' as const,
+                owner: 'authored_preplanned' as const,
+            };
+            state.military.brigade_movement_orders[brigadeId] = concentrationOrder;
+        }
+    }
+}
+
+/** Advance dated bot-controlled Main Staff concentrations every war turn. */
+export function prestageDeferredPrePlannedElites(state: GameState): void {
+    const turn = state.meta.turn;
+    for (const def of ALL_PRE_PLANNED) {
+        if (def.enqueue_from != null) {
+            const command = state.military.corps_command?.[def.corps];
+            if (turn >= def.enqueue_from && command
+                && !prePlannedOperationAlreadyResolved(state, def)
+                && !hasDeclinedPrePlannedAuthorization(state, def)
+                && !command.queued_operations?.includes(def.name)
+                && !command.active_operations.some((op) => op.name === def.name)) {
+                command.queued_operations = [...(command.queued_operations ?? []), def.name];
+            }
+            // A terminal queue removal (declined or already owned) must also
+            // stop this dated plan from continuing to marshal its old force.
+            if (!command?.queued_operations?.includes(def.name)
+                && !command?.active_operations.some((op) => op.name === def.name)) continue;
+            if (hasDeclinedPrePlannedAuthorization(state, def)) continue;
+        }
+        prestageReservedPrePlannedElites(state, def, turn);
     }
 }
 
@@ -1534,6 +2210,11 @@ export function injectPrePlannedOperations(
 
     const formations = state.military.formations ?? {};
     const turn = state.meta?.turn ?? 0;
+
+    for (const def of ALL_PRE_PLANNED) {
+        if (options?.faction && def.faction !== options.faction) continue;
+        prestageReservedPrePlannedElites(state, def, turn);
+    }
 
     // Validate only definitions that are actually eligible to inject now.
     // Deferred operations are validated when their queue slot becomes live.
@@ -1656,7 +2337,7 @@ export function injectPrePlannedOperations(
         }
     }
 
-    // Queue Drina Corps: Operation Drina → Podrinje Sweep → Pracha River → Zvezda 94 (available_from:100)
+    // Queue Drina Corps: Operation Drina → Podrinje Sweep → Pracha River → Zvezda 94 (planning from w93)
     if (injectedCorps.has('vrs_drina')) {
         const cmd = corpsCommand['vrs_drina'];
         if (cmd && !cmd.queued_operations) {
@@ -1664,12 +2345,11 @@ export function injectPrePlannedOperations(
         }
     }
 
-    // Queue SRK: Operation Prsten → autumn Kijevo shoulder → Operation Trnovo
-    // Prsten completes ~w9-10; Trnovo (available_from:6) injects immediately after.
+    // Queue SRK: Operation Prsten → Kijevo shoulder → Operation Lukavac 93.
     if (injectedCorps.has('vrs_sarajevo_romanija')) {
         const cmd = corpsCommand['vrs_sarajevo_romanija'];
         if (cmd && !cmd.queued_operations) {
-            cmd.queued_operations = ['Operation Kijevo', 'Operation Trnovo'];
+            cmd.queued_operations = ['Operation Kijevo', 'Operation Lukavac 93'];
         }
     }
 
@@ -1688,6 +2368,7 @@ export function injectPrePlannedOperations(
     for (const def of ALL_PRE_PLANNED) {
         if (options?.faction && def.faction !== options.faction) continue;
         if (def.available_from == null) continue;
+        if (def.enqueue_from != null && turn < def.enqueue_from) continue;
         if (prePlannedOperationAlreadyResolved(state, def)) continue;
         if (injectedCorps.has(def.corps)) continue; // already injected directly
         if (deferredCorps.has(def.corps)) continue; // first live op is awaiting player authorization
@@ -1769,6 +2450,7 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
             severity: 'warning',
             turn,
         }]);
+        recordPrePlannedSatisfiedByStart(state, def);
         cmd.queued_operations.shift();
         if (cmd.queued_operations.length === 0) delete cmd.queued_operations;
         return false;
@@ -1870,8 +2552,30 @@ export function admitAuthoredPrePlannedReinforcements(state: GameState): number 
                     if (committedElsewhere.has(brigadeId)) continue;
                     if (!isEligibleOperationFormation(formation)) continue;
                     if ((formation.disrupted_turns ?? 0) > 0) continue;
-                    if (getFormationCorpsId(formation) !== corpsId) continue;
                     if (formation.location_osid !== stagingOsid) continue;
+
+                    const isArmyHqElite = isSectorAssignmentExemptCorpsId(formation.corps_id)
+                        && formation.elite_loan_state != null;
+                    if (!isArmyHqElite && getFormationCorpsId(formation) !== corpsId) continue;
+                    if (isArmyHqElite) {
+                        if (formation.elite_loan_state?.on_loan) continue;
+                        if (!isEliteAvailableForLoan(formation, state.meta.turn)) continue;
+                        deployEliteLoan(
+                            state,
+                            brigadeId,
+                            corpsId,
+                            'offensive_support',
+                            0,
+                            state.meta.turn,
+                            {
+                                purpose: 'offensive',
+                                why_needed: `Late assembly: ${brigadeId} assigned to ${operation.name}`,
+                                how_to_use: `Assault reserve on main axis of ${operation.name}`,
+                            },
+                            `Late pre-planned elite loan for ${operation.name}`,
+                            'army_ai',
+                        );
+                    }
 
                     const strengthBeforeAdmission = operation.initial_strength
                         ?? operation.participating_brigades.reduce(
@@ -1970,13 +2674,35 @@ export function getQueuedPrePlannedBrigadeIds(state: Pick<GameState, 'military'>
 }
 
 /**
- * Formation identities owned by each corps' next queued historical operation.
+ * Formation identities owned by each corps' next queued historical operation
+ * once that operation is due for preparation.
  *
- * Probe selection needs the narrower reservation: protect the plan that can
- * inject next without freezing formations authored only for later campaigns.
- * Other generic-routing owners deliberately use the full-queue helper above.
+ * Command selection must not consume the roster of the plan that can inject now:
+ * a due-but-deferred head keeps its formations excluded from new
+ * commander-generated operations, and active-operation ownership is handled
+ * separately by the caller.
+ *
+ * The exclusion is bounded by the plan's own timing. `available_from` is the
+ * earliest preparation/injection point, not an attack deadline, so a queue head
+ * whose `available_from` is still in the future is not preparing and must not
+ * freeze its roster merely because it is first in line. Reserving the whole
+ * future roster is what held sixteen ARBiH 3rd Corps brigades out of the
+ * commander's hands from t14 to t60 while the Central Bosnia Counteroffensive
+ * waited its turn. No lookahead constant is introduced: the plan's own
+ * `available_from` is the bound, and missing timing defaults to due (0), matching
+ * `getReservedPrePlannedBrigadeIds`.
+ *
+ * Probe selection needs this narrower reservation than the full-queue helper
+ * above: protect the plan that can inject next without freezing formations
+ * authored only for later campaigns.
  */
-export function getHeadQueuedPrePlannedBrigadeIds(state: Pick<GameState, 'military'>): Set<FormationId> {
+export function getHeadQueuedPrePlannedBrigadeIds(
+    state: {
+        readonly meta: { readonly turn: number };
+        readonly military: { readonly corps_command?: Record<string, { readonly queued_operations?: readonly string[] } | undefined> };
+    },
+): Set<FormationId> {
+    const currentTurn = state.meta?.turn ?? 0;
     const reserved = new Set<FormationId>();
     const corpsCommand = state.military.corps_command ?? {};
     for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
@@ -1986,9 +2712,29 @@ export function getHeadQueuedPrePlannedBrigadeIds(state: Pick<GameState, 'milita
             candidate.corps === corpsId && candidate.name === operationName
         ));
         if (!def) continue;
+        if ((def.enqueue_from ?? def.available_from ?? 0) > currentTurn) continue;
         for (const axis of def.axes) {
             for (const brigadeId of axis.brigades) reserved.add(brigadeId);
         }
+    }
+    return reserved;
+}
+
+/** Roster already marshaling for a dated, queued operation. Front repair must
+ * leave these formations at their authored staging area until injection. */
+export function getQueuedDatedPrestageBrigadeIds(
+    state: {
+        readonly meta: { readonly turn: number };
+        readonly military: { readonly corps_command?: Record<string, { readonly queued_operations?: readonly string[] } | undefined> };
+    },
+): Set<FormationId> {
+    const reserved = new Set<FormationId>();
+    for (const corpsId of Object.keys(state.military.corps_command ?? {}).sort(strictCompare)) {
+        const operationName = state.military.corps_command?.[corpsId]?.queued_operations?.[0];
+        if (!operationName) continue;
+        const def = ALL_PRE_PLANNED.find((candidate) => candidate.corps === corpsId && candidate.name === operationName);
+        if (def?.enqueue_from == null || state.meta.turn < def.enqueue_from) continue;
+        for (const axis of def.axes) for (const brigadeId of axis.brigades) reserved.add(brigadeId);
     }
     return reserved;
 }

@@ -79,6 +79,7 @@ describe('Event timeline historical integrity', () => {
         const vanceOwen = allEvents.find((e: any) => e.id === 'vance_owen_plan_1993');
         const cbWar = allEvents.find((e: any) => e.id === 'croat_bosniak_war_begins_1993');
         expect(cbWar.trigger.turn_min).toBeGreaterThan(vanceOwen.trigger.turn_min);
+        expect(cbWar.trigger.turn_min).toBe(40); // January rupture precedes the April offensive
     });
 
     it('East Mostar siege requires Croat-Bosniak war', () => {
@@ -125,6 +126,34 @@ describe('Event timeline historical integrity', () => {
     it('Stari Most destruction requires East Mostar siege', () => {
         const bridge = allEvents.find((e: any) => e.id === 'mostar_bridge_destroyed_1993');
         expect(bridge.trigger.requires_events).toContain('east_mostar_siege_1993');
+    });
+
+    it('Battle of Bugojno requires control of a captured Bugojno position', () => {
+        const bugojno = allEvents.find((event: any) => event.id === 'battle_of_bugojno_1993');
+
+        expect(bugojno).toBeDefined();
+        expect(bugojno.trigger.condition).toEqual({
+            type: 'territory_control',
+            osid: 'op:bugojno:medini',
+            faction: 'RBiH',
+        });
+    });
+
+    it('Stupni Do fires in its dated week and only while the HVO holds Vareš', () => {
+        const stupniDo = allEvents.find((event: any) => event.id === 'stupni_do_massacre_1993');
+
+        expect(stupniDo).toBeDefined();
+        // 23 October 1993 falls in the turn-81 week (BB2 printed p.438).
+        expect(stupniDo.trigger.turn_min).toBe(81);
+        expect(stupniDo.trigger.requires_events).toContain('croat_bosniak_war_begins_1993');
+        expect(stupniDo.trigger.condition).toEqual({
+            type: 'territory_control',
+            osid: 'op:vares:vares_2',
+            faction: 'HRHB',
+        });
+        // The humanitarian row records the crime; it never moves territory.
+        const effects = [stupniDo.effect, ...(stupniDo.effects ?? [])].filter(Boolean);
+        expect(effects.some((effect: any) => /control|territory|flip/.test(effect.kind))).toBe(false);
     });
 
     it('Zepa requires Srebrenica', () => {
@@ -284,6 +313,9 @@ describe('Event timeline historical integrity', () => {
     });
 
     it('total event count is 158 after retiring the Lukavac political event', () => {
+        // Briefly 161 on 2026-09-17 while three Donji Vakuf takeover rows existed. Those rows
+        // were withdrawn as unauthorized event-driven ownership transfer, so the pin returns to
+        // 158. See tests/donji_vakuf_no_authored_takeover.test.ts for the standing guard.
         expect(allEvents.length).toBe(158);
     });
 });

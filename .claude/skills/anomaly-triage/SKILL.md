@@ -21,7 +21,7 @@ An automated investigation pipeline that turns anomaly detector output into root
 
 Read the latest `run_summary.json` from the most recent run directory:
 ```bash
-ls -td runs/apr1992_definitive_40w__* | head -1
+ls -td runs/apr1992_definitive_188w__* | head -1
 ```
 Then extract `anomaly_detection.reports` from the summary.
 

@@ -28,11 +28,12 @@
 - COHA/causality gate: `tests/coha_operation_pause.test.ts` pins ceasefire suppression receipts, preserved movement intent, and a paused operation clock. `tests/scenario_operation_diagnostics.test.ts` requires exact battle contributor receipts and rejects same-target attribution without a contributing operation id.
 - Mixed-battle occupation gate: `tests/probe_territory_flip.test.ts` proves occupation requires unanimous permission from the resolver's validated contributors, remains invariant under contributor-ID renaming and attack-order insertion order, defaults missing declarations and operationless contributors to permission, and excludes invalid/nonadjacent orders from veto authority. Its elite-loan integration case executes the real `generateArmyReserveRequests` → bot-order generation → OSID resolver sequence and proves pre-order operation commitment controls the generated order and occupation declaration. `tests/war_phase_step_order.test.ts` pins that sequence before combat and proves commitment reconciliation remains live without a spatial cache; `tests/army_reserve_system.test.ts` proves the post-combat loan tick cannot rewrite operation membership.
 - Ops-only attack gate: `tests/uncontested_occupation_priority.test.ts` proves an empty adjacent target remains unavailable to a brigade even when it is inside the assigned subsegment and named by the corps directive; only the guarded recent-position counterattack path remains operationless. Its source guard prevents the deleted `evaluateUncontestedOccupation` owner or score from returning. `tests/capture_provenance.test.ts` pins the checkpoint tool's fail-closed distinction between exact operation-owned capture receipts, missing/contradictory receipts, and operationless receipts whose counterattack authority cannot be proved from default artifacts.
+- Bounded local occupation: `tests/commander/elite_formation_utilization.test.ts` exercises deterministic nearby donor–target selection, the post-week-20 boundary, real population-based militia and organized-defense checks, donor/authority guards, and ordinary operation launch → generated attack order → resolver capture. `tests/commander/local_occupation_population_threading.test.ts` executes the production corps-order phase and proves municipality population is converted to OSID population before commander prediction. Existing probe, enclave and operation-ownership gates remain applicable.
 - Formation/opportunity eligibility gate: `tests/loaned_elite_rescue_reserve_cap.test.ts` proves forming elite loans cannot enter either rescue roster path. The operation-opportunity catalog suites require deterministic authored-order filtering through the same live status, personnel, disruption, transit, and host-corps eligibility gates.
 - Authored operation identity: `tests/operation_formation_resolver.test.ts` proves exact-key precedence, unique `oob:<authored id>` resolution, sorted ambiguity rejection, and true-missing classification; triggered and pre-planned suites prove those paths store the resolved live ID and do not emit an alias-backed missing warning.
 - Historical peace gate: `tests/peace_plans.test.ts` and the real `runTurn` regression in `tests/turn_pipeline.test.ts` pin normalized historical faction dispositions, one-time Cutileiro catch-up at the first War turn, and the dedicated Dayton resolver boundary.
 - Commander/HV gate: `tests/commander/primary_sector_operation_objectives.test.ts` pins primary-sector objective/fallback selection and stale-target validation; `tests/hv_integration.test.ts` and `tests/fall_1995_hv_depth_priority.test.ts` pin all-or-nothing legal stationing, stable placement order, and station/home truth.
-- Bilateral-war timing gate: `tests/rear_pocket_consolidation_alliance_gate.test.ts` proves rear-pocket consolidation cannot bypass the centralized RBiH-HRHB combat gate before the canonical turn-40 floor. `tests/alliance_lifecycle.test.ts` pins the shared runtime default, and `tests/scenario_sister_parity.test.ts` requires every active definitive April 1992 scenario to carry that same floor.
+- Bilateral-war timing gate: `tests/rear_pocket_consolidation_alliance_gate.test.ts` characterizes the retained legacy helper and proves it cannot bypass the centralized RBiH-HRHB combat gate before the canonical turn-40 floor. `tests/war_phase_paramilitary_canon_contract.test.ts` separately pins that `rear-pocket-consolidation` is absent from the production pipeline. `tests/alliance_lifecycle.test.ts` pins the shared runtime default, and `tests/scenario_sister_parity.test.ts` requires every active definitive April 1992 scenario to carry that same floor.
 
 ### Historical calibration authority and January contracts
 
@@ -42,6 +43,16 @@
 - `tests/pre_planned_operations.test.ts` pins the Višegrad objective exclusions, Donji Vakuf
   and Vlašić pocket axes, Srebrenica high-water exclusion, and the Operation
   Circle/Kijevo/Upper Drina combat package.
+- `tests/pre_planned_operations.test.ts` also pins the Operation Corridor Derventa-pocket axis
+  and retained east-axis roster, plus the bounded Prozor–Rama counterattack's exact HVO roster,
+  provisional `available_from: 71` scenario-inference timing, objectives, and execution multiplier.
+  `tests/brigade_aor_subsegment.test.ts` pins the
+  deterministic HVO fixed-home local-contact assignment preference and proves it is inactive for
+  quiet homes and other factions.
+- `tests/events_evaluate.test.ts` pins `operation_attacked` against live, ended, and halted
+  attack counts; `tests/events_owed_followups_termination.test.ts` pins the bounded, once-only
+  terminal follow-up write through serialization. `tests/combat_external_support_osid.test.ts`
+  pins dated OSID attack support and its absence outside the authored window.
 - `tests/gorazde_pocket_event_state_truth.test.ts`,
   `tests/srebrenica_linkup_event_state_truth.test.ts`, and
   `tests/upper_drina_front_event_state_truth.test.ts` forbid calibration-authored
@@ -65,19 +76,25 @@
   `final_save.json` byte-hash and per-faction brigade/formation counts (the latter vary
   run-to-run even at identical territory, so they are a run-snapshot artifact, not
   territory truth).
-- **Anchor authority (RE-0D2):** the 40-week fixture is not a painted-control scoring scenario and
-  therefore must not emit top-level or `historical_fit.anchor_checks`. Its run summary instead
-  carries the distinct non-scoring `anchor_contract_evaluation`, derived from the existing
-  canonical anchor contract. The fingerprint consumes that evaluation and fails closed when it is
-  absent, empty, malformed, or has duplicate/missing anchor IDs; missing coverage is never 0/0.
+- **Anchor authority (RE-0D2, updated 2026-09-19):** the short structural-fingerprint run is the
+  canonical 188w scenario shortened with `--weeks 40`, so it IS a painted-control scoring scenario
+  and legitimately emits `anchor_checks` alongside the non-scoring `anchor_contract_evaluation`.
+  The fingerprint consumes that evaluation and fails closed when it is absent, empty, malformed,
+  or has duplicate/missing anchor IDs; missing coverage is never 0/0.
 - **Gate:** CI job `structural-fingerprint` in `.github/workflows/full-suite-and-fingerprint.yml`
-  runs a fresh 40w and compares against committed `data/calibration/structural_fingerprint_40w.json`
-  via `npm run ci:structural-fingerprint:check`. A structural move without a deliberate
-  `npm run ci:structural-fingerprint:update` fails the gate.
+  runs a fresh canonical 188w at `--weeks 40` and compares against committed
+  `data/calibration/structural_fingerprint_188w.json` via `npm run ci:structural-fingerprint:check`.
+  A structural move without a deliberate `npm run ci:structural-fingerprint:update` fails the gate.
+  **Provenance status (2026-09-19):** the committed `structural_fingerprint_188w.json` is
+  **PROPOSED, NOT ACCEPTED** — it was generated from a dirty tree at HEAD `20eb1c806`
+  (`git_dirty: true`, consumed-input digest `ac81d9f025d19017…`). The gate remains enabled and its
+  status is reported **UNMET** until the golden is regenerated on a clean accepted commit. A
+  passing anchor count does not make a dirty-tree fingerprint an accepted baseline.
 - **Tool self-test:** `tests/structural_fingerprint.test.ts` (determinism, order-independence,
   formation-exclusion, fail-closed anchor coverage, and positive sensitivity to
   control-count/OSID-flip/anchor/benchmark changes). `tests/integration_run_summary.test.ts`
-  proves the live 40-week contract while preserving the sole 188-week scorer.
+  proves the live short-horizon contract on the canonical scenario while preserving the sole
+  188-week scorer.
 - **Reference platform = Linux/Node 22 (DoD C2):** Windows==Linux byte-hashes are NOT
   promised; the structural fingerprint IS the cross-platform determinism authority.
 

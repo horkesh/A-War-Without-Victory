@@ -76,10 +76,10 @@ describe('Gorazde enclave defender contract', () => {
         }
     });
 
-    it('rastosnica_2 starts RBiH in the 40w scenario', () => {
-        const scenarioPath = path.resolve(__dirname, '../data/scenarios/apr1992_definitive_40w.json');
+    it('rastosnica_2 starts RBiH in the canonical 188w scenario', () => {
+        const scenarioPath = path.resolve(__dirname, '../data/scenarios/apr1992_definitive_188w.json');
         const scenario = JSON.parse(fs.readFileSync(scenarioPath, 'utf8'));
-        const ctrl = scenario.initial_osid_controllers?.['op:zvornik:rastosnica_2'];
+        const ctrl = scenario.osid_control_overrides?.['op:zvornik:rastosnica_2'];
         expect(ctrl, 'rastosnica_2 should start RBiH').toBe('RBiH');
     });
 });

@@ -1,0 +1,154 @@
+{
+  "verdict": "STOP_FAIL_NO_SECOND_RUN",
+  "head": "51fe494151397c1cc6521b54006b0f8da70705e5",
+  "source_clean_after_validation": true,
+  "command": "npm.cmd run sim:scenario:run -- --scenario data/scenarios/apr1992_definitive_188w.json --weeks 188 --out runs/roadmap_integration_20260912/post_a --unique",
+  "environment": {
+    "AWWV_S6_GRADE_RUN": "true",
+    "UPDATE_BASELINES": "unset",
+    "AWWV_PROVENANCE_OVERRIDE": "unset",
+    "node": "v22.23.2"
+  },
+  "started": "2026-09-13T08:13:37.9592240+02:00",
+  "finished": "2026-09-13T08:18:26.5887469+02:00",
+  "duration_seconds": 288.6295229,
+  "scenario_exit": 0,
+  "run_dir": "runs/roadmap_integration_20260912/post_a/apr1992_definitive_188w__6898d6d2e324c7a3__w188_n0",
+  "final_state_hash": "5d6f8378dbf433fc",
+  "final_seals": {
+    "turn_markers": 188,
+    "final_save_markers": 1,
+    "unresolved_sum": 0
+  },
+  "validators": {
+    "health": 1,
+    "consistency": 0,
+    "checkpoints": 1,
+    "truth": 1
+  },
+  "passes": {
+    "consistency": "all",
+    "anchors": "31/31",
+    "enclave_guards": "9/9",
+    "eastern_capture_provenance": "clean",
+    "farz_positive_cells": "4/4",
+    "assignment_truth_checks": "9/10"
+  },
+  "stops": [
+    {
+      "gate": "jan1993 floor",
+      "observed": 692,
+      "required": 694,
+      "delta": -2
+    },
+    {
+      "gate": "western Bosnia cascade",
+      "observed": 33,
+      "required_minimum": 38,
+      "base": 40,
+      "delta": -7
+    },
+    {
+      "gate": "Farz allowed-exception identity",
+      "observed": [
+        {
+          "attacker_brigade": "arbih_327th_vitezka_mountain",
+          "battle_id": "165:op:maglaj:gornja_bocinja:arbih_327th_vitezka_mountain:rs_1st_srbac_light_infantry",
+          "from": "RS",
+          "mechanism": "combat",
+          "mun_id": "maglaj",
+          "settlement_id": "op:maglaj:gornja_bocinja",
+          "to": "RBiH",
+          "turn": 165
+        },
+        {
+          "attacker_brigade": "arbih_327th_vitezka_mountain",
+          "battle_id": "166:op:maglaj:donja_bocinja_2:arbih_327th_vitezka_mountain:rs_2nd_ozren_light_infantry",
+          "from": "RS",
+          "mechanism": "combat",
+          "mun_id": "maglaj",
+          "settlement_id": "op:maglaj:donja_bocinja_2",
+          "to": "RBiH",
+          "turn": 166
+        },
+        {
+          "attacker_brigade": "arbih_327th_vitezka_mountain",
+          "battle_id": "169:op:lukavac:brijesnica_donja_2:arbih_327th_vitezka_mountain:rs_1st_celinac_light_infantry",
+          "from": "RS",
+          "mechanism": "combat",
+          "mun_id": "lukavac",
+          "settlement_id": "op:lukavac:brijesnica_donja_2",
+          "to": "RBiH",
+          "turn": 169
+        }
+      ],
+      "allowed": {
+        "settlement_id": "op:lukavac:brijesnica_donja_2",
+        "turn": 168,
+        "attacker_brigade": "arbih_327th_vitezka_mountain",
+        "corps_id": "arbih_3rd_corps",
+        "defender_brigade": "rs_2nd_armored"
+      },
+      "finding": "Same cell, attacker, and corps as retained reference, but post-A is turn 169 with defender rs_1st_celinac_light_infantry; exact tuple changed.",
+      "correction_note": "Supersedes the earlier task wording that incorrectly named Stari Majdan."
+    },
+    {
+      "gate": "operations_combat truth",
+      "injection_errors": 1,
+      "turn": 41,
+      "operation": "Prozor–Rama Line Counterattack",
+      "error": "op_empty: All 1 axes would be dropped — operation cannot execute",
+      "raw_validator_label": "op_empty: All 1 axes would be dropped — operation cannot execute",
+      "actual_control_fact": "Lug and Paroš are RBiH from initial state through t41; their HRHB flips occur at t54/t55.",
+      "supported_cause": "At t41 bilateral hostility policy makes both objectives unavailable, but the queued operation is validated as empty instead of deferred for retry.",
+      "label_correction": "The upstream all_objectives_owned warning is factually inaccurate here; it means no currently hostile objectives."
+    }
+  ],
+  "evidence": [
+    {
+      "path": "logs/roadmap-integration-20260912/post-a-188w-launch.txt",
+      "sha256": "814b3c6c9cf23d7a62914f6ddce4f259529cd01bc1f20d8203904981133de052",
+      "bytes": 446
+    },
+    {
+      "path": "logs/roadmap-integration-20260912/post-a-188w.log",
+      "sha256": "8608c1100784f58f22e45d7446cf9cc8b3fe31d5f96511933f94f7ba5bba0937",
+      "bytes": 658726
+    },
+    {
+      "path": "logs/roadmap-integration-20260912/post-a-validator-driver.log",
+      "sha256": "18381db5dcd1a3b0288a6e6ff0dac03d11932587b6a949a6b83aeea9a3f0242d",
+      "bytes": 1751
+    },
+    {
+      "path": "logs/roadmap-integration-20260912/post-a-health.log",
+      "sha256": "b2eb10a47f04be987e192d5a0d9a067dcac7f5abd0ea89fb02c35f8cbcce01df",
+      "bytes": 1850
+    },
+    {
+      "path": "logs/roadmap-integration-20260912/post-a-consistency.log",
+      "sha256": "851d5814bb66bfe0c518be5768e442bc4d66123a16b7d91ea767b6b5759f883f",
+      "bytes": 2207
+    },
+    {
+      "path": "logs/roadmap-integration-20260912/post-a-checkpoints.log",
+      "sha256": "c3b267be33e81673c4c2c78954bf820ffffcab90de183e2761603e39f2aa9c2b",
+      "bytes": 3049
+    },
+    {
+      "path": "logs/roadmap-integration-20260912/post-a-truth.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "logs/roadmap-integration-20260912/post-a-truth.json",
+      "sha256": "696b4513fd26b3e05112198236ef4e54de6bb029760d19a500ab23f1f795a500",
+      "bytes": 120204
+    },
+    {
+      "path": "logs/roadmap-integration-20260912/post-a-validation.json",
+      "sha256": "ee0274969d3451a93f454741239386579f0eb99f231964a529430821630aeb2b",
+      "bytes": 15488
+    }
+  ]
+}

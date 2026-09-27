@@ -45,7 +45,7 @@
 
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -80,6 +80,9 @@ const CHECKPOINTS = [
 ];
 
 const FACTION_COLOR = { RBiH: '#4a7c54', RS: '#b03636', HRHB: '#486ebe' };
+// Two-letter marker labels. The circle is colour-keyed to the legend; the letters
+// are there so colour is not the only channel carrying the expected owner.
+const FACTION_SHORT = { RBiH: 'RB', RS: 'RS', HRHB: 'HR' };
 const MECHANISM_COLOR = {
     combat: '#c98e26',
     paramilitary: '#8b3fa8',
@@ -274,6 +277,83 @@ const geometryPath = (g) => {
     return polys.flatMap((poly) => poly.map(ringPath)).join('');
 };
 
+// --- Mismatch marker anchors -----------------------------------------------
+// Each mismatched cell gets a circle naming the faction that SHOULD hold it, so
+// the expected owner is readable without selecting the cell. The anchor must lie
+// INSIDE the polygon: an area centroid falls outside a crescent-shaped or
+// two-lobed municipality, which would park the circle on a neighbour and assert
+// something false about that neighbour. So the centroid is tested, and when it
+// lands outside it is replaced by the midpoint of the widest interior span at
+// that height — always inside, and stable for a fixed ring.
+// Computed here in projected SVG units; the client does no geometry maths.
+const outerRingsOf = (g) => (g.type === 'Polygon' ? [g.coordinates] : g.coordinates)
+    .map((poly) => poly[0]).filter((r) => Array.isArray(r) && r.length >= 4);
+const projectRing = (ring) => ring.map((pt) => project(pt).map(Number));
+function ringArea(r) {
+    let a = 0;
+    for (let i = 0, j = r.length - 1; i < r.length; j = i++) a += r[j][0] * r[i][1] - r[i][0] * r[j][1];
+    return a / 2;
+}
+function ringCentroid(r) {
+    let cx = 0, cy = 0, a = 0;
+    for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+        const f = r[j][0] * r[i][1] - r[i][0] * r[j][1];
+        a += f; cx += (r[j][0] + r[i][0]) * f; cy += (r[j][1] + r[i][1]) * f;
+    }
+    if (a === 0) return null;
+    return [cx / (3 * a), cy / (3 * a)];
+}
+function pointInRing([px, py], r) {
+    let inside = false;
+    for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+        const [xi, yi] = r[i], [xj, yj] = r[j];
+        if ((yi > py) !== (yj > py) && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) inside = !inside;
+    }
+    return inside;
+}
+// Midpoint of the widest run of interior at height y: the x-crossings of the
+// ring at y, paired off, longest pair wins.
+function widestSpanMidpoint(r, y) {
+    const xs = [];
+    for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+        const [xi, yi] = r[i], [xj, yj] = r[j];
+        if ((yi > y) !== (yj > y)) xs.push(((xj - xi) * (y - yi)) / (yj - yi) + xi);
+    }
+    xs.sort((a, b) => a - b);
+    let best = null, bestW = -1;
+    for (let k = 0; k + 1 < xs.length; k += 2) {
+        const w = xs[k + 1] - xs[k];
+        if (w > bestW) { bestW = w; best = (xs[k] + xs[k + 1]) / 2; }
+    }
+    return best === null ? null : [best, y];
+}
+function representativePoint(r) {
+    const c = ringCentroid(r);
+    if (c && pointInRing(c, r)) return c;
+    const ys = r.map((p) => p[1]);
+    const mid = c ? c[1] : (Math.min(...ys) + Math.max(...ys)) / 2;
+    return widestSpanMidpoint(r, mid) ?? c;
+}
+
+// One anchor per SCORED cell, taken from its largest outer ring. A scored cell
+// may be drawn as several paths (merged sub-1km² children); the marker belongs
+// to the parent that is actually scored, drawn once on its biggest body.
+const bestRingByScored = new Map();
+for (const f of features) {
+    const scored = mergeMap[f.properties.osid] ?? f.properties.osid;
+    for (const ring of outerRingsOf(f.geometry)) {
+        const projected = projectRing(ring);
+        const area = Math.abs(ringArea(projected));
+        const current = bestRingByScored.get(scored);
+        if (!current || area > current.area) bestRingByScored.set(scored, { area, ring: projected });
+    }
+}
+const markers = {};
+for (const scored of [...bestRingByScored.keys()].sort()) {
+    const point = representativePoint(bestRingByScored.get(scored).ring);
+    if (point) markers[scored] = [Number(point[0].toFixed(1)), Number(point[1].toFixed(1))];
+}
+
 const cells = features.map((f) => {
     const osid = f.properties.osid;
     const mergedInto = mergeMap[osid] ?? null;
@@ -291,10 +371,12 @@ const cells = features.map((f) => {
 // Emit
 
 const provenance = {
-    run_dir: runDir.replace(/\\/g, '/'),
-    run_commit: runMeta?.git_commit ?? runMeta?.commit ?? null,
-    run_dirty: runMeta?.git_dirty ?? null,
-    run_node: runMeta?.node_version ?? null,
+    run_name: basename(runDir),
+    run_id: runMeta?.run_id ?? null,
+    run_fingerprint: runMeta?.run_id?.match(/__([a-f0-9]{16})__/i)?.[1] ?? sha256(readFileSync(savePath)).slice(0, 16),
+    run_commit: runMeta?.git_commit ?? runMeta?.commit ?? runMeta?.provenance?.git_commit ?? null,
+    run_dirty: runMeta?.git_dirty ?? runMeta?.provenance?.git_dirty ?? null,
+    run_node: runMeta?.node_version ?? runMeta?.provenance?.node_version ?? null,
     scenario: runMeta?.scenario_id ?? runMeta?.scenario ?? null,
     weeks: maxWeek,
     events: events.length,
@@ -329,13 +411,14 @@ const esc = (s) => String(s).replaceAll('&', '&amp;').replaceAll('<', '&lt;').re
 const payload = (obj) => JSON.stringify(obj).replaceAll('<', '\\u003c');
 
 const scoreRows = scores.map((s) => `<tr${s.reached ? '' : ' class="unreached"'}>
-<td class="cp" data-week="${s.week}">${esc(s.label)}</td><td class="wk">w${s.week}</td>
+<td><button class="cp" data-week="${s.week}"${s.reached ? '' : ' disabled'}>${esc(s.label)}</button></td><td class="wk">w${s.week}</td>
 <td class="num">${s.reached ? s.matched : '—'}</td><td class="den">/ ${s.total}</td>
 <td class="num miss">${s.reached ? s.mismatches.length : '—'}</td></tr>`).join('');
 
 const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
 <title>Control timeline — ${esc(provenance.scenario ?? 'run')}</title><style>
 :root{--ink:#29261f;--dim:#70695d;--line:rgba(54,45,31,.18);--panel:rgba(255,255,255,.5);--amber:#c98e26}
 *{box-sizing:border-box}html,body{margin:0;height:100%}
@@ -346,13 +429,34 @@ body{color:var(--ink);font:14px/1.5 Georgia,'Times New Roman',serif;background:l
 .wrap{display:grid;grid-template-columns:minmax(0,1fr) 340px;grid-template-rows:minmax(0,1fr);gap:14px;height:100%;padding:12px}
 .mapcol{display:flex;flex-direction:column;min-width:0;gap:8px}
 .mapbox{position:relative;flex:1;min-height:0;background:#0a0e14;overflow:hidden;box-shadow:0 14px 40px rgba(42,34,22,.22)}
-svg{width:100%;height:100%;display:block}
+svg{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+svg.dragging{cursor:grabbing}svg:focus-visible{outline:3px solid var(--amber);outline-offset:-3px}
+.mapcontrols{position:absolute;z-index:4;top:8px;right:8px;display:flex;gap:4px;align-items:center;padding:4px;
+background:rgba(8,12,17,.84);border:1px solid rgba(255,255,255,.2);border-radius:5px;color:#fff;font-family:ui-monospace,monospace}
+.mapcontrols button{min-width:44px;min-height:44px;padding:4px 9px;border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font:700 18px/1 ui-monospace,monospace}
+.mapcontrols button:hover{background:rgba(255,255,255,.24)}.mapcontrols button:disabled{opacity:.4}
+.mapcontrols .reset{font-size:12px}.zoomlevel{min-width:48px;text-align:center;font-size:11px}
 .cell{stroke:#0a0e14;stroke-width:.6;cursor:pointer}
-.cell.sel{stroke:#fff;stroke-width:2.4}
-.mismatch{fill:var(--amber)!important}
+.cell.mismatch{stroke:var(--amber);stroke-width:3;vector-effect:non-scaling-stroke}
+.hide-mismatch .cell.mismatch{stroke:#0a0e14;stroke-width:.6;vector-effect:none}
+.cell.sel{stroke:#fff;stroke-width:3;vector-effect:non-scaling-stroke;filter:drop-shadow(0 0 3px #fff)}
+.cell.mismatch.sel{stroke:var(--amber);stroke-width:5;filter:drop-shadow(0 0 3px #fff)}
+.hide-mismatch .cell.mismatch.sel{stroke:#fff;stroke-width:3;vector-effect:non-scaling-stroke}
+/* Expected-owner markers. pointer-events:none so a circle never steals the click
+   from the cell under it — the polygon stays the click target it always was. */
+#markers{pointer-events:none}
+.hide-mismatch #markers{display:none}
+.mk circle{stroke:var(--amber);stroke-width:2;vector-effect:non-scaling-stroke}
+/* No font-size here on purpose: it is set per-render in user units so the label
+   holds a constant on-screen size. A CSS font shorthand would override it. */
+.mk text{fill:#fff;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:700;
+text-anchor:middle;dominant-baseline:central;paint-order:stroke;stroke:rgba(8,12,17,.55);stroke-width:2.5px}
+.marker-key{display:inline-block;width:13px;height:13px;margin-right:5px;vertical-align:-2px;border-radius:50%;
+border:2px solid var(--amber);background:${FACTION_COLOR.RS}}
 .bar{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--panel);border:1px solid var(--line)}
 input[type=range]{flex:1;min-width:0}
-button{font:inherit;padding:4px 10px;border:1px solid var(--line);background:rgba(255,255,255,.6);cursor:pointer}
+button,input[type=search]{font:inherit;border:1px solid var(--line);background:rgba(255,255,255,.6);color:inherit}
+button{min-height:44px;padding:7px 10px;cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}
 button:hover{background:#fff}
 .side{display:flex;flex-direction:column;gap:10px;overflow:auto;min-height:0}
 .panel{background:var(--panel);border:1px solid var(--line);padding:10px}
@@ -361,9 +465,11 @@ table{width:100%;border-collapse:collapse;font-family:ui-monospace,monospace;fon
 td{padding:2px 3px}.num{text-align:right;font-weight:700}.den,.wk{color:var(--dim)}
 .miss{color:#b03636}tr.unreached{opacity:.42}
 tr.active td{background:rgba(201,142,38,.22)}
-td.cp{cursor:pointer;text-decoration:underline dotted}
+.cp{width:100%;min-height:40px;padding:4px 3px;border:0;background:transparent;text-align:left;text-decoration:underline dotted}
 .legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-family:ui-monospace,monospace;font-size:11px}
 .legend i{display:inline-block;width:9px;height:9px;margin-right:4px;vertical-align:baseline}
+.mismatch-key{display:inline-block;width:12px;height:12px;margin-right:5px;vertical-align:-2px;border:3px solid var(--amber);background:transparent}
+.toggle{display:flex;align-items:center;min-height:44px;cursor:pointer}.toggle input{width:20px;height:20px;margin:0 7px 0 0}
 .list{max-height:230px;overflow:auto;font-family:ui-monospace,monospace;font-size:11px;line-height:1.55}
 .list div{cursor:pointer;padding:1px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .list div:hover{background:rgba(201,142,38,.22)}
@@ -372,34 +478,59 @@ td.cp{cursor:pointer;text-decoration:underline dotted}
 .warn{border-left:3px solid #b03636;padding-left:8px;color:#b03636;font-size:12px}
 .note{color:var(--dim);font-size:11.5px;line-height:1.45}
 .prov{font-family:ui-monospace,monospace;font-size:10.5px;color:var(--dim);line-height:1.5;word-break:break-all}
+.runid{margin:0;font-family:ui-monospace,monospace;font-size:11px;overflow-wrap:anywhere}
+.search-label{display:block;margin-bottom:5px;color:var(--dim);font-size:12px}.search{width:100%;min-height:44px;padding:8px 10px}
+.search-results{display:grid;gap:3px;max-height:220px;overflow:auto;margin-top:5px}.search-results button{text-align:left;line-height:1.25}
+.detail{margin-top:10px;padding-top:9px;border-top:1px solid var(--line)}.detail-name{font-weight:700}.detail-row{margin-top:3px;font-family:ui-monospace,monospace;font-size:11.5px}
 .tip{position:absolute;display:none;pointer-events:none;z-index:5;padding:8px 10px;background:rgba(8,12,17,.95);color:#fff;border-radius:5px;
 font-family:ui-monospace,monospace;font-size:11.5px;line-height:1.45;max-width:290px}
 .tip[data-open=true]{display:block}
-@media(max-width:1000px){.wrap{grid-template-columns:1fr;height:auto}.mapbox{height:62vh}}
+@media(max-width:1000px){.wrap{grid-template-columns:minmax(0,1fr);height:auto}.mapbox{height:62vh}.side{overflow:visible}
+/* Below this width the map is too small for a legible two-letter label. The
+   amber-ringed colour dot still names the expected owner against the legend. */
+.mk text{display:none}}
+@media(max-width:480px){.wrap{padding:6px;gap:8px}.timelinebar{display:grid;grid-template-columns:1fr 1fr}.timelinebar input{grid-column:1/-1;grid-row:1;min-height:44px}.timelinebar #prev{grid-column:1}.timelinebar #next{grid-column:2}.timelinebar #weeklabel{grid-column:1/-1;text-align:center}.mapbox{height:55vh}.bar{padding:6px;gap:6px}.legend{gap:2px 10px}.panel{padding:9px}}
 @media(prefers-color-scheme:dark){:root{--ink:#eee5d6;--dim:#aaa092;--line:rgba(255,255,255,.14);--panel:rgba(255,255,255,.05)}
-body{background:linear-gradient(145deg,#17140f,#211d17 68%,#15120e)}button{background:rgba(255,255,255,.08);color:inherit}button:hover{background:rgba(255,255,255,.16)}}
+body{background:linear-gradient(145deg,#17140f,#211d17 68%,#15120e)}button,input[type=search]{background:rgba(255,255,255,.08);color:inherit}button:hover{background:rgba(255,255,255,.16)}}
 </style></head><body>
 <div class="wrap">
 <div class="mapcol">
-  <div class="bar">
+  <div class="bar timelinebar">
     <button id="prev" title="Previous week with a flip">◀ flip</button>
     <input type="range" id="week" min="0" max="${maxWeek}" value="${maxWeek}" step="1">
     <button id="next" title="Next week with a flip">flip ▶</button>
     <strong class="mono" id="weeklabel"></strong>
   </div>
   <div class="mapbox">
-    <svg id="map" viewBox="0 0 ${WIDTH} ${HEIGHT}" preserveAspectRatio="xMidYMid meet"></svg>
+    <svg id="map" viewBox="0 0 ${WIDTH} ${HEIGHT}" preserveAspectRatio="xMidYMid meet" tabindex="0" role="img" aria-label="Control map. Use plus and minus to zoom, or drag to pan."></svg>
+    <div class="mapcontrols" aria-label="Map zoom controls">
+      <button id="zoomout" type="button" aria-label="Zoom out" title="Zoom out">−</button>
+      <span id="zoomlevel" class="zoomlevel" aria-live="polite">100%</span>
+      <button id="zoomin" type="button" aria-label="Zoom in" title="Zoom in">+</button>
+      <button id="zoomreset" class="reset" type="button" aria-label="Reset map view" title="Reset map view">Reset</button>
+    </div>
     <div class="tip" id="tip"></div>
   </div>
   <div class="bar legend">
     <span><i style="background:${FACTION_COLOR.RBiH}"></i>RBiH</span>
     <span><i style="background:${FACTION_COLOR.RS}"></i>RS</span>
     <span><i style="background:${FACTION_COLOR.HRHB}"></i>HRHB</span>
-    <span><i style="background:${'#c98e26'}"></i>mismatch vs painted (checkpoints only)</span>
-    <span style="opacity:.7">merged sub-1km² cells draw with their parent, so amber polygons can exceed the scored mismatch count — the panel number is the score</span>
+    <label class="toggle"><input id="showmismatch" type="checkbox" checked><span class="mismatch-key"></span><span class="marker-key"></span>Show mismatches (checkpoints only)</label>
+    <span style="opacity:.7">Fill always means actual controller. An amber outline marks a mismatch, and its circle is the faction that <em>should</em> hold the cell — the circle is painted historical truth, never simulated control. Merged sub-1km² cells draw with their parent, so outlined polygons can exceed the scored mismatch count — the panel number is the score.</span>
   </div>
 </div>
 <div class="side">
+  <div class="panel">
+    <h2>Source run</h2>
+    <p class="runid">${esc(provenance.run_name)} · ${esc(provenance.run_fingerprint)}</p>
+  </div>
+  <div class="panel">
+    <h2>Settlement selection</h2>
+    <label class="search-label" for="settlement-search">Search by settlement, municipality, or OSID</label>
+    <input class="search" id="settlement-search" type="search" autocomplete="off" placeholder="Type a name or OSID">
+    <div class="search-results" id="search-results" role="listbox"></div>
+    <div class="detail" id="selection-detail" aria-live="polite"></div>
+  </div>
   <div class="panel">
     <h2>Checkpoint scores</h2>
     <table><tbody id="scores">${scoreRows}</tbody></table>
@@ -416,8 +547,8 @@ body{background:linear-gradient(145deg,#17140f,#211d17 68%,#15120e)}button{backg
     <div class="list" id="fliplist"></div>
   </div>
   <div class="panel">
-    <h2>Provenance</h2>
-    ${admissibility.length ? `<p class="warn">${admissibility.map(esc).join('<br>')}</p>` : ''}
+    <h2>Provenance</h2>${admissibility.length ? `
+    <p class="warn">${admissibility.map(esc).join('<br>')}</p>` : ''}
     <div class="prov" id="prov"></div>
   </div>
 </div>
@@ -431,6 +562,8 @@ const SCORES=${payload(scores.map((s) => ({ key: s.key, week: s.week, label: s.l
 const PROV=${payload(provenance)};
 const FCOLOR=${payload(FACTION_COLOR)};
 const MCOLOR=${payload(MECHANISM_COLOR)};
+const MARKERS=${payload(markers)};
+const FSHORT=${payload(FACTION_SHORT)};
 const MAXWEEK=${maxWeek};
 
 const svg=document.getElementById('map'),tip=document.getElementById('tip');
@@ -447,6 +580,134 @@ for(const c of CELLS){
   frag.appendChild(p);
 }
 svg.appendChild(frag);
+// Markers ride above every cell, so a circle is never buried under a neighbour
+// drawn later. Appended after the cell fragment for that reason.
+const markerLayer=document.createElementNS(NS,'g');
+markerLayer.setAttribute('id','markers');
+svg.appendChild(markerLayer);
+
+// Marker size is specified in SCREEN pixels and converted to user units per
+// render. A fixed user-unit radius measured correct in the payload and rendered
+// as a 2px sliver of fill inside a 6px amber ring: the faction colour, which is
+// the whole point of the marker, was invisible. Constant screen size also keeps
+// the circles usable as the map is resized.
+const MK_R=10,MK_FONT=11;
+function mapScale(){
+  const box=svg.getBoundingClientRect(),vb=svg.viewBox.baseVal;
+  if(!box.width||!box.height||!vb.width||!vb.height)return 1;
+  return Math.min(box.width/vb.width,box.height/vb.height)||1;
+}
+function sizeMarkers(){
+  const s=mapScale(),r=(MK_R/s).toFixed(1),f=(MK_FONT/s).toFixed(1);
+  for(const c of markerLayer.querySelectorAll('circle'))c.setAttribute('r',r);
+  for(const t of markerLayer.querySelectorAll('text'))t.setAttribute('font-size',f);
+}
+addEventListener('resize',sizeMarkers);
+
+// Bounded viewBox camera. It changes only the viewport: paths, replay state and
+// reference data remain untouched. Pointer math accounts for the letterboxing
+// introduced by preserveAspectRatio="xMidYMid meet".
+const BASE_VIEW={x:0,y:0,w:${WIDTH},h:${HEIGHT}},MIN_ZOOM=1,MAX_ZOOM=12;
+let camera={...BASE_VIEW,zoom:1};
+const zoomIn=document.getElementById('zoomin'),zoomOut=document.getElementById('zoomout');
+const zoomReset=document.getElementById('zoomreset'),zoomLevel=document.getElementById('zoomlevel');
+const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
+function constrainedCamera(next){
+  const zoom=clamp(next.zoom,MIN_ZOOM,MAX_ZOOM),w=BASE_VIEW.w/zoom,h=BASE_VIEW.h/zoom;
+  return {zoom,w,h,x:clamp(next.x,BASE_VIEW.x,BASE_VIEW.x+BASE_VIEW.w-w),y:clamp(next.y,BASE_VIEW.y,BASE_VIEW.y+BASE_VIEW.h-h)};
+}
+function applyCamera(next){
+  camera=constrainedCamera(next);
+  svg.setAttribute('viewBox',camera.x+' '+camera.y+' '+camera.w+' '+camera.h);
+  zoomLevel.textContent=Math.round(camera.zoom*100)+'%';
+  zoomIn.disabled=camera.zoom>=MAX_ZOOM-.001;
+  zoomOut.disabled=camera.zoom<=MIN_ZOOM+.001;
+  zoomReset.disabled=camera.zoom<=MIN_ZOOM+.001;
+  sizeMarkers();
+}
+function viewportMetrics(cam=camera){
+  const box=svg.getBoundingClientRect(),scale=Math.min(box.width/cam.w,box.height/cam.h)||1;
+  return {box,scale,offsetX:(box.width-cam.w*scale)/2,offsetY:(box.height-cam.h*scale)/2};
+}
+function clientToMap(clientX,clientY,cam=camera){
+  const m=viewportMetrics(cam);
+  return {x:cam.x+(clientX-m.box.left-m.offsetX)/m.scale,y:cam.y+(clientY-m.box.top-m.offsetY)/m.scale};
+}
+function zoomAt(nextZoom,clientX,clientY,anchor=clientToMap(clientX,clientY)){
+  const zoom=clamp(nextZoom,MIN_ZOOM,MAX_ZOOM),w=BASE_VIEW.w/zoom,h=BASE_VIEW.h/zoom;
+  const box=svg.getBoundingClientRect(),scale=Math.min(box.width/w,box.height/h)||1;
+  const offsetX=(box.width-w*scale)/2,offsetY=(box.height-h*scale)/2;
+  applyCamera({zoom,w,h,x:anchor.x-(clientX-box.left-offsetX)/scale,y:anchor.y-(clientY-box.top-offsetY)/scale});
+}
+function zoomFromCenter(factor){
+  const box=svg.getBoundingClientRect();
+  zoomAt(camera.zoom*factor,box.left+box.width/2,box.top+box.height/2);
+}
+zoomIn.addEventListener('click',()=>zoomFromCenter(1.5));
+zoomOut.addEventListener('click',()=>zoomFromCenter(1/1.5));
+zoomReset.addEventListener('click',()=>applyCamera({...BASE_VIEW,zoom:1}));
+svg.addEventListener('wheel',e=>{
+  e.preventDefault();tip.dataset.open='false';
+  const delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?svg.clientHeight:1);
+  zoomAt(camera.zoom*Math.exp(-delta*.002),e.clientX,e.clientY);
+},{passive:false});
+svg.addEventListener('keydown',e=>{
+  if(e.key==='+'||e.key==='='){e.preventDefault();zoomFromCenter(1.5)}
+  else if(e.key==='-'){e.preventDefault();zoomFromCenter(1/1.5)}
+  else if(e.key==='0'){e.preventDefault();applyCamera({...BASE_VIEW,zoom:1})}
+});
+applyCamera(camera);
+
+const activePointers=new Map();
+let gesture=null,gestureHadMovement=false,suppressClickUntil=0;
+const midpoint=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
+const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+function beginSingle(pointer){gesture={kind:'pan',start:pointer,startCamera:{...camera},moved:false,tapOsid:gestureHadMovement?null:pointer.osid}}
+function beginPinch(){
+  const [a,b]=[...activePointers.values()],mid=midpoint(a,b);
+  gesture={kind:'pinch',startDistance:Math.max(1,distance(a,b)),startCamera:{...camera},anchor:clientToMap(mid.x,mid.y),moved:true};
+  gestureHadMovement=true;
+  tip.dataset.open='false';
+}
+svg.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  if(activePointers.size===0)gestureHadMovement=false;
+  activePointers.set(e.pointerId,{x:e.clientX,y:e.clientY,osid:e.target.closest('.cell')?.dataset.s||null});
+  svg.setPointerCapture(e.pointerId);svg.classList.add('dragging');
+  if(activePointers.size===1)beginSingle(activePointers.get(e.pointerId));
+  else if(activePointers.size===2)beginPinch();
+});
+svg.addEventListener('pointermove',e=>{
+  if(!activePointers.has(e.pointerId))return;
+  activePointers.set(e.pointerId,{...activePointers.get(e.pointerId),x:e.clientX,y:e.clientY});
+  if(activePointers.size>=2){
+    if(gesture?.kind!=='pinch')beginPinch();
+    const [a,b]=[...activePointers.values()],mid=midpoint(a,b);
+    zoomAt(gesture.startCamera.zoom*distance(a,b)/gesture.startDistance,mid.x,mid.y,gesture.anchor);
+    return;
+  }
+  if(gesture?.kind!=='pan')beginSingle(activePointers.get(e.pointerId));
+  const pointer=activePointers.get(e.pointerId),dx=pointer.x-gesture.start.x,dy=pointer.y-gesture.start.y;
+  if(Math.hypot(dx,dy)>4){gesture.moved=true;gestureHadMovement=true;tip.dataset.open='false'}
+  if(gesture.moved){
+    const scale=viewportMetrics(gesture.startCamera).scale;
+    applyCamera({...gesture.startCamera,x:gesture.startCamera.x-dx/scale,y:gesture.startCamera.y-dy/scale});
+  }
+});
+function endPointer(e){
+  if(!activePointers.has(e.pointerId))return;
+  const tapOsid=e.type==='pointerup'&&!gestureHadMovement&&gesture?.tapOsid;
+  activePointers.delete(e.pointerId);
+  if(activePointers.size===1)beginSingle([...activePointers.values()][0]);
+  else if(activePointers.size===0){
+    if(gestureHadMovement)suppressClickUntil=performance.now()+350;
+    else if(tapOsid)highlight(tapOsid);
+    gesture=null;gestureHadMovement=false;svg.classList.remove('dragging');
+  }
+  else beginPinch();
+}
+svg.addEventListener('pointerup',endPointer);
+svg.addEventListener('pointercancel',endPointer);
 const META=new Map(CELLS.map(c=>[c.o,c]));
 
 // Weeks that actually contain a flip — the map is static between them, so the
@@ -460,7 +721,25 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 
 function stateAt(w){const st=Object.assign({},INIT);for(const e of EVENTS){if(e.t>w)break;st[e.o]=e.x}return st}
 
-let week=MAXWEEK,selected=null;
+const SCORED_META=new Map();
+for(const c of CELLS)if(!SCORED_META.has(c.s)||c.o===c.s)SCORED_META.set(c.s,c);
+const SEARCHABLE=[...SCORED_META.entries()].map(([osid,c])=>({osid,n:c.n||'',u:c.u||''}))
+  .sort((a,b)=>(a.n||a.osid).localeCompare(b.n||b.osid)||a.osid.localeCompare(b.osid));
+let week=MAXWEEK,selected=SEARCHABLE[0]?.osid||null;
+function renderSelection(st,cp){
+  const box=document.getElementById('selection-detail');
+  if(!selected){box.innerHTML='<div class="note">Choose a settlement from search, the map, a mismatch, or a flip.</div>';return}
+  const c=SCORED_META.get(selected),controller=st[selected]||'—';
+  const hasReference=Boolean(cp&&cp.reached&&Object.prototype.hasOwnProperty.call(PAINTED[cp.key],selected));
+  const historical=hasReference?PAINTED[cp.key][selected]:null;
+  const last=[...EVENTS].reverse().find(e=>e.o===selected&&e.t<=week);
+  box.innerHTML='<div class="detail-name">'+esc(c?.n||selected)+'</div>'
+    +(c?.u?'<div class="note">'+esc(c.u)+'</div>':'')
+    +'<div class="detail-row">OSID: '+esc(selected)+'</div>'
+    +'<div class="detail-row">Controller: <strong>'+esc(controller)+'</strong></div>'
+    +'<div class="detail-row">Historical owner: '+(hasReference?'<strong>'+esc(historical)+'</strong>':'no reference at week '+esc(week))+'</div>'
+    +'<div class="detail-row">Last change week: '+(last?'week '+esc(last.t):'none (initial control)')+'</div>';
+}
 function render(){
   const st=stateAt(week);
   for(const [osid,p] of nodes){
@@ -470,11 +749,33 @@ function render(){
   }
   const cp=CPBYWEEK.get(week);
   const mmlist=document.getElementById('mmlist'),mmnote=document.getElementById('mmnote'),mmwhen=document.getElementById('mmwhen');
+  markerLayer.textContent='';
   if(cp&&cp.reached){
     for(const m of cp.mismatches){const arr=byScored.get(m.osid);if(arr)for(const p of arr)p.classList.add('mismatch')}
+    // One circle per MISMATCH, not per drawn polygon: merged children share the
+    // parent's anchor, so a scored cell is named once rather than once per lobe.
+    const mfrag=document.createDocumentFragment();
+    for(const m of cp.mismatches){
+      const pt=MARKERS[m.osid];if(!pt)continue;
+      const g=document.createElementNS(NS,'g');g.setAttribute('class','mk');
+      const ci=document.createElementNS(NS,'circle');
+      ci.setAttribute('cx',pt[0]);ci.setAttribute('cy',pt[1]);
+      ci.setAttribute('fill',FCOLOR[m.want]||'#3a3f47');
+      g.appendChild(ci);
+      const tx=document.createElementNS(NS,'text');
+      tx.setAttribute('x',pt[0]);tx.setAttribute('y',pt[1]);
+      tx.textContent=FSHORT[m.want]||'?';
+      g.appendChild(tx);
+      const ttl=document.createElementNS(NS,'title');
+      ttl.textContent=(META.get(m.osid)?.n||m.osid)+' — should be '+(m.want||'—')+', is '+(m.sim||'—');
+      g.appendChild(ttl);
+      mfrag.appendChild(g);
+    }
+    markerLayer.appendChild(mfrag);
+    sizeMarkers();
     mmwhen.textContent='· '+cp.label+' (w'+cp.week+')';
     mmnote.textContent=cp.mismatches.length+' of '+cp.total+' OSIDs differ from painted control.';
-    mmlist.innerHTML=cp.mismatches.map(m=>'<div data-o="'+esc(m.osid)+'">'+esc(m.osid)+' — sim '+esc(m.sim||'—')+' · want '+esc(m.want)+'</div>').join('');
+    mmlist.innerHTML=cp.mismatches.map(m=>'<div data-o="'+esc(m.osid)+'">'+esc(m.osid)+' — controller '+esc(m.sim||'—')+' · historical '+esc(m.want)+'</div>').join('');
   }else{
     mmwhen.textContent='';
     // Deliberate: painted truth exists at four weeks only. Comparing any other week
@@ -491,30 +792,33 @@ function render(){
     ?fl.map(e=>'<div class="flip" data-o="'+esc(e.o)+'"><span style="color:'+(MCOLOR[e.m]||'#888')+'">■</span> '+esc(e.o)+' — '+esc(e.f||'—')+' → '+esc(e.x||'—')+' <span style="opacity:.65">('+esc(e.m)+')</span></div>').join('')
     :'<div class="note">No control changes this week.</div>';
   document.getElementById('weeklabel').textContent='week '+week+(cp?' · '+cp.label:'');
-  if(selected)highlight(selected);
+  if(selected)highlight(selected);else renderSelection(st,cp);
 }
 function highlight(osid){
   document.querySelectorAll('.cell.sel').forEach(p=>p.classList.remove('sel'));
   const arr=byScored.get(osid)||(nodes.has(osid)?[nodes.get(osid)]:[]);
   for(const p of arr)p.classList.add('sel');
   selected=osid;
+  renderSelection(stateAt(week),CPBYWEEK.get(week));
 }
 const slider=document.getElementById('week');
 slider.addEventListener('input',()=>{week=Number(slider.value);render()});
 document.getElementById('prev').onclick=()=>{const c=[...flipWeeks].reverse().find(w=>w<week);if(c!==undefined){week=c;slider.value=week;render()}};
 document.getElementById('next').onclick=()=>{const c=flipWeeks.find(w=>w>week);if(c!==undefined){week=c;slider.value=week;render()}};
 document.addEventListener('keydown',e=>{
+  if(e.target.matches('input,button'))return;
   if(e.key==='ArrowLeft'&&week>0){week-=1;slider.value=week;render()}
   if(e.key==='ArrowRight'&&week<MAXWEEK){week+=1;slider.value=week;render()}
 });
 document.getElementById('scores').addEventListener('click',e=>{
-  const td=e.target.closest('td.cp');if(!td)return;
-  week=Number(td.dataset.week);slider.value=week;render();
+  const control=e.target.closest('button.cp');if(!control)return;
+  week=Number(control.dataset.week);slider.value=week;render();
 });
 for(const id of ['mmlist','fliplist'])document.getElementById(id).addEventListener('click',e=>{
   const el=e.target.closest('[data-o]');if(!el)return;highlight(el.dataset.o);
 });
 svg.addEventListener('mousemove',e=>{
+  if(activePointers.size){tip.dataset.open='false';return}
   const p=e.target.closest('.cell');
   if(!p){tip.dataset.open='false';return}
   const c=META.get(p.dataset.o),st=stateAt(week),cp=CPBYWEEK.get(week);
@@ -533,10 +837,28 @@ svg.addEventListener('mousemove',e=>{
   tip.style.left=x+'px';tip.style.top=y+'px';
 });
 svg.addEventListener('mouseleave',()=>{tip.dataset.open='false'});
-svg.addEventListener('click',e=>{const p=e.target.closest('.cell');if(p)highlight(p.dataset.s)});
+svg.addEventListener('click',e=>{
+  if(activePointers.size||performance.now()<suppressClickUntil){e.preventDefault();return}
+  const p=e.target.closest('.cell');if(p)highlight(p.dataset.s);
+});
+
+document.getElementById('showmismatch').addEventListener('change',e=>{
+  document.body.classList.toggle('hide-mismatch',!e.target.checked);
+});
+const search=document.getElementById('settlement-search'),searchResults=document.getElementById('search-results');
+function renderSearchResults(){
+  const q=search.value.trim().toLocaleLowerCase();
+  if(!q){searchResults.innerHTML='';return}
+  const hits=SEARCHABLE.filter(c=>(c.n+' '+c.u+' '+c.osid).toLocaleLowerCase().includes(q)).slice(0,12);
+  searchResults.innerHTML=hits.length?hits.map(c=>'<button type="button" role="option" data-o="'+esc(c.osid)+'">'+esc(c.n||c.osid)+(c.u?' · '+esc(c.u):'')+'<br><span class="note">'+esc(c.osid)+'</span></button>').join(''):'<div class="note">No matching settlement.</div>';
+}
+search.addEventListener('input',renderSearchResults);
+search.addEventListener('keydown',e=>{if(e.key==='Enter'){const first=searchResults.querySelector('[data-o]');if(first){e.preventDefault();highlight(first.dataset.o)}}});
+searchResults.addEventListener('click',e=>{const choice=e.target.closest('[data-o]');if(choice)highlight(choice.dataset.o)});
 
 document.getElementById('prov').innerHTML=[
-  'run: '+esc(PROV.run_dir),
+  'run: '+esc(PROV.run_name),
+  'run id: '+esc(PROV.run_id||'—')+' · fingerprint '+esc(PROV.run_fingerprint),
   'scenario: '+esc(PROV.scenario||'—')+' · weeks '+esc(PROV.weeks)+' · '+esc(PROV.events)+' flips',
   'run commit: '+esc(PROV.run_commit||'—')+(PROV.run_dirty===true?' (DIRTY)':'')+' · node '+esc(PROV.run_node||'—'),
   'geojson: '+esc(PROV.geojson_features)+' drawn / '+esc(PROV.scored_osids)+' scored',

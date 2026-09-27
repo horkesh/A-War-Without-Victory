@@ -1,0 +1,4 @@
+Run actions/setup-node@v5 |   node-version: 22
+Run actions/setup-node@v5 | node: v22.23.2
+Install dependencies (root) | added 1368 packages, and audited 1370 packages in 22s
+Baseline regression	2026-09-17T06:34:14.0930008Z ##[group]Run node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_baseline_regression.ts
