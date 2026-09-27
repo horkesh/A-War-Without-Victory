@@ -31,8 +31,14 @@ import { strictCompare } from '../../state/validateGameState.js';
 // Constants
 // ═══════════════════════════════════════════════════════════════════════════
 
-/** Weeks after Washington Agreement before HV brigades arrive. */
-export const HV_PREPARATION_DELAY = 6;
+/**
+ * Weeks after Washington Agreement before HV brigades arrive.
+ * Retained BB1 printed p.243 dates Cincar beginning 1 Nov 1994 and says Croatian
+ * Army forces almost certainly helped plan and probably execute it. The four-turn
+ * lead before the t132 Cincar window is a scenario choice (retained n13:
+ * Washington t98 + 30 = t128).
+ */
+export const HV_PREPARATION_DELAY = 30;
 
 /** Corps assignment for spawned HV brigades. */
 export const HV_CORPS_ID = 'hvo_tomislavgrad' as FormationId;

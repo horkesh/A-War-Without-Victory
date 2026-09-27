@@ -261,8 +261,12 @@ const DONJI_VAKUF_AXES: readonly OpportunityAxisDef[] = [
 //   - hvo_rama_brigade — HVO Tomislavgrad, af=0 (BB v2 ch. 28: Rama covered
 //     Prozor-Kupres approach for the Cincar axis; ICTY Prlić IT-04-74-T
 //     trial record on HVO Tomislavgrad operative group composition)
-//   - hv_4th_guards_split — HV loan brigade, hvo_tomislavgrad after WA+6
-//     (BB v2 ch. 28; ICTY Gotovina IT-06-90-T §44-58 confirms HV 4th Guards
+//   - hv_4th_guards_split — HV loan brigade, hvo_tomislavgrad after
+//     HV_PREPARATION_DELAY. Its retained-n13 four-turn lead before the t132
+//     Cincar window is a scenario choice anchored to BB1 printed p.243, which
+//     dates Cincar beginning 1 Nov 1994 and says Croatian Army forces almost
+//     certainly helped plan and probably execute it. ICTY Gotovina IT-06-90-T
+//     §44-58 confirms HV 4th Guards
 //     cross-border employment on the Livno-Kupres-Grahovo axis from late 1994)
 //   - hv_5th_guards_karlovac, hv_7th_guards_varazdin — retained for plausibility
 //     symmetry; currently inactive at runtime but become available once HV
