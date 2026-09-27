@@ -1,0 +1,47 @@
+{
+  "dataset": "geoBoundaries gbOpen ADM0",
+  "release_snapshot": "geoBoundaries current API snapshot built 2023-12-12; pinned repository revision 9469f09",
+  "api_base": "https://www.geoboundaries.org/api/current/gbOpen",
+  "geometry_variant": "simplifiedGeometryGeoJSON",
+  "sources": [
+    {
+      "state": "HRV",
+      "path": "data/source/boundaries/geoboundaries_adm0_2023/geoBoundaries-HRV-ADM0_simplified.geojson",
+      "metadata_path": "data/source/boundaries/geoboundaries_adm0_2023/geoBoundaries-HRV-ADM0-metaData.json",
+      "metadata_sha256": "a78410458085ad4ee1efbcff27f9bb28bbd8101b2c73e41a3c20e11883d43c56",
+      "boundary_id": "HRV-ADM0-1432937",
+      "boundary_year": "2017",
+      "build_date": "2023-12-12",
+      "source_url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/HRV/ADM0/geoBoundaries-HRV-ADM0_simplified.geojson",
+      "license": "Open Data Commons Open Database License 1.0",
+      "license_url": "https://www.openstreetmap.org/copyright",
+      "sha256": "7f9b66bd5e0f84ac77efbd49219730637b5e3b4da03ae9c0e134bc146e3631b7"
+    },
+    {
+      "state": "MNE",
+      "path": "data/source/boundaries/geoboundaries_adm0_2023/geoBoundaries-MNE-ADM0_simplified.geojson",
+      "metadata_path": "data/source/boundaries/geoboundaries_adm0_2023/geoBoundaries-MNE-ADM0-metaData.json",
+      "metadata_sha256": "0e8a48cd3d59b17194c74b2436d0ead818927e4256dc887abcfcc67335e47712",
+      "boundary_id": "MNE-ADM0-69169217",
+      "boundary_year": "2017",
+      "build_date": "2023-12-12",
+      "source_url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/MNE/ADM0/geoBoundaries-MNE-ADM0_simplified.geojson",
+      "license": "Open Data Commons Open Database License 1.0",
+      "license_url": "https://www.openstreetmap.org/copyright",
+      "sha256": "5878886ab474d94f17607eb7395b62e1a33da0d0758a02ce307da643e20c210b"
+    },
+    {
+      "state": "SRB",
+      "path": "data/source/boundaries/geoboundaries_adm0_2023/geoBoundaries-SRB-ADM0_simplified.geojson",
+      "metadata_path": "data/source/boundaries/geoboundaries_adm0_2023/geoBoundaries-SRB-ADM0-metaData.json",
+      "metadata_sha256": "56f9631ff090fb10bca65936ef3f49965a811929eb056cf3aafb0deb551324cb",
+      "boundary_id": "SRB-ADM0-94879208",
+      "boundary_year": "2017",
+      "build_date": "2023-12-12",
+      "source_url": "https://github.com/wmgeolab/geoBoundaries/raw/9469f09/releaseData/gbOpen/SRB/ADM0/geoBoundaries-SRB-ADM0_simplified.geojson",
+      "license": "Open Data Commons Open Database License 1.0",
+      "license_url": "https://www.openstreetmap.org/copyright",
+      "sha256": "03a7f63318b09351689666b2f0e149c10d6331abfcc3c3b2070dfc7840d89ebf"
+    }
+  ]
+}

@@ -70,3 +70,7 @@
 - Lopare Selo remains RS; probes remain permitted.
 - The Foča southern axis and Vareš approach retain live participants and attempt their objectives.
 - Stable ordering and identical rerun hashes are demonstrated.
+
+### 2026-09-27 owner-authorized border refinement
+
+For April 1995 Donja Mahala, the owner approved a derived exterior-border test for the existing `reduce_isolated_position` purpose. A connected defender cluster touching its own patron state is eligible for exterior relief and therefore fails this purpose even if the in-country ring is closed: HRHB uses Croatia, RS uses Serbia or Montenegro, and RBiH has no patron-border exclusion. This is a geography-backed candidate on `codex/april1995-hv-integration-20260927`; it does not alter campaign objectives, recent recaptures, combat, movement, supply, painted references, or the unadopted April 1995 baseline. Deterministic ADM0 provenance, the generator and its focused tests, commander tests, map/canon/operations review, and bounded measurement evidence are part of this candidate's review record.

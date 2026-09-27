@@ -448,3 +448,85 @@ describe('emergent operation purpose guard', () => {
         expect(deriveOpportunityTargetPurpose(TARGET, makeZone(), briefing)).toBeNull();
     });
 });
+
+describe('patron-backed exterior border and isolated-position purpose', () => {
+    const DONJA = 'op:orasje:donja_mahala';
+    const ZVORNIK = 'op:zvornik:zvornik';
+    const BILECA = 'op:bileca:bileca_2';
+    const INLAND = 'op:fixture:inland';
+    const RING = 'op:fixture:ring';
+
+    function borderBriefing(
+        target: string,
+        defender: FactionId,
+        attacker: FactionId,
+        pocketMate?: string,
+    ): CommanderBriefing {
+        const adjacency = new Map<string, readonly string[]>([
+            [target, pocketMate ? [pocketMate, RING] : [RING]],
+            [RING, pocketMate ? [target, pocketMate] : [target]],
+            ...(pocketMate ? [[pocketMate, [target, RING]] as const] : []),
+        ]);
+        return makeBriefing({
+            faction: attacker,
+            spatial: {
+                ...makeBriefing().spatial,
+                adjacency,
+                sharedBoundaryAdjacency: adjacency,
+            } as SpatialContext,
+            state_ref: {
+                political: {
+                    political_controllers: {
+                        [target]: defender,
+                        [RING]: attacker,
+                        ...(pocketMate ? { [pocketMate]: defender } : {}),
+                    },
+                    control_events: [],
+                },
+            } as unknown as CommanderBriefing['state_ref'],
+        });
+    }
+
+    it.each([
+        ['HRHB pocket on the Croatian border', DONJA, 'HRHB', 'RS', null],
+        ['RS pocket on the Serbian border', ZVORNIK, 'RS', 'RBiH', null],
+        ['RS pocket on the Montenegrin border', BILECA, 'RS', 'RBiH', null],
+        ['inland target in a Croatian-border cluster', INLAND, 'HRHB', 'RS', DONJA],
+    ] as const)('rejects %s', (_label, target, defender, attacker, mate) => {
+        expect(deriveOpportunityTargetPurpose(
+            target,
+            makeZone(),
+            borderBriefing(target, defender, attacker, mate ?? undefined),
+        )).toBeNull();
+    });
+
+    it.each([
+        ['RBiH at the Croatian border', DONJA, 'RBiH', 'RS'],
+        ['HRHB at a non-patron Serbian border', ZVORNIK, 'HRHB', 'RS'],
+        ['RS at an inland pocket', TARGET, 'RS', 'RBiH'],
+    ] as const)('preserves the isolation purpose for %s', (_label, target, defender, attacker) => {
+        expect(deriveOpportunityTargetPurpose(
+            target,
+            makeZone(),
+            borderBriefing(target, defender, attacker),
+        )).toBe('reduce_isolated_position');
+    });
+
+    it('preserves higher-priority campaign and recent-recapture purposes at a patron border', () => {
+        const campaign = {
+            ...borderBriefing(DONJA, 'HRHB', 'RS'),
+            campaign_offensive_targets: [DONJA],
+        };
+        expect(deriveOpportunityTargetPurpose(DONJA, makeZone(), campaign)).toBe('campaign_objective');
+
+        const recapture = borderBriefing(DONJA, 'HRHB', 'RS');
+        recapture.state_ref!.political.control_events = [{
+            turn: recapture.turn - 1,
+            settlement_id: DONJA,
+            mechanism: 'combat',
+            from: 'RS',
+            to: 'HRHB',
+        }];
+        expect(deriveOpportunityTargetPurpose(DONJA, makeZone(), recapture)).toBe('recent_recapture');
+    });
+});

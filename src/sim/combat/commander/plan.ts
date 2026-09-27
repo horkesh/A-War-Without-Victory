@@ -36,6 +36,7 @@
 
 import type { FactionId, FormationId } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
+import { OSID_EXTERIOR_BORDER_BY_OSID } from './osid_exterior_border_data.js';
 import { spatialFriendlyDistance, spatialSameComponent } from '../../spatial_context.js';
 import { areRbihHrhbAllied } from '../../early_war/alliance_update.js';
 
@@ -1521,6 +1522,11 @@ export type OpportunityTargetPurpose =
 
 const RECENT_RECAPTURE_WINDOW_TURNS = 8;
 const MAX_ISOLATED_POSITION_OSIDS = 6;
+const DEFENDER_PATRON_BORDER_STATES: Readonly<Record<FactionId, readonly string[]>> = {
+    HRHB: ['HRV'],
+    RS: ['SRB', 'MNE'],
+    RBiH: [],
+};
 
 /**
  * Share of a bounded position's external ring the attacking corps must hold itself
@@ -1549,6 +1555,15 @@ export function isBoundedIsolatedEnemyPosition(
             cluster.add(neighbor);
             if (cluster.size > MAX_ISOLATED_POSITION_OSIDS) return false;
             queue.push(neighbor);
+        }
+    }
+
+    // A cluster touching its defender's patron state has an exterior relief route,
+    // even if its in-country ring is entirely controlled by the attacker.
+    const patronStates = DEFENDER_PATRON_BORDER_STATES[targetController as FactionId] ?? [];
+    for (const member of [...cluster].sort(strictCompare)) {
+        if ((OSID_EXTERIOR_BORDER_BY_OSID[member] ?? []).some((state) => patronStates.includes(state))) {
+            return false;
         }
     }
 
