@@ -1,0 +1,130 @@
+{
+  "base": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n0",
+  "candidate": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n1",
+  "changes": {
+    "156": [
+      {
+        "osid": "op:orasje:donja_mahala",
+        "n0": "RS",
+        "n1": "HRHB"
+      },
+      {
+        "osid": "op:travnik:paklarevo",
+        "n0": "RBiH",
+        "n1": "RS"
+      }
+    ],
+    "188": [
+      {
+        "osid": "op:bosanska_krupa:arapusa_2",
+        "n0": "RBiH",
+        "n1": "RS"
+      },
+      {
+        "osid": "op:bosanska_krupa:gornja_suvaja",
+        "n0": "RBiH",
+        "n1": "RS"
+      },
+      {
+        "osid": "op:bosanska_krupa:ivanjska_2",
+        "n0": "RBiH",
+        "n1": "RS"
+      },
+      {
+        "osid": "op:bosanska_krupa:vranjska_2",
+        "n0": "RBiH",
+        "n1": "RS"
+      },
+      {
+        "osid": "op:bosanski_petrovac:jasenovac_2",
+        "n0": "RBiH",
+        "n1": "RS"
+      },
+      {
+        "osid": "op:bosanski_petrovac:krnjeusa",
+        "n0": "RBiH",
+        "n1": "RS"
+      },
+      {
+        "osid": "op:bosansko_grahovo:bosansko_grahovo_2",
+        "n0": "HRHB",
+        "n1": "RS"
+      },
+      {
+        "osid": "op:bosansko_grahovo:crni_lug",
+        "n0": "HRHB",
+        "n1": "RS"
+      },
+      {
+        "osid": "op:bosansko_grahovo:malesevci",
+        "n0": "HRHB",
+        "n1": "RS"
+      },
+      {
+        "osid": "op:bosansko_grahovo:ugarci",
+        "n0": "HRHB",
+        "n1": "RS"
+      },
+      {
+        "osid": "op:glamoc:halapic",
+        "n0": "HRHB",
+        "n1": "RS"
+      },
+      {
+        "osid": "op:glamoc:kovacevci_2",
+        "n0": "HRHB",
+        "n1": "RS"
+      },
+      {
+        "osid": "op:glamoc:stekerovci_2",
+        "n0": "HRHB",
+        "n1": "RS"
+      },
+      {
+        "osid": "op:kljuc:hadzici",
+        "n0": "RBiH",
+        "n1": "RS"
+      },
+      {
+        "osid": "op:livno:gubin_2",
+        "n0": "HRHB",
+        "n1": "RS"
+      },
+      {
+        "osid": "op:orasje:donja_mahala",
+        "n0": "RS",
+        "n1": "HRHB"
+      },
+      {
+        "osid": "op:sanski_most:budimlic_japra_2",
+        "n0": "RBiH",
+        "n1": "RS"
+      },
+      {
+        "osid": "op:titov_drvar:drvar_2",
+        "n0": "HRHB",
+        "n1": "RS"
+      },
+      {
+        "osid": "op:titov_drvar:prekaja_2",
+        "n0": "HRHB",
+        "n1": "RS"
+      },
+      {
+        "osid": "op:titov_drvar:sipovljani_2",
+        "n0": "HRHB",
+        "n1": "RS"
+      },
+      {
+        "osid": "op:travnik:gornje_krcevine",
+        "n0": "RS",
+        "n1": "RBiH"
+      },
+      {
+        "osid": "op:travnik:varosluk",
+        "n0": "RS",
+        "n1": "RBiH"
+      }
+    ]
+  }
+}
