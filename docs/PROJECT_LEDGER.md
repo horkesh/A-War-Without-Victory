@@ -7328,3 +7328,145 @@ wrong-corps attribution, Prozor injection, full-suite exit and clean-source
 188-week proof remain open. April 1994 calibration begins from the revised
 697/712 checkpoint, checking historical control and operation mechanisms for
 each mismatch before making changes. [Closeout receipt](../logs/session-closeout-20260924/receipt.txt).
+
+### 2026-09-24 — Lukavac 93 military candidate validated; checkpoint gate open
+
+The post-auto-flip `n396` succeeded through combat; later Lukavac runs failed as
+2nd Romanija arrived out of position with low cohesion, the Guards and 65th
+weakened, and defenders strengthened. The candidate restores staging for the
+generated Romanija formation, reinforces the northern corridor, and assigns the
+Guards and Herzegovina brigades to a separate southern TG Kalinovik. In the
+188-week run `lukavac-staging-20260924/final188/...__w188_n0`, hash
+`a4079d59934a55cf`, the two commands succeed and five objectives change by
+combat. January is 707/712; April 1994 702/712; April 1995 697/712; October
+1995 664/712. Engine health and anchor tests pass; the 90-week prefix repeats
+byte-for-byte. The pre-existing Farz 95 P-A attribution guard remains red, and
+the ungated western Bosnia cascade falls from 32 to 28; the candidate is not
+merge-ready. Changed `pre_planned_operations.ts`, `historical_elite_reservations.ts`,
+their two focused test files, this ledger, and `CALIBRATION_MASTER.md`; a scan
+found no stale structural Lukavac references in active canon or engineering
+guides. [Calibration evidence](40_reports/CALIBRATION_MASTER.md#2026-09-24--lukavac-93-military-calibration-candidate).
+
+### 2026-09-24 — Lukavac 93 external map refreshed
+
+At the owner's request, rendered the retained 188-week Lukavac candidate into
+the existing control timeline and published only `index.html` and `README.md`
+on `gh-pages` at `40aeaf57e`. The [live viewer](https://horkesh.github.io/A-War-Without-Victory/?run=lukavac-93-20260924)
+shows **707/702/697/664**, 744 drawn/712 scored OSIDs, and 232 saved flips.
+Embedded script, payload/marker checks, local desktop/mobile and live mobile
+interaction pass. Pages reports built; HTTP 200 content is byte-identical to
+the generated 719,513-byte HTML (SHA-256 `a7d9b8184a97ec6360d4e43593062d2e1ae69def510487105b838109323ef8f7`).
+The page labels the dirty local run inadmissible as a baseline; publication
+does not change simulation, references, source branch, or acceptance gates.
+
+### 2026-09-24 — Goražde and Sana combat calibration; map refreshed
+
+The owner prohibited artificial OSID flips and distant-enclave deployment of
+the ARBiH Guards. Prača River now takes Brćigovo, Sopotnica, Ustiprača and
+Slatina by turns 62–63, before Lukavac; Zvezda 94 takes Donje Žešće at turn
+95. Sana's earlier Ivanjska stage yields Oborci at turn 187 and Škucani Vakuf
+at turn 188. Each is a logged combat transfer. The Guards boundary excludes
+distant enclave assignment and uses ordinary movement for a reachable return.
+The 188-week from-scratch candidate hashes `ca5d585c54ff23e0` and scores
+**707/707/700/668**; 31 anchors, consistency/provenance, typecheck and 290
+focused tests pass. The post-suite startup, bundle and inventory corrections
+pass 110 targeted tests. The required full suite exited 1 once: its two
+calibration-caused top-level failures are corrected, while 56 unrelated
+top-level failures remain. Farz 95 P-A wrong-corps attribution still fails the
+checkpoint gate, so this dirty candidate is not adopted or merge-ready.
+The [updated external map](https://horkesh.github.io/A-War-Without-Victory/?run=gorazde-lukavac-20260924)
+is `gh-pages` commit `eda6c82c1`, built and byte-verified live. See
+[calibration evidence](40_reports/CALIBRATION_MASTER.md#2026-09-24--gorazde-and-sana-follow-on-calibration-candidate).
+
+### 2026-09-24 — 1993 HVO–ARBiH timing calibration remains a candidate
+
+Bugojno now attacks and captures its HVO cells at t67, with its event at t68;
+Vareš attacks only after Stupni Do (t80), taking the approach at t82 and town
+at t83. Travnik no longer fires from a town already held by ARBiH. Neretva's
+event requires its named operation to have recorded an attack, not an unrelated
+Mostar flag. Moving the Gornji Vakuf clashes from December to January fires the
+event at t41. The t49 alliance-break event now describes the local rupture;
+the existing April offensive event remains distinct. A bounded RS Brčko defense
+support window prevents the newly exposed Donji Rahić loss at t87 through
+ordinary combat (attacker ratios 1.66 without support, 0.95 with support).
+The 105-week trial at `F:/A-War-Without-Victory/runs/zvezda-guard-recall105-20260924`
+scores 707/704 at January 1993/April 1994, passes 32/32 anchors and combat
+health, and seals with zero unresolved formations. Lopare Selo remains RS after
+a local garrison priority; a recall-precedence correction lets the VRS 1st
+Guards reach Zvezda 94 and take Donje Žešće in combat at t96. The Prozor
+Ljubunci/Lug/Paroš trio remains below the previous 707/712 candidate. A
+summer Rama Brigade/HV support trial could not launch and was reverted. This
+timing candidate is not adopted and the external map remains on the prior,
+better-scoring 188-week run pending local recovery and later gates.
+
+### 2026-09-27 — Provisional Doljani combat-capture timing candidate
+
+The owner provisionally accepted the scenario-inference change to
+`Prozor–Rama Line Counterattack.available_from` from 41 to 71 in
+`src/sim/combat/pre_planned_operations.ts`; the timing fixture in
+`tests/pre_planned_operations.test.ts` follows it. No source dates the inferred
+counterattack to August–September 1993. The independent operations review gave
+GO after a comment correction. The 188-week candidate run
+`runs/apr1992_definitive_188w__6deb5845c150c196__w188_n13` (hash
+`ee5dbfb8f42e7d14`) captures Doljani by ordinary RBiH combat at t57 and holds
+it at w104, with Ljubunci/Lug/Paroš HRHB; January/April scores are 707/712.
+The week-105 Central Bosnia trade accepted provisionally by the owner remains
+one critical anomaly at t188 in the turn-71 candidate (7/11 brigades under 400);
+no 188-week turn-41 control was run. The full Vitest gate and Farz P-A checkpoint guard
+remain red, so the candidate is uncommitted and not an adopted baseline.
+`docs/10_canon/Systems_Manual_v0_9_0.md` and
+`docs/20_engineering/DETERMINISM_TEST_MATRIX.md` now describe the provisional
+current timing; `docs/40_reports/CALIBRATION_MASTER.md` holds the detailed
+evidence and open gates. No painted reference, external map, control authority,
+denominator, detector, or threshold changed.
+
+### 2026-09-27 — Doljani candidate external map published for inspection
+
+At the owner's request, the retained 188-week Doljani candidate was rendered in
+the existing control timeline and published at the
+[external map](https://horkesh.github.io/A-War-Without-Victory/?run=doljani-20260927).
+Only `index.html` and `README.md` changed on `gh-pages` at `6c1655eb3`;
+Pages reports built, and the live HTTP 200 HTML is byte-identical to the
+reviewed artifact SHA-256 `e64c53aa53e3a2e176f5e1c656d0c8961ae16c698c3903653e967be7451b548f`.
+The page shows 707/707/701/664, Doljani RBiH by combat at w104, the Prozor
+trio HRHB, and Maglaj still parked. It visibly states that the dirty candidate
+is not adopted and the full-suite, Farz P-A, and Central Bosnia gates remain.
+Local and live desktop/phone browser checks passed. No painted reference, map
+geometry, simulation, baseline, or main branch changed. Receipt:
+`logs/external-map-doljani-20260927/receipt.md`.
+
+### 2026-09-27 — Doljani integration closeout and retained gate audit
+
+The current simulation, scenario, event, OOB, desktop, tests, and process edits
+were gathered on `codex/april1994-closeout-20260927` for review. The provisional
+Doljani capture meets the owner's local April 1994 acceptance through logged
+ordinary combat, with the painted value unchanged and the Prozor trio still
+HRHB. Governing canon, event authoring, determinism, calibration, roadmap,
+board, open-gates, and plan-index documents now state the candidate and its
+unresolved gates; the compact evidence is
+`logs/integration-closeout-20260927/receipt.md`.
+
+One corrected Git Bash full-suite run exited 1 with 14,127 passed, eight real
+failed, and 31 skipped tests. The failures were triaged into plan-index drift,
+one stale 1993 event-window assertion, an untracked map receipt, Windows
+worktree path identity, and tracked-blob versus checkout-byte accounting.
+Focused corrections were made without another full-suite or campaign run. The
+retained 188-week candidate still fails the Farz P-A wrong-corps checkpoint and
+has one HVO Central Bosnia critical anomaly (7/11 brigades below 400). An
+older 188-week comparison has different initial-save bytes and operation
+layout, so its October score difference cannot isolate this retiming. This
+candidate remains provisional and is not a baseline adoption or merge GO.
+
+### 2026-09-27 — Independent closeout review blocks merge on sensitive-history effects
+
+The independent Sol reviewer confirmed two already-recorded §6 defects in the
+Grabovica/Uzdol event. The generic collector applies both singular `effect`
+and `effects[0]`, each carrying `war_crimes_delta: 2`, so the actual write is
++4. The event's `negotiation_capital international_credibility -10` target is
+absent from negotiation capital and silently does nothing; its separate
+`international_standing -10` dimension shift still applies. The new t77 and
+terminal follow-up path makes this existing row reliably executable. The prior
+event/termination/desktop packet passed 360 focused tests with five skips, but
+its effect assertion checks only positivity. A separate §6-approved correction,
+exact-effect tests, and measured proof are required before merge/adoption.
+The closeout candidate remains a review vehicle with red gates, not promotion.

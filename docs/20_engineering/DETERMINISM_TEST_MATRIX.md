@@ -45,9 +45,14 @@
   Circle/Kijevo/Upper Drina combat package.
 - `tests/pre_planned_operations.test.ts` also pins the Operation Corridor Derventa-pocket axis
   and retained east-axis roster, plus the bounded Prozor–Rama counterattack's exact HVO roster,
-  timing, objectives, and execution multiplier. `tests/brigade_aor_subsegment.test.ts` pins the
+  provisional `available_from: 71` scenario-inference timing, objectives, and execution multiplier.
+  `tests/brigade_aor_subsegment.test.ts` pins the
   deterministic HVO fixed-home local-contact assignment preference and proves it is inactive for
   quiet homes and other factions.
+- `tests/events_evaluate.test.ts` pins `operation_attacked` against live, ended, and halted
+  attack counts; `tests/events_owed_followups_termination.test.ts` pins the bounded, once-only
+  terminal follow-up write through serialization. `tests/combat_external_support_osid.test.ts`
+  pins dated OSID attack support and its absence outside the authored window.
 - `tests/gorazde_pocket_event_state_truth.test.ts`,
   `tests/srebrenica_linkup_event_state_truth.test.ts`, and
   `tests/upper_drina_front_event_state_truth.test.ts` forbid calibration-authored

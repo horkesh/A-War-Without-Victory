@@ -11,6 +11,7 @@ import type { AxisRejectionDetail, GameState, CorpsOperation, FormationId, Comma
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { recordedOperationAttackCount } from './operation_attack_count.js';
 import { resolveTacticalGroupIdsForOperation } from '../../state/operation_lifecycle_reconciliation.js';
 import { ENABLE_TG_ARMY_HQ_OPS } from './tactical_group_config.js';
 
@@ -359,19 +360,7 @@ function collectObjectives(op: CorpsOperation): string[] {
 }
 
 function canonicalOperationAttackCount(op: CorpsOperation, weeklyFallback: number): number {
-    if (op.axes && op.axes.length > 0) {
-        let total = 0;
-        let hasAxisCounter = false;
-        for (const axis of op.axes) {
-            if (typeof axis.attack_attempt_count === 'number') {
-                total += axis.attack_attempt_count;
-                hasAxisCounter = true;
-            }
-        }
-        if (hasAxisCounter) return total;
-    }
-    if (typeof op.attack_attempt_count === 'number') return op.attack_attempt_count;
-    return weeklyFallback;
+    return recordedOperationAttackCount(op) ?? weeklyFallback;
 }
 
 function canonicalAxisAttackCount(

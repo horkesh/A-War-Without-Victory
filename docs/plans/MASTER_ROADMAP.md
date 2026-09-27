@@ -13,28 +13,37 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-09-24 (R6 January candidate and Vranjevići reference)
+**Last updated:** 2026-09-27 (R6 provisional Doljani candidate and integration gates)
 
-**Current R6 status — supersedes the historical measurements below.** The local
-`Operation Donji Vakuf` axis takes Prusac at t30 and Jemanlići at t31 through
-ordinary combat; Orašac remains the earlier t1 Bosanska Krupa capture.
-Srebrenica–Cerska Link-Up captures Sebiočina at t15 for RBiH, and VRS
-Cerska–Kamenica retakes it at t45. The definitive scenario now gives RS East
-Bosnian Corps a must-hold priority for Brčko city and Donji Rahić; both stay RS
-through the corrected run. The owner paints Mostar Vranjevići RS at all four
-checkpoints. Against those references the retained 188-week candidate scores
-**707/697/690/662**; engine health, 31 final protected anchors and nine enclave
-guards pass. January's numeric and named capture targets are met locally.
-Full-campaign acceptance remains **NO-GO**: the inherited Farz wrong-corps and
-Prozor operation-injection defects persist. The post-snapshot full suite ran
-and exited 1 on board length and a 10-second runtime dependency setup timeout;
-both pass targeted checks after shortening the board (7/7 and 12/12). The
-full-suite exit remains red; clean-source 188-week proof remains open.
-The [published map](https://horkesh.github.io/A-War-Without-Victory/?run=vranjevici-rs-20260924)
-shows this dirty local candidate with the revised reference. No pin refresh,
-baseline adoption or merge.
+**Current R6 status — supersedes the historical measurements below.** The
+provisional Doljani candidate at `w188_n13` scores **707/707/701/664** against
+the unchanged painted references. `op:jablanica:doljani_2` becomes RBiH by
+ordinary logged combat at turn 57 and remains RBiH at week 104; Ljubunci, Lug,
+and Paroš are HRHB then. The five remaining January/April mismatches include
+parked Maglaj. The owner approved the turn-71 Prozor–Rama timing as a scenario
+inference and provisionally accepted its measured week-105 Central Bosnia trade,
+not final baseline adoption. The 188-week run has one Central Bosnia critical
+anomaly (7/11 below 400); the Farz P-A checkpoint verifier still fails because
+the turn-169 capture belongs to the 3rd rather than 2nd Corps. A full-suite run
+with Git Bash selected explicitly exited 1 with eight real failures across
+plan-index drift, a stale Neretva window assertion, one untracked receipt,
+Windows worktree dependency identity, and checkout research-byte counting.
+The affected five files now pass 74/74 focused tests, but the full-suite exit
+remains red pending a clean-source rerun.
+Independent closeout review also confirms two pre-existing §6 defects in the
+now reliably fired Grabovica/Uzdol row: duplicate humanitarian impact (+4 in
+practice rather than +2) and a no-op negotiation-capital target. These need
+their own approved correction and exact-effect proof before merge.
+The 1995 comparison to `n8` is not a one-field control because the initial
+saves and operation layouts differ. Overall calibration remains **NO-GO**
+pending the unchanged gates, clean-source proof, and final adoption. The
+[published map](https://horkesh.github.io/A-War-Without-Victory/?run=doljani-20260927)
+labels this as an inspection candidate. No pin refresh or baseline adoption.
 See the [current calibration evidence](../40_reports/CALIBRATION_MASTER.md).
 The earlier source scores and verdicts below remain historical.
+
+**Current review branch:** `codex/april1994-closeout-20260927` (candidate, not promoted).
+The execution-branch paragraph below records the earlier January checkpoint.
 
 **Execution branch:** `codex/january-1993-operations-20260914`, from clean integration checkpoint `9ac9f11da` through the Jajce local occupation step. All 20 April calibration commits, approved canon amendments and coverage tests remain ancestors. The January operations implementation is measured at clean `ac3e5e152`: January meets its authorized 700/712 contract and every checkpoint improves on the preceding `8db305596` source, while overall calibration still fails the remaining conditions below. Two later bounded commits extend it: `772a67808` (the bounded isolated-position predicate reads the live RBiH–HRHB alliance; the head-queue roster reservation is bounded by `available_from`) and `41a148bf9` (Operation Jackal gains `op:stolac:pjesivac_kula_2`). On that clean source the independent run **n403** measures **701/712** at t39 = 4 January 1993 with 11 mismatches; later checkpoints are NOT REACHED. Local `main` remains `9588876bc`; promotion and baseline refresh are held.
 
@@ -260,7 +269,7 @@ on matching contracts/inputs. No baseline refresh, remote configuration change o
 | R3 | Operational/Tactical Group convergence | **COMPLETE** | [TG closeout plan](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) | One offensive task-organization path, synchronized lifecycle/AHQ receipts, terminal telemetry, unique sourced promotions, locked exhaustion constants, and aligned Standing-OG doctrine. |
 | R4 | Command, event, and Dynamic Codex convergence | **COMPLETE — CLOSED 2026-08-06** (Phase 6 merged, PR #481 → main `40d3c5452`). Twelve-specialist panel fixes 6.1–6.5 landed; calibration byte-identical, independent Code Review + QA GO. Detail in [archive](MASTER_ROADMAP_ARCHIVE.md#closed-lane-detail-moved-2026-09-10). | [Command/event/Codex plan](2026-07-31-command-event-codex-convergence-plan.md) (Phase 6) | Five presidential levers remain; Decision Room owns action; Desk owns triage; events, Chronicle, Cost Ledger, and Codex share deterministic receipts and priority truth. |
 | R5 | Engine quality, performance, and stability | **COMPLETE — CLOSED 2026-08-05** at the ~1,086 ms/turn floor. Every self-executable item done; Phase 2e reverted on a measured regression; Task 6 DECLINED, not deferred, and the 100 ms/turn target is retired. Detail in [archive](MASTER_ROADMAP_ARCHIVE.md#closed-lane-detail-moved-2026-09-10). | [Engine-quality plan](2026-07-31-engine-quality-performance-stability-plan.md) / [Phase 2c/2d packet](2026-08-01-r5-phase2c-amortized-sector-topology-plan.md) / [Phase 2e pure solve](2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md) | Optional state is classified, measured hot paths improve without byte drift, save/replay contracts are stable, generated artifacts have owners, and local/CI release checks match. |
-| R6 | Historical gameplay depth and final calibration | **JANUARY CANDIDATE; FULL CAMPAIGN NO-GO (2026-09-24).** Sebiočina RBiH t15, RS t45; Brčko corridor holds. Vranjevići reference RS at all checkpoints. Retained 188w **707/697/690/662**, health/31 final anchors/nine enclave guards. Farz, Prozor and the post-snapshot full-suite gate remain open. Next: diagnose the 15 April 1994 mismatches. | [Historical-gameplay plan](2026-07-31-historical-gameplay-depth-calibration-plan.md) · [exhaustion/scoring plan](2026-08-06-exhaustion-scoring-redesign-plan.md) | Preserve protected data, legal capture, determinism, final clean-source acceptance and every other unchanged gate. |
+| R6 | Historical gameplay depth and final calibration | **PROVISIONAL DOLJANI CANDIDATE; FULL CAMPAIGN NO-GO (2026-09-27).** Retained 188w **707/707/701/664**; Doljani RBiH by combat at t57 and the Prozor trio HRHB at w104. Five January/April mismatches remain parked. Central Bosnia has one critical anomaly; Farz P-A and the corrected-environment full suite are red. The owner accepted the t105 trade provisionally, not final adoption. Next: close the named gates and obtain clean-source proof before promotion. | [Historical-gameplay plan](2026-07-31-historical-gameplay-depth-calibration-plan.md) · [exhaustion/scoring plan](2026-08-06-exhaustion-scoring-redesign-plan.md) | Preserve protected data, legal capture, determinism, final clean-source acceptance and every other unchanged gate. |
 | RC | Pressure → exhaustion → **COLLAPSE** pipeline | **PRE-1.0 NARROW SCOPE COMPLETE — CLOSED 2026-08-15.** Retained v3 selection plus reversible D-shape; deterministic and trajectory-flat, 31/31 anchors, 6/6 benchmarks, 7/7 health gates, full Section 6 pass. D-topology is explicitly post-1.0. Detail in [archive](MASTER_ROADMAP_ARCHIVE.md#closed-lane-detail-moved-2026-09-10). | [Scope](../40_reports/proposals/20260609_SCOPE_collapse_pipeline.md) · [build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) · [measurement plan](2026-08-15-collapse-d-selection-measurement-plan.md) · [D-shape design](2026-08-15-collapse-d-shape-design.md) · [Stage 0/2 panel record](../40_reports/20260813_RC_COLLAPSE_PANEL_FROZEN_ARTIFACT.md) | The default-OFF local collapse model measures historically discriminating combat pressure, recovers on quiet turns, reaches a bounded live writer, preserves Section 6, and leaves neighbour cascade to an explicit post-1.0 topology packet. |
 | RE | 1.0 engine integrity: seven outcomes, no general cleanup | **CLOSED — owner, 2026-09-01.** RE gates nothing: not calibration, not R7, not R8. P2B and the auxiliary prerequisite are retired history. Engine health remains sacrosanct as a principle, not as an RE gate. Detail in [archive](MASTER_ROADMAP_ARCHIVE.md#closed-lane-detail-moved-2026-09-10). | [1.0 contract](2026-08-26-engine-integrity-plan.md) · [recovery plan](2026-08-28-packaged-probe-recovery-plan.md) · [living audit](../40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md) | The unproven prerequisite config/test hypothesis was rolled back exactly and its receipt closed. P2B–P7 and final-pair/profile gates are retired historical acceptance, not unfinished current work; no successor proof route is active. |
 | R7 | Content, historical attribution, audio, accessibility, and opening experience | **ACTIVE — AUDIO AND BROADER ACCEPTANCE OPEN.** WR01 delivered in #517; stale-pin refresh landed in #518. Human listening/sensitivity, offline playback/controls and disposition of ten cue triggers remain open. Separate R8 opening/setup readability, two status contrasts and runtime/package failures remain. Human listening waits for owner inspection. The merged April candidate requires its own canon and 188-week acceptance; neither WR01 nor #518 accepts it. | [Content/history/audio plan](2026-07-31-content-history-localization-audio-plan.md) · [accepted functional opening plan](2026-08-23-opening-screens-implementation-plan.md) · [cinematic opening and typography amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md) · [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) · [ARBiH names](2026-09-07-arbih-brigade-honorific-name-correction-plan.md) · [WR01 warroom presentation design](2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.md) | Provenance and English presentation stay supported; audio/runtime and broader acceptance require their named receipts. |

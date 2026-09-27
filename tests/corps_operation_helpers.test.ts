@@ -12,10 +12,15 @@ import {
     getPrimaryOperation,
     removeOperation,
     countAxisConcentrationSupport,
+    getSynchronizedOperationBrigadesAtObjective,
 } from '../src/sim/combat/corps_operation_helpers.js';
 import { makeFormation, makeSector } from './test_factories.js';
 
 describe('buildCorpsOperation', () => {
+    it('persists a synchronized assault name', () => {
+        const op = buildCorpsOperation({ name: 'north', staging_osid: 'a', sync_operation_name: 'sync_lukavac_93' }, [], [], 69);
+        expect(op.sync_operation_name).toBe('sync_lukavac_93');
+    });
     it('preserves an Army HQ operation link from a pre-planned operation', () => {
         const operation = buildCorpsOperation(
             {
@@ -34,6 +39,28 @@ describe('buildCorpsOperation', () => {
         );
 
         expect(operation.army_hq_op_id).toBe('ahq:RBiH:1993:neretva_93');
+    });
+});
+
+describe('synchronized assault forecast', () => {
+    it('counts only executing same-faction peers at the exact objective', () => {
+        const axis = (objective: string, brigades: string[]) => ({
+            status: 'executing', current_objective_index: 0,
+            objectives: [objective], assigned_brigades: brigades,
+        });
+        const local = { name: 'south', phase: 'planning', sync_operation_name: 'sync_lukavac_93', axes: [axis('target', ['south_b'])] } as any;
+        const peer = { name: 'north', phase: 'planning', sync_operation_name: 'sync_lukavac_93', axes: [axis('target', ['north_b', 'south_b'])] } as any;
+        const otherObjective = { name: 'other', phase: 'execution', sync_operation_name: 'sync_lukavac_93', axes: [axis('other_target', ['other_b'])] } as any;
+        const otherFaction = { name: 'enemy', phase: 'execution', sync_operation_name: 'sync_lukavac_93', axes: [axis('target', ['enemy_b'])] } as any;
+        const state = { military: { formations: {
+            corps_north: { faction: 'RS' }, corps_enemy: { faction: 'RBiH' },
+        }, corps_command: {
+            corps_north: { active_operations: [peer, otherObjective] },
+            corps_enemy: { active_operations: [otherFaction] },
+        } } } as any;
+        expect(getSynchronizedOperationBrigadesAtObjective(state, local, 'RS', 'target')).toEqual(['south_b']);
+        peer.phase = 'execution';
+        expect(getSynchronizedOperationBrigadesAtObjective(state, local, 'RS', 'target')).toEqual(['north_b', 'south_b']);
     });
 });
 

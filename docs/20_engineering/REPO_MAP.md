@@ -27,8 +27,9 @@ Populate this section from the discovery checklist.
   - Bounded browser fallback (not co-equal): `src/sim/run_early_war_browser.ts` — the existing Warroom fallback; desktop advance uses the IPC bridge.
 - Militia/brigade formation (early-war): pool population `src/sim/early_war/pool_population.ts`, formation spawn `src/sim/formation_spawn.ts`, recruitment (player_choice mode) `src/sim/recruitment_engine.ts`, `src/state/recruitment_types.ts`; design: `docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md`. CLI: `src/cli/sim_generate_formations.ts`.
 - B1 Events: `src/sim/events/` — emergent event system (v0.6.0)
-  - `event_types.ts` — EventCondition (23 variants), EventDefinition, EventResponseOption, PressureConfig, RecurrenceConfig, DimensionId, StrategicDimension, DimensionShift
-  - `evaluate_events.ts` — collect-then-fire evaluation, pressure integration, recurrence gating, 3/turn queue cap
+  - `event_types.ts` — EventCondition vocabulary, EventDefinition, EventResponseOption, PressureConfig, RecurrenceConfig, DimensionId, StrategicDimension, DimensionShift
+  - `evaluate_events.ts` — collect-then-fire evaluation, pressure integration, recurrence gating, 3/turn queue cap, and causally owed no-choice records at termination
+  - `../endgame/owed_termination_records.ts` — idempotent terminal-record writer and endgame-snapshot refresh, called by the war pipeline and desktop save boundary
   - `event_loader.ts` — loads `data/scenarios/events/war_*.json`
   - `apply_effects.ts` — deterministic effect application (10 effect kinds)
   - `resolve_decision.ts` — player decision resolution

@@ -46,6 +46,7 @@ import { bfsDistance } from './sector_utils.js';
 import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
 import { ENABLE_STANDING_OG_RESERVE_COMMIT } from './standing_og_defense.js';
 import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
+import { getQueuedDatedPrestageBrigadeIds } from './pre_planned_operations.js';
 
 type CorpsAssetFormationState = FormationState & {
     active_operations?: CorpsCommandState['active_operations'];
@@ -123,6 +124,7 @@ function isSarajevoSiegeSector(sector: CorpsFrontSector): boolean {
  */
 function buildOperationParticipantSet(state: GameState): Set<string> {
     const participants = new Set<string>();
+    for (const brigadeId of getQueuedDatedPrestageBrigadeIds(state)) participants.add(brigadeId);
     const formations: Record<string, CorpsAssetFormationState> = state.military.formations ?? {};
     for (const fid of Object.keys(formations)) {
         const f = formations[fid];

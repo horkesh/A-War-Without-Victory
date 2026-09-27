@@ -1206,6 +1206,7 @@
         "corps_exhaustion": 0,
         "og_slots": 2,
         "queued_operations": [
+          "Jablanica–Doljani Local Attack",
           "Operation Neretva '93"
         ],
         "stance": "balanced",
@@ -29072,7 +29073,7 @@
         "wounded_pending": 0
       },
       "gornji_vakuf:HRHB": {
-        "available": 499,
+        "available": 663,
         "committed": 0,
         "exhausted": 0,
         "faction": "HRHB",
@@ -31268,7 +31269,8 @@
       ],
       "vrs_east_bosnian": [
         "op:brcko:brcko",
-        "op:brcko:donji_rahic"
+        "op:brcko:donji_rahic",
+        "op:lopare:lopare_selo_2"
       ]
     },
     "named_officer_data": [
@@ -39098,7 +39100,7 @@
         "RS": 28.7
       },
       "gornji_vakuf": {
-        "HRHB": 34.2,
+        "HRHB": 45.4,
         "RBiH": 25,
         "RS": 25.9
       },
@@ -39796,6 +39798,27 @@
             "rogatica",
             "prijedor"
           ]
+        },
+        {
+          "combat_multiplier": 1.6,
+          "end_turn": 79,
+          "faction": "RS",
+          "municipalities": [
+            "trnovo"
+          ],
+          "osid_attack_support": true,
+          "role": "attack",
+          "start_turn": 69
+        },
+        {
+          "combat_multiplier": 1.75,
+          "end_turn": 104,
+          "faction": "RS",
+          "municipalities": [
+            "brcko"
+          ],
+          "role": "defend",
+          "start_turn": 70
         }
       ],
       "id": "apr1992",
@@ -42025,8 +42048,8 @@
         "control": "consolidated",
         "control_status": "SECURE",
         "organizational_penetration": {
-          "hdz_penetration": 40,
-          "paramilitary_hrhb": 25,
+          "hdz_penetration": 50,
+          "paramilitary_hrhb": 60,
           "paramilitary_rs": 5,
           "patriotska_liga": 25,
           "police_loyalty": "mixed",

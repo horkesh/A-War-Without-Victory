@@ -80,11 +80,11 @@ lanes:
   - lane: R6
     title: "Historical gameplay depth and final calibration"
     lane_open: true
-    status: "JANUARY CANDIDATE; FULL CAMPAIGN NO-GO (2026-09-24). Sebiočina RBiH t15, RS t45; Brčko corridor holds. Vranjevići reference RS at all checkpoints. Retained 188w"
+    status: "PROVISIONAL DOLJANI CANDIDATE; FULL CAMPAIGN NO-GO (2026-09-27). Retained 188w 707/707/701/664; Doljani RBiH by combat at t57 and the Prozor trio HRHB at w104. "
     plans:
       - path: docs/plans/2026-07-31-historical-gameplay-depth-calibration-plan.md
         exists: true
-        tokens: 20383
+        tokens: 20440
         fits_context: true
         tasks: null
       - path: docs/plans/2026-08-06-exhaustion-scoring-redesign-plan.md
@@ -129,7 +129,7 @@ lanes:
     plans:
       - path: docs/plans/2026-07-31-content-history-localization-audio-plan.md
         exists: true
-        tokens: 13466
+        tokens: 13301
         fits_context: true
         tasks: docs/plans/tasks/2026-07-31-content-history-localization-audio-plan.yml
       - path: docs/plans/2026-08-23-opening-screens-implementation-plan.md
@@ -144,7 +144,7 @@ lanes:
         tasks: null
       - path: docs/plans/2026-09-05-r7-presentation-and-english-readability-amendment-plan.md
         exists: true
-        tokens: 25984
+        tokens: 25640
         fits_context: true
         tasks: null
       - path: docs/plans/2026-09-07-arbih-brigade-honorific-name-correction-plan.md

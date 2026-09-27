@@ -36,13 +36,17 @@ describe('R7 Phase 1.1 sensitive-history content', () => {
         }
     });
 
-    it('keeps the September anchors at turns 74-76 with exact local BB and ICTY support', () => {
+    it('keeps the staggered September anchors (Neretva t76, Grabovica/Uzdol record t77) with exact local BB and ICTY support', () => {
+        const staggeredTurn: Record<string, number> = {
+            operation_neretva_93_1993: 76,
+            grabovica_uzdol_massacres_1993: 77,
+        };
         for (const id of ['operation_neretva_93_1993', 'grabovica_uzdol_massacres_1993']) {
             const event = events.find((row: any) => row.id === id);
             const essay = readJson(`data/scenarios/essays/${id}.json`);
 
-            expect(event.trigger.turn_min).toBe(74);
-            expect(event.trigger.turn_max).toBe(76);
+            expect(event.trigger.turn_min).toBe(staggeredTurn[id]);
+            expect(event.trigger.turn_max).toBe(staggeredTurn[id]);
             expect(`${event.historical_source} ${essay.sources.join(' ')}`).toMatch(/Halilovic.*IT-01-48-T/i);
             expect(`${event.historical_source} ${essay.sources.join(' ')}`).toMatch(/Balkan Battlegrounds Vol\. II, pp\. 434-435/i);
         }

@@ -32,7 +32,7 @@
 #   npm run gates                           prints the currently-open rows
 
 version: 1
-updated: 2026-09-16
+updated: 2026-09-27
 
 lanes: [R1, R2, R3, R4, R5, R6, R7, R8, R9, RC, RE, REPO]
 
@@ -187,7 +187,25 @@ gates:
       t>=160 is required. The Prozor op_empty injection is inherited identically from the
       8db305596 reference. Two clean identical 188-week runs on the combined source are
       still outstanding. Broader operation scheduling and attribution need separate repair
-      scope. No conditional repeat, promotion or pin refresh followed.
+      scope. No conditional repeat, promotion or pin refresh followed. The later
+      provisional Doljani source at w188_n13 scores 707/707/701/664 and records
+      an ordinary RBiH combat capture of Doljani at t57 while the Prozor trio
+      remains HRHB at w104. The owner accepted the measured t105 timing trade
+      provisionally, not final adoption. This run still has one Central Bosnia
+      critical anomaly (7/11 below 400), and verify_checkpoints exits 1 on a
+      Farz P-A capture by the 3rd rather than 2nd Corps at t169. A corrected
+      Git-Bash full suite on the dirty candidate exited 1 with eight real
+      failures; its categories and bounded corrections are in CALIBRATION_MASTER.
+      The five affected test files now pass 74/74 focused assertions; the
+      required full-suite exit remains red pending clean-source proof.
+      Independent closeout review confirmed two separate open §6 effects
+      defects in the now reliably fired Grabovica/Uzdol row: duplicate
+      war_crimes_delta 2 produces +4, and negotiation_capital targets absent
+      international_credibility. They need their own authorized correction,
+      exact-effect tests and measured proof before merge or adoption.
+      n8 is not a one-field retiming control for the 1995 score delta. Clean
+      combined-source reruns and final acceptance remain open; no gate or
+      threshold is waived by the Doljani result or published inspection map.
 
   - id: R8-OPTIONAL-AI-OWNERSHIP
     lane: R8

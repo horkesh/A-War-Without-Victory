@@ -1054,7 +1054,7 @@ describe('entry-specific: sana_95 family', () => {
         // launches at w175 at full strength instead of being corridor-gated into
         // a late, recovery-phase follow-on. It commits the two 5th Corps brigades
         // NOT used by the Krupa/Bihać-Petrovac axes (506th + 517th) and stages at
-        // the Krupa-axis tail jasenica_2. See operation_opportunity_catalog_5th_corps.ts.
+        // the earlier Krupa-axis bridgehead ivanjska_2. See operation_opportunity_catalog_5th_corps.ts.
         const skParent = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_sanski_most_kljuc')!;
         expect(skParent).toBeDefined();
         expect(skParent.brigades).toEqual([
@@ -1064,11 +1064,15 @@ describe('entry-specific: sana_95 family', () => {
         // 2026-08-11: the Ključ interior was restored additively as a second,
         // faster path after the Petrovac axis proved saturated in the 188w trace.
         // Friendly-controlled objectives are filtered when the operation spawns.
-        expect(skParent.objectives).toHaveLength(13);
+        expect(skParent.objectives).toHaveLength(14);
+        expect(skParent.objectives[0]).toBe('op:bosanska_krupa:donji_dubovik_2');
         expect(skParent.objectives).toContain('op:kljuc:hadzici');
         expect(skParent.objectives).toContain('op:kljuc:kljuc_2');
         expect(skParent.objectives).toContain('op:kljuc:krasulje_2');
-        expect(skParent.staging_osid).toBe('op:bosanska_krupa:jasenica_2');
+        expect(skParent.staging_osid).toBe('op:bosanska_krupa:ivanjska_2');
+        expect(krupa.objectives.indexOf(skParent.staging_osid!)).toBeLessThan(
+            krupa.objectives.indexOf('op:bosanska_krupa:donji_dubovik_2'),
+        );
         // #284 (2026-06-08): the standalone `sana_95_follow_on` backstop was
         // retired — the third axis above is now the sole owner of the interior.
         // The retired duplicate must be absent from the catalog.

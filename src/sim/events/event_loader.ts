@@ -339,6 +339,15 @@ function validateCondition(value: unknown, path: string, filename: string, rowIn
     if (!KNOWN_EVENT_CONDITION_TYPE_SET.has(value.type)) {
         failRow(filename, rowIndex, `${path}.type must be a known event condition type: ${value.type}`);
     }
+    if (value.type === 'operation_attacked') {
+        if (!isNonEmptyString(value.operation_name_pattern)) {
+            failRow(filename, rowIndex, `${path}.operation_name_pattern must be a non-empty string`);
+        }
+        if (hasOwn(value, 'min_attacks')
+            && !(Number.isInteger(value.min_attacks) && (value.min_attacks as number) >= 1)) {
+            failRow(filename, rowIndex, `${path}.min_attacks must be an integer >= 1 when present`);
+        }
+    }
 
     if (hasOwn(value, 'conditions')) {
         if (!Array.isArray(value.conditions)) {

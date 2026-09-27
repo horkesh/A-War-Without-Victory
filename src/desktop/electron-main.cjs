@@ -432,6 +432,9 @@ function setCurrentStateSnapshots(sim, state) {
 }
 
 function writeCanonicalCurrentState(sim, state, excludeSender, metadata, options = {}) {
+  // Any handler that ends the war (decision, peace plan, Dayton) leaves no later turn,
+  // so no-choice records play already owes are written here, before the save.
+  if (state?.meta?.game_over === true) sim.writeOwedTerminationRecords(state, getBaseDir());
   const previousGameStateJson = currentGameStateJson;
   const previousCanonicalSaveJson = currentCanonicalSaveJson;
   setCurrentStateSnapshots(sim, state);

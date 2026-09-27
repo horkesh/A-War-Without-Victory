@@ -565,6 +565,8 @@ export interface CorpsOperation {
     require_all_axes_ready?: boolean;
     /** Authored execution quality for exceptional operations; defaults to 1.0. */
     execution_attack_power_mult?: number;
+    /** A decisive same-axis breach may advance a second participating brigade. */
+    coordinated_advance?: boolean;
     /** Fraction of participating brigades with adequate supply (0-1). */
     supply_readiness?: number;
     /** Consecutive objective captures (legacy — used when axes is absent). */
@@ -1021,8 +1023,10 @@ export interface CorpsCommandState {
     /**
      * Append-only log of operations the president has halted via STOP-OP (one entry
      * per applied halt). Surfaced to the UI and consumed by the (follow-up) political
-     * consequence wiring. Optional — absent in headless scenarios. */
-    halted_op_record?: { op_name: string; turn: number }[];
+     * consequence wiring. Optional — absent in headless scenarios. `operation_id`
+     * (AAR id format) and `executed_attacks` keep a halted op's attack evidence,
+     * since a halt writes no AAR; both are absent in records from older saves. */
+    halted_op_record?: { op_name: string; turn: number; operation_id?: string; executed_attacks?: number }[];
     /**
      * REQUEST-OP presidential lever (Presidential Command Model slice 2/N). The
      * president names a strategic OBJECTIVE (target_osid) for this corps; the engine

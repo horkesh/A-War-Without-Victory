@@ -783,18 +783,19 @@ describe('strict null inventory progress', () => {
             // at 0 / 3 / 5 / 7 — no new type escape. `classifyDomain` routes both to `sim`
             // on the /Corps|Operation/ interface-name rule, so sim 349 -> 351 and `state`
             // is unchanged at 187.
-            optional_fields_game_state: 548,
+            // Lukavac calibration adds optional CorpsOperation.coordinated_advance.
+            optional_fields_game_state: 549,
         });
         // Reason-code instrumentation (item 3): +1, `OperationAxis.launch_blocker_detail`.
         // `classifyDomain` routes it to `sim` on the /Corps|Operation/ interface-name rule,
         // so sim 335->336 and state is UNCHANGED at 186. Gated by
         // `AWWV_DEBUG_REASON_CODES=axis_reject`; absent on every default run.
-        expect(current.optional_field_domains.total).toBe(548);
+        expect(current.optional_field_domains.total).toBe(549);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 351,
+            sim: 352,
             state: 187,
             ui_adapter: 0,
             unknown: 0,

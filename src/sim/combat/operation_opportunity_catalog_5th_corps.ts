@@ -67,11 +67,10 @@ const SANA_DEFENDER_WEAKNESS_FLOOR = 0.20;
 // ─── Staging anchors (5th Corps holds these throughout the pocket arc) ──────
 const STAGING_BIHAC = 'op:bihac:bihac_2';
 const STAGING_KRUPA_OTOKA = 'op:bosanska_krupa:otoka_2';
-// jasenica_2 is adjacent to lusci_palanka_2 (15 shared segments) — the first
-// SANSKI_KLJUC follow-on objective. otoka_2 has zero adjacency to lusci_palanka_2,
-// so staging there produces no_approach_osid. jasenica_2 is captured by
-// sana_krupa before the follow-on fires (it's in KRUPA_VALLEY_OBJECTIVES).
-const STAGING_JASENICA = 'op:bosanska_krupa:jasenica_2';
+// ivanjska_2 is adjacent to donji_dubovik_2. The Krupa axis captures it
+// three turns before donji_dubovik_2 in the measured run, allowing the
+// dedicated 506th/517th to march toward the Sanski corridor sooner.
+const STAGING_IVANJSKA = 'op:bosanska_krupa:ivanjska_2';
 
 // ─── Sana objectives (BB1 pp.417, 419-420; identical roster to legacy
 //     scripted Sana in triggered_operations.ts so painted-truth comparison
@@ -140,9 +139,9 @@ const BIHAC_PETROVAC_OBJECTIVES = [
 ];
 
 // 2026-06-07: re-ordered into a single verified front-edge adjacency walk
-// rooted at the Krupa-axis tail (jasenica_2). Every step below is adjacent to
+// rooted at the Krupa-axis corridor (ivanjska_2). Every step below is adjacent to
 // its predecessor per data/derived/operational/operational_contact_graph.json
-// (validated walk: jasenica_2 → budimlic_japra_2 → lusci_palanka_2 →
+// (validated walk: ivanjska_2 → donji_dubovik_2 → budimlic_japra_2 → lusci_palanka_2 →
 // jelasinovci → skucani_vakuf_2 → stari_majdan → sanski_most_2 → ostra_luka →
 // ilidza_2 → kljevci → sanica_2 → hadzici → kljuc_2 → krasulje_2). The prior
 // order opened with lusci_palanka_2 then jumped to non-adjacent sanski_most_2,
@@ -171,6 +170,7 @@ const BIHAC_PETROVAC_OBJECTIVES = [
 // tempo actually reaches it first captures it; the other's copy is filtered
 // as friendly-controlled once taken (spawnCorpsOperationFromOpportunity).
 const SANSKI_KLJUC_OBJECTIVES = [
+    'op:bosanska_krupa:donji_dubovik_2',
     'op:sanski_most:budimlic_japra_2',
     'op:sanski_most:lusci_palanka_2',
     'op:sanski_most:jelasinovci',
@@ -206,8 +206,8 @@ const VRS_HELD_TARGETS_FOR_WEAKNESS: readonly string[] = [
 
 // ─── Axis definitions. Initial Sana owns all reachable breakthrough axes,
 //     including the interior Sanski Most + Ključ liberation as its third axis
-//     (staged at the Krupa-axis tail jasenica_2, front-edge-gated until the
-//     Krupa axis captures it). The redundant `sana_95_follow_on` duplicate of
+//     (staged on the Krupa axis, front-edge-gated until that axis captures its
+//     approach). The redundant `sana_95_follow_on` duplicate of
 //     this axis was retired 2026-06-08 (#284, owner-approved): it was a latent
 //     corridor-gated copy that never surfaced once the third axis folded the
 //     interior into the initial op.
@@ -261,8 +261,8 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
         // the initial Krupa (3) / Bihać-Petrovac (5) axes — 506th + 517th — so it
         // fights at full strength. 5th Corps holds exactly 10 line brigades; 8 are
         // on the two working axes (16/16), leaving 506th/517th free. The axis
-        // stages at jasenica_2 (the Krupa-axis tail) and is front-edge-blocked
-        // (no_approach_osid) until the Krupa axis captures jasenica_2 — then it
+        // stages at ivanjska_2 and is front-edge-blocked
+        // (no_approach_osid) until the Krupa axis captures that cell — then it
         // rolls down the verified contiguous adjacency walk (SANSKI_KLJUC_
         // OBJECTIVES) without ever entering a recovery break, because it lives
         // inside the one continuously-active Sana op. No global threshold, no
@@ -277,7 +277,7 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
             'arbih_517th_light' as FormationId,
         ],
         objectives: SANSKI_KLJUC_OBJECTIVES,
-        staging_osid: STAGING_JASENICA,
+        staging_osid: STAGING_IVANJSKA,
     },
 ];
 
@@ -431,11 +431,9 @@ export const SANA_95_OPPORTUNITY: OperationOpportunityDef = {
 // NOTE (#284, 2026-06-08, owner-approved): the redundant
 // `SANA_95_FOLLOW_ON_OPPORTUNITY` was retired here. It was a latent
 // corridor-gated duplicate of the interior Sanski Most + Ključ axis that
-// `sana_95` now carries as its third axis (`sana_sanski_most_kljuc`, staged at
-// jasenica_2). Proven territory-flat at 188w: OSID 634/712 unchanged,
-// control_delta byte-identical; the only behavioral delta was ~5 casualties on
-// VRS rs_17th_klju before its turn-186 destruction (plus the hash-of-record).
-// 40w stays byte-identical (`2221700edf20621e`).
+// `sana_95` carries as its third axis (`sana_sanski_most_kljuc`). The 2026-06-08
+// retirement was territory-flat in its then-current 188w comparison. The axis
+// now stages at ivanjska_2 to support the late Sanski Most advance.
 
 // ═════════════════════════════════════════════════════════════════════════════
 // Operation Tigar-Sloboda 94 — LANE C Phase 2.

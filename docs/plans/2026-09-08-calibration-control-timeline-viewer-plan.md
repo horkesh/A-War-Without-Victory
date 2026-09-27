@@ -2,10 +2,50 @@
 
 **Date:** 2026-09-08
 **Lane:** Development instrumentation (`tools/`) — NOT product surface, NOT a roadmap workstream
-**Status:** IMPLEMENTED 2026-09-08; expected-owner markers published 2026-09-16; Vranjevići RS reference update published and verified on GitHub Pages 2026-09-24.
+**Status:** IMPLEMENTED 2026-09-08; expected-owner markers published 2026-09-16; Doljani inspection candidate published and verified on GitHub Pages 2026-09-27.
 **Branch/worktree:** `calibration-timeline-viewer` at `F:/AWWV-worktrees/calibration-timeline-viewer`, isolated from the concurrent `codex/*` branches and from `r7-arbih-honorific-names`
-**Live viewer:** <https://horkesh.github.io/A-War-Without-Victory/?run=vranjevici-rs-20260924>
-**Publication:** `gh-pages` commit `b66e6da43`, superseding `a29e6c855`; latest dataset is the dirty local Sebiočina candidate against the corrected Vranjevići references, not an adopted baseline (2026-09-24).
+**Live viewer:** <https://horkesh.github.io/A-War-Without-Victory/?run=doljani-20260927>
+**Publication:** `gh-pages` commit `6c1655eb3`, superseding `948029d0a`; latest dataset is the dirty local Doljani candidate, not an adopted baseline (2026-09-27).
+
+## 2026-09-27 — Doljani inspection candidate published
+
+The unchanged timeline generator replayed the saved 188-week `w188_n13` run,
+scoring **707/707/701/664** against current painted references with 235 saved
+control events. A publication-only warning in the Source run panel identifies
+the dirty run, red full-suite/Farz gates and Central Bosnia anomaly. The April
+1994 view shows Doljani RBiH after ordinary combat and the Prozor trio HRHB.
+Only `index.html` and `README.md` changed on `gh-pages` at `6c1655eb3`;
+the live HTML matches the reviewed artifact SHA-256
+`e64c53aa53e3a2e176f5e1c656d0c8961ae16c698c3903653e967be7451b548f`.
+Local and live desktop/phone browser checks passed. Publication does not adopt
+the candidate; full evidence is in `logs/external-map-doljani-20260927/receipt.md`.
+
+## 2026-09-24 — Goražde–Lukavac candidate published
+
+The unchanged viewer now replays the final 188-week candidate: **707/707/700/668**,
+238 saved control events and 744 drawn/712 scored OSIDs. The four Prača cells
+change before Lukavac, Donje Žešće changes in Zvezda 94, and Oborci plus
+Škucani Vakuf change in Sana. The page labels the source as a dirty candidate
+and Farz 95 attribution as an open gate. Pages reports `eda6c82c1` built;
+live HTTP 200 bytes match the generated artifact (SHA-256
+`3b10e48c13cf6feea4bcd22c812bed7247c098439d26f92d7342254405397334`).
+
+## 2026-09-24 — Lukavac 93 candidate published
+
+The unchanged viewer now replays the retained 188-week Lukavac candidate.
+It shows **707/702/697/664**, **5/10/15/48** mismatches, 232 saved control
+events, and 744 drawn/712 scored OSIDs. Trnovo changes to RS at week 73
+through joint northern/southern combat; the Guards take Tošići at week 74.
+The page identifies the run as dirty and inadmissible as a baseline. Source,
+painted references, and calibration acceptance are unchanged.
+
+The generated HTML passes embedded-script syntax, exact initial-owner and
+event-payload comparison, 712/712 markers, and local desktop/mobile checks.
+Pages reports `40aeaf57e` built. The live HTTP 200 HTML is byte-identical
+to the generated 719,513-byte artifact (SHA-256
+`a7d9b8184a97ec6360d4e43593062d2e1ae69def510487105b838109323ef8f7`);
+live mobile selection and checkpoint behavior pass without browser errors.
+Only `index.html` and `README.md` changed on `gh-pages`.
 
 ## 2026-09-24 — Vranjevići RS reference update published
 

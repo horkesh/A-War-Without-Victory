@@ -18,7 +18,7 @@ const HISTORICAL_ELITE_RESERVATIONS: ReadonlyArray<{
     {
         brigadeId: 'rs_1st_guards_motorized' as FormationId,
         releaseTurn: 113,
-        operationNames: ['Operation Cerska-Kamenica', 'Operation Lukavac 93', 'Operation Zvezda 94'],
+        operationNames: ['Operation Cerska-Kamenica', 'Operation Pracha River', 'Lukavac 93 — TG Kalinovik', 'Operation Zvezda 94'],
     },
     {
         brigadeId: 'rs_65th_protection_motorized_regiment' as FormationId,

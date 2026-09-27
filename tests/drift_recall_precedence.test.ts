@@ -112,6 +112,36 @@ function makeState(overrides: {
 }
 
 describe('recallDriftedBrigades', () => {
+    it('preserves an authored historical concentration order for an ownerless brigade', () => {
+        const state = makeState({ movementOrder: 'op:donji_vakuf:pribraca_2' });
+        state.military.brigade_movement_orders!.rs_1st_podrinje!.owner = 'authored_preplanned';
+
+        recallDriftedBrigades(state, makeAdjacency());
+
+        expect(state.military.brigade_movement_orders?.rs_1st_podrinje).toEqual({
+            destination_sids: ['op:donji_vakuf:pribraca_2'],
+            stance: 'column',
+            owner: 'authored_preplanned',
+        });
+    });
+
+    it('does not issue a home order over an authored historical transit', () => {
+        const state = makeState();
+        state.military.brigade_movement_state = {
+            rs_1st_podrinje: {
+                status: 'in_transit',
+                stance: 'column',
+                destination_sids: ['op:donji_vakuf:pribraca_2'],
+                turns_remaining: 2,
+                owner: 'authored_preplanned',
+            },
+        };
+
+        recallDriftedBrigades(state, makeAdjacency());
+
+        expect(state.military.brigade_movement_orders?.rs_1st_podrinje).toBeUndefined();
+    });
+
     it('overrides a generic move order for an ownerless brigade stranded outside same-corps space', () => {
         const state = makeState({ movementOrder: 'op:donji_vakuf:pribraca_2' });
 

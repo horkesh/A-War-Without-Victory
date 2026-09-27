@@ -79,7 +79,8 @@
     ],
     "vrs_east_bosnian": [
       "op:brcko:brcko",
-      "op:brcko:donji_rahic"
+      "op:brcko:donji_rahic",
+      "op:lopare:lopare_selo_2"
     ]
   },
   "comms_override_by_corps": {

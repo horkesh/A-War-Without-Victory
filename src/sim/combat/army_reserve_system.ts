@@ -49,7 +49,7 @@ import type {
     OperationAxis,
     SettlementId,
 } from '../../state/game_state.js';
-import type { Osid } from './osid_adjacency.js';
+import { munFromOsid, type Osid } from './osid_adjacency.js';
 import {
     ELITE_LOAN_MIN_DURATION,
     ELITE_LOAN_COOLDOWN,
@@ -76,8 +76,66 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { getPrimaryOperation } from './corps_operation_helpers.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { removeFromActiveOperation } from './brigade_dissolution.js';
+import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from './enclave_resilience.js';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+// These distant ARBiH pockets cannot receive the General Staff Guards. The
+// Sarajevo core is deliberately absent: the brigade was based there.
+const GUARDS_EXCLUDED_ENCLAVES = ENCLAVE_DEFINITIONS.filter((definition) =>
+    definition.faction === 'RBiH'
+    && ['bihac_pocket', 'srebrenica', 'zepa', 'gorazde'].includes(definition.id));
+// The eastern pocket includes approaches outside the Goražde resilience list.
+// Treat it as a region even while a narrow friendly corridor still connects it.
+const GUARDS_EXCLUDED_EASTERN_MUNICIPALITIES = new Set([
+    'gorazde', 'rogatica', 'visegrad', 'cajnice', 'foca',
+    'srebrenica', 'bratunac', 'vlasenica',
+]);
+const GUARDS_EXCLUDED_EASTERN_APPROACHES = new Set([
+    'op:pale:praca', 'op:pale:podgrab',
+]);
+
+function isGuardsExcludedEnclaveOsid(osid: string): boolean {
+    return GUARDS_EXCLUDED_EASTERN_MUNICIPALITIES.has(munFromOsid(osid) ?? '')
+        || GUARDS_EXCLUDED_EASTERN_APPROACHES.has(osid)
+        || GUARDS_EXCLUDED_ENCLAVES.some((definition) => osidBelongsToEnclave(osid, definition));
+}
+
+function isExcludedGuardsEnclaveOsid(brigadeId: FormationId, osid: string | null | undefined): boolean {
+    return brigadeId === 'arbih_guards_brigade' && !!osid && isGuardsExcludedEnclaveOsid(osid);
+}
+
+function isExcludedGuardsEnclaveOperation(brigadeId: FormationId, operation: CorpsOperation): boolean {
+    return isExcludedGuardsEnclaveOsid(brigadeId, operation.staging_osid)
+        || isExcludedGuardsEnclaveOsid(brigadeId, operation.schwerpunkt_osid)
+        || (operation.objectives ?? []).some((osid) => isExcludedGuardsEnclaveOsid(brigadeId, osid))
+        || (operation.target_settlements ?? []).some((osid) => isExcludedGuardsEnclaveOsid(brigadeId, osid))
+        || (operation.axes ?? []).some((axis) =>
+            isExcludedGuardsEnclaveOsid(brigadeId, axis.staging_osid)
+            || (axis.objectives ?? []).some((osid) => isExcludedGuardsEnclaveOsid(brigadeId, osid)));
+}
+
+function hasFriendlyGuardsReturnRoute(
+    state: GameState,
+    from: string,
+    to: string,
+    adjacency?: Map<Osid, Osid[]>,
+): boolean {
+    if (!adjacency || getPoliticalControllerOSID(state, from as Osid) !== 'RBiH'
+        || getPoliticalControllerOSID(state, to as Osid) !== 'RBiH') return false;
+    const visited = new Set<string>([from]);
+    const queue = [from];
+    for (let index = 0; index < queue.length; index++) {
+        const current = queue[index]!;
+        if (current === to) return true;
+        for (const neighbor of [...(adjacency.get(current as Osid) ?? [])].sort(strictCompare)) {
+            if (visited.has(neighbor) || getPoliticalControllerOSID(state, neighbor) !== 'RBiH') continue;
+            visited.add(neighbor);
+            queue.push(neighbor);
+        }
+    }
+    return false;
+}
 
 /**
  * Returns a reference OSID for a corps — used to compute travel distance.
@@ -284,13 +342,18 @@ function isFriendlyOrUnknownTarget(state: GameState, faction: FactionId, osid: s
     return controller == null || controller === faction;
 }
 
-function firstFriendlySectorOsid(state: GameState, faction: FactionId, sector: CorpsFrontSector): string | null {
+function isEligibleEliteTarget(state: GameState, faction: FactionId, brigadeId: FormationId, osid: string | undefined): osid is string {
+    return isFriendlyOrUnknownTarget(state, faction, osid)
+        && !isExcludedGuardsEnclaveOsid(brigadeId, osid);
+}
+
+function firstFriendlySectorOsid(state: GameState, faction: FactionId, brigadeId: FormationId, sector: CorpsFrontSector): string | null {
     const frontOsids = sectorFrontOsids(sector);
     for (const osid of frontOsids) {
-        if (isFriendlyOrUnknownTarget(state, faction, osid)) return osid;
+        if (isEligibleEliteTarget(state, faction, brigadeId, osid)) return osid;
     }
     for (const osid of [...(sector.territory_osids ?? [])].sort(strictCompare)) {
-        if (isFriendlyOrUnknownTarget(state, faction, osid)) return osid;
+        if (isEligibleEliteTarget(state, faction, brigadeId, osid)) return osid;
     }
     return null;
 }
@@ -316,12 +379,12 @@ function currentOperationObjective(operation: CorpsOperation): string | null {
     return operation.schwerpunkt_osid ?? objectives[index] ?? null;
 }
 
-function sectorFrontForEnemyObjective(state: GameState, faction: FactionId, sector: CorpsFrontSector, objective: string | null): string | null {
+function sectorFrontForEnemyObjective(state: GameState, faction: FactionId, brigadeId: FormationId, sector: CorpsFrontSector, objective: string | null): string | null {
     if (!objective) return null;
     for (const subSegment of [...(sector.sub_segments ?? [])].sort((a, b) => strictCompare(a.sub_segment_id, b.sub_segment_id))) {
         if (!(subSegment.enemy_osids ?? []).includes(objective)) continue;
         for (const osid of [...(subSegment.friendly_osids ?? [])].sort(strictCompare)) {
-            if (isFriendlyOrUnknownTarget(state, faction, osid)) return osid;
+            if (isEligibleEliteTarget(state, faction, brigadeId, osid)) return osid;
         }
     }
     return null;
@@ -343,6 +406,7 @@ function pickOperationAxis(operation: CorpsOperation, brigadeId: FormationId): O
 function pickActiveOperation(state: GameState, corpsId: string, brigadeId: FormationId): CorpsOperation | null {
     const operations = [...(state.military.corps_command?.[corpsId]?.active_operations ?? [])]
         .filter((operation) => operation.phase === 'planning' || operation.phase === 'execution')
+        .filter((operation) => !isExcludedGuardsEnclaveOperation(brigadeId, operation))
         .sort((a, b) => {
             const phaseRank = (operation: CorpsOperation): number => operation.phase === 'execution' ? 0 : 1;
             const aHasBrigade = a.participating_brigades?.includes(brigadeId) ? 1 : 0;
@@ -357,6 +421,7 @@ function pickActiveOperation(state: GameState, corpsId: string, brigadeId: Forma
 function nearestSectorTarget(
     state: GameState,
     formation: FormationState,
+    brigadeId: FormationId,
     sectors: CorpsFrontSector[],
     adjacency?: Map<Osid, Osid[]>,
 ): string | null {
@@ -370,7 +435,7 @@ function nearestSectorTarget(
             ...[...(sector.territory_osids ?? [])].sort(strictCompare),
         ];
         for (const osid of targetOsids) {
-            if (!isFriendlyOrUnknownTarget(state, faction, osid)) continue;
+            if (!isEligibleEliteTarget(state, faction, brigadeId, osid)) continue;
             const hops = startOsid && adjacency
                 ? computeOsidGraphDistance(startOsid as Osid, osid as Osid, adjacency)
                 : Infinity;
@@ -407,23 +472,22 @@ function resolveEliteDeploymentTarget(
     const sectors = sortedCorpsSectors(state, corpsId);
     const sectorById = new Map(sectors.map((sector) => [sector.sector_id, sector]));
     const operation = pickActiveOperation(state, corpsId, brigadeId);
-
     if (operation) {
         const axis = pickOperationAxis(operation, brigadeId);
         const axisStaging = axis?.staging_osid;
-        if (isFriendlyOrUnknownTarget(state, faction, axisStaging)) return axisStaging;
-        if (isFriendlyOrUnknownTarget(state, faction, operation.staging_osid)) return operation.staging_osid!;
+        if (isEligibleEliteTarget(state, faction, brigadeId, axisStaging)) return axisStaging;
+        if (isEligibleEliteTarget(state, faction, brigadeId, operation.staging_osid)) return operation.staging_osid!;
 
         const primarySector = operation.sector_id ? sectorById.get(operation.sector_id) : undefined;
         const objective = axis ? currentAxisObjective(axis) : currentOperationObjective(operation);
         if (primarySector) {
-            const objectiveFront = sectorFrontForEnemyObjective(state, faction, primarySector, objective);
+            const objectiveFront = sectorFrontForEnemyObjective(state, faction, brigadeId, primarySector, objective);
             if (objectiveFront) return objectiveFront;
-            const primaryFront = firstFriendlySectorOsid(state, faction, primarySector);
+            const primaryFront = firstFriendlySectorOsid(state, faction, brigadeId, primarySector);
             if (primaryFront) return primaryFront;
         }
         for (const sector of sectors) {
-            const objectiveFront = sectorFrontForEnemyObjective(state, faction, sector, objective);
+            const objectiveFront = sectorFrontForEnemyObjective(state, faction, brigadeId, sector, objective);
             if (objectiveFront) return objectiveFront;
         }
     }
@@ -436,11 +500,11 @@ function resolveEliteDeploymentTarget(
             || strictCompare(a.sector_id, b.sector_id)
         );
     for (const sector of threatened) {
-        const target = firstFriendlySectorOsid(state, faction, sector);
+        const target = firstFriendlySectorOsid(state, faction, brigadeId, sector);
         if (target) return target;
     }
 
-    return nearestSectorTarget(state, formation, sectors, adjacency);
+    return nearestSectorTarget(state, formation, brigadeId, sectors, adjacency);
 }
 
 function issueEliteDeploymentOrder(
@@ -464,6 +528,60 @@ function issueEliteDeploymentOrder(
         destination_sids: [targetOsid as SettlementId],
         stance: 'column',
     };
+}
+
+/** Keep the General Staff Guards out of the distant enclave combat roster and march queue. */
+export function enforceGuardsEnclaveBoundary(state: GameState, turn: number, adjacency?: Map<Osid, Osid[]>): void {
+    const brigadeId = 'arbih_guards_brigade' as FormationId;
+    const guard = state.military.formations?.[brigadeId];
+    if (!guard || guard.status !== 'active') return;
+
+    for (const corpsId of Object.keys(state.military.corps_command ?? {}).sort(strictCompare)) {
+        const command = state.military.corps_command?.[corpsId];
+        for (const operation of command?.active_operations ?? []) {
+            if (!isExcludedGuardsEnclaveOperation(brigadeId, operation)) continue;
+            operation.participating_brigades = operation.participating_brigades.filter((id) => id !== brigadeId);
+            for (const axis of operation.axes ?? []) {
+                axis.assigned_brigades = axis.assigned_brigades.filter((id) => id !== brigadeId);
+            }
+        }
+    }
+
+    const attackTarget = state.military.brigade_attack_orders?.[brigadeId];
+    if (isExcludedGuardsEnclaveOsid(brigadeId, attackTarget)) {
+        delete state.military.brigade_attack_orders?.[brigadeId];
+    }
+
+    const orderedDestination = state.military.brigade_movement_orders?.[brigadeId]?.destination_sids ?? [];
+    const transitDestination = state.military.brigade_movement_state?.[brigadeId]?.destination_sids ?? [];
+    if (orderedDestination.some((osid) => isExcludedGuardsEnclaveOsid(brigadeId, osid))
+        || transitDestination.some((osid) => isExcludedGuardsEnclaveOsid(brigadeId, osid))) {
+        delete state.military.brigade_movement_orders?.[brigadeId];
+        delete state.military.brigade_movement_state?.[brigadeId];
+        const receivingCorps = guard.elite_loan_state?.loaned_to_corps;
+        if (guard.elite_loan_state?.on_loan && receivingCorps) {
+            if (resolveEliteDeploymentTarget(state, guard, brigadeId, receivingCorps, adjacency)) {
+                issueEliteDeploymentOrder(state, guard, brigadeId, receivingCorps, adjacency);
+            } else {
+                recallEliteLoan(state, brigadeId, 'need_expired', turn);
+            }
+        }
+    }
+
+    if (isExcludedGuardsEnclaveOsid(brigadeId, guard.location_osid)) {
+        if (guard.elite_loan_state?.on_loan) {
+            recallEliteLoan(state, brigadeId, 'need_expired', turn);
+        } else {
+            const returnBase = guard.base_osid ?? guard.home_osid;
+            if (returnBase && !isExcludedGuardsEnclaveOsid(brigadeId, returnBase)
+                && hasFriendlyGuardsReturnRoute(state, guard.location_osid!, returnBase, adjacency)) {
+                if (!state.military.brigade_movement_orders) state.military.brigade_movement_orders = {};
+                state.military.brigade_movement_orders[brigadeId] = {
+                    destination_sids: [returnBase as SettlementId], stance: 'column',
+                };
+            }
+        }
+    }
 }
 
 function ensureActiveEliteDeploymentOrder(
@@ -638,6 +756,7 @@ export function generateArmyReserveRequests(
     state: GameState,
     adjacency?: Map<Osid, Osid[]>
 ): void {
+    enforceGuardsEnclaveBoundary(state, state.meta.turn, adjacency);
     const corpsWithLoanedElite = reconcileEliteLoanOperationCommitments(state);
     if (!adjacency) return;
 
@@ -812,6 +931,8 @@ export function generateArmyReserveRequests(
             const f = formations[bid];
             const brigadeOsid = f.location_osid ?? f.home_osid;
             if (!brigadeOsid) continue;
+            if (bid === 'arbih_guards_brigade'
+                && !resolveEliteDeploymentTarget(state, f, bid, corpsId, adjacency)) continue;
             const hops = computeFriendlyDistanceToCorpsSectors(
                 state,
                 f.faction,
@@ -950,6 +1071,8 @@ export function deployEliteLoan(
     const f = state.military.formations?.[brigadeId];
     if (!f?.elite_loan_state) return false;
     if (!isEliteAvailableForLoan(f, turn)) return false;
+    if (brigadeId === 'arbih_guards_brigade'
+        && !resolveEliteDeploymentTarget(state, f, brigadeId, corpsId, adjacency)) return false;
 
     const ls = f.elite_loan_state;
     ls.on_loan = true;
@@ -1093,6 +1216,8 @@ export function retaskEliteLoan(
     const ls = f?.elite_loan_state;
     if (!f || !ls?.on_loan || ls.permanently_degraded) return false;
     if (ls.loaned_to_corps === corpsId) return false;
+    if (brigadeId === 'arbih_guards_brigade'
+        && !resolveEliteDeploymentTarget(state, f, brigadeId, corpsId, adjacency)) return false;
 
     const previousRecallTurn = ls.last_recall_turn;
     const previousLocation = f.location_osid;
@@ -1170,6 +1295,8 @@ export function evaluateArmyReserveAssignments(
                 const bOsid = f?.location_osid ?? f?.home_osid;
                 if (!bOsid) continue;
                 if (!canEliteLoanReachCorpsTerritory(state, bid, req.corps_id, adjacency)) continue;
+                if (bid === 'arbih_guards_brigade'
+                    && !resolveEliteDeploymentTarget(state, f, bid, req.corps_id, adjacency)) continue;
                 const h = computeOsidGraphDistance(bOsid as Osid, corpsRef as Osid, adjacency);
                 if (h < nearestHops) { nearestHops = h; nearestId = bid; }
             }
@@ -1181,7 +1308,7 @@ export function evaluateArmyReserveAssignments(
             const whyNeeded = req.why_needed ?? req.description;
             const howToUse = req.how_to_use ?? 'Reinforce threatened front sectors and stabilize local combat power.';
             const requestId = req.request_id ?? `req:${req.turn_requested}:${req.corps_id}:${req.reason}`;
-            deployEliteLoan(
+            const deployed = deployEliteLoan(
                 state,
                 nearestId,
                 req.corps_id,
@@ -1193,6 +1320,10 @@ export function evaluateArmyReserveAssignments(
                 'army_ai',
                 adjacency,
             );
+            if (!deployed) {
+                remaining.push(req);
+                continue;
+            }
             appendReserveDecision(state, {
                 request_id: requestId,
                 turn,
@@ -1213,7 +1344,10 @@ export function evaluateArmyReserveAssignments(
 
         // Verify the suggested brigade is still available (another request may have claimed it)
         const f = state.military.formations?.[brigadeId];
-        if (!f || !isEliteAvailableForLoan(f, turn) || req.travel_hops > MAX_AUTO_DEPLOY_HOPS || !canEliteLoanReachCorpsTerritory(state, brigadeId, req.corps_id, adjacency)) {
+        if (!f || !isEliteAvailableForLoan(f, turn) || req.travel_hops > MAX_AUTO_DEPLOY_HOPS
+            || !canEliteLoanReachCorpsTerritory(state, brigadeId, req.corps_id, adjacency)
+            || (brigadeId === 'arbih_guards_brigade'
+                && !resolveEliteDeploymentTarget(state, f, brigadeId, req.corps_id, adjacency))) {
             remaining.push(req);
             continue;
         }
@@ -1222,7 +1356,7 @@ export function evaluateArmyReserveAssignments(
         const whyNeeded = req.why_needed ?? req.description;
         const howToUse = req.how_to_use ?? 'Reinforce threatened front sectors and stabilize local combat power.';
         const requestId = req.request_id ?? `req:${req.turn_requested}:${req.corps_id}:${req.reason}`;
-        deployEliteLoan(
+        const deployed = deployEliteLoan(
             state,
             brigadeId,
             req.corps_id,
@@ -1234,6 +1368,10 @@ export function evaluateArmyReserveAssignments(
             'army_ai',
             adjacency,
         );
+        if (!deployed) {
+            remaining.push(req);
+            continue;
+        }
         appendReserveDecision(state, {
             request_id: requestId,
             turn,
@@ -1282,7 +1420,8 @@ function reconcileEliteLoanOperationCommitments(state: GameState): Set<string> {
         // historical commitment; tickEliteLoans will recall the stale loan.
         if (isEliteReservedForHistoricalOperation(bid as FormationId, state.meta.turn)) continue;
 
-        const operation = (targetCommand.active_operations ?? []).find((candidate) => candidate.phase === 'execution');
+        const operation = (targetCommand.active_operations ?? []).find((candidate) =>
+            candidate.phase === 'execution' && !isExcludedGuardsEnclaveOperation(bid as FormationId, candidate));
         if (operation) attachEliteToOperation(operation, bid);
     }
     return corpsWithLoanedElite;
@@ -1295,6 +1434,7 @@ function reconcileEliteLoanOperationCommitments(state: GameState): Set<string> {
  *  - Updates active episode tracker fields (turns_deployed, battles_fought)
  */
 export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<Osid, Osid[]>): void {
+    enforceGuardsEnclaveBoundary(state, turn, adjacency);
     const formations = state.military.formations ?? {};
     const corpsCommand = state.military.corps_command ?? {};
     const brigadeIds = Object.keys(formations).sort(strictCompare);
@@ -1303,7 +1443,6 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
         const f = formations[bid];
         const ls = f.elite_loan_state;
         if (!ls?.on_loan || !ls.loaned_to_corps) continue;
-
         const tracker = state.military.elite_brigade_tracker?.[bid];
         const episode = tracker && ls.current_episode_id != null ? tracker.episodes[ls.current_episode_id] : undefined;
 

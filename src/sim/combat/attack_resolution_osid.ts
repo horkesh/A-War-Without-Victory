@@ -44,6 +44,7 @@ import type {
     FormationId,
     FormationState,
     GameState,
+    CorpsOperation,
     TacticalGroup,
 } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
@@ -605,6 +606,41 @@ export function resolveAttackOrdersOsid(
     }
     const targetOsids = Array.from(targetToAttackers.keys()).sort(strictCompare);
     report.unique_attack_targets = targetOsids.length;
+    // A sector's mobile reserves cannot answer separate axes of the same
+    // operation at full strength in the same week. Count only current,
+    // executable axis objectives with a physically adjacent attacker; a
+    // planning axis or a paper objective does not dilute the defense.
+    const sectorAxesByOperation = new Map<CorpsOperation, Map<string, Set<string>>>();
+    const targetOperationSector = new Map<Osid, { operation: CorpsOperation; sectorId: string }>();
+    for (const target of targetOsids) {
+        const controller = getPoliticalControllerOSID(state, target, reverseMap);
+        if (!controller) continue;
+        const sector = findSectorForEnemyOsid(state, target, controller);
+        if (!sector) continue;
+        for (const brigadeId of targetToAttackers.get(target) ?? []) {
+            const brigade = fmts[brigadeId];
+            if (!brigade || brigade.status !== 'active' || brigade.faction === controller) continue;
+            if (!brigade.location_osid || !getTacticalAdjacentOsids(state, brigade.location_osid as Osid, adjacency).includes(target)) continue;
+            if (isRbihHrhbCombatBlocked(state, brigade.faction, controller)) continue;
+            const match = findBrigadeOperationAnywhere(state, brigadeId);
+            if (!match || match.op.phase !== 'execution' || match.op.type !== 'sector_attack') continue;
+            const axis = getBrigadeAxis(match.op, brigadeId);
+            if (!axis || axis.status !== 'executing' || axis.objectives[axis.current_objective_index] !== target) continue;
+            let sectors = sectorAxesByOperation.get(match.op);
+            if (!sectors) {
+                sectors = new Map();
+                sectorAxesByOperation.set(match.op, sectors);
+            }
+            let axes = sectors.get(sector.sector_id);
+            if (!axes) {
+                axes = new Set();
+                sectors.set(sector.sector_id, axes);
+            }
+            axes.add(axis.axis_id);
+            targetOperationSector.set(target, { operation: match.op, sectorId: sector.sector_id });
+            break;
+        }
+    }
     for (const fid of formationIds) {
         const f = state.military.formations?.[fid];
         if (!f) continue;
@@ -798,7 +834,11 @@ export function resolveAttackOrdersOsid(
 
                 // Apply sector stance reactive bonus (Layer B)
                 const stanceReactiveBonus = SECTOR_STANCE_REACTIVE_BONUS[sector?.sector_stance ?? 'defend'];
-                const boostedReserves = effectiveReserves * stanceReactiveBonus;
+                const commitment = targetOperationSector.get(targetOsid);
+                const simultaneousAxes = commitment && commitment.sectorId === sector?.sector_id
+                    ? (sectorAxesByOperation.get(commitment.operation)?.get(commitment.sectorId)?.size ?? 1)
+                    : 1;
+                const boostedReserves = effectiveReserves * stanceReactiveBonus / simultaneousAxes;
 
                 // Cap reactive response proportional to attack size
                 const avgReactivePower = avgBrigadePower;
@@ -1626,6 +1666,20 @@ export function resolveAttackOrdersOsid(
             if (advanceFormation) {
                 (advanceFormation as { location_osid?: string }).location_osid = targetOsid;
                 (advanceFormation as { entrenchment_turns?: number }).entrenchment_turns = 0;
+            }
+            // A decisive operation breach can carry one supporting brigade
+            // through the same opening. Both formations must have fought on
+            // the same axis; this keeps an unrelated adjacent attack from
+            // inheriting the operation's pursuit and caps the stack at two.
+            if (outcome === 'decisive_victory' && opMatch?.op.phase === 'execution' && opMatch.op.coordinated_advance === true) {
+                const leadAxis = getBrigadeAxis(opMatch.op, firstAttacker.id);
+                const support = leadAxis && attackerFormations.slice(1).find((attacker) =>
+                    getBrigadeAxis(opMatch.op, attacker.id)?.axis_id === leadAxis.axis_id
+                );
+                if (support) {
+                    support.location_osid = targetOsid;
+                    support.entrenchment_turns = 0;
+                }
             }
             // Displace any other formations still in the flipped OSID (invariant: no brigade in enemy territory)
             const formations = state.military.formations ?? {};

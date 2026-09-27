@@ -64,7 +64,7 @@ import {
     getBrigadeAxis,
 } from './bot_brigade_ai_osid.js'; // Will need to export these from bot_brigade_ai_osid.ts
 import { MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
-import { countAxisConcentrationSupport, getConvergingOperationBrigades } from './corps_operation_helpers.js';
+import { countAxisConcentrationSupport, getConvergingOperationBrigades, getSynchronizedOperationBrigadesAtObjective } from './corps_operation_helpers.js';
 import { isReasonCodeTopicEnabled } from './reason_code_debug.js';
 
 export function recordAxisOrderGenerationDetail(
@@ -347,7 +347,9 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                 const probeThreshold = getSectorOffensiveProbeThreshold(activeOp, brigade.id);
                 directAttackThreshold = probeThreshold;
                 const predictedOutcome = directObjectiveAttack.prediction.predicted_outcome;
-                const axisBrigades = getConvergingOperationBrigades(activeOp, brigade.id);
+                const axisBrigades = activeOp.sync_operation_name
+                    ? getSynchronizedOperationBrigadesAtObjective(state, activeOp, faction, currentObjective)
+                    : getConvergingOperationBrigades(activeOp, brigade.id);
                 // R13b op-level concentration: count op-mates on every axis sharing
                 // this current objective within 2 hops
                 // of the objective with distance weighting (1-hop=1.0, 2-hop=0.5,

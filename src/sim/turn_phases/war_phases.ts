@@ -31,6 +31,7 @@ import { applyGuerrillaAttrition } from '../combat/guerrilla_attrition.js';
 import { cleanupExpiredEventModifiers } from '../events/active_modifiers.js';
 import { attributeOperationCasualties } from '../combat/operation_casualty_attribution.js';
 import { recordOperationWeeklyEntries } from '../combat/operation_aar.js';
+import { operationExecutedAttackCount } from '../combat/operation_attack_count.js';
 import { buildAdjacencyMapCached } from '../../map/adjacency_map.js';
 import { computeFrontEdges, computeFrontEdgesOsid } from '../../map/front_edges.js';
 import { computeFrontRegions } from '../../map/front_regions.js';
@@ -203,7 +204,7 @@ import {
     updateSupplyReserves
 } from '../../state/supply_reserves.js';
 import type { Osid } from '../combat/osid_adjacency.js';
-import { generateArmyReserveRequests, evaluateArmyReserveAssignments, tickEliteLoans } from '../combat/army_reserve_system.js';
+import { enforceGuardsEnclaveBoundary, generateArmyReserveRequests, evaluateArmyReserveAssignments, tickEliteLoans } from '../combat/army_reserve_system.js';
 import { buildHomeDistanceCache } from '../combat/home_distance.js';
 import { computeSectorCombatRatings } from '../combat/sector_combat_rating.js';
 import { detectParamilitaryTargets, advanceParamilitaries } from '../combat/paramilitary_sweep.js';
@@ -485,7 +486,15 @@ function applyOpHalts(state: GameState): void {
             removeOperation(cmd, op);
 
             // Append the halt record (op_name + turn) for the UI / follow-up consequence.
-            const record = { op_name: op.name ?? staged.op_name ?? 'Operation', turn };
+            // The halt writes no AAR, so the record keeps the op's identity and executed
+            // attacks (read by the `operation_attacked` event condition).
+            const opName = op.name ?? staged.op_name ?? 'Operation';
+            const record = {
+                op_name: opName,
+                turn,
+                operation_id: `${corpsId}:${opName}:t${op.started_turn}`,
+                executed_attacks: operationExecutedAttackCount(op),
+            };
             if (Array.isArray(cmd.halted_op_record)) cmd.halted_op_record.push(record);
             else cmd.halted_op_record = [record];
 
@@ -1539,6 +1548,12 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const od = getOperationalData(context);
             if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
+            const moveSpatial = getSpatialContextCache(context);
+            enforceGuardsEnclaveBoundary(
+                context.state,
+                context.state.meta.turn,
+                moveSpatial?.preCombat.adjacency as Map<Osid, Osid[]> | undefined,
+            );
             let terrainData;
             try {
                 terrainData = await loadTerrainScalars();
@@ -2942,6 +2957,12 @@ export const warPhases: NamedPhase[] = [
         name: 'resolve-attack-orders',
         run: async (context) => {
             if (context.state.meta.phase !== 'war') return;
+            const attackSpatial = getSpatialContextCache(context);
+            enforceGuardsEnclaveBoundary(
+                context.state,
+                context.state.meta.turn,
+                attackSpatial?.preCombat.adjacency as Map<Osid, Osid[]> | undefined,
+            );
             const od = getOperationalData(context);
             if (od?.opData?.operationalToCanonical && od?.edges?.length) {
                 let terrainData: Awaited<ReturnType<typeof loadTerrainScalars>> | undefined;
@@ -2963,7 +2984,6 @@ export const warPhases: NamedPhase[] = [
                 }
                 // Control events are persisted for the full game — no trimming.
                 // They feed the settlement timeline ("The Story of This Place").
-                const attackSpatial = getSpatialContextCache(context);
                 context.report.attack_resolution_osid = resolveAttackOrdersOsid(
                     context.state,
                     od.edges,
@@ -4450,6 +4470,16 @@ export function recallDriftedBrigades(state: GameState, adjacency?: Map<string, 
         if (f.kind !== 'brigade' && f.kind !== 'og') continue;
         if (!f.home_osid || !f.location_osid) continue;
         if (f.home_osid === f.location_osid) continue;
+        const transit = state.military.brigade_movement_state?.[fid];
+        if (transit?.status === 'in_transit' && transit.owner === 'authored_preplanned') {
+            const order = moveOrders[fid];
+            if (order && order.owner !== 'authored_preplanned'
+                && order.destination_sids?.[0] !== transit.destination_sids?.[0]) {
+                delete moveOrders[fid];
+            }
+            continue;
+        }
+        if (moveOrders[fid]?.owner === 'authored_preplanned') continue;
         if (inOp.has(fid)) continue;
         if ((f.disrupted_turns ?? 0) > 0) continue;
         if (sectorOwned.has(fid) || f.assignment?.kind === 'sector') {

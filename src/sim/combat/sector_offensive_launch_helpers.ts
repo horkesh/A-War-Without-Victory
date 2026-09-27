@@ -49,7 +49,7 @@ import { ENABLE_TACTICAL_GROUPS, getAnchorBrigade } from './tactical_group_confi
 // ENGINE-HEALTH B3 (2026-09-19): the donation-readiness gate no longer runs here, so this
 // module no longer selects donors or resolves a TG anchor. Readiness is evaluated once, at
 // the site that actually forms a Tactical Group (`formTgsAtReadyTransition`).
-import { getOperationBrigadesAtCurrentObjective } from './corps_operation_helpers.js';
+import { getSynchronizedOperationBrigadesAtObjective } from './corps_operation_helpers.js';
 
 // BATCH C: launch-readiness probes call `predictAllAdjacentTargets(...)` only
 // to query whether the brigade has a direct-objective adjacency entry; they do
@@ -1394,7 +1394,7 @@ export function evaluateOpeningAttackReadiness(
             if (axis.status === 'complete' || axis.status === 'stalled') continue;
             const objective = axis.objectives[axis.current_objective_index ?? 0];
             const convergingBrigades = typeof objective === 'string'
-                ? getOperationBrigadesAtCurrentObjective(op, objective)
+                ? getSynchronizedOperationBrigadesAtObjective(state, op, faction, objective)
                 : axis.assigned_brigades;
             const result = classifyAxisOpeningAttack(
                 state,

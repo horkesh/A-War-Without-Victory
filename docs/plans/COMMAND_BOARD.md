@@ -1,6 +1,6 @@
 # AWWV Command Board
 
-**Status:** Derived dispatch view, synchronized 2026-09-24 (R6).
+**Status:** Derived dispatch view, synchronized 2026-09-27 (R6 provisional candidate).
 
 **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole authority for unfinished work and wins if this board differs.
 
@@ -23,7 +23,7 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 3 | R3 | **COMPLETE** | None. | [TG convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) |
 | 4 | R4 | **COMPLETE** | None; Phase 6 and its packaging follow-up are closed. | [Command/event/Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) |
 | 5 | R5 | **COMPLETE -- CLOSED 2026-08-05** | None. The accepted performance floor is approximately 1.09 seconds per turn; the 100 ms target and incremental-reuse Task 6 are retired from 1.0 scope. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
-| 6 | R6 | **JANUARY CANDIDATE; FULL CAMPAIGN NO-GO** | Sebiočina RBiH t15, RS t45; Brčko/Donji Rahić hold RS. Vranjevići reference RS throughout; **707/697/690/662**. Next: April 1994. Farz, Prozor and suite gates open. [Map](https://horkesh.github.io/A-War-Without-Victory/?run=vranjevici-rs-20260924). | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
+| 6 | R6 | **PROVISIONAL DOLJANI CANDIDATE; FULL CAMPAIGN NO-GO** | Retained 188w **707/707/701/664**; Doljani RBiH by combat t57, Prozor trio HRHB at w104. Five mismatches incl. Maglaj parked. Central Bosnia critical, Farz P-A, suite and two Grabovica/Uzdol §6 effects defects open; clean proof pending. [Inspection map](https://horkesh.github.io/A-War-Without-Victory/?run=doljani-20260927). | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
 | 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
 | 7 | R7 | **WR01/PIN REFRESH LANDED; AUDIO/ACCEPTANCE OPEN** | Finish offline audio and ten-cue disposition; human listening waits for owner inspection. WR01 closed in #517 and pins refreshed in #518; April combined-source acceptance is separate. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [accepted functional opening](2026-08-23-opening-screens-implementation-plan.md) / [cinematic opening and typography amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md) / [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) |
 | 7.5 | RE | **CLOSED — owner, 2026-09-01** | None. RE gates nothing; engine-health defects are still fixed before tuning. | [Closed recovery record](2026-08-28-packaged-probe-recovery-plan.md) / [closed RE contract](2026-08-26-engine-integrity-plan.md) |

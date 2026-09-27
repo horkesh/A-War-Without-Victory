@@ -420,9 +420,9 @@ describe('event taxonomy diagnostic report', () => {
             // by its sensitive-history keyword review.
             'hrhb_posavina_orasje_posture_1992',
             'hrhb_jajce_joint_defense_1992',
-            'gornji_vakuf_clashes_1993',
             'ic_pressure_vopp_engagement',
             'vance_owen_plan_1993',
+            'gornji_vakuf_clashes_1993',
             'hrhb_vance_owen_acceptance_1993',
             'hrhb_central_bosnia_defense_1993',
             'rs_assembly_rejects_voplan_1993',

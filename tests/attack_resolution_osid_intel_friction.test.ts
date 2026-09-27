@@ -230,6 +230,79 @@ function seedIntel(state: GameState, confidence: number): void {
 }
 
 describe('attack resolution intel execution friction', () => {
+    it('advances two same-axis attackers after a decisive operation breach', () => {
+        const { state, edges } = makeScenario();
+        const second = makeFormation('brig_rs_2', 'RS', 'brigade', 'op:rs:staging', { corps_id: 'vrs_1st' });
+        state.military.formations!.brig_rs_2 = second;
+        const op = state.military.corps_command!.vrs_1st!.active_operations[0]!;
+        op.coordinated_advance = true;
+        op.participating_brigades = ['brig_rs_1', 'brig_rs_2'];
+        op.axes = [{
+            axis_id: 'breach', status: 'executing',
+            assigned_brigades: ['brig_rs_1', 'brig_rs_2'],
+            objectives: ['op:rbih:target'], current_objective_index: 0,
+        }] as CorpsOperation['axes'];
+        state.military.brigade_attack_orders = {
+            brig_rs_1: 'op:rbih:target', brig_rs_2: 'op:rbih:target',
+        } as any;
+        const report = resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+        expect(report.battles[0]?.outcome).toBe('decisive_victory');
+        expect(state.military.formations!.brig_rs_1!.location_osid).toBe('op:rbih:target');
+        expect(second.location_osid).toBe('op:rbih:target');
+    });
+
+    it('divides mobile sector response across simultaneous axes without weakening a lone attack', () => {
+        const makeMultiAxis = (secondAttack: boolean) => {
+            const { state, edges } = makeScenario();
+            const formations = state.military.formations!;
+            formations.brig_rs_1!.location_osid = 'op:rs:stage_a';
+            formations.brig_rs_2 = makeFormation('brig_rs_2', 'RS', 'brigade', 'op:rs:stage_b', { corps_id: 'vrs_1st' });
+            for (const id of ['brig_rbih_1', 'brig_rbih_2']) {
+                formations[id] = makeFormation(id, 'RBiH', 'brigade', 'op:rbih:reserve', {
+                    corps_id: 'rbih_corps',
+                    personnel: 900,
+                    cohesion: 80,
+                });
+            }
+            state.political.political_controllers!['op:rs:stage_a'] = 'RS';
+            state.political.political_controllers!['op:rs:stage_b'] = 'RS';
+            state.political.political_controllers!['op:rbih:target_a'] = 'RBiH';
+            state.political.political_controllers!['op:rbih:target_b'] = 'RBiH';
+            state.political.political_controllers!['op:rbih:reserve'] = 'RBiH';
+            const op = state.military.corps_command!.vrs_1st!.active_operations[0]!;
+            op.participating_brigades = ['brig_rs_1', 'brig_rs_2'];
+            op.axes = [
+                { axis_id: 'a', status: 'executing', assigned_brigades: ['brig_rs_1'], objectives: ['op:rbih:target_a'], current_objective_index: 0 },
+                { axis_id: 'b', status: 'executing', assigned_brigades: ['brig_rs_2'], objectives: ['op:rbih:target_b'], current_objective_index: 0 },
+            ] as CorpsOperation['axes'];
+            state.military.corps_front_sectors!['sector:rbih_defense:0'] = makeSector(
+                'sector:rbih_defense:0', 'rbih_corps', 'RBiH',
+                ['brig_rbih_1', 'brig_rbih_2'],
+                [makeSubSegment('sub:defense', ['op:rs:stage_a', 'op:rs:stage_b'],
+                    ['op:rbih:target_a', 'op:rbih:target_b', 'op:rbih:reserve'], ['ea', 'eb', 'ra', 'rb'])],
+            );
+            state.military.brigade_attack_orders = secondAttack
+                ? { brig_rs_1: 'op:rbih:target_a', brig_rs_2: 'op:rbih:target_b' } as any
+                : { brig_rs_1: 'op:rbih:target_a' } as any;
+            edges.push(
+                { edge_id: 'ea', a: 'op:rs:stage_a', b: 'op:rbih:target_a' } as EdgeRecord,
+                { edge_id: 'eb', a: 'op:rs:stage_b', b: 'op:rbih:target_b' } as EdgeRecord,
+                { edge_id: 'ra', a: 'op:rbih:reserve', b: 'op:rbih:target_a' } as EdgeRecord,
+                { edge_id: 'rb', a: 'op:rbih:reserve', b: 'op:rbih:target_b' } as EdgeRecord,
+            );
+            return { state, edges };
+        };
+        const alone = makeMultiAxis(false);
+        const together = makeMultiAxis(true);
+        const aloneBattle = resolveAttackOrdersOsid(alone.state, alone.edges, new Map<string, string[]>())
+            .battles.find(b => b.target_osid === 'op:rbih:target_a');
+        const togetherBattle = resolveAttackOrdersOsid(together.state, together.edges, new Map<string, string[]>())
+            .battles.find(b => b.target_osid === 'op:rbih:target_a');
+        expect(aloneBattle).toBeDefined();
+        expect(togetherBattle).toBeDefined();
+        expect(togetherBattle!.power_ratio).toBeGreaterThan(aloneBattle!.power_ratio * 1.3);
+    });
+
     it('resolves attack orders across live war-front contacts outside the movement graph', () => {
         const { state } = makeScenario();
         state.military.war_front_edges_osid = [{

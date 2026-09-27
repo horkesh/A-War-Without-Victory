@@ -394,6 +394,10 @@ When War phase runs, attack orders are resolved as **discrete attacks** per targ
 
 **Implementation-note (head-queue roster reservation, 2026-09-16):** The command-selection reservation for the next queued historical operation (`getHeadQueuedPrePlannedBrigadeIds`) excludes that operation's authored roster from new commander-generated operations only once the plan is due — when `(available_from ?? 0) <= meta.turn` (missing timing defaults to due). A queue head whose `available_from` is still in the future is not preparing and must not freeze its roster. Active-operation ownership remains handled separately by the caller, and the full-queue routing helper (`getQueuedPrePlannedBrigadeIds`), task-group donor-consumption protection (`getReservedPrePlannedBrigadeIds`) and recruitment/assembly placement (`getActiveAuthoredAssemblyOsid`) are unchanged. Being released from this reservation does not make a formation automatically surplus, ordered to move, or guaranteed to participate.
 
+**Calibration implementation note (2026-09-27, provisional):** The current `Prozor–Rama Line Counterattack` catalog entry has `available_from: 71`, an owner-approved scenario inference without a dated source for an August–September 1993 Lug/Paroš counterattack. Its authored HVO roster, objectives, and combat resolution remain ordinary operations. In the measured April 1992 campaign, this timing permits an RBiH combat capture of Doljani at turn 57 while Ljubunci, Lug, and Paroš are HRHB at week 104. The owner provisionally accepted the measured timing despite a week-105 Central Bosnia critical anomaly. The full suite and 188-week checkpoint verifier ran and failed, so adoption remains pending. See `docs/40_reports/CALIBRATION_MASTER.md` for the run evidence. This note does not change painted references, control authority, or the historical-source status of the inferred date.
+
+**Authored-operation coordination (2026-09-27 candidate):** `enqueue_from` admits a dated plan to its corps queue separately from `available_from`, which still gates launch. Operations sharing `sync_operation_name` may count the eligible formations of an executing peer at the same objective for attack readiness; each corps operation retains its own ownership and AAR. With `coordinated_advance: true`, a decisive operation-owned victory may advance one same-axis supporting attacker alongside the lead attacker, capped at two formations. A dated `external_support` row affects OSID attack power and prediction only when it has `role: attack`, `osid_attack_support: true`, the target municipality, and a turn in its half-open `[start_turn, end_turn)` window. None of these fields writes political control; the ordinary attack resolver must win and record a combat transfer. These candidate rules are covered by the focused operation and support tests and remain subject to the calibration gates below.
+
 ### 7.6 Operation Preparation System
 
 **Implementation-note (2026-03-12):** Operations now pass through a preparation phase between launch and execution, modeled as a state machine within `CorpsOperation`. The preparation system gates execution on readiness and is shaped by commander personality.
@@ -552,15 +556,18 @@ Elapsed turns alone are not a recall condition. A healthy brigade supporting an 
 
 **Implementation-note (2026-03-18):** Historical events can now specify game-state conditions that must be satisfied before firing. Events without conditions continue to fire by week range as before (backward compatible).
 
-**EventCondition type** (9 variants in `src/sim/events/event_types.ts`):
+**EventCondition type** (selected variants in `src/sim/events/event_types.ts`; use the type and loader vocabulary for the complete set):
 - `territory_control` — faction controls municipality/OSID above threshold
 - `alliance_below` / `alliance_above` — RBiH-HRHB alliance level check
 - `faction_controls_municipality` — faction controls ≥threshold fraction of municipality OSIDs
 - `siege_active` — siege detected at OSID or municipality
-- `operation_completed` — named operation matching pattern has completed
+- `operation_completed` — named operation matching pattern has completed; optional `min_attacks` requires recorded combat attempts
+- `operation_attacked` — matching operation has recorded at least one attack (or `min_attacks` if supplied); reads live execution, completed AARs, and player-halted attack records, so a merely queued or planned operation does not qualify
 - `and` / `or` / `not` — logical combinators (recursive)
 
 **Evaluator:** `evaluateCondition(condition, state)` — recursive evaluator in `event_types.ts`. Called from `shouldEventFire()` when an event's trigger includes a `condition` field. Returns boolean.
+
+**Terminal follow-up persistence (2026-09-27 candidate):** If play ends before the next turn, `writeOwedRecordsAtTermination` writes only once-only, no-choice, no-pressure event rows whose single-turn window opens immediately next turn, all prerequisite events have fired, at least one prerequisite fired on the terminal turn, and every prerequisite window closes on that terminal turn. The row must still pass its normal eligibility checks. It is stamped at that retrospective opening turn before the terminal save and endgame snapshot are finalized. It does not advance combat, offer a decision, or evaluate unrelated future events. The write is idempotent across war-pipeline and desktop persistence paths.
 
 **Converted events** (in `data/scenarios/events/war_1992.json`):
 - `operation_corridor_1992` — fires when RS controls ≥50% of Brcko municipality (w12-22)
