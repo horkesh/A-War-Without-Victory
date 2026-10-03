@@ -88,6 +88,7 @@ import { shouldLaunchProbeInstead } from '../bot_corps_directives.js';
 import { getStalestSectorIntelConfidence } from '../sector_intel.js';
 import { computePlanningDuration } from '../sector_offensive_axis_helpers.js';
 import { canFormationReachAssemblyInTime } from '../sector_offensive_launch_helpers.js';
+import { mayEliteJoinOperation } from '../historical_elite_reservations.js';
 
 export function capOpportunityOperationParticipants(
     participantIds: readonly string[],
@@ -365,6 +366,7 @@ function findLocalOccupationCandidate(
     const terrainCache = buildTerrainCache(reverseMap);
     const candidates = allocation.surplus_pool
         .filter((evaluation) => evaluation.is_combat_effective && !evaluation.is_disrupted)
+        .filter((evaluation) => mayEliteJoinOperation(evaluation.brigade_id, briefing.turn))
         .filter((evaluation) => !queuedHistoricalParticipants.has(evaluation.brigade_id))
         .filter((evaluation) => !activeOperationParticipants.has(evaluation.brigade_id))
         .filter((evaluation) => isCombatReadyParticipant(briefing, evaluation.brigade_id))
@@ -563,6 +565,7 @@ function findLocalOccupationCandidate(
                     const formation = formationById[brigadeId];
                     const movementStatus = briefing.state_ref?.military.brigade_movement_state?.[brigadeId]?.status;
                     return garrisonLockedIds.has(brigadeId)
+                        && mayEliteJoinOperation(brigadeId, briefing.turn)
                         && !queuedHistoricalParticipants.has(brigadeId)
                         && !activeOperationParticipants.has(brigadeId)
                         && isCombatReadyParticipant(briefing, brigadeId)
@@ -1209,6 +1212,14 @@ function buildOperations(
         (planDecision.plan.target_osids.length > 0 || planDecision.plan.source === 'opportunity')
     ) {
         const activePlan = planDecision.plan;
+        const authoredOperationName = activePlan.source === 'pre_planned'
+            ? activePlan.objective_description
+            : undefined;
+        const mayJoinPlanOperation = (brigadeId: string): boolean => mayEliteJoinOperation(
+            brigadeId as FormationId,
+            briefing.turn,
+            authoredOperationName,
+        );
         // Slot cap guard: don't emit a new op if corps is already at capacity.
         // Mirrors hasAvailableSlot() used in bot_corps_directives / bot_corps_operations.
         // Exclude recovery-phase ops — they don't occupy an active slot.
@@ -1229,7 +1240,7 @@ function buildOperations(
             // between READY and emission. Combat readiness and reachability remain
             // enforced below for every reserved participant.
             for (const brigadeId of activePlan.assigned_brigades) {
-                surplusSet.add(brigadeId);
+                if (mayJoinPlanOperation(brigadeId)) surplusSet.add(brigadeId);
             }
         }
 
@@ -1298,7 +1309,10 @@ function buildOperations(
             `${BUILD_OPERATIONS_PROFILE_PREFIX}.plan.primaryPool`,
             () => primarySector
                 ? primarySector.assigned_brigade_ids
-                    .filter(id => surplusSet.has(id) && canReach(id) && isCombatReadyParticipant(briefing, id))
+                    .filter(id => surplusSet.has(id)
+                        && mayJoinPlanOperation(id)
+                        && canReach(id)
+                        && isCombatReadyParticipant(briefing, id))
                     .sort(strictCompare)
                 : [],
         );
@@ -1311,7 +1325,9 @@ function buildOperations(
             primaryPool = [...new Set([
                 ...primaryPool,
                 ...activePlan.assigned_brigades.filter(id =>
-                    canReach(id) && isCombatReadyParticipant(briefing, id)),
+                    mayJoinPlanOperation(id)
+                    && canReach(id)
+                    && isCombatReadyParticipant(briefing, id)),
             ])].sort(strictCompare);
         }
 
@@ -1349,7 +1365,10 @@ function buildOperations(
                         if (maxAttachable <= 0) continue;
 
                         const eligibleFromSector = adjSector.assigned_brigade_ids
-                            .filter(id => surplusSet.has(id) && canReach(id) && isCombatReadyParticipant(briefing, id))
+                            .filter(id => surplusSet.has(id)
+                                && mayJoinPlanOperation(id)
+                                && canReach(id)
+                                && isCombatReadyParticipant(briefing, id))
                             .sort(strictCompare)
                             .slice(0, maxAttachable);
 
@@ -1645,6 +1664,7 @@ function buildOperations(
                     : new Set<FormationId>();
                 return allocation.surplus_pool
                     .filter(ev => ev.is_combat_effective && !ev.is_disrupted)
+                    .filter(ev => mayEliteJoinOperation(ev.brigade_id, briefing.turn))
                     .filter(ev => !queuedHistoricalParticipants.has(ev.brigade_id))
                     .filter(ev => isCombatReadyParticipant(briefing, ev.brigade_id))
                     .sort((a, b) => {
@@ -1893,6 +1913,7 @@ function buildOperations(
                     ]
                         .filter((brigadeId, index, all) => all.indexOf(brigadeId) === index)
                         .filter((brigadeId) => surplusParticipantIds.has(brigadeId))
+                        .filter((brigadeId) => mayEliteJoinOperation(brigadeId as FormationId, briefing.turn))
                         .filter((brigadeId) => !queuedHistoricalParticipants.has(brigadeId))
                         .filter((brigadeId) => !activeOperationParticipants.has(brigadeId))
                         .filter((brigadeId) => isCombatReadyParticipant(briefing, brigadeId))

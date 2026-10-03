@@ -46,7 +46,7 @@
 
 import type { TerrainScalarsData } from '../../map/terrain_scalars.js';
 import { getTerrainScalarsForSid, type TerrainScalars } from '../../map/terrain_scalars.js';
-import type { BrigadeMovementOrder, FactionId, FormationId, FormationState, GameState } from '../../state/game_state.js';
+import type { BrigadeMovementOrder, CorpsOperation, FactionId, FormationId, FormationState, GameState } from '../../state/game_state.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
@@ -56,6 +56,7 @@ import { ensureBrigadeComposition } from './equipment_effects.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { whenReasonCodeTopic } from './reason_code_debug.js';
 import {
+    getOperationAuthorizedDestinations,
     isRoutineScopeEnforcedForOrder,
 } from './brigade_routine_scope.js';
 
@@ -327,6 +328,93 @@ export interface OsidColumnMovementReport {
     }>;
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Operation-authorized column destinations
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Opportunity responses that authorize the CorpsOperation the approval spawned. `approve`,
+ * `redirect` and `under_resource` all spawn an operation; `decline` and `expire` do not.
+ */
+const APPROVING_OPPORTUNITY_RESPONSES: ReadonlySet<string> = new Set([
+    'approve',
+    'redirect',
+    'under_resource',
+]);
+
+/**
+ * True when an active operation carries an authorization record already represented in
+ * persisted state — the operation was genuinely authored, ordered or approved, rather than
+ * emerging from the bot evaluators:
+ *
+ *  - `is_pre_planned` — a scenario-authored pre-planned operation;
+ *  - `authored_by_player` / `requested_by_president` — an owner order;
+ *  - `triggered_operations_accepted` — a triggered or Army-HQ historical operation that was
+ *    accepted and injected (the same ledger
+ *    `war_phases.isPlayerHistoricalOperationAssistOperation` reads). This ledger is name →
+ *    accepted launch turn, and the injected operation's `started_turn` is that same turn, so the
+ *    entry authorizes only when the recorded launch turn matches `op.started_turn` — a same-name
+ *    entry from a different launch turn is a different operation;
+ *  - an `operation_opportunity_resolutions` row whose executed name AND response turn match the
+ *    operation and whose response is an approval class. Name alone is not identity: the
+ *    response turn (`started_turn`) and status pin it, mirroring the codebase's
+ *    `{corps_id}:{op_name}:t{started_turn}` operation join convention.
+ *
+ * An emergent, never-authorized bot `sector_attack` satisfies none of these: it never passed
+ * an authorization surface. (`Operation Jajce` is NOT such an operation — it is a queued
+ * scenario-authored pre-planned op and satisfies `is_pre_planned === true`.)
+ */
+function isOperationAuthorized(state: GameState, op: CorpsOperation): boolean {
+    if (op.is_pre_planned === true || op.authored_by_player === true || op.requested_by_president === true) return true;
+    if (state.military.triggered_operations_accepted?.[op.name] === op.started_turn) return true;
+    return (state.military.operation_opportunity_resolutions ?? []).some((resolution) =>
+        resolution.executed_op_name === op.name
+        && resolution.response_turn === op.started_turn
+        && APPROVING_OPPORTUNITY_RESPONSES.has(resolution.response),
+    );
+}
+
+/**
+ * True when a pending column order's destination is authorized by an ACTIVE, AUTHORIZED
+ * operation this brigade participates in — its staging OSID, an approach OSID, or a
+ * flagged-axis friendly staging neighbor.
+ *
+ * An operation-authorized order is a higher-priority commitment that a stale defensive posture
+ * must not veto. The movement-side counterpart of the `dig_in → defend` release in
+ * `army_reserve_system.issueEliteDeploymentOrder`: a rear-role brigade's posture is frozen
+ * (`applyPostureOrders` skips brigades failing `isBrigadeAssignedToFront`), so without this the
+ * operation's own staging/approach order is deleted as `posture_dig_in` every turn and the
+ * brigade never marches (measured Vlašić defect).
+ *
+ * The destination test uses `getOperationAuthorizedDestinations`. What this gate adds is that
+ * the authorizing operation must carry an authorization
+ * record (`isOperationAuthorized`), so an emergent bot operation cannot uproot a dug-in
+ * brigade just because the destination lies inside its plan footprint. Named so the posture
+ * release below applies to EXACTLY the condition this gate exempts, and only after the order
+ * passes the remaining gates — an unauthorized, out-of-scope or pathfinding-invalid order must
+ * never silently un-dig a brigade.
+ */
+function isOperationAuthorizedColumnOrder(
+    state: GameState,
+    formation: FormationState,
+    order: BrigadeMovementOrder | undefined,
+    adjacency: Map<Osid, Osid[]>,
+    reverseMap: OperationalToCanonicalReverseMap,
+): boolean {
+    const destination = order?.destination_sids?.[0];
+    if (!destination) return false;
+
+    const corpsId = formation.corps_id;
+    if (!corpsId) return false;
+    const cmd = state.military.corps_command?.[corpsId];
+    if (!cmd) return false;
+
+    return (cmd.active_operations ?? []).some((op) => {
+        if (!isOperationAuthorized(state, op)) return false;
+        return getOperationAuthorizedDestinations(state, formation.id, op, adjacency, reverseMap).has(destination);
+    });
+}
+
 /**
  * Process OSID column movement orders and advance in-transit brigades.
  *
@@ -462,8 +550,15 @@ export function processOsidColumnMovement(
             continue;
         }
 
-        // dig_in lockout: brigades actively fortifying cannot be ordered to move
-        if (f.posture === 'dig_in') {
+        // dig_in lockout: brigades actively fortifying cannot be ordered to move — EXCEPT when the
+        // pending destination is authorized by an active, AUTHORIZED operation this brigade
+        // participates in (its staging or an approach OSID). Such an order is the operation's own
+        // commitment and must not be vetoed by a stale defensive posture; the posture is released
+        // further below, and only once the order is actually accepted for transit. An emergent,
+        // never-authorized operation leaves a dug-in brigade exactly where it was.
+        const digInAuthorizedForOperation = f.posture === 'dig_in'
+            && isOperationAuthorizedColumnOrder(state, f, order, adjacency, reverseMap);
+        if (f.posture === 'dig_in' && !digInAuthorizedForOperation) {
             report.column_blocked += 1;
             recordRejection(
                 formationId,
@@ -550,6 +645,15 @@ export function processOsidColumnMovement(
             turns_remaining: transitTurns,
             owner: order.owner,
         };
+
+        // The accepted operation-authorized order supersedes the stale defensive posture. Only
+        // reached after the order passed the scope and pathfinding gates above, so a rejected
+        // order cannot silently un-dig the brigade (mirrors the `issueEliteDeploymentOrder`
+        // release, `army_reserve_system.ts`).
+        if (digInAuthorizedForOperation) {
+            f.posture = 'defend';
+            f.dig_in_progress = 0;
+        }
 
         // Remove consumed order
         delete movementOrders[formationId];

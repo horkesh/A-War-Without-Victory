@@ -9,6 +9,96 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-03 — Sana Ivanjska retained-suite failure corrections
+
+Corrected the two real failures identified in the retained single Sana Ivanjska
+full-suite result without rerunning the suite or campaign. The catalog-shape
+regression now records the approved 15-objective Sanski/Ključ axis, including
+the prepended Ivanjska gateway and Otoka staging. The fresh-clone citation
+regression now uses tracked source/test evidence instead of machine-local
+candidate receipts. No simulation, control/data, canon, or calibration output
+changed. Focused catalog and citation tests, TypeScript `--noEmit`, and
+`git diff --check` all exited 0. The deliberate failing fixture remains
+intentional and unchanged. Evidence: retained
+`tests/operation_opportunities_catalog.test.ts` and
+`tests/receipt_citations.test.ts`.
+
+## 2026-09-28 — March Vlašić ridge axis narrowed to the Domet-1 targets
+
+The owner-authorized C1 scope correction is applied. `op:travnik:varosluk`
+(Komar) is removed from `VLASIC_TRAVNIK_RIDGE_OBJECTIVES` in
+`src/sim/combat/operation_opportunity_catalog_central_bosnia.ts`, leaving
+`[op:travnik:paklarevo, op:travnik:gornje_krcevine]`; the shared `ridge_probe`
+variant and `VLASIC_ENEMY_TARGETS` follow the constant. Adjacent comments were
+updated to the narrower March set and the recorded 2026-09-02 Historian ruling
+(`docs/PROJECT_LEDGER_ARCHIVE_2026Q3.md:8714-8781`). Varošluk is not re-homed or
+retimed here, and the separate uncommitted February planning candidate is
+preserved. No map/paint/denominator, engine, or acceptance change.
+
+A focused red-first assertion (authored axis objectives omit Varošluk and retain
+the two Domet-1 targets) failed 1/1 before the edit; the focused catalog suite
+then passed 18/18. Directly affected suites (`operation_name_collision`,
+`coha_operation_pause`, `pre_planned_operations`, `brigade_stacking_sector_truth`)
+passed 108/108. Typecheck and `git diff --check` exited 0. Determinism impact:
+none intended — a single authored objective is dropped from a static list.
+
+No prefix, campaign, full suite, map refresh, commit, merge, or baseline adoption
+was run. The change remains a candidate pending independent review and the open
+April/protected-checkpoint measurement. Evidence:
+`logs/vlasic-march-timing-20260928/opencode_varosluk_scope_candidate_result.md`.
+
+## 2026-09-28 — Mistral 1 reservation bypasses repaired; campaign validation pending
+
+Owner option 1 in [069] authorized the same five identities and t154–160
+window to be protected across the live generic roster paths. The shared
+reservation predicate now exempts only an explicitly authored operation name.
+Commander primary, adjacent, bilateral, probe, and bounded-position admission;
+preparation probes; sector-operation and active-probe carry-over; final roster
+reconciliation; general-operation replacement; and elite-loan auto-join all
+apply that predicate. A carried generic claim is removed from the operation
+and its axes without moving the formation. The staged primary-garrison path
+also rejects a reserved formation. `Operation Mistral 1` at t160 and the
+existing Goražde named operations retain their authored exemptions. The exact
+`Operation Cincar / Kupres` commitment begun at t132 may retain
+`F_HRHB_0001` during t154–155; generic and newly started same-name operations
+remain blocked. The
+inactive reinforcement pool and deprecated legacy sector-offensive wrapper
+were not changed because the [068] audit found no live source caller.
+
+The new regressions failed first on every changed path. Final focused coverage
+passes 261/261 tests across commander, emission, catalog, formation resolver,
+army reserve, preparation, final reconciliation, and sector lifecycle suites.
+Typecheck, the 5/5 border-data suite, startup snapshot, and diff check pass.
+Evidence is in `logs/mistral-reservation-070-20260928/`. No scenario prefix,
+188-week campaign, full suite, map refresh, commit, merge, baseline adoption,
+acceptance change, roster/window change, or combat change was performed in this
+implementation step; independent review and the separately authorized bounded
+scenario gates remain pending.
+
+## 2026-09-28 — Mistral 1 reservation candidate measured; acceptance still red
+
+Owner option 1 and Claude [067] authorized a t154–160 inclusive hold for the
+five Mistral 1 live roster identities, including `F_HRHB_0001`. The existing
+historical elite reservation table now has an optional start turn (default t0),
+and the shared corps commander brigade selector excludes the roster during the
+window unless the plan is the named `Operation Mistral 1`. Existing Goražde
+entries and planner shortage semantics remain unchanged. Focused tests 160/160,
+border-data tests 5/5, typecheck, startup snapshot and diff check passed;
+independent operations and canon review gave GO. Logs are in
+`logs/mistral-reservation-067-20260928/`.
+
+The one authorized 188-week measurement is `runs/apr1992_definitive_188w__6deb5845c150c196__w188_n2`
+(hash `6a8bddb1ff2be3a0`). Donja Mahala remains HRHB, but the current-reference
+scores are 707/707/704/653: April stays below the required 705 despite 40/40
+anchors, and October falls below 669 despite 31/31 anchors. The January 1993
+and April 1994 mismatch sets are identical to retained n0. Generic probe
+participation at t156–157 and `Operacija Vjetar` at t158–160 still claim reserved
+brigades; Mistral 1 captures 0/8 and ends failure. Mistral 2 is active at w188,
+5/12 captured, with its Drvar/Grahovo axis blocked by `no_approach_osid`.
+The verifier exits 1 on both the inherited Farz P-A §6 failure and the October
+regression. No new critical anomaly type appears. The full suite and external
+map refresh were correctly skipped after the failed acceptance gate. The
+candidate is unadopted and unmerged; no retune or second campaign is authorized.
 ## 2026-09-27 — Patron-border isolated-position candidate measured; April gate remains red
 
 The owner chose option A in channel [063], authorizing derived HRV/SRB/MNE
@@ -1162,6 +1252,7 @@ state or simulation-decision path. Canonical serialization still omits the cache
 retains only the loaded player's own sector-rating keys; `GameStateAdapter` receives the computed
 offensive, defensive, defense-per-edge, strength-class and personnel values. Browser-only raw-JSON
 fallback loading was outside the approved Electron scope.
+
 
 The focused TDD regression first failed because loaded ratings were undefined, then passed against
 the tracked canonical startup save with exact equality to the authoritative computation, 172/172
@@ -7575,3 +7666,509 @@ unchanged archival artifact with the recorded SHA-256
 `E0252CEB2A3C108AFB1CDCF6E86A862772F7F4B8E8E6B2BD1E5F0C436679E888`.
 Plan-index, open-gates and strict receipt-citation checks pass. This is
 evidence preservation, not R8 acceptance or R6 merge clearance.
+
+## 2026-09-28 — Vlašić February planning candidate
+
+Owner requested moving the Vlašić operation planning window from March to February:
+t152→t150 (week of 1995-02-20). The Systems Manual note was updated to reflect the
+February eligibility window (opening week of 20 February 1995, closing after t166).
+Combat logic and `planning_duration=4` are unchanged. Focused tests t149/t150/t167
+passed 16/16; typecheck and `git diff --check` both exited 0. No campaign or full suite
+was run. The candidate is uncommitted, unmerged, and unadopted; the full-suite,
+188-week, and protected-checkpoint gates and Farz P-A §6 NO-MERGE remain open.
+Evidence: `logs/vlasic-march-timing-20260928/opencode_feb_planning_result.md`.
+
+### 2026-09-28 — February Vlašić planning measurement: April checkpoint unchanged
+
+The owner authorized one repeat 188-week campaign after the first launcher stopped at
+week 62 without an exit code. OpenCode's tracked campaign completed exit 0 in n6.
+Against current painted references, scores were 707/707/704/670, exactly the
+retained n4 scores; April 1995 remains below the agreed 705/712 floor.
+The Vlašić proposal and approval moved t152→t150, but the operation stayed in
+planning through w155, first attacked Paklarevo at w156, and captured it by
+ordinary combat at t157, after the w156 checkpoint. Donja Mahala, Doljani,
+the Prozor trio, and Gornja Presjenica retain their protected results.
+Farz P-A §6 still fails and forbids merge; the candidate is unadopted and unmerged.
+The preceding ledger entry's statement that planning_duration was unchanged at 4
+was inaccurate: the February edit did not touch it, and the pre-existing
+candidate value is 2. See logs/vlasic-march-timing-20260928/measurement_result.md.
+
+## 2026-09-28 — COHA Vlašić exception live-path correction
+
+The independent review correction aligned the COHA exception with the retained
+Operation Vlasic Ridge save and catalog: operation-level staging is
+`op:travnik:travnik_2`, while the executing axis stages at
+`op:travnik:turbe_2`. Order admission now requires the brigade's executing axis
+current objective rather than any authored objective, and operation-local COHA
+diagnostics no longer treat an unrelated suppressed order as a pause on every
+operation. Focused affected tests passed 53/53; typecheck and `git diff --check`
+exited 0. The retained-save predicate check passed in memory with t154 and
+`coha_active=true`; the save was not modified. No campaign or full suite was run.
+
+Determinism impact: none intended; the correction uses authored catalog identity,
+stable axis/objective selection, and sorted existing diagnostic traversal.
+Evidence: `logs/vlasic-march-timing-20260928/opencode_coha_exception_impl_result.md`.
+
+## 2026-09-28 — Owner approval for March Vlašić objective scope
+
+In the Codex chat, after review of the retained n11 April-prefix evidence and the
+recorded Historian ruling at `docs/PROJECT_LEDGER_ARCHIVE_2026Q3.md:8714-8781`,
+the owner explicitly said: "You may remove Varosluk." This authorizes removing
+`op:travnik:varosluk` from the March `VLASIC_TRAVNIK_RIDGE_OBJECTIVES` list,
+leaving Paklarevo and Gornje Krčevine. It does not authorize a painted/map
+change, September operation authoring, merge, baseline adoption, or a new
+expensive campaign. The candidate remains subject to focused checks,
+independent review, and the open April/protected-checkpoint gates.
+## 2026-09-29 — Owner approval for one April 1995 Vlašić prefix
+
+After the March Varošluk scope edit passed focused tests and independent review,
+Codex asked whether OpenCode may run one 156-week prefix (~3–5 minutes) to check
+Paklarevo and Gornje Krčevine RBiH, Varošluk RS, April fit against retained n9,
+and all protected anchors, stopping after one run. The owner replied: "Do it."
+This approves that one bounded measurement under
+`logs/vlasic-march-timing-20260928/opencode_varosluk_scope_prefix_handoff.md`.
+It does not approve an automatic retry, 188-week run, full suite, merge, baseline
+adoption, painted/map change, or October calibration.
+
+## 2026-09-29 — One Vlašić prefix failed; late Donji Vakuf roster repair remains unmeasured
+
+OpenCode ran the one owner-approved 156-week prefix after the Varošluk scope edit.
+The child exited 0 with 156 weekly rows and final hash `34ee9fcb3a1aee24`
+(`runs/apr1992_definitive_188w__2cb8853e73fa74b8__w156_n12`). April 1995
+scored 703/712 with 39/40 protected anchors, below the 705/712 floor. The
+Donji Vakuf trio remained RBiH instead of RS. Paklarevo and Gornje Krčevine
+were captured for RBiH by ordinary combat, while Varošluk remained RS.
+January 1993 and April 1994 each scored 704/712 versus retained n9's 707/712.
+No run was repeated. The initial save was byte-identical to n9 and n11.
+
+Retained AAR and brigade logs show that queued, preplanned Operation Jajce
+finished at t28 rather than n9's t29. Queued Donji Vakuf then injected at t28
+without its authored 16th Krajina brigade, which was still moving to the exact
+staging OSID. The brigade arrived t29 and a generic Bedem operation claimed it
+at t30. An earlier read-only diagnosis wrongly classified Jajce as an
+unauthorized emergent bot operation and misstated the checkpoint arithmetic;
+`logs/vlasic-march-timing-20260928/n12_diagnosis_erratum.md` corrects both.
+
+OpenCode made the smallest general admission change: an authored brigade at
+its exact assembly OSID may join its preplanned operation during execution as
+well as planning, subject to the existing eligibility, commitment and corps
+gates. It also corrected the false Jajce source comment. Focused tests passed
+91/91, related tests 46/46, typecheck and `git diff --check` exited 0; an
+independent Sol reviewer returned GO. See
+`logs/vlasic-march-timing-20260928/opencode_dv_late_roster_result.md`.
+No second prefix, 188-week campaign or full suite has measured this repair.
+The candidate remains uncommitted, unmerged and unadopted. April acceptance,
+all protected checks, the full-run gates, and Farz P-A §6 NO-MERGE remain open.
+
+## 2026-09-29 — Owner approval for one late-roster 156-week prefix
+
+After the focused late authored-roster repair passed cheap tests and independent
+review, Codex proposed one additional 156-week prefix (about 3–5 minutes) to
+measure whether the 16th Krajina rejoins Donji Vakuf, all 40 protected anchors
+hold, January 1993 and April 1994 remain at least 707/712, and April 1995
+reaches at least 705/712. The owner replied, “Sure, have open code run it.”
+This authorizes exactly the one bounded measurement specified in
+`logs/vlasic-march-timing-20260928/opencode_dv_late_roster_prefix_handoff.md`.
+It does not authorize automatic retry, retune, 188-week run, full suite,
+map/reference change, merge, baseline adoption or October calibration.
+
+## 2026-09-29 — Late-roster April 1995 prefix passes its bounded gate
+
+OpenCode ran the one owner-approved 156-week command once on the reviewed
+execution-phase authored-roster candidate. The child exited 0; n13 has 156
+weekly rows, final hash `66e196202b71e016`, no unresolved final refs, and a
+byte-identical initial save to retained n9/n12. The checkpoint fits are
+707/712 (January 1993), 707/712 (April 1994), and **706/712 (April 1995)**.
+All 40/40 April protected anchors pass. The 16th Krajina joins the executing
+queued Operation Donji Vakuf at t29; that operation succeeds, and ordinary
+combat receipts restore `oborci_2`, `donji_vakuf_2`, and `korenici` to RS.
+Paklarevo and Gornje Krčevine are RBiH through ordinary combat at w156;
+Varošluk remains RS. Donja Mahala HRHB, Doljani RBiH, the Ljubunci/Lug/Paroš
+HRHB trio, and Gornja Presjenica RS retain their named results. The n13 final
+controllers differ from n9 only at Paklarevo and Gornje Krčevine. No critical
+anomaly is reported. See
+`logs/vlasic-march-timing-20260928/opencode_dv_late_roster_prefix_result.md`
+and `runs/apr1992_definitive_188w__2cb8853e73fa74b8__w156_n13`.
+
+This is a **prefix pass**, not baseline adoption or full acceptance. The
+authoritative 188-week run, full suite, October 1995 gate, and Farz P-A §6
+NO-MERGE review remain open. The candidate stays uncommitted and unmerged;
+no retry, retune, second campaign or October calibration was performed.
+
+## 2026-09-29 — Owner approval for one authoritative 188-week measurement
+
+After the n13 156-week prefix passed at 707/707/706 with 40/40 April anchors,
+Codex asked for the next full-trajectory validation. The owner replied,
+“Authorized, have open code run it.” This authorizes one 188-week run on the
+reviewed late-roster candidate under
+`logs/vlasic-march-timing-20260928/opencode_dv_late_roster_188w_handoff.md`.
+It does not authorize automatic retry, tuning, full-suite rerun, merge,
+baseline adoption, painted/map changes, or October calibration edits.
+
+## 2026-09-29 — One late-roster 188-week measurement clears fit and anchors; Farz gate remains open
+
+OpenCode ran the owner-authorized command once. The child exited 0 and created
+`runs/apr1992_definitive_188w__6deb5845c150c196__w188_n14` with 188 weekly
+rows, final hash `34cd42f71e70c2ba`, zero unresolved final references and
+the byte-identical initial save used by retained n0 and the n13 prefix.
+The one trajectory scores **707/712 January 1993, 707/712 April 1994,
+706/712 April 1995, and 671/712 October 1995**. Protected anchors pass
+31/31, 32/32, 40/40 and 31/31 respectively. The w156 controller map is
+identical to n13: Donja Mahala HRHB; Doljani RBiH; Ljubunci/Lug/Paroš HRHB;
+Gornja Presjenica RS; Donji Vakuf trio RS; Paklarevo and Gornje Krčevine
+RBiH; Varošluk RS. The 16th Krajina participates in Operation Donji Vakuf,
+whose ordinary-combat battles capture the RS trio. No critical anomaly is
+reported. The retained n0 October summary says 668/712, while replay of that
+old run against current references yields 669/712; n14 exceeds both.
+
+The independent checkpoint verifier exits 1 because the Farz P-A §6 signature
+cell was captured at t167 by an ARBiH 3rd-Corps formation rather than the
+required 2nd Corps. Retained n0 has the same failure. This is a **NO-MERGE**
+panel matter, not waived by the fit and anchor pass. The full test suite also
+remains unrun on this candidate. The run report and raw evidence are in
+`logs/vlasic-march-timing-20260928/opencode_dv_late_roster_188w_result.md`.
+No retry, retune, code edit, full suite, merge or baseline adoption followed;
+the candidate remains uncommitted and unmerged.
+
+## 2026-09-29 — Owner narrows Farz acceptance to captured objectives
+
+The owner clarified that either participating corps may make the final capture
+in a historically joint 2nd/3rd Corps operation, provided Farz's objectives
+were captured. The previous P-A verifier required a **2nd Corps final capture
+of Briješnica**; that proxy is superseded. The verifier now requires all four
+Farz cells to have logged, operation-owned combat captures in the late window
+by a 2nd- or 3rd-Corps brigade under the authored Army HQ operation, and to
+remain RBiH at w188. It keeps the 2nd Corps participation observation visible
+and preserves the universal guard on unwarranted late 2nd Corps captures.
+
+The retained n14 and n0 artifacts both pass this revised Farz objective gate
+with all four combat receipts and verifier exit 0. Neither run records a 2nd
+Corps participant in the Farz AAR; this remains a historical fidelity
+diagnostic, so the runs must not be described as reproducing the historical
+joint link-up. The prior ledger's “Farz P-A §6 NO-MERGE” label was inaccurate:
+`CALIBRATION_MASTER.md` explicitly carves this discriminator out from the
+sensitive-history §6 breach. This entry supersedes that label, without waiving
+any separate §6, full-suite, calibration, merge or baseline gate.
+
+Focused Farz/capture-provenance tests pass 7/7; typecheck, syntax, retained
+verifier replay, and independent targeted review pass. The review found and
+the correction closed an initial false pass for 1st/unknown-Corps capturers.
+Evidence: `logs/vlasic-march-timing-20260928/opencode_farz_owner_ruling_result.md`.
+The correction changes only the verifier and tests; no campaign, scenario,
+paint, canon, map publish, merge or baseline adoption was run or changed.
+
+## 2026-09-29 — Prusac reference correction and n14 inspection map
+
+By owner direction, Prusac (`op:donji_vakuf:prusac_2`) is now painted RBiH in
+all four active checkpoints. The January 1993, April 1994 and April 1995
+targets changed RS→RBiH; October 1995 was already RBiH. Each active target
+still has 712 OSIDs. This owner determination is recorded with the limits of
+the historical evidence in `docs/40_reports/CALIBRATION_MASTER.md`.
+
+The retained n14 save shows a single 1992 loss: an authored VRS Donji Vakuf
+operation captures Prusac from RBiH militia at t29, with no defending brigade.
+The unchanged save replays at 706/712, 706/712, 705/712 and 671/712 against
+the corrected references. Focused target checks and independent review pass;
+the checkpoint verifier exits 0. No simulation repair or new campaign ran.
+
+The corrected static inspection map is published at
+`https://horkesh.github.io/A-War-Without-Victory/?run=april1995-n14-prusac-20260929`
+from Pages commit `4b2d73d793954bbf3e69c8e83a69636873990bdd`. The live
+page hash and desktop/mobile Prusac display were checked; the earlier n14
+page remains available. The candidate is unmerged and unadopted. A 1992
+operation repair, full suite, clean-source provenance and remaining canon
+gates require separate work and validation.
+
+## 2026-09-30 — Prusac objective candidate holds, October Sana regression blocks adoption
+
+The t29 defense audit found Prusac in ARBiH 3rd Corps sector 0 with no eligible
+assigned defender; the available 770th Donji Vakuf brigade was two friendly
+hops away in sibling sector 1. Independent canon review blocked a generic
+two-hop, cross-sector defense exception. OpenCode instead tested the documented
+`CALIBRATION_MASTER.md` hypothesis: remove the authored VRS `prusac_local`
+axis, leave ordinary combat eligibility intact, and append Jemanlići after
+Korenići on the main Donji Vakuf sweep. Typecheck and 91/91 focused tests
+passed; independent review cleared one bounded measurement.
+
+The one 40-week prefix scored 707/712 against the corrected January target,
+versus retained n14's 706/712. Prusac alone left the mismatch set. The one
+188-week run `runs/apr1992_definitive_188w__6deb5845c150c196__w188_n22`
+ended with final hash `c3cd08a6c5ed3fe5`, zero unresolved final assignment
+references, zero critical anomalies, and Prusac RBiH at all four checkpoints.
+Its paired scores are **707/712, 707/712, 706/712, 673/712**, versus n14
+replayed against current paint at **706/712, 706/712, 705/712, 671/712**.
+All checkpoint anchor summaries pass, and the verifier log reports guard
+intact; Farz's missing 2nd Corps participation remains a diagnostic.
+
+The candidate still **fails** the agreed no-new-mismatch condition. Five
+October 1995 cells in Bosanski Novi/Sanski Most that n14's Operation Sana
+captured through ordinary combat at t185–188 remain RS in n22. Sana starts
+at t175 in both runs but has 15 captures in n22 versus 21 in n14; its first
+visible battle divergence is t179 at Račić. Western Bosnia cascade matches
+fall from 31 to 29 even as the net October paired score rises by two. Both
+runs are dirty and the n14/n22 painted-input hashes differ; no clean
+single-change causal attribution is claimed. The full suite was started before
+the exact October delta was checked and stopped on this failure; two
+strict-null inventory tests had failed, but the suite has no final verdict.
+No second campaign, retune, merge, baseline adoption or map publication ran.
+Evidence: `logs/prusac-diagnostic-20260929/prefix_result.md`,
+`authoritative_result.md`, and `oct_delta_audit.md`.
+
+## 2026-09-30 — Shared Sana axis candidate restores Sanski cells but trades Bosanski Petrovac
+
+To test the October loss in retained n22, OpenCode added a general, capped
+shared-objective wait for an idle, never-attacked operation axis while a
+progressing sibling still has that objective in its path. The correction
+restored the prior movement-only stall cap and made sibling eligibility
+independent of axis iteration order. Test-first focused checks passed 104/104,
+TypeScript typecheck passed, and independent review gave GO for measurement.
+The single 40-week gate preserved January at 707/712, all 31 early anchors,
+and Prusac RBiH. No new January mismatch appeared.
+
+The single 188-week run `runs/apr1992_definitive_188w__6deb5845c150c196__w188_n24`
+exited 0, final hash `95bdca738504cc86`, final assignment seal unresolved 0,
+and zero critical anomalies. Its checkpoint scores are **707/712, 707/712,
+706/712, 676/712** versus n22's **707/712, 707/712, 706/712, 673/712**.
+Four Sanski Most cells returned RS→RBiH through ordinary Operation Sana combat
+at t185–188. The exact October mismatch delta is four resolved cells and one
+new loss: `op:bosanski_petrovac:bosanski_petrovac_2`. In n22 the 501st Slavna
+Mountain recaptured Bosanski Petrovac at t188 against the RS 17th Ključ
+brigade (decisive victory, power ratio 3.05); in n24 its t188 attack against
+militia stalemated (ratio 0.96). The upstream battle-input divergence is not
+yet established. The **no-new-October-mismatch criterion fails**, despite the
+net score gain. Kršlje remains RS. Earlier protected controls and the Farz
+four-cell positive gate hold; the missing 2nd Corps Farz participation remains
+a historical fidelity diagnostic.
+
+Evidence: `logs/prusac-diagnostic-20260929/october_sana_shared_axis_result.md`,
+`october_sana_40w_result.md`, `october_sana_188w_result.md`, and the n24 run.
+The candidate remains uncommitted, unmerged and unadopted. No automatic retry,
+retune, full suite or map publication followed the failed acceptance gate.
+
+## 2026-09-30 — Ključ-first Sana catalog candidate
+
+Implemented one bounded, unmeasured 5th Corps catalog candidate. Krupa now
+uses 503rd/505th/511th; the Petrovac pursuit uses 501st/510th on the verified
+short route through Bosanski Petrovac into Ključ; a disjoint approach axis
+retains `orasac_2`, `prkosi`, and `vodjenica`; the 506th/517th Sanski axis is
+unchanged. No source, paint, combat, timing, denominator, canon, baseline, or
+campaign changes were made. Deterministic authored ordering and unique roster
+ownership are asserted. Focused catalog test: 45/45; direct typecheck: exit 0;
+graph route: 8/8 edges; diff check: exit 0. This is candidate evidence only,
+not measured w188 acceptance. Receipt:
+`logs/prusac-diagnostic-20260929/october_kljuc_first_candidate_result.md`.
+
+## 2026-09-30 — Bounded n26 Hadžići pursuit diagnosis
+
+The retained n26 idle Petrovac pursuit was diagnosed without a campaign. A final-state
+probe generated `march_to_approach` orders for the 501st and 510th to allied HRHB
+Jasenovac, and the column processor accepted both orders into transit; the corps-scope
+destination exemption is intentional. Retained n26 lacks the per-turn order-generation
+and movement-rejection receipts needed to explain why t185–188 differed, so no
+production correction or regression test was authorized. Focused route/order probes
+exited 0 and `git diff --check` exited 0. Receipt:
+`logs/prusac-diagnostic-20260929/opencode_n26_hadzici_bounded_result.md`.
+
+## 2026-09-30 — Allied operation drift-recall correction
+
+Implemented the bounded movement-authority correction from the allied-operation handoff. Drift
+cleanup now computes active operation membership before deleting movement orders and preserves a
+different-faction destination only when `isFriendlyFaction` confirms the factions are currently
+allied. Enemy destinations and non-operation allied destinations retain deletion behavior; no
+operation objective, combat rule, authored control, or calibration data changed.
+
+Focused regression coverage includes active RBiH→HRHB operation movement, absent operation, and
+inactive alliance. The focused test passed 16/16, typecheck passed, and `git diff --check` passed;
+all exits were 0. The pre-edit focused test reproduced the diagnosed allied-operation deletion
+(exit 1). Evidence and result: `opencode_allied_op_recall_fix_result.md` and the corresponding
+focused/typecheck/diff-check logs under `logs/prusac-diagnostic-20260929/`. No campaign or full
+suite was run.
+
+## 2026-10-01 — Otoka staging evidence correction
+
+Narrowed the Sana Otoka candidate evidence after independent review. Removed the
+unused Ivanjska staging constant, retained the existing friendly Otoka catalog
+assignment and the distinct Ivanjska front-edge gate, and revised the focused
+fixture/report to identify the producer/consumer exercise as synthetic rather
+than a production t175/t176 pipeline, protected-owner proof, or same-corps route.
+No simulation, save/movement authority, objective, roster, or protected data
+changed. Determinism impact: none; only comments, test fixture wording/timing,
+and evidence prose changed. The three affected focused files passed 86/86,
+TypeScript passed, and `git diff --check` passed. No full suite, prefix, map,
+merge, baseline adoption, or campaign ran. Evidence:
+`logs/prusac-diagnostic-20260929/opencode_sanski_otoka_staging_result.md`.
+
+## 2026-10-01 — Bounded Sana planning-prefix fixture
+
+Added a focused real-topology reconciliation fixture for the retained n29/n30 Sana discrepancy. The fixture proves that the first lawful approach in the Sanski walk is `op:kljuc:hadzici` when the retained `jasenovac_2 -> hadzici` contact is live, and that reconciliation prunes the preceding prefix to Hadžići/Ključ/Krasulje. A real `ivanjska_2 -> donji_dubovik_2` positive control retains its prefix. Changing only `staging_osid` produces identical selector output; no causal claim about Otoka is made. Focused test passed 11/11 and `git diff --check` exited 0. No production code, catalog, painted control, campaign, prefix, or full suite changed or ran. Evidence: `logs/prusac-diagnostic-20260929/mistral_otoka_planning_fixture_evidence.md`.
+
+## 2026-10-01 — Bounded Otoka rollback closeout
+
+Rolled back only the rejected `sana_sanski_most_kljuc` Otoka staging candidate to `STAGING_IVANJSKA`; preserved Krupa-axis Otoka staging, the Mistral 1 roster admission, and the planning fixture. Removed the synthetic producer/consumer test and candidate-only negative baseline entry. Focused tests 63/63, typecheck, and diff check passed (all exit 0). No campaign or 188-week acceptance claim.
+
+## 2026-10-02 — Observation-only Sana planning trace
+
+Added an environment-gated pre/post JSON receipt immediately around planning objective
+reconciliation for Operation Sana, 5th Corps, turns 175–177. The receipt records the Sanski
+axis objectives, pure approach-OSID results, effective controllers, live front edges,
+static graph neighbor/controller pairs, relevant corps subsegments, staging, sequence
+preservation, and 506th/517th location and movement state. The trace is read-only and
+disabled by default; no authored data, control, objective, roster, or combat behavior
+changes. Focused reconciliation/trace tests passed 12/12, typecheck and `git diff --check`
+exited 0. Evidence: `logs/prusac-diagnostic-20260929/sana_boundary_trace_result.md`.
+No 177-week prefix, full suite, campaign, merge, or Farz P-A §6 adoption was performed.
+
+## 2026-10-02 — Single Sana boundary prefix measured
+
+Ran the one owner-authorized 177-week replay of the rejected n30 Otoka configuration
+with the observation-only trace enabled. Exit 0; all 177 weekly report rows matched
+retained n30 byte for byte. The guarded helper restored the catalog's exact bytes
+and SHA-256. At t176, the first 11 RS-controlled Sanski-axis objectives had no
+approach; Hadžići was first reachable through a live HRHB Prekaja–RS Hadžići
+edge. Reconciliation cut the 14-objective axis to Hadžići/Ključ/Krasulje.
+Operacija Kamen had captured Prekaja by ordinary HRHB combat at t175. This
+establishes the immediate n30 pruning mechanism but does not attribute Kamen
+to Otoka staging or establish October acceptance. An independent Sol review
+confirmed the selector trace, capture chronology, and evidence limits.
+No full suite, new 188-week
+campaign, retune, merge, map refresh, or baseline adoption occurred. Farz P-A
+§6 remains NO-MERGE. Receipt: `logs/prusac-diagnostic-20260929/sana_boundary_177w_result.md`.
+## 2026-10-02 — n32 Sana state and exit-marker probe
+
+Read the actual n32 t183/t184 saves and t183–188 Sana temporal evidence. The
+saved front fields are derived omissions, not a grounding blocker: production
+hydration reproduced 266/265 edges and 59 sectors at both turns. The explicitly
+counterfactual 517th Škucani / 506th Sanski-town split failed first at the real
+approach-set selector gate; unchanged-n32 positive control returned approaches.
+No production behavior, campaign, or calibration acceptance claim was added.
+The diagnostic probe records a numeric Node child exit (0), while the original
+blank-marker cause remains unproved because the correction changed Refresh and
+cast. `git diff --check` exited 0. Evidence:
+`logs/prusac-diagnostic-20260929/sana_n32_exploratory_result.md`.
+
+## 2026-10-02 — Sana flagged-axis staging-neighbor correction
+
+For a flagged `OperationAxis` whose current objective has no lawful approach,
+planning and execution now prefer the exact friendly staging OSID when reachable;
+otherwise they choose a deterministic friendly tactical/static neighbor of that
+staging OSID through the existing friendly-only pathfinder. If no lawful route
+exists, the brigade defends/holds. Unflagged axes and operation/save catalogs are
+unchanged. Focused red test exited 1 as expected; focused objective tests passed
+19/19, affected column-movement tests passed 29/29, direct TypeScript `--noEmit`
+and `git diff --check` exited 0. Evidence:
+`logs/prusac-diagnostic-20260929/sana_axis_staging_neighbor_result.md`. Determinism
+impact: none intended; candidate neighbors and path traversal retain strict
+lexicographic ordering and the existing deterministic friendly-only pathfinder.
+Knowledge note: `PROJECT_LEDGER_KNOWLEDGE.md` records the lawful-neighbor staging
+pattern. No prefix, full suite, or campaign was run.
+
+## 2026-10-03 — Sana transit authority for flagged staging neighbors
+
+The shared operation-destination predicate now authorizes a friendly tactical neighbor of hostile staging only for an active participating axis with `preserve_objective_sequence`. This aligns the flagged Sana axis column transit toward Otoka with the existing attack-evaluator fallback. Unrelated brigades remain subject to routine correction; unflagged axes and authored historical transit are unchanged.
+
+The focused regression failed before the fix (exit 1) and passed after it (37/37, exit 0). Two Sana producer tests passed (17 skipped); TypeScript typecheck and `git diff --check` exited 0. No full suite or campaign was run. Evidence: `logs/prusac-diagnostic-20260929/sana_transit_authority_result.md`.
+
+## 2026-10-03 — Unmeasured Sana planning-duration candidate
+
+Using retained n36 evidence (run exit 0 but NO-GO: Petrovac t181, Ključ t185,
+four Sanski-belt captures at t185–188, and no Stari Majdan or Sanski town
+attack by w188), reduced only `SANA_95_OPPORTUNITY.planning_duration` from 5 to 3.
+Storm/theater and t175 date gates, rosters, objective order, and all other
+operations remain unchanged. The catalog comment identifies this as a calibration
+candidate, not historical timing. The focused test proves the live opportunity is
+absent before the date or without Storm, then approves through the canonical spawn
+path and derives the two-turn-earlier preparation window from the spawned operation.
+No control/data/paint/denominator, HVO, victory, merge, or baseline change.
+
+Focused catalog test, TypeScript `--noEmit`, and `git diff --check` are the only
+checks authorized for this unmeasured candidate; no prefix, full suite, or 188-week
+campaign was run. Determinism impact: the static catalog remains deterministically
+ordered; only the authored preparation budget changes. Evidence: retained
+`runs/apr1992_definitive_188w__6deb5845c150c196__w188_n36` and
+`logs/prusac-diagnostic-20260929/sana_n36_failure_diagnosis_receipt.md`.
+
+Correction: independent Sol review BLOCKED this unmeasured candidate; it does not
+produce an earlier launch. `planning_duration` is reverted to 5 and the misleading
+lifecycle test was removed.
+
+## 2026-10-03 — Sana Ivanjska joint-gateway candidate pre-edit plan
+
+Pre-edit authorization records one unmeasured, one-change Sana candidate based on
+retained n36 evidence (NO-GO): stage the disjoint 506th/517th Sanski axis at friendly
+Otoka and prepend hostile, adjacent Ivanjska before its existing unchanged contiguous
+Sanski/Ključ objective chain. The t175/Storm gates, `planning_duration: 5`, all rosters,
+and all other objectives/operations remain protected. Feasibility review found the
+existing axis-local roster and convergence logic can safely handle both axes targeting
+Ivanjska without duplicate brigades or scripted capture. No prefix, full suite, or
+188-week campaign is authorized; stop on an unexpected focused failure. Determinism
+impact intended: static catalog ordering only, with no new runtime ordering or control
+writer. Plan/evidence receipt: `logs/sana_ivanjska_joint_gateway_pre_edit_plan.md`.
+
+Implementation remains an **unmeasured candidate** and retained n36 remains
+**NO-GO**. Only the Sanski axis staging/objective data changed: friendly Otoka
+staging and hostile Ivanjska as the first objective, followed by the prior
+unchanged chain. The corrected candidate-focused regression passes 1/1 with an
+RBiH fixture holding both brigades at friendly Otoka and Ivanjska already
+captured by the sibling axis; both axes advance past that shared gateway while
+hostile Donji Dubovik is not flipped. This is post-capture convergence evidence
+only, not a hostile-battle, direct-flip, or production t175 pipeline claim.
+Typecheck and `git diff --check` exited 0. Candidate provenance and the test
+scope are recorded in `logs/prusac-diagnostic-20260929/sana_ivanjska_candidate_only_provenance.md`.
+No prefix, full suite, 188-week campaign, HVO/control/paint/reference/denominator
+change, direct flip, scripted victory, merge, or baseline adoption occurred.
+
+## 2026-10-03 — Sana n37 convergence boundary: STOP
+
+Change: Added the bounded pre-edit gate to `logs/prusac-diagnostic-20260929/sana_ivanjska_joint_validation_plan.md` and a STOP report for the n37 Sana t187–188 convergence question. A local, run-dependent characterization fixture was used for diagnosis only. No production source, catalog, control, denominator, battle-power, timing, or baseline data changed in this task.
+
+Calibration: No prefix, full suite, campaign, or new calibration run. The retained n37 final save reproduces 517th previous-objective drift: current objective Stari Majdan, retained and regenerated movement order Budimlić Japra, and no 517th attack order.
+
+Determinism: Fixture uses the retained n37 save and the deterministic operational contact graph; it does not mutate political control or formation location.
+
+Verification: Focused Vitest exit 0 (1 passed); TypeScript `--noEmit` exit 0; `git diff --check` exit 0. Evidence is summarized in `logs/prusac-diagnostic-20260929/sana_n37_convergence_report.md`, with raw check logs retained locally.
+
+Files: `logs/prusac-diagnostic-20260929/sana_ivanjska_joint_validation_plan.md` and `logs/prusac-diagnostic-20260929/sana_n37_convergence_report.md`. The local fixture and raw check logs rely on an ignored n37 run and are retained outside the tracked test suite. Remaining blocker: t187 pre-order selector inputs and lifecycle receipt are not retained, so no production retarget rule is justified.
+## 2026-10-03 — Sana n37 boundary 186-week diagnostic dispatched
+
+Change: Appended the bounded diagnostic addendum and created a one-time local helper. It dispatches exactly the approved
+186-week prefix with `--save-weeks 186`, duplicate-marker protection, raw
+stdout/stderr, and started/dispatch/exact-exit markers. No production code,
+tests, baseline, paint, controls, or denominators changed.
+
+Calibration: One helper was launched once; campaign completion is intentionally
+not awaited in-session. The question is the t187 pre-order 517th stale
+destination, with pass requiring exit 0, `save_w186.json`, input digest/initial
+save, and week186 control totals consistent with n37. No 188-week campaign was
+run or launched.
+
+Determinism: The diagnostic uses the fixed scenario and runner command and does
+not mutate authored controls or simulation source; output provenance remains
+pending the child exit marker.
+
+Verification: Cheap preflight passed with Node `v22.23.2`, required files,
+retained n37 focused exit 0, and all three intended markers absent. Launch
+markers were verified. Helper PID `108140`; child PID `76824`; dispatch UTC
+`2026-10-03T08:52:22.1852617Z`.
+
+Durable plan: `logs/prusac-diagnostic-20260929/sana_ivanjska_joint_validation_plan.md`. The one-time helper and runtime markers remain local evidence.
+
+## 2026-10-03 — Sana October calibration checkpoint closeout
+
+Documentation-only synchronization of the retained October checkpoint. n37's
+full suite and 188-week campaign both exit 0, but calibration is **NO-GO**:
+Petrovac t181, Ključ t185, Sanski Most town remains RS at w188, four Sana-belt
+gains occur at t184–187, Jajce is 3/5, and four n25 October matches are lost
+(Barevo, Lupnica, Majdan, Varošluk). Protected checkpoints remain retained and
+critical anomalies are zero.
+
+n38 is one exit-0 186-week prefix with the same consumed-input digest,
+initial-save hash, and week-186 totals as n37. Its `save_w186` is post-turn;
+lawful 517th route alternatives are present, but no selector bug is proven.
+The dirty diagnostic candidate is not an accepted baseline: no merge/adoption,
+production edit, or second 188-week campaign follows. The owner Farz ruling at
+the top of CALIBRATION_MASTER supersedes stale P-A wrong-corps wording.
+
+No production code, tests, data, runs, or Git stage/commit/push/delete changed.
+Exact helper exits and retained diagnosis/convergence receipts remain local
+evidence under `logs/prusac-diagnostic-20260929/`; no new report or process
+journal was created.

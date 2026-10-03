@@ -5,6 +5,7 @@ import { derivePrimarySectorForBrigades } from './corps_operation_helpers.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { isMainStaffOpRetentionEnabled } from './mainstaff_op_availability_gate.js';
 import { enterOperationRecovery } from './tactical_group_lifecycle.js';
+import { mayEliteJoinOperation } from './historical_elite_reservations.js';
 
 function buildSectorClaimsByBrigade(state: GameState): Map<FormationId, string[]> {
     const claims = new Map<FormationId, Set<string>>();
@@ -34,6 +35,8 @@ function uniqueActiveParticipants(
     state: GameState,
     corpsId: string,
     brigadeIds: ReadonlyArray<FormationId> | undefined,
+    operationName: string,
+    operationStartedTurn: number,
 ): FormationId[] {
     const seen = new Set<FormationId>();
     const formations = state.military.formations ?? {};
@@ -43,6 +46,7 @@ function uniqueActiveParticipants(
     for (const brigadeId of brigadeIds ?? []) {
         if (seen.has(brigadeId)) continue;
         seen.add(brigadeId);
+        if (!mayEliteJoinOperation(brigadeId, state.meta.turn, operationName, operationStartedTurn)) continue;
         const formation = formations[brigadeId];
         if (formation?.status !== 'active') continue;
 
@@ -85,13 +89,25 @@ function sameFormationIds(a: ReadonlyArray<FormationId>, b: ReadonlyArray<Format
 function reconcileOperationRoster(state: GameState, corpsId: string, operation: CorpsOperation): boolean {
     const previousParticipants = [...(operation.participating_brigades ?? [])];
     const previousPhase = operation.phase;
-    const activeParticipants = uniqueActiveParticipants(state, corpsId, operation.participating_brigades);
+    const activeParticipants = uniqueActiveParticipants(
+        state,
+        corpsId,
+        operation.participating_brigades,
+        operation.name,
+        operation.started_turn,
+    );
     const activeParticipantSet = new Set(activeParticipants);
     operation.participating_brigades = activeParticipants;
 
     if (Array.isArray(operation.axes)) {
         for (const axis of operation.axes) {
-            axis.assigned_brigades = uniqueActiveParticipants(state, corpsId, axis.assigned_brigades)
+            axis.assigned_brigades = uniqueActiveParticipants(
+                state,
+                corpsId,
+                axis.assigned_brigades,
+                operation.name,
+                operation.started_turn,
+            )
                 .filter((brigadeId) => activeParticipantSet.has(brigadeId));
         }
     }

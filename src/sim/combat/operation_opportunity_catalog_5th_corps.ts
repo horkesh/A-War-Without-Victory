@@ -119,23 +119,29 @@ const KRUPA_VALLEY_OBJECTIVES = [
 // Historical basis (ICTY / BB1 Ch.91-93): Ključ fell 17 Sep 1995 to the 5th
 // Corps 501st+510th advancing FROM Bosanski Petrovac (south), not from the
 // Sanski Most belt (2-3 hops via jelasinovci, used by the depleted 506th/517th).
-// Prior axis (sana_sanski_most_kljuc) retained only the Sanski-Most belt — the
-// 506th/517th continue to deliver sanica_2 there without needing these targets.
+// Candidate: preserve the n25-matching approach cells on a disjoint-roster
+// consolidation axis while the 501st+510th take the shorter Petrovac pursuit.
 const BIHAC_PETROVAC_OBJECTIVES = [
+    'op:bihac:ripac',
+    'op:bihac:racic',
+    'op:bosanski_petrovac:vrtoce',
+    'op:bosanski_petrovac:dobro_selo_2',
+    'op:bosanski_petrovac:bosanski_petrovac_2',
+    'op:bosanski_petrovac:kolonic_2',
+    'op:bosanski_petrovac:jasenovac_2',
+    // Ključ interior extension — Petrovac axis (1-hop from jasenovac_2):
+    'op:kljuc:hadzici',
+    'op:kljuc:kljuc_2',
+    'op:kljuc:krasulje_2',
+];
+
+const BIHAC_PETROVAC_APPROACH_OBJECTIVES = [
     'op:bihac:ripac',
     'op:bihac:racic',
     'op:bihac:orasac_2',
     'op:bosanski_petrovac:vrtoce',
     'op:bosanski_petrovac:prkosi',
     'op:bosanski_petrovac:vodjenica',
-    'op:bosanski_petrovac:kolonic_2',
-    'op:bosanski_petrovac:bosanski_petrovac_2',
-    'op:bosanski_petrovac:dobro_selo_2',
-    'op:bosanski_petrovac:jasenovac_2',
-    // Ključ interior extension — Petrovac axis (1-hop from jasenovac_2):
-    'op:kljuc:hadzici',
-    'op:kljuc:kljuc_2',
-    'op:kljuc:krasulje_2',
 ];
 
 // 2026-06-07: re-ordered into a single verified front-edge adjacency walk
@@ -170,6 +176,7 @@ const BIHAC_PETROVAC_OBJECTIVES = [
 // tempo actually reaches it first captures it; the other's copy is filtered
 // as friendly-controlled once taken (spawnCorpsOperationFromOpportunity).
 const SANSKI_KLJUC_OBJECTIVES = [
+    'op:bosanska_krupa:ivanjska_2',
     'op:bosanska_krupa:donji_dubovik_2',
     'op:sanski_most:budimlic_japra_2',
     'op:sanski_most:lusci_palanka_2',
@@ -216,15 +223,12 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
         axis_id: 'sana_krupa',
         name: 'Krupa Una Valley',
         corps: PRIMARY_CORPS,
-        // Wave 32 (2026-05-23): added 510th to bring axis to 3 brigades.
-        // Wave 31 SCRT (20260523_SANA_95_COMBAT_BALANCE.md): historical Sana 95
-        // ran 5-7 brigades per axis; sim's 2-3 per axis couldn't cross
-        // VICTORY_THRESHOLD_COSTLY despite favorable 1:8 cas ratio. Concentration
-        // is the missing element. 510th homed at Bos. Krupa (axis-correct).
+        // Ključ-first candidate: 503rd replaces the historically Petrovac-bound
+        // 510th on Krupa, preserving the Krupa axis's three-brigade mass.
         brigades: [
             'arbih_511th_slavna_mountain' as FormationId,
             'arbih_505th_vitezka_mountain' as FormationId,
-            'arbih_510th_bosnian_liberation' as FormationId,
+            'arbih_503rd_slavna_mountain' as FormationId,
         ],
         objectives: KRUPA_VALLEY_OBJECTIVES,
         staging_osid: STAGING_KRUPA_OTOKA,
@@ -233,17 +237,26 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
         axis_id: 'sana_bihac_petrovac',
         name: 'Bihać–Petrovac Corridor',
         corps: PRIMARY_CORPS,
-        // Wave 32: added 503rd + hvo_101st_bihac to bring axis to 5 brigades.
-        // Both are status=active, full personnel, located at op:bihac:* matching
-        // the staging_osid + first-objective adjacency.
+        // Ključ-first candidate: BB1 p.419 Petrovac pursuit roster is 501st +
+        // 510th. The remaining eligible Petrovac participants retain the
+        // matching approach cells on the separate axis below.
         brigades: [
             'arbih_501st_slavna_mountain' as FormationId,
+            'arbih_510th_bosnian_liberation' as FormationId,
+        ],
+        objectives: BIHAC_PETROVAC_OBJECTIVES,
+        staging_osid: STAGING_BIHAC,
+    },
+    {
+        axis_id: 'sana_bihac_petrovac_approach',
+        name: 'Bihać–Petrovac Approach Consolidation',
+        corps: PRIMARY_CORPS,
+        brigades: [
             'arbih_502nd_vitezka_mountain' as FormationId,
-            'arbih_503rd_slavna_mountain' as FormationId,
             'arbih_504th_cazin_light' as FormationId,
             'hvo_101st_bihac' as FormationId,
         ],
-        objectives: BIHAC_PETROVAC_OBJECTIVES,
+        objectives: BIHAC_PETROVAC_APPROACH_OBJECTIVES,
         staging_osid: STAGING_BIHAC,
     },
     {
@@ -261,12 +274,13 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
         // the initial Krupa (3) / Bihać-Petrovac (5) axes — 506th + 517th — so it
         // fights at full strength. 5th Corps holds exactly 10 line brigades; 8 are
         // on the two working axes (16/16), leaving 506th/517th free. The axis
-        // stages at ivanjska_2 and is front-edge-blocked
-        // (no_approach_osid) until the Krupa axis captures that cell — then it
-        // rolls down the verified contiguous adjacency walk (SANSKI_KLJUC_
-        // OBJECTIVES) without ever entering a recovery break, because it lives
-        // inside the one continuously-active Sana op. No global threshold, no
-        // combat math, and no corridor predicate touched. Historical mass: the
+        // candidate stages at friendly otoka_2 and opens on hostile ivanjska_2,
+        // which is also the Krupa axis's gateway objective. Once either axis
+        // captures that shared cell, the other advances through the verified
+        // contiguous adjacency walk (SANSKI_KLJUC_OBJECTIVES) without ever
+        // entering a recovery break, because it lives inside the one
+        // continuously-active Sana op. No global threshold, no combat math,
+        // and no corridor predicate touched. Historical mass: the
         // 5th Corps committed its operational groups en masse Sep-Oct 1995
         // (Ključ ~17 Sep, Sanski Most ~10 Oct; BB1 pp.417, 419-420).
         axis_id: 'sana_sanski_most_kljuc',
@@ -277,7 +291,8 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
             'arbih_517th_light' as FormationId,
         ],
         objectives: SANSKI_KLJUC_OBJECTIVES,
-        staging_osid: STAGING_IVANJSKA,
+        staging_osid: STAGING_KRUPA_OTOKA,
+        preserve_objective_sequence: true,
     },
 ];
 

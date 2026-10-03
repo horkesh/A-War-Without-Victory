@@ -1252,6 +1252,216 @@ describe('plan', () => {
         expect(result.plan!.source).toBe('opportunity');
     });
 
+    it.each([154, 160])('reserves the Mistral 1 roster from generic commander plans at t%d', (turn) => {
+        const zoneId = 'zone:hvo_tomislavgrad:0' as ZoneId;
+        const reservedIds = [
+            'hvo_1st_guard_abb',
+            'hv_4th_guards_split',
+            'hrhb_kralj_petar_kreimir_iv_brigade',
+            'F_HRHB_0001',
+            'hv_7th_hgr_1995',
+        ].map(id => id as FormationId);
+        const lineIds = ['hrhb_line_a', 'hrhb_line_b', 'hrhb_line_c'].map(id => id as FormationId);
+        const brigadeIds = [...reservedIds, ...lineIds];
+        const zones = [makeZone({
+            zone_id: zoneId,
+            corps_id: 'hvo_tomislavgrad' as FormationId,
+            faction: 'HRHB',
+            posture: 'projecting',
+            front_edge_count: 15,
+            surplus_brigades: brigadeIds,
+            assigned_brigades: brigadeIds,
+            enemy_adjacent_osids: ['op:glamoc:target'],
+        })];
+        const evals = brigadeIds.map((id, index) => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            fitness_offense: index < reservedIds.length ? 1 : 0.5,
+            is_combat_effective: true,
+            is_disrupted: false,
+            tier: 'main_effort',
+        }));
+        const formations = Object.fromEntries(brigadeIds.map(id => [id, {
+            id,
+            name: id,
+            kind: 'brigade',
+            status: 'active',
+            faction: 'HRHB',
+            corps_id: 'hvo_tomislavgrad',
+            personnel: 1500,
+            morale: 70,
+            cohesion: 70,
+        }]));
+        const briefing = makeMinimalBriefing({
+            corps_id: 'hvo_tomislavgrad' as FormationId,
+            faction: 'HRHB',
+            turn,
+            state_ref: {
+                meta: { turn },
+                military: { formations },
+            } as unknown as GameState,
+            campaign_offensive_targets: ['op:glamoc:target'],
+        });
+
+        const result = managePlan(briefing, zones, makeForces(evals, zones), evals, null, turn);
+
+        expect(result.action).toBe('created');
+        expect(result.plan?.source).toBe('opportunity');
+        expect(result.plan?.assigned_brigades).toEqual(lineIds);
+    });
+
+    it.each([153, 161])('does not reserve the Mistral 1 roster outside t154-160 at t%d', (turn) => {
+        const zoneId = 'zone:hvo_tomislavgrad:0' as ZoneId;
+        const reservedId = 'hvo_1st_guard_abb' as FormationId;
+        const lineIds = ['hrhb_line_a', 'hrhb_line_b', 'hrhb_line_c'].map(id => id as FormationId);
+        const brigadeIds = [reservedId, ...lineIds];
+        const zones = [makeZone({
+            zone_id: zoneId,
+            corps_id: 'hvo_tomislavgrad' as FormationId,
+            faction: 'HRHB',
+            posture: 'projecting',
+            front_edge_count: 15,
+            surplus_brigades: brigadeIds,
+            assigned_brigades: brigadeIds,
+            enemy_adjacent_osids: ['op:glamoc:target'],
+        })];
+        const evals = brigadeIds.map((id, index) => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            fitness_offense: index === 0 ? 1 : 0.5,
+            is_combat_effective: true,
+            is_disrupted: false,
+            tier: 'main_effort',
+        }));
+        const briefing = makeMinimalBriefing({
+            corps_id: 'hvo_tomislavgrad' as FormationId,
+            faction: 'HRHB',
+            turn,
+            state_ref: {
+                meta: { turn },
+                military: { formations: Object.fromEntries(brigadeIds.map(id => [id, {
+                    id,
+                    name: id,
+                    kind: 'brigade',
+                    status: 'active',
+                    faction: 'HRHB',
+                    corps_id: 'hvo_tomislavgrad',
+                    personnel: 1500,
+                }])) },
+            } as unknown as GameState,
+            campaign_offensive_targets: ['op:glamoc:target'],
+        });
+
+        const result = managePlan(briefing, zones, makeForces(evals, zones), evals, null, turn);
+
+        expect(result.plan?.assigned_brigades).toContain(reservedId);
+    });
+
+    it('excludes the Mistral 1 roster from a generic pre-planned commander operation at t154', () => {
+        const turn = 154;
+        const zoneId = 'zone:hvo_tomislavgrad:0' as ZoneId;
+        const reservedId = 'hvo_1st_guard_abb' as FormationId;
+        const lineIds = ['hrhb_line_a', 'hrhb_line_b', 'hrhb_line_c'].map(id => id as FormationId);
+        const brigadeIds = [reservedId, ...lineIds];
+        const zones = [makeZone({
+            zone_id: zoneId,
+            corps_id: 'hvo_tomislavgrad' as FormationId,
+            faction: 'HRHB',
+            posture: 'projecting',
+            front_edge_count: 15,
+            surplus_brigades: brigadeIds,
+            assigned_brigades: brigadeIds,
+        })];
+        const evals = brigadeIds.map((id, index) => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            fitness_offense: index === 0 ? 1 : 0.5,
+            is_combat_effective: true,
+            is_disrupted: false,
+            tier: 'main_effort',
+        }));
+        const briefing = makeMinimalBriefing({
+            corps_id: 'hvo_tomislavgrad' as FormationId,
+            faction: 'HRHB',
+            turn,
+            pre_planned_ops: [{ name: 'Generic June Offensive', target_osids: ['op:glamoc:target'] }],
+        });
+
+        const result = managePlan(briefing, zones, makeForces(evals, zones), evals, null, turn);
+
+        expect(result.plan?.source).toBe('pre_planned');
+        expect(result.plan?.assigned_brigades).toEqual(lineIds);
+    });
+
+    it('lets a pre-planned Operation Mistral 1 claim a reserved participant at t160', () => {
+        const turn = 160;
+        const zoneId = 'zone:hvo_tomislavgrad:0' as ZoneId;
+        const reservedId = 'hvo_1st_guard_abb' as FormationId;
+        const brigadeIds = [reservedId, 'hrhb_line_a', 'hrhb_line_b'].map(id => id as FormationId);
+        const zones = [makeZone({
+            zone_id: zoneId,
+            corps_id: 'hvo_tomislavgrad' as FormationId,
+            faction: 'HRHB',
+            posture: 'projecting',
+            front_edge_count: 15,
+            surplus_brigades: brigadeIds,
+            assigned_brigades: brigadeIds,
+        })];
+        const evals = brigadeIds.map((id, index) => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            fitness_offense: index === 0 ? 1 : 0.5,
+            is_combat_effective: true,
+            is_disrupted: false,
+            tier: 'main_effort',
+        }));
+        const briefing = makeMinimalBriefing({
+            corps_id: 'hvo_tomislavgrad' as FormationId,
+            faction: 'HRHB',
+            turn,
+            pre_planned_ops: [{ name: 'Operation Mistral 1', target_osids: ['op:glamoc:target'] }],
+        });
+
+        const result = managePlan(briefing, zones, makeForces(evals, zones), evals, null, turn);
+
+        expect(result.plan?.source).toBe('pre_planned');
+        expect(result.plan?.assigned_brigades).toContain(reservedId);
+    });
+
+    it('does not require state_ref.military to apply generic reservation filtering', () => {
+        const turn = 154;
+        const zoneId = 'zone:hvo_tomislavgrad:0' as ZoneId;
+        const brigadeIds = ['hrhb_line_a', 'hrhb_line_b', 'hrhb_line_c'].map(id => id as FormationId);
+        const zones = [makeZone({
+            zone_id: zoneId,
+            corps_id: 'hvo_tomislavgrad' as FormationId,
+            faction: 'HRHB',
+            posture: 'projecting',
+            front_edge_count: 15,
+            surplus_brigades: brigadeIds,
+            assigned_brigades: brigadeIds,
+            enemy_adjacent_osids: ['op:glamoc:target'],
+        })];
+        const evals = brigadeIds.map(id => makeEval({
+            brigade_id: id,
+            current_zone: zoneId,
+            is_combat_effective: true,
+            is_disrupted: false,
+            tier: 'main_effort',
+        }));
+        const briefing = makeMinimalBriefing({
+            corps_id: 'hvo_tomislavgrad' as FormationId,
+            faction: 'HRHB',
+            turn,
+            state_ref: {} as GameState,
+            campaign_offensive_targets: ['op:glamoc:target'],
+        });
+
+        const result = managePlan(briefing, zones, makeForces(evals, zones), evals, null, turn);
+
+        expect(result.plan?.source).toBe('opportunity');
+    });
+
     it('prefers projecting zone over balanced zone when both have surplus', () => {
         // Task 5: projecting should always be chosen first
         const projectingId = 'zone:test_corps:0' as ZoneId;

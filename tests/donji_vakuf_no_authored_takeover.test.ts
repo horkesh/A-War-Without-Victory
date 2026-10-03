@@ -196,29 +196,31 @@ describe('Donji Vakuf 1992 — initial control is not repainted to bypass the ac
 describe('Operation Donji Vakuf — ordinary combat configuration stays bounded', () => {
     const op = ALL_PRE_PLANNED.find((candidate) => candidate.name === 'Operation Donji Vakuf');
     const sweep = op?.axes?.find((axis) => axis.axis_id === 'donji_vakuf_sweep');
-    const prusac = op?.axes?.find((axis) => axis.axis_id === 'prusac_local');
+    const pocket = op?.axes?.find((axis) => axis.axis_id === 'vlasic_pocket');
 
-    it('keeps Prusac and Jemanlići inside the existing operation on a local parallel axis', () => {
+    it('keeps the current two-axis operation bounded and excludes Prusac from authorship', () => {
         expect(op, 'Operation Donji Vakuf must exist').toBeTruthy();
         expect(op!.corps).toBe('vrs_1st_krajina');
         expect(op!.faction).toBe('RS');
-        expect(op!.axes.length).toBe(3);
+        expect(op!.axes.length).toBe(2);
         expect(sweep, 'the donji_vakuf_sweep axis must exist').toBeTruthy();
-        expect(prusac, 'the prusac_local axis must exist').toBeTruthy();
-        expect(prusac).toMatchObject({
-            brigades: ['rs_19th_krajina_light_infantry', 'rs_31st_light_infantry'],
-            objectives: [PRUSAC, JEMANLICI],
-            staging_osid: 'op:donji_vakuf:pribraca_2',
+        expect(pocket, 'the vlasic_pocket axis must exist').toBeTruthy();
+        expect(pocket).toMatchObject({
+            brigades: ['rs_1st_banja_luka_light_infantry', 'rs_43rd_prijedor_motorized'],
+            objectives: ['op:travnik:gornje_krcevine'],
+            staging_osid: 'op:travnik:varosluk',
         });
+        expect(op!.axes.flatMap((axis) => axis.objectives)).not.toContain(PRUSAC);
     });
 
-    it('preserves every objective and brigade exactly once while the main sweep ends at Korenici', () => {
+    it('preserves every objective and brigade exactly once while the main sweep continues through Jemanlići', () => {
         expect(sweep!.objectives).toEqual([
             'op:donji_vakuf:torlakovac_2',
             'op:donji_vakuf:babin_potok_2',
             'op:donji_vakuf:oborci_2',
             TOWN,
             KORENICI,
+            JEMANLICI,
         ]);
         expect(sweep!.brigades).toEqual([
             'rs_22nd_krajina_infantry',
@@ -228,18 +230,18 @@ describe('Operation Donji Vakuf — ordinary combat configuration stays bounded'
 
         const objectiveOccurrences = op!.axes.flatMap((axis) => axis.objectives);
         const brigadeOccurrences = op!.axes.flatMap((axis) => axis.brigades);
-        expect(objectiveOccurrences).toHaveLength(8);
-        expect(new Set(objectiveOccurrences).size).toBe(8);
-        expect(objectiveOccurrences).toContain(PRUSAC);
+        expect(objectiveOccurrences).toHaveLength(7);
+        expect(new Set(objectiveOccurrences).size).toBe(7);
+        expect(objectiveOccurrences).not.toContain(PRUSAC);
         expect(objectiveOccurrences).toContain(JEMANLICI);
-        expect(brigadeOccurrences).toHaveLength(7);
-        expect(new Set(brigadeOccurrences).size).toBe(7);
+        expect(brigadeOccurrences).toHaveLength(5);
+        expect(new Set(brigadeOccurrences).size).toBe(5);
     });
 
     it('preserves operation-level combat inputs and gives each combat axis its authored staging', () => {
         expect(op!.staging_osid).toBe('op:sipovo:pribeljci_2');
         expect(sweep!.staging_osid).toBe('op:sipovo:pribeljci_2');
-        expect(prusac!.staging_osid).toBe('op:donji_vakuf:pribraca_2');
+        expect(pocket!.staging_osid).toBe('op:travnik:varosluk');
         expect(op!.execution_attack_power_mult).toBe(1.65);
         expect(op!.planning_duration).toBe(7);
         expect(op!.prestage_from).toBe(21);

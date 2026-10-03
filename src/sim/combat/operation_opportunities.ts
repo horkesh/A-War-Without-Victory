@@ -82,6 +82,10 @@ import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants
 import { buildCorpsOperation, findBrigadeLiveOperationAnywhere } from './corps_operation_helpers.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { isMainStaffOpAvailabilityEnabled } from './mainstaff_op_availability_gate.js';
+import {
+    isEliteAuthoredForHistoricalOperation,
+    isEliteReservedForHistoricalOperation,
+} from './historical_elite_reservations.js';
 import { isReasonCodeTopicEnabled, whenReasonCodeTopic } from './reason_code_debug.js';
 import { resolveOperationFormation } from './operation_formation_resolver.js';
 import type { Osid } from './osid_adjacency.js';
@@ -167,6 +171,8 @@ export interface OpportunityAxisDef {
     readonly objectives: readonly string[];
     /** Optional per-axis staging override (otherwise the opportunity-level staging is used). */
     readonly staging_osid?: string;
+    /** Preserve this authored axis sequence during planning and approach selection. */
+    readonly preserve_objective_sequence?: boolean;
 }
 
 /**
@@ -1265,6 +1271,8 @@ function spawnCorpsOperationFromOpportunity(
             state,
             axis,
             commitment,
+            def.name,
+            turn,
             adjacency,
             axisLoans,
             participantEvaluations,
@@ -1312,6 +1320,7 @@ function spawnCorpsOperationFromOpportunity(
             movement_only_execution_turns: 0,
             idle_execution_turn_streak: 0,
             ...(axis.staging_osid ? { staging_osid: axis.staging_osid } : {}),
+            ...(axis.preserve_objective_sequence === true ? { preserve_objective_sequence: true } : {}),
         });
         for (const b of brigadesForAxis) allParticipating.push(b);
         for (const loan of axisLoans) eliteLoans.push(loan);
@@ -1428,6 +1437,8 @@ function selectEligibleOpportunityParticipants(
     state: GameState,
     axis: OpportunityAxisDef,
     commitment: 'minimum' | 'standard' | 'reinforced',
+    operationName: string,
+    turn: number,
     adjacency?: Map<Osid, Osid[]>,
     eliteLoansOut?: Array<{ brigadeId: FormationId; corpsId: string }>,
     evaluationsOut?: OperationParticipantEvaluation[],
@@ -1537,7 +1548,10 @@ function selectEligibleOpportunityParticipants(
             record('rejected', 'disrupted');
             continue;
         }
-        if (movementStatus === 'in_transit') {
+        const exactReservedTransitAdmission = movementStatus === 'in_transit'
+            && isEliteReservedForHistoricalOperation(brigadeId, turn)
+            && isEliteAuthoredForHistoricalOperation(brigadeId, operationName);
+        if (movementStatus === 'in_transit' && !exactReservedTransitAdmission) {
             record('rejected', 'in_transit');
             continue;
         }

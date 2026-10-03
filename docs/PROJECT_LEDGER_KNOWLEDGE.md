@@ -1,3 +1,13 @@
+## 2026-10-03 - A selected-save boundary is not a pre-turn decision receipt
+
+When a retained prefix is saved after turn execution, matching its consumed-input
+digest, initial-save hash, and control totals proves provenance and boundary
+reproducibility, not the unique selector decision that produced the next order.
+Use the post-turn artifact to enumerate lawful route alternatives and to reject
+unsupported bug claims; require a retained pre-order state or explicit decision
+receipt before changing a selector or order-lifecycle rule. Applied in the
+[Sana October checkpoint closeout](PROJECT_LEDGER.md#2026-10-03--sana-october-calibration-checkpoint-closeout).
+
 ## 2026-09-02 - Calibration must preserve causal ownership, not merely painted control
 
 **A correct endpoint produced by the wrong mechanism is still a defect.** April 1994 initially
@@ -1565,7 +1575,8 @@ Use this doc to find decisions, patterns, and rationale by topic. For full chang
 8. **[2026-03-18] Operations are corps-level â€” brigades from entire corps pool**
    Do instead: Operations launch from `generateCorpsDirectives` via `evaluateCorpsOffensiveLaunch`. Corps-wide brigade pool: all active subordinates with persâ‰¥400, not disrupted, sorted by equipment priority. Contiguity seeded from ALL corps sectors' friendly OSIDs. `MAX_PARTICIPATING_BRIGADES=12`. Old catalog-based `generateCorpsOperationOrders` disabled. Probes remain sector-scoped (small recon actions). Per-sector cluster expansion and `computeReinforcementPool` REMOVED (n915).
 9. **[2026-03-08] Player operations support multi-axis advance with per-axis staging**
-   Do instead: OpsPlanningModal exposes the engine's existing `CorpsOperation.axes` system to the player. Each axis has independent brigade assignment, ordered objective chain, and optional staging OSID. Single-axis operations omit the `axes` payload for backward compatibility. IPC: `stage-corps-operation-order` in `electron-main.cjs`. Force-ratio preview aggregates enemy formations per objective OSID for planning intelligence.
+
+    Do instead: OpsPlanningModal exposes the engine's existing `CorpsOperation.axes` system to the player. Each axis has independent brigade assignment, ordered objective chain, and optional staging OSID. Single-axis operations omit the `axes` payload for backward compatibility. IPC: `stage-corps-operation-order` in `electron-main.cjs`. Force-ratio preview aggregates enemy formations per objective OSID for planning intelligence.
 10. **[2026-03-08] Frontline attrition uses corps_front_sectors, not legacy brigade_front_assignment**
    Do instead: Build `brigadeSector` lookup from `sector.assigned_brigade_ids` across `state.corps_front_sectors`. A brigade takes passive attrition if it appears in any sector's assigned list (location-validated by `classifyBrigadesByTerritory()`). Reserves exempt. Density from `sector.assigned_brigade_ids.length / sector.length_edges`. `isColdFront()` uses structured `CorpsFrontSector` data (faction, opposing_factions, sub_segments) â€” no legacy front_id string parsing. Key design decision: `assigned_brigade_ids` (all brigades in sector territory) not `sub_segments[].friendly_osids` (border-adjacent only â€” too narrow, dropped casualties ~50%). n366 = 88.2%.
 11. **[2026-03-08] Sector classification: front/reserve/deep-rear three-tier system**
@@ -5226,3 +5237,49 @@ Owner direction recorded in the calibration record: **later territorial outcomes
 correction** — without waiving determinism, valid state, legal movement/capture, population accounting,
 political permissions or command ownership. Evidence should live in the repo (`logs/<lane>/` for raw
 patches/logs plus a compact record), not only in chat or `%TEMP%`.
+
+## 2026-09-28 - Operation identity and axis execution are separate contracts
+
+An authored operation can carry a canonical operation-level `staging_osid` that
+differs from the executing axis's `staging_osid`. Identity gates must use the
+catalog/live operation field, while order admission must resolve the brigade's
+executing axis and its current objective; accepting any authored future axis
+objective can reopen a broader COHA bypass. Resolver-level suppression receipts
+are aggregate, so scenario diagnostics must scope lifecycle-paused interpretation
+to suppressed participants of the operation being diagnosed rather than applying
+one global reason to every active operation. Evidence: the retained n7
+`Operation Vlasic Ridge` save and `logs/vlasic-march-timing-20260928/opencode_coha_exception_impl_result.md`.
+
+## 2026-09-30 — Ključ-first catalog candidates must separate pursuit from coverage
+
+The source-grounded Petrovac→Ključ shortcut can preserve previously matching
+approach cells only by giving them a legal adjacent authored flank axis with a
+disjoint brigade roster. A roster swap alone is insufficient evidence: the
+focused retained-style admission fixture must prove unique ownership and show
+which authored participants are actually admitted. The candidate route's
+8/8 contact-graph edges and 501st/510th Petrovac allocation are covered by
+`october_kljuc_first_candidate_result.md`; no campaign result is implied.
+
+## 2026-10-01 — Planning reconciliation is contact-state driven, not staging driven
+
+`reconcilePlanningObjectives` selects the first objective with a lawful friendly approach in the live contact/controller state. It does not read brigade locations or `staging_osid` from its inputs. In the bounded Sana fixture, the real graph edge `jasenovac_2 -> hadzici` is supplied as live in a bounded synthetic state and therefore prunes the preceding Sanski prefix, while changing Bihać staging to Otoka leaves the selector unchanged. Movement receipts can establish an earlier trajectory difference, but without the serialized planning-boundary contact state they cannot by themselves attribute the selector result to Otoka or prove that edge was the retained t175 front edge.
+
+The later one-prefix n30 replay serialized that missing boundary state. At t176,
+the **actual** first lawful approach was HRHB Prekaja across a bidirectional live edge with RS
+Hadžići; the 11 preceding Sanski-axis objectives had no approach and were
+pruned. Operacija Kamen's ordinary HRHB capture of Prekaja at t175 supplied
+this contact. The prior Jasenovac fixture remains a synthetic selector example,
+not the measured edge. The replay's first 177 weekly reports matched n30
+exactly. This does not establish why Kamen differed upstream or prove that
+Otoka staging alone caused it. Receipt: `sana_boundary_177w_result.md`.
+
+## 2026-10-02 — Flagged no-approach axes may stage lawfully without attacking through
+
+Unmeasured candidate pending real transit: when a sequence-preserving operation axis has no friendly approach to its current
+objective, a hostile authored staging cell does not justify attacking an off-axis
+intermediate. Prefer the exact staging OSID when friendly and reachable; otherwise
+inspect only its deterministic tactical/static neighbors, filter them to friendly
+control, and path to one through the existing friendly-only route. If none is
+reachable, hold. This preserves objective sequence and control authority while
+allowing lawful forward staging. This remains an unmeasured candidate pending real
+transit. Evidence: `sana_axis_staging_neighbor_*`.

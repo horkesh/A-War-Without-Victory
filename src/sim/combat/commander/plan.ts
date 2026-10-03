@@ -59,6 +59,10 @@ import { BESIEGED_SURPLUS_HOP_LIMIT } from './allocate.js';
 import { CRITICAL_MORALE_THRESHOLD } from '../combat_math.js';
 import { MAX_EXHAUSTION_FOR_OPERATION } from '../bot_constants.js';
 import {
+    isEliteAuthoredForHistoricalOperation,
+    isEliteReservedForHistoricalOperation,
+} from '../historical_elite_reservations.js';
+import {
     buildCorpsOperationReadinessInputSnapshot,
     computeCorpsOperationReadiness,
 } from '../corps_operation_readiness.js';
@@ -1249,7 +1253,7 @@ function tryCreateFromPrePlanned(
     }
 
     // Assign brigades from surplus pool (sorted by offensive fitness)
-    const assignedBrigades = selectBrigadesForPlan(surplusPool, requiredBrigades);
+    const assignedBrigades = selectBrigadesForPlan(surplusPool, requiredBrigades, turn, opName);
 
     // Pre-planned ops are designed to execute AFTER concentration, not from current positions.
     // Reachability is enforced in emit.ts (buildAxesFromDef) at execution time when brigades
@@ -1407,7 +1411,7 @@ function createOpportunityPlan(
         return null;
     }
 
-    const assignedBrigades = selectBrigadesForPlan(reachableSurplus, requiredBrigades);
+    const assignedBrigades = selectBrigadesForPlan(reachableSurplus, requiredBrigades, turn);
 
     // Verify objectives are reachable from the selected (already-filtered) brigades.
     const reachableEnemyOsids = filterReachableObjectives(
@@ -1560,7 +1564,9 @@ export function isBoundedIsolatedEnemyPosition(
 
     // A cluster touching its defender's patron state has an exterior relief route,
     // even if its in-country ring is entirely controlled by the attacker.
-    const patronStates = DEFENDER_PATRON_BORDER_STATES[targetController as FactionId] ?? [];
+    const patronStates = targetController === 'HRHB' || targetController === 'RS' || targetController === 'RBiH'
+        ? DEFENDER_PATRON_BORDER_STATES[targetController]
+        : [];
     for (const member of [...cluster].sort(strictCompare)) {
         if ((OSID_EXTERIOR_BORDER_BY_OSID[member] ?? []).some((state) => patronStates.includes(state))) {
             return false;
@@ -2013,9 +2019,14 @@ function countBrigadesInZone(
 function selectBrigadesForPlan(
     surplusPool: readonly BrigadeEvaluation[],
     count: number,
+    turn: number,
+    operationName?: string,
 ): FormationId[] {
     const sorted = [...surplusPool]
         .filter(ev => ev.is_combat_effective && !ev.is_disrupted && ev.morale > CRITICAL_MORALE_THRESHOLD)
+        .filter((ev) => !isEliteReservedForHistoricalOperation(ev.brigade_id, turn)
+            || (operationName != null
+                && isEliteAuthoredForHistoricalOperation(ev.brigade_id, operationName)))
         .sort((a, b) => {
             const fitDiff = b.fitness_offense - a.fitness_offense;
             if (fitDiff !== 0) return fitDiff;

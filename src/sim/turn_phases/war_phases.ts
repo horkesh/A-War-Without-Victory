@@ -83,6 +83,7 @@ import { migratePoliticalControllersToOsidIfNeeded } from '../../state/political
 import { updateSarajevoState, refreshSarajevoLifelineCache } from '../../state/sarajevo_exception.js';
 import { updateSustainability } from '../../state/sustainability.js';
 import { updateLossOfControlTrends } from '../../state/loss_of_control_trends.js';
+import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { calculateFactionProductionBonus, ensureProductionFacilities } from '../../state/production_facilities.js';
 import { computeSupplyReachability } from '../../state/supply_reachability.js';
 import { computeSupplyReachabilityOsid, type SupplyReachabilityOsidReport } from '../../state/supply_reachability_osid.js';
@@ -4428,19 +4429,8 @@ export function recallDriftedBrigades(state: GameState, adjacency?: Map<string, 
     const pc = (state.political.political_controllers ?? {}) as Record<string, string>;
     const moveOrders = state.military.brigade_movement_orders ??= {};
 
-    for (const [fid, order] of Object.entries(moveOrders)) {
-        const formation = formations[fid];
-        const dest = order?.destination_sids?.[0];
-        if (!formation || !dest || !formation.faction) continue;
-        const controller = pc[dest];
-        if (controller != null && controller !== formation.faction) {
-            delete moveOrders[fid];
-        }
-    }
-
-    if (!adjacency || adjacency.size === 0) return;
-
-    // Build set of brigades in active operations
+    // Operation-backed movement has higher precedence than drift cleanup. Build this
+    // before validating destinations because column movement runs next turn.
     const inOp = new Set<string>();
     const corpsCmd = state.military.corps_command ?? {};
     for (const cmd of Object.values(corpsCmd)) {
@@ -4453,6 +4443,22 @@ export function recallDriftedBrigades(state: GameState, adjacency?: Map<string, 
             }
         }
     }
+
+    for (const [fid, order] of Object.entries(moveOrders)) {
+        const formation = formations[fid];
+        const dest = order?.destination_sids?.[0];
+        if (!formation || !dest || !formation.faction) continue;
+        const controller = pc[dest];
+        const preservesAlliedOperationMarch = controller != null
+            && controller !== formation.faction
+            && inOp.has(fid)
+            && isFriendlyFaction(controller, formation.faction, state);
+        if (controller != null && controller !== formation.faction && !preservesAlliedOperationMarch) {
+            delete moveOrders[fid];
+        }
+    }
+
+    if (!adjacency || adjacency.size === 0) return;
 
     const adj = adjacency;
 

@@ -1604,6 +1604,47 @@ describe('elite loan per-turn reconciliation and tick', () => {
         expect(activeOp.axes?.[1]?.assigned_brigades).toEqual(['rs_1st_guards']);
     });
 
+    it.each([
+        { turn: 154, brigadeId: 'hv_4th_guards_split', operationName: 'Generic June Offensive', joined: false },
+        { turn: 160, brigadeId: 'hv_4th_guards_split', operationName: 'Operation Mistral 1', joined: true },
+        { turn: 113, brigadeId: 'rs_1st_guards_motorized', operationName: 'Operation Zvezda 94', joined: true },
+    ])('$operationName auto-join joined=$joined at t$turn', ({ turn, brigadeId, operationName, joined }) => {
+        const brigade = makeOnLoanBrigade(brigadeId, { loanStartTurn: turn - 1 });
+        const state = makeState({
+            formations: { [brigadeId]: brigade },
+            corps_command: {
+                vrs_drina: {
+                    active_operations: [{
+                        name: operationName,
+                        phase: 'execution',
+                        participating_brigades: ['rs_line_1'],
+                        axes: [{
+                            axis_id: 'axis:a',
+                            assigned_brigades: ['rs_line_1'],
+                            objectives: ['enemy_a'],
+                            current_objective_index: 0,
+                            status: 'executing',
+                            failure_count: 0,
+                            consecutive_failures_on_current: 0,
+                            momentum: 0,
+                            attack_attempt_count: 0,
+                            objective_capture_count: 0,
+                            movement_only_execution_turns: 0,
+                            idle_execution_turn_streak: 0,
+                        }],
+                    }],
+                },
+            },
+            turn,
+        });
+
+        generateArmyReserveRequests(state);
+
+        const op = state.military.corps_command!.vrs_drina.active_operations[0]!;
+        expect(op.participating_brigades.includes(brigadeId)).toBe(joined);
+        expect(op.axes?.[0]?.assigned_brigades.includes(brigadeId)).toBe(joined);
+    });
+
     it('does not auto-join a second operation when the live loan is already committed', () => {
         const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: 0 });
         const operation = (name: string, assignedBrigades: string[]) => ({

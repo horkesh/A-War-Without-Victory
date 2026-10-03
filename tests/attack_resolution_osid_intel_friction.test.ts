@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { resolveAttackOrdersOsid } from '../src/sim/combat/attack_resolution_osid.js';
+import { updateSectorOffensiveResults } from '../src/sim/combat/sector_offensive.js';
 import {
     getIntelAmbushDefenderCasualtyMult,
     getIntelAmbushAttackerCasualtyMult,
@@ -301,6 +302,121 @@ describe('attack resolution intel execution friction', () => {
         expect(aloneBattle).toBeDefined();
         expect(togetherBattle).toBeDefined();
         expect(togetherBattle!.power_ratio).toBeGreaterThan(aloneBattle!.power_ratio * 1.3);
+    });
+
+    it('aggregates hostile Ivanjska gateway attacks from disjoint Krupa and Sanski axes', () => {
+        const otoka = 'op:bosanska_krupa:otoka_2';
+        const ivanjska = 'op:bosanska_krupa:ivanjska_2';
+        const donjiDubovik = 'op:bosanska_krupa:donji_dubovik_2';
+        const krupaBrigadeId = 'brig_rbih_krupa';
+        const sanskiBrigadeId = 'brig_rbih_sanski';
+        const defenderId = 'brig_rs_ivanjska';
+        const operation = {
+            name: 'Sana Ivanjska gateway evidence',
+            type: 'sector_attack',
+            phase: 'execution',
+            started_turn: 180,
+            phase_started_turn: 180,
+            participating_brigades: [krupaBrigadeId, sanskiBrigadeId],
+            objectives: [ivanjska, donjiDubovik],
+            current_objective_index: 0,
+            objective_capture_count: 0,
+            attack_attempt_count: 1,
+            axes: [
+                {
+                    axis_id: 'sana_krupa',
+                    status: 'executing',
+                    assigned_brigades: [krupaBrigadeId],
+                    objectives: [ivanjska, donjiDubovik],
+                    current_objective_index: 0,
+                    attack_attempt_count: 1,
+                },
+                {
+                    axis_id: 'sana_sanski_most_kljuc',
+                    status: 'executing',
+                    assigned_brigades: [sanskiBrigadeId],
+                    objectives: [ivanjska, donjiDubovik],
+                    current_objective_index: 0,
+                    attack_attempt_count: 1,
+                },
+            ],
+        } as unknown as CorpsOperation;
+        const state = {
+            meta: {
+                turn: 180,
+                phase: 'war',
+                seed: 'sana-ivanjska-hostile-gateway',
+            },
+            factions: [{ id: 'RBiH' }, { id: 'RS' }],
+            political: {
+                political_controllers: {
+                    [otoka]: 'RBiH',
+                    [ivanjska]: 'RS',
+                    [donjiDubovik]: 'RS',
+                },
+                control_events: [],
+            },
+            military: {
+                formations: {
+                    rbih_corps: makeFormation('rbih_corps', 'RBiH', 'corps', otoka),
+                    [krupaBrigadeId]: makeFormation(krupaBrigadeId, 'RBiH', 'brigade', otoka, {
+                        corps_id: 'rbih_corps',
+                    }),
+                    [sanskiBrigadeId]: makeFormation(sanskiBrigadeId, 'RBiH', 'brigade', otoka, {
+                        corps_id: 'rbih_corps',
+                    }),
+                    [defenderId]: makeFormation(defenderId, 'RS', 'brigade', ivanjska, {
+                        corps_id: 'rs_corps',
+                        personnel: 300,
+                        cohesion: 20,
+                        morale: 20,
+                    }),
+                    rs_corps: makeFormation('rs_corps', 'RS', 'corps', donjiDubovik),
+                },
+                corps_command: {
+                    rbih_corps: {
+                        active_operations: [operation],
+                    },
+                },
+                brigade_attack_orders: {
+                    [krupaBrigadeId]: ivanjska,
+                    [sanskiBrigadeId]: ivanjska,
+                },
+                casualty_ledger: initializeCasualtyLedger(['RBiH', 'RS']),
+            },
+            displacement: {},
+        } as unknown as GameState;
+        const edges: EdgeRecord[] = [
+            { edge_id: 'otoka-ivanjska', a: otoka, b: ivanjska } as EdgeRecord,
+            { edge_id: 'ivanjska-donji-dubovik', a: ivanjska, b: donjiDubovik } as EdgeRecord,
+        ];
+
+        // Orders are supplied directly because this test covers resolver aggregation,
+        // not the separate operation order-generation path.
+        const report = resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+        const ivanjskaBattles = report.battles.filter((battle) => battle.target_osid === ivanjska);
+        expect(ivanjskaBattles).toHaveLength(1);
+        expect(ivanjskaBattles[0]!.attacker_brigades).toEqual([krupaBrigadeId, sanskiBrigadeId].sort());
+        expect(ivanjskaBattles[0]!.attacker_faction).toBe('RBiH');
+        expect(ivanjskaBattles[0]!.defender_faction).toBe('RS');
+
+        const controlEvents = state.political.control_events ?? [];
+        expect(report.flips_applied).toBe(1);
+        expect(controlEvents).toHaveLength(1);
+        expect(controlEvents.filter((event) =>
+            event.settlement_id === ivanjska
+            && event.mechanism === 'combat'
+            && event.from === 'RS'
+            && event.to === 'RBiH',
+        )).toHaveLength(1);
+        expect(state.political.political_controllers![ivanjska]).toBe('RBiH');
+
+        updateSectorOffensiveResults(state);
+        expect(operation.axes![0]!.current_objective_index).toBe(1);
+        expect(operation.axes![1]!.current_objective_index).toBe(1);
+        expect(operation.axes![0]!.objectives[operation.axes![0]!.current_objective_index]).toBe(donjiDubovik);
+        expect(operation.axes![1]!.objectives[operation.axes![1]!.current_objective_index]).toBe(donjiDubovik);
+        expect(state.political.political_controllers![donjiDubovik]).toBe('RS');
     });
 
     it('resolves attack orders across live war-front contacts outside the movement graph', () => {

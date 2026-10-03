@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import {
     computePlanningDuration,
     advanceSectorOffensives,
+    evaluateOperationProgress,
     evaluateSectorOffensiveLaunch,
     getMomentumAggressionBonus,
     getMomentumMinOutcome,
@@ -160,6 +161,105 @@ describe('pre-planned operations', () => {
                 `Operation "${op.name}" assigned to exempt corps "${op.corps}"`,
             ).toBe(false);
         }
+    });
+});
+
+describe('historical elite reservation enforcement', () => {
+    it.each([154, 155])('retains the existing Cincar commitment during the t%d overlap', (turn) => {
+        const state = makeMinimalState(turn, {
+            corps_1: { kind: 'corps' as any, personnel: 0, location_osid: undefined },
+            F_HRHB_0001: { corps_id: 'corps_1' as any },
+            line_brigade: { corps_id: 'corps_1' as any },
+        });
+        state.military.corps_command = {
+            corps_1: {
+                corps_exhaustion: 0,
+                active_operations: [{
+                    name: 'Operation Cincar / Kupres',
+                    type: 'sector_attack',
+                    phase: 'execution',
+                    started_turn: 132,
+                    phase_started_turn: turn,
+                    participating_brigades: ['F_HRHB_0001', 'line_brigade'],
+                    objectives: [],
+                    active_probe: {
+                        target_osid: 'op:enemy:probe',
+                        brigade_ids: ['F_HRHB_0001', 'line_brigade'],
+                        started_turn: 153,
+                        resolved: false,
+                    },
+                }],
+            },
+        } as any;
+
+        advanceSectorOffensives(state);
+
+        expect(state.military.corps_command!.corps_1.active_operations[0]!.participating_brigades)
+            .toContain('F_HRHB_0001');
+        expect(state.military.corps_command!.corps_1.active_operations[0]!.active_probe?.brigade_ids)
+            .toContain('F_HRHB_0001');
+    });
+
+    it('evicts a reserved Mistral 1 participant from a carried generic sector attack at t154', () => {
+        const state = makeMinimalState(154, {
+            corps_1: { kind: 'corps' as any, personnel: 0, location_osid: undefined },
+            hv_4th_guards_split: { corps_id: 'corps_1' as any },
+            line_brigade: { corps_id: 'corps_1' as any },
+        });
+        state.military.corps_command = {
+            corps_1: {
+                corps_exhaustion: 0,
+                active_operations: [{
+                    name: 'Generic June Offensive',
+                    type: 'sector_attack',
+                    phase: 'execution',
+                    started_turn: 153,
+                    phase_started_turn: 154,
+                    participating_brigades: ['hv_4th_guards_split', 'line_brigade'],
+                    objectives: [],
+                    active_probe: {
+                        target_osid: 'op:enemy:probe',
+                        brigade_ids: ['hv_4th_guards_split', 'line_brigade'],
+                        started_turn: 153,
+                        resolved: false,
+                    },
+                }],
+            },
+        } as any;
+
+        advanceSectorOffensives(state);
+
+        expect(state.military.corps_command!.corps_1.active_operations[0]!.participating_brigades)
+            .toEqual(['line_brigade']);
+        expect(state.military.corps_command!.corps_1.active_operations[0]!.active_probe?.brigade_ids)
+            .toEqual(['line_brigade']);
+    });
+
+    it('skips reserved Mistral 1 candidates when replacing a damaged generic-operation brigade', () => {
+        const state = makeMinimalState(154, {
+            corps_1: { kind: 'corps' as any, personnel: 0, location_osid: undefined },
+            damaged: { corps_id: 'corps_1' as any, personnel: 100 },
+            hv_4th_guards_split: { corps_id: 'corps_1' as any, personnel: 2500 },
+            z_line_replacement: { corps_id: 'corps_1' as any, personnel: 2500 },
+        });
+        state.military.corps_command = {
+            corps_1: {
+                active_operations: [{
+                    name: 'Generic General Offensive',
+                    type: 'general_offensive',
+                    phase: 'execution',
+                    started_turn: 154,
+                    phase_started_turn: 154,
+                    participating_brigades: ['damaged'],
+                    target_settlements: [],
+                }],
+            },
+        } as any;
+
+        evaluateOperationProgress(state, 'RS');
+
+        expect(state.military.corps_command!.corps_1.active_operations[0]!.participating_brigades)
+            .toEqual(['z_line_replacement']);
     });
 });
 

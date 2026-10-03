@@ -455,6 +455,58 @@ describe('estimateForceRatio', () => {
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('selectProbeBrigades', () => {
+    it('excludes a Mistral 1 reservation from a generic operation probe at t154', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 154;
+        state.military.formations = {
+            hv_4th_guards_split: makeFormation('hv_4th_guards_split', { equipment_class: 'mechanized' }),
+            line_brigade: makeFormation('line_brigade', { equipment_class: 'light_infantry' }),
+        };
+        const op = makeOperation({
+            name: 'Generic June Offensive',
+            participating_brigades: ['hv_4th_guards_split', 'line_brigade'],
+        });
+
+        expect(selectProbeBrigades(state, op)).toEqual(['line_brigade']);
+    });
+
+    it('lets Operation Mistral 1 use its reserved probe participant at t160', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 160;
+        state.military.formations = {
+            hv_4th_guards_split: makeFormation('hv_4th_guards_split', { equipment_class: 'mechanized' }),
+            line_brigade: makeFormation('line_brigade', { equipment_class: 'light_infantry' }),
+        };
+        const op = makeOperation({
+            name: 'Operation Mistral 1',
+            participating_brigades: ['hv_4th_guards_split', 'line_brigade'],
+        });
+
+        expect(selectProbeBrigades(state, op)).toContain('hv_4th_guards_split');
+    });
+
+    it('keeps the existing Cincar commitment eligible for a probe during the overlap', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 154;
+        state.military.formations = {
+            F_HRHB_0001: makeFormation('F_HRHB_0001', { equipment_class: 'mechanized' }),
+            line_brigade: makeFormation('line_brigade', { equipment_class: 'light_infantry' }),
+        };
+        const existingCincar = makeOperation({
+            name: 'Operation Cincar / Kupres',
+            started_turn: 132,
+            participating_brigades: ['F_HRHB_0001', 'line_brigade'],
+        });
+        const newCincar = makeOperation({
+            name: 'Operation Cincar / Kupres',
+            started_turn: 154,
+            participating_brigades: ['F_HRHB_0001', 'line_brigade'],
+        });
+
+        expect(selectProbeBrigades(state, existingCincar)).toContain('F_HRHB_0001');
+        expect(selectProbeBrigades(state, newCincar)).not.toContain('F_HRHB_0001');
+    });
+
     it('prefers mechanized/motorized over light infantry', () => {
         const state = makeMinimalState();
         state.military.formations = {

@@ -33,14 +33,21 @@ const STAGING_TRAVNIK = 'op:travnik:travnik_2';
 const STAGING_TURBE = 'op:travnik:turbe_2';
 const STAGING_CUKLE = 'op:travnik:cukle_2';
 
-// Wave 24C (2026-05-23): reordered for OSID-adjacency reachability per the
+// Wave 24C (2026-05-23): ordered for OSID-adjacency reachability per the
 // catalog-sweep audit (docs/40_reports/audits/20260523_CATALOG_ADJACENCY_SWEEP.md
-// §c-vlasic). gornje_krcevine has no baseline-HRHB/RBiH neighbor — axis aborts
-// at step 1 with 0 captures. paklarevo is adjacent to STAGING_TURBE, captures
-// expose varosluk, then varosluk exposes gornje_krcevine.
+// §c-vlasic). gornje_krcevine has no baseline-HRHB/RBiH neighbor, so starting
+// there would abort the axis at step 1 with 0 captures. paklarevo is adjacent to
+// STAGING_TURBE and is therefore the first target; its capture advances the axis
+// to gornje_krcevine.
+//
+// 2026-09-28 owner-approved scope correction (PROJECT_LEDGER.md "Owner approval
+// for March Vlašić objective scope"; 2026-09-02 Historian ruling
+// docs/PROJECT_LEDGER_ARCHIVE_2026Q3.md:8714-8781): removed `op:travnik:varosluk`
+// (Komar). Domet-1 (20-24 Mar 1995) took the Vlašić massif and stopped at
+// Sečevo/Kostolac (inside paklarevo) plus Vitovlje (inside gornje_krcevine);
+// Komar belongs to the September 1995 Donji Vakuf advance and is NOT re-homed here.
 const VLASIC_TRAVNIK_RIDGE_OBJECTIVES: readonly string[] = [
     'op:travnik:paklarevo',
-    'op:travnik:varosluk',
     'op:travnik:gornje_krcevine',
 ];
 
@@ -197,11 +204,12 @@ const VLASIC_AXES: readonly OpportunityAxisDef[] = [
 // javorani_2 t160 and knezevo_2 t161 each captured a cell painted RS at oct1995 (-3), and
 // donji_koricani t156 did the same at apr1995 (-1).
 //
-// DELIBERATELY NOT DONE HERE — 1995 calibration is a later lane. The ridge axis is still
-// MISTIMED (fires t157-t160; Domet-1 is ~w152), and op:travnik:varosluk/Komar belongs to the
-// SEPTEMBER 1995 Donji Vakuf advance (~w180), not to Domet-1 at all. The catalog currently
-// compresses two historically distinct operations into one mid-1995 window. Retiming and
-// splitting those is queued, not attempted in this change.
+// UPDATE 2026-09-28: the Komar misattribution is corrected — op:travnik:varosluk is no
+// longer an objective of the ridge axis (see VLASIC_TRAVNIK_RIDGE_OBJECTIVES above and
+// PROJECT_LEDGER.md "Owner approval for March Vlašić objective scope"). Re-homing Komar to
+// the SEPTEMBER 1995 Donji Vakuf advance (~w180) still is not done here. Retiming the ridge
+// axis to Domet-1 (~w152) is a separate candidate and is likewise not part of this change:
+// this change only narrows the March target set.
 //
 // donji_koricani carries one caveat: the Historian seat marked its wartime control NOT
 // ESTABLISHED. It is Croat-majority (5,088/5,566), painted RS at oct1995, and Federation
@@ -324,9 +332,9 @@ const KUPRES_GLAMOC_SHOULDER_AXES: readonly OpportunityAxisDef[] = [
 ];
 
 const dateWindowVlasic: AxisPredicate = (_state, turn) => {
-    if (turn < 152) return { green: false, reason: 'spring 1995 Central Bosnia window not yet open' };
-    if (turn > 166) return { green: false, reason: 'spring 1995 Central Bosnia window has closed' };
-    return { green: true, reason: 'within spring 1995 Central Bosnia operation window' };
+    if (turn < 150) return { green: false, reason: 'February 1995 planning window for spring Central Bosnia operation not yet open' };
+    if (turn > 166) return { green: false, reason: 'spring 1995 Central Bosnia operation window has closed' };
+    return { green: true, reason: 'within February 1995 planning / spring Central Bosnia operation window' };
 };
 
 const allianceContextVlasic: AxisPredicate = (state) => {
@@ -639,7 +647,10 @@ export const VLASIC_RIDGE_95_OPPORTUNITY: OperationOpportunityDef = {
     family: 'central_bosnia_vlasic',
     axes: VLASIC_AXES,
     staging_osid: STAGING_TRAVNIK,
-    planning_duration: 4,
+    // 2026-09-28 timing candidate: planning 4→2 so a t152-approved Vlašić
+    // operation can begin executing by t154 (1995-03-20, the documented
+    // Domet-1 start) instead of waiting out a 4-turn planning window.
+    planning_duration: 2,
     min_attack_outcome: 'repulsed',
     citations: [
         'docs/research/2026-05-01-late-war-operation-opportunity-research.md - Central Bosnia / Vlasic-Kupres family backlog',

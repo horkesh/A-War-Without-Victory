@@ -32,6 +32,7 @@
 const fs = require('fs');
 const path = require('path');
 const { classifyCombatCapture } = require('./lib/capture_provenance.cjs');
+const { checkFarzObjectiveCaptures } = require('./lib/farz_objective_gate.cjs');
 
 const runDir = process.argv[2];
 if (!runDir) {
@@ -335,56 +336,53 @@ for (const [name, osid] of FARZ_CELLS) {
   console.log(`    ${name.padEnd(26)} ${String(got)}  ${ok ? '** TAKEN **' : '*** NOT TAKEN — 2nd/3rd Corps suppressed; this is not a pass ***'}`);
 }
 
-// ── P2 + P3, added 2026-08-26 after the Historian ruled the cells-only test A TECHNICALITY ──
+// ── Farz objective receipts and 2nd-Corps diagnostic ──
 //
-// WHY THE CELL LIST ALONE WAS NOT ENOUGH. Uragan 95 was a JOINT 2nd + 3rd Corps operation, and
-// **the capture of Vozuća WAS the link-up of the two corps** (BB1 printed 386): 2nd Corps' 22nd
-// Division driving east from Pribitkovići, 3rd Corps' 35th Division marching south-east from
-// Zavidovići, meeting at Vozuća on 13 September 1995. The strategic product was the Tuzla-Zenica
-// road, which requires BOTH ends by definition. A one-corps Vozuća is not a coarse rendering of the
-// event — it is a different event that fails to produce the thing that made it matter, and it drops
-// exactly what BB singles out as significant: the ARBiH's arrival at coordinated corps-level
-// operations.
+// Uragan 95 was a JOINT 2nd + 3rd Corps operation (BB1 printed 386): 2nd Corps' 22nd
+// Division and 3rd Corps' 35th Division linked up at Vozuća. The older gate used the
+// final capturer of one cell as a proxy for that participation. The proxy was too narrow:
+// a joint operation can have either corps make the final capture. The AAR participation
+// diagnostic below reports what the simulation actually records without claiming that
+// objective control alone proves the historical link-up.
 //
-// AND THE MAP IS FINE ENOUGH — the Historian checked rather than assuming: three of the four cells
-// sit in 3rd Corps sectors, but `op:lukavac:brijesnica_donja_2` sits in the TUZLA corps' sector and
-// historically flipped. So the resolution CAN distinguish "2nd Corps took part" from "2nd Corps did
-// nothing". The old condition was 2-to-1 weighted toward 3rd Corps and passed on its work alone.
+// Owner ruling 2026-09-29: either corps may make an objective's final capture. Require the
+// authored operation's logged, operation-owned combat capture of all four objectives instead.
+// Report actual 2nd-Corps participation separately; an objective pass does not assert it.
 //
-// ⚠ NAME-FREE BY CONSTRUCTION, deliberately. An operation NAME must never be the test: the emergent
-// name pool collides with authored designations — n377 contains an emergent `Operacija Farz` at t70
-// AND the authored `Operation Farz 95` at t163. Test on CORPS + CELLS + TURN WINDOW only. Do not
-// reintroduce a name match here.
+// ⚠ NAME-FREE BY CONSTRUCTION: the authored Army HQ marker distinguishes this operation
+// from a generic name collision; the operation's AAR, combat events and battle receipts
+// must agree. The emergent name pool once emitted another `Farz` at t70.
 const FARZ_WINDOW_START = 160;   // Uragan/Farz ran 10 Sep - 11 Oct 1995; nothing before ~w160 is it.
 const SECOND_CORPS = 'arbih_2nd_corps';
-const SECOND_CORPS_CELL = 'op:lukavac:brijesnica_donja_2';
 
 // Corps attribution needs formation -> corps, which lives in the save this tool already loaded.
 const formationsForAttribution = (save.military && save.military.formations) || {};
 const corpsOf = (brigadeId) => (formationsForAttribution[brigadeId] || {}).corps_id ?? null;
 
-const secondCorpsCellEvents = events.filter((e) => e.settlement_id === SECOND_CORPS_CELL && e.to === 'RBiH');
-const lastCapture = secondCorpsCellEvents.length ? secondCorpsCellEvents[secondCorpsCellEvents.length - 1] : null;
-const capturingCorps = lastCapture ? corpsOf(lastCapture.attacker_brigade) : null;
-
-// P-A — THE DISCRIMINATOR. One measurement, name-free. Brijesnica is the SOLE Lukavac flip in the
-// entire apr1995→oct1995 window (7 cells, 1 flip), so it is a clean signature by construction.
-console.log('  P-A discriminator — the 2nd-Corps signature cell, captured by 2nd Corps, in the window');
-const paCapture = events.find((e) => e.settlement_id === SECOND_CORPS_CELL && e.to === 'RBiH'
-  && (e.turn ?? -1) >= FARZ_WINDOW_START && corpsOf(e.attacker_brigade) === SECOND_CORPS);
-if (paCapture) {
-  console.log(`    taken t${paCapture.turn} by ${paCapture.attacker_brigade} (arbih_2nd_corps)  ** PASS **`);
-} else {
-  farzBroken++;
-  const anyCap = lastCapture
-    ? `taken t${lastCapture.turn} by ${lastCapture.attacker_brigade ?? '?'} (${capturingCorps ?? 'unknown corps'})`
-    : 'never captured';
-  console.log(`    ${anyCap}  *** FAIL — needs an arbih_2nd_corps capture at t>=${FARZ_WINDOW_START} ***`);
+let operationAars = [];
+try {
+  operationAars = JSON.parse(fs.readFileSync(path.join(runDir, 'operation_aars.json'), 'utf8'));
+} catch { /* A missing or unreadable AAR fails the objective gate below. */ }
+if (!Array.isArray(operationAars)) operationAars = [];
+const farz = checkFarzObjectiveCaptures({
+  cells: FARZ_CELLS, at188, events, battleById, aars: operationAars, corpsOf,
+  windowStart: FARZ_WINDOW_START,
+});
+console.log('  P-A authored Farz objective receipts — operation-owned combat in the late window');
+for (const row of farz.rows) {
+  console.log(`    ${row.name.padEnd(26)} ${row.ok ? `t${row.turn} ** CAPTURED **` : '*** MISSING OR UNATTRIBUTED ***'}`);
 }
+if (!farz.ok) {
+  farzBroken++;
+  console.log(`    *** FAIL — ${farz.authoredCount} authored Farz AAR(s); all four receipts required ***`);
+} else {
+  console.log('    all four authored objectives captured ** PASS **');
+}
+console.log(`  2nd Corps participation: ${farz.secondCorpsParticipated ? 'recorded' : 'NOT RECORDED — historical fidelity diagnostic'}`);
 
 // P-B — THE UNIVERSAL GUARD, and the reason it exists rather than another list.
 //
-// P-A is EXISTENTIAL over a fixed cell ("this must flip"): it can pass while the corps also does
+// P-A is about the authored operation's objective captures: it can pass while the corps also does
 // five wrong things. P-B is UNIVERSAL over what the corps DOES ("every late capture must be
 // warranted"): it cannot pass while the corps does anything wrong. Different quantifiers, different
 // failure modes, no overlap — which is why P-B is NOT a restatement of the cell list.
@@ -416,8 +414,8 @@ if (unwarranted.length > 0) {
 } else if (lateSecondCorps.length > 0) {
   console.log('    all warranted by the painted reference ** PASS **');
 } else {
-  // Zero late captures is not automatically a fail here — P-A already requires one.
-  console.log('    (none — P-A is what requires 2nd Corps to act at all)');
+  // Zero late captures is not a failure under the owner's objective-based ruling.
+  console.log('    (none; 2nd Corps participation is reported above)');
 }
 
 if (farzBroken > 0) breached = true;
@@ -494,7 +492,7 @@ if (base) {
 }
 
 console.log('');
-if (breached) console.log('RESULT: GUARD BREACHED — §6 panel matter. Do not merge.');
+if (breached) console.log('RESULT: GUARD BREACHED — inspect failed guard(s). Do not merge.');
 else if (regressed) console.log('RESULT: SCORE REGRESSION beyond tolerance. Not a guard breach; explain or revert.');
 else console.log('RESULT: guard intact.');
 

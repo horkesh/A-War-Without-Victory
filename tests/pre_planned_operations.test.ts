@@ -112,6 +112,50 @@ function makeMinimalState(): GameState {
     } as unknown as GameState;
 }
 
+/**
+ * Build the real queued `Operation Donji Vakuf` in a minimal state with its authored
+ * 16th Krajina Motorized Brigade absent (not yet at the assembly OSID), then advance
+ * the operation into execution. Mirrors the measured n12 t28→t29 late-arrival window
+ * (`rs_16th_krajina_motorized` reaches `op:sipovo:pribeljci_2` on the op's first
+ * attack turn).
+ */
+function injectExecutingDonjiVakufMissing16th(state: GameState): {
+    operation: CorpsOperation;
+    sweepAxis: NonNullable<CorpsOperation['axes']>[number];
+} {
+    state.meta.turn = 28;
+    delete state.military.formations!.rs_16th_krajina_motorized;
+    const command = state.military.corps_command!.vrs_1st_krajina!;
+    command.queued_operations = ['Operation Donji Vakuf'];
+
+    assert.equal(injectQueuedOperation(state, 'vrs_1st_krajina'), true);
+    const operation = command.active_operations
+        .find((candidate) => candidate.name === 'Operation Donji Vakuf');
+    assert.ok(operation);
+    const sweepAxis = operation.axes!.find((axis) => axis.axis_id === 'donji_vakuf_sweep');
+    assert.ok(sweepAxis);
+    assert.equal(operation.participating_brigades.includes('rs_16th_krajina_motorized'), false);
+
+    operation.phase = 'execution';
+    state.meta.turn = 29;
+    return { operation, sweepAxis };
+}
+
+function place16thAt(state: GameState, osid: string): void {
+    state.military.formations!.rs_16th_krajina_motorized = {
+        id: 'rs_16th_krajina_motorized',
+        name: '16th Krajina Motorized Brigade',
+        faction: 'RS',
+        corps_id: 'vrs_1st_krajina',
+        kind: 'brigade',
+        status: 'active',
+        personnel: 2200,
+        cohesion: 50,
+        morale: 50,
+        location_osid: osid,
+    } as FormationState;
+}
+
 describe('pre-planned operations', () => {
     it('assigns the former Foča start-override cells to Operation Foca combat', () => {
         const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Foca');
@@ -1029,6 +1073,69 @@ describe('pre-planned operations', () => {
         assert.equal(operation.initial_strength, initialStrengthBeforeAdmission + 600);
     });
 
+    it('admits an authored brigade that reaches its assembly OSID while the pre-planned operation is executing', async () => {
+        const state = makeMinimalState();
+        const { operation, sweepAxis } = injectExecutingDonjiVakufMissing16th(state);
+        place16thAt(state, 'op:sipovo:pribeljci_2');
+        const strengthBeforeAdmission = operation.participating_brigades.reduce(
+            (sum, brigadeId) => sum + (state.military.formations?.[brigadeId]?.personnel ?? 0),
+            0,
+        );
+
+        const step = warPhases.find((phase) => phase.name === 'admit-authored-pre-planned-reinforcements');
+        assert.ok(step);
+        await step.run({ state, input: {}, report: {} } as any);
+
+        assert.ok(operation.participating_brigades.includes('rs_16th_krajina_motorized'));
+        assert.ok(sweepAxis.assigned_brigades.includes('rs_16th_krajina_motorized'));
+        assert.equal(operation.initial_strength, strengthBeforeAdmission + 2200);
+    });
+
+    it('does not admit an authored brigade that is not at the exact assembly OSID', () => {
+        const state = makeMinimalState();
+        const { operation } = injectExecutingDonjiVakufMissing16th(state);
+        place16thAt(state, 'op:teslic:blatnica_2');
+
+        assert.equal(admitAuthoredPrePlannedReinforcements(state), 0);
+        assert.equal(operation.participating_brigades.includes('rs_16th_krajina_motorized'), false);
+    });
+
+    it('does not admit an authored brigade already committed to another operation', () => {
+        const state = makeMinimalState();
+        const { operation } = injectExecutingDonjiVakufMissing16th(state);
+        place16thAt(state, 'op:sipovo:pribeljci_2');
+        state.military.corps_command!.vrs_1st_krajina!.active_operations.push({
+            name: 'Operacija Bedem',
+            type: 'sector_attack',
+            phase: 'execution',
+            started_turn: 30,
+            phase_started_turn: 30,
+            participating_brigades: ['rs_16th_krajina_motorized'],
+            objectives: ['op:donji_vakuf:oborci_2'],
+            current_objective_index: 0,
+            momentum: 0,
+            failure_count: 0,
+            consecutive_failures_on_current: 0,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+        } as unknown as CorpsOperation);
+
+        assert.equal(admitAuthoredPrePlannedReinforcements(state), 0);
+        assert.equal(operation.participating_brigades.includes('rs_16th_krajina_motorized'), false);
+    });
+
+    it('does not admit a brigade to a non-pre-planned operation', () => {
+        const state = makeMinimalState();
+        const { operation } = injectExecutingDonjiVakufMissing16th(state);
+        operation.is_pre_planned = false;
+        place16thAt(state, 'op:sipovo:pribeljci_2');
+
+        assert.equal(admitAuthoredPrePlannedReinforcements(state), 0);
+        assert.equal(operation.participating_brigades.includes('rs_16th_krajina_motorized'), false);
+    });
+
     it('admits and loans an authored Army-HQ elite that reaches Zvezda staging during planning', () => {
         const state = makeMinimalState();
         state.meta.turn = 97;
@@ -1287,28 +1394,29 @@ describe('pre-planned operations', () => {
         ]);
     });
 
-    it('assigns the Donji Vakuf local and sweep forces to separate axes', () => {
+    it('extends the Donji Vakuf sweep to Jemanlići and authors no Prusac objective', () => {
         const operation = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Donji Vakuf');
         assert.ok(operation);
         const sweep = operation.axes.find((axis) => axis.axis_id === 'donji_vakuf_sweep');
-        const prusac = operation.axes.find((axis) => axis.axis_id === 'prusac_local');
         assert.ok(sweep);
-        assert.ok(prusac);
 
-        assert.equal(sweep.objectives.at(-1), 'op:donji_vakuf:korenici');
+        // Jemanlići follows Korenići as the final sweep objective (contact edge verified).
+        assert.equal(sweep.objectives.at(-1), 'op:donji_vakuf:jemanlici');
+        assert.equal(sweep.objectives.at(-2), 'op:donji_vakuf:korenici');
         assert.deepEqual(sweep.brigades, [
             'rs_22nd_krajina_infantry',
             'rs_5th_kozara_light_infantry',
             'rs_16th_krajina_motorized',
         ]);
-        assert.deepEqual(prusac, {
-            axis_id: 'prusac_local',
-            name: 'Prusac Local Axis',
-            brigades: ['rs_19th_krajina_light_infantry', 'rs_31st_light_infantry'],
-            objectives: ['op:donji_vakuf:prusac_2', 'op:donji_vakuf:jemanlici'],
-            staging_osid: 'op:donji_vakuf:pribraca_2',
-        });
         assert.equal(operation.execution_attack_power_mult, 1.65);
+
+        // Focused guard: Prusac is absent from ALL authored objectives (2026-09-29 hypothesis).
+        const allObjectives = operation.axes.flatMap((axis) => axis.objectives);
+        assert.ok(!allObjectives.includes('op:donji_vakuf:prusac_2'),
+            'Prusac must not be an authored objective');
+
+        // The prusac_local axis is removed entirely.
+        assert.equal(operation.axes.find((axis) => axis.axis_id === 'prusac_local'), undefined);
     });
 
     it('uses a separate Pracha River axis to reduce the Visegrad bridgehead', () => {
@@ -2094,7 +2202,7 @@ describe('pre-planned operations', () => {
         assert.deepEqual(injectedEastAxis?.assigned_brigades, eastAxis.brigades);
     });
 
-    it('keeps the displaced 31st Brigade eligible for the Prusac local axis', () => {
+    it('injects Operation Donji Vakuf without the removed prusac_local axis', () => {
         const state = makeMinimalState();
         state.meta.turn = 27;
         const command = state.military.corps_command!.vrs_1st_krajina!;
@@ -2102,8 +2210,8 @@ describe('pre-planned operations', () => {
         command.queued_operations = ['Operation Donji Vakuf'];
 
         const donjiVakuf = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Donji Vakuf')!;
-        const prusac = donjiVakuf.axes.find((axis) => axis.axis_id === 'prusac_local')!;
-        const staging = prusac.staging_osid ?? donjiVakuf.staging_osid;
+        const sweep = donjiVakuf.axes.find((axis) => axis.axis_id === 'donji_vakuf_sweep')!;
+        const staging = sweep.staging_osid ?? donjiVakuf.staging_osid;
         const route = [
             'op:test:displaced_31st_start',
             'op:test:displaced_31st_route_1',
@@ -2118,27 +2226,25 @@ describe('pre-planned operations', () => {
             adjacency.set(route[i]!, [route[i - 1], route[i + 1]].filter((osid): osid is string => osid !== undefined));
             state.political.political_controllers![route[i]!] = 'RS';
         }
-        state.military.formations.rs_31st_light_infantry!.location_osid = route[0];
+        state.military.formations.rs_16th_krajina_motorized!.location_osid = route[0];
 
         const injected = injectQueuedOperation(state, 'vrs_1st_krajina', adjacency as any);
 
         assert.equal(injected, true);
         const operation = command.active_operations.find((op) => op.name === 'Operation Donji Vakuf');
         assert.ok(operation);
-        const injectedPrusac = operation!.axes?.find((axis) => axis.axis_id === 'prusac_local');
-        assert.deepEqual(injectedPrusac?.assigned_brigades, [
-            'rs_19th_krajina_light_infantry',
-            'rs_31st_light_infantry',
-        ]);
-        assert.deepEqual(injectedPrusac?.objectives, ['op:donji_vakuf:prusac_2', 'op:donji_vakuf:jemanlici']);
+        const injectedSweep = operation!.axes?.find((axis) => axis.axis_id === 'donji_vakuf_sweep');
+        assert.ok(injectedSweep);
+        assert.ok(injectedSweep!.assigned_brigades.includes('rs_16th_krajina_motorized'));
+        // The 19th and 31st are no longer authored participants.
+        assert.ok(!operation!.participating_brigades.includes('rs_19th_krajina_light_infantry'));
+        assert.ok(!operation!.participating_brigades.includes('rs_31st_light_infantry'));
     });
 
     it('pre-stages the Donji Vakuf follow-through force before its queued slot opens', () => {
         const state = makeMinimalState();
         state.meta.turn = 21;
         state.meta.player_faction = 'RBiH';
-        state.military.formations.rs_19th_krajina_light_infantry!.location_osid = 'op:donji_vakuf:jemanlici';
-        state.military.formations.rs_31st_light_infantry!.location_osid = 'op:donji_vakuf:babin_potok_2';
         state.military.formations.rs_16th_krajina_motorized!.location_osid = 'op:test:remote_16th';
 
         prestageDeferredPrePlannedElites(state);
@@ -2158,16 +2264,9 @@ describe('pre-planned operations', () => {
                 owner: 'authored_preplanned',
             },
         );
-        for (const brigadeId of ['rs_19th_krajina_light_infantry', 'rs_31st_light_infantry']) {
-            assert.deepEqual(
-                state.military.brigade_movement_orders?.[brigadeId],
-                {
-                    destination_sids: ['op:donji_vakuf:pribraca_2'],
-                    stance: 'column',
-                    owner: 'authored_preplanned',
-                },
-            );
-        }
+        // The 19th and 31st are no longer authored participants; no march orders for them.
+        assert.equal(state.military.brigade_movement_orders?.rs_19th_krajina_light_infantry, undefined);
+        assert.equal(state.military.brigade_movement_orders?.rs_31st_light_infantry, undefined);
 
         state.military.brigade_movement_state = {
             ...(state.military.brigade_movement_state ?? {}),

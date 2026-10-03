@@ -162,6 +162,40 @@ function buildObjectivePathDistances(
     return distances;
 }
 
+function findFlaggedAxisStagingDestination(
+    state: GameState,
+    faction: FactionId,
+    loc: Osid,
+    stagingOsid: Osid | undefined,
+    adjacency: Map<Osid, Osid[]>,
+    reverseMap: OperationalToCanonicalReverseMap,
+): Osid | null {
+    if (!stagingOsid) return null;
+
+    const stagingController = getPoliticalControllerOSID(state, stagingOsid, reverseMap);
+    const stagingIsFriendly = stagingController === faction
+        || (stagingController != null && isFriendlyFaction(stagingController, faction, state));
+    if (stagingIsFriendly) {
+        const exactDestination = findNearestFriendlyOsidDestination(
+            state, faction, loc, adjacency, reverseMap, new Set([stagingOsid]),
+        );
+        if (exactDestination) return exactDestination;
+    }
+
+    const friendlyNeighbors = new Set(
+        getTacticalAdjacentOsids(state, stagingOsid, adjacency).filter((neighbor) => {
+            const controller = getPoliticalControllerOSID(state, neighbor, reverseMap);
+            return controller === faction
+                || (controller != null && isFriendlyFaction(controller, faction, state));
+        }),
+    );
+    if (friendlyNeighbors.size === 0) return null;
+    const neighborDestination = findNearestFriendlyOsidDestination(
+        state, faction, loc, adjacency, reverseMap, friendlyNeighbors,
+    );
+    return neighborDestination && neighborDestination !== loc ? neighborDestination : null;
+}
+
 function wasRecentlyRepulsedFromTarget(
     brigade: FormationState,
     targetOsid: string,
@@ -223,7 +257,17 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
             } else if (planningApproachOsids.size === 0) {
                 // No approach OSIDs found — fall back to staging area
                 sectorAttackProfileTime('.sectorAttack.planningApproachPath', () => {
-                    const axisStaging = getBrigadeAxis(activeOp, brigade.id)?.staging_osid ?? activeOp.staging_osid;
+                    const operationAxis = getBrigadeAxis(activeOp, brigade.id);
+                    const axisStaging = operationAxis?.staging_osid ?? activeOp.staging_osid;
+                    if (operationAxis?.preserve_objective_sequence === true) {
+                        const stagingDestination = findFlaggedAxisStagingDestination(
+                            state, faction, loc, axisStaging, adjacency, reverseMap,
+                        );
+                        if (stagingDestination && stagingDestination !== loc) {
+                            result.column_march_orders[brigade.id] = stagingDestination;
+                        }
+                        return;
+                    }
                     if (axisStaging && loc !== axisStaging) {
                         const nearestStaging = findNearestFriendlyOsidDestination(
                             state,
@@ -461,6 +505,25 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
                     return true;
                 }
+            }
+
+            // A sequence-committed axis must not attack through a sibling axis while
+            // its own current objective has no lawful approach.  The authored staging
+            // cell may still be enemy-held (Sana: Ivanjska before the sibling capture),
+            // so the friendly-only route can legitimately produce no order; hold until
+            // the current objective or its real approach opens instead.
+            if (operationAxis?.preserve_objective_sequence === true) {
+                const stagingDestination = findFlaggedAxisStagingDestination(
+                    state, faction, loc, operationAxis.staging_osid, adjacency, reverseMap,
+                );
+                if (stagingDestination && stagingDestination !== loc) {
+                    recordOrderDecision('march_to_approach', { issued_target_osid: stagingDestination });
+                    result.column_march_orders[brigade.id] = stagingDestination;
+                } else {
+                    recordOrderDecision('defend_no_route_or_viable_target');
+                }
+                result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                return true;
             }
 
             // ── Attack through: last resort when march path blocked ──

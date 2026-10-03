@@ -1,6 +1,7 @@
 import type { AttackResolutionOsidReport } from '../sim/combat/attack_resolution_osid.js';
 import type { AxisLaunchReadinessDetail, AxisOrderGenerationDetail, CorpsOperation, FactionId, FormationId, FormationState, GameState } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
+import { isVlasicCohaExceptionOperation } from '../sim/combat/coha_operation_exception.js';
 
 export interface BotOrderDiagnosticsSnapshot {
     attack_orders_by_brigade: Record<FormationId, string>;
@@ -179,7 +180,6 @@ export function buildOperationCombatDiagnostics(
     orderSnapshot: BotOrderDiagnosticsSnapshot | undefined,
     osidResolution: AttackResolutionOsidReport | undefined
 ): OperationCombatDiagnostic[] {
-    const lifecyclePaused = osidResolution?.operation_lifecycle_paused_reason !== undefined;
     const suppressedAttackOrders = new Set(
         (osidResolution?.suppressed_attack_orders ?? [])
             .map((order) => `${order.brigade_id}|${order.target_osid}`)
@@ -251,6 +251,8 @@ export function buildOperationCombatDiagnostics(
             const attackTargetCounts = new Map<string, number>();
             const participantAttackOrders: OperationCombatDiagnostic['participant_attack_orders'] = [];
             const participantSet = new Set(brigades);
+            const lifecyclePaused = osidResolution?.operation_lifecycle_paused_reason !== undefined
+                && !isVlasicCohaExceptionOperation(state, corpsId, operation, state.meta?.turn ?? 0);
             const skippedAttackOrders = (osidResolution?.skipped_attack_orders ?? [])
                 .filter((skip) => participantSet.has(skip.brigade_id))
                 .sort((a, b) => {

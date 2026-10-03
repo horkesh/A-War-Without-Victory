@@ -285,6 +285,8 @@ export interface OperationAxis {
     minimum_staged_brigades?: number;
     /** Assigned brigades required on friendly approaches before a new objective is attacked. */
     minimum_forward_brigades?: number;
+    /** Authored axis sequence must not skip forward while its current objective is unreachable. */
+    preserve_objective_sequence?: boolean;
     objectives: string[];
     current_objective_index: number;
     status: 'executing' | 'stalled' | 'complete';
@@ -300,6 +302,11 @@ export interface OperationAxis {
      *  After 2 consecutive catastrophics on the same target, axis stalls — no commander
      *  sends men to die at the same fortified position three turns running. */
     consecutive_catastrophic_on_current?: number;
+    /** Turns spent waiting for a sibling axis to capture a shared current objective.
+     *  When an axis is idle and about to stall, but another executing axis in the same
+     *  operation is advancing on the same objective, the idle axis waits up to
+     *  MAX_SHARED_OBJECTIVE_WAIT_TURNS before stalling. Reset on objective advance. */
+    shared_objective_wait_turns?: number;
     /** Friendly OSID where this axis's brigades stage during planning. */
     staging_osid?: string;
     /** Diagnostic (write-only): set true at launch-readiness check when this axis's

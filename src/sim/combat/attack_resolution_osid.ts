@@ -50,6 +50,7 @@ import type {
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { isVlasicCohaExceptionAttackOrder } from './coha_operation_exception.js';
 import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../data/operational_data.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import {
@@ -527,15 +528,20 @@ export function resolveAttackOrdersOsid(
         battles: []
     };
 
-    // COHA suppresses combat, but the attempted orders remain auditable and
-    // must be consumed so they cannot leak into a later turn.
+    // COHA suppresses combat, except for the one authored Vlašić operation
+    // window. Generic and unrelated orders remain auditable and are consumed.
     if (state.military.event_flags?.coha_active === true) {
         report.combat_suppressed_reason = 'coha_ceasefire';
         report.operation_lifecycle_paused_reason = 'coha_ceasefire';
         const suppressedOrders = state.military.brigade_attack_orders ?? {};
+        const permittedOrders: Record<FormationId, Osid> = {};
         for (const brigadeId of Object.keys(suppressedOrders).sort(strictCompare) as FormationId[]) {
             const target = suppressedOrders[brigadeId];
             if (!target) continue;
+            if (isVlasicCohaExceptionAttackOrder(state, brigadeId, target)) {
+                permittedOrders[brigadeId] = target;
+                continue;
+            }
             (report.orders_seen_by_brigade ??= {})[brigadeId] = target;
             (report.suppressed_attack_orders ??= []).push({
                 brigade_id: brigadeId,
@@ -547,8 +553,10 @@ export function resolveAttackOrdersOsid(
                 report.orders_by_faction[faction] = (report.orders_by_faction[faction] ?? 0) + 1;
             }
         }
-        state.military.brigade_attack_orders = undefined;
-        return report;
+        state.military.brigade_attack_orders = Object.keys(permittedOrders).length > 0
+            ? permittedOrders
+            : undefined;
+        if (Object.keys(permittedOrders).length === 0) return report;
     }
 
     const terrainMultByOsid = buildTerrainMultByOsid(reverseMap, terrainData);

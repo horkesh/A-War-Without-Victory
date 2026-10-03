@@ -71,6 +71,7 @@ import { computeOsidGraphDistance } from './home_distance.js';
 import {
     isEliteAuthoredForHistoricalOperation,
     isEliteReservedForHistoricalOperation,
+    mayEliteJoinOperation,
 } from './historical_elite_reservations.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getPrimaryOperation } from './corps_operation_helpers.js';
@@ -406,6 +407,7 @@ function pickOperationAxis(operation: CorpsOperation, brigadeId: FormationId): O
 function pickActiveOperation(state: GameState, corpsId: string, brigadeId: FormationId): CorpsOperation | null {
     const operations = [...(state.military.corps_command?.[corpsId]?.active_operations ?? [])]
         .filter((operation) => operation.phase === 'planning' || operation.phase === 'execution')
+        .filter((operation) => mayEliteJoinOperation(brigadeId, state.meta.turn, operation.name))
         .filter((operation) => !isExcludedGuardsEnclaveOperation(brigadeId, operation))
         .sort((a, b) => {
             const phaseRank = (operation: CorpsOperation): number => operation.phase === 'execution' ? 0 : 1;
@@ -1414,14 +1416,10 @@ function reconcileEliteLoanOperationCommitments(state: GameState): Set<string> {
         const targetCommand = corpsCommand[loan.loaned_to_corps];
         if (!targetCommand || alreadyCommitted) continue;
 
-        // A live loan left over from an earlier authored operation must not be
-        // absorbed by whichever unrelated corps offensive happens to execute
-        // next. Keep dated Main Staff assault formations free for their next
-        // historical commitment; tickEliteLoans will recall the stale loan.
-        if (isEliteReservedForHistoricalOperation(bid as FormationId, state.meta.turn)) continue;
-
         const operation = (targetCommand.active_operations ?? []).find((candidate) =>
-            candidate.phase === 'execution' && !isExcludedGuardsEnclaveOperation(bid as FormationId, candidate));
+            candidate.phase === 'execution'
+            && mayEliteJoinOperation(bid as FormationId, state.meta.turn, candidate.name)
+            && !isExcludedGuardsEnclaveOperation(bid as FormationId, candidate));
         if (operation) attachEliteToOperation(operation, bid);
     }
     return corpsWithLoanedElite;

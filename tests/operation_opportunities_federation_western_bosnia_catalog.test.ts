@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 import {
     OPERATION_OPPORTUNITY_CATALOG,
@@ -14,6 +16,7 @@ import {
     SOUTHERN_MOVE_95_OPPORTUNITY,
 } from '../src/sim/combat/operation_opportunity_catalog_federation_western_bosnia.js';
 import { OPERATION_STORM_EVENT_ID } from '../src/sim/combat/operation_storm_theater.js';
+import { getSectorOffensiveCurrentObjective } from '../src/sim/combat/bot_brigade_ai_osid.js';
 import { _TRIGGERED_OPS } from '../src/sim/combat/triggered_operations.js';
 import type { CorpsCommandState, FactionId, GameState } from '../src/state/game_state.js';
 
@@ -76,6 +79,24 @@ const SOUTHERN_MOVE_BRIGADES = [
     'hv_4th_guards_brigade_1995',
     'hv_7th_guards_brigade_1995',
 ];
+
+const JAJCE_CONTINUATION_OBJECTIVES = [
+    'op:jajce:bravnice',
+    'op:jajce:vinac_2',
+    'op:jajce:jajce_3',
+    'op:jajce:lupnica',
+    'op:jajce:barevo_2',
+    'op:jajce:jezero_2',
+    'op:jajce:prisoje',
+];
+
+const OCTOBER_PAINTED_CONTROL = JSON.parse(readFileSync(resolve(
+    'data/source/calibration/painted_control_oct1995.json',
+), 'utf8')).by_settlement_id as Record<string, FactionId>;
+
+const OPERATIONAL_CONTACT_GRAPH = JSON.parse(readFileSync(resolve(
+    'data/derived/operational/operational_contact_graph.json',
+), 'utf8')).edges as Array<{ a: string; b: string }>;
 
 function makeCommand(opts: { addCommanderState?: boolean; axisCoordinationLow?: boolean } = {}): CorpsCommandState {
     return {
@@ -304,6 +325,99 @@ function addVrsKrajinaDefenderCorps(
 }
 
 describe('Federation / Western Bosnia operation opportunity catalog', () => {
+    it('red fixture: admits the exact t160 Mistral 1 reserved roster while preserving transit', () => {
+        const state = buildMistralState({ turn: 160, stormFired: false });
+        state.military.formations.hrhb_kralj_petar_kreimir_iv_brigade = {
+            id: 'hrhb_kralj_petar_kreimir_iv_brigade',
+            name: 'Kralj Petar Krešimir IV Brigade',
+            kind: 'brigade',
+            status: 'active',
+            faction: 'HRHB',
+            corps_id: 'hvo_tomislavgrad',
+            personnel: 1500,
+            strength: 1500,
+        } as any;
+        state.military.brigade_movement_state = {
+            hrhb_kralj_petar_kreimir_iv_brigade: {
+                status: 'in_transit',
+                stance: 'column',
+                destination_sids: ['op:glamoc:vidimlije_2'],
+                path: ['op:duvno:tomislavgrad_2', 'op:glamoc:vidimlije_2'],
+                turns_remaining: 1,
+            },
+            hv_4th_guards_split: {
+                status: 'in_transit',
+                stance: 'column',
+                destination_sids: ['op:livno:priluka_2'],
+                path: ['op:duvno:tomislavgrad_2', 'op:livno:priluka_2'],
+                turns_remaining: 1,
+            },
+        } as any;
+        const transitBefore = JSON.parse(JSON.stringify(state.military.brigade_movement_state));
+
+        runOpportunityEvaluationStep(state, 160);
+        const proposalId = buildProposalId('mistral_1_95', 160);
+        expect(state.military.operation_opportunities?.some(p => p.proposal_id === proposalId)).toBe(true);
+
+        const approved = applyOpportunityDecision(state, 160, proposalId, 'approve');
+
+        expect(approved?.status).toBe('approved');
+        const op = state.military.corps_command!.hvo_tomislavgrad.active_operations
+            .find(activeOp => activeOp.name === 'Operation Mistral 1');
+        expect(op).toBeDefined();
+        expect(op!.axes!.find(axis => axis.axis_id === 'mistral_1_grahovo')!.assigned_brigades)
+            .toEqual(['hvo_1st_guard_abb', 'hv_4th_guards_split']);
+        expect(op!.axes!.find(axis => axis.axis_id === 'mistral_1_glamoc')!.assigned_brigades)
+            .toEqual(['hrhb_kralj_petar_kreimir_iv_brigade']);
+        expect(state.military.brigade_movement_state).toEqual(transitBefore);
+    });
+
+    it('rejects an unreserved in-transit opportunity participant', () => {
+        const state = buildMistralState({ turn: 180 });
+        state.military.brigade_movement_state = {
+            hvo_1st_guard_abb: {
+                status: 'in_transit',
+                stance: 'column',
+                destination_sids: ['op:glamoc:vidimlije_2'],
+                path: ['op:duvno:tomislavgrad_2', 'op:glamoc:vidimlije_2'],
+                turns_remaining: 1,
+            },
+        } as any;
+        runOpportunityEvaluationStep(state, 180);
+        applyOpportunityDecision(state, 180, buildProposalId('mistral_2_95', 180), 'approve');
+
+        const op = state.military.corps_command!.hvo_tomislavgrad.active_operations[0];
+        expect(op.participating_brigades).not.toContain('hvo_1st_guard_abb');
+    });
+
+    it('rejects an exact reserved in-transit participant with a conflicting live commitment', () => {
+        const state = buildMistralState({ turn: 160, stormFired: false });
+        state.military.brigade_movement_state = {
+            hv_4th_guards_split: {
+                status: 'in_transit',
+                stance: 'column',
+                destination_sids: ['op:livno:priluka_2'],
+                path: ['op:duvno:tomislavgrad_2', 'op:livno:priluka_2'],
+                turns_remaining: 1,
+            },
+        } as any;
+        state.military.corps_command!.hvo_tomislavgrad.active_operations.push({
+            name: 'Conflicting live operation',
+            type: 'sector_offensive',
+            phase: 'execution',
+            corps_id: 'hvo_tomislavgrad',
+            participating_brigades: ['hv_4th_guards_split'],
+            axes: [],
+        } as any);
+
+        runOpportunityEvaluationStep(state, 160);
+        applyOpportunityDecision(state, 160, buildProposalId('mistral_1_95', 160), 'approve');
+
+        const op = state.military.corps_command!.hvo_tomislavgrad.active_operations
+            .find(activeOp => activeOp.name === 'Operation Mistral 1');
+        expect(op?.participating_brigades ?? []).not.toContain('hv_4th_guards_split');
+    });
+
     it('exposes Mistral 2 through its family export and the canonical catalog', () => {
         expect(FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES.map(op => op.opportunity_id))
             .toEqual(['mistral_1_95', 'mistral_2_95', 'southern_move_95', 'jajce_95']);
@@ -443,6 +557,43 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
                 'hv_4th_guards_split',
                 'hvo_2nd_guard_mechanized',
             ]);
+    });
+
+    it('continues the admitted Sipovo axis from captured Pribeljci into the painted Jajce walk', () => {
+        expect(JAJCE_CONTINUATION_OBJECTIVES.every(osid => OCTOBER_PAINTED_CONTROL[osid] === 'HRHB')).toBe(true);
+        const sipovoAndJajce = ['op:sipovo:pribeljci_2', ...JAJCE_CONTINUATION_OBJECTIVES];
+        expect(sipovoAndJajce.slice(0, -1).every((from, index) => {
+            const to = sipovoAndJajce[index + 1];
+            return OPERATIONAL_CONTACT_GRAPH.some(edge =>
+                (edge.a === from && edge.b === to) || (edge.a === to && edge.b === from));
+        })).toBe(true);
+
+        const state = buildMistralState({ turn: 180 });
+        const controllers = state.political!.political_controllers as Record<string, FactionId>;
+        for (const osid of JAJCE_CONTINUATION_OBJECTIVES) controllers[osid] = 'RS';
+        runOpportunityEvaluationStep(state, 180);
+        const approved = applyOpportunityDecision(
+            state,
+            180,
+            buildProposalId('mistral_2_95', 180),
+            'approve',
+        );
+        expect(approved?.status).toBe('approved');
+
+        const op = state.military.corps_command!.hvo_tomislavgrad.active_operations[0];
+        const sipovoAxis = op.axes!.find(axis => axis.axis_id === 'mistral_sipovo')!;
+        expect(sipovoAxis.assigned_brigades).toEqual([
+            'hvo_3rd_guard_jastrebovi',
+            'hvo_rama_brigade',
+            'hv_1st_hgz_1995',
+        ]);
+        expect(new Set(op.axes!.flatMap(axis => axis.assigned_brigades)).size)
+            .toBe(op.axes!.flatMap(axis => axis.assigned_brigades).length);
+
+        controllers['op:sipovo:pribeljci_2'] = 'HRHB';
+        sipovoAxis.current_objective_index = sipovoAxis.objectives.indexOf('op:sipovo:pribeljci_2') + 1;
+        expect(getSectorOffensiveCurrentObjective(op, 'hvo_3rd_guard_jastrebovi'))
+            .toBe('op:jajce:bravnice');
     });
 
     it('surfaces Southern Move after Sipovo staging anchors are held', () => {

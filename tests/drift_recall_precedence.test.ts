@@ -6,6 +6,7 @@ function makeAdjacency(): Map<string, string[]> {
     return new Map<string, string[]>([
         ['op:banja_luka:banja_luka_2', ['op:doboj:doboj_2', 'op:donji_vakuf:pribraca_2']],
         ['op:donji_vakuf:pribraca_2', ['op:banja_luka:banja_luka_2']],
+        ['op:bosanski_petrovac:jasenovac_2', ['op:banja_luka:banja_luka_2']],
         ['op:doboj:doboj_2', ['op:banja_luka:banja_luka_2', 'op:tuzla:tuzla_2']],
         ['op:tuzla:tuzla_2', ['op:doboj:doboj_2', 'op:zvornik:zvornik_2']],
         ['op:zvornik:zvornik_2', ['op:tuzla:tuzla_2', 'op:rogatica:pljesevica']],
@@ -249,6 +250,64 @@ describe('recallDriftedBrigades', () => {
             destination_sids: ['op:donji_vakuf:pribraca_2'],
             stance: 'column',
         });
+    });
+
+    it('preserves an active RBiH operation march into allied HRHB territory', () => {
+        const state = makeState({
+            formation: { faction: 'RBiH' },
+            movementOrder: 'op:bosanski_petrovac:jasenovac_2',
+            activeOperations: [{
+                phase: 'execution',
+                participating_brigades: ['rs_1st_podrinje'],
+                axes: [],
+            }],
+        });
+        (state.political.political_controllers as Record<string, string>)[
+            'op:bosanski_petrovac:jasenovac_2'
+        ] = 'HRHB';
+        state.political.war_alliance_rbih_hrhb = 0.75;
+
+        recallDriftedBrigades(state, makeAdjacency());
+
+        expect(state.military.brigade_movement_orders?.rs_1st_podrinje).toEqual({
+            destination_sids: ['op:bosanski_petrovac:jasenovac_2'],
+            stance: 'column',
+        });
+    });
+
+    it('deletes an allied-territory march when the brigade is not in an operation', () => {
+        const state = makeState({
+            formation: { faction: 'RBiH' },
+            movementOrder: 'op:bosanski_petrovac:jasenovac_2',
+        });
+        (state.political.political_controllers as Record<string, string>)[
+            'op:bosanski_petrovac:jasenovac_2'
+        ] = 'HRHB';
+        state.political.war_alliance_rbih_hrhb = 0.75;
+
+        recallDriftedBrigades(state, makeAdjacency());
+
+        expect(state.military.brigade_movement_orders?.rs_1st_podrinje).toBeUndefined();
+    });
+
+    it('deletes an operation march into allied territory after the alliance becomes inactive', () => {
+        const state = makeState({
+            formation: { faction: 'RBiH' },
+            movementOrder: 'op:bosanski_petrovac:jasenovac_2',
+            activeOperations: [{
+                phase: 'execution',
+                participating_brigades: ['rs_1st_podrinje'],
+                axes: [],
+            }],
+        });
+        (state.political.political_controllers as Record<string, string>)[
+            'op:bosanski_petrovac:jasenovac_2'
+        ] = 'HRHB';
+        state.political.war_alliance_rbih_hrhb = 0.2;
+
+        recallDriftedBrigades(state, makeAdjacency());
+
+        expect(state.military.brigade_movement_orders?.rs_1st_podrinje).toBeUndefined();
     });
 
     it('clears a stale home-recall order once the brigade is reserve-owned by a live sector', () => {

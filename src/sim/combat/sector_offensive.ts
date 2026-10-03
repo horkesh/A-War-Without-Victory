@@ -100,6 +100,8 @@ import { checkLoanedArrivals, areLoanedBrigadesReady, cleanupDissolvedLoans } fr
 import { MAX_OP_LOAN_DISTANCE, LOAN_STAGING_BUFFER_TURNS } from './operation_reinforcement_constants.js';
 import { findBrigadeLiveOperationAnywhere, hasActiveOperation, removeOperation } from './corps_operation_helpers.js';
 import { MIN_ATTACK_PERSONNEL, MAX_BRIGADE_PERSONNEL } from '../../state/formation_constants.js';
+import { mayEliteJoinOperation } from './historical_elite_reservations.js';
+import { isVlasicCohaExceptionOperation } from './coha_operation_exception.js';
 import { isFactionOffensiveOpsSuppressed } from '../events/active_modifiers.js';
 import { isOperationObjectiveForeignControlled } from './operation_objective_hostility.js';
 import {
@@ -617,6 +619,13 @@ const MAX_OPERATION_ZERO_PROGRESS_FAILURES = 5;
  *  But no one sends men to die at the same fortified position three turns running.
  *  After 2 consecutive catastrophics, the axis stalls. */
 const MAX_CONSECUTIVE_CATASTROPHIC_ON_CURRENT = 2;
+
+/** Maximum turns an idle axis will wait for a sibling axis to capture a shared
+ *  current objective before stalling. Prevents premature stall when another executing
+ *  axis in the same operation is advancing on the same objective (convergence capture).
+ *  Finite termination: the cap guarantees the waiting axis stalls if the sibling
+ *  ceases advancing or fails to capture within the wait window. */
+const MAX_SHARED_OBJECTIVE_WAIT_TURNS = 3;
 const EARLY_LAUNCH_COHESION_PENALTY = 15;
 const ALL_OUT_EXTRA_COHESION_COST = 1;
 const BOMBARDMENT_PREP_COST = 2;
@@ -920,6 +929,112 @@ function pruneUnreachablePlanningObjectivePrefix(
     return objectives.slice(firstReachableIndex);
 }
 
+type SanaPlanningTracePhase = 'pre' | 'post';
+
+/**
+ * Observation-only boundary receipt for the owner-authorized Sana diagnosis.
+ *
+ * The gate is deliberately the first operation: when the trace is off this
+ * function must not inspect graph, sector, formation, or movement state.
+ */
+export function emitSanaPlanningTraceReceipt(
+    state: GameState,
+    corpsId: FormationId,
+    op: CorpsOperation,
+    faction: FactionId,
+    staticAdjacency: Map<string, string[]> | undefined,
+    phase: SanaPlanningTracePhase,
+    verdict?: 'completed' | 'valid' | 'invalidated',
+): void {
+    const turn = state.meta?.turn ?? 0;
+    if (
+        process.env.AWWV_SANA_PLANNING_TRACE !== '1'
+        || op.name !== 'Operation Sana'
+        || corpsId !== 'arbih_5th_corps'
+        || turn < 175
+        || turn > 177
+    ) return;
+
+    const axisObjectives = (op.axes ?? []).map((axis) => ({
+        axis_id: axis.axis_id,
+        objectives: [...axis.objectives],
+        staging_osid: axis.staging_osid ?? null,
+    })).sort((a, b) => strictCompare(a.axis_id, b.axis_id));
+    const tracedAxis = op.axes?.find((axis) => axis.axis_id === 'sana_sanski_most_kljuc') ?? op.axes?.[0];
+    const objectives = [...(tracedAxis?.objectives ?? op.objectives ?? [])];
+    const objectiveFacts = objectives.map((objective) => {
+        const approaches = [...collectObjectiveApproachOsids(state, corpsId, faction, [objective], staticAdjacency)]
+            .sort(strictCompare);
+        return {
+            objective,
+            effective_controller: getPoliticalControllerOSID(state, objective, undefined) ?? null,
+            approaches,
+        };
+    });
+    const objectiveSet = new Set(objectives);
+    const approachSet = new Set(objectiveFacts.flatMap((fact) => fact.approaches));
+    const liveFrontEdges = (state.military.war_front_edges_osid ?? [])
+        .filter((edge) => objectiveSet.has(edge.a) || objectiveSet.has(edge.b) || approachSet.has(edge.a) || approachSet.has(edge.b))
+        .map((edge) => ({
+            edge_id: edge.edge_id,
+            a: edge.a,
+            b: edge.b,
+            side_a: edge.side_a,
+            side_b: edge.side_b,
+        }))
+        .sort((a, b) => strictCompare(a.edge_id, b.edge_id));
+    const staticGraphEdges = objectives.flatMap((objective) =>
+        [...(staticAdjacency?.get(objective) ?? [])].sort(strictCompare).map((neighbor) => ({
+            objective,
+            neighbor,
+            objective_controller: getPoliticalControllerOSID(state, objective, undefined) ?? null,
+            neighbor_controller: getPoliticalControllerOSID(state, neighbor, undefined) ?? null,
+        })))
+        .sort((a, b) => strictCompare(`${a.objective}:${a.neighbor}`, `${b.objective}:${b.neighbor}`));
+    const relevantSubsegments = Object.values(state.military.corps_front_sectors ?? {})
+        .filter((sector) => sector.corps_id === corpsId)
+        .flatMap((sector) => (sector.sub_segments ?? [])
+            .filter((subSegment) => subSegment.enemy_osids.some((osid) => objectiveSet.has(osid)))
+            .map((subSegment) => ({
+                sector_id: sector.sector_id,
+                sub_segment_id: subSegment.sub_segment_id,
+                edge_ids: [...subSegment.edge_ids].sort(strictCompare),
+                friendly_osids: [...subSegment.friendly_osids].sort(strictCompare),
+                enemy_osids: [...subSegment.enemy_osids].sort(strictCompare),
+            })))
+        .sort((a, b) => strictCompare(a.sub_segment_id, b.sub_segment_id));
+    const tracedBrigades = ['arbih_506th_mountain', 'arbih_517th_light'].map((brigadeId) => {
+        const brigade = state.military.formations?.[brigadeId];
+        return {
+            brigade_id: brigadeId,
+            location_osid: brigade?.location_osid ?? null,
+            movement_state: state.military.brigade_movement_state?.[brigadeId] ?? null,
+            movement_order: state.military.brigade_movement_orders?.[brigadeId] ?? null,
+        };
+    });
+    const receipt = {
+        trace: 'sana_planning_boundary',
+        phase,
+        turn,
+        corps_id: corpsId,
+        operation: op.name,
+        axis_objectives: axisObjectives,
+        objectives,
+        objective_facts: objectiveFacts,
+        live_front_edges: liveFrontEdges,
+        static_graph_edges: staticGraphEdges,
+        corps_front_subsegments: relevantSubsegments,
+        operation_staging_osid: op.staging_osid ?? null,
+        preserve_objective_sequence: op.preserve_objective_sequence === true,
+        brigades: tracedBrigades,
+        ...(phase === 'post' ? {
+            resulting_objectives: [...(tracedAxis?.objectives ?? op.objectives ?? [])],
+            verdict,
+        } : {}),
+    };
+    console.log(JSON.stringify(receipt));
+}
+
 export function reconcilePlanningObjectives(
     state: GameState,
     corpsId: FormationId,
@@ -935,6 +1050,7 @@ export function reconcilePlanningObjectives(
         for (const axis of op.axes) {
             const enemyObjectives = filterAxisPlanningObjectives(state, axis, faction);
             const filteredObjectives = op.preserve_objective_sequence === true
+                || axis.preserve_objective_sequence === true
                 ? enemyObjectives
                 : pruneUnreachablePlanningObjectivePrefix(
                     state,
@@ -1201,6 +1317,7 @@ export function advanceSectorOffensives(
             const cmd = corpsCommand[corpsId];
             if (!cmd) continue;
             for (const operation of cmd.active_operations) {
+                if (isVlasicCohaExceptionOperation(state, corpsId, operation, turn)) continue;
                 if (
                     (operation.phase === 'planning' || operation.phase === 'execution') &&
                     operation.phase_started_turn < turn
@@ -1215,7 +1332,8 @@ export function advanceSectorOffensives(
                 }
             }
         }
-        return prepEvents;
+        // The exception operation continues through the normal lifecycle below;
+        // every other operation has already had its clock paused above.
     }
 
     const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
@@ -1225,6 +1343,27 @@ export function advanceSectorOffensives(
 
         for (const op of [...cmd.active_operations]) {
         if (op.type !== 'sector_attack' && op.type !== 'feint' && op.type !== 'probe') continue;
+        if (state.military.event_flags?.coha_active === true
+            && !isVlasicCohaExceptionOperation(state, corpsId, op, state.meta?.turn ?? 0)) continue;
+
+        const operationName = op.name;
+        op.participating_brigades = op.participating_brigades.filter((brigadeId) =>
+            mayEliteJoinOperation(brigadeId, state.meta.turn, operationName, op.started_turn));
+        if (Array.isArray(op.axes)) {
+            const participantSet = new Set(op.participating_brigades);
+            for (const axis of op.axes) {
+                axis.assigned_brigades = axis.assigned_brigades.filter((brigadeId) =>
+                    participantSet.has(brigadeId)
+                    && mayEliteJoinOperation(brigadeId, state.meta.turn, operationName, op.started_turn));
+            }
+        }
+        if (op.active_probe) {
+            const participantSet = new Set(op.participating_brigades);
+            op.active_probe.brigade_ids = op.active_probe.brigade_ids.filter((brigadeId) =>
+                participantSet.has(brigadeId)
+                && mayEliteJoinOperation(brigadeId, state.meta.turn, operationName, op.started_turn));
+            if (op.active_probe.brigade_ids.length === 0) delete op.active_probe;
+        }
 
         // Reset per-turn combat feedback counters
         op.battles_this_turn = 0;
@@ -1426,7 +1565,24 @@ export function advanceSectorOffensives(
                 beginRecovery(op, turn, 'political_blocked', state);
                 continue;
             }
+            emitSanaPlanningTraceReceipt(
+                state,
+                corpsId,
+                op,
+                faction,
+                operationStaticAdjacency,
+                'pre',
+            );
             const planningObjectiveState = reconcilePlanningObjectives(state, corpsId, op, faction, operationStaticAdjacency);
+            emitSanaPlanningTraceReceipt(
+                state,
+                corpsId,
+                op,
+                faction,
+                operationStaticAdjacency,
+                'post',
+                planningObjectiveState,
+            );
             if (planningObjectiveState === 'completed') {
                 beginRecovery(op, turn, 'completed', state);
                 continue;
@@ -1731,8 +1887,6 @@ export function updateSectorOffensiveResults(
     state: GameState,
     reverseMap?: OperationalToCanonicalReverseMap | null
 ): void {
-    if (state.military.event_flags?.coha_active === true) return;
-
     const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
 
@@ -1743,6 +1897,8 @@ export function updateSectorOffensiveResults(
 
         for (const op of cmd.active_operations) {
             if ((op.type !== 'sector_attack' && op.type !== 'probe') || op.phase !== 'execution') continue;
+            if (state.military.event_flags?.coha_active === true
+                && !isVlasicCohaExceptionOperation(state, corpsId, op, state.meta?.turn ?? 0)) continue;
 
             const corps = state.military.formations?.[corpsId];
             const faction: FactionId = corps?.faction ?? 'RS';
@@ -1796,8 +1952,25 @@ function updateMultiAxisResults(
         }
     }
 
+    // Snapshot eligible sibling shared-objective paths at the start of the second
+    // pass. Loop iterations mutate sibling status and current_objective_index
+    // (captures advance the index, stalls flip status), so deciding the wait from
+    // a snapshot keeps it independent of axis iteration order.
+    const eligibleSiblingPaths = axes.map((other, idx) => {
+        if (other.status !== 'executing') return null;
+        // Credible progress: the sibling has attacked at least once, or was active
+        // on the previous turn (the idle streak only survives a fully idle turn).
+        const hasCredibleProgress = other.attack_attempt_count > 0
+            || other.idle_execution_turn_streak === 0;
+        if (!hasCredibleProgress) return null;
+        const remaining = other.current_objective_index < other.objectives.length
+            ? other.objectives.slice(other.current_objective_index)
+            : [];
+        return { idx, remaining };
+    });
+
     // Second pass: advance each axis
-    for (const axis of axes) {
+    for (const [axisIndex, axis] of axes.entries()) {
         if (axis.status !== 'executing') continue;
         const currentIdx = axis.current_objective_index;
         if (currentIdx >= axis.objectives.length) {
@@ -1820,6 +1993,7 @@ function updateMultiAxisResults(
             }
             axis.idle_execution_turn_streak = 0;
             axis.movement_only_execution_turns = 0; // reset: objective captured
+            axis.shared_objective_wait_turns = 0; // reset: no longer waiting for sibling
             axis.current_objective_index = currentIdx + 1;
             axis.consecutive_failures_on_current = 0;
             axis.consecutive_catastrophic_on_current = 0;
@@ -1934,29 +2108,53 @@ function updateMultiAxisResults(
                 } else {
                     // Truly idle: no movement, no attack.
                     axis.idle_execution_turn_streak += 1;
-                    axis.last_result = 'stalemate';
                     axis.momentum = 0;
+
+                    // Check if this axis is waiting for a sibling to capture a shared objective.
+                    // When another executing axis in the same operation has credible progress
+                    // (attacked at least once, or active on the previous turn) and the shared
+                    // objective lies on its remaining path, the idle axis gets a bounded wait
+                    // instead of stalling.
+                    const hasAdvancingSiblingOnSameObjective = eligibleSiblingPaths.some(entry =>
+                        entry !== null && entry.idx !== axisIndex && entry.remaining.includes(currentObjective));
+
+                    const idleStallThreshold = op.type === 'probe' ? 1 : 4;
+                    const wouldIdleStall = !anyMoved && axis.attack_attempt_count === 0
+                        && axis.idle_execution_turn_streak >= idleStallThreshold;
+
+                    if (wouldIdleStall && hasAdvancingSiblingOnSameObjective) {
+                        // Bounded wait for sibling to capture shared objective.
+                        axis.shared_objective_wait_turns = (axis.shared_objective_wait_turns ?? 0) + 1;
+                        if (axis.shared_objective_wait_turns <= MAX_SHARED_OBJECTIVE_WAIT_TURNS) {
+                            axis.last_result = 'approach';
+                            // Don't increment failure counts — this is a wait, not a failure.
+                            continue;
+                        }
+                        // Wait cap reached — fall through to normal stall.
+                    }
+
+                    axis.last_result = 'stalemate';
                     axis.failure_count += 1;
                     axis.consecutive_failures_on_current += 1;
+
+                    // Idle stall: no movement and no attacks ever on this axis.
+                    // Threshold = 4 to give brigades time to march from staging to objectives
+                    // via regular movement (1 hop/turn). Column-marching brigades are already
+                    // detected via anyMoved (in_transit) and use the movement-only stall instead.
+                    if (wouldIdleStall) {
+                        axis.movement_only_execution_turns = Math.max(1, axis.movement_only_execution_turns);
+                        axis.status = 'stalled';
+                        continue;
+                    }
                 }
 
-                // Idle stall: no movement and no attacks ever on this axis.
-                // Threshold = 4 to give brigades time to march from staging to objectives
-                // via regular movement (1 hop/turn). Column-marching brigades are already
-                // detected via anyMoved (in_transit) and use the movement-only stall instead.
-                const idleStallThreshold = op.type === 'probe' ? 1 : 4;
-                if (!anyMoved && axis.attack_attempt_count === 0 && axis.idle_execution_turn_streak >= idleStallThreshold) {
-                    axis.movement_only_execution_turns = Math.max(1, axis.movement_only_execution_turns);
-                    axis.status = 'stalled';
-                    continue;
-                }
-
-                // Movement-only stall: brigades marching but not attacking objectives
+                // Movement-only stall: brigades marching but not attacking objectives.
+                // Checked after both branches so a continuously marching axis still stalls
+                // at its existing cap.
                 if (axis.movement_only_execution_turns >= MAX_MOVEMENT_ONLY_EXECUTION_TURNS) {
                     axis.status = 'stalled';
                     continue;
                 }
-
             }
         }
 
@@ -2774,6 +2972,7 @@ export function evaluateOperationProgress(
                             !op.participating_brigades.includes(s.id) &&
                             !updatedParticipants.includes(s.id) &&
                             findBrigadeLiveOperationAnywhere(state, s.id) === null &&
+                            mayEliteJoinOperation(s.id, turn, op.name) &&
                             (s.personnel ?? 0) / MAX_BRIGADE_PERSONNEL >= PERSONNEL_HEALTHY_THRESHOLD &&
                             (s.cohesion ?? 60) >= COHESION_HEALTHY_THRESHOLD
                         );

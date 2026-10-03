@@ -1063,6 +1063,170 @@ test('execution-phase operation does not attack unrelated intermediates off the 
     );
 });
 
+test('flagged Sana axis holds when its current objective has no friendly approach instead of attacking sibling-axis Ripac', () => {
+    const state = {
+        meta: { turn: 177, phase: 'war', seed: 'sana-t176-facts' },
+        corps_front_directives: {},
+        military: {
+            formations: {
+                arbih_506th_mountain: {
+                    id: 'arbih_506th_mountain', kind: 'brigade', faction: 'RBiH', status: 'active',
+                    corps_id: 'arbih_5th_corps', personnel: 1200, cohesion: 70, morale: 70,
+                    equipment: { infantry: 1200, tanks: 0, artillery: 0, air_defense: 0 },
+                    location_osid: 'op:bihac:bihac_2',
+                },
+                arbih_517th_light: {
+                    id: 'arbih_517th_light', kind: 'brigade', faction: 'RBiH', status: 'active',
+                    corps_id: 'arbih_5th_corps', personnel: 1200, cohesion: 70, morale: 70,
+                    equipment: { infantry: 1200, tanks: 0, artillery: 0, air_defense: 0 },
+                    location_osid: 'op:bihac:bihac_2',
+                },
+            },
+            corps_command: {
+                arbih_5th_corps: {
+                    stance: 'offensive',
+                    active_operations: [{
+                        name: 'Operation Sana', type: 'sector_attack', phase: 'execution',
+                        started_turn: 175, phase_started_turn: 176,
+                        participating_brigades: ['arbih_506th_mountain', 'arbih_517th_light'],
+                        objectives: ['op:bosanska_krupa:donji_dubovik_2'], current_objective_index: 0,
+                        axes: [{
+                            axis_id: 'sana_sanski_most_kljuc', name: 'Sanski Most + Ključ Liberation',
+                            assigned_brigades: ['arbih_506th_mountain', 'arbih_517th_light'],
+                            objectives: ['op:bosanska_krupa:donji_dubovik_2'], current_objective_index: 0,
+                            staging_osid: 'op:bosanska_krupa:ivanjska_2', preserve_objective_sequence: true,
+                            status: 'executing', failure_count: 0, consecutive_failures_on_current: 0,
+                            momentum: 0, attack_attempt_count: 0, objective_capture_count: 0,
+                            movement_only_execution_turns: 0, idle_execution_turn_streak: 0,
+                        }],
+                    }],
+                },
+            },
+            brigade_posture_orders: [],
+        },
+        political: {
+            political_controllers: {
+                'op:bihac:bihac_2': 'RBiH',
+                'op:bihac:ripac': 'RS',
+                'op:bosanska_krupa:otoka_2': 'RBiH',
+                'op:bosanska_krupa:donji_dubovik_2': 'RS',
+                'op:bosanska_krupa:ivanjska_2': 'RS',
+            },
+        },
+    } as any as GameState;
+
+    generateAllBotOrdersOsid(state, ['RBiH'], {
+        edges: [
+            { a: 'op:bihac:bihac_2', b: 'op:bihac:ripac' },
+            { a: 'op:bihac:bihac_2', b: 'op:bosanska_krupa:otoka_2' },
+            { a: 'op:bosanska_krupa:otoka_2', b: 'op:bosanska_krupa:ivanjska_2' },
+            { a: 'op:bihac:ripac', b: 'op:bosanska_krupa:donji_dubovik_2' },
+        ] as any,
+        reverseMap: new Map(), supplyStateByOsid: {} as any, osidPopulationMap: new Map(),
+    });
+
+    assert.equal(state.military.brigade_attack_orders?.arbih_506th_mountain, undefined);
+    assert.equal(state.military.brigade_attack_orders?.arbih_517th_light, undefined);
+    assert.equal(
+        state.military.brigade_movement_orders?.arbih_506th_mountain?.destination_sids?.[0],
+        'op:bosanska_krupa:otoka_2',
+    );
+    assert.equal(
+        state.military.brigade_movement_orders?.arbih_517th_light?.destination_sids?.[0],
+        'op:bosanska_krupa:otoka_2',
+    );
+
+    // Once the sibling capture makes Ivanjska friendly, the same flagged axis
+    // uses it as the real approach to Donji Dubovik and resumes ordinary attack.
+    (state.political as any).political_controllers['op:bosanska_krupa:ivanjska_2'] = 'RBiH';
+    generateAllBotOrdersOsid(state, ['RBiH'], {
+        edges: [
+            { a: 'op:bihac:bihac_2', b: 'op:bosanska_krupa:ivanjska_2' },
+            { a: 'op:bosanska_krupa:ivanjska_2', b: 'op:bosanska_krupa:donji_dubovik_2' },
+        ] as any,
+        reverseMap: new Map(), supplyStateByOsid: {} as any, osidPopulationMap: new Map(),
+    });
+    assert.equal(
+        state.military.brigade_movement_orders?.arbih_506th_mountain?.destination_sids?.[0],
+        'op:bosanska_krupa:ivanjska_2',
+    );
+    assert.equal(
+        state.military.brigade_movement_orders?.arbih_517th_light?.destination_sids?.[0],
+        'op:bosanska_krupa:ivanjska_2',
+    );
+
+    state.military.formations.arbih_506th_mountain.location_osid = 'op:bosanska_krupa:ivanjska_2';
+    state.military.formations.arbih_517th_light.location_osid = 'op:bosanska_krupa:ivanjska_2';
+    state.military.brigade_movement_orders = {};
+    state.military.brigade_posture_orders = [];
+    generateAllBotOrdersOsid(state, ['RBiH'], {
+        edges: [{ a: 'op:bosanska_krupa:ivanjska_2', b: 'op:bosanska_krupa:donji_dubovik_2' }] as any,
+        reverseMap: new Map(), supplyStateByOsid: {} as any, osidPopulationMap: new Map(),
+    });
+    assert.equal(
+        state.military.brigade_attack_orders?.arbih_506th_mountain,
+        'op:bosanska_krupa:donji_dubovik_2',
+    );
+    assert.equal(
+        state.military.brigade_attack_orders?.arbih_517th_light,
+        'op:bosanska_krupa:donji_dubovik_2',
+    );
+});
+
+test('planning flagged axis stages at a friendly neighbor when authored staging is hostile and no approach exists', () => {
+    const state = {
+        meta: { turn: 176, phase: 'war', seed: 'sana-t176-planning-neighbor' },
+        corps_front_directives: {},
+        military: {
+            formations: {
+                arbih_506th_mountain: {
+                    id: 'arbih_506th_mountain', kind: 'brigade', faction: 'RBiH', status: 'active',
+                    corps_id: 'arbih_5th_corps', personnel: 1200, cohesion: 70, morale: 70,
+                    equipment: { infantry: 1200, tanks: 0, artillery: 0, air_defense: 0 },
+                    location_osid: 'op:bihac:bihac_2',
+                },
+            },
+            corps_command: {
+                arbih_5th_corps: {
+                    stance: 'offensive',
+                    active_operations: [{
+                        name: 'Operation Sana', type: 'sector_attack', phase: 'planning',
+                        started_turn: 175, phase_started_turn: 175,
+                        participating_brigades: ['arbih_506th_mountain'],
+                        objectives: ['op:bosanska_krupa:donji_dubovik_2'], current_objective_index: 0,
+                        axes: [{
+                            axis_id: 'sana_sanski_most_kljuc', assigned_brigades: ['arbih_506th_mountain'],
+                            objectives: ['op:bosanska_krupa:donji_dubovik_2'], current_objective_index: 0,
+                            staging_osid: 'op:bosanska_krupa:ivanjska_2', preserve_objective_sequence: true,
+                        }], staging_osid: 'op:bosanska_krupa:ivanjska_2', planning_duration: 5,
+                    }],
+                },
+            },
+            brigade_posture_orders: [],
+        },
+        political: {
+            political_controllers: {
+                'op:bihac:bihac_2': 'RBiH', 'op:bosanska_krupa:otoka_2': 'RBiH',
+                'op:bosanska_krupa:ivanjska_2': 'RS',
+                'op:bosanska_krupa:donji_dubovik_2': 'RS',
+            },
+        },
+    } as any as GameState;
+
+    generateAllBotOrdersOsid(state, ['RBiH'], {
+        edges: [
+            { a: 'op:bihac:bihac_2', b: 'op:bosanska_krupa:otoka_2' },
+            { a: 'op:bosanska_krupa:otoka_2', b: 'op:bosanska_krupa:ivanjska_2' },
+        ] as any,
+        reverseMap: new Map(), supplyStateByOsid: {} as any, osidPopulationMap: new Map(),
+    });
+
+    assert.equal(
+        state.military.brigade_movement_orders?.arbih_506th_mountain?.destination_sids?.[0],
+        'op:bosanska_krupa:otoka_2',
+    );
+});
+
 test('planning-phase operation emits a column march destination toward a distant staging OSID', () => {
     const state = {
   meta: { turn: 11, phase: 'war', seed: 'test-seed' },

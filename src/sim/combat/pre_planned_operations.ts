@@ -1082,11 +1082,13 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         // adjacent but starts HRHB; pribeljci_2 is always RS and safe.
         //
         // Objectives: the main sweep follows the town breakthrough directly into Korenići,
-        // preserving the heavy spearhead's ordinary town–Korenići combat edge. Prusac is
-        // not adjacent to that chain, so the local 19th and 31st approach it on a parallel
-        // axis from RS-held Pribrača instead of making a lateral transfer after Korenići.
-        // Jemanlići is adjacent to Prusac, so the local axis can contest its
-        // RBiH-held position after taking Prusac through ordinary combat.
+        // preserving the heavy spearhead's ordinary town–Korenići combat edge. Jemanlići
+        // is contact-adjacent to Korenići (verified in operational_contact_graph.json),
+        // so the sweep continues to it as the final objective. Prusac is NOT authored
+        // as an objective: the 2026-09-29 CALIBRATION_MASTER hypothesis tests whether
+        // removing the authored Prusac capture eliminates the four simulated RS mismatches
+        // while preserving ordinary combat eligibility. The axis path is a simulation
+        // hypothesis, not a claim of sourced historical route.
         // Torlakovac (3 June 1992) and Korenići (21 May 1992) carry the same date defect as the town
         // (Stanišić TJ §242); they too are listed here only until a sound replacement exists.
         // Removed from triggered Op Jajce (vrs_2nd_krajina) — 1KK handles DV.
@@ -1108,27 +1110,17 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
                     'rs_16th_krajina_motorized' as FormationId,
                 ],
                 // pribeljci_2 (RS) is adjacent to torlakovac_2 — valid staging → first obj chain.
-                // torlakovac_2 → babin_potok_2 → oborci_2 → donji_vakuf_2 → korenici.
+                // torlakovac_2 → babin_potok_2 → oborci_2 → donji_vakuf_2 → korenici → jemanlici.
+                // Prusac is intentionally absent (2026-09-29 CALIBRATION_MASTER hypothesis).
                 objectives: [
                     'op:donji_vakuf:torlakovac_2',
                     'op:donji_vakuf:babin_potok_2',
                     'op:donji_vakuf:oborci_2',
                     'op:donji_vakuf:donji_vakuf_2',
                     'op:donji_vakuf:korenici',
+                    'op:donji_vakuf:jemanlici',
                 ],
                 staging_osid: 'op:sipovo:pribeljci_2',
-            },
-            {
-                // Pribrača is RS-held and directly adjacent to Prusac. Keeping the local
-                // brigades on this axis avoids sending them to the main sweep and back again.
-                axis_id: 'prusac_local',
-                name: 'Prusac Local Axis',
-                brigades: [
-                    'rs_19th_krajina_light_infantry' as FormationId,
-                    'rs_31st_light_infantry' as FormationId,
-                ],
-                objectives: ['op:donji_vakuf:prusac_2', 'op:donji_vakuf:jemanlici'],
-                staging_osid: 'op:donji_vakuf:pribraca_2',
             },
             {
                 // Gornje Krčevine is a separate Vlašić-side pocket, not graph-adjacent
@@ -2508,11 +2500,19 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
 
 /**
  * Admit a later-authored formation that materializes at its pre-planned assembly
- * area while the operation is still planning.
+ * area while the operation is still active.
  *
- * Initial injection cannot roster a mandatory brigade that does not exist yet.
- * The authored identity is nevertheless part of the plan, so once recruitment
- * creates it at the exact staging OSID the operation—not generic routing—owns it.
+ * Initial injection cannot roster a mandatory brigade that does not exist yet or
+ * is still marching to the assembly OSID. The authored identity is nevertheless
+ * part of the plan, so once recruitment creates it or its transit completes at the
+ * exact staging OSID the operation—not generic routing—owns it.
+ *
+ * The window stays open through execution as well as planning, because a brigade
+ * can reach its authored assembly OSID on the operation's first attack turn (the
+ * t28→t29 Donji Vakuf window): the plan then still holds authored ownership of that
+ * brigade and must claim it before a generic operation does. Recovery and completion
+ * close the window; execution is the only later phase and every other gate below
+ * (exact authored staging OSID, no competing commitment, same corps) still binds.
  */
 export function admitAuthoredPrePlannedReinforcements(state: GameState): number {
     const formations = state.military.formations ?? {};
@@ -2523,7 +2523,11 @@ export function admitAuthoredPrePlannedReinforcements(state: GameState): number 
         const operations = [...(commands[corpsId]?.active_operations ?? [])]
             .sort((a, b) => strictCompare(a.name, b.name) || a.started_turn - b.started_turn);
         for (const operation of operations) {
-            if (!operation.is_pre_planned || operation.phase !== 'planning') continue;
+            if (!operation.is_pre_planned) continue;
+            // Authored assembly stays open through execution: a mandated brigade can
+            // arrive at its exact assembly OSID on the operation's first attack turn,
+            // after the op has begun executing. Recovery/completion end the window.
+            if (operation.phase !== 'planning' && operation.phase !== 'execution') continue;
             const def = ALL_PRE_PLANNED.find(candidate => (
                 candidate.corps === corpsId && candidate.name === operation.name
             ));

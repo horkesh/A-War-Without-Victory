@@ -44,7 +44,7 @@ import {
     computeControlFlipProposals
 } from '../state/control_flip_proposals.js';
 import { computeFrontBreaches } from '../state/front_breaches.js';
-import type { FactionId, GameState, MunicipalityId } from '../state/game_state.js';
+import type { CorpsOperation, FactionId, GameState, MunicipalityId } from '../state/game_state.js';
 import { CANONICAL_FACTIONS, CURRENT_SCHEMA_VERSION } from '../state/game_state.js';
 import { prepareNewGameState } from '../state/initialize_new_game_state.js';
 import {
@@ -379,6 +379,8 @@ export interface RunScenarioOptions {
     seedOverride?: string;
     outDirBase?: string;
     emitEvery?: number;
+    /** Optional deterministic, opt-in diagnostic saves after the requested weeks. */
+    emitSaveAtWeeks?: readonly number[];
     /** When true, emit a weekly save every turn to support tactical-map replay/video workflows. */
     emitWeeklySavesForVideo?: boolean;
     weeksOverride?: number;
@@ -2053,11 +2055,112 @@ export async function buildScenarioStartupState(
     };
 }
 
+/**
+ * VLAŠÍC MARCH-TIMING DIAGNOSTIC — opt-in, read-only, inert by default.
+ *
+ * WHY THIS EXISTS. The n6 prefix approved the Operation Vlasic Ridge opportunity at
+ * t150 but the first Paklarevo battle did not land until t156, and the weekly report
+ * omits both `turnReport.preparation_events` and the live operation's
+ * `preparation_sub_phase` — so the gate that delayed execution (intel confidence?
+ * supply? force ratio? assembly floor?) could not be read from any retained artifact.
+ * This trace prints one stable JSON line per turn 149–156 with the operation's
+ * preparation state, its assigned brigades' positions/movement, and the matching
+ * per-turn preparation events, so the delaying gate is identifiable from a single
+ * 156-week prefix run.
+ *
+ * ═══ GATE ═══
+ *
+ * Emits ONLY when `AWWV_VLASIC_TRACE=1` is set in the environment. With the gate off
+ * the function returns before touching state — zero effect on simulation state,
+ * default artifacts, or deterministic ordering.
+ *
+ * ═══ OBSERVATION ONLY ═══
+ *
+ * Reads existing state/report fields only. Mutates nothing, writes no files, and
+ * reproduces no readiness evaluation — opening-readiness thresholds are reported as
+ * authored (`minimum_viable_participants`, `minimum_assembled_participants`) without
+ * recomputing pass/fail. Output is one `stableStringify` line on stdout, prefixed
+ * `[vlasic-trace] `, so it can be grepped out of combined run output.
+ */
+const VLASIC_TRACE_ENV_VAR = 'AWWV_VLASIC_TRACE';
+const VLASIC_TRACE_OPERATION_NAME = 'Operation Vlasic Ridge';
+const VLASIC_TRACE_TURN_MIN = 149;
+const VLASIC_TRACE_TURN_MAX = 156;
+
+export function emitVlasicTraceLine(state: GameState, turnReport: TurnReport): void {
+    if (process.env[VLASIC_TRACE_ENV_VAR] !== '1') return;
+    const turn = state.meta.turn;
+    if (turn < VLASIC_TRACE_TURN_MIN || turn > VLASIC_TRACE_TURN_MAX) return;
+
+    // Find the operation across all corps' active-operation lists. Corps IDs are
+    // sorted so the emitted corps_id is deterministic.
+    let found: { corpsId: string; op: CorpsOperation } | null = null;
+    const corpsCommand = state.military.corps_command ?? {};
+    for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
+        const ops = corpsCommand[corpsId]?.active_operations ?? [];
+        const match = ops.find((op) => op.name === VLASIC_TRACE_OPERATION_NAME);
+        if (match) {
+            found = { corpsId, op: match };
+            break;
+        }
+    }
+
+    const brigades = found
+        ? found.op.participating_brigades.map((id) => {
+            const formation = state.military.formations?.[id];
+            return {
+                id,
+                location_osid: formation?.location_osid ?? null,
+                status: formation?.status ?? null,
+                movement: state.military.brigade_movement_state?.[id] ?? null,
+            };
+        })
+        : [];
+
+    const preparationEvents = (turnReport.preparation_events ?? []).filter(
+        (event) => event.operation_name === VLASIC_TRACE_OPERATION_NAME
+    );
+
+    const payload = {
+        turn,
+        operation: found
+            ? {
+                corps_id: found.corpsId,
+                name: found.op.name,
+                phase: found.op.phase,
+                phase_started_turn: found.op.phase_started_turn,
+                planning_duration: found.op.planning_duration ?? null,
+                preparation_sub_phase: found.op.preparation_sub_phase ?? null,
+                preparation_turns_elapsed: found.op.preparation_turns_elapsed ?? null,
+                preparation_max_turns: found.op.preparation_max_turns ?? null,
+                supply_readiness: found.op.supply_readiness ?? null,
+                intel_confidence_at_assessment: found.op.intel_confidence_at_assessment ?? null,
+                force_ratio_estimate: found.op.force_ratio_estimate ?? null,
+                commander_assessment: found.op.commander_assessment ?? null,
+                postponement_count: found.op.postponement_count ?? null,
+                staging_osid: found.op.staging_osid ?? null,
+                reinforcement_source: found.op.reinforcement_source ?? null,
+                attached_brigades: found.op.attached_brigades ?? [],
+                primary_sector_brigades: found.op.primary_sector_brigades ?? [],
+                minimum_viable_participants: found.op.minimum_viable_participants ?? null,
+                minimum_assembled_participants: found.op.minimum_assembled_participants ?? null,
+                require_all_axes_ready: found.op.require_all_axes_ready ?? null,
+                is_pre_planned: found.op.is_pre_planned ?? null,
+            }
+            : null,
+        brigades,
+        preparation_events: preparationEvents,
+    };
+
+    process.stdout.write(`[vlasic-trace] ${stableStringify(payload)}\n`);
+}
+
 export async function runScenario(options: RunScenarioOptions): Promise<RunScenarioResult> {
     const {
         scenarioPath,
         outDirBase = 'runs',
         emitEvery = 0,
+        emitSaveAtWeeks,
         emitWeeklySavesForVideo = false,
         weeksOverride,
         injectFailureAfterRunMeta,
@@ -2082,6 +2185,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         throw new Error(`Unsupported replayPayloadMode: ${String(replayPayloadMode)}`);
     }
 
+    // Establish run-scoped process state before any scenario I/O. This keeps the
+    // lifecycle gate effective even when setup fails (and prevents a later run from
+    // inheriting flags from an earlier run).
+    applyCollapseGateFromEnv();
+
     // COLLAPSE PHASE IV-a (2026-06-10) — env-gated collapse-pipeline enable. HELD / EXPLORATORY.
     // The collapse pipeline (Phase 3A→3D) is feature-gated OFF by default (every getEnablePhase3*()
     // returns false); only the CLI audit harness flips it. There is no production enable path yet —
@@ -2101,13 +2209,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     // restores the module defaults, which are exactly the values a pristine process starts with.
     // Determinism: reads only an env var at run start; no RNG/clock; identical across two runs with
     // the same env.
-    applyCollapseGateFromEnv();
     const emitFullReplayPayload = replayPayloadMode === 'full';
     const timingTotals = createScenarioTimingTotals();
     const totalTimingStart = timingStart(emitTimingJson);
-    if (!consoleDiagnostics) {
-        pushRoutineConsoleDiagnosticsSuppressed();
-    }
     if (initialStateOnly && resumeFromSavePath) {
         throw new Error('initialStateOnly cannot be combined with resumeFromSavePath');
     }
@@ -2119,6 +2223,24 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     const weeks = weeksOverride !== undefined ? weeksOverride : scenario.weeks;
     if (weeks < 1 || !Number.isInteger(weeks)) {
         throw new Error('weeks must be an integer >= 1');
+    }
+    const selectedSaveWeeks = emitSaveAtWeeks === undefined
+        ? new Set<number>()
+        : (() => {
+            const normalized = [...emitSaveAtWeeks].sort((a, b) => a - b);
+            for (let index = 0; index < normalized.length; index += 1) {
+                const week = normalized[index];
+                if (!Number.isInteger(week) || week < 1 || week > weeks) {
+                    throw new Error(`emitSaveAtWeeks must contain unique positive integer weeks within 1..${weeks}`);
+                }
+                if (index > 0 && normalized[index - 1] === week) {
+                    throw new Error('emitSaveAtWeeks must contain unique positive integer weeks');
+                }
+            }
+            return new Set(normalized);
+        })();
+    if (!consoleDiagnostics) {
+        pushRoutineConsoleDiagnosticsSuppressed();
     }
     // The effective scenario carries the overridden duration. Duration-derived
     // selection (scoring-reference epoch, reached checkpoints) MUST read this,
@@ -2620,6 +2742,10 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 }
             }
 
+            // VLAŠÍC MARCH-TIMING DIAGNOSTIC: opt-in, read-only. Inert unless
+            // AWWV_VLASIC_TRACE=1; see emitVlasicTraceLine for the contract.
+            emitVlasicTraceLine(state, turnReport);
+
             let weeklyCombatCausalityForReport: WeeklyCombatCausalitySummary | undefined;
             let weeklyControlChangeAttributionForReport: WeeklyControlChangeAttributionSummary | undefined;
             let operationDiagnosticsForReport: ReturnType<typeof buildOperationCombatDiagnostics> | undefined;
@@ -3057,7 +3183,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                 });
             }
 
-            if (effectiveEmitEvery > 0 && (week_index + 1) % effectiveEmitEvery === 0) {
+            const elapsedWeek = week_index + 1;
+            if (
+                (effectiveEmitEvery > 0 && elapsedWeek % effectiveEmitEvery === 0)
+                || selectedSaveWeeks.has(elapsedWeek)
+            ) {
                 const midPath = join(outDir, `save_w${week_index + 1}.json`);
                 const serializedMid = timedSync(emitTimingJson, timingTotals, 'serialization_artifacts', () =>
                     serializeState(state)

@@ -31,6 +31,7 @@ import type {
 import type { TgParticipationRecord } from '../../state/brigade_history.js';
 import { createEmptyBrigadeHistory, TG_PARTICIPATION_WINDOW_TURNS } from '../../state/brigade_history.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { isVlasicCohaExceptionOperation } from './coha_operation_exception.js';
 import {
     resolveArmyHqOperation,
     resolveTacticalGroupIdsForOperation,
@@ -421,7 +422,8 @@ export function evaluateOperationTacticalGroupExhaustion(
 ): TgExhaustionRecoveryReason | null {
     if (op.phase !== 'execution') return null;
     if (state.meta?.phase != null && state.meta.phase !== 'war') return null;
-    if (state.military.event_flags?.coha_active === true) return null;
+    if (state.military.event_flags?.coha_active === true
+        && !isVlasicCohaExceptionOperation(state, hostCorpsId, op, turn)) return null;
     if (turn <= op.phase_started_turn) return null;
 
     const engagedGroups = resolveTacticalGroupIdsForOperation(state, hostCorpsId, op)

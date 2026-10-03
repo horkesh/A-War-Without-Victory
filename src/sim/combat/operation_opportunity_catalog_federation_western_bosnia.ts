@@ -79,6 +79,17 @@ const MISTRAL_SIPOVO_OBJECTIVES: readonly string[] = [
     'op:sipovo:sipovo_2',
     'op:sipovo:volari_2',
     'op:sipovo:pribeljci_2',
+    // BB1 pp.417-418: the joint HV/HVO Maestral advance continued from
+    // Sipovo toward Jajce, restored to Croat hands on 13 September 1995.
+    // The operational contact graph supplies this contiguous ordinary-combat
+    // walk from the captured Pribeljci shoulder.
+    'op:jajce:bravnice',
+    'op:jajce:vinac_2',
+    'op:jajce:jajce_3',
+    'op:jajce:lupnica',
+    'op:jajce:barevo_2',
+    'op:jajce:jezero_2',
+    'op:jajce:prisoje',
 ];
 
 const SOUTHERN_MOVE_STAGING_ANCHORS: readonly string[] = [

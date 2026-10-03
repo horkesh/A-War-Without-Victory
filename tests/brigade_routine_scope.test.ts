@@ -498,6 +498,46 @@ describe('correctTransitStates — same scope decision as the producer', () => {
         correctTransitStates(state, adjacency());
         expect(state.military.brigade_movement_state?.b19?.status).toBe('in_transit');
     });
+
+    it('keeps a flagged axis transit to a friendly neighbor of hostile staging, but cancels an unrelated transit', () => {
+        const state = makeState({
+            formationId: 'axis_brigade', faction: 'RBiH', corpsId: 'arbih_5th_corps',
+            location: 'bihac', frontOsids: ['bihac'], assignedSubSegmentId: 'subseg:test:0',
+            transit: { destination: 'otoka', turnsRemaining: 1 },
+            controllers: { bihac: 'RBiH', otoka: 'RBiH', ivanjska: 'RS', objective: 'RS' },
+        });
+        const graph = new Map([
+            ['bihac', ['otoka']], ['otoka', ['bihac', 'ivanjska']],
+            ['ivanjska', ['otoka']], ['objective', []],
+        ]);
+        (state.military as any).corps_command = {
+            arbih_5th_corps: {
+                active_operations: [{
+                    name: 'Operation Sana', type: 'sector_attack', phase: 'execution',
+                    participating_brigades: ['axis_brigade'], objectives: ['objective'],
+                    axes: [{
+                        axis_id: 'sana_axis', assigned_brigades: ['axis_brigade'],
+                        objectives: ['objective'], current_objective_index: 0,
+                        staging_osid: 'ivanjska', preserve_objective_sequence: true,
+                    }],
+                }],
+            },
+        };
+        (state.military.formations as any).unrelated = makeFormation(
+            'unrelated', 'RBiH', 'bihac', { corps_id: 'arbih_5th_corps', assigned_sub_segment_id: 'subseg:test:0' },
+        );
+        (state.military.brigade_movement_state as any).unrelated = {
+            status: 'in_transit', stance: 'column', destination_sids: ['otoka'],
+            path: ['bihac', 'otoka'], turns_remaining: 1,
+        };
+
+        expect(isDestinationAuthorizedByOperation(state, 'axis_brigade', 'otoka', graph)).toBe(true);
+        expect(isDestinationAuthorizedByOperation(state, 'unrelated', 'otoka', graph)).toBe(false);
+        correctTransitStates(state, graph);
+
+        expect(state.military.brigade_movement_state?.axis_brigade?.status).toBe('in_transit');
+        expect(state.military.brigade_movement_state?.unrelated).toBeUndefined();
+    });
 });
 
 // ── Producer tier (T2) — the layer the helper tests could not see ─────────────────────────

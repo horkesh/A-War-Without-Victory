@@ -30,6 +30,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 
 import { _TRIGGERED_OPS } from '../src/sim/combat/triggered_operations.js';
 import {
@@ -1030,7 +1031,71 @@ describe('entry-specific: sana_95 family', () => {
             .toBe(true);
     });
 
-    it('axis shape: parent has Krupa 3/9 + Bihac-Petrovac 5/13 + folded Sanski-Most/Kljuc 2/13 third axis', () => {
+    it('Ključ-first candidate: graph-adjacent pursuit swaps 503rd/510th and preserves approach coverage', () => {
+        const graph = JSON.parse(readFileSync(
+            'data/derived/operational/operational_contact_graph.json', 'utf8')) as {
+            edges: Array<{ a: string; b: string }>;
+        };
+        const edgeSet = new Set(graph.edges.map(edge => `${edge.a}|${edge.b}`));
+        const hasEdge = (a: string, b: string): boolean =>
+            edgeSet.has(`${a}|${b}`) || edgeSet.has(`${b}|${a}`);
+        const krupa = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_krupa')!;
+        const bp = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_bihac_petrovac')!;
+        const approach = SANA_95_OPPORTUNITY.axes.find(
+            a => a.axis_id === 'sana_bihac_petrovac_approach');
+        const sanski = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_sanski_most_kljuc')!;
+        expect(approach).toBeDefined();
+
+        expect(krupa.brigades).toEqual([
+            'arbih_511th_slavna_mountain',
+            'arbih_505th_vitezka_mountain',
+            'arbih_503rd_slavna_mountain',
+        ]);
+        expect(bp.brigades).toEqual([
+            'arbih_501st_slavna_mountain',
+            'arbih_510th_bosnian_liberation',
+        ]);
+        expect(approach!.brigades).toEqual([
+            'arbih_502nd_vitezka_mountain',
+            'arbih_504th_cazin_light',
+            'hvo_101st_bihac',
+        ]);
+        const allBrigades = SANA_95_OPPORTUNITY.axes.flatMap(axis => axis.brigades);
+        expect(new Set(allBrigades).size).toBe(allBrigades.length);
+
+        for (let i = 1; i < bp.objectives.length; i++) {
+            expect(hasEdge(bp.objectives[i - 1], bp.objectives[i])).toBe(true);
+        }
+        for (let i = 1; i < approach!.objectives.length; i++) {
+            expect(hasEdge(approach!.objectives[i - 1], approach!.objectives[i])).toBe(true);
+        }
+        for (const osid of [
+            'op:bihac:orasac_2', 'op:bosanski_petrovac:prkosi',
+            'op:bosanski_petrovac:vodjenica',
+        ]) expect(approach!.objectives).toContain(osid);
+
+        expect(bp.objectives.indexOf('op:bosanski_petrovac:bosanski_petrovac_2'))
+            .toBeLessThan(bp.objectives.indexOf('op:kljuc:kljuc_2'));
+        expect(sanski.objectives.indexOf('op:sanski_most:sanski_most_2'))
+            .toBeLessThan(sanski.objectives.indexOf('op:kljuc:kljuc_2'));
+        expect(SANA_95_OPPORTUNITY.axes.indexOf(bp))
+            .toBeLessThan(SANA_95_OPPORTUNITY.axes.indexOf(sanski));
+
+        const state = buildState({ entry, turn: 180 });
+        runOpportunityEvaluationStep(state, 180);
+        applyOpportunityDecision(state, 180, buildProposalId('sana_95', 180), 'approve');
+        const spawned = state.military.corps_command!['arbih_5th_corps']
+            .active_operations.find(operation => operation.name === 'Operation Sana');
+        expect(spawned).toBeDefined();
+        expect(spawned!.axes?.map(axis => axis.assigned_brigades)).toEqual([
+            krupa.brigades,
+            bp.brigades,
+            approach!.brigades.filter(brigade => brigade !== 'hvo_101st_bihac'),
+            sanski.brigades,
+        ]);
+    });
+
+    it('axis shape: parent has Ključ-first Petrovac pursuit + approach consolidation + folded Sanski-Most/Kljuc 2/13 third axis', () => {
         // 2026-06-11 (panel-GO Ključ re-root, +2 OSID 649→651): interior-3
         // (hadzici/kljuc_2/krasulje_2) moved from sana_sanski_most_kljuc to
         // sana_bihac_petrovac (Petrovac extension, 1-hop from jasenovac_2).
@@ -1044,17 +1109,25 @@ describe('entry-specific: sana_95 family', () => {
         expect(krupa.objectives).toContain('op:bosanski_novi:krslje_2');
         expect(krupa.objectives).toContain('op:bosanski_novi:matavazi_2');
         const bp = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_bihac_petrovac')!;
-        expect(bp.brigades).toHaveLength(5);
-        expect(bp.objectives).toHaveLength(13);
+        expect(bp.brigades).toHaveLength(2);
+        expect(bp.objectives).toHaveLength(10);
         expect(bp.objectives).toContain('op:kljuc:hadzici');
         expect(bp.objectives).toContain('op:kljuc:kljuc_2');
         expect(bp.objectives).toContain('op:kljuc:krasulje_2');
+        const approach = SANA_95_OPPORTUNITY.axes.find(
+            a => a.axis_id === 'sana_bihac_petrovac_approach')!;
+        expect(approach.brigades).toHaveLength(3);
+        expect(approach.objectives).toEqual([
+            'op:bihac:ripac', 'op:bihac:racic', 'op:bihac:orasac_2',
+            'op:bosanski_petrovac:vrtoce', 'op:bosanski_petrovac:prkosi',
+            'op:bosanski_petrovac:vodjenica',
+        ]);
         // 2026-06-07 (lever (b) launch-timing fix): the Sanski Most + Ključ
         // interior is now folded into the INITIAL Sana op as a third axis so it
         // launches at w175 at full strength instead of being corridor-gated into
         // a late, recovery-phase follow-on. It commits the two 5th Corps brigades
-        // NOT used by the Krupa/Bihać-Petrovac axes (506th + 517th) and stages at
-        // the earlier Krupa-axis bridgehead ivanjska_2. See operation_opportunity_catalog_5th_corps.ts.
+        // NOT used by the Krupa/Bihać-Petrovac axes (506th + 517th). The
+        // Ivanjska joint-gateway candidate stages them at friendly Otoka.
         const skParent = SANA_95_OPPORTUNITY.axes.find(a => a.axis_id === 'sana_sanski_most_kljuc')!;
         expect(skParent).toBeDefined();
         expect(skParent.brigades).toEqual([
@@ -1064,15 +1137,14 @@ describe('entry-specific: sana_95 family', () => {
         // 2026-08-11: the Ključ interior was restored additively as a second,
         // faster path after the Petrovac axis proved saturated in the 188w trace.
         // Friendly-controlled objectives are filtered when the operation spawns.
-        expect(skParent.objectives).toHaveLength(14);
-        expect(skParent.objectives[0]).toBe('op:bosanska_krupa:donji_dubovik_2');
+        expect(skParent.objectives).toHaveLength(15);
+        expect(skParent.objectives[0]).toBe('op:bosanska_krupa:ivanjska_2');
+        expect(skParent.objectives[1]).toBe('op:bosanska_krupa:donji_dubovik_2');
         expect(skParent.objectives).toContain('op:kljuc:hadzici');
         expect(skParent.objectives).toContain('op:kljuc:kljuc_2');
         expect(skParent.objectives).toContain('op:kljuc:krasulje_2');
-        expect(skParent.staging_osid).toBe('op:bosanska_krupa:ivanjska_2');
-        expect(krupa.objectives.indexOf(skParent.staging_osid!)).toBeLessThan(
-            krupa.objectives.indexOf('op:bosanska_krupa:donji_dubovik_2'),
-        );
+        expect(skParent.staging_osid).toBe('op:bosanska_krupa:otoka_2');
+        expect(krupa.objectives).toContain(skParent.objectives[0]);
         // #284 (2026-06-08): the standalone `sana_95_follow_on` backstop was
         // retired — the third axis above is now the sole owner of the interior.
         // The retired duplicate must be absent from the catalog.

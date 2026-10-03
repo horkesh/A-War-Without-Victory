@@ -54,6 +54,7 @@ import type {
 import type { Osid } from './osid_adjacency.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { getSectorOffensiveApproachOsids, isOperationParticipant } from './operation_approach_osids.js';
+import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
 
@@ -258,7 +259,8 @@ export function hasActiveOperationCommitment(
 }
 
 /**
- * Staging + approach OSIDs an ACTIVE operation authorizes for this brigade. Empty when the
+ * Staging, approach, and flagged-axis friendly staging-neighbor OSIDs an ACTIVE operation
+ * authorizes for this brigade. Empty when the
  * operation is not in planning/execution, the brigade is not a participant, or it has no
  * formation record.
  *
@@ -288,7 +290,33 @@ export function getOperationAuthorizedDestinations(
     if (!participates) return out;
 
     const stagingOsid = axis?.staging_osid ?? activeOp.staging_osid;
-    if (stagingOsid) out.add(stagingOsid);
+    if (stagingOsid) {
+        out.add(stagingOsid);
+
+        // Preserve the flagged-axis fallback in bot_brigade_eval_attack: when authored
+        // staging is hostile, it marches to a friendly tactical neighbor instead. That
+        // neighbor is a genuine operation destination, but is not an objective approach.
+        if (axis?.preserve_objective_sequence === true) {
+            const stagingController = getPoliticalControllerOSID(
+                state, stagingOsid, reverseMap ?? undefined,
+            );
+            const stagingIsFriendly = stagingController === formation.faction
+                || (stagingController != null && isFriendlyFaction(stagingController, formation.faction, state));
+            if (!stagingIsFriendly) {
+                for (const neighbor of getTacticalAdjacentOsids(
+                    state, stagingOsid as Osid, adjacency as Map<Osid, Osid[]>,
+                )) {
+                    const controller = getPoliticalControllerOSID(
+                        state, neighbor, reverseMap ?? undefined,
+                    );
+                    if (controller === formation.faction
+                        || (controller != null && isFriendlyFaction(controller, formation.faction, state))) {
+                        out.add(neighbor);
+                    }
+                }
+            }
+        }
+    }
 
     const approaches = getSectorOffensiveApproachOsids(
         state,
@@ -306,7 +334,7 @@ export function getOperationAuthorizedDestinations(
 
 /**
  * True when `destinationOsid` is supported by an ACTIVE operation the brigade participates in
- * — its staging OSID, or one of the operation's approach OSIDs.
+ * — its staging OSID, an approach OSID, or a flagged-axis friendly staging neighbor.
  */
 export function isDestinationAuthorizedByOperation(
     state: GameState,

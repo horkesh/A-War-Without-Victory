@@ -59,6 +59,7 @@ import { getSeasonalModifiers } from './seasonal_effects.js';
 import { getAllAxisBrigades, isMultiAxis } from './sector_offensive_axis_helpers.js';
 import { buildOfficerCombatLookup, getCorpsStance } from './combat_math.js';
 import { findBrigadeOperation, findBrigadeOperationAnywhere } from './corps_operation_helpers.js';
+import { isVlasicCohaExceptionAttackOrder } from './coha_operation_exception.js';
 export { getConvergingOperationBrigades } from './corps_operation_helpers.js';
 import { buildSectorDefenseByFactionAndOsid } from './corps_front_sectors.js';
 
@@ -824,13 +825,21 @@ export function generateAllBotOrdersOsid(
     // stage attacks or charge attack/assault posture costs during the pause.
     if (state.military.event_flags?.coha_active === true) {
         for (const brigadeId of Object.keys(allAttackOrders).sort(strictCompare)) {
-            delete allAttackOrders[brigadeId as FormationId];
+            const target = allAttackOrders[brigadeId as FormationId];
+            if (!isVlasicCohaExceptionAttackOrder(state, brigadeId as FormationId, target)) {
+                delete allAttackOrders[brigadeId as FormationId];
+            }
         }
         for (const corpsId of Object.keys(allEligibleAttackersByCorps).sort(strictCompare)) {
-            delete allEligibleAttackersByCorps[corpsId as FormationId];
+            const hasExceptionOrder = Object.entries(allAttackOrders).some(([brigadeId, target]) =>
+                state.military.formations?.[brigadeId]?.corps_id === corpsId
+                && isVlasicCohaExceptionAttackOrder(state, brigadeId as FormationId, target));
+            if (!hasExceptionOrder) delete allEligibleAttackersByCorps[corpsId as FormationId];
         }
         for (const order of allPostureOrders) {
-            if (order.posture === 'attack' || order.posture === 'assault') {
+            const target = allAttackOrders[order.brigade_id as FormationId];
+            if ((order.posture === 'attack' || order.posture === 'assault')
+                && !target) {
                 order.posture = 'hold';
             }
         }

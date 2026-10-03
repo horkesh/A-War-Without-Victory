@@ -172,7 +172,7 @@ describe('stranded_brigade_lifecycle', () => {
         });
 
         it('does not withdraw a brigade reserved by a queued historical operation', () => {
-            const brigadeId = 'rs_19th_krajina_light_infantry';
+            const brigadeId = 'rs_22nd_krajina_infantry';
             const corpsId = 'vrs_1st_krajina';
             const formations = {
                 [brigadeId]: makeBrigade(brigadeId, 'RS', corpsId, 'pocket'),

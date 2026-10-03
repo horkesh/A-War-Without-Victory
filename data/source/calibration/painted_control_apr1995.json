@@ -6,13 +6,20 @@
     "description": "Painted control target: April 1995",
     "total_osids": 712,
     "counts": {
-      "RS": 390,
-      "RBiH": 246,
+      "RS": 389,
+      "RBiH": 247,
       "HRHB": 76
     },
     "source": "painted_control_targets",
-    "revision": 6,
+    "revision": 7,
     "changelog": [
+      {
+        "date": "2026-09-29",
+        "osid": "op:donji_vakuf:prusac_2",
+        "from": "RS",
+        "to": "RBiH",
+        "rationale": "Owner determination, 2026-09-29: paint Prusac RBiH at all four checkpoints, superseding the earlier Prusac RS paint, including the 2026-08-24 apr1995 owner-paint entry retained below. ICTY Stanišić & Župljanin Trial Judgement Vol I para 242 directly establishes that the 17 August 1992 attack failed; local BB2 printed p466 directly places ARBiH at Prusac in 1994. Neither source directly proves every aggregate constituent at every checkpoint; the all-checkpoint RBiH paint is the owner's reference determination."
+      },
       {
         "date": "2026-09-27",
         "osid": "op:trnovo:gornja_presjenica",
@@ -414,7 +421,7 @@
     "op:donji_vakuf:kutanja": "RS",
     "op:donji_vakuf:oborci_2": "RS",
     "op:donji_vakuf:pribraca_2": "RS",
-    "op:donji_vakuf:prusac_2": "RS",
+    "op:donji_vakuf:prusac_2": "RBiH",
     "op:donji_vakuf:torlakovac_2": "RS",
     "op:duvno:dobrici": "HRHB",
     "op:duvno:kongora": "HRHB",

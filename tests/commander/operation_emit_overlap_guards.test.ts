@@ -396,6 +396,53 @@ function makePlanDecision(): PlanDecision {
 }
 
 describe('commander emission overlap guards', () => {
+    it.each([
+        { confidence: 0.25, expectedType: 'sector_attack' },
+        { confidence: 0, expectedType: 'probe' },
+    ] as const)('keeps a t154 Mistral 1 reservation out of a generic $expectedType roster', ({ confidence, expectedType }) => {
+        const reservedId = 'hv_4th_guards_split';
+        const lineIds = ['z_line_1', 'z_line_2'];
+        const brigadeIds = [reservedId, ...lineIds];
+        const brigades = brigadeIds.map((id) => makeBrigade(id, 'op:test:approach'));
+        const baseBriefing = makeIntelBriefing([confidence], {
+            turn: 154,
+            consecutiveProbes: expectedType === 'sector_attack' ? 2 : 0,
+        });
+        const briefing = {
+            ...baseBriefing,
+            brigades,
+            sectors: [{
+                ...makeSector(),
+                assigned_brigade_ids: brigadeIds as FormationId[],
+                sub_segments: [{
+                    ...makeSector().sub_segments[0]!,
+                    primary_brigade_ids: brigadeIds as FormationId[],
+                }],
+            }],
+        } as CommanderBriefing;
+        briefing.state_ref!.meta.turn = 154;
+        briefing.state_ref!.military.corps_command![CORPS_ID]!.subordinate_count = brigadeIds.length;
+        const allocation: AllocationResult = {
+            ...makeAllocation(),
+            surplus_pool: brigadeIds.map(makeEval),
+        };
+
+        const output = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            allocation,
+            makePlanDecision(),
+            makeDecisions(),
+            makeThreats(),
+        );
+
+        expect(output.operations).toHaveLength(1);
+        expect(output.operations[0]?.type).toBe(expectedType);
+        expect(output.operations[0]?.participating_brigades).not.toContain(reservedId);
+        expect(output.operations[0]?.participating_brigades.length).toBeGreaterThan(0);
+    });
+
     it('emits a bilateral operation from plan-reserved brigades even when the new allocation garrison-locks them', () => {
         const briefing = { ...makeBriefing(), bilateral_offensive: true } as CommanderBriefing;
         const planDecision = makePlanDecision();
@@ -1343,27 +1390,54 @@ describe('commander emission overlap guards', () => {
 
         const emitVariant = ({
             garrisonOverrides = {},
+            garrisonId = 'garrison' as FormationId,
+            candidateTurn = 30,
             primaryOverride = primary,
             activeOperations = [],
             movementState,
             candidateAllocation = allocation,
         }: {
             garrisonOverrides?: Partial<FormationState>;
+            garrisonId?: FormationId;
+            candidateTurn?: number;
             primaryOverride?: CorpsFrontSector;
             activeOperations?: any[];
             movementState?: GameState['military']['brigade_movement_state'];
             candidateAllocation?: AllocationResult;
         }) => {
             const candidateBrigades = brigades.map((brigade) => brigade.id === 'garrison'
-                ? { ...brigade, ...garrisonOverrides }
+                ? { ...brigade, ...garrisonOverrides, id: garrisonId }
                 : brigade);
+            const candidatePrimary = {
+                ...primaryOverride,
+                assigned_brigade_ids: primaryOverride.assigned_brigade_ids.map(
+                    (id) => id === 'garrison' ? garrisonId : id,
+                ),
+                reserve_brigade_ids: primaryOverride.reserve_brigade_ids.map(
+                    (id) => id === 'garrison' ? garrisonId : id,
+                ),
+                sub_segments: primaryOverride.sub_segments.map((subSegment) => ({
+                    ...subSegment,
+                    primary_brigade_ids: subSegment.primary_brigade_ids.map(
+                        (id) => id === 'garrison' ? garrisonId : id,
+                    ),
+                })),
+            } as CorpsFrontSector;
+            const normalizedAllocation = {
+                ...candidateAllocation,
+                garrison_locks: candidateAllocation.garrison_locks.map((lock) => ({
+                    ...lock,
+                    brigade_id: lock.brigade_id === 'garrison' ? garrisonId : lock.brigade_id,
+                })),
+            };
             const candidateState = {
                 ...state,
+                meta: { ...state.meta, turn: candidateTurn },
                 military: {
                     ...state.military,
                     formations: Object.fromEntries(candidateBrigades.map((brigade) => [brigade.id, brigade])),
                     corps_front_sectors: Object.fromEntries(
-                        [primaryOverride, donor].map((sector) => [sector.sector_id, sector]),
+                        [candidatePrimary, donor].map((sector) => [sector.sector_id, sector]),
                     ),
                     brigade_movement_state: movementState ?? {},
                     corps_command: {
@@ -1378,14 +1452,15 @@ describe('commander emission overlap guards', () => {
             return emitCommanderOutput(
                 {
                     ...briefing,
+                    turn: candidateTurn,
                     brigades: candidateBrigades,
-                    sectors: [primaryOverride, donor],
+                    sectors: [candidatePrimary, donor],
                     state_ref: candidateState,
                     active_operations: activeOperations,
                 },
                 [],
                 makeForces(),
-                candidateAllocation,
+                normalizedAllocation,
                 { ...makePlanDecision(), plan: null, action: 'none' },
                 makeDecisions(),
                 makeThreats(),
@@ -1451,6 +1526,18 @@ describe('commander emission overlap guards', () => {
             },
         });
         excludesPrimaryGarrison(soloGarrison);
+
+        const reservationWindowOutput = emitVariant({
+            garrisonId: 'hv_4th_guards_split' as FormationId,
+            candidateTurn: 154,
+        });
+        expect(reservationWindowOutput.operations[0]).toMatchObject({
+            type: 'sector_attack',
+            objectives: ['op:test:objective'],
+        });
+        expect(reservationWindowOutput.operations[0]?.participating_brigades).toContain('b1');
+        expect(reservationWindowOutput.operations[0]?.participating_brigades)
+            .not.toContain('hv_4th_guards_split');
 
         const lowIntelState = {
             ...state,

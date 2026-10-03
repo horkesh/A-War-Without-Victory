@@ -55,6 +55,7 @@ import type {
 } from '../../state/game_state.js';
 import type { NamedOfficer, NamedOfficerState } from '../../state/officer_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { mayEliteJoinOperation } from './historical_elite_reservations.js';
 import { FACTION_RECON_PROFILES } from './sector_intel_constants.js';
 import {
     getEquipmentOffensivePriority,
@@ -497,6 +498,7 @@ export function selectProbeBrigades(
     const candidates: Array<{ id: FormationId; priority: number; personnel: number }> = [];
 
     for (const bid of op.participating_brigades) {
+        if (!mayEliteJoinOperation(bid, state.meta.turn, op.name, op.started_turn)) continue;
         const b = state.military.formations?.[bid];
         if (!b || b.status !== 'active') continue;
         if ((b.personnel ?? 0) < 400) continue; // Combat ineffective — can't probe

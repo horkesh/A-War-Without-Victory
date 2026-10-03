@@ -57,8 +57,14 @@ export function getSectorOffensiveApproachOsids(
     brigadeId?: FormationId,
 ): Set<Osid> {
     const axis = brigadeId ? getBrigadeAxis(activeOp, brigadeId) : null;
-    const objectives = axis ? axis.objectives : (activeOp.objectives ?? []);
-    const currentIdx = axis ? axis.current_objective_index : (activeOp.current_objective_index ?? 0);
+    const objectives = axis
+        ? axis.preserve_objective_sequence === true
+            ? axis.objectives.slice(axis.current_objective_index, axis.current_objective_index + 1)
+            : axis.objectives
+        : (activeOp.objectives ?? []);
+    const currentIdx = axis
+        ? axis.preserve_objective_sequence === true ? 0 : axis.current_objective_index
+        : (activeOp.current_objective_index ?? 0);
     const approachOsids = new Set<Osid>();
     for (const objective of objectives.slice(currentIdx)) {
         for (const neighbor of getTacticalAdjacentOsids(state, objective as Osid, adjacency)) {

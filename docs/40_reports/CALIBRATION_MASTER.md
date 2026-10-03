@@ -1,5 +1,51 @@
 # AWWV Calibration Master Reference
 
+## Farz objective ruling — 2026-09-29
+
+The owner accepts an authored Farz objective captured by either the 2nd or
+3rd Corps; the final blow on Briješnica need not be assigned to the 2nd Corps.
+The verifier now checks four late, operation-owned combat capture receipts
+and w188 RBiH control, while reporting 2nd Corps roster participation
+separately. Retained n14 and n0 both pass the revised Farz objective gate.
+Neither AAR records a 2nd Corps participant, so neither run establishes the
+historical joint link-up (BB1 printed p.386). Earlier “Farz P-A §6 NO-MERGE”
+status text is superseded: the prior P-A failure was a carved-out calibration
+discriminator, as this master already states below, not a sensitive-history
+§6 breach. Full-suite, final calibration, merge and baseline adoption remain
+open. See the latest `docs/PROJECT_LEDGER.md` entry and
+`logs/vlasic-march-timing-20260928/opencode_farz_owner_ruling_result.md`.
+
+## October calibration checkpoint — Sana n37/n38 — 2026-10-03
+
+The 2026-09-29 owner ruling above remains authoritative for Farz. Do not
+restate the superseded P-A wrong-corps wording as a current blocker; the Farz
+decision and the Sana checkpoint below are separate. This checkpoint does not
+adopt or merge the dirty Sana diagnostic candidate.
+
+Retained n37 (`runs/apr1992_definitive_188w__6deb5845c150c196__w188_n37`) has
+both the full-suite and 188-week campaign exit 0. Calibration is nevertheless
+**NO-GO**: Petrovac is captured at t181, Ključ at t185, Sanski Most town stays
+RS at w188, and the four Sana-belt gains arrive at t184–187. Jajce reaches 3/5
+(Bravnice t185, Vinac t186, Jajce town t187). Four n25 October matches are
+lost: Barevo, Lupnica, Majdan, and Varošluk. Protected checkpoints remain
+retained and n37 reports zero critical anomalies (27 total anomalies).
+
+The single n38 186-week prefix
+(`runs/apr1992_definitive_188w__4658849344f21642__w186_n38`) also exits 0. It
+uses the same consumed-input digest
+`8f13061b19ed9fd2d899f77f0115fdd4c5379e52cb058b3edadbd00e0e41af20`, the same
+initial-save SHA-256
+`413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1`, and the
+same week-186 totals (HRHB 98 / RBiH 276 / RS 338) as n37. Its `save_w186` is
+post-turn. The retained boundary shows lawful 517th route alternatives, but
+does not prove a unique selector bug or justify a production correction.
+
+Disposition: n37 is a dirty diagnostic candidate, not an accepted baseline;
+n38 is a read-only boundary receipt. No merge or adoption follows, no
+production edit was made, and no second 188-week campaign is authorized from
+this evidence. Exact helper exits are retained locally in
+`logs/prusac-diagnostic-20260929/`.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing
@@ -5475,3 +5521,47 @@ correct these effects; current focused tests assert only a positive impact.
 They require their own §6-approved correction, exact-effect tests and measured
 proof before merge/adoption. The independent review verdict is BLOCK merge;
 the Doljani combat result and published map remain provisional evidence.
+
+## 2026-09-29 — Prusac owner reference correction and 1992 trace
+
+The owner directs `op:donji_vakuf:prusac_2` to be **RBiH at all four calibration
+checkpoints**. The January 1993, April 1994 and April 1995 active painted
+targets change RS→RBiH; October 1995 was already RBiH. Each changed target
+retains 712 OSIDs and records the correction as an owner determination. This
+supersedes the earlier April 1995 owner paint to RS. The alternate
+`painted_control_jan1993_improved.json` is a legacy, non-active artifact.
+
+The evidence should not be overstated: ICTY *Stanišić & Župljanin*, Trial
+Judgement Vol I ¶242, finds that the 17 August 1992 Prusac attack failed and
+the attackers returned to their original positions. BB2 printed p.466 places
+the ARBiH at/from Prusac in April and November 1994. Those sources do not by
+themselves establish every constituent of the four-settlement operational
+aggregate or its ownership at every checkpoint; the all-checkpoint paint is
+the owner's explicit reference decision.
+
+**Retained n14 trace, no new campaign:** Prusac begins RBiH and flips once,
+RBiH→RS at t29 (26 October 1992). The authored VRS `Operation Donji Vakuf`
+opens its parallel `prusac_local` axis from Pribrača with Prusac as the first
+objective. The 19th Krajina Light Infantry wins ordinary combat at power ratio
+10.47 against RBiH militia (120 casualties) with no defending brigade; the
+operation then captures Jemanlići at t30. No later Prusac flip is logged.
+This is the immediate cause of the four current simulated RS mismatches. A
+reference edit alone cannot prevent the 1992 capture.
+
+Replaying the unchanged n14 save against the corrected targets yields
+**706/712, 706/712, 705/712, 671/712**, versus the prior
+707/707/706/671. The independent checkpoint verifier exits 0 and preserves
+its enclave and Farz guards; April protected anchors remain 40/40. No
+simulation behavior, initial control, operation objective, or force roster was
+changed. The candidate remains dirty, unmerged and unadopted; existing full
+suite, clean-source and separate §6 gates remain open.
+
+The smallest 1992 simulation hypothesis to test is to stop authoring a
+successful Prusac objective for the VRS operation while preserving ordinary
+combat eligibility. Jemanlići has a contact edge from Korenići, the main
+sweep's final objective, so its operation path could be tested separately
+without using Prusac as a mandatory stepping stone. An objective edit would
+need focused route/combat proof, a cheap 1992 prefix and then the required
+188-week, protected-anchor, full-suite and provenance checks. It is a
+**proposal, not an implemented or measured repair**; removing the authored
+objective alone does not prove generic VRS attacks will never take Prusac.

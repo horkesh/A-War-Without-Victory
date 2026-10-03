@@ -9,6 +9,7 @@ import {
     linkOpportunityResolutionToAAR,
     runOpportunityEvaluationStep,
 } from '../src/sim/combat/operation_opportunities.js';
+import { advanceSectorOffensives } from '../src/sim/combat/sector_offensive.js';
 import {
     CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES,
     DONJI_VAKUF_95_OPPORTUNITY,
@@ -24,14 +25,13 @@ const STAGING_ANCHORS = [
     'op:travnik:cukle_2',
 ];
 
+// The authored March ridge objectives (VLASIC_TRAVNIK_RIDGE_OBJECTIVES): Domet-1's
+// two historical targets. Varošluk/Komar belongs to the September 1995 Donji Vakuf
+// advance, not Domet-1 (see PROJECT_LEDGER.md "Owner approval for March Vlašić
+// objective scope"); the op:skender_vakuf cells were removed 2026-09-02.
 const VLASIC_OBJECTIVES = [
-    'op:travnik:gornje_krcevine',
     'op:travnik:paklarevo',
-    'op:travnik:varosluk',
-    'op:skender_vakuf:donji_koricani',
-    'op:skender_vakuf:imljani_2',
-    'op:skender_vakuf:javorani_2',
-    'op:skender_vakuf:knezevo_2',
+    'op:travnik:gornje_krcevine',
 ];
 
 const VLASIC_BRIGADES = [
@@ -397,6 +397,26 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         expect(DONJI_VAKUF_95_OPPORTUNITY.primary_corps).toBe('arbih_3rd_corps');
     });
 
+    it('authors the March Vlašić ridge axis without Varošluk, retaining the two Domet-1 targets', () => {
+        // 2026-09-28 owner-approved scope correction (PROJECT_LEDGER.md "Owner
+        // approval for March Vlašić objective scope"; 2026-09-02 Historian ruling
+        // docs/PROJECT_LEDGER_ARCHIVE_2026Q3.md:8714-8781): Varošluk/Komar is a
+        // September 1995 Donji Vakuf objective, not a Domet-1 (20-24 Mar 1995) one.
+        const ridgeAxis = VLASIC_RIDGE_95_OPPORTUNITY.axes[0];
+        expect(ridgeAxis.objectives).toEqual([
+            'op:travnik:paklarevo',
+            'op:travnik:gornje_krcevine',
+        ]);
+        expect(ridgeAxis.objectives).not.toContain('op:travnik:varosluk');
+
+        const probeAxis = VLASIC_RIDGE_95_OPPORTUNITY.variants
+            ?.find(v => v.variant_id === 'ridge_probe')?.axes[0];
+        expect(probeAxis?.objectives).toEqual([
+            'op:travnik:paklarevo',
+            'op:travnik:gornje_krcevine',
+        ]);
+    });
+
     it('starts Donji Vakuf 95 on the live Travnik-Komar contact edge', () => {
         const openingAxis = DONJI_VAKUF_95_OPPORTUNITY.axes[0];
 
@@ -487,9 +507,23 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
             .toBe(true);
     });
 
+    it('surfaces at the February planning boundary turn 150', () => {
+        const state = buildVlasicState({ turn: 150 });
+        runOpportunityEvaluationStep(state, 150);
+
+        const proposal = state.military.operation_opportunities
+            ?.find(p => p.opportunity_id === 'vlasic_ridge_95');
+
+        expect(proposal).toBeDefined();
+        expect(proposal!.proposal_id).toBe('OPP_150_vlasic_ridge_95');
+        expect(proposal!.status).toBe('eligible_pending_review');
+        expect(isOpportunityEligible(VLASIC_RIDGE_95_OPPORTUNITY, evaluateAxes(state, 150, VLASIC_RIDGE_95_OPPORTUNITY)))
+            .toBe(true);
+    });
+
     it('does not surface before/after window, under broken alliance, lost staging, or no enemy-held objectives', () => {
         const cases = [
-            buildVlasicState({ turn: 151 }),
+            buildVlasicState({ turn: 149 }),
             buildVlasicState({ turn: 167 }),
             buildVlasicState({ turn: 156, alliance: 0.35 }),
             buildVlasicState({ turn: 156, stagingHeld: false }),
@@ -654,5 +688,50 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         expect(state.military.operation_opportunity_resolutions?.[0].exit_class).toBe('partial_success');
         expect(state.military.operation_opportunity_resolutions?.[0].executed_op_aar_id)
             .toBe('arbih_3rd_corps:vlasic:t156');
+    });
+
+    it('spawns a t152 Vlašić operation with planning_duration 2 for t154 execution', () => {
+        // 2026-09-28 timing candidate: planning_duration 4→2 must let a t152-approved
+        // Vlašić operation begin executing by t154 (1995-03-20, the documented
+        // Domet-1 start). This drives the real opportunity→spawn path and verifies
+        // the operation inherits the shortened planning window.
+        //
+        // NOTE: The full planning→execution transition through advanceSectorOffensives
+        // is NOT verified here. The opening-attack readiness gate
+        // (axisHasExecutableOpeningAttack) depends on the combat predictor, which
+        // returns 'catastrophic' with a null power ratio under this minimal fixture
+        // (no terrain/supply/officer-lookup state). Configuring that state is not
+        // cheap; see logs/vlasic-march-timing-20260928/opencode_result.md.
+        const state = buildVlasicState({ turn: 152 });
+
+        // The lifecycle owner derives the acting faction from the corps formation;
+        // buildVlasicState only sets the six brigades, so add the RBiH corps.
+        (state.military.formations as Record<string, unknown>)['arbih_3rd_corps'] = {
+            id: 'arbih_3rd_corps',
+            name: '3rd Corps',
+            kind: 'corps',
+            status: 'active',
+            faction: 'RBiH',
+            personnel: 50,
+            cohesion: 80,
+            morale: 75,
+        };
+
+        // Spawn the operation through the canonical opportunity decision path.
+        runOpportunityEvaluationStep(state, 152);
+        const proposalId = buildProposalId('vlasic_ridge_95', 152);
+        const approved = applyOpportunityDecision(state, 152, proposalId, 'approve');
+
+        expect(approved?.status).toBe('approved');
+        const op = state.military.corps_command!.arbih_3rd_corps.active_operations[0];
+        expect(op).toBeDefined();
+        // The operation inherits the catalog's shortened planning window...
+        expect(op.planning_duration).toBe(2);
+        // ...starts in the planning phase at the approval turn...
+        expect(op.phase).toBe('planning');
+        expect(op.phase_started_turn).toBe(152);
+        // ...and the 2-turn window means the earliest execution turn is t154
+        // (t152 start + 2 planning turns), matching the documented Domet-1 start.
+        expect(op.phase_started_turn + (op.planning_duration ?? 0)).toBe(154);
     });
 });
