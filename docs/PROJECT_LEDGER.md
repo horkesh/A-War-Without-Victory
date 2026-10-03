@@ -9,6 +9,34 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-03 — Dispatcher observation: focused preparation GO
+
+Owner “Proceed” authorizes observation preparation and local integration. Added
+default-absent dispatcher_decision eligibility/filter/pre-order/first-handler
+receipts in the ordinary bot pass and real weekly serialization. No selector,
+lifecycle, combat/control/reference/denominator/save-schema change. Later assist
+passes remain separate; outputs distinguish pre-cap/generated/snapshot.
+
+Initial independent NO-GO found cross-row duplicates, inverse transit consistency
+and two proof gaps. One targeted verification is GO only for preparation. RED1
+(19/22 passed); corrected22/22 exits0, syntax/diff0. Real cap emits2 attacks before
+cap and1 survivor; merge generatedT1 differs from retainedMANUAL snapshot. Focused
+off/on complete states/orders match. Prior54/54 route/reason/writer evidence and
+corrected production typecheck0 reused; full-suite/default campaign neutrality open.
+
+OpenCode Sol126/no-route; Go Luna126/quota429, both before tools. Fresh Sol
+implementation/review and one direct legacy n39 negative check complete scope.
+Expected consumer1:0 receipts, missing737 at137/138/139. Raw failures/catalog
+cancellation and all retained evidence preserved. Compact source/proof/parent hashes:
+`logs/prusac-diagnostic-20260929/continuation4_dispatcher_reviewed_summary.json`.
+Exact commands/review/remaining gaps are in existing Sana validation/convergence
+docs. Reuse n39 late outcomes and required Farz receipts. No original dirty-source
+or unique-cause claim. Future139 is proposed only, about3–5 minutes with stop on
+first run/provenance/coverage failure. No campaign, full suite, gameplay correction,
+push, merge or adoption.
+Final docs63/63, strict130 tracked citations, index/inventory/whitespace0;
+source8/parent22/n39-artifact7 hashes match. Required commit hook retained.
+
 ## 2026-10-03 — n39 known-source diagnostic: bounded STOP
 
 Owner “Next it is” authorizes exactly one recorded188-week campaign from clean

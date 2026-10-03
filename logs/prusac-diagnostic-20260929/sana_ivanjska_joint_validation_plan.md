@@ -494,3 +494,93 @@ Expected cost: tens of seconds because the existing pre-commit classifier treats
 JSON/exit receipts as requiring `npx tsc --noEmit`. Preserve that required hook;
 reuse other unaffected production proofs. Pass: commit/hook0 and clean tracked
 status. Stop on failure; no campaign or full suite is included.
+
+## Continuation 4 — bounded dispatcher observation preparation (2026-10-03)
+
+Question: can the actual ordinary `generateAllBotOrdersOsid` pass emit an opt-in,
+one-pass receipt for every formation boundary, naming exact eligibility/filter
+outcome and the first handled evaluator (or active-column skip), while preserving
+evaluator/filter call counts and order, default-off state/orders, the existing
+`route_decision` shape, and completed-turn weekly serialization?
+
+Checks, in order: focused RED/GREEN Vitest for the dispatcher writer/projection
+and strict reader; the existing route writer/reader plus reason-code tests where
+touched; `node --check tools/diagnostics/bot_dispatcher_decision_coverage.cjs`;
+one owned `npm run typecheck`; and `git diff --check`. Pass means the focused
+fixtures cover an earlier real evaluator, active-column skip, terminal handling,
+inactive/unsupported/missing-location/faction/filter exclusions, exact-once
+filter calls, stable multi-actor ordering, replace/merge scope, off/on state and
+order equality, real weekly JSON roundtrip, and fail-closed schema/enums/turn/
+duplicate actor-pass/missing boundary/eligibility-handler contradictions. Focused
+tests should take seconds and typecheck about one minute. Stop after one concrete
+unexpected failure for diagnosis and a cheap targeted correction; do not retry an
+unchanged failure or start a campaign, replay, prefix, package build, or full suite.
+
+## Continuation 4 — independent-review targeted correction (2026-10-03)
+
+Question: does the strict dispatcher reader reject duplicate completed-turn
+actor/pass receipts across weekly rows and inverse active-column contradictions,
+and do real public generator fixtures prove writer→weekly JSON→consumer
+compatibility plus distinct pre-cap/final/snapshot outputs under the actual attack
+cap and merge precedence without changing gameplay behavior?
+
+Exact focused command:
+`node node_modules/vitest/vitest.mjs run tests/bot_dispatcher_decision_coverage_diagnostic.test.ts tests/bot_dispatcher_decision_diagnostic.test.ts`.
+Then run `node --check tools/diagnostics/bot_dispatcher_decision_coverage.cjs`
+and `git diff --check`. Pass means both focused files pass; the reader rejects the
+two reviewed contradictions; an actual generated, attached, stable-JSON weekly
+row passes the strict consumer; real attack-cap and merge fixtures expose the
+three output boundaries; and topic off/on state and orders remain equal. Expected
+cost: seconds. Stop after one concrete unexpected failure for consolidated
+diagnosis and one cheap targeted correction only. Reuse the existing 54-test
+route/reason proof and corrected production typecheck because production source
+types are unchanged; do not run a campaign, suite, replay, prefix, or n39 check.
+
+### Dispatcher closeout and future proposal — NOT AUTHORIZED
+
+Scoped targeted review GO; exact final command: `node node_modules/vitest/vitest.mjs run tests/bot_dispatcher_decision_coverage_diagnostic.test.ts tests/bot_dispatcher_decision_diagnostic.test.ts`.
+RED1(19/22 passed), corrected22/22 exits0; syntax/diff0. Prior54/54 route/reason/
+writer proof and corrected production typecheck0 reused. No campaign neutrality
+or calibration acceptance claim. Earlier literal commands/diagnoses are in
+continuation4_dispatcher_implementation_summary.md; initial/targeted review preserved.
+
+Distinct legacy negative command, ran once after OpenCode quota: `node tools/diagnostics/bot_dispatcher_decision_coverage.cjs runs/apr1992_definitive_188w__6deb5845c150c196__w188_n39 --formation arbih_737th_muslim_light --expect-boundary arbih_737th_muslim_light:137 --expect-boundary arbih_737th_muslim_light:138 --expect-boundary arbih_737th_muslim_light:139 --turn-min 137 --turn-max 139 --json`.
+Expected negative: consumer1, receipts0, named737/all137–139 missing, causal_proof:false.
+OpenCode Sol126/no-route and Luna126/quota429 before tools; owned catalog cancellation
+tool exit1/no child marker. No provider retries or unowned process actions.
+
+Final closeout question: are source-bound evidence/docs tracked, consistent, within
+size limits, and are protected source/data boundaries unchanged? Commands:
+`node node_modules/vitest/vitest.mjs run tests/receipt_citations.test.ts tests/plan_index.test.ts tests/docs_desktop_v09_truth.test.ts`;
+`node tools/validate_receipt_citations.cjs --strict`; `node tools/derive_plan_index.cjs --check`; working/staged `git diff --check`.
+Check unchanged route consumer/touched-path inventory; preserve raw evidence/junctions.
+Pass requires all focused docs/citation/index/whitespace checks0; board<20000 and
+roadmap<60000 characters. Cost seconds; stop/correct only concrete doc defects.
+Local integration exact command: `git -c core.hooksPath=.husky commit -m "Add reviewed dispatcher observation for calibration diagnosis"`.
+Real required hook typechecks, expected about one minute; stop/diagnose hook failure.
+
+Future proposal needs new owner authorization: one139-week current-source diagnostic
+asks which ordinary eligibility/first-handler branch737 takes at completed137–139.
+Prerequisites: clean committed candidate, Node22, existing focused controls passing,
+n39 consumed31-input digest/initial hash pinned; no runner help command.
+Proposed exact PowerShell:
+```powershell
+$env:AWWV_DEBUG_REASON_CODES = 'dispatcher_decision'
+node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_188w.json --weeks 139 --out runs --unique
+```
+Then use the same strict consumer command above with the NEW unique directory.
+Pass: runner0, clean/provenance/input/initial equality, reader0 with named737 at
+137/138/139 and0 inconsistencies; no unexplained retained pre139 control/checkpoint
+drift. Inspect preexisting/issued destinations and actual handler. A handler receipt
+localizes the next predicate question; it does not prove a selector defect or
+original dirty n37 cause. Expected cost about3–5 minutes plus artifact inspection;
+new output can add cost. Stop on the first failed run/provenance/coverage gate,
+preserve evidence/diagnose; no automatic retry. Reuse n39 late evidence. No new188,
+full suite, gameplay correction, adoption or merge is authorized.
+
+Final closeout: documentation63/63, strict130 tracked citations, plan-index,
+inventory and working/staged whitespace exit0. Eight source/22 parent/seven n39
+fingerprints match; raw runs/logs and local junctions retained, Node22.23.2,
+protected source/data/canon diff empty. Required local commit hook is retained;
+its actual result is captured in continuation4_dispatcher_commit logs. No
+simulation or unaffected check was repeated for this closeout.

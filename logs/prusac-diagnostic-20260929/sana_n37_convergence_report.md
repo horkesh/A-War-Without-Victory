@@ -626,3 +626,27 @@ The129 count is this final invocation; the128 count above belongs to preparation
 No production proof, consumer or campaign was repeated for this closeout.
 Local documentation/receipt integration retains the existing pre-commit hook;
 its exact outcome is captured under `continuation4_campaign_docs_commit`.
+
+### Dispatcher preparation and targeted review — 2026-10-03
+
+Independent targeted GO is limited to observation preparation. Ordinary pre-order
+eligibility/filter/first handler and distinct pre-cap/generated/snapshot receipts
+are default-absent. Real cap/merge off/on state/orders match; no gameplay/save fix.
+Initial NO-GO and targeted GO retained in continuation4_dispatcher_independent_review.md.
+RED1(19/22), corrected22/22 exits0; syntax/diff0, prior54/54 and typecheck0 reused.
+Real weekly JSON passes strict consumer; global duplicate and inverse transit gaps closed.
+
+OpenCode Sol126/no-route and Luna126/quota429 before tools. Direct n39 negative
+ran once: expected1,0 receipts, missing737 at137–139; no cause inferred.
+Compact: `continuation4_dispatcher_reviewed_summary.json`.
+No campaign/suite/replay/prefix ran. Reuse n39 late517, towns/belt/Jajce/matches/
+protected/critical/Farz evidence. Original cause, continuous737 boundary, launch/
+HV receipts, full-suite/default campaign neutrality and calibration acceptance
+remain open. Next is a separately authorized139-week branch question; no188 retry.
+
+Final closeout: documentation63/63, strict130 tracked citations, plan-index,
+inventory and working/staged whitespace exit0. Eight source/22 parent/seven n39
+fingerprints match; raw runs/logs and local junctions retained, Node22.23.2,
+protected source/data/canon diff empty. Required local commit hook is retained;
+its actual result is captured in continuation4_dispatcher_commit logs. No
+simulation or unaffected check was repeated for this closeout.

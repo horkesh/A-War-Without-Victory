@@ -100,6 +100,8 @@ import { strictCompare } from '../../state/validateGameState.js';
  *                      Replaces the retired `insufficient_donation` launch blocker,
  *                      which reported an operation failure for what is now only a
  *                      declined augmentation.
+ *  dispatcher_decision — formation eligibility and first-handler observation at
+ *                        the actual bot-order dispatcher boundary.
  */
 export type ReasonCodeTopic =
     | 'battle_stack'
@@ -112,7 +114,8 @@ export type ReasonCodeTopic =
     | 'objective_filter'
     | 'opportunity_roster'
     | 'route_decision'
-    | 'tg_formation';
+    | 'tg_formation'
+    | 'dispatcher_decision';
 
 const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'axis_reject',
@@ -126,6 +129,7 @@ const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'opportunity_roster',
     'route_decision',
     'tg_formation',
+    'dispatcher_decision',
 ];
 
 /**

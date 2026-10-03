@@ -105,6 +105,20 @@ Independent review is GO for bounded STOP only. Compact evidence:
 [n39 reviewed receipt](../../logs/prusac-diagnostic-20260929/continuation4_campaign_reviewed_summary.json).
 No retry/full suite/adoption/merge; original attribution and acceptance stay open.
 
+Dispatcher observation preparation now has independent targeted **GO**.
+The ordinary pass records eligibility/filter, pre-order context and first handler
+or active-column skip, distinguishing pre-cap/generated/snapshot outputs. It is
+opt-in/default-absent; no gameplay or save-schema change. Initial review NO-GO
+is preserved; four findings corrected. Targeted22/22, syntax0 and reused production
+typecheck0; real cap/merge and writer→weekly→strict-reader controls pass. Prior
+route/reason evidence is reused. OpenCode Sol no-route126 and Luna quota429/exit126
+occurred before tools; Sol completed implementation/review. Legacy n39 negative
+reader1 is expected:0 receipts, missing737 at137–139. No branch cause is inferred.
+[Preparation receipt](../../logs/prusac-diagnostic-20260929/continuation4_dispatcher_reviewed_summary.json).
+Next is separately authorized139-week737 diagnosis, not an188 retry. Original
+source/cause, full-suite/default campaign neutrality, launch/HV receipts and all
+calibration acceptance gaps remain open; n39 late/Farz/protected evidence stands.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

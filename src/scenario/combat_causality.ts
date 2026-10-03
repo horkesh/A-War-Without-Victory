@@ -2,7 +2,7 @@ import type { AttackResolutionOsidReport } from '../sim/combat/attack_resolution
 import type { AxisLaunchReadinessDetail, AxisOrderGenerationDetail, CorpsOperation, FactionId, FormationId, FormationState, GameState } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 import { isVlasicCohaExceptionOperation } from '../sim/combat/coha_operation_exception.js';
-import type { BotRouteDecisionDetail } from '../sim/combat/bot_brigade_ai_osid.js';
+import type { BotDispatcherDecisionDetail, BotRouteDecisionDetail } from '../sim/combat/bot_brigade_ai_osid.js';
 
 export interface BotOrderDiagnosticsSnapshot {
     attack_orders_by_brigade: Record<FormationId, string>;
@@ -12,6 +12,8 @@ export interface BotOrderDiagnosticsSnapshot {
     eligible_attackers_by_corps: Record<FormationId, number>;
     /** Env-gated pre-order generic route decisions; absent on default runs. */
     route_decision_details?: BotRouteDecisionDetail[];
+    /** Env-gated dispatcher eligibility and first-handler receipts. */
+    dispatcher_decision_details?: BotDispatcherDecisionDetail[];
 }
 
 export type OperationCombatInvalidationReason =
@@ -130,6 +132,7 @@ export function createBotOrderDiagnosticsSnapshot(
     extras?: {
         eligible_attackers_by_corps?: Record<FormationId, number>;
         route_decision_details?: BotRouteDecisionDetail[];
+        dispatcher_decision_details?: BotDispatcherDecisionDetail[];
     }
 ): BotOrderDiagnosticsSnapshot {
     const attackOrdersByBrigade: Record<FormationId, string> = {};
@@ -181,6 +184,24 @@ export function createBotOrderDiagnosticsSnapshot(
         ...(extras?.route_decision_details === undefined ? {} : {
             route_decision_details: [...extras.route_decision_details]
                 .sort((a, b) => strictCompare(a.brigade_id, b.brigade_id)),
+        }),
+        ...(extras?.dispatcher_decision_details === undefined ? {} : {
+            dispatcher_decision_details: extras.dispatcher_decision_details
+                .map((detail) => ({
+                    ...detail,
+                    snapshot_output: {
+                        attack_target_osid: attackOrdersByBrigade[detail.formation_id] ?? null,
+                        movement_destination_osid: movementOrdersByBrigade[detail.formation_id] ?? null,
+                        column_march_destination_osid:
+                            state.military.brigade_movement_orders?.[detail.formation_id]?.stance === 'column'
+                                ? state.military.brigade_movement_orders[detail.formation_id]?.destination_sids?.[0] ?? null
+                                : null,
+                        postures: (state.military.brigade_posture_orders ?? [])
+                            .filter((order) => order.brigade_id === detail.formation_id)
+                            .map((order) => order.posture),
+                    },
+                }))
+                .sort((a, b) => strictCompare(a.formation_id, b.formation_id)),
         }),
     };
 }

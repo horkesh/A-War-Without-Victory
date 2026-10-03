@@ -46,6 +46,7 @@ const ALL_TOPICS: ReasonCodeTopic[] = [
     'route_decision',
     // ENGINE-HEALTH B3 (2026-09-19): TG augmentation declines.
     'tg_formation',
+    'dispatcher_decision',
 ];
 
 function setFlag(value: string | undefined): void {

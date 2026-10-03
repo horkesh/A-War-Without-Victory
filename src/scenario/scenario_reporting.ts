@@ -123,7 +123,8 @@ export function attachBotOrderDiagnosticsToWeeklyReport(
     row: WeeklyReportRow,
     diagnostics: BotOrderDiagnosticsSnapshot | undefined,
 ): void {
-    if ((diagnostics?.route_decision_details?.length ?? 0) > 0) {
+    if ((diagnostics?.route_decision_details?.length ?? 0) > 0
+        || (diagnostics?.dispatcher_decision_details?.length ?? 0) > 0) {
         row.bot_order_diagnostics = diagnostics;
     }
 }
