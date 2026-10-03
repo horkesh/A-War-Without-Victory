@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-03 (October Sana checkpoint synchronized)
+**Last updated:** 2026-10-03 (Sana observation preparation reviewed)
 
 **Current R6 status — October Sana checkpoint remains NO-GO.** The retained n37
 full suite and 188-week campaign both exit 0, but the calibration result fails:
@@ -23,7 +23,7 @@ Majdan, Varošluk). Protected checkpoints remain retained and critical anomalies
 are zero. The n38 single 186-week prefix exits 0 with the same consumed-input
 digest, initial-save hash, and week-186 totals as n37; its save is post-turn and
 does not prove a selector bug. The dirty candidate is not an accepted baseline:
-no merge/adoption, production edit, or second 188-week campaign follows. The
+no merge/adoption or calibration correction follows. The
 2026-09-29 owner Farz ruling at the top of [CALIBRATION_MASTER](../40_reports/CALIBRATION_MASTER.md)
 supersedes the old P-A wrong-corps wording; do not restore that stale blocker.
 
@@ -35,7 +35,7 @@ cause. Independent Sol review is GO for the bounded stop without correction,
 not calibration acceptance. Fresh Farz receipt audit exits 0 under the current
 owner ruling. n37 Southern Move is still planning at w188 (elapsed 3/5),
 correcting the older late-execution narrative. Jajce and all four lost matches
-remain open. No production edit, retry, new suite/campaign, merge or adoption.
+remain open. No calibration correction, retry, merge or adoption.
 See the [convergence diagnosis](../../logs/prusac-diagnostic-20260929/sana_n37_convergence_report.md).
 
 The subsequent owner-authorized OpenCode source audit exits 0 but fails the
@@ -47,6 +47,12 @@ Retained western audit: Barevo/Lupnica are lost n29→n30; Majdan/Varošluk are
 already lost in n29. The 737th's first recorded route-state difference is t138.
 These chronological facts do not identify a launch/selector cause. No correction
 or campaign follows; protected evidence and every acceptance gap remain open.
+
+Observation preparation: Go quota126; Sol adds opt-in interior-route receipts
+and a strict weekly consumer. Correction15/15, typecheck/syntax0;86 cases reused;
+independent preparation GO. The linked report preserves the accidental default
+partial run/stop uncertainty and36 unchanged artifact hashes. No routing/control/
+save change or acceptance. Known-source188w proposal NOT AUTHORIZED; all gaps open.
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference

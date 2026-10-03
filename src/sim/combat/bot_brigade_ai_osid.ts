@@ -213,10 +213,35 @@ export interface OsidBotOrdersResult {
     column_march_orders: Record<FormationId, Osid>;
     /** Diagnostics: operation participants that could directly attack the current objective this turn. */
     eligible_attackers_by_corps: Record<FormationId, number>;
+    /** Env-gated observation of the terminal generic interior-routing rule. */
+    route_decision_details?: BotRouteDecisionDetail[];
 }
 
 export interface BotOrderGenerationDiagnostics {
     eligible_attackers_by_corps: Record<FormationId, number>;
+    /** Absent unless `AWWV_DEBUG_REASON_CODES=route_decision` emitted a receipt. */
+    route_decision_details?: BotRouteDecisionDetail[];
+}
+
+export interface BotRouteDecisionDetail {
+    turn: number;
+    phase: string | null;
+    brigade_id: FormationId;
+    location_osid: Osid;
+    transit_status: string | null;
+    /** Destination already present in the turn-scoped order map when this evaluator ran. */
+    preexisting_movement_order_destination_osid: string | null;
+    /** Destination retained by the multi-turn movement state, if any. */
+    persistent_movement_state_destination_osid: string | null;
+    operation_name: string | null;
+    axis_id: string | null;
+    current_objective: string | null;
+    rule: 'priority_sector' | 'offensive_target' | 'own_corps_front' | 'fallback';
+    route_goal_osids: Osid[];
+    outcome: 'issued' | 'rejected' | 'held' | 'no_order';
+    candidate_destination_osid: Osid | null;
+    issued_destination_osid: Osid | null;
+    rejection_reason: 'risky_destination' | 'already_at_goal' | 'no_destination_selected' | null;
 }
 
 export interface BotOrderGenerationOptions {
@@ -661,6 +686,7 @@ export function generateAllBotOrdersOsid(
     const allMovementOrders: Record<FormationId, Osid> = {};
     const allColumnMarchOrders: Record<FormationId, Osid> = {};
     const allEligibleAttackersByCorps: Record<FormationId, number> = {};
+    let allRouteDecisionDetails: BotRouteDecisionDetail[] | undefined;
 
     for (const faction of sortedFactions) {
         const fmtsBrigades = state.military.formations ?? {};
@@ -777,6 +803,10 @@ export function generateAllBotOrdersOsid(
         }
         for (const [bid, dest] of Object.entries(result.column_march_orders)) {
             if (dest != null) allColumnMarchOrders[bid as FormationId] = dest;
+        }
+        if (result.route_decision_details !== undefined) {
+            allRouteDecisionDetails ??= [];
+            allRouteDecisionDetails.push(...result.route_decision_details);
         }
         for (const corpsId of Object.keys(finalEligibleAttackersByCorps).sort(strictCompare)) {
             allEligibleAttackersByCorps[corpsId] =
@@ -913,6 +943,10 @@ export function generateAllBotOrdersOsid(
     }
 
     return {
-        eligible_attackers_by_corps: allEligibleAttackersByCorps
+        eligible_attackers_by_corps: allEligibleAttackersByCorps,
+        ...(allRouteDecisionDetails === undefined ? {} : {
+            route_decision_details: [...allRouteDecisionDetails]
+                .sort((a, b) => strictCompare(a.brigade_id, b.brigade_id)),
+        }),
     };
 }

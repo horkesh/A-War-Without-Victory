@@ -79,6 +79,19 @@ Majdan/Varošluk are already lost in n29. The 737th's recorded route intent firs
 differs at completed t138. Reviewed chronology does not supply the missing
 launch/selector predicate; no production correction or campaign follows.
 
+Continuation 4 prepares observation only. OpenCode Go dispatch exits126 on
+provider quota429 before tool use; Sol completes the authorized preparation.
+The opt-in generic interior route receipt now reaches the real weekly writer;
+its consumer checks exact schema, completed-turn alignment and named boundaries
+without claiming causal proof. Correction tests15/15, typecheck and syntax exit0;
+86 unaffected focused cases are reused. Independent correction review is GO
+for preparation only. No routing/combat/control/save-schema change or baseline
+adoption follows. The accidental default 52-week launch produced four partial
+weekly rows; it and the uncertain broad process stop are preserved in the
+existing report. All36 fingerprinted retained comparison artifacts still match.
+The known-source 188-week proposal remains **NOT AUTHORIZED**. Original n37
+source/cause, all named acceptance outcomes and full acceptance review stay open.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

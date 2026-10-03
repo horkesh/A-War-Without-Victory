@@ -43,6 +43,7 @@ const ALL_TOPICS: ReasonCodeTopic[] = [
     'movement_reject',
     'objective_filter',
     'opportunity_roster',
+    'route_decision',
     // ENGINE-HEALTH B3 (2026-09-19): TG augmentation declines.
     'tg_formation',
 ];
@@ -81,6 +82,7 @@ describe('reason-code gate', () => {
         expect(isReasonCodeTopicEnabled('movement_reject')).toBe(false);
         expect(isReasonCodeTopicEnabled('objective_filter')).toBe(false);
         expect(isReasonCodeTopicEnabled('opportunity_roster')).toBe(false);
+        expect(isReasonCodeTopicEnabled('route_decision')).toBe(false);
     });
 
     it('accepts all and * as every topic, and tolerates whitespace and case', () => {

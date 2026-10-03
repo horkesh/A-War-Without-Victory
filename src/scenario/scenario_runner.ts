@@ -176,7 +176,7 @@ import type {
     WeeklyCorpsSummaryEntry,
     WeeklyReportRow
 } from './scenario_reporting.js';
-import { buildWeeklyReport } from './scenario_reporting.js';
+import { attachBotOrderDiagnosticsToWeeklyReport, buildWeeklyReport } from './scenario_reporting.js';
 import { buildBrigadeTemporalRows } from './brigade_temporal_emit.js';
 // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: per-turn full-state snapshot
 // stream + end-of-run consolidated `replay_save_sequence.json` artifact powering
@@ -3109,6 +3109,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             if (turnReport.movement_report) {
                 reportRow.movement_report = turnReport.movement_report;
             }
+            // `weekly_report.jsonl` is baselined. Preserve its default shape and
+            // attach the bot-order snapshot only for an emitted route receipt.
+            attachBotOrderDiagnosticsToWeeklyReport(reportRow, turnReport.bot_order_diagnostics);
             // REASON-CODE INSTRUMENTATION (topic `formation_refusal`) — item 4.
             // `turnReport.recruitment_report` has NO other consumer anywhere in
             // `src/`, so without this attachment the counters would be surfaced into

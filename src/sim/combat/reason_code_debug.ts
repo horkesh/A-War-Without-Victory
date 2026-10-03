@@ -1,5 +1,5 @@
 /**
- * REASON-CODE INSTRUMENTATION — one env gate, nine topics, inert by default.
+ * REASON-CODE INSTRUMENTATION — one env gate, eleven topics, inert by default.
  *
  * ═══ WHAT THIS IS FOR ═══
  *
@@ -51,7 +51,7 @@
  * an order the engine already fixed upstream. Reading `process.env` is a pure
  * read of process configuration and does not vary within a run.
  *
- * ═══ ONE VARIABLE, NINE TOPICS — AND WHY NOT NINE VARIABLES ═══
+ * ═══ ONE VARIABLE, ELEVEN TOPICS — AND WHY NOT ELEVEN VARIABLES ═══
  *
  * `mainstaff_op_availability_gate.ts` deliberately uses two separate flags,
  * because its two halves move participation in OPPOSITE directions and a
@@ -92,7 +92,9 @@ import { strictCompare } from '../../state/validateGameState.js';
  *                      and routing scope, emitted on the movement report.
  *  opportunity_roster — item 9. Why each catalog-authored brigade was admitted
  *                       to or rejected from an opportunity operation axis.
- *  tg_formation      — item 10 (ENGINE-HEALTH B3, 2026-09-19). Why a Tactical Group
+ *  route_decision    — item 10. Which generic interior-routing rule selected a
+ *                      non-operation brigade's pre-order destination or terminal fallback.
+ *  tg_formation      — item 11 (ENGINE-HEALTH B3, 2026-09-19). Why a Tactical Group
  *                      AUGMENTATION was declined: anchor, donor count, pledged
  *                      personnel, readiness fraction and the donation it required.
  *                      Replaces the retired `insufficient_donation` launch blocker,
@@ -109,6 +111,7 @@ export type ReasonCodeTopic =
     | 'movement_reject'
     | 'objective_filter'
     | 'opportunity_roster'
+    | 'route_decision'
     | 'tg_formation';
 
 const ALL_TOPICS: readonly ReasonCodeTopic[] = [
@@ -121,6 +124,7 @@ const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'movement_reject',
     'objective_filter',
     'opportunity_roster',
+    'route_decision',
     'tg_formation',
 ];
 

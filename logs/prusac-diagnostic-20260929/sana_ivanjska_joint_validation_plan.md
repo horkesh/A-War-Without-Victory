@@ -177,3 +177,261 @@ n37 suite/campaign, n38 prefix, protected controls and Farz proof are reused.
 Closeout: focused documentation tests63/63, derived index, Node syntax and
 working/staged whitespace checks exit0. Independent targeted correction
 verification is GO for scoped chronology/STOP only. No calibration acceptance.
+
+## 2026-10-03 instrumentation-preparation handoff
+
+Owner requested OpenCode instructions for the next closure step. Bounded scope:
+reuse existing reason-code topics, identify actual writer/projection gaps,
+prepare minimal observation-only receipts and focused neutrality/compatibility
+proof, then a concrete campaign proposal. Exact scope, files, commands, pass
+criteria, expected cost and stop rules are in
+`continuation4_opencode_instrumentation_handoff.md`. No campaign, full suite,
+behavior correction or acceptance waiver is authorized by this handoff.
+
+One OpenCode dispatch attempt exits126: provider.quota, HTTP429, Go usage limit
+exceeded. No worker tool action occurred; no retry or implementation followed.
+The handoff remains ready for an available OpenCode session. Exact exit and raw
+stdout/stderr are retained with prefix `continuation4_opencode_dispatch`.
+
+The quota limits that OpenCode provider only. Authorized preparation continues
+with a fresh Sol-medium worker. Initial coverage confirms existing axis/launch,
+roster, rejection and HV lifecycle diagnostics; the bounded addition is the
+generic interior-routing selector receipt. Campaign authorization is unchanged.
+
+### Continuation 4 observation coverage and focused-proof plan
+
+| Question | Existing receipt/topic and consumer | Actual gap | Smallest correction | Focused proof |
+|---|---|---|---|---|
+| Why did the current Sana axis launch or refuse? | `axis_reject`; `launch_readiness_detail` / `launch_blocker_detail`; operation AAR and `operation_launch_order_consistency.cjs` | None found | Reuse unchanged | Existing launch, projection and positive-control tests |
+| Why did the 517th attack, hold or march toward the current objective? | `axis_reject`; `order_generation_details`; `combat_causality.axis_decision_diagnostics`; weekly report and launch/order consumer | None found | Reuse unchanged | Existing staging-truth and scenario-operation diagnostic tests |
+| Why was a catalog brigade admitted to an opportunity axis? | `opportunity_roster`; operation-opportunity trace; lifecycle diagnostic consumer | None found | Reuse unchanged | Existing opportunity and lifecycle positive controls |
+| Did an HV expeditionary ghost actually remain live or withdraw? | `formation_lifecycle`; opt-in temporal rows; `hv_1995_lifecycle.ts` | None found for observation preparation | Reuse unchanged | Existing temporal-emitter and lifecycle diagnostic tests |
+| Why did a non-operation brigade such as the 737th select a route? | Final movement destination exists, and `movement_reject` explains later column rejection, but no receipt identifies the interior-routing rule, goal set, selected step or terminal fallback | Writer, projection and consumer are absent at the pre-order boundary | Add one env-gated optional route-decision receipt at `evaluateInteriorMovement`, project it through `bot_order_diagnostics`, and add a read-only coverage consumer | First observe a failing 737th-shaped production-entrypoint regression; then prove positive observability, disabled-field absence, debug-off/on behavioral equality, deterministic ordering and consumer fail-closed behavior |
+
+Focused validation question: does the added receipt expose the non-operation
+route rule and selected destination without changing any order, movement,
+objective, combat/control or RNG-bearing state, while all existing axis/roster/
+lifecycle facilities remain intact? Commands: run the new route diagnostic test
+first (red, then green), then the handoff's six focused files plus that test,
+`node node_modules/typescript/bin/tsc --noEmit`, and `git diff --check`. Pass:
+the observed red is caused only by the missing receipt; green tests have zero
+failures; debug-off omits the field; debug-on differs only by the reviewed
+diagnostic receipt; typecheck and whitespace exits are 0. Expected cost is
+seconds for the new test and a few minutes for the focused set/typecheck. Stop
+after any unexpected failure, diagnose all visible categories, and rerun only
+the smallest affected proof. No full suite, prefix, resume, package build or
+campaign is part of this proof.
+
+### Settled focused proof and save/default-shape boundary
+
+The bounded draft writes no `GameState` field and changes no state schema,
+serializer, loader or migration path. Its new optional value exists only in the
+ephemeral bot-order return value and the per-turn `TurnReport` projection that
+feeds `weekly_report.jsonl`. `git diff -- src/state src/state/game_state.ts
+src/state/serializeGameState.ts` is empty. Therefore old-save loading and
+round-trip behavior use the unchanged production path; a fabricated save
+migration test would not exercise this report-only change.
+
+The portable 737th-shaped production-entrypoint test supplies the applicable
+compatibility/neutrality proof. With the topic disabled, both the returned
+diagnostics and serialized report snapshot omit `route_decision_details`.
+With it enabled, the complete `GameState` (orders, movement state, objectives,
+control/combat fields and RNG-bearing state) is exactly equal to the disabled
+run. Removing only the named `route_decision_details` field makes both the
+returned diagnostics and report snapshot exactly equal; no whole summary or
+order map is normalized away. A separate terminal-no-order positive control
+proves absence of a destination is observable rather than inferred.
+
+TDD evidence: missing writer/projection red 2/2 exit1; the first green attempt
+exit1 correctly exposed a risky positive fixture; corrected receipt test 2/2
+exit0. Missing consumer red exit1, assertion red exit1, consumer green 3/3
+exit0. The unchanged six handoff files plus the two new focused files pass
+91/91, exit0; TypeScript `--noEmit` exits0. Evidence prefix:
+`continuation4_route_receipt_*`, `continuation4_route_consumer_*`,
+`continuation4_focused_tests.*`, and `continuation4_typecheck.*`. Consumer
+`node --check` exits0 (`continuation4_consumer_syntax.*`); the pre-summary
+working/staged whitespace check exits0 (`continuation4_diffcheck.*`).
+
+### Proposed known-source diagnostic campaign — NOT AUTHORIZED / DO NOT EXECUTE
+
+**Question.** On a newly bound candidate, which exact pre-order rules select or
+reject the named 737th's non-operation routes across the full 188-turn horizon;
+which launch/readiness and order-generation predicates govern the 517th and the
+late Mistral/Southern Move axes; which catalog brigades enter their rosters; and
+what lifecycle action, if any, actually occurs for the HGZ/112th expeditionary
+formations? This characterizes the new candidate only and cannot attribute the
+original dirty n37 run.
+
+**Cheapest prerequisites and binding.** Before authorization, root must bind the
+executable to a clean candidate commit (preferred) or preserve a complete dirty
+binary patch plus every untracked executable path and SHA-256 manifest. Record
+`git rev-parse HEAD`, `git status --porcelain=v1 -uall`, Node/npm versions,
+`package-lock.json` SHA-256, scenario SHA-256, and SHA-256 for all changed
+production sources, the new consumer and all untracked executable inputs. The
+current preparation observed Node `v22.23.2`, npm `10.9.8`, package-lock SHA-256
+`3BED66FE10B593A7889E90863C3FCB0990BB1AE244DC559EF30E21232C5D8CA5`, and
+scenario SHA-256
+`4257B039F5B1DBB7F21D940EC656B2D0B787856F27E7C26B6F3F57F256D82ECF`;
+these are preparation facts, not future-run binding. Require the focused tests,
+typecheck, `node --check tools/diagnostics/bot_route_decision_coverage.cjs`, and
+working/staged `git diff --check` to exit0. Verify the scenario, runner, TSX,
+consumer and output junction exist, and guard a fresh `continuation4_` marker;
+do not probe the runner with `--help`. `run_scenario.ts` source confirms the only
+campaign flags below are supported: `--scenario`, `--weeks`, `--out`, `--unique`.
+
+**Proposed command, only after separate owner authorization:**
+
+```powershell
+$env:AWWV_DEBUG_REASON_CODES = 'axis_reject,opportunity_roster,formation_lifecycle,movement_reject,route_decision'
+node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_188w.json --weeks 188 --out runs --unique
+$campaignExit = $LASTEXITCODE
+Remove-Item Env:AWWV_DEBUG_REASON_CODES
+exit $campaignExit
+```
+
+Capture guarded raw stdout/stderr and exact exit under a fresh
+`continuation4_instrumented_188w_*` prefix. Resolve the unique run directory
+from the runner's emitted path and record SHA-256 for `run_meta.json`,
+`initial_save.json`, `final_save.json`, `weekly_report.jsonl`,
+`brigade_temporal_log.jsonl`, `operation_aars.json` and `run_summary.json`.
+Require `run_meta.provenance.git_commit`, `git_dirty`, Node version,
+scenario path/weeks, and `consumed_inputs.digest/files` to agree with the bound
+candidate and recorded inputs.
+
+**Receipt windows, actors and coverage.** Actor filtering remains post-process;
+there is no new simulation env filter. Run the route consumer across the entire
+horizon, not only original t138:
+
+```powershell
+node tools/diagnostics/bot_route_decision_coverage.cjs <run-dir> --formation arbih_737th_muslim_light --expect-boundary arbih_737th_muslim_light:137 --expect-boundary arbih_737th_muslim_light:138 --expect-boundary arbih_737th_muslim_light:139 --turn-min 1 --turn-max 188 --json
+node tools/diagnostics/operation_launch_order_consistency.cjs <run-dir> --json --inject-positive-control
+node node_modules/tsx/dist/cli.mjs tools/diagnostics/hv_1995_lifecycle.ts <run-dir>
+```
+
+The first command must exit0 with named 737th receipts across the full horizon,
+exact completed-turn alignment (`receipt.turn === weekly_report.week_index`),
+and explicit t137/t138/t139 boundary coverage. The adjacent turns are coverage
+controls around the retained completed-t138 post-turn divergence; a new
+known-source candidate is not guaranteed to reproduce the retained route or
+intent. Any missing expected boundary is therefore a failed observation gate,
+not evidence that the historical event did not occur or that its cause is
+known. Inspect every named 737th receipt for turn/phase, location/transit, the
+separate preexisting turn-order and persistent movement-state destinations,
+null operation/axis, route goal set, candidate, terminal outcome and resulting
+destination. The verifier rejects unknown schema/enums, invalid outcome pairs,
+duplicate brigade receipts, destination/order contradictions and a missed
+named boundary. It reports structural coverage separately and always reports
+`causal_proof: false`.
+For turns 170–188, structurally extract `arbih_517th_light` axis
+`order_generation_details`, all Sana/Mistral/Southern Move
+`launch_readiness_detail`/blockers, and opportunity-roster rows; require at
+least one named 517th order-decision receipt and the actual first-execution axis
+receipts. Route receipt `turn` is the completed counter and must equal weekly
+`week_index`; the zero-based temporal-log loop index remains distinct. The
+operation consumer must exit0 and detect its injected positive
+control. The HV diagnostic must establish `formation_lifecycle` temporal
+projection and opportunity-roster positive controls, then report the actual
+HGZ/112th state/action. If no withdrawal action occurs by t188, record that
+bounded absence and live/end state; do not infer withdrawal or destruction.
+
+**Pass, cost and stop.** Estimated campaign cost is about five minutes from the
+retained prefix, plus seconds for post-processing. Pass requires exact runner
+exit0, complete provenance/artifact fingerprints, all named coverage gates,
+internally consistent receipts, and preserved ordinary combat/control output.
+Receipt coverage is not calibration acceptance. Petrovac/Ključ/Sanski chronology,
+every n25 checkpoint match, four belt/five Jajce gains, protected controls, zero
+critical anomalies, Farz/source/run receipts and independent acceptance all
+remain separate. Stop before launch on any prerequisite/binding failure. After
+launch, stop after the first nonzero, incomplete artifact, provenance mismatch,
+missing named receipt or consumer contradiction; preserve evidence, diagnose,
+and do not retry or retune without a new owner decision. No full suite, prefix,
+resume, package build or second campaign is bundled into this proposal.
+
+### Continuation 4 targeted correction plan — independent-review blockers
+
+**Question.** Does the real `TurnReport.bot_order_diagnostics` to
+`weekly_report.jsonl` production edge serialize the env-gated route-decision
+receipt while leaving the default weekly row shape absent and unchanged; and
+does the consumer fail closed on schema, enum, completed-turn alignment,
+duplicate-brigade and named-boundary defects? The receipt counter is the
+decision-time `state.meta.turn`. `runTurn` increments that counter before
+war order generation, and `buildWeeklyReport` later copies the same completed
+counter into `week_index`, so the weekly projection requires exact equality.
+The zero-based temporal-log loop index is a separate counter and is not used by
+this check.
+
+**Focused commands.** First run only
+`tests/bot_route_decision_diagnostic.test.ts` and
+`tests/bot_route_decision_coverage_diagnostic.test.ts` to observe the new
+regressions fail, then rerun those same two files after the narrow correction.
+After green, run `node node_modules/typescript/bin/tsc --noEmit`, `node --check
+tools/diagnostics/bot_route_decision_coverage.cjs`, and working/staged `git diff
+--check`. Logs use fresh `continuation4_correction_*` names and may not replace
+existing evidence.
+
+**Pass, cost and stop.** Pass requires env-off production projection to omit
+the field; env-on serialization to include the exact receipt and movement map;
+the renamed turn-scoped and persistent destination sources to be distinct;
+terminal no-selection to avoid a claim of illegality; and all malformed or
+missing named-boundary fixtures to exit nonzero. Expected cost is seconds for
+each focused test command and a few minutes for typecheck. Stop after a failure
+that is not a routine fixture or narrow receipt correction. Do not invoke a
+runner, campaign, resume, full suite, package build, process inspection or
+retry. The prior unaffected 91/91 focused evidence remains reusable.
+
+### Continuation 4 targeted correction result
+
+The independent-review blockers are corrected within the observation-only
+scope. The scenario runner now calls one reporting helper after
+`buildWeeklyReport`; that helper attaches the complete bot-order snapshot only
+when `route_decision_details` is non-empty. The env-off production row therefore
+retains its baselined shape, while the env-on row serializes both the receipt
+and the same completed-turn movement-order map. `runTurn` increments
+`state.meta.turn` before war phases, and `buildWeeklyReport` uses that same
+post-turn value for `week_index`; the consumer enforces equality rather than
+using the distinct zero-based temporal emitter index.
+
+Receipt source fields now distinguish
+`preexisting_movement_order_destination_osid` from
+`persistent_movement_state_destination_osid`. A failed bounded search reports
+`no_destination_selected`; it does not assert that every lawful destination
+predicate was exhausted. The receipt describes only the terminal generic
+interior evaluator and is not a complete history of earlier predicates. Active
+column transit skips before this hook and has a focused negative control.
+
+The first correction red run exits1 with 12 intended failures (2 files, 14
+tests: 2 passed, 12 failed). After the narrow implementation, the first green
+run passes 14/14. Adding the existing-path active-transit negative control is
+the only intervening test change; `continuation4_correction_green2` then passes
+15/15. Consumer syntax exits0. The first non-interactive typecheck had no exit
+receipt when its 30-second command window returned. A second typecheck was
+unnecessarily started while the first completion was pending. Both exit0;
+both receipts are preserved; no further manual typecheck follows. The initial 91/91
+result was not rerun: the 15 correction cases supersede its five original
+route/consumer cases, and its other 86 cases are reused.
+
+### Root closeout checks
+
+Question: do the final authority/ledger edits retain valid tracked citations,
+plan-index truth and document size limits; and is the accidental output still
+incomplete with the recorded four weekly rows? Exact focused command:
+`node node_modules/vitest/vitest.mjs run tests/receipt_citations.test.ts tests/plan_index.test.ts tests/docs_desktop_v09_truth.test.ts`.
+Also run `node tools/validate_receipt_citations.cjs --strict`,
+`node tools/derive_plan_index.cjs --check`, and working/staged `git diff --check`.
+Read the partial directory's names, lengths and JSONL row counts; verify runtime
+files/junctions exist and record Node/npm versions and source/input hashes.
+Reuse the exit0 check of all36 retained fingerprints because subsequent edits
+touch only candidate source/tests/docs. Expected cost: seconds, no simulation.
+Pass: all focused exits0, size limits hold, partial output is explicitly excluded,
+and final scope contains no data/control/save changes. Stop on failure and
+correct only that documentation/inventory issue. Independent correction review
+is GO for observation preparation; campaign remains NOT AUTHORIZED.
+
+For clean source binding after those checks, use
+`git -c core.hooksPath=.husky commit -m "Add opt-in route receipts for Sana diagnosis"`.
+The configured `.husky/_` directory is absent in this continuation checkout;
+the per-command override runs the existing `.husky/pre-commit` (`npx tsc --noEmit`)
+and Git LFS post-commit hooks without changing shared configuration. Expected
+cost: tens of seconds. Require commit/hook exit0 and clean tracked status;
+stop on failure. This required hook is separate from the unnecessary duplicate
+manual typecheck and is not a campaign/full-suite authorization.

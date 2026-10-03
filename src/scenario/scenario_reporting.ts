@@ -5,7 +5,7 @@
 
 import type { GameState, FormationId, FactionId } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
-import type { OperationCombatDiagnostic } from './combat_causality.js';
+import type { BotOrderDiagnosticsSnapshot, OperationCombatDiagnostic } from './combat_causality.js';
 // REASON-CODE INSTRUMENTATION (topic `formation_refusal`) — see reason_code_debug.ts.
 import type { EmergentFormationRefusalRecord } from '../state/recruitment_types.js';
 import type { CombatOutcome } from '../sim/combat/combat_math.js';
@@ -94,6 +94,12 @@ export interface WeeklyReportRow {
     /** Legacy movement diagnostic payload copied from the turn report when present. */
     movement_report?: unknown;
     /**
+     * Env-gated generic route-decision observation. The runner attaches this
+     * only when `route_decision_details` is non-empty, preserving the default
+     * baselined weekly-row shape.
+     */
+    bot_order_diagnostics?: BotOrderDiagnosticsSnapshot;
+    /**
      * REASON-CODE INSTRUMENTATION, topic `formation_refusal` — item 4. Absent
      * unless `AWWV_DEBUG_REASON_CODES` requests it.
      *
@@ -105,6 +111,21 @@ export interface WeeklyReportRow {
      * are routed here instead, where an artifact actually exists to read.
      */
     recruitment_refusals?: WeeklyRecruitmentRefusals;
+}
+
+/**
+ * Attach the production bot-order snapshot only when the `route_decision`
+ * topic emitted a receipt. The receipt's `turn` is the completed turn counter:
+ * `runTurn` increments `state.meta.turn` before war order generation, and
+ * `buildWeeklyReport` copies the same counter to `week_index` afterward.
+ */
+export function attachBotOrderDiagnosticsToWeeklyReport(
+    row: WeeklyReportRow,
+    diagnostics: BotOrderDiagnosticsSnapshot | undefined,
+): void {
+    if ((diagnostics?.route_decision_details?.length ?? 0) > 0) {
+        row.bot_order_diagnostics = diagnostics;
+    }
 }
 
 /**

@@ -326,3 +326,230 @@ checks for the corrected/reviewed helpers and working/staged whitespace checks
 exit **0**. Board/roadmap limits hold at 19,953/20,000 and 59,543/60,000.
 Large raw JSON extracts remain preserved locally; compact summary, guarded
 helpers, handoffs and exit receipts are retained with this documentation.
+
+## Instrumentation-preparation instructions — 2026-10-03
+
+Owner requested the next OpenCode handoff. It reuses existing axis, roster,
+movement and formation-lifecycle topics, bounds edits to proved observation
+gaps, requires focused neutrality/compatibility proof, and prepares a concrete
+campaign proposal without authorizing execution. Instructions:
+`continuation4_opencode_instrumentation_handoff.md`. Dispatch exits126 on
+provider.quota429 (Go usage limit exceeded), before any worker tool action.
+No retry or worker tool use followed that dispatch. Subsequent Sol preparation
+and its incident are recorded below. Calibration remains NO-GO.
+
+## Continuation 4 incident audit — 2026-10-03
+
+Implementation and validation stopped after an unauthorized runner launch and
+an overbroad process-stop command. This subsection records observed facts only;
+all draft code, logs, junctions and partial run artifacts remain preserved.
+
+The command that caused the launch was:
+
+```powershell
+node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario_with_preflight.ts --help
+```
+
+It ran from the October continuation checkout as one member of a parallel
+read-only prerequisite batch. `run_scenario_with_preflight.ts` forwards unknown
+arguments, and `run_scenario.ts` ignores `--help`; because no `--scenario` was
+provided, it selected the default 52-week historical scenario. The tool call
+yielded after about 10.2 seconds with no recorded exit and its session id was
+not retained in the wrapper output. No dedicated local stdout/stderr file was
+created for this command. Exact process start time is unavailable. The preceding
+focused consumer receipt completed at 20:48:05+02:00; the accidental run
+directory was created at 20:49:01.5285256+02:00.
+
+The attempted containment command was exactly:
+
+```powershell
+$matches = Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -like '*run_scenario_with_preflight.ts --help*' }; $matches | Select-Object ProcessId,Name,CommandLine | Format-List; foreach ($p in $matches) { Stop-Process -Id $p.ProcessId -Force }; Write-Output "STOPPED=$($matches.Count)"
+```
+
+The filter had no checkout or parent-process constraint. It matched these six
+PIDs before the loop (parent PIDs and process creation times were not captured
+and cannot be recovered from the ended processes):
+
+| PID | Name | Observed command line / identity |
+|---:|---|---|
+| 13096 | `pwsh.exe` | Codex exec wrapper whose command invoked the October-checkout `node ... run_scenario_with_preflight.ts --help` command |
+| 17120 | `node.exe` | Volta Node invocation of `node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario_with_preflight.ts --help` |
+| 13640 | `cmd.exe` | `cmd.exe /C node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario_with_preflight.ts --help` |
+| 20228 | `node.exe` | Node invocation of the same TSX/preflight command |
+| 12176 | `node.exe` | TSX loader command whose loader paths resolve through `C:\Users\User\.codex\worktrees\april-1995-glamoc\A-War-Without-Victory\node_modules`, ending in `tools/scenario_runner/run_scenario_with_preflight.ts --help` |
+| 17864 | `pwsh.exe` | The containment command itself; its own literal filter text matched |
+
+The loop reached its own PID and terminated before printing `STOPPED=...`; no
+per-PID success receipt, aggregate exit, or session id exists. It is therefore
+unknown which termination calls completed successfully or the exact stop time.
+The matched `april-1995-glamoc` path does **not** by itself prove PID 12176 was
+an unrelated prior job: this checkout's `node_modules` is a junction to that
+exact older-checkout directory, so PID 12176 may have been the TSX execution
+child of the accidental command. Because parent PIDs were omitted from the
+capture, its ownership remains unresolved. The earlier worker message calling
+it an unrelated process was premature. The process filter was still overbroad
+and could have affected another matching process; absence of deletion evidence
+does not establish absence of damage.
+
+The accidental job's preserved output is
+`runs/apr1992_historical_52w__434fe8ff83b7b523__w52`. The October checkout's
+`runs` junction targets the older checkout's `runs` directory, so both paths
+name the same physical artifact. `run_meta.json` identifies commit
+`c3354ee3a9c3563dc5eec88da94c55cc91861fec`, `git_dirty: true`, Node
+`v22.23.2`, default scenario `apr1992_historical_52w`, 52 requested weeks and
+consumed-input digest
+`ab5ee17ba732cb991d2b5305b7bd3841e76244143d61e20bd630454637cd04e5`.
+The directory is incomplete and is not validation evidence. Preserved files:
+
+| File | Bytes | Last write (+02:00) |
+|---|---:|---|
+| `run_meta.json` | 9,382 | 20:49:01.9467034 |
+| `initial_save.json` | 1,124,102 | 20:49:03.6212653 |
+| `weekly_report.jsonl` | 64,430 (4 rows) | 20:49:15.0063077 |
+| `brigade_temporal_log.jsonl` | 513,474 (1,000 rows) | 20:49:15.0847344 |
+| `displacement_event_log.jsonl` | 5,586 (30 rows) | 20:49:15.0837346 |
+
+No `final_save.json`, `run_summary.json`, `end_report.md`, operation AAR or exact
+exit marker exists. The write stream continued until 20:49:15 after the process
+enumeration/kill attempt; the exact child lifetime is not recoverable. No other
+new run directory was identified at the same timestamp in the shared target.
+
+Instrumentation remains an uncommitted draft in:
+
+- `src/scenario/combat_causality.ts`
+- `src/sim/combat/bot_brigade_ai_osid.ts`
+- `src/sim/combat/bot_brigade_eval_movement.ts`
+- `src/sim/combat/reason_code_debug.ts`
+- `tests/reason_code_debug.test.ts`
+- `tests/bot_route_decision_diagnostic.test.ts`
+- `tests/bot_route_decision_coverage_diagnostic.test.ts`
+- `tools/diagnostics/bot_route_decision_coverage.cjs`
+- the coverage/validation-plan addition in
+  `sana_ivanjska_joint_validation_plan.md`
+
+Last settled focused checks, separate from the incident: receipt red exit 1;
+first green attempt exit 1 because the positive fixture was correctly rejected
+as risky; corrected receipt green 2/2 exit 0; consumer error/red exits 1 and 1;
+consumer green 3/3 exit 0; combined focused set 91/91 across eight files exit 0.
+Evidence is preserved under `continuation4_route_receipt_*`,
+`continuation4_route_consumer_*`, and `continuation4_focused_tests.*`.
+Typecheck was launched at 20:50:00+02:00 and its controlling tool call was
+aborted after 14.3 seconds. At the 20:50:48 audit the process tree remained live
+(PIDs 10912 → 12460 → 6976 → 10192), with empty stdout/stderr and no exit file.
+It then completed without another command: `continuation4_typecheck.exit.txt`
+was written at 20:51:07.9881754+02:00 with exit 0, stdout/stderr still empty,
+and none of those PIDs remained at the next audit. No diff check,
+save-compatibility gate, independent review, full suite or
+authorized diagnostic campaign was completed. Root owns containment,
+restoration and any decision about this preserved draft.
+
+## Continuation 4 focused preparation result — 2026-10-03
+
+After root's incident assessment, preparation continued within the existing
+owner authorization; no new campaign authorization was given. The
+draft adds one `route_decision` reason-code topic at the actual generic interior
+pre-order seam. It records existing locals: turn/phase, formation location and
+transit/prior-order state, operation/axis/objective when present, chosen rule,
+sorted route goals, candidate destination, issued destination and exact terminal
+outcome/rejection. It neither recomputes routing nor feeds a decision. The
+receipt is projected through `bot_order_diagnostics`; the read-only coverage
+consumer fails closed on a missing named formation or issued/order mismatch.
+
+Existing instrumentation was reused unchanged for axis launch/readiness and
+517th order decisions, opportunity rosters, downstream movement rejection and
+HGZ/112th lifecycle visibility. `movement_reject` remains downstream rejection
+evidence and is not presented as selector evidence.
+
+Save compatibility is structural and directly bounded: no `GameState`, state
+schema, serializer, loader or migration file changed. The new optional field is
+an ephemeral bot-order/`TurnReport` diagnostic only. The focused paired fixture
+proves the default report shape omits it and enabled/disabled complete states are
+equal; removing only `route_decision_details` makes the returned diagnostics and
+report snapshots equal. No summary or order map is discarded. A no-order
+positive control preserves the terminal fallback as an explicit receipt.
+
+Focused proof is **91/91**, exit0 across the six handoff files and two new
+diagnostic files (`continuation4_focused_tests.*`). TypeScript `--noEmit` exits0
+with empty stdout/stderr (`continuation4_typecheck.*`). Earlier red/fixture and
+consumer evidence remains preserved under `continuation4_route_receipt_*` and
+`continuation4_route_consumer_*`; it is not rewritten as passing evidence.
+Consumer syntax and the pre-summary working/staged whitespace check exit0 in
+`continuation4_consumer_syntax.*` and `continuation4_diffcheck.*`.
+
+The existing validation plan now contains the concrete full-horizon campaign
+proposal, exact source-supported flags, source/initial/final artifact binding,
+named 737th/517th and late-operation coverage, lifecycle/roster consumers,
+five-minute estimate and one-failure stop rule. It is **NOT AUTHORIZED** and was
+not executed. A future known-source run characterizes only its own candidate;
+it cannot prove original n37 attribution or waive any calibration criterion.
+
+## Continuation 4 independent-review correction — 2026-10-03
+
+The candidate now closes the real serialization gap. After
+`buildWeeklyReport`, the production runner attaches `bot_order_diagnostics`
+only when the env-gated `route_decision_details` array is non-empty. The
+env-off weekly row remains absent of the field; the env-on focused production
+projection serializes the exact receipt and `movement_orders_by_brigade` map.
+No `GameState`, save schema, serializer, loader or migration path changes.
+
+Turn semantics were checked against the real pipeline. `runTurn` increments
+`working.meta.turn` before war order generation. The receipt reads that value,
+and `buildWeeklyReport` later assigns the same completed-turn value to
+`week_index`. The consumer requires exact integer equality. The temporal-log
+loop index remains a separate zero-based counter and is not substituted.
+
+The receipt now separates the turn-scoped
+`preexisting_movement_order_destination_osid` from
+`persistent_movement_state_destination_osid`. The former
+`no_lawful_destination` label is replaced by the observed
+`no_destination_selected`. This is a terminal generic-interior receipt only;
+it does not claim complete predicate history. Active column transit skips
+before this seam, and the focused negative control proves no terminal receipt
+or weekly attachment is emitted for that path.
+
+The consumer now fails closed on exact receipt keys and types, known rules,
+outcomes and rejection reasons, outcome-field invariants, sorted unique goal
+sets, row/receipt completed-turn mismatch, duplicate brigade receipts in a row,
+movement-map disagreement, missing named formations and missing repeated
+`--expect-boundary FORMATION:TURN` gates. Its output separates structural
+coverage and sets `causal_proof: false`.
+
+TDD correction evidence is preserved under `continuation4_correction_*`.
+The red run exits1 with 12 intended failures across 14 tests. The first green
+passes 14/14. The sole intervening change is an existing-path active-transit
+negative regression; green2 passes 15/15, exit0. `node --check` exits0. The
+first non-interactive typecheck attempt returned after its 30-second command
+window with stdout/stderr files but no exit receipt at that audit. A second
+typecheck was unnecessarily started while the first completion was pending.
+Both ultimately exit0; both receipts remain preserved. No further manual
+typecheck follows; the required pre-commit hook remains part of local integration.
+The initial 91/91 result was not rerun; its five original route/consumer cases
+are superseded by the 15 correction cases, and its other 86 cases are reused.
+
+The plan's proposed command now checks the entire 188-turn output and explicit
+737th completed t137/t138/t139 boundaries. Those are observation gates around
+the retained t138 post-turn divergence, not a promise that a new known-source
+candidate reproduces the old route. A missing boundary stops the proposal as
+incomplete coverage. The campaign remains **NOT AUTHORIZED** and was not run;
+full default-horizon/global gates remain pending.
+
+### Root integration disposition
+
+Independent targeted correction verification is **GO for observation preparation
+only**, recorded in `continuation_independent_review.md`. No routing/lifecycle
+correction is justified by the retained evidence. Final read-only inventory
+exits0 and still finds four weekly rows and1,000 temporal rows in the incomplete
+accidental output, with no final save or run summary. Its file fingerprints,
+junction targets and runtime versions are preserved in
+`continuation4_final_inventory.json`; it is not calibration evidence. Reuse the
+exit0 all36 retained-artifact fingerprint check; subsequent changes are confined
+to candidate source/tests/docs. No retained log/save/run was deleted or replaced.
+The unchanged canon still governs deterministic state and ordinary combat;
+no mechanic, control/reference, denominator or save schema is amended.
+
+Final documentation checks pass63/63, exit0. Strict tracked citation validation
+passes128 citations, exit0; plan-index and final working/staged whitespace checks
+exit0. Their `continuation4_closeout_*` exits are retained with the existing
+proof receipts. Board19,920 and roadmap59,917 characters remain within limits.
+The final source commit runs the existing pre-commit typecheck hook; its exact
+commit/hook outcome is retained locally under `continuation4_local_commit`.

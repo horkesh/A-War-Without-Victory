@@ -2,6 +2,7 @@ import type { AttackResolutionOsidReport } from '../sim/combat/attack_resolution
 import type { AxisLaunchReadinessDetail, AxisOrderGenerationDetail, CorpsOperation, FactionId, FormationId, FormationState, GameState } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 import { isVlasicCohaExceptionOperation } from '../sim/combat/coha_operation_exception.js';
+import type { BotRouteDecisionDetail } from '../sim/combat/bot_brigade_ai_osid.js';
 
 export interface BotOrderDiagnosticsSnapshot {
     attack_orders_by_brigade: Record<FormationId, string>;
@@ -9,6 +10,8 @@ export interface BotOrderDiagnosticsSnapshot {
     attack_orders_by_corps: Record<FormationId, number>;
     attack_orders_by_faction: Record<FactionId, number>;
     eligible_attackers_by_corps: Record<FormationId, number>;
+    /** Env-gated pre-order generic route decisions; absent on default runs. */
+    route_decision_details?: BotRouteDecisionDetail[];
 }
 
 export type OperationCombatInvalidationReason =
@@ -124,7 +127,10 @@ function getCurrentObjectives(operation: CorpsOperation): string[] {
 
 export function createBotOrderDiagnosticsSnapshot(
     state: GameState,
-    extras?: { eligible_attackers_by_corps?: Record<FormationId, number> }
+    extras?: {
+        eligible_attackers_by_corps?: Record<FormationId, number>;
+        route_decision_details?: BotRouteDecisionDetail[];
+    }
 ): BotOrderDiagnosticsSnapshot {
     const attackOrdersByBrigade: Record<FormationId, string> = {};
     const movementOrdersByBrigade: Record<FormationId, string> = {};
@@ -171,7 +177,11 @@ export function createBotOrderDiagnosticsSnapshot(
         movement_orders_by_brigade: movementOrdersByBrigade,
         attack_orders_by_corps: attackOrdersByCorps,
         attack_orders_by_faction: attackOrdersByFaction,
-        eligible_attackers_by_corps: { ...(extras?.eligible_attackers_by_corps ?? {}) }
+        eligible_attackers_by_corps: { ...(extras?.eligible_attackers_by_corps ?? {}) },
+        ...(extras?.route_decision_details === undefined ? {} : {
+            route_decision_details: [...extras.route_decision_details]
+                .sort((a, b) => strictCompare(a.brigade_id, b.brigade_id)),
+        }),
     };
 }
 

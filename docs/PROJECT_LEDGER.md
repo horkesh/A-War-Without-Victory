@@ -9,6 +9,58 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-03 — Sana observation preparation and incident preservation
+
+OpenCode Go dispatch exits126 (quota429, zero worker tools); authorized bounded
+preparation continues with Sol. Added default-absent `route_decision` receipts
+at the terminal generic interior evaluator, actual weekly serialization, and a
+read-only exact-schema/completed-turn/named-boundary consumer. Turn-scoped and
+persistent destinations are distinguished; no-selection does not claim illegality.
+No routing/combat/control/data/save-schema correction, merge or adoption.
+
+Independent review first NO-GO catches the missing weekly edge, permissive
+consumer and ambiguous context. One correction verification is GO for observation
+preparation only. Correction red exits1 (12 expected failures/2 passes), final
+focused15/15 exits0, typecheck/syntax exit0. Two typechecks finished0; the second
+was unnecessarily started while the first completion was pending. Initial91/91
+is retained: five route/consumer cases are superseded;86 others reused.
+
+The implementer's `--help` probe accidentally started the default52w scenario.
+Four partial weekly rows remain preserved; broad process matching had uncertain
+ownership and no per-PID termination receipt. It does not prove another job was
+killed. All36 fingerprinted retained comparison artifacts match, exit0. The
+partial output is incomplete and is not validation evidence. See the incident,
+focused results and remaining gates in
+`logs/prusac-diagnostic-20260929/sana_n37_convergence_report.md`, the concrete
+NOT-AUTHORIZED188w proposal in
+`logs/prusac-diagnostic-20260929/sana_ivanjska_joint_validation_plan.md`, and
+`logs/prusac-diagnostic-20260929/continuation_independent_review.md`.
+
+Code/proof: `src/sim/combat/bot_brigade_eval_movement.ts`,
+`src/scenario/scenario_reporting.ts`, `src/scenario/scenario_runner.ts`,
+`tools/diagnostics/bot_route_decision_coverage.cjs`,
+`tests/bot_route_decision_diagnostic.test.ts`, and
+`tests/bot_route_decision_coverage_diagnostic.test.ts`.
+Original n37 executable/cause remains unbound; calibration is NO-GO. Sanski town,
+two Jajce gains and four lost matches stay open; protected outcomes and Farz
+receipts remain required. No authorized diagnostic campaign or full suite ran.
+Final documentation63/63 and strict128 tracked citations exit0; plan-index and
+whitespace exit0. Local integration retains the required pre-commit typecheck.
+
+## 2026-10-03 — OpenCode instrumentation handoff prepared
+
+Prepared owner-requested bounded instrumentation/neutrality-proof instructions
+and a reviewable future campaign proposal task. Existing diagnostics are reused
+first; no behavior correction, suite, campaign or acceptance waiver authorized.
+Dispatch exits126 on Go provider.quota429 before worker tool use; no retry or
+implementation. Source and retained evidence unchanged. Handoff:
+`logs/prusac-diagnostic-20260929/continuation4_opencode_instrumentation_handoff.md`;
+exact dispatch exit/context in the existing
+`logs/prusac-diagnostic-20260929/sana_n37_convergence_report.md`.
+
+Prompt citation checks43/43 exit0; working/staged whitespace checks exit0.
+Unaffected plan-index/desktop checks are reused; no general suite repeated.
+
 ## 2026-10-03 — Retained western failure chronology and causal stop
 
 Owner-authorized bounded n25/n37 evidence audit, with n29/n30 inheritance
