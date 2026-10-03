@@ -74,6 +74,11 @@ hash is candidate-scoped, not proof of n37/n38 execution. No conditional
 continuous trace ran. Raw receipt and reviewed addendum are preserved in the
 existing convergence report; original cause and acceptance gaps remain open.
 
+The retained western comparison localizes Barevo/Lupnica loss to n29→n30;
+Majdan/Varošluk are already lost in n29. The 737th's recorded route intent first
+differs at completed t138. Reviewed chronology does not supply the missing
+launch/selector predicate; no production correction or campaign follows.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

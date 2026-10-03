@@ -9,6 +9,34 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-03 — Retained western failure chronology and causal stop
+
+Owner-authorized bounded n25/n37 evidence audit, with n29/n30 inheritance
+checks. OpenCode Go Luna medium dispatch/extraction exit0. Independent Sol
+review rejected incomplete coverage and earliest-divergence wording. OpenCode
+targeted correction produced a new extraction exit0, then session exit126 on
+provider quota429; no retry. Both raw receipts/helpers/logs are preserved.
+Lead compact reviewed projection exits0 and verifies36 consumed artifact hashes
+plus parent SHA. It distinguishes temporal turn=week_index+1 from weekly report
+completed-turn indexing and rejects the broad aggregate divergence claims.
+
+Measured: n29 retains Barevo/Lupnica, n30 already loses both and Mistral launch
+slips t178→t180. Majdan/Varošluk are already lost n29. n25 Southern Move's four
+Majdan orders at t188 differ from n29 Gerzovo orders and n30/n37 planning-only
+endpoints. Named737th first recorded route-state difference is completedt138;
+its missing Varošluk capture is separate from Sana's Stari Majdan. Ghost temporal
+logging and launch/selector predicates remain absent; no destruction/withdrawal
+cause is inferred. STOP at causal attribution, no supported production correction.
+
+No simulation, resume, suite, campaign, control/paint, denominator, canon or save
+change. n37/n38 and protected/Farz evidence reused; all acceptance gaps stay open.
+Plan/master/roadmap/board/knowledge synchronized.
+Focused documentation tests63/63, index, Node syntax and working/staged
+whitespace checks exit0. Independent targeted correction verification is GO
+for scoped chronology and STOP only, not calibration acceptance. Evidence/exits:
+`logs/prusac-diagnostic-20260929/sana_n37_convergence_report.md`; review:
+`logs/prusac-diagnostic-20260929/continuation_independent_review.md`.
+
 ## 2026-10-03 — OpenCode Sana source-continuity stop
 
 Owner-authorized bounded handoff completed through OpenCode Go Luna medium,

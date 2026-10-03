@@ -21,6 +21,12 @@ run-bound fingerprint. Preserve it and state its coverage; do not claim no
 source receipt exists merely because the executed dirty tree remains unbound.
 An incomplete search or timed-out object scan cannot prove evidence absent.
 
+Temporal and weekly receipts may use different counters: these retained
+temporal rows record completed `turn = week_index + 1`, while weekly reports
+use `week_index` as completed turn. Preserve both schema meanings; a filter
+floor is not a run-earliest divergence. Missing ghost rows are a logging gap,
+not a withdrawal/destruction receipt. Applied in the retained western audit.
+
 ## 2026-09-02 - Calibration must preserve causal ownership, not merely painted control
 
 **A correct endpoint produced by the wrong mechanism is still a defect.** April 1994 initially

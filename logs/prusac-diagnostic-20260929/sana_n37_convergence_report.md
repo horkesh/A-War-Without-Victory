@@ -212,3 +212,117 @@ Focused documentation closeout: 63/63 tests exit 0
 (`continuation2_docs_focused.exit.txt`); derived plan index exits 0
 (`continuation2_plan_index.exit.txt`). Raw-receipt and catalog-hash checks pass;
 board length is 19,940/20,000 and roadmap 59,226/60,000 characters.
+
+## Continuation 3 retained western failure extraction — 2026-10-03
+
+**Initial coverage claim superseded after independent review; STOP for causal
+diagnosis.** The single guarded read-only command exited **0**, but omitted
+relevant actor/order history and mislabeled temporal indices. It covered all
+four exact lost OSIDs at denominator 712 and preserved before/after rows, operation
+names, formation IDs, battle/control/lifecycle rows, inherited n29/n30 receipts
+where applicable, and SHA-256 hashes for every consumed artifact. The receipt is
+`continuation3_western_failure_receipts.json`; raw stdout/stderr and the exact
+exit are `continuation3_western_audit.stdout.log`,
+`continuation3_western_audit.stderr.log`, and
+`continuation3_western_audit.exit.txt`.
+
+The initial helper's differences below are confined to its filtered temporal
+`week_index170–188` window, not run-earliest or causal divergences:
+
+- **Barevo** (`op:jajce:barevo_2`, HRHB→RS): formation/roster/movement rows
+  already differ at **week_index170**. The retained Operation Mistral 2 chain then shows
+  n25 target execution at **t186** and a later HRHB battle/control receipt at
+  t187, while n37 has no Barevo target receipt after the prior RS control.
+  Relevant IDs include `hv_112th_infantry_1995`, `hv_1st_hgz_1995`,
+  `hvo_1st_guard_abb`, `hvo_3rd_guard_jastrebovi`, and `hvo_rama_brigade`;
+  n37's late Mistral participants instead include
+  `hv_4th_guards_split` and `hvo_2nd_guard_mechanized`.
+- **Lupnica** (`op:jajce:lupnica`, HRHB→RS): formation/roster/movement rows
+  already differ at **week_index170**. Mistral target receipts are n25 **t185** versus
+  n37 **t187–188**; n25 has the HRHB capture battle/control receipt at t186,
+  n37 does not. The same exact formation IDs and n37 2nd Guard Mechanized
+  axis are retained in the JSON receipt.
+- **Majdan** (`op:mrkonjic_grad:majdan_2`, HRHB→RS): formation/roster/movement
+  rows already differ at **week_index170**; Southern Move target planning is n25 **t183**
+  versus n37 **t185**. n37 remains planning through t188 with
+  `intel_gathering`, elapsed **3/5**, and `intel_confidence_at_assessment`
+  null. n25 has the HRHB combat/control receipt at t188; n37 has none.
+  This is the Mrkonjić Grad Majdan ID, not Stari Majdan.
+- **Varošluk** (`op:travnik:varosluk`, RBiH→RS): relevant temporal rows first
+  differ at **week_index173 within that filtered set**, but both retained n25 and n37 show the RS
+  `rs_43rd_prijedor_motorized` and `rs_6th_sanske_infantry` destroyed at
+  **t174**. n25 alone has the 737th (`arbih_737th_muslim_light`) RBiH
+  combat/control receipt at t181; n37, n29, and n30 retain only the earlier
+  t119 battle. n29/n30 therefore localize the route issue as inherited,
+  without identifying its cause.
+
+Recorded predicates do **not** establish why the divergence occurred. Operation
+assignment/objective, temporal formation state, battle rows, and control events
+are present where listed; withdrawal/destruction is only recorded where the
+destroyed-brigade artifact says so. Selector rejection, order lifecycle cause,
+route-loss cause, and any causal code predicate are **unreported**, not zero.
+No scenario, resume, production change, control edit, denominator change,
+acceptance waiver, or causal attribution follows this extraction. The smallest
+discriminating next check would be a newly authorized trace that retains the
+first missing lifecycle/route-rejection predicate at the relevant boundary; it
+was not run here.
+
+### Consolidated integration receipt and disposition
+
+OpenCode's targeted correction produced
+`continuation3_western_failure_receipts_corrected.json`, extraction exit **0**,
+then the session terminated with dispatch exit **126**, `provider.quota`,
+HTTP 429, “Go usage limit exceeded”. No retry followed. Original and corrected
+raw receipts/helpers/logs remain preserved locally. The corrected extraction
+adds order/AAR/actor history but still projects temporal `week_index` into a
+field named `turn`; its aggregate first-divergence labels are not accepted.
+
+The lead's compact `continuation3_reviewed_summary.json` is authoritative for
+the chronology claims below. Its guarded projection exits **0**, verifies all
+**36** consumed artifact hashes and the parent receipt SHA, and uses original
+temporal `turn` explicitly. Raw temporal rows have `turn = week_index + 1`;
+weekly reports use `week_index` for completed turn. This is a schema difference,
+not a one-turn simulation discrepancy. No raw receipt was overwritten.
+
+**Measured separation of failures:**
+
+- **Barevo/Lupnica:** n25 and n29 Mistral first execute t178; n30 and n37 first
+  execute t180. n29 retains both HRHB target controls; n30 already loses both.
+  n25 HGZ attack orders target Jajce/Lupnica/Barevo at t185/186/187; n37 HGZ
+  targets Bravnice/Vinac/Jajce at those same turns. At t188 n37 has no HGZ
+  Lupnica/Barevo order. This localizes the late-stage regression to the retained
+  n29→n30 transition; it does not identify the launch-delay predicate.
+- **Mrkonjić Grad Majdan:** already RS in n29. n25 Southern Move plans t183,
+  executes t188 with four Majdan orders and an HRHB combat capture. n29 also
+  executes t188, but its orders target Gerzovo. n30/n37 start planning t185 and
+  never execute by w188. The target difference and subsequent delay are distinct
+  measured failures; neither authorizes objective substitution or retiming.
+- **Varošluk:** the first recorded route-state difference for the named 737th
+  between n25/n37 is **completed t138**: both at Gornja Rovna, but only n37 has
+  Udurlije as a movement destination. This is post-turn intent, not a retained
+  selector predicate. At t181 n25's 737th is at Varošluk after the RBiH capture;
+  n29/n30/n37 are at Brizina with Udurlije intent. n37 stays there through w188,
+  changing destination to Komar t187 and Gornje Krčevine t188. The missing
+  Varošluk capture is inherited before the latest Sana continuation.
+
+**Evidence limits:** HGZ/112th have zero temporal-log rows in n25/n37 and no
+destroyed-brigade receipt. Their operation-order/roster history is recorded;
+their disappearance cause is unreported. Neither watched-operation set contains
+Mistral/Southern Move, and the operation receipts lack launch-readiness/blocker
+details. Recorded skipped-order arrays at the cited late targets are empty;
+they do not prove a selector rejection. Source continuity remains unproved.
+
+**Decision:** no selector, order-lifecycle, launch-timing, roster or objective
+correction is supported. Stop at causal attribution; preserve the measured
+chains and all acceptance gaps. No suite, resume or campaign was launched.
+Any future clean-source trace would characterize a new candidate and must retain
+the missing pre-order predicate; it cannot prove the original dirty-run cause.
+
+Targeted independent correction verification is **GO for this chronology and
+STOP disposition only**, not calibration acceptance. Final focused documentation
+checks pass **63/63**, exit **0** (`continuation3_docs_focused.exit.txt`);
+derived index exits **0** (`continuation3_plan_index.exit.txt`). Node syntax
+checks for the corrected/reviewed helpers and working/staged whitespace checks
+exit **0**. Board/roadmap limits hold at 19,953/20,000 and 59,543/60,000.
+Large raw JSON extracts remain preserved locally; compact summary, guarded
+helpers, handoffs and exit receipts are retained with this documentation.

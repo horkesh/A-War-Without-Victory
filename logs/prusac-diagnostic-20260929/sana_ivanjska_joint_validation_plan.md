@@ -145,3 +145,35 @@ seconds, pass exit 0, stop on a documentation failure and correct only that issu
 Closeout: 63/63 focused documentation tests and derived-index check exit 0.
 Independent review's targeted wording verification is GO for the STOP
 disposition only. Raw worker receipt SHA is unchanged. No trace or acceptance.
+
+## 2026-10-03 retained western failure comparison
+
+Owner authorized a bounded retained-evidence comparison of n25/n37 for missing
+Barevo/Lupnica, Mrkonjić Grad Majdan, and Varošluk. Question: what is the first
+observable relevant divergence, and which causal predicates are actually
+recorded? Use n29/n30 only to localize inherited changes. Exact dispatch and
+extraction commands are in `continuation3_opencode_handoff.md` and the resulting
+receipt. Expected cost: 5–10 minutes of focused extraction/reasoning, seconds
+per read-only script. Pass: exact OSIDs, cited chronological receipts and
+missing-data limits for every failure category; no claim based solely on
+endpoint correlation. Stop at absent causal evidence or conflicting schema;
+no resume, campaign, full suite, production correction or acceptance waiver.
+Codex decides whether any narrow correction is supported after the audit.
+
+Settled chronology: n29 retains Barevo/Lupnica; n30 already loses them, with
+Mistral execution t178→t180. Majdan/Varošluk are already lost in n29. The 737th's
+first recorded post-turn route-state difference is completed t138; the selector
+predicate remains absent. No narrow production correction is supported.
+Initial OpenCode dispatch/extraction exit0; corrected extraction exits0 but its
+session exits126 on Go quota429. No retry. Lead reviewed projection exits0,
+verifies36 consumed hashes and distinguishes temporal turn from week_index.
+Raw receipts remain local and unchanged; the compact reviewed summary and
+existing report carry the accepted chronology, not calibration acceptance.
+Final documentation checks reuse the three focused tests and index command
+above, plus guarded Node syntax/whitespace checks; cost seconds. Pass exit0;
+stop and correct only an identified documentation/integration failure. Original
+n37 suite/campaign, n38 prefix, protected controls and Farz proof are reused.
+
+Closeout: focused documentation tests63/63, derived index, Node syntax and
+working/staged whitespace checks exit0. Independent targeted correction
+verification is GO for scoped chronology/STOP only. No calibration acceptance.

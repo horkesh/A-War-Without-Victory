@@ -43,6 +43,11 @@ continuity gate: no complete run-bound dirty-tree fingerprint recovered. The
 partial candidate catalog hash is insufficient. No conditional continuous
 trace ran; original cause and all calibration acceptance gaps remain open.
 
+Retained western audit: Barevo/Lupnica are lost n29→n30; Majdan/Varošluk are
+already lost in n29. The 737th's first recorded route-state difference is t138.
+These chronological facts do not identify a launch/selector cause. No correction
+or campaign follows; protected evidence and every acceptance gap remain open.
+
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference
 for `op:trnovo:gornja_presjenica` to RS. Replaying the unchanged run now scores
