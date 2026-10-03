@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "status": "STOP_INSUFFICIENT_SOURCE_CONTINUITY",
+  "raw_receipt": "continuation2_source_continuity.json",
+  "raw_receipt_sha256": "8073fff7c43bfb4a3df8e4ca7a0ca55008e1ce8d83438e6a4500ada2c0d9792d",
+  "raw_receipt_preserved": true,
+  "opencode_model": "opencode-go/gpt-5.6-luna#medium",
+  "opencode_dispatch_exit": 0,
+  "reviewed_finding": "No complete run-bound dirty-tree fingerprint was recovered in the bounded audit.",
+  "counts": {
+    "current_vs_clean_changed_paths": 30,
+    "source_paths_not_bound_to_n37_n38": 24,
+    "runner_or_verifier_paths_not_bound_to_n37_n38": 3,
+    "changed_calibration_inputs_matching_recorded_run_hashes": 3
+  },
+  "partial_source_receipt": {
+    "receipt": "sana_ivanjska_candidate_only_provenance.md",
+    "source": "src/sim/combat/operation_opportunity_catalog_5th_corps.ts",
+    "sha256": "35577cf555869989f22321a9c56453793e9f9f65f03e52468dd781ea57d7de94",
+    "matches_current_source": true,
+    "bound_to_n37_n38_execution": false,
+    "limitation": "Candidate-scoped byte receipt does not establish which bytes n37/n38 executed or cover the other 23 changed source paths."
+  },
+  "search_limit": "Git object scan timed out; the bounded search is not exhaustive evidence that no recoverable object exists.",
+  "conditional_trace": "NOT_RUN",
+  "continuous_trace_helper": "NOT_PREPARED",
+  "production_correction": "NONE",
+  "campaign": "NONE",
+  "calibration_acceptance": "NO_GO"
+}

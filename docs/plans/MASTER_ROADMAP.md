@@ -38,6 +38,11 @@ correcting the older late-execution narrative. Jajce and all four lost matches
 remain open. No production edit, retry, new suite/campaign, merge or adoption.
 See the [convergence diagnosis](../../logs/prusac-diagnostic-20260929/sana_n37_convergence_report.md).
 
+The subsequent owner-authorized OpenCode source audit exits 0 but fails the
+continuity gate: no complete run-bound dirty-tree fingerprint recovered. The
+partial candidate catalog hash is insufficient. No conditional continuous
+trace ran; original cause and all calibration acceptance gaps remain open.
+
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference
 for `op:trnovo:gornja_presjenica` to RS. Replaying the unchanged run now scores

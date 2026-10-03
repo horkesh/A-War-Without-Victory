@@ -9,6 +9,25 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-03 — OpenCode Sana source-continuity stop
+
+Owner-authorized bounded handoff completed through OpenCode Go Luna medium,
+dispatch exit 0. Source-continuity gate is STOP: no complete run-bound dirty-tree
+fingerprint recovered. Audit covers 30 current-versus-clean paths: 24 source,
+three consumed calibration inputs matching run hashes, three tools. Independent
+Sol review found a partial candidate catalog SHA receipt, which does not bind
+the catalog or other changed source bytes to n37/n38 execution. Its wording
+correction is recorded in an addendum; raw worker evidence is preserved.
+The timed-out Git object scan is incomplete search evidence. No conditional
+trace/helper, production correction, suite, campaign, merge or adoption followed.
+Original n37/n38 evidence and every calibration acceptance gap remain retained.
+Plan, calibration master, roadmap, board and knowledge note synchronized.
+Focused documentation checks pass 63/63, exit 0; derived-index check exits 0.
+Raw-receipt SHA verification passes. Targeted review correction verification
+is GO for this STOP disposition only; no calibration acceptance follows.
+Evidence and exact exit: `logs/prusac-diagnostic-20260929/sana_n37_convergence_report.md`;
+review: `logs/prusac-diagnostic-20260929/continuation_independent_review.md`.
+
 ## 2026-10-03 — Sana continuation pre-order diagnosis
 
 Continued from clean `24452b5fa` on

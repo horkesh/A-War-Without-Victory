@@ -126,3 +126,22 @@ The board-length preflight rejected the initial long status insertion; its
 replacement is 19,972 characters and the existing truth test passes. No
 acceptance criterion or governance limit changed. Independent review retains
 the no-correction/no-acceptance disposition.
+
+## 2026-10-03 OpenCode source-continuity gate
+
+Owner authorized the bounded OpenCode handoff in
+`continuation2_opencode_handoff.md`: recover source continuity first, then one
+conditional continuous post-turn186 through t188 diagnostic. OpenCode Go Luna
+medium completed the audit, dispatch exit 0. Gate result is
+`STOP_INSUFFICIENT_SOURCE_CONTINUITY`; no helper or conditional trace ran.
+The partial candidate catalog hash does not bind all executable bytes to
+n37/n38. Raw evidence is preserved, with a reviewed wording addendum; see the
+existing convergence report and independent review. No retry, correction,
+full suite or campaign follows. Original suite/prefix evidence is reused.
+Documentation closeout reuses the focused commands above and adds
+`tests/docs_desktop_v09_truth.test.ts` in the same Vitest invocation; expected
+seconds, pass exit 0, stop on a documentation failure and correct only that issue.
+
+Closeout: 63/63 focused documentation tests and derived-index check exit 0.
+Independent review's targeted wording verification is GO for the STOP
+disposition only. Raw worker receipt SHA is unchanged. No trace or acceptance.

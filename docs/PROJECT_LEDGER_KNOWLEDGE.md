@@ -16,6 +16,11 @@ A dirty commit marker plus matching consumed data does not fingerprint the
 uncommitted executable source. In this continuation, t188 fails equivalence
 despite matching Sana outcomes; no retarget/clear-order correction follows.
 
+A candidate-scoped byte hash is partial source evidence, not a complete
+run-bound fingerprint. Preserve it and state its coverage; do not claim no
+source receipt exists merely because the executed dirty tree remains unbound.
+An incomplete search or timed-out object scan cannot prove evidence absent.
+
 ## 2026-09-02 - Calibration must preserve causal ownership, not merely painted control
 
 **A correct endpoint produced by the wrong mechanism is still a defect.** April 1994 initially

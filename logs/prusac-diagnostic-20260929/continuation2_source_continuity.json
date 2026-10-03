@@ -1,0 +1,352 @@
+{
+  "schema_version": 1,
+  "status": "STOP_INSUFFICIENT_SOURCE_CONTINUITY",
+  "created_utc": "2026-10-03T13:08:11.017Z",
+  "read_only_gate": true,
+  "question": "Can executable source continuity for retained Sana n37/n38 be established from contemporaneous evidence?",
+  "verdict": "NO",
+  "conditional_trace": "NOT_RUN",
+  "production_correction": "NOT_RUN",
+  "campaign": "NOT_RUN",
+  "retained_runs": [
+    {
+      "run_meta": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n37/run_meta.json",
+      "run_id": "apr1992_definitive_188w__6deb5845c150c196__w188",
+      "git_commit": "df3cc3167f387b052ea74e2d008dc5aa84f7b2ff",
+      "git_dirty": true,
+      "node_version": "v22.23.2",
+      "consumed_input_digest": "8f13061b19ed9fd2d899f77f0115fdd4c5379e52cb058b3edadbd00e0e41af20",
+      "initial_save_sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+      "weeks": 188
+    },
+    {
+      "run_meta": "runs/apr1992_definitive_188w__4658849344f21642__w186_n38/run_meta.json",
+      "run_id": "apr1992_definitive_188w__4658849344f21642__w186",
+      "git_commit": "df3cc3167f387b052ea74e2d008dc5aa84f7b2ff",
+      "git_dirty": true,
+      "node_version": "v22.23.2",
+      "consumed_input_digest": "8f13061b19ed9fd2d899f77f0115fdd4c5379e52cb058b3edadbd00e0e41af20",
+      "initial_save_sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+      "weeks": 186
+    }
+  ],
+  "evidence": {
+    "clean_checkpoint": "df3cc3167f387b052ea74e2d008dc5aa84f7b2ff",
+    "retained_meta_paths": [
+      "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n37/run_meta.json",
+      "runs/apr1992_definitive_188w__4658849344f21642__w186_n38/run_meta.json"
+    ],
+    "same_consumed_input_digest": "8f13061b19ed9fd2d899f77f0115fdd4c5379e52cb058b3edadbd00e0e41af20",
+    "same_initial_save_sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+    "current_vs_clean_diff_command": "git diff --name-only df3cc3167f387b052ea74e2d008dc5aa84f7b2ff -- src data tools",
+    "current_vs_clean_changed_file_count": 30,
+    "current_vs_clean_hashes": [
+      {
+        "path": "data/source/calibration/painted_control_apr1994.json",
+        "category": "consumed_input",
+        "current_sha256": "24f6e8923afa6a5ceaf7e4148cd119f2952f48c99544b5e50e994836dc863dba",
+        "clean_commit_sha256": "4703efee1ecf8b86c5136b4b80bd78b0b668d051b92d43ea83e22f1d4896a958",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "data/source/calibration/painted_control_apr1995.json",
+        "category": "consumed_input",
+        "current_sha256": "59f05f4919e8e4b6cfd81fe63958a9cd07406acbdb4aa8a4edd1a14596cba44d",
+        "clean_commit_sha256": "c72dae85e1b976c15204191d42e1c052ccec763b6faf80b40a3619fffcb81bfa",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "data/source/calibration/painted_control_jan1993.json",
+        "category": "consumed_input",
+        "current_sha256": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7",
+        "clean_commit_sha256": "9a31368bd9699d69a0e0c7ff199c662e68b4f70edd7b295963b0d0a272a7e084",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/scenario/combat_causality.ts",
+        "category": "executable_source",
+        "current_sha256": "c07ef4dfffa70dfa38622b70eaf51e854c59097f3b142147cf8dd1ac6c2dadaf",
+        "clean_commit_sha256": "298b770bad75872806d58c07487f2f4f27e23fdf9f29efd54b1d5ea874ec404b",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/scenario/scenario_runner.ts",
+        "category": "executable_source",
+        "current_sha256": "ea3d332d116ce7257ad9aad316afb72a63b40d8c634d59122aba1c4153932db8",
+        "clean_commit_sha256": "9d52267341fa9c10af21e35b76190fb69b2b3041ba4c0d0cd401da2d5d9aea76",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/combat/army_reserve_system.ts",
+        "category": "executable_source",
+        "current_sha256": "100fc9027a2543273bd83d4e6a4d498337d437a8370201bda4ff5699ce1e7d3c",
+        "clean_commit_sha256": "70a100fe3a0a98425073191b8132fe896f25c6749b83c27708d1430ff6b10311",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/combat/attack_resolution_osid.ts",
+        "category": "executable_source",
+        "current_sha256": "68d0bfd01cae5fb1fba476991578220dca38c82e340339e427641c74d81b5515",
+        "clean_commit_sha256": "46d5abf650a70f0754fe90087545de1f8432cd756926550d36e5b866a62ebc00",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/combat/bot_brigade_ai_osid.ts",
+        "category": "executable_source",
+        "current_sha256": "5865531f27a7ee0c2052baf33e7d663a241b33ffca47c4141d10168e935a6d2c",
+        "clean_commit_sha256": "bd2fed5cc920bba7ab356ca4437b7e2981295c254f6be989fe1806461f23d4e2",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/combat/bot_brigade_eval_attack.ts",
+        "category": "executable_source",
+        "current_sha256": "9a407f682f1f8b5e34c238e18c27410906e644505b6d131d5e670b210b87f982",
+        "clean_commit_sha256": "65644b3b9fe245b41c9880296e0242a30e418543d74b99aef8be522c4b282241",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/combat/brigade_routine_scope.ts",
+        "category": "executable_source",
+        "current_sha256": "9cc6fd48558262ef7788f4d5e8f293eec1a36feeba6fc21b1dddf7eb7fb55097",
+        "clean_commit_sha256": "e282ada9be39dd708c4b5d5e534187a2a0bc4e2254fa98c36495c828071ee3c1",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/combat/coha_operation_exception.ts",
+        "category": "executable_source",
+        "current_sha256": "08382a59a35c66b68c9260277da72483391350f800b3bfb6af7dc7a11d664c8d",
+        "clean_commit_sha256": null,
+        "clean_commit_object_available": false,
+        "clean_error": "Command failed: git show df3cc3167f387b052ea74e2d008dc5aa84f7b2ff:src/sim/combat/coha_operation_exception.ts"
+      },
+      {
+        "path": "src/sim/combat/commander/emit.ts",
+        "category": "executable_source",
+        "current_sha256": "5db7b3d726129cd0ebba9b560f4907cc6e1e6fcb8fae1c653cea4cb611b53be8",
+        "clean_commit_sha256": "e779a6367852bd545b13b21f4563d9ddf9918ee0a64b6c3b8b4e575e5821761d",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/combat/commander/plan.ts",
+        "category": "executable_source",
+        "current_sha256": "f0c651ed8356dc4a3912b8b9d85fa97c93e0a6387a594ac0ba5ef41bc1d20cd1",
+        "clean_commit_sha256": "9250bdded7be1f8acd7b36bb9f484e57b7fedb2c508452bd56c023444b34f404",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/combat/final_operation_truth_reconciliation.ts",
+        "category": "executable_source",
+        "current_sha256": "35de1f71798cc8a1653f53df21f9dee049c132c23bfa8e1cf6b922854d526f39",
+        "clean_commit_sha256": "d41f0153d8160e5a6a4a15ea96470916fe19c446b60f399b3735e0facdf9b6da",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/combat/historical_elite_reservations.ts",
+        "category": "executable_source",
+        "current_sha256": "f9435c425fd8bf31116f3be272503fbf956147e3d6b30fb509dd3d255364fee3",
+        "clean_commit_sha256": "19fdbe711fd1941de8e7821e47c2a5eacbdafd72a671a0719ec848737060a6b2",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/combat/operation_approach_osids.ts",
+        "category": "executable_source",
+        "current_sha256": "16659ec430d399c2f32d1b115ed7c4df74e96fa2cd42fdf611f32fcb6e505646",
+        "clean_commit_sha256": "f7aef26959da023ca44ff946be6fa59570bb92002ef7253b9dfc92f262d828ea",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/combat/operation_opportunities.ts",
+        "category": "executable_source",
+        "current_sha256": "123107384f6368714ed8588883c9f5f7c197f702a414d90435a52642059e501f",
+        "clean_commit_sha256": "99c0765a981ed8e072014a1b6297c6e2283d05c3ceb82bbd532ec3dc59827dcc",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/combat/operation_opportunity_catalog_5th_corps.ts",
+        "category": "executable_source",
+        "current_sha256": "35577cf555869989f22321a9c56453793e9f9f65f03e52468dd781ea57d7de94",
+        "clean_commit_sha256": "fde66107d2dc9951159cd19ea36ddb30e569cb26653e713bd7299435d04d48c8",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/combat/operation_opportunity_catalog_central_bosnia.ts",
+        "category": "executable_source",
+        "current_sha256": "2936bf31492e0beb783728d218d6a805b885f7fd71d1ebe8f6fdf68c694b9b8a",
+        "clean_commit_sha256": "83772577a04dda5a5ccec58b61ce82f0430b66ab9ae1d689b565e8e23dfb7660",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/combat/operation_opportunity_catalog_federation_western_bosnia.ts",
+        "category": "executable_source",
+        "current_sha256": "e361e590d3fceeafcefb23f378dd08e25195778c9c9b46c1706295cfe9846015",
+        "clean_commit_sha256": "e1a8f326585e02958229cfe9cd613ca2a4a57c765242e951e1a38c3659e74592",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/combat/operation_preparation.ts",
+        "category": "executable_source",
+        "current_sha256": "de185fc6e0df0ed0b85a1183542fe2de1489c17dfc08ee0b0313658da6f1bd2c",
+        "clean_commit_sha256": "e336d1dcca085233d1ae1ae27ed49b41b9a5dac77e9fb41e08294c4739861507",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/combat/osid_column_movement.ts",
+        "category": "executable_source",
+        "current_sha256": "a3600a86885ecd34bb976dd92e784c0f01fe8c1796d66bd2039cf5bae46a6489",
+        "clean_commit_sha256": "abfdc57e07b5f0e6648676ffc20af65503831be9cc2de52aa45bf342b78f112b",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/combat/pre_planned_operations.ts",
+        "category": "executable_source",
+        "current_sha256": "6935ffcc00c96e830ddb27eaf11ed8599cd90de5bd4ddcee380a2152ac6024d1",
+        "clean_commit_sha256": "534ffcdcd63947d557ab86c6c14852f9055b9143317a62b06aafd814e03ff222",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/combat/sector_offensive.ts",
+        "category": "executable_source",
+        "current_sha256": "27b9dfc8e1586cd9b21ac34bdbda2c94a378b75f5fee7898543e6cae060c7bf2",
+        "clean_commit_sha256": "0f8c1459e39c06c25b48076b0fb4658f000bb7442a7d1a9bb27af7adfe039586",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/combat/tactical_group_lifecycle.ts",
+        "category": "executable_source",
+        "current_sha256": "0d7496fd530aef27acd6c77b920b8f5292f5c12c370ddc6f1dafd102b0b8e917",
+        "clean_commit_sha256": "c407ec74604a9cd47fd05e04d979a9f1284fd913051005a2d2a8726429bccef2",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/sim/turn_phases/war_phases.ts",
+        "category": "executable_source",
+        "current_sha256": "973b406f04a173d302220c185cf41eaa1677ddabc00e2cc0a7c495a04703941d",
+        "clean_commit_sha256": "d778b889a71d8237249eba67699da9a9f73c9de8d23a3868862f454e95549ae9",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "src/state/game_state.ts",
+        "category": "executable_source",
+        "current_sha256": "7ff612b93c97d708d4b43638f1015c80d905d7737aa5d938847976e6c4f92e6c",
+        "clean_commit_sha256": "eee801d732721d6c839aa76c5b78dd7948cbb6d435672120e2363988c69cf3b6",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "tools/lib/farz_objective_gate.cjs",
+        "category": "runner_or_verifier_tool",
+        "current_sha256": "6afede8efef22b013e928cdc0425c5d6eafa0ce682ed80cafac672324aaa5b38",
+        "clean_commit_sha256": null,
+        "clean_commit_object_available": false,
+        "clean_error": "Command failed: git show df3cc3167f387b052ea74e2d008dc5aa84f7b2ff:tools/lib/farz_objective_gate.cjs"
+      },
+      {
+        "path": "tools/scenario_runner/run_scenario.ts",
+        "category": "runner_or_verifier_tool",
+        "current_sha256": "40b7d90b69cd1592836c6107314219f5cbbf920d05a601d019bcb6033efbe678",
+        "clean_commit_sha256": "277b8dfa9f0e3d14bf238791a4ade0f9d25fd2260f7eed7a9f8af0a9ea2cf4fd",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      },
+      {
+        "path": "tools/verify_checkpoints.cjs",
+        "category": "runner_or_verifier_tool",
+        "current_sha256": "d4545345614f7801c9c54377d08d1ea531a5dc428e338ac28413417ea6528dce",
+        "clean_commit_sha256": "bbaa8e0f880e48cdc6cfd91a8b550d249311398c061fb51c24426ab0e1211af8",
+        "clean_commit_object_available": true,
+        "clean_error": null
+      }
+    ],
+    "older_evidence_worktree": "C:/Users/User/.codex/worktrees/april-1995-glamoc/A-War-Without-Victory",
+    "older_evidence_search": "narrow filename/content search for source snapshots, manifests, patches, hashes and dirty provenance; no contemporaneous dirty source patch or source snapshot found",
+    "git_object_search": "git log --all --reflog found clean commit history only for this lane; git fsck object scan timed out and is not treated as positive evidence"
+  },
+  "coverage": {
+    "consumed_input_paths_bound_by_run_digest": [
+      {
+        "path": "data/source/calibration/painted_control_apr1994.json",
+        "current_sha256": "24f6e8923afa6a5ceaf7e4148cd119f2952f48c99544b5e50e994836dc863dba",
+        "run_recorded_sha256": "24f6e8923afa6a5ceaf7e4148cd119f2952f48c99544b5e50e994836dc863dba"
+      },
+      {
+        "path": "data/source/calibration/painted_control_apr1995.json",
+        "current_sha256": "59f05f4919e8e4b6cfd81fe63958a9cd07406acbdb4aa8a4edd1a14596cba44d",
+        "run_recorded_sha256": "59f05f4919e8e4b6cfd81fe63958a9cd07406acbdb4aa8a4edd1a14596cba44d"
+      },
+      {
+        "path": "data/source/calibration/painted_control_jan1993.json",
+        "current_sha256": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7",
+        "run_recorded_sha256": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7"
+      }
+    ],
+    "executable_source_paths_unbound": [
+      "src/scenario/combat_causality.ts",
+      "src/scenario/scenario_runner.ts",
+      "src/sim/combat/army_reserve_system.ts",
+      "src/sim/combat/attack_resolution_osid.ts",
+      "src/sim/combat/bot_brigade_ai_osid.ts",
+      "src/sim/combat/bot_brigade_eval_attack.ts",
+      "src/sim/combat/brigade_routine_scope.ts",
+      "src/sim/combat/coha_operation_exception.ts",
+      "src/sim/combat/commander/emit.ts",
+      "src/sim/combat/commander/plan.ts",
+      "src/sim/combat/final_operation_truth_reconciliation.ts",
+      "src/sim/combat/historical_elite_reservations.ts",
+      "src/sim/combat/operation_approach_osids.ts",
+      "src/sim/combat/operation_opportunities.ts",
+      "src/sim/combat/operation_opportunity_catalog_5th_corps.ts",
+      "src/sim/combat/operation_opportunity_catalog_central_bosnia.ts",
+      "src/sim/combat/operation_opportunity_catalog_federation_western_bosnia.ts",
+      "src/sim/combat/operation_preparation.ts",
+      "src/sim/combat/osid_column_movement.ts",
+      "src/sim/combat/pre_planned_operations.ts",
+      "src/sim/combat/sector_offensive.ts",
+      "src/sim/combat/tactical_group_lifecycle.ts",
+      "src/sim/turn_phases/war_phases.ts",
+      "src/state/game_state.ts"
+    ],
+    "runner_or_verifier_tool_paths_unbound": [
+      "tools/lib/farz_objective_gate.cjs",
+      "tools/scenario_runner/run_scenario.ts",
+      "tools/verify_checkpoints.cjs"
+    ],
+    "counts": {
+      "consumed_input_paths_changed": 3,
+      "executable_source_paths_changed": 24,
+      "runner_or_verifier_tool_paths_changed": 3,
+      "total_changed": 30
+    }
+  },
+  "insufficiency": [
+    "git_dirty=true in both retained run metadata",
+    "no dirty patch hash, source snapshot, executable manifest, or contemporaneous byte receipt binds the 24 changed src files to n37/n38",
+    "matching consumed-input digest and initial-save hash bind data/save inputs only, not dirty executable bytes",
+    "current/clean working-copy hashes and selected outcomes cannot fingerprint the original dirty executable"
+  ],
+  "stop_rule": "Do not run the continuous t186?t188 trace or any campaign; preserve evidence and stop."
+}

@@ -68,6 +68,12 @@ review: [existing convergence report](../../logs/prusac-diagnostic-20260929/sana
 Calibration remains NO-GO; no additional suite/campaign, merge or adoption is
 authorized by these diagnostic results.
 
+The owner-authorized OpenCode source-continuity audit exits 0 but stops at the
+gate: no complete run-bound dirty-tree fingerprint recovered. A partial catalog
+hash is candidate-scoped, not proof of n37/n38 execution. No conditional
+continuous trace ran. Raw receipt and reviewed addendum are preserved in the
+existing convergence report; original cause and acceptance gaps remain open.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

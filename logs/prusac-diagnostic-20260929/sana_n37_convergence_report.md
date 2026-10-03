@@ -153,3 +153,62 @@ authored `_2` ID corrected it. The next extraction exited 0 but overasserted
 January HRHB for Lug/Paroš. The final explicit checkpoint timeline agrees with
 paint and exits 0. Earlier outputs are retained; these correct audit assumptions,
 not simulation control or acceptance criteria.
+
+## Continuation 2 source-continuity gate — 2026-10-03
+
+**STOP — insufficient continuity; conditional trace not run.** The exact retained
+run metadata for n37 and n38 records clean commit
+`df3cc3167f387b052ea74e2d008dc5aa84f7b2ff` with `git_dirty: true`. No complete
+run-bound dirty-tree fingerprint was recovered by this bounded audit.
+
+The retained evidence does bind the consumed inputs: both runs record digest
+`8f13061b19ed9fd2d899f77f0115fdd4c5379e52cb058b3edadbd00e0e41af20` and initial
+save SHA-256
+`413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1`.
+Current bytes for the three changed calibration input files match their run
+recorded hashes. That is input/save continuity, not executable-source
+continuity.
+
+The current checkpoint differs from clean `df3cc` in 30 paths: 24 `src/`
+executable-source paths, 3 changed calibration inputs, and 3 `tools/` runner or
+verifier paths. Clean-commit object hashes are recorded where available, but
+current-vs-clean hashes and matching selected outcomes cannot identify the
+original dirty bytes. The bounded older-checkout search recovered no complete
+run-bound snapshot or patch. A Git object scan timed out; it is incomplete
+search evidence, not proof that no recoverable object exists. Exact coverage
+and all paths are preserved in raw `continuation2_source_continuity.json`.
+
+Independent review identified a partial source receipt:
+`sana_ivanjska_candidate_only_provenance.md` records catalog SHA-256
+`35577cf555869989f22321a9c56453793e9f9f65f03e52468dd781ea57d7de94`, matching
+the current `operation_opportunity_catalog_5th_corps.ts`. That candidate-scoped
+receipt does not bind those bytes to n37/n38 execution or cover the other 23
+changed source paths. All 24 remain **not bound to n37/n38**. The reviewed
+addendum `continuation2_source_continuity_reviewed.json` narrows the raw receipt's
+absence wording without changing or overwriting it.
+
+**Measured:** dirty provenance, digest/save equality, 30-path change set and
+hash coverage above. **Hypotheses not tested:** source continuity, second-resume
+effects, and flag neutrality. **Missing evidence:** the original dirty
+executable source receipt. Per the gate, no new helper was prepared or invoked,
+no validation-plan dispatch was recorded, and no production correction or
+campaign followed.
+
+OpenCode executed the bounded handoff through
+`opencode-go/gpt-5.6-luna#medium`; dispatch exit **0** is in
+`continuation2_opencode_dispatch.exit.txt`, with raw stdout/stderr retained
+locally. Exit 0 means the audit completed; the source-continuity gate failed.
+The earlier explicit OpenAI Sol route failure remains separate. Independent
+review and its targeted correction verification are GO for this STOP
+disposition; calibration remains NO-GO.
+
+Exact dispatch command (stdout/stderr captured in the corresponding local logs):
+
+```powershell
+opencode run --standalone --model 'opencode-go/gpt-5.6-luna#medium' --format json --auto --title 'Sana source continuity' --file logs/prusac-diagnostic-20260929/continuation2_opencode_handoff.md 'Execute the attached bounded diagnostic handoff. Start with source continuity and stop if it is not established. Preserve all evidence; no production correction or campaign.'
+```
+
+Focused documentation closeout: 63/63 tests exit 0
+(`continuation2_docs_focused.exit.txt`); derived plan index exits 0
+(`continuation2_plan_index.exit.txt`). Raw-receipt and catalog-hash checks pass;
+board length is 19,940/20,000 and roadmap 59,226/60,000 characters.
