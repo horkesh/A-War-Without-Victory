@@ -1,0 +1,223 @@
+{
+  "mode": "trace-t188",
+  "prerequisites": {
+    "save_turn": 186,
+    "scenario_id_equal": true,
+    "consumed_input_digest_n38": "8f13061b19ed9fd2d899f77f0115fdd4c5379e52cb058b3edadbd00e0e41af20",
+    "consumed_input_digest_n37": "8f13061b19ed9fd2d899f77f0115fdd4c5379e52cb058b3edadbd00e0e41af20",
+    "consumed_input_digest_equal": true,
+    "initial_save_sha256_n38": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+    "initial_save_sha256_n37": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+    "initial_save_equal": true
+  },
+  "run_out_dir": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\prusac-diagnostic-20260929\\continuation_sana_t188_trace_artifacts",
+  "checks": {
+    "turn": true,
+    "formation_506": true,
+    "formation_517": true,
+    "current_objective": true,
+    "battle": true,
+    "control_counts": true,
+    "column_movement": false,
+    "trace_predicate": true,
+    "direct_approach_not_fallback": true,
+    "selected_approach_reproduced": true,
+    "diagnostic_free_state_hash": false
+  },
+  "pass": false,
+  "observed": {
+    "current_objective": "op:sanski_most:stari_majdan",
+    "formation_506": {
+      "location_osid": "op:sanski_most:skucani_vakuf_2",
+      "movement_destination": null,
+      "movement_status": null
+    },
+    "formation_517": {
+      "location_osid": "op:sanski_most:lusci_palanka_2",
+      "movement_destination": "op:sanski_most:budimlic_japra_2",
+      "movement_status": null
+    },
+    "order_generation_detail_517": {
+      "brigade_id": "arbih_517th_light",
+      "concentrated_outcome": null,
+      "decision": "march_to_approach",
+      "issued_target_osid": "op:sanski_most:budimlic_japra_2",
+      "location_osid": "op:sanski_most:lusci_palanka_2",
+      "objective": "op:sanski_most:stari_majdan",
+      "objective_controller": "RS",
+      "phase": "execution",
+      "power_ratio": null,
+      "predicted_outcome": null,
+      "tactically_adjacent": false,
+      "threshold": null,
+      "turn": 188
+    },
+    "approach_branch": {
+      "tactical_neighbors_with_controllers": [
+        {
+          "osid": "op:prijedor:ljubija_2",
+          "controller": "RS"
+        },
+        {
+          "osid": "op:prijedor:raljas",
+          "controller": "RS"
+        },
+        {
+          "osid": "op:sanski_most:budimlic_japra_2",
+          "controller": "RBiH"
+        },
+        {
+          "osid": "op:sanski_most:ostra_luka",
+          "controller": "RS"
+        },
+        {
+          "osid": "op:sanski_most:sanski_most_2",
+          "controller": "RS"
+        },
+        {
+          "osid": "op:sanski_most:skucani_vakuf_2",
+          "controller": "RBiH"
+        }
+      ],
+      "direct_friendly_approaches": [
+        {
+          "osid": "op:sanski_most:budimlic_japra_2",
+          "controller": "RBiH"
+        },
+        {
+          "osid": "op:sanski_most:skucani_vakuf_2",
+          "controller": "RBiH"
+        }
+      ],
+      "full_approach_set": [
+        "op:sanski_most:budimlic_japra_2",
+        "op:sanski_most:skucani_vakuf_2"
+      ],
+      "fallback_used": false,
+      "nearest_friendly_bfs_selection": "op:sanski_most:budimlic_japra_2"
+    },
+    "battle": {
+      "attacker_brigade": "arbih_506th_mountain",
+      "target_osid": "op:sanski_most:stari_majdan",
+      "attacker_won": false,
+      "outcome": "stalemate"
+    },
+    "control_counts": {
+      "HRHB": 99,
+      "RBiH": 280,
+      "RS": 333
+    },
+    "column_movement": {
+      "column_advances": 1,
+      "column_arrivals": 6,
+      "column_blocked": 12,
+      "column_starts": 5
+    },
+    "normalized_replay_sha256": "c0d711f3c969ec9e9b06efdb0483f6f911a326248901874a279a10b424bc871f",
+    "normalized_n37_sha256": "6b9ff36eb915f6304d0f1a1799b3de265982f3aa74e15795256c14c262a610f1",
+    "raw_replay_sha256": "54e5483807dcaa4132e9bfa3cfaff9a837fa174856094dd89fa39a4ab3c8f7e9",
+    "raw_n37_sha256": "2e3ad11b585560cff93876a275163faa17d044e68c403245c36df55dda0e5731",
+    "normalized_diff_paths": [
+      "military.casualty_ledger.RS.missing_captured",
+      "military.casualty_ledger.RS.per_formation.rs_1st_gradika_light_infantry.wounded",
+      "military.casualty_ledger.RS.per_formation.rs_4th_banja_luka_light_infantry.missing_captured",
+      "military.casualty_ledger.RS.wounded",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_102nd_motorized",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_104th_vitezka_motorized",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_105th_motorized",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_111th_vitezka_motorized",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_112th_vitezka_motorized",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_124th_light_king_tvrtko",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_141st_light",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_143rd_light",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_146th_light",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_152nd_mountain",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_155th_motorized",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_161st_slavna_olovo_mountain",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_162nd_mountain",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_165th_mountain",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_17th_muslim_light",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_2nd_mountain",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_803rd_light",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_807th_muslim_liberation",
+      "military.corps_command.arbih_1st_corps.commander_state.belief_state.subordinate_reliability.arbih_hvo_kralj_tvrtko",
+      "military.corps_command.arbih_1st_corps.commander_state.decision_trace.candidates[2].score",
+      "military.corps_command.arbih_1st_corps.commander_state.decision_trace.candidates[2].score_breakdown.fatigue_readiness",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[1].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[1].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[2].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[2].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[5].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[5].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[6].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[6].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[9].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[9].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[11].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[11].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[12].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[12].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[13].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[13].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[15].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[15].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[16].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[16].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[17].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[17].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[18].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[18].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[20].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[20].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[21].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[21].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[26].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[26].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[27].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:breza:koritnik[27].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:centar_sarajevo:sarajevo_dio_centar_sajarevo[0].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:centar_sarajevo:sarajevo_dio_centar_sajarevo[0].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:gorazde:bacci[2].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:gorazde:bacci[2].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:gorazde:bacci[3].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.by_zone.zone:arbih_1st_corps:op:gorazde:bacci[3].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[1].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[1].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[2].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[2].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[3].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[3].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[6].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[6].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[7].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[7].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[10].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[10].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[12].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[12].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[13].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[13].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[14].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[14].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[16].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[16].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[17].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[17].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[18].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[18].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[19].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[19].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[21].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[21].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[22].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[22].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[27].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[27].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[30].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[30].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[31].fitness_defense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[31].fitness_offense",
+      "military.corps_command.arbih_1st_corps.commander_state.force_assessment.evaluations[35].fitness_defense"
+    ]
+  }
+}

@@ -1,0 +1,671 @@
+{
+  "scope": "retained-only western lifecycle comparison; null is unreported, not zero",
+  "operations": [
+    {
+      "name": "Operation Mistral 2",
+      "runs": [
+        {
+          "run": "n25",
+          "first_planning": 175,
+          "first_execution": 178,
+          "late_receipts": [
+            {
+              "turn": 175,
+              "phase": "planning",
+              "current_objectives": [
+                "op:sipovo:brdjani",
+                "op:titov_drvar:prekaja_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hvo_rama_brigade"
+              ]
+            },
+            {
+              "turn": 176,
+              "phase": "planning",
+              "current_objectives": [
+                "op:sipovo:brdjani",
+                "op:titov_drvar:prekaja_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hvo_rama_brigade"
+              ]
+            },
+            {
+              "turn": 177,
+              "phase": "planning",
+              "current_objectives": [
+                "op:sipovo:brdjani",
+                "op:titov_drvar:prekaja_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hvo_rama_brigade"
+              ]
+            },
+            {
+              "turn": 178,
+              "phase": "execution",
+              "current_objectives": [
+                "op:sipovo:gornji_mujdzici_2",
+                "op:titov_drvar:drvar_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hvo_1st_guard_abb",
+                "hvo_3rd_guard_jastrebovi",
+                "hvo_rama_brigade"
+              ]
+            },
+            {
+              "turn": 179,
+              "phase": "execution",
+              "current_objectives": [
+                "op:sipovo:sipovo_2",
+                "op:titov_drvar:drvar_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hvo_1st_guard_abb",
+                "hvo_3rd_guard_jastrebovi",
+                "hvo_rama_brigade"
+              ]
+            },
+            {
+              "turn": 180,
+              "phase": "execution",
+              "current_objectives": [
+                "op:sipovo:volari_2",
+                "op:titov_drvar:sipovljani_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hvo_1st_guard_abb",
+                "hvo_3rd_guard_jastrebovi",
+                "hvo_rama_brigade"
+              ]
+            },
+            {
+              "turn": 181,
+              "phase": "execution",
+              "current_objectives": [
+                "op:bosansko_grahovo:bosansko_grahovo_2",
+                "op:sipovo:pribeljci_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hvo_1st_guard_abb",
+                "hvo_3rd_guard_jastrebovi",
+                "hvo_rama_brigade"
+              ]
+            },
+            {
+              "turn": 182,
+              "phase": "execution",
+              "current_objectives": [
+                "op:bosansko_grahovo:malesevci",
+                "op:jajce:bravnice"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hvo_1st_guard_abb",
+                "hvo_3rd_guard_jastrebovi",
+                "hvo_rama_brigade"
+              ]
+            },
+            {
+              "turn": 183,
+              "phase": "execution",
+              "current_objectives": [
+                "op:bosansko_grahovo:ugarci",
+                "op:jajce:vinac_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hvo_1st_guard_abb",
+                "hvo_3rd_guard_jastrebovi",
+                "hvo_rama_brigade"
+              ]
+            },
+            {
+              "turn": 184,
+              "phase": "execution",
+              "current_objectives": [
+                "op:jajce:jajce_3"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hvo_1st_guard_abb",
+                "hvo_3rd_guard_jastrebovi",
+                "hvo_rama_brigade"
+              ]
+            },
+            {
+              "turn": 185,
+              "phase": "execution",
+              "current_objectives": [
+                "op:jajce:lupnica"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hvo_1st_guard_abb",
+                "hvo_3rd_guard_jastrebovi",
+                "hvo_rama_brigade"
+              ]
+            },
+            {
+              "turn": 186,
+              "phase": "execution",
+              "current_objectives": [
+                "op:jajce:barevo_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hvo_1st_guard_abb",
+                "hvo_3rd_guard_jastrebovi",
+                "hvo_rama_brigade"
+              ]
+            },
+            {
+              "turn": 187,
+              "phase": "execution",
+              "current_objectives": [
+                "op:jajce:jezero_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hvo_1st_guard_abb",
+                "hvo_3rd_guard_jastrebovi",
+                "hvo_rama_brigade"
+              ]
+            },
+            {
+              "turn": 188,
+              "phase": "execution",
+              "current_objectives": [
+                "op:jajce:jezero_2"
+              ],
+              "participants": [
+                "hvo_1st_guard_abb",
+                "hvo_3rd_guard_jastrebovi",
+                "hvo_rama_brigade"
+              ]
+            }
+          ],
+          "endpoint": {
+            "phase": "execution",
+            "started_turn": 175,
+            "phase_started_turn": 178,
+            "preparation_sub_phase": "ready",
+            "preparation_turns_elapsed": 3,
+            "preparation_max_turns": 5,
+            "intel_confidence_at_assessment": 1,
+            "participants": [
+              "hvo_1st_guard_abb",
+              "hvo_3rd_guard_jastrebovi",
+              "hvo_rama_brigade"
+            ],
+            "axes": [
+              {
+                "id": "mistral_drvar_grahovo",
+                "current_objective": null,
+                "assigned_brigades": [
+                  "hvo_1st_guard_abb",
+                  "hvo_3rd_guard_jastrebovi"
+                ]
+              },
+              {
+                "id": "mistral_sipovo",
+                "current_objective": "op:jajce:jezero_2",
+                "assigned_brigades": [
+                  "hvo_rama_brigade"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "run": "n37",
+          "first_planning": 175,
+          "first_execution": 180,
+          "late_receipts": [
+            {
+              "turn": 175,
+              "phase": "planning",
+              "current_objectives": [
+                "op:sipovo:brdjani",
+                "op:titov_drvar:prekaja_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hv_4th_guards_split"
+              ]
+            },
+            {
+              "turn": 176,
+              "phase": "planning",
+              "current_objectives": [
+                "op:sipovo:brdjani",
+                "op:titov_drvar:drvar_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hv_4th_guards_split"
+              ]
+            },
+            {
+              "turn": 177,
+              "phase": "planning",
+              "current_objectives": [
+                "op:sipovo:brdjani",
+                "op:titov_drvar:drvar_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hv_4th_guards_split"
+              ]
+            },
+            {
+              "turn": 178,
+              "phase": "planning",
+              "current_objectives": [
+                "op:sipovo:brdjani",
+                "op:titov_drvar:drvar_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hv_4th_guards_split"
+              ]
+            },
+            {
+              "turn": 179,
+              "phase": "planning",
+              "current_objectives": [
+                "op:sipovo:brdjani",
+                "op:titov_drvar:drvar_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hv_4th_guards_split"
+              ]
+            },
+            {
+              "turn": 180,
+              "phase": "execution",
+              "current_objectives": [
+                "op:sipovo:gornji_mujdzici_2",
+                "op:titov_drvar:sipovljani_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hv_4th_guards_split",
+                "hvo_2nd_guard_mechanized"
+              ]
+            },
+            {
+              "turn": 181,
+              "phase": "execution",
+              "current_objectives": [
+                "op:sipovo:sipovo_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hv_4th_guards_split",
+                "hvo_2nd_guard_mechanized"
+              ]
+            },
+            {
+              "turn": 182,
+              "phase": "execution",
+              "current_objectives": [
+                "op:sipovo:volari_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hv_4th_guards_split",
+                "hvo_2nd_guard_mechanized"
+              ]
+            },
+            {
+              "turn": 183,
+              "phase": "execution",
+              "current_objectives": [
+                "op:sipovo:pribeljci_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hv_4th_guards_split",
+                "hvo_2nd_guard_mechanized"
+              ]
+            },
+            {
+              "turn": 184,
+              "phase": "execution",
+              "current_objectives": [
+                "op:jajce:bravnice"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hv_4th_guards_split",
+                "hvo_2nd_guard_mechanized"
+              ]
+            },
+            {
+              "turn": 185,
+              "phase": "execution",
+              "current_objectives": [
+                "op:jajce:vinac_2"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hv_4th_guards_split",
+                "hvo_2nd_guard_mechanized"
+              ]
+            },
+            {
+              "turn": 186,
+              "phase": "execution",
+              "current_objectives": [
+                "op:jajce:jajce_3"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hv_4th_guards_split",
+                "hvo_2nd_guard_mechanized"
+              ]
+            },
+            {
+              "turn": 187,
+              "phase": "execution",
+              "current_objectives": [
+                "op:jajce:lupnica"
+              ],
+              "participants": [
+                "hv_112th_infantry_1995",
+                "hv_1st_hgz_1995",
+                "hv_4th_guards_split",
+                "hvo_2nd_guard_mechanized"
+              ]
+            },
+            {
+              "turn": 188,
+              "phase": "execution",
+              "current_objectives": [
+                "op:jajce:lupnica"
+              ],
+              "participants": [
+                "hv_4th_guards_split",
+                "hvo_2nd_guard_mechanized"
+              ]
+            }
+          ],
+          "endpoint": {
+            "phase": "execution",
+            "started_turn": 175,
+            "phase_started_turn": 180,
+            "preparation_sub_phase": "ready",
+            "preparation_turns_elapsed": 5,
+            "preparation_max_turns": 5,
+            "intel_confidence_at_assessment": 0,
+            "participants": [
+              "hv_4th_guards_split",
+              "hvo_2nd_guard_mechanized"
+            ],
+            "axes": [
+              {
+                "id": "mistral_drvar_grahovo",
+                "current_objective": null,
+                "assigned_brigades": [
+                  "hv_4th_guards_split"
+                ]
+              },
+              {
+                "id": "mistral_sipovo",
+                "current_objective": "op:jajce:lupnica",
+                "assigned_brigades": [
+                  "hvo_2nd_guard_mechanized"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Operation Southern Move",
+      "runs": [
+        {
+          "run": "n25",
+          "first_planning": 183,
+          "first_execution": 188,
+          "late_receipts": [
+            {
+              "turn": 183,
+              "phase": "planning",
+              "current_objectives": [
+                "op:mrkonjic_grad:majdan_2"
+              ],
+              "participants": [
+                "hrhb_kralj_petar_kreimir_iv_brigade",
+                "hv_1st_guards_tigers",
+                "hv_4th_guards_split",
+                "hv_5th_guards_karlovac"
+              ]
+            },
+            {
+              "turn": 184,
+              "phase": "planning",
+              "current_objectives": [
+                "op:mrkonjic_grad:majdan_2"
+              ],
+              "participants": [
+                "hrhb_kralj_petar_kreimir_iv_brigade",
+                "hv_1st_guards_tigers",
+                "hv_4th_guards_split",
+                "hv_5th_guards_karlovac"
+              ]
+            },
+            {
+              "turn": 185,
+              "phase": "planning",
+              "current_objectives": [
+                "op:mrkonjic_grad:majdan_2"
+              ],
+              "participants": [
+                "hrhb_kralj_petar_kreimir_iv_brigade",
+                "hv_1st_guards_tigers",
+                "hv_4th_guards_split",
+                "hv_5th_guards_karlovac"
+              ]
+            },
+            {
+              "turn": 186,
+              "phase": "planning",
+              "current_objectives": [
+                "op:mrkonjic_grad:majdan_2"
+              ],
+              "participants": [
+                "hrhb_kralj_petar_kreimir_iv_brigade",
+                "hv_1st_guards_tigers",
+                "hv_4th_guards_split",
+                "hv_5th_guards_karlovac"
+              ]
+            },
+            {
+              "turn": 187,
+              "phase": "planning",
+              "current_objectives": [
+                "op:mrkonjic_grad:majdan_2"
+              ],
+              "participants": [
+                "hrhb_kralj_petar_kreimir_iv_brigade",
+                "hv_1st_guards_tigers",
+                "hv_4th_guards_split",
+                "hv_5th_guards_karlovac"
+              ]
+            },
+            {
+              "turn": 188,
+              "phase": "execution",
+              "current_objectives": [
+                "op:mrkonjic_grad:podrasnica_2"
+              ],
+              "participants": [
+                "hrhb_kralj_petar_kreimir_iv_brigade",
+                "hv_1st_guards_tigers",
+                "hv_4th_guards_split",
+                "hv_5th_guards_karlovac"
+              ]
+            }
+          ],
+          "endpoint": {
+            "phase": "execution",
+            "started_turn": 183,
+            "phase_started_turn": 188,
+            "preparation_sub_phase": "ready",
+            "preparation_turns_elapsed": 5,
+            "preparation_max_turns": 5,
+            "intel_confidence_at_assessment": 0,
+            "participants": [
+              "hrhb_kralj_petar_kreimir_iv_brigade",
+              "hv_1st_guards_tigers",
+              "hv_4th_guards_split",
+              "hv_5th_guards_karlovac"
+            ],
+            "axes": [
+              {
+                "id": "southern_move_mrkonjic",
+                "current_objective": "op:mrkonjic_grad:podrasnica_2",
+                "assigned_brigades": [
+                  "hrhb_kralj_petar_kreimir_iv_brigade",
+                  "hv_1st_guards_tigers",
+                  "hv_4th_guards_split",
+                  "hv_5th_guards_karlovac"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "run": "n37",
+          "first_planning": 185,
+          "first_execution": null,
+          "late_receipts": [
+            {
+              "turn": 185,
+              "phase": "planning",
+              "current_objectives": [
+                "op:mrkonjic_grad:majdan_2"
+              ],
+              "participants": [
+                "F_HRHB_0001",
+                "hrhb_kralj_petar_kreimir_iv_brigade",
+                "hv_1st_guards_tigers",
+                "hv_5th_guards_karlovac",
+                "hvo_rama_brigade"
+              ]
+            },
+            {
+              "turn": 186,
+              "phase": "planning",
+              "current_objectives": [
+                "op:mrkonjic_grad:majdan_2"
+              ],
+              "participants": [
+                "F_HRHB_0001",
+                "hrhb_kralj_petar_kreimir_iv_brigade",
+                "hv_1st_guards_tigers",
+                "hv_5th_guards_karlovac",
+                "hvo_rama_brigade"
+              ]
+            },
+            {
+              "turn": 187,
+              "phase": "planning",
+              "current_objectives": [
+                "op:mrkonjic_grad:majdan_2"
+              ],
+              "participants": [
+                "F_HRHB_0001",
+                "hrhb_kralj_petar_kreimir_iv_brigade",
+                "hv_1st_guards_tigers",
+                "hv_5th_guards_karlovac",
+                "hvo_rama_brigade"
+              ]
+            },
+            {
+              "turn": 188,
+              "phase": "planning",
+              "current_objectives": [
+                "op:mrkonjic_grad:majdan_2"
+              ],
+              "participants": [
+                "F_HRHB_0001",
+                "hrhb_kralj_petar_kreimir_iv_brigade",
+                "hv_1st_guards_tigers",
+                "hv_5th_guards_karlovac",
+                "hvo_rama_brigade"
+              ]
+            }
+          ],
+          "endpoint": {
+            "phase": "planning",
+            "started_turn": 185,
+            "phase_started_turn": 185,
+            "preparation_sub_phase": "intel_gathering",
+            "preparation_turns_elapsed": 3,
+            "preparation_max_turns": 5,
+            "intel_confidence_at_assessment": null,
+            "participants": [
+              "F_HRHB_0001",
+              "hrhb_kralj_petar_kreimir_iv_brigade",
+              "hv_1st_guards_tigers",
+              "hv_5th_guards_karlovac",
+              "hvo_rama_brigade"
+            ],
+            "axes": [
+              {
+                "id": "southern_move_mrkonjic",
+                "current_objective": "op:mrkonjic_grad:majdan_2",
+                "assigned_brigades": [
+                  "F_HRHB_0001",
+                  "hrhb_kralj_petar_kreimir_iv_brigade",
+                  "hv_1st_guards_tigers",
+                  "hv_5th_guards_karlovac",
+                  "hvo_rama_brigade"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

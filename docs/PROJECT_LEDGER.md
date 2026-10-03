@@ -9,6 +9,38 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-03 — Sana continuation pre-order diagnosis
+
+Continued from clean `24452b5fa` on
+`codex/october-calibration-continuation-20261003`. OpenCode's explicit Sol route
+exited 126 (unavailable); a fresh Sol worker performed two bounded single-turn
+diagnostics. t187 exited 0 on all declared retained counterparts. t188 exited 2:
+local Sana receipts reproduce a freshly selected Budimlić Japra approach for
+current Stari Majdan, but column totals and diagnostic-free whole-state hashes
+fail equivalence. All 1,147 differing leaves were classified; no retry followed.
+Dirty original source-patch provenance and exact original pre-order cause remain
+open. Independent Sol review is GO for the bounded stop without correction,
+BLOCK for claiming that cause established; it is not calibration acceptance.
+
+Read-only retained audits exit 0: no earlier n25 matching OSID lost, exactly four
+October losses (Barevo, Lupnica, Majdan, Varošluk), protected checkpoint controls
+retained, 27 anomalies/zero critical, and actual Farz operation-owned captures
+t162/164/163/167 accepted under the 2026-09-29 either-corps ruling. n37 Southern
+Move starts planning t185 and stays planning w188, elapsed 3/5 with initial
+intelligence unreported; this corrects a prior narrative imported from older
+evidence. Mistral 2's two-turn delay and inherited Varošluk route loss remain
+separate. Diagnostic audit-assumption failures and all retained runs are preserved.
+
+No production, test, canon, control/paint, denominator, save-schema or baseline
+change; no new full suite, campaign, merge or adoption. Typecheck exits 0.
+Final documentation tests pass 63/63 (two invocations, exits 0); derived-index
+and working/staged whitespace checks exit 0. The initial overlong board update
+was shortened after its cheap preflight, retaining the 20,000-character limit.
+Plan, calibration master, roadmap, board and knowledge note updated. Evidence
+and exact exits: `logs/prusac-diagnostic-20260929/sana_n37_convergence_report.md`;
+independent review: `logs/prusac-diagnostic-20260929/continuation_independent_review.md`.
+All original calibration acceptance gaps remain open.
+
 ## 2026-10-03 — Sana Ivanjska retained-suite failure corrections
 
 Corrected the two real failures identified in the retained single Sana Ivanjska

@@ -27,6 +27,17 @@ no merge/adoption, production edit, or second 188-week campaign follows. The
 2026-09-29 owner Farz ruling at the top of [CALIBRATION_MASTER](../40_reports/CALIBRATION_MASTER.md)
 supersedes the old P-A wrong-corps wording; do not restore that stale blocker.
 
+**Clean continuation diagnosis — 2026-10-03:** t187 resumed single-turn check
+exits 0 on declared receipts; t188 trace exits 2 on column totals and whole-state
+equivalence (1,147 differing leaves). Its local 517th receipt freshly selects
+Budimlić Japra for Stari Majdan, but cannot establish the original n37 pre-order
+cause. Independent Sol review is GO for the bounded stop without correction,
+not calibration acceptance. Fresh Farz receipt audit exits 0 under the current
+owner ruling. n37 Southern Move is still planning at w188 (elapsed 3/5),
+correcting the older late-execution narrative. Jajce and all four lost matches
+remain open. No production edit, retry, new suite/campaign, merge or adoption.
+See the [convergence diagnosis](../../logs/prusac-diagnostic-20260929/sana_n37_convergence_report.md).
+
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference
 for `op:trnovo:gornja_presjenica` to RS. Replaying the unchanged run now scores

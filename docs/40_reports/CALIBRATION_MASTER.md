@@ -46,6 +46,28 @@ production edit was made, and no second 188-week campaign is authorized from
 this evidence. Exact helper exits are retained locally in
 `logs/prusac-diagnostic-20260929/`.
 
+### Clean continuation diagnosis — 2026-10-03
+
+On `codex/october-calibration-continuation-20261003` (base `24452b5fa`), two
+bounded resumed single turns tested the missing order boundary. t187 exits 0
+and matches declared retained receipts; t188 exits 2 because column totals and
+diagnostic-free whole-state hashes differ (1,147 differing leaves). The t188
+trace reproduces a fresh 517th `march_to_approach` selection of Budimlić Japra
+for current Stari Majdan, supporting lawful routing rather than proving stale
+intent. Exact original n37 pre-order cause remains open. Independent Sol review
+is GO for stopping without correction, BLOCK for claiming that cause established.
+No production correction or further replay follows the failed equivalence gate.
+
+Fresh retained audits exit 0: actual Farz operation receipts are t162/164/163/167
+under the current owner ruling; protected controls and zero critical anomalies
+hold. Southern Move in n37 stays planning t188 after starting t185, preparation
+elapsed 3/5 and initial intelligence unreported. The older five-turn/zero-intel
+execution narrative is not n37 evidence. Mistral 2's t180 launch, two missing
+Jajce gains and inherited Varošluk loss remain separate. Details, exact exits and
+review: [existing convergence report](../../logs/prusac-diagnostic-20260929/sana_n37_convergence_report.md).
+Calibration remains NO-GO; no additional suite/campaign, merge or adoption is
+authorized by these diagnostic results.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

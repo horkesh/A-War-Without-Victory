@@ -41,3 +41,88 @@ retained state supplies lawful 517th route alternatives, not proof of a selector
 bug. The dirty candidate remains unaccepted: no merge/adoption, production edit,
 or second 188-week campaign follows. The owner Farz ruling at the top of
 CALIBRATION_MASTER remains current and supersedes stale P-A wording.
+
+## 2026-10-03 clean continuation: bounded pre-order diagnosis
+
+Checkout: `codex/october-calibration-continuation-20261003`, base `24452b5fa`.
+Question: which actual pre-order predicate produced the 517th's stale destination,
+and can the retained post-turn n38 state recover that predicate faithfully?
+Scope: retained n37/n38 state, production order/movement phase ordering and context;
+at most two cloned single-turn diagnostic replays, only after recovering their
+required inputs. No selector/lifecycle correction follows an altered-context probe.
+Pass: exact decision receipt and retained n37 outcome agreement; otherwise record
+the missing boundary inputs and stop that route. Expected cost: minutes. No
+scenario-runner prefix, full suite, campaign, retiming, control/reference change,
+baseline adoption or merge is authorized by this diagnosis.
+
+Separate cheap acceptance audit: `node tools/verify_checkpoints.cjs
+runs/apr1992_definitive_188w__6deb5845c150c196__w188_n37`, plus retained n25/n37
+cell-level comparison at weeks 39/104/156/188. Question: confirm protected controls,
+the exact lost matching OSIDs, and actual Farz operation-owned receipts under the
+2026-09-29 ruling. Expected cost: seconds. Pass means complete parsed retained
+artifacts and explicit results for each category, not calibration acceptance.
+Stop on unreadable/missing inputs or receipt contradiction; retain the command's
+own exit. The old wrong-corps blocker is superseded; Sana belt captures are not
+Farz receipts. Reuse n37 full-suite/campaign and n38 prefix exits without rerunning.
+
+OpenCode availability preflight used `opencode run --standalone --model
+'openai/gpt-5.6-sol#medium' --format json` with a read-only branch request.
+It exited 126 (`provider.no-route`); bounded Sol delegation is the fallback.
+No new expensive check is approved here. Any later full suite/campaign needs its
+own question, exact command, pass criteria, cost and stop rule; an additional
+expensive campaign also requires owner authorization.
+
+Pre-replay prerequisite: the production resume loader can hydrate n38 and recover
+canonical graph, operational data, population/OOB/HQ inputs, events and `runTurn`
+context. The first retained comparison is t187, followed by a t188 decision trace.
+Commands, from the continuation checkout:
+
+```powershell
+node node_modules/tsx/dist/cli.mjs logs/prusac-diagnostic-20260929/continuation_sana_preorder_trace.ts exact-t187
+# Only after the first replay agrees with n37:
+$env:AWWV_DEBUG_REASON_CODES = 'axis_reject'
+node node_modules/tsx/dist/cli.mjs logs/prusac-diagnostic-20260929/continuation_sana_preorder_trace.ts trace-t188
+Remove-Item Env:AWWV_DEBUG_REASON_CODES
+```
+
+Each command is one cloned resumed single-turn diagnostic through `runScenario`,
+not a new calibration campaign. Expected cost: setup plus one turn, under two
+minutes per command. First pass: t187 formation movement, battle, current-objective
+and control counts agree with retained n37. Second pass: the same t188 fields
+agree, the 517th pre-order decision is captured, and final state with only debug
+receipts removed agrees with n37. Discriminator: is Budimlić Japra freshly selected
+for Stari Majdan, rather than leftover previous-objective intent? Stop on any
+nonzero exit, missing input, replay mismatch or missing exact predicate; no retry.
+Stop after the second replay even on success. Do not infer a fix from route
+availability alone or use normalization to discard any behavioral difference.
+
+### Settled continuation result
+
+t187 exits 0 on all declared retained counterparts. t188 exits 2 on column
+movement and diagnostic-free whole-state equivalence; 1,147 differing leaves
+were classified. The local pre-order trace freshly selects Budimlić Japra for
+Stari Majdan, supporting a lawful approach explanation but not exact original
+n37 attribution. No production correction or replay retry follows. Independent
+Sol review is GO for stopping without correction, BLOCK for claiming the
+original cause established; see `continuation_independent_review.md` and the
+updated `sana_n37_convergence_report.md`.
+
+Retained checkpoint/Farz, cell-level and western lifecycle audits exit 0.
+Southern Move's actual n37 endpoint is planning, started t185, preparation 3/5;
+its initial intelligence is unreported. Five Jajce gains, four lost n25 October
+matches, Sanski capture/chronology and exact original pre-order attribution
+remain unmet. Protected controls, four Sana belt gains and zero critical
+anomalies remain retained. Existing n37 suite/campaign and n38 prefix are reused.
+
+Final documentation checks (seconds): `node tools/derive_plan_index.cjs --check`,
+`node node_modules/vitest/vitest.mjs run tests/receipt_citations.test.ts
+tests/plan_index.test.ts --reporter=dot`, and `git diff --check`. Pass: exact exit
+0, no fresh-clone citation/index/whitespace failures; stop and correct only the
+identified documentation failure. No full suite or campaign is part of closeout.
+
+Closeout: citation/plan-index focused tests 56/56 exit 0; desktop/roadmap truth
+tests 7/7 exit 0; derived index and working/staged whitespace checks exit 0.
+The board-length preflight rejected the initial long status insertion; its
+replacement is 19,972 characters and the existing truth test passes. No
+acceptance criterion or governance limit changed. Independent review retains
+the no-correction/no-acceptance disposition.

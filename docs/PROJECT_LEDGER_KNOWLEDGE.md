@@ -6,7 +6,15 @@ reproducibility, not the unique selector decision that produced the next order.
 Use the post-turn artifact to enumerate lawful route alternatives and to reject
 unsupported bug claims; require a retained pre-order state or explicit decision
 receipt before changing a selector or order-lifecycle rule. Applied in the
-[Sana October checkpoint closeout](PROJECT_LEDGER.md#2026-10-03--sana-october-calibration-checkpoint-closeout).
+[Sana continuation diagnosis](PROJECT_LEDGER.md#2026-10-03--sana-continuation-pre-order-diagnosis).
+
+A resumed trace can reproduce a local decision while failing whole-state
+equivalence. Treat the decision as an explanation in that resumed context until
+source continuity and the full boundary are proved. Remove only named diagnostic
+receipt fields during comparison; retain and classify every behavioral mismatch.
+A dirty commit marker plus matching consumed data does not fingerprint the
+uncommitted executable source. In this continuation, t188 fails equivalence
+despite matching Sana outcomes; no retarget/clear-order correction follows.
 
 ## 2026-09-02 - Calibration must preserve causal ownership, not merely painted control
 

@@ -1,0 +1,456 @@
+{
+  "scope": "retained n25/n37 read-only audit; extraction success does not mean calibration acceptance",
+  "checkpoints": [
+    {
+      "name": "jan1993",
+      "week": 39,
+      "denominator": 712,
+      "n25_matches": 707,
+      "n37_matches": 707,
+      "lost_matches": [],
+      "gained_matches": []
+    },
+    {
+      "name": "apr1994",
+      "week": 104,
+      "denominator": 712,
+      "n25_matches": 707,
+      "n37_matches": 707,
+      "lost_matches": [],
+      "gained_matches": []
+    },
+    {
+      "name": "apr1995",
+      "week": 156,
+      "denominator": 712,
+      "n25_matches": 706,
+      "n37_matches": 706,
+      "lost_matches": [],
+      "gained_matches": []
+    },
+    {
+      "name": "oct1995",
+      "week": 188,
+      "denominator": 712,
+      "n25_matches": 681,
+      "n37_matches": 684,
+      "lost_matches": [
+        {
+          "osid": "op:jajce:barevo_2",
+          "reference": "HRHB",
+          "n25": "HRHB",
+          "n37": "RS"
+        },
+        {
+          "osid": "op:jajce:lupnica",
+          "reference": "HRHB",
+          "n25": "HRHB",
+          "n37": "RS"
+        },
+        {
+          "osid": "op:mrkonjic_grad:majdan_2",
+          "reference": "HRHB",
+          "n25": "HRHB",
+          "n37": "RS"
+        },
+        {
+          "osid": "op:travnik:varosluk",
+          "reference": "RBiH",
+          "n25": "RBiH",
+          "n37": "RS"
+        }
+      ],
+      "gained_matches": [
+        "op:bosanski_novi:krslje_2",
+        "op:bosanski_petrovac:bosanski_petrovac_2",
+        "op:bosanski_petrovac:dobro_selo_2",
+        "op:bosanski_petrovac:jasenovac_2",
+        "op:kljuc:hadzici",
+        "op:kljuc:kljuc_2",
+        "op:kljuc:krasulje_2"
+      ]
+    }
+  ],
+  "captures": [
+    {
+      "name": "Petrovac town",
+      "osid": "op:bosanski_petrovac:bosanski_petrovac_2",
+      "expected": "RBiH",
+      "at188": "RBiH",
+      "captures": [
+        {
+          "turn": 181,
+          "mechanism": "combat",
+          "attacker_brigade": "arbih_501st_slavna_mountain",
+          "provenance": {
+            "kind": "operation_owned",
+            "gates": false,
+            "operation_ids": [
+              "arbih_5th_corps:Operation Sana:t175"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Kljuc town",
+      "osid": "op:kljuc:kljuc_2",
+      "expected": "RBiH",
+      "at188": "RBiH",
+      "captures": [
+        {
+          "turn": 185,
+          "mechanism": "combat",
+          "attacker_brigade": "arbih_501st_slavna_mountain",
+          "provenance": {
+            "kind": "operation_owned",
+            "gates": false,
+            "operation_ids": [
+              "arbih_5th_corps:Operation Sana:t175"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sanski town",
+      "osid": "op:sanski_most:sanski_most_2",
+      "expected": "RBiH",
+      "at188": "RS",
+      "captures": []
+    },
+    {
+      "name": "Budimlic Japra",
+      "osid": "op:sanski_most:budimlic_japra_2",
+      "expected": "RBiH",
+      "at188": "RBiH",
+      "captures": [
+        {
+          "turn": 184,
+          "mechanism": "combat",
+          "attacker_brigade": "arbih_506th_mountain",
+          "provenance": {
+            "kind": "operation_owned",
+            "gates": false,
+            "operation_ids": [
+              "arbih_5th_corps:Operation Sana:t175"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lusci Palanka",
+      "osid": "op:sanski_most:lusci_palanka_2",
+      "expected": "RBiH",
+      "at188": "RBiH",
+      "captures": [
+        {
+          "turn": 185,
+          "mechanism": "combat",
+          "attacker_brigade": "arbih_506th_mountain",
+          "provenance": {
+            "kind": "operation_owned",
+            "gates": false,
+            "operation_ids": [
+              "arbih_5th_corps:Operation Sana:t175"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Jelasinovci",
+      "osid": "op:sanski_most:jelasinovci",
+      "expected": "RBiH",
+      "at188": "RBiH",
+      "captures": [
+        {
+          "turn": 186,
+          "mechanism": "combat",
+          "attacker_brigade": "arbih_506th_mountain",
+          "provenance": {
+            "kind": "operation_owned",
+            "gates": false,
+            "operation_ids": [
+              "arbih_5th_corps:Operation Sana:t175"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Skucani Vakuf",
+      "osid": "op:sanski_most:skucani_vakuf_2",
+      "expected": "RBiH",
+      "at188": "RBiH",
+      "captures": [
+        {
+          "turn": 187,
+          "mechanism": "combat",
+          "attacker_brigade": "arbih_506th_mountain",
+          "provenance": {
+            "kind": "operation_owned",
+            "gates": false,
+            "operation_ids": [
+              "arbih_5th_corps:Operation Sana:t175"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bravnice",
+      "osid": "op:jajce:bravnice",
+      "expected": "HRHB",
+      "at188": "HRHB",
+      "captures": [
+        {
+          "turn": 185,
+          "mechanism": "combat",
+          "attacker_brigade": "hv_1st_hgz_1995",
+          "provenance": {
+            "kind": "operation_owned",
+            "gates": false,
+            "operation_ids": [
+              "hvo_tomislavgrad:Operation Mistral 2:t175"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vinac",
+      "osid": "op:jajce:vinac_2",
+      "expected": "HRHB",
+      "at188": "HRHB",
+      "captures": [
+        {
+          "turn": 186,
+          "mechanism": "combat",
+          "attacker_brigade": "hv_1st_hgz_1995",
+          "provenance": {
+            "kind": "operation_owned",
+            "gates": false,
+            "operation_ids": [
+              "hvo_tomislavgrad:Operation Mistral 2:t175"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Jajce town",
+      "osid": "op:jajce:jajce_3",
+      "expected": "HRHB",
+      "at188": "HRHB",
+      "captures": [
+        {
+          "turn": 187,
+          "mechanism": "combat",
+          "attacker_brigade": "hv_1st_hgz_1995",
+          "provenance": {
+            "kind": "operation_owned",
+            "gates": false,
+            "operation_ids": [
+              "hvo_tomislavgrad:Operation Mistral 2:t175"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lupnica",
+      "osid": "op:jajce:lupnica",
+      "expected": "HRHB",
+      "at188": "RS",
+      "captures": []
+    },
+    {
+      "name": "Barevo",
+      "osid": "op:jajce:barevo_2",
+      "expected": "HRHB",
+      "at188": "RS",
+      "captures": []
+    },
+    {
+      "name": "Majdan",
+      "osid": "op:mrkonjic_grad:majdan_2",
+      "expected": "HRHB",
+      "at188": "RS",
+      "captures": []
+    },
+    {
+      "name": "Varosluk",
+      "osid": "op:travnik:varosluk",
+      "expected": "RBiH",
+      "at188": "RS",
+      "captures": []
+    }
+  ],
+  "protectedTargets": [
+    {
+      "osid": "op:jablanica:doljani_2",
+      "checkpoints": [
+        {
+          "week": 104,
+          "expected": "RBiH",
+          "controller": "RBiH",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "osid": "op:donji_vakuf:prusac_2",
+      "checkpoints": [
+        {
+          "week": 39,
+          "expected": "RBiH",
+          "controller": "RBiH",
+          "ok": true
+        },
+        {
+          "week": 104,
+          "expected": "RBiH",
+          "controller": "RBiH",
+          "ok": true
+        },
+        {
+          "week": 156,
+          "expected": "RBiH",
+          "controller": "RBiH",
+          "ok": true
+        },
+        {
+          "week": 188,
+          "expected": "RBiH",
+          "controller": "RBiH",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "osid": "op:prozor:ljubunci_2",
+      "checkpoints": [
+        {
+          "week": 39,
+          "expected": "HRHB",
+          "controller": "HRHB",
+          "ok": true
+        },
+        {
+          "week": 104,
+          "expected": "HRHB",
+          "controller": "HRHB",
+          "ok": true
+        },
+        {
+          "week": 156,
+          "expected": "HRHB",
+          "controller": "HRHB",
+          "ok": true
+        },
+        {
+          "week": 188,
+          "expected": "HRHB",
+          "controller": "HRHB",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "osid": "op:prozor:lug_2",
+      "checkpoints": [
+        {
+          "week": 39,
+          "expected": "RBiH",
+          "controller": "RBiH",
+          "ok": true
+        },
+        {
+          "week": 104,
+          "expected": "HRHB",
+          "controller": "HRHB",
+          "ok": true
+        },
+        {
+          "week": 156,
+          "expected": "HRHB",
+          "controller": "HRHB",
+          "ok": true
+        },
+        {
+          "week": 188,
+          "expected": "HRHB",
+          "controller": "HRHB",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "osid": "op:prozor:paros",
+      "checkpoints": [
+        {
+          "week": 39,
+          "expected": "RBiH",
+          "controller": "RBiH",
+          "ok": true
+        },
+        {
+          "week": 104,
+          "expected": "HRHB",
+          "controller": "HRHB",
+          "ok": true
+        },
+        {
+          "week": 156,
+          "expected": "HRHB",
+          "controller": "HRHB",
+          "ok": true
+        },
+        {
+          "week": 188,
+          "expected": "HRHB",
+          "controller": "HRHB",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "osid": "op:trnovo:gornja_presjenica",
+      "checkpoints": [
+        {
+          "week": 39,
+          "expected": "RS",
+          "controller": "RS",
+          "ok": true
+        },
+        {
+          "week": 104,
+          "expected": "RS",
+          "controller": "RS",
+          "ok": true
+        },
+        {
+          "week": 156,
+          "expected": "RS",
+          "controller": "RS",
+          "ok": true
+        },
+        {
+          "week": 188,
+          "expected": "RS",
+          "controller": "RS",
+          "ok": true
+        }
+      ]
+    }
+  ],
+  "anomaly_detection": {
+    "count": 27,
+    "critical": 0,
+    "info": 22,
+    "warning": 5
+  },
+  "farz": "Separate authoritative verifier: continuation_n37_checkpoints.stdout.log / .exit.txt; Sana belt receipts are not Farz receipts."
+}
