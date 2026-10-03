@@ -119,6 +119,23 @@ Next is separately authorized139-week737 diagnosis, not an188 retry. Original
 source/cause, full-suite/default campaign neutrality, launch/HV receipts and all
 calibration acceptance gaps remain open; n39 late/Farz/protected evidence stands.
 
+### n40 authorized139-week boundary — 2026-10-04
+
+Owner “Go for it” authorizes one run from clean `fe828b9e0222a80238dbe60c22391fae53c48039`.
+n40 runner/coverage exit0;737 has three valid137/138/139 receipts: eligible,
+balanced3rdCorps, no active operation/transit/assigned sector, first handler
+offensive, dig_in, no ordinary attack/movement. This explains missing interior
+receipts; it does not establish Varosluk or originaldirty517 cause. Aligned
+post-turn destinations are null/Udurlije/Udurlije; exact later writer unmeasured.
+173 events/139 weekly controller maps/reached39+104 match n39; checkpoints707/712,
+same matchingOSIDs/protectedcontrols. Prefix critical0/24. No whole-state claim.
+Raw provenance/audit guards1 preserved:139w horizon omitsoct1995(30 common stamped
+hashes match), neutralplayer is absentboth, temporal rawloop is completedturn-1.
+Corrected read-only protocol/temporal audits0; literal full31/digest criterion
+remains failed. IndependentGO only for bounded measurement/STOP. No correction,
+campaign retry/adoption/merge; n39 late/Farz evidence and all acceptance gaps stand.
+[Reviewed n40 receipt](../../logs/prusac-diagnostic-20260929/continuation4_139_20261004_reviewed_summary.json).
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

@@ -9,6 +9,42 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-04 — n40 bounded dispatcher measurement and STOP
+
+Owner “Go for it” authorizes exactly one139-week run from cleanfe828b9e0.
+OpenCode GoLuna126/quota429 before tools; atomic direct fallback launches once.
+Runner0, n40 finalhashd6715e9cefa14d0c; strictcoverage0 with900 actor-window
+receipts, three737 boundaries137–139, zero inconsistencies. No further campaign.
+
+737 measured eligible/balanced3rdCorps/GornjaRovna, no op/sector/transit, first
+handleroffensive, dig_in/no attack or movement. Terminal interior never reached.
+Source predicates suggest front-defense; exact adjacency/cohesion not emitted.
+Temporalturn=weeklycompletedindex; rawloop=turn-1. Aligned postturn destinations
+null/Udurlije/Udurlije. Later reconciliation can write movement; exactwriter
+branch/inputs notmeasured. No selector/lifecycle correction or originaldirtycause.
+
+Rawprovenance1 wrongly requires188manifest31/full digest and explicitplayernull;
+actual30 hashes match n39/current, soleomissionoct1995 by scoringhorizon. Initial
+bytes identical; neutralplayer absentboth. Literal31 criterion remains failed;
+protocolaudit0 explains source consistency without waiver/completeinventoryclaim.
+Rawartifactaudit1 mislabels temporalrawindex; targetedtemporalcorrection0 reuses
+zero-diff prefixcomparisons. Original rawoutputs/exits/helperbytes retained.
+
+Measured173controlevents/139weeklycounts+controller maps unchanged, checkpoints
+39/104 both707/712 with identicalmatchingOSIDs/controllers/protectedcontrols.
+Prefix critical0/24(3warning21info); twoTravnikstderr warnings are separate.
+No fullstate/defaultcampaignneutrality claim;156/188 notreached. IndependentGO
+for boundedmeasurement/STOP only. No codechanges/fullsuite/188/push/merge/adoption.
+Reuse n39 late517/towns2of3/belt4/Jajce3of5/four lostmatches/Farz/protected evidence.
+Nextcheap scope:post-bot movement ancestry. Allcalibration/causal/receipt gapsopen.
+Exact exits, commands, source/run/raw/corrected/review fingerprints:
+`logs/prusac-diagnostic-20260929/continuation4_139_20261004_reviewed_summary.json`.
+
+Closeout: documentation63/63, strict131 tracked citations, plan-index and
+preservation inventory all exit0.18 parent/eight source hashes match; production
+diff empty, n37–n40/partial52 and local junctions retained. Required local hook
+result is recorded separately; no simulation or unaffected validation repeated.
+
 ## 2026-10-03 — Dispatcher observation: focused preparation GO
 
 Owner “Proceed” authorizes observation preparation and local integration. Added

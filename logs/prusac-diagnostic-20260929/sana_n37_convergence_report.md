@@ -650,3 +650,31 @@ fingerprints match; raw runs/logs and local junctions retained, Node22.23.2,
 protected source/data/canon diff empty. Required local commit hook is retained;
 its actual result is captured in continuation4_dispatcher_commit logs. No
 simulation or unaffected check was repeated for this closeout.
+
+### n40 one authorized139-week run — bounded measurement/STOP
+
+Owner Go for it exhausts the one-run proposal from cleanfe828b9e0.
+Runner0/strictcoverage0; n40 finalhashd6715e9cefa14d0c. Three737 receipts137–139
+eligible→offensive/dig_in,no ordinarymovement/attack; balanced3rdCorps/GornjaRovna,
+no assigned sector/operation/transit. This closes interior-hook absence, not
+Varosluk or originaldirty517 cause. Aligned temporal137/138/139 rawloop136/137/138
+has postturn destinationsnull/Udurlije/Udurlije. Later finaldistribution is a
+source-supported possiblewriter after ordinarysnapshot; exactbranchnotmeasured.
+173events/139weeklymaps unchanged; reached39/104 both707/712 andsame matching
+OSIDs/protectedcontrols. Prefixcritical0/24, not188acceptance.
+
+Preserve failures:rawprovenance1 compares139manifest30 with188manifest31/digest
+and incorrectly requiresplayernull; actual30common/current hashes match, only
+octpaint omitted byhorizon, initialSHA equal and neutralfield absentboth.
+Protocolaudit0 is notwaiver of literal31criterion. Rawaudit1 is a misnamed
+temporalrawloop boundary; correctedtemporal-onlyaudit0 reusescontrolcomparisons.
+Originalhelperbytes/rawlogs/exits retained. OpenCode126/quota429 beforetools;
+one atomicdirectfallback, no campaignretry. IndependentGO boundedmeasurement/STOP.
+Compact: `continuation4_139_20261004_reviewed_summary.json`.
+No production correction/fullsuite/newcampaign. Reuse n39 lateacceptance failures/
+protected/Farz evidence. Nextcheap scope:post-bot movement ancestry; all gapsopen.
+
+Closeout: documentation63/63, strict131 tracked citations, plan-index and
+preservation inventory all exit0.18 parent/eight source hashes match; production
+diff empty, n37–n40/partial52 and local junctions retained. Required local hook
+result is recorded separately; no simulation or unaffected validation repeated.

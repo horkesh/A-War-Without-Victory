@@ -1,0 +1,31 @@
+{
+  "run_dir": "runs/apr1992_definitive_188w__0b1f040ff4abe835__w139_n40",
+  "original_guard_exit": 1,
+  "original_full_manifest_criterion_met": false,
+  "diagnosis": "Guard incorrectly required188w manifest31/digest at139w and explicit player_faction:null; raw input_count31 was hardcoded, not measured",
+  "protocol_exit": 0,
+  "actual_input_count": 30,
+  "actual_digest": "ed7fa30986392451f797708a5a0fe9d3ac83f284692be04e199305c533a1f0b6",
+  "common_rows_equal": 30,
+  "current_normalized_hashes_match": 30,
+  "missing_vs188": [
+    "data/source/calibration/painted_control_oct1995.json"
+  ],
+  "extra_or_changed": [],
+  "current_hash_mismatches": [],
+  "digest_recomputed_equal": true,
+  "initial_sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+  "initial_equal_n39": true,
+  "headless_auto": true,
+  "player_faction_property_present": false,
+  "neutral_player_predicate": "== null accepts undefined and null",
+  "source_basis": [
+    "src/scenario/run_provenance.ts:17-25,418-438 (per-horizon scoring references)",
+    "src/scenario/scenario_runner.ts:757-763,2292-2301 (139 selects apr1995; reached39/104)",
+    "src/scenario/scenario_runner.ts:1640-1672 (undefined neutral player is intentional)"
+  ],
+  "full31_prelaunch_normalized_check_exit": 0,
+  "failed": [],
+  "calibration_acceptance": false,
+  "retry_authorized": false
+}

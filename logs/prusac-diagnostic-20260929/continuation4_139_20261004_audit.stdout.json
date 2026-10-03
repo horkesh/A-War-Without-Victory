@@ -1,0 +1,986 @@
+{
+  "verdict": "INCOMPLETE",
+  "scope": {
+    "claim": "read-only comparison of declared control/report surfaces through completed weekly.week_index 139, plus full named 737th dispatcher receipts and compact trajectory",
+    "exclusions": [
+      "no raw weekly-report equality requirement",
+      "no whole-state or gameplay-neutrality claim",
+      "no strict dispatcher schema/consistency adjudication (owned by the strict consumer)",
+      "no provenance/input/initial-save adjudication (owned by the provenance gate)",
+      "no diagnosis of selector cause",
+      "no late-operation, towns, belt, Jajce, lost-match, protected-post139, or Farz re-audit"
+    ]
+  },
+  "invocation": {
+    "argv": [
+      "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+      "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\prusac-diagnostic-20260929\\continuation4_139_20261004_audit.cjs",
+      "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\runs\\apr1992_definitive_188w__0b1f040ff4abe835__w139_n40"
+    ]
+  },
+  "baseline_run_dir": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\runs\\apr1992_definitive_188w__6deb5845c150c196__w188_n39",
+  "candidate_run_dir": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\runs\\apr1992_definitive_188w__0b1f040ff4abe835__w139_n40",
+  "completed_through_week_index": 139,
+  "artifact_inventory": {
+    "baseline": {
+      "run_meta.json": {
+        "present": true,
+        "bytes": 10472,
+        "sha256": "84d0486f93493fdc1bc8f1d1ee3ccfc217e0953cfb30e81b19a1effc3d7871ae"
+      },
+      "initial_save.json": {
+        "present": true,
+        "bytes": 1373722,
+        "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+      },
+      "final_save.json": {
+        "present": true,
+        "bytes": 9071450,
+        "sha256": "afa185b2591dac1a51e1f313963e4a004cdfdbc00b811d040bd910b087adb9fd"
+      },
+      "weekly_report.jsonl": {
+        "present": true,
+        "bytes": 3867327,
+        "sha256": "eb9ba5c6d9ddb1e90246539de4568152629c12a1121b6b90afee8bb758e6962b"
+      },
+      "brigade_temporal_log.jsonl": {
+        "present": true,
+        "bytes": 24080523,
+        "sha256": "a0322f048b94f5611a5eb09dc15aaee004037c695ace3189cb0322e92628b052"
+      },
+      "run_summary.json": {
+        "present": true,
+        "bytes": 630433,
+        "sha256": "ce6ce8a87ef609b57304766739475cc156778e40c6f9eaab73c042d9b0a00796"
+      }
+    },
+    "candidate": {
+      "run_meta.json": {
+        "present": true,
+        "bytes": 11493,
+        "sha256": "8b106c29dd10e3bbae934277d719c9d960bf3c2820ff539e2afb031c507c34ba"
+      },
+      "initial_save.json": {
+        "present": true,
+        "bytes": 1373722,
+        "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+      },
+      "final_save.json": {
+        "present": true,
+        "bytes": 7611874,
+        "sha256": "d6715e9cefa14d0cf88b1af34d12c38c231186b6cf44cbb71e87636c0a6b04b9"
+      },
+      "weekly_report.jsonl": {
+        "present": true,
+        "bytes": 153790127,
+        "sha256": "10cc0729966a4f45eeb6ea22bf61da5901d9e34ecebd0287ded5c3cecccc8058"
+      },
+      "brigade_temporal_log.jsonl": {
+        "present": true,
+        "bytes": 17582660,
+        "sha256": "521677bf5d4303e056a843626889d829a01dfb614435a59cf4de9aff258bc9f7"
+      },
+      "run_summary.json": {
+        "present": true,
+        "bytes": 490378,
+        "sha256": "10fb820edf424f02e81bed8cbfcb23402f9fea59fed2b737eed8c9cfceab187e"
+      }
+    }
+  },
+  "counts": {
+    "baseline_weekly_rows": 188,
+    "candidate_weekly_rows": 139,
+    "baseline_week_index_range": [
+      1,
+      188
+    ],
+    "candidate_week_index_range": [
+      1,
+      139
+    ],
+    "baseline_actor_temporal_rows_total": 188,
+    "candidate_actor_temporal_rows_total": 139,
+    "candidate_named_actor_receipts_137_139": 3
+  },
+  "control_events": {
+    "completed_through_week_index": 139,
+    "compared_fields": "complete serialized political.control_events objects whose declared turn is <=139, in declared order",
+    "baseline_count": 173,
+    "candidate_count": 173,
+    "baseline_sha256": "f7622baa03cdcc0726ca1cca3f047cde71f7af104e962b6a88d37da6f91d3ee2",
+    "candidate_sha256": "f7622baa03cdcc0726ca1cca3f047cde71f7af104e962b6a88d37da6f91d3ee2",
+    "baseline_mechanism_counts": {
+      "combat": 139,
+      "event": 1,
+      "paramilitary": 33
+    },
+    "candidate_mechanism_counts": {
+      "combat": 139,
+      "event": 1,
+      "paramilitary": 33
+    },
+    "ordered_difference_count": 0,
+    "first_ordered_differences": [],
+    "differences_truncated": false
+  },
+  "weekly_report_control_counts": {
+    "compared_fields": "weekly_report.control_counts complete serialized objects",
+    "requested_completed_week_range": [
+      1,
+      139
+    ],
+    "compared_week_count": 139,
+    "compared_week_set_sha256": "c4fe0442a86d4988df8beb1c690f4688664ddc7511da8312ba0cc09cf1c3bd68",
+    "difference_count": 0,
+    "differences": []
+  },
+  "reconstructed_territory": {
+    "method": "initial_political_controllers plus declared control_events with event.turn <= completed_week_index",
+    "selected_snapshots": [
+      {
+        "completed_week_index": 39,
+        "compared_fields": [
+          "political.initial_political_controllers",
+          "political.control_events[].turn",
+          "settlement_id",
+          "to"
+        ],
+        "baseline_osid_count": 712,
+        "candidate_osid_count": 712,
+        "baseline_osid_set_sha256": "103af434c7fc69a2f715ed09332a45b1ef484df6d60bf698afdba0cce4a5683e",
+        "candidate_osid_set_sha256": "103af434c7fc69a2f715ed09332a45b1ef484df6d60bf698afdba0cce4a5683e",
+        "baseline_controller_map_sha256": "c21a55c5f3a3d49f60220196cfd6c2ff9a00c4a3e24d7481126c13e60e6a3f95",
+        "candidate_controller_map_sha256": "c21a55c5f3a3d49f60220196cfd6c2ff9a00c4a3e24d7481126c13e60e6a3f95",
+        "missing_from_candidate": [],
+        "extra_in_candidate": [],
+        "controller_differences": []
+      },
+      {
+        "completed_week_index": 104,
+        "compared_fields": [
+          "political.initial_political_controllers",
+          "political.control_events[].turn",
+          "settlement_id",
+          "to"
+        ],
+        "baseline_osid_count": 712,
+        "candidate_osid_count": 712,
+        "baseline_osid_set_sha256": "103af434c7fc69a2f715ed09332a45b1ef484df6d60bf698afdba0cce4a5683e",
+        "candidate_osid_set_sha256": "103af434c7fc69a2f715ed09332a45b1ef484df6d60bf698afdba0cce4a5683e",
+        "baseline_controller_map_sha256": "e3a0734f8004c4c790340c602190207e6f5e964695039b31be219b9ea477ceb1",
+        "candidate_controller_map_sha256": "e3a0734f8004c4c790340c602190207e6f5e964695039b31be219b9ea477ceb1",
+        "missing_from_candidate": [],
+        "extra_in_candidate": [],
+        "controller_differences": []
+      },
+      {
+        "completed_week_index": 139,
+        "compared_fields": [
+          "political.initial_political_controllers",
+          "political.control_events[].turn",
+          "settlement_id",
+          "to"
+        ],
+        "baseline_osid_count": 712,
+        "candidate_osid_count": 712,
+        "baseline_osid_set_sha256": "103af434c7fc69a2f715ed09332a45b1ef484df6d60bf698afdba0cce4a5683e",
+        "candidate_osid_set_sha256": "103af434c7fc69a2f715ed09332a45b1ef484df6d60bf698afdba0cce4a5683e",
+        "baseline_controller_map_sha256": "3a800606bf349c093e96fad0f930d63529df0b347b614baaeccd8844ad5b7be2",
+        "candidate_controller_map_sha256": "3a800606bf349c093e96fad0f930d63529df0b347b614baaeccd8844ad5b7be2",
+        "missing_from_candidate": [],
+        "extra_in_candidate": [],
+        "controller_differences": []
+      }
+    ],
+    "differing_week_count_1_139": 0,
+    "differing_weeks_1_139": []
+  },
+  "completed_checkpoints": [
+    {
+      "name": "jan1993",
+      "completed_week_index": 39,
+      "available": true,
+      "reference_path": "data/source/calibration/painted_control_jan1993.json",
+      "reference_sha256": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7",
+      "compared_fields": [
+        "reference.by_settlement_id OSID set and controller",
+        "reconstructed controller at completed week"
+      ],
+      "denominator": 712,
+      "reference_osid_set_sha256": "103af434c7fc69a2f715ed09332a45b1ef484df6d60bf698afdba0cce4a5683e",
+      "baseline_match_count": 707,
+      "candidate_match_count": 707,
+      "baseline_matching_osid_set_sha256": "c0f6bf2635348a8a9ad946246dc508c39e683275f4c3fdb87840f4303a317ff1",
+      "candidate_matching_osid_set_sha256": "c0f6bf2635348a8a9ad946246dc508c39e683275f4c3fdb87840f4303a317ff1",
+      "lost_baseline_matches": [],
+      "gained_vs_baseline": [],
+      "controller_difference_count_on_reference_osids": 0,
+      "controller_differences_on_reference_osids": [],
+      "baseline_missing_controller_osids": [],
+      "candidate_missing_controller_osids": []
+    },
+    {
+      "name": "apr1994",
+      "completed_week_index": 104,
+      "available": true,
+      "reference_path": "data/source/calibration/painted_control_apr1994.json",
+      "reference_sha256": "24f6e8923afa6a5ceaf7e4148cd119f2952f48c99544b5e50e994836dc863dba",
+      "compared_fields": [
+        "reference.by_settlement_id OSID set and controller",
+        "reconstructed controller at completed week"
+      ],
+      "denominator": 712,
+      "reference_osid_set_sha256": "103af434c7fc69a2f715ed09332a45b1ef484df6d60bf698afdba0cce4a5683e",
+      "baseline_match_count": 707,
+      "candidate_match_count": 707,
+      "baseline_matching_osid_set_sha256": "c0f6bf2635348a8a9ad946246dc508c39e683275f4c3fdb87840f4303a317ff1",
+      "candidate_matching_osid_set_sha256": "c0f6bf2635348a8a9ad946246dc508c39e683275f4c3fdb87840f4303a317ff1",
+      "lost_baseline_matches": [],
+      "gained_vs_baseline": [],
+      "controller_difference_count_on_reference_osids": 0,
+      "controller_differences_on_reference_osids": [],
+      "baseline_missing_controller_osids": [],
+      "candidate_missing_controller_osids": []
+    }
+  ],
+  "protected_controls_through_139": {
+    "declaration_source": "continuation4_campaign_audit.cjs protected definitions, limited to completed checkpoints <=139",
+    "rows": [
+      {
+        "osid": "op:jablanica:doljani_2",
+        "points": [
+          {
+            "completed_week_index": 104,
+            "expected": "RBiH",
+            "baseline": "RBiH",
+            "candidate": "RBiH",
+            "baseline_expected_match": true,
+            "candidate_expected_match": true,
+            "baseline_candidate_equal": true
+          }
+        ]
+      },
+      {
+        "osid": "op:donji_vakuf:prusac_2",
+        "points": [
+          {
+            "completed_week_index": 39,
+            "expected": "RBiH",
+            "baseline": "RBiH",
+            "candidate": "RBiH",
+            "baseline_expected_match": true,
+            "candidate_expected_match": true,
+            "baseline_candidate_equal": true
+          },
+          {
+            "completed_week_index": 104,
+            "expected": "RBiH",
+            "baseline": "RBiH",
+            "candidate": "RBiH",
+            "baseline_expected_match": true,
+            "candidate_expected_match": true,
+            "baseline_candidate_equal": true
+          }
+        ]
+      },
+      {
+        "osid": "op:prozor:ljubunci_2",
+        "points": [
+          {
+            "completed_week_index": 39,
+            "expected": "HRHB",
+            "baseline": "HRHB",
+            "candidate": "HRHB",
+            "baseline_expected_match": true,
+            "candidate_expected_match": true,
+            "baseline_candidate_equal": true
+          },
+          {
+            "completed_week_index": 104,
+            "expected": "HRHB",
+            "baseline": "HRHB",
+            "candidate": "HRHB",
+            "baseline_expected_match": true,
+            "candidate_expected_match": true,
+            "baseline_candidate_equal": true
+          }
+        ]
+      },
+      {
+        "osid": "op:prozor:lug_2",
+        "points": [
+          {
+            "completed_week_index": 39,
+            "expected": "RBiH",
+            "baseline": "RBiH",
+            "candidate": "RBiH",
+            "baseline_expected_match": true,
+            "candidate_expected_match": true,
+            "baseline_candidate_equal": true
+          },
+          {
+            "completed_week_index": 104,
+            "expected": "HRHB",
+            "baseline": "HRHB",
+            "candidate": "HRHB",
+            "baseline_expected_match": true,
+            "candidate_expected_match": true,
+            "baseline_candidate_equal": true
+          }
+        ]
+      },
+      {
+        "osid": "op:prozor:paros",
+        "points": [
+          {
+            "completed_week_index": 39,
+            "expected": "RBiH",
+            "baseline": "RBiH",
+            "candidate": "RBiH",
+            "baseline_expected_match": true,
+            "candidate_expected_match": true,
+            "baseline_candidate_equal": true
+          },
+          {
+            "completed_week_index": 104,
+            "expected": "HRHB",
+            "baseline": "HRHB",
+            "candidate": "HRHB",
+            "baseline_expected_match": true,
+            "candidate_expected_match": true,
+            "baseline_candidate_equal": true
+          }
+        ]
+      },
+      {
+        "osid": "op:trnovo:gornja_presjenica",
+        "points": [
+          {
+            "completed_week_index": 39,
+            "expected": "RS",
+            "baseline": "RS",
+            "candidate": "RS",
+            "baseline_expected_match": true,
+            "candidate_expected_match": true,
+            "baseline_candidate_equal": true
+          },
+          {
+            "completed_week_index": 104,
+            "expected": "RS",
+            "baseline": "RS",
+            "candidate": "RS",
+            "baseline_expected_match": true,
+            "candidate_expected_match": true,
+            "baseline_candidate_equal": true
+          }
+        ]
+      }
+    ]
+  },
+  "actor_737th": {
+    "actor_id": "arbih_737th_muslim_light",
+    "dispatcher_receipts_full": [
+      {
+        "completed_week_index": 137,
+        "diagnostics_field_present": true,
+        "receipts": [
+          {
+            "assigned_sector_id": null,
+            "assigned_sector_role": null,
+            "caller_filter": "not_present",
+            "corps_id": "arbih_3rd_corps",
+            "corps_stance": "balanced",
+            "directive_assigned_front_ids": [
+              "op:bugojno:kula_2__op:donji_vakuf:jemanlici",
+              "op:bugojno:kula_2__op:donji_vakuf:korenici",
+              "op:bugojno:medini__op:donji_vakuf:komar_2",
+              "op:bugojno:prijaci__op:donji_vakuf:korenici",
+              "op:bugojno:udurlije__op:donji_vakuf:jemanlici",
+              "op:bugojno:vesela_2__op:donji_vakuf:jemanlici",
+              "op:doboj:boljanic_2__op:doboj:matuzici_2",
+              "op:doboj:boljanic_2__op:tesanj:lepenica",
+              "op:doboj:boljanic_2__op:tesanj:sije_2",
+              "op:doboj:bukovica_velika_2__op:tesanj:kalosevic_2",
+              "op:doboj:bukovica_velika_2__op:tesanj:ularice_2",
+              "op:doboj:makljenovac__op:doboj:matuzici_2",
+              "op:doboj:makljenovac__op:tesanj:ularice_2",
+              "op:donji_vakuf:jemanlici__op:donji_vakuf:prusac_2",
+              "op:donji_vakuf:komar_2__op:travnik:turbe_2",
+              "op:donji_vakuf:pribraca_2__op:donji_vakuf:prusac_2",
+              "op:gracanica:petrovo_2__op:maglaj:kosova_2",
+              "op:gracanica:petrovo_2__op:tesanj:sije_2",
+              "op:kotor_varos:krusevo_brdo_i__op:travnik:gluha_bukovica",
+              "op:kotor_varos:krusevo_brdo_i__op:travnik:paklarevo",
+              "op:maglaj:cobe_2__op:teslic:kamenica_2",
+              "op:maglaj:cobe_2__op:teslic:vitkovci",
+              "op:maglaj:donja_bocinja_2__op:maglaj:lijesnica",
+              "op:maglaj:donja_bocinja_2__op:zavidovici:cinovici",
+              "op:maglaj:gornja_bocinja__op:zavidovici:cinovici",
+              "op:maglaj:jablanica__op:maglaj:kosova_2",
+              "op:maglaj:jablanica__op:maglaj:maglaj_2",
+              "op:maglaj:jablanica__op:maglaj:misurici_2",
+              "op:skender_vakuf:donji_koricani__op:travnik:paklarevo",
+              "op:tesanj:kalosevic_2__op:teslic:vitkovci",
+              "op:tesanj:novi_miljanovci_2__op:teslic:vitkovci",
+              "op:tesanj:radusa_2__op:teslic:vitkovci",
+              "op:teslic:blatnica_2__op:travnik:gluha_bukovica",
+              "op:teslic:blatnica_2__op:zenica:serici_2",
+              "op:teslic:kamenica_2__op:zenica:serici_2",
+              "op:travnik:gornje_krcevine__op:travnik:paklarevo",
+              "op:travnik:paklarevo__op:travnik:varosluk",
+              "op:travnik:turbe_2__op:travnik:varosluk",
+              "op:zavidovici:cinovici__op:zavidovici:vozuca_2",
+              "op:zavidovici:hajderovici_2__op:zavidovici:vozuca_2"
+            ],
+            "directive_avoid_osids": [],
+            "directive_hold_osids": [],
+            "directive_offensive_targets": [],
+            "eligibility": "eligible",
+            "final_generated_output": {
+              "attack_target_osid": null,
+              "column_march_destination_osid": null,
+              "movement_destination_osid": null,
+              "postures": [
+                "dig_in"
+              ]
+            },
+            "first_handler": "offensive",
+            "formation_faction": "RBiH",
+            "formation_id": "arbih_737th_muslim_light",
+            "formation_kind": "brigade",
+            "formation_status": "active",
+            "location_osid": "op:busovaca:gornja_rovna",
+            "operation_axis_id": null,
+            "operation_current_objective": null,
+            "operation_name": null,
+            "pass": "bot_dispatcher",
+            "persistent_destination_osids": [],
+            "phase": "war",
+            "pre_cap_output": {
+              "attack_target_osid": null,
+              "column_march_destination_osid": null,
+              "movement_destination_osid": null,
+              "postures": [
+                "dig_in"
+              ]
+            },
+            "preexisting_movement_order_destination_osid": null,
+            "requested_factions": [
+              "HRHB",
+              "RBiH",
+              "RS"
+            ],
+            "scope": "replace",
+            "snapshot_output": {
+              "attack_target_osid": null,
+              "column_march_destination_osid": null,
+              "movement_destination_osid": null,
+              "postures": [
+                "dig_in"
+              ]
+            },
+            "transit_stance": null,
+            "transit_status": null,
+            "turn": 137
+          }
+        ]
+      },
+      {
+        "completed_week_index": 138,
+        "diagnostics_field_present": true,
+        "receipts": [
+          {
+            "assigned_sector_id": null,
+            "assigned_sector_role": null,
+            "caller_filter": "not_present",
+            "corps_id": "arbih_3rd_corps",
+            "corps_stance": "balanced",
+            "directive_assigned_front_ids": [
+              "op:bugojno:kula_2__op:donji_vakuf:jemanlici",
+              "op:bugojno:kula_2__op:donji_vakuf:korenici",
+              "op:bugojno:medini__op:donji_vakuf:komar_2",
+              "op:bugojno:prijaci__op:donji_vakuf:korenici",
+              "op:bugojno:udurlije__op:donji_vakuf:jemanlici",
+              "op:bugojno:vesela_2__op:donji_vakuf:jemanlici",
+              "op:doboj:boljanic_2__op:doboj:matuzici_2",
+              "op:doboj:boljanic_2__op:tesanj:lepenica",
+              "op:doboj:boljanic_2__op:tesanj:sije_2",
+              "op:doboj:bukovica_velika_2__op:tesanj:kalosevic_2",
+              "op:doboj:bukovica_velika_2__op:tesanj:ularice_2",
+              "op:doboj:makljenovac__op:doboj:matuzici_2",
+              "op:doboj:makljenovac__op:tesanj:ularice_2",
+              "op:donji_vakuf:jemanlici__op:donji_vakuf:prusac_2",
+              "op:donji_vakuf:komar_2__op:travnik:turbe_2",
+              "op:donji_vakuf:pribraca_2__op:donji_vakuf:prusac_2",
+              "op:gracanica:petrovo_2__op:maglaj:kosova_2",
+              "op:gracanica:petrovo_2__op:tesanj:sije_2",
+              "op:kotor_varos:krusevo_brdo_i__op:travnik:gluha_bukovica",
+              "op:kotor_varos:krusevo_brdo_i__op:travnik:paklarevo",
+              "op:maglaj:cobe_2__op:teslic:kamenica_2",
+              "op:maglaj:cobe_2__op:teslic:vitkovci",
+              "op:maglaj:donja_bocinja_2__op:maglaj:lijesnica",
+              "op:maglaj:donja_bocinja_2__op:zavidovici:cinovici",
+              "op:maglaj:gornja_bocinja__op:zavidovici:cinovici",
+              "op:maglaj:jablanica__op:maglaj:kosova_2",
+              "op:maglaj:jablanica__op:maglaj:maglaj_2",
+              "op:maglaj:jablanica__op:maglaj:misurici_2",
+              "op:skender_vakuf:donji_koricani__op:travnik:paklarevo",
+              "op:tesanj:kalosevic_2__op:teslic:vitkovci",
+              "op:tesanj:novi_miljanovci_2__op:teslic:vitkovci",
+              "op:tesanj:radusa_2__op:teslic:vitkovci",
+              "op:teslic:blatnica_2__op:travnik:gluha_bukovica",
+              "op:teslic:blatnica_2__op:zenica:serici_2",
+              "op:teslic:kamenica_2__op:zenica:serici_2",
+              "op:travnik:gornje_krcevine__op:travnik:paklarevo",
+              "op:travnik:paklarevo__op:travnik:varosluk",
+              "op:travnik:turbe_2__op:travnik:varosluk",
+              "op:zavidovici:cinovici__op:zavidovici:vozuca_2",
+              "op:zavidovici:hajderovici_2__op:zavidovici:vozuca_2"
+            ],
+            "directive_avoid_osids": [],
+            "directive_hold_osids": [],
+            "directive_offensive_targets": [],
+            "eligibility": "eligible",
+            "final_generated_output": {
+              "attack_target_osid": null,
+              "column_march_destination_osid": null,
+              "movement_destination_osid": null,
+              "postures": [
+                "dig_in"
+              ]
+            },
+            "first_handler": "offensive",
+            "formation_faction": "RBiH",
+            "formation_id": "arbih_737th_muslim_light",
+            "formation_kind": "brigade",
+            "formation_status": "active",
+            "location_osid": "op:busovaca:gornja_rovna",
+            "operation_axis_id": null,
+            "operation_current_objective": null,
+            "operation_name": null,
+            "pass": "bot_dispatcher",
+            "persistent_destination_osids": [],
+            "phase": "war",
+            "pre_cap_output": {
+              "attack_target_osid": null,
+              "column_march_destination_osid": null,
+              "movement_destination_osid": null,
+              "postures": [
+                "dig_in"
+              ]
+            },
+            "preexisting_movement_order_destination_osid": null,
+            "requested_factions": [
+              "HRHB",
+              "RBiH",
+              "RS"
+            ],
+            "scope": "replace",
+            "snapshot_output": {
+              "attack_target_osid": null,
+              "column_march_destination_osid": null,
+              "movement_destination_osid": null,
+              "postures": [
+                "dig_in"
+              ]
+            },
+            "transit_stance": null,
+            "transit_status": null,
+            "turn": 138
+          }
+        ]
+      },
+      {
+        "completed_week_index": 139,
+        "diagnostics_field_present": true,
+        "receipts": [
+          {
+            "assigned_sector_id": null,
+            "assigned_sector_role": null,
+            "caller_filter": "not_present",
+            "corps_id": "arbih_3rd_corps",
+            "corps_stance": "balanced",
+            "directive_assigned_front_ids": [
+              "op:bugojno:kula_2__op:donji_vakuf:jemanlici",
+              "op:bugojno:kula_2__op:donji_vakuf:korenici",
+              "op:bugojno:medini__op:donji_vakuf:komar_2",
+              "op:bugojno:prijaci__op:donji_vakuf:korenici",
+              "op:bugojno:udurlije__op:donji_vakuf:jemanlici",
+              "op:bugojno:vesela_2__op:donji_vakuf:jemanlici",
+              "op:doboj:boljanic_2__op:doboj:matuzici_2",
+              "op:doboj:boljanic_2__op:tesanj:lepenica",
+              "op:doboj:boljanic_2__op:tesanj:sije_2",
+              "op:doboj:bukovica_velika_2__op:tesanj:kalosevic_2",
+              "op:doboj:bukovica_velika_2__op:tesanj:ularice_2",
+              "op:doboj:makljenovac__op:doboj:matuzici_2",
+              "op:doboj:makljenovac__op:tesanj:ularice_2",
+              "op:donji_vakuf:jemanlici__op:donji_vakuf:prusac_2",
+              "op:donji_vakuf:komar_2__op:travnik:turbe_2",
+              "op:donji_vakuf:pribraca_2__op:donji_vakuf:prusac_2",
+              "op:gracanica:petrovo_2__op:maglaj:kosova_2",
+              "op:gracanica:petrovo_2__op:tesanj:sije_2",
+              "op:kotor_varos:krusevo_brdo_i__op:travnik:gluha_bukovica",
+              "op:kotor_varos:krusevo_brdo_i__op:travnik:paklarevo",
+              "op:maglaj:cobe_2__op:teslic:kamenica_2",
+              "op:maglaj:cobe_2__op:teslic:vitkovci",
+              "op:maglaj:donja_bocinja_2__op:maglaj:lijesnica",
+              "op:maglaj:donja_bocinja_2__op:zavidovici:cinovici",
+              "op:maglaj:gornja_bocinja__op:zavidovici:cinovici",
+              "op:maglaj:jablanica__op:maglaj:kosova_2",
+              "op:maglaj:jablanica__op:maglaj:maglaj_2",
+              "op:maglaj:jablanica__op:maglaj:misurici_2",
+              "op:skender_vakuf:donji_koricani__op:travnik:paklarevo",
+              "op:tesanj:kalosevic_2__op:teslic:vitkovci",
+              "op:tesanj:novi_miljanovci_2__op:teslic:vitkovci",
+              "op:tesanj:radusa_2__op:teslic:vitkovci",
+              "op:teslic:blatnica_2__op:travnik:gluha_bukovica",
+              "op:teslic:blatnica_2__op:zenica:serici_2",
+              "op:teslic:kamenica_2__op:zenica:serici_2",
+              "op:travnik:gornje_krcevine__op:travnik:paklarevo",
+              "op:travnik:paklarevo__op:travnik:varosluk",
+              "op:travnik:turbe_2__op:travnik:varosluk",
+              "op:zavidovici:cinovici__op:zavidovici:vozuca_2",
+              "op:zavidovici:hajderovici_2__op:zavidovici:vozuca_2"
+            ],
+            "directive_avoid_osids": [],
+            "directive_hold_osids": [],
+            "directive_offensive_targets": [],
+            "eligibility": "eligible",
+            "final_generated_output": {
+              "attack_target_osid": null,
+              "column_march_destination_osid": null,
+              "movement_destination_osid": null,
+              "postures": [
+                "dig_in"
+              ]
+            },
+            "first_handler": "offensive",
+            "formation_faction": "RBiH",
+            "formation_id": "arbih_737th_muslim_light",
+            "formation_kind": "brigade",
+            "formation_status": "active",
+            "location_osid": "op:busovaca:gornja_rovna",
+            "operation_axis_id": null,
+            "operation_current_objective": null,
+            "operation_name": null,
+            "pass": "bot_dispatcher",
+            "persistent_destination_osids": [],
+            "phase": "war",
+            "pre_cap_output": {
+              "attack_target_osid": null,
+              "column_march_destination_osid": null,
+              "movement_destination_osid": null,
+              "postures": [
+                "dig_in"
+              ]
+            },
+            "preexisting_movement_order_destination_osid": null,
+            "requested_factions": [
+              "HRHB",
+              "RBiH",
+              "RS"
+            ],
+            "scope": "replace",
+            "snapshot_output": {
+              "attack_target_osid": null,
+              "column_march_destination_osid": null,
+              "movement_destination_osid": null,
+              "postures": [
+                "dig_in"
+              ]
+            },
+            "transit_stance": null,
+            "transit_status": null,
+            "turn": 139
+          }
+        ]
+      }
+    ],
+    "strict_consumer_result": "not evaluated here",
+    "baseline_weekly_trajectory": [
+      {
+        "completed_week_index": 134,
+        "available": true,
+        "projected_movement_order": null,
+        "projected_attack_order": null,
+        "route_decisions": [],
+        "dispatcher_receipt_count": null
+      },
+      {
+        "completed_week_index": 135,
+        "available": true,
+        "projected_movement_order": "op:bugojno:udurlije",
+        "projected_attack_order": null,
+        "route_decisions": [],
+        "dispatcher_receipt_count": null
+      },
+      {
+        "completed_week_index": 136,
+        "available": true,
+        "projected_movement_order": null,
+        "projected_attack_order": null,
+        "route_decisions": [],
+        "dispatcher_receipt_count": null
+      },
+      {
+        "completed_week_index": 137,
+        "available": true,
+        "projected_movement_order": null,
+        "projected_attack_order": null,
+        "route_decisions": [],
+        "dispatcher_receipt_count": null
+      },
+      {
+        "completed_week_index": 138,
+        "available": true,
+        "projected_movement_order": null,
+        "projected_attack_order": null,
+        "route_decisions": [],
+        "dispatcher_receipt_count": null
+      },
+      {
+        "completed_week_index": 139,
+        "available": true,
+        "projected_movement_order": null,
+        "projected_attack_order": null,
+        "route_decisions": [],
+        "dispatcher_receipt_count": null
+      }
+    ],
+    "candidate_weekly_trajectory": [
+      {
+        "completed_week_index": 134,
+        "available": true,
+        "projected_movement_order": "op:bugojno:udurlije",
+        "projected_attack_order": null,
+        "route_decisions": [],
+        "dispatcher_receipt_count": 1
+      },
+      {
+        "completed_week_index": 135,
+        "available": true,
+        "projected_movement_order": "op:bugojno:udurlije",
+        "projected_attack_order": null,
+        "route_decisions": [],
+        "dispatcher_receipt_count": 1
+      },
+      {
+        "completed_week_index": 136,
+        "available": true,
+        "projected_movement_order": null,
+        "projected_attack_order": null,
+        "route_decisions": [],
+        "dispatcher_receipt_count": 1
+      },
+      {
+        "completed_week_index": 137,
+        "available": true,
+        "projected_movement_order": null,
+        "projected_attack_order": null,
+        "route_decisions": [],
+        "dispatcher_receipt_count": 1
+      },
+      {
+        "completed_week_index": 138,
+        "available": true,
+        "projected_movement_order": null,
+        "projected_attack_order": null,
+        "route_decisions": [],
+        "dispatcher_receipt_count": 1
+      },
+      {
+        "completed_week_index": 139,
+        "available": true,
+        "projected_movement_order": null,
+        "projected_attack_order": null,
+        "route_decisions": [],
+        "dispatcher_receipt_count": 1
+      }
+    ],
+    "baseline_temporal_trajectory": [
+      {
+        "completed_week_index": 134,
+        "temporal_loop_turn": 135,
+        "observed_loop_turn_minus_completed_week": 1,
+        "kind": "brigade",
+        "status": "active",
+        "lifecycle_status": null,
+        "location_osid": "op:busovaca:gornja_rovna",
+        "movement_state": null,
+        "movement_destinations": [
+          "op:bugojno:udurlije"
+        ],
+        "sector_id": "sector:arbih_3rd_corps:1",
+        "assigned_sub_segment_id": null,
+        "active_op_id": null
+      },
+      {
+        "completed_week_index": 135,
+        "temporal_loop_turn": 136,
+        "observed_loop_turn_minus_completed_week": 1,
+        "kind": "brigade",
+        "status": "active",
+        "lifecycle_status": null,
+        "location_osid": "op:busovaca:gornja_rovna",
+        "movement_state": null,
+        "movement_destinations": null,
+        "sector_id": "sector:arbih_3rd_corps:1",
+        "assigned_sub_segment_id": null,
+        "active_op_id": null
+      },
+      {
+        "completed_week_index": 136,
+        "temporal_loop_turn": 137,
+        "observed_loop_turn_minus_completed_week": 1,
+        "kind": "brigade",
+        "status": "active",
+        "lifecycle_status": null,
+        "location_osid": "op:busovaca:gornja_rovna",
+        "movement_state": null,
+        "movement_destinations": null,
+        "sector_id": "sector:arbih_3rd_corps:1",
+        "assigned_sub_segment_id": null,
+        "active_op_id": null
+      },
+      {
+        "completed_week_index": 137,
+        "temporal_loop_turn": 138,
+        "observed_loop_turn_minus_completed_week": 1,
+        "kind": "brigade",
+        "status": "active",
+        "lifecycle_status": null,
+        "location_osid": "op:busovaca:gornja_rovna",
+        "movement_state": null,
+        "movement_destinations": [
+          "op:bugojno:udurlije"
+        ],
+        "sector_id": "sector:arbih_3rd_corps:1",
+        "assigned_sub_segment_id": null,
+        "active_op_id": null
+      },
+      {
+        "completed_week_index": 138,
+        "temporal_loop_turn": 139,
+        "observed_loop_turn_minus_completed_week": 1,
+        "kind": "brigade",
+        "status": "active",
+        "lifecycle_status": null,
+        "location_osid": "op:busovaca:gornja_rovna",
+        "movement_state": null,
+        "movement_destinations": [
+          "op:bugojno:udurlije"
+        ],
+        "sector_id": "sector:arbih_3rd_corps:1",
+        "assigned_sub_segment_id": null,
+        "active_op_id": null
+      },
+      {
+        "completed_week_index": 139,
+        "temporal_loop_turn": 140,
+        "observed_loop_turn_minus_completed_week": 1,
+        "kind": "brigade",
+        "status": "active",
+        "lifecycle_status": null,
+        "location_osid": "op:busovaca:gornja_rovna",
+        "movement_state": null,
+        "movement_destinations": [
+          "op:bugojno:udurlije"
+        ],
+        "sector_id": "sector:arbih_3rd_corps:1",
+        "assigned_sub_segment_id": null,
+        "active_op_id": null
+      }
+    ],
+    "candidate_temporal_trajectory": [
+      {
+        "completed_week_index": 134,
+        "temporal_loop_turn": 135,
+        "observed_loop_turn_minus_completed_week": 1,
+        "kind": "brigade",
+        "status": "active",
+        "lifecycle_status": null,
+        "location_osid": "op:busovaca:gornja_rovna",
+        "movement_state": null,
+        "movement_destinations": [
+          "op:bugojno:udurlije"
+        ],
+        "sector_id": "sector:arbih_3rd_corps:1",
+        "assigned_sub_segment_id": null,
+        "active_op_id": null
+      },
+      {
+        "completed_week_index": 135,
+        "temporal_loop_turn": 136,
+        "observed_loop_turn_minus_completed_week": 1,
+        "kind": "brigade",
+        "status": "active",
+        "lifecycle_status": null,
+        "location_osid": "op:busovaca:gornja_rovna",
+        "movement_state": null,
+        "movement_destinations": null,
+        "sector_id": "sector:arbih_3rd_corps:1",
+        "assigned_sub_segment_id": null,
+        "active_op_id": null
+      },
+      {
+        "completed_week_index": 136,
+        "temporal_loop_turn": 137,
+        "observed_loop_turn_minus_completed_week": 1,
+        "kind": "brigade",
+        "status": "active",
+        "lifecycle_status": null,
+        "location_osid": "op:busovaca:gornja_rovna",
+        "movement_state": null,
+        "movement_destinations": null,
+        "sector_id": "sector:arbih_3rd_corps:1",
+        "assigned_sub_segment_id": null,
+        "active_op_id": null
+      },
+      {
+        "completed_week_index": 137,
+        "temporal_loop_turn": 138,
+        "observed_loop_turn_minus_completed_week": 1,
+        "kind": "brigade",
+        "status": "active",
+        "lifecycle_status": null,
+        "location_osid": "op:busovaca:gornja_rovna",
+        "movement_state": null,
+        "movement_destinations": [
+          "op:bugojno:udurlije"
+        ],
+        "sector_id": "sector:arbih_3rd_corps:1",
+        "assigned_sub_segment_id": null,
+        "active_op_id": null
+      },
+      {
+        "completed_week_index": 138,
+        "temporal_loop_turn": 139,
+        "observed_loop_turn_minus_completed_week": 1,
+        "kind": "brigade",
+        "status": "active",
+        "lifecycle_status": null,
+        "location_osid": "op:busovaca:gornja_rovna",
+        "movement_state": null,
+        "movement_destinations": [
+          "op:bugojno:udurlije"
+        ],
+        "sector_id": "sector:arbih_3rd_corps:1",
+        "assigned_sub_segment_id": null,
+        "active_op_id": null
+      }
+    ],
+    "temporal_semantics": "temporal_loop_turn and completed_week_index are reported separately; retained schema normally exposes loop turn = completed week + 1"
+  },
+  "anomalies_prefix_only": {
+    "control_event_ordered_differences": 0,
+    "reported_control_count_week_differences": 0,
+    "reconstructed_territory_week_differences": 0,
+    "checkpoint_match_set_or_controller_differences": [],
+    "protected_control_differences": [],
+    "temporal_offset_anomalies": [],
+    "missing_data_count": 1
+  },
+  "missing_data": [
+    "candidate.brigade_temporal_log missing arbih_737th_muslim_light completed week_index 139"
+  ]
+}

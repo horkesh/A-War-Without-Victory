@@ -1,0 +1,45 @@
+{
+  "run_dir": "runs/apr1992_definitive_188w__0b1f040ff4abe835__w139_n40",
+  "candidate_commit": "fe828b9e0222a80238dbe60c22391fae53c48039",
+  "git_dirty": false,
+  "weeks": 139,
+  "node": "v22.23.2",
+  "input_digest": "ed7fa30986392451f797708a5a0fe9d3ac83f284692be04e199305c533a1f0b6",
+  "input_count": 31,
+  "initial_sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+  "ordinary_headless": true,
+  "failed": [
+    "inputs",
+    "ordinary headless population"
+  ],
+  "artifacts": {
+    "run_meta.json": {
+      "sha256": "8b106c29dd10e3bbae934277d719c9d960bf3c2820ff539e2afb031c507c34ba",
+      "bytes": 11493
+    },
+    "initial_save.json": {
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+      "bytes": 1373722
+    },
+    "final_save.json": {
+      "sha256": "d6715e9cefa14d0cf88b1af34d12c38c231186b6cf44cbb71e87636c0a6b04b9",
+      "bytes": 7611874
+    },
+    "weekly_report.jsonl": {
+      "sha256": "10cc0729966a4f45eeb6ea22bf61da5901d9e34ecebd0287ded5c3cecccc8058",
+      "bytes": 153790127
+    },
+    "run_summary.json": {
+      "sha256": "10fb820edf424f02e81bed8cbfcb23402f9fea59fed2b737eed8c9cfceab187e",
+      "bytes": 490378
+    },
+    "control_delta.json": {
+      "sha256": "cd1994f6bfebc3613a14c0d07d3bd8f49893107bc391472e686b347863e0593d",
+      "bytes": 27664
+    },
+    "formation_delta.json": {
+      "sha256": "bf329b15eb9698bca8c16d0d5c35934f3b0a2cd0310341ae7790c7f8153db8ff",
+      "bytes": 3676
+    }
+  }
+}
