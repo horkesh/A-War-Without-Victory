@@ -89,8 +89,21 @@ for preparation only. No routing/combat/control/save-schema change or baseline
 adoption follows. The accidental default 52-week launch produced four partial
 weekly rows; it and the uncertain broad process stop are preserved in the
 existing report. All36 fingerprinted retained comparison artifacts still match.
-The known-source 188-week proposal remains **NOT AUTHORIZED**. Original n37
-source/cause, all named acceptance outcomes and full acceptance review stay open.
+At preparation closeout the188-week proposal was NOT AUTHORIZED; the single
+owner grant/execution below supersedes that pending-run status. Original n37
+source/cause and all acceptance outcomes stay open.
+
+The owner then authorized one n39 diagnostic from clean `7b9c242a3`. Runner
+exits0, final hash `afa185b2591dac1a`, but route and launch/order gates both exit1:
+the737th has no terminal receipt(137–139 missing); four axis-local joins fail.
+Its exact pre-order branch is unreported. The517th's bound188 receipt freshly
+selects Budimlić toward Stari Majdan; no stale-selector correction follows.
+Towns2/3,belt4/4,Jajce3/5 and the same four lost matches retain NO-GO. Protected
+controls, critical0/27 and current Farz receipts hold; all31 normalized input
+hashes match. HV disappearance is observed, explicit withdrawal cause is not.
+Independent review is GO for bounded STOP only. Compact evidence:
+[n39 reviewed receipt](../../logs/prusac-diagnostic-20260929/continuation4_campaign_reviewed_summary.json).
+No retry/full suite/adoption/merge; original attribution and acceptance stay open.
 
 ## April 1995 patron-border candidate measurement — 2026-09-27
 

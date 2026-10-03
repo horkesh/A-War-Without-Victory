@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-03 (Sana observation preparation reviewed)
+**Last updated:** 2026-10-03 (n39 diagnostic STOP reviewed)
 
 **Current R6 status — October Sana checkpoint remains NO-GO.** The retained n37
 full suite and 188-week campaign both exit 0, but the calibration result fails:
@@ -48,11 +48,11 @@ already lost in n29. The 737th's first recorded route-state difference is t138.
 These chronological facts do not identify a launch/selector cause. No correction
 or campaign follows; protected evidence and every acceptance gap remain open.
 
-Observation preparation: Go quota126; Sol adds opt-in interior-route receipts
-and a strict weekly consumer. Correction15/15, typecheck/syntax0;86 cases reused;
-independent preparation GO. The linked report preserves the accidental default
-partial run/stop uncertainty and36 unchanged artifact hashes. No routing/control/
-save change or acceptance. Known-source188w proposal NOT AUTHORIZED; all gaps open.
+n39: owner-authorized once from clean7b9c242a3; runner0, route/launch gates1.
+Missing737 receipts and four axis joins; exact branch remains unknown. Towns2/3,
+belt4/4,Jajce3/5,four lost matches; protected/Farz hold,critical0. Independent
+STOP GO; no retry/correction/adoption. Reuse late receipts; first prove dispatcher
+coverage cheaply. Original cause/all acceptance gaps open; no new campaign grant.
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference

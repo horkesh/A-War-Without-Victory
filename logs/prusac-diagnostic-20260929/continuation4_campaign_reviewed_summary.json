@@ -1,0 +1,875 @@
+{
+  "scope": "Single owner-authorized known-source n39 campaign; GO bounded STOP, no retry/gameplay correction/calibration acceptance",
+  "run_dir": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n39",
+  "authorization": {
+    "historical_source_binding_authorized_false": "nested marker copies pre-authorization preparation receipt; top-level later owner grant governs",
+    "used_once": true,
+    "owner_message": "Next it is",
+    "scope": "one diagnostic188w campaign",
+    "reviewed_supplement_parent_sha": "40-character candidate Git commit; separate file SHA256s below"
+  },
+  "provenance": {
+    "git_commit": "7b9c242a3d3942a8a64673457c4e75b545dab6e4",
+    "git_dirty": false,
+    "node_version": "v22.23.2",
+    "consumed_inputs_digest": "8f13061b19ed9fd2d899f77f0115fdd4c5379e52cb058b3edadbd00e0e41af20",
+    "consumed_input_count": 31,
+    "scenario_path": "data/scenarios/apr1992_definitive_188w.json",
+    "weeks": 188,
+    "initial_save_sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+    "retained_n25_initial_save_sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+    "initial_save_matches_retained_n25": true,
+    "artifacts": {
+      "run_meta.json": {
+        "sha256": "84d0486f93493fdc1bc8f1d1ee3ccfc217e0953cfb30e81b19a1effc3d7871ae",
+        "bytes": 10472
+      },
+      "initial_save.json": {
+        "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+        "bytes": 1373722
+      },
+      "final_save.json": {
+        "sha256": "afa185b2591dac1a51e1f313963e4a004cdfdbc00b811d040bd910b087adb9fd",
+        "bytes": 9071450
+      },
+      "weekly_report.jsonl": {
+        "sha256": "eb9ba5c6d9ddb1e90246539de4568152629c12a1121b6b90afee8bb758e6962b",
+        "bytes": 3867327
+      },
+      "brigade_temporal_log.jsonl": {
+        "sha256": "a0322f048b94f5611a5eb09dc15aaee004037c695ace3189cb0322e92628b052",
+        "bytes": 24080523
+      },
+      "operation_aars.json": {
+        "sha256": "f86beacb9bdc6e64d1d3d95e4684b6923cab9b30d87444ad3ba75204c5696f59",
+        "bytes": 660706
+      },
+      "run_summary.json": {
+        "sha256": "ce6ce8a87ef609b57304766739475cc156778e40c6f9eaab73c042d9b0a00796",
+        "bytes": 630433
+      }
+    }
+  },
+  "consumed_input_fingerprints": {
+    "explanation": "Rawbyte comparison flagged only CRLF geojson; actual run-provenance normalization matches all31. No input mutation.",
+    "raw_byte_check_exit": 1,
+    "failures": 0,
+    "normalized_check_exit": 0,
+    "checked": 31,
+    "algorithm": "src/scenario/run_provenance.ts normalizeForHash: CRLF to LF before UTF8 SHA256"
+  },
+  "parent_artifact_sha256": [
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_instrumented_188w.started.json",
+      "sha256": "CF5C8A7B0E8C83A7415E9B8A3F9F004A4D13E10C985A61FB17AF4318C7EB57B8"
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_campaign_audit.stdout.json",
+      "sha256": "18942547F829B1F90C51449B9581D11DB764DD06EAF65E64FAE3CF99E9D7FE9F"
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_campaign_sana_towns_belt.json",
+      "sha256": "2A8F7A369E7F63B404CC7D72E824BAEDB0A3CC024F400614A9D35A5EF4D7F2A8"
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_campaign_sana_towns_belt_corrected.json",
+      "sha256": "A660DFDB91B631AE01A0B267F5682F98B289C5E07F275D6F9F01687FA392CAF8"
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_campaign_sana_towns_belt_reviewed.json",
+      "sha256": "2649579062290A691E8AD88E87D3AEC66DBA27E19B287C050F02C19235C68FDA"
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_campaign_route.stdout.json",
+      "sha256": "6FCB01BBF4CC53A4A4E9DF89CF3222E2349DAB5FCA9393427FF89165A84ADFD1"
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_campaign_operation.stdout.json",
+      "sha256": "094EC3F98655068D0DA303FFD8D6A7040E82476406881D17F79D80A3117A1378"
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_campaign_hv_lifecycle.stdout.json",
+      "sha256": "45A8066F08490BBA1D4EF0066D9488BCA2959105807A1ED1818FB93CE7C9F728"
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_campaign_normalized_input_check.json",
+      "sha256": "1E2D69FEDA290A1EBA766F329AD134EF076DEE274110EFAA40C0DE8D1697D8AE"
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_campaign_raw_input_hash_mismatch.json",
+      "sha256": "A9BAA1AFDF8ED145ED44CC12F4AF86A7B02B6CE623FBE88717B2FCF45526E5C8"
+    }
+  ],
+  "exits": {
+    "checkpoints_farz": 0,
+    "audit": 0,
+    "route": 1,
+    "launch_orders": 1,
+    "sana_reviewed": 0,
+    "hv_lifecycle": 0,
+    "runner": 0
+  },
+  "coverage": {
+    "missing737boundaries": [
+      "arbih_737th_muslim_light:137",
+      "arbih_737th_muslim_light:138",
+      "arbih_737th_muslim_light:139"
+    ],
+    "launch_traced_axes": 978,
+    "route_receipts": 145,
+    "route_inconsistencies": 0,
+    "named737_receipts": 0,
+    "launch_first_execution_axes": 63,
+    "positive_control_detected": true,
+    "launch_mismatches": [
+      {
+        "week": 14,
+        "corps_id": "arbih_2nd_corps",
+        "operation_name": "Srebrenica–Cerska Link-Up",
+        "axis_id": "srebrenica_convergence",
+        "reason": "executable_launch_missing_order_evidence",
+        "launch_brigades": [
+          "arbih_1st_cerska"
+        ],
+        "order_decisions": []
+      },
+      {
+        "week": 70,
+        "corps_id": "vrs_sarajevo_romanija",
+        "operation_name": "Operation Lukavac 93",
+        "axis_id": "trnovo_town",
+        "reason": "executable_launch_missing_order_evidence",
+        "launch_brigades": [
+          "rs_bilea_brigade"
+        ],
+        "order_decisions": []
+      },
+      {
+        "week": 177,
+        "corps_id": "arbih_5th_corps",
+        "operation_name": "Operation Sana",
+        "axis_id": "sana_bihac_petrovac_approach",
+        "reason": "executable_launch_missing_order_evidence",
+        "launch_brigades": [
+          "arbih_501st_slavna_mountain"
+        ],
+        "order_decisions": []
+      },
+      {
+        "week": 177,
+        "corps_id": "arbih_5th_corps",
+        "operation_name": "Operation Sana",
+        "axis_id": "sana_sanski_most_kljuc",
+        "reason": "executable_launch_missing_order_evidence",
+        "launch_brigades": [
+          "arbih_503rd_slavna_mountain"
+        ],
+        "order_decisions": []
+      }
+    ]
+  },
+  "sana": {
+    "scope": "reviewed compact superseding Sana town/belt count summary for n39",
+    "parent_sha": "7b9c242a3d3942a8a64673457c4e75b545dab6e4",
+    "source": "continuation4_campaign_sana_towns_belt_corrected.json",
+    "supersedes": "continuation4_campaign_sana_towns_belt.json counts only; all earlier raw artifacts preserved",
+    "count_rule": "control event mechanism=combat plus matching winning Operation Sana battle, same battle_id/target/faction/turn; optional weekly battle territory_flipped is not required when absent",
+    "counts": {
+      "towns_ordinary_combat_captured": 2,
+      "towns_required": 3,
+      "full_town_acceptance": false,
+      "belt_ordinary_combat_captured": 4,
+      "belt_required": 4,
+      "full_belt_acceptance": true
+    },
+    "rows": [
+      {
+        "group": "town",
+        "name": "Petrovac town",
+        "osid": "op:bosanski_petrovac:bosanski_petrovac_2",
+        "final_controller": "RBiH",
+        "captured_by_ordinary_combat": true,
+        "turn": 181,
+        "mechanism": "combat",
+        "battle_id": "181:op:bosanski_petrovac:bosanski_petrovac_2:arbih_501st_slavna_mountain:null",
+        "operation_name": "Operation Sana",
+        "attacker": "arbih_501st_slavna_mountain",
+        "attacker_won": true,
+        "outcome": "decisive_victory",
+        "target_osid": "op:bosanski_petrovac:bosanski_petrovac_2"
+      },
+      {
+        "group": "town",
+        "name": "Kljuc town",
+        "osid": "op:kljuc:kljuc_2",
+        "final_controller": "RBiH",
+        "captured_by_ordinary_combat": true,
+        "turn": 185,
+        "mechanism": "combat",
+        "battle_id": "185:op:kljuc:kljuc_2:arbih_501st_slavna_mountain:rs_1st_drvar_light_infantry",
+        "operation_name": "Operation Sana",
+        "attacker": "arbih_501st_slavna_mountain",
+        "attacker_won": true,
+        "outcome": "decisive_victory",
+        "target_osid": "op:kljuc:kljuc_2"
+      },
+      {
+        "group": "town",
+        "name": "Sanski town",
+        "osid": "op:sanski_most:sanski_most_2",
+        "final_controller": "RS",
+        "captured_by_ordinary_combat": false,
+        "turn": null,
+        "mechanism": null,
+        "battle_id": null,
+        "operation_name": null,
+        "attacker": null,
+        "attacker_won": null,
+        "outcome": null,
+        "target_osid": null
+      },
+      {
+        "group": "belt",
+        "name": "Budimlic Japra",
+        "osid": "op:sanski_most:budimlic_japra_2",
+        "final_controller": "RBiH",
+        "captured_by_ordinary_combat": true,
+        "turn": 184,
+        "mechanism": "combat",
+        "battle_id": "184:op:sanski_most:budimlic_japra_2:arbih_506th_mountain:rs_17th_klju_light_infantry",
+        "operation_name": "Operation Sana",
+        "attacker": "arbih_506th_mountain",
+        "attacker_won": true,
+        "outcome": "decisive_victory",
+        "target_osid": "op:sanski_most:budimlic_japra_2"
+      },
+      {
+        "group": "belt",
+        "name": "Lusci Palanka",
+        "osid": "op:sanski_most:lusci_palanka_2",
+        "final_controller": "RBiH",
+        "captured_by_ordinary_combat": true,
+        "turn": 185,
+        "mechanism": "combat",
+        "battle_id": "185:op:sanski_most:lusci_palanka_2:arbih_506th_mountain:rs_11th_krupa_light_infantry",
+        "operation_name": "Operation Sana",
+        "attacker": "arbih_506th_mountain",
+        "attacker_won": true,
+        "outcome": "decisive_victory",
+        "target_osid": "op:sanski_most:lusci_palanka_2"
+      },
+      {
+        "group": "belt",
+        "name": "Jelasinovci",
+        "osid": "op:sanski_most:jelasinovci",
+        "final_controller": "RBiH",
+        "captured_by_ordinary_combat": true,
+        "turn": 186,
+        "mechanism": "combat",
+        "battle_id": "186:op:sanski_most:jelasinovci:arbih_506th_mountain:rs_17th_klju_light_infantry",
+        "operation_name": "Operation Sana",
+        "attacker": "arbih_506th_mountain",
+        "attacker_won": true,
+        "outcome": "victory",
+        "target_osid": "op:sanski_most:jelasinovci"
+      },
+      {
+        "group": "belt",
+        "name": "Skucani Vakuf",
+        "osid": "op:sanski_most:skucani_vakuf_2",
+        "final_controller": "RBiH",
+        "captured_by_ordinary_combat": true,
+        "turn": 187,
+        "mechanism": "combat",
+        "battle_id": "187:op:sanski_most:skucani_vakuf_2:arbih_506th_mountain:rs_17th_klju_light_infantry",
+        "operation_name": "Operation Sana",
+        "attacker": "arbih_506th_mountain",
+        "attacker_won": true,
+        "outcome": "costly_victory",
+        "target_osid": "op:sanski_most:skucani_vakuf_2"
+      }
+    ],
+    "route_claim_limits": {
+      "proven": "The 737th terminal generic-interior receipt is absent across the horizon and at t137/t138/t139.",
+      "not_proven": "Neither an earlier evaluator bypass nor any exact pre-order cause is uniquely established. Pre-order transit/filter eligibility and complete predicate state were not serialized; earlier bypass is only a source-consistent hypothesis."
+    }
+  },
+  "western_targets": [
+    {
+      "name": "Bravnice",
+      "osid": "op:jajce:bravnice",
+      "expected": "HRHB",
+      "controller": "HRHB",
+      "captures": [
+        {
+          "turn": 185,
+          "mechanism": "combat",
+          "attacker_brigade": "hv_1st_hgz_1995",
+          "battle_id": "185:op:jajce:bravnice:hv_1st_hgz_1995:rs_19th_krajina_light_infantry"
+        }
+      ]
+    },
+    {
+      "name": "Vinac",
+      "osid": "op:jajce:vinac_2",
+      "expected": "HRHB",
+      "controller": "HRHB",
+      "captures": [
+        {
+          "turn": 186,
+          "mechanism": "combat",
+          "attacker_brigade": "hv_1st_hgz_1995",
+          "battle_id": "186:op:jajce:vinac_2:hv_1st_hgz_1995:rs_4th_banja_luka_light_infantry"
+        }
+      ]
+    },
+    {
+      "name": "Jajce town",
+      "osid": "op:jajce:jajce_3",
+      "expected": "HRHB",
+      "controller": "HRHB",
+      "captures": [
+        {
+          "turn": 187,
+          "mechanism": "combat",
+          "attacker_brigade": "hv_1st_hgz_1995",
+          "battle_id": "187:op:jajce:jajce_3:hv_1st_hgz_1995:rs_22nd_krajina_infantry"
+        }
+      ]
+    },
+    {
+      "name": "Lupnica",
+      "osid": "op:jajce:lupnica",
+      "expected": "HRHB",
+      "controller": "RS",
+      "captures": []
+    },
+    {
+      "name": "Barevo",
+      "osid": "op:jajce:barevo_2",
+      "expected": "HRHB",
+      "controller": "RS",
+      "captures": []
+    },
+    {
+      "name": "Majdan",
+      "osid": "op:mrkonjic_grad:majdan_2",
+      "expected": "HRHB",
+      "controller": "RS",
+      "captures": []
+    },
+    {
+      "name": "Varosluk",
+      "osid": "op:travnik:varosluk",
+      "expected": "RBiH",
+      "controller": "RS",
+      "captures": []
+    }
+  ],
+  "checkpoints": [
+    {
+      "name": "jan1993",
+      "week": 39,
+      "denominator": 712,
+      "n25_matches": 707,
+      "candidate_matches": 707,
+      "lost_n25_matches": [],
+      "gained_vs_n25": []
+    },
+    {
+      "name": "apr1994",
+      "week": 104,
+      "denominator": 712,
+      "n25_matches": 707,
+      "candidate_matches": 707,
+      "lost_n25_matches": [],
+      "gained_vs_n25": []
+    },
+    {
+      "name": "apr1995",
+      "week": 156,
+      "denominator": 712,
+      "n25_matches": 706,
+      "candidate_matches": 706,
+      "lost_n25_matches": [],
+      "gained_vs_n25": []
+    },
+    {
+      "name": "oct1995",
+      "week": 188,
+      "denominator": 712,
+      "n25_matches": 681,
+      "candidate_matches": 684,
+      "lost_n25_matches": [
+        "op:jajce:barevo_2",
+        "op:jajce:lupnica",
+        "op:mrkonjic_grad:majdan_2",
+        "op:travnik:varosluk"
+      ],
+      "gained_vs_n25": [
+        "op:bosanski_novi:krslje_2",
+        "op:bosanski_petrovac:bosanski_petrovac_2",
+        "op:bosanski_petrovac:dobro_selo_2",
+        "op:bosanski_petrovac:jasenovac_2",
+        "op:kljuc:hadzici",
+        "op:kljuc:kljuc_2",
+        "op:kljuc:krasulje_2"
+      ]
+    }
+  ],
+  "protected_controls": {
+    "all_ok": true,
+    "rows": [
+      {
+        "osid": "op:jablanica:doljani_2",
+        "checkpoints": [
+          {
+            "week": 104,
+            "expected": "RBiH",
+            "controller": "RBiH",
+            "ok": true
+          }
+        ]
+      },
+      {
+        "osid": "op:donji_vakuf:prusac_2",
+        "checkpoints": [
+          {
+            "week": 39,
+            "expected": "RBiH",
+            "controller": "RBiH",
+            "ok": true
+          },
+          {
+            "week": 104,
+            "expected": "RBiH",
+            "controller": "RBiH",
+            "ok": true
+          },
+          {
+            "week": 156,
+            "expected": "RBiH",
+            "controller": "RBiH",
+            "ok": true
+          },
+          {
+            "week": 188,
+            "expected": "RBiH",
+            "controller": "RBiH",
+            "ok": true
+          }
+        ]
+      },
+      {
+        "osid": "op:prozor:ljubunci_2",
+        "checkpoints": [
+          {
+            "week": 39,
+            "expected": "HRHB",
+            "controller": "HRHB",
+            "ok": true
+          },
+          {
+            "week": 104,
+            "expected": "HRHB",
+            "controller": "HRHB",
+            "ok": true
+          },
+          {
+            "week": 156,
+            "expected": "HRHB",
+            "controller": "HRHB",
+            "ok": true
+          },
+          {
+            "week": 188,
+            "expected": "HRHB",
+            "controller": "HRHB",
+            "ok": true
+          }
+        ]
+      },
+      {
+        "osid": "op:prozor:lug_2",
+        "checkpoints": [
+          {
+            "week": 39,
+            "expected": "RBiH",
+            "controller": "RBiH",
+            "ok": true
+          },
+          {
+            "week": 104,
+            "expected": "HRHB",
+            "controller": "HRHB",
+            "ok": true
+          },
+          {
+            "week": 156,
+            "expected": "HRHB",
+            "controller": "HRHB",
+            "ok": true
+          },
+          {
+            "week": 188,
+            "expected": "HRHB",
+            "controller": "HRHB",
+            "ok": true
+          }
+        ]
+      },
+      {
+        "osid": "op:prozor:paros",
+        "checkpoints": [
+          {
+            "week": 39,
+            "expected": "RBiH",
+            "controller": "RBiH",
+            "ok": true
+          },
+          {
+            "week": 104,
+            "expected": "HRHB",
+            "controller": "HRHB",
+            "ok": true
+          },
+          {
+            "week": 156,
+            "expected": "HRHB",
+            "controller": "HRHB",
+            "ok": true
+          },
+          {
+            "week": 188,
+            "expected": "HRHB",
+            "controller": "HRHB",
+            "ok": true
+          }
+        ]
+      },
+      {
+        "osid": "op:trnovo:gornja_presjenica",
+        "checkpoints": [
+          {
+            "week": 39,
+            "expected": "RS",
+            "controller": "RS",
+            "ok": true
+          },
+          {
+            "week": 104,
+            "expected": "RS",
+            "controller": "RS",
+            "ok": true
+          },
+          {
+            "week": 156,
+            "expected": "RS",
+            "controller": "RS",
+            "ok": true
+          },
+          {
+            "week": 188,
+            "expected": "RS",
+            "controller": "RS",
+            "ok": true
+          }
+        ]
+      }
+    ]
+  },
+  "anomalies": {
+    "critical": 0,
+    "warning": 5,
+    "total": 27,
+    "info": 22
+  },
+  "farz": {
+    "operation_owned_capture_turns": [
+      162,
+      164,
+      163,
+      167
+    ],
+    "second_corps_participation": "not recorded; fidelity diagnostic only",
+    "gate_passed": true
+  },
+  "orders_517th": [
+    {
+      "brigade_id": "arbih_517th_light",
+      "concentrated_outcome": null,
+      "decision": "in_transit_skipped",
+      "issued_target_osid": "op:bosanska_krupa:otoka_2",
+      "location_osid": "op:bihac:bihac_2",
+      "objective": "op:bosanska_krupa:ivanjska_2",
+      "objective_controller": "RS",
+      "phase": "planning",
+      "power_ratio": null,
+      "predicted_outcome": null,
+      "tactically_adjacent": false,
+      "threshold": "repulsed",
+      "turn": 176
+    },
+    {
+      "brigade_id": "arbih_517th_light",
+      "concentrated_outcome": "costly_victory",
+      "decision": "direct_attack",
+      "issued_target_osid": "op:bosanska_krupa:ivanjska_2",
+      "location_osid": "op:bosanska_krupa:otoka_2",
+      "objective": "op:bosanska_krupa:ivanjska_2",
+      "objective_controller": "RS",
+      "phase": "execution",
+      "power_ratio": 0.3344607369066755,
+      "predicted_outcome": "catastrophic",
+      "tactically_adjacent": true,
+      "threshold": "repulsed",
+      "turn": 177
+    },
+    {
+      "brigade_id": "arbih_517th_light",
+      "concentrated_outcome": "victory",
+      "decision": "direct_attack",
+      "issued_target_osid": "op:bosanska_krupa:ivanjska_2",
+      "location_osid": "op:bosanska_krupa:otoka_2",
+      "objective": "op:bosanska_krupa:ivanjska_2",
+      "objective_controller": "RS",
+      "phase": "execution",
+      "power_ratio": 0.42136494970497257,
+      "predicted_outcome": "catastrophic",
+      "tactically_adjacent": true,
+      "threshold": "repulsed",
+      "turn": 178
+    },
+    {
+      "brigade_id": "arbih_517th_light",
+      "concentrated_outcome": "decisive_victory",
+      "decision": "direct_attack",
+      "issued_target_osid": "op:bosanska_krupa:ivanjska_2",
+      "location_osid": "op:bosanska_krupa:otoka_2",
+      "objective": "op:bosanska_krupa:ivanjska_2",
+      "objective_controller": "RS",
+      "phase": "execution",
+      "power_ratio": 0.4821404494952806,
+      "predicted_outcome": "catastrophic",
+      "tactically_adjacent": true,
+      "threshold": "repulsed",
+      "turn": 179
+    },
+    {
+      "brigade_id": "arbih_517th_light",
+      "concentrated_outcome": null,
+      "decision": "march_to_approach",
+      "issued_target_osid": "op:bosanska_krupa:ivanjska_2",
+      "location_osid": "op:bosanska_krupa:otoka_2",
+      "objective": "op:bosanska_krupa:donji_dubovik_2",
+      "objective_controller": "RS",
+      "phase": "execution",
+      "power_ratio": null,
+      "predicted_outcome": null,
+      "tactically_adjacent": false,
+      "threshold": null,
+      "turn": 180
+    },
+    {
+      "brigade_id": "arbih_517th_light",
+      "concentrated_outcome": null,
+      "decision": "in_transit_skipped",
+      "issued_target_osid": "op:bosanska_krupa:ivanjska_2",
+      "location_osid": "op:bosanska_krupa:otoka_2",
+      "objective": "op:bosanska_krupa:donji_dubovik_2",
+      "objective_controller": "RS",
+      "phase": "execution",
+      "power_ratio": null,
+      "predicted_outcome": null,
+      "tactically_adjacent": false,
+      "threshold": "repulsed",
+      "turn": 181
+    },
+    {
+      "brigade_id": "arbih_517th_light",
+      "concentrated_outcome": null,
+      "decision": "march_to_approach",
+      "issued_target_osid": "op:bosanska_krupa:donji_dubovik_2",
+      "location_osid": "op:bosanska_krupa:ivanjska_2",
+      "objective": "op:sanski_most:budimlic_japra_2",
+      "objective_controller": "RS",
+      "phase": "execution",
+      "power_ratio": null,
+      "predicted_outcome": null,
+      "tactically_adjacent": false,
+      "threshold": null,
+      "turn": 182
+    },
+    {
+      "brigade_id": "arbih_517th_light",
+      "concentrated_outcome": null,
+      "decision": "in_transit_skipped",
+      "issued_target_osid": "op:bosanska_krupa:donji_dubovik_2",
+      "location_osid": "op:bosanska_krupa:ivanjska_2",
+      "objective": "op:sanski_most:budimlic_japra_2",
+      "objective_controller": "RS",
+      "phase": "execution",
+      "power_ratio": null,
+      "predicted_outcome": null,
+      "tactically_adjacent": false,
+      "threshold": "repulsed",
+      "turn": 183
+    },
+    {
+      "brigade_id": "arbih_517th_light",
+      "concentrated_outcome": "decisive_victory",
+      "decision": "direct_attack",
+      "issued_target_osid": "op:sanski_most:budimlic_japra_2",
+      "location_osid": "op:bosanska_krupa:donji_dubovik_2",
+      "objective": "op:sanski_most:budimlic_japra_2",
+      "objective_controller": "RS",
+      "phase": "execution",
+      "power_ratio": 10.357246766306618,
+      "predicted_outcome": "decisive_victory",
+      "tactically_adjacent": true,
+      "threshold": "repulsed",
+      "turn": 184
+    },
+    {
+      "brigade_id": "arbih_517th_light",
+      "concentrated_outcome": null,
+      "decision": "march_to_approach",
+      "issued_target_osid": "op:bosanska_krupa:jasenica_2",
+      "location_osid": "op:bosanska_krupa:donji_dubovik_2",
+      "objective": "op:sanski_most:lusci_palanka_2",
+      "objective_controller": "RS",
+      "phase": "execution",
+      "power_ratio": null,
+      "predicted_outcome": null,
+      "tactically_adjacent": false,
+      "threshold": null,
+      "turn": 185
+    },
+    {
+      "brigade_id": "arbih_517th_light",
+      "concentrated_outcome": null,
+      "decision": "march_to_approach",
+      "issued_target_osid": "op:sanski_most:lusci_palanka_2",
+      "location_osid": "op:bosanska_krupa:donji_dubovik_2",
+      "objective": "op:sanski_most:jelasinovci",
+      "objective_controller": "RS",
+      "phase": "execution",
+      "power_ratio": null,
+      "predicted_outcome": null,
+      "tactically_adjacent": false,
+      "threshold": null,
+      "turn": 186
+    },
+    {
+      "brigade_id": "arbih_517th_light",
+      "concentrated_outcome": null,
+      "decision": "in_transit_skipped",
+      "issued_target_osid": "op:sanski_most:lusci_palanka_2",
+      "location_osid": "op:bosanska_krupa:donji_dubovik_2",
+      "objective": "op:sanski_most:skucani_vakuf_2",
+      "objective_controller": "RS",
+      "phase": "execution",
+      "power_ratio": null,
+      "predicted_outcome": null,
+      "tactically_adjacent": false,
+      "threshold": "repulsed",
+      "turn": 187
+    },
+    {
+      "brigade_id": "arbih_517th_light",
+      "concentrated_outcome": null,
+      "decision": "march_to_approach",
+      "issued_target_osid": "op:sanski_most:budimlic_japra_2",
+      "location_osid": "op:sanski_most:lusci_palanka_2",
+      "objective": "op:sanski_most:stari_majdan",
+      "objective_controller": "RS",
+      "phase": "execution",
+      "power_ratio": null,
+      "predicted_outcome": null,
+      "tactically_adjacent": false,
+      "threshold": null,
+      "turn": 188
+    }
+  ],
+  "hv112_hgz": [
+    {
+      "formation_id": "hv_112th_infantry_1995",
+      "final_registry": null,
+      "temporal_first": {
+        "temporal_turn": 174,
+        "temporal_week_index": 173,
+        "kind": "hv_phantom",
+        "status": "active",
+        "lifecycle_status": null,
+        "location_osid": "op:livno:livno_2",
+        "movement_state": null,
+        "movement_destinations": [
+          "op:glamoc:vidimlije_2"
+        ],
+        "sector_id": "sector:hvo_tomislavgrad:0",
+        "assigned_sub_segment_id": null,
+        "active_op_id": null
+      },
+      "temporal_last": {
+        "temporal_turn": 187,
+        "temporal_week_index": 186,
+        "kind": "hv_phantom",
+        "status": "active",
+        "lifecycle_status": null,
+        "location_osid": "op:titov_drvar:sipovljani_2",
+        "movement_state": null,
+        "movement_destinations": null,
+        "sector_id": "sector:hvo_tomislavgrad:0",
+        "assigned_sub_segment_id": null,
+        "active_op_id": "hvo_tomislavgrad:Operation Mistral 2:t175"
+      },
+      "temporal_rows": 14,
+      "explicit_lifecycle_events": []
+    },
+    {
+      "formation_id": "hv_1st_hgz_1995",
+      "final_registry": null,
+      "temporal_first": {
+        "temporal_turn": 174,
+        "temporal_week_index": 173,
+        "kind": "hv_phantom",
+        "status": "active",
+        "lifecycle_status": null,
+        "location_osid": "op:kupres:donji_malovan",
+        "movement_state": null,
+        "movement_destinations": [
+          "op:glamoc:vidimlije_2"
+        ],
+        "sector_id": "sector:hvo_tomislavgrad:0",
+        "assigned_sub_segment_id": null,
+        "active_op_id": null
+      },
+      "temporal_last": {
+        "temporal_turn": 187,
+        "temporal_week_index": 186,
+        "kind": "hv_phantom",
+        "status": "active",
+        "lifecycle_status": null,
+        "location_osid": "op:jajce:jajce_3",
+        "movement_state": null,
+        "movement_destinations": null,
+        "sector_id": "sector:hvo_tomislavgrad:1",
+        "assigned_sub_segment_id": "subseg:sector:hvo_tomislavgrad:1:0",
+        "active_op_id": "hvo_tomislavgrad:Operation Mistral 2:t175"
+      },
+      "temporal_rows": 14,
+      "explicit_lifecycle_events": []
+    }
+  ],
+  "claim_limits": {
+    "route737": "Absence of terminal-hook receipts is proven. Earlier evaluator bypass is only a hypothesis; pre-order transit/filter/eligibility not serialized.",
+    "hv": "Active through completed187 then absent final/188 roster; no explicit withdrawal action receipt. Disappearance is not proof of cause.",
+    "launch14_70": "Exact missing branch remains unresolved.",
+    "original_n37": "Executable source remains unbound; new n39 receipts characterize only n39.",
+    "launch177": "Required per-axis evidence join fails despite actual orders under sibling axes; no proof of globally omitted orders."
+  },
+  "supersedes": "Raw audit earlier-evaluator proof wording and raw Sana zero-capture counts; raw evidence preserved",
+  "independent_review": "GO boundedSTOP; calibrationNO-GO",
+  "next_small_scope": "Opt-in dispatcher eligibility/first handled evaluator for737, focused proof before separately authorized run through139; no full188 retry authorized",
+  "retained36_fingerprints": "reuse prior unaffected exit0; no retained artifact rewritten"
+}

@@ -252,7 +252,7 @@ exit0. The unchanged six handoff files plus the two new focused files pass
 `node --check` exits0 (`continuation4_consumer_syntax.*`); the pre-summary
 working/staged whitespace check exits0 (`continuation4_diffcheck.*`).
 
-### Proposed known-source diagnostic campaign — NOT AUTHORIZED / DO NOT EXECUTE
+### Historical proposal — authorized once; exhausted by n39 below
 
 **Question.** On a newly bound candidate, which exact pre-order rules select or
 reject the named 737th's non-operation routes across the full 188-turn horizon;
@@ -435,3 +435,62 @@ and Git LFS post-commit hooks without changing shared configuration. Expected
 cost: tens of seconds. Require commit/hook exit0 and clean tracked status;
 stop on failure. This required hook is separate from the unnecessary duplicate
 manual typecheck and is not a campaign/full-suite authorization.
+
+### n39 execution and failed observation gates — 2026-10-03
+
+Owner's “Next it is” authorized exactly the recorded one188-week diagnostic.
+The clean `7b9c242a3` candidate ran once in
+`runs/apr1992_definitive_188w__6deb5845c150c196__w188_n39`, runner/preflight exit0,
+final hash `afa185b2591dac1a`; about4m55s elapsed. No retry or full suite followed.
+Run provenance and initial save match the bound source and recorded inputs.
+All31 consumed inputs match using the runner's UTF8 CRLF→LF hash protocol.
+A raw-byte check first exits1 on the CRLF GeoJSON; its incorrect protocol and
+the normalized exit0 correction are preserved, without changing an input.
+
+Route consumer exits1:145 valid receipts, zero inconsistencies, no737th receipt
+at any turn, and missing137/138/139. The launch/order consumer exits1:978 traced
+axes,63 first-execution axes, four mismatches and positive-control detection.
+At t177 the Sana order exists under a sibling axis; the per-axis join fails,
+which does not prove globally missing orders. t14/t70 exact branches remain open.
+HV lifecycle and authoritative checkpoint/Farz consumers exit0; those passes
+do not waive either failed observation gate. All categories were inspected.
+
+The517th has13 n39 order receipts at t176–188; at188 its fresh Stari Majdan
+`march_to_approach` decision from Lušci emits Budimlić Japra. The737th's earlier
+evaluator bypass remains a hypothesis: post-turn transit/status and global order
+maps do not establish pre-order eligibility or branch. HV112/HGZ are active
+through187, then absent from188/final records, with no explicit withdrawal action.
+
+Measured acceptance remains NO-GO: towns2/3(Petrovac181,Ključ185,SanskiRS),
+belt4/4 at184–187, Jajce3/5, all four lost n25 matches. Scores707/707/706/684
+at denominator712; protected controls pass, critical0/27 and Farz four receipts
+pass under the current owner ruling. The initial zero-capture supplement used
+an absent optional battle flag incorrectly; a reviewed supplement instead
+joins combat control changes with winning matching battles and supersedes it.
+
+Independent review is GO for this bounded STOP only. Compact authoritative
+receipt: `continuation4_campaign_reviewed_summary.json`, with separate parent
+file SHA256s and all failed exits retained. Its source commit is distinct from
+file fingerprints. The started marker's nested authorization=false is copied
+pre-authorization preparation state; its top-level later owner grant governs.
+No original n37 attribution, gameplay correction, adoption or merge follows.
+
+Smallest next scope: observe the737th's pre-order eligibility and first handled
+evaluator, prove that with actual branch controls before considering a separately
+authorized run through139. Reuse n39's unaffected late receipts. t14/t70 and HV
+action visibility remain separate. No further campaign is authorized here.
+
+Closeout question: do the final STOP docs retain tracked evidence, authoritative
+plan-index truth and size limits? Command:
+`node node_modules/vitest/vitest.mjs run tests/receipt_citations.test.ts tests/plan_index.test.ts tests/docs_desktop_v09_truth.test.ts`;
+also `node tools/validate_receipt_citations.cjs --strict`,
+`node tools/derive_plan_index.cjs --check`, working/staged `git diff --check`.
+Cost: seconds. Pass: all exits0, correct counters/claims and retained proof;
+stop and correct only a concrete documentation defect. No simulation included.
+
+Local closeout commit command:
+`git -c core.hooksPath=.husky commit -m "Record n39 diagnostic STOP and acceptance gaps"`.
+Expected cost: tens of seconds because the existing pre-commit classifier treats
+JSON/exit receipts as requiring `npx tsc --noEmit`. Preserve that required hook;
+reuse other unaffected production proofs. Pass: commit/hook0 and clean tracked
+status. Stop on failure; no campaign or full suite is included.

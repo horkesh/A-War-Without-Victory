@@ -553,3 +553,76 @@ exit0. Their `continuation4_closeout_*` exits are retained with the existing
 proof receipts. Board19,920 and roadmap59,917 characters remain within limits.
 The final source commit runs the existing pre-commit typecheck hook; its exact
 commit/hook outcome is retained locally under `continuation4_local_commit`.
+
+## n39 known-source campaign — bounded STOP — 2026-10-03
+
+Owner's “Next it is” authorized one campaign from clean source
+`7b9c242a3d3942a8a64673457c4e75b545dab6e4`. It completed once in
+`runs/apr1992_definitive_188w__6deb5845c150c196__w188_n39` with runner/preflight
+exit0 and final hash `afa185b2591dac1a`. The initial-save SHA256 and input digest
+match retained n25/n37. All31 inputs match the actual CRLF→LF provenance protocol;
+the first raw-byte GeoJSON mismatch is a checker error, preserved separately.
+No input was rewritten, and no retry or full suite followed.
+
+| Check | Exit | Measured result |
+|---|---:|---|
+| Runner/preflight | 0 | Complete188-week output; clean source binding |
+| Route coverage | 1 | 145 valid receipts,0 inconsistencies;737th absent,137–139 missing |
+| Launch/order join | 1 | 978 axes,63 first-execution axes,4 mismatches; positive control detected |
+| HV lifecycle | 0 | Six spawned/traced formations and positive controls; disappearance cause unreported |
+| Authoritative checkpoints/Farz | 0 | Protected guards/current Farz receipts hold |
+| Audit/Sana supplement | 0 | Reviewed counts: towns2/3,belt4/4 |
+| Raw-byte input comparison | 1 | Wrong hashing protocol on one CRLF GeoJSON |
+| Correct normalized comparison | 0 | 31/31 inputs match |
+
+The517th has13 exact order receipts across176–188. At188 it is at Lušci,
+objective Stari Majdan, and issues Budimlić Japra through `march_to_approach`.
+This is a fresh bound n39 decision, not proof of original dirty n37 attribution
+or a stale-selector defect. The737th has188 active-brigade temporal rows and
+movement orders on30 serialized weekly rows, but no terminal route receipt.
+An earlier evaluator bypass is only a source-consistent hypothesis. Pre-order
+transit/filter eligibility and the first handled evaluator were not serialized.
+This supersedes the raw audit's unsupported “proves earlier evaluator bypass”.
+
+The four launch flags occur at14(Srebrenica–Cerska),70(Lukavac93) and two Sana
+axes at177. Sana's paired axes retain launch-readiness names whose actual orders
+appear under sibling axes; this is missing axis-local evidence, not proof of
+omitted global production orders. The agreed join gate remains failed; exact
+t14/t70 missing branches are unresolved. HV112/HGZ are active Mistral participants
+through187, absent at188/final registry. No explicit withdrawal action receipt
+exists; their disappearance is not itself a measured cause.
+
+Ordinary Operation Sana combat captures Petrovac181 and Ključ185; Sanski town
+remainsRS. Belt captures are Budimlić184,Lušci185,Jelašinovci186,Skučani187.
+Jajce remains3/5(Bravnice185,Vinac186,town187). Barevo,Lupnica,Mrkonjić Grad
+Majdan and Varošluk remain the four lost n25 matches. Scores707/707/706/684
+retain denominator712; earlier matching OSIDs and protected controls hold.
+Anomalies27=0critical/5warning/22info. Farz four operation-owned receipts at
+162/164/163/167 pass; no2nd-Corps participation remains a fidelity diagnostic.
+
+The raw town/belt helper incorrectly required an absent optional
+`battle.territory_flipped` flag and counted zero. Reviewed combat-control-event
+and winning matching-battle joins prove2/3 towns and4/4 belt. Raw helper/output
+and exit remain preserved; only the counts and unsupported causal wording are
+superseded. The reviewed supplement's `parent_sha` is the40-character candidate
+Git commit, not a file SHA256. Separate file fingerprints are in the compact
+authoritative `continuation4_campaign_reviewed_summary.json`, including raw,
+corrected and reviewed supplements, source/run/input/artifact hashes and exits.
+The started marker preserves its pre-authorization nested source-binding false;
+its top-level owner message/scope records the later one-run grant.
+
+Independent review is **GO for bounded STOP**, **NO-GO for calibration/adoption
+or exact original attribution**. No selector/lifecycle correction is supported.
+Next cheap scope is a dispatcher eligibility/first-handler observation for737
+with meaningful branch controls, before separately authorizing at most a139-week
+question. Unaffected n39 late receipts should be reused; no188-week retry is
+authorized. All town/order/match/protected/critical/Farz/source and independent
+acceptance requirements remain in force.
+
+Final targeted correction verification is GO for bounded STOP. All10 compact
+parent-artifact fingerprints match. Campaign closeout documentation63/63,
+strict129 tracked citations, plan-index and working/staged whitespace exit0.
+The129 count is this final invocation; the128 count above belongs to preparation.
+No production proof, consumer or campaign was repeated for this closeout.
+Local documentation/receipt integration retains the existing pre-commit hook;
+its exact outcome is captured under `continuation4_campaign_docs_commit`.

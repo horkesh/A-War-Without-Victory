@@ -9,6 +9,48 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-03 — n39 known-source diagnostic: bounded STOP
+
+Owner “Next it is” authorizes exactly one recorded188-week campaign from clean
+`7b9c242a3`. Runner/preflight exit0, n39 final hash `afa185b2591dac1a`. No retry,
+full suite, gameplay correction, adoption, merge or push. Independent review GO
+for STOP only; all calibration/unique-cause acceptance gaps remain open.
+
+Route consumer exits1:145 valid receipts,zero inconsistencies,no737th receipt or
+137–139 coverage. Launch/order consumer exits1:978 axes,63 first-execution axes,
+four flags,positive control detected. Sana's177 flags are axis-local evidence
+joins despite sibling-axis orders;14/70 exact missing branches remain open.
+The517th has13 bound176–188 receipts;188 selects Budimlić toward Stari Majdan
+from Lušci. No old-source or stale-selector attribution follows. HV/checkpoint/
+Farz consumers exit0;112/HGZ absence after187 lacks explicit withdrawal receipt.
+
+Towns2/3(Petrovac181,Ključ185,SanskiRS),belt4/4 at184–187,Jajce3/5. Scores
+707/707/706/684, denominator712;four n25 October matches still lost. Earlier
+matching OSIDs/protected controls hold;critical0/27 and four current Farz
+operation-owned receipts pass. No2nd-Corps participation is a fidelity diagnostic.
+
+Corrected two reporting errors cheaply: raw post-turn737 context cannot prove
+an earlier evaluator bypass; absent optional battle flip flag cannot negate
+combat-control-event plus winning-battle receipts. Also raw-byte input check1
+on CRLF GeoJSON was wrong protocol; actual CRLF→LF protocol verifies31/31,exit0.
+All raw evidence retained; compact receipt fingerprints raw/corrected/reviewed
+files separately from the40-character candidate commit. Historical nested
+authorization=false is preparation state; top-level later grant governs.
+
+Authoritative compact evidence:
+`logs/prusac-diagnostic-20260929/continuation4_campaign_reviewed_summary.json`.
+Exact exits/commands and claims:
+`logs/prusac-diagnostic-20260929/sana_n37_convergence_report.md`,
+`logs/prusac-diagnostic-20260929/sana_ivanjska_joint_validation_plan.md`,
+`logs/prusac-diagnostic-20260929/continuation_independent_review.md`.
+Reuse unaffected n39 late receipts and the prior36 retained-fingerprint check;
+no evidence overwritten. Smallest future scope is dispatcher eligibility/first
+handled evaluator with focused controls, before a separately authorized139-week
+question. This does not authorize that run or a188-week retry.
+Final targeted review GO for STOP;10 parent fingerprints match. Documentation
+63/63 and strict129 citations, plan-index and whitespace exit0; required commit
+hook retained. All raw failures and residual gates remain visible.
+
 ## 2026-10-03 — Sana observation preparation and incident preservation
 
 OpenCode Go dispatch exits126 (quota429, zero worker tools); authorized bounded
