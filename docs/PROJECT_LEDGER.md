@@ -9,6 +9,33 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-04 — Claude/Codex shared channel restored
+
+The owner requested Claude instead of OpenCode and the former shared-file,
+dual-timer workflow. Found the historical12be channel (ending at070); left its
+history untouched. Restored the numbered append-only protocol in the October
+checkout at [the shared channel](../logs/codex-claude-channel.md). Codex remains
+reasoning/acceptance/integration lead; Claude handles bounded implementation,
+extraction and checks. Matching later reports resolve status without edits to
+earlier entries; one active assignment and exclusive artifact names.
+
+Both five-minute timers are verified: Codex current-thread heartbeat
+awwv-claude-coordination ACTIVE; Claude native job439b64f9 created/listed in
+background session f75b0a11-9a10-434a-a713-54e2a04688d9, Sonnet5.5 medium.
+Claude timer is session-local, idle-only and autoexpires after7days. Unchanged
+checks stay quiet; CLOSED/owner pause stops the matching timers. Unrelated
+paused overnight automation and existing F: Claude session remain unchanged.
+[Native verification](../logs/claude-channel-20261004/verification.json) records
+actual CronCreate/CronList calls and session/bridge binding. Earlier owned idle
+startup attempts are retained; their exit0 was never treated as timer proof.
+
+071 bootstrap is accepted;072 queues retained737 admission evidence only, with
+explicit missing-input reporting and no speculative correction. No source,
+canon, scenario, control, paint, denominator or save changes; no campaign, full
+suite, merge, push or baseline adoption. n42 measurement-only GO and calibration
+NO-GO remain unchanged. Future expensive work still requires its recorded
+question/command/criteria/cost/stop and owner authorization.
+
 ## 2026-10-04 — Authorized n42 front-writer/rejection measurement
 
 Owner “Authorized”: exactly one139 diagnostic from clean2a1554a; runner0 in
