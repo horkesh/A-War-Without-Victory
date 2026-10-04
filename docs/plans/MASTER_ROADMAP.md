@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-04 (retained admission/Jajce gates settled)
+**Last updated:** 2026-10-04 (clean prep binding; observation proposal pending)
 
 **Current R6 — October Sana remains NO-GO.** n37 full suite/campaign exit0:
 Petrovac181, Ključ185, Sanski town RS188; belt4, Jajce3/5, losses Barevo,
@@ -39,9 +39,11 @@ execution shifts178→180 at n29→n30; Jajce battles185→187, leaving Lupnica/
 uncaptured by188. Late prep elapsed3/5 and intel1/0 do not identify the hold.
 No175–180 snapshot in the bounded six-run inventory; full watched lookup finds
 no Mistral/prep receipt. Majdan was already lost in n29 and remains separate.
-Next: resolve the exact missing decision inputs and costly scope before any
-new run. Original517, Sanski/Jajce/all matches and late receipts stay open;
-protected outcomes cannot be traded. No gameplay fix, merge or adoption.
+076 clean prep binding;078 diagnostic mismatch explained;079 env/control checks0.
+173 ordered events match through139; n39 map proof is reconstruction-based.
+Five-topic/default-off trace181w proposal awaits owner; emitter/hook/review first.
+Estimate5–8min; stop first failure. No188 retry, gameplay fix, merge/adoption.
+Original517/737/Majdan, towns/matches and late receipts stay open.
 See [retained audit](../../logs/claude-channel-20261004/074-snapshot-result.md)
 and the calibration master for task074's completed watched lookup and limits.
 

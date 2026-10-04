@@ -10,6 +10,23 @@ not the earlier gate or its cause; require correctly phased decision inputs
 before a gameplay correction. Applied in the
 [October retained audit](PROJECT_LEDGER.md#2026-10-04--retained-october-admission-and-jajce-gates-settled).
 
+Full provenance keys are required: a600-character sample missed the clean
+n39 git_commit/git_dirty binding. Compare exact relevant blobs, then retain
+dirty-source and external-dependency limits. Weekly week_index is meta.turn;
+loop and temporal indices are zero-based. An endpoint reference picker can
+stamp a future checkpoint's input before the checkpoint is reached; distinguish
+declared hashes, actual reads and reached acceptance. A previous non-ready
+line is not necessary for a global timeout when callers can hold ready ops.
+Applied in the [revised observer proposal](PROJECT_LEDGER.md#2026-10-04--clean-mistral-preparation-binding-and-revised-observer-proposal).
+
+A debug environment can add gated operation fields, temporal actor rows and
+serialized trace keys without changing the observed shared artifacts. Classify
+all differences and bind the topic parser/writers before changing a comparator.
+Prefer matching baseline topics and direct content comparison. Equal initial
+maps and ordered events support reconstructed-map equality; final reconciliation
+does not prove every intermediate map or all-writers coverage. Applied in the
+[revised observer proposal](PROJECT_LEDGER.md#2026-10-04--clean-mistral-preparation-binding-and-revised-observer-proposal).
+
 ## 2026-10-03 - A selected-save boundary is not a pre-turn decision receipt
 
 When a retained prefix is saved after turn execution, matching its consumed-input

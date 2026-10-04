@@ -9,6 +9,46 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-04 — Clean Mistral preparation binding and revised observer proposal
+
+076 full metadata binds clean n39 source7b9c242a3 and four preparation/caller
+blobs; dirty n37 and original517 remain unbound. Two original/two targeted
+primary checks0. Existing prepEvents are omitted by weekly serialization.
+Final timeout-writer finding is conditional; earlier holds remain unobserved.
+077 draft/revision preserves originals: six revised checks0, positive collector0,
+six expected negative1, apply-check0 (not applied). No source/test edit or run.
+
+Corrected weekly indexing1..181 versus loop/temporal0..180 and removed the
+unsupported iff rule. Codex also corrects its broad prefix claim: endpoint
+reference selection can stamp October at181. Declared stamp is not actual
+consumption or188 reach; literal31 remains open until used-file proof.
+Evidence: `logs/claude-channel-20261004/076-correction-result.md` and
+`logs/claude-channel-20261004/078-revised-proposal-copy.md`; original proposal is
+preserved and corrected by the latter plus the master's input qualification.
+
+078 retained control-contract check1:130 differing weekly rows resolved to
+one env-gated key on484/831 operations. Initial extraction1 preserved; corrected
+extraction/temporal/hvtg/raw0. Shared32991 temporal rows match;72 baseline-only
+hv_phantom rows are formation_lifecycle-gated. No comparator broadening.
+079 schema/control/parser/weeklygrep/events181 all0. Parser unchanged; five
+baseline topics enable no added topics. opportunity_roster adds serialized
+participant_evaluations; not save-byte inert. Initial712 maps and173 ordered
+control events through139 match. n39 map at139 is reconstructed; coverage
+self-check at final saves does not prove all intermediate maps/all writers.
+Evidence: `logs/claude-channel-20261004/078-difference-result.md` and
+`logs/claude-channel-20261004/079-config-result.md`. No simulation/patch applied.
+The revised proposal matches five baseline topics, compares gated content
+directly and n39's217 events through181 plus a labelled reconstructed map.
+
+Updated existing plan/master/board/roadmap/knowledge. Owner decision pending
+for harness-only trace proof/review/typehook and at most one181w observation
+(runner estimate5–8min). No implementation/run authorized by these docs/timer.
+Stop first failure/nonreproduction; no retry/188 extension. All town/match/late
+receipts, original517/737/Majdan and calibration NO-GO remain. n42 measurement
+GO/Farz Sep29 ruling and protected controls hold. Unchanged56 doc tests and
+075 checks are reused where unaffected; final focused checks/hook follow in
+the canonical channel. No canon/data/save or gameplay change, push/adoption.
+
 ## 2026-10-04 — Retained October admission and Jajce gates settled
 
 Claude072–074 extraction and one targeted074 lookup are accepted with limits:

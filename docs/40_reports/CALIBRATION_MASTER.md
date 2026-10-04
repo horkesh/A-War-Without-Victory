@@ -319,6 +319,65 @@ No production correction, replay, campaign, merge or adoption follows. Any new
 expensive scope needs a concrete question/command/criteria/cost/stop and owner
 authorization; retained late state does not authorize a full-horizon retry.
 
+### Clean preparation binding and observation proposal — 2026-10-04
+
+076 original and targeted primary checks exit0 (two each). Full metadata binds
+n39 to clean7b9c242a3; four preparation/caller/helper/opportunity blobs match
+current source. Dirty n25/n29/n30/n37/n38 remain unbound; external dependencies
+were not fully compared. Conditional final timeout-writer inference is accepted,
+not an executed per-tick receipt or explanation of the earlier hold. Exact
+force ratio1 fits a sentinel but can also be a computed value. Existing
+prepEvents are produced/carried and omitted by the weekly serializer.
+[Corrected binding/event receipt](../../logs/claude-channel-20261004/076-correction-result.md).
+
+077 is a draft only: harness-only, default-off Mistral stdout observer, no
+applied source/test change. Six revised primary checks0; collector positive0,
+six expected negative1 controls; patch apply-check0, not applied. Real emitter
+proof, type hook and independent code/determinism review remain prerequisites.
+Weekly rows use completed turns1..181; temporal/loop indices use0..180. The
+removed previous-phase iff rule did not handle ready operations held by callers.
+[Revised proposal](../../logs/claude-channel-20261004/078-revised-proposal-copy.md).
+
+Endpoint reference selection can stamp31 paths (including October) at181;
+this neither reaches the188 checkpoint nor alone proves actual consumption.
+Codex corrects its earlier broad prefix-digest claim. Literal31 remains open
+until actual used-file proof; do not categorically rule it out solely from
+horizon181. All late188 calibration criteria remain unreached by this proposal.
+
+Owner decision pending: authorize trace preparation/focused proof/one reviewer
+and at most one181-week observational run after cheap gates/clean hook pass.
+Question is the actual early Mistral hold trajectory and clean n39 reproduction.
+Runner estimate5–8min (n42 measured139 in235.644s); extra cheap checks/review.
+Require source/input/index/coverage and the qualified artifact comparisons below;
+stop first failure or nonreproduction, no retry/188 extension. Exact frozen
+command and criteria are in the existing Sana plan. No implementation/run,
+gameplay correction, acceptance change, merge or adoption is authorized here.
+
+078 pre-campaign comparison1 is resolved as a configuration mismatch, not a
+simulation failure. Corrected extraction/temporal/hvtg/raw checks0 (initial
+extraction1 TypeError preserved):831 operations each,484 differing records
+carry only n39's axis_decision_diagnostics key; removing it leaves0/139 weekly
+differences. Shared32991 temporal rows match;72 extra n39 rows are four
+hv_phantom IDs at weeks0–17. The normalizer remains unchanged; no broad
+exclusion is adopted. [Diagnostic classification](../../logs/claude-channel-20261004/078-difference-result.md).
+
+079 five primary checks0 bind identical parser logic and the baseline five-topic
+list; no new topic defaults on. opportunity_roster adds participant_evaluations
+to serialized opportunity traces, not weekly rows; it is not save-byte inert.
+Initial712 controller maps match;173 full ordered events through139 match.
+Each retained save's initial+events reconstructs its actual final map with0
+differences. n42 actual139 matches n39 reconstructed139; no n39 actual139 save
+or all-writers/intermediate-map proof exists. No behavior after139 is measured.
+[Configuration/control receipt](../../logs/claude-channel-20261004/079-config-result.md).
+
+The proposal now uses exactly n39's five debug topics plus the default-off
+Mistral trace. Compare gated content directly, including roster traces; retain
+all operation diagnostics and temporal IDs. Future181 control criteria use
+n39's217 ordered events and a labelled reconstructed181 map, with candidate
+coverage self-check. These are artifact comparisons, not whole-state neutrality.
+Owner authorization and focused emitter/hook/independent review still precede
+any campaign. n42 measurement GO/calibration NO-GO and all original gaps hold.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing
