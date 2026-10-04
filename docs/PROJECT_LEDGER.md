@@ -36,6 +36,13 @@ suite, merge, push or baseline adoption. n42 measurement-only GO and calibration
 NO-GO remain unchanged. Future expensive work still requires its recorded
 question/command/criteria/cost/stop and owner authorization.
 
+Native scheduler lease hygiene: the previously tracked scheduled_tasks.lock
+changed on timer creation. Preserved both historical blob and current live
+bytes, removed only its index entry, and ignored the runtime lease. The live
+file remains intact; this avoids dirty calibration provenance without editing
+scheduler settings. Existing required hook results are retained in local
+restoration logs; no general smoke suite or campaign is warranted.
+
 ## 2026-10-04 — Authorized n42 front-writer/rejection measurement
 
 Owner “Authorized”: exactly one139 diagnostic from clean2a1554a; runner0 in
