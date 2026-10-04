@@ -9,6 +9,31 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-05 — Default-off Mistral observer preparation; campaign unapproved
+
+Released080 separately after Codex unnecessarily bundled reversible preparation
+with campaign approval. Claude changed only src/scenario/scenario_runner.ts and
+one focused test: exact-1 opt-in, default-off stdout, existing175–181 post-tick
+events/post-turn values, no state/report/default-artifact/control/save mutation
+or readiness/selector/lifecycle correction. Initial red1 intentionally lacked
+the export; green0 with10/10 focused cases. Actual emitter fixture0 (7 lines),
+unchanged collector0; prior synthetic controls reused. One independent Sol
+review GO_PREPARATION_ONLY, no findings; explicit tracked type hook0 against
+reviewed staged source, not automatic dispatcher proof. Implementation and
+review receipts: logs/claude-channel-20261004/080-implementation-result.md and
+080-review-result.md. Source/test hashes remain pinned in those receipts.
+
+Updated existing master/plan/board/roadmap/knowledge in one integration batch.
+No campaign/replay/full suite or remote action. The constructed fixture's180
+execution is a test shape, not a measured hold trajectory. Owner authorization
+is still required for at most one181 measurement under the frozen five-topic
+contract, with first-failure stop and no retry/188 extension. Original517/737/
+Majdan, towns/all matching OSIDs, protected controls, input/late receipts and
+final review remain open. n42 observational GO/calibration NO-GO/Farz Sep29 hold.
+Final focused references/index/whitespace/links/sizes/preservation and local
+commit results are recorded in the shared channel; unaffected10 focused tests,
+56 documentation cases and retained campaigns are reused. No duplicate tsc.
+
 ## 2026-10-04 — Clean Mistral preparation binding and revised observer proposal
 
 076 full metadata binds clean n39 source7b9c242a3 and four preparation/caller

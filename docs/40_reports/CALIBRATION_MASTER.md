@@ -344,8 +344,8 @@ Codex corrects its earlier broad prefix-digest claim. Literal31 remains open
 until actual used-file proof; do not categorically rule it out solely from
 horizon181. All late188 calibration criteria remain unreached by this proposal.
 
-Owner decision pending: authorize trace preparation/focused proof/one reviewer
-and at most one181-week observational run after cheap gates/clean hook pass.
+Campaign owner decision pending: at most one181-week observational run.
+Bounded trace preparation was released separately and is complete below.
 Question is the actual early Mistral hold trajectory and clean n39 reproduction.
 Runner estimate5–8min (n42 measured139 in235.644s); extra cheap checks/review.
 Require source/input/index/coverage and the qualified artifact comparisons below;
@@ -377,6 +377,30 @@ n39's217 ordered events and a labelled reconstructed181 map, with candidate
 coverage self-check. These are artifact comparisons, not whole-state neutrality.
 Owner authorization and focused emitter/hook/independent review still precede
 any campaign. n42 measurement GO/calibration NO-GO and all original gaps hold.
+
+### Mistral observer preparation complete — 2026-10-05 — campaign unapproved
+
+080 adds an exact-1, default-off stdout observer in the scenario harness, not
+preparation/selector/order-lifecycle logic. It exposes existing post-tick events
+and labelled post-turn operation/intel/brigade values for175–181. No readiness
+recomputation, state/report/control/save/default-artifact mutation is introduced.
+Meaningful focused proof: gate-off access tripwire, gate-on frozen inputs,
+stable bytes, window/index/event filtering and missing-operation boundaries.
+Test-first red1 (intended missing export), green0 (10/10); actual emitter on
+seven constructed fixtures0 and unchanged collector0. Synthetic controls reused.
+[Implementation receipt](../../logs/claude-channel-20261004/080-implementation-result.md).
+
+One independent Sol review is GO_PREPARATION_ONLY, no findings. Explicit tracked
+type hook against the actual reviewed staged code exits0; automatic dispatcher
+coverage remains absent. Source SHA256 dca86f0ac0855425ed0e664674d1630910e695b105b03e355933eacb229532a6;
+test fc3174f63ded063d86c9684c1883ab56bb5816f3163f2b70dd8ea30e2870a0f4.
+[Independent review](../../logs/claude-channel-20261004/080-review-result.md).
+Codex corrects its unnecessary bundling of routine preparation with costly-run
+approval. No campaign, replay or full suite was launched. Fixture trajectory
+is authored test input, not the real earlier hold or an internal-branch receipt.
+The existing181 question/command/criteria/cost/stop still needs owner approval.
+Original517/737/Majdan, towns/matches/late receipts/actual-used inputs and final
+acceptance remain open; n42 measurement GO/calibration NO-GO/Farz ruling hold.
 
 ## April 1995 patron-border candidate measurement — 2026-09-27
 

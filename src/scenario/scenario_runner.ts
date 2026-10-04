@@ -2155,6 +2155,117 @@ export function emitVlasicTraceLine(state: GameState, turnReport: TurnReport): v
     process.stdout.write(`[vlasic-trace] ${stableStringify(payload)}\n`);
 }
 
+/**
+ * MISTRAL 2 PREPARATION-HOLD DIAGNOSTIC — opt-in, read-only, inert by default.
+ *
+ * WHY THIS EXISTS. The weekly report serializes neither `turnReport.preparation_events`
+ * nor the operation's preparation fields, so the early Operation Mistral 2 preparation
+ * trajectory cannot be read from a retained artifact. This trace prints one stable JSON
+ * line per turn (turns 175-181) so that trajectory can be observed in a single run.
+ * It exposes existing values only; it asserts no cause and no internal branch.
+ *
+ * ═══ GATE ═══
+ *
+ * Emits ONLY when `AWWV_MISTRAL_PREP_TRACE=1` is set. With the gate off the function
+ * returns before touching state — zero effect on state, default artifacts or ordering.
+ *
+ * ═══ INDEXING AND PHASE ═══
+ *
+ * Called once per loop iteration, AFTER `runTurn` returns. The argument is the zero-based
+ * LOOP index (`loop_index`), not a weekly `week_index`: `runTurn` sets `meta.turn` to
+ * `loop_index + 1` before the war phases, so `turn = loop_index + 1`, the weekly row has
+ * `week_index = turn` (`buildWeeklyReport`) and temporal rows use `week_index = loop_index`.
+ * `preparation_events` are the existing per-tick events (POST-tick `sub_phase`, the tick's
+ * own confidence). The `operation` block, `sector_intel_for_sector` and `brigades` are read
+ * AFTER the whole turn pipeline: post-turn state, not pre-tick state.
+ *
+ * ═══ OBSERVATION ONLY ═══
+ *
+ * Reads existing state/report fields only. Mutates nothing, recomputes no readiness,
+ * writes no files. One `stableStringify` line on stdout prefixed `[mistral-prep-trace] `.
+ */
+const MISTRAL_PREP_TRACE_ENV_VAR = 'AWWV_MISTRAL_PREP_TRACE';
+const MISTRAL_PREP_TRACE_OPERATION_NAME = 'Operation Mistral 2';
+const MISTRAL_PREP_TRACE_TURN_MIN = 175;
+const MISTRAL_PREP_TRACE_TURN_MAX = 181;
+
+export function emitMistralPrepTraceLine(state: GameState, turnReport: TurnReport, loopIndex: number): void {
+    if (process.env[MISTRAL_PREP_TRACE_ENV_VAR] !== '1') return;
+    const turn = state.meta.turn;
+    if (turn < MISTRAL_PREP_TRACE_TURN_MIN || turn > MISTRAL_PREP_TRACE_TURN_MAX) return;
+
+    // Corps IDs are sorted so the emitted corps_id is deterministic.
+    let found: { corpsId: string; op: CorpsOperation } | null = null;
+    const corpsCommand = state.military.corps_command ?? {};
+    for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
+        const ops = corpsCommand[corpsId]?.active_operations ?? [];
+        const match = ops.find((op) => op.name === MISTRAL_PREP_TRACE_OPERATION_NAME);
+        if (match) {
+            found = { corpsId, op: match };
+            break;
+        }
+    }
+
+    const sectorId = found?.op.sector_id;
+    const sectorIntel = sectorId
+        ? (state.military.sector_intel?.[sectorId] ?? []).map((record) => ({
+            enemy_sector_id: record.enemy_sector_id,
+            confidence: record.confidence,
+        }))
+        : [];
+
+    const brigades = found
+        ? found.op.participating_brigades.map((id) => {
+            const formation = state.military.formations?.[id];
+            return {
+                id,
+                location_osid: formation?.location_osid ?? null,
+                status: formation?.status ?? null,
+            };
+        })
+        : [];
+
+    const preparationEvents = (turnReport.preparation_events ?? []).filter(
+        (event) => event.operation_name === MISTRAL_PREP_TRACE_OPERATION_NAME
+    );
+
+    const payload = {
+        loop_index: loopIndex,
+        turn,
+        operation: found
+            ? {
+                corps_id: found.corpsId,
+                name: found.op.name,
+                started_turn: found.op.started_turn,
+                phase: found.op.phase,
+                phase_started_turn: found.op.phase_started_turn,
+                planning_duration: found.op.planning_duration ?? null,
+                preparation_sub_phase: found.op.preparation_sub_phase ?? null,
+                preparation_turns_elapsed: found.op.preparation_turns_elapsed ?? null,
+                preparation_max_turns: found.op.preparation_max_turns ?? null,
+                postponement_count: found.op.postponement_count ?? null,
+                commander_assessment: found.op.commander_assessment ?? null,
+                commander_officer_id: found.op.commander_officer_id ?? null,
+                is_pre_planned: found.op.is_pre_planned ?? null,
+                force_launch: found.op.force_launch ?? null,
+                supply_readiness: found.op.supply_readiness ?? null,
+                intel_confidence_at_assessment: found.op.intel_confidence_at_assessment ?? null,
+                supply_readiness_at_assessment: found.op.supply_readiness_at_assessment ?? null,
+                force_ratio_estimate: found.op.force_ratio_estimate ?? null,
+                active_probe: found.op.active_probe ?? null,
+                sector_id: sectorId ?? null,
+                loaned_brigade_count: found.op.loaned_brigades?.length ?? 0,
+                participating_brigades: found.op.participating_brigades,
+            }
+            : null,
+        sector_intel_for_sector: sectorIntel,
+        brigades,
+        preparation_events: preparationEvents,
+    };
+
+    process.stdout.write(`[mistral-prep-trace] ${stableStringify(payload)}\n`);
+}
+
 export async function runScenario(options: RunScenarioOptions): Promise<RunScenarioResult> {
     const {
         scenarioPath,
@@ -2745,6 +2856,9 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             // VLAŠÍC MARCH-TIMING DIAGNOSTIC: opt-in, read-only. Inert unless
             // AWWV_VLASIC_TRACE=1; see emitVlasicTraceLine for the contract.
             emitVlasicTraceLine(state, turnReport);
+            // MISTRAL 2 PREPARATION-HOLD DIAGNOSTIC: opt-in, read-only. Inert unless
+            // AWWV_MISTRAL_PREP_TRACE=1; see emitMistralPrepTraceLine for the contract.
+            emitMistralPrepTraceLine(state, turnReport, week_index /* zero-based loop index */);
 
             let weeklyCombatCausalityForReport: WeeklyCombatCausalitySummary | undefined;
             let weeklyControlChangeAttributionForReport: WeeklyControlChangeAttributionSummary | undefined;

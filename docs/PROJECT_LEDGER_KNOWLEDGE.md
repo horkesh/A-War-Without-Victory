@@ -27,6 +27,13 @@ maps and ordered events support reconstructed-map equality; final reconciliation
 does not prove every intermediate map or all-writers coverage. Applied in the
 [revised observer proposal](PROJECT_LEDGER.md#2026-10-04--clean-mistral-preparation-binding-and-revised-observer-proposal).
 
+A fixture using the real opt-in emitter proves output shape and collector
+compatibility; an authored phase trajectory remains constructed input. Use
+gate-off access tripwires and gate-on frozen state/report to test observer
+isolation, then retain the distinction between post-tick events, post-turn
+state and uncaptured internal branches. Applied in the
+[observer preparation](PROJECT_LEDGER.md#2026-10-05--default-off-mistral-observer-preparation-campaign-unapproved).
+
 ## 2026-10-03 - A selected-save boundary is not a pre-turn decision receipt
 
 When a retained prefix is saved after turn execution, matching its consumed-input

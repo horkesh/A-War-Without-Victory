@@ -1304,3 +1304,56 @@ Documentation-only closeout uses strict citations/index/whitespace, staged
 scope/changed links/size/original hashes plus unchanged hook; expected seconds,
 all0, stop first failed check cheaply. Reuse unaffected56 documentation tests
 and earlier source/provenance/run receipts; no manual typecheck or simulation.
+
+### Preparation released separately — 2026-10-05 — campaign still unapproved
+
+Codex corrects the unnecessary bundling of reversible observation preparation
+with costly campaign approval. Existing autonomous implementation authorization
+covers the bounded default-off harness observer, focused fixture proof and one
+independent code/determinism review.080 is preparation only; no campaign or
+production/selector/order-lifecycle correction is authorized. The181 proposal
+still requires the owner's explicit costly-scope decision, with its existing
+question/command/criteria/estimate/first-failure stop. No acceptance waiver.
+
+Files: src/scenario/scenario_runner.ts and one focused test file; use the preserved
+077 revised draft as starting evidence, not an approved patch. Cheapest checks:
+symbol/schema/import/fixture/runtime prerequisites and apply-check before edits;
+node node_modules/vitest/vitest.mjs run tests/scenario_runner_mistral_prep_trace.test.ts;
+real emitter output from constructed post-turn fixtures through the retained
+077-revised-collect-trace.cjs, without a runTurn/campaign. Reuse unaffected
+synthetic collector controls. Gate-off must not read state or mutate state/report;
+gate-on stable bytes, correct175–181 window/index labels and event filtering.
+Expected seconds to minutes for preparation/checks/review; no simulation. Stop
+first unexpected focused failure, diagnose cheaply, one targeted correction;
+consolidate any persistent failure instead of retries or scope expansion.
+One independent reviewer precedes Codex integration and one explicit tracked
+.husky/pre-commit type hook against the real staged code diff. The missing
+.husky/_ dispatcher prevents automatic coverage claims. No duplicate manual tsc.
+Final docs/ledger batch after evidence settles; no intermediate process commit.
+
+### Observer preparation settled — 2026-10-05 — no campaign authorization
+
+080 implementation/source+test only: test-first red1 intended missing export,
+green0 (10/10), real emitter on seven constructed post-turn fixtures0, unchanged
+collector0. Prior synthetic positive/six negatives reused. One independent Sol
+review GO_PREPARATION_ONLY with no findings. Explicit tracked type hook0 against
+the reviewed actual staged source/test/plan; .husky/_ is still missing, so no
+automatic hook claim. Source SHA256 dca86f0ac0855425ed0e664674d1630910e695b105b03e355933eacb229532a6;
+test fc3174f63ded063d86c9684c1883ab56bb5816f3163f2b70dd8ea30e2870a0f4.
+[Implementation](../claude-channel-20261004/080-implementation-result.md),
+[independent review](../claude-channel-20261004/080-review-result.md).
+
+The default-off observer does not capture internal branches or reproduce the
+real preparation hold. The authored fixture's180 execution is not a measured
+result. No campaign/replay/full suite occurred. Bounded preparation is complete;
+the earlier combined preparation/measurement owner wording is superseded only
+for preparation. The additional181 campaign still needs explicit owner approval
+under the frozen five-topic question/command/criteria/5–8min/first-failure stop.
+All historical acceptance gaps, n42 observational GO/calibration NO-GO and
+Farz Sep29/protected boundaries remain. No gameplay correction or acceptance.
+
+Final integration uses strict citations/index/changed links/sizes/whitespace
+and original-artifact/n42 save/junction hashes, expected seconds, all0. Stop
+any failure cheaply. Reuse unaffected10 focused cases, collector proof,56 doc
+tests and retained runs; no repeat typecheck. One local clean code/docs commit
+after these checks; no push/merge/adoption or intermediate process commit.
