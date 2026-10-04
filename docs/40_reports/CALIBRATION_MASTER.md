@@ -402,6 +402,38 @@ The existing181 question/command/criteria/cost/stop still needs owner approval.
 Original517/737/Majdan, towns/matches/late receipts/actual-used inputs and final
 acceptance remain open; n42 measurement GO/calibration NO-GO/Farz ruling hold.
 
+### n43 Mistral observation reviewed — 2026-10-05
+
+The owner authorized one181-week diagnostic after080 preparation. Clean source
+56bc584e5bc54717d658bd1eb28c5c2fd68de635 produced
+`runs/apr1992_definitive_188w__1508e07b584aad75__w181_n43`: runner0, one launch,
+no retry; frozen preflight/post-check0, collector0 with7 lines175–181. Final-save
+SHA25641401c7173945dc05d014755ff999ea34e545c384314b85bcb9adf2d2cf4564f.
+Compared n39 weekly181/181 full rows,43576 temporal rows and217 ordered events
+match; reached checkpoint sets707/707/706 of712 and11 protected points match.
+Critical0 (25 anomalies:6 warning/19 info), not the same-horizon anomaly count
+as n39's188. Actual181 map matches n39's reconstructed181 map; intermediate
+actual maps, all-writers and whole-state equality remain unproved.
+[Measurement](../../logs/claude-channel-20261004/081-measurement-result.md).
+
+Measured post-tick events/post-turn fields show preparation ready176 (elapsed1,
+launch assessment,intel0.96,FR21.83), planning through179, then execution180
+(elapsed5/5,assessment0/1/1,roster adds2nd Guard Mechanized). Independent Sol
+scenario/evidence review is GO_BOUNDED_OBSERVATION_ONLY: this supports an outer
+caller hold, but no exact participant/opening gate or release trigger is captured.
+Timeout assessment overwrite is source-derived, not an internal branch receipt.
+Raw stderr has14 nonempty lines:12 Node colour-warning lines plus the same two
+Travnik simulation diagnostics as n39; the worker's2 is a filtered count.
+[Independent review](../../logs/claude-channel-20261004/081-review-result.md).
+
+Declared31 hashes/digest match n39; actual-used-file proof remains OPEN.181 is
+not188. The grant is consumed; no second run/replay/suite/production correction
+or acceptance/adoption change follows. Claude082 maps the caller gates using
+source and retained correctly phased evidence only, stopping at the first
+missing input. Original517/737/Majdan, town/Jajce/all n25 match/late-receipt/final
+review gaps remain. n42 observational GO, calibration NO-GO, Farz Sep29 ruling,
+protected controls/canon/determinism/control/paint/denominator/save gates hold.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

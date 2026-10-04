@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-05 (observer prepared; campaign unapproved)
+**Last updated:** 2026-10-05 (n43 bounded observation reviewed; calibration NO-GO)
 
 **Current R6 — October Sana remains NO-GO.** n37 full suite/campaign exit0:
 Petrovac181, Ključ185, Sanski town RS188; belt4, Jajce3/5, losses Barevo,
@@ -41,8 +41,9 @@ No175–180 snapshot in the bounded six-run inventory; full watched lookup finds
 no Mistral/prep receipt. Majdan was already lost in n29 and remains separate.
 076–079 source/env/event gates settled with limits; n39 maps reconstructed.
 080 observer prepared:10 tests/real collector/typehook0, independent GO prep only.
-Five-topic181w campaign awaits owner; estimate5–8min, stop first failure.
-No188 retry, gameplay fix, merge/adoption; fixtures prove no historical cause.
+Owner-authorized n43 181w runner/post0; independent GO observation only.
+Ready176, execution180: exact outer hold/release open; Claude082 diagnoses cheaply.
+No188 retry, gameplay fix, merge/adoption; actual-used31 remains open.
 Original517/737/Majdan, towns/matches and late receipts stay open.
 See [retained audit](../../logs/claude-channel-20261004/074-snapshot-result.md)
 and the calibration master for task074's completed watched lookup and limits.

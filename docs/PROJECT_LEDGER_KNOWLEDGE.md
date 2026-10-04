@@ -34,6 +34,13 @@ isolation, then retain the distinction between post-tick events, post-turn
 state and uncaptured internal branches. Applied in the
 [observer preparation](PROJECT_LEDGER.md#2026-10-05--default-off-mistral-observer-preparation-campaign-unapproved).
 
+Measured ready state can coexist with continued planning: identify the outer
+launch predicate using its actual decision-time inputs before changing the
+preparation state machine. A timeout assessment write and roster change on the
+execution turn are not proof of which predicate released it. Distinguish raw
+stderr from explicitly filtered simulation categories. Applied in the
+[reviewed n43 observation](PROJECT_LEDGER.md#2026-10-05--authorized-n43-mistral-measurement-bounded-review-go).
+
 ## 2026-10-03 - A selected-save boundary is not a pre-turn decision receipt
 
 When a retained prefix is saved after turn execution, matching its consumed-input

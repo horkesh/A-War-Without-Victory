@@ -1357,3 +1357,32 @@ and original-artifact/n42 save/junction hashes, expected seconds, all0. Stop
 any failure cheaply. Reuse unaffected10 focused cases, collector proof,56 doc
 tests and retained runs; no repeat typecheck. One local clean code/docs commit
 after these checks; no push/merge/adoption or intermediate process commit.
+
+### Owner-authorized n43 observation settled — 2026-10-05
+
+Owner "Authorized" supersedes the earlier pending181 grant only. Frozen exact
+command/env/question/criteria/cost/first-failure stop are retained locally in
+081-root-authorization.json and081-measurement-frozen.json. One181 launch from
+clean56bc584e5; runner0/preflight0/post0/collector0; no retry or source edit.
+n43 path runs/apr1992_definitive_188w__1508e07b584aad75__w181_n43, final-save
+SHA25641401c7173945dc05d014755ff999ea34e545c384314b85bcb9adf2d2cf4564f.
+[Measurement](../claude-channel-20261004/081-measurement-result.md),
+[independent scenario/evidence review](../claude-channel-20261004/081-review-result.md).
+
+Full weekly181/181 and43576 unique temporal rows equal n39;217 ordered events
+and reached checkpoint sets707/707/706 of712/11 protected points match;critical0.
+Actual181 candidate map equals reconstructed n39's181, with reconstruction/
+whole-state/intermediate-map/all-writers limits retained. Declared31 hashes match,
+actual-used receipts OPEN. Raw stderr14 =12 Node warning lines +2 simulation
+Travnik warnings; the report/helper's2 is filtered, originals unchanged.
+Independent GO_BOUNDED_OBSERVATION_ONLY, no blocking finding. No188 acceptance.
+
+Measured ready176/planning through179/execution180 supports outer-caller hold;
+timeout writer is source-derived, not a branch receipt, exact gate/release open.
+Claude082 is one cheap read-only source/retained-gate inventory, no new simulation
+or source change; stop at first missing gate-time premise. Cost minutes; commands
+rg/source reads and only necessary retained extraction, exact exits/logs returned.
+No new campaign/replay/suite/correction/merge/push/adoption. Reuse unaffected080
+focused/typehook/collector and56 documentation cases. Root batches focused docs
+checks/preservation/local integration after review. n42 observational GO,
+calibration NO-GO/Farz Sep29/protected/canon/save and all original gaps hold.

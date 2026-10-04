@@ -9,6 +9,33 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-05 — Authorized n43 Mistral measurement; bounded review GO
+
+Owner authorized one181-week run from clean56bc584e5. One launch, runner0,
+preflight/post0, collector0; no retry or source change. n43 retained path:
+runs/apr1992_definitive_188w__1508e07b584aad75__w181_n43. Full weekly181/181,
+temporal43576 rows and217 ordered events match n39; reached checkpoint sets
+707/707/706 of712,11 protected points and critical0 hold. Candidate actual181
+controller map matches reconstructed n39's181, not captured intermediate maps
+or whole-state proof. Declared31 hashes match; actual-used-file proof stays OPEN.
+
+Ready176/planning through179/execution180 is measured. One independent Sol
+scenario/evidence review GO_BOUNDED_OBSERVATION_ONLY supports an outer-caller
+hold without identifying participant/opening gate or release. Source-derived
+timeout overwrite is not a branch receipt. Raw stderr14 includes12 Node colour
+warning lines and two Travnik simulation diagnostics; original report preserved.
+Evidence: `logs/claude-channel-20261004/081-measurement-result.md` and
+`logs/claude-channel-20261004/081-review-result.md`.
+
+Claude082 receives one cheap read-only caller-gate inventory/missing-input task.
+No second campaign/replay/suite/production correction/188 extension/remote action
+or baseline adoption. Reuse080 ten focused cases/typehook/emitter/collector,
+56 documentation cases and retained campaigns. Existing master/plan/board/
+roadmap/knowledge update together after review; focused documentation validation
+and preservation receipts record exact exits. Original517/737/Majdan, towns,
+Jajce/all matching n25 OSIDs/late receipts and final calibration review stay open.
+n42 observational GO/calibration NO-GO, Farz Sep29/protected/canon/save gates hold.
+
 ## 2026-10-05 — Default-off Mistral observer preparation; campaign unapproved
 
 Released080 separately after Codex unnecessarily bundled reversible preparation
