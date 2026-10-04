@@ -1,0 +1,420 @@
+{
+  "scope": "opt-in movement observer preparation; no campaign or gameplay correction",
+  "date": "2026-10-04",
+  "base_commit": "bdb3acc9cc14d09f1eed8a5691d6451a4fcb7af1",
+  "authorized": "bounded instrumentation, focused regression proof, independent review, docs and local integration",
+  "opencode": {
+    "attempts": 1,
+    "child_exit": 126,
+    "provider": "provider.quota",
+    "http_status": 429,
+    "tools_used": false,
+    "fallback": "local bounded Sol implementation"
+  },
+  "preparation": {
+    "verdict": "GO_PREPARATION_ONLY",
+    "independent_review": "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_actor_correction_verification.md",
+    "default": "absent; selector and snapshots only after topic enabled",
+    "configuration": [
+      "AWWV_DEBUG_REASON_CODES=movement_phase",
+      "AWWV_DEBUG_MOVEMENT_FORMATIONS=<comma-separated formation IDs>"
+    ],
+    "boundaries": "all actual named phases by index/name/group, executed/skipped; fresh terminal after invariant result at return",
+    "snapshots": "formation context, movement state and orders separately; absent/undefined/null/value preserved at record/context boundaries; detached arrays",
+    "strict_reader": "explicit actor:completed_turn for every emitted actor/turn, complete manifest chain, safe numeric turns/indexes and nonempty string IDs",
+    "proof": "real successful brigade A-to-B ordinary movement/order consumption, bottom-up, ON/OFF ordinary state/report/weekly equality and weekly JSON reader",
+    "causal_proof": false
+  },
+  "evidence_limits": [
+    "Initial green receipts are stale for subsequently changed source bytes; reuse only unchanged topic/dispatcher/static/skip scope explicitly.",
+    "Correction RED included reader-test syntax failure; no historical no-expectation RED is reconstructed.",
+    "Actor first RED exposed shared mutable test manifest; isolated RED and final green supersede it for current test validity.",
+    "Initial untracked execution summary was overwritten, no byte backup exists; labeled tool readback is not original-byte recovery. Raw logs/reviews/campaign evidence remain.",
+    "Invariant-failure terminal placement is source-verified, not runtime-proved by this fixture.",
+    "Fixtures establish preparation only, not whole-campaign neutrality or any historical writer."
+  ],
+  "preservation": {
+    "base_commit": "bdb3acc9cc14d09f1eed8a5691d6451a4fcb7af1",
+    "pass": true,
+    "parents": [
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_reviewed_summary.json",
+        "sha256": "e0406841a817f319c89d402c4218acdbedcd6a3f4f29a15d332ae759762f7b7b",
+        "bytes": 26122,
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_table_reviewed.md",
+        "sha256": "03759831b5e5fb03c6c008060a5ba75011587de2d81242f9fe56af58dfce998d",
+        "bytes": 8409,
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_independent_review.md",
+        "sha256": "61bd9a1a0aa45dd3977dd9619ab9db7bd353f6b0bd91376d7a65e3cd8ecffe22",
+        "bytes": 6759,
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_correction_verification.md",
+        "sha256": "2c794d4d384caf2d6dc2dcad6d4092050a6fe97285c00f22418300364e395c99",
+        "bytes": 2884,
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_139_20261004_reviewed_summary.json",
+        "sha256": "c80aef69ea3bd8fa378aab235b03c3af4c58c74da7bfda3d4b0bf99fbcec5f50",
+        "bytes": 25964,
+        "intact": true
+      },
+      {
+        "path": "logs/prusac-diagnostic-20260929/continuation4_campaign_reviewed_summary.json",
+        "sha256": "2efec3c3e1c910da881f9ba9da70cc27ec256865ae58ebc019bfecb05c5b74e5",
+        "bytes": 29249,
+        "intact": true
+      }
+    ],
+    "protected_sources": [
+      {
+        "path": "src/state/game_state.ts",
+        "git_blob": "09b47b74df937c392190243803be459910c1a57e",
+        "intact": true
+      },
+      {
+        "path": "src/state/serializeGameState.ts",
+        "git_blob": "80462edb9c1c7d6e2a5851fe40a99364a07ae528",
+        "intact": true
+      },
+      {
+        "path": "src/sim/combat/bot_brigade_ai_osid.ts",
+        "git_blob": "33b7c97aa9f330cb43a336cbc42bacb0f9d50b8f",
+        "intact": true
+      },
+      {
+        "path": "src/sim/combat/bot_brigade_eval_attack.ts",
+        "git_blob": "7c7cb9085131b3e491e1a5f960ed896840f39af4",
+        "intact": true
+      },
+      {
+        "path": "src/sim/combat/brigade_front_distribution.ts",
+        "git_blob": "7b679d178d3ca4caef3391f07d8ad125040c8c25",
+        "intact": true
+      },
+      {
+        "path": "src/sim/turn_phases/war_phases.ts",
+        "git_blob": "1da8bc8d60af67ad4e394ccb148bbf2f8117618f",
+        "intact": true
+      },
+      {
+        "path": "src/sim/turn_phases/war_phase_reconciliation_steps.ts",
+        "git_blob": "adfa26a54ad1f537b98a2b064d7c2ccd108e4aa1",
+        "intact": true
+      }
+    ],
+    "retained_runs": [
+      {
+        "name": "apr1992_definitive_188w__0b1f040ff4abe835__w139_n40",
+        "present": true
+      },
+      {
+        "name": "apr1992_definitive_188w__4658849344f21642__w186_n38",
+        "present": true
+      },
+      {
+        "name": "apr1992_definitive_188w__6deb5845c150c196__w188_n37",
+        "present": true
+      },
+      {
+        "name": "apr1992_definitive_188w__6deb5845c150c196__w188_n39",
+        "present": true
+      },
+      {
+        "name": "apr1992_historical_52w__434fe8ff83b7b523__w52",
+        "present": true
+      }
+    ],
+    "junctions": [
+      {
+        "path": "runs",
+        "target": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\runs"
+      },
+      {
+        "path": "node_modules",
+        "target": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\node_modules"
+      }
+    ],
+    "unexpected_changed_paths": [],
+    "reuse": "Prior retained full-run hashes/comparisons remain evidence; this check confirms parents/protected sources/run presence and junctions without reparsing campaigns."
+  },
+  "retained_campaigns": "n37/n38/n39/n40 and partial52 reused; no run restarted or artifact regenerated",
+  "remaining_acceptance": [
+    "Original dirty n37 517th pre-order source/context/cause unbound; complete evaluator inputs still missing.",
+    "737th post-dispatch writer137-139 and subsequent Varosluk operation admission unmeasured.",
+    "Petrovac/Kljuc/Sanski ordinary combat by188 and strict Kljuc-before-Sanski; retained towns2/3.",
+    "All n25 matching OSIDs: Barevo/Lupnica/Majdan/Varosluk remain lost; separate timing/objective/route diagnoses.",
+    "Five Jajce HRHB gains: retained3/5; belt4/4 retained evidence is not new acceptance.",
+    "Protected controls, critical0, current Farz ruling/receipts, paint/control references, denominators and save compatibility remain required; retained passing receipts are reused.",
+    "Launch/axis join and explicit HV withdrawal receipts remain incomplete; literal31-input139 provenance criterion remains failed without waiver.",
+    "Required final full-suite/campaign/provenance/review acceptance is not granted by focused preparation."
+  ],
+  "closeout": {
+    "planned_checks": [
+      "docs focused63 selection",
+      "strict tracked receipt citations",
+      "plan index",
+      "working/staged diff check"
+    ],
+    "required_hook": "git -c core.hooksPath=.husky commit invokes existing npx tsc --noEmit once; actual results are in commit log/final binding",
+    "campaign_authorized": false,
+    "push_merge_adoption": false,
+    "final_binding": "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_final_binding.json"
+  },
+  "source_fingerprints": {
+    "src/sim/combat/movement_phase_diagnostic.ts": {
+      "sha256": "2bd875e6ca9df60838ad2e9ae2f29aba3129761ac515b5dd072387a5c6d49cb1",
+      "bytes": 7090
+    },
+    "src/sim/combat/reason_code_debug.ts": {
+      "sha256": "6d9f085f43e75c9166fe05fcdb39bb7666e194a1e17cfc5a9eb3637d259a810f",
+      "bytes": 9700
+    },
+    "src/sim/turn_pipeline.ts": {
+      "sha256": "df4f7a8815995bc05d7bfa0bd3d9b2b6d65d1ff53e181e09c62a4478d15d9076",
+      "bytes": 10991
+    },
+    "src/sim/turn_pipeline_types.ts": {
+      "sha256": "88fafd1665da2197e30596a259c4515072936ef0394bf94097dd06cd0875caa6",
+      "bytes": 36668
+    },
+    "src/scenario/scenario_reporting.ts": {
+      "sha256": "4462d71be7f1aee1edbd7d35019ab419ef154ef197c68dce1407102101ddbc91",
+      "bytes": 17851
+    },
+    "src/scenario/scenario_runner.ts": {
+      "sha256": "5a3ae5ab8cc00c4f8b9b8abe3368cad6f75c489bf3b38302d1ed2300dfe0b462",
+      "bytes": 197363
+    },
+    "tools/diagnostics/movement_phase_coverage.cjs": {
+      "sha256": "88cffc40abc12dcca52667f0d3293bcc3aba43f030bf8e5f65eaca614fbc474d",
+      "bytes": 11023
+    },
+    "tests/movement_phase_diagnostic.test.ts": {
+      "sha256": "4e8bcd9b72153c3d66300a79f8c326cad086d947884387a42287f14710793d8c",
+      "bytes": 9326
+    },
+    "tests/movement_phase_coverage_diagnostic.test.ts": {
+      "sha256": "4f56149c01cefaa0f76548f086b37f1ec69285586206d58520c6d874315097e4",
+      "bytes": 10709
+    },
+    "tests/reason_code_debug.test.ts": {
+      "sha256": "63d8aab3b3915c840f685a62946a75b2b0937871c41c4395c91d6c81d80e05d8",
+      "bytes": 9150
+    }
+  },
+  "evidence_fingerprints": {
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_handoff.md": {
+      "sha256": "5c9424ee45ba72a0f2047116634547bf26681ab18432d4514287650cfb1bf11c",
+      "bytes": 5977
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_preservation_start.json": {
+      "sha256": "63d931c1b1537a44596ad5f86743bc2439dd352f15ab7eabf72e883d343b2a62",
+      "bytes": 2714
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_preservation_final.json": {
+      "sha256": "7ff32fe3e79fe666ca0403c16b18ada6855ab7f0cf361fbcc3957fd27c2d5afc",
+      "bytes": 3680
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_independent_review.md": {
+      "sha256": "a7c8b58fbc6cbc1689dfb421a808427a4d3e0a87f9190253ee30a6eca0906c1a",
+      "bytes": 11064
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_correction_verification.md": {
+      "sha256": "5e249afb5576211610378b0e3d10acb6c9502516ab733bd0927e51289fe6e67b",
+      "bytes": 7908
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_numeric_correction_verification.md": {
+      "sha256": "3c2f7d75f98a87156fe0f5a81ee2b0ce20cf542d98c500af35cf73912d313046",
+      "bytes": 5311
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_actor_correction_verification.md": {
+      "sha256": "b636787a625bb58c00033461676b6e2febd6aecc9d8553cbd7c6974527b3380a",
+      "bytes": 4712
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_execution_summary.md": {
+      "sha256": "7c8c0f57a00bfba15b7920ceb3edb30cf4b57b9b949f70bf4267413782940996",
+      "bytes": 6085
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_initial_summary_readback.md": {
+      "sha256": "ca19a6d68814250d937c4b0fccc134ee22ed8b1e3c693ab9dde3e06387813e30",
+      "bytes": 3099
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_numeric_correction_summary.md": {
+      "sha256": "7ea59773718e7bc2214b6b38e7fbd593a7e75975a91572108262d3ebbde9342e",
+      "bytes": 3034
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_actor_correction_summary.md": {
+      "sha256": "3774256f4902653cc6fa24d1b06c087290520791f6bad2ec3dcea25a70ce9d8c",
+      "bytes": 3556
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_opencode.stdout.jsonl": {
+      "sha256": "b197f4e28fde1f0943451388d25dc1c84783972eeb1f3f562bf5ad187172114f",
+      "bytes": 477
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_opencode.exit.txt": {
+      "sha256": "65a699905c02619370bcf9207f5a477c3d67130ca71ec6f750e07fe8d510b084",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_red.log": {
+      "sha256": "54ab5df3b6166bc636845e7483f1b05dd5f65f2c7108fd08c932037fdd5579a8",
+      "bytes": 6307
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_red.exit.txt": {
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_green.log": {
+      "sha256": "a52be8377d89a713a6e4a1bce0dcaf9b43d6656bc7186ae1a141d846b14bab10",
+      "bytes": 1629
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_green.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_affected.log": {
+      "sha256": "a9f2f98b7de56294da0f6d103af47ff8e093a0f826e8a9562fc59c698dab2ddd",
+      "bytes": 781
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_affected.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_post_green_verification.log": {
+      "sha256": "3f969fa5b328d540e6368a050600e498c89897fcf68b888a03ab40483964ba5c",
+      "bytes": 1502
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_post_green_verification.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_review_red.log": {
+      "sha256": "9d351f555394eb5ca77040a620a9ce0873401593aa7911ac0b7120a6aa1701e4",
+      "bytes": 30503
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_review_red.exit.txt": {
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_correction_green.log": {
+      "sha256": "9dadbb91284857aa9788cba2738cd4b9e11d26a7296e12a357ac37674e4568c9",
+      "bytes": 2018
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_correction_green.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_correction_verification.log": {
+      "sha256": "21fde7631ec43c68f44cc8fc438c5f921f71754da64e88a88cc1753548453b86",
+      "bytes": 1684
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_correction_verification.exit.txt": {
+      "sha256": "edd1cb8698931a6b735719e00f3d4132e4ec19efa160b275bb026d9313a0001b",
+      "bytes": 28
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_bottom_up_verification.log": {
+      "sha256": "7604df2e19c224a8384d940642494582bb49596f9e819d1ad9c925b7651eb53b",
+      "bytes": 1611
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_bottom_up_verification.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_final_targeted_verification.log": {
+      "sha256": "9a971749e3ca036205e567c55e5c777f7546d6c619f64484f5ec5c9ae43b3b7f",
+      "bytes": 366
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_final_targeted_verification.exit.txt": {
+      "sha256": "2fa95daf9abe0da846681cd4241ae87b5a8bffeb772e5719409dbd1b1f4e5b4e",
+      "bytes": 40
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_numeric_schema_probe.log": {
+      "sha256": "5456a3bf5fbb99e633d97256bc6c5185fc04b90c5580e94d8e1c4fa90adbe548",
+      "bytes": 120
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_numeric_schema_probe.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_actor_schema_probe.log": {
+      "sha256": "5d08c30addf551228b499a50927a6ec12ed36d477444aa1790e47306fa03b5f0",
+      "bytes": 118
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_actor_schema_probe.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_numeric_red.log": {
+      "sha256": "87ae3296ebf78d8536ea607a9899ec47f8ed1f711eb6d4c0da489907df4b5bea",
+      "bytes": 2757
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_numeric_red.exit.txt": {
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_numeric_green.log": {
+      "sha256": "70693699258f022e5e0763cbc94603ed9838f0327f2b87b6853ddb9e94f030bf",
+      "bytes": 1686
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_numeric_green.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_numeric_syntax.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_numeric_syntax.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_actor_green.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_actor_green.log": {
+      "sha256": "ab948b8316438e7be8c7454b077a0fea4428a13592e31c7d160982627b2d3412",
+      "bytes": 366
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_actor_red.exit.txt": {
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_actor_red.log": {
+      "sha256": "75f59b57c0e603a6db636d1cc12df39055ff32d42d573810d7c3fa99431b1017",
+      "bytes": 9670
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_actor_red_meaningful.exit.txt": {
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_actor_red_meaningful.log": {
+      "sha256": "febda6a8fb79815b3dd414f5ce8d31a10e1839599d0343769b5e907ca0f6e74f",
+      "bytes": 8024
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_actor_syntax.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_actor_syntax.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_isolated_actor_red.exit.txt": {
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_isolated_actor_red.log": {
+      "sha256": "c42c1d1970fe32369e68acf92e2b928b315d18e3c9b0437351aed4fd25dab0e0",
+      "bytes": 1474
+    }
+  }
+}

@@ -18,6 +18,7 @@ import { earlyWarPhases } from './turn_phases/early_war_phases.js';
 import { warPhases } from './turn_phases/war_phases.js';
 import { runPostTurnInvariantBarrier } from './turn_phases/war_phase_reconciliation_steps.js';
 import type { ValidationIssue } from '../validate/validate.js';
+import { createMovementPhaseObserver, type MovementPhaseObserver } from './combat/movement_phase_diagnostic.js';
 
 // Re-export all public types so existing importers (scenario_runner, tests, etc.) continue to work.
 export type {
@@ -141,9 +142,10 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<TurnR
 
     const report: TurnReport = { seed: input.seed, phases: [] };
     const context: TurnContext = { state: working, rng: rejectRandomness, input, report };
+    const movementObserver = createMovementPhaseObserver();
 
     for (const step of warPhases) {
-        await runNamedPhase(context, step, 'war');
+        await runNamedPhase(context, step, 'war', movementObserver);
     }
 
     // Bottom-up formation mode: run militia/pool/formation steps in war context.
@@ -159,7 +161,7 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<TurnR
         ]);
         for (const step of earlyWarPhases) {
             if (!bottomUpStepNames.has(step.name)) continue;
-            await runNamedPhase(context, step, 'early-war');
+            await runNamedPhase(context, step, 'early-war', movementObserver);
         }
     }
 
@@ -174,6 +176,8 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<TurnR
 
     const issues = runPostTurnInvariantBarrier(context);
     if (issues.length > 0) {
+        movementObserver?.terminalBoundary(context.state, report.phases.length);
+        if (movementObserver) report.movement_phase_diagnostics = movementObserver.finish();
         return {
             status: 'invariant_failure',
             turn: context.state.meta.turn,
@@ -194,6 +198,8 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<TurnR
     // identical to predecessor baseline. See src/sim/perf/heap_profile.ts.
     maybeWriteHeapSnapshot(context.state.meta.turn, '', context.state.meta.seed);
 
+    movementObserver?.terminalBoundary(context.state, report.phases.length);
+    if (movementObserver) report.movement_phase_diagnostics = movementObserver.finish();
     return { status: 'success', nextState: context.state, report };
 }
 
@@ -220,15 +226,20 @@ async function getEdgesForTurn(input: TurnInput): Promise<EdgeRecord[]> {
     return edges;
 }
 
-async function runNamedPhase(context: TurnContext, step: NamedPhase, phase: string): Promise<void> {
+/** Central named-phase wrapper. Exported for focused instrumentation boundary tests. */
+export async function runNamedPhase(context: TurnContext, step: NamedPhase, phase: string, movementObserver?: MovementPhaseObserver): Promise<void> {
+    const phaseIndex = context.report.phases.length;
+    const movementBoundary = movementObserver?.beforePhase(context.state, step.name, phaseIndex, phase);
     context.report.phases.push({ name: step.name });
     for (const skipIf of step.skipIf ?? []) {
         const skipReason = skipIf(context);
         if (!skipReason) continue;
         recordPhaseSkipDiagnostic(context, phase, step.name, skipReason);
+        movementObserver?.afterPhase(context.state, movementBoundary, 'skipped', skipReason);
         return;
     }
     await step.run(context);
+    movementObserver?.afterPhase(context.state, movementBoundary, 'executed', null);
 }
 
 async function refreshFrontEdgeSnapshot(state: GameState, input: TurnInput): Promise<void> {

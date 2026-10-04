@@ -33,6 +33,17 @@ Read `docs/10_canon/context.md` first (workflow discipline and validation rules)
 
 If you are changing war behavior, start at `src/sim/turn_pipeline.ts`. If you are changing peace/state progression, start at `src/state/turn_pipeline.ts`. Nothing else is co-equal with these two.
 
+Opt-in movement observation: `src/sim/combat/movement_phase_diagnostic.ts` records
+detached selected-actor snapshots through the canonical named-phase wrapper and
+fresh terminal snapshots after the invariant result. Enable topic `movement_phase`
+in `AWWV_DEBUG_REASON_CODES` and explicit comma-separated IDs in
+`AWWV_DEBUG_MOVEMENT_FORMATIONS`. State and orders remain separate, with record
+and context presence tagged absent/undefined/null/value. No GameState/save field
+is added. Turn/weekly fields are absent by default. The reader
+`tools/diagnostics/movement_phase_coverage.cjs` requires every emitted actor/turn
+expectation and complete manifest continuity; phase localization is not branch
+or historical causal proof. Missing selection cannot establish coverage.
+
 ### Canonical harnesses and surfaces (callers of the pipelines)
 - Scenario harness: `src/scenario/scenario_runner.ts` — routes to peace vs war runner based on `state.meta.phase`.
 - Scenario CLI: `src/cli/sim_scenario.ts`.

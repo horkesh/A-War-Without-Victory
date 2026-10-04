@@ -6,6 +6,7 @@
 import type { GameState, FormationId, FactionId } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 import type { BotOrderDiagnosticsSnapshot, OperationCombatDiagnostic } from './combat_causality.js';
+import type { MovementPhaseDiagnostics } from '../sim/combat/movement_phase_diagnostic.js';
 // REASON-CODE INSTRUMENTATION (topic `formation_refusal`) — see reason_code_debug.ts.
 import type { EmergentFormationRefusalRecord } from '../state/recruitment_types.js';
 import type { CombatOutcome } from '../sim/combat/combat_math.js';
@@ -99,6 +100,7 @@ export interface WeeklyReportRow {
      * baselined weekly-row shape.
      */
     bot_order_diagnostics?: BotOrderDiagnosticsSnapshot;
+    movement_phase_diagnostics?: MovementPhaseDiagnostics;
     /**
      * REASON-CODE INSTRUMENTATION, topic `formation_refusal` — item 4. Absent
      * unless `AWWV_DEBUG_REASON_CODES` requests it.
@@ -127,6 +129,14 @@ export function attachBotOrderDiagnosticsToWeeklyReport(
         || (diagnostics?.dispatcher_decision_details?.length ?? 0) > 0) {
         row.bot_order_diagnostics = diagnostics;
     }
+}
+
+/** Attach only an enabled observer receipt; default rows remain byte-identical. */
+export function attachMovementPhaseDiagnosticsToWeeklyReport(
+    row: WeeklyReportRow,
+    diagnostics: MovementPhaseDiagnostics | undefined,
+): void {
+    if (diagnostics) row.movement_phase_diagnostics = diagnostics;
 }
 
 /**

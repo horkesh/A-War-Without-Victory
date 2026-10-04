@@ -670,3 +670,166 @@ Causal closeout: 63/63 documentation tests, 132 tracked citations, plan index,
 Seven parent receipts and 16 source files remain bound; production diff empty.
 n37–n40, partial52 and junctions retained. Prior campaign evidence is reused.
 The required local commit hook result is recorded separately; no extra simulation.
+
+### Movement phase observer preparation — 2026-10-04
+
+Owner “Proceed” authorizes bounded observer implementation/focused checks and
+local integration, without routine checkpoint approvals. The question is whether
+an opt-in named-actor observer records separate state/orders at actual pipeline
+phase boundaries and survives weekly serialization, while remaining absent and
+inert by default. No historical cause is established by fixture preparation.
+Bounded files/tests/reader and exact commands are in the observer handoff.
+Red/green focused tests precede implementation; reader syntax and affected
+canonical pipeline/dispatcher/static gates run once after green. Cost seconds.
+Stop unexpected failures for cheap diagnosis/targeted correction; no campaign,
+prefix, replay, full suite, control/selector/lifecycle/save changes or adoption.
+Use one OpenCode availability attempt for a narrow checklist, then Sol fallback
+if quota remains unavailable; one implementer and one independent reviewer.
+Root runs required typecheck once through the existing local commit hook.
+Closeout commands: docs63-test selection, strict tracked receipts, plan-index,
+working/staged whitespace and preservation inventory; expected seconds, exits0.
+Local commit: `git -c core.hooksPath=.husky commit -m "Add opt-in named movement phase diagnostics"`.
+Required hook cost about one minute; stop/diagnose failure, no duplicate check.
+Future expensive validation still needs a new concrete question and owner grant.
+
+Observer prerequisite correction: the legacy order/weekly-increment tests use
+src/state/runOneTurn, so they are unaffected and reused. The final affected
+selection uses canonical pipeline_skip_diagnostics plus the new real runTurn
+neutrality/phase/serialization proof, old dispatcher tests and static scan.
+No unrelated scenario benchmark-summary test is added.
+
+Observer review correction gate: first independent review is NO-GO. Correct the
+fixed phase subset, synthetic terminal gap, optional coverage expectations,
+undefined/null conflation and sparse production fixture in one bounded pass.
+Observe every actual named phase for configured actors; bind its ordered manifest
+to the pipeline report, including bottom-up and skipped phases. The fresh terminal
+snapshot must follow the invariant result and expose any unobserved gap without
+assigning it a writer. Strict coverage requires explicit expectations and complete
+manifest receipts; absent/unconfigured diagnostics cannot pass. Add a genuine
+production brigade movement mutation and removal/presence/terminal regressions.
+Red command: `node node_modules/vitest/vitest.mjs run tests/movement_phase_diagnostic.test.ts tests/movement_phase_coverage_diagnostic.test.ts`.
+After correction: `node --check tools/diagnostics/movement_phase_coverage.cjs` and
+`node node_modules/vitest/vitest.mjs run tests/movement_phase_diagnostic.test.ts tests/movement_phase_coverage_diagnostic.test.ts tests/pipeline_skip_diagnostics.test.ts tests/determinism_static_scan_r1_5.test.ts`.
+Pass: new assertions fail on the reviewed source, then all corrected tests/syntax
+exit0, full actual phase coverage, detached truthful presence and ordinary ON/OFF
+state/report equality. Expected seconds; stop failures for targeted diagnosis.
+Reuse unchanged topic/dispatcher and prior campaign evidence; retain initial
+green logs as stale for subsequently changed bytes. No OpenCode quota retry,
+manual typecheck, campaign, replay or suite. One targeted independent correction
+verification precedes root documentation and the required commit-hook typecheck.
+
+Consolidated follow-up diagnosis: targeted review verifies the structural fixes
+but finds a numeric schema fail-open: row/receipt/terminal turn strings pass by
+equality without integer validation. Its novel probe exits0 when failure1 was
+required. Revised smallest scope is reader boundary-number validation plus
+explicit successful canonical fixture returns, with no observer/mechanic change.
+Add numeric-string regressions before the reader correction; keep prior probe,
+red syntax defect and both NO-GO reviews. Exact red and corrected command:
+`node node_modules/vitest/vitest.mjs run tests/movement_phase_coverage_diagnostic.test.ts tests/movement_phase_diagnostic.test.ts`;
+syntax: `node --check tools/diagnostics/movement_phase_coverage.cjs`.
+Pass: new negative assertions reject the old reader then exit0 after correction;
+ON/OFF production fixture both return success. Audit turn/index numeric fields
+and CLI expectation parsing once; malformed numeric boundaries must fail closed.
+Expected seconds. Stop another failure for consolidated diagnosis, not an
+unchanged validation/review loop. Reuse accepted observer/static/skip/dispatcher
+evidence. One targeted verification of these two findings, no campaign/suite/tsc.
+Source placement supports failure-return terminal handling, but runtime failure
+coverage remains explicitly unproved unless a cheap meaningful fixture adds it.
+Preservation exception: the worker overwrote the initial untracked execution
+summary; no byte backup exists. Labeled tool readback retains its substantive
+claims, not original bytes. Raw logs/reviews/runs remain, and root parent/source
+inventory0 confirms six parent receipts, seven protected files and five runs.
+
+Boundary audit completion: numeric turns and successful fixture returns verify,
+but a novel numeric actor737 probe still exits0 through template coercion. This
+is the same boundary-type diagnosis; centralize nonempty string actor validation
+for selection and phase/terminal IDs, with one complete source audit of primitive
+schema boundaries. Add exact numeric actor regression before editing reader.
+Only reader and its test may change. Red/green command:
+`node node_modules/vitest/vitest.mjs run tests/movement_phase_coverage_diagnostic.test.ts`;
+syntax: `node --check tools/diagnostics/movement_phase_coverage.cjs`.
+Pass: old reader fails numeric-actor negative; corrected tests/syntax exit0 and
+string actor coverage remains valid. Cost seconds; stop another unexpected
+failure for revised diagnosis. Reuse accepted observer, integer, success and
+static/skip evidence. Final independent verification is of this typed boundary
+correction, rather than another unchanged full review. Preserve all prior files.
+
+Observer preparation settles at independent GO. Current reader28/28 and syntax0;
+successful canonical ON/OFF movement/bottom-up/weekly fixture4/4 is reused from
+numeric green20/20. Accepted structural source/skip/static/topic/dispatcher proofs
+remain bound; no unchanged whole selection repeats. Initial contaminated actor
+RED and isolated actor RED are separate, with final manifest cloning preventing
+cross-test contamination. This is preparation only; all historical and late
+acceptance gaps remain. Root final documentation and required hook results live
+in the reviewed receipt's closeout/final-binding references.
+
+### Proposed next discriminator — NOT AUTHORIZED
+
+Concrete new question: which actual named phase first changes the737th's movement
+state or order at completed137–139, given retained n40 ordinary dig_in/no move?
+The retained n40 report lacks those snapshots; fixtures cannot answer it. Smallest
+continuous scope is one139-week diagnostic from the clean reviewed observer
+commit, with one selected actor. Cost about3–5 minutes plus artifact inspection;
+all-phase output may add cost. No188 run, replay or full suite is proposed.
+Only an explicit new owner grant authorizes this expensive run.
+
+Exact proposed PowerShell runner:
+```powershell
+$env:AWWV_DEBUG_REASON_CODES = 'movement_phase'
+$env:AWWV_DEBUG_MOVEMENT_FORMATIONS = 'arbih_737th_muslim_light'
+node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_188w.json --weeks 139 --out runs --unique
+```
+Afterward, exact coverage command with the NEW unique directory substituted:
+```powershell
+$movementCoverageArgs = @('tools/diagnostics/movement_phase_coverage.cjs', '<new-run-dir>')
+foreach ($movementTurn in 1..139) {
+    $movementCoverageArgs += @('--expect-boundary', "arbih_737th_muslim_light:${movementTurn}")
+}
+node @movementCoverageArgs --json
+```
+Prerequisites: clean commit, Node22, fresh accepted observer/reader bindings,
+readable existing runtime/data and unchanged normalized inputs. Pass: runner0,
+reader0 for all139 full phase chains/terminal continuity, clean provenance and
+initial-save SHA413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1;
+same actual139 input set30/digested7fa30986392451f797708a5a0fe9d3ac83f284692be04e199305c533a1f0b6,
+same n40 final-save hashd6715e9cefa14d0c and full SHA256
+d6715e9cefa14d0cf88b1af34d12c38c231186b6cf44cbb71e87636c0a6b04b9;
+same173 control events,139 controller maps and reached39/104 matching/protected
+OSIDs. The old literal31 criterion remains FAILED, not waived by this horizon
+comparison. Inspect first differing actual before/after phase at137–139, without
+inferring a branch or link to later admission. Stop on the FIRST runner,
+provenance, neutrality, coverage or protected failure; retain evidence and
+diagnose, no automatic retry. Reuse n39 late/Farz/Jajce/Sana evidence, without
+claiming new late results. All acceptance and original517 cause remain open.
+
+Final bridge check: the latest reader adds primitive validation, so refresh only
+the affected real weekly producer-to-reader positive, not unchanged observer
+cases. Command: `node node_modules/vitest/vitest.mjs run tests/movement_phase_diagnostic.test.ts -t "proves a real apply-brigade-movement mutation and complete runTurn/weekly neutrality"`.
+Pass: success/ON-OFF equality and actual weekly JSON accepted by current reader,
+exit0. Cost seconds; stop failure for diagnosis. No campaign or broader selection.
+
+Commit hook STOP: first commit exits1 with four TypeScript fixture errors:
+reader-test unknown/null presence inference and observer-test implicit-any
+callback parameters. No production error or campaign failure is reported. Keep
+the first commit log/exit unchanged. Smallest correction is test annotations
+only; runtime red is unnecessary because retained hook diagnostics establish
+the failure. Recheck affected command:
+`node node_modules/vitest/vitest.mjs run tests/movement_phase_coverage_diagnostic.test.ts tests/movement_phase_diagnostic.test.ts`.
+Pass: current32 tests exit0 and type-only independent diff verification. Cost
+seconds. Then retry the SAME local commit command through the required hook,
+with NEW commit_retry logs. Question: do corrected fixture types compile without
+runtime/production change? Expected about one minute; pass commit/hook0, stop
+another failure for consolidated diagnosis. No manual tsc, campaign or suite.
+
+Hook retry STOP: exit1 now has only TS2532 at the terminal assertion. Typing the
+previously-any diagnostic exposes `Array.at(-1)`'s optional return; the successful
+fixture already proves a nonempty complete phase chain. Root adds only a nonnull
+type assertion (no emitted/runtime change) and inspects all typed array accesses.
+Refresh only that affected producer/reader case with the final-bridge command
+above, expected seconds, exit0; reuse unchanged reader28 and other fixture cases.
+Independent verification is of this one erased annotation, not a full review.
+Then retry the same commit through the required hook into NEW commit_retry2
+logs, about one minute, pass0; stop another failure for revised diagnosis.
+First commit and retry logs remain unchanged; no campaign or manual tsc.
+Retry2 uses local GIT_TRACE=1 to record actual hook invocation, restoring the
+previous trace setting afterward; the commit command/hook remain unchanged.

@@ -24,6 +24,7 @@ Populate this section from the discovery checklist.
 - Code entrypoints (one canonical owner per phase; nothing else is co-equal):
   - **Canonical war-phase pipeline:** `src/sim/turn_pipeline.ts` — `runTurn()`. Steps in `src/sim/turn_phases/war_phases.ts` + `early_war_phases.ts`; shared types in `src/sim/turn_pipeline_types.ts`.
   - **Canonical peace/state pipeline:** `src/state/turn_pipeline.ts` — `runOneTurn()`. Weekly state progression (directives, deployments, military_interaction, fragmentation_resolution, supply_resolution, political_effects, exhaustion_update, persistence).
+  - Selected movement observer: `src/sim/combat/movement_phase_diagnostic.ts`, central wrapper in `turn_pipeline.ts`, additive weekly projection in `scenario_reporting.ts`/`scenario_runner.ts`; strict full actor/turn chain reader `tools/diagnostics/movement_phase_coverage.cjs`. Topic `movement_phase` plus `AWWV_DEBUG_MOVEMENT_FORMATIONS` selects actors; default absent, no GameState/save ownership.
   - Bounded browser fallback (not co-equal): `src/sim/run_early_war_browser.ts` — the existing Warroom fallback; desktop advance uses the IPC bridge.
 - Militia/brigade formation (early-war): pool population `src/sim/early_war/pool_population.ts`, formation spawn `src/sim/formation_spawn.ts`, recruitment (player_choice mode) `src/sim/recruitment_engine.ts`, `src/state/recruitment_types.ts`; design: `docs/20_engineering/MILITIA_BRIGADE_FORMATION_DESIGN.md`. CLI: `src/cli/sim_generate_formations.ts`.
 - B1 Events: `src/sim/events/` — emergent event system (v0.6.0)

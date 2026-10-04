@@ -166,6 +166,35 @@ measured. [Corrected causal receipt](../../logs/prusac-diagnostic-20260929/conti
 Targeted independent correction verification is GO for the bounded table and
 wording fixes only. Causal attribution and calibration acceptance remain NO-GO.
 
+### Movement observer preparation — 2026-10-04
+
+The default-off `movement_phase` observer records selected actors' formation
+context, movement state and orders at every actual named phase, including skips
+and bottom-up phases. Fresh terminal snapshots follow the invariant result;
+an unobserved return interval fails continuity without assigning a writer.
+Weekly projection is additive and absent by default. The strict reader requires
+explicit actor/turn expectations, the complete phase chain, typed boundaries
+and an active terminal actor. Receipts declare `causal_proof: false`.
+
+Independent review is GO for preparation after structural and primitive-schema
+corrections. Current reader28/28 and successful canonical movement fixture4/4
+exit0; syntax0. Unchanged skip/static/dispatcher/topic evidence is reused.
+OpenCode child126/provider429 before tools; bounded Sol fallback, no campaign.
+The earlier reader RED syntax gap and shared-fixture failure remain explicit.
+One interim execution summary was overwritten without a byte backup; labeled
+tool readback is not recovery. Raw logs/reviews/runs and six parent/seven
+protected-source fingerprints remain. Failure-return terminal placement is
+source-verified, not runtime-proved. The required first commit hook exits1 on
+four fixture type errors; type-only correction32/32 and review GO, with hook
+retry recorded separately. Retry1 exposes only the optional last-receipt type;
+one erased annotation and its refreshed fixture/review pass. [Final observer binding](../../logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_final_integration_summary.json).
+
+Historical737 ownership, original517 inputs/cause, Jajce and all four lost
+matches remain open. Protected/Farz, ordinary combat, paint/control references,
+denominators, saves, critical0 and final review remain required. The next proposed
+139-week writer diagnostic needs a new owner grant; no gameplay correction,
+188-week campaign, baseline adoption or merge follows this preparation.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

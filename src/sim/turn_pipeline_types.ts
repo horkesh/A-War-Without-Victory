@@ -67,6 +67,7 @@ import type { OperationStormCheckReport } from './combat/operation_storm.js';
 import type { AttackResolutionOsidReport } from './combat/attack_resolution_osid.js';
 import type { BotOrderDiagnosticsSnapshot } from '../scenario/combat_causality.js';
 import type { BotOrderGenerationDiagnostics } from './combat/bot_brigade_ai_osid.js';
+import type { MovementPhaseDiagnostics } from './combat/movement_phase_diagnostic.js';
 import type { CorpsAiReportEntry } from './combat/bot_corps_ai.js';
 import type { CohesionDriftReport } from './combat/cohesion_drift.js';
 import type { EnclaveResilienceReport } from './combat/enclave_resilience.js';
@@ -213,6 +214,7 @@ export interface TurnReport {
     phase_e_pressure_update?: PhaseEPressureDiffusionReport;
     front_emergence_report?: FrontDescriptor[];
     bot_order_diagnostics?: BotOrderDiagnosticsSnapshot;
+    movement_phase_diagnostics?: MovementPhaseDiagnostics;
     /** Legacy SID combat fallback; canonical war-phase combat lives in attack_resolution_osid. */
     resolve_attack_orders?: ResolveAttackOrdersReport;
     attack_resolution_osid?: AttackResolutionOsidReport;

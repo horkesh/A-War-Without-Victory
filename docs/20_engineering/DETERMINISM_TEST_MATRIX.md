@@ -18,6 +18,7 @@
 ### Derived state not serialized as source of truth
 - Code invariant: `src/state/serializeGameState.ts` (denylist + key ordering + wrapper rejection)
 - Gate: `tests/scenario_harness_contracts.test.ts` (`H1.1 scenario determinism`)
+- Opt-in movement receipts: `tests/movement_phase_diagnostic.test.ts` proves a successful canonical brigade move, bottom-up phase manifest, detached presence and ordinary ON/OFF state/report/weekly equality. `tests/movement_phase_coverage_diagnostic.test.ts` pins required full chains, terminal gaps, removal, malformed typed boundaries and fail-closed coverage through weekly JSON. These are preparation fixtures, not full-campaign determinism or historical writer proof; no diagnostic enters GameState/save truth.
 
 ### Byte-identical reruns from identical inputs
 - Gate: `tools/scenario_runner/run_baseline_regression.ts`

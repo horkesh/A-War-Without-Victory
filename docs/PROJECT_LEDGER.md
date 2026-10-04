@@ -9,6 +9,45 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-04 — Opt-in movement observer preparation
+
+Owner “Proceed” authorizes bounded instrumentation, focused proof, review and
+local integration. OpenCode child126/provider.quota429 before tools, one attempt;
+bounded Sol fallback. The observer records selected state/orders at all actual
+named phases, skips/bottom-up and a fresh post-invariant terminal boundary.
+Default absent, no GameState/save/selector/combat/control/data/canon change.
+
+First review NO-GO found missing phases/terminal gap/coverage/presence/fixture
+defects. Structural correction19 tests0, then targeted strengthening; numeric
+turn and actor probes exposed fail-opens and were preserved. Numeric RED1 then
+GREEN20/20 exit0 proves typed turns and successful canonical ON/OFF returns.
+First actor RED1 exposed shared-manifest fixture contamination; after isolation,
+numeric actor RED1 reproduces old reader0, then reader28/28 and syntax exit0.
+Final independent verification GO for preparation; accepted structural/skip/
+static/topic/dispatcher evidence reused. No suite/campaign/replay/prefix/build.
+
+Preservation exception: worker overwrote the initial untracked execution summary,
+no byte backup exists; labeled tool readback is not recovery. Raw logs/reviews
+and retained runs remain. Inventory0 verifies six parent receipts, seven protected
+source blobs, five retained runs and two junctions. The earlier reader RED syntax
+gap remains; failure-return terminal placement has source, not runtime, proof.
+
+Historical737 writer and original517 evaluator inputs/cause remain unmeasured.
+Separate Barevo/Lupnica timing, Majdan objective/readiness and Varošluk admission
+gaps persist; towns2/3, Jajce3/5/four lost matches retain calibration NO-GO.
+Protected/Farz/critical/paint/control/denominator/save gates and final review
+remain required. One proposed139 diagnostic needs a new owner grant; no188,
+gameplay correction, adoption, push or merge. Exact hashes/exits/claim limits:
+`logs/prusac-diagnostic-20260929/continuation4_movement_observer_20261004_final_integration_summary.json`.
+Root closeout documentation/citations/index/whitespace and required existing
+commit-hook typecheck results are recorded separately in final binding/logs.
+First hook1 reports four test type errors. Four annotations/casts preserve runtime
+values/assertions; fresh32/32 and type-only independent review GO. The initial
+pre-hook receipt stays unchanged; the integration supplement binds final tests.
+Retry1 exits1 on an optional `Array.at(-1)` result. One erased nonnull annotation
+is justified by the nonempty manifest/count assertions; refreshed fixture1/1
+and targeted review GO. Prior receipts remain; retry2/hook result is separate.
+
 ## 2026-10-04 — Bounded causal diagnosis
 
 Owner “So do it” authorizes the retained-evidence/source diagnosis pass. One

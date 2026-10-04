@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-04 (causal boundaries reviewed)
+**Last updated:** 2026-10-04 (movement observer prepared)
 
 **Current R6 status — October Sana checkpoint remains NO-GO.** The retained n37
 full suite and 188-week campaign both exit 0, but the calibration result fails:
@@ -49,11 +49,10 @@ These chronological facts do not identify a launch/selector cause. No correction
 or campaign follows; protected evidence and every acceptance gap remain open.
 
 n39 retains towns2/3, belt4/4, Jajce3/5 and four lost matches; protected/Farz
-hold, critical0. n40 runner/coverage0; 737 ordinary137–139 dig_in/no move,
-prefix controls unchanged. Causal pass separates timing/objective/route gaps;
-later movement writer and original517 cause remain unmeasured. Candidate
-inventory is bounded. Next: state/order phase observer with focused proof.
-No gameplay correction, new campaign, adoption or merge.
+hold, critical0. n40 ordinary737 dig_in/no move137–139. Phase observer is
+reviewed GO for preparation; historical writer/original517 cause remain open.
+Separate timing/objective/route gaps persist. Next139 diagnostic needs owner
+grant. No gameplay correction, campaign, adoption or merge follows.
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference
