@@ -9,6 +9,37 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-04 — Focused front-distribution characterization
+
+Owner “Proceed” authorizes bounded source diagnosis and local fixtures at
+b7f4ed902. The real distributor/column fixture passes3/3, exit0, then passes
+3/3 again after explicit fixture typing. It characterizes main Phase B issuing
+a synthetic dig_in column order that the next consumer rejects/deletes; defend
+starts transit, active-operation participation suppresses this candidate.
+Characterization is green, not a failing contract test or historical proof.
+
+Independent review GO requires corrected chronology, reserve-or-rear pool,
+entrenchment threshold and fixture/source coverage wording. Root also removes
+the unsupported unique-helper inference. Original summary is retained; corrected
+summary and targeted wording verification GO. No tests repeated for prose fixes.
+Post-distribution seals176/177 invalidate post-turn roster reconstruction.
+Actual n41 helper/rejection and originaldirty517 cause remain unproved; no canon
+contract requires every local distribution writer to filter posture. No production
+correction, campaign, replay, full suite, push, merge or baseline adoption.
+OpenCode's prior quota/no-route receipts reused; bounded Sol diagnosis/review.
+
+Inventory0 verifies11 parent/source fingerprints,6 retained runs and2 junctions;
+production diff empty. Earlier observer summary overwrite exception remains.
+Sanski, Jajce, four lost matches and all late acceptance gates remain open;
+n39 late/Farz/protected and n41 neutral-prefix evidence reused. Durable result:
+`logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_final_integration_summary.json`.
+Documentation and required local hook results are separate closeout receipts.
+First hook exits1 on TS2352 in the partial synthetic sector cast. One erased
+unknown intermediate cast preserves runtime values; fresh3/3 exit0 and targeted
+type-only verification precede the same hook retry. The original accepted test
+bytes are recovered exactly from the staged Git blob (old hash matches), while
+pre-hook receipts/logs remain unchanged. Retry result is recorded separately.
+
 ## 2026-10-04 — n41 named-phase diagnostic
 
 Owner “Proceee” grants exactly one139-week diagnostic from clean c43290677.

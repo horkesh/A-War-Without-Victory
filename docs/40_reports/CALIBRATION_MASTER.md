@@ -217,6 +217,24 @@ retry,188 campaign,adoption or merge. Originaldirty517 cause, later Varosluk
 admission, separate Jajce/Majdan timing/objective gaps and all late acceptance
 remain open; n39 late/Farz/protected evidence is reused. [Reviewed n41 receipt](../../logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_reviewed_summary.json).
 
+### Focused distribution characterization — 2026-10-04
+
+Three real producer/consumer fixtures pass (exit0): synthetic main Phase B
+issues a routine column order for `dig_in`; the next consumer invocation rejects
+and deletes it without movement. The same order under `defend` starts transit;
+active-operation participation excludes that constructed distribution candidate.
+Other writer-family operation guards are source-inspected, not fixture-proved.
+All six families share the order shape. Reserve-commit candidates include rear
+brigades, so rear role cannot uniquely identify the helper. Phases176/177 seal
+rosters after distribution; post-turn buckets cannot reconstruct pre-write inputs.
+
+Independent review and corrected wording verification GO for characterization.
+The current contract does not require a posture filter on every local writer;
+no contract violation, historical branch or calibration correction is proved.
+Original517 cause, n41 helper/rejection, later admission, Sanski/Jajce and four
+lost matches remain open. No production change, campaign, replay, suite or
+baseline adoption. [Corrected predicate table](../../logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_summary_corrected.md).
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

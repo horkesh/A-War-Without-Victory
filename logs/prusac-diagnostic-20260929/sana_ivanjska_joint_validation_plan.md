@@ -870,3 +870,63 @@ Final local command: `git -c core.hooksPath=.husky commit -m "Record n41 movemen
 Question: does required existing hook accept the finalized receipt/doc packet?
 JSON staging triggers npx tsc --noEmit; cost about one minute, pass hook/commit0.
 Stop first failure for diagnosis; preserve logs, no manual duplicate typecheck.
+
+### Focused front-distribution investigation — 2026-10-04
+
+Owner “Proceed” authorizes source diagnosis and focused local fixtures from
+b7f4ed902. Question: which of the six distribution writer families can produce
+the measured order, and does the real distribution-to-column path demonstrate
+an unintended posture/order conflict under its documented contract?
+Scope: brigade_front_distribution, osid_column_movement, relevant invariants
+and existing tests; add one focused diagnostic test file if needed. No campaign,
+replay, full suite, historical source reconstruction or production correction
+from a synthetic fixture alone. OpenCode's prior quota429/no-route126 receipts
+are reused; no unchanged quota retry or more expensive fallback.
+
+Commands after source/fixture-readability checks:
+`node node_modules/vitest/vitest.mjs run tests/front_distribution_order_conflict_diagnostic.test.ts`;
+if warranted, affected existing files only:
+`node node_modules/vitest/vitest.mjs run tests/brigade_front_distribution.test.ts tests/osid_column_movement.test.ts`.
+Pass: real producer/consumer calls, deterministic repeat, defensive and authorized
+operation controls, explicit helper/eligibility coverage; report measured versus
+synthetic inputs and remaining historical gaps. Cost seconds per focused command.
+Stop a failed fixture for diagnosis, retain it; no costly retry/expansion. If a
+defect is established, root decides the narrow correction and required gates.
+The original517 cause remains required before changing selector/order lifecycle;
+no territory-moving behavior can be accepted without its required suite/188 proof.
+Independent review covers mechanism, canon, determinism and claim limits once.
+
+Disposition:3/3 characterization tests exit0, repeated after explicit types0;
+no production defect or actual n41 helper established. Initial review GO with
+wording corrections; corrected supplement and targeted verification GO. Original
+summary preserved. Six source writer families, reserve-or-rear commit pool,
+garrison entrenchment threshold and fixture-versus-source guard coverage are
+recorded without unique-helper inference. Post-write seals176/177 prevent
+reconstructing the writer from final buckets. Original517 and all late gaps stand.
+Only the new fixture was run; unchanged production suites and n39/n41 evidence
+are reused. Inventory0:11 fingerprints,6 runs,2 junctions, no production diff.
+Pre-hook receipt: `continuation5_front_conflict_20261004_reviewed_summary.json`;
+final type binding: `continuation5_front_conflict_20261004_final_integration_summary.json`.
+
+Closeout commands: `node tools/derive_plan_index.cjs --check`;
+`node node_modules/vitest/vitest.mjs run tests/plan_index.test.ts tests/receipt_citations.test.ts`;
+`node tools/validate_receipt_citations.cjs --strict`; working/staged `git diff --check`.
+Question: do final docs and tracked receipts remain coherent? Cost seconds;
+pass own exits0/all affected tests/citations/index/size caps; stop failure for
+targeted documentation diagnosis. Reuse unchanged open-gates and production checks.
+Required local command: `git -c core.hooksPath=.husky commit -m "Characterize front distribution column order conflict"`.
+Question: do the final fixture types pass the existing hook? Cost about one minute;
+pass hook/commit0, stop first failure for diagnosis. No manual duplicate typecheck,
+campaign, replay or full suite; no automatic expensive retry.
+
+Hook STOP: first commit exits1, single TS2352 at the partial synthetic sector
+cast. The fixture intentionally supplies only fields read by these real functions;
+add an explicit unknown intermediate cast, preserving every runtime value and
+assertion. Root checks the complete error log; no production error is reported.
+Affected proof command remains the new three-case file above, cost seconds,
+pass3/3 exit0 plus targeted independent type-only verification. Preserve original
+test binding/logs and create a final-type integration supplement, no overwrite.
+Then retry the same local commit/hook once with NEW commit_retry log/exit;
+question: does the corrected partial-fixture cast compile? Cost about one minute,
+pass hook/commit0, stop another failure for consolidated diagnosis. No manual
+typecheck, production change, suite, campaign or replay.

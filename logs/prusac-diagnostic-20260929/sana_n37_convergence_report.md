@@ -735,3 +735,18 @@ four lost matches remain. No production correction/campaign retry/adoption/merge
 Preservation0:10 source hashes,6 parents,7 protected blobs,6 runs,2 junctions;
 earlier summary overwrite exception and underscoped inventory remain disclosed.
 [Reviewed n41 receipt](continuation4_movement_campaign_20261004_reviewed_summary.json).
+
+### Focused distribution characterization — 2026-10-04
+
+Real-function synthetic fixture3/3 exit0 (typing refresh3/3 exit0): main Phase B
+issues dig_in column intent that the next consumer rejects/deletes without
+movement; defend starts transit, active-operation participation excludes this
+candidate. All-six operation guards are source inspection. No failing contract,
+historical helper/rejection or original517 cause is established by this fixture.
+Post-write seals176/177 prevent final-roster reconstruction; reserve-commit
+accepts rear candidates too, defeating the unique-helper suggestion.
+Independent review and corrected wording verification GO; original summary
+retained. No production change/campaign/replay/suite/adoption; all late gaps stay.
+Inventory0 binds11 parents/sources,6 retained runs and2 junctions, while prior
+raw-run inventories and initial-summary preservation exception remain explicit.
+[Corrected diagnosis](continuation5_front_conflict_20261004_summary_corrected.md).

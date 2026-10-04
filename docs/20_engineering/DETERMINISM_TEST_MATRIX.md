@@ -19,6 +19,7 @@
 - Code invariant: `src/state/serializeGameState.ts` (denylist + key ordering + wrapper rejection)
 - Gate: `tests/scenario_harness_contracts.test.ts` (`H1.1 scenario determinism`)
 - Opt-in movement receipts: `tests/movement_phase_diagnostic.test.ts` proves a successful canonical brigade move, bottom-up phase manifest, detached presence and ordinary ON/OFF state/report/weekly equality. `tests/movement_phase_coverage_diagnostic.test.ts` pins required full chains, terminal gaps, removal, malformed typed boundaries and fail-closed coverage through weekly JSON. These are preparation fixtures, not full-campaign determinism or historical writer proof; no diagnostic enters GameState/save truth.
+- Local distribution characterization: `tests/front_distribution_order_conflict_diagnostic.test.ts` repeats a real synthetic main Phase B producer/column consumer path and checks dig-in rejection, defend transit and active-operation exclusion. It does not exercise every writer, prove a historical helper, establish a contract defect or replace campaign determinism gates.
 
 ### Byte-identical reruns from identical inputs
 - Gate: `tools/scenario_runner/run_baseline_regression.ts`

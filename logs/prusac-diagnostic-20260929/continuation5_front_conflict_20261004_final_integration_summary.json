@@ -1,0 +1,78 @@
+{
+  "pass": true,
+  "base_commit": "b7f4ed902f15d6d3a4db3cab86a065da2021b37e",
+  "parent": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_reviewed_summary.json",
+  "scope": "Final type-only integration supplement; bounded characterization, no calibration acceptance.",
+  "current_test": {
+    "path": "tests/front_distribution_order_conflict_diagnostic.test.ts",
+    "sha256": "5659a31cb183db45ab773ad25b056eece8817970b8cddce5f8db97979152c4f5",
+    "tests": 3,
+    "exit": 0
+  },
+  "pre_fix_test_sha256": "a46a4b082f86c06e5c2d62c07d921ed7204a069a3172ff3e2e52665fdf56d1b3",
+  "type_correction": "One erased unknown intermediate assertion for intentionally partial synthetic CorpsFrontSector; runtime values/calls/assertions unchanged.",
+  "type_only_review": "GO; one targeted verification, no unchanged mechanism review or tests repeated by reviewer.",
+  "pre_fix_preservation": "Exact staged Git blob matches the accepted original raw SHA; preserved copy plus method receipt.",
+  "first_hook": {
+    "exit": 1,
+    "error": "SingleTS2352 at partial-sector assertion; no production errors reported"
+  },
+  "required_retry": {
+    "command": "git -c core.hooksPath=.husky commit -m \"Characterize front distribution column order conflict\"",
+    "result": "Separate commit_retry.log/exit and final_binding.json; this pre-retry receipt does not claim success."
+  },
+  "artifacts": {
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_reviewed_summary.json": {
+      "sha256": "d335bd8b84a243d00bc02c13d268bbe0689c5cee6db25bbbea44e567d4242ba9",
+      "bytes": 11477
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_closeout.json": {
+      "sha256": "dcd73803a86ecd53253b42d5ba71af1576ca3cea0b93b6de61b6ed421c2739a0",
+      "bytes": 5834
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_commit.log": {
+      "sha256": "7327b0040d041af438676526ef8cab69efd42378fffec6cd8d0a7c4a94f526ee",
+      "bytes": 1811
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_commit.exit.txt": {
+      "sha256": "f1b2f662800122bed0ff255693df89c4487fbdcf453d3524a42d4ec20c3d9c04",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_test_pre_type_fix.txt": {
+      "sha256": "a46a4b082f86c06e5c2d62c07d921ed7204a069a3172ff3e2e52665fdf56d1b3",
+      "bytes": 7439
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_test_pre_type_fix_preservation.json": {
+      "sha256": "79853441d480fff3144088fc309956cba6f1ec6ca4729a27ad406ed007f0728f",
+      "bytes": 1086
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_type_fix_summary.md": {
+      "sha256": "dd7632f4aaf1366f2acbea474ce1a5fa8193e4a0f7649a12c61e788b603279a9",
+      "bytes": 1545
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_type_fix_green.log": {
+      "sha256": "7a55b7b6ff053c2e17468eea37c19dcab85b3e5db0219a27ef679cde61423bc5",
+      "bytes": 372
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_type_fix_green.exit.txt": {
+      "sha256": "13bf7b3039c63bf5a50491fa3cfd8eb4e699d1ba1436315aef9cbe5711530354",
+      "bytes": 3
+    },
+    "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_type_fix_verification.md": {
+      "sha256": "5ecc93000854c9b1075c63e32d501d86e97f9bb3a5f6573a13347f48cb8c878e",
+      "bytes": 1850
+    }
+  },
+  "reuse": "Parent characterization/corrected wording reviews, immutable pre-hook closeout,56 documentation tests with affected citation refresh separately; unchanged production evidence retained.",
+  "production_change": false,
+  "campaign_replay_full_suite": false,
+  "calibration_acceptance": false,
+  "merge_push_adoption": false,
+  "remaining": [
+    "Actualn41 phase176 helper/rejection unmeasured; n39 posture_dig_in receipt remains n39-scoped.",
+    "Originaldirty517 source/pre-order cause unbound; no selector or order-lifecycle change.",
+    "No later Varosluk admission link or Sanski/Jajce/four lost-match closure.",
+    "Literal31-input139 criterion remains failed/unwaived; all ordinary combat/protected/matching/denominator/save/canon/receipt/final-review gates remain.",
+    "Initial observer interim summary overwrite remains unrecovered."
+  ]
+}
