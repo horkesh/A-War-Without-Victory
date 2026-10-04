@@ -1,0 +1,575 @@
+{
+  "pass": true,
+  "parent": {
+    "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final_type_integration_summary.json",
+    "sha256": "b3bd325e1ce7805039686f7cfd0d377c0fd254aad288c99ce8baa2132ce60816"
+  },
+  "sources": [
+    {
+      "path": "src/sim/combat/front_distribution_diagnostic.ts",
+      "intact": true
+    },
+    {
+      "path": "src/sim/combat/brigade_front_distribution.ts",
+      "intact": true
+    },
+    {
+      "path": "src/sim/combat/movement_phase_diagnostic.ts",
+      "intact": true
+    },
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "intact": true
+    },
+    {
+      "path": "src/sim/turn_phases/war_phases.ts",
+      "intact": true
+    },
+    {
+      "path": "src/sim/turn_phases/war_phase_reconciliation_steps.ts",
+      "intact": true
+    },
+    {
+      "path": "src/sim/turn_pipeline_types.ts",
+      "intact": true
+    },
+    {
+      "path": "src/scenario/scenario_reporting.ts",
+      "intact": true
+    },
+    {
+      "path": "src/scenario/scenario_runner.ts",
+      "intact": true
+    },
+    {
+      "path": "tools/diagnostics/front_distribution_writer_coverage.cjs",
+      "intact": true
+    },
+    {
+      "path": "tests/front_distribution_writer_diagnostic.test.ts",
+      "intact": true
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_affected.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_affected.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_affected.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_affected_correction.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_affected_correction.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_affected_correction.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_build_final_integration.cjs",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_build_final_type.cjs",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_build_receipt.cjs",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_build_receipt.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_build_receipt.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_citation_refresh.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_citation_refresh.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_citation_refresh.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_citations.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_citations.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_citations.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_citations_refresh.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_citations_refresh.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_citations_refresh.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_commit.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_commit.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_commit.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_correction_summary.md",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_correction_verification.md",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_diagnosis_tool_readback.md",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_docs.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_docs.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_docs.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final2_green.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final2_green.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final2_green.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final2_syntax.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final2_syntax.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final2_syntax.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final3_green.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final3_green.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final3_green.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final4_green.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final4_green.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final4_green.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final_green.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final_green.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final_green.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final_integration_summary.json",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_green.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_green.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_green.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_implementation_summary.md",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_independent_review.md",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_integration_build.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_integration_build.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_inventory.cjs",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_inventory.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_inventory.json",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_inventory.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_module_pre_type_fix.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_plan_index.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_plan_index.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_plan_index.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_hardening_green.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_hardening_green.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_hardening_green.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_hardening_red.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_hardening_red.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_hardening_red.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_hardening_syntax.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_hardening_syntax.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_hardening_syntax.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_pre_residual.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reader_pre_review.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_red.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_red.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_red.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_green.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_green.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_green.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_red.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_red.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_red.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_summary.md",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_syntax.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_syntax.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_syntax.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_residual_verification.md",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_green.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_green.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_green.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_green2.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_green2.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_green2.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_green3.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_green3.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_green3.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_red.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_red.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_red.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_syntax.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_syntax.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_review_correction_syntax.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_reviewed_summary.json",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_root_start.json",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_syntax.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_syntax.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_syntax.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_test_pre_residual.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_test_pre_review.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_type_fix_green.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_type_fix_green.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_type_fix_green.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_type_fix_summary.md",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_type_fix_verification.md",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_whitespace.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_whitespace.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_whitespace.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_whitespace_final.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_whitespace_final.json",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_whitespace_final_staged.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_whitespace_final_working.log",
+      "intact": true
+    }
+  ],
+  "retained": [
+    {
+      "name": "apr1992_definitive_188w__0b1f040ff4abe835__w139_n40",
+      "present": true
+    },
+    {
+      "name": "apr1992_definitive_188w__4658849344f21642__w186_n38",
+      "present": true
+    },
+    {
+      "name": "apr1992_definitive_188w__6deb5845c150c196__w188_n37",
+      "present": true
+    },
+    {
+      "name": "apr1992_definitive_188w__6deb5845c150c196__w188_n39",
+      "present": true
+    },
+    {
+      "name": "apr1992_historical_52w__434fe8ff83b7b523__w52",
+      "present": true
+    },
+    {
+      "name": "apr1992_definitive_188w__0b1f040ff4abe835__w139_n41",
+      "present": true
+    }
+  ],
+  "junctions": [
+    {
+      "path": "runs",
+      "target": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\runs",
+      "intact": true
+    },
+    {
+      "path": "node_modules",
+      "target": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\node_modules",
+      "intact": true
+    }
+  ],
+  "protected_boundary_diff": "",
+  "limits": [
+    "Existing run directories checked for presence; prior raw-run byte inventories reused. Current new-run save/report/control neutrality is proved separately.",
+    "Original older observer summary overwrite remains unrecovered.",
+    "This turn preflight source/command/log/exit and pre-refactor comparator/helper summary were overwritten; available tool readback is not raw-byte recovery. Current binding records do not erase that preservation failure."
+  ]
+}

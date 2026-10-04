@@ -9,6 +9,30 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-04 — Authorized n42 front-writer/rejection measurement
+
+Owner “Authorized”: exactly one139 diagnostic from clean2a1554a; runner0 in
+235.644s. Coverage/compare/control/inventory0;139 rows,278 invocations,41 writes,
+no missing boundaries. Actual138 final empty_front_subsegment_fill issues737
+Udurlije(distance6,pool8,width5,maxhops20);139 rejects posture_dig_in and reissues.
+n40 raw saves,30-input digest,139 ordinary rows/maps,173 ordered events and
+39/104707of712 matching OSIDs/protected11 are identical; critical0. Independent
+GO_BOUNDED_MEASUREMENT_ONLY; post-selection locals are not comparator proof.
+No gameplay correction/suite/188 retry/merge/adoption; original517, later737
+admission,Sanski/Jajce/four losses,late receipts and literal31 remain open.
+Readiness proxy correction RED1/GREEN0/syntax0/targeted GO; normalizer13 controls0.
+New preflight and helper-refactor receipts were overwritten without raw backups;
+current tool readback/bindings disclose that failure. Parent119 artifacts/11
+sources,6 retained run directories and2 junctions pass preservation checks.
+Reuse previous affected tests/typehook and n39 late/Farz, n40/n41 prefix evidence;
+OpenCode quota/no-route failures reused without retry or costly fallback.
+[Reviewed n42 measurement](../logs/prusac-diagnostic-20260929/continuation7_front_writer_campaign_20261004_final_summary.json).
+
+Documentation56/56, strict135 citations, index and whitespace exit0.
+Size preflights1/1 then exact-overage correction0; original receipts retained.
+Final supplement corrects one completed builder-stdout binding, preserving parent.
+Required local commit/hook result is recorded separately, never inferred.
+
 ## 2026-10-04 — Front-distribution writer observation preparation
 
 Owner Continue authorizes bounded local preparation from09dcd816e. Topic

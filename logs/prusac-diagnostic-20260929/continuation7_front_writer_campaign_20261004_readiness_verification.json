@@ -1,0 +1,52 @@
+{
+  "scope": "targeted readiness correction verification",
+  "verdict": "GO_SINGLE_AUTHORIZED_139_TURN_DIAGNOSTIC",
+  "calibration_acceptance": false,
+  "campaign_run_by_reviewer": false,
+  "checks_rerun_by_reviewer": false,
+  "bindings": {
+    "pre_review_comparator_sha256": "8e57420073add4f7cbfaee4b2feb42e84860c9b9215ff2d321617d3117e8b0ee",
+    "current_comparator_sha256": "3d7b511a97ac4940bd96ff4724620519e2d8d9a23b8959c88a6e81aab6e34fbc",
+    "proxy_fixture_sha256": "1deb15cb51f83232e842f8b78cbc299cb4d1292cd0fac1fa654093b5bcc205dc",
+    "root_full_control_audit_sha256": "359558944c76e04749049eb67795ed7ae3bc0fc0f878bdcd4bba3f0094b71651"
+  },
+  "retained_results": {
+    "proxy_red_exit": 1,
+    "proxy_red_failure": "pre-review comparator missing exact predicate export",
+    "proxy_green_exit": 0,
+    "write_negative_controls": 14,
+    "rejection_reason_positive_controls": 9,
+    "rejection_negative_controls": 11,
+    "proxy_syntax_exit": 0,
+    "root_preflight_exit": 0
+  },
+  "exact_turn_138": {
+    "actor": "arbih_737th_muslim_light",
+    "action_kind": "column_order",
+    "target_osid": "op:bugojno:udurlije",
+    "completed_turn": 138,
+    "boundary": "pre_write",
+    "selection_inputs_boundary": "post_selection_pre_write",
+    "allowed_helper_count": 6,
+    "allowed_callsite_count": 2
+  },
+  "exact_turn_139": {
+    "actor": "arbih_737th_muslim_light",
+    "source_osid": "op:busovaca:gornja_rovna",
+    "destination_osid": "op:bugojno:udurlije",
+    "completed_turn": 139,
+    "allowed_reason_count": 9,
+    "hardcodes_n39_reason": false
+  },
+  "root_full_control_audit_delta": {
+    "changed_lines": 1,
+    "change": "stderr literal continuation4_movement_campaign_20261004_runner.stderr.log -> continuation7_front_writer_campaign_20261004_runner.stderr.log"
+  },
+  "limits": [
+    "readiness only; no calibration acceptance",
+    "does not prove actual n41 helper or rejection reason before the run",
+    "does not prove dirty-n37/517 cause, later 737 admission, or late outcomes",
+    "collision readback is transcript evidence, not original-byte recovery"
+  ],
+  "stop_rule": "Run exactly one authorized 139-turn campaign and stop at the first runner, comparator, or control-audit failure; no retry without a new decision."
+}

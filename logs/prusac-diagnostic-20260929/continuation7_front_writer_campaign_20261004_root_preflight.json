@@ -1,0 +1,28 @@
+{
+  "pass": true,
+  "checks": {
+    "commit": true,
+    "clean": true,
+    "node22": true,
+    "reviewed_sources": true,
+    "previous_hook": true,
+    "inputs": true,
+    "runtime": true,
+    "no_provenance_override": true
+  },
+  "head": "2a1554a50866af292b949d3668ae45aec4e861fa",
+  "node": "v22.23.2",
+  "sources": 11,
+  "source_mismatches": [],
+  "inputs": 30,
+  "input_digest": "ed7fa30986392451f797708a5a0fe9d3ac83f284692be04e199305c533a1f0b6",
+  "input_mismatches": [],
+  "baseline": "runs/apr1992_definitive_188w__0b1f040ff4abe835__w139_n40",
+  "expected_initial_sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+  "expected_final_sha256": "d6715e9cefa14d0cf88b1af34d12c38c231186b6cf44cbb71e87636c0a6b04b9",
+  "authorization": "logs/prusac-diagnostic-20260929/continuation7_front_writer_campaign_20261004_authorization.json",
+  "helper_readiness": "Separate fixture/syntax/review receipts must pass before launch; not inferred by this source preflight.",
+  "next_campaign_authorized": true,
+  "authorized_campaign_count": 1,
+  "calibration_acceptance": false
+}

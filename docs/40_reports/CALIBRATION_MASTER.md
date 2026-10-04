@@ -260,6 +260,24 @@ cause, later737 admission and all late acceptance gaps remain open; n39/n40/n41
 evidence is reused. A new139 measurement needs an owner decision; no188 retry,
 gameplay fix, merge or adoption follows. [Reviewed preparation receipt](../../logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final_type_integration_summary.json).
 
+### Authorized n42 writer/rejection measurement — 2026-10-04
+
+The owner authorized one139 diagnostic from clean2a1554a. n42 runner0 in235.644s;
+coverage/comparison/control/inventory0. Both actual calls are covered at137–139.
+At138 final empty_front_subsegment_fill issues the737th Udurlije column order
+(distance=score6,pool8,width5,maxhops20,rear/nonparticipant,no prior order/transit).
+At139 the same-run Gornja Rovna→Udurlije receipt reports posture_dig_in; the final
+helper reissues it. This establishes the local cycle, not an internal comparator
+trace, a canon defect or a later admission consequence.
+
+n40 raw saves/30 inputs/139 ordinary rows/maps/173 events and39/104707of712
+matching OSIDs/11 protected points are identical; critical0. Independent review
+GO for bounded measurement only. Literal31 criterion stays failed/unwaived;
+originaldirty517, later737 admission, Sanski/Jajce/four losses and late receipts
+remain open. No gameplay change, suite,188 retry, merge or adoption. New helper
+preflight/refactor overwrites are disclosed; retained parent119 bindings hold.
+[Reviewed n42 receipt](../../logs/prusac-diagnostic-20260929/continuation7_front_writer_campaign_20261004_final_summary.json).
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

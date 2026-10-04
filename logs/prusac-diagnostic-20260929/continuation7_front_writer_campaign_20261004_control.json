@@ -1,0 +1,259 @@
+{
+  "schema": "continuation4_movement_campaign_full_control_audit_v1",
+  "candidate_dir": "runs/apr1992_definitive_188w__0b1f040ff4abe835__w139_n42",
+  "baseline_dir": "runs/apr1992_definitive_188w__0b1f040ff4abe835__w139_n40",
+  "verdict": "PASS_FULL_TEMPORAL_CONTROL_AND_PREFIX_AUDIT",
+  "checks": [
+    {
+      "category": "all_139_reconstructed_controller_maps_equal",
+      "pass": true,
+      "compared_turns": 139
+    },
+    {
+      "category": "reconstructed_controller_map_trajectory_hash_equal",
+      "pass": true
+    },
+    {
+      "category": "ordered_control_events_equal",
+      "pass": true,
+      "candidate_count": 173,
+      "baseline_count": 173
+    },
+    {
+      "category": "ordered_control_event_count_expected_173",
+      "pass": true
+    },
+    {
+      "category": "checkpoint_reference_results_equal",
+      "pass": true
+    },
+    {
+      "category": "checkpoint_expected_counts_707_of_712",
+      "pass": true
+    },
+    {
+      "category": "protected_controls_match_expected",
+      "pass": true,
+      "point_count": 11
+    },
+    {
+      "category": "anomaly_reports_equal",
+      "pass": true
+    },
+    {
+      "category": "candidate_anomaly_counts_expected",
+      "pass": true
+    },
+    {
+      "category": "stderr_unresolved_lines_are_two_travnik",
+      "pass": true,
+      "unresolved_count": 2,
+      "travnik_count": 2
+    }
+  ],
+  "reconstructed_controller_maps": {
+    "completed_turn_range": [
+      1,
+      139
+    ],
+    "compared_count": 139,
+    "baseline_trajectory_sha256": "b1bae54e8cacfbcb94d6d39fa8598540f69cf2d9583fa5d5b1f96f6f9b3f2eac",
+    "candidate_trajectory_sha256": "b1bae54e8cacfbcb94d6d39fa8598540f69cf2d9583fa5d5b1f96f6f9b3f2eac",
+    "difference_turn_count": 0,
+    "differences": [],
+    "checkpoint_map_hashes": [
+      {
+        "completed_turn": 39,
+        "baseline_sha256": "c21a55c5f3a3d49f60220196cfd6c2ff9a00c4a3e24d7481126c13e60e6a3f95",
+        "candidate_sha256": "c21a55c5f3a3d49f60220196cfd6c2ff9a00c4a3e24d7481126c13e60e6a3f95"
+      },
+      {
+        "completed_turn": 104,
+        "baseline_sha256": "e3a0734f8004c4c790340c602190207e6f5e964695039b31be219b9ea477ceb1",
+        "candidate_sha256": "e3a0734f8004c4c790340c602190207e6f5e964695039b31be219b9ea477ceb1"
+      }
+    ]
+  },
+  "ordered_control_events": {
+    "completed_through": 139,
+    "baseline_count": 173,
+    "candidate_count": 173,
+    "baseline_sha256": "f7622baa03cdcc0726ca1cca3f047cde71f7af104e962b6a88d37da6f91d3ee2",
+    "candidate_sha256": "f7622baa03cdcc0726ca1cca3f047cde71f7af104e962b6a88d37da6f91d3ee2",
+    "exact_equal": true
+  },
+  "checkpoints": [
+    {
+      "name": "jan1993",
+      "completed_week": 39,
+      "reference_path": "data/source/calibration/painted_control_jan1993.json",
+      "reference_sha256": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7",
+      "denominator": 712,
+      "baseline_match_count": 707,
+      "candidate_match_count": 707,
+      "baseline_matching_osids_sha256": "c0f6bf2635348a8a9ad946246dc508c39e683275f4c3fdb87840f4303a317ff1",
+      "candidate_matching_osids_sha256": "c0f6bf2635348a8a9ad946246dc508c39e683275f4c3fdb87840f4303a317ff1",
+      "lost_baseline_matches": [],
+      "gained_vs_baseline": [],
+      "candidate_baseline_controller_difference_count": 0,
+      "baseline_missing_reference_osids": [],
+      "candidate_missing_reference_osids": []
+    },
+    {
+      "name": "apr1994",
+      "completed_week": 104,
+      "reference_path": "data/source/calibration/painted_control_apr1994.json",
+      "reference_sha256": "24f6e8923afa6a5ceaf7e4148cd119f2952f48c99544b5e50e994836dc863dba",
+      "denominator": 712,
+      "baseline_match_count": 707,
+      "candidate_match_count": 707,
+      "baseline_matching_osids_sha256": "c0f6bf2635348a8a9ad946246dc508c39e683275f4c3fdb87840f4303a317ff1",
+      "candidate_matching_osids_sha256": "c0f6bf2635348a8a9ad946246dc508c39e683275f4c3fdb87840f4303a317ff1",
+      "lost_baseline_matches": [],
+      "gained_vs_baseline": [],
+      "candidate_baseline_controller_difference_count": 0,
+      "baseline_missing_reference_osids": [],
+      "candidate_missing_reference_osids": []
+    }
+  ],
+  "protected_controls": [
+    {
+      "osid": "op:jablanica:doljani_2",
+      "completed_turn": 104,
+      "expected": "RBiH",
+      "baseline": "RBiH",
+      "candidate": "RBiH",
+      "baseline_expected_match": true,
+      "candidate_expected_match": true,
+      "baseline_candidate_equal": true
+    },
+    {
+      "osid": "op:donji_vakuf:prusac_2",
+      "completed_turn": 39,
+      "expected": "RBiH",
+      "baseline": "RBiH",
+      "candidate": "RBiH",
+      "baseline_expected_match": true,
+      "candidate_expected_match": true,
+      "baseline_candidate_equal": true
+    },
+    {
+      "osid": "op:donji_vakuf:prusac_2",
+      "completed_turn": 104,
+      "expected": "RBiH",
+      "baseline": "RBiH",
+      "candidate": "RBiH",
+      "baseline_expected_match": true,
+      "candidate_expected_match": true,
+      "baseline_candidate_equal": true
+    },
+    {
+      "osid": "op:prozor:ljubunci_2",
+      "completed_turn": 39,
+      "expected": "HRHB",
+      "baseline": "HRHB",
+      "candidate": "HRHB",
+      "baseline_expected_match": true,
+      "candidate_expected_match": true,
+      "baseline_candidate_equal": true
+    },
+    {
+      "osid": "op:prozor:ljubunci_2",
+      "completed_turn": 104,
+      "expected": "HRHB",
+      "baseline": "HRHB",
+      "candidate": "HRHB",
+      "baseline_expected_match": true,
+      "candidate_expected_match": true,
+      "baseline_candidate_equal": true
+    },
+    {
+      "osid": "op:prozor:lug_2",
+      "completed_turn": 39,
+      "expected": "RBiH",
+      "baseline": "RBiH",
+      "candidate": "RBiH",
+      "baseline_expected_match": true,
+      "candidate_expected_match": true,
+      "baseline_candidate_equal": true
+    },
+    {
+      "osid": "op:prozor:lug_2",
+      "completed_turn": 104,
+      "expected": "HRHB",
+      "baseline": "HRHB",
+      "candidate": "HRHB",
+      "baseline_expected_match": true,
+      "candidate_expected_match": true,
+      "baseline_candidate_equal": true
+    },
+    {
+      "osid": "op:prozor:paros",
+      "completed_turn": 39,
+      "expected": "RBiH",
+      "baseline": "RBiH",
+      "candidate": "RBiH",
+      "baseline_expected_match": true,
+      "candidate_expected_match": true,
+      "baseline_candidate_equal": true
+    },
+    {
+      "osid": "op:prozor:paros",
+      "completed_turn": 104,
+      "expected": "HRHB",
+      "baseline": "HRHB",
+      "candidate": "HRHB",
+      "baseline_expected_match": true,
+      "candidate_expected_match": true,
+      "baseline_candidate_equal": true
+    },
+    {
+      "osid": "op:trnovo:gornja_presjenica",
+      "completed_turn": 39,
+      "expected": "RS",
+      "baseline": "RS",
+      "candidate": "RS",
+      "baseline_expected_match": true,
+      "candidate_expected_match": true,
+      "baseline_candidate_equal": true
+    },
+    {
+      "osid": "op:trnovo:gornja_presjenica",
+      "completed_turn": 104,
+      "expected": "RS",
+      "baseline": "RS",
+      "candidate": "RS",
+      "baseline_expected_match": true,
+      "candidate_expected_match": true,
+      "baseline_candidate_equal": true
+    }
+  ],
+  "anomaly_detection": {
+    "baseline": {
+      "count": 24,
+      "critical": 0,
+      "warning": 3,
+      "info": 21,
+      "sha256": "eebfa739739acde990ff89aa35ad0638d78787f3fbde5471981a701efea0e874"
+    },
+    "candidate": {
+      "count": 24,
+      "critical": 0,
+      "warning": 3,
+      "info": 21,
+      "sha256": "eebfa739739acde990ff89aa35ad0638d78787f3fbde5471981a701efea0e874"
+    },
+    "exact_equal": true
+  },
+  "runner_stderr": {
+    "path": "logs/prusac-diagnostic-20260929/continuation7_front_writer_campaign_20261004_runner.stderr.log",
+    "nonempty_line_count": 2,
+    "unresolved_count": 2,
+    "travnik_unresolved_count": 2,
+    "unresolved_lines": [
+      "[brigade_assignment] UNRESOLVED hrhb_travnik_brigade (1419 pers): fell through sector pipeline, corps=hvo_central_bosnia",
+      "[brigade_assignment] UNRESOLVED hrhb_travnik_brigade (1491 pers): fell through sector pipeline, corps=hvo_central_bosnia"
+    ]
+  },
+  "failures": []
+}

@@ -1029,7 +1029,7 @@ Unlogged diagnoses: two transcript-derived categories plus another same-category
 observation, no complete raw archive; older observer-summary overwrite unresolved.
 Durable receipt: continuation6_front_writer_20261004_final_type_integration_summary.json.
 
-PENDING OWNER DECISION, NOT AUTHORIZED: one continuous139 measurement from the
+OWNER AUTHORIZED AND MEASURED (n42): one continuous139 measurement from the
 clean reviewed preparation commit. New question: which actual helper/local input
 context writes the737th Udurlije column order at138, and which actual existing
 movement_reject reason removes it at139? n40/n41 have no pre-order save or these
@@ -1093,3 +1093,51 @@ use that supplement. Refresh only43 citation cases/strict citations/whitespace;
 13 unchanged plan-index cases and previous validator reused. Then one SAME
 commit/hook retry with fresh trace/log/exit, pass0, stop another failure. No
 runtime/canon/schema/gameplay change, manual tsc, campaign, replay or suite.
+
+### Authorized n42 front-writer measurement — 2026-10-04
+
+Owner “Authorized” granted exactly one continuous139 diagnostic from clean
+2a1554a50866af292b949d3668ae45aec4e861fa. n42 runner0,235.644 seconds; coverage,
+comparison, full temporal-control audit and preservation inventory all exit0.
+Coverage139 rows/278 actual invocations/41 writes has no gaps. n40 raw initial
+413ce64... and finald6715e9... saves,30-input digest ed7fa309...,139 ordinary
+weekly rows and controller maps,173 ordered events,39/104707of712 matching OSIDs
+and11 protected points are identical; critical0,warning3,info21. Literal31 stays
+failed/unwaived;156/188 were not reached. Farz/late evidence is reused from n39.
+
+Actual737:137 both calls write nothing;138 final call empty_front_subsegment_fill
+writes op:bugojno:udurlije from rear Gornja Rovna, distance=score6, active pool8,
+frontline width5,max hops20, nonparticipant with absent pre-write order/transit.
+139 same-run column receipt rejects Gornja Rovna→Udurlije as posture_dig_in,
+then the final helper reissues it. Selected locals are post-selection/pre-write;
+earlier local mutations are possible and causal_proof remains false. The helper
+has no dig_in filter; the consumer lockout has an authorized-operation exception.
+This explains the measured cycle, not a contract defect or later admission effect.
+
+Independent review GO_BOUNDED_MEASUREMENT_ONLY. No gameplay correction, full
+suite,188 retry, merge or baseline adoption. Originaldirty517, later737 admission,
+Sanski/Jajce/four lost matches and required late receipts remain open. Next cheap
+work: review actual gap-fill contract and retained admission/Jajce objective
+evidence; no additional expensive campaign is authorized.
+
+Preflight filename collision overwrote new helper source/command/log/exit; fresh
+root preflight0 binds11 reviewed sources. Worker normalizer refactor also replaced
+the original helper summary/comparator without raw backups. Current bindings and
+tool readback disclose these preservation failures, not raw recovery. Parent119
+artifacts/11 sources and retained run directories/junctions remain intact.
+Readiness first NO-GO (weak write/rejection proxy predicates), exact-event
+correction RED1/GREEN0/syntax0 and targeted GO are retained. Normalizer13 controls0.
+[Reviewed n42 receipt](continuation7_front_writer_campaign_20261004_final_summary.json).
+
+Closeout validation: focused receipt citations/plan-index tests and validators,
+working/staged whitespace and roadmap/board limits; no general smoke/full suite.
+Required local commit: git -c core.hooksPath=.husky commit -m "Record authorized n42 front-writer measurement".
+Question: do the final receipt/document changes satisfy the existing hook?
+Expected cost about one minute if JSON staging invokes npx tsc --noEmit.
+Pass hook/commit0; stop first failure, diagnose before a retry. No manual tsc.
+
+Documentation56/56 exit0; strict135 citations, plan index and whitespace0.
+Roadmap59985/60000 and board19715/20000 bytes. Two size-preflight exits1
+precede the consolidated exact-overage correction0; failures are retained.
+Final receipt preserves its parent and corrects one completed builder-stdout
+binding. Required commit/hook outcome is a separate closeout receipt.

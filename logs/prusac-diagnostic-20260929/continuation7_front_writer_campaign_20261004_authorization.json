@@ -1,0 +1,24 @@
+{
+  "owner_message": "Authorized",
+  "candidate_commit": "2a1554a50866af292b949d3668ae45aec4e861fa",
+  "clean_before_helpers": true,
+  "authorized_scope": "Exactly one continuous139 diagnostic; no188, full suite, replay, automatic retry, gameplay correction, merge or adoption",
+  "question": "Which actual helper/local context writes 737 Udurlije at138, and which actual movement_reject reason removes it139?",
+  "runner_command": "node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_188w.json --weeks 139 --out runs --unique",
+  "topics": "front_distribution,movement_reject",
+  "selected_formation": "arbih_737th_muslim_light",
+  "helper_preflight": "New ignored normalizer/extraction helper plus fixture positive/negative controls, syntax, accepted source bindings and normalized30-input/runtime preflight; commands recorded before execution",
+  "reader_command": "node tools/diagnostics/front_distribution_writer_coverage.cjs <new-run-dir> --expect-boundary arbih_737th_muslim_light:137 --expect-boundary arbih_737th_muslim_light:138 --expect-boundary arbih_737th_muslim_light:139 --json",
+  "pass_criteria": [
+    "runner/reader/comparison/control audits0",
+    "same clean provenance and actual30 inputs/digest asn40",
+    "same raw initial/final saves",
+    "same139 ordinary weekly rows and controller maps,173 ordered events",
+    "39/104 matchingOSIDs707/712 and11 protected points unchanged;critical0",
+    "actual737 required boundaries/helper/consumerreason reported"
+  ],
+  "expected_cost": "about3–5 minutes plus audit; diagnostics may add cost",
+  "stop_rule": "FIRST runner, provenance, coverage, neutrality, or protected failure: retain and diagnose; no automatic retry",
+  "reuse": "Reviewed continuation6 observer/reader/fixtures/typehook, n40/n41 prefix and n39 late/Farz evidence; prior OpenCode quota429/child126 before tools, no unchanged retry",
+  "limits": "Originaldirty517, later737 admission and all late calibration acceptance remain open; literal31 criterion remains failed/unwaived"
+}
