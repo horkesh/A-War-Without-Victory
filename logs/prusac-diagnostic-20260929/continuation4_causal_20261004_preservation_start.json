@@ -1,0 +1,65 @@
+{
+  "base_commit": "e24eba7af6d3071c20cd4174d03b40451d45d8a9",
+  "node": "v22.23.2",
+  "parent_receipts": 6,
+  "unchanged_source_files": 8,
+  "fingerprints": {
+    "logs/prusac-diagnostic-20260929/continuation4_139_20261004_reviewed_summary.json": {
+      "sha256": "c80aef69ea3bd8fa378aab235b03c3af4c58c74da7bfda3d4b0bf99fbcec5f50",
+      "bytes": 25964
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_139_20261004_audit_corrected.stdout.json": {
+      "sha256": "71d040cbbe08a2cc1d551e05d0333b545d0a70ab12cc5e6274ae8eb41a354156",
+      "bytes": 11175
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_campaign_reviewed_summary.json": {
+      "sha256": "2efec3c3e1c910da881f9ba9da70cc27ec256865ae58ebc019bfecb05c5b74e5",
+      "bytes": 29249
+    },
+    "logs/prusac-diagnostic-20260929/continuation4_campaign_audit.stdout.json": {
+      "sha256": "18942547f829b1f90c51449b9581d11db764dd06eaf65e64fae3cf99e9d7fe9f",
+      "bytes": 110841
+    },
+    "logs/prusac-diagnostic-20260929/continuation3_western_failure_receipts_corrected.json": {
+      "sha256": "115e5b97c42359c8a9afe5e49e72f14871b257383bf1174f7fb2e09d6ff1be13",
+      "bytes": 7185030
+    },
+    "logs/prusac-diagnostic-20260929/continuation_western_receipts.json": {
+      "sha256": "cd1b3227d5fd4399531efa922f7eaf7e64fa85b84b4e3f08ee03e7bc80871e8b",
+      "bytes": 20506
+    },
+    "src/sim/combat/bot_brigade_ai_osid.ts": {
+      "sha256": "1a5e12d9198c4743955e579440e3bc7f9cc777e5c486fe3cef5842d80af7014e",
+      "bytes": 57294
+    },
+    "src/sim/combat/reason_code_debug.ts": {
+      "sha256": "a72fe590c87947ff355e9b53996d9ad92c30722fd8862ab5c99648420b6245cb",
+      "bytes": 9548
+    },
+    "src/scenario/combat_causality.ts": {
+      "sha256": "37382226bde0e855a487754ccacd162fa220cd98fd55877a776a74c444ddbe7e",
+      "bytes": 25109
+    },
+    "src/scenario/scenario_reporting.ts": {
+      "sha256": "a24c5402f3d003e1be93e5520076c66a39d870fed7da600589c3770679f0b3ed",
+      "bytes": 17393
+    },
+    "tests/bot_dispatcher_decision_diagnostic.test.ts": {
+      "sha256": "ab058607071929b3434caef0a46c3dd501e553619b40724e551fad7a9f825876",
+      "bytes": 14038
+    },
+    "tests/bot_dispatcher_decision_coverage_diagnostic.test.ts": {
+      "sha256": "a4720a71c03176a9bb8c225144b65524645178c6c4c89f574bd5324f971c27e5",
+      "bytes": 6494
+    },
+    "tests/reason_code_debug.test.ts": {
+      "sha256": "c71cfc3d1da2411d593ed5373c0feaf88d0634cf56e3397eea178d91788dce53",
+      "bytes": 9128
+    },
+    "tools/diagnostics/bot_dispatcher_decision_coverage.cjs": {
+      "sha256": "47e93ebd0d7c16b73ead993b828517a1cddcd9ba0c2b6a0a3669a7dbaf0deca0",
+      "bytes": 12592
+    }
+  },
+  "errors": []
+}

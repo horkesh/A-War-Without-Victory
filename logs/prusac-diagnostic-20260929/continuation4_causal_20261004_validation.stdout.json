@@ -1,0 +1,12 @@
+{
+  "json_parse": true,
+  "rows": 6,
+  "writers": 8,
+  "trailing_whitespace": 0,
+  "execution_commands": 4,
+  "exits": {
+    "opencode": "126",
+    "nodecheck": "0",
+    "extract": "0"
+  }
+}

@@ -623,3 +623,50 @@ Closeout: documentation63/63, strict131 tracked citations, plan-index and
 preservation inventory all exit0.18 parent/eight source hashes match; production
 diff empty, n37–n40/partial52 and local junctions retained. Required local hook
 result is recorded separately; no simulation or unaffected validation repeated.
+
+### Bounded causal diagnosis — 2026-10-04
+
+Owner “So do it” authorizes retained-evidence/source diagnosis only. Questions:
+which post-bot writer owns the 737th movement, what establishes the original
+517th destination ancestry, and where do the four lost matches first diverge?
+Use one bounded extraction worker and one independent review; OpenCode gets one
+static-inventory attempt, with direct read-only fallback if unavailable. Exact
+commands and exits go in the new causal receipt. Reuse n37–n40 evidence; no
+production change, campaign, prefix, replay or full suite. Cost: source/receipt
+reading plus seconds for JSON/helper checks. Pass: actor/turn/source-bound table
+separates facts, hypotheses, missing evidence and cheapest discriminators. Stop
+at missing pre-order inputs; do not infer a selector defect or invent authority.
+Root integrates only settled evidence into the existing report/ledger/roadmap.
+
+Causal-pass closeout gates: one independent Sol review of the extraction and
+claim boundaries, then focused documentation checks only. Exact commands:
+`node node_modules/vitest/vitest.mjs run tests/receipt_citations.test.ts tests/plan_index.test.ts tests/docs_desktop_v09_truth.test.ts`;
+`node tools/validate_receipt_citations.cjs --strict`;
+`node tools/derive_plan_index.cjs --check`; working/staged `git diff --check`.
+Pass: exits0, tracked receipt references, board<20000/roadmap<60000 characters,
+no production diff and retained evidence fingerprints intact. Expected seconds.
+Stop and correct a concrete documentation defect; reuse unaffected simulation,
+source and earlier whole-run comparisons. Local integration command:
+`git -c core.hooksPath=.husky commit -m "Record bounded causal diagnosis and next evidence gates"`.
+The existing hook may run its required typecheck (about one minute); preserve it
+and stop on failure. No additional campaign, package, replay or full suite.
+
+Causal pass findings: no failing predicate supports a gameplay correction.
+The corrected table retains six separate evidence rows and a bounded candidate
+writer inventory. Next preparation: observe named movement state AND orders
+(destination/status/stance/reported ownership) across relevant post-bot phase
+boundaries before branch selection. Capture/bind complete 517 evaluator inputs
+before a contextual fixture; reconstructed state is not dirty n37 attribution.
+Barevo/Lupnica timing, Majdan objectives/readiness and Varošluk admission remain
+separate checks. All existing late acceptance/launch/HV/neutrality gaps remain;
+no campaign is granted by this diagnosis. Raw review and extraction retained;
+corrected summary/table undergo one targeted independent verification.
+
+Targeted independent correction verification is GO for the bounded table and
+wording fixes only. Causal attribution and calibration acceptance remain NO-GO.
+
+Causal closeout: 63/63 documentation tests, 132 tracked citations, plan index,
+35-fingerprint preservation inventory and working/staged whitespace all exit0.
+Seven parent receipts and 16 source files remain bound; production diff empty.
+n37–n40, partial52 and junctions retained. Prior campaign evidence is reused.
+The required local commit hook result is recorded separately; no extra simulation.

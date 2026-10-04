@@ -9,6 +9,40 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-04 — Bounded causal diagnosis
+
+Owner “So do it” authorizes the retained-evidence/source diagnosis pass. One
+OpenCode attempt exits126/provider429 before tools (wrapper0); bounded local
+extraction follows, syntax/extraction/artifact validation0. Six causal rows
+reuse seven parent receipts; no simulation or gameplay/test change.
+
+Facts: n40 ordinary737 emits dig_in/no movement137–139; post-turn Udurlije
+source/writer is unreported. n39 517 at188 freshly marches to Budimlić for
+Stari Majdan, without a complete serialized evaluator input tuple. Original
+dirty n37 cause remains unbound. Barevo/Lupnica diverge n29→n30 with Mistral
+178→180; Majdan has an earlier objective difference and later launch delay;
+Varošluk requires movement ownership plus admission linkage. No shared cause
+or failing pre-order predicate is established.
+
+Independent review accepts STOP/chronology, rejects exhaustive inventory and
+unsupported input/eligibility wording. Corrected supplement adds recall/elite
+candidate families and requires separate movement state/order observation at
+post-bot phase boundaries before branch attribution. Original artifacts remain
+unchanged. Root generation exit1 (source versus sources[] shape) is corrected
+to0; this documentation error is distinct from engine behavior. No campaign,
+full suite, replay, adoption, push or merge. All existing acceptance gaps and
+Farz/protected evidence remain. Exact exits, inputs, source bounds and table:
+`logs/prusac-diagnostic-20260929/continuation4_causal_20261004_reviewed_summary.json`.
+
+Targeted independent correction verification is GO for the bounded table and
+wording fixes only. Causal attribution and calibration acceptance remain NO-GO.
+
+Causal closeout: 63/63 documentation tests, 132 tracked citations, plan index,
+35-fingerprint preservation inventory and working/staged whitespace all exit0.
+Seven parent receipts and 16 source files remain bound; production diff empty.
+n37–n40, partial52 and junctions retained. Prior campaign evidence is reused.
+The required local commit hook result is recorded separately; no extra simulation.
+
 ## 2026-10-04 — n40 bounded dispatcher measurement and STOP
 
 Owner “Go for it” authorizes exactly one139-week run from cleanfe828b9e0.

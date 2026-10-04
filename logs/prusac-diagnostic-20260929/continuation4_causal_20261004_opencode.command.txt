@@ -1,0 +1,1 @@
+opencode run --standalone --model opencode-go/gpt-5.6-luna#medium --format json --auto --title "Bounded movement writer inventory" --file logs/prusac-diagnostic-20260929/continuation4_causal_20261004_opencode_instruction.md "Inventory the static movement destination writers and report exact source lines and missing runtime discriminator."

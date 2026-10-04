@@ -678,3 +678,39 @@ Closeout: documentation63/63, strict131 tracked citations, plan-index and
 preservation inventory all exit0.18 parent/eight source hashes match; production
 diff empty, n37–n40/partial52 and local junctions retained. Required local hook
 result is recorded separately; no simulation or unaffected validation repeated.
+
+### Bounded causal diagnosis — 2026-10-04
+
+The retained evidence supports STOP without a gameplay correction. n40 measures
+the 737th ordinary-pass dig_in/no-movement branch at completed t137–139. Its
+post-turn Udurlije destination can come from movement state or orders; neither
+source nor writer is reported. The candidate inventory includes front
+distribution, drift recall, elite-loan ticking and elite repair, but is not
+exhaustive and does not establish the 737th's eligibility for those branches.
+The next cheap preparation is a named-actor state/order observer across relevant
+post-bot phase boundaries, followed by a fixture proving observer coverage.
+
+n39's 517th at t188 freshly issues Budimlić as an approach to Stari Majdan.
+The receipt omits complete adjacency/control/candidate/path/prior-order inputs;
+it cannot reproduce that full pre-order context or attribute dirty n37.
+Barevo/Lupnica localize to n29→n30 with Mistral execution t178→t180. Majdan
+already differs in n29 (Gerzovo rather than Majdan) before the later launch
+delay. Varošluk requires both t138 movement ownership and later admission linkage.
+These are separate chronology boundaries, not proved failing predicates.
+
+OpenCode child126/provider429 before tools (wrapper0), no retry; local helper
+syntax/extraction/artifact checks0. Initial independent review accepts bounded
+STOP/chronology and requires narrower wording; original artifacts and failures
+are preserved with the corrected supplement. No production change or new run.
+All town/Jajce/lost-match, launch/HV receipt, protected-control, Farz, save,
+denominator and final calibration gates remain open or retained as previously
+measured. [Corrected causal receipt](continuation4_causal_20261004_reviewed_summary.json).
+
+Targeted independent correction verification is GO for the bounded table and
+wording fixes only. Causal attribution and calibration acceptance remain NO-GO.
+
+Causal closeout: 63/63 documentation tests, 132 tracked citations, plan index,
+35-fingerprint preservation inventory and working/staged whitespace all exit0.
+Seven parent receipts and 16 source files remain bound; production diff empty.
+n37–n40, partial52 and junctions retained. Prior campaign evidence is reused.
+The required local commit hook result is recorded separately; no extra simulation.

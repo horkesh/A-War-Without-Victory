@@ -27,6 +27,13 @@ use `week_index` as completed turn. Preserve both schema meanings; a filter
 floor is not a run-earliest divergence. Missing ghost rows are a logging gap,
 not a withdrawal/destruction receipt. Applied in the retained western audit.
 
+A temporal destination can prefer movement state and fall back to movement
+orders. Observe the two fields separately across phase boundaries before
+assigning an order writer. Static branch predicates do not establish a named
+actor's eligibility, and an emitted decision does not serialize all evaluator
+inputs. A fixture with reconstructed inputs proves that constructed context.
+Applied in the [bounded causal diagnosis](PROJECT_LEDGER.md#2026-10-04--bounded-causal-diagnosis).
+
 ## 2026-09-02 - Calibration must preserve causal ownership, not merely painted control
 
 **A correct endpoint produced by the wrong mechanism is still a defect.** April 1994 initially

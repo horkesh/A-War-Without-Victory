@@ -1,0 +1,50 @@
+{
+  "workspace": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "base": "e24eba7af6d3071c20cd4174d03b40451d45d8a9",
+  "commands": [
+    {
+      "name": "opencode_static_writer_inventory",
+      "command_file": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_opencode.command.txt",
+      "wrapper_exit": 0,
+      "actual_child_exit": 126,
+      "provider_status": 429,
+      "tool_use_observed": false,
+      "retry": false,
+      "stdout": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_opencode.stdout.jsonl",
+      "stderr": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_opencode.stderr.log",
+      "exit_receipt": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_opencode.exit.txt"
+    },
+    {
+      "name": "helper_syntax",
+      "command": "node --check logs/prusac-diagnostic-20260929/continuation4_causal_20261004_extract.cjs",
+      "wrapper_exit": 0,
+      "actual_child_exit": 0,
+      "stdout": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_nodecheck.stdout.log",
+      "stderr": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_nodecheck.stderr.log",
+      "exit_receipt": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_nodecheck.exit.txt"
+    },
+    {
+      "name": "local_read_only_extraction",
+      "command_file": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_extract.command.txt",
+      "wrapper_exit": 0,
+      "actual_child_exit": 0,
+      "stdout": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_extract.stdout.json",
+      "stderr": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_extract.stderr.log",
+      "exit_receipt": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_extract.exit.txt"
+    },
+    {
+      "name": "artifact_validation",
+      "command": "parse summary/execution JSON; require 6 causal rows, 8 writer entries, zero Markdown trailing whitespace, and exact 126/0/0 prior exits",
+      "wrapper_exit": 0,
+      "actual_child_exit": 0,
+      "stdout": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_validation.stdout.json",
+      "stderr": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_validation.stderr.log",
+      "exit_receipt": "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_validation.exit.txt"
+    }
+  ],
+  "outputs": [
+    "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_summary.json",
+    "logs/prusac-diagnostic-20260929/continuation4_causal_20261004_table.md"
+  ],
+  "scope": "read-only diagnosis; no simulation, replay, tests, package, source/test/doc edit, Git mutation, or gameplay correction"
+}
