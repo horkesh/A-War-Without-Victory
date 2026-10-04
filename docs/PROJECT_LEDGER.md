@@ -9,6 +9,31 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-05 — Retained Mistral approaching-veto diagnosis; conditional GO
+
+Claude082 retained extraction/control/blob reads0 expose fresh gate detail:
+both axes unready176, Šipovo executable/Drvar non-executable177–179, both ready180.
+Independent GO_CONDITIONAL_DIAGNOSIS_WITH_CORRECTIONS supports the source-based
+anyApproaching deduction with Drvar the sole possible contributing axis; exact
+gate-time member/destination remains unobserved. No simulation/source change.
+Preserved evidence: `logs/claude-channel-20261004/082-diagnosis-result.md` and
+`logs/claude-channel-20261004/082-review-result.md`.
+
+Corrected synthesis: timeout FR writes are consumed by caller floors; both
+before/after values pass0.15, but indirect timeout mutations remain unexcluded.
+Considered-brigade detail does not establish full assigned-roster addition timing.
+Post-turn transit is not gate-time membership. The reviewer’s event-return/
+stored-value numeric label is separately corrected without replacing its report:
+`logs/claude-channel-20261004/082-review-correction.md` (targeted read0).
+Controllers+static graph alone miss live-front/sector/alliance/movement/pool inputs.
+Claude083 performs only static-filter/input preflight, stopping before graph
+reconstruction/run. Root batches existing docs and qualified reports; focused
+references/index/links/sizes/whitespace/preservation, exact exits in closeout.
+Reuse081 observation and080 focused/typehook/collector/56 documentation evidence.
+No new campaign/replay/suite/production correction/merge/push/adoption. Original
+517/737/Majdan/towns/Jajce/n25 matches/input/late/final-review gaps remain;
+calibration NO-GO,n42 observational GO and Farz Sep29/protected/canon/save hold.
+
 ## 2026-10-05 — Authorized n43 Mistral measurement; bounded review GO
 
 Owner authorized one181-week run from clean56bc584e5. One launch, runner0,

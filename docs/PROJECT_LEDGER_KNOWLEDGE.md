@@ -38,8 +38,13 @@ Measured ready state can coexist with continued planning: identify the outer
 launch predicate using its actual decision-time inputs before changing the
 preparation state machine. A timeout assessment write and roster change on the
 execution turn are not proof of which predicate released it. Distinguish raw
-stderr from explicitly filtered simulation categories. Applied in the
-[reviewed n43 observation](PROJECT_LEDGER.md#2026-10-05--authorized-n43-mistral-measurement-bounded-review-go).
+stderr from explicitly filtered simulation categories. Considered-brigade
+diagnostics are not full assigned rosters. Follow timeout writes to their actual
+consumers; event-return force ratio and stored assessment ratio may differ.
+Reconstructing controllers/static contacts alone does not recover live front,
+sector fallback or gate-time movement/pool inputs. Applied in the
+[reviewed n43 observation](PROJECT_LEDGER.md#2026-10-05--authorized-n43-mistral-measurement-bounded-review-go)
+and [qualified caller diagnosis](PROJECT_LEDGER.md#2026-10-05--retained-mistral-approaching-veto-diagnosis-conditional-go).
 
 ## 2026-10-03 - A selected-save boundary is not a pre-turn decision receipt
 

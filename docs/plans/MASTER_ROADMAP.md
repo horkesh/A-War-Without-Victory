@@ -42,7 +42,7 @@ no Mistral/prep receipt. Majdan was already lost in n29 and remains separate.
 076–079 source/env/event gates settled with limits; n39 maps reconstructed.
 080 observer prepared:10 tests/real collector/typehook0, independent GO prep only.
 Owner-authorized n43 181w runner/post0; independent GO observation only.
-Ready176, execution180: exact outer hold/release open; Claude082 diagnoses cheaply.
+082 infers Drvar approaching veto177–179; exact member unobserved;083 preflight.
 No188 retry, gameplay fix, merge/adoption; actual-used31 remains open.
 Original517/737/Majdan, towns/matches and late receipts stay open.
 See [retained audit](../../logs/claude-channel-20261004/074-snapshot-result.md)

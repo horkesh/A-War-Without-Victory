@@ -1386,3 +1386,26 @@ No new campaign/replay/suite/correction/merge/push/adoption. Reuse unaffected080
 focused/typehook/collector and56 documentation cases. Root batches focused docs
 checks/preservation/local integration after review. n42 observational GO,
 calibration NO-GO/Farz Sep29/protected/canon/save and all original gaps hold.
+
+### Retained opening gate qualified — 2026-10-05 — no new run
+
+082 extraction/control/blob reads0; independent GO_CONDITIONAL_DIAGNOSIS_WITH_CORRECTIONS.
+Fresh axis detail: neither executable176, Šipovo only177–179, both180. Bound
+source/immutable require_all_axes_ready absence/downstream caller ordering imply
+the opening anyApproaching hold177–179, Drvar sole possible contributor. Exact
+approaching boolean/brigade/destination/approach set not serialized; conditional,
+not captured branch. [Diagnosis](../claude-channel-20261004/082-diagnosis-result.md),
+[review](../claude-channel-20261004/082-review-result.md).
+
+Timeout rewrites floor-consumed FR; before/after pass0.15, not proof that every
+indirect timeout mutation was irrelevant. Considered-brigade detail is not a full
+assigned roster; post-turn transit is consistency evidence only. Numeric event-
+return versus stored-ratio clarification is a
+[preserved separate note](../claude-channel-20261004/082-review-correction.md), targeted read0.
+No originaldirty517/n25/n37 equivalence or gameplay defect/repair follows.
+Controllers/static contacts cannot supply missing gate-time front/sector/alliance/
+movement/converging-pool state.083 Claude static-filter/input preflight is minutes,
+rg/source reads and one small retained graph extraction; stop at missing premise,
+no reconstructed pipeline/run/observer/source edits. Existing081/080/doc proofs
+reused. Root focused docs/preservation integration only; no new suite/campaign,
+merge/push/adoption. All n42 GO/calibration NO-GO/Farz/protected/188 gaps hold.

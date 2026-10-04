@@ -434,6 +434,35 @@ missing input. Original517/737/Majdan, town/Jajce/all n25 match/late-receipt/fin
 review gaps remain. n42 observational GO, calibration NO-GO, Farz Sep29 ruling,
 protected controls/canon/determinism/control/paint/denominator/save gates hold.
 
+### Retained Mistral opening-gate diagnosis — 2026-10-05 — conditional
+
+082 extraction/control/blob reads exit0. Existing fresh launch_readiness_detail
+records both axes non-executable176, Šipovo executable/Drvar non-executable177–179,
+both executable180. Unchanged source, final absence of require_all_axes_ready
+with no runtime writer/deleter, and classifier call ordering support a conditional
+deduction: participant checks passed, then anyApproaching held177–179; Drvar
+was the sole possible contributing axis. This is not a captured aggregate,
+approaching boolean or gate-time brigade/destination membership receipt.
+[Worker diagnosis](../../logs/claude-channel-20261004/082-diagnosis-result.md),
+[independent review](../../logs/claude-channel-20261004/082-review-result.md).
+
+GO_CONDITIONAL_DIAGNOSIS_WITH_CORRECTIONS accepts that bounded deduction with
+these qualifications: timeout rewrites force_ratio_estimate consumed by launch
+floors; the before/after values both pass0.15, but every indirect timeout-side
+mutation is not excluded.2nd Guard is absent from considered-brigade detail,
+which does not establish the full gate-time assigned roster or addition timing.
+Post-turn transit only supports consistency, not the exact approaching member.
+The reviewer’s event-return versus stored-field numeric label is clarified in
+the [preserved correction note](../../logs/claude-channel-20261004/082-review-correction.md);
+no evidence bytes are replaced.
+
+Controllers+static contacts cannot reconstruct the gate faithfully without
+live-front/sector-fallback/alliance/movement/assigned-converging inputs. Claude083
+only tests the static membership filter and inventories missing phase data,
+stopping before reconstruction or another run. No defect or timing correction,
+dirty n25/n37 source equivalence, original517 attribution or188 acceptance follows.
+All existing calibration NO-GO/n42 GO/Farz/protected/input/late-review gates hold.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing
