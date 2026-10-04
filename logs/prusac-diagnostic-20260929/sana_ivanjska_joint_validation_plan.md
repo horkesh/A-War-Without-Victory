@@ -1141,3 +1141,48 @@ Roadmap59985/60000 and board19715/20000 bytes. Two size-preflight exits1
 precede the consolidated exact-overage correction0; failures are retained.
 Final receipt preserves its parent and corrects one completed builder-stdout
 binding. Required commit/hook outcome is a separate closeout receipt.
+
+### Retained Claude072–074 closeout — 2026-10-04
+
+Bounded admission/Jajce/schema checks and targeted watched lookup are accepted:
+4+3+2+1 primary exits0; compact formatter exits unrecorded. No new run or suite.
+737 Vlasic150 admission is shared; later Medini/Turbe_2 routing and n25-only
+Plamicak180 do not bind138 churn as the Varošluk cause. Missing creation,
+sector/destination writers remain exact gates. Mistral2 execution178 versus180
+shifts Jajce185→187; Lupnica186/Barevo187 occur only in n25/n29. Delayed runs
+have no captures of those cells by188 and zero eligible attackers/attempts.
+Attachments/objectives and HV participant loss differ, but their causes are
+unreported. Majdan_2 is separate and was already lost in n29.
+
+Correct saved name field locates Mistral2 late state: ready, elapsed3/5,
+supply1, intel1/0, force ratios10.96/17.47 versus1. These are late assessment
+values, not proof of the175–180 hold. Six inspected run directories have no
+175–180 snapshot; n38's186 save is post-turn and manifests are summaries with
+no file references. Full watched lookup checks5 entries/run, zero Mistral/prep
+matches with Kotor Varos positive controls. No claim about unchecked receipts.
+Receipts: [072 admission](../claude-channel-20261004/072-admission-result.md),
+[073 Jajce](../claude-channel-20261004/073-jajce-result.md),
+[074 schema/inventory](../claude-channel-20261004/074-snapshot-result.md);
+targeted074 watched addendum is in the canonical shared channel.
+
+No gameplay correction, new instrumentation, replay, campaign/full suite,
+merge/adoption or acceptance change. n42 measurement-only GO and Farz Sep29
+ruling hold. Originaldirty517, later737 admission/writers, Mistral preparation,
+Sanski town/Jajce5/5/four matches, required late receipts and literal31 inputs
+remain open. Preserve protected outcomes; no direct flips or scripted victory.
+Next costly proposal must identify the actual missing decision boundary,
+source/phase bindings, exact command, pass criteria, cost and first-failure stop
+and receive owner authorization. This evidence does not authorize another run.
+
+Documentation integration uses strict receipt citations, plan-index validator,
+changed-link/size/preservation checks and working/staged whitespace; unchanged
+56 citation/index tests and production/run evidence are reused. Expected cost
+seconds, pass all0 and roadmap<=60000/board<=20000 bytes. Final docs-only local
+commit uses the unchanged hook; stop any failure for cheap diagnosis, no tsc
+duplication or expensive retry. Exact closeout results follow after checks.
+
+Integration checks: strict138 citations/index/11 changed links/preservation and
+working/staged whitespace exit0;68 Claude artifacts and n42 raw saves/junctions
+intact. Roadmap59569/60000, board19716/20000 bytes. Saved-script launch1 before
+edits (execution policy), identical inline code0 with policy unchanged; original
+failure retained. Final docs-only hook outcome is recorded in the shared channel.

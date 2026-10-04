@@ -278,6 +278,47 @@ remain open. No gameplay change, suite,188 retry, merge or adoption. New helper
 preflight/refactor overwrites are disclosed; retained parent119 bindings hold.
 [Reviewed n42 receipt](../../logs/prusac-diagnostic-20260929/continuation7_front_writer_campaign_20261004_final_summary.json).
 
+### Retained admission and Jajce evidence — 2026-10-04
+
+Claude tasks072–074 are accepted as bounded retained-evidence findings, not
+calibration acceptance or a gameplay diagnosis. Four admission extractions,
+three Jajce extractions, two snapshot/schema checks and the targeted watched
+lookup record exit0. Compact display helpers have no recorded exits; do not
+generalize the primary exits to every helper. No new simulation or suite ran.
+
+Both n25 and n37 admit the737th to Vlasic Ridge:t150. Their destinations diverge
+later (n37 Medini w154 versus n25 Turbe_2 w161); only n25 records Plamicak:t180
+and its Varošluk combat capture. Creation/admission and subsequent destination
+and sector writers are unreported. The t138 Udurlije cycle does not prove the
+later loss. [Admission receipt](../../logs/claude-channel-20261004/072-admission-result.md).
+
+Mistral2 first execution is w178 in n25/n29 and w180 in n30/n37/n39. Recorded
+Jajce battles shift185→187; Lupnica186 and Barevo187 occur only in n25/n29.
+At188 the delayed operation has zero eligible attackers/attempts and loses
+112th/HGZ participation. This measures the horizon failure; why preparation,
+attachments and planning objectives differed remains unbound. Majdan is the
+separate op:mrkonjic_grad:majdan_2 lane, not Stari Majdan.
+[Jajce receipt](../../logs/claude-channel-20261004/073-jajce-result.md).
+
+The correct stored operation field is active_operations[].name, not diagnostic
+operation_name. Late saves show ready, elapsed3 versus5, supply1, intel1 versus0
+and force ratios10.96/17.47 versus1. These are late assessment values, not the
+175–180 gate. The six-run bounded inventory has initial/final saves and n38's
+post-turn186 snapshot only; replay manifests contain summaries with no file
+references. Full watched-operation lookup checks all5 entries in each run:
+zero Mistral/prep matches, with Kotor Varos found once per run as positive control.
+This does not assert absence in unchecked receipts elsewhere.
+[Snapshot/schema receipt](../../logs/claude-channel-20261004/074-snapshot-result.md)
+and its task074 watched-lookup addendum in the shared channel.
+
+Remaining gates: originaldirty517 pre-order/source continuity; Mistral175–180
+preparation inputs;737 later writers/admission; Sanski town, Jajce5/5, all four
+n25 matches, required late receipts and literal31 inputs. n42 observational GO,
+Farz Sep29 ruling, protected controls and calibration NO-GO remain unchanged.
+No production correction, replay, campaign, merge or adoption follows. Any new
+expensive scope needs a concrete question/command/criteria/cost/stop and owner
+authorization; retained late state does not authorize a full-horizon retry.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

@@ -13,44 +13,37 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-04 (n42 writer/rejection measured)
+**Last updated:** 2026-10-04 (retained admission/Jajce gates settled)
 
-**Current R6 status — October Sana checkpoint remains NO-GO.** The retained n37
-full suite and 188-week campaign both exit 0, but the calibration result fails:
-Petrovac t181, Ključ t185, Sanski Most town still RS at w188, four Sana-belt
-gains at t184–187, Jajce 3/5, and four lost n25 October matches (Barevo, Lupnica,
-Majdan, Varošluk). Protected checkpoints remain retained and critical anomalies
-are zero. The n38 single 186-week prefix exits 0 with the same consumed-input
-digest, initial-save hash, and week-186 totals as n37; its save is post-turn and
-does not prove a selector bug. The dirty candidate is not an accepted baseline:
-no merge/adoption or calibration correction follows. The
-2026-09-29 owner Farz ruling at the top of [CALIBRATION_MASTER](../40_reports/CALIBRATION_MASTER.md)
-supersedes the old P-A wrong-corps wording; do not restore that stale blocker.
+**Current R6 — October Sana remains NO-GO.** n37 full suite/campaign exit0:
+Petrovac181, Ključ185, Sanski town RS188; belt4, Jajce3/5, losses Barevo,
+Lupnica, Majdan, Varošluk. Protected controls hold; critical0. n38 prefix0 has
+matching input/initial-save provenance and totals, but its186 save is post-turn.
+Neither establishes a selector bug or baseline. Farz Sep29 owner ruling at
+[CALIBRATION_MASTER](../40_reports/CALIBRATION_MASTER.md) supersedes wrong-corps wording.
 
-**Clean continuation diagnosis — 2026-10-03:** t187 resumed single-turn check
-exits 0 on declared receipts; t188 trace exits 2 on column totals and whole-state
-equivalence (1,147 differing leaves). Its local 517th receipt freshly selects
-Budimlić Japra for Stari Majdan, but cannot establish the original n37 pre-order
-cause. Independent Sol review is GO for the bounded stop without correction,
-not calibration acceptance. Fresh Farz receipt audit exits 0 under the current
-owner ruling. n37 Southern Move is still planning at w188 (elapsed 3/5),
-correcting the older late-execution narrative. Jajce and all four lost matches
-remain open. No calibration correction, retry, merge or adoption.
-See the [convergence diagnosis](../../logs/prusac-diagnostic-20260929/sana_n37_convergence_report.md).
+Resumed187 exits0;188 exits2 (1,147 state-leaf differences). Fresh517 routing
+does not bind the original dirty-run pre-order cause. Bounded independent review
+GO does not accept calibration. Farz audit0; Southern Move remains planning188
+(elapsed3/5). The OpenCode source audit0 recovers no complete dirty fingerprint;
+partial catalog provenance is insufficient. No continuous trace/retry follows.
+[Convergence receipt](../../logs/prusac-diagnostic-20260929/sana_n37_convergence_report.md).
 
-The subsequent owner-authorized OpenCode source audit exits 0 but fails the
-continuity gate: no complete run-bound dirty-tree fingerprint recovered. The
-partial candidate catalog hash is insufficient. No conditional continuous
-trace ran; original cause and all calibration acceptance gaps remain open.
+n42 authorized139 runner/audits0; n40 saves/maps/protected match.737 gap-fill
+writes Udurlije;139 posture_dig_in/reissue. Independent GO measurement only;
+literal31 criterion remains unmet. No correction or188 retry authorized.
 
-Retained western audit: Barevo/Lupnica are lost n29→n30; Majdan/Varošluk are
-already lost in n29. The 737th's first recorded route-state difference is t138.
-These chronological facts do not identify a launch/selector cause. No correction
-or campaign follows; protected evidence and every acceptance gap remain open.
-
-n42 authorized139 runner/audits0; n40 saves/maps/protected match.
-737 gap-fill writes Udurlije;139 posture_dig_in/reissue. Review GO measurement
-only; original517/late gaps open. Next cheap admission/Jajce review.
+Claude072–074 retained audits0: both runs admit737 to Vlasic150; later routing
+and n25-only Plamicak180 have no proven causal link to138. Mistral2
+execution shifts178→180 at n29→n30; Jajce battles185→187, leaving Lupnica/Barevo
+uncaptured by188. Late prep elapsed3/5 and intel1/0 do not identify the hold.
+No175–180 snapshot in the bounded six-run inventory; full watched lookup finds
+no Mistral/prep receipt. Majdan was already lost in n29 and remains separate.
+Next: resolve the exact missing decision inputs and costly scope before any
+new run. Original517, Sanski/Jajce/all matches and late receipts stay open;
+protected outcomes cannot be traded. No gameplay fix, merge or adoption.
+See [retained audit](../../logs/claude-channel-20261004/074-snapshot-result.md)
+and the calibration master for task074's completed watched lookup and limits.
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference

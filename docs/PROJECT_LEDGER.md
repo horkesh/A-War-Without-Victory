@@ -9,6 +9,40 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-04 — Retained October admission and Jajce gates settled
+
+Claude072–074 extraction and one targeted074 lookup are accepted with limits:
+four admission, three Jajce, two inventory/schema and one watched check exits0.
+Compact formatter exits are unrecorded. Original receipts remain unchanged.
+Both runs admit737 to Vlasic150; later route/admission writers are unreported,
+so138 churn does not prove the lost Varošluk match. Mistral2 execution shifts
+178→180 in n29→n30; ordinary Jajce battles185→187. Lupnica186/Barevo187 are
+captured in n25/n29, absent in delayed runs by188 with zero eligible attackers.
+Why prep, attachments/objectives and HV participation differ remains unbound.
+
+Correct saved operation field name reveals late prep elapsed3/5, intel1/0,
+supply1 and force ratios10.96/17.47 versus1. These are late values, not a
+175–180 gate trace. Six-run inventory has no such snapshot; replay manifests
+are summaries. All5 watched entries per run are checked with positive control:
+zero Mistral/prep matches. Scope is bounded; unchecked receipts remain unchecked.
+Evidence: `logs/claude-channel-20261004/072-admission-result.md`,
+`logs/claude-channel-20261004/073-jajce-result.md`,
+`logs/claude-channel-20261004/074-snapshot-result.md` and074 channel addendum.
+
+Updated existing Sana plan/master/board/roadmap and knowledge entry. No source,
+canon, scenario, control, paint, denominator or save change; no new simulation,
+suite, replay, merge, push or adoption. Reuse unchanged56 documentation tests,
+n42 observational GO and n39 late/Farz evidence. Calibration remains NO-GO:
+original517, later737, Sanski/Jajce5/5/all matches, required receipts and
+literal31 input criterion remain open. New expensive scope still needs owner
+authorization and its question/command/criteria/cost/stop; no retry implied.
+Strict138 citations, plan-index,11 changed links, preservation and whitespace
+checks exit0;68 retained Claude artifacts, n42 raw saves and both junctions
+are intact. Roadmap and board remain within60000/20000 bytes. Saved-script
+launch exit1 (execution policy, before edits); same code inline exit0, no policy
+change. Required docs-only hook result follows in the canonical channel; no
+simulation checks repeated.
+
 ## 2026-10-04 — Claude/Codex shared channel restored
 
 The owner requested Claude instead of OpenCode and the former shared-file,

@@ -1,3 +1,15 @@
+## 2026-10-04 — Search serialized state by its schema and preserve temporal limits
+
+Weekly operation diagnostics use operation_name; CorpsOperation saves use name
+under military.corps_command[].active_operations. A miss with the diagnostic
+field does not establish absent save state. Inspect the real address, all
+relevant small watched records and a positive-control operation before closing
+a bounded missing-input gate. Replay manifests may contain only summaries.
+Late assessment fields and elapsed preparation establish a measured difference,
+not the earlier gate or its cause; require correctly phased decision inputs
+before a gameplay correction. Applied in the
+[October retained audit](PROJECT_LEDGER.md#2026-10-04--retained-october-admission-and-jajce-gates-settled).
+
 ## 2026-10-03 - A selected-save boundary is not a pre-turn decision receipt
 
 When a retained prefix is saved after turn execution, matching its consumed-input
