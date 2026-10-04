@@ -44,6 +44,18 @@ is added. Turn/weekly fields are absent by default. The reader
 expectation and complete manifest continuity; phase localization is not branch
 or historical causal proof. Missing selection cannot establish coverage.
 
+Opt-in front-distribution observation: topic `front_distribution` uses the same
+movement formation selector. `front_distribution_diagnostic.ts` records both
+production invocations and six column-capable helper families plus Phase A direct
+actions, outside GameState. Inputs are detached at post-selection/pre-write;
+earlier local mutations remain possible. Main Phase B score is reconstructed
+from selected locals at the hook, not a captured comparator trace. No-write
+coverage is not a refusal reason; use existing `movement_reject`. The strict
+`front_distribution_writer_coverage.cjs` reader requires both production calls,
+complete actor manifests, global write ordinals, typed snapshots/features and
+candidate/target linkage. Default report keys remain absent. Fixture proof does
+not identify a historical helper or establish a gameplay defect.
+
 ### Canonical harnesses and surfaces (callers of the pipelines)
 - Scenario harness: `src/scenario/scenario_runner.ts` — routes to peace vs war runner based on `state.meta.phase`.
 - Scenario CLI: `src/cli/sim_scenario.ts`.

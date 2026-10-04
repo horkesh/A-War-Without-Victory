@@ -930,3 +930,166 @@ Then retry the same local commit/hook once with NEW commit_retry log/exit;
 question: does the corrected partial-fixture cast compile? Cost about one minute,
 pass hook/commit0, stop another failure for consolidated diagnosis. No manual
 typecheck, production change, suite, campaign or replay.
+
+### Bounded front-writer observation preparation — 2026-10-04
+
+Owner Continue authorizes local observational preparation from 09dcd816e.
+Question: can an opt-in receipt identify the actual distribution helper, its
+available pre-write candidate/selection inputs and guard context at both real
+pipeline calls, while preserving all default and enabled simulation decisions?
+Scope: six existing writer sites, shared movement formation selector, report and
+weekly projection, one strict diagnostic reader and focused tests. No selector,
+posture, order-lifecycle, thresholds, canon or GameState changes; movement_reject
+is reused for consumer rejection. Pre-write is not pre-selection if local
+mutation has already happened; record the boundary honestly. Explicit invocation
+coverage/no-write records prevent inferring rejection from missing output.
+
+Cheapest gates: source/fixture readability and existing hook/runtime prerequisites;
+TDD command: node node_modules/vitest/vitest.mjs run tests/front_distribution_writer_diagnostic.test.ts.
+Expected RED is missing observation capability; retain exact log/exit before
+implementation. Then run the same file GREEN plus affected producer, consumer,
+reason-topic and real report/reader files identified before execution. Cost
+seconds per focused command; pass all tests/own exit0, detached deterministic
+receipts, all six hooks, both callsites, real weekly reader positive and negative
+controls, OFF absence and ON/OFF whole-state plus ordinary-report equality.
+Stop unexpected failures for targeted diagnosis; no full suite, replay or campaign.
+Reuse continuation5 characterization, n40/n41 comparisons, unchanged production
+checks and retained late-run outcomes. OpenCode prior quota429/no-route126 is
+reused; no unchanged retry or unannounced expensive fallback. Sol handles bounded
+implementation and one independent combined review. Root owns acceptance.
+
+Closeout: node tools/derive_plan_index.cjs --check;
+node node_modules/vitest/vitest.mjs run tests/plan_index.test.ts tests/receipt_citations.test.ts;
+node tools/validate_receipt_citations.cjs --strict; git diff --check.
+Cost seconds, pass0 and size caps; stop for targeted documentation correction.
+Required commit: git -c core.hooksPath=.husky commit -m "Add opt-in front distribution writer receipts".
+Hook runs npx tsc --noEmit, about one minute; pass hook/commit0, stop first failure
+for diagnosis. No duplicate manual typecheck. New expensive measurements remain
+unauthorized until the concrete question, exact command, cost and stop rule are
+presented to the owner. Original517 pre-order cause and all acceptance gaps stay open.
+### Continuation 6 front-writer affected checks (2026-10-04)
+
+- Focused TDD RED/GREEN: `node node_modules/vitest/vitest.mjs run tests/front_distribution_writer_diagnostic.test.ts`.
+- Affected regression selection after focused GREEN: `node node_modules/vitest/vitest.mjs run tests/front_distribution_writer_diagnostic.test.ts tests/brigade_front_distribution.test.ts tests/reason_code_debug.test.ts tests/movement_phase_diagnostic.test.ts`.
+- Static reader syntax: `node --check tools/diagnostics/front_distribution_writer_coverage.cjs`.
+- Pass: focused diagnostic contracts, unchanged distributor regressions, shared selector/topic parsing, weekly projection/reader controls all pass. Stop on any unexpected failure for cheap diagnosis; no full suite, campaign, replay, or manual typecheck.
+
+### Continuation 6 independent review STOP and one targeted correction
+
+Single combined review NO-GO: producer/hooks accepted bounded/neutral, but the
+reader can crash after flagging malformed entries, lacks both-call/ordinal
+coverage, rejects valid multi-actor global write ordinals, under-validates typed
+snapshots/features and omits candidate/target membership. No historical inference.
+Root authorizes reader-and-test-only correction, preserve original review/packet
+and pre-correction source copies. Question: do explicit RED controls demonstrate
+all five categories, then does the strict reader accept the two REAL production
+calls merged through the real report/weekly path, including multiple actors?
+Commands: node node_modules/vitest/vitest.mjs run tests/front_distribution_writer_diagnostic.test.ts;
+node --check tools/diagnostics/front_distribution_writer_coverage.cjs.
+Cost seconds; require new RED/then GREEN own exits, structured inconsistencies
+for malformed null/primitive entries, complete requested actor/call/turn/ordinal
+coverage, typed presence/movement/features, valid candidate/target linkage, and
+no producer/game behavior changes. Reuse unchanged 56 other affected cases,
+accepted producer source/writer fixtures and preservation inventory. Stop an
+unexpected failure for cheap diagnosis. Exactly one targeted independent
+verification follows; persistent disagreement requires consolidated diagnosis,
+not another unchanged review cycle. No suite, campaign, replay or manual tsc.
+Main-B score must be labeled hook-time reconstruction from selected locals,
+not an original comparator local or pre-selection trace. Two unlogged diagnosis
+failures get available tool-readback only, never a raw-byte recovery claim.
+
+### Continuation 6 consolidated residual and revised local approach
+
+Targeted verification remains NO-GO: all prior coverage/ordinal/schema/linkage
+items closed, but validHelperFeatures dereferences null/missing feature_inputs
+after the outer validator flags them. This repeats the validate-then-dereference
+failure pattern; a second unchanged review cycle is not warranted.
+Revised approach: make helper validation total over unknown JSON values before
+reading fields, scan all nested validator call sites for that same unsafe pattern,
+and table-drive missing/null/primitive nested-field controls with structured JSON
+exit1 assertions. Preserve failed verification and pre-residual source bytes.
+Scope reader/tests only, same focused Vitest file and node --check commands;
+seconds, RED then GREEN with no uncaught exception and valid two-call/multi-actor
+positive intact. Reuse closed review items and all unaffected production evidence.
+One verification of this consolidated residual/sweep follows; no full rereview,
+manual tsc, campaign, replay or suite. Stop an unexpected failure and revise the
+consolidated diagnosis before another edit. Root owns the resulting integration.
+
+### Continuation 6 reviewed disposition and next measurement proposal
+
+Preparation GO only: affected61/61 exit0, final diagnostic5/5 exit0 refreshes
+changed reader/tests,56 unaffected cases reused. Six column-capable families and
+both real phases/report/weekly/strict reader are fixture-proved. Reader syntax0;
+inventory0 binds2 parent receipts/52 retained artifacts,6 runs,2 junctions and
+protected state/data/canon/hook diff empty. Initial review/first targeted check
+NO-GO retained; revised nested-validator totality sweep closes the residual and
+receives independent GO. Main-B score is hook-time reconstruction. No historical
+helper, rejection, original517 cause or gameplay defect is established.
+Unlogged diagnoses: two transcript-derived categories plus another same-category
+observation, no complete raw archive; older observer-summary overwrite unresolved.
+Durable receipt: continuation6_front_writer_20261004_final_type_integration_summary.json.
+
+PENDING OWNER DECISION, NOT AUTHORIZED: one continuous139 measurement from the
+clean reviewed preparation commit. New question: which actual helper/local input
+context writes the737th Udurlije column order at138, and which actual existing
+movement_reject reason removes it at139? n40/n41 have no pre-order save or these
+helper inputs; fixtures and n39-scoped rejection cannot answer that question.
+Expected cost about3–5 minutes plus audit, based on previous planned139 costs;
+new output may add cost. No188/full suite/replay or automatic retry is included.
+Exact proposed PowerShell runner:
+```powershell
+$env:AWWV_DEBUG_REASON_CODES = 'front_distribution,movement_reject'
+$env:AWWV_DEBUG_MOVEMENT_FORMATIONS = 'arbih_737th_muslim_light'
+node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_188w.json --weeks 139 --out runs --unique
+```
+Exact reader after substituting the NEW directory:
+```powershell
+node tools/diagnostics/front_distribution_writer_coverage.cjs <new-run-dir> --expect-boundary arbih_737th_muslim_light:137 --expect-boundary arbih_737th_muslim_light:138 --expect-boundary arbih_737th_muslim_light:139 --json
+```
+Prerequisites after a grant: clean commit/source bindings, Node22/runtime/data,
+focused local observer/reader proof, a cheaply fixture-proved comparison normalizer
+that strips only additive diagnostic fields and movement column_rejections. Record
+its exact command/exits before runner launch. Pass: runner/reader/audits0, both
+actualcalls at required137–139 boundaries, actual139 rejection reason and matching
+order/local actor context; same n40 initial/final SHA413ce64.../d6715e9...,
+actual30-input digest ed7fa309..., all139 ordinary rows and controller maps,
+173 ordered events,39/104707/712 matchingOSIDs and11 protected points unchanged,
+critical0. Full hashes live in the n41 section/receipt above. Literal31 remains
+failed/unwaived;156/188 unreached. Stop FIRST runner/provenance/coverage/neutrality/
+protected failure; retain and diagnose before any retry proposal. Reuse n39 late
+/Farz evidence. This measurement would not close original517 or late acceptance.
+
+Preparation documentation56/56, strict135 citations, plan index and working/staged
+whitespace exit0. Final integration preserves the first receipt and corrects
+exactly one binding: its builder stdout was hashed before the final output line.
+Other80 parent artifacts and11 source bindings are intact; final supplement has
+96 completed artifact bindings, excluding its own still-live emission log.
+Final link refresh uses receipt-citation43 cases;13 unchanged plan-index cases
+and index validator are reused. Record new refresh/whitespace logs, then invoke
+the same required existing hook. Hook result remains pending, never inferred.
+
+### Continuation 6 required hook STOP: one diagnostic clone type error
+
+First required commit/hook exits1, single TS2322 at front_distribution_diagnostic
+feature_inputs: cloning a string[]|number[] inferred (string|number)[] while the
+existing receipt contract requires homogeneous arrays. Complete retained log has
+this one type category. No commit, no runtime or gameplay failure is reported.
+Preserve original module bytes/hash and all pre-hook packets/logs. Minimal erased
+assertion on the cloned array preserves its already-declared homogeneous union;
+no runtime value, predicate, ordering or source schema change is authorized.
+Focused proof: node node_modules/vitest/vitest.mjs run tests/front_distribution_writer_diagnostic.test.ts;
+cost seconds, require5/5 exit0 and independent type-only verification of the
+exact erased delta; reuse all unaffected review/tests, no full rereview.
+Then retry SAME commit/hook once into NEW commit_retry log/exit. Question: does
+the corrected declared clone type compile? Cost about one minute (first hook
+about71 seconds), pass hook/commit0; stop another failure for consolidated
+diagnosis. No manual duplicate tsc, campaign, replay or suite. Final type binding
+supplement preserves prior receipt rather than rewriting its source fingerprint.
+
+Type-only fix5/5 exit0, independent erased-delta verification GO. Original module
+hash e9059b... preserved; current495e64... final type supplement binds the only
+source change,10 other source bindings and96 parent artifacts intact. Final links
+use that supplement. Refresh only43 citation cases/strict citations/whitespace;
+13 unchanged plan-index cases and previous validator reused. Then one SAME
+commit/hook retry with fresh trace/log/exit, pass0, stop another failure. No
+runtime/canon/schema/gameplay change, manual tsc, campaign, replay or suite.

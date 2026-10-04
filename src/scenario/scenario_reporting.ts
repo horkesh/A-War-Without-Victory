@@ -7,6 +7,7 @@ import type { GameState, FormationId, FactionId } from '../state/game_state.js';
 import { strictCompare } from '../state/validateGameState.js';
 import type { BotOrderDiagnosticsSnapshot, OperationCombatDiagnostic } from './combat_causality.js';
 import type { MovementPhaseDiagnostics } from '../sim/combat/movement_phase_diagnostic.js';
+import type { FrontDistributionDiagnostics } from '../sim/combat/front_distribution_diagnostic.js';
 // REASON-CODE INSTRUMENTATION (topic `formation_refusal`) — see reason_code_debug.ts.
 import type { EmergentFormationRefusalRecord } from '../state/recruitment_types.js';
 import type { CombatOutcome } from '../sim/combat/combat_math.js';
@@ -101,6 +102,7 @@ export interface WeeklyReportRow {
      */
     bot_order_diagnostics?: BotOrderDiagnosticsSnapshot;
     movement_phase_diagnostics?: MovementPhaseDiagnostics;
+    front_distribution_diagnostics?: FrontDistributionDiagnostics;
     /**
      * REASON-CODE INSTRUMENTATION, topic `formation_refusal` — item 4. Absent
      * unless `AWWV_DEBUG_REASON_CODES` requests it.
@@ -137,6 +139,10 @@ export function attachMovementPhaseDiagnosticsToWeeklyReport(
     diagnostics: MovementPhaseDiagnostics | undefined,
 ): void {
     if (diagnostics) row.movement_phase_diagnostics = diagnostics;
+}
+
+export function attachFrontDistributionDiagnosticsToWeeklyReport(row: WeeklyReportRow, diagnostics: FrontDistributionDiagnostics | undefined): void {
+    if (diagnostics) row.front_distribution_diagnostics = diagnostics;
 }
 
 /**

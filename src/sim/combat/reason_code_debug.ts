@@ -1,5 +1,5 @@
 /**
- * REASON-CODE INSTRUMENTATION — one env gate, thirteen topics, inert by default.
+ * REASON-CODE INSTRUMENTATION — one env gate, fourteen topics, inert by default.
  *
  * ═══ WHAT THIS IS FOR ═══
  *
@@ -51,7 +51,7 @@
  * an order the engine already fixed upstream. Reading `process.env` is a pure
  * read of process configuration and does not vary within a run.
  *
- * ═══ ONE VARIABLE, THIRTEEN TOPICS ═══
+ * ═══ ONE VARIABLE, FOURTEEN TOPICS ═══
  *
  * `mainstaff_op_availability_gate.ts` deliberately uses two separate flags,
  * because its two halves move participation in OPPOSITE directions and a
@@ -70,7 +70,7 @@
 import { strictCompare } from '../../state/validateGameState.js';
 
 /**
- * The thirteen diagnostic topics.
+ * The fourteen diagnostic topics.
  *
  *  battle_stack      — item 1. `attacker_brigades` + `defender_contributions` on the
  *                      weekly battle entry. Answers: is this casualty figure a
@@ -104,6 +104,8 @@ import { strictCompare } from '../../state/validateGameState.js';
  *                        the actual bot-order dispatcher boundary.
  *  movement_phase — selected-formation movement state/order snapshots at named
  *                   pipeline mutation boundaries.
+ *  front_distribution — selected-formation pre-write receipts at front-distribution
+ *                       writer boundaries and invocation/no-write coverage.
  */
 export type ReasonCodeTopic =
     | 'battle_stack'
@@ -118,7 +120,8 @@ export type ReasonCodeTopic =
     | 'route_decision'
     | 'tg_formation'
     | 'dispatcher_decision'
-    | 'movement_phase';
+    | 'movement_phase'
+    | 'front_distribution';
 
 const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'axis_reject',
@@ -134,6 +137,7 @@ const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'tg_formation',
     'dispatcher_decision',
     'movement_phase',
+    'front_distribution',
 ];
 
 /**

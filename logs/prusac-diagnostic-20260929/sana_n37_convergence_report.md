@@ -750,3 +750,22 @@ retained. No production change/campaign/replay/suite/adoption; all late gaps sta
 Inventory0 binds11 parents/sources,6 retained runs and2 junctions, while prior
 raw-run inventories and initial-summary preservation exception remain explicit.
 [Corrected diagnosis](continuation5_front_conflict_20261004_summary_corrected.md).
+
+### Front-writer observation prepared — 2026-10-04
+
+Six column-capable families plus Phase A direct actions are observable under
+front_distribution with the shared movement selector. Both actual distribution
+phases flow through report/weekly/strict reader; two-actor global ordinals,
+OFF/ON complete-state and ordinary-report neutrality and nested malformed-input
+controls are fixture-proved. Affected61/61 exit0; final diagnostic5/5 exit0,
+56 unaffected cases reused; syntax/inventory0. Reader-only review failures are
+retained; consolidated totality correction receives independent GO bounded.
+Inputs are post-selection/pre-write, and Main-B score is hook-time reconstruction.
+No historical cause/contract defect is inferred. Tool readback preserves two
+unlogged failure categories and another same-category observation, not raw logs;
+older observer-summary overwrite remains unrecovered. Retained52 artifacts,
+6 run directories,2 junctions and protected boundaries hold. No campaign,
+replay, suite, gameplay correction, merge or adoption. New139 helper/rejection
+measurement is proposed in the plan and needs owner authorization. Original517,
+Jajce/four losses, later admission and all calibration gates remain open.
+[Reviewed preparation](continuation6_front_writer_20261004_final_type_integration_summary.json).

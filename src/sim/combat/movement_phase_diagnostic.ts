@@ -60,6 +60,11 @@ function selectedFormations(): { configured: boolean; ids: string[] } {
         : [];
     return cachedSelection = { configured: ids.length > 0, ids };
 }
+/** Shared selector for formation-scoped diagnostics. Returns a detached id list. */
+export function getMovementDiagnosticSelection(): { configured: boolean; ids: string[] } {
+    const selection = selectedFormations();
+    return { configured: selection.configured, ids: [...selection.ids] };
+}
 export function resetMovementPhaseSelectorCacheForTests(): void {
     cachedSelection = undefined;
     resetReasonCodeTopicCacheForTests();

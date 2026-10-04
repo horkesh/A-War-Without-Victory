@@ -47,16 +47,20 @@ import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
 import { ENABLE_STANDING_OG_RESERVE_COMMIT } from './standing_og_defense.js';
 import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
 import { getQueuedDatedPrestageBrigadeIds } from './pre_planned_operations.js';
+import { createFrontDistributionRecorder, type FrontDistributionCallsite, type FrontDistributionDiagnostics, type FrontDistributionRecorder } from './front_distribution_diagnostic.js';
 
 type CorpsAssetFormationState = FormationState & {
     active_operations?: CorpsCommandState['active_operations'];
 };
 
-interface FrontDistributionOptions {
+export interface FrontDistributionOptions {
     rearDirectRepairMaxHops?: number;
     frontGapRepairMaxHops?: number;
     enableStandingOgReserveCommit?: boolean;
     population1991ByMun?: MunicipalityPopulation1991Map;
+    diagnosticCallsite?: FrontDistributionCallsite;
+    completedTurn?: number;
+    invocationOrdinal?: number;
 }
 
 // ── Corps boundary helpers ─────────────────────────────────────────────────────
@@ -228,6 +232,7 @@ function disperseStackedRearBrigadesForSector(
     friendlySet: Set<string> | undefined,
     opParticipants: Set<string>,
     options: FrontDistributionOptions = {},
+    recorder?: FrontDistributionRecorder,
 ): void {
     const formations = state.military.formations ?? {};
     const sectorTerritory = new Set(sector.territory_osids ?? []);
@@ -292,6 +297,9 @@ function disperseStackedRearBrigadesForSector(
             if (!best) continue;
 
             const directRepairMaxHops = options.rearDirectRepairMaxHops ?? 1;
+            recorder?.recordWrite({ helper: 'rear_stack_dispersion', action_kind: best.dist <= directRepairMaxHops ? 'direct_location' : 'column_order', formation_id: bid, sectors: [sector], op_participants: opParticipants,
+                candidate_ids: candidates, target_ids: reachableTargets.map((entry) => entry.target), target_osid: best.target,
+                distance: best.dist, score: best.dist, feature_inputs: { origin_osid: osid, direct_repair_max_hops: directRepairMaxHops, active_origin_count: activeCounts.get(osid) ?? 0 } });
             if (best.dist <= directRepairMaxHops) {
                 f.location_osid = best.target;
                 f.entrenchment_turns = 0;
@@ -326,6 +334,7 @@ function commitReserveToThreatenedFront(
     friendlySet: Set<string> | undefined,
     opParticipants: Set<string>,
     options: FrontDistributionOptions = {},
+    recorder?: FrontDistributionRecorder,
 ): void {
     if (!(options.enableStandingOgReserveCommit ?? ENABLE_STANDING_OG_RESERVE_COMMIT)) return;
     if ((sector.threat_ratio ?? 0) < 1.5) return;
@@ -402,6 +411,12 @@ function commitReserveToThreatenedFront(
     const best = viable[0];
     if (!best) return;
 
+    recorder?.recordWrite({ helper: 'threatened_reserve_commit', action_kind: best.dist <= 1 ? 'direct_location' : 'column_order', formation_id: best.bid, sectors: [sector], op_participants: opParticipants,
+        candidate_ids: reserveCandidates, target_ids: targetFrontOsids, target_osid: best.target, distance: best.dist,
+        score: best.targetCount, feature_inputs: { threat_ratio: sector.threat_ratio ?? 0, target_count: best.targetCount,
+            effective_enable_standing_og_reserve_commit: options.enableStandingOgReserveCommit ?? ENABLE_STANDING_OG_RESERVE_COMMIT,
+            population_affinity_configured: options.population1991ByMun !== undefined } });
+
     if (best.dist <= 1) {
         best.formation.location_osid = best.target;
         best.formation.entrenchment_turns = 0;
@@ -423,6 +438,7 @@ function fillEmptyFrontSubsegmentsFromSectorReserve(
     friendlySet: Set<string> | undefined,
     opParticipants: Set<string>,
     options: FrontDistributionOptions = {},
+    recorder?: FrontDistributionRecorder,
 ): void {
     const formations = state.military.formations ?? {};
     const allFrontOsids = new Set<string>();
@@ -507,6 +523,12 @@ function fillEmptyFrontSubsegmentsFromSectorReserve(
         const best = viable[0];
         if (!best) continue;
 
+        recorder?.recordWrite({ helper: 'empty_front_subsegment_fill', action_kind: best.dist === 1 ? 'direct_location' : 'column_order', formation_id: best.bid, sectors: [sector], op_participants: opParticipants,
+            candidate_ids: candidateIds, target_ids: [...(subSegment.friendly_osids ?? [])], target_osid: best.target,
+            distance: best.dist, score: best.dist, feature_inputs: { sub_segment_id: subSegment.sub_segment_id,
+                front_gap_repair_max_hops: options.frontGapRepairMaxHops ?? MAX_REDISTRIBUTION_DISTANCE,
+                active_sector_pool_count: activeSectorPoolCount, frontline_width: frontlineWidth } });
+
         if (best.dist === 1) {
             best.formation.location_osid = best.target;
             best.formation.entrenchment_turns = 0;
@@ -528,6 +550,7 @@ function deconflictSharedFrontOsidStacks(
     adjacency: Map<string, string[]>,
     friendlyByFaction: Map<FactionId, Set<string>>,
     opParticipants: Set<string>,
+    recorder?: FrontDistributionRecorder,
 ): void {
     const formations = state.military.formations ?? {};
     const activeCounts = countActiveBrigadesByOsid(formations);
@@ -622,6 +645,12 @@ function deconflictSharedFrontOsidStacks(
             if (entry.claim.bid === keeper) continue;
             if (!entry.target) continue;
 
+            recorder?.recordWrite({ helper: 'shared_front_stack_deconflict', action_kind: entry.target.dist === 1 ? 'direct_location' : 'column_order', formation_id: entry.claim.bid, sectors, op_participants: opParticipants,
+                candidate_ids: claims.map((claim) => claim.bid), target_ids: entry.claim.frontOsids, target_osid: entry.target.target,
+                distance: entry.target.dist, score: entry.target.dist,
+                feature_inputs: { shared_osid: osid, keeper_id: keeper, active_origin_count: activeCounts.get(osid) ?? 0,
+                    personnel: entry.claim.formation.personnel ?? 0, entrenchment_turns: entry.claim.formation.entrenchment_turns ?? 0 } });
+
             if (entry.target.dist === 1) {
                 entry.claim.formation.location_osid = entry.target.target;
                 entry.claim.formation.entrenchment_turns = 0;
@@ -675,6 +704,8 @@ function pinGarrisonToMustHoldFrontEdge(
     adjacency: Map<string, string[]>,
     friendlyByFaction: Map<FactionId, Set<string>>,
     opParticipants: Set<string>,
+    sectors: CorpsFrontSector[],
+    recorder?: FrontDistributionRecorder,
 ): void {
     const mustHoldByCorps = state.military.must_hold_osids_by_corps;
     if (!mustHoldByCorps) return;
@@ -751,6 +782,12 @@ function pinGarrisonToMustHoldFrontEdge(
             const best = candidates[0];
             if (!best) continue;
 
+            recorder?.recordWrite({ helper: 'must_hold_garrison_pin', action_kind: best.dist <= 1 ? 'direct_location' : 'column_order', formation_id: best.bid, sectors, op_participants: opParticipants,
+                candidate_ids: candidates.map((entry) => entry.bid), target_ids: mustHoldOsids, target_osid: target,
+                distance: best.dist, score: best.dist, feature_inputs: { corps_id: corpsId, minimum_personnel: MUST_HOLD_GARRISON_MIN_PERSONNEL,
+                    entrenchment_threshold: ENTRENCHMENT_REDISTRIBUTION_THRESHOLD, personnel: best.f.personnel ?? 0,
+                    entrenchment_turns: best.f.entrenchment_turns ?? 0 } });
+
             if (best.dist <= 1) {
                 best.f.location_osid = target;
                 best.f.entrenchment_turns = 0;
@@ -776,9 +813,12 @@ export function distributeBrigadesToFront(
     sectors: CorpsFrontSector[],
     adjacency: Map<string, string[]>,
     options: FrontDistributionOptions = {},
-): void {
+): FrontDistributionDiagnostics | undefined {
     const formations = state.military.formations ?? {};
     const opParticipants = buildOperationParticipantSet(state);
+    const effectiveStandingOgReserveCommit = options.enableStandingOgReserveCommit ?? ENABLE_STANDING_OG_RESERVE_COMMIT;
+    const recorder = createFrontDistributionRecorder(state, sectors, opParticipants, options.diagnosticCallsite ?? 'direct-call',
+        options.completedTurn, options.invocationOrdinal ?? 0, effectiveStandingOgReserveCommit);
 
     // Build friendly OSID sets per faction (BFS should not path through enemy territory)
     const friendlyByFaction = new Map<FactionId, Set<string>>();
@@ -870,6 +910,10 @@ export function distributeBrigadesToFront(
                 if (candidates.length === 0) continue;
 
                 const target = candidates[0]!;
+                recorder?.recordWrite({ helper: 'main_phase_a', action_kind: 'direct_location', formation_id: bid, sectors, op_participants: opParticipants,
+                    candidate_ids: phaseABrigades, target_ids: candidates, target_osid: target, distance: 1, score: osidCount.get(target) ?? 0,
+                    feature_inputs: { sector_id: sector.sector_id, sub_segment_id: subSeg.sub_segment_id,
+                        origin_osid: loc, active_origin_count: osidCount.get(loc) ?? 0, entrenchment_threshold: ENTRENCHMENT_REDISTRIBUTION_THRESHOLD } });
                 // Move brigade
                 f.location_osid = target;
                 f.entrenchment_turns = 0;
@@ -936,11 +980,23 @@ export function distributeBrigadesToFront(
                 const dist = distToTarget.get(target) ?? Infinity;
 
                 if (dist === 1) {
+                    recorder?.recordWrite({ helper: 'main_phase_b', action_kind: 'direct_location', formation_id: bid, sectors, op_participants: opParticipants,
+                        candidate_ids: eligibleBrigadeIds, target_ids: allowedFrontOsids, target_osid: target, distance: dist,
+                        score: (osidCount.get(target) ?? 0) + PHASE_B_DISTANCE_WEIGHT * dist,
+                        feature_inputs: { sector_id: sector.sector_id, sub_segment_id: subSeg.sub_segment_id, origin_osid: loc,
+                            use_corps_boundary: useCorpsBoundary, distance_weight: PHASE_B_DISTANCE_WEIGHT,
+                            target_stack_count: osidCount.get(target) ?? 0 } });
                     // Adjacent: move directly
                     f.location_osid = target;
                     f.entrenchment_turns = 0;
                     osidCount.set(target, (osidCount.get(target) ?? 0) + 1);
                 } else if (dist > 1 && dist <= MAX_REDISTRIBUTION_DISTANCE) {
+                    recorder?.recordWrite({ helper: 'main_phase_b', action_kind: 'column_order', formation_id: bid, sectors, op_participants: opParticipants,
+                        candidate_ids: eligibleBrigadeIds, target_ids: allowedFrontOsids, target_osid: target, distance: dist,
+                        score: (osidCount.get(target) ?? 0) + PHASE_B_DISTANCE_WEIGHT * dist,
+                        feature_inputs: { sector_id: sector.sector_id, sub_segment_id: subSeg.sub_segment_id, origin_osid: loc,
+                            use_corps_boundary: useCorpsBoundary, distance_weight: PHASE_B_DISTANCE_WEIGHT,
+                            target_stack_count: osidCount.get(target) ?? 0 } });
                     // Issue column march order and reserve the target so later brigades
                     // in this loop see it as occupied (prevents simultaneous pileup)
                     if (!state.military.brigade_movement_orders) {
@@ -961,6 +1017,7 @@ export function distributeBrigadesToFront(
             friendlyByFaction.get(sector.faction),
             opParticipants,
             options,
+            recorder,
         );
 
         fillEmptyFrontSubsegmentsFromSectorReserve(
@@ -970,6 +1027,7 @@ export function distributeBrigadesToFront(
             friendlyByFaction.get(sector.faction),
             opParticipants,
             options,
+            recorder,
         );
 
         disperseStackedRearBrigadesForSector(
@@ -979,12 +1037,14 @@ export function distributeBrigadesToFront(
             friendlyByFaction.get(sector.faction),
             opParticipants,
             options,
+            recorder,
         );
     }
 
-    deconflictSharedFrontOsidStacks(state, sectors, adjacency, friendlyByFaction, opParticipants);
+    deconflictSharedFrontOsidStacks(state, sectors, adjacency, friendlyByFaction, opParticipants, recorder);
 
     // Scenario-authored garrison repair: pin an idle same-corps brigade onto any
     // friendly, currently-undefended must-hold OSID. Narrowly scoped; see guards above.
-    pinGarrisonToMustHoldFrontEdge(state, adjacency, friendlyByFaction, opParticipants);
+    pinGarrisonToMustHoldFrontEdge(state, adjacency, friendlyByFaction, opParticipants, sectors, recorder);
+    return recorder?.finish();
 }

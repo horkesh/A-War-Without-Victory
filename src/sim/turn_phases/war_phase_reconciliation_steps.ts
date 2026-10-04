@@ -2,6 +2,7 @@ import { assertControlEventConsistency } from '../combat/assert_control_events.j
 import { assertFormationsInFriendlyTerritory } from '../combat/assert_formation_territory.js';
 import { assertOperationLifecycle } from '../combat/assert_operation_lifecycle.js';
 import { distributeBrigadesToFront } from '../combat/brigade_front_distribution.js';
+import { mergeFrontDistributionDiagnostics, nextFrontDistributionInvocationOrdinal } from '../combat/front_distribution_diagnostic.js';
 import { reconcileFinalOperationTruth } from '../combat/final_operation_truth_reconciliation.js';
 import {
     createFinalSectorReconciliationSession,
@@ -175,9 +176,13 @@ export const warPhaseReconciliationSteps: NamedPhase[] = [
             const spatial = getSpatialContextCache(context);
             const adjacency = spatial?.postCombat?.adjacency ?? spatial?.preCombat.adjacency;
             if (!adjacency) return;
-            distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency as Map<string, string[]>, {
+            const diagnostics = distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency as Map<string, string[]>, {
                 population1991ByMun: context.input.municipalityPopulation1991,
+                diagnosticCallsite: 'final-distribute-brigades-to-front', completedTurn: context.state.meta.turn,
+                invocationOrdinal: nextFrontDistributionInvocationOrdinal(context.report.front_distribution_diagnostics),
             });
+            const mergedDiagnostics = mergeFrontDistributionDiagnostics(context.report.front_distribution_diagnostics, diagnostics);
+            if (mergedDiagnostics) context.report.front_distribution_diagnostics = mergedDiagnostics;
             const reconciliationSession = context.finalSectorReconciliationSession;
             if (reconciliationSession) {
                 recordFinalSectorReconciliationMutation(

@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-04 (distribution fixtures reviewed)
+**Last updated:** 2026-10-04 (front writer observation prepared)
 
 **Current R6 status — October Sana checkpoint remains NO-GO.** The retained n37
 full suite and 188-week campaign both exit 0, but the calibration result fails:
@@ -50,10 +50,10 @@ or campaign follows; protected evidence and every acceptance gap remain open.
 
 n39 retains towns2/3,belt4/4,Jajce3/5,four lost matches; protected/Farz hold.
 n41 checks0; n40 saves,139 maps and diagnostic-stripped rows match; critical0.
-737:138 front issues Udurlije;139 column removes, front reissues. Reviewed3-case
-fixture reproduces dig_in order churn; no contract defect/historical helper proved.
-Original517/admission/late gaps remain. Pre-write helper inputs still needed;
-reuse movement_reject. No new campaign, gameplay fix, adoption or merge.
+737:138 front issues Udurlije;139 column removes, front reissues. Opt-in writer
+receipts prepared:61 affected cases0, final5 refreshed0, independent GO bounded.
+Historical helper/rejection, original517/admission/late gaps remain. New139 needs
+owner decision; reuse movement_reject. No campaign, gameplay fix, adoption/merge.
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference

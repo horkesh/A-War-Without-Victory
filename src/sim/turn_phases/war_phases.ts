@@ -158,6 +158,7 @@ import { buildCorpsFrontSectors, assignBrigadesToSubSegments, REASSIGNMENT_ENTRE
 import { ENABLE_TG_OG_PROMOTION } from '../combat/tactical_group_config.js';
 import { applyOgPromotions, projectPromotionDisplayNames } from '../combat/tactical_group_promotion.js';
 import { distributeBrigadesToFront } from '../combat/brigade_front_distribution.js';
+import { mergeFrontDistributionDiagnostics, nextFrontDistributionInvocationOrdinal } from '../combat/front_distribution_diagnostic.js';
 import { correctMarchOrders, correctTransitStates } from '../combat/commander_march_correction.js';
 import { evaluateHomeReturn } from '../combat/brigade_home_return.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
@@ -1672,9 +1673,13 @@ export const warPhases: NamedPhase[] = [
             const spatial = getSpatialContextCache(context);
             if (!spatial) return;
             const adjacency = spatial.preCombat.adjacency as Map<Osid, Osid[]>;
-            distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency, {
+            const diagnostics = distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency, {
                 population1991ByMun: context.input.municipalityPopulation1991,
+                diagnosticCallsite: 'distribute-brigades-to-front', completedTurn: context.state.meta.turn,
+                invocationOrdinal: nextFrontDistributionInvocationOrdinal(context.report.front_distribution_diagnostics),
             });
+            const mergedDiagnostics = mergeFrontDistributionDiagnostics(context.report.front_distribution_diagnostics, diagnostics);
+            if (mergedDiagnostics) context.report.front_distribution_diagnostics = mergedDiagnostics;
         }
     },
 

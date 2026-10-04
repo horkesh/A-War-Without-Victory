@@ -9,6 +9,39 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-04 — Front-distribution writer observation preparation
+
+Owner Continue authorizes bounded local preparation from09dcd816e. Topic
+front_distribution shares the movement formation selector, records both real
+distribution invocations and six column-capable helper families plus Phase A
+direct actions. Detached post-selection/pre-write inputs reach the weekly writer;
+no GameState/save, data, canon, threshold or gameplay predicate changes. Main-B
+score is hook-time reconstruction, not comparator/pre-selection proof.
+
+Capability RED1; first affected command1 (29 default-off meta-access failures,
+one cause); gated fallback correction61/61 exit0. Reader-hardening RED1/GREEN0.
+Initial independent review NO-GO on validation/coverage/ordinals/schema/linkage.
+Reader/tests correction RED1, first GREEN1 fixture write-count error, then5/5
+GREEN0. Targeted verification NO-GO finds one remaining null-feature dereference;
+consolidated diagnosis/revised totality sweep RED1, minimal guard5/5 GREEN0,
+syntax0 and residual independent GO. Reuse56 unaffected cases and accepted
+producer review; no unchanged full review, suite, campaign, replay or manual tsc.
+
+Preservation inventory0 binds2 parents/52 retained artifacts,6 run directories,
+2 junctions and protected state/data/canon/hook boundaries. Pre-correction source
+copies, failed packets and raw logged failures remain intact. Earlier unlogged
+diagnoses are transcript-only readback of two categories plus another same-category
+observation, not a complete raw inventory. Older interim observer-summary overwrite
+remains unrecovered. Actual n41 helper/rejection, originaldirty517 cause, later737
+admission, Sanski/Jajce/four lost matches and all acceptance gates remain open.
+Required doc checks and local hook are recorded separately; no success inferred.
+[Reviewed preparation](../logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final_type_integration_summary.json).
+
+First hook1: singleTS2322 homogeneous-array clone inference. Original module
+bytes preserved; one erased typeof assertion changes no runtime behavior/schema.
+Focused5/5 exit0 and independent type-only verification GO. Final type supplement
+binds current11 sources and preserved pre-hook packet. Required same-hook retry
+and final link checks are recorded separately; no success inferred here.
 ## 2026-10-04 — Focused front-distribution characterization
 
 Owner “Proceed” authorizes bounded source diagnosis and local fixtures at

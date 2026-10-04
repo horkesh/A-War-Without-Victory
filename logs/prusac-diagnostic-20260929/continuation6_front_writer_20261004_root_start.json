@@ -1,0 +1,60 @@
+{
+  "head": "09dcd816e44566961e224bf010c8d7bfaad83edb",
+  "branch": "codex/october-calibration-continuation-20261003",
+  "fingerprints": [
+    {
+      "path": "src/sim/combat/brigade_front_distribution.ts",
+      "sha256": "ef36c1d5882ec529a94024af0dcf3ca482d52645158cac5211049c2a3f19f755"
+    },
+    {
+      "path": "src/sim/combat/movement_phase_diagnostic.ts",
+      "sha256": "2bd875e6ca9df60838ad2e9ae2f29aba3129761ac515b5dd072387a5c6d49cb1"
+    },
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "sha256": "6d9f085f43e75c9166fe05fcdb39bb7666e194a1e17cfc5a9eb3637d259a810f"
+    },
+    {
+      "path": "src/sim/turn_phases/war_phases.ts",
+      "sha256": "973b406f04a173d302220c185cf41eaa1677ddabc00e2cc0a7c495a04703941d"
+    },
+    {
+      "path": "src/sim/turn_phases/war_phase_reconciliation_steps.ts",
+      "sha256": "2f62a89c0ac5a145fa7737930b015aab74ac976b0d2532cec45e63a0b792d0b6"
+    },
+    {
+      "path": "src/sim/turn_pipeline_types.ts",
+      "sha256": "88fafd1665da2197e30596a259c4515072936ef0394bf94097dd06cd0875caa6"
+    },
+    {
+      "path": "src/scenario/scenario_reporting.ts",
+      "sha256": "4462d71be7f1aee1edbd7d35019ab419ef154ef197c68dce1407102101ddbc91"
+    },
+    {
+      "path": "src/scenario/scenario_runner.ts",
+      "sha256": "5a3ae5ab8cc00c4f8b9b8abe3368cad6f75c489bf3b38302d1ed2300dfe0b462"
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_final_integration_summary.json",
+      "sha256": "24c47749ef5c4a1d395782f8c534f84d803fcefd762fc428b4d5a272119c1ab6"
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_reviewed_summary.json",
+      "sha256": "8f79b81bf0e32b56f41659f69104c435b11083d4b1bae268bcee78650588a29c"
+    }
+  ],
+  "junctions": [
+    {
+      "path": "runs",
+      "link_type": "Junction",
+      "target": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\runs"
+    },
+    {
+      "path": "node_modules",
+      "link_type": "Junction",
+      "target": "C:\\Users\\User\\.codex\\worktrees\\april-1995-glamoc\\A-War-Without-Victory\\node_modules"
+    }
+  ],
+  "question": "Observe exact front-distribution writer and pre-write inputs without changing simulation decisions",
+  "campaign_authorized": false
+}

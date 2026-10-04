@@ -235,6 +235,31 @@ Original517 cause, n41 helper/rejection, later admission, Sanski/Jajce and four
 lost matches remain open. No production change, campaign, replay, suite or
 baseline adoption. [Corrected predicate table](../../logs/prusac-diagnostic-20260929/continuation5_front_conflict_20261004_summary_corrected.md).
 
+### Front-writer observation prepared — 2026-10-04
+
+Topic `front_distribution` shares the movement formation selector and observes
+six column-capable helper families plus Phase A direct actions at both production
+calls. Detached invocation/no-write and post-selection/pre-write inputs reach the
+real weekly writer. No gameplay predicate, threshold, control, data or save-schema
+change is made. Main Phase B score is hook-time reconstruction from selected
+locals, not a captured comparator trace; no-write coverage is not a refusal.
+Existing `movement_reject` remains the consumer reason channel.
+
+Affected selection61/61 exit0; final diagnostic5/5 exit0 refreshes changed reader
+tests, reusing56 unaffected cases. Reader syntax and preservation inventory exit0
+(52 retained artifacts,6 runs,2 junctions). Initial review and targeted verification
+were NO-GO on reader validation; consolidated totality diagnosis, minimal guard
+and nested malformed-input sweep receive independent GO for preparation only.
+Earlier failure logs/copies are retained. Unlogged fixture diagnoses have two
+categories preserved as tool readback with another same-category observation;
+this is not complete raw-log recovery. The older observer-summary overwrite
+exception remains unrecovered.
+
+No campaign, replay or full suite ran. Actual n41 helper/rejection, originaldirty517
+cause, later737 admission and all late acceptance gaps remain open; n39/n40/n41
+evidence is reused. A new139 measurement needs an owner decision; no188 retry,
+gameplay fix, merge or adoption follows. [Reviewed preparation receipt](../../logs/prusac-diagnostic-20260929/continuation6_front_writer_20261004_final_type_integration_summary.json).
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing
