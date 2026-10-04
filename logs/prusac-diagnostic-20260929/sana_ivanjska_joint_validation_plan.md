@@ -763,7 +763,11 @@ cross-test contamination. This is preparation only; all historical and late
 acceptance gaps remain. Root final documentation and required hook results live
 in the reviewed receipt's closeout/final-binding references.
 
-### Proposed next discriminator — NOT AUTHORIZED
+### One139 discriminator — authorized and consumed as n41
+
+Owner “Proceee” on2026-10-04 grants exactly this one139-week diagnostic from
+clean c43290677. The original pending wording below is historical; the grant
+does not authorize another campaign,188 run,full suite or retry.
 
 Concrete new question: which actual named phase first changes the737th's movement
 state or order at completed137–139, given retained n40 ordinary dig_in/no move?
@@ -771,7 +775,7 @@ The retained n40 report lacks those snapshots; fixtures cannot answer it. Smalle
 continuous scope is one139-week diagnostic from the clean reviewed observer
 commit, with one selected actor. Cost about3–5 minutes plus artifact inspection;
 all-phase output may add cost. No188 run, replay or full suite is proposed.
-Only an explicit new owner grant authorizes this expensive run.
+The explicit owner grant above authorizes this expensive run exactly once.
 
 Exact proposed PowerShell runner:
 ```powershell
@@ -833,3 +837,36 @@ logs, about one minute, pass0; stop another failure for revised diagnosis.
 First commit and retry logs remain unchanged; no campaign or manual tsc.
 Retry2 uses local GIT_TRACE=1 to record actual hook invocation, restoring the
 previous trace setting afterward; the commit command/hook remain unchanged.
+
+### n41 disposition and closeout — 2026-10-04
+
+The authorized run is `apr1992_definitive_188w__0b1f040ff4abe835__w139_n41`.
+Preflight/runner/strict reader/comparison/full-control audit/preservation all0.
+26,410 receipts/139 full chains; n40 initial/final saves, ordinary139 weekly
+rows after stripping both diagnostic fields,139 controller maps and173 events
+match. Actual30 inputs/digest match;39/104 each707/712 and11 protected points
+hold. Prefix critical0/24, two unresolved Travnik stderr lines. Old literal31
+criterion failed/unwaived;156/188 are unreached. Unaffected tests/typecheck and
+n39 late/Farz/protected measurements are reused.
+
+737 writer measured:138 phase176 final-front distribution creates Udurlije
+column order;139 phase34 column movement removes it without movement,176
+reissues. Exact helper/rejection inputs are unreported. Existing rejection
+inventory36/36 rows finds n39 737 t139 posture_dig_in only; n41 unreported,
+no cross-run transfer. Earlier21-row inventory is preserved/superseded.
+Reuse existing movement_reject before adding duplicate rejection instrumentation.
+Independent review GO bounded measurement/STOP; no gameplay correction/retry.
+Original517/Jajce/four lost matches and late acceptance remain open.
+Evidence: `continuation4_movement_campaign_20261004_reviewed_summary.json`.
+
+Closeout question: do changed documentation and durable receipts remain coherent?
+Commands: `node tools/derive_plan_index.cjs --check`;
+`node node_modules/vitest/vitest.mjs run tests/plan_index.test.ts tests/receipt_citations.test.ts`;
+`node tools/validate_receipt_citations.cjs --strict`; working/staged `git diff --check`.
+Pass: own exits0, all affected tests, tracked citations and size caps; cost seconds.
+Reuse unchanged open-gates/observer/reader/dispatcher proofs. Stop any failure and
+correct only its documentation cause; no simulation validation is triggered.
+Final local command: `git -c core.hooksPath=.husky commit -m "Record n41 movement phase diagnosis"`.
+Question: does required existing hook accept the finalized receipt/doc packet?
+JSON staging triggers npx tsc --noEmit; cost about one minute, pass hook/commit0.
+Stop first failure for diagnosis; preserve logs, no manual duplicate typecheck.

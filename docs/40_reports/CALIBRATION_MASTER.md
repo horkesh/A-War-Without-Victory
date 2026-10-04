@@ -192,8 +192,30 @@ one erased annotation and its refreshed fixture/review pass. [Final observer bin
 Historical737 ownership, original517 inputs/cause, Jajce and all four lost
 matches remain open. Protected/Farz, ordinary combat, paint/control references,
 denominators, saves, critical0 and final review remain required. The next proposed
-139-week writer diagnostic needs a new owner grant; no gameplay correction,
-188-week campaign, baseline adoption or merge follows this preparation.
+139-week writer diagnostic needed a new owner grant at preparation closeout;
+the single grant and execution below supersede that pending status.
+
+### n41 named-phase measurement — 2026-10-04
+
+Owner “Proceee” authorizes exactly one139-week run from clean `c43290677`.
+Runner/strict coverage/comparison/full-control audit exit0:26,410 receipts,
+139 complete actor-turn chains, no missing boundaries or inconsistencies.
+n40 initial/final save SHA256 and all139 ordinary weekly rows match after
+stripping movement and bot diagnostics. Actual30 normalized inputs match;
+173 ordered control events,139 controller maps, reached39/104 matches707/712
+and11 protected points are unchanged. Prefix critical0/24; two unresolved
+Travnik stderr diagnostics remain. The prior literal31 criterion stays failed.
+
+Measured737:137 no change;138 phase176 `final-distribute-brigades-to-front`
+creates an owner-absent Udurlije column order;139 phase34 `osid-column-movement`
+removes it without location/state change, then176 reissues it. Exact internal
+helper/rejection predicate is unreported. Retained n39 has a737 t139
+`posture_dig_in` rejection; n41 lacks that field, so the cause is not transferred.
+Future rejection measurement should reuse existing `movement_reject`.
+Independent review GO for this bounded attribution/STOP; no gameplay fix,
+retry,188 campaign,adoption or merge. Originaldirty517 cause, later Varosluk
+admission, separate Jajce/Majdan timing/objective gaps and all late acceptance
+remain open; n39 late/Farz/protected evidence is reused. [Reviewed n41 receipt](../../logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_reviewed_summary.json).
 
 ## April 1995 patron-border candidate measurement — 2026-09-27
 

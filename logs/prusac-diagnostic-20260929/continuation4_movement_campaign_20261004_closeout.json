@@ -1,0 +1,266 @@
+{
+  "pass": true,
+  "candidate_commit": "c43290677156767b7f9ba665bbc9f4d0d9b0282a",
+  "exits": {
+    "preflight": 0,
+    "runner": 0,
+    "coverage": 0,
+    "compare": 0,
+    "full_control_audit": 0,
+    "preservation": 0,
+    "docs": 0,
+    "plan_index": 0,
+    "citations": 0
+  },
+  "artifact_checks": [
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_compare.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_compare.json",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_compare.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_compare_extract.cjs",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_compare_extract.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_coverage.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_coverage.json",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_coverage.stderr.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_extraction_summary.md",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_full_control_audit.cjs",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_full_control_audit.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_full_control_audit.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_full_control_audit.json",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_full_control_audit.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_full_control_audit.stderr.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_full_control_audit.syntax.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_independent_review.md",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_preflight.cjs",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_preflight.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_preflight.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_preservation.cjs",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_preservation.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_preservation.json",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_preservation.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection.json",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection.stderr.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection_complete.command.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection_complete.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection_complete.json",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection_complete.stderr.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection_complete_extract.cjs",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection_complete_syntax.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection_extract.cjs",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection_summary.md",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection_syntax.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_run_identity.json",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_runner.exit.txt",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_runner.stderr.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_runner.stdout.log",
+      "intact": true
+    },
+    {
+      "path": "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_started.json",
+      "intact": true
+    }
+  ],
+  "source_checks": [
+    {
+      "path": "src/sim/combat/movement_phase_diagnostic.ts",
+      "intact": true
+    },
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "intact": true
+    },
+    {
+      "path": "src/sim/turn_pipeline.ts",
+      "intact": true
+    },
+    {
+      "path": "src/sim/turn_pipeline_types.ts",
+      "intact": true
+    },
+    {
+      "path": "src/scenario/scenario_reporting.ts",
+      "intact": true
+    },
+    {
+      "path": "src/scenario/scenario_runner.ts",
+      "intact": true
+    },
+    {
+      "path": "tools/diagnostics/movement_phase_coverage.cjs",
+      "intact": true
+    },
+    {
+      "path": "tests/movement_phase_diagnostic.test.ts",
+      "intact": true
+    },
+    {
+      "path": "tests/movement_phase_coverage_diagnostic.test.ts",
+      "intact": true
+    },
+    {
+      "path": "tests/reason_code_debug.test.ts",
+      "intact": true
+    }
+  ],
+  "staged_paths": [
+    "docs/40_reports/CALIBRATION_MASTER.md",
+    "docs/PROJECT_LEDGER.md",
+    "docs/plans/COMMAND_BOARD.md",
+    "docs/plans/MASTER_ROADMAP.md",
+    "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_extraction_summary.md",
+    "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_independent_review.md",
+    "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_retained_rejection_summary.md",
+    "logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_reviewed_summary.json",
+    "logs/prusac-diagnostic-20260929/sana_ivanjska_joint_validation_plan.md",
+    "logs/prusac-diagnostic-20260929/sana_n37_convergence_report.md"
+  ],
+  "production_diff_empty": true,
+  "documentation": {
+    "focused_tests": 56,
+    "exit": 0,
+    "strict_tracked_citations": 134,
+    "working_whitespace_exit": 0,
+    "staged_whitespace_exit": 0,
+    "caps": [
+      {
+        "path": "docs/plans/MASTER_ROADMAP.md",
+        "characters": 59987,
+        "maximum": 60000
+      },
+      {
+        "path": "docs/plans/COMMAND_BOARD.md",
+        "characters": 19677,
+        "maximum": 20000
+      }
+    ],
+    "unaffected": "Accepted preparation tests/review/typecheck and n39 late/Farz/protected measurements reused; unchanged open-gates tests reused."
+  },
+  "required_hook": {
+    "command": "git -c core.hooksPath=.husky commit -m \"Record n41 movement phase diagnosis\"",
+    "result": "Recorded after execution in final-binding and commit.log/exit; this immutable pre-hook closeout does not claim hook success."
+  },
+  "calibration_acceptance": false,
+  "merge_push_adoption": false
+}

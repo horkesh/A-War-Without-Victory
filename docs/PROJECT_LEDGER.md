@@ -9,6 +9,33 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-04 — n41 named-phase diagnostic
+
+Owner “Proceee” grants exactly one139-week diagnostic from clean c43290677.
+Fresh prerequisites0; runner0, strict coverage0 (26,410 receipts/139 turns,
+no missing/inconsistent chain), comparison0, full-control audit0. n40 saves
+and diagnostic-stripped139 weekly rows match; actual30 inputs match,173 events
+and139 controller maps unchanged. Reached39/104 each707/712 with no lost matches;
+11 protected points hold, critical0/24. Two unresolved Travnik stderr lines remain.
+
+737 measured:138 final-front phase176 issues Udurlije column order;139 column
+phase34 deletes without movement, then176 reissues. Helper/prepredicate unknown.
+Cheap existing-rejection inventory0:36/36 target rows,30 unreported,6 n39 arrays,
+one n39 737 t139 posture_dig_in receipt. It cannot prove n41's unreported reason.
+Earlier underscoped21-row inventory is retained and explicitly superseded.
+Use existing movement_reject for any later rejection discriminator.
+
+Independent GO for bounded measurement/STOP. Preservation0 binds10 sources,
+6 parents,7 protected source blobs,6 retained runs and2 junctions. Prior initial
+summary overwrite exception remains; no recovery claim. OpenCode's retained
+quota429/child126 before tools is reused; Sol extracts/reviews without quota retry.
+No production edit, suite,replay,retry,188 campaign,push,merge or adoption.
+Originaldirty517 cause/later admission/Jajce/four lost matches remain open;
+n39 late/Farz/protected evidence reused. Literal31 criterion remains failed.
+Exact exits, hashes, snapshots, review and residuals:
+`logs/prusac-diagnostic-20260929/continuation4_movement_campaign_20261004_reviewed_summary.json`.
+Documentation checks and required local commit hook are separate closeout receipts.
+
 ## 2026-10-04 — Opt-in movement observer preparation
 
 Owner “Proceed” authorizes bounded instrumentation, focused proof, review and

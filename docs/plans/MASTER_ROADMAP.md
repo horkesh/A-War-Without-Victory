@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-04 (movement observer prepared)
+**Last updated:** 2026-10-04 (n41 phase attribution measured)
 
 **Current R6 status — October Sana checkpoint remains NO-GO.** The retained n37
 full suite and 188-week campaign both exit 0, but the calibration result fails:
@@ -48,11 +48,12 @@ already lost in n29. The 737th's first recorded route-state difference is t138.
 These chronological facts do not identify a launch/selector cause. No correction
 or campaign follows; protected evidence and every acceptance gap remain open.
 
-n39 retains towns2/3, belt4/4, Jajce3/5 and four lost matches; protected/Farz
-hold, critical0. n40 ordinary737 dig_in/no move137–139. Phase observer is
-reviewed GO for preparation; historical writer/original517 cause remain open.
-Separate timing/objective/route gaps persist. Next139 diagnostic needs owner
-grant. No gameplay correction, campaign, adoption or merge follows.
+n39 retains towns2/3,belt4/4,Jajce3/5,four lost matches; protected/Farz hold.
+n41 checks0; n40 saves,139 maps and diagnostic-stripped rows match; critical0.
+737:138 final-front phase issues Udurlije;139 column phase removes, front reissues.
+Internal predicate/original517 cause/admission gaps remain; review GO bounded
+STOP. Existing movement_reject is next rejection discriminator. No new campaign,
+gameplay correction,adoption or merge. Detail in CALIBRATION_MASTER/current plan.
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference

@@ -714,3 +714,24 @@ Causal closeout: 63/63 documentation tests, 132 tracked citations, plan index,
 Seven parent receipts and 16 source files remain bound; production diff empty.
 n37–n40, partial52 and junctions retained. Prior campaign evidence is reused.
 The required local commit hook result is recorded separately; no extra simulation.
+
+### n41 named-phase measurement — 2026-10-04
+
+Owner “Proceee” grants one139 diagnostic at clean c43290677. Runner/coverage/
+comparison/full-control audit0,26,410 receipts/139 complete phase chains.
+n40 raw initial/final saves and all139 diagnostic-stripped weekly rows match;
+30 inputs,173 ordered events,139 maps,39/104707/712 matchingOSIDs and11
+protected points unchanged. Prefix critical0/24; two Travnik stderr diagnostics.
+Literal31 criterion remains failed;156/188 unreached. n39 late evidence reused.
+
+Measured737:137 unchanged;138 final-front phase176 creates Udurlije column
+order;139 column phase34 removes without moving,176 reissues. Internal helper
+and actual rejection predicate remain unproved. Existing rejection inventory0
+has36/36 rows, n39 t139 posture_dig_in only; n41 unreported. Do not transfer
+that reason. Reuse existing movement_reject for a later discriminator.
+Independent GO bounded attribution/STOP, not calibration acceptance; original
+517 cause, later admission, separate Jajce/Majdan timing/objective gaps and
+four lost matches remain. No production correction/campaign retry/adoption/merge.
+Preservation0:10 source hashes,6 parents,7 protected blobs,6 runs,2 junctions;
+earlier summary overwrite exception and underscoped inventory remain disclosed.
+[Reviewed n41 receipt](continuation4_movement_campaign_20261004_reviewed_summary.json).
