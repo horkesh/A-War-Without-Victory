@@ -9,6 +9,24 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-05 — Original dirty517 source provenance requested; criterion remains open
+
+097 six primary receipts0; first top-level-only metadata view preserved with the
+corrected provenance extraction. `logs/claude-channel-20261004/097-source-result.md`
+unchanged. Prior reviewed source-continuity STOP reused; no repeated investigation.
+Inspected metadata binds df3cc commit plus dirty=true, not original dirty bytes.
+Partial candidate catalog hash is not run-bound; matching declared inputs/saves
+and later clean fingerprints do not establish the original executable source.
+
+UNPROVED_IN_INSPECTED_RECEIPTS, not globally unrecoverable or unprovable.
+Owner source-capture path/hash/run linkage requested; no answer inferred, criterion
+change or replay grant. Hash checks bytes; separate provenance must link execution.
+STOP this lane pending new evidence; Claude does not await a routine root decision.
+Reuse074/n39 lawful routing/failed1147-leaf resume and prior reviewed continuity,
+all passed town/belt/protected/Farz evidence. n42 observational GO/calibration NO-GO;
+all188 town/order/n25matches/4belt/5Jajce/critical0/receipts/finalreview remain required.
+Source/canon/test/observer/run/remote/adoption/acceptance unchanged.
+
 ## 2026-10-05 — Defender source comparison qualified; dirty517 provenance next
 
 095 two primary reads0;096 two correction receipts0 with all innercommands0 and

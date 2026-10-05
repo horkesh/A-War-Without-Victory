@@ -1673,3 +1673,23 @@ Reuse093/094/092/091/073/western/083–085/080 and passed captures/protected/Far
 n42 observational GO/calibration NO-GO; all188 criteria required, passed evidence
 retained. Original517/737/towns/Jajce5/matches/input/late/finalreview remain open.
 No source/canon/test/run/remote/adoption/acceptance change.
+
+
+### Original dirty517 provenance STOP pending new evidence — 2026-10-05
+
+097 six primary receipts0; original top-level-only extraction retained with the
+corrected nested read. [Matrix](../claude-channel-20261004/097-source-result.md),
+[prior reviewed continuity](continuation2_source_continuity_reviewed.json).
+Inspected metadata binds df3cc plus dirty=true, not a complete original executable
+capture. Partial catalog hash/current input/save agreement cannot supply that.
+UNPROVED_IN_INSPECTED_RECEIPTS; incomplete prior search is not global
+unrecoverability/unprovability. No new clean replay proves the historical claim
+by itself; no continuous-trace proposal/run adopted. Owner capture path/hash and
+run linkage requested; no answer inferred. Hash verifies bytes, not execution.
+STOP this lane pending new evidence; no routine Codex/Claude mutual waiting.
+Original517 criterion/all188 town/order/n25matching/protected/4belt/5Jajce/
+critical0/receipts/finalreview remain required; passed evidence retained.
+Reuse074/n39/failed1147-leaf resume/continuity review and town/belt/Farz/protected.
+n42 observational GO/calibration NO-GO;canon/determinism/control/paint/reference/
+denominator/save unchanged. No source/test/observer/replay/campaign/suite/remote/
+merge/push/baseline/adoption/acceptance change.

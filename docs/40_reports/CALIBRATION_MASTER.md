@@ -804,6 +804,32 @@ order/n25matches/4belt/5Jajce/critical0/receipts/finalreview requirements remain
 Original517/737/matches/input/late/finalreview stay open; passed checks retained.
 No source/canon/test/simulation/remote/adoption/acceptance change.
 
+## Original dirty517 provenance prerequisite remains open — 2026-10-05
+
+097 six read receipts0; top-level metadata extraction is retained alongside the
+corrected nested-provenance read. The inspected n37/n38 metadata records commit
+df3cc3167f387b052ea74e2d008dc5aa84f7b2ff and dirty=true, but no complete run-bound
+dirty-source capture. Reuse the prior reviewed continuity disposition:
+[097 matrix](../../logs/claude-channel-20261004/097-source-result.md),
+[prior qualified review](../../logs/prusac-diagnostic-20260929/continuation2_source_continuity_reviewed.json).
+The partial catalog fingerprint is not bound to n37/n38 execution; later clean
+fingerprints bind their own runs. Matching declared inputs or initial saves
+cannot establish original executable-source identity.
+
+Disposition: UNPROVED_IN_INSPECTED_RECEIPTS. The older object scan was incomplete;
+global unrecoverability or unprovability is not established. No new clean replay
+by itself proves the historical dirty cause, and no trace/run proposal is adopted.
+The owner has been asked for a contemporaneous capture path/hash and its run
+linkage. A capture hash identifies bytes; separate evidence must link those bytes
+to execution. No criterion redefinition or waiver requested or applied.
+STOP this provenance lane pending that new evidence; no mutual Codex/Claude wait.
+
+Original517 and all other188 requirements remain open where unsatisfied;
+individually passed evidence is retained. n42 observational GO/calibration NO-GO,
+FarzSep29,protected controls,canon,determinism,control/paint/reference/denominator/
+save boundaries unchanged. No source/test/observer/replay/campaign/suite/remote/
+merge/push/baseline/adoption/acceptance change.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

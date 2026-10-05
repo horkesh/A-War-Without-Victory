@@ -1,3 +1,11 @@
+## 2026-10-05 — A capture hash and execution linkage are separate evidence
+
+A hash can verify a source archive's bytes without proving a particular run used
+them. Commit plus dirty=true records neither the dirty patch nor its execution
+identity. Request the capture and its run linkage; bounded absence does not prove
+global unrecoverability, and a new clean run does not supply historical linkage.
+See [provenance disposition](PROJECT_LEDGER.md#2026-10-05--original-dirty517-source-provenance-requested-criterion-remains-open).
+
 ## 2026-10-05 — Shared selection models do not bind historical selected sets
 
 Two callers can share a multi-member model while filters, phase or modifiers
