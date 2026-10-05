@@ -1594,3 +1594,21 @@ No source/canon/test/run/replay/suite/remote/adoption/acceptance change.
 n42 GO/calibration NO-GO/Farz Sep29/protected/canon/determinism/ordinarycombat/
 control/paint/denominator/save and all188 gates remain; passed evidence retained.
 Original517/737/towns/other-match/input/late/finalreview stay separate.
+
+### Jajce188 roster/order STOP / Sanski combat next — 2026-10-05
+
+092 eight reads0;independent read/verify0(required12,forbidden6). Authored withdrawal188
+and bound removal/clean phase order fit112th/HGZ active187/absent188;actual action
+not captured. Positive188 survivor order labels:no objective/in-transit towardBravnice.
+[Worker](../claude-channel-20261004/092-jajce-result.md),
+[review](../claude-channel-20261004/092-review-result.md),unchanged.
+Order-detail write phase unbound;no attribution to advance-sector-offensives.
+Aggregateeligible0 not per-brigade rejection proof;weekly/temporal indices distinct.
+Stale launchdetail not current roster/readiness;finite grep not allserializer proof.
+No schedule-collision/earlier delay/counterfactual attack/date correctness proof.
+STOP roster lane,no date/roster/readiness/action-confirmation run.093 posted:
+finite506th StariMajdan combat and serialSanski objective obstruction. Reuse073/
+western/083–085/091;originaldirty517/737/input/late/othermatches separate.
+n42 observational GO/calibration NO-GO/FarzSep29/protected/canon/determinism/
+ordinarycombat/control/paint/reference/denominator/save and all188 criteria
+required;passed evidence retained. No source/canon/test/run/remote/adoption.

@@ -1,3 +1,11 @@
+## 2026-10-05 — Positive order decisions refine an aggregate zero
+
+Authored withdrawal and endpoint absence support a reconstruction without
+a captured action. Positive survivor order labels distinguish no current objective
+from transit; aggregate eligibility zero alone cannot do this. Launch-time details
+can retain removed members. Bind source and exact generator phase separately.
+See [Jajce disposition](PROJECT_LEDGER.md#2026-10-05--jajce-withdrawal-and-survivor-orders-bounded-sanski-combat-next).
+
 ## 2026-10-05 — Stop endpoint confirmation and reuse actor receipts
 
 A final-save confidence calculation supports a conditional comparison, not its earlier

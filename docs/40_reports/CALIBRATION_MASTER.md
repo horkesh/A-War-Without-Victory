@@ -697,6 +697,31 @@ No correction/canon/run/acceptance change; reuse unaffected evidence.
 n42 observational GO/calibration NO-GO/Farz Sep29/protected and ALL existing188
 town/order/n25-match/4belt/5Jajce/critical0/receipt/final-review requirements hold.
 
+## Jajce188 roster/order lane closed — 2026-10-05
+
+092 eight reads0; independent read/verify0(required12,forbidden6).
+Authored112th/HGZ withdrawal188 and bound removal source/clean phase order fit
+active187/absent188. Source strips the first containing operation/axis roster
+and deletes the formation. This is reconstruction,not a captured withdrawal action.
+[Worker](../../logs/claude-channel-20261004/092-jajce-result.md),
+[review](../../logs/claude-channel-20261004/092-review-result.md),unchanged.
+
+Positive weekly188 survivor decisions:4thGuards objective_missing_or_friendly
+with null objective;2ndGuardMech in_transit_skipped towardBravnice. These explain
+their lack of attack orders,not per-brigade rejection components of aggregate0.
+Prior186–187 participant attack orders name HGZ within retained operation output.
+Weekly188/temporal week187 storedturn188 align by turn,not exact pipeline phase.
+Precise order-detail write phase unbound;do not claim advance-sector-offensives
+emitted them. Stale launchreadiness is not current roster/readiness/pre-order input.
+Finite grep not exhaustive writer/caller/serializer proof. No schedule-collision
+cause,earlier delay cause,counterfactual attack or date correctness established.
+
+STOP roster lane;no date/roster/readiness lever or action-confirmation run.
+093 active: retained506th StariMajdan combat/serialSanski objective obstruction.
+Reuse073/western/083–085/091;originaldirty517/737/input/late/othermatches separate.
+n42 observational GO/calibration NO-GO/FarzSep29 and all188 criteria preserved;
+previously passed belt/protected/criticalzero/Farz town-control evidence retained.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

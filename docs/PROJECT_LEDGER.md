@@ -9,6 +9,28 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-05 — Jajce withdrawal and survivor orders bounded; Sanski combat next
+
+092 eight retained/source reads0; independent read/verify0(required12,forbidden6).
+Authored112th/HGZ withdrawal188 plus clean phase order fits active187/absent188
+rosters;no actual withdrawal action captured. Source strips first containing
+operation/axes and deletes formations. Positive188 survivor decisions show
+4thGuards objective_missing_or_friendly and2ndGuardMech in_transit_skipped
+towardBravnice. These explain no survivor attack orders;aggregateeligible0
+remains aggregate,not per-brigade rejection proof.
+`logs/claude-channel-20261004/092-jajce-result.md` and
+`logs/claude-channel-20261004/092-review-result.md` unchanged.
+
+Precise order-detail write phase unbound;do not assign advance-sector-offensives.
+Weekly188/temporal week187 storedturn188 distinct. Stale launchdetail not current
+roster/readiness input. Finite grep not allserializer proof;no schedule-collision/
+earlier delay/counterfactual attack or date correctness. STOP roster lane,no
+historic-date/readiness/roster lever.093 already posted:506th StariMajdan combat/
+serialSanski objective obstruction. Reuse073/western/083–085/091;zero simulation/
+source/canon/test/remote/acceptance changes. Focused docs checks only. n42 GO/
+calibration NO-GO/FarzSep29/protected and all188 criteria required;passed evidence
+retained. Originaldirty517/737/input/late/othermatches/finalreview stay separate.
+
 ## 2026-10-05 — Southern Move endpoint intel settled; Jajce producer gap next
 
 091 source/extract/commander reads0; END188 derived confidence0.245 versus
