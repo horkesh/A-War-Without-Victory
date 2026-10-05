@@ -1509,3 +1509,26 @@ unaffected081/082/084/085/086/073/080 evidence. n42 observational GO/calibration
 NO-GO/Farz Sep29/protected/canon/determinism/ordinarycombat/control/paint/
 denominator/save and all original188/517/737/Majdan/town/order/Jajce/n25-match/
 input/late/final-review gaps remain.
+### Southern Move staging dates / launch contract next — 2026-10-05
+
+088 six primary reads0. Clean n39 required staging_access red182–184; optional
+axes pass; eligible/approved and planning creation185, no execution/attacks by188.
+Bound two-anchor guard aligns Mistral2 Sipovo182/Pribeljci184 captures; no defect.
+[Worker](../claude-channel-20261004/088-southern-result.md),
+[review](../claude-channel-20261004/088-review-result.md), unchanged.
+Dirty n25/n29 approved183/execution188 cannot prove clean190 launch or its cause.
+No direct planning launch tuple; null=unreported. Approval/creation/first execution
+are distinct; object construction is not directly captured. Evaluator samples
+are not sole whole-turn blocker/exact combat-order proof; battle/net deltas are
+not complete controller history. Review read0/verify0(12 categories).
+Event-derived Gerzovo persistence/filter remains conditional.
+No Mistral hold correction, shared517/737/Jajce/town cause or acceptance follows.
+
+089 dispatched: bound actual single-axis launch predicates + retained assigned
+five-brigade185–188 inputs; gate discriminator or first missing tuple and smallest
+next scope. Read-only/minutes/zero simulation; root owns next action, no mutual
+wait. Reuse087/086/081/082/084/085/073/080 unaffected evidence. No source observer/
+correction/campaign/replay/suite/remote/adoption. n42 GO/calibration NO-GO/Farz
+Sep29/protected/canon/determinism/ordinarycombat/control/paint/denominator/save
+and every188 town/order/n25 matchingOSID/4belt/5Jajce/critical0/required-receipt/
+independent-final-review gate remains; original517/737/input/late gaps open.

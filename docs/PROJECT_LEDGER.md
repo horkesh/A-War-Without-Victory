@@ -9,6 +9,34 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-05 — Southern Move staging dates measured; post-creation gate next
+
+088 schema/records/approved/weekly/anchors/axis reads0. Clean n39 traces required
+staging_access red182–184, eligible/approved185, Southern Move planning185–188
+with zero attacks. Bound catalog requires both Sipovo staging anchors; Mistral2
+captures sipovo_2 at182/pribeljci_2 at184. Guard is coherent; no defect established.
+Unchanged worker and independent review:
+`logs/claude-channel-20261004/088-southern-result.md` and
+`logs/claude-channel-20261004/088-review-result.md`.
+
+Dirty n25/n29 approval183/execution188 is a finite contrast, not a clean190
+prediction or measured latency cause. Approval/creation is not execution; missing
+launch details are unreported. Gerzovo persistence/filter inference remains
+conditional on complete ordered events. Review accepts finite facts: evaluator sample is not a sole whole-turn blocker
+or exact combat-order receipt; battle/net deltas are not complete controller
+history. Object construction is not directly captured by the post-turn row.
+Review read0/verify0(12 categories). No hold correction/shared failure cause.
+089 already dispatched to SAME Claude: actual single-axis launch contract and
+five assigned participants' retained185–188 inputs, read-only; first resolved
+gate or irreducible missing tuple. Root chooses next bounded scope autonomously.
+
+One bounded review; focused docs citation/index/whitespace/link/scope/size/hash/
+hook checks. Reuse087/086 facts,081/082/084/085 limits,073/western and080 checks.
+No production correction/observer/campaign/replay/suite/remote/adoption/acceptance.
+n42 observational GO/calibration NO-GO/Farz Sep29/protected/canon/save and all
+188 towns/order/n25-match/4belt/5Jajce/critical0/receipt/final-review gates remain;
+original517/737/input/late causes and acceptance stay open.
+
 ## 2026-10-05 — Clean Kamen evidence corrects name inference; Southern Move gate next
 
 087 finite operation/battle correction accepted with independent qualifications:

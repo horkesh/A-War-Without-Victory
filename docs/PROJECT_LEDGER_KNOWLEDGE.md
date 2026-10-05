@@ -1,3 +1,13 @@
+## 2026-10-05 — Separate opportunity eligibility from execution latency
+
+A stored failed required axis can explain eligibility timing without proving a
+production defect. Southern Move's two staging anchors fall182/184, approval is185,
+and planning persists through188. Bind the guard to the actual source and distinguish
+approval/creation from first execution. A dirty run's five-turn latency is neither
+a clean forecast nor the cause of a missing launch. Inspect actual gate requirements
+and correctly phased actor inputs before changing timing to fit a checkpoint.
+Applied in the [staging discriminator](PROJECT_LEDGER.md#2026-10-05--southern-move-staging-dates-measured-post-creation-gate-next).
+
 ## 2026-10-05 — Operation names are not behavior identities
 
 Exact-name absence cannot establish absent behavior: clean runs had Kamen ordinary

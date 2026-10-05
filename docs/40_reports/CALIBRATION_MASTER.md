@@ -578,6 +578,37 @@ matches/input/late/final-review gaps stay open. Farz Sep29, protected controls,
 canon, determinism, ordinary combat, control/paint/denominator/save boundaries
 and all required188 acceptance gates remain authoritative.
 
+## Southern Move staging discriminator — 2026-10-05
+
+088 six primary reads exit0. Clean n39 stored opportunity traces report required
+staging_access red182–184; optional axes pass. Eligible/approved185 aligns with
+the first post-turn planning row185. The bound catalog requires HRHB control of sipovo_2 and
+pribeljci_2; Mistral2 combat takes them182/184. Southern Move stays planning185–188,
+targets Majdan_2, and reports zero attacks. These dates locate a real late boundary;
+the guard behaves coherently with the records, without an established defect.
+[Worker](../../logs/claude-channel-20261004/088-southern-result.md),
+[independent review](../../logs/claude-channel-20261004/088-review-result.md).
+
+Dirty n25/n29 approved183 and first execute188. Their five-turn pattern does not
+prove clean n39 would execute190, identify its first failed launch gate, or justify
+changing Mistral's hold. Approval, creation, planning and execution remain distinct.
+First Gerzovo capture/no listed return flip supports the friendly-filter hypothesis
+only under complete ordered-event premises. Missing planning launch details are
+unreported, not readiness failures or zeros; no all-writers/gate-input proof.
+Independent review accepts this finite timeline with qualifications. Evaluator
+samples do not prove the sole whole-turn blocker or exact combat ordering; anchor
+battle/net deltas are not complete ordered controller history. Approval, object
+construction and planning entry remain distinct. No common cause is established
+for original517/737/Jajce/towns.
+
+089 active: finite n39 Southern Move single-axis launch contract plus ONLY assigned
+five-brigade185–188 retained records; resolve a gate or first missing exact tuple.
+No observer, correction, replay or campaign adopted; root chooses the next bounded
+action without mutual waiting. Reuse087/086 finite facts and081/082/084/085 limits.
+n42 observational GO/calibration NO-GO/Farz Sep29/protected/canon/determinism/
+ordinary combat/control/paint/denominator/save and all required188 towns/order/
+n25 matches/4belt/5Jajce/critical0/receipts/final-review gates remain.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing
