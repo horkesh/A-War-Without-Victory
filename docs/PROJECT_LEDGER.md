@@ -9,6 +9,28 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-05 — Generic preparation rule documented; no budget lever adopted
+
+090 five text reads0, tests NOT executed. Bound code/manual agree on max(generic,
+authored) budget. Explicit constructor false is slot-motivated; stored flag absent.
+Preparation coupling intent/higher-precedence wording remain unresolved; no defect
+or canon interpretation accepted. Date-window admission/24-turn proposal expiry
+does not terminate approved operations. Finite test search is not full coverage.
+`logs/claude-channel-20261004/090-contract-result.md` and
+`logs/claude-channel-20261004/090-review-result.md` preserved unchanged.
+
+Reject generic prep bypass/cap: broad protected/Sana/Jajce/match risk and insufficient
+single-op evidence. Review read0/verify0(17 categories); constructor false is
+not catalog-authored false. Consumer/test searches are finite, not exhaustive.
+No blanket Invariants panel requirement established; applicable
+FORAWWV panels remain mandatory.091 dispatched to SAME Claude: final188 intel/
+threshold/actual commander/mapping/probe snapshot; no decision-time history claim.
+If endpoint-only, stop lane and propose a different gap; root chooses next scope.
+Focused docs checks; reuse089–086/081–085/073/080. No source/canon/observer/
+campaign/replay/suite/remote/adoption/acceptance. n42 GO/calibration NO-GO/Farz
+Sep29/protected/canon/save and ALL188 towns/order/n25 matches/4belt/5Jajce/
+critical0/receipts/final-review remain; original517/737/input/late causes open.
+
 ## 2026-10-05 — Southern Move preparation endpoint; authored budget contract next
 
 089 op/prep/prepevents/temporal/temporal-v2 exits0; temporal EMPTY wrong-schema

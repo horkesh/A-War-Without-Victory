@@ -1,3 +1,12 @@
+## 2026-10-05 — Source agreement is not higher-precedence canon adjudication
+
+A max-budget implementation matching the Systems Manual does not settle ambiguous
+Invariants wording. A flag chosen for slot ownership can also control preparation;
+that coupling is observed, its intent needs authority. Constructor false differs
+from an absent serialized field. Proposal expiry is not active-operation expiry.
+Read tests as finite contract text until actually executed; apply panels only to
+their governed scope. See the [budget disposition](PROJECT_LEDGER.md#2026-10-05--generic-preparation-rule-documented-no-budget-lever-adopted).
+
 ## 2026-10-05 — A final preparation state is not a per-tick trace
 
 An intel_gathering/3of5 endpoint and an earlier not-ready continue explain a

@@ -1556,3 +1556,23 @@ n42 observational GO/calibration NO-GO/Farz Sep29/protected/canon/determinism/
 ordinarycombat/control/paint/denominator/save and ALL188 towns/order/n25 matching
 OSIDs/4belt/5Jajce/critical0/required receipts/independent-final-review gates hold.
 Original517/737/input/late causes remain; root owns next routine scope, no mutual wait.
+### Southern Move budget disposition / endpoint intel read — 2026-10-05
+
+090 five TEXT reads0; no tests run. Code/manual max(generic,authored) budget agrees;
+constructor slot false serializes absent and also retains generic preparation.
+Coupling intent/higher-precedence wording unresolved; no narrow defect or lever.
+[Worker](../claude-channel-20261004/090-contract-result.md),
+[review](../claude-channel-20261004/090-review-result.md), unchanged.
+Admission/24-turn pending/delayed proposal expiry does not end approved operations.
+Review read0/verify0(17 categories); constructor false is not catalog-authored
+false. Consumer/test searches finite, no all-consumer/coverage/pass claim.
+Blanket Invariants panel rule
+unestablished; actual FORAWWV/sensitive-history requirements remain mandatory.
+
+091 posted: END188 actual commander/intel/threshold/objective mapping/probe derived
+snapshot; frozen pure reads, not captured tick or causal history. If endpoint-only,
+stop lane/select different gap. No prep bypass/cap/canon/source/observer/run/
+replay/suite/remote/adoption/acceptance. Reuse089–086/081–085/073/080 evidence.
+n42 observational GO/calibration NO-GO/Farz Sep29/protected/canon/determinism/
+ordinarycombat/control/paint/denominator/save and ALL188 town/order/n25 matches/
+4belt/5Jajce/critical0/required-receipt/independent-review gates stay unchanged.

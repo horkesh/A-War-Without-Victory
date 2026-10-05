@@ -644,6 +644,35 @@ Farz Sep29/protected/canon/determinism/ordinary combat/control/paint/denominator
 save and ALL188 town/order/n25 matches/4belt/5Jajce/critical0/receipt/final-review
 gates remain; original517/737/input/late causes stay open.
 
+## Southern Move budget contract disposition — 2026-10-05
+
+090 five TEXT reads0; no tests executed. Clean-bound source and Systems Manual
+both initialize max(generic aggressiveness budget, authored duration). Constructor
+passes is_pre_planned=false for slot ownership; serializer omits the false field.
+That also leaves generic preparation active. It does not establish intended
+coupling or resolve higher-precedence Invariants wording and separate Rulebook
+wording about duration. Review read0/verify0(17 categories). Constructor false
+is not a catalog-authored false; catalog has no such field.
+No narrow mismatch, canon adjudication or preparation bypass/cap is accepted.
+[Worker](../../logs/claude-channel-20261004/090-contract-result.md),
+[review](../../logs/claude-channel-20261004/090-review-result.md), unchanged.
+
+Direct date-window admission and turn+24 eligible/delayed proposal expiry consumers
+do not terminate approved operations at the inspected sites; no exhaustive
+all-consumer claim. Named tests are finite text evidence, not
+executed or exhaustive coverage. No blanket Engine Invariants panel requirement
+is established; required FORAWWV/sensitive-history panels apply in their scope.
+A generic budget change risks other opportunities/protected/Sana/Jajce/matches;
+single final-save evidence does not justify that lever.
+
+091 active: derive END188 Southern Move intel/required-confidence from actual
+stored commander selection, objective-sector mapping and probe fields; frozen
+pure reads only. Endpoint arithmetic is not captured earlier prep inputs or a
+proven binding cause. Stop this lane if it merely confirms the endpoint and pick
+a different open gap. No correction/canon/observer/campaign/acceptance change.
+Reuse089–086 and earlier qualified evidence. n42 observational GO/calibration
+NO-GO/Farz Sep29/protected and every existing188 acceptance gate remain unchanged.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing
