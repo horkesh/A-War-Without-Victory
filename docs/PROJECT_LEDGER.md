@@ -9,6 +9,33 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-05 — Majdan finite discriminator; clean commander gate dispatched
+
+086 primary extract/gerzovo/bljesak/n43 commands0; display formatter exit
+unreported. Independent review requires narrower causal wording. Accept finite
+capture/battle facts, post-turn objectives and final stored axis lists: n25
+Gerzovo combat175 precedes Majdan188; n29 captures Gerzovo188. Weekly183–187
+shows Majdan versus Gerzovo; final axes contain five versus six objectives.
+Original worker/review retained unchanged:
+`logs/claude-channel-20261004/086-majdan-result.md` and
+`logs/claude-channel-20261004/086-review-result.md`.
+
+Current friendly filter explains a coherent hypothesis, not a measured dirty
+branch. Authored-list identity is unbound; controller-at-creation is event-derived
+under completeness/order premises; constant weekly snapshots do not exclude
+intraturn retargeting. Current planning reconciler also writes objective arrays.
+Root qualifications supersede the worker's stronger exclusions, with targeted
+verification. No gameplay defect or correction accepted. Reuse081/082/084 expert
+boundaries,085 disposition and073/western receipts; no repeated campaigns.
+
+087 already assigned to the same Claude: clean n43 Tomislavgrad169–175 earliest
+creation gate/first missing input, then smallest focused fixture/preparation.
+Probe threshold semantics alone do not establish clean branch reachability.
+Routine bounded decisions stay with root; one stopped lane does not stop R6.
+Docs-only checks/preservation; no run/replay/suite/production/remote/adoption.
+n42 observational GO/calibration NO-GO/Farz Sep29/protected/canon/save and
+original517/737/Majdan/Jajce/towns/four-match/input/late/final-review gaps remain.
+
 ## 2026-10-05 — Mistral hold lane stops on retained evidence
 
 085 disposition reads0; root current-producer/blob review0. Existing scoped

@@ -59,6 +59,11 @@ explanation without changing a concrete implementation or acceptance decision.
 A future-run probe does not directly capture a retained run's old gate inputs.
 Applied in the [Mistral disposition](PROJECT_LEDGER.md#2026-10-05--mistral-hold-lane-stops-on-retained-evidence).
 
+Constant post-turn objective snapshots show no observed inter-snapshot change;
+they do not exclude intraturn mutation. A current authored catalog does not bind
+an incompletely fingerprinted dirty run. Applied in the
+[Majdan qualification](PROJECT_LEDGER.md#2026-10-05--majdan-finite-discriminator-clean-commander-gate-dispatched).
+
 ## 2026-10-03 - A selected-save boundary is not a pre-turn decision receipt
 
 When a retained prefix is saved after turn execution, matching its consumed-input

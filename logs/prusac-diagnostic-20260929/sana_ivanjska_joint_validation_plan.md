@@ -1464,3 +1464,25 @@ for concrete new scope; no duplicated investigation. Focused docs checks and
 preservation only, reusing unaffected evidence; no run/replay/suite/source change/
 remote/adoption/acceptance. Original188/517/737/Majdan/towns/Jajce/four matches/
 input/late/final-review gaps,n42 GO/calibration NO-GO/Farz/protected/canon/save hold.
+
+### Majdan finite discriminator / clean commander gate — 2026-10-05
+
+086 four primary extractions0; formatter exit unreported. Independent review
+requires narrower causal wording. Measured n25 Gerzovo175/Bljesak and Majdan188/
+Southern Move, n29 Gerzovo188/Southern Move; weekly183–187 first objectives
+Majdan versus Gerzovo; final stored five/six axis lists. Current catalog/filter
+is conditional; dirty authored identity unbound. Creation controllers are
+event-derived under completeness/order premises. Constant post-turn snapshots
+do not exclude intraturn retargets; planning reconciler writes objective lists.
+[Worker](../claude-channel-20261004/086-majdan-result.md),
+[review](../claude-channel-20261004/086-review-result.md), originals unchanged.
+Root qualifications supersede the stronger worker claims; no correction accepted.
+
+087 active: clean n43 Tomislavgrad169–175 earliest evidenced creation gate or
+first missing decisive input; smallest implementation-ready focused preparation.
+Neither Bljesak nor173 probe in finite clean scan does not prove intel predicate
+reached. No threshold-only fixture/campaign for reassurance. Root dispatches next
+routine action, no mutual wait. Reuse081/082/084/085/073 evidence; focused docs
+checks/preservation only. No new run/replay/suite/production/remote/adoption/
+acceptance. n42 GO/calibration NO-GO/Farz Sep29/protected/canon/save and original
+188/517/737/Majdan/towns/Jajce/four-match/input/late/final-review gaps remain.

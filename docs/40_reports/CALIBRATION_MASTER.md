@@ -520,6 +520,31 @@ change. No campaign/replay/suite/source change or acceptance change authorized.
 Claude waits for concrete new scope; do not repeat this investigation. Calibration
 NO-GO/n42 observational GO and all original town/Jajce/match/517/737/Majdan/input/
 late/final-review/Farz/protected/control/paint/denominator/save gaps remain.
+### Majdan discriminator — 2026-10-05 — finite facts, causal claims qualified
+
+086 four primary extraction receipts0; display formatter exit unreported.
+Independent review requires correction of causal wording. Retained facts: n25
+Gerzovo combat175 in Bljesak173, Majdan combat188 in Southern Move; n29 Gerzovo
+combat188 in Southern Move. Weekly183–187 objectives are Majdan versus Gerzovo;
+final stored axis lists have five versus six entries. n25 has Bljesak rows, n29
+a173 probe; neither named row appears in the finite clean n39/n43 scan.
+[Worker](../../logs/claude-channel-20261004/086-majdan-result.md),
+[review](../../logs/claude-channel-20261004/086-review-result.md), originals unchanged.
+
+Controller-at-creation is reconstructed from initial controls/events under
+completeness/order premises. Current catalog/filter/reconciler/probe semantics
+are current-source conditional, not dirty n25/n29 executed branches. Runtime
+authored-list equality is unbound; constant weekly snapshots do not exclude
+intraturn retargeting. The friendly-controller filter is consistent with the
+observations, not proved as their unique cause. No selector correction follows.
+Root supersedes the worker's stronger exclusions with these qualifications.
+
+087 is active on clean n43 Tomislavgrad169–175: identify the earliest evidenced
+commander creation gate or first missing input and smallest focused preparation.
+Do not assume the probe predicate was reached or run its truth table for
+reassurance. No campaign/replay/suite/source change; original517/737/Jajce/town/
+match/input/late/final-review gaps and all acceptance/protected boundaries hold.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing
