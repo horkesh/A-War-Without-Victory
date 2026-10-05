@@ -1,3 +1,14 @@
+## 2026-10-05 — Operation names are not behavior identities
+
+Exact-name absence cannot establish absent behavior: clean runs had Kamen ordinary
+sector_attack/Gerzovo172 although the Bljesak name was absent. Compare actual
+operation type, phase, objectives, participants, battles and control events first.
+Different names and matching output types do not prove identical creator semantics.
+First capture does not prove later persistence; post-turn recovery/planning rows
+do not capture internal overlap/slot/allocation guards. Choose the next receipt at
+the actual failed outcome boundary, not a successful earlier operation.
+Applied in the [clean commander correction](PROJECT_LEDGER.md#2026-10-05--clean-kamen-evidence-corrects-name-inference-southern-move-gate-next).
+
 ## 2026-10-04 — Search serialized state by its schema and preserve temporal limits
 
 Weekly operation diagnostics use operation_name; CorpsOperation saves use name

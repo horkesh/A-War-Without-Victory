@@ -9,6 +9,32 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-05 — Clean Kamen evidence corrects name inference; Southern Move gate next
+
+087 finite operation/battle correction accepted with independent qualifications:
+retained n43/n39/n30/n37 Kamen sector_attack plans171, Gerzovo combat/control delta172;
+n25 Bljesak plans173/captures175, n29 Southern Move first Gerzovo capture188.
+086 exact-name absence does not imply absent ordinary attack. Originals retained:
+`logs/claude-channel-20261004/087-commander-result.md` and
+`logs/claude-channel-20261004/087-review-result.md`.
+
+No identical creator/semantics claim, later controller persistence/filter proof,
+or all-probe-path exclusion. Recovery169–170/planning171 is measured; plan,
+overlap, slot, allocation, surplus, selection and first-return guards are missing.
+Root rejects causal blocker and observer/181/two-run proposal. Five primary reads0;
+two failed drafts1 preserved, corrected v2 reads0. Review read0, initial verifier2
+(Markdown literal mismatch), corrected verifier0. No new simulation or source change.
+
+088 already dispatched/acknowledged to the same Claude: retained clean n39
+Southern Move180–188 earliest opportunity/approval/creation or launch discriminator,
+then finite bound producer and smallest decision-changing next scope. Root owns
+next routine decision without an owner checkpoint. Reuse unaffected086 review,
+081/082/084 limits,085 disposition,073/western and080 checks. Docs-only focused
+citation/index/whitespace/hook/link/scope/size/hash/save/junction checks; no
+campaign/replay/suite/production/remote/adoption/acceptance change.
+n42 observational GO/calibration NO-GO/Farz Sep29/protected/canon/save and original
+188/517/737/Majdan/towns/order/Jajce/all n25 matches/input/late/final-review gaps hold.
+
 ## 2026-10-05 — Majdan finite discriminator; clean commander gate dispatched
 
 086 primary extract/gerzovo/bljesak/n43 commands0; display formatter exit

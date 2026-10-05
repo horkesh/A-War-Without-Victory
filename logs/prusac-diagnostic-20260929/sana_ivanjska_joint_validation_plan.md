@@ -1486,3 +1486,26 @@ routine action, no mutual wait. Reuse081/082/084/085/073 evidence; focused docs
 checks/preservation only. No new run/replay/suite/production/remote/adoption/
 acceptance. n42 GO/calibration NO-GO/Farz Sep29/protected/canon/save and original
 188/517/737/Majdan/towns/Jajce/four-match/input/late/final-review gaps remain.
+
+### Clean commander correction / late Southern Move gate — 2026-10-05
+
+087 accepted with independent qualifications: retained n43/n39/n30/n37 Kamen
+sector_attack planning171/Gerzovo first combat delta172; n25 Bljesak173/175,
+n29 Southern Move/Gerzovo188. Exact-name absence in086 is not behavior absence.
+[Worker](../claude-channel-20261004/087-commander-result.md),
+[review](../claude-channel-20261004/087-review-result.md) unchanged.
+No same-creator semantics, later controller persistence/filter proof or all-probe
+exclusion. Recovery169–170/planning171 is visible; plan/overlap/slot/allocation/
+surplus/selection/first-return guard inputs are missing. Hypotheses stay conditional.
+
+Five successful primary reads0, two draft failures1 preserved/corrected v2 reads0;
+review read0/initial literal verifier2/corrected verifier0. Commander observer plus
+181/two-run proposal declined: no actual clean Majdan188 defect demonstrated.
+088 active/acknowledged: retained clean n39 Southern Move180–188 earliest stored
+opportunity/approval/creation/preparation/execution blocker or decisive missing
+tuple; finite bound producer only. Root owns next bounded dispatch without mutual
+wait. No campaign/replay/suite/source/remote/adoption/acceptance change; reuse
+unaffected081/082/084/085/086/073/080 evidence. n42 observational GO/calibration
+NO-GO/Farz Sep29/protected/canon/determinism/ordinarycombat/control/paint/
+denominator/save and all original188/517/737/Majdan/town/order/Jajce/n25-match/
+input/late/final-review gaps remain.

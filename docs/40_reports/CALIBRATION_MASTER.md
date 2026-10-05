@@ -545,6 +545,39 @@ Do not assume the probe predicate was reached or run its truth table for
 reassurance. No campaign/replay/suite/source change; original517/737/Jajce/town/
 match/input/late/final-review gaps and all acceptance/protected boundaries hold.
 
+## Clean commander name inference corrected — 2026-10-05
+
+087 independently accepted with qualifications. Retained n43/n39/n30/n37 show an
+ordinary sector_attack named Operacija Kamen: planning171, execution172–174,
+recovery175. Gerzovo's first HRHB battle/control delta is172; n25's Bljesak
+plans173 and captures Gerzovo175; n29 first captures it188 in Southern Move.
+086 measured exact Bljesak-name absence, not absence of an ordinary attack.
+[Worker](../../logs/claude-channel-20261004/087-commander-result.md) and
+[review](../../logs/claude-channel-20261004/087-review-result.md) remain unchanged.
+
+n43 is clean-source; the other rows do not waive dirty/unbound source limits.
+These finite rows do not bind Kamen/Bljesak to identical semantics or creator
+paths. First capture does not prove uninterrupted later controller persistence
+or a Southern Move filter result. Mistral1 recovery169–170/Kamen planning171 is
+visible; active-plan, overlap, slot, allocation, surplus, selection and first-return
+inputs are unreported. Recovery/slot explanations remain hypotheses. Kamen's
+emitted full operation is not a probe; other calls/fallback paths are not excluded.
+
+Five primary extractions exit0; ops1(undefined corps summary) and scan1(schema
+handling) remain preserved, with corrected ops-v2/scan-v2 exits0. Review read0,
+initial literal verifier2(Markdown mismatch), corrected verifier0; no simulation.
+Root declines the proposed commander observer/181-week/two-run proof: no measured
+connection to the actual clean Majdan-at188 failure.088 is active on retained
+clean n39 Southern Move180–188 opportunity/approval/creation/preparation/execution
+and its first decisive stored guard or missing input. No production correction,
+campaign, replay, suite, remote action or adoption follows from087.
+
+Reuse unaffected081/082/084/085/086 and073/western evidence. n42 observational
+GO and calibration NO-GO remain; original517/737/towns/order/Jajce/all n25
+matches/input/late/final-review gaps stay open. Farz Sep29, protected controls,
+canon, determinism, ordinary combat, control/paint/denominator/save boundaries
+and all required188 acceptance gates remain authoritative.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing
