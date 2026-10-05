@@ -1,3 +1,13 @@
+## 2026-10-05 — A final preparation state is not a per-tick trace
+
+An intel_gathering/3of5 endpoint and an earlier not-ready continue explain a
+coherent preparation hold; they do not capture every earlier predicate, reset or
+intraturn transition. Null readiness detail is unreported, not proof the evaluator
+never ran. Keep conditional timeout arithmetic distinct from actual launch.
+Align derived temporal loop+1 labels with weekly/meta.turn before causality.
+Opportunity admission dates are not active-operation deadlines without a consumer.
+Applied in the [preparation endpoint](PROJECT_LEDGER.md#2026-10-05--southern-move-preparation-endpoint-authored-budget-contract-next).
+
 ## 2026-10-05 — Separate opportunity eligibility from execution latency
 
 A stored failed required axis can explain eligibility timing without proving a

@@ -1532,3 +1532,27 @@ correction/campaign/replay/suite/remote/adoption. n42 GO/calibration NO-GO/Farz
 Sep29/protected/canon/determinism/ordinarycombat/control/paint/denominator/save
 and every188 town/order/n25 matchingOSID/4belt/5Jajce/critical0/required-receipt/
 independent-final-review gate remains; original517/737/input/late gaps open.
+### Southern Move preparation endpoint / budget contract — 2026-10-05
+
+089 five extracts0; initial temporal EMPTY wrong-schema selector is not proof;
+temporal-v2 retained. Final188 planning185,intel_gathering,3of5 ticks,duration2,
+supply1,postponement0,unresolved Majdan probe188. Bound source has preparation
+not-ready continue before later readiness gates at elapsed<=4.
+[Worker](../claude-channel-20261004/089-launch-result.md),
+[review](../claude-channel-20261004/089-review-result.md), unchanged.
+Endpoint/null readiness does not prove every earlier predicate absent/false,
+every-tick low intel,no reset/intraturn change or all-writers coverage. Conditional
+timeout190 is not observed launch. Review read0/verify0(14 categories); an
+opening-readiness precheck at elapsed5 can recover before timeout. Temporal-v2
+contains25 literal post-turn rows. Post-turn five-member temporal positions/
+derived loop+1 labels require phase alignment; assembly is not live readiness.
+
+Root STOP on reassurance capture, no observer/run.090 direct authored planning2/
+generic prep5 contract/constructor flags/window-expiry consumer/spec/test reads;
+minimal supported next PLAN or next different gap. Admission dates/owner188 target
+are not active-op deadline contract. No correction/lever/source/run/replay/suite/
+remote/adoption/acceptance. Reuse088/087/086/081/082/084/085/073/080 evidence.
+n42 observational GO/calibration NO-GO/Farz Sep29/protected/canon/determinism/
+ordinarycombat/control/paint/denominator/save and ALL188 towns/order/n25 matching
+OSIDs/4belt/5Jajce/critical0/required receipts/independent-final-review gates hold.
+Original517/737/input/late causes remain; root owns next routine scope, no mutual wait.

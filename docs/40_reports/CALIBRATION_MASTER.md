@@ -609,6 +609,41 @@ n42 observational GO/calibration NO-GO/Farz Sep29/protected/canon/determinism/
 ordinary combat/control/paint/denominator/save and all required188 towns/order/
 n25 matches/4belt/5Jajce/critical0/receipts/final-review gates remain.
 
+## Southern Move final preparation state — 2026-10-05
+
+089 five extraction exits0; initial temporal lookup is EMPTY on wrong row schema
+and supplies no proof. Corrected temporal-v2 is retained. Clean n39 final188:
+Southern Move planning, phase_started185, planning_duration2, intel_gathering,
+preparation_turns_elapsed3/max5, postponement0, supply1 and unresolved Majdan
+probe started188. Bound caller order puts tickPreparation and its not-ready
+continue before later staging/participant/opening readiness gates at elapsed<=4.
+[Worker](../../logs/claude-channel-20261004/089-launch-result.md),
+[independent review](../../logs/claude-channel-20261004/089-review-result.md).
+
+This establishes an endpoint and source order, not captured results on every
+earlier tick. Missing readiness detail is unreported; it does not independently
+prove evaluation never ran. No every-tick low-intel/no reset/all-writers inference.
+Review accepts the endpoint/order/locations with corrections; read0/verify0
+(14 categories). At elapsed>duration+grace, an earlier opening-readiness check
+can send the op to recovery BEFORE the timeout tick. Timeout-at190 is conditional
+arithmetic with unchanged clock/commander/supply/
+path premises, not an observed clean launch or earliest combat outcome.
+Temporal five-member locations/movement are post-turn; derived loop+1 labels
+require alignment to weekly/meta.turn. Assembly is not live approach/readiness.
+Generic max5/init-time commander arithmetic does not bind later commander values.
+
+Root stops reassurance observation for this lane: no new observer/full188 run.
+090 active: direct authored planning2 versus generic preparation5 contract,
+constructor flags/overrides, actual date-window/expiry consumers, relevant existing
+spec/test intent read-only; return minimal defensible correction/calibration PLAN
+or next different gap. An opportunity admission window is not automatically an
+active-operation deadline, and owner188 acceptance is not a production contract.
+No source correction/calibration lever adopted. Reuse088/087/086 finite facts,
+081/082/084/085 limits and080 checks. n42 observational GO/calibration NO-GO/
+Farz Sep29/protected/canon/determinism/ordinary combat/control/paint/denominator/
+save and ALL188 town/order/n25 matches/4belt/5Jajce/critical0/receipt/final-review
+gates remain; original517/737/input/late causes stay open.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

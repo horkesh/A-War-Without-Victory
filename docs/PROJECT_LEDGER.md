@@ -9,6 +9,36 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-05 — Southern Move preparation endpoint; authored budget contract next
+
+089 op/prep/prepevents/temporal/temporal-v2 exits0; temporal EMPTY wrong-schema
+draft preserved and not proof. Clean n39 final188 planning185,intel_gathering,
+3of5 prep ticks,planning_duration2,supply1,postponement0,unresolved Majdan probe188.
+Bound code orders preparation before later readiness at elapsed<=4.
+Unchanged worker/review:
+`logs/claude-channel-20261004/089-launch-result.md` and
+`logs/claude-channel-20261004/089-review-result.md`.
+
+End state/null diagnostics do not establish all earlier ticks, unevaluated gates,
+every-tick low confidence or no reset/intraturn change. Conditional timeout190
+arithmetic is not measured launch; init commander derivation is not live values.
+Review read0/verify0(14 categories): at elapsed5 an opening-readiness precheck
+can recover the op BEFORE tickPreparation. Thus190 is a possible timeout tick
+if reached, not earliest launch. Temporal-v2 contains25 literal post-turn rows.
+Five-participant temporal locations use post-turn rows/derived loop+1 labels,
+not aligned gate inputs or live approach/readiness. No all-writers proof.
+
+STOP reassurance capture only;090 already dispatched to SAME Claude: direct
+authored planning2/generic prep5 intent,constructor flags,date-window/expiry
+consumer and named existing tests/spec reads; minimal supported next proposal.
+Admission window/owner188 target is not active-operation production deadline.
+Root chooses next bounded action without mutual waiting. No correction/lever/
+observer/campaign/replay/suite/remote/adoption/acceptance change. Reuse088/087/086,
+081/082/084/085 limits,073/western and080 focused/typehook/collector.
+Focused docs checks only. n42 GO/calibration NO-GO/Farz Sep29/protected/canon/save
+and all188 towns/order/n25-match/4belt/5Jajce/critical0/receipts/final-review remain;
+original517/737/input/late gaps stay open.
+
 ## 2026-10-05 — Southern Move staging dates measured; post-creation gate next
 
 088 schema/records/approved/weekly/anchors/axis reads0. Clean n39 traces required
