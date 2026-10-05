@@ -504,6 +504,22 @@ and material decision value, not reassurance. No source preparation/run/replay/
 suite/correction authorized. Original calibration NO-GO/n42 GO/Farz/protected/
 188/town/Jajce/match/517/737/Majdan/input/late/final-review gaps remain.
 
+### Mistral hold lane disposition — 2026-10-05 — retained-evidence STOP
+
+085 source/receipt reads0; root producer/blob review0, reusing084 independent
+qualification. Existing scoped axis-readiness stdout emits an aggregate but
+omits exact gate-time membership/destinations/approach sets. Its derived executed
+field is not a phase transition. The deliberate staging-hold explanation remains
+conditional; no narrow defect/correction follows. A future probe measures its
+new run, not the old n43 gates; selected-output equality cannot waive that limit.
+[Disposition](../../logs/claude-channel-20261004/085-disposition-result.md).
+
+Accept STOP for this diagnosis lane. Decline the optional181 confirmation run
+and observer preparation: no concrete implementation/acceptance decision would
+change. No campaign/replay/suite/source change or acceptance change authorized.
+Claude waits for concrete new scope; do not repeat this investigation. Calibration
+NO-GO/n42 observational GO and all original town/Jajce/match/517/737/Majdan/input/
+late/final-review/Farz/protected/control/paint/denominator/save gaps remain.
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

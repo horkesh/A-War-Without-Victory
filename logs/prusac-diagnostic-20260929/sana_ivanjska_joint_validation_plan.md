@@ -1448,3 +1448,19 @@ and concrete command/criteria/cost/first-failure stop/new owner authority.
 Reuse081/082 expert/083 graph/080 focused/doc evidence; focused docs preservation
 and local integration only. Original188/town/Jajce/match/517/737/Majdan/input/
 late/final-review gaps,n42 GO/calibration NO-GO/Farz/protected/canon/save hold.
+
+### Mistral hold lane disposition — 2026-10-05 — STOP; broader NO-GO remains
+
+085 source/receipt reads0; root emitter/caller/blob review0, reusing084 independent
+qualification. Scoped existing probe records aggregate, not exact gate members,
+destinations or approach sets; executed debug field is not actual transition.
+The deliberate staging hold remains conditional. Future capture measures its new
+run, not retained n43 gate inputs; selected-output equality does not waive this.
+[Disposition](../claude-channel-20261004/085-disposition-result.md) unchanged.
+
+Root accepts STOP for this lane and declines optional181 confirmation/observer
+preparation: no concrete correction/acceptance decision changes. Same Claude waits
+for concrete new scope; no duplicated investigation. Focused docs checks and
+preservation only, reusing unaffected evidence; no run/replay/suite/source change/
+remote/adoption/acceptance. Original188/517/737/Majdan/towns/Jajce/four matches/
+input/late/final-review gaps,n42 GO/calibration NO-GO/Farz/protected/canon/save hold.

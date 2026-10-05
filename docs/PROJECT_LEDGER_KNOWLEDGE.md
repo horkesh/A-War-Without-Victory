@@ -53,6 +53,12 @@ record only if later creation/retargeting is excluded; finite grep/tool inventor
 remains a premise, not an exhaustive proof. Final absence does not establish
 earlier absence. Applied in the [P4 boundary](PROJECT_LEDGER.md#2026-10-05--p4-finite-writer-argument-reviewed-stop-static-expansion).
 
+
+Stop a diagnosis lane when the next measurement would only strengthen an
+explanation without changing a concrete implementation or acceptance decision.
+A future-run probe does not directly capture a retained run's old gate inputs.
+Applied in the [Mistral disposition](PROJECT_LEDGER.md#2026-10-05--mistral-hold-lane-stops-on-retained-evidence).
+
 ## 2026-10-03 - A selected-save boundary is not a pre-turn decision receipt
 
 When a retained prefix is saved after turn execution, matching its consumed-input

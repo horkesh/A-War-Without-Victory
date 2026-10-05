@@ -9,6 +9,24 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-05 — Mistral hold lane stops on retained evidence
+
+085 disposition reads0; root current-producer/blob review0. Existing scoped
+axis-readiness aggregate would confirm a conditional deliberate staging hold,
+not justify a narrow correction. Its executed debug field is not a phase
+transition. Future capture measures that future run; equality of selected n43
+outputs does not directly capture old gate inputs. Reuse084 independent
+qualification/081–083 evidence; no repeated review or simulation.
+`logs/claude-channel-20261004/085-disposition-result.md` preserved unchanged.
+
+Root accepts retained-evidence STOP for this lane and declines the optional181
+confirmation campaign/observer preparation. No concrete calibration or
+implementation decision changes; broader calibration work remains open.
+Claude awaits concrete new scope, without duplicate investigation/status entries.
+Docs-only batch uses focused citation/index/whitespace/hook/preservation checks;
+no campaign/replay/suite/source/remote/adoption/acceptance change. Calibration
+NO-GO/n42 observational GO/Farz Sep29/protected/canon/save and original517/737/
+Majdan/towns/Jajce/four-match/input/late/final-review gaps hold.
 ## 2026-10-05 — P4 finite writer argument reviewed; stop static expansion
 
 084 actor/grep/whowrites reads0; one independent review returns
