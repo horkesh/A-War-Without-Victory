@@ -42,7 +42,9 @@ stderr from explicitly filtered simulation categories. Considered-brigade
 diagnostics are not full assigned rosters. Follow timeout writes to their actual
 consumers; event-return force ratio and stored assessment ratio may differ.
 Reconstructing controllers/static contacts alone does not recover live front,
-sector fallback or gate-time movement/pool inputs. Applied in the
+sector fallback or gate-time movement/pool inputs. A specific edge/filter can
+admit membership without proving the gate set; check the temporal serializer's
+field sources before attempting a movement-state lifetime proof. Applied in the
 [reviewed n43 observation](PROJECT_LEDGER.md#2026-10-05--authorized-n43-mistral-measurement-bounded-review-go)
 and [qualified caller diagnosis](PROJECT_LEDGER.md#2026-10-05--retained-mistral-approaching-veto-diagnosis-conditional-go).
 

@@ -463,6 +463,25 @@ stopping before reconstruction or another run. No defect or timing correction,
 dirty n25/n37 source equivalence, original517 attribution or188 acceptance follows.
 All existing calibration NO-GO/n42 GO/Farz/protected/input/late-review gates hold.
 
+### P3 graph preflight — 2026-10-05 — admissible reconstruction only
+
+083 edge extraction0; root source/blob review0 binds the producer/helpers to
+clean n43 source56. One Drvar–Bosansko Grahovo static edge passes front filters;
+recorded/current normalized graph hash matches. Mistral's absent is_pre_planned
+makes operationStaticAdjacency undefined, so the static-neighbor filter is inert.
+Contact graph plus reconstructed RS/HRHB controls admits BG2 as the single friendly
+approach176–180 under the stated event-order premises. This is not the captured
+gate array or all-writers/actual-used-input proof. No readiness pipeline ran.
+[Preflight](../../logs/claude-channel-20261004/083-preflight-result.md).
+
+The worker's claim that further learning requires executing reconstructed state
+is too strong: temporal field mapping and later reachable writers can be checked
+statically. Claude084 first maps the saved temporal fields to isCommittedInTransitTo's
+movement.status/destination_sids; only if they match, inspect gate-to-serialization
+mutations, stopping at the first unexcluded gap. No run/replay/suite/source change.
+081/082 expert evidence is reused; this narrow preflight has root review only.
+Exact approaching member and all original calibration NO-GO/Farz/protected gaps hold.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

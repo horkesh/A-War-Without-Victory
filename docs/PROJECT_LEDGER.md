@@ -9,6 +9,27 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-05 — P3 graph preflight admitted; movement premise remains open
+
+Claude083 edge extraction0, root source/blob review0. One static Drvar/BG2 edge
+passes front filters; normalized current hash equals the n43 recorded graph hash.
+Mistral's is_pre_planned is absent, making the static-neighbor filter inert.
+Graph plus event-reconstructed controls admits BG2 under qualified ordering;
+not a captured gate array, actual-used inputs or all-writers proof. No pipeline
+or simulation executed. `logs/claude-channel-20261004/083-preflight-result.md`.
+
+Root corrects the claim that only reconstruction execution could learn more:
+Claude084 checks temporal field mapping to the actual transit predicate, then
+only necessary later-writer ordering, stopping at the first unexcluded gap.
+Source-only, no new run/replay/suite/observer/correction/remote action/adoption.
+Existing081/082 independent expert evidence is reused; this narrow preflight
+is root-reviewed, not another independent campaign review. Focused docs checks/
+preservation and exact exits retained in closeout. Earlier literal filename
+wildcard source-read1 is retained as a routing error; corrected directory/-g
+source review0, no edits or changed proof rule. Exact gate-time member/517/737/
+Majdan/towns/Jajce/n25 matches/input/late/final-review gaps remain; n42 GO,
+calibration NO-GO/Farz Sep29/protected/canon/control/paint/denominator/save hold.
+
 ## 2026-10-05 — Retained Mistral approaching-veto diagnosis; conditional GO
 
 Claude082 retained extraction/control/blob reads0 expose fresh gate detail:

@@ -1409,3 +1409,22 @@ rg/source reads and one small retained graph extraction; stop at missing premise
 no reconstructed pipeline/run/observer/source edits. Existing081/080/doc proofs
 reused. Root focused docs/preservation integration only; no new suite/campaign,
 merge/push/adoption. All n42 GO/calibration NO-GO/Farz/protected/188 gaps hold.
+
+### P3 preflight admitted — 2026-10-05 — no captured gate set
+
+083 extraction0 and root source/blob review0: static Drvar/BG2 edge passes filters,
+normalized graph hash equals n43 metadata, Mistral is_pre_planned absence disables
+the static-neighbor filter. Event-reconstructed controllers admit BG2 under
+ordering premises, not live gate/all-writers/actual-used31 proof. No readiness
+pipeline or simulation. [Result](../claude-channel-20261004/083-preflight-result.md).
+Reconstruction admissibility is separate from approaching branch capture.
+
+084 is a cheap read-only temporal-field/phase-order check: map actual serialized
+fields to movement.status/destination_sids before inventorying any later writers.
+Stop first mismatch or unexcluded actor/phase premise. Cost minutes, rg/source
+reads only, new raw logs/exits; no runTurn/run/replay/suite/source edits. Root
+corrects083's overstatement that no further learning is possible without executing
+reconstructed state. Reuse081/082 expert/080 focused/doc evidence; preflight root
+review only. Existing docs batch/focused checks/preservation/local integration;
+no campaign/merge/push/adoption or acceptance change. Original188/517/737/town/
+Jajce/match/input/late/final-review gaps,n42 GO/calibration NO-GO/Farz/protected hold.
