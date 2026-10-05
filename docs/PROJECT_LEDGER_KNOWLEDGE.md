@@ -1,3 +1,11 @@
+## 2026-10-05 — A primary defender label does not define a prediction set
+
+A weekly battle row can name one primary defender while participant histories
+record several defenders. Those summaries do not reveal which defenders the
+order predictor selected. Compare actual selection functions and phases before
+proposing instrumentation or treating a ratio difference as a defect.
+See [battle tuple disposition](PROJECT_LEDGER.md#2026-10-05--battle-tuple-gate-and-multiple-defender-summaries-bounded).
+
 ## 2026-10-05 — Keep forecast and resolved battle quantities separate
 
 A recorded forecast and a resolved battle ratio can differ without identifying

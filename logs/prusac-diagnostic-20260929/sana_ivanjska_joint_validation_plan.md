@@ -1632,3 +1632,24 @@ Reuse093/092/091/073/western/083–085/080, captures/protected/Farz evidence.
 n42 observational GO/calibration NO-GO; all188 criteria required; passed checks
 retained. Source/canon/determinism/control/paint/reference/denominator/save intact.
 Originaldirty517/737/othermatches/input/late/finalreview remain separate.
+
+
+
+### Battle tuple missing / defender selection compare next — 2026-10-05
+
+094 AAR1 (regex bug) retained; correctedaar-v2/other/paths/projector0;
+independent read/verify0 (required15, forbidden8). No exact battle/predictor power tuple in finite inspected
+artifacts. Active Sana lacks a matching finalized AAR; absence is bounded.
+[Worker](../claude-channel-20261004/094-battle-result.md),
+[review](../claude-channel-20261004/094-review-result.md), unchanged.
+188 history records identify >=3 defenders and reciprocal casualty sums204/12.
+187 has one matching defender record in this save, not an exhaustive universe.
+Post-combat histories/weekly primary label do not reveal prediction's selected
+set. Ratio difference remains unclassified; no count-based causal claim.
+095 posted: finite clean predictor/resolver selection/aggregation/phase compare.
+General observer proposal not adopted; protections unprepared; full188 not inevitable.
+No instrumentation/campaign grant.
+Reuse093/092/091/073/western/083–085/080 and passed captures/protected/Farz.
+n42 observational GO/calibration NO-GO; all188 criteria required, passed evidence
+retained. Canon/determinism/control/paint/reference/denominator/save unchanged.
+Originaldirty517/737/othermatches/input/late/finalreview remain separate.

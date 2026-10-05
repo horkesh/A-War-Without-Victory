@@ -748,6 +748,33 @@ or campaign grant. Reuse093/092/091 and earlier town/belt/Farz/protected evidenc
 n42 observational GO; calibration NO-GO. All188 acceptance requirements remain;
 previously passed checks are retained.
 
+## Battle inputs missing; defender summaries measured — 2026-10-05
+
+094 initial AAR extraction1 (regex bug), corrected AAR/other/path/projector reads0;
+independent read/verify0 (required15, forbidden8). No exact resolver or predictor power tuple was found
+in the finite inspected n39 artifacts. Sana remains in execution and has no
+matching entry among62 retained finalized AARs; these are bounded facts, not a
+proof of universal serialization absence.
+[Worker](../../logs/claude-channel-20261004/094-battle-result.md),
+[review](../../logs/claude-channel-20261004/094-review-result.md), unchanged.
+
+Final-save history records for the188 Stari Majdan battle name at least three
+matched defender-role records:15thBiha,17thKlju,3rdPetrovac. Their inflicted casualties116+51+37=204
+match the506th's taken204; taken0+7+5=12 matches its inflicted12. These are
+post-combat summaries, not strength terms or the predictor's selected set.
+The187 positive control has one matching defender history record in the inspected
+save, not proof of a complete one-member defender universe. A weekly primary
+defender label does not imply that prediction used only that brigade.
+
+The1.296/0.93 difference remains unclassified. No defender-count causal claim,
+power/readiness/date/route tuning or dirty517 attribution follows. The proposed
+general observer is not adopted; its off/stdout/determinism/save/hash protections
+are unprepared. No instrumentation or campaign grant; full188 is not inevitable.
+095 active: finite clean predictor/resolver defender selection, aggregation and
+phase comparison first. Reuse093/092/091, prior captures/protected/Farz evidence.
+n42 observational GO/calibration NO-GO; all188 requirements remain, passed checks
+retained. Canon, determinism, control/paint/reference/denominator/save unchanged.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

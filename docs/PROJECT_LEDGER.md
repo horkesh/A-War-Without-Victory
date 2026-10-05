@@ -9,6 +9,26 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-05 — Battle tuple gate and multiple defender summaries bounded
+
+094 AAR extraction1 (regex bug) preserved; correctedaar-v2/other/paths/projector0.
+Independent read/verify0. The inspected n39 artifacts provide no exact resolver/
+predictor power tuple; active Sana has no matching finalized AAR.188 Stari Majdan
+history has at least three defender records; reciprocal casualties sum204/12.
+187 positive control has one matched defender record, not an exhaustive roster.
+`logs/claude-channel-20261004/094-battle-result.md` and
+`logs/claude-channel-20261004/094-review-result.md` unchanged.
+
+History records are post-combat summaries, not power or order-time input sets.
+One weekly primary-defender label cannot establish predictor cardinality.
+Finite missingtuple is not global absence; no defect/variance or defender-count
+cause is established. General observer proposal not adopted; protections unprepared, no campaign grant.
+095 already posted: finite clean predictor/resolver selection/aggregation/phase
+comparison. Reuse093/092/091/073/western/083–085/080 and passed town/belt/Farz/
+protected evidence. Focused docs checks; zero source/canon/test/run/remote/
+adoption/acceptance change. n42 GO/calibration NO-GO; all188 criteria required,
+passed checks retained. Original517/737/matches/input/late/finalreview stay open.
+
 ## 2026-10-05 — Stari Majdan battle and Sanski endpoint bounded; battle tuple next
 
 093 five retained/source reads0; independent read/verify0 (required14, forbidden7). Clean n39 turn188
