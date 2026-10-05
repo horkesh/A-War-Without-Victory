@@ -722,6 +722,32 @@ Reuse073/western/083–085/091;originaldirty517/737/input/late/othermatches sepa
 n42 observational GO/calibration NO-GO/FarzSep29 and all188 criteria preserved;
 previously passed belt/protected/criticalzero/Farz town-control evidence retained.
 
+## Sanski endpoint obstruction measured — 2026-10-05
+
+093 five reads exited0; independent read/verify0 (required14, forbidden7). The retained clean n39 turn188
+506th order targets Stari Majdan. Its matching battle records attacker_won=false,
+stalemate, power_ratio0.93 and casualties204/12. The order assessment predicts
+costly_victory at1.296. These are different recorded quantities; their difference
+is unclassified without the actual input tuples.
+[Worker](../../logs/claude-channel-20261004/093-sanski-result.md),
+[review](../../logs/claude-channel-20261004/093-review-result.md), unchanged.
+
+The stored Sana axis ends at Stari Majdan index6, with Sanski town next at7;
+both remain RS. Positive order/battle receipts support this endpoint obstruction.
+Capture can advance the index; failure also advances after3 consecutive unsuccessful
+objective battles. Endpoint counter1 is below3 and index stays6. Do not
+universalize “capture required” or “cannot attack town before capture.”
+The rounded0.93 is consistent with the bound stalemate band, not proof of exact
+resolver inputs or every branch. A finite three-turn view is not complete-horizon
+uniqueness proof. Post-combat objective rows are not order-time index snapshots.
+
+No combat-power/readiness/date/objective/route tuning or dirty517 cause follows.
+094 is active: inspect existing phase-bound resolver/predictor detail for this
+battle, or record the finite missing tuple and minimal proof plan. No observer
+or campaign grant. Reuse093/092/091 and earlier town/belt/Farz/protected evidence.
+n42 observational GO; calibration NO-GO. All188 acceptance requirements remain;
+previously passed checks are retained.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

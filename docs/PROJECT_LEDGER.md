@@ -9,6 +9,28 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-05 — Stari Majdan battle and Sanski endpoint bounded; battle tuple next
+
+093 five retained/source reads0; independent read/verify0 (required14, forbidden7). Clean n39 turn188
+506th Stari Majdan order predicts1.296/costly_victory; the matching battle records
+0.93/stalemate, attacker_won=false, casualties204/12. Stored axis remains index6
+(Stari Majdan), Sanski town next7; both RS. This measures the immediate endpoint
+obstruction, not the inputs producing0.93 or the predictor/resolver difference.
+`logs/claude-channel-20261004/093-sanski-result.md` and
+`logs/claude-channel-20261004/093-review-result.md` unchanged.
+
+Capture and failure-at3 can advance objectives; endpoint counter1/index6 shows no
+skip by188. No universal capture-required
+claim. Rounded ratio fits stalemate thresholds but does not capture exact resolver
+inputs. Finite186–188 extraction is not an exhaustive horizon/attack proof;
+post-combat index differs from order-time state. No tuning, forced capture,
+dirty517 attribution or shared Jajce/737 cause.094 already posted: inspect retained
+phase-bound battle/predictor tuple, or stop at missing terms with minimal proof
+plan. No observer/campaign authority. Reuse093/092/091/073/western/083–085/080
+and existing captures/protected/Farz. Focused docs checks; no source/canon/test/
+run/remote/adoption/acceptance changes. n42 GO/calibration NO-GO; all188 criteria
+required, passed evidence retained. Original517/737/matches/input/late/review open.
+
 ## 2026-10-05 — Jajce withdrawal and survivor orders bounded; Sanski combat next
 
 092 eight retained/source reads0; independent read/verify0(required12,forbidden6).

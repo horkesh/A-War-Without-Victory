@@ -1,3 +1,11 @@
+## 2026-10-05 — Keep forecast and resolved battle quantities separate
+
+A recorded forecast and a resolved battle ratio can differ without identifying
+the reason. Bind both input tuples and their phases before classifying that gap.
+A rounded ratio can fit an outcome band without proving the exact resolver call;
+an unchanged objective index does not establish a universal capture prerequisite.
+See [Sanski disposition](PROJECT_LEDGER.md#2026-10-05--stari-majdan-battle-and-sanski-endpoint-bounded-battle-tuple-next).
+
 ## 2026-10-05 — Positive order decisions refine an aggregate zero
 
 Authored withdrawal and endpoint absence support a reconstruction without

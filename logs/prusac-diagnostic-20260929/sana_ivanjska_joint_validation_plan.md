@@ -1612,3 +1612,23 @@ western/083–085/091;originaldirty517/737/input/late/othermatches separate.
 n42 observational GO/calibration NO-GO/FarzSep29/protected/canon/determinism/
 ordinarycombat/control/paint/reference/denominator/save and all188 criteria
 required;passed evidence retained. No source/canon/test/run/remote/adoption.
+
+
+
+### Stari Majdan battle/endpoint bounded; retained tuple next — 2026-10-05
+
+093 five reads0; independent read/verify0 (required14, forbidden7). Retained clean n39 turn188506th order
+targets Stari Majdan (forecast1.296/costly_victory); matching battle is stalemate
+at rounded0.93, attacker_won=false. Axis endindex6, Sanski town next7, both RS.
+[Worker](../claude-channel-20261004/093-sanski-result.md),
+[review](../claude-channel-20261004/093-review-result.md), unchanged.
+Failure-skip threshold3; endpoint counter1/index6 shows no skip by188. No universal
+capture prerequisite.
+Rounded threshold fit not exact resolver/input proof. Finite186–188 view not
+complete-horizon uniqueness proof; postcombat index not order-time snapshot.
+094 posted: existing phase-bound predictor/resolver detail for this battle or
+finite missing tuple/minimal proof plan. No observer/campaign grant or tuning.
+Reuse093/092/091/073/western/083–085/080, captures/protected/Farz evidence.
+n42 observational GO/calibration NO-GO; all188 criteria required; passed checks
+retained. Source/canon/determinism/control/paint/reference/denominator/save intact.
+Originaldirty517/737/othermatches/input/late/finalreview remain separate.
