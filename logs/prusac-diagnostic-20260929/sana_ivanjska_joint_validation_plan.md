@@ -1428,3 +1428,23 @@ reconstructed state. Reuse081/082 expert/080 focused/doc evidence; preflight roo
 review only. Existing docs batch/focused checks/preservation/local integration;
 no campaign/merge/push/adoption or acceptance change. Original188/517/737/town/
 Jajce/match/input/late/final-review gaps,n42 GO/calibration NO-GO/Farz/protected hold.
+
+### P4 reviewed boundary — 2026-10-05 — conditional; no new run
+
+084 actor/grep/whowrites reads0 and independent review
+GO_CONDITIONAL_P4_ONLY_WITH_QUALIFICATIONS. Status maps directly; destination
+falls back to orders if state list empty. Under nonempty-state invariant and
+finite known writers, surviving post-turn in_transit/BG2 supports earlier gate
+state because known creators/retargeters precede it and later correction deletes.
+No exhaustive/all-writers/captured aggregate/member proof. Correct all-creators
+language to known sites; final181 loan absence cannot exclude177–179 behavior.
+[Result](../claude-channel-20261004/084-order-result.md),
+[review](../claude-channel-20261004/084-review-result.md), originals unchanged.
+
+Stop broader static hunting.085 decision-value/direct-receipt disposition only,
+source reads/minutes, no implementation/pipeline/run. Existing diagnostic emits
+aggregate, omits exact membership; extra observation requires material decision
+and concrete command/criteria/cost/first-failure stop/new owner authority.
+Reuse081/082 expert/083 graph/080 focused/doc evidence; focused docs preservation
+and local integration only. Original188/town/Jajce/match/517/737/Majdan/input/
+late/final-review gaps,n42 GO/calibration NO-GO/Farz/protected/canon/save hold.

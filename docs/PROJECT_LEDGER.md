@@ -9,6 +9,28 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-05 — P4 finite writer argument reviewed; stop static expansion
+
+084 actor/grep/whowrites reads0; one independent review returns
+GO_CONDITIONAL_P4_ONLY_WITH_QUALIFICATIONS. Status mapping is exact; destination
+has a state-first/order-fallback rule. Surviving in_transit/BG2 rows imply earlier
+gate state only under the nonempty-state invariant and finite inspected writers:
+known pre-gate creators/retargeters, known later deleters. No all-writers or
+captured aggregate/member proof; the tool missed an aliased deleter. Narrow
+all-creators language to known sites and remove final181 loan absence as an
+exclusion for177–179. Worker/review originals remain unchanged:
+`logs/claude-channel-20261004/084-order-result.md` and
+`logs/claude-channel-20261004/084-review-result.md`.
+
+Stop broader static searching; Claude085 consolidates concrete decision value
+and smallest direct receipt, proposal only. Existing scoped axis-readiness stdout
+can emit the aggregate but not exact member inputs; no further run for reassurance.
+No new source preparation/campaign/replay/suite/correction/remote action/adoption.
+Root docs/ledger batch uses focused checks/preservation and exact exits, reusing
+081/082 expert evidence/083 preflight/080 focused/typehook/collector/56 doc cases.
+Original517/737/Majdan/towns/Jajce/n25 matches/input/late/final-review gaps remain;
+n42 observational GO/calibration NO-GO/Farz Sep29/protected/canon/save hold.
+
 ## 2026-10-05 — P3 graph preflight admitted; movement premise remains open
 
 Claude083 edge extraction0, root source/blob review0. One static Drvar/BG2 edge

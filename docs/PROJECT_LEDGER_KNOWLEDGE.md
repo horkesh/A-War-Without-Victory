@@ -48,6 +48,11 @@ field sources before attempting a movement-state lifetime proof. Applied in the
 [reviewed n43 observation](PROJECT_LEDGER.md#2026-10-05--authorized-n43-mistral-measurement-bounded-review-go)
 and [qualified caller diagnosis](PROJECT_LEDGER.md#2026-10-05--retained-mistral-approaching-veto-diagnosis-conditional-go).
 
+A deletion-only later writer can support a backward argument for a surviving
+record only if later creation/retargeting is excluded; finite grep/tool inventory
+remains a premise, not an exhaustive proof. Final absence does not establish
+earlier absence. Applied in the [P4 boundary](PROJECT_LEDGER.md#2026-10-05--p4-finite-writer-argument-reviewed-stop-static-expansion).
+
 ## 2026-10-03 - A selected-save boundary is not a pre-turn decision receipt
 
 When a retained prefix is saved after turn execution, matching its consumed-input

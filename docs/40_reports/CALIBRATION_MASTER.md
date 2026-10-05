@@ -482,6 +482,28 @@ mutations, stopping at the first unexcluded gap. No run/replay/suite/source chan
 081/082 expert evidence is reused; this narrow preflight has root review only.
 Exact approaching member and all original calibration NO-GO/Farz/protected gaps hold.
 
+### P4 temporal/writer boundary reviewed — 2026-10-05 — conditional only
+
+084 actor/grep/whowrites reads0; independent GO_CONDITIONAL_P4_ONLY_WITH_QUALIFICATIONS.
+Temporal status maps directly to movement state; destination falls back to orders
+when the state's list is empty. In_transit/BG2 post-turn rows support the earlier
+gate state only under a nonempty-state destination invariant and the finite
+inspected writer set: known creators/retargeters precede the gate, known later
+correction deletes. A surviving row can support that one-way deduction; absence
+cannot. whowrites missed the aliased deleter, so no exhaustive/all-writers proof.
+Final181 elite-loan absence does not exclude177–179 loan behavior.
+[Worker result](../../logs/claude-channel-20261004/084-order-result.md),
+[independent qualification](../../logs/claude-channel-20261004/084-review-result.md).
+
+Replace the worker's broad all-creators language with known inspected sites.
+No captured aggregate/member/approach-set proof or gameplay defect follows.
+End broader static searching here.085 only consolidates what direct receipt
+could change a concrete decision; existing axis-readiness stdout can report the
+aggregate but omits exact member inputs. Any extra run needs new owner authority
+and material decision value, not reassurance. No source preparation/run/replay/
+suite/correction authorized. Original calibration NO-GO/n42 GO/Farz/protected/
+188/town/Jajce/match/517/737/Majdan/input/late/final-review gaps remain.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing
