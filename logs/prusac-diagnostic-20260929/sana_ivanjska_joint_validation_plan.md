@@ -1653,3 +1653,23 @@ Reuse093/092/091/073/western/083–085/080 and passed captures/protected/Farz.
 n42 observational GO/calibration NO-GO; all188 criteria required, passed evidence
 retained. Canon/determinism/control/paint/reference/denominator/save unchanged.
 Originaldirty517/737/othermatches/input/late/finalreview remain separate.
+
+
+### Defender-source comparison STOP / original dirty517 source gate next — 2026-10-05
+
+095/096 four primary scripts0; corrected receipts all innercommands0/empty stderr;
+independent read/verify0. Original095 disclosure/bytes preserved;096 supersedes
+overclaims. [Original](../claude-channel-20261004/095-defenders-result.md),
+[addendum](../claude-channel-20261004/096-defenders-result.md),
+[review](../claude-channel-20261004/096-review-result.md), unchanged.
+Both models allow multiple defenders; no fixed single-defender prediction design.
+Actual188 sets/counts/power/phase not established,1.296vs0.93 gap unclassified.
+Fog feasibility is not cause; outcome-band fit not harmlessvariance/exactcall.
+Casualty-history writer link unproved. battle_power adds battle-artifact fields;
+stdout-only/neutrality/fulltuple guarantees unproved. No observer/run grant,
+full188 not inevitable. STOP source-count lane;097 already posted: finite
+originaldirty517 source-continuity prerequisites before any replay proposal.
+Reuse093/094/092/091/073/western/083–085/080 and passed captures/protected/Farz.
+n42 observational GO/calibration NO-GO; all188 criteria required, passed evidence
+retained. Original517/737/towns/Jajce5/matches/input/late/finalreview remain open.
+No source/canon/test/run/remote/adoption/acceptance change.

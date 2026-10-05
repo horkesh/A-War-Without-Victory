@@ -775,6 +775,35 @@ phase comparison first. Reuse093/092/091, prior captures/protected/Farz evidence
 n42 observational GO/calibration NO-GO; all188 requirements remain, passed checks
 retained. Canon, determinism, control/paint/reference/denominator/save unchanged.
 
+## Defender models compared; historical power gap remains — 2026-10-05
+
+095/096 finite clean-source comparison, four primary receipt scripts0; independent
+review read/verify0. 096 supersedes the stronger original095 claims, preserved
+unchanged with the missing-read disclosure.
+[Original](../../logs/claude-channel-20261004/095-defenders-result.md),
+[corrected addendum](../../logs/claude-channel-20261004/096-defenders-result.md),
+[review](../../logs/claude-channel-20261004/096-review-result.md).
+
+Both predictor and resolver support multiple defenders. This rejects a fixed
+single-defender predictor design, not a one-versus-many historical selection or
+different actual cardinality. Shared helpers and base formulas coexist with
+different filters/modifiers. One attacker is the prediction call shape; it does
+not establish resolver attacker count. Source comments describe fog estimate
+intent; conditional fog arithmetic proves no observed confidence or cause.
+The1.296/0.93 gap remains unclassified. Outcome-band consistency is not harmless
+variance, exact-call/input proof or a tuning basis. The casualty-history writer
+link and actual188 phase sequence remain unproved.
+
+Existing battle_power adds power_breakdown to a battle artifact; no stdout-only,
+on/off-neutrality or full-tuple guarantee follows. No observer/run plan adopted;
+full188 is not inevitable or granted. Stop this defender-count lane.
+097 active: original dirty517 source-continuity prerequisites from retained
+bindings, before considering any replay. Reuse093/094 and passed captures,
+protected/Farz evidence. n42 observational GO/calibration NO-GO; all188 town/
+order/n25matches/4belt/5Jajce/critical0/receipts/finalreview requirements remain.
+Original517/737/matches/input/late/finalreview stay open; passed checks retained.
+No source/canon/test/simulation/remote/adoption/acceptance change.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

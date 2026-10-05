@@ -1,3 +1,12 @@
+## 2026-10-05 — Shared selection models do not bind historical selected sets
+
+Two callers can share a multi-member model while filters, phase or modifiers
+produce different actual sets. Reject a fixed one-member design only; source
+similarity cannot establish historical cardinality or reconcile a ratio gap.
+Diagnostic topics that add report fields are not automatically stdout-only or
+state-neutral observations.
+See [qualified source comparison](PROJECT_LEDGER.md#2026-10-05--defender-source-comparison-qualified-dirty517-provenance-next).
+
 ## 2026-10-05 — A primary defender label does not define a prediction set
 
 A weekly battle row can name one primary defender while participant histories

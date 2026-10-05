@@ -9,6 +9,26 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-05 — Defender source comparison qualified; dirty517 provenance next
+
+095 two primary reads0;096 two correction receipts0 with all innercommands0 and
+empty stderr. Independent read/verify0. Original095 is preserved;096 supersedes
+its stronger cardinality/cause/phase/run-necessity claims.
+`logs/claude-channel-20261004/095-defenders-result.md`,
+`logs/claude-channel-20261004/096-defenders-result.md` and
+`logs/claude-channel-20261004/096-review-result.md` unchanged.
+
+Both models support multiple defenders; no fixed single-defender prediction
+design. Actual188 sets/counts/power/phase remain unproved,1.296vs0.93 unclassified;
+conditional fog arithmetic is not causation, threshold fit is not harmless
+variance. Existing battle_power changes battle artifacts; no stdout-only,
+neutrality/fulltuple guarantee, new observer or run grant. Stop source-count
+lane;097 already posted: finite originaldirty517 source-continuity prerequisites.
+Reuse093/094/092/091/073/western/083–085/080 and passed town/belt/protected/Farz.
+Focused docs checks only; source/canon/test/run/remote/adoption/acceptance unchanged.
+n42 observational GO/calibration NO-GO; all188 criteria required, passed evidence
+retained. Original517/737/towns/Jajce5/matches/input/late/finalreview remain open.
+
 ## 2026-10-05 — Battle tuple gate and multiple defender summaries bounded
 
 094 AAR extraction1 (regex bug) preserved; correctedaar-v2/other/paths/projector0.
