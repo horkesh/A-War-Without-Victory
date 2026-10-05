@@ -1,3 +1,11 @@
+## 2026-10-05 — Stop endpoint confirmation and reuse actor receipts
+
+A final-save confidence calculation supports a conditional comparison, not its earlier
+binding cause. Distinguish explicit absent-ID defaults from an unreported officer;
+do not universalize a comment's attribute range. Probe timestamps do not replace
+ordering receipts. Once the endpoint is settled, move to an actionable different
+gap and reuse earlier actor/roster extractions. See the [endpoint disposition](PROJECT_LEDGER.md#2026-10-05--southern-move-endpoint-intel-settled-jajce-producer-gap-next).
+
 ## 2026-10-05 — Source agreement is not higher-precedence canon adjudication
 
 A max-budget implementation matching the Systems Manual does not settle ambiguous

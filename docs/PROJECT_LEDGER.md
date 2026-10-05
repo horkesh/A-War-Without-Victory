@@ -9,6 +9,27 @@
   Compacted 2026-09-10: 1723 sections moved out, 62 kept live.
 -->
 
+## 2026-10-05 — Southern Move endpoint intel settled; Jajce producer gap next
+
+091 source/extract/commander reads0; END188 derived confidence0.245 versus
+default3/3 threshold0.54 would be red IF reached. Review read0/verify0
+(required12,forbidden5): unresolved probe returns before that comparison.
+No actual predicate/pure-helper execution is captured. Mapping is final-save
+RS sectors8/9; absent
+commander selects explicit defaults, not a stored officer. Endpoint only.
+`logs/claude-channel-20261004/091-intel-result.md` and
+`logs/claude-channel-20261004/091-review-result.md` unchanged.
+
+No universal commander-range/all-writer/probe-order/earlier binding-cause claim.
+STOP finished endpoint lane; no tuning/observer/full188.092 already dispatched:
+Jajce188 finite112th/HGZ removal and remaining Lupnica eligible-output producer;
+reuse073/continuation4 reviewed actor/roster facts, no duplicate chronology.
+Source schedules/absence/aggregate0 cannot prove actual withdrawal/rejection.
+Focused docs checks; reuse089–086/081–085/073/080. No source/canon/test/run/
+replay/suite/remote/adoption/acceptance. n42 GO/calibration NO-GO/Farz Sep29/
+protected and all188 gates remain required; original517/737/towns/other matches/
+input/late/final-review remain separate. Previously passed evidence retained.
+
 ## 2026-10-05 — Generic preparation rule documented; no budget lever adopted
 
 090 five text reads0, tests NOT executed. Bound code/manual agree on max(generic,

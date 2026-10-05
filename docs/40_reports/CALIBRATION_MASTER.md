@@ -673,6 +673,30 @@ a different open gap. No correction/canon/observer/campaign/acceptance change.
 Reuse089–086 and earlier qualified evidence. n42 observational GO/calibration
 NO-GO/Farz Sep29/protected and every existing188 acceptance gate remain unchanged.
 
+## Southern Move endpoint intel lane closed — 2026-10-05
+
+091 three reads0. Clean n39 END188 objective-sector mapping selects RS sectors8/9;
+their stored confidences0.245/0.11 yield max0.245. Absent commander ID makes the
+bound helper use defaults3/3: required0.54. Arithmetic is red IF reached.
+Review read0/verify0(required12,forbidden5): unresolved active_probe returns
+BEFORE confidence is read/compared. No actual188 predicate/helper call is captured.
+[Worker](../../logs/claude-channel-20261004/091-intel-result.md),
+[review](../../logs/claude-channel-20261004/091-review-result.md), unchanged.
+
+This is derived post-turn state, not captured earlier prep inputs or a binding
+cause. Reject universal commander-range0.34 without verified bounds, sole-writer
+history from finite search, and probe-start188 as captured ordering. The unresolved
+probe wait and confidence comparison are distinct; no earlier probe cadence proof.
+Root STOP on this finished endpoint lane; no intel/prep tuning or188 observation.
+
+092 active on Jajce188: reuse073 and continuation4 reviewed roster/actor receipts
+rather than repeat4→2 loss/capture schedule. Target finite112th/HGZ removal producer
+and two remaining members' Lupnica eligibility, or first missing action/gate tuple.
+Source schedule/absence/aggregate0 is not actual withdrawal/rejection proof.
+No correction/canon/run/acceptance change; reuse unaffected evidence.
+n42 observational GO/calibration NO-GO/Farz Sep29/protected and ALL existing188
+town/order/n25-match/4belt/5Jajce/critical0/receipt/final-review requirements hold.
+
 ## April 1995 patron-border candidate measurement — 2026-09-27
 
 The owner authorized a derived exterior-border exclusion for the existing

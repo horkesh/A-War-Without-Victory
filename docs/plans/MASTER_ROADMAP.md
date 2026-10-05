@@ -42,7 +42,7 @@ no Mistral/prep receipt. Majdan was already lost in n29 and remains separate.
 076–079 source/env/event gates settled with limits; n39 maps reconstructed.
 080 observer prepared:10 tests/real collector/typehook0, independent GO prep only.
 Owner-authorized n43 181w runner/post0; independent GO observation only.
-090 max-rule/canon wording unresolved;091 final intel snapshot active.
+091 endpoint intel0.245<0.54/STOP;092 Jajce removal/eligibility active.
 No188 retry, gameplay fix, merge/adoption; actual-used31 remains open.
 Original517/737/Majdan, towns/matches and late receipts stay open.
 See [retained audit](../../logs/claude-channel-20261004/074-snapshot-result.md)

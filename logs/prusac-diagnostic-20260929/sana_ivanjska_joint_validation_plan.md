@@ -1576,3 +1576,21 @@ replay/suite/remote/adoption/acceptance. Reuse089–086/081–085/073/080 eviden
 n42 observational GO/calibration NO-GO/Farz Sep29/protected/canon/determinism/
 ordinarycombat/control/paint/denominator/save and ALL188 town/order/n25 matches/
 4belt/5Jajce/critical0/required-receipt/independent-review gates stay unchanged.
+### Southern Move endpoint STOP / Jajce188 cause next — 2026-10-05
+
+091 three reads0; END188 mapping RS sectors8/9 gives confidence0.245<required0.54
+using explicit3/3 defaults for absentcommander,IF comparison reached. Review
+read0/verify0(required12,forbidden5); unresolved probe returns before comparison.
+No actual predicate/helper invocation captured. Derived endpoint, not earlier prep.
+[Worker](../claude-channel-20261004/091-intel-result.md),
+[review](../claude-channel-20261004/091-review-result.md), unchanged.
+No universal range/solewriter/probeorder/per-tick binding-input proof. Probe wait
+distinct from comparison. STOP lane; no intel/prep lever or confirmation188run.
+
+092 posted: Jajce188 finite removal/eligible-output cause; reuse073/continuation4
+reviewed112th/HGZ and4→2 roster records, no repeat chronology/actor extraction.
+Source schedule/absence/aggregate0 is not an actual action or rejection receipt.
+No source/canon/test/run/replay/suite/remote/adoption/acceptance change.
+n42 GO/calibration NO-GO/Farz Sep29/protected/canon/determinism/ordinarycombat/
+control/paint/denominator/save and all188 gates remain; passed evidence retained.
+Original517/737/towns/other-match/input/late/finalreview stay separate.
