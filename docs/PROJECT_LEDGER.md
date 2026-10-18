@@ -7513,3 +7513,52 @@ No build, scenario, full suite, push, merge, acceptance change or baseline
 adoption was performed. The duplicate inventory, bounded hash results, safety
 review, compression/restoration proofs and final review are retained under
 `F:/AWWV-housekeeping-20261018`.
+
+### 2026-10-18 — Lossless compression of closed October telemetry snapshots
+
+The owner authorized safe space recovery while preserving every unique piece
+of evidence and ongoing calibration. The October checkpoint remains an active
+checkout. Its preserving-capture wrapper retains full before/after telemetry
+copies, so old closed archives accounted for most of its storage growth.
+
+A frozen, receipt-bound selection admitted 1,202 `C-before.jsonl` and
+`C-after.jsonl` snapshots older than 24 hours under the checkpoint's local logs
+directory, in channel `claude-channel-20261004` (exact external paths are in
+the frozen selection). Failed, malformed, recent and label-658+
+captures were excluded. The live C/D telemetry sources, D snapshots, receipts,
+capture writer, source files, packages, dependencies and directory compression
+inheritance were excluded from mutation. Compression waited until calibration
+allowance 658 and its evidence/report closeout completed; a process guard then
+checked before every file and would pause for calibration, scenario, test or
+TypeScript compiler work. The executor used below-normal CPU and background
+I/O priority, with synchronous in-process NTFS compression.
+
+Independent safety review cleared the guarded single-file pilot and separately
+bound batch. The pilot saved 48,345,058 bytes (75.0016%). The remaining 1,201
+files saved 67,526,712,761 bytes. All 1,202 selected files completed, reducing
+their measured stored size from **90,102,820,251 to 22,527,762,432 bytes**:
+**67,575,057,819 bytes of file-level stored-size reduction**, with no selected
+remainder. Active work totalled 2,320.338 seconds, within the fixed 90-minute
+limit. No file was
+deleted, moved, replaced, hardlinked or deduplicated.
+
+Every processed file received fresh full SHA-256 checks before and after,
+matched to its preservation receipt. File IDs, link counts, logical lengths,
+creation/write times, owner/ACL, streams and non-compression attributes matched;
+last-access times were restored. Receipt hashes remained exact. Logical file
+sizes and paths remain unchanged. Among audited properties, only NTFS stored
+allocation and the expected Compressed attribute changed. NTFS change-time was
+not measured or claimed preserved. New captures can still accumulate because the
+writer and current telemetry-retention contract were left intact.
+
+C: free-capacity observations rose from 299,312,152,576 to 355,717,554,176
+bytes across the operation: a net increase of 56,405,401,600 bytes. Volume-wide
+activity and allocation outside the selected files were not controlled, so this
+observation is distinct from the file-level stored-size reduction above.
+
+The frozen selection, permits, per-file intent/verification journal, pilot and
+batch results, volume observations and independent review are retained under
+`F:/AWWV-housekeeping-20261018`. No engine, build, scenario or full-suite run was
+performed for this maintenance. No calibration acceptance criterion, baseline,
+branch, worktree registration, push or merge was changed. Closeout uses focused
+plan-index, open-gate, strict receipt-citation and ledger-whitespace checks.
