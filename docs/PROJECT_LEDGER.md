@@ -7399,3 +7399,40 @@ the affected file 7/7, reusing the other two files' passing evidence. No full
 suite, campaign, package, push, merge or baseline adoption was performed.
 Inventory, preservation manifest, original failure and correction logs are in
 `F:/AWWV-housekeeping-20261018`.
+
+### 2026-10-18 — Follow-up worktree retirement and drive-root consolidation
+
+The owner requested more archival housekeeping while protecting parallel
+calibration. Four further clean detached worktrees were retired through Git:
+`e1e5`, `bc01-pre-controls`, `r7-readability-pre`, and `r7-readability-post-a`.
+Their exact integrated source commits and restoration instructions are recorded
+under `F:/AWWV-worktree-archives/20261018-retired-worktrees`. All 15 ignored
+diagnostic/hook files were archived and SHA-256 verified before removal; only
+the four dependency junctions were unlinked, without recursion. Their physical
+dependency target was verified intact. Fourteen registered worktrees remain;
+all branch names and calibration refs were preserved.
+
+Four dormant drive-root folders were consolidated intact under
+`F:/AWWV-worktree-archives/drive-root-20261018`: the June hygiene archive,
+`awwv-flake-check`, `awwv-instr-evidence`, and `AWWV-perf`. The same-volume
+renames preserved original directory/file identities and matching inventories
+for 35,208 files (7,822,756,547 bytes). Ten recorded dependency junctions were
+detached without traversal first, including one dangling historical RE link.
+The archive README maps historical paths to their new locations, and the move
+manifest records file inventories and junction targets for restoration. This
+consolidation does not reclaim the archived payload's disk space.
+
+The agent-setup modernization backup was moved prematurely before the scoped
+reference audit finished. It was restored immediately to its original
+`F:/AWWV-agent-setup-modernization-backup` path when the audit found exact-path
+Apply/Rollback receipt bindings in the modernization plan. Its directory/file
+identities and required receipt subtree were verified after restoration; that
+contract and the parallel calibration checkout were not edited.
+
+The four attribution repositories, mixed `F:/tmp` sources/runtime files, current
+housekeeping evidence, protected October/April/read-observer checkouts and
+unrelated drive contents remain in place. Remaining worktrees retain active
+ownership, unique/dirty work, cited evidence or physical dependency installs.
+No build, campaign, source change, baseline adoption, push or merge was performed.
+The bounded audit, final inventory, move/restore proofs and review are retained
+under `F:/AWWV-housekeeping-20261018`.
