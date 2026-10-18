@@ -7436,3 +7436,41 @@ ownership, unique/dirty work, cited evidence or physical dependency installs.
 No build, campaign, source change, baseline adoption, push or merge was performed.
 The bounded audit, final inventory, move/restore proofs and review are retained
 under `F:/AWWV-housekeeping-20261018`.
+
+### 2026-10-18 — Reclaim space while preserving calibration inputs and evidence
+
+The owner requested further housekeeping and actual disk-space recovery. A
+bounded Sol metadata audit separated unused generated installs/outputs from
+calibration dependencies and cited package/playtest evidence. Active calibration,
+its dependency chain, the main checkout's shared dependency install, map-cache
+data, original source files, logs, runs and frozen packages were preserved.
+
+Transparent NTFS compression was applied only to a fixed set of 256 archived
+text/data files under `F:/AWWV-worktree-archives/drive-root-20261018`, excluding
+shared hardlinks and already-compressed media. The one-file pilot saved
+49,643,979 stored bytes with an identical SHA-256. The remaining 255 files
+completed in 150 seconds within the three-minute stopping rule and saved
+1,295,645,362 bytes. All 256 before/after hashes matched. Total stored-size
+reduction is **1,345,289,341 bytes**, with paths and readable contents unchanged;
+compression is reversible. No additional compression campaign was run.
+
+Five verified generated directories were removed from dormant BC02 and R8
+checkouts: both root and map-UI `node_modules` installs, plus BC02's `dist`.
+This removed 148,461 files totaling **2,894,818,120 logical bytes**. The BC02
+root/UI lockfiles and the R8 workspace lockfile cover the removed installs;
+source and lockfile hashes and both checkouts' Git statuses matched afterward.
+The single R8 `node_modules/awwv-map` junction was unlinked without recursion
+before deleting its containing dependency directory; its UI source target was
+preserved. The BC02 map cache was retained rather than widening data-provenance
+review for a small saving. All 14 worktrees and branch names remain available.
+
+The deletion audit recorded free-space increases of 1,828,769,792 bytes on C:
+and 1,325,076,480 bytes on F: across that operation. These volume observations
+include concurrent activity; the file-level compression and removed-payload
+counts above are the bounded maintenance evidence, not a promise about future
+free capacity. No source behavior, acceptance criterion, calibration ref,
+baseline, package, active process or protected dependency target was changed.
+No build, campaign, full suite, push or merge was performed. Plans, open gates,
+strict receipt citations and ledger whitespace were checked locally. Audit,
+hashes, commands, logs and independent review are retained under
+`F:/AWWV-housekeeping-20261018`.
