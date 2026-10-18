@@ -1,5 +1,12 @@
 # A War Without Victory — Master Roadmap
 
+**Checkout scope — 2026-10-18:** This is the retained September handoff on
+`codex/january-1993-operations-20260914`. Its scores and open gates describe
+this branch. Active October calibration has its own roadmap, board, calibration
+master and ledger in a separate checkout; use the
+[worktree routing record](../PROJECT_LEDGER.md#2026-10-18--calibration-safe-local-housekeeping)
+before dispatching work. Do not treat this older checkout as the live October queue.
+
 **Status:** IN AUTONOMOUS EXECUTION. **Engine health is sacrosanct, and calibration works on top
 of it** (owner, 2026-08-26, restated 2026-09-01). Engine-health defects are fixed before tuning;
 calibration builds on a healthy engine rather than compensating for a sick one.

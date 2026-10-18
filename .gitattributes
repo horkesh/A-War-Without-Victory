@@ -25,3 +25,6 @@
 data/derived/startup/*.json text eol=lf
 *.pmtiles filter=lfs diff=lfs merge=lfs -text
 *.osm.pbf filter=lfs diff=lfs merge=lfs -text
+
+# Preserve the archived R8 draft patch's recorded SHA-256 on every checkout.
+logs/branch-hygiene/20260924-parallel-audit/r8-uncommitted.patch -text

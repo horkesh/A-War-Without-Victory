@@ -1,5 +1,11 @@
 # AWWV Calibration Master Reference
 
+**Checkout scope — 2026-10-18:** The measurements below belong to the retained
+September handoff branch. Active October calibration maintains its own copy in
+the [separate calibration checkout](../PROJECT_LEDGER.md#2026-10-18--calibration-safe-local-housekeeping).
+Consult that checkout for live results; these historical scores are not a new
+measurement or a baseline adoption.
+
 ## September 2026 session handoff — April 1994 next
 
 The January candidate and the owner's Vranjevići repaint are documented below.

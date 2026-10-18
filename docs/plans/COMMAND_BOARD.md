@@ -1,6 +1,6 @@
 # AWWV Command Board
 
-**Status:** Derived dispatch view, synchronized 2026-09-24 (R6).
+**Status:** Derived dispatch view: September branch snapshot; [October routing](../PROJECT_LEDGER.md#2026-10-18--calibration-safe-local-housekeeping).
 
 **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole authority for unfinished work and wins if this board differs.
 

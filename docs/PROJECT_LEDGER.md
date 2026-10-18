@@ -7361,3 +7361,41 @@ pushed. Other worktrees retain active ownership, uncommitted changes, cited
 evidence or dependency junctions. Automatic approval review blocked recursive
 deletion of unregistered external folders, so they remain. No source, scenario,
 canon, baseline, acceptance gate or release state changed.
+
+### 2026-10-18 — Calibration-safe local housekeeping
+
+The owner authorized local folder, worktree, branch and artifact housekeeping
+and documentation synchronization while protecting parallel calibration.
+The retained September checkout is not the live October queue. Active work
+is in `C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory`;
+its own roadmap, command board, calibration master and ledger govern that work.
+The October measurement checkout, April-1995 integration tree and read-observer
+tree remain protected. The September board, roadmap, calibration reference and
+locally excluded `working-on.md` now identify their checkout scope; no scores,
+acceptance criteria or lane dispositions were changed.
+
+A read-only Sol audit inventoried 20 registered worktrees and 13 local branches.
+Two clean detached worktrees, `21d7` at `61db7e9df` and `40ef` at `2d4efeb6f`,
+were retired with non-force `git worktree remove` after confirming integrated
+ancestry, no tracked/untracked changes, no ignored content and no dependency
+links. Eighteen worktrees remain. All 13 branch refs were preserved; nine
+dependency junctions and dirty, divergent or evidence-bearing trees were retained.
+Five obsolete scratch directories were moved to
+`F:/AWWV-housekeeping-20261018/scratch`: 21 files, 439,408 bytes, with every
+SHA-256 verified after the move. The previous local summary is backed up in
+the same external directory. Runs, logs, saves, packages and active processes
+were preserved. The pre-existing `.claude/scheduled_tasks.lock` deletion remains
+outside this change.
+
+The exact existing R8 preservation patch cited above is added to version control
+at its original path and recorded hash, repairing the strict receipt check's
+single inherited portability failure. An exact-path Git attribute prevents
+line-ending conversion from changing the preserved patch hash. Its original
+unified-diff whitespace is retained; whitespace checks cover the edited docs
+and attribute file separately. No draft patch was applied. Plan-index
+and open-gate validation pass. Focused documentation tests initially passed
+37/38; restoring the board's required "Derived dispatch view" wording passed
+the affected file 7/7, reusing the other two files' passing evidence. No full
+suite, campaign, package, push, merge or baseline adoption was performed.
+Inventory, preservation manifest, original failure and correction logs are in
+`F:/AWWV-housekeeping-20261018`.
