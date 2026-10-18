@@ -7474,3 +7474,42 @@ No build, campaign, full suite, push or merge was performed. Plans, open gates,
 strict receipt citations and ledger whitespace were checked locally. Audit,
 hashes, commands, logs and independent review are retained under
 `F:/AWWV-housekeeping-20261018`.
+
+### 2026-10-18 — Bounded duplicate-evidence check and safe cold-report compression
+
+The owner authorized checking the retained playtest folders and frozen packages
+for duplicates, reclaiming only safe space while preserving unique evidence and
+parallel calibration. A no-follow metadata inventory covered 16,780 files
+(26,675,792,146 logical bytes) across the primary and R8 playtest/package roots;
+113 runtime/profile/cache directories were excluded. Size and partial-content
+fingerprints narrowed the full-hash work. The fixed four-minute pass stopped at
+240.248 seconds after reading 9,304,368,436 bytes: 692 files received full hashes,
+55 of 2,091 candidate size groups completed, and 58 exact duplicate-content
+groups established 6,858,317,184 bytes of potential payload sharing. Smaller
+candidate groups remain unchecked; this is not an exhaustive duplicate count.
+
+Independent review rejected hardlink conversion while package/runtime gates
+remain open. Sharing streams would couple future writes and discard distinct
+per-path metadata. The original and replacement packages, their paths and the
+retained post-run directory mismatch remain evidence; no package was normalized,
+deleted, compressed or linked. Duplicate screenshots retain separate files and
+provenance. No additional hashing campaign was run after the stopping rule.
+
+One duplicate PNG compression pilot was immaterial and was decompressed back
+to its original allocation and attributes. A cold JSON-report pilot preserved
+content and metadata while saving 68,596,826 bytes; the fixed remaining 34
+closed reports/netlogs saved 200,771,646 bytes in 15.99 seconds, within the
+two-minute limit. Total stored-size reduction is **269,368,472 bytes** across
+35 files. All full hashes, file IDs, link counts, creation/write timestamps,
+ACLs, stream inventories and non-compression attributes matched; access times
+were restored. Only transparent NTFS compression changed, reversible with
+`compact /U` on the recorded files. Saves, profiles, runtime caches and package
+trees were excluded from mutation. No evidence file was deleted or hardlinked.
+
+Fresh metadata verification passed for every original inventoried file,
+including 7,076 package files. The 14 worktrees remain available; calibration
+checkouts, dependencies and processes received no writes or process operations.
+No build, scenario, full suite, push, merge, acceptance change or baseline
+adoption was performed. The duplicate inventory, bounded hash results, safety
+review, compression/restoration proofs and final review are retained under
+`F:/AWWV-housekeeping-20261018`.
