@@ -1,0 +1,117 @@
+{
+  "schema": "awwv.targeted-root-closeout-verification.v1",
+  "captured_utc": "2026-10-19T20:39:08.1700290Z",
+  "writes_closed": true,
+  "verdict": "PASS_TARGETED_ROOT_CLOSEOUT_CONTENT",
+  "scope": "Targeted verification of only the new 726 closeout documentation, the 11-file portable provenance package, and the actual 725 source-checkpoint push receipt. The sealed 724 independent review and unchanged implementation were not re-reviewed.",
+  "head": "a9c92d82076700c77859376789979beb76d6d214",
+  "branch": "codex/october-calibration-continuation-20261003",
+  "findings": [],
+  "source_checkpoint": {
+    "commit": "a9c92d82076700c77859376789979beb76d6d214",
+    "receipt": "logs/claude-channel-20261004/725-git-push-receipt.json",
+    "commit_exit": 0,
+    "push_exit": 0,
+    "receipt_remote_verification_exit": 0,
+    "fresh_ls_remote": "a9c92d82076700c77859376789979beb76d6d214 refs/heads/codex/october-calibration-continuation-20261003",
+    "staged_committed_paths": 106,
+    "receipt_post_push_working_tree_status": [],
+    "meaning": "Immutable primary source/tests/data/docs/images preservation checkpoint identity. It is not calibration acceptance, baseline adoption, or a complete ignored-raw backup."
+  },
+  "portable_package": {
+    "path": "docs/provenance/october-calibration-20261019",
+    "file_count": 11,
+    "bytes": 5924550,
+    "json_files": 9,
+    "json_parse_failures": [],
+    "copy_identity": {
+      "documentation-review.json": "matches logs/claude-channel-20261004/724-independent-review.json",
+      "documentation-review.md": "matches logs/claude-channel-20261004/724-independent-review.md",
+      "source-checkpoint-push.json": "matches logs/claude-channel-20261004/725-git-push-receipt.json",
+      "precommit-typecheck-child.json": "matches logs/claude-channel-20261004/725-precommit-typecheck/receipt.json",
+      "retained-historical-pins.json": "matches logs/claude-channel-20261004/720-closeout-a/inventory.json",
+      "raw-archive-feasibility.json": "matches logs/claude-channel-20261004/723-bounded-estimate-attempt-a/result.json",
+      "raw-audit-timeout.json": "matches logs/claude-channel-20261004/723-archive-audit-attempt-a/receipt.json"
+    },
+    "label_review": "PASS. README and JSON labels distinguish path/size inventory from byte backup, inherited scoped hashes from fresh hashing, source credential-pattern scan from raw publication clearance, and low-confidence compression estimate from an archive build."
+  },
+  "raw_inventory": {
+    "path": "docs/provenance/october-calibration-20261019/raw-file-inventory.json",
+    "rows": 26532,
+    "declared_count": 26532,
+    "summed_row_bytes": 117423624771,
+    "declared_bytes": 117423624771,
+    "fresh_hash_scope": "Path/size snapshot only",
+    "remote_raw_backup": "NOT_CREATED_OR_UPLOADED; owner storage disposition pending",
+    "audit_measured_prior_scope_bytes": 117221249498,
+    "audit_timeout": {
+      "timeout_ms": 540000,
+      "child_exit": 124,
+      "wrapper_exit": 124,
+      "usable_partial_result": false
+    },
+    "compression_estimate_bytes": 15669303863,
+    "compression_confidence": "LOW",
+    "chunk_dedup": "UNMEASURED",
+    "review": "Honest. The closeout states that the later path/size inventory includes newly generated checkpoint artifacts and therefore has a different byte total from the earlier bounded audit. It does not present either inventory as a fresh full hash or raw backup."
+  },
+  "current_cheap_pins": {
+    "C": {
+      "bytes": 97701891,
+      "sha256": "294077be226a772639eb03d89216b9e8d11d4e1d97e8b29abccfbf45440142df"
+    },
+    "D": {
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    "n80_native": {
+      "count": 31,
+      "mismatches_against_720_inventory": []
+    }
+  },
+  "closeout_document_review": {
+    "paths": [
+      "docs/40_reports/CALIBRATION_MASTER.md",
+      "docs/plans/COMMAND_BOARD.md",
+      "docs/plans/MASTER_ROADMAP.md",
+      "docs/PROJECT_LEDGER.md"
+    ],
+    "verdict": "PASS",
+    "claims": [
+      "Source checkpoint a9c92d82076700c77859376789979beb76d6d214 is pushed and freshly confirmed at the branch remote ref.",
+      "Source/docs preservation is separated from production acceptance and raw-byte remote preservation.",
+      "n80 remains 703/712, NO-GO/unadopted; suite 718 and inherited failures remain open.",
+      "The 15.7 GB figure is explicitly a low-confidence bounded estimate; the 540-second full scan is explicitly a timeout without usable partial results.",
+      "No raw archive/upload, Git LFS, paid storage, new campaign, suite, build, merge, or adoption is claimed.",
+      "Calibration remains paused while the owner decides private storage versus local raw retention plus pushed inventory."
+    ]
+  },
+  "checks": [
+    {
+      "argv": ["node", "tools/derive_plan_index.cjs", "--check"],
+      "exit": 0,
+      "result": "plan index up to date"
+    },
+    {
+      "argv": ["git", "diff", "--check"],
+      "exit": 0,
+      "result": "PASS"
+    },
+    {
+      "check": "fresh remote branch lookup",
+      "exit": 0,
+      "result": "remote branch equals a9c92d82076700c77859376789979beb76d6d214"
+    }
+  ],
+  "remaining_root_actions": [
+    "Run the planned secret-pattern scan over the exact 15 publication paths before staging/commit.",
+    "Inspect the exact staged names and sizes, then commit and push the closeout package without force.",
+    "Verify the follow-up remote branch SHA. The follow-up commit cannot self-reference its own final SHA; a9c92d82076700c77859376789979beb76d6d214 remains the immutable primary source-checkpoint identity.",
+    "Record the owner's later raw-storage decision without representing the path/size inventory as a raw-byte backup."
+  ],
+  "limits": [
+    "No source, documentation, test, data, Git index, commit, push, suite, build, package build, campaign, or raw archive was changed or run by this reviewer.",
+    "No fresh full hash of the 117.4 GB inventory was attempted.",
+    "This verdict covers content ready for the root's planned publication scan and follow-up commit/push; it does not claim those later actions have already occurred."
+  ]
+}

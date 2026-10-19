@@ -1,0 +1,80 @@
+{
+  "schema": "awwv.independent-checkpoint-review.v1",
+  "captured_utc": "2026-10-19T20:29:59.8129317Z",
+  "writes_closed": true,
+  "verdict": "PASS_SCOPED_CHECKPOINT_DOCS",
+  "scope": "Independent read-only review of the 721-725 preservation-checkpoint documentation, retained evidence claims, protected pins, and two targeted wording/comment corrections. This is not production acceptance, calibration adoption, a full-suite result, or a raw-evidence remote-backup claim.",
+  "head": "47872b8c66f17cde8101a5aba81be59c5d1ac62a",
+  "branch": "codex/october-calibration-continuation-20261003",
+  "status_uall_count": 106,
+  "findings": [
+    {
+      "severity": "blocking_before_checkpoint_commit",
+      "status": "RESOLVED_AND_TARGETED_VERIFIED",
+      "finding": "The new calibration-master and ledger summaries originally stated bare consumer/fingerprint exits, which could imply a current n80 measurement. Current n80 consumer/fingerprint are UNMEASURED; exit 2/1 belongs to historical n75 evidence.",
+      "resolution": [
+        "docs/40_reports/CALIBRATION_MASTER.md:9 now says historical n75 consumer exit 2 and fingerprint exit 1, with current n80 consumer/fingerprint UNMEASURED.",
+        "docs/PROJECT_LEDGER.md:11366 now gives the same scope explicitly. The first attempted ledger correction touched an old historical line; root restored the complete 722 ledger baseline, retained that intermediate, and changed only the unique new-summary phrase."
+      ],
+      "evidence": [
+        "logs/claude-channel-20261004/725-targeted-doc-correction/docs__40_reports__CALIBRATION_MASTER.md.before",
+        "logs/claude-channel-20261004/725-targeted-doc-correction/docs__PROJECT_LEDGER.md.before",
+        "logs/claude-channel-20261004/725-targeted-doc-correction/ledger.intermediate-1.md",
+        "logs/claude-channel-20261004/725-targeted-doc-correction/ledger-final-pin.json"
+      ]
+    },
+    {
+      "severity": "blocking_before_checkpoint_commit",
+      "status": "RESOLVED_AND_TARGETED_VERIFIED",
+      "finding": "The retained run-provenance source comment still said 31 rows/16 fixed while the live fixed-input list and run_provenance_stamp test establish 32 rows/17 fixed after formation_lifecycle_events.json was added.",
+      "resolution": "src/scenario/run_provenance.ts:22 is corrected comment-only to 32 rows/17 fixed. The arithmetic is 17 fixed + scenario + 4 declared + 6 EVENT_FILES + 4 painted = 32, matching tests/run_provenance_stamp.test.ts:163-187.",
+      "evidence": [
+        "logs/claude-channel-20261004/725-targeted-doc-correction/src__scenario__run_provenance.ts.before",
+        "logs/claude-channel-20261004/725-targeted-doc-correction/pins.json"
+      ]
+    }
+  ],
+  "current_pins": {
+    "docs": [
+      { "path": "docs/20_engineering/CODE_CANON.md", "bytes": 15611, "sha256": "9183ed1d54cde431037682a2fb265b22ad484656981c9fd531d1d34613bf01f9" },
+      { "path": "docs/20_engineering/DETERMINISM_TEST_MATRIX.md", "bytes": 28382, "sha256": "08a9c2c4b7f192b4d5b45b23a1e97658749867a1d89c7e5fc947da48aaad1ca5" },
+      { "path": "docs/20_engineering/REPO_MAP.md", "bytes": 46928, "sha256": "2b54d11452e66efe0a74f83dc529403f2cd56cc25f6e8dad7cdf702d2160671f" },
+      { "path": "docs/40_reports/CALIBRATION_MASTER.md", "bytes": 1245401, "sha256": "119283b5a2574851455c6248428f3ac785f695286b9aac22be92a3f431e27269" },
+      { "path": "docs/plans/COMMAND_BOARD.md", "bytes": 19836, "sha256": "32e226accef95c8f3577cf0afd40fb4b55ae122ae9e02bd6ffad9a8bbc507d46" },
+      { "path": "docs/plans/MASTER_ROADMAP.md", "bytes": 60903, "sha256": "6b709c4b142a889aadbb7fb0ae47e764aaa5d1eb50c6b3ecacdc5857ccbf3c6e" },
+      { "path": "docs/PROJECT_LEDGER.md", "bytes": 1156289, "sha256": "cbe26ed21ffe3b4f7ca07ee4dbc2cb80ef6550ac706a5fe549b220400b314121" }
+    ],
+    "source_comment_target": { "path": "src/scenario/run_provenance.ts", "bytes": 36955, "sha256": "5df03d72739ca862f7ea38fb4f04610e55be847917f2db9984bd9d3823ec2871" },
+    "source_emit": { "path": "src/sim/combat/commander/emit.ts", "bytes": 198276, "sha256": "6d04bd153030f88b7105f8d9e71510487576136cfa67a5f0bc10ba74ad7109ae" },
+    "threshold": { "path": "data/calibration/engine_health_thresholds.json", "bytes": 3775, "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d" },
+    "telemetry_c": { "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl", "bytes": 97701891, "sha256": "294077be226a772639eb03d89216b9e8d11d4e1d97e8b29abccfbf45440142df" },
+    "telemetry_d": { "path": "data/derived/_debug/d_lane_persona_decisions.jsonl", "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" },
+    "systems_manual_sha256": "97164ccd418d6a2ab1c392b4c88046a8ced7e8bf59c452e42b2f9e9e41eb8af1",
+    "forawwv_diff_exit": 0,
+    "n80_native": { "count": 31, "mismatches_against_720_inventory": [] }
+  },
+  "checks": [
+    { "check": "722 preserved documentation check", "result": "PASS", "child_exit": 0, "wrapper_exit": 0, "artifact_contract": true, "evidence": "logs/claude-channel-20261004/722-docs-check-b/receipt.json" },
+    { "check": "opening pins outside the seven 722 docs before the targeted source-comment correction", "result": "99/99 exact", "evidence": "logs/claude-channel-20261004/722-docs-check-b/result.json" },
+    { "check": "targeted source-comment correction", "result": "exactly one comment line: 31/16 to 32/17; live fixed list and test arithmetic agree", "evidence": "logs/claude-channel-20261004/725-targeted-doc-correction/src__scenario__run_provenance.ts.before" },
+    { "check": "targeted checkpoint wording corrections", "result": "master and new ledger summary explicitly separate historical n75 exits from current n80 UNMEASURED state", "evidence": "logs/claude-channel-20261004/725-targeted-doc-correction" },
+    { "check": "plan index", "argv": ["node", "tools/derive_plan_index.cjs", "--check"], "exit": 0, "result": "up to date" },
+    { "check": "working-tree whitespace", "argv": ["git", "diff", "--check"], "exit": 0, "result": "PASS; existing CRLF advisory for PROJECT_LEDGER_KNOWLEDGE only" },
+    { "check": "precommit no-emit TypeScript", "result": "REUSED_UNAFFECTED_PASS", "child_exit": 0, "wrapper_exit": 0, "capture_exit": 0, "evidence": ["logs/claude-channel-20261004/725-precommit-typecheck/receipt.json", "logs/claude-channel-20261004/396-varosluk-725-precommit-typecheck-telemetry/result.json"] },
+    { "check": "configured Git hook coverage", "result": "core.hooksPath is .husky/_ but that path is absent in this worktree; no hook-run claim is made. Root used explicit checks." }
+  ],
+  "truth_boundaries": {
+    "calibration": "NO_GO_UNADOPTED",
+    "n80": "retained 703/712; consumer/fingerprint UNMEASURED",
+    "full_suite_718": "FAIL_TIMEOUT_INCOMPLETE: timeout; child/wrapper/capture 1/124/124; 3/5 groups green; 10152 passed, 30 skipped, zero observed genuine failures; shard 1 incomplete at 325/342 and serial 74 unreached",
+    "still_open": ["122 STOP", "historical 473 5,181-byte loss", "604 preservation failure", "632 preservation failure", "668 preservation failure", "670 preservation failure", "all other inherited unmet or unmeasured criteria"],
+    "protected": "Systems Manual matches the 721 opening pin; FORAWWV has no diff; threshold and painted-control boundaries are not claimed changed.",
+    "publication": "The documents accurately say the ignored approximately 109 GB evidence estate plus approximately 8 GB runs estate is not assumed committed or pushed. This review does not establish a raw-evidence remote backup or authorize publishing secret-bearing raw logs."
+  },
+  "review_limits": [
+    "No suite, campaign, build, package, scenario, or broad unchanged code review was run.",
+    "The 725 typecheck is reused because the post-typecheck changes are documentation and one source comment only; no executable token changed.",
+    "Commit, push, staged inventory, archive disposition, secret review, and remote-SHA equality remain root closeout actions."
+  ],
+  "failures": []
+}

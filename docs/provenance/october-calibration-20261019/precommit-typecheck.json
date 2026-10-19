@@ -1,0 +1,78 @@
+{
+  "schema": "awwv.395.command-capture.start.v1",
+  "label": "396-varosluk-725-precommit-typecheck",
+  "start_utc": "2026-10-19T20:23:34.723Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tools/diagnostics/run_preserved_preflight.cjs",
+    "--attempt-dir",
+    "logs/claude-channel-20261004/725-precommit-typecheck",
+    "--entry-script",
+    "node_modules/typescript/bin/tsc",
+    "--timeout-ms",
+    "180000",
+    "--allow-artifact",
+    "tsconfig.tsbuildinfo",
+    "--",
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "node_modules/typescript/bin/tsc",
+    "--noEmit",
+    "--pretty",
+    "false",
+    "--incremental",
+    "--tsBuildInfoFile",
+    "{evidenceDir}/tsconfig.tsbuildinfo"
+  ],
+  "timeout_ms": 210000,
+  "paths": {
+    "start": "logs/claude-channel-20261004/396-varosluk-725-precommit-typecheck.start.json",
+    "receipt": "logs/claude-channel-20261004/396-varosluk-725-precommit-typecheck.receipt.json",
+    "stdout": "logs/claude-channel-20261004/396-varosluk-725-precommit-typecheck.stdout.log",
+    "stderr": "logs/claude-channel-20261004/396-varosluk-725-precommit-typecheck.stderr.log",
+    "wrapper_error": "logs/claude-channel-20261004/396-varosluk-725-precommit-typecheck.wrapper-error.log"
+  },
+  "child_env": {
+    "reviewed_env_path": null,
+    "reviewed_awwv_names": [],
+    "inherited_path_key": "Path",
+    "path_keys": [
+      "PATH"
+    ],
+    "path_key_count": 1,
+    "git_bin_prefix": "C:/Program Files/Git/bin",
+    "git_bin_occurrences": 1,
+    "removed_awwv_names": [
+      "AWWV_SLACK_WEBHOOK_URL"
+    ],
+    "remaining_awwv_names": [],
+    "removed_slack_names": [
+      "AWWV_SLACK_WEBHOOK_URL",
+      "SLACK_WEBHOOK_URL"
+    ],
+    "remaining_slack_names": []
+  },
+  "pid": 27468,
+  "end_utc": "2026-10-19T20:25:07.441Z",
+  "child_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "wrapper_exit": 0,
+  "stdout": {
+    "path": "logs/claude-channel-20261004/396-varosluk-725-precommit-typecheck.stdout.log",
+    "bytes": 212,
+    "sha256": "ee498144890397c2542f8342fa330e5758743d5c10b1104413dc56b4db5c6f68"
+  },
+  "stderr": {
+    "path": "logs/claude-channel-20261004/396-varosluk-725-precommit-typecheck.stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "wrapper_error": {
+    "path": "logs/claude-channel-20261004/396-varosluk-725-precommit-typecheck.wrapper-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

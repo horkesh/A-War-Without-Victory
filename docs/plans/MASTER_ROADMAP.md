@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-19 — 717–720 full-suite timeout;3/5native groups green;n80 retained703/712;scratch opening states recoverable.
+**Last updated:** 2026-10-19 — source/docs checkpoint a9c92d820 pushed; raw-storage decision pending; calibration paused.
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -42,7 +42,7 @@ moved from the roadmap — 2026-10-07".
 
 **717–720 current:** ONE full suite timed out at35minutes;3/5native groups green,1022files passed+2skipped,10152tests passed+30skipped,0observed failures;1parallel+serial unmeasured. n80 retained703/712, thresholds and C/D preserved; 17scratch opening states recovered via14exact prior archives+3empty states. No retry/campaign. [Evidence](../40_reports/CALIBRATION_MASTER.md).
 
-**721–722 preservation checkpoint (pending):** Calibration is paused while the retained working tree is reconciled, independently reviewed, checked, committed and pushed with an exact remote-SHA receipt. The opening 105 dirty paths are pinned; 722 adds one focused engineering-document path for the previously undocumented scenario-read receipt/test-discovery boundary. No source, test, data, gameplay, canon, threshold or acceptance change belongs to this documentation step. The approximately 109 GB ignored evidence tree plus approximately 8 GB under `runs/` requires an explicit archive disposition and is not assumed Git-backed. Until root records final inventory, archive disposition, checks and remote identity, this checkpoint is incomplete and R6 remains NO-GO. Owner priorities remain Oštra Luka RS, Veliki Badić and the Southern Move tail solved in retained n80, and Bijela/Sitnik/Golubići deferred to later 1992 work.
+**721–726 preservation checkpoint:** Source/docs106paths committed+pushed a9c92d820; remoteSHA verified,724reviewPASS,725typecheck0. n80retained703/712 NO-GO;718suite still incomplete. Portable evidence inventory pushed separately;117.2GB raw archive/storage decision pending, calibration paused. [Portable receipts](../provenance/october-calibration-20261019/README.md).
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference

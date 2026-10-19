@@ -1,0 +1,67 @@
+{
+  "schema": "awwv.evidence-archive-bounded-estimate.v1",
+  "captured_utc": "2026-10-19T20:34:57.726Z",
+  "scope": {
+    "raw_candidate_bytes": 117221249498,
+    "components": {
+      "logs_bytes": 109061182804,
+      "runs_bytes": 8045916376,
+      "telemetry_bytes": 97701891,
+      "sarajevo_override_bytes": 16448427
+    },
+    "qualification": "component totals measured before/at audit; excludes 723 active outputs and includes no node_modules/env/profiles"
+  },
+  "prior_inventory": {
+    "path": "logs/claude-channel-20261004/720-closeout-a/inventory.json",
+    "bytes": 2644323,
+    "sha256": "726464518f8b6d3dad60bab17a4f6d4cd3ff6cf03ca8beaf95c5e6a78b2d531d",
+    "entries": 11218,
+    "duplicate_groups": 366,
+    "duplicate_files": 3568,
+    "duplicate_bytes_avoidable": 58041378928,
+    "caveat": "exact arithmetic over sealed historical hashes, not a fresh full-scope rehash"
+  },
+  "sample": {
+    "method": "first 4 MiB of lexically ordered distinct whole-file hashes from 720 inventory, capped 512 MiB",
+    "files": 4518,
+    "chunks": 4518,
+    "raw_bytes": 537596022,
+    "gzip6_bytes": 142296145,
+    "ratio": 0.2646897283030863,
+    "estimated_candidate_bytes_after_whole_file_dedup": 15669303863,
+    "manifest_allowance_bytes": 5000000,
+    "caveat": "compression estimate only; chunk-level dedup beyond whole-file duplicates is unmeasured because fresh 109 GB scan timed out"
+  },
+  "pins721": {
+    "files": 105,
+    "bytes_read": 10736169,
+    "missing": [],
+    "values_retained": false,
+    "publication_blocker_candidate_occurrences": 0,
+    "by_pattern": {
+      "github_token": [],
+      "slack_webhook": [],
+      "aws_access_key_id": [],
+      "aws_secret_context": [],
+      "private_key_header": []
+    }
+  },
+  "failed_full_scan": {
+    "attempt": "logs/claude-channel-20261004/723-archive-audit-attempt-a/receipt.json",
+    "wrapper_exit": 124,
+    "timeout_ms": 540000,
+    "usable_partial_result": false
+  },
+  "plan": {
+    "format": "4 MiB content-addressed SHA-256 chunks, each gzip member; recovery-manifest.jsonl; recovery.cjs",
+    "manifest_fields": [
+      "path",
+      "bytes",
+      "sha256",
+      "ordered chunks with raw/gzip sizes"
+    ],
+    "publication": "No blocker in 721 source-path scan; raw evidence still requires an explicitly chosen non-Git storage destination",
+    "max_git_blob_policy": "Do not place 117 GB archive or chunk objects in public Git/Git LFS",
+    "estimated_build_runtime": "At least 10 minutes on this host; full hash+secret+gzip pass exceeded 9 minutes before completion. Budget 20-40 minutes for a real build plus verification, with destination capacity >= estimated size + 10%."
+  }
+}
