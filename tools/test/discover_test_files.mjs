@@ -44,9 +44,19 @@ export function fileRunsScenario(path) {
   );
 }
 
-export function discoverTests(rootDir) {
+// Opt-in startup test: it needs AWWV_READ_WIRING_CASE (off|on|failing) and rejects anything else
+// before starting. Default discovery therefore omits exactly this file while the variable is ABSENT
+// (undefined). A present value, including empty or unknown, keeps it discovered so the test's own
+// pre-startup selector rejection fires. No other file's membership depends on this.
+export const OPT_IN_WIRING_TEST = 'tests/scenario_runner_read_context_wiring.test.ts';
+export const OPT_IN_WIRING_ENV_VAR = 'AWWV_READ_WIRING_CASE';
+
+export function discoverTests(rootDir, env = process.env) {
   const testsDir = join(rootDir, 'tests');
-  const files = listTsFiles(testsDir);
+  const omitOptIn = env[OPT_IN_WIRING_ENV_VAR] === undefined;
+  const files = listTsFiles(testsDir).filter(
+    (file) => !(omitOptIn && relative(rootDir, file).replaceAll('\\', '/') === OPT_IN_WIRING_TEST),
+  );
   const vitestFiles = [];
   const fastVitestFiles = [];
   const scenarioVitestFiles = [];

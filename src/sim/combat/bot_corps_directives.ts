@@ -276,15 +276,55 @@ export function shouldLaunchProbeInstead(
     consecutiveProbes: number,
     turn?: number,
     timeline?: WarTimeline,
+    observe?: (trace: ProbeLaunchDecisionTrace) => void,
 ): boolean {
     // Doctrine phase exemption: some phases (e.g. RS blitz) bypass probe requirement
     const doctrinePhase = getActiveDoctrinePhase(faction, turn ?? 0, timeline);
-    if (doctrinePhase?.probe_exempt) return false;
+    if (doctrinePhase?.probe_exempt) {
+        observe?.({
+            doctrine_probe_exempt: true,
+            consecutive_probe_cap_reached: null,
+            resolved_threshold: null,
+            intel_below_threshold: null,
+            first_reached_exit: 'doctrine_probe_exempt',
+            launch_probe: false,
+        });
+        return false;
+    }
 
-    if (consecutiveProbes >= MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT) return false;
+    if (consecutiveProbes >= MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT) {
+        observe?.({
+            doctrine_probe_exempt: doctrinePhase?.probe_exempt ?? null,
+            consecutive_probe_cap_reached: true,
+            resolved_threshold: null,
+            intel_below_threshold: null,
+            first_reached_exit: 'consecutive_probe_cap',
+            launch_probe: false,
+        });
+        return false;
+    }
 
     const threshold = INTEL_GATE_LAUNCH_THRESHOLD[faction as NonNullable<FactionId>] ?? 0.30;
-    return sectorIntelConfidence < threshold;
+    const launchProbe = sectorIntelConfidence < threshold;
+    observe?.({
+        doctrine_probe_exempt: doctrinePhase?.probe_exempt ?? null,
+        consecutive_probe_cap_reached: false,
+        resolved_threshold: threshold,
+        intel_below_threshold: launchProbe,
+        first_reached_exit: 'intel_threshold',
+        launch_probe: launchProbe,
+    });
+    return launchProbe;
+}
+
+/** Actual short-circuit trace of shouldLaunchProbeInstead; populated only by an explicit opt-in caller. */
+export interface ProbeLaunchDecisionTrace {
+    doctrine_probe_exempt: boolean | null;
+    consecutive_probe_cap_reached: boolean | null;
+    resolved_threshold: number | null;
+    intel_below_threshold: boolean | null;
+    first_reached_exit: 'doctrine_probe_exempt' | 'consecutive_probe_cap' | 'intel_threshold';
+    launch_probe: boolean;
 }
 
 export function collectSectorFriendlyOsids(sector: CorpsFrontSector): string[] {

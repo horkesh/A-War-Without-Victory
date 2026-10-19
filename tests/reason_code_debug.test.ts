@@ -20,9 +20,11 @@
  * file and reset in `afterEach`.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+    emitLocalOccupationCandidateRecord,
     isReasonCodeTopicEnabled,
+    LOCAL_OCCUPATION_CANDIDATE_PREFIX,
     resetReasonCodeTopicCacheForTests,
     sortedIds,
     whenReasonCodeTopic,
@@ -48,6 +50,7 @@ const ALL_TOPICS: ReasonCodeTopic[] = [
     'tg_formation',
     'dispatcher_decision',
     'movement_phase',
+    'local_occupation_candidate',
 ];
 
 function setFlag(value: string | undefined): void {
@@ -133,6 +136,16 @@ describe('reason-code gate', () => {
         const input = ['c', 'a', 'b'];
         expect(sortedIds(input)).toEqual(['a', 'b', 'c']);
         expect(input).toEqual(['c', 'a', 'b']);
+    });
+
+    it('local occupation emitter is silent when off and isolates a throwing stdout sink when on', () => {
+        const sink = vi.spyOn(console, 'log').mockImplementation(() => { throw new Error('sink failed'); });
+        expect(() => emitLocalOccupationCandidateRecord({ phase: 'test' })).not.toThrow();
+        expect(sink).not.toHaveBeenCalled();
+        setFlag('local_occupation_candidate');
+        expect(() => emitLocalOccupationCandidateRecord({ phase: 'test' })).not.toThrow();
+        expect(sink).toHaveBeenCalledWith(`${LOCAL_OCCUPATION_CANDIDATE_PREFIX} {"phase":"test"}`);
+        sink.mockRestore();
     });
 });
 

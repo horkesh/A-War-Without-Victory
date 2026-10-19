@@ -1,7 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type {
     CorpsFrontSector,
+    CorpsOperation,
     FactionId,
     FormationId,
     FormationState,
@@ -31,6 +32,7 @@ import { predictCombatOutcome } from '../../src/sim/combat/combat_predictor.js';
 import { isOutcomeSufficientForAttack } from '../../src/sim/combat/bot_brigade_targeting.js';
 import { generateAllBotOrdersOsid } from '../../src/sim/combat/bot_brigade_ai_osid.js';
 import { autoResolveProbe, tickPreparation } from '../../src/sim/combat/operation_preparation.js';
+import { resetReasonCodeTopicCacheForTests } from '../../src/sim/combat/reason_code_debug.js';
 
 const FACTION: FactionId = 'RS';
 const CORPS_ID = 'vrs_test_corps' as FormationId;
@@ -40,6 +42,17 @@ const defaultPersonality: OfficerPersonality = {
     initiative: 0.8,
     competence: 0.6,
 };
+
+function setReasonCodeTopics(value: string | undefined): void {
+    if (value === undefined) delete process.env.AWWV_DEBUG_REASON_CODES;
+    else process.env.AWWV_DEBUG_REASON_CODES = value;
+    resetReasonCodeTopicCacheForTests();
+}
+
+afterEach(() => {
+    setReasonCodeTopics(undefined);
+    vi.restoreAllMocks();
+});
 
 describe('opportunity operation force contract', () => {
     it('does not let launch-time sector attachments exceed the planned force', () => {
@@ -395,7 +408,671 @@ function makePlanDecision(): PlanDecision {
     };
 }
 
+const OMITTED_TARGET = 'op:test:objective';
+const OMITTED_APPROACH = 'op:test:approach';
+const ADJACENCY_ONLY_TARGET = 'op:test:aaa-adjacency-only';
+
+interface OmittedTargetHarness {
+    briefing: CommanderBriefing;
+    allocation: AllocationResult;
+    state: GameState;
+    primary: CorpsFrontSector;
+}
+
+function makeOmittedTargetHarness(): OmittedTargetHarness {
+    const localBrigades = ['b1', 'b2', 'b3'].map((id) => makeBrigade(id, OMITTED_APPROACH, { personnel: 500 }));
+    const probe = makeBrigade('probe', 'op:test:other-approach', { personnel: 1_600 });
+    const brigades = [...localBrigades, probe];
+    const primary = {
+        ...makeSector(),
+        assigned_brigade_ids: localBrigades.map((brigade) => brigade.id),
+        sub_segments: makeSector().sub_segments.map((subSegment) => ({
+            ...subSegment,
+            enemy_osids: [],
+            primary_brigade_ids: localBrigades.map((brigade) => brigade.id),
+        })),
+    } as CorpsFrontSector;
+    const probeSector = {
+        ...makeSector(),
+        sector_id: `sector:${CORPS_ID}:probe`,
+        territory_osids: ['op:test:other-approach'],
+        assigned_brigade_ids: ['probe'] as FormationId[],
+        sub_segments: [{
+            ...makeSector().sub_segments[0]!,
+            sub_segment_id: `subseg:${CORPS_ID}:probe`,
+            friendly_osids: ['op:test:other-approach'],
+            enemy_osids: ['op:test:other-target'],
+            primary_brigade_ids: ['probe'] as FormationId[],
+        }],
+    } as CorpsFrontSector;
+    const genericDepth = Array.from({ length: 6 }, (_, index) => `op:test:other-depth:${index}`);
+    const adjacency = new Map<string, readonly string[]>([
+        [OMITTED_APPROACH, [OMITTED_TARGET]],
+        [OMITTED_TARGET, [OMITTED_APPROACH]],
+        ['op:test:other-approach', ['op:test:other-target']],
+        ['op:test:other-target', ['op:test:other-approach', ...genericDepth]],
+        ...genericDepth.map((osid) => [osid, ['op:test:other-target']] as const),
+    ]);
+    const base = makeBriefing([], brigades);
+    const state = {
+        ...base.state_ref!,
+        meta: { ...base.state_ref!.meta, turn: 30 },
+        military: {
+            ...base.state_ref!.military,
+            formations: Object.fromEntries(brigades.map((brigade) => [brigade.id, brigade])),
+            corps_front_sectors: {
+                [primary.sector_id]: primary,
+                [probeSector.sector_id]: probeSector,
+            },
+        },
+        political: {
+            ...base.state_ref!.political,
+            political_controllers: {
+                [OMITTED_APPROACH]: FACTION,
+                [OMITTED_TARGET]: 'RBiH',
+                'op:test:other-approach': FACTION,
+                'op:test:other-target': 'RBiH',
+                ...Object.fromEntries(genericDepth.map((osid) => [osid, 'RBiH'])),
+            },
+        },
+    } as GameState;
+    state.military.corps_command![CORPS_ID]!.consecutive_probes = 2;
+    const briefing = {
+        ...base,
+        turn: 30,
+        brigades,
+        sectors: [primary, probeSector],
+        state_ref: state,
+        reverse_map: new Map([
+            [OMITTED_APPROACH, ['S1']],
+            [OMITTED_TARGET, ['S2']],
+            ['op:test:other-approach', ['S3']],
+            ['op:test:other-target', ['S4']],
+        ]),
+        osid_population_map: new Map([
+            [OMITTED_TARGET, 40_000],
+            ['op:test:other-target', 10_000],
+        ]),
+        spatial: {
+            ...makeSpatial(),
+            adjacency,
+            sharedBoundaryAdjacency: adjacency,
+            friendlyOsidsByFaction: new Map([
+                [FACTION, new Set([OMITTED_APPROACH, 'op:test:other-approach'])],
+                ['RBiH' as FactionId, new Set([OMITTED_TARGET, 'op:test:other-target', ...genericDepth])],
+                ['HRHB' as FactionId, new Set()],
+            ]),
+        } as SpatialContext,
+    } as CommanderBriefing;
+    return {
+        briefing,
+        allocation: {
+            ...makeAllocation(),
+            surplus_pool: [
+                { ...makeEval('probe'), fitness_offense: 0.99 },
+                ...localBrigades.map((brigade) => makeEval(brigade.id)),
+            ],
+        },
+        state,
+        primary,
+    };
+}
+
+function emitOmittedTargetHarness(harness: OmittedTargetHarness) {
+    return emitCommanderOutput(
+        harness.briefing,
+        [],
+        makeForces(),
+        harness.allocation,
+        { ...makePlanDecision(), plan: null, action: 'none' },
+        makeDecisions(),
+        makeThreats(),
+    );
+}
+
+function replaceHarnessBrigades(
+    harness: OmittedTargetHarness,
+    transform: (brigade: FormationState) => FormationState,
+): void {
+    harness.briefing = {
+        ...harness.briefing,
+        brigades: harness.briefing.brigades.map((brigade) => (
+            brigade.id === 'probe' ? brigade : transform(brigade)
+        )),
+    };
+    harness.state.military.formations = Object.fromEntries(
+        harness.briefing.brigades.map((brigade) => [brigade.id, brigade]),
+    );
+}
+
+function addPriorityTargets(
+    harness: OmittedTargetHarness,
+    listedPopulation: number | null,
+    adjacencyOnlyPopulation: number,
+): void {
+    harness.primary.sub_segments = harness.primary.sub_segments.map((subSegment) => ({
+        ...subSegment,
+        enemy_osids: [OMITTED_TARGET],
+    }));
+    const adjacency = new Map(harness.briefing.spatial.adjacency);
+    adjacency.set(OMITTED_APPROACH, [ADJACENCY_ONLY_TARGET, OMITTED_TARGET, OMITTED_TARGET]);
+    adjacency.set(OMITTED_TARGET, [OMITTED_APPROACH]);
+    adjacency.set(ADJACENCY_ONLY_TARGET, [OMITTED_APPROACH]);
+    (harness.briefing as any).spatial = {
+        ...harness.briefing.spatial,
+        adjacency,
+        sharedBoundaryAdjacency: adjacency,
+        friendlyOsidsByFaction: new Map([
+            [FACTION, new Set([OMITTED_APPROACH, 'op:test:other-approach'])],
+            ['RBiH' as FactionId, new Set([
+                OMITTED_TARGET,
+                ADJACENCY_ONLY_TARGET,
+                'op:test:other-target',
+                ...Array.from({ length: 6 }, (_, index) => `op:test:other-depth:${index}`),
+            ])],
+            ['HRHB' as FactionId, new Set()],
+        ]),
+    } as SpatialContext;
+    harness.state.political.political_controllers![ADJACENCY_ONLY_TARGET] = 'RBiH';
+    harness.briefing.reverse_map!.set(ADJACENCY_ONLY_TARGET, ['S5']);
+    if (listedPopulation == null) {
+        harness.briefing.osid_population_map!.delete(OMITTED_TARGET);
+    } else {
+        harness.briefing.osid_population_map!.set(OMITTED_TARGET, listedPopulation);
+    }
+    harness.briefing.osid_population_map!.set(ADJACENCY_ONLY_TARGET, adjacencyOnlyPopulation);
+}
+
+function addObjectiveClaimWithSecondSlot(
+    harness: OmittedTargetHarness,
+    phase: CorpsOperation['phase'] = 'execution',
+    objectives: string[] = [OMITTED_TARGET],
+): void {
+    const additionalBrigades = Array.from({ length: 20 }, (_, index) => (
+        makeBrigade(`slot-${index}`, `op:test:rear-${index}`)
+    ));
+    harness.briefing = {
+        ...harness.briefing,
+        brigades: [...harness.briefing.brigades, ...additionalBrigades],
+    };
+    harness.state.military.formations = Object.fromEntries(
+        harness.briefing.brigades.map((brigade) => [brigade.id, brigade]),
+    );
+    harness.state.military.corps_command![CORPS_ID]!.subordinate_count = harness.briefing.brigades.length;
+
+    const executingClaim: CorpsOperation = {
+        name: 'Existing claimed objective',
+        type: 'sector_attack',
+        phase,
+        started_turn: 25,
+        phase_started_turn: 27,
+        sector_id: `sector:${CORPS_ID}:claimed`,
+        objectives,
+        participating_brigades: ['claim-owner' as FormationId],
+    };
+    harness.briefing = { ...harness.briefing, active_operations: [executingClaim] };
+    harness.state.military.corps_command![CORPS_ID]!.active_operations = [executingClaim];
+}
+
+function emitClaimedObjectiveHarness(harness: OmittedTargetHarness, observe = true) {
+    setReasonCodeTopics(observe ? 'local_occupation_candidate,commander_creation' : undefined);
+    const lines: string[] = [];
+    const spy = vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => {
+        lines.push(args.map(String).join(' '));
+    });
+    try {
+        return {
+            output: emitOmittedTargetHarness(harness),
+            localRows: lines
+                .filter((line) => line.startsWith('[local_occupation_candidate] '))
+                .map((line) => JSON.parse(line.slice('[local_occupation_candidate] '.length)) as Record<string, unknown>),
+            commanderRows: lines
+                .filter((line) => line.startsWith('[commander_creation] '))
+                .map((line) => JSON.parse(line.slice('[commander_creation] '.length)) as Record<string, unknown>),
+        };
+    } finally {
+        spy.mockRestore();
+    }
+}
+
 describe('commander emission overlap guards', () => {
+    it('builds the later target when an explicit input change makes the earlier target ineligible', () => {
+        const harness = makeOmittedTargetHarness();
+        addPriorityTargets(harness, null, 1_000);
+        const topicOffHarness = makeOmittedTargetHarness();
+        addPriorityTargets(topicOffHarness, null, 1_000);
+
+        const topicOff = emitClaimedObjectiveHarness(topicOffHarness, false);
+        const result = emitClaimedObjectiveHarness(harness);
+
+        expect(result.output.operations).toHaveLength(1);
+        expect(result.output.operations[0]).toMatchObject({
+            objectives: [ADJACENCY_ONLY_TARGET],
+            participating_brigades: ['b1'],
+        });
+        expect(result.localRows.filter((row) => row.phase === 'candidate')).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                target_osid: OMITTED_TARGET,
+                outcome: 'rejected',
+                first_failed_predicate: 'target_population_present',
+            }),
+            expect.objectContaining({
+                target_osid: ADJACENCY_ONLY_TARGET,
+                outcome: 'qualified',
+            }),
+        ]));
+        expect(result.output).toEqual(topicOff.output);
+        expect(JSON.stringify(harness.briefing.state_ref)).toBe(JSON.stringify(topicOffHarness.briefing.state_ref));
+    });
+
+    it('still applies the recovery same-sector guard after reaching the later target', () => {
+        const harness = makeOmittedTargetHarness();
+        addPriorityTargets(harness, null, 1_000);
+        const recoveryGuard: CorpsOperation = {
+            name: 'Existing recovery guard',
+            type: 'sector_attack',
+            phase: 'recovery',
+            started_turn: 20,
+            phase_started_turn: 29,
+            sector_id: harness.primary.sector_id,
+            objectives: ['op:test:unrelated'],
+            participating_brigades: ['recovery-owner' as FormationId],
+        };
+        harness.briefing = { ...harness.briefing, active_operations: [recoveryGuard] };
+        harness.state.military.corps_command![CORPS_ID]!.active_operations = [recoveryGuard];
+
+        const result = emitClaimedObjectiveHarness(harness);
+        const completion = result.commanderRows.at(-1);
+
+        expect(result.localRows.filter((row) => row.phase === 'candidate')).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                target_osid: ADJACENCY_ONLY_TARGET,
+                outcome: 'qualified',
+            }),
+        ]));
+        expect(completion).toMatchObject({
+            exit: 'reduction_overlap_suppressed',
+            overlap_found: true,
+            overlap_detail: {
+                first_matched_clause: 'same_sector',
+                conflicting_operation: { name: 'Existing recovery guard' },
+            },
+            returned: [],
+        });
+        expect(result.output.operations).toEqual([]);
+    });
+
+    it('continues to the later target when an executing operation claims the first target', () => {
+        const harness = makeOmittedTargetHarness();
+        addPriorityTargets(harness, 1_000, 1_000);
+        addObjectiveClaimWithSecondSlot(harness);
+        const topicOffHarness = makeOmittedTargetHarness();
+        addPriorityTargets(topicOffHarness, 1_000, 1_000);
+        addObjectiveClaimWithSecondSlot(topicOffHarness);
+
+        const topicOff = emitClaimedObjectiveHarness(topicOffHarness, false);
+        const result = emitClaimedObjectiveHarness(harness);
+        const candidateRows = result.localRows.filter((row) => row.phase === 'candidate');
+        const completion = result.commanderRows.at(-1);
+
+        expect(result.output.operations).toHaveLength(1);
+        expect(result.output.operations[0]).toMatchObject({
+            objectives: [ADJACENCY_ONLY_TARGET],
+            participating_brigades: ['b1'],
+        });
+        expect(candidateRows).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                target_osid: OMITTED_TARGET,
+                outcome: 'rejected',
+                first_failed_predicate: 'target_not_claimed_by_executing_operation',
+            }),
+            expect.objectContaining({
+                target_osid: ADJACENCY_ONLY_TARGET,
+                outcome: 'qualified',
+            }),
+        ]));
+        expect(completion).toMatchObject({
+            exit: 'reduction_created',
+            overlap_found: false,
+        });
+        expect(result.output).toEqual(topicOff.output);
+        expect(JSON.stringify(harness.briefing.state_ref)).toBe(JSON.stringify(topicOffHarness.briefing.state_ref));
+    });
+
+    it('continues from a claimed sector-listed group target to an adjacency-only group target', () => {
+        const harness = makeOmittedTargetHarness();
+        addPriorityTargets(harness, 40_000, 40_000);
+        addObjectiveClaimWithSecondSlot(harness);
+
+        const result = emitClaimedObjectiveHarness(harness);
+        const candidateRows = result.localRows.filter((row) => row.phase === 'candidate');
+
+        expect(result.output.operations[0]).toMatchObject({
+            objectives: [ADJACENCY_ONLY_TARGET],
+            participating_brigades: ['b1', 'b2', 'b3'],
+        });
+        expect(candidateRows).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                candidate_class: 'sector-listed_group',
+                target_osid: OMITTED_TARGET,
+                outcome: 'rejected',
+                first_failed_predicate: 'target_not_claimed_by_executing_operation',
+            }),
+            expect.objectContaining({
+                candidate_class: 'adjacency-only_group',
+                target_osid: ADJACENCY_ONLY_TARGET,
+                outcome: 'qualified',
+            }),
+        ]));
+    });
+
+    it('rejects every claimed local target without changing the class search order', () => {
+        const harness = makeOmittedTargetHarness();
+        addPriorityTargets(harness, 40_000, 40_000);
+        addObjectiveClaimWithSecondSlot(harness, 'execution', [OMITTED_TARGET, ADJACENCY_ONLY_TARGET]);
+
+        const result = emitClaimedObjectiveHarness(harness);
+        const candidateRows = result.localRows.filter((row) => row.phase === 'candidate');
+        const searchEnd = result.localRows.find((row) => row.phase === 'search_end');
+        const completion = result.commanderRows.at(-1);
+
+        expect(candidateRows).toEqual(expect.arrayContaining([
+            expect.objectContaining({
+                candidate_class: 'sector-listed_group',
+                target_osid: OMITTED_TARGET,
+                first_failed_predicate: 'target_not_claimed_by_executing_operation',
+            }),
+            expect.objectContaining({
+                candidate_class: 'adjacency-only_group',
+                target_osid: ADJACENCY_ONLY_TARGET,
+                first_failed_predicate: 'target_not_claimed_by_executing_operation',
+            }),
+        ]));
+        expect(searchEnd).toMatchObject({
+            outcome: 'rejected',
+            selected_class: null,
+            selected_target_osid: null,
+            class_outcomes: [
+                { candidate_class: 'sector-listed_single', outcome: 'rejected' },
+                { candidate_class: 'sector-listed_group', outcome: 'rejected' },
+                { candidate_class: 'adjacency-only_single', outcome: 'rejected' },
+                { candidate_class: 'adjacency-only_group', outcome: 'rejected' },
+            ],
+        });
+        expect(completion).toMatchObject({
+            exit: 'fallback_probe_created',
+            overlap_found: false,
+        });
+        expect(result.output.operations).toHaveLength(1);
+        expect(result.output.operations.every((operation) => (
+            operation.objectives?.includes(OMITTED_TARGET) !== true
+            && operation.objectives?.includes(ADJACENCY_ONLY_TARGET) !== true
+        ))).toBe(true);
+    });
+
+    it.each(['planning', 'recovery'] as const)(
+        'keeps a %s objective claim in candidate search and lets the downstream shared-objective guard block it',
+        (phase) => {
+            const harness = makeOmittedTargetHarness();
+            addPriorityTargets(harness, 1_000, 1_000);
+            addObjectiveClaimWithSecondSlot(harness, phase);
+
+            const result = emitClaimedObjectiveHarness(harness);
+            const completion = result.commanderRows.at(-1);
+
+            expect(result.localRows.filter((row) => row.phase === 'candidate')).toEqual(expect.arrayContaining([
+                expect.objectContaining({
+                    target_osid: OMITTED_TARGET,
+                    outcome: 'qualified',
+                    first_failed_predicate: null,
+                }),
+            ]));
+            expect(completion).toMatchObject({
+                exit: 'reduction_overlap_suppressed',
+                overlap_found: true,
+                overlap_detail: {
+                    first_matched_clause: 'shared_objective',
+                    conflicting_operation: {
+                        name: 'Existing claimed objective',
+                        objective_ids: [OMITTED_TARGET],
+                    },
+                },
+            });
+            expect(result.output.operations).toEqual([]);
+        },
+    );
+
+    it('prefers a qualifying sector-listed group over a qualifying adjacency-only single', () => {
+        const harness = makeOmittedTargetHarness();
+        addPriorityTargets(harness, 40_000, 1_000);
+
+        expect(emitOmittedTargetHarness(harness).operations[0]).toMatchObject({
+            objectives: [OMITTED_TARGET],
+            participating_brigades: ['b1', 'b2', 'b3'],
+        });
+    });
+
+    it('prefers a qualifying sector-listed single over an adjacency-only group', () => {
+        const harness = makeOmittedTargetHarness();
+        addPriorityTargets(harness, 1_000, 40_000);
+
+        expect(emitOmittedTargetHarness(harness).operations[0]).toMatchObject({
+            objectives: [OMITTED_TARGET],
+            participating_brigades: ['b1'],
+        });
+    });
+
+    it('uses an adjacency-only single after all sector-listed candidates reject', () => {
+        const harness = makeOmittedTargetHarness();
+        addPriorityTargets(harness, null, 1_000);
+
+        expect(emitOmittedTargetHarness(harness).operations[0]).toMatchObject({
+            objectives: [ADJACENCY_ONLY_TARGET],
+            participating_brigades: ['b1'],
+        });
+    });
+
+    it('uses an adjacency-only group after listed candidates reject and no single is strong enough', () => {
+        const harness = makeOmittedTargetHarness();
+        addPriorityTargets(harness, null, 40_000);
+
+        expect(emitOmittedTargetHarness(harness).operations[0]).toMatchObject({
+            objectives: [ADJACENCY_ONLY_TARGET],
+            participating_brigades: ['b1', 'b2', 'b3'],
+        });
+    });
+
+    it('keeps listed-target priority and output deterministic under duplicated adjacency and permuted inputs', () => {
+        const baseline = makeOmittedTargetHarness();
+        addPriorityTargets(baseline, 40_000, 1_000);
+        const permuted = makeOmittedTargetHarness();
+        addPriorityTargets(permuted, 40_000, 1_000);
+        (permuted.briefing as any).brigades = [...permuted.briefing.brigades].reverse();
+        (permuted.briefing as any).sectors = [...permuted.briefing.sectors].reverse();
+        permuted.allocation.surplus_pool.reverse();
+        for (const neighbours of permuted.briefing.spatial.adjacency.values()) {
+            (neighbours as string[]).reverse();
+        }
+
+        expect(JSON.stringify(emitOmittedTargetHarness(permuted).operations))
+            .toBe(JSON.stringify(emitOmittedTargetHarness(baseline).operations));
+        expect(emitOmittedTargetHarness(permuted).operations[0]?.objectives)
+            .toEqual([OMITTED_TARGET]);
+    });
+
+    it('admits a bounded adjacent target omitted from the associated sector enemy list', () => {
+        const output = emitOmittedTargetHarness(makeOmittedTargetHarness());
+        expect(output.operations[0]).toMatchObject({
+            type: 'sector_attack',
+            objectives: [OMITTED_TARGET],
+            participating_brigades: ['b1', 'b2', 'b3'],
+        });
+    });
+
+    it('retains the Graz block for an otherwise qualifying local occupation target', () => {
+        const harness = makeOmittedTargetHarness();
+        harness.state.political.political_controllers![OMITTED_TARGET] = 'HRHB';
+        harness.state.political.vienna_declaration_turn = 4;
+        harness.state.political.vienna_accepted = { RS: true, HRHB: true } as Record<FactionId, boolean>;
+        harness.state.political.vienna_herzegovina_broken_by = undefined;
+        const friendly = harness.briefing.spatial.friendlyOsidsByFaction as Map<FactionId, ReadonlySet<string>>;
+        friendly.set('RBiH', new Set(['op:test:other-target', ...Array.from({ length: 6 }, (_, index) => `op:test:other-depth:${index}`)]));
+        friendly.set('HRHB', new Set([OMITTED_TARGET]));
+
+        const output = emitOmittedTargetHarness(harness);
+        expect(output.operations.every(
+            (operation) => operation.objectives?.includes(OMITTED_TARGET) !== true,
+        )).toBe(true);
+    });
+
+    const omittedTargetNegativeCases: Array<[
+        string,
+        (harness: OmittedTargetHarness) => void,
+    ]> = [
+        ['no primary-sector association', (harness) => {
+            harness.primary.assigned_brigade_ids = [];
+            harness.primary.territory_osids = [];
+            harness.primary.sub_segments = harness.primary.sub_segments.map((subSegment) => ({
+                ...subSegment,
+                friendly_osids: [],
+                primary_brigade_ids: [],
+            }));
+        }],
+        ['wrong corps association', (harness) => {
+            replaceHarnessBrigades(harness, (brigade) => ({
+                ...brigade,
+                corps_id: 'vrs_other_corps' as FormationId,
+            }));
+        }],
+        ['no target adjacency', (harness) => {
+            const adjacency = new Map<string, readonly string[]>(([
+                [OMITTED_APPROACH, []],
+                [OMITTED_TARGET, []],
+            ]));
+            harness.briefing = {
+                ...harness.briefing,
+                spatial: {
+                    ...harness.briefing.spatial,
+                    adjacency,
+                    sharedBoundaryAdjacency: adjacency,
+                } as SpatialContext,
+            };
+        }],
+        ['reachable organized defender', (harness) => {
+            const defender = makeBrigade('enemy', OMITTED_TARGET, {
+                faction: 'RBiH' as FactionId,
+                corps_id: 'arbih_test_corps' as FormationId,
+                personnel: 1_200,
+            });
+            harness.state.military.formations = {
+                ...harness.state.military.formations,
+                [defender.id]: defender,
+            };
+        }],
+        ['unbounded enemy component', (harness) => {
+            const depth = Array.from({ length: 6 }, (_, index) => `op:test:depth:${index}`);
+            const adjacency = new Map(harness.briefing.spatial.adjacency);
+            adjacency.set(OMITTED_TARGET, [OMITTED_APPROACH, ...depth]);
+            for (const osid of depth) {
+                adjacency.set(osid, [OMITTED_TARGET]);
+                harness.state.political.political_controllers![osid] = 'RBiH';
+            }
+            harness.briefing = {
+                ...harness.briefing,
+                spatial: {
+                    ...harness.briefing.spatial,
+                    adjacency,
+                    sharedBoundaryAdjacency: adjacency,
+                } as SpatialContext,
+            };
+        }],
+        ['excessive population', (harness) => {
+            harness.briefing.osid_population_map!.set(OMITTED_TARGET, 100_000);
+        }],
+        ['missing population', (harness) => {
+            harness.briefing.osid_population_map!.delete(OMITTED_TARGET);
+        }],
+        ['disrupted candidates', (harness) => {
+            replaceHarnessBrigades(harness, (brigade) => ({ ...brigade, disrupted_turns: 1 }));
+        }],
+        ['in-transit candidates', (harness) => {
+            harness.state.military.brigade_movement_state = Object.fromEntries(
+                harness.briefing.brigades.map((brigade) => [brigade.id, { status: 'in_transit' }]),
+            ) as any;
+        }],
+        ['understrength candidates', (harness) => {
+            replaceHarnessBrigades(harness, (brigade) => ({ ...brigade, personnel: 100 }));
+        }],
+        ['active-operation commitment', (harness) => {
+            const recovery = {
+                name: 'existing recovery',
+                type: 'sector_attack',
+                phase: 'recovery',
+                started_turn: 29,
+                phase_started_turn: 29,
+                participating_brigades: ['b1', 'b2', 'b3'],
+            } as any;
+            harness.briefing = { ...harness.briefing, active_operations: [recovery] };
+        }],
+        ['front-staffing floor', (harness) => {
+            const b3 = harness.briefing.brigades.find((brigade) => brigade.id === 'b3')!;
+            b3.location_osid = 'op:test:donor';
+            harness.primary.assigned_brigade_ids = ['b1', 'b2'] as FormationId[];
+            harness.primary.sub_segments = harness.primary.sub_segments.map((subSegment) => ({
+                ...subSegment,
+                primary_brigade_ids: ['b1', 'b2'] as FormationId[],
+            }));
+            const donor = {
+                ...makeSector(),
+                sector_id: `sector:${CORPS_ID}:1`,
+                territory_osids: ['op:test:donor'],
+                assigned_brigade_ids: ['b3'] as FormationId[],
+                sub_segments: [],
+                length_edges: 3,
+            } as CorpsFrontSector;
+            harness.briefing = { ...harness.briefing, sectors: [harness.primary, donor] };
+            harness.state.military.corps_front_sectors = {
+                [harness.primary.sector_id]: harness.primary,
+                [donor.sector_id]: donor,
+            };
+            const adjacency = new Map(harness.briefing.spatial.adjacency);
+            adjacency.set(OMITTED_APPROACH, [OMITTED_TARGET, 'op:test:donor']);
+            adjacency.set('op:test:donor', [OMITTED_APPROACH]);
+            harness.briefing = {
+                ...harness.briefing,
+                spatial: {
+                    ...harness.briefing.spatial,
+                    adjacency,
+                    sharedBoundaryAdjacency: adjacency,
+                } as SpatialContext,
+            };
+            harness.state.political.political_controllers!['op:test:donor'] = FACTION;
+        }],
+        ['enclave candidates', (harness) => {
+            replaceHarnessBrigades(harness, (brigade) => ({ ...brigade, tags: ['enclave'] }));
+        }],
+        ['loaned candidates', (harness) => {
+            replaceHarnessBrigades(harness, (brigade) => ({
+                ...brigade,
+                elite_loan_state: { on_loan: true } as any,
+            }));
+        }],
+        ['player autonomy', (harness) => {
+            harness.state.meta.autonomy_level = 1;
+        }],
+        ['friendly controller', (harness) => {
+            harness.state.political.political_controllers![OMITTED_TARGET] = FACTION;
+        }],
+    ];
+
+    it.each(omittedTargetNegativeCases)('rejects omitted-target discovery with %s', (_name, mutate) => {
+        const harness = makeOmittedTargetHarness();
+        mutate(harness);
+        const output = emitOmittedTargetHarness(harness);
+        expect(output.operations.every(
+            (operation) => operation.objectives?.includes(OMITTED_TARGET) !== true,
+        )).toBe(true);
+    });
     it.each([
         { confidence: 0.25, expectedType: 'sector_attack' },
         { confidence: 0, expectedType: 'probe' },

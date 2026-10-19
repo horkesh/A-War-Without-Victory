@@ -6,13 +6,20 @@
     "description": "Painted control target: October 1995",
     "total_osids": 712,
     "counts": {
-      "RS": 309,
-      "RBiH": 294,
+      "RS": 310,
+      "RBiH": 293,
       "HRHB": 109
     },
     "source": "painted_control_targets",
-    "revision": 6,
+    "revision": 7,
     "changelog": [
+      {
+        "date": "2026-10-17",
+        "osid": "op:sanski_most:ostra_luka",
+        "from": "RBiH",
+        "to": "RS",
+        "rationale": "Owner determination, 2026-10-17: paint the Sanski Most Oštra Luka operational cell RS at the October 1995 checkpoint. This is an owner reference correction, not an engine capture; the constituent-level history has not been independently verified."
+      },
       {
         "date": "2026-09-27",
         "osid": "op:trnovo:gornja_presjenica",
@@ -675,7 +682,7 @@
     "op:sanski_most:jelasinovci": "RBiH",
     "op:sanski_most:kljevci": "RBiH",
     "op:sanski_most:lusci_palanka_2": "RBiH",
-    "op:sanski_most:ostra_luka": "RBiH",
+    "op:sanski_most:ostra_luka": "RS",
     "op:sanski_most:sanski_most_2": "RBiH",
     "op:sanski_most:skucani_vakuf_2": "RBiH",
     "op:sanski_most:stari_majdan": "RBiH",

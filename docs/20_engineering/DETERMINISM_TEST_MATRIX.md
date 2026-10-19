@@ -1,5 +1,15 @@
 # Determinism Test Matrix (AWWV)
 
+## Formation cadre lifecycle candidate — isolated for recovery (341)
+
+The unaccepted cadre gameplay package and its fixture are archived byte-for-byte under
+`logs/claude-channel-20261004/341-candidate-archive/`; the fixture is outside active discovery.
+Its historical intent remains Jajce → Tomislavgrad/Livno → Rama for Hrvoje and Odžak →
+Orašje for the102nd. The active recovery candidate restores the earlier lifecycle implementation
+and authored events. Archived conservation/delay/route tests remain evidence for the parked
+candidate, not active-production coverage. Required full-suite/188-week/anchor/provenance gates
+must establish recovery; focused restoration checks do not waive them.
+
 ## Rules → Gates
 ### No timestamps / wall-clock values
 - Gate: `tests/determinism_static_scan_r1_5.test.ts`
@@ -29,6 +39,9 @@
 - Opening-operation equivalence gate: `tests/desktop_start_campaign_authorization.test.ts` compares a preserved turn-0 operation with the real remove-review-accept-reinject desktop path and requires identical eligible attackers, brigade orders, battle targets, and first-turn control totals.
 - Paramilitary truth gate: `tests/paramilitary_sweep.test.ts` proves offensive detection emits neither an automatic deployment nor a player request against an exactly defended OSID, any organized defender present at arrival forces dissolution without capture or defender casualties, week-21 formations dissolve before acting, every dissolution clears active readiness, civilian killings update both casualty/event ledgers and municipality `lost_population`, and local organizational-penetration ranking/caps are deterministic. Candidate and formation iteration remain explicitly sorted. `tests/control_change_attribution.test.ts` keeps paramilitary control changes in their own deterministic reporting bucket instead of combat or legacy-other attribution, and `tests/control_event_consistency.test.ts` keeps that mechanism inside the accepted control-event contract. `tests/validate_run_consistency.test.ts` pins all nine enclave geometries between the simulation and standalone validator so enclave-restricted brigades are never reported as legal cross-boundary donors.
 - COHA/causality gate: `tests/coha_operation_pause.test.ts` pins ceasefire suppression receipts, preserved movement intent, and a paused operation clock. `tests/scenario_operation_diagnostics.test.ts` requires exact battle contributor receipts and rejects same-target attribution without a contributing operation id.
+- Subordinate preparation-probe gate: `tests/subordinate_preparation_probe.test.ts` pins Southern Move as the sole semantic opt-in, absent-capability legacy behavior and byte shape, deterministic sorted admission, exact parent/request/source-axis ownership, parent-floor and cross-operation rejection, one clock unit per deferred parent visit, ordinary one-turn planning/order/combat gates, one real credit/exhaustion charge, zero-credit no-opportunity recovery, exact restoration, save validation/round-trip, and linked child AAR archival.
+- Linked probe observer gate: `tests/linked_preparation_probe_observer.test.ts` exercises real creation/execution/winning-order/contact/recovery receipts, persisted-parent selection, no-opportunity and deleted-parent honesty, once-only terminal behavior, and byte-identical enabled/disabled state serialization. Diagnostic contributor-reader controls remain evidence-local under an explicit configuration; they are not CI dependencies.
+- Scenario-read receipt gate: `tests/scenario_read_context.test.ts` pins decoded-text and normalized-hash receipts, lexical path identity, repeated-read agreement, parse failures and observer-failure containment. `tests/scenario_runner_read_context_gate.test.ts` and the opt-in startup wiring suite prove literal-`1` enablement, one-line placement after stamp construction, no extra read and unchanged runner errors/artifacts. The receipt covers only `loadScenario`; it cannot prove actual use of the other stamped inputs. `tests/run_provenance_stamp.test.ts` fixes the current 188-week stamp at 32 named rows, including `data/source/formation_lifecycle_events.json`, while the input-surface scan retains 15 explicitly deferred reads.
 - Mixed-battle occupation gate: `tests/probe_territory_flip.test.ts` proves occupation requires unanimous permission from the resolver's validated contributors, remains invariant under contributor-ID renaming and attack-order insertion order, defaults missing declarations and operationless contributors to permission, and excludes invalid/nonadjacent orders from veto authority. Its elite-loan integration case executes the real `generateArmyReserveRequests` → bot-order generation → OSID resolver sequence and proves pre-order operation commitment controls the generated order and occupation declaration. `tests/war_phase_step_order.test.ts` pins that sequence before combat and proves commitment reconciliation remains live without a spatial cache; `tests/army_reserve_system.test.ts` proves the post-combat loan tick cannot rewrite operation membership.
 - Ops-only attack gate: `tests/uncontested_occupation_priority.test.ts` proves an empty adjacent target remains unavailable to a brigade even when it is inside the assigned subsegment and named by the corps directive; only the guarded recent-position counterattack path remains operationless. Its source guard prevents the deleted `evaluateUncontestedOccupation` owner or score from returning. `tests/capture_provenance.test.ts` pins the checkpoint tool's fail-closed distinction between exact operation-owned capture receipts, missing/contradictory receipts, and operationless receipts whose counterattack authority cannot be proved from default artifacts.
 - Bounded local occupation: `tests/commander/elite_formation_utilization.test.ts` exercises deterministic nearby donor–target selection, the post-week-20 boundary, real population-based militia and organized-defense checks, donor/authority guards, and ordinary operation launch → generated attack order → resolver capture. `tests/commander/local_occupation_population_threading.test.ts` executes the production corps-order phase and proves municipality population is converted to OSID population before commander prediction. Existing probe, enclave and operation-ownership gates remain applicable.
@@ -163,3 +176,35 @@
   `tests/ui/presidential_decision_room_panel_i18n.test.ts`: exact launch binding, unavailable states,
   raw projection through adapter to the actual mounted Decision Room, and no false pending reviews.
 - Clean 188-week POST and observer parity passed; all-three-player matched evidence leaves endpoint convergence unmet. See [BC01 verification](../40_reports/audits/20260907_BC01_PLAYER_OPPORTUNITY_IMPLEMENTATION_VERIFICATION.md); the owner explicitly retired territory similarity as a BC01 acceptance requirement on 2026-09-07; final calibration stays open.
+
+### Operation phase gate and dispatcher observation (October 2026, opt-in)
+- `tests/sector_offensive_phase_gate.test.ts` and `tests/operation_capture_order_ownership.test.ts`:
+  holding-phase capture refusal over the complete gated target set, once-only activation from owned
+  held receipts, emitted-order ownership validated at the resolver, real-serializer round trip with
+  the optional fields present and absent. 168 full suite: exit 0, 1419 files, 14415 passed / 33 skipped.
+- Named Sana and Southern Move `late_phase.handoff` opt-ins: focused coverage fixes each declared source/destination and brigade,
+  proves atomic no-op for missing/dead/foreign/wrong-source/duplicate/elsewhere-committed states,
+  preserves physical and movement state, and compares reversed axis/formation insertion orders.
+  Catalog construction proves the pending destination exists without double reservation; serializer
+  coverage binds pending/applied exact-once state; exact-key-first / unique-OOB-alias normalization
+  persists the resolved runtime ID and deterministically rejects missing or ambiguous bindings; the real
+  resolver proves a post-handoff attack is owned by the destination axis. No time or random input is read
+  by the handoff path. These focused checks do not establish campaign preservation.
+- Opt-in `dispatcher_decision` records (weekly `bot_order_diagnostics` only, completed-turn labels, not
+  GameState). Selected-artifact evidence: 180/n46 (topic on, unchanged source, fresh 188-week run)
+  matched ten n44 artifacts byte for byte via `Buffer.equals` (`initial_save`, `save_w178..185`,
+  `final_save`; 0 semantic differences). This is a qualified replication of those ten artifacts, NOT a
+  global neutrality claim for every unsaved turn and not a retroactive capture of n44 handler state.
+- Open: 176's resumed continuation diverged from the continuous run at its first resumed turn (58 first-turn
+  paths at turn 179, 177) and totals 616 semantic differences across the seven saved turns 179..185
+  (58/61/65/68/74/127/163); 177 diagnosed a readiness/eligibility/reserve chain but not the upstream
+  writer). Resumed-from-save runs are not accepted as byte evidence; 122 retention/startup STOP remains.
+
+### Dispatcher sector_march observer and 194 result (October 2026, opt-in)
+- `tests/bot_dispatcher_sector_march_observer.test.ts` (17 tests, 190): topic-off absence, topic-on identical returned orders and real `serializeState`,
+  detached-copy mutation, reversed formation/sector insertion-order equivalence (orders and observations after sorting only the diagnostic inventory),
+  every constructible terminal exit incl. same-sector reassignment, defend/enclave and tooth-blocked fall-through. One-label mutation went red then green (188).
+- Local reader `192-sector-march-reader.cjs`: fail-closed exact id x completed-turn inventory with embedded-turn binding, evaluator-order reach rule (missing observation
+  fails when sector_march or a later evaluator was reached; legitimate skips reported), deterministic evidence rows and a baseline comparator (31 selfcheck controls; 193 direct check).
+- 194 (owner-approved ONE run, n47, exit 0, 297 s, 23 artifacts): ten selected saves Buffer.equals to n44 (0 semantic differences); four arbih_737th_muslim_light rows 154..157 equal n46 on
+  first_handler, final/pre_cap/snapshot orders, postures, location and transit. A qualified selected-artifact replication; it does NOT prove unsaved-frame identity or retroactive n25 causality.

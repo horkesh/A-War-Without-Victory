@@ -173,6 +173,21 @@ export interface OperationActiveProbe {
     result_confidence_gain?: number;
 }
 
+/** Persisted ownership link for a preparation probe temporarily detached from a planning parent. */
+export interface PreparationProbeLink {
+    parent_operation_name: string;
+    parent_started_turn: number;
+    request_started_turn: number;
+    target_osid: string;
+    source_axes: Array<{
+        brigade_id: FormationId;
+        axis_id?: string;
+    }>;
+    entered_execution_turn?: number;
+    order_opportunity_turn?: number;
+    restored_to_parent?: boolean;
+}
+
 // --- Sector-facing intelligence (replaces legacy SID-keyed recon_intelligence) ---
 
 /** Estimated enemy sector strength from sector-pair observation. */
@@ -269,6 +284,69 @@ export interface SectorIntelRecord {
 }
 
 /**
+ * One operation-owned capture receipt: this exact operation instance's resolving lead,
+ * acting on its own surviving emitted order, flipped `osid` from an enemy to the acting
+ * faction in ordinary combat. Written by the resolver only for operations that carry a
+ * phase gate (`OperationAxis.late_phase`); absent everywhere else.
+ */
+export interface OperationCaptureReceipt {
+    osid: string;
+    turn: number;
+    /** Deterministic battle join key: {turn}:{osid}:{lead brigade}:{defender|null}. */
+    battle_id: string;
+    /** The ACTUAL resolving lead (lexicographically first attacker) whose emitted order owned the capture. */
+    attacker_brigade: string;
+    /** Exact operation instance: "{host corps}:{operation name}:t{started_turn}". */
+    operation_id: string;
+    /** Axis of the lead at consumption (must be the gate's main axis). */
+    axis_id: string;
+}
+
+/** Authored same-operation brigade transfer performed atomically when a phase gate activates. */
+export interface OperationAxisHandoff {
+    brigade_id: FormationId;
+    source_axis_id: string;
+}
+
+/**
+ * Opt-in phase gate on a multi-axis operation axis (authored on the opportunity axis as
+ * `phase_gate`). While `phase === 'holding'` the axis may lawfully approach/hold but may
+ * not capture ANY of `gated_objectives`; it activates exactly once when this operation's
+ * main axis has produced owned, still-held captures of every `requires` OSID, and stalls if
+ * the main axis becomes terminal without them. Absent on every axis without the opt-in.
+ */
+export interface OperationAxisLatePhase {
+    phase: 'holding' | 'capture';
+    /** Axis whose owned captures satisfy `requires`. */
+    main_axis_id: string;
+    /** OSIDs this operation's main axis must capture (owned receipts) before capture authority. */
+    requires: string[];
+    /** Complete capture-authority target set: every authored objective of the gated axis at spawn. */
+    gated_objectives: string[];
+    receipts: OperationCaptureReceipt[];
+    /** Optional exact-once source-to-this-axis transfer. Gate phase is the persisted applied truth. */
+    handoff?: OperationAxisHandoff;
+    /** Set once at the planning->execution transition. */
+    hold_started_turn?: number;
+    /** Set exactly once at activation. */
+    activated_turn?: number;
+    /** Set when the held phase ended terminally (main axis terminal without the owned captures). */
+    terminal_reason?: 'main_axis_terminal_without_prerequisites';
+}
+
+/**
+ * Pending emitted-order ownership for one brigade's attack order (this turn only). Written by
+ * the operation evaluator ONLY for brigades of operations that carry a phase gate; validated at
+ * resolver consumption against the surviving order (same turn, same target) before any receipt.
+ */
+export interface BrigadeAttackOrderOwner {
+    operation_id: string;
+    axis_id: string;
+    target: string;
+    turn: number;
+}
+
+/**
  * Independent axis of advance within a multi-axis operation.
  * Each axis has its own contiguous objective chain and assigned brigades.
  * Multiple axes can converge on a shared terminal objective.
@@ -287,6 +365,8 @@ export interface OperationAxis {
     minimum_forward_brigades?: number;
     /** Authored axis sequence must not skip forward while its current objective is unreachable. */
     preserve_objective_sequence?: boolean;
+    /** Opt-in phase gate (see OperationAxisLatePhase). Absent => today's behavior. */
+    late_phase?: OperationAxisLatePhase;
     objectives: string[];
     current_objective_index: number;
     status: 'executing' | 'stalled' | 'complete';
@@ -564,6 +644,8 @@ export interface CorpsOperation {
     current_objective_index?: number;
     /** Turns of preparation required (from scope). */
     planning_duration?: number;
+    /** Explicit authored delivery mode for an operation-owned preparation probe. */
+    preparation_probe_delivery?: 'subordinate';
     /** Authored live-roster floor; when absent, the operation type default applies. */
     minimum_viable_participants?: number;
     /** Active, non-disrupted, non-empty authored formations required before planning may transition to execution. */
@@ -675,6 +757,8 @@ export interface CorpsOperation {
     postponement_count?: number;
     /** Active probe sub-action within preparation. */
     active_probe?: OperationActiveProbe;
+    /** Ownership link for a subordinate probe created by an opted-in planning parent. */
+    preparation_probe_link?: PreparationProbeLink;
 
     // --- AAR accumulator fields (populated during lifecycle) ---
     /** Per-turn log entries for the operation AAR. */
@@ -2686,6 +2770,8 @@ export interface CausalityLogEntry {
 
 export interface MilitaryState {
 formations: Record<FormationId, FormationState>;
+/** Stable lifecycle directive receipts (directive id -> firing turn). Optional for legacy saves. @persistence optional-persisted */
+formation_lifecycle_events_fired?: Record<string, number>;
 front_segments: Record<string, FrontSegmentState>;
 front_posture: Record<FactionId, FrontPostureState>;
 front_posture_regions: Record<FactionId, FrontRegionPostureState>;
@@ -2753,6 +2839,8 @@ brigade_desired_aor_cap?: Record<FormationId, number>;
 brigade_posture_orders?: BrigadePostureOrder[];
 /** Attack orders: one target settlement per brigade per turn; null = no attack (Brigade Realism plan §3.4). Consumed once per turn. */
 brigade_attack_orders?: Record<FormationId, SettlementId | null>;
+/** Pending emitted-order ownership for this turn's attack orders; present ONLY while an operation with a phase gate has pending orders (opt-in), deleted when orders are consumed. */
+brigade_attack_order_owners?: Record<FormationId, BrigadeAttackOrderOwner>;
 /**
      * Corps-level attack axis orders: target geometry compressed as ordered edge_ids.
      * Intent-only order surface; translated to brigade orders by deterministic assignment.

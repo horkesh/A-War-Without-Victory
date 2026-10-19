@@ -13,8 +13,9 @@
  *   - Static-grep guard: no Math.random / Date.now / new Date / setTimeout
  *     in source (T9).
  *
- * Determinism: pure file IO + sorted iteration. No timestamps. SDK mocked
- * at module level so api_president cannot make real network calls.
+ * Determinism: pure file IO + sorted iteration. No timestamps. SDK and
+ * telemetry emitter mocked at module level so api_president cannot make
+ * real network calls or append to the persistent telemetry side-channel.
  */
 
 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest';
@@ -43,6 +44,15 @@ vi.mock('@anthropic-ai/sdk', () => {
     }
     return { default: MockAnthropic };
 });
+
+// D1 verifies directive shaping, not telemetry persistence. D2 owns the
+// emitDecision call/payload assertions, so isolate this fixture at that seam.
+vi.mock('../tools/claude_plays_vrs/persona_telemetry.js', () => ({
+    emitDecision: vi.fn(),
+    isPersonaTelemetryDisabled: vi.fn(() => false),
+    D2_TELEMETRY_OUTPUT_REL_PATH: 'data/derived/_debug/d_lane_persona_decisions.jsonl',
+    D2_TELEMETRY_SCHEMA_VERSION: 1,
+}));
 
 import {
     loadPersona,

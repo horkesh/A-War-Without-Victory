@@ -119,11 +119,13 @@ describe('planning objective reconciliation', () => {
             .toEqual(new Set(['op:approach:current']));
     });
 
-    it('marks only the authored Sana Sanski axis for sequence commitment', () => {
+    it('marks both authored Sana fixed-route axes for sequence commitment', () => {
         const sanskiAxis = SANA_95_OPPORTUNITY.axes.find(axis => axis.axis_id === 'sana_sanski_most_kljuc');
+        const handoffAxis = SANA_95_OPPORTUNITY.axes.find(axis => axis.axis_id === 'sana_west_sana_510th');
         expect(sanskiAxis?.preserve_objective_sequence).toBe(true);
+        expect(handoffAxis?.preserve_objective_sequence).toBe(true);
         expect(SANA_95_OPPORTUNITY.axes.filter(axis => axis.preserve_objective_sequence).map(axis => axis.axis_id))
-            .toEqual(['sana_sanski_most_kljuc']);
+            .toEqual(['sana_west_sana_510th', 'sana_sanski_most_kljuc']);
     });
 
     it('retains foreign-controlled objectives during reconciliation, including a combat-blocked one', () => {

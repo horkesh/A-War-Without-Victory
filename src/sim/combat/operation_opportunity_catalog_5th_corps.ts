@@ -107,7 +107,9 @@ const KRUPA_VALLEY_OBJECTIVES = [
 // orasac_2 then attacked trubar as an intermediate, accumulating spurious vrtoce
 // failure counts and stalling the axis before the Petrovac cluster could be
 // reached. Fix: vrtoce placed directly after orasac_2 (orasac_2→vrtoce IS
-// adjacent). trubar remains consolidation-only. Krnjeusa is explicit on the
+// adjacent). Trubar is therefore not restored between Orašac and Vrtoče; its
+// lawful cleanup placement is the direct Vodjenica-adjacent tail below.
+// Krnjeusa is explicit on the
 // sana_krupa flank because the 188w closeout proved consolidation can leave it
 // as an undefended RS island after gornja_suvaja/jasenica_2 fall. Verified
 // Petrovac corridor adjacency chain (all ✓):
@@ -142,6 +144,20 @@ const BIHAC_PETROVAC_APPROACH_OBJECTIVES = [
     'op:bosanski_petrovac:vrtoce',
     'op:bosanski_petrovac:prkosi',
     'op:bosanski_petrovac:vodjenica',
+    // Bounded cleanup tail. This is a model objective, not a claim that these
+    // axis brigades historically captured the represented settlement.
+    'op:bihac:trubar', // adj vodjenica ✓
+];
+
+// Owner-approved 510th-only post-Ključ handoff. This is a model of the sourced west-Sana
+// push, not a claim that the 510th individually captured each represented settlement.
+// The path is contiguous in the operational contact graph (430 geometry evidence).
+const WEST_SANA_HANDOFF_OBJECTIVES = [
+    'op:kljuc:sanica_2',
+    'op:sanski_most:kljevci',
+    'op:sanski_most:ilidza_2',
+    'op:sanski_most:ostra_luka',
+    'op:sanski_most:sanski_most_2',
 ];
 
 // 2026-06-07: re-ordered into a single verified front-edge adjacency walk
@@ -234,6 +250,27 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
         staging_osid: STAGING_KRUPA_OTOKA,
     },
     {
+        axis_id: 'sana_veliki_badic_505th',
+        name: 'Veliki Badić Cleanup (505th handoff)',
+        corps: PRIMARY_CORPS,
+        // Intentionally empty at launch: the already-admitted 505th remains on
+        // the three-brigade Krupa axis until this exact Operation Sana instance
+        // owns and still holds Ivanjska. This modeled detachment does not claim
+        // that the 505th was the historical captor of Veliki Badić.
+        brigades: [],
+        objectives: ['op:bosanska_krupa:veliki_badic'],
+        staging_osid: STAGING_IVANJSKA,
+        preserve_objective_sequence: true,
+        phase_gate: {
+            main_axis_id: 'sana_krupa',
+            requires_operation_captures: ['op:bosanska_krupa:ivanjska_2'],
+            handoff: {
+                brigade_id: 'arbih_505th_vitezka_mountain' as FormationId,
+                source_axis_id: 'sana_krupa',
+            },
+        },
+    },
+    {
         axis_id: 'sana_bihac_petrovac',
         name: 'Bihać–Petrovac Corridor',
         corps: PRIMARY_CORPS,
@@ -246,6 +283,26 @@ const SANA_AXES: readonly OpportunityAxisDef[] = [
         ],
         objectives: BIHAC_PETROVAC_OBJECTIVES,
         staging_osid: STAGING_BIHAC,
+    },
+    {
+        axis_id: 'sana_west_sana_510th',
+        name: 'West Sana Push (510th handoff)',
+        corps: PRIMARY_CORPS,
+        // Intentionally empty at launch: phase_gate.handoff transfers the already-admitted
+        // 510th from the Petrovac/Ključ source axis only after that exact operation owns and
+        // still holds the Ključ capture. The 501st remains on the source axis.
+        brigades: [],
+        objectives: WEST_SANA_HANDOFF_OBJECTIVES,
+        staging_osid: 'op:bosanski_petrovac:jasenovac_2',
+        preserve_objective_sequence: true,
+        phase_gate: {
+            main_axis_id: 'sana_bihac_petrovac',
+            requires_operation_captures: ['op:kljuc:kljuc_2'],
+            handoff: {
+                brigade_id: 'arbih_510th_bosnian_liberation' as FormationId,
+                source_axis_id: 'sana_bihac_petrovac',
+            },
+        },
     },
     {
         axis_id: 'sana_bihac_petrovac_approach',

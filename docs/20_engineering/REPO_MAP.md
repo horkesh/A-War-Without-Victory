@@ -66,6 +66,7 @@ Populate this section from the discovery checklist.
 
 ### Test Discovery and Complete-Suite Execution
 - Discovery owner: `tools/test/discover_test_files.mjs`.
+- The startup-wiring contract `tests/scenario_runner_read_context_wiring.test.ts` is intentionally omitted only when `AWWV_READ_WIRING_CASE` is absent. Any present value keeps it discoverable so the test itself can accept `off|on|failing` or reject invalid selectors; `tests/test_discovery_contract.test.ts` pins that no other membership changes.
 - Hazard inventory owner: `tools/test/test_suite_inventory.mjs`; its contracts pin complete discovery, deterministic ordering, shared-state classifications, and duration-weight balancing.
 - Complete local/CI runner: `tools/test/run_vitest_balanced.mjs`, exposed as `npm run test:vitest:balanced`; four isolated ordinary-file lanes plus a serial hazard tail.
 - `test:vitest:fast` and `test:vitest:scenario` are diagnostic slices, not substitutes for the complete-suite gate.

@@ -5,6 +5,20 @@
 > The actionable rule lives in the index; this file is what you read when you are actually in that
 > situation. Nothing here was edited — only relocated.
 
+## User directives
+
+**2026-10-06 — Delegated approval authority.** The owner assigned Codex approval
+authority and responsibility for driving the work. Codex approves routine
+in-scope implementation, checks, targeted corrections/retests and integration
+against unchanged criteria. Do not request another owner approval for those
+steps. Bring substantive decisions to the owner with options and a recommendation:
+goal/acceptance changes, canon or protected-boundary changes, material scope/cost
+tradeoffs and irreversible/external actions. Record costly work's concrete
+question, commands, criteria, expected cost and stop rule; reuse unaffected
+evidence and preserve mandatory reviews. A failed criterion remains open.
+This delegation supersedes earlier routine owner-approval waits; it does not
+turn the existing calibration NO-GO into acceptance.
+
 
 ## 0z
 

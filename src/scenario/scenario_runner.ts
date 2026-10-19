@@ -5,7 +5,7 @@
  */
 
 import { createHash } from 'node:crypto';
-import { createWriteStream } from 'node:fs';
+import { createWriteStream, writeSync } from 'node:fs';
 import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -59,7 +59,12 @@ import {
 } from '../state/seed_organizational_penetration_from_control.js';
 import { applyJnaInheritanceBonus, ensureSupplyReserves } from '../state/supply_reserves.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
-import { buildRunProvenance, type RunHarness } from './run_provenance.js';
+import { buildRunProvenance, type ConsumedInputHash, type RunHarness } from './run_provenance.js';
+import {
+    createScenarioReadContext,
+    renderScenarioReadComparison,
+    type ScenarioReadContext,
+} from './scenario_read_context.js';
 import { runOneTurn } from '../state/turn_pipeline.js';
 import { computeSpatialContext } from '../sim/spatial_context.js';
 import { strictCompare } from '../state/validateGameState.js';
@@ -2266,6 +2271,116 @@ export function emitMistralPrepTraceLine(state: GameState, turnReport: TurnRepor
     process.stdout.write(`[mistral-prep-trace] ${stableStringify(payload)}\n`);
 }
 
+/**
+ * ONE-LOADER SCENARIO READ RECEIPT (diagnostic; default OFF).
+ *
+ * When enabled, `runScenario` hands a fresh per-invocation `ScenarioReadContext` to the existing
+ * `loadScenario` call, and right after the provenance stamp resolves (before `run_meta` is built or
+ * written) prints exactly one line comparing the exact decoded text the loader parsed with the stamp
+ * row for the same logical scenario input. It covers `loadScenario` ONLY: no other loader, no
+ * actual-used-31 claim, lexical (not physical-file) path identity. It writes no state, save,
+ * `run_meta`, file or stamp field, and performs no extra filesystem read.
+ *
+ * Gate: only the literal "1" enables it (absent, "0", "true" and any other value are OFF). It is
+ * sampled ONCE at `runScenario` entry; later environment changes are not observed.
+ */
+export const SCENARIO_READ_RECEIPT_ENV_VAR = 'AWWV_SCENARIO_READ_RECEIPT';
+export const SCENARIO_READ_RECEIPT_LINE_PREFIX = '[input-read-receipt] ';
+
+export function isScenarioReadReceiptEnabled(env: NodeJS.ProcessEnv): boolean {
+    return env[SCENARIO_READ_RECEIPT_ENV_VAR] === '1';
+}
+
+function describeScenarioReadDiagnosticError(error: unknown): string {
+    return error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+}
+
+function invalidScenarioReadDiagnostic(reason: string): string {
+    return stableStringify({ proof_status: 'INVALID', overall: 'invalid', invalid_reasons: [reason] });
+}
+
+export interface ScenarioReadReceiptEmission {
+    /** The context handed to `loadScenario`, or `undefined` when its factory failed. */
+    readonly context: ScenarioReadContext | undefined;
+    /** Description of a factory failure, reported as an INVALID diagnostic. */
+    readonly contextFailure: string | undefined;
+    readonly baseDir: string;
+    readonly scenarioPath: string;
+    readonly stampFiles: readonly ConsumedInputHash[];
+}
+
+/**
+ * Facts about the one diagnostic write. `delivered` is true ONLY when every byte was written; a
+ * short or failed write records how many bytes did go out and the error, never a success claim.
+ */
+export interface ScenarioReadReceiptOutputFacts {
+    readonly delivered: boolean;
+    readonly bytes_total: number;
+    readonly bytes_written: number;
+    readonly error: string | undefined;
+}
+
+/**
+ * SYNCHRONOUS write of the diagnostic text to stdout (fd 1): every failure surfaces here as a thrown
+ * error or a non-positive byte count and is caught, so there is no asynchronous sink error, no
+ * listener and no callback to retain. A partial write loops until complete or fails with the
+ * partial count recorded; a zero/invalid count is a stalled write (never an endless loop).
+ */
+function writeScenarioReadReceiptSync(text: string): ScenarioReadReceiptOutputFacts {
+    const data = Buffer.from(text, 'utf8');
+    let written = 0;
+    try {
+        while (written < data.length) {
+            const count = writeSync(1, data, written, data.length - written);
+            if (!Number.isInteger(count) || count <= 0) {
+                return {
+                    delivered: false,
+                    bytes_total: data.length,
+                    bytes_written: written,
+                    error: `stalled_write: writeSync returned ${String(count)}`,
+                };
+            }
+            written += count;
+        }
+    } catch (error) {
+        return {
+            delivered: false,
+            bytes_total: data.length,
+            bytes_written: written,
+            error: describeScenarioReadDiagnosticError(error),
+        };
+    }
+    return { delivered: true, bytes_total: data.length, bytes_written: written, error: undefined };
+}
+
+/**
+ * Emit the single diagnostic line. Every diagnostic failure (comparison, render, output) is contained:
+ * it can never replace a runner or loader result or error, a failed comparison/render is reported as
+ * an explicit INVALID diagnostic, and a failed or short output write is returned as facts (never
+ * claimed as delivered).
+ */
+export function emitScenarioReadReceiptDiagnostic(emission: ScenarioReadReceiptEmission): ScenarioReadReceiptOutputFacts {
+    let payload: string;
+    try {
+        if (emission.context === undefined) {
+            payload = invalidScenarioReadDiagnostic(emission.contextFailure ?? 'context_missing');
+        } else {
+            payload = renderScenarioReadComparison(emission.context.compareToStamp({
+                baseDir: emission.baseDir,
+                scenarioPathAsPassed: emission.scenarioPath,
+                stampFiles: emission.stampFiles,
+            }));
+        }
+    } catch (error) {
+        try {
+            payload = invalidScenarioReadDiagnostic(`diagnostic_failure: ${describeScenarioReadDiagnosticError(error)}`);
+        } catch {
+            payload = '{"invalid_reasons":["diagnostic_failure"],"overall":"invalid","proof_status":"INVALID"}';
+        }
+    }
+    return writeScenarioReadReceiptSync(`${SCENARIO_READ_RECEIPT_LINE_PREFIX}${payload}\n`);
+}
+
 export async function runScenario(options: RunScenarioOptions): Promise<RunScenarioResult> {
     const {
         scenarioPath,
@@ -2294,6 +2409,18 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
     } = options;
     if (replayPayloadMode !== 'manifest_only' && replayPayloadMode !== 'full') {
         throw new Error(`Unsupported replayPayloadMode: ${String(replayPayloadMode)}`);
+    }
+    // One-loader scenario read receipt (diagnostic, default OFF). The gate is sampled exactly once,
+    // here; a factory failure is contained and reported later as an INVALID diagnostic.
+    const scenarioReadReceiptOn = isScenarioReadReceiptEnabled(process.env);
+    let scenarioReadContext: ScenarioReadContext | undefined;
+    let scenarioReadContextFailure: string | undefined;
+    if (scenarioReadReceiptOn) {
+        try {
+            scenarioReadContext = createScenarioReadContext();
+        } catch (error) {
+            scenarioReadContextFailure = `context_factory_failure: ${describeScenarioReadDiagnosticError(error)}`;
+        }
     }
 
     // Establish run-scoped process state before any scenario I/O. This keeps the
@@ -2327,7 +2454,11 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         throw new Error('initialStateOnly cannot be combined with resumeFromSavePath');
     }
     const effectiveEmitEvery = emitWeeklySavesForVideo ? Math.max(1, emitEvery) : emitEvery;
-    let scenario = await timedAsync(emitTimingJson, timingTotals, 'setup', () => loadScenario(scenarioPath));
+    let scenario = await timedAsync(emitTimingJson, timingTotals, 'setup', () => (
+        scenarioReadContext === undefined
+            ? loadScenario(scenarioPath)
+            : loadScenario(scenarioPath, scenarioReadContext)
+    ));
     if (filterProbeIntent) {
         scenario = scenarioWithoutProbeIntent(scenario);
     }
@@ -2415,6 +2546,17 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             collapseEnabled: readCollapseGateFromEnv(),
         })
     );
+    // Diagnostic only (default OFF; gate sampled once at entry): one line, immediately after the stamp
+    // and before `run_meta` is built or written. Reads the already-built stamp rows; changes nothing.
+    if (scenarioReadReceiptOn) {
+        emitScenarioReadReceiptDiagnostic({
+            context: scenarioReadContext,
+            contextFailure: scenarioReadContextFailure,
+            baseDir,
+            scenarioPath,
+            stampFiles: provenance.consumed_inputs.files,
+        });
+    }
     const usesHistoricalAnchorContract = scenario.init_control === 'apr1992'
         || (scenario.init_control_mode === 'ethnic_1991' && scenario.scenario_id.includes('apr1992'));
     const anchorEpoch = pickHistoricalReferenceKey(effectiveScenario);

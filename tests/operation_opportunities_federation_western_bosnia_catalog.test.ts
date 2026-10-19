@@ -17,6 +17,7 @@ import {
 } from '../src/sim/combat/operation_opportunity_catalog_federation_western_bosnia.js';
 import { OPERATION_STORM_EVENT_ID } from '../src/sim/combat/operation_storm_theater.js';
 import { getSectorOffensiveCurrentObjective } from '../src/sim/combat/bot_brigade_ai_osid.js';
+import { advanceLatePhaseGates } from '../src/sim/combat/operation_phase_gate.js';
 import { _TRIGGERED_OPS } from '../src/sim/combat/triggered_operations.js';
 import type { CorpsCommandState, FactionId, GameState } from '../src/state/game_state.js';
 
@@ -72,12 +73,13 @@ const SOUTHERN_MOVE_OBJECTIVES = [
 ];
 
 const SOUTHERN_MOVE_BRIGADES = [
-    'hvo_1st_guard_abb',
-    'hvo_2nd_guard_mechanized',
-    'hvo_3rd_guard_jastrebovi',
+    'hrhb_kralj_petar_kreimir_iv_brigade',
+    'hrhb_kralj_tomislav_brigade',
+    'hvo_rama_brigade',
     'hv_1st_hgz_1995',
-    'hv_4th_guards_brigade_1995',
-    'hv_7th_guards_brigade_1995',
+    'hv_4th_guards_split',
+    'hv_1st_guards_tigers',
+    'hv_5th_guards_karlovac',
 ];
 
 const JAJCE_CONTINUATION_OBJECTIVES = [
@@ -627,7 +629,7 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
         }
     });
 
-    it('spawns Southern Move as a Mrkonjic-only operation through the canonical path', () => {
+    it('spawns Southern Move with its original source axis and an empty pre-Majdan handoff tail', () => {
         const state = buildSouthernMoveState({ turn: 182 });
         runOpportunityEvaluationStep(state, 182);
         const proposalId = buildProposalId('southern_move_95', 182);
@@ -638,9 +640,38 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
         const op = state.military.corps_command!.hvo_tomislavgrad.active_operations
             .find(activeOp => activeOp.name === 'Operation Southern Move');
         expect(op).toBeDefined();
-        expect(op!.axes).toHaveLength(1);
-        expect(op!.axes![0].axis_id).toBe('southern_move_mrkonjic');
-        expect(op!.axes![0].objectives).toEqual(SOUTHERN_MOVE_OBJECTIVES);
-        expect(op!.axes![0].assigned_brigades).toContain('hv_1st_hgz_1995');
+        expect(op!.name).toBe('Operation Southern Move');
+        expect(op!.axes).toHaveLength(2);
+        const main = op!.axes!.find(axis => axis.axis_id === 'southern_move_mrkonjic')!;
+        const tail = op!.axes!.find(axis => axis.axis_id === 'southern_move_bjelajce_baljvine')!;
+        expect(main).toMatchObject({
+            objectives: SOUTHERN_MOVE_OBJECTIVES.slice(0, 4),
+            assigned_brigades: SOUTHERN_MOVE_BRIGADES,
+            staging_osid: 'op:sipovo:sipovo_2',
+        });
+        expect(tail).toMatchObject({
+            objectives: SOUTHERN_MOVE_OBJECTIVES.slice(4),
+            assigned_brigades: [],
+            late_phase: {
+                phase: 'holding',
+                main_axis_id: 'southern_move_mrkonjic',
+                requires: ['op:mrkonjic_grad:majdan_2'],
+                gated_objectives: SOUTHERN_MOVE_OBJECTIVES.slice(4),
+                receipts: [],
+                handoff: {
+                    brigade_id: 'hrhb_kralj_tomislav_brigade',
+                    source_axis_id: 'southern_move_mrkonjic',
+                },
+            },
+        });
+        expect(state.political.political_controllers!['op:mrkonjic_grad:majdan_2']).toBe('RS');
+        expect(Object.prototype.hasOwnProperty.call(tail, 'staging_osid')).toBe(false);
+        expect(main.assigned_brigades).toContain('hrhb_kralj_tomislav_brigade');
+        expect(tail.late_phase?.activated_turn).toBeUndefined();
+        const beforeAdvance = structuredClone(op!.axes);
+        advanceLatePhaseGates(state, op!, 'hvo_tomislavgrad', 'HRHB', 182);
+        expect(op!.axes).toEqual(beforeAdvance);
+        expect(tail.late_phase).toMatchObject({ phase: 'holding', receipts: [] });
+        expect(main.assigned_brigades).toContain('hrhb_kralj_tomislav_brigade');
     });
 });

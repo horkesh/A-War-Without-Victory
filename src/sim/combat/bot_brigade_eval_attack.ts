@@ -3,6 +3,7 @@ import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import { getAdjacentEnemyOsids } from './bot_brigade_context.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
+import { isGatedObjectiveHeld, recordOperationOrderOwner } from './operation_phase_gate.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { findNearestFriendlyOsidDestination } from './bot_brigade_context.js';
 import { predictAllAdjacentTargets, predictCombatOutcome } from './combat_predictor.js';
@@ -418,7 +419,9 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                         additionalAttackers
                     )
                     : null;
-                const canDirectAttackObjective = forwardAssaultGroupReady && (
+                const canDirectAttackObjective = forwardAssaultGroupReady
+                    && !isGatedObjectiveHeld(operationAxis, currentObjective)
+                    && (
                     isOutcomeSufficientForAttack(predictedOutcome, probeThreshold) ||
                     (concentratedOutcome != null &&
                         isOutcomeSufficientForAttack(concentratedOutcome, probeThreshold))
@@ -442,6 +445,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     result.posture_orders.push({ brigade_id: brigade.id, posture: attackPosture });
                     result.attack_orders[brigade.id] = currentObjective;
                     result.attack_scores[brigade.id] = 900;
+                    recordOperationOrderOwner(state, result, brigade.id, currentObjective);
                     chosenTargets.set(currentObjective, alreadyAssigned + 1);
                     return true;
                 }
@@ -578,6 +582,9 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                         ? targets.filter(t => getPoliticalControllerOSID(state, t.osid, reverseMap) === objectiveController)
                         : targets).filter(t => {
                             if (_avoidedOsids?.includes(t.osid)) return false;
+                            // Phase gate: a holding axis may not capture a gated objective through the
+                            // attack-through fallback either (lawful approach captures elsewhere stay).
+                            if (isGatedObjectiveHeld(operationAxis, t.osid)) return false;
                             const targetDistance = objectivePathDistances.get(t.osid);
                             return targetDistance !== undefined
                                 && locObjectiveDistance !== undefined
@@ -604,6 +611,7 @@ export function evaluateSectorAttack(ctx: BrigadeEvaluationContext): boolean {
                     result.posture_orders.push({ brigade_id: brigade.id, posture: attackPosture });
                     result.attack_orders[brigade.id] = bestIntermediate.osid;
                     result.attack_scores[brigade.id] = 800;
+                    recordOperationOrderOwner(state, result, brigade.id, bestIntermediate.osid);
                     chosenTargets.set(bestIntermediate.osid, (chosenTargets.get(bestIntermediate.osid) ?? 0) + 1);
                     return true;
                 }

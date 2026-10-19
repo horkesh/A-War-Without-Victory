@@ -25,12 +25,14 @@ import { describe, expect, it } from 'vitest';
 import {
     OPERATION_OPPORTUNITY_CATALOG,
     applyOpportunityDecision,
+    applyOpportunityDecisionDetailed,
     buildProposalId,
     defaultBotDecisionForOpportunity,
     evaluateOperationOpportunities,
     exitClassFromOperationAAR,
     isOpportunityEligible,
     linkOpportunityResolutionToAAR,
+    preflightOpportunityAdmission,
     runOpportunityEvaluationStep,
     type AxisPredicate,
     type OperationOpportunityDef,
@@ -40,6 +42,7 @@ import { resetReasonCodeTopicCacheForTests } from '../src/sim/combat/reason_code
 import { assertOperationLifecycle } from '../src/sim/combat/assert_operation_lifecycle.js';
 import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
 import type { CorpsCommandState, FactionId, GameState } from '../src/state/game_state.js';
+import type { NamedOfficer, NamedOfficerState } from '../src/state/officer_types.js';
 
 // ─── Fixtures ───────────────────────────────────────────────────────────────
 
@@ -184,6 +187,59 @@ function fixtureSana(): OperationOpportunityDef {
         },
         staff_recommendation: 'approve',
     };
+}
+
+function seedOperationCommanderCandidates(state: GameState, reverse = false): void {
+    const candidates: NamedOfficer[] = [
+        {
+            id: 'regional_junior',
+            name: 'Regional Junior',
+            faction: 'RBiH',
+            rank: 'corps_commander',
+            competence: 3,
+            aggressiveness: 5,
+            defensive_skill: 3,
+            political_reliability: 3,
+            home_corps_id: 'arbih_5th_corps',
+            available_from_turn: 0,
+            origin: 'military',
+            casualty_vulnerability: 0,
+            can_improve: false,
+            improvement_rate: 0,
+            pool_tier: 'tier_b',
+        },
+        {
+            id: 'regional_senior',
+            name: 'Regional Senior',
+            faction: 'RBiH',
+            rank: 'corps_commander',
+            competence: 4,
+            aggressiveness: 2,
+            defensive_skill: 4,
+            political_reliability: 3,
+            home_corps_id: 'arbih_5th_corps',
+            available_from_turn: 0,
+            origin: 'military',
+            casualty_vulnerability: 0,
+            can_improve: false,
+            improvement_rate: 0,
+            pool_tier: 'tier_a',
+        },
+    ];
+    state.military.named_officer_data = reverse ? candidates.reverse() : candidates;
+    state.military.named_officers = Object.fromEntries(
+        candidates.map(({ id }) => [id, {
+            officer_id: id,
+            status: 'reserve',
+            assigned_corps_id: null,
+            turns_in_command: 0,
+            battles: 0,
+            victories: 0,
+            effective_competence_penalty: 0,
+            penalty_turns_remaining: 0,
+            acting_commander: false,
+        } satisfies NamedOfficerState]),
+    );
 }
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
@@ -406,6 +462,265 @@ describe('operation_opportunities — Phase 1 substrate', () => {
         expect(updated!.executed_op_id).toBe(def.name);
     });
 
+    it('keeps an insufficient sector-attack opportunity pending without launch-side mutations', () => {
+        const state = buildMinimalState(175);
+        const formations = state.military.formations!;
+        formations.b_elite = {
+            ...formations.b_a!,
+            id: 'b_elite',
+            name: 'b_elite',
+            corps_id: 'arbih_general_staff',
+            elite_loan_state: {
+                on_loan: false,
+                loaned_to_corps: null,
+                loan_start_turn: null,
+                last_recall_turn: null,
+                loan_start_personnel: null,
+                permanently_degraded: false,
+                current_episode_id: null,
+            },
+        };
+        const cmd = state.military.corps_command!.arbih_5th_corps!;
+        const probe = {
+            name: 'probe_before_jajce', type: 'probe' as const, phase: 'execution' as const,
+            started_turn: 173, phase_started_turn: 174,
+            participating_brigades: ['b_elite'], objectives: ['op:probe'], current_objective_index: 0,
+        };
+        cmd.active_operations.push(
+            probe,
+            {
+                name: 'committed_b', type: 'sector_attack', phase: 'execution',
+                started_turn: 170, phase_started_turn: 171,
+                participating_brigades: ['b_b'], objectives: ['op:b'], current_objective_index: 0,
+            },
+            {
+                name: 'committed_c', type: 'sector_attack', phase: 'execution',
+                started_turn: 170, phase_started_turn: 171,
+                participating_brigades: ['b_c'], objectives: ['op:c'], current_objective_index: 0,
+            },
+        );
+        const def: OperationOpportunityDef = {
+            ...fixtureSana(),
+            opportunity_id: 'fixture_jajce_recovery',
+            name: 'Fixture Jajce Recovery',
+            axes: [{
+                axis_id: 'jajce', name: 'Jajce', corps: 'arbih_5th_corps',
+                brigades: ['b_elite', 'b_b', 'b_c'], objectives: ['op:jajce'],
+            }],
+        };
+        runOpportunityEvaluationStep(state, 175, [def]);
+        const proposal = state.military.operation_opportunities![0]!;
+        const beforePreflight = JSON.stringify(state);
+        expect(preflightOpportunityAdmission(state, def, def.axes, 'standard', 175)).toEqual({
+            admitted: false,
+            selected_participants: 1,
+            required_participants: 2,
+            reason: 'below_minimum_brigades (1/2)',
+        });
+        expect(JSON.stringify(state)).toBe(beforePreflight);
+
+        const beforeDecision = JSON.stringify(state);
+        const outcome = applyOpportunityDecisionDetailed(
+            state, 175, proposal.proposal_id, 'approve', [def],
+        );
+
+        expect(outcome).toEqual({
+            proposal,
+            decision_applied: false,
+            reason: 'below_minimum_brigades (1/2)',
+        });
+        expect(JSON.stringify(state)).toBe(beforeDecision);
+        expect(applyOpportunityDecision(state, 175, proposal.proposal_id, 'approve', [def])).toBe(proposal);
+        expect(JSON.stringify(state)).toBe(beforeDecision);
+        expect(proposal.status).toBe('eligible_pending_review');
+        expect(proposal.response_turn).toBeUndefined();
+        expect(proposal.executed_op_id).toBeUndefined();
+        expect(state.military.operation_opportunity_resolutions).toBeUndefined();
+        expect(cmd.active_operations.map(({ name }) => name)).toEqual([
+            'probe_before_jajce', 'committed_b', 'committed_c',
+        ]);
+        expect(probe).toMatchObject({
+            phase: 'execution', participating_brigades: ['b_elite'],
+        });
+        expect(formations.b_elite!.elite_loan_state).toMatchObject({
+            on_loan: false, loaned_to_corps: null,
+        });
+        expect(state.military.elite_brigade_tracker).toBeUndefined();
+    });
+
+    it('admits a previously insufficient opportunity once two unique participants are available', () => {
+        const state = buildMinimalState(175);
+        const cmd = state.military.corps_command!.arbih_5th_corps!;
+        const committed: CorpsCommandState['active_operations'][number] = {
+            name: 'temporary_commitment', type: 'sector_attack' as const, phase: 'execution' as const,
+            started_turn: 170, phase_started_turn: 171,
+            participating_brigades: ['b_b'], objectives: ['op:old'], current_objective_index: 0,
+        };
+        cmd.active_operations.push(committed);
+        const def: OperationOpportunityDef = {
+            ...fixtureSana(),
+            axes: [{
+                axis_id: 'main', name: 'Main', corps: 'arbih_5th_corps',
+                brigades: ['b_a', 'b_b'], objectives: ['op:new'],
+            }],
+        };
+        runOpportunityEvaluationStep(state, 175, [def]);
+        const proposal = state.military.operation_opportunities![0]!;
+
+        expect(applyOpportunityDecisionDetailed(
+            state, 175, proposal.proposal_id, 'approve', [def],
+        )).toEqual({
+            proposal,
+            decision_applied: false,
+            reason: 'below_minimum_brigades (1/2)',
+        });
+        expect(proposal.status).toBe('eligible_pending_review');
+
+        committed.phase = 'recovery';
+        expect(applyOpportunityDecisionDetailed(
+            state, 176, proposal.proposal_id, 'approve', [def],
+        )).toEqual({ proposal, decision_applied: true, reason: null });
+        expect(proposal).toMatchObject({ status: 'approved', response_turn: 176, executed_op_id: def.name });
+        expect(cmd.active_operations.find(({ name }) => name === def.name)?.participating_brigades)
+            .toEqual(['b_a', 'b_b']);
+    });
+
+    it('does not admit an opportunity decision after its expiry', () => {
+        const state = buildMinimalState(175);
+        const def = fixtureSana();
+        runOpportunityEvaluationStep(state, 175, [def]);
+        const proposal = state.military.operation_opportunities![0]!;
+
+        const outcome = applyOpportunityDecisionDetailed(
+            state, proposal.expires_turn + 1, proposal.proposal_id, 'approve', [def],
+        );
+
+        expect(outcome).toEqual({ proposal: null, decision_applied: false, reason: null });
+        expect(proposal.status).toBe('eligible_pending_review');
+        expect(state.military.corps_command![def.primary_corps].active_operations).toEqual([]);
+        expect(state.military.operation_opportunity_resolutions).toBeUndefined();
+    });
+
+    it('constructs a deferred handoff axis without reserving its source brigade twice', () => {
+        const state = buildMinimalState(175);
+        const def: OperationOpportunityDef = {
+            ...fixtureSana(),
+            axes: [{
+                axis_id: 'source', name: 'Source', corps: 'arbih_5th_corps',
+                brigades: ['arbih_5_brigade_a', 'arbih_5_brigade_b'], objectives: ['op:source'],
+            }, {
+                axis_id: 'destination', name: 'Destination', corps: 'arbih_5th_corps',
+                brigades: [], objectives: ['op:destination'],
+                phase_gate: {
+                    main_axis_id: 'source', requires_operation_captures: ['op:source'],
+                    handoff: { brigade_id: 'arbih_5_brigade_a', source_axis_id: 'source' },
+                },
+            }],
+        };
+        runOpportunityEvaluationStep(state, 175, [def]);
+        expect(preflightOpportunityAdmission(state, def, def.axes, 'standard', 175)).toEqual({
+            admitted: true,
+            selected_participants: 2,
+            required_participants: 2,
+            reason: null,
+        });
+        applyOpportunityDecision(state, 175, buildProposalId(def.opportunity_id, 175), 'approve', [def]);
+
+        const op = state.military.corps_command!.arbih_5th_corps!.active_operations[0]!;
+        expect(op.axes).toHaveLength(2);
+        expect(op.axes!.find(({ axis_id }) => axis_id === 'source')!.assigned_brigades)
+            .toEqual(['arbih_5_brigade_a', 'arbih_5_brigade_b']);
+        expect(op.axes!.find(({ axis_id }) => axis_id === 'destination')).toMatchObject({
+            assigned_brigades: [],
+            late_phase: {
+                phase: 'holding', main_axis_id: 'source',
+                handoff: { brigade_id: 'arbih_5_brigade_a', source_axis_id: 'source' },
+            },
+        });
+        expect(op.participating_brigades).toEqual(['arbih_5_brigade_a', 'arbih_5_brigade_b']);
+    });
+
+    it('approve assigns the deterministic reserve commander and records both ownership sides', () => {
+        const forward = buildMinimalState(175);
+        const reversed = buildMinimalState(175);
+        seedOperationCommanderCandidates(forward);
+        seedOperationCommanderCandidates(reversed, true);
+        const def = fixtureSana();
+
+        for (const state of [forward, reversed]) {
+            runOpportunityEvaluationStep(state, 175, [def]);
+            applyOpportunityDecision(
+                state,
+                175,
+                buildProposalId(def.opportunity_id, 175),
+                'approve',
+                [def],
+            );
+        }
+
+        for (const state of [forward, reversed]) {
+            const op = state.military.corps_command![def.primary_corps].active_operations[0];
+            expect(op.commander_officer_id).toBe('regional_senior');
+            expect(state.military.named_officers!.regional_senior).toMatchObject({
+                status: 'active',
+                assigned_operation: def.name,
+            });
+            expect(state.military.named_officers!.regional_junior.status).toBe('reserve');
+            expect(state.military.named_officers!.regional_junior.assigned_operation).toBeUndefined();
+        }
+    });
+
+    it('approve remains valid when no reserve commander is eligible', () => {
+        const state = buildMinimalState(175);
+        seedOperationCommanderCandidates(state);
+        for (const officer of Object.values(state.military.named_officers!)) {
+            officer.status = 'active';
+            officer.assigned_corps_id = 'arbih_1st_corps';
+        }
+        const def = fixtureSana();
+        runOpportunityEvaluationStep(state, 175, [def]);
+
+        const updated = applyOpportunityDecision(
+            state,
+            175,
+            buildProposalId(def.opportunity_id, 175),
+            'approve',
+            [def],
+        );
+
+        expect(updated).toMatchObject({ status: 'approved', executed_op_id: def.name });
+        const op = state.military.corps_command![def.primary_corps].active_operations[0];
+        expect(op.commander_officer_id).toBeUndefined();
+        expect(Object.values(state.military.named_officers!).map(({ officer_id, status, assigned_operation }) => ({
+            officer_id,
+            status,
+            assigned_operation,
+        }))).toEqual([
+            { officer_id: 'regional_junior', status: 'active', assigned_operation: undefined },
+            { officer_id: 'regional_senior', status: 'active', assigned_operation: undefined },
+        ]);
+    });
+
+    it('decline does not reserve an otherwise eligible operation commander', () => {
+        const state = buildMinimalState(175);
+        seedOperationCommanderCandidates(state);
+        const def = fixtureSana();
+        runOpportunityEvaluationStep(state, 175, [def]);
+
+        const updated = applyOpportunityDecision(
+            state,
+            175,
+            buildProposalId(def.opportunity_id, 175),
+            'decline',
+            [def],
+        );
+
+        expect(updated).toMatchObject({ status: 'declined' });
+        expect(state.military.corps_command![def.primary_corps].active_operations).toEqual([]);
+        expect(Object.values(state.military.named_officers!).every((officer) =>
+            officer.status === 'reserve' && officer.assigned_operation === undefined)).toBe(true);
+    });
+
     it('preempts disposable probes for an approved opportunity without double-committing participants', () => {
         process.env.AWWV_DEBUG_REASON_CODES = 'opportunity_roster';
         resetReasonCodeTopicCacheForTests();
@@ -504,7 +819,7 @@ describe('operation_opportunities — Phase 1 substrate', () => {
                 axis_id: 'main',
                 name: 'Main',
                 corps: 'arbih_5th_corps',
-                brigades: ['b_a', 'b_b'],
+                brigades: ['b_a', 'b_b', 'b_c'],
                 objectives: ['op:new'],
             }],
         };
@@ -520,7 +835,7 @@ describe('operation_opportunities — Phase 1 substrate', () => {
             participating_brigades: ['b_a'],
         });
         expect(cmd.active_operations.find((op) => op.name === def.name)?.participating_brigades)
-            .toEqual(['b_b']);
+            .toEqual(['b_b', 'b_c']);
         expect(assertOperationLifecycle(state)).toEqual([]);
     });
 
@@ -642,9 +957,10 @@ describe('operation_opportunities — Phase 1 substrate', () => {
             'approve',
             [def],
         );
-        // Decision still records a status change + resolution row, but no op spawned.
-        expect(updated!.status).toBe('approved');
+        // Admission cannot become terminal when no owning corps can receive the operation.
+        expect(updated!.status).toBe('eligible_pending_review');
         expect(updated!.executed_op_id).toBeUndefined();
+        expect(state.military.operation_opportunity_resolutions).toBeUndefined();
     });
 
     it('default bot decision falls back to delay when required axes are red', () => {
@@ -802,7 +1118,7 @@ describe('operation_opportunities — LANE C Phase 1 Substrate A (targets_friend
                     axis_id: 'z_axis',
                     name: 'Z axis',
                     corps: 'arbih_5th_corps',
-                    brigades: ['arbih_5_brigade_a'],
+                    brigades: ['arbih_5_brigade_a', 'b_c'],
                     objectives: [
                         'op:velika_kladusa:velika_kladusa_2',
                         'op:cazin:cazin_3',
@@ -1011,6 +1327,13 @@ describe('operation_opportunities — LANE C Phase 1 Substrate A (targets_friend
         const def = fixtureFifthCorpsT1WithFriendlyTarget({
             tier: 'T3',
             targets_friendly_overrides: ['op:velika_kladusa:velika_kladusa_2'],
+            axes: [{
+                axis_id: 'apwb_main',
+                name: 'APWB Main',
+                corps: 'arbih_5th_corps',
+                brigades: ['arbih_5_brigade_a', 'arbih_5_brigade_b', 'b_c', 'b_d'],
+                objectives: ['op:velika_kladusa:velika_kladusa_2', 'op:cazin:cazin_3'],
+            }],
         });
         runOpportunityEvaluationStep(state, 175, [def]);
         const updated = applyOpportunityDecision(
@@ -1197,11 +1520,17 @@ describe('operation_opportunities — LANE C Phase 1 Substrate B (T3 early-retur
             'under_resource',
             [def],
         );
-        expect(updated!.status).toBe('under_resourced_approved');
-        // Override ignored: friendly-painted bihac_2 was filtered, no axis survives,
-        // so spawn returns null.
+        expect(updated!.status).toBe('eligible_pending_review');
+        expect(preflightOpportunityAdmission(state, def, def.axes, 'minimum', 175)).toEqual({
+            admitted: false,
+            selected_participants: 0,
+            required_participants: 2,
+            reason: 'below_minimum_brigades (0/2)',
+        });
+        // Override ignored: friendly-painted bihac_2 was filtered, so admission remains pending.
         expect(updated!.executed_op_id).toBeUndefined();
         expect(state.military.corps_command![def.primary_corps].active_operations).toHaveLength(0);
+        expect(state.military.operation_opportunity_resolutions).toBeUndefined();
     });
 
     it('determinism: T3 and T1 resolutions are sorted-stable across re-invocation', () => {

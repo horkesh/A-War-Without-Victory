@@ -27,6 +27,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 interface PrePlannedOpDef {
     name: string;
     planning_duration?: number;
+    preparation_probe_delivery?: CorpsOperation['preparation_probe_delivery'];
     minimum_viable_participants?: number;
     minimum_assembled_participants?: number;
     require_all_axes_ready?: boolean;
@@ -45,7 +46,47 @@ export function getMaxOperationSlots(activeBrigadeCount: number): number {
 
 /** Whether the corps has a free operation slot */
 export function hasAvailableSlot(cmd: CorpsCommandState, activeBrigadeCount: number): boolean {
-    return cmd.active_operations.length < getMaxOperationSlots(activeBrigadeCount);
+    return getOperationSlotUsage(cmd) < getMaxOperationSlots(activeBrigadeCount);
+}
+
+function sharesExactPreparationParentSlot(
+    op: CorpsOperation,
+    activeOperations: readonly CorpsOperation[],
+): boolean {
+    const link = op.preparation_probe_link;
+    if (!link || op.type !== 'probe') return false;
+    const parent = activeOperations.find((candidate) =>
+        candidate !== op
+        && candidate.preparation_probe_delivery === 'subordinate'
+        && candidate.name === link.parent_operation_name
+        && candidate.started_turn === link.parent_started_turn
+        && candidate.phase === 'planning'
+    );
+    const request = parent?.active_probe;
+    if (!parent || !request
+        || request.started_turn !== link.request_started_turn
+        || request.target_osid !== link.target_osid
+        || request.target_osid !== op.objectives?.[0]) return false;
+    const participants = [...op.participating_brigades].sort(strictCompare);
+    const requested = [...new Set(request.brigade_ids)].sort(strictCompare);
+    const sources = link.source_axes.map((source) => source.brigade_id);
+    if (requested.length !== participants.length || sources.length !== participants.length) return false;
+    if (requested.some((brigadeId, index) => brigadeId !== participants[index])) return false;
+    if (sources.some((brigadeId, index) => brigadeId !== participants[index])) return false;
+    if (participants.some((brigadeId) => parent.participating_brigades.includes(brigadeId))) return false;
+    const parentAxisIds = new Set((parent.axes ?? []).map((axis) => axis.axis_id));
+    return link.source_axes.every((source) => source.axis_id === undefined || parentAxisIds.has(source.axis_id));
+}
+
+export function getOperationSlotUsageForOperations(activeOperations: readonly CorpsOperation[]): number {
+    return activeOperations.reduce(
+        (count, op) => count + (sharesExactPreparationParentSlot(op, activeOperations) ? 0 : 1),
+        0,
+    );
+}
+
+export function getOperationSlotUsage(cmd: CorpsCommandState): number {
+    return getOperationSlotUsageForOperations(cmd.active_operations);
 }
 
 /** Find which operation (if any) a brigade participates in */
@@ -314,6 +355,9 @@ export function buildCorpsOperation(
         objectives: [...new Set(allObjectives)],
         current_objective_index: 0,
         planning_duration: def.planning_duration ?? 1,
+        ...(def.preparation_probe_delivery != null
+            ? { preparation_probe_delivery: def.preparation_probe_delivery }
+            : {}),
         ...(def.minimum_viable_participants != null
             ? { minimum_viable_participants: Math.max(1, Math.trunc(def.minimum_viable_participants)) }
             : {}),

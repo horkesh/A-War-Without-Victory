@@ -82,6 +82,7 @@ import { isSectorAssignmentExemptCorpsId } from './corps_front_sectors_constants
 import { buildCorpsOperation, findBrigadeLiveOperationAnywhere } from './corps_operation_helpers.js';
 import { getFormationCorpsId } from './corps_sector_partition.js';
 import { isMainStaffOpAvailabilityEnabled } from './mainstaff_op_availability_gate.js';
+import { assignOperationCommander } from './officer_system.js';
 import {
     isEliteAuthoredForHistoricalOperation,
     isEliteReservedForHistoricalOperation,
@@ -98,6 +99,7 @@ import { FIFTH_CORPS_OPPORTUNITIES } from './operation_opportunity_catalog_5th_c
 import { CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES } from './operation_opportunity_catalog_central_bosnia.js';
 import { FEDERATION_WESTERN_BOSNIA_OPPORTUNITIES } from './operation_opportunity_catalog_federation_western_bosnia.js';
 import { enterOperationRecovery } from './tactical_group_lifecycle.js';
+import { effectiveOperationMinimum } from './operation_minimum_policy.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Public types
@@ -173,6 +175,22 @@ export interface OpportunityAxisDef {
     readonly staging_osid?: string;
     /** Preserve this authored axis sequence during planning and approach selection. */
     readonly preserve_objective_sequence?: boolean;
+    /**
+     * Opt-in phase gate (default absent => today's behavior). While the operation's MAIN axis
+     * (`main_axis_id`) has not produced this operation's owned, still-held captures of every
+     * `requires_operation_captures` OSID, this axis may lawfully approach/hold but may not capture
+     * any of its authored objectives; it then activates exactly once, or stalls if the main axis
+     * ends terminal without them. See `operation_phase_gate.ts`.
+     */
+    readonly phase_gate?: {
+        readonly main_axis_id: string;
+        readonly requires_operation_captures: readonly string[];
+        /** Brigade stays on `source_axis_id` until this gate activates, then transfers here. */
+        readonly handoff?: {
+            readonly brigade_id: FormationId;
+            readonly source_axis_id: string;
+        };
+    };
 }
 
 /**
@@ -219,6 +237,8 @@ export interface OperationOpportunityDef {
     readonly staging_osid: string;
     /** Planning duration once approved. */
     readonly planning_duration: number;
+    /** Optional authored delivery mode for an operation-owned preparation probe. */
+    readonly preparation_probe_delivery?: CorpsOperation['preparation_probe_delivery'];
     /** Optional minimum-attack-outcome override on the resulting CorpsOperation. */
     readonly min_attack_outcome?: CorpsOperation['min_attack_outcome'];
     /** Family identifier — multiple opportunities may share a family (e.g. "5th_corps"). */
@@ -428,6 +448,21 @@ export interface OperationParticipantEvaluation {
     readonly personnel: number | null;
     readonly disrupted_turns: number | null;
     readonly movement_status: string | null;
+}
+
+export interface OpportunityAdmissionPreflight {
+    readonly admitted: boolean;
+    readonly selected_participants: number;
+    readonly required_participants: number;
+    readonly reason: string | null;
+}
+
+/** Non-persistent result for callers that must distinguish an applied decision
+ * from a pending proposal returned for legacy compatibility. */
+export interface OpportunityDecisionOutcome {
+    readonly proposal: OperationOpportunityState | null;
+    readonly decision_applied: boolean;
+    readonly reason: string | null;
 }
 
 function sortObjectiveFilterRejections(
@@ -1008,26 +1043,62 @@ function normalizeOpportunityDecisionOptions(value: unknown): OpportunityDecisio
  * approval ALWAYS routes through `buildCorpsOperation` so the resulting op is
  * indistinguishable from any other in `sector_offensive.ts`.
  *
- * Returns the updated proposal record (or null if the proposal id was not
- * found / was already terminal).
+ * Returns a non-persistent outcome so callers can distinguish a decision that
+ * was applied from an admission rejection that leaves the proposal pending.
+ * `reason` carries the exact admission failure without writing it to state.
  */
-export function applyOpportunityDecision(
+export function applyOpportunityDecisionDetailed(
     state: GameState,
     turn: number,
     proposalId: string,
     decision: OpportunityDecision,
     catalog: readonly OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG,
     options: OpportunityDecisionOptions = {},
-): OperationOpportunityState | null {
+): OpportunityDecisionOutcome {
     const proposals = state.military.operation_opportunities;
-    if (!proposals) return null;
+    if (!proposals) return { proposal: null, decision_applied: false, reason: null };
     const proposal = proposals.find(p => p.proposal_id === proposalId);
-    if (!proposal) return null;
+    if (!proposal) return { proposal: null, decision_applied: false, reason: null };
     if (proposal.status !== 'eligible_pending_review' && proposal.status !== 'delayed') {
-        return null;
+        return { proposal: null, decision_applied: false, reason: null };
     }
     const def = catalog.find(d => d.opportunity_id === proposal.opportunity_id);
-    if (!def) return null;
+    if (!def) return { proposal: null, decision_applied: false, reason: null };
+
+    if (turn > proposal.expires_turn) {
+        return { proposal: null, decision_applied: false, reason: null };
+    }
+
+    const admissionRequest = (() => {
+        if (decision === 'redirect') {
+            const variantId = options.redirect_variant_id;
+            const variant = variantId ? def.variants?.find(v => v.variant_id === variantId) : undefined;
+            return variant ? { axes: variant.axes, commitment: 'standard' as const } : null;
+        }
+        if (decision === 'under_resource') {
+            return { axes: def.axes, commitment: 'minimum' as const };
+        }
+        if (decision === 'approve' && def.tier !== 'T3') {
+            return {
+                axes: def.axes,
+                commitment: options.commitment_profile ?? 'standard',
+            };
+        }
+        return null;
+    })();
+    if (admissionRequest) {
+        const preflight = preflightOpportunityAdmission(
+            state,
+            def,
+            admissionRequest.axes,
+            admissionRequest.commitment,
+            turn,
+            options.adjacency,
+        );
+        if (!preflight.admitted) {
+            return { proposal, decision_applied: false, reason: preflight.reason };
+        }
+    }
 
     if (!state.military.operation_opportunity_resolutions) {
         state.military.operation_opportunity_resolutions = [];
@@ -1044,7 +1115,7 @@ export function applyOpportunityDecision(
                 event: 'delayed',
                 proposal_id: proposal.proposal_id,
             }]);
-            return proposal;
+            return { proposal, decision_applied: true, reason: null };
         }
         case 'decline': {
             proposal.status = 'declined';
@@ -1061,13 +1132,13 @@ export function applyOpportunityDecision(
                 event: 'declined',
                 proposal_id: proposal.proposal_id,
             }]);
-            return proposal;
+            return { proposal, decision_applied: true, reason: null };
         }
         case 'redirect': {
             const variantId = options.redirect_variant_id;
             if (!variantId || !def.variants?.some(v => v.variant_id === variantId)) {
                 // Unknown variant → no-op, leaves proposal pending so caller can retry.
-                return null;
+                return { proposal: null, decision_applied: false, reason: null };
             }
             proposal.status = 'redirected';
             proposal.response_turn = turn;
@@ -1113,7 +1184,7 @@ export function applyOpportunityDecision(
                     participant_evaluations: sortParticipantEvaluations(participantEvaluations ?? []),
                 })),
             }]);
-            return proposal;
+            return { proposal, decision_applied: true, reason: null };
         }
         case 'under_resource': {
             proposal.status = 'under_resourced_approved';
@@ -1156,7 +1227,7 @@ export function applyOpportunityDecision(
                     participant_evaluations: sortParticipantEvaluations(participantEvaluations ?? []),
                 })),
             }]);
-            return proposal;
+            return { proposal, decision_applied: true, reason: null };
         }
         case 'approve': {
             proposal.status = 'approved';
@@ -1183,7 +1254,7 @@ export function applyOpportunityDecision(
                     event: 't3_authorized_no_offensive',
                     proposal_id: proposal.proposal_id,
                 }]);
-                return proposal;
+                return { proposal, decision_applied: true, reason: null };
             }
             const objectiveFilterRejections = isReasonCodeTopicEnabled('objective_filter')
                 ? [] as OperationObjectiveFilterRejection[]
@@ -1223,9 +1294,119 @@ export function applyOpportunityDecision(
                     participant_evaluations: sortParticipantEvaluations(participantEvaluations ?? []),
                 })),
             }]);
-            return proposal;
+            return { proposal, decision_applied: true, reason: null };
         }
     }
+}
+
+/**
+ * Legacy decision API. Pending admission rejection continues to return the
+ * unchanged proposal; callers needing to distinguish that from an applied
+ * decision use `applyOpportunityDecisionDetailed`.
+ */
+export function applyOpportunityDecision(
+    state: GameState,
+    turn: number,
+    proposalId: string,
+    decision: OpportunityDecision,
+    catalog: readonly OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG,
+    options: OpportunityDecisionOptions = {},
+): OperationOpportunityState | null {
+    return applyOpportunityDecisionDetailed(state, turn, proposalId, decision, catalog, options).proposal;
+}
+
+/**
+ * Pure admission check for an opportunity-spawned sector attack. The count is
+ * based on unique live participants on axes that would actually be built,
+ * including the authored handoff guards. No proposal, operation, probe, loan,
+ * trace, or resolution state is written here.
+ */
+export function preflightOpportunityAdmission(
+    state: GameState,
+    def: OperationOpportunityDef,
+    axesIn: readonly OpportunityAxisDef[] = def.axes,
+    commitment: 'minimum' | 'standard' | 'reinforced' = 'standard',
+    turn: number = state.meta.turn,
+    adjacency?: Map<Osid, Osid[]>,
+): OpportunityAdmissionPreflight {
+    const required = effectiveOperationMinimum('sector_attack');
+    if (!state.military.corps_command?.[def.primary_corps]) {
+        return insufficientAdmission(0, required);
+    }
+
+    const overrideActive = def.tier === 'T1' && def.family === 'fifth_corps';
+    const overrideSet: ReadonlySet<string> = overrideActive && def.targets_friendly_overrides
+        ? new Set(def.targets_friendly_overrides)
+        : new Set<string>();
+    const candidateAxes: Array<{ axis: OpportunityAxisDef; participants: FormationId[] }> = [];
+
+    for (const axis of axesIn) {
+        const handoff = axis.phase_gate?.handoff;
+        const selectionAxis = handoff
+            ? { ...axis, brigades: axis.brigades.filter((brigadeId) => brigadeId !== handoff.brigade_id) }
+            : axis;
+        const participants = selectEligibleOpportunityParticipants(
+            state,
+            selectionAxis,
+            commitment,
+            def.name,
+            turn,
+            adjacency,
+        );
+        if (participants.length === 0 && !handoff) continue;
+        const hasObjective = axis.objectives.some((osid) => {
+            const controller = getPoliticalControllerOSID(state, osid, undefined);
+            return controller === null
+                || isOperationObjectiveHostile(state, def.faction, controller)
+                || overrideSet.has(osid);
+        });
+        if (!hasObjective) continue;
+        candidateAxes.push({ axis, participants });
+    }
+
+    for (let index = candidateAxes.length - 1; index >= 0; index--) {
+        const candidate = candidateAxes[index]!;
+        const gate = candidate.axis.phase_gate;
+        if (!gate?.handoff || gate.requires_operation_captures.length === 0) continue;
+        const handoff = gate.handoff;
+        const resolvedHandoff = resolveOperationFormation(
+            state.military.formations ?? {},
+            handoff.brigade_id,
+        ).formation_id;
+        const source = candidateAxes.find(({ axis }) => axis.axis_id === handoff.source_axis_id);
+        const assignedCount = candidateAxes.reduce(
+            (count, row) => count + row.participants.filter(
+                (brigadeId) => brigadeId === resolvedHandoff,
+            ).length,
+            0,
+        );
+        if (
+            !resolvedHandoff
+            ||
+            handoff.source_axis_id !== gate.main_axis_id
+            || !source
+            || source === candidate
+            || candidate.axis.brigades.length !== 0
+            || !source.participants.includes(resolvedHandoff)
+            || assignedCount !== 1
+        ) {
+            candidateAxes.splice(index, 1);
+        }
+    }
+
+    const selected = new Set(candidateAxes.flatMap(({ participants }) => participants)).size;
+    return selected >= required
+        ? { admitted: true, selected_participants: selected, required_participants: required, reason: null }
+        : insufficientAdmission(selected, required);
+}
+
+function insufficientAdmission(selected: number, required: number): OpportunityAdmissionPreflight {
+    return {
+        admitted: false,
+        selected_participants: selected,
+        required_participants: required,
+        reason: `below_minimum_brigades (${selected}/${required})`,
+    };
 }
 
 /**
@@ -1259,6 +1440,10 @@ function spawnCorpsOperationFromOpportunity(
         : new Set<string>();
 
     const builtAxes: OperationAxis[] = [];
+    // Complete AUTHORED objective list per built axis, captured before the friendly-controller
+    // filter: the phase gate protects every authored target, including one friendly at spawn that
+    // is lost to the enemy while the axis is holding.
+    const authoredObjectivesByAxis = new Map<string, string[]>();
     const allParticipating: FormationId[] = [];
     const probePreemptions: ProbePreemption[] = [];
     // Elite loans owed to sector-exempt roster members, deployed only once the
@@ -1267,9 +1452,13 @@ function spawnCorpsOperationFromOpportunity(
     for (const axis of axesIn) {
         const axisLoans: Array<{ brigadeId: FormationId; corpsId: string }> = [];
         const axisProbePreemptions: ProbePreemption[] = [];
+        const handoff = axis.phase_gate?.handoff;
+        const selectionAxis = handoff
+            ? { ...axis, brigades: axis.brigades.filter((brigadeId) => brigadeId !== handoff.brigade_id) }
+            : axis;
         const brigadesForAxis = selectEligibleOpportunityParticipants(
             state,
-            axis,
+            selectionAxis,
             commitment,
             def.name,
             turn,
@@ -1278,7 +1467,9 @@ function spawnCorpsOperationFromOpportunity(
             participantEvaluations,
             axisProbePreemptions,
         );
-        if (brigadesForAxis.length === 0) continue;
+        // A handoff destination is intentionally empty until activation. Its brigade is admitted
+        // once through the declared source axis and must never be reserved on both axes.
+        if (brigadesForAxis.length === 0 && !handoff) continue;
 
         // Friendly-controller filter — mirrors triggered_operations.ts:buildOperation
         // (lines 542-545). Objectives painted/controlled by the acting faction or its
@@ -1322,10 +1513,73 @@ function spawnCorpsOperationFromOpportunity(
             ...(axis.staging_osid ? { staging_osid: axis.staging_osid } : {}),
             ...(axis.preserve_objective_sequence === true ? { preserve_objective_sequence: true } : {}),
         });
+        authoredObjectivesByAxis.set(axis.axis_id, [...axis.objectives]);
         for (const b of brigadesForAxis) allParticipating.push(b);
         for (const loan of axisLoans) eliteLoans.push(loan);
         for (const preemption of axisProbePreemptions) probePreemptions.push(preemption);
     }
+    // Opt-in phase gate: initialise `late_phase` on each authored gated axis whose main axis was
+    // actually built (an absent main axis leaves the axis ungated rather than holding forever).
+    // `gated_objectives` is the axis's COMPLETE authored objective set BEFORE the friendly filter.
+    for (let builtIndex = builtAxes.length - 1; builtIndex >= 0; builtIndex--) {
+        const built = builtAxes[builtIndex]!;
+        const gate = axesIn.find((candidate) => candidate.axis_id === built.axis_id)?.phase_gate;
+        if (!gate || gate.requires_operation_captures.length === 0) continue;
+        const mainAxis = builtAxes.find((candidate) => candidate.axis_id === gate.main_axis_id);
+        if (!mainAxis) {
+            if (gate.handoff) builtAxes.splice(builtIndex, 1);
+            continue;
+        }
+        if (gate.handoff) {
+            const handoff = gate.handoff;
+            const resolvedHandoff = resolveOperationFormation(
+                state.military.formations ?? {},
+                handoff.brigade_id,
+            ).formation_id;
+            const sourceAxis = builtAxes.find((candidate) => candidate.axis_id === handoff.source_axis_id);
+            const authoredDestination = axesIn.find((candidate) => candidate.axis_id === built.axis_id);
+            const assignedCount = builtAxes.reduce(
+                (count, candidate) => count + candidate.assigned_brigades.filter(
+                    (brigadeId) => brigadeId === resolvedHandoff,
+                ).length,
+                0,
+            );
+            const participantCount = allParticipating.filter(
+                (brigadeId) => brigadeId === resolvedHandoff,
+            ).length;
+            if (
+                !resolvedHandoff
+                ||
+                handoff.source_axis_id !== gate.main_axis_id
+                || !sourceAxis
+                || sourceAxis === built
+                || authoredDestination?.brigades.length !== 0
+                || !sourceAxis.assigned_brigades.includes(resolvedHandoff)
+                || assignedCount !== 1
+                || participantCount !== 1
+            ) {
+                builtAxes.splice(builtIndex, 1);
+                continue;
+            }
+        }
+        built.late_phase = {
+            phase: 'holding',
+            main_axis_id: gate.main_axis_id,
+            requires: [...gate.requires_operation_captures],
+            gated_objectives: [...(authoredObjectivesByAxis.get(built.axis_id) ?? built.objectives)],
+            receipts: [],
+            ...(gate.handoff ? {
+                handoff: {
+                    ...gate.handoff,
+                    brigade_id: resolveOperationFormation(
+                        state.military.formations ?? {},
+                        gate.handoff.brigade_id,
+                    ).formation_id!,
+                },
+            } : {}),
+        };
+    }
+
     if (builtAxes.length === 0) return null;
 
     preemptOpportunityProbeParticipants(state, turn, probePreemptions);
@@ -1336,6 +1590,9 @@ function spawnCorpsOperationFromOpportunity(
             name: def.name,
             planning_duration: def.planning_duration,
             staging_osid: stagingOsid,
+            ...(def.preparation_probe_delivery != null
+                ? { preparation_probe_delivery: def.preparation_probe_delivery }
+                : {}),
             ...(def.min_attack_outcome ? { min_attack_outcome: def.min_attack_outcome } : {}),
         },
         builtAxes,
@@ -1346,6 +1603,7 @@ function spawnCorpsOperationFromOpportunity(
     );
 
     cmd.active_operations.push(op);
+    assignOperationCommander(state, op, def.primary_corps, def.faction);
     return op.name;
 }
 
@@ -1634,9 +1892,9 @@ export function applyBotOpportunityDecisions(
     playerFaction: FactionId | null,
     catalog: readonly OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG,
     adjacency?: Map<Osid, Osid[]>,
-): void {
+): OpportunityDecisionOutcome[] {
     const proposals = state.military.operation_opportunities;
-    if (!proposals || proposals.length === 0) return;
+    if (!proposals || proposals.length === 0) return [];
     // Snapshot the proposal ids first — the apply mutates the underlying array.
     const targets: Array<{ proposalId: string; def: OperationOpportunityDef; proposal: OperationOpportunityState }> = [];
     for (const p of proposals) {
@@ -1649,10 +1907,14 @@ export function applyBotOpportunityDecisions(
     }
     // Sort deterministically so bot decisions are stable across replays.
     targets.sort((a, b) => strictCompare(a.proposalId, b.proposalId));
+    const outcomes: OpportunityDecisionOutcome[] = [];
     for (const t of targets) {
         const decision = defaultBotDecisionForOpportunity(t.proposal, t.def);
-        applyOpportunityDecision(state, turn, t.proposalId, decision, catalog, { adjacency });
+        outcomes.push(applyOpportunityDecisionDetailed(
+            state, turn, t.proposalId, decision, catalog, { adjacency },
+        ));
     }
+    return outcomes;
 }
 
 /**
@@ -1756,15 +2018,16 @@ export function applyResolvedOpportunityDecisions(
     turn: number,
     catalog: readonly OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG,
     adjacency?: Map<Osid, Osid[]>,
-): void {
+): OpportunityDecisionOutcome[] {
     const reviews = state.meta.pending_proposal_reviews;
-    if (!reviews || reviews.length === 0) return;
+    if (!reviews || reviews.length === 0) return [];
     // Sort deterministically so the order of decisions is replay-stable.
     const targets = reviews
         .filter(r =>
             r.proposed_action.startsWith(OPPORTUNITY_PROPOSAL_ACTION_PREFIX)
             && (normalizeOpportunityDecision(r.opportunity_decision) !== null || r.accepted != null))
         .sort((a, b) => strictCompare(a.id, b.id));
+    const outcomes: OpportunityDecisionOutcome[] = [];
     for (const r of targets) {
         const proposalId = r.proposed_action.slice(OPPORTUNITY_PROPOSAL_ACTION_PREFIX.length);
         const explicitDecision = normalizeOpportunityDecision(r.opportunity_decision);
@@ -1772,6 +2035,9 @@ export function applyResolvedOpportunityDecisions(
         const options = explicitDecision
             ? normalizeOpportunityDecisionOptions(r.opportunity_decision_options)
             : {};
-        applyOpportunityDecision(state, turn, proposalId, decision, catalog, { ...options, adjacency });
+        outcomes.push(applyOpportunityDecisionDetailed(
+            state, turn, proposalId, decision, catalog, { ...options, adjacency },
+        ));
     }
+    return outcomes;
 }

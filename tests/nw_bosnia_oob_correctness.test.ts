@@ -198,7 +198,7 @@ test('T5: static-grep — no per-faction OOB branches added (faction-symmetric m
 });
 
 /**
- * T6 IS A KNOWN-DIVERGENCE TEST, NOT A FIDELITY PIN. READ THIS BEFORE CHANGING IT.
+ * T6 IS A BASELINE-ACTIVE DIVERGENCE TEST, NOT A FIDELITY PIN. READ THIS BEFORE CHANGING IT.
  *
  * The playable data on this row is DELIBERATELY WRONG ON THE HISTORY, and this test
  * exists to keep both halves of that statement true at once:
@@ -238,7 +238,7 @@ test('T5: static-grep — no per-faction OOB branches added (faction-symmetric m
  *      by neither n222 nor n223 and is pending its own 188w. It is NOT asserted
  *      here on purpose — pinning an unmeasured behaviour would bless it.
  */
-test('T6: KNOWN DIVERGENCE — the Hrvoje Vukčić row carries the mechanically-required Odžak value while provenance retains the Jajce finding', async () => {
+test('T6: BASELINE ACTIVE DIVERGENCE — Hrvoje remains at Odžak while provenance retains the approved Jajce-to-Rama finding', async () => {
     const brigades = await loadOobBrigades(REPO_ROOT);
     const hrvoje = brigades.find(b => b.id === 'hvo_hrvoje_vukcic_brigade');
     assert.ok(hrvoje, 'hvo_hrvoje_vukcic_brigade must exist; the row was deleted once already and that threw away a real formation');
@@ -275,12 +275,10 @@ test('T6: KNOWN DIVERGENCE — the Hrvoje Vukčić row carries the mechanically-
     }
 
     const conflictNote = String(record.conflict_note ?? '');
-    assert.ok(conflictNote.includes('CALIBRATION GROUNDS, NOT ON EVIDENCE GROUNDS'),
-        'the provenance conflict_note must state that the Odžak value is restored on ' +
-        'calibration grounds and not on evidence grounds — that sentence is what stops ' +
-        'a future reader from re-deriving the Jajce fix and rediscovering the same failure.');
-    assert.ok(conflictNote.includes('55th Home Defense Regiment'),
-        'the provenance conflict_note must retain BB1 p.248/211 on the destruction of the unit at the fall of Jajce');
+    for (const fragment of ['OWNER-RESOLVED 2026-10-09', 'Jajce', 'Tomislavgrad', 'Rama']) {
+        assert.ok(conflictNote.includes(fragment),
+            `the approved historical finding must remain in provenance while its gameplay candidate is withdrawn (${fragment})`);
+    }
 });
 
 test('T7: Brod-Derventa-Modriča brigades open with their documented April force and retain pocket metadata', async () => {
@@ -342,4 +340,12 @@ test('T8: Odžak opens with an HVO defender — a name correction must never lea
         'BB1 p.437 names the 102nd as the Odžak brigade of the original six; its ' +
         'Orašje home came from the October 1995 post-consolidation OOB and is ' +
         'wrong for an April 1992 start');
+
+    const provenanceRaw = await fs.readFile(
+        path.join(REPO_ROOT, 'docs', 'provenance', 'OFFICER_OOB_PROVENANCE.json'), 'utf8');
+    const record = JSON.parse(provenanceRaw).records?.['brigade:hrhb_102nd_brigade'];
+    assert.ok(String(record?.citation).includes('102nd Odzak'),
+        'the approved source finding for the April 1992 Odžak identity must remain recorded');
+    assert.ok(String(record?.conflict_note).includes('Orašje'),
+        'the approved later Orašje transition finding must remain recorded while the gameplay candidate is withdrawn');
 });

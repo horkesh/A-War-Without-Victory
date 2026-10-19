@@ -184,6 +184,8 @@ export interface OperationAAR {
     requested_by_president?: boolean;
     /** CA cost paid at time of force-launch. Always 15 when force_launched is true. */
     ca_cost_at_launch?: number;
+    /** Exact parent operation instance for a subordinate preparation-probe archive receipt. */
+    preparation_probe_parent_operation_id?: string;
     /** Snapshot of commander's recommendation at the moment of presidential decision. */
     commander_assessment_at_launch?: CommanderAssessment;
     /** Phase 4 (Force Quality Foundation): snapshot of the seven readiness traits at
@@ -918,6 +920,9 @@ export function finalizeOperationAAR(
     // Player-only tag → omitted in headless runs, so baselines stay byte-identical.
     if (op.requested_by_president) {
         aar.requested_by_president = true;
+    }
+    if (op.preparation_probe_link) {
+        aar.preparation_probe_parent_operation_id = `${corpsId}:${op.preparation_probe_link.parent_operation_name}:t${op.preparation_probe_link.parent_started_turn}`;
     }
     if (op.commander_assessment_at_launch != null) {
         aar.commander_assessment_at_launch = op.commander_assessment_at_launch;

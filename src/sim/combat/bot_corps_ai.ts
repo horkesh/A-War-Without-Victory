@@ -44,6 +44,7 @@ import {
     getCorpsSubordinates,
 } from './bot_corps_helpers.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import { emitCommanderCreationRecord, isReasonCodeTopicEnabled } from './reason_code_debug.js';
 import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
 import { isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
 import { MAX_EXHAUSTION_FOR_OPERATION } from './bot_constants.js';
@@ -424,6 +425,16 @@ export function generateAllCorpsOrders(
     if (spatial) {
         // v0.8 Commander Loop: per-corps PERCEIVE→DECIDE→EXECUTE pipeline
         const corpsList = getFactionCorps(state, faction);
+        if (isReasonCodeTopicEnabled('commander_creation')) {
+            emitCommanderCreationRecord({
+                schema: 'commander_creation.v1',
+                phase: 'pass_start',
+                turn: state.meta?.turn ?? null,
+                faction,
+                spatial_present: true,
+                corps_ids: corpsList.map((entry) => entry.id).sort(strictCompare),
+            });
+        }
         const corpsSubordinatesByCorps = botOrdersPerfTime(
             'commander.runCommanderForCorps.corpsSubordinatesIndex',
             () => buildCorpsSubordinatesByCorps(state),
@@ -450,6 +461,32 @@ export function generateAllCorpsOrders(
             );
             applyCommanderOutput(state, corps.id, output);
         }
+        if (isReasonCodeTopicEnabled('commander_creation')) {
+            emitCommanderCreationRecord({
+                schema: 'commander_creation.v1',
+                phase: 'pass_end',
+                turn: state.meta?.turn ?? null,
+                faction,
+                status: 'completed',
+                completed_corps_count: corpsList.length,
+            });
+        }
+    } else if (isReasonCodeTopicEnabled('commander_creation')) {
+        // The commander block is skipped without spatial context: an explicit skip, never coverage by absence.
+        emitCommanderCreationRecord({
+            schema: 'commander_creation.v1',
+            phase: 'pass_start',
+            turn: state.meta?.turn ?? null,
+            faction,
+            spatial_present: false,
+        });
+        emitCommanderCreationRecord({
+            schema: 'commander_creation.v1',
+            phase: 'pass_end',
+            turn: state.meta?.turn ?? null,
+            faction,
+            status: 'skipped_no_spatial',
+        });
     }
 
     // Final cleanup: prune any 0-edge ghost sectors (pocket containment artifacts)

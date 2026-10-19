@@ -1,5 +1,5 @@
 /**
- * REASON-CODE INSTRUMENTATION — one env gate, fourteen topics, inert by default.
+ * REASON-CODE INSTRUMENTATION — one env gate, independently selectable topics, inert by default.
  *
  * ═══ WHAT THIS IS FOR ═══
  *
@@ -51,7 +51,7 @@
  * an order the engine already fixed upstream. Reading `process.env` is a pure
  * read of process configuration and does not vary within a run.
  *
- * ═══ ONE VARIABLE, FOURTEEN TOPICS ═══
+ * ═══ ONE VARIABLE, INDEPENDENT TOPICS ═══
  *
  * `mainstaff_op_availability_gate.ts` deliberately uses two separate flags,
  * because its two halves move participation in OPPOSITE directions and a
@@ -68,9 +68,11 @@
  */
 
 import { strictCompare } from '../../state/validateGameState.js';
+import type { CorpsOperation } from '../../state/game_state.js';
+import { stableStringify } from '../../utils/stable_json.js';
 
 /**
- * The fourteen diagnostic topics.
+ * Diagnostic topics.
  *
  *  battle_stack      — item 1. `attacker_brigades` + `defender_contributions` on the
  *                      weekly battle entry. Answers: is this casualty figure a
@@ -121,7 +123,15 @@ export type ReasonCodeTopic =
     | 'tg_formation'
     | 'dispatcher_decision'
     | 'movement_phase'
-    | 'front_distribution';
+    | 'front_distribution'
+    | 'commander_creation'
+    | 'mistral_tg_activation'
+    | 'mistral_tg_donor_selection'
+    | 'operation_capture_ownership'
+    | 'salient_evacuation'
+    | 'southern_move_preparation'
+    | 'southern_move_confidence_lookup'
+    | 'local_occupation_candidate';
 
 const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'axis_reject',
@@ -138,6 +148,14 @@ const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'dispatcher_decision',
     'movement_phase',
     'front_distribution',
+    'commander_creation',
+    'mistral_tg_activation',
+    'mistral_tg_donor_selection',
+    'operation_capture_ownership',
+    'salient_evacuation',
+    'southern_move_preparation',
+    'southern_move_confidence_lookup',
+    'local_occupation_candidate',
 ];
 
 /**
@@ -195,6 +213,216 @@ export function whenReasonCodeTopic<T extends Record<string, unknown>>(
     build: () => T,
 ): T | Record<string, never> {
     return isReasonCodeTopicEnabled(topic) ? build() : {};
+}
+
+/**
+ * Opt-in `commander_creation` stdout receipt: ONE uniquely-prefixed JSON line per record (pass markers and per-corps
+ * buildOperations completion rows). Console evidence only — never weekly/save/GameState state. Absent (no write, no
+ * allocation by callers) when the topic is off. Keys are written in stable sorted order; callers pass detached scalar copies.
+ */
+export const COMMANDER_CREATION_PREFIX = '[commander_creation]';
+export function emitCommanderCreationRecord(record: Record<string, unknown>): void {
+    if (!isReasonCodeTopicEnabled('commander_creation')) return;
+    console.log(`${COMMANDER_CREATION_PREFIX} ${stableStringify(record)}`);
+}
+
+/**
+ * Local-only stdout observation of the real four-class local occupation search.
+ * The caller allocates records only after the topic gate passes. A diagnostic
+ * sink failure is isolated from commander selection and simulation state.
+ */
+export const LOCAL_OCCUPATION_CANDIDATE_PREFIX = '[local_occupation_candidate]';
+export function emitLocalOccupationCandidateRecord(record: Record<string, unknown>): void {
+    if (!isReasonCodeTopicEnabled('local_occupation_candidate')) return;
+    try {
+        console.log(`${LOCAL_OCCUPATION_CANDIDATE_PREFIX} ${stableStringify(record)}`);
+    } catch {
+        // Diagnostics must never change the commander result.
+    }
+}
+
+/** Copy-only stdout receipts for the bounded Mistral activation/capture observation packet. */
+export const MISTRAL_TG_ACTIVATION_PREFIX = '[mistral_tg_activation]';
+export const MISTRAL_TG_DONOR_SELECTION_PREFIX = '[mistral_tg_donor_selection]';
+export const OPERATION_CAPTURE_OWNERSHIP_PREFIX = '[operation_capture_ownership]';
+
+export function emitMistralTgActivationRecord(record: Record<string, unknown>): void {
+    if (!isReasonCodeTopicEnabled('mistral_tg_activation')) return;
+    console.log(`${MISTRAL_TG_ACTIVATION_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);
+}
+
+export function emitMistralTgDonorSelectionRecord(record: Record<string, unknown>): void {
+    if (!isReasonCodeTopicEnabled('mistral_tg_donor_selection')) return;
+    console.log(`${MISTRAL_TG_DONOR_SELECTION_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);
+}
+
+export function emitOperationCaptureOwnershipRecord(record: Record<string, unknown>): void {
+    if (!isReasonCodeTopicEnabled('operation_capture_ownership')) return;
+    console.log(`${OPERATION_CAPTURE_OWNERSHIP_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);
+}
+
+/** Copy-only stdout receipts for the bounded salient evacuation observer. */
+export const SALIENT_EVACUATION_PREFIX = '[salient_evacuation]';
+export function emitSalientEvacuationRecord(record: Record<string, unknown>): void {
+    if (!isReasonCodeTopicEnabled('salient_evacuation')) return;
+    console.log(`${SALIENT_EVACUATION_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);
+}
+
+/**
+ * Local-only stdout observation for the exact historical Southern Move preparation window.
+ * The fixed selector prevents a generated same-family name or a different operation instance
+ * from becoming evidence. Payload construction is lazy, so default/topic-off runs do no
+ * observer allocation beyond the gate call and never write GameState or weekly reports.
+ */
+export const SOUTHERN_MOVE_PREPARATION_PREFIX = '[southern_move_preparation]';
+export function isSouthernMovePreparationSelected(
+    operationName: string,
+    faction: string | null | undefined,
+    corpsId: string,
+    turn: number,
+): boolean {
+    return isReasonCodeTopicEnabled('southern_move_preparation')
+        && operationName === 'Operation Southern Move'
+        && faction === 'HRHB'
+        && corpsId === 'hvo_tomislavgrad'
+        && turn >= 183
+        && turn <= 188;
+}
+
+export function isSouthernMovePreparationPassSelected(
+    faction: string | null | undefined,
+    corpsId: string,
+    turn: number,
+): boolean {
+    return isReasonCodeTopicEnabled('southern_move_preparation')
+        && faction === 'HRHB'
+        && corpsId === 'hvo_tomislavgrad'
+        && turn >= 183
+        && turn <= 188;
+}
+
+export function emitSouthernMovePreparationPassRecord(
+    faction: string | null | undefined,
+    corpsId: string,
+    turn: number,
+    build: () => Record<string, unknown>,
+): void {
+    if (!isSouthernMovePreparationPassSelected(faction, corpsId, turn)) return;
+    console.log(`${SOUTHERN_MOVE_PREPARATION_PREFIX} ${stableStringify({
+        schema_version: 1,
+        faction,
+        corps_id: corpsId,
+        turn,
+        ...build(),
+    })}`);
+}
+
+export function emitSouthernMovePreparationRecord(
+    operationName: string,
+    faction: string | null | undefined,
+    corpsId: string,
+    turn: number,
+    build: () => Record<string, unknown>,
+): void {
+    if (!isSouthernMovePreparationSelected(operationName, faction, corpsId, turn)) return;
+    console.log(`${SOUTHERN_MOVE_PREPARATION_PREFIX} ${stableStringify({
+        schema_version: 1,
+        operation_name: operationName,
+        faction,
+        corps_id: corpsId,
+        turn,
+        ...build(),
+    })}`);
+}
+
+export interface LinkedPreparationProbeObserverReceipt {
+    child_operation_name: string;
+    child_operation_started_turn: number;
+    child_axis_id: string;
+    brigade_ids: string[];
+    target_osid: string;
+}
+
+/**
+ * Emit a linked-probe lifecycle row selected by the persisted parent link.
+ * The generated child name is identity data only and never participates in selection.
+ */
+export function emitLinkedPreparationProbeRecord(
+    child: CorpsOperation,
+    faction: string | null | undefined,
+    corpsId: string,
+    turn: number,
+    build: (receipt: LinkedPreparationProbeObserverReceipt) => Record<string, unknown>,
+): void {
+    const link = child.preparation_probe_link;
+    if (!link || !isSouthernMovePreparationSelected(link.parent_operation_name, faction, corpsId, turn)) return;
+    const childAxisId = child.axes?.[0]?.axis_id;
+    if (!childAxisId) return;
+    const receipt: LinkedPreparationProbeObserverReceipt = {
+        child_operation_name: child.name,
+        child_operation_started_turn: child.started_turn,
+        child_axis_id: childAxisId,
+        brigade_ids: sortedIds(child.participating_brigades),
+        target_osid: link.target_osid,
+    };
+    emitSouthernMovePreparationRecord(link.parent_operation_name, faction, corpsId, turn, () => ({
+        parent_operation_started_turn: link.parent_started_turn,
+        ...build(receipt),
+    }));
+}
+
+/**
+ * Separate stdout stream for the actual confidence getter reached by the selected
+ * Southern Move preparation tick. The context is allocated only after the exact
+ * topic/name/faction/corps/turn gate passes, then reused by every reached lookup.
+ */
+export const SOUTHERN_MOVE_CONFIDENCE_LOOKUP_PREFIX = '[southern_move_confidence_lookup]';
+
+export interface SouthernMoveConfidenceLookupContext {
+    operation_name: string;
+    faction: string;
+    corps_id: string;
+    turn: number;
+    operation_index?: number;
+    operation_started_turn: number;
+    operation_phase_started_turn: number;
+}
+
+export function createSouthernMoveConfidenceLookupContext(
+    operationName: string,
+    faction: string | null | undefined,
+    corpsId: string,
+    turn: number,
+    operationIndex: number | undefined,
+    operationStartedTurn: number,
+    operationPhaseStartedTurn: number,
+): SouthernMoveConfidenceLookupContext | undefined {
+    if (!isReasonCodeTopicEnabled('southern_move_confidence_lookup')
+        || operationName !== 'Operation Southern Move'
+        || faction !== 'HRHB'
+        || corpsId !== 'hvo_tomislavgrad'
+        || turn < 183
+        || turn > 188) return undefined;
+    return {
+        operation_name: operationName,
+        faction,
+        corps_id: corpsId,
+        turn,
+        ...(operationIndex === undefined ? {} : { operation_index: operationIndex }),
+        operation_started_turn: operationStartedTurn,
+        operation_phase_started_turn: operationPhaseStartedTurn,
+    };
+}
+
+export function emitSouthernMoveConfidenceLookupRecord(
+    context: SouthernMoveConfidenceLookupContext,
+    record: Record<string, unknown>,
+): void {
+    console.log(`${SOUTHERN_MOVE_CONFIDENCE_LOOKUP_PREFIX} ${stableStringify({
+        schema_version: 1,
+        ...context,
+        ...record,
+    })}`);
 }
 
 /**

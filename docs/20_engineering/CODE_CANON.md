@@ -56,6 +56,84 @@ complete actor manifests, global write ordinals, typed snapshots/features and
 candidate/target linkage. Default report keys remain absent. Fixture proof does
 not identify a historical helper or establish a gameplay defect.
 
+Opt-in subordinate preparation-probe delivery (October 2026): `OperationOpportunityDef.preparation_probe_delivery`
+propagates through the canonical `buildCorpsOperation` seam into optional persisted
+`CorpsOperation.preparation_probe_delivery`. Only Southern Move authors `'subordinate'`; code does not infer the
+mode from name, date, tier, family, or outcome. The child uses ordinary planning, order, resolver, recovery, and
+AAR ownership. Its exact parent slot and selected brigade ownership are shared/exclusive only while the persisted
+link matches the live parent request. The parent clock advances once at its deferred visit, while request mutation,
+readiness assessment, and launch remain paused until ownership restoration. Absent capability preserves the legacy
+request/auto-resolution path and serialization shape. Proof: `tests/subordinate_preparation_probe.test.ts`.
+
+Opt-in operation axis phasing (reviewed, October 2026): an authored `phase_gate` on a
+multi-axis opportunity axis becomes `OperationAxis.late_phase` (`src/state/game_state.ts`;
+gate logic in `src/sim/combat/operation_phase_gate.ts`). While `holding` the axis may approach/hold
+but may not capture any `gated_objectives` (complete held target set; enforced at the final
+attack consumer, `sector_offensive.ts`/`attack_resolution_osid.ts`); it activates once, only after
+the same operation instance's main axis has produced owned, still-held capture receipts
+(`OperationCaptureReceipt`, written by the resolver from the surviving emitted order's
+instance/axis/lead-brigade/target attribution). `brigade_attack_order_owners` is a real persisted
+sidecar holding pending emitted-order ownership for one turn, present only while a gated
+operation has pending orders. A late TG is formed and engaged for the axis (`formTgForAxis`
+returns the formed TgId; finite lifetime via the TG lifecycle). Absent opt-in, no field is written
+and behavior is the pre-existing path (compatibility proven through the real serializer, not
+only unit fixtures). Proof: `tests/sector_offensive_phase_gate.test.ts`,
+`tests/operation_capture_order_ownership.test.ts` plus the 168 full-suite pass (exit 0, 1419 files,
+14415 passed / 33 skipped). No save-schema version change, global TG clock reset or global
+empirical determinism claim; unit/serializer proof is distinct from measured campaign gaps (actual TG
+activation exit and Barevo/Lupnica emitted ownership remain UNMEASURED); the inherited 122
+retention/startup STOP stays open.
+
+The owner-approved named Sana and Southern Move extensions add optional `late_phase.handoff` to that same persisted gate.
+Its destination axis is constructed empty, so the transferred brigade is admitted and reserved only
+once on the source axis. Activation first verifies exact source membership, active/faction eligibility,
+single operation participation and absence from every other live operation; only then does it replace
+source/destination membership and recompute both axes' main/support roles atomically. Gate phase and
+the resulting memberships are the exact-once truth; there is no parallel transient owner. The transfer
+does not touch formation location, movement, orders, control, force, confidence, preparation, dates or
+thresholds. Only the named `sana_95` and `southern_move_95` destination axes author this capability.
+Catalog-authored formation IDs normalize to the live runtime ID by exact key first or one unique
+`oob:<authored id>` alias; missing or ambiguous bindings reject the gated axis, and the resolved ID is
+persisted in `late_phase.handoff`. This changes neither schema shape/version nor migration rules. Proof includes construction, malformed-save,
+save/load pending/applied, reversed-order, conflict no-op, and real resolver ownership cases in
+`tests/operation_opportunities_substrate.test.ts`, `tests/operation_opportunities_catalog.test.ts`,
+`tests/sector_offensive_phase_gate.test.ts`, `tests/operation_capture_order_ownership.test.ts`, and
+`tests/operation_opportunities_federation_western_bosnia_catalog.test.ts`. Focused proof is not campaign proof.
+
+Opt-in dispatcher observation: topic `dispatcher_decision` (`AWWV_DEBUG_REASON_CODES`) adds
+per-formation detached records (`first_handler`, directive/axis/objective context, pre-cap and
+final generated orders) to the weekly `bot_order_diagnostics` only. Records carry completed-turn
+labels (`turn` equals the weekly `week_index`); they are observation, not a simulation decision,
+and are not written to GameState. A source audit found no reference mutation, in-place sort or
+cache effect in the detail builder; 180/n46 (topic on) reproduced ten selected n44 artifacts byte
+for byte (a qualified replication, not neutrality at every unsaved turn).
+
+Opt-in `sector_march` observer (reviewed, October 2026): when `dispatcher_decision` is enabled, a detail row may carry an
+optional detached scalar `sector_march` record (`SectorMarchObservation`, `bot_brigade_eval_types.ts`) naming the ACTUAL terminal
+exit of `evaluateSectorMarch` (`bot_brigade_eval_front.ts`; wrapper over the unchanged body) and its branch-local inputs
+(operation commitment, routine-scope source/sub-segment/size, requested reassignment including a same-sector id, scoped/allowed front
+sizes, selected destination and its scoped-front membership). Labels are set only where the function returns, so an inner lambda that
+returns false never masks the later exit; `first_handler` stays the first TRUE evaluator. Default-off: no observer callback/context property, no observation allocation, no diagnostic key.
+No GameState/save/schema/version change. The record is evaluator-time and not an order authority. Proof: `tests/bot_dispatcher_sector_march_observer.test.ts`
+(17 tests: real dispatcher path, topic-off absence, identical orders and `serializeState`, copy and reversed-insertion-order fixtures, scoped march,
+same-sector reassignment, trap reroute, retroactive tooth, overstack, defend/enclave exits, tooth-blocked fall-through). The local fail-closed
+reader `logs/claude-channel-20261004/192-sector-march-reader.cjs` (exact id x completed-turn inventory, embedded-turn binding, legitimate
+skips, baseline comparator) is evidence tooling, not a simulation authority. Reviews: 189 source review, 191 targeted verification, 192/193 final
+verification; 188 focused 75 tests + typecheck, 190 17 tests + 26 reader controls, 192 31 controls (each at its own date/scope; no combined rerun count,
+no global empirical determinism claim).
+
+Opt-in scenario-read provenance observation (October 2026): `src/scenario/scenario_read_context.ts`
+owns one per-run receipt context for the existing `loadScenario` read. Literal
+`AWWV_SCENARIO_READ_RECEIPT=1` causes `runScenario` to compare the decoded text actually parsed,
+its lexical path identity, and its normalized hash with the matching consumed-input stamp row,
+then emit exactly one `[input-read-receipt]` line. The observer is default-off, contains its own
+failures, performs no second read, and changes no state, save, `run_meta`, stamp, or gameplay
+artifact. It covers only this loader call and therefore is not evidence that every consumed input
+was actually read. `data/source/formation_lifecycle_events.json` is now a named fixed input, making
+the current authoritative stamp 32 rows. Proof: `tests/scenario_read_context.test.ts`,
+`tests/scenario_runner_read_context_gate.test.ts`, `tests/scenario_runner_read_context_wiring.test.ts`,
+`tests/run_provenance_stamp.test.ts`, and `tests/run_provenance_input_surface_scan.test.ts`.
+
 ### Canonical harnesses and surfaces (callers of the pipelines)
 - Scenario harness: `src/scenario/scenario_runner.ts` — routes to peace vs war runner based on `state.meta.phase`.
 - Scenario CLI: `src/cli/sim_scenario.ts`.

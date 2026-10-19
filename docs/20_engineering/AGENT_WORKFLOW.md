@@ -53,6 +53,10 @@ Choose checks from changed behavior:
 - territory-moving or calibration-affecting simulation behavior: required full suite, authoritative 188-week run, protected anchors, deterministic artifact/provenance checks, and one change per measured run; focused or shorter runs do not waive these gates
 - release/package: required build, inventory, runtime, save-preservation and provenance checks from the active release authority
 
+For calibration work, use scenario-first iteration after the cheapest rejecting focused tests, type/static checks and appropriate independent review. Run each specifically authorized bounded scenario and evaluate authoritative checkpoint floors, every formerly correct OSID loss, protected anchors and artifact/provenance gates before spending on a broad suite. A failed or discarded experimental candidate does not require a full suite merely to continue diagnosis. Run the required full suite on the qualifying final gameplay candidate before acceptance or integration; repeat it only when a later change invalidates that evidence or a required gate calls for it. Observer-only diagnostics reuse unaffected broad checks at their actual scope. This cadence changes validation sequence and frequency, not required acceptance criteria, canon/review seats, one-change-per-measured-run discipline, expensive-run authorization, fixed allowances or stopping rules.
+
+Calibration preflight diagnostics must use a fresh, explicitly named attempt directory and preserve the exact entry script, argv, stdout, stderr, child artifacts, and terminal receipt for every attempt, including failures and timeouts. Corrections run in a new attempt directory; they never replace or delete evidence from an earlier attempt. Use `tools/diagnostics/run_preserved_preflight.cjs` for this contract.
+
 Reuse unaffected evidence. Passing another check never retires an unmet acceptance criterion.
 
 ## Failure, documentation, and closeout

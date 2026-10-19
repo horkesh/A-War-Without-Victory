@@ -98,6 +98,8 @@ flag; broadening it would hand those types the attack evaluator's gates. Destina
 remains phase-gated to planning/execution exactly as at T3/T6; the guard predicate preserves its
 pre-existing treatment of recovery-phase participants.
 
+**Active-loan operation ownership.** Operation authorization uses the receiving corps in `elite_loan_state.loaned_to_corps` when `on_loan` is true and a receiving corps is present; otherwise it uses the formation's home `corps_id`, matching brigade bot dispatch. This resolves the operation owner only. Participant, phase, axis, objective-index, staging/approach, adjacency and exact-destination checks remain unchanged; it does not authorize a global operation search or arbitrary cross-corps movement.
+
 **Single-cell assignment.** When a brigade's assigned sub-segment contains only its current
 location and no authorized alternative destination exists, no discretionary relocation is emitted.
 The brigade stays physically where it is; no transit or completed move is fabricated, and its

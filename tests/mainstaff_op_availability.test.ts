@@ -93,6 +93,19 @@ function buildOpportunityState(turn: number): GameState {
                     location_osid: 'op:livno:livno_2',
                     home_osid: 'op:livno:livno_2',
                 },
+                // Second ordinary host-corps participant keeps this fixture above the
+                // shared sector-attack minimum when the brigade under test is rejected.
+                hvo_local_support_brigade: {
+                    id: 'hvo_local_support_brigade',
+                    name: 'hvo_local_support_brigade',
+                    kind: 'brigade',
+                    status: 'active',
+                    faction: 'HRHB',
+                    corps_id: HOST_CORPS,
+                    personnel: 1800,
+                    location_osid: 'op:livno:livno_2',
+                    home_osid: 'op:livno:livno_2',
+                },
                 // Rostered, sector-exempt elite — the brigade the designer named.
                 hvo_1st_guard_abb: {
                     id: 'hvo_1st_guard_abb',
@@ -163,6 +176,7 @@ function mistralLikeDef(): OperationOpportunityDef {
                 'hvo_staff_militia',
                 'hvo_other_corps_brigade',
                 'hvo_local_brigade',
+                'hvo_local_support_brigade',
             ],
             objectives: ['op:titov_drvar:drvar_2'],
         }],
@@ -226,7 +240,8 @@ describe('GATE 2 — opportunity roster admission for sector-exempt brigades', (
         const op = spawnFixtureOperation(state, 175, mistralLikeDef());
 
         expect(op).not.toBeNull();
-        expect(op!.axes![0].assigned_brigades).toEqual(['hvo_local_brigade']);
+        expect(op!.axes![0].assigned_brigades)
+            .toEqual(['hvo_local_brigade', 'hvo_local_support_brigade']);
         expect(state.military.formations!.hvo_1st_guard_abb.elite_loan_state!.on_loan).toBe(false);
     });
 
@@ -621,7 +636,8 @@ describe('the two flags are INDEPENDENT', () => {
         setMainStaffOpAvailabilityOverride(false);
         const state = buildOpportunityState(175);
         const op = spawnFixtureOperation(state, 175, mistralLikeDef());
-        expect(op!.axes![0].assigned_brigades).toEqual(['hvo_local_brigade']);
+        expect(op!.axes![0].assigned_brigades)
+            .toEqual(['hvo_local_brigade', 'hvo_local_support_brigade']);
         expect(state.military.formations!.hvo_1st_guard_abb.elite_loan_state!.on_loan).toBe(false);
     });
 

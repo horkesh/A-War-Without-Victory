@@ -44,7 +44,9 @@
  */
 
 import type {
+    CorpsCommandState,
     CorpsOperation,
+    OperationAxis,
     FactionId,
     FormationId,
     FormationState,
@@ -52,11 +54,14 @@ import type {
     PreparationSubPhase,
     CommanderAssessment,
     TgFormationDeclineDetail,
+    TgId,
+    SectorIntelRecord,
 } from '../../state/game_state.js';
 import type { NamedOfficer, NamedOfficerState } from '../../state/officer_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { mayEliteJoinOperation } from './historical_elite_reservations.js';
 import { FACTION_RECON_PROFILES } from './sector_intel_constants.js';
+import { ensureCurrentSectorIntelRecord, stableSectorKey } from './sector_intel.js';
 import {
     getEquipmentOffensivePriority,
     // LANE-2026-05-02-IN-TRANSIT-COMBAT-POWER-CONTEXT: shared predicate +
@@ -88,13 +93,22 @@ import {
     tgDonationReadinessFraction,
     totalPledgedPersonnel,
 } from './tactical_group_selection.js';
-import { formTacticalGroup } from './tactical_group_lifecycle.js';
+import { engageTacticalGroup, formTacticalGroup } from './tactical_group_lifecycle.js';
 // REASON-CODE INSTRUMENTATION (topic `tg_formation`): env-gated, absent by default.
-import { isReasonCodeTopicEnabled } from './reason_code_debug.js';
+import {
+    createSouthernMoveConfidenceLookupContext,
+    emitLinkedPreparationProbeRecord,
+    emitSouthernMoveConfidenceLookupRecord,
+    emitMistralTgActivationRecord,
+    emitSouthernMovePreparationRecord,
+    isReasonCodeTopicEnabled,
+    type SouthernMoveConfidenceLookupContext,
+} from './reason_code_debug.js';
 // ADR-0005 Phase 4: phantom-aware anchor resolution + dual-anchor de-confliction. Flag-gated.
 import { resolveTgAnchor, collectActiveAnchorIds } from './tactical_group_anchor.js';
 import { getReservedPrePlannedBrigadeIds } from './pre_planned_operations.js';
 import { getStandingOgDefenseBrigadeIds } from './standing_og_defense.js';
+import { buildProbeOperation } from './corps_operation_helpers.js';
 // ADR-0006 Phase 3A: named TG commander + faction-asymmetric naming. Flag-gated (ENABLE_TG_FORMATION).
 import { assignTacticalCommander } from './officer_system.js';
 import { generateTacticalGroupName } from './tactical_group_naming.js';
@@ -165,13 +179,76 @@ export function getGoThreshold(aggressiveness: number): number {
  * Get the best intel confidence for the enemy sector facing this operation's targets.
  * Reads from state.military.sector_intel using the operation's sector_id.
  */
+type ConfidenceLookupCall = 'initial' | 'current' | 'pre_planned';
+type OwnRecordSelectionMode = 'not_reached' | 'missing_sector_positional' | 'edgeless_positional' | 'stable' | 'unkeyed_fallback';
+
+interface ConfidenceLookupCandidate {
+    source_intel_key: string;
+    enemy_sector_id: string;
+    own_stable_key: string | null;
+    enemy_stable_key: string | null;
+    confidence: number;
+    objective_match: boolean | null;
+}
+
+interface ConfidenceLookupTrace {
+    context: SouthernMoveConfidenceLookupContext;
+    lookup_call: ConfidenceLookupCall;
+    own_record_selection_mode: OwnRecordSelectionMode;
+    operation_sector_id: string | null;
+    own_sector_id: string | null;
+    own_sector_stable_key: string | null;
+    objective_mappings: Array<{
+        objective_osid: string;
+        controller: string | null;
+        sector_id: string | null;
+        sector_stable_key: string | null;
+    }>;
+    candidates: ConfidenceLookupCandidate[];
+}
+
+function emitConfidenceLookupReturn(
+    trace: ConfidenceLookupTrace | undefined,
+    returnBranch: string,
+    returnedConfidence: number,
+): number {
+    if (trace) {
+        emitSouthernMoveConfidenceLookupRecord(trace.context, {
+            event: 'confidence_lookup',
+            lookup_call: trace.lookup_call,
+            return_branch: returnBranch,
+            own_record_selection_mode: trace.own_record_selection_mode,
+            operation_sector_id: trace.operation_sector_id,
+            own_sector_id: trace.own_sector_id,
+            own_sector_stable_key: trace.own_sector_stable_key,
+            objective_mappings: trace.objective_mappings,
+            candidates: trace.candidates,
+            returned_confidence: returnedConfidence,
+        });
+    }
+    return returnedConfidence;
+}
+
 export function getOperationIntelConfidence(
     state: GameState,
     op: CorpsOperation,
+    observerContext?: SouthernMoveConfidenceLookupContext,
+    lookupCall: ConfidenceLookupCall = 'initial',
 ): number {
-    if (!op.sector_id || !state.military.sector_intel) return 0;
-    const records = state.military.sector_intel[op.sector_id];
-    if (!records || records.length === 0) return 0;
+    const trace: ConfidenceLookupTrace | undefined = observerContext ? {
+        context: observerContext,
+        lookup_call: lookupCall,
+        own_record_selection_mode: 'not_reached',
+        operation_sector_id: op.sector_id ?? null,
+        own_sector_id: op.sector_id ?? null,
+        own_sector_stable_key: null,
+        objective_mappings: [],
+        candidates: [],
+    } : undefined;
+    if (!op.sector_id) return emitConfidenceLookupReturn(trace, 'missing_operation_sector', 0);
+    if (!state.military.sector_intel) return emitConfidenceLookupReturn(trace, 'missing_sector_intel', 0);
+    const records = getOperationSectorIntelRecords(state, op.sector_id, trace);
+    if (records.length === 0) return emitConfidenceLookupReturn(trace, 'no_records', 0);
 
     // Find the record facing the enemy sector that contains our objectives
     const objectives = new Set(op.objectives ?? []);
@@ -182,42 +259,141 @@ export function getOperationIntelConfidence(
     }
 
     if (objectives.size === 0) {
-        return records.reduce((best, rec) => Math.max(best, rec.confidence), 0);
+        const best = records.reduce((value, rec) => Math.max(value, rec.confidence), 0);
+        return emitConfidenceLookupReturn(trace, 'no_objectives_best', best);
     }
 
-    const objectiveEnemySectors = collectObjectiveEnemySectorIds(state, objectives);
+    const objectiveEnemySectors = collectObjectiveEnemySectorIds(state, objectives, trace);
 
     if (objectiveEnemySectors.size === 0) {
         // Objective-specific intel is only meaningful when we can actually map
         // the target OSIDs back to enemy sectors. Older or thinner state slices
         // may not carry that geometry, so fall back to the best facing-sector
         // record instead of treating the operation as having no usable intel.
-        return records.reduce((best, rec) => Math.max(best, rec.confidence), 0);
+        const best = records.reduce((value, rec) => Math.max(value, rec.confidence), 0);
+        return emitConfidenceLookupReturn(trace, 'unmapped_objectives_best', best);
     }
 
     let best = 0;
-    for (const rec of records) {
-        if (!objectiveEnemySectors.has(rec.enemy_sector_id)) continue;
+    for (let recordIndex = 0; recordIndex < records.length; recordIndex++) {
+        const rec = records[recordIndex]!;
+        const matches = matchesObjectiveEnemySector(state, rec, objectiveEnemySectors);
+        if (trace) trace.candidates[recordIndex]!.objective_match = matches;
+        if (!matches) continue;
         best = Math.max(best, rec.confidence);
     }
 
-    return best;
+    return emitConfidenceLookupReturn(trace, 'objective_filtered_best', best);
+}
+
+function appendConfidenceLookupCandidate(
+    trace: ConfidenceLookupTrace | undefined,
+    sourceIntelKey: string,
+    rec: SectorIntelRecord,
+): void {
+    if (!trace) return;
+    trace.candidates.push({
+        source_intel_key: sourceIntelKey,
+        enemy_sector_id: rec.enemy_sector_id,
+        own_stable_key: rec.own_stable_key ?? null,
+        enemy_stable_key: rec.enemy_stable_key ?? null,
+        confidence: rec.confidence,
+        objective_match: null,
+    });
+}
+
+function getOperationSectorIntelRecords(
+    state: GameState,
+    sectorId: string,
+    trace?: ConfidenceLookupTrace,
+): SectorIntelRecord[] {
+    const intel = state.military.sector_intel;
+    if (!intel) return [];
+    const sector = state.military.corps_front_sectors?.[sectorId];
+    if (!sector || sector.edge_ids.length === 0) {
+        if (trace) {
+            trace.own_record_selection_mode = sector ? 'edgeless_positional' : 'missing_sector_positional';
+            trace.own_sector_id = sector?.sector_id ?? null;
+        }
+        const positional = intel[sectorId] ?? [];
+        for (const rec of positional) appendConfidenceLookupCandidate(trace, sectorId, rec);
+        return positional;
+    }
+
+    const ownStable = stableSectorKey(sector);
+    if (trace) {
+        trace.own_sector_id = sector.sector_id;
+        trace.own_sector_stable_key = ownStable;
+    }
+    const stableMatches: SectorIntelRecord[] = [];
+    for (const key of Object.keys(intel).sort(strictCompare)) {
+        for (const rec of intel[key] ?? []) {
+            if (rec.own_stable_key === ownStable) {
+                stableMatches.push(rec);
+                appendConfidenceLookupCandidate(trace, key, rec);
+            }
+        }
+    }
+    if (stableMatches.length > 0) {
+        if (trace) trace.own_record_selection_mode = 'stable';
+        return stableMatches;
+    }
+
+    const positional = intel[sectorId] ?? [];
+    const unkeyed = positional.filter(rec => rec.own_stable_key === undefined);
+    if (trace) trace.own_record_selection_mode = 'unkeyed_fallback';
+    for (const rec of unkeyed) appendConfidenceLookupCandidate(trace, sectorId, rec);
+    return unkeyed;
+}
+
+function matchesObjectiveEnemySector(
+    state: GameState,
+    rec: SectorIntelRecord,
+    sectorIds: ReadonlySet<string>,
+): boolean {
+    const sectors = state.military.corps_front_sectors;
+    if (!sectors) return false;
+    for (const sectorId of [...sectorIds].sort(strictCompare)) {
+        const sector = sectors[sectorId];
+        if (!sector || sector.edge_ids.length === 0) {
+            if (rec.enemy_sector_id === sectorId) return true;
+            continue;
+        }
+        if (rec.enemy_stable_key !== undefined) {
+            if (rec.enemy_stable_key === stableSectorKey(sector)) return true;
+        } else if (rec.enemy_sector_id === sectorId) {
+            return true;
+        }
+    }
+    return false;
 }
 
 function collectObjectiveEnemySectorIds(
     state: GameState,
     objectives: ReadonlySet<string>,
+    trace?: ConfidenceLookupTrace,
 ): Set<string> {
     const objectiveEnemySectors = new Set<string>();
     for (const objective of objectives) {
         const controller = state.political?.political_controllers?.[objective];
-        if (!controller) continue;
+        if (!controller) {
+            if (trace) trace.objective_mappings.push({
+                objective_osid: objective, controller: null, sector_id: null, sector_stable_key: null,
+            });
+            continue;
+        }
         const sector = state.military.corps_front_sectors
             ? Object.values(state.military.corps_front_sectors).find(
                 s => s.faction === controller && (s.territory_osids?.includes(objective)
                     || s.sub_segments.some(sub => sub.friendly_osids.includes(objective))),
             )
             : null;
+        if (trace) trace.objective_mappings.push({
+            objective_osid: objective,
+            controller,
+            sector_id: sector?.sector_id ?? null,
+            sector_stable_key: sector ? stableSectorKey(sector) : null,
+        });
         if (sector) objectiveEnemySectors.add(sector.sector_id);
     }
     return objectiveEnemySectors;
@@ -518,6 +694,262 @@ export function selectProbeBrigades(
     return candidates.slice(0, PROBE_MAX_BRIGADES).map(c => c.id);
 }
 
+/** Materialize an opted-in preparation request as a subordinate operation. */
+export function createLinkedPreparationProbe(
+    state: GameState,
+    corpsId: FormationId,
+    parent: CorpsOperation,
+): CorpsOperation | null {
+    if (parent.preparation_probe_delivery !== 'subordinate') return null;
+    const cmd = state.military.corps_command?.[corpsId];
+    const request = parent.active_probe;
+    if (!cmd || !cmd.active_operations.includes(parent) || parent.phase !== 'planning') return null;
+    if (!request || request.resolved) return null;
+    if (cmd.active_operations.some((candidate) => {
+        const link = candidate.preparation_probe_link;
+        return link?.parent_operation_name === parent.name
+            && link.parent_started_turn === parent.started_turn
+            && link.request_started_turn === request.started_turn
+            && link.target_osid === request.target_osid;
+    })) return null;
+
+    const selected = [...new Set(request.brigade_ids)].sort(strictCompare);
+    if (selected.length === 0) return null;
+    const parentParticipants = new Set(parent.participating_brigades);
+    if (!selected.every((brigadeId) => parentParticipants.has(brigadeId))) return null;
+    if (!selected.every((brigadeId) => state.military.formations?.[brigadeId]?.status === 'active')) return null;
+    const minimumRemaining = Math.max(1, Math.trunc(parent.minimum_viable_participants ?? 2));
+    const selectedSet = new Set(selected);
+    const liveRemaining = parent.participating_brigades.filter((brigadeId) =>
+        !selectedSet.has(brigadeId)
+        && state.military.formations?.[brigadeId]?.status === 'active'
+    ).length;
+    if (liveRemaining < minimumRemaining) return null;
+
+    const hasConflictingLiveCommitment = Object.keys(state.military.corps_command ?? {})
+        .sort(strictCompare)
+        .some((candidateCorpsId) => state.military.corps_command?.[candidateCorpsId]?.active_operations.some((candidate) =>
+            candidate !== parent
+            && (candidate.phase === 'planning' || candidate.phase === 'execution')
+            && candidate.participating_brigades.some((brigadeId) => selectedSet.has(brigadeId))
+        ) === true);
+    if (hasConflictingLiveCommitment) return null;
+
+    const sourceAxes = selected.map((brigadeId) => {
+        const matches = (parent.axes ?? []).filter((axis) => axis.assigned_brigades.includes(brigadeId));
+        if (matches.length !== 1) return null;
+        return { brigade_id: brigadeId, axis_id: matches[0]!.axis_id };
+    });
+    if (sourceAxes.some((source) => source === null)) return null;
+
+    const child = buildProbeOperation(
+        corpsId,
+        state.meta?.turn ?? 0,
+        selected[0]!,
+        parent.sector_id,
+        [request.target_osid],
+    );
+    child.name = `Preparation Probe: ${parent.name}`;
+    child.participating_brigades = selected;
+    if (child.axes?.[0]) child.axes[0].assigned_brigades = selected;
+    child.preparation_probe_link = {
+        parent_operation_name: parent.name,
+        parent_started_turn: parent.started_turn,
+        request_started_turn: request.started_turn,
+        target_osid: request.target_osid,
+        source_axes: sourceAxes as NonNullable<CorpsOperation['preparation_probe_link']>['source_axes'],
+    };
+
+    parent.participating_brigades = parent.participating_brigades
+        .filter((brigadeId) => !selectedSet.has(brigadeId))
+        .sort(strictCompare);
+    for (const axis of parent.axes ?? []) {
+        axis.assigned_brigades = axis.assigned_brigades
+            .filter((brigadeId) => !selectedSet.has(brigadeId))
+            .sort(strictCompare);
+    }
+    cmd.active_operations.push(child);
+    const faction = state.military.formations?.[corpsId]?.faction;
+    emitLinkedPreparationProbeRecord(child, faction, corpsId, state.meta?.turn ?? 0, (receipt) => ({
+        event: 'linked_probe_created',
+        ...receipt,
+    }));
+    return child;
+}
+
+function findExactPreparationProbeParent(
+    cmd: CorpsCommandState,
+    child: CorpsOperation,
+): CorpsOperation | null {
+    const link = child.preparation_probe_link;
+    if (!link) return null;
+    return cmd.active_operations.find((candidate) =>
+        candidate !== child
+        && candidate.preparation_probe_delivery === 'subordinate'
+        && candidate.name === link.parent_operation_name
+        && candidate.started_turn === link.parent_started_turn
+    ) ?? null;
+}
+
+function requestMatchesPreparationProbeLink(
+    request: CorpsOperation['active_probe'],
+    link: NonNullable<CorpsOperation['preparation_probe_link']>,
+): boolean {
+    return request !== undefined
+        && request.started_turn === link.request_started_turn
+        && request.target_osid === link.target_osid;
+}
+
+export type LinkedPreparationProbeSettlement =
+    | 'not_linked'
+    | 'already_restored'
+    | 'parent_missing'
+    | 'restored_real_contact'
+    | 'restored_no_contact'
+    | 'restored_no_opportunity';
+
+/** Restore a subordinate probe's surviving formations before its parent resumes. */
+export function settleLinkedPreparationProbeOnRecovery(
+    state: GameState,
+    corpsId: FormationId,
+    child: CorpsOperation,
+): LinkedPreparationProbeSettlement {
+    const link = child.preparation_probe_link;
+    if (!link) return 'not_linked';
+    if (link.restored_to_parent === true) return 'already_restored';
+    const cmd = state.military.corps_command?.[corpsId];
+    const parent = cmd ? findExactPreparationProbeParent(cmd, child) : null;
+    if (!cmd || !parent || parent.phase !== 'planning') return 'parent_missing';
+
+    const sourceAxisIds = new Set((parent.axes ?? []).map((axis) => axis.axis_id));
+    if (link.source_axes.some((source) => source.axis_id !== undefined && !sourceAxisIds.has(source.axis_id))) {
+        return 'parent_missing';
+    }
+    const surviving = child.participating_brigades.filter((brigadeId) => {
+        const formation = state.military.formations?.[brigadeId];
+        if (!formation || formation.status !== 'active') return false;
+        return !cmd.active_operations.some((candidate) =>
+            candidate !== child
+            && candidate !== parent
+            && (candidate.phase === 'planning' || candidate.phase === 'execution')
+            && candidate.participating_brigades.includes(brigadeId));
+    }).sort(strictCompare);
+
+    const faction = state.military.formations?.[corpsId]?.faction;
+    let outcome: LinkedPreparationProbeSettlement = 'restored_real_contact';
+    const linkedRequest = parent.active_probe;
+    if (requestMatchesPreparationProbeLink(linkedRequest, link) && linkedRequest && !linkedRequest.resolved) {
+        if (link.order_opportunity_turn !== undefined && faction) {
+            autoResolveProbe(state, parent, faction, corpsId);
+            outcome = 'restored_no_contact';
+        } else {
+            linkedRequest.resolved = true;
+            linkedRequest.result_confidence_gain = 0;
+            outcome = 'restored_no_opportunity';
+        }
+    }
+
+    const survivorSet = new Set(surviving);
+    parent.participating_brigades = [...new Set([
+        ...parent.participating_brigades,
+        ...surviving,
+    ])].sort(strictCompare);
+    for (const source of link.source_axes) {
+        if (!survivorSet.has(source.brigade_id) || source.axis_id === undefined) continue;
+        const axis = parent.axes?.find((candidate) => candidate.axis_id === source.axis_id);
+        if (axis) axis.assigned_brigades = [...new Set([...axis.assigned_brigades, source.brigade_id])].sort(strictCompare);
+    }
+    if (outcome === 'restored_no_contact') {
+        emitLinkedPreparationProbeRecord(child, faction, corpsId, state.meta?.turn ?? 0, (receipt) => ({
+            event: 'probe_return',
+            entrypoint: 'auto_probe',
+            linked_probe_receipt: {
+                ...receipt,
+                terminal_reason: child.recovery_reason ?? 'probe_complete',
+            },
+        }));
+    }
+    emitLinkedPreparationProbeRecord(child, faction, corpsId, state.meta?.turn ?? 0, (receipt) => ({
+        event: 'linked_probe_recovery',
+        ...receipt,
+        outcome,
+        order_opportunity_turn: link.order_opportunity_turn ?? null,
+    }));
+    link.restored_to_parent = true;
+    return outcome;
+}
+
+/** Record the exact ordinary attack-order opportunity for a subordinate probe. */
+export function recordLinkedPreparationProbeOrderOpportunity(
+    state: GameState,
+    brigadeId: FormationId,
+    targetOsid: string,
+): boolean {
+    for (const corpsId of Object.keys(state.military.corps_command ?? {}).sort(strictCompare)) {
+        const cmd = state.military.corps_command?.[corpsId];
+        if (!cmd) continue;
+        for (const child of cmd.active_operations) {
+            const link = child.preparation_probe_link;
+            if (!link || child.phase !== 'execution' || link.target_osid !== targetOsid) continue;
+            if (!child.participating_brigades.includes(brigadeId)) continue;
+            const axis = child.axes?.find((candidate) => candidate.assigned_brigades.includes(brigadeId));
+            if (!axis || axis.objectives[axis.current_objective_index ?? 0] !== targetOsid) continue;
+            const parent = findExactPreparationProbeParent(cmd, child);
+            const request = parent?.active_probe;
+            if (!parent || !request || request.resolved || !requestMatchesPreparationProbeLink(request, link)) continue;
+            if (!request.brigade_ids.includes(brigadeId)) continue;
+            if (link.order_opportunity_turn === undefined) {
+                link.order_opportunity_turn = state.meta?.turn ?? 0;
+                const faction = state.military.formations?.[corpsId]?.faction;
+                emitLinkedPreparationProbeRecord(child, faction, corpsId, state.meta?.turn ?? 0, (receipt) => ({
+                    event: 'linked_probe_order_opportunity',
+                    ...receipt,
+                    brigade_ids: [brigadeId],
+                    order_opportunity_turn: link.order_opportunity_turn,
+                }));
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+/** Apply a battle receipt only when it belongs to the exact subordinate request. */
+export function resolveLinkedPreparationProbeBattle(
+    state: GameState,
+    corpsId: FormationId,
+    child: CorpsOperation,
+    targetOsid: string,
+    contributingBrigadeIds: readonly FormationId[],
+    _battleId: string,
+): boolean {
+    const cmd = state.military.corps_command?.[corpsId];
+    if (!cmd || child.phase !== 'execution' || !child.preparation_probe_link) return false;
+    const parent = findExactPreparationProbeParent(cmd, child);
+    const request = parent?.active_probe;
+    if (!parent || !request || !requestMatchesPreparationProbeLink(request, child.preparation_probe_link)
+        || request.resolved || request.target_osid !== targetOsid) return false;
+    const selected = new Set(request.brigade_ids);
+    const childParticipants = new Set(child.participating_brigades);
+    const contributors = [...contributingBrigadeIds]
+        .filter((brigadeId) => selected.has(brigadeId) && childParticipants.has(brigadeId))
+        .sort(strictCompare);
+    if (contributors.length === 0) return false;
+    const faction = state.military.formations?.[corpsId]?.faction;
+    if (!faction) return false;
+    child.preparation_probe_link.order_opportunity_turn ??= state.meta?.turn ?? 0;
+    resolveActiveProbe(state, parent, faction, corpsId);
+    emitLinkedPreparationProbeRecord(child, faction, corpsId, state.meta?.turn ?? 0, (receipt) => ({
+        event: 'probe_return',
+        entrypoint: 'real_probe',
+        linked_probe_receipt: {
+            ...receipt,
+            battle_id: _battleId,
+        },
+    }));
+    return true;
+}
+
 /**
  * Find the best target OSID for a probe (first objective of the operation).
  */
@@ -694,6 +1126,122 @@ function recordTgFormationDecline(
     target.tg_formation_decline = detail;
 }
 
+/**
+ * One axis's share of `formTgsAtReadyTransition` (behavior-preserving extraction): resolve the
+ * anchor against the shared reservation set, claim it, pick donors around the axis staging OSID
+ * and form the TG unless one already exists or the donor pool is inadequate.
+ */
+function formTgForSingleAxis(
+    state: GameState,
+    op: CorpsOperation,
+    axis: OperationAxis,
+    currentTurn: number,
+    adjacency: Map<string, string[]> | undefined,
+    reservedAnchors: Set<string>,
+    maxDonors: number | undefined,
+    observe?: (record: Record<string, unknown>) => void,
+    donorObservation?: { corps_id: string; caller_stage: 'pre_results' | 'post_results' | 'direct' },
+): TgId | null {
+    const anchorId = resolveTgAnchor(state, axis, reservedAnchors);
+    if (!anchorId) { observe?.({ kind: 'tg_inner_terminal', reason: 'no_anchor' }); return null; }
+    reservedAnchors.add(anchorId); // claim it: a sibling axis must pick its next-best
+    const stagingOsid = axis.staging_osid ?? op.staging_osid;
+    if (!stagingOsid) { observe?.({ kind: 'tg_inner_terminal', reason: 'no_staging', anchor_id: anchorId }); return null; }
+    // Idempotent: skip if a TG for this op+anchor already exists (the
+    // sector_attack ready-path may form first; the canonical launch-site
+    // call must not double-form).
+    if (tgAlreadyExistsFor(state, op.name, anchorId)) { observe?.({ kind: 'tg_inner_terminal', reason: 'already_exists', anchor_id: anchorId, staging_osid: stagingOsid }); return null; }
+    const donors = selectDonors(state, {
+        anchor_brigade_id: anchorId,
+        staging_osid: stagingOsid,
+        army_hq_op_id: op.army_hq_op_id,
+        adjacency,
+        max_donors: maxDonors,
+        observation: {
+            caller_turn: currentTurn,
+            operation_name: op.name,
+            operation_id: donorObservation ? `${donorObservation.corps_id}:${op.name}:t${op.started_turn}` : null,
+            axis_id: axis.axis_id,
+            corps_id: donorObservation?.corps_id ?? null,
+            caller_stage: donorObservation?.caller_stage ?? 'direct',
+        },
+    });
+    // Codex P2 #46: a zero-donor anchor must NOT form a phantom TG (consuming TG
+    // caps + identity/commander + TG-only dissolution/revert). With no donors the
+    // intended behavior is the legacy lone-anchor (no-TG) attack, exactly as
+    // flag-off: the op still launches via the sector/operation path with just the
+    // anchor brigade. Skip TG formation for this axis.
+    //
+    // ENGINE-HEALTH B3 (2026-09-19): an INADEQUATE pool now takes the same exit as
+    // an empty one. `tgDonationMeetsReadiness` is false for both, so a pool below
+    // the faction's readiness fraction declines the augmentation instead of
+    // refusing the operation — which is what the old `insufficient_donation` gate
+    // in `classifyAxisOpeningAttack` did. `formTacticalGroup` is never reached, so
+    // no donor personnel, equipment, cohesion bleed, cooldown or per-scenario
+    // donation credit is consumed by a declined augmentation.
+    const anchorPersonnel = state.military?.formations?.[anchorId]?.personnel ?? 0;
+    const anchorFaction = state.military?.formations?.[anchorId]?.faction;
+    if (!tgDonationMeetsReadiness(donors, anchorPersonnel, anchorFaction)) {
+        recordTgFormationDecline(axis, anchorId, anchorPersonnel, anchorFaction, donors);
+        observe?.({ kind: 'tg_inner_terminal', reason: donors.length === 0 ? 'no_eligible_donors' : 'donation_below_readiness', anchor_id: anchorId, staging_osid: stagingOsid, donor_count: donors.length, donated_personnel: totalPledgedPersonnel(donors), anchor_personnel: anchorPersonnel, anchor_faction: anchorFaction ?? null });
+        return null;
+    }
+    const formed = formTacticalGroup(state, {
+        op_id: op.name,
+        anchor_brigade_id: anchorId,
+        donors,
+        current_turn: currentTurn,
+        army_hq_op_id: op.army_hq_op_id,
+    });
+    if (!formed.tg_id) { observe?.({ kind: 'tg_inner_terminal', reason: 'formation_rejected', anchor_id: anchorId, staging_osid: stagingOsid, donor_count: donors.length }); return null; }
+    applyTgIdentity(state, op, anchorId);
+    observe?.({ kind: 'tg_inner_terminal', reason: 'formed', anchor_id: anchorId, staging_osid: stagingOsid, donor_count: donors.length, tg_id: formed.tg_id });
+    return formed.tg_id;
+}
+
+/**
+ * Form the TG for ONE axis at its own lawful transition (phase-gate activation). Same policy,
+ * reservation and idempotence rules as the ready transition; never forms for a holding axis.
+ *
+ * Returns the id of the group this call actually formed, or null when nothing was formed
+ * (formation disabled, no anchor, no/inadequate donors, already existing, rejected). The newly
+ * formed group is ENGAGED here (existing anchor-location/engagement semantics via
+ * `engageTacticalGroup`): activation happens after the operation entered execution, so the
+ * original `markOperationExecuting` pass never saw it, and exhaustion considers engaged groups
+ * only. ONLY that group is engaged — no sibling/unrelated group and no operation-wide pass.
+ */
+export function formTgForAxis(
+    state: GameState,
+    op: CorpsOperation,
+    axis: OperationAxis,
+    currentTurn: number,
+    adjacency?: Map<string, string[]>,
+    observation?: { corps_id: string; caller_stage: 'pre_results' | 'post_results' | 'direct' },
+): TgId | null {
+    const observe = isReasonCodeTopicEnabled('mistral_tg_activation');
+    const emit = (record: Record<string, unknown>): void => emitMistralTgActivationRecord({
+        turn: currentTurn, operation_name: op.name, axis_id: axis.axis_id,
+        corps_id: observation?.corps_id ?? null,
+        operation_id: observation ? `${observation.corps_id}:${op.name}:t${op.started_turn}` : null,
+        caller_stage: observation?.caller_stage ?? 'direct', ...record,
+    });
+    if (observe) emit({ kind: 'tg_call_start', axis_status: axis.status, gate_phase: axis.late_phase?.phase ?? null });
+    if (!ENABLE_TG_FORMATION) { if (observe) emit({ kind: 'tg_call_end', result: 'formation_disabled' }); return null; }
+    if (axis.late_phase?.phase === 'holding') { if (observe) emit({ kind: 'tg_call_end', result: 'axis_holding' }); return null; }
+    const policy = classifyOpDonorPolicy(op);
+    if (policy === 'none') { if (observe) emit({ kind: 'tg_call_end', result: 'policy_none' }); return null; }
+    const maxDonors = donorCapForPolicy(policy);
+    const reservedAnchors = collectActiveAnchorIds(state);
+    for (const id of getReservedPrePlannedBrigadeIds(currentTurn)) reservedAnchors.add(id);
+    const formedId = formTgForSingleAxis(
+        state, op, axis, currentTurn, adjacency, reservedAnchors, maxDonors,
+        observe ? emit : undefined, observation,
+    );
+    if (formedId !== null && op.phase === 'execution') engageTacticalGroup(state, formedId);
+    if (observe) emit({ kind: 'tg_call_end', result: formedId === null ? 'not_formed' : 'formed', tg_id: formedId });
+    return formedId;
+}
+
 export function formTgsAtReadyTransition(
     state: GameState,
     op: CorpsOperation,
@@ -721,49 +1269,11 @@ export function formTgsAtReadyTransition(
 
     if (op.axes && op.axes.length > 0) {
         for (const axis of op.axes) {
-            const anchorId = resolveTgAnchor(state, axis, reservedAnchors);
-            if (!anchorId) continue;
-            reservedAnchors.add(anchorId); // claim it: a sibling axis must pick its next-best
-            const stagingOsid = axis.staging_osid ?? op.staging_osid;
-            if (!stagingOsid) continue;
-            // Idempotent: skip if a TG for this op+anchor already exists (the
-            // sector_attack ready-path may form first; the canonical launch-site
-            // call must not double-form).
-            if (tgAlreadyExistsFor(state, op.name, anchorId)) continue;
-            const donors = selectDonors(state, {
-                anchor_brigade_id: anchorId,
-                staging_osid: stagingOsid,
-                army_hq_op_id: op.army_hq_op_id,
-                adjacency,
-                max_donors: maxDonors,
-            });
-            // Codex P2 #46: a zero-donor anchor must NOT form a phantom TG (consuming TG
-            // caps + identity/commander + TG-only dissolution/revert). With no donors the
-            // intended behavior is the legacy lone-anchor (no-TG) attack, exactly as
-            // flag-off: the op still launches via the sector/operation path with just the
-            // anchor brigade. Skip TG formation for this axis.
-            //
-            // ENGINE-HEALTH B3 (2026-09-19): an INADEQUATE pool now takes the same exit as
-            // an empty one. `tgDonationMeetsReadiness` is false for both, so a pool below
-            // the faction's readiness fraction declines the augmentation instead of
-            // refusing the operation — which is what the old `insufficient_donation` gate
-            // in `classifyAxisOpeningAttack` did. `formTacticalGroup` is never reached, so
-            // no donor personnel, equipment, cohesion bleed, cooldown or per-scenario
-            // donation credit is consumed by a declined augmentation.
-            const anchorPersonnel = state.military?.formations?.[anchorId]?.personnel ?? 0;
-            const anchorFaction = state.military?.formations?.[anchorId]?.faction;
-            if (!tgDonationMeetsReadiness(donors, anchorPersonnel, anchorFaction)) {
-                recordTgFormationDecline(axis, anchorId, anchorPersonnel, anchorFaction, donors);
-                continue;
-            }
-            const formed = formTacticalGroup(state, {
-                op_id: op.name,
-                anchor_brigade_id: anchorId,
-                donors,
-                current_turn: currentTurn,
-                army_hq_op_id: op.army_hq_op_id,
-            });
-            if (formed.tg_id) applyTgIdentity(state, op, anchorId);
+            // Opt-in phase gate: a holding axis forms no TG (no donor pull, no spent TG budget) at
+            // launch or at the preparation-ready transition; it forms its own TG exactly once at
+            // activation (`formTgForAxis`). Axes without the opt-in take the unchanged path.
+            if (axis.late_phase?.phase === 'holding') continue;
+            formTgForSingleAxis(state, op, axis, currentTurn, adjacency, reservedAnchors, maxDonors);
         }
         return;
     }
@@ -884,7 +1394,17 @@ export function tickPreparation(
     supplyByOsid?: SupplyStateByOsidReport | null, // LANE-2026-05-02
     terrainMultByOsid?: Record<string, number>, // LANE-2026-05-02
     adjacency?: Map<string, string[]>,
+    observerOperationIndex?: number,
 ): PreparationTickResult {
+    const confidenceLookupContext = createSouthernMoveConfidenceLookupContext(
+        op.name,
+        faction,
+        corpsId,
+        state.meta?.turn ?? 0,
+        observerOperationIndex,
+        op.started_turn,
+        op.phase_started_turn,
+    );
     const commander = getOpsCommander(state, op);
     const competence = commander?.data.competence ?? 3;
     const aggressiveness = commander?.data.aggressiveness ?? 3;
@@ -910,22 +1430,35 @@ export function tickPreparation(
     if (op.is_pre_planned === true) {
         op.preparation_sub_phase = 'ready';
         op.commander_assessment = 'launch';
-        return {
+        const prePlannedResult: PreparationTickResult = {
             sub_phase: 'ready',
             ready: true,
             probe_ordered: false,
-            intel_confidence: getOperationIntelConfidence(state, op),
+            intel_confidence: getOperationIntelConfidence(state, op, confidenceLookupContext, 'pre_planned'),
             supply_readiness: supplyReadiness,
             force_ratio_estimate: 1.0,
             aborted: false,
         };
+        emitSouthernMovePreparationRecord(op.name, faction, corpsId, state.meta?.turn ?? 0, () => ({
+            event: 'tick_return',
+            return_path: 'pre_planned',
+            ...(observerOperationIndex === undefined ? {} : { operation_index: observerOperationIndex }),
+            operation_started_turn: op.started_turn,
+            operation_phase_started_turn: op.phase_started_turn,
+            returned_intel_confidence: prePlannedResult.intel_confidence,
+            returned_ready: prePlannedResult.ready,
+            returned_aborted: prePlannedResult.aborted,
+            turn: state.meta?.turn ?? 0,
+        }));
+        return prePlannedResult;
     }
 
-    const confidence = getOperationIntelConfidence(state, op);
+    const confidence = getOperationIntelConfidence(state, op, confidenceLookupContext, 'initial');
     // LANE-2026-05-02: pass supplyByOsid + terrainMultByOsid for honest defender modifiers
     const forceRatio = estimateForceRatio(state, op, competence, confidence, supplyByOsid, terrainMultByOsid);
     const requiredConfidence = getRequiredConfidence(competence, aggressiveness);
     const requiredForceRatio = getRequiredForceRatio(competence, aggressiveness);
+    let currentConfidenceReached: number | undefined;
 
     const result: PreparationTickResult = {
         sub_phase: op.preparation_sub_phase,
@@ -958,6 +1491,19 @@ export function tickPreparation(
         op.intel_confidence_at_assessment = confidence;
         op.supply_readiness_at_assessment = supplyReadiness;
         op.force_ratio_estimate = forceRatio;
+        emitSouthernMovePreparationRecord(op.name, faction, corpsId, state.meta?.turn ?? 0, () => ({
+            event: 'tick_return',
+            return_path: result.aborted ? 'anti_paralysis_abort' : 'anti_paralysis_launch',
+            ...(observerOperationIndex === undefined ? {} : { operation_index: observerOperationIndex }),
+            operation_started_turn: op.started_turn,
+            operation_phase_started_turn: op.phase_started_turn,
+            initial_confidence: confidence,
+            required_confidence: requiredConfidence,
+            returned_intel_confidence: result.intel_confidence,
+            returned_ready: result.ready,
+            returned_aborted: result.aborted,
+            turn: state.meta?.turn ?? 0,
+        }));
         return result;
     }
 
@@ -975,6 +1521,14 @@ export function tickPreparation(
                 // Check if an active probe is pending resolution
                 if (op.active_probe && !op.active_probe.resolved) {
                     result.sub_phase = 'intel_gathering';
+                    emitSouthernMovePreparationRecord(op.name, faction, corpsId, state.meta?.turn ?? 0, () => ({
+                        event: 'tick_return', return_path: 'pending_probe', turn: state.meta?.turn ?? 0,
+                        ...(observerOperationIndex === undefined ? {} : { operation_index: observerOperationIndex }),
+                        operation_started_turn: op.started_turn, operation_phase_started_turn: op.phase_started_turn,
+                        initial_confidence: confidence, required_confidence: requiredConfidence,
+                        returned_intel_confidence: result.intel_confidence, returned_ready: result.ready,
+                        returned_aborted: result.aborted,
+                    }));
                     return result;
                 }
 
@@ -984,7 +1538,8 @@ export function tickPreparation(
                 }
 
                 // Re-read confidence after potential probe resolution
-                const currentConfidence = getOperationIntelConfidence(state, op);
+                const currentConfidence = getOperationIntelConfidence(state, op, confidenceLookupContext, 'current');
+                currentConfidenceReached = currentConfidence;
                 result.intel_confidence = currentConfidence;
 
                 if (currentConfidence >= requiredConfidence) {
@@ -1003,7 +1558,16 @@ export function tickPreparation(
                                 started_turn: state.meta?.turn ?? 0,
                                 resolved: false,
                             };
-                            result.probe_ordered = true;
+                            if (op.preparation_probe_delivery === 'subordinate') {
+                                const child = createLinkedPreparationProbe(state, corpsId, op);
+                                result.probe_ordered = child !== null;
+                                if (!child) {
+                                    op.active_probe.resolved = true;
+                                    op.active_probe.result_confidence_gain = 0;
+                                }
+                            } else {
+                                result.probe_ordered = true;
+                            }
                         }
                     }
                     result.sub_phase = 'intel_gathering';
@@ -1121,6 +1685,20 @@ export function tickPreparation(
         if (!advanced || result.ready || result.aborted) break;
     }
 
+    emitSouthernMovePreparationRecord(op.name, faction, corpsId, state.meta?.turn ?? 0, () => ({
+        event: 'tick_return',
+        return_path: 'normal',
+        ...(observerOperationIndex === undefined ? {} : { operation_index: observerOperationIndex }),
+        operation_started_turn: op.started_turn,
+        operation_phase_started_turn: op.phase_started_turn,
+        initial_confidence: confidence,
+        ...(currentConfidenceReached === undefined ? {} : { current_confidence: currentConfidenceReached }),
+        required_confidence: requiredConfidence,
+        returned_intel_confidence: result.intel_confidence,
+        returned_ready: result.ready,
+        returned_aborted: result.aborted,
+        turn: state.meta?.turn ?? 0,
+    }));
     return result;
 }
 
@@ -1141,7 +1719,15 @@ export function resolveActiveProbe(
     faction: FactionId,
     corpsId: FormationId,
 ): void {
-    if (!op.active_probe || op.active_probe.resolved) return;
+    const turn = state.meta?.turn ?? 0;
+    if (!op.active_probe || op.active_probe.resolved) {
+        emitSouthernMovePreparationRecord(op.name, faction, corpsId, turn, () => ({
+            event: 'probe_return', entrypoint: 'real_probe', outcome: op.active_probe ? 'already_resolved' : 'no_pending_probe',
+            operation_started_turn: op.started_turn, operation_phase_started_turn: op.phase_started_turn,
+            write_count: 0, turn,
+        }));
+        return;
+    }
 
     const profile = FACTION_RECON_PROFILES[faction as NonNullable<FactionId>];
     if (!profile) return;
@@ -1150,51 +1736,101 @@ export function resolveActiveProbe(
     op.active_probe.resolved = true;
     op.active_probe.result_confidence_gain = confidenceGain;
 
-    // Apply confidence boost to sector intel
-    if (op.sector_id && state.military.sector_intel) {
-        const records = state.military.sector_intel[op.sector_id];
-        if (records) {
-            for (const rec of records) {
-                rec.confidence = Math.min(1.0, rec.confidence + confidenceGain);
-            }
+    // Apply confidence boost only to the current sector pair containing the probe target.
+    let writeCount = 0;
+    const pair = resolveCurrentProbeSectorPair(state, op);
+    if (pair) {
+        const rec = ensureCurrentSectorIntelRecord(state, pair.ownSectorId, pair.enemySectorId, turn);
+        if (rec) {
+            creditProbeRecord(state, op, faction, corpsId, 'real_probe', rec, confidenceGain);
+            writeCount += 1;
         }
     }
 
     // Counter-probe: defender detects the probing activity
-    applyCounterProbeIntel(state, op);
+    if (pair) writeCount += applyCounterProbeIntel(state, op, faction, corpsId, pair);
 
     // Add exhaustion cost
     const cmd = state.military.corps_command?.[corpsId];
     if (cmd) {
         cmd.corps_exhaustion = Math.min(100, (cmd.corps_exhaustion ?? 0) + PROBE_EXHAUSTION_COST);
     }
+    emitSouthernMovePreparationRecord(op.name, faction, corpsId, turn, () => ({
+        event: 'probe_return', entrypoint: 'real_probe', outcome: writeCount > 0 ? 'resolved_with_writes' : 'resolved_no_credit',
+        operation_started_turn: op.started_turn, operation_phase_started_turn: op.phase_started_turn,
+        write_count: writeCount, turn,
+    }));
 }
 
 /**
  * Counter-probe: when we probe an enemy, they detect our preparations.
  * Boosts the defender's intel confidence for the sector facing us.
  */
-function applyCounterProbeIntel(state: GameState, op: CorpsOperation): void {
-    if (!op.sector_id || !state.military.sector_intel || !state.military.corps_front_sectors) return;
+function applyCounterProbeIntel(
+    state: GameState,
+    op: CorpsOperation,
+    faction: FactionId,
+    corpsId: FormationId,
+    pair: CurrentProbeSectorPair,
+): number {
+    const rec = ensureCurrentSectorIntelRecord(
+        state,
+        pair.enemySectorId,
+        pair.ownSectorId,
+        state.meta?.turn ?? 0,
+    );
+    if (!rec) return 0;
+    creditProbeRecord(state, op, faction, corpsId, 'counter_probe', rec, COUNTER_PROBE_CONFIDENCE_GAIN);
+    rec.offensive_signs = true;
+    return 1;
+}
 
-    // Find the enemy sector(s) facing our operation sector
-    const ourRecords = state.military.sector_intel[op.sector_id];
-    if (!ourRecords) return;
+interface CurrentProbeSectorPair {
+    ownSectorId: string;
+    enemySectorId: string;
+}
 
-    for (const ourRec of ourRecords) {
-        // The enemy sector's intel about US should get a confidence boost
-        const enemySectorId = ourRec.enemy_sector_id;
-        const enemyIntel = state.military.sector_intel[enemySectorId];
-        if (!enemyIntel) continue;
+function resolveCurrentProbeSectorPair(state: GameState, op: CorpsOperation): CurrentProbeSectorPair | null {
+    const ownSectorId = op.sector_id;
+    const targetOsid = op.active_probe?.target_osid;
+    const sectors = state.military.corps_front_sectors;
+    if (!ownSectorId || !targetOsid || !sectors) return null;
+    const ownSector = sectors[ownSectorId];
+    const controller = state.political?.political_controllers?.[targetOsid];
+    if (!ownSector?.faction || !controller || ownSector.faction === controller) return null;
 
-        // Find the record in the enemy's intel that faces our sector
-        for (const enemyRec of enemyIntel) {
-            if (enemyRec.enemy_sector_id === op.sector_id) {
-                enemyRec.confidence = Math.min(1.0, enemyRec.confidence + COUNTER_PROBE_CONFIDENCE_GAIN);
-                enemyRec.offensive_signs = true; // They know we're preparing
-            }
-        }
-    }
+    const matches = Object.keys(sectors).sort(strictCompare).filter(sectorId => {
+        const sector = sectors[sectorId]!;
+        return sector.faction === controller
+            && (sector.territory_osids?.includes(targetOsid)
+                || sector.sub_segments.some(sub => sub.friendly_osids.includes(targetOsid)));
+    });
+    if (matches.length !== 1) return null;
+    return { ownSectorId, enemySectorId: matches[0]! };
+}
+
+function creditProbeRecord(
+    state: GameState,
+    op: CorpsOperation,
+    faction: FactionId,
+    corpsId: FormationId,
+    entrypoint: 'real_probe' | 'auto_probe' | 'counter_probe',
+    rec: SectorIntelRecord,
+    gain: number,
+    observerOperationIndex?: number,
+): void {
+    const turn = state.meta?.turn ?? 0;
+    const before = rec.confidence;
+    const after = Math.min(1.0, before + gain);
+    rec.confidence = after;
+    emitSouthernMovePreparationRecord(op.name, faction, corpsId, turn, () => ({
+        event: 'probe_write', entrypoint, turn,
+        ...(observerOperationIndex === undefined ? {} : { operation_index: observerOperationIndex }),
+        operation_started_turn: op.started_turn, operation_phase_started_turn: op.phase_started_turn,
+        own_stable_key: rec.own_stable_key, enemy_stable_key: rec.enemy_stable_key,
+        record_enemy_sector_id: rec.enemy_sector_id, before, gain, after,
+        clamped: after < before + gain,
+    }));
 }
 
 /**
@@ -1214,8 +1850,20 @@ export function autoResolveProbe(
     state: GameState,
     op: CorpsOperation,
     faction: FactionId,
+    corpsId?: FormationId,
+    observerOperationIndex?: number,
 ): void {
-    if (!op.active_probe || op.active_probe.resolved) return;
+    const selectedCorpsId = corpsId ?? '';
+    const turn = state.meta?.turn ?? 0;
+    if (!op.active_probe || op.active_probe.resolved) {
+        emitSouthernMovePreparationRecord(op.name, faction, selectedCorpsId, turn, () => ({
+            event: 'probe_return', entrypoint: 'auto_probe', outcome: op.active_probe ? 'already_resolved' : 'no_pending_probe',
+            ...(observerOperationIndex === undefined ? {} : { operation_index: observerOperationIndex }),
+            operation_started_turn: op.started_turn, operation_phase_started_turn: op.phase_started_turn,
+            write_count: 0, turn,
+        }));
+        return;
+    }
 
     const profile = FACTION_RECON_PROFILES[faction as NonNullable<FactionId>];
     if (!profile) return;
@@ -1225,13 +1873,22 @@ export function autoResolveProbe(
     op.active_probe.resolved = true;
     op.active_probe.result_confidence_gain = partialGain;
 
-    // Apply partial confidence boost
-    if (op.sector_id && state.military.sector_intel) {
-        const records = state.military.sector_intel[op.sector_id];
-        if (records) {
-            for (const rec of records) {
-                rec.confidence = Math.min(1.0, rec.confidence + partialGain);
-            }
+    // Apply partial confidence boost only to the current sector pair containing the probe target.
+    let writeCount = 0;
+    const pair = resolveCurrentProbeSectorPair(state, op);
+    if (pair) {
+        const rec = ensureCurrentSectorIntelRecord(state, pair.ownSectorId, pair.enemySectorId, turn);
+        if (rec) {
+            creditProbeRecord(
+                state, op, faction, selectedCorpsId, 'auto_probe', rec, partialGain, observerOperationIndex,
+            );
+            writeCount = 1;
         }
     }
+    emitSouthernMovePreparationRecord(op.name, faction, selectedCorpsId, turn, () => ({
+        event: 'probe_return', entrypoint: 'auto_probe', outcome: writeCount > 0 ? 'resolved_with_writes' : 'resolved_no_credit',
+        ...(observerOperationIndex === undefined ? {} : { operation_index: observerOperationIndex }),
+        operation_started_turn: op.started_turn, operation_phase_started_turn: op.phase_started_turn,
+        write_count: writeCount, turn,
+    }));
 }

@@ -163,6 +163,7 @@ function addSectorIntel(
     friendlySectorId: string,
     enemySectorId: string,
     confidence: number,
+    stableKeys?: { own: string; enemy: string },
 ): void {
     if (!state.military.sector_intel) state.military.sector_intel = {};
     if (!state.military.sector_intel[friendlySectorId]) {
@@ -180,7 +181,36 @@ function addSectorIntel(
         turns_in_contact: 5,
         visible_brigade_ids: [],
         last_updated_turn: 8,
+        own_stable_key: stableKeys?.own,
+        enemy_stable_key: stableKeys?.enemy,
     });
+}
+
+function addCurrentSector(
+    state: GameState,
+    sectorId: string,
+    corpsId: string,
+    faction: 'RS' | 'RBiH',
+    edgeId: string,
+    territoryOsids: string[],
+): void {
+    state.military.corps_front_sectors![sectorId] = {
+        sector_id: sectorId,
+        corps_id: corpsId,
+        faction,
+        opposing_factions: [faction === 'RS' ? 'RBiH' : 'RS'],
+        edge_ids: [edgeId],
+        sub_segments: [],
+        length_edges: 1,
+        territory_osids: territoryOsids,
+        assigned_brigade_ids: [],
+        reserve_brigade_ids: [],
+        density: 0,
+        threat_ratio: 0,
+        defensive_power: 0,
+        sector_stance: 'defend',
+        stance_source: 'bot',
+    };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -357,6 +387,127 @@ describe('getOperationIntelConfidence', () => {
         });
 
         expect(getOperationIntelConfidence(state, op)).toBe(0);
+    });
+
+    it('reads the previous stable sector pair after both current sector ids are renumbered', () => {
+        const state = makeMinimalState();
+        addCurrentSector(state, 'own_now', 'vrs_1kk', 'RS', 'edge:own', ['own_osid']);
+        addCurrentSector(state, 'enemy_now', 'arbih_2nd_corps', 'RBiH', 'edge:enemy', ['objective']);
+        state.political.political_controllers = { objective: 'RBiH' };
+        addSectorIntel(state, 'own_old', 'enemy_old', 0.2, {
+            own: 'vrs_1kk|edge:own', enemy: 'arbih_2nd_corps|edge:enemy',
+        });
+        addSectorIntel(state, 'own_now', 'other_old', 0.8, {
+            own: 'vrs_other|edge:other', enemy: 'arbih_other|edge:other',
+        });
+
+        expect(getOperationIntelConfidence(state, makeOperation({
+            sector_id: 'own_now', objectives: ['objective'],
+        }))).toBeCloseTo(0.2, 6);
+    });
+
+    it('does not use a conflicting modern positional bucket when the stable identity is missing', () => {
+        const state = makeMinimalState();
+        addCurrentSector(state, 'own_now', 'vrs_1kk', 'RS', 'edge:own', ['own_osid']);
+        addSectorIntel(state, 'own_now', 'enemy_old', 0.8, {
+            own: 'vrs_other|edge:other', enemy: 'arbih_other|edge:other',
+        });
+
+        expect(getOperationIntelConfidence(state, makeOperation({ sector_id: 'own_now' }))).toBe(0);
+    });
+
+    it('keeps legacy records usable beside a conflicting modern positional record', () => {
+        const state = makeMinimalState();
+        addCurrentSector(state, 'own_now', 'vrs_1kk', 'RS', 'edge:own', ['own_osid']);
+        addSectorIntel(state, 'own_now', 'wrong_enemy', 0.8, {
+            own: 'vrs_other|edge:other', enemy: 'arbih_other|edge:other',
+        });
+        addSectorIntel(state, 'own_now', 'legacy_enemy', 0.35);
+
+        expect(getOperationIntelConfidence(state, makeOperation({ sector_id: 'own_now' }))).toBeCloseTo(0.35, 6);
+    });
+
+    it('is invariant to insertion order when selecting a stable intel bucket', () => {
+        const makeState = (reverse: boolean): GameState => {
+            const state = makeMinimalState();
+            addCurrentSector(state, 'own_now', 'vrs_1kk', 'RS', 'edge:own', ['own_osid']);
+            const entries: Array<[string, string, number, { own: string; enemy: string }]> = [
+                ['wrong_bucket', 'wrong_enemy', 0.8, { own: 'vrs_other|edge:other', enemy: 'arbih_other|edge:other' }],
+                ['right_bucket', 'right_enemy', 0.2, { own: 'vrs_1kk|edge:own', enemy: 'arbih_2nd_corps|edge:enemy' }],
+            ];
+            for (const entry of reverse ? entries.reverse() : entries) addSectorIntel(state, ...entry);
+            return state;
+        };
+        const op = makeOperation({ sector_id: 'own_now', objectives: [] });
+
+        expect(getOperationIntelConfidence(makeState(false), op)).toBeCloseTo(0.2, 6);
+        expect(getOperationIntelConfidence(makeState(true), op)).toBeCloseTo(0.2, 6);
+    });
+
+    it('matches edge-backed and edgeless objective sectors by their own geometry', () => {
+        const state = makeMinimalState();
+        addCurrentSector(state, 'own_now', 'vrs_1kk', 'RS', 'edge:own', ['own']);
+        addCurrentSector(state, 'edge_enemy_now', 'arbih_2nd_corps', 'RBiH', 'edge:enemy', ['edge_obj']);
+        addCurrentSector(state, 'thin_enemy', 'arbih_2nd_corps', 'RBiH', '', ['thin_obj']);
+        state.military.corps_front_sectors!.thin_enemy!.edge_ids = [];
+        state.political.political_controllers = { edge_obj: 'RBiH', thin_obj: 'RBiH' };
+        addSectorIntel(state, 'own_old', 'edge_enemy_old', 0.2, {
+            own: 'vrs_1kk|edge:own', enemy: 'arbih_2nd_corps|edge:enemy',
+        });
+        addSectorIntel(state, 'own_old', 'thin_enemy', 0.7, {
+            own: 'vrs_1kk|edge:own', enemy: 'noedge:thin_enemy',
+        });
+
+        expect(getOperationIntelConfidence(state, makeOperation({
+            sector_id: 'own_now', objectives: ['edge_obj', 'thin_obj'],
+        }))).toBeCloseTo(0.7, 6);
+    });
+
+    it('does not positionally match a conflicting known key for an edge-backed target', () => {
+        const state = makeMinimalState();
+        addCurrentSector(state, 'own_now', 'vrs_1kk', 'RS', 'edge:own', ['own']);
+        addCurrentSector(state, 'enemy_now', 'arbih_2nd_corps', 'RBiH', 'edge:enemy', ['objective']);
+        state.political.political_controllers = { objective: 'RBiH' };
+        addSectorIntel(state, 'own_old', 'enemy_old', 0.2, {
+            own: 'vrs_1kk|edge:own', enemy: 'arbih_2nd_corps|edge:enemy',
+        });
+        addSectorIntel(state, 'own_old', 'enemy_now', 0.8, {
+            own: 'vrs_1kk|edge:own', enemy: 'arbih_other|edge:other',
+        });
+
+        expect(getOperationIntelConfidence(state, makeOperation({
+            sector_id: 'own_now', objectives: ['objective'],
+        }))).toBeCloseTo(0.2, 6);
+    });
+
+    it('uses legacy positional target matching when the record has no stable enemy key', () => {
+        const state = makeMinimalState();
+        addCurrentSector(state, 'own_now', 'vrs_1kk', 'RS', 'edge:own', ['own']);
+        addCurrentSector(state, 'enemy_now', 'arbih_2nd_corps', 'RBiH', 'edge:enemy', ['objective']);
+        state.political.political_controllers = { objective: 'RBiH' };
+        addSectorIntel(state, 'own_old', 'enemy_now', 0.65, {
+            own: 'vrs_1kk|edge:own', enemy: 'arbih_2nd_corps|edge:enemy',
+        });
+        delete state.military.sector_intel!.own_old![0]!.enemy_stable_key;
+
+        expect(getOperationIntelConfidence(state, makeOperation({
+            sector_id: 'own_now', objectives: ['objective'],
+        }))).toBeCloseTo(0.65, 6);
+    });
+
+    it('keeps positional compatibility for a wholly edgeless target despite known conflicting metadata', () => {
+        const state = makeMinimalState();
+        addCurrentSector(state, 'own_now', 'vrs_1kk', 'RS', 'edge:own', ['own']);
+        addCurrentSector(state, 'thin_enemy', 'arbih_2nd_corps', 'RBiH', '', ['thin_obj']);
+        state.military.corps_front_sectors!.thin_enemy!.edge_ids = [];
+        state.political.political_controllers = { thin_obj: 'RBiH' };
+        addSectorIntel(state, 'own_old', 'thin_enemy', 0.7, {
+            own: 'vrs_1kk|edge:own', enemy: 'arbih_other|edge:known-but-conflicting',
+        });
+
+        expect(getOperationIntelConfidence(state, makeOperation({
+            sector_id: 'own_now', objectives: ['thin_obj'],
+        }))).toBeCloseTo(0.7, 6);
     });
 });
 
@@ -763,6 +914,9 @@ describe('tickPreparation', () => {
 describe('resolveActiveProbe', () => {
     it('applies faction-specific confidence gain to sector intel', () => {
         const state = makeMinimalState();
+        addCurrentSector(state, 'sector_a', 'vrs_1kk', 'RS', 'shared_edge', ['own_osid']);
+        addCurrentSector(state, 'enemy_1', 'arbih_2nd_corps', 'RBiH', 'shared_edge', ['op:enemy:target_1']);
+        state.political.political_controllers = { 'op:enemy:target_1': 'RBiH' };
         addSectorIntel(state, 'sector_a', 'enemy_1', 0.3);
         const op = makeOperation({
             active_probe: {
@@ -791,6 +945,9 @@ describe('resolveActiveProbe', () => {
 
     it('applies counter-probe intel boost to defender', () => {
         const state = makeMinimalState();
+        addCurrentSector(state, 'sector_a', 'vrs_1kk', 'RS', 'shared_edge', ['own_osid']);
+        addCurrentSector(state, 'enemy_sector_1', 'arbih_2nd_corps', 'RBiH', 'shared_edge', ['op:enemy:target_1']);
+        state.political.political_controllers = { 'op:enemy:target_1': 'RBiH' };
         // Attacker's intel
         addSectorIntel(state, 'sector_a', 'enemy_sector_1', 0.3);
         // Defender's intel (enemy sector looking back at us)
@@ -844,11 +1001,36 @@ describe('resolveActiveProbe', () => {
 
         expect(state.military.corps_command!['vrs_1kk']!.corps_exhaustion).toBe(15); // 10 + 5
     });
+
+    it('credits the reciprocal stable pair once after both sector ids are renumbered', () => {
+        const state = makeMinimalState();
+        addCurrentSector(state, 'own_now', 'vrs_1kk', 'RS', 'edge:shared', ['own_osid']);
+        addCurrentSector(state, 'enemy_now', 'arbih_2nd_corps', 'RBiH', 'edge:shared', ['objective']);
+        state.political.political_controllers = { objective: 'RBiH' };
+        addSectorIntel(state, 'own_old', 'enemy_old', 0.2, {
+            own: 'vrs_1kk|edge:shared', enemy: 'arbih_2nd_corps|edge:shared',
+        });
+        addSectorIntel(state, 'enemy_old', 'own_old', 0.25, {
+            own: 'arbih_2nd_corps|edge:shared', enemy: 'vrs_1kk|edge:shared',
+        });
+        const op = makeOperation({ sector_id: 'own_now', active_probe: {
+            target_osid: 'objective', brigade_ids: ['bde_1'], started_turn: 9, resolved: false,
+        } });
+
+        resolveActiveProbe(state, op, 'RS', 'vrs_1kk');
+
+        expect(state.military.sector_intel!.own_old![0]!.confidence).toBeCloseTo(0.55, 6);
+        expect(state.military.sector_intel!.enemy_old![0]!.confidence).toBeCloseTo(0.4, 6);
+        expect(state.military.sector_intel!.enemy_old![0]!.offensive_signs).toBe(true);
+    });
 });
 
 describe('autoResolveProbe', () => {
     it('gives partial confidence gain when no combat occurred', () => {
         const state = makeMinimalState();
+        addCurrentSector(state, 'sector_a', 'vrs_1kk', 'RS', 'shared_edge', ['own_osid']);
+        addCurrentSector(state, 'enemy_1', 'arbih_2nd_corps', 'RBiH', 'shared_edge', ['op:enemy:target_1']);
+        state.political.political_controllers = { 'op:enemy:target_1': 'RBiH' };
         addSectorIntel(state, 'sector_a', 'enemy_1', 0.3);
         const op = makeOperation({
             active_probe: {
@@ -866,6 +1048,27 @@ describe('autoResolveProbe', () => {
         expect(op.active_probe!.result_confidence_gain).toBeCloseTo(0.175, 2);
         const records = state.military.sector_intel!['sector_a']!;
         expect(records[0]!.confidence).toBeCloseTo(0.475, 2); // 0.3 + 0.175
+    });
+
+    it('credits only the matching stable bucket after current-sector renumbering', () => {
+        const state = makeMinimalState();
+        addCurrentSector(state, 'own_now', 'vrs_1kk', 'RS', 'edge:shared', ['own_osid']);
+        addCurrentSector(state, 'enemy_now', 'arbih_2nd_corps', 'RBiH', 'edge:shared', ['op:enemy:target_1']);
+        state.political.political_controllers = { 'op:enemy:target_1': 'RBiH' };
+        addSectorIntel(state, 'own_old', 'enemy_old', 0.2, {
+            own: 'vrs_1kk|edge:shared', enemy: 'arbih_2nd_corps|edge:shared',
+        });
+        addSectorIntel(state, 'own_now', 'other_old', 0.8, {
+            own: 'vrs_other|edge:other', enemy: 'arbih_other|edge:other',
+        });
+        const op = makeOperation({ sector_id: 'own_now', active_probe: {
+            target_osid: 'op:enemy:target_1', brigade_ids: ['bde_1'], started_turn: 9, resolved: false,
+        } });
+
+        autoResolveProbe(state, op, 'RS');
+
+        expect(state.military.sector_intel!.own_old![0]!.confidence).toBeCloseTo(0.375, 6);
+        expect(state.military.sector_intel!.own_now![0]!.confidence).toBeCloseTo(0.8, 6);
     });
 });
 

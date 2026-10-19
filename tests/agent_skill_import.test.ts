@@ -6,6 +6,26 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 const fixtures: string[] = [];
 const installer = resolve('tools/install_superpowers.ps1');
+const envValue = (name: string) => Object.entries(process.env).find(([key]) => key.toLowerCase() === name.toLowerCase())?.[1];
+/**
+ * Environment for the PowerShell child. npm launched from PowerShell 7 can inherit only its module
+ * directories, so Windows PowerShell must see its own built-in modules first; no host setting changes.
+ * Windows env names are case-insensitive but a vitest worker's copy of `process.env` is a plain
+ * object (keys arrive upper-case, e.g. PSMODULEPATH), so spreading it and adding `PSModulePath`
+ * produced TWO differently-cased keys and the child kept the inherited PowerShell 7 value, which
+ * made `Get-FileHash` unavailable. Drop every casing of the variable and set it exactly once.
+ */
+function childEnv(): NodeJS.ProcessEnv {
+  const inherited = Object.fromEntries(Object.entries(process.env).filter(([key]) => key.toLowerCase() !== 'psmodulepath'));
+  if (process.platform !== 'win32') return inherited;
+  return {
+    ...inherited,
+    PSModulePath: [
+      join(envValue('SystemRoot') ?? 'C:/Windows', 'System32/WindowsPowerShell/v1.0/Modules'),
+      envValue('PSModulePath') ?? '',
+    ].join(';'),
+  };
+}
 function fixture(existing = false) {
   const root = mkdtempSync(join(tmpdir(), 'awwv-skill-import-'));
   fixtures.push(root);
@@ -35,15 +55,7 @@ function fixture(existing = false) {
     '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', join(root, 'tools/install_superpowers.ps1'),
     ...[['-Name', 'sample'], ['-SourceRoot', source], ['-DestinationRoot', target], ['-ReviewPath', review]]
       .filter(([key]) => !args.includes(key)).flat(), ...args,
-  ], { cwd: root, encoding: 'utf8', timeout: 15_000, env: {
-    ...process.env,
-    // npm launched from PowerShell 7 can inherit only its module directories.
-    // Give the Windows PowerShell child its own built-in modules; no host setting changes.
-    ...(process.platform === 'win32' ? { PSModulePath: [
-      join(process.env.SystemRoot ?? 'C:/Windows', 'System32/WindowsPowerShell/v1.0/Modules'),
-      process.env.PSModulePath ?? '',
-    ].join(';') } : {}),
-  } });
+  ], { cwd: root, encoding: 'utf8', timeout: 15_000, env: childEnv() });
   return { root, source, target, review, backup, run };
 }
 afterEach(() => {

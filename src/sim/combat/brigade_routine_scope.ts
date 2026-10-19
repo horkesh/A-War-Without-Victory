@@ -345,7 +345,13 @@ export function isDestinationAuthorizedByOperation(
 ): boolean {
     const formation = state.military.formations?.[brigadeId];
     if (!formation) return false;
-    const corpsId = formation.corps_id;
+    // Active elite loans place the receiving corps in command of the brigade while retaining
+    // its home `corps_id`. Match the bot dispatcher's effective-corps lookup so T3/T6 validate
+    // the same operation that T2 used to issue the march.
+    const loanedTo = formation.elite_loan_state?.on_loan
+        ? formation.elite_loan_state.loaned_to_corps
+        : null;
+    const corpsId = loanedTo ?? formation.corps_id;
     if (!corpsId) return false;
     const cmd = state.military.corps_command?.[corpsId];
     if (!cmd) return false;

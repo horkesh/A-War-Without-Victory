@@ -1961,6 +1961,236 @@ function validateBrigadeAttackOrders(value: unknown, errors: string[]): void {
     }
 }
 
+/** Opt-in pending emitted-order ownership (operation_phase_gate.ts); absent unless an operation carries a phase gate. */
+function validateBrigadeAttackOrderOwners(value: unknown, errors: string[], corpsCommand?: unknown): void {
+    if (!isRecord(value)) {
+        errors.push('military.brigade_attack_order_owners must be an object when present');
+        return;
+    }
+    // Association: an owner must name a live operation instance ("{corps}:{name}:t{started}") whose
+    // axis `axis_id` holds this brigade. Checked only when corps_command is present to inspect.
+    const instances = new Map<string, Map<string, string[]>>();
+    if (isRecord(corpsCommand)) {
+        for (const [corpsId, command] of Object.entries(corpsCommand)) {
+            if (!isRecord(command) || !Array.isArray(command.active_operations)) continue;
+            for (const op of command.active_operations) {
+                if (!isRecord(op) || typeof op.name !== 'string') continue;
+                const axes = new Map<string, string[]>();
+                for (const axis of Array.isArray(op.axes) ? op.axes : []) {
+                    if (isRecord(axis) && typeof axis.axis_id === 'string') {
+                        axes.set(axis.axis_id, Array.isArray(axis.assigned_brigades) ? axis.assigned_brigades.filter((b): b is string => typeof b === 'string') : []);
+                    }
+                }
+                instances.set(`${corpsId}:${op.name}:t${String(op.started_turn)}`, axes);
+            }
+        }
+    }
+    for (const [brigadeId, owner] of Object.entries(value)) {
+        const path = `military.brigade_attack_order_owners.${brigadeId}`;
+        if (!isRecord(owner)) {
+            errors.push(`${path} must be an object`);
+            continue;
+        }
+        if (typeof owner.operation_id !== 'string' || owner.operation_id.length === 0) {
+            errors.push(`${path}.operation_id must be a non-empty string`);
+        }
+        if (typeof owner.axis_id !== 'string' || owner.axis_id.length === 0) {
+            errors.push(`${path}.axis_id must be a non-empty string`);
+        }
+        if (typeof owner.target !== 'string' || owner.target.length === 0) {
+            errors.push(`${path}.target must be a non-empty string`);
+        }
+        if (typeof owner.turn !== 'number' || !Number.isInteger(owner.turn) || owner.turn < 0) {
+            errors.push(`${path}.turn must be a non-negative integer`);
+        }
+        if (isRecord(corpsCommand) && typeof owner.operation_id === 'string' && typeof owner.axis_id === 'string') {
+            const axes = instances.get(owner.operation_id);
+            if (axes === undefined) {
+                errors.push(`${path}.operation_id must name a live operation instance`);
+            } else if (!(axes.get(owner.axis_id) ?? []).includes(brigadeId)) {
+                errors.push(`${path}.axis_id must be an axis of that operation assigned to ${brigadeId}`);
+            }
+        }
+    }
+}
+
+/**
+ * Opt-in `OperationAxis.late_phase` (operation_phase_gate.ts) and its capture receipts. Axes without
+ * the field are not inspected, so ordinary and pre-feature saves are unaffected.
+ */
+function validateOperationLatePhases(corpsCommand: unknown, errors: string[]): void {
+    if (!isRecord(corpsCommand)) return;
+    for (const corpsId of Object.keys(corpsCommand).sort()) {
+        const command = corpsCommand[corpsId];
+        if (!isRecord(command) || !Array.isArray(command.active_operations)) continue;
+        command.active_operations.forEach((op: unknown, opIndex: number) => {
+            if (!isRecord(op) || !Array.isArray(op.axes)) return;
+            const axisIds = new Set(op.axes.filter(isRecord).map((a) => a.axis_id));
+            const instanceId = `${corpsId}:${String(op.name)}:t${String(op.started_turn)}`;
+            op.axes.forEach((axis: unknown, axisIndex: number) => {
+                if (!isRecord(axis) || axis.late_phase === undefined) return;
+                const path = `military.corps_command.${corpsId}.active_operations[${opIndex}].axes[${axisIndex}].late_phase`;
+                const gate = axis.late_phase;
+                if (!isRecord(gate)) {
+                    errors.push(`${path} must be an object`);
+                    return;
+                }
+                if (gate.phase !== 'holding' && gate.phase !== 'capture') {
+                    errors.push(`${path}.phase must be 'holding' or 'capture'`);
+                }
+                if (typeof gate.main_axis_id !== 'string' || gate.main_axis_id.length === 0) {
+                    errors.push(`${path}.main_axis_id must be a non-empty string`);
+                } else if (!axisIds.has(gate.main_axis_id) || gate.main_axis_id === axis.axis_id) {
+                    errors.push(`${path}.main_axis_id must name a different axis of the same operation`);
+                }
+                const isStringList = (v: unknown): v is string[] =>
+                    Array.isArray(v) && v.length > 0 && v.every((s) => typeof s === 'string' && s.length > 0);
+                if (!isStringList(gate.requires)) errors.push(`${path}.requires must be a non-empty string array`);
+                if (!isStringList(gate.gated_objectives)) errors.push(`${path}.gated_objectives must be a non-empty string array`);
+                if (!Array.isArray(gate.receipts)) {
+                    errors.push(`${path}.receipts must be an array`);
+                } else {
+                    const seen = new Set<string>();
+                    gate.receipts.forEach((receipt: unknown, i: number) => {
+                        const rpath = `${path}.receipts[${i}]`;
+                        if (!isRecord(receipt)) {
+                            errors.push(`${rpath} must be an object`);
+                            return;
+                        }
+                        if (typeof receipt.osid !== 'string' || receipt.osid.length === 0) {
+                            errors.push(`${rpath}.osid must be a non-empty string`);
+                        } else {
+                            if (seen.has(receipt.osid)) errors.push(`${rpath}.osid must be unique within the gate`);
+                            seen.add(receipt.osid);
+                            if (isStringList(gate.requires) && !gate.requires.includes(receipt.osid)) {
+                                errors.push(`${rpath}.osid must be one of the gate's required OSIDs`);
+                            }
+                        }
+                        if (!isNonNegativeInteger(receipt.turn)) errors.push(`${rpath}.turn must be a non-negative integer`);
+                        if (typeof receipt.battle_id !== 'string' || receipt.battle_id.length === 0) {
+                            errors.push(`${rpath}.battle_id must be a non-empty string`);
+                        }
+                        if (typeof receipt.attacker_brigade !== 'string' || receipt.attacker_brigade.length === 0) {
+                            errors.push(`${rpath}.attacker_brigade must be a non-empty string`);
+                        }
+                        if (receipt.operation_id !== instanceId) {
+                            errors.push(`${rpath}.operation_id must equal this operation instance (${instanceId})`);
+                        }
+                        if (receipt.axis_id !== gate.main_axis_id) errors.push(`${rpath}.axis_id must equal main_axis_id`);
+                    });
+                }
+                if (gate.handoff !== undefined) {
+                    const handoffPath = `${path}.handoff`;
+                    if (!isRecord(gate.handoff)) {
+                        errors.push(`${handoffPath} must be an object when present`);
+                    } else {
+                        if (typeof gate.handoff.brigade_id !== 'string' || gate.handoff.brigade_id.length === 0) {
+                            errors.push(`${handoffPath}.brigade_id must be a non-empty string`);
+                        }
+                        if (typeof gate.handoff.source_axis_id !== 'string' || gate.handoff.source_axis_id.length === 0) {
+                            errors.push(`${handoffPath}.source_axis_id must be a non-empty string`);
+                        } else if (gate.handoff.source_axis_id !== gate.main_axis_id) {
+                            errors.push(`${handoffPath}.source_axis_id must equal main_axis_id`);
+                        } else if (!axisIds.has(gate.handoff.source_axis_id) || gate.handoff.source_axis_id === axis.axis_id) {
+                            errors.push(`${handoffPath}.source_axis_id must name a different axis of the same operation`);
+                        }
+                    }
+                }
+                for (const field of ['hold_started_turn', 'activated_turn'] as const) {
+                    if (gate[field] !== undefined && !isNonNegativeInteger(gate[field])) {
+                        errors.push(`${path}.${field} must be a non-negative integer when present`);
+                    }
+                }
+                if (gate.phase === 'capture' && gate.activated_turn === undefined) {
+                    errors.push(`${path}.activated_turn is required once phase is 'capture'`);
+                }
+                if (gate.phase === 'holding' && gate.activated_turn !== undefined) {
+                    errors.push(`${path}.activated_turn must be absent while phase is 'holding'`);
+                }
+                if (gate.terminal_reason !== undefined) {
+                    if (gate.terminal_reason !== 'main_axis_terminal_without_prerequisites') {
+                        errors.push(`${path}.terminal_reason is not a known value`);
+                    } else if (gate.phase !== 'holding') {
+                        errors.push(`${path}.terminal_reason is only valid while phase is 'holding'`);
+                    }
+                }
+            });
+        });
+    }
+}
+
+function validateOperationPreparationProbeDelivery(corpsCommand: unknown, errors: string[]): void {
+    if (!isRecord(corpsCommand)) return;
+    for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
+        const command = corpsCommand[corpsId];
+        if (!isRecord(command) || !Array.isArray(command.active_operations)) continue;
+        command.active_operations.forEach((op: unknown, opIndex: number) => {
+            if (!isRecord(op) || op.preparation_probe_delivery === undefined) return;
+            if (op.preparation_probe_delivery !== 'subordinate') {
+                errors.push(`military.corps_command.${corpsId}.active_operations[${opIndex}].preparation_probe_delivery must be 'subordinate' when present`);
+            }
+        });
+    }
+}
+
+function validatePreparationProbeLinks(corpsCommand: unknown, errors: string[]): void {
+    if (!isRecord(corpsCommand)) return;
+    for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
+        const command = corpsCommand[corpsId];
+        if (!isRecord(command) || !Array.isArray(command.active_operations)) continue;
+        command.active_operations.forEach((op: unknown, opIndex: number) => {
+            if (!isRecord(op) || op.preparation_probe_link === undefined) return;
+            const path = `military.corps_command.${corpsId}.active_operations[${opIndex}].preparation_probe_link`;
+            const link = op.preparation_probe_link;
+            if (!isRecord(link)) {
+                errors.push(`${path} must be an object`);
+                return;
+            }
+            if (op.type !== 'probe') errors.push(`${path} is only valid on a probe operation`);
+            if (!isNonEmptyString(link.parent_operation_name)) errors.push(`${path}.parent_operation_name must be a non-empty string`);
+            if (!isNonNegativeInteger(link.parent_started_turn)) errors.push(`${path}.parent_started_turn must be a non-negative integer`);
+            if (!isNonNegativeInteger(link.request_started_turn)) errors.push(`${path}.request_started_turn must be a non-negative integer`);
+            if (!isNonEmptyString(link.target_osid)) errors.push(`${path}.target_osid must be a non-empty string`);
+            if (!Array.isArray(link.source_axes) || link.source_axes.length === 0) {
+                errors.push(`${path}.source_axes must be a non-empty array`);
+            } else {
+                const brigadeIds: string[] = [];
+                link.source_axes.forEach((source: unknown, sourceIndex: number) => {
+                    const sourcePath = `${path}.source_axes[${sourceIndex}]`;
+                    if (!isRecord(source)) {
+                        errors.push(`${sourcePath} must be an object`);
+                        return;
+                    }
+                    if (!isNonEmptyString(source.brigade_id)) errors.push(`${sourcePath}.brigade_id must be a non-empty string`);
+                    else brigadeIds.push(source.brigade_id);
+                    if (source.axis_id !== undefined && !isNonEmptyString(source.axis_id)) {
+                        errors.push(`${sourcePath}.axis_id must be a non-empty string when present`);
+                    }
+                });
+                const sortedUnique = [...new Set(brigadeIds)].sort(strictCompare);
+                if (brigadeIds.length !== sortedUnique.length || brigadeIds.some((id, index) => id !== sortedUnique[index])) {
+                    errors.push(`${path}.source_axes must be unique and sorted by brigade_id`);
+                }
+                const participants = Array.isArray(op.participating_brigades)
+                    ? op.participating_brigades.filter((id): id is string => typeof id === 'string').slice().sort(strictCompare)
+                    : [];
+                if (participants.length !== sortedUnique.length || participants.some((id, index) => id !== sortedUnique[index])) {
+                    errors.push(`${path}.source_axes brigade ids must equal the child participants`);
+                }
+            }
+            if (link.entered_execution_turn !== undefined && !isNonNegativeInteger(link.entered_execution_turn)) {
+                errors.push(`${path}.entered_execution_turn must be a non-negative integer when present`);
+            }
+            if (link.order_opportunity_turn !== undefined && !isNonNegativeInteger(link.order_opportunity_turn)) {
+                errors.push(`${path}.order_opportunity_turn must be a non-negative integer when present`);
+            }
+            if (link.restored_to_parent !== undefined && typeof link.restored_to_parent !== 'boolean') {
+                errors.push(`${path}.restored_to_parent must be a boolean when present`);
+            }
+        });
+    }
+}
+
 function validateStringRecord(value: unknown, path: string, errors: string[]): void {
     if (!isRecord(value)) {
         errors.push(`${path} must be an object when present`);
@@ -4029,6 +4259,14 @@ export function validateGameStateShape(
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_attack_orders' in military && military.brigade_attack_orders !== undefined) {
         validateBrigadeAttackOrders(military.brigade_attack_orders, errors);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_attack_order_owners' in military && military.brigade_attack_order_owners !== undefined) {
+        validateBrigadeAttackOrderOwners(military.brigade_attack_order_owners, errors, (military as Record<string, unknown>).corps_command);
+    }
+    if (military && typeof military === 'object' && !Array.isArray(military)) {
+        validateOperationLatePhases((military as Record<string, unknown>).corps_command, errors);
+        validateOperationPreparationProbeDelivery((military as Record<string, unknown>).corps_command, errors);
+        validatePreparationProbeLinks((military as Record<string, unknown>).corps_command, errors);
     }
     if (military && typeof military === 'object' && !Array.isArray(military) && 'brigade_sector_override' in military && military.brigade_sector_override !== undefined) {
         validateStringRecord(military.brigade_sector_override, 'military.brigade_sector_override', errors);

@@ -88,25 +88,8 @@ export function deriveSectorIntel(state: GameState, turn: number): void {
             if (!enemySector) continue;
             const enemyStable = stableSectorKey(enemySector);
             const prev = prevByEnemySector.get(enemyStable) ?? prevByEnemySector.get(enemySectorId);
-            const prevConfidence = prev?.confidence ?? initialFloor;
-            const prevTurnsInContact = prev?.turns_in_contact ?? 0;
-            const passiveBuildup = (state.military.opsec_sectors ?? []).includes(enemySectorId)
-                ? profile.passive_buildup_per_turn * 0.5
-                : profile.passive_buildup_per_turn;
-            // Intel goes stale: decay applies even in contact. Passive buildup
-            // partially offsets it, but net effect is negative — only combat or
-            // probes refresh intel to full confidence.
-            let newConfidence = Math.min(1.0, Math.max(0, prevConfidence + passiveBuildup - profile.confidence_decay_per_turn));
-
-            // Concentration detection: if enemy has 2+ reserve brigades, defenders detect staging
-            if ((enemySector.reserve_brigade_ids?.length ?? 0) >= 2) {
-                newConfidence = Math.min(1.0, newConfidence + 0.10);
-            }
-
-            const turnsInContact = prevTurnsInContact + 1;
-            newRecords.push(buildRecord(
-                sector, enemySectorId, enemySector, edgeCount,
-                newConfidence, turnsInContact, turn, state, profile.recon_range
+            newRecords.push(buildCurrentContactRecord(
+                state, sector, enemySectorId, enemySector, edgeCount, turn, profile, initialFloor, prev,
             ));
         }
 
@@ -127,6 +110,69 @@ export function deriveSectorIntel(state: GameState, turn: number): void {
     }
 
     state.military.sector_intel = nextIntel;
+}
+
+/**
+ * Return the intel record for one current, facing sector pair. When absent, create the
+ * pre-derivation record at the existing faction initial floor. The normal later
+ * deriveSectorIntel call owns this turn's passive buildup, decay, concentration check,
+ * and first contact increment; doing any of those here would double-tick the pair.
+ */
+export function ensureCurrentSectorIntelRecord(
+    state: GameState,
+    friendlySectorId: string,
+    enemySectorId: string,
+    turn: number,
+): SectorIntelRecord | null {
+    const sectors = state.military.corps_front_sectors;
+    if (!sectors) return null;
+    const friendlySector = sectors[friendlySectorId];
+    const enemySector = sectors[enemySectorId];
+    if (!friendlySector?.faction || !enemySector?.faction) return null;
+    if (friendlySector.faction === enemySector.faction) return null;
+
+    const profile = FACTION_RECON_PROFILES[friendlySector.faction as NonNullable<FactionId>];
+    if (!profile) return null;
+    const enemyEdges = new Set(enemySector.edge_ids);
+    const edgeCount = friendlySector.edge_ids.reduce(
+        (count, edgeId) => count + (enemyEdges.has(edgeId) ? 1 : 0),
+        0,
+    );
+    if (edgeCount === 0) return null;
+
+    const intel = state.military.sector_intel ?? (state.military.sector_intel = {});
+    const ownStable = stableSectorKey(friendlySector);
+    const enemyStable = stableSectorKey(enemySector);
+    for (const key of Object.keys(intel).sort(strictCompare)) {
+        for (const rec of intel[key] ?? []) {
+            if (rec.own_stable_key === ownStable && rec.enemy_stable_key === enemyStable) return rec;
+        }
+    }
+
+    // Save compatibility: a legacy positional record may omit either stable key.
+    // A present, conflicting key is authoritative and must never match positionally.
+    const positional = intel[friendlySectorId] ?? [];
+    const legacy = positional.find(rec => rec.enemy_sector_id === enemySectorId
+        && (rec.own_stable_key === undefined || rec.own_stable_key === ownStable)
+        && (rec.enemy_stable_key === undefined || rec.enemy_stable_key === enemyStable));
+    if (legacy) return legacy;
+
+    const initialFloor = FACTION_INITIAL_INTEL_CONFIDENCE[friendlySector.faction as NonNullable<FactionId>] ?? 0;
+    const created = buildRecord(
+        friendlySector,
+        enemySectorId,
+        enemySector,
+        edgeCount,
+        initialFloor,
+        0,
+        turn,
+        state,
+        profile.recon_range,
+    );
+    positional.push(created);
+    positional.sort((a, b) => strictCompare(a.enemy_sector_id, b.enemy_sector_id));
+    intel[friendlySectorId] = positional;
+    return created;
 }
 
 // ===============================================================
@@ -212,6 +258,43 @@ function buildRecord(
         own_stable_key: stableSectorKey(friendlySector),
         enemy_stable_key: stableSectorKey(enemySector),
     };
+}
+
+function buildCurrentContactRecord(
+    state: GameState,
+    friendlySector: CorpsFrontSector,
+    enemySectorId: string,
+    enemySector: CorpsFrontSector,
+    edgeCount: number,
+    turn: number,
+    profile: (typeof FACTION_RECON_PROFILES)[NonNullable<FactionId>],
+    initialFloor: number,
+    previous?: SectorIntelRecord,
+): SectorIntelRecord {
+    const previousConfidence = previous?.confidence ?? initialFloor;
+    const passiveBuildup = (state.military.opsec_sectors ?? []).includes(enemySectorId)
+        ? profile.passive_buildup_per_turn * 0.5
+        : profile.passive_buildup_per_turn;
+    // Intel goes stale even in contact. New records start at the faction floor,
+    // then receive the same first passive/decay tick as the full derivation.
+    let confidence = Math.min(
+        1.0,
+        Math.max(0, previousConfidence + passiveBuildup - profile.confidence_decay_per_turn),
+    );
+    if ((enemySector.reserve_brigade_ids?.length ?? 0) >= 2) {
+        confidence = Math.min(1.0, confidence + 0.10);
+    }
+    return buildRecord(
+        friendlySector,
+        enemySectorId,
+        enemySector,
+        edgeCount,
+        confidence,
+        (previous?.turns_in_contact ?? 0) + 1,
+        turn,
+        state,
+        profile.recon_range,
+    );
 }
 
 function computeOsidConfidence(
@@ -323,7 +406,7 @@ function computeVisibleBrigades(sector: CorpsFrontSector, confidence: number, re
  * a full re-partition match, and if split-heavy fronts turn out to matter, the upgrade is
  * edge-overlap matching, not a different anchor.
  */
-function stableSectorKey(sector: CorpsFrontSector): string {
+export function stableSectorKey(sector: CorpsFrontSector): string {
     let min: string | null = null;
     for (const edgeId of sector.edge_ids) {
         if (min === null || strictCompare(edgeId, min) < 0) min = edgeId;

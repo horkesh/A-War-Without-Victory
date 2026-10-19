@@ -1390,6 +1390,7 @@ export function evaluateOpeningAttackReadiness(
         // objective)` instead, which is already in scope. Needs its own 188w.
         // Re-measure Brcko if this gate is touched again.
         let anyApproaching = false;
+        let anyBlockingApproach = false;
         for (const axis of op.axes) {
             if (axis.status === 'complete' || axis.status === 'stalled') continue;
             const objective = axis.objectives[axis.current_objective_index ?? 0];
@@ -1411,21 +1412,32 @@ export function evaluateOpeningAttackReadiness(
             // TEMPORARY DIAGNOSTIC — see src/sim/combat/axis_readiness_debug.ts. Inert
             // unless AWWV_DEBUG_AXIS_READINESS is set; remove with that file.
             emitAxisReadinessTrace(state, corpsId, op, axis, result.executable, result.blocker);
+            // Opt-in phase gate: a HOLDING axis (late_phase.phase === 'holding') may approach/hold without
+            // blocking the launch and its own executability does not count as launch readiness — the
+            // main axis must be executable. RAW approach truth (`anyApproaching`) is unchanged; the
+            // launch decision uses `anyBlockingApproach`. Absent opt-in: held is false everywhere.
+            const heldAxis = axis.late_phase?.phase === 'holding';
             if (result.executable) {
-                anyExecutable = true;
+                if (!heldAxis) anyExecutable = true;
             } else {
                 allLiveAxesExecutable = false;
                 if (result.blocker) blockers.push(result.blocker);
-                if (result.approaching === true) anyApproaching = true;
+                if (result.approaching === true) {
+                    anyApproaching = true;
+                    if (!heldAxis) anyBlockingApproach = true;
+                }
             }
         }
         // TEMPORARY DIAGNOSTIC — see src/sim/combat/axis_readiness_debug.ts.
-        emitOperationReadinessTrace(state, corpsId, op, anyExecutable, anyApproaching);
+        emitOperationReadinessTrace(
+            state, corpsId, op, anyExecutable, anyApproaching,
+            op.axes.some((a) => a.late_phase !== undefined) ? anyBlockingApproach : undefined,
+        );
         if (op.require_all_axes_ready === true) {
             if (anyExecutable && allLiveAxesExecutable) return { executable: true };
             return { executable: false, blocker: rankOpeningAttackBlocker(blockers) };
         }
-        if (anyExecutable && !anyApproaching) return { executable: true };
+        if (anyExecutable && !anyBlockingApproach) return { executable: true };
         return { executable: false, blocker: rankOpeningAttackBlocker(blockers) };
     }
 

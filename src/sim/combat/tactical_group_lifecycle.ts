@@ -54,6 +54,7 @@ import {
     TG_DISSOLVE_COHESION,
     TG_MAX_LIFECYCLE_TURNS,
 } from './tactical_group_config.js';
+import { lateTgLifecycleStartTurn } from './operation_phase_gate.js';
 
 export interface FormTgParams {
     op_id: string;
@@ -385,6 +386,19 @@ function finalizeTgParticipations(
     }
 }
 
+/**
+ * Engage ONE tactical group: status `engaged` and its location mirrored from the anchor. The
+ * per-group body of `markOperationExecuting` (unchanged semantics); also the late-axis activation
+ * hook, which must engage only the group it just formed and never re-touch sibling groups.
+ */
+export function engageTacticalGroup(state: GameState, tgId: TgId): void {
+    const tg = state.military.tactical_groups?.[tgId];
+    if (!tg) return;
+    tg.status = 'engaged';
+    const anchorLocation = state.military.formations?.[tg.anchor_brigade_id]?.location_osid;
+    if (anchorLocation) tg.location_osid = anchorLocation;
+}
+
 /** Synchronize live TG and Army-HQ receipts after a CorpsOperation enters execution. */
 export function markOperationExecuting(
     state: GameState,
@@ -392,13 +406,7 @@ export function markOperationExecuting(
     op: CorpsOperation,
 ): void {
     const tgIds = resolveTacticalGroupIdsForOperation(state, hostCorpsId, op);
-    for (const tgId of tgIds) {
-        const tg = state.military.tactical_groups?.[tgId];
-        if (!tg) continue;
-        tg.status = 'engaged';
-        const anchorLocation = state.military.formations?.[tg.anchor_brigade_id]?.location_osid;
-        if (anchorLocation) tg.location_osid = anchorLocation;
-    }
+    for (const tgId of tgIds) engageTacticalGroup(state, tgId);
 
     const resolved = resolveArmyHqOperation(state, hostCorpsId, op);
     if (!resolved) return;
@@ -435,8 +443,16 @@ export function evaluateOperationTacticalGroupExhaustion(
         if (group.cohesion < TG_DISSOLVE_COHESION) return 'tg_cohesion_exhausted';
     }
 
-    const activeExecutionTurns = turn - op.phase_started_turn;
-    if (activeExecutionTurns >= TG_MAX_LIFECYCLE_TURNS) return 'tg_max_lifecycle';
+    // Every ordinary group is aged by the operation's execution clock, so for an ordinary
+    // operation "every engaged group is past its bound" is exactly the old single comparison.
+    // An opt-in late-axis group (operation_phase_gate.ts) is aged from its OWN formation/activation
+    // turn, so a spent main-operation age cannot immediately end a freshly activated group; the
+    // operation ends only once every engaged group is past its own finite bound.
+    const anyGroupWithinBound = engagedGroups.some((group) => {
+        const lifecycleStart = lateTgLifecycleStartTurn(op, group) ?? op.phase_started_turn;
+        return turn - lifecycleStart < TG_MAX_LIFECYCLE_TURNS;
+    });
+    if (!anyGroupWithinBound) return 'tg_max_lifecycle';
 
     let terminationReason: TgExhaustionRecoveryReason | null = null;
     for (const group of engagedGroups) {

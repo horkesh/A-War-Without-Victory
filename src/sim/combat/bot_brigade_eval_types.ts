@@ -20,6 +20,47 @@ import type { ActiveFormationLocationsByFaction, CorpsBrigadeCountsByOsid, Corps
 import type { SectorDefenseByFactionAndOsid } from './sector_utils.js';
 import type { OfficerCombatLookup } from './combat_math.js';
 
+/**
+ * Terminal exits of `evaluateSectorMarch` (opt-in `dispatcher_decision` observation only). A label is
+ * assigned only where the evaluator actually returns; a local lambda that returns false and lets a later
+ * branch succeed never leaves its own label. `unlabeled_true` is a coverage defect, never a real exit.
+ */
+export type SectorMarchExit =
+    | 'explicit_reassignment_march'
+    | 'pending_home_return_false'
+    | 'reserve_near_front_stay_false'
+    | 'enclave_no_front_target_defend'
+    | 'allowed_front_empty_defend'
+    | 'scoped_front_march'
+    | 'trap_corps_front_reroute'
+    | 'retroactive_tooth_evict_march'
+    | 'overstack_redistribution_march'
+    | 'enclave_final_defend'
+    | 'fallthrough_false'
+    | 'unlabeled_true';
+
+/** Detached scalar/string copy of the inputs and terminal exit of one `evaluateSectorMarch` call. */
+export interface SectorMarchObservation {
+    exit: SectorMarchExit | null;
+    evaluator_result: boolean | null;
+    operation_commitment: boolean | null;
+    routine_scope_source: string | null;
+    routine_scope_restricted: boolean | null;
+    routine_scope_sub_segment_id: string | null;
+    routine_scope_size: number | null;
+    assigned_sector_id: string | null;
+    is_reserve: boolean | null;
+    reassignment_order_present: boolean;
+    reassignment_to_sector_id: string | null;
+    reassignment_target_found: boolean | null;
+    loc_in_scoped_front: boolean | null;
+    scoped_front_size: number | null;
+    allowed_front_size: number | null;
+    tooth_blocked: boolean;
+    selected_destination: string | null;
+    selected_destination_in_scoped_front: boolean | null;
+}
+
 export interface BrigadeEvaluationContext {
     state: GameState;
     faction: FactionId;
@@ -66,6 +107,11 @@ export interface BrigadeEvaluationContext {
     officerCombatLookup?: OfficerCombatLookup;
     /** Lazily builds the officer combat lookup on first predictor use in this faction-order pass. */
     getOfficerCombatLookup?: () => OfficerCombatLookup | undefined;
+    /**
+     * Opt-in `dispatcher_decision` observation callback, supplied only when the topic is on. Called once per
+     * `evaluateSectorMarch` call with a fresh detached record; absent => no observation work at all.
+     */
+    sectorMarchObserver?: (observation: SectorMarchObservation) => void;
     
     // Global context dependencies:
     adjacency: Map<Osid, Osid[]>;

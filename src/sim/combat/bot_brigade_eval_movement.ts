@@ -105,7 +105,7 @@ export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean
                 if (dest && !isMovementDestinationRisky(dest, graphAnalysis)) {
                     recordRouteDecision(ctx, {
                         rule: 'priority_sector',
-                        route_goal_osids: [...priorityOsids] as any,
+                        route_goal_osids: [...priorityOsids],
                         outcome: 'issued',
                         candidate_destination_osid: dest,
                         issued_destination_osid: dest,
@@ -175,7 +175,7 @@ export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean
                 if (dest && !isMovementDestinationRisky(dest, graphAnalysis)) {
                     recordRouteDecision(ctx, {
                         rule: 'own_corps_front',
-                        route_goal_osids: [...scopedOwnCorpsFrontOsids] as any,
+                        route_goal_osids: [...scopedOwnCorpsFrontOsids],
                         outcome: 'issued',
                         candidate_destination_osid: dest,
                         issued_destination_osid: dest,
@@ -185,7 +185,7 @@ export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean
                 } else {
                     recordRouteDecision(ctx, {
                         rule: 'own_corps_front',
-                        route_goal_osids: [...scopedOwnCorpsFrontOsids] as any,
+                        route_goal_osids: [...scopedOwnCorpsFrontOsids],
                         outcome: dest ? 'rejected' : 'no_order',
                         candidate_destination_osid: dest ?? null,
                         issued_destination_osid: null,
@@ -195,7 +195,7 @@ export function evaluateInteriorMovement(ctx: BrigadeEvaluationContext): boolean
             } else {
                 recordRouteDecision(ctx, {
                     rule: 'own_corps_front',
-                    route_goal_osids: [...scopedOwnCorpsFrontOsids] as any,
+                    route_goal_osids: [...scopedOwnCorpsFrontOsids],
                     outcome: 'held',
                     candidate_destination_osid: null,
                     issued_destination_osid: null,

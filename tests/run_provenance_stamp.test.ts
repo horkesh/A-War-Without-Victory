@@ -160,7 +160,7 @@ describe('the consumed set is the set a headless run actually reads', () => {
      * recomputes it from the live fixed set plus the live derivation, so adding an input
      * turns it RED and forces the header to be updated in the same change.
      */
-    it('★ the 188w stamp is exactly 31 named rows, derived not remembered', async () => {
+    it('★ the 188w stamp is exactly 32 named rows, derived not remembered', async () => {
         const fsp = await import('node:fs/promises');
         const { checkpointsForScenario } =
             await import('../src/scenario/scenario_runner.js');
@@ -181,8 +181,8 @@ describe('the consumed set is the set a headless run actually reads', () => {
             collapseEnabled: false,
         });
         const paths = p.consumed_inputs.files.map(f => f.path);
-        expect(paths.length, `31 = ${HEADLESS_CONSUMED_INPUTS.length} fixed + scenario + 4 declared + ${EVENT_FILES.length} events + 4 painted`)
-            .toBe(31);
+        expect(paths.length, `32 = ${HEADLESS_CONSUMED_INPUTS.length} fixed + scenario + 4 declared + ${EVENT_FILES.length} events + 4 painted`)
+            .toBe(32);
         // Cross-check the arithmetic rather than the literal, so the two cannot drift apart.
         expect(paths.length).toBe(HEADLESS_CONSUMED_INPUTS.length + 5 + EVENT_FILES.length + 4);
         // ★ EVERY SCORING REFERENCE is stamped, not just the terminal one. A 188w run scores

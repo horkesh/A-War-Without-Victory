@@ -37,6 +37,7 @@ import type {
     CorpsFrontSector,
     CorpsDirective,
     CorpsOperation,
+    FactionId,
     FormationId,
     GameState,
     SectorStance,
@@ -44,9 +45,10 @@ import type {
 import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../../state/formation_constants.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { spatialFriendlyDistance, spatialSameComponent } from '../../spatial_context.js';
-import { buildCommanderOperation, buildProbeOperation, derivePrimarySectorForBrigades, getMaxOperationSlots } from '../corps_operation_helpers.js';
+import { buildCommanderOperation, buildProbeOperation, derivePrimarySectorForBrigades, getMaxOperationSlots, getOperationSlotUsageForOperations } from '../corps_operation_helpers.js';
 import { isBrigadeEligibleForOperationObjectives } from '../enclave_resilience.js';
 import { pickOperationName } from '../operation_names.js';
+import { emitCommanderCreationRecord, emitLocalOccupationCandidateRecord, isReasonCodeTopicEnabled } from '../reason_code_debug.js';
 import { buildTerrainCache, predictCombatOutcome, type CombatPrediction } from '../combat_predictor.js';
 import { buildOfficerCombatLookup } from '../combat_math.js';
 import { isOutcomeSufficientForAttack } from '../bot_brigade_targeting.js';
@@ -58,6 +60,7 @@ import {
     getPatronConfidenceOpsHesitationMultiplier,
 } from '../sector_offensive.js';
 import { getPoliticalControllerOSID } from '../../../state/settlement_control.js';
+import { isRbihHrhbCombatBlocked } from '../../early_war/alliance_update.js';
 import { shouldGrazBlockAttack } from '../../local_truces.js';
 import { getHeadQueuedPrePlannedBrigadeIds } from '../pre_planned_operations.js';
 import type {
@@ -84,7 +87,7 @@ import { COMMITMENT_RATIO_UNBOUNDED_PERSISTED } from './zone_detection.js';
 import type { DecisionResult } from './decide.js';
 import { augmentOffensiveTargetsWithShifts } from './bot_priority_shift_augmentation.js';
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
-import { shouldLaunchProbeInstead } from '../bot_corps_directives.js';
+import { shouldLaunchProbeInstead, type ProbeLaunchDecisionTrace } from '../bot_corps_directives.js';
 import { getStalestSectorIntelConfidence } from '../sector_intel.js';
 import { computePlanningDuration } from '../sector_offensive_axis_helpers.js';
 import { canFormationReachAssemblyInTime } from '../sector_offensive_launch_helpers.js';
@@ -215,19 +218,50 @@ function isCombatReadyParticipant(
     return true;
 }
 
+type CommanderCreationOverlapClause = 'same_sector' | 'shared_objective' | 'shared_participant';
+
+interface CommanderCreationOverlapPredicates {
+    same_sector: boolean;
+    shared_objective: boolean | null;
+    shared_participant: boolean | null;
+    first_matched_clause: CommanderCreationOverlapClause | null;
+}
+
 function operationsOverlap(
     left: Pick<CorpsOperation, 'sector_id' | 'objectives' | 'participating_brigades'>,
     right: Pick<CorpsOperation, 'sector_id' | 'objectives' | 'participating_brigades'>,
+    observe?: (predicates: CommanderCreationOverlapPredicates) => void,
 ): boolean {
-    if (left.sector_id && right.sector_id && left.sector_id === right.sector_id) {
+    const sameSector = Boolean(left.sector_id && right.sector_id && left.sector_id === right.sector_id);
+    if (sameSector) {
+        observe?.({
+            same_sector: true,
+            shared_objective: null,
+            shared_participant: null,
+            first_matched_clause: 'same_sector',
+        });
         return true;
     }
     const leftObjectives = new Set(left.objectives ?? []);
-    if ((right.objectives ?? []).some((objective) => leftObjectives.has(objective))) {
+    const sharedObjective = (right.objectives ?? []).some((objective) => leftObjectives.has(objective));
+    if (sharedObjective) {
+        observe?.({
+            same_sector: false,
+            shared_objective: true,
+            shared_participant: null,
+            first_matched_clause: 'shared_objective',
+        });
         return true;
     }
     const leftBrigades = new Set(left.participating_brigades ?? []);
-    return (right.participating_brigades ?? []).some((brigadeId) => leftBrigades.has(brigadeId));
+    const sharedParticipant = (right.participating_brigades ?? []).some((brigadeId) => leftBrigades.has(brigadeId));
+    observe?.({
+        same_sector: false,
+        shared_objective: false,
+        shared_participant: sharedParticipant,
+        first_matched_clause: sharedParticipant ? 'shared_participant' : null,
+    });
+    return sharedParticipant;
 }
 
 /** Plan action → plan_updates action mapping (plan.ts uses past tense). */
@@ -336,6 +370,354 @@ function canReachAssemblyInTime(
     );
 }
 
+type LocalOccupationCandidateClass =
+    | 'sector-listed_single'
+    | 'sector-listed_group'
+    | 'adjacency-only_single'
+    | 'adjacency-only_group';
+
+interface LocalOccupationPredicateObservation {
+    predicate: string;
+    passed: boolean;
+}
+
+interface LocalOccupationAttemptObservation {
+    candidate_class: LocalOccupationCandidateClass;
+    sector_id: string | null;
+    target_osid: string | null;
+    considered_roster: string[] | null;
+    predicates: LocalOccupationPredicateObservation[];
+    outcome: 'rejected' | 'qualified';
+    first_failed_predicate: string | null;
+}
+
+interface LocalOccupationSurplusObservation {
+    brigade_id: string;
+    predicates: LocalOccupationPredicateObservation[];
+    first_failed_predicate: string | null;
+}
+
+interface LocalOccupationGroupRosterObservation {
+    candidate_class: Extract<LocalOccupationCandidateClass, 'sector-listed_group' | 'adjacency-only_group'>;
+    roster_path: 'projected_surplus' | 'staged_primary_garrison';
+    sector_id: string;
+    target_osid: string;
+    brigade_id: string;
+    predicates: LocalOccupationPredicateObservation[];
+    outcome: 'rejected' | 'eligible';
+    first_failed_predicate: string | null;
+}
+
+interface LocalOccupationSearchObservation {
+    surplus: Map<string, LocalOccupationSurplusObservation>;
+    group_roster: LocalOccupationGroupRosterObservation[];
+    attempts: LocalOccupationAttemptObservation[];
+    class_outcomes: Array<{ candidate_class: LocalOccupationCandidateClass; outcome: 'selected' | 'rejected' | 'no_enumerated_candidate' | 'skipped_after_selection' }>;
+    precondition_failure: string | null;
+}
+
+interface LocalOccupationSearchOptions {
+    only_class?: LocalOccupationCandidateClass;
+    enumerate_all_qualified?: boolean;
+    suppress_profile?: boolean;
+}
+
+function recordLocalOccupationGroupRoster(
+    observation: LocalOccupationSearchObservation | undefined,
+    candidateClass: Extract<LocalOccupationCandidateClass, 'sector-listed_group' | 'adjacency-only_group'>,
+    rosterPath: LocalOccupationGroupRosterObservation['roster_path'],
+    sectorId: string,
+    targetOsid: string,
+    brigadeId: string,
+    predicates: LocalOccupationPredicateObservation[] | undefined,
+    eligible: boolean,
+): void {
+    if (!observation || !predicates) return;
+    observation.group_roster.push({
+        candidate_class: candidateClass,
+        roster_path: rosterPath,
+        sector_id: sectorId,
+        target_osid: targetOsid,
+        brigade_id: brigadeId,
+        predicates: [...predicates],
+        outcome: eligible ? 'eligible' : 'rejected',
+        first_failed_predicate: predicates.find((entry) => !entry.passed)?.predicate ?? null,
+    });
+}
+
+const LOCAL_OCCUPATION_CLASSES: readonly LocalOccupationCandidateClass[] = [
+    'sector-listed_single',
+    'sector-listed_group',
+    'adjacency-only_single',
+    'adjacency-only_group',
+];
+
+function observeLocalOccupationPredicate(
+    predicates: LocalOccupationPredicateObservation[] | undefined,
+    predicate: string,
+    passed: boolean,
+): boolean {
+    predicates?.push({ predicate, passed });
+    return passed;
+}
+
+function observeLocalOccupationSurplusPredicate(
+    observation: LocalOccupationSearchObservation | undefined,
+    brigadeId: string,
+    predicate: string,
+    passed: boolean,
+): boolean {
+    if (!observation) return passed;
+    let entry = observation.surplus.get(brigadeId);
+    if (!entry) {
+        entry = { brigade_id: brigadeId, predicates: [], first_failed_predicate: null };
+        observation.surplus.set(brigadeId, entry);
+    }
+    entry.predicates.push({ predicate, passed });
+    if (!passed && entry.first_failed_predicate === null) entry.first_failed_predicate = predicate;
+    return passed;
+}
+
+function recordLocalOccupationAttempt(
+    observation: LocalOccupationSearchObservation | undefined,
+    candidateClass: LocalOccupationCandidateClass,
+    sectorId: string | null | undefined,
+    targetOsid: string | null,
+    consideredRoster: readonly string[] | null,
+    predicates: LocalOccupationPredicateObservation[] | undefined,
+    qualified: boolean,
+): void {
+    if (!observation || !predicates) return;
+    observation.attempts.push({
+        candidate_class: candidateClass,
+        sector_id: sectorId ?? null,
+        target_osid: targetOsid,
+        considered_roster: consideredRoster === null ? null : [...consideredRoster].sort(strictCompare),
+        predicates: [...predicates],
+        outcome: qualified ? 'qualified' : 'rejected',
+        first_failed_predicate: predicates.find((entry) => !entry.passed)?.predicate ?? null,
+    });
+}
+
+function emitLocalOccupationSearchObservation(
+    briefing: CommanderBriefing,
+    allocation: AllocationResult,
+    observation: LocalOccupationSearchObservation,
+    result: LocalOccupationCandidate | null,
+): void {
+    const base = {
+        schema: 'local_occupation_candidate.v1',
+        faction: briefing.faction,
+        corps_id: briefing.corps_id,
+        turn: briefing.turn,
+    };
+    emitLocalOccupationCandidateRecord({
+        ...base,
+        phase: 'search_start',
+        surplus_inventory: allocation.surplus_pool.map((entry) => entry.brigade_id).sort(strictCompare),
+    });
+    for (const entry of [...observation.surplus.values()].sort((left, right) => strictCompare(left.brigade_id, right.brigade_id))) {
+        emitLocalOccupationCandidateRecord({
+            ...base,
+            phase: 'surplus_filter',
+            brigade_id: entry.brigade_id,
+            target_osid: null,
+            considered_roster: null,
+            predicates: entry.predicates,
+            outcome: entry.first_failed_predicate === null ? 'eligible' : 'rejected',
+            first_failed_predicate: entry.first_failed_predicate,
+        });
+    }
+    for (const entry of [...observation.group_roster].sort((left, right) => (
+        LOCAL_OCCUPATION_CLASSES.indexOf(left.candidate_class) - LOCAL_OCCUPATION_CLASSES.indexOf(right.candidate_class)
+        || strictCompare(left.sector_id, right.sector_id)
+        || strictCompare(left.target_osid, right.target_osid)
+        || strictCompare(left.roster_path, right.roster_path)
+        || strictCompare(left.brigade_id, right.brigade_id)
+    ))) {
+        emitLocalOccupationCandidateRecord({
+            ...base,
+            phase: 'group_roster',
+            ...entry,
+            considered_roster: null,
+        });
+    }
+    for (const attempt of observation.attempts) {
+        emitLocalOccupationCandidateRecord({ ...base, phase: 'candidate', ...attempt });
+    }
+    const eligibleCount = [...observation.surplus.values()].filter((entry) => entry.first_failed_predicate === null).length;
+    emitLocalOccupationCandidateRecord({
+        ...base,
+        phase: 'search_end',
+        outcome: observation.precondition_failure != null
+            ? 'skipped_precondition'
+            : eligibleCount === 0
+                ? 'no_eligible_surplus'
+                : result
+                    ? 'selected'
+                    : observation.attempts.length === 0
+                        ? 'no_enumerated_candidate'
+                        : 'rejected',
+        precondition_failure: observation.precondition_failure,
+        selected_class: result ? observation.class_outcomes.find((entry) => entry.outcome === 'selected')?.candidate_class ?? null : null,
+        selected_sector_id: result?.sector_id ?? null,
+        selected_target_osid: result?.target_osid ?? null,
+        selected_roster: result ? [...result.participating_brigade_ids].sort(strictCompare) : null,
+        selection_scope: 'candidate_search',
+        downstream_operation_status: 'unmeasured',
+        class_outcomes: observation.class_outcomes,
+    });
+}
+
+function emitVaroslukSkippedGroupShadow(
+    briefing: CommanderBriefing,
+    allocation: AllocationResult,
+    actualResult: LocalOccupationCandidate,
+    actualClass: LocalOccupationCandidateClass | null,
+): void {
+    if (briefing.faction !== 'RBiH'
+        || briefing.corps_id !== 'arbih_3rd_corps'
+        || actualClass !== 'adjacency-only_single'
+        || actualResult.target_osid !== 'op:travnik:varosluk') return;
+
+    const base = {
+        schema: 'local_occupation_skipped_alternative.v1',
+        shadow: true,
+        actual_selected: false,
+        evaluation_scope: 'adjacency-only_group_only',
+        coverage_status: 'partial_skipped_class_only',
+        candidate_disposition: 'shadow_only_never_selected_or_emitted',
+        lawful_operation_status: 'unmeasured',
+        operation_construction_status: 'not_performed',
+        emission_status: 'not_performed',
+        faction: briefing.faction,
+        corps_id: briefing.corps_id,
+        turn: briefing.turn,
+        actual_selected_class: actualClass,
+        actual_selected_sector_id: actualResult.sector_id,
+        actual_selected_target_osid: actualResult.target_osid,
+        actual_selected_roster: [...actualResult.participating_brigade_ids].sort(strictCompare),
+        admission_status: 'unmeasured',
+        officer_ownership_status: 'unmeasured',
+        launch_status: 'unmeasured',
+    };
+    emitLocalOccupationCandidateRecord({
+        ...base,
+        phase: 'skipped_alternative_shadow_start',
+        outcome: 'started',
+    });
+    let detached: { briefing: CommanderBriefing; allocation: AllocationResult };
+    try {
+        detached = structuredClone({ briefing, allocation });
+    } catch {
+        emitLocalOccupationCandidateRecord({
+            ...base,
+            phase: 'skipped_alternative_shadow_end',
+            outcome: 'isolation_unavailable',
+            enumerated_count: 0,
+            roster_count: 0,
+            attempt_count: 0,
+            qualified_count: 0,
+            rejected_count: 0,
+        });
+        return;
+    }
+
+    try {
+    const shadowObservation: LocalOccupationSearchObservation = {
+        surplus: new Map(),
+        group_roster: [],
+        attempts: [],
+        class_outcomes: [],
+        precondition_failure: null,
+    };
+    findLocalOccupationCandidateImpl(
+        detached.briefing,
+        detached.allocation,
+        shadowObservation,
+        { only_class: 'adjacency-only_group', enumerate_all_qualified: true, suppress_profile: true },
+    );
+
+    for (const entry of shadowObservation.group_roster) {
+        emitLocalOccupationCandidateRecord({
+            ...base,
+            phase: 'skipped_alternative_shadow_roster',
+            ...entry,
+            considered_roster: null,
+            overlap: { evaluated: false, found: null, checks: [] },
+        });
+    }
+    for (const attempt of shadowObservation.attempts) {
+        const checks: Array<CommanderCreationOverlapPredicates & {
+            existing_operation: CommanderCreationOperationTuple;
+        }> = [];
+        let firstMatchedClause: CommanderCreationOverlapClause | null = null;
+        let conflictingOperation: CommanderCreationOperationTuple | null = null;
+        let overlapFound: boolean | null = null;
+        if (attempt.outcome === 'qualified' && attempt.sector_id && attempt.target_osid && attempt.considered_roster) {
+            const candidate = {
+                sector_id: attempt.sector_id,
+                objectives: [attempt.target_osid],
+                participating_brigades: attempt.considered_roster,
+            };
+            const conflict = detached.briefing.active_operations.find((existing) => operationsOverlap(
+                existing,
+                candidate,
+                (predicates) => {
+                    const existingOperation = commanderCreationOperationTuple(detached.briefing.corps_id, existing);
+                    checks.push({ existing_operation: existingOperation, ...predicates });
+                    if (predicates.first_matched_clause !== null && firstMatchedClause === null) {
+                        firstMatchedClause = predicates.first_matched_clause;
+                        conflictingOperation = existingOperation;
+                    }
+                },
+            ));
+            overlapFound = conflict != null;
+        }
+        emitLocalOccupationCandidateRecord({
+            ...base,
+            phase: 'skipped_alternative_shadow',
+            ...attempt,
+            overlap: attempt.outcome === 'qualified'
+                ? {
+                    evaluated: true,
+                    found: overlapFound,
+                    checks,
+                    first_matched_clause: firstMatchedClause,
+                    conflicting_operation: conflictingOperation,
+                }
+                : { evaluated: false, found: null, checks: [] },
+        });
+    }
+    const qualifiedCount = shadowObservation.attempts.filter((entry) => entry.outcome === 'qualified').length;
+    emitLocalOccupationCandidateRecord({
+        ...base,
+        phase: 'skipped_alternative_shadow_end',
+        outcome: shadowObservation.attempts.length === 0
+            ? 'no_enumerated_candidate'
+            : qualifiedCount > 0
+                ? 'qualified_candidate_observed'
+                : 'rejected_only',
+        enumerated_count: shadowObservation.attempts.length,
+        roster_count: shadowObservation.group_roster.length,
+        attempt_count: shadowObservation.attempts.length,
+        qualified_count: qualifiedCount,
+        rejected_count: shadowObservation.attempts.length - qualifiedCount,
+    });
+    } catch {
+        emitLocalOccupationCandidateRecord({
+            ...base,
+            phase: 'skipped_alternative_shadow_end',
+            outcome: 'shadow_evaluation_failed',
+            enumerated_count: 0,
+            roster_count: 0,
+            attempt_count: 0,
+            qualified_count: 0,
+            rejected_count: 0,
+        });
+    }
+}
+
 /**
  * Find a surplus brigade that is already adjacent to a bounded enemy pocket it
  * can defeat by itself. This is deliberately evaluated before the generic
@@ -346,31 +728,112 @@ function findLocalOccupationCandidate(
     briefing: CommanderBriefing,
     allocation: AllocationResult,
 ): LocalOccupationCandidate | null {
-    if (!briefing.state_ref || !briefing.reverse_map || !briefing.osid_population_map) {
+    if (!isReasonCodeTopicEnabled('local_occupation_candidate')) {
+        return findLocalOccupationCandidateImpl(briefing, allocation, undefined);
+    }
+    const observation: LocalOccupationSearchObservation = {
+        surplus: new Map(),
+        group_roster: [],
+        attempts: [],
+        class_outcomes: [],
+        precondition_failure: null,
+    };
+    const result = findLocalOccupationCandidateImpl(briefing, allocation, observation);
+    emitLocalOccupationSearchObservation(briefing, allocation, observation, result);
+    if (result) {
+        const selectedClass = observation.class_outcomes.find((entry) => entry.outcome === 'selected')?.candidate_class ?? null;
+        emitVaroslukSkippedGroupShadow(briefing, allocation, result, selectedClass);
+    }
+    return result;
+}
+
+function findLocalOccupationCandidateImpl(
+    briefing: CommanderBriefing,
+    allocation: AllocationResult,
+    observation: LocalOccupationSearchObservation | undefined,
+    options: LocalOccupationSearchOptions = {},
+): LocalOccupationCandidate | null {
+    const stateRef = briefing.state_ref;
+    const reverseMap = briefing.reverse_map;
+    const osidPopulationMap = briefing.osid_population_map;
+    if (!stateRef || !reverseMap || !osidPopulationMap) {
+        if (observation) observation.precondition_failure = !stateRef
+            ? 'state_ref_present'
+            : !reverseMap
+                ? 'reverse_map_present'
+                : 'osid_population_map_present';
         return null;
     }
-    const reverseMap = briefing.reverse_map;
-    if (briefing.turn <= 20) return null;
+    if (briefing.turn <= 20) {
+        if (observation) observation.precondition_failure = 'turn_after_20';
+        return null;
+    }
     // A standalone local opportunity has no proposal identity for the Level-1
     // approval flow. Fail closed instead of admitting it around player authority.
-    if ((briefing.state_ref.meta?.autonomy_level ?? 0) === 1) return null;
-    const queuedHistoricalParticipants = getHeadQueuedPrePlannedBrigadeIds(briefing.state_ref);
+    if ((stateRef.meta?.autonomy_level ?? 0) === 1) {
+        if (observation) observation.precondition_failure = 'autonomy_not_level_1';
+        return null;
+    }
+    const queuedHistoricalParticipants = getHeadQueuedPrePlannedBrigadeIds(stateRef);
     const activeOperationParticipants = new Set(
         briefing.active_operations
             .flatMap((operation) => operation.participating_brigades ?? []),
+    );
+    const executingOperationObjectives = new Set(
+        briefing.active_operations
+            .filter((operation) => operation.phase === 'execution')
+            .flatMap((operation) => operation.objectives ?? []),
     );
     const corpsSectors = briefing.sectors
         .filter((sector) => sector.corps_id === briefing.corps_id)
         .sort((left, right) => strictCompare(left.sector_id, right.sector_id));
     const formationById = Object.fromEntries(briefing.brigades.map((brigade) => [brigade.id, brigade]));
     const terrainCache = buildTerrainCache(reverseMap);
-    const candidates = allocation.surplus_pool
-        .filter((evaluation) => evaluation.is_combat_effective && !evaluation.is_disrupted)
-        .filter((evaluation) => mayEliteJoinOperation(evaluation.brigade_id, briefing.turn))
-        .filter((evaluation) => !queuedHistoricalParticipants.has(evaluation.brigade_id))
-        .filter((evaluation) => !activeOperationParticipants.has(evaluation.brigade_id))
-        .filter((evaluation) => isCombatReadyParticipant(briefing, evaluation.brigade_id))
-        .filter((evaluation) => formationById[evaluation.brigade_id]?.elite_loan_state?.on_loan !== true)
+    const candidates = (observation
+        ? allocation.surplus_pool
+        .filter((evaluation) => observeLocalOccupationSurplusPredicate(
+            observation,
+            evaluation.brigade_id,
+            'combat_effective_and_not_disrupted',
+            evaluation.is_combat_effective && !evaluation.is_disrupted,
+        ))
+        .filter((evaluation) => observeLocalOccupationSurplusPredicate(
+            observation,
+            evaluation.brigade_id,
+            'elite_hold_allows_operation',
+            mayEliteJoinOperation(evaluation.brigade_id, briefing.turn),
+        ))
+        .filter((evaluation) => observeLocalOccupationSurplusPredicate(
+            observation,
+            evaluation.brigade_id,
+            'not_queued_historical_participant',
+            !queuedHistoricalParticipants.has(evaluation.brigade_id),
+        ))
+        .filter((evaluation) => observeLocalOccupationSurplusPredicate(
+            observation,
+            evaluation.brigade_id,
+            'not_active_operation_participant',
+            !activeOperationParticipants.has(evaluation.brigade_id),
+        ))
+        .filter((evaluation) => observeLocalOccupationSurplusPredicate(
+            observation,
+            evaluation.brigade_id,
+            'combat_ready',
+            isCombatReadyParticipant(briefing, evaluation.brigade_id),
+        ))
+        .filter((evaluation) => observeLocalOccupationSurplusPredicate(
+            observation,
+            evaluation.brigade_id,
+            'not_on_elite_loan',
+            formationById[evaluation.brigade_id]?.elite_loan_state?.on_loan !== true,
+        ))
+        : allocation.surplus_pool
+            .filter((evaluation) => evaluation.is_combat_effective && !evaluation.is_disrupted)
+            .filter((evaluation) => mayEliteJoinOperation(evaluation.brigade_id, briefing.turn))
+            .filter((evaluation) => !queuedHistoricalParticipants.has(evaluation.brigade_id))
+            .filter((evaluation) => !activeOperationParticipants.has(evaluation.brigade_id))
+            .filter((evaluation) => isCombatReadyParticipant(briefing, evaluation.brigade_id))
+            .filter((evaluation) => formationById[evaluation.brigade_id]?.elite_loan_state?.on_loan !== true))
         .sort((left, right) => {
             const fitnessDiff = right.fitness_offense - left.fitness_offense;
             return fitnessDiff !== 0
@@ -378,74 +841,188 @@ function findLocalOccupationCandidate(
                 : strictCompare(left.brigade_id, right.brigade_id);
         });
 
-    for (const brigade of candidates) {
-        const formation = formationById[brigade.brigade_id];
-        const location = formation?.location_osid;
-        if (!location || formation?.corps_id !== briefing.corps_id) continue;
-        const sectorId = derivePrimarySectorForBrigades(
-            corpsSectors,
-            briefing.corps_id,
-            [brigade.brigade_id],
-            formationById,
-        );
-        if (!sectorId) continue;
-        const sector = corpsSectors.find((entry) => entry.sector_id === sectorId);
-        if (!sector) continue;
-        const commandState = briefing.state_ref.military.corps_command?.[briefing.corps_id];
-        const sectorIntelConfidence = getStalestSectorIntelConfidence(briefing.state_ref, sectorId);
-        if (shouldLaunchProbeInstead(
-            briefing.faction,
-            sectorIntelConfidence,
-            commandState?.consecutive_probes ?? 0,
-            briefing.turn,
-            briefing.state_ref.military.war_timeline,
-        )) continue;
+    type TargetPass = 'sector-listed' | 'adjacency-only';
+    const findSingleCandidate = (targetPass: TargetPass): LocalOccupationCandidate | null => {
+        const candidateClass: LocalOccupationCandidateClass = targetPass === 'sector-listed'
+            ? 'sector-listed_single'
+            : 'adjacency-only_single';
+        for (const brigade of candidates) {
+            const prefixPredicates: LocalOccupationPredicateObservation[] | undefined = observation ? [] : undefined;
+            const formation = formationById[brigade.brigade_id];
+            const location = formation?.location_osid;
+            if (!observeLocalOccupationPredicate(prefixPredicates, 'location_present', location != null)) {
+                recordLocalOccupationAttempt(observation, candidateClass, null, null, null, prefixPredicates, false);
+                continue;
+            }
+            if (!observeLocalOccupationPredicate(prefixPredicates, 'belongs_to_corps', formation?.corps_id === briefing.corps_id)) {
+                recordLocalOccupationAttempt(observation, candidateClass, null, null, [brigade.brigade_id], prefixPredicates, false);
+                continue;
+            }
+            const sectorId = derivePrimarySectorForBrigades(
+                corpsSectors,
+                briefing.corps_id,
+                [brigade.brigade_id],
+                formationById,
+            );
+            if (!observeLocalOccupationPredicate(prefixPredicates, 'primary_sector_present', sectorId != null)) {
+                recordLocalOccupationAttempt(observation, candidateClass, null, null, [brigade.brigade_id], prefixPredicates, false);
+                continue;
+            }
+            const sector = corpsSectors.find((entry) => entry.sector_id === sectorId);
+            const selectedSector = sector ?? null;
+            if (!observeLocalOccupationPredicate(prefixPredicates, 'sector_present', selectedSector != null)) {
+                recordLocalOccupationAttempt(observation, candidateClass, sectorId!, null, [brigade.brigade_id], prefixPredicates, false);
+                continue;
+            }
+            if (selectedSector == null) continue;
+            const commandState = stateRef.military.corps_command?.[briefing.corps_id];
+            const sectorIntelConfidence = getStalestSectorIntelConfidence(stateRef, sectorId!);
+            const launchProbeInstead = shouldLaunchProbeInstead(
+                briefing.faction,
+                sectorIntelConfidence,
+                commandState?.consecutive_probes ?? 0,
+                briefing.turn,
+                stateRef.military.war_timeline,
+            );
+            if (!observeLocalOccupationPredicate(prefixPredicates, 'launch_intel_sufficient', !launchProbeInstead)) {
+                recordLocalOccupationAttempt(observation, candidateClass, sectorId!, null, [brigade.brigade_id], prefixPredicates, false);
+                continue;
+            }
 
-        const directTargets = new Set<string>();
-        for (const subSegment of sector.sub_segments ?? []) {
-            for (const target of subSegment.enemy_osids ?? []) {
-                if ((briefing.spatial.adjacency.get(target) ?? []).includes(location)) {
-                    directTargets.add(target);
+            const listedTargets = new Set<string>();
+            for (const subSegment of selectedSector.sub_segments ?? []) {
+                for (const target of subSegment.enemy_osids ?? []) {
+                    if ((briefing.spatial.adjacency.get(target) ?? []).includes(location!)) {
+                        listedTargets.add(target);
+                    }
                 }
             }
+            const directTargets = targetPass === 'sector-listed'
+                ? listedTargets
+                : new Set(
+                    (briefing.spatial.adjacency.get(location!) ?? [])
+                        .filter((target) => !listedTargets.has(target)),
+                );
+            for (const target of [...directTargets].sort(strictCompare)) {
+                const predicates = prefixPredicates ? [...prefixPredicates] : undefined;
+                const targetPopulation = osidPopulationMap.get(target);
+                if (!observeLocalOccupationPredicate(predicates, 'target_population_present', Number.isFinite(targetPopulation))) {
+                    recordLocalOccupationAttempt(observation, candidateClass, sectorId, target, [brigade.brigade_id], predicates, false);
+                    continue;
+                }
+                if (!observeLocalOccupationPredicate(predicates, 'target_not_on_cooldown', (briefing.failed_offensive_objectives?.[target]?.cooldown_until_turn ?? 0) <= briefing.turn)) {
+                    recordLocalOccupationAttempt(observation, candidateClass, sectorId, target, [brigade.brigade_id], predicates, false);
+                    continue;
+                }
+                if (!observeLocalOccupationPredicate(predicates, 'bounded_isolated_enemy_position', isBoundedIsolatedEnemyPosition(target, briefing))) {
+                    recordLocalOccupationAttempt(observation, candidateClass, sectorId, target, [brigade.brigade_id], predicates, false);
+                    continue;
+                }
+                if (!observeLocalOccupationPredicate(predicates, 'formation_eligible_for_objective', isBrigadeEligibleForOperationObjectives(formation, [target]))) {
+                    recordLocalOccupationAttempt(observation, candidateClass, sectorId, target, [brigade.brigade_id], predicates, false);
+                    continue;
+                }
+                const targetController = getPoliticalControllerOSID(
+                    stateRef,
+                    target,
+                    reverseMap,
+                );
+                const hostileTargetController = targetController != null && targetController !== briefing.faction
+                    ? targetController
+                    : null;
+                if (!observeLocalOccupationPredicate(predicates, 'target_controller_hostile_known', hostileTargetController != null)) {
+                    recordLocalOccupationAttempt(observation, candidateClass, sectorId, target, [brigade.brigade_id], predicates, false);
+                    continue;
+                }
+                if (hostileTargetController == null) continue;
+                if (!observeLocalOccupationPredicate(predicates, 'rbih_hrhb_combat_allowed', !isRbihHrhbCombatBlocked(stateRef, briefing.faction, hostileTargetController))) {
+                    recordLocalOccupationAttempt(observation, candidateClass, sectorId, target, [brigade.brigade_id], predicates, false);
+                    continue;
+                }
+                const grazBlocked = shouldGrazBlockAttack(
+                    stateRef,
+                    briefing.corps_id,
+                    briefing.faction,
+                    target,
+                    hostileTargetController,
+                );
+                if (!observeLocalOccupationPredicate(predicates, 'graz_attack_allowed', !grazBlocked)) {
+                    recordLocalOccupationAttempt(observation, candidateClass, sectorId, target, [brigade.brigade_id], predicates, false);
+                    continue;
+                }
+                const prediction = predictDirectEnemyTargets(
+                    briefing,
+                    brigade.brigade_id,
+                    new Set([target]),
+                    briefing.spatial.adjacency as Map<any, any>,
+                    terrainCache,
+                    briefing.osid_population_map,
+                )[0]?.prediction;
+                const presentPrediction = prediction ?? null;
+                if (!observeLocalOccupationPredicate(predicates, 'prediction_present', presentPrediction != null)) {
+                    recordLocalOccupationAttempt(observation, candidateClass, sectorId, target, [brigade.brigade_id], predicates, false);
+                    continue;
+                }
+                if (presentPrediction == null) continue;
+                if (!observeLocalOccupationPredicate(predicates, 'defender_has_no_reachable_brigade', !presentPrediction.defender_has_reachable_brigade)) {
+                    recordLocalOccupationAttempt(observation, candidateClass, sectorId, target, [brigade.brigade_id], predicates, false);
+                    continue;
+                }
+                if (!observeLocalOccupationPredicate(predicates, 'outcome_sufficient', isOutcomeSufficientForAttack(presentPrediction.predicted_outcome, 'costly_victory'))) {
+                    recordLocalOccupationAttempt(observation, candidateClass, sectorId, target, [brigade.brigade_id], predicates, false);
+                    continue;
+                }
+                if (!observeLocalOccupationPredicate(predicates, 'target_not_claimed_by_executing_operation', !executingOperationObjectives.has(target))) {
+                    recordLocalOccupationAttempt(observation, candidateClass, sectorId, target, [brigade.brigade_id], predicates, false);
+                    continue;
+                }
+                recordLocalOccupationAttempt(observation, candidateClass, sectorId, target, [brigade.brigade_id], predicates, true);
+                return {
+                    brigade,
+                    sector_id: sectorId!,
+                    target_osid: target,
+                    prediction: presentPrediction,
+                    participating_brigade_ids: [brigade.brigade_id],
+                    prepare_before_intel: false,
+                };
+            }
         }
-        for (const target of [...directTargets].sort(strictCompare)) {
-            const targetPopulation = briefing.osid_population_map.get(target);
-            if (!Number.isFinite(targetPopulation)) continue;
-            if ((briefing.failed_offensive_objectives?.[target]?.cooldown_until_turn ?? 0) > briefing.turn) continue;
-            if (!isBoundedIsolatedEnemyPosition(target, briefing)) continue;
-            if (!isBrigadeEligibleForOperationObjectives(formation, [target])) continue;
-            const targetController = getPoliticalControllerOSID(
-                briefing.state_ref,
-                target,
-                briefing.reverse_map,
-            );
-            if (targetController == null || targetController === briefing.faction) continue;
-            if (shouldGrazBlockAttack(
-                briefing.state_ref,
-                briefing.corps_id,
-                briefing.faction,
-                target,
-                targetController,
-            )) continue;
-            const prediction = predictDirectEnemyTargets(
-                briefing,
-                brigade.brigade_id,
-                new Set([target]),
-                briefing.spatial.adjacency as Map<any, any>,
-                terrainCache,
-                briefing.osid_population_map,
-            )[0]?.prediction;
-            if (!prediction || prediction.defender_has_reachable_brigade) continue;
-            if (!isOutcomeSufficientForAttack(prediction.predicted_outcome, 'costly_victory')) continue;
-            return {
-                brigade,
-                sector_id: sectorId,
-                target_osid: target,
-                prediction,
-                participating_brigade_ids: [brigade.brigade_id],
-                prepare_before_intel: false,
-            };
+        return null;
+    };
+
+    const runCandidateClass = (
+        candidateClass: LocalOccupationCandidateClass,
+        search: () => LocalOccupationCandidate | null,
+    ): LocalOccupationCandidate | null => {
+        const attemptsBefore = observation?.attempts.length ?? 0;
+        const result = search();
+        if (observation) {
+            observation.class_outcomes.push({
+                candidate_class: candidateClass,
+                outcome: result
+                    ? 'selected'
+                    : observation.attempts.length > attemptsBefore
+                        ? 'rejected'
+                        : 'no_enumerated_candidate',
+            });
+        }
+        return result;
+    };
+    const markSkippedClasses = (): void => {
+        if (!observation) return;
+        const reached = new Set(observation.class_outcomes.map((entry) => entry.candidate_class));
+        for (const candidateClass of LOCAL_OCCUPATION_CLASSES) {
+            if (!reached.has(candidateClass)) {
+                observation.class_outcomes.push({ candidate_class: candidateClass, outcome: 'skipped_after_selection' });
+            }
+        }
+    };
+
+    if (options.only_class !== 'adjacency-only_group') {
+        const listedSingle = runCandidateClass('sector-listed_single', () => findSingleCandidate('sector-listed'));
+        if (listedSingle) {
+            markSkippedClasses();
+            return listedSingle;
         }
     }
 
@@ -455,54 +1032,110 @@ function findLocalOccupationCandidate(
     // This is a read-only projected staging view: real locations, movement and
     // launch assembly remain owned by the downstream operation pipeline.
     const stationaryLineStaffBySector = new Map<string, ReadonlySet<string>>();
-    for (const sector of corpsSectors) {
+    const findGroupCandidate = (targetPass: TargetPass): LocalOccupationCandidate | null => {
+        const candidateClass: LocalOccupationCandidateClass = targetPass === 'sector-listed'
+            ? 'sector-listed_group'
+            : 'adjacency-only_group';
+        let firstQualified: LocalOccupationCandidate | null = null;
+        for (const sector of corpsSectors) {
         const staff = new Set<string>();
         for (const brigadeId of sector.assigned_brigade_ids) {
             const formation = formationById[brigadeId];
             if (!formation || formation.status !== 'active' || !isEligibleOperationFormation(formation)) continue;
             if (!formation.location_osid || !sector.territory_osids.includes(formation.location_osid)) continue;
             if (activeOperationParticipants.has(brigadeId)) continue;
-            const movementStatus = briefing.state_ref.military.brigade_movement_state?.[brigadeId]?.status;
+            const movementStatus = stateRef.military.brigade_movement_state?.[brigadeId]?.status;
             if (movementStatus === 'packing' || movementStatus === 'in_transit') continue;
-            if (briefing.state_ref.military.brigade_movement_orders?.[brigadeId]) continue;
+            if (stateRef.military.brigade_movement_orders?.[brigadeId]) continue;
             staff.add(brigadeId);
         }
         stationaryLineStaffBySector.set(sector.sector_id, staff);
     }
     const rankedCandidateIds = candidates.map((candidate) => candidate.brigade_id);
     const evaluationById = new Map(candidates.map((candidate) => [candidate.brigade_id, candidate]));
+    const candidatePrimarySectorById = new Map<FormationId, string>();
+    for (const brigadeId of rankedCandidateIds) {
+        const sectorId = derivePrimarySectorForBrigades(
+            corpsSectors,
+            briefing.corps_id,
+            [brigadeId],
+            formationById,
+        );
+        if (sectorId) candidatePrimarySectorById.set(brigadeId, sectorId);
+    }
     const predictionAdjacency = briefing.spatial.adjacency as Map<any, any>;
-    const officerCombatLookup = briefing.state_ref.military.named_officers && briefing.state_ref.military.named_officer_data
-        ? buildOfficerCombatLookup(briefing.state_ref)
+    const officerCombatLookup = stateRef.military.named_officers && stateRef.military.named_officer_data
+        ? buildOfficerCombatLookup(stateRef)
         : undefined;
 
     for (const sector of corpsSectors) {
-        const commandState = briefing.state_ref.military.corps_command?.[briefing.corps_id];
-        const sectorIntelConfidence = getStalestSectorIntelConfidence(briefing.state_ref, sector.sector_id);
+        const commandState = stateRef.military.corps_command?.[briefing.corps_id];
+        const sectorIntelConfidence = getStalestSectorIntelConfidence(stateRef, sector.sector_id);
         const prepareBeforeIntel = shouldLaunchProbeInstead(
             briefing.faction,
             sectorIntelConfidence,
             commandState?.consecutive_probes ?? 0,
             briefing.turn,
-            briefing.state_ref.military.war_timeline,
+            stateRef.military.war_timeline,
         );
         const sectorParticipantIds = new Set<FormationId>([
             ...(sector.reserve_brigade_ids ?? []),
             ...(sector.rear_brigade_ids ?? []),
             ...sector.assigned_brigade_ids,
         ]);
-        const targets = new Set<string>();
+        const listedTargets = new Set<string>();
         for (const subSegment of sector.sub_segments ?? []) {
-            for (const target of subSegment.enemy_osids ?? []) targets.add(target);
+            for (const target of subSegment.enemy_osids ?? []) listedTargets.add(target);
+        }
+        // Use the same bounded local discovery window for concentrations: only
+        // eligible same-corps surplus brigades whose real primary assignment is
+        // this sector may contribute adjacent candidates. This does not reassign
+        // a brigade or sweep enemy territory globally.
+        const targets = new Set(listedTargets);
+        if (targetPass === 'adjacency-only') {
+            targets.clear();
+            for (const brigadeId of rankedCandidateIds) {
+                if (candidatePrimarySectorById.get(brigadeId) !== sector.sector_id) continue;
+                const location = formationById[brigadeId]?.location_osid;
+                if (!location) continue;
+                for (const target of briefing.spatial.adjacency.get(location) ?? []) {
+                    if (!listedTargets.has(target)) targets.add(target);
+                }
+            }
         }
         for (const target of [...targets].sort(strictCompare)) {
-            const targetPopulation = briefing.osid_population_map.get(target);
-            if (!Number.isFinite(targetPopulation)) continue;
-            if ((briefing.failed_offensive_objectives?.[target]?.cooldown_until_turn ?? 0) > briefing.turn) continue;
-            if (!isBoundedIsolatedEnemyPosition(target, briefing)) continue;
-            const targetController = getPoliticalControllerOSID(briefing.state_ref, target, briefing.reverse_map);
-            if (targetController == null || targetController === briefing.faction) continue;
-            if (shouldGrazBlockAttack(briefing.state_ref, briefing.corps_id, briefing.faction, target, targetController)) continue;
+            const predicates: LocalOccupationPredicateObservation[] | undefined = observation ? [] : undefined;
+            const targetPopulation = osidPopulationMap.get(target);
+            if (!observeLocalOccupationPredicate(predicates, 'target_population_present', Number.isFinite(targetPopulation))) {
+                recordLocalOccupationAttempt(observation, candidateClass, sector.sector_id, target, null, predicates, false);
+                continue;
+            }
+            if (!observeLocalOccupationPredicate(predicates, 'target_not_on_cooldown', (briefing.failed_offensive_objectives?.[target]?.cooldown_until_turn ?? 0) <= briefing.turn)) {
+                recordLocalOccupationAttempt(observation, candidateClass, sector.sector_id, target, null, predicates, false);
+                continue;
+            }
+            if (!observeLocalOccupationPredicate(predicates, 'bounded_isolated_enemy_position', isBoundedIsolatedEnemyPosition(target, briefing))) {
+                recordLocalOccupationAttempt(observation, candidateClass, sector.sector_id, target, null, predicates, false);
+                continue;
+            }
+            const targetController = getPoliticalControllerOSID(stateRef, target, reverseMap);
+            const hostileTargetController = targetController != null && targetController !== briefing.faction
+                ? targetController
+                : null;
+            if (!observeLocalOccupationPredicate(predicates, 'target_controller_hostile_known', hostileTargetController != null)) {
+                recordLocalOccupationAttempt(observation, candidateClass, sector.sector_id, target, null, predicates, false);
+                continue;
+            }
+            if (hostileTargetController == null) continue;
+            if (!observeLocalOccupationPredicate(predicates, 'rbih_hrhb_combat_allowed', !isRbihHrhbCombatBlocked(stateRef, briefing.faction, hostileTargetController))) {
+                recordLocalOccupationAttempt(observation, candidateClass, sector.sector_id, target, null, predicates, false);
+                continue;
+            }
+            const grazBlocked = shouldGrazBlockAttack(stateRef, briefing.corps_id, briefing.faction, target, hostileTargetController);
+            if (!observeLocalOccupationPredicate(predicates, 'graz_attack_allowed', !grazBlocked)) {
+                recordLocalOccupationAttempt(observation, candidateClass, sector.sector_id, target, null, predicates, false);
+                continue;
+            }
 
             const approaches = (
                 briefing.spatial.sharedBoundaryAdjacency?.get(target)
@@ -511,7 +1144,10 @@ function findLocalOccupationCandidate(
             )
                 .filter((osid) => briefing.spatial.friendlyOsidsByFaction?.get(briefing.faction)?.has(osid))
                 .sort(strictCompare);
-            if (approaches.length === 0) continue;
+            if (!observeLocalOccupationPredicate(predicates, 'friendly_approach_present', approaches.length > 0)) {
+                recordLocalOccupationAttempt(observation, candidateClass, sector.sector_id, target, null, predicates, false);
+                continue;
+            }
             const projectedApproachByBrigade = new Map<FormationId, string>();
             const distanceToTarget = (brigadeId: FormationId): number => {
                 const location = formationById[brigadeId]?.location_osid;
@@ -538,6 +1174,36 @@ function findLocalOccupationCandidate(
             const eligibleSurplusIds = rankedCandidateIds
                 .filter((brigadeId) => {
                     const formation = formationById[brigadeId];
+                    if (observation) {
+                        const rosterPredicates: LocalOccupationPredicateObservation[] = [];
+                        if (!observeLocalOccupationPredicate(rosterPredicates, 'same_corps', formation?.corps_id === briefing.corps_id)) {
+                            recordLocalOccupationGroupRoster(observation, candidateClass, 'projected_surplus', sector.sector_id, target, brigadeId, rosterPredicates, false);
+                            return false;
+                        }
+                        if (!observeLocalOccupationPredicate(rosterPredicates, 'not_on_elite_loan', formation.elite_loan_state?.on_loan !== true)) {
+                            recordLocalOccupationGroupRoster(observation, candidateClass, 'projected_surplus', sector.sector_id, target, brigadeId, rosterPredicates, false);
+                            return false;
+                        }
+                        if (!observeLocalOccupationPredicate(rosterPredicates, 'formation_eligible_for_objective', isBrigadeEligibleForOperationObjectives(formation, [target]))) {
+                            recordLocalOccupationGroupRoster(observation, candidateClass, 'projected_surplus', sector.sector_id, target, brigadeId, rosterPredicates, false);
+                            return false;
+                        }
+                        if (!observeLocalOccupationPredicate(rosterPredicates, 'approach_distance_finite', Number.isFinite(distanceToTarget(brigadeId)))) {
+                            recordLocalOccupationGroupRoster(observation, candidateClass, 'projected_surplus', sector.sector_id, target, brigadeId, rosterPredicates, false);
+                            return false;
+                        }
+                        const atApproach = formation.location_osid != null && approaches.includes(formation.location_osid);
+                        if (!observeLocalOccupationPredicate(
+                            rosterPredicates,
+                            'at_approach_or_reachable_in_time',
+                            atApproach || canReachAssemblyInTime(briefing, brigadeId, target, computePlanningDuration(1)),
+                        )) {
+                            recordLocalOccupationGroupRoster(observation, candidateClass, 'projected_surplus', sector.sector_id, target, brigadeId, rosterPredicates, false);
+                            return false;
+                        }
+                        recordLocalOccupationGroupRoster(observation, candidateClass, 'projected_surplus', sector.sector_id, target, brigadeId, rosterPredicates, true);
+                        return true;
+                    }
                     return formation?.corps_id === briefing.corps_id
                         && formation.elite_loan_state?.on_loan !== true
                         && isBrigadeEligibleForOperationObjectives(formation, [target])
@@ -547,7 +1213,10 @@ function findLocalOccupationCandidate(
                         // assembly budget (planning_duration + grace). The escalation path
                         // builds a multi-brigade op with planning_duration =
                         // computePlanningDuration(objectiveCount).
-                        && canReachAssemblyInTime(briefing, brigadeId, target, computePlanningDuration(1));
+                        && (
+                            (formation.location_osid != null && approaches.includes(formation.location_osid))
+                            || canReachAssemblyInTime(briefing, brigadeId, target, computePlanningDuration(1))
+                        );
                 });
             const primaryEnemyTargets = new Set(
                 (sector.sub_segments ?? []).flatMap((subSegment) => subSegment.enemy_osids ?? []),
@@ -564,6 +1233,28 @@ function findLocalOccupationCandidate(
                 ? sector.assigned_brigade_ids.filter((brigadeId) => {
                     const formation = formationById[brigadeId];
                     const movementStatus = briefing.state_ref?.military.brigade_movement_state?.[brigadeId]?.status;
+                    if (observation) {
+                        const rosterPredicates: LocalOccupationPredicateObservation[] = [];
+                        const reject = (): false => {
+                            recordLocalOccupationGroupRoster(observation, candidateClass, 'staged_primary_garrison', sector.sector_id, target, brigadeId, rosterPredicates, false);
+                            return false;
+                        };
+                        if (!observeLocalOccupationPredicate(rosterPredicates, 'garrison_locked', garrisonLockedIds.has(brigadeId))) return reject();
+                        if (!observeLocalOccupationPredicate(rosterPredicates, 'elite_available', mayEliteJoinOperation(brigadeId, briefing.turn))) return reject();
+                        if (!observeLocalOccupationPredicate(rosterPredicates, 'not_queued_historical', !queuedHistoricalParticipants.has(brigadeId))) return reject();
+                        if (!observeLocalOccupationPredicate(rosterPredicates, 'not_active_operation', !activeOperationParticipants.has(brigadeId))) return reject();
+                        if (!observeLocalOccupationPredicate(rosterPredicates, 'combat_ready', isCombatReadyParticipant(briefing, brigadeId))) return reject();
+                        if (!observeLocalOccupationPredicate(rosterPredicates, 'movement_not_packing', movementStatus !== 'packing')) return reject();
+                        if (!observeLocalOccupationPredicate(rosterPredicates, 'movement_not_in_transit', movementStatus !== 'in_transit')) return reject();
+                        if (!observeLocalOccupationPredicate(rosterPredicates, 'no_movement_order', !briefing.state_ref?.military.brigade_movement_orders?.[brigadeId])) return reject();
+                        if (!observeLocalOccupationPredicate(rosterPredicates, 'same_corps', formation?.corps_id === briefing.corps_id)) return reject();
+                        if (!observeLocalOccupationPredicate(rosterPredicates, 'not_on_elite_loan', formation.elite_loan_state?.on_loan !== true)) return reject();
+                        if (!observeLocalOccupationPredicate(rosterPredicates, 'formation_eligible_for_objective', isBrigadeEligibleForOperationObjectives(formation, [target]))) return reject();
+                        if (!observeLocalOccupationPredicate(rosterPredicates, 'location_present', !!formation.location_osid)) return reject();
+                        if (!observeLocalOccupationPredicate(rosterPredicates, 'location_is_friendly_approach', approaches.includes(formation.location_osid!))) return reject();
+                        recordLocalOccupationGroupRoster(observation, candidateClass, 'staged_primary_garrison', sector.sector_id, target, brigadeId, rosterPredicates, true);
+                        return true;
+                    }
                     return garrisonLockedIds.has(brigadeId)
                         && mayEliteJoinOperation(brigadeId, briefing.turn)
                         && !queuedHistoricalParticipants.has(brigadeId)
@@ -627,7 +1318,9 @@ function findLocalOccupationCandidate(
                     briefing.osid_population_map,
                     undefined,
                     briefing.ethnic_map,
-                    `${BUILD_OPERATIONS_PROFILE_PREFIX}.localOccupation.predictConcentration`,
+                    options.suppress_profile
+                        ? undefined
+                        : `${BUILD_OPERATIONS_PROFILE_PREFIX}.localOccupation.predictConcentration`,
                     officerCombatLookup,
                 );
             };
@@ -641,21 +1334,37 @@ function findLocalOccupationCandidate(
             if (!prepareBeforeIntel && stagedPrimaryParticipants.length >= ISOLATED_POSITION_OPERATION_MIN_BRIGADES) {
                 const stagedPrediction = predictParticipants(stagedPrimaryParticipants, false);
                 const stagedLead = stagedPrimaryParticipants.find((brigadeId) => evaluationById.has(brigadeId));
-                if (
-                    stagedLead
-                    && stagedPrediction
-                    && !stagedPrediction.defender_has_reachable_brigade
-                    && isOutcomeSufficientForAttack(stagedPrediction.predicted_outcome, 'stalemate')
-                ) {
-                    return {
-                        brigade: evaluationById.get(stagedLead)!,
+                const stagedPredicates = predicates ? [...predicates] : undefined;
+                observeLocalOccupationPredicate(stagedPredicates, 'minimum_group_roster', true);
+                const stagedLeadPresent = observeLocalOccupationPredicate(stagedPredicates, 'staged_lead_present', stagedLead != null);
+                const stagedPredictionPresent = stagedLeadPresent
+                    && observeLocalOccupationPredicate(stagedPredicates, 'prediction_present', stagedPrediction != null);
+                let stagedDefenderClear = false;
+                let stagedOutcomeSufficient = false;
+                if (stagedPredictionPresent && stagedPrediction != null) {
+                    stagedDefenderClear = observeLocalOccupationPredicate(stagedPredicates, 'defender_has_no_reachable_brigade', !stagedPrediction.defender_has_reachable_brigade);
+                    stagedOutcomeSufficient = stagedDefenderClear
+                        && observeLocalOccupationPredicate(stagedPredicates, 'outcome_sufficient', isOutcomeSufficientForAttack(stagedPrediction.predicted_outcome, 'stalemate'));
+                }
+                if (stagedOutcomeSufficient && stagedPrediction != null) {
+                    if (!observeLocalOccupationPredicate(stagedPredicates, 'target_not_claimed_by_executing_operation', !executingOperationObjectives.has(target))) {
+                        recordLocalOccupationAttempt(observation, candidateClass, sector.sector_id, target, stagedPrimaryParticipants, stagedPredicates, false);
+                        continue;
+                    }
+                    recordLocalOccupationAttempt(observation, candidateClass, sector.sector_id, target, stagedPrimaryParticipants, stagedPredicates, true);
+                    const candidate = {
+                        brigade: evaluationById.get(stagedLead!)!,
                         sector_id: sector.sector_id,
                         target_osid: target,
                         prediction: stagedPrediction,
                         participating_brigade_ids: stagedPrimaryParticipants,
                         prepare_before_intel: false,
                     };
+                    if (!options.enumerate_all_qualified) return candidate;
+                    firstQualified ??= candidate;
+                    continue;
                 }
+                recordLocalOccupationAttempt(observation, candidateClass, sector.sector_id, target, stagedPrimaryParticipants, stagedPredicates, false);
             }
             const primaryParticipants = [
                 ...stagedPrimaryParticipants,
@@ -678,29 +1387,74 @@ function findLocalOccupationCandidate(
                 ...primaryParticipants,
                 ...donors.brigade_ids.slice(0, ISOLATED_POSITION_OPERATION_MAX_BRIGADES - primaryParticipants.length),
             ] as FormationId[];
-            if (participants.length < ISOLATED_POSITION_OPERATION_MIN_BRIGADES) continue;
+            if (!observeLocalOccupationPredicate(predicates, 'minimum_group_roster', participants.length >= ISOLATED_POSITION_OPERATION_MIN_BRIGADES)) {
+                recordLocalOccupationAttempt(observation, candidateClass, sector.sector_id, target, participants, predicates, false);
+                continue;
+            }
             // Before launch-grade intelligence exists, preparation must own the
             // complete bounded roster from birth. Preparation cannot add a donor
             // later, so a weak pair must remain a probe instead of reserving an
             // under-strength assault.
-            if (prepareBeforeIntel && participants.length !== ISOLATED_POSITION_OPERATION_MAX_BRIGADES) continue;
+            if (!observeLocalOccupationPredicate(predicates, 'preparation_roster_complete', !prepareBeforeIntel || participants.length === ISOLATED_POSITION_OPERATION_MAX_BRIGADES)) {
+                recordLocalOccupationAttempt(observation, candidateClass, sector.sector_id, target, participants, predicates, false);
+                continue;
+            }
             const prediction = predictParticipants(participants, true);
-            if (!prediction || prediction.defender_has_reachable_brigade) continue;
-            if (!isOutcomeSufficientForAttack(prediction.predicted_outcome, 'stalemate')) continue;
+            const presentPrediction = prediction ?? null;
+            if (!observeLocalOccupationPredicate(predicates, 'prediction_present', presentPrediction != null)) {
+                recordLocalOccupationAttempt(observation, candidateClass, sector.sector_id, target, participants, predicates, false);
+                continue;
+            }
+            if (presentPrediction == null) continue;
+            if (!observeLocalOccupationPredicate(predicates, 'defender_has_no_reachable_brigade', !presentPrediction.defender_has_reachable_brigade)) {
+                recordLocalOccupationAttempt(observation, candidateClass, sector.sector_id, target, participants, predicates, false);
+                continue;
+            }
+            if (!observeLocalOccupationPredicate(predicates, 'outcome_sufficient', isOutcomeSufficientForAttack(presentPrediction.predicted_outcome, 'stalemate'))) {
+                recordLocalOccupationAttempt(observation, candidateClass, sector.sector_id, target, participants, predicates, false);
+                continue;
+            }
             const leadId = participants.find((brigadeId) => evaluationById.has(brigadeId));
             const brigade = leadId ? evaluationById.get(leadId) : undefined;
-            if (!brigade) continue;
-            return {
-                brigade,
+            if (!observeLocalOccupationPredicate(predicates, 'surplus_lead_present', brigade != null)) {
+                recordLocalOccupationAttempt(observation, candidateClass, sector.sector_id, target, participants, predicates, false);
+                continue;
+            }
+            if (!observeLocalOccupationPredicate(predicates, 'target_not_claimed_by_executing_operation', !executingOperationObjectives.has(target))) {
+                recordLocalOccupationAttempt(observation, candidateClass, sector.sector_id, target, participants, predicates, false);
+                continue;
+            }
+            recordLocalOccupationAttempt(observation, candidateClass, sector.sector_id, target, participants, predicates, true);
+            const candidate = {
+                brigade: brigade!,
                 sector_id: sector.sector_id,
                 target_osid: target,
-                prediction,
+                prediction: presentPrediction,
                 participating_brigade_ids: participants,
                 prepare_before_intel: prepareBeforeIntel,
             };
+            if (!options.enumerate_all_qualified) return candidate;
+            firstQualified ??= candidate;
         }
+        }
+        return firstQualified;
+    };
+
+    if (options.only_class === 'adjacency-only_group') {
+        return runCandidateClass('adjacency-only_group', () => findGroupCandidate('adjacency-only'));
     }
-    return null;
+
+    const listedGroup = runCandidateClass('sector-listed_group', () => findGroupCandidate('sector-listed'));
+    if (listedGroup) {
+        markSkippedClasses();
+        return listedGroup;
+    }
+    const adjacencySingle = runCandidateClass('adjacency-only_single', () => findSingleCandidate('adjacency-only'));
+    if (adjacencySingle) {
+        markSkippedClasses();
+        return adjacencySingle;
+    }
+    return runCandidateClass('adjacency-only_group', () => findGroupCandidate('adjacency-only'));
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1193,11 +1947,403 @@ function buildSectorReassignmentOrders(
 // buildOperations — create CorpsOperation list
 // ═══════════════════════════════════════════════════════════════════════════
 
+type CommanderCreationExit =
+    | 'active_slot_full'
+    | 'below_min_participants'
+    | 'no_objectives'
+    | 'below_min_after_eligibility'
+    | 'plan_probe_created'
+    | 'plan_probe_overlap_suppressed'
+    | 'general_created'
+    | 'general_overlap_suppressed'
+    | 'reduction_created'
+    | 'reduction_overlap_suppressed'
+    | 'fallback_probe_created'
+    | 'fallback_probe_overlap_suppressed'
+    | 'completed_no_operation';
+
+type CommanderCreationSite = 'general' | 'plan_probe' | 'reduction' | 'fallback_probe';
+
+interface CommanderCreationBuiltOperation {
+    site: CommanderCreationSite;
+    name: string;
+    type: string;
+    /** Stored CorpsOperation.started_turn (the operation has no stored id; any id is derived from host corps + name + started_turn). */
+    started_turn: number;
+}
+
+interface CommanderCreationOperationTuple {
+    derived_id: string;
+    host_corps_id: string;
+    name: string;
+    type: string;
+    started_turn: number;
+    sector_id: string | null;
+    objective_ids: string[];
+    participant_ids: string[];
+}
+
+interface CommanderCreationOverlapCheck extends CommanderCreationOverlapPredicates {
+    existing_operation: CommanderCreationOperationTuple;
+}
+
+interface CommanderCreationOverlapDetail {
+    candidate: CommanderCreationOperationTuple;
+    checks: CommanderCreationOverlapCheck[];
+    first_matched_clause: CommanderCreationOverlapClause | null;
+    conflicting_operation: CommanderCreationOperationTuple | null;
+}
+
+type CommanderCreationProbeDecisionSite = 'plan' | 'fallback_escalation';
+
+interface CommanderCreationProbeDecision extends ProbeLaunchDecisionTrace {
+    reached: true;
+    site: CommanderCreationProbeDecisionSite;
+    sector_id: string | null;
+    sector_intel_confidence: number;
+    consecutive_probes: number;
+    bilateral_offensive: boolean | null;
+}
+
+interface CommanderCreationProbeGateReceipt {
+    selector: { faction: FactionId; corps_id: FormationId; turn: number };
+    first_reached_exit: CommanderCreationExit | null;
+    plan_decision: CommanderCreationProbeDecision | null;
+    fallback_escalation_decision: CommanderCreationProbeDecision | null;
+    candidate_operations: Array<{ site: CommanderCreationSite; operation: CommanderCreationOperationTuple }>;
+    returned_operations: CommanderCreationOperationTuple[];
+    target_selection_detail?: CommanderCreationProbeTargetSelectionDetail;
+}
+
+type CommanderCreationProbeTargetSelectionStatus =
+    | 'not_reached'
+    | 'no_brigade'
+    | 'no_sector'
+    | 'missing_adjacency_or_friendly_set_or_location'
+    | 'local_occupation_bypass'
+    | 'empty_enemy_set'
+    | 'empty_direct_set'
+    | 'all_filtered'
+    | 'generic_search';
+
+type CommanderCreationProbeTargetRejector =
+    | 'cooldown'
+    | 'politics'
+    | 'direct'
+    | 'reachable'
+    | 'predicted_viable';
+
+interface CommanderCreationProbeTargetDetail {
+    target_id: string;
+    cooldown_raw_present: boolean | null;
+    cooldown_raw_value: number | null;
+    cooldown_effective_value: number | null;
+    controller: FactionId | null;
+    politically_blocked: boolean | null;
+    prediction_present: boolean | null;
+    prediction_outcome: string | null;
+    prediction_threshold: 'stalemate';
+    predicted_viable: boolean | null;
+    direct: boolean;
+    reachable: boolean | null;
+    approach_distance: number | null;
+    cooldown_filter_reached: boolean;
+    cooldown_filter_passed: boolean | null;
+    politics_filter_reached: boolean;
+    politics_filter_passed: boolean | null;
+    direct_filter_reached: boolean;
+    direct_filter_passed: boolean | null;
+    reachable_filter_reached: boolean;
+    reachable_filter_passed: boolean | null;
+    prediction_filter_reached: boolean;
+    prediction_filter_passed: boolean | null;
+    passed: boolean;
+    first_rejecting_filter: CommanderCreationProbeTargetRejector | null;
+}
+
+interface CommanderCreationProbeTargetSelectionDetail {
+    status: CommanderCreationProbeTargetSelectionStatus;
+    selected_brigade_id: FormationId | null;
+    selected_brigade_location: string | null;
+    derived_sector_id: string | null;
+    enemy_candidate_ids: string[];
+    direct_candidate_ids: string[];
+    survivor_ids: string[];
+    ranked_objective_ids: string[];
+    targets: CommanderCreationProbeTargetDetail[];
+}
+
+type CommanderCreationLocalOpportunityOperand =
+    | 'ops_length_zero'
+    | 'allocation_can_launch_ops'
+    | 'surplus_pool_nonempty'
+    | 'initiative_above_threshold'
+    | 'active_slot_free';
+
+type CommanderCreationLocalOpportunityOperands = Record<
+    CommanderCreationLocalOpportunityOperand,
+    boolean | null
+>;
+
+/**
+ * Detached reached-field receipt of ONE buildOperations call (opt-in `commander_creation`). Every optional field is set only
+ * where its decision was actually reached (absent otherwise, never inferred false/0); inner-callback emptiness is a reached
+ * INPUT, never an outer terminal. Scalars/strings and copied sorted id arrays only.
+ */
+interface CommanderCreationObservation {
+    plan_present: boolean;
+    plan_source: string | null;
+    plan_status: string | null;
+    plan_target_ids: string[];
+    general_entry_passed: boolean;
+    exit: CommanderCreationExit | null;
+    built: CommanderCreationBuiltOperation[];
+    active_slot_users?: number;
+    max_operation_slots?: number;
+    primary_pool_size?: number;
+    attached_pool_size?: number;
+    participating_count?: number;
+    effective_min_for_op?: number;
+    reachable_enemy_osid_count?: number;
+    objective_ids?: string[];
+    eligible_count?: number;
+    launch_probe_evaluated?: boolean;
+    launch_probe?: boolean;
+    probe_on_cooldown?: boolean;
+    can_consider_local_opportunity?: boolean;
+    local_opportunity_operands?: CommanderCreationLocalOpportunityOperands;
+    local_opportunity_first_failed_operand?: CommanderCreationLocalOpportunityOperand | null;
+    local_occupation_candidate_present?: boolean;
+    fallback_considered?: boolean;
+    probe_brigade_selected?: boolean;
+    probe_objective_ids?: string[];
+    probe_reachable?: boolean;
+    target_is_bounded_position?: boolean;
+    reduction_participant_count?: number;
+    single_brigade_sufficient?: boolean;
+    escalate_to_operation?: boolean;
+    overlap_checked?: boolean;
+    overlap_found?: boolean;
+    overlap_detail?: CommanderCreationOverlapDetail;
+    probe_gate_receipt?: CommanderCreationProbeGateReceipt;
+}
+
+function commanderCreationOperation(site: CommanderCreationSite, op: CorpsOperation): CommanderCreationBuiltOperation {
+    return { site, name: op.name, type: String(op.type), started_turn: op.started_turn };
+}
+
+function commanderCreationOperationTuple(
+    hostCorpsId: string,
+    op: Pick<CorpsOperation, 'name' | 'type' | 'started_turn' | 'sector_id' | 'objectives' | 'participating_brigades'>,
+): CommanderCreationOperationTuple {
+    return {
+        derived_id: `${hostCorpsId}:${op.name}:t${op.started_turn}`,
+        host_corps_id: hostCorpsId,
+        name: op.name,
+        type: String(op.type),
+        started_turn: op.started_turn,
+        sector_id: op.sector_id ?? null,
+        objective_ids: [...(op.objectives ?? [])].sort(strictCompare),
+        participant_ids: [...(op.participating_brigades ?? [])].sort(strictCompare),
+    };
+}
+
+function findCommanderCreationOverlap(
+    activeOperations: readonly CorpsOperation[],
+    candidate: CorpsOperation,
+    hostCorpsId: string,
+    obs: CommanderCreationObservation | undefined,
+): CorpsOperation | undefined {
+    if (!obs) {
+        return activeOperations.find((existing) => operationsOverlap(existing, candidate));
+    }
+    const detail: CommanderCreationOverlapDetail = {
+        candidate: commanderCreationOperationTuple(hostCorpsId, candidate),
+        checks: [],
+        first_matched_clause: null,
+        conflicting_operation: null,
+    };
+    obs.overlap_detail = detail;
+    return activeOperations.find((existing) => operationsOverlap(existing, candidate, (predicates) => {
+        const existingOperation = commanderCreationOperationTuple(hostCorpsId, existing);
+        detail.checks.push({ existing_operation: existingOperation, ...predicates });
+        if (predicates.first_matched_clause !== null && detail.first_matched_clause === null) {
+            detail.first_matched_clause = predicates.first_matched_clause;
+            detail.conflicting_operation = existingOperation;
+        }
+    }));
+}
+
+function observeCanConsiderLocalOpportunity(
+    obs: CommanderCreationObservation,
+    ops: readonly CorpsOperation[],
+    allocation: AllocationResult,
+    personality: OfficerPersonality,
+    briefing: CommanderBriefing,
+): boolean {
+    const operands: CommanderCreationLocalOpportunityOperands = {
+        ops_length_zero: null,
+        allocation_can_launch_ops: null,
+        surplus_pool_nonempty: null,
+        initiative_above_threshold: null,
+        active_slot_free: null,
+    };
+    let firstFailed: CommanderCreationLocalOpportunityOperand | null = null;
+    const reached = (operand: CommanderCreationLocalOpportunityOperand, value: boolean): boolean => {
+        operands[operand] = value;
+        if (!value && firstFailed === null) firstFailed = operand;
+        return value;
+    };
+    const result =
+        reached('ops_length_zero', ops.length === 0) &&
+        reached('allocation_can_launch_ops', allocation.can_launch_ops) &&
+        reached('surplus_pool_nonempty', allocation.surplus_pool.length > 0) &&
+        reached('initiative_above_threshold', personality.initiative > 0.3) &&
+        reached(
+            'active_slot_free',
+            getOperationSlotUsageForOperations(briefing.active_operations.filter(op => op.phase !== 'recovery'))
+                < getMaxOperationSlots(briefing.brigades.length),
+        );
+    obs.local_opportunity_operands = operands;
+    obs.local_opportunity_first_failed_operand = firstFailed;
+    return result;
+}
+
+function markCommanderCreationExit(obs: CommanderCreationObservation | undefined, exit: CommanderCreationExit): void {
+    if (obs && obs.exit === null) obs.exit = exit;
+}
+
+function isFourthCorpsProbeWindow(briefing: CommanderBriefing): boolean {
+    return briefing.faction === 'RBiH'
+        && briefing.corps_id === 'arbih_4th_corps'
+        && briefing.turn >= 177
+        && briefing.turn <= 179;
+}
+
+function observeProbeDecision(
+    obs: CommanderCreationObservation | undefined,
+    site: CommanderCreationProbeDecisionSite,
+    briefing: CommanderBriefing,
+    sectorId: string | null,
+    sectorIntelConfidence: number,
+    consecutiveProbes: number,
+): boolean {
+    const receipt = obs?.probe_gate_receipt;
+    if (!receipt) {
+        return shouldLaunchProbeInstead(
+            briefing.faction,
+            sectorIntelConfidence,
+            consecutiveProbes,
+            briefing.turn,
+            briefing.state_ref?.military.war_timeline,
+        );
+    }
+    let trace: ProbeLaunchDecisionTrace | undefined;
+    const launchProbe = shouldLaunchProbeInstead(
+        briefing.faction,
+        sectorIntelConfidence,
+        consecutiveProbes,
+        briefing.turn,
+        briefing.state_ref?.military.war_timeline,
+        (actual) => { trace = actual; },
+    );
+    if (trace) {
+        receipt[site === 'plan' ? 'plan_decision' : 'fallback_escalation_decision'] = {
+            reached: true,
+            site,
+            sector_id: sectorId,
+            sector_intel_confidence: sectorIntelConfidence,
+            consecutive_probes: consecutiveProbes,
+            bilateral_offensive: briefing.bilateral_offensive ?? null,
+            ...trace,
+        };
+    }
+    return launchProbe;
+}
+
+function recordProbeWindowCandidate(
+    obs: CommanderCreationObservation | undefined,
+    site: CommanderCreationSite,
+    operation: CorpsOperation,
+    hostCorpsId: FormationId,
+): void {
+    obs?.probe_gate_receipt?.candidate_operations.push({
+        site,
+        operation: commanderCreationOperationTuple(hostCorpsId, operation),
+    });
+}
+
+/**
+ * Observation wrapper (opt-in `commander_creation`). The decision body is unchanged; `obs` exists only when the topic is on,
+ * and one completion row is written to stdout when the REAL body returns normally (an exception writes no row).
+ */
 function buildOperations(
     briefing: CommanderBriefing,
     allocation: AllocationResult,
     planDecision: PlanDecision,
     personality: OfficerPersonality,
+): CorpsOperation[] {
+    if (!isReasonCodeTopicEnabled('commander_creation')) {
+        return buildOperationsImpl(briefing, allocation, planDecision, personality, undefined);
+    }
+    const plan = planDecision.plan;
+    const obs: CommanderCreationObservation = {
+        plan_present: plan != null,
+        plan_source: plan ? String(plan.source) : null,
+        plan_status: plan ? String(plan.status) : null,
+        plan_target_ids: plan ? [...plan.target_osids].sort(strictCompare) : [],
+        general_entry_passed: false,
+        exit: null,
+        built: [],
+    };
+    if (isFourthCorpsProbeWindow(briefing)) {
+        obs.probe_gate_receipt = {
+            selector: { faction: briefing.faction, corps_id: briefing.corps_id, turn: briefing.turn },
+            first_reached_exit: null,
+            plan_decision: null,
+            fallback_escalation_decision: null,
+            candidate_operations: [],
+            returned_operations: [],
+            ...(briefing.turn === 178 ? { target_selection_detail: {
+                status: 'not_reached',
+                selected_brigade_id: null,
+                selected_brigade_location: null,
+                derived_sector_id: null,
+                enemy_candidate_ids: [],
+                direct_candidate_ids: [],
+                survivor_ids: [],
+                ranked_objective_ids: [],
+                targets: [],
+            } } : {}),
+        };
+    }
+    const ops = buildOperationsImpl(briefing, allocation, planDecision, personality, obs);
+    if (obs.exit === null) obs.exit = 'completed_no_operation';
+    if (obs.probe_gate_receipt) {
+        obs.probe_gate_receipt.first_reached_exit = obs.exit;
+        obs.probe_gate_receipt.returned_operations = ops.map((operation) => (
+            commanderCreationOperationTuple(briefing.corps_id, operation)
+        ));
+    }
+    emitCommanderCreationRecord({
+        schema: 'commander_creation.v1',
+        phase: 'build_operations_complete',
+        turn: briefing.turn,
+        faction: briefing.faction,
+        corps_id: briefing.corps_id,
+        ...obs,
+        host_corps_id: briefing.corps_id,
+        returned: ops.map((op) => ({ name: op.name, type: String(op.type), started_turn: op.started_turn })),
+    });
+    return ops;
+}
+
+function buildOperationsImpl(
+    briefing: CommanderBriefing,
+    allocation: AllocationResult,
+    planDecision: PlanDecision,
+    personality: OfficerPersonality,
+    obs: CommanderCreationObservation | undefined,
 ): CorpsOperation[] {
     const ops: CorpsOperation[] = [];
 
@@ -1212,6 +2358,7 @@ function buildOperations(
         (planDecision.plan.target_osids.length > 0 || planDecision.plan.source === 'opportunity')
     ) {
         const activePlan = planDecision.plan;
+        if (obs) obs.general_entry_passed = true;
         const authoredOperationName = activePlan.source === 'pre_planned'
             ? activePlan.objective_description
             : undefined;
@@ -1227,7 +2374,14 @@ function buildOperations(
             `${BUILD_OPERATIONS_PROFILE_PREFIX}.plan.activeSlotUsers`,
             () => briefing.active_operations.filter(op => op.phase !== 'recovery'),
         );
-        if (activeSlotUsers.length >= getMaxOperationSlots(briefing.brigades.length)) {
+        const activeSlotUsage = getOperationSlotUsageForOperations(activeSlotUsers);
+        const maxOperationSlots = getMaxOperationSlots(briefing.brigades.length);
+        if (obs) {
+            obs.active_slot_users = activeSlotUsage;
+            obs.max_operation_slots = maxOperationSlots;
+        }
+        if (activeSlotUsage >= maxOperationSlots) {
+            markCommanderCreationExit(obs, 'active_slot_full');
             return ops;
         }
         const surplusSet = new Set(
@@ -1382,6 +2536,10 @@ function buildOperations(
             },
         );
 
+        if (obs) {
+            obs.primary_pool_size = primaryPool.length;
+            obs.attached_pool_size = attachedPool.length;
+        }
         let participatingBrigades = capOpportunityOperationParticipants(
             [...new Set([...primaryPool, ...attachedPool])].sort(strictCompare),
             activePlan.source,
@@ -1444,7 +2602,12 @@ function buildOperations(
         const effectiveMinForOp = combinedMult !== 1.0
             ? Math.ceil(baseMinForOp / combinedMult)
             : baseMinForOp;
+        if (obs) {
+            obs.participating_count = participatingBrigades.length;
+            obs.effective_min_for_op = effectiveMinForOp;
+        }
         if (participatingBrigades.length < effectiveMinForOp) {
+            markCommanderCreationExit(obs, 'below_min_participants');
             return ops;
         }
 
@@ -1494,7 +2657,12 @@ function buildOperations(
         // Guard: if every plan objective was stale (none survived the filter), skip
         // creating this operation rather than injecting an empty-objectives op that
         // would immediately stall. The plan will be abandoned on the next assess cycle.
+        if (obs) {
+            obs.reachable_enemy_osid_count = reachableEnemyOsids.size;
+            obs.objective_ids = [...objectives].sort(strictCompare);
+        }
         if (objectives.length === 0) {
+            markCommanderCreationExit(obs, 'no_objectives');
             return ops;
         }
 
@@ -1516,7 +2684,9 @@ function buildOperations(
             const eligibilityById = new Map(briefing.brigades.map((b) => [b.id, b]));
             const eligible = participatingBrigades.filter((id) =>
                 isBrigadeEligibleForOperationObjectives(eligibilityById.get(id), objectives));
+            if (obs) obs.eligible_count = eligible.length;
             if (eligible.length < effectiveMinForOp) {
+                markCommanderCreationExit(obs, 'below_min_after_eligibility');
                 return ops;
             }
             participatingBrigades = eligible;
@@ -1530,13 +2700,18 @@ function buildOperations(
         // front-derived campaign objective. Treat that as sufficient command
         // intent to commit rather than converting the short war window into
         // another non-occupying reconnaissance probe.
-        const launchProbe = !briefing.bilateral_offensive && shouldLaunchProbeInstead(
-            briefing.faction,
+        const launchProbe = !briefing.bilateral_offensive && observeProbeDecision(
+            obs,
+            'plan',
+            briefing,
+            sectorId ?? null,
             sectorIntelConfidence,
             commandState?.consecutive_probes ?? 0,
-            briefing.turn,
-            briefing.state_ref?.military.war_timeline,
         );
+        if (obs) {
+            obs.launch_probe_evaluated = !briefing.bilateral_offensive;
+            if (!briefing.bilateral_offensive) obs.launch_probe = launchProbe;
+        }
         if (launchProbe) {
             const probeOp = buildProbeOperation(
                 briefing.corps_id,
@@ -1545,9 +2720,19 @@ function buildOperations(
                 sectorId ?? undefined,
                 objectives,
             );
-            const conflictingProbe = briefing.active_operations.find(
-                (existing) => operationsOverlap(existing, probeOp),
+            const conflictingProbe = findCommanderCreationOverlap(
+                briefing.active_operations,
+                probeOp,
+                briefing.corps_id,
+                obs,
             );
+            if (obs) {
+                obs.built.push(commanderCreationOperation('plan_probe', probeOp));
+                recordProbeWindowCandidate(obs, 'plan_probe', probeOp, briefing.corps_id);
+                obs.overlap_checked = true;
+                obs.overlap_found = conflictingProbe != null;
+                markCommanderCreationExit(obs, conflictingProbe ? 'plan_probe_overlap_suppressed' : 'plan_probe_created');
+            }
             if (!conflictingProbe) {
                 ops.push(probeOp);
             }
@@ -1591,8 +2776,20 @@ function buildOperations(
             },
         );
 
-        const conflictingOp = briefing.active_operations.find((existing) => operationsOverlap(existing, op));
+        const conflictingOp = findCommanderCreationOverlap(
+            briefing.active_operations,
+            op,
+            briefing.corps_id,
+            obs,
+        );
+        if (obs) {
+            obs.built.push(commanderCreationOperation('general', op));
+            recordProbeWindowCandidate(obs, 'general', op, briefing.corps_id);
+            obs.overlap_checked = true;
+            obs.overlap_found = conflictingOp != null;
+        }
         if (conflictingOp) {
+            markCommanderCreationExit(obs, 'general_overlap_suppressed');
             return ops;
         }
 
@@ -1610,6 +2807,7 @@ function buildOperations(
             op.force_quality_max_axes_at_launch = activePlan.force_quality_max_axes;
         }
 
+        markCommanderCreationExit(obs, 'general_created');
         ops.push(op);
     }
 
@@ -1637,22 +2835,29 @@ function buildOperations(
         },
     );
 
-    const canConsiderLocalOpportunity =
-        ops.length === 0 &&
-        allocation.can_launch_ops &&
-        allocation.surplus_pool.length > 0 &&
-        personality.initiative > 0.3 &&
-        briefing.active_operations.filter(op => op.phase !== 'recovery').length < getMaxOperationSlots(briefing.brigades.length);
+    const canConsiderLocalOpportunity = obs
+        ? observeCanConsiderLocalOpportunity(obs, ops, allocation, personality, briefing)
+        : ops.length === 0 &&
+            allocation.can_launch_ops &&
+            allocation.surplus_pool.length > 0 &&
+            personality.initiative > 0.3 &&
+            getOperationSlotUsageForOperations(briefing.active_operations.filter(op => op.phase !== 'recovery')) < getMaxOperationSlots(briefing.brigades.length);
     const localOccupationCandidate = canConsiderLocalOpportunity
         ? botOrdersPerfTime(
             `${BUILD_OPERATIONS_PROFILE_PREFIX}.localOccupation.selectCandidate`,
             () => findLocalOccupationCandidate(briefing, allocation),
         )
         : null;
+    if (obs) {
+        obs.probe_on_cooldown = probeOnCooldown;
+        obs.can_consider_local_opportunity = canConsiderLocalOpportunity;
+        if (canConsiderLocalOpportunity) obs.local_occupation_candidate_present = localOccupationCandidate != null;
+    }
 
     // If no plan but surplus and high-initiative commander: occupy a verified
     // local pocket, or retain the cooldown-governed generic probe fallback.
     if (canConsiderLocalOpportunity && (localOccupationCandidate != null || !probeOnCooldown)) {
+        if (obs) obs.fallback_considered = true;
 
         // A verified local occupation pair takes precedence. If there is none,
         // retain the existing highest-fitness probe selection unchanged.
@@ -1674,8 +2879,17 @@ function buildOperations(
                     })[0];
             })(),
         );
+        if (obs) obs.probe_brigade_selected = probeBrigade != null;
+        const targetSelectionDetail = obs?.probe_gate_receipt?.target_selection_detail;
+        if (targetSelectionDetail && !probeBrigade) targetSelectionDetail.status = 'no_brigade';
 
         if (probeBrigade) {
+            if (targetSelectionDetail) {
+                targetSelectionDetail.selected_brigade_id = probeBrigade.brigade_id;
+                targetSelectionDetail.selected_brigade_location = briefing.brigades.find(
+                    (brigade) => brigade.id === probeBrigade.brigade_id,
+                )?.location_osid ?? null;
+            }
             const probeSectorId = localOccupationCandidate?.sector_id
                 ?? derivePrimarySectorForBrigades(
                     briefing.sectors.filter((sector) => sector.corps_id === briefing.corps_id),
@@ -1683,6 +2897,7 @@ function buildOperations(
                     [probeBrigade.brigade_id],
                     Object.fromEntries(briefing.brigades.map((brigade) => [brigade.id, brigade])),
                 );
+            if (targetSelectionDetail) targetSelectionDetail.derived_sector_id = probeSectorId ?? null;
 
             // Derive probe objective: first enemy-adjacent OSID in the probe sector.
             // Without objectives the probe op has no axis targets and would be ZEA.
@@ -1690,6 +2905,11 @@ function buildOperations(
                 `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives`,
                 () => {
                     if (localOccupationCandidate) {
+                        if (targetSelectionDetail) {
+                            targetSelectionDetail.status = 'local_occupation_bypass';
+                            targetSelectionDetail.survivor_ids = [localOccupationCandidate.target_osid];
+                            targetSelectionDetail.ranked_objective_ids = [localOccupationCandidate.target_osid];
+                        }
                         return [localOccupationCandidate.target_osid];
                     }
                     let probeObjectives: string[] = [];
@@ -1720,6 +2940,43 @@ function buildOperations(
                                         return enemyTargets;
                                     },
                                 );
+                                const targetDetailByOsid = targetSelectionDetail
+                                    ? new Map<string, CommanderCreationProbeTargetDetail>()
+                                    : null;
+                                if (targetSelectionDetail && targetDetailByOsid) {
+                                    targetSelectionDetail.enemy_candidate_ids = [...enemyTargets].sort(strictCompare);
+                                    for (const target of targetSelectionDetail.enemy_candidate_ids) {
+                                        const targetNeighbors = (adjacency.get(target) ?? []) as readonly string[];
+                                        const direct = targetNeighbors.includes(probeBrigLoc);
+                                        targetDetailByOsid.set(target, {
+                                            target_id: target,
+                                            cooldown_raw_present: null,
+                                            cooldown_raw_value: null,
+                                            cooldown_effective_value: null,
+                                            controller: null,
+                                            politically_blocked: null,
+                                            prediction_present: null,
+                                            prediction_outcome: null,
+                                            prediction_threshold: 'stalemate',
+                                            predicted_viable: null,
+                                            direct,
+                                            reachable: null,
+                                            approach_distance: null,
+                                            cooldown_filter_reached: false,
+                                            cooldown_filter_passed: null,
+                                            politics_filter_reached: false,
+                                            politics_filter_passed: null,
+                                            direct_filter_reached: true,
+                                            direct_filter_passed: direct,
+                                            reachable_filter_reached: false,
+                                            reachable_filter_passed: null,
+                                            prediction_filter_reached: false,
+                                            prediction_filter_passed: null,
+                                            passed: false,
+                                            first_rejecting_filter: direct ? null : 'direct',
+                                        });
+                                    }
+                                }
                                 const directEnemyTargets = botOrdersPerfTime(
                                     `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.directEnemyTargets`,
                                     () => {
@@ -1733,6 +2990,9 @@ function buildOperations(
                                         return directEnemyTargets;
                                     },
                                 );
+                                if (targetSelectionDetail) {
+                                    targetSelectionDetail.direct_candidate_ids = [...directEnemyTargets].sort(strictCompare);
+                                }
                                 const predictedTargets = botOrdersPerfTime(
                                     `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.predictDirectTargets`,
                                     () => predictDirectEnemyTargets(
@@ -1751,7 +3011,8 @@ function buildOperations(
                                 );
                                 const rankedTargets = botOrdersPerfTime(
                                     `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.rankTargets`,
-                                    () => [...directEnemyTargets]
+                                    () => {
+                                        const mappedTargets = [...directEnemyTargets]
                                         .map((target) => {
                                             const cooldown = briefing.failed_offensive_objectives?.[target];
                                             const targetController = briefing.reverse_map && briefing.state_ref
@@ -1773,18 +3034,25 @@ function buildOperations(
                                                     bestApproachDistance = dist;
                                                 }
                                             }
-                                            return {
+                                            const candidate = {
                                                 target,
                                                 onCooldown: (cooldown?.cooldown_until_turn ?? 0) > briefing.turn,
                                                 direct,
                                                 politicallyBlocked: briefing.state_ref != null
                                                     && targetController != null
-                                                    && shouldGrazBlockAttack(
-                                                        briefing.state_ref,
-                                                        briefing.corps_id,
-                                                        briefing.faction,
-                                                        target,
-                                                        targetController,
+                                                    && (
+                                                        isRbihHrhbCombatBlocked(
+                                                            briefing.state_ref,
+                                                            briefing.faction,
+                                                            targetController,
+                                                        )
+                                                        || shouldGrazBlockAttack(
+                                                            briefing.state_ref,
+                                                            briefing.corps_id,
+                                                            briefing.faction,
+                                                            target,
+                                                            targetController,
+                                                        )
                                                     ),
                                                 predictedViable: directPrediction == null
                                                     ? true
@@ -1795,32 +3063,113 @@ function buildOperations(
                                                 reachable: Number.isFinite(bestApproachDistance),
                                                 approachDistance: bestApproachDistance,
                                             };
-                                        })
-                                        .filter((candidate) => !candidate.onCooldown)
-                                        .filter((candidate) => !candidate.politicallyBlocked)
+                                            if (targetDetailByOsid) {
+                                                const cooldownRawPresent = cooldown != null
+                                                    && Object.prototype.hasOwnProperty.call(cooldown, 'cooldown_until_turn');
+                                                const detail = targetDetailByOsid.get(target)!;
+                                                Object.assign(detail, {
+                                                    cooldown_raw_present: cooldownRawPresent,
+                                                    cooldown_raw_value: cooldownRawPresent
+                                                        ? cooldown?.cooldown_until_turn ?? null
+                                                        : null,
+                                                    cooldown_effective_value: cooldown?.cooldown_until_turn ?? 0,
+                                                    controller: targetController,
+                                                    politically_blocked: candidate.politicallyBlocked,
+                                                    prediction_present: directPrediction != null,
+                                                    prediction_outcome: directPrediction?.prediction.predicted_outcome ?? null,
+                                                    predicted_viable: candidate.predictedViable,
+                                                    reachable: candidate.reachable,
+                                                    approach_distance: candidate.approachDistance,
+                                                });
+                                            }
+                                            return candidate;
+                                        });
+                                        const filteredTargets = targetDetailByOsid
+                                            ? mappedTargets
+                                                .filter((candidate) => {
+                                                    const detail = targetDetailByOsid.get(candidate.target)!;
+                                                    detail.cooldown_filter_reached = true;
+                                                    detail.cooldown_filter_passed = !candidate.onCooldown;
+                                                    if (candidate.onCooldown) detail.first_rejecting_filter = 'cooldown';
+                                                    return !candidate.onCooldown;
+                                                })
+                                                .filter((candidate) => {
+                                                    const detail = targetDetailByOsid.get(candidate.target)!;
+                                                    detail.politics_filter_reached = true;
+                                                    detail.politics_filter_passed = !candidate.politicallyBlocked;
+                                                    if (candidate.politicallyBlocked) detail.first_rejecting_filter = 'politics';
+                                                    return !candidate.politicallyBlocked;
+                                                })
+                                                .filter((candidate) => {
+                                                    const detail = targetDetailByOsid.get(candidate.target)!;
+                                                    if (!candidate.direct) {
+                                                        detail.first_rejecting_filter = 'direct';
+                                                        return false;
+                                                    }
+                                                    detail.reachable_filter_reached = true;
+                                                    detail.reachable_filter_passed = candidate.reachable;
+                                                    if (!candidate.reachable) {
+                                                        detail.first_rejecting_filter = 'reachable';
+                                                        return false;
+                                                    }
+                                                    detail.prediction_filter_reached = true;
+                                                    detail.prediction_filter_passed = candidate.predictedViable;
+                                                    if (!candidate.predictedViable) {
+                                                        detail.first_rejecting_filter = 'predicted_viable';
+                                                        return false;
+                                                    }
+                                                    detail.passed = true;
+                                                    return true;
+                                                })
+                                            : mappedTargets
+                                                .filter((candidate) => !candidate.onCooldown)
+                                                .filter((candidate) => !candidate.politicallyBlocked)
                                         // Probe ops are one-brigade recon-by-force, not small marches.
                                         // Only launch when the chosen brigade is already on a valid
                                         // approach node for the target this turn and the brigade can
                                         // already clear the probe threshold on that exact target.
-                                        .filter((candidate) => candidate.direct && candidate.reachable && candidate.predictedViable)
-                                        .sort((a, b) =>
+                                                .filter((candidate) => candidate.direct && candidate.reachable && candidate.predictedViable);
+                                        const ranked = filteredTargets.sort((a, b) =>
                                             Number(b.direct) - Number(a.direct)
                                             || a.approachDistance - b.approachDistance
                                             || strictCompare(a.target, b.target)
-                                        ),
+                                        );
+                                        if (targetSelectionDetail && targetDetailByOsid) {
+                                            targetSelectionDetail.targets = [...targetDetailByOsid.values()];
+                                            targetSelectionDetail.survivor_ids = ranked.map((candidate) => candidate.target);
+                                        }
+                                        return ranked;
+                                    },
                                 );
                                 probeObjectives = botOrdersPerfTime(
                                     `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.deriveObjectives.pickObjective`,
                                     () => rankedTargets.slice(0, 1).map((candidate) => candidate.target),
                                 );
+                                if (targetSelectionDetail) {
+                                    targetSelectionDetail.ranked_objective_ids = [...probeObjectives];
+                                    targetSelectionDetail.status = enemyTargets.size === 0
+                                        ? 'empty_enemy_set'
+                                        : directEnemyTargets.size === 0
+                                            ? 'empty_direct_set'
+                                            : rankedTargets.length === 0
+                                                ? 'all_filtered'
+                                                : 'generic_search';
+                                }
+                            } else if (targetSelectionDetail) {
+                                targetSelectionDetail.status = 'missing_adjacency_or_friendly_set_or_location';
                             }
+                        } else if (targetSelectionDetail) {
+                            targetSelectionDetail.status = 'no_sector';
                         }
+                    } else if (targetSelectionDetail) {
+                        targetSelectionDetail.status = 'no_sector';
                     }
                     return probeObjectives;
                 },
             );
 
             // Skip probe if no enemy-adjacent OSIDs found — empty objectives cause immediate ZEA.
+            if (obs) obs.probe_objective_ids = [...probeObjectives].sort(strictCompare);
             if (probeObjectives.length > 0) {
                 const probeReachable = botOrdersPerfTime(
                     `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.reachability`,
@@ -1842,6 +3191,7 @@ function buildOperations(
                     }
                 );
 
+                if (obs) obs.probe_reachable = probeReachable;
                 if (probeReachable) {
                     const commandState = briefing.state_ref?.military.corps_command?.[briefing.corps_id];
                     const sectorIntelConfidence = briefing.state_ref && probeSectorId
@@ -1973,14 +3323,21 @@ function buildOperations(
                         )
                         && (
                             localOccupationCandidate?.prepare_before_intel === true
-                            || !shouldLaunchProbeInstead(
-                                briefing.faction,
+                            || !observeProbeDecision(
+                                obs,
+                                'fallback_escalation',
+                                briefing,
+                                probeSectorId ?? null,
                                 sectorIntelConfidence,
                                 commandState?.consecutive_probes ?? 0,
-                                briefing.turn,
-                                briefing.state_ref?.military.war_timeline,
                             )
                         );
+                    if (obs) {
+                        obs.target_is_bounded_position = targetIsBoundedPosition;
+                        obs.reduction_participant_count = reductionParticipants.length;
+                        obs.single_brigade_sufficient = singleBrigadeOccupationIsSufficient;
+                        obs.escalate_to_operation = escalateToOperation;
+                    }
                     const probeOp = botOrdersPerfTime(
                         escalateToOperation
                             ? `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.buildIsolatedPositionOperation`
@@ -2058,7 +3415,26 @@ function buildOperations(
                             return operation;
                         },
                     );
-                    const conflictingOp = briefing.active_operations.find((existing) => operationsOverlap(existing, probeOp));
+                    const conflictingOp = findCommanderCreationOverlap(
+                        briefing.active_operations,
+                        probeOp,
+                        briefing.corps_id,
+                        obs,
+                    );
+                    if (obs) {
+                        obs.built.push(commanderCreationOperation(escalateToOperation ? 'reduction' : 'fallback_probe', probeOp));
+                        recordProbeWindowCandidate(
+                            obs,
+                            escalateToOperation ? 'reduction' : 'fallback_probe',
+                            probeOp,
+                            briefing.corps_id,
+                        );
+                        obs.overlap_checked = true;
+                        obs.overlap_found = conflictingOp != null;
+                        markCommanderCreationExit(obs, escalateToOperation
+                            ? (conflictingOp ? 'reduction_overlap_suppressed' : 'reduction_created')
+                            : (conflictingOp ? 'fallback_probe_overlap_suppressed' : 'fallback_probe_created'));
+                    }
                     if (!conflictingOp) {
                         ops.push(probeOp);
                     }

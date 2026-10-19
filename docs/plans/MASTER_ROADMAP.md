@@ -9,44 +9,40 @@ The accepted January-1993 slice remains landed evidence. RE no longer gates cali
 and the P2B packaged-proof blocker is history rather than a live constraint. The original probe
 channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 follows R8.
 
-**Read this file, not the older prose below it, for current state.** Sections further down retain
+**Read this file, not the older prose below it, for current state.** Sections below retain
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-05 (n43 bounded observation reviewed; calibration NO-GO)
+**Last updated:** 2026-10-19 — 717–720 full-suite timeout;3/5native groups green;n80 retained703/712;scratch opening states recoverable.
 
-**Current R6 — October Sana remains NO-GO.** n37 full suite/campaign exit0:
-Petrovac181, Ključ185, Sanski town RS188; belt4, Jajce3/5, losses Barevo,
-Lupnica, Majdan, Varošluk. Protected controls hold; critical0. n38 prefix0 has
-matching input/initial-save provenance and totals, but its186 save is post-turn.
-Neither establishes a selector bug or baseline. Farz Sep29 owner ruling at
-[CALIBRATION_MASTER](../40_reports/CALIBRATION_MASTER.md) supersedes wrong-corps wording.
+**Owner delegation — 2026-10-06:** Codex is the approval authority for routine
+work within the current goal and drives prioritization, implementation, targeted
+validation/correction and integration against unchanged criteria. Routine
+approvals must not return to the owner. Surface substantive decisions about the
+goal, acceptance criteria, canon/protected boundaries, material scope/cost
+tradeoffs or irreversible/external actions with concrete options and a
+recommendation. Required evidence, review panels and cost-control gates remain.
 
-Resumed187 exits0;188 exits2 (1,147 state-leaf differences). Fresh517 routing
-does not bind the original dirty-run pre-order cause. Bounded independent review
-GO does not accept calibration. Farz audit0; Southern Move remains planning188
-(elapsed3/5). The OpenCode source audit0 recovers no complete dirty fingerprint;
-partial catalog provenance is insufficient. No continuous trace/retry follows.
-[Convergence receipt](../../logs/prusac-diagnostic-20260929/sana_n37_convergence_report.md).
+**Current R6 — October Sana remains NO-GO (compact current state).** Calibration is NO-GO. The
+latest n44 score is 692/712 (97.19%, 20 mismatches; prior n39 684/712), unadopted: checkpoints
+707/707/706 preserved, seven n39 gains kept, no matched cell lost, eight new endpoint matches,
+Jajce 5/5 endpoint and Majdan recovered, Drvar by 188 retained. These are measured endpoint
+findings, not closure of emitted ownership or historical timing/route/provenance acceptance. The
+opt-in Mistral phase gate is implemented and reviewed (168 suite exit 0, 14415 passed/33 skipped);
+n46/n47/n48 matched ten selected n44 saves byte for byte, no new score gain. Sana 506th/517th: column
+marches 179/181, skips 180/182, attack 183 (no handler fix). 737 t155 (n47, opt-in reviewed sector_march
+observer): overstack_redistribution_march from on-front Paklarevo to in-front Medini, no reassignment;
+reconstructed stack 4 vs cap 2 carries a stability/limited-writer qualifier; ranking and history
+unmeasured, not n25 causality. Farz Sep 29
+ruling binds; n42 observational GO only. UNMEASURED/open: TG donor-filter cause, broader ownership/history, 177 upstream readiness writer, dirty-517 provenance, actual-used 31, 737,
+the remaining 20 mismatches and route/history gates; 176's resumed continuation (58 first-turn paths; 616 diffs total over seven saved turns) is
+UNBOUND; 122 STOP stands. Southern Move TGs formed t187 on hvo_tomislavgrad (not 3/5 planning).
+Verbose October history is VERBATIM in the calibration master "October 2026 coordination history
+moved from the roadmap — 2026-10-07".
 
-n42 authorized139 runner/audits0; n40 saves/maps/protected match.737 gap-fill
-writes Udurlije;139 posture_dig_in/reissue. Independent GO measurement only;
-literal31 criterion remains unmet. No correction or188 retry authorized.
+**717–720 current:** ONE full suite timed out at35minutes;3/5native groups green,1022files passed+2skipped,10152tests passed+30skipped,0observed failures;1parallel+serial unmeasured. n80 retained703/712, thresholds and C/D preserved; 17scratch opening states recovered via14exact prior archives+3empty states. No retry/campaign. [Evidence](../40_reports/CALIBRATION_MASTER.md).
 
-Claude072–074 retained audits0: both runs admit737 to Vlasic150; later routing
-and n25-only Plamicak180 have no proven causal link to138. Mistral2
-execution shifts178→180 at n29→n30; Jajce battles185→187, leaving Lupnica/Barevo
-uncaptured by188. Late prep elapsed3/5 and intel1/0 do not identify the hold.
-No175–180 snapshot in the bounded six-run inventory; full watched lookup finds
-no Mistral/prep receipt. Majdan was already lost in n29 and remains separate.
-076–079 source/env/event gates settled with limits; n39 maps reconstructed.
-080 observer prepared:10 tests/real collector/typehook0, independent GO prep only.
-Owner-authorized n43 181w runner/post0; independent GO observation only.
-097 dirty517 source unbound in receipts;capture/run linkage requested.
-No188 retry, gameplay fix, merge/adoption; actual-used31 remains open.
-Original517/737/Majdan, towns/matches and late receipts stay open.
-See [retained audit](../../logs/claude-channel-20261004/074-snapshot-result.md)
-and the calibration master for task074's completed watched lookup and limits.
+**721–722 preservation checkpoint (pending):** Calibration is paused while the retained working tree is reconciled, independently reviewed, checked, committed and pushed with an exact remote-SHA receipt. The opening 105 dirty paths are pinned; 722 adds one focused engineering-document path for the previously undocumented scenario-read receipt/test-discovery boundary. No source, test, data, gameplay, canon, threshold or acceptance change belongs to this documentation step. The approximately 109 GB ignored evidence tree plus approximately 8 GB under `runs/` requires an explicit archive disposition and is not assumed Git-backed. Until root records final inventory, archive disposition, checks and remote identity, this checkpoint is incomplete and R6 remains NO-GO. Owner priorities remain Oštra Luka RS, Veliki Badić and the Southern Move tail solved in retained n80, and Bijela/Sitnik/Golubići deferred to later 1992 work.
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference
@@ -312,7 +308,7 @@ on matching contracts/inputs. No baseline refresh, remote configuration change o
 | R3 | Operational/Tactical Group convergence | **COMPLETE** | [TG closeout plan](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) | One offensive task-organization path, synchronized lifecycle/AHQ receipts, terminal telemetry, unique sourced promotions, locked exhaustion constants, and aligned Standing-OG doctrine. |
 | R4 | Command, event, and Dynamic Codex convergence | **COMPLETE — CLOSED 2026-08-06** (Phase 6 merged, PR #481 → main `40d3c5452`). Twelve-specialist panel fixes 6.1–6.5 landed; calibration byte-identical, independent Code Review + QA GO. Detail in [archive](MASTER_ROADMAP_ARCHIVE.md#closed-lane-detail-moved-2026-09-10). | [Command/event/Codex plan](2026-07-31-command-event-codex-convergence-plan.md) (Phase 6) | Five presidential levers remain; Decision Room owns action; Desk owns triage; events, Chronicle, Cost Ledger, and Codex share deterministic receipts and priority truth. |
 | R5 | Engine quality, performance, and stability | **COMPLETE — CLOSED 2026-08-05** at the ~1,086 ms/turn floor. Every self-executable item done; Phase 2e reverted on a measured regression; Task 6 DECLINED, not deferred, and the 100 ms/turn target is retired. Detail in [archive](MASTER_ROADMAP_ARCHIVE.md#closed-lane-detail-moved-2026-09-10). | [Engine-quality plan](2026-07-31-engine-quality-performance-stability-plan.md) / [Phase 2c/2d packet](2026-08-01-r5-phase2c-amortized-sector-topology-plan.md) / [Phase 2e pure solve](2026-08-02-r5-phase2e-pure-full-solve-serial-commit-plan.md) | Optional state is classified, measured hot paths improve without byte drift, save/replay contracts are stable, generated artifacts have owners, and local/CI release checks match. |
-| R6 | Historical gameplay depth and final calibration | **APRIL 1995 REOPENED; NO MERGE (2026-09-27).** Retained delay-30 run replays **707/707/704/669** after the owner corrected Gornja Presjenica's 1995 painted references to RS. Doljani's combat RBiH result and Prozor trio are protected. Donja Mahala's generic VRS t119 combat capture is reopened; Vidimlije and Farz P-A §6 remain open. The candidate is unadopted; no new campaign or October calibration is authorized. | [Historical-gameplay plan](2026-07-31-historical-gameplay-depth-calibration-plan.md) · [exhaustion/scoring plan](2026-08-06-exhaustion-scoring-redesign-plan.md) | Preserve protected data, legal capture, determinism, final clean-source acceptance and every other unchanged gate. |
+| R6 | Historical gameplay depth and final calibration | **OCTOBER SANA — NO-GO.** ONE full suite timed out at35minutes;3/5native groups green,1022files passed+2skipped,10152tests passed+30skipped,0observed failures;1parallel+serial unmeasured. n80 retained703/712, thresholds and C/D preserved; 17scratch opening states recovered via14exact prior archives+3empty states. No retry/campaign. | [Historical-gameplay plan](2026-07-31-historical-gameplay-depth-calibration-plan.md) · [exhaustion/scoring plan](2026-08-06-exhaustion-scoring-redesign-plan.md) | Preserve protected data, legal capture, determinism, final clean-source acceptance and every other unchanged gate. |
 | RC | Pressure → exhaustion → **COLLAPSE** pipeline | **PRE-1.0 NARROW SCOPE COMPLETE — CLOSED 2026-08-15.** Retained v3 selection plus reversible D-shape; deterministic and trajectory-flat, 31/31 anchors, 6/6 benchmarks, 7/7 health gates, full Section 6 pass. D-topology is explicitly post-1.0. Detail in [archive](MASTER_ROADMAP_ARCHIVE.md#closed-lane-detail-moved-2026-09-10). | [Scope](../40_reports/proposals/20260609_SCOPE_collapse_pipeline.md) · [build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) · [measurement plan](2026-08-15-collapse-d-selection-measurement-plan.md) · [D-shape design](2026-08-15-collapse-d-shape-design.md) · [Stage 0/2 panel record](../40_reports/20260813_RC_COLLAPSE_PANEL_FROZEN_ARTIFACT.md) | The default-OFF local collapse model measures historically discriminating combat pressure, recovers on quiet turns, reaches a bounded live writer, preserves Section 6, and leaves neighbour cascade to an explicit post-1.0 topology packet. |
 | RE | 1.0 engine integrity: seven outcomes, no general cleanup | **CLOSED — owner, 2026-09-01.** RE gates nothing: not calibration, not R7, not R8. P2B and the auxiliary prerequisite are retired history. Engine health remains sacrosanct as a principle, not as an RE gate. Detail in [archive](MASTER_ROADMAP_ARCHIVE.md#closed-lane-detail-moved-2026-09-10). | [1.0 contract](2026-08-26-engine-integrity-plan.md) · [recovery plan](2026-08-28-packaged-probe-recovery-plan.md) · [living audit](../40_reports/audits/20260826_RE_LEAN_ENGINE_INTEGRITY_EXECUTION.md) | The unproven prerequisite config/test hypothesis was rolled back exactly and its receipt closed. P2B–P7 and final-pair/profile gates are retired historical acceptance, not unfinished current work; no successor proof route is active. |
 | R7 | Content, historical attribution, audio, accessibility, and opening experience | **ACTIVE — AUDIO AND BROADER ACCEPTANCE OPEN.** WR01 delivered in #517; stale-pin refresh landed in #518. Human listening/sensitivity, offline playback/controls and disposition of ten cue triggers remain open. Separate R8 opening/setup readability, two status contrasts and runtime/package failures remain. Human listening waits for owner inspection. The merged April candidate requires its own canon and 188-week acceptance; neither WR01 nor #518 accepts it. | [Content/history/audio plan](2026-07-31-content-history-localization-audio-plan.md) · [accepted functional opening plan](2026-08-23-opening-screens-implementation-plan.md) · [cinematic opening and typography amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md) · [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) · [ARBiH names](2026-09-07-arbih-brigade-honorific-name-correction-plan.md) · [WR01 warroom presentation design](2026-09-10-warroom-whiteboard-date-and-corkboard-map-design.md) | Provenance and English presentation stay supported; audio/runtime and broader acceptance require their named receipts. |

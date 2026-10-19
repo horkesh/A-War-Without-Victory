@@ -51,6 +51,14 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { isVlasicCohaExceptionAttackOrder } from './coha_operation_exception.js';
+import {
+    anyOperationHasPhaseGate,
+    clearAttackOrderOwners,
+    invalidateReceiptsOnControlChange,
+    isHeldCaptureOrder,
+    pruneAttackOrderOwners,
+    recordOwnedCaptureReceipt,
+} from './operation_phase_gate.js';
 import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../data/operational_data.js';
 import { getSeasonalModifiers } from './seasonal_effects.js';
 import {
@@ -67,6 +75,7 @@ import { isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 import { getPostWashingtonJointPressureMultiplier } from '../early_war/washington_agreement.js';
 import { findBrigadeOperationAnywhere, countAxisConcentrationSupport, getBrigadeExecutionAttackPowerMult } from './corps_operation_helpers.js';
 import { getBrigadeAxis } from './bot_brigade_ai_osid.js';
+import { resolveLinkedPreparationProbeBattle } from './operation_preparation.js';
 import { evacuateFormationsSeveredByCapture } from './salient_withdrawal.js';
 
 // ── Shared combat math ──────────────────────────────────────────────────
@@ -118,7 +127,7 @@ import { getAmbushDepthFactor } from './intel_ambush_depth.js';
 import { isSupportBrigadeOnActiveOp } from './sector_offensive_axis_helpers.js';
 import { SUPPORT_POWER_MULT } from './bot_constants.js';
 // REASON-CODE INSTRUMENTATION: env-gated, inert by default. See reason_code_debug.ts.
-import { whenReasonCodeTopic } from './reason_code_debug.js';
+import { emitOperationCaptureOwnershipRecord, isReasonCodeTopicEnabled, whenReasonCodeTopic } from './reason_code_debug.js';
 // ADR-0005 v2.2b: TG combat-power synthesis + casualty distribution. Flag-gated.
 import { ENABLE_TG_COMBAT_SYNTHESIS } from './tactical_group_config.js';
 import { distributeCasualtiesAcrossTg } from './tactical_group_casualties.js';
@@ -527,6 +536,18 @@ export function resolveAttackOrdersOsid(
         skipped_attack_orders: [],
         battles: []
     };
+    const currentTurn = state.meta?.turn ?? 0;
+    const observeOwnership = isReasonCodeTopicEnabled('operation_capture_ownership');
+    const initialOwnerInventory = observeOwnership
+        ? Object.entries(state.military.brigade_attack_order_owners ?? {}).sort(([a], [b]) => strictCompare(a, b)).map(([brigadeId, owner]) => {
+            return { brigade_id: brigadeId, final_target: state.military.brigade_attack_orders?.[brigadeId as FormationId] ?? null, ...owner };
+        })
+        : [];
+    if (observeOwnership) emitOperationCaptureOwnershipRecord({ kind: 'resolver_pass_start', turn: currentTurn, owner_inventory: initialOwnerInventory });
+    const emitOwnershipPassEnd = (terminal: string): void => {
+        if (!observeOwnership) return;
+        emitOperationCaptureOwnershipRecord({ kind: 'resolver_pass_end', turn: currentTurn, terminal, orders_processed: report.orders_processed, flips_applied: report.flips_applied });
+    };
 
     // COHA suppresses combat, except for the one authored Vlašić operation
     // window. Generic and unrelated orders remain auditable and are consumed.
@@ -556,13 +577,13 @@ export function resolveAttackOrdersOsid(
         state.military.brigade_attack_orders = Object.keys(permittedOrders).length > 0
             ? permittedOrders
             : undefined;
-        if (Object.keys(permittedOrders).length === 0) return report;
+        pruneAttackOrderOwners(state);
+        if (Object.keys(permittedOrders).length === 0) { emitOwnershipPassEnd('coha_suppressed'); return report; }
     }
 
     const terrainMultByOsid = buildTerrainMultByOsid(reverseMap, terrainData);
     const slopeByOsid = buildSlopeByOsid(reverseMap, terrainData);
 
-    const currentTurn = state.meta?.turn ?? 0;
     const startDate = state.meta?.scenario_start_date;
 
     const orders = state.military.brigade_attack_orders;
@@ -582,6 +603,7 @@ export function resolveAttackOrdersOsid(
         return s;
     };
     if (!orders || typeof orders !== 'object') {
+        clearAttackOrderOwners(state);
         // No orders this turn — still run displacement pass so formations left in enemy territory from a previous turn are fixed
         for (const f of allFormations) {
             if (!f || f.status !== 'active') continue;
@@ -599,14 +621,24 @@ export function resolveAttackOrdersOsid(
                 forceRetreatWithPenalties(state, otherFormation, reverseMap, loc, { adjacency, friendlyOsids: getFriendlyForFaction(factionId) });
             }
         }
+        emitOwnershipPassEnd('no_orders');
         return report;
     }
 
     const formationIds = Object.keys(orders).sort(strictCompare) as FormationId[];
     const targetToAttackers = new Map<Osid, FormationId[]>();
+    // Opt-in phase gate (operation_phase_gate.ts): the FINAL consumer refuses capture orders onto a
+    // gated objective of a still-holding axis regardless of which writer produced the order.
+    const phaseGateActive = anyOperationHasPhaseGate(state);
+    const heldCaptureOrders: Array<{ brigadeId: FormationId; target: string }> = [];
     for (const fid of formationIds) {
         const target = orders[fid] as string | undefined;
         if (!target) continue;
+        if (phaseGateActive && isHeldCaptureOrder(state, fid, target)) {
+            heldCaptureOrders.push({ brigadeId: fid, target });
+            (report.orders_seen_by_brigade ??= {})[fid] = target as Osid;
+            continue;
+        }
         const list = targetToAttackers.get(target) ?? [];
         list.push(fid);
         targetToAttackers.set(target, list);
@@ -671,6 +703,10 @@ export function resolveAttackOrdersOsid(
             ...(targetController !== undefined ? { target_controller: targetController } : {}),
         });
     };
+
+    for (const held of heldCaptureOrders) {
+        recordSkippedOrder(held.brigadeId, held.target as Osid, 'capture_phase_held');
+    }
 
     if (!state.military.casualty_ledger) {
         const factionIds = (state.factions ?? []).map(f => f.id);
@@ -1441,6 +1477,27 @@ export function resolveAttackOrdersOsid(
             })),
         });
 
+        const linkedChildren = new Map<string, { corpsId: FormationId; op: CorpsOperation }>();
+        for (const attacker of attackerFormations) {
+            const match = attackerOperationMatches.get(attacker.id);
+            if (!match || match.op.phase !== 'execution' || !match.op.preparation_probe_link) continue;
+            linkedChildren.set(`${match.corps_id}:${match.op.name}:t${match.op.started_turn}`, {
+                corpsId: match.corps_id,
+                op: match.op,
+            });
+        }
+        for (const operationId of [...linkedChildren.keys()].sort(strictCompare)) {
+            const linked = linkedChildren.get(operationId)!;
+            resolveLinkedPreparationProbeBattle(
+                state,
+                linked.corpsId,
+                linked.op,
+                targetOsid,
+                attackerBrigadeIds,
+                battleId,
+            );
+        }
+
         const ammoCrisis = attackerLost && getSupplyMult(firstAttacker, state, 'attack', supplyStateByOsid) < 0.5;
         const pyrrhic = attackerWon && personnelAttacker > 0 && finalAttackerCas / personnelAttacker > 0.15;
         const crisisEvent = applyAmmoCrisisPyrrhicEffects({
@@ -1580,6 +1637,10 @@ export function resolveAttackOrdersOsid(
                     );
                 }
                 emitCascadePenaltiesOnFlip(state, targetOsid, prevController, adjacency);
+                // Opt-in phase gate: a standing capture receipt for this OSID is void once control
+                // changes to another faction (the capturing operation's own new receipt, if any, is
+                // written later in this function, after this invalidation).
+                if (phaseGateActive) invalidateReceiptsOnControlChange(state, targetOsid, attackerFaction);
             }
         }
 
@@ -1606,6 +1667,32 @@ export function resolveAttackOrdersOsid(
             if (flip) {
                 activeOp.territory_gained_this_turn = (activeOp.territory_gained_this_turn ?? 0) + 1;
                 activeOp.total_territory_gained = (activeOp.total_territory_gained ?? 0) + 1;
+                // Opt-in phase gate: operation-owned capture receipt, recorded only AFTER all
+                // result/revert handling (flip is the post-revert value) for a real
+                // enemy-to-friendly combat flip whose ACTUAL resolving lead's surviving emitted
+                // order belongs to this exact operation instance, axis and target.
+                if (phaseGateActive && controller != null && controller !== attackerFaction) {
+                    const survivingTarget = state.military.brigade_attack_orders?.[firstAttacker.id as FormationId] ?? null;
+                    const owner = state.military.brigade_attack_order_owners?.[firstAttacker.id as FormationId] ?? null;
+                    const receiptRecorded = recordOwnedCaptureReceipt(state, {
+                        op: activeOp,
+                        corpsId: attackerCorpsId as string,
+                        leadId: firstAttacker.id,
+                        targetOsid,
+                        battleId,
+                        turn: currentTurn,
+                    });
+                    if (observeOwnership) emitOperationCaptureOwnershipRecord({
+                        kind: 'owned_capture_resolution', turn: currentTurn, corps_id: attackerCorpsId,
+                        operation_id: `${attackerCorpsId}:${activeOp.name}:t${activeOp.started_turn}`,
+                        operation_name: activeOp.name, battle_id: battleId, resolving_lead: firstAttacker.id,
+                        attacker_faction: attackerFaction,
+                        target_osid: targetOsid, controller_before: controller,
+                        controller_after: state.political.political_controllers?.[targetOsid] ?? null,
+                        flip_after_revert: flip, surviving_target: survivingTarget, owner,
+                        receipt_recorded: receiptRecorded,
+                    });
+                }
             }
         }
 
@@ -1783,6 +1870,8 @@ export function resolveAttackOrdersOsid(
         return strictCompare(a.trigger_phase, b.trigger_phase);
     });
     state.military.brigade_attack_orders = undefined;
+    emitOwnershipPassEnd('complete');
+    clearAttackOrderOwners(state);
     // (defense path logging removed)
     return report;
 }
