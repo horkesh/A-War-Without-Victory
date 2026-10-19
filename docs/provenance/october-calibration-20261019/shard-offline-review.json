@@ -1,0 +1,49 @@
+{
+  "schema": "awwv.729.offline-rebalance-verification.v1",
+  "closed": true,
+  "writes_closed": true,
+  "reviewer": "Sol729",
+  "reviewed_result": "logs/claude-channel-20261004/728-offline-rebalance-a/result.json",
+  "reviewed_markdown": "logs/claude-channel-20261004/728-offline-rebalance-a/result.md",
+  "reviewed_receipt": "logs/claude-channel-20261004/728-offline-rebalance-a/receipt.json",
+  "reviewed_closed_receipt": "logs/claude-channel-20261004/728-offline-rebalance-a/closed-receipt.json",
+  "verdict": "PASS_SCOPED_OFFLINE_MODEL",
+  "findings": [],
+  "verified": {
+    "execution_contract": "Preserved offline helper completed in 185ms with child/wrapper 0/0, empty stderr, immutable entry-script hash, and the declared artifact contract passing.",
+    "algorithm_binding": "The helper pins tools/test/test_suite_inventory.mjs at 0ccd170b10537892053c13a8f645691e49a2b971265544ccad5346ad7137e824 and copies lines 48-65 exactly: descending duration/path ordering followed by lowest-load/lowest-index assignment.",
+    "baseline": {
+      "unique_worker_loads_ms": [464736, 465581, 464605, 465528],
+      "sum_ms": 1860450,
+      "spread_ms": 976
+    },
+    "primary_counterfactual": {
+      "unknown_file_weight_ms": 1000,
+      "unique_worker_loads_ms": [610673, 610673, 610673, 610673],
+      "sum_ms": 2442692,
+      "spread_ms": 0,
+      "moved_unique_files": 999,
+      "deterministic_replay_equal": true
+    },
+    "coverage": "All 1362 unique parallel files are assigned exactly once; the one partitioned suite is added once to each of four indexed workers; 74 serial files remain unchanged; 1362 + 4 + 74 = 1440 modeled executions.",
+    "unknown_sensitivity": "The completed-jsdom p50/p90/max substitutions of 195/720/3876ms produce modeled unique-load spreads of 1/0/0ms. These are illustrative points, not finite bounds on any of the 17 unobserved files.",
+    "partitioned_work": "The four observed property-suite durations 836608/845596/850341/853246ms remain unassigned to worker index and are treated only as a once-per-worker range. The model does not claim identical case-data ownership.",
+    "overhead": "The completed-worker wall-minus-tests residuals 341380/380090/378590ms yield the stated 341380-380090ms illustrative range. It is correctly marked non-transferable and is not used as a completion guarantee.",
+    "causality": "The model supports known planner underweight/skew as actionable and as the strongest measured contributor. It does not establish the historical timeout's exact cause, exclude a hang or resource effect, bind an in-flight file, predict future wall time, or guarantee completion within 35 minutes."
+  },
+  "next_scope_assessment": {
+    "future_reliability_goal": "Supported: refresh the duration baseline only from retained measured completions, preserve explicit uncertainty for the 17 missing files, add per-file start/finish receipts, and run focused planner/harness checks before requesting any new runtime. This is a proposed remediation/instrumentation scope; the 999 moved files make it a materially different membership from 718.",
+    "historical_cause_goal": "An exact-membership shard-1 replay with per-file start/finish telemetry and unchanged worker semantics remains the smallest experiment that can answer whether 718 ended in ordinary tail work or a blocked file. Refreshing weights first cannot answer that historical question because it changes 999 assignments in the primary model.",
+    "recommendation": "Do not run both by default. State the bounded diagnosis now. If the owner prioritizes full-suite reliability, use the refresh-plus-receipts path; if the owner requires exact historical cause, use the unchanged exact-shard replay. Either runtime needs separate authorization and neither is a full-suite acceptance substitute unless the actual required full suite is later run."
+  },
+  "status": "718 acceptance remains unmet and overall status remains NO-GO. No timing baseline, config, membership, timeout, threshold, floor, source, test, historical gate, or acceptance criterion changed.",
+  "scope": {
+    "tests_runs": 0,
+    "full_suites_runs": 0,
+    "campaigns_runs": 0,
+    "builds_runs": 0,
+    "engine_executions": 0,
+    "source_test_harness_config_docs_git_writes": 0,
+    "review_artifacts_written": 2
+  }
+}

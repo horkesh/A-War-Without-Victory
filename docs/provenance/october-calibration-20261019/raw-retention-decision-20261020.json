@@ -1,0 +1,15 @@
+{
+  "schema": "awwv.raw-retention-owner-decision.v1",
+  "owner_date": "2026-10-20",
+  "recorded_utc": "2026-10-19T22:25:59.3081935+00:00",
+  "instruction": "Keep the raw evidence locally with the pushed inventory. Then diagnose the unfinished test shard using retained logs. Preserve 703/712, thresholds and telemetry. No new full suite or campaign yet.",
+  "raw_retention": "LOCAL_ONLY",
+  "inventory_commit": "83b56ced8d7201335f2bbc0cc37772c2f0a839ca",
+  "source_checkpoint": "a9c92d82076700c77859376789979beb76d6d214",
+  "remote_raw_byte_backup": false,
+  "raw_archive_build_authorized": false,
+  "new_full_suite_authorized": false,
+  "new_campaign_authorized": false,
+  "storage_pending_blocker": "RESOLVED_BY_EXPLICIT_OWNER_CHOICE",
+  "acceptance": "703/712 retained; all full-suite/other unmet gates remain; no baseline adoption"
+}

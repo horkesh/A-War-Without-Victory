@@ -1,0 +1,65 @@
+{
+  "schema": "awwv.729.independent-retained-diagnosis-review.v1",
+  "closed": true,
+  "writes_closed": true,
+  "reviewer": "Sol729",
+  "reviewed_result": "logs/claude-channel-20261004/728-retained-diagnosis-a/728-result.json",
+  "reviewed_markdown": "logs/claude-channel-20261004/728-retained-diagnosis-a/728-result.md",
+  "reviewed_closed_receipt": "logs/claude-channel-20261004/728-retained-diagnosis-a/closed-receipt.json",
+  "reviewed_inventory": "logs/claude-channel-20261004/728-retained-diagnosis-a/inventory.json",
+  "head": "83b56ced8d7201335f2bbc0cc37772c2f0a839ca",
+  "verdict": "SCOPED_DIAGNOSIS_REQUIRES_CAUSAL_QUALIFICATION",
+  "findings": [
+    {
+      "severity": "MATERIAL",
+      "title": "Shard skew is strongly supported but is not a strict established cause of the timeout",
+      "evidence": [
+        "Shard 1 has 931969ms of unique reported file duration and shard 2 has 647242ms. Assigning the shared property-file occurrence adversarially gives a correct 268089-301365ms reported-duration excess.",
+        "Shard 2 completed in 1876180ms, leaving 223820ms below the 2100000ms wrapper cap.",
+        "The runner sets fileParallelism=false and maxWorkers=1 (tools/test/run_vitest_balanced.mjs:109-112), so completed files within a worker do not overlap.",
+        "However, Vitest's file-line durations correspond chiefly to test execution, while completed-worker wall time also includes transform, collection, environment, prepare, and other overhead. Shard 2 reports 1497590ms tests within 1876180ms wall time (718 stdout lines 1704-1707). Shard 1 has no terminal summary for those categories.",
+        "Therefore comparing shard 1 minus shard 2 summed file durations directly with shard 2's wall-clock margin is not a strict wall-time lower bound. Per-shard overhead, cache effects, collection cost, and the 17 missing files' start/runtime state remain unmeasured."
+      ],
+      "required_correction": "Replace 'established bounded cause' and 'sufficient explanation' with 'strongly supported primary measured contributor' or 'plausible sufficient explanation'. Preserve that no specific hang, deadlock, contention mechanism, terminal file, or ordinary-tail completion was established."
+    },
+    {
+      "severity": "LIMITATION",
+      "title": "Native preservation is referenced, not freshly rehashed file-by-file by 728",
+      "evidence": "728 freshly records the hashes of retained 703, retained 712, and the 720 native-inventory file, and states file_count=31. Its inventory does not contain a fresh 728 hash pass over each of the 31 native files. The accurate claim is that the retained 31-file 720 inventory remains referenced unchanged."
+    }
+  ],
+  "verified_facts": {
+    "run_outcome": "718 timed out at 2100000ms with child/wrapper/cleanup 1/124/0; full-suite acceptance remains unmet.",
+    "completed_shards": [
+      { "shard": 0, "coverage": "338/338", "duration_ms": 1689840 },
+      { "shard": 2, "coverage": "342/342 including 2 skipped files", "duration_ms": 1876180 },
+      { "shard": 3, "coverage": "344/344", "duration_ms": 1563970 }
+    ],
+    "positive_control": "The three completed shards total 1024 file executions, 10152 passed tests, and 30 skipped tests. The deliberate 529ms nested failing fixture is expected by and contained within its passing 13/13 parent harness, so it is not a genuine native failure.",
+    "unfinished_shard": "Shard 1 has 325 observed completion paths of 342 planned and 17 completion gaps; the 74-file serial lane was not reached because the runner awaits every parallel worker before starting it (tools/test/run_vitest_balanced.mjs:207-221).",
+    "shared_property_file": "tests/sector_partition_buildCorpsFrontSectors_integration.test.ts completed once in each of four workers at 836608, 845596, 850341, and 853246ms, about 39.8-40.6% of the cap. These are four shard-indexed suite executions; retained evidence does not prove identical case-data ownership across copies.",
+    "planner": "The planner defaults unmeasured files to 1000ms and greedily balances declared weights (tools/test/test_suite_inventory.mjs:35-65). The six largest shard-1 underweights sum to 615382ms; five used the 1000ms default. Retained 602/710 logs independently show the same named slow families recurring.",
+    "missing_files": "All 17 completion gaps are jsdom files; one source uses fake timers and the scan found no named child-process/server/listener token. This is source-shape context only: it proves neither that a file started nor that no hang or leak occurred.",
+    "protected_pins": "728 records passing hashes for emit.ts, engine_health_thresholds.json, C telemetry, and D telemetry at the required expected values.",
+    "historical_status": "Overall NO-GO remains unchanged. No acceptance threshold, historical gate, telemetry gate, campaign gate, test selection, timeout, shard count, or floor is retired."
+  },
+  "causal_assessment": {
+    "measured": "Large planner error and shard-1 reported-duration skew are established.",
+    "inference": "That skew can plausibly account for the missed 35-minute window without invoking a hang and is the strongest retained explanation.",
+    "unknown": "Exact terminal/in-flight file, shard-1 overhead categories, execution order/cache state, resource contention, blocked handles, and whether the 17 missing files started."
+  },
+  "smallest_next_action": {
+    "now": "Correct only the causal wording in the closeout synthesis; no new execution is needed to preserve the bounded retained finding.",
+    "cheapest_optional_analysis": "Before any run, recompute a candidate partition offline from retained 718 durations with conservative sensitivity for the 17 unknown files and explicit per-worker overhead. This can test whether known planner underweights are practically actionable, but cannot identify the terminal file or prove the timeout cause.",
+    "if_exact_cause_is_required": "Seek owner authorization for one preserved replay of the exact 718 shard-1 membership with per-file start and finish timestamps and unchanged test code and worker semantics. Stop on a bounded per-file budget breach or the shard terminal summary. This is a diagnostic replay, not a full-suite acceptance run."
+  },
+  "scope": {
+    "tests_runs": 0,
+    "full_suites_runs": 0,
+    "campaigns_runs": 0,
+    "builds_runs": 0,
+    "engine_executions": 0,
+    "source_test_harness_config_docs_git_writes": 0,
+    "review_artifacts_written": 2
+  }
+}

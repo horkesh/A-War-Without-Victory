@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-19 — source/docs checkpoint a9c92d820 pushed; raw-storage decision pending; calibration paused.
+**Last updated:** 2026-10-20 — local raw retention accepted; retained shard diagnosis reviewed; n80 retained703/712.
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -42,7 +42,7 @@ moved from the roadmap — 2026-10-07".
 
 **717–720 current:** ONE full suite timed out at35minutes;3/5native groups green,1022files passed+2skipped,10152tests passed+30skipped,0observed failures;1parallel+serial unmeasured. n80 retained703/712, thresholds and C/D preserved; 17scratch opening states recovered via14exact prior archives+3empty states. No retry/campaign. [Evidence](../40_reports/CALIBRATION_MASTER.md).
 
-**721–726 preservation checkpoint:** Source/docs106paths committed+pushed a9c92d820; remoteSHA verified,724reviewPASS,725typecheck0. n80retained703/712 NO-GO;718suite still incomplete. Portable evidence inventory pushed separately;117.2GB raw archive/storage decision pending, calibration paused. [Portable receipts](../provenance/october-calibration-20261019/README.md).
+**727–730 current:** Raw-local retention explicitly accepted; source/docs checkpoints pushed. Retained shard diagnosis finds stale timing weights/workload skew as strongest measured contributor; exact in-flight cause unmeasured. Offline1440-execution coverage intact; no tests/fullsuite/campaign. n80retained703/712 NO-GO. [Qualified findings](../provenance/october-calibration-20261019/unfinished-shard-diagnosis.md).
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference
