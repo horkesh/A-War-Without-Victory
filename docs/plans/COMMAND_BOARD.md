@@ -1,6 +1,6 @@
 # AWWV Command Board
 
-**Status:** Derived dispatch view, synchronized 2026-10-20 (retained n80 triage; Prisoje observer/fixture proposed).
+**Status:** Derived dispatch view, synchronized 2026-10-20 (Prisoje first removal/replacement measured; no gameplay fix).
 
 **Authority:** [MASTER_ROADMAP.md](MASTER_ROADMAP.md) is the sole authority for unfinished work and wins if this board differs.
 
@@ -23,7 +23,7 @@ Signing, store upload, public release creation, and a public `1.0` tag remain ou
 | 3 | R3 | **COMPLETE** | None. | [TG convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) |
 | 4 | R4 | **COMPLETE** | None; Phase 6 and its packaging follow-up are closed. | [Command/event/Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) |
 | 5 | R5 | **COMPLETE -- CLOSED 2026-08-05** | None. The accepted performance floor is approximately 1.09 seconds per turn; the 100 ms target and incremental-reuse Task 6 are retired from 1.0 scope. | [Engine quality](2026-07-31-engine-quality-performance-stability-plan.md) |
-| 6 | R6 | **OCTOBER SANA — NO-GO** | Retained n80 six-cell triage is complete. Prioritize Prisoje’s turn185 ABB movement/correction/bot boundary with one focused observer/fixture; no gameplay fix is yet established. Donji lacks an admitted operation in consulted records. Brka has failed admitted operations; Toljenak has an isolation rejection. Šeher/Jablanica already diverge by the first checkpoint. Retained703/712, thresholds and telemetry unchanged; no campaign. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
+| 6 | R6 | **OCTOBER SANA — NO-GO** | Prisoje turn185 reconstructed on an exact n80 save184 clone: T3 admits ABB Bravnice transit; late march correction first deletes it after scope rebuild; following bot ordering queues Jajce_3. Independent750 targeted review passes. No gameplay fix or gain is claimed; retained703/712 and thresholds preserved. All telemetry retained, including C+5181 bytes. No campaign/full suite. Next: bounded rebuilt-scope/operation-authority diagnosis; preserve guards. | [Calibration authority](../40_reports/CALIBRATION_MASTER.md) |
 | 6.5 | RC | **PRE-1.0 NARROW SCOPE COMPLETE -- CLOSED 2026-08-15** | None. V3 selection plus reversible D-shape is retained; D-topology is reserved post-1.0. | [Collapse build spec](../40_reports/proposals/20260609_COLLAPSE_PIPELINE_BUILD_SPEC.md) / [D-shape result](2026-08-15-collapse-d-shape-design.md) |
 | 7 | R7 | **WR01/PIN REFRESH LANDED; AUDIO/ACCEPTANCE OPEN** | Finish offline audio and ten-cue disposition; human listening waits for owner inspection. WR01 closed in #517 and pins refreshed in #518; April combined-source acceptance is separate. | [Content/history/audio](2026-07-31-content-history-localization-audio-plan.md) / [accepted functional opening](2026-08-23-opening-screens-implementation-plan.md) / [cinematic opening and typography amendment](2026-08-28-cinematic-opening-typography-implementation-plan.md) / [presentation and English-readability amendment](2026-09-05-r7-presentation-and-english-readability-amendment-plan.md) |
 | 7.5 | RE | **CLOSED — owner, 2026-09-01** | None. RE gates nothing; engine-health defects are still fixed before tuning. | [Closed recovery record](2026-08-28-packaged-probe-recovery-plan.md) / [closed RE contract](2026-08-26-engine-integrity-plan.md) |

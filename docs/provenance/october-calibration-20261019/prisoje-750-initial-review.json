@@ -1,0 +1,128 @@
+{
+  "schema": "awwv.750.prisoje-fixture-independent-review.v1",
+  "reviewer_role": "independent_sol_reviewer",
+  "verdict": "PASS_AS_BOUNDED_CURRENT_SOURCE_BRANCH_CHARACTERIZATION__HISTORICAL_N80_CAUSALITY_NOT_ESTABLISHED",
+  "pass": true,
+  "writes_closed": true,
+  "scope": {
+    "worktree": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+    "head": "e803b7660b1774bcfafd949fc0c991f69dc2715b",
+    "review_only": true,
+    "tracked_diff_paths": [
+      "tests/mistral_prisoje_turn_order.test.ts"
+    ],
+    "tests_run_by_reviewer": 0,
+    "suite_run_by_reviewer": 0,
+    "campaigns_run_by_reviewer": 0,
+    "runTurn_by_reviewer": 0,
+    "builds_run_by_reviewer": 0,
+    "source_or_docs_mutated_by_reviewer": false,
+    "git_mutated_by_reviewer": false
+  },
+  "verdict_basis": {
+    "production_binding": "The fixture calls BotManager.runBots, increments the retained 184 counter to turn 185, then executes the registered warPhases prefix through osid-column-movement with runNamedPhase. The later T6 and bot checks call the registered commander-correct-march-orders and generate-bot-brigade-orders owners.",
+    "measured_fixture_boundary": "Under the explicitly injected one-cell assigned sub-segment, the retained-shaped Bravnice bot_discretionary column order reaches production T3 with restricted scope [Maleševci], no operation or reassignment authorization, and is deleted as routine_destination_out_of_scope before transit.",
+    "positive_control": "Adding Bravnice to only the injected assigned-front scope admits the same order and creates production transit, so the rejection assertion cannot pass merely because ABB never reaches T3.",
+    "route_guard": "With scope admission retained, hostile control at Gornji Mujdžići yields no_friendly_path and no transit.",
+    "preservation": "The test checks the active loan and operation commitments remain unchanged; the final diff changes no production, data, canon, threshold, or save file.",
+    "ci_portability": "The active test reads repository scenario and map inputs only; it has no dependency on ignored n80 runs or review logs.",
+    "determinism": "No random or wall-clock input is introduced. The fixture uses the production phase ordering and sorted receipt destinations. No determinism risks found under Engine_Invariants_v0_9_0 section 11.1, PHASE_A_INVARIANTS, CODE_CANON, and DETERMINISM_TEST_MATRIX stable-order/save-state gates."
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "claim_boundary",
+      "classification": "counterfactual_topology",
+      "finding": "The default rejection is caused by test-supplied topology, not a recovered historical turn-185 topology. The retained save does not omit the corps_front_sectors field: it persists an empty object. Current GameState marks corps_front_sectors required-persisted, and canonical serialization does not denylist it.",
+      "evidence": [
+        "tests/mistral_prisoje_turn_order.test.ts:142-170",
+        "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w184.json#/military/corps_front_sectors",
+        "src/state/game_state.ts:2890-2891",
+        "src/state/serializeGameState.ts:21-28",
+        "src/sim/combat/brigade_routine_scope.ts:138-176"
+      ],
+      "impact": "The test may be cited only as a current-source branch characterization under synthesized topology. It does not establish routine_destination_out_of_scope as the historical n80 rejector or prove a calibration fix.",
+      "correction_for_root_closeout": "Replace claims that serialization omits corps_front_sectors with the precise statement that retained save_w184 persists an empty sector snapshot and therefore lacks the non-empty pre-T3 footprint the counterfactual fixture injects."
+    },
+    {
+      "id": "F2",
+      "severity": "residual",
+      "classification": "omitted_historical_prefix",
+      "finding": "The selective T6 and bot-phase jump proves only the bounded projected-state outcomes. It does not reproduce the retained end-185 Jajce_3 replacement or end-186 transit and cannot identify their writer.",
+      "evidence": [
+        "tests/mistral_prisoje_turn_order.test.ts:291-327",
+        "tests/mistral_prisoje_turn_order.test.ts:378-449",
+        "logs/claude-channel-20261004/749-seal-a/result.json#/later_boundary"
+      ],
+      "impact": "Historical n80 causality remains open. No gameplay, calibration, or acceptance claim follows."
+    }
+  ],
+  "claim_boundaries": {
+    "established": [
+      "production T3 deletes this order when given the fixture's restricted one-cell scope and false higher-authority guards",
+      "adding Bravnice to that scope admits transit",
+      "a hostile intermediate route blocks transit as no_friendly_path",
+      "the bounded later actor snapshot remains eligible for Mistral but emits no march after the synthetic T3 deletion",
+      "loan and operation commitments remain exact in the asserted paths"
+    ],
+    "not_established": [
+      "actual n80 pre-T3 corps-front topology",
+      "actual n80 T3 rejection reason",
+      "historical Jajce_3 replacement writer",
+      "historical end-186 transit cause",
+      "a production defect or gameplay fix",
+      "any calibration gain or retirement of existing gates"
+    ]
+  },
+  "validation_reviewed": {
+    "final_focused": {
+      "files": 1,
+      "tests": 4,
+      "passed": 4,
+      "exit": 0,
+      "evidence": "logs/claude-channel-20261004/749-attempt-green-e"
+    },
+    "affected": {
+      "files": 3,
+      "tests": 12,
+      "passed": 12,
+      "exit": 0,
+      "evidence": "logs/claude-channel-20261004/749-attempt-affected-a",
+      "reuse_qualification": "The later one-token test-only type correction invalidated only the selected file result; final_focused reran all 4 selected-file tests. The 8 companion-test passes are reused at their unaffected scope."
+    },
+    "no_emit": {
+      "diagnostics": 0,
+      "exit": 0,
+      "evidence": "logs/claude-channel-20261004/749-attempt-tsc-b"
+    },
+    "diff_check": 0
+  },
+  "preservation_reviewed": {
+    "production_source_edits": 0,
+    "protected_3_exact": true,
+    "native_n80_exact": 31,
+    "receipt_count_exact": 179,
+    "telemetry_C": {
+      "bytes": 100097339,
+      "sha256": "05e6cf95acda31236a719f4a8ab775d3b9514945ec7d777c39afc9db942ba011"
+    },
+    "telemetry_D": {
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    }
+  },
+  "reviewed_hashes": [
+    { "path": "tests/mistral_prisoje_turn_order.test.ts", "bytes": 23974, "sha256": "8a94c36ff6b864d5455a9ecf9a181fb451333a3685923c3989c64f7fa97cd875" },
+    { "path": "logs/claude-channel-20261004/748-root-plan.md", "bytes": 5501, "sha256": "d8689aa7ad4859c32e159c322985ac7bf4eb25a8c281ca77269564703f786456" },
+    { "path": "logs/claude-channel-20261004/749-seal-a/result.json", "bytes": 8671, "sha256": "e1e7e21da0d30dfd93fdb46dd5312dd42199ae3fd5cd915f6d973252573310c8" },
+    { "path": "logs/claude-channel-20261004/749-seal-a/inventory.json", "bytes": 15581, "sha256": "2f4d4e02c85b7c5e2956627a48ab418aa0440d6068d5eccb42de2da736325f5c" },
+    { "path": "logs/claude-channel-20261004/749-seal-a/closed-receipt.json", "bytes": 925, "sha256": "0818055478acd170722a899874f6961cde1e836702646197180410f7b8b2f373" },
+    { "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w184.json", "bytes": 8704869, "sha256": "e97ed2e154be0738773e326392347741d7aa17e730138b1f669008d045a879b4" }
+  ],
+  "retained_limits": [
+    "703/712 is retained and was not rerun.",
+    "No full suite, campaign, replay, full runTurn, or build was run.",
+    "No production fix is accepted and all prior calibration and acceptance gates remain open at their recorded scope."
+  ],
+  "smallest_justified_next_question": "From an exact clone of retained save_w184, run only the exact scenario-week prelude and registered war-phase prefix through T3, with no injected corps_front_sectors, and capture ABB's scope, higher-authority guards, order, and T3 result. Stop once that exact boundary is observed. If it passes T3, inspect only the subsequent production writers needed to reproduce the saved Jajce_3 replacement."
+}

@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 
 import { loadOperationalCentroids, loadOperationalData, loadOperationalEdges } from '../src/data/operational_data.js';
 import { computeFrontEdges } from '../src/map/front_edges.js';
@@ -12,11 +12,20 @@ import { loadEventDefinitions } from '../src/sim/events/event_loader.js';
 import { runNamedPhase } from '../src/sim/turn_pipeline.js';
 import type { OperationalDataCache, TurnContext, TurnReport } from '../src/sim/turn_pipeline_types.js';
 import { warPhases } from '../src/sim/turn_phases/war_phases.js';
+import { resetReasonCodeTopicCacheForTests } from '../src/sim/combat/reason_code_debug.js';
+import {
+    isDestinationAuthorizedByOperation,
+    isMovementAuthorizedByCorpsReassignment,
+    isRoutineScopeEnforcedForOrder,
+    resolveRoutineMovementScope,
+} from '../src/sim/combat/brigade_routine_scope.js';
 import type { CorpsOperation, GameState } from '../src/state/game_state.js';
 
 const ABB = 'hvo_1st_guard_abb';
 const MALESEVCI = 'op:bosansko_grahovo:malesevci';
 const BRAVNICE = 'op:jajce:bravnice';
+const JAJCE_3 = 'op:jajce:jajce_3';
+const LUPNICA = 'op:jajce:lupnica';
 const BLOCKED_ROUTE_OSID = 'op:sipovo:gornji_mujdzici_2';
 const ROUTE = [
     MALESEVCI,
@@ -42,7 +51,24 @@ type PortableInputs = {
     operationalData: OperationalDataCache;
 };
 
+type T3InputReceipt = {
+    turn: number;
+    order: unknown;
+    assignment: unknown;
+    assigned_sub_segment_id: string | null;
+    loan: unknown;
+    scope: { restricted: boolean; source: string; destinations: string[] };
+    operation_authorized: boolean;
+    reassignment_authorized: boolean;
+    routine_scope_enforced: boolean;
+};
+
 let inputs: PortableInputs;
+
+afterEach(() => {
+    delete process.env.AWWV_DEBUG_REASON_CODES;
+    resetReasonCodeTopicCacheForTests();
+});
 
 function observe(state: GameState, boundary: string): AbbObservation {
     return {
@@ -110,9 +136,79 @@ function portableFixture(blockRoute = false): GameState {
     return state;
 }
 
+// Portable current-source projection. Retained n80 save_w184.json (raw SHA-256
+// e97ed2e154be0738773e326392347741d7aa17e730138b1f669008d045a879b4) supplies
+// ABB's order, formation/loan/assignment identifiers, Mistral commitments and route control.
+// The retained save persists corps_front_sectors as an empty object. The non-empty Maleševci-only
+// sector below is wholly injected counterfactual topology used to exercise branch selectivity; it
+// is not recovered historical topology. The named-phase fixture also skips private T1/T2 inputs,
+// so its rejection cannot establish the historical n80 predicate.
+function counterfactualTurn184Projection(options: { includeBravniceInScope?: boolean; blockRoute?: boolean } = {}): GameState {
+    const state = portableFixture(options.blockRoute ?? false);
+    state.military.corps_command!.hvo_main_staff ??= {
+        command_span: 0, subordinate_count: 0, og_slots: 0, active_ogs: [],
+        stance: 'balanced', corps_exhaustion: 0, active_operations: [],
+    };
+    const formation = state.military.formations![ABB]!;
+    formation.assignment = { kind: 'sector', role: 'front', sector_id: 'sector:hvo_tomislavgrad:0' };
+    formation.assigned_sub_segment_id = 'subseg:sector:hvo_tomislavgrad:0:0';
+    state.military.corps_front_sectors = {
+        'sector:hvo_tomislavgrad:0': {
+            sector_id: 'sector:hvo_tomislavgrad:0', corps_id: 'hvo_tomislavgrad', faction: 'HRHB',
+            opposing_factions: ['RS'], edge_ids: [`${MALESEVCI}__${LUPNICA}`], length_edges: 1,
+            territory_osids: [MALESEVCI], assigned_brigade_ids: [ABB], reserve_brigade_ids: [],
+            rear_brigade_ids: [], density: 1, threat_ratio: 1, defensive_power: 2800,
+            sector_stance: 'defend', stance_source: 'bot',
+            sub_segments: [{
+                sub_segment_id: 'subseg:sector:hvo_tomislavgrad:0:0',
+                edge_ids: [`${MALESEVCI}__${LUPNICA}`],
+                friendly_osids: options.includeBravniceInScope ? [MALESEVCI, BRAVNICE] : [MALESEVCI],
+                enemy_osids: [LUPNICA], primary_brigade_ids: [ABB], length_edges: 1,
+            }],
+        },
+    };
+    const operation = state.military.corps_command!.hvo_tomislavgrad!.active_operations[0]!;
+    operation.participating_brigades = [
+        'hv_112th_infantry_1995', 'hv_1st_hgz_1995', 'hv_4th_guards_split', ABB,
+        'hvo_3rd_guard_jastrebovi',
+    ];
+    operation.objectives = [
+        'op:jajce:barevo_2', BRAVNICE, JAJCE_3, 'op:jajce:jezero_2', LUPNICA,
+        'op:jajce:prisoje', 'op:jajce:vinac_2', 'op:sipovo:brdjani',
+        'op:sipovo:gornji_mujdzici_2', 'op:sipovo:pribeljci_2',
+        'op:sipovo:sipovo_2', 'op:sipovo:volari_2', 'op:titov_drvar:drvar_2',
+        'op:titov_drvar:sipovljani_2',
+    ];
+    operation.axes = [
+        {
+            axis_id: 'mistral_drvar_grahovo', name: 'Drvar / Grahovo Axis',
+            assigned_brigades: ['hv_112th_infantry_1995', 'hv_4th_guards_split', 'hvo_3rd_guard_jastrebovi'],
+            objectives: ['op:titov_drvar:drvar_2', 'op:titov_drvar:sipovljani_2'], current_objective_index: 0,
+            staging_osid: 'op:livno:misi_2', status: 'executing', failure_count: 0,
+            consecutive_failures_on_current: 0, momentum: 0, attack_attempt_count: 0,
+            objective_capture_count: 0, movement_only_execution_turns: 0, idle_execution_turn_streak: 0,
+        },
+        {
+            axis_id: 'mistral_sipovo', name: 'Sipovo Axis', assigned_brigades: ['hv_1st_hgz_1995', ABB],
+            objectives: [
+                'op:sipovo:brdjani', 'op:sipovo:gornji_mujdzici_2', 'op:sipovo:sipovo_2',
+                'op:sipovo:volari_2', 'op:sipovo:pribeljci_2', BRAVNICE,
+                'op:jajce:vinac_2', JAJCE_3, LUPNICA, 'op:jajce:barevo_2',
+                'op:jajce:jezero_2', 'op:jajce:prisoje',
+            ],
+            current_objective_index: 8,
+            staging_osid: 'op:livno:livno_2', status: 'executing', failure_count: 0,
+            consecutive_failures_on_current: 0, momentum: 3, attack_attempt_count: 8,
+            objective_capture_count: 8, movement_only_execution_turns: 0, idle_execution_turn_streak: 0,
+        },
+    ];
+    return state;
+}
+
 async function runToColumnMovement(state: GameState): Promise<{
     observations: AbbObservation[];
     report: TurnReport;
+    t3Input: T3InputReceipt;
 }> {
     const observations = [observe(state, 'bounded-counterfactual-post-184')];
     const botManager = new BotManager({
@@ -151,11 +247,83 @@ async function runToColumnMovement(state: GameState): Promise<{
     };
     const movementIndex = warPhases.findIndex((phase) => phase.name === 'osid-column-movement');
     expect(movementIndex).toBeGreaterThan(0);
-    for (const phase of warPhases.slice(0, movementIndex + 1)) {
+    for (const phase of warPhases.slice(0, movementIndex)) {
         await runNamedPhase(context, phase, 'war');
         observations.push(observe(state, phase.name));
     }
-    return { observations, report };
+    const adjacency = new Map<string, string[]>();
+    for (const edge of inputs.operationalData.edges) {
+        const a = edge.a as string;
+        const b = edge.b as string;
+        if (!adjacency.has(a)) adjacency.set(a, []);
+        if (!adjacency.has(b)) adjacency.set(b, []);
+        adjacency.get(a)!.push(b);
+        adjacency.get(b)!.push(a);
+    }
+    const formation = state.military.formations![ABB]!;
+    const order = state.military.brigade_movement_orders?.[ABB];
+    const destination = order?.destination_sids?.[0] ?? '';
+    const scope = resolveRoutineMovementScope(state, formation, 'routing');
+    const t3Input: T3InputReceipt = {
+        turn: state.meta.turn,
+        order: structuredClone(order ?? null),
+        assignment: structuredClone(formation.assignment ?? null),
+        assigned_sub_segment_id: formation.assigned_sub_segment_id ?? null,
+        loan: structuredClone(formation.elite_loan_state ?? null),
+        scope: { restricted: scope.restricted, source: scope.source, destinations: [...scope.destinations].sort() },
+        operation_authorized: isDestinationAuthorizedByOperation(
+            state, ABB, destination, adjacency, inputs.operationalData.opData.operationalToCanonical,
+        ),
+        reassignment_authorized: isMovementAuthorizedByCorpsReassignment(
+            state, formation, destination, adjacency, inputs.operationalData.opData.operationalToCanonical,
+        ),
+        routine_scope_enforced: isRoutineScopeEnforcedForOrder(
+            state, formation, order, adjacency, inputs.operationalData.opData.operationalToCanonical,
+        ),
+    };
+    const movementPhase = warPhases[movementIndex]!;
+    await runNamedPhase(context, movementPhase, 'war');
+    observations.push(observe(state, movementPhase.name));
+    return { observations, report, t3Input };
+}
+
+async function runSelectedTurn185Boundaries(state: GameState): Promise<{
+    observations: AbbObservation[];
+    report: TurnReport;
+    t3Input: T3InputReceipt;
+}> {
+    process.env.AWWV_DEBUG_REASON_CODES = 'movement_reject,dispatcher_decision';
+    resetReasonCodeTopicCacheForTests();
+    const result = await runToColumnMovement(state);
+    // Once T3 identifies the first boundary, jump only to the two requested later owners. This
+    // distinguishes T6 and the following bot actor without reconstructing skipped combat/front
+    // writers; consequently the retained end-185 Jajce_3 replacement remains unproven here.
+    for (const phaseName of ['commander-correct-march-orders', 'generate-bot-brigade-orders']) {
+        const phase = warPhases.find((candidate) => candidate.name === phaseName);
+        expect(phase).toBeDefined();
+        await runNamedPhase({
+            state,
+            rng: () => { throw new Error('Engine Invariants 11.1 prohibits simulation randomness'); },
+            report: result.report,
+            input: {
+                seed: state.meta.seed,
+                settlementGraph: inputs.startup.graph,
+                operationalSettlementGraph: inputs.operationalSettlementGraph,
+                operationalData: inputs.operationalData,
+                settlementEdges: inputs.startup.graph.edges,
+                municipalityPopulation1991: inputs.startup.municipalityPopulation1991,
+                settlementPopulationBySid: inputs.startup.settlementPopulationBySid,
+                settlementDataRaw: inputs.startup.settlementDataRaw,
+                municipalityHqSettlement: inputs.startup.municipalityHqSettlement,
+                historicalNameLookup: inputs.startup.historicalNameLookup,
+                historicalCorpsLookup: inputs.startup.historicalCorpsLookup,
+                historicalOobIdLookup: inputs.startup.historicalOobIdLookup,
+                eventDefinitions: loadEventDefinitions(inputs.scenario.scenario_start_week ?? 0),
+            },
+        }, phase!, 'war');
+        result.observations.push(observe(state, phaseName));
+    }
+    return result;
 }
 
 function firstMutation(observations: AbbObservation[]): AbbObservation | undefined {
@@ -206,5 +374,77 @@ describe('645 — portable Prisoje caller and writer order', () => {
             boundary: 'osid-column-movement', order: null, movement: null, location_osid: MALESEVCI,
         });
         expect(report.column_movement?.column_blocked).toBeGreaterThan(0);
+    });
+
+    it('749 counterfactual: injected one-cell scope rejects the end-184 Bravnice order at T3 and records the later no-write actor snapshot', async () => {
+        const state = counterfactualTurn184Projection();
+        const commitments = structuredClone({
+            home: state.military.corps_command!.hvo_main_staff!.active_operations,
+            loan: state.military.corps_command!.hvo_tomislavgrad!.active_operations,
+        });
+        const initialLoan = structuredClone(state.military.formations![ABB]!.elite_loan_state);
+        const { observations, report, t3Input } = await runSelectedTurn185Boundaries(state);
+        expect(t3Input).toMatchObject({
+            turn: 185,
+            order: { destination_sids: [BRAVNICE], owner: 'bot_discretionary', stance: 'column' },
+            assignment: { kind: 'sector', role: 'front', sector_id: 'sector:hvo_tomislavgrad:0' },
+            assigned_sub_segment_id: 'subseg:sector:hvo_tomislavgrad:0:0',
+            loan: { on_loan: true, loaned_to_corps: 'hvo_tomislavgrad' },
+            scope: { restricted: true, source: 'assigned_sub_segment', destinations: [MALESEVCI] },
+            operation_authorized: false,
+            reassignment_authorized: false,
+            routine_scope_enforced: true,
+        });
+        expect(observations.find((entry) => entry.boundary === 'osid-column-movement')).toMatchObject({
+            order: null, movement: null, location_osid: MALESEVCI,
+        });
+        expect(report.column_movement?.column_rejections).toContainEqual(expect.objectContaining({
+            formation_id: ABB, reason: 'routine_destination_out_of_scope',
+            location_osid: MALESEVCI, destination_osid: BRAVNICE,
+            formation_corps_id: 'hvo_main_staff', loaned_to_corps_id: 'hvo_tomislavgrad',
+            routing_corps_id: 'hvo_main_staff', routing_scope_osid_count: null,
+            source_in_routing_scope: null, destination_in_routing_scope: null,
+        }));
+        expect(observations.find((entry) => entry.boundary === 'commander-correct-march-orders')).toMatchObject({
+            order: null, movement: null,
+        });
+        const botDetail = report.bot_order_diagnostics?.dispatcher_decision_details?.find((entry) => entry.formation_id === ABB);
+        expect(botDetail)
+            .toMatchObject({
+                eligibility: 'eligible', corps_id: 'hvo_tomislavgrad', operation_name: 'Operation Mistral 2',
+                operation_axis_id: 'mistral_sipovo',
+            });
+        expect(observations.find((entry) => entry.boundary === 'generate-bot-brigade-orders')).toMatchObject({
+            order: null, movement: null, location_osid: MALESEVCI,
+        });
+        expect(botDetail?.first_handler).not.toBeNull();
+        expect(botDetail?.snapshot_output).toMatchObject({ column_march_destination_osid: null });
+        expect(state.military.formations![ABB]!.elite_loan_state).toEqual(initialLoan);
+        expect({
+            home: state.military.corps_command!.hvo_main_staff!.active_operations,
+            loan: state.military.corps_command!.hvo_tomislavgrad!.active_operations,
+        }).toEqual(commitments);
+    });
+
+    it('749 controls: an admitted front-scope destination reaches transit while a hostile route rejects without changing commitments', async () => {
+        const authorized = counterfactualTurn184Projection({ includeBravniceInScope: true });
+        const authorizedCommitments = structuredClone(authorized.military.corps_command!.hvo_tomislavgrad!.active_operations);
+        const authorizedResult = await runToColumnMovement(authorized);
+        expect(authorizedResult.observations.at(-1)).toMatchObject({
+            boundary: 'osid-column-movement', order: null, location_osid: MALESEVCI,
+            movement: { destination_sids: [BRAVNICE], status: 'in_transit' },
+        });
+        expect(authorized.military.corps_command!.hvo_tomislavgrad!.active_operations).toEqual(authorizedCommitments);
+
+        const hostile = counterfactualTurn184Projection({ includeBravniceInScope: true, blockRoute: true });
+        const hostileCommitments = structuredClone(hostile.military.corps_command!.hvo_tomislavgrad!.active_operations);
+        process.env.AWWV_DEBUG_REASON_CODES = 'movement_reject';
+        resetReasonCodeTopicCacheForTests();
+        const hostileResult = await runToColumnMovement(hostile);
+        expect(hostileResult.report.column_movement?.column_rejections).toContainEqual(expect.objectContaining({
+            formation_id: ABB, reason: 'no_friendly_path', destination_osid: BRAVNICE,
+        }));
+        expect(hostile.military.brigade_movement_state?.[ABB]).toBeUndefined();
+        expect(hostile.military.corps_command!.hvo_tomislavgrad!.active_operations).toEqual(hostileCommitments);
     });
 });

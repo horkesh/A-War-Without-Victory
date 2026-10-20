@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-20 — retained n80 six-cell triage; Prisoje turn185 fixture proposed.
+**Last updated:** 2026-10-20 — Prisoje turn185 removal/replacement measured; retained n80 703/712.
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -24,13 +24,13 @@ tradeoffs or irreversible/external actions with concrete options and a
 recommendation. Required evidence, review panels and cost-control gates remain.
 
 **Current R6 — October Sana remains NO-GO.** Retained n80 is **703/712**, unadopted.
-Six-cell triage selects one Prisoje observer/fixture at actual185 T3 movement→T6 correction→bot
-orders, continuing186 only if185 passes. No gameplay fix is established. Donji has no admitted
-operation in consulted records; Brka/Toljenak need separate evidence, while Šeher/Jablanica
-diverge before1995. Thresholds and all telemetry are preserved. No campaign or suite was run.
-The prior full suite remains failed; its two assertions were corrected with47/47 focused checks.
-Every other unmet gate remains open. [Calibration authority](../40_reports/CALIBRATION_MASTER.md)
-retains all history, scope limits, evidence and the corrected triage.
+Exact cloned-save184 reconstruction identifies turn185 T6 march correction deleting ABB's
+Bravnice transit after scope rebuild, followed by bot ordering Jajce_3. The portable one-cell
+fixture is counterfactual; it is not historical topology. Focused4/4 and independent review
+pass; no gameplay fix/gain/campaign/full suite is claimed. Next question: rebuilt scope and
+operation authority, with routine/path guards preserved. All telemetry survives, including
+C+5181 bytes. Other six-cell findings and every unmet gate remain in the
+[calibration authority](../40_reports/CALIBRATION_MASTER.md).
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference

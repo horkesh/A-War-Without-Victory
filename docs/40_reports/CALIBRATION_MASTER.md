@@ -1,4 +1,25 @@
 # AWWV Calibration Master Reference
+## 748–751 — Prisoje turn185 first removal and replacement writer (2026-10-20)
+
+Prisoje turn185 reconstructed on an exact n80 save184 clone: T3 admits ABB Bravnice transit; late march correction first deletes it after scope rebuild; following bot ordering queues Jajce_3. Independent750 targeted review passes. No gameplay fix or gain is claimed; retained703/712 and thresholds preserved. All telemetry retained, including C+5181 bytes. No campaign/full suite.
+
+The portable fixture in tests/mistral_prisoje_turn_order.test.ts characterizes branch selectivity using explicitly counterfactual one-cell topology. Its initial routine_destination_out_of_scope result is NOT the n80 cause: save_w184 actually persists corps_front_sectors:{} rather than omitting it. Review750 caught that premise error. Original fixture/seal bytes and failed controls remain intact. A consolidated correction used an exact cloned save184, actual scenario actions/BotManager prelude and production turn increment, then every registered war phase through the following bot-order phase (85 phases). No full runTurn, campaign, turn186, final-turn outputs or production edits were used.
+
+| Boundary | Measured ABB result |
+|---|---|
+| T3 osid-column-movement | Stale assignment means unrestricted routine scope; Bravnice order is consumed and active transit starts with4 turns remaining. |
+| advance-sector-offensives | Receiving-corps active_operations hash changes; transit remains. Exact operation/axis field mutation was not separately captured. |
+| commander-correct-march-orders | First transit removal. Rebuilt assigned-subsegment scope contains Bosansko Grahovo2, Maleševci and Prekaja2, excluding Bravnice. Operation and reassignment authority are false. Transit is deleted; no queued order remains. |
+| generate-bot-brigade-orders | Same actor hvo_1st_guard_abb receives a bot_discretionary queued Jajce_3 march. |
+
+This measured current-source reconstruction reproduces selected retained end185 ABB fields: queued Jajce_3 and no transit. It identifies the first removal phase and later replacement writer. It does not prove full-campaign neutrality, a score gain, turn186 causality, the precise earlier operation/axis mutation, or that cancelling the transit is itself unlawful. Next smallest question is why the rebuilt scope and operation-authority decision exclude ABB's Bravnice delivery; retain the routine and hostile-route guards until a lawful exception or upstream order correction is proved. No gameplay fix is authorized or implemented by these findings.
+
+Focused fixture4/4 passes. The affected12/12 result and noEmit0 are reused at their actual scopes after naming/comment corrections; eight companion tests were not rerun for reassurance. Positive scope control admits real transit; hostile-route control reaches no_friendly_path, with loan and operation commitments retained. Original counterfactual and exact-state evidence are kept distinct. Independent750 targeted verification accepts the corrected fixture/probe claims and preservation.
+
+C retains its exact100097339-byte opening prefix SHA25605e6cf95acda31236a719f4a8ab775d3b9514945ec7d777c39afc9db942ba011 plus all5181new bytes. Current100102520-byte C SHA2565b225eededbb39e6a08fd0231dc1e5ff14a6c1a401b292c684f91419c2c3adf3 and full before/after archives are retained. D1041 remains exact; protected3/native31/179earlier receipts remain exact. No restore, truncation or deletion occurred. The exact-tail helper incorrectly reported unchanged-C preservation=false but returned0 because its fallback selected the successful child exit; the corrected seal records this failed check and the wrapper defect. Pure corrected-status controls return0/2/1 for preserved-child0/unpreserved-child0/preserved-child1. The failed old-C seal1/126 remains preserved; no engine rerun was used to manufacture identity.
+
+Evidence: logs/claude-channel-20261004/748-root-plan.md,749-seal-a,749-correction-exact-t3-b,749-correction-exact-tail-a,749-correction-seal-c,750-independent-review.* and750-targeted-verification.*. Portable final result/inventory/closed receipts and review are in docs/provenance/october-calibration-20261019; raw phase/telemetry logs remain local. Only the existing test file changes executable test code. All inherited full-suite/calibration/history/preservation gates and NO-GO/unadopted status remain.
+
 ## 744–747 — Retained n80 six-cell triage (2026-10-20)
 
 Retained n80 six-cell triage is complete. Prioritize Prisoje’s turn185 ABB movement/correction/bot boundary with one focused observer/fixture; no gameplay fix is yet established. Donji lacks an admitted operation in consulted records. Brka has failed admitted operations; Toljenak has an isolation rejection. Šeher/Jablanica already diverge by the first checkpoint. Retained703/712, thresholds and telemetry unchanged; no campaign.

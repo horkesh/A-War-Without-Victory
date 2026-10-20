@@ -6045,3 +6045,8 @@ See PROJECT_LEDGER.md, 2026-10-20, 731–734. With Vitest 2.1.9 isolation, one s
 ## 2026-10-20 — Complete suite coverage can expose previously unreached failures
 
 See PROJECT_LEDGER.md, 2026-10-20, 735–738. Refreshed weights and durable receipts allowed one full suite to reach every lane within its cap, exposing a real roadmap length breach and an exact-list fixture stale against intentional retained Sana behavior. Completion is not acceptance: retain both failures, preserve the limit and production rules, and correct the smallest documented/test contract before any separately authorized expensive rerun. One run cannot establish general runtime bounds or prove why an earlier run timed out.
+
+
+## 2026-10-20 — Persisted empty topology and telemetry status must be inspected directly
+
+See PROJECT_LEDGER.md, 2026-10-20, 748–751. A field persisted as {} is not an omitted field. Injecting a restrictive topology can directly manufacture a scope rejection; label such tests counterfactual and use an exact saved-state production-prefix probe to locate the actual boundary. Here T3 admits transit while rebuilt T6 scope later cancels it. Also, a successful child exit must never mask a failed preservation check: test the status truth table. Appended telemetry is preserved by exact prefix plus full current/archive bytes, not by restoring an old hash.

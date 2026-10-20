@@ -1,0 +1,24 @@
+{
+  "schema": "awwv.749.closed-receipt.v1",
+  "writes_closed": true,
+  "verdict": "PASS_BOUNDED_CURRENT_SOURCE_T3_FIRST_BOUNDARY__HISTORICAL_N80_CAUSALITY_REMAINS_UNPROVED",
+  "result": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/749-seal-a/result.json",
+    "bytes": 8671,
+    "sha256": "e1e7e21da0d30dfd93fdb46dd5312dd42199ae3fd5cd915f6d973252573310c8"
+  },
+  "inventory": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/749-seal-a/inventory.json",
+    "bytes": 15581,
+    "sha256": "2f4d4e02c85b7c5e2956627a48ab418aa0440d6068d5eccb42de2da736325f5c"
+  },
+  "checks": {
+    "diff_only_test": true,
+    "diff_check": true,
+    "protected_3_exact": true,
+    "native_31_exact": true,
+    "receipt_count_179": true,
+    "C_exact": true,
+    "D_exact": true
+  }
+}

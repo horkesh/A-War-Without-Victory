@@ -57,3 +57,10 @@ The focused-740 result, inventory, closed receipt, focused-test/typecheck result
 Retained n80 six-cell triage is complete. Prioritize Prisoje’s turn185 ABB movement/correction/bot boundary with one focused observer/fixture; no gameplay fix is yet established. Donji lacks an admitted operation in consulted records. Brka has failed admitted operations; Toljenak has an isolation rejection. Šeher/Jablanica already diverge by the first checkpoint. Retained703/712, thresholds and telemetry unchanged; no campaign.
 
 The triage-745 inventory/closed receipt preserve the original synthesis identity; triage-747-result is the corrected six-row synthesis. Initial746 and targeted746 reviews preserve the first-boundary and attribution corrections. Original745 raw JSON/Markdown and extraction logs stay local and unchanged. These files are diagnostic evidence, not a new campaign or a proven gameplay fix.
+
+
+## Prisoje turn185 fixture and first writer — 2026-10-20
+
+Prisoje turn185 reconstructed on an exact n80 save184 clone: T3 admits ABB Bravnice transit; late march correction first deletes it after scope rebuild; following bot ordering queues Jajce_3. Independent750 targeted review passes. No gameplay fix or gain is claimed; retained703/712 and thresholds preserved. All telemetry retained, including C+5181 bytes. No campaign/full suite.
+
+The prisoje-749 result/inventory/closed receipt and initial/final750 reviews record the corrected claim. Original749 closed evidence remains available and its premise correction is explicit. Exact raw phase probes, fixture before-images and all telemetry stay local. C grew to100102520bytes; all5181newbytes and the originalprefix are archived. The false-zero helper and failed unchanged-C gate are retained, not counted as successful preservation evidence. Fullcampaign neutrality, gain and a gameplay fix remain unmeasured.
