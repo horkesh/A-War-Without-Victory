@@ -6040,3 +6040,8 @@ Retainedcompletiontimescanprovebadestimates/unevenknownwork,notanexacthung/infli
 ## 2026-10-20 — Durable Vitest file receipts require real multi-file and nested-child proof
 
 See PROJECT_LEDGER.md, 2026-10-20, 731–734. With Vitest 2.1.9 isolation, one sequential lane can construct a fresh runner for every file: a constructor-local counter is not a lane sequence. Recover the prior durable tail under the one-active-writer contract. Strip inherited receipt identity from ordinary nested children; explicitly assign owned contexts. Await native finalization before recording finish, and capture intrinsic clocks before tests can fake them. Real-child negative controls exposed all four errors missed by a one-file, context-free green check. Keep receipt output outside generated-config cleanup and retain failed controls. Refreshed completion timings can improve workload estimates, but neither offline balance nor focused tests prove full-suite wall time or the exact cause of a historical timeout.
+
+
+## 2026-10-20 — Complete suite coverage can expose previously unreached failures
+
+See PROJECT_LEDGER.md, 2026-10-20, 735–738. Refreshed weights and durable receipts allowed one full suite to reach every lane within its cap, exposing a real roadmap length breach and an exact-list fixture stale against intentional retained Sana behavior. Completion is not acceptance: retain both failures, preserve the limit and production rules, and correct the smallest documented/test contract before any separately authorized expensive rerun. One run cannot establish general runtime bounds or prove why an earlier run timed out.

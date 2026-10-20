@@ -22,7 +22,7 @@ Raw evidence remains at its original paths in the October worktree. It is intent
 
 For the known17Sarajevo scratch rewrites,14nonempty opening states have exact old byte copies in `logs/claude-channel-20261004/324-pre-suite-generated-backup`; three opening files were empty per716pins. Current bytes are preserved in720closeout, and719independent review verifies this dependency. C97701891bytesSHA256`294077be226a772639eb03d89216b9e8d11d4e1d97e8b29abccfbf45440142df`; D1041bytesSHA256`ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3`. All31n80native files retain their measured hashes. Earlier unrecoverable losses remain failures; this checkpoint cannot recreate missing bytes.
 
-The raw-retention choice is resolved. The retained-log diagnosis is complete; the authorized timing refresh and durable receipt implementation have passed focused checks and independent review. No new full suite or campaign is authorized. No merge, baseline adoption, acceptance-criterion change, new campaign or automatic retry is authorized by these records.
+The raw-retention choice is resolved. The retained-log diagnosis is complete; the authorized timing refresh and durable receipt implementation have passed focused checks and independent review. The separately authorized 736 full suite is now complete and failed; no additional suite or campaign is authorized. No merge, baseline adoption, acceptance-criterion change, new campaign or automatic retry is authorized by these records.
 
 ## Retained shard diagnosis — 2026-10-20
 
@@ -34,3 +34,12 @@ See [qualified findings](unfinished-shard-diagnosis.md), the independent shard r
 Timing weights refreshed from retained 718 measurements; durable per-file collection/execution receipts added to the balanced harness. Focused 38/38 and root noEmit exit 0; independent 733 targeted verification PASS_SCOPED_HARNESS. Retained n80 remains 703/712, with all 31 native files and protected source/reference/threshold/C/D hashes exact. No full suite or campaign; 718 remains TIMEOUT/incomplete and calibration remains NO-GO/unadopted.
 
 The harness-correction result/inventory/closed receipt, initial independent review, targeted review and fresh protection receipt preserve the scoped evidence. Initial review findings and failed attempts are retained rather than erased. All 76 historical receipt files and 70 new receipt files remain local; the inventory records their preservation. These portable files are not a remote backup of raw logs. Current coverage is 1,438 unique files / 1,441 executions, with all prior tests retained. The refreshed baseline and synchronous per-file receipts are ready for future authorized use; no runtime improvement is yet measured.
+
+
+## Refreshed full suite and results review — 2026-10-20
+
+One refreshed full suite completed all five lanes in 29m51s, under the 35-minute cap, but FAILED two native assertions (exits 1/1/1). Tests: 14,726 passed, 33 skipped, 2 failed. Independent 737 review confirms full coverage and preservation. Retained n80 is 703/712; thresholds unchanged; NO-GO/unadopted. No retry or campaign.
+
+The fullsuite-736 result, inventory, preservation, closed receipt and capture receipt, plus fullsuite-737 independent review, record exact scope and hashes. All raw stdout/stderr, lane logs and before/after telemetry/scratch archives stay local. Receipt inventory: 146 prior files exact plus 33 new retained. C is now 100,097,339 bytes with its complete opening prefix; D and all 31 n80 artifacts are exact. Earlier sections remain dated evidence. This complete run supersedes runtime uncertainty for this invocation only; it does not erase historical timeout/preservation failures or waive full-suite acceptance.
+
+Portable fullsuite-737-review.md removes Markdown trailing spaces for the repository whitespace check; the original hash-inventoried review bytes remain untouched locally. Its JSON copy is byte-exact.

@@ -1,0 +1,61 @@
+{
+  "schema": "awwv.395.command-capture.start.v1",
+  "label": "396-varosluk-736-fullsuite",
+  "start_utc": "2026-10-20T05:56:30.564Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tools/test/run_vitest_default.mjs"
+  ],
+  "timeout_ms": 2100000,
+  "paths": {
+    "start": "logs/claude-channel-20261004/396-varosluk-736-fullsuite.start.json",
+    "receipt": "logs/claude-channel-20261004/396-varosluk-736-fullsuite.receipt.json",
+    "stdout": "logs/claude-channel-20261004/396-varosluk-736-fullsuite.stdout.log",
+    "stderr": "logs/claude-channel-20261004/396-varosluk-736-fullsuite.stderr.log",
+    "wrapper_error": "logs/claude-channel-20261004/396-varosluk-736-fullsuite.wrapper-error.log"
+  },
+  "child_env": {
+    "reviewed_env_path": null,
+    "reviewed_awwv_names": [],
+    "inherited_path_key": "Path",
+    "path_keys": [
+      "PATH"
+    ],
+    "path_key_count": 1,
+    "git_bin_prefix": "C:/Program Files/Git/bin",
+    "git_bin_occurrences": 1,
+    "removed_awwv_names": [
+      "AWWV_SLACK_WEBHOOK_URL"
+    ],
+    "remaining_awwv_names": [],
+    "removed_slack_names": [
+      "AWWV_SLACK_WEBHOOK_URL",
+      "SLACK_WEBHOOK_URL"
+    ],
+    "remaining_slack_names": []
+  },
+  "pid": 39096,
+  "end_utc": "2026-10-20T06:26:21.797Z",
+  "child_exit": 1,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "wrapper_exit": 1,
+  "stdout": {
+    "path": "logs/claude-channel-20261004/396-varosluk-736-fullsuite.stdout.log",
+    "bytes": 158535,
+    "sha256": "64a54189512469d13567e4b7f633fe350953c3d7606cce8e1c399d8293cc5bac"
+  },
+  "stderr": {
+    "path": "logs/claude-channel-20261004/396-varosluk-736-fullsuite.stderr.log",
+    "bytes": 7503,
+    "sha256": "7f04eec87363eed9ac1cfb8b62be97a615b4cda9e1b05b6d0bb5f55618fb38b7"
+  },
+  "wrapper_error": {
+    "path": "logs/claude-channel-20261004/396-varosluk-736-fullsuite.wrapper-error.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

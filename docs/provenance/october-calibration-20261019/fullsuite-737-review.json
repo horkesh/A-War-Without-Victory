@@ -1,0 +1,269 @@
+{
+  "schema": "awwv.737.independent-fullsuite-review.v1",
+  "captured_utc": "2026-10-20T06:33:22.902Z",
+  "reviewer_role": "independent_sol_results_reviewer",
+  "verdict": "FAIL_COMPLETE_TWO_NATIVE_ASSERTIONS",
+  "answer": "All five native lanes completed inside the cap with complete manifest-bound coverage, truthful receipts, and complete reviewed preservation, but the agreed zero-genuine-failure criterion is unmet by two native assertions.",
+  "scope": {
+    "worktree": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+    "head": "6132c5e4434ff786c062a25495805267dd124a0b",
+    "branch": "codex/october-calibration-continuation-20261003",
+    "opening_clean": true,
+    "review_only": true,
+    "tests_rerun": false,
+    "suite_rerun": false,
+    "campaign_run": false,
+    "build_run": false,
+    "source_docs_git_mutated": false
+  },
+  "invocation": {
+    "argv": [
+      "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+      "tools/test/run_vitest_default.mjs"
+    ],
+    "dispatcher_arguments": [],
+    "start_utc": "2026-10-20T05:56:30.564Z",
+    "end_utc": "2026-10-20T06:26:21.797Z",
+    "wall_duration_ms": 1791233,
+    "timeout_ms": 2100000,
+    "under_cap": true,
+    "timed_out": false,
+    "exits": {
+      "suite_child": 1,
+      "suite_wrapper": 1,
+      "preserving_capture": 1
+    }
+  },
+  "coverage": {
+    "native_lanes_complete": 5,
+    "parallel_lanes": 4,
+    "serial_files": 74,
+    "unique_files": 1438,
+    "file_executions": 1441,
+    "partitioned_unique_files": 1,
+    "partitioned_executions": 4,
+    "files": {
+      "pass": 1435,
+      "skip": 4,
+      "fail": 2,
+      "total": 1441
+    },
+    "tests": {
+      "pass": 14726,
+      "skip": 33,
+      "fail": 2,
+      "todo": 0,
+      "total": 14761
+    },
+    "native_collection_failures": 0,
+    "native_unhandled_errors": 0,
+    "native_incomplete_or_unstarted": 0,
+    "omitted_default_opt_in": "tests/scenario_runner_read_context_wiring.test.ts"
+  },
+  "receipt_review": {
+    "run_id": "run-20261020055631692-22968-a3c9bf68-1ad9-4154-b745-5ddcd7ab12e6",
+    "manifest_binding": true,
+    "run_identity_exact": true,
+    "five_native_lanes": true,
+    "lane_file_sets_exact": true,
+    "sequences_strict": true,
+    "all_files_have_collection_and_execution_start_finish": true,
+    "terminal_states_match_native_summaries": true,
+    "indexed_property_present_in_all_four_parallel_lanes": true,
+    "intentional_nested_controls_separated_from_native_failures": true,
+    "lane_receipt_sha256": {
+      "parallel-0": "f47232758eccd72697adb8fdf9c98d587941a1ab79c9c6060b3d2e75709e2f36",
+      "parallel-1": "5b26c50f97d24fb2dc2f368c33247e3af06f1a209ca304990d6dbfd147e09a8f",
+      "parallel-2": "302b2e1d37b5c28d5b0426bb9cb58659aa411aad1baf0f38b569a28bf75be122",
+      "parallel-3": "86dca4fbd9dc2b27066727d3ff76ffc955e3981e5e94d8287e9ea8199584f58c",
+      "serial": "99cda811af705c52a5c658f3dd33efbe03700d686d720e3406f83b3b835eb13b"
+    }
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "classification": "genuine_native_documentation_governance_assertion",
+      "file": "tests/docs_desktop_v09_truth.test.ts",
+      "line": 35,
+      "expected": "MASTER_ROADMAP.md JavaScript string length < 60000",
+      "actual": 60637,
+      "assessment": "The explicit compact-roadmap acceptance guard is exceeded by 637 code units. Source history shows the guard has been stable since 2026-07-31; current roadmap history accumulated detail beyond it.",
+      "smallest_justified_next_action": "Compact or move at least 638 code units of duplicated historical roadmap detail into the existing roadmap archive or calibration report while preserving current authority and citations; do not raise the threshold. Then run only tests/docs_desktop_v09_truth.test.ts as the first rejecting check.",
+      "production_change_supported": false,
+      "acceptance_change_supported": false
+    },
+    {
+      "id": "F2",
+      "classification": "genuine_native_stale_exact_enumeration_assertion",
+      "file": "tests/sector_offensive_planning_objective_reconciliation.test.ts",
+      "line": 128,
+      "expected": [
+        "sana_west_sana_510th",
+        "sana_sanski_most_kljuc"
+      ],
+      "actual": [
+        "sana_veliki_badic_505th",
+        "sana_west_sana_510th",
+        "sana_sanski_most_kljuc"
+      ],
+      "assessment": "Commit a9c92d82076700c77859376789979beb76d6d214 intentionally added the Veliki Badic handoff axis with preserve_objective_sequence true while changing this exact enumeration to only two axes. Dedicated sana_pocket_cleanup_tails coverage separately pins the third axis and its atomic handoff behavior, and passed in the sealed suite. The current evidence supports a stale test expectation, not a production rollback.",
+      "smallest_justified_next_action": "Make a test-only correction: rename the assertion to cover all three authored sequence-preserving Sana axes, explicitly assert the Veliki Badic axis flag, and include sana_veliki_badic_505th first in catalog order. Then run only tests/sector_offensive_planning_objective_reconciliation.test.ts as the first rejecting check.",
+      "production_change_supported": false,
+      "acceptance_change_supported": false
+    }
+  ],
+  "nested_controls": {
+    "classification_correct": true,
+    "native_parent_tests_passed": true,
+    "controls": [
+      "tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts",
+      "tests/fixtures/vitest_balanced/receipt_fail.fixture.ts",
+      "tests/fixtures/vitest_balanced/receipt_import_error.fixture.ts",
+      "tests/fixtures/vitest_balanced/receipt_finalize_error_runner.fixture.mjs"
+    ]
+  },
+  "preservation": {
+    "pass": true,
+    "prior_receipts_retained": 146,
+    "new_receipts_retained": 33,
+    "current_receipts_retained": 179,
+    "C": {
+      "opening_bytes": 97701891,
+      "appended_bytes": 2395448,
+      "final_bytes": 100097339,
+      "opening_prefix_exact": true,
+      "before_archive_exact": true,
+      "after_archive_current_exact": true,
+      "every_appended_byte_retained": true,
+      "final_sha256": "05e6cf95acda31236a719f4a8ab775d3b9514945ec7d777c39afc9db942ba011"
+    },
+    "D": {
+      "opening_bytes": 1041,
+      "final_bytes": 1041,
+      "unchanged": true,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    "before_backup_manifest_pass": true,
+    "after_backup_manifest_pass": true,
+    "changed_scratch_roots_archived_before_after": 3,
+    "source_fixture_receipt_baseline_pins_exact": 19,
+    "protected_pins_exact": 3,
+    "n80_native_files_exact": 31,
+    "owned_processes_remaining": 0
+  },
+  "seal_review": {
+    "seal_b_terminal": true,
+    "all_closed_receipt_reference_hashes_match": true,
+    "seal_a_retained": true,
+    "seal_a_issue": "stdout-only native assertion lookup returned false",
+    "seal_b_correction": "includes stderr in native assertion lookup; no test rerun",
+    "contradictions": [],
+    "lifecycle_note": "result.json writes_closed false records extraction before closure; the later hash-bound closed-receipt.json writes_closed true records terminal closure."
+  },
+  "determinism_review": {
+    "risks_found": [],
+    "statement": "No determinism risks found in this read-only evidence review.",
+    "authorities": [
+      "docs/10_canon/Engine_Invariants_v0_9_0.md",
+      "docs/20_engineering/DETERMINISM_TEST_MATRIX.md",
+      "docs/PHASE_A_INVARIANTS.md",
+      "docs/20_engineering/CODE_CANON.md"
+    ]
+  },
+  "historical_gate_limits": {
+    "retained_n80_score": "703/712",
+    "n80_is_new_measurement": false,
+    "new_campaign": false,
+    "calibration_status": "NO-GO_UNADOPTED",
+    "historical_accuracy_claimed": false,
+    "campaign_acceptance_claimed": false,
+    "baseline_adoption_claimed": false,
+    "inherited_unmet_gates_waived": false,
+    "statement": "All inherited startup, campaign, consumer/fingerprint, historical, preservation-loss, and adoption gates remain open."
+  },
+  "runtime_claim_limits": {
+    "established": "This single default suite invocation completed every planned native lane in 1791233 ms under the 2100000 ms cap, with complete receipt and preservation evidence.",
+    "not_established": [
+      "green full-suite acceptance",
+      "zero genuine failures",
+      "general or repeatable runtime guarantee",
+      "gameplay or campaign correctness",
+      "historical calibration acceptance"
+    ]
+  },
+  "next_scope": {
+    "authorized_now": false,
+    "no_retry_rule_preserved": true,
+    "future_green_suite_requires_separate_authority": true,
+    "sequence": [
+      "Apply the two smallest corrections only if authorized.",
+      "Run each affected test as the cheapest rejecting verification.",
+      "Do not claim full-suite green from targeted passes.",
+      "Seek separate authority before another full-suite invocation required for final acceptance."
+    ]
+  },
+  "evidence": {
+    "sealed_result": {
+      "path": "logs/claude-channel-20261004/736-seal-b/result.json",
+      "bytes": 12489,
+      "sha256": "3d677fcad251f132d2166566a9cadecef7f621f4ebee80cf5a0eed650ca7cbe3"
+    },
+    "sealed_inventory": {
+      "path": "logs/claude-channel-20261004/736-seal-b/inventory.json",
+      "bytes": 124574,
+      "sha256": "bdef83562d1a9ff03af01ebeafcd12b9a4a711e0d8a4ec3ac0fc1c7c842c6f1d"
+    },
+    "sealed_preservation": {
+      "path": "logs/claude-channel-20261004/736-seal-b/preservation.json",
+      "bytes": 34198,
+      "sha256": "5b02763927a3d2a0dec82c54476b6cb249cc6d38cce79295aedbc83320198b38"
+    },
+    "closed_receipt": {
+      "path": "logs/claude-channel-20261004/736-seal-b/closed-receipt.json",
+      "bytes": 3209,
+      "sha256": "f72b5aa3290ad17aba6dafd69b2cfe9226cbbefe23a024f455327b8b1273a44c"
+    },
+    "stdout": {
+      "path": "logs/claude-channel-20261004/396-varosluk-736-fullsuite.stdout.log",
+      "bytes": 158535,
+      "sha256": "64a54189512469d13567e4b7f633fe350953c3d7606cce8e1c399d8293cc5bac"
+    },
+    "stderr": {
+      "path": "logs/claude-channel-20261004/396-varosluk-736-fullsuite.stderr.log",
+      "bytes": 7503,
+      "sha256": "7f04eec87363eed9ac1cfb8b62be97a615b4cda9e1b05b6d0bb5f55618fb38b7"
+    },
+    "suite_start": {
+      "path": "logs/claude-channel-20261004/396-varosluk-736-fullsuite.start.json",
+      "bytes": 1328,
+      "sha256": "d8dc461279586b09409eae9c078f0156187ce1c5fd1875fed093016d1440458d"
+    },
+    "suite_receipt": {
+      "path": "logs/claude-channel-20261004/396-varosluk-736-fullsuite.receipt.json",
+      "bytes": 2131,
+      "sha256": "ece5b0292b26e4787390f61f39c8c8612eb577f4cf65521f275d29497f07070a"
+    },
+    "capture_result": {
+      "path": "logs/claude-channel-20261004/396-varosluk-736-fullsuite-telemetry/result.json",
+      "bytes": 1940,
+      "sha256": "fb6b404c3480cf9698c827b07ca0e2e718289b2fa522c87ff9c99a23ed95ce0c"
+    },
+    "readiness": {
+      "path": "logs/claude-channel-20261004/736-readiness-attempt/result.json",
+      "bytes": 108513,
+      "sha256": "c305011ffbba013938b97680f2aa93fd7e9101fb4c4fcf43d358014a0fba0e50"
+    },
+    "before_backup": {
+      "path": "logs/claude-channel-20261004/736-backup-attempt/manifest.json",
+      "bytes": 103629,
+      "sha256": "f6327f81cba73458491de9110e65e1d30f10b3bda4c6afd907528fdd2d857718"
+    },
+    "review_markdown": {
+      "path": "logs/claude-channel-20261004/737-independent-review.md",
+      "bytes": 4380,
+      "sha256": "315f5567fd0cb3421a0b2d3efa9ed96ea47ed07e3b84d68955ebc07299d7dc9a"
+    }
+  },
+  "pass": false,
+  "writes_closed": true
+}

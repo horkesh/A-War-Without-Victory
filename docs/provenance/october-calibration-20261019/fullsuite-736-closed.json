@@ -1,0 +1,78 @@
+{
+  "schema": "awwv.736.closed-receipt.v1",
+  "captured_utc": "2026-10-20T06:30:03.111Z",
+  "writes_closed": true,
+  "verdict": "FAIL_COMPLETE_TWO_NATIVE_ASSERTIONS",
+  "evidence_complete": true,
+  "result": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/736-seal-b/result.json",
+    "bytes": 12489,
+    "sha256": "3d677fcad251f132d2166566a9cadecef7f621f4ebee80cf5a0eed650ca7cbe3"
+  },
+  "result_md": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/736-seal-b/result.md",
+    "bytes": 1283,
+    "sha256": "c5c199cafea1bd5aaccb752afbbccb9519abcf0123a71b65eaf21ddba03783ef"
+  },
+  "inventory": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/736-seal-b/inventory.json",
+    "bytes": 124574,
+    "sha256": "bdef83562d1a9ff03af01ebeafcd12b9a4a711e0d8a4ec3ac0fc1c7c842c6f1d"
+  },
+  "preservation": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/736-seal-b/preservation.json",
+    "bytes": 34198,
+    "sha256": "5b02763927a3d2a0dec82c54476b6cb249cc6d38cce79295aedbc83320198b38"
+  },
+  "suite_receipt": {
+    "path": "logs/claude-channel-20261004/396-varosluk-736-fullsuite.receipt.json",
+    "bytes": 2131,
+    "sha256": "ece5b0292b26e4787390f61f39c8c8612eb577f4cf65521f275d29497f07070a"
+  },
+  "capture_result": {
+    "path": "logs/claude-channel-20261004/396-varosluk-736-fullsuite-telemetry/result.json",
+    "bytes": 1940,
+    "sha256": "fb6b404c3480cf9698c827b07ca0e2e718289b2fa522c87ff9c99a23ed95ce0c"
+  },
+  "stdout": {
+    "path": "logs/claude-channel-20261004/396-varosluk-736-fullsuite.stdout.log",
+    "bytes": 158535,
+    "sha256": "64a54189512469d13567e4b7f633fe350953c3d7606cce8e1c399d8293cc5bac"
+  },
+  "stderr": {
+    "path": "logs/claude-channel-20261004/396-varosluk-736-fullsuite.stderr.log",
+    "bytes": 7503,
+    "sha256": "7f04eec87363eed9ac1cfb8b62be97a615b4cda9e1b05b6d0bb5f55618fb38b7"
+  },
+  "readiness": {
+    "path": "logs/claude-channel-20261004/736-readiness-attempt/result.json",
+    "bytes": 108513,
+    "sha256": "c305011ffbba013938b97680f2aa93fd7e9101fb4c4fcf43d358014a0fba0e50"
+  },
+  "before_backup": {
+    "path": "logs/claude-channel-20261004/736-backup-attempt/manifest.json",
+    "bytes": 103629,
+    "sha256": "f6327f81cba73458491de9110e65e1d30f10b3bda4c6afd907528fdd2d857718"
+  },
+  "after_backup": {
+    "path": "logs/claude-channel-20261004/736-post-backup-attempt/manifest.json",
+    "bytes": 115934,
+    "sha256": "fbf24321085c456fee104f2cf08cea75f1e6702ae70d835d2d48946d01967d57"
+  },
+  "seal_checks": {
+    "exact_command": true,
+    "exact_timeout": true,
+    "terminal_before_cap": true,
+    "exits": true,
+    "wall_duration": true,
+    "complete_native_coverage": true,
+    "exact_native_test_totals": true,
+    "native_summary_lines_present": true,
+    "native_failure_excerpts_present": true,
+    "nested_controls_present": true,
+    "no_owned_residual": true,
+    "clean_head": true,
+    "receipts": true,
+    "preservation": true
+  }
+}
