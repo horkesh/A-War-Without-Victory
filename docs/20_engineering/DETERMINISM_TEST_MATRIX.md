@@ -127,6 +127,7 @@ must establish recovery; focused restoration checks do not waive them.
   signal. The balanced full-suite job runs everything the config discovers, so full-suite-only pins
    (`strict_null_inventory_progress`, `war_phase_step_order`, consequence/substrate
    inventory) can no longer reach main green.
+- **Balanced harness receipts:** `tests/vitest_balanced_receipts.test.ts` runs real tiny Vitest children for pass/fail/skip/import error and interruption, plus nested-context isolation, two-file lane sequence continuity, native-finalization failure and fake-clock immunity. `tests/run_vitest_balanced.test.ts` and `tests/test_suite_inventory.test.ts` pin output ownership, selector coverage and baseline use. Diagnostic clocks/IDs stay outside simulation state, saves and campaign outputs. This focused proof does not establish full-suite runtime or close its gate.
 - **JNA lifecycle/presentation:** `tests/early_war_jna_transition.test.ts` pins event-backed
   `war_jna` completion and War-pipeline ownership; `tests/jna_phantom_brigades.test.ts` pins
   deterministic synthetic-command retirement after the final spawned subordinate; and

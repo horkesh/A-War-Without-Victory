@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process';
 import { join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { balanceTestFiles, buildTestInventory } from './test_suite_inventory.mjs';
+import { createReceiptRun, receiptEnvironmentForLane } from './vitest_file_receipts.mjs';
 
 function strictCompare(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -96,6 +97,7 @@ export function renderBalancedVitestConfig(files) {
     "    'zustand': join(rootModules, 'zustand'),",
     '  } },',
     '  test: {',
+    "    runner: join(rootDir, 'tools/test/vitest_receipt_runner.mjs'),",
     `    include: ${JSON.stringify([...files].sort(strictCompare), null, 6)},`,
     '    globals: false,',
     "    environment: 'node',",
@@ -140,7 +142,16 @@ function parseArgs(argv) {
   return parsed;
 }
 
-export function runVitestChild(vitestCli, configPath, passthrough, root, env = process.env) {
+function defaultVitestChildEnvironment() {
+  const env = { ...process.env };
+  for (const name of Object.keys(env)) {
+    if (name.toUpperCase().startsWith('AWWV_VITEST_RECEIPT_')) delete env[name];
+  }
+  return env;
+}
+
+export function runVitestChild(vitestCli, configPath, passthrough, root, env) {
+  const childEnvironment = env ?? defaultVitestChildEnvironment();
   return new Promise((resolveStatus) => {
     const child = spawn(process.execPath, [
       vitestCli,
@@ -148,7 +159,7 @@ export function runVitestChild(vitestCli, configPath, passthrough, root, env = p
       '--config',
       toPosixPath(relative(root, configPath)),
       ...passthrough,
-    ], { cwd: root, env, stdio: 'inherit', shell: false });
+    ], { cwd: root, env: childEnvironment, stdio: 'inherit', shell: false });
     child.once('error', () => resolveStatus(1));
     child.once('exit', (code) => resolveStatus(code ?? 1));
   });
@@ -192,6 +203,31 @@ export async function runBalancedVitest(argv, root = process.cwd(), dependencies
     return 0;
   }
 
+  let receiptRun;
+  try {
+    receiptRun = createReceiptRun(
+      root,
+      dependencies.receiptRoot
+        ?? process.env.AWWV_VITEST_RECEIPT_ROOT
+        ?? join(root, '.tmp_vitest_balanced_receipts'),
+      {
+        shard_count: cli.shards,
+        selected_file_count: inventory.length,
+        partitioned_file_count: plan.partitionedFiles.length,
+        serial_file_count: plan.serialFiles.length,
+        planner: 'deterministic-duration-balanced-v1',
+        plan: {
+          parallel_shards: plan.parallelShards,
+          partitioned_files: plan.partitionedFiles,
+          serial_files: plan.serialFiles,
+        },
+      },
+    );
+  } catch (error) {
+    console.error(`Cannot initialize Vitest receipts: ${error instanceof Error ? error.message : String(error)}`);
+    return 1;
+  }
+
   const generatedRoot = join(root, '.tmp_vitest_balanced', String(process.pid));
   mkdirSync(generatedRoot, { recursive: true });
   try {
@@ -209,16 +245,25 @@ export async function runBalancedVitest(argv, root = process.cwd(), dependencies
         path,
         cli.passthrough,
         root,
-        {
+        receiptEnvironmentForLane(receiptRun, {
+          workerId: `worker-${shardIndex}`,
+          lane: `parallel-${shardIndex}`,
+        }, {
           ...process.env,
           AWWV_PROPERTY_SHARD_INDEX: String(shardIndex),
           AWWV_PROPERTY_SHARD_COUNT: String(cli.shards),
-        },
+        }),
       )));
     if (plan.serialFiles.length > 0) {
       const serialConfig = join(generatedRoot, 'serial.config.mjs');
       writeFileSync(serialConfig, renderBalancedVitestConfig(plan.serialFiles), 'utf8');
-      statuses.push(await childRunner(vitestCli, serialConfig, cli.passthrough, root));
+      statuses.push(await childRunner(
+        vitestCli,
+        serialConfig,
+        cli.passthrough,
+        root,
+        receiptEnvironmentForLane(receiptRun, { workerId: 'serial', lane: 'serial' }),
+      ));
     }
     return aggregateChildStatuses(statuses);
   } finally {

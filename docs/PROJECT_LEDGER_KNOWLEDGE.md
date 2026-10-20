@@ -6035,3 +6035,8 @@ Default suite reached native35-minute cap with3/5groupsgreen;oneparallel+serialr
 ### 2026-10-20 — Shard duration skew is not exact wall-cause proof
 
 Retainedcompletiontimescanprovebadestimates/unevenknownwork,notanexacthung/inflightfile. Globallyinterleavedcompletion-onlystdout lacksstartownership; missingcompletiondoesnotprovestart. Cross-workerfilesumsversuswallmarginarenotstrictboundswhenoverheads/order/resourcesareunknown. Preservecoveragepositivecontrols,skipsandnestedfailureownership. Offlinebalancemodelcanvalidate1440coverage/determinismwithunknownsensitivity,notpromise35minutecompletion. Preferfuturetimingrefresh+perfilereceiptswithfocusedchecks; unchangedshardreplayanswersadifferenthistoricalcausequestion,dontautorunboth. Owner2026-10-20acceptsrawLOCALwithpushedinventory; remote-bytebackupnotpromised. See727–730masterandledger.
+
+
+## 2026-10-20 — Durable Vitest file receipts require real multi-file and nested-child proof
+
+See PROJECT_LEDGER.md, 2026-10-20, 731–734. With Vitest 2.1.9 isolation, one sequential lane can construct a fresh runner for every file: a constructor-local counter is not a lane sequence. Recover the prior durable tail under the one-active-writer contract. Strip inherited receipt identity from ordinary nested children; explicitly assign owned contexts. Await native finalization before recording finish, and capture intrinsic clocks before tests can fake them. Real-child negative controls exposed all four errors missed by a one-file, context-free green check. Keep receipt output outside generated-config cleanup and retain failed controls. Refreshed completion timings can improve workload estimates, but neither offline balance nor focused tests prove full-suite wall time or the exact cause of a historical timeout.

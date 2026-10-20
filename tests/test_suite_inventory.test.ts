@@ -67,6 +67,34 @@ describe('duration-balanced shards', () => {
   });
 });
 
+describe('retained timing baseline provenance', () => {
+  it('binds every safely measured positive ordinary duration to retained run 718', () => {
+    const baseline = JSON.parse(readFileSync(
+      join(process.cwd(), 'tools/test/test_duration_baseline.json'),
+      'utf8',
+    ));
+    expect(baseline.source).toMatchObject({
+      retained_run: 718,
+      stdout_sha256: '264573c915ed4191be463960225f56d2416c00f4185d14af601cc0fcac8b3efe',
+      extraction_sha256: '9688536ebbe644a2a9d9a3b6e0fcf3711452f41dfe4846a504e2fda69756773e',
+      measured_positive_file_count: 1342,
+      repeated_file_rule: 'maximum positive completion duration',
+    });
+    expect(baseline.durations_ms['tests/sector_partition_buildCorpsFrontSectors_integration.test.ts'])
+      .toBe(853246);
+    for (const file of [
+      'tests/sector_front_role_truth_real_save.test.ts',
+      'tests/magazine_modal_boundary.test.ts',
+      'tests/ui/warroom_settings_modal_i18n.test.ts',
+    ]) {
+      expect(baseline.durations_ms[file], file).toBeUndefined();
+    }
+    expect(Object.values(baseline.durations_ms).every(
+      (value) => Number.isInteger(value) && (value as number) > 0,
+    )).toBe(true);
+  });
+});
+
 describe('inventory source is deterministic', () => {
   it('serializes rows byte-identically regardless of caller order', () => {
     const rows = [

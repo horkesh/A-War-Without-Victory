@@ -22,8 +22,15 @@ Raw evidence remains at its original paths in the October worktree. It is intent
 
 For the known17Sarajevo scratch rewrites,14nonempty opening states have exact old byte copies in `logs/claude-channel-20261004/324-pre-suite-generated-backup`; three opening files were empty per716pins. Current bytes are preserved in720closeout, and719independent review verifies this dependency. C97701891bytesSHA256`294077be226a772639eb03d89216b9e8d11d4e1d97e8b29abccfbf45440142df`; D1041bytesSHA256`ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3`. All31n80native files retain their measured hashes. Earlier unrecoverable losses remain failures; this checkpoint cannot recreate missing bytes.
 
-The raw-retention choice is resolved. Current work is retained-log shard diagnosis only; no new full suite or campaign is authorized. No merge, baseline adoption, acceptance-criterion change, new campaign or automatic retry is authorized by these records.
+The raw-retention choice is resolved. The retained-log diagnosis is complete; the authorized timing refresh and durable receipt implementation have passed focused checks and independent review. No new full suite or campaign is authorized. No merge, baseline adoption, acceptance-criterion change, new campaign or automatic retry is authorized by these records.
 
 ## Retained shard diagnosis — 2026-10-20
 
 See [qualified findings](unfinished-shard-diagnosis.md), the independent shard review, offline model/review and fresh protection receipt. Workload skew is the strongest measured contributor, not a proven exact terminal cause. The offline model runs no tests and promises no wall-time bound. The original raw inputs and closed attempts remain local.
+
+
+## Harness timing and file receipts — 2026-10-20
+
+Timing weights refreshed from retained 718 measurements; durable per-file collection/execution receipts added to the balanced harness. Focused 38/38 and root noEmit exit 0; independent 733 targeted verification PASS_SCOPED_HARNESS. Retained n80 remains 703/712, with all 31 native files and protected source/reference/threshold/C/D hashes exact. No full suite or campaign; 718 remains TIMEOUT/incomplete and calibration remains NO-GO/unadopted.
+
+The harness-correction result/inventory/closed receipt, initial independent review, targeted review and fresh protection receipt preserve the scoped evidence. Initial review findings and failed attempts are retained rather than erased. All 76 historical receipt files and 70 new receipt files remain local; the inventory records their preservation. These portable files are not a remote backup of raw logs. Current coverage is 1,438 unique files / 1,441 executions, with all prior tests retained. The refreshed baseline and synchronous per-file receipts are ready for future authorized use; no runtime improvement is yet measured.

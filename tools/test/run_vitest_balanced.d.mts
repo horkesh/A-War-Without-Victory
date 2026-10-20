@@ -27,6 +27,7 @@ export function runVitestChild(
 ): Promise<number>;
 export interface BalancedVitestDependencies {
   inventory?: TestInventoryRow[];
+  receiptRoot?: string;
   runVitestChild?: typeof runVitestChild;
 }
 

@@ -145,6 +145,8 @@ the current authoritative stamp 32 rows. Proof: `tests/scenario_read_context.tes
 - Product architecture authority: `docs/20_engineering/PRODUCT_ARCHITECTURE_AUTHORITY.md`.
 - Complete-suite test runner: `tools/test/run_vitest_balanced.mjs` (`npm run test:vitest:balanced`), backed by the deterministic hazard inventory in `tools/test/test_suite_inventory.mjs`. Fast/scenario slices are diagnostic subsets, not complete pre-merge proof.
 
+The balanced harness uses versioned measured weights in `tools/test/test_duration_baseline.json`; missing measurements retain prior weights or the deterministic default. It does not learn weights during a run. Generated configs install `tools/test/vitest_receipt_runner.mjs` (Vitest 2.1.9), which persists collection/execution starts and finishes with native finalization before finish. `tools/test/vitest_file_receipts.mjs` allocates unique manifests and per-worker lane JSONL files under `.tmp_vitest_balanced_receipts` (override `AWWV_VITEST_RECEIPT_ROOT`), outside generated-config cleanup. Nested children receive no inherited receipt context by default; explicit planner-owned context, monotonic lane sequences and intrinsic clocks preserve attribution. Receipt IDs and clocks are harness diagnostics only, never simulation state or artifacts. Focused tests do not replace complete-suite acceptance.
+
 ### Master calibration contract
 
 - Sole scoring scenario: `data/scenarios/apr1992_definitive_188w.json`.

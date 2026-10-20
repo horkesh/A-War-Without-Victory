@@ -1,0 +1,124 @@
+{
+  "schema": "awwv.732.review-correction.result.v1",
+  "writes_closed": true,
+  "verdict": "PASS_FOCUSED",
+  "scope": "One consolidated review correction pass for balanced-Vitest receipt ownership, lane sequence continuity, native finalization ordering, and intrinsic clocks; no full suite, campaign, or build.",
+  "corrections": {
+    "nested_child_context": "Default runVitestChild environment removes inherited AWWV_VITEST_RECEIPT_* keys; explicitly supplied owned environments remain unchanged.",
+    "lane_sequence": "Each file runner recovers the last sequence from a bounded 64 KiB lane tail and validates run/worker/lane ownership before appending.",
+    "native_finalization": "execution_finish is persisted only after the native onAfterRunSuite hook succeeds.",
+    "clocks": "Wall and monotonic clock functions are captured before test execution; durations are finite and nonnegative."
+  },
+  "tdd": {
+    "red": {
+      "child_exit": 1,
+      "files": 1,
+      "tests": 7,
+      "failed": 4,
+      "passed": 3,
+      "evidence": "logs/claude-channel-20261004/396-varosluk-732-review-red-a.stdout.log"
+    },
+    "green": {
+      "child_exit": 0,
+      "files": 1,
+      "tests": 7,
+      "evidence": "logs/claude-channel-20261004/396-varosluk-732-review-green-a.stdout.log"
+    },
+    "focused": {
+      "child_exit": 0,
+      "files": 4,
+      "tests": 38,
+      "evidence": "logs/claude-channel-20261004/396-varosluk-732-review-focused-a.stdout.log"
+    },
+    "typecheck": {
+      "child_exit": 0,
+      "diagnostics": 0,
+      "evidence": "logs/claude-channel-20261004/396-varosluk-732-review-typecheck-a.receipt.json"
+    }
+  },
+  "timing": {
+    "retained_run": 718,
+    "stdout_sha256": "264573c915ed4191be463960225f56d2416c00f4185d14af601cc0fcac8b3efe",
+    "extraction_sha256": "9688536ebbe644a2a9d9a3b6e0fcf3711452f41dfe4846a504e2fda69756773e",
+    "measured_positive_file_count": 1342,
+    "retained_prior_file_count": 6,
+    "weighted_file_count": 1348,
+    "repeated_file_rule": "maximum positive completion duration",
+    "changed_by_correction": false
+  },
+  "coverage": {
+    "retained_718_unique_files": 1437,
+    "current_unique_files": 1438,
+    "current_executions": 1441,
+    "added": [
+      "tests/vitest_balanced_receipts.test.ts"
+    ],
+    "removed": [],
+    "serial_count": 74,
+    "partitioned_files": [
+      "tests/sector_partition_buildCorpsFrontSectors_integration.test.ts"
+    ]
+  },
+  "receipts": {
+    "historical_file_count": 76,
+    "historical_files_byte_exact": true,
+    "total_retained_file_count": 146,
+    "new_retained_file_count": 70,
+    "corrected_two_file_lane": "receipt-contract-tests/run-20261020054158634-36560-53f470c3-b88a-416e-982c-a1f1a68999a2/worker-0-parallel-0.jsonl",
+    "nested_isolation_proven": true,
+    "finalization_start_only_proven": true,
+    "interrupted_start_only_proven": true,
+    "intrinsic_clock_proven": true
+  },
+  "preservation": {
+    "initial_732_seal_files_byte_exact": 9,
+    "protected_pin_count": 5,
+    "n80_native_count": 31,
+    "c": {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 97701891,
+      "sha256": "294077be226a772639eb03d89216b9e8d11d4e1d97e8b29abccfbf45440142df"
+    },
+    "d": {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    "all_correction_capture_runs_preserved": true
+  },
+  "historical_gates": {
+    "retained_703_712": "preserved historical measurement; not rerun",
+    "retained_718": "TIMEOUT with unknown inflight work; not reclassified",
+    "all_unmet_gates_remain_unmet": true
+  },
+  "correction_files": [
+    "tests/fixtures/vitest_balanced/receipt_fake_clock.fixture.ts",
+    "tests/fixtures/vitest_balanced/receipt_finalize_error_runner.fixture.mjs",
+    "tests/fixtures/vitest_balanced/receipt_nested_child.fixture.ts",
+    "tests/fixtures/vitest_balanced/receipt_pass_second.fixture.ts",
+    "tests/vitest_balanced_receipts.test.ts",
+    "tools/test/run_vitest_balanced.mjs",
+    "tools/test/vitest_receipt_runner.mjs"
+  ],
+  "full_candidate_files": [
+    "tests/fixtures/vitest_balanced/receipt_block.fixture.ts",
+    "tests/fixtures/vitest_balanced/receipt_fail.fixture.ts",
+    "tests/fixtures/vitest_balanced/receipt_fake_clock.fixture.ts",
+    "tests/fixtures/vitest_balanced/receipt_finalize_error_runner.fixture.mjs",
+    "tests/fixtures/vitest_balanced/receipt_import_error.fixture.ts",
+    "tests/fixtures/vitest_balanced/receipt_nested_child.fixture.ts",
+    "tests/fixtures/vitest_balanced/receipt_pass.fixture.ts",
+    "tests/fixtures/vitest_balanced/receipt_pass_second.fixture.ts",
+    "tests/fixtures/vitest_balanced/receipt_skip.fixture.ts",
+    "tests/run_vitest_balanced.test.ts",
+    "tests/test_suite_inventory.test.ts",
+    "tests/vitest_balanced_receipts.test.ts",
+    "tools/test/run_vitest_balanced.d.mts",
+    "tools/test/run_vitest_balanced.mjs",
+    "tools/test/run_vitest_default.mjs",
+    "tools/test/test_duration_baseline.json",
+    "tools/test/vitest_file_receipts.d.mts",
+    "tools/test/vitest_file_receipts.mjs",
+    "tools/test/vitest_receipt_runner.mjs"
+  ]
+}

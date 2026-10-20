@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { VITEST_ALIASED_PACKAGES, VITEST_SETUP_FILE } from '../tools/test/vitest_shared_config.mjs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -102,6 +102,65 @@ describe('balanced Vitest execution plan', () => {
     expect(status).toBe(1);
   });
 
+  it('allocates one create-new receipt per worker lane without filtering reporter flags', async () => {
+    const root = process.cwd();
+    const receiptRoot = join(root, '.tmp_vitest_balanced_receipts', 'balanced-wiring-tests');
+    const calls: Array<{ passthrough: string[]; env: NodeJS.ProcessEnv }> = [];
+    const status = await runBalancedVitest([
+      '--shards=2', '--', '--reporter=dot', '--silent',
+    ], root, {
+      receiptRoot,
+      inventory: [
+        { file: 'tests/a.test.ts', durationMs: 2, serial: false, reasons: [] },
+        { file: 'tests/b.test.ts', durationMs: 1, serial: false, reasons: [] },
+        { file: 'tests/c.test.ts', durationMs: 1, serial: true, reasons: ['fixed-port'] },
+      ],
+      runVitestChild: async (_cli: string, _config: string, passthrough: string[], _root: string, env: NodeJS.ProcessEnv = {}) => {
+        calls.push({ passthrough, env });
+        return 0;
+      },
+    });
+    expect(status).toBe(0);
+    expect(calls).toHaveLength(3);
+    expect(calls.every((call) => call.passthrough.join(' ') === '--reporter=dot --silent')).toBe(true);
+    expect(new Set(calls.map((call) => call.env.AWWV_VITEST_RECEIPT_RUN_ID)).size).toBe(1);
+    expect(calls.map((call) => call.env.AWWV_VITEST_RECEIPT_LANE).sort())
+      .toEqual(['parallel-0', 'parallel-1', 'serial']);
+    expect(calls.every((call) => existsSync(call.env.AWWV_VITEST_RECEIPT_FILE!))).toBe(true);
+    const manifest = JSON.parse(readFileSync(join(
+      calls[0]!.env.AWWV_VITEST_RECEIPT_FILE!, '..', 'manifest.json',
+    ), 'utf8'));
+    expect(manifest).toMatchObject({
+      schema: 'awwv.vitest-file-receipt-run.v1',
+      planner: 'deterministic-duration-balanced-v1',
+      shard_count: 2,
+      selected_file_count: 3,
+      partitioned_file_count: 0,
+      serial_file_count: 1,
+    });
+    expect(manifest.plan.parallel_shards.flatMap((shard: { files: string[] }) => shard.files).sort())
+      .toEqual(['tests/a.test.ts', 'tests/b.test.ts']);
+    expect(manifest.plan.serial_files).toEqual(['tests/c.test.ts']);
+  });
+
+  it('fails receipt-root startup before invoking a test child', async () => {
+    const root = process.cwd();
+    const occupied = join(root, '.tmp_vitest_balanced_test', `receipt-root-file-${process.pid}`);
+    mkdirSync(join(root, '.tmp_vitest_balanced_test'), { recursive: true });
+    writeFileSync(occupied, 'not a directory', { flag: existsSync(occupied) ? 'w' : 'wx' });
+    let childCalls = 0;
+    const status = await runBalancedVitest(['--shards=1'], root, {
+      receiptRoot: occupied,
+      inventory: [{ file: 'tests/a.test.ts', durationMs: 1, serial: false, reasons: [] }],
+      runVitestChild: async () => {
+        childCalls += 1;
+        return 0;
+      },
+    });
+    expect(status).toBe(1);
+    expect(childCalls).toBe(0);
+  });
+
   it('selects a bounded smoke subset without changing discovery order', () => {
     expect(filterInventoryByPattern(inventory, 'a\\.test|shared\\.test').map((row) => row.file))
       .toEqual(['tests/a.test.ts', 'tests/shared.test.ts']);
@@ -140,6 +199,10 @@ describe('every vitest config surface stays in sync', () => {
         expect(rootConfig).toContain(VITEST_SETUP_FILE);
         expect(generatedBalanced).toContain(VITEST_SETUP_FILE);
         expect(sliceRunner).toContain('renderSetupFilesLine');
+    });
+
+    it('installs the mandatory receipt runner on every generated balanced config', () => {
+        expect(generatedBalanced).toContain("runner: join(rootDir, 'tools/test/vitest_receipt_runner.mjs')");
     });
 
     it('does not retain map and Deck aliases after workspace resolution is unified', () => {

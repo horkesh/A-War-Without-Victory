@@ -1,0 +1,74 @@
+{
+  "schema": "awwv.733.targeted-correction-verification.v1",
+  "writes_closed": true,
+  "verdict": "PASS_SCOPED_HARNESS",
+  "scope": "One targeted verification of the four findings in 733-independent-review against the writes-closed 732 consolidated correction; no general review, test rerun, full suite, campaign, or build.",
+  "head": "c46faf3f97508e97ab7486c172c74126c7154169",
+  "sealed_correction": {
+    "path": "logs/claude-channel-20261004/732-review-seal-d",
+    "wrapper_child_exit": 0,
+    "wrapper_exit": 0,
+    "artifact_contract_pass": true,
+    "result_sha256": "d49820c439d3ec3382626434aeac63d9f317fca8e54ca46f6c6e07f7b3f78f8e",
+    "inventory_sha256": "deae9f457d52fddcf7820cf2dcee7b35f4a84cdd7f4e70758059c3cec005c602",
+    "closed_receipt_sha256": "8637e7b158e27625e93a1125b35a0df20a5b0f47808851481113509f1a5f0b3e",
+    "wrapper_receipt_sha256": "68918d79822a47e2d7853c3aef9d3b2f1cf9830ee9eae8994cb9e6ad9bc81a71",
+    "source_pin_count": 19,
+    "source_pins_match_final_source": true
+  },
+  "finding_verification": [
+    {
+      "id": "nested-receipt-context-inheritance",
+      "status": "RESOLVED",
+      "source": "tools/test/run_vitest_balanced.mjs:145",
+      "evidence": ".tmp_vitest_balanced_receipts/receipt-contract-tests/run-20261020054238693-38412-9e2f19d6-29be-4680-b7f4-498cedb01af4/worker-0-parallel-0.jsonl",
+      "evidence_sha256": "a49627944d8b10fc981e1d02a111727eaa3aa628f90848d69d674036b20be7cd",
+      "observation": "The default child environment removes every case-insensitive AWWV_VITEST_RECEIPT_* key. The retained nested-child lane contains only receipt_nested_child.fixture.ts, excludes deliberate_failure.fixture.ts, and has a contiguous sequence."
+    },
+    {
+      "id": "lane-sequence-resets-per-file",
+      "status": "RESOLVED",
+      "source": "tools/test/vitest_receipt_runner.mjs:37",
+      "evidence": ".tmp_vitest_balanced_receipts/receipt-contract-tests/run-20261020054242377-38412-64adab81-b0f6-464a-a0c3-ed8e3bb88096/worker-0-parallel-0.jsonl",
+      "evidence_sha256": "2bdf202fb722040c98d3dc89de1915af987c5f7da3fda6e90732e32fd4eecfa7",
+      "observation": "Each new runner recovers and validates the prior lane tail. The retained two-file lane has exactly eight events with sequence 1 through 8, one run id, one worker id, one lane, and only the two planned pass fixtures."
+    },
+    {
+      "id": "finish-before-native-finalization",
+      "status": "RESOLVED",
+      "source": "tools/test/vitest_receipt_runner.mjs:147",
+      "evidence": ".tmp_vitest_balanced_receipts/receipt-contract-tests/run-20261020054244610-38412-8ddc1687-7c00-4271-ac8c-c8ce1808bf28/worker-0-parallel-0.jsonl",
+      "evidence_sha256": "21d44195d2d3009de860f4be507151a9f4cd5daca860654d1a46d1054cd0dae0",
+      "observation": "The runner awaits native onAfterRunSuite before persisting finish. The retained deliberate native-finalization failure exits nonzero and contains collection_start, collection_finish, and execution_start only; no execution_finish is forged."
+    },
+    {
+      "id": "fake-clock-timestamp",
+      "status": "RESOLVED",
+      "source": "tools/test/vitest_receipt_runner.mjs:13",
+      "evidence": ".tmp_vitest_balanced_receipts/receipt-contract-tests/run-20261020054246435-38412-0e5a2bbc-b3bc-455d-830e-b9efb7728dd4/worker-0-parallel-0.jsonl",
+      "evidence_sha256": "228c17043407285ecad0864d64f2acc83c16b3cad01ea002abeb7994fa2837cc",
+      "observation": "The runner captures intrinsic wall and monotonic clocks before test execution. Despite a fixture leaving epoch fake time active, all four timestamps are 2026 UTC values and both measured durations are finite and nonnegative."
+    }
+  ],
+  "reused_validation": {
+    "red": "1 file, 7 tests: 4 failed and 3 passed; child exit 1",
+    "correction_green": "1 file, 7 tests: 7 passed; child exit 0",
+    "focused": "4 files, 38 tests: 38 passed; child exit 0",
+    "typecheck": "root noEmit child exit 0; stdout 0 bytes; stderr 0 bytes",
+    "historical_receipt_files_byte_exact": 76,
+    "new_retained_receipt_files": 70,
+    "total_retained_receipt_files": 146,
+    "initial_732_seal_files_byte_exact": 9,
+    "protected_pins_byte_exact": 5,
+    "n80_native_files_byte_exact": 31,
+    "git_diff_check_exit": 0
+  },
+  "determinism": "No simulation determinism risk found under Engine Invariants v0.9.0, CODE_CANON, PHASE_A_INVARIANTS, and DETERMINISM_TEST_MATRIX. Wall clocks, UUIDs, and receipt sequence are confined to external test-harness diagnostics and do not enter GameState, saves, scenario truth artifacts, planning, or gameplay ordering.",
+  "limits": [
+    "No full suite, campaign, or build was run for this verification.",
+    "Retained run 718 remains TIMEOUT with unknown in-flight work and is not reclassified.",
+    "Historical 703/712/718 evidence retains its actual scope; no new native-703 claim is made.",
+    "Failed seal attempts 732-review-seal-a, -b, and -c remain retained with their actual failure provenance; only 732-review-seal-d is the successful correction seal.",
+    "All historical NO-GO and unadopted gates remain unchanged."
+  ]
+}
