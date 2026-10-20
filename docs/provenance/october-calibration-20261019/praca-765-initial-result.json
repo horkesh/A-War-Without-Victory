@@ -1,0 +1,134 @@
+{
+  "schema": "awwv.765.praca-retained-diagnosis.v1",
+  "captured_utc": "2026-10-20T22:55:00Z",
+  "writes_closed": true,
+  "verdict": "BOUNDED_CAUSAL_CHAIN_PROVED__FIRST_HELPER_WRITER_UNMEASURED",
+  "summary": "The question premise needs correction: n81 does not flip Prača to RBiH. Both runs start Prača under RBiH; n80 captures it for RS at turn 26, while n81 omits that capture and therefore remains RBiH. The missing capture is traced through Operation Kijevo's missing Prača axis to rs_4th_sarajevo_light_infantry being held by a turn-23 probe when Kijevo is built. Retained artifacts show an earlier global trajectory divergence at turn 4 consistent with the new global pre-T3 helper, but do not record the helper call or its pre/post order, so the helper is associated with the changed trajectory rather than proved as the first writer.",
+  "scope": {
+    "worktree": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+    "opening_head": "9d291ff4ce30bc3cf376dedb77ffee10747e38bc",
+    "opening_and_closing_git_status": "clean; ignored 765 evidence only",
+    "campaigns": 0,
+    "runTurn_calls": 0,
+    "replays": 0,
+    "simulation_imports": 0,
+    "builds": 0,
+    "full_suites": 0,
+    "noEmit": 0,
+    "gameplay_test_data_docs_git_changes": 0
+  },
+  "inputs": {
+    "baseline": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80",
+    "candidate": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n81",
+    "native_files_each": 31,
+    "weekly_rows_each": 188,
+    "initial_save": {
+      "bytes_each": 1373722,
+      "sha256_each": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+      "byte_equal": true,
+      "controller_count": 712
+    },
+    "consumed_inputs": {
+      "count": 32,
+      "ordered_digest_each": "7986f05230e1d526e1794673e796dcb77730501d4958e435970c4ec806cc8039",
+      "exact_match_reused_from": "logs/claude-channel-20261004/761-readiness-b/readiness.json"
+    }
+  },
+  "controls": {
+    "positive_selector": "n80 target lookup finds exactly one native Prača control event and one Operation Kijevo AAR containing Prača",
+    "negative_selector": "impossible op:pale:praca__absent_control returns zero",
+    "schema": "both weekly files have 188 parseable rows; both temporal logs parse; target has canonical three-component OSID shape",
+    "pass": true,
+    "extractor_attempt": "logs/claude-channel-20261004/765-praca-extract-a",
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false,
+    "trace_sha256": "d4919792ef84c03c1ce69859ee8844fb9fec97414ec69cfd5580b1f3530defa7"
+  },
+  "turn_week_binding": {
+    "native_control_and_aar": "turn 26",
+    "weekly_report": "week_index 26 contains the turn-26 Prača battle",
+    "brigade_temporal_log": "turn 26 row carries week_index 25; this harness artifact is one less than its turn field",
+    "checkpoint": "save_w39 evaluates turn 39 and sees n80 RS versus n81 RBiH"
+  },
+  "event_actor_chain": [
+    {
+      "status": "measured",
+      "event": "n80 turn-26 combat control change",
+      "detail": "op:pale:praca RBiH→RS; battle_id 26:op:pale:praca:rs_4th_sarajevo_light_infantry:arbih_851st_vitezka_liberation; attacking lead rs_4th_sarajevo_light_infantry; defenders arbih_851st_vitezka_liberation and arbih_181st_mountain; decisive victory and territory_flipped=true. n81 has no Prača control event."
+    },
+    {
+      "status": "measured",
+      "event": "n81 retains RBiH rather than recapturing",
+      "detail": "n81's only Prača engagement is turn 172, a catastrophic failed RS probe by rs_5th_podrinje with territory_flipped=false."
+    },
+    {
+      "status": "measured",
+      "event": "Operation Kijevo roster and axis divergence",
+      "detail": "n80 Kijevo starts turn 24 with rs_1st_romanija_infantry, rs_2nd_sarajevo_light_infantry and rs_4th_sarajevo_light_infantry; its praca_approach axis captures Prača at turn 26. n81 Kijevo starts turn 24 with only the first two brigades, contains only kijevo_shoulder, captures Kijevo at turn 25 and ends turn 26."
+    },
+    {
+      "status": "measured_plus_source_predicate",
+      "event": "rs_4th is excluded because it is already committed",
+      "detail": "n81 temporal rows show rs_4th committed to probe_vrs_sarajevo_romanija_t23 in planning at turn 23 and recovery at turn 24, exactly when Kijevo begins. pre_planned_operations.ts collectCommittedFormationIds records every active-operation participant and buildAxesFromDef rejects committedElsewhere at lines 1904, 1934 and 1965. This proves the roster exclusion predicate, not why the probe was selected."
+    },
+    {
+      "status": "measured",
+      "event": "earliest retained rs_4th divergence",
+      "detail": "At turn 22/week_index 21, n80 personnel is 1405 and n81 is 1516; location, movement destination, operation, cohesion, morale and fatigue still agree. n80 receives the comparable +105 replenishment one turn later. Retained reports do not identify the writer or pool decision that shifted this replenishment."
+    },
+    {
+      "status": "measured_post_turn_state_only",
+      "event": "earliest global formation divergence",
+      "detail": "At turn 4/week_index 3, rs_1st_armored and rs_5th_kozara_light_infantry are both Operation Prijedor participants at Rasavci and in transit. n80 post-turn destination is op:prijedor:kozarac_2; n81 is op:prijedor:ljubija_2. Operation Prijedor's AAR is otherwise identical and shows both as sequential captured objectives on prijedor_clean. The first aggregate weekly difference appears later at week_index 7 in column_movement and movement_report."
+    }
+  ],
+  "candidate_source": {
+    "helper": "src/sim/combat/commander_march_correction.ts:71-177",
+    "callsite": "src/sim/turn_phases/war_phases.ts:1571",
+    "helper_sha256": "9db5d8b250fc606c00a2e8d7327d2ff4113cb1048414d7f1532c1f9cb6d0a68d",
+    "war_phases_sha256": "93fcb005fa725c8a45269370c8319ca34779d1e032624fee08a4ae5800baa04a",
+    "source_supported_shape": "The helper globally scans pending bot_discretionary column orders with no transit, requires unique live operation/axis membership and a completed earlier objective, then replaces that destination with an approach to the current objective immediately before T3. The turn-4 Operation Prijedor destination divergence is consistent with this shape.",
+    "direct_helper_writer_measured": false,
+    "counterfactual_causality_proved": false
+  },
+  "telemetry": {
+    "C_after_bytes": 101054372,
+    "C_after_sha256": "b11e26cdda6948e8a0c6812a1e5563578d8de42d4cc4f235a25598d075acc8be",
+    "C_before_bytes": 100107701,
+    "C_before_sha256": "8d242e18f199a54c26f755e648fe4612159563ec0b606930112653770d725f3c",
+    "C_append_bytes": 946671,
+    "C_opening_prefix_exact": true,
+    "C_append_complete_lines": 4228,
+    "C_target_matches": 0,
+    "C_attacker_matches": 0,
+    "D_bytes": 1041,
+    "D_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+    "limit": "The exact n81 C append is attributable via the archived before/after boundary and runner receipt, but its directive-chain schema contains neither Prača nor rs_4th and does not observe the helper. Zero matches are not evidence that the helper did not run."
+  },
+  "causal_assessment": {
+    "actual": "n81 misses the turn-26 capture because Kijevo omits rs_4th and the complete Prača axis; source proves the live probe commitment causes that roster exclusion.",
+    "inferred": "The globally activated pre-T3 reconciliation is the only candidate change and the turn-4 destination difference matches its designed predicate, so it is the strongest upstream suspect for the changed deterministic trajectory.",
+    "unresolved": "No retained artifact records the first helper invocation, order owner, old/new destinations and guard results at the call boundary. The chain from the turn-4 Prijedor rewrite to turn-22 rs_4th replenishment and turn-23 probe selection is therefore not directly measured."
+  },
+  "recommendation": {
+    "disposition": "Keep n81 rejected and do not adopt the global pre-T3 prepass. Withdrawing an unaccepted candidate is safe disposition, not a claimed mechanism fix.",
+    "smallest_justified_fix": null,
+    "reason_no_mechanic_fix": "The retained evidence does not establish which helper predicate is overbroad or whether the turn-4 rewrite is itself unlawful; a date, OSID, operation-name exception, or new opt-in would be a guess.",
+    "smallest_next_measurement": "If another bounded run is authorized, add an observer-only receipt immediately around reconcileStaleOperationMarchOrders. For every replacement, record turn, brigade, pre/post owner+stance+destination, physical location, effective host, operation id/name/phase, axis id, objective list/current index/capture count, prior-objective controller, each preservation guard result, approaches, and selected replacement. Also record a terminal no-change receipt and selector coverage. This is the minimum evidence needed to prove the first writer and choose a systemic predicate correction."
+  },
+  "preservation": {
+    "protected_threshold_sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d",
+    "painted_oct1995_sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+    "retained_n80": "703/712, NO-GO/unadopted",
+    "n81": "689/712, rejected/unadopted",
+    "thresholds_and_raw_telemetry_untouched": true,
+    "prior_761_archives_and_native_inventory_reused": true,
+    "full_estate_hash_scan": false
+  },
+  "limits": [
+    "No root-cause claim is made for the turn-22 replenishment shift or turn-23 probe creation.",
+    "No gameplay mechanic, source rollback, date patch, OSID exception, operation-name exception, acceptance recovery, or new score is claimed.",
+    "All inherited acceptance gates remain unmet; retained n80 remains the only baseline."
+  ]
+}

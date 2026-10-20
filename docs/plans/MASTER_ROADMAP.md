@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-20 — n81 pre-T3 regression rejected; retainedn80 703/712.
+**Last updated:** 2026-10-21 — Prača missed-capture trace bounded; retainedn80 703/712.
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -24,13 +24,13 @@ tradeoffs or irreversible/external actions with concrete options and a
 recommendation. Required evidence, review panels and cost-control gates remain.
 
 **Current R6 — October Sana remains NO-GO.** Retained n80 is **703/712**, unadopted.
-The single n81 pre-T3 reconciliation regression fails **689/712**,14formerly-correct
-October losses,0gains and4anchor failures. Earlier scores706/704/703 also regress.
-ABB does not reach Prisoje; bot187 queues Bosansko Grahovo and transit starts188.
-Candidate rejected; source/evidence retained unchanged, no retry/fullsuite/adoption.
-All telemetry retained (C+946671bytes); thresholds unchanged. Next bounded question
-is the retained early divergence, beginning with Prača. No new campaign approved.
-Every inherited unmet gate remains in the
+Rejected n81 is689/712 with14October losses. Prača was never captured in n81; n80
+rs4Sarajevo captured it through Kijevo at26. n81's missing Prača axis is strongly
+explained by rs4's active23probe commitment, without a direct rejection receipt.
+Turn4 is only the earliest selected brigade-projection difference; first helper
+writer and upstream causal chain remain unmeasured. No mechanic fix justified.
+Next bounded scope: observer seams and focused coverage, no campaign approved.
+Thresholds and all telemetry remain exact; every inherited unmet gate remains in the
 [calibration authority](../40_reports/CALIBRATION_MASTER.md).
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate

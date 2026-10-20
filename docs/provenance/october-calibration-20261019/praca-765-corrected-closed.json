@@ -1,0 +1,18 @@
+{
+  "schema": "awwv.765.correction-closed.v1",
+  "correction_timestamp_utc": "2026-10-20T22:55:14.010Z",
+  "writes_closed": true,
+  "corrected_result": {
+    "path": "logs/claude-channel-20261004/765-corrected-result.json",
+    "bytes": 7954,
+    "sha256": "ae8aba85cbe3b94f079881a75a7997156e04f29576c45a447dbf56b5024a0d57"
+  },
+  "correction_inventory": {
+    "path": "logs/claude-channel-20261004/765-correction-inventory.json",
+    "bytes": 2432,
+    "sha256": "6ccc7766955135ad997f1e53762ea81d346c8d48a7891c3b2029cf407eecc447"
+  },
+  "original_sealed_bytes_preserved": true,
+  "review_verdict_applied": "PASS_BOUNDED_DIAGNOSIS_WITH_REQUIRED_PROVENANCE_AND_SCOPE_CORRECTIONS",
+  "no_new_extraction_runtime_tests": true
+}

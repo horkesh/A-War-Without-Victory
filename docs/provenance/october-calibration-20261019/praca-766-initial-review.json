@@ -1,0 +1,152 @@
+{
+  "schema": "awwv.766.independent-review.v1",
+  "captured_utc": "2026-10-20T22:52:15.218Z",
+  "writes_closed": true,
+  "verdict": "PASS_BOUNDED_DIAGNOSIS_WITH_REQUIRED_PROVENANCE_AND_SCOPE_CORRECTIONS",
+  "scope": {
+    "worktree": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+    "head": "9d291ff4ce30bc3cf376dedb77ffee10747e38bc",
+    "git_status_before_review_outputs": "clean",
+    "campaigns": 0,
+    "runTurn_calls": 0,
+    "replays": 0,
+    "builds": 0,
+    "noEmit": 0,
+    "tests": 0,
+    "probes": 0,
+    "production_test_data_docs_git_changes": 0,
+    "review_outputs_only": [
+      "logs/claude-channel-20261004/766-independent-review.json",
+      "logs/claude-channel-20261004/766-independent-review.md"
+    ]
+  },
+  "reviewed_inputs": [
+    {
+      "path": "logs/claude-channel-20261004/764-root-plan.md",
+      "sha256": "e441854ab685952055c20902614b523affebb00c39fecbd3437e87285db5e692"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-result.json",
+      "bytes": 9868,
+      "sha256": "c7ee12b646286fcd721876c17bcb3a7b816691b618177fd179e5bdd034ab514f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-inventory.json",
+      "bytes": 2048,
+      "sha256": "e468e71a9651f17dd9e45a80c76d47e9b515ae9c4cc205c4a254373543665ac1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-closed.json",
+      "bytes": 1103,
+      "sha256": "a753f61fa98036458ddc7b7ddc66a5ebe42413bdd452fe6a31bc1bff400138ae"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-praca-extract-a/trace.json",
+      "bytes": 132839,
+      "sha256": "d4919792ef84c03c1ce69859ee8844fb9fec97414ec69cfd5580b1f3530defa7"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-praca-extract-a/receipt.json",
+      "bytes": 2723,
+      "sha256": "ac0d8e9b8dedccbd50a9d3d0f55c3c15f3daeec074bfe577524bdb30fbfd7eee"
+    },
+    {
+      "path": "logs/claude-channel-20261004/761-readiness-b/readiness.json",
+      "sha256": "8d470370e40eb101423c98ebd795b0e324c672a80da8c85c101f89234e64e95c"
+    },
+    {
+      "path": "docs/provenance/october-calibration-20261019/regression-761-result.json",
+      "sha256": "f81f2464c5f7055c7f0548ccb441972d1bf8a935aafbc36672e106d12af2ce70"
+    },
+    {
+      "path": "docs/provenance/october-calibration-20261019/regression-762-review.json",
+      "sha256": "59162ba2964c7a492720777495db351199504db87f9c3593564f9e0922cc85ab"
+    },
+    {
+      "path": "docs/provenance/october-calibration-20261019/regression-763-result.json",
+      "sha256": "dc1572b0f87d6b740db3eded785472170f6c469006aefa72813600e1c7aecd99"
+    }
+  ],
+  "inventory_verification": {
+    "declared_count": 8,
+    "listed_count": 8,
+    "all_paths_present": true,
+    "all_byte_counts_match": true,
+    "all_sha256_match": true,
+    "note": "The declared eight-file inventory covers the extractor, its five preserved-preflight artifacts, trace, and result. The inventory and closed receipt are separately sealed inputs and are not counted among those eight entries."
+  },
+  "findings": [
+    {
+      "severity": "required_correction",
+      "id": "future_dated_765_seal_metadata",
+      "finding": "The 765 result, inventory, and closed receipt report captured_utc values 22:55:00Z, 22:56:00Z, and 22:57:00Z. At the orchestrator's live-clock audit the actual clock was 22:49:49Z, and this review's later live clock was still only 22:52:15.218Z. Those three values were future-dated and are invalid capture/seal metadata.",
+      "correction": "Preserve the original sealed 765 bytes. Treat only the preserved extractor timing as established: start 2026-10-20T22:46:47.668Z, trace capture 2026-10-20T22:46:53.893Z, and receipt end 2026-10-20T22:46:53.991Z. The exact later result/inventory/closed creation times are unestablished. This metadata defect does not imply that simulation runtime timestamps were fabricated."
+    },
+    {
+      "severity": "required_scope_correction",
+      "id": "selector_controls_partial",
+      "finding": "The positive selector is meaningful: it finds one n80 Prača native control event and one Kijevo AAR containing Prača. The absent-target lookup returns zero. However, malformed_target_rejected merely checks that the real target has three colon-delimited components; it never supplies or rejects a malformed target. The controls therefore do not satisfy the fixed plan's malformed-target fail-closed claim.",
+      "impact": "The positive target evidence remains readable, but controls.pass must be described as partial rather than complete selector validation. No new probe is justified for this closed retained-evidence review."
+    },
+    {
+      "severity": "required_scope_correction",
+      "id": "earliest_t4_is_projection_scoped",
+      "finding": "Turn 4/week_index 3 is the earliest difference found across the extractor's retained brigade_temporal_log rows after projecting only location_osid, movement destination/state, active operation/phase, personnel, cohesion, morale, fatigue, status, and readiness. It is not proof of the earliest divergence in complete GameState, every report field, or the helper call boundary. The weekly comparison separately excludes movement_phase_diagnostics and first differs at week_index 7.",
+      "correction": "Call the turn-4 Prijedor rows the earliest retained compact brigade-projection divergence, not the earliest global state or first-writer divergence."
+    },
+    {
+      "severity": "qualified_support",
+      "id": "praca_capture_chain",
+      "finding": "The strongest downstream chain is supported. Both initial saves are byte-identical and place op:pale:praca under RBiH. n80 records the sole turn-26 RBiH-to-RS combat flip by rs_4th_sarajevo_light_infantry and is RS at save_w39; n81 records no Prača flip and remains RBiH at save_w39. n80 Kijevo contains the rs_4th-only praca_approach axis and captures Prača; n81 Kijevo contains only kijevo_shoulder."
+    },
+    {
+      "severity": "qualified_support",
+      "id": "probe_exclusion_is_source_supported_not_boundary_observed",
+      "finding": "n81 retains the exact rs_4th probe identity vrs_sarajevo_romanija:probe_vrs_sarajevo_romanija_t23:t23 in planning at temporal turn 23 and recovery at turn 24, while Kijevo starts at turn 24. collectCommittedFormationIds inventories participants of every active operation, and buildAxesFromDef rejects committedElsewhere before constructing the axis. This is a strong source-supported explanation for rs_4th and the now-empty praca_approach axis being omitted.",
+      "limit": "No retained pre/post injectQueuedOperation receipt records committedElsewhere for rs_4th or each alternative eligibility guard at that boundary. Runtime firing of that exact predicate is inferred from matching retained state and phase/source order rather than directly observed."
+    },
+    {
+      "severity": "supported_limit",
+      "id": "upstream_helper_association_only",
+      "finding": "At temporal turn 4, rs_1st_armored and rs_5th_kozara_light_infantry remain Operation Prijedor participants at Rasavci, but n80 points to Kozarac and n81 to Ljubija. Both AARs are otherwise identical and show Ljubija then Kozarac as captured objectives on prijedor_clean. This shape is consistent with the global pre-T3 helper replacing a stale completed-objective order with a current-objective approach.",
+      "limit": "The helper call, old/new order, guard results, and selected replacement are absent. The link from this turn-4 divergence through the turn-22 rs_4th personnel difference and turn-23 probe admission is not measured. The turn-22 replenishment writer is also unmeasured."
+    },
+    {
+      "severity": "required_scope_correction",
+      "id": "counterfactual_and_source_delta_not_proved",
+      "finding": "n81 is source-pinned by the clean 761 readiness receipt to the reviewed helper and callsite hashes, which still match the reviewed checkout. n80 has the same 32 consumed data inputs and identical initial save, but its run_meta records git_dirty=true and does not hash the executable source tree. The records establish the intended one-candidate experiment; they do not independently prove that the helper was the sole executable source delta between the actual n80 and n81 processes.",
+      "correction": "Describe the helper as the strongest candidate associated with the changed deterministic trajectory, never as a proved sole counterfactual cause."
+    },
+    {
+      "severity": "supported",
+      "id": "telemetry_segment_attribution",
+      "finding": "The retained C-after file begins with the exact 100107701-byte C-before prefix and adds 946671 bytes / 4228 complete lines; the sole approved n81 runner receipt is 0/0 and the 761 preserved capture binds the archives to that invocation. This supports qualified attribution of the append to n81. The append contains neither Prača nor rs_4th because the directive-chain schema does not observe the helper; zero matches cannot establish a helper no-op. D remains byte-identical at 1041 bytes."
+    }
+  ],
+  "authority_assessment": {
+    "calibration_truth": "Painted checkpoint control is the governing truth; n81 loses the formerly correct Prača cell and remains rejected.",
+    "movement_authority": "MOVEMENT_AUTHORITY section 3a records this pre-T3 helper as a rejected calibration candidate preserved for diagnosis and requires separate campaign proof. The source uses deterministic sorted iteration and does not write control directly.",
+    "determinism_and_provenance": "Identical initial saves and consumed inputs support comparison, but incomplete n80 executable-source provenance prevents full counterfactual proof.",
+    "control_ownership": "The observed Prača change is an ordinary combat resolver event in n80, consistent with canon's control-change boundary; n81 has no replacement control event."
+  },
+  "disposition": {
+    "n81": "rejected and unadopted at 689/712",
+    "n80": "retained 703/712 NO-GO/unadopted baseline",
+    "global_pre_t3_prepass": "do not adopt",
+    "mechanic_fix": "none justified by retained evidence",
+    "acceptance_or_recovery_claim": false,
+    "retained_703_712_changed": false,
+    "threshold_or_control_repaint": false
+  },
+  "next_action": {
+    "authorization": "requires a separately authorized bounded run",
+    "minimum_observation": "Record a direct observer-only receipt immediately before and after reconcileStaleOperationMarchOrders, including a terminal no-change receipt and selector coverage. For each replacement record turn, brigade, pre/post owner, stance and destination, physical location, effective host, operation and axis identity/phase, objective sequence/current index/capture count, prior-objective controller, every preservation guard, approaches, and replacement. At the Kijevo injection boundary also record each rs_4th buildAxesFromDef eligibility result and committed operation identity.",
+    "stopping_rule": "If the first helper write or injection exclusion is still not directly observed, stop without proposing a mechanic, date, OSID, operation-name exception, or global predicate change."
+  },
+  "limits": [
+    "No campaign, replay, runTurn, build, noEmit, test, or new probe was run.",
+    "No implementation-757 general review was repeated.",
+    "No claim is made that the helper is unlawful, that the turn-4 rewrite causes the later Prača miss, or that any proposed mechanic would recover Prača without losses.",
+    "All inherited acceptance gates remain unmet."
+  ]
+}

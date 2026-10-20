@@ -1,0 +1,35 @@
+{
+  "schema": "awwv.765.closed.v1",
+  "captured_utc": "2026-10-20T22:57:00Z",
+  "writes_closed": true,
+  "head": "9d291ff4ce30bc3cf376dedb77ffee10747e38bc",
+  "git_status_short": "",
+  "result": {
+    "path": "logs/claude-channel-20261004/765-result.json",
+    "bytes": 9868,
+    "sha256": "c7ee12b646286fcd721876c17bcb3a7b816691b618177fd179e5bdd034ab514f"
+  },
+  "inventory": {
+    "path": "logs/claude-channel-20261004/765-inventory.json",
+    "bytes": 2048,
+    "sha256": "e468e71a9651f17dd9e45a80c76d47e9b515ae9c4cc205c4a254373543665ac1"
+  },
+  "extractor": {
+    "attempt": "logs/claude-channel-20261004/765-praca-extract-a",
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false,
+    "artifact_contract_pass": true,
+    "controls_pass": true
+  },
+  "scope": {
+    "repository_changes": 0,
+    "campaigns": 0,
+    "runTurn_calls": 0,
+    "replays": 0,
+    "builds": 0,
+    "full_suites": 0,
+    "noEmit": 0
+  },
+  "disposition": "n81 remains rejected and unadopted; n80 remains retained 703/712 NO-GO baseline. No mechanism fix is proposed without the missing first-writer receipt."
+}

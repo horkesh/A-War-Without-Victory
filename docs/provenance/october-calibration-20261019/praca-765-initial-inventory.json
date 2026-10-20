@@ -1,0 +1,54 @@
+{
+  "schema": "awwv.765.inventory.v1",
+  "captured_utc": "2026-10-20T22:56:00Z",
+  "count": 8,
+  "files": [
+    {
+      "path": "logs/claude-channel-20261004/765-praca-extract.cjs",
+      "bytes": 10234,
+      "sha256": "b82ddb690487eb53d0786ae722018a6bfc46bceac159ad15c3200875d168d22d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-praca-extract-a/entry-script.snapshot",
+      "bytes": 10234,
+      "sha256": "b82ddb690487eb53d0786ae722018a6bfc46bceac159ad15c3200875d168d22d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-praca-extract-a/start.json",
+      "bytes": 1530,
+      "sha256": "4b0739a36af511e5ee697ae25a8b144dd40d3ec29f533f042ad4f5123ae11572"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-praca-extract-a/stdout.log",
+      "bytes": 1926,
+      "sha256": "1349b0e6cbd922f0a1beb6d4e2fbd4013dada6bbb4ec900457aed9bb13da5e01"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-praca-extract-a/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-praca-extract-a/receipt.json",
+      "bytes": 2723,
+      "sha256": "ac0d8e9b8dedccbd50a9d3d0f55c3c15f3daeec074bfe577524bdb30fbfd7eee"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-praca-extract-a/trace.json",
+      "bytes": 132839,
+      "sha256": "d4919792ef84c03c1ce69859ee8844fb9fec97414ec69cfd5580b1f3530defa7"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-result.json",
+      "bytes": 9868,
+      "sha256": "c7ee12b646286fcd721876c17bcb3a7b816691b618177fd179e5bdd034ab514f"
+    }
+  ],
+  "reused_not_rehashed_wholesale": [
+    "logs/claude-channel-20261004/761-seal-a/inventory.json",
+    "logs/claude-channel-20261004/761-seal-a/result.json",
+    "logs/claude-channel-20261004/761-seal-a/closed-receipt.json",
+    "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80 (31 native files)",
+    "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n81 (31 native files)"
+  ]
+}

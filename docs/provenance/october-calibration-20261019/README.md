@@ -85,3 +85,10 @@ The march-757 initial closed result/inventory/receipt retain their original fail
 One approved n81 regression failed:689/712 versus retained n80 703/712, with14 formerly correct October OSIDs lost and zero gains. Earlier checkpoints and four anchor checks also fail. Candidate rejected, no retry or adoption. ABB does not reach Prisoje; thresholds and every telemetry byte preserved.
 
 regression-761 result/inventory/closed receipt preserve the exact run, checkpoint cell differences, ABB trace and local raw-file identities. regression-762 records independent verification of all72 inventory rows and sound rejection. regression-763 is the reviewed synthesis; it does not erase prior focused evidence or claim rollback/adoption. C grew946671bytes with exact prefix/fullarchives; D stays exact. Raw evidence remainsLOCAL, inventory is not remote byte backup. No source change, retry, replay or full suite belongs to this allowance.
+
+
+## Prača missed-capture diagnosis — 2026-10-21
+
+Prača divergence traced to a missed RS capture: n80 captures it on turn26 through Kijevo; n81 never captures it. n81 lacks Kijevo's Prača axis while the 4th Sarajevo Brigade is committed to a turn23 probe. Existing commitment filters explain that omission, but their actual rejection call and the first reconciliation write remain unmeasured. No gameplay fix is yet justified; retain703/712 and keep n81 rejected.
+
+praca-765 initial result/inventory/closed preserve original overclaims and invalid assumed timestamp metadata. Corrected765 qualifies controls, time/source provenance and causal scope;766 initial/targeted reviews retain remaining initial-roster wording finding. praca-767 is the authoritative narrowed synthesis (n80AAR24counts2/25counts3; no observed initial3 claim). Raw trace132839bytes and extractor receipts stayLOCAL, with published identities. No new simulation or gameplay change; C/D/thresholds remain exact,703/712 is retained evidence only.

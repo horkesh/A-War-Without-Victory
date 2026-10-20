@@ -1,0 +1,69 @@
+{
+  "schema": "awwv.765.correction-inventory.v1",
+  "correction_timestamp_utc": "2026-10-20T22:55:14.009Z",
+  "writes_closed": true,
+  "immutable_inputs": [
+    {
+      "path": "logs/claude-channel-20261004/765-result.json",
+      "bytes": 9868,
+      "sha256": "c7ee12b646286fcd721876c17bcb3a7b816691b618177fd179e5bdd034ab514f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-inventory.json",
+      "bytes": 2048,
+      "sha256": "e468e71a9651f17dd9e45a80c76d47e9b515ae9c4cc205c4a254373543665ac1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-closed.json",
+      "bytes": 1103,
+      "sha256": "a753f61fa98036458ddc7b7ddc66a5ebe42413bdd452fe6a31bc1bff400138ae"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-praca-extract-a/trace.json",
+      "bytes": 132839,
+      "sha256": "d4919792ef84c03c1ce69859ee8844fb9fec97414ec69cfd5580b1f3530defa7"
+    },
+    {
+      "path": "logs/claude-channel-20261004/765-praca-extract-a/receipt.json",
+      "bytes": 2723,
+      "sha256": "ac0d8e9b8dedccbd50a9d3d0f55c3c15f3daeec074bfe577524bdb30fbfd7eee"
+    },
+    {
+      "path": "logs/claude-channel-20261004/766-independent-review.json",
+      "bytes": 11488,
+      "sha256": "11947d83ad8af30b443fc18e950165ba4c6563cdda8a4c48a8e7de7bf456d1e1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/766-independent-review.md",
+      "bytes": 2795,
+      "sha256": "125adbd518e473e86481cfa85db4711ffc860dbd48c99400c2f77433e4efc4d9"
+    }
+  ],
+  "verified_pins": [
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 101054372,
+      "sha256": "b11e26cdda6948e8a0c6812a1e5563578d8de42d4cc4f235a25598d075acc8be"
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    {
+      "path": "src/sim/combat/commander_march_correction.ts",
+      "bytes": 16668,
+      "sha256": "9db5d8b250fc606c00a2e8d7327d2ff4113cb1048414d7f1532c1f9cb6d0a68d"
+    },
+    {
+      "path": "src/sim/turn_phases/war_phases.ts",
+      "bytes": 231691,
+      "sha256": "93fcb005fa725c8a45269370c8319ca34779d1e032624fee08a4ae5800baa04a"
+    }
+  ],
+  "corrected_result": {
+    "path": "logs/claude-channel-20261004/765-corrected-result.json",
+    "bytes": 7954,
+    "sha256": "ae8aba85cbe3b94f079881a75a7997156e04f29576c45a447dbf56b5024a0d57"
+  }
+}
