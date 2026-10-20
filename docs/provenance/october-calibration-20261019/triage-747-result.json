@@ -1,0 +1,576 @@
+{
+  "schema": "awwv.747.corrected-retained-n80-six-cell-triage.v1",
+  "verdict": "CORRECTED_RETAINED_TRIAGE__ONE_FIXTURE_PROPOSAL__NO_GAMEPLAY_FIX_ESTABLISHED",
+  "scope": {
+    "retained_evidence_diagnosis_only": true,
+    "engine_execution": 0,
+    "tests": 0,
+    "campaigns": 0,
+    "gameplay_edits": 0,
+    "root_747_documentation_closeout": true,
+    "git_preservation": "Handled separately after final review; not a gameplay integration"
+  },
+  "independent_scope_check": {
+    "checkpoint_scores": [
+      707,
+      707,
+      706,
+      703
+    ],
+    "october_mismatch_count": 9,
+    "six_rows": 6,
+    "deferred_excluded": true
+  },
+  "selected_single_next_action": "One focused production-path observer/fixture at actual turn185: T3 column-order consumption, Mistral participant/axis/effective-loan eligibility and order emission, T6 late march correction, then the following bot actor decision/end state. Seed from retained pre-turn state; continue to turn186 only if the turn185 boundary passes. Identify the first non-admission or overwrite. No gameplay, authorization, withdrawal, movement-speed, threshold, objective-order or control change; no new campaign.",
+  "rows": [
+    {
+      "osid": "op:jajce:prisoje",
+      "priority": 1,
+      "mismatch_first_retained_checkpoint": 188,
+      "scope_fitness": "FIT_LATE_1995",
+      "mechanism": "Late Mistral objective delivery with the actual blocking predicate/writer UNMEASURED. HGZ wins Jezero at187, leaving Prisoje current; HGZ is absent at188, with ABB the sole Sipovo-axis assignee and operation eligible count zero. ABB has a queued bot_discretionary Jajce_3 march at end185 without active transit, then active Jajce_3 transit at186/187/188 with4/3/2 turns remaining. Maleševci is its serialized transit-origin anchor, not a measured physical midpoint. The weekly movement-order count is operation-wide, not an ABB-specific emission receipt.",
+      "actors_turns": {
+        "operation": "hvo_tomislavgrad:Operation Mistral 2:t175 / mistral_sipovo objective 12 of 12",
+        "turn_187": {
+          "current_objective": [
+            "op:jajce:prisoje"
+          ],
+          "battle_target": "op:jajce:jezero_2",
+          "attacker": "hv_1st_hgz_1995",
+          "outcome": "decisive_victory",
+          "abb": {
+            "id": "hvo_1st_guard_abb",
+            "name": "1st Guards Brigade 'Ante Bruno Bušić'",
+            "faction": "HRHB",
+            "corps_id": "hvo_main_staff",
+            "home_mun": null,
+            "elite_loan_state": {
+              "current_episode_id": 1,
+              "last_recall_turn": 154,
+              "loan_start_personnel": 2800,
+              "loan_start_turn": 160,
+              "loaned_to_corps": "hvo_tomislavgrad",
+              "on_loan": true,
+              "permanently_degraded": false
+            },
+            "status": "active",
+            "location_osid": "op:bosansko_grahovo:malesevci",
+            "personnel": 2800,
+            "cohesion": 42.5,
+            "morale": 91,
+            "fatigue": 0,
+            "posture": "defend",
+            "movement_order": null,
+            "movement_state": {
+              "destination_sids": [
+                "op:jajce:jajce_3"
+              ],
+              "owner": "bot_discretionary",
+              "path": [
+                "op:bosansko_grahovo:malesevci",
+                "op:bosansko_grahovo:crni_lug",
+                "op:glamoc:halapic",
+                "op:sipovo:brdjani",
+                "op:sipovo:gornji_mujdzici_2",
+                "op:sipovo:pribeljci_2",
+                "op:jajce:vinac_2",
+                "op:jajce:jajce_3"
+              ],
+              "stance": "column",
+              "status": "in_transit",
+              "turns_remaining": 3
+            },
+            "attack_order": null,
+            "attack_order_owner": null
+          }
+        },
+        "turn_188": {
+          "current_objective": [
+            "op:jajce:prisoje"
+          ],
+          "eligible": 0,
+          "attacks": 0,
+          "battles": 0,
+          "roster": [
+            "hv_4th_guards_split",
+            "hvo_1st_guard_abb",
+            "hvo_3rd_guard_jastrebovi"
+          ],
+          "abb": {
+            "id": "hvo_1st_guard_abb",
+            "name": "1st Guards Brigade 'Ante Bruno Bušić'",
+            "faction": "HRHB",
+            "corps_id": "hvo_main_staff",
+            "home_mun": null,
+            "elite_loan_state": {
+              "current_episode_id": 1,
+              "last_recall_turn": 154,
+              "loan_start_personnel": 2800,
+              "loan_start_turn": 160,
+              "loaned_to_corps": "hvo_tomislavgrad",
+              "on_loan": true,
+              "permanently_degraded": false
+            },
+            "status": "active",
+            "location_osid": "op:bosansko_grahovo:malesevci",
+            "personnel": 2800,
+            "cohesion": 42,
+            "morale": 89,
+            "fatigue": 0,
+            "posture": "defend",
+            "movement_order": null,
+            "movement_state": {
+              "destination_sids": [
+                "op:jajce:jajce_3"
+              ],
+              "owner": "bot_discretionary",
+              "path": [
+                "op:bosansko_grahovo:malesevci",
+                "op:bosansko_grahovo:crni_lug",
+                "op:glamoc:halapic",
+                "op:sipovo:brdjani",
+                "op:sipovo:gornji_mujdzici_2",
+                "op:sipovo:pribeljci_2",
+                "op:jajce:vinac_2",
+                "op:jajce:jajce_3"
+              ],
+              "stance": "column",
+              "status": "in_transit",
+              "turns_remaining": 2
+            },
+            "attack_order": null,
+            "attack_order_owner": null
+          },
+          "hgz": {
+            "id": "hv_1st_hgz_1995",
+            "missing": true
+          },
+          "operation_movement_order_count": 1
+        }
+      },
+      "confidence": {
+        "retained_facts": "HIGH",
+        "causal_predicate": "UNMEASURED"
+      },
+      "evidence": [
+        "745-extract-c active_operation_links turns178-188",
+        "745-extract-c prisoje_priority_weekly turns187-188",
+        "745-extract-c ABB/HGZ saved actor states turns184-188",
+        "CALIBRATION_MASTER 641-657 retained authorization/writer findings"
+      ],
+      "missing_measurement": "First unexplained actual turn185 T3 consumption→T6 correction→following bot decision boundary: queued/current order identity, participant/axis/effective-loan eligibility, objective reachability, operation authorization/emission, correction disposition and bot active-column decision before/after. Observe186 only if185 passes. End states do not identify the actual writer or rejecting predicate.",
+      "next_action": "One focused production-path observer/fixture at actual turn185: T3 column-order consumption, Mistral participant/axis/effective-loan eligibility and order emission, T6 late march correction, then the following bot actor decision/end state. Seed from retained pre-turn state; continue to turn186 only if the turn185 boundary passes. Identify the first non-admission or overwrite. No gameplay, authorization, withdrawal, movement-speed, threshold, objective-order or control change; no new campaign.",
+      "location_semantics": "location_osid is the serialized origin anchor during in_transit; osid_column_movement changes it only on arrival.",
+      "first_boundary_evidence": {
+        "save184_pointer": "/military/brigade_movement_orders/hvo_1st_guard_abb = Bravnice / bot_discretionary",
+        "save185_pointer": "/military/brigade_movement_orders/hvo_1st_guard_abb = Jajce_3 / bot_discretionary; no active ABB movement_state",
+        "save186_pointer": "/military/brigade_movement_state/hvo_1st_guard_abb = Jajce_3 / in_transit / turns_remaining4",
+        "extraction": "745-extract-c/result.json: Prisoje actor_late_states and actor_temporal_rows",
+        "phase_source": "src/sim/turn_phases/war_phases.ts:1548-1572,2621-2629,2655-2705",
+        "location_source": "src/sim/combat/osid_column_movement.ts:421-427,475-508",
+        "operation_count_source": "src/scenario/combat_causality.ts:303-329",
+        "save_order_source": "src/scenario/scenario_runner.ts:2939-2970,3349-3407,3447-3460"
+      }
+    },
+    {
+      "osid": "op:kljuc:donji_vrbljani_2",
+      "priority": 2,
+      "mismatch_first_retained_checkpoint": 188,
+      "scope_fitness": "POTENTIALLY_FIT_LATE_1995_BUT_NO_ACTOR_ROUTE_AUTHORITY",
+      "mechanism": "No admitted HRHB/RBiH operation, order, battle, or control writer. The only HRHB target-specific n80 reason receipt is hvo_tomislavgrad at t169, rejected as not a bounded isolated enemy position. Later t170-186 receipts are RS adjacency-only self-side candidates and do not explain HRHB admission.",
+      "actors_turns": {
+        "hrhb_candidate": {
+          "key": "local_occupation_candidate|local_occupation_candidate.v1|hvo_tomislavgrad|HRHB|rejected|bounded_isolated_enemy_position",
+          "count": 1,
+          "min_turn": 169,
+          "max_turn": 169
+        },
+        "later_rs_candidates": {
+          "key": "local_occupation_candidate|local_occupation_candidate.v1|vrs_1st_krajina|RS|rejected|bounded_isolated_enemy_position",
+          "count": 14,
+          "min_turn": 170,
+          "max_turn": 186
+        },
+        "active_operations": 0,
+        "completed_operations": 0,
+        "weekly_links": 0,
+        "orders": 0,
+        "control_events": 0
+      },
+      "confidence": {
+        "retained_absence": "HIGH_WITHIN_17_SAVES_188_WEEKLY_ROWS_AND_AARS",
+        "hrhb_local_candidate_predicate": "HIGH",
+        "broader_historical_cause": "LOW"
+      },
+      "evidence": [
+        "745-extract-c reason stdout t169 HRHB and t170-186 RS",
+        "745-extract-c zero operation/order/battle/control links",
+        "CALIBRATION_MASTER 641-648 campaign-plan briefing and general-guard findings"
+      ],
+      "missing_measurement": "No consulted n80 receipt connects campaign-plan intent through general guards to an admitted HRHB/RBiH corps operation. Consulted retained evidence does not establish the historical actor/route; absence in these records is not proof no historical capture occurred. Local bounded-isolation rejection is not authority to author an operation.",
+      "next_action": "No fix in this scope. Preserve the mismatch until actor/route provenance exists; if diagnosis resumes, observe the existing campaign-plan→briefing→general-guard→candidate boundary without altering exhaustion, stance, launch window, minimums, or target ranking."
+    },
+    {
+      "osid": "op:brcko:brka_2",
+      "priority": 3,
+      "mismatch_first_retained_checkpoint": 156,
+      "scope_fitness": "FIT_APRIL_TO_OCTOBER_1995_WINDOW",
+      "mechanism": "VRS East Bosnian Corps repeatedly admits the correct target but fails to execute a capture. Bedem t141-157, Zaslon t169-171, and Prag t173-175 all end failure; weekly receipts show zero target battles and recovery defender_power_too_high for the three late attempts, with cooldown and participant/slot churn between attempts.",
+      "actors_turns": {
+        "operations": [
+          {
+            "operation_id": "vrs_east_bosnian:Operacija Bedem:t141",
+            "operation_name": "Operacija Bedem",
+            "started_turn": 141,
+            "ended_turn": 157,
+            "outcome": "failure",
+            "objectives_targeted": [
+              "op:brcko:brka_2",
+              "op:gradacac:gradacac_2"
+            ],
+            "objectives_logged_captured": [],
+            "participants": [
+              "rs_2nd_majevica_light_infantry",
+              "rs_2nd_semberija_light_infantry"
+            ]
+          },
+          {
+            "operation_id": "vrs_east_bosnian:Operacija Zaslon:t169",
+            "operation_name": "Operacija Zaslon",
+            "started_turn": 169,
+            "ended_turn": 171,
+            "outcome": "failure",
+            "objectives_targeted": [
+              "op:brcko:brka_2",
+              "op:gradacac:gradacac_2"
+            ],
+            "objectives_logged_captured": [],
+            "participants": [
+              "rs_2nd_majevica_light_infantry",
+              "rs_2nd_semberija_light_infantry",
+              "rs_3rd_posavina_light_infantry"
+            ]
+          },
+          {
+            "operation_id": "vrs_east_bosnian:Operacija Prag:t173",
+            "operation_name": "Operacija Prag",
+            "started_turn": 173,
+            "ended_turn": 175,
+            "outcome": "failure",
+            "objectives_targeted": [
+              "op:brcko:brka_2",
+              "op:gradacac:gradacac_2"
+            ],
+            "objectives_logged_captured": [],
+            "participants": [
+              "rs_3rd_posavina_light_infantry"
+            ]
+          }
+        ],
+        "first_saved_active": {
+          "turn": 156,
+          "operation_id": "vrs_east_bosnian:Operacija Bedem:t141",
+          "corps_id": "vrs_east_bosnian",
+          "name": "Operacija Bedem",
+          "phase": "recovery",
+          "started_turn": 141,
+          "phase_started_turn": 156,
+          "participating_brigades": [
+            "rs_2nd_majevica_light_infantry",
+            "rs_2nd_semberija_light_infantry"
+          ],
+          "axes": [
+            {
+              "axis_id": "cmd_vrs_east_bosnian_main",
+              "status": "executing",
+              "objectives": [
+                "op:brcko:brka_2",
+                "op:gradacac:gradacac_2"
+              ],
+              "current_objective_index": 0,
+              "current_objective": "op:brcko:brka_2",
+              "assigned_brigades": [
+                "rs_2nd_majevica_light_infantry",
+                "rs_2nd_semberija_light_infantry"
+              ],
+              "launch_blocker": null,
+              "attack_attempt_count": 0,
+              "objective_capture_count": 0,
+              "movement_only_execution_turns": 0,
+              "last_result": null
+            }
+          ]
+        },
+        "target_control_events": 0
+      },
+      "confidence": {
+        "mechanism": "HIGH",
+        "lawful_fix": "UNESTABLISHED"
+      },
+      "evidence": [
+        "745-extract-c AAR links for three operations",
+        "weekly t141-175 operation diagnostics",
+        "reason stdout commander creation/cooldown receipts"
+      ],
+      "missing_measurement": "Exact defender-power inputs and why assigned participants yield zero eligible target attackers at execution. No evidence supports lowering a threshold or forcing control.",
+      "next_action": "Not selected. If prioritized later, use a bounded Bedem/Zaslon/Prag eligibility and defender-power observer; keep cooldowns, force ratios, and control writers unchanged."
+    },
+    {
+      "osid": "op:kalesija:seher_2",
+      "priority": 4,
+      "mismatch_first_retained_checkpoint": 39,
+      "scope_fitness": "NOT_FIT_FOR_APRIL_TO_OCTOBER_1995_FIX",
+      "mechanism": "Persistent opening-era ownership divergence: actual is RBiH from initial through t188 while every painted checkpoint expects RS. There is no target battle/control event or admitted operation. The four weekly matches are Seher used as an RBiH brigade location for attacks on Gojcin, not attacks on Seher. RBiH local candidates are rejected by bounded_isolated_enemy_position through t188.",
+      "actors_turns": {
+        "actual_all_saved": "RBiH",
+        "reference_39_104_156_188": "RS",
+        "active_operations": 0,
+        "completed_operations": 0,
+        "control_events": 0,
+        "rbih_candidate_group": {
+          "key": "local_occupation_candidate|local_occupation_candidate.v1|arbih_2nd_corps|RBiH|rejected|bounded_isolated_enemy_position",
+          "count": 352,
+          "min_turn": 21,
+          "max_turn": 188
+        }
+      },
+      "confidence": {
+        "divergence": "HIGH",
+        "cause": "OPENING_STATE_OR_PRE_T39_UNMEASURED"
+      },
+      "evidence": [
+        "745-extract-c controller timeline",
+        "weekly t66/86/112/126 location-only links",
+        "reason stdout grouped receipts"
+      ],
+      "missing_measurement": "Historical/opening-control authority before t39; current late-war evidence cannot identify it.",
+      "next_action": "Defer to a separately authorized 1992/opening-control review. Do not add a 1995 operation or reverse current control in this calibration slice."
+    },
+    {
+      "osid": "op:maglaj:jablanica",
+      "priority": 5,
+      "mismatch_first_retained_checkpoint": 39,
+      "scope_fitness": "NOT_FIT_FOR_APRIL_TO_OCTOBER_1995_FIX",
+      "mechanism": "Persistent early-war combat failure. Actual is RS from initial through t188 while every painted checkpoint expects RBiH. The t14 Maglaj Local Counterattack reaches execution but loses at t25 (stalemate, ratio 0.96) and t26 (repulsed, 0.70); later RBiH probes repeatedly fail. A t156 costly victory at ratio 1.13 is recorded without a control transfer, so the cell remains RS.",
+      "actors_turns": {
+        "initial_operation": {
+          "operation_id": "arbih_3rd_corps:Maglaj Local Counterattack:t14",
+          "operation_name": "Maglaj Local Counterattack",
+          "started_turn": 14,
+          "ended_turn": 29,
+          "outcome": "failure",
+          "objectives_targeted": [
+            "op:maglaj:jablanica"
+          ],
+          "objectives_logged_captured": [],
+          "participants": [
+            "arbih_327th_vitezka_mountain",
+            "arbih_328th_mountain"
+          ]
+        },
+        "turn_25": {
+          "attacker_brigade": "arbih_327th_vitezka_mountain",
+          "attacker_casualties": 783,
+          "attacker_faction": "RBiH",
+          "attacker_won": false,
+          "battle_id": "25:op:maglaj:jablanica:arbih_327th_vitezka_mountain:rs_1st_srbac_light_infantry",
+          "defender_brigade": "rs_1st_srbac_light_infantry",
+          "defender_casualties": 181,
+          "defender_faction": "RS",
+          "equipment": {
+            "attacker_artillery_lost": 3,
+            "attacker_tanks_lost": 0,
+            "captured_artillery": 0,
+            "captured_tanks": 0,
+            "defender_artillery_lost": 1,
+            "defender_tanks_lost": 0,
+            "scavenged_artillery": 0,
+            "scavenged_tanks": 0
+          },
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel",
+              "defender_opsec",
+              "ambush_risk"
+            ]
+          },
+          "operation_id": "arbih_3rd_corps:Maglaj Local Counterattack:t14",
+          "operation_name": "Maglaj Local Counterattack",
+          "outcome": "stalemate",
+          "power_ratio": 0.96,
+          "target_osid": "op:maglaj:jablanica"
+        },
+        "turn_26": {
+          "attacker_brigade": "arbih_327th_vitezka_mountain",
+          "attacker_casualties": 1207,
+          "attacker_faction": "RBiH",
+          "attacker_won": false,
+          "battle_id": "26:op:maglaj:jablanica:arbih_327th_vitezka_mountain:rs_1st_srbac_light_infantry",
+          "defender_brigade": "rs_1st_srbac_light_infantry",
+          "defender_casualties": 104,
+          "defender_faction": "RS",
+          "equipment": {
+            "attacker_artillery_lost": 0,
+            "attacker_tanks_lost": 0,
+            "captured_artillery": 0,
+            "captured_by": "RS",
+            "captured_tanks": 0,
+            "defender_artillery_lost": 1,
+            "defender_tanks_lost": 0,
+            "scavenged_artillery": 0,
+            "scavenged_tanks": 0
+          },
+          "operation_id": "arbih_3rd_corps:Maglaj Local Counterattack:t14",
+          "operation_name": "Maglaj Local Counterattack",
+          "outcome": "repulsed",
+          "power_ratio": 0.7,
+          "target_osid": "op:maglaj:jablanica"
+        },
+        "turn_156": {
+          "attacker_brigade": "arbih_7th_vitezka_muslim_liberation",
+          "attacker_casualties": 343,
+          "attacker_faction": "RBiH",
+          "attacker_won": true,
+          "battle_id": "156:op:maglaj:jablanica:arbih_7th_vitezka_muslim_liberation:rs_1st_ozren_light_infantry",
+          "defender_brigade": "rs_1st_ozren_light_infantry",
+          "defender_casualties": 148,
+          "defender_faction": "RS",
+          "equipment": {
+            "attacker_artillery_lost": 0,
+            "attacker_tanks_lost": 0,
+            "captured_artillery": 0,
+            "captured_by": "RBiH",
+            "captured_tanks": 0,
+            "defender_artillery_lost": 1,
+            "defender_tanks_lost": 0,
+            "scavenged_artillery": 0,
+            "scavenged_tanks": 0
+          },
+          "execution_friction": {
+            "attacker_confidence_band": "low",
+            "labels": [
+              "stale_intel",
+              "defender_opsec",
+              "ambush_risk"
+            ]
+          },
+          "operation_id": "arbih_3rd_corps:probe_arbih_3rd_corps_t141:t141",
+          "operation_name": "probe_arbih_3rd_corps_t141",
+          "outcome": "costly_victory",
+          "power_ratio": 1.13,
+          "target_osid": "op:maglaj:jablanica"
+        },
+        "control_events": 0
+      },
+      "confidence": {
+        "combat_chain": "HIGH",
+        "single_fix_causality": "LOW"
+      },
+      "evidence": [
+        "745-extract-c weekly target battles t25/t26/t88/t91/t95/t103/t115/t118/t121/t126/t129/t132/t156",
+        "operation AAR t14-29 failure",
+        "controller timeline"
+      ],
+      "missing_measurement": "The historical reason the painted owner should already be RBiH by t39 and whether any one modeled early battle should transfer control. A late costly victory is not enough to infer a historical/control predicate.",
+      "next_action": "Defer to 1992 calibration/history. Do not force the t156 costly victory to flip control, lower combat thresholds, or treat repeated probes as authority for a 1995 correction."
+    },
+    {
+      "osid": "op:vares:toljenak",
+      "priority": 6,
+      "mismatch_first_retained_checkpoint": 188,
+      "scope_fitness": "FIT_LATE_1995_WINDOW_BUT_CAUSE_INCOMPLETE",
+      "mechanism": "No admitted operation, order, battle, or control event. RBiH 1st Corps repeatedly evaluates Toljenak as a sector-listed target; arbih_162nd_mountain is the named single candidate at t179-188, but both single and group candidates fail bounded_isolated_enemy_position. Actual and reference agree RS through t156, then October expects RBiH.",
+      "actors_turns": {
+        "rbih_candidate_group": {
+          "key": "local_occupation_candidate|local_occupation_candidate.v1|arbih_1st_corps|RBiH|rejected|bounded_isolated_enemy_position",
+          "count": 382,
+          "min_turn": 21,
+          "max_turn": 188
+        },
+        "active_operations": 0,
+        "completed_operations": 0,
+        "weekly_links": 0,
+        "orders": 0,
+        "control_events": 0
+      },
+      "confidence": {
+        "target_specific_rejector": "HIGH",
+        "historical_operation_need": "UNMEASURED"
+      },
+      "evidence": [
+        "745-extract-c t179-188 last reason receipts",
+        "controller checkpoints",
+        "zero operation/order/battle/control links"
+      ],
+      "missing_measurement": "Whether a historically authorized late-1995 operation should own Toljenak; bounded-isolation is only the generic local-op rejector.",
+      "next_action": "Not selected. If later prioritized, add a target-local observer/fixture for the existing RBiH 1st Corps candidate topology and admission path; do not relax bounded isolation or author an operation from this evidence alone."
+    }
+  ],
+  "source_boundary": {
+    "completed_existing_fix": "655-657 aligned active-loan operation authorization in brigade_routine_scope; n80 already contains that source change.",
+    "actual_n80_evidence": "Saved operation/roster, loan, location, order/transit, weekly battle and control facts only.",
+    "source_possibilities_not_proved_as_actual_writer": [
+      "src/sim/combat/commander_march_correction.ts",
+      "src/sim/combat/bot_brigade_ai_osid.ts",
+      "src/sim/combat/brigade_routine_scope.ts"
+    ]
+  },
+  "preservation": {
+    "head": "bba51090d6f1423406464c54e6cb3880e03fcd63",
+    "expected_head": "bba51090d6f1423406464c54e6cb3880e03fcd63",
+    "tracked_diff_paths": [],
+    "status": [],
+    "extract": {
+      "path": "logs/claude-channel-20261004/745-extract-c/result.json",
+      "bytes": 801278,
+      "sha256": "8f1ef6f9609d8e956ae7964c51ed43e256cae414c8ab8adec051ba83abfb420a"
+    },
+    "extract_receipt": {
+      "path": "logs/claude-channel-20261004/745-extract-c/receipt.json",
+      "bytes": 2702,
+      "sha256": "97f2ff59a14c864b8f9ffc914650fdbc7cd7f81a0979584cf79b86ff846fbda3"
+    },
+    "protected_3_exact": true,
+    "native_31_exact": true,
+    "C_exact": true,
+    "D_exact": true,
+    "receipt_count_179": true
+  },
+  "retained_limits": [
+    "n80 703/712 retained and unadopted; potential gains unmeasured",
+    "736 full suite remains FAIL_COMPLETE_TWO_NATIVE_ASSERTIONS",
+    "740 47/47 and 741 review reused at actual scope",
+    "n42 observational GO, Farz second-or-third, 122 STOP and historical preservation failures unchanged"
+  ],
+  "correction_provenance": {
+    "source_result": {
+      "path": "logs/claude-channel-20261004/745-synthesis-a/result.json",
+      "sha256": "668c6b475599bc983e79615973207bc63953d2df084ec29c13d8601edfb3ddaf"
+    },
+    "initial_review": {
+      "path": "logs/claude-channel-20261004/746-independent-review.json",
+      "sha256": "3b1f63e84d0988c2db296e3568d946eb4cbdf8fad4e2b569b78dd44bbc774a1c"
+    },
+    "original_bytes_unchanged": true,
+    "corrections": [
+      "Observer starts at first unexplained turn185 boundary, not terminal188",
+      "Serialized origin anchor is not physical midpoint",
+      "Operation-wide movement count is not ABB-specific receipt"
+    ],
+    "targeted_review": "Separate final746-targeted-verification receipt; this synthesis does not assert campaign causality or gameplay fix",
+    "metadata_scope_correction": "Original extraction scope retained explicitly; root747 documentation closeout is separate. Original747 integration candidate remains unchanged locally."
+  },
+  "writes_closed": true,
+  "original_745_extraction_scope": {
+    "read_only": true,
+    "runTurn": 0,
+    "campaigns": 0,
+    "replays": 0,
+    "tests": 0,
+    "builds": 0,
+    "gameplay_edits": 0,
+    "documentation_edits": 0,
+    "git_mutations": 0
+  }
+}

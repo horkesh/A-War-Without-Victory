@@ -1,4 +1,23 @@
 # AWWV Calibration Master Reference
+## 744–747 — Retained n80 six-cell triage (2026-10-20)
+
+Retained n80 six-cell triage is complete. Prioritize Prisoje’s turn185 ABB movement/correction/bot boundary with one focused observer/fixture; no gameplay fix is yet established. Donji lacks an admitted operation in consulted records. Brka has failed admitted operations; Toljenak has an isolation rejection. Šeher/Jablanica already diverge by the first checkpoint. Retained703/712, thresholds and telemetry unchanged; no campaign.
+
+| OSID | Retained mechanism | Smallest next step |
+|---|---|---|
+| Prisoje | Mistral wins Jezero at187, then Prisoje is current. HGZ is absent at188; ABB remains loaned/assigned but its Jajce_3 transit is unfinished and operation eligibility is zero. | Selected: trace actual185 T3→T6→bot order boundary in a focused production-path observer/fixture. Continue186 only if185 passes. |
+| Donji Vrbljani | No admitted HRHB/RBiH operation/order/battle/control receipt in consulted records. HRHB target169 fails bounded isolation; later170–186 candidates belong to RS. | No gameplay fix established; retain actor/route and campaign-intent admission evidence gaps. |
+| Brka | Three VRS operations fail; recovery records defender_power_too_high and no target battle. | Later eligibility/force-input trace, keeping thresholds unchanged. |
+| Šeher | RBiH actual versus RS reference already at first checkpoint, no late target capture. | Earlier-period diagnosis is needed; no1995 workaround. |
+| Jablanica | RS actual versus RBiH reference already at first checkpoint; early counterattacks fail. Later costly victory has no control transfer. | Earlier-period diagnosis is needed; no forced flip or threshold change. |
+| Toljenak | Late target repeatedly rejected by bounded_isolated_enemy_position; no admitted operation. | Not selected; later target-local admission/topology evidence. |
+
+The nine October mismatches and707/707/706/703 checkpoints are independently reproduced from retained control events. Bijela/Sitnik/Golubići stay outside this task. The existing655–657 active-loan authorization correction is already in n80; repeating it is unsupported. ABB's end185 queued bot_discretionary Jajce_3 order has no active transit; end186 transit has4 turns remaining, then3/2 at187/188. Saved location_osid Maleševci is the transit origin anchor, not physical midpoint. The weekly movement-order count1 is operation-wide and cannot be attributed to ABB without an actor receipt. No actual non-admission or overwrite predicate is measured. The selected fixture records participant/axis/effective-loan eligibility, objective reachability, operation emission/authorization, late correction and following bot decision. It changes no gameplay, threshold, withdrawal, movement speed, objective order or control.
+
+745 extraction/synthesis exits0/0 with six bounded rows. Independent746 review accepts the classifications but corrects the original terminal188-only proposal to the first unexplained185 boundary and corrects the two field/attribution semantics above. Original745 and initial746 bytes remain unchanged; the747 corrected synthesis preserves their hashes, with final targeted verification separate. No tests, runTurn, engine replay, full suite, campaign, historical authorship or source/data/canon change occurs. Fresh protected3/native31/C100097339/D1041/179-receipt identity and clean opening HEAD are retained. No 703/712 gain or zero-loss counterfactual is claimed. All historical unmet gates and NO-GO/unadopted status remain.
+
+Evidence: logs/claude-channel-20261004/744-root-plan.md,745-extract-c,745-synthesis-a,746-independent-review.*,747-integration-b/result.json and746-targeted-verification.*. Portable corrected synthesis, raw-synthesis inventory/closed receipt and reviews are in docs/provenance/october-calibration-20261019; raw logs remain local.
+
 ## 739–742 — Focused correction of two suite failures (2026-10-20)
 
 The roadmap and stale Sana fixture are corrected: focused checks pass 47/47, root noEmit exits 0, and thresholds remain unchanged. The focused correction preserved final C/D and all retained telemetry; n80 remains retained 703/712. No full suite or campaign was rerun. The recorded 736 full-suite failure and all other unmet gates remain open.

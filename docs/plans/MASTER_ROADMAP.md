@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-20 — bounded documentation/test fixes pass focused checks; n80 retained 703/712.
+**Last updated:** 2026-10-20 — retained n80 six-cell triage; Prisoje turn185 fixture proposed.
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -23,15 +23,14 @@ goal, acceptance criteria, canon/protected boundaries, material scope/cost
 tradeoffs or irreversible/external actions with concrete options and a
 recommendation. Required evidence, review panels and cost-control gates remain.
 
-**Current R6 — October Sana remains NO-GO.** The latest retained result is **n80, 703/712**,
-unadopted. The 736 full suite completed all five lanes in 29m51s but failed two assertions
-(14,726 passed, 33 skipped, two failed). The roadmap and stale Sana fixture are now corrected;
-focused checks pass 47/47 and root noEmit exits 0. Thresholds remain unchanged; the focused
-correction preserved final C/D and all retained telemetry. No full suite or campaign was rerun;
-the recorded full-suite failure and all other unmet gates remain open. October history,
-route/provenance gates, the earlier timeout and shard diagnosis remain in the
-[calibration master](../40_reports/CALIBRATION_MASTER.md) and
-[retained shard findings](../provenance/october-calibration-20261019/unfinished-shard-diagnosis.md).
+**Current R6 — October Sana remains NO-GO.** Retained n80 is **703/712**, unadopted.
+Six-cell triage selects one Prisoje observer/fixture at actual185 T3 movement→T6 correction→bot
+orders, continuing186 only if185 passes. No gameplay fix is established. Donji has no admitted
+operation in consulted records; Brka/Toljenak need separate evidence, while Šeher/Jablanica
+diverge before1995. Thresholds and all telemetry are preserved. No campaign or suite was run.
+The prior full suite remains failed; its two assertions were corrected with47/47 focused checks.
+Every other unmet gate remains open. [Calibration authority](../40_reports/CALIBRATION_MASTER.md)
+retains all history, scope limits, evidence and the corrected triage.
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference

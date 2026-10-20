@@ -1,0 +1,73 @@
+{
+  "schema": "awwv.745.inventory.v1",
+  "files": [
+    {
+      "path": "logs/claude-channel-20261004/745-extract-c/result.json",
+      "bytes": 801278,
+      "sha256": "8f1ef6f9609d8e956ae7964c51ed43e256cae414c8ab8adec051ba83abfb420a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/745-extract-c/receipt.json",
+      "bytes": 2702,
+      "sha256": "97f2ff59a14c864b8f9ffc914650fdbc7cd7f81a0979584cf79b86ff846fbda3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/745-extract-a/receipt.json",
+      "bytes": 2702,
+      "sha256": "3a16e3dbf23bac9afa2e4d1709b472f53012df49c900cd9f93215af47fe2f8ce"
+    },
+    {
+      "path": "logs/claude-channel-20261004/745-extract-b/receipt.json",
+      "bytes": 2702,
+      "sha256": "dff75fc21155680bab330a8f86f7160b487cffb2d614e65b3830f0f73bc10e52"
+    },
+    {
+      "path": "logs/claude-channel-20261004/745-extract-c/entry-script.snapshot",
+      "bytes": 17710,
+      "sha256": "2985a38e963ddd5b5b8a0fa2b682127866b6ba8e6b354480b83cea07d09455b0"
+    },
+    {
+      "path": "logs/claude-channel-20261004/745-six-cell-extract.cjs",
+      "bytes": 17710,
+      "sha256": "2985a38e963ddd5b5b8a0fa2b682127866b6ba8e6b354480b83cea07d09455b0"
+    },
+    {
+      "path": "logs/claude-channel-20261004/745-synthesize.cjs",
+      "bytes": 17511,
+      "sha256": "0b186664b7f53fc79d40e81a3edef421dded750812053b46f36575f84789b8d7"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/745-synthesis-a/result.json",
+      "bytes": 23534,
+      "sha256": "668c6b475599bc983e79615973207bc63953d2df084ec29c13d8601edfb3ddaf"
+    },
+    {
+      "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/745-synthesis-a/result.md",
+      "bytes": 14995,
+      "sha256": "8c36b8fe4aba1ca2156e5b3de2297f72c95d157ba1e752ed3566a1e9bbe6d4f5"
+    }
+  ],
+  "preservation": {
+    "head": "bba51090d6f1423406464c54e6cb3880e03fcd63",
+    "expected_head": "bba51090d6f1423406464c54e6cb3880e03fcd63",
+    "tracked_diff_paths": [],
+    "status": [],
+    "extract": {
+      "path": "logs/claude-channel-20261004/745-extract-c/result.json",
+      "bytes": 801278,
+      "sha256": "8f1ef6f9609d8e956ae7964c51ed43e256cae414c8ab8adec051ba83abfb420a"
+    },
+    "extract_receipt": {
+      "path": "logs/claude-channel-20261004/745-extract-c/receipt.json",
+      "bytes": 2702,
+      "sha256": "97f2ff59a14c864b8f9ffc914650fdbc7cd7f81a0979584cf79b86ff846fbda3"
+    },
+    "protected_3_exact": true,
+    "native_31_exact": true,
+    "C_exact": true,
+    "D_exact": true,
+    "receipt_count_179": true
+  }
+}

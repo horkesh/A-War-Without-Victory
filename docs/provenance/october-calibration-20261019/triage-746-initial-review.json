@@ -1,0 +1,157 @@
+{
+  "schema": "awwv.746.retained-n80-six-cell-independent-review.v1",
+  "captured_utc": "2026-10-20T12:30:33.2703106Z",
+  "reviewer_role": "independent_sol_reviewer",
+  "verdict": "CHANGES_REQUIRED_ONE_OBSERVER_BOUNDARY_CORRECTION__NO_GAMEPLAY_FIX_ESTABLISHED",
+  "answer": "The six retained triage classifications and no-gameplay-fix conclusion are supported. The selected Prisoje observer is placed too late: the first unexplained ABB transition is between the turn-184 and turn-185 post-turn states, before the terminal turn-188 consequence. Correct the single proposal to observe actual turn 185 across column consumption, operation/participant eligibility and emission, late correction, and the following bot actor decision; continue into the turn-186 start only if turn 185 does not identify the first reject, delete, or overwrite.",
+  "scope": {
+    "worktree": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+    "head": "bba51090d6f1423406464c54e6cb3880e03fcd63",
+    "branch": "codex/october-calibration-continuation-20261003",
+    "review_only": true,
+    "six_rows_only": true,
+    "deferred_excluded": [
+      "op:mostar:bijela_2",
+      "op:konjic:sitnik",
+      "op:konjic:golubici_2"
+    ],
+    "tests_rerun": false,
+    "suite_rerun": false,
+    "campaign_run": false,
+    "replay_or_runTurn": false,
+    "build_run": false,
+    "source_docs_git_mutated_by_reviewer": false,
+    "review_seals_written": true
+  },
+  "reviewed_artifacts": {
+    "plan": "logs/claude-channel-20261004/744-root-plan.md",
+    "synthesis_result": {
+      "path": "logs/claude-channel-20261004/745-synthesis-a/result.json",
+      "bytes": 23534,
+      "sha256": "668c6b475599bc983e79615973207bc63953d2df084ec29c13d8601edfb3ddaf"
+    },
+    "synthesis_markdown": {
+      "path": "logs/claude-channel-20261004/745-synthesis-a/result.md",
+      "bytes": 14995,
+      "sha256": "8c36b8fe4aba1ca2156e5b3de2297f72c95d157ba1e752ed3566a1e9bbe6d4f5"
+    },
+    "inventory": {
+      "path": "logs/claude-channel-20261004/745-synthesis-a/inventory.json",
+      "bytes": 2696,
+      "sha256": "40ed472e9498139a06adeb16cdc3a9c14be712f1816a84c9dadfe9db8e03c689"
+    },
+    "closed_receipt": {
+      "path": "logs/claude-channel-20261004/745-synthesis-a/closed-receipt.json",
+      "bytes": 1827,
+      "sha256": "2e54383925184b94ec1615e1ae453c6587b04cf4ff0701e22d4f7a3c067bede6"
+    },
+    "extract": {
+      "path": "logs/claude-channel-20261004/745-extract-c/result.json",
+      "bytes": 801278,
+      "sha256": "8f1ef6f9609d8e956ae7964c51ed43e256cae414c8ab8adec051ba83abfb420a"
+    },
+    "extract_receipt": {
+      "path": "logs/claude-channel-20261004/745-extract-c/receipt.json",
+      "bytes": 2702,
+      "sha256": "97f2ff59a14c864b8f9ffc914650fdbc7cd7f81a0979584cf79b86ff846fbda3"
+    }
+  },
+  "row_review": [
+    {
+      "osid": "op:jajce:prisoje",
+      "classification": "PASS_WITH_TARGETED_PROPOSAL_CORRECTION",
+      "established": "Mistral 2 is executing its final Prisoje objective at turns 187-188; HGZ wins Jezero at 187 and is absent from the turn-188 roster; ABB remains active, loaned to Tomislavgrad, assigned to mistral_sipovo, and serializes a Jajce_3 column transit with 4/3/2 turns remaining at turns 186/187/188. No Prisoje attack or battle executes.",
+      "unresolved": "The actual actor-level rejecting predicate or later writer is not measured.",
+      "correction": "Observe the actual turn-185 seam first. Post-turn save 184 has ABB at the serialized Maleševci origin with a queued bot_discretionary Bravnice order. Post-turn save 185 has no transit and a queued bot_discretionary Jajce_3 order. Post-turn save 186 begins that Jajce_3 transit. Record ABB's effective-loan ownership, participant/axis eligibility, operation emission, T3 order consumption/rejection, T6 correction inputs and disposition, following bot active-column/route decision, and actor-specific output after each boundary. Stop at the first reject, delete, or overwrite; inspect the turn-186 start only if turn 185 passes without identifying it. Do not change gameplay.",
+      "precision_limits": [
+        "location_osid is the serialized column origin until arrival; source updates it only when turns_remaining reaches zero. Describe Maleševci as the location anchor, not proof of the formation's physical midpoint.",
+        "weekly movement_order_count is operation-wide across participating brigades. The n80 weekly artifact omitted actor-level bot_order_diagnostics, so its value 1 is not itself an ABB receipt. ABB's post-turn movement_state is separate corroborating state, and attribution across the snapshot boundary remains inference."
+      ]
+    },
+    {
+      "osid": "op:kljuc:donji_vrbljani_2",
+      "classification": "PASS",
+      "established": "One target-specific HRHB local candidate at turn 169 is rejected by bounded_isolated_enemy_position. The 14 later turn-170 through turn-186 receipts are RS adjacency-only self-side candidates. The retained selectors find no target operation AAR, weekly operation link, target order, battle, or control event.",
+      "limit": "This establishes the retained admission gap, not a historical actor or route and not authority to author an operation."
+    },
+    {
+      "osid": "op:brcko:brka_2",
+      "classification": "PASS",
+      "established": "Bedem, Zaslon, and Prag all target Brka and close as failures. Their recovery rows record defender_power_too_high at turns 156, 170, and 174 respectively, with no target battle or control event.",
+      "limit": "The exact defender-power inputs and participant eligibility remain unmeasured; no threshold or control fix is established."
+    },
+    {
+      "osid": "op:kalesija:seher_2",
+      "classification": "PASS",
+      "established": "All retained saved checkpoints hold RBiH while all four references expect RS; there is no target operation, battle, order, or control event. Weekly exact matches are location occurrences for attacks on another target.",
+      "limit": "The divergence predates turn 39 and is outside a 1995 fix."
+    },
+    {
+      "osid": "op:maglaj:jablanica",
+      "classification": "PASS",
+      "established": "The turn-14 Maglaj operation fails after the turn-25 stalemate and turn-26 repulse; later probes include a turn-156 costly victory without a control event. Actual RS versus expected RBiH already diverges at turn 39.",
+      "limit": "Neither a won battle nor repeated probes proves which historical or control predicate should change."
+    },
+    {
+      "osid": "op:vares:toljenak",
+      "classification": "PASS",
+      "established": "Actual and reference agree through turn 156, then October expects RBiH. The retained evidence has no target operation, order, battle, or control event; turn-179 through turn-188 single and group RBiH 1st Corps candidates fail bounded_isolated_enemy_position, with arbih_162nd_mountain named in the single-candidate receipts.",
+      "limit": "The generic local-candidate rejector does not establish a historical operation or justify relaxing bounded isolation."
+    }
+  ],
+  "evidence_boundary_review": {
+    "temporal_weekly_save_mapping": "weekly_report.week_index is state.meta.turn and is written post-runTurn; brigade temporal rows are projected from the same post-turn state; save_wN is serialized afterward from that state. The operation diagnostic uses the turn report's bot-order snapshot plus post-turn operation roster, while saved movement state is a later state observation. These artifacts align by numbered turn but do not expose every in-turn writer boundary.",
+    "selectors": "Target matching is exact-value recursive matching, not substring matching. Controller timelines use the four reference checkpoints plus selected retained saves; completed-operation AARs and all 188 weekly rows cover the target execution history. Absence claims remain expressly bounded to these artifacts and the reason-code stdout.",
+    "source_possibilities": "commander march correction and bot generation are source-capable writers. Their presence and bot_discretionary owner values do not prove which branch ran in n80. The proposed observer must measure actor-specific before/after state.",
+    "historical_scope": "No row is treated as proof of the actual historical cause or authority for a new owner, route, operation, threshold, or direct control write."
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "change_required",
+      "classification": "observer_boundary",
+      "problem": "The selected proposal begins at turn 188, after the first retained unexplained order transition at turn 185 and after the Jajce_3 transit starts at turn 186.",
+      "smallest_correction": "Move the one observer/fixture to actual turn 185 across T3 column processing, operation/participant eligibility and order emission, T6 correction, and the following bot actor decision. Continue into turn 186 only if turn 185 does not identify the first reject, delete, or overwrite.",
+      "verification": "Review the corrected 745 wording and selector fields only. No test, scenario, suite, replay, runTurn, build, or gameplay edit is needed."
+    },
+    {
+      "id": "F2",
+      "severity": "precision_correction",
+      "classification": "save_field_semantics",
+      "problem": "Calling ABB physically at Maleševci overstates location_osid during column transit. The movement source retains the origin location until arrival.",
+      "smallest_correction": "Call Maleševci the serialized location/origin anchor and report destination/path/turns_remaining separately."
+    },
+    {
+      "id": "F3",
+      "severity": "precision_correction",
+      "classification": "actor_attribution",
+      "problem": "The weekly movement_order_count is operation-wide and the n80 weekly file does not contain actor-level bot diagnostics.",
+      "smallest_correction": "Keep the count operation-wide. Treat ABB's end-state movement_state as corroborating post-turn state, not a direct actor receipt for the weekly count or its writer."
+    }
+  ],
+  "preservation": {
+    "protected_3_exact_reused": true,
+    "native_31_exact_reused": true,
+    "C": {
+      "bytes": 100097339,
+      "sha256": "05e6cf95acda31236a719f4a8ab775d3b9514945ec7d777c39afc9db942ba011",
+      "reused": true
+    },
+    "D_bytes": 1041,
+    "receipt_count_exact": 179,
+    "head_unchanged": true,
+    "tracked_diff_empty_before_review_seals": true,
+    "full_native_or_telemetry_rehash_repeated": false
+  },
+  "inherited_gates": {
+    "retained_score": "703/712, not rerun",
+    "formerly_correct_losses": 0,
+    "full_suite_736": "FAIL_COMPLETE_TWO_NATIVE_ASSERTIONS",
+    "full_suite_rerun": false,
+    "other_acceptance_gates_waived": false,
+    "calibration_adoption_claimed": false
+  },
+  "next_action": "Apply one wording-only correction to the 745 synthesis: select the turn-185 actor-level observer boundary, preserve the t188 consequence as context, correct location and movement-count attribution, and retain all six no-gameplay-fix limits. Then perform one targeted document/evidence reread; do not rerun tests or a scenario.",
+  "pass": false,
+  "writes_closed": true
+}

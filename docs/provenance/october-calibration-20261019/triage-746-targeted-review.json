@@ -1,0 +1,131 @@
+{
+  "schema": "awwv.746.targeted-correction-verification.v1",
+  "captured_utc": "2026-10-20T12:35:04.0977830Z",
+  "reviewer_role": "independent_sol_targeted_verifier",
+  "verdict": "PASS_TARGETED_THREE_CORRECTIONS__SELECTED_PROPOSAL_BOUND__NO_GAMEPLAY_FIX",
+  "answer": "Corrected 747 applies all three accepted review corrections and selects one bounded observability proposal at the first unexplained turn-185 boundary. The portable provenance copy is byte-identical, and original 745 remains unchanged.",
+  "scope": {
+    "targeted_only": true,
+    "verified_items": [
+      "turn-185 first observer boundary and conditional turn-186 continuation",
+      "Maleševci serialized-origin semantics",
+      "operation-wide movement count without ABB-specific receipt attribution",
+      "selected proposal remains observability-only"
+    ],
+    "tests_rerun": false,
+    "general_review_repeated": false,
+    "source_changes_by_verifier": false,
+    "documentation_changes_by_verifier": false,
+    "git_mutations_by_verifier": false,
+    "review_seals_written": true
+  },
+  "artifacts": {
+    "corrected_747": {
+      "path": "logs/claude-channel-20261004/747-integration-b/result.json",
+      "bytes": 26462,
+      "sha256": "90723b8292f8d5c57e196add7595a78773317c73176d3ea3c9331ff19d1d53d3"
+    },
+    "portable_747": {
+      "path": "docs/provenance/october-calibration-20261019/triage-747-result.json",
+      "bytes": 26462,
+      "sha256": "90723b8292f8d5c57e196add7595a78773317c73176d3ea3c9331ff19d1d53d3",
+      "byte_identical_to_corrected": true
+    },
+    "original_745": {
+      "path": "logs/claude-channel-20261004/745-synthesis-a/result.json",
+      "bytes": 23534,
+      "sha256": "668c6b475599bc983e79615973207bc63953d2df084ec29c13d8601edfb3ddaf",
+      "unchanged": true
+    },
+    "original_745_markdown": {
+      "path": "logs/claude-channel-20261004/745-synthesis-a/result.md",
+      "bytes": 14995,
+      "sha256": "8c36b8fe4aba1ca2156e5b3de2297f72c95d157ba1e752ed3566a1e9bbe6d4f5",
+      "unchanged": true
+    },
+    "initial_746_review": {
+      "path": "logs/claude-channel-20261004/746-independent-review.json",
+      "bytes": 11164,
+      "sha256": "3b1f63e84d0988c2db296e3568d946eb4cbdf8fad4e2b569b78dd44bbc774a1c",
+      "unchanged": true
+    },
+    "corrected_747_receipt": {
+      "path": "logs/claude-channel-20261004/747-integration-b/receipt.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "artifact_contract": true
+    }
+  },
+  "checks": [
+    {
+      "id": "C1",
+      "name": "first unexplained boundary",
+      "pass": true,
+      "evidence": "selected_single_next_action, Prisoje missing_measurement, next_action and first_boundary_evidence all start at actual turn 185 across T3 column consumption, participant/axis/effective-loan eligibility and operation emission, T6 correction, and the following bot actor decision; turn 186 is conditional on turn 185 passing.",
+      "source_pointers": [
+        "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w184.json#/military/brigade_movement_orders/hvo_1st_guard_abb",
+        "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w185.json#/military/brigade_movement_orders/hvo_1st_guard_abb",
+        "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w186.json#/military/brigade_movement_state/hvo_1st_guard_abb",
+        "src/sim/turn_phases/war_phases.ts:1548-1572",
+        "src/sim/turn_phases/war_phases.ts:2621-2629",
+        "src/sim/turn_phases/war_phases.ts:2655-2705"
+      ]
+    },
+    {
+      "id": "C2",
+      "name": "serialized-origin semantics",
+      "pass": true,
+      "evidence": "Prisoje mechanism and location_semantics call Maleševci the serialized transit-origin anchor and explicitly reject a physical-midpoint interpretation.",
+      "source_pointers": [
+        "src/sim/combat/osid_column_movement.ts:421-427",
+        "src/sim/combat/osid_column_movement.ts:475-508"
+      ]
+    },
+    {
+      "id": "C3",
+      "name": "operation-wide movement count",
+      "pass": true,
+      "evidence": "The turn-188 field is named operation_movement_order_count. The mechanism says it is operation-wide and not an ABB-specific emission receipt; the actual writer remains unmeasured.",
+      "source_pointers": [
+        "src/scenario/combat_causality.ts:303-329",
+        "logs/claude-channel-20261004/745-extract-c/result.json#prisoje_priority_weekly"
+      ]
+    },
+    {
+      "id": "C4",
+      "name": "selected proposal scope",
+      "pass": true,
+      "evidence": "One observer/fixture only, stopping at the first non-admission or overwrite. It forbids gameplay, authorization, withdrawal, movement-speed, threshold, objective-order and control changes and forbids a new campaign."
+    }
+  ],
+  "scope_preservation": {
+    "original_745_extraction_scope_equals_745_scope": true,
+    "six_rows": 6,
+    "deferred_three_excluded": true,
+    "other_rows": "Brka, Seher, Jablanica and Toljenak are structurally identical to 745. Donji Vrbljani changes only missing_measurement to evidence-scoped wording: consulted receipts do not establish the historical actor/route and do not prove no historical capture occurred. Its classification, mechanism, evidence, confidence and next action are unchanged.",
+    "correction_metadata_separate_from_original_scope": true
+  },
+  "preservation": {
+    "head": "bba51090d6f1423406464c54e6cb3880e03fcd63",
+    "original_745_hash_unchanged": true,
+    "initial_746_hash_unchanged": true,
+    "prior_747_candidate": {
+      "path": "logs/claude-channel-20261004/747-integration-a/result.json",
+      "sha256": "d92a58e0717b0fda41e868ee9a2d7b22558fd10e6069b7fffa7e45d43265e2c2"
+    },
+    "protected_native_telemetry_rehash_repeated": false,
+    "protected_3_native_31_C_D_179_receipts": "reused from sealed 745/746 evidence at actual scope"
+  },
+  "inherited_limits": {
+    "retained_score": "703/712, not rerun",
+    "full_suite_736": "FAIL_COMPLETE_TWO_NATIVE_ASSERTIONS",
+    "gameplay_fix_established": false,
+    "campaign_causality_established": false,
+    "acceptance_or_adoption_claimed": false,
+    "other_gates_waived": false
+  },
+  "findings": [],
+  "pass": true,
+  "writes_closed": true
+}

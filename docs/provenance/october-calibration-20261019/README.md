@@ -50,3 +50,10 @@ Portable fullsuite-737-review.md removes Markdown trailing spaces for the reposi
 The roadmap and stale Sana fixture are corrected: focused checks pass 47/47, root noEmit exits 0, and thresholds remain unchanged. The focused correction preserved final C/D and all retained telemetry; n80 remains retained 703/712. No full suite or campaign was rerun. The recorded 736 full-suite failure and all other unmet gates remain open.
 
 The focused-740 result, inventory, closed receipt, focused-test/typecheck results and initial741 review preserve the bounded evidence. The final targeted741 review resolves only the C/D wording issue; original review bytes remain local. The roadmap's unchanged length guard and all three intended Sana sequence flags are preserved. Raw receipts/telemetry remain local under the owner decision. Earlier full-suite results retain their original verdicts.
+
+
+## Retained n80 six-cell triage — 2026-10-20
+
+Retained n80 six-cell triage is complete. Prioritize Prisoje’s turn185 ABB movement/correction/bot boundary with one focused observer/fixture; no gameplay fix is yet established. Donji lacks an admitted operation in consulted records. Brka has failed admitted operations; Toljenak has an isolation rejection. Šeher/Jablanica already diverge by the first checkpoint. Retained703/712, thresholds and telemetry unchanged; no campaign.
+
+The triage-745 inventory/closed receipt preserve the original synthesis identity; triage-747-result is the corrected six-row synthesis. Initial746 and targeted746 reviews preserve the first-boundary and attribution corrections. Original745 raw JSON/Markdown and extraction logs stay local and unchanged. These files are diagnostic evidence, not a new campaign or a proven gameplay fix.
