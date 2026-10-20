@@ -1,0 +1,139 @@
+{
+  "schema": "awwv.741.independent-focused-correction-review.v1",
+  "captured_utc": "2026-10-20T08:06:35.8819157Z",
+  "reviewer_role": "independent_sol_reviewer",
+  "verdict": "CHANGES_REQUIRED_ONE_DOCUMENTATION_SCOPE_CLARIFICATION",
+  "answer": "The stale Sana-axis fixture correction, focused validation, preservation, and roadmap compaction all pass their bounded technical checks. One roadmap sentence inaccurately implies that C was unchanged during the 736 full suite, although that run appended 2,395,448 bytes. Clarify that thresholds were unchanged and that the 740 focused correction preserved the final C/D state.",
+  "scope": {
+    "worktree": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+    "head": "bd6a546a38a28f816586a0a6e171eecd618c0599",
+    "branch": "codex/october-calibration-continuation-20261003",
+    "review_only": true,
+    "tests_rerun": false,
+    "suite_rerun": false,
+    "campaign_run": false,
+    "build_run": false,
+    "source_docs_git_mutated_by_reviewer": false,
+    "review_seals_written": true
+  },
+  "reviewed_changes": {
+    "tracked_files": [
+      "docs/plans/MASTER_ROADMAP.md",
+      "tests/sector_offensive_planning_objective_reconciliation.test.ts"
+    ],
+    "tracked_file_count": 2,
+    "roadmap": {
+      "bytes": 58755,
+      "code_units": 58493,
+      "guard_code_units": 60000,
+      "sha256": "703a5d8f6519918db874948e38487bc35eed682d34f786ac4395fa98578de912",
+      "authority_and_links_preserved": true,
+      "current_n80_truth": "703/712 retained; not a new measurement",
+      "calibration_status": "NO-GO_UNADOPTED",
+      "historical_detail_destination": "docs/40_reports/CALIBRATION_MASTER.md",
+      "shard_detail_destination": "docs/provenance/october-calibration-20261019/unfinished-shard-diagnosis.md"
+    },
+    "test": {
+      "bytes": 50032,
+      "sha256": "f2027242d84bf5f03fae63a932380b289a1cf734586434ba461fa4643b63a9cb",
+      "explicit_preserve_assertions": 3,
+      "catalog_order": [
+        "sana_veliki_badic_505th",
+        "sana_west_sana_510th",
+        "sana_sanski_most_kljuc"
+      ],
+      "ownership_sequence_handoff_guards_preserved": true
+    },
+    "production_catalog": {
+      "path": "src/sim/combat/operation_opportunity_catalog_5th_corps.ts",
+      "bytes": 89794,
+      "sha256": "c9df78bdfd9295da6888dfa11663bc432852da135d64a4f01077ca0c2346e61c",
+      "changed": false
+    }
+  },
+  "validation_reused": {
+    "focused": {
+      "files_passed": 4,
+      "files_failed": 0,
+      "tests_passed": 47,
+      "tests_failed": 0,
+      "exit": 0
+    },
+    "targeted_sana_file": {
+      "tests_passed": 17,
+      "tests_failed": 0
+    },
+    "plan_index_exit": 0,
+    "diff_check_exit": 0,
+    "noemit_exit": 0,
+    "noemit_duration_ms": 71096,
+    "full_suite_736": {
+      "status": "FAIL_COMPLETE_TWO_NATIVE_ASSERTIONS",
+      "rerun": false,
+      "tests_passed": 14726,
+      "tests_skipped": 33,
+      "tests_failed": 2
+    }
+  },
+  "preservation": {
+    "receipt_files_exact": 179,
+    "source_pins_exact": 19,
+    "protected_pins_exact": 3,
+    "n80_native_files_exact": 31,
+    "C": {
+      "bytes": 100097339,
+      "sha256": "05e6cf95acda31236a719f4a8ab775d3b9514945ec7d777c39afc9db942ba011",
+      "changed_by_740_checks": false,
+      "historical_736_append_bytes": 2395448
+    },
+    "D": {
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "changed_by_740_checks": false
+    }
+  },
+  "preflight_review": {
+    "attempt_a_retained": true,
+    "attempt_a_pass": false,
+    "attempt_a_failure": "The checker compared the current opening roadmap's 60,615 code units to the historical 736 measurement of 60,637 and expected the catalog list in a different order.",
+    "attempt_b_retained": true,
+    "attempt_b_pass": true,
+    "attempt_b_correction": "The checker records the 736 historical measurement separately and checks the actual catalog order. This is a cheap checker-only correction, not a source fallback or test rerun."
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "classification": "documentation_scope_precision",
+      "severity": "change_required",
+      "file": "docs/plans/MASTER_ROADMAP.md",
+      "line": 29,
+      "current": "Thresholds and C/D remain unchanged; no retry or campaign.",
+      "problem": "Placed directly after the 736 full-suite result, this implies C was unchanged during 736. The sealed 736 evidence records C growing from 97,701,891 to 100,097,339 bytes, an append of 2,395,448 bytes. Only the 740 focused correction preserved the already-final C/D hashes unchanged.",
+      "smallest_correction": "State that thresholds remain unchanged and that the focused correction preserved final C/D and retained telemetry. Keep the no-retry/no-campaign limit and the historical full-suite failure explicit.",
+      "verification": "Review the revised paragraph, code-unit count, links, and git diff/check. No test, suite, campaign, build, or noEmit rerun is needed."
+    }
+  ],
+  "limits": {
+    "green_full_suite_claimed": false,
+    "full_suite_failure_retired": false,
+    "new_campaign_measurement_claimed": false,
+    "calibration_adoption_claimed": false,
+    "inherited_gates_waived": false
+  },
+  "evidence": {
+    "result_740": {
+      "path": "logs/claude-channel-20261004/396-varosluk-740-seal-a-attempt/result.json",
+      "sha256": "ccda14a858fbc39bcb0e86991aae6306038c0de1237bab65b88752fa902abea8"
+    },
+    "inventory_740": {
+      "path": "logs/claude-channel-20261004/396-varosluk-740-seal-a-attempt/inventory.json",
+      "sha256": "073b8eee33f6a2fc7aab6818e5f91c6cd02ee5300b4b4c042a05ace3b95064ff"
+    },
+    "closed_receipt_740": {
+      "path": "logs/claude-channel-20261004/396-varosluk-740-seal-a-attempt/closed-receipt.json",
+      "sha256": "5ff8368dc8248ea1546c08b1856b4828622068c6bdb63e7732bcd16b7c8cb0b2"
+    }
+  },
+  "pass": false,
+  "writes_closed": true
+}

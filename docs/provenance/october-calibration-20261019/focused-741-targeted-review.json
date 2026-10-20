@@ -1,0 +1,69 @@
+{
+  "schema": "awwv.741.targeted-correction-verification.v1",
+  "captured_utc": "2026-10-20T08:09:12.4664820Z",
+  "reviewer_role": "independent_sol_reviewer",
+  "verdict": "PASS_DOCUMENTATION_SCOPE_FINDING_CLOSED",
+  "answer": "The revised current R6 paragraph closes 741 F1. It now distinguishes unchanged thresholds from the focused correction's preservation of the already-final C/D state and all retained telemetry, while retaining the historical 736 full-suite failure, 47/47 focused result, NO-GO/unadopted n80 status, no-rerun limit, and open gates.",
+  "scope": {
+    "targeted_only": true,
+    "finding": "741 F1 documentation_scope_precision",
+    "tests_rerun": false,
+    "suite_rerun": false,
+    "campaign_run": false,
+    "build_run": false,
+    "noemit_rerun": false,
+    "general_review_repeated": false,
+    "source_docs_git_mutated_by_reviewer": false,
+    "review_seals_written": true
+  },
+  "verification": {
+    "roadmap": {
+      "path": "docs/plans/MASTER_ROADMAP.md",
+      "bytes": 58767,
+      "code_units": 58505,
+      "guard_code_units": 60000,
+      "under_guard": true,
+      "guard_margin_code_units": 1495,
+      "sha256": "1b3fdb782a34046e0d5d4100357689d15b7bc3809457ba4795efb5ec8f61302e"
+    },
+    "paragraph_checks": {
+      "thresholds_unchanged": true,
+      "focused_correction_preserved_final_C_D_and_all_retained_telemetry": true,
+      "no_full_suite_or_campaign_rerun": true,
+      "historical_full_suite_failure_retained": true,
+      "all_other_unmet_gates_open": true,
+      "focused_47_of_47_retained": true,
+      "n80_703_of_712_retained": true,
+      "unadopted_NO_GO_retained": true
+    },
+    "links": {
+      "calibration_master_exists": true,
+      "shard_findings_exists": true
+    },
+    "diff_check_exit": 0,
+    "test_file_unchanged_from_740": {
+      "path": "tests/sector_offensive_planning_objective_reconciliation.test.ts",
+      "sha256": "f2027242d84bf5f03fae63a932380b289a1cf734586434ba461fa4643b63a9cb",
+      "pass": true
+    },
+    "production_catalog_unchanged": {
+      "path": "src/sim/combat/operation_opportunity_catalog_5th_corps.ts",
+      "sha256": "c9df78bdfd9295da6888dfa11663bc432852da135d64a4f01077ca0c2346e61c",
+      "pass": true
+    }
+  },
+  "evidence": {
+    "initial_review": {
+      "path": "logs/claude-channel-20261004/741-independent-review.json",
+      "sha256": "4eb790e464f44d7763945a2f8562e322de14b271eb6e753eb3ba414c7bed7ebb"
+    },
+    "root_documentation_result": {
+      "path": "logs/claude-channel-20261004/742-docs-a/result.json",
+      "sha256": "4c675ef5bab62941dc5483299d0273c1c2b35b50578e4b0650091a245b05d4e1",
+      "writes_closed": true
+    }
+  },
+  "findings": [],
+  "pass": true,
+  "writes_closed": true
+}

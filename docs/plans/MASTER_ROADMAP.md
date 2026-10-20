@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-20 — refreshed full suite complete, two failures; n80 retained 703/712.
+**Last updated:** 2026-10-20 — bounded documentation/test fixes pass focused checks; n80 retained 703/712.
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -23,28 +23,15 @@ goal, acceptance criteria, canon/protected boundaries, material scope/cost
 tradeoffs or irreversible/external actions with concrete options and a
 recommendation. Required evidence, review panels and cost-control gates remain.
 
-**Current R6 — October Sana remains NO-GO (compact current state).** Calibration is NO-GO. The
-latest n44 score is 692/712 (97.19%, 20 mismatches; prior n39 684/712), unadopted: checkpoints
-707/707/706 preserved, seven n39 gains kept, no matched cell lost, eight new endpoint matches,
-Jajce 5/5 endpoint and Majdan recovered, Drvar by 188 retained. These are measured endpoint
-findings, not closure of emitted ownership or historical timing/route/provenance acceptance. The
-opt-in Mistral phase gate is implemented and reviewed (168 suite exit 0, 14415 passed/33 skipped);
-n46/n47/n48 matched ten selected n44 saves byte for byte, no new score gain. Sana 506th/517th: column
-marches 179/181, skips 180/182, attack 183 (no handler fix). 737 t155 (n47, opt-in reviewed sector_march
-observer): overstack_redistribution_march from on-front Paklarevo to in-front Medini, no reassignment;
-reconstructed stack 4 vs cap 2 carries a stability/limited-writer qualifier; ranking and history
-unmeasured, not n25 causality. Farz Sep 29
-ruling binds; n42 observational GO only. UNMEASURED/open: TG donor-filter cause, broader ownership/history, 177 upstream readiness writer, dirty-517 provenance, actual-used 31, 737,
-the remaining 20 mismatches and route/history gates; 176's resumed continuation (58 first-turn paths; 616 diffs total over seven saved turns) is
-UNBOUND; 122 STOP stands. Southern Move TGs formed t187 on hvo_tomislavgrad (not 3/5 planning).
-Verbose October history is VERBATIM in the calibration master "October 2026 coordination history
-moved from the roadmap — 2026-10-07".
-
-**717–720 current:** ONE full suite timed out at35minutes;3/5native groups green,1022files passed+2skipped,10152tests passed+30skipped,0observed failures;1parallel+serial unmeasured. n80 retained703/712, thresholds and C/D preserved; 17scratch opening states recovered via14exact prior archives+3empty states. No retry/campaign. [Evidence](../40_reports/CALIBRATION_MASTER.md).
-
-**735–738 current:** One refreshed full suite completed all five lanes in 29m51s, under the 35-minute cap, but FAILED two native assertions (exits 1/1/1). Tests: 14,726 passed, 33 skipped, 2 failed. Independent 737 review confirms full coverage and preservation. Retained n80 is 703/712; thresholds unchanged; NO-GO/unadopted. No retry or campaign. Next: compact the roadmap without raising its limit and correct the stale Sana-axis test; targeted checks first. [Evidence](../40_reports/CALIBRATION_MASTER.md).
-
-**727–730 current (historical diagnosis):** Raw-local retention explicitly accepted; source/docs checkpoints pushed. Retained shard diagnosis finds stale timing weights/workload skew as strongest measured contributor; exact in-flight cause unmeasured. Offline1440-execution coverage intact; no tests/fullsuite/campaign. n80retained703/712 NO-GO. [Qualified findings](../provenance/october-calibration-20261019/unfinished-shard-diagnosis.md).
+**Current R6 — October Sana remains NO-GO.** The latest retained result is **n80, 703/712**,
+unadopted. The 736 full suite completed all five lanes in 29m51s but failed two assertions
+(14,726 passed, 33 skipped, two failed). The roadmap and stale Sana fixture are now corrected;
+focused checks pass 47/47 and root noEmit exits 0. Thresholds remain unchanged; the focused
+correction preserved final C/D and all retained telemetry. No full suite or campaign was rerun;
+the recorded full-suite failure and all other unmet gates remain open. October history,
+route/provenance gates, the earlier timeout and shard diagnosis remain in the
+[calibration master](../40_reports/CALIBRATION_MASTER.md) and
+[retained shard findings](../provenance/october-calibration-20261019/unfinished-shard-diagnosis.md).
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference

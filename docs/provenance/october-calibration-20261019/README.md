@@ -43,3 +43,10 @@ One refreshed full suite completed all five lanes in 29m51s, under the 35-minute
 The fullsuite-736 result, inventory, preservation, closed receipt and capture receipt, plus fullsuite-737 independent review, record exact scope and hashes. All raw stdout/stderr, lane logs and before/after telemetry/scratch archives stay local. Receipt inventory: 146 prior files exact plus 33 new retained. C is now 100,097,339 bytes with its complete opening prefix; D and all 31 n80 artifacts are exact. Earlier sections remain dated evidence. This complete run supersedes runtime uncertainty for this invocation only; it does not erase historical timeout/preservation failures or waive full-suite acceptance.
 
 Portable fullsuite-737-review.md removes Markdown trailing spaces for the repository whitespace check; the original hash-inventoried review bytes remain untouched locally. Its JSON copy is byte-exact.
+
+
+## Focused suite-failure corrections — 2026-10-20
+
+The roadmap and stale Sana fixture are corrected: focused checks pass 47/47, root noEmit exits 0, and thresholds remain unchanged. The focused correction preserved final C/D and all retained telemetry; n80 remains retained 703/712. No full suite or campaign was rerun. The recorded 736 full-suite failure and all other unmet gates remain open.
+
+The focused-740 result, inventory, closed receipt, focused-test/typecheck results and initial741 review preserve the bounded evidence. The final targeted741 review resolves only the C/D wording issue; original review bytes remain local. The roadmap's unchanged length guard and all three intended Sana sequence flags are preserved. Raw receipts/telemetry remain local under the owner decision. Earlier full-suite results retain their original verdicts.
