@@ -1,0 +1,211 @@
+{
+  "schema": "awwv.754.prisoje-authority-independent-review.v1",
+  "reviewer_role": "independent_sol_reviewer",
+  "verdict": "PASS_DIAGNOSIS__CANDIDATE_REQUIRES_NARROWER_DESIGN_BEFORE_IMPLEMENTATION",
+  "pass": true,
+  "writes_closed": true,
+  "scope": {
+    "worktree": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+    "head": "130ffb29213a6d2e2a2a8f823339b102a371a066",
+    "review_only": true,
+    "tests_run": 0,
+    "runtime_probes_run": 0,
+    "suites_run": 0,
+    "campaigns_run": 0,
+    "builds_run": 0,
+    "runTurn_called": false,
+    "turn186_or_later": false,
+    "production_source_docs_or_git_mutated": false,
+    "review_outputs_only": [
+      "logs/claude-channel-20261004/754-independent-review.md",
+      "logs/claude-channel-20261004/754-independent-review.json"
+    ]
+  },
+  "diagnosis_review": {
+    "verdict": "PASS",
+    "causal_chain": [
+      "The retained save-184 input has corps_front_sectors={} and ABB retains assigned_sub_segment_id subseg:sector:hvo_tomislavgrad:0:0. resolveRoutineMovementScope therefore returns unrestricted stale_assignment.",
+      "At T3 the queued bot_discretionary destination Bravnice has operation_authorized=false and reassignment_authorized=false, but isRoutineScopeEnforcedForOrder returns false at brigade_routine_scope.ts:538-539 because the routing scope is unrestricted. The unchanged T3 path guard passes and a four-turn Bravnice transit is written.",
+      "partition-corps-front-sectors replaces sector truth through war_phases.ts:1605-1607. buildCorpsFrontSectors calls syncSectorAssignmentsToFormations at corps_front_sectors.ts:773-774, whose brigade_assignment.ts:2701-2722 clearing pass removes derived assigned_sub_segment_id. The exact capture observes ABB cleared at the partition boundary.",
+      "assign-brigades-to-subsegments immediately follows partition and directly writes assigned_sub_segment_id at subsegment_assignment.ts:103-109 or 266-276. By the later captured boundary ABB is restricted to Bosansko Grahovo 2, Malesevci, and Prekaja 2.",
+      "At T6 ABB is at valid Malesevci; Bravnice is outside the rebuilt assigned-front set; operation and reassignment authority are both false. commander_march_correction.ts:167-180 therefore deletes the transit and order."
+    ],
+    "authority_ownership": {
+      "operation_and_sector_owner": "hvo_tomislavgrad via ABB active elite loan",
+      "reassignment_and_t3_path_owner": "hvo_main_staff via formation.corps_id",
+      "wrong_loan_lookup": false,
+      "source_basis": [
+        "brigade_routine_scope.ts:339-364 selects the active loan receiver for operation authority",
+        "brigade_routine_scope.ts:437-468 uses formation.corps_id for reassignment",
+        "osid_column_movement.ts:620-627 uses formation.corps_id for allowedOsids"
+      ]
+    },
+    "operation_identity": {
+      "eligible_active_operation_count_for_abb": 1,
+      "operation": "Operation Mistral 2",
+      "effective_corps": "hvo_tomislavgrad",
+      "axis": "mistral_sipovo",
+      "axis_index": 1,
+      "current_objective_index": 8,
+      "current_objective": "op:jajce:lupnica",
+      "bravnice_objective_index": 5,
+      "bravnice_authorized": false,
+      "jajce_3_authorized": true,
+      "authorized_destinations": [
+        "op:jajce:jajce_3",
+        "op:livno:livno_2"
+      ],
+      "interpretation": "Jajce_3 is a friendly approach to current Lupnica; Livno_2 is axis staging. Bravnice is an earlier completed objective and is neither current-or-later approach nor staging."
+    },
+    "operation_hash_change": {
+      "before_sha256": "cfa971f3ae18ec9c5fd17a093b53dc3a94030893898e4d2d2d2b7a375c724356",
+      "after_sha256": "c5d28337e3d74cd9c4e49b1a57311932263c96336da7337dd485eaaea4824543",
+      "established": "Preparation Probe: Operation Southern Move is removed from the receiving active_operations array, count 3 to 2; selected Mistral roster, axis status, current objective index, current objective, and Bravnice/Jajce_3 authorization remain unchanged.",
+      "limit": "The evidence does not establish that probe removal is the only mutation across every field of the surviving Southern Move operation."
+    }
+  },
+  "evidence_classification": {
+    "measured": [
+      "Exact save-184/scenario prelude and all 85 registered phase-prefix executions through generate-bot-brigade-orders, without runTurn or turn 186.",
+      "T3 input scope/order/authority and resulting Bravnice transit.",
+      "ABB assigned_sub_segment_id is null after partition and restored by the later captured boundary.",
+      "T6 preconditions at the prior captured boundary and deletion at commander-correct-march-orders.",
+      "Operation membership and authorized destination sets at every captured boundary.",
+      "Following bot phase queues Jajce_3."
+    ],
+    "source_proven": [
+      "The T3 unrestricted-scope early return and T6 deletion branch are deterministic for the captured operands.",
+      "The sector builder's sync clears derived sub-segment ownership and assignBrigadesToSubSegments can restore it."
+    ],
+    "inferred_not_directly_instrumented": [
+      "assign-brigades-to-subsegments is the first effective reassignment writer: it immediately follows partition and is the identified direct writer, but the probe did not snapshot immediately after that phase.",
+      "The claimed rebuilt total of 54 sectors is not recorded in the sealed probe. The review accepts a rebuilt non-empty map, not the numeric count 54."
+    ]
+  },
+  "findings": [
+    {
+      "id": "F1",
+      "severity": "design_constraint",
+      "classification": "candidate_underconstrained",
+      "finding": "The 753 candidate may not choose an arbitrary destination from getOperationAuthorizedDestinations and may not infer operation ownership from owner=bot_discretionary. In the exact state the authorized set contains both Jajce_3 approach and Livno_2 staging, while stale/unrestricted scope makes routine-scope validity non-discriminating.",
+      "required_narrowing": "Require one eligible planning/execution operation and one ABB axis; prove the old destination is an earlier completed objective on that same axis and is no longer current approach/staging; exclude explicit reassignment, lawful retreat/recovery, valid staging, already-authorized orders, and unrelated bot orders; then reuse getSectorOffensiveApproachOsids plus findNearestFriendlyOsidDestination for the current objective. Ambiguous ownership, no lawful approach, or invalid path must use existing rejection/handling without forced progress.",
+      "impact": "The diagnosis passes, but the candidate is not ready to implement until these constraints are encoded in its design and focused tests."
+    },
+    {
+      "id": "F2",
+      "severity": "claim_boundary",
+      "classification": "writer_and_count_precision",
+      "finding": "The probe captures null assignment after partition and a restored assignment only at the later advance-sector-offensives boundary. The direct assign phase and the total sector count were not separately snapshotted.",
+      "required_correction": "Describe assign-brigades-to-subsegments as the source-supported first identified writer, and omit the total of 54 unless another retained artifact pins it.",
+      "impact": "No change to the established T3-to-T6 cause; this limits attribution precision."
+    }
+  ],
+  "smallest_lawful_candidate": {
+    "status": "design_only_not_implemented",
+    "location": "T3 queued-order pre-consumption",
+    "trigger": [
+      "owner is bot_discretionary",
+      "exactly one planning/execution operation under the effective receiving corps contains the formation",
+      "exactly one axis of that operation contains the formation",
+      "queued destination is an earlier objective of that axis with index lower than current_objective_index",
+      "queued destination is not currently authorized approach or staging",
+      "no explicit reassignment, lawful retreat/recovery, valid staging, already-authorized order, or other identifiable producer owns the order"
+    ],
+    "replacement_selection": "Derive current-objective approaches with the existing operation producer helper and select with the existing deterministic nearest-friendly-destination BFS. Do not pick any arbitrary member of the union authorization set.",
+    "unchanged_guards": [
+      "routine scope",
+      "home-corps allowed OSIDs",
+      "friendly path/connectivity",
+      "hostile route",
+      "operation membership and authority",
+      "T6 correction"
+    ],
+    "no_change_on": [
+      "ambiguous operation or axis ownership",
+      "already lawful approach or staging",
+      "explicit reassignment",
+      "lawful retreat or recovery",
+      "unrelated bot order",
+      "no lawful current approach",
+      "invalid path"
+    ]
+  },
+  "focused_pass_criteria": {
+    "positive": [
+      "Exact save-184-derived ABB case identifies Bravnice as a completed earlier objective of the unique Mistral/Sipovo axis and selects Jajce_3 through the existing current-objective approach selector only when the existing path guard passes.",
+      "The reconciled Jajce_3 order creates lawful transit and remains valid through T6.",
+      "Candidate selection is deterministic and insertion-order independent."
+    ],
+    "negative": [
+      "An already-authorized Jajce_3 approach remains semantic/byte equivalent.",
+      "A valid Livno_2 staging order remains unchanged.",
+      "Explicit reassignment and lawful retreat/recovery remain unchanged.",
+      "An unrelated bot_discretionary order is not treated as operation-owned merely because ABB is an operation participant.",
+      "Nonparticipant, recovery/completed operation, multiple eligible operations or axes, empty approach set, and invalid path do not retarget or force transit.",
+      "Bravnice remains unauthorized under rebuilt scope and T6 still deletes an independently injected invalid Bravnice transit.",
+      "Loan receiver operation lookup and home-corps reassignment/path ownership remain unchanged."
+    ]
+  },
+  "limits": [
+    "The earlier Bravnice order emitter remains unmeasured.",
+    "No implementation or gameplay-neutrality proof was performed.",
+    "No Prisoje capture, 703 improvement, calibration gain, turn-186 causality, full-campaign, or acceptance claim is made."
+  ],
+  "validation": {
+    "fresh_read_only_checks": [
+      "HEAD and git status",
+      "753 seal and probe hashes",
+      "source line-path review",
+      "C prefix byte comparison with cmp -n",
+      "current C/D hashes",
+      "protected/native retained-pin hashes",
+      "receipt file count"
+    ],
+    "head": "130ffb29213a6d2e2a2a8f823339b102a371a066",
+    "git_status_before_review_outputs": "clean",
+    "seal_result_matches_closed_receipt": true,
+    "seal_inventory_matches_closed_receipt": true,
+    "probe_child_exit": 0,
+    "probe_wrapper_exit": 0,
+    "probe_timed_out": false,
+    "probe_artifact_contract_pass": true,
+    "C": {
+      "opening_bytes": 100102520,
+      "opening_sha256": "5b225eededbb39e6a08fd0231dc1e5ff14a6c1a401b292c684f91419c2c3adf3",
+      "prefix_cmp_exit": 0,
+      "prefix_preserved": true,
+      "append_bytes": 5181,
+      "live_bytes": 100107701,
+      "live_sha256": "8d242e18f199a54c26f755e648fe4612159563ec0b606930112653770d725f3c",
+      "live_matches_archived_after": true
+    },
+    "D": {
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "unchanged": true
+    },
+    "protected_3_exact": true,
+    "native_31_exact": true,
+    "receipt_files_recursive_count": 179,
+    "false_zero_wrapper_749_used_as_proof": false
+  },
+  "reviewed_hashes": [
+    { "path": "logs/claude-channel-20261004/752-root-plan.md", "bytes": 4620, "sha256": "3f4282d7824836292c3991c0537fdb543a09ef6499815ecbebb71e2f8aa259f7" },
+    { "path": "logs/claude-channel-20261004/753-authority-seal-a/result.json", "bytes": 11138, "sha256": "54796c0cb94abd08dd450c7376c6fc33e114137520e6ce65868ed1009174c880" },
+    { "path": "logs/claude-channel-20261004/753-authority-seal-a/inventory.json", "bytes": 3655, "sha256": "c0b9f9ea1845dc83603e8281cfe1372dcef28439e88a0c3b51369c1079ec9cc2" },
+    { "path": "logs/claude-channel-20261004/753-authority-seal-a/closed-receipt.json", "bytes": 1510, "sha256": "cf5bc0e02e19ddf949a514b627063fbad95a8a3ebf8b80a11cdfbf57abbb6764" },
+    { "path": "logs/claude-channel-20261004/753-authority-probe-a/753-exact-save184-authority-probe.json", "bytes": 253261, "sha256": "bb180a407ab6ff8dce4ff7bca360eaa108068202f191759d1c49934b7084512a" },
+    { "path": "docs/provenance/october-calibration-20261019/prisoje-750-targeted-review.json", "bytes": 8520, "sha256": "c4f2264d380ab9bea4fee6d66b07c7ebe9c813e34c1a3f9f645ac1e652df5b9b" },
+    { "path": "src/sim/combat/brigade_routine_scope.ts", "bytes": 27703, "sha256": "b379ccc4eb12cffce18656f41707b02ea22ef28db975ac4496e78e9fa90e6cc8" },
+    { "path": "src/sim/combat/operation_approach_osids.ts", "bytes": 5676, "sha256": "16659ec430d399c2f32d1b115ed7c4df74e96fa2cd42fdf611f32fcb6e505646" },
+    { "path": "src/sim/combat/commander_march_correction.ts", "bytes": 10353, "sha256": "3967fa770a5bb5e9a57899e7bc5135b64552bdc5f1c711c53b1d25f4940917d3" },
+    { "path": "src/sim/combat/osid_column_movement.ts", "bytes": 32573, "sha256": "a3600a86885ecd34bb976dd92e784c0f01fe8c1796d66bd2039cf5bae46a6489" },
+    { "path": "src/sim/combat/subsegment_assignment.ts", "bytes": 15516, "sha256": "d67c2e4bd6ded11c7475b1f06ab45d2bbb2e3258ba9823885b754411bb41b78d" },
+    { "path": "src/sim/combat/corps_front_sectors.ts", "bytes": 193636, "sha256": "a46f78a9248e4333346cd2f3066a10a0c195cf6546e1c6e8b974405129b46d93" },
+    { "path": "src/sim/combat/brigade_assignment.ts", "bytes": 135010, "sha256": "69529ac82c224236ff94a330c39e1828188365517bd2d072ba8e3b496ec8e191" },
+    { "path": "src/sim/combat/bot_brigade_context.ts", "bytes": 13434, "sha256": "2a13810cfac715755847144cee21faea2fe9f0d4a3f19ecd5719c9e424966506" },
+    { "path": "src/sim/combat/bot_brigade_eval_attack.ts", "bytes": 50814, "sha256": "cdc2c62207d78a6716f8fd67d427ff58d693026e8dd7e0c63f2bbbd79ec96c03" },
+    { "path": "src/sim/turn_phases/war_phases.ts", "bytes": 231312, "sha256": "5ae935c3db6bc80e0b1f878a1871067fb6ffdcb239dcf317574433acfb8f2709" },
+    { "path": "logs/claude-channel-20261004/754-independent-review.md", "bytes": 5498, "sha256": "6f6bd3db5fcfada51262a59dbe682cabccc2cea5c4ddd76d7533568a30a932ed" }
+  ]
+}

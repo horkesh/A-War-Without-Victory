@@ -1,0 +1,122 @@
+{
+  "schema": "awwv.754.prisoje-755-integration-targeted-verification.v1",
+  "reviewer_role": "independent_sol_targeted_verifier",
+  "verdict": "PASS_TARGETED_INTEGRATION",
+  "pass": true,
+  "writes_closed": true,
+  "scope": {
+    "worktree": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+    "head": "130ffb29213a6d2e2a2a8f823339b102a371a066",
+    "targeted_verification_only": true,
+    "tests_run": 0,
+    "runtime_probes_run": 0,
+    "suites_run": 0,
+    "campaigns_run": 0,
+    "builds_run": 0,
+    "further_diagnosis": false,
+    "production_source_mutated": false,
+    "review_outputs_only": [
+      "logs/claude-channel-20261004/754-targeted-verification.md",
+      "logs/claude-channel-20261004/754-targeted-verification.json"
+    ]
+  },
+  "integrated_result": {
+    "local": {
+      "path": "logs/claude-channel-20261004/755-integration-a/result.json",
+      "bytes": 5170,
+      "sha256": "36f1130807600c50e1db88820eae6b8ce8e88efd43aaff9981d0bd0e1b5535c0"
+    },
+    "portable": {
+      "path": "docs/provenance/october-calibration-20261019/authority-755-result.json",
+      "bytes": 5170,
+      "sha256": "36f1130807600c50e1db88820eae6b8ce8e88efd43aaff9981d0bd0e1b5535c0"
+    },
+    "byte_identical": true,
+    "verdict": "DIAGNOSIS_ESTABLISHED__NARROW_CANDIDATE_REQUIRES_IMPLEMENTATION_DESIGN_AND_TESTS"
+  },
+  "claim_limit_verification": {
+    "no_54_sector_claim": true,
+    "assignment_writer_source_supported_not_direct_snapshot": true,
+    "operation_hash_change_includes_completed_probe_removal_not_exclusive_mutation_claim": true,
+    "objective_positions": {
+      "bravnice_completed_index": 5,
+      "lupnica_current_index": 8
+    },
+    "authorized_destination_roles": {
+      "op:jajce:jajce_3": "current Lupnica approach",
+      "op:livno:livno_2": "axis staging; not interchangeable automatic replacement"
+    },
+    "candidate_constraints_present": [
+      "unique eligible operation under effective receiving corps",
+      "unique actor axis and valid loan/participant membership",
+      "old destination proved a completed earlier objective of that same axis",
+      "producer ownership required; bot_discretionary alone is insufficient",
+      "authorized operation, valid routine, staging, retreat, reassignment, recovery/completed, ambiguous, and unrelated bot orders excluded",
+      "stale/unrestricted scope is not retarget permission",
+      "existing current-objective approach derivation reused",
+      "existing deterministic nearest-friendly selector reused",
+      "no arbitrary combined-authorized-set member selection",
+      "path/connectivity, political, scope, ownership, threshold, phase order, and T6 guards preserved"
+    ],
+    "implementation_claim": false,
+    "gain_or_neutrality_claim": false,
+    "earlier_bravnice_emitter_measured": false
+  },
+  "documentation_consistency": {
+    "verdict": "PASS",
+    "files": [
+      "docs/40_reports/CALIBRATION_MASTER.md",
+      "docs/plans/COMMAND_BOARD.md",
+      "docs/plans/MASTER_ROADMAP.md",
+      "docs/PROJECT_LEDGER.md",
+      "docs/provenance/october-calibration-20261019/README.md"
+    ],
+    "consistent_points": [
+      "diagnosis established and candidate remains an unimplemented proposal",
+      "assignment writer precision and no numeric rebuilt-sector count",
+      "Bravnice/Lupnica/Jajce_3/Livno_2 role distinction",
+      "narrow candidate preserves lawful movement and existing guards",
+      "no Prisoje capture, 703 gain, neutrality, turn-186 causality, or acceptance claim",
+      "retained 703/712 and October Sana NO-GO remain open"
+    ]
+  },
+  "original_evidence_preservation": {
+    "original_753_result": {
+      "bytes": 11138,
+      "sha256": "54796c0cb94abd08dd450c7376c6fc33e114137520e6ce65868ed1009174c880"
+    },
+    "original_753_inventory": {
+      "bytes": 3655,
+      "sha256": "c0b9f9ea1845dc83603e8281cfe1372dcef28439e88a0c3b51369c1079ec9cc2"
+    },
+    "original_753_closed_receipt": {
+      "bytes": 1510,
+      "sha256": "cf5bc0e02e19ddf949a514b627063fbad95a8a3ebf8b80a11cdfbf57abbb6764"
+    },
+    "original_754_initial_review": {
+      "bytes": 14482,
+      "sha256": "821d16d87cd14c2c97beeb52a3a106393a21cb9504b66bfa6821d5c5153e97fb"
+    },
+    "portable_753_closed_matches_original": true,
+    "portable_753_inventory_matches_original": true,
+    "portable_754_initial_review_matches_original": true
+  },
+  "reviewed_hashes": [
+    { "path": "logs/claude-channel-20261004/755-integration-a/result.json", "bytes": 5170, "sha256": "36f1130807600c50e1db88820eae6b8ce8e88efd43aaff9981d0bd0e1b5535c0" },
+    { "path": "docs/provenance/october-calibration-20261019/authority-755-result.json", "bytes": 5170, "sha256": "36f1130807600c50e1db88820eae6b8ce8e88efd43aaff9981d0bd0e1b5535c0" },
+    { "path": "logs/claude-channel-20261004/753-authority-seal-a/result.json", "bytes": 11138, "sha256": "54796c0cb94abd08dd450c7376c6fc33e114137520e6ce65868ed1009174c880" },
+    { "path": "logs/claude-channel-20261004/753-authority-seal-a/inventory.json", "bytes": 3655, "sha256": "c0b9f9ea1845dc83603e8281cfe1372dcef28439e88a0c3b51369c1079ec9cc2" },
+    { "path": "logs/claude-channel-20261004/753-authority-seal-a/closed-receipt.json", "bytes": 1510, "sha256": "cf5bc0e02e19ddf949a514b627063fbad95a8a3ebf8b80a11cdfbf57abbb6764" },
+    { "path": "logs/claude-channel-20261004/754-independent-review.json", "bytes": 14482, "sha256": "821d16d87cd14c2c97beeb52a3a106393a21cb9504b66bfa6821d5c5153e97fb" },
+    { "path": "docs/provenance/october-calibration-20261019/authority-753-closed.json", "bytes": 1510, "sha256": "cf5bc0e02e19ddf949a514b627063fbad95a8a3ebf8b80a11cdfbf57abbb6764" },
+    { "path": "docs/provenance/october-calibration-20261019/authority-753-inventory.json", "bytes": 3655, "sha256": "c0b9f9ea1845dc83603e8281cfe1372dcef28439e88a0c3b51369c1079ec9cc2" },
+    { "path": "docs/provenance/october-calibration-20261019/authority-754-initial-review.json", "bytes": 14482, "sha256": "821d16d87cd14c2c97beeb52a3a106393a21cb9504b66bfa6821d5c5153e97fb" },
+    { "path": "docs/40_reports/CALIBRATION_MASTER.md", "bytes": 1273897, "sha256": "03cd410432d975b0431c1ddce316a316229b9c0c9011ee4b22f9ef2b0f8589e2" },
+    { "path": "docs/plans/COMMAND_BOARD.md", "bytes": 19987, "sha256": "18bedd5918bc5f836221251f112c5958c716c7d7e5c62403575048bcb9e5b238" },
+    { "path": "docs/plans/MASTER_ROADMAP.md", "bytes": 58617, "sha256": "7f72049554660b92997b5deb6aa9cc2108c8ed13eeb02fe876ec9d0056ccb592" },
+    { "path": "docs/PROJECT_LEDGER.md", "bytes": 1167550, "sha256": "a5e683d6859b4d53012c35b8e84b1b9e562e79b6a08239df9b85906237b27ce4" },
+    { "path": "docs/provenance/october-calibration-20261019/README.md", "bytes": 10121, "sha256": "14e5dcbfe39b06839763e741cf169799aeb5aa3c5e131a71ae3412bc70bfc791" },
+    { "path": "logs/claude-channel-20261004/754-targeted-verification.md", "bytes": 2195, "sha256": "56c9cee20cda164f344078ff1049a1f5a31380e63bdc43046faa20834ac0b358" }
+  ],
+  "findings": []
+}

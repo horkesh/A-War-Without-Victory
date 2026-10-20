@@ -64,3 +64,10 @@ The triage-745 inventory/closed receipt preserve the original synthesis identity
 Prisoje turn185 reconstructed on an exact n80 save184 clone: T3 admits ABB Bravnice transit; late march correction first deletes it after scope rebuild; following bot ordering queues Jajce_3. Independent750 targeted review passes. No gameplay fix or gain is claimed; retained703/712 and thresholds preserved. All telemetry retained, including C+5181 bytes. No campaign/full suite.
 
 The prisoje-749 result/inventory/closed receipt and initial/final750 reviews record the corrected claim. Original749 closed evidence remains available and its premise correction is explicit. Exact raw phase probes, fixture before-images and all telemetry stay local. C grew to100102520bytes; all5181newbytes and the originalprefix are archived. The false-zero helper and failed unchanged-C gate are retained, not counted as successful preservation evidence. Fullcampaign neutrality, gain and a gameplay fix remain unmeasured.
+
+
+## Prisoje scope and operation authority — 2026-10-20
+
+Prisoje cause established: stale Bravnice intent starts under T3 stale/unrestricted scope, then T6 correctly cancels it under rebuilt scope. Loan ownership is correct; Bravnice was already an obsolete Mistral objective, while Jajce_3 is an authorized Lupnica approach. Recommend only a narrowly guarded pre-T3 stale-order reconciliation design; no gameplay fix implemented. Retained703/712 and thresholds preserved; all telemetry retained.
+
+The authority-755 reviewed result supersedes unqualified writer/count/design wording in the original753 diagnosis, whose closed receipt and inventory preserve its identity. Initial754 and targeted754 reviews record accepted facts and candidate limits. C is now100107701bytes with all5181newbytes retained; raw prefix observations and telemetry archives remain local. No test, gameplay fix or new campaign belongs to this diagnosis.

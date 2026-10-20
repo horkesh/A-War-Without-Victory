@@ -1,0 +1,84 @@
+{
+  "schema": "awwv.755.reviewed-prisoje-authority-diagnosis.v1",
+  "writes_closed": true,
+  "verdict": "DIAGNOSIS_ESTABLISHED__NARROW_CANDIDATE_REQUIRES_IMPLEMENTATION_DESIGN_AND_TESTS",
+  "scope": {
+    "diagnosis_only": true,
+    "production_edits": 0,
+    "tests": 0,
+    "campaigns": 0,
+    "full_runTurn": 0,
+    "turn186": 0,
+    "root_documentation_closeout": true
+  },
+  "inputs": {
+    "source": {
+      "path": "logs/claude-channel-20261004/753-authority-seal-a/result.json",
+      "sha256": "54796c0cb94abd08dd450c7376c6fc33e114137520e6ce65868ed1009174c880"
+    },
+    "review": {
+      "path": "logs/claude-channel-20261004/754-independent-review.json",
+      "sha256": "821d16d87cd14c2c97beeb52a3a106393a21cb9504b66bfa6821d5c5153e97fb"
+    }
+  },
+  "measured_facts": [
+    "Save184 persists empty corps_front_sectors plus ABB stale assignment; T3 therefore does not enforce a routine footprint and admits Bravnice transit.",
+    "At T6 the rebuilt assigned subsegment restricts ABB to Bosansko Grahovo2, Maleševci and Prekaja2. Bravnice is outside that scope and both operation and reassignment authorization are false, so correctTransitStates deletes the transit.",
+    "The receiving corps hvo_tomislavgrad correctly owns ABB sector placement and operation lookup; home hvo_main_staff owns reassignment lookup and T3 path allowed-set derivation.",
+    "ABB is a valid participant of the unique relevant Mistral operation/axis. Its current objective stays Lupnica at index8. Bravnice is already a completed prior objective at index5, not current approach or staging.",
+    "The authorized set is Jajce_3 and Livno_2: Jajce_3 is a current Lupnica approach; Livno_2 is staging, not an interchangeable automatic replacement.",
+    "Receiving-corps active_operations hash change includes removal of the completed Southern Move Preparation Probe. It does not establish a Mistral authority mutation; Mistral roster/index/authorization stay unchanged. Other surviving Southern Move fields were not fully diffed.",
+    "Following bot ordering queues Jajce_3. The earlier emitter of the stale Bravnice order remains unmeasured."
+  ],
+  "source_supported_inference": {
+    "scope_writer": "partition-corps-front-sectors rebuild plus assign-brigades-to-subsegments restores the restrictive assignment before T6; the assignment writer is supported by source/phase order, not a separately captured phase-state mutation.",
+    "sector_count": "No numeric rebuilt-sector count is claimed; review did not find a sealed pin for 54."
+  },
+  "candidate_not_implemented": {
+    "question": "Narrowly reconcile a proven stale pending operation march before T3 consumption, preserving all movement guards.",
+    "conditions": [
+      "Require the same unique eligible operation and actor axis under the effective receiving corps, with valid loan/participant membership.",
+      "Require queued destination is a completed earlier objective of that same axis and is no longer authorized as its current approach or staging; bot_discretionary alone does not prove operation producer ownership.",
+      "Exclude authorized operation orders, valid routine orders, staging, retreat, corps reassignment, recovery/completed or ambiguous operations and unrelated bot intent. Stale/unrestricted scope alone is not permission to retarget.",
+      "Use the existing current-objective approach derivation and deterministic nearest-friendly selection. Never select an arbitrary member of the combined approach/staging authorized set or silently send the brigade to Livno.",
+      "Retain existing path/connectivity, political, scope, operation ownership and threshold guards. Leave invalid/no-approach cases to existing rejection; do not reorder phases or bypass T6."
+    ],
+    "specific_expected_case": "Only after those predicates are proved, Bravnice may reconcile to Jajce_3 before pathfinding/transit creation. No implementation or calibration benefit is established."
+  },
+  "limits": [
+    "No earlier Bravnice producer measured.",
+    "No gameplay fix, new campaign, gain, full-campaign neutrality or turn186 causality proved.",
+    "Candidate requires bounded implementation design and positive/negative tests before adoption."
+  ],
+  "evidence": {
+    "attempt": "logs/claude-channel-20261004/753-authority-probe-a",
+    "probe": {
+      "bytes": 253261,
+      "sha256": "bb180a407ab6ff8dce4ff7bca360eaa108068202f191759d1c49934b7084512a"
+    },
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false
+  },
+  "preservation": {
+    "C_before": {
+      "bytes": 100102520,
+      "sha256": "5b225eededbb39e6a08fd0231dc1e5ff14a6c1a401b292c684f91419c2c3adf3"
+    },
+    "C_after": {
+      "bytes": 100107701,
+      "sha256": "8d242e18f199a54c26f755e648fe4612159563ec0b606930112653770d725f3c"
+    },
+    "C_prefix_preserved": true,
+    "C_append_bytes_retained": 5181,
+    "D_unchanged": {
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    "protected_3_exact": true,
+    "native_31_exact": true,
+    "receipt_files_recursive_count": 179,
+    "git_status_clean": true,
+    "restore_truncate_delete": false
+  }
+}
