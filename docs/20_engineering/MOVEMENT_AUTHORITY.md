@@ -116,6 +116,8 @@ held forever — leaving requires an authorized order or a combat consequence.
 
 ## 3a. Stale operation order reconciliation (2026-10-20)
 
+**Candidate calibration rejected:** n81 measures689/712 versus n80 703/712, with14 previously correct October cells lost. The implementation below remains preserved source for diagnosis; focused fixtures are not campaign acceptance. See CALIBRATION_MASTER760–763.
+
 Immediately before T3 column consumption, the command-owner prepass may replace a pending bot-discretionary column destination only when existing state proves a completed earlier objective of the same unique operation and axis. It inventories participant or axis memberships across every command and phase; exactly one live planning/execution membership hosted by the effective valid loan/home corps is required. Recovery/completed, overlapping, foreign-host-only, nonparticipant, reserve and active-transit cases stay unchanged. The earlier objective must be unique, covered by the axis capture prefix and friendly-held. Valid routine, current operation/staging and reassignment orders retain precedence.
 
 The replacement comes only from the current objective approach and existing deterministic nearest friendly-path selection, with operation authorization rechecked. No staging fallback or new strategic intent is created. Existing T3 route/scope/political/ownership checks and T6 invalid-transit repair remain in force. This adds neither a phase reorder nor state/save fields. Focused ownership and registered-phase proof: `tests/stale_operation_march_reconciliation.test.ts` and `tests/mistral_prisoje_turn_order.test.ts`. Full-campaign neutrality and calibration gains remain separately measured gates.

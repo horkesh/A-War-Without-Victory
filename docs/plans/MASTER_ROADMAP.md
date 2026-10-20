@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-20 — pre-T3 stale-march reconciliation focused/reviewed; retained703/712.
+**Last updated:** 2026-10-20 — n81 pre-T3 regression rejected; retainedn80 703/712.
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -24,12 +24,13 @@ tradeoffs or irreversible/external actions with concrete options and a
 recommendation. Required evidence, review panels and cost-control gates remain.
 
 **Current R6 — October Sana remains NO-GO.** Retained n80 is **703/712**, unadopted.
-Pre-T3 reconciliation now redirects proved completed prior-objective marches to the same
-unique operation/axis current approach. State-wide ownership, valid orders, movement guards
-and thresholds are preserved. Focused29/29, noEmit0 and independent targeted review PASS.
-No new campaign or full suite; changed-engine calibration impact and zero-loss remain
-UNMEASURED. All telemetry survives. Required qualifying gates, other six-cell findings
-and every inherited unmet gate remain in the
+The single n81 pre-T3 reconciliation regression fails **689/712**,14formerly-correct
+October losses,0gains and4anchor failures. Earlier scores706/704/703 also regress.
+ABB does not reach Prisoje; bot187 queues Bosansko Grahovo and transit starts188.
+Candidate rejected; source/evidence retained unchanged, no retry/fullsuite/adoption.
+All telemetry retained (C+946671bytes); thresholds unchanged. Next bounded question
+is the retained early divergence, beginning with Prača. No new campaign approved.
+Every inherited unmet gate remains in the
 [calibration authority](../40_reports/CALIBRATION_MASTER.md).
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate

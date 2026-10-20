@@ -1,0 +1,107 @@
+{
+  "schema": "awwv.762.independent-review.v1",
+  "captured_utc": "2026-10-20T19:53:00Z",
+  "writes_closed": true,
+  "verdict": "PASS_FAILED_RUN_REJECTION",
+  "review_scope": "Independent read-only review of the single n81 188-week regression rejection against retained n80; this is not a gameplay GO or baseline-adoption approval.",
+  "subject": {
+    "head": "078132c9052c58cbcadab1d9a3cdf183571a2cfd",
+    "baseline": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80",
+    "candidate": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n81",
+    "result_sha256": "f81f2464c5f7055c7f0548ccb441972d1bf8a935aafbc36672e106d12af2ce70",
+    "inventory_sha256": "ec0ac3516faceacfa2953b30366be8f9b5628cb3d32dcdd4bebcbbb60e536ef5",
+    "closed_receipt_sha256": "6a29cb278435f24f1e454f8e01bf8f9ba72ecdb9c37940a5d4e1974ca81b98b3"
+  },
+  "findings": [],
+  "evidence": {
+    "readiness": {
+      "authoritative_attempt": "logs/claude-channel-20261004/761-readiness-b",
+      "pass": true,
+      "head_and_clean_state_pinned": true,
+      "node": "v22.23.2",
+      "baseline_native_count": 31,
+      "baseline_weekly_rows": 188,
+      "baseline_initial_controllers": 712,
+      "consumed_inputs": 32,
+      "consumed_inputs_ordered_and_matching": true,
+      "active_campaigns": 0,
+      "source_helper_threshold_reference_pins_exact": true
+    },
+    "runner": {
+      "invocations": 1,
+      "retries": 0,
+      "exact_authorized_argv": true,
+      "actual_stdout_derived_run_dir": true,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "elapsed_seconds": 381.157,
+      "native_count": 31
+    },
+    "checkpoint_accounting": [
+      {"turn": 39, "reference_count": 712, "score": 706, "floor": 707, "gross_lost": 1, "gross_gained": 0, "pass": false},
+      {"turn": 104, "reference_count": 712, "score": 704, "floor": 707, "gross_lost": 3, "gross_gained": 0, "pass": false},
+      {"turn": 156, "reference_count": 712, "score": 703, "floor": 706, "gross_lost": 4, "gross_gained": 1, "pass": false},
+      {"turn": 188, "reference_count": 712, "score": 689, "floor": 703, "gross_lost": 14, "gross_gained": 0, "pass": false}
+    ],
+    "anchor_failures": [
+      "op:bosanski_novi:matavazi_2",
+      "op:mrkonjic_grad:podrasnica_2",
+      "op:mrkonjic_grad:mrkonjic_grad_2",
+      "op:mrkonjic_grad:baljvine_2"
+    ],
+    "failure_handling": {
+      "checkpoint_evaluation_exit": 2,
+      "acceptance_stopped_after_failure": true,
+      "timeline_checkpoint_cli_consistency_health_protected_producer": "UNREACHED_AFTER_CHECKPOINT_FAILURE",
+      "consumer": "UNMEASURED_NOT_RUN",
+      "fingerprint": "UNMEASURED_NOT_RUN",
+      "full_suite": "NOT_AUTHORIZED_NOT_RUN__MANDATORY_BEFORE_ACCEPTANCE"
+    },
+    "trace": {
+      "named_phase_coverage_weeks": "179-188",
+      "coverage_complete": true,
+      "earliest_retained_actor_and_operation_projection_divergence_turn": 104,
+      "direct_helper_writer_measured": false,
+      "causal_counterfactual_proved": false,
+      "weeks_178_186_candidate_abb_order_or_transit": false,
+      "week_187_bot_order_destination": "op:bosansko_grahovo:bosansko_grahovo_2",
+      "week_188_physical_origin": "op:bosansko_grahovo:malesevci",
+      "week_188_status": "in_transit",
+      "week_188_turns_remaining": 1,
+      "prisoje_control_events": 0,
+      "prisoje_engagements": 0,
+      "observation_semantics_accurate": true
+    },
+    "preservation": {
+      "capture_pass": true,
+      "c_before_bytes": 100107701,
+      "c_after_bytes": 101054372,
+      "c_appended_bytes": 946671,
+      "c_opening_prefix_exact": true,
+      "d_before_after_bytes": 1041,
+      "d_unchanged": true,
+      "full_archives_retained": true,
+      "no_restore_truncate_delete": true
+    },
+    "inventory_verification": {
+      "declared_count": 72,
+      "actual_rows": 72,
+      "missing": 0,
+      "size_mismatches": 0,
+      "sha256_mismatches": 0
+    }
+  },
+  "pins": [
+    "The n81 candidate is rejected and unadopted; retained n80 remains authoritative at 703/712.",
+    "Passing this review validates the failed-run rejection and evidence handling only.",
+    "No downstream acceptance gate is promoted by this review.",
+    "All inherited unmet criteria remain unmet, including n42 observational GO only, Farz second OR third, and 122 startup STOP."
+  ],
+  "limits": [
+    "The trace observes named phase entry/exit snapshots, not the actual helper writer.",
+    "The retained turn-104 divergence is an earliest available snapshot divergence, not proof of first causal divergence.",
+    "Formation location is physical origin while transit progress is represented separately.",
+    "No consumer/fingerprint gate, full suite, replay, retry, or additional campaign was run."
+  ]
+}

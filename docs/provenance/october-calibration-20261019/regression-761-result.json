@@ -1,0 +1,1185 @@
+{
+  "schema": "awwv.761.one188-regression-result.v1",
+  "captured_utc": "2026-10-20T19:51:03.480Z",
+  "writes_closed": true,
+  "verdict": "FAIL_REJECTED__CHECKPOINT_FLOORS_AND_ZERO_LOSS_GATE_FAILED__NO_RETRY",
+  "campaign": {
+    "baseline": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80",
+    "candidate": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n81",
+    "actual_stdout_derived_run_dir": true,
+    "start_utc": "2026-10-20T19:41:59.632Z",
+    "end_utc": "2026-10-20T19:48:20.789Z",
+    "argv": [
+      "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+      "node_modules/tsx/dist/cli.mjs",
+      "tools/scenario_runner/run_scenario_with_preflight.ts",
+      "--scenario",
+      "data/scenarios/apr1992_definitive_188w.json",
+      "--weeks",
+      "188",
+      "--out",
+      "runs",
+      "--unique",
+      "--save-weeks",
+      "39,104,111,112,113,156,178,179,180,181,182,183,184,185,186,187"
+    ],
+    "timeout_ms": 600000,
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false,
+    "native_count": 31,
+    "final_state_hash": "a8fee534fb0089f5"
+  },
+  "acceptance": {
+    "pass": false,
+    "failures": [
+      "checkpoint floor/loss",
+      "anchors"
+    ],
+    "initial": {
+      "controller_count": 712,
+      "control_equal": true,
+      "raw_equal": true
+    },
+    "provenance": {
+      "count": 32,
+      "ordered": true,
+      "all_match": true,
+      "exact_baseline": true,
+      "digest": "7986f05230e1d526e1794673e796dcb77730501d4958e435970c4ec806cc8039",
+      "rows": [
+        {
+          "path": "data/derived/census_rolled_up_wgs84.json",
+          "recorded": "6653e75d9dd695bc2b676b1a49635bd51eecf228ec8c58b37ed1ecb773f1e3b2",
+          "current": "6653e75d9dd695bc2b676b1a49635bd51eecf228ec8c58b37ed1ecb773f1e3b2",
+          "match": true
+        },
+        {
+          "path": "data/derived/municipality_hq_settlement.json",
+          "recorded": "7ff0af467f4b1fedbe7e2515fc9ca96dde9f3c825724c0bf6333653a08a1801b",
+          "current": "7ff0af467f4b1fedbe7e2515fc9ca96dde9f3c825724c0bf6333653a08a1801b",
+          "match": true
+        },
+        {
+          "path": "data/derived/municipality_political_controllers_1990.json",
+          "recorded": "5fb60e0d3b7ec22da487c720c5256a58c3c8a95c2114c3ecaa2d13ed8cccfdd4",
+          "current": "5fb60e0d3b7ec22da487c720c5256a58c3c8a95c2114c3ecaa2d13ed8cccfdd4",
+          "match": true
+        },
+        {
+          "path": "data/derived/municipality_population_1991.json",
+          "recorded": "b475f88f15b130a626d1699f9d3064a2e64c70e816b67b608d734b10763a7c7b",
+          "current": "b475f88f15b130a626d1699f9d3064a2e64c70e816b67b608d734b10763a7c7b",
+          "match": true
+        },
+        {
+          "path": "data/derived/operational/operational_contact_graph.json",
+          "recorded": "f7f9aaeea51710fda376234d79945b51dfea31a16ebca948ffd8dc54f3ce0c46",
+          "current": "f7f9aaeea51710fda376234d79945b51dfea31a16ebca948ffd8dc54f3ce0c46",
+          "match": true
+        },
+        {
+          "path": "data/derived/operational/operational_political_control.json",
+          "recorded": "309af26381cb36126f5c80b2327035865b4ac9c467cda66211f35516949a0a3d",
+          "current": "309af26381cb36126f5c80b2327035865b4ac9c467cda66211f35516949a0a3d",
+          "match": true
+        },
+        {
+          "path": "data/derived/operational/operational_settlements.geojson",
+          "recorded": "c03cc9ce4286b779139ce460e5f515d67415fe633e4ed2dbda1764b9440338c8",
+          "current": "c03cc9ce4286b779139ce460e5f515d67415fe633e4ed2dbda1764b9440338c8",
+          "match": true
+        },
+        {
+          "path": "data/derived/settlement_edges.json",
+          "recorded": "69073545ddac46395019b63295cd0de3a79920771b417178eb06cc38aa9a7cb7",
+          "current": "69073545ddac46395019b63295cd0de3a79920771b417178eb06cc38aa9a7cb7",
+          "match": true
+        },
+        {
+          "path": "data/derived/settlement_ethnicity_data.json",
+          "recorded": "ca1e986d7f1c5e6662c7629a6f970441d1fb5474a48271bb0626194455674104",
+          "current": "ca1e986d7f1c5e6662c7629a6f970441d1fb5474a48271bb0626194455674104",
+          "match": true
+        },
+        {
+          "path": "data/scenarios/apr1992_definitive_188w.json",
+          "recorded": "4257b039f5b1dbb7f21d940ec656b2d0b787856f27e7c26b6f3f57f256d82ecf",
+          "current": "4257b039f5b1dbb7f21d940ec656b2d0b787856f27e7c26b6f3f57f256d82ecf",
+          "match": true
+        },
+        {
+          "path": "data/scenarios/events/consequences.json",
+          "recorded": "17ee0a0aaaf9162e550db85081a513c4b764ee042a50a0f663198de884300b0b",
+          "current": "17ee0a0aaaf9162e550db85081a513c4b764ee042a50a0f663198de884300b0b",
+          "match": true
+        },
+        {
+          "path": "data/scenarios/events/war_1992.json",
+          "recorded": "7596df56b934be4334ab8bffe51cf92f439c1fec238d6b82c21e68f25c61162a",
+          "current": "7596df56b934be4334ab8bffe51cf92f439c1fec238d6b82c21e68f25c61162a",
+          "match": true
+        },
+        {
+          "path": "data/scenarios/events/war_1992_hrhb_summer.json",
+          "recorded": "de9bfc484847caa911d6921424b80ddcf8754219fffc016bdd346f80028d99e2",
+          "current": "de9bfc484847caa911d6921424b80ddcf8754219fffc016bdd346f80028d99e2",
+          "match": true
+        },
+        {
+          "path": "data/scenarios/events/war_1993.json",
+          "recorded": "d31a781fc2479546a217f8cc82f958783c283345a1e1122c68d7b9dfd1bc46d2",
+          "current": "d31a781fc2479546a217f8cc82f958783c283345a1e1122c68d7b9dfd1bc46d2",
+          "match": true
+        },
+        {
+          "path": "data/scenarios/events/war_1994.json",
+          "recorded": "aef6d5321f41224953c311b2194ac71eb8b42e6e63c3a501fdacd79d1ce29449",
+          "current": "aef6d5321f41224953c311b2194ac71eb8b42e6e63c3a501fdacd79d1ce29449",
+          "match": true
+        },
+        {
+          "path": "data/scenarios/events/war_1995.json",
+          "recorded": "b16b52e0a25c4312c2dc146e824c46fe3b5d8b567907d443304bb8dbb4958dc4",
+          "current": "b16b52e0a25c4312c2dc146e824c46fe3b5d8b567907d443304bb8dbb4958dc4",
+          "match": true
+        },
+        {
+          "path": "data/scenarios/initial_formations/initial_formations_apr1992.json",
+          "recorded": "37832ee7aad72e8a99aaf21ec66d92d0161477902e8db42bf1579d77314008f4",
+          "current": "37832ee7aad72e8a99aaf21ec66d92d0161477902e8db42bf1579d77314008f4",
+          "match": true
+        },
+        {
+          "path": "data/scenarios/officers/apr1992_officers.json",
+          "recorded": "1a4565169fc90b119da7bd5624587078a42b935dd16d241ecb93b8e0a29524d0",
+          "current": "1a4565169fc90b119da7bd5624587078a42b935dd16d241ecb93b8e0a29524d0",
+          "match": true
+        },
+        {
+          "path": "data/scenarios/political_leader_data.json",
+          "recorded": "6affed383f92f9786fa112c1fedc2b6a9c4dc5193c750c822c1ccf114b643474",
+          "current": "6affed383f92f9786fa112c1fedc2b6a9c4dc5193c750c822c1ccf114b643474",
+          "match": true
+        },
+        {
+          "path": "data/scenarios/presidential_initiatives/apr1992.json",
+          "recorded": "f26279f708514b5b237ba71f915d43131db2663660de44d27b23684f5f415cfb",
+          "current": "f26279f708514b5b237ba71f915d43131db2663660de44d27b23684f5f415cfb",
+          "match": true
+        },
+        {
+          "path": "data/scenarios/timelines/apr1992.json",
+          "recorded": "3674a0cfc0c2062a0c0a5390a53cdfe2a7704628199ce60d9ff7148c55699a9d",
+          "current": "3674a0cfc0c2062a0c0a5390a53cdfe2a7704628199ce60d9ff7148c55699a9d",
+          "match": true
+        },
+        {
+          "path": "data/source/calibration/painted_control_apr1994.json",
+          "recorded": "24f6e8923afa6a5ceaf7e4148cd119f2952f48c99544b5e50e994836dc863dba",
+          "current": "24f6e8923afa6a5ceaf7e4148cd119f2952f48c99544b5e50e994836dc863dba",
+          "match": true
+        },
+        {
+          "path": "data/source/calibration/painted_control_apr1995.json",
+          "recorded": "59f05f4919e8e4b6cfd81fe63958a9cd07406acbdb4aa8a4edd1a14596cba44d",
+          "current": "59f05f4919e8e4b6cfd81fe63958a9cd07406acbdb4aa8a4edd1a14596cba44d",
+          "match": true
+        },
+        {
+          "path": "data/source/calibration/painted_control_jan1993.json",
+          "recorded": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7",
+          "current": "6a64300a599aa0b75833d5232bf9f08a1ab97085746337e622d54fb1a4a0ddc7",
+          "match": true
+        },
+        {
+          "path": "data/source/calibration/painted_control_oct1995.json",
+          "recorded": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+          "current": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+          "match": true
+        },
+        {
+          "path": "data/source/formation_lifecycle_events.json",
+          "recorded": "f70b3f5b48196eedda02602b2a454dbfba83e2d3de7147854143e0b75247f90b",
+          "current": "f70b3f5b48196eedda02602b2a454dbfba83e2d3de7147854143e0b75247f90b",
+          "match": true
+        },
+        {
+          "path": "data/source/municipalities_1990_initial_political_controllers_apr1992.json",
+          "recorded": "dcbf9ec5a73a0d8b86588851e5ca7a83fab7f37aa9f1513e27eebb11b5802f6d",
+          "current": "dcbf9ec5a73a0d8b86588851e5ca7a83fab7f37aa9f1513e27eebb11b5802f6d",
+          "match": true
+        },
+        {
+          "path": "data/source/municipalities_1990_registry_110.json",
+          "recorded": "8ede3d014b0b8694021b79e77e58f07266f647682b23fcd2a793417f16d433cc",
+          "current": "8ede3d014b0b8694021b79e77e58f07266f647682b23fcd2a793417f16d433cc",
+          "match": true
+        },
+        {
+          "path": "data/source/oob_brigades.json",
+          "recorded": "e01b58c71b0d51daadf1796ba21a02d0cca04509add1ef706f3b8a350f7c513d",
+          "current": "e01b58c71b0d51daadf1796ba21a02d0cca04509add1ef706f3b8a350f7c513d",
+          "match": true
+        },
+        {
+          "path": "data/source/oob_corps.json",
+          "recorded": "bce056408d0b7fcaeda20c3f847c4cc36f054ae2355d740708c83f139d76149c",
+          "current": "bce056408d0b7fcaeda20c3f847c4cc36f054ae2355d740708c83f139d76149c",
+          "match": true
+        },
+        {
+          "path": "data/source/settlement_political_controllers_overrides.json",
+          "recorded": "0eb42921290f1812adc5fc4a008113483840d7d2ab2e2d382ea7582ca4659a33",
+          "current": "0eb42921290f1812adc5fc4a008113483840d7d2ab2e2d382ea7582ca4659a33",
+          "match": true
+        },
+        {
+          "path": "data/source/settlements_initial_master.json",
+          "recorded": "0a4fa946436ed525e38d94df0d3afe98ad2cfdd1e0f26f4cad2ae32bc894535d",
+          "current": "0a4fa946436ed525e38d94df0d3afe98ad2cfdd1e0f26f4cad2ae32bc894535d",
+          "match": true
+        }
+      ]
+    },
+    "checkpoints": [
+      {
+        "label": "jan1993",
+        "turn": 39,
+        "reference_count": 712,
+        "score": 706,
+        "floor": 707,
+        "gross_formerly_correct_lost": 1,
+        "lost": [
+          {
+            "id": "op:pale:praca",
+            "baseline": "RS",
+            "candidate": "RBiH",
+            "reference": "RS"
+          }
+        ],
+        "gross_gained": 0,
+        "gained": [],
+        "pass": false
+      },
+      {
+        "label": "apr1994",
+        "turn": 104,
+        "reference_count": 712,
+        "score": 704,
+        "floor": 707,
+        "gross_formerly_correct_lost": 3,
+        "lost": [
+          {
+            "id": "op:pale:podgrab",
+            "baseline": "RS",
+            "candidate": "RBiH",
+            "reference": "RS"
+          },
+          {
+            "id": "op:pale:praca",
+            "baseline": "RS",
+            "candidate": "RBiH",
+            "reference": "RS"
+          },
+          {
+            "id": "op:prozor:paros",
+            "baseline": "HRHB",
+            "candidate": "RBiH",
+            "reference": "HRHB"
+          }
+        ],
+        "gross_gained": 0,
+        "gained": [],
+        "pass": false
+      },
+      {
+        "label": "apr1995",
+        "turn": 156,
+        "reference_count": 712,
+        "score": 703,
+        "floor": 706,
+        "gross_formerly_correct_lost": 4,
+        "lost": [
+          {
+            "id": "op:pale:podgrab",
+            "baseline": "RS",
+            "candidate": "RBiH",
+            "reference": "RS"
+          },
+          {
+            "id": "op:pale:praca",
+            "baseline": "RS",
+            "candidate": "RBiH",
+            "reference": "RS"
+          },
+          {
+            "id": "op:prozor:paros",
+            "baseline": "HRHB",
+            "candidate": "RBiH",
+            "reference": "HRHB"
+          },
+          {
+            "id": "op:travnik:gornje_krcevine",
+            "baseline": "RBiH",
+            "candidate": "RS",
+            "reference": "RBiH"
+          }
+        ],
+        "gross_gained": 1,
+        "gained": [
+          {
+            "id": "op:glamoc:vidimlije_2",
+            "baseline": "HRHB",
+            "candidate": "RS",
+            "reference": "RS"
+          }
+        ],
+        "pass": false
+      },
+      {
+        "label": "oct1995",
+        "turn": 188,
+        "reference_count": 712,
+        "score": 689,
+        "floor": 703,
+        "gross_formerly_correct_lost": 14,
+        "lost": [
+          {
+            "id": "op:bosanski_novi:matavazi_2",
+            "baseline": "RBiH",
+            "candidate": "RS",
+            "reference": "RBiH"
+          },
+          {
+            "id": "op:jajce:jezero_2",
+            "baseline": "HRHB",
+            "candidate": "RS",
+            "reference": "HRHB"
+          },
+          {
+            "id": "op:mrkonjic_grad:baljvine_2",
+            "baseline": "HRHB",
+            "candidate": "RS",
+            "reference": "HRHB"
+          },
+          {
+            "id": "op:mrkonjic_grad:mrkonjic_grad_2",
+            "baseline": "HRHB",
+            "candidate": "RS",
+            "reference": "HRHB"
+          },
+          {
+            "id": "op:mrkonjic_grad:podrasnica_2",
+            "baseline": "HRHB",
+            "candidate": "RS",
+            "reference": "HRHB"
+          },
+          {
+            "id": "op:pale:podgrab",
+            "baseline": "RS",
+            "candidate": "RBiH",
+            "reference": "RS"
+          },
+          {
+            "id": "op:pale:praca",
+            "baseline": "RS",
+            "candidate": "RBiH",
+            "reference": "RS"
+          },
+          {
+            "id": "op:prozor:paros",
+            "baseline": "HRHB",
+            "candidate": "RBiH",
+            "reference": "HRHB"
+          },
+          {
+            "id": "op:sanski_most:sanski_most_2",
+            "baseline": "RBiH",
+            "candidate": "RS",
+            "reference": "RBiH"
+          },
+          {
+            "id": "op:sanski_most:stari_majdan",
+            "baseline": "RBiH",
+            "candidate": "RS",
+            "reference": "RBiH"
+          },
+          {
+            "id": "op:titov_drvar:drvar_2",
+            "baseline": "HRHB",
+            "candidate": "RS",
+            "reference": "HRHB"
+          },
+          {
+            "id": "op:titov_drvar:sipovljani_2",
+            "baseline": "HRHB",
+            "candidate": "RS",
+            "reference": "HRHB"
+          },
+          {
+            "id": "op:travnik:gornje_krcevine",
+            "baseline": "RBiH",
+            "candidate": "RS",
+            "reference": "RBiH"
+          },
+          {
+            "id": "op:travnik:varosluk",
+            "baseline": "RBiH",
+            "candidate": "RS",
+            "reference": "RBiH"
+          }
+        ],
+        "gross_gained": 0,
+        "gained": [],
+        "pass": false
+      }
+    ],
+    "anchor_failures": [
+      {
+        "id": "op:bosanski_novi:matavazi_2",
+        "expected": "RBiH",
+        "actual": "RS",
+        "pass": false
+      },
+      {
+        "id": "op:mrkonjic_grad:podrasnica_2",
+        "expected": "HRHB",
+        "actual": "RS",
+        "pass": false
+      },
+      {
+        "id": "op:mrkonjic_grad:mrkonjic_grad_2",
+        "expected": "HRHB",
+        "actual": "RS",
+        "pass": false
+      },
+      {
+        "id": "op:mrkonjic_grad:baljvine_2",
+        "expected": "HRHB",
+        "actual": "RS",
+        "pass": false
+      }
+    ],
+    "raw_artifact_difference_count": 29
+  },
+  "gates": {
+    "stop_after_first_acceptance_failure": true,
+    "checkpoint_evaluation_exit": 2,
+    "timeline": "UNREACHED_AFTER_CHECKPOINT_FAILURE",
+    "checkpoint_cli": "UNREACHED_AFTER_CHECKPOINT_FAILURE",
+    "consistency": "UNREACHED_AFTER_CHECKPOINT_FAILURE",
+    "health": "UNREACHED_AFTER_CHECKPOINT_FAILURE",
+    "protected": "UNREACHED_AFTER_CHECKPOINT_FAILURE",
+    "producer": "UNREACHED_AFTER_CHECKPOINT_FAILURE",
+    "consumer": "UNMEASURED_NOT_RUN",
+    "fingerprint": "UNMEASURED_NOT_RUN",
+    "full_suite": "NOT_AUTHORIZED_NOT_RUN__MANDATORY_BEFORE_ACCEPTANCE"
+  },
+  "abb_trace": {
+    "coverage": [
+      {
+        "week_index": 179,
+        "topic": "movement_phase",
+        "selector_configured": true,
+        "requested": [
+          "hvo_1st_guard_abb"
+        ],
+        "manifest_count": 190,
+        "receipt_count": 190,
+        "terminal_count": 1
+      },
+      {
+        "week_index": 180,
+        "topic": "movement_phase",
+        "selector_configured": true,
+        "requested": [
+          "hvo_1st_guard_abb"
+        ],
+        "manifest_count": 190,
+        "receipt_count": 190,
+        "terminal_count": 1
+      },
+      {
+        "week_index": 181,
+        "topic": "movement_phase",
+        "selector_configured": true,
+        "requested": [
+          "hvo_1st_guard_abb"
+        ],
+        "manifest_count": 190,
+        "receipt_count": 190,
+        "terminal_count": 1
+      },
+      {
+        "week_index": 182,
+        "topic": "movement_phase",
+        "selector_configured": true,
+        "requested": [
+          "hvo_1st_guard_abb"
+        ],
+        "manifest_count": 190,
+        "receipt_count": 190,
+        "terminal_count": 1
+      },
+      {
+        "week_index": 183,
+        "topic": "movement_phase",
+        "selector_configured": true,
+        "requested": [
+          "hvo_1st_guard_abb"
+        ],
+        "manifest_count": 190,
+        "receipt_count": 190,
+        "terminal_count": 1
+      },
+      {
+        "week_index": 184,
+        "topic": "movement_phase",
+        "selector_configured": true,
+        "requested": [
+          "hvo_1st_guard_abb"
+        ],
+        "manifest_count": 190,
+        "receipt_count": 190,
+        "terminal_count": 1
+      },
+      {
+        "week_index": 185,
+        "topic": "movement_phase",
+        "selector_configured": true,
+        "requested": [
+          "hvo_1st_guard_abb"
+        ],
+        "manifest_count": 190,
+        "receipt_count": 190,
+        "terminal_count": 1
+      },
+      {
+        "week_index": 186,
+        "topic": "movement_phase",
+        "selector_configured": true,
+        "requested": [
+          "hvo_1st_guard_abb"
+        ],
+        "manifest_count": 190,
+        "receipt_count": 190,
+        "terminal_count": 1
+      },
+      {
+        "week_index": 187,
+        "topic": "movement_phase",
+        "selector_configured": true,
+        "requested": [
+          "hvo_1st_guard_abb"
+        ],
+        "manifest_count": 190,
+        "receipt_count": 190,
+        "terminal_count": 1
+      },
+      {
+        "week_index": 188,
+        "topic": "movement_phase",
+        "selector_configured": true,
+        "requested": [
+          "hvo_1st_guard_abb"
+        ],
+        "manifest_count": 190,
+        "receipt_count": 190,
+        "terminal_count": 1
+      }
+    ],
+    "earliest_retained_divergence": {
+      "turn": 104,
+      "actor_equal": false,
+      "operations_equal": false,
+      "prisoje_control_equal": true,
+      "baseline": {
+        "actor": {
+          "formation": {
+            "presence": "present",
+            "value": {
+              "activation_gated": false,
+              "activation_turn": 83,
+              "assigned_sub_segment_id": "subseg:sector:hvo_tomislavgrad:0:0",
+              "assignment": {
+                "kind": "sector",
+                "role": "front",
+                "sector_id": "sector:hvo_tomislavgrad:0"
+              },
+              "base_osid": "op:livno:livno_2",
+              "brigade_history": {
+                "battles_as_attacker": 0,
+                "battles_as_defender": 0,
+                "battles_fought": 0,
+                "current_defense_streak": 0,
+                "current_victory_streak": 0,
+                "defeats": 0,
+                "engagements": [],
+                "first_battle_osid": null,
+                "first_battle_turn": null,
+                "longest_defense_streak": 0,
+                "longest_victory_streak": 0,
+                "nadir_personnel": 2200,
+                "peak_personnel": 2800,
+                "stalemates": 0,
+                "total_casualties_inflicted": 0,
+                "total_casualties_taken": 0,
+                "total_equipment_captured": {
+                  "aa_systems": 0,
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "total_equipment_destroyed": {
+                  "aa_systems": 0,
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "total_osids_captured": 0,
+                "total_osids_lost": 0,
+                "turns_under_siege": 0,
+                "victories": 0,
+                "worst_single_battle_casualties": 0,
+                "worst_single_battle_turn": null
+              },
+              "cohesion": 80,
+              "composition": {
+                "aa_systems": 2,
+                "artillery": 6,
+                "artillery_condition": {
+                  "degraded": 0.009600000000000001,
+                  "non_operational": 0.0008999999999999998,
+                  "operational": 0.9894999999999999
+                },
+                "infantry": 800,
+                "tank_condition": {
+                  "degraded": 0.17200000000000001,
+                  "non_operational": 0.01199999999999999,
+                  "operational": 0.8159999999999998
+                },
+                "tanks": 14
+              },
+              "corps_id": "hvo_main_staff",
+              "created_turn": 80,
+              "decorations": [],
+              "dig_in_progress": 0,
+              "doctrine_state": {
+                "active": null,
+                "active_turns": 0,
+                "eligible": {
+                  "ARTILLERY_COUNTER": false,
+                  "ATTACK": false,
+                  "COORDINATED_STRIKE": false,
+                  "DEFEND": false,
+                  "INFILTRATE": false,
+                  "STATIC_DEFENSE": false
+                }
+              },
+              "elite_loan_state": {
+                "current_episode_id": 0,
+                "last_recall_turn": null,
+                "loan_start_personnel": 2200,
+                "loan_start_turn": 81,
+                "loaned_to_corps": "hvo_tomislavgrad",
+                "on_loan": true,
+                "permanently_degraded": false
+              },
+              "entrenchment_turns": 12,
+              "equipment_class": "mechanized",
+              "equipment_state": {
+                "degraded_heavy": 0,
+                "last_maintenance": 104,
+                "maintenance_deficit": 0.8818048,
+                "non_operational_heavy": 0,
+                "operational_heavy": 29,
+                "total_heavy": 29
+              },
+              "faction": "HRHB",
+              "force_label": "HVO",
+              "home_defense_active": false,
+              "home_osid": "op:livno:misi_2",
+              "hq_sid": "op:livno:livno_2",
+              "id": "hvo_1st_guard_abb",
+              "kind": "brigade",
+              "last_reachable_turn": 104,
+              "location_osid": "op:duvno:kongora",
+              "max_personnel": 2800,
+              "morale": 100,
+              "name": "1st Guards Brigade 'Ante Bruno Bušić'",
+              "officer_quality": 0.4985,
+              "ops": {
+                "fatigue": 0,
+                "last_supplied_turn": 104
+              },
+              "origin_mun": "livno",
+              "personnel": 2800,
+              "posture": "assault",
+              "readiness": "active",
+              "status": "active",
+              "tags": [
+                "corps:hvo_main_staff",
+                "equip:mechanized",
+                "mun:livno"
+              ],
+              "war_story": {
+                "arc": "garrison",
+                "corps_id": "hvo_main_staff",
+                "faction": "HRHB",
+                "formation_id": "hvo_1st_guard_abb",
+                "formation_name": "1st Guards Brigade 'Ante Bruno Bušić'",
+                "narrative": "The 1st Guards Brigade 'Ante Bruno Bušić' has held its ground. With only 0 engagements, its war has been one of patience, not blood. It currently fields 2800 personnel.",
+                "notable_moments": [],
+                "stats": {
+                  "battles_fought": 0,
+                  "defeats": 0,
+                  "final_personnel": 2800,
+                  "nadir_personnel": 2200,
+                  "peak_personnel": 2800,
+                  "total_casualties_inflicted": 0,
+                  "total_casualties_taken": 0,
+                  "victories": 0
+                }
+              }
+            }
+          },
+          "movement_order": {
+            "presence": "absent"
+          },
+          "movement_state": {
+            "presence": "absent"
+          }
+        },
+        "operations": [
+          {
+            "corps": "hvo_tomislavgrad",
+            "index": 0,
+            "name": "probe_hvo_tomislavgrad_t103",
+            "id": null,
+            "phase": "recovery",
+            "started_turn": 103,
+            "participants": [
+              "hvo_1st_guard_abb",
+              "hvo_rama_brigade"
+            ],
+            "objectives": [
+              "op:kupres:bucovaca"
+            ],
+            "axes": [
+              {
+                "assigned_brigades": [
+                  "hvo_1st_guard_abb",
+                  "hvo_rama_brigade"
+                ],
+                "attack_attempt_count": 1,
+                "axis_id": "probe_hvo_tomislavgrad_t103",
+                "battles_this_turn": 1,
+                "consecutive_catastrophic_on_current": 1,
+                "consecutive_failures_on_current": 1,
+                "current_objective_index": 0,
+                "failure_count": 1,
+                "idle_execution_turn_streak": 0,
+                "last_result": "failed",
+                "momentum": 0,
+                "movement_only_execution_turns": 0,
+                "name": "Probe",
+                "objective_battles_this_turn": 1,
+                "objective_capture_count": 0,
+                "objectives": [
+                  "op:kupres:bucovaca"
+                ],
+                "status": "executing",
+                "total_battles": 1
+              }
+            ]
+          }
+        ],
+        "prisoje_control": "RS"
+      },
+      "candidate": {
+        "actor": {
+          "formation": {
+            "presence": "present",
+            "value": {
+              "activation_gated": false,
+              "activation_turn": 83,
+              "assigned_sub_segment_id": "subseg:sector:hvo_tomislavgrad:0:0",
+              "assignment": {
+                "kind": "sector",
+                "role": "front",
+                "sector_id": "sector:hvo_tomislavgrad:0"
+              },
+              "base_osid": "op:livno:livno_2",
+              "brigade_history": {
+                "battles_as_attacker": 0,
+                "battles_as_defender": 0,
+                "battles_fought": 0,
+                "current_defense_streak": 0,
+                "current_victory_streak": 0,
+                "defeats": 0,
+                "engagements": [],
+                "first_battle_osid": null,
+                "first_battle_turn": null,
+                "longest_defense_streak": 0,
+                "longest_victory_streak": 0,
+                "nadir_personnel": 2200,
+                "peak_personnel": 2800,
+                "stalemates": 0,
+                "total_casualties_inflicted": 0,
+                "total_casualties_taken": 0,
+                "total_equipment_captured": {
+                  "aa_systems": 0,
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "total_equipment_destroyed": {
+                  "aa_systems": 0,
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "total_osids_captured": 0,
+                "total_osids_lost": 0,
+                "turns_under_siege": 0,
+                "victories": 0,
+                "worst_single_battle_casualties": 0,
+                "worst_single_battle_turn": null
+              },
+              "cohesion": 96,
+              "composition": {
+                "aa_systems": 2,
+                "artillery": 6,
+                "artillery_condition": {
+                  "degraded": 0,
+                  "non_operational": 0,
+                  "operational": 1
+                },
+                "infantry": 800,
+                "tank_condition": {
+                  "degraded": 0.17199999999999993,
+                  "non_operational": 0.011999999999999983,
+                  "operational": 0.8159999999999998
+                },
+                "tanks": 14
+              },
+              "corps_id": "hvo_main_staff",
+              "created_turn": 80,
+              "decorations": [],
+              "dig_in_progress": 0,
+              "doctrine_state": {
+                "active": null,
+                "active_turns": 0,
+                "eligible": {
+                  "ARTILLERY_COUNTER": false,
+                  "ATTACK": false,
+                  "COORDINATED_STRIKE": false,
+                  "DEFEND": false,
+                  "INFILTRATE": false,
+                  "STATIC_DEFENSE": false
+                }
+              },
+              "elite_loan_state": {
+                "current_episode_id": 0,
+                "last_recall_turn": null,
+                "loan_start_personnel": 2200,
+                "loan_start_turn": 81,
+                "loaned_to_corps": "hvo_tomislavgrad",
+                "on_loan": true,
+                "permanently_degraded": false
+              },
+              "entrenchment_turns": 1.2,
+              "equipment_class": "mechanized",
+              "equipment_state": {
+                "degraded_heavy": 0,
+                "last_maintenance": 104,
+                "maintenance_deficit": 0.8818048,
+                "non_operational_heavy": 0,
+                "operational_heavy": 29,
+                "total_heavy": 29
+              },
+              "faction": "HRHB",
+              "force_label": "HVO",
+              "home_defense_active": false,
+              "home_osid": "op:livno:misi_2",
+              "hq_sid": "op:livno:livno_2",
+              "id": "hvo_1st_guard_abb",
+              "kind": "brigade",
+              "last_reachable_turn": 104,
+              "location_osid": "op:livno:livno_2",
+              "max_personnel": 2800,
+              "morale": 100,
+              "name": "1st Guards Brigade 'Ante Bruno Bušić'",
+              "officer_quality": 0.4985,
+              "ops": {
+                "fatigue": 0,
+                "last_supplied_turn": 104
+              },
+              "origin_mun": "livno",
+              "personnel": 2800,
+              "posture": "defend",
+              "readiness": "active",
+              "status": "active",
+              "tags": [
+                "corps:hvo_main_staff",
+                "equip:mechanized",
+                "mun:livno"
+              ],
+              "war_story": {
+                "arc": "garrison",
+                "corps_id": "hvo_main_staff",
+                "faction": "HRHB",
+                "formation_id": "hvo_1st_guard_abb",
+                "formation_name": "1st Guards Brigade 'Ante Bruno Bušić'",
+                "narrative": "The 1st Guards Brigade 'Ante Bruno Bušić' has held its ground. With only 0 engagements, its war has been one of patience, not blood. It currently fields 2800 personnel.",
+                "notable_moments": [],
+                "stats": {
+                  "battles_fought": 0,
+                  "defeats": 0,
+                  "final_personnel": 2800,
+                  "nadir_personnel": 2200,
+                  "peak_personnel": 2800,
+                  "total_casualties_inflicted": 0,
+                  "total_casualties_taken": 0,
+                  "victories": 0
+                }
+              }
+            }
+          },
+          "movement_order": {
+            "presence": "present",
+            "value": {
+              "destination_sids": [
+                "op:duvno:suica_2"
+              ],
+              "owner": "bot_discretionary"
+            }
+          },
+          "movement_state": {
+            "presence": "absent"
+          }
+        },
+        "operations": [],
+        "prisoje_control": "RS"
+      }
+    },
+    "late_changed_named_phase_receipts": [
+      {
+        "week_index": 187,
+        "phase": "generate-bot-brigade-orders",
+        "before": {
+          "formation": {
+            "presence": "present_value",
+            "value": {
+              "corps_id": {
+                "presence": "present_value",
+                "value": "hvo_main_staff"
+              },
+              "faction": {
+                "presence": "present_value",
+                "value": "HRHB"
+              },
+              "location_osid": {
+                "presence": "present_value",
+                "value": "op:bosansko_grahovo:malesevci"
+              },
+              "status": {
+                "presence": "present_value",
+                "value": "active"
+              }
+            }
+          },
+          "movement_order": {
+            "presence": "absent"
+          },
+          "movement_state": {
+            "presence": "absent"
+          }
+        },
+        "after": {
+          "formation": {
+            "presence": "present_value",
+            "value": {
+              "corps_id": {
+                "presence": "present_value",
+                "value": "hvo_main_staff"
+              },
+              "faction": {
+                "presence": "present_value",
+                "value": "HRHB"
+              },
+              "location_osid": {
+                "presence": "present_value",
+                "value": "op:bosansko_grahovo:malesevci"
+              },
+              "status": {
+                "presence": "present_value",
+                "value": "active"
+              }
+            }
+          },
+          "movement_order": {
+            "presence": "present_value",
+            "value": {
+              "destination_sids": [
+                "op:bosansko_grahovo:bosansko_grahovo_2"
+              ],
+              "owner": "bot_discretionary",
+              "stance": "column"
+            }
+          },
+          "movement_state": {
+            "presence": "absent"
+          }
+        }
+      },
+      {
+        "week_index": 188,
+        "phase": "osid-column-movement",
+        "before": {
+          "formation": {
+            "presence": "present_value",
+            "value": {
+              "corps_id": {
+                "presence": "present_value",
+                "value": "hvo_main_staff"
+              },
+              "faction": {
+                "presence": "present_value",
+                "value": "HRHB"
+              },
+              "location_osid": {
+                "presence": "present_value",
+                "value": "op:bosansko_grahovo:malesevci"
+              },
+              "status": {
+                "presence": "present_value",
+                "value": "active"
+              }
+            }
+          },
+          "movement_order": {
+            "presence": "present_value",
+            "value": {
+              "destination_sids": [
+                "op:bosansko_grahovo:bosansko_grahovo_2"
+              ],
+              "owner": "bot_discretionary",
+              "stance": "column"
+            }
+          },
+          "movement_state": {
+            "presence": "absent"
+          }
+        },
+        "after": {
+          "formation": {
+            "presence": "present_value",
+            "value": {
+              "corps_id": {
+                "presence": "present_value",
+                "value": "hvo_main_staff"
+              },
+              "faction": {
+                "presence": "present_value",
+                "value": "HRHB"
+              },
+              "location_osid": {
+                "presence": "present_value",
+                "value": "op:bosansko_grahovo:malesevci"
+              },
+              "status": {
+                "presence": "present_value",
+                "value": "active"
+              }
+            }
+          },
+          "movement_order": {
+            "presence": "absent"
+          },
+          "movement_state": {
+            "presence": "present_value",
+            "value": {
+              "destination_sids": [
+                "op:bosansko_grahovo:bosansko_grahovo_2"
+              ],
+              "owner": "bot_discretionary",
+              "path": [
+                "op:bosansko_grahovo:malesevci",
+                "op:bosansko_grahovo:bosansko_grahovo_2"
+              ],
+              "stance": "column",
+              "status": "in_transit",
+              "turns_remaining": 1
+            }
+          }
+        }
+      }
+    ],
+    "prisoje_control_events": 0,
+    "prisoje_engagements": 0,
+    "finding": "n81 already differs from n80 at retained turn104 in ABB actor and relevant-operation projection. At 178–186 n81 has no ABB order/transit while Mistral progresses planning to execution; n80 queues successive Mistral-route orders and has Jajce_3 transit by186. In n81 bot order generation at187 queues Bosansko Grahovo_2, and the named osid-column-movement phase at188 changes that pending order to one-turn transit from Maleševci. The phase receipt encloses reconciliation before the consumer; it does not directly identify the helper writer. Prisoje remains RS with no candidate control event or engagement.",
+    "semantics": {
+      "receipt_boundary": "Each receipt is the named phase entry/exit state. The osid-column-movement receipt encloses reconciliation immediately before the movement consumer.",
+      "direct_helper_writer_measurement": false,
+      "causal_proof": false,
+      "location_origin_not_progress": true,
+      "emitted_not_admitted": true,
+      "missing_is_unmeasured": true
+    }
+  },
+  "preservation": {
+    "capture_pass": true,
+    "before": {
+      "C": {
+        "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+        "archive": "logs/claude-channel-20261004/396-varosluk-761-one188-telemetry/C-before.jsonl",
+        "bytes": 100107701,
+        "sha256": "8d242e18f199a54c26f755e648fe4612159563ec0b606930112653770d725f3c"
+      },
+      "D": {
+        "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+        "archive": "logs/claude-channel-20261004/396-varosluk-761-one188-telemetry/D-before.jsonl",
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+      }
+    },
+    "after": {
+      "C": {
+        "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+        "archive": "logs/claude-channel-20261004/396-varosluk-761-one188-telemetry/C-after.jsonl",
+        "bytes": 101054372,
+        "sha256": "b11e26cdda6948e8a0c6812a1e5563578d8de42d4cc4f235a25598d075acc8be",
+        "appended_bytes": 946671
+      },
+      "D": {
+        "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+        "archive": "logs/claude-channel-20261004/396-varosluk-761-one188-telemetry/D-after.jsonl",
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+        "appended_bytes": 0
+      }
+    },
+    "full_before_after_archives_retained": true,
+    "old_failures_retained": true,
+    "no_restore_truncate_delete": true
+  },
+  "reused": {
+    "focused": "757/758 final 29/29",
+    "root_noemit": "757/758 exit0",
+    "independent_review": "758 PASS_NO_REMAINING_758_BLOCKERS"
+  },
+  "scope": {
+    "campaign_invocations": 1,
+    "retries": 0,
+    "full_suites": 0,
+    "replays": 0,
+    "gameplay_data_threshold_canon_changes": 0,
+    "git_writes": 0
+  },
+  "residual": [
+    "candidate rejected and unadopted",
+    "retained n80 remains authoritative at 703/712",
+    "all inherited unmet gates remain unmet",
+    "n42 observational GO only",
+    "Farz second OR third",
+    "122 startup STOP"
+  ]
+}

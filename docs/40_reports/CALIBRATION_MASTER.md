@@ -1,4 +1,23 @@
 # AWWV Calibration Master Reference
+## 760–763 — n81 regression rejects pre-T3 reconciliation candidate (2026-10-20)
+
+One approved n81 regression failed:689/712 versus retained n80 703/712, with14 formerly correct October OSIDs lost and zero gains. Earlier checkpoints and four anchor checks also fail. Candidate rejected, no retry or adoption. ABB does not reach Prisoje; thresholds and every telemetry byte preserved.
+
+| Checkpoint | n80 | n81 | Previously correct lost | Gained |
+|---|---:|---:|---:|---:|
+| January1993 /39 |707|706|1|0|
+| April1994 /104 |707|704|3|0|
+| April1995 /156 |706|703|4|1|
+| October1995 /188 |703|689|14|0|
+
+All712 reference cells were compared at each checkpoint. The first retained calibration loss is Prača at39; that is not a measured first writer. October losses: Matavaži, Jezero, Baljvine, Mrkonjić Grad, Podrašnica, Podgrab, Prača, Paroš, Sanski Most, Stari Majdan, Drvar, Šipovljani, Gornje Krčevine and Varošluk (exact OSIDs/factions in the portable result). Four checked anchors fail: Matavaži, Podrašnica, Mrkonjić Grad and Baljvine. Initial save bytes/all712 controllers and ordered32 consumed input identities match n80. Native31 are inventoried. The actual evaluator exits2/2; later timeline/checkpoint CLI/consistency/health/protected/producer gates are UNREACHED after failure, consumer/fingerprint UNMEASURED. No passing focused check waives this rejection.
+
+ABB named-phase coverage is complete for179–188. During178–186 n81 has no ABB order or transit while Mistral progresses planning→execution. Bot ordering at187 queues Bosansko Grahovo_2; at188 the column phase consumes it into one-turn transit from Maleševci. Prisoje remainsRS, with zero candidate control events or engagements. The earliest differing retained ABB actor/operation projection is104; no actual first helper writer or full causal chain is established. The named column boundary encloses both reconciliation and consumer, so entry/exit alone is not direct helper-call proof. Retained n80 had late Mistral-route orders and Jajce_3 transit by186.
+
+The sole original-trajectory runner exits0/0 without timeout,19:41:59.632–19:48:20.789UTC (6m21.157s), actual stdout-derived runDir runs/apr1992_definitive_188w__6deb5845c150c196__w188_n81, final hash a8fee534fb0089f5. Readiness-b passes after a retained cheap checker-symbol correction in readiness-a; no engine requirement was relaxed. Independent762 confirms rejection and verifies72/72 inventory files with zero size/hash mismatches. No retry, full suite, replay, source/data/threshold/canon change or adoption. Tested source remains preserved unchanged, not promoted.
+
+C retains the complete100107701-byte opening prefix and946671newbytes, now101054372bytes SHA256b11e26cdda6948e8a0c6812a1e5563578d8de42d4cc4f235a25598d075acc8be; full before/after archives retained. D1041bytes remainsff120d4a… exact. Baseline artifacts, frozen source and threshold/reference pins preserved. Raw logs stayLOCAL with portable result/inventory/review in docs/provenance/october-calibration-20261019. Retained n80 remains703/712, NO-GO/unadopted; all inherited unmet gates remain. Smallest next diagnosis is retained n80/n81 early-divergence analysis beginning with Prača; another campaign or revised gameplay is outside this spent allowance.
+
 ## 756–759 — Pre-T3 stale-operation march reconciliation (2026-10-20)
 
 Pre-T3 stale-operation march reconciliation implemented and independently verified after one ownership correction. It redirects only a proved completed prior objective of the same unique operation/axis to its current friendly approach. Valid orders, movement guards and thresholds remain protected. Focused29/29 and final noEmit pass; retained n80 remains703/712, NO-GO/unadopted. No new campaign or full suite; calibration impact is UNMEASURED.

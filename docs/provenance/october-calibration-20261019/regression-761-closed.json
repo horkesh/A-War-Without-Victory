@@ -1,0 +1,49 @@
+{
+  "schema": "awwv.761.closed-receipt.v1",
+  "captured_utc": "2026-10-20T19:51:03.483Z",
+  "writes_closed": true,
+  "verdict": "FAIL_REJECTED__CHECKPOINT_FLOORS_AND_ZERO_LOSS_GATE_FAILED__NO_RETRY",
+  "candidate": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n81",
+  "runner_exit": [
+    0,
+    0
+  ],
+  "evaluation_exit": [
+    2,
+    2
+  ],
+  "native_count": 31,
+  "scores": [
+    706,
+    704,
+    703,
+    689
+  ],
+  "losses": [
+    1,
+    3,
+    4,
+    14
+  ],
+  "gains": [
+    0,
+    0,
+    1,
+    0
+  ],
+  "anchor_failures": [
+    "op:bosanski_novi:matavazi_2",
+    "op:mrkonjic_grad:podrasnica_2",
+    "op:mrkonjic_grad:mrkonjic_grad_2",
+    "op:mrkonjic_grad:baljvine_2"
+  ],
+  "later_gates_unreached": true,
+  "trace_exit": [
+    0,
+    0
+  ],
+  "telemetry_preserved": true,
+  "inventory_count": 72,
+  "inventory_path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/761-seal-a/inventory.json",
+  "result_path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/761-seal-a/result.json"
+}
