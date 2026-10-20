@@ -10,6 +10,10 @@ and authored events. Archived conservation/delay/route tests remain evidence for
 candidate, not active-production coverage. Required full-suite/188-week/anchor/provenance gates
 must establish recovery; focused restoration checks do not waive them.
 
+## Pre-T3 stale operation order reconciliation (2026-10-20)
+
+`tests/stale_operation_march_reconciliation.test.ts` covers deterministic insertion-order selection, unique state-wide membership across phases/hosts, completed-prefix proof, preserved valid orders/transit and blocked/no-approach cases. `tests/mistral_prisoje_turn_order.test.ts` exercises the registered production phase before T3 and survival through T6; an independently invalid transit remains rejected. Final focused29/29 and typecheck0 are preparation evidence only. Required authoritative188, formerly-correct-cell loss, anchor/artifact/provenance and qualifying full-suite gates remain separate; retained n80 score703/712 is not a new-engine measurement.
+
 ## Rules → Gates
 ### No timestamps / wall-clock values
 - Gate: `tests/determinism_static_scan_r1_5.test.ts`

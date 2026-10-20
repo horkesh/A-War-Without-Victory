@@ -159,7 +159,11 @@ import { ENABLE_TG_OG_PROMOTION } from '../combat/tactical_group_config.js';
 import { applyOgPromotions, projectPromotionDisplayNames } from '../combat/tactical_group_promotion.js';
 import { distributeBrigadesToFront } from '../combat/brigade_front_distribution.js';
 import { mergeFrontDistributionDiagnostics, nextFrontDistributionInvocationOrdinal } from '../combat/front_distribution_diagnostic.js';
-import { correctMarchOrders, correctTransitStates } from '../combat/commander_march_correction.js';
+import {
+    correctMarchOrders,
+    correctTransitStates,
+    reconcileStaleOperationMarchOrders,
+} from '../combat/commander_march_correction.js';
 import { evaluateHomeReturn } from '../combat/brigade_home_return.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
 import { advanceSectorOffensives, updateSectorOffensiveResults, reevaluateWeakenedOperations } from '../combat/sector_offensive.js';
@@ -1562,6 +1566,13 @@ export const warPhases: NamedPhase[] = [
             } catch {
                 terrainData = { by_sid: {} };
             }
+            const movementAdjacency = moveSpatial?.preCombat.adjacency
+                ?? buildStaticOsidAdjacency(od.edges);
+            reconcileStaleOperationMarchOrders(
+                context.state,
+                movementAdjacency as Map<string, string[]>,
+                od.opData.operationalToCanonical,
+            );
             const report = processOsidColumnMovement(
                 context.state,
                 od.edges,

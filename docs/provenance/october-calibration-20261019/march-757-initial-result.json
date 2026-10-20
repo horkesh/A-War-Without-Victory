@@ -1,0 +1,84 @@
+{
+  "schema": "awwv.757.pre-t3-stale-operation-march-result.v1",
+  "writes_closed": true,
+  "verdict": "IMPLEMENTED_FOCUSED_GREEN__INDEPENDENT_REVIEW_PENDING",
+  "opening": {
+    "head": "eed73dc0c66ed291b67b9547b96702ecb2797d73",
+    "branch": "codex/october-calibration-continuation-20261003",
+    "git_status": "clean"
+  },
+  "implementation": {
+    "layer": "command-owner prepass immediately before osid-column-movement/T3 consumption",
+    "eligible_order": "pending bot_discretionary column order with no active transit",
+    "ownership_proof": "active eligible non-reserve formation; effective corps is active loan recipient or home corps; exactly one planning/execution operation and one matching axis; operation and axis both include the brigade",
+    "stale_prior_objective_proof": "destination occurs exactly once before current axis index, objective_capture_count covers the completed prefix, and destination is friendly-held",
+    "producer_disambiguation": "bot_discretionary is necessary but insufficient; unique live command/axis commitment plus exact completed-prefix destination proves operation intent; missing/stale routine scope alone proves nothing",
+    "preserved_authorities": [
+      "current operation approach/staging",
+      "fresh valid assigned routine scope",
+      "explicit corps reassignment",
+      "retreat/non-bot/authored orders",
+      "reserve and loan/lifecycle intent",
+      "active transit",
+      "recovery/completed, nonparticipant, invalid-loan and ambiguous operation/axis cases"
+    ],
+    "replacement": "existing current-objective-only approach derivation plus deterministic nearest friendly destination selector; no combined authorized-set or staging fallback",
+    "mutation": "only the pending order destination is replaced through the typed column-order helper; owner and all unrelated state remain unchanged",
+    "source_hardcodes": "none for operation name, OSID, date, turn or faction"
+  },
+  "files": [
+    { "path": "src/sim/combat/commander_march_correction.ts", "bytes": 15746, "sha256": "fd115016cd2ee2ac3128b1cd6bb1cdb09544d4235885c6ba3adc648a5155ffcd" },
+    { "path": "src/sim/turn_phases/war_phases.ts", "bytes": 231691, "sha256": "93fcb005fa725c8a45269370c8319ca34779d1e032624fee08a4ae5800baa04a" },
+    { "path": "tests/stale_operation_march_reconciliation.test.ts", "bytes": 9824, "sha256": "cad8b5a30c71ceee68d1dd1e38deda4fb712366c76b16fb195695e29edd32a33" },
+    { "path": "tests/mistral_prisoje_turn_order.test.ts", "bytes": 24676, "sha256": "910cc665f64afc776b36f562fa3d79ba38ef82c40067e3dde6fdf1187619a1e0" },
+    { "path": "logs/claude-channel-20261004/756-root-plan.md", "bytes": 9589, "sha256": "aea32af21fea121361c0bc5d6b4f036a5a0ddf668d5b659e81ac92c55934ad82" }
+  ],
+  "checks": {
+    "red": { "attempt": "757-red-c", "child_exit": 1, "wrapper_exit": 1, "tests": 18, "expected_failure": "reconcileStaleOperationMarchOrders is not a function" },
+    "initial_green": { "attempt": "757-green-a", "child_exit": 0, "wrapper_exit": 0, "passed": 18, "failed": 0 },
+    "affected_first_pass": { "attempt": "757-focused-a", "child_exit": 1, "wrapper_exit": 1, "passed": 179, "failed": 1, "expected_contract_update": "old 749 T3 rejection expectation" },
+    "final_targeted": { "attempt": "757-current-objective-green-b", "child_exit": 0, "wrapper_exit": 0, "passed": 25, "failed": 0, "suites": 4 },
+    "unaffected_affected_assertions_reused": 158,
+    "root_noemit_final": { "attempt": "757-noemit-c", "timeout_ms": 180000, "child_exit": 0, "wrapper_exit": 0, "timed_out": false, "stdout_bytes": 0, "stderr_bytes": 0, "private_buildinfo_bytes": 644985 },
+    "diff_check_exit": 0,
+    "phase_order": { "osid_column_phase_line": 1552, "reconcile_line": 1571, "consumer_line": 1576, "pass": true },
+    "production_wiring": "portable named-phase Mistral fixture proves Bravnice becomes Jajce_3 transit at T3 and survives T6/following bot actor",
+    "optional_saved_prefix_runtime": "not run; portable production-phase fixture answered the wiring/T6-survival question"
+  },
+  "provenance": {
+    "lupnica_neighbor_controls": "all four neighbors copied from retained n80 save_w184.json",
+    "save_path": "logs/claude-channel-20261004/174-fixtures/save_w184.json",
+    "save_sha256": "0ab3bc2723bd8430466bea6c933aef38801edfef914392d0fc1a024e2b1f75d5",
+    "neighbors": { "op:jajce:barevo_2": "RS", "op:jajce:divicani_2": "RS", "op:jajce:jajce_3": "HRHB", "op:jajce:kruscica": "RS" }
+  },
+  "preservation": {
+    "C_before": { "bytes": 100107701, "sha256": "8d242e18f199a54c26f755e648fe4612159563ec0b606930112653770d725f3c" },
+    "C_after": { "bytes": 100107701, "sha256": "8d242e18f199a54c26f755e648fe4612159563ec0b606930112653770d725f3c" },
+    "C_prefix_preserved": true,
+    "C_append_bytes": 0,
+    "D_before": { "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" },
+    "D_after": { "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" },
+    "full_before_after_archives_retained": true,
+    "protected_3_and_native_31": "reused exact 755 pins; no protected/native files changed",
+    "sealed_receipts_179": "retained; no restore, truncate, cleanup or delete",
+    "all_757_attempts_retained": true
+  },
+  "scope": {
+    "campaigns": 0,
+    "full_suites": 0,
+    "builds": 0,
+    "full_runTurn": 0,
+    "turn186": 0,
+    "saved184_prefix_runs": 0,
+    "schema_or_canon_changes": 0,
+    "threshold_or_control_changes": 0,
+    "git_writes": 0,
+    "docs_writes_outside_756_plan": 0
+  },
+  "limits": [
+    "Independent 758 review remains pending.",
+    "No full-campaign score, gain, regression absence, turn-186 causality or acceptance claim is made.",
+    "Retained 703/712 and native31 are prior evidence, not newly measured results.",
+    "Required qualifying-gameplay campaign and full-suite gates remain unrun and unmet pending separate authorization."
+  ]
+}

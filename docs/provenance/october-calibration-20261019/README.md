@@ -71,3 +71,10 @@ The prisoje-749 result/inventory/closed receipt and initial/final750 reviews rec
 Prisoje cause established: stale Bravnice intent starts under T3 stale/unrestricted scope, then T6 correctly cancels it under rebuilt scope. Loan ownership is correct; Bravnice was already an obsolete Mistral objective, while Jajce_3 is an authorized Lupnica approach. Recommend only a narrowly guarded pre-T3 stale-order reconciliation design; no gameplay fix implemented. Retained703/712 and thresholds preserved; all telemetry retained.
 
 The authority-755 reviewed result supersedes unqualified writer/count/design wording in the original753 diagnosis, whose closed receipt and inventory preserve its identity. Initial754 and targeted754 reviews record accepted facts and candidate limits. C is now100107701bytes with all5181newbytes retained; raw prefix observations and telemetry archives remain local. No test, gameplay fix or new campaign belongs to this diagnosis.
+
+
+## Pre-T3 stale operation march reconciliation — 2026-10-20
+
+Pre-T3 stale-operation march reconciliation implemented and independently verified after one ownership correction. It redirects only a proved completed prior objective of the same unique operation/axis to its current friendly approach. Valid orders, movement guards and thresholds remain protected. Focused29/29 and final noEmit pass; retained n80 remains703/712, NO-GO/unadopted. No new campaign or full suite; calibration impact is UNMEASURED.
+
+The march-757 initial closed result/inventory/receipt retain their original failures and mistaken174/n80 fixture attribution. Corrected757 and initial/targeted758 review receipts document one correction, fulln80 e97… pin, state-wide lifecycle/ownership exclusion and29/29 focused proof. march-759 is the reviewed synthesis. Raw tests, stderr/stdout, telemetry archives and previous attempts remain local under the accepted inventory arrangement. Full-campaign regression is UNMEASURED; no new campaign or full suite belongs to this change.

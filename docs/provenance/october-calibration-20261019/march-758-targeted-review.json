@@ -1,0 +1,77 @@
+{
+  "schema": "awwv.758.pre-t3-stale-operation-march-targeted-verification.v1",
+  "writes_closed": true,
+  "verdict": "PASS_NO_REMAINING_758_BLOCKERS",
+  "scope": {
+    "targeted_findings_only": true,
+    "tests_run": 0,
+    "probes_run": 0,
+    "suites_run": 0,
+    "campaigns_run": 0,
+    "builds_run": 0,
+    "saved_prefix_runs": 0,
+    "full_runTurn": 0,
+    "turn186": 0,
+    "source_docs_or_git_mutations": 0,
+    "review_outputs_only": [
+      "logs/claude-channel-20261004/758-targeted-verification.json",
+      "logs/claude-channel-20261004/758-targeted-verification.md"
+    ]
+  },
+  "correction_receipts": [
+    { "path": "logs/claude-channel-20261004/757-correction-758-a/result.json", "sha256": "33b067297bfd71da2be939a18224a8d58209ea922ebbd3086859b55354bb3129" },
+    { "path": "logs/claude-channel-20261004/757-correction-758-a/inventory.json", "sha256": "1386e17ebec37f716ae5aea38efd23eaf26e307c5bf529e78d2e441e594fc5aa" },
+    { "path": "logs/claude-channel-20261004/757-correction-758-a/closed-receipt.json", "sha256": "af458f4e80b08fd7fd9c5cb6859f4a52ca7de00b2669773f05b2b0202d3de495" }
+  ],
+  "findings_verified": [
+    {
+      "id": "state-wide-operation-membership-not-unique",
+      "status": "closed",
+      "evidence": "Every corps command and every phase is inspected in stable order; exactly one state-wide participant/axis membership, effective-host identity, live phase and exactly one axis are required. Competing lifecycle, cross-host, axis-only and foreign-host-only cases fail closed.",
+      "eligibility_expansion": false
+    },
+    {
+      "id": "n80-save184-provenance-mispin",
+      "status": "closed",
+      "authoritative_path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w184.json",
+      "bytes": 8704869,
+      "sha256": "e97ed2e154be0738773e326392347741d7aa17e730138b1f669008d045a879b4"
+    },
+    {
+      "id": "module-ownership-header-incomplete",
+      "status": "closed",
+      "evidence": "Source header distinguishes T2 command-owner reconciliation before T3 consumption from unchanged T6 repair."
+    }
+  ],
+  "retained_checks": {
+    "red": { "passed": 22, "failed": 3, "expected_failures": ["live plus recovery membership", "live plus completed membership", "cross-corps live overlap"] },
+    "focused_green": { "passed": 29, "failed": 0, "composition": "25 reconciliation plus 4 Mistral registered-wiring assertions" },
+    "root_noemit": { "child_exit": 0, "wrapper_exit": 0, "stdout_bytes": 0, "stderr_bytes": 0 },
+    "diff_check_exit": 0
+  },
+  "final_source_pins": [
+    { "path": "src/sim/combat/commander_march_correction.ts", "bytes": 16668, "sha256": "9db5d8b250fc606c00a2e8d7327d2ff4113cb1048414d7f1532c1f9cb6d0a68d" },
+    { "path": "src/sim/turn_phases/war_phases.ts", "bytes": 231691, "sha256": "93fcb005fa725c8a45269370c8319ca34779d1e032624fee08a4ae5800baa04a" },
+    { "path": "tests/stale_operation_march_reconciliation.test.ts", "bytes": 10886, "sha256": "5911d5ad2fffdf1fcc9f161b6363f8ccf82b814eef912908756eaca1646b8857" },
+    { "path": "tests/mistral_prisoje_turn_order.test.ts", "bytes": 24721, "sha256": "fbb527e4b5ad279abcade093aeca9a66e75a99da783e20c721386363c2392747" }
+  ],
+  "original_757_seal": {
+    "result_sha256": "0ecea409e25bd067f8ba31c6d1bbd053bceef123a1e780189fe57c80918cc04c",
+    "inventory_sha256": "adad08725d7b0f44cd187a69e9984f8af2e235e31fef920a0941cb6a94327305",
+    "closed_receipt_sha256": "84294d4b75bc5c70a32bbf6c4309c3211954abc3fd509151e8df2950527815da",
+    "unchanged": true
+  },
+  "preservation": {
+    "C_before_after": { "bytes": 100107701, "sha256": "8d242e18f199a54c26f755e648fe4612159563ec0b606930112653770d725f3c" },
+    "D_before_after": { "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" },
+    "protected_emit_reference_threshold_reused": true,
+    "native_31_reused": true,
+    "sealed_179_receipts_retained": true
+  },
+  "remaining_blockers": [],
+  "limits": [
+    "No new gameplay regression, gain, full-campaign neutrality or turn-186 causality was measured.",
+    "Retained 703/712 remains prior unadopted evidence.",
+    "Full-suite and qualifying-campaign gates remain unrun and unmet."
+  ]
+}

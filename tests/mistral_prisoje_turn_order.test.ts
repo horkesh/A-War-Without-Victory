@@ -202,6 +202,17 @@ function counterfactualTurn184Projection(options: { includeBravniceInScope?: boo
             objective_capture_count: 8, movement_only_execution_turns: 0, idle_execution_turn_streak: 0,
         },
     ];
+    // Match every Lupnica-neighbor controller in retained authoritative n80
+    // runs/apr1992_definitive_188w__6deb5845c150c196__w188_n80/save_w184.json
+    // (8,704,869 bytes; SHA-256 e97ed2e154be0738773e326392347741d7aa17e730138b1f669008d045a879b4): barevo_2,
+    // divicani_2 and kruscica are RS; jajce_3 is HRHB. This preserves the fixture's explicitly
+    // counterfactual one-cell sector topology while using retained control truth for approach
+    // selection. Livno_2 remains staging, outside the Lupnica-neighbor set.
+    state.political.political_controllers![JAJCE_3] = 'HRHB';
+    state.political.political_controllers![LUPNICA] = 'RS';
+    state.political.political_controllers!['op:jajce:barevo_2'] = 'RS';
+    state.political.political_controllers!['op:jajce:divicani_2'] = 'RS';
+    state.political.political_controllers!['op:jajce:kruscica'] = 'RS';
     return state;
 }
 
@@ -376,7 +387,7 @@ describe('645 — portable Prisoje caller and writer order', () => {
         expect(report.column_movement?.column_blocked).toBeGreaterThan(0);
     });
 
-    it('749 counterfactual: injected one-cell scope rejects the end-184 Bravnice order at T3 and records the later no-write actor snapshot', async () => {
+    it('749 counterfactual: injected one-cell scope reconciles the stale Bravnice order to the sealed current approach before T3', async () => {
         const state = counterfactualTurn184Projection();
         const commitments = structuredClone({
             home: state.military.corps_command!.hvo_main_staff!.active_operations,
@@ -396,17 +407,15 @@ describe('645 — portable Prisoje caller and writer order', () => {
             routine_scope_enforced: true,
         });
         expect(observations.find((entry) => entry.boundary === 'osid-column-movement')).toMatchObject({
-            order: null, movement: null, location_osid: MALESEVCI,
+            order: null, location_osid: MALESEVCI,
+            movement: { destination_sids: [JAJCE_3], owner: 'bot_discretionary', status: 'in_transit' },
         });
-        expect(report.column_movement?.column_rejections).toContainEqual(expect.objectContaining({
-            formation_id: ABB, reason: 'routine_destination_out_of_scope',
-            location_osid: MALESEVCI, destination_osid: BRAVNICE,
-            formation_corps_id: 'hvo_main_staff', loaned_to_corps_id: 'hvo_tomislavgrad',
-            routing_corps_id: 'hvo_main_staff', routing_scope_osid_count: null,
-            source_in_routing_scope: null, destination_in_routing_scope: null,
+        expect(report.column_movement?.column_rejections ?? []).not.toContainEqual(expect.objectContaining({
+            formation_id: ABB,
         }));
         expect(observations.find((entry) => entry.boundary === 'commander-correct-march-orders')).toMatchObject({
-            order: null, movement: null,
+            order: null,
+            movement: { destination_sids: [JAJCE_3], owner: 'bot_discretionary', status: 'in_transit' },
         });
         const botDetail = report.bot_order_diagnostics?.dispatcher_decision_details?.find((entry) => entry.formation_id === ABB);
         expect(botDetail)
@@ -415,7 +424,9 @@ describe('645 — portable Prisoje caller and writer order', () => {
                 operation_axis_id: 'mistral_sipovo',
             });
         expect(observations.find((entry) => entry.boundary === 'generate-bot-brigade-orders')).toMatchObject({
-            order: null, movement: null, location_osid: MALESEVCI,
+            order: null,
+            movement: { destination_sids: [JAJCE_3], owner: 'bot_discretionary', status: 'in_transit' },
+            location_osid: MALESEVCI,
         });
         expect(botDetail?.first_handler).not.toBeNull();
         expect(botDetail?.snapshot_output).toMatchObject({ column_march_destination_osid: null });

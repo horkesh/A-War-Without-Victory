@@ -37,7 +37,7 @@ Every writer of `sector_reassignment_orders`, `brigade_movement_orders`, `brigad
 | `src/sim/combat/sector_offensive.ts` | T4 | Applies operation movement clauses owned by an active operation. |
 | `src/sim/combat/brigade_reconstitution.ts` | T5 | Places newly reconstituted brigades. |
 | `src/sim/combat/army_reserve_system.ts` | T5 | Applies reserve assignment and recall lifecycle effects. |
-| `src/sim/combat/commander_march_correction.ts` | T6 | Repairs invalid march paths and transit state. |
+| `src/sim/combat/commander_march_correction.ts` | T2 prepass / T6 repair | Reconciles narrowly proved stale operation orders before T3; existing functions repair invalid march paths and transit state at T6. |
 | `src/sim/combat/brigade_front_distribution.ts` | T6 | Performs bounded local front distribution without paper transfers. |
 | `src/sim/combat/brigade_home_return.ts` | T6 | Routes eligible idle displaced brigades home. |
 | `src/sim/combat/corps_front_sectors.ts` | Derived truth | Classifies only roster-eligible, legally reachable formations as potential sector staff and marks a sector `unstaffed_front` when no legal donor exists. |
@@ -113,6 +113,12 @@ held forever — leaving requires an authorized order or a combat consequence.
 3. During `generate-bot-brigade-orders`, T2 translates the reassignment into a column movement order after revalidating the destination and route.
 4. On later turns, `osid-column-movement` and `apply-brigade-movement` perform T3 movement. Arrival is proven by physical `location_osid`, not by assignment metadata.
 5. If no legal donor exists, the sector remains empty and is marked `unstaffed_front: true`. The UI may report the gap, but no engine tier may teleport a brigade or fabricate staffing.
+
+## 3a. Stale operation order reconciliation (2026-10-20)
+
+Immediately before T3 column consumption, the command-owner prepass may replace a pending bot-discretionary column destination only when existing state proves a completed earlier objective of the same unique operation and axis. It inventories participant or axis memberships across every command and phase; exactly one live planning/execution membership hosted by the effective valid loan/home corps is required. Recovery/completed, overlapping, foreign-host-only, nonparticipant, reserve and active-transit cases stay unchanged. The earlier objective must be unique, covered by the axis capture prefix and friendly-held. Valid routine, current operation/staging and reassignment orders retain precedence.
+
+The replacement comes only from the current objective approach and existing deterministic nearest friendly-path selection, with operation authorization rechecked. No staging fallback or new strategic intent is created. Existing T3 route/scope/political/ownership checks and T6 invalid-transit repair remain in force. This adds neither a phase reorder nor state/save fields. Focused ownership and registered-phase proof: `tests/stale_operation_march_reconciliation.test.ts` and `tests/mistral_prisoje_turn_order.test.ts`. Full-campaign neutrality and calibration gains remain separately measured gates.
 
 ## 4. Pipeline constraints
 

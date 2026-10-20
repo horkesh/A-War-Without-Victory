@@ -1,0 +1,18 @@
+{
+  "schema": "awwv.757.pre-t3-stale-operation-march-correction-closed.v1",
+  "writes_closed": true,
+  "result": "result.json",
+  "inventory": "inventory.json",
+  "original_757_seal_unchanged": true,
+  "review_758_findings_addressed": 3,
+  "focused_passed": 29,
+  "focused_failed": 0,
+  "root_noemit_child_exit": 0,
+  "root_noemit_wrapper_exit": 0,
+  "diff_check_exit": 0,
+  "C_before_after_exact": true,
+  "D_before_after_exact": true,
+  "targeted_read_only_verification_pending": true,
+  "campaigns_full_suites_saved_prefix_runs": 0,
+  "acceptance_or_gain_claim": false
+}

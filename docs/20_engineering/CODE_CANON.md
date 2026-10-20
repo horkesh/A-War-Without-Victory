@@ -27,6 +27,10 @@ If you touch determinism-sensitive areas, also read:
 ## Where to Start Reading the Code (First 30 Minutes)
 Read `docs/10_canon/context.md` first (workflow discipline and validation rules).
 
+### Pre-T3 stale operation march reconciliation
+
+`reconcileStaleOperationMarchOrders` in `commander_march_correction.ts` is a T2 command-owner prepass immediately before column consumption, separate from that module's T6 repairs. It requires unique state-wide operation/axis membership, valid effective-host ownership and completed prior-objective proof; preserves valid competing order authority and active transit; and selects only the current objective's existing friendly approach deterministically. It changes a pending destination only. T3/T6 guards, thresholds, state schema and objective identity stay unchanged. See `MOVEMENT_AUTHORITY.md` section3a and the focused stale-operation/Mistral fixtures; those do not establish campaign neutrality or calibration gain.
+
 ### Canonical turn pipelines (one owner per phase)
 - **War-phase pipeline:** `src/sim/turn_pipeline.ts` — `runTurn()`. Sole canonical runtime for live war behavior. Steps in `src/sim/turn_phases/war_phases.ts` and `early_war_phases.ts`; types in `src/sim/turn_pipeline_types.ts`.
 - **Peace/state pipeline:** `src/state/turn_pipeline.ts` — `runOneTurn()`. Sole canonical runtime for non-war weekly state progression (directives → deployments → military_interaction → fragmentation_resolution → supply_resolution → political_effects → exhaustion_update → persistence).
