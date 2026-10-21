@@ -1,0 +1,37 @@
+{
+  "schema": "awwv.boundary-observer-correction-inventory.v1",
+  "sealed_utc": "2026-10-21T05:19:31.1358699Z",
+  "tracked_modified": [
+    { "path": "src/sim/combat/reason_code_debug.ts", "bytes": 20066, "sha256": "07ac547769cd7df22bf183e662d48e7e0a5ab5e5ba1d67157f588acc2aa77b2c", "correction_changed": false },
+    { "path": "src/sim/combat/commander_march_correction.ts", "bytes": 28367, "sha256": "56f4fd5bb73c7a058752007481442bf21085298365dbd04955323ac87033e793", "correction_changed": false },
+    { "path": "src/sim/combat/pre_planned_operations.ts", "bytes": 150579, "sha256": "5ea85b79e0a2df80bfed1702c7fcceaaf44df5cdc66b661ce6296d0e3e9c392a", "correction_changed": false },
+    { "path": "tests/stale_operation_march_reconciliation.test.ts", "bytes": 16293, "sha256": "8f7bdeda256dcad937640dece529f10a5c287607b88b4742a1c2803b6cde14a5", "correction_changed": false },
+    { "path": "tests/pre_planned_operations.test.ts", "bytes": 135571, "sha256": "a4d283f516a6eefa94da900916d9a7d9599aa7f03d9462bda9b483467d54585e", "correction_changed": true },
+    { "path": "tests/reason_code_debug.test.ts", "bytes": 10386, "sha256": "84d6ead9826cba20534a63024d461e311baf2cebf79b2d06011be11da708f29a", "correction_changed": true }
+  ],
+  "correction_evidence": [
+    { "path": "logs/claude-channel-20261004/769-red-reconciliation-a-retrospective.json", "bytes": 1253, "sha256": "fd7d33ef8df0fcfc1d67d82d2f1ab2d0210e8ed56f1ceccc123ffcd6db3d06e9" },
+    { "path": "logs/claude-channel-20261004/769-correction-770-focused-a/receipt.json", "bytes": 2771, "sha256": "142d036d484cf997ea7244db75aba748ad6b9d9f687fbd89cee76a8fb397a9a6" },
+    { "path": "logs/claude-channel-20261004/769-correction-770-focused-a/vitest.json", "bytes": 47178, "sha256": "416f2bfee65324d18f29318987dfa7ff70d364b69c24e4278896c1a5cf8ad99c" },
+    { "path": "logs/claude-channel-20261004/769-correction-770-typecheck-a/receipt.json", "bytes": 2678, "sha256": "acbe8562084004e320f8ec2feb13a8af4834c1f3d4ceb296d9a594eea54665cd" },
+    { "path": "logs/claude-channel-20261004/769-correction-770-typecheck-a/tsconfig.tsbuildinfo", "bytes": 645018, "sha256": "20209df24641892ac43fd5b41bbc8b11fad98190841463f1498df6dd2b1df8a2" },
+    { "path": "logs/claude-channel-20261004/769-correction-770-archive-report-failure-retrospective.json", "bytes": 609, "sha256": "97df68a37b9974c36f4cbe62368aeec0479ec1d2f08dcbd57d610917a55efc0f" },
+    { "path": "logs/claude-channel-20261004/769-correction-770-result.json", "bytes": 4852, "sha256": "4d081dd8a7b3798a520694351bf3c276ed48116173c1f9f09f246543c1b7b63e" }
+  ],
+  "full_telemetry_archives": [
+    { "path": "logs/claude-channel-20261004/769-correction-770-preservation/c_lane_before.jsonl", "bytes": 101054372, "sha256": "b11e26cdda6948e8a0c6812a1e5563578d8de42d4cc4f235a25598d075acc8be" },
+    { "path": "logs/claude-channel-20261004/769-correction-770-preservation/c_lane_after.jsonl", "bytes": 101054372, "sha256": "b11e26cdda6948e8a0c6812a1e5563578d8de42d4cc4f235a25598d075acc8be" },
+    { "path": "logs/claude-channel-20261004/769-correction-770-preservation/d_lane_before.jsonl", "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" },
+    { "path": "logs/claude-channel-20261004/769-correction-770-preservation/d_lane_after.jsonl", "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" }
+  ],
+  "protected_pins": [
+    { "path": "src/sim/combat/commander/emit.ts", "bytes": 198276, "sha256": "6d04bd153030f88b7105f8d9e71510487576136cfa67a5f0bc10ba74ad7109ae" },
+    { "path": "data/calibration/engine_health_thresholds.json", "bytes": 3775, "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d" },
+    { "path": "data/source/calibration/painted_control_oct1995.json", "bytes": 35266, "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b" }
+  ],
+  "original_769_seals": [
+    { "path": "logs/claude-channel-20261004/769-result.json", "sha256": "e417ddf7b5e38053281f79d8670b249a53528f6c6fa9cb60e41b9d09ca495ce9" },
+    { "path": "logs/claude-channel-20261004/769-inventory.json", "sha256": "3b8007850a3679e1ab62029b4126e28ae00f91754b435fb510ec72ad5a977e09" },
+    { "path": "logs/claude-channel-20261004/769-closed.json", "sha256": "712b762cd37331b70466aebd99986099c6bd4db906fdff824134eff2c6c89108" }
+  ]
+}

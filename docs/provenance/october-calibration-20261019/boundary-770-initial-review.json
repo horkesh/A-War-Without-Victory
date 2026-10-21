@@ -1,0 +1,109 @@
+{
+  "schema": "awwv.boundary-observer-independent-review.v1",
+  "sealed_utc": "2026-10-21T05:15:14.0886853Z",
+  "writes_closed": true,
+  "reviewer": "independent Sol 770",
+  "verdict": "CORRECTION_REQUIRED",
+  "observer_readiness": false,
+  "campaign_neutrality_claimed": false,
+  "opening_head": "7de47be2050cbe2efee78b9028bf6b3a03bf3fca",
+  "scope": {
+    "production_files": [
+      "src/sim/combat/reason_code_debug.ts",
+      "src/sim/combat/commander_march_correction.ts",
+      "src/sim/combat/pre_planned_operations.ts"
+    ],
+    "test_files": [
+      "tests/stale_operation_march_reconciliation.test.ts",
+      "tests/pre_planned_operations.test.ts"
+    ],
+    "tracked_diff_at_review": "exactly 3 production plus 2 test files",
+    "excluded": ["campaign", "replay", "runTurn", "full suite", "package build", "historical causality", "old prepass or Praca mechanic review"]
+  },
+  "source_review": {
+    "verdict": "PASS",
+    "head_before_archive_matches_head": true,
+    "gameplay_helper_call_counts_match_head": true,
+    "guard_and_evaluation_order_match_head": true,
+    "mutation_and_return_order_match_head": true,
+    "commitment_collection_passes": 1,
+    "default_off_record_allocations": 0,
+    "game_state_fields_added": 0,
+    "save_or_weekly_fields_added": 0,
+    "file_telemetry_fields_added": 0,
+    "threshold_phase_canon_or_gameplay_changes": 0,
+    "determinism": "detached scalar/copy-only records, strict deterministic ordering where diagnostic identities are sorted, no clock/RNG/persisted counter, stable JSON stdout only",
+    "sink_isolation": "both emitters catch stable serialization and console failures",
+    "identity": "contiguous_unsequenced invocation keys make repeated same-key attempts joinable without claiming uniqueness"
+  },
+  "findings": [
+    {
+      "severity": "critical",
+      "id": "770-F1",
+      "file": "tests/pre_planned_operations.test.ts",
+      "line": 2731,
+      "finding": "The real direct injectPrePlannedOperations path is exercised only with the topic enabled; unlike the queued path, it has no enabled-versus-disabled full-state, ordinary void-return, and stable-serialization equality proof. The throwing sink assertion also exercises only injectQueuedOperation.",
+      "required_correction": "Add direct-path ON/OFF state, return and serialized-byte parity plus direct-path throwing-sink containment."
+    },
+    {
+      "severity": "critical",
+      "id": "770-F2",
+      "file": "tests/reason_code_debug.test.ts",
+      "line": 36,
+      "finding": "The test-local ALL_TOPICS matrix is non-exhaustive and omits reconciliation_write and preplanned_eligibility, so its unset/empty, all/*, whitespace/case, and malformed-selector checks do not cover the two new topics.",
+      "required_correction": "Add both topics to the selector matrix and retain exact-name feature coverage."
+    },
+    {
+      "severity": "process",
+      "id": "770-F3",
+      "file": "logs/claude-channel-20261004/769-inventory.json",
+      "finding": "The pre-wrapper 769-red-reconciliation-a placeholder-quoting failure is disclosed honestly but exists only in the parent tool transcript, leaving no local artifact that this independent review can hash.",
+      "required_correction": "Preserve an exact retrospective literal copy of the attempted argv and error, labeled copied from the parent tool transcript and explicitly not a wrapper/runtime receipt."
+    }
+  ],
+  "non_findings": [
+    "No production semantic, ownership, mutation-order, or determinism defect found.",
+    "Reconciliation records the actual pre-write and post-assignment tuples and every source terminal with later guards NOT_REACHED.",
+    "Preplanned records distinguish caller rejection, build-null, built result, viable-floor deferral and admission; commitment identities include recovery operations.",
+    "The untested axis/build terminal branches were inspected directly and match the real branch exits; no broad test expansion is requested."
+  ],
+  "retained_test_evidence": {
+    "focused_combined": {"attempt": "769-focused-combined-a", "tests": 159, "passed": 159, "failed": 0, "child_exit": 0, "wrapper_exit": 0},
+    "targeted_correction": {"attempt": "769-correction-focused-a", "tests": 132, "passed": 132, "failed": 0, "child_exit": 0, "wrapper_exit": 0},
+    "final_off_allocation_subset": {"attempt": "769-off-allocation-correction-a", "tests": 100, "passed": 100, "failed": 0, "child_exit": 0, "wrapper_exit": 0},
+    "final_typecheck": {"attempt": "769-typecheck-d", "child_exit": 0, "wrapper_exit": 0},
+    "count_scope": "159, 132 and 100 are overlapping runs at their actual scopes and are not added together"
+  },
+  "retained_failures": {
+    "red_reconciliation_b": "32 total, 25 passed, 7 failed",
+    "red_reconciliation_c": "32 total, 26 passed, 6 expected observer-absence failures",
+    "red_preplanned_a": "95 total, 91 passed, 4 expected observer-absence failures",
+    "green_preplanned_a": "95 total, 92 passed, 3 failed",
+    "green_preplanned_b": "95 total, 93 passed, 2 failed",
+    "typecheck_a": "child 1/wrapper 126, malformed joined --tsBuildInfoFile argument",
+    "typecheck_b": "child 2/wrapper 2, retained TypeScript errors later corrected",
+    "usage_failure": "769-red-reconciliation-a rejected before attempt-directory creation; local evidence correction required by 770-F3"
+  },
+  "preservation": {
+    "source_before_archive_matches_head": true,
+    "c_before_after": {"bytes": 101054372, "sha256": "b11e26cdda6948e8a0c6812a1e5563578d8de42d4cc4f235a25598d075acc8be", "identical": true},
+    "d_before_after": {"bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3", "identical": true},
+    "protected": [
+      {"path": "src/sim/combat/commander/emit.ts", "bytes": 198276, "sha256": "6d04bd153030f88b7105f8d9e71510487576136cfa67a5f0bc10ba74ad7109ae"},
+      {"path": "data/calibration/engine_health_thresholds.json", "bytes": 3775, "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d"},
+      {"path": "data/source/calibration/painted_control_oct1995.json", "bytes": 35266, "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b"}
+    ]
+  },
+  "evidence_hashes": [
+    {"path": "logs/claude-channel-20261004/768-root-plan.md", "sha256": "68f9e1832cb70720c2c0d03384d168e0b1e4badb42dd64da057a7f110d1e69c3"},
+    {"path": "logs/claude-channel-20261004/769-result.json", "sha256": "e417ddf7b5e38053281f79d8670b249a53528f6c6fa9cb60e41b9d09ca495ce9"},
+    {"path": "logs/claude-channel-20261004/769-inventory.json", "sha256": "3b8007850a3679e1ab62029b4126e28ae00f91754b435fb510ec72ad5a977e09"},
+    {"path": "logs/claude-channel-20261004/769-closed.json", "sha256": "712b762cd37331b70466aebd99986099c6bd4db906fdff824134eff2c6c89108"},
+    {"path": "logs/claude-channel-20261004/769-preservation-before/source-before-head-7de47be.zip", "sha256": "18dffe0fe31ab11735b54b39098fda0f61c7b34579fa9a922d3d660c4105e079"},
+    {"path": "logs/claude-channel-20261004/769-focused-combined-a/vitest.json", "sha256": "213dde13c46de133cd59e787a3990f8b56f43bc615ab58b804b1d32a8b0daaf0"},
+    {"path": "logs/claude-channel-20261004/769-correction-focused-a/vitest.json", "sha256": "a29a11e616164ccbad756f9d99b973e783934c823c8a03ab7d6626705bb7a0a3"},
+    {"path": "logs/claude-channel-20261004/769-off-allocation-correction-a/vitest.json", "sha256": "bbef298d44a5247caf5eb6fa77509820711d8c06dd3afa2e09042b25a9437681"},
+    {"path": "logs/claude-channel-20261004/769-typecheck-d/receipt.json", "sha256": "2d93a9151e22a75203e8408a16e8f2a6944650960f8f128435390dda262e6c75"}
+  ],
+  "next_action": "One tests/evidence-only correction for 770-F1 through 770-F3, followed by one targeted correction verification. Reuse unchanged production-source and preservation evidence."
+}

@@ -16,6 +16,10 @@ Measured n81 qualification fails689/712 with14 previously correct October cells 
 
 `tests/stale_operation_march_reconciliation.test.ts` covers deterministic insertion-order selection, unique state-wide membership across phases/hosts, completed-prefix proof, preserved valid orders/transit and blocked/no-approach cases. `tests/mistral_prisoje_turn_order.test.ts` exercises the registered production phase before T3 and survival through T6; an independently invalid transit remains rejected. Final focused29/29 and typecheck0 are preparation evidence only. Required authoritative188, formerly-correct-cell loss, anchor/artifact/provenance and qualifying full-suite gates remain separate; retained n80 score703/712 is not a new-engine measurement.
 
+## Reconciliation and preplanned stdout observers (2026-10-21)
+
+Default-off topics `reconciliation_write` / `preplanned_eligibility` are covered by tests/stale_operation_march_reconciliation.test.ts, tests/pre_planned_operations.test.ts and tests/reason_code_debug.test.ts. Real queued/direct entry fixtures compare complete state, ordinary return and full serialized bytes OFF/ON, plus throwing-sink isolation. Repeated records are stable; snapshots detach; actual guard/write/axis/admission distinctions and generic selector modes are covered. Final correction141/141 and rootnoEmit0 follow earlier159/132/100 overlapping scopes; never sum them. Independent source comparison checks original predicate/helper/evaluation/mutation order. These are observer-preparation gates, not a new campaign, historical first-writer proof or replacement for inherited calibration/qualifying gates.
+
 ## Rules → Gates
 ### No timestamps / wall-clock values
 - Gate: `tests/determinism_static_scan_r1_5.test.ts`

@@ -1,0 +1,207 @@
+{
+  "schema": "awwv.771.reviewed-boundary-observers.v1",
+  "captured_utc": "2026-10-21T05:25:11.764Z",
+  "writes_closed": true,
+  "verdict": "PASS_OBSERVER_READINESS_ONLY__NO_NEW_CAMPAIGN",
+  "summary": "Default-off observer-only reconciliation_write and preplanned_eligibility stdout receipts implemented and independently verified. They expose actual write/guard and queued/direct eligibility/admission boundaries without changing gameplay, thresholds or state/save/weekly fields. Final focused141/141 and noEmit0; C/D telemetry byte-identical. Retained n80 remains703/712; n81 rejected689, no campaign or adoption.",
+  "inputs": [
+    {
+      "path": "logs/claude-channel-20261004/769-result.json",
+      "sha256": "e417ddf7b5e38053281f79d8670b249a53528f6c6fa9cb60e41b9d09ca495ce9"
+    },
+    {
+      "path": "logs/claude-channel-20261004/769-inventory.json",
+      "sha256": "3b8007850a3679e1ab62029b4126e28ae00f91754b435fb510ec72ad5a977e09"
+    },
+    {
+      "path": "logs/claude-channel-20261004/769-closed.json",
+      "sha256": "712b762cd37331b70466aebd99986099c6bd4db906fdff824134eff2c6c89108"
+    },
+    {
+      "path": "logs/claude-channel-20261004/769-correction-770-result.json",
+      "sha256": "4d081dd8a7b3798a520694351bf3c276ed48116173c1f9f09f246543c1b7b63e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/769-correction-770-inventory.json",
+      "sha256": "a5dcc311749c56a3166228c8ef163253b797ef91b788c123311992da873d24cc"
+    },
+    {
+      "path": "logs/claude-channel-20261004/769-correction-770-closed.json",
+      "sha256": "051aac7e6ac48ea240af383f96f290a98919392825bc9378fee53e718cce4870"
+    },
+    {
+      "path": "logs/claude-channel-20261004/770-independent-review.json",
+      "sha256": "ea9537ab4d565f04e179638b46f062d9f386c9a3d55f48fa57e835c4dd9f6159"
+    },
+    {
+      "path": "logs/claude-channel-20261004/770-targeted-verification.json",
+      "sha256": "4ebf0067189c42466fc7367c9756df278ce409d7a0754f8410cf27c1e821c4a3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/771-postclose-tool-transcript.json",
+      "sha256": "05bf5a33ec1951da3299a2ceb483476dccf8bba6223ce8a435dd856d5e783973"
+    }
+  ],
+  "files": [
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20066,
+      "sha256": "07ac547769cd7df22bf183e662d48e7e0a5ab5e5ba1d67157f588acc2aa77b2c",
+      "correction_changed": false
+    },
+    {
+      "path": "src/sim/combat/commander_march_correction.ts",
+      "bytes": 28367,
+      "sha256": "56f4fd5bb73c7a058752007481442bf21085298365dbd04955323ac87033e793",
+      "correction_changed": false
+    },
+    {
+      "path": "src/sim/combat/pre_planned_operations.ts",
+      "bytes": 150579,
+      "sha256": "5ea85b79e0a2df80bfed1702c7fcceaaf44df5cdc66b661ce6296d0e3e9c392a",
+      "correction_changed": false
+    },
+    {
+      "path": "tests/stale_operation_march_reconciliation.test.ts",
+      "bytes": 16293,
+      "sha256": "8f7bdeda256dcad937640dece529f10a5c287607b88b4742a1c2803b6cde14a5",
+      "correction_changed": false
+    },
+    {
+      "path": "tests/pre_planned_operations.test.ts",
+      "bytes": 135571,
+      "sha256": "a4d283f516a6eefa94da900916d9a7d9599aa7f03d9462bda9b483467d54585e",
+      "correction_changed": true
+    },
+    {
+      "path": "tests/reason_code_debug.test.ts",
+      "bytes": 10386,
+      "sha256": "84d6ead9826cba20534a63024d461e311baf2cebf79b2d06011be11da708f29a",
+      "correction_changed": true
+    }
+  ],
+  "topics": [
+    "reconciliation_write",
+    "preplanned_eligibility"
+  ],
+  "prefixes": [
+    "[reconciliation_write]",
+    "[preplanned_eligibility]"
+  ],
+  "enable": "AWWV_DEBUG_REASON_CODES=reconciliation_write,preplanned_eligibility",
+  "behavior": {
+    "default_off": true,
+    "sink_failure_isolated": true,
+    "stdout_stable_json_only": true,
+    "game_state_fields_added": 0,
+    "weekly_report_fields_added": 0,
+    "schema_changes": 0,
+    "gameplay_predicate_changes": 0,
+    "threshold_changes": 0,
+    "phase_order_changes": 0,
+    "file_telemetry_changes": 0,
+    "caller_linkage": "deterministic caller/turn/corps/operation key with contiguous_unsequenced marker; repeated same-turn attempts are not falsely numbered or claimed unique",
+    "candidate_order": "authored declaration and existing decision order unchanged; only detached diagnostic identity copies are sorted"
+  },
+  "coverage": {
+    "reconciliation": [
+      "call start/no-orders/completion",
+      "sorted real order candidates and every existing terminal guard",
+      "global participant/axis memberships across phases",
+      "effective loan/home corps",
+      "selected operation/axis/objective/capture prefix/controller",
+      "approach set and selected replacement",
+      "immediate-before and actual-after real orders assignment"
+    ],
+    "preplanned": [
+      "public queued injection and direct preplanned construction callers",
+      "outer exits before build",
+      "shared build start/end",
+      "each authored candidate first actual rejection or selection with NOT_REACHED later guards",
+      "exact active commitment identities including recovery",
+      "axis no-formation/no-hostile-objective/built outcomes",
+      "build returned versus viable-floor defer versus stored/admitted caller outcome"
+    ]
+  },
+  "validation": {
+    "final_focused": {
+      "attempt": "769-correction-770-focused-a",
+      "requested_files": [
+        "tests/pre_planned_operations.test.ts",
+        "tests/reason_code_debug.test.ts"
+      ],
+      "total": 141,
+      "passed": 141,
+      "failed": 0,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timeout_ms": 120000,
+      "vitest_sha256": "416f2bfee65324d18f29318987dfa7ff70d364b69c24e4278896c1a5cf8ad99c"
+    },
+    "final_root_noemit": {
+      "attempt": "769-correction-770-typecheck-a",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timeout_ms": 180000,
+      "private_build_info": "tsconfig.tsbuildinfo",
+      "build_info_sha256": "20209df24641892ac43fd5b41bbc8b11fad98190841463f1498df6dd2b1df8a2"
+    },
+    "earlier_green_scopes": {
+      "focused_combined": "769-focused-combined-a: 159/159",
+      "targeted_correction": "769-correction-focused-a: 132/132",
+      "off_allocation_subset": "769-off-allocation-correction-a: 100/100",
+      "count_rule": "Overlapping runs retained at their actual scopes; counts are not added."
+    },
+    "neutrality_fixture_scope": {
+      "reconciliation": "topic-OFF absence plus full state, ordinary void return, and serializeState equality; topic-ON equals OFF after real replacement; throwing stdout does not escape",
+      "preplanned": "topic-OFF absence plus full state, boolean/void ordinary return, and stable full-state bytes; topic-ON equals OFF through public queued/direct paths; repeated receipts byte-stable; throwing stdout does not escape"
+    },
+    "source_comparison": "Independent770 checks original HEAD guard/short-circuit/helper-call/mutation/return order, not only ON/OFF parity.",
+    "review": "Initial770 requested direct-entry parity/sink coverage, new-topic selector matrix and locally retained pre-wrapper error; one test/evidence-only correction and targeted770 PASS. No production changes in correction.",
+    "counts_are_not_added": true
+  },
+  "preservation": {
+    "archive": "logs/claude-channel-20261004/769-correction-770-preservation",
+    "c_before_after": {
+      "bytes": 101054372,
+      "sha256": "b11e26cdda6948e8a0c6812a1e5563578d8de42d4cc4f235a25598d075acc8be",
+      "identical": true,
+      "appended_bytes": 0
+    },
+    "d_before_after": {
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "identical": true,
+      "appended_bytes": 0
+    },
+    "protected_pins_unchanged": true
+  },
+  "retained_failures": {
+    "initial_attempts": "All RED/failed preflight/typecheck attempts retained in original769 inventory, including retrospective pre-wrapper usage copy. They are not green reruns.",
+    "correction_archive_report": {
+      "path": "logs/claude-channel-20261004/769-correction-770-archive-report-failure-retrospective.json",
+      "sha256": "97df68a37b9974c36f4cbe62368aeec0479ec1d2f08dcbd57d610917a55efc0f",
+      "effect": "A post-test PowerShell reporting command was rejected during parsing before execution; the corrected archive command then succeeded."
+    },
+    "postclose_parse_failure": "Supplemental771 transcript outside closed769 set, hash in inputs; parser rejected before execution, no source/telemetry changed, exact original time/numeric exit unknown."
+  },
+  "scope": {
+    "production_files": 3,
+    "test_files": 3,
+    "new_campaigns": 0,
+    "full_suites": 0,
+    "builds": 0,
+    "replays": 0,
+    "runTurn_calls": 0,
+    "gameplay_predicate_changes": 0,
+    "threshold_control_schema_canon_changes": 0
+  },
+  "limits": [
+    "Focused fixture state/return/serialized-byte neutrality is not full-campaign neutrality or historical first-writer proof.",
+    "invocation_key is deterministic context, not a unique attempt ID. Repeated same-turn calls remain contiguous_unsequenced blocks and must not be deduplicated by key.",
+    "Record actual reached guards and NOT_REACHED; built/emitted is not admitted. No inferred turn/week conversion is added.",
+    "No standalone reader or new campaign run belongs to this task. A future measured diagnostic requires separate authorization and cheapest coverage checks.",
+    "n80 retained703/712 remains prior unadopted evidence; n81 rejected689/global prepass remains unadopted, no mechanic fix or recovery claimed.",
+    "All inherited unmet acceptance/preservation/history gates remain unmet. Raw evidence stays LOCAL with pushed inventory, not remote raw-byte backup."
+  ]
+}

@@ -92,3 +92,10 @@ regression-761 result/inventory/closed receipt preserve the exact run, checkpoin
 Prača divergence traced to a missed RS capture: n80 captures it on turn26 through Kijevo; n81 never captures it. n81 lacks Kijevo's Prača axis while the 4th Sarajevo Brigade is committed to a turn23 probe. Existing commitment filters explain that omission, but their actual rejection call and the first reconciliation write remain unmeasured. No gameplay fix is yet justified; retain703/712 and keep n81 rejected.
 
 praca-765 initial result/inventory/closed preserve original overclaims and invalid assumed timestamp metadata. Corrected765 qualifies controls, time/source provenance and causal scope;766 initial/targeted reviews retain remaining initial-roster wording finding. praca-767 is the authoritative narrowed synthesis (n80AAR24counts2/25counts3; no observed initial3 claim). Raw trace132839bytes and extractor receipts stayLOCAL, with published identities. No new simulation or gameplay change; C/D/thresholds remain exact,703/712 is retained evidence only.
+
+
+## Boundary observer preparation — 2026-10-21
+
+Default-off observer-only reconciliation_write and preplanned_eligibility stdout receipts implemented and independently verified. They expose actual write/guard and queued/direct eligibility/admission boundaries without changing gameplay, thresholds or state/save/weekly fields. Final focused141/141 and noEmit0; C/D telemetry byte-identical. Retained n80 remains703/712; n81 rejected689, no campaign or adoption.
+
+Boundary769 initial/corrected result, inventory and closed receipts plus770 initial/targeted reviews preserve actual scopes and one correction. boundary-771 is the reviewed synthesis; its inputs also pin the supplemental post-close parser-error transcript keptLOCAL outside closed769. Initial failed preflight/typecheck/RED bytes and retrospective errors remain preserved. Final141/141 is not summed with159/132/100 earlier checks. These records establish observer readiness only; no new campaign, first historical writer, acceptance, rollback or recovery claim. Raw archives/logsLOCAL with pushed identities.

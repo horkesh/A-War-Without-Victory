@@ -1,5 +1,7 @@
-import { describe, expect, it } from 'vitest';
-import type { GameState } from '../src/state/game_state.js';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { CURRENT_SCHEMA_VERSION, type GameState } from '../src/state/game_state.js';
+import { serializeState } from '../src/state/serialize.js';
+import { resetReasonCodeTopicCacheForTests } from '../src/sim/combat/reason_code_debug.js';
 import {
     correctTransitStates,
     reconcileStaleOperationMarchOrders,
@@ -84,7 +86,9 @@ function state(overrides: {
         ? [{ ...op, name: 'Foreign hosted operation' }]
         : [];
     return {
+        schema_version: CURRENT_SCHEMA_VERSION,
         meta: { turn: 10, seed: 'test', phase: 'war' },
+        factions: [{ id: 'HRHB' }, { id: 'RS' }, { id: 'RBiH' }],
         political: { political_controllers: {
             start: 'HRHB', mid: 'HRHB', [APPROACH]: overrides.emptyApproach ? 'RS' : 'HRHB',
             [CURRENT]: 'RS', [OLD]: overrides.oldFriendly === false ? 'RS' : 'HRHB', [STAGING]: 'HRHB',
@@ -130,6 +134,7 @@ function state(overrides: {
                 } : {}),
             } : {},
         },
+        displacement: {},
     } as unknown as GameState;
 }
 
@@ -207,5 +212,112 @@ describe('pre-T3 stale operation march reconciliation', () => {
         input.military.brigade_movement_state![B]!.destination_sids = ['unrelated_bad_destination'];
         correctTransitStates(input, graph());
         expect(input.military.brigade_movement_state?.[B]).toBeUndefined();
+    });
+});
+
+describe('reconciliation write observer', () => {
+    const originalTopics = process.env.AWWV_DEBUG_REASON_CODES;
+
+    afterEach(() => {
+        if (originalTopics === undefined) delete process.env.AWWV_DEBUG_REASON_CODES;
+        else process.env.AWWV_DEBUG_REASON_CODES = originalTopics;
+        resetReasonCodeTopicCacheForTests();
+        vi.restoreAllMocks();
+    });
+
+    function records(log: ReturnType<typeof vi.spyOn>): Array<Record<string, any>> {
+        return log.mock.calls
+            .map(([line]) => String(line))
+            .filter((line) => line.startsWith('[reconciliation_write] '))
+            .map((line) => JSON.parse(line.slice('[reconciliation_write] '.length)));
+    }
+
+    it('is absent when off and leaves the full state and serialization byte-identical', () => {
+        delete process.env.AWWV_DEBUG_REASON_CODES;
+        resetReasonCodeTopicCacheForTests();
+        const input = state();
+        const control = structuredClone(input);
+        const beforeBytes = serializeState(input);
+        const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+        reconcile(input);
+        reconcile(control);
+
+        expect(records(log)).toEqual([]);
+        expect(input).toEqual(control);
+        expect(serializeState(input)).toBe(serializeState(control));
+        expect(beforeBytes).not.toBe(serializeState(input));
+    });
+
+    it('records actual reached guards, memberships, and the real pre/post assignment', () => {
+        process.env.AWWV_DEBUG_REASON_CODES = 'reconciliation_write';
+        resetReasonCodeTopicCacheForTests();
+        const input = state();
+        const control = structuredClone(input);
+        const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+        reconcile(input);
+        const observedBytes = serializeState(input);
+        delete process.env.AWWV_DEBUG_REASON_CODES;
+        resetReasonCodeTopicCacheForTests();
+        reconcile(control);
+
+        expect(input).toEqual(control);
+        expect(observedBytes).toBe(serializeState(control));
+        const rows = records(log);
+        const terminal = rows.find((row) => row.kind === 'candidate_terminal');
+        if (!terminal) throw new Error('missing reconciliation candidate terminal');
+        expect(terminal).toMatchObject({
+            actual_exit: 'replaced',
+            brigade_id: B,
+            old_order: { owner: 'bot_discretionary', stance: 'column', destination_sids: [OLD] },
+            new_order: { owner: 'bot_discretionary', stance: 'column', destination_sids: [APPROACH] },
+            selected_operation: { name: 'Operation', phase: 'execution' },
+            selected_axis: { axis_id: 'axis', current_objective_index: 1 },
+        });
+        expect(terminal.guards.order_present).toBe(true);
+        expect(terminal.guards.replacement_authorized).toBe(true);
+        expect(terminal.approaches).toEqual([APPROACH]);
+        expect(rows.at(0)).toMatchObject({ kind: 'call_start', turn: 10, order_count: 1 });
+        expect(rows.at(-1)).toMatchObject({ kind: 'call_terminal', actual_exit: 'completed', candidate_count: 1 });
+    });
+
+    it.each([
+        ['valid competing owner', { owner: 'authored_preplanned' }, 'order_owner_or_stance'],
+        ['active transit', { activeTransit: true }, 'active_transit'],
+        ['recovery operation', { phase: 'recovery' }, 'operation_phase'],
+        ['reserve membership', { reserve: true }, 'reserve_membership'],
+    ])('marks later guards NOT_REACHED for %s', (_name, overrides, actualExit) => {
+        process.env.AWWV_DEBUG_REASON_CODES = 'reconciliation_write';
+        resetReasonCodeTopicCacheForTests();
+        const input = state(overrides as Parameters<typeof state>[0]);
+        const before = structuredClone(input);
+        const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+        reconcile(input);
+
+        const terminal = records(log).find((row) => row.kind === 'candidate_terminal');
+        if (!terminal) throw new Error('missing reconciliation candidate terminal');
+        expect(terminal.actual_exit).toBe(actualExit);
+        expect(terminal.guards.replacement_authorized).toBe('NOT_REACHED');
+        expect(input).toEqual(before);
+    });
+
+    it('reports the no-orders terminal and isolates a throwing stdout sink', () => {
+        process.env.AWWV_DEBUG_REASON_CODES = 'reconciliation_write';
+        resetReasonCodeTopicCacheForTests();
+        const empty = state();
+        delete empty.military.brigade_movement_orders;
+        const log = vi.spyOn(console, 'log').mockImplementation(() => { throw new Error('sink failed'); });
+
+        expect(() => reconcile(empty)).not.toThrow();
+
+        log.mockRestore();
+        const capture = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+        reconcile(empty);
+        expect(records(capture)).toEqual([
+            expect.objectContaining({ kind: 'call_start', order_count: 0 }),
+            expect.objectContaining({ kind: 'call_terminal', actual_exit: 'no_orders', candidate_count: 0 }),
+        ]);
     });
 });

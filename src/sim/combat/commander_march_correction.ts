@@ -60,6 +60,84 @@ import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { isEligibleOperationFormation } from '../../state/formation_constants.js';
 import type { Osid } from './osid_adjacency.js';
+import {
+    emitReconciliationWriteRecord,
+    isReasonCodeTopicEnabled,
+    sortedIds,
+} from './reason_code_debug.js';
+
+const RECONCILIATION_GUARDS = [
+    'order_present',
+    'formation_present',
+    'formation_eligible',
+    'owner_column',
+    'active_transit_absent',
+    'reserve_membership_absent',
+    'destination_present',
+    'location_present',
+    'effective_corps_present',
+    'unique_membership',
+    'membership_host_matches_effective_corps',
+    'participating',
+    'operation_phase_active',
+    'unique_axis',
+    'destination_not_staging',
+    'destination_not_operation_authorized',
+    'destination_not_reassignment_authorized',
+    'destination_not_routine_authorized',
+    'prior_objective_unique',
+    'current_index_after_prior',
+    'current_index_in_range',
+    'capture_prefix_complete',
+    'prior_objective_friendly',
+    'approaches_nonempty',
+    'replacement_present',
+    'replacement_changed',
+    'replacement_in_approaches',
+    'replacement_authorized',
+] as const;
+
+type ReconciliationGuard = typeof RECONCILIATION_GUARDS[number];
+type ReconciliationObserver = {
+    turn: number;
+    candidate_ordinal: number;
+    brigade_id: string;
+    guards: Record<ReconciliationGuard, boolean | 'NOT_REACHED'>;
+    old_order: Record<string, unknown> | null;
+    [key: string]: unknown;
+};
+
+function movementOrderTuple(order: NonNullable<GameState['military']['brigade_movement_orders']>[string] | undefined): Record<string, unknown> | null {
+    if (!order) return null;
+    return {
+        owner: order.owner ?? null,
+        stance: order.stance ?? null,
+        destination_sids: [...(order.destination_sids ?? [])],
+    };
+}
+
+function beginReconciliationCandidate(
+    turn: number,
+    candidateOrdinal: number,
+    brigadeId: string,
+    order: NonNullable<GameState['military']['brigade_movement_orders']>[string] | undefined,
+): ReconciliationObserver {
+    return {
+        turn,
+        candidate_ordinal: candidateOrdinal,
+        brigade_id: brigadeId,
+        guards: Object.fromEntries(RECONCILIATION_GUARDS.map((guard) => [guard, 'NOT_REACHED'])) as ReconciliationObserver['guards'],
+        old_order: movementOrderTuple(order),
+    };
+}
+
+function finishReconciliationCandidate(observer: ReconciliationObserver, actualExit: string): void {
+    emitReconciliationWriteRecord({
+        kind: 'candidate_terminal',
+        actual_exit: actualExit,
+        ...observer,
+    });
+}
 
 /**
  * Reconcile a pending operation march that still targets a proved-completed objective.
@@ -75,24 +153,64 @@ export function reconcileStaleOperationMarchOrders(
 ): void {
     const formations = state.military.formations ?? {};
     const orders = state.military.brigade_movement_orders;
-    if (!orders) return;
+    const observe = isReasonCodeTopicEnabled('reconciliation_write');
+    const turn = state.meta?.turn ?? 0;
+    if (observe) {
+        emitReconciliationWriteRecord({
+            kind: 'call_start',
+            turn,
+            order_count: orders ? Object.keys(orders).length : 0,
+        });
+    }
+    if (!orders) {
+        if (observe) emitReconciliationWriteRecord({ kind: 'call_terminal', turn, actual_exit: 'no_orders', candidate_count: 0 });
+        return;
+    }
 
-    for (const brigadeId of Object.keys(orders).sort(strictCompare)) {
+    const orderedBrigadeIds = Object.keys(orders).sort(strictCompare);
+    for (let candidateOrdinal = 0; candidateOrdinal < orderedBrigadeIds.length; candidateOrdinal += 1) {
+        const brigadeId = orderedBrigadeIds[candidateOrdinal]!;
         const order = orders[brigadeId];
         const formation = formations[brigadeId];
-        if (!order || !formation || !isEligibleOperationFormation(formation)) continue;
-        if (order.owner !== 'bot_discretionary' || order.stance !== 'column') continue;
-        if (state.military.brigade_movement_state?.[brigadeId]) continue;
-        if (Object.values(state.military.corps_front_sectors ?? {})
-            .some((sector) => sector.reserve_brigade_ids?.includes(brigadeId as FormationId))) continue;
+        const observer = observe ? beginReconciliationCandidate(turn, candidateOrdinal, brigadeId, order) : undefined;
+        if (observer) observer.guards.order_present = order != null;
+        if (!order) { if (observer) finishReconciliationCandidate(observer, 'order_missing'); continue; }
+        if (observer) observer.guards.formation_present = formation != null;
+        if (!formation) { if (observer) finishReconciliationCandidate(observer, 'formation_missing'); continue; }
+        const formationEligible = isEligibleOperationFormation(formation);
+        if (observer) observer.guards.formation_eligible = formationEligible;
+        if (!formationEligible) { if (observer) finishReconciliationCandidate(observer, 'formation_ineligible'); continue; }
+        const ownerColumn = order.owner === 'bot_discretionary' && order.stance === 'column';
+        if (observer) observer.guards.owner_column = ownerColumn;
+        if (!ownerColumn) { if (observer) finishReconciliationCandidate(observer, 'order_owner_or_stance'); continue; }
+        const activeTransitAbsent = !state.military.brigade_movement_state?.[brigadeId];
+        if (observer) observer.guards.active_transit_absent = activeTransitAbsent;
+        if (!activeTransitAbsent) { if (observer) finishReconciliationCandidate(observer, 'active_transit'); continue; }
+        const reserveMembershipAbsent = !Object.values(state.military.corps_front_sectors ?? {})
+            .some((sector) => sector.reserve_brigade_ids?.includes(brigadeId as FormationId));
+        if (observer) observer.guards.reserve_membership_absent = reserveMembershipAbsent;
+        if (!reserveMembershipAbsent) { if (observer) finishReconciliationCandidate(observer, 'reserve_membership'); continue; }
 
         const destination = order.destination_sids?.[0];
         const location = formation.location_osid;
-        if (!destination || !location) continue;
+        if (observer) observer.guards.destination_present = Boolean(destination);
+        if (!destination) { if (observer) finishReconciliationCandidate(observer, 'destination_missing'); continue; }
+        if (observer) observer.guards.location_present = Boolean(location);
+        if (!location) { if (observer) finishReconciliationCandidate(observer, 'location_missing'); continue; }
 
         const loan = formation.elite_loan_state;
         const effectiveCorps = loan?.on_loan ? loan.loaned_to_corps : formation.corps_id;
-        if (!effectiveCorps) continue;
+        if (observer) {
+            observer.loan = loan ? {
+                on_loan: loan.on_loan,
+                loaned_to_corps: loan.loaned_to_corps ?? null,
+            } : null;
+            observer.effective_corps = effectiveCorps ?? null;
+            observer.location = location;
+            observer.destination = destination;
+            observer.guards.effective_corps_present = Boolean(effectiveCorps);
+        }
+        if (!effectiveCorps) { if (observer) finishReconciliationCandidate(observer, 'effective_corps_missing'); continue; }
         const memberships: Array<{
             hostCorpsId: string;
             operation: CorpsOperation;
@@ -110,32 +228,94 @@ export function reconcileStaleOperationMarchOrders(
                 }
             }
         }
-        if (memberships.length !== 1) continue;
+        if (observer) {
+            observer.memberships = memberships.map((entry) => ({
+                host_corps_id: entry.hostCorpsId,
+                operation: {
+                    name: entry.operation.name,
+                    type: entry.operation.type,
+                    phase: entry.operation.phase,
+                    started_turn: entry.operation.started_turn,
+                },
+                participating: entry.participating,
+                axes: entry.axes.map((candidateAxis) => ({
+                    axis_id: candidateAxis.axis_id,
+                    current_objective_index: candidateAxis.current_objective_index,
+                    objective_capture_count: candidateAxis.objective_capture_count,
+                })).sort((a, b) => strictCompare(a.axis_id, b.axis_id)),
+            })).sort((a, b) => strictCompare(a.host_corps_id, b.host_corps_id)
+                || strictCompare(a.operation.name, b.operation.name));
+            observer.guards.unique_membership = memberships.length === 1;
+        }
+        if (memberships.length !== 1) { if (observer) finishReconciliationCandidate(observer, 'membership_count'); continue; }
         const membership = memberships[0]!;
-        if (membership.hostCorpsId !== effectiveCorps || !membership.participating) continue;
+        const hostMatches = membership.hostCorpsId === effectiveCorps;
+        if (observer) observer.guards.membership_host_matches_effective_corps = hostMatches;
+        if (!hostMatches) { if (observer) finishReconciliationCandidate(observer, 'membership_host'); continue; }
+        if (observer) observer.guards.participating = membership.participating;
+        if (!membership.participating) { if (observer) finishReconciliationCandidate(observer, 'not_participating'); continue; }
         const operation = membership.operation;
-        if (operation.phase !== 'planning' && operation.phase !== 'execution') continue;
+        const activePhase = operation.phase === 'planning' || operation.phase === 'execution';
+        if (observer) observer.guards.operation_phase_active = activePhase;
+        if (!activePhase) { if (observer) finishReconciliationCandidate(observer, 'operation_phase'); continue; }
         const axes = membership.axes;
-        if (axes.length !== 1) continue;
+        if (observer) observer.guards.unique_axis = axes.length === 1;
+        if (axes.length !== 1) { if (observer) finishReconciliationCandidate(observer, 'axis_count'); continue; }
         const axis = axes[0]!;
+        if (observer) {
+            observer.selected_operation = {
+                name: operation.name,
+                type: operation.type,
+                phase: operation.phase,
+                started_turn: operation.started_turn,
+            };
+            observer.selected_axis = {
+                axis_id: axis.axis_id,
+                objectives: [...axis.objectives],
+                current_objective_index: axis.current_objective_index,
+                objective_capture_count: axis.objective_capture_count,
+                staging_osid: axis.staging_osid ?? null,
+            };
+        }
 
-        if (axis.staging_osid === destination) continue;
-        if (isDestinationAuthorizedByOperation(state, brigadeId, destination, adjacency, reverseMap)) continue;
-        if (isMovementAuthorizedByCorpsReassignment(state, formation, destination, adjacency, reverseMap)) continue;
+        const destinationNotStaging = axis.staging_osid !== destination;
+        if (observer) observer.guards.destination_not_staging = destinationNotStaging;
+        if (!destinationNotStaging) { if (observer) finishReconciliationCandidate(observer, 'staging_destination'); continue; }
+        const destinationOperationAuthorized = isDestinationAuthorizedByOperation(state, brigadeId, destination, adjacency, reverseMap);
+        if (observer) observer.guards.destination_not_operation_authorized = !destinationOperationAuthorized;
+        if (destinationOperationAuthorized) { if (observer) finishReconciliationCandidate(observer, 'operation_authorized_destination'); continue; }
+        const destinationReassignmentAuthorized = isMovementAuthorizedByCorpsReassignment(state, formation, destination, adjacency, reverseMap);
+        if (observer) observer.guards.destination_not_reassignment_authorized = !destinationReassignmentAuthorized;
+        if (destinationReassignmentAuthorized) { if (observer) finishReconciliationCandidate(observer, 'reassignment_authorized_destination'); continue; }
         const routineScope = resolveRoutineMovementScope(state, formation, 'routing');
-        if (routineScope.restricted && isDestinationInRoutineScope(routineScope, destination)) continue;
+        const destinationRoutineAuthorized = routineScope.restricted && isDestinationInRoutineScope(routineScope, destination);
+        if (observer) observer.guards.destination_not_routine_authorized = !destinationRoutineAuthorized;
+        if (destinationRoutineAuthorized) { if (observer) finishReconciliationCandidate(observer, 'routine_authorized_destination'); continue; }
 
         const priorMatches = axis.objectives.reduce<number[]>((matches, objective, index) => {
             if (objective === destination) matches.push(index);
             return matches;
         }, []);
-        if (priorMatches.length !== 1) continue;
+        if (observer) observer.guards.prior_objective_unique = priorMatches.length === 1;
+        if (priorMatches.length !== 1) { if (observer) finishReconciliationCandidate(observer, 'prior_objective_count'); continue; }
         const priorIndex = priorMatches[0]!;
         const currentIndex = axis.current_objective_index;
-        if (currentIndex <= priorIndex || currentIndex >= axis.objectives.length) continue;
-        if (axis.objective_capture_count < currentIndex) continue;
+        const currentAfterPrior = currentIndex > priorIndex;
+        if (observer) observer.guards.current_index_after_prior = currentAfterPrior;
+        if (!currentAfterPrior) { if (observer) finishReconciliationCandidate(observer, 'current_not_after_prior'); continue; }
+        const currentInRange = currentIndex < axis.objectives.length;
+        if (observer) observer.guards.current_index_in_range = currentInRange;
+        if (!currentInRange) { if (observer) finishReconciliationCandidate(observer, 'current_index_out_of_range'); continue; }
+        const capturePrefixComplete = axis.objective_capture_count >= currentIndex;
+        if (observer) observer.guards.capture_prefix_complete = capturePrefixComplete;
+        if (!capturePrefixComplete) { if (observer) finishReconciliationCandidate(observer, 'capture_prefix_incomplete'); continue; }
         const oldController = getPoliticalControllerOSID(state, destination, reverseMap);
-        if (!isFriendlyFaction(oldController, formation.faction, state)) continue;
+        const priorFriendly = isFriendlyFaction(oldController, formation.faction, state);
+        if (observer) {
+            observer.old_controller = oldController ?? null;
+            observer.guards.prior_objective_friendly = priorFriendly;
+        }
+        if (!priorFriendly) { if (observer) finishReconciliationCandidate(observer, 'prior_objective_not_friendly'); continue; }
 
         const currentObjective = axis.objectives[currentIndex]!;
         const currentAxis = {
@@ -157,7 +337,11 @@ export function reconcileStaleOperationMarchOrders(
             reverseMap,
             brigadeId as FormationId,
         );
-        if (approaches.size === 0) continue;
+        if (observer) {
+            observer.approaches = sortedIds([...approaches]);
+            observer.guards.approaches_nonempty = approaches.size > 0;
+        }
+        if (approaches.size === 0) { if (observer) finishReconciliationCandidate(observer, 'approaches_empty'); continue; }
         const replacement = findNearestFriendlyOsidDestination(
             state,
             formation.faction as FactionId,
@@ -166,15 +350,39 @@ export function reconcileStaleOperationMarchOrders(
             reverseMap,
             approaches,
         );
-        if (!replacement || replacement === destination || !approaches.has(replacement)) continue;
-        if (!isDestinationAuthorizedByOperation(state, brigadeId, replacement, adjacency, reverseMap)) continue;
+        if (observer) {
+            observer.replacement = replacement ?? null;
+            observer.guards.replacement_present = Boolean(replacement);
+        }
+        if (!replacement) { if (observer) finishReconciliationCandidate(observer, 'replacement_missing'); continue; }
+        const replacementChanged = replacement !== destination;
+        if (observer) observer.guards.replacement_changed = replacementChanged;
+        if (!replacementChanged) { if (observer) finishReconciliationCandidate(observer, 'replacement_unchanged'); continue; }
+        const replacementInApproaches = approaches.has(replacement);
+        if (observer) observer.guards.replacement_in_approaches = replacementInApproaches;
+        if (!replacementInApproaches) { if (observer) finishReconciliationCandidate(observer, 'replacement_not_approach'); continue; }
+        const replacementAuthorized = isDestinationAuthorizedByOperation(state, brigadeId, replacement, adjacency, reverseMap);
+        if (observer) observer.guards.replacement_authorized = replacementAuthorized;
+        if (!replacementAuthorized) { if (observer) finishReconciliationCandidate(observer, 'replacement_not_authorized'); continue; }
 
+        if (observer) observer.immediate_before_write = movementOrderTuple(orders[brigadeId]);
         orders[brigadeId] = {
             ...order,
             ...createColumnMovementOrder(replacement),
             owner: order.owner,
         };
+        if (observer) {
+            observer.new_order = movementOrderTuple(orders[brigadeId]);
+            observer.actual_after_write = movementOrderTuple(orders[brigadeId]);
+            finishReconciliationCandidate(observer, 'replaced');
+        }
     }
+    if (observe) emitReconciliationWriteRecord({
+        kind: 'call_terminal',
+        turn,
+        actual_exit: 'completed',
+        candidate_count: orderedBrigadeIds.length,
+    });
 }
 
 export function correctMarchOrders(state: GameState, adjacency: Map<string, string[]>): void {

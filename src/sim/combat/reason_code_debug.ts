@@ -131,7 +131,9 @@ export type ReasonCodeTopic =
     | 'salient_evacuation'
     | 'southern_move_preparation'
     | 'southern_move_confidence_lookup'
-    | 'local_occupation_candidate';
+    | 'local_occupation_candidate'
+    | 'reconciliation_write'
+    | 'preplanned_eligibility';
 
 const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'axis_reject',
@@ -156,6 +158,8 @@ const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'southern_move_preparation',
     'southern_move_confidence_lookup',
     'local_occupation_candidate',
+    'reconciliation_write',
+    'preplanned_eligibility',
 ];
 
 /**
@@ -238,6 +242,28 @@ export function emitLocalOccupationCandidateRecord(record: Record<string, unknow
         console.log(`${LOCAL_OCCUPATION_CANDIDATE_PREFIX} ${stableStringify(record)}`);
     } catch {
         // Diagnostics must never change the commander result.
+    }
+}
+
+/** Default-off stdout receipts at the actual stale-order reconciliation assignment. */
+export const RECONCILIATION_WRITE_PREFIX = '[reconciliation_write]';
+export function emitReconciliationWriteRecord(record: Record<string, unknown>): void {
+    if (!isReasonCodeTopicEnabled('reconciliation_write')) return;
+    try {
+        console.log(`${RECONCILIATION_WRITE_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);
+    } catch {
+        // A diagnostic sink must never affect movement ownership or execution.
+    }
+}
+
+/** Default-off stdout receipts for pre-planned build eligibility and caller outcomes. */
+export const PREPLANNED_ELIGIBILITY_PREFIX = '[preplanned_eligibility]';
+export function emitPreplannedEligibilityRecord(record: Record<string, unknown>): void {
+    if (!isReasonCodeTopicEnabled('preplanned_eligibility')) return;
+    try {
+        console.log(`${PREPLANNED_ELIGIBILITY_PREFIX} ${stableStringify({ schema_version: 1, ...record })}`);
+    } catch {
+        // Observation and serialization failures are isolated from operation injection.
     }
 }
 

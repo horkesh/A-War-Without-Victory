@@ -6050,3 +6050,8 @@ See PROJECT_LEDGER.md, 2026-10-20, 735–738. Refreshed weights and durable rece
 ## 2026-10-20 — Persisted empty topology and telemetry status must be inspected directly
 
 See PROJECT_LEDGER.md, 2026-10-20, 748–751. A field persisted as {} is not an omitted field. Injecting a restrictive topology can directly manufacture a scope rejection; label such tests counterfactual and use an exact saved-state production-prefix probe to locate the actual boundary. Here T3 admits transit while rebuilt T6 scope later cancels it. Also, a successful child exit must never mask a failed preservation check: test the status truth table. Appended telemetry is preserved by exact prefix plus full current/archive bytes, not by restoring an old hash.
+
+
+## 2026-10-21 — Repeated observer context is not a unique invocation
+
+A caller/turn/corps/operation tuple may repeat within one turn. Keep every ordered start/candidate/terminal block and label contiguous_unsequenced rather than deduplicating by that tuple or adding a persisted game counter. Reached guard values must come from the existing evaluation; later guards remain NOT_REACHED. Neutrality at a queued entry point does not cover the direct entry point: compare complete state, ordinary return and serialized bytes at both, and inspect the original source order as well. Applied in the [2026-10-21 boundary observer entry](PROJECT_LEDGER.md#2026-10-21--boundary-observer-preparation-768-771).

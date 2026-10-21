@@ -122,6 +122,8 @@ Immediately before T3 column consumption, the command-owner prepass may replace 
 
 The replacement comes only from the current objective approach and existing deterministic nearest friendly-path selection, with operation authorization rechecked. No staging fallback or new strategic intent is created. Existing T3 route/scope/political/ownership checks and T6 invalid-transit repair remain in force. This adds neither a phase reorder nor state/save fields. Focused ownership and registered-phase proof: `tests/stale_operation_march_reconciliation.test.ts` and `tests/mistral_prisoje_turn_order.test.ts`. Full-campaign neutrality and calibration gains remain separately measured gates.
 
+Observer-only topic `reconciliation_write` records actual command-owner pre/post assignment and existing guard outcomes before T3 consumption. `preplanned_eligibility` observes direct/queued historical-operation eligibility, commitment and admission boundaries. Both are default-off stable JSON stdout only; neither changes authority, thresholds, phase order, GameState/save/weekly fields or existing movement guards. Repeated context keys are not unique invocation IDs. See CODE_CANON observer boundaries and CALIBRATION_MASTER768–771 for proof and limits.
+
 ## 4. Pipeline constraints
 
 - `osid-column-movement` runs before `apply-brigade-movement`; reversing them can discard column intent.

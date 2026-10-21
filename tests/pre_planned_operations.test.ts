@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { describe, it } from 'vitest';
+import { afterEach, describe, it, vi } from 'vitest';
 
 import { deferUnauthorizedHistoricalOperationsForPlayer } from '../src/sim/combat/historical_operation_authorization.js';
 import { isEliteAuthoredForHistoricalOperation } from '../src/sim/combat/historical_elite_reservations.js';
@@ -26,6 +26,8 @@ import type {
     FormationState,
     GameState,
 } from '../src/state/game_state.js';
+import { stableStringify } from '../src/utils/stable_json.js';
+import { resetReasonCodeTopicCacheForTests } from '../src/sim/combat/reason_code_debug.js';
 
 async function applyAutonomyTransition(state: GameState): Promise<void> {
     const step = warPhases.find((phase) => phase.name === 'apply-autonomy-transition');
@@ -2620,5 +2622,231 @@ describe('pre-planned operations', () => {
                 staging_osid: 'op:cajnice:zaborak',
             },
         );
+    });
+});
+
+describe('pre-planned eligibility observer', () => {
+    const originalTopics = process.env.AWWV_DEBUG_REASON_CODES;
+
+    afterEach(() => {
+        if (originalTopics === undefined) delete process.env.AWWV_DEBUG_REASON_CODES;
+        else process.env.AWWV_DEBUG_REASON_CODES = originalTopics;
+        resetReasonCodeTopicCacheForTests();
+        vi.restoreAllMocks();
+    });
+
+    function rows(log: ReturnType<typeof vi.spyOn>): Array<Record<string, any>> {
+        return log.mock.calls
+            .map(([line]) => String(line))
+            .filter((line) => line.startsWith('[preplanned_eligibility] '))
+            .map((line) => JSON.parse(line.slice('[preplanned_eligibility] '.length)));
+    }
+
+    function queuedKijevo(): GameState {
+        const state = makeMinimalState();
+        state.meta.turn = 24;
+        const command = state.military.corps_command!.vrs_sarajevo_romanija!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Kijevo'];
+        return state;
+    }
+
+    it('is absent when off and preserves the queued public return, state, and serialized bytes', () => {
+        delete process.env.AWWV_DEBUG_REASON_CODES;
+        resetReasonCodeTopicCacheForTests();
+        const observed = queuedKijevo();
+        const control = structuredClone(observed);
+        const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+        const observedReturn = injectQueuedOperation(observed, 'vrs_sarajevo_romanija');
+        const controlReturn = injectQueuedOperation(control, 'vrs_sarajevo_romanija');
+
+        assert.equal(observedReturn, controlReturn);
+        assert.deepEqual(observed, control);
+        assert.equal(stableStringify(observed), stableStringify(control));
+        assert.deepEqual(rows(log), []);
+    });
+
+    it('links queued Kijevo caller, build, candidate, axes, and admitted terminal records', () => {
+        process.env.AWWV_DEBUG_REASON_CODES = 'preplanned_eligibility';
+        resetReasonCodeTopicCacheForTests();
+        const observed = queuedKijevo();
+        const control = structuredClone(observed);
+        const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+        const observedReturn = injectQueuedOperation(observed, 'vrs_sarajevo_romanija');
+        const observedBytes = stableStringify(observed);
+        delete process.env.AWWV_DEBUG_REASON_CODES;
+        resetReasonCodeTopicCacheForTests();
+        const controlReturn = injectQueuedOperation(control, 'vrs_sarajevo_romanija');
+
+        assert.equal(observedReturn, controlReturn);
+        assert.deepEqual(observed, control);
+        assert.equal(observedBytes, stableStringify(control));
+        const records = rows(log);
+        assert.ok(records.some((row) => row.kind === 'caller_start'
+            && row.caller === 'queued_injection' && row.operation_name === 'Operation Kijevo'));
+        assert.ok(records.some((row) => row.kind === 'build_start' && row.caller === 'queued_injection'));
+        assert.ok(records.some((row) => row.kind === 'candidate_terminal'
+            && row.authored_formation_id === 'rs_4th_sarajevo_light_infantry'
+            && row.actual_exit === 'selected'
+            && row.guards.committed_elsewhere === false));
+        assert.ok(records.some((row) => row.kind === 'axis_terminal'
+            && row.axis_id === 'praca_approach' && row.actual_exit === 'built'));
+        assert.ok(records.some((row) => row.kind === 'caller_terminal'
+            && row.actual_exit === 'admitted' && row.ordinary_return === true));
+    });
+
+    it('names the exact recovery operation that rejects a Kijevo candidate without confusing build and admission', () => {
+        process.env.AWWV_DEBUG_REASON_CODES = 'preplanned_eligibility';
+        resetReasonCodeTopicCacheForTests();
+        const state = queuedKijevo();
+        state.military.corps_command!.vrs_east_bosnian!.active_operations.push({
+            name: 'Recovery Probe', type: 'probe', phase: 'recovery', started_turn: 23,
+            phase_started_turn: 24, participating_brigades: ['rs_4th_sarajevo_light_infantry'],
+            objectives: ['op:test:objective'], current_objective_index: 0, momentum: 0,
+            failure_count: 0, consecutive_failures_on_current: 0, attack_attempt_count: 0,
+            objective_capture_count: 0, movement_only_execution_turns: 0,
+        } as CorpsOperation);
+        const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+        const admitted = injectQueuedOperation(state, 'vrs_sarajevo_romanija');
+
+        assert.equal(admitted, true);
+        const candidate = rows(log).find((row) => row.kind === 'candidate_terminal'
+            && row.authored_formation_id === 'rs_4th_sarajevo_light_infantry');
+        assert.ok(candidate);
+        assert.equal(candidate.actual_exit, 'committed_elsewhere');
+        assert.equal(candidate.commitment_operations.length, 1);
+        assert.deepEqual(candidate.commitment_operations[0], {
+            corps_id: 'vrs_east_bosnian', name: 'Recovery Probe', phase: 'recovery',
+            started_turn: 23, type: 'probe',
+        });
+        assert.equal(candidate.guards.reachability, 'NOT_REACHED');
+        assert.ok(rows(log).some((row) => row.kind === 'axis_terminal'
+            && row.axis_id === 'praca_approach' && row.actual_exit === 'no_eligible_formations'));
+        assert.ok(rows(log).some((row) => row.kind === 'caller_terminal' && row.actual_exit === 'admitted'));
+    });
+
+    it('covers direct construction and caller-before-build exits, and isolates a failed sink', () => {
+        process.env.AWWV_DEBUG_REASON_CODES = 'preplanned_eligibility';
+        resetReasonCodeTopicCacheForTests();
+        const direct = makeMinimalState();
+        direct.meta.turn = 0;
+        const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+        assert.doesNotThrow(() => injectPrePlannedOperations(direct, undefined, { faction: 'RS' }));
+        assert.ok(rows(log).some((row) => row.kind === 'build_start' && row.caller === 'direct_preplanned'));
+        assert.ok(rows(log).some((row) => row.kind === 'caller_terminal'
+            && row.caller === 'direct_preplanned' && row.actual_exit === 'admitted'));
+
+        const blocked = queuedKijevo();
+        blocked.military.corps_command!.vrs_sarajevo_romanija!.active_operations.push({
+            name: 'Existing authored operation', type: 'sector_attack', phase: 'planning', is_pre_planned: true,
+            started_turn: 20, phase_started_turn: 20, participating_brigades: [], objectives: [],
+            current_objective_index: 0, momentum: 0, failure_count: 0,
+            consecutive_failures_on_current: 0, attack_attempt_count: 0,
+            objective_capture_count: 0, movement_only_execution_turns: 0,
+        } as CorpsOperation);
+        assert.equal(injectQueuedOperation(blocked, 'vrs_sarajevo_romanija'), false);
+        assert.ok(rows(log).some((row) => row.kind === 'caller_terminal'
+            && row.caller === 'queued_injection' && row.actual_exit === 'slot_unavailable'
+            && row.build_reached === false));
+
+        log.mockRestore();
+        vi.spyOn(console, 'log').mockImplementation(() => { throw new Error('sink failed'); });
+        assert.doesNotThrow(() => injectQueuedOperation(queuedKijevo(), 'vrs_sarajevo_romanija'));
+    });
+
+    it('preserves the direct public entry full state, stable bytes, void return, and contains a failed sink', () => {
+        const disabled = makeMinimalState();
+        disabled.meta.turn = 0;
+        const enabled = structuredClone(disabled);
+
+        delete process.env.AWWV_DEBUG_REASON_CODES;
+        resetReasonCodeTopicCacheForTests();
+        const disabledReturn = injectPrePlannedOperations(disabled, undefined, { faction: 'RS' });
+        const disabledBytes = stableStringify(disabled);
+
+        process.env.AWWV_DEBUG_REASON_CODES = 'preplanned_eligibility';
+        resetReasonCodeTopicCacheForTests();
+        const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+        const enabledReturn = injectPrePlannedOperations(enabled, undefined, { faction: 'RS' });
+
+        assert.equal(disabledReturn, undefined);
+        assert.equal(enabledReturn, disabledReturn);
+        assert.deepEqual(enabled, disabled);
+        assert.equal(stableStringify(enabled), disabledBytes);
+        assert.ok(rows(log).some((row) => row.kind === 'caller_terminal'
+            && row.caller === 'direct_preplanned'));
+
+        log.mockRestore();
+        vi.spyOn(console, 'log').mockImplementation(() => { throw new Error('sink failed'); });
+        const sinkState = makeMinimalState();
+        sinkState.meta.turn = 0;
+        assert.doesNotThrow(() => injectPrePlannedOperations(sinkState, undefined, { faction: 'RS' }));
+    });
+
+    it.each([
+        ['formation_unresolved', (state: GameState) => { delete state.military.formations!.rs_4th_sarajevo_light_infantry; }, undefined],
+        ['disrupted', (state: GameState) => { state.military.formations!.rs_4th_sarajevo_light_infantry!.disrupted_turns = 1; }, undefined],
+        ['transit_owned_elsewhere', (state: GameState) => {
+            state.military.brigade_movement_state = {
+                rs_4th_sarajevo_light_infantry: {
+                    status: 'in_transit', owner: 'authored_preplanned', stance: 'column',
+                    destination_sids: ['op:test:destination'], path: [], turns_remaining: 1,
+                },
+            } as any;
+        }, undefined],
+        ['staging_unreachable', (state: GameState) => {
+            state.military.formations!.rs_4th_sarajevo_light_infantry!.location_osid = 'op:test:isolated';
+            state.political.political_controllers!['op:test:isolated'] = 'RS';
+        }, new Map([['op:test:isolated', []]])],
+    ])('reports the first actual candidate rejection %s and leaves later guards NOT_REACHED', (actualExit, mutate, adjacency) => {
+        process.env.AWWV_DEBUG_REASON_CODES = 'preplanned_eligibility';
+        resetReasonCodeTopicCacheForTests();
+        const state = queuedKijevo();
+        mutate(state);
+        const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+
+        injectQueuedOperation(state, 'vrs_sarajevo_romanija', adjacency as Map<any, any> | undefined);
+
+        const candidate = rows(log).find((row) => row.kind === 'candidate_terminal'
+            && row.authored_formation_id === 'rs_4th_sarajevo_light_infantry');
+        assert.ok(candidate);
+        assert.equal(candidate.actual_exit, actualExit);
+        if (actualExit !== 'staging_unreachable') assert.equal(candidate.guards.reachability, 'NOT_REACHED');
+        assert.equal(candidate.guards.elite_loan_state_present, 'NOT_REACHED');
+    });
+
+    it('distinguishes a returned build from viable-floor deferral and emits stable repeated receipts', () => {
+        process.env.AWWV_DEBUG_REASON_CODES = 'preplanned_eligibility';
+        resetReasonCodeTopicCacheForTests();
+        const first = queuedKijevo();
+        for (const brigadeId of [
+            'rs_1st_romanija_infantry',
+            'rs_2nd_sarajevo_light_infantry',
+            'rs_4th_sarajevo_light_infantry',
+        ]) first.military.formations![brigadeId]!.personnel = 1;
+        const second = structuredClone(first);
+        const firstLines: string[] = [];
+        const log = vi.spyOn(console, 'log').mockImplementation((line) => { firstLines.push(String(line)); });
+
+        assert.equal(injectQueuedOperation(first, 'vrs_sarajevo_romanija'), false);
+        const terminal = rows(log).find((row) => row.kind === 'caller_terminal');
+        assert.ok(terminal);
+        assert.equal(terminal.actual_exit, 'viable_floor');
+        assert.equal(terminal.build_reached, true);
+        assert.equal(terminal.build_returned, true);
+        assert.equal(terminal.admitted, false);
+        assert.equal(terminal.ordinary_return, false);
+        assert.equal(terminal.viable_participating, 0);
+
+        log.mockRestore();
+        const secondLines: string[] = [];
+        vi.spyOn(console, 'log').mockImplementation((line) => { secondLines.push(String(line)); });
+        assert.equal(injectQueuedOperation(second, 'vrs_sarajevo_romanija'), false);
+        assert.deepEqual(secondLines, firstLines);
+        assert.deepEqual(second, first);
+        assert.equal(stableStringify(second), stableStringify(first));
     });
 });

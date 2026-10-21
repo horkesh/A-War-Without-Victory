@@ -51,6 +51,8 @@ const ALL_TOPICS: ReasonCodeTopic[] = [
     'dispatcher_decision',
     'movement_phase',
     'local_occupation_candidate',
+    'reconciliation_write',
+    'preplanned_eligibility',
 ];
 
 function setFlag(value: string | undefined): void {
@@ -90,6 +92,13 @@ describe('reason-code gate', () => {
         expect(isReasonCodeTopicEnabled('route_decision')).toBe(false);
     });
 
+    it.each(ALL_TOPICS)('enables the exact topic %s with whitespace and case normalization only', (topic) => {
+        setFlag(`  ${topic.toUpperCase()}  `);
+        for (const candidate of ALL_TOPICS) {
+            expect(isReasonCodeTopicEnabled(candidate), candidate).toBe(candidate === topic);
+        }
+    });
+
     it('accepts all and * as every topic, and tolerates whitespace and case', () => {
         for (const spelling of ['all', '*', ' ALL ', 'All']) {
             setFlag(spelling);
@@ -99,10 +108,13 @@ describe('reason-code gate', () => {
         }
     });
 
-    it('DEGRADES A TYPO TO SILENCE rather than throwing', () => {
+    it.each([
+        'battle_stak,not_a_topic',
+        ', ,BATTLE STACK,preplanned eligibility,,',
+    ])('DEGRADES A TYPO OR MALFORMED SELECTOR TO SILENCE rather than throwing: %s', (selector) => {
         // A misspelled topic must never fail a 188-week run. It must produce
         // exactly as much output as an unset variable: none.
-        setFlag('battle_stak,not_a_topic');
+        setFlag(selector);
         for (const topic of ALL_TOPICS) {
             expect(isReasonCodeTopicEnabled(topic)).toBe(false);
         }

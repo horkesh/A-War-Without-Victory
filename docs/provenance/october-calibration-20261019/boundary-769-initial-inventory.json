@@ -1,0 +1,34 @@
+{
+  "schema": "awwv.boundary-observer-inventory.v1",
+  "sealed_utc": "2026-10-21T05:10:06.3815574Z",
+  "modified": [
+    { "path": "src/sim/combat/reason_code_debug.ts", "bytes": 20066, "sha256": "07ac547769cd7df22bf183e662d48e7e0a5ab5e5ba1d67157f588acc2aa77b2c" },
+    { "path": "src/sim/combat/commander_march_correction.ts", "bytes": 28367, "sha256": "56f4fd5bb73c7a058752007481442bf21085298365dbd04955323ac87033e793" },
+    { "path": "src/sim/combat/pre_planned_operations.ts", "bytes": 150579, "sha256": "5ea85b79e0a2df80bfed1702c7fcceaaf44df5cdc66b661ce6296d0e3e9c392a" },
+    { "path": "tests/stale_operation_march_reconciliation.test.ts", "bytes": 16293, "sha256": "8f7bdeda256dcad937640dece529f10a5c287607b88b4742a1c2803b6cde14a5" },
+    { "path": "tests/pre_planned_operations.test.ts", "bytes": 134121, "sha256": "8e8e76c271ca7b599b69b9f833554c287e7ca67b58928a270c2461a0d0affe37" }
+  ],
+  "authorized_design_note": { "path": "logs/claude-channel-20261004/768-root-plan.md", "bytes": 12242, "sha256": "68f9e1832cb70720c2c0d03384d168e0b1e4badb42dd64da057a7f110d1e69c3" },
+  "source_before_archive": { "path": "logs/claude-channel-20261004/769-preservation-before/source-before-head-7de47be.zip", "sha256": "18dffe0fe31ab11735b54b39098fda0f61c7b34579fa9a922d3d660c4105e079" },
+  "preserved_attempts": [
+    "769-red-reconciliation-b", "769-red-reconciliation-c", "769-red-preplanned-a",
+    "769-green-reconciliation-a", "769-green-preplanned-a", "769-green-preplanned-b",
+    "769-green-preplanned-c", "769-green-preplanned-d", "769-focused-combined-a",
+    "769-correction-focused-a", "769-off-allocation-correction-a",
+    "769-typecheck-a", "769-typecheck-b", "769-typecheck-c", "769-typecheck-d"
+  ],
+  "preflight_usage_failure_without_attempt_directory": "769-red-reconciliation-a command rejected before wrapper attempt creation because the placeholder argument was not quoted; retained in parent tool transcript and superseded by 769-red-reconciliation-b/c.",
+  "protected_pins": [
+    { "path": "src/sim/combat/commander/emit.ts", "bytes": 198276, "sha256": "6d04bd153030f88b7105f8d9e71510487576136cfa67a5f0bc10ba74ad7109ae" },
+    { "path": "data/calibration/engine_health_thresholds.json", "bytes": 3775, "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d" },
+    { "path": "data/source/calibration/painted_control_oct1995.json", "bytes": 35266, "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b" }
+  ],
+  "telemetry": {
+    "c_before": { "bytes": 101054372, "sha256": "b11e26cdda6948e8a0c6812a1e5563578d8de42d4cc4f235a25598d075acc8be" },
+    "c_after": { "bytes": 101054372, "sha256": "b11e26cdda6948e8a0c6812a1e5563578d8de42d4cc4f235a25598d075acc8be", "appended_bytes": 0 },
+    "d_before": { "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" },
+    "d_after": { "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3", "appended_bytes": 0 },
+    "full_before_after_archives": "logs/claude-channel-20261004/769-preservation-before"
+  },
+  "unaffected_evidence_reused": "Prior 31-file n80/n81 native inventory remains at its recorded scope; no campaign/native artifact writer ran."
+}

@@ -53,6 +53,10 @@ import { resolveOperationFormation } from './operation_formation_resolver.js';
 import { isOperationObjectiveHostile } from './operation_objective_hostility.js';
 import { computeMultiAxisPlanningDuration } from './sector_offensive_axis_helpers.js';
 import { isEliteAuthoredForHistoricalOperation } from './historical_elite_reservations.js';
+import {
+    emitPreplannedEligibilityRecord,
+    isReasonCodeTopicEnabled,
+} from './reason_code_debug.js';
 // Graz truce imports removed: east Herzegovina truce is handled by sector_offensive
 // on operation completion (graz_east_herzegovina_active_turn), not by injection.
 
@@ -1901,12 +1905,87 @@ function prePlannedOperationAlreadyResolved(state: GameState, def: PrePlannedOp)
  * made the collision reachable. The brigade stays with whoever holds it — a pre-planned
  * op yields rather than crashing, and drops below its participant floor if that leaves it short.
  */
-function collectCommittedFormationIds(state: GameState): Set<FormationId> {
+type PreplannedObserverCaller = 'direct_preplanned' | 'queued_injection';
+type PreplannedBuildObservation = {
+    caller: PreplannedObserverCaller;
+    invocation_key: string;
+    linkage: 'contiguous_unsequenced';
+};
+
+const PREPLANNED_CANDIDATE_GUARDS = [
+    'formation_resolved',
+    'formation_eligible',
+    'not_disrupted',
+    'transit_authority_available',
+    'committed_elsewhere',
+    'reachability',
+    'elite_loan_state_present',
+    'elite_loan_owner_available',
+    'elite_loan_available',
+    'elite_corps_reachable',
+] as const;
+
+type PreplannedCandidateGuard = typeof PREPLANNED_CANDIDATE_GUARDS[number];
+type PreplannedCandidateObservation = {
+    caller: PreplannedObserverCaller;
+    invocation_key: string;
+    linkage: 'contiguous_unsequenced';
+    turn: number;
+    operation_name: string;
+    corps_id: string;
+    axis_id: string;
+    authored_formation_id: string;
+    resolved_formation_id: string | null;
+    guards: Record<PreplannedCandidateGuard, boolean | 'NOT_REACHED'>;
+    commitment_operations: Array<Record<string, unknown>>;
+};
+
+function beginPreplannedCandidate(
+    observation: PreplannedBuildObservation,
+    def: PrePlannedOp,
+    axisDef: AxisDef,
+    authoredFormationId: string,
+    turn: number,
+): PreplannedCandidateObservation {
+    return {
+        ...observation,
+        turn,
+        operation_name: def.name,
+        corps_id: def.corps,
+        axis_id: axisDef.axis_id,
+        authored_formation_id: authoredFormationId,
+        resolved_formation_id: null,
+        guards: Object.fromEntries(PREPLANNED_CANDIDATE_GUARDS.map((guard) => [guard, 'NOT_REACHED'])) as PreplannedCandidateObservation['guards'],
+        commitment_operations: [],
+    };
+}
+
+function finishPreplannedCandidate(observation: PreplannedCandidateObservation, actualExit: string): void {
+    emitPreplannedEligibilityRecord({ kind: 'candidate_terminal', actual_exit: actualExit, ...observation });
+}
+
+function collectCommittedFormationIds(
+    state: GameState,
+    observedIdentities?: Map<FormationId, Array<Record<string, unknown>>>,
+): Set<FormationId> {
     const committed = new Set<FormationId>();
     const corpsCommand = state.military.corps_command ?? {};
     for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
         for (const op of corpsCommand[corpsId]?.active_operations ?? []) {
-            for (const brigadeId of op.participating_brigades ?? []) committed.add(brigadeId);
+            for (const brigadeId of op.participating_brigades ?? []) {
+                committed.add(brigadeId);
+                if (observedIdentities) {
+                    const identities = observedIdentities.get(brigadeId) ?? [];
+                    identities.push({
+                        corps_id: corpsId,
+                        name: op.name,
+                        type: op.type,
+                        phase: op.phase,
+                        started_turn: op.started_turn,
+                    });
+                    observedIdentities.set(brigadeId, identities);
+                }
+            }
         }
     }
     return committed;
@@ -1916,6 +1995,7 @@ function buildAxesFromDef(
     def: PrePlannedOp,
     state: GameState,
     adjacency?: Map<Osid, Osid[]>,
+    observation?: PreplannedBuildObservation,
 ): {
     axes: OperationAxis[];
     participating: FormationId[];
@@ -1931,15 +2011,49 @@ function buildAxesFromDef(
     let viableParticipating = 0;
 
     const movementState = state.military.brigade_movement_state ?? {};
-    const committedElsewhere = collectCommittedFormationIds(state);
+    const observedCommitments = observation
+        ? new Map<FormationId, Array<Record<string, unknown>>>()
+        : undefined;
+    const committedElsewhere = collectCommittedFormationIds(state, observedCommitments);
+    if (observation) {
+        emitPreplannedEligibilityRecord({
+            kind: 'build_start',
+            ...observation,
+            turn: state.meta.turn,
+            operation_name: def.name,
+            corps_id: def.corps,
+            declared_axis_ids: def.axes.map((axis) => axis.axis_id),
+        });
+    }
     for (const axisDef of def.axes) {
+        if (observation) emitPreplannedEligibilityRecord({
+            kind: 'axis_start',
+            ...observation,
+            turn: state.meta.turn,
+            operation_name: def.name,
+            corps_id: def.corps,
+            axis_id: axisDef.axis_id,
+            declared_brigades: [...axisDef.brigades],
+            declared_objectives: [...axisDef.objectives],
+        });
         const axisBrigades = axisDef.brigades.flatMap((authoredFormationId) => {
             const resolved = resolveOperationFormation(formations, authoredFormationId);
             const fid = resolved.formation_id;
             const formation = resolved.formation;
-            if (!fid || !formation) return [];
-            if (!isEligibleOperationFormation(formation)) return [];
-            if ((formation.disrupted_turns ?? 0) > 0) return [];
+            const candidate = observation
+                ? beginPreplannedCandidate(observation, def, axisDef, authoredFormationId, state.meta.turn)
+                : undefined;
+            if (candidate) {
+                candidate.resolved_formation_id = fid ?? null;
+                candidate.guards.formation_resolved = Boolean(fid && formation);
+            }
+            if (!fid || !formation) { if (candidate) finishPreplannedCandidate(candidate, 'formation_unresolved'); return []; }
+            const eligible = isEligibleOperationFormation(formation);
+            if (candidate) candidate.guards.formation_eligible = eligible;
+            if (!eligible) { if (candidate) finishPreplannedCandidate(candidate, 'formation_ineligible'); return []; }
+            const notDisrupted = (formation.disrupted_turns ?? 0) <= 0;
+            if (candidate) candidate.guards.not_disrupted = notDisrupted;
+            if (!notDisrupted) { if (candidate) finishPreplannedCandidate(candidate, 'disrupted'); return []; }
             const isArmyHqElite = isSectorAssignmentExemptCorpsId(formation.corps_id)
                 && formation.elite_loan_state != null;
             const isAuthoredEliteAtStaging = isArmyHqElite
@@ -1955,40 +2069,58 @@ function buildAxesFromDef(
             // axis's staging OSID: its generic home-return transit is superseded
             // by the operation it physically assembled for.
             if (movementState[fid]?.status === 'in_transit') {
-                if (
+                const transitAuthorityAvailable = !(
                     movementState[fid]?.owner !== 'bot_discretionary'
                     && !isAuthoredEliteAtStaging
                     && !isAlreadyLoanedToHost
-                ) return [];
+                );
+                if (candidate) candidate.guards.transit_authority_available = transitAuthorityAvailable;
+                if (!transitAuthorityAvailable) { if (candidate) finishPreplannedCandidate(candidate, 'transit_owned_elsewhere'); return []; }
+            } else if (candidate) {
+                candidate.guards.transit_authority_available = true;
             }
             // Already fighting for someone else — see collectCommittedFormationIds.
-            if (committedElsewhere.has(fid)) return [];
-            if (
-                !isForwardDeployedOnAxis(formation, axisDef)
-                && !canReachAxisStaging(
+            const isCommittedElsewhere = committedElsewhere.has(fid);
+            if (candidate) {
+                candidate.guards.committed_elsewhere = isCommittedElsewhere;
+                candidate.commitment_operations = [...(observedCommitments?.get(fid) ?? [])]
+                    .sort((a, b) => strictCompare(String(a.corps_id), String(b.corps_id))
+                        || strictCompare(String(a.name), String(b.name))
+                        || Number(a.started_turn ?? 0) - Number(b.started_turn ?? 0));
+            }
+            if (isCommittedElsewhere) { if (candidate) finishPreplannedCandidate(candidate, 'committed_elsewhere'); return []; }
+            const forwardDeployed = isForwardDeployedOnAxis(formation, axisDef);
+            const stagingReachable = forwardDeployed || canReachAxisStaging(
                     state,
                     formation,
                     def.faction,
                     (axisDef.staging_osid ?? def.staging_osid) as Osid | undefined,
                     adjacency,
                     def.planning_duration != null ? Math.max(0, def.planning_duration - 1) : undefined,
-                )
-            ) return [];
+                );
+            if (candidate) candidate.guards.reachability = stagingReachable;
+            if (!stagingReachable) { if (candidate) finishPreplannedCandidate(candidate, 'staging_unreachable'); return []; }
             // Exempt-corps brigades (e.g. General Staff elites) are allowed
             // if explicitly named in a pre-planned op — they get an elite loan
             // to the operation's corps at injection time.
             const corpsId = getFormationCorpsId(formation);
             if (isArmyHqElite || isSectorAssignmentExemptCorpsId(corpsId)) {
-                if (!formation.elite_loan_state) return []; // non-elite exempt = skip
+                const eliteLoanStatePresent = formation.elite_loan_state != null;
+                if (candidate) candidate.guards.elite_loan_state_present = eliteLoanStatePresent;
+                if (!formation.elite_loan_state) { if (candidate) finishPreplannedCandidate(candidate, 'elite_loan_state_missing'); return []; }
                 const ls = formation.elite_loan_state;
-                if (ls.on_loan && !isAlreadyLoanedToHost) return [];
+                const eliteLoanOwnerAvailable = !ls.on_loan || isAlreadyLoanedToHost;
+                if (candidate) candidate.guards.elite_loan_owner_available = eliteLoanOwnerAvailable;
+                if (!eliteLoanOwnerAvailable) { if (candidate) finishPreplannedCandidate(candidate, 'elite_loaned_elsewhere'); return []; }
                 if (!isAlreadyLoanedToHost) {
-                    if (!isEliteAvailableForLoan(formation, state.meta.turn)) return [];
-                    if (
-                        !isAuthoredEliteAtStaging
-                        && adjacency
-                        && !canEliteLoanReachCorpsTerritory(state, fid, def.corps, adjacency)
-                    ) return [];
+                    const eliteLoanAvailable = isEliteAvailableForLoan(formation, state.meta.turn);
+                    if (candidate) candidate.guards.elite_loan_available = eliteLoanAvailable;
+                    if (!eliteLoanAvailable) { if (candidate) finishPreplannedCandidate(candidate, 'elite_loan_unavailable'); return []; }
+                    const eliteCorpsReachable = isAuthoredEliteAtStaging
+                        || !adjacency
+                        || canEliteLoanReachCorpsTerritory(state, fid, def.corps, adjacency);
+                    if (candidate) candidate.guards.elite_corps_reachable = eliteCorpsReachable;
+                    if (!eliteCorpsReachable) { if (candidate) finishPreplannedCandidate(candidate, 'elite_corps_unreachable'); return []; }
                     eliteLoans.push({ brigadeId: fid, corpsId: def.corps });
                 }
             }
@@ -1996,17 +2128,36 @@ function buildAxesFromDef(
                 reclaimedBotTransit.push(fid);
             }
             if ((formation.personnel ?? 0) >= MIN_ATTACK_PERSONNEL) viableParticipating += 1;
+            if (candidate) finishPreplannedCandidate(candidate, 'selected');
             return [fid];
         });
 
-        if (axisBrigades.length === 0) continue;
+        if (axisBrigades.length === 0) {
+            if (observation) emitPreplannedEligibilityRecord({
+                kind: 'axis_terminal', ...observation, turn: state.meta.turn,
+                operation_name: def.name, corps_id: def.corps, axis_id: axisDef.axis_id,
+                actual_exit: 'no_eligible_formations', selected_brigades: [],
+            });
+            continue;
+        }
 
+        const objectiveObservations: Array<Record<string, unknown>> | undefined = observation ? [] : undefined;
         const axisObjectives = axisDef.objectives.filter((osid) => {
             const controller = getPoliticalControllerOSID(state, osid, undefined);
-            return isOperationObjectiveHostile(state, def.faction, controller);
+            const hostile = isOperationObjectiveHostile(state, def.faction, controller);
+            if (objectiveObservations) objectiveObservations.push({ osid, controller: controller ?? null, hostile });
+            return hostile;
         });
 
-        if (axisObjectives.length === 0) continue;
+        if (axisObjectives.length === 0) {
+            if (observation) emitPreplannedEligibilityRecord({
+                kind: 'axis_terminal', ...observation, turn: state.meta.turn,
+                operation_name: def.name, corps_id: def.corps, axis_id: axisDef.axis_id,
+                actual_exit: 'no_hostile_objectives', selected_brigades: [...axisBrigades],
+                objectives: objectiveObservations,
+            });
+            continue;
+        }
 
         builtAxes.push(createPrePlannedAxis(
             axisBrigades,
@@ -2023,9 +2174,28 @@ function buildAxesFromDef(
             lastAxis.minimum_forward_brigades = Math.max(1, Math.trunc(axisDef.minimum_forward_brigades));
         }
         allParticipating.push(...axisBrigades);
+        if (observation) emitPreplannedEligibilityRecord({
+            kind: 'axis_terminal', ...observation, turn: state.meta.turn,
+            operation_name: def.name, corps_id: def.corps, axis_id: axisDef.axis_id,
+            actual_exit: 'built', selected_brigades: [...axisBrigades],
+            selected_objectives: [...axisObjectives], objectives: objectiveObservations,
+        });
     }
 
-    if (builtAxes.length === 0) return null;
+    if (builtAxes.length === 0) {
+        if (observation) emitPreplannedEligibilityRecord({
+            kind: 'build_terminal', ...observation, turn: state.meta.turn,
+            operation_name: def.name, corps_id: def.corps, actual_exit: 'no_axes',
+            built_axis_ids: [], viable_participating: viableParticipating,
+        });
+        return null;
+    }
+    if (observation) emitPreplannedEligibilityRecord({
+        kind: 'build_terminal', ...observation, turn: state.meta.turn,
+        operation_name: def.name, corps_id: def.corps, actual_exit: 'built',
+        built_axis_ids: builtAxes.map((axis) => axis.axis_id),
+        participating: [...allParticipating], viable_participating: viableParticipating,
+    });
     return {
         axes: builtAxes,
         participating: allParticipating,
@@ -2196,9 +2366,22 @@ export function injectPrePlannedOperations(
     adjacency?: Map<Osid, Osid[]>,
     options?: PrePlannedOperationInjectionOptions,
 ): void {
+    const observe = isReasonCodeTopicEnabled('preplanned_eligibility');
     const corpsCommand = state.military.corps_command;
-    if (!corpsCommand) return;
-    if (!hasInjectableBrigadeRoster(state)) return;
+    if (!corpsCommand) {
+        if (observe) emitPreplannedEligibilityRecord({
+            kind: 'caller_terminal', caller: 'direct_preplanned', linkage: 'contiguous_unsequenced',
+            turn: state.meta?.turn ?? 0, actual_exit: 'corps_command_missing', build_reached: false,
+        });
+        return;
+    }
+    if (!hasInjectableBrigadeRoster(state)) {
+        if (observe) emitPreplannedEligibilityRecord({
+            kind: 'caller_terminal', caller: 'direct_preplanned', linkage: 'contiguous_unsequenced',
+            turn: state.meta?.turn ?? 0, actual_exit: 'injectable_roster_missing', build_reached: false,
+        });
+        return;
+    }
 
     const formations = state.military.formations ?? {};
     const turn = state.meta?.turn ?? 0;
@@ -2237,26 +2420,45 @@ export function injectPrePlannedOperations(
     for (const def of ALL_PRE_PLANNED) {
         if (options?.faction && def.faction !== options.faction) continue;
         const cmd = corpsCommand[def.corps];
-        if (!cmd) continue;
+        const invocationKey = observe ? `direct_preplanned:${turn}:${def.corps}:${def.name}` : '';
+        if (observe) emitPreplannedEligibilityRecord({
+            kind: 'caller_start', caller: 'direct_preplanned', linkage: 'contiguous_unsequenced',
+            invocation_key: invocationKey, turn, operation_name: def.name, corps_id: def.corps,
+        });
+        if (!cmd) {
+            if (observe) emitPreplannedEligibilityRecord({
+                kind: 'caller_terminal', caller: 'direct_preplanned', linkage: 'contiguous_unsequenced',
+                invocation_key: invocationKey, turn, operation_name: def.name, corps_id: def.corps,
+                actual_exit: 'command_missing', build_reached: false,
+            });
+            continue;
+        }
 
         // Skip if not yet available
-        if (def.available_from != null && turn < def.available_from) continue;
-        if (prePlannedOperationAlreadyResolved(state, def)) continue;
+        if (def.available_from != null && turn < def.available_from) {
+            if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'direct_preplanned', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: def.name, corps_id: def.corps, actual_exit: 'not_available', build_reached: false });
+            continue;
+        }
+        if (prePlannedOperationAlreadyResolved(state, def)) {
+            if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'direct_preplanned', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: def.name, corps_id: def.corps, actual_exit: 'already_resolved', build_reached: false });
+            continue;
+        }
         if (allPrePlannedObjectivesOwnedByFaction(state, def)) {
             recordPrePlannedSatisfiedByStart(state, def);
+            if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'direct_preplanned', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: def.name, corps_id: def.corps, actual_exit: 'objectives_already_owned', build_reached: false });
             continue;
         }
 
         // Skip if corps already has active or queued work. Follow-on chain entries
         // are injected only by injectQueuedOperation, which consumes queue order.
-        if (hasActiveOperation(cmd)) continue;
-        if ((cmd.queued_operations?.length ?? 0) > 0) continue;
-        if (injectedCorps.has(def.corps)) continue;
-        if (deferredCorps.has(def.corps)) continue;
+        if (hasActiveOperation(cmd)) { if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'direct_preplanned', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: def.name, corps_id: def.corps, actual_exit: 'active_operation', build_reached: false }); continue; }
+        if ((cmd.queued_operations?.length ?? 0) > 0) { if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'direct_preplanned', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: def.name, corps_id: def.corps, actual_exit: 'queue_nonempty', build_reached: false }); continue; }
+        if (injectedCorps.has(def.corps)) { if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'direct_preplanned', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: def.name, corps_id: def.corps, actual_exit: 'corps_already_injected_this_pass', build_reached: false }); continue; }
+        if (deferredCorps.has(def.corps)) { if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'direct_preplanned', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: def.name, corps_id: def.corps, actual_exit: 'corps_deferred_this_pass', build_reached: false }); continue; }
 
         const warnings = validateOpAtInjection(def, state, undefined, cmd);
         collectOpInjectionWarnings(state, warnings);
-        if (hasBlockingOpInjectionWarnings(warnings)) continue;
+        if (hasBlockingOpInjectionWarnings(warnings)) { if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'direct_preplanned', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: def.name, corps_id: def.corps, actual_exit: 'blocking_warning', build_reached: false }); continue; }
 
         const authorizationInput = {
             kind: 'preplanned',
@@ -2267,13 +2469,16 @@ export function injectPrePlannedOperations(
         const authorization = ensureHistoricalOperationAuthorizationReview(state, authorizationInput);
         if (authorization === 'pending' || authorization === 'declined') {
             deferredCorps.add(def.corps);
+            if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'direct_preplanned', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: def.name, corps_id: def.corps, actual_exit: authorization === 'pending' ? 'authorization_pending' : 'authorization_declined', build_reached: false });
             continue;
         }
 
         // Build axes with validated brigades and objectives
-        const result = buildAxesFromDef(def, state, adjacency);
-        if (!result) continue;
-        if (result.viableParticipating < (def.minimum_viable_participants ?? MIN_OPERATION_PARTICIPANTS)) continue;
+        const result = buildAxesFromDef(def, state, adjacency, observe ? {
+            caller: 'direct_preplanned', invocation_key: invocationKey, linkage: 'contiguous_unsequenced',
+        } : undefined);
+        if (!result) { if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'direct_preplanned', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: def.name, corps_id: def.corps, actual_exit: 'build_returned_null', build_reached: true, build_returned: false }); continue; }
+        if (result.viableParticipating < (def.minimum_viable_participants ?? MIN_OPERATION_PARTICIPANTS)) { if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'direct_preplanned', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: def.name, corps_id: def.corps, actual_exit: 'viable_floor', build_reached: true, build_returned: true, admitted: false, viable_participating: result.viableParticipating }); continue; }
 
         deployPrePlannedEliteLoans(state, result.eliteLoans, def, turn, adjacency);
 
@@ -2302,6 +2507,12 @@ export function injectPrePlannedOperations(
         cmd.stance = 'offensive';
         injectedCorps.add(def.corps);
         injectedOperations.add(def.name);
+        if (observe) emitPreplannedEligibilityRecord({
+            kind: 'caller_terminal', caller: 'direct_preplanned', linkage: 'contiguous_unsequenced',
+            invocation_key: invocationKey, turn, operation_name: def.name, corps_id: def.corps,
+            actual_exit: 'admitted', build_reached: true, build_returned: true, admitted: true,
+            stored_operation: { name: op.name, started_turn: op.started_turn, phase: op.phase },
+        });
     }
 
     // Queue second Herzegovina op (Foca) if Visegrad was injected
@@ -2380,13 +2591,30 @@ export function injectPrePlannedOperations(
  * Called when a corps completes an operation and has queued_operations.
  */
 export function injectQueuedOperation(state: GameState, corpsId: string, adjacency?: Map<Osid, Osid[]>): boolean {
+    const observe = isReasonCodeTopicEnabled('preplanned_eligibility');
     const cmd = state.military.corps_command?.[corpsId];
+    const observedOperationName = observe ? cmd?.queued_operations?.[0] ?? null : null;
+    const turn = state.meta?.turn ?? 0;
+    const invocationKey = observe ? `queued_injection:${turn}:${corpsId}:${observedOperationName ?? 'NO_OPERATION'}` : '';
+    if (observe) emitPreplannedEligibilityRecord({
+        kind: 'caller_start', caller: 'queued_injection', linkage: 'contiguous_unsequenced',
+        invocation_key: invocationKey, turn, operation_name: observedOperationName, corps_id: corpsId,
+    });
     // Queued pre-planned ops are sequential in slot 0.
     // Bot AI ops in other slots do NOT block queue injection.
-    if (!cmd || !isSlot0AvailableForQueue(cmd)) return false;
-    if (!cmd.queued_operations?.length) return false;
+    if (!cmd) {
+        if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: observedOperationName, corps_id: corpsId, actual_exit: 'command_missing', build_reached: false, ordinary_return: false });
+        return false;
+    }
+    if (!isSlot0AvailableForQueue(cmd)) {
+        if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: observedOperationName, corps_id: corpsId, actual_exit: 'slot_unavailable', build_reached: false, ordinary_return: false });
+        return false;
+    }
+    if (!cmd.queued_operations?.length) {
+        if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: null, corps_id: corpsId, actual_exit: 'queue_empty', build_reached: false, ordinary_return: false });
+        return false;
+    }
 
-    const turn = state.meta?.turn ?? 0;
     const opName = cmd.queued_operations[0]!;
 
     const def = ALL_PRE_PLANNED.find(d => d.name === opName && d.corps === corpsId);
@@ -2394,25 +2622,36 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
         // Unknown op — remove from queue and skip
         cmd.queued_operations.shift();
         if (cmd.queued_operations.length === 0) delete cmd.queued_operations;
+        if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: opName, corps_id: corpsId, actual_exit: 'definition_missing', build_reached: false, ordinary_return: false });
         return false;
     }
 
     if (prePlannedOperationAlreadyResolved(state, def)) {
         cmd.queued_operations.shift();
         if (cmd.queued_operations.length === 0) delete cmd.queued_operations;
+        if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: opName, corps_id: corpsId, actual_exit: 'already_resolved', build_reached: false, ordinary_return: false });
         return false;
     }
 
     // Check available_from gating
-    if (def.available_from != null && turn < def.available_from) return false;
+    if (def.available_from != null && turn < def.available_from) {
+        if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: opName, corps_id: corpsId, actual_exit: 'not_available', build_reached: false, ordinary_return: false });
+        return false;
+    }
 
     // A probe/feint cannot capture its target. Defer the canonical queued
     // operation until that transient work closes instead of permanently
     // deleting the shared objective from the historical plan.
-    if (hasNonCapturingObjectiveOverlap(def, cmd)) return false;
+    if (hasNonCapturingObjectiveOverlap(def, cmd)) {
+        if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: opName, corps_id: corpsId, actual_exit: 'noncapturing_objective_overlap', build_reached: false, ordinary_return: false });
+        return false;
+    }
 
     const effectiveDef = omitObjectivesClaimedByActiveOperations(def, cmd);
-    if (effectiveDef.axes.length === 0) return false;
+    if (effectiveDef.axes.length === 0) {
+        if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: opName, corps_id: corpsId, actual_exit: 'all_axes_claimed', build_reached: false, ordinary_return: false });
+        return false;
+    }
 
     const authorization = ensureHistoricalOperationAuthorizationReview(state, {
         kind: 'preplanned',
@@ -2420,10 +2659,14 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
         corpsId,
         operationName: effectiveDef.name,
     });
-    if (authorization === 'pending') return false;
+    if (authorization === 'pending') {
+        if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: opName, corps_id: corpsId, actual_exit: 'authorization_pending', build_reached: false, ordinary_return: false });
+        return false;
+    }
     if (authorization === 'declined') {
         cmd.queued_operations.shift();
         if (cmd.queued_operations.length === 0) delete cmd.queued_operations;
+        if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: opName, corps_id: corpsId, actual_exit: 'authorization_declined', build_reached: false, ordinary_return: false });
         return false;
     }
 
@@ -2445,17 +2688,26 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
         recordPrePlannedSatisfiedByStart(state, def);
         cmd.queued_operations.shift();
         if (cmd.queued_operations.length === 0) delete cmd.queued_operations;
+        if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: opName, corps_id: corpsId, actual_exit: 'objectives_already_owned', build_reached: false, ordinary_return: false });
         return false;
     }
 
     // Validate before building
     const queueWarnings = validateOpAtInjection(effectiveDef, state, undefined, cmd);
     collectOpInjectionWarnings(state, queueWarnings);
-    if (hasBlockingOpInjectionWarnings(queueWarnings)) return false;
+    if (hasBlockingOpInjectionWarnings(queueWarnings)) {
+        if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: opName, corps_id: corpsId, actual_exit: 'blocking_warning', build_reached: false, ordinary_return: false });
+        return false;
+    }
 
     // Build axes — brigades may not exist yet; keep queue entry for retry
-    const result = buildAxesFromDef(effectiveDef, state, adjacency);
-    if (!result) return false;
+    const result = buildAxesFromDef(effectiveDef, state, adjacency, observe ? {
+        caller: 'queued_injection', invocation_key: invocationKey, linkage: 'contiguous_unsequenced',
+    } : undefined);
+    if (!result) {
+        if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: opName, corps_id: corpsId, actual_exit: 'build_returned_null', build_reached: true, build_returned: false, ordinary_return: false });
+        return false;
+    }
     const minimumViableParticipants = effectiveDef.minimum_viable_participants ?? MIN_OPERATION_PARTICIPANTS;
     if (result.viableParticipating < minimumViableParticipants) {
         collectOpInjectionWarnings(state, [{
@@ -2465,6 +2717,7 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
             severity: 'warning',
             turn,
         }]);
+        if (observe) emitPreplannedEligibilityRecord({ kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced', invocation_key: invocationKey, turn, operation_name: opName, corps_id: corpsId, actual_exit: 'viable_floor', build_reached: true, build_returned: true, admitted: false, viable_participating: result.viableParticipating, ordinary_return: false });
         return false;
     }
 
@@ -2495,6 +2748,13 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
     cmd.active_operations.push(op);
     assignOperationCommander(state, op, corpsId, effectiveDef.faction);
     cmd.stance = 'offensive';
+    if (observe) emitPreplannedEligibilityRecord({
+        kind: 'caller_terminal', caller: 'queued_injection', linkage: 'contiguous_unsequenced',
+        invocation_key: invocationKey, turn, operation_name: opName, corps_id: corpsId,
+        actual_exit: 'admitted', build_reached: true, build_returned: true, admitted: true,
+        ordinary_return: true,
+        stored_operation: { name: op.name, started_turn: op.started_turn, phase: op.phase },
+    });
     return true;
 }
 
