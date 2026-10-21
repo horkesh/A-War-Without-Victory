@@ -1,0 +1,32 @@
+{
+  "schema": "awwv.786.closed.v1",
+  "closed_utc": "2026-10-21T11:07:34.767Z",
+  "writes_closed": true,
+  "verdict": "NO_GO_PREREQUISITE_PROVENANCE_MISMATCH__RUNNER_NOT_LAUNCHED",
+  "result": {
+    "path": "logs/claude-channel-20261004/786-result.json",
+    "bytes": 7304,
+    "sha256": "0edf82ac47dc5093578d0444c41ffbb67e11ca51a90228e9d09ee4c209edd890"
+  },
+  "inventory": {
+    "path": "logs/claude-channel-20261004/786-inventory.json",
+    "bytes": 9648,
+    "sha256": "e3313f3b79ec44e0b1966177bb49f2d0a3e8da524a1b2ae3a9fd1d5b0ab629b4"
+  },
+  "head": "cd65b0f20b045378342c8cd1f224f46649d368cf",
+  "clean": true,
+  "runner_invocations": 0,
+  "no_active_owned_runner": true,
+  "telemetry": {
+    "C": {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 102001043,
+      "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899"
+    },
+    "D": {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    }
+  }
+}

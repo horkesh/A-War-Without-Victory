@@ -1,0 +1,506 @@
+{
+  "schema": "awwv.788.reviewed-preflight-stop.v1",
+  "captured_utc": "2026-10-21T11:27:13.312Z",
+  "writes_closed": true,
+  "verdict": "FAIL_DIAGNOSTIC_NOT_EXECUTED__READER_STATUS_MATRIX_UNPROVED",
+  "summary": "Approved188 diagnostic against n82 was NOT executed: reader validation failed pre-run independent review. Runner invocations0/1; allowance unspent, no new runDir. The canonical normalized32 inputs and baseline31 inventory pass; apparent geometry drift was a raw-versus-normalized checker defect. Reader corrections closed several gaps, but producer-bound full status fixtures remain unproved. No new personnel/probe causality or gameplay-neutrality measurement.",
+  "authority": {
+    "plan": "logs/claude-channel-20261004/785-root-plan.md",
+    "execution_ack_utc": "2026-10-21T11:00:36Z",
+    "hard_deadline_utc": "2026-10-21T11:35:36Z",
+    "campaign_stop_utc": "2026-10-21T11:20:05Z"
+  },
+  "inputs": [
+    {
+      "path": "logs/claude-channel-20261004/785-root-plan.md",
+      "sha256": "4059d1db5a4a51d4a3518130300d64b31abc08723ae2ed2a2c5324a7a7ac9127"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-result.json",
+      "sha256": "0edf82ac47dc5093578d0444c41ffbb67e11ca51a90228e9d09ee4c209edd890"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-inventory.json",
+      "sha256": "e3313f3b79ec44e0b1966177bb49f2d0a3e8da524a1b2ae3a9fd1d5b0ab629b4"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-closed.json",
+      "sha256": "8dfed6e2acb53688541e75b71ffea0129c0a185bbf27fe5950702d9e934d57a2"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-continuation-result.json",
+      "sha256": "d4ed156abee5477ef7e10ae1f6b3058c2a6a825903a4abdcb9803d3ce8fcad5e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-continuation-inventory.json",
+      "sha256": "3a0384e963c0bd952a20e3f6e661a3d0a72fa9bc25c98261597bbeefd06bd6eb"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-continuation-closed.json",
+      "sha256": "cd2f6dfe9170f371ae700ac972e3db89f43cf930301ca33d03437cc672e8c178"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-partial-reader-seal.json",
+      "sha256": "385d3294c5c3b27012ca3023d91ac3fba7553a58c66fdd736282e57a02f98d37"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-final-preflight-result.json",
+      "sha256": "34b0dfe09f1e4164db70a75b66484e6af44b79d2083bc2d0d0665a7fc75e9460"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-final-preflight-inventory.json",
+      "sha256": "9fded695901f16b16b4d6b4f18d7804602cfb5afe9c59dec15ccd23628e2c339"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-final-preflight-closed.json",
+      "sha256": "03f5f3acdba77e0a497b6597e52688be0bbb9f0bcda108503dcaaecc6b7f4b5c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-d-gate-wiring.json",
+      "sha256": "165f96300ec45812e507fc56f15ee829f1e31fdb790c87ceaa9c13ce9ce8208d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/787-preflight-review.json",
+      "sha256": "25646eb65a620bc85a14a181a20a6671c6d6cfd2d564da3f2410e85064b1d491"
+    },
+    {
+      "path": "logs/claude-channel-20261004/787-targeted-preflight-review.json",
+      "sha256": "77899c98c6fdbc5bd40dfcdeb68f20e8bc0044985213b38d3ec7fc615ded9582"
+    },
+    {
+      "path": "logs/claude-channel-20261004/787-status-contract-audit.json",
+      "sha256": "72fd18d6d646007acb5f6296427389d6ebe0e89cbfa349f0b8e83cdf4965e3f9"
+    },
+    {
+      "path": "logs/claude-channel-20261004/788-raw-inventory.json",
+      "sha256": "b9985117a4d727181c4e41516e694ccd955ebe133717a9bf0d9cc7c246340e55"
+    }
+  ],
+  "source_pins": [
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20210,
+      "sha256": "beabdcaa779995ed93d820a957b0fd4cbd1e662d47502b0c0374b28819880484"
+    },
+    {
+      "path": "src/sim/combat/movement_phase_diagnostic.ts",
+      "bytes": 7386,
+      "sha256": "cac140facd432e206a079093514702237f7690088b92eac10a556de9e6ba62d8"
+    },
+    {
+      "path": "src/sim/combat/personnel_diagnostic.ts",
+      "bytes": 5870,
+      "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3"
+    },
+    {
+      "path": "src/sim/turn_pipeline.ts",
+      "bytes": 11675,
+      "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25"
+    },
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "bytes": 44692,
+      "sha256": "d8586722b72a3345c610d422f4e069fe2150748a316cbe8d1fc8c4fcfd86c072"
+    },
+    {
+      "path": "src/sim/combat/strategic_reserve.ts",
+      "bytes": 10755,
+      "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae"
+    },
+    {
+      "path": "src/sim/combat/frontline_attrition.ts",
+      "bytes": 21594,
+      "sha256": "0cc09b4eca821d2dce287893fdde312239c2b8be495ed02e36b8a23ba59f5ee1"
+    },
+    {
+      "path": "src/sim/combat/morale_drift.ts",
+      "bytes": 17730,
+      "sha256": "cb7720d5da303e02d89fb3aaf034488a340a51155dfd6dbfc4839cf9cedcdc5c"
+    },
+    {
+      "path": "src/sim/combat/commander/emit.ts",
+      "bytes": 202428,
+      "sha256": "76351f818c3403fcc23bf5b51f30c467bd42886d68f1e6b754d9f90baa58746b"
+    },
+    {
+      "path": "tests/personnel_diagnostic.test.ts",
+      "bytes": 19693,
+      "sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b"
+    },
+    {
+      "path": "tests/reason_code_debug.test.ts",
+      "bytes": 10403,
+      "sha256": "189ba6da07dc0b931e4e98c54565e50bd8182299843606cefccbc113e972bf08"
+    },
+    {
+      "path": "tests/commander_creation_observer.test.ts",
+      "bytes": 100803,
+      "sha256": "05bfd3cf245aa0f929c44d6efff8abdf7316e0fb54b415f25a3c48c9e0f8bb86"
+    }
+  ],
+  "telemetry": [
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 102001043,
+      "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899"
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    }
+  ],
+  "baseline": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n82",
+  "runner_invocations": 0,
+  "allowance_unspent": true,
+  "new_run_dir": null,
+  "retries": 0,
+  "gates": {
+    "normalized_baseline_inputs": "PASS32/32",
+    "baseline_native_inventory": "PASS31",
+    "candidate_inventory": "UNREACHED",
+    "candidate_provenance": "UNREACHED",
+    "raw30": "UNREACHED",
+    "ten_pair": "UNREACHED",
+    "actual_personnel_reader": "UNREACHED",
+    "actual_commander_reader": "UNREACHED",
+    "historical_personnel_writer": "UNMEASURED",
+    "probe_ranking_cause": "UNMEASURED",
+    "observer_campaign_neutrality": "UNMEASURED"
+  },
+  "review": {
+    "initial": {
+      "schema": "awwv.787.preflight-review.v1",
+      "captured_utc": "2026-10-21T11:10:35.568Z",
+      "writes_closed": true,
+      "verdict": "NO_GO_READER_CONTROLS_UNDER_ENFORCE_FIXED_PLAN",
+      "campaign_authorized_to_start": false,
+      "scope": "Independent pre-run review of task 786 canonical provenance correction, stateful readers, and 14 reader controls against fixed plan 785.",
+      "bindings": {
+        "plan": "logs/claude-channel-20261004/785-root-plan.md",
+        "reader": {
+          "path": "logs/claude-channel-20261004/786-stateful-readers.cjs",
+          "sha256": "fbdd5ce0ee14cde3ec3195c82da1fec41f00d7eeffd807fed3cd8159ca45c797"
+        },
+        "preflight_b": {
+          "path": "logs/claude-channel-20261004/786-preflight-b.json",
+          "sha256": "2003128a630f783a69a6b8a7f21d8e51c0cb6c410d4fb3f2cacd066b7c93a438"
+        },
+        "controls": "logs/claude-channel-20261004/786-reader-controls-a/controls.json",
+        "canonical_source": "src/scenario/run_provenance.ts"
+      },
+      "accepted_preflight_evidence": {
+        "canonical_crlf_to_lf_normalizer_binding": true,
+        "changed_content_negative_control": true,
+        "ordered_32_row_digest_recomputed": true,
+        "all_32_normalized_input_hashes_match": true,
+        "geo_raw_sha256": "03713c8e80ba7111ff64ad0bd69b70db4c7e2b30e22f23b8c4e2c11be60baa1a",
+        "geo_normalized_sha256": "c03cc9ce4286b779139ce460e5f515d67415fe633e4ed2dbda1764b9440338c8",
+        "baseline_geo_sha256": "c03cc9ce4286b779139ce460e5f515d67415fe633e4ed2dbda1764b9440338c8",
+        "consumed_input_digest": "7986f05230e1d526e1794673e796dcb77730501d4958e435970c4ec806cc8039",
+        "note": "The original raw-byte NO-GO remains preserved as a checker failure; the corrected canonical-text comparison is sound and does not edit data."
+      },
+      "blocking_findings": [
+        {
+          "id": "P1",
+          "severity": "blocking",
+          "finding": "Personnel coverage is not bound to the real runTurn phase manifest. The positive fixture repeats one synthetic phase per turn for 188 turns, while the reader merely records the set of phase counts and never asserts expected phase names, groups, counts, or ordering beyond sequential indices.",
+          "evidence": [
+            "786-stateful-readers.cjs:7-17",
+            "786-stateful-readers.cjs:23-25"
+          ]
+        },
+        {
+          "id": "P2",
+          "severity": "blocking",
+          "finding": "Personnel state continuity is not enforced. The accepted positive fixture ends every turn at personnel 22 and begins the next at 21. The reader does not bind phase_end.after to the next phase_start.before or terminal actors to the final phase_end, so fabricated or dropped transitions can pass.",
+          "evidence": [
+            "786-stateful-readers.cjs:7-17",
+            "786-stateful-readers.cjs:23-25"
+          ]
+        },
+        {
+          "id": "P3",
+          "severity": "blocking",
+          "finding": "Presence and direct-writer semantics are under-validated. Any string is accepted as a presence enum; writer rows need only finite before/after and a nonzero change. The reader does not validate allowed presence shapes, source-specific transfer/casualty/branch operands, writer before/after continuity, or reconciliation with the enclosing phase delta.",
+          "evidence": [
+            "786-stateful-readers.cjs:6",
+            "786-stateful-readers.cjs:10",
+            "786-stateful-readers.cjs:16",
+            "786-stateful-readers.cjs:23"
+          ]
+        },
+        {
+          "id": "C1",
+          "severity": "blocking",
+          "finding": "Commander caller-pass coverage is local rather than campaign-complete. Actual mode accepts any set of internally complete passes as long as exactly five RS Sarajevo-Romanija rows exist for turns 20 through 24. It does not enforce the expected turn/faction pass schedule or full corps inventories across the 188-week stream.",
+          "evidence": [
+            "786-stateful-readers.cjs:19-22"
+          ]
+        },
+        {
+          "id": "C2",
+          "severity": "blocking",
+          "finding": "Commander target-selection semantics are only type checked. The reader accepts any status string and any string actual_fitness, and does not enforce filter short-circuit progression, eligibility-to-rank consistency, selected_brigade_id agreement, local-occupation bypass semantics, or fitness plus brigade-id ranking order.",
+          "evidence": [
+            "786-stateful-readers.cjs:18-20",
+            "src/sim/combat/commander/emit.ts:2004-2088",
+            "src/sim/combat/commander/emit.ts:2870-2957"
+          ]
+        },
+        {
+          "id": "C3",
+          "severity": "blocking",
+          "finding": "The only commander positive control is one synthetic fallback-created pass and is invoked with target coverage disabled. There are no positive controls for valid not-reached, non-fallback completion, generic all-filtered/no-brigade, or local-occupation-bypass records, so tightening the reader cannot be shown to accept production-valid alternate shapes.",
+          "evidence": [
+            "786-stateful-readers.cjs:23-25"
+          ]
+        },
+        {
+          "id": "G1",
+          "severity": "blocking",
+          "finding": "Preflight-b reduces the reader gate to controls.pass plus a count of 14; it does not inspect which semantic controls ran. Therefore the green preflight does not establish the fixed-plan reader requirements.",
+          "evidence": [
+            "786-preflight-b.cjs:13"
+          ]
+        }
+      ],
+      "required_targeted_correction": [
+        "Bind personnel records to the actual ordered phase manifest for each runTurn call and validate actor order, legal presence variants, cross-boundary continuity, terminal equality, and source-specific writer arithmetic against phase deltas.",
+        "Bind commander passes to the expected 188-week turn/faction caller schedule and exact per-pass corps inventories, then validate status enums, finite markers, short-circuit NOT_REACHED rules, ordinal/rank/fitness ordering, selected identity, and local-occupation bypass semantics.",
+        "Add focused positive and negative controls for those rules, including valid alternate production paths; retain the existing 14 cases but do not count them as sufficient by number alone."
+      ],
+      "stopping_rule": "Do not invoke the sole 188-week campaign until one targeted reader/control correction passes a fresh cheap review. Do not rerun the campaign or broaden to suites/builds/replays.",
+      "runner_invocations_observed": 0,
+      "original_786_false_failure_unchanged": true
+    },
+    "targeted": {
+      "schema": "awwv.787.targeted-preflight-review.v1",
+      "captured_utc": "2026-10-21T11:19:32.411Z",
+      "writes_closed": true,
+      "verdict": "NO_GO_COMMANDER_NOT_REACHED_SEMANTICS_UNDER_ENFORCED",
+      "campaign_authorized_to_start": false,
+      "reviewed": {
+        "personnel_and_schedule_reader": {
+          "path": "logs/claude-channel-20261004/786-stateful-readers-b.cjs",
+          "sha256": "e3d837c7f193c7a4fc052eb6b0fc4745ab5b04e85c9bbd43c3d0d9fbdb93759f"
+        },
+        "commander_semantics_reader": {
+          "path": "logs/claude-channel-20261004/786-commander-semantics-c.cjs",
+          "sha256": "1ba4681d043138991d930947fd29513ce06c9b22307e0d81dee8adc644609e83"
+        },
+        "personnel_and_schedule_controls": {
+          "path": "logs/claude-channel-20261004/786-reader-controls-b-v3/controls.json",
+          "sha256": "3e8e979e4e38bf15de1493cb1910a9841c47f5cc23bd1ec963bcc83bd1c4b147",
+          "pass": true,
+          "count": 10
+        },
+        "commander_semantics_controls": {
+          "path": "logs/claude-channel-20261004/786-commander-controls-c-b/controls.json",
+          "sha256": "65cf232fd0cc9e6a17892f09bca692e99b68d1c3053588f7bbc1f69bf60472fd",
+          "pass": true,
+          "count": 10
+        }
+      },
+      "original_findings": {
+        "P1_phase_manifest": "closed",
+        "P2_personnel_continuity": "closed",
+        "P3_presence_and_writer_semantics": "closed_at_fixed_plan_scope",
+        "C1_full_caller_pass_schedule": "closed",
+        "C2_commander_selection_semantics": "open_blocking",
+        "C3_alternate_positive_controls": "closed_except_not_reached_negative",
+        "G1_named_semantic_controls": "closed"
+      },
+      "blocking_finding": {
+        "id": "C2-NOT-REACHED",
+        "finding": "The commander semantic validator applies special status semantics only to local_occupation_bypass and no_brigade. Every other status, including not_reached, falls through the generic ranking path. It therefore accepts a not_reached detail containing a fully reached, ranked, selected brigade with a non-null selected_brigade_id. That contradicts the production initialization of not_reached and leaves the fixed-plan selected/bypass/not-reached gate unproved.",
+        "source_evidence": [
+          "786-commander-semantics-c.cjs:4-6",
+          "src/sim/combat/commander/emit.ts:2313-2324"
+        ],
+        "control_gap": "The valid-not-reached positive has empty candidates and a null selected id, but no negative control mutates forbidden reached or selected detail under status not_reached."
+      },
+      "secondary_finding": {
+        "severity": "non_campaign_blocking_but_real",
+        "finding": "786-commander-semantics-c.cjs exports functions but lacks a require.main guard around CLI dispatch. Requiring it executes validateFile(undefined) and throws ERR_INVALID_ARG_TYPE. Direct CLI invocation remains usable, but exported composition/testing is not usable as written.",
+        "observed_exit": 1,
+        "observed_error": "TypeError [ERR_INVALID_ARG_TYPE]: path must be a string; validateFile received undefined"
+      },
+      "accepted_closures": [
+        "Personnel is bound to the baseline's complete 188-turn ordered phase manifests.",
+        "Personnel actor, presence enum, cross-phase, cross-turn, phase-end, and terminal continuity are enforced.",
+        "Bounded writer sources and fixed-plan transfer/casualty/branch context are validated and chained to phase endpoints where numeric deltas exist.",
+        "Commander schedule enforces 188 turns by HRHB, RBiH, RS with exact ordered per-pass corps completion coverage.",
+        "Every completion row is composed with the retained 203 full-row validator.",
+        "Commander status enum, fitness tags, stage short-circuiting, ordinals, eligibility, rank comparator, selected identity, and local-occupation bypass are otherwise enforced."
+      ],
+      "runner_invocations_observed": 0,
+      "original_786_false_failure_preserved": true,
+      "stop_reason": "The fixed not-reached acceptance criterion remains unmet, and the final allowed targeted review cycle found the unresolved defect. Do not launch the campaign or begin another unchanged review cycle."
+    },
+    "changed_contract": {
+      "schema": "awwv.787.status-contract-audit.v1",
+      "captured_utc": "2026-10-21T11:23:22.192Z",
+      "writes_closed": true,
+      "verdict": "PARTIAL_PASS_NOT_REACHED_AND_INTERFACE_CLOSED__FULL_STATUS_MATRIX_UNPROVED",
+      "scope": "One bounded changed-contract audit of task 786 revision D: exact not_reached forbidden fields, module require interface, and claimed per-status control binding to the producer. This is not a campaign GO review and does not repeat the original seven-finding review.",
+      "old_window": {
+        "verdict": "FAILED_NO_GO",
+        "campaign_launched": false,
+        "runner_invocations": 0,
+        "retroactive_approval": false
+      },
+      "bindings": {
+        "validator": {
+          "path": "logs/claude-channel-20261004/786-commander-semantics-d.cjs",
+          "sha256": "bd4543832b9cca7905fe420f91cafb6315fb4eb0f03f498048496a376dac5cd2"
+        },
+        "controls": {
+          "path": "logs/claude-channel-20261004/786-commander-controls-d/controls.json",
+          "pass": true,
+          "count": 18,
+          "valid_status_positives": 9,
+          "not_reached_field_injection_negatives": 9
+        },
+        "final_packet": {
+          "path": "logs/claude-channel-20261004/786-final-preflight-result.json",
+          "sha256": "34b0dfe09f1e4164db70a75b66484e6af44b79d2083bc2d0d0665a7fc75e9460"
+        },
+        "producer": "src/sim/combat/commander/emit.ts:2313"
+      },
+      "passed": [
+        {
+          "criterion": "Exact not_reached initial shape",
+          "evidence": "Validator requires selected_brigade_id, selected_brigade_location, and derived_sector_id to be null and all six diagnostic arrays to be empty. Nine one-field injection negatives cover every forbidden field."
+        },
+        {
+          "criterion": "Require-safe module interface",
+          "evidence": "Fresh Node 22 require exited 0 and exported detailErrors and validateFile without executing CLI dispatch. D has an explicit require.main guard."
+        },
+        {
+          "criterion": "Composition with prior corrected readers",
+          "evidence": "D delegates non-not_reached semantic checks to C; C composes retained 203 checkRow on every completion. The final packet binds unchanged reader B and D by exact hashes."
+        }
+      ],
+      "blocking_finding": {
+        "id": "STATUS-MATRIX-PRODUCER-BINDING",
+        "finding": "The nine positive status controls are not valid producer-shaped records. The fixture constructor gives every non-bypass status null selected fields and empty arrays. Production selects a brigade and populates brigade_candidates before no_sector, missing_adjacency_or_friendly_set_or_location, empty_enemy_set, empty_direct_set, all_filtered, and generic_search; derived_sector_id is also populated for the latter five, and target arrays vary by the reached filter stage. Consequently the controls prove enum acceptance, not the claimed per-status contract.",
+        "validator_limit": "D adds exact semantics only for not_reached and delegates the remaining statuses to C, whose special cases are local_occupation_bypass and no_brigade. The other six producer statuses still share the generic branch.",
+        "impact": "The requested full per-status matrix versus producer source is unproved. This does not reopen the exact not_reached or require-safe findings, which are closed."
+      },
+      "producer_shape_summary": {
+        "not_reached": "initial all-null/all-empty shape",
+        "no_brigade": "candidate evaluation reached; no selected survivor",
+        "no_sector": "brigade selected; selected fields and candidate detail present; derived sector absent",
+        "missing_adjacency_or_friendly_set_or_location": "brigade selected and sector derived; generic target search prerequisites missing",
+        "empty_enemy_set": "brigade selected and sector derived; enemy set empty",
+        "empty_direct_set": "brigade selected and sector derived; enemy candidates present but direct set empty",
+        "all_filtered": "brigade selected and sector derived; direct candidates present but no target survives filters",
+        "generic_search": "brigade selected and sector derived; at least one ranked target survives",
+        "local_occupation_bypass": "one selected candidate with every generic eligibility stage NOT_REACHED"
+      },
+      "next_bounded_action": "If future preparation continues, replace the six impossible empty positive fixtures with producer-shaped positives and add status-specific negative mutations for selected/derived/candidate/target stage relationships. No campaign, runtime, general suite, or source/data change is authorized by this audit."
+    }
+  },
+  "correction": {
+    "schema": "awwv.786.final-preflight-result.v1",
+    "sealed_utc": "2026-10-21T11:21:26.986Z",
+    "writes_closed": true,
+    "verdict": "PREPARATION_CORRECTED_AFTER_FINAL_NO_GO__CAMPAIGN_WINDOW_CLOSED_UNSPENT",
+    "runner_invocations": 0,
+    "allowance_unspent": true,
+    "corrected": {
+      "canonical_provenance": true,
+      "personnel_manifest_continuity_writer": true,
+      "commander_full_schedule": true,
+      "all_completion_rows_203": true,
+      "commander_status_fitness_stage_rank_selected_bypass": true,
+      "not_reached_exact_initial_shape": true,
+      "require_safe_exports": true,
+      "postrun_composes_d": true
+    },
+    "controls": {
+      "personnel_schedule": {
+        "pass": true,
+        "count": 10,
+        "path": "logs/claude-channel-20261004/786-reader-controls-b-v3/controls.json"
+      },
+      "commander_d": {
+        "pass": true,
+        "count": 18,
+        "path": "logs/claude-channel-20261004/786-commander-controls-d/controls.json",
+        "valid_status_positives": 9,
+        "not_reached_field_injection_negatives": 9
+      }
+    },
+    "artifacts": [
+      {
+        "path": "logs/claude-channel-20261004/786-stateful-readers-b.cjs",
+        "bytes": 9292,
+        "sha256": "e3d837c7f193c7a4fc052eb6b0fc4745ab5b04e85c9bbd43c3d0d9fbdb93759f"
+      },
+      {
+        "path": "logs/claude-channel-20261004/786-commander-semantics-d.cjs",
+        "bytes": 4830,
+        "sha256": "bd4543832b9cca7905fe420f91cafb6315fb4eb0f03f498048496a376dac5cd2"
+      },
+      {
+        "path": "logs/claude-channel-20261004/786-postrun-gates-d.cjs",
+        "bytes": 580,
+        "sha256": "9ebe604392e40838766ff2efade828d5c689a7b9ae5db0f742116c722dcacf6d"
+      },
+      {
+        "path": "logs/claude-channel-20261004/786-preflight-b.json",
+        "bytes": 5235,
+        "sha256": "2003128a630f783a69a6b8a7f21d8e51c0cb6c410d4fb3f2cacd066b7c93a438"
+      },
+      {
+        "path": "logs/claude-channel-20261004/786-run-env.json",
+        "bytes": 327,
+        "sha256": "5a4e74ce7f8ea830e1525ed6be4d96302feb802ab1251338437550756d656d5c"
+      },
+      {
+        "path": "logs/claude-channel-20261004/787-targeted-preflight-review.json",
+        "bytes": 3994,
+        "sha256": "77899c98c6fdbc5bd40dfcdeb68f20e8bc0044985213b38d3ec7fc615ded9582"
+      }
+    ],
+    "retained_failures": [
+      "initial raw-byte provenance checker failure",
+      "initial reader 14 controls under-enforced",
+      "c bypass control failure",
+      "b-v2 baseline week_index assumption failure",
+      "787 initial seven reader findings",
+      "787 targeted not_reached and require-safe findings"
+    ],
+    "gates": {
+      "campaign": "UNREACHED_NO_LAUNCH",
+      "raw30": "UNREACHED",
+      "ten_pair": "UNREACHED",
+      "actual_readers": "UNREACHED"
+    },
+    "head": "cd65b0f20b045378342c8cd1f224f46649d368cf",
+    "clean": true,
+    "no_active_runner": true
+  },
+  "control_limits": "Original14 under-enforced; b-v3 ten assertions improve phase/full-schedule coverage. D18 assertions include9 valid-status labels and9 forbidden-field injections: independent audit closes exactnot_reached/interface only, rejects six impossible all-empty status positives as producer proof. Do not present these passing process exits as complete reader readiness.",
+  "consolidated_diagnosis": "Hand-authored positive fixtures were not bound to actual producer records. Shared generic validation plus incremental negative patches repeatedly left alternate-status requirements unproved. Normalized provenance was a separate cheap checker defect, not data drift.",
+  "next_action": "Replace hand-authored commander status positives with fixtures captured from the actual production emission path; assert required reached/null/empty field contracts and reject injected contradictions. Complete focused reader review before requesting a fresh188 execution window. No more correction/review cycles or campaign in this window.",
+  "scope": {
+    "new_campaigns": 0,
+    "engine_runs": 0,
+    "tests_of_project": 0,
+    "full_suites": 0,
+    "builds": 0,
+    "replays": 0,
+    "source_test_data_threshold_canon_changes": 0
+  },
+  "retained_n80": 703,
+  "rejected_n81_n82": 689,
+  "limits": [
+    "The owner-requested measurement remains incomplete; no candidate gameplay result exists.",
+    "No gate is waived by baseline inventory, selfchecks, local parser assertions or source readiness.",
+    "All prior failed/partial artifacts and inherited unmet gates remain.",
+    "Raw evidence isLOCAL with pushed inventory; no remote raw-byte backup."
+  ]
+}

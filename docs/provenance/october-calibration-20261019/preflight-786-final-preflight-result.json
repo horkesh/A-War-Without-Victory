@@ -1,0 +1,81 @@
+{
+  "schema": "awwv.786.final-preflight-result.v1",
+  "sealed_utc": "2026-10-21T11:21:26.986Z",
+  "writes_closed": true,
+  "verdict": "PREPARATION_CORRECTED_AFTER_FINAL_NO_GO__CAMPAIGN_WINDOW_CLOSED_UNSPENT",
+  "runner_invocations": 0,
+  "allowance_unspent": true,
+  "corrected": {
+    "canonical_provenance": true,
+    "personnel_manifest_continuity_writer": true,
+    "commander_full_schedule": true,
+    "all_completion_rows_203": true,
+    "commander_status_fitness_stage_rank_selected_bypass": true,
+    "not_reached_exact_initial_shape": true,
+    "require_safe_exports": true,
+    "postrun_composes_d": true
+  },
+  "controls": {
+    "personnel_schedule": {
+      "pass": true,
+      "count": 10,
+      "path": "logs/claude-channel-20261004/786-reader-controls-b-v3/controls.json"
+    },
+    "commander_d": {
+      "pass": true,
+      "count": 18,
+      "path": "logs/claude-channel-20261004/786-commander-controls-d/controls.json",
+      "valid_status_positives": 9,
+      "not_reached_field_injection_negatives": 9
+    }
+  },
+  "artifacts": [
+    {
+      "path": "logs/claude-channel-20261004/786-stateful-readers-b.cjs",
+      "bytes": 9292,
+      "sha256": "e3d837c7f193c7a4fc052eb6b0fc4745ab5b04e85c9bbd43c3d0d9fbdb93759f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-commander-semantics-d.cjs",
+      "bytes": 4830,
+      "sha256": "bd4543832b9cca7905fe420f91cafb6315fb4eb0f03f498048496a376dac5cd2"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-postrun-gates-d.cjs",
+      "bytes": 580,
+      "sha256": "9ebe604392e40838766ff2efade828d5c689a7b9ae5db0f742116c722dcacf6d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-preflight-b.json",
+      "bytes": 5235,
+      "sha256": "2003128a630f783a69a6b8a7f21d8e51c0cb6c410d4fb3f2cacd066b7c93a438"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-run-env.json",
+      "bytes": 327,
+      "sha256": "5a4e74ce7f8ea830e1525ed6be4d96302feb802ab1251338437550756d656d5c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/787-targeted-preflight-review.json",
+      "bytes": 3994,
+      "sha256": "77899c98c6fdbc5bd40dfcdeb68f20e8bc0044985213b38d3ec7fc615ded9582"
+    }
+  ],
+  "retained_failures": [
+    "initial raw-byte provenance checker failure",
+    "initial reader 14 controls under-enforced",
+    "c bypass control failure",
+    "b-v2 baseline week_index assumption failure",
+    "787 initial seven reader findings",
+    "787 targeted not_reached and require-safe findings"
+  ],
+  "gates": {
+    "campaign": "UNREACHED_NO_LAUNCH",
+    "raw30": "UNREACHED",
+    "ten_pair": "UNREACHED",
+    "actual_readers": "UNREACHED"
+  },
+  "head": "cd65b0f20b045378342c8cd1f224f46649d368cf",
+  "clean": true,
+  "no_active_runner": true
+}

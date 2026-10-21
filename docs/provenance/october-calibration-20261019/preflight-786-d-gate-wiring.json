@@ -1,0 +1,99 @@
+{
+  "schema": "awwv.786.d-gate-wiring.v1",
+  "sealed_utc": "2026-10-21T11:23:58.6900402Z",
+  "writes_closed": true,
+  "campaign_window": "CLOSED_NO_GO",
+  "engine_runner_invocations": 0,
+  "syntax_only": true,
+  "syntax": {
+    "argv": [
+      "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+      "--check",
+      "logs/claude-channel-20261004/786-postrun-gates-d.cjs"
+    ],
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false,
+    "start_utc": "2026-10-21T11:23:28.211Z",
+    "end_utc": "2026-10-21T11:23:28.289Z",
+    "capture": [
+      {
+        "path": "logs/claude-channel-20261004/396-varosluk-786-postrun-d-syntax.start.json",
+        "bytes": 1402,
+        "sha256": "f1334ff509732be96bdfb7ad32618ad8ffc568b521d7a53073ecc863e81255cd"
+      },
+      {
+        "path": "logs/claude-channel-20261004/396-varosluk-786-postrun-d-syntax.receipt.json",
+        "bytes": 2218,
+        "sha256": "53648e62b982eb3eb1d132dab81a183972a1cc136b32340f281397f8ef790c3b"
+      },
+      {
+        "path": "logs/claude-channel-20261004/396-varosluk-786-postrun-d-syntax.stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "logs/claude-channel-20261004/396-varosluk-786-postrun-d-syntax.stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "logs/claude-channel-20261004/396-varosluk-786-postrun-d-syntax.wrapper-error.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "wiring": {
+    "wrapper": {
+      "path": "logs/claude-channel-20261004/786-postrun-gates-d.cjs",
+      "bytes": 580,
+      "sha256": "9ebe604392e40838766ff2efade828d5c689a7b9ae5db0f742116c722dcacf6d"
+    },
+    "base_preserved": {
+      "path": "logs/claude-channel-20261004/786-postrun-gates.cjs",
+      "bytes": 3349,
+      "sha256": "b516f1e77107e1e5d32bf9f1918b3619c3e4a6d4c39404fa4cca4a3c7766e3b8"
+    },
+    "personnel_reader": {
+      "path": "logs/claude-channel-20261004/786-stateful-readers-b.cjs",
+      "bytes": 9292,
+      "sha256": "e3d837c7f193c7a4fc052eb6b0fc4745ab5b04e85c9bbd43c3d0d9fbdb93759f"
+    },
+    "commander_semantic": {
+      "path": "logs/claude-channel-20261004/786-commander-semantics-d.cjs",
+      "bytes": 4830,
+      "sha256": "bd4543832b9cca7905fe420f91cafb6315fb4eb0f03f498048496a376dac5cd2"
+    },
+    "commander_203": {
+      "path": "logs/claude-channel-20261004/203-commander-creation-reader.cjs",
+      "bytes": 27523,
+      "sha256": "250816bce802f41a02a3f6d8b215b0747fbf6c67466e8f2e588e30e40a629078"
+    },
+    "wrapper_replaces_c_with_d": true,
+    "base_invokes_personnel_b": true,
+    "base_invokes_commander_c": true,
+    "d_composes_203": true
+  },
+  "head": "cd65b0f20b045378342c8cd1f224f46649d368cf",
+  "git_status_short": [],
+  "clean": true,
+  "original_final_packet_untouched": [
+    {
+      "path": "logs/claude-channel-20261004/786-final-preflight-result.json",
+      "bytes": 2742,
+      "sha256": "34b0dfe09f1e4164db70a75b66484e6af44b79d2083bc2d0d0665a7fc75e9460"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-final-preflight-inventory.json",
+      "bytes": 20941,
+      "sha256": "9fded695901f16b16b4d6b4f18d7804602cfb5afe9c59dec15ccd23628e2c339"
+    },
+    {
+      "path": "logs/claude-channel-20261004/786-final-preflight-closed.json",
+      "bytes": 663,
+      "sha256": "03f5f3acdba77e0a497b6597e52688be0bbb9f0bcda108503dcaaecc6b7f4b5c"
+    }
+  ],
+  "actual_run_gates": "UNREACHED"
+}

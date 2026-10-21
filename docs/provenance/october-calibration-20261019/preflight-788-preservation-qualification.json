@@ -1,0 +1,9 @@
+{
+  "writes_closed": true,
+  "captured_utc": "2026-10-21T11:30:49.114Z",
+  "qualification": "Preservation qualification: the partial seal records an earlier B reader SHA a63d09b8d0c81c5d34fdab7587fcaa6f34cb04382d7e2311c529aad111c8d2d2; the current file is e3d837c7f193c7a4fc052eb6b0fc4745ab5b04e85c9bbd43c3d0d9fbdb93759f. No exact earlier source snapshot has been located in the inventoried packet. Historical receipts and hashes remain, but reproduction of that intermediate version is not established. The current raw inventory proves current bytes only; it does not prove preservation of every intermediate reader version. This does not affect the separately verified unchanged production source, thresholds or telemetry.",
+  "runner_invocations": 0,
+  "readiness": "FAIL",
+  "previous_synthesis": "preflight-788-result.json",
+  "effect": "Narrows intermediate-reader preservation claims; campaign remains unexecuted."
+}
