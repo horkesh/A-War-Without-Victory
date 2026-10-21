@@ -1,4 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 
 import type { CorpsFrontSector, FactionId, FormationId, FormationState, GameState } from '../../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../../src/state/game_state.js';
@@ -28,7 +30,13 @@ interface HarnessOptions {
     emptyEnemySet?: boolean;
     secondCandidate?: boolean;
     reverseCandidateInsertion?: boolean;
+    noEligibleBrigade?: boolean;
+    noSector?: boolean;
+    missingSearchPrerequisite?: boolean;
+    localOccupationBypass?: boolean;
 }
+
+const require = createRequire(import.meta.url);
 
 function setTopics(value: string | undefined): void {
     if (value === undefined) delete process.env.AWWV_DEBUG_REASON_CODES;
@@ -84,7 +92,7 @@ function runHarness(options: HarnessOptions = {}) {
     const turn = options.turn ?? 178;
     const brigadeLocation = options.brigadeLocation ?? APPROACH;
     const controller = options.targetController ?? (faction === 'RS' ? 'RBiH' : 'RS');
-    const attacker = brigade('probe', faction, brigadeLocation, 1_800);
+    const attacker = brigade('probe', faction, brigadeLocation, options.localOccupationBypass ? 5_000 : 1_800);
     attacker.corps_id = corpsId;
     const defender = brigade('defender', controller, TARGET, options.defenderPersonnel ?? 1_800);
     const secondDefender = brigade('defender-z', controller, SECOND_TARGET, options.defenderPersonnel ?? 1_800);
@@ -97,6 +105,11 @@ function runHarness(options: HarnessOptions = {}) {
         [SECOND_TARGET, [APPROACH]],
         ...DEPTHS.map((osid): [string, string[]] => [osid, [TARGET]]),
     ]);
+    if (options.localOccupationBypass) {
+        adjacency.clear();
+        adjacency.set(APPROACH, [TARGET]);
+        adjacency.set(TARGET, [APPROACH]);
+    }
     const sector = {
         sector_id: `sector:${corpsId}:0`,
         corps_id: corpsId,
@@ -128,11 +141,16 @@ function runHarness(options: HarnessOptions = {}) {
         military: {
             formations: {
                 [attacker.id]: attacker,
-                [defender.id]: defender,
+                ...(options.localOccupationBypass ? {} : { [defender.id]: defender }),
                 ...(options.secondCandidate ? { [secondDefender.id]: secondDefender } : {}),
             },
             brigade_movement_state: {},
             corps_front_sectors: { [sector.sector_id]: sector },
+            sector_intel: options.localOccupationBypass ? {
+                [sector.sector_id]: [{
+                    enemy_sector_id: 'sector:enemy:0', confidence: 1, last_updated_turn: turn, sources: ['passive_contact'],
+                }],
+            } : undefined,
             corps_command: {
                 [corpsId]: {
                     command_span: 5,
@@ -164,7 +182,7 @@ function runHarness(options: HarnessOptions = {}) {
         ['HRHB', controller === 'HRHB' ? new Set([TARGET, ...(options.secondCandidate ? [SECOND_TARGET] : []), ...DEPTHS]) : new Set()],
     ]);
     const spatial = {
-        adjacency,
+        adjacency: options.missingSearchPrerequisite ? undefined : adjacency,
         sharedBoundaryAdjacency: adjacency,
         friendlyOsidsByFaction: friendlyByFaction,
         componentsByFaction: new Map(),
@@ -187,10 +205,11 @@ function runHarness(options: HarnessOptions = {}) {
         faction,
         turn,
         spatial,
-        sectors: [sector],
+        sectors: options.noSector ? [] : [sector],
         brigades: [attacker],
         state_ref: state,
         reverse_map: reverseMap,
+        osid_population_map: options.localOccupationBypass ? new Map([[TARGET, 1]]) : null,
         supply_by_osid: null,
         ethnic_map: null,
         graph_analysis: null,
@@ -217,7 +236,10 @@ function runHarness(options: HarnessOptions = {}) {
         campaign_sync_role: null,
         campaign_sync_targets: [],
     } as CommanderBriefing;
-    const probeEvaluation = evaluation(attacker.id);
+    const probeEvaluation = {
+        ...evaluation(attacker.id),
+        is_combat_effective: options.noEligibleBrigade ? false : true,
+    } as BrigadeEvaluation;
     const lines: string[] = [];
     const spy = vi.spyOn(console, 'log').mockImplementation((...args: unknown[]) => { lines.push(args.map(String).join(' ')); });
     const output = emitCommanderOutput(
@@ -499,5 +521,122 @@ describe('fallback probe target production filters', () => {
     it('requires the chosen probe brigade to be directly adjacent to the candidate', () => {
         expect(selectedObjectives({ brigadeLocation: APPROACH })).toEqual([TARGET]);
         expect(selectedObjectives({ brigadeLocation: REAR })).toEqual([]);
+    });
+});
+
+describe('producer-bound commander target-selection reader', () => {
+    const statusFixtures: Array<[string, HarnessOptions]> = [
+        ['not_reached', { canLaunchOps: false }],
+        ['no_brigade', { noEligibleBrigade: true }],
+        ['no_sector', { noSector: true }],
+        ['missing_adjacency_or_friendly_set_or_location', { missingSearchPrerequisite: true }],
+        ['local_occupation_bypass', { localOccupationBypass: true }],
+        ['empty_enemy_set', { emptyEnemySet: true }],
+        ['empty_direct_set', { brigadeLocation: REAR }],
+        ['all_filtered', { defenderPersonnel: 4_000 }],
+        ['generic_search', {}],
+    ];
+
+    function producerRows(): Record<string, any>[] {
+        setTopics('commander_creation');
+        return statusFixtures.map(([expectedStatus, options]) => {
+            const row = runHarness(options).receipt;
+            expect(row?.phase).toBe('build_operations_complete');
+            expect(row?.probe_gate_receipt?.target_selection_detail?.status).toBe(expectedStatus);
+            return row!;
+        });
+    }
+
+    it('accepts full completion rows emitted by the real producer for every reachable status', () => {
+        const reader = require('../../tools/diagnostics/commander_target_selection_reader.cjs');
+        const tracked203 = require('../../tools/diagnostics/commander_creation_reader_203.cjs');
+        const rows = producerRows();
+
+        for (const row of rows) {
+            expect(tracked203.checkRow(row, row.probe_gate_receipt.target_selection_detail.status)).toEqual([]);
+            expect(reader.detailErrors(row, row.probe_gate_receipt.target_selection_detail.status)).toEqual([]);
+        }
+
+        const capturePath = process.env.AWWV_790_CAPTURE_ROWS;
+        if (capturePath) writeFileSync(
+            capturePath,
+            `${rows.map((row) => `${COMMANDER_CREATION_PREFIX} ${JSON.stringify(row)}`).join('\n')}\n`,
+            { flag: 'wx' },
+        );
+    });
+
+    it('rejects contradictory status mutations and malformed stage, rank, fitness, filter, and selection fields', () => {
+        const reader = require('../../tools/diagnostics/commander_target_selection_reader.cjs');
+        const rows = producerRows();
+        const byStatus = Object.fromEntries(rows.map((row) => [row.probe_gate_receipt.target_selection_detail.status, row]));
+        const clone = (status: string) => structuredClone(byStatus[status]);
+        const controls: Array<[string, Record<string, any>]> = [];
+        const contradictory: Array<[string, string]> = [
+            ['not_reached', 'generic_search'],
+            ['no_brigade', 'generic_search'],
+            ['no_sector', 'generic_search'],
+            ['missing_adjacency_or_friendly_set_or_location', 'generic_search'],
+            ['local_occupation_bypass', 'generic_search'],
+            ['empty_enemy_set', 'empty_direct_set'],
+            ['empty_direct_set', 'all_filtered'],
+            ['all_filtered', 'generic_search'],
+            ['generic_search', 'all_filtered'],
+        ];
+        for (const [source, replacement] of contradictory) {
+            const row = clone(source);
+            row.probe_gate_receipt.target_selection_detail.status = replacement;
+            controls.push([`${source} as ${replacement}`, row]);
+        }
+
+        const badStage = clone('generic_search');
+        badStage.probe_gate_receipt.target_selection_detail.brigade_candidates[0].elite_available = 'NOT_REACHED';
+        controls.push(['stage after passing predecessor', badStage]);
+        const badRank = clone('generic_search');
+        badRank.probe_gate_receipt.target_selection_detail.brigade_candidates[0].sorted_rank = 4;
+        controls.push(['rank mismatch', badRank]);
+        const badFitness = clone('generic_search');
+        badFitness.probe_gate_receipt.target_selection_detail.brigade_candidates[0].actual_fitness = 'finite-ish';
+        controls.push(['fitness tag', badFitness]);
+        const badFilter = clone('generic_search');
+        badFilter.probe_gate_receipt.target_selection_detail.targets[0].cooldown_filter_reached = false;
+        controls.push(['target filter reachability', badFilter]);
+        const badCooldownValue = clone('generic_search');
+        badCooldownValue.probe_gate_receipt.target_selection_detail.targets[0].cooldown_effective_value = 999;
+        controls.push(['cooldown result binding', badCooldownValue]);
+        const badPoliticsValue = clone('generic_search');
+        badPoliticsValue.probe_gate_receipt.target_selection_detail.targets[0].politics_filter_passed = false;
+        controls.push(['politics result binding', badPoliticsValue]);
+        const badReachableValue = clone('generic_search');
+        badReachableValue.probe_gate_receipt.target_selection_detail.targets[0].reachable_filter_passed = false;
+        controls.push(['reachable result binding', badReachableValue]);
+        const badPredictionValue = clone('generic_search');
+        badPredictionValue.probe_gate_receipt.target_selection_detail.targets[0].prediction_filter_passed = false;
+        controls.push(['prediction result binding', badPredictionValue]);
+        const badRawCooldown = clone('generic_search');
+        badRawCooldown.probe_gate_receipt.target_selection_detail.targets[0].cooldown_raw_present = true;
+        controls.push(['raw cooldown consistency', badRawCooldown]);
+        const badPredictionPresence = clone('generic_search');
+        badPredictionPresence.probe_gate_receipt.target_selection_detail.targets[0].prediction_present = false;
+        controls.push(['prediction presence binding', badPredictionPresence]);
+        const badControllerPolitics = clone('generic_search');
+        badControllerPolitics.probe_gate_receipt.target_selection_detail.targets[0].controller = null;
+        badControllerPolitics.probe_gate_receipt.target_selection_detail.targets[0].politically_blocked = true;
+        controls.push(['controller politics binding', badControllerPolitics]);
+        const multiTarget = runHarness({ secondCandidate: true }).receipt!;
+        expect(reader.detailErrors(multiTarget, 'multi target producer')).toEqual([]);
+        const badTargetOrder = structuredClone(multiTarget);
+        badTargetOrder.probe_gate_receipt.target_selection_detail.targets.reverse();
+        controls.push(['target order', badTargetOrder]);
+        const badSurvivorOrder = structuredClone(multiTarget);
+        badSurvivorOrder.probe_gate_receipt.target_selection_detail.survivor_ids.reverse();
+        controls.push(['survivor rank order', badSurvivorOrder]);
+        const badSelection = clone('generic_search');
+        badSelection.probe_gate_receipt.target_selection_detail.selected_brigade_id = 'other';
+        controls.push(['selected identity', badSelection]);
+
+        expect(controls).toHaveLength(23);
+        for (const [name, row] of controls) {
+            expect(reader.detailErrors(row, name), name).not.toEqual([]);
+        }
     });
 });

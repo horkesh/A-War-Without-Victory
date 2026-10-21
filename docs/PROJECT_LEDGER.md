@@ -11475,3 +11475,14 @@ Determinism impact:none; no engine/projectsource/test/data/schema/threshold/cano
 
 
 Preservation qualification: the partial seal records an earlier B reader SHA a63d09b8d0c81c5d34fdab7587fcaa6f34cb04382d7e2311c529aad111c8d2d2; the current file is e3d837c7f193c7a4fc052eb6b0fc4745ab5b04e85c9bbd43c3d0d9fbdb93759f. No exact earlier source snapshot has been located in the inventoried packet. Historical receipts and hashes remain, but reproduction of that intermediate version is not established. The current raw inventory proves current bytes only; it does not prove preservation of every intermediate reader version. This does not affect the separately verified unchanged production source, thresholds or telemetry.
+
+
+### 2026-10-21 — Producer-bound reader repair (789–792)
+
+Producer-bound commander reader repair is accepted at completion-row scope. Real emitCommanderOutput fixtures cover all9 statuses; final2/2 tests include23 negative mutations; CLI9rows/0violations, require-safe0 and exact final noEmit0. Observer suite60/60 reused unchanged. No campaign/full suite, no gameplay/threshold/telemetry change. Retained n80 remains703/712 NO-GO; n81/n82 rejected689.
+
+Four-file change: portable203 copy, target-selection reader, explicit stateful+commander composition, existing production-path probe fixture. Determinism impact: validation only; production simulation source, data and thresholds unchanged. All protected source and C/D telemetry hashes freshly exact. Independent791 scopedaccept after one correction; Selector assertion at probe_target_selection_filter.test.ts:477 also fails in exactHEAD extraction:13/14pass,child/wrapper1/1; finalproducer-bound2/2pass does not make the whole file green.
+
+Each retained attempt has argv, entry snapshot, stdout/stderr and receipts. Vitest entry snapshots contain its launcher, not every evolving reader/test source version; exact intermediate790 source versions are not all retained. Final source hashes and actual producer rows are retained. The old missing intermediateB snapshot limitation remains. Neither limitation is a telemetry-loss or recovered-history claim.
+
+Evidence: reader-792-result and inventory in docs/provenance/october-calibration-20261019; raw789–791 locally retained. Next: Reconcile the inherited selector assertion against the all-corps receipt contract with a focused test correction before another campaign readiness claim. No new campaign authorized in this task.

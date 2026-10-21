@@ -1,3 +1,13 @@
+## 789–792 — Producer-bound reader accepted at scoped boundary (2026-10-21)
+
+Producer-bound commander reader repair is accepted at completion-row scope. Real emitCommanderOutput fixtures cover all9 statuses; final2/2 tests include23 negative mutations; CLI9rows/0violations, require-safe0 and exact final noEmit0. Observer suite60/60 reused unchanged. No campaign/full suite, no gameplay/threshold/telemetry change. Retained n80 remains703/712 NO-GO; n81/n82 rejected689.
+
+Independent791 review closed ignored-log portability, zero-coverage acceptance and computed target/filter/order gaps in one correction pass. Tracked203 dependency is byte-identical to original250816bce802f41a02a3f6d8b215b0747fbf6c67466e8f2e588e30e40a629078. Fullproducerstatuses and23negativecontrols use actual emitted completion records, not synthetic positives. Portable evidence: docs/provenance/october-calibration-20261019/reader-792-result.json and reader-792-raw-inventory.json. Raw bytesLOCAL.
+
+Selector assertion at probe_target_selection_filter.test.ts:477 also fails in exactHEAD extraction:13/14pass,child/wrapper1/1; finalproducer-bound2/2pass does not make the whole file green. Next: Reconcile the inherited selector assertion against the all-corps receipt contract with a focused test correction before another campaign readiness claim. No new campaign authorized in this task. Whole personnel/stateful pipeline and actual postrun remain unqualified/UNREACHED; personnel writer and ranking cause stayUNMEASURED. All inherited acceptance gates remain.
+
+Each retained attempt has argv, entry snapshot, stdout/stderr and receipts. Vitest entry snapshots contain its launcher, not every evolving reader/test source version; exact intermediate790 source versions are not all retained. Final source hashes and actual producer rows are retained. The old missing intermediateB snapshot limitation remains. Neither limitation is a telemetry-loss or recovered-history claim.
+
 # AWWV Calibration Master Reference
 ## 785–788 — Approved diagnostic stopped before launch (2026-10-21)
 

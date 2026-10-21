@@ -1,3 +1,7 @@
+## 2026-10-21 — Reader positives must come from the producer
+
+A hand-authored valid-status label does not prove that its fields can occur. Capture each reachable branch through the actual emitter, then mutate copies to reject contradictory stage, filter, rank and selection fields. Include zero-coverage and fresh-checkout dependency controls. A Vitest launcher snapshot does not preserve evolving test/tool versions; capture those separately when intermediate reproduction is required. See [reader repair](PROJECT_LEDGER.md#2026-10-21--producer-bound-reader-repair-789792).
+
 ## 2026-10-05 — A capture hash and execution linkage are separate evidence
 
 A hash can verify a source archive's bytes without proving a particular run used
