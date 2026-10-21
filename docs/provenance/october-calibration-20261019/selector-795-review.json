@@ -1,0 +1,116 @@
+{
+  "schema": "awwv.795.selector-contract-review.v1",
+  "reviewed_head": "154db7ce997a362933d04dc5f7710016a733b6c7",
+  "verdict": "ACCEPT",
+  "open_findings": [],
+  "resolved_findings": [
+    {
+      "severity": "critical",
+      "file": "tests/commander/probe_target_selection_filter.test.ts",
+      "original_lines": [179, 184, 522, 533],
+      "finding": "The first RS fixture overwrote the RS friendly set with an empty set, causing RS-controlled REAR to be classified and ranked as an enemy objective. The test passed against an impossible context.",
+      "resolution": "Friendly sets now derive uniquely from state.political.political_controllers. The test explicitly proves RS owns APPROACH and REAR, RBiH owns TARGET, and RS does not own TARGET. The RS receipt now contains only TARGET and ranks TARGET with controller RBiH and decisive_victory prediction.",
+      "verification": "795-correction-verification-02 passed 16/16 with child/wrapper 0/0 at the corrected frozen hash."
+    }
+  ],
+  "changed_file": {
+    "path": "tests/commander/probe_target_selection_filter.test.ts",
+    "bytes": 33157,
+    "sha256": "ae8697168b590f3e6eb8f8af5994f0a892ba482e31be03b8ea8073dfd33c8457",
+    "diff_numstat": "102\t17",
+    "only_changed_tracked_file": true
+  },
+  "contract_review": {
+    "topic_off": "AWWV_DEBUG_REASON_CODES unset produces no commander_creation receipt.",
+    "topic_on": "Every enabled invocation asserts the exact {faction, corps_id, turn} selector and complete target_selection_detail.",
+    "contexts": [
+      "RS / arbih_4th_corps / turn 178",
+      "RBiH / arbih_3rd_corps / turn 178",
+      "RBiH / arbih_4th_corps / turns 176, 177, 179, and 180"
+    ],
+    "semantics": "Each context asserts status, selected brigade and location, derived sector, enemy/direct/survivor/ranked IDs, every target filter field, prediction fields, and brigade candidate fields. The corrected RS context uses politically consistent friendly/enemy sets and a real enemy TARGET.",
+    "state_output_neutrality": "The existing selector-on versus selector-off equality assertions for returned output and state remain present.",
+    "production_contract": "src/sim/combat/commander/emit.ts creates probe_gate_receipt and initial target_selection_detail for every commander_creation-enabled buildOperations call; it has no old faction/corps/turn narrowing."
+  },
+  "evidence": {
+    "inherited_red": {
+      "path": "logs/claude-channel-20261004/794-red-affected-03",
+      "tests": "15 passed, 1 failed, 16 total",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "artifact_contract_pass": true
+    },
+    "worker_final_affected": {
+      "path": "logs/claude-channel-20261004/794-correction-final-affected-11",
+      "tests": "16 passed, 0 failed",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true
+    },
+    "worker_observer_reused": {
+      "path": "logs/claude-channel-20261004/794-green-observer-05",
+      "tests": "60 passed, 0 failed",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true
+    },
+    "worker_final_typecheck": {
+      "path": "logs/claude-channel-20261004/794-correction-final-typecheck-12",
+      "command": "tsc --noEmit --incremental false -p tsconfig.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true
+    },
+    "review_initial_run": {
+      "path": "logs/claude-channel-20261004/795-review-affected-01",
+      "tests": "16 passed, 0 failed",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true,
+      "review_result": "Blocked by semantic inspection despite green execution."
+    },
+    "correction_intermediate_typecheck": {
+      "path": "logs/claude-channel-20261004/794-correction-typecheck-10",
+      "child_exit": 2,
+      "wrapper_exit": 2,
+      "cause": "Object.entries received the optional political_controllers value without a fallback.",
+      "correction": "Use state.political.political_controllers ?? {}.",
+      "final_verification": "794-correction-final-typecheck-12 passed 0/0."
+    },
+    "review_correction_verification": {
+      "path": "logs/claude-channel-20261004/795-correction-verification-02",
+      "tests": "16 passed, 0 failed",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true,
+      "entry_script_immutable": true,
+      "source_snapshots_sha256": "7668af28a5ba26692f6b761ef6a1878c56e494a251b7806d0cafa75026ac7c00"
+    },
+    "corrected_freeze": "logs/claude-channel-20261004/794-corrected-final-freeze-13/manifest.json"
+  },
+  "preservation": {
+    "production_emit_sha256": "76351f818c3403fcc23bf5b51f30c467bd42886d68f1e6b754d9f90baa58746b",
+    "protected_sources": "12/12 match reader-792",
+    "old_786_792_files": "22/22 immutable against HEAD",
+    "c_telemetry": {
+      "bytes": 102001043,
+      "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899",
+      "matches": true
+    },
+    "d_telemetry": {
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "matches": true
+    },
+    "engine_health_thresholds": {
+      "bytes": 3775,
+      "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d",
+      "matches": true
+    },
+    "retained_calibration_status": "n80 remains 703/712, NO-GO, unadopted; no threshold, telemetry, historical gate, or acceptance criterion changed.",
+    "campaign_invocations": 0,
+    "full_suite_invocations": 0
+  },
+  "scope_limit": "Test-only selector-contract reconciliation. This review does not reopen reader qualification or qualify a whole pipeline, campaign, or gameplay change.",
+  "next_scope": "Root may perform the already-authorized documentation, preservation, and Git closeout. No campaign or additional broad validation is indicated."
+}

@@ -1,3 +1,7 @@
+## 2026-10-22 — Fixture faction maps must agree with control ownership
+
+A second Map entry with the same faction key can overwrite its own friendly set and make a passing receipt test classify friendly territory as an enemy objective. Build unique faction sets from the fixture control map and assert own/enemy membership before validating emitted detail. See [selector reconciliation](PROJECT_LEDGER.md#2026-10-22--receipt-selector-assertion-reconciled-793796).
+
 ## 2026-10-21 — Reader positives must come from the producer
 
 A hand-authored valid-status label does not prove that its fields can occur. Capture each reachable branch through the actual emitter, then mutate copies to reject contradictory stage, filter, rank and selection fields. Include zero-coverage and fresh-checkout dependency controls. A Vitest launcher snapshot does not preserve evolving test/tool versions; capture those separately when intermediate reproduction is required. See [reader repair](PROJECT_LEDGER.md#2026-10-21--producer-bound-reader-repair-789792).

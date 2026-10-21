@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-21 — producer-bound commander reader accepted; selector fixture residual.
+**Last updated:** 2026-10-22 — selector fixture reconciled; no new campaign.
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -24,13 +24,14 @@ tradeoffs or irreversible/external actions with concrete options and a
 recommendation. Required evidence, review panels and cost-control gates remain.
 
 **Current R6 — October Sana remains NO-GO.** Retained n80 is **703/712**, unadopted.
-Producer-bound commander reader accepted by independent791 review:9actualstatuses,
-23negativecontrols,2/2tests,CLI9rows/0violations,typecheck0; observer60/60 reused.
-Inherited selector assertion fails exactHEAD13/14; reconcile that fixture before
-any campaign readiness claim. No campaign/full suite or new gameplay/threshold/
-telemetry changes. Actual postrun and personnel causality remain unmeasured;
-n81/n82 rejected689. All inherited gates remain in the
-[calibration authority](../40_reports/CALIBRATION_MASTER.md).
+Producer-bound reader remains accepted at commander completion-row scope.
+Inherited selector assertion now reconciled: final affected16/16, observer60/60,
+typecheck0, independent795ACCEPT after fixing RS fixture ownership mapping.
+Only tests changed; production, thresholds and telemetry exact. No new campaign
+or full suite. Actual postrun/personnel causality and whole-pipeline readiness
+remain unmeasured; n81/n82 rejected689. Future diagnostic needs its fixed
+prerequisites and explicit run scope. All inherited acceptance gates remain in
+the [calibration authority](../40_reports/CALIBRATION_MASTER.md).
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference

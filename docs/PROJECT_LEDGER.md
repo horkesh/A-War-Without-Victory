@@ -11486,3 +11486,12 @@ Four-file change: portable203 copy, target-selection reader, explicit stateful+c
 Each retained attempt has argv, entry snapshot, stdout/stderr and receipts. Vitest entry snapshots contain its launcher, not every evolving reader/test source version; exact intermediate790 source versions are not all retained. Final source hashes and actual producer rows are retained. The old missing intermediateB snapshot limitation remains. Neither limitation is a telemetry-loss or recovered-history claim.
 
 Evidence: reader-792-result and inventory in docs/provenance/october-calibration-20261019; raw789–791 locally retained. Next: Reconcile the inherited selector assertion against the all-corps receipt contract with a focused test correction before another campaign readiness claim. No new campaign authorized in this task.
+
+
+### 2026-10-22 — Receipt selector assertion reconciled (793–796)
+
+The inherited selector assertion is reconciled with the existing topic-wide receipt contract. Only the probe fixture changed: topic-OFF absence, enabled exact faction/corps/turn identity and full detail semantics are checked across formerly excluded contexts. Canonical controller-derived friendly sets fix the RS fixture overwrite; own APPROACH/REAR and enemy TARGET are explicitly checked. No production behavior changed.
+
+Fresh inherited red15/16 exit1/1; final affected16/16 exit0/0; observer60/60 exit0/0 reused at unaffected scope; final noEmit0/0; independent795 correction verification16/16 exit0/0, verdictACCEPT/no open findings. Counts are distinct, not added. Initial green had an impossible RS friendly-set fixture; targeted correction and its initial typecheck2/2 remain retained.
+
+Determinism impact:none in simulation; test expectation and fixture consistency only. Production source/threshold/reference/C/D pins exact, all telemetry and old evidence preserved. Current exact source snapshots retained for failed and corrected attempts. Historical intermediate source-version gaps remain. Independent795ACCEPT; retained703 NO-GO, rejected689 unchanged. No campaign/fullsuite/adoption. Evidence: docs/provenance/october-calibration-20261019/selector-796-result.json and rawinventory; rawbytesLOCAL.

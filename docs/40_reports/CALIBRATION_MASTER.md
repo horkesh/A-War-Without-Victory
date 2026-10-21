@@ -1,3 +1,11 @@
+## 793–796 — Selector assertion reconciled (2026-10-22)
+
+The inherited selector assertion is reconciled with the existing topic-wide receipt contract. Only the probe fixture changed: topic-OFF absence, enabled exact faction/corps/turn identity and full detail semantics are checked across formerly excluded contexts. Canonical controller-derived friendly sets fix the RS fixture overwrite; own APPROACH/REAR and enemy TARGET are explicitly checked. No production behavior changed.
+
+Fresh inherited red15/16 exit1/1; final affected16/16 exit0/0; observer60/60 exit0/0 reused at unaffected scope; final noEmit0/0; independent795 correction verification16/16 exit0/0, verdictACCEPT/no open findings. Counts are distinct, not added. Initial green had an impossible RS friendly-set fixture; targeted correction and its initial typecheck2/2 remain retained.
+
+Final testSHA256 ae8697168b590f3e6eb8f8af5994f0a892ba482e31be03b8ea8073dfd33c8457. All12 protected production/source-test pins, thresholds/reference and C/D telemetry exact. Current attempts include exact test/dependency source snapshots beyond the launcher; original786–792 failures and source-version limitations remain. No campaign/fullsuite, no new calibration/neutrality/causal measurement. Retained703/712 staysNO-GO/unadopted; n81/n82 rejected689. Selector fixture residual isCLOSED; older stateful/pipeline and all other unmet gates remain. Evidence: selector-795-review and selector-796-result/rawinventory in docs/provenance/october-calibration-20261019; rawbytesLOCAL.
+
 ## 789–792 — Producer-bound reader accepted at scoped boundary (2026-10-21)
 
 Producer-bound commander reader repair is accepted at completion-row scope. Real emitCommanderOutput fixtures cover all9 statuses; final2/2 tests include23 negative mutations; CLI9rows/0violations, require-safe0 and exact final noEmit0. Observer suite60/60 reused unchanged. No campaign/full suite, no gameplay/threshold/telemetry change. Retained n80 remains703/712 NO-GO; n81/n82 rejected689.

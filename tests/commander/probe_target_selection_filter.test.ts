@@ -176,10 +176,15 @@ function runHarness(options: HarnessOptions = {}) {
         },
         displacement: {},
     } as unknown as GameState;
+    const controlledOsids = (owner: FactionId): ReadonlySet<string> => new Set(
+        Object.entries(state.political.political_controllers ?? {})
+            .filter(([, politicalController]) => politicalController === owner)
+            .map(([osid]) => osid),
+    );
     const friendlyByFaction = new Map<FactionId, ReadonlySet<string>>([
-        [faction, new Set([APPROACH, REAR])],
-        ['RS', controller === 'RS' ? new Set([TARGET, ...(options.secondCandidate ? [SECOND_TARGET] : []), ...DEPTHS]) : new Set()],
-        ['HRHB', controller === 'HRHB' ? new Set([TARGET, ...(options.secondCandidate ? [SECOND_TARGET] : []), ...DEPTHS]) : new Set()],
+        ['RBiH', controlledOsids('RBiH')],
+        ['RS', controlledOsids('RS')],
+        ['HRHB', controlledOsids('HRHB')],
     ]);
     const spatial = {
         adjacency: options.missingSearchPrerequisite ? undefined : adjacency,
@@ -287,7 +292,7 @@ function runHarness(options: HarnessOptions = {}) {
     const receipt = receiptLine
         ? JSON.parse(receiptLine.slice(COMMANDER_CREATION_PREFIX.length + 1)) as Record<string, any>
         : null;
-    return { output, prediction: prediction?.predicted_outcome ?? null, receipt, state };
+    return { output, prediction: prediction?.predicted_outcome ?? null, receipt, state, friendlyByFaction };
 }
 
 function selectedObjectives(options: HarnessOptions = {}): readonly string[] {
@@ -463,24 +468,104 @@ describe('fallback probe target production filters', () => {
         });
     });
 
-    it('emits detail only for the exact topic, faction, corps, and turn selector', () => {
+    it('emits receipt detail for every enabled context and records the exact selector identity', () => {
         setTopics(undefined);
         expect(runHarness().receipt).toBeNull();
 
-        setTopics('commander_creation');
-        for (const options of [
-            { faction: 'RS' as FactionId },
-            { corpsId: 'arbih_3rd_corps' as FormationId },
-            { turn: 176 },
-            { turn: 180 },
-        ]) {
-            expect(runHarness(options).receipt?.probe_gate_receipt).toBeUndefined();
-        }
+        const passedTarget = (
+            targetId: string,
+            controller: FactionId,
+            predictionPresent: boolean,
+            predictionOutcome: string | null,
+        ) => ({
+            target_id: targetId,
+            direct: true,
+            direct_filter_reached: true,
+            direct_filter_passed: true,
+            cooldown_raw_present: false,
+            cooldown_raw_value: null,
+            cooldown_effective_value: 0,
+            cooldown_filter_reached: true,
+            cooldown_filter_passed: true,
+            controller,
+            politically_blocked: false,
+            politics_filter_reached: true,
+            politics_filter_passed: true,
+            reachable: true,
+            approach_distance: 0,
+            reachable_filter_reached: true,
+            reachable_filter_passed: true,
+            prediction_present: predictionPresent,
+            prediction_outcome: predictionOutcome,
+            prediction_threshold: 'stalemate',
+            predicted_viable: true,
+            prediction_filter_reached: true,
+            prediction_filter_passed: true,
+            passed: true,
+            first_rejecting_filter: null,
+        });
+        const brigadeCandidates = [{
+            original_ordinal: 0,
+            brigade_id: 'probe',
+            actual_fitness: 0.9,
+            disrupted_and_effective: true,
+            elite_available: true,
+            historical_queue_free: true,
+            combat_ready: true,
+            sorted_rank: 0,
+            selected: true,
+        }];
 
-        for (const turn of [177, 179]) {
-            const oldReceipt = runHarness({ turn }).receipt?.probe_gate_receipt;
-            expect(oldReceipt).toBeDefined();
-            expect(oldReceipt).not.toHaveProperty('target_selection_detail');
+        setTopics('commander_creation');
+        for (const { options, selector, detail } of [
+            {
+                options: { faction: 'RS' as FactionId },
+                selector: { faction: 'RS', corps_id: CORPS_ID, turn: 178 },
+                detail: {
+                    status: 'generic_search',
+                    selected_brigade_id: 'probe',
+                    selected_brigade_location: APPROACH,
+                    derived_sector_id: `sector:${CORPS_ID}:0`,
+                    enemy_candidate_ids: [TARGET],
+                    direct_candidate_ids: [TARGET],
+                    survivor_ids: [TARGET],
+                    ranked_objective_ids: [TARGET],
+                    targets: [passedTarget(TARGET, 'RBiH', true, 'decisive_victory')],
+                    brigade_candidates: brigadeCandidates,
+                },
+            },
+            ...([
+                { options: { corpsId: 'arbih_3rd_corps' as FormationId }, corpsId: 'arbih_3rd_corps' as FormationId, turn: 178 },
+                { options: { turn: 176 }, corpsId: CORPS_ID, turn: 176 },
+                { options: { turn: 180 }, corpsId: CORPS_ID, turn: 180 },
+                { options: { turn: 177 }, corpsId: CORPS_ID, turn: 177 },
+                { options: { turn: 179 }, corpsId: CORPS_ID, turn: 179 },
+            ]).map(({ options, corpsId, turn }) => ({
+                options,
+                selector: { faction: FACTION, corps_id: corpsId, turn },
+                detail: {
+                    status: 'generic_search',
+                    selected_brigade_id: 'probe',
+                    selected_brigade_location: APPROACH,
+                    derived_sector_id: `sector:${corpsId}:0`,
+                    enemy_candidate_ids: [TARGET],
+                    direct_candidate_ids: [TARGET],
+                    survivor_ids: [TARGET],
+                    ranked_objective_ids: [TARGET],
+                    targets: [passedTarget(TARGET, 'RS', true, 'stalemate')],
+                    brigade_candidates: brigadeCandidates,
+                },
+            })),
+        ]) {
+            const result = runHarness(options);
+            const probeReceipt = result.receipt?.probe_gate_receipt;
+            expect(probeReceipt?.selector).toEqual(selector);
+            expect(probeReceipt?.target_selection_detail).toEqual(detail);
+            if (selector.faction === 'RS') {
+                expect(result.friendlyByFaction.get('RS')).toEqual(new Set([APPROACH, REAR]));
+                expect(result.friendlyByFaction.get('RBiH')).toContain(TARGET);
+                expect(result.friendlyByFaction.get('RS')).not.toContain(TARGET);
+            }
         }
     });
 

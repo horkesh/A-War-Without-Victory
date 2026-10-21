@@ -1,0 +1,730 @@
+{
+  "schema": "awwv.worker-794.corrected-final-manifest.v2",
+  "captured_utc": "2026-10-21T23:05:43.936Z",
+  "head": "154db7ce997a362933d04dc5f7710016a733b6c7",
+  "status_short": "M tests/commander/probe_target_selection_filter.test.ts",
+  "diff_numstat": "102\t17\ttests/commander/probe_target_selection_filter.test.ts",
+  "changed_file": {
+    "path": "tests/commander/probe_target_selection_filter.test.ts",
+    "bytes": 33157,
+    "sha256": "ae8697168b590f3e6eb8f8af5994f0a892ba482e31be03b8ea8073dfd33c8457"
+  },
+  "attempts": [
+    {
+      "name": "794-red-affected-03",
+      "command": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "logs/claude-channel-20261004/worker-794-entry.cjs",
+        "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\794-red-affected-03",
+        "tests/commander/probe_target_selection_filter.test.ts",
+        "src/sim/combat/commander/emit.ts",
+        "tools/diagnostics/commander_target_selection_reader.cjs",
+        "tools/diagnostics/commander_creation_reader_203.cjs",
+        "tools/diagnostics/commander_target_selection_postrun.cjs",
+        "--",
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "tests/commander/probe_target_selection_filter.test.ts"
+      ],
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "timed_out": false,
+      "artifact_contract": {
+        "pass": true,
+        "unexpected": [],
+        "missing_allowed": []
+      },
+      "entry_script_immutable": true,
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 580,
+        "sha256": "3061474ee2496153d1642e6a72b12f47fad55f7e8a0dc2d6376e61c8e79e1beb"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 3886,
+        "sha256": "823841a39e6e517c1c91b05fcd3cd88403d5ffebe076222c7bbbfae148fbb20f"
+      },
+      "source_snapshots": {
+        "path": "source-snapshots.json",
+        "bytes": 377614,
+        "sha256": "37aa1aafe4b217595f6db8faa01d8910ab2dd200791a0ba16b0bc7b5f39e4d75"
+      },
+      "vitest_summary": "Tests  1 failed | 15 passed (16)"
+    },
+    {
+      "name": "794-green-affected-04",
+      "command": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "logs/claude-channel-20261004/worker-794-entry.cjs",
+        "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\794-green-affected-04",
+        "tests/commander/probe_target_selection_filter.test.ts",
+        "src/sim/combat/commander/emit.ts",
+        "tools/diagnostics/commander_target_selection_reader.cjs",
+        "tools/diagnostics/commander_creation_reader_203.cjs",
+        "tools/diagnostics/commander_target_selection_postrun.cjs",
+        "--",
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "tests/commander/probe_target_selection_filter.test.ts"
+      ],
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "artifact_contract": {
+        "pass": true,
+        "unexpected": [],
+        "missing_allowed": []
+      },
+      "entry_script_immutable": true,
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 359,
+        "sha256": "b3006c4fdc5b55ef77439ceef1cb5a9db6550e801aa34de5f4e4650dbdbcac24"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "source_snapshots": {
+        "path": "source-snapshots.json",
+        "bytes": 382162,
+        "sha256": "051dacf8a8c4c6506abf94c352c132cca62f42fcfb380ed14fda8297d23f1db2"
+      },
+      "vitest_summary": "Tests  16 passed (16)"
+    },
+    {
+      "name": "794-green-observer-05",
+      "command": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "logs/claude-channel-20261004/worker-794-entry.cjs",
+        "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\794-green-observer-05",
+        "tests/commander_creation_observer.test.ts",
+        "tests/commander/probe_target_selection_filter.test.ts",
+        "src/sim/combat/commander/emit.ts",
+        "tools/diagnostics/commander_target_selection_reader.cjs",
+        "tools/diagnostics/commander_creation_reader_203.cjs",
+        "--",
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "tests/commander_creation_observer.test.ts"
+      ],
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "artifact_contract": {
+        "pass": true,
+        "unexpected": [],
+        "missing_allowed": []
+      },
+      "entry_script_immutable": true,
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 349,
+        "sha256": "4b8c0b8077eb383249f7e620c65eaddb06860ac0a962afa3ce7d16a9f4c92b7b"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "source_snapshots": {
+        "path": "source-snapshots.json",
+        "bytes": 513401,
+        "sha256": "9744604b12cbb54630e0a47b74476707377051ec51bcb1a29f3f85a76294d40c"
+      },
+      "vitest_summary": "Tests  60 passed (60)"
+    },
+    {
+      "name": "794-typecheck-06",
+      "command": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "logs/claude-channel-20261004/worker-794-entry.cjs",
+        "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\794-typecheck-06",
+        "tests/commander/probe_target_selection_filter.test.ts",
+        "tests/commander_creation_observer.test.ts",
+        "src/sim/combat/commander/emit.ts",
+        "tools/diagnostics/commander_target_selection_reader.cjs",
+        "tools/diagnostics/commander_creation_reader_203.cjs",
+        "tsconfig.json",
+        "--",
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--incremental",
+        "false",
+        "-p",
+        "tsconfig.json"
+      ],
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "artifact_contract": {
+        "pass": true,
+        "unexpected": [],
+        "missing_allowed": []
+      },
+      "entry_script_immutable": true,
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "source_snapshots": {
+        "path": "source-snapshots.json",
+        "bytes": 514348,
+        "sha256": "ae2e0a8f0c2f6c7cc2e7ffebb5c1c3664301df0f763734d3e3c312e9841d6365"
+      },
+      "vitest_summary": null
+    },
+    {
+      "name": "794-correction-preedit-08",
+      "command": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "logs/claude-channel-20261004/worker-794-entry.cjs",
+        "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\794-correction-preedit-08",
+        "tests/commander/probe_target_selection_filter.test.ts",
+        "src/sim/combat/commander/emit.ts",
+        "tools/diagnostics/commander_target_selection_reader.cjs",
+        "tools/diagnostics/commander_creation_reader_203.cjs",
+        "--",
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "-e",
+        "const fs=require('fs'),c=require('crypto'); const b=fs.readFileSync('tests/commander/probe_target_selection_filter.test.ts'); console.log(JSON.stringify({bytes:b.length,sha256:c.createHash('sha256').update(b).digest('hex')}));"
+      ],
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "artifact_contract": {
+        "pass": true,
+        "unexpected": [],
+        "missing_allowed": []
+      },
+      "entry_script_immutable": true,
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 92,
+        "sha256": "4958c51959d9c2029533a46f3e69b7fef9d4b98fd34884bc2d965cbbb5e0b913"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "source_snapshots": {
+        "path": "source-snapshots.json",
+        "bytes": 378715,
+        "sha256": "d2742b22df20501fdaa3236fae7c7e3ecfdb1ebcdd2cbb33d8638f8a941d4452"
+      },
+      "vitest_summary": null
+    },
+    {
+      "name": "794-correction-affected-09",
+      "command": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "logs/claude-channel-20261004/worker-794-entry.cjs",
+        "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\794-correction-affected-09",
+        "tests/commander/probe_target_selection_filter.test.ts",
+        "src/sim/combat/commander/emit.ts",
+        "tools/diagnostics/commander_target_selection_reader.cjs",
+        "tools/diagnostics/commander_creation_reader_203.cjs",
+        "tools/diagnostics/commander_target_selection_postrun.cjs",
+        "--",
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "tests/commander/probe_target_selection_filter.test.ts"
+      ],
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "artifact_contract": {
+        "pass": true,
+        "unexpected": [],
+        "missing_allowed": []
+      },
+      "entry_script_immutable": true,
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 359,
+        "sha256": "85c4c1e1ba6afa4da4b76b8c6152c48a533f707833c315920d083ff547adb085"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "source_snapshots": {
+        "path": "source-snapshots.json",
+        "bytes": 382586,
+        "sha256": "94017c4aac691485969b2e45d791644146d3bc06243a4f1fcc22fdb37483464c"
+      },
+      "vitest_summary": "Tests  16 passed (16)"
+    },
+    {
+      "name": "794-correction-typecheck-10",
+      "command": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "logs/claude-channel-20261004/worker-794-entry.cjs",
+        "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\794-correction-typecheck-10",
+        "tests/commander/probe_target_selection_filter.test.ts",
+        "tests/commander_creation_observer.test.ts",
+        "src/sim/combat/commander/emit.ts",
+        "tools/diagnostics/commander_target_selection_reader.cjs",
+        "tools/diagnostics/commander_creation_reader_203.cjs",
+        "tsconfig.json",
+        "--",
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--incremental",
+        "false",
+        "-p",
+        "tsconfig.json"
+      ],
+      "child_exit": 2,
+      "wrapper_exit": 2,
+      "timed_out": false,
+      "artifact_contract": {
+        "pass": true,
+        "unexpected": [],
+        "missing_allowed": []
+      },
+      "entry_script_immutable": true,
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 769,
+        "sha256": "f2f5dd6ef52031ff30777839d7643d3ed70f9af60284690af645957133349520"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "source_snapshots": {
+        "path": "source-snapshots.json",
+        "bytes": 514772,
+        "sha256": "647fc12162920bff4e40d46a5ed0154b048f909d778a8ca6142101ee213de78f"
+      },
+      "vitest_summary": null
+    },
+    {
+      "name": "794-correction-final-affected-11",
+      "command": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "logs/claude-channel-20261004/worker-794-entry.cjs",
+        "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\794-correction-final-affected-11",
+        "tests/commander/probe_target_selection_filter.test.ts",
+        "src/sim/combat/commander/emit.ts",
+        "tools/diagnostics/commander_target_selection_reader.cjs",
+        "tools/diagnostics/commander_creation_reader_203.cjs",
+        "tools/diagnostics/commander_target_selection_postrun.cjs",
+        "--",
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "tests/commander/probe_target_selection_filter.test.ts"
+      ],
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "artifact_contract": {
+        "pass": true,
+        "unexpected": [],
+        "missing_allowed": []
+      },
+      "entry_script_immutable": true,
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 359,
+        "sha256": "aa0372498fe27836deaed3f21d032f5a6cdf4d15d4f9db9724a1401f5ac176d8"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "source_snapshots": {
+        "path": "source-snapshots.json",
+        "bytes": 382594,
+        "sha256": "7668af28a5ba26692f6b761ef6a1878c56e494a251b7806d0cafa75026ac7c00"
+      },
+      "vitest_summary": "Tests  16 passed (16)"
+    },
+    {
+      "name": "794-correction-final-typecheck-12",
+      "command": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "logs/claude-channel-20261004/worker-794-entry.cjs",
+        "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\794-correction-final-typecheck-12",
+        "tests/commander/probe_target_selection_filter.test.ts",
+        "tests/commander_creation_observer.test.ts",
+        "src/sim/combat/commander/emit.ts",
+        "tools/diagnostics/commander_target_selection_reader.cjs",
+        "tools/diagnostics/commander_creation_reader_203.cjs",
+        "tsconfig.json",
+        "--",
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--incremental",
+        "false",
+        "-p",
+        "tsconfig.json"
+      ],
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "artifact_contract": {
+        "pass": true,
+        "unexpected": [],
+        "missing_allowed": []
+      },
+      "entry_script_immutable": true,
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "source_snapshots": {
+        "path": "source-snapshots.json",
+        "bytes": 514780,
+        "sha256": "b115de7b02ab2413255c8698910fbe0ba54ed2e840e215ffcfd3c57646b0408e"
+      },
+      "vitest_summary": null
+    }
+  ],
+  "protected_source_pins": [
+    {
+      "expected": {
+        "path": "src/sim/combat/reason_code_debug.ts",
+        "bytes": 20210,
+        "sha256": "beabdcaa779995ed93d820a957b0fd4cbd1e662d47502b0c0374b28819880484"
+      },
+      "actual": {
+        "path": "src/sim/combat/reason_code_debug.ts",
+        "bytes": 20210,
+        "sha256": "beabdcaa779995ed93d820a957b0fd4cbd1e662d47502b0c0374b28819880484"
+      },
+      "matches": true
+    },
+    {
+      "expected": {
+        "path": "src/sim/combat/movement_phase_diagnostic.ts",
+        "bytes": 7386,
+        "sha256": "cac140facd432e206a079093514702237f7690088b92eac10a556de9e6ba62d8"
+      },
+      "actual": {
+        "path": "src/sim/combat/movement_phase_diagnostic.ts",
+        "bytes": 7386,
+        "sha256": "cac140facd432e206a079093514702237f7690088b92eac10a556de9e6ba62d8"
+      },
+      "matches": true
+    },
+    {
+      "expected": {
+        "path": "src/sim/combat/personnel_diagnostic.ts",
+        "bytes": 5870,
+        "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3"
+      },
+      "actual": {
+        "path": "src/sim/combat/personnel_diagnostic.ts",
+        "bytes": 5870,
+        "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3"
+      },
+      "matches": true
+    },
+    {
+      "expected": {
+        "path": "src/sim/turn_pipeline.ts",
+        "bytes": 11675,
+        "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25"
+      },
+      "actual": {
+        "path": "src/sim/turn_pipeline.ts",
+        "bytes": 11675,
+        "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25"
+      },
+      "matches": true
+    },
+    {
+      "expected": {
+        "path": "src/sim/formation_spawn.ts",
+        "bytes": 44692,
+        "sha256": "d8586722b72a3345c610d422f4e069fe2150748a316cbe8d1fc8c4fcfd86c072"
+      },
+      "actual": {
+        "path": "src/sim/formation_spawn.ts",
+        "bytes": 44692,
+        "sha256": "d8586722b72a3345c610d422f4e069fe2150748a316cbe8d1fc8c4fcfd86c072"
+      },
+      "matches": true
+    },
+    {
+      "expected": {
+        "path": "src/sim/combat/strategic_reserve.ts",
+        "bytes": 10755,
+        "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae"
+      },
+      "actual": {
+        "path": "src/sim/combat/strategic_reserve.ts",
+        "bytes": 10755,
+        "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae"
+      },
+      "matches": true
+    },
+    {
+      "expected": {
+        "path": "src/sim/combat/frontline_attrition.ts",
+        "bytes": 21594,
+        "sha256": "0cc09b4eca821d2dce287893fdde312239c2b8be495ed02e36b8a23ba59f5ee1"
+      },
+      "actual": {
+        "path": "src/sim/combat/frontline_attrition.ts",
+        "bytes": 21594,
+        "sha256": "0cc09b4eca821d2dce287893fdde312239c2b8be495ed02e36b8a23ba59f5ee1"
+      },
+      "matches": true
+    },
+    {
+      "expected": {
+        "path": "src/sim/combat/morale_drift.ts",
+        "bytes": 17730,
+        "sha256": "cb7720d5da303e02d89fb3aaf034488a340a51155dfd6dbfc4839cf9cedcdc5c"
+      },
+      "actual": {
+        "path": "src/sim/combat/morale_drift.ts",
+        "bytes": 17730,
+        "sha256": "cb7720d5da303e02d89fb3aaf034488a340a51155dfd6dbfc4839cf9cedcdc5c"
+      },
+      "matches": true
+    },
+    {
+      "expected": {
+        "path": "src/sim/combat/commander/emit.ts",
+        "bytes": 202428,
+        "sha256": "76351f818c3403fcc23bf5b51f30c467bd42886d68f1e6b754d9f90baa58746b"
+      },
+      "actual": {
+        "path": "src/sim/combat/commander/emit.ts",
+        "bytes": 202428,
+        "sha256": "76351f818c3403fcc23bf5b51f30c467bd42886d68f1e6b754d9f90baa58746b"
+      },
+      "matches": true
+    },
+    {
+      "expected": {
+        "path": "tests/personnel_diagnostic.test.ts",
+        "bytes": 19693,
+        "sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b"
+      },
+      "actual": {
+        "path": "tests/personnel_diagnostic.test.ts",
+        "bytes": 19693,
+        "sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b"
+      },
+      "matches": true
+    },
+    {
+      "expected": {
+        "path": "tests/reason_code_debug.test.ts",
+        "bytes": 10403,
+        "sha256": "189ba6da07dc0b931e4e98c54565e50bd8182299843606cefccbc113e972bf08"
+      },
+      "actual": {
+        "path": "tests/reason_code_debug.test.ts",
+        "bytes": 10403,
+        "sha256": "189ba6da07dc0b931e4e98c54565e50bd8182299843606cefccbc113e972bf08"
+      },
+      "matches": true
+    },
+    {
+      "expected": {
+        "path": "tests/commander_creation_observer.test.ts",
+        "bytes": 100803,
+        "sha256": "05bfd3cf245aa0f929c44d6efff8abdf7316e0fb54b415f25a3c48c9e0f8bb86"
+      },
+      "actual": {
+        "path": "tests/commander_creation_observer.test.ts",
+        "bytes": 100803,
+        "sha256": "05bfd3cf245aa0f929c44d6efff8abdf7316e0fb54b415f25a3c48c9e0f8bb86"
+      },
+      "matches": true
+    }
+  ],
+  "protected_sources_all_match_792": true,
+  "protected_data": [
+    {
+      "expected": {
+        "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+        "bytes": 102001043,
+        "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899"
+      },
+      "actual": {
+        "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+        "bytes": 102001043,
+        "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899"
+      },
+      "matches": true
+    },
+    {
+      "expected": {
+        "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+      },
+      "actual": {
+        "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+      },
+      "matches": true
+    },
+    {
+      "expected": {
+        "path": "data/calibration/engine_health_thresholds.json",
+        "bytes": 3775,
+        "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d"
+      },
+      "actual": {
+        "path": "data/calibration/engine_health_thresholds.json",
+        "bytes": 3775,
+        "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d"
+      },
+      "matches": true
+    }
+  ],
+  "protected_data_all_match": true,
+  "old_786_792": {
+    "git_diff_exit": 0,
+    "immutable_against_head": true,
+    "files": [
+      {
+        "path": "docs/provenance/october-calibration-20261019/preflight-786-closed.json",
+        "bytes": 1092,
+        "sha256": "8dfed6e2acb53688541e75b71ffea0129c0a185bbf27fe5950702d9e934d57a2"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/preflight-786-continuation-closed.json",
+        "bytes": 1009,
+        "sha256": "cd2f6dfe9170f371ae700ac972e3db89f43cf930301ca33d03437cc672e8c178"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/preflight-786-continuation-inventory.json",
+        "bytes": 11483,
+        "sha256": "3a0384e963c0bd952a20e3f6e661a3d0a72fa9bc25c98261597bbeefd06bd6eb"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/preflight-786-continuation-result.json",
+        "bytes": 6903,
+        "sha256": "d4ed156abee5477ef7e10ae1f6b3058c2a6a825903a4abdcb9803d3ce8fcad5e"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/preflight-786-d-gate-wiring.json",
+        "bytes": 3736,
+        "sha256": "165f96300ec45812e507fc56f15ee829f1e31fdb790c87ceaa9c13ce9ce8208d"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/preflight-786-final-preflight-closed.json",
+        "bytes": 663,
+        "sha256": "03f5f3acdba77e0a497b6597e52688be0bbb9f0bcda108503dcaaecc6b7f4b5c"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/preflight-786-final-preflight-inventory.json",
+        "bytes": 20941,
+        "sha256": "9fded695901f16b16b4d6b4f18d7804602cfb5afe9c59dec15ccd23628e2c339"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/preflight-786-final-preflight-result.json",
+        "bytes": 2742,
+        "sha256": "34b0dfe09f1e4164db70a75b66484e6af44b79d2083bc2d0d0665a7fc75e9460"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/preflight-786-inventory.json",
+        "bytes": 9648,
+        "sha256": "e3313f3b79ec44e0b1966177bb49f2d0a3e8da524a1b2ae3a9fd1d5b0ab629b4"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/preflight-786-partial-reader-seal.json",
+        "bytes": 1450,
+        "sha256": "385d3294c5c3b27012ca3023d91ac3fba7553a58c66fdd736282e57a02f98d37"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/preflight-786-result.json",
+        "bytes": 7304,
+        "sha256": "0edf82ac47dc5093578d0444c41ffbb67e11ca51a90228e9d09ee4c209edd890"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/preflight-787-preflight-review.json",
+        "bytes": 6125,
+        "sha256": "25646eb65a620bc85a14a181a20a6671c6d6cfd2d564da3f2410e85064b1d491"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/preflight-787-status-contract-audit.json",
+        "bytes": 4445,
+        "sha256": "72fd18d6d646007acb5f6296427389d6ebe0e89cbfa349f0b8e83cdf4965e3f9"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/preflight-787-targeted-preflight-review.json",
+        "bytes": 3994,
+        "sha256": "77899c98c6fdbc5bd40dfcdeb68f20e8bc0044985213b38d3ec7fc615ded9582"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/preflight-788-preservation-qualification.json",
+        "bytes": 924,
+        "sha256": "46a8f6845e19224e60179c8599d26c6d4cbbc4e1a54df5cfea6d568ee160c2b5"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/preflight-788-raw-inventory.json",
+        "bytes": 24150,
+        "sha256": "b9985117a4d727181c4e41516e694ccd955ebe133717a9bf0d9cc7c246340e55"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/preflight-788-result.json",
+        "bytes": 27033,
+        "sha256": "c46e1f9b507fc3086c0eb20a1ac65f5e80af356f6233b688b56451404b7d8b0b"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/reader-790-closing-manifest.json",
+        "bytes": 5389,
+        "sha256": "186b508f1556358600aaef29526d76214567010829963a96dac9a47887f8b80f"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/reader-791-review.json",
+        "bytes": 6696,
+        "sha256": "1c984ad8fd9222b404349aa6d20ccadce1d03fd7f575d7a64541b26612763ce6"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/reader-791-review.md",
+        "bytes": 3633,
+        "sha256": "72b970f78dbe8454850303900e9651f54464f65366aadee4a8becd5d085a5869"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/reader-792-raw-inventory.json",
+        "bytes": 37711,
+        "sha256": "ccc00e320f37589651b33ede97e5dde9d1a4d263c50030aa1224e2e749604464"
+      },
+      {
+        "path": "docs/provenance/october-calibration-20261019/reader-792-result.json",
+        "bytes": 5229,
+        "sha256": "ef0d652663a6da6a90ca5949e26509f63ba23105e7cc8df52132b695e98ef12b"
+      }
+    ]
+  },
+  "campaign_invocations": 0,
+  "full_suite_invocations": 0
+}
