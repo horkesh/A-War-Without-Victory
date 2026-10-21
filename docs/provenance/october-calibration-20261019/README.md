@@ -113,3 +113,10 @@ instrumented-773 originals retain the initial reader claim; instrumented-774 ini
 Retained Sarajevo trace isolates the first named-field/personnel split at temporal22/week_index21: n801405 versus n811516, after equal1411 rows at21. The stored turn23 probe uses1stRomanija towardLokve in n80, but4thSarajevo towardOsjecani in n81/n82. Actual personnel writer and probe candidate ranks remain unmeasured; no gameplay fix established.
 
 sarajevo-777 is the fixed trace plan;778 result/inventory/closed bind raw extraction/controls/source/telemetry.779 is the independent review and780 the narrowed integration.780 explicitly preserves controls-after-extraction and missing exploratory-failure receipt as unmet process requirements, and does not adopt the worker24-week campaign proposal or equate a phase delta with an individual writer. Raw records and failed artifacts stayLOCAL;703 retained,689 rejected, no gameplay change/campaign/adoption.
+
+
+## Personnel/probe observer preparation — 2026-10-21
+
+Default-off stdout-only personnel and generic-probe selection observers are implemented and independently verified. Independent AWWV_DEBUG_PERSONNEL_FORMATIONS allows Sarajevo observation while the existing ABB movement-report payload stays exact. No gameplay, threshold, GameState/save/report/weekly or file-telemetry change; no campaign or historical-cause finding.
+
+personnel-781 fixedplan includes the independent-selector prerequisite correction. Original782 result/source-telemetry inventory/closed, initial783 required-fixture review, corrected782 seals and targeted783 review remain separately preserved. personnel-784-raw-inventory pins every bounded local raw attempt, not just the original20 source/telemetry entries. personnel-784-result is the reviewed synthesis. Initial146 and corrected test scopes are not added. Raw bytes remainLOCAL; full telemetry archives exact. New readiness is not a campaign neutrality/causal/acceptance claim; retained703 and rejected689 remain.

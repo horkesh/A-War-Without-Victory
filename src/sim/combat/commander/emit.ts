@@ -2071,6 +2071,20 @@ interface CommanderCreationProbeTargetSelectionDetail {
     survivor_ids: string[];
     ranked_objective_ids: string[];
     targets: CommanderCreationProbeTargetDetail[];
+    brigade_candidates: CommanderCreationProbeBrigadeCandidateDetail[];
+}
+
+type ReachedBoolean = boolean | 'NOT_REACHED';
+interface CommanderCreationProbeBrigadeCandidateDetail {
+    original_ordinal: number;
+    brigade_id: FormationId;
+    actual_fitness: number | 'NaN' | 'Infinity' | '-Infinity';
+    disrupted_and_effective: ReachedBoolean;
+    elite_available: ReachedBoolean;
+    historical_queue_free: ReachedBoolean;
+    combat_ready: ReachedBoolean;
+    sorted_rank: number | null;
+    selected: boolean;
 }
 
 type CommanderCreationLocalOpportunityOperand =
@@ -2213,13 +2227,6 @@ function markCommanderCreationExit(obs: CommanderCreationObservation | undefined
     if (obs && obs.exit === null) obs.exit = exit;
 }
 
-function isFourthCorpsProbeWindow(briefing: CommanderBriefing): boolean {
-    return briefing.faction === 'RBiH'
-        && briefing.corps_id === 'arbih_4th_corps'
-        && briefing.turn >= 177
-        && briefing.turn <= 179;
-}
-
 function observeProbeDecision(
     obs: CommanderCreationObservation | undefined,
     site: CommanderCreationProbeDecisionSite,
@@ -2296,27 +2303,26 @@ function buildOperations(
         exit: null,
         built: [],
     };
-    if (isFourthCorpsProbeWindow(briefing)) {
-        obs.probe_gate_receipt = {
-            selector: { faction: briefing.faction, corps_id: briefing.corps_id, turn: briefing.turn },
-            first_reached_exit: null,
-            plan_decision: null,
-            fallback_escalation_decision: null,
-            candidate_operations: [],
-            returned_operations: [],
-            ...(briefing.turn === 178 ? { target_selection_detail: {
-                status: 'not_reached',
-                selected_brigade_id: null,
-                selected_brigade_location: null,
-                derived_sector_id: null,
-                enemy_candidate_ids: [],
-                direct_candidate_ids: [],
-                survivor_ids: [],
-                ranked_objective_ids: [],
-                targets: [],
-            } } : {}),
-        };
-    }
+    obs.probe_gate_receipt = {
+        selector: { faction: briefing.faction, corps_id: briefing.corps_id, turn: briefing.turn },
+        first_reached_exit: null,
+        plan_decision: null,
+        fallback_escalation_decision: null,
+        candidate_operations: [],
+        returned_operations: [],
+        target_selection_detail: {
+            status: 'not_reached',
+            selected_brigade_id: null,
+            selected_brigade_location: null,
+            derived_sector_id: null,
+            enemy_candidate_ids: [],
+            direct_candidate_ids: [],
+            survivor_ids: [],
+            ranked_objective_ids: [],
+            targets: [],
+            brigade_candidates: [],
+        },
+    };
     const ops = buildOperationsImpl(briefing, allocation, planDecision, personality, obs);
     if (obs.exit === null) obs.exit = 'completed_no_operation';
     if (obs.probe_gate_receipt) {
@@ -2861,26 +2867,97 @@ function buildOperationsImpl(
 
         // A verified local occupation pair takes precedence. If there is none,
         // retain the existing highest-fitness probe selection unchanged.
+        const targetSelectionDetail = obs?.probe_gate_receipt?.target_selection_detail;
+        if (targetSelectionDetail && localOccupationCandidate) {
+            targetSelectionDetail.brigade_candidates = allocation.surplus_pool.map((ev, original_ordinal) => ({
+                original_ordinal,
+                brigade_id: ev.brigade_id,
+                actual_fitness: Number.isNaN(ev.fitness_offense)
+                    ? 'NaN'
+                    : ev.fitness_offense === Number.POSITIVE_INFINITY
+                        ? 'Infinity'
+                        : ev.fitness_offense === Number.NEGATIVE_INFINITY
+                            ? '-Infinity'
+                            : ev.fitness_offense,
+                disrupted_and_effective: 'NOT_REACHED',
+                elite_available: 'NOT_REACHED',
+                historical_queue_free: 'NOT_REACHED',
+                combat_ready: 'NOT_REACHED',
+                sorted_rank: null,
+                selected: ev === localOccupationCandidate.brigade,
+            }));
+        }
         const probeBrigade = botOrdersPerfTime(
             `${BUILD_OPERATIONS_PROFILE_PREFIX}.probe.selectBrigade`,
             () => localOccupationCandidate?.brigade ?? (() => {
                 const queuedHistoricalParticipants = briefing.state_ref
                     ? getHeadQueuedPrePlannedBrigadeIds(briefing.state_ref)
                     : new Set<FormationId>();
-                return allocation.surplus_pool
-                    .filter(ev => ev.is_combat_effective && !ev.is_disrupted)
-                    .filter(ev => mayEliteJoinOperation(ev.brigade_id, briefing.turn))
-                    .filter(ev => !queuedHistoricalParticipants.has(ev.brigade_id))
-                    .filter(ev => isCombatReadyParticipant(briefing, ev.brigade_id))
+                if (!targetSelectionDetail) {
+                    return allocation.surplus_pool
+                        .filter(ev => ev.is_combat_effective && !ev.is_disrupted)
+                        .filter(ev => mayEliteJoinOperation(ev.brigade_id, briefing.turn))
+                        .filter(ev => !queuedHistoricalParticipants.has(ev.brigade_id))
+                        .filter(ev => isCombatReadyParticipant(briefing, ev.brigade_id))
+                        .sort((a, b) => {
+                            const fitDiff = b.fitness_offense - a.fitness_offense;
+                            if (fitDiff !== 0) return fitDiff;
+                            return strictCompare(a.brigade_id, b.brigade_id);
+                        })[0];
+                }
+                const candidates = allocation.surplus_pool.map((ev, original_ordinal) => ({
+                    ev,
+                    detail: {
+                        original_ordinal,
+                        brigade_id: ev.brigade_id,
+                        actual_fitness: Number.isNaN(ev.fitness_offense)
+                            ? 'NaN' as const
+                            : ev.fitness_offense === Number.POSITIVE_INFINITY
+                                ? 'Infinity' as const
+                                : ev.fitness_offense === Number.NEGATIVE_INFINITY
+                                    ? '-Infinity' as const
+                                    : ev.fitness_offense,
+                        disrupted_and_effective: 'NOT_REACHED' as ReachedBoolean,
+                        elite_available: 'NOT_REACHED' as ReachedBoolean,
+                        historical_queue_free: 'NOT_REACHED' as ReachedBoolean,
+                        combat_ready: 'NOT_REACHED' as ReachedBoolean,
+                        sorted_rank: null,
+                        selected: false,
+                    } as CommanderCreationProbeBrigadeCandidateDetail,
+                }));
+                const survivors = candidates
+                    .filter((candidate) => {
+                        const passed = candidate.ev.is_combat_effective && !candidate.ev.is_disrupted;
+                        candidate.detail.disrupted_and_effective = passed;
+                        return passed;
+                    })
+                    .filter((candidate) => {
+                        const passed = mayEliteJoinOperation(candidate.ev.brigade_id, briefing.turn);
+                        candidate.detail.elite_available = passed;
+                        return passed;
+                    })
+                    .filter((candidate) => {
+                        const passed = !queuedHistoricalParticipants.has(candidate.ev.brigade_id);
+                        candidate.detail.historical_queue_free = passed;
+                        return passed;
+                    })
+                    .filter((candidate) => {
+                        const passed = isCombatReadyParticipant(briefing, candidate.ev.brigade_id);
+                        candidate.detail.combat_ready = passed;
+                        return passed;
+                    })
                     .sort((a, b) => {
-                        const fitDiff = b.fitness_offense - a.fitness_offense;
+                        const fitDiff = b.ev.fitness_offense - a.ev.fitness_offense;
                         if (fitDiff !== 0) return fitDiff;
-                        return strictCompare(a.brigade_id, b.brigade_id);
-                    })[0];
+                        return strictCompare(a.ev.brigade_id, b.ev.brigade_id);
+                    });
+                survivors.forEach((candidate, sortedRank) => { candidate.detail.sorted_rank = sortedRank; });
+                if (survivors[0]) survivors[0].detail.selected = true;
+                targetSelectionDetail.brigade_candidates = candidates.map((candidate) => candidate.detail);
+                return survivors[0]?.ev;
             })(),
         );
         if (obs) obs.probe_brigade_selected = probeBrigade != null;
-        const targetSelectionDetail = obs?.probe_gate_receipt?.target_selection_detail;
         if (targetSelectionDetail && !probeBrigade) targetSelectionDetail.status = 'no_brigade';
 
         if (probeBrigade) {

@@ -1,0 +1,13 @@
+{
+  "task": 782,
+  "writes_closed": true,
+  "implementation_complete": true,
+  "focused_verification_complete": true,
+  "independent_review_pending": true,
+  "git_writes": false,
+  "documentation_writes": false,
+  "last_source_test_attempt": "logs/claude-channel-20261004/782-green-focused-final-02/receipt.json",
+  "last_typecheck_attempt": "logs/claude-channel-20261004/782-typecheck-final-02/receipt.json",
+  "inventory": "logs/claude-channel-20261004/782-inventory.json",
+  "result": "logs/claude-channel-20261004/782-result.json"
+}

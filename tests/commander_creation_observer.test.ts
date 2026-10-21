@@ -1303,6 +1303,21 @@ describe('commander_creation emitter observation', () => {
         expect(result.output.operations).toHaveLength(1);
     });
 
+    it('contains commander receipt serialization/stdout failure without changing the real result', () => {
+        setTopics(undefined);
+        const baseline = runEmit(SCENARIOS[0]!.build());
+        setTopics('commander_creation');
+        const inputs = prepare(SCENARIOS[0]!.build());
+        const sink = vi.spyOn(console, 'log').mockImplementation(() => { throw new Error('commander sink'); });
+        let output: ReturnType<typeof emitCommanderOutput> | undefined;
+        expect(() => {
+            output = emitCommanderOutput(inputs.briefing, [], makeForces(), inputs.allocation, inputs.plan, makeDecisions(), makeThreats());
+        }).not.toThrow();
+        sink.mockRestore();
+        expect(output).toEqual(baseline.output);
+        expect(serializeState(inputs.briefing.state_ref!)).toBe(serializeState(baseline.state));
+    });
+
     it('reversed brigade/surplus insertion order gives an identical row and identical operations', () => {
         setTopics('commander_creation');
         for (const scenario of [SCENARIOS[0]!, SCENARIOS[4]!]) {
@@ -1315,7 +1330,16 @@ describe('commander_creation emitter observation', () => {
             const b = runEmit(reversed);
             expect(a.lines).toHaveLength(1);
             expect(b.lines).toHaveLength(1);
-            expect(parseRow(b.lines[0]!)).toEqual(parseRow(a.lines[0]!));
+            const aRow = parseRow(a.lines[0]!);
+            const bRow = parseRow(b.lines[0]!);
+            const aCandidates = aRow.probe_gate_receipt?.target_selection_detail?.brigade_candidates ?? [];
+            const bCandidates = bRow.probe_gate_receipt?.target_selection_detail?.brigade_candidates ?? [];
+            if (aRow.probe_gate_receipt?.target_selection_detail) delete aRow.probe_gate_receipt.target_selection_detail.brigade_candidates;
+            if (bRow.probe_gate_receipt?.target_selection_detail) delete bRow.probe_gate_receipt.target_selection_detail.brigade_candidates;
+            expect(bRow).toEqual(aRow);
+            expect(bCandidates.map((candidate: any) => candidate.brigade_id)).toEqual(
+                aCandidates.map((candidate: any) => candidate.brigade_id).reverse(),
+            );
             expect(b.output.operations.map((op) => op.name)).toEqual(a.output.operations.map((op) => op.name));
         }
     });
@@ -1673,7 +1697,7 @@ describe('commander_creation emitter observation', () => {
     }
 
     describe('exact RBiH 4th Corps turns 177-179 probe-gate receipt', () => {
-        it('is absent outside the exact selector and remains default-off', () => {
+        it('is default-off but records actual reached probe paths without a hardcoded corps or turn selector', () => {
             setTopics(undefined);
             expect(runEmit(fourthCorpsProbeWindowInputs()).lines).toEqual([]);
 
@@ -1686,8 +1710,86 @@ describe('commander_creation emitter observation', () => {
             ];
             for (const input of controls) {
                 const row = parseRow(runEmit(input).lines[0]!);
-                expect(row).not.toHaveProperty('probe_gate_receipt');
+                expect(row.probe_gate_receipt.selector).toEqual({
+                    faction: input.briefing.faction,
+                    corps_id: input.briefing.corps_id,
+                    turn: input.briefing.turn,
+                });
             }
+        });
+
+        it('records original surplus ordinals, reached filters, actual fitness, sorted ranks, and selected identity', () => {
+            const input = fourthCorpsProbeWindowInputs({
+                plan: noPlan(112), turn: 112, corpsId: 'arbih_3rd_corps' as FormationId,
+            });
+            input.allocation = {
+                ...input.allocation,
+                surplus_pool: [
+                    { ...input.allocation.surplus_pool[0]!, brigade_id: 'b2', fitness_offense: 10 },
+                    { ...input.allocation.surplus_pool[0]!, brigade_id: 'b1', fitness_offense: 10 },
+                    { ...input.allocation.surplus_pool[0]!, brigade_id: 'b1', fitness_offense: 9, is_disrupted: true },
+                ],
+            };
+            setTopics('commander_creation');
+            const row = parseRow(runEmit(input).lines[0]!);
+            expect(row.probe_gate_receipt.target_selection_detail.brigade_candidates).toEqual([
+                expect.objectContaining({ original_ordinal: 0, brigade_id: 'b2', actual_fitness: 10, sorted_rank: 1, selected: false }),
+                expect.objectContaining({ original_ordinal: 1, brigade_id: 'b1', actual_fitness: 10, sorted_rank: 0, selected: true }),
+                expect.objectContaining({ original_ordinal: 2, brigade_id: 'b1', disrupted_and_effective: false, elite_available: 'NOT_REACHED', sorted_rank: null, selected: false }),
+            ]);
+            expect(row.probe_gate_receipt.target_selection_detail.status).not.toBe('not_reached');
+        });
+
+        it('records every successive filter failure, nonfinite fitness tags, and exactly one reached helper evaluation', () => {
+            const input = fourthCorpsProbeWindowInputs({
+                plan: noPlan(112), turn: 112, corpsId: 'arbih_3rd_corps' as FormationId,
+            });
+            input.briefing.state_ref!.meta.autonomy_level = 1;
+            input.briefing.state_ref!.military.corps_command!.vrs_sarajevo_romanija = {
+                command_span: 3, subordinate_count: 0, og_slots: 0, active_ogs: [], active_operations: [],
+                corps_exhaustion: 0, stance: 'balanced', queued_operations: ['Operation Kijevo'],
+            } as any;
+            const combatFail = makeBrigade('combat_fail', 'op:test:approach', { personnel: 100 });
+            (input.briefing as any).sectors = [];
+            (input.briefing as any).brigades = [...input.briefing.brigades, combatFail];
+            input.briefing.state_ref!.military.formations = { combat_fail: combatFail };
+
+            const counts: Record<string, number> = {};
+            const counted = (id: string, fitness: number, overrides: Partial<BrigadeEvaluation> = {}): BrigadeEvaluation => {
+                const evaluation = { ...makeEval(id), fitness_offense: fitness, ...overrides } as BrigadeEvaluation;
+                counts[id] = 0;
+                Object.defineProperty(evaluation, 'brigade_id', {
+                    enumerable: true,
+                    get: () => { counts[id] += 1; return id as FormationId; },
+                });
+                return evaluation;
+            };
+            input.allocation = {
+                ...input.allocation,
+                surplus_pool: [
+                    counted('stage1_fail', Number.NaN, { is_combat_effective: false }),
+                    counted('rs_1st_guards_motorized', Number.POSITIVE_INFINITY),
+                    counted('rs_1st_romanija_infantry', Number.NEGATIVE_INFINITY),
+                    counted('combat_fail', 5),
+                    counted('b1', 4),
+                ],
+            };
+            setTopics('commander_creation');
+            const row = parseRow(runEmit(input).lines[0]!);
+            expect(row.probe_gate_receipt.target_selection_detail.brigade_candidates).toEqual([
+                expect.objectContaining({ original_ordinal: 0, brigade_id: 'stage1_fail', actual_fitness: 'NaN', disrupted_and_effective: false, elite_available: 'NOT_REACHED', historical_queue_free: 'NOT_REACHED', combat_ready: 'NOT_REACHED', sorted_rank: null, selected: false }),
+                expect.objectContaining({ original_ordinal: 1, brigade_id: 'rs_1st_guards_motorized', actual_fitness: 'Infinity', disrupted_and_effective: true, elite_available: false, historical_queue_free: 'NOT_REACHED', combat_ready: 'NOT_REACHED', sorted_rank: null, selected: false }),
+                expect.objectContaining({ original_ordinal: 2, brigade_id: 'rs_1st_romanija_infantry', actual_fitness: '-Infinity', disrupted_and_effective: true, elite_available: true, historical_queue_free: false, combat_ready: 'NOT_REACHED', sorted_rank: null, selected: false }),
+                expect.objectContaining({ original_ordinal: 3, brigade_id: 'combat_fail', actual_fitness: 5, disrupted_and_effective: true, elite_available: true, historical_queue_free: true, combat_ready: false, sorted_rank: null, selected: false }),
+                expect.objectContaining({ original_ordinal: 4, brigade_id: 'b1', actual_fitness: 4, disrupted_and_effective: true, elite_available: true, historical_queue_free: true, combat_ready: true, sorted_rank: 0, selected: true }),
+            ]);
+            expect(counts).toEqual({
+                stage1_fail: 1,
+                rs_1st_guards_motorized: 2,
+                rs_1st_romanija_infantry: 3,
+                combat_fail: 4,
+                b1: expect.any(Number),
+            });
         });
 
         it('records an outer exit before the predicate as not reached, without manufacturing false inputs', () => {
@@ -1718,6 +1820,7 @@ describe('commander_creation emitter observation', () => {
                     survivor_ids: [],
                     ranked_objective_ids: [],
                     targets: [],
+                    brigade_candidates: [],
                 },
             });
         });
@@ -1805,6 +1908,18 @@ describe('commander_creation emitter observation', () => {
                 ranked_objective_ids: ['op:test:local_target'],
                 targets: [],
             });
+            expect(row.probe_gate_receipt.target_selection_detail.brigade_candidates).toEqual([
+                expect.objectContaining({
+                    original_ordinal: 0, brigade_id: 'local_b1', disrupted_and_effective: 'NOT_REACHED',
+                    elite_available: 'NOT_REACHED', historical_queue_free: 'NOT_REACHED', combat_ready: 'NOT_REACHED',
+                    sorted_rank: null, selected: true,
+                }),
+                expect.objectContaining({
+                    original_ordinal: 1, brigade_id: 'local_b2', disrupted_and_effective: 'NOT_REACHED',
+                    elite_available: 'NOT_REACHED', historical_queue_free: 'NOT_REACHED', combat_ready: 'NOT_REACHED',
+                    sorted_rank: null, selected: false,
+                }),
+            ]);
         });
 
         it('preserves output, canonical state, and detached probe tuples when the selected detail is enabled', () => {

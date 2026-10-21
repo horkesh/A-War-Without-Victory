@@ -35,6 +35,7 @@ import type { FormationState, GameState, MilitiaPoolState } from '../../state/ga
 import { strictCompare } from '../../state/validateGameState.js';
 import { ensureBrigadeHistory } from './brigade_history_recorder.js';
 import { getOsidPriority, priorityRank } from './strategic_priorities.js';
+import { emitPersonnelWriterRecord, isPersonnelDiagnosticSelected } from './personnel_diagnostic.js';
 
 /**
  * Pool.available above this flows to faction reserve after reinforcement.
@@ -217,6 +218,12 @@ export function reinforceFromStrategicReserves(state: GameState): StrategicReser
         if (transfer <= 0) continue;
 
         (f as FormationState & { personnel: number }).personnel = current + transfer;
+        if (isPersonnelDiagnosticSelected(id)) emitPersonnelWriterRecord(id, {
+            source: 'strategic_reserve.reinforce', completed_turn: currentTurn,
+            before: current, cap, reserve_faction: poolFaction, reserve_before: reserveAvail,
+            in_combat: inCombat, rate, need, transfer, after: current + transfer,
+            reserve_after: reserveAvail - transfer,
+        });
         // Track peak personnel after strategic reserve draw
         const newPers = current + transfer;
         const hist = ensureBrigadeHistory(f);

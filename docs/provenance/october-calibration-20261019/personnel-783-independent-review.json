@@ -1,0 +1,141 @@
+{
+  "task": 783,
+  "reviewed_task": 782,
+  "review_type": "independent_source_and_evidence_review",
+  "base_head": "e95a1df818f5a8ba77b134926bc7c17a388ec8e1",
+  "verdict": "CHANGES_REQUIRED",
+  "writes_closed_at_review_start": true,
+  "review_writes_only": [
+    "logs/claude-channel-20261004/783-independent-review.json",
+    "logs/claude-channel-20261004/783-independent-review.md"
+  ],
+  "production_source_assessment": {
+    "verdict": "PASS_BY_DIRECT_SOURCE_COMPARISON",
+    "details": [
+      "The personnel topic is default-off; the observer is not allocated and the shared formation selector is not read while the topic gate is false.",
+      "The named-phase wrapper preserves report insertion, skip predicates, gameplay-body execution, mutation order, ordinary return identity, and exception propagation. A throwing body emits no false phase_end receipt.",
+      "All eight scoped direct-writer hooks sit immediately after the existing personnel assignment and record call-local operands/results without reevaluating gameplay predicates.",
+      "The generic-probe default-off path is the original filter/sort expression. The enabled path calls each original helper once, in the original short-circuit order, uses the original fitness comparator and brigade-id tie break, and returns the same BrigadeEvaluation identity.",
+      "Personnel and commander diagnostics use stableStringify through caught stdout sinks and add no GameState, save, report, weekly, or file-telemetry field. The existing movement_phase report payload is unchanged.",
+      "No hardcoded turn, corps, brigade, objective, threshold, or new availability rule was introduced."
+    ]
+  },
+  "blockers": [
+    {
+      "severity": "required_verification_gap",
+      "file": "tests/commander_creation_observer.test.ts",
+      "line": 1724,
+      "finding": "The new generic-probe candidate test covers a finite fitness tie/winner and a rejection at the first disrupted/effective stage only. It does not exercise elite_available, historical_queue_free, or combat_ready as reached failures with later stages left NOT_REACHED; it also does not cover NaN/Infinity/-Infinity tags or assert that the gameplay helpers are called exactly once. Those were explicit 781 acceptance conditions, so source inspection alone cannot close the regression gate."
+    },
+    {
+      "severity": "required_verification_gap",
+      "file": "tests/personnel_diagnostic.test.ts",
+      "line": 73,
+      "finding": "Presence coverage omits formation_present_undefined and formation_present_null. The real-writer fixture at line 117 executes only regular reinforcement and low-morale desertion, while the sealed claim enumerates bottom_up/enclave reinforcement and collapse desertion as directly covered. It checks source-name presence rather than the branch-local before/after/operand payloads for all eight claimed writer labels."
+    }
+  ],
+  "targeted_correction_required": [
+    "Add table-driven generic-probe candidates that fail at each successive filter, assert every reached/NOT_REACHED field, finite and nonfinite fitness encoding, sorted ranks/winner, and one-call helper counts without changing production code unless a test exposes a defect.",
+    "Add the two missing formation-presence cases and exercise/assert the bottom_up, regular, enclave, WIA, strategic-reserve, frontline-attrition, collapse-desertion, and low-morale-desertion writer payloads at their real assignments.",
+    "Run only the affected personnel and commander observer tests in one fresh preserved-preflight directory, followed by the existing seven-file focused set and noEmit only if the correction changes shared fixtures or production source."
+  ],
+  "evidence_assessment": {
+    "final_focused": {
+      "path": "logs/claude-channel-20261004/782-green-focused-final-02",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "tests": 146,
+      "passed": 146,
+      "failed": 0,
+      "receipt_sha256": "a549444d30ea1571f0606ded61147f2b06f6a7cef20ed7b3f7429be9f0715baf",
+      "vitest_sha256": "35455955623f50df080032720bd02dadbdfc95e1e57c4ae7d7e19644814d905d"
+    },
+    "final_typecheck": {
+      "path": "logs/claude-channel-20261004/782-typecheck-final-02",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "mode": "noEmit with private typecheck.tsbuildinfo",
+      "receipt_sha256": "2a8e732c6a68d6d1214d81ee2b3e14e9b768ecebdd1b1222d116c5991db215a7",
+      "buildinfo_sha256": "722397e4ea8ec3f762fa1462050e7b4d90c6f7fd273a24ee86aec5e9421e9e39"
+    },
+    "fresh_static_check": {
+      "command": "git diff --check --no-ext-diff e95a1df818f5a8ba77b134926bc7c17a388ec8e1 --",
+      "exit": 0
+    },
+    "retained_failures": [
+      {
+        "attempt": "782-red-personnel-01",
+        "child_exit": 1,
+        "wrapper_exit": 1,
+        "failed_tests": 2,
+        "category": "planned RED: personnel topic absent",
+        "receipt_sha256": "3ea24c4411ca2761a7875a6f7bf7fe0ff4ed139dfaa9bec44ad115f49d05dfa6"
+      },
+      {
+        "attempt": "782-red-probe-bypass-01",
+        "child_exit": 1,
+        "wrapper_exit": 1,
+        "failed_tests": 1,
+        "category": "planned RED: local-occupation bypass candidate inventory absent",
+        "receipt_sha256": "716829cf72959f908b5304b22177369bea0de2407275dc3a931847b17cab5447"
+      },
+      {
+        "attempt": "782-green-focused-01",
+        "child_exit": 1,
+        "wrapper_exit": 1,
+        "failed_tests": 3,
+        "category": "unexpected focused failures: insertion-order expectation and two personnel phase-record expectations",
+        "receipt_sha256": "e7aa2ca1255f86950244ff3641d5a85a1bee5ea41bf88d8e3849c2ed961e9df6",
+        "resolved_in_final_scope": true
+      },
+      {
+        "attempt": "782-typecheck-01",
+        "child_exit": 2,
+        "wrapper_exit": 2,
+        "errors": 2,
+        "category": "unexpected type errors in commander sorted_rank and nullable pool municipality",
+        "receipt_sha256": "c2c84f99cc3c8a8f1794c6e2fc18f772bdd8f8b2b90cf71e73533f9a1dfa72de",
+        "resolved_in_final_scope": true
+      }
+    ],
+    "inventory_scope_note": "782-inventory.json pins the 12 scoped source/test files and eight telemetry/archive files. It does not pin raw attempt start/argv/stdout/stderr/receipt files; supplemental task 784 is expected to add that portable raw inventory without changing 782 bytes. This review inspected the raw receipts directly and does not represent the 20-entry inventory as a complete attempt inventory."
+  },
+  "reviewed_file_hashes": [
+    { "path": "src/sim/combat/reason_code_debug.ts", "sha256": "beabdcaa779995ed93d820a957b0fd4cbd1e662d47502b0c0374b28819880484" },
+    { "path": "src/sim/combat/movement_phase_diagnostic.ts", "sha256": "07952c72fbb48c14cab2a669184421fc5c63897867c32b9a7c8cbabd7c233117" },
+    { "path": "src/sim/combat/personnel_diagnostic.ts", "sha256": "024685fdec2f8e002a171643f8b3c9f67d067b93fd15c077f51ad8ab5bb80e83" },
+    { "path": "src/sim/turn_pipeline.ts", "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25" },
+    { "path": "src/sim/formation_spawn.ts", "sha256": "d8586722b72a3345c610d422f4e069fe2150748a316cbe8d1fc8c4fcfd86c072" },
+    { "path": "src/sim/combat/strategic_reserve.ts", "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae" },
+    { "path": "src/sim/combat/frontline_attrition.ts", "sha256": "0cc09b4eca821d2dce287893fdde312239c2b8be495ed02e36b8a23ba59f5ee1" },
+    { "path": "src/sim/combat/morale_drift.ts", "sha256": "cb7720d5da303e02d89fb3aaf034488a340a51155dfd6dbfc4839cf9cedcdc5c" },
+    { "path": "src/sim/combat/commander/emit.ts", "sha256": "76351f818c3403fcc23bf5b51f30c467bd42886d68f1e6b754d9f90baa58746b" },
+    { "path": "tests/personnel_diagnostic.test.ts", "sha256": "499b584dfa42c71918d4675b51e35103602950acea4f0d00deeed51674b069f2" },
+    { "path": "tests/reason_code_debug.test.ts", "sha256": "189ba6da07dc0b931e4e98c54565e50bd8182299843606cefccbc113e972bf08" },
+    { "path": "tests/commander_creation_observer.test.ts", "sha256": "4bdbdd018e5fff58274cfed8417fa180ddaa6b6a95363cffd822fe384aa419e7" }
+  ],
+  "telemetry_protection": {
+    "c_bytes": 102001043,
+    "c_sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899",
+    "d_bytes": 1041,
+    "d_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+    "current_before_final_and_396_archive_match": true
+  },
+  "determinism_and_canon": {
+    "determinism_risk_found": false,
+    "canon_conflict_found": false,
+    "basis": [
+      "Engine Invariants v0.9.0 sections 11.1-11.4 and 13.1",
+      "DETERMINISM_TEST_MATRIX observer-only diagnostic contracts",
+      "CODE_CANON default-off stdout observer boundary",
+      "Phase Specifications v0.9.0 War-only lifecycle"
+    ]
+  },
+  "not_claimed": [
+    "campaign neutrality",
+    "historical first writer or historical rank causality",
+    "full-suite acceptance",
+    "scenario, replay, package, or adoption readiness"
+  ],
+  "retained_posture": "Historical writer/rank remain UNMEASURED. n80 remains retained at 703/712 and unadopted; n81/n82 remain rejected at 689."
+}

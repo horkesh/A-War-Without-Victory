@@ -13,6 +13,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { CRITICAL_MORALE_THRESHOLD } from './combat_math.js';
 import { munFromOsid } from './osid_adjacency.js';
 import { resolveMoraleDriftMaxPerTurn } from '../../state/formation_constants.js';
+import { emitPersonnelWriterRecord, isPersonnelDiagnosticSelected } from './personnel_diagnostic.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -313,12 +314,23 @@ export function runMoraleDrift(
         // Without this, brigades at morale 0 with 1,000+ personnel and decent cohesion
         // survive indefinitely — a 1,000-man unit at zero morale is a mob, not a brigade.
         const MIN_COMBAT = 100; // matches MIN_COMBAT_PERSONNEL from formation_constants
+        const personnelBeforeDesertion = f.personnel;
         if (f.morale <= 0) {
             // Morale collapse: 5% personnel loss per turn — rapid disintegration
             f.personnel = Math.max(MIN_COMBAT, Math.floor((f.personnel ?? 0) * 0.95));
+            if (isPersonnelDiagnosticSelected(fId)) emitPersonnelWriterRecord(fId, {
+                source: 'morale_drift.desertion', branch: 'collapse', completed_turn: state.meta.turn,
+                morale: f.morale, before: personnelBeforeDesertion, multiplier: 0.95,
+                floor: MIN_COMBAT, after: f.personnel,
+            });
         } else if ((f.morale ?? 50) < CRITICAL_MORALE_THRESHOLD) {
             // Low morale desertion: 2% personnel loss per turn — steady hemorrhage
             f.personnel = Math.max(MIN_COMBAT, Math.floor((f.personnel ?? 0) * 0.98));
+            if (isPersonnelDiagnosticSelected(fId)) emitPersonnelWriterRecord(fId, {
+                source: 'morale_drift.desertion', branch: 'low_morale', completed_turn: state.meta.turn,
+                morale: f.morale, before: personnelBeforeDesertion, multiplier: 0.98,
+                floor: MIN_COMBAT, after: f.personnel,
+            });
         }
 
         if (f.morale !== prev) {

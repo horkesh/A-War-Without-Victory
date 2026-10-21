@@ -1,0 +1,30 @@
+{
+  "task": "782-correction-783",
+  "head": "e95a1df818f5a8ba77b134926bc7c17a388ec8e1",
+  "files": [
+    { "path": "src/sim/combat/reason_code_debug.ts", "bytes": 20210, "sha256": "beabdcaa779995ed93d820a957b0fd4cbd1e662d47502b0c0374b28819880484" },
+    { "path": "src/sim/combat/movement_phase_diagnostic.ts", "bytes": 7386, "sha256": "cac140facd432e206a079093514702237f7690088b92eac10a556de9e6ba62d8" },
+    { "path": "src/sim/combat/personnel_diagnostic.ts", "bytes": 5870, "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3" },
+    { "path": "src/sim/turn_pipeline.ts", "bytes": 11675, "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25" },
+    { "path": "src/sim/formation_spawn.ts", "bytes": 44692, "sha256": "d8586722b72a3345c610d422f4e069fe2150748a316cbe8d1fc8c4fcfd86c072" },
+    { "path": "src/sim/combat/strategic_reserve.ts", "bytes": 10755, "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae" },
+    { "path": "src/sim/combat/frontline_attrition.ts", "bytes": 21594, "sha256": "0cc09b4eca821d2dce287893fdde312239c2b8be495ed02e36b8a23ba59f5ee1" },
+    { "path": "src/sim/combat/morale_drift.ts", "bytes": 17730, "sha256": "cb7720d5da303e02d89fb3aaf034488a340a51155dfd6dbfc4839cf9cedcdc5c" },
+    { "path": "src/sim/combat/commander/emit.ts", "bytes": 202428, "sha256": "76351f818c3403fcc23bf5b51f30c467bd42886d68f1e6b754d9f90baa58746b" },
+    { "path": "tests/personnel_diagnostic.test.ts", "bytes": 19693, "sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b" },
+    { "path": "tests/reason_code_debug.test.ts", "bytes": 10403, "sha256": "189ba6da07dc0b931e4e98c54565e50bd8182299843606cefccbc113e972bf08" },
+    { "path": "tests/commander_creation_observer.test.ts", "bytes": 100803, "sha256": "05bfd3cf245aa0f929c44d6efff8abdf7316e0fb54b415f25a3c48c9e0f8bb86" }
+  ],
+  "telemetry": [
+    { "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl", "bytes": 102001043, "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899" },
+    { "path": "data/derived/_debug/d_lane_persona_decisions.jsonl", "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" },
+    { "path": "logs/claude-channel-20261004/782-preservation-before/C-before.jsonl", "bytes": 102001043, "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899" },
+    { "path": "logs/claude-channel-20261004/782-preservation-before/D-before.jsonl", "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" },
+    { "path": "logs/claude-channel-20261004/782-preservation-final/C-after.jsonl", "bytes": 102001043, "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899" },
+    { "path": "logs/claude-channel-20261004/782-preservation-final/D-after.jsonl", "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" },
+    { "path": "logs/claude-channel-20261004/782-correction-783-preservation-final/C-after.jsonl", "bytes": 102001043, "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899" },
+    { "path": "logs/claude-channel-20261004/782-correction-783-preservation-final/D-after.jsonl", "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" },
+    { "path": "logs/claude-channel-20261004/396-varosluk-773-one188-telemetry/C-after.jsonl", "bytes": 102001043, "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899" },
+    { "path": "logs/claude-channel-20261004/396-varosluk-773-one188-telemetry/D-after.jsonl", "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" }
+  ]
+}

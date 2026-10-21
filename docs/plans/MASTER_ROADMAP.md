@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-21 — Sarajevo retained trace; n80 703/712 protected.
+**Last updated:** 2026-10-21 — personnel/probe observer readiness; retained n80 703/712.
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -24,14 +24,13 @@ tradeoffs or irreversible/external actions with concrete options and a
 recommendation. Required evidence, review panels and cost-control gates remain.
 
 **Current R6 — October Sana remains NO-GO.** Retained n80 is **703/712**, unadopted.
-Rejected n81/n82 remain689; n82 observer-only artifacts equal all30 n81 files.
-rs4 first named-field split at22: n801405/n811516 personnel after equal1411 at21.
-Stored23probes select1stRomanija→Lokve versus4thSarajevo→Osjecani. The actual
-personnel writer and candidate ranks remain unmeasured; no mechanic fix justified.
-Next: generic personnel-phase and reached fallback-selection observer preparation.
-No campaign approved or run in this trace; thresholds/telemetry exact. Evidence
-process gaps retained; all unmet gates remain in the
-[calibration authority](../40_reports/CALIBRATION_MASTER.md).
+Rejected n81/n82 remain689. Personnel phase/direct-write and reached generic-probe
+filter/fitness/rank observers are ready after focused/noEmit and targeted review.
+Independent personnel selector preserves existing ABB movement payload. All raw
+failed attempts and telemetry remain; no gameplay/threshold/report schema change.
+Historical writer/rank and new campaign neutrality remain unmeasured. Next:
+separately authorized bounded diagnostic against n82; none ran in this task.
+All unmet gates remain in the [calibration authority](../40_reports/CALIBRATION_MASTER.md).
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference

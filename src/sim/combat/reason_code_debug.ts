@@ -123,6 +123,7 @@ export type ReasonCodeTopic =
     | 'tg_formation'
     | 'dispatcher_decision'
     | 'movement_phase'
+    | 'personnel'
     | 'front_distribution'
     | 'commander_creation'
     | 'mistral_tg_activation'
@@ -149,6 +150,7 @@ const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'tg_formation',
     'dispatcher_decision',
     'movement_phase',
+    'personnel',
     'front_distribution',
     'commander_creation',
     'mistral_tg_activation',
@@ -227,7 +229,11 @@ export function whenReasonCodeTopic<T extends Record<string, unknown>>(
 export const COMMANDER_CREATION_PREFIX = '[commander_creation]';
 export function emitCommanderCreationRecord(record: Record<string, unknown>): void {
     if (!isReasonCodeTopicEnabled('commander_creation')) return;
-    console.log(`${COMMANDER_CREATION_PREFIX} ${stableStringify(record)}`);
+    try {
+        console.log(`${COMMANDER_CREATION_PREFIX} ${stableStringify(record)}`);
+    } catch {
+        // Observation and stdout failures cannot affect commander output.
+    }
 }
 
 /**

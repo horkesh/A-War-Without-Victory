@@ -20,6 +20,10 @@ Measured n81 qualification fails689/712 with14 previously correct October cells 
 
 Default-off topics `reconciliation_write` / `preplanned_eligibility` are covered by tests/stale_operation_march_reconciliation.test.ts, tests/pre_planned_operations.test.ts and tests/reason_code_debug.test.ts. Real queued/direct entry fixtures compare complete state, ordinary return and full serialized bytes OFF/ON, plus throwing-sink isolation. Repeated records are stable; snapshots detach; actual guard/write/axis/admission distinctions and generic selector modes are covered. Final correction141/141 and rootnoEmit0 follow earlier159/132/100 overlapping scopes; never sum them. Independent source comparison checks original predicate/helper/evaluation/mutation order. These are observer-preparation gates, not a new campaign, historical first-writer proof or replacement for inherited calibration/qualifying gates.
 
+## Personnel and generic-probe stdout preparation (2026-10-21)
+
+`personnel_diagnostic.test.ts`, `commander_creation_observer.test.ts` and the `reason_code_debug` selector matrix cover independent personnel selection, exact existing movement-payload/state/report bytes OFF/ON, selected presence/delta distinctions, phase closure/skip/gameplay exception propagation, deterministic output/detachment/sink isolation, eight direct writer branches, reached probe filters/NOT_REACHED/nonfinite fitness/helper counts/ties/bypass. The named movement coverage and affected writer tests remain at their recorded scopes. Initial146/146 and corrected scoped runs are separate, never summed. Final noEmit uses private buildinfo; independent source review checks original evaluation/mutation/return order as well as parity. Supplemental784 inventory preserves raw failed attempts. No campaign/full-suite/historical writer proof or acceptance waiver.
+
 ## Rules → Gates
 ### No timestamps / wall-clock values
 - Gate: `tests/determinism_static_scan_r1_5.test.ts`

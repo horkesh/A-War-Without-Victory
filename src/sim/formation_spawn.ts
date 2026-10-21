@@ -46,6 +46,7 @@ import {
     RS_STAFF_PRIORITY_RATE_BONUS
 } from './combat/municipality_support.js';
 import { getEnclaveIdForOsid, getEnclaveMaxPersonnel, isEnclaveBrigade } from './combat/enclave_resilience.js';
+import { emitPersonnelWriterRecord, isPersonnelDiagnosticSelected } from './combat/personnel_diagnostic.js';
 
 /**
  * Shared pocket pool: besieged municipalities where brigades can draw reinforcements
@@ -358,6 +359,12 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
             if (transfer <= 0) continue;
 
             (f as FormationState & { personnel: number }).personnel = current + transfer;
+            if (isPersonnelDiagnosticSelected(id)) emitPersonnelWriterRecord(id, {
+                source: 'formation_spawn.reinforce', branch: 'bottom_up', completed_turn: currentTurn,
+                before: current, tier_cap: tierCap, rate, need, available: availableForReinforcement,
+                transfer, after: current + transfer, pool_mun_id: pool.mun_id ?? null,
+                pool_faction: pool.faction, used_pocket_fallback: usedPocketFallback,
+            });
             // Track peak personnel after reinforcement
             const newPers1 = current + transfer;
             const h1 = ensureBrigadeHistory(f);
@@ -430,6 +437,11 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         if (transfer <= 0) continue;
 
         (f as FormationState & { personnel: number }).personnel = current + transfer;
+        if (isPersonnelDiagnosticSelected(id)) emitPersonnelWriterRecord(id, {
+            source: 'formation_spawn.reinforce', branch: 'regular', completed_turn: currentTurn,
+            before: current, cap, rate, need, available: availableForReinforcement, transfer,
+            after: current + transfer, pool_key: key,
+        });
         // Track peak personnel after reinforcement
         const newPers2 = current + transfer;
         const h2 = ensureBrigadeHistory(f);
@@ -484,6 +496,11 @@ export function reinforceBrigadesFromPools(state: GameState): ReinforceBrigadesR
         if (transfer <= 0) continue;
 
         (f as FormationState & { personnel: number }).personnel = current + transfer;
+        if (isPersonnelDiagnosticSelected(id)) emitPersonnelWriterRecord(id, {
+            source: 'formation_spawn.reinforce', branch: 'enclave', completed_turn: currentTurn,
+            before: current, cap: maxPers, rate, need, available: pool.available, transfer,
+            after: current + transfer, pool_key: key,
+        });
         // Track peak personnel after reinforcement
         const newPers3 = current + transfer;
         const h3 = ensureBrigadeHistory(f);
@@ -878,6 +895,11 @@ export function applyWiaTrickleback(state: GameState): WiaTricklebackReport {
 
         f.wounded_pending = pending - returned;
         f.personnel = current + returned;
+        if (isPersonnelDiagnosticSelected(id)) emitPersonnelWriterRecord(id, {
+            source: 'formation_spawn.wia_trickleback', completed_turn: state.meta.turn,
+            before: current, pending_before: pending, cap, returned, after: current + returned,
+            pending_after: pending - returned,
+        });
         // Track peak personnel after WIA return
         const newPers4 = current + returned;
         const h4 = ensureBrigadeHistory(f);
