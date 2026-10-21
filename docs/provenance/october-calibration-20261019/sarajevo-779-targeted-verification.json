@@ -1,0 +1,80 @@
+{
+  "schema": "awwv.779.targeted-verification.v1",
+  "reviewed_utc": "2026-10-21T08:18:05.3469707Z",
+  "writes_closed": true,
+  "verdict": "PASS_TARGETED_QUALIFICATION__WORDING_AND_NEXT_SCOPE_CLOSED__PROCESS_GAPS_REMAIN_OPEN",
+  "scope": "One targeted verification of the 780 integration against the 779 wording and next-scope findings; no repetition of the general observer review or raw 46-entry inventory audit.",
+  "inputs": {
+    "integration_result": {
+      "path": "logs/claude-channel-20261004/780-integration-b/result.json",
+      "sha256": "b8e11cccb77b79753fc7aaa6b00e6842629e907407cbfab60c35f11d6ef7c064"
+    },
+    "portable_result": {
+      "path": "docs/provenance/october-calibration-20261019/sarajevo-780-result.json",
+      "sha256": "b8e11cccb77b79753fc7aaa6b00e6842629e907407cbfab60c35f11d6ef7c064",
+      "exact_copy_of_integration_result": true
+    },
+    "master_paragraph": "docs/plans/MASTER_ROADMAP.md:26"
+  },
+  "checks": {
+    "bounded_verdict": {
+      "pass": true,
+      "evidence": "780 verdict is BOUNDED_FACTS_RETAINED__WRITER_RANK_UNMEASURED__PROCESS_GAPS_RETAINED; it does not convert 778 into an unqualified full pass."
+    },
+    "process_sequence_gap": {
+      "pass": true,
+      "status": "REMAINS_OPEN",
+      "evidence": "780 preserves that trace08:05 and targeted08:08 preceded controls08:10, and states later passing controls do not retroactively satisfy the required order."
+    },
+    "missing_receipt_gap": {
+      "pass": true,
+      "status": "REMAINS_OPEN",
+      "evidence": "780 preserves the exploratory PowerShell exit 1 as lacking a preserved-preflight receipt and states that the declaration cannot recover exact command/output evidence."
+    },
+    "next_scope": {
+      "pass": true,
+      "evidence": "780 narrows next work to generic, selected-formation, default-off observer preparation at personnel phase boundaries and the reached generic fallback. It states that a phase delta localizes a changing phase rather than proving an individual writer, and requires direct writer-boundary evidence when needed."
+    },
+    "excluded_scope": {
+      "pass": true,
+      "evidence": "780 excludes gameplay fixes, threshold/ownership changes, hard-coded turn-23 or Sarajevo branches, implementation in this integration, and engine/campaign execution. The proposed 24-week run remains unapproved; any abbreviated diagnostic cannot waive authoritative 188-week acceptance."
+    },
+    "master_alignment": {
+      "pass": true,
+      "evidence": "MASTER_ROADMAP lines 26-34 retain NO-GO, unmeasured writer/ranks, generic observer preparation, no campaign, exact thresholds/telemetry, retained process gaps, and all unmet gates."
+    },
+    "attempt_a_preserved": {
+      "pass": true,
+      "evidence": "780-integration-a is retained with child exit 1 / wrapper exit 126. Its checker incorrectly required a writes_closed field absent from the actual 779 schema. Corrected integration-b validates reviewed_utc, verdict, and exact review SHA; child/wrapper exit 0/0."
+    },
+    "sealed_inputs_unchanged": {
+      "pass": true,
+      "hashes": {
+        "778-result.json": "58877156bca2d77fefb20457cdd17b028d2e7cf999e7ac901bb350865bf6ba2d",
+        "778-inventory.json": "d5f2b2e4957db9094b84c0c36f696c26033d0afd2470b53d32fabf7dbf5cfc7d",
+        "778-closed.json": "865c49746afd96125e13e0cf8b4cbe87686c232c0f239b3fb26614e7d60e8587",
+        "779-independent-review.json": "a60b669295ace576ec31f34f3aa145130b64a24f40c77cdcc818686416df8bf2",
+        "779-independent-review.md": "2bcf757b07a6fa165cb177f39734cf536ca2d8e262d9d1377005ae18b0a1c066"
+      }
+    }
+  },
+  "disposition": {
+    "wording_finding": "CLOSED by qualified 780 language.",
+    "next_scope_finding": "CLOSED by root override to generic observer-only preparation and separate measurement authorization.",
+    "process_gaps": "NOT CLOSED. Late controls and the missing exploratory receipt remain unmet evidence-process requirements.",
+    "remaining_action": "None for this targeted verification. Do not rerun or implement under this scope."
+  },
+  "review_actions": {
+    "engine_runs": 0,
+    "campaigns": 0,
+    "replays": 0,
+    "runTurn_calls": 0,
+    "tests": 0,
+    "builds": 0,
+    "production_source_data_docs_git_edits": 0,
+    "new_files": [
+      "logs/claude-channel-20261004/779-targeted-verification.json",
+      "logs/claude-channel-20261004/779-targeted-verification.md"
+    ]
+  }
+}

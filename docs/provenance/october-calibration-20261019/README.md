@@ -106,3 +106,10 @@ Boundary769 initial/corrected result, inventory and closed receipts plus770 init
 One authorized instrumented188 diagnostic created n82, runner0/0 in5m14s with no retry. All30 gameplay artifacts and TEN pinned-save pairs are raw byte-identical to n81;32 consumed inputs exact. Actual first reconciliation replacement is turn4 jna_2nd_md_tg, Kozarac→Ljubija under Prijedor. Kijevo turn24 excludes rs_4th_sarajevo_light_infantry because committed to the executing turn23 probe. No gameplay fix or adoption; retained n80 remains703/712, n81 remains rejected689.
 
 instrumented-773 originals retain the initial reader claim; instrumented-774 initial review blocks it. instrumented-775 correction and instrumented-774-targeted-verification govern final complete-frame validation without another campaign. instrumented-776 is the reviewed synthesis. Inventories pin local raw stdout, native artifacts, failed attempts, full telemetry archives, readers and exact exits. Raw evidence isLOCAL, not remotely backed up by these inventories. All30 excludes only run_meta provenance metadata as fixed before execution; TEN raw pairs also pass. n80 retained703 and n81/n82 rejected689, no adoption.
+
+
+## Sarajevo probe/personnel retained trace — 2026-10-21
+
+Retained Sarajevo trace isolates the first named-field/personnel split at temporal22/week_index21: n801405 versus n811516, after equal1411 rows at21. The stored turn23 probe uses1stRomanija towardLokve in n80, but4thSarajevo towardOsjecani in n81/n82. Actual personnel writer and probe candidate ranks remain unmeasured; no gameplay fix established.
+
+sarajevo-777 is the fixed trace plan;778 result/inventory/closed bind raw extraction/controls/source/telemetry.779 is the independent review and780 the narrowed integration.780 explicitly preserves controls-after-extraction and missing exploratory-failure receipt as unmet process requirements, and does not adopt the worker24-week campaign proposal or equate a phase delta with an individual writer. Raw records and failed artifacts stayLOCAL;703 retained,689 rejected, no gameplay change/campaign/adoption.

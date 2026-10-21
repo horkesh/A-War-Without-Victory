@@ -1,0 +1,896 @@
+{
+  "schema": "awwv.780.reviewed-sarajevo-trace.v1",
+  "captured_utc": "2026-10-21T08:17:19.366Z",
+  "writes_closed": true,
+  "verdict": "BOUNDED_FACTS_RETAINED__WRITER_RANK_UNMEASURED__PROCESS_GAPS_RETAINED",
+  "summary": "Retained Sarajevo trace isolates the first named-field/personnel split at temporal22/week_index21: n801405 versus n811516, after equal1411 rows at21. The stored turn23 probe uses1stRomanija towardLokve in n80, but4thSarajevo towardOsjecani in n81/n82. Actual personnel writer and probe candidate ranks remain unmeasured; no gameplay fix established.",
+  "inputs": [
+    {
+      "path": "logs/claude-channel-20261004/777-root-plan.md",
+      "sha256": "7f8fb00a56f80c5d37fe5ddfd07a84a88dc4009f3dd5ede23508d7db4b2b06e3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-result.json",
+      "sha256": "58877156bca2d77fefb20457cdd17b028d2e7cf999e7ac901bb350865bf6ba2d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-inventory.json",
+      "sha256": "d5f2b2e4957db9094b84c0c36f696c26033d0afd2470b53d32fabf7dbf5cfc7d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/778-closed.json",
+      "sha256": "865c49746afd96125e13e0cf8b4cbe87686c232c0f239b3fb26614e7d60e8587"
+    },
+    {
+      "path": "logs/claude-channel-20261004/779-independent-review.json",
+      "sha256": "a60b669295ace576ec31f34f3aa145130b64a24f40c77cdcc818686416df8bf2"
+    }
+  ],
+  "facts": {
+    "actor": "rs_4th_sarajevo_light_infantry",
+    "temporal_coverage": {
+      "80": {
+        "total_rows": 45229,
+        "selected_count": 188,
+        "turn_min": 1,
+        "turn_max": 188,
+        "unique_turns": 188
+      },
+      "81": {
+        "total_rows": 45220,
+        "selected_count": 188,
+        "turn_min": 1,
+        "turn_max": 188,
+        "unique_turns": 188
+      },
+      "82": {
+        "total_rows": 45220,
+        "selected_count": 188,
+        "turn_min": 1,
+        "turn_max": 188,
+        "unique_turns": 188
+      },
+      "note": "Coverage is 188 actor records per run, not whole-GameState equality."
+    },
+    "prior_equal": {
+      "turn": 21,
+      "week_index": 20,
+      "row_n80": {
+        "active_op_id": null,
+        "assigned_sub_segment_id": "subseg:sector:vrs_sarajevo_romanija:4:0",
+        "brigade_id": "rs_4th_sarajevo_light_infantry",
+        "cohesion": 35,
+        "corps_id": "vrs_sarajevo_romanija",
+        "current_op_phase": null,
+        "faction": "RS",
+        "fatigue": 4,
+        "home_osid": "op:pale:bulozi",
+        "kind": "brigade",
+        "lifecycle_status": null,
+        "location_osid": "op:pale:bulozi",
+        "morale": 55,
+        "mv_destinations": [
+          "op:pale:bulozi"
+        ],
+        "mv_state": null,
+        "officer_quality": 0.602365223394228,
+        "personnel": 1411,
+        "sector_id": "sector:vrs_sarajevo_romanija:4",
+        "status": "active",
+        "turn": 21,
+        "week_index": 20
+      },
+      "row_n81": {
+        "active_op_id": null,
+        "assigned_sub_segment_id": "subseg:sector:vrs_sarajevo_romanija:4:0",
+        "brigade_id": "rs_4th_sarajevo_light_infantry",
+        "cohesion": 35,
+        "corps_id": "vrs_sarajevo_romanija",
+        "current_op_phase": null,
+        "faction": "RS",
+        "fatigue": 4,
+        "home_osid": "op:pale:bulozi",
+        "kind": "brigade",
+        "lifecycle_status": null,
+        "location_osid": "op:pale:bulozi",
+        "morale": 55,
+        "mv_destinations": [
+          "op:pale:bulozi"
+        ],
+        "mv_state": null,
+        "officer_quality": 0.602365223394228,
+        "personnel": 1411,
+        "sector_id": "sector:vrs_sarajevo_romanija:4",
+        "status": "active",
+        "turn": 21,
+        "week_index": 20
+      },
+      "compared_named_fields_equal": true
+    },
+    "first_actor_divergence": {
+      "turn": 22,
+      "week_index": 21,
+      "only_differing_named_field": "personnel",
+      "row_n80": {
+        "turn": 22,
+        "week_index": 21,
+        "personnel": 1405,
+        "cohesion": 35,
+        "morale": 55,
+        "fatigue": 3,
+        "location_osid": "op:pale:bulozi",
+        "home_osid": "op:pale:bulozi",
+        "active_op_id": null,
+        "current_op_phase": null,
+        "mv_state": null,
+        "mv_destinations": [
+          "op:pale:bulozi"
+        ],
+        "sector_id": "sector:vrs_sarajevo_romanija:4",
+        "assigned_sub_segment_id": "subseg:sector:vrs_sarajevo_romanija:4:0",
+        "status": "active",
+        "lifecycle_status": null,
+        "officer_quality": 0.6048110842532881,
+        "corps_id": "vrs_sarajevo_romanija"
+      },
+      "row_n81": {
+        "turn": 22,
+        "week_index": 21,
+        "personnel": 1516,
+        "cohesion": 35,
+        "morale": 55,
+        "fatigue": 3,
+        "location_osid": "op:pale:bulozi",
+        "home_osid": "op:pale:bulozi",
+        "active_op_id": null,
+        "current_op_phase": null,
+        "mv_state": null,
+        "mv_destinations": [
+          "op:pale:bulozi"
+        ],
+        "sector_id": "sector:vrs_sarajevo_romanija:4",
+        "assigned_sub_segment_id": "subseg:sector:vrs_sarajevo_romanija:4:0",
+        "status": "active",
+        "lifecycle_status": null,
+        "officer_quality": 0.6048110842532881,
+        "corps_id": "vrs_sarajevo_romanija"
+      },
+      "n80_delta_from_prior": -6,
+      "n81_delta_from_prior": 105
+    },
+    "probe_t23": {
+      "n80": {
+        "participant_ids": [
+          "rs_1st_romanija_infantry"
+        ],
+        "objective_ids": [
+          "op:hadzici:lokve"
+        ],
+        "phase": "planning"
+      },
+      "n81": {
+        "participant_ids": [
+          "rs_4th_sarajevo_light_infantry"
+        ],
+        "objective_ids": [
+          "op:gorazde:osjecani_2"
+        ],
+        "phase": "planning"
+      },
+      "n82": {
+        "participant_ids": [
+          "rs_4th_sarajevo_light_infantry"
+        ],
+        "objective_ids": [
+          "op:gorazde:osjecani_2"
+        ],
+        "phase": "planning"
+      },
+      "n81_execution": {
+        "line_index": 23,
+        "week_index": 24,
+        "operations": [
+          {
+            "attack_attempt_count": 1,
+            "attack_order_targets": [
+              {
+                "battle_count": 1,
+                "current_objective": true,
+                "order_count": 1,
+                "target_osid": "op:gorazde:osjecani_2"
+              }
+            ],
+            "battle_count": 1,
+            "corps_id": "vrs_sarajevo_romanija",
+            "current_objective": "op:gorazde:osjecani_2",
+            "current_objective_attack_count": 1,
+            "current_objective_battle_count": 1,
+            "current_objectives": [
+              "op:gorazde:osjecani_2"
+            ],
+            "eligible_attacker_count": 1,
+            "faction_id": "RS",
+            "idle_execution_turn_streak": 0,
+            "invalid_for_combat_calibration": false,
+            "invalidation_reasons": [],
+            "movement_only_execution_turns": 0,
+            "movement_order_count": 0,
+            "objective_attempt_count": 1,
+            "objective_capture_count": 0,
+            "operation_name": "probe_vrs_sarajevo_romanija_t23",
+            "operation_phase": "recovery",
+            "operation_type": "probe",
+            "participant_attack_orders": [
+              {
+                "battle_count": 1,
+                "brigade_id": "rs_4th_sarajevo_light_infantry",
+                "location_osid": "op:pale:bulozi",
+                "resolver_seen_target_osid": "op:gorazde:osjecani_2",
+                "target_is_current_objective": true,
+                "target_osid": "op:gorazde:osjecani_2"
+              }
+            ],
+            "participating_brigades": [
+              "rs_4th_sarajevo_light_infantry"
+            ],
+            "recovery_reason": "probe_complete",
+            "skipped_attack_orders": []
+          }
+        ],
+        "battles": [
+          {
+            "attacker_brigade": "rs_4th_sarajevo_light_infantry",
+            "attacker_casualties": 171,
+            "attacker_faction": "RS",
+            "attacker_won": false,
+            "battle_id": "24:op:gorazde:osjecani_2:rs_4th_sarajevo_light_infantry:arbih_851st_vitezka_liberation",
+            "defender_brigade": "arbih_851st_vitezka_liberation",
+            "defender_casualties": 112,
+            "defender_faction": "RBiH",
+            "equipment": {
+              "attacker_artillery_lost": 1,
+              "attacker_tanks_lost": 3,
+              "captured_artillery": 0,
+              "captured_tanks": 0,
+              "defender_artillery_lost": 0,
+              "defender_tanks_lost": 0,
+              "scavenged_artillery": 0,
+              "scavenged_tanks": 0
+            },
+            "execution_friction": {
+              "attacker_confidence_band": "low",
+              "labels": [
+                "stale_intel"
+              ]
+            },
+            "operation_id": "vrs_sarajevo_romanija:probe_vrs_sarajevo_romanija_t23:t23",
+            "operation_name": "probe_vrs_sarajevo_romanija_t23",
+            "outcome": "stalemate",
+            "power_ratio": 0.78,
+            "target_osid": "op:gorazde:osjecani_2"
+          }
+        ]
+      },
+      "n81_n82_actor_rows_identical_all_188": true
+    },
+    "retained_runtime": {
+      "rs4_reconciliation_turns_20_23": [
+        {
+          "line": 1261,
+          "tag": "reconciliation_write",
+          "record": {
+            "actual_exit": "order_owner_or_stance",
+            "brigade_id": "rs_4th_sarajevo_light_infantry",
+            "candidate_ordinal": 4,
+            "guards": {
+              "active_transit_absent": "NOT_REACHED",
+              "approaches_nonempty": "NOT_REACHED",
+              "capture_prefix_complete": "NOT_REACHED",
+              "current_index_after_prior": "NOT_REACHED",
+              "current_index_in_range": "NOT_REACHED",
+              "destination_not_operation_authorized": "NOT_REACHED",
+              "destination_not_reassignment_authorized": "NOT_REACHED",
+              "destination_not_routine_authorized": "NOT_REACHED",
+              "destination_not_staging": "NOT_REACHED",
+              "destination_present": "NOT_REACHED",
+              "effective_corps_present": "NOT_REACHED",
+              "formation_eligible": true,
+              "formation_present": true,
+              "location_present": "NOT_REACHED",
+              "membership_host_matches_effective_corps": "NOT_REACHED",
+              "operation_phase_active": "NOT_REACHED",
+              "order_present": true,
+              "owner_column": false,
+              "participating": "NOT_REACHED",
+              "prior_objective_friendly": "NOT_REACHED",
+              "prior_objective_unique": "NOT_REACHED",
+              "replacement_authorized": "NOT_REACHED",
+              "replacement_changed": "NOT_REACHED",
+              "replacement_in_approaches": "NOT_REACHED",
+              "replacement_present": "NOT_REACHED",
+              "reserve_membership_absent": "NOT_REACHED",
+              "unique_axis": "NOT_REACHED",
+              "unique_membership": "NOT_REACHED"
+            },
+            "kind": "candidate_terminal",
+            "old_order": {
+              "destination_sids": [
+                "op:pale:bulozi"
+              ],
+              "owner": null,
+              "stance": "column"
+            },
+            "schema_version": 1,
+            "turn": 20
+          }
+        },
+        {
+          "line": 1282,
+          "tag": "reconciliation_write",
+          "record": {
+            "actual_exit": "order_owner_or_stance",
+            "brigade_id": "rs_4th_sarajevo_light_infantry",
+            "candidate_ordinal": 7,
+            "guards": {
+              "active_transit_absent": "NOT_REACHED",
+              "approaches_nonempty": "NOT_REACHED",
+              "capture_prefix_complete": "NOT_REACHED",
+              "current_index_after_prior": "NOT_REACHED",
+              "current_index_in_range": "NOT_REACHED",
+              "destination_not_operation_authorized": "NOT_REACHED",
+              "destination_not_reassignment_authorized": "NOT_REACHED",
+              "destination_not_routine_authorized": "NOT_REACHED",
+              "destination_not_staging": "NOT_REACHED",
+              "destination_present": "NOT_REACHED",
+              "effective_corps_present": "NOT_REACHED",
+              "formation_eligible": true,
+              "formation_present": true,
+              "location_present": "NOT_REACHED",
+              "membership_host_matches_effective_corps": "NOT_REACHED",
+              "operation_phase_active": "NOT_REACHED",
+              "order_present": true,
+              "owner_column": false,
+              "participating": "NOT_REACHED",
+              "prior_objective_friendly": "NOT_REACHED",
+              "prior_objective_unique": "NOT_REACHED",
+              "replacement_authorized": "NOT_REACHED",
+              "replacement_changed": "NOT_REACHED",
+              "replacement_in_approaches": "NOT_REACHED",
+              "replacement_present": "NOT_REACHED",
+              "reserve_membership_absent": "NOT_REACHED",
+              "unique_axis": "NOT_REACHED",
+              "unique_membership": "NOT_REACHED"
+            },
+            "kind": "candidate_terminal",
+            "old_order": {
+              "destination_sids": [
+                "op:pale:bulozi"
+              ],
+              "owner": null,
+              "stance": "column"
+            },
+            "schema_version": 1,
+            "turn": 21
+          }
+        },
+        {
+          "line": 1302,
+          "tag": "reconciliation_write",
+          "record": {
+            "actual_exit": "order_owner_or_stance",
+            "brigade_id": "rs_4th_sarajevo_light_infantry",
+            "candidate_ordinal": 5,
+            "guards": {
+              "active_transit_absent": "NOT_REACHED",
+              "approaches_nonempty": "NOT_REACHED",
+              "capture_prefix_complete": "NOT_REACHED",
+              "current_index_after_prior": "NOT_REACHED",
+              "current_index_in_range": "NOT_REACHED",
+              "destination_not_operation_authorized": "NOT_REACHED",
+              "destination_not_reassignment_authorized": "NOT_REACHED",
+              "destination_not_routine_authorized": "NOT_REACHED",
+              "destination_not_staging": "NOT_REACHED",
+              "destination_present": "NOT_REACHED",
+              "effective_corps_present": "NOT_REACHED",
+              "formation_eligible": true,
+              "formation_present": true,
+              "location_present": "NOT_REACHED",
+              "membership_host_matches_effective_corps": "NOT_REACHED",
+              "operation_phase_active": "NOT_REACHED",
+              "order_present": true,
+              "owner_column": false,
+              "participating": "NOT_REACHED",
+              "prior_objective_friendly": "NOT_REACHED",
+              "prior_objective_unique": "NOT_REACHED",
+              "replacement_authorized": "NOT_REACHED",
+              "replacement_changed": "NOT_REACHED",
+              "replacement_in_approaches": "NOT_REACHED",
+              "replacement_present": "NOT_REACHED",
+              "reserve_membership_absent": "NOT_REACHED",
+              "unique_axis": "NOT_REACHED",
+              "unique_membership": "NOT_REACHED"
+            },
+            "kind": "candidate_terminal",
+            "old_order": {
+              "destination_sids": [
+                "op:pale:bulozi"
+              ],
+              "owner": null,
+              "stance": "column"
+            },
+            "schema_version": 1,
+            "turn": 22
+          }
+        },
+        {
+          "line": 1325,
+          "tag": "reconciliation_write",
+          "record": {
+            "actual_exit": "order_owner_or_stance",
+            "brigade_id": "rs_4th_sarajevo_light_infantry",
+            "candidate_ordinal": 6,
+            "guards": {
+              "active_transit_absent": "NOT_REACHED",
+              "approaches_nonempty": "NOT_REACHED",
+              "capture_prefix_complete": "NOT_REACHED",
+              "current_index_after_prior": "NOT_REACHED",
+              "current_index_in_range": "NOT_REACHED",
+              "destination_not_operation_authorized": "NOT_REACHED",
+              "destination_not_reassignment_authorized": "NOT_REACHED",
+              "destination_not_routine_authorized": "NOT_REACHED",
+              "destination_not_staging": "NOT_REACHED",
+              "destination_present": "NOT_REACHED",
+              "effective_corps_present": "NOT_REACHED",
+              "formation_eligible": true,
+              "formation_present": true,
+              "location_present": "NOT_REACHED",
+              "membership_host_matches_effective_corps": "NOT_REACHED",
+              "operation_phase_active": "NOT_REACHED",
+              "order_present": true,
+              "owner_column": false,
+              "participating": "NOT_REACHED",
+              "prior_objective_friendly": "NOT_REACHED",
+              "prior_objective_unique": "NOT_REACHED",
+              "replacement_authorized": "NOT_REACHED",
+              "replacement_changed": "NOT_REACHED",
+              "replacement_in_approaches": "NOT_REACHED",
+              "replacement_present": "NOT_REACHED",
+              "reserve_membership_absent": "NOT_REACHED",
+              "unique_axis": "NOT_REACHED",
+              "unique_membership": "NOT_REACHED"
+            },
+            "kind": "candidate_terminal",
+            "old_order": {
+              "destination_sids": [
+                "op:pale:bulozi"
+              ],
+              "owner": null,
+              "stance": "column"
+            },
+            "schema_version": 1,
+            "turn": 23
+          }
+        }
+      ],
+      "kijevo_turn24": {
+        "line": 1364,
+        "tag": "preplanned_eligibility",
+        "record": {
+          "actual_exit": "committed_elsewhere",
+          "authored_formation_id": "rs_4th_sarajevo_light_infantry",
+          "axis_id": "praca_approach",
+          "caller": "queued_injection",
+          "commitment_operations": [
+            {
+              "corps_id": "vrs_sarajevo_romanija",
+              "name": "probe_vrs_sarajevo_romanija_t23",
+              "phase": "execution",
+              "started_turn": 23,
+              "type": "probe"
+            }
+          ],
+          "corps_id": "vrs_sarajevo_romanija",
+          "guards": {
+            "committed_elsewhere": true,
+            "elite_corps_reachable": "NOT_REACHED",
+            "elite_loan_available": "NOT_REACHED",
+            "elite_loan_owner_available": "NOT_REACHED",
+            "elite_loan_state_present": "NOT_REACHED",
+            "formation_eligible": true,
+            "formation_resolved": true,
+            "not_disrupted": true,
+            "reachability": "NOT_REACHED",
+            "transit_authority_available": true
+          },
+          "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+          "kind": "candidate_terminal",
+          "linkage": "contiguous_unsequenced",
+          "operation_name": "Operation Kijevo",
+          "resolved_formation_id": "rs_4th_sarajevo_light_infantry",
+          "schema_version": 1,
+          "turn": 24
+        }
+      },
+      "matched_actor_battle_dissolution_reconstitution_weekly_report_weeks_1_through_24": {
+        "n80": [],
+        "n81": [
+          {
+            "line_index": 23,
+            "week_index": 24,
+            "battles": [
+              {
+                "attacker_brigade": "rs_4th_sarajevo_light_infantry",
+                "attacker_casualties": 171,
+                "attacker_faction": "RS",
+                "attacker_won": false,
+                "battle_id": "24:op:gorazde:osjecani_2:rs_4th_sarajevo_light_infantry:arbih_851st_vitezka_liberation",
+                "defender_brigade": "arbih_851st_vitezka_liberation",
+                "defender_casualties": 112,
+                "defender_faction": "RBiH",
+                "equipment": {
+                  "attacker_artillery_lost": 1,
+                  "attacker_tanks_lost": 3,
+                  "captured_artillery": 0,
+                  "captured_tanks": 0,
+                  "defender_artillery_lost": 0,
+                  "defender_tanks_lost": 0,
+                  "scavenged_artillery": 0,
+                  "scavenged_tanks": 0
+                },
+                "execution_friction": {
+                  "attacker_confidence_band": "low",
+                  "labels": [
+                    "stale_intel"
+                  ]
+                },
+                "operation_id": "vrs_sarajevo_romanija:probe_vrs_sarajevo_romanija_t23:t23",
+                "operation_name": "probe_vrs_sarajevo_romanija_t23",
+                "outcome": "stalemate",
+                "power_ratio": 0.78,
+                "target_osid": "op:gorazde:osjecani_2"
+              }
+            ],
+            "dissolution": [],
+            "reconstitution": []
+          }
+        ],
+        "n82": [
+          {
+            "line_index": 23,
+            "week_index": 24,
+            "battles": [
+              {
+                "attacker_brigade": "rs_4th_sarajevo_light_infantry",
+                "attacker_casualties": 171,
+                "attacker_faction": "RS",
+                "attacker_won": false,
+                "battle_id": "24:op:gorazde:osjecani_2:rs_4th_sarajevo_light_infantry:arbih_851st_vitezka_liberation",
+                "defender_brigade": "arbih_851st_vitezka_liberation",
+                "defender_casualties": 112,
+                "defender_faction": "RBiH",
+                "equipment": {
+                  "attacker_artillery_lost": 1,
+                  "attacker_tanks_lost": 3,
+                  "captured_artillery": 0,
+                  "captured_tanks": 0,
+                  "defender_artillery_lost": 0,
+                  "defender_tanks_lost": 0,
+                  "scavenged_artillery": 0,
+                  "scavenged_tanks": 0
+                },
+                "execution_friction": {
+                  "attacker_confidence_band": "low",
+                  "labels": [
+                    "stale_intel"
+                  ]
+                },
+                "operation_id": "vrs_sarajevo_romanija:probe_vrs_sarajevo_romanija_t23:t23",
+                "operation_name": "probe_vrs_sarajevo_romanija_t23",
+                "outcome": "stalemate",
+                "power_ratio": 0.78,
+                "target_osid": "op:gorazde:osjecani_2"
+              }
+            ],
+            "dissolution": [],
+            "reconstitution": []
+          }
+        ]
+      },
+      "binding_note": "No logged actor battle/dissolution/reconstitution occurs before the temporal turn-22/week_index-21 divergence. n81/n82 first log an actor battle at weekly_report week_index 24, after the stored turn-23 probe selection."
+    }
+  },
+  "inferences": [
+    {
+      "statement": "The turn-22 personnel split precedes the stored turn-23 participant/objective split and is a plausible upstream contributor because the source selection path ranks eligible surplus brigades by fitness_offense, whose definition includes personnel.",
+      "status": "ARITHMETIC_AND_SOURCE_COMPATIBLE_ONLY",
+      "not_proved": "No retained complete candidate population, filter outcomes, fitness values, or ranks bind personnel to the actual selection."
+    },
+    {
+      "statement": "The retained Kijevo exclusion is downstream of the probe commitment.",
+      "status": "PROVED_FOR_N82_RUNTIME",
+      "evidence": "turn-24 preplanned_eligibility actual_exit=committed_elsewhere names the executing turn-23 probe."
+    }
+  ],
+  "unmeasured": {
+    "personnel_writer": {
+      "status": "UNMEASURED",
+      "searched_receipt_locations": [
+        "runs/..._n80/weekly_report.jsonl weeks 1..24",
+        "runs/..._n81/weekly_report.jsonl weeks 1..24",
+        "runs/..._n82/weekly_report.jsonl weeks 1..24",
+        "logs/.../396-varosluk-773-one188.stdout.log tagged records turns 20..24",
+        "retained movement_phase diagnostics"
+      ],
+      "reason": "The retained movement_phase observer selected hvo_1st_guard_abb and its snapshot omits personnel. Weekly reports expose battles/dissolution/reconstitution but do not identify the phase that wrote the turn-22 personnel value."
+    },
+    "probe_selection_reason": {
+      "status": "UNMEASURED",
+      "searched_receipt_locations": [
+        "weekly_report probe records at week_index 23/24",
+        "retained reconciliation/preplanned stdout turns 20..24",
+        "commander_creation topic configuration"
+      ],
+      "reason": "commander_creation was not enabled; the weekly artifact stores the selected tuple but not the selectable population, reached rejection predicates, fitness scores, or rank. Source code is not runtime predicate evidence."
+    },
+    "n80_reconstruction": {
+      "status": "UNMEASURED",
+      "reason": "n80 provenance records git_dirty=true; retained artifacts do not identify its exact uncommitted source state or the actor personnel writer."
+    }
+  },
+  "checks": {
+    "exits": {
+      "778-controls-a": {
+        "start_utc": "2026-10-21T08:10:26.371Z",
+        "end_utc": "2026-10-21T08:10:28.160Z",
+        "child_exit": 0,
+        "wrapper_exit": 0,
+        "timed_out": false,
+        "argv": [
+          "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+          "logs\\claude-channel-20261004\\778-controls.cjs",
+          "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\778-controls-a"
+        ]
+      },
+      "778-trace-a": {
+        "start_utc": "2026-10-21T08:05:31.343Z",
+        "end_utc": "2026-10-21T08:05:38.609Z",
+        "child_exit": 0,
+        "wrapper_exit": 0,
+        "timed_out": false,
+        "argv": [
+          "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+          "logs\\claude-channel-20261004\\778-trace.cjs",
+          "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\778-trace-a"
+        ]
+      },
+      "778-targeted-a": {
+        "start_utc": "2026-10-21T08:08:55.989Z",
+        "end_utc": "2026-10-21T08:09:00.730Z",
+        "child_exit": 0,
+        "wrapper_exit": 0,
+        "timed_out": false,
+        "argv": [
+          "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+          "logs\\claude-channel-20261004\\778-targeted.cjs",
+          "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\778-targeted-a"
+        ]
+      }
+    },
+    "controls": {
+      "positive": {
+        "expected": 1,
+        "actual": 1
+      },
+      "absent": {
+        "expected": 0,
+        "actual": 0
+      },
+      "invalid": {
+        "expected": 1,
+        "actual": 1
+      }
+    },
+    "actual_schema": {
+      "80": {
+        "readable": true,
+        "total": 45229,
+        "selected": 188,
+        "invalid": 0
+      },
+      "81": {
+        "readable": true,
+        "total": 45220,
+        "selected": 188,
+        "invalid": 0
+      },
+      "82": {
+        "readable": true,
+        "total": 45220,
+        "selected": 188,
+        "invalid": 0
+      }
+    },
+    "reused": {
+      "n81_n82_all30_raw_equal": true,
+      "reader_review": "logs/claude-channel-20261004/774-targeted-verification.json",
+      "reader_controls": "logs/claude-channel-20261004/775-result.json"
+    }
+  },
+  "review": {
+    "schema": "awwv.779.independent-review.v1",
+    "reviewed_utc": "2026-10-21T08:15:23.4700420Z",
+    "reviewer_scope": "Independent read-only review of sealed 778 retained evidence and bounded diagnostic controls",
+    "verdict": "QUALIFIED_PASS_FACTS__PROCESS_SEQUENCE_AND_NEXT_SCOPE_REQUIRE_CORRECTION",
+    "reviewed_artifacts": {
+      "result": {
+        "path": "logs/claude-channel-20261004/778-result.json",
+        "bytes": 29579,
+        "sha256": "58877156bca2d77fefb20457cdd17b028d2e7cf999e7ac901bb350865bf6ba2d"
+      },
+      "inventory": {
+        "path": "logs/claude-channel-20261004/778-inventory.json",
+        "bytes": 9005,
+        "sha256": "d5f2b2e4957db9094b84c0c36f696c26033d0afd2470b53d32fabf7dbf5cfc7d",
+        "entries_checked": 46,
+        "missing_or_mismatched": 0
+      },
+      "closed": {
+        "path": "logs/claude-channel-20261004/778-closed.json",
+        "bytes": 1063,
+        "sha256": "865c49746afd96125e13e0cf8b4cbe87686c232c0f239b3fb26614e7d60e8587"
+      }
+    },
+    "established_facts": [
+      {
+        "fact": "Each n80/n81/n82 brigade temporal log contains 188 valid rows for rs_4th_sarajevo_light_infantry, covering unique turns 1 through 188.",
+        "scope": "Actor projection only; this is not whole-GameState equality."
+      },
+      {
+        "fact": "At turn 21 / week_index 20, n80 and n81 have equal complete actor rows and personnel 1411. At turn 22 / week_index 21, the complete 21-key actor rows differ only in personnel: n80=1405 and n81=1516.",
+        "scope": "The sealed trace compared 16 named state fields; independent full-row key/value comparison also found personnel as the sole difference at turn 22. This does not establish the global first run divergence."
+      },
+      {
+        "fact": "The stored planning record at weekly_report week_index 23 names n80 participant rs_1st_romanija_infantry with objective op:hadzici:lokve, while n81 and n82 name rs_4th_sarajevo_light_infantry with objective op:gorazde:osjecani_2.",
+        "scope": "Stored operation tuple and creation outcome are known; the actual candidate population, reached filters, scores and sorted rank are not recorded."
+      },
+      {
+        "fact": "For the named actor, weekly reports through week_index 24 contain no battle, dissolution or reconstitution receipt before the turn-22/week_index-21 personnel split. n81/n82 first record its battle at week_index 24, after the week_index-23 planning tuple; n80 records no such actor receipt through 24.",
+        "scope": "Absence is limited to those logged receipt categories and weeks 1 through 24."
+      },
+      {
+        "fact": "The retained n82 turn-24 Kijevo eligibility record exits committed_elsewhere and names the executing turn-23 probe commitment.",
+        "scope": "This proves the Kijevo exclusion is downstream for n82; it does not explain the earlier personnel or probe-selection divergence."
+      },
+      {
+        "fact": "n81 and n82 actor rows are byte-equivalent as parsed objects for all 188 turns; the previously sealed 773 result separately reports all 30 n81/n82 gameplay artifacts raw-equal.",
+        "scope": "Prior 773-776 neutrality evidence was reused and not rerun."
+      }
+    ],
+    "inference_limits": {
+      "personnel_to_selection": "Source inspection shows fitness_offense includes personnel and the generic probe fallback sorts eligible surplus evaluations by fitness_offense, so personnel is a possible contributor. Retained runtime evidence does not establish that rs4 reached that fallback, its actual rank, or that personnel caused selection.",
+      "personnel_writer": "UNMEASURED. Existing movement_phase snapshots omit personnel. Adding before/after personnel can identify a phase interval in which the value changed, but cannot by itself identify the actual assignment/writer if multiple writers execute inside that phase.",
+      "n80_reconstruction": "UNMEASURED because n80 records git_dirty=true and retained artifacts do not reconstruct its exact uncommitted source state.",
+      "source_is_not_runtime_predicate": true
+    },
+    "findings": [
+      {
+        "severity": "process",
+        "finding": "778-result pass=true overstates compliance with the ordered plan. Trace extraction started at 08:05:31Z and targeted extraction at 08:08:55Z; selector/schema controls started later at 08:10:26Z. The controls passed, but the required controls-before-extraction sequence was not met.",
+        "disposition": "Retain as a process residual. Do not rerun unchanged extraction merely to manufacture false preflight provenance."
+      },
+      {
+        "severity": "process",
+        "finding": "The exploratory PowerShell parser failure exited 1 before the retained scripts and has no preserved-preflight receipt.",
+        "disposition": "778 reports it accurately. Do not invent a receipt or recast it as a preserved attempt."
+      },
+      {
+        "severity": "scope",
+        "finding": "The 778 recommendation combines diagnostic source preparation with an unapproved preserved 24-week observer run and hard-codes turn-23 Sarajevo-Romanija rows in the proposed production observer path.",
+        "disposition": "Correct the next action to observer-only preparation at the two precise missing boundaries. Use generic configured selectors, keep diagnostics default-off, preserve thresholds and selection behavior, and make no Sarajevo/turn-23 production branch. A measurement run or horizon requires a separate owner decision."
+      }
+    ],
+    "corrected_next_scope": {
+      "authorized_interpretation": "No gameplay fix is justified. Prepare observer-only diagnostics, without changing thresholds, selection, state, saves, or outputs when disabled.",
+      "personnel_boundary": "Add generic, selector-scoped, default-off personnel presence/value and pre/post phase deltas. Treat a changing phase only as localization; add a more precise assignment/writer receipt if actual writer identity is required.",
+      "probe_boundary": "At the reached generic probe fallback, emit the complete reached candidate/filter/fitness/rank/selected tuple through commander_creation under generic selectors. Do not hard-code Sarajevo, turn 23, brigade IDs or objectives in production source.",
+      "measurement_boundary": "Do not run the proposed 24-week observer reproduction under authority 777. Present a separate measurement question, cost and stopping rule for owner approval. Any later abbreviated observer run is diagnostic only and cannot waive the authoritative 188-week acceptance criterion.",
+      "stop_condition": "Stop after observer preparation and cheap source/control verification. Do not execute an engine run, replay, runTurn, campaign, suite, test or build in this review."
+    },
+    "preservation": {
+      "sealed_head": "26431de4d1c63c6b585e9b318974bf1ceecd3e41",
+      "sealed_status_porcelain": "",
+      "telemetry_C": {
+        "bytes": 102001043,
+        "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899"
+      },
+      "telemetry_D": {
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+      },
+      "retained_posture": "n80=703 remains NO-GO/unadopted; n81/n82=689 remain rejected. All telemetry, source and thresholds remain preserved.",
+      "review_actions": {
+        "engine_runs": 0,
+        "replays": 0,
+        "runTurn_calls": 0,
+        "campaigns": 0,
+        "suites": 0,
+        "tests": 0,
+        "builds": 0,
+        "source_data_canon_docs_git_edits": 0
+      }
+    }
+  },
+  "preservation": {
+    "runs": {
+      "80": {
+        "git_commit": "47872b8c66f17cde8101a5aba81be59c5d1ac62a",
+        "git_dirty": true,
+        "consumed_inputs_digest": "7986f05230e1d526e1794673e796dcb77730501d4958e435970c4ec806cc8039",
+        "weeks": 188
+      },
+      "81": {
+        "git_commit": "078132c9052c58cbcadab1d9a3cdf183571a2cfd",
+        "git_dirty": false,
+        "consumed_inputs_digest": "7986f05230e1d526e1794673e796dcb77730501d4958e435970c4ec806cc8039",
+        "weeks": 188
+      },
+      "82": {
+        "git_commit": "7d1e7054b658c81a7d875b12a4c1fb115bc88c88",
+        "git_dirty": false,
+        "consumed_inputs_digest": "7986f05230e1d526e1794673e796dcb77730501d4958e435970c4ec806cc8039",
+        "weeks": 188
+      }
+    },
+    "head": "26431de4d1c63c6b585e9b318974bf1ceecd3e41",
+    "status_porcelain": "",
+    "telemetry": {
+      "C": {
+        "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+        "bytes": 102001043,
+        "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899"
+      },
+      "D": {
+        "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+      }
+    },
+    "failed_exploratory_attempts": [
+      {
+        "command": "foreach pipeline combining run_meta rows and git status",
+        "exit": 1,
+        "error": "PowerShell ParserError: An empty pipe element is not allowed.",
+        "preserved_preflight": false,
+        "note": "Occurred before the retained diagnostic scripts; reported explicitly and not retried expensively."
+      }
+    ]
+  },
+  "scope": {
+    "engine_runs": 0,
+    "campaigns": 0,
+    "full_suites": 0,
+    "replays": 0,
+    "runTurn_calls": 0,
+    "builds": 0,
+    "source_test_data_threshold_canon_changes": 0
+  },
+  "process_residuals": [
+    "777 required selector/schema controls before extraction; actual778-trace08:05 and targeted08:08 preceded controls08:10. Later passing controls do not retroactively satisfy planned ordering.",
+    "An exploratory PowerShell parser failure exit1 lacks a preserved-preflight receipt. The retained declaration is not an exact argv/stdout/stderr/runtime receipt and cannot restore missing evidence."
+  ],
+  "root_next_scope": {
+    "action": "Observer-only preparation for generic selected-formation personnel pre/post/delta at covered phase boundaries, and actual reached fallback candidate filters, fitness/rank, selected brigade/sector/objective tuples. Phase deltas identify a changing phase, not an individual assignment when multiple writers exist; instrument the writing boundary if actual writer identity is required.",
+    "excluded": "No gameplay fix, ownership bypass, threshold change, hardcoded turn23/Sarajevo branch or new campaign implemented.",
+    "measurement": "The worker24-week reproduction is a proposal only, not authorized or adopted here. Any new measurement needs its own fixed question, cost, artifact comparison and owner allowance. An abbreviated diagnostic cannot waive authoritative188 acceptance."
+  },
+  "retained_n80": 703,
+  "rejected_n81_n82": 689,
+  "limits": [
+    "188 selected actor rows per run are not complete-state/global first-divergence evidence.",
+    "Source fitness includes personnel, but no measured candidate population/ranks prove the personnel change caused selection.",
+    "No logged battle before the split is bounded to matched weekly records1..24, not universal proof of no writer/event.",
+    "n80 dirty metadata lacks an exact executable source-tree counterfactual.",
+    "All inherited unmet gates remain; raw evidenceLOCAL with pushed inventory, no remote raw-byte backup."
+  ],
+  "admin_failure": "780-integration-a child1/wrapper126 before any publication mutation: checker assumed reviewer writes_closed field absent in the actual779 schema. Original attempt/script/stderr retained. Corrected reader validates actual reviewed_utc/verdict plus exact review SHA, not an invented field; no engine run or evidence rewrite."
+}
