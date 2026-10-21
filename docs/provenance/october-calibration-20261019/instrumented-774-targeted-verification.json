@@ -1,0 +1,71 @@
+{
+  "schema": "awwv.774.targeted-verification.v1",
+  "sealed_utc": "2026-10-21T06:47:31.4658468Z",
+  "writes_closed": true,
+  "verdict": "PASS_TARGETED_VERIFICATION__INITIAL_READER_FINDING_CLOSED",
+  "scope": "One targeted verification of the 775 stateful reader correction against the retained 773 stdout; the initial 774 review remains preserved.",
+  "finding_disposition": {
+    "initial_finding": "preplanned_reader_not_stateful",
+    "status": "CLOSED",
+    "basis": "775-reader.cjs now enforces build-start, declared-axis order and uniqueness, axis/candidate ordering and exact coverage, axis terminals, selected summaries, build terminal and summaries, caller return/admission consistency, and caller closure. Fourteen controls include the previously missing/reordered/duplicate build-axis cases and all pass. The corrected reader consumes the retained 4268-record stdout with 400 closed preplanned blocks, including 44 built blocks, 111 axes, and 280 candidates."
+  },
+  "checks": {
+    "source_review": "PASS",
+    "controls": {
+      "pass": true,
+      "count": 14,
+      "failed": 0,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false
+    },
+    "retained_stdout_actual": {
+      "pass": true,
+      "records_total": 4268,
+      "reconciliation_calls": 188,
+      "preplanned_blocks": 400,
+      "built_blocks": 44,
+      "axes": 111,
+      "candidates": 280,
+      "all_records_consumed": true,
+      "stateful_nested_coverage": true,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false
+    },
+    "sealed_inventory": {
+      "entries": 14,
+      "missing_or_mismatched": 0
+    },
+    "closed_bindings": {
+      "result_hash_matches": true,
+      "inventory_hash_matches": true
+    },
+    "original_773_seals_unchanged": true,
+    "head": "7d1e7054b658c81a7d875b12a4c1fb115bc88c88",
+    "clean_before_this_ignored_review_artifact": true
+  },
+  "evidence_hashes": {
+    "775-reader.cjs": "f4d439edd2ca04191164ea41f8b6e883025a1e5ed5720c499dc064b42a135a79",
+    "775-result.json": "8131fa5115a439d14fb06cae93d72150d8cf67bb941f58e5e67fbd6b5446735f",
+    "775-inventory.json": "1d0ea3c95f5e6d706f882a18338d36519e1bc5e12ddcd162104be9f02e87fc5d",
+    "775-closed.json": "3532ecad6c56f98730e22d4f759e3943e8a030e40b5a0a5faf39c7c251c27d45",
+    "775-reader-controls-a/controls.json": "65f8b3e157ff9fb1dc51361fc92b178bf1507a9a9a1d3bba65ebff8b096acda4",
+    "775-reader-actual-a/reader.json": "40b1426f6b3b72bf375bc71b3cbda19552c8c217be56b176245e37a34853d850",
+    "773-result.json": "211443ce774d265cace5d063937ce01a9f1672827e7591041ac51e4ec7515e2e",
+    "773-inventory.json": "b54d8682d427cd2b95c8afa924478fd9c8dcab355ad885cf74adae0be1fa5758",
+    "773-closed.json": "f2b13fc60710f80970d84d08d376e836ae6104aaedcbb994b8196338a98ad73c"
+  },
+  "limits": {
+    "campaigns": 0,
+    "replays": 0,
+    "runTurn_calls": 0,
+    "suites": 0,
+    "builds": 0,
+    "production_source_test_data_docs_git_edits": 0,
+    "diagnostic_not_adoption": true,
+    "n81_remains_rejected_689": true,
+    "n80_remains_retained_703_no_go": true,
+    "no_unsaved_state_or_historical_counterfactual_claim": true
+  }
+}

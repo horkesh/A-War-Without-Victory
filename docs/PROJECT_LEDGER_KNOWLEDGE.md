@@ -6055,3 +6055,8 @@ See PROJECT_LEDGER.md, 2026-10-20, 748–751. A field persisted as {} is not an 
 ## 2026-10-21 — Repeated observer context is not a unique invocation
 
 A caller/turn/corps/operation tuple may repeat within one turn. Keep every ordered start/candidate/terminal block and label contiguous_unsequenced rather than deduplicating by that tuple or adding a persisted game counter. Reached guard values must come from the existing evaluation; later guards remain NOT_REACHED. Neutrality at a queued entry point does not cover the direct entry point: compare complete state, ordinary return and serialized bytes at both, and inspect the original source order as well. Applied in the [2026-10-21 boundary observer entry](PROJECT_LEDGER.md#2026-10-21--boundary-observer-preparation-768-771).
+
+
+## 2026-10-21 — Validate nested diagnostic frames and the actual decision boundary
+
+Consuming every JSON record and closing caller blocks does not prove nested build/axis completeness. Reconcile declared axes and candidate ordinals with ordered start/terminal records, and test missing/reordered/duplicate frames before endorsing coverage. A commitment can be execution at injection and recovery in the completed-turn report; use the actual predicate receipt for the decision. Applied in [instrumented n82 diagnostic](PROJECT_LEDGER.md#2026-10-21--instrumented-n82-diagnostic-772-776).

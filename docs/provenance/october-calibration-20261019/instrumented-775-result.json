@@ -1,0 +1,712 @@
+{
+  "schema": "awwv.775.reader-correction-result.v1",
+  "sealed_utc": "2026-10-21T06:46:38.300Z",
+  "writes_closed": true,
+  "pass": true,
+  "failures": [],
+  "verdict": "PASS_TARGETED_READER_CORRECTION__773_RUNTIME_AND_TARGET_FINDINGS_REVALIDATED_AT_RETAINED_SCOPE",
+  "trigger": {
+    "review": {
+      "path": "logs/claude-channel-20261004/774-independent-review.json",
+      "bytes": 6949,
+      "sha256": "d1b2de13c918d6d5cb8c569899640abbac9f7a13e8480e44e3555b0cb2b424c0"
+    },
+    "blocking_finding": "preplanned_reader_not_stateful"
+  },
+  "scope": {
+    "retained_stdout_only": {
+      "path": "logs/claude-channel-20261004/396-varosluk-773-one188.stdout.log",
+      "bytes": 5154789,
+      "sha256": "922c65fceb712a4d82c1061d3e59af8e607b95eaed4dee7ea16dd6d962d4f903"
+    },
+    "campaigns": 0,
+    "replays": 0,
+    "runTurn_calls": 0,
+    "suites": 0,
+    "builds": 0,
+    "production_test_data_docs_git_edits": 0
+  },
+  "commands": {
+    "controls": {
+      "argv": [
+        "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+        "logs/claude-channel-20261004/775-reader.cjs",
+        "--selfcheck",
+        "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\775-reader-controls-a"
+      ],
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false
+    },
+    "actual": {
+      "argv": [
+        "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+        "logs/claude-channel-20261004/775-reader.cjs",
+        "logs/claude-channel-20261004/396-varosluk-773-one188.stdout.log",
+        "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\775-reader-actual-a"
+      ],
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false
+    }
+  },
+  "controls": {
+    "pass": true,
+    "count": 14,
+    "synthetic": true,
+    "items": [
+      {
+        "name": "positive",
+        "pass": true,
+        "expected_error": false,
+        "error": null
+      },
+      {
+        "name": "missing build_start",
+        "pass": true,
+        "expected_error": true,
+        "error": "axis_start order/duplicate"
+      },
+      {
+        "name": "reordered axis before build",
+        "pass": true,
+        "expected_error": true,
+        "error": "axis_start order/duplicate"
+      },
+      {
+        "name": "duplicate axis_start",
+        "pass": true,
+        "expected_error": true,
+        "error": "axis_start order/duplicate"
+      },
+      {
+        "name": "missing candidate",
+        "pass": true,
+        "expected_error": true,
+        "error": "candidate coverage"
+      },
+      {
+        "name": "duplicate candidate",
+        "pass": true,
+        "expected_error": true,
+        "error": "candidate declaration/order/duplicate"
+      },
+      {
+        "name": "missing axis_terminal",
+        "pass": true,
+        "expected_error": true,
+        "error": "axis_start order/duplicate"
+      },
+      {
+        "name": "duplicate axis_terminal",
+        "pass": true,
+        "expected_error": true,
+        "error": "axis_terminal order/duplicate"
+      },
+      {
+        "name": "missing build_terminal",
+        "pass": true,
+        "expected_error": true,
+        "error": "caller_terminal order"
+      },
+      {
+        "name": "duplicate build_terminal",
+        "pass": true,
+        "expected_error": true,
+        "error": "build_terminal order/coverage/duplicate"
+      },
+      {
+        "name": "wrong declared axis order",
+        "pass": true,
+        "expected_error": true,
+        "error": "axis_start declared order"
+      },
+      {
+        "name": "wrong selected summary",
+        "pass": true,
+        "expected_error": true,
+        "error": "axis selected summary"
+      },
+      {
+        "name": "wrong built axis summary",
+        "pass": true,
+        "expected_error": true,
+        "error": "build axis summary"
+      },
+      {
+        "name": "missing caller terminal",
+        "pass": true,
+        "expected_error": true,
+        "error": "preplanned truncation"
+      }
+    ]
+  },
+  "coverage": {
+    "records_total": 4268,
+    "reconciliation_records": 2878,
+    "reconciliation_calls": 188,
+    "reconciliation_candidates": 2502,
+    "preplanned_records": 1390,
+    "preplanned_blocks": 400,
+    "built_blocks": 44,
+    "axes": 111,
+    "candidates": 280,
+    "kijevo_blocks": 21,
+    "all_records_consumed": true,
+    "stateful_nested_coverage": true,
+    "enforced": [
+      "build_start iff build reached",
+      "declared axis uniqueness and exact order",
+      "axis_start before candidates",
+      "candidate exact declaration order and count",
+      "one axis_terminal after each declared axis",
+      "selected brigade summary equals selected candidates",
+      "one build_terminal after all axes",
+      "built axis and participant summaries",
+      "caller build_return/admission consistency",
+      "one caller_terminal closure"
+    ]
+  },
+  "findings_revalidated": {
+    "first_replacement": {
+      "turn": 4,
+      "candidate_ordinal": 6,
+      "brigade_id": "jna_2nd_md_tg",
+      "old_order": {
+        "destination_sids": [
+          "op:prijedor:kozarac_2"
+        ],
+        "owner": "bot_discretionary",
+        "stance": "column"
+      },
+      "new_order": {
+        "destination_sids": [
+          "op:prijedor:ljubija_2"
+        ],
+        "owner": "bot_discretionary",
+        "stance": "column"
+      },
+      "operation": {
+        "name": "Operation Prijedor",
+        "phase": "execution",
+        "started_turn": 0,
+        "type": "sector_attack"
+      },
+      "axis": {
+        "axis_id": "prijedor_clean",
+        "current_objective_index": 3,
+        "objective_capture_count": 3,
+        "objectives": [
+          "op:prijedor:ljubija_2",
+          "op:prijedor:kozarac_2",
+          "op:prijedor:kamicani",
+          "op:prijedor:raljas"
+        ],
+        "staging_osid": "op:prijedor:prijedor_2"
+      }
+    },
+    "kijevo_turn24": {
+      "caller": "queued_injection",
+      "key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+      "turn": 24,
+      "operation": "Operation Kijevo",
+      "corps": "vrs_sarajevo_romanija",
+      "start_line": 1357,
+      "records": [
+        {
+          "caller": "queued_injection",
+          "corps_id": "vrs_sarajevo_romanija",
+          "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+          "kind": "caller_start",
+          "linkage": "contiguous_unsequenced",
+          "operation_name": "Operation Kijevo",
+          "schema_version": 1,
+          "turn": 24
+        },
+        {
+          "caller": "queued_injection",
+          "corps_id": "vrs_sarajevo_romanija",
+          "declared_axis_ids": [
+            "kijevo_shoulder",
+            "praca_approach"
+          ],
+          "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+          "kind": "build_start",
+          "linkage": "contiguous_unsequenced",
+          "operation_name": "Operation Kijevo",
+          "schema_version": 1,
+          "turn": 24
+        },
+        {
+          "axis_id": "kijevo_shoulder",
+          "caller": "queued_injection",
+          "corps_id": "vrs_sarajevo_romanija",
+          "declared_brigades": [
+            "rs_1st_romanija_infantry",
+            "rs_2nd_sarajevo_light_infantry"
+          ],
+          "declared_objectives": [
+            "op:trnovo:kijevo_2"
+          ],
+          "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+          "kind": "axis_start",
+          "linkage": "contiguous_unsequenced",
+          "operation_name": "Operation Kijevo",
+          "schema_version": 1,
+          "turn": 24
+        },
+        {
+          "actual_exit": "selected",
+          "authored_formation_id": "rs_1st_romanija_infantry",
+          "axis_id": "kijevo_shoulder",
+          "caller": "queued_injection",
+          "commitment_operations": [],
+          "corps_id": "vrs_sarajevo_romanija",
+          "guards": {
+            "committed_elsewhere": false,
+            "elite_corps_reachable": "NOT_REACHED",
+            "elite_loan_available": "NOT_REACHED",
+            "elite_loan_owner_available": "NOT_REACHED",
+            "elite_loan_state_present": "NOT_REACHED",
+            "formation_eligible": true,
+            "formation_resolved": true,
+            "not_disrupted": true,
+            "reachability": true,
+            "transit_authority_available": true
+          },
+          "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+          "kind": "candidate_terminal",
+          "linkage": "contiguous_unsequenced",
+          "operation_name": "Operation Kijevo",
+          "resolved_formation_id": "rs_1st_romanija_infantry",
+          "schema_version": 1,
+          "turn": 24
+        },
+        {
+          "actual_exit": "selected",
+          "authored_formation_id": "rs_2nd_sarajevo_light_infantry",
+          "axis_id": "kijevo_shoulder",
+          "caller": "queued_injection",
+          "commitment_operations": [],
+          "corps_id": "vrs_sarajevo_romanija",
+          "guards": {
+            "committed_elsewhere": false,
+            "elite_corps_reachable": "NOT_REACHED",
+            "elite_loan_available": "NOT_REACHED",
+            "elite_loan_owner_available": "NOT_REACHED",
+            "elite_loan_state_present": "NOT_REACHED",
+            "formation_eligible": true,
+            "formation_resolved": true,
+            "not_disrupted": true,
+            "reachability": true,
+            "transit_authority_available": true
+          },
+          "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+          "kind": "candidate_terminal",
+          "linkage": "contiguous_unsequenced",
+          "operation_name": "Operation Kijevo",
+          "resolved_formation_id": "rs_2nd_sarajevo_light_infantry",
+          "schema_version": 1,
+          "turn": 24
+        },
+        {
+          "actual_exit": "built",
+          "axis_id": "kijevo_shoulder",
+          "caller": "queued_injection",
+          "corps_id": "vrs_sarajevo_romanija",
+          "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+          "kind": "axis_terminal",
+          "linkage": "contiguous_unsequenced",
+          "objectives": [
+            {
+              "controller": "RBiH",
+              "hostile": true,
+              "osid": "op:trnovo:kijevo_2"
+            }
+          ],
+          "operation_name": "Operation Kijevo",
+          "schema_version": 1,
+          "selected_brigades": [
+            "rs_1st_romanija_infantry",
+            "rs_2nd_sarajevo_light_infantry"
+          ],
+          "selected_objectives": [
+            "op:trnovo:kijevo_2"
+          ],
+          "turn": 24
+        },
+        {
+          "axis_id": "praca_approach",
+          "caller": "queued_injection",
+          "corps_id": "vrs_sarajevo_romanija",
+          "declared_brigades": [
+            "rs_4th_sarajevo_light_infantry"
+          ],
+          "declared_objectives": [
+            "op:pale:praca"
+          ],
+          "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+          "kind": "axis_start",
+          "linkage": "contiguous_unsequenced",
+          "operation_name": "Operation Kijevo",
+          "schema_version": 1,
+          "turn": 24
+        },
+        {
+          "actual_exit": "committed_elsewhere",
+          "authored_formation_id": "rs_4th_sarajevo_light_infantry",
+          "axis_id": "praca_approach",
+          "caller": "queued_injection",
+          "commitment_operations": [
+            {
+              "corps_id": "vrs_sarajevo_romanija",
+              "name": "probe_vrs_sarajevo_romanija_t23",
+              "phase": "execution",
+              "started_turn": 23,
+              "type": "probe"
+            }
+          ],
+          "corps_id": "vrs_sarajevo_romanija",
+          "guards": {
+            "committed_elsewhere": true,
+            "elite_corps_reachable": "NOT_REACHED",
+            "elite_loan_available": "NOT_REACHED",
+            "elite_loan_owner_available": "NOT_REACHED",
+            "elite_loan_state_present": "NOT_REACHED",
+            "formation_eligible": true,
+            "formation_resolved": true,
+            "not_disrupted": true,
+            "reachability": "NOT_REACHED",
+            "transit_authority_available": true
+          },
+          "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+          "kind": "candidate_terminal",
+          "linkage": "contiguous_unsequenced",
+          "operation_name": "Operation Kijevo",
+          "resolved_formation_id": "rs_4th_sarajevo_light_infantry",
+          "schema_version": 1,
+          "turn": 24
+        },
+        {
+          "actual_exit": "no_eligible_formations",
+          "axis_id": "praca_approach",
+          "caller": "queued_injection",
+          "corps_id": "vrs_sarajevo_romanija",
+          "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+          "kind": "axis_terminal",
+          "linkage": "contiguous_unsequenced",
+          "operation_name": "Operation Kijevo",
+          "schema_version": 1,
+          "selected_brigades": [],
+          "turn": 24
+        },
+        {
+          "actual_exit": "built",
+          "built_axis_ids": [
+            "kijevo_shoulder"
+          ],
+          "caller": "queued_injection",
+          "corps_id": "vrs_sarajevo_romanija",
+          "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+          "kind": "build_terminal",
+          "linkage": "contiguous_unsequenced",
+          "operation_name": "Operation Kijevo",
+          "participating": [
+            "rs_1st_romanija_infantry",
+            "rs_2nd_sarajevo_light_infantry"
+          ],
+          "schema_version": 1,
+          "turn": 24,
+          "viable_participating": 2
+        },
+        {
+          "actual_exit": "admitted",
+          "admitted": true,
+          "build_reached": true,
+          "build_returned": true,
+          "caller": "queued_injection",
+          "corps_id": "vrs_sarajevo_romanija",
+          "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+          "kind": "caller_terminal",
+          "linkage": "contiguous_unsequenced",
+          "operation_name": "Operation Kijevo",
+          "ordinary_return": true,
+          "schema_version": 1,
+          "stored_operation": {
+            "name": "Operation Kijevo",
+            "phase": "planning",
+            "started_turn": 24
+          },
+          "turn": 24
+        }
+      ],
+      "stage": "built",
+      "axes": [
+        {
+          "axis_id": "kijevo_shoulder",
+          "start": {
+            "axis_id": "kijevo_shoulder",
+            "caller": "queued_injection",
+            "corps_id": "vrs_sarajevo_romanija",
+            "declared_brigades": [
+              "rs_1st_romanija_infantry",
+              "rs_2nd_sarajevo_light_infantry"
+            ],
+            "declared_objectives": [
+              "op:trnovo:kijevo_2"
+            ],
+            "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+            "kind": "axis_start",
+            "linkage": "contiguous_unsequenced",
+            "operation_name": "Operation Kijevo",
+            "schema_version": 1,
+            "turn": 24
+          },
+          "candidates": [
+            {
+              "actual_exit": "selected",
+              "authored_formation_id": "rs_1st_romanija_infantry",
+              "axis_id": "kijevo_shoulder",
+              "caller": "queued_injection",
+              "commitment_operations": [],
+              "corps_id": "vrs_sarajevo_romanija",
+              "guards": {
+                "committed_elsewhere": false,
+                "elite_corps_reachable": "NOT_REACHED",
+                "elite_loan_available": "NOT_REACHED",
+                "elite_loan_owner_available": "NOT_REACHED",
+                "elite_loan_state_present": "NOT_REACHED",
+                "formation_eligible": true,
+                "formation_resolved": true,
+                "not_disrupted": true,
+                "reachability": true,
+                "transit_authority_available": true
+              },
+              "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+              "kind": "candidate_terminal",
+              "linkage": "contiguous_unsequenced",
+              "operation_name": "Operation Kijevo",
+              "resolved_formation_id": "rs_1st_romanija_infantry",
+              "schema_version": 1,
+              "turn": 24
+            },
+            {
+              "actual_exit": "selected",
+              "authored_formation_id": "rs_2nd_sarajevo_light_infantry",
+              "axis_id": "kijevo_shoulder",
+              "caller": "queued_injection",
+              "commitment_operations": [],
+              "corps_id": "vrs_sarajevo_romanija",
+              "guards": {
+                "committed_elsewhere": false,
+                "elite_corps_reachable": "NOT_REACHED",
+                "elite_loan_available": "NOT_REACHED",
+                "elite_loan_owner_available": "NOT_REACHED",
+                "elite_loan_state_present": "NOT_REACHED",
+                "formation_eligible": true,
+                "formation_resolved": true,
+                "not_disrupted": true,
+                "reachability": true,
+                "transit_authority_available": true
+              },
+              "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+              "kind": "candidate_terminal",
+              "linkage": "contiguous_unsequenced",
+              "operation_name": "Operation Kijevo",
+              "resolved_formation_id": "rs_2nd_sarajevo_light_infantry",
+              "schema_version": 1,
+              "turn": 24
+            }
+          ],
+          "terminal": {
+            "actual_exit": "built",
+            "axis_id": "kijevo_shoulder",
+            "caller": "queued_injection",
+            "corps_id": "vrs_sarajevo_romanija",
+            "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+            "kind": "axis_terminal",
+            "linkage": "contiguous_unsequenced",
+            "objectives": [
+              {
+                "controller": "RBiH",
+                "hostile": true,
+                "osid": "op:trnovo:kijevo_2"
+              }
+            ],
+            "operation_name": "Operation Kijevo",
+            "schema_version": 1,
+            "selected_brigades": [
+              "rs_1st_romanija_infantry",
+              "rs_2nd_sarajevo_light_infantry"
+            ],
+            "selected_objectives": [
+              "op:trnovo:kijevo_2"
+            ],
+            "turn": 24
+          }
+        },
+        {
+          "axis_id": "praca_approach",
+          "start": {
+            "axis_id": "praca_approach",
+            "caller": "queued_injection",
+            "corps_id": "vrs_sarajevo_romanija",
+            "declared_brigades": [
+              "rs_4th_sarajevo_light_infantry"
+            ],
+            "declared_objectives": [
+              "op:pale:praca"
+            ],
+            "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+            "kind": "axis_start",
+            "linkage": "contiguous_unsequenced",
+            "operation_name": "Operation Kijevo",
+            "schema_version": 1,
+            "turn": 24
+          },
+          "candidates": [
+            {
+              "actual_exit": "committed_elsewhere",
+              "authored_formation_id": "rs_4th_sarajevo_light_infantry",
+              "axis_id": "praca_approach",
+              "caller": "queued_injection",
+              "commitment_operations": [
+                {
+                  "corps_id": "vrs_sarajevo_romanija",
+                  "name": "probe_vrs_sarajevo_romanija_t23",
+                  "phase": "execution",
+                  "started_turn": 23,
+                  "type": "probe"
+                }
+              ],
+              "corps_id": "vrs_sarajevo_romanija",
+              "guards": {
+                "committed_elsewhere": true,
+                "elite_corps_reachable": "NOT_REACHED",
+                "elite_loan_available": "NOT_REACHED",
+                "elite_loan_owner_available": "NOT_REACHED",
+                "elite_loan_state_present": "NOT_REACHED",
+                "formation_eligible": true,
+                "formation_resolved": true,
+                "not_disrupted": true,
+                "reachability": "NOT_REACHED",
+                "transit_authority_available": true
+              },
+              "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+              "kind": "candidate_terminal",
+              "linkage": "contiguous_unsequenced",
+              "operation_name": "Operation Kijevo",
+              "resolved_formation_id": "rs_4th_sarajevo_light_infantry",
+              "schema_version": 1,
+              "turn": 24
+            }
+          ],
+          "terminal": {
+            "actual_exit": "no_eligible_formations",
+            "axis_id": "praca_approach",
+            "caller": "queued_injection",
+            "corps_id": "vrs_sarajevo_romanija",
+            "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+            "kind": "axis_terminal",
+            "linkage": "contiguous_unsequenced",
+            "operation_name": "Operation Kijevo",
+            "schema_version": 1,
+            "selected_brigades": [],
+            "turn": 24
+          }
+        }
+      ],
+      "current": null,
+      "buildStart": {
+        "caller": "queued_injection",
+        "corps_id": "vrs_sarajevo_romanija",
+        "declared_axis_ids": [
+          "kijevo_shoulder",
+          "praca_approach"
+        ],
+        "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+        "kind": "build_start",
+        "linkage": "contiguous_unsequenced",
+        "operation_name": "Operation Kijevo",
+        "schema_version": 1,
+        "turn": 24
+      },
+      "buildTerminal": {
+        "actual_exit": "built",
+        "built_axis_ids": [
+          "kijevo_shoulder"
+        ],
+        "caller": "queued_injection",
+        "corps_id": "vrs_sarajevo_romanija",
+        "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+        "kind": "build_terminal",
+        "linkage": "contiguous_unsequenced",
+        "operation_name": "Operation Kijevo",
+        "participating": [
+          "rs_1st_romanija_infantry",
+          "rs_2nd_sarajevo_light_infantry"
+        ],
+        "schema_version": 1,
+        "turn": 24,
+        "viable_participating": 2
+      },
+      "end_line": 1367
+    }
+  },
+  "preservation": {
+    "original_773_seals": [
+      {
+        "path": "logs/claude-channel-20261004/773-result.json",
+        "bytes": 40810,
+        "sha256": "211443ce774d265cace5d063937ce01a9f1672827e7591041ac51e4ec7515e2e",
+        "expected": "211443ce774d265cace5d063937ce01a9f1672827e7591041ac51e4ec7515e2e",
+        "unchanged": true
+      },
+      {
+        "path": "logs/claude-channel-20261004/773-inventory.json",
+        "bytes": 20719,
+        "sha256": "b54d8682d427cd2b95c8afa924478fd9c8dcab355ad885cf74adae0be1fa5758",
+        "expected": "b54d8682d427cd2b95c8afa924478fd9c8dcab355ad885cf74adae0be1fa5758",
+        "unchanged": true
+      },
+      {
+        "path": "logs/claude-channel-20261004/773-closed.json",
+        "bytes": 673,
+        "sha256": "f2b13fc60710f80970d84d08d376e836ae6104aaedcbb994b8196338a98ad73c",
+        "expected": "f2b13fc60710f80970d84d08d376e836ae6104aaedcbb994b8196338a98ad73c",
+        "unchanged": true
+      }
+    ],
+    "telemetry": [
+      {
+        "path": "logs/claude-channel-20261004/396-varosluk-773-one188-telemetry/C-before.jsonl",
+        "bytes": 101054372,
+        "sha256": "b11e26cdda6948e8a0c6812a1e5563578d8de42d4cc4f235a25598d075acc8be"
+      },
+      {
+        "path": "logs/claude-channel-20261004/396-varosluk-773-one188-telemetry/C-after.jsonl",
+        "bytes": 102001043,
+        "sha256": "05abfdaee0483d99e62474de75dab5e58c6230993d3e01187078008b0cbbe899"
+      },
+      {
+        "path": "logs/claude-channel-20261004/396-varosluk-773-one188-telemetry/D-before.jsonl",
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+      },
+      {
+        "path": "logs/claude-channel-20261004/396-varosluk-773-one188-telemetry/D-after.jsonl",
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+      }
+    ],
+    "final_head": "7d1e7054b658c81a7d875b12a4c1fb115bc88c88",
+    "final_clean": true
+  },
+  "limits": {
+    "n81_rejected_689": true,
+    "n80_retained_703_no_go": true,
+    "diagnostic_not_adoption": true,
+    "no_unsaved_state_identity_claim": true,
+    "no_historical_counterfactual_claim": true
+  }
+}

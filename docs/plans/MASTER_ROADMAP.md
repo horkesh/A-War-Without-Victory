@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-21 — boundary observers focused/reviewed; retainedn80 703/712.
+**Last updated:** 2026-10-21 — n82 observer-neutral diagnostic; retained n80 703/712.
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -24,14 +24,13 @@ tradeoffs or irreversible/external actions with concrete options and a
 recommendation. Required evidence, review panels and cost-control gates remain.
 
 **Current R6 — October Sana remains NO-GO.** Retained n80 is **703/712**, unadopted.
-Rejected n81 remains689/712 with14October losses; no mechanic fix adopted.
-Default-off stdout reconciliation_write/preplanned_eligibility observers now cover
-actual writes, eligibility/commitment, caller exits and admission. Final141/141,
-noEmit0 and independent targeted review PASS; gameplay, thresholds and C/D exact.
-First historical writer and campaign neutrality remain unmeasured. No campaign
-ran; future bounded measurement is a separate owner decision. Every inherited
-unmet gate remains in the
-[calibration authority](../40_reports/CALIBRATION_MASTER.md).
+One authorized n82 diagnostic matches all30 n81 gameplay artifacts raw; no retry.
+First actual reconciliation write: t4 JNA2ndMDTG, Kozarac→Ljubija. Kijevo t24
+excludes rs4 because its t23 probe is executing; ownership guard remains valid.
+Initial reader gap corrected and reviewed against retained stdout only. Thresholds,
+source and telemetry preserved. n81/n82 remain rejected689; causal propagation
+and recovery unproved. Next bounded work: retained-evidence probe/personnel trace.
+All unmet gates remain in the [calibration authority](../40_reports/CALIBRATION_MASTER.md).
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference

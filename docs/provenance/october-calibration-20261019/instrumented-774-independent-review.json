@@ -1,0 +1,98 @@
+{
+  "schema": "awwv.774.independent-review.v1",
+  "sealed_utc": "2026-10-21T06:44:09.5070021Z",
+  "writes_closed": true,
+  "verdict": "FAIL_READER_STATEFUL_COMPLETENESS_UNPROVEN__TARGETED_CLAIM_CORRECTION_REQUIRED",
+  "review_scope": "Independent read-only review of the sealed 773 observer-neutrality diagnostic only.",
+  "concrete_findings": [
+    {
+      "severity": "blocking",
+      "id": "preplanned_reader_not_stateful",
+      "finding": "The preplanned parser proves prefix/schema/kind, contiguous caller linkage, candidate guard shape, and a closing caller_terminal, but it does not validate the promised nested build/axis state machine. It does not require build_start when build_reached is true, require axis_start before candidate_terminal, pair each axis_start with axis_terminal, require build_terminal before an admitted caller_terminal, or reconcile declared axes and candidates with terminal summaries. Its synthetic negative controls do not exercise any of those omissions.",
+      "implication": "The 773 claims reader actual-complete-frame coverage and all-record consumption more strongly than its reader establishes. Under 772's explicit reader-stateful-validation criterion, the sealed PASS verdict is not independently supportable until that claim is corrected or a bounded strengthened reader validates the already-retained stdout. No campaign rerun is needed for this correction.",
+      "evidence": [
+        "logs/claude-channel-20261004/773-reader.cjs:16",
+        "logs/claude-channel-20261004/773-reader.cjs:21",
+        "logs/claude-channel-20261004/772-root-plan.md"
+      ]
+    },
+    {
+      "severity": "verified",
+      "id": "runtime_and_byte_neutrality",
+      "finding": "The sole preserved runner invocation used the authorized argv and 600000 ms timeout, ended child/wrapper 0/0 without timeout, and created only n82. All eight recorded cheap checks have 0/0 receipts. Independent hashing found 31 native files on each side and exact raw equality for all 30 gameplay artifacts, excluding only run_meta.json as preclassified provenance metadata. The 103-entry sealed inventory has no missing, byte-size, or SHA mismatch.",
+      "evidence": [
+        "logs/claude-channel-20261004/396-varosluk-773-one188.start.json",
+        "logs/claude-channel-20261004/396-varosluk-773-one188.receipt.json",
+        "logs/claude-channel-20261004/773-all30-a/all30.json",
+        "logs/claude-channel-20261004/773-inventory.json"
+      ]
+    },
+    {
+      "severity": "verified_at_bounded_actual_scope",
+      "id": "target_observations",
+      "finding": "The retained stdout directly shows the first reconciliation replacement at turn 4, candidate ordinal 6, for jna_2nd_md_tg from Kozarac 2 to Ljubija 2 under Operation Prijedor/prijedor_clean; later same-call replacements are separate. It also directly shows Operation Kijevo unavailable at turn 23 and, at turn 24, rs_4th_sarajevo_light_infantry rejected from praca_approach as committed to the executing turn-23 probe, while kijevo_shoulder built with two brigades and the operation was admitted. Weekly and temporal artifacts support the reported planning/recovery/cleared timing. The result correctly declines the unsupported causal chain from the turn-4 write to turn-22 personnel or turn-23 probe selection.",
+      "evidence": [
+        "logs/claude-channel-20261004/396-varosluk-773-one188.stdout.log:349",
+        "logs/claude-channel-20261004/396-varosluk-773-one188.stdout.log:1335",
+        "logs/claude-channel-20261004/396-varosluk-773-one188.stdout.log:1357",
+        "logs/claude-channel-20261004/773-extract-a/trace.json"
+      ]
+    },
+    {
+      "severity": "verified",
+      "id": "provenance_and_preservation",
+      "finding": "The recorded 32 consumed inputs are ordered and current, with matching digest 7986f05230e1d526e1794673e796dcb77730501d4958e435970c4ec806cc8039. Independent current-file hashing found no protected source/test/threshold/painted-reference pin mismatch. The C archive retains the 101054372-byte opening prefix and appends 946671 bytes; D remains byte-identical. HEAD is 7d1e7054b658c81a7d875b12a4c1fb115bc88c88 and status was clean before this ignored review artifact was written.",
+      "evidence": [
+        "logs/claude-channel-20261004/773-readiness-a/readiness.json",
+        "logs/claude-channel-20261004/396-varosluk-773-one188-telemetry/result.json",
+        "logs/claude-channel-20261004/773-result.json"
+      ]
+    },
+    {
+      "severity": "retained_failure",
+      "id": "acceptance_scope_unchanged",
+      "finding": "This diagnostic does not adopt n81, retire its 689 rejection, waive the retained 703 floor, prove unsaved GameState identity, or resolve inherited acceptance gates. n80 remains retained NO-GO/unadopted. The observer-neutrality result cannot be used as historical counterfactual or acceptance evidence."
+    }
+  ],
+  "source": {
+    "authorities": [
+      "AGENTS.md",
+      "docs/20_engineering/AGENT_WORKFLOW.md",
+      ".claude/skills/verification-before-completion/SKILL.md",
+      ".claude/napkin.md",
+      ".claude/napkin/qa_gates.md",
+      ".claude/napkin/engine_runtime.md",
+      "logs/claude-channel-20261004/772-root-plan.md"
+    ],
+    "reviewed_evidence": [
+      "logs/claude-channel-20261004/773-result.json",
+      "logs/claude-channel-20261004/773-inventory.json",
+      "logs/claude-channel-20261004/773-closed.json",
+      "logs/claude-channel-20261004/773-reader.cjs",
+      "logs/claude-channel-20261004/773-reader-controls-b/controls.json",
+      "logs/claude-channel-20261004/773-reader-actual-a/reader.json",
+      "logs/claude-channel-20261004/396-varosluk-773-one188.stdout.log",
+      "logs/claude-channel-20261004/773-extract-a/trace.json"
+    ]
+  },
+  "evidence_hashes": {
+    "773-result.json": "211443ce774d265cace5d063937ce01a9f1672827e7591041ac51e4ec7515e2e",
+    "773-inventory.json": "b54d8682d427cd2b95c8afa924478fd9c8dcab355ad885cf74adae0be1fa5758",
+    "773-closed.json": "f2b13fc60710f80970d84d08d376e836ae6104aaedcbb994b8196338a98ad73c",
+    "runner_stdout": "922c65fceb712a4d82c1061d3e59af8e607b95eaed4dee7ea16dd6d962d4f903",
+    "reader": "d7b48a74caec44c7de17ada7f9aae0b79768367cd52b5945408ac39865830c5c",
+    "reader_actual": "745bb4cc7617207b7d6f775d7ef9d713140504c7d440fdb95e9145d4052813a1",
+    "all30": "1bc1f3318d1b63d9de2341618c2e55ef91920286b14f4e3762466e7651104f25",
+    "trace": "ad4dcfa8bcb38a0a3895ff46b1d732d655023c8ad7ba0c97314be8ca168359f8"
+  },
+  "limits": {
+    "read_only_review": true,
+    "campaigns_run": 0,
+    "tests_run": 0,
+    "builds_run": 0,
+    "replays_run": 0,
+    "source_docs_git_edits": 0,
+    "no_re_review_of_769_implementation": true,
+    "recommended_next_action": "Apply one targeted claim correction: mark preplanned complete-frame coverage UNMEASURED and withdraw the unconditional PASS, or validate the retained stdout with a stateful reader and controls. Do not rerun the 188-week campaign."
+  }
+}
