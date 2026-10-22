@@ -1,3 +1,17 @@
+## 817–820 — n84 Pale allocation measured; gameplay identical to n83 (2026-10-22)
+
+The one approved instrumented 188-week diagnostic completed as n84 with runner exit 0, no retries. All 30 gameplay artifacts and TEN 10 selected-save pairs are byte-identical to n83, with the exact 31-file native inventory and 32 ordered normalized consumed inputs/digest. Raw run_meta differences remain retained as preclassified metadata. Independent review accepts the bounded measurement. This reproduces rejected n83 gameplay; it does not restore or adopt retained n80 703/712.
+
+At completed turn 21, Pale opens with available 0 / committed 1600. Its sole attempted recipient, rs_4th_sarajevo_light_infantry, is skipped as pool_empty; closing balances are unchanged. At turn 22, Pale opens with raw available 111 / committed 1600. The same brigade is the sole attempted recipient: reserve 0, effective availability 111, need/rate 400, transfer 111, personnel 1405→1516. Closing availability is 0 and committed is 1711. No earlier Pale recipient consumed anything. The captured allocation is lawful; the upstream net pool change from 0 to 111 is outside this observer boundary.
+
+All reader gates exit 0 after raw identity: 564 allocation records spanning 188 observed validated regular-stage blocks, requested turns 21 and 22 once each; personnel 71931 records and 564 faction passes; commander 4418 records, 3290 completions, zero violations. Source binding and raw row offsets are retained. No whole-pool lifecycle or missing n80 counterfactual is established.
+
+Production, reader, test, thresholds and October reference hashes remain exact. Full C/D before/after archives preserve their opening prefixes. C appends 946671 bytes to 103894385, SHA256 00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557; D remains 1041 bytes, SHA256 ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3, append 0. Two hrhb_travnik_brigade stderr notices remain raw and unresolved; they did not fail the runner or diagnostic gates. No full suite, replay, gameplay fix, adoption or acceptance waiver occurred. Every inherited NO-GO gate remains.
+
+Smallest justified next action: trace retained evidence and source for pool writes between turn 21 closing availability 0 and turn 22 opening availability 111. Do not change allocation/ranking rules or thresholds, infer an actual upstream writer, or reconstruct absent n80 history from this receipt. No additional campaign is authorized.
+
+Evidence: pale-run-820-result/raw-inventory and independent pale-run-819-review under docs/provenance/october-calibration-20261019. Raw logs, source snapshots, archives and original failures remain local.
+
 ## 813–816 — Pale diagnostic stopped before launch (2026-10-22)
 
 The approved diagnostic stopped before campaign launch: the local preflight checker incorrectly required a serialized weekly row.turn. Actual weekly artifacts expose week_index, assigned from state.meta.turn. Preflight passed99/100, child/wrapper2/2, artifact contract passed. Campaign invocations0; no actual runDir, runner exit, gameplay comparisons or reader coverage exist. Pale allocation at21–22 remains UNMEASURED.

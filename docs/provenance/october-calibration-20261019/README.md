@@ -210,3 +210,18 @@ Production source, reader, fixture, thresholds and October reference are unchang
 A campaign launch requires a fresh explicit authorization under the stop-on-prerequisite-failure rule. Smallest proposed scope remains one instrumented188 against n83,35min/600srunner/no retry, after rebinding the fresh HEAD pin and corrected week_index prerequisite. Require ALL30 gameplay byte pairs,TEN10,exact31native inventory,32normalized inputs,full telemetry preservation and all strict reader gates. No gameplay fix or new acceptance criterion is justified.
 
 pale-814-stopped-result preserves the initial stop; pale-814-correction-proof and pale-815-review qualify only the cheap checker correction. pale-816-result/raw-inventory synthesize closed source snapshots, original failures and proofs. Rawbytes LOCAL; inventories are not remote backups.
+
+
+## n84 Pale allocation diagnostic — 2026-10-22
+
+The one approved instrumented 188-week diagnostic completed as n84 with runner exit 0, no retries. All 30 gameplay artifacts and TEN 10 selected-save pairs are byte-identical to n83, with the exact 31-file native inventory and 32 ordered normalized consumed inputs/digest. Raw run_meta differences remain retained as preclassified metadata. Independent review accepts the bounded measurement. This reproduces rejected n83 gameplay; it does not restore or adopt retained n80 703/712.
+
+At completed turn 21, Pale opens with available 0 / committed 1600. Its sole attempted recipient, rs_4th_sarajevo_light_infantry, is skipped as pool_empty; closing balances are unchanged. At turn 22, Pale opens with raw available 111 / committed 1600. The same brigade is the sole attempted recipient: reserve 0, effective availability 111, need/rate 400, transfer 111, personnel 1405→1516. Closing availability is 0 and committed is 1711. No earlier Pale recipient consumed anything. The captured allocation is lawful; the upstream net pool change from 0 to 111 is outside this observer boundary.
+
+All reader gates exit 0 after raw identity: 564 allocation records spanning 188 observed validated regular-stage blocks, requested turns 21 and 22 once each; personnel 71931 records and 564 faction passes; commander 4418 records, 3290 completions, zero violations. Source binding and raw row offsets are retained. No whole-pool lifecycle or missing n80 counterfactual is established.
+
+Production, reader, test, thresholds and October reference hashes remain exact. Full C/D before/after archives preserve their opening prefixes. C appends 946671 bytes to 103894385, SHA256 00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557; D remains 1041 bytes, SHA256 ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3, append 0. Two hrhb_travnik_brigade stderr notices remain raw and unresolved; they did not fail the runner or diagnostic gates. No full suite, replay, gameplay fix, adoption or acceptance waiver occurred. Every inherited NO-GO gate remains.
+
+Smallest justified next action: trace retained evidence and source for pool writes between turn 21 closing availability 0 and turn 22 opening availability 111. Do not change allocation/ranking rules or thresholds, infer an actual upstream writer, or reconstruct absent n80 history from this receipt. No additional campaign is authorized.
+
+pale-run-818-result/raw-inventory preserve the frozen execution packet and 101 closed files. pale-run-819-review records independent review; pale-run-820-result/raw-inventory synthesize all closed 817/818/819 evidence. Rawbytes remain LOCAL; inventories are not remote backups. The earlier stopped814 attempt remains separate and unchanged.

@@ -1,3 +1,7 @@
+## 2026-10-22 — Measure pool availability before attributing a short transfer
+
+The n84 Pale receipt has no earlier recipient and zero reserve at turn22: raw111 equals effective111 and all111 transfers lawfully. A shortfall against need400 therefore does not establish competition or a reservation defect. Trace the upstream net pool balance between observed stage boundaries before proposing an allocation fix. See [Pale measurement](PROJECT_LEDGER.md#2026-10-22--n84-pale-allocation-diagnostic-817820).
+
 ## 2026-10-22 — Check serialized fields against the real artifact contract
 
 WeeklyReportRow exposes week_index copied from state.meta.turn; it does not serialize row.turn. A preflight must verify that actual contract rather than requiring both names. A false checker failure is not engine evidence or campaign coverage; preserve the failure and prove the smallest correction against retained positive and mutated negative artifacts. See [prelaunch stop](PROJECT_LEDGER.md#2026-10-22--pale-diagnostic-prelaunch-stop-and-checker-correction-813816).
