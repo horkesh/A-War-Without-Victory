@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-22 — n84 Pale allocation measured; gameplay identical to n83.
+**Last updated:** 2026-10-22 — Pale mobilization writer phase supported; exact branch unmeasured.
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -24,12 +24,11 @@ tradeoffs or irreversible/external actions with concrete options and a
 recommendation. Required evidence, review panels and cost-control gates remain.
 
 **Current R6 — October Sana remains NO-GO.** Retained n80 is **703/712**, unadopted.
-One n84 diagnostic passed all30/TEN10 byte comparisons against rejected n83,
-exact inventory/provenance and all reader gates, no retry. Pale turn21 is empty;
-turn22 opens raw111, sole recipient/reserve0 receives all111. Allocation is lawful.
-Next trace retained upstream pool writes; no new campaign or gameplay fix.
-Production/thresholds exact; all telemetry archived with exact opening prefixes.
-This is diagnostic neutrality, not calibration recovery or n80 historical cause.
+Retained n84/source support ongoing-mobilization as the positive Pale writer phase
+under an explicit canonical OSID battle exclusion chain. Direct/shared credit,
+gross amount and decay remain unmeasured; no gameplay fix is established.
+Next proposal: selected-pool default-off stdout receipts, no new campaign.
+Source/thresholds/telemetry exact;822 failed finalizers and provenance gap retained.
 All inherited gates remain in the [calibration authority](../40_reports/CALIBRATION_MASTER.md).
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate

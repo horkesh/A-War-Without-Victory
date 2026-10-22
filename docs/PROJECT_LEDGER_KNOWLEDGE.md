@@ -1,3 +1,7 @@
+## 2026-10-22 — Preserve the distinction between writer class and branch receipt
+
+An initial wounded count plus a complete canonical militia-battle projection can exclude later WIA return, supporting a positive writer phase by elimination. State the projection assumption. That does not reveal direct/shared mobilization amounts or subsequent decay. Also, a frozen synthesis after failed finalizers must retain those exits and must not inherit an unrelated passing receipt. See [Pale source trace](PROJECT_LEDGER.md#2026-10-22--retained-pale-upstream-writer-phase-trace-821824).
+
 ## 2026-10-22 — Measure pool availability before attributing a short transfer
 
 The n84 Pale receipt has no earlier recipient and zero reserve at turn22: raw111 equals effective111 and all111 transfers lawfully. A shortfall against need400 therefore does not establish competition or a reservation defect. Trace the upstream net pool balance between observed stage boundaries before proposing an allocation fix. See [Pale measurement](PROJECT_LEDGER.md#2026-10-22--n84-pale-allocation-diagnostic-817820).
