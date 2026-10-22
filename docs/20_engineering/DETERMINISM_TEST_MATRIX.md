@@ -28,6 +28,10 @@ Default-off topics `reconciliation_write` / `preplanned_eligibility` are covered
 
 `reinforcement_allocation_diagnostic.test.ts` calls the real regular reinforcement function. Shared-pool ordered consumers, actual-helper nonzero reserve, balance conservation, reversed input insertion, exact state/report/serialized OFF/ON parity, selector silence, early guards/unreached values, missing/nonfinite fields, caught output/serialization, and gameplay exception/no-false-close are covered. An independent throwing-accessor control exposed pre-eligibility key access; the targeted correction restores production eligibility→cap→single key, with lazy/caught ON-only skip metadata. Initial7file96tests, finalobserver8tests and independent2file9tests are distinct scopes, never summed. Final nonincremental noEmit0. No campaign/fullsuite/n80causality/703retention measurement is implied; all earlier gates remain.
 
+## Strict allocation reader qualification (2026-10-22)
+
+Real production-function stdout fixtures qualify schema 2 ordered close manifests and the portable strict reader. Whole-stream validation precedes extraction; explicit invocation policy and monotonic completed turns are required. Missing zero-transfer rows, malformed outside-request blocks, reordering, duplication, truncation, schema/presence/manifest/arithmetic errors, blank turn tokens and CLI overwrite/usage failures are covered. Initial 3-file 67/67 is reused at unaffected scope; after the retained prefix-truncation rejection, final affected fixture 18/18 and nonincremental noEmit 0 passed. There are 36 negative controls including 5 added prefix fragments, within the tests. Core allocation/source and telemetry pins remain exact. No campaign neutrality, historical n80 cause or calibration recovery is established by these tests.
+
 ## Rules → Gates
 ### No timestamps / wall-clock values
 - Gate: `tests/determinism_static_scan_r1_5.test.ts`

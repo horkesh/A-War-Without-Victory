@@ -1,0 +1,196 @@
+{
+  "writes_closed": true,
+  "scope": "Closed root integration, failed staging and terminal-whitespace correction; original reviewed source retained; no commit/push occurred in failed staging attempt.",
+  "entries": [
+    {
+      "path": "logs/claude-channel-20261004/812-integration-a/checks.json",
+      "bytes": 224,
+      "sha256": "ce96eb5995a5677a56abd22611ef6c35b48decf61a0856c5f310f4ee245e522b"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-integration-a/diff-check.stderr.log",
+      "bytes": 125,
+      "sha256": "027f3ae5305302b306c06ad432501ea01542faee8509a912528aa6c0e2928e9d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-integration-a/diff-check.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-integration-a/entry-script.snapshot",
+      "bytes": 13507,
+      "sha256": "1cb59452ed0f2e3d3089fbd5c6f6e4d8268c42504f0f0d3d72ca357e30081d35"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-integration-a/plan-index.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-integration-a/plan-index.stdout.log",
+      "bytes": 51,
+      "sha256": "0aec8598455f4eea73c024b7c4b215690505926c8c2ee2152dfdc9970b7941de"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-integration-a/receipt.json",
+      "bytes": 3551,
+      "sha256": "bb62eebcf69d1883709fa1b2c2423120551ebecc9964676831e6eb7cefea0bc5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-integration-a/result.json",
+      "bytes": 12306,
+      "sha256": "e58f82b576aad6fa6ff311f4607d563f67c274a92750da93cc07b129d4a240b0"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-integration-a/start.json",
+      "bytes": 1602,
+      "sha256": "aca3c1143fd09f2f541a69845e4842b42100b2144f328455457653d3eb40d20f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-integration-a/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-integration-a/stdout.log",
+      "bytes": 150,
+      "sha256": "4bd7ae14b88a0a1036e377f244bb0a30addc663c6ae90279db40c5f2a2c0a897"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-preserve-a/branch.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-preserve-a/branch.stdout.log",
+      "bytes": 48,
+      "sha256": "97b424e5364f08706a44c96cd402b9a788026049508ad9197989a1ea9a9e6604"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-preserve-a/entry-script.snapshot",
+      "bytes": 3578,
+      "sha256": "80daada7b6027152e845a864d3d73c6ff09f45c0233b6fabd4f79c1eeaf010c0"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-preserve-a/opening-head.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-preserve-a/opening-head.stdout.log",
+      "bytes": 41,
+      "sha256": "a4059b0148bcffc611a28e7fd9d60e36381246ec578a93d4b3ceae2e819684b5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-preserve-a/opening-status.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-preserve-a/opening-status.stdout.log",
+      "bytes": 1265,
+      "sha256": "3b3ffb814c6247d43e7c1dba813ea530b451bd61fc82367956ffe32b691f6e31"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-preserve-a/progress.json",
+      "bytes": 2142,
+      "sha256": "7c2ca24aa2eabc5716c34bcc5dba1d52b53efc4ddd103de26587f4abd204bb00"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-preserve-a/receipt.json",
+      "bytes": 5533,
+      "sha256": "afa62d68f18854604d257563e07d07c11b22f7970a2e45be7e66cbc5b0934759"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-preserve-a/stage.stderr.log",
+      "bytes": 297,
+      "sha256": "a77323d642c97168b5525bb72831d6be576be1f29db4e123796b50bcfea4638f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-preserve-a/stage.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-preserve-a/staged-check.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-preserve-a/staged-check.stdout.log",
+      "bytes": 82,
+      "sha256": "dc3790c966aaf6441ee61bdb163af3e944a244fd2cde43972ba270e63a2639e8"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-preserve-a/staged-files.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-preserve-a/staged-files.stdout.log",
+      "bytes": 1205,
+      "sha256": "f7f766f4f6e7980141db9e160c1889e103883b071fe67a58bfb6bfe20fdee085"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-preserve-a/start.json",
+      "bytes": 2135,
+      "sha256": "919680daf6f2cccd0e94b4e659d8b00829ce7082d44fc2a78cfc01c5e43a5b79"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-preserve-a/stderr.log",
+      "bytes": 1052,
+      "sha256": "8cffea3dca9ee4dd35784cf94053d276016d826ac3de514b7a72f4b1732c90cd"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-preserve-a/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-format-a/entry-script.snapshot",
+      "bytes": 1640,
+      "sha256": "29432fd2b398a2c3226a712246d701522c58891b033b6d450c28544d3caf9a9c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-format-a/receipt.json",
+      "bytes": 3168,
+      "sha256": "62bb7d59e5d85d64d1a0618a00e759ea707a5280ce6cab2095751f393411f7cb"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-format-a/result.json",
+      "bytes": 803,
+      "sha256": "1b8bb4b6d9491d8a9c0dcf32b05e7f83a5abcd4c1cf8c9d50b3928287c4060f0"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-format-a/reviewed-reader.snapshot",
+      "bytes": 20532,
+      "sha256": "9739fe2e8ff59d2cf1896b9c177c3a6ac9ef1c84e9c03c2097da44f523c10840"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-format-a/start.json",
+      "bytes": 1527,
+      "sha256": "fa85601523653de7308f2baefd7b967cb19339cf5e9e94730a5f28145803da78"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-format-a/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-format-a/stdout.log",
+      "bytes": 101,
+      "sha256": "37b9181b2f5a7e3775804140cb5f46b7641047d403938346175139cd453752df"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-format-a/syntax.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/812-format-a/syntax.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

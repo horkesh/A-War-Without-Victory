@@ -1,3 +1,7 @@
+## 2026-10-22 — Balance conservation cannot prove receipt completeness
+
+Removing a skipped or zero-transfer recipient preserves pool balances. Strict allocation coverage therefore needs a producer-side ordered attempt manifest and diagnostic-error flag, followed by whole-stream semantic validation before selection. Explicit invocation counts and completed-turn ordering catch duplicate/reordered blocks. See [reader closeout](PROJECT_LEDGER.md#2026-10-22--strict-allocation-reader-and-completeness-contract-809812).
+
 ## 2026-10-22 — Neutrality includes guard access order
 
 Ordinary state/report parity can miss a metadata hook that reads a field or helper before an existing early guard. Preserve production access order; resolve optional skip metadata lazily inside caught observer code, and pin access counts with a skipped-path throwing getter control. See [allocation observer](PROJECT_LEDGER.md#2026-10-22--shared-pool-allocation-receipt-and-fixture-805808).

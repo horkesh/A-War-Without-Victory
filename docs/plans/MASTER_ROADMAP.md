@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-22 — shared-pool receipt/fixture approved; no new campaign.
+**Last updated:** 2026-10-22 — strict allocation reader qualified; no new campaign.
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -24,14 +24,13 @@ tradeoffs or irreversible/external actions with concrete options and a
 recommendation. Required evidence, review panels and cost-control gates remain.
 
 **Current R6 — October Sana remains NO-GO.** Retained n80 is **703/712**, unadopted.
-Shared-pool defaultOFF stdout receipt and deterministic fixture are approved: final
-observer8/8/type0, independent8079/9 after restoring original pool-access order.
-Initial96-test batch reused at actualscope. Raw/reserve/effective/ordered skip/
-transfer/closing fields cover regular stage only; source/state/report/threshold
-semantics and telemetry preserved. No new campaign or n80historical recovery.
-Future measurement needs separate fixed authority/artifact/coverage gates. All
-inherited acceptance gates remain in the
-[calibration authority](../40_reports/CALIBRATION_MASTER.md).
+Strict allocation reader and stdout schema 2 are qualified: initial 67/67 reused,
+final affected 18/18, nonincremental typecheck 0 and targeted review approval. Ordered close manifests
+and explicit invocation coverage reject missing skipped rows and invalid blocks.
+Only observer/reader/fixture changed; core allocation, thresholds and telemetry
+remain exact. One bounded n83 diagnostic is proposed; no new campaign launched
+and absent n80 allocation history remains unmeasured. All inherited gates remain
+in the [calibration authority](../40_reports/CALIBRATION_MASTER.md).
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference

@@ -1,0 +1,212 @@
+{
+  "schema": "pale-810.strict-allocation-reader-result.v1",
+  "writes_closed": true,
+  "captured_utc": "2026-10-22T11:17:35.688Z",
+  "verdict": "READY_FOR_INDEPENDENT_REVIEW",
+  "head": "f7d5609fd5c11197c963c4ca9d2e94d0630e814a",
+  "git_status_short": [
+    "M src/sim/combat/reinforcement_allocation_diagnostic.ts",
+    " M tests/reinforcement_allocation_diagnostic.test.ts",
+    "?? tools/diagnostics/reinforcement_allocation_reader.cjs"
+  ],
+  "changed": [
+    {
+      "path": "src/sim/combat/reinforcement_allocation_diagnostic.ts",
+      "bytes": 7113,
+      "sha256": "12d24113946ad414ae3f310a45c9d7f52e0a24bde916ed60f0001d18d4bacdc6"
+    },
+    {
+      "path": "tools/diagnostics/reinforcement_allocation_reader.cjs",
+      "bytes": 20358,
+      "sha256": "f3a5959c79f4514843c779e0a73c9e2febe34358fcffb981466d7e14d7ae0237"
+    },
+    {
+      "path": "tests/reinforcement_allocation_diagnostic.test.ts",
+      "bytes": 35098,
+      "sha256": "2fa7cd7770a5af6fe32ccd6a4b57689a3640e11188257b30983e4bddb30a33d9"
+    }
+  ],
+  "protected": [
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "bytes": 47679,
+      "sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa",
+      "expected_bytes": 47679,
+      "expected_sha256": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa",
+      "matches": true
+    },
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20275,
+      "sha256": "b7467c47f97c5c349535b59aaeafa3dea0bc5d03314961c5ac17ef3a4283434a",
+      "expected_bytes": 20275,
+      "expected_sha256": "b7467c47f97c5c349535b59aaeafa3dea0bc5d03314961c5ac17ef3a4283434a",
+      "matches": true
+    },
+    {
+      "path": "src/sim/combat/personnel_diagnostic.ts",
+      "bytes": 5870,
+      "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3",
+      "expected_bytes": 5870,
+      "expected_sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3",
+      "matches": true
+    },
+    {
+      "path": "tests/personnel_diagnostic.test.ts",
+      "bytes": 19693,
+      "sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b",
+      "expected_bytes": 19693,
+      "expected_sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b",
+      "matches": true
+    },
+    {
+      "path": "tests/reason_code_debug.test.ts",
+      "bytes": 10435,
+      "sha256": "44a60e84d8b22d1cb629364a84e10257d3454531678b987a75582ddaee9a756c",
+      "expected_bytes": 10435,
+      "expected_sha256": "44a60e84d8b22d1cb629364a84e10257d3454531678b987a75582ddaee9a756c",
+      "matches": true
+    },
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 102947714,
+      "sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9",
+      "expected_bytes": 102947714,
+      "expected_sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9",
+      "matches": true
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "expected_bytes": 1041,
+      "expected_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "matches": true
+    },
+    {
+      "path": "data/calibration/engine_health_thresholds.json",
+      "bytes": 3775,
+      "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d",
+      "expected_bytes": 3775,
+      "expected_sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d",
+      "matches": true
+    },
+    {
+      "path": "data/source/calibration/painted_control_oct1995.json",
+      "bytes": 35266,
+      "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+      "expected_bytes": 35266,
+      "expected_sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b",
+      "matches": true
+    }
+  ],
+  "checks": {
+    "final_focused": {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-15-final-focused/receipt.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true,
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 605,
+        "sha256": "646f11e81ee1703a9bd3c2b4e2093b108148a27b58b356b0051441472b332bdb"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 1364,
+        "sha256": "444b3be9772f73bfb445df781a5c757894867c178c1a27868fce3cbcd8d56d80"
+      }
+    },
+    "final_typecheck": {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-16-final-typecheck/receipt.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true,
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "focused_counts": {
+      "files": 3,
+      "tests": 67,
+      "passed": 67,
+      "failed": 0
+    },
+    "typecheck": {
+      "nonincremental": true,
+      "no_emit": true
+    }
+  },
+  "tdd_reds": [
+    "attempt-01-red-completeness",
+    "attempt-03-red-reader-absent",
+    "attempt-04-red-reader-contract",
+    "attempt-06-red-cli",
+    "attempt-10-red-observed-scope",
+    "attempt-13-red-turn-order"
+  ],
+  "negative_controls": {
+    "stream_loss_duplication_reordering_truncation": 8,
+    "schema_selector_manifest_presence_arithmetic_errors": 15,
+    "zero_transfer_manifest_gap": 1,
+    "whole_stream_scope_order_and_turn_token": 4,
+    "cli_existing_output_invalid_stream_and_usage": 3,
+    "total": 31
+  },
+  "raw_fixtures": [
+    {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-15-final-focused/raw-two-pool-fixture.log",
+      "bytes": 4544,
+      "sha256": "3aaf06a1ea18a6ad27dbb481ba47cd1807dbbb2075c0a9a2594008855f724f8c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-15-final-focused/raw-guard-fixture.log",
+      "bytes": 7108,
+      "sha256": "c8001bf02656354b50a50d3c91860acb0ed12cf2b61c296ea51ada8b38ae4303"
+    },
+    {
+      "path": "logs/claude-channel-20261004/810-reinforcement-allocation-reader/attempt-15-final-focused/raw-turns-21-22-fixture.log",
+      "bytes": 9071,
+      "sha256": "948a1b54b58edc85e0079d2ffb6f64d7fc3d7ea4600a9b9adb9dfa241301d10b"
+    }
+  ],
+  "cli": {
+    "success_exit": 0,
+    "invalid_receipt_exit": 2,
+    "usage_exit": 3,
+    "requires": [
+      "--input",
+      "--output",
+      "--pool",
+      "--turns",
+      "--expected-invocations-per-turn"
+    ],
+    "output_contract": "new file opened with wx"
+  },
+  "receipt_contract": {
+    "supported_schema_version": 2,
+    "schema_v1": "unsupported because it has no close completeness manifest",
+    "validates_all_observed_blocks": true,
+    "selected_future_scope": {
+      "pools": [
+        "pale:RS"
+      ],
+      "turns": [
+        21,
+        22
+      ],
+      "expected_invocations_per_turn": 1
+    },
+    "historical_claim": "No allocation coverage is claimed until a future source-bound campaign stdout passes this reader."
+  },
+  "campaign_invocations": 0,
+  "replay_invocations": 0,
+  "full_suite_invocations": 0
+}

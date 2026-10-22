@@ -78,7 +78,7 @@ function observePool(pool: MilitiaPoolState | undefined): PoolObservation {
 function emit(record: Record<string, unknown>): void {
     try {
         console.log(`${REINFORCEMENT_ALLOCATION_PREFIX} ${stableStringify({
-            schema_version: 1,
+            schema_version: 2,
             source: 'formation_spawn.reinforce',
             ...record,
         })}`);
@@ -88,6 +88,9 @@ function emit(record: Record<string, unknown>): void {
 }
 
 export class ReinforcementAllocationObserver {
+    private readonly attemptedRecipients = new Map<string, Array<{ formation_id: string; global_order: number }>>();
+    private diagnosticErrorCount = 0;
+
     constructor(
         private readonly completedTurn: number,
         private readonly poolKeys: readonly string[],
@@ -113,6 +116,9 @@ export class ReinforcementAllocationObserver {
         if (!this.isSelected(poolKey)) return;
         try {
             const record = build();
+            const attempted = this.attemptedRecipients.get(poolKey) ?? [];
+            attempted.push({ formation_id: record.formation_id, global_order: record.global_order });
+            this.attemptedRecipients.set(poolKey, attempted);
             const numbers = record.numbers ?? {};
             const observed = Object.fromEntries(RECIPIENT_NUMBER_FIELDS.map((field) => [
                 field,
@@ -124,6 +130,7 @@ export class ReinforcementAllocationObserver {
                 disposition: record.disposition, reason: record.reason, ...observed,
             });
         } catch {
+            this.diagnosticErrorCount += 1;
             // Observation and record construction cannot change allocation.
         }
     }
@@ -138,16 +145,23 @@ export class ReinforcementAllocationObserver {
             const poolFaction = readRecruitPoolFaction() ?? faction;
             this.recordRecipient(militiaPoolKey(munId, poolFaction), build);
         } catch {
+            this.diagnosticErrorCount += 1;
             // Lazy pool association is diagnostic-only and cannot alter an early gameplay guard.
         }
     }
 
     stageClose(): void {
         try {
-            this.poolKeys.forEach((pool_key, selected_pool_ordinal) => emit({
-                event: 'stage_close', branch: 'regular', completed_turn: this.completedTurn,
-                pool_key, selected_pool_ordinal, pool: observePool(this.pools[pool_key]),
-            }));
+            this.poolKeys.forEach((pool_key, selected_pool_ordinal) => {
+                const attempted_recipients = this.attemptedRecipients.get(pool_key) ?? [];
+                emit({
+                    event: 'stage_close', branch: 'regular', completed_turn: this.completedTurn,
+                    pool_key, selected_pool_ordinal, pool: observePool(this.pools[pool_key]),
+                    attempted_recipient_count: attempted_recipients.length,
+                    attempted_recipients: attempted_recipients.map((recipient) => ({ ...recipient })),
+                    diagnostic_error_count: this.diagnosticErrorCount,
+                });
+            });
         } catch {
             // Observation cannot mask a completed regular reinforcement stage.
         }

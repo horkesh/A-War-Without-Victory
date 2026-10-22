@@ -1,3 +1,15 @@
+## 809–812 — Strict allocation reader qualified (2026-10-22)
+
+Strict shared-pool allocation reader is implemented and independently approved. Schema 2 closes each regular-stage pool with an ordered attempted-recipient manifest and diagnostic error count. This detects omitted skipped or zero-transfer rows that schema 1 balances could not expose. The portable reader rejects schema 1, validates every observed block before selecting requested turns, and requires explicit invocation counts and ordered completed turns.
+
+Initial focused validation: 3 files, 67/67 tests passed, child/wrapper exits 0/0, reused at unaffected scope. Independent review then found that a partial topic prefix could be ignored. The reader-only correction rejects every nonempty proper prefix; its final affected fixture passed 18/18 with child/wrapper exits 0/0, and final nonincremental noEmit exits 0/0. There are 36 negative controls, including 5 added prefix fragments. The original rejection, red and superseded checks remain preserved. Counts are separate, never combined into a fictional rerun. One independent review and one targeted correction verification were performed.
+
+Only the observer, strict reader and production-function fixture changed. formation_spawn.ts, reason gate, personnel code/tests, C/D telemetry, thresholds and October reference remain byte-exact. No gameplay, state, report, save, weekly or file-telemetry change; no campaign, replay or full suite. Retained n80 703/712 remains NO-GO/unadopted, n83 remains a rejected 689 trajectory, and missing n80 allocation history remains unmeasured. Reader readiness does not prove campaign neutrality or calibration recovery.
+
+Next proposed action: one instrumented original-trajectory 188-week diagnostic against n83, 35-minute cap, runner timeout 600 seconds, one invocation with no retry. Measure Pale regular-stage opening balance, reserve and ordered earlier recipients at completed turns 21–22. Require exact native gameplay artifact identity, input provenance, telemetry preservation and the existing plus new strict readers. The fixed proposal is in allocation-reader-809-root-plan.md; no campaign launch is authorized by this closeout.
+
+Evidence: docs/provenance/october-calibration-20261019/allocation-reader-812-final-result.json and allocation-reader-812-raw-inventory.json; exact hashes and original failures retained locally.
+
 ## 805–808 — Shared-pool observer and fixture approved (2026-10-22)
 
 Default-off stdout-only regular shared-pool allocation receipt and deterministic production-path fixtures are implemented and independently approved. Topic reinforcement_allocation requires explicit AWWV_DEBUG_REINFORCEMENT_POOLS; emits stage_open/recipient/stage_close with source, completedturn, pool balances, ordered recipients/skips and presence-tagged reserve/effective/transfer values. No gameplay decision, threshold, state/save/report/weekly or file-telemetry change.
