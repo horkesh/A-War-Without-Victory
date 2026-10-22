@@ -11543,3 +11543,16 @@ Only the observer, strict reader and production-function fixture changed. format
 Next proposed action: one instrumented original-trajectory 188-week diagnostic against n83, 35-minute cap, runner timeout 600 seconds, one invocation with no retry. Measure Pale regular-stage opening balance, reserve and ordered earlier recipients at completed turns 21–22. Require exact native gameplay artifact identity, input provenance, telemetry preservation and the existing plus new strict readers. The fixed proposal is in allocation-reader-809-root-plan.md; no campaign launch is authorized by this closeout.
 
 Determinism impact: observer-local manifest/error tracking and stdout schema version only; core production access order and mutations unchanged. Real-function fixtures retain state/report parity. Complete retained attempt inventory and final pins are in docs/provenance/october-calibration-20261019/allocation-reader-812-final-result.json.
+
+
+### 2026-10-22 — Pale diagnostic prelaunch stop and checker correction (813–816)
+
+The approved diagnostic stopped before campaign launch: the local preflight checker incorrectly required a serialized weekly row.turn. Actual weekly artifacts expose week_index, assigned from state.meta.turn. Preflight passed99/100, child/wrapper2/2, artifact contract passed. Campaign invocations0; no actual runDir, runner exit, gameplay comparisons or reader coverage exist. Pale allocation at21–22 remains UNMEASURED.
+
+A separate local corrected copy removes only the unsupported &&w.turn===i+1 clause (-14bytes). Targeted proof accepts actual n83 week_index1–188 and rejects missing, wrong, duplicate and truncated indices; source binding remains explicit. Proof child/wrapper0/0. Original checker, failed preflight/receipt, frozen result and all99 other gate implementations remain byte-exact. No whole preflight retry, campaign, replay, build or full suite occurred. Independent review accepts only this bounded stop/correction, not a campaign measurement.
+
+Production source, reader, fixture, thresholds and October reference are unchanged. C102947714/edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9 and D1041/ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3 remain exact, append0. No new telemetry archives were needed because runtime never began; the original bytes and prior full archives remain intact. Retained n80 703/712 remains NO-GO/unadopted; n83 remains rejected689 and all inherited gates stay unmet.
+
+A campaign launch requires a fresh explicit authorization under the stop-on-prerequisite-failure rule. Smallest proposed scope remains one instrumented188 against n83,35min/600srunner/no retry, after rebinding the fresh HEAD pin and corrected week_index prerequisite. Require ALL30 gameplay byte pairs,TEN10,exact31native inventory,32normalized inputs,full telemetry preservation and all strict reader gates. No gameplay fix or new acceptance criterion is justified.
+
+Determinism impact: none in simulation; only ignored local preflight copy corrected. Current production/reader/test and telemetry hashes remain exact. Rawbytes LOCAL with pushed inventories; all failed and corrected attempts preserved.

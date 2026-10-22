@@ -1,3 +1,7 @@
+## 2026-10-22 — Check serialized fields against the real artifact contract
+
+WeeklyReportRow exposes week_index copied from state.meta.turn; it does not serialize row.turn. A preflight must verify that actual contract rather than requiring both names. A false checker failure is not engine evidence or campaign coverage; preserve the failure and prove the smallest correction against retained positive and mutated negative artifacts. See [prelaunch stop](PROJECT_LEDGER.md#2026-10-22--pale-diagnostic-prelaunch-stop-and-checker-correction-813816).
+
 ## 2026-10-22 — Balance conservation cannot prove receipt completeness
 
 Removing a skipped or zero-transfer recipient preserves pool balances. Strict allocation coverage therefore needs a producer-side ordered attempt manifest and diagnostic-error flag, followed by whole-stream semantic validation before selection. Explicit invocation counts and completed-turn ordering catch duplicate/reordered blocks. See [reader closeout](PROJECT_LEDGER.md#2026-10-22--strict-allocation-reader-and-completeness-contract-809812).

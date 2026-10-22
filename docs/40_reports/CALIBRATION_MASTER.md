@@ -1,3 +1,15 @@
+## 813–816 — Pale diagnostic stopped before launch (2026-10-22)
+
+The approved diagnostic stopped before campaign launch: the local preflight checker incorrectly required a serialized weekly row.turn. Actual weekly artifacts expose week_index, assigned from state.meta.turn. Preflight passed99/100, child/wrapper2/2, artifact contract passed. Campaign invocations0; no actual runDir, runner exit, gameplay comparisons or reader coverage exist. Pale allocation at21–22 remains UNMEASURED.
+
+A separate local corrected copy removes only the unsupported &&w.turn===i+1 clause (-14bytes). Targeted proof accepts actual n83 week_index1–188 and rejects missing, wrong, duplicate and truncated indices; source binding remains explicit. Proof child/wrapper0/0. Original checker, failed preflight/receipt, frozen result and all99 other gate implementations remain byte-exact. No whole preflight retry, campaign, replay, build or full suite occurred. Independent review accepts only this bounded stop/correction, not a campaign measurement.
+
+Production source, reader, fixture, thresholds and October reference are unchanged. C102947714/edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9 and D1041/ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3 remain exact, append0. No new telemetry archives were needed because runtime never began; the original bytes and prior full archives remain intact. Retained n80 703/712 remains NO-GO/unadopted; n83 remains rejected689 and all inherited gates stay unmet.
+
+A campaign launch requires a fresh explicit authorization under the stop-on-prerequisite-failure rule. Smallest proposed scope remains one instrumented188 against n83,35min/600srunner/no retry, after rebinding the fresh HEAD pin and corrected week_index prerequisite. Require ALL30 gameplay byte pairs,TEN10,exact31native inventory,32normalized inputs,full telemetry preservation and all strict reader gates. No gameplay fix or new acceptance criterion is justified.
+
+Evidence: pale-816-result/raw-inventory under docs/provenance/october-calibration-20261019; raw failure and corrected-source snapshots remain local.
+
 ## 809–812 — Strict allocation reader qualified (2026-10-22)
 
 Strict shared-pool allocation reader is implemented and independently approved. Schema 2 closes each regular-stage pool with an ordered attempted-recipient manifest and diagnostic error count. This detects omitted skipped or zero-transfer rows that schema 1 balances could not expose. The portable reader rejects schema 1, validates every observed block before selecting requested turns, and requires explicit invocation counts and ordered completed turns.
