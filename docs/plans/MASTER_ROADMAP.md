@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-22 — selector fixture reconciled; no new campaign.
+**Last updated:** 2026-10-22 — n83 observer diagnostic passed; actual reinforcement/probe ranking measured.
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -24,13 +24,13 @@ tradeoffs or irreversible/external actions with concrete options and a
 recommendation. Required evidence, review panels and cost-control gates remain.
 
 **Current R6 — October Sana remains NO-GO.** Retained n80 is **703/712**, unadopted.
-Producer-bound reader remains accepted at commander completion-row scope.
-Inherited selector assertion now reconciled: final affected16/16, observer60/60,
-typecheck0, independent795ACCEPT after fixing RS fixture ownership mapping.
-Only tests changed; production, thresholds and telemetry exact. No new campaign
-or full suite. Actual postrun/personnel causality and whole-pipeline readiness
-remain unmeasured; n81/n82 rejected689. Future diagnostic needs its fixed
-prerequisites and explicit run scope. All inherited acceptance gates remain in
+One n83diagnostic passed raw30/30+TEN10/10 against rejectedn82, no retry.
+Actual t22regular reinforcement+111 frompale:RS and t23rs4rank0 probe selection
+are measured; Kijevo24Prača rejected commitment tothatprobe. Independent799
+accepts substantiveevidence and verified post-close inventory70/70. Fulltelemetry
+preserved; source/thresholds exact. This reproduces n82, not703recovery. Next:
+inspect retainedn80 t22pool/recipient evidence; no endpoint counterfactual or
+productionfix/newcampaign authorized. All inherited acceptance gates remain in
 the [calibration authority](../40_reports/CALIBRATION_MASTER.md).
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate

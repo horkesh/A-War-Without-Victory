@@ -1,0 +1,83 @@
+{
+  "schema": "awwv.799.preservation-supplement.v1",
+  "captured_utc": "2026-10-22T05:29:11.203Z",
+  "verdict": "PASS_POSTCLOSE_PRESERVATION_CORRECTION",
+  "scope": "Targeted verification of the 800 post-close inventory only; 799 substantive acceptance is reused unchanged.",
+  "inventory": {
+    "path": "logs/claude-channel-20261004/800-postclose-a/inventory.json",
+    "bytes": 14145,
+    "sha256": "62cceaad5f1cf1bb976eca9a84b1f95ae28485d97fddfe66bc34ba2ffe4e90dd",
+    "entries": 70
+  },
+  "generator_receipt": {
+    "path": "logs/claude-channel-20261004/800-postclose-a/receipt.json",
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false,
+    "artifact_contract": true
+  },
+  "coverage": {
+    "current_798_files": 70,
+    "inventoried_files": 70,
+    "missing": [],
+    "extra": [],
+    "mismatches": []
+  },
+  "pins": [
+    {
+      "file": "logs/claude-channel-20261004/798-seal-a/798-result.json",
+      "expected": "2e03cbbe69e4319f570e2f078cf13956d32d4b338f221a5b776d7028179d1e44",
+      "actual": "2e03cbbe69e4319f570e2f078cf13956d32d4b338f221a5b776d7028179d1e44",
+      "pass": true
+    },
+    {
+      "file": "logs/claude-channel-20261004/798-seal-a/798-inventory.json",
+      "expected": "306b8688624968eaa5875ea983dd811c7331aa7bb39b6769f19bfe9950681a99",
+      "actual": "306b8688624968eaa5875ea983dd811c7331aa7bb39b6769f19bfe9950681a99",
+      "pass": true
+    },
+    {
+      "file": "logs/claude-channel-20261004/798-seal-a/798-closed.json",
+      "expected": "1cd1a5625b78f79f25c3d089721df47739c392a122451808578f2f0c3ff8eba1",
+      "actual": "1cd1a5625b78f79f25c3d089721df47739c392a122451808578f2f0c3ff8eba1",
+      "pass": true
+    },
+    {
+      "file": "logs/claude-channel-20261004/798-seal-a/stdout.log",
+      "expected": "5f5bdf9523a6503e9f0bbf7af066410cd0d761b77ac033fcaffd5fe60c666a0c",
+      "actual": "5f5bdf9523a6503e9f0bbf7af066410cd0d761b77ac033fcaffd5fe60c666a0c",
+      "pass": true
+    },
+    {
+      "file": "logs/claude-channel-20261004/798-run-one.pre-archive-proof-fix.cjs",
+      "expected": "5e76a8905295c38b29cadb80a29a9a819fc9767143090a381ccce8bbfa9862a7",
+      "actual": "5e76a8905295c38b29cadb80a29a9a819fc9767143090a381ccce8bbfa9862a7",
+      "pass": true
+    },
+    {
+      "file": "logs/claude-channel-20261004/799-review-b/799-review.json",
+      "expected": "aad9f02e78e663804b1f3284d27d8a167a90f14f09eaaa7b781c182d0ab60553",
+      "actual": "aad9f02e78e663804b1f3284d27d8a167a90f14f09eaaa7b781c182d0ab60553",
+      "pass": true
+    },
+    {
+      "file": "logs/claude-channel-20261004/799-review-b/799-review.md",
+      "expected": "d7bf8cc5f80cdbd4fc7596c79a037f18a9850ea27fd1e24d1f56dcdcfd373652",
+      "actual": "d7bf8cc5f80cdbd4fc7596c79a037f18a9850ea27fd1e24d1f56dcdcfd373652",
+      "pass": true
+    }
+  ],
+  "checks": {
+    "inventory_hash": true,
+    "wrapper_child_zero": true,
+    "wrapper_zero": true,
+    "wrapper_contract": true,
+    "entry_count_70": true,
+    "exact_coverage": true,
+    "exact_bytes": true,
+    "original_pins_unchanged": true,
+    "finalized_seal_stdout": true,
+    "three_seal_outputs": true
+  },
+  "resulting_scope": "The prior preservation-only rejection is closed. The n83 substantive diagnostic findings remain accepted at their original bounded scope."
+}

@@ -1,0 +1,319 @@
+{
+  "schema": "awwv.799.review.v1",
+  "captured_utc": "2026-10-22T05:27:41.021Z",
+  "verdict": "REJECT_PRESERVATION_INVENTORY__SUBSTANTIVE_FINDINGS_ACCEPTED",
+  "substantive_pass": true,
+  "preservation_pass": false,
+  "reviewed_head": "ceec13291f4ce3e96e09ec42e2954910022d5cbb",
+  "reviewed_run": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n83",
+  "findings": [
+    {
+      "severity": "critical",
+      "title": "Sealed inventory does not match the retained seal stdout",
+      "evidence": [
+        {
+          "path": "logs/claude-channel-20261004/798-seal-a/stdout.log",
+          "recorded": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "actual": {
+            "bytes": 270,
+            "sha256": "5f5bdf9523a6503e9f0bbf7af066410cd0d761b77ac033fcaffd5fe60c666a0c"
+          }
+        }
+      ],
+      "impact": "The 66-file exact-inventory preservation claim is false as sealed. The mismatch is confined to seal wrapper stdout and does not invalidate the raw run, identity, reader, personnel, Romanija, or Kijevo evidence.",
+      "next_smallest_step": "Create one fresh post-close inventory outside the 798 evidence scope that hashes the final retained 798 files, including the finalized 270-byte seal stdout and the three seal outputs; do not alter or delete existing bytes. Verify that new inventory once."
+    }
+  ],
+  "checks": [
+    {
+      "name": "result handoff hash",
+      "pass": true
+    },
+    {
+      "name": "inventory handoff hash",
+      "pass": true
+    },
+    {
+      "name": "closed handoff hash",
+      "pass": true
+    },
+    {
+      "name": "closed/result linkage",
+      "pass": true
+    },
+    {
+      "name": "closed/inventory linkage",
+      "pass": true
+    },
+    {
+      "name": "inventory exact current bytes",
+      "pass": false,
+      "detail": [
+        {
+          "path": "logs/claude-channel-20261004/798-seal-a/stdout.log",
+          "recorded": {
+            "bytes": 0,
+            "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          },
+          "actual": {
+            "bytes": 270,
+            "sha256": "5f5bdf9523a6503e9f0bbf7af066410cd0d761b77ac033fcaffd5fe60c666a0c"
+          }
+        }
+      ]
+    },
+    {
+      "name": "inventory count",
+      "pass": true,
+      "detail": 66
+    },
+    {
+      "name": "attempt receipts and preserved entry bytes",
+      "pass": true,
+      "detail": [
+        {
+          "name": "798-preflight-a",
+          "start_utc": "2026-10-22T05:15:46.086Z",
+          "end_utc": "2026-10-22T05:15:52.170Z",
+          "child_exit": 2,
+          "wrapper_exit": 2,
+          "timed_out": false,
+          "entry_match": true,
+          "artifact_contract": true
+        },
+        {
+          "name": "798-preflight-b",
+          "start_utc": "2026-10-22T05:16:21.877Z",
+          "end_utc": "2026-10-22T05:16:27.137Z",
+          "child_exit": 0,
+          "wrapper_exit": 0,
+          "timed_out": false,
+          "entry_match": true,
+          "artifact_contract": true
+        },
+        {
+          "name": "798-runner-proof-prep-a",
+          "start_utc": "2026-10-22T05:17:47.804Z",
+          "end_utc": "2026-10-22T05:17:48.067Z",
+          "child_exit": 0,
+          "wrapper_exit": 0,
+          "timed_out": false,
+          "entry_match": true,
+          "artifact_contract": true
+        },
+        {
+          "name": "798-run-a",
+          "start_utc": "2026-10-22T05:18:19.257Z",
+          "end_utc": "2026-10-22T05:20:43.220Z",
+          "child_exit": 0,
+          "wrapper_exit": 0,
+          "timed_out": false,
+          "entry_match": true,
+          "artifact_contract": true
+        },
+        {
+          "name": "798-postrun-a",
+          "start_utc": "2026-10-22T05:21:32.707Z",
+          "end_utc": "2026-10-22T05:21:35.831Z",
+          "child_exit": 0,
+          "wrapper_exit": 0,
+          "timed_out": false,
+          "entry_match": true,
+          "artifact_contract": true
+        },
+        {
+          "name": "798-extract-a",
+          "start_utc": "2026-10-22T05:22:31.200Z",
+          "end_utc": "2026-10-22T05:22:31.955Z",
+          "child_exit": 2,
+          "wrapper_exit": 2,
+          "timed_out": false,
+          "entry_match": true,
+          "artifact_contract": true
+        },
+        {
+          "name": "798-extract-b",
+          "start_utc": "2026-10-22T05:23:08.510Z",
+          "end_utc": "2026-10-22T05:23:09.268Z",
+          "child_exit": 0,
+          "wrapper_exit": 0,
+          "timed_out": false,
+          "entry_match": true,
+          "artifact_contract": true
+        },
+        {
+          "name": "798-seal-a",
+          "start_utc": "2026-10-22T05:23:56.888Z",
+          "end_utc": "2026-10-22T05:23:57.759Z",
+          "child_exit": 0,
+          "wrapper_exit": 0,
+          "timed_out": false,
+          "entry_match": true,
+          "artifact_contract": true
+        }
+      ]
+    },
+    {
+      "name": "gate order before sole run",
+      "pass": true
+    },
+    {
+      "name": "post-run gate order",
+      "pass": true
+    },
+    {
+      "name": "C archive prefix and append",
+      "pass": true
+    },
+    {
+      "name": "D archive prefix and append",
+      "pass": true
+    },
+    {
+      "name": "runner exit and archive helper controls",
+      "pass": true
+    },
+    {
+      "name": "31 native / 30 raw Buffer identities",
+      "pass": true
+    },
+    {
+      "name": "TEN 10/10 identities",
+      "pass": true
+    },
+    {
+      "name": "ordered 32 input provenance",
+      "pass": true
+    },
+    {
+      "name": "threshold and source pins",
+      "pass": true
+    },
+    {
+      "name": "full stateful reader coverage",
+      "pass": true
+    },
+    {
+      "name": "tracked commander completion semantics",
+      "pass": true
+    },
+    {
+      "name": "weekly and telemetry turn binding",
+      "pass": true
+    },
+    {
+      "name": "turn 21 writer arithmetic/source",
+      "pass": true
+    },
+    {
+      "name": "turn 22 writer arithmetic/source",
+      "pass": true
+    },
+    {
+      "name": "Romanija turn 23 selected brigade and ranks",
+      "pass": true
+    },
+    {
+      "name": "Romanija turn 23 built/returned bounded scope",
+      "pass": true
+    },
+    {
+      "name": "Kijevo 24 scope and admission",
+      "pass": true
+    }
+  ],
+  "boundaries": [
+    "n82 reproduction establishes observer neutrality for the 30 retained gameplay artifacts only; it does not recover n80 703/712",
+    "n80 remains retained 703/712 NO-GO; n81/n82 remain rejected 689",
+    "no n80 counterfactual or historical causality inference",
+    "phase closure localizes phase changes; only listed direct_writers identify covered assignments",
+    "uncovered personnel writers remain unmeasured",
+    "commander build_operations_complete distinguishes built and returned at builder scope; it does not independently prove later game-state admission",
+    "Operation Kijevo caller_terminal explicitly observed admitted=true at turn24"
+  ],
+  "attempts": [
+    {
+      "name": "798-preflight-a",
+      "start_utc": "2026-10-22T05:15:46.086Z",
+      "end_utc": "2026-10-22T05:15:52.170Z",
+      "child_exit": 2,
+      "wrapper_exit": 2,
+      "timed_out": false,
+      "entry_match": true,
+      "artifact_contract": true
+    },
+    {
+      "name": "798-preflight-b",
+      "start_utc": "2026-10-22T05:16:21.877Z",
+      "end_utc": "2026-10-22T05:16:27.137Z",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "entry_match": true,
+      "artifact_contract": true
+    },
+    {
+      "name": "798-runner-proof-prep-a",
+      "start_utc": "2026-10-22T05:17:47.804Z",
+      "end_utc": "2026-10-22T05:17:48.067Z",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "entry_match": true,
+      "artifact_contract": true
+    },
+    {
+      "name": "798-run-a",
+      "start_utc": "2026-10-22T05:18:19.257Z",
+      "end_utc": "2026-10-22T05:20:43.220Z",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "entry_match": true,
+      "artifact_contract": true
+    },
+    {
+      "name": "798-postrun-a",
+      "start_utc": "2026-10-22T05:21:32.707Z",
+      "end_utc": "2026-10-22T05:21:35.831Z",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "entry_match": true,
+      "artifact_contract": true
+    },
+    {
+      "name": "798-extract-a",
+      "start_utc": "2026-10-22T05:22:31.200Z",
+      "end_utc": "2026-10-22T05:22:31.955Z",
+      "child_exit": 2,
+      "wrapper_exit": 2,
+      "timed_out": false,
+      "entry_match": true,
+      "artifact_contract": true
+    },
+    {
+      "name": "798-extract-b",
+      "start_utc": "2026-10-22T05:23:08.510Z",
+      "end_utc": "2026-10-22T05:23:09.268Z",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "entry_match": true,
+      "artifact_contract": true
+    },
+    {
+      "name": "798-seal-a",
+      "start_utc": "2026-10-22T05:23:56.888Z",
+      "end_utc": "2026-10-22T05:23:57.759Z",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "entry_match": true,
+      "artifact_contract": true
+    }
+  ]
+}

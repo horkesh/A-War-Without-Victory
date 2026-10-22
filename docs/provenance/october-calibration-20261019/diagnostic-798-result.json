@@ -1,0 +1,2110 @@
+{
+  "schema": "awwv.798.result.v1",
+  "captured_utc": "2026-10-22T05:23:56.932Z",
+  "writes_closed": true,
+  "verdict": "PASS_N82_OBSERVER_NEUTRALITY_BOUNDED_FINDINGS",
+  "head": "ceec13291f4ce3e96e09ec42e2954910022d5cbb",
+  "branch": "codex/october-calibration-continuation-20261003",
+  "git_status": "",
+  "campaign": {
+    "allowance": "1/1 spent; no retry",
+    "actual_run_dir": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n83",
+    "start_utc": "2026-10-22T05:18:19.548Z",
+    "end_utc": "2026-10-22T05:20:42.570Z",
+    "runner_child_exit": 0,
+    "runner_wrapper_child_exit": 0,
+    "runner_wrapper_exit": 0,
+    "telemetry_archive_pass": true,
+    "C": {
+      "opening_prefix_equal": true,
+      "append_bytes": 946671,
+      "opening_bytes": 102001043,
+      "after_bytes": 102947714
+    },
+    "D": {
+      "opening_prefix_equal": true,
+      "append_bytes": 0,
+      "opening_bytes": 1041,
+      "after_bytes": 1041
+    }
+  },
+  "identity": {
+    "postrun_child_exit": 0,
+    "postrun_wrapper_exit": 0,
+    "native_count": 31,
+    "raw30_equal": 30,
+    "ten_equal": 10,
+    "run_meta_raw_equal": false,
+    "run_meta_baseline_sha256": "261e0728bb814c12d9b410b9a18f3e0cb7102cc218aed765a5c49ddda5ad22e2",
+    "run_meta_actual_sha256": "b5a9faff9db1b2ed010dc980af36ce9403574724ee7dc40102c8837e104cb3c3",
+    "consumed_inputs_count": 32,
+    "consumed_inputs_digest": "7986f05230e1d526e1794673e796dcb77730501d4958e435970c4ec806cc8039",
+    "ordered_rows_equal": true
+  },
+  "readers": {
+    "stateful_exit": 0,
+    "tracked_commander_exit": 0,
+    "personnel_records": 71931,
+    "covered_personnel_writers": 303,
+    "commander_passes": 564,
+    "commander_completion_rows": 3290,
+    "tracked_records": 4418,
+    "tracked_completion_rows": 3290,
+    "tracked_violations": 0
+  },
+  "findings": {
+    "personnel_turns_21_22": {
+      "21": {
+        "changing_phases": [
+          {
+            "completed_turn": 21,
+            "phase_index": 110,
+            "phase_name": "apply-frontline-attrition",
+            "phase_group": "war",
+            "start": {
+              "presence": "present_value",
+              "value": 1417
+            },
+            "end": {
+              "presence": "present_value",
+              "value": 1411
+            },
+            "delta": -6,
+            "direct_writers": [
+              {
+                "after": 1411,
+                "base_attrition": 6,
+                "before": 1417,
+                "bombardment": 0,
+                "casualties": 6,
+                "casualty_cap": 1317,
+                "completed_turn": 21,
+                "event": "writer",
+                "faction_id": "RS",
+                "formation_id": "rs_4th_sarajevo_light_infantry",
+                "schema_version": 1,
+                "sector_id": "sector:vrs_sarajevo_romanija:4",
+                "source": "frontline_attrition"
+              }
+            ]
+          }
+        ],
+        "first_changing_phase": {
+          "completed_turn": 21,
+          "phase_index": 110,
+          "phase_name": "apply-frontline-attrition",
+          "phase_group": "war",
+          "start": {
+            "presence": "present_value",
+            "value": 1417
+          },
+          "end": {
+            "presence": "present_value",
+            "value": 1411
+          },
+          "delta": -6,
+          "direct_writers": [
+            {
+              "after": 1411,
+              "base_attrition": 6,
+              "before": 1417,
+              "bombardment": 0,
+              "casualties": 6,
+              "casualty_cap": 1317,
+              "completed_turn": 21,
+              "event": "writer",
+              "faction_id": "RS",
+              "formation_id": "rs_4th_sarajevo_light_infantry",
+              "schema_version": 1,
+              "sector_id": "sector:vrs_sarajevo_romanija:4",
+              "source": "frontline_attrition"
+            }
+          ]
+        }
+      },
+      "22": {
+        "changing_phases": [
+          {
+            "completed_turn": 22,
+            "phase_index": 110,
+            "phase_name": "apply-frontline-attrition",
+            "phase_group": "war",
+            "start": {
+              "presence": "present_value",
+              "value": 1411
+            },
+            "end": {
+              "presence": "present_value",
+              "value": 1405
+            },
+            "delta": -6,
+            "direct_writers": [
+              {
+                "after": 1405,
+                "base_attrition": 6,
+                "before": 1411,
+                "bombardment": 0,
+                "casualties": 6,
+                "casualty_cap": 1311,
+                "completed_turn": 22,
+                "event": "writer",
+                "faction_id": "RS",
+                "formation_id": "rs_4th_sarajevo_light_infantry",
+                "schema_version": 1,
+                "sector_id": "sector:vrs_sarajevo_romanija:4",
+                "source": "frontline_attrition"
+              }
+            ]
+          },
+          {
+            "completed_turn": 22,
+            "phase_index": 125,
+            "phase_name": "brigade-reinforcement",
+            "phase_group": "war",
+            "start": {
+              "presence": "present_value",
+              "value": 1405
+            },
+            "end": {
+              "presence": "present_value",
+              "value": 1516
+            },
+            "delta": 111,
+            "direct_writers": [
+              {
+                "after": 1516,
+                "available": 111,
+                "before": 1405,
+                "branch": "regular",
+                "cap": 2200,
+                "completed_turn": 22,
+                "event": "writer",
+                "formation_id": "rs_4th_sarajevo_light_infantry",
+                "need": 400,
+                "pool_key": "pale:RS",
+                "rate": 400,
+                "schema_version": 1,
+                "source": "formation_spawn.reinforce",
+                "transfer": 111
+              }
+            ]
+          }
+        ],
+        "first_changing_phase": {
+          "completed_turn": 22,
+          "phase_index": 110,
+          "phase_name": "apply-frontline-attrition",
+          "phase_group": "war",
+          "start": {
+            "presence": "present_value",
+            "value": 1411
+          },
+          "end": {
+            "presence": "present_value",
+            "value": 1405
+          },
+          "delta": -6,
+          "direct_writers": [
+            {
+              "after": 1405,
+              "base_attrition": 6,
+              "before": 1411,
+              "bombardment": 0,
+              "casualties": 6,
+              "casualty_cap": 1311,
+              "completed_turn": 22,
+              "event": "writer",
+              "faction_id": "RS",
+              "formation_id": "rs_4th_sarajevo_light_infantry",
+              "schema_version": 1,
+              "sector_id": "sector:vrs_sarajevo_romanija:4",
+              "source": "frontline_attrition"
+            }
+          ]
+        }
+      }
+    },
+    "romanija_20_24": [
+      {
+        "turn": 20,
+        "status": "not_reached",
+        "selected_brigade_id": null,
+        "brigade_candidates": [],
+        "targets": [],
+        "sector_id": null,
+        "ranked_objective_ids": [],
+        "exit": "completed_no_operation",
+        "built": [],
+        "returned": [],
+        "candidate_operations": [],
+        "returned_operations": [],
+        "record": {
+          "built": [],
+          "can_consider_local_opportunity": false,
+          "corps_id": "vrs_sarajevo_romanija",
+          "exit": "completed_no_operation",
+          "faction": "RS",
+          "general_entry_passed": false,
+          "host_corps_id": "vrs_sarajevo_romanija",
+          "local_opportunity_first_failed_operand": "active_slot_free",
+          "local_opportunity_operands": {
+            "active_slot_free": false,
+            "allocation_can_launch_ops": true,
+            "initiative_above_threshold": true,
+            "ops_length_zero": true,
+            "surplus_pool_nonempty": true
+          },
+          "phase": "build_operations_complete",
+          "plan_present": true,
+          "plan_source": "pre_planned",
+          "plan_status": "suspended",
+          "plan_target_ids": [],
+          "probe_gate_receipt": {
+            "candidate_operations": [],
+            "fallback_escalation_decision": null,
+            "first_reached_exit": "completed_no_operation",
+            "plan_decision": null,
+            "returned_operations": [],
+            "selector": {
+              "corps_id": "vrs_sarajevo_romanija",
+              "faction": "RS",
+              "turn": 20
+            },
+            "target_selection_detail": {
+              "brigade_candidates": [],
+              "derived_sector_id": null,
+              "direct_candidate_ids": [],
+              "enemy_candidate_ids": [],
+              "ranked_objective_ids": [],
+              "selected_brigade_id": null,
+              "selected_brigade_location": null,
+              "status": "not_reached",
+              "survivor_ids": [],
+              "targets": []
+            }
+          },
+          "probe_on_cooldown": true,
+          "returned": [],
+          "schema": "commander_creation.v1",
+          "turn": 20
+        }
+      },
+      {
+        "turn": 21,
+        "status": "generic_search",
+        "selected_brigade_id": "rs_1st_sarajevo_mechanized",
+        "brigade_candidates": [
+          {
+            "actual_fitness": 0.32218266399999995,
+            "brigade_id": "rs_1st_romanija_infantry",
+            "combat_ready": true,
+            "disrupted_and_effective": true,
+            "elite_available": true,
+            "historical_queue_free": true,
+            "original_ordinal": 0,
+            "selected": false,
+            "sorted_rank": 1
+          },
+          {
+            "actual_fitness": 0.35644391999999997,
+            "brigade_id": "rs_1st_sarajevo_mechanized",
+            "combat_ready": true,
+            "disrupted_and_effective": true,
+            "elite_available": true,
+            "historical_queue_free": true,
+            "original_ordinal": 1,
+            "selected": true,
+            "sorted_rank": 0
+          },
+          {
+            "actual_fitness": 0.17579519999999998,
+            "brigade_id": "rs_3rd_sarajevo_infantry",
+            "combat_ready": true,
+            "disrupted_and_effective": true,
+            "elite_available": true,
+            "historical_queue_free": true,
+            "original_ordinal": 2,
+            "selected": false,
+            "sorted_rank": 3
+          },
+          {
+            "actual_fitness": 0.28169959999999994,
+            "brigade_id": "rs_4th_sarajevo_light_infantry",
+            "combat_ready": true,
+            "disrupted_and_effective": true,
+            "elite_available": true,
+            "historical_queue_free": true,
+            "original_ordinal": 3,
+            "selected": false,
+            "sorted_rank": 2
+          },
+          {
+            "actual_fitness": 0.06985999999999999,
+            "brigade_id": "rs_igman_brigade",
+            "combat_ready": false,
+            "disrupted_and_effective": true,
+            "elite_available": true,
+            "historical_queue_free": true,
+            "original_ordinal": 4,
+            "selected": false,
+            "sorted_rank": null
+          },
+          {
+            "actual_fitness": 0.10933999999999999,
+            "brigade_id": "rs_ilidza_brigade",
+            "combat_ready": true,
+            "disrupted_and_effective": true,
+            "elite_available": true,
+            "historical_queue_free": true,
+            "original_ordinal": 5,
+            "selected": false,
+            "sorted_rank": 4
+          },
+          {
+            "actual_fitness": 0.0875,
+            "brigade_id": "rs_trnovo_brigade",
+            "combat_ready": true,
+            "disrupted_and_effective": true,
+            "elite_available": true,
+            "historical_queue_free": true,
+            "original_ordinal": 6,
+            "selected": false,
+            "sorted_rank": 5
+          }
+        ],
+        "targets": [
+          {
+            "approach_distance": null,
+            "controller": null,
+            "cooldown_effective_value": null,
+            "cooldown_filter_passed": null,
+            "cooldown_filter_reached": false,
+            "cooldown_raw_present": null,
+            "cooldown_raw_value": null,
+            "direct": false,
+            "direct_filter_passed": false,
+            "direct_filter_reached": true,
+            "first_rejecting_filter": "direct",
+            "passed": false,
+            "politically_blocked": null,
+            "politics_filter_passed": null,
+            "politics_filter_reached": false,
+            "predicted_viable": null,
+            "prediction_filter_passed": null,
+            "prediction_filter_reached": false,
+            "prediction_outcome": null,
+            "prediction_present": null,
+            "prediction_threshold": "stalemate",
+            "reachable": null,
+            "reachable_filter_passed": null,
+            "reachable_filter_reached": false,
+            "target_id": "op:centar_sarajevo:sarajevo_dio_centar_sajarevo"
+          },
+          {
+            "approach_distance": 0,
+            "controller": "RBiH",
+            "cooldown_effective_value": 0,
+            "cooldown_filter_passed": true,
+            "cooldown_filter_reached": true,
+            "cooldown_raw_present": false,
+            "cooldown_raw_value": null,
+            "direct": true,
+            "direct_filter_passed": true,
+            "direct_filter_reached": true,
+            "first_rejecting_filter": "predicted_viable",
+            "passed": false,
+            "politically_blocked": false,
+            "politics_filter_passed": true,
+            "politics_filter_reached": true,
+            "predicted_viable": false,
+            "prediction_filter_passed": false,
+            "prediction_filter_reached": true,
+            "prediction_outcome": "catastrophic",
+            "prediction_present": true,
+            "prediction_threshold": "stalemate",
+            "reachable": true,
+            "reachable_filter_passed": true,
+            "reachable_filter_reached": true,
+            "target_id": "op:hadzici:binjezevo"
+          },
+          {
+            "approach_distance": 0,
+            "controller": "RBiH",
+            "cooldown_effective_value": 0,
+            "cooldown_filter_passed": true,
+            "cooldown_filter_reached": true,
+            "cooldown_raw_present": false,
+            "cooldown_raw_value": null,
+            "direct": true,
+            "direct_filter_passed": true,
+            "direct_filter_reached": true,
+            "first_rejecting_filter": null,
+            "passed": true,
+            "politically_blocked": false,
+            "politics_filter_passed": true,
+            "politics_filter_reached": true,
+            "predicted_viable": true,
+            "prediction_filter_passed": true,
+            "prediction_filter_reached": true,
+            "prediction_outcome": "decisive_victory",
+            "prediction_present": true,
+            "prediction_threshold": "stalemate",
+            "reachable": true,
+            "reachable_filter_passed": true,
+            "reachable_filter_reached": true,
+            "target_id": "op:hadzici:lokve"
+          },
+          {
+            "approach_distance": 0,
+            "controller": "RBiH",
+            "cooldown_effective_value": 0,
+            "cooldown_filter_passed": true,
+            "cooldown_filter_reached": true,
+            "cooldown_raw_present": false,
+            "cooldown_raw_value": null,
+            "direct": true,
+            "direct_filter_passed": true,
+            "direct_filter_reached": true,
+            "first_rejecting_filter": null,
+            "passed": true,
+            "politically_blocked": false,
+            "politics_filter_passed": true,
+            "politics_filter_reached": true,
+            "predicted_viable": true,
+            "prediction_filter_passed": true,
+            "prediction_filter_reached": true,
+            "prediction_outcome": "victory",
+            "prediction_present": true,
+            "prediction_threshold": "stalemate",
+            "reachable": true,
+            "reachable_filter_passed": true,
+            "reachable_filter_reached": true,
+            "target_id": "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo"
+          },
+          {
+            "approach_distance": null,
+            "controller": null,
+            "cooldown_effective_value": null,
+            "cooldown_filter_passed": null,
+            "cooldown_filter_reached": false,
+            "cooldown_raw_present": null,
+            "cooldown_raw_value": null,
+            "direct": false,
+            "direct_filter_passed": false,
+            "direct_filter_reached": true,
+            "first_rejecting_filter": "direct",
+            "passed": false,
+            "politically_blocked": null,
+            "politics_filter_passed": null,
+            "politics_filter_reached": false,
+            "predicted_viable": null,
+            "prediction_filter_passed": null,
+            "prediction_filter_reached": false,
+            "prediction_outcome": null,
+            "prediction_present": null,
+            "prediction_threshold": "stalemate",
+            "reachable": null,
+            "reachable_filter_passed": null,
+            "reachable_filter_reached": false,
+            "target_id": "op:novo_sarajevo:sarajevo_dio_novo_sarajevo"
+          },
+          {
+            "approach_distance": null,
+            "controller": null,
+            "cooldown_effective_value": null,
+            "cooldown_filter_passed": null,
+            "cooldown_filter_reached": false,
+            "cooldown_raw_present": null,
+            "cooldown_raw_value": null,
+            "direct": false,
+            "direct_filter_passed": false,
+            "direct_filter_reached": true,
+            "first_rejecting_filter": "direct",
+            "passed": false,
+            "politically_blocked": null,
+            "politics_filter_passed": null,
+            "politics_filter_reached": false,
+            "predicted_viable": null,
+            "prediction_filter_passed": null,
+            "prediction_filter_reached": false,
+            "prediction_outcome": null,
+            "prediction_present": null,
+            "prediction_threshold": "stalemate",
+            "reachable": null,
+            "reachable_filter_passed": null,
+            "reachable_filter_reached": false,
+            "target_id": "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo"
+          },
+          {
+            "approach_distance": null,
+            "controller": null,
+            "cooldown_effective_value": null,
+            "cooldown_filter_passed": null,
+            "cooldown_filter_reached": false,
+            "cooldown_raw_present": null,
+            "cooldown_raw_value": null,
+            "direct": false,
+            "direct_filter_passed": false,
+            "direct_filter_reached": true,
+            "first_rejecting_filter": "direct",
+            "passed": false,
+            "politically_blocked": null,
+            "politics_filter_passed": null,
+            "politics_filter_reached": false,
+            "predicted_viable": null,
+            "prediction_filter_passed": null,
+            "prediction_filter_reached": false,
+            "prediction_outcome": null,
+            "prediction_present": null,
+            "prediction_threshold": "stalemate",
+            "reachable": null,
+            "reachable_filter_passed": null,
+            "reachable_filter_reached": false,
+            "target_id": "op:trnovo:delijas"
+          },
+          {
+            "approach_distance": null,
+            "controller": null,
+            "cooldown_effective_value": null,
+            "cooldown_filter_passed": null,
+            "cooldown_filter_reached": false,
+            "cooldown_raw_present": null,
+            "cooldown_raw_value": null,
+            "direct": false,
+            "direct_filter_passed": false,
+            "direct_filter_reached": true,
+            "first_rejecting_filter": "direct",
+            "passed": false,
+            "politically_blocked": null,
+            "politics_filter_passed": null,
+            "politics_filter_reached": false,
+            "predicted_viable": null,
+            "prediction_filter_passed": null,
+            "prediction_filter_reached": false,
+            "prediction_outcome": null,
+            "prediction_present": null,
+            "prediction_threshold": "stalemate",
+            "reachable": null,
+            "reachable_filter_passed": null,
+            "reachable_filter_reached": false,
+            "target_id": "op:trnovo:kijevo_2"
+          },
+          {
+            "approach_distance": null,
+            "controller": null,
+            "cooldown_effective_value": null,
+            "cooldown_filter_passed": null,
+            "cooldown_filter_reached": false,
+            "cooldown_raw_present": null,
+            "cooldown_raw_value": null,
+            "direct": false,
+            "direct_filter_passed": false,
+            "direct_filter_reached": true,
+            "first_rejecting_filter": "direct",
+            "passed": false,
+            "politically_blocked": null,
+            "politics_filter_passed": null,
+            "politics_filter_reached": false,
+            "predicted_viable": null,
+            "prediction_filter_passed": null,
+            "prediction_filter_reached": false,
+            "prediction_outcome": null,
+            "prediction_present": null,
+            "prediction_threshold": "stalemate",
+            "reachable": null,
+            "reachable_filter_passed": null,
+            "reachable_filter_reached": false,
+            "target_id": "op:vogosca:hotonj"
+          }
+        ],
+        "sector_id": "sector:vrs_sarajevo_romanija:1",
+        "ranked_objective_ids": [
+          "op:hadzici:lokve"
+        ],
+        "exit": "fallback_probe_created",
+        "built": [
+          {
+            "name": "probe_vrs_sarajevo_romanija_t21",
+            "site": "fallback_probe",
+            "started_turn": 21,
+            "type": "probe"
+          }
+        ],
+        "returned": [
+          {
+            "name": "probe_vrs_sarajevo_romanija_t21",
+            "started_turn": 21,
+            "type": "probe"
+          }
+        ],
+        "candidate_operations": [
+          {
+            "operation": {
+              "derived_id": "vrs_sarajevo_romanija:probe_vrs_sarajevo_romanija_t21:t21",
+              "host_corps_id": "vrs_sarajevo_romanija",
+              "name": "probe_vrs_sarajevo_romanija_t21",
+              "objective_ids": [
+                "op:hadzici:lokve"
+              ],
+              "participant_ids": [
+                "rs_1st_sarajevo_mechanized"
+              ],
+              "sector_id": "sector:vrs_sarajevo_romanija:1",
+              "started_turn": 21,
+              "type": "probe"
+            },
+            "site": "fallback_probe"
+          }
+        ],
+        "returned_operations": [
+          {
+            "derived_id": "vrs_sarajevo_romanija:probe_vrs_sarajevo_romanija_t21:t21",
+            "host_corps_id": "vrs_sarajevo_romanija",
+            "name": "probe_vrs_sarajevo_romanija_t21",
+            "objective_ids": [
+              "op:hadzici:lokve"
+            ],
+            "participant_ids": [
+              "rs_1st_sarajevo_mechanized"
+            ],
+            "sector_id": "sector:vrs_sarajevo_romanija:1",
+            "started_turn": 21,
+            "type": "probe"
+          }
+        ],
+        "record": {
+          "built": [
+            {
+              "name": "probe_vrs_sarajevo_romanija_t21",
+              "site": "fallback_probe",
+              "started_turn": 21,
+              "type": "probe"
+            }
+          ],
+          "can_consider_local_opportunity": true,
+          "corps_id": "vrs_sarajevo_romanija",
+          "escalate_to_operation": false,
+          "exit": "fallback_probe_created",
+          "faction": "RS",
+          "fallback_considered": true,
+          "general_entry_passed": false,
+          "host_corps_id": "vrs_sarajevo_romanija",
+          "local_occupation_candidate_present": false,
+          "local_opportunity_first_failed_operand": null,
+          "local_opportunity_operands": {
+            "active_slot_free": true,
+            "allocation_can_launch_ops": true,
+            "initiative_above_threshold": true,
+            "ops_length_zero": true,
+            "surplus_pool_nonempty": true
+          },
+          "overlap_checked": true,
+          "overlap_detail": {
+            "candidate": {
+              "derived_id": "vrs_sarajevo_romanija:probe_vrs_sarajevo_romanija_t21:t21",
+              "host_corps_id": "vrs_sarajevo_romanija",
+              "name": "probe_vrs_sarajevo_romanija_t21",
+              "objective_ids": [
+                "op:hadzici:lokve"
+              ],
+              "participant_ids": [
+                "rs_1st_sarajevo_mechanized"
+              ],
+              "sector_id": "sector:vrs_sarajevo_romanija:1",
+              "started_turn": 21,
+              "type": "probe"
+            },
+            "checks": [],
+            "conflicting_operation": null,
+            "first_matched_clause": null
+          },
+          "overlap_found": false,
+          "phase": "build_operations_complete",
+          "plan_present": true,
+          "plan_source": "pre_planned",
+          "plan_status": "ready",
+          "plan_target_ids": [],
+          "probe_brigade_selected": true,
+          "probe_gate_receipt": {
+            "candidate_operations": [
+              {
+                "operation": {
+                  "derived_id": "vrs_sarajevo_romanija:probe_vrs_sarajevo_romanija_t21:t21",
+                  "host_corps_id": "vrs_sarajevo_romanija",
+                  "name": "probe_vrs_sarajevo_romanija_t21",
+                  "objective_ids": [
+                    "op:hadzici:lokve"
+                  ],
+                  "participant_ids": [
+                    "rs_1st_sarajevo_mechanized"
+                  ],
+                  "sector_id": "sector:vrs_sarajevo_romanija:1",
+                  "started_turn": 21,
+                  "type": "probe"
+                },
+                "site": "fallback_probe"
+              }
+            ],
+            "fallback_escalation_decision": null,
+            "first_reached_exit": "fallback_probe_created",
+            "plan_decision": null,
+            "returned_operations": [
+              {
+                "derived_id": "vrs_sarajevo_romanija:probe_vrs_sarajevo_romanija_t21:t21",
+                "host_corps_id": "vrs_sarajevo_romanija",
+                "name": "probe_vrs_sarajevo_romanija_t21",
+                "objective_ids": [
+                  "op:hadzici:lokve"
+                ],
+                "participant_ids": [
+                  "rs_1st_sarajevo_mechanized"
+                ],
+                "sector_id": "sector:vrs_sarajevo_romanija:1",
+                "started_turn": 21,
+                "type": "probe"
+              }
+            ],
+            "selector": {
+              "corps_id": "vrs_sarajevo_romanija",
+              "faction": "RS",
+              "turn": 21
+            },
+            "target_selection_detail": {
+              "brigade_candidates": [
+                {
+                  "actual_fitness": 0.32218266399999995,
+                  "brigade_id": "rs_1st_romanija_infantry",
+                  "combat_ready": true,
+                  "disrupted_and_effective": true,
+                  "elite_available": true,
+                  "historical_queue_free": true,
+                  "original_ordinal": 0,
+                  "selected": false,
+                  "sorted_rank": 1
+                },
+                {
+                  "actual_fitness": 0.35644391999999997,
+                  "brigade_id": "rs_1st_sarajevo_mechanized",
+                  "combat_ready": true,
+                  "disrupted_and_effective": true,
+                  "elite_available": true,
+                  "historical_queue_free": true,
+                  "original_ordinal": 1,
+                  "selected": true,
+                  "sorted_rank": 0
+                },
+                {
+                  "actual_fitness": 0.17579519999999998,
+                  "brigade_id": "rs_3rd_sarajevo_infantry",
+                  "combat_ready": true,
+                  "disrupted_and_effective": true,
+                  "elite_available": true,
+                  "historical_queue_free": true,
+                  "original_ordinal": 2,
+                  "selected": false,
+                  "sorted_rank": 3
+                },
+                {
+                  "actual_fitness": 0.28169959999999994,
+                  "brigade_id": "rs_4th_sarajevo_light_infantry",
+                  "combat_ready": true,
+                  "disrupted_and_effective": true,
+                  "elite_available": true,
+                  "historical_queue_free": true,
+                  "original_ordinal": 3,
+                  "selected": false,
+                  "sorted_rank": 2
+                },
+                {
+                  "actual_fitness": 0.06985999999999999,
+                  "brigade_id": "rs_igman_brigade",
+                  "combat_ready": false,
+                  "disrupted_and_effective": true,
+                  "elite_available": true,
+                  "historical_queue_free": true,
+                  "original_ordinal": 4,
+                  "selected": false,
+                  "sorted_rank": null
+                },
+                {
+                  "actual_fitness": 0.10933999999999999,
+                  "brigade_id": "rs_ilidza_brigade",
+                  "combat_ready": true,
+                  "disrupted_and_effective": true,
+                  "elite_available": true,
+                  "historical_queue_free": true,
+                  "original_ordinal": 5,
+                  "selected": false,
+                  "sorted_rank": 4
+                },
+                {
+                  "actual_fitness": 0.0875,
+                  "brigade_id": "rs_trnovo_brigade",
+                  "combat_ready": true,
+                  "disrupted_and_effective": true,
+                  "elite_available": true,
+                  "historical_queue_free": true,
+                  "original_ordinal": 6,
+                  "selected": false,
+                  "sorted_rank": 5
+                }
+              ],
+              "derived_sector_id": "sector:vrs_sarajevo_romanija:1",
+              "direct_candidate_ids": [
+                "op:hadzici:binjezevo",
+                "op:hadzici:lokve",
+                "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo"
+              ],
+              "enemy_candidate_ids": [
+                "op:centar_sarajevo:sarajevo_dio_centar_sajarevo",
+                "op:hadzici:binjezevo",
+                "op:hadzici:lokve",
+                "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo",
+                "op:novo_sarajevo:sarajevo_dio_novo_sarajevo",
+                "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo",
+                "op:trnovo:delijas",
+                "op:trnovo:kijevo_2",
+                "op:vogosca:hotonj"
+              ],
+              "ranked_objective_ids": [
+                "op:hadzici:lokve"
+              ],
+              "selected_brigade_id": "rs_1st_sarajevo_mechanized",
+              "selected_brigade_location": "op:ilidza:sarajevo_dio_ilidza_2",
+              "status": "generic_search",
+              "survivor_ids": [
+                "op:hadzici:lokve",
+                "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo"
+              ],
+              "targets": [
+                {
+                  "approach_distance": null,
+                  "controller": null,
+                  "cooldown_effective_value": null,
+                  "cooldown_filter_passed": null,
+                  "cooldown_filter_reached": false,
+                  "cooldown_raw_present": null,
+                  "cooldown_raw_value": null,
+                  "direct": false,
+                  "direct_filter_passed": false,
+                  "direct_filter_reached": true,
+                  "first_rejecting_filter": "direct",
+                  "passed": false,
+                  "politically_blocked": null,
+                  "politics_filter_passed": null,
+                  "politics_filter_reached": false,
+                  "predicted_viable": null,
+                  "prediction_filter_passed": null,
+                  "prediction_filter_reached": false,
+                  "prediction_outcome": null,
+                  "prediction_present": null,
+                  "prediction_threshold": "stalemate",
+                  "reachable": null,
+                  "reachable_filter_passed": null,
+                  "reachable_filter_reached": false,
+                  "target_id": "op:centar_sarajevo:sarajevo_dio_centar_sajarevo"
+                },
+                {
+                  "approach_distance": 0,
+                  "controller": "RBiH",
+                  "cooldown_effective_value": 0,
+                  "cooldown_filter_passed": true,
+                  "cooldown_filter_reached": true,
+                  "cooldown_raw_present": false,
+                  "cooldown_raw_value": null,
+                  "direct": true,
+                  "direct_filter_passed": true,
+                  "direct_filter_reached": true,
+                  "first_rejecting_filter": "predicted_viable",
+                  "passed": false,
+                  "politically_blocked": false,
+                  "politics_filter_passed": true,
+                  "politics_filter_reached": true,
+                  "predicted_viable": false,
+                  "prediction_filter_passed": false,
+                  "prediction_filter_reached": true,
+                  "prediction_outcome": "catastrophic",
+                  "prediction_present": true,
+                  "prediction_threshold": "stalemate",
+                  "reachable": true,
+                  "reachable_filter_passed": true,
+                  "reachable_filter_reached": true,
+                  "target_id": "op:hadzici:binjezevo"
+                },
+                {
+                  "approach_distance": 0,
+                  "controller": "RBiH",
+                  "cooldown_effective_value": 0,
+                  "cooldown_filter_passed": true,
+                  "cooldown_filter_reached": true,
+                  "cooldown_raw_present": false,
+                  "cooldown_raw_value": null,
+                  "direct": true,
+                  "direct_filter_passed": true,
+                  "direct_filter_reached": true,
+                  "first_rejecting_filter": null,
+                  "passed": true,
+                  "politically_blocked": false,
+                  "politics_filter_passed": true,
+                  "politics_filter_reached": true,
+                  "predicted_viable": true,
+                  "prediction_filter_passed": true,
+                  "prediction_filter_reached": true,
+                  "prediction_outcome": "decisive_victory",
+                  "prediction_present": true,
+                  "prediction_threshold": "stalemate",
+                  "reachable": true,
+                  "reachable_filter_passed": true,
+                  "reachable_filter_reached": true,
+                  "target_id": "op:hadzici:lokve"
+                },
+                {
+                  "approach_distance": 0,
+                  "controller": "RBiH",
+                  "cooldown_effective_value": 0,
+                  "cooldown_filter_passed": true,
+                  "cooldown_filter_reached": true,
+                  "cooldown_raw_present": false,
+                  "cooldown_raw_value": null,
+                  "direct": true,
+                  "direct_filter_passed": true,
+                  "direct_filter_reached": true,
+                  "first_rejecting_filter": null,
+                  "passed": true,
+                  "politically_blocked": false,
+                  "politics_filter_passed": true,
+                  "politics_filter_reached": true,
+                  "predicted_viable": true,
+                  "prediction_filter_passed": true,
+                  "prediction_filter_reached": true,
+                  "prediction_outcome": "victory",
+                  "prediction_present": true,
+                  "prediction_threshold": "stalemate",
+                  "reachable": true,
+                  "reachable_filter_passed": true,
+                  "reachable_filter_reached": true,
+                  "target_id": "op:novi_grad_sarajevo:sarajevo_dio_novi_grad_sarajevo"
+                },
+                {
+                  "approach_distance": null,
+                  "controller": null,
+                  "cooldown_effective_value": null,
+                  "cooldown_filter_passed": null,
+                  "cooldown_filter_reached": false,
+                  "cooldown_raw_present": null,
+                  "cooldown_raw_value": null,
+                  "direct": false,
+                  "direct_filter_passed": false,
+                  "direct_filter_reached": true,
+                  "first_rejecting_filter": "direct",
+                  "passed": false,
+                  "politically_blocked": null,
+                  "politics_filter_passed": null,
+                  "politics_filter_reached": false,
+                  "predicted_viable": null,
+                  "prediction_filter_passed": null,
+                  "prediction_filter_reached": false,
+                  "prediction_outcome": null,
+                  "prediction_present": null,
+                  "prediction_threshold": "stalemate",
+                  "reachable": null,
+                  "reachable_filter_passed": null,
+                  "reachable_filter_reached": false,
+                  "target_id": "op:novo_sarajevo:sarajevo_dio_novo_sarajevo"
+                },
+                {
+                  "approach_distance": null,
+                  "controller": null,
+                  "cooldown_effective_value": null,
+                  "cooldown_filter_passed": null,
+                  "cooldown_filter_reached": false,
+                  "cooldown_raw_present": null,
+                  "cooldown_raw_value": null,
+                  "direct": false,
+                  "direct_filter_passed": false,
+                  "direct_filter_reached": true,
+                  "first_rejecting_filter": "direct",
+                  "passed": false,
+                  "politically_blocked": null,
+                  "politics_filter_passed": null,
+                  "politics_filter_reached": false,
+                  "predicted_viable": null,
+                  "prediction_filter_passed": null,
+                  "prediction_filter_reached": false,
+                  "prediction_outcome": null,
+                  "prediction_present": null,
+                  "prediction_threshold": "stalemate",
+                  "reachable": null,
+                  "reachable_filter_passed": null,
+                  "reachable_filter_reached": false,
+                  "target_id": "op:stari_grad_sarajevo:sarajevo_dio_stari_grad_sarajevo"
+                },
+                {
+                  "approach_distance": null,
+                  "controller": null,
+                  "cooldown_effective_value": null,
+                  "cooldown_filter_passed": null,
+                  "cooldown_filter_reached": false,
+                  "cooldown_raw_present": null,
+                  "cooldown_raw_value": null,
+                  "direct": false,
+                  "direct_filter_passed": false,
+                  "direct_filter_reached": true,
+                  "first_rejecting_filter": "direct",
+                  "passed": false,
+                  "politically_blocked": null,
+                  "politics_filter_passed": null,
+                  "politics_filter_reached": false,
+                  "predicted_viable": null,
+                  "prediction_filter_passed": null,
+                  "prediction_filter_reached": false,
+                  "prediction_outcome": null,
+                  "prediction_present": null,
+                  "prediction_threshold": "stalemate",
+                  "reachable": null,
+                  "reachable_filter_passed": null,
+                  "reachable_filter_reached": false,
+                  "target_id": "op:trnovo:delijas"
+                },
+                {
+                  "approach_distance": null,
+                  "controller": null,
+                  "cooldown_effective_value": null,
+                  "cooldown_filter_passed": null,
+                  "cooldown_filter_reached": false,
+                  "cooldown_raw_present": null,
+                  "cooldown_raw_value": null,
+                  "direct": false,
+                  "direct_filter_passed": false,
+                  "direct_filter_reached": true,
+                  "first_rejecting_filter": "direct",
+                  "passed": false,
+                  "politically_blocked": null,
+                  "politics_filter_passed": null,
+                  "politics_filter_reached": false,
+                  "predicted_viable": null,
+                  "prediction_filter_passed": null,
+                  "prediction_filter_reached": false,
+                  "prediction_outcome": null,
+                  "prediction_present": null,
+                  "prediction_threshold": "stalemate",
+                  "reachable": null,
+                  "reachable_filter_passed": null,
+                  "reachable_filter_reached": false,
+                  "target_id": "op:trnovo:kijevo_2"
+                },
+                {
+                  "approach_distance": null,
+                  "controller": null,
+                  "cooldown_effective_value": null,
+                  "cooldown_filter_passed": null,
+                  "cooldown_filter_reached": false,
+                  "cooldown_raw_present": null,
+                  "cooldown_raw_value": null,
+                  "direct": false,
+                  "direct_filter_passed": false,
+                  "direct_filter_reached": true,
+                  "first_rejecting_filter": "direct",
+                  "passed": false,
+                  "politically_blocked": null,
+                  "politics_filter_passed": null,
+                  "politics_filter_reached": false,
+                  "predicted_viable": null,
+                  "prediction_filter_passed": null,
+                  "prediction_filter_reached": false,
+                  "prediction_outcome": null,
+                  "prediction_present": null,
+                  "prediction_threshold": "stalemate",
+                  "reachable": null,
+                  "reachable_filter_passed": null,
+                  "reachable_filter_reached": false,
+                  "target_id": "op:vogosca:hotonj"
+                }
+              ]
+            }
+          },
+          "probe_objective_ids": [
+            "op:hadzici:lokve"
+          ],
+          "probe_on_cooldown": false,
+          "probe_reachable": true,
+          "reduction_participant_count": 2,
+          "returned": [
+            {
+              "name": "probe_vrs_sarajevo_romanija_t21",
+              "started_turn": 21,
+              "type": "probe"
+            }
+          ],
+          "schema": "commander_creation.v1",
+          "single_brigade_sufficient": false,
+          "target_is_bounded_position": false,
+          "turn": 21
+        }
+      },
+      {
+        "turn": 22,
+        "status": "not_reached",
+        "selected_brigade_id": null,
+        "brigade_candidates": [],
+        "targets": [],
+        "sector_id": null,
+        "ranked_objective_ids": [],
+        "exit": "completed_no_operation",
+        "built": [],
+        "returned": [],
+        "candidate_operations": [],
+        "returned_operations": [],
+        "record": {
+          "built": [],
+          "can_consider_local_opportunity": false,
+          "corps_id": "vrs_sarajevo_romanija",
+          "exit": "completed_no_operation",
+          "faction": "RS",
+          "general_entry_passed": false,
+          "host_corps_id": "vrs_sarajevo_romanija",
+          "local_opportunity_first_failed_operand": "active_slot_free",
+          "local_opportunity_operands": {
+            "active_slot_free": false,
+            "allocation_can_launch_ops": true,
+            "initiative_above_threshold": true,
+            "ops_length_zero": true,
+            "surplus_pool_nonempty": true
+          },
+          "phase": "build_operations_complete",
+          "plan_present": true,
+          "plan_source": "pre_planned",
+          "plan_status": "executing",
+          "plan_target_ids": [],
+          "probe_gate_receipt": {
+            "candidate_operations": [],
+            "fallback_escalation_decision": null,
+            "first_reached_exit": "completed_no_operation",
+            "plan_decision": null,
+            "returned_operations": [],
+            "selector": {
+              "corps_id": "vrs_sarajevo_romanija",
+              "faction": "RS",
+              "turn": 22
+            },
+            "target_selection_detail": {
+              "brigade_candidates": [],
+              "derived_sector_id": null,
+              "direct_candidate_ids": [],
+              "enemy_candidate_ids": [],
+              "ranked_objective_ids": [],
+              "selected_brigade_id": null,
+              "selected_brigade_location": null,
+              "status": "not_reached",
+              "survivor_ids": [],
+              "targets": []
+            }
+          },
+          "probe_on_cooldown": true,
+          "returned": [],
+          "schema": "commander_creation.v1",
+          "turn": 22
+        }
+      },
+      {
+        "turn": 23,
+        "status": "generic_search",
+        "selected_brigade_id": "rs_4th_sarajevo_light_infantry",
+        "brigade_candidates": [
+          {
+            "actual_fitness": 0.2985696,
+            "brigade_id": "rs_1st_romanija_infantry",
+            "combat_ready": true,
+            "disrupted_and_effective": true,
+            "elite_available": true,
+            "historical_queue_free": true,
+            "original_ordinal": 0,
+            "selected": false,
+            "sorted_rank": 1
+          },
+          {
+            "actual_fitness": 0.280499352,
+            "brigade_id": "rs_1st_sarajevo_mechanized",
+            "combat_ready": true,
+            "disrupted_and_effective": true,
+            "elite_available": true,
+            "historical_queue_free": true,
+            "original_ordinal": 1,
+            "selected": false,
+            "sorted_rank": 2
+          },
+          {
+            "actual_fitness": 0.1782368,
+            "brigade_id": "rs_3rd_sarajevo_infantry",
+            "combat_ready": true,
+            "disrupted_and_effective": true,
+            "elite_available": true,
+            "historical_queue_free": true,
+            "original_ordinal": 2,
+            "selected": false,
+            "sorted_rank": 3
+          },
+          {
+            "actual_fitness": 0.3056256,
+            "brigade_id": "rs_4th_sarajevo_light_infantry",
+            "combat_ready": true,
+            "disrupted_and_effective": true,
+            "elite_available": true,
+            "historical_queue_free": true,
+            "original_ordinal": 3,
+            "selected": true,
+            "sorted_rank": 0
+          },
+          {
+            "actual_fitness": 0.06985999999999999,
+            "brigade_id": "rs_igman_brigade",
+            "combat_ready": false,
+            "disrupted_and_effective": true,
+            "elite_available": true,
+            "historical_queue_free": true,
+            "original_ordinal": 4,
+            "selected": false,
+            "sorted_rank": null
+          },
+          {
+            "actual_fitness": 0.10933999999999999,
+            "brigade_id": "rs_ilidza_brigade",
+            "combat_ready": true,
+            "disrupted_and_effective": true,
+            "elite_available": true,
+            "historical_queue_free": true,
+            "original_ordinal": 5,
+            "selected": false,
+            "sorted_rank": 4
+          },
+          {
+            "actual_fitness": 0.0875,
+            "brigade_id": "rs_trnovo_brigade",
+            "combat_ready": true,
+            "disrupted_and_effective": true,
+            "elite_available": true,
+            "historical_queue_free": true,
+            "original_ordinal": 6,
+            "selected": false,
+            "sorted_rank": 5
+          }
+        ],
+        "targets": [
+          {
+            "approach_distance": 0,
+            "controller": "RBiH",
+            "cooldown_effective_value": 0,
+            "cooldown_filter_passed": true,
+            "cooldown_filter_reached": true,
+            "cooldown_raw_present": false,
+            "cooldown_raw_value": null,
+            "direct": true,
+            "direct_filter_passed": true,
+            "direct_filter_reached": true,
+            "first_rejecting_filter": null,
+            "passed": true,
+            "politically_blocked": false,
+            "politics_filter_passed": true,
+            "politics_filter_reached": true,
+            "predicted_viable": true,
+            "prediction_filter_passed": true,
+            "prediction_filter_reached": true,
+            "prediction_outcome": "stalemate",
+            "prediction_present": true,
+            "prediction_threshold": "stalemate",
+            "reachable": true,
+            "reachable_filter_passed": true,
+            "reachable_filter_reached": true,
+            "target_id": "op:gorazde:osjecani_2"
+          },
+          {
+            "approach_distance": 0,
+            "controller": "RBiH",
+            "cooldown_effective_value": 0,
+            "cooldown_filter_passed": true,
+            "cooldown_filter_reached": true,
+            "cooldown_raw_present": false,
+            "cooldown_raw_value": null,
+            "direct": true,
+            "direct_filter_passed": true,
+            "direct_filter_reached": true,
+            "first_rejecting_filter": null,
+            "passed": true,
+            "politically_blocked": false,
+            "politics_filter_passed": true,
+            "politics_filter_reached": true,
+            "predicted_viable": true,
+            "prediction_filter_passed": true,
+            "prediction_filter_reached": true,
+            "prediction_outcome": "decisive_victory",
+            "prediction_present": true,
+            "prediction_threshold": "stalemate",
+            "reachable": true,
+            "reachable_filter_passed": true,
+            "reachable_filter_reached": true,
+            "target_id": "op:pale:podgrab"
+          },
+          {
+            "approach_distance": 0,
+            "controller": "RBiH",
+            "cooldown_effective_value": 0,
+            "cooldown_filter_passed": true,
+            "cooldown_filter_reached": true,
+            "cooldown_raw_present": false,
+            "cooldown_raw_value": null,
+            "direct": true,
+            "direct_filter_passed": true,
+            "direct_filter_reached": true,
+            "first_rejecting_filter": null,
+            "passed": true,
+            "politically_blocked": false,
+            "politics_filter_passed": true,
+            "politics_filter_reached": true,
+            "predicted_viable": true,
+            "prediction_filter_passed": true,
+            "prediction_filter_reached": true,
+            "prediction_outcome": "decisive_victory",
+            "prediction_present": true,
+            "prediction_threshold": "stalemate",
+            "reachable": true,
+            "reachable_filter_passed": true,
+            "reachable_filter_reached": true,
+            "target_id": "op:pale:praca"
+          }
+        ],
+        "sector_id": "sector:vrs_sarajevo_romanija:4",
+        "ranked_objective_ids": [
+          "op:gorazde:osjecani_2"
+        ],
+        "exit": "fallback_probe_created",
+        "built": [
+          {
+            "name": "probe_vrs_sarajevo_romanija_t23",
+            "site": "fallback_probe",
+            "started_turn": 23,
+            "type": "probe"
+          }
+        ],
+        "returned": [
+          {
+            "name": "probe_vrs_sarajevo_romanija_t23",
+            "started_turn": 23,
+            "type": "probe"
+          }
+        ],
+        "candidate_operations": [
+          {
+            "operation": {
+              "derived_id": "vrs_sarajevo_romanija:probe_vrs_sarajevo_romanija_t23:t23",
+              "host_corps_id": "vrs_sarajevo_romanija",
+              "name": "probe_vrs_sarajevo_romanija_t23",
+              "objective_ids": [
+                "op:gorazde:osjecani_2"
+              ],
+              "participant_ids": [
+                "rs_4th_sarajevo_light_infantry"
+              ],
+              "sector_id": "sector:vrs_sarajevo_romanija:4",
+              "started_turn": 23,
+              "type": "probe"
+            },
+            "site": "fallback_probe"
+          }
+        ],
+        "returned_operations": [
+          {
+            "derived_id": "vrs_sarajevo_romanija:probe_vrs_sarajevo_romanija_t23:t23",
+            "host_corps_id": "vrs_sarajevo_romanija",
+            "name": "probe_vrs_sarajevo_romanija_t23",
+            "objective_ids": [
+              "op:gorazde:osjecani_2"
+            ],
+            "participant_ids": [
+              "rs_4th_sarajevo_light_infantry"
+            ],
+            "sector_id": "sector:vrs_sarajevo_romanija:4",
+            "started_turn": 23,
+            "type": "probe"
+          }
+        ],
+        "record": {
+          "built": [
+            {
+              "name": "probe_vrs_sarajevo_romanija_t23",
+              "site": "fallback_probe",
+              "started_turn": 23,
+              "type": "probe"
+            }
+          ],
+          "can_consider_local_opportunity": true,
+          "corps_id": "vrs_sarajevo_romanija",
+          "escalate_to_operation": false,
+          "exit": "fallback_probe_created",
+          "faction": "RS",
+          "fallback_considered": true,
+          "general_entry_passed": false,
+          "host_corps_id": "vrs_sarajevo_romanija",
+          "local_occupation_candidate_present": false,
+          "local_opportunity_first_failed_operand": null,
+          "local_opportunity_operands": {
+            "active_slot_free": true,
+            "allocation_can_launch_ops": true,
+            "initiative_above_threshold": true,
+            "ops_length_zero": true,
+            "surplus_pool_nonempty": true
+          },
+          "overlap_checked": true,
+          "overlap_detail": {
+            "candidate": {
+              "derived_id": "vrs_sarajevo_romanija:probe_vrs_sarajevo_romanija_t23:t23",
+              "host_corps_id": "vrs_sarajevo_romanija",
+              "name": "probe_vrs_sarajevo_romanija_t23",
+              "objective_ids": [
+                "op:gorazde:osjecani_2"
+              ],
+              "participant_ids": [
+                "rs_4th_sarajevo_light_infantry"
+              ],
+              "sector_id": "sector:vrs_sarajevo_romanija:4",
+              "started_turn": 23,
+              "type": "probe"
+            },
+            "checks": [],
+            "conflicting_operation": null,
+            "first_matched_clause": null
+          },
+          "overlap_found": false,
+          "phase": "build_operations_complete",
+          "plan_present": false,
+          "plan_source": null,
+          "plan_status": null,
+          "plan_target_ids": [],
+          "probe_brigade_selected": true,
+          "probe_gate_receipt": {
+            "candidate_operations": [
+              {
+                "operation": {
+                  "derived_id": "vrs_sarajevo_romanija:probe_vrs_sarajevo_romanija_t23:t23",
+                  "host_corps_id": "vrs_sarajevo_romanija",
+                  "name": "probe_vrs_sarajevo_romanija_t23",
+                  "objective_ids": [
+                    "op:gorazde:osjecani_2"
+                  ],
+                  "participant_ids": [
+                    "rs_4th_sarajevo_light_infantry"
+                  ],
+                  "sector_id": "sector:vrs_sarajevo_romanija:4",
+                  "started_turn": 23,
+                  "type": "probe"
+                },
+                "site": "fallback_probe"
+              }
+            ],
+            "fallback_escalation_decision": null,
+            "first_reached_exit": "fallback_probe_created",
+            "plan_decision": null,
+            "returned_operations": [
+              {
+                "derived_id": "vrs_sarajevo_romanija:probe_vrs_sarajevo_romanija_t23:t23",
+                "host_corps_id": "vrs_sarajevo_romanija",
+                "name": "probe_vrs_sarajevo_romanija_t23",
+                "objective_ids": [
+                  "op:gorazde:osjecani_2"
+                ],
+                "participant_ids": [
+                  "rs_4th_sarajevo_light_infantry"
+                ],
+                "sector_id": "sector:vrs_sarajevo_romanija:4",
+                "started_turn": 23,
+                "type": "probe"
+              }
+            ],
+            "selector": {
+              "corps_id": "vrs_sarajevo_romanija",
+              "faction": "RS",
+              "turn": 23
+            },
+            "target_selection_detail": {
+              "brigade_candidates": [
+                {
+                  "actual_fitness": 0.2985696,
+                  "brigade_id": "rs_1st_romanija_infantry",
+                  "combat_ready": true,
+                  "disrupted_and_effective": true,
+                  "elite_available": true,
+                  "historical_queue_free": true,
+                  "original_ordinal": 0,
+                  "selected": false,
+                  "sorted_rank": 1
+                },
+                {
+                  "actual_fitness": 0.280499352,
+                  "brigade_id": "rs_1st_sarajevo_mechanized",
+                  "combat_ready": true,
+                  "disrupted_and_effective": true,
+                  "elite_available": true,
+                  "historical_queue_free": true,
+                  "original_ordinal": 1,
+                  "selected": false,
+                  "sorted_rank": 2
+                },
+                {
+                  "actual_fitness": 0.1782368,
+                  "brigade_id": "rs_3rd_sarajevo_infantry",
+                  "combat_ready": true,
+                  "disrupted_and_effective": true,
+                  "elite_available": true,
+                  "historical_queue_free": true,
+                  "original_ordinal": 2,
+                  "selected": false,
+                  "sorted_rank": 3
+                },
+                {
+                  "actual_fitness": 0.3056256,
+                  "brigade_id": "rs_4th_sarajevo_light_infantry",
+                  "combat_ready": true,
+                  "disrupted_and_effective": true,
+                  "elite_available": true,
+                  "historical_queue_free": true,
+                  "original_ordinal": 3,
+                  "selected": true,
+                  "sorted_rank": 0
+                },
+                {
+                  "actual_fitness": 0.06985999999999999,
+                  "brigade_id": "rs_igman_brigade",
+                  "combat_ready": false,
+                  "disrupted_and_effective": true,
+                  "elite_available": true,
+                  "historical_queue_free": true,
+                  "original_ordinal": 4,
+                  "selected": false,
+                  "sorted_rank": null
+                },
+                {
+                  "actual_fitness": 0.10933999999999999,
+                  "brigade_id": "rs_ilidza_brigade",
+                  "combat_ready": true,
+                  "disrupted_and_effective": true,
+                  "elite_available": true,
+                  "historical_queue_free": true,
+                  "original_ordinal": 5,
+                  "selected": false,
+                  "sorted_rank": 4
+                },
+                {
+                  "actual_fitness": 0.0875,
+                  "brigade_id": "rs_trnovo_brigade",
+                  "combat_ready": true,
+                  "disrupted_and_effective": true,
+                  "elite_available": true,
+                  "historical_queue_free": true,
+                  "original_ordinal": 6,
+                  "selected": false,
+                  "sorted_rank": 5
+                }
+              ],
+              "derived_sector_id": "sector:vrs_sarajevo_romanija:4",
+              "direct_candidate_ids": [
+                "op:gorazde:osjecani_2",
+                "op:pale:podgrab",
+                "op:pale:praca"
+              ],
+              "enemy_candidate_ids": [
+                "op:gorazde:osjecani_2",
+                "op:pale:podgrab",
+                "op:pale:praca"
+              ],
+              "ranked_objective_ids": [
+                "op:gorazde:osjecani_2"
+              ],
+              "selected_brigade_id": "rs_4th_sarajevo_light_infantry",
+              "selected_brigade_location": "op:pale:bulozi",
+              "status": "generic_search",
+              "survivor_ids": [
+                "op:gorazde:osjecani_2",
+                "op:pale:podgrab",
+                "op:pale:praca"
+              ],
+              "targets": [
+                {
+                  "approach_distance": 0,
+                  "controller": "RBiH",
+                  "cooldown_effective_value": 0,
+                  "cooldown_filter_passed": true,
+                  "cooldown_filter_reached": true,
+                  "cooldown_raw_present": false,
+                  "cooldown_raw_value": null,
+                  "direct": true,
+                  "direct_filter_passed": true,
+                  "direct_filter_reached": true,
+                  "first_rejecting_filter": null,
+                  "passed": true,
+                  "politically_blocked": false,
+                  "politics_filter_passed": true,
+                  "politics_filter_reached": true,
+                  "predicted_viable": true,
+                  "prediction_filter_passed": true,
+                  "prediction_filter_reached": true,
+                  "prediction_outcome": "stalemate",
+                  "prediction_present": true,
+                  "prediction_threshold": "stalemate",
+                  "reachable": true,
+                  "reachable_filter_passed": true,
+                  "reachable_filter_reached": true,
+                  "target_id": "op:gorazde:osjecani_2"
+                },
+                {
+                  "approach_distance": 0,
+                  "controller": "RBiH",
+                  "cooldown_effective_value": 0,
+                  "cooldown_filter_passed": true,
+                  "cooldown_filter_reached": true,
+                  "cooldown_raw_present": false,
+                  "cooldown_raw_value": null,
+                  "direct": true,
+                  "direct_filter_passed": true,
+                  "direct_filter_reached": true,
+                  "first_rejecting_filter": null,
+                  "passed": true,
+                  "politically_blocked": false,
+                  "politics_filter_passed": true,
+                  "politics_filter_reached": true,
+                  "predicted_viable": true,
+                  "prediction_filter_passed": true,
+                  "prediction_filter_reached": true,
+                  "prediction_outcome": "decisive_victory",
+                  "prediction_present": true,
+                  "prediction_threshold": "stalemate",
+                  "reachable": true,
+                  "reachable_filter_passed": true,
+                  "reachable_filter_reached": true,
+                  "target_id": "op:pale:podgrab"
+                },
+                {
+                  "approach_distance": 0,
+                  "controller": "RBiH",
+                  "cooldown_effective_value": 0,
+                  "cooldown_filter_passed": true,
+                  "cooldown_filter_reached": true,
+                  "cooldown_raw_present": false,
+                  "cooldown_raw_value": null,
+                  "direct": true,
+                  "direct_filter_passed": true,
+                  "direct_filter_reached": true,
+                  "first_rejecting_filter": null,
+                  "passed": true,
+                  "politically_blocked": false,
+                  "politics_filter_passed": true,
+                  "politics_filter_reached": true,
+                  "predicted_viable": true,
+                  "prediction_filter_passed": true,
+                  "prediction_filter_reached": true,
+                  "prediction_outcome": "decisive_victory",
+                  "prediction_present": true,
+                  "prediction_threshold": "stalemate",
+                  "reachable": true,
+                  "reachable_filter_passed": true,
+                  "reachable_filter_reached": true,
+                  "target_id": "op:pale:praca"
+                }
+              ]
+            }
+          },
+          "probe_objective_ids": [
+            "op:gorazde:osjecani_2"
+          ],
+          "probe_on_cooldown": false,
+          "probe_reachable": true,
+          "reduction_participant_count": 1,
+          "returned": [
+            {
+              "name": "probe_vrs_sarajevo_romanija_t23",
+              "started_turn": 23,
+              "type": "probe"
+            }
+          ],
+          "schema": "commander_creation.v1",
+          "single_brigade_sufficient": false,
+          "target_is_bounded_position": false,
+          "turn": 23
+        }
+      },
+      {
+        "turn": 24,
+        "status": "not_reached",
+        "selected_brigade_id": null,
+        "brigade_candidates": [],
+        "targets": [],
+        "sector_id": null,
+        "ranked_objective_ids": [],
+        "exit": "completed_no_operation",
+        "built": [],
+        "returned": [],
+        "candidate_operations": [],
+        "returned_operations": [],
+        "record": {
+          "built": [],
+          "can_consider_local_opportunity": false,
+          "corps_id": "vrs_sarajevo_romanija",
+          "exit": "completed_no_operation",
+          "faction": "RS",
+          "general_entry_passed": false,
+          "host_corps_id": "vrs_sarajevo_romanija",
+          "local_opportunity_first_failed_operand": "active_slot_free",
+          "local_opportunity_operands": {
+            "active_slot_free": false,
+            "allocation_can_launch_ops": true,
+            "initiative_above_threshold": true,
+            "ops_length_zero": true,
+            "surplus_pool_nonempty": true
+          },
+          "phase": "build_operations_complete",
+          "plan_present": false,
+          "plan_source": null,
+          "plan_status": null,
+          "plan_target_ids": [],
+          "probe_gate_receipt": {
+            "candidate_operations": [],
+            "fallback_escalation_decision": null,
+            "first_reached_exit": "completed_no_operation",
+            "plan_decision": null,
+            "returned_operations": [],
+            "selector": {
+              "corps_id": "vrs_sarajevo_romanija",
+              "faction": "RS",
+              "turn": 24
+            },
+            "target_selection_detail": {
+              "brigade_candidates": [],
+              "derived_sector_id": null,
+              "direct_candidate_ids": [],
+              "enemy_candidate_ids": [],
+              "ranked_objective_ids": [],
+              "selected_brigade_id": null,
+              "selected_brigade_location": null,
+              "status": "not_reached",
+              "survivor_ids": [],
+              "targets": []
+            }
+          },
+          "probe_on_cooldown": true,
+          "returned": [],
+          "schema": "commander_creation.v1",
+          "turn": 24
+        }
+      }
+    ],
+    "kijevo24": [
+      {
+        "caller": "queued_injection",
+        "corps_id": "vrs_sarajevo_romanija",
+        "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+        "kind": "caller_start",
+        "linkage": "contiguous_unsequenced",
+        "operation_name": "Operation Kijevo",
+        "schema_version": 1,
+        "turn": 24
+      },
+      {
+        "caller": "queued_injection",
+        "corps_id": "vrs_sarajevo_romanija",
+        "declared_axis_ids": [
+          "kijevo_shoulder",
+          "praca_approach"
+        ],
+        "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+        "kind": "build_start",
+        "linkage": "contiguous_unsequenced",
+        "operation_name": "Operation Kijevo",
+        "schema_version": 1,
+        "turn": 24
+      },
+      {
+        "axis_id": "kijevo_shoulder",
+        "caller": "queued_injection",
+        "corps_id": "vrs_sarajevo_romanija",
+        "declared_brigades": [
+          "rs_1st_romanija_infantry",
+          "rs_2nd_sarajevo_light_infantry"
+        ],
+        "declared_objectives": [
+          "op:trnovo:kijevo_2"
+        ],
+        "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+        "kind": "axis_start",
+        "linkage": "contiguous_unsequenced",
+        "operation_name": "Operation Kijevo",
+        "schema_version": 1,
+        "turn": 24
+      },
+      {
+        "actual_exit": "selected",
+        "authored_formation_id": "rs_1st_romanija_infantry",
+        "axis_id": "kijevo_shoulder",
+        "caller": "queued_injection",
+        "commitment_operations": [],
+        "corps_id": "vrs_sarajevo_romanija",
+        "guards": {
+          "committed_elsewhere": false,
+          "elite_corps_reachable": "NOT_REACHED",
+          "elite_loan_available": "NOT_REACHED",
+          "elite_loan_owner_available": "NOT_REACHED",
+          "elite_loan_state_present": "NOT_REACHED",
+          "formation_eligible": true,
+          "formation_resolved": true,
+          "not_disrupted": true,
+          "reachability": true,
+          "transit_authority_available": true
+        },
+        "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+        "kind": "candidate_terminal",
+        "linkage": "contiguous_unsequenced",
+        "operation_name": "Operation Kijevo",
+        "resolved_formation_id": "rs_1st_romanija_infantry",
+        "schema_version": 1,
+        "turn": 24
+      },
+      {
+        "actual_exit": "selected",
+        "authored_formation_id": "rs_2nd_sarajevo_light_infantry",
+        "axis_id": "kijevo_shoulder",
+        "caller": "queued_injection",
+        "commitment_operations": [],
+        "corps_id": "vrs_sarajevo_romanija",
+        "guards": {
+          "committed_elsewhere": false,
+          "elite_corps_reachable": "NOT_REACHED",
+          "elite_loan_available": "NOT_REACHED",
+          "elite_loan_owner_available": "NOT_REACHED",
+          "elite_loan_state_present": "NOT_REACHED",
+          "formation_eligible": true,
+          "formation_resolved": true,
+          "not_disrupted": true,
+          "reachability": true,
+          "transit_authority_available": true
+        },
+        "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+        "kind": "candidate_terminal",
+        "linkage": "contiguous_unsequenced",
+        "operation_name": "Operation Kijevo",
+        "resolved_formation_id": "rs_2nd_sarajevo_light_infantry",
+        "schema_version": 1,
+        "turn": 24
+      },
+      {
+        "actual_exit": "built",
+        "axis_id": "kijevo_shoulder",
+        "caller": "queued_injection",
+        "corps_id": "vrs_sarajevo_romanija",
+        "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+        "kind": "axis_terminal",
+        "linkage": "contiguous_unsequenced",
+        "objectives": [
+          {
+            "controller": "RBiH",
+            "hostile": true,
+            "osid": "op:trnovo:kijevo_2"
+          }
+        ],
+        "operation_name": "Operation Kijevo",
+        "schema_version": 1,
+        "selected_brigades": [
+          "rs_1st_romanija_infantry",
+          "rs_2nd_sarajevo_light_infantry"
+        ],
+        "selected_objectives": [
+          "op:trnovo:kijevo_2"
+        ],
+        "turn": 24
+      },
+      {
+        "axis_id": "praca_approach",
+        "caller": "queued_injection",
+        "corps_id": "vrs_sarajevo_romanija",
+        "declared_brigades": [
+          "rs_4th_sarajevo_light_infantry"
+        ],
+        "declared_objectives": [
+          "op:pale:praca"
+        ],
+        "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+        "kind": "axis_start",
+        "linkage": "contiguous_unsequenced",
+        "operation_name": "Operation Kijevo",
+        "schema_version": 1,
+        "turn": 24
+      },
+      {
+        "actual_exit": "committed_elsewhere",
+        "authored_formation_id": "rs_4th_sarajevo_light_infantry",
+        "axis_id": "praca_approach",
+        "caller": "queued_injection",
+        "commitment_operations": [
+          {
+            "corps_id": "vrs_sarajevo_romanija",
+            "name": "probe_vrs_sarajevo_romanija_t23",
+            "phase": "execution",
+            "started_turn": 23,
+            "type": "probe"
+          }
+        ],
+        "corps_id": "vrs_sarajevo_romanija",
+        "guards": {
+          "committed_elsewhere": true,
+          "elite_corps_reachable": "NOT_REACHED",
+          "elite_loan_available": "NOT_REACHED",
+          "elite_loan_owner_available": "NOT_REACHED",
+          "elite_loan_state_present": "NOT_REACHED",
+          "formation_eligible": true,
+          "formation_resolved": true,
+          "not_disrupted": true,
+          "reachability": "NOT_REACHED",
+          "transit_authority_available": true
+        },
+        "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+        "kind": "candidate_terminal",
+        "linkage": "contiguous_unsequenced",
+        "operation_name": "Operation Kijevo",
+        "resolved_formation_id": "rs_4th_sarajevo_light_infantry",
+        "schema_version": 1,
+        "turn": 24
+      },
+      {
+        "actual_exit": "no_eligible_formations",
+        "axis_id": "praca_approach",
+        "caller": "queued_injection",
+        "corps_id": "vrs_sarajevo_romanija",
+        "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+        "kind": "axis_terminal",
+        "linkage": "contiguous_unsequenced",
+        "operation_name": "Operation Kijevo",
+        "schema_version": 1,
+        "selected_brigades": [],
+        "turn": 24
+      },
+      {
+        "actual_exit": "built",
+        "built_axis_ids": [
+          "kijevo_shoulder"
+        ],
+        "caller": "queued_injection",
+        "corps_id": "vrs_sarajevo_romanija",
+        "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+        "kind": "build_terminal",
+        "linkage": "contiguous_unsequenced",
+        "operation_name": "Operation Kijevo",
+        "participating": [
+          "rs_1st_romanija_infantry",
+          "rs_2nd_sarajevo_light_infantry"
+        ],
+        "schema_version": 1,
+        "turn": 24,
+        "viable_participating": 2
+      },
+      {
+        "actual_exit": "admitted",
+        "admitted": true,
+        "build_reached": true,
+        "build_returned": true,
+        "caller": "queued_injection",
+        "corps_id": "vrs_sarajevo_romanija",
+        "invocation_key": "queued_injection:24:vrs_sarajevo_romanija:Operation Kijevo",
+        "kind": "caller_terminal",
+        "linkage": "contiguous_unsequenced",
+        "operation_name": "Operation Kijevo",
+        "ordinary_return": true,
+        "schema_version": 1,
+        "stored_operation": {
+          "name": "Operation Kijevo",
+          "phase": "planning",
+          "started_turn": 24
+        },
+        "turn": 24
+      }
+    ],
+    "weekly_binding": {
+      "count": 188,
+      "week_index_1_to_188": true,
+      "commander_turns_1_to_188": true,
+      "personnel_completed_turns_1_to_188": true
+    },
+    "source_binding": [
+      {
+        "file": "src/sim/combat/personnel_diagnostic.ts",
+        "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3",
+        "rows": [
+          {
+            "line": 68,
+            "text": "const boundary = { completed_turn: state.meta.turn, phase_index: phaseIndex, phase_name: phaseName, phase_group: phaseGroup, snapshots };"
+          },
+          {
+            "line": 98,
+            "text": "emit({ event: 'terminal', completed_turn: state.meta.turn, phase_index: phaseIndex, actors: this.ids.map((formation_id) => ({ formation_id, personnel: personnelPresence(state, formation_id) })) });"
+          }
+        ]
+      },
+      {
+        "file": "src/scenario/scenario_reporting.ts",
+        "sha256": "df0c17f6473f80ad2867106749d07ceda18fef1a53a68097586d3231e4f521c2",
+        "rows": [
+          {
+            "line": 123,
+            "text": "* `runTurn` increments `state.meta.turn` before war order generation, and"
+          },
+          {
+            "line": 124,
+            "text": "* `buildWeeklyReport` copies the same counter to `week_index` afterward."
+          },
+          {
+            "line": 273,
+            "text": "const week_index = state.meta.turn;"
+          }
+        ]
+      },
+      {
+        "file": "src/sim/combat/commander/emit.ts",
+        "sha256": "76351f818c3403fcc23bf5b51f30c467bd42886d68f1e6b754d9f90baa58746b",
+        "rows": []
+      }
+    ]
+  },
+  "boundaries": [
+    "n82 reproduction establishes observer neutrality for the 30 retained gameplay artifacts only; it does not recover n80 703/712",
+    "n80 remains retained 703/712 NO-GO; n81/n82 remain rejected 689",
+    "no n80 counterfactual or historical causality inference",
+    "phase closure localizes phase changes; only listed direct_writers identify covered assignments",
+    "uncovered personnel writers remain unmeasured",
+    "commander build_operations_complete distinguishes built and returned at builder scope; it does not independently prove later game-state admission",
+    "Operation Kijevo caller_terminal explicitly observed admitted=true at turn24"
+  ],
+  "retained_failures": [
+    {
+      "attempt": "798-preflight-a",
+      "child_exit": 2,
+      "wrapper_exit": 2,
+      "cause": "two local checker assumptions; corrected only governed Oct path and exact scoped review verdict"
+    },
+    {
+      "attempt": "798-extract-a",
+      "child_exit": 2,
+      "wrapper_exit": 2,
+      "cause": "bounded extraction interpreted 21->22 as value transition; corrected to turns 21 and 22"
+    }
+  ],
+  "preparation": {
+    "preflight_child_exit": 0,
+    "preflight_wrapper_exit": 0,
+    "runner_proof_child_exit": 0,
+    "runner_proof_wrapper_exit": 0
+  },
+  "checks": {
+    "all": true,
+    "runner_zero": true,
+    "identity": true,
+    "readers": true,
+    "extraction": true,
+    "romanija23_generic": true,
+    "kijevo24_admitted": true
+  }
+}

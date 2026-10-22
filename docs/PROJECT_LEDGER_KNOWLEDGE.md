@@ -1,3 +1,7 @@
+## 2026-10-22 — Inventory only closed output streams
+
+A sealing process can hash its own stdout before its final line arrives. Preserve the original claim and use a fresh post-close inventory outside the inventoried scope; verify final bytes, including seal outputs. Matching endpoints do not prove an unobserved historical writer or allocation. See [n83 measurement](PROJECT_LEDGER.md#2026-10-22--n83-personnel-and-probe-measurement-797800).
+
 ## 2026-10-22 — Fixture faction maps must agree with control ownership
 
 A second Map entry with the same faction key can overwrite its own friendly set and make a passing receipt test classify friendly territory as an enemy objective. Build unique faction sets from the fixture control map and assert own/enemy membership before validating emitted detail. See [selector reconciliation](PROJECT_LEDGER.md#2026-10-22--receipt-selector-assertion-reconciled-793796).

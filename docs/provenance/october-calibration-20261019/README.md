@@ -148,3 +148,14 @@ The inherited selector assertion is reconciled with the existing topic-wide rece
 Fresh inherited red15/16 exit1/1; final affected16/16 exit0/0; observer60/60 exit0/0 reused at unaffected scope; final noEmit0/0; independent795 correction verification16/16 exit0/0, verdictACCEPT/no open findings. Counts are distinct, not added. Initial green had an impossible RS friendly-set fixture; targeted correction and its initial typecheck2/2 remain retained.
 
 selector-794-manifest and selector-795-review pin final source and correction proof; selector-796-result/rawinventory synthesize the bounded evidence. Current exact test/dependency snapshots are retained locally. Prior source-version gaps stay explicit. Production, thresholds and telemetry unchanged; no new campaign or whole-pipeline readiness claim.
+
+
+## n83 personnel/probe diagnostic — 2026-10-22
+
+The single instrumented188 diagnostic completed as n83: runner0, raw30/30 gameplay artifacts and TEN10/10 byte-identical to n82, exact31 inventory and32 normalized consumed inputs/digest. Independent799 accepts substantive findings; one post-close inventory correction is verified70/70 with0mismatches. No retry or gameplay/threshold change. Retained n80 remains703/712 NO-GO/unadopted; n83 reproduces rejected n82 trajectory, not recovery.
+
+At completedturn22, rs_4th_sarajevo_light_infantry changed1411→1405 by frontline attrition(-6), then1405→1516 by an actual regular formation_spawn.reinforce transfer(+111) from pale:RS (available111, need400, rate400, cap2200). At Romanija23, it ranked0 with fitness0.3056256 versus1stRomanija0.2985696; builder created/returned one probe. At Kijevo24, its Prača candidacy was committed_elsewhere to that probe, so reachability wasNOT_REACHED; two shoulder brigades were built and caller terminal admitted=true. Builder emission alone is not admission. Actual n80 allocation/dirty-source counterfactual remainsUNMEASURED.
+
+Selected actor personnel coverage71931records/303coveredwriters, all188phase manifests/terminals; commander564factionpasses(188×3),3290completionrows; trackedreader4418records/3290completions/0violations. Allreader/extraction gates0 after rawidentityPASS. Source/threshold/reference exact. Cfullopeningprefix preserved with946671byteappend (now102947714/SHAedbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9); D1041/ff120d4a… exact, append0. Fullbefore/afterarchives retainedLOCAL.
+
+Original798inventory and799rejection remain; diagnostic-800-postclose-inventory is authoritative for final798bytes, verified70/70 by799supplement. diagnostic-800-raw-inventory pins all closed797/798/799 andpostclose evidence. Inventories are not remote rawbyte backup. All earlier source-version/acceptance limits remain.
