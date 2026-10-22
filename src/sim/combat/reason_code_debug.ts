@@ -124,6 +124,7 @@ export type ReasonCodeTopic =
     | 'dispatcher_decision'
     | 'movement_phase'
     | 'personnel'
+    | 'reinforcement_allocation'
     | 'front_distribution'
     | 'commander_creation'
     | 'mistral_tg_activation'
@@ -151,6 +152,7 @@ const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'dispatcher_decision',
     'movement_phase',
     'personnel',
+    'reinforcement_allocation',
     'front_distribution',
     'commander_creation',
     'mistral_tg_activation',

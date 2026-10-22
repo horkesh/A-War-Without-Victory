@@ -24,6 +24,10 @@ Default-off topics `reconciliation_write` / `preplanned_eligibility` are covered
 
 `personnel_diagnostic.test.ts`, `commander_creation_observer.test.ts` and the `reason_code_debug` selector matrix cover independent personnel selection, exact existing movement-payload/state/report bytes OFF/ON, selected presence/delta distinctions, phase closure/skip/gameplay exception propagation, deterministic output/detachment/sink isolation, eight direct writer branches, reached probe filters/NOT_REACHED/nonfinite fitness/helper counts/ties/bypass. The named movement coverage and affected writer tests remain at their recorded scopes. Initial146/146 and corrected scoped runs are separate, never summed. Final noEmit uses private buildinfo; independent source review checks original evaluation/mutation/return order as well as parity. Supplemental784 inventory preserves raw failed attempts. No campaign/full-suite/historical writer proof or acceptance waiver.
 
+## Shared-pool allocation stdout preparation (2026-10-22)
+
+`reinforcement_allocation_diagnostic.test.ts` calls the real regular reinforcement function. Shared-pool ordered consumers, actual-helper nonzero reserve, balance conservation, reversed input insertion, exact state/report/serialized OFF/ON parity, selector silence, early guards/unreached values, missing/nonfinite fields, caught output/serialization, and gameplay exception/no-false-close are covered. An independent throwing-accessor control exposed pre-eligibility key access; the targeted correction restores production eligibility→cap→single key, with lazy/caught ON-only skip metadata. Initial7file96tests, finalobserver8tests and independent2file9tests are distinct scopes, never summed. Final nonincremental noEmit0. No campaign/fullsuite/n80causality/703retention measurement is implied; all earlier gates remain.
+
 ## Rules → Gates
 ### No timestamps / wall-clock values
 - Gate: `tests/determinism_static_scan_r1_5.test.ts`

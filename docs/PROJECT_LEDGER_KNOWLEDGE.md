@@ -1,3 +1,7 @@
+## 2026-10-22 — Neutrality includes guard access order
+
+Ordinary state/report parity can miss a metadata hook that reads a field or helper before an existing early guard. Preserve production access order; resolve optional skip metadata lazily inside caught observer code, and pin access counts with a skipped-path throwing getter control. See [allocation observer](PROJECT_LEDGER.md#2026-10-22--shared-pool-allocation-receipt-and-fixture-805808).
+
 ## 2026-10-22 — Effective availability is not raw pool opening
 
 A recipient writer may report pool availability after earlier recipients and spawn reserves. Do not call that raw opening, infer reserve0 or infer a different historical transfer from end-of-turn strength. Preserve raw/reserve/effective/ordered-recipient/debit/closing boundaries and check conservation in focused fixtures. See [Pale allocation trace](PROJECT_LEDGER.md#2026-10-22--pale-allocation-boundary-remains-unmeasured-801804).

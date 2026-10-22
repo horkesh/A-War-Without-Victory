@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-22 — Pale retained-evidence trace reviewed; allocation boundary gap remains.
+**Last updated:** 2026-10-22 — shared-pool receipt/fixture approved; no new campaign.
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -24,13 +24,13 @@ tradeoffs or irreversible/external actions with concrete options and a
 recommendation. Required evidence, review panels and cost-control gates remain.
 
 **Current R6 — October Sana remains NO-GO.** Retained n80 is **703/712**, unadopted.
-Prior n83 diagnostic is raw-identical to rejectedn82. Retained Pale trace802/803
-finds no proven reinforcement defect: n83transfer111 is effective after reserve
-and ordered consumers; n80 native logs lack direct allocation records and no
-turn21/22snapshot survives in the inspected saves. Endpoint1405 does not establish zero
-transfer. Propose only a focused raw/reserve/recipient/skip/debit/closing fixture
-and receipt; no gameplay fix or newcampaign authorized. Historicaln80cause is
-unmeasured. All inherited acceptance gates remain in the
+Shared-pool defaultOFF stdout receipt and deterministic fixture are approved: final
+observer8/8/type0, independent8079/9 after restoring original pool-access order.
+Initial96-test batch reused at actualscope. Raw/reserve/effective/ordered skip/
+transfer/closing fields cover regular stage only; source/state/report/threshold
+semantics and telemetry preserved. No new campaign or n80historical recovery.
+Future measurement needs separate fixed authority/artifact/coverage gates. All
+inherited acceptance gates remain in the
 [calibration authority](../40_reports/CALIBRATION_MASTER.md).
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate

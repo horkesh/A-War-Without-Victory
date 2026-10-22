@@ -51,6 +51,7 @@ const ALL_TOPICS: ReasonCodeTopic[] = [
     'dispatcher_decision',
     'movement_phase',
     'personnel',
+    'reinforcement_allocation',
     'local_occupation_candidate',
     'reconciliation_write',
     'preplanned_eligibility',

@@ -1,3 +1,15 @@
+## 805–808 — Shared-pool observer and fixture approved (2026-10-22)
+
+Default-off stdout-only regular shared-pool allocation receipt and deterministic production-path fixtures are implemented and independently approved. Topic reinforcement_allocation requires explicit AWWV_DEBUG_REINFORCEMENT_POOLS; emits stage_open/recipient/stage_close with source, completedturn, pool balances, ordered recipients/skips and presence-tagged reserve/effective/transfer values. No gameplay decision, threshold, state/save/report/weekly or file-telemetry change.
+
+Pale shared-pool fixture uses actual sorted recipients transferring300 then400 from1900available/100committed to1200/800 (total2000). Actual-helper Zenica reserve800 leaves100effective from900available/20committed; transfer100 closes800/120 (total920). Reverse insertion preserves rows/state/report. Fullstate/report/serialized ON/OFF parity, guards/unreached/absent/nonfinite values, caught stdout/serialization and no false close on gameplay exception are covered. Synthetic fixtures do not establish n83 actual reserve or recover n80 history.
+
+Initial affected batch96/96 across7files is reused at its covered scope; final corrected observer8/8 and nonincremental noEmit0. Independent807 targeted verification9/9 across2files, child/wrapper0/0, includes its original default-OFF red control. Counts are separate, not summed. Initial ordering defect and all failed fixture/type/source-label/infrastructure controls remain retained; one consolidated review and one targeted correction verification.
+
+Review found pool-field/key evaluation had moved before eligibility even OFF. Correction restores eligibility→cap→single production pool selection. Early-skip ON association is lazy/caught observer-only metadata; post-cap rows reuse production key. Source/access regression verifies skipped OFF paths and exception containment rather than relying solely on plain-state parity.
+
+C102947714/edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9 and D1041/ff120d4a… remain exact with archives; append0. Threshold/reference exact. No campaign/fullsuite or adoption; retained703 NO-GO and all inherited gates remain. Evidence: allocation-808-result/rawinventory and allocation-807-correction-verification under docs/provenance/october-calibration-20261019; rawbytesLOCAL. Regular-stage coverage only; n80cause remainsUNMEASURED.
+
 ## 801–804 — Pale allocation trace: no proven gameplay defect (2026-10-22)
 
 Retained n80/n83 evidence establishes the first rs4 endpoint divergence at completedturn22 (1405vs1516) and n83 actual regular transfer111 frompale:RS. It does not retain n80 direct allocation records or a turn21/22 pool snapshot. No reinforcement gameplay fix is justified.

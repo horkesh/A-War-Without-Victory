@@ -1,0 +1,55 @@
+{
+  "schema": "awwv.pale.807.targeted-correction-verification.v1",
+  "verdict": "APPROVED",
+  "original_review_immutable": "807-review.json",
+  "blocking_finding_closed": true,
+  "correction": {
+    "production_order": ["eligibility", "cap", "pool_field_and_key"],
+    "default_off_ineligible_pool_access": 0,
+    "default_off_at_cap_pool_access": 0,
+    "on_early_skip_association": "lazy_observer_owned_caught",
+    "post_cap_production_militia_pool_key_calls": 1,
+    "gameplay_exception_propagation_and_no_false_close": true
+  },
+  "fresh_verification": {
+    "attempt": "attempt-04-correction-verification",
+    "files": 2,
+    "tests": 9,
+    "passed": 9,
+    "failed": 0,
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "artifact_contract_pass": true,
+    "stdout_sha256": "05fb98d2eb70f2ce26fe2ebf2457c6ad0f24323e908e7458d5f45db73932110e",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "correction_seal": {
+    "path": "logs/claude-channel-20261004/806-reinforcement-allocation-correction/correction-result.json",
+    "bytes": 5174,
+    "sha256": "3d6ab80e366633a3e0162ea23420d5bad54c350da9a851a32e2ca1ef8027bb41"
+  },
+  "final_source_pins": {
+    "src/sim/combat/reinforcement_allocation_diagnostic.ts": "f98037e0ab7def9cc09695431a150263b9c35957da13084a158bbed5f104b039",
+    "src/sim/formation_spawn.ts": "741ec5e56486eea9834b620589f1dcbae30a28f2bd83c34781c9f1d7d560f2aa",
+    "src/sim/combat/reason_code_debug.ts": "b7467c47f97c5c349535b59aaeafa3dea0bc5d03314961c5ac17ef3a4283434a",
+    "tests/reinforcement_allocation_diagnostic.test.ts": "682027bd41c1dc84817166847a1a0a5e388aa0170b96149e4a9b56a924c48a75",
+    "tests/reason_code_debug.test.ts": "44a60e84d8b22d1cb629364a84e10257d3454531678b987a75582ddaee9a756c"
+  },
+  "protected_controls": {
+    "c": { "bytes": 102947714, "sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9" },
+    "d": { "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" },
+    "thresholds": { "bytes": 3775, "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d" },
+    "october_reference": { "bytes": 35266, "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b" }
+  },
+  "reused": {
+    "focused": "806 attempt-08: 7 files, 96 passed",
+    "typecheck": "806 correction attempt-04: exit 0"
+  },
+  "residual_scope": [
+    "no n80 history recovery",
+    "no retained-703 campaign-neutrality proof",
+    "no n80 historical-cause proof",
+    "no threshold/reference change",
+    "no campaign/replay/full-suite/runTurn"
+  ]
+}

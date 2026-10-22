@@ -1,0 +1,86 @@
+{
+  "schema": "awwv.pale.807.independent-review.v1",
+  "opening_head": "78fc1a1d25ec64573e276e4d667f328d155bdc17",
+  "verdict": "CHANGES_REQUIRED_SOURCE_NEUTRALITY",
+  "findings": [
+    {
+      "severity": "blocking",
+      "file": "src/sim/formation_spawn.ts",
+      "lines": "415-418",
+      "contract": "no gameplay, helper-evaluation, or default-OFF access-order change",
+      "finding": "recruit_pool_faction and militiaPoolKey are evaluated before the existing eligibility guard; opening HEAD evaluated eligibility first",
+      "runtime_evidence": "attempt-03-source-neutrality-final: 1 test failed because default-OFF newly threw Error: pool selection evaluated",
+      "required_correction": "restore production pool-field/helper evaluation after eligibility and cap; make any ineligible diagnostic association lazy, observer-owned, and caught; add a production-entry access-order regression"
+    }
+  ],
+  "field_contract": {
+    "prefix": "[reinforcement_allocation]",
+    "topic": "reinforcement_allocation",
+    "selector": "AWWV_DEBUG_REINFORCEMENT_POOLS",
+    "source": "formation_spawn.reinforce",
+    "branch": "regular",
+    "events": ["stage_open", "recipient", "stage_close"],
+    "stage_scope_truthful": true,
+    "gameplay_exception_has_no_false_close": true,
+    "stable_serialization": true,
+    "default_off_no_observer_object": true,
+    "default_off_no_new_pool_access": false
+  },
+  "source_comparison": {
+    "eligibility_calls_in_regular_body": { "opening": 1, "current": 1 },
+    "reserve_helper_calls_in_regular_body": { "opening": 1, "current": 1 },
+    "pool_debits_in_regular_body": { "opening": 1, "current": 1 },
+    "pool_committed_credits_in_regular_body": { "opening": 1, "current": 1 },
+    "predicates_or_thresholds_changed": false,
+    "mutation_or_report_order_changed": false,
+    "pool_selection_access_order_changed": true,
+    "helper_access_count_fixture_present": false
+  },
+  "fixture_review": {
+    "production_entry": "reinforceBrigadesFromPools",
+    "cross_faction_field_is_preexisting": true,
+    "hrhb_actual_eligibility_helper_accepts_fixture": true,
+    "pale_transfers": [300, 400],
+    "pale_conservation": { "opening_total": 2000, "closing_total": 2000 },
+    "zenica_actual_reserve": 800,
+    "zenica_transfer": 100,
+    "zenica_conservation": { "opening_total": 920, "closing_total": 920 },
+    "reverse_insertion_rows_state_report_identical": true
+  },
+  "evidence": {
+    "reused": [
+      { "attempt": "806/attempt-08-final-focused", "files": 7, "passed": 96, "failed": 0, "exit": 0 },
+      { "attempt": "806/attempt-11-green-source-binding", "files": 1, "passed": 7, "failed": 0, "exit": 0 },
+      { "attempt": "806/attempt-12-final-typecheck", "exit": 0 }
+    ],
+    "review_attempts": [
+      { "attempt": "attempt-01-source-neutrality", "exit": 1, "classification": "no_collection_repository_include" },
+      { "attempt": "attempt-02-source-neutrality-executed", "exit": 1, "classification": "no_collection_worker_option_conflict" },
+      { "attempt": "attempt-03-source-neutrality-final", "exit": 1, "files": 1, "passed": 0, "failed": 1, "artifact_contract_pass": true, "classification": "substantive_retained_red" }
+    ]
+  },
+  "preservation": {
+    "c": { "bytes": 102947714, "sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9" },
+    "d": { "bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3" },
+    "thresholds": { "bytes": 3775, "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d" },
+    "october_reference": { "bytes": 35266, "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b" }
+  },
+  "canon_determinism": {
+    "mapping": [
+      "docs/10_canon/CANON.md:51-55",
+      "docs/20_engineering/CODE_CANON.md:13-19",
+      "docs/10_canon/Systems_Manual_v0_9_0.md:958-964",
+      "docs/20_engineering/DETERMINISM_TEST_MATRIX.md:19-25"
+    ],
+    "canon_change": false,
+    "panel_required_if_corrected_source_neutral": false,
+    "determinism_risks_beyond_blocking_access_order": []
+  },
+  "residual_scope": [
+    "no n80 turn-22 history recovery",
+    "no retained-703 campaign-neutrality proof",
+    "no n80 historical-cause proof",
+    "no threshold or reference change",
+    "no campaign, replay, full-suite, or runTurn invocation"
+  ]
+}

@@ -1,0 +1,515 @@
+{
+  "schema": "awwv.pale.806.result.v1",
+  "writes_closed": true,
+  "opening_head": "78fc1a1d25ec64573e276e4d667f328d155bdc17",
+  "verdict": "IMPLEMENTED_FOCUSED_GREEN_PENDING_807_REVIEW",
+  "scope": "Default-off stdout-only regular reinforcement allocation observer and direct production-function fixture; no gameplay, threshold, data, save, report, weekly telemetry, canon, or campaign change.",
+  "field_contract": {
+    "prefix": "[reinforcement_allocation]",
+    "topic": "reinforcement_allocation",
+    "selector": "AWWV_DEBUG_REINFORCEMENT_POOLS",
+    "source": "formation_spawn.reinforce",
+    "branch": "regular",
+    "events": [
+      "stage_open",
+      "recipient",
+      "stage_close"
+    ],
+    "numeric_presence": [
+      "unreached",
+      "present_undefined",
+      "present_null",
+      "present_nonfinite",
+      "present_value"
+    ],
+    "pool_presence": [
+      "missing",
+      "present"
+    ],
+    "skip_reasons": [
+      "ineligible",
+      "at_cap",
+      "pool_missing",
+      "pool_empty",
+      "reserve_exhausted",
+      "no_transfer"
+    ],
+    "stage_close_scope": "regular stage before enclave reinforcement; not whole-function or whole-pool lifecycle"
+  },
+  "fixture": {
+    "qualification": "Synthetic production-function evidence only; it does not recover n80 history or establish n83 historical reserve.",
+    "pale_rs": {
+      "opening_available": 1900,
+      "opening_committed": 100,
+      "sorted_transfers": [
+        300,
+        400
+      ],
+      "reserves": [
+        0,
+        0
+      ],
+      "closing_available": 1200,
+      "closing_committed": 800,
+      "conserved_total": 2000
+    },
+    "zenica_rs": {
+      "opening_available": 900,
+      "opening_committed": 20,
+      "actual_helper_reserve": 800,
+      "effective_available": 100,
+      "transfer": 100,
+      "closing_available": 800,
+      "closing_committed": 120,
+      "conserved_total": 920
+    },
+    "cross_faction_legitimacy": "The earlier Pale HRHB formation uses the existing recruit_pool_faction=RS field and a matching HRHB location controller; the observer adds no cross-faction mechanic.",
+    "reverse_insertion": "Identical stdout rows, serialized state, and report."
+  },
+  "neutrality": {
+    "default_off_returns_no_observer": true,
+    "topic_on_without_selector_returns_no_observer": true,
+    "wrong_topic_silent": true,
+    "unselected_pool_has_no_recipient_rows": true,
+    "full_state_report_and_serialized_on_off_equal": true,
+    "existing_personnel_available_field_preserved_as_effective_available": true,
+    "stdout_and_serialization_failures_contained": true,
+    "gameplay_exception_propagates_without_false_stage_close": true,
+    "no_game_state_save_report_weekly_or_file_telemetry_fields": true
+  },
+  "early_guards": {
+    "covered": [
+      "ineligible",
+      "at_cap",
+      "pool_missing",
+      "pool_empty",
+      "reserve_exhausted"
+    ],
+    "later_operands": "explicit unreached presence",
+    "absent_and_nonfinite": "explicit missing/present_undefined/present_null/present_nonfinite representations",
+    "no_formation": "selected pool still receives regular stage_open/stage_close only"
+  },
+  "source_counts": {
+    "regular_reserve_helper_calls": 1,
+    "regular_eligibility_helper_calls": 1,
+    "regular_pool_debits": 1,
+    "regular_pool_committed_credits": 1,
+    "observer_stage_open": 1,
+    "observer_stage_close": 1
+  },
+  "tests": {
+    "focused_attempt": "attempt-08-final-focused",
+    "focused_count": "7 files, 96 passed, 0 failed",
+    "final_observer_attempt": "attempt-11-green-source-binding",
+    "final_observer_count": "1 file, 7 passed, 0 failed",
+    "final_typecheck_attempt": "attempt-12-final-typecheck",
+    "final_typecheck_exit": 0,
+    "tdd_red_attempts": [
+      "attempt-02-red-observer-absent",
+      "attempt-10-red-source-binding"
+    ],
+    "retained_failures": {
+      "attempt-01": "test arithmetic expectation corrected before production code",
+      "attempt-03": "fixture exposed Pale cap=1, leading to separate lawful Zenica reserve context",
+      "attempt-06": "two explicit minimal-fixture cast diagnostics; corrected through unknown"
+    }
+  },
+  "attempts": [
+    {
+      "name": "attempt-01-red-shared-pool",
+      "expected_exit": 1,
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "timed_out": false,
+      "artifact_contract_pass": true,
+      "receipt": {
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/806-reinforcement-allocation/attempt-01-red-shared-pool/receipt.json",
+        "bytes": 4336,
+        "sha256": "c369853b8e5616b65731905be3b432c82d5e3e5b0c9548b9f489560dbf2cfa6b"
+      },
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 611,
+        "sha256": "2275adb47b89d8c1addc8ea2d6064b9af897f139af5673df41a3eb737c5be002"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 1018,
+        "sha256": "77414700ae3d0200128d60aad6878f97efbdff8fd8822b55aa36d2e75999d2e2"
+      }
+    },
+    {
+      "name": "attempt-02-red-observer-absent",
+      "expected_exit": 1,
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "timed_out": false,
+      "artifact_contract_pass": true,
+      "receipt": {
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/806-reinforcement-allocation/attempt-02-red-observer-absent/receipt.json",
+        "bytes": 4344,
+        "sha256": "dbcf21bba14865f4123c6c97397a7e34a7b6cb2b49efe7c049c726a709ab55fe"
+      },
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 582,
+        "sha256": "cdad8c6c8ee7f804a40166d5fb56cc10ad4f68afc2ba40c1639d0a312cce611d"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 3374,
+        "sha256": "516ddf8625100ac248a85e52c024a5349be8c2c8023b7bfe7da4b716318ddeee"
+      }
+    },
+    {
+      "name": "attempt-03-green-shared-pool",
+      "expected_exit": 1,
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "timed_out": false,
+      "artifact_contract_pass": true,
+      "receipt": {
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/806-reinforcement-allocation/attempt-03-green-shared-pool/receipt.json",
+        "bytes": 4692,
+        "sha256": "c49417eb79e731553dffbacf2e12746ffcf02784daec0604120a5b7aa73b9d62"
+      },
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 621,
+        "sha256": "3231be8179e2c4379e72f4916310a0d9f0e2db6157268dc59b2b96bd46f61283"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 4950,
+        "sha256": "89098e8138a715cc32228b1e52a6015f3c07b025685fca445a0dd64419195458"
+      }
+    },
+    {
+      "name": "attempt-04-green-multipool",
+      "expected_exit": 0,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "artifact_contract_pass": true,
+      "receipt": {
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/806-reinforcement-allocation/attempt-04-green-multipool/receipt.json",
+        "bytes": 4685,
+        "sha256": "3756cd758d8ed7c87a21b558380c91b7bcef93384349b230795efc89860be8e7"
+      },
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 349,
+        "sha256": "cb80377c15830266220f551a94ec3f0d361ee2c3111d86f805885e9cf1b3ff29"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "attempt-05-focused-observer",
+      "expected_exit": 0,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "artifact_contract_pass": true,
+      "receipt": {
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/806-reinforcement-allocation/attempt-05-focused-observer/receipt.json",
+        "bytes": 4688,
+        "sha256": "e60ee53234014b3f4dd9bbee10c4a45c31a768b26657e5b8ca9d042ef31e734c"
+      },
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 932,
+        "sha256": "d81e0cf700b6a7cab7a1aa30a13a333a660cecb2c844ec2edc7d6db5e0b09a2d"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "attempt-06-typecheck",
+      "expected_exit": 2,
+      "child_exit": 2,
+      "wrapper_exit": 2,
+      "timed_out": false,
+      "artifact_contract_pass": true,
+      "receipt": {
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/806-reinforcement-allocation/attempt-06-typecheck/receipt.json",
+        "bytes": 4882,
+        "sha256": "19ab6c88a49ac87e6be4cd4f335a289c0f3505092b4e350dccb2d1d8a3f8a86d"
+      },
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 1829,
+        "sha256": "5fdb34d6df533ac72138436ad8cd2fc74543ce0a98c15f6e4dea35d90d60052b"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "attempt-07-typecheck-corrected",
+      "expected_exit": 0,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "artifact_contract_pass": true,
+      "receipt": {
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/806-reinforcement-allocation/attempt-07-typecheck-corrected/receipt.json",
+        "bytes": 4900,
+        "sha256": "0219c33e37a7ed8f2af775235d21ed588b02f2a186a60a684830c2281d317f9a"
+      },
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "attempt-08-final-focused",
+      "expected_exit": 0,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "artifact_contract_pass": true,
+      "receipt": {
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/806-reinforcement-allocation/attempt-08-final-focused/receipt.json",
+        "bytes": 7063,
+        "sha256": "aa38e1b08b86897aac36e134187bb36f670240bc87ad67bade067bbc55226ea6"
+      },
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 827,
+        "sha256": "9ddc2d7d0a2334c922ab009f6ec36804a370c2fbf3a7de4b9a18d274277c9edc"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 1364,
+        "sha256": "444b3be9772f73bfb445df781a5c757894867c178c1a27868fce3cbcd8d56d80"
+      }
+    },
+    {
+      "name": "attempt-09-final-typecheck",
+      "expected_exit": 0,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "artifact_contract_pass": true,
+      "receipt": {
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/806-reinforcement-allocation/attempt-09-final-typecheck/receipt.json",
+        "bytes": 4892,
+        "sha256": "8f861596e0117c76507b957405a0f318c054731f6ef7d9fcc81683f6205b8502"
+      },
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "attempt-10-red-source-binding",
+      "expected_exit": 1,
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "timed_out": false,
+      "artifact_contract_pass": true,
+      "receipt": {
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/806-reinforcement-allocation/attempt-10-red-source-binding/receipt.json",
+        "bytes": 4693,
+        "sha256": "79a050595a3b99d50d1516b4fce6766c9188bc575e3a7b072f0a2d0a3a69ad75"
+      },
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 572,
+        "sha256": "3bad994998fa8db2202164a1d8b3bc7a4f561d5638d1d700a99795631a5800c9"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 944,
+        "sha256": "a4d952504e19a545f95ecabb927e862db86735a49bfaf0069ac3715582ee93a1"
+      }
+    },
+    {
+      "name": "attempt-11-green-source-binding",
+      "expected_exit": 0,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "artifact_contract_pass": true,
+      "receipt": {
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/806-reinforcement-allocation/attempt-11-green-source-binding/receipt.json",
+        "bytes": 4696,
+        "sha256": "bc4833a872cb31e94993e0f7d3811dbd85067246a56b9ca7d3bf7980dcc9cdbc"
+      },
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 352,
+        "sha256": "0286fcdfeb923c88ccc963dd2ab8086567f83e7e7731edcb54527e985daf7abd"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "attempt-12-final-typecheck",
+      "expected_exit": 0,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "artifact_contract_pass": true,
+      "receipt": {
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/806-reinforcement-allocation/attempt-12-final-typecheck/receipt.json",
+        "bytes": 4892,
+        "sha256": "b4f8e497e3738f6cd2bc82bfed1a266294f373f0ff36f6f18f82a1f6f342b4a6"
+      },
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "changed_source_pins": [
+    {
+      "path": "src/sim/combat/reinforcement_allocation_diagnostic.ts",
+      "bytes": 5653,
+      "sha256": "e0a3722ac4c5c352b314bc63702d9c1c1f269404422bcc1e8eef3015e912918e"
+    },
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20275,
+      "sha256": "b7467c47f97c5c349535b59aaeafa3dea0bc5d03314961c5ac17ef3a4283434a"
+    },
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "bytes": 47557,
+      "sha256": "78c574ced3a8b9456f830fd5348356d6effc5995d4d6ef668603396d75855ddd"
+    },
+    {
+      "path": "tests/reinforcement_allocation_diagnostic.test.ts",
+      "bytes": 17786,
+      "sha256": "0978f1cd5f0577c19bef200640c369bea059030e33f56f774304aaf06195e50f"
+    },
+    {
+      "path": "tests/reason_code_debug.test.ts",
+      "bytes": 10435,
+      "sha256": "44a60e84d8b22d1cb629364a84e10257d3454531678b987a75582ddaee9a756c"
+    }
+  ],
+  "unaffected_protected_pins": [
+    {
+      "path": "src/sim/combat/movement_phase_diagnostic.ts",
+      "bytes": 7386,
+      "sha256": "cac140facd432e206a079093514702237f7690088b92eac10a556de9e6ba62d8",
+      "expected_sha256": "cac140facd432e206a079093514702237f7690088b92eac10a556de9e6ba62d8",
+      "matches": true
+    },
+    {
+      "path": "src/sim/combat/personnel_diagnostic.ts",
+      "bytes": 5870,
+      "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3",
+      "expected_sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3",
+      "matches": true
+    },
+    {
+      "path": "src/sim/turn_pipeline.ts",
+      "bytes": 11675,
+      "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25",
+      "expected_sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25",
+      "matches": true
+    },
+    {
+      "path": "src/sim/combat/strategic_reserve.ts",
+      "bytes": 10755,
+      "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae",
+      "expected_sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae",
+      "matches": true
+    },
+    {
+      "path": "src/sim/combat/frontline_attrition.ts",
+      "bytes": 21594,
+      "sha256": "0cc09b4eca821d2dce287893fdde312239c2b8be495ed02e36b8a23ba59f5ee1",
+      "expected_sha256": "0cc09b4eca821d2dce287893fdde312239c2b8be495ed02e36b8a23ba59f5ee1",
+      "matches": true
+    },
+    {
+      "path": "src/sim/combat/morale_drift.ts",
+      "bytes": 17730,
+      "sha256": "cb7720d5da303e02d89fb3aaf034488a340a51155dfd6dbfc4839cf9cedcdc5c",
+      "expected_sha256": "cb7720d5da303e02d89fb3aaf034488a340a51155dfd6dbfc4839cf9cedcdc5c",
+      "matches": true
+    },
+    {
+      "path": "src/sim/combat/commander/emit.ts",
+      "bytes": 202428,
+      "sha256": "76351f818c3403fcc23bf5b51f30c467bd42886d68f1e6b754d9f90baa58746b",
+      "expected_sha256": "76351f818c3403fcc23bf5b51f30c467bd42886d68f1e6b754d9f90baa58746b",
+      "matches": true
+    },
+    {
+      "path": "tests/personnel_diagnostic.test.ts",
+      "bytes": 19693,
+      "sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b",
+      "expected_sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b",
+      "matches": true
+    },
+    {
+      "path": "tests/commander_creation_observer.test.ts",
+      "bytes": 100803,
+      "sha256": "05bfd3cf245aa0f929c44d6efff8abdf7316e0fb54b415f25a3c48c9e0f8bb86",
+      "expected_sha256": "05bfd3cf245aa0f929c44d6efff8abdf7316e0fb54b415f25a3c48c9e0f8bb86",
+      "matches": true
+    }
+  ],
+  "protected_controls": [
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 102947714,
+      "sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9"
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    {
+      "path": "data/calibration/engine_health_thresholds.json",
+      "bytes": 3775,
+      "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d"
+    },
+    {
+      "path": "data/source/calibration/painted_control_oct1995.json",
+      "bytes": 35266,
+      "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b"
+    }
+  ],
+  "backup_bytes_match_final": true,
+  "campaign_invocations": 0,
+  "replay_invocations": 0,
+  "full_suite_invocations": 0,
+  "retained_calibration": "703/712 NO-GO and unadopted; no historical counterfactual or n80 causality claim.",
+  "failures": []
+}
