@@ -241,6 +241,8 @@ export interface OperationOpportunityDef {
     readonly preparation_probe_delivery?: CorpsOperation['preparation_probe_delivery'];
     /** Optional minimum-attack-outcome override on the resulting CorpsOperation. */
     readonly min_attack_outcome?: CorpsOperation['min_attack_outcome'];
+    /** A decisive same-axis breach may advance one admitted supporting brigade. */
+    readonly coordinated_advance?: CorpsOperation['coordinated_advance'];
     /** Family identifier — multiple opportunities may share a family (e.g. "5th_corps"). */
     readonly family: string;
     /** BB / ICTY / primary citation strings. */
@@ -1594,6 +1596,7 @@ function spawnCorpsOperationFromOpportunity(
                 ? { preparation_probe_delivery: def.preparation_probe_delivery }
                 : {}),
             ...(def.min_attack_outcome ? { min_attack_outcome: def.min_attack_outcome } : {}),
+            ...(def.coordinated_advance === true ? { coordinated_advance: true } : {}),
         },
         builtAxes,
         allParticipating,

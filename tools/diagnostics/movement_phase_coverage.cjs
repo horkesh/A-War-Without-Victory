@@ -10,23 +10,32 @@ let json = false;
 while (args.length) {
     const arg = args.shift();
     if (arg === '--json') json = true;
-    else if (arg === '--expect-boundary' && args.length) expected.push(args.shift());
+    else if (['--expect-boundary', '--expect-active-boundary', '--expect-inactive-boundary'].includes(arg) && args.length) {
+        expected.push({ spec: args.shift(), activity: arg === '--expect-inactive-boundary' ? 'inactive' : 'active' });
+    }
     else process.exit(2);
 }
 const inconsistencies = [];
 const missing = [];
 const covered = new Set();
+const activeCoverage = new Set();
+const inactiveCoverage = new Set();
 let receiptsSeen = 0;
 if (expected.length === 0) inconsistencies.push({ reason: 'expectation_required' });
 const expectationKeys = new Set();
+const expectedActivityByKey = new Map();
 const nonemptyString = (value) => typeof value === 'string' && value.trim().length > 0;
-for (const spec of expected) {
+for (const expectation of expected) {
+    const { spec, activity } = expectation;
     const split = spec.lastIndexOf(':');
     const actor = spec.slice(0, split);
     const turnText = spec.slice(split + 1);
     const turn = Number(turnText);
     if (split < 1 || !nonemptyString(actor) || !/^[1-9]\d*$/.test(turnText) || !Number.isSafeInteger(turn)) process.exit(2);
-    expectationKeys.add(`${actor}:${turn}`);
+    const key = `${actor}:${turn}`;
+    if (expectedActivityByKey.has(key)) process.exit(2);
+    expectationKeys.add(key);
+    expectedActivityByKey.set(key, activity);
 }
 const exactKeys = (value, keys) => value && typeof value === 'object' && !Array.isArray(value) && Object.keys(value).sort().join('|') === [...keys].sort().join('|');
 function validPresence(p, validateValue = () => true) {
@@ -67,6 +76,7 @@ function add(reason, fields = {}) { inconsistencies.push({ reason, ...fields });
 
 const file = path.join(root, 'weekly_report.jsonl');
 const observedExpectations = new Set();
+const previousTerminalByActor = new Map();
 if (!fs.existsSync(file)) add('missing_weekly_report');
 else {
     const rows = fs.readFileSync(file, 'utf8').split(/\r?\n/).filter(Boolean);
@@ -117,10 +127,15 @@ else {
         for (const actor of d.requested_formations) {
             const expectationKey = `${actor}:${row.week_index}`;
             if (!expectationKeys.has(expectationKey)) { add('unexpected_selected_actor', { boundary: expectationKey }); continue; }
+            const boundaryErrorStart = inconsistencies.length;
             if (observedExpectations.has(expectationKey)) add('duplicate_actor_turn_diagnostic', { boundary: expectationKey });
             observedExpectations.add(expectationKey);
             const actorReceipts = d.receipts.filter((r) => r?.formation_id === actor);
             receiptsSeen += actorReceipts.length;
+            const previousTerminal = previousTerminalByActor.get(actor);
+            if (previousTerminal && actorReceipts.length > 0 && JSON.stringify(previousTerminal) !== JSON.stringify(actorReceipts[0].before)) {
+                add('cross_turn_discontinuity', { actor, completed_turn: row.week_index });
+            }
             const byIndex = new Map();
             for (let position = 0; position < actorReceipts.length; position++) {
                 const r = actorReceipts[position];
@@ -140,15 +155,31 @@ else {
                 if (t.completed_turn !== row.week_index || t.phase_index !== d.phase_manifest.length) add('invalid_terminal_receipt', { actor });
                 const last = byIndex.get(d.phase_manifest.length - 1);
                 if (last && JSON.stringify(last.after) !== JSON.stringify(t.before)) add('terminal_discontinuity', { actor });
-                if (!actorActive(t.after)) add('terminal_actor_not_active', { actor });
+                const active = actorActive(t.after);
+                const expectedActivity = expectedActivityByKey.get(expectationKey);
+                if (expectedActivity === 'active' && !active) add('terminal_actor_not_active', { actor });
+                if (expectedActivity === 'inactive' && active) add('terminal_actor_unexpectedly_active', { actor });
+                previousTerminalByActor.set(actor, t.after);
             }
-            if (inconsistencies.length === 0) covered.add(expectationKey);
+            if (inconsistencies.length === boundaryErrorStart) {
+                covered.add(expectationKey);
+                if (expectedActivityByKey.get(expectationKey) === 'active') activeCoverage.add(expectationKey);
+                else inactiveCoverage.add(expectationKey);
+            }
         }
     }
 }
 for (const key of expectationKeys) {
     if (!observedExpectations.has(key)) { add('missing_expected_boundary', { boundary: key }); missing.push(key); }
 }
-const report = { receipts_seen: receiptsSeen, causal_proof: false, coverage: [...covered].sort(), inconsistencies, missing_expected_boundaries: missing.sort() };
+const report = {
+    receipts_seen: receiptsSeen,
+    causal_proof: false,
+    coverage: [...covered].sort(),
+    active_coverage: [...activeCoverage].sort(),
+    inactive_coverage: [...inactiveCoverage].sort(),
+    inconsistencies,
+    missing_expected_boundaries: missing.sort(),
+};
 process.stdout.write(`${JSON.stringify(report, null, json ? 0 : 2)}\n`);
 process.exit(inconsistencies.length === 0 && missing.length === 0 ? 0 : 1);

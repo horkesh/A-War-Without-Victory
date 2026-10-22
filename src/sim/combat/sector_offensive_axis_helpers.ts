@@ -29,6 +29,42 @@ export function getAllAxisObjectives(op: CorpsOperation): string[] {
     return result;
 }
 
+export function isAxisExcludedFromPreparation(axis: OperationAxis): boolean {
+    return axis.late_phase?.phase === 'holding'
+        && axis.late_phase.handoff !== undefined
+        && axis.assigned_brigades.length === 0;
+}
+
+/**
+ * Return the objectives that can affect the operation's current preparation.
+ *
+ * An empty holding axis with a future brigade handoff owns durable objectives,
+ * but has no present preparation force. Its exclusively-owned objectives stay
+ * serialized on the operation and axis while remaining outside this read-only
+ * view. Shared objectives remain visible through any included axis.
+ */
+export function getPreparationObjectiveView(
+    op: CorpsOperation,
+    fullObjectives: readonly string[],
+): string[] {
+    const axes = op.axes;
+    if (!axes || axes.length === 0) return [...fullObjectives];
+
+    const excludedObjectives = new Set<string>();
+    const includedObjectives = new Set<string>();
+    let hasExcludedAxis = false;
+    for (const axis of axes) {
+        const excluded = isAxisExcludedFromPreparation(axis);
+        if (excluded) hasExcludedAxis = true;
+        for (const objective of axis.objectives) {
+            (excluded ? excludedObjectives : includedObjectives).add(objective);
+        }
+    }
+    if (!hasExcludedAxis) return [...fullObjectives];
+    return fullObjectives.filter(objective =>
+        !excludedObjectives.has(objective) || includedObjectives.has(objective));
+}
+
 /** Get all participating brigades across all axes (deduplicated, sorted). */
 export function getAllAxisBrigades(op: CorpsOperation): FormationId[] {
     if (!isMultiAxis(op)) return op.participating_brigades;

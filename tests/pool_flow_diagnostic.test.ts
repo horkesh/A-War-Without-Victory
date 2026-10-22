@@ -15,6 +15,7 @@ import { runNamedPhase } from '../src/sim/turn_pipeline.js';
 import { runOngoingMobilization } from '../src/sim/combat/ongoing_mobilization.js';
 import { runDisplacedAndCrossEthnicContributions } from '../src/sim/early_war/pool_population.js';
 import { applyPoolWarWearinessDecay } from '../src/sim/combat/pool_decay.js';
+import { applyFrontlineAttrition } from '../src/sim/combat/frontline_attrition.js';
 import { applyMilitiaWiaTrickleback } from '../src/sim/formation_spawn.js';
 import { serializeState } from '../src/state/serialize.js';
 
@@ -165,6 +166,7 @@ describe('bounded Pale pool-flow diagnostic', () => {
         const output: string[] = [];
         vi.spyOn(console, 'log').mockImplementation((line) => output.push(String(line)));
         const expectedPhases = [
+            { phase_name: 'apply-frontline-attrition', phase_family: 'war' },
             { phase_name: 'ongoing-mobilization', phase_family: 'war' },
             { phase_name: 'pool-war-weariness-decay', phase_family: 'war' },
             { phase_name: 'wia-trickleback', phase_family: 'war' },
@@ -173,10 +175,25 @@ describe('bounded Pale pool-flow diagnostic', () => {
         const actual = state(21, { available: 100, wounded_pending: 10 });
         actual.political = { municipalities: { pale: { control: 'consolidated' } }, political_controllers: { 'op:pale:center': 'RS' } } as any;
         actual.displacement = { displacement_state: { pale: { displaced_in: 10_000, displaced_in_by_faction: { RS: 10_000 } } } } as any;
+        actual.military.formations = {
+            front: {
+                id: 'front', faction: 'RS', name: 'Front', kind: 'brigade', status: 'active', assignment: null,
+                created_turn: 1, personnel: 2_000, cohesion: 70, morale: 70,
+                location_osid: 'op:pale:center', home_osid: 'op:pale:center', origin_mun: 'pale',
+            },
+        } as any;
+        actual.military.corps_front_sectors = {
+            front: {
+                sector_id: 'front', corps_id: 'vrs_sarajevo_romanija', faction: 'RS', opposing_factions: ['RBiH'],
+                territory_osids: ['op:pale:center'], assigned_brigade_ids: ['front'], reserve_brigade_ids: [], rear_brigade_ids: [],
+                length_edges: 1, sub_segments: [{ sub_segment_id: 'front:0', friendly_osids: ['op:pale:center'], enemy_osids: ['op:trnovo:center'], edge_ids: [], primary_brigade_ids: ['front'], length_edges: 1 }],
+            },
+        } as any;
         for (const turn of [21, 22]) {
             actual.meta.turn = turn;
             const observer = createPoolFlowObserver(actual, expectedPhases)!;
             const context = { state: actual, report: { seed: 'x', phases: [] }, input: {}, rng: () => 0 } as any;
+            await runNamedPhase(context, { name: 'apply-frontline-attrition', run: () => { applyFrontlineAttrition(actual); } }, 'war', undefined, undefined, observer);
             await runNamedPhase(context, { name: 'ongoing-mobilization', run: () => { runOngoingMobilization(actual, settlements, { pale: { serb: 50_000, bosniak: 0, croat: 0, other: 0 } } as any); } }, 'war', undefined, undefined, observer);
             await runNamedPhase(context, { name: 'pool-war-weariness-decay', run: () => { applyPoolWarWearinessDecay(actual); } }, 'war', undefined, undefined, observer);
             await runNamedPhase(context, { name: 'wia-trickleback', run: () => applyMilitiaWiaTrickleback(actual, { formations_returned: 0, personnel_returned: 0 }) }, 'war', undefined, undefined, observer);
@@ -184,7 +201,14 @@ describe('bounded Pale pool-flow diagnostic', () => {
         }
         const stream = `${output.join('\n')}\n`;
         const reader = require('../tools/diagnostics/pool_flow_reader.cjs');
-        expect(reader.validatePoolFlowStream(stream)).toMatchObject({ schema_version: 1, turns: [21, 22], terminal_count: 2, mutation_count: 7 });
+        expect(reader.validatePoolFlowStream(stream)).toMatchObject({
+            schema_version: 1, turns: [21, 22], terminal_count: 2, mutation_count: 7,
+            uninstrumented_phase_delta_count: 2,
+            uninstrumented_phase_deltas: [
+                expect.objectContaining({ completed_turn: 21, phase_name: 'apply-frontline-attrition', phase_family: 'war', phase_index: 0 }),
+                expect.objectContaining({ completed_turn: 22, phase_name: 'apply-frontline-attrition', phase_family: 'war', phase_index: 0 }),
+            ],
+        });
         const variants = [
             output.slice(1),
             output.slice(0, -1),
@@ -244,6 +268,10 @@ describe('bounded Pale pool-flow diagnostic', () => {
             return row ? `${POOL_FLOW_PREFIX} ${JSON.stringify(row)}` : line;
         });
         expect(() => reader.validatePoolFlowStream(`${discontinuous.join('\n')}\n`)).toThrow(/continuity/i);
+        const crossPhaseGap = parseOutput();
+        const nextPhaseStart = crossPhaseGap.find((row) => row.completed_turn === 21 && row.event === 'phase_start' && row.phase_name === 'ongoing-mobilization')!;
+        nextPhaseStart.pool.exhausted.value += 1;
+        expect(() => reader.validatePoolFlowStream(resequence(crossPhaseGap))).toThrow(/continuity/i);
         expect(() => reader.validatePoolFlowStream(`${stream}[pool_fl\n`)).toThrow(/partial/i);
     });
 

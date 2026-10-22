@@ -1,0 +1,47 @@
+{
+  "schema": "awwv.two-hvo-881.portable-result.v1",
+  "frozen_date": "2026-10-23",
+  "source_head_before_closeout": "ee1dacc581757b8e3fde96133b29e67558fa25fa",
+  "implementation_validation": "ACCEPT_TWO_TARGET_IMPLEMENTATION_VALIDATION",
+  "global_calibration": "NO_GO_UNADOPTED",
+  "n91": {
+    "run_dir": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n91",
+    "scores": [707, 707, 706, 705],
+    "n80_correct_cell_losses": 0,
+    "n90_correct_cell_losses": 0,
+    "early_raw_equal": 6,
+    "normalized_inputs": 32,
+    "anchors": 16,
+    "native_inventory": 31,
+    "core_nonzero_exits": 0,
+    "prisoje": {"controller": "HRHB", "turn": 188, "outcome": "decisive_victory", "lead": "hvo_1st_guard_abb", "defender": "rs_1st_armored", "power_ratio": 13.03},
+    "donji_vrbljani": {"controller": "HRHB", "turn": 188, "outcome": "costly_victory", "lead": "hvo_rama_brigade", "defender": "rs_15th_biha_infantry", "power_ratio": 1.03},
+    "historical_rama_actor_claimed": false
+  },
+  "full_suite": {
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false,
+    "all_eleven_checks": true,
+    "tests": {"pass": 14882, "fail": 0, "skip": 33, "total": 14915},
+    "files": {"unique": 1443, "executions": 1446, "pass": 1442, "fail": 0, "skip": 4},
+    "nested_fixture_groups_retained_excluded": 10
+  },
+  "telemetry": {
+    "c": {"opening_bytes": 112034905, "closing_bytes": 114430353, "appended_bytes": 2395448, "closing_sha256": "7f24870dd2dae3de961d0d2390c19e6e7854007639b8726d643488b8a6c8c3cf", "prefix_exact": true},
+    "d": {"bytes": 1041, "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3", "prefix_exact": true}
+  },
+  "pins": [
+    {"path": "logs/claude-channel-20261004/876-qualified-n91-final-01/final-result.json", "bytes": 2980, "sha256": "18fc3dc32b957a4691c3543adcd56f406a8ec76c047c6e06f4a0853fc70787f7"},
+    {"path": "logs/claude-channel-20261004/875-combined-postrun-correction-01/corrected-result.json", "bytes": 34710, "sha256": "fe5e7509c527bd50183a5e708200aed222882e6014010b65ac9cde56c43b2b62"},
+    {"path": "logs/claude-channel-20261004/875-combined-postrun-correction-01/delta-accounting.json", "bytes": 3048540, "sha256": "24b8f7c2bd24610d7780fab1d9638fde12760e8e230cc5afcc97683f90a0097c"},
+    {"path": "logs/claude-channel-20261004/875-independent-reader-correction-review.json", "bytes": 3856, "sha256": "fbb827686bfd0464282b4a816341428e822375bc7aaf9184c136dd897b62ceaf"},
+    {"path": "logs/claude-channel-20261004/880-suite-attempt/result.json", "bytes": 95837, "sha256": "61e7e2a50818513e44f1f138a4b94773d20324285f318fc770824c836c777718"},
+    {"path": "logs/claude-channel-20261023/879-targeted-correction-independent-review.json", "bytes": 5254, "sha256": "6cfbd5286db6ef4f47e6f320a31b114c84b9ccbe00fe6e8af3fb8340924e15b7"},
+    {"path": "logs/claude-channel-20261023/881-final-results-independent-review.json", "bytes": 5492, "sha256": "580a14776358f2e204c185e37492726ce8c47ff3cf2b7c1f83bcba9528dc5216"},
+    {"path": "logs/claude-channel-20261023/881-final-results-independent-review-freeze-01/receipt.json", "bytes": 3432, "sha256": "65af7d94edc27613f35404142d62cf6425bfd4dd076eff8959be4edbdcdfbb8e"}
+  ],
+  "preserved_rulings": ["n42 observational-only GO", "governing Farz second-or-third ruling"],
+  "residuals": ["seven October mismatches", "122 STOP", "legacy consumer/fingerprint/retention/dispatcher coverage"],
+  "raw_evidence": "LOCAL_WITH_PUSHED_INVENTORY_NOT_A_BYTE_BACKUP"
+}

@@ -121,6 +121,7 @@ import {
     getAllAxisBrigades,
     getAllAxisObjectives,
     getCurrentLaunchObjectives,
+    getPreparationObjectiveView,
     isMultiAxis,
     isSupportBrigadeOnActiveOp,
     resetAxisForExecution,
@@ -1444,7 +1445,8 @@ export function advanceSectorOffensives(
         const multiAxis = isMultiAxis(op);
         const operationStaticAdjacency = op.is_pre_planned === true ? staticAdjacency : undefined;
 
-        const allObjectives = multiAxis ? getAllAxisObjectives(op) : (op.objectives ?? []);
+        const fullObjectives = multiAxis ? getAllAxisObjectives(op) : (op.objectives ?? []);
+        const allObjectives = getPreparationObjectiveView(op, fullObjectives);
         const allBrigades = multiAxis ? getAllAxisBrigades(op) : op.participating_brigades;
 
         const resolvedSectorId = resolveOperationSectorId(

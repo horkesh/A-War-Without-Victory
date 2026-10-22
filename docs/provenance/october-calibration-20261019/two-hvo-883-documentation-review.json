@@ -1,0 +1,83 @@
+{
+  "schema": "awwv.884.documentation-correction-independent-review.v1",
+  "verdict": "APPROVE_FOR_SOURCE_DOCS_PRESERVATION_COMMIT",
+  "findings": [],
+  "verified_closures": [
+    {
+      "finding": "EARLY_EQUALITY_UNIT_MISLABELED",
+      "status": "closed",
+      "evidence": "CALIBRATION_MASTER now names six selected saved GameState pairs and no longer calls them six cells."
+    },
+    {
+      "finding": "PREPARATION_PREDICATE_INVENTED",
+      "status": "closed",
+      "evidence": "All five passages state holding phase plus handoff plus zero assigned brigades as the omission predicate and identify sector/intel/defender/terrain-ratio/transit logic as consumers rather than further predicates."
+    },
+    {
+      "finding": "N88_CAUSAL_CHAIN_OVERCLAIM",
+      "status": "closed",
+      "evidence": "CALIBRATION_MASTER separates the turn-16 Vlasenica first divergence from the later week-104 Lopare loss and explicitly leaves the connecting chain unmeasured."
+    },
+    {
+      "finding": "PRESERVED_RULINGS_RELABELED_UNMET",
+      "status": "closed",
+      "evidence": "The master and portable result separate n42 observational-only GO and the governing Farz second-or-third ruling from actual residual and unmet gates."
+    }
+  ],
+  "portable_pins": [
+    {
+      "path": "docs/provenance/october-calibration-20261019/two-hvo-881-portable-result.json",
+      "bytes": 3465,
+      "sha256": "ec39f251b4776de47bbb9e3167cb7c361592a988be369f9d448feb065001f222"
+    },
+    {
+      "path": "docs/provenance/october-calibration-20261019/two-hvo-881-local-raw-inventory.json",
+      "bytes": 102338,
+      "sha256": "d3079aaacbca5cd51dfc217e29cc40945f382ecde622bfa7ecdab707f9edcac8"
+    }
+  ],
+  "inventory": {
+    "new_20261023_files": 96,
+    "new_20261023_bytes": 247003004,
+    "diagnostic_scripts": 16,
+    "diagnostic_script_bytes": 119413,
+    "older_top_level_entries": 363,
+    "v1_before_image_preserved": true,
+    "later_883_verification_review_admin_excluded": true,
+    "whole_historical_corpus_rescanned": false
+  },
+  "verification": {
+    "path": "logs/claude-channel-20261023/883-documentation-correction-verification-03/focused-verification.json",
+    "bytes": 2780,
+    "sha256": "db7f5593b7e6250754b568cde01825394a18e7f680bb1a19f964b38e4475b488",
+    "pass": true,
+    "receipt": {
+      "path": "logs/claude-channel-20261023/883-documentation-correction-verification-03/receipt.json",
+      "bytes": 2657,
+      "sha256": "864cd5c82e9aa5dabe0cd9f40cb93b95d7de7521a472bd5997d970ca77cdc980",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true
+    }
+  },
+  "preservation": {
+    "before_manifest": {
+      "path": "logs/claude-channel-20261023/883-docs-correction-before-01/before-manifest.json",
+      "bytes": 1944,
+      "sha256": "58240229ebf8b85aa07d29307fa087c7117a60b8b799c3c2e0c431a3c7233988"
+    },
+    "ledger_head_prefix_bytes": 1204623,
+    "roadmap_code_units": 58402,
+    "roadmap_under_60000": true,
+    "git_diff_check": "pass",
+    "source_and_test_pins_unchanged": true
+  },
+  "scope": {
+    "source_edits_by_reviewer": false,
+    "runtime_suite_or_campaign": false,
+    "live_c_or_d_read": false,
+    "git_stage_commit_or_push": false,
+    "baseline_adoption_claimed": false,
+    "global_no_go_changed": false
+  }
+}

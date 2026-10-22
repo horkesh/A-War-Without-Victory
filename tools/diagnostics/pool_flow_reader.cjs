@@ -109,6 +109,7 @@ function validatePoolFlowStream(text) {
 
   let mutationCount = 0;
   let terminalCount = 0;
+  const uninstrumentedPhaseDeltas = [];
   let previousTurnTerminalPool = null;
   for (const turn of TARGET_TURNS) {
     const group = rows.filter((row) => row.completed_turn === turn);
@@ -117,6 +118,7 @@ function validatePoolFlowStream(text) {
     let openWriterRows = [];
     const phaseStarts = [];
     let lastPool = null;
+    let phaseStartPool = null;
     for (let index = 0; index < group.length; index += 1) {
       const row = group[index];
       if (row.sequence !== index + 1) fail(`turn ${turn} sequence discontinuity`);
@@ -125,16 +127,28 @@ function validatePoolFlowStream(text) {
       validatePool(startPool, `turn ${turn} row ${index + 1} start pool`);
       validatePool(endPool, `turn ${turn} row ${index + 1} end pool`);
       if (index === 0 && previousTurnTerminalPool && !same(previousTurnTerminalPool, startPool)) fail('two-turn pool continuity failure');
-      if (lastPool && !same(lastPool, startPool)) fail(`turn ${turn} pool continuity failure`);
-      lastPool = endPool;
       if (row.event === 'phase_start') {
         if (openPhase) fail(`turn ${turn} nested phase`);
+        if (lastPool && !same(lastPool, startPool)) fail(`turn ${turn} cross-phase pool continuity failure`);
         openPhase = [row.phase_name, row.phase_family, row.phase_index];
         openWriterRows = [];
+        phaseStartPool = startPool;
         phaseStarts.push({ phase_name: row.phase_name, phase_family: row.phase_family });
       } else if (row.event === 'phase_end') {
         if (!openPhase || !same(openPhase, [row.phase_name, row.phase_family, row.phase_index])) fail(`turn ${turn} unmatched phase end`);
         if (!['executed', 'skipped'].includes(row.status)) fail(`turn ${turn} invalid phase status`);
+        if (openWriterRows.length > 0 && lastPool && !same(lastPool, startPool)) fail(`turn ${turn} covered phase pool continuity failure`);
+        if (openWriterRows.length === 0 && !same(phaseStartPool, endPool)) {
+          if (row.status !== 'executed') fail(`turn ${turn} skipped phase changed pool`);
+          uninstrumentedPhaseDeltas.push({
+            completed_turn: turn,
+            phase_name: row.phase_name,
+            phase_family: row.phase_family,
+            phase_index: row.phase_index,
+            before: phaseStartPool,
+            after: endPool,
+          });
+        }
         const required = REQUIRED_WRITERS_BY_PHASE.get(row.phase_name) ?? [];
         if (!same(openWriterRows.map((item)=>item.writer_group).slice().sort(), required.slice().sort())) fail(`turn ${turn} ${row.phase_name} writer coverage mismatch`);
         for (const writer of openWriterRows) {
@@ -145,9 +159,11 @@ function validatePoolFlowStream(text) {
           }
         }
         openPhase = null;
+        phaseStartPool = null;
       } else if (row.event === 'mutation') {
         mutationCount += 1;
         if (!openPhase) fail(`turn ${turn} mutation outside phase`);
+        if (lastPool && !same(lastPool, startPool)) fail(`turn ${turn} mutation pool continuity failure`);
         if (openWriterRows.some((item)=>item.writer_group===row.writer_group)) fail('duplicate writer coverage');
         openWriterRows.push(row);
         if (!row.operands || typeof row.operands !== 'object') fail('missing mutation operands');
@@ -155,6 +171,7 @@ function validatePoolFlowStream(text) {
         validateMutationArithmetic(row);
       } else if (row.event === 'writer_qualification') {
         if (!openPhase) fail(`turn ${turn} qualification outside phase`);
+        if (lastPool && !same(lastPool, startPool)) fail(`turn ${turn} qualification pool continuity failure`);
         if (openWriterRows.some((item)=>item.writer_group===row.writer_group)) fail('duplicate writer coverage');
         openWriterRows.push(row);
         const expectedSource = row.writer_group === 'direct' ? 'ongoing_mobilization' : row.writer_group === 'shared' ? 'pool_population' : row.writer_group === 'decay' ? 'pool_decay' : row.writer_group === 'wia' ? 'formation_spawn' : null;
@@ -163,6 +180,7 @@ function validatePoolFlowStream(text) {
         if (!same(row.before,row.after) || Object.keys(row.operands ?? {}).length !== 0) fail('writer qualification changed balance or invented operands');
       } else {
         terminalCount += 1;
+        if (lastPool && !same(lastPool, startPool)) fail(`turn ${turn} terminal pool continuity failure`);
         if (index !== group.length - 1) fail(`turn ${turn} terminal is not final`);
         if (openPhase) fail(`turn ${turn} terminal with open phase`);
         if (row.status !== 'success' || row.error_status !== null) fail(`turn ${turn} terminal status incomplete`);
@@ -171,11 +189,21 @@ function validatePoolFlowStream(text) {
         if (!same(row.expected_phase_manifest,row.observed_phase_manifest) || !same(row.observed_phase_manifest,phaseStarts)) fail(`turn ${turn} phase manifest mismatch`);
         for (const requiredPhase of REQUIRED_WRITERS_BY_PHASE.keys()) if (!row.expected_phase_manifest.some((phase) => phase.phase_name === requiredPhase && phase.phase_family === 'war')) fail(`turn ${turn} phase manifest missing ${requiredPhase}`);
       }
+      lastPool = endPool;
     }
     if (group[group.length - 1].event !== 'terminal') fail(`turn ${turn} missing terminal`);
     previousTurnTerminalPool = recordEndPool(group[group.length - 1]);
   }
-  return { schema_version: 1, pool_key: 'pale:RS', turns: TARGET_TURNS.slice(), row_count: rows.length, terminal_count: terminalCount, mutation_count: mutationCount };
+  return {
+    schema_version: 1,
+    pool_key: 'pale:RS',
+    turns: TARGET_TURNS.slice(),
+    row_count: rows.length,
+    terminal_count: terminalCount,
+    mutation_count: mutationCount,
+    uninstrumented_phase_delta_count: uninstrumentedPhaseDeltas.length,
+    uninstrumented_phase_deltas: uninstrumentedPhaseDeltas,
+  };
 }
 
 function main(argv) {

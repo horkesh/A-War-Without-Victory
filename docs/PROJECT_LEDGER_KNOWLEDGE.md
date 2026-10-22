@@ -6100,3 +6100,10 @@ A caller/turn/corps/operation tuple may repeat within one turn. Keep every order
 ## 2026-10-21 — Validate nested diagnostic frames and the actual decision boundary
 
 Consuming every JSON record and closing caller blocks does not prove nested build/axis completeness. Reconcile declared axes and candidate ordinals with ordered start/terminal records, and test missing/reordered/duplicate frames before endorsing coverage. A commitment can be execution at injection and recovery in the completed-turn report; use the actual predicate receipt for the decision. Applied in [instrumented n82 diagnostic](PROJECT_LEDGER.md#2026-10-21--instrumented-n82-diagnostic-772-776).
+
+
+## 2026-10-23 — Keep authored handoff, preparation and movement authority proofs separate
+
+An authored axis is omitted from the current preparation view only when `late_phase.phase === 'holding'`, a handoff exists and `assigned_brigades.length === 0`. Sector selection, intel confidence, defender/enclave aggregation, terrain/force ratio and in-transit relevance consume that view; they are not additional exclusion predicates. Staffed or held axes, all stored objectives, ownership reconciliation and execution state remain available. A successful handoff changes axis membership and roles exactly once; it does not itself move a formation or assign historical credit for a later capture.
+
+Elite-loan ownership is equally local. Resolve the receiving corps only to validate one unique active operation/axis for the loaned formation; do not turn that rule into a global operation search or alter ordinary home-corps movement policy. When an authored operation enables coordinated advance, it still depends on ordinary operation-owned combat resolution and admits at most one same-axis supporter with the lead. See the [2026-10-23 ledger closeout](PROJECT_LEDGER.md#2026-10-23--two-hvo-target-implementation-validation-and-portable-closeout-829881).

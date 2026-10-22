@@ -1124,6 +1124,7 @@ describe('canonical Mistral 2 spawn propagates the opt-in to exactly the intende
             'sana_95#0:sana_veliki_badic_505th',
             'sana_95#0:sana_west_sana_510th',
             'southern_move_95#0:southern_move_bjelajce_baljvine',
+            'southern_move_95#0:southern_move_donji_vrbljani',
         ]);
         for (const variant of MISTRAL_2_95_OPPORTUNITY.variants ?? []) {
             expect(variant.axes.every((a) => a.phase_gate === undefined)).toBe(true);

@@ -1,11 +1,11 @@
 /**
  * ═══════════════════════════════════════════════════════════════
- * OWNERSHIP: Command intent reconciliation (pre-T3) and repair (T6)
- * DOMAIN:    March correction — reconciles proved stale operation intent and repairs invalid destinations
+ * OWNERSHIP: Dormant pre-T3 reconciliation helper and active T6 repair
+ * DOMAIN:    March correction — T6 preserves only proved active-loan transit and repairs invalid destinations
  * ═══════════════════════════════════════════════════════════════
  *
- * DECIDES:   Pre-T3 command ownership may replace one proved stale operation destination;
- *            T6 repair may correct a destination outside its assigned sub-segment
+ * DECIDES:   The pre-T3 helper can replace one proved stale operation destination when called;
+ *            T6 repair may preserve an active elite-loan transit or correct an invalid destination
  * WRITES:    brigade_movement_orders (recomputed BFS path), deletes invalid movement_state
  * READS:     assigned_sub_segment_id → sub-segment friendly_osids, current march destination
  * MUST NOT:  issue new strategic intent — only fix march destinations that violate T1 assignment
@@ -140,6 +140,108 @@ function finishReconciliationCandidate(observer: ReconciliationObserver, actualE
 }
 
 /**
+ * Preserve only an already-started operation approach whose objective was completed after
+ * the transit began. This is a T6 ownership check, not a producer: it never creates or
+ * retargets movement intent.
+ */
+function isActiveAxisCompletedPrefixTransit(
+    state: GameState,
+    brigadeId: string,
+    formation: NonNullable<GameState['military']['formations']>[string],
+    transit: NonNullable<GameState['military']['brigade_movement_state']>[string],
+    adjacency: Map<string, string[]>,
+): boolean {
+    if (!isEligibleOperationFormation(formation)) return false;
+    if (transit.owner !== 'bot_discretionary' || transit.stance !== 'column') return false;
+    if (typeof transit.turns_remaining !== 'number'
+        || !Number.isFinite(transit.turns_remaining)
+        || transit.turns_remaining <= 0) return false;
+
+    const destination = transit.destination_sids?.[0];
+    const location = formation.location_osid;
+    const path = transit.path;
+    if (!destination || !location || transit.destination_sids?.length !== 1 || !Array.isArray(path) || path.length < 2) return false;
+    if (path[0] !== location || path[path.length - 1] !== destination) return false;
+    for (let index = 1; index < path.length; index += 1) {
+        if (!(adjacency.get(path[index - 1]!) ?? []).includes(path[index]!)) return false;
+    }
+    for (const osid of path) {
+        const controller = getPoliticalControllerOSID(state, osid);
+        if (!isFriendlyFaction(controller, formation.faction, state)) return false;
+    }
+    const destinationNeighbors = adjacency.get(destination) ?? [];
+    if (!destinationNeighbors.some((neighbor) =>
+        isFriendlyFaction(getPoliticalControllerOSID(state, neighbor), formation.faction, state))) return false;
+
+    const pendingOrder = state.military.brigade_movement_orders?.[brigadeId];
+    if (pendingOrder && (
+        pendingOrder.owner !== transit.owner
+        || pendingOrder.stance !== transit.stance
+        || pendingOrder.destination_sids?.length !== 1
+        || pendingOrder.destination_sids[0] !== destination
+    )) return false;
+
+    const commands = state.military.corps_command ?? {};
+    const loan = formation.elite_loan_state;
+    const effectiveCorps = loan?.on_loan === true
+        && loan.loaned_to_corps
+        && commands[loan.loaned_to_corps]
+        ? loan.loaned_to_corps
+        : undefined;
+    if (!effectiveCorps || !commands[effectiveCorps]) return false;
+
+    const memberships: Array<{ host: string; operation: CorpsOperation; axes: OperationAxis[]; participating: boolean }> = [];
+    for (const host of Object.keys(commands).sort(strictCompare)) {
+        for (const operation of commands[host]?.active_operations ?? []) {
+            const axes = (operation.axes ?? []).filter((axis) => axis.assigned_brigades.includes(brigadeId as FormationId));
+            const participating = operation.participating_brigades.includes(brigadeId as FormationId);
+            if (participating || axes.length > 0) memberships.push({ host, operation, axes, participating });
+        }
+    }
+    if (memberships.length !== 1) return false;
+    const membership = memberships[0]!;
+    if (membership.host !== effectiveCorps || !membership.participating) return false;
+    if (membership.operation.phase !== 'execution' || membership.axes.length !== 1) return false;
+    const axis = membership.axes[0]!;
+    if (axis.status !== 'executing') return false;
+
+    const currentIndex = axis.current_objective_index;
+    if (!Number.isInteger(currentIndex) || currentIndex <= 0 || currentIndex >= axis.objectives.length) return false;
+    if (axis.objective_capture_count < currentIndex) return false;
+    for (const completedObjective of axis.objectives.slice(0, currentIndex)) {
+        const controller = getPoliticalControllerOSID(state, completedObjective);
+        if (!isFriendlyFaction(controller, formation.faction, state)) return false;
+    }
+
+    const emptyReverseMap: OperationalToCanonicalReverseMap = new Map();
+    const matchingPriorIndices: number[] = [];
+    for (let priorIndex = 0; priorIndex < currentIndex; priorIndex += 1) {
+        const priorAxis = {
+            ...axis,
+            objectives: [axis.objectives[priorIndex]!],
+            current_objective_index: 0,
+            preserve_objective_sequence: true,
+        };
+        const priorOperation = {
+            ...membership.operation,
+            axes: (membership.operation.axes ?? []).map((candidate) => candidate === axis ? priorAxis : candidate),
+        };
+        const approaches = getSectorOffensiveApproachOsids(
+            state,
+            priorOperation,
+            formation.faction,
+            adjacency as Map<Osid, Osid[]>,
+            emptyReverseMap,
+            brigadeId as FormationId,
+        );
+        if (axis.objectives[priorIndex] === destination || approaches.has(destination as Osid)) {
+            matchingPriorIndices.push(priorIndex);
+        }
+    }
+    return matchingPriorIndices.length === 1;
+}
+
+/**
  * Reconcile a pending operation march that still targets a proved-completed objective.
  *
  * This is a command-owner prepass for T3. It does not create strategic intent: a candidate
@@ -199,7 +301,9 @@ export function reconcileStaleOperationMarchOrders(
         if (!location) { if (observer) finishReconciliationCandidate(observer, 'location_missing'); continue; }
 
         const loan = formation.elite_loan_state;
-        const effectiveCorps = loan?.on_loan ? loan.loaned_to_corps : formation.corps_id;
+        const effectiveCorps = loan?.on_loan === true && loan.loaned_to_corps
+            ? loan.loaned_to_corps
+            : undefined;
         if (observer) {
             observer.loan = loan ? {
                 on_loan: loan.on_loan,
@@ -344,7 +448,7 @@ export function reconcileStaleOperationMarchOrders(
         if (approaches.size === 0) { if (observer) finishReconciliationCandidate(observer, 'approaches_empty'); continue; }
         const replacement = findNearestFriendlyOsidDestination(
             state,
-            formation.faction as FactionId,
+            formation.faction,
             location as Osid,
             adjacency as Map<Osid, Osid[]>,
             reverseMap,
@@ -509,7 +613,8 @@ export function correctTransitStates(state: GameState, adjacency: Map<string, st
             brigadeAlreadyAtValidFront
             && !frontOsids.has(transitDest)
             && (isDestinationAuthorizedByOperation(state, bid, transitDest, adjacency)
-                || isMovementAuthorizedByCorpsReassignment(state, f, transitDest, adjacency))
+                || isMovementAuthorizedByCorpsReassignment(state, f, transitDest, adjacency)
+                || isActiveAxisCompletedPrefixTransit(state, bid, f, transitState, adjacency))
         ) {
             continue;
         }

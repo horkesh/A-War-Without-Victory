@@ -109,6 +109,10 @@ import { resolveTgAnchor, collectActiveAnchorIds } from './tactical_group_anchor
 import { getReservedPrePlannedBrigadeIds } from './pre_planned_operations.js';
 import { getStandingOgDefenseBrigadeIds } from './standing_og_defense.js';
 import { buildProbeOperation } from './corps_operation_helpers.js';
+import {
+    getPreparationObjectiveView,
+    isAxisExcludedFromPreparation,
+} from './sector_offensive_axis_helpers.js';
 // ADR-0006 Phase 3A: named TG commander + faction-asymmetric naming. Flag-gated (ENABLE_TG_FORMATION).
 import { assignTacticalCommander } from './officer_system.js';
 import { generateTacticalGroupName } from './tactical_group_naming.js';
@@ -251,12 +255,10 @@ export function getOperationIntelConfidence(
     if (records.length === 0) return emitConfidenceLookupReturn(trace, 'no_records', 0);
 
     // Find the record facing the enemy sector that contains our objectives
-    const objectives = new Set(op.objectives ?? []);
-    if (objectives.size === 0 && op.axes) {
-        for (const axis of op.axes) {
-            for (const obj of axis.objectives) objectives.add(obj);
-        }
-    }
+    const fullObjectives = (op.objectives?.length ?? 0) > 0
+        ? op.objectives!
+        : (op.axes ?? []).flatMap(axis => axis.objectives);
+    const objectives = new Set(getPreparationObjectiveView(op, fullObjectives));
 
     if (objectives.size === 0) {
         const best = records.reduce((value, rec) => Math.max(value, rec.confidence), 0);
@@ -407,12 +409,11 @@ function collectObjectiveEnemySectorIds(
 function allObjectivesInOneEnclave(
     op: CorpsOperation,
 ): typeof ENCLAVE_DEFINITIONS[number] | null {
-    const objectives = new Set<string>(op.objectives ?? []);
-    if (op.axes) {
-        for (const ax of op.axes) {
-            for (const o of ax.objectives) objectives.add(o);
-        }
-    }
+    const fullObjectives = [
+        ...(op.objectives ?? []),
+        ...(op.axes ?? []).flatMap(axis => axis.objectives),
+    ];
+    const objectives = new Set(getPreparationObjectiveView(op, fullObjectives));
     if (objectives.size === 0) return null;
     for (const enclave of ENCLAVE_DEFINITIONS) {
         let allMatch = true;
@@ -462,12 +463,10 @@ export function estimateForceRatio(
     }
     if (attackerFormations.length === 0) return 0;
 
-    const objectives = new Set(op.objectives ?? []);
-    if (objectives.size === 0 && op.axes) {
-        for (const axis of op.axes) {
-            for (const obj of axis.objectives) objectives.add(obj);
-        }
-    }
+    const fullObjectives = (op.objectives?.length ?? 0) > 0
+        ? op.objectives!
+        : (op.axes ?? []).flatMap(axis => axis.objectives);
+    const objectives = new Set(getPreparationObjectiveView(op, fullObjectives));
 
     // LANE-2026-05-02: pick a single primary objective OSID for terrain/supply lookups.
     // Stable: lowest sorted objective string. Defender power is summed across the
@@ -506,6 +505,7 @@ export function estimateForceRatio(
     if (op.staging_osid) relevanceOsids.add(op.staging_osid);
     if (op.axes && op.axes.length > 0) {
         for (const ax of op.axes) {
+            if (isAxisExcludedFromPreparation(ax)) continue;
             if (ax.staging_osid) relevanceOsids.add(ax.staging_osid);
             const currentObjective = ax.objectives[ax.current_objective_index ?? 0];
             if (typeof currentObjective === 'string' && currentObjective.length > 0

@@ -162,7 +162,6 @@ import { mergeFrontDistributionDiagnostics, nextFrontDistributionInvocationOrdin
 import {
     correctMarchOrders,
     correctTransitStates,
-    reconcileStaleOperationMarchOrders,
 } from '../combat/commander_march_correction.js';
 import { evaluateHomeReturn } from '../combat/brigade_home_return.js';
 import { applyFrontlineAttrition } from '../combat/frontline_attrition.js';
@@ -1568,11 +1567,6 @@ export const warPhases: NamedPhase[] = [
             }
             const movementAdjacency = moveSpatial?.preCombat.adjacency
                 ?? buildStaticOsidAdjacency(od.edges);
-            reconcileStaleOperationMarchOrders(
-                context.state,
-                movementAdjacency as Map<string, string[]>,
-                od.opData.operationalToCanonical,
-            );
             const report = processOsidColumnMovement(
                 context.state,
                 od.edges,

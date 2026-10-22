@@ -6,6 +6,7 @@ import { resolveAttackOrdersOsid } from '../src/sim/combat/attack_resolution_osi
 import { SANA_95_OPPORTUNITY } from '../src/sim/combat/operation_opportunity_catalog_5th_corps.js';
 import { advanceLatePhaseGates, buildAttackOrderOwner } from '../src/sim/combat/operation_phase_gate.js';
 import { processOsidColumnMovement } from '../src/sim/combat/osid_column_movement.js';
+import { getPreparationObjectiveView } from '../src/sim/combat/sector_offensive_axis_helpers.js';
 import { initializeCasualtyLedger } from '../src/state/casualty_ledger.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import type { CorpsOperation, FactionId, GameState, OperationAxis } from '../src/state/game_state.js';
@@ -375,6 +376,47 @@ describe('Operation Sana bounded pocket cleanup tails', () => {
             'arbih_505th_vitezka_mountain',
             'arbih_503rd_slavna_mountain',
         ]);
+        const runtimeAxes = SANA_95_OPPORTUNITY.axes.map((definition) => ({
+            axis_id: definition.axis_id,
+            name: definition.name,
+            assigned_brigades: [...definition.brigades],
+            objectives: [...definition.objectives],
+            current_objective_index: 0,
+            status: 'executing',
+            failure_count: 0,
+            consecutive_failures_on_current: 0,
+            momentum: 0,
+            attack_attempt_count: 0,
+            objective_capture_count: 0,
+            movement_only_execution_turns: 0,
+            idle_execution_turn_streak: 0,
+            ...(definition.phase_gate ? {
+                late_phase: {
+                    phase: 'holding',
+                    main_axis_id: definition.phase_gate.main_axis_id,
+                    requires: [...definition.phase_gate.requires_operation_captures],
+                    gated_objectives: [...definition.objectives],
+                    receipts: [],
+                    handoff: definition.phase_gate.handoff,
+                },
+            } : {}),
+        })) as OperationAxis[];
+        const fullObjectives = runtimeAxes.flatMap(axis => axis.objectives);
+        const runtimeOp = { axes: runtimeAxes } as CorpsOperation;
+        const view = getPreparationObjectiveView(runtimeOp, fullObjectives);
+        for (const axisId of ['sana_veliki_badic_505th', 'sana_west_sana_510th']) {
+            const gated = runtimeAxes.find(axis => axis.axis_id === axisId)!;
+            expect(gated.assigned_brigades).toEqual([]);
+            for (const objective of gated.objectives) {
+                const sharedWithIncludedAxis = runtimeAxes.some(axis =>
+                    axis !== gated
+                    && !(axis.late_phase?.phase === 'holding'
+                        && axis.late_phase.handoff !== undefined
+                        && axis.assigned_brigades.length === 0)
+                    && axis.objectives.includes(objective));
+                expect(view.includes(objective)).toBe(sharedWithIncludedAxis);
+            }
+        }
 
         const edgeSet = new Set(realContactEdges().flatMap(({ a, b }) => [`${a}|${b}`, `${b}|${a}`]));
         for (const [a, b] of [

@@ -231,10 +231,103 @@ function seedIntel(state: GameState, confidence: number): void {
 }
 
 describe('attack resolution intel execution friction', () => {
-    it('advances two same-axis attackers after a decisive operation breach', () => {
+    it('strictly orders the lead and advances exactly the first admitted same-axis supporter', () => {
         const { state, edges } = makeScenario();
-        const second = makeFormation('brig_rs_2', 'RS', 'brigade', 'op:rs:staging', { corps_id: 'vrs_1st' });
-        state.military.formations!.brig_rs_2 = second;
+        for (const id of ['brig_rs_2', 'brig_rs_3', 'brig_rs_cross', 'brig_rs_free']) {
+            state.military.formations![id] = makeFormation(id, 'RS', 'brigade', 'op:rs:staging', {
+                corps_id: 'vrs_1st',
+            });
+        }
+        const op = state.military.corps_command!.vrs_1st!.active_operations[0]!;
+        op.coordinated_advance = true;
+        op.participating_brigades = ['brig_rs_cross', 'brig_rs_3', 'brig_rs_2', 'brig_rs_1'];
+        op.axes = [
+            {
+                axis_id: 'breach', status: 'executing',
+                assigned_brigades: ['brig_rs_3', 'brig_rs_2', 'brig_rs_1'],
+                objectives: ['op:rbih:target'], current_objective_index: 0,
+            },
+            {
+                axis_id: 'other', status: 'executing',
+                assigned_brigades: ['brig_rs_cross'],
+                objectives: ['op:rbih:target'], current_objective_index: 0,
+            },
+        ] as CorpsOperation['axes'];
+        state.military.brigade_attack_orders = {
+            brig_rs_free: 'op:rbih:target',
+            brig_rs_cross: 'op:rbih:target',
+            brig_rs_3: 'op:rbih:target',
+            brig_rs_2: 'op:rbih:target',
+            brig_rs_1: 'op:rbih:target',
+        } as any;
+        const report = resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+        expect(report.battles[0]?.outcome).toBe('decisive_victory');
+        expect(report.battles[0]?.attacker_brigades).toEqual([
+            'brig_rs_1', 'brig_rs_2', 'brig_rs_3', 'brig_rs_cross', 'brig_rs_free',
+        ]);
+        expect(state.military.formations!.brig_rs_1!.location_osid).toBe('op:rbih:target');
+        expect(state.military.formations!.brig_rs_2!.location_osid).toBe('op:rbih:target');
+        expect(state.military.formations!.brig_rs_3!.location_osid).toBe('op:rs:staging');
+        expect(state.military.formations!.brig_rs_cross!.location_osid).toBe('op:rs:staging');
+        expect(state.military.formations!.brig_rs_free!.location_osid).toBe('op:rs:staging');
+    });
+
+    it('does not advance a same-faction coattacker committed to another live operation', () => {
+        const { state, edges } = makeScenario();
+        state.military.formations!.brig_rs_2 = makeFormation(
+            'brig_rs_2', 'RS', 'brigade', 'op:rs:staging', { corps_id: 'vrs_1st' },
+        );
+        const leadOperation = state.military.corps_command!.vrs_1st!.active_operations[0]!;
+        leadOperation.coordinated_advance = true;
+        leadOperation.axes = [{
+            axis_id: 'breach', status: 'executing',
+            assigned_brigades: ['brig_rs_1'],
+            objectives: ['op:rbih:target'], current_objective_index: 0,
+        }] as CorpsOperation['axes'];
+        const otherLiveOperation = {
+            ...structuredClone(leadOperation),
+            name: 'other_live_op',
+            started_turn: 4,
+            phase_started_turn: 4,
+            coordinated_advance: true,
+            participating_brigades: ['brig_rs_2'],
+            axes: [{
+                axis_id: 'other_breach', status: 'executing',
+                assigned_brigades: ['brig_rs_2'],
+                objectives: ['op:rbih:target'], current_objective_index: 0,
+            }],
+        } as CorpsOperation;
+        state.military.corps_command!.vrs_1st!.active_operations.push(otherLiveOperation);
+        state.military.brigade_attack_orders = {
+            brig_rs_2: 'op:rbih:target',
+            brig_rs_1: 'op:rbih:target',
+        } as any;
+
+        const report = resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+
+        expect(report.battles[0]?.outcome).toBe('decisive_victory');
+        expect(report.battles[0]?.attacker_brigades).toEqual(['brig_rs_1', 'brig_rs_2']);
+        expect(state.military.formations!.brig_rs_1!.location_osid).toBe('op:rbih:target');
+        expect(state.military.formations!.brig_rs_2!.location_osid).toBe('op:rs:staging');
+    });
+
+    it.each([
+        { name: 'unflagged operation', configure: (op: CorpsOperation) => { delete op.coordinated_advance; } },
+        { name: 'nonexecuting operation', configure: (op: CorpsOperation) => { op.phase = 'recovery'; } },
+        { name: 'decisive battle without a control flip', configure: (op: CorpsOperation) => { op.occupies_on_victory = false; } },
+        {
+            name: 'nondecisive battle',
+            configure: (_op: CorpsOperation, state: GameState) => {
+                state.military.formations!.brig_rbih_1!.personnel = 50_000;
+                state.military.formations!.brig_rbih_1!.cohesion = 100;
+                state.military.formations!.brig_rbih_1!.morale = 100;
+            },
+        },
+    ])('does not advance a supporter for $name', ({ configure }) => {
+        const { state, edges } = makeScenario();
+        state.military.formations!.brig_rs_2 = makeFormation(
+            'brig_rs_2', 'RS', 'brigade', 'op:rs:staging', { corps_id: 'vrs_1st' },
+        );
         const op = state.military.corps_command!.vrs_1st!.active_operations[0]!;
         op.coordinated_advance = true;
         op.participating_brigades = ['brig_rs_1', 'brig_rs_2'];
@@ -244,12 +337,14 @@ describe('attack resolution intel execution friction', () => {
             objectives: ['op:rbih:target'], current_objective_index: 0,
         }] as CorpsOperation['axes'];
         state.military.brigade_attack_orders = {
-            brig_rs_1: 'op:rbih:target', brig_rs_2: 'op:rbih:target',
+            brig_rs_2: 'op:rbih:target', brig_rs_1: 'op:rbih:target',
         } as any;
+        configure(op, state);
+
         const report = resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
-        expect(report.battles[0]?.outcome).toBe('decisive_victory');
-        expect(state.military.formations!.brig_rs_1!.location_osid).toBe('op:rbih:target');
-        expect(second.location_osid).toBe('op:rbih:target');
+
+        expect(report.battles).toHaveLength(1);
+        expect(state.military.formations!.brig_rs_2!.location_osid).toBe('op:rs:staging');
     });
 
     it('divides mobile sector response across simultaneous axes without weakening a lone attack', () => {

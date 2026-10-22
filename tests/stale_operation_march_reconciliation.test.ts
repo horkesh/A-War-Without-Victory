@@ -32,6 +32,7 @@ function state(overrides: {
     duplicateOperation?: boolean;
     duplicateAxis?: boolean;
     loanedTo?: string | null;
+    onLoan?: boolean;
     oldFriendly?: boolean;
     emptyApproach?: boolean;
     activeTransit?: boolean;
@@ -67,7 +68,7 @@ function state(overrides: {
     };
     if (overrides.loanedTo !== null) {
         formation.elite_loan_state = {
-            on_loan: true, loaned_to_corps: overrides.loanedTo ?? receivingCorps, loan_start_turn: 0,
+            on_loan: overrides.onLoan ?? true, loaned_to_corps: overrides.loanedTo ?? receivingCorps, loan_start_turn: 0,
             last_recall_turn: null, loan_start_personnel: 1000,
             permanently_degraded: false, current_episode_id: 0,
         };
@@ -178,6 +179,9 @@ describe('pre-T3 stale operation march reconciliation', () => {
         ['ambiguous axes', { duplicateAxis: true }],
         ['recovery operation', { phase: 'recovery' }],
         ['completed operation', { phase: 'completed' }],
+        ['non-loan home-corps operation', { loanedTo: null }],
+        ['inactive loan with stale receiver', { onLoan: false }],
+        ['active loan with empty receiver', { loanedTo: '' }],
         ['invalid loan recipient', { loanedTo: 'other' }],
         ['prior objective no longer friendly-held', { oldFriendly: false }],
         ['empty current approach', { emptyApproach: true }],
@@ -287,6 +291,8 @@ describe('reconciliation write observer', () => {
         ['active transit', { activeTransit: true }, 'active_transit'],
         ['recovery operation', { phase: 'recovery' }, 'operation_phase'],
         ['reserve membership', { reserve: true }, 'reserve_membership'],
+        ['non-loan home-corps operation', { loanedTo: null }, 'effective_corps_missing'],
+        ['inactive loan with stale receiver', { onLoan: false }, 'effective_corps_missing'],
     ])('marks later guards NOT_REACHED for %s', (_name, overrides, actualExit) => {
         process.env.AWWV_DEBUG_REASON_CODES = 'reconciliation_write';
         resetReasonCodeTopicCacheForTests();
@@ -299,6 +305,10 @@ describe('reconciliation write observer', () => {
         const terminal = records(log).find((row) => row.kind === 'candidate_terminal');
         if (!terminal) throw new Error('missing reconciliation candidate terminal');
         expect(terminal.actual_exit).toBe(actualExit);
+        if (actualExit === 'effective_corps_missing') {
+            expect(terminal.guards.effective_corps_present).toBe(false);
+            expect(terminal.guards.unique_membership).toBe('NOT_REACHED');
+        }
         expect(terminal.guards.replacement_authorized).toBe('NOT_REACHED');
         expect(input).toEqual(before);
     });

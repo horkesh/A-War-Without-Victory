@@ -21,6 +21,7 @@ const PODRASNICA = 'op:mrkonjic_grad:podrasnica_2';
 const MRKONJIC = 'op:mrkonjic_grad:mrkonjic_grad_2';
 const BJELAJCE = 'op:mrkonjic_grad:bjelajce_2';
 const BALJVINE = 'op:mrkonjic_grad:baljvine_2';
+const DONJI_VRBLJANI = 'op:kljuc:donji_vrbljani_2';
 const DONOR = 'hv_5th_guards_karlovac';
 const FORWARD_DONOR = 'F_HRHB_0001';
 const OP_ID = 'hvo_tomislavgrad:Operation Southern Move:t182';
@@ -197,7 +198,7 @@ function approveSouthernMove(state: GameState) {
 describe('test-only Southern Move Bjelajce-Baljvine handoff feasibility', () => {
     it('authors the approved Southern Move main axis and empty gated tail without changing operation identity', () => {
         expect(ACTUAL_N74_SAVE_W184_SHA256).toHaveLength(64);
-        expect(SOUTHERN_MOVE_95_OPPORTUNITY.axes).toHaveLength(2);
+        expect(SOUTHERN_MOVE_95_OPPORTUNITY.axes).toHaveLength(3);
         expect(SOUTHERN_MOVE_95_OPPORTUNITY.axes[0]).toMatchObject({
             axis_id: 'southern_move_mrkonjic',
             objectives: [GERZOVO, MAJDAN, PODRASNICA, MRKONJIC],
@@ -216,6 +217,19 @@ describe('test-only Southern Move Bjelajce-Baljvine handoff feasibility', () => 
                 },
             },
         }));
+        expect(SOUTHERN_MOVE_95_OPPORTUNITY.axes[2]).toEqual(expect.objectContaining({
+            axis_id: 'southern_move_donji_vrbljani',
+            brigades: [],
+            objectives: [DONJI_VRBLJANI],
+            phase_gate: {
+                main_axis_id: 'southern_move_mrkonjic',
+                requires_operation_captures: [PODRASNICA],
+                handoff: {
+                    brigade_id: 'hvo_rama_brigade',
+                    source_axis_id: 'southern_move_mrkonjic',
+                },
+            },
+        }));
         expect(SOUTHERN_MOVE_95_OPPORTUNITY.name).toBe('Operation Southern Move');
     });
 
@@ -230,12 +244,23 @@ describe('test-only Southern Move Bjelajce-Baljvine handoff feasibility', () => 
         expect(outcome).toMatchObject({ decision_applied: true, reason: null });
         const spawned = state.military.corps_command!.hvo_tomislavgrad!.active_operations[0]!;
         expect(spawned.name).toBe('Operation Southern Move');
-        expect(spawned.axes).toHaveLength(2);
+        expect(spawned.axes).toHaveLength(3);
         expect(spawned.axes![0]!.assigned_brigades).toContain(FORWARD_DONOR);
-        expect(spawned.axes![1]!.late_phase?.handoff).toEqual({
+        const bjelajce = spawned.axes!.find((axis) => axis.axis_id === 'southern_move_bjelajce_baljvine')!;
+        const donji = spawned.axes!.find((axis) => axis.axis_id === 'southern_move_donji_vrbljani')!;
+        expect(bjelajce.late_phase?.handoff).toEqual({
             brigade_id: FORWARD_DONOR,
             source_axis_id: 'southern_move_mrkonjic',
         });
+        expect(donji).toMatchObject({
+            assigned_brigades: [], objectives: [DONJI_VRBLJANI],
+            late_phase: {
+                phase: 'holding', main_axis_id: 'southern_move_mrkonjic',
+                requires: [PODRASNICA], gated_objectives: [DONJI_VRBLJANI],
+                handoff: { brigade_id: 'hvo_rama_brigade', source_axis_id: 'southern_move_mrkonjic' },
+            },
+        });
+        expect(spawned.participating_brigades.filter((id) => id === 'hvo_rama_brigade')).toHaveLength(1);
     });
 
     it('keeps exact runtime identity ahead of an OOB alias for the handoff binding', () => {
@@ -248,8 +273,11 @@ describe('test-only Southern Move Bjelajce-Baljvine handoff feasibility', () => 
         expect(preflightOpportunityAdmission(state, SOUTHERN_MOVE_95_OPPORTUNITY).selected_participants).toBe(5);
         approveSouthernMove(state);
         const spawned = state.military.corps_command!.hvo_tomislavgrad!.active_operations[0]!;
-        expect(spawned.axes).toHaveLength(2);
-        expect(spawned.axes![1]!.late_phase?.handoff?.brigade_id).toBe('hrhb_kralj_tomislav_brigade');
+        expect(spawned.axes).toHaveLength(3);
+        expect(spawned.axes!.find((axis) => axis.axis_id === 'southern_move_bjelajce_baljvine')!.late_phase?.handoff?.brigade_id)
+            .toBe('hrhb_kralj_tomislav_brigade');
+        expect(spawned.axes!.find((axis) => axis.axis_id === 'southern_move_donji_vrbljani')!.late_phase?.handoff?.brigade_id)
+            .toBe('hvo_rama_brigade');
     });
 
     it.each([
@@ -265,8 +293,18 @@ describe('test-only Southern Move Bjelajce-Baljvine handoff feasibility', () => 
         }
         approveSouthernMove(state);
         const spawned = state.military.corps_command!.hvo_tomislavgrad!.active_operations[0]!;
-        expect(spawned.axes).toHaveLength(1);
-        expect(spawned.axes![0]!.axis_id).toBe('southern_move_mrkonjic');
+        expect(spawned.axes).toHaveLength(2);
+        expect(spawned.axes!.map((axis) => axis.axis_id)).toEqual([
+            'southern_move_mrkonjic',
+            'southern_move_donji_vrbljani',
+        ]);
+        expect(spawned.axes![1]).toMatchObject({
+            assigned_brigades: [], objectives: [DONJI_VRBLJANI],
+            late_phase: {
+                main_axis_id: 'southern_move_mrkonjic', gated_objectives: [DONJI_VRBLJANI],
+                handoff: { brigade_id: 'hvo_rama_brigade', source_axis_id: 'southern_move_mrkonjic' },
+            },
+        });
     });
 
     it('hands one constructed uncommitted donor exactly once; this five-to-four fixture leaves four', () => {

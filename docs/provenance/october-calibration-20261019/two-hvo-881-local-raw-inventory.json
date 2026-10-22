@@ -1,0 +1,2540 @@
+{
+  "schema": "awwv.two-hvo-883.local-raw-inventory.v2",
+  "frozen_utc": "2026-10-22T23:43:08.0922095Z",
+  "scope_note": "Bounded 829-883 documentation-correction closeout only. The 2026-10-23 tree, including 882 review/structural attempts and the closed 883 before-image attempt, plus 16 untracked diagnostic scripts are freshly hashed file-by-file. Older 829-880 attempt directories are enumerated and reuse their preserved receipts/inventories at actual scope; no fresh scan of the historical 117 GB raw corpus occurred.",
+  "excludes": "This inventory itself; the later 883 focused-verification attempt and any commit/push/admin or targeted-review receipts created after this freeze; live C/D paths. Full C/D bytes are represented only by already closed opening/closing archives and pins.",
+  "backup_status": "Inventory only; raw bytes remain LOCAL and are not remotely backed up.",
+  "supersedes": {
+    "schema": "awwv.two-hvo-881.local-raw-inventory.v1",
+    "before_image": "logs/claude-channel-20261023/883-docs-correction-before-01/before-raw-inventory.json",
+    "preserved": true
+  },
+  "counts": {
+    "new_20261023_files": 96,
+    "new_20261023_bytes": 247003004,
+    "diagnostic_scripts": 16,
+    "diagnostic_script_bytes": 119413,
+    "older_top_level_entries": 363
+  },
+  "new_20261023": [
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-before-02/commander.before.js",
+      "bytes": 32837,
+      "sha256": "204efd8daa165b8c10d330f8b754d84c9126d68fc08be2ff78f20e018b3f7679"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-before-02/commander.before.ts",
+      "bytes": 33526,
+      "sha256": "2d81213fb368c4a3c9c2f9f979243915256992b9279dbfbcebd2096bc96e470e"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-before-02/entry-script.snapshot",
+      "bytes": 9536,
+      "sha256": "3933e010daf15938d026692e732e401d5ce50e1e0656d546e4697723e9a7779e"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-before-02/environment.json",
+      "bytes": 248,
+      "sha256": "99ebf537be719b5d405148da7a5013cee26d6051f76c08d9fd715d92d20337e7"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-before-02/hvo.before.ts",
+      "bytes": 25444,
+      "sha256": "9a21e13d898418e3beff2ad213c04a2b029bf1cb283517cc54704dbfafbb943e"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-before-02/receipt.json",
+      "bytes": 5840,
+      "sha256": "8615d0e599a6e534128ee4de936c67db9f2100efb7ef856b6dc972877c698752"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-before-02/sector.before.ts",
+      "bytes": 65604,
+      "sha256": "1e19e8dd7288fede9cdc2affbbb4bcab191f0c421a82ca498c40bfde9facc647"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-before-02/start.json",
+      "bytes": 4041,
+      "sha256": "02c623f6d84f665d807139c970849e5ff4d7dacdfa4502ddbb9da76d9f4523b2"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-before-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-before-02/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-closing-manifest-01/closing-manifest.json",
+      "bytes": 731,
+      "sha256": "30376945cfe236222f54982dbf4687e5b3220b5bc4cdc5baff5b4a7e652205c5"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-closing-manifest-01/entry-script.snapshot",
+      "bytes": 9536,
+      "sha256": "3933e010daf15938d026692e732e401d5ce50e1e0656d546e4697723e9a7779e"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-closing-manifest-01/receipt.json",
+      "bytes": 4001,
+      "sha256": "d87a4356c2f3822b4f8557cd3da4b3ed160fd1f9fa45e65d8cc7a68810673a13"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-closing-manifest-01/start.json",
+      "bytes": 2809,
+      "sha256": "0bbdd198575fa5a655feb511ab54b66040bce7a5475dba1d1b6b7464e2a873a9"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-closing-manifest-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-closing-manifest-01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-focused-01/c.after.jsonl",
+      "bytes": 112034905,
+      "sha256": "437fbb3a8863c972b5a8369fae4196be0a8eec9c355ebf3c37b2fb562450e33f"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-focused-01/c.before.jsonl",
+      "bytes": 112034905,
+      "sha256": "437fbb3a8863c972b5a8369fae4196be0a8eec9c355ebf3c37b2fb562450e33f"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-focused-01/c.new-bytes.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-focused-01/d.after.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-focused-01/d.before.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-focused-01/d.new-bytes.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-focused-01/entry-script.snapshot",
+      "bytes": 43,
+      "sha256": "39db22f579acf5639bbb17a261408debbde03f4692c0c439e77e7f13aeba74d6"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-focused-01/receipt.json",
+      "bytes": 8655,
+      "sha256": "600e86547ce24dcc95c7644c7ce7d029274e5e2b8ff051c16ed91b2ee9543d3b"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-focused-01/start.json",
+      "bytes": 6571,
+      "sha256": "244ccb4cdb3b384297d2b8fcb74f9794e6732976070e3c8cb36d6eb7f792defe"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-focused-01/stderr.log",
+      "bytes": 13800,
+      "sha256": "84b5d9cef1168b5b5a850ebb930d23901f1e3094ff530e28f27403442e683064"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-focused-01/stdout.log",
+      "bytes": 9345,
+      "sha256": "0eeee7b9f866727c93423d9d0dd95a7070120d2a6ace3aa088997e0a528ebe72"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-focused-01/telemetry-manifest.json",
+      "bytes": 1347,
+      "sha256": "2fdd3a445bcdf50f6ccbbee387e8da49f78acae95a4a70f786ee2eaa478ef217"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-frozen-ready-01/entry-script.snapshot",
+      "bytes": 9536,
+      "sha256": "3933e010daf15938d026692e732e401d5ce50e1e0656d546e4697723e9a7779e"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-frozen-ready-01/frozen-verdict.json",
+      "bytes": 7803,
+      "sha256": "70cfc08d4894ed943db9fe1a85b7debbbbdcde3226953c5c42d32ccff00c959f"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-frozen-ready-01/receipt.json",
+      "bytes": 9741,
+      "sha256": "4478ef75ad83032a004277f3830f4ca505f9d5126e46711e83253378e73ac5b4"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-frozen-ready-01/start.json",
+      "bytes": 8549,
+      "sha256": "3074f6a7ed3477528293acf10ebf727dee85700468bebc7c1721e01651732b2f"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-frozen-ready-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-frozen-ready-01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-noemit-01/entry-script.snapshot",
+      "bytes": 45,
+      "sha256": "8d5fa5bd883fec0979fc2004f1fe1d99aef40570155d550eadc0b03b55513bf0"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-noemit-01/receipt.json",
+      "bytes": 2861,
+      "sha256": "5b251f1861c4bac972e2dacea5548f545f088b1239b353fefb3f797e72c4cf1c"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-noemit-01/start.json",
+      "bytes": 1841,
+      "sha256": "164fcba8c2c093979fdb070c4854675ac1117b9d87910bff3de09d1451a7ed6c"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-noemit-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-noemit-01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-transpile-parity-01/entry-script.snapshot",
+      "bytes": 9112572,
+      "sha256": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-transpile-parity-01/receipt.json",
+      "bytes": 4518,
+      "sha256": "56ecd12b22aa2437ed7be3728d8cc68335b7c8f58805998dcf7da87a5fa63762"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-transpile-parity-01/start.json",
+      "bytes": 3397,
+      "sha256": "c40d58cf6265d8a0e78aad47db5b2d628a667a0bfb53dc590538c408f59db813"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-transpile-parity-01/stderr.log",
+      "bytes": 995,
+      "sha256": "4151955167ccb717226b7c503e8a8b529d77d08ba72128885bf7ef501ef18d3c"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-transpile-parity-01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-transpile-parity-02/commander.after.js",
+      "bytes": 32837,
+      "sha256": "204efd8daa165b8c10d330f8b754d84c9126d68fc08be2ff78f20e018b3f7679"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-transpile-parity-02/commander.after.ts",
+      "bytes": 33513,
+      "sha256": "bafd5750bd750d84eeaece66b4c2abf1333c072c07a03d35b9b55e42248adac5"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-transpile-parity-02/entry-script.snapshot",
+      "bytes": 9112572,
+      "sha256": "3ae902c92cc44dace175c0e69e13a4b0899f6983c6121d76b9ab8dd5795e7675"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-transpile-parity-02/parity.json",
+      "bytes": 395,
+      "sha256": "72ee19c58f8c745fc42facd1b4ead16841bc7f036c82ca6e4d475b58693166be"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-transpile-parity-02/receipt.json",
+      "bytes": 4908,
+      "sha256": "3bed1fe271f965587e690014eb2b503ecc46d2d326f70b8768379326a390319f"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-transpile-parity-02/start.json",
+      "bytes": 3419,
+      "sha256": "38c45b37a0521c670a51169694963d456144f0681d1192a5552bed0324250b98"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-transpile-parity-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/878-suite-targeted-transpile-parity-02/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/879-targeted-correction-independent-review-freeze-01/entry-script.snapshot",
+      "bytes": 5254,
+      "sha256": "6cfbd5286db6ef4f47e6f320a31b114c84b9ccbe00fe6e8af3fb8340924e15b7"
+    },
+    {
+      "path": "logs/claude-channel-20261023/879-targeted-correction-independent-review-freeze-01/receipt.json",
+      "bytes": 3285,
+      "sha256": "82e170092b73b5354f159fb6432f23bb8d76859b988a6b64f2bddd600369d1a6"
+    },
+    {
+      "path": "logs/claude-channel-20261023/879-targeted-correction-independent-review-freeze-01/start.json",
+      "bytes": 2219,
+      "sha256": "bb3e48207fd92efdf702d47ad98ed7e89ab5d35214995b1ad046189a7b4871d9"
+    },
+    {
+      "path": "logs/claude-channel-20261023/879-targeted-correction-independent-review-freeze-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/879-targeted-correction-independent-review-freeze-01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/879-targeted-correction-independent-review.json",
+      "bytes": 5254,
+      "sha256": "6cfbd5286db6ef4f47e6f320a31b114c84b9ccbe00fe6e8af3fb8340924e15b7"
+    },
+    {
+      "path": "logs/claude-channel-20261023/881-final-results-independent-review-freeze-01/entry-script.snapshot",
+      "bytes": 5492,
+      "sha256": "580a14776358f2e204c185e37492726ce8c47ff3cf2b7c1f83bcba9528dc5216"
+    },
+    {
+      "path": "logs/claude-channel-20261023/881-final-results-independent-review-freeze-01/receipt.json",
+      "bytes": 3432,
+      "sha256": "65af7d94edc27613f35404142d62cf6425bfd4dd076eff8959be4edbdcdfbb8e"
+    },
+    {
+      "path": "logs/claude-channel-20261023/881-final-results-independent-review-freeze-01/start.json",
+      "bytes": 2371,
+      "sha256": "bff988167bf91bb810a13dcdd1bc7b70c30d683dccd8ff71f9d2dd9a7c81a01c"
+    },
+    {
+      "path": "logs/claude-channel-20261023/881-final-results-independent-review-freeze-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/881-final-results-independent-review-freeze-01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/881-final-results-independent-review.json",
+      "bytes": 5492,
+      "sha256": "580a14776358f2e204c185e37492726ce8c47ff3cf2b7c1f83bcba9528dc5216"
+    },
+    {
+      "path": "logs/claude-channel-20261023/882-documentation-focused-verification-01/entry-script.snapshot",
+      "bytes": 3432,
+      "sha256": "3006d5297fb2a379778f77a62eba356abffeddedd092110beca814fc3f2c75b5"
+    },
+    {
+      "path": "logs/claude-channel-20261023/882-documentation-focused-verification-01/receipt.json",
+      "bytes": 13533,
+      "sha256": "6365a278d2b87a694f6f89000e2fa46b4751e1155a11b144c13662b5dfa939e1"
+    },
+    {
+      "path": "logs/claude-channel-20261023/882-documentation-focused-verification-01/start.json",
+      "bytes": 12421,
+      "sha256": "9fbe35c46eb5273973ba20268bee29958a1a7495319c171e3c3f162df5328316"
+    },
+    {
+      "path": "logs/claude-channel-20261023/882-documentation-focused-verification-01/stderr.log",
+      "bytes": 2141,
+      "sha256": "5a8e6ecfed544c26b17ca288e76d81e6299652e817fdf7a9c776cd4cdbc664c4"
+    },
+    {
+      "path": "logs/claude-channel-20261023/882-documentation-focused-verification-01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/882-documentation-focused-verification-02/entry-script.snapshot",
+      "bytes": 3432,
+      "sha256": "3006d5297fb2a379778f77a62eba356abffeddedd092110beca814fc3f2c75b5"
+    },
+    {
+      "path": "logs/claude-channel-20261023/882-documentation-focused-verification-02/focused-verification.json",
+      "bytes": 4714,
+      "sha256": "b4c6f00365258fb065eb0e287bf8ef0a69e172bf9bd6fdc25c72b3c39bd7a0d0"
+    },
+    {
+      "path": "logs/claude-channel-20261023/882-documentation-focused-verification-02/receipt.json",
+      "bytes": 12743,
+      "sha256": "edfe5e1e8daeb4fa19b3a58acab1bb27dc01f17b8da22bd5bf1a1b28a4e88ab6"
+    },
+    {
+      "path": "logs/claude-channel-20261023/882-documentation-focused-verification-02/start.json",
+      "bytes": 11513,
+      "sha256": "b59680d8a57ea4f5f66bf089050c7a25a214ab323b437fca4209826905e95de2"
+    },
+    {
+      "path": "logs/claude-channel-20261023/882-documentation-focused-verification-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/882-documentation-focused-verification-02/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/882-documentation-integration-review-freeze-01/entry-script.snapshot",
+      "bytes": 5033,
+      "sha256": "3a257487dc76038ba5055d074112bd31586bf9a1e62f9bc44c11404b392ff668"
+    },
+    {
+      "path": "logs/claude-channel-20261023/882-documentation-integration-review-freeze-01/receipt.json",
+      "bytes": 3279,
+      "sha256": "e865085ef8c26bf9a408aac03783d29277697c488c6cae6a55c7d8644452e2e1"
+    },
+    {
+      "path": "logs/claude-channel-20261023/882-documentation-integration-review-freeze-01/start.json",
+      "bytes": 2219,
+      "sha256": "ec7d7aa97aaf639a2a0d2fe141305eec79c2965ce3373d50469a15c3c50e0f14"
+    },
+    {
+      "path": "logs/claude-channel-20261023/882-documentation-integration-review-freeze-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/882-documentation-integration-review-freeze-01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/882-documentation-integration-review.json",
+      "bytes": 5033,
+      "sha256": "3a257487dc76038ba5055d074112bd31586bf9a1e62f9bc44c11404b392ff668"
+    },
+    {
+      "path": "logs/claude-channel-20261023/883-docs-correction-archive.cjs",
+      "bytes": 1272,
+      "sha256": "a1dc10df9f0315b87102fcc4a49b2d7bbde542e5c7a6dfc5d6972454c6681a21"
+    },
+    {
+      "path": "logs/claude-channel-20261023/883-docs-correction-before-01/before-calibration-master.md",
+      "bytes": 1334235,
+      "sha256": "207f36388972cbeb8f10720818b66b8ff80e3e5b43c958cfbd9399c08e58317f"
+    },
+    {
+      "path": "logs/claude-channel-20261023/883-docs-correction-before-01/before-code-canon.md",
+      "bytes": 24875,
+      "sha256": "452a8c2a5ef854857bcc19abe90a2ff814e870aa28334fb4b99bf9387e980003"
+    },
+    {
+      "path": "logs/claude-channel-20261023/883-docs-correction-before-01/before-knowledge-ledger.md",
+      "bytes": 1330626,
+      "sha256": "999b9fc82d1b1a01081f65b99a5fb3ebba1a21fd344639f0a2f15255593a7ed5"
+    },
+    {
+      "path": "logs/claude-channel-20261023/883-docs-correction-before-01/before-manifest.json",
+      "bytes": 1944,
+      "sha256": "58240229ebf8b85aa07d29307fa087c7117a60b8b799c3c2e0c431a3c7233988"
+    },
+    {
+      "path": "logs/claude-channel-20261023/883-docs-correction-before-01/before-portable-result.json",
+      "bytes": 3432,
+      "sha256": "3006d5297fb2a379778f77a62eba356abffeddedd092110beca814fc3f2c75b5"
+    },
+    {
+      "path": "logs/claude-channel-20261023/883-docs-correction-before-01/before-project-ledger.md",
+      "bytes": 1208003,
+      "sha256": "ee511bf32a4065c6348c05379c3370a7fc4a47319d8348a8b60f518a63ccc0fc"
+    },
+    {
+      "path": "logs/claude-channel-20261023/883-docs-correction-before-01/before-provenance-readme.md",
+      "bytes": 44229,
+      "sha256": "4259a24c19db04c4ec68df0e97756046be979248e4cefb6e34dfceec983e64a0"
+    },
+    {
+      "path": "logs/claude-channel-20261023/883-docs-correction-before-01/before-raw-inventory.json",
+      "bytes": 94806,
+      "sha256": "b97ffe09a66564557ea412301d8997518f5aaba54d6037de13879937440b42ad"
+    },
+    {
+      "path": "logs/claude-channel-20261023/883-docs-correction-before-01/before-systems-manual.md",
+      "bytes": 184851,
+      "sha256": "2d401ed997afb9a7db19d37dbb2939fd7238e621e824fc9150ada23d44fdc2f8"
+    },
+    {
+      "path": "logs/claude-channel-20261023/883-docs-correction-before-01/entry-script.snapshot",
+      "bytes": 1272,
+      "sha256": "a1dc10df9f0315b87102fcc4a49b2d7bbde542e5c7a6dfc5d6972454c6681a21"
+    },
+    {
+      "path": "logs/claude-channel-20261023/883-docs-correction-before-01/receipt.json",
+      "bytes": 4181,
+      "sha256": "a36570b7179bfd90adeba149790e42121b0a4e419ea542a244cbb803be718869"
+    },
+    {
+      "path": "logs/claude-channel-20261023/883-docs-correction-before-01/start.json",
+      "bytes": 1678,
+      "sha256": "318f84661f8db6a1a6990e231383d102c86ba55d9cdf77951e0a8dbdc6ad5066"
+    },
+    {
+      "path": "logs/claude-channel-20261023/883-docs-correction-before-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261023/883-docs-correction-before-01/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "untracked_diagnostic_scripts": [
+    {
+      "path": "tools/diagnostics/842_archive_rejected_test.cjs",
+      "bytes": 1441,
+      "sha256": "2c56e867b5897b8f2a93f6ccdf32da7ff25ffe8f3c3dadacb36d0fc2b1b38794"
+    },
+    {
+      "path": "tools/diagnostics/842_donji_planning_extract.cjs",
+      "bytes": 3444,
+      "sha256": "534f421c3dfafebfe1f637d141e91ec4660f13f04f4ce20aab3e2c0ceaaa2bfd"
+    },
+    {
+      "path": "tools/diagnostics/842_donji_predecessor_extract_v2.cjs",
+      "bytes": 4041,
+      "sha256": "b542c6c58244c10c95083e350302df9e76d5e3f9f39f22ab372ad167de4648b3"
+    },
+    {
+      "path": "tools/diagnostics/842_donji_predecessor_extract.cjs",
+      "bytes": 7409,
+      "sha256": "c5bbeffc2d26590ee3be8686e78add607a4fa323b06a94052bb88acaf56baa62"
+    },
+    {
+      "path": "tools/diagnostics/842_donji_turn_extract_v2.cjs",
+      "bytes": 2588,
+      "sha256": "be469ae4a768b8f9d6cad878bbc5d5ab0221c5b51826711242940e8c62a384de"
+    },
+    {
+      "path": "tools/diagnostics/842_donji_turn_extract_v3.cjs",
+      "bytes": 2225,
+      "sha256": "41a7839679fd6485f61cc6bfbd2d1de128683f1c0dcde31657216a792ed7b9dc"
+    },
+    {
+      "path": "tools/diagnostics/842_donji_turn_extract.cjs",
+      "bytes": 3517,
+      "sha256": "af389b91d16d07e7931c5eac4e1aeb435c2862d383eb72f20ba07d8110d3e120"
+    },
+    {
+      "path": "tools/diagnostics/842_finalize.cjs",
+      "bytes": 10767,
+      "sha256": "33b4bc5ede53025a59f1cb9c68b0b8706c61166025fa6c7b59952c2ecc415cb5"
+    },
+    {
+      "path": "tools/diagnostics/853_finalize.cjs",
+      "bytes": 8632,
+      "sha256": "245baf0d4273de7185f42fc00f4dbf928edda9f4ff64984f12945502fe4c8b4c"
+    },
+    {
+      "path": "tools/diagnostics/853_prisoje_actual_save_pipeline.ts",
+      "bytes": 10215,
+      "sha256": "d5c9b22b33aee2f65fd7f055560bec0db5d46443fad9518184225ff3238881c5"
+    },
+    {
+      "path": "tools/diagnostics/853_run_checks.cjs",
+      "bytes": 1545,
+      "sha256": "99d468a3f48218c5047f221a5f6bb8ffaa3d112eb0b0687d47b7a5d859f3ace7"
+    },
+    {
+      "path": "tools/diagnostics/854_finalize_failed.cjs",
+      "bytes": 4755,
+      "sha256": "286745f726da7b3e4b52aba61c6aa0b3f1fc08ddc281dc3b67800b1e2120048c"
+    },
+    {
+      "path": "tools/diagnostics/854_prisoje_isolated_factory_runtime.ts",
+      "bytes": 17193,
+      "sha256": "2b99403130ede0b06c77507eac5d02e8e80c716b51ab64118dbe2eaaf506684e"
+    },
+    {
+      "path": "tools/diagnostics/856_finalize.cjs",
+      "bytes": 6913,
+      "sha256": "411429e4f66817406982b55846c1ed7f7a84176617cd691077d6bd5660a3943a"
+    },
+    {
+      "path": "tools/diagnostics/856_prisoje_isolated_factory_runtime_v2.ts",
+      "bytes": 17763,
+      "sha256": "e95e555582d24850148b19b637eb97786a506b8e2d9a35d3014e8f17d38fa5a9"
+    },
+    {
+      "path": "tools/diagnostics/859_donji_rama_n90.ts",
+      "bytes": 16965,
+      "sha256": "1ffccdc00133a8dbf542981f81bb0a4a4e35f248a6ed555ad39a857ada466977"
+    }
+  ],
+  "older_829_880_top_level": [
+    {
+      "path": "logs/claude-channel-20261004/829-root-plan.md",
+      "kind": "file",
+      "bytes": 81388,
+      "sha256": "5660e7b56e9f4fd9dfb0e5af1cc26291d83952565df5cbc6f0fd4f6dbb9fa005"
+    },
+    {
+      "path": "logs/claude-channel-20261004/830-hvo-two-targets-freeze-b",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/830-hvo-two-targets-freeze.cjs",
+      "kind": "file",
+      "bytes": 13351,
+      "sha256": "2b088821e607a98e18e1141d07fa232cd0bc197a0ab8b9ec5839b2b009f59f3b"
+    },
+    {
+      "path": "logs/claude-channel-20261004/831-correction-final-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/831-correction-finalize.cjs",
+      "kind": "file",
+      "bytes": 8210,
+      "sha256": "12a290beec5b154019c8dde7d729eeb233de9e771aa8e1dcc5ee01733d7078e0"
+    },
+    {
+      "path": "logs/claude-channel-20261004/831-correction-focused-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/831-correction-typecheck-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/831-deactivate-check.cjs",
+      "kind": "file",
+      "bytes": 2321,
+      "sha256": "eeed53b464a6e02b2dedb5a0df2bac837fbf3ef972b86b6536a53aeb35a1f562"
+    },
+    {
+      "path": "logs/claude-channel-20261004/831-deactivate-final-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/831-deactivate-finalize.cjs",
+      "kind": "file",
+      "bytes": 11329,
+      "sha256": "771dfd5d1d030c495f4c31fbfdf691e073e1def19463427d56b2ba80b6f00383"
+    },
+    {
+      "path": "logs/claude-channel-20261004/831-deactivate-focused-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/831-deactivate-green-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/831-deactivate-preedit-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/831-deactivate-red-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/831-deactivate-typecheck-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/831-final-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/831-finalize.cjs",
+      "kind": "file",
+      "bytes": 10082,
+      "sha256": "dc0243a70382e1a187432cf1bf16af32bcd7b7d4f52784ed5a02b48087b21f11"
+    },
+    {
+      "path": "logs/claude-channel-20261004/831-focused-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/831-green-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/831-red-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/831-run-check.cjs",
+      "kind": "file",
+      "bytes": 2698,
+      "sha256": "a156ec305e5f2b71945cc3eb3abd753e9bd7a8d0e6727b4a16fc05deb44b716d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/831-typecheck-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/832-donji-history-authority-a",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/832-donji-history-authority-b",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/832-donji-history-authority-c",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/832-donji-history-authority-d",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/832-donji-history-authority-entry.ps1",
+      "kind": "file",
+      "bytes": 10169,
+      "sha256": "4a74b9425f2f8ab53b8bf8c3fa520b445df1f040d41065b833a4d38c52a29514"
+    },
+    {
+      "path": "logs/claude-channel-20261004/833-correction-review-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/833-correction-review.cjs",
+      "kind": "file",
+      "bytes": 6539,
+      "sha256": "1696e9f4fee2f93775104439e846f99734ed4b3dc8230be2622b731a4d3b0b65"
+    },
+    {
+      "path": "logs/claude-channel-20261004/833-freeze-review.cjs",
+      "kind": "file",
+      "bytes": 5530,
+      "sha256": "473ad93da7e61b0a47e34b8d9846e71475d9402d549ac8394771fee8023f01b0"
+    },
+    {
+      "path": "logs/claude-channel-20261004/833-review-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/833-review-freeze-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/833-review-freeze-03",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-core-gates-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-core-gates.cjs",
+      "kind": "file",
+      "bytes": 3045,
+      "sha256": "243556fbdf612dbad3fb82fe4ad3b69c2e60c58326189acf7947fdff05c7c1ab"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-evaluator-self-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-failure-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-failure-freeze-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-failure-freeze-03",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-failure-freeze.cjs",
+      "kind": "file",
+      "bytes": 6940,
+      "sha256": "2c24648b42d2b59ac7266e6bbb707f2caea6874bc20fc5e94a7ba43b74813806"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-file-share-append.cjs",
+      "kind": "file",
+      "bytes": 232,
+      "sha256": "17c6d930ff3644981aa3f36c25069080b789babf894a470e7c1ee58fd83db52f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-file-share-proof-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-file-share-proof-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-file-share-proof-03",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-file-share-proof-04",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-file-share-proof-05",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-file-share-proof.ps1",
+      "kind": "file",
+      "bytes": 3003,
+      "sha256": "e445889a4d2b6aea28045caef8e2670d8fdf2461a75b8529ee560543a4cc8604"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-final-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-final-freeze.cjs",
+      "kind": "file",
+      "bytes": 6687,
+      "sha256": "9bac7bb2602011a625ec2a783d71b3b93a639ffb265c30362a1f71c93594b66f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-movement-active-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-movement-active-03",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-movement-active.cjs",
+      "kind": "file",
+      "bytes": 1011,
+      "sha256": "c6506674d8b848344caa748f87303dfb7025616ab1f8633b522647d3d1712b54"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-postrun-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-postrun-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-postrun.cjs",
+      "kind": "file",
+      "bytes": 13828,
+      "sha256": "d0c82721cc7f418209427e011193f6e61c3d1376450b8be33c6286a53aaab029"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-preflight-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-preflight-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-preflight-03",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-preflight.cjs",
+      "kind": "file",
+      "bytes": 14806,
+      "sha256": "11e536da214d0882d843b25b5e5250061f22e13b1f2974e147b70309bb7de23b"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-run-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-run-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-run-one.cjs",
+      "kind": "file",
+      "bytes": 6155,
+      "sha256": "ce41f8a999162a1a2a18edcc28c79a2c9c1e849f0834424c651f33b6bfadbebd"
+    },
+    {
+      "path": "logs/claude-channel-20261004/834-run-two-isolated.cjs",
+      "kind": "file",
+      "bytes": 6676,
+      "sha256": "b5245fb7588011a8e74b179208cad44e9d9e85cb0bfec2dea639664e8fe7c1ce"
+    },
+    {
+      "path": "logs/claude-channel-20261004/835-donji-calibration-panel-b",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/835-donji-calibration-panel-c",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/835-donji-calibration-panel-d",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/835-donji-calibration-panel-entry.ps1",
+      "kind": "file",
+      "bytes": 21356,
+      "sha256": "cd0fc7eedc32d9239c9f4c0bf5a3071c3965cf5eab63cd3b780f7e9e57d7ce16"
+    },
+    {
+      "path": "logs/claude-channel-20261004/836-donji-engine-panel-b",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/836-donji-engine-panel-entry.cjs",
+      "kind": "file",
+      "bytes": 18709,
+      "sha256": "06b265b3ad9da0b530fdcc9f1d7c69c3c9871659798da60e28473da83da6ea30"
+    },
+    {
+      "path": "logs/claude-channel-20261004/837-donji-red-team-entry.cjs",
+      "kind": "file",
+      "bytes": 16743,
+      "sha256": "dd82525308dcf75c15b57225a939df4f576f943036aa58e759a1140c98e370a7"
+    },
+    {
+      "path": "logs/claude-channel-20261004/837-donji-red-team-panel-b",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/837-donji-red-team-panel-c",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/837-donji-red-team-panel-d",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/838-movement-retained-green-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/838-movement-retained-red-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/838-pool-boundary-diagnose.cjs",
+      "kind": "file",
+      "bytes": 1301,
+      "sha256": "8d1761efc312208fe665e62d510590bd44c10cb13f1d6a29fab2c12971857884"
+    },
+    {
+      "path": "logs/claude-channel-20261004/838-pool-boundary-diagnosis-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/838-pool-retained-green-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/838-pool-retained-red-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/838-pool-retained-red-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/838-pool-row-diagnosis-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/838-reader-final-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/838-reader-fixtures-green-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/838-reader-fixtures-red-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/838-reader-freeze.cjs",
+      "kind": "file",
+      "bytes": 8393,
+      "sha256": "212cff2354308714e4fbf27e6b73a84efe68ff21986b13f028ed968da9192e2a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/838-reader-typecheck-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/839-combined-review-check-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/839-combined-review-check-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/839-combined-review.cjs",
+      "kind": "file",
+      "bytes": 12710,
+      "sha256": "90dcb95bc78cb2521525bde040a776be586ea0defae16205f0640cc79437db73"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-actual-order-join-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-actual-order-join.cjs",
+      "kind": "file",
+      "bytes": 4548,
+      "sha256": "4ef6878d9bac0e19f27fa0853ccfe8750692a3486bd73d76f288ed5f9db3c113"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-argv-guard-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-dispatcher-diagnose.cjs",
+      "kind": "file",
+      "bytes": 9711,
+      "sha256": "09d7970164b76daed1f38718fd465a8785c5b969f32b2e86d3cf5df48ee23727"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-dispatcher-diagnosis-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-final-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-final-freeze-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-freeze.cjs",
+      "kind": "file",
+      "bytes": 3947,
+      "sha256": "bf9312ab94de38572aabef8f2e7052ec7c05ee3dac7e1d1e608b9fb28f1c3221"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-handshake-final-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-handshake-finalize.cjs",
+      "kind": "file",
+      "bytes": 7174,
+      "sha256": "e188afa07e0f011e43a324f06a7f02c2c8c4bdc2e823bf7cc41414958d92b4c5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-postrun-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-postrun.cjs",
+      "kind": "file",
+      "bytes": 15699,
+      "sha256": "0c4189643cd5dd1568d08c263de869d4ee041cd30d3aa75e7e394c560421dc61"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-preflight-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-preflight-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-preflight.cjs",
+      "kind": "file",
+      "bytes": 11871,
+      "sha256": "72827753fe95cffd1e359ed1aea066dfd55ea887effb9ddec79c1ddc519fdd98"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-recovery-final-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-recovery-finalize.cjs",
+      "kind": "file",
+      "bytes": 9559,
+      "sha256": "ab1e8caa578250b2b97c74a026ef5f425733f8f1416824f60c9ad78c7d07fa42"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-run-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-run-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/840-run-recovery-isolated.cjs",
+      "kind": "file",
+      "bytes": 10138,
+      "sha256": "bba40f66f3c857c1e53298d6e19393b88ebd2b921415d032e42e62b33adc4b63"
+    },
+    {
+      "path": "logs/claude-channel-20261004/841-n88-rejection-diagnosis",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/841-prisoje-actual-diagnosis",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/841-prisoje-t6-implementation",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/842-donji-planning-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/842-donji-predecessor-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/842-donji-predecessor-v2-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/842-donji-tests-red-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/842-donji-tests-red-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/842-donji-tests-red-03",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/842-donji-turn-bindings-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/842-donji-turn-bindings-v2-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/842-donji-turn-bindings-v3-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/842-final-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/842-rama-final-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/842-rama-guard-probe-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/842-rama-guard-probe-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/842-rama-guard-probe-03",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/842-rama-guard-probe-entry.ts",
+      "kind": "file",
+      "bytes": 11047,
+      "sha256": "ac6b215475e4a88b0cc6da1fb06e6d31678f2aed252ae4a567de52afc9a17a37"
+    },
+    {
+      "path": "logs/claude-channel-20261004/842-rejected-test-archive-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/843-prisoje-t6-review-final-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/843-prisoje-t6-review-final-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/843-prisoje-t6-review.cjs",
+      "kind": "file",
+      "bytes": 7651,
+      "sha256": "a809f51f81bf1db462130dedfa749410db8e7267ca96d9851a0233dfe1d1992b"
+    },
+    {
+      "path": "logs/claude-channel-20261004/844-final-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/844-final-ready-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/844-finalize-rejected.cjs",
+      "kind": "file",
+      "bytes": 6966,
+      "sha256": "20992f8daa24dd0b011bed8860c23b69e27bebdba9f6f1d6fef9e62e51778979"
+    },
+    {
+      "path": "logs/claude-channel-20261004/844-freeze-ready.cjs",
+      "kind": "file",
+      "bytes": 7271,
+      "sha256": "ded6fcc1df64ac53c7580406ea51413d33d2148208d33fa00e2f7b2a85d0eb06"
+    },
+    {
+      "path": "logs/claude-channel-20261004/844-no-spawn-control-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/844-no-spawn-control-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/844-no-spawn-control-03",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/844-no-spawn-control.cjs",
+      "kind": "file",
+      "bytes": 2179,
+      "sha256": "91bb8de0c506694a06e2eaad3004b8ffb243a4aea0a60c122f8f0ee64fc56935"
+    },
+    {
+      "path": "logs/claude-channel-20261004/844-postrun-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/844-postrun.cjs",
+      "kind": "file",
+      "bytes": 10352,
+      "sha256": "1930e062a0f781a772fc98fdd11753a04e955be22c5d5f003a4c4a91e6cfd79d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/844-root-preflight-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/844-root-rejecting-preflight.cjs",
+      "kind": "file",
+      "bytes": 3040,
+      "sha256": "6a977bc49f269b2e15d74edb11a60bc67bc9fac82cbb6431ab52bf84263f023f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/844-run-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/844-run-t6-candidate-isolated.cjs",
+      "kind": "file",
+      "bytes": 7650,
+      "sha256": "74fb791261fcfed54335153a72154c50d904fdf132770a749881ee699a5dd906"
+    },
+    {
+      "path": "logs/claude-channel-20261004/845-loan-command-authority-fix",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/846-loan-command-authority-review",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/847-donji-bind-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/847-donji-predecessor-bind.cjs",
+      "kind": "file",
+      "bytes": 5128,
+      "sha256": "9e6cda620be10d3068226fc0b089c5b5a9cae85346706496fa67819ef3b01a8b"
+    },
+    {
+      "path": "logs/claude-channel-20261004/847-final-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/847-final-ready-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/847-finalize-n89.cjs",
+      "kind": "file",
+      "bytes": 6899,
+      "sha256": "ff57cfd4bf1c1a5cdeb9f3a9ab5afcf035b093e7607db47e828c7df97f2f5a39"
+    },
+    {
+      "path": "logs/claude-channel-20261004/847-freeze-ready.cjs",
+      "kind": "file",
+      "bytes": 7003,
+      "sha256": "cdaefb11a227ff5f5942345d7b08a851257dad15d628d3db480781594807a2af"
+    },
+    {
+      "path": "logs/claude-channel-20261004/847-no-spawn-control-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/847-no-spawn-control-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/847-no-spawn-control.cjs",
+      "kind": "file",
+      "bytes": 2195,
+      "sha256": "7523fd48fcbf214e5bca549e41bc0e67ff1c0e6e8d0c8075bb8ceb55cf8040a8"
+    },
+    {
+      "path": "logs/claude-channel-20261004/847-postrun-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/847-postrun.cjs",
+      "kind": "file",
+      "bytes": 11864,
+      "sha256": "07fac2d0ade7978865b07ff84f1af03bc8b9557175b8a8af67c7f002c934b414"
+    },
+    {
+      "path": "logs/claude-channel-20261004/847-root-preflight-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/847-root-preflight-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/847-root-rejecting-preflight.cjs",
+      "kind": "file",
+      "bytes": 4877,
+      "sha256": "ccd54da2ffbc05255e68a5dacc27357f7e5bc4b0fbfb86a38938a9e177237f59"
+    },
+    {
+      "path": "logs/claude-channel-20261004/847-run-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/847-run-receiving-command-isolated.cjs",
+      "kind": "file",
+      "bytes": 7798,
+      "sha256": "9c6bae901a0d8708c2cea79d5311e9fc7cb2124fb5500046e8cf4d9002a89878"
+    },
+    {
+      "path": "logs/claude-channel-20261004/848-prisoje-attack-pipeline",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/849-prisoje-coordinated-advance-proposal.json",
+      "kind": "file",
+      "bytes": 4063,
+      "sha256": "359cd5542b2fc6e52891cbd5c24bca5880e5f002521a1a3d1678224ee56d651c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/849-prisoje-historian-entry.ps1",
+      "kind": "file",
+      "bytes": 5756,
+      "sha256": "15de406c18387cc3d65023172586834534992cd71d68873540029ea1678f18d1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/849-prisoje-historian-panel-final-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/849-prisoje-historian-panel-final-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/850-prisoje-calibration-scenario-review",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/851-prisoje-engine-final-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/851-prisoje-engine-source-audit-08",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/851-prisoje-engine-systems-review",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/851-prisoje-preflight-smoke-06",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/852-prisoje-redteam-entry.cjs",
+      "kind": "file",
+      "bytes": 8944,
+      "sha256": "93d5b16b2a54fc97b1b1ff6add9809372c21e57239aba3b4b99aa0b6998db9e7"
+    },
+    {
+      "path": "logs/claude-channel-20261004/852-prisoje-redteam-final-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/853-prisoje-actual-save-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/853-prisoje-actual-save-03",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/853-prisoje-actual-save-04",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/853-prisoje-actual-save-diagnose-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/853-prisoje-actual-save-final-05",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/853-prisoje-actual-save-final-06",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/853-prisoje-focused-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/853-prisoje-focused-final-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/853-prisoje-focused-final-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/853-prisoje-frozen-not-ready-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/853-prisoje-green-factory-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/853-prisoje-green-factory-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/853-prisoje-red-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/853-prisoje-typecheck-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/853-prisoje-typecheck-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/854-prisoje-engine-fixture-correction-review",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/854-prisoje-engine-fixture-review-final-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/854-prisoje-frozen-supplement-failed-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/854-prisoje-isolated-factory-runtime-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/854-prisoje-no-spawn-control-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/854-prisoje-no-spawn-control-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/854-prisoje-no-spawn-control-03",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/854-prisoje-no-spawn-control.cjs",
+      "kind": "file",
+      "bytes": 2362,
+      "sha256": "a8e7196e8b6816476e660eecc392bed6d37001eb73b6f7043feef0ce745cbb13"
+    },
+    {
+      "path": "logs/claude-channel-20261004/854-prisoje-postrun.cjs",
+      "kind": "file",
+      "bytes": 15511,
+      "sha256": "08593138e394d36b59a57c11712b77de8a70e622b38ce5eac4f5274a8498af5e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/854-prisoje-prepare.cjs",
+      "kind": "file",
+      "bytes": 10137,
+      "sha256": "62c7c4aab4c51705816a184b3dfdbf0149e8b741a0231638841adc4bb4ff24a3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/854-prisoje-prepared-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/854-prisoje-prepared-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/854-prisoje-run-isolated.cjs",
+      "kind": "file",
+      "bytes": 8862,
+      "sha256": "c153d1b970e84beab7be210203ae8adad2bcf5bbac578260bf72f7ddfdcd20ad"
+    },
+    {
+      "path": "logs/claude-channel-20261004/855-prisoje-independent-review-entry.cjs",
+      "kind": "file",
+      "bytes": 5744,
+      "sha256": "ff7b2a1ddfbc460740f1e404d302c01f4ca890e51a3b2b6e866b95d8105d9092"
+    },
+    {
+      "path": "logs/claude-channel-20261004/855-prisoje-independent-review-final-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/856-donji-planning-source-map-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/856-prisoje-frozen-ready-supplement-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/856-prisoje-independent-targeted-entry.cjs",
+      "kind": "file",
+      "bytes": 4658,
+      "sha256": "9f8792a1c905b85e590fe93200ed3dbb65dac430d6029497f2f142ecab4d9aa4"
+    },
+    {
+      "path": "logs/claude-channel-20261004/856-prisoje-independent-targeted-final-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/856-prisoje-isolated-factory-runtime-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/856-prisoje-resolver-targeted-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/856-prisoje-typecheck-targeted-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/857-prisoje-bound-no-spawn-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/857-prisoje-bound-no-spawn.cjs",
+      "kind": "file",
+      "bytes": 2105,
+      "sha256": "c6dbaf38a0ca1293a23d33825c68de3e8bfdd6439329bd8095e7e3b9dbf4b5ac"
+    },
+    {
+      "path": "logs/claude-channel-20261004/857-prisoje-bound-run.cjs",
+      "kind": "file",
+      "bytes": 5354,
+      "sha256": "c28aea4185e3491093639efac9909e03f438873c685ea658479b788c418b7fdc"
+    },
+    {
+      "path": "logs/claude-channel-20261004/857-prisoje-final-ready-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/857-prisoje-final-ready-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/857-prisoje-freeze-ready.cjs",
+      "kind": "file",
+      "bytes": 12320,
+      "sha256": "4fd58bac6af6c7ec4c8b2030f9501b4b978b5c8f3ea64c5d6a881a8f5f094b9d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/857-prisoje-postrun-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/857-prisoje-postrun-selector-control-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/857-prisoje-postrun-selector-control.cjs",
+      "kind": "file",
+      "bytes": 3689,
+      "sha256": "6b42e09c22cf524fd95cb46d2d2cb8221e21036adb63ff9d7e15f04ed670a874"
+    },
+    {
+      "path": "logs/claude-channel-20261004/857-prisoje-postrun-v2.cjs",
+      "kind": "file",
+      "bytes": 8114,
+      "sha256": "aa72afb4b1d3ccd377d7019618309e7a14ee8c6d486fd42a6bda665d86c24d19"
+    },
+    {
+      "path": "logs/claude-channel-20261004/857-prisoje-run-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/858-prisoje-failed-run-synthesis-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/858-prisoje-failed-run-synthesis-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/858-prisoje-failed-run-synthesis.cjs",
+      "kind": "file",
+      "bytes": 19681,
+      "sha256": "e3c0c9afefe1f81be657b80cef9a07f72b0183e248b1812337b112ba63bc3434"
+    },
+    {
+      "path": "logs/claude-channel-20261004/858-prisoje-finalization-fixture-control-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/858-prisoje-finalization-fixture-control.cjs",
+      "kind": "file",
+      "bytes": 5334,
+      "sha256": "79bc62d290adb32339d45a00c2a09f660ee930167e61dc56198dc32e5fb05d94"
+    },
+    {
+      "path": "logs/claude-channel-20261004/859-donji-rama-n90-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/859-donji-rama-n90-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/859-prisoje-corrected-harness-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/859-prisoje-corrected-harness-freeze.cjs",
+      "kind": "file",
+      "bytes": 7045,
+      "sha256": "20042ea8f57d77133eb6b598fcfead1e4c8a44a10e72abf79b5731f1c3dee3a9"
+    },
+    {
+      "path": "logs/claude-channel-20261004/859-prisoje-corrected-runner-control-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/859-prisoje-corrected-runner-control.cjs",
+      "kind": "file",
+      "bytes": 7891,
+      "sha256": "a22677746f4772487b077fe8fb02c698e6cbaf31362543a5c9be36937ebfb1c3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/859-prisoje-corrected-runner.cjs",
+      "kind": "file",
+      "bytes": 12959,
+      "sha256": "02ddbeb4b6ec546df9e6b535aeb4e8cafe01c8589aaf2cf69c4fc6045aa7bfba"
+    },
+    {
+      "path": "logs/claude-channel-20261004/860-donji-rama-preparation-proposal.json",
+      "kind": "file",
+      "bytes": 9684,
+      "sha256": "e9c5d5d30f87ad47c893e12885e1e7edb740dd9bb3ca60591eff46b9d0a246e8"
+    },
+    {
+      "path": "logs/claude-channel-20261004/861-donji-rama-historian-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/861-donji-rama-historian-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/861-donji-rama-historian-entry.ps1",
+      "kind": "file",
+      "bytes": 11169,
+      "sha256": "45acb654e3ff51b942f80be30db065e651c0169b131d1f91e1895ee742c1c723"
+    },
+    {
+      "path": "logs/claude-channel-20261004/862-donji-rama-calibration-panel-freeze.cjs",
+      "kind": "file",
+      "bytes": 6177,
+      "sha256": "3c06a02061e5e306f9e66ef7d9d438359c0b7e285891040ee09f5c3243c5ff69"
+    },
+    {
+      "path": "logs/claude-channel-20261004/862-donji-rama-calibration-panel-verdict-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/863-donji-rama-engine-panel-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/863-donji-rama-engine-panel-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/863-donji-rama-engine-panel-03",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/863-donji-rama-engine-panel.cjs",
+      "kind": "file",
+      "bytes": 16158,
+      "sha256": "97f262476f0148e61cfad770a69a44208bd895d97078f4be84b9545f0bc2577b"
+    },
+    {
+      "path": "logs/claude-channel-20261004/864-donji-rama-red-team-verdict.json",
+      "kind": "file",
+      "bytes": 5668,
+      "sha256": "c0f9cab25f083f526054d1a8c23e1095d1a7eaa92e32fca4353b65d73f9c3dfb"
+    },
+    {
+      "path": "logs/claude-channel-20261004/864-donji-rama-red-team-verification-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/864-donji-rama-red-team-verify.cjs",
+      "kind": "file",
+      "bytes": 2289,
+      "sha256": "04f1431cc91eaaa19aa78db24d685597a302aa1e8be2d406614bb6eaaedf50ef"
+    },
+    {
+      "path": "logs/claude-channel-20261004/865-catalog-branches-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/865-donji-rama-green-smoke-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/865-donji-rama-implementation-ready-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/865-donji-rama-implementation-ready-freeze-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/865-donji-rama-implementation-ready.json",
+      "kind": "file",
+      "bytes": 8014,
+      "sha256": "1ebf7a52237dfb8a7751891af2ede22729213e48e5628f6e3fa1497a21f27947"
+    },
+    {
+      "path": "logs/claude-channel-20261004/865-donji-rama-red-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/865-factory-gates-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/865-fixture-correction-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/865-focused-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/865-opening-minimum-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/865-preparation-consumers-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/865-sana-correction-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/865-sector-consumer-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/865-typecheck-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/865-typecheck-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/866-combined-corrected-runner.cjs",
+      "kind": "file",
+      "bytes": 14282,
+      "sha256": "0201f238138e050ec596b7ef7bd7aa960f78684de5c84e8233b0d7ef2edf6bc2"
+    },
+    {
+      "path": "logs/claude-channel-20261004/866-combined-freeze-prepared.cjs",
+      "kind": "file",
+      "bytes": 6921,
+      "sha256": "4f8c61d8858a98238570d761eec864c3d473f428f650022ab8276b4a6a66e27a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/866-combined-harness-prepared-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/866-combined-postrun-control-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/866-combined-postrun-control-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/866-combined-postrun-control-03",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/866-combined-postrun-control-04",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/866-combined-postrun-control.cjs",
+      "kind": "file",
+      "bytes": 4987,
+      "sha256": "c648cb5c0ac90813cb21459f9ecfeaaffb65efefa1fdbf2d3e8cedaa26e33a83"
+    },
+    {
+      "path": "logs/claude-channel-20261004/866-combined-postrun.cjs",
+      "kind": "file",
+      "bytes": 11782,
+      "sha256": "9c28e93c6d8617d8138c4e1d711eb528e645afad82a801194c4ca29e6f59d54c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/866-combined-runner-control-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/866-combined-runner-control-02",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/866-combined-runner-control-03",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/866-combined-runner-control-04",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/866-combined-runner-control.cjs",
+      "kind": "file",
+      "bytes": 6212,
+      "sha256": "562fe64d28c038d5b0a2acd2942a96f62f291afbb32a6354e8ab02ab586f55ef"
+    },
+    {
+      "path": "logs/claude-channel-20261004/867-combined-freeze-prepared.cjs",
+      "kind": "file",
+      "bytes": 6921,
+      "sha256": "a11513da66ebfc77e0ac7fa9028b617c4624f18fdafac5939c8a0deeb1b90118"
+    },
+    {
+      "path": "logs/claude-channel-20261004/867-combined-harness-prepared-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/867-combined-postrun-control-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/867-combined-postrun-control.cjs",
+      "kind": "file",
+      "bytes": 4987,
+      "sha256": "c0d0058bce3ba04262838eefa8f1cf0814fa7cb3ab8c357d806fccd2978e59f4"
+    },
+    {
+      "path": "logs/claude-channel-20261004/867-combined-postrun.cjs",
+      "kind": "file",
+      "bytes": 11847,
+      "sha256": "b86214145342aa9b9d33bccbbbad2543350b8217c3ae95c870f42031d704281f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/868-combined-harness-targeted-review-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/868-combined-harness-targeted-review.cjs",
+      "kind": "file",
+      "bytes": 10392,
+      "sha256": "c86ef2c8c37902567e448038dcd99c8529198659ae52f64214d0a1dfc10d5d2f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/869-donji-rama-independent-implementation-review.json",
+      "kind": "file",
+      "bytes": 9624,
+      "sha256": "18a40bf4f68d760c2ca2c5bb8b2db51f84f5d3666a68b5254a71e09e70202d83"
+    },
+    {
+      "path": "logs/claude-channel-20261004/869-donji-rama-independent-review-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/869-donji-rama-independent-review-tests-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/870-combined-corrected-runner.cjs",
+      "kind": "file",
+      "bytes": 14431,
+      "sha256": "9400a047e38d7eca8488f77ff0de571d17974984bb755d9428695484202a064d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/870-combined-freeze-prepared.cjs",
+      "kind": "file",
+      "bytes": 7626,
+      "sha256": "fe390c94e2f7fb3fa8758a150d4278e8c11d2d40cc2d28a7e70d4f3d66d8ccc6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/870-combined-harness-prepared-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/870-combined-runner-control-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/870-combined-runner-control-dry",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/870-combined-runner-control.cjs",
+      "kind": "file",
+      "bytes": 7772,
+      "sha256": "44a2be805ad9a3265efa86ed7f1ef6ac90196143658726c4d6a35566a044aa91"
+    },
+    {
+      "path": "logs/claude-channel-20261004/871-combined-harness-blocker-verification-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/871-combined-harness-blocker-verification.cjs",
+      "kind": "file",
+      "bytes": 3999,
+      "sha256": "7185a80ae01d526d040f145c50eb47b138dd223c1793ff98b9488d9db6934561"
+    },
+    {
+      "path": "logs/claude-channel-20261004/872-combined-final-ready-dry",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/872-combined-final-ready.cjs",
+      "kind": "file",
+      "bytes": 8412,
+      "sha256": "bd5d740c570b301301724cb32212f84d930b606133b5ec45ed3b5d2f85daa8ea"
+    },
+    {
+      "path": "logs/claude-channel-20261004/873-donji-rama-implementation-ready-v2-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/873-donji-rama-independent-binding-review-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/873-donji-rama-independent-binding-review.json",
+      "kind": "file",
+      "bytes": 2661,
+      "sha256": "5d35884165439973f7416372c7fa42f575381cdb66742a8c3dcf0870075a6d41"
+    },
+    {
+      "path": "logs/claude-channel-20261004/873-reconcile-implementation-ready.cjs",
+      "kind": "file",
+      "bytes": 2323,
+      "sha256": "545014355719ebe81d08a23c3e3dfe4758af17f6dab63876568b989c77a8776b"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-combined-final-ready-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-combined-final-ready-dry",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-combined-final-ready.cjs",
+      "kind": "file",
+      "bytes": 9056,
+      "sha256": "76f3c0b5c29bed903cfd4ecd2c05a55e962ce615bb7a5c0f48998cfaf9c1e203"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-combined-postrun-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-combined-run-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-control-failure-attempt",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-control-failure-attempt-b",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-control-failure-fixture",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-control-finalize-attempt",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-control-finalize-attempt-b",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-control-finalize-fixture",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-control-success-attempt",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-control-success-attempt-b",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-control-success-attempt-c",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-control-success-c-fixture",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-control-success-fixture",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-control-timeout-attempt",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-control-timeout-attempt-b",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-control-timeout-fixture",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-suite-attempt",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-suite-control-child.cjs",
+      "kind": "file",
+      "bytes": 2497,
+      "sha256": "265d31f47d151a9d92c99f25db5a99903df5aa3cfc439d961ae60c6d9a3f1d9f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-suite-control-setup.cjs",
+      "kind": "file",
+      "bytes": 1353,
+      "sha256": "7d8d9641b1fb33b5fb1c84050de6a0f3c7d1b2695cd7bfc20e59aa6343298c4b"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-suite-entry.cjs",
+      "kind": "file",
+      "bytes": 20541,
+      "sha256": "71f5c0dbe788e2d1d9456aaa6735c977d53dd2c8ba60853834486c13ffe09157"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-suite-prepare.cjs",
+      "kind": "file",
+      "bytes": 6523,
+      "sha256": "3f2607c8551f39bf3d001195745b49c980d0fa521d2ca1dcd9e7680e374451c4"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-suite-prepared-attempt",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-suite-prepared-attempt-b",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/874-suite-preservation",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/875-combined-postrun-correction-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/875-combined-postrun-correction-control-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/875-combined-postrun-correction-control.cjs",
+      "kind": "file",
+      "bytes": 2468,
+      "sha256": "b5be94cd2f0be8614d47d1432d2c8747a4c868f9d0d29f5887e2a856d7bd751b"
+    },
+    {
+      "path": "logs/claude-channel-20261004/875-combined-postrun-correction-dry",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/875-combined-postrun-correction-dry2",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/875-combined-postrun-correction-dry3",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/875-combined-postrun-correction.cjs",
+      "kind": "file",
+      "bytes": 9994,
+      "sha256": "616f319cc1c5a3d9b7817804f1f6e118fa67ee0671867a3c9edcea5b149d3efe"
+    },
+    {
+      "path": "logs/claude-channel-20261004/875-independent-reader-correction-review-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/875-independent-reader-correction-review.json",
+      "kind": "file",
+      "bytes": 3856,
+      "sha256": "fbb827686bfd0464282b4a816341428e822375bc7aaf9184c136dd897b62ceaf"
+    },
+    {
+      "path": "logs/claude-channel-20261004/876-actual-attempt",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/876-closed-suite-report.cjs",
+      "kind": "file",
+      "bytes": 13022,
+      "sha256": "76f9eb1c1919004ed8f85512b735045067850f7143ff6cd161c4c1e8ca27f776"
+    },
+    {
+      "path": "logs/claude-channel-20261004/876-finalize-qualified-n91.cjs",
+      "kind": "file",
+      "bytes": 4575,
+      "sha256": "00036eff62d6e9b400db88e7e1e2b02e87be73072ece060f1496ddf7516e9b1c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/876-freeze-report.cjs",
+      "kind": "file",
+      "bytes": 3769,
+      "sha256": "3902c5d0b7fa5d80ec0244696cd37a94dfb28fcffad878fe0b74d9dcfa2b21f8"
+    },
+    {
+      "path": "logs/claude-channel-20261004/876-qualified-n91-final-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/876-reporting-controls.cjs",
+      "kind": "file",
+      "bytes": 1998,
+      "sha256": "7b4076d85a17b68a23b9d1106eae7de6692290489cf9b8792da7842158682b11"
+    },
+    {
+      "path": "logs/claude-channel-20261004/876-reporting-manifest-attempt",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/876-synthetic-attempt",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/877-fullsuite-failure-review-freeze-01",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/877-fullsuite-failure-review.json",
+      "kind": "file",
+      "bytes": 11101,
+      "sha256": "3340e933612310ed7707d432018b62b6214f1ed8ac239fc38d848d8b278f2362"
+    },
+    {
+      "path": "logs/claude-channel-20261004/880-control-failure-attempt",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/880-control-failure-attempt-b",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/880-control-failure-b-fixture",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/880-control-failure-fixture",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/880-control-success-attempt",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/880-control-success-attempt-b",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/880-control-success-b-fixture",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/880-control-success-fixture",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/880-final-ready-attempt",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/880-final-ready-freeze.cjs",
+      "kind": "file",
+      "bytes": 10505,
+      "sha256": "24cc66735fc97761c45c09174b2cd2a16148c6a3c2395de5e6e7a50b100b2123"
+    },
+    {
+      "path": "logs/claude-channel-20261004/880-prepare-manifest.cjs",
+      "kind": "file",
+      "bytes": 8102,
+      "sha256": "efc3346313d7a66b4cc945eea9d9013b90e862e838260fb189f4640cbd95e1e6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/880-prepared-attempt",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/880-suite-attempt",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    },
+    {
+      "path": "logs/claude-channel-20261004/880-suite-control-child.cjs",
+      "kind": "file",
+      "bytes": 2538,
+      "sha256": "0e47cb77751259dc344ba6379bd2ded313e17c1c3c85aec75af16dcc44f7e7ec"
+    },
+    {
+      "path": "logs/claude-channel-20261004/880-suite-entry.cjs",
+      "kind": "file",
+      "bytes": 21098,
+      "sha256": "0fc28ad5639277e111bce15ccab98659290c3e80a98a5f009dc06bc53e8554fd"
+    },
+    {
+      "path": "logs/claude-channel-20261004/880-suite-preservation",
+      "kind": "directory",
+      "retention": "LOCAL; contents bound by attempt receipts and closed inventories"
+    }
+  ],
+  "closed_run_pins": [
+    {
+      "run": "n85",
+      "status": "INCOMPLETE_EBUSY"
+    },
+    {
+      "run": "n86",
+      "status": "REJECTED_691_12_CORRECT_CELL_LOSSES"
+    },
+    {
+      "run": "n87",
+      "status": "RESTORED_703_HELPER_OFF"
+    },
+    {
+      "run": "n88",
+      "status": "REJECTED_702_FIRST_DIVERGENCE_T16_ORDINARY_NONLOAN_VLASENICA_SOKOLAC_NEVACKA_LATER_LOPARE_LOSS_CHAIN_UNMEASURED"
+    },
+    {
+      "run": "n89",
+      "status": "QUALIFIED_703_BOTH_TARGETS_RS"
+    },
+    {
+      "run": "n90",
+      "status": "FAILED_UNADOPTED_704_PRISOJE_CAPTURE_MISSING_NUMERIC_EXIT_AND_READER_FIELDS"
+    },
+    {
+      "run": "n91",
+      "status": "QUALIFIED_707_707_706_705",
+      "final_result_sha256": "18fc3dc32b957a4691c3543adcd56f406a8ec76c047c6e06f4a0853fc70787f7"
+    }
+  ]
+}

@@ -341,6 +341,7 @@ export const MISTRAL_2_95_OPPORTUNITY: OperationOpportunityDef = {
     staging_osid: STAGING_LIVNO_MISI,
     planning_duration: 4,
     min_attack_outcome: 'repulsed',
+    coordinated_advance: true,
     citations: [
         'Balkan Battlegrounds, Volume I, pp.380-381 (digital pp.417-418) - 1st HGZ on the Vitorog-Sipovo main effort',
         'docs/research/2026-05-01-late-war-operation-opportunity-research.md - Federation / Western Bosnia candidates',
@@ -469,6 +470,21 @@ const SOUTHERN_MOVE_AXES: readonly OpportunityAxisDef[] = [
             requires_operation_captures: ['op:mrkonjic_grad:majdan_2'],
             handoff: {
                 brigade_id: 'hrhb_kralj_tomislav_brigade' as FormationId,
+                source_axis_id: 'southern_move_mrkonjic',
+            },
+        },
+    },
+    {
+        axis_id: 'southern_move_donji_vrbljani',
+        name: 'Donji Vrbljani Axis',
+        corps: SECONDARY_CORPS,
+        brigades: [],
+        objectives: ['op:kljuc:donji_vrbljani_2'],
+        phase_gate: {
+            main_axis_id: 'southern_move_mrkonjic',
+            requires_operation_captures: ['op:mrkonjic_grad:podrasnica_2'],
+            handoff: {
+                brigade_id: 'hvo_rama_brigade' as FormationId,
                 source_axis_id: 'southern_move_mrkonjic',
             },
         },

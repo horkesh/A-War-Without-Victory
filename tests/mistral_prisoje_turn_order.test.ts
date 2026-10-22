@@ -307,8 +307,8 @@ async function runSelectedTurn185Boundaries(state: GameState): Promise<{
     resetReasonCodeTopicCacheForTests();
     const result = await runToColumnMovement(state);
     // Once T3 identifies the first boundary, jump only to the two requested later owners. This
-    // distinguishes T6 and the following bot actor without reconstructing skipped combat/front
-    // writers; consequently the retained end-185 Jajce_3 replacement remains unproven here.
+    // proves the rejected routine order does not survive into T6 and that the following bot actor
+    // sees the restored production state without reconstructing skipped combat/front writers.
     for (const phaseName of ['commander-correct-march-orders', 'generate-bot-brigade-orders']) {
         const phase = warPhases.find((candidate) => candidate.name === phaseName);
         expect(phase).toBeDefined();
@@ -387,7 +387,7 @@ describe('645 — portable Prisoje caller and writer order', () => {
         expect(report.column_movement?.column_blocked).toBeGreaterThan(0);
     });
 
-    it('749 counterfactual: injected one-cell scope reconciles the stale Bravnice order to the sealed current approach before T3', async () => {
+    it('restored production flow rejects the stale Bravnice order at T3 without pre-T3 reconciliation', async () => {
         const state = counterfactualTurn184Projection();
         const commitments = structuredClone({
             home: state.military.corps_command!.hvo_main_staff!.active_operations,
@@ -407,15 +407,15 @@ describe('645 — portable Prisoje caller and writer order', () => {
             routine_scope_enforced: true,
         });
         expect(observations.find((entry) => entry.boundary === 'osid-column-movement')).toMatchObject({
-            order: null, location_osid: MALESEVCI,
-            movement: { destination_sids: [JAJCE_3], owner: 'bot_discretionary', status: 'in_transit' },
+            order: null, movement: null, location_osid: MALESEVCI,
         });
-        expect(report.column_movement?.column_rejections ?? []).not.toContainEqual(expect.objectContaining({
+        expect(report.column_movement?.column_rejections ?? []).toContainEqual(expect.objectContaining({
             formation_id: ABB,
+            reason: 'routine_destination_out_of_scope',
+            destination_osid: BRAVNICE,
         }));
         expect(observations.find((entry) => entry.boundary === 'commander-correct-march-orders')).toMatchObject({
-            order: null,
-            movement: { destination_sids: [JAJCE_3], owner: 'bot_discretionary', status: 'in_transit' },
+            order: null, movement: null, location_osid: MALESEVCI,
         });
         const botDetail = report.bot_order_diagnostics?.dispatcher_decision_details?.find((entry) => entry.formation_id === ABB);
         expect(botDetail)
@@ -424,12 +424,10 @@ describe('645 — portable Prisoje caller and writer order', () => {
                 operation_axis_id: 'mistral_sipovo',
             });
         expect(observations.find((entry) => entry.boundary === 'generate-bot-brigade-orders')).toMatchObject({
-            order: null,
-            movement: { destination_sids: [JAJCE_3], owner: 'bot_discretionary', status: 'in_transit' },
+            movement: null,
             location_osid: MALESEVCI,
         });
         expect(botDetail?.first_handler).not.toBeNull();
-        expect(botDetail?.snapshot_output).toMatchObject({ column_march_destination_osid: null });
         expect(state.military.formations![ABB]!.elite_loan_state).toEqual(initialLoan);
         expect({
             home: state.military.corps_command!.hvo_main_staff!.active_operations,

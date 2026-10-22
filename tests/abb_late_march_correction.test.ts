@@ -3,6 +3,7 @@ import { afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { loadOperationalData, loadOperationalEdges } from '../src/data/operational_data.js';
 import { generateAllBotOrdersOsid } from '../src/sim/combat/bot_brigade_ai_osid.js';
 import { correctTransitStates } from '../src/sim/combat/commander_march_correction.js';
+import { processOsidColumnMovement } from '../src/sim/combat/osid_column_movement.js';
 import {
     getOperationAuthorizedDestinations,
     isDestinationAuthorizedByOperation,
@@ -14,10 +15,12 @@ import type { CorpsOperation, GameState } from '../src/state/game_state.js';
 
 const ABB = 'hvo_1st_guard_abb';
 const MALESEVCI = 'op:bosansko_grahovo:malesevci';
+const CRNI_LUG = 'op:bosansko_grahovo:crni_lug';
+const HALAPIC = 'op:glamoc:halapic';
 const BRAVNICE = 'op:jajce:bravnice';
 const LUPNICA = 'op:jajce:lupnica';
 const ROUTE = [
-    MALESEVCI, 'op:bosansko_grahovo:crni_lug', 'op:glamoc:halapic',
+    MALESEVCI, CRNI_LUG, HALAPIC,
     'op:sipovo:brdjani', 'op:sipovo:gornji_mujdzici_2',
     'op:sipovo:pribeljci_2', BRAVNICE,
 ];
@@ -135,7 +138,91 @@ function fixture(destination = BRAVNICE): GameState {
     } as unknown as GameState;
 }
 
+function firstAcceptedMistralTransit(): GameState {
+    const state = fixture(HALAPIC);
+    state.meta.turn = 178;
+    state.military.brigade_movement_state![ABB] = {
+        status: 'in_transit', destination_sids: [HALAPIC], path: [MALESEVCI, CRNI_LUG, HALAPIC],
+        turns_remaining: 2, stance: 'column', owner: 'bot_discretionary',
+    };
+    const operation = state.military.corps_command!.hvo_tomislavgrad!.active_operations[0]!;
+    const axis = operation.axes!.find((candidate) => candidate.axis_id === 'mistral_sipovo')!;
+    axis.current_objective_index = 2;
+    axis.objective_capture_count = 2;
+    operation.current_objective_index = 2;
+    operation.objective_capture_count = 2;
+    return state;
+}
+
 describe('ABB late march correction and following bot-order writer', () => {
+    it('retains the first accepted same-axis approach transit after HGZ advances the captured prefix', () => {
+        const state = firstAcceptedMistralTransit();
+        const before = structuredClone(state.military.brigade_movement_state?.[ABB]);
+
+        expect(isDestinationAuthorizedByOperation(state, ABB, HALAPIC, adjacency)).toBe(false);
+        correctTransitStates(state, adjacency);
+        expect(state.military.brigade_movement_state?.[ABB]).toEqual(before);
+
+        processOsidColumnMovement(state, edges, reverseMap, { by_sid: {} }, adjacency);
+        expect(state.military.brigade_movement_state?.[ABB]).toMatchObject({
+            destination_sids: [HALAPIC], status: 'in_transit', turns_remaining: 1,
+        });
+        expect(state.military.formations?.[ABB]?.location_osid).toBe(MALESEVCI);
+    });
+
+    it('cancels completed-prefix transit for an ordinary non-loan formation', () => {
+        const state = firstAcceptedMistralTransit();
+        delete state.military.formations![ABB]!.elite_loan_state;
+        state.military.corps_command!.hvo_main_staff!.active_operations =
+            state.military.corps_command!.hvo_tomislavgrad!.active_operations;
+        state.military.corps_command!.hvo_tomislavgrad!.active_operations = [];
+        correctTransitStates(state, adjacency);
+
+        expect(state.military.brigade_movement_state?.[ABB]).toBeUndefined();
+    });
+
+    it.each([
+        ['invalid loan receiver', (state: GameState) => {
+            state.military.formations![ABB]!.elite_loan_state!.loaned_to_corps = 'missing_corps';
+        }],
+        ['duplicate operation membership', (state: GameState) => {
+            state.military.corps_command!.hvo_main_staff!.active_operations = [structuredClone(mistral2())];
+        }],
+        ['incomplete capture prefix', (state: GameState) => {
+            state.military.corps_command!.hvo_tomislavgrad!.active_operations[0]!.axes![1]!.objective_capture_count = 1;
+        }],
+        ['unfriendly completed objective', (state: GameState) => {
+            state.political.political_controllers!['op:sipovo:brdjani'] = 'RS';
+        }],
+        ['hostile transit destination', (state: GameState) => {
+            state.political.political_controllers![HALAPIC] = 'RS';
+        }],
+        ['broken transit path', (state: GameState) => {
+            state.military.brigade_movement_state![ABB]!.path = [MALESEVCI, HALAPIC];
+        }],
+        ['unrelated pending order', (state: GameState) => {
+            state.military.brigade_movement_orders![ABB] = { destination_sids: [BRAVNICE], stance: 'column', owner: 'bot_discretionary' };
+        }],
+        ['ended operation', (state: GameState) => {
+            state.military.corps_command!.hvo_tomislavgrad!.active_operations[0]!.phase = 'recovery';
+        }],
+        ['held axis', (state: GameState) => {
+            state.military.corps_command!.hvo_tomislavgrad!.active_operations[0]!.axes![1]!.status = 'stalled';
+        }],
+        ['wrong axis', (state: GameState) => {
+            const operation = state.military.corps_command!.hvo_tomislavgrad!.active_operations[0]!;
+            operation.axes![1]!.assigned_brigades = operation.axes![1]!.assigned_brigades.filter((id) => id !== ABB);
+            operation.axes![0]!.assigned_brigades.push(ABB);
+        }],
+    ] as const)('cancels rather than broadening authority for %s', (_label, mutate) => {
+        const state = firstAcceptedMistralTransit();
+        mutate(state);
+
+        correctTransitStates(state, adjacency);
+
+        expect(state.military.brigade_movement_state?.[ABB]).toBeUndefined();
+    });
+
     it('preserves an active-loan operation march and the following bot skips replacement', () => {
         const state = fixture();
         const beforeCommitments = structuredClone({

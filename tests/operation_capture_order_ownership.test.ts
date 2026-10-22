@@ -17,7 +17,10 @@
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { resolveAttackOrdersOsid } from '../src/sim/combat/attack_resolution_osid.js';
-import { generateAllBotOrdersOsid } from '../src/sim/combat/bot_brigade_ai_osid.js';
+import {
+    generateAllBotOrdersOsid,
+    resolveReceivingOperationAttackCorps,
+} from '../src/sim/combat/bot_brigade_ai_osid.js';
 import {
     advanceLatePhaseGates,
     buildAttackOrderOwner,
@@ -46,7 +49,7 @@ afterEach(() => {
 const OP_NAME = 'Phase Gate Test Op';
 const HOST_CORPS = 'vrs_1st';
 const OP_ID = `${HOST_CORPS}:${OP_NAME}:t3`;
-const MAIN_TARGET = 'op:rbih:main_target';
+const MAIN_TARGET = 'op:jajce:prisoje';
 const HELD_TARGET = 'op:rbih:held_target';
 const LATER_TARGET = 'op:rbih:later_target';
 const APPROACH_TARGET = 'op:rbih:approach_cell';
@@ -508,6 +511,128 @@ describe('emitted ownership through the real dispatcher (evaluator -> merge boun
         expect(buildAttackOrderOwner(gated.state, 'not_a_member', MAIN_TARGET, 5)).toBeNull();
         const ungated = makeScenario({ gated: false });
         expect(buildAttackOrderOwner(ungated.state, 'brig_main', MAIN_TARGET, 5)).toBeNull();
+    });
+});
+
+describe('active elite-loan receiving command at the final Graz filter', () => {
+    function loanedHrhbScenario(): Scenario {
+        const scenario = makeScenario({ ownMain: false });
+        const { state, operation } = scenario;
+        const oldCommand = state.military.corps_command![HOST_CORPS]!;
+        delete state.military.corps_command![HOST_CORPS];
+        state.military.corps_command!.hvo_tomislavgrad = oldCommand;
+        const oldSector = state.military.corps_front_sectors![`sector:${HOST_CORPS}:0`]!;
+        delete state.military.corps_front_sectors![`sector:${HOST_CORPS}:0`];
+        oldSector.corps_id = 'hvo_tomislavgrad' as never;
+        oldSector.faction = 'HRHB';
+        state.military.corps_front_sectors!['sector:hvo_tomislavgrad:0'] = oldSector;
+        operation.sector_id = 'sector:hvo_tomislavgrad:0';
+        state.factions = [{ id: 'HRHB' }, { id: 'RS' }] as GameState['factions'];
+        state.political.vienna_declaration_turn = 4;
+        state.political.vienna_accepted = { HRHB: true, RS: true } as Record<FactionId, boolean>;
+        for (const osid of ['op:rs:staging', 'op:rs:hq']) {
+            state.political.political_controllers![osid] = 'HRHB';
+        }
+        for (const osid of [MAIN_TARGET, HELD_TARGET, LATER_TARGET, APPROACH_TARGET]) {
+            state.political.political_controllers![osid] = 'RS';
+        }
+        for (const id of ['brig_main', 'brig_held', HOST_CORPS]) {
+            state.military.formations![id]!.faction = 'HRHB';
+        }
+        for (const id of ['def_main', 'def_held', 'def_approach']) {
+            state.military.formations![id]!.faction = 'RS';
+        }
+        const loaned = state.military.formations!.brig_main!;
+        loaned.corps_id = 'hvo_main_staff';
+        loaned.elite_loan_state = {
+            on_loan: true,
+            loaned_to_corps: 'hvo_tomislavgrad',
+            loan_start_turn: 3,
+            last_recall_turn: null,
+            loan_start_personnel: loaned.personnel ?? 0,
+            permanently_degraded: false,
+            current_episode_id: 1,
+        };
+        return scenario;
+    }
+
+    it('keeps a correctly produced operation-owned Prisoje-style attack under the receiving corps and resolves it', () => {
+        const scenario = loanedHrhbScenario();
+        generateAllBotOrdersOsid(scenario.state, ['HRHB'], {
+            edges: scenario.edges,
+            reverseMap: {} as never,
+            adjacency: scenario.adjacency,
+        });
+        expect(scenario.state.military.brigade_attack_orders?.brig_main).toBe(MAIN_TARGET);
+        expect(scenario.state.military.brigade_attack_order_owners?.brig_main).toEqual({
+            operation_id: `hvo_tomislavgrad:${OP_NAME}:t3`,
+            axis_id: 'axis_main',
+            target: MAIN_TARGET,
+            turn: 5,
+        });
+        const report = resolveAttackOrdersOsid(scenario.state, scenario.edges, scenario.adjacency);
+        expect(report.battles.some((battle) => battle.attacker_brigade === 'brig_main' && battle.attacker_won)).toBe(true);
+        expect(scenario.state.political.political_controllers![MAIN_TARGET]).toBe('HRHB');
+    });
+
+    it('keeps the same produced attack blocked under routine home-corps command', () => {
+        const control = loanedHrhbScenario();
+        delete control.state.military.formations!.brig_main!.elite_loan_state;
+        control.state.political.vienna_declaration_turn = undefined;
+        generateAllBotOrdersOsid(control.state, ['HRHB'], {
+            edges: control.edges,
+            reverseMap: {} as never,
+            adjacency: control.adjacency,
+        });
+        expect(control.state.military.brigade_attack_orders?.brig_main).toBe(MAIN_TARGET);
+
+        const scenario = loanedHrhbScenario();
+        delete scenario.state.military.formations!.brig_main!.elite_loan_state;
+        generateAllBotOrdersOsid(scenario.state, ['HRHB'], {
+            edges: scenario.edges,
+            reverseMap: {} as never,
+            adjacency: scenario.adjacency,
+        });
+        expect(scenario.state.military.brigade_attack_orders?.brig_main).toBeUndefined();
+        expect(scenario.state.political.political_controllers![MAIN_TARGET]).toBe('RS');
+    });
+
+    it.each([
+        ['routine home-corps order', (scenario: Scenario) => {
+            delete scenario.state.military.formations!.brig_main!.elite_loan_state;
+        }],
+        ['inactive loan', (scenario: Scenario) => {
+            scenario.state.military.formations!.brig_main!.elite_loan_state!.on_loan = false;
+        }],
+        ['invalid receiver', (scenario: Scenario) => {
+            scenario.state.military.formations!.brig_main!.elite_loan_state!.loaned_to_corps = 'missing';
+        }],
+        ['foreign host', (scenario: Scenario) => {
+            scenario.state.military.formations!.brig_main!.elite_loan_state!.loaned_to_corps = 'hvo_main_staff';
+            scenario.state.military.corps_command!.hvo_main_staff = {
+                command_span: 1, subordinate_count: 0, og_slots: 0, active_ogs: [],
+                corps_exhaustion: 0, stance: 'offensive', active_operations: [],
+            } as never;
+        }],
+        ['ended operation', (scenario: Scenario) => {
+            scenario.operation.phase = 'recovery';
+        }],
+        ['duplicate operation identity', (scenario: Scenario) => {
+            scenario.state.military.corps_command!.hvo_tomislavgrad!.active_operations.push(structuredClone(scenario.operation));
+        }],
+    ])('does not transfer command for %s', (_label, mutate) => {
+        const scenario = loanedHrhbScenario();
+        const owner = buildAttackOrderOwner(scenario.state, 'brig_main', MAIN_TARGET, 5)!;
+        mutate(scenario);
+        expect(resolveReceivingOperationAttackCorps(scenario.state, 'brig_main', MAIN_TARGET, owner)).toBeNull();
+    });
+
+    it('rejects foreign target, operation and axis ownership metadata', () => {
+        const scenario = loanedHrhbScenario();
+        const owner = buildAttackOrderOwner(scenario.state, 'brig_main', MAIN_TARGET, 5)!;
+        expect(resolveReceivingOperationAttackCorps(scenario.state, 'brig_main', MAIN_TARGET, { ...owner, target: HELD_TARGET })).toBeNull();
+        expect(resolveReceivingOperationAttackCorps(scenario.state, 'brig_main', MAIN_TARGET, { ...owner, operation_id: 'foreign:op:t3' })).toBeNull();
+        expect(resolveReceivingOperationAttackCorps(scenario.state, 'brig_main', MAIN_TARGET, { ...owner, axis_id: 'foreign-axis' })).toBeNull();
     });
 });
 

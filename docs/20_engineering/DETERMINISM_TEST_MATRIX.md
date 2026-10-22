@@ -1,5 +1,11 @@
 # Determinism Test Matrix (AWWV)
 
+## Two-HVO late-operation validation (2026-10-23)
+
+Focused proof covers strict pool-flow/movement readers, elite-loan T6 transit preservation, receiving-corps Graz ownership, operation-opportunity value propagation, Mistral 2 coordinated advance, the narrow preparation view, Southern Move's third-axis handoff, exact-once Rama transfer and full-state guard parity. The final targeted correction passed 282/282; nonincremental `tsc --noEmit` exited 0. Its only source change removed a redundant cast; the emitted commander JavaScript remained byte-identical at 32,837 bytes, SHA-256 `204efd8daa165b8c10d330f8b754d84c9126d68fc08be2ff78f20e018b3f7679`, so the already qualified n91 campaign remains applicable.
+
+The final full suite exited child/wrapper 0/0 with 14,882 passed, 0 failed and 33 skipped tests across 1,446 file executions (1,443 unique; 1,442 pass, 4 skip), no timeout, and all 11 artifact/source/preservation checks true. Ten nested fake-fixture summaries are retained and excluded by exact outer-receipt identity. Independent 881 review accepts the two-target implementation validation with no findings. These checks validate the implementation and evidence linkage; they do not retire the seven remaining mismatches or any inherited global calibration gate.
+
 ## Formation cadre lifecycle candidate — isolated for recovery (341)
 
 The unaccepted cadre gameplay package and its fixture are archived byte-for-byte under

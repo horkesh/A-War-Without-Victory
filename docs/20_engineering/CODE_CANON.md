@@ -25,13 +25,20 @@ If you touch determinism-sensitive areas, also read:
 - `docs/20_engineering/INVARIANTS_IN_CODE.md`
 
 ## Where to Start Reading the Code (First 30 Minutes)
+
+### Two-HVO late-operation closure (2026-10-23)
+
+The current accepted source keeps the experimental pre-T3 global reconciliation helper dormant; `war_phases.ts` does not import or call it. T6 transit repair preserves a valid active elite-loan movement only when receiving-corps ownership, unique executing-axis membership and completed objective-prefix proof agree. The Graz attack lookup likewise resolves the receiving corps only for a valid unique active elite-loan operation-owned attack; ordinary home-corps policy and guards remain.
+
+`OperationOpportunityDef.coordinated_advance` propagates to the live operation and remains optional. Mistral 2 opts in: after the ordinary resolver records a decisive operation-owned victory, the lead and at most one admitted same-axis supporter may advance under the existing ownership guard. Preparation excludes only an axis with `late_phase.phase === 'holding'`, an existing handoff and `assigned_brigades.length === 0`. Sector selection, intel confidence, defender/enclave aggregation, terrain/force ratio and in-transit relevance consume that filtered view; they are not further exclusion predicates. Staffed or held Mistral axes and all stored objectives remain available to the existing ownership, reconciliation, execution and full-state guards. Southern Move's third axis starts empty, opens only after its own still-held Podrašnica capture, and moves Rama from the main axis exactly once. These mechanics are validated by n91 and the closed 880 full suite; they do not imply historical actor attribution or overall calibration adoption.
+
 Read `docs/10_canon/context.md` first (workflow discipline and validation rules).
 
-### Pre-T3 stale operation march reconciliation
+### Rejected pre-T3 stale-operation helper (dormant)
 
 Campaign qualification failed: n81 scores689/712 with14 previously correct October cells lost versus n80 703/712. The candidate is rejected and unadopted; preserved source and focused fixtures do not establish accepted calibration behavior.
 
-`reconcileStaleOperationMarchOrders` in `commander_march_correction.ts` is a T2 command-owner prepass immediately before column consumption, separate from that module's T6 repairs. It requires unique state-wide operation/axis membership, valid effective-host ownership and completed prior-objective proof; preserves valid competing order authority and active transit; and selects only the current objective's existing friendly approach deterministically. It changes a pending destination only. T3/T6 guards, thresholds, state schema and objective identity stay unchanged. See `MOVEMENT_AUTHORITY.md` section3a and the focused stale-operation/Mistral fixtures; those do not establish campaign neutrality or calibration gain.
+`reconcileStaleOperationMarchOrders` remains in `commander_march_correction.ts` as a dormant rejected candidate exercised only by local tests. The production War pipeline does not import or call it. Its historical candidate contract required unique state-wide operation/axis membership, valid effective-host ownership and completed prior-objective proof; n81 rejected that global prepass. Current production behavior uses the module's narrow T6 repairs described above. See `MOVEMENT_AUTHORITY.md` section 3a; the focused stale-operation/Mistral fixtures preserve the rejected helper's local contract without making it active or accepted.
 
 ### Observer-only command boundaries (2026-10-21)
 

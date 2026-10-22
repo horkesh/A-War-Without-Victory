@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-22 — Pale pool-flow observer ready; no campaign.
+**Last updated:** 2026-10-23 — two HVO target implementation validated; global calibration remains NO-GO.
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -23,12 +23,14 @@ goal, acceptance criteria, canon/protected boundaries, material scope/cost
 tradeoffs or irreversible/external actions with concrete options and a
 recommendation. Required evidence, review panels and cost-control gates remain.
 
-**Current R6 — October Sana remains NO-GO.** Retained n80 is **703/712**, unadopted.
-Corrected Pale-only default-off pool-flow logging and strict reader are ready for21–22.
-Focused55/55, nonincremental noEmit0 and independent827 verification qualify preparation.
-Actual direct/shared credit and decay operands still await measurement; no campaign.
-Threshold/reference and C/D telemetry exact; all failures and original BLOCKED review retained.
-All inherited gates remain in the [calibration authority](../40_reports/CALIBRATION_MASTER.md).
+**Current R6 — two HVO targets validated; October remains globally NO-GO.** Authoritative n91
+scores **707/707/706/705**, with Prisoje and Donji Vrbljani both HRHB at week 188, zero
+formerly-correct losses versus n80/n90, all 16 anchors and nine core checks green. The final full
+suite closes at 14,882 pass / 0 fail / 33 skip; independent 881 review accepts the implementation
+validation with no findings. Seven mismatches and all inherited acceptance gates remain. This does
+not adopt a baseline, refresh a pin or change a painted reference. See the
+[calibration authority](../40_reports/CALIBRATION_MASTER.md) and
+[portable provenance](../provenance/october-calibration-20261019/README.md).
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference

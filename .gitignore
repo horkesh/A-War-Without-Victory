@@ -161,6 +161,7 @@ logs/jemanlici-op-probe-20260923/
 logs/sebiocina-trial-20260923/
 logs/vranjevici-reference-20260924/
 logs/session-closeout-20260924/
+/logs/claude-channel-20261023/
 
 # Claude scheduler session lease; keep live lock local.
 /.claude/scheduled_tasks.lock

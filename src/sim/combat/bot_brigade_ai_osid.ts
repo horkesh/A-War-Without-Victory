@@ -33,9 +33,9 @@ import type {
     FormationState,
     GameState,
 } from '../../state/game_state.js';
-import { getFormationTier, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
+import { getFormationTier, isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
-import { syncAttackOrderOwners } from './operation_phase_gate.js';
+import { operationInstanceId, syncAttackOrderOwners } from './operation_phase_gate.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { OperationalToCanonicalReverseMap, OsidPopulationMap } from '../../data/operational_data.js';
 import {
@@ -76,6 +76,45 @@ import type { OsidEthnicComposition } from './ethnic_defense.js';
 import { COUNTER_ATTACK_RETREAT_WINDOW } from './bot_constants.js';
 import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
 import { isReasonCodeTopicEnabled, sortedIds } from './reason_code_debug.js';
+
+/**
+ * Resolve exceptional receiving-command authority for a surviving operation-evaluator attack.
+ * Routine orders retain formation corps authority. Invalid or ambiguous loan/owner metadata
+ * returns null so the caller applies Graz to the home corps and fails closed.
+ */
+export function resolveReceivingOperationAttackCorps(
+    state: GameState,
+    brigadeId: string,
+    target: string,
+    owner: BrigadeAttackOrderOwner | undefined,
+): string | null {
+    const formation = state.military.formations?.[brigadeId];
+    if (!formation || !isEligibleOperationFormation(formation)) return null;
+    const loan = formation.elite_loan_state;
+    const receivingCorps = loan?.on_loan === true && loan.loaned_to_corps
+        ? loan.loaned_to_corps
+        : null;
+    const commands = state.military.corps_command ?? {};
+    if (!receivingCorps || !commands[receivingCorps]) return null;
+    if (!owner || owner.target !== target || owner.turn !== (state.meta?.turn ?? 0)) return null;
+
+    const matches: Array<{ host: string }> = [];
+    for (const host of Object.keys(commands).sort(strictCompare)) {
+        for (const operation of commands[host]?.active_operations ?? []) {
+            if (operation.phase !== 'execution') continue;
+            if (operationInstanceId(host, operation) !== owner.operation_id) continue;
+            if (!operation.participating_brigades.includes(brigadeId as FormationId)) continue;
+            const axes = (operation.axes ?? []).filter((axis) =>
+                axis.axis_id === owner.axis_id
+                && axis.status === 'executing'
+                && axis.assigned_brigades.includes(brigadeId as FormationId));
+            if (axes.length === 1) matches.push({ host });
+        }
+    }
+    return matches.length === 1 && matches[0]!.host === receivingCorps
+        ? receivingCorps
+        : null;
+}
 
 /**
  * ═══════════════════════════════════════════════════════════════
@@ -1075,7 +1114,10 @@ export function generateAllBotOrdersOsid(
             if (!target) continue;
             const f = formations[bid];
             if (!f) continue;
-            const corpsId = f.corps_id ?? '';
+            const homeCorpsId = f.corps_id ?? '';
+            const owner = allAttackOrderOwners[bid as FormationId];
+            const corpsId = resolveReceivingOperationAttackCorps(state, bid, target, owner)
+                ?? homeCorpsId;
             const faction = f.faction;
             const targetController = pc[target] ?? '';
             // Skip Graz block for brigades attacking Op Jackal objectives only
