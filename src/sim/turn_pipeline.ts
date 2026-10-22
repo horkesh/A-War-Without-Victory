@@ -20,6 +20,7 @@ import { runPostTurnInvariantBarrier } from './turn_phases/war_phase_reconciliat
 import type { ValidationIssue } from '../validate/validate.js';
 import { createMovementPhaseObserver, type MovementPhaseObserver } from './combat/movement_phase_diagnostic.js';
 import { createPersonnelObserver, type PersonnelObserver } from './combat/personnel_diagnostic.js';
+import { createPoolFlowObserver, type PoolFlowObserver } from './combat/pool_flow_diagnostic.js';
 
 // Re-export all public types so existing importers (scenario_runner, tests, etc.) continue to work.
 export type {
@@ -145,9 +146,21 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<TurnR
     const context: TurnContext = { state: working, rng: rejectRandomness, input, report };
     const movementObserver = createMovementPhaseObserver();
     const personnelObserver = createPersonnelObserver();
+    const poolFlowObserver = createPoolFlowObserver(working, () => {
+        const selectedBottomUpStepNames = new Set([
+            'militia-emergence', 'compute-siege-state', 'pool-population',
+            'formation-spawn', 'activate-corps', 'promote-formations',
+        ]);
+        return [
+            ...warPhases.map((step) => ({ phase_name: step.name, phase_family: 'war' })),
+            ...(working.meta.recruitment_mode === 'bottom_up'
+                ? earlyWarPhases.filter((step) => selectedBottomUpStepNames.has(step.name)).map((step) => ({ phase_name: step.name, phase_family: 'early-war' }))
+                : []),
+        ];
+    });
 
     for (const step of warPhases) {
-        await runNamedPhase(context, step, 'war', movementObserver, personnelObserver);
+        await runNamedPhase(context, step, 'war', movementObserver, personnelObserver, poolFlowObserver);
     }
 
     // Bottom-up formation mode: run militia/pool/formation steps in war context.
@@ -163,7 +176,7 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<TurnR
         ]);
         for (const step of earlyWarPhases) {
             if (!bottomUpStepNames.has(step.name)) continue;
-            await runNamedPhase(context, step, 'early-war', movementObserver, personnelObserver);
+            await runNamedPhase(context, step, 'early-war', movementObserver, personnelObserver, poolFlowObserver);
         }
     }
 
@@ -180,6 +193,7 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<TurnR
     if (issues.length > 0) {
         movementObserver?.terminalBoundary(context.state, report.phases.length);
         personnelObserver?.terminalBoundary(context.state, report.phases.length);
+        poolFlowObserver?.finish(context.state, 'invariant_failure', 'post_turn_invariant');
         if (movementObserver) report.movement_phase_diagnostics = movementObserver.finish();
         return {
             status: 'invariant_failure',
@@ -203,6 +217,7 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<TurnR
 
     movementObserver?.terminalBoundary(context.state, report.phases.length);
     personnelObserver?.terminalBoundary(context.state, report.phases.length);
+    poolFlowObserver?.finish(context.state, 'success');
     if (movementObserver) report.movement_phase_diagnostics = movementObserver.finish();
     return { status: 'success', nextState: context.state, report };
 }
@@ -231,10 +246,11 @@ async function getEdgesForTurn(input: TurnInput): Promise<EdgeRecord[]> {
 }
 
 /** Central named-phase wrapper. Exported for focused instrumentation boundary tests. */
-export async function runNamedPhase(context: TurnContext, step: NamedPhase, phase: string, movementObserver?: MovementPhaseObserver, personnelObserver?: PersonnelObserver): Promise<void> {
+export async function runNamedPhase(context: TurnContext, step: NamedPhase, phase: string, movementObserver?: MovementPhaseObserver, personnelObserver?: PersonnelObserver, poolFlowObserver?: PoolFlowObserver): Promise<void> {
     const phaseIndex = context.report.phases.length;
     const movementBoundary = movementObserver?.beforePhase(context.state, step.name, phaseIndex, phase);
     const personnelBoundary = personnelObserver?.beforePhase(context.state, step.name, phaseIndex, phase);
+    const poolFlowBoundary = poolFlowObserver?.beforePhase(context.state, step.name, phaseIndex, phase);
     context.report.phases.push({ name: step.name });
     for (const skipIf of step.skipIf ?? []) {
         const skipReason = skipIf(context);
@@ -242,11 +258,13 @@ export async function runNamedPhase(context: TurnContext, step: NamedPhase, phas
         recordPhaseSkipDiagnostic(context, phase, step.name, skipReason);
         movementObserver?.afterPhase(context.state, movementBoundary, 'skipped', skipReason);
         personnelObserver?.afterPhase(context.state, personnelBoundary, 'skipped', skipReason);
+        if (poolFlowBoundary) poolFlowObserver?.afterPhase(context.state, poolFlowBoundary, 'skipped', skipReason);
         return;
     }
     await step.run(context);
     movementObserver?.afterPhase(context.state, movementBoundary, 'executed', null);
     personnelObserver?.afterPhase(context.state, personnelBoundary, 'executed', null);
+    if (poolFlowBoundary) poolFlowObserver?.afterPhase(context.state, poolFlowBoundary, 'executed', null);
 }
 
 async function refreshFrontEdgeSnapshot(state: GameState, input: TurnInput): Promise<void> {

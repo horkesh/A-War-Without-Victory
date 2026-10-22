@@ -40,6 +40,7 @@ import { type SiegeRatioByMunFaction, getSiegeRatio } from './early_war/compute_
 import { isEmergentFormationSuppressed } from './recruitment_engine.js';
 import { ensureBrigadeHistory } from './combat/brigade_history_recorder.js';
 import { getFactionDefaultOfficerQuality } from './combat/combat_math.js';
+import { beginPoolFlowMutation } from './combat/pool_flow_diagnostic.js';
 import {
     getActiveMunicipalitySupport,
     HRHB_SUPPORT_PACKAGE_COHESION_BONUS,
@@ -999,9 +1000,14 @@ export function applyMilitiaWiaTrickleback(state: GameState, report: WiaTrickleb
         const returned = Math.min(pending, WIA_TRICKLE_RATE);
         if (returned <= 0) continue;
 
+        const poolFlow = beginPoolFlowMutation(state, key);
         pool.wounded_pending = pending - returned;
         pool.available = Math.max(0, (pool.available ?? 0) + returned);
         pool.updated_turn = state.meta?.turn ?? pool.updated_turn ?? 0;
+        poolFlow?.complete('formation_spawn', 'militia_wia', 'credited', {
+            wounded_pending_before: pending, trickle_rate: WIA_TRICKLE_RATE, returned,
+            wounded_pending_after: pool.wounded_pending,
+        }, 'wia');
 
         poolsReturned += 1;
         personnelReturned += returned;

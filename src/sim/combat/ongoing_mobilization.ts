@@ -25,6 +25,7 @@ import {
 } from '../early_war/pool_population.js';
 import type { MunicipalityPopulation1991Map } from '../early_war/pool_population.js';
 import { getActiveRecruitmentMultiplier } from '../events/active_modifiers.js';
+import { beginPoolFlowMutation } from './pool_flow_diagnostic.js';
 
 /**
  * Weekly mobilization rate as fraction of eligible military-age population.
@@ -324,8 +325,16 @@ export function runOngoingMobilization(
                 : 0;
         if (mobilized + shipmentBonus <= 0) continue;
 
+        const poolFlow = beginPoolFlowMutation(state, key);
         pool.available += mobilized + shipmentBonus;
         pool.updated_turn = currentTurn;
+        poolFlow?.complete('ongoing_mobilization', 'direct_controller', 'credited', {
+            census_eligible: censusEligible, base_rate: BASE_MOBILIZATION_RATE, faction_scale: factionScale,
+            surge, exhaustion_multiplier: exhaustionMult, pocket_multiplier: pocketMult,
+            authority_multiplier: authorityMult, event_multiplier: eventMult, raw,
+            mobilization_cap: MAX_MOBILIZATION_PER_MUN_PER_TURN,
+            mobilized, shipment_bonus: shipmentBonus, credit: mobilized + shipmentBonus,
+        }, 'direct');
         report.total_mobilized += mobilized + shipmentBonus;
         report.by_faction[controller] = (report.by_faction[controller] ?? 0) + mobilized + shipmentBonus;
         report.municipalities_contributing += 1;

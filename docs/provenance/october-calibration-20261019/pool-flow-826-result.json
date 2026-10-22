@@ -1,0 +1,569 @@
+{
+  "verdict": "READY_FOR_TARGETED_RESIDUAL_VERIFICATION",
+  "scope": "contained expected-phase callback residual for default-OFF stdout-only pale:RS pool-flow readiness on completed turns 21-22; no campaign measurement or gameplay change",
+  "head": "9ea5d278c481324172d8ada8b32fc188de55a0e2",
+  "files": [
+    {
+      "path": "src/sim/combat/ongoing_mobilization.ts",
+      "bytes": 23509,
+      "sha256": "0cf1323690dac8ca0dc58641088a1c0bf6aacc571637890c6ed17f2f37911e8e"
+    },
+    {
+      "path": "src/sim/combat/pool_decay.ts",
+      "bytes": 3417,
+      "sha256": "74c15ff78413d6669813fc5babbda59c2817987fa3bc4c2b52de9efbee8d7c63"
+    },
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20310,
+      "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+    },
+    {
+      "path": "src/sim/combat/pool_flow_diagnostic.ts",
+      "bytes": 8979,
+      "sha256": "fc485758d68b360ff34b922d30fbc2edc6cfd86fc4ce75e680ec38f28d8691fc"
+    },
+    {
+      "path": "src/sim/early_war/pool_population.ts",
+      "bytes": 21692,
+      "sha256": "340eb0a7b695e174bfaa3234244df7217264ac0169ef120d89cc779f4e9d5fe7"
+    },
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "bytes": 48051,
+      "sha256": "44236006a3d5ae5346421096b58aad5cc189bfe93f5f05c116d8016344c53e16"
+    },
+    {
+      "path": "src/sim/turn_pipeline.ts",
+      "bytes": 12975,
+      "sha256": "6ef907e1835cbddba5a5faa550e7ad47dc934ff1e9720a5344b7a142fe2c2e9d"
+    },
+    {
+      "path": "tests/pool_flow_diagnostic.test.ts",
+      "bytes": 23447,
+      "sha256": "9f1a41062d154650e49d322d66cf8df6885f46a96ffe305c6b5c7eca96518eb2"
+    },
+    {
+      "path": "tools/diagnostics/pool_flow_reader.cjs",
+      "bytes": 12724,
+      "sha256": "d5bce9c409a639dd68a97c0cb05e4a279ee985fdacfcfdaeb1ac7e1d572b6528"
+    }
+  ],
+  "whitespace": {
+    "tracked_diff_check_exit": 0,
+    "all_changed_files_eof_newline": true,
+    "trailing_whitespace_findings": 0
+  },
+  "activation": "AWWV_DEBUG_REASON_CODES=pool_flow and AWWV_DEBUG_REINFORCEMENT_POOLS containing pale:RS",
+  "reader_cli": "node tools/diagnostics/pool_flow_reader.cjs --input <stdout.log> --output <fresh-result.json>",
+  "schema": {
+    "prefix": "[pool_flow]",
+    "version": 1,
+    "pool_key": "pale:RS",
+    "turns": [
+      21,
+      22
+    ],
+    "phase_manifest": "production warPhases plus active bottom-up phases",
+    "required_writer_groups": [
+      "direct",
+      "shared",
+      "decay",
+      "wia"
+    ]
+  },
+  "tests": {
+    "focused": {
+      "files": 2,
+      "tests": 55,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "path": "logs/claude-channel-20261004/826-residual-focused-final/receipt.json"
+    },
+    "typecheck": {
+      "command": "tsc --noEmit --incremental false -p tsconfig.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "path": "logs/claude-channel-20261004/826-residual-typecheck/receipt.json"
+    },
+    "targeted": {
+      "file": "tests/pool_flow_diagnostic.test.ts",
+      "tests": 13,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "path": "logs/claude-channel-20261004/826-residual-green-01/receipt.json"
+    },
+    "reused": {
+      "files": 6,
+      "tests": 102,
+      "receipt_sha256": "89f537b07beeac8f9347c9e9ef40ee5263d62d0d884aeaf481dcbb62d6ebd3f4",
+      "scope": "unchanged prior correction scope; reused rather than rerun"
+    }
+  },
+  "initial_review": {
+    "verdict": "BLOCKED",
+    "path": "logs/claude-channel-20261004/827-pool-flow-verification-c/review.json",
+    "bytes": 7932,
+    "sha256": "8fdd6514c00cf913ea48f62f224f7a62963b4293d4b1184274268e3d5e4ded2d"
+  },
+  "corrections": [
+    {
+      "finding": "mutation-key scoping",
+      "result": "each hook passes the already-reached actual key; non-Pale writes return before snapshot or emission"
+    },
+    {
+      "finding": "ON-only access containment",
+      "result": "selected-pool snapshots and output serialization are caught; actual producer access/mutation/exception order stays authoritative"
+    },
+    {
+      "finding": "reader completeness",
+      "result": "production-sourced expected phase manifest, exact phase closure, direct/shared/decay/WIA coverage, source-specific arithmetic, balance bindings, WIA conservation, and skip semantics are required"
+    },
+    {
+      "finding": "expected-phase callback containment",
+      "result": "callback failure is retained as a null manifest and diagnostic error; it cannot escape observer construction or qualify in the reader"
+    }
+  ],
+  "failure_ledger": [
+    {
+      "attempt": "826-correction-red-01",
+      "kind": "intended_RED",
+      "result": "two-pool false attribution and ON accessor exception reordering reproduced"
+    },
+    {
+      "attempt": "826-correction-green-01",
+      "kind": "stale_expectation",
+      "result": "pre-correction phase event assertion omitted new explicit writer qualifications"
+    },
+    {
+      "attempt": "826-correction-red-02",
+      "kind": "intended_RED",
+      "result": "reader rejected new qualification event before fixed contract implementation"
+    },
+    {
+      "attempt": "826-correction-green-02",
+      "kind": "reader_comparison_setup",
+      "result": "manifest object key order compared textually rather than semantically"
+    },
+    {
+      "attempt": "826-correction-green-03",
+      "kind": "test_design_miss",
+      "result": "shared displaced poison of +1 did not cross floor boundary; corrected to +100"
+    },
+    {
+      "attempt": "826-correction-red-03",
+      "kind": "intended_RED",
+      "result": "invented skipped writer qualification accepted before phase/skip binding"
+    },
+    {
+      "attempt": "826-correction-typecheck-final",
+      "kind": "test_typing_failure",
+      "result": "three phase test callbacks returned reports instead of void; production source typecheck findings zero"
+    },
+    {
+      "attempt": "826-correction-red-04",
+      "kind": "intended_RED",
+      "result": "phase-manifest builder ran before the complete observer gate; OFF and selector-isolated paths expected zero builds but observed one"
+    },
+    {
+      "attempt": "826-correction-final",
+      "kind": "superseded_packet",
+      "result": "exact-source audit found eager expected-manifest construction added an OFF recruitment_mode read; packet preserved and superseded"
+    },
+    {
+      "attempt": "826-correction-focused-final-c",
+      "kind": "wrapper_allowlist_setup",
+      "result": "102 tests passed, but PowerShell child scope dropped 14 generated snapshot allowlist entries and wrapper rejected the unexpected retained artifacts"
+    },
+    {
+      "attempt": "826-residual-red-01",
+      "kind": "intended_RED",
+      "result": "enabled expected-phase callback propagated recruitment_mode getter from observer construction; expected no throw"
+    },
+    {
+      "attempt": "826-residual-finalizer-precheck",
+      "kind": "packet_authoring_syntax",
+      "result": "initial local finalizer edit closed the corrections array one row early; fixed before any packet attempt"
+    }
+  ],
+  "receipts": [
+    {
+      "name": "826-correction-red-01",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "artifact_pass": true,
+      "receipt_sha256": "e7f707c686b189a3145182a804cc89d03025aaecd9eda4419605a8f11d3232f8"
+    },
+    {
+      "name": "826-correction-green-01",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "artifact_pass": true,
+      "receipt_sha256": "96c407b40bce7f4a97dcc6a437c59f7ab453ab888775f37cd0eb8b6f38c2fdbe"
+    },
+    {
+      "name": "826-correction-red-02",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "artifact_pass": true,
+      "receipt_sha256": "86ceb1a4cdcb251ddd47886681aae1191670cb3f9876a1e4846e070eb6561cb3"
+    },
+    {
+      "name": "826-correction-green-02",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "artifact_pass": true,
+      "receipt_sha256": "f0a7481a82e79e4fefe5aba94ce394014da34d521e08ddf9c99678c693ff1eb5"
+    },
+    {
+      "name": "826-correction-green-03",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "artifact_pass": true,
+      "receipt_sha256": "c036dccd23c4d873fcc7a843377b84ad2f0a3d0000e4f805ce55a9ba3caccec5"
+    },
+    {
+      "name": "826-correction-red-03",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "artifact_pass": true,
+      "receipt_sha256": "97efc5cf8d86349f9731cc55cb1d5122257b1c006ea5773a7647637024dbe0f9"
+    },
+    {
+      "name": "826-correction-green-04",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_pass": true,
+      "receipt_sha256": "2885e75babf90a830695bad769cef6f8685254a4d19a9d30ac1af45b074a6745"
+    },
+    {
+      "name": "826-correction-focused-final",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_pass": true,
+      "receipt_sha256": "96d5fefa8aec158ea36320469c040b8fabba2126840e34a20ec064d5c7d5f0b1"
+    },
+    {
+      "name": "826-correction-typecheck-final",
+      "child_exit": 2,
+      "wrapper_exit": 2,
+      "artifact_pass": true,
+      "receipt_sha256": "679074265699b04856c30703f67d25376ee24c8d03ee27dc03c3ca373196beef"
+    },
+    {
+      "name": "826-correction-focused-final-b",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_pass": true,
+      "receipt_sha256": "8be089b83322902f73e56d3fbd743d1a9842a6b3b78dc171debd3c7896a856ec"
+    },
+    {
+      "name": "826-correction-typecheck-final-b",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_pass": true,
+      "receipt_sha256": "e09ae8be4b994d7fc73a39e738583eef2a6f6c42d71d57bfd6382d4752d0b870"
+    },
+    {
+      "name": "826-correction-red-04",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "artifact_pass": true,
+      "receipt_sha256": "c18a8bbff6de68a676a51b18644088d43152c5464f827a9ae3451164840b1d76"
+    },
+    {
+      "name": "826-correction-green-05",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_pass": true,
+      "receipt_sha256": "20fe1b08137d870ad9c94ff9b89ea01105fff89b1d2bd0d16ed717a50080376a"
+    },
+    {
+      "name": "826-correction-focused-final-c",
+      "child_exit": 0,
+      "wrapper_exit": 126,
+      "artifact_pass": false,
+      "receipt_sha256": "e6f04877c23a98b0e64311063b1cea919c7077069333b876969bdfeca6e4d0ca"
+    },
+    {
+      "name": "826-correction-focused-final-d",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_pass": true,
+      "receipt_sha256": "89f537b07beeac8f9347c9e9ef40ee5263d62d0d884aeaf481dcbb62d6ebd3f4"
+    },
+    {
+      "name": "826-correction-typecheck-final-c",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_pass": true,
+      "receipt_sha256": "c87a8562f1894a01017af751be6b65b1fc7a7372c3a91390ffd7efe94d6cb40e"
+    },
+    {
+      "name": "826-residual-red-01",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "artifact_pass": true,
+      "receipt_sha256": "99372f8f39cc8ddcb8dc406b3625b22cf011c5129d0502088c3b9d545b58c1dd"
+    },
+    {
+      "name": "826-residual-green-01",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_pass": true,
+      "receipt_sha256": "3f7d62fc3a4d7e6fabb250723cd07383ccbac8a55fc284ce255db303bf57fcfe"
+    },
+    {
+      "name": "826-residual-focused-final",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_pass": true,
+      "receipt_sha256": "5db9486b756996c3b385c314eaffc2302fb1362fa224414d0f05add25014cae9"
+    },
+    {
+      "name": "826-residual-typecheck",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_pass": true,
+      "receipt_sha256": "86e21613fdca03b7b814f75827d7ddab304d6fecfccc5b8fed1eb85533d1ba13"
+    }
+  ],
+  "telemetry": {
+    "C": {
+      "before_bytes": 103894385,
+      "before_sha256": "00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557",
+      "after_bytes": 103894385,
+      "after_sha256": "00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557",
+      "append_bytes": 0,
+      "exact_prefix": true
+    },
+    "D": {
+      "before_bytes": 1041,
+      "before_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "after_bytes": 1041,
+      "after_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "append_bytes": 0,
+      "exact_prefix": true
+    }
+  },
+  "protected_controls": [
+    {
+      "path": "data/calibration/engine_health_thresholds.json",
+      "bytes": 3775,
+      "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d"
+    },
+    {
+      "path": "data/source/calibration/painted_control_oct1995.json",
+      "bytes": 35266,
+      "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b"
+    }
+  ],
+  "closed_receipt_inventory": [
+    {
+      "path": "logs/claude-channel-20261004/826-correction-final-b/receipt.json",
+      "bytes": 4597,
+      "sha256": "f8c437ae22385d0e591e8e7392b72dc52219b3204e10281d81c2173af66cb64c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-correction-focused-final/receipt.json",
+      "bytes": 7565,
+      "sha256": "96d5fefa8aec158ea36320469c040b8fabba2126840e34a20ec064d5c7d5f0b1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-correction-focused-final-b/receipt.json",
+      "bytes": 7569,
+      "sha256": "8be089b83322902f73e56d3fbd743d1a9842a6b3b78dc171debd3c7896a856ec"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-correction-focused-final-c/receipt.json",
+      "bytes": 5396,
+      "sha256": "e6f04877c23a98b0e64311063b1cea919c7077069333b876969bdfeca6e4d0ca"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-correction-focused-final-d/receipt.json",
+      "bytes": 7568,
+      "sha256": "89f537b07beeac8f9347c9e9ef40ee5263d62d0d884aeaf481dcbb62d6ebd3f4"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-correction-green-01/receipt.json",
+      "bytes": 4311,
+      "sha256": "96c407b40bce7f4a97dcc6a437c59f7ab453ab888775f37cd0eb8b6f38c2fdbe"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-correction-green-02/receipt.json",
+      "bytes": 5152,
+      "sha256": "f0a7481a82e79e4fefe5aba94ce394014da34d521e08ddf9c99678c693ff1eb5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-correction-green-03/receipt.json",
+      "bytes": 4080,
+      "sha256": "c036dccd23c4d873fcc7a843377b84ad2f0a3d0000e4f805ce55a9ba3caccec5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-correction-green-04/receipt.json",
+      "bytes": 4077,
+      "sha256": "2885e75babf90a830695bad769cef6f8685254a4d19a9d30ac1af45b074a6745"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-correction-green-05/receipt.json",
+      "bytes": 4050,
+      "sha256": "20fe1b08137d870ad9c94ff9b89ea01105fff89b1d2bd0d16ed717a50080376a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-correction-inventory/receipt.json",
+      "bytes": 2690,
+      "sha256": "a68268751ac8d3f1ba2387fd75e4b2500447f5c6ec0f9a2414b4e0841d784164"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-correction-inventory-b/receipt.json",
+      "bytes": 2695,
+      "sha256": "2533e4842b9c801597fad93ffab01d538d68f95bac74398a337d7121a1418d47"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-correction-red-01/receipt.json",
+      "bytes": 4056,
+      "sha256": "e7f707c686b189a3145182a804cc89d03025aaecd9eda4419605a8f11d3232f8"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-correction-red-02/receipt.json",
+      "bytes": 5146,
+      "sha256": "86ceb1a4cdcb251ddd47886681aae1191670cb3f9876a1e4846e070eb6561cb3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-correction-red-03/receipt.json",
+      "bytes": 3796,
+      "sha256": "97efc5cf8d86349f9731cc55cb1d5122257b1c006ea5773a7647637024dbe0f9"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-correction-red-04/receipt.json",
+      "bytes": 4048,
+      "sha256": "c18a8bbff6de68a676a51b18644088d43152c5464f827a9ae3451164840b1d76"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-correction-typecheck-final/receipt.json",
+      "bytes": 5977,
+      "sha256": "679074265699b04856c30703f67d25376ee24c8d03ee27dc03c3ca373196beef"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-correction-typecheck-final-b/receipt.json",
+      "bytes": 5979,
+      "sha256": "e09ae8be4b994d7fc73a39e738583eef2a6f6c42d71d57bfd6382d4752d0b870"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-correction-typecheck-final-c/receipt.json",
+      "bytes": 5979,
+      "sha256": "c87a8562f1894a01017af751be6b65b1fc7a7372c3a91390ffd7efe94d6cb40e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-final/receipt.json",
+      "bytes": 4400,
+      "sha256": "c9349e1a2b07170f931f076d4346b213e2631425dba64ac241b5205d47424397"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-final-b/receipt.json",
+      "bytes": 4522,
+      "sha256": "f1054ac804f527dacc72ae2caf3789d1c1254e726ccf83fc74cac5ffb762a5b1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-focused-final/receipt.json",
+      "bytes": 7542,
+      "sha256": "b7569e0fb2ceb167f1741720994c92b7d522ba4122cc7948d27ee641164d202c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-green-01/receipt.json",
+      "bytes": 3939,
+      "sha256": "e51895acd49a6f6a811e579cd1d991135e971d3217e73026e0feef045a0ad9d6"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-green-02/receipt.json",
+      "bytes": 4710,
+      "sha256": "d5136952b30c627c315307722436591f9de4394c388d76d816ecb8db4cb9d2bf"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-green-03/receipt.json",
+      "bytes": 3945,
+      "sha256": "b44e9dc5447582ac30052f41970c98d2ddc651fa8c918bbcb1c86984541c4bf7"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-green-04/receipt.json",
+      "bytes": 3948,
+      "sha256": "fb55b2100f91a1f8ad5f123ce38bb210c100bbd1f145d6fa4e2bea33873398c5"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-green-05/receipt.json",
+      "bytes": 3944,
+      "sha256": "7eb48c637d37a4cfb777cdfd1a9af5595aa6892b41c1b769e5b213989750064c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-inventory/receipt.json",
+      "bytes": 2669,
+      "sha256": "b6ecde81d11c09d128a4acba5602a8fa0a37e1c81ccb6ff21460fdc54cb59c3f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-red-01/receipt.json",
+      "bytes": 3658,
+      "sha256": "4ee170c1dc2ab01545ac0806c4c50468b4786221d7dadb3cc27504d0aaed881e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-red-02/receipt.json",
+      "bytes": 4778,
+      "sha256": "c946b59efbefd9574a5349c84f751e6212d8f955ee8231d1c6ed2171b22dd06e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-red-03/receipt.json",
+      "bytes": 3665,
+      "sha256": "046d660946d415a076b4c75c0c96f500c6e5e36f670e51bf17e0ebe22d06677f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-red-04/receipt.json",
+      "bytes": 3941,
+      "sha256": "c075c75d6651844b6e9d7a991e61fc4981eb8dc70861386f8567dbfb176fac90"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-red-05/receipt.json",
+      "bytes": 3942,
+      "sha256": "639c779ce919910508c75b5d741f9e014b2a240a510b3dc1bb665ad714f63bdb"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-residual-focused-final/receipt.json",
+      "bytes": 4674,
+      "sha256": "5db9486b756996c3b385c314eaffc2302fb1362fa224414d0f05add25014cae9"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-residual-green-01/receipt.json",
+      "bytes": 4326,
+      "sha256": "3f7d62fc3a4d7e6fabb250723cd07383ccbac8a55fc284ce255db303bf57fcfe"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-residual-red-01/receipt.json",
+      "bytes": 4324,
+      "sha256": "99372f8f39cc8ddcb8dc406b3625b22cf011c5129d0502088c3b9d545b58c1dd"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-residual-typecheck/receipt.json",
+      "bytes": 4331,
+      "sha256": "86e21613fdca03b7b814f75827d7ddab304d6fecfccc5b8fed1eb85533d1ba13"
+    },
+    {
+      "path": "logs/claude-channel-20261004/826-typecheck-final/receipt.json",
+      "bytes": 5673,
+      "sha256": "7b2c90340e4ac715a1288d0903e61c4b8dc70aa82d59f8b72f5278d46822ab7b"
+    }
+  ],
+  "source_order_audit": {
+    "default_off": "topic gate returns before selector, turn, manifest, pool, or writer snapshot reads; hooks use WeakMap/key guard before selected-pool reads",
+    "enabled": "manifest resolves only after topic, exact selector, and turn gates; callback exceptions become null manifest plus diagnostic error, selected-pool reads and serialization are caught without changing producer exception order",
+    "callback_audit": "expectedPhases is the sole injected callback; it is contained. Console output and stable serialization share the existing emit catch; pool snapshots share the existing snapshot catch. No other observer callback seam exists.",
+    "review_obligations": [
+      "actual mutation-key scoping closed",
+      "selected-pool access containment closed",
+      "reader completeness closed",
+      "expected-phase callback containment corrected"
+    ]
+  },
+  "supersedes": {
+    "packet": "logs/claude-channel-20261004/826-correction-final-b/result.json",
+    "reason": "targeted residual verification found enabled expected-phase callback exception propagation; prior packet preserved unchanged"
+  },
+  "correction_limits": "Readiness fixtures only. No campaign, runTurn, replay, build, full suite, retained-run writer measurement, campaign neutrality, n84 causality, historical causality, or 703/712 acceptance. Retained 703 remains NO-GO/unadopted."
+}

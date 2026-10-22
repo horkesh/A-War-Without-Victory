@@ -125,6 +125,7 @@ export type ReasonCodeTopic =
     | 'movement_phase'
     | 'personnel'
     | 'reinforcement_allocation'
+    | 'pool_flow'
     | 'front_distribution'
     | 'commander_creation'
     | 'mistral_tg_activation'
@@ -153,6 +154,7 @@ const ALL_TOPICS: readonly ReasonCodeTopic[] = [
     'movement_phase',
     'personnel',
     'reinforcement_allocation',
+    'pool_flow',
     'front_distribution',
     'commander_creation',
     'mistral_tg_activation',

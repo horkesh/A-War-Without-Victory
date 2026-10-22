@@ -21,6 +21,7 @@ import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { buildSettlementsByMun, getMunicipalityController } from './control_strain.js';
 import { type SiegeRatioByMunFaction, getSiegeRatio } from './compute_siege_state.js';
+import { beginPoolFlowMutation } from '../combat/pool_flow_diagnostic.js';
 
 /** Re-export for consumers that import from pool_population (e.g. ongoing_mobilization). */
 export { buildSettlementsByMun, getMunicipalityController };
@@ -225,8 +226,13 @@ export function runDisplacedAndCrossEthnicContributions(
                 const key = militiaPoolKey(munId, factionId);
                 const pool = pools[key];
                 if (pool) {
+                    const poolFlow = beginPoolFlowMutation(state, key);
                     pool.available += contribution;
                     pool.updated_turn = currentTurn;
+                    poolFlow?.complete('pool_population', 'shared_displaced_by_faction', 'credited', {
+                        displaced_in: displacedForFaction, reinforcement_rate: reinforcementRate,
+                        contribution_cap: DISPLACED_CONTRIBUTION_CAP, credit: contribution,
+                    }, 'shared');
                     report.displaced_contributions += 1;
                 } else {
                     pools[key] = {
@@ -251,8 +257,13 @@ export function runDisplacedAndCrossEthnicContributions(
             const key = militiaPoolKey(munId, controller);
             const pool = pools[key];
             if (pool) {
+                const poolFlow = beginPoolFlowMutation(state, key);
                 pool.available += contribution;
                 pool.updated_turn = currentTurn;
+                poolFlow?.complete('pool_population', 'shared_displaced_controller', 'credited', {
+                    displaced_in: disp.displaced_in, reinforcement_rate: reinforcementRate,
+                    contribution_cap: DISPLACED_CONTRIBUTION_CAP, credit: contribution,
+                }, 'shared');
                 report.displaced_contributions += 1;
             } else {
                 pools[key] = {

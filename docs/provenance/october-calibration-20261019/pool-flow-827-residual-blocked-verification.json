@@ -1,0 +1,180 @@
+{
+  "verdict": "BLOCKED",
+  "scope": "one targeted verification of the three original review findings plus the superseding default-OFF manifest gate",
+  "head": "9ea5d278c481324172d8ada8b32fc188de55a0e2",
+  "correction_packet": {
+    "result": {
+      "path": "logs/claude-channel-20261004/826-correction-final-b/result.json",
+      "bytes": 18102,
+      "sha256": "f9d34dae4d36034589785dc2a5070aea999ee77118f8b602c511c299a087785b"
+    },
+    "receipt": {
+      "path": "logs/claude-channel-20261004/826-correction-final-b/receipt.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "sha256": "f8c437ae22385d0e591e8e7392b72dc52219b3204e10281d81c2173af66cb64c"
+    },
+    "inventory": {
+      "path": "logs/claude-channel-20261004/826-correction-inventory-b/inventory.json",
+      "sha256": "f8f0bc4eb589f2c2892cfe970575d3b131cbdb88e172c2b6a065ed142f4b472e"
+    }
+  },
+  "resolved_findings": [
+    {
+      "original": "mutation hooks attribute every pool write to pale:RS",
+      "verdict": "RESOLVED",
+      "evidence": "Fresh real two-pool decay controls in both insertion orders emitted exactly one selected Pale mutation, 100 to 98."
+    },
+    {
+      "original": "selected-pool snapshots change access and exception order",
+      "verdict": "RESOLVED_FOR_SELECTED_POOL_SNAPSHOTS",
+      "evidence": "Fresh OFF and ON controls both mutated aaa:RS 100 to 98, recorded one phase, then propagated the same original Pale getter exception."
+    },
+    {
+      "original": "reader falsely qualifies incomplete or operand-poisoned evidence",
+      "verdict": "RESOLVED",
+      "evidence": "Fresh real-producer two-turn envelope accepted 22 rows/7 mutations with an explicit lawful turn-22 WIA unreached qualification; nine negative controls rejected missing phase, missing writer, poisoned direct/shared/decay/WIA/binding arithmetic, and invented skip semantics."
+    },
+    {
+      "original": "default-OFF observer must not evaluate diagnostic-only manifest inputs",
+      "verdict": "RESOLVED",
+      "evidence": "Fresh gate control built the manifest zero times OFF, zero times with another selector, and once only after the complete ON gate."
+    }
+  ],
+  "remaining_blocker": {
+    "severity": "critical",
+    "title": "ON expected-phase manifest construction remains uncontained and can reorder gameplay exceptions",
+    "locations": [
+      "src/sim/combat/pool_flow_diagnostic.ts:180",
+      "src/sim/turn_pipeline.ts:149"
+    ],
+    "detail": "createPoolFlowObserver now defers the manifest callback until the complete topic/selector/turn gate, fixing OFF behavior, but invokes that diagnostic-only callback without a try/catch. The production callback reads working.meta.recruitment_mode before any War phase. A fresh accessor control showed OFF did not invoke the callback, while ON propagated the recruitment_mode getter exception from observer construction. Thus enabling stdout observation can still introduce/move an exception ahead of gameplay, contrary to the authorized requirement that ON-only reads be caught and never mask or reorder gameplay exceptions.",
+    "evidence": "logs/claude-channel-20261004/827-manifest-accessor-probe/probe.json",
+    "required_fix": "Contain expected-manifest construction failure as diagnostic failure without throwing into gameplay, while retaining fail-closed terminal qualification. Verify ON/OFF exception and mutation order at this seam. Because this is a persistent residual after the one correction cycle, no further correction loop was run in this review."
+  },
+  "checks": {
+    "inherited_focused": {
+      "files": 6,
+      "tests": 102,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "receipt_sha256": "89f537b07beeac8f9347c9e9ef40ee5263d62d0d884aeaf481dcbb62d6ebd3f4"
+    },
+    "inherited_typecheck": {
+      "command": "tsc --noEmit --incremental false -p tsconfig.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "receipt_sha256": "c87a8562f1894a01017af751be6b65b1fc7a7372c3a91390ffd7efe94d6cb40e"
+    },
+    "inherited_targeted": {
+      "file": "tests/pool_flow_diagnostic.test.ts",
+      "tests": 12,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "receipt_sha256": "20fe1b08137d870ad9c94ff9b89ea01105fff89b1d2bd0d16ed717a50080376a"
+    },
+    "independent_targeted": {
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "receipt_sha256": "e5b160e6efeac117dab8470978fe9e629931ac1aa2f8da163c60cc95e11b25be",
+      "valid_rows": 22,
+      "valid_mutations": 7,
+      "reader_negative_controls": 9,
+      "multipool_orders": 2
+    },
+    "independent_residual": {
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "receipt_sha256": "e3d89a1db25187101234c6a7ae3adfe31d36477423724baa97fea8d0c222eb6e",
+      "result": {
+        "verdict": "CONFIRMED_ON_MANIFEST_EXCEPTION_PROPAGATION",
+        "off": {
+          "error": null,
+          "builds": 0
+        },
+        "on": {
+          "error": "recruitment_mode getter",
+          "builds": 1
+        }
+      }
+    }
+  },
+  "final_files": [
+    {
+      "path": "src/sim/combat/ongoing_mobilization.ts",
+      "bytes": 23509,
+      "sha256": "0cf1323690dac8ca0dc58641088a1c0bf6aacc571637890c6ed17f2f37911e8e"
+    },
+    {
+      "path": "src/sim/combat/pool_decay.ts",
+      "bytes": 3417,
+      "sha256": "74c15ff78413d6669813fc5babbda59c2817987fa3bc4c2b52de9efbee8d7c63"
+    },
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20310,
+      "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+    },
+    {
+      "path": "src/sim/combat/pool_flow_diagnostic.ts",
+      "bytes": 8634,
+      "sha256": "96d910eb2f7461459a142d1ff3924a88f44f186ef3ecc31ea8c9cd6870d0252e"
+    },
+    {
+      "path": "src/sim/early_war/pool_population.ts",
+      "bytes": 21692,
+      "sha256": "340eb0a7b695e174bfaa3234244df7217264ac0169ef120d89cc779f4e9d5fe7"
+    },
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "bytes": 48051,
+      "sha256": "44236006a3d5ae5346421096b58aad5cc189bfe93f5f05c116d8016344c53e16"
+    },
+    {
+      "path": "src/sim/turn_pipeline.ts",
+      "bytes": 12975,
+      "sha256": "6ef907e1835cbddba5a5faa550e7ad47dc934ff1e9720a5344b7a142fe2c2e9d"
+    },
+    {
+      "path": "tests/pool_flow_diagnostic.test.ts",
+      "bytes": 21596,
+      "sha256": "b696a4815cde262b67c40d6f9a80985377d45a1bcdaea80d7f33968efa23bcc2"
+    },
+    {
+      "path": "tools/diagnostics/pool_flow_reader.cjs",
+      "bytes": 12724,
+      "sha256": "d5bce9c409a639dd68a97c0cb05e4a279ee985fdacfcfdaeb1ac7e1d572b6528"
+    }
+  ],
+  "telemetry": {
+    "C": {
+      "before_bytes": 103894385,
+      "before_sha256": "00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557",
+      "after_bytes": 103894385,
+      "after_sha256": "00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557",
+      "append_bytes": 0,
+      "exact_prefix": true
+    },
+    "D": {
+      "before_bytes": 1041,
+      "before_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "after_bytes": 1041,
+      "after_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "append_bytes": 0,
+      "exact_prefix": true
+    }
+  },
+  "protected_controls": [
+    {
+      "path": "data/calibration/engine_health_thresholds.json",
+      "bytes": 3775,
+      "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d"
+    },
+    {
+      "path": "data/source/calibration/painted_control_oct1995.json",
+      "bytes": 35266,
+      "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b"
+    }
+  ],
+  "qualification_limits": "Readiness verification only. No campaign, full suite, build, replay, or runTurn was executed. This does not establish campaign neutrality, actual retained-run n84 writer values, historical causality, n80 causality, or acceptance of 703/712. The retained 703 remains NO-GO/unadopted; thresholds and prior telemetry gates remain in force."
+}

@@ -1,0 +1,130 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-22T18:45:41.515Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/826-residual-final",
+  "timeout_ms": 60000,
+  "original_argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "logs/claude-channel-20261004/826-residual-finalize.cjs",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+    "logs/claude-channel-20261004/826-residual-finalize.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\826-residual-final"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "dependencies.json",
+    "dependency-00.snapshot",
+    "dependency-01.snapshot",
+    "dependency-02.snapshot",
+    "dependency-03.snapshot",
+    "dependency-04.snapshot",
+    "dependency-05.snapshot",
+    "dependency-06.snapshot",
+    "dependency-07.snapshot",
+    "dependency-08.snapshot",
+    "result.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/826-residual-finalize.cjs",
+    "bytes": 10362,
+    "raw_sha256": "f5dc5856be2576dc24a2d9d56c98f7371a9102c3bf66077f80d6cd969c31d699",
+    "normalized_text_sha256": "f5dc5856be2576dc24a2d9d56c98f7371a9102c3bf66077f80d6cd969c31d699",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 10362,
+      "sha256": "f5dc5856be2576dc24a2d9d56c98f7371a9102c3bf66077f80d6cd969c31d699"
+    }
+  },
+  "end_utc": "2026-10-22T18:45:42.181Z",
+  "pid": 20864,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/logs/claude-channel-20261004/826-residual-finalize.cjs",
+    "bytes": 10362,
+    "raw_sha256": "f5dc5856be2576dc24a2d9d56c98f7371a9102c3bf66077f80d6cd969c31d699",
+    "normalized_text_sha256": "f5dc5856be2576dc24a2d9d56c98f7371a9102c3bf66077f80d6cd969c31d699",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 142,
+    "sha256": "41eb674c8f40d1b6ad2b2a34873b4a705aabc9a0679d02f496c9f281726f85b7"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "dependencies.json",
+      "bytes": 1810,
+      "sha256": "d6aa81b94bb35780e8ba880976b21c3e98ab5eb4b345e2df011a6a8ad33084fa"
+    },
+    {
+      "path": "dependency-00.snapshot",
+      "bytes": 23509,
+      "sha256": "0cf1323690dac8ca0dc58641088a1c0bf6aacc571637890c6ed17f2f37911e8e"
+    },
+    {
+      "path": "dependency-01.snapshot",
+      "bytes": 3417,
+      "sha256": "74c15ff78413d6669813fc5babbda59c2817987fa3bc4c2b52de9efbee8d7c63"
+    },
+    {
+      "path": "dependency-02.snapshot",
+      "bytes": 20310,
+      "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+    },
+    {
+      "path": "dependency-03.snapshot",
+      "bytes": 8979,
+      "sha256": "fc485758d68b360ff34b922d30fbc2edc6cfd86fc4ce75e680ec38f28d8691fc"
+    },
+    {
+      "path": "dependency-04.snapshot",
+      "bytes": 21692,
+      "sha256": "340eb0a7b695e174bfaa3234244df7217264ac0169ef120d89cc779f4e9d5fe7"
+    },
+    {
+      "path": "dependency-05.snapshot",
+      "bytes": 48051,
+      "sha256": "44236006a3d5ae5346421096b58aad5cc189bfe93f5f05c116d8016344c53e16"
+    },
+    {
+      "path": "dependency-06.snapshot",
+      "bytes": 12975,
+      "sha256": "6ef907e1835cbddba5a5faa550e7ad47dc934ff1e9720a5344b7a142fe2c2e9d"
+    },
+    {
+      "path": "dependency-07.snapshot",
+      "bytes": 23447,
+      "sha256": "9f1a41062d154650e49d322d66cf8df6885f46a96ffe305c6b5c7eca96518eb2"
+    },
+    {
+      "path": "dependency-08.snapshot",
+      "bytes": 12724,
+      "sha256": "d5bce9c409a639dd68a97c0cb05e4a279ee985fdacfcfdaeb1ac7e1d572b6528"
+    },
+    {
+      "path": "result.json",
+      "bytes": 21495,
+      "sha256": "0e6a1fe4a04d0015fe4632e3e44877ae88241beefa238c8b0d563b3d44e3e82c"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

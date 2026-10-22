@@ -1,3 +1,7 @@
+## 2026-10-22 — Pair selected-pool write operands with phase continuity
+
+A transfer receipt cannot identify earlier pool credits. Record actual reached write operands alongside selected-pool phase snapshots and terminal attempt/error manifests; reject missing zero-change records and cross-turn discontinuity. Default-off hooks must preserve original guard/access order, and output errors must remain outside gameplay. This qualifies future measurement, not a recovered historical writer receipt. See [Pale observer](PROJECT_LEDGER.md#2026-10-22--pale-pool-flow-observer-preparation-825828).
+
 ## 2026-10-22 — Preserve the distinction between writer class and branch receipt
 
 An initial wounded count plus a complete canonical militia-battle projection can exclude later WIA return, supporting a positive writer phase by elimination. State the projection assumption. That does not reveal direct/shared mobilization amounts or subsequent decay. Also, a frozen synthesis after failed finalizers must retain those exits and must not inherit an unrelated passing receipt. See [Pale source trace](PROJECT_LEDGER.md#2026-10-22--retained-pale-upstream-writer-phase-trace-821824).

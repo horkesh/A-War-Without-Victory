@@ -1,0 +1,335 @@
+{
+  "writes_closed": true,
+  "captured_utc": "2026-10-22T18:50:16.190Z",
+  "verdict": "APPROVED_BOUNDED_POOL_FLOW_OBSERVER_READINESS",
+  "scope": "contained expected-phase callback residual for default-OFF stdout-only pale:RS pool-flow readiness on completed turns 21-22; no campaign measurement or gameplay change",
+  "head": "9ea5d278c481324172d8ada8b32fc188de55a0e2",
+  "worker": {
+    "path": "logs/claude-channel-20261004/826-residual-final/result.json",
+    "bytes": 21495,
+    "sha256": "0e6a1fe4a04d0015fe4632e3e44877ae88241beefa238c8b0d563b3d44e3e82c",
+    "receipt": "logs/claude-channel-20261004/826-residual-final/receipt.json"
+  },
+  "review": {
+    "path": "logs/claude-channel-20261004/827-pool-flow-residual-verification-b/review.json",
+    "bytes": 7926,
+    "sha256": "ca7d2e5bf5abb19443fc58a60381c453a5eafb77d8239a8fdf7837e037af4767",
+    "verdict": "APPROVE"
+  },
+  "files": [
+    {
+      "path": "src/sim/combat/ongoing_mobilization.ts",
+      "bytes": 23509,
+      "sha256": "0cf1323690dac8ca0dc58641088a1c0bf6aacc571637890c6ed17f2f37911e8e"
+    },
+    {
+      "path": "src/sim/combat/pool_decay.ts",
+      "bytes": 3417,
+      "sha256": "74c15ff78413d6669813fc5babbda59c2817987fa3bc4c2b52de9efbee8d7c63"
+    },
+    {
+      "path": "src/sim/combat/reason_code_debug.ts",
+      "bytes": 20310,
+      "sha256": "a70c5e1c55c77fab7c771b77b583d3cc1c6742d1d9cb8f08b9962b062d6d68bd"
+    },
+    {
+      "path": "src/sim/combat/pool_flow_diagnostic.ts",
+      "bytes": 8979,
+      "sha256": "fc485758d68b360ff34b922d30fbc2edc6cfd86fc4ce75e680ec38f28d8691fc"
+    },
+    {
+      "path": "src/sim/early_war/pool_population.ts",
+      "bytes": 21692,
+      "sha256": "340eb0a7b695e174bfaa3234244df7217264ac0169ef120d89cc779f4e9d5fe7"
+    },
+    {
+      "path": "src/sim/formation_spawn.ts",
+      "bytes": 48051,
+      "sha256": "44236006a3d5ae5346421096b58aad5cc189bfe93f5f05c116d8016344c53e16"
+    },
+    {
+      "path": "src/sim/turn_pipeline.ts",
+      "bytes": 12975,
+      "sha256": "6ef907e1835cbddba5a5faa550e7ad47dc934ff1e9720a5344b7a142fe2c2e9d"
+    },
+    {
+      "path": "tests/pool_flow_diagnostic.test.ts",
+      "bytes": 23447,
+      "sha256": "9f1a41062d154650e49d322d66cf8df6885f46a96ffe305c6b5c7eca96518eb2"
+    },
+    {
+      "path": "tools/diagnostics/pool_flow_reader.cjs",
+      "bytes": 12724,
+      "sha256": "d5bce9c409a639dd68a97c0cb05e4a279ee985fdacfcfdaeb1ac7e1d572b6528"
+    }
+  ],
+  "tests": {
+    "focused": {
+      "files": 2,
+      "tests": 55,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "path": "logs/claude-channel-20261004/826-residual-focused-final/receipt.json"
+    },
+    "typecheck": {
+      "command": "tsc --noEmit --incremental false -p tsconfig.json",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "path": "logs/claude-channel-20261004/826-residual-typecheck/receipt.json"
+    },
+    "targeted": {
+      "file": "tests/pool_flow_diagnostic.test.ts",
+      "tests": 13,
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "path": "logs/claude-channel-20261004/826-residual-green-01/receipt.json"
+    },
+    "reused": {
+      "files": 6,
+      "tests": 102,
+      "receipt_sha256": "89f537b07beeac8f9347c9e9ef40ee5263d62d0d884aeaf481dcbb62d6ebd3f4",
+      "scope": "unchanged prior correction scope; reused rather than rerun"
+    }
+  },
+  "failure_ledger": [
+    {
+      "attempt": "826-correction-red-01",
+      "kind": "intended_RED",
+      "result": "two-pool false attribution and ON accessor exception reordering reproduced"
+    },
+    {
+      "attempt": "826-correction-green-01",
+      "kind": "stale_expectation",
+      "result": "pre-correction phase event assertion omitted new explicit writer qualifications"
+    },
+    {
+      "attempt": "826-correction-red-02",
+      "kind": "intended_RED",
+      "result": "reader rejected new qualification event before fixed contract implementation"
+    },
+    {
+      "attempt": "826-correction-green-02",
+      "kind": "reader_comparison_setup",
+      "result": "manifest object key order compared textually rather than semantically"
+    },
+    {
+      "attempt": "826-correction-green-03",
+      "kind": "test_design_miss",
+      "result": "shared displaced poison of +1 did not cross floor boundary; corrected to +100"
+    },
+    {
+      "attempt": "826-correction-red-03",
+      "kind": "intended_RED",
+      "result": "invented skipped writer qualification accepted before phase/skip binding"
+    },
+    {
+      "attempt": "826-correction-typecheck-final",
+      "kind": "test_typing_failure",
+      "result": "three phase test callbacks returned reports instead of void; production source typecheck findings zero"
+    },
+    {
+      "attempt": "826-correction-red-04",
+      "kind": "intended_RED",
+      "result": "phase-manifest builder ran before the complete observer gate; OFF and selector-isolated paths expected zero builds but observed one"
+    },
+    {
+      "attempt": "826-correction-final",
+      "kind": "superseded_packet",
+      "result": "exact-source audit found eager expected-manifest construction added an OFF recruitment_mode read; packet preserved and superseded"
+    },
+    {
+      "attempt": "826-correction-focused-final-c",
+      "kind": "wrapper_allowlist_setup",
+      "result": "102 tests passed, but PowerShell child scope dropped 14 generated snapshot allowlist entries and wrapper rejected the unexpected retained artifacts"
+    },
+    {
+      "attempt": "826-residual-red-01",
+      "kind": "intended_RED",
+      "result": "enabled expected-phase callback propagated recruitment_mode getter from observer construction; expected no throw"
+    },
+    {
+      "attempt": "826-residual-finalizer-precheck",
+      "kind": "packet_authoring_syntax",
+      "result": "initial local finalizer edit closed the corrections array one row early; fixed before any packet attempt"
+    }
+  ],
+  "corrections": [
+    {
+      "finding": "mutation-key scoping",
+      "result": "each hook passes the already-reached actual key; non-Pale writes return before snapshot or emission"
+    },
+    {
+      "finding": "ON-only access containment",
+      "result": "selected-pool snapshots and output serialization are caught; actual producer access/mutation/exception order stays authoritative"
+    },
+    {
+      "finding": "reader completeness",
+      "result": "production-sourced expected phase manifest, exact phase closure, direct/shared/decay/WIA coverage, source-specific arithmetic, balance bindings, WIA conservation, and skip semantics are required"
+    },
+    {
+      "finding": "expected-phase callback containment",
+      "result": "callback failure is retained as a null manifest and diagnostic error; it cannot escape observer construction or qualify in the reader"
+    }
+  ],
+  "source_order_audit": {
+    "default_off": "topic gate returns before selector, turn, manifest, pool, or writer snapshot reads; hooks use WeakMap/key guard before selected-pool reads",
+    "enabled": "manifest resolves only after topic, exact selector, and turn gates; callback exceptions become null manifest plus diagnostic error, selected-pool reads and serialization are caught without changing producer exception order",
+    "callback_audit": "expectedPhases is the sole injected callback; it is contained. Console output and stable serialization share the existing emit catch; pool snapshots share the existing snapshot catch. No other observer callback seam exists.",
+    "review_obligations": [
+      "actual mutation-key scoping closed",
+      "selected-pool access containment closed",
+      "reader completeness closed",
+      "expected-phase callback containment corrected"
+    ]
+  },
+  "protected_source_pins": [
+    {
+      "path": "src/scenario/turn_inputs.ts",
+      "bytes": 17275,
+      "sha256": "4f385b0b5f32d82e38b0dea8a7d7a54f5b2f48687c8cbf1ef2c73af93725ba6c"
+    },
+    {
+      "path": "src/sim/combat/brigade_reconstitution.ts",
+      "bytes": 23654,
+      "sha256": "95648226f916e0404c630e0384539c88f7befe4cb8e8e387be988552c8d2fba2"
+    },
+    {
+      "path": "src/sim/combat/militia_casualties.ts",
+      "bytes": 8134,
+      "sha256": "3c5d461a187fc8690e6c12d586195ed7c8afd18be1e03cbb41a139ea0478f00f"
+    },
+    {
+      "path": "src/sim/combat/personnel_diagnostic.ts",
+      "bytes": 5870,
+      "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3"
+    },
+    {
+      "path": "src/sim/combat/reinforcement_allocation_diagnostic.ts",
+      "bytes": 7113,
+      "sha256": "12d24113946ad414ae3f310a45c9d7f52e0a24bde916ed60f0001d18d4bacdc6"
+    },
+    {
+      "path": "src/sim/combat/strategic_reserve.ts",
+      "bytes": 10755,
+      "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae"
+    },
+    {
+      "path": "src/sim/early_war/minority_militia_decay.ts",
+      "bytes": 4026,
+      "sha256": "166ac9cc394ace45e208551620ec43ae070af6461617acb926199f3741df4064"
+    },
+    {
+      "path": "src/sim/recruitment_engine.ts",
+      "bytes": 55659,
+      "sha256": "c657b778736fe9599395b48968702e45ca4d1141de6112990942ce3a744ae4d9"
+    },
+    {
+      "path": "src/sim/recruitment_turn.ts",
+      "bytes": 13674,
+      "sha256": "d807e44faac2aabe3cde46bd0ab775b34738e2d6a10b608ec9589ac2589e62c3"
+    },
+    {
+      "path": "src/sim/turn_phases/early_war_phases.ts",
+      "bytes": 15623,
+      "sha256": "1a1061dc850edc23d58abb59bcc730b604c7a4389201ef63941d405ddd863f50"
+    },
+    {
+      "path": "src/sim/turn_phases/war_phases.ts",
+      "bytes": 231691,
+      "sha256": "93fcb005fa725c8a45269370c8319ca34779d1e032624fee08a4ae5800baa04a"
+    },
+    {
+      "path": "src/state/displacement.ts",
+      "bytes": 43147,
+      "sha256": "d992a11227b4728dafe9006519bdeb4ca8bb90490e7d4f55fb7865ac034fa7b2"
+    },
+    {
+      "path": "src/state/displacement_takeover.ts",
+      "bytes": 42755,
+      "sha256": "5f3717d4ab04592aacfba9ecc82a67459d28fbc9e4dfad2eba14ee5826a8bf3a"
+    },
+    {
+      "path": "src/state/formation_constants.ts",
+      "bytes": 25491,
+      "sha256": "985eeaa427a356e83db5b384a9fbe5533c6bb4eb385855eb4f025a0ed7c11c32"
+    },
+    {
+      "path": "tests/personnel_diagnostic.test.ts",
+      "bytes": 19693,
+      "sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b"
+    },
+    {
+      "path": "tests/reason_code_debug.test.ts",
+      "bytes": 10435,
+      "sha256": "44a60e84d8b22d1cb629364a84e10257d3454531678b987a75582ddaee9a756c"
+    },
+    {
+      "path": "tests/reinforcement_allocation_diagnostic.test.ts",
+      "bytes": 36000,
+      "sha256": "6eff326a27cc9892aa45a6d84ae018afd19ecba18af65896ce050f7a05a094df"
+    },
+    {
+      "path": "tools/diagnostics/reinforcement_allocation_reader.cjs",
+      "bytes": 20531,
+      "sha256": "bf1e94e52c2efb447041161fa6e14de2d078f2177d7392209344acc746c71c86"
+    }
+  ],
+  "protected_controls": [
+    {
+      "path": "data/calibration/engine_health_thresholds.json",
+      "bytes": 3775,
+      "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d"
+    },
+    {
+      "path": "data/source/calibration/painted_control_oct1995.json",
+      "bytes": 35266,
+      "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b"
+    }
+  ],
+  "telemetry": [
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 103894385,
+      "sha256": "00d6d7e65832a45e4b8ddc34e077c228b9496ca8f1068a6b9633571b4bae5557",
+      "append_bytes": 0,
+      "exact_prefix": true,
+      "before_archive": "logs/claude-channel-20261004/826-pool-flow/c-before.bin",
+      "after_archive": "logs/claude-channel-20261004/826-pool-flow/c-after.bin"
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "append_bytes": 0,
+      "exact_prefix": true,
+      "before_archive": "logs/claude-channel-20261004/826-pool-flow/d-before.bin",
+      "after_archive": "logs/claude-channel-20261004/826-pool-flow/d-after.bin"
+    }
+  ],
+  "activation": "AWWV_DEBUG_REASON_CODES=pool_flow and AWWV_DEBUG_REINFORCEMENT_POOLS containing pale:RS",
+  "reader_cli": "node tools/diagnostics/pool_flow_reader.cjs --input <stdout.log> --output <fresh-result.json>",
+  "schema": {
+    "prefix": "[pool_flow]",
+    "version": 1,
+    "pool_key": "pale:RS",
+    "turns": [
+      21,
+      22
+    ],
+    "phase_manifest": "production warPhases plus active bottom-up phases",
+    "required_writer_groups": [
+      "direct",
+      "shared",
+      "decay",
+      "wia"
+    ]
+  },
+  "campaign_invocations": 0,
+  "full_suite_invocations": 0,
+  "calibration": "Retained n80 703/712 remains NO-GO/unadopted. Rejected n83/n84 trajectory and all inherited gates unchanged; no new runtime measurement, historical cause or campaign-neutrality claim.",
+  "raw_inventory": {
+    "path": "logs/claude-channel-20261004/828-raw-inventory.json",
+    "bytes": 163087,
+    "sha256": "876c7d750d0c27a39f91a78ff0e2f69ef2e77dd9df3dcb7dc77065382cfcd85c"
+  }
+}
