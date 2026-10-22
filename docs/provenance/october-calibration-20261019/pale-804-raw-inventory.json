@@ -1,0 +1,266 @@
+{
+  "writes_closed": true,
+  "scope": "Final closed801/802/803 retained evidence; rawbytesLOCAL with pushed inventory",
+  "entries": [
+    {
+      "path": "logs/claude-channel-20261004/801-root-plan.md",
+      "bytes": 2968,
+      "sha256": "49d2f6b9a9d6b0187800debd5db0b92b45639a3ee15ecbbf0b3f0d61af1f0c97"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-extract-a/802-result.json",
+      "bytes": 44867,
+      "sha256": "3366cc29279d8d94c6513203f93cd32faf7d5dd0e23e5c9557f4143b40fc7b81"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-extract-a/802-result.md",
+      "bytes": 1596,
+      "sha256": "3e1cdc1d92ab79550ee532be1134e1c768954ab99341aedcf80f27d331ce9b70"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-extract-a/entry-script.snapshot",
+      "bytes": 18312,
+      "sha256": "3b3c2134b8c7e6784f6386edf44be6ccb17f4909b23f600ce47a72bcd5fd9a56"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-extract-a/receipt.json",
+      "bytes": 2840,
+      "sha256": "31961c0e5bc48b646b926f98bb415a612dc14f0121c7206345b3973d1661e828"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-extract-a/start.json",
+      "bytes": 1502,
+      "sha256": "9dd752af30349e46f1ece8dcf23e892be8c33aed93773655e0197b78ef97555f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-extract-a/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-extract-a/stdout.log",
+      "bytes": 313,
+      "sha256": "7ff68902c14ee785b6097e16e0986d94cd48a3f22bb3b8cfef4f209ebfabab41"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-extract-b/802-result.json",
+      "bytes": 47770,
+      "sha256": "d6d7e444a0a0b0713332916cf158169cff0941443cfd744dcc7ceddda15b21d9"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-extract-b/802-result.md",
+      "bytes": 1596,
+      "sha256": "3e1cdc1d92ab79550ee532be1134e1c768954ab99341aedcf80f27d331ce9b70"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-extract-b/entry-script.snapshot",
+      "bytes": 19314,
+      "sha256": "9c7cd09a9d92265f471d93b4f40de36ba29b860bc0dc8c869592d58f2d69ddde"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-extract-b/receipt.json",
+      "bytes": 2841,
+      "sha256": "10984bf49d36861c88674adf865670e2e04e58ac2cdf71f58b267203c3165657"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-extract-b/start.json",
+      "bytes": 1502,
+      "sha256": "dcf99982dce5ec39e0364e02743e631d7b7f51d1577f1e2c10d042cb4d8b15d1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-extract-b/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-extract-b/stdout.log",
+      "bytes": 312,
+      "sha256": "c5d98ab76dbe3d4432a232c18538fec3d392b6abe94343b77d3bef0d7784f954"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-extract.cjs",
+      "bytes": 19314,
+      "sha256": "9c7cd09a9d92265f471d93b4f40de36ba29b860bc0dc8c869592d58f2d69ddde"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-seal-a/802-final-manifest.json",
+      "bytes": 13775,
+      "sha256": "b11700d31435fc0c9608695b2c8f4ccd306ae4cbf3fcff7f8188a52de92eb3e0"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-seal-a/entry-script.snapshot",
+      "bytes": 6938,
+      "sha256": "f765253917308cba568c1f21b0c23f6eaf01dd26ddf396a5d485546f82227fb3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-seal-a/receipt.json",
+      "bytes": 2665,
+      "sha256": "984719253a912df05cab0abc1b544bb8b942d5e7bc2bcdeb3a413e07e5831eac"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-seal-a/start.json",
+      "bytes": 1471,
+      "sha256": "51a6d4fbbbc1104c541d15456be088dc6d17d750d975abd3eb8da34be58ec21f"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-seal-a/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-seal-a/stdout.log",
+      "bytes": 320,
+      "sha256": "5381175dc5007f1186469cb951f83252a48012ac2a03c01775e389c706f88266"
+    },
+    {
+      "path": "logs/claude-channel-20261004/802-seal.cjs",
+      "bytes": 6938,
+      "sha256": "f765253917308cba568c1f21b0c23f6eaf01dd26ddf396a5d485546f82227fb3"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-finalize-a/entry-script.snapshot",
+      "bytes": 9507,
+      "sha256": "e39625821d3be93d42b25f90a13a9a4bb9a525d449dba9ab78e914a756cde71e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-finalize-a/receipt.json",
+      "bytes": 2597,
+      "sha256": "b0524c0f9533bf44cdbecb11f571c3858b2b5663132f8c123e73b3f6655a9351"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-finalize-a/start.json",
+      "bytes": 1504,
+      "sha256": "ee72352de8b6a6f0ab455c4c3742c905f36178ed082cee3cc8ec685ee1afc388"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-finalize-a/stderr.log",
+      "bytes": 1059,
+      "sha256": "fa24919332a7fce812854d04e162c4bfdef0b789ab599e505b0b9cbebbee1a4c"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-finalize-a/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-finalize-b/803-review.json",
+      "bytes": 5879,
+      "sha256": "2eac40b85410ba62ab30b74f5d827e343c8c7b4f1f01d53b9ac87489df09ea2d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-finalize-b/803-review.md",
+      "bytes": 1773,
+      "sha256": "3fe32e30208d6a7cc08b45af2876eb03f172e006f6c53fc954c27268a6d9f17a"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-finalize-b/entry-script.snapshot",
+      "bytes": 9777,
+      "sha256": "93a1e6f3ab11776d7e0feb9119b78533c74bc3c0e1db1b42a0e9a1b01c893f2e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-finalize-b/receipt.json",
+      "bytes": 2842,
+      "sha256": "347c90f87217eec869213b575b7d0bcae31322ef856a4b839fcd11256ed2a1ee"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-finalize-b/start.json",
+      "bytes": 1504,
+      "sha256": "d172d00782d625fd60fe608463a2883ac002a64e811c3e16ff480f7149d14183"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-finalize-b/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-finalize-b/stdout.log",
+      "bytes": 203,
+      "sha256": "99f6e78cb61801cc85c8808a1595a02e3cd5a3df691f7354b47e7f5da0efd3d7"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-finalize.cjs",
+      "bytes": 9777,
+      "sha256": "93a1e6f3ab11776d7e0feb9119b78533c74bc3c0e1db1b42a0e9a1b01c893f2e"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-review-a/entry-script.snapshot",
+      "bytes": 11611,
+      "sha256": "e714cb8e842a0db757b9e9588d1da323f89ff4378ed866a86b29ec8cc623e825"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-review-a/receipt.json",
+      "bytes": 2636,
+      "sha256": "e4c300a1576cf5fe523540c8449edc64448b219759b43775cee8a5cf5db4e52d"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-review-a/start.json",
+      "bytes": 1526,
+      "sha256": "efe5a0f761adc508fde86213781163de4c7deb25ca7ba30895b4b152cff95509"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-review-a/stderr.log",
+      "bytes": 1128,
+      "sha256": "bf2872cdd365d1253b7c8f755438855459e880384a3b9fcb11499617df2b7866"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-review-a/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-review-b/entry-script.snapshot",
+      "bytes": 11611,
+      "sha256": "a4d973bf99c25de8e7ae93a7cb745b59243e3cc47bc045a1129fc3878ea0b2dd"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-review-b/receipt.json",
+      "bytes": 2635,
+      "sha256": "5211c64078ffde6305a17230b6414a838f4f881b25be15a9bd5694a4a444f7fb"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-review-b/start.json",
+      "bytes": 1526,
+      "sha256": "0a6ba4aa738e8620ca856062739fbf8ca02ce70b7e3cb03da2006c0ae894b4b1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-review-b/stderr.log",
+      "bytes": 1140,
+      "sha256": "0551a8c88b72f3e4a4c2b59f95c16400a830f6048898365d0863196821aa0e76"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-review-b/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-review-c/entry-script.snapshot",
+      "bytes": 11473,
+      "sha256": "a80acbbce74b0a7e75a6df0662f7fa8644ddaca32cf4aed2755b00bc3bf303c1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-review-c/receipt.json",
+      "bytes": 2636,
+      "sha256": "110feaccbd40a9e349adb13544535aa89350edd83bd4ad4b9a8c5000a8a87aa7"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-review-c/start.json",
+      "bytes": 1526,
+      "sha256": "5bf7e2b9122741103152da3da7587949781915308af3fefc9054b7dd6eb085a1"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-review-c/stderr.log",
+      "bytes": 1135,
+      "sha256": "cb85845eb941679f758349e2599335045fb5b06c337c5d44f09c201fe4400a3b"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-review-c/stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/claude-channel-20261004/803-review-check.cjs",
+      "bytes": 11473,
+      "sha256": "a80acbbce74b0a7e75a6df0662f7fa8644ddaca32cf4aed2755b00bc3bf303c1"
+    }
+  ]
+}

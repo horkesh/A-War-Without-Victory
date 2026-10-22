@@ -1,3 +1,7 @@
+## 2026-10-22 — Effective availability is not raw pool opening
+
+A recipient writer may report pool availability after earlier recipients and spawn reserves. Do not call that raw opening, infer reserve0 or infer a different historical transfer from end-of-turn strength. Preserve raw/reserve/effective/ordered-recipient/debit/closing boundaries and check conservation in focused fixtures. See [Pale allocation trace](PROJECT_LEDGER.md#2026-10-22--pale-allocation-boundary-remains-unmeasured-801804).
+
 ## 2026-10-22 — Inventory only closed output streams
 
 A sealing process can hash its own stdout before its final line arrives. Preserve the original claim and use a fresh post-close inventory outside the inventoried scope; verify final bytes, including seal outputs. Matching endpoints do not prove an unobserved historical writer or allocation. See [n83 measurement](PROJECT_LEDGER.md#2026-10-22--n83-personnel-and-probe-measurement-797800).

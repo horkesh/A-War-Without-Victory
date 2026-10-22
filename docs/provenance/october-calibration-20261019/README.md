@@ -159,3 +159,14 @@ At completedturn22, rs_4th_sarajevo_light_infantry changed1411→1405 by frontli
 Selected actor personnel coverage71931records/303coveredwriters, all188phase manifests/terminals; commander564factionpasses(188×3),3290completionrows; trackedreader4418records/3290completions/0violations. Allreader/extraction gates0 after rawidentityPASS. Source/threshold/reference exact. Cfullopeningprefix preserved with946671byteappend (now102947714/SHAedbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9); D1041/ff120d4a… exact, append0. Fullbefore/afterarchives retainedLOCAL.
 
 Original798inventory and799rejection remain; diagnostic-800-postclose-inventory is authoritative for final798bytes, verified70/70 by799supplement. diagnostic-800-raw-inventory pins all closed797/798/799 andpostclose evidence. Inventories are not remote rawbyte backup. All earlier source-version/acceptance limits remain.
+
+
+## Pale allocation retained trace — 2026-10-22
+
+Retained n80/n83 evidence establishes the first rs4 endpoint divergence at completedturn22 (1405vs1516) and n83 actual regular transfer111 frompale:RS. It does not retain n80 direct allocation records or a turn21/22 pool snapshot. No reinforcement gameplay fix is justified.
+
+The regular loop sorts brigade IDs, applies eligibility/cap/pool guards, computes need=min(cap-current,rate), effective=max(0,pool.available-reserveForSpawn), transfers=min(need,effective), then immediately debits the pool. Observed available111 is effective availability at this recipient after prior iterations and reserve subtraction, not raw opening. Dynamic suppression/headroom leaves reserve unbound; do not infer raw111, reserve0, n80zero transfer or historical counterfactual.
+
+Schema-aware positive controls parse188weekly and45229temporal rows,162weeklybattles arrays and actualrs4turn21/22rows; no directassignment fields in those schemas or run_summary. Savesbegin39, with no21/22snapshot. Externaln83stdout positively supplies the111writer, demonstrating the native evidence gap. Independent803 accepts the bounded conclusion with no material findings; correctedextract/seal/review0/0. Initial802checker2/2 and four803local checker/finalizer1/126 attempts remain retained separately. No production/test/reader/data/threshold/telemetry changes, suite, replay, runTurn or campaign.
+
+pale-802-final-manifest and pale-803-review pin reviewed localresults; pale-804-result/rawinventory are the bounded synthesis and complete closed-attempt identities. Raw bytes remainLOCAL; no new campaign or gameplay fix. Next: Propose only a focused deterministic shared-pool fixture/observer: raw opening, reserve, every ordered recipient or skip reason, effective availability, transfer/debit and closing balance with conservation checks. No implementation or new campaign is authorized by this diagnosis. Such evidence cannot retroactively recover dirty-n80 causality.

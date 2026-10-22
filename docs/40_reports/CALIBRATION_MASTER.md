@@ -1,3 +1,13 @@
+## 801–804 — Pale allocation trace: no proven gameplay defect (2026-10-22)
+
+Retained n80/n83 evidence establishes the first rs4 endpoint divergence at completedturn22 (1405vs1516) and n83 actual regular transfer111 frompale:RS. It does not retain n80 direct allocation records or a turn21/22 pool snapshot. No reinforcement gameplay fix is justified.
+
+The regular loop sorts brigade IDs, applies eligibility/cap/pool guards, computes need=min(cap-current,rate), effective=max(0,pool.available-reserveForSpawn), transfers=min(need,effective), then immediately debits the pool. Observed available111 is effective availability at this recipient after prior iterations and reserve subtraction, not raw opening. Dynamic suppression/headroom leaves reserve unbound; do not infer raw111, reserve0, n80zero transfer or historical counterfactual.
+
+Schema-aware positive controls parse188weekly and45229temporal rows,162weeklybattles arrays and actualrs4turn21/22rows; no directassignment fields in those schemas or run_summary. Savesbegin39, with no21/22snapshot. Externaln83stdout positively supplies the111writer, demonstrating the native evidence gap. Independent803 accepts the bounded conclusion with no material findings; correctedextract/seal/review0/0. Initial802checker2/2 and four803local checker/finalizer1/126 attempts remain retained separately. No production/test/reader/data/threshold/telemetry changes, suite, replay, runTurn or campaign.
+
+Smallest justified next scope: Propose only a focused deterministic shared-pool fixture/observer: raw opening, reserve, every ordered recipient or skip reason, effective availability, transfer/debit and closing balance with conservation checks. No implementation or new campaign is authorized by this diagnosis. Such evidence cannot retroactively recover dirty-n80 causality. Retained703/712 remainsNO-GO/unadopted; n83same-rejectedn82trajectory689 and all inherited criteria unchanged. Evidence: pale-804-result/rawinventory and pale-803-review under docs/provenance/october-calibration-20261019; rawbytesLOCAL.
+
 ## 797–800 — n83 personnel/probe diagnostic measured (2026-10-22)
 
 The single instrumented188 diagnostic completed as n83: runner0, raw30/30 gameplay artifacts and TEN10/10 byte-identical to n82, exact31 inventory and32 normalized consumed inputs/digest. Independent799 accepts substantive findings; one post-close inventory correction is verified70/70 with0mismatches. No retry or gameplay/threshold change. Retained n80 remains703/712 NO-GO/unadopted; n83 reproduces rejected n82 trajectory, not recovery.

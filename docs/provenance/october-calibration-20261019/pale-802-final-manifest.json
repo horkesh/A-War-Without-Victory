@@ -1,0 +1,379 @@
+{
+  "schema": "awwv.802.final-manifest.v1",
+  "captured_utc": "2026-10-22T05:39:35.909Z",
+  "writes_closed": true,
+  "verdict": "NO_PROVEN_ENGINE_DEFECT_RETAINED_N80_ASSIGNMENT_BOUNDARY_MISSING",
+  "head": "ad8789c2ca5c66064a5b7b2cb596fa917f91f93b",
+  "result": {
+    "path": "logs/claude-channel-20261004/802-extract-b/802-result.json",
+    "bytes": 47770,
+    "sha256": "d6d7e444a0a0b0713332916cf158169cff0941443cfd744dcc7ceddda15b21d9"
+  },
+  "markdown": {
+    "path": "logs/claude-channel-20261004/802-extract-b/802-result.md",
+    "bytes": 1596,
+    "sha256": "3e1cdc1d92ab79550ee532be1134e1c768954ab99341aedcf80f27d331ce9b70"
+  },
+  "attempts": [
+    {
+      "name": "802-extract-a",
+      "child_exit": 2,
+      "wrapper_exit": 2,
+      "retained": true,
+      "cause": "positive-control checker incorrectly required battles on all 188 weekly rows; evidence itself already established the correct schema boundary"
+    },
+    {
+      "name": "802-extract-b",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "retained": true,
+      "pass": true
+    }
+  ],
+  "commands": [
+    {
+      "attempt": "802-extract-a",
+      "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+      "argv": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "logs\\claude-channel-20261004\\802-extract.cjs",
+        "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\802-extract-a"
+      ],
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 313,
+        "sha256": "7ff68902c14ee785b6097e16e0986d94cd48a3f22bb3b8cfef4f209ebfabab41"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "attempt": "802-extract-b",
+      "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+      "argv": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "logs\\claude-channel-20261004\\802-extract.cjs",
+        "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\logs\\claude-channel-20261004\\802-extract-b"
+      ],
+      "stdout": {
+        "path": "stdout.log",
+        "bytes": 312,
+        "sha256": "c5d98ab76dbe3d4432a232c18538fec3d392b6abe94343b77d3bef0d7784f954"
+      },
+      "stderr": {
+        "path": "stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "retained_save_weeks": {
+    "n80": [
+      39,
+      104,
+      111,
+      112,
+      113,
+      156,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187
+    ],
+    "n83": [
+      39,
+      104,
+      111,
+      112,
+      113,
+      156,
+      178,
+      179,
+      180,
+      181,
+      182,
+      183,
+      184,
+      185,
+      186,
+      187
+    ],
+    "has_turn_21_or_22_snapshot": false,
+    "nearest_boundary": "initial_save turn 0, then save_w39; no turn-21 or turn-22 state/pool snapshot"
+  },
+  "measured_boundary": {
+    "first_target_endpoint_divergence": {
+      "turn": 22,
+      "n80": {
+        "personnel": 1405,
+        "status": "active",
+        "readiness": null,
+        "line": 4677
+      },
+      "n83": {
+        "personnel": 1516,
+        "status": "active",
+        "readiness": null,
+        "line": 4677
+      }
+    },
+    "n80_native_assignment_fields": {
+      "after": 0,
+      "available": 0,
+      "before": 0,
+      "branch": 0,
+      "cap": 0,
+      "completed_turn": 0,
+      "need": 0,
+      "pool_key": 0,
+      "rate": 0,
+      "source": 0,
+      "transfer": 0
+    },
+    "n80_run_summary_direct_assignment_candidates": 0,
+    "positive_controls": {
+      "weekly_battles": 162,
+      "temporal_brigade_id": 45229,
+      "temporal_personnel": 45229,
+      "target_rows_21_22": 2
+    },
+    "actual_n83_writer": {
+      "stdout_line": 10082,
+      "after": 1516,
+      "available": 111,
+      "before": 1405,
+      "branch": "regular",
+      "cap": 2200,
+      "completed_turn": 22,
+      "event": "writer",
+      "formation_id": "rs_4th_sarajevo_light_infantry",
+      "need": 400,
+      "pool_key": "pale:RS",
+      "rate": 400,
+      "schema_version": 1,
+      "source": "formation_spawn.reinforce",
+      "transfer": 111
+    }
+  },
+  "source_conclusion": {
+    "recipient_order": "All brigade IDs carrying a mun:* tag are sorted by strictCompare before the regular loop (formation_spawn.ts:397-404).",
+    "guards": "Each recipient is filtered by external-reinforcement eligibility, cap, pool existence/positive available, then transfer>0 (formation_spawn.ts:410-419,432-437; formation_constants.ts:186-208).",
+    "exact_arithmetic": "need=min(cap-current,rate); reserveForSpawn is computed; effective available=max(0,pool.available-reserveForSpawn); transfer=min(need,effective available); transfer is then subtracted from raw pool.available (formation_spawn.ts:432-450).",
+    "observed_stage": "The n83 writer available=111 is effective available at rs4 evaluation, after any preceding sorted consumers and reserve subtraction. It is not raw pool opening, does not prove raw pool.available=111, and does not prove reserveForSpawn=0.",
+    "unobserved": [
+      "raw Pale pool opening at brigade-reinforcement",
+      "prior same-pool recipients and exclusions",
+      "reserveForSpawn",
+      "per-pool gains and deductions before rs4",
+      "n80 direct assignments"
+    ]
+  },
+  "decision": {
+    "engine_bug": "NOT PROVEN",
+    "downstream_intended_allocation": "Plausible and source-consistent: strict-order shared-pool allocation may produce rs4 +111 without any defect.",
+    "fixture_observer_gap": "PROVEN: retained outputs do not expose the causal fields needed for n80 comparison.",
+    "smallest_justified_fix": null,
+    "next_action": "No production, threshold, or forced-zero change. If separately authorized, add a focused deterministic fixture/source-level observer that records raw opening pool, reserve, every sorted recipient with eligibility or skip reason, effective available, transfer, and closing pool. This can validate algorithm behavior but cannot retroactively recover dirty-source n80 historical causality; a new full campaign is not proposed."
+  },
+  "protected": {
+    "production_12_exact": true,
+    "reader_threshold_reference_pins": {
+      "production_12": [
+        {
+          "path": "src/sim/combat/reason_code_debug.ts",
+          "bytes": 20210,
+          "sha256": "beabdcaa779995ed93d820a957b0fd4cbd1e662d47502b0c0374b28819880484"
+        },
+        {
+          "path": "src/sim/combat/movement_phase_diagnostic.ts",
+          "bytes": 7386,
+          "sha256": "cac140facd432e206a079093514702237f7690088b92eac10a556de9e6ba62d8"
+        },
+        {
+          "path": "src/sim/combat/personnel_diagnostic.ts",
+          "bytes": 5870,
+          "sha256": "60ae859e9a8017cb5d7d3079d335f61b890e8ee9c1de38f07f868d4ceae283f3"
+        },
+        {
+          "path": "src/sim/turn_pipeline.ts",
+          "bytes": 11675,
+          "sha256": "53fe8ea1fccf227351be6928f5be66349de4cf7752b1bc247f7d939cf0a6fd25"
+        },
+        {
+          "path": "src/sim/formation_spawn.ts",
+          "bytes": 44692,
+          "sha256": "d8586722b72a3345c610d422f4e069fe2150748a316cbe8d1fc8c4fcfd86c072"
+        },
+        {
+          "path": "src/sim/combat/strategic_reserve.ts",
+          "bytes": 10755,
+          "sha256": "e1cdb2df6999c2d40ffe621e624fb6c51492b44c47a2698a387024cb40037cae"
+        },
+        {
+          "path": "src/sim/combat/frontline_attrition.ts",
+          "bytes": 21594,
+          "sha256": "0cc09b4eca821d2dce287893fdde312239c2b8be495ed02e36b8a23ba59f5ee1"
+        },
+        {
+          "path": "src/sim/combat/morale_drift.ts",
+          "bytes": 17730,
+          "sha256": "cb7720d5da303e02d89fb3aaf034488a340a51155dfd6dbfc4839cf9cedcdc5c"
+        },
+        {
+          "path": "src/sim/combat/commander/emit.ts",
+          "bytes": 202428,
+          "sha256": "76351f818c3403fcc23bf5b51f30c467bd42886d68f1e6b754d9f90baa58746b"
+        },
+        {
+          "path": "tests/personnel_diagnostic.test.ts",
+          "bytes": 19693,
+          "sha256": "db6f95683a7371b3f9d2ed05c3c807c350aba39329bf2380d651ec927eb5824b"
+        },
+        {
+          "path": "tests/reason_code_debug.test.ts",
+          "bytes": 10403,
+          "sha256": "189ba6da07dc0b931e4e98c54565e50bd8182299843606cefccbc113e972bf08"
+        },
+        {
+          "path": "tests/commander_creation_observer.test.ts",
+          "bytes": 100803,
+          "sha256": "05bfd3cf245aa0f929c44d6efff8abdf7316e0fb54b415f25a3c48c9e0f8bb86"
+        }
+      ],
+      "readers": [
+        {
+          "path": "logs/claude-channel-20261004/798-postrun-a/readers/result.json",
+          "bytes": 648,
+          "sha256": "c4c0ae90db184494c9d2f935d5af18299003b000ea99015d66a33e1f4e6dad51"
+        },
+        {
+          "path": "logs/claude-channel-20261004/798-postrun-a/readers/commander-reader.json",
+          "bytes": 69,
+          "sha256": "e9c90ab5d949f777e376c5a126b34800010e9987e9cf4e822182ac69fcd7abfd"
+        },
+        {
+          "path": "logs/claude-channel-20261004/798-postrun-a/readers/stateful-reader/reader.json",
+          "bytes": 176362,
+          "sha256": "825481a2e60a3da260c5582a5e539898471e8ac5dc91bf7ef1b753eb33ec3795"
+        }
+      ],
+      "threshold": {
+        "path": "data/calibration/engine_health_thresholds.json",
+        "bytes": 3775,
+        "sha256": "c62dca5a966479737d2999d95483f764da5f5a14d612aa3399ef7fefa115007d"
+      },
+      "reference": {
+        "path": "data/source/calibration/painted_control_oct1995.json",
+        "bytes": 35266,
+        "sha256": "fef1c52b1f0bd87f5bbfa9f04ee948d58958a9e2352fa3b1ca26a4fcdef0257b"
+      }
+    },
+    "telemetry": [
+      {
+        "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+        "bytes": 102947714,
+        "sha256": "edbbff425eebccf8cb43a53fae7b9865d9742d2c01cc68b413366a47d40550a9"
+      },
+      {
+        "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+      }
+    ],
+    "telemetry_unchanged": true
+  },
+  "campaign_invocations": 0,
+  "full_suite_invocations": 0,
+  "observer_invocations": 0,
+  "inventory": {
+    "scope": "802-extract.cjs and closed 802-extract-a/b only; this post-close manifest and its wrapper receipt are intentionally outside the inventoried scope",
+    "entries": 15,
+    "files": [
+      {
+        "path": "logs/claude-channel-20261004/802-extract-a/802-result.json",
+        "bytes": 44867,
+        "sha256": "3366cc29279d8d94c6513203f93cd32faf7d5dd0e23e5c9557f4143b40fc7b81"
+      },
+      {
+        "path": "logs/claude-channel-20261004/802-extract-a/802-result.md",
+        "bytes": 1596,
+        "sha256": "3e1cdc1d92ab79550ee532be1134e1c768954ab99341aedcf80f27d331ce9b70"
+      },
+      {
+        "path": "logs/claude-channel-20261004/802-extract-a/entry-script.snapshot",
+        "bytes": 18312,
+        "sha256": "3b3c2134b8c7e6784f6386edf44be6ccb17f4909b23f600ce47a72bcd5fd9a56"
+      },
+      {
+        "path": "logs/claude-channel-20261004/802-extract-a/receipt.json",
+        "bytes": 2840,
+        "sha256": "31961c0e5bc48b646b926f98bb415a612dc14f0121c7206345b3973d1661e828"
+      },
+      {
+        "path": "logs/claude-channel-20261004/802-extract-a/start.json",
+        "bytes": 1502,
+        "sha256": "9dd752af30349e46f1ece8dcf23e892be8c33aed93773655e0197b78ef97555f"
+      },
+      {
+        "path": "logs/claude-channel-20261004/802-extract-a/stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "logs/claude-channel-20261004/802-extract-a/stdout.log",
+        "bytes": 313,
+        "sha256": "7ff68902c14ee785b6097e16e0986d94cd48a3f22bb3b8cfef4f209ebfabab41"
+      },
+      {
+        "path": "logs/claude-channel-20261004/802-extract-b/802-result.json",
+        "bytes": 47770,
+        "sha256": "d6d7e444a0a0b0713332916cf158169cff0941443cfd744dcc7ceddda15b21d9"
+      },
+      {
+        "path": "logs/claude-channel-20261004/802-extract-b/802-result.md",
+        "bytes": 1596,
+        "sha256": "3e1cdc1d92ab79550ee532be1134e1c768954ab99341aedcf80f27d331ce9b70"
+      },
+      {
+        "path": "logs/claude-channel-20261004/802-extract-b/entry-script.snapshot",
+        "bytes": 19314,
+        "sha256": "9c7cd09a9d92265f471d93b4f40de36ba29b860bc0dc8c869592d58f2d69ddde"
+      },
+      {
+        "path": "logs/claude-channel-20261004/802-extract-b/receipt.json",
+        "bytes": 2841,
+        "sha256": "10984bf49d36861c88674adf865670e2e04e58ac2cdf71f58b267203c3165657"
+      },
+      {
+        "path": "logs/claude-channel-20261004/802-extract-b/start.json",
+        "bytes": 1502,
+        "sha256": "dcf99982dce5ec39e0364e02743e631d7b7f51d1577f1e2c10d042cb4d8b15d1"
+      },
+      {
+        "path": "logs/claude-channel-20261004/802-extract-b/stderr.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "path": "logs/claude-channel-20261004/802-extract-b/stdout.log",
+        "bytes": 312,
+        "sha256": "c5d98ab76dbe3d4432a232c18538fec3d392b6abe94343b77d3bef0d7784f954"
+      },
+      {
+        "path": "logs/claude-channel-20261004/802-extract.cjs",
+        "bytes": 19314,
+        "sha256": "9c7cd09a9d92265f471d93b4f40de36ba29b860bc0dc8c869592d58f2d69ddde"
+      }
+    ]
+  },
+  "pass": true
+}

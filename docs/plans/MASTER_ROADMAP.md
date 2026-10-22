@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-22 — n83 observer diagnostic passed; actual reinforcement/probe ranking measured.
+**Last updated:** 2026-10-22 — Pale retained-evidence trace reviewed; allocation boundary gap remains.
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -24,14 +24,14 @@ tradeoffs or irreversible/external actions with concrete options and a
 recommendation. Required evidence, review panels and cost-control gates remain.
 
 **Current R6 — October Sana remains NO-GO.** Retained n80 is **703/712**, unadopted.
-One n83diagnostic passed raw30/30+TEN10/10 against rejectedn82, no retry.
-Actual t22regular reinforcement+111 frompale:RS and t23rs4rank0 probe selection
-are measured; Kijevo24Prača rejected commitment tothatprobe. Independent799
-accepts substantiveevidence and verified post-close inventory70/70. Fulltelemetry
-preserved; source/thresholds exact. This reproduces n82, not703recovery. Next:
-inspect retainedn80 t22pool/recipient evidence; no endpoint counterfactual or
-productionfix/newcampaign authorized. All inherited acceptance gates remain in
-the [calibration authority](../40_reports/CALIBRATION_MASTER.md).
+Prior n83 diagnostic is raw-identical to rejectedn82. Retained Pale trace802/803
+finds no proven reinforcement defect: n83transfer111 is effective after reserve
+and ordered consumers; n80 native logs lack direct allocation records and no
+turn21/22snapshot survives in the inspected saves. Endpoint1405 does not establish zero
+transfer. Propose only a focused raw/reserve/recipient/skip/debit/closing fixture
+and receipt; no gameplay fix or newcampaign authorized. Historicaln80cause is
+unmeasured. All inherited acceptance gates remain in the
+[calibration authority](../40_reports/CALIBRATION_MASTER.md).
 
 **Historical R6 status — April 1995 remains active.** The retained delay-30 candidate
 is not adopted. The owner corrected the April and October 1995 painted reference
