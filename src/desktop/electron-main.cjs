@@ -2011,6 +2011,11 @@ function getSavesDir() {
   return path.join(root, 'saves');
 }
 
+function configurePackagedRuntimeOutputRoot() {
+  if (!app.isPackaged || String(process.env.AWWV_RUNTIME_OUTPUT_ROOT || '').trim()) return;
+  process.env.AWWV_RUNTIME_OUTPUT_ROOT = path.join(app.getPath('userData'), 'runtime-output');
+}
+
 /** Write canonical save bytes to the writable saves directory. Returns the file path. */
 function writeSaveFile(filename) {
   if (!currentCanonicalSaveJson) throw new Error('No game loaded');
@@ -2273,6 +2278,7 @@ if (process.platform === 'win32' && typeof app.setAppUserModelId === 'function')
 }
 
 app.whenReady().then(() => {
+  configurePackagedRuntimeOutputRoot();
   alignPackagedProcessCwdWithResources();
   registerProtocol();
   // Task 6.5: install BEFORE any handler registers so every channel is policy-wrapped.

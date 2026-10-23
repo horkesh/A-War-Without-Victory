@@ -14,7 +14,7 @@ export function hasReliableThreatIntel(confidence: unknown): confidence is numbe
 
 export function getPlayerSafeThreatPresentation(ratio: number): PlayerSafeThreatPresentation {
   if (ratio > 2.0) {
-    return { label: 'OVERMATCHED', summary: 'critical pressure', toneClass: 'text-red-500 font-black' };
+    return { label: 'OVERMATCHED', summary: 'critical pressure', toneClass: 'text-red-400 font-black' };
   }
   if (ratio > 1.5) {
     return { label: 'VULNERABLE', summary: 'heavy pressure', toneClass: 'text-red-400 font-bold' };

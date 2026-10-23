@@ -705,8 +705,9 @@ test('diagnostics attach before game-page waiting and abort allowlisting is name
     assert.match(harness, /map-osm-navigation/);
     assert.match(harness, /MAP_NAVIGATION_ABORT_WINDOW_MS = 45_000/);
     assert.match(harness, /withinMapNavigationAbortWindow/);
-    assert.match(harness, /mapNavigationWindow: diagnostics\.getMapNavigationAbortWindow\(observedAtMs\)/);
+    assert.match(harness, /mapNavigationWindow: navigationAttribution/);
     assert.match(harness, /expectedNavigationAborts/);
+    assert.match(harness, /expectedAmbientLifecycleAborts/);
     assert.doesNotMatch(harness, /expectedStartupAborts\.length < 2/);
 
     const classifyExpectedRequestAbort = loadFunction<(record: Record<string, unknown>) => string | null>(
@@ -748,7 +749,8 @@ test('diagnostics attach before game-page waiting and abort allowlisting is name
         isMainFrame: false,
         eventCount: 22,
         teardownStarted: false,
-        observedAtMs: 2_000,
+        observedAtMs: 60_000,
+        requestInitiatedAtMs: 2_000,
         mapNavigationWindow: activePackagedMapNavigation,
     }), 'map-hillshade-navigation');
     assert.equal(classifyExpectedRequestAbort({
@@ -760,6 +762,7 @@ test('diagnostics attach before game-page waiting and abort allowlisting is name
         eventCount: 22,
         teardownStarted: false,
         observedAtMs: 2_000,
+        requestInitiatedAtMs: 2_000,
         mapNavigationWindow: activePackagedMapNavigation,
     }), 'map-osm-navigation');
     assert.equal(classifyExpectedRequestAbort({
@@ -784,6 +787,58 @@ test('diagnostics attach before game-page waiting and abort allowlisting is name
         observedAtMs: 2_000,
         mapNavigationWindow: null,
     }), null, 'an exact local tile abort outside the bounded navigation window must fail');
+    const ambientFieldUrl = 'http://127.0.0.1:3002/assets/ambient_field-D4f9a2.ogg';
+    assert.equal(classifyExpectedRequestAbort({
+        failure: { errorText: 'net::ERR_ABORTED' },
+        method: 'GET',
+        url: ambientFieldUrl,
+        resourceType: 'media',
+        isMainFrame: false,
+        eventCount: 22,
+        teardownStarted: false,
+        ambientLifecycleStop: { url: ambientFieldUrl, observedAtMs: 1_900 },
+        observedAtMs: 2_000,
+    }), 'ambient-bed-lifecycle');
+    assert.equal(classifyExpectedRequestAbort({
+        failure: { errorText: 'net::ERR_ABORTED' },
+        method: 'GET',
+        url: ambientFieldUrl,
+        resourceType: 'media',
+        isMainFrame: false,
+        eventCount: 22,
+        teardownStarted: false,
+        ambientLifecycleStop: null,
+        observedAtMs: 2_000,
+    }), null, 'ambient media without an observed pause must remain a failure');
+    assert.equal(classifyExpectedRequestAbort({
+        failure: { errorText: 'net::ERR_ABORTED' },
+        method: 'GET',
+        url: ambientFieldUrl,
+        resourceType: 'media',
+        isMainFrame: false,
+        eventCount: 22,
+        teardownStarted: false,
+        ambientLifecycleStop: { url: ambientFieldUrl, observedAtMs: 1_000 },
+        observedAtMs: 7_001,
+    }), null, 'an old same-URL pause must not clear a later abort');
+    assert.equal(classifyExpectedRequestAbort({
+        failure: { errorText: 'net::ERR_ABORTED' },
+        method: 'GET',
+        url: 'http://127.0.0.1:3002/assets/ui_click-D4f9a2.ogg',
+        resourceType: 'media',
+        isMainFrame: false,
+        eventCount: 22,
+        teardownStarted: false,
+    }), null, 'non-ambient media must remain a failure');
+    assert.equal(classifyExpectedRequestAbort({
+        failure: { errorText: 'net::ERR_ABORTED' },
+        method: 'GET',
+        url: 'https://example.invalid/assets/ambient_field-D4f9a2.ogg',
+        resourceType: 'media',
+        isMainFrame: false,
+        eventCount: 22,
+        teardownStarted: false,
+    }), null, 'remote ambient media must remain a failure');
     assert.equal(classifyExpectedRequestAbort({
         failure: { errorText: 'net::ERR_ABORTED' },
         method: 'GET',
@@ -793,6 +848,7 @@ test('diagnostics attach before game-page waiting and abort allowlisting is name
         eventCount: 22,
         teardownStarted: false,
         observedAtMs: 46_001,
+        requestInitiatedAtMs: 46_001,
         mapNavigationWindow: activePackagedMapNavigation,
     }), null, 'an exact local tile abort after the bounded navigation deadline must fail');
     assert.equal(classifyExpectedRequestAbort({
@@ -804,8 +860,56 @@ test('diagnostics attach before game-page waiting and abort allowlisting is name
         eventCount: 22,
         teardownStarted: false,
         observedAtMs: 2_000,
+        requestInitiatedAtMs: 2_000,
         mapNavigationWindow: activePackagedMapNavigation,
     }), null);
+});
+
+test('delayed map aborts use request-initiation attribution and the action window still closes immediately', () => {
+    const harness = readHarness();
+    const endSource = extractFunctionSource(harness, 'endMapNavigationAbortWindow');
+    assert.match(endSource, /activeMapNavigationAbortWindow\s*=\s*null/);
+    assert.match(harness, /page\.on\('request'/);
+    assert.match(harness, /requestNavigationWindows\.set\(request/);
+    assert.match(harness, /requestInitiatedAtMs/);
+});
+
+test('sector warnings remain fatal when final serialized state cannot prove same-turn resolution', () => {
+    const harness = readHarness();
+    assert.doesNotMatch(harness, /classifyResolvedSectorLifecycleWarning/);
+    assert.doesNotMatch(harness, /expectedResolvedSectorLifecycleWarnings/);
+    assert.match(harness, /unexpectedMainProcessStderr = mainProcessStderr\.filter\(\(line\) => !isExpectedInspectorTeardownLine\(line\)\)/);
+});
+
+test('one ambient pause can clear at most one matching request failure', () => {
+    const harness = readHarness();
+    const classifySource = extractFunctionSource(harness, 'classifyExpectedRequestAbort');
+    const attributeSource = extractFunctionSource(harness, 'attributeAmbientLifecycleAborts');
+    const attribute = runInNewContext(
+        `(() => { const classifyExpectedRequestAbort = ${classifySource}; return (${attributeSource}); })()`,
+        { URL },
+    ) as (failures: Array<Record<string, unknown>>, stops: Array<Record<string, unknown>>, expected: Array<Record<string, unknown>>) => void;
+    const url = 'http://127.0.0.1:3002/assets/ambient_field-D4f9a2.ogg';
+    const failure = (observedAtMs: number) => ({
+        failure: { errorText: 'net::ERR_ABORTED' }, method: 'GET', url,
+        resourceType: 'media', isMainFrame: false, eventCount: 22,
+        teardownStarted: false, observedAtMs,
+    });
+    const failures = [failure(2_000), failure(2_100)];
+    const expected: Array<Record<string, unknown>> = [];
+    attribute(failures, [{ url, observedAtMs: 1_900 }], expected);
+    assert.equal(expected.length, 1);
+    assert.equal(failures.length, 1);
+    assert.equal(failures[0]?.observedAtMs, 2_100);
+});
+
+test('ambient lifecycle attribution runs after optional final Save/load transitions', () => {
+    const harness = readHarness();
+    const playIndex = harness.indexOf('const playtest = await playTurns(');
+    const saveLoadIndex = harness.indexOf('playtest.saveLoadProof = await exerciseFinalSaveLoad(', playIndex);
+    const readSignalsIndex = harness.indexOf('await readAmbientLifecycleStopSignals(frame)', playIndex);
+    assert.ok(playIndex >= 0 && saveLoadIndex > playIndex);
+    assert.ok(readSignalsIndex > saveLoadIndex);
 });
 
 test('events proposals and peace plans resolve only through exact visible UI controls', () => {

@@ -122,6 +122,25 @@ describe('desktop persistence contract', () => {
     expect(helper).toContain("path.join(root, 'saves')");
   });
 
+  it('isolates packaged runtime diagnostics under Electron userData without changing an explicit output root', () => {
+    const source = readFileSync(
+      resolve(process.cwd(), 'src/desktop/electron-main.cjs'),
+      'utf8',
+    );
+    const helperStart = source.indexOf('function configurePackagedRuntimeOutputRoot');
+    const helperEnd = source.indexOf('\n}', helperStart);
+    const helper = source.slice(helperStart, helperEnd);
+    const readyStart = source.indexOf('app.whenReady().then(() => {');
+    const ready = source.slice(readyStart, readyStart + 300);
+
+    expect(helperStart).toBeGreaterThanOrEqual(0);
+    expect(helper).toContain('app.isPackaged');
+    expect(helper).toContain('process.env.AWWV_RUNTIME_OUTPUT_ROOT');
+    expect(helper).toContain("path.join(app.getPath('userData'), 'runtime-output')");
+    expect(ready).toContain('configurePackagedRuntimeOutputRoot();');
+    expect(ready.indexOf('configurePackagedRuntimeOutputRoot();')).toBeLessThan(ready.indexOf('alignPackagedProcessCwdWithResources();'));
+  });
+
   it('separates runtime renderer bytes from canonical disk-save bytes', () => {
     const source = readFileSync(
       resolve(process.cwd(), 'src/desktop/electron-main.cjs'),

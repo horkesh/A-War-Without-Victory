@@ -543,7 +543,7 @@ export function CorpsFrontPanel({ railSlot = 'primary', breadcrumb }: CorpsFront
             {hasReportedOpsec && (
               <div>
                 <span className="font-bold text-neutral-800">{t('corpsFront.opsec')}:</span>{' '}
-                <span className={opsecActive ? 'text-amber-700 font-bold' : 'text-neutral-700'}>
+                <span className={opsecActive ? 'text-amber-800 font-bold' : 'text-neutral-700'}>
                   {opsecActive ? t('corpsFront.active') : t('corpsFront.inactive')}
                 </span>
               </div>

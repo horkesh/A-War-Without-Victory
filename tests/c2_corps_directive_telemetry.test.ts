@@ -198,8 +198,35 @@ beforeEach(() => {
 afterEach(() => {
     delete process.env.C_LANE_CORPS_DIRECTIVE_TELEMETRY_DISABLED;
     delete process.env.C_LANE_CORPS_DIRECTIVE_CONSUMER_DISABLED;
+    delete process.env.AWWV_RUNTIME_OUTPUT_ROOT;
     __c2TelemetryTestHooks.closeTurn();
     teardownTmpCwd();
+});
+
+describe('C2 — runtime output ownership', () => {
+    it('writes beneath an explicit runtime output root instead of the process cwd', () => {
+        const cwdOutputPath = setupTmpCwd();
+        const runtimeRoot = join(_testTmpDir!, 'runtime-output');
+        process.env.AWWV_RUNTIME_OUTPUT_ROOT = runtimeRoot;
+        const state = makeStateWithArmyCO('RS', {}, {}, 10, 1);
+        injectDirective(state, 'RS', {
+            verb: 'HOLD_AT_ALL_COSTS',
+            target_corps_id: 'RS_corps_a',
+            directive_id: 'pol-runtime-output-root',
+        });
+
+        applyArmyDirectiveInterpretation(state);
+
+        const isolatedOutputPath = join(
+            runtimeRoot,
+            'data',
+            'derived',
+            '_debug',
+            'c_lane_corps_directive_telemetry.jsonl',
+        );
+        expect(existsSync(isolatedOutputPath)).toBe(true);
+        expect(existsSync(cwdOutputPath)).toBe(false);
+    });
 });
 
 // ===========================================================================

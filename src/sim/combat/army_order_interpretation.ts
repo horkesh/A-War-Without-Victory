@@ -61,6 +61,7 @@ type NodeFsSync = {
 
 type NodePathSync = {
     join(...paths: string[]): string;
+    isAbsolute(path: string): boolean;
 };
 
 type ProcessWithBuiltinModule = NodeJS.Process & {
@@ -175,9 +176,10 @@ const A3_RELIABILITY_PLACEHOLDER = 0.0;
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Side-channel JSONL output path, relative to process.cwd(). Gitignored via
- * the `data/derived/_debug/` rule in `.gitignore`. The post-run panel reads
- * this path directly when the C2 flag is enabled.
+ * Side-channel JSONL output path, relative to `AWWV_RUNTIME_OUTPUT_ROOT` when
+ * it is an absolute path, otherwise relative to process.cwd(). Gitignored via
+ * the `data/derived/_debug/` rule in `.gitignore`. Packaged desktop supplies a
+ * writable user-data root; ordinary CLI runs retain the historical cwd path.
  */
 const C2_TELEMETRY_OUTPUT_REL_PATH = 'data/derived/_debug/c_lane_corps_directive_telemetry.jsonl';
 
@@ -308,7 +310,11 @@ function flushC2TurnTelemetry(): void {
     const path = getNodeBuiltinModule<NodePathSync>('node:path');
     const cwd = nodeProcess?.cwd();
     if (!cwd) return;
-    const outDir = path.join(cwd, 'data', 'derived', '_debug');
+    const configuredRuntimeOutputRoot = nodeProcess?.env.AWWV_RUNTIME_OUTPUT_ROOT?.trim();
+    const outputRoot = configuredRuntimeOutputRoot && path.isAbsolute(configuredRuntimeOutputRoot)
+        ? configuredRuntimeOutputRoot
+        : cwd;
+    const outDir = path.join(outputRoot, 'data', 'derived', '_debug');
     if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
     const outPath = path.join(outDir, 'c_lane_corps_directive_telemetry.jsonl');
 

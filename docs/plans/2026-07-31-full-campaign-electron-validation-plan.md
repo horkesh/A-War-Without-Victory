@@ -15,6 +15,41 @@
 **Collision rule:** This plan does not repair source while a session is running. Findings are routed to the owning plan, verified, then the affected session restarts from a fresh campaign.
 **Activation:** `Execute the master roadmap` authorizes transient local directory packages for this validation, but not installer publication, signing, upload, tag, or release.
 
+## Package/shakedown repair — owner authorized 2026-10-23
+
+The owner authorized cheap reproductions, retained-failure repairs, Save/load and all three
+faction shakedowns in the October checkpoint worktree at starting commit `668de6f80`.
+Calibration tuning, baseline adoption and full campaigns remain outside this packet.
+Preserve n91/n92, existing telemetry and every failed attempt. Historical September paths
+below are evidence descriptions, not permission to access another checkout. This worktree
+contains the old evidence inventory only; original package/screenshots/logs are unavailable here.
+
+Bounded sequence: reproduce current presentation/runtime boundaries with focused checks;
+fix established causes; independent review; one complete affected UI boundary and typecheck;
+then one new immutable directory package and short opening/Save-load prerequisites before
+fresh RBiH, RS, HRHB 24-week shakedowns. Use the existing harness and exact historical-choice,
+checkpoint-tour and Save/load contract. No threshold reductions or diagnostic blanket waivers.
+Any actual simulation/sector defect is reported separately before changing gameplay.
+
+Evidence lives under `tmp/r8-shakedown-20261023/`, with fresh attempt directories, exact
+commands, stdout/stderr and receipts. Opening preservation inventories 2,446 files including
+n91/n92, prior Toljenak evidence, debug telemetry and protected simulation/calibration inputs.
+Package prerequisites pass 20/20 (child/wrapper 0/0); this establishes source/resource presence,
+not an executed package. Node is 22.23.2; shared dependency junction is left untouched.
+
+Before expensive validation, freeze reviewed inputs. Commands are the existing affected UI
+Vitest boundary and `npm run typecheck` (up to twenty minutes), then
+`npm run desktop:package:dir -- --config.directories.output=dist-packaged/r8-shakedown-20261023`
+(expected several minutes; twenty-minute cap). Require absent output and a complete frozen
+package inventory. Execute `node tools/ui/paradox_local_qa.cjs --turns=24 --faction=<faction>
+--label=<fresh-label> --strategic --auto-recruit --historical-choice --final-checkpoint-tour
+--checkpoint-turns=1,4,8,12,16,20,24 --save-load-proof --packaged-executable=<new-executable>`
+sequentially (expected 30–90 minutes total; forty-five-minute cap per faction).
+Pass requires exact turn/faction, real route and Save/load identity, diagnostics disposition,
+readability, unchanged package inventory and preserved prior evidence. An unexpected failure
+stops affected expensive work: inspect all available categories, reproduce/correct cheaply,
+and record the new question before an affected restart. No automatic retry or full campaign.
+
 ## Opening Inbox / package blocker — owner authorized 2026-09-10
 
 The owner now says, "Let's solve the inbox/package blocker." This authorizes the previously

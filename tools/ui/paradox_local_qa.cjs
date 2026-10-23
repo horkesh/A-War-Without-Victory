@@ -5114,7 +5114,9 @@ function classifyExpectedRequestAbort({
   eventCount,
   teardownStarted,
   observedAtMs,
+  requestInitiatedAtMs,
   mapNavigationWindow,
+  ambientLifecycleStop = null,
 }) {
   if (failure?.errorText !== 'net::ERR_ABORTED' || method !== 'GET') return null;
   let parsed;
@@ -5133,9 +5135,9 @@ function classifyExpectedRequestAbort({
     && mapNavigationWindow.runtime === 'packaged-local'
     && Number.isFinite(mapNavigationWindow.openedAtMs)
     && Number.isFinite(mapNavigationWindow.expiresAtMs)
-    && Number.isFinite(observedAtMs)
-    && observedAtMs >= mapNavigationWindow.openedAtMs
-    && observedAtMs <= mapNavigationWindow.expiresAtMs
+    && Number.isFinite(requestInitiatedAtMs)
+    && requestInitiatedAtMs >= mapNavigationWindow.openedAtMs
+    && requestInitiatedAtMs <= mapNavigationWindow.expiresAtMs
     && parsed.protocol === 'http:'
     && parsed.hostname === '127.0.0.1'
     && parsed.origin === mapNavigationWindow.expectedOrigin
@@ -5148,6 +5150,21 @@ function classifyExpectedRequestAbort({
     && exactPackagedLocalNavigationWindow
     && navigationAbortAllowlist.has(parsed.pathname);
   if (canceledMapSourceOnNavigation) return navigationAbortAllowlist.get(parsed.pathname);
+  const canceledAmbientBedOnSurfaceChange = !teardownStarted
+    && eventCount > 0
+    && !isMainFrame
+    && resourceType === 'media'
+    && parsed.protocol === 'http:'
+    && parsed.hostname === '127.0.0.1'
+    && parsed.search === ''
+    && parsed.hash === ''
+    && ambientLifecycleStop?.url === url
+    && Number.isFinite(ambientLifecycleStop.observedAtMs)
+    && Number.isFinite(observedAtMs)
+    && ambientLifecycleStop.observedAtMs <= observedAtMs
+    && observedAtMs - ambientLifecycleStop.observedAtMs <= 5_000
+    && /^\/assets\/ambient_(?:warroom|field|archive)-[A-Za-z0-9_-]+\.ogg$/.test(parsed.pathname);
+  if (canceledAmbientBedOnSurfaceChange) return 'ambient-bed-lifecycle';
   if (resourceType !== 'document') return null;
   const embeddedWarroomDocument = parsed.origin === 'http://127.0.0.1:3002'
     && parsed.pathname === '/index.html'
@@ -5193,9 +5210,20 @@ function attachPageDiagnostics(page, diagnostics) {
   page.on('pageerror', (error) => {
     diagnostics.pageErrors.push({ message: String(error?.message ?? error), stack: error?.stack ?? null });
   });
+  page.on('request', (request) => {
+    const requestInitiatedAtMs = Date.now();
+    const mapNavigationWindow = diagnostics.getMapNavigationAbortWindow(requestInitiatedAtMs);
+    if (mapNavigationWindow) {
+      diagnostics.requestNavigationWindows.set(request, {
+        ...mapNavigationWindow,
+        requestInitiatedAtMs,
+      });
+    }
+  });
   page.on('requestfailed', (request) => {
     const failure = request.failure();
     const observedAtMs = Date.now();
+    const navigationAttribution = diagnostics.requestNavigationWindows.get(request) ?? null;
     const record = {
       kind: 'requestfailed',
       method: request.method(),
@@ -5206,7 +5234,8 @@ function attachPageDiagnostics(page, diagnostics) {
       eventCount: diagnostics.events.length,
       teardownStarted: diagnostics.isTeardownStarted(),
       observedAtMs,
-      mapNavigationWindow: diagnostics.getMapNavigationAbortWindow(observedAtMs),
+      requestInitiatedAtMs: navigationAttribution?.requestInitiatedAtMs ?? null,
+      mapNavigationWindow: navigationAttribution,
     };
     const expectedAbort = classifyExpectedRequestAbort(record);
     if (expectedAbort === 'startup-embedded-warroom-document') {
@@ -5221,6 +5250,10 @@ function attachPageDiagnostics(page, diagnostics) {
       diagnostics.expectedNavigationAborts.push({ ...record, allowlist: expectedAbort });
       return;
     }
+    if (expectedAbort === 'ambient-bed-lifecycle') {
+      diagnostics.expectedAmbientLifecycleAborts.push({ ...record, allowlist: expectedAbort });
+      return;
+    }
     diagnostics.networkFailures.push(record);
   });
   page.on('response', (response) => {
@@ -5228,6 +5261,44 @@ function attachPageDiagnostics(page, diagnostics) {
       diagnostics.networkFailures.push({ kind: 'http-error', status: response.status(), url: response.url() });
     }
   });
+}
+
+async function installAmbientLifecycleObserver(frame) {
+  await frame.evaluate(() => {
+    if (window.__AWWV_QA_AMBIENT_PAUSE_OBSERVER_INSTALLED__) return;
+    window.__AWWV_QA_AMBIENT_PAUSE_OBSERVER_INSTALLED__ = true;
+    window.__AWWV_QA_AMBIENT_PAUSE_SIGNALS__ = [];
+    const originalPause = HTMLMediaElement.prototype.pause;
+    HTMLMediaElement.prototype.pause = function observedAmbientPause() {
+      const url = this.currentSrc || this.src;
+      if (url) window.__AWWV_QA_AMBIENT_PAUSE_SIGNALS__.push({ url, observedAtMs: Date.now() });
+      return originalPause.call(this);
+    };
+  });
+}
+
+async function readAmbientLifecycleStopSignals(frame) {
+  return frame.evaluate(() => [...(window.__AWWV_QA_AMBIENT_PAUSE_SIGNALS__ ?? [])]);
+}
+
+function attributeAmbientLifecycleAborts(networkFailures, stopSignals, expectedAmbientLifecycleAborts) {
+  const availableStops = [...stopSignals];
+  const attributedFailureIndexes = new Set();
+  for (let index = 0; index < networkFailures.length; index += 1) {
+    const record = networkFailures[index];
+    const stopIndex = availableStops.findIndex((ambientLifecycleStop) =>
+      classifyExpectedRequestAbort({ ...record, ambientLifecycleStop }) === 'ambient-bed-lifecycle');
+    if (stopIndex < 0) continue;
+    const [ambientLifecycleStop] = availableStops.splice(stopIndex, 1);
+    expectedAmbientLifecycleAborts.push({
+      ...record,
+      ambientLifecycleStop,
+      allowlist: 'ambient-bed-lifecycle',
+    });
+    attributedFailureIndexes.add(index);
+  }
+  const remaining = networkFailures.filter((_record, index) => !attributedFailureIndexes.has(index));
+  networkFailures.splice(0, networkFailures.length, ...remaining);
 }
 
 async function exerciseFinalSaveLoad(page, frame, faction, events, userDataDir, expectedTurn) {
@@ -5294,10 +5365,12 @@ async function runFaction(faction, result) {
   const expectedStartupAborts = [];
   const expectedTeardownAborts = [];
   const expectedNavigationAborts = [];
+  const expectedAmbientLifecycleAborts = [];
   const pageErrors = [];
   const mainProcessStdout = [];
   const mainProcessStderr = [];
   const attachedPages = new WeakSet();
+  const requestNavigationWindows = new WeakMap();
   let teardownStarted = false;
   const app = await electron.launch({
     cwd: repo,
@@ -5325,7 +5398,9 @@ async function runFaction(faction, result) {
     expectedStartupAborts,
     expectedTeardownAborts,
     expectedNavigationAborts,
+    expectedAmbientLifecycleAborts,
     attachedPages,
+    requestNavigationWindows,
     isTeardownStarted: () => teardownStarted,
     getMapNavigationAbortWindow: getActiveMapNavigationAbortWindow,
   };
@@ -5354,6 +5429,7 @@ async function runFaction(faction, result) {
     } else {
       frame = await startCampaign(page, faction, events);
     }
+    await installAmbientLifecycleObserver(frame);
     const initialAutosavePath = resolveDecisionReceiptAutosavePath(
       canonicalAutosavePath,
       resumeSavePath,
@@ -5430,6 +5506,12 @@ async function runFaction(faction, result) {
     if (saveLoadProof) {
       playtest.saveLoadProof = await exerciseFinalSaveLoad(page, frame, faction, events, userDataDir, maxTurns);
     }
+    const ambientLifecycleStopSignals = await readAmbientLifecycleStopSignals(frame);
+    attributeAmbientLifecycleAborts(
+      networkFailures,
+      ambientLifecycleStopSignals,
+      expectedAmbientLifecycleAborts,
+    );
     if (strategicRun && maxTurns > 0 && playtest.finalState?.autonomyLevel !== 1) {
       throw new Error(`Strategic autonomy did not apply: expected level 1, observed ${playtest.finalState?.autonomyLevel}`);
     }
@@ -5443,6 +5525,8 @@ async function runFaction(faction, result) {
       expectedStartupAborts,
       expectedTeardownAborts,
       expectedNavigationAborts,
+      expectedAmbientLifecycleAborts,
+      ambientLifecycleStopSignals,
       mainProcessStdout,
       mainProcessStderr,
       initialEvidence,
@@ -5469,6 +5553,7 @@ async function runFaction(faction, result) {
       expectedStartupAborts,
       expectedTeardownAborts,
       expectedNavigationAborts,
+      expectedAmbientLifecycleAborts,
       mainProcessStdout,
       mainProcessStderr,
       events,
