@@ -212,6 +212,18 @@ sector wrapped around that isolated pocket does not make its brigade connected t
 front. The stranded-brigade lifecycle therefore treats the location as unreachable and invokes
 the ordinary deterministic emergency-retreat/lifecycle path when combat removes the pocket.
 
+**Operation-completion ownership handoff (2026-10-23, focused candidate):** operations
+completing in the current `advance-sector-offensives` invocation publish released participant
+IDs on transient turn context after return handling and operation removal. Immediately before
+normal final distribution/seal, eligible released participants are checked with the existing
+postcombat same-corps reachability rule (using the established precombat fallback when needed).
+Any assignment, movement order/state, active loan, active/queued operation, enclave ownership
+or prior holding status excludes a participant from this handoff. Newly unreachable candidates
+enter existing `holding` with current `stranded_since_turn`; `last_reachable_turn` is unchanged.
+This classification does not apply another attrition tick or write movement, location, control,
+supply or alliance state. The ordinary once-per-turn lifecycle and final collector remain
+unchanged; stale ownership records can still produce a visible unresolved warning.
+
 The command hierarchy remains army standing orders → corps AI and commander intent → brigade routing and execution. Shared targeting helpers live in `src/sim/combat/war_adjacency.ts`; the current movement authority contract is `docs/20_engineering/MOVEMENT_AUTHORITY.md`.
 
 ### 6.6 Graz Accords (RS-HRHB Non-Aggression)

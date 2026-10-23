@@ -9,7 +9,7 @@
 **Tech stack:** Electron, Playwright/CDP, packaged directory build, `paradox_local_qa.cjs`, deterministic autosave/replay comparison, Markdown diary template.
 
 **Date:** 2026-07-31
-**Status:** ACTIVE — bounded readability/runtime-output repairs and all-faction zero-turn Save/load verified on 2026-10-23; genuine turn-16 sector failure and nine unresolved historical ambient aborts keep the 24-week shakedown blocked. No calibration tuning or full campaign.
+**Status:** ACTIVE — readability/runtime-output and all-faction zero-turn Save/load verified; the operation-completion handoff candidate passes focused tests and canon/determinism review. Gameplay regression/adoption and audio/shakedown gates remain open. No calibration tuning or full campaign.
 **Roadmap workstream:** R8
 **Canonical owner:** packaged Electron UI and bound autosave/replay; diary is the product verdict
 **Collision rule:** This plan does not repair source while a session is running. Findings are routed to the owning plan, verified, then the affected session restarts from a fresh campaign.
@@ -61,7 +61,7 @@ then finds it active, unassigned, not operation/movement-owned and without stran
 The earlier new-postcombat-pocket hypothesis is rejected. The smallest proposed repair is
 a classification-only released-participant handoff before final distribution using normal
 reachability, preserving movement/operation owners and applying no extra attrition tick.
-No gameplay fix or warning suppression has been implemented; repair authority is pending.
+No gameplay fix or warning suppression was implemented by that diagnostic; follow-up authority is recorded below.
 
 The prepared observer-only equivalence assumption was disproved: light checkpoints permit
 one extra successful RBiH recruitment at turn 9. Initial canonical bytes, historical receipts,
@@ -72,6 +72,46 @@ No further replay is authorized. Bound evidence: `logs/r8-shakedown-20261023/DIA
 diagnosis and independent review remain under the retained diagnostic/report paths.
 Any persisted-lifecycle repair requires canon/determinism review, real completion-to-final-seal
 focused tests and separately authorized required gameplay regression before adoption.
+
+**Bounded handoff repair authorized 2026-10-23:** the owner explicitly approved the
+classification-only released-participant repair, focused production-path checks and
+independent canon/determinism review. Scope is the normal operation-completion -> final
+topology/distribution/seal boundary, existing stranded reachability and persisted fields.
+Preserve active/queued operation and movement owners, process IDs deterministically, and
+apply no second attrition tick. No collector waiver, assignment/control fabrication,
+schema change, calibration tuning, baseline adoption, package build or campaign is included.
+One fresh Sol implementer writes a failing production-path regression before production
+edits; one independent Sol reviewer maps canon/design before edits and reviews the final
+diff. Controls cover reachable release, existing holding, movement/other-operation owners,
+reversed insertion ordering and save round-trip. Use focused RED/GREEN and affected tests
+first, then typecheck/static checks (five-minute cap) and one independent review with
+targeted correction verification if needed. Expected work is 20-40 minutes. Preserve every
+failure in fresh attempts under `tmp/r8-operation-release-repair-20261023/`; stop and diagnose
+unexpected failures cheaply. The candidate remains unadopted until separately authorized
+authoritative gameplay regression, protected gates and the required full suite pass.
+
+**Focused candidate result:** five production files and
+`tests/operation_completion_stranded_handoff.test.ts` implement the handoff. Actual offensive
+phase completion publishes a transient participant-ID receipt; the existing final-distribution
+step checks only eligible candidates without assignment, movement order/state, active loan,
+active/queued operation, enclave or prior-holding ownership. Canonical unreachable candidates
+receive only existing holding/current `stranded_since_turn`; `last_reachable_turn` is unchanged.
+The ordinary lifecycle, collector, phase count, GameState schema and control rules are unchanged.
+RED proves absent holding; a preserved no-receipt control still seals unresolved=1. Six focused
+files pass 60/60 (focused-04), with final nonincremental TypeScript exit 0 (typecheck-03).
+Independent source/canon/determinism review reran the initial 59/59 with GO/no findings.
+The additional production-path test reverses independently completing corps/operations,
+participant arrays and formation insertion; receipt, classification and canonical state agree
+without normalizing meaningful operation/history arrays. The failed intermediate 191-phase attempt remains retained;
+folding the handoff into the existing phase preserves the normal phase count.
+
+Preservation passes for 2,446 opening protected files, 2,170 source-freeze entries except the
+five explicitly authorized source edits, all 195 diagnostic artifacts, and both complete immutable
+package inventories. Stale/noncanonical ownership entries remain fail-closed and can still warn;
+this is not a universal zero-unresolved guarantee. No post-fix campaign/package or broad suite
+has run. The old replay-equivalence gate and nine old/three new ambient aborts remain open.
+Source and evidence are recorded in `logs/r8-operation-release-repair-20261023/RESULT.json`.
+
 Evidence and independent review are under `tmp/r8-shakedown-20261023/`; all earlier
 attempts, n91/n92 and telemetry remain retained. No baseline adoption or full campaign.
 

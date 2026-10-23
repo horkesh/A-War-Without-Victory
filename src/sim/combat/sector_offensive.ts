@@ -1315,6 +1315,7 @@ export function advanceSectorOffensives(
     terrainMultByOsid?: Record<string, number>, // LANE-2026-05-02
     staticAdjacency?: Map<string, string[]>,
     openingAttackPredictionContext?: OpeningAttackPredictionContext,
+    completedParticipantIds?: Set<FormationId>,
 ): PreparationEvent[] {
     const prepEvents: PreparationEvent[] = [];
     const corpsCommand = state.military.corps_command;
@@ -1952,6 +1953,14 @@ export function advanceSectorOffensives(
                 }
                 completeOperationLifecycle(state, corpsId, op);
                 removeOperation(cmd, op);
+                if (completedParticipantIds) {
+                    const participantIds = isMultiAxis(op)
+                        ? getAllAxisBrigades(op)
+                        : (op.participating_brigades ?? []);
+                    for (const participantId of [...new Set(participantIds)].sort(strictCompare)) {
+                        completedParticipantIds.add(participantId as FormationId);
+                    }
+                }
             }
         }
         }

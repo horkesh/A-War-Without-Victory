@@ -1895,6 +1895,7 @@ export const warPhases: NamedPhase[] = [
                 terrainMultByOsid,
                 staticAdjacency,
                 openingAttackPredictionContext,
+                context.completedOperationParticipantIds ??= new Set(),
             );
             if (prepEvents.length > 0) {
                 context.report.preparation_events = prepEvents;

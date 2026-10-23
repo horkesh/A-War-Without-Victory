@@ -1,5 +1,22 @@
 # Code Canon (AWWV)
 
+## Operation-completion ownership handoff (2026-10-23, focused candidate)
+
+`advanceSectorOffensives` optionally records IDs released by operations completing in its
+current invocation, after return handling, archival and removal. The normal War phase supplies
+`TurnContext.completedOperationParticipantIds`; this receipt is not GameState or save data.
+The existing final-distribution step calls `classifyReleasedOperationParticipants` using final
+adjacency and canonical stranded reachability. Only eligible candidates without assignment,
+movement order/state, active loan, active/queued operation, enclave or existing holding ownership
+can enter holding. It writes only `stranded_status` and current `stranded_since_turn`; it leaves
+`last_reachable_turn`, attrition, movement, control, supply and alliance unchanged.
+The collector and phase count are unchanged. Direct callers without a completion receipt retain
+the old path; stale ownership entries remain fail-closed rather than silently exempted.
+`tests/operation_completion_stranded_handoff.test.ts` crosses actual completion, handoff,
+distribution and final seal, including a positive unresolved control, owner/enclave protections,
+same-turn idempotence and insertion-order/save proof. Focused review does not establish campaign
+neutrality or adoption; authoritative 188-week, full-suite and protected provenance gates remain.
+
 ## Behar-I catalog allocation (2026-10-23, candidate)
 
 `operation_opportunity_catalog_central_bosnia.ts` adds `behar_i_94`: RBiH/1st Corps, t133-only admission, two ordered current-model predecessor allocations (162nd/164th slots), Budoželje staging and Toljenak-only objective. The ordinary three-turn assembly budget permits early readiness after the existing one-full-planning-turn floor; the focused legal movement chain executes at t135. Approval, brigade eligibility, movement, bot orders and resolver ownership use existing consumers. It is absent from future preplanned reservations and introduces no generic rule, direct control write or save field. Ordinary nongated battle attribution uses `operation_id`/`contributing_operation_ids`; no artificial phase-gate receipt is added. [Focused evidence and campaign limits](../40_reports/implemented/20261023_BEHAR_I_TOLJENAK_CANDIDATE.md).

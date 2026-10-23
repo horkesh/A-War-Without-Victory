@@ -114,6 +114,14 @@ Real production-function stdout fixtures qualify schema 2 ordered close manifest
 - `tests/stranded_brigade_lifecycle.test.ts` pins critical-supply isolation over circular
   one-cell sector membership. `tests/tg_lifecycle.test.ts` and `tests/tg_routing.test.ts`
   pin friendly political-graph donor routing, stable distance ordering, and residual floors.
+- `tests/operation_completion_stranded_handoff.test.ts` crosses the actual offensive phase's
+  current-pass completion receipt and final distribution/seal. It pins disconnected release
+  classification without decay, reachable/owner/enclave protections, positive unresolved
+  behavior without a receipt, repeated-call idempotence, reversed-ID/formation insertion and
+  canonical save round-trip. Independent completing corps/operation and participant insertion
+  reversal also produces identical receipt, classification and canonical state without
+  normalizing semantic operation/history arrays. The receipt stays on TurnContext; no persisted schema is added.
+  Focused proof does not waive authoritative 188-week/full-suite/protected adoption gates.
 - A week-39 artifact establishes January only. Full-trajectory determinism or later checkpoint
   claims require a fresh 188-week master run.
 

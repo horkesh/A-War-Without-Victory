@@ -23,6 +23,11 @@ import type { Osid } from './osid_adjacency.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
 import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
 import { getQueuedPrePlannedBrigadeIds } from './pre_planned_operations.js';
+import {
+    isMovementOwnedActiveLoanDeployment,
+    isMovementOwnedHomeReturn,
+    isMovementOwnedReturnToCorps,
+} from './brigade_assignment.js';
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -173,6 +178,81 @@ function canReachCorpsSectorFront(
     }
 
     return false;
+}
+
+/**
+ * Classify only participants released by operations completed during the current
+ * offensive-advance pass. This is a final-topology ownership handoff, not a
+ * second stranded lifecycle tick: it never issues movement or applies decay.
+ */
+export function classifyReleasedOperationParticipants(
+    state: GameState,
+    releasedParticipantIds: Iterable<FormationId>,
+    adjacency: ReadonlyMap<Osid, readonly Osid[]>,
+): StrandedBrigadeReport {
+    const report: StrandedBrigadeReport = {
+        updated: 0,
+        newly_stranded: [],
+        still_holding: [],
+        reconnected: [],
+        orderly_withdrawal_orders: [],
+        collapsed: [],
+    };
+    const formations = state.military.formations ?? {};
+    const sectors = Object.values(state.military.corps_front_sectors ?? {});
+    const queuedOperationBrigades = getQueuedPrePlannedBrigadeIds(state);
+    const releasedIds = [...new Set(releasedParticipantIds)].sort(strictCompare);
+
+    for (const formationId of releasedIds) {
+        const formation = formations[formationId];
+        if (!formation || formation.status !== 'active') continue;
+        if (formation.lifecycle_status && formation.lifecycle_status !== 'active') continue;
+        if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') continue;
+        if (!formation.location_osid || !formation.faction || !formation.corps_id) continue;
+        if (formation.assignment?.kind != null || formation.stranded_status === 'holding') continue;
+        if (isEnclaveBrigade(formation) || queuedOperationBrigades.has(formationId)) continue;
+
+        let activeOperationOwner = false;
+        for (const corpsId of Object.keys(state.military.corps_command ?? {}).sort(strictCompare)) {
+            const command = state.military.corps_command?.[corpsId];
+            if (!command) continue;
+            for (const operation of command.active_operations) {
+                if ((operation.participating_brigades ?? []).includes(formationId)
+                    || (operation.axes ?? []).some((axis) => (axis.assigned_brigades ?? []).includes(formationId))) {
+                    activeOperationOwner = true;
+                    break;
+                }
+            }
+            if (activeOperationOwner) break;
+        }
+        if (activeOperationOwner) continue;
+
+        if (state.military.brigade_movement_orders?.[formationId]
+            || state.military.brigade_movement_state?.[formationId]
+            || formation.elite_loan_state?.on_loan === true
+            || isMovementOwnedHomeReturn(state, formationId, formation)
+            || isMovementOwnedActiveLoanDeployment(state, formationId, formation)
+            || isMovementOwnedReturnToCorps(state, formationId, formation, sectors)) {
+            continue;
+        }
+
+        if (canReachCorpsSectorFront(
+            formation.location_osid,
+            formation.faction,
+            formation.corps_id,
+            state,
+            adjacency,
+        )) {
+            continue;
+        }
+
+        formation.stranded_status = 'holding';
+        formation.stranded_since_turn = state.meta.turn;
+        report.newly_stranded.push(formationId);
+        report.updated += 1;
+    }
+
+    return report;
 }
 
 // ── Main lifecycle function ──────────────────────────────────────────────────

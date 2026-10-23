@@ -1,0 +1,516 @@
+{
+  "schema": "awwv.operation-release-focused-repair.v1",
+  "baseCommit": "059dcdc780ba1c2af3462f8dea3a4a6cd53dcb3a",
+  "status": "FOCUSED_REVIEW_GO_UNADOPTED",
+  "scope": "Current-pass operation completion receipt and conservative holding classification before final distribution/seal",
+  "changes": [
+    {
+      "path": "src/sim/combat/sector_offensive.ts",
+      "bytes": 159029,
+      "sha256": "acbfec9cd1f7e604da913108b29d001e98ff7bfd44a17048b08bb5d9f1f40d21"
+    },
+    {
+      "path": "src/sim/combat/stranded_brigade_lifecycle.ts",
+      "bytes": 16061,
+      "sha256": "fad05b7f4294726ddd757a798756ffb04b243c02b6a57e93f76aae196ea74f59"
+    },
+    {
+      "path": "src/sim/turn_phases/war_phase_reconciliation_steps.ts",
+      "bytes": 11698,
+      "sha256": "7e42c31fec9ad53d997785dc0b1f556a651b228a57b60661c9e1c4d88b479a0c"
+    },
+    {
+      "path": "src/sim/turn_phases/war_phases.ts",
+      "bytes": 231519,
+      "sha256": "1722d49381b6a7ea5e606d0ff2a4581bed288ea51e4700698a2aff43f517a64a"
+    },
+    {
+      "path": "src/sim/turn_pipeline_types.ts",
+      "bytes": 36979,
+      "sha256": "dbe90b200dbe12b63197665635a0f64c622b6e97f0cc489365c8c18bb3e1ec0e"
+    },
+    {
+      "path": "tests/operation_completion_stranded_handoff.test.ts",
+      "bytes": 21965,
+      "sha256": "05f1723ef4c7c6d3af6e7d72d2605a4f0e178bf9de709f0e1710c0cd37803dc4"
+    }
+  ],
+  "focused": {
+    "files": 6,
+    "passed": 60,
+    "failed": 0,
+    "childExit": 0,
+    "wrapperExit": 0,
+    "receipt": "tmp/r8-operation-release-repair-20261023/implementation/focused-04/receipt.json"
+  },
+  "typecheck": {
+    "incremental": false,
+    "exit": 0,
+    "receipt": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-03/receipt.json"
+  },
+  "documentationChecks": {
+    "passed": 68,
+    "failed": 0,
+    "childExit": 0,
+    "wrapperExit": 0
+  },
+  "independentReview": {
+    "sourceCanonDeterminism": "GO; initial matrix 59/59 reused",
+    "targetedProducerOrdering": {
+      "path": "tmp/r8-operation-release-repair-20261023/review/targeted-ordering-correction-review.md",
+      "bytes": 3674,
+      "sha256": "44ebb6dcdfd4b115c03ba1cb92559dcf51aa21549372192f73f317f234bde697"
+    },
+    "targetedTestsPassed": 5,
+    "exit": 0,
+    "orderingScope": "One independent completing operation per corps; does not assert reordering semantic active_operations/history arrays"
+  },
+  "behaviorLimits": [
+    "Only current invocation released participants",
+    "Existing assignment, movement, active loan, active/queued operation, enclave and holding owners preserved",
+    "Only holding and current stranded_since_turn written; last_reachable_turn unchanged",
+    "No extra attrition tick; ordinary lifecycle and unresolved collector unchanged",
+    "Transient TurnContext receipt; save schema and phase count unchanged"
+  ],
+  "preservation": {
+    "passed": true,
+    "openingProtectedFiles": 2446,
+    "sourceFreezeFiles": 2170,
+    "diagnosticFiles": 195,
+    "packages": "both immutable inventories checked, including additions",
+    "authorizedSourceChanges": [
+      {
+        "path": "src/sim/combat/sector_offensive.ts",
+        "before": "065a99a1b2b176a2fffd43eeb4c4727052f7e4bf0952914ddcbc9b41267b3626",
+        "after": "acbfec9cd1f7e604da913108b29d001e98ff7bfd44a17048b08bb5d9f1f40d21"
+      },
+      {
+        "path": "src/sim/combat/stranded_brigade_lifecycle.ts",
+        "before": "03e0ece5798fd8a74ce8c991112e50aa4243c14b519879746432e21cd6412040",
+        "after": "fad05b7f4294726ddd757a798756ffb04b243c02b6a57e93f76aae196ea74f59"
+      },
+      {
+        "path": "src/sim/turn_phases/war_phase_reconciliation_steps.ts",
+        "before": "c09184e75d1be6917beb3daf7167132bc52c52c4acd5e7c4df1a13204dfe31c2",
+        "after": "7e42c31fec9ad53d997785dc0b1f556a651b228a57b60661c9e1c4d88b479a0c"
+      },
+      {
+        "path": "src/sim/turn_phases/war_phases.ts",
+        "before": "e8769c14a0c8051a655d0a67db7d95744d57cb4fc67583b58e209eebfc59dd4d",
+        "after": "1722d49381b6a7ea5e606d0ff2a4581bed288ea51e4700698a2aff43f517a64a"
+      },
+      {
+        "path": "src/sim/turn_pipeline_types.ts",
+        "before": "dbf02b2ce77484d6b872122e9415c84b8d33171559f785320eacb9b048073694",
+        "after": "dbe90b200dbe12b63197665635a0f64c622b6e97f0cc489365c8c18bb3e1ec0e"
+      }
+    ],
+    "unexpected": []
+  },
+  "retainedFailures": "All RED, intermediate phase-count and other failed attempts remain in the evidence inventory; no logs restored or truncated",
+  "notRun": [
+    "campaign",
+    "new package",
+    "full suite"
+  ],
+  "calibrationTuning": false,
+  "baselineAdoption": false,
+  "push": false,
+  "remainingGates": [
+    "Separately authorized authoritative 188-week gameplay regression, protected checkpoints/anchors/provenance, qualifying full suite and adoption",
+    "Existing RBiH diagnostic replay equivalence unmet due to additional recruitment",
+    "Ambient audio abort classification and three-faction full-duration shakedowns remain open"
+  ],
+  "evidence": [
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-01/entry-script.snapshot",
+      "bytes": 16926,
+      "sha256": "0ef9d6957ed6490e84e4d33db96dbc6d17d7069308a2ff27d7bae438fe92a455"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-01/receipt.json",
+      "bytes": 3293,
+      "sha256": "625e0f34a08dc0f2cfd353d2eda4505c57bc0f4962919f9d4b1cb77b89138636"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-01/start.json",
+      "bytes": 2099,
+      "sha256": "a81c2d2a5d7580e1ca9e44afa3f39ba74683f0ae130ac14a913f31f40bc57c8e"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-01/stdout.log",
+      "bytes": 186,
+      "sha256": "759036e689ff761a7493fb56dd4e75f19dea651b16fd843f878744102ea06398"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-01/vitest.json",
+      "bytes": 24661,
+      "sha256": "684c938bee2d57648be901c5b62d9ae14f689c2e44816668ef9dbb5ec837dc74"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-02/entry-script.snapshot",
+      "bytes": 17101,
+      "sha256": "9eea6f2d956b5758caded490708fa7c65d729b0d62fd9573b942d0f591b6ed41"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-02/receipt.json",
+      "bytes": 3293,
+      "sha256": "ece7b1aa0be3bbfc4fc2b76645eb679bd03a99812922adc7f214a84f1bed4290"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-02/start.json",
+      "bytes": 2099,
+      "sha256": "395c51567742b4862ed7491ec492e4f283237b6adb155b6b2cc3c6167e2eda2e"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-02/stdout.log",
+      "bytes": 186,
+      "sha256": "996d79460a2b73d19f78211bab6a11331fc6b5dd8dca8da3b978931bbcdb682e"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-02/vitest.json",
+      "bytes": 23215,
+      "sha256": "4c78ecf93d85e1a3d66a0cba0271b93d87b6ea1f2db0857e86745ad0b3c1251b"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-03/entry-script.snapshot",
+      "bytes": 17101,
+      "sha256": "cd76a4e7a1153f765a19bc09a21c9724ebfb2cd97251b66db5601aaf20e46da0"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-03/receipt.json",
+      "bytes": 3293,
+      "sha256": "a62200e2f2a637024870328a136452ea8b87b5c1c3bbb2bb80e532e606b10e90"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-03/start.json",
+      "bytes": 2099,
+      "sha256": "6d054f9f2fbbab3c61b1bc8ceb442bfc45ef79d554a1be51f47c6fca0c767ae3"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-03/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-03/stdout.log",
+      "bytes": 186,
+      "sha256": "431cefab90bc3ebe74c7acff3ffa82448411cd2a28ca8ab88b2f04eb64283956"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-03/vitest.json",
+      "bytes": 23218,
+      "sha256": "97a6a46a7b592471fef994aff7a0027f0b52f034bce0086c5cb8d2b1f5682333"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-04/entry-script.snapshot",
+      "bytes": 21965,
+      "sha256": "05f1723ef4c7c6d3af6e7d72d2605a4f0e178bf9de709f0e1710c0cd37803dc4"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-04/receipt.json",
+      "bytes": 3292,
+      "sha256": "673f80d74a6262ce89f3481af9c5c925fd3ec0063a1c001ae7cdc050b69aaa7d"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-04/start.json",
+      "bytes": 2099,
+      "sha256": "0820575bc75bd2946dd6d9af9142837ec6faa6ff015bbf7e73d15a2aa843d5f4"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-04/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-04/stdout.log",
+      "bytes": 186,
+      "sha256": "6fd2d0ec0f3ebf8625aa0482ff802318a9789cdebc57c26b9a84b65b1ba5f5ce"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/focused-04/vitest.json",
+      "bytes": 23664,
+      "sha256": "59ac19ac2b800657f2e29fda111aa282e0e02f166ecd879bc9a506d2aecf0109"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/green-01/entry-script.snapshot",
+      "bytes": 7601,
+      "sha256": "df7b85690dacaa37ccbbe51f77a32bc4e6c5c3932fb6766b9c1ba332e107d07b"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/green-01/receipt.json",
+      "bytes": 2791,
+      "sha256": "0fa6415815836ef1fb443ea5e5b86cd4db459b61d4c8bb758d4761086f44cc8e"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/green-01/start.json",
+      "bytes": 1599,
+      "sha256": "2fba7346c76cb12cc9e6743f3e113d9cab94ce06e07710d61f271605d1b942ad"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/green-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/green-01/stdout.log",
+      "bytes": 184,
+      "sha256": "baf3ab02646c8933fd2b9b8160a6d0d2227788e104db52baed116ea17753d94c"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/green-01/vitest.json",
+      "bytes": 1180,
+      "sha256": "0d2e4735cfc25551ee249387ebac0a59ae3fcff9dfe1703c08c815552edce723"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/matrix-01/entry-script.snapshot",
+      "bytes": 15586,
+      "sha256": "741c74d4df926908d3caa12fef24387b36e24823797bcfcd0e133acc149e9674"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/matrix-01/receipt.json",
+      "bytes": 2796,
+      "sha256": "082ddabd01543167a07ad2dee1e9c19b6765fb0eeac620312d0fbb6f7b622623"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/matrix-01/start.json",
+      "bytes": 1603,
+      "sha256": "989e0a9e73c835394836ba421aa9b3608835ced9ae63a0da02b64fbe4c97b534"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/matrix-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/matrix-01/stdout.log",
+      "bytes": 185,
+      "sha256": "7b62d08768864e9b832c5c94620b2a09095ff913875c775c0a5306265b4f731e"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/matrix-01/vitest.json",
+      "bytes": 3599,
+      "sha256": "a9a23618a2f649952ebedc93efd62933d1a0d9a505d72135f52db0378cb2534d"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/matrix-02/entry-script.snapshot",
+      "bytes": 16926,
+      "sha256": "0ef9d6957ed6490e84e4d33db96dbc6d17d7069308a2ff27d7bae438fe92a455"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/matrix-02/receipt.json",
+      "bytes": 2796,
+      "sha256": "5926f103f7fad5e177fe2533b8331d412e4455ce805cdaa15675b4fa2b53035e"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/matrix-02/start.json",
+      "bytes": 1603,
+      "sha256": "bffe06e42b017a072d73a94c584ce935c7aa49c8177848ae745a56082af8c6c4"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/matrix-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/matrix-02/stdout.log",
+      "bytes": 185,
+      "sha256": "159794a5ec8c29c7c546f23e9807c69ca47f3d08e6735a99ef3ba28424dc6fcb"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/matrix-02/vitest.json",
+      "bytes": 2516,
+      "sha256": "1edd5e279c47af8dcbf6756632f197117e01fa48200a2e5bf91903e5096d6b0b"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/red-01/entry-script.snapshot",
+      "bytes": 7529,
+      "sha256": "e5c54121272050319bbf876496b5c6fdd53423bb7a89c35dd151f908b6729731"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/red-01/receipt.json",
+      "bytes": 2787,
+      "sha256": "74b4c7b8849fb18802d765e5c5d1e1e5924c699cd1ab68379d65eab3c7b60e77"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/red-01/start.json",
+      "bytes": 1595,
+      "sha256": "bfb71e1bb256f2df894db309f05283cf8234e7219acc68a93a14ce96a4338278"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/red-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/red-01/stdout.log",
+      "bytes": 182,
+      "sha256": "0e967f8eb6266d531e7898f5b37bf922a799a01d3a90a88eec50ae89775a7feb"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/red-01/vitest.json",
+      "bytes": 2737,
+      "sha256": "b9f380088fa7fc9b9f95911a524775f0969adf705d66f9688e9984c12ce3ed54"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/red-02/entry-script.snapshot",
+      "bytes": 7565,
+      "sha256": "01751e0c7f39ed40656b1746fafa82d5816c016a718df2b90e661f2ebb3f8044"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/red-02/receipt.json",
+      "bytes": 2787,
+      "sha256": "cfaf6b79e9f82fc37095452d36a1b0d8c2027e6012fb1768d709418af17533b1"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/red-02/start.json",
+      "bytes": 1595,
+      "sha256": "b1ab3275b0b201d1ef58bcee1508e1fb0914ba9ac5b1c0ea38892f7cc8ea1122"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/red-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/red-02/stdout.log",
+      "bytes": 182,
+      "sha256": "f9bd03aae6c800b9aa0419514934845f24837a929aeb3f384fea17d89a518697"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/red-02/vitest.json",
+      "bytes": 2673,
+      "sha256": "b607fb514ac85b0eacf3aafec6d963e2f7536617606fc935b1540ca29c7a3517"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-01/command.json",
+      "bytes": 230,
+      "sha256": "85d429bafd0fa387a001e8f6aa20cf5d514ae7bc6bac24e2c382313686c193e2"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-01/receipt.json",
+      "bytes": 2740,
+      "sha256": "789e39234438ded20b2dadc0f870a6e2007dbda8918e51da193ce8cb8290a02e"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-01/start.json",
+      "bytes": 1555,
+      "sha256": "6eecd3e3873cdae6a5727bf5c9734c8b4ed25a2a6f59d304f7aaf199334577f3"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-01/stdout.log",
+      "bytes": 31,
+      "sha256": "91e0225603863bff7bfba2454b7ae4eb8d4ec8722f9ffa08fc263bf857e4f9af"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-02/command.json",
+      "bytes": 230,
+      "sha256": "85d429bafd0fa387a001e8f6aa20cf5d514ae7bc6bac24e2c382313686c193e2"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-02/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-02/receipt.json",
+      "bytes": 2740,
+      "sha256": "c4c0f82bd433e896a77a6bf418ee81cc0e92ef0bd4fd5592076d1665c5dd85df"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-02/start.json",
+      "bytes": 1555,
+      "sha256": "a2109f1694f4b4a78c29a9dace97604fa6b07cd4da3808e9a23a8bba3b5ef37f"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-02/stdout.log",
+      "bytes": 31,
+      "sha256": "91e0225603863bff7bfba2454b7ae4eb8d4ec8722f9ffa08fc263bf857e4f9af"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-03/command.json",
+      "bytes": 230,
+      "sha256": "85d429bafd0fa387a001e8f6aa20cf5d514ae7bc6bac24e2c382313686c193e2"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-03/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-03/receipt.json",
+      "bytes": 2740,
+      "sha256": "1e29a477b1563bc1c44d6edc33c07c7ae32b7b6a5b8630699fb11d4f68306575"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-03/start.json",
+      "bytes": 1555,
+      "sha256": "6e22d22b5ffa8d57435988954dc257dd3e1518718466ad50f974cebbc340e16a"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-03/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-03/stdout.log",
+      "bytes": 31,
+      "sha256": "91e0225603863bff7bfba2454b7ae4eb8d4ec8722f9ffa08fc263bf857e4f9af"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/implementation/typecheck-command.json",
+      "bytes": 230,
+      "sha256": "85d429bafd0fa387a001e8f6aa20cf5d514ae7bc6bac24e2c382313686c193e2"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/review/final-review.md",
+      "bytes": 10525,
+      "sha256": "1794b9a244adc58aadb3aa0d37a761200211360ea65116d5b4384308f2fc5032"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/review/pre-implementation.md",
+      "bytes": 10168,
+      "sha256": "611e66c67e90f78ab4e626401213b80246b381a2d24ffee1aedb9aacdbe96e2b"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/review/targeted-ordering-correction-review.md",
+      "bytes": 3674,
+      "sha256": "44ebb6dcdfd4b115c03ba1cb92559dcf51aa21549372192f73f317f234bde697"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/root/final-preservation-01.json",
+      "bytes": 1451,
+      "sha256": "fc3700071d86d33692ffbdc216c827b7b614a63c686604388e7e68ddb7faf7fd"
+    },
+    {
+      "path": "tmp/r8-operation-release-repair-20261023/root/docs-01/receipt.json",
+      "bytes": 2681,
+      "sha256": "97b741ba636ae7ce7e34727de5216e90f19c767ee95bb5045cbfc2617bdf23a3"
+    }
+  ]
+}

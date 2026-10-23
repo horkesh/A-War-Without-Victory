@@ -26,6 +26,7 @@ import { CANONICAL_FACTIONS } from '../../state/game_state.js';
 import { computeFrontEdgesOsid } from '../../map/front_edges.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { ValidationIssue } from '../../validate/validate.js';
+import { classifyReleasedOperationParticipants } from '../combat/stranded_brigade_lifecycle.js';
 
 function compareIssues(a: ValidationIssue, b: ValidationIssue): number {
     return strictCompare(a.path ?? '', b.path ?? '')
@@ -176,6 +177,24 @@ export const warPhaseReconciliationSteps: NamedPhase[] = [
             const spatial = getSpatialContextCache(context);
             const adjacency = spatial?.postCombat?.adjacency ?? spatial?.preCombat.adjacency;
             if (!adjacency) return;
+            const releasedParticipantIds = context.completedOperationParticipantIds;
+            if (releasedParticipantIds && releasedParticipantIds.size > 0) {
+                const handoff = classifyReleasedOperationParticipants(
+                    context.state,
+                    releasedParticipantIds,
+                    adjacency,
+                );
+                if (handoff.updated > 0) {
+                    const report = context.report.stranded_brigade_lifecycle;
+                    if (report) {
+                        report.updated += handoff.updated;
+                        report.newly_stranded.push(...handoff.newly_stranded);
+                        report.newly_stranded.sort(strictCompare);
+                    } else {
+                        context.report.stranded_brigade_lifecycle = handoff;
+                    }
+                }
+            }
             const diagnostics = distributeBrigadesToFront(context.state, Object.values(sectorMap), adjacency as Map<string, string[]>, {
                 population1991ByMun: context.input.municipalityPopulation1991,
                 diagnosticCallsite: 'final-distribute-brigades-to-front', completedTurn: context.state.meta.turn,

@@ -362,6 +362,8 @@ export interface TurnContext {
     finalSectorReconciliationSession?: FinalSectorReconciliationSession;
     /** Internal side-effect batch withheld until post-turn validation succeeds. */
     pendingDisplacementEventStream?: DisplacementEvent[];
+    /** Formation IDs released by operations completed in this turn's offensive advance. */
+    completedOperationParticipantIds?: Set<FormationId>;
 }
 
 export type PhaseHandler = (context: TurnContext) => void | Promise<void>;

@@ -246,9 +246,11 @@ gates:
       RS/HRHB 24-week runs remain unlaunched. Owner-approved corrected diagnostic 02
       reaches turn 16 in 823.623 seconds and reproduces an operation-release ownership
       gap plus three unresolved ambient aborts. Exact replay equivalence is unmet due
-      to extra RBiH recruitment; no gameplay repair or adoption is authorized by diagnosis.
-      Both startup failure and corrected evidence are retained. Packages, n91/n92 and
-      telemetry remain preserved. No baseline adoption or full campaign.
+      to extra RBiH recruitment. The owner separately authorized a bounded handoff repair;
+      its five-file candidate passes 60 focused tests, nonincremental TypeScript and
+      independent canon/determinism review. Required gameplay regression/adoption remains
+      open; no new package/campaign or full suite ran. Ambient aborts remain unresolved.
+      Startup/diagnostic failures, packages, n91/n92 and telemetry are preserved. No baseline adoption.
 
   - id: R8-FINAL-CAMPAIGNS
     lane: R8

@@ -1,3 +1,13 @@
+## Operation-completion handoff — focused candidate, campaign unmeasured (2026-10-23)
+
+The owner separately authorized the R8 operation-release ownership repair and focused checks.
+It changes persisted holding classification after operation completion and can affect later
+attrition/combat; focused review cannot establish calibration neutrality. No new campaign,
+baseline adoption, reference edit or tuning is authorized by that packet. The n91/n92 evidence
+and qualifications below remain attached to their recorded sources and are byte-preserved;
+they do not qualify the new engine candidate. Required authoritative regression/full-suite,
+protected-cell/anchor and provenance gates remain open. See the [controlling R8 plan](../plans/2026-07-31-full-campaign-electron-validation-plan.md).
+
 ## Toljenak n92 — owner-corrected April reference; 707/707/706/706 (2026-10-23)
 
 The owner explicitly repainted April1995 Toljenak to RBiH. Only that controller key changes, with consistent counts/revision/changelog; the old reference is archived. Re-evaluated n91→n92 is707→707 /707→707 /705→706 /705→706, with zero formerly correct losses and zero unrelated shared-save control deltas. Toljenak's normal t135 capture and retention through188,16 anchors and Prisoje/Donji Vrbljani HRHB outcomes remain proven. Paint values are post-simulation scoring/diagnostics only, so n92 is reused without another campaign. Raw32-input run metadata remains historical and untouched; the current evaluation validates exactly one approved old/new reference-hash difference and all other31 inputs exact. Current checkpoint/Farz and protected readers pass0/0; independent qualification review GO.
