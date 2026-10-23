@@ -2,7 +2,16 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-09-07 (cinematic React-owned opening, shared Warroom continuity, two-family typography, host recovery hardening, approved owner plates, and the atmospheric map-portal texture implemented; live packaged first-paint acceptance PASSED 2026-08-29)
+**Updated:** 2026-10-23 (bounded R8 readability, runtime-output isolation and all-faction zero-turn Save/load verified; full shakedown remains blocked)
+
+**R8 repair scope:** local source `2d1872e15` and immutable clip2 package verify the
+full DirectiveCard instruction in All, Command and current dossier views on the exact
+retained week-24 RBiH save. It wraps at 214x33 CSS pixels with no overflow; game-state
+and quicksave hashes are unchanged. Earlier opening font/contrast fixes remain retained.
+Native zero-turn Save/load passes separately for RBiH, RS and HRHB with exact canonical
+bytes and independently expected hydrated projections. These results do not accept the
+failed RBiH 24-week run: nine ambient aborts and the genuine turn-16 Ajnie final-seal
+failure remain open; RS/HRHB 24-week sessions are unlaunched. See the [controlling plan](../plans/2026-07-31-full-campaign-electron-validation-plan.md).
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 

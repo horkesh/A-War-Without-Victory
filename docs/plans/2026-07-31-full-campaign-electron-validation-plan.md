@@ -9,7 +9,7 @@
 **Tech stack:** Electron, Playwright/CDP, packaged directory build, `paradox_local_qa.cjs`, deterministic autosave/replay comparison, Markdown diary template.
 
 **Date:** 2026-07-31
-**Status:** ACTIVE — Inbox repair and replacement build verified; package-directory identity fails after runtime telemetry was added. The RBiH shakedown failed final readability before Save/load; runtime disposition, RS/HRHB and full campaigns remain open.
+**Status:** ACTIVE — bounded readability/runtime-output repairs and all-faction zero-turn Save/load verified on 2026-10-23; genuine turn-16 sector failure and nine unresolved historical ambient aborts keep the 24-week shakedown blocked. No calibration tuning or full campaign.
 **Roadmap workstream:** R8
 **Canonical owner:** packaged Electron UI and bound autosave/replay; diary is the product verdict
 **Collision rule:** This plan does not repair source while a session is running. Findings are routed to the owning plan, verified, then the affected session restarts from a fresh campaign.
@@ -21,7 +21,7 @@
 Native zero-turn Save/load passes for RBiH, RS and HRHB with unchanged canonical bytes
 and exact independently hydrated projected-state bytes. These are prerequisites only.
 The fresh RBiH 24-week shakedown fails before Save/load: 22 diagnostics identify one
-clipped DirectiveCard instruction, seven ambient aborts lack qualifying causal evidence,
+clipped DirectiveCard instruction, nine ambient aborts lack final native causal evidence,
 and `rs_ajnie_brigade` is genuinely unresolved at the turn-16 final sector seal.
 No turn-15/16 state was retained in that attempt; turn-17+ recovery cannot waive it.
 RS/HRHB 24-week runs remain unlaunched.
@@ -34,16 +34,22 @@ lines and opt-in exclusive per-turn save archives. The old package reproduces cl
 in the retained week-24 current dossier (214 px client / 279 px scroll width); its paired
 All/Command probe selected the wrong title, so that probe exits 1 and remains failed.
 The supported fixture route is fresh isolated quicksave -> Field Records -> Resume ->
-Desk -> command surface. A new immutable `r8-shakedown-20261023-clip2` package and one
-correctly scoped rendered check are the next affected presentation gate (several minutes,
-twenty-minute build cap, eight-minute route cap; stop on unexpected failure, no blind retry).
-No gameplay or calibration changes are included.
+Desk -> command surface. Immutable `r8-shakedown-20261023-clip2` builds with child/wrapper
+0/0 and freezes 1,213 files / 1,914,180,954 bytes. Its simulation bundle is byte-identical
+to the original package. The single correctly scoped native rendered check passes All,
+Command and current dossier: client/scroll 214x33, complete instruction visible, unchanged
+turn-24 RBiH state and exact quicksave hashes. Child/wrapper 0/0; independent image and
+artifact verification GO. Earlier failed probes remain retained. No gameplay or calibration
+changes are included. Earlier all-faction Save/load evidence is reusable at its exact
+zero-turn scope because the native menu, save-record/load/projector source and sim bytes
+are unchanged; this is not fresh turn-24 Save/load acceptance on clip2.
 
 The owner separately authorized one diagnostic-only replay through turn 16, twenty-minute
 cap and no automatic retry. Its first wrapper exits 1 before game launch: fingerprinting
 encounters a locked file in the concurrently open read-only probe profile. That failed
 attempt is preserved; a corrected start is pending an explicit owner decision under the
-recorded stop rule. No diagnostic turns ran. Any actual sector-assignment repair still
+recorded stop rule. With all probes closed, the exact extracted production fingerprint
+function now passes a read-only readiness check. No diagnostic turns ran. Any actual sector-assignment repair still
 requires exact evidence and separate gameplay validation scope; no warning suppression.
 Evidence and independent review are under `tmp/r8-shakedown-20261023/`; all earlier
 attempts, n91/n92 and telemetry remain retained. No baseline adoption or full campaign.

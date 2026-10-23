@@ -1,0 +1,180 @@
+{
+  "schema": "awwv.r8.bounded-repair-result.v1",
+  "sourceCommit": "2d1872e15",
+  "status": "BLOCKED_24_WEEK_SHAKEDOWN",
+  "calibrationTuning": false,
+  "baselineAdoption": false,
+  "campaignRun": false,
+  "candidatePackage": "dist-packaged/r8-shakedown-20261023-clip2/win-unpacked",
+  "packageFiles": 1213,
+  "packageBytes": 1914180954,
+  "simulationBytesEqualOriginal": true,
+  "directiveVisualProof": {
+    "views": [
+      "All",
+      "Command",
+      "current dossier"
+    ],
+    "clientAndScroll": [
+      214,
+      33
+    ],
+    "stateAndQuicksaveUnchanged": true,
+    "childExit": 0,
+    "wrapperExit": 0
+  },
+  "saveLoadPrerequisites": [
+    {
+      "faction": "RBiH",
+      "scope": "native zero-turn Save/load only",
+      "canonicalBytesEqual": true,
+      "exactExpectedHydratedProjection": true,
+      "runtimeDiagnostics": 0
+    },
+    {
+      "faction": "RS",
+      "scope": "native zero-turn Save/load only",
+      "canonicalBytesEqual": true,
+      "exactExpectedHydratedProjection": true,
+      "runtimeDiagnostics": 0
+    },
+    {
+      "faction": "HRHB",
+      "scope": "native zero-turn Save/load only",
+      "canonicalBytesEqual": true,
+      "exactExpectedHydratedProjection": true,
+      "runtimeDiagnostics": 0
+    }
+  ],
+  "checks": {
+    "focusedUI": 30,
+    "harness": 70,
+    "typecheckExit": 0,
+    "earlierFullUI": {
+      "files": 358,
+      "tests": 3036,
+      "childExit": 0,
+      "wrapperExit": 126,
+      "qualification": "unchanged UI child evidence reconciled; wrapper failure retained"
+    },
+    "documentation": {
+      "tests": 68,
+      "childExit": 0,
+      "wrapperExit": 0,
+      "retainedInitialFailure": "board exceeded 20000-character limit; shortened only the changed R8 row"
+    }
+  },
+  "residuals": [
+    "Genuine rs_ajnie_brigade final-seal unresolved state at turn 16",
+    "Nine old ambient aborts lack final native lifecycle proof; one tile abort specifically qualified",
+    "RBiH 24-week run failed; RS/HRHB 24-week runs unlaunched",
+    "Authorized diagnostic startup failed before Electron; corrected start awaits owner decision"
+  ],
+  "evidence": [
+    {
+      "path": "tmp/r8-shakedown-20261023/root/package-freeze.json",
+      "bytes": 248411,
+      "sha256": "5ecebcf0a3694d290e594c798e669f8d535959e5b2334efd0c7d72fcde8860a2"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/package-freeze-02.json",
+      "bytes": 248588,
+      "sha256": "c53343e05928c0eb869a2a813486edb11f481a909cada3590206f56ea2aa7ee2"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/source-freeze-07.json",
+      "bytes": 397064,
+      "sha256": "7f772318f122ef9849cf4c69e45943bbf442b7513213a47330c358f4263fbe9e"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/package-02/receipt.json",
+      "bytes": 2626,
+      "sha256": "75f4f3c0969f1d8fe5240a11a09a533e8da87fa803659944630c273340103588"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/typecheck-final-01/receipt.json",
+      "bytes": 2653,
+      "sha256": "9c46bacc2bd34faaaa902a9925da4592c5e4c68d1c1195aec7e3e15a9fbe764f"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/direct-save-proof-manifest.json",
+      "bytes": 10324,
+      "sha256": "883ec705e660617e15ef1ad0ca35b3d2a17931f9febd282b33ccf88c682a8f3f"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/direct-save-rs-manifest.json",
+      "bytes": 22094,
+      "sha256": "0a95104be37ab992c21f4d6cd148453bd08eb5acbb92bde4d16e4ca2a52b89e1"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/direct-save-hrhb-manifest.json",
+      "bytes": 17573,
+      "sha256": "9f5c25b27d27ad3b1910f3af2a3d9d950bfab2dab92b5cc24961ebf425bb3bb2"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/shakedown-rbih-01/receipt.json",
+      "bytes": 2649,
+      "sha256": "8a27199fc0e9660a0c5592042236c4a8594d3b503c9715ca2b0a1f6de96af332"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/r8-shakedown-20261023-rbih-ajnie-w16-01/receipt.json",
+      "bytes": 2743,
+      "sha256": "d28bbca433012b0a2a83490302d45e1d66633d259474ac2ac78aab15a35af9bd"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/fingerprint-readiness-01.json",
+      "bytes": 269,
+      "sha256": "5f4c8097819fe9d31a5110ce658628f774503d61f11da4e002bbadeec3547127"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/final-preservation-01.json",
+      "bytes": 1228,
+      "sha256": "7ef0f862a50a0f3a3b570a4d75cf3c60c9736f4331cea1afb25832138f09be83"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/ui-receipt-reconciliation.json",
+      "bytes": 358,
+      "sha256": "97e78d7e1b7ae0b04c0eff16211f0a207cc1c55397dd4de20c3270bcd0da071d"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/runtime/reviewer-targeted-correction-01.log",
+      "bytes": 355,
+      "sha256": "c6d4f594b103046ae00989bc9537424a0a5c9b21176d79b106c82790a1bc9b13"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/presentation/clip-focused-ui-attempt-01.log",
+      "bytes": 746,
+      "sha256": "0ac962655fdd9f75bb32f85ef2e5ea51017221d77303c5aab8cc1528ffecf2ba"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/presentation/clip-native-red-02/receipt.json",
+      "bytes": 3305,
+      "sha256": "9013fffff9ad29e807ee34c9b896e1bfaaf7ae79657dab14dfc06e21d8cd641f"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/presentation/clip-native-green-01/receipt.json",
+      "bytes": 3316,
+      "sha256": "cba9c0c2e4607d8f984298ad276fed75de9520754cb523f38eee85b7aacff158"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/presentation/clip-native-green-01/result.json",
+      "bytes": 4199,
+      "sha256": "cf9decc99c35438870c9352c436c1dcc870e4ef5bfb1130b53fa41b2ce5e047b"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/review/final-review.md",
+      "bytes": 14161,
+      "sha256": "ee1f02bae8fe5f83fa221a4b4d4fde257846a2360167e7a22efb6a7d74bebc3e"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/final-docs-01/receipt.json",
+      "bytes": 2637,
+      "sha256": "1f234ef37ea216196d2eb9bcfe5dfc38e6155ac83bb1f38a8bae224f305c73e2"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/final-docs-02/receipt.json",
+      "bytes": 2635,
+      "sha256": "852f49686c961d54c5de703aa29e7f2ce8dab728e3c9bfd6d779440329d052f1"
+    }
+  ]
+}

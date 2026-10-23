@@ -238,9 +238,14 @@ gates:
     evidence_path: null
     source: docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
     notes: >
-      Retain RBiH turn 24/577 captures, 53 readability findings, 19 request aborts,
-      one final-sector warning and added package telemetry. Save/load was not reached;
-      RS/HRHB were not launched. WR01 closure does not close these distinct failures.
+      Retain September RBiH 24/577 evidence and the October 24/569-event failed run.
+      Source 2d1872e15 and immutable clip2 package verify font/contrast/directive wrap;
+      native zero-turn Save/load passes all three factions with exact canonical bytes.
+      This does not accept the 24-week shakedown: nine retained ambient aborts remain
+      unclassified and Ajnie genuinely fails the turn-16 final sector seal.
+      RS/HRHB 24-week runs remain unlaunched. The authorized diagnostic wrapper failed
+      before game launch on a locked fingerprint input; corrected start awaits owner
+      decision. Original packages, n91/n92 and telemetry are preserved. No baseline adoption.
 
   - id: R8-FINAL-CAMPAIGNS
     lane: R8
