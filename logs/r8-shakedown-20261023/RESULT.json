@@ -4,7 +4,6 @@
   "status": "BLOCKED_24_WEEK_SHAKEDOWN",
   "calibrationTuning": false,
   "baselineAdoption": false,
-  "campaignRun": false,
   "candidatePackage": "dist-packaged/r8-shakedown-20261023-clip2/win-unpacked",
   "packageFiles": 1213,
   "packageBytes": 1914180954,
@@ -65,10 +64,11 @@
     }
   },
   "residuals": [
-    "Genuine rs_ajnie_brigade final-seal unresolved state at turn 16",
-    "Nine old ambient aborts lack final native lifecycle proof; one tile abort specifically qualified",
-    "RBiH 24-week run failed; RS/HRHB 24-week runs unlaunched",
-    "Authorized diagnostic startup failed before Electron; corrected start awaits owner decision"
+    "Reviewed operation-completion ownership gap in diagnostic 02; gameplay repair awaits owner authority",
+    "Exact old/new replay equivalence gate unmet due to extra RBiH recruitment",
+    "Nine historical and three new ambient aborts lack final native lifecycle evidence",
+    "RBiH 24-week run remains failed; RS/HRHB 24-week runs unlaunched",
+    "Focused source/UI/save proofs do not waive required gameplay regression or shakedown acceptance"
   ],
   "evidence": [
     {
@@ -176,5 +176,11 @@
       "bytes": 2635,
       "sha256": "852f49686c961d54c5de703aa29e7f2ce8dab728e3c9bfd6d779440329d052f1"
     }
-  ]
+  ],
+  "fullCampaignRun": false,
+  "latestDiagnostic": {
+    "path": "logs/r8-shakedown-20261023/DIAGNOSTIC_16_RESULT.json",
+    "bytes": 2593,
+    "sha256": "b793b32f8c2dba1e15b8dd0a5bb4a7a2223a7239880119337c872f863c743dc2"
+  }
 }

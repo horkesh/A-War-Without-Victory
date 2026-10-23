@@ -1,0 +1,53 @@
+{
+  "schema": "awwv.r8.diagnostic16.result.v1",
+  "status": "ROOT_CAUSE_REVIEWED_GAMEPLAY_REPAIR_PENDING_AUTHORITY",
+  "label": "r8-shakedown-20261023-rbih-ajnie-w16-02",
+  "turns": 16,
+  "durationSeconds": 823.623,
+  "childExit": 1,
+  "wrapperExit": 1,
+  "timedOut": false,
+  "warningReproduced": true,
+  "exactTrajectoryEquivalence": false,
+  "shakedownAccepted": false,
+  "causeInDiagnosticRun": "Operation Foca completion releases already disconnected Ajnie after the sole stranded pass; friendly-location return skip leaves no operation, movement, sector or holding owner before final seal.",
+  "rejectedHypothesis": "New turn-16 postcombat pocket",
+  "minimumProposal": "Classification-only released-participant handoff using final canonical reachability before final distribution; preserve other owners and apply no extra attrition tick.",
+  "implementationPerformed": false,
+  "calibrationTuning": false,
+  "fullCampaignRun": false,
+  "baselineAdoption": false,
+  "runtimeDiagnostics": {
+    "console": 0,
+    "page": 0,
+    "unresolvedNetwork": 3
+  },
+  "networkDisposition": "All three new ambient failures remain unresolved; nine historical ambient failures also remain open.",
+  "trajectoryLimitation": "Additional successful RBiH recruitment on turn 9; same initial bytes, historical receipts, corresponding control hashes and RS formation counts do not establish a fully identical replay.",
+  "nextAuthority": "Pending owner decision on bounded repair, focused production tests and independent canon/determinism review; required full-suite/188-week adoption gates remain separate.",
+  "evidence": [
+    {
+      "path": "logs/r8-shakedown-20261023/DIAGNOSTIC_16_EVIDENCE.json",
+      "bytes": 51187,
+      "sha256": "2a0bada79a6e3989238a6f557c406f655ce2325a4bd0b3bce950df372039106e"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/diagnostics/r8-shakedown-20261023-rbih-ajnie-w16-02/ajnie-raw-analysis.md",
+      "bytes": 11804,
+      "sha256": "b14ea3ff209f46ac4c3b673ec7e0b2e5b0ed232bf91a82618cdb418c50262811"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/review/ajnie-diagnostic02-review.md",
+      "bytes": 10387,
+      "sha256": "5aa2005cf50c369e9b4a742f59750a430c67aff82b3234e3940ce2e83659e312"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/diagnostic02-preservation.json",
+      "bytes": 967,
+      "sha256": "d085ab93438feb0d18dfc2523227fdac5708c86257de741c443b3ae1e9a115a5"
+    }
+  ],
+  "automaticRetries": 0,
+  "correctedStartOwnerAuthorized": true,
+  "priorPrelaunchFailureRetained": true
+}

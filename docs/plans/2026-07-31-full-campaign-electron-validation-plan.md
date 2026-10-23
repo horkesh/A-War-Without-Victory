@@ -47,10 +47,31 @@ are unchanged; this is not fresh turn-24 Save/load acceptance on clip2.
 The owner separately authorized one diagnostic-only replay through turn 16, twenty-minute
 cap and no automatic retry. Its first wrapper exits 1 before game launch: fingerprinting
 encounters a locked file in the concurrently open read-only probe profile. That failed
-attempt is preserved; a corrected start is pending an explicit owner decision under the
-recorded stop rule. With all probes closed, the exact extracted production fingerprint
-function now passes a read-only readiness check. No diagnostic turns ran. Any actual sector-assignment repair still
-requires exact evidence and separate gameplay validation scope; no warning suppression.
+attempt is preserved. The owner explicitly approved one corrected start. After fingerprint
+readiness and package/source checks, diagnostic 02 reached turn 16 in 823.623 seconds,
+without timeout or retry, archiving turns 1-16. It reproduced the exact 910-person Ajnie
+warning and final seal unresolved=1; child/wrapper 1/1 also retain three unclassified
+ambient aborts (console/page zero). This is a diagnostic result, not shakedown acceptance.
+
+Raw turn-15/16 evidence and independent review establish an operation-completion ownership
+gap in diagnostic 02: Ajnie is already disconnected from same-corps sectors while owned by
+Operation Foca in recovery. The operation ends after the sole stranded-lifecycle pass;
+its return-march helper skips the friendly-controlled location. Final distribution/seal
+then finds it active, unassigned, not operation/movement-owned and without stranded fields.
+The earlier new-postcombat-pocket hypothesis is rejected. The smallest proposed repair is
+a classification-only released-participant handoff before final distribution using normal
+reachability, preserving movement/operation owners and applying no extra attrition tick.
+No gameplay fix or warning suppression has been implemented; repair authority is pending.
+
+The prepared observer-only equivalence assumption was disproved: light checkpoints permit
+one extra successful RBiH recruitment at turn 9. Initial canonical bytes, historical receipts,
+control hashes and RS formation counts correspond, but full trajectory/recruitment equivalence
+is UNMET. The new run proves its own causal chain and the same warning in matching RS/control
+context; absent old turn-16 raw state prevents proving an identical old operand chain.
+No further replay is authorized. Bound evidence: `logs/r8-shakedown-20261023/DIAGNOSTIC_16_EVIDENCE.json`;
+diagnosis and independent review remain under the retained diagnostic/report paths.
+Any persisted-lifecycle repair requires canon/determinism review, real completion-to-final-seal
+focused tests and separately authorized required gameplay regression before adoption.
 Evidence and independent review are under `tmp/r8-shakedown-20261023/`; all earlier
 attempts, n91/n92 and telemetry remain retained. No baseline adoption or full campaign.
 

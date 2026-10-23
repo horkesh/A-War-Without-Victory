@@ -1,0 +1,1027 @@
+{
+  "schema": "awwv.r8.diagnostic16.evidence.v1",
+  "label": "r8-shakedown-20261023-rbih-ajnie-w16-02",
+  "scope": "One owner-authorized diagnostic replay, no gameplay changes or shakedown acceptance",
+  "package": "dist-packaged/r8-shakedown-20261023/win-unpacked",
+  "childExit": 1,
+  "wrapperExit": 1,
+  "timedOut": false,
+  "durationSeconds": 823.623,
+  "archivedTurns": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16
+  ],
+  "initialCanonicalBytesEqualRetainedRun": true,
+  "reproducedWarning": {
+    "sequence": 691,
+    "observedAtMs": 1792779264403,
+    "stream": "stderr",
+    "line": "[brigade_assignment] UNRESOLVED rs_ajnie_brigade (910 pers): fell through sector pipeline, corps=vrs_herzegovina"
+  },
+  "finalSeal": {
+    "sequence": 692,
+    "observedAtMs": 1792779264404,
+    "stream": "stdout",
+    "line": "[brigade_assignment] FINAL_SEAL kind=turn turn=16 unresolved=1"
+  },
+  "runtimeDiagnostics": {
+    "console": 0,
+    "page": 0,
+    "unresolvedNetwork": 3
+  },
+  "files": [
+    {
+      "path": "tmp/r8-shakedown-20261023/root/diagnostic02-preservation.json",
+      "bytes": 967,
+      "sha256": "d085ab93438feb0d18dfc2523227fdac5708c86257de741c443b3ae1e9a115a5"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/fingerprint-readiness-02.json",
+      "bytes": 269,
+      "sha256": "c12c97b9783f08f135233dfc5d3418a27733defea05b3afb8561ea7c7947785a"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/r8-shakedown-20261023-rbih-ajnie-w16-02/command.json",
+      "bytes": 6991,
+      "sha256": "7071c4b86be39d29ed5ce32a6631dfc267c414519ef98501ffa8f01b4e9250c9"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/r8-shakedown-20261023-rbih-ajnie-w16-02/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/r8-shakedown-20261023-rbih-ajnie-w16-02/receipt.json",
+      "bytes": 2741,
+      "sha256": "6f6d52d094e22820bbd25ae8b35be0e0c845dcebc5674da1625c179c9b8d0aa4"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/r8-shakedown-20261023-rbih-ajnie-w16-02/start.json",
+      "bytes": 1554,
+      "sha256": "7b906a3b3b1b3c087d10220554005ba83416ce0e960c308c17587257fed2fbd2"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/r8-shakedown-20261023-rbih-ajnie-w16-02/stderr.log",
+      "bytes": 414,
+      "sha256": "8e2f1b6270b1e80eefbacf45975754a26bb31ee9253b0b2e1441c95127755131"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/root/r8-shakedown-20261023-rbih-ajnie-w16-02/stdout.log",
+      "bytes": 31,
+      "sha256": "935f5e7229c60dd0425c7096c17f97493c1e4300c3cbf04a2e4ccb94d625d945"
+    },
+    {
+      "path": "tmp/r8-shakedown-20261023/runtime/rbih-ajnie-week16-diagnostic-plan-02.json",
+      "bytes": 7121,
+      "sha256": "02deb5f62ad30a03f010abca68f81b83aa5e962303d53a739b3e586ec2502a56"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-shakedown-20261023-rbih-ajnie-w16-02/rbih/final-autosave.json",
+      "bytes": 4462538,
+      "sha256": "23338eff9062317501f05034ca44c4b679b0bbd34cc701f4ec70d809549fa091"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-shakedown-20261023-rbih-ajnie-w16-02/rbih/initial-autosave.json",
+      "bytes": 1456427,
+      "sha256": "bfc75b4717a2d781a7b374e059e23128436ad62789eea04df465aad6bc25a920"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-shakedown-20261023-rbih-ajnie-w16-02/rbih/manifest.json",
+      "bytes": 2268,
+      "sha256": "469ed581d82e4b083c49a148037e6b21e8638d38b77891243deed275acd12e78"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-shakedown-20261023-rbih-ajnie-w16-02/rbih/turn-autosaves/turn-001.json",
+      "bytes": 3478556,
+      "sha256": "b2f469bbb8682b8d1f1f119ac35bd49506d2a59135e42ecdf7aebaf5d4e684d5"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-shakedown-20261023-rbih-ajnie-w16-02/rbih/turn-autosaves/turn-002.json",
+      "bytes": 3579122,
+      "sha256": "0527578b4bd909879a48c9b0a1c06cb44628acedba4b2e2b80b40c2f6723ec07"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-shakedown-20261023-rbih-ajnie-w16-02/rbih/turn-autosaves/turn-003.json",
+      "bytes": 3661633,
+      "sha256": "e30904cbebc3e1e935552f628a7aafef0870b12ac35d6415247e7c849cbe6f01"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-shakedown-20261023-rbih-ajnie-w16-02/rbih/turn-autosaves/turn-004.json",
+      "bytes": 3719091,
+      "sha256": "9eb99d0737117637891cf9403d84b54870cc679df0365386a7c733d7a16ad7f8"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-shakedown-20261023-rbih-ajnie-w16-02/rbih/turn-autosaves/turn-005.json",
+      "bytes": 3959244,
+      "sha256": "b32bfde021552a78637cafa3d6b6101cf55c474a10a80cf0c27dedcddba4651c"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-shakedown-20261023-rbih-ajnie-w16-02/rbih/turn-autosaves/turn-006.json",
+      "bytes": 3988780,
+      "sha256": "1cc59b8ceb3e32ef82cdf3b3b08d5990e108cee24ea9f1e5de6f053c2b971694"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-shakedown-20261023-rbih-ajnie-w16-02/rbih/turn-autosaves/turn-007.json",
+      "bytes": 4003882,
+      "sha256": "e07144b985edef88fe50f01dc78b21a3b7f808e0f21b486ea5d44de0ab4d2a49"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-shakedown-20261023-rbih-ajnie-w16-02/rbih/turn-autosaves/turn-008.json",
+      "bytes": 4040232,
+      "sha256": "34200651f9aa096241274a6c5f7d6db9c9848c6c69a606bc85e7e5249c816372"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-shakedown-20261023-rbih-ajnie-w16-02/rbih/turn-autosaves/turn-009.json",
+      "bytes": 4084908,
+      "sha256": "7c5658b9eca266398d8cebdf5ba46c1b7b8bdec7ca12cc57abb553b05c2ec80b"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-shakedown-20261023-rbih-ajnie-w16-02/rbih/turn-autosaves/turn-010.json",
+      "bytes": 4197619,
+      "sha256": "522fcd1864fd6630a5eec487f7277019aac26ba99d655ca19fc898b661f8a6b6"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-shakedown-20261023-rbih-ajnie-w16-02/rbih/turn-autosaves/turn-011.json",
+      "bytes": 4254960,
+      "sha256": "49ffdd0018d387648497df301c38de731e914b99faea61dafeebf9c1b6c4c580"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-shakedown-20261023-rbih-ajnie-w16-02/rbih/turn-autosaves/turn-012.json",
+      "bytes": 4312444,
+      "sha256": "dc22d9e395f8474040327d9cdeb270e33ae81b153e9b0cfd8b22082f1816d6fd"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-shakedown-20261023-rbih-ajnie-w16-02/rbih/turn-autosaves/turn-013.json",
+      "bytes": 4360152,
+      "sha256": "e7d9c71f51d2de6ccb700b846a2d496d479740565951b7c280dcafab9eefbfe9"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-shakedown-20261023-rbih-ajnie-w16-02/rbih/turn-autosaves/turn-014.json",
+      "bytes": 4391876,
+      "sha256": "4c586f30b000e2db18f031ba2ddb5253a1f54906a4dad8cb92a98f35a189347d"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-shakedown-20261023-rbih-ajnie-w16-02/rbih/turn-autosaves/turn-015.json",
+      "bytes": 4409689,
+      "sha256": "a74dece984eca2dbc899045d74d34a0a9f256f7629bb3efc4840e376a92be0ec"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/evidence/r8-shakedown-20261023-rbih-ajnie-w16-02/rbih/turn-autosaves/turn-016.json",
+      "bytes": 4462538,
+      "sha256": "23338eff9062317501f05034ca44c4b679b0bbd34cc701f4ec70d809549fa091"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/main-process-output/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih.jsonl",
+      "bytes": 128829,
+      "sha256": "e4cb717fbe5fb8a0e4dfe6bc93de90d9f0f9d6d4c13889be5030046463bd56aa"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-error-r8-shakedown-20261023-rbih-ajnie-w16-02.txt",
+      "bytes": 413,
+      "sha256": "9904b48aa0fb2c92474ef7d158d606e4dde4b1764b0cc2cb4c55668f782a9563"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-netlog-r8-shakedown-20261023-rbih-ajnie-w16-02.json",
+      "bytes": 4868771,
+      "sha256": "d04b2367cebb9abff3afc6b1929e2fed5360c5f7944d9d7d263d23d952541099"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-progress-r8-shakedown-20261023-rbih-ajnie-w16-02.json",
+      "bytes": 13500502,
+      "sha256": "9eb1948bfa9437be76bbb06d20d93ee1cd8f5a7f35ef2ffb9cda0d0cd5cd1b1c"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-000-launch-screen.png",
+      "bytes": 2615343,
+      "sha256": "bc01bde8696b86099f86ac58cf256ffeb0ad5f102b2e579312d629b8d1c8f3ed"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-001-side-picker.png",
+      "bytes": 2415380,
+      "sha256": "f5c5addb3ad9d712511c647a3721eb963ba45824746de9f43fa984c5fb83d692"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-002-faction-dossier.png",
+      "bytes": 2570517,
+      "sha256": "c8bb34c4d51b8f84e17ca7f11eb05723b1435ed857d621d4ee82a57dfed9c837"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-003-command-mode.png",
+      "bytes": 1559743,
+      "sha256": "8de97baa367d407345c72df879a627f4c354d6633ab063b1903d8dc2ed48a364"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-004-intro-before-dismiss.png",
+      "bytes": 1323246,
+      "sha256": "0c2df166ba53f1c428978fe5457a11794ce23bfb96cda7ccbe08634d1bda8882"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-005-command-post-after-intro.png",
+      "bytes": 2064346,
+      "sha256": "f74c666f6db4aff7808b069981de970d95d44b9e2c99ae9c1140a5a008119122"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-006-initial-state-evidence.png",
+      "bytes": 2064346,
+      "sha256": "f74c666f6db4aff7808b069981de970d95d44b9e2c99ae9c1140a5a008119122"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-007-pre-tour-event-before-response.png",
+      "bytes": 891452,
+      "sha256": "4c0866ae4a670c45b63e51a69d335872f84ac566f69ff7bdf871538e36495a7f"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-008-pre-tour-event-after-response.png",
+      "bytes": 2063618,
+      "sha256": "fa5e3e21a53d9a861bda2fd9205f45ac3d9cd2f3338ca0fd5cbe75aea73acc9b"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-009-war-map.png",
+      "bytes": 3724670,
+      "sha256": "37f0c956058b5853b73e3d497b4e7d4788896082708b65da27fc68a73c323e27"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-010-initial-map-probe-overview.png",
+      "bytes": 3724748,
+      "sha256": "074db6e07bfeadcccf405ebe18c1cabbb691b158df5789330555649ad1528acb"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-011-initial-map-probe-counter-arbih_109th_mountain.png",
+      "bytes": 4013731,
+      "sha256": "86f084cd199dcd42a54d002a8d30dbf49aa0cafd04a52b18720e9ac6f46a2cf3"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-012-initial-map-probe-counter-arbih_10th_mountain.png",
+      "bytes": 4063684,
+      "sha256": "c3a1ebe715c8f2460cc9f93281c939473ba969079949b7e90d793fda92927af8"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-013-initial-map-probe-counter-arbih_123rd_light.png",
+      "bytes": 4073702,
+      "sha256": "6dec204a533b23ae2d947075b170f8b53ef918a819f112432e05a23107551fce"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-014-initial-map-probe-counter-arbih_131st_light.png",
+      "bytes": 4079673,
+      "sha256": "035964931d718c9076333862bbf6548476b974879dae9630da554cc9e6d9ccfb"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-015-initial-map-probe-counter-arbih_146th_light.png",
+      "bytes": 4072531,
+      "sha256": "3592984711f0f912fa371efc963e76f28a08556f2a14fe2cb17405ab37944311"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-016-initial-map-probe-counter-arbih_152nd_mountain.png",
+      "bytes": 4076714,
+      "sha256": "2e68204e57cac3c80f3d28c4d73b2f969d8bb4b49136bdcc18505c400ed32ae8"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-017-initial-map-probe-counter-arbih_161st_slavna_olovo_mountain.png",
+      "bytes": 4057565,
+      "sha256": "df88cbc4e9dd398feba0acc6230a325cb04dbf34ba56a1c1ae0989574fbb1670"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-018-initial-map-probe-counter-arbih_162nd_mountain.png",
+      "bytes": 4048777,
+      "sha256": "f0487355ceaa08e27dfc74b9fdf452a6a14613436c5a9e51aae142802f569938"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-019-initial-map-probe-counter-arbih_164th_mountain.png",
+      "bytes": 4065327,
+      "sha256": "cf0e43453283c3e3a0df04867467253707a8017059466898d2ebc7abdd7af1c7"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-020-initial-map-probe-counter-arbih_165th_mountain.png",
+      "bytes": 4081228,
+      "sha256": "12dd8504e77e7f6b5ca900450d1da925baa01bda07b4076ac5c1d6be0d85aa96"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-021-initial-map-probe-counter-arbih_17th_muslim_light.png",
+      "bytes": 4028450,
+      "sha256": "eb0b86552380827a3247144aaa88a96a00f2f325ec4bea482f19d9aaaa9bf2a4"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-022-initial-map-probe-counter-coverage.png",
+      "bytes": 3655389,
+      "sha256": "bb53966dce85445812039bc78bfc69702f0fcb5c2a5723de4b2742cd0a1c1003"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-023-initial-map-probe-map-click-center-formation.png",
+      "bytes": 4014701,
+      "sha256": "7bab007366530fc8c62c671e915f4f2267accb3ec91d47c1dbbc7963ccb7bf80"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-024-initial-map-probe-map-click-north-west.png",
+      "bytes": 3614046,
+      "sha256": "4aef6923fd893cb021f2be29a7dec3fbf814de5e669a1555d9336e5a77b79966"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-025-initial-map-probe-map-click-north-east-sector.png",
+      "bytes": 3352019,
+      "sha256": "5175bfdd08cf49bc6da411aa61f817c4185fc15e5ad58d7861b7eda030f161cf"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-026-initial-map-probe-map-click-south-west-empty.png",
+      "bytes": 3607033,
+      "sha256": "1389dabf53a67f57f9a520f41c9a9e9594aaaa5e93c092982dbe37dfc23e4625"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-027-initial-map-probe-map-click-south-east-sector.png",
+      "bytes": 3668727,
+      "sha256": "c260e51c3152351aea5b2ad0987e63a7cf99577e4d1c1d6950b55a2105c41162"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-028-route-president-desk.png",
+      "bytes": 1979329,
+      "sha256": "24a5213d0b6081ee23b7ebbbd0363683374c23bdd6c7d9b2ec53d92963a1307a"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-029-route-president-desk-drill.png",
+      "bytes": 296586,
+      "sha256": "96d8f577fbf1abd03752a2ebb985d0db09dd0b060a68f5bf9686dd376c96541b"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-030-route-command-surface.png",
+      "bytes": 2018116,
+      "sha256": "a17706d4b37c2d0d64c7e2b29e28da4b2be4d5f89e79bb90796cb6cea50b5f43"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-031-route-diplomacy.png",
+      "bytes": 1491307,
+      "sha256": "0ad996d6b37188ad4bd05f96ebca1ef86782101723b760542e3769120189ac30"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-032-route-intelligence.png",
+      "bytes": 1997992,
+      "sha256": "ce1b99689c928fdd80ced1bd9f60146733c7d1d326746c02410543390ff7e908"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-033-route-intelligence-drill.png",
+      "bytes": 136910,
+      "sha256": "992643fa0152a74f897fc3995782da0aa24e2635249eb66e6161d065c5371fad"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-034-route-faction.png",
+      "bytes": 2001512,
+      "sha256": "b904654baf6a21380edf9f6e56cb8ca3b0e9d9067bd4b8774c583a2798218c3b"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-035-route-faction-drill.png",
+      "bytes": 157685,
+      "sha256": "10ad9b3ea5f36c589744527815f8dd754ab1c4a049f86deb88c1f3791cf2fd40"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-036-route-chronicle-route.png",
+      "bytes": 121147,
+      "sha256": "6b74d1f2d273b22dbd51ec17e28035adc68edb0078a886a604833cc5153ef5c1"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-037-route-war-map-route.png",
+      "bytes": 3649674,
+      "sha256": "fb342500f114a0b4ed95f273cff0d77c84d36d42d6b995c31ade5a5e157df487"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-038-presidents-desk.png",
+      "bytes": 1979329,
+      "sha256": "24a5213d0b6081ee23b7ebbbd0363683374c23bdd6c7d9b2ec53d92963a1307a"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-039-command-surface-start.png",
+      "bytes": 2018116,
+      "sha256": "a17706d4b37c2d0d64c7e2b29e28da4b2be4d5f89e79bb90796cb6cea50b5f43"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-040-command-card-command-card-cat_war_direction.png",
+      "bytes": 1597958,
+      "sha256": "0c0053d6afa53625098f0d4c7aeb4a34fbeb77d37e73630f2c3e886b2ad3d112"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-041-command-card-command-card-cat_diplomacy.png",
+      "bytes": 1599026,
+      "sha256": "c5e9ce7ef79923423658a61d8a38d22eb3f95561315568a4363f22a24ba943fd"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-042-command-card-command-card-cat_home_front.png",
+      "bytes": 1597025,
+      "sha256": "284dcf52bf1221ec760d6df79f2babbc76cbc19e37afeec0a988cd7bc3ebe52c"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-043-command-card-command-card-cat_command.png",
+      "bytes": 1255067,
+      "sha256": "0f066f4a7bd19b5e43e3ae030b704a6f5a474ef25a9904100bcf3ef7e1f28d36"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-044-command-surface-empty-cat_conscience.png",
+      "bytes": 1599622,
+      "sha256": "1190bff5c3f1cf0dd7b8dc07e55bb21389d80fb3a1fde03a774b133e28ecd25c"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-045-command-card-command-card-cat_conscience.png",
+      "bytes": 1599622,
+      "sha256": "1190bff5c3f1cf0dd7b8dc07e55bb21389d80fb3a1fde03a774b133e28ecd25c"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-046-command-card-command-card-cat_record.png",
+      "bytes": 1550694,
+      "sha256": "4392345fa8a8613ccf2f8c43acbbc65b2467d0599aa847eabb244ce58671323d"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-047-command-surface-after-deep-dive.png",
+      "bytes": 2165935,
+      "sha256": "9e0ca7f386719e24ce444448f15f15ac1ce2446ce5bd34c2cbf67826ecf28bb4"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-048-decision-room-war-direction.png",
+      "bytes": 1753596,
+      "sha256": "2ca8f7043da300e0820457ccba833ec2707921eb9c98911710536f6767738352"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-049-decision-room-direct-lens-all.png",
+      "bytes": 1438615,
+      "sha256": "58f4991954f1a13e5109d9e22f8f082e621259cebb75b10e2f4719d7783e900a"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-050-decision-room-direct-lens-command.png",
+      "bytes": 1439721,
+      "sha256": "68d12fcfeb8ec21fce5bed6ce915b76009d23f1ecb2a4a45e143bdd9d405ae18"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-051-decision-room-direct-lens-memory.png",
+      "bytes": 1548225,
+      "sha256": "6565a71436b9f8cea0c22a29c51b26b329af3872b27bcf954b6c949551b4879d"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-052-decision-room-direct-review-action.png",
+      "bytes": 123664,
+      "sha256": "37aab401103c7f689a836ffd25375d874bdb6e4aa5da6f3d4a5c88ce9fd2e232"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-053-army-hq-open.png",
+      "bytes": 317961,
+      "sha256": "f11e7d8c8c74c6151a1518a1c9baa9a7e8ba4baa175cfa85fad6e5c8289e4582"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-054-army-hq-tab-briefing.png",
+      "bytes": 317976,
+      "sha256": "17d9a0c811db8ad9e22ed8157c327bc17badd5c4fdbd52a5b9ae3fb9512b2823"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-055-army-hq-tab-summary.png",
+      "bytes": 177527,
+      "sha256": "b719d9ae9f7140eaaca20154ad252f8721530c13dc9931df96f470c354614d7c"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-056-army-hq-tab-records.png",
+      "bytes": 141246,
+      "sha256": "e24309b097d8f493c0763a9fa55b0da9288b036f9de2627e4908136ad16effc1"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-057-army-hq-tab-personnel.png",
+      "bytes": 154682,
+      "sha256": "19b2587b6c53d99ef50e897d8181685716e0468fd1c133a34805c40601cf4c88"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-058-army-hq-recruitment-route.png",
+      "bytes": 2957956,
+      "sha256": "a7420b557d497c68d5d22c4b7ec02449d933e27a8e34cc37a3246ef864a88ede"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-059-army-hq-autonomy-return.png",
+      "bytes": 317961,
+      "sha256": "f11e7d8c8c74c6151a1518a1c9baa9a7e8ba4baa175cfa85fad6e5c8289e4582"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-060-army-hq-autonomy-route.png",
+      "bytes": 4845800,
+      "sha256": "8bcab331a2defe639812c6d688aa262019c33194289545110e3657f986c84574"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-061-army-hq-corps-1.png",
+      "bytes": 127872,
+      "sha256": "6314d7eaf283b0e7a870f53be6016c4762d126e25117ebc77e4a8268e7caeb07"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-062-army-hq-corps-2.png",
+      "bytes": 136444,
+      "sha256": "c75460a5131d0d4dcdc1b80f50cb54d74a68842391ec5584d80d8a5e14673cd8"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-063-army-hq-corps-3.png",
+      "bytes": 132028,
+      "sha256": "e314b24356ece4c44d8f3c67b8d1a153929784c706b7be2b920666649a881124"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-064-army-hq-corps-4.png",
+      "bytes": 130206,
+      "sha256": "36e1f2dc292e7d153bf06a5f2098b3e432064e50e6911d51cc20564b30b24986"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-065-army-hq-corps-5.png",
+      "bytes": 129874,
+      "sha256": "c9fc1a7ae2376469acabe587a5d6f17df79d4b6ee971a3ba3436734b9edeede9"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-066-army-hq-decision-room-handoff.png",
+      "bytes": 1438661,
+      "sha256": "f63b7e3f9bcb6ee711dca222f4be73f0829ba1d34fbb87258c757b0b35b56359"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-067-decision-room-from-army-hq-lens-all.png",
+      "bytes": 1438661,
+      "sha256": "f63b7e3f9bcb6ee711dca222f4be73f0829ba1d34fbb87258c757b0b35b56359"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-068-decision-room-from-army-hq-lens-command.png",
+      "bytes": 1439805,
+      "sha256": "e8ff89e9f8a4713a20f120989a681f0dc4e796933f30b639162d87f3f4634433"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-069-decision-room-from-army-hq-lens-memory.png",
+      "bytes": 1548256,
+      "sha256": "beb3b779cebd89426450b8198922057d91d010dbed1a400e18bc857f6ea6501d"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-070-decision-room-from-army-hq-review-action.png",
+      "bytes": 123664,
+      "sha256": "37aab401103c7f689a836ffd25375d874bdb6e4aa5da6f3d4a5c88ce9fd2e232"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-071-army-hq-after-deep-dive.png",
+      "bytes": 4731132,
+      "sha256": "befb561bed4f6ed5f4ce88f360da9da596569446ea48363c97fcd783b647e997"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-072-records.png",
+      "bytes": 141272,
+      "sha256": "e85da00c9a8dffdf224ada725419977d830a2bdd68fa40988a267e69a6ec08f6"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-073-chronicle.png",
+      "bytes": 123664,
+      "sha256": "37aab401103c7f689a836ffd25375d874bdb6e4aa5da6f3d4a5c88ce9fd2e232"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-074-codex.png",
+      "bytes": 1260084,
+      "sha256": "1559ba368af8a36be8e7485c13071aceaa52725077812c62ae28e6cfcb16bf06"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-075-advance-probe-skipped-final-state.png",
+      "bytes": 4730856,
+      "sha256": "5debd6e4e41b84978228fff667abef3bf8d31663136c3558caf5035e9cd132fd"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-076-strategic-run-configured.png",
+      "bytes": 4730856,
+      "sha256": "5debd6e4e41b84978228fff667abef3bf8d31663136c3558caf5035e9cd132fd"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-077-strategic-setup-after-drain.png",
+      "bytes": 4730856,
+      "sha256": "5debd6e4e41b84978228fff667abef3bf8d31663136c3558caf5035e9cd132fd"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-078-strategic-ca-front-visit-before.png",
+      "bytes": 1425914,
+      "sha256": "102f3c890f70e8cc0b396265e15fab7d4375f1fd5c898cf6691c6a517a33d982"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-079-strategic-ca-front-visit-after.png",
+      "bytes": 1441199,
+      "sha256": "1678efdc3b05717d1a7b64b2212ce54468fdbe31535a3099c3fff3cbb4b7ac04"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-080-strategic-ca-front-visit-response.png",
+      "bytes": 2206953,
+      "sha256": "51ad6cbbd0aff0ed65483453d2e5787866fb3f24540440122f52f99c703a0d20"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-081-strategic-ca-address-nation-before.png",
+      "bytes": 1429558,
+      "sha256": "d453341e0854bef025bc7062210bbd242870c992f4f7dd9ec56ec40c6d5a7c46"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-082-strategic-ca-address-nation-after.png",
+      "bytes": 1475534,
+      "sha256": "01ca9f260d1a6416c88326eea6f4f3e0af0a4f75d96842b2e3975fc0c2b7c4ea"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-083-strategic-ca-address-nation-response.png",
+      "bytes": 2172106,
+      "sha256": "cc2f884ff824215c1936cea1b29430070d726f620cacdd2269634118fce94cf4"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-084-strategic-ca-complete.png",
+      "bytes": 2172106,
+      "sha256": "cc2f884ff824215c1936cea1b29430070d726f620cacdd2269634118fce94cf4"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-085-turn-loop-1.png",
+      "bytes": 2095107,
+      "sha256": "6181ccda57368051c72c9ba7e512b4ca151d4507be30dce4951e7b654aaace92"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-086-light-turn-1-pre-checkpoint-after-drain.png",
+      "bytes": 2095107,
+      "sha256": "6181ccda57368051c72c9ba7e512b4ca151d4507be30dce4951e7b654aaace92"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-087-light-turn-1-map.png",
+      "bytes": 4678731,
+      "sha256": "8979c57f8d0c25602fcfcb2b8773e27364183da67104f8c4cd6f0ea15d8ab367"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-088-light-turn-1-command-surface.png",
+      "bytes": 2030964,
+      "sha256": "1a70b94f04620034787c2b9a1700c25ddae5f627ac0e3bd5267544b99d38de75"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-089-light-turn-1-decision-room.png",
+      "bytes": 1304576,
+      "sha256": "bfc1447f1da5217e2fcf138ae88358185609abca7bd23531e97e1d2ca45ea033"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-090-light-turn-1-army-hq.png",
+      "bytes": 197339,
+      "sha256": "110724586c3e548a967823c0cf493ec88aa87b8bb1ce9fe9c442105b18ac8efb"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-091-turn-1-strategic-recruitment.png",
+      "bytes": 5427780,
+      "sha256": "7e039f8a2bdee8f121f6d81c45ecf828123380c8d7dbaa352f4a695236a1a574"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-092-handled-advance-modal.png",
+      "bytes": 4635944,
+      "sha256": "06091070548991e3c5b2440f0030c0c338f961e55ee024d528d2b9aac99f1ad6"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-093-turn-2-strategic-recruitment.png",
+      "bytes": 5425562,
+      "sha256": "f761960530d1a58d093f5ae08bb303943cfca8e7f3b0f41abb1626dfa8d78c97"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-094-handled-advance-modal.png",
+      "bytes": 2853199,
+      "sha256": "50b2598f1dfc97c946e9e6e74ee81e5243fbc8bc029b9a087756e1918b3166a9"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-095-strategic-pending-event-before-response.png",
+      "bytes": 2887105,
+      "sha256": "2a605fb0e1e29ba2496624d24a1708dad9e138e64e462c09796cd9b891dcebf6"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-096-strategic-pending-event-after-response.png",
+      "bytes": 2123447,
+      "sha256": "1c65a7d674f44d0e145efc95870bd2c05a02ebc15d6b63b9642568a248818257"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-097-turn-3-strategic-recruitment.png",
+      "bytes": 2283910,
+      "sha256": "92ca0d497c5a3d5e2ad6695d8148afcc04a91f05c3071dfe11d7bf1d18ec7f9d"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-098-handled-event-notice.png",
+      "bytes": 2327226,
+      "sha256": "f66382a27a76a73028bffe219ae4e9edac49f115dfbd661317f685bf160e597e"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-099-handled-event-notice.png",
+      "bytes": 2369740,
+      "sha256": "03ec0abefce01f496e604b807f4e9005fa38a9455df7cc2273b5cbf3dc38d4c6"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-100-handled-event-notice.png",
+      "bytes": 5419623,
+      "sha256": "437daf149f7850c345de208e89fe204b4e95cdf6f1c862bf59e49ee942f0977e"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-101-handled-advance-modal.png",
+      "bytes": 2322306,
+      "sha256": "bd548699022a02f1599e7ead94b7567a0f2484cc453c71eb254bca9b47cf8437"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-102-handled-event-notice.png",
+      "bytes": 4617199,
+      "sha256": "279eca3b4684ba03b965b31a081f52039c50e5687aa8b445cdf9a8eeb0a03089"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-103-light-turn-4-pre-checkpoint-after-drain.png",
+      "bytes": 4617199,
+      "sha256": "279eca3b4684ba03b965b31a081f52039c50e5687aa8b445cdf9a8eeb0a03089"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-104-light-turn-4-map.png",
+      "bytes": 4691737,
+      "sha256": "a79318fd33a2e0c1677868197cca74028eef1cbefd7256a7bb249f17a4982452"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-105-light-turn-4-command-surface.png",
+      "bytes": 2028603,
+      "sha256": "1c13d26d9093a909a0f763b8136987eb5e85e1e2c9431c1eb661d2474b54084d"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-106-light-turn-4-decision-room.png",
+      "bytes": 1307315,
+      "sha256": "5b00bbc9fe61195430c752634a84406304d453a3961ae3b116204085952a7ad5"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-107-light-turn-4-army-hq.png",
+      "bytes": 199306,
+      "sha256": "b05adb2a6f407b1ed71450ac61585a70b3d55f8b76c43a624e3ce60227860ddc"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-108-turn-4-strategic-recruitment.png",
+      "bytes": 5397783,
+      "sha256": "33e71342c6683d7230b86ac60fbbd7c914ca962d333633889d744e49f0786e86"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-109-handled-advance-modal.png",
+      "bytes": 2229967,
+      "sha256": "b0b405b1c407928895bf1fe313431c83bf75523ffaeb915ee13b13e10f298758"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-110-turn-5-strategic-recruitment.png",
+      "bytes": 2344793,
+      "sha256": "6f925a7f8ae125c5af462f13f7ea5c62f681df1ee42d7860a2301d927abf701c"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-111-handled-event-notice.png",
+      "bytes": 5398161,
+      "sha256": "656ea8c4629434ad2e377c17bcfa48c9761f86ba7f0e51b05286e45d9ba62b9e"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-112-handled-advance-modal.png",
+      "bytes": 2451263,
+      "sha256": "df793b2a87a2e416f01c7273f92d9b9623f3f05937fd60243e06e77f82133984"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-113-turn-6-strategic-recruitment.png",
+      "bytes": 2562982,
+      "sha256": "f2951c34fa6e38994d9f95840185ede67aee8445382d70251e0e6e14d8eb8541"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-114-handled-event-notice.png",
+      "bytes": 2457336,
+      "sha256": "820ed54253ca57c3ef30e2e2f5ff65698cc761dc4495e2a81d4801f752230507"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-115-handled-event-notice.png",
+      "bytes": 2383804,
+      "sha256": "d5aa1aceb4090cc18a71edc398e40ac033a27d651fefffe93f9300b0f53b04fc"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-116-handled-event-notice.png",
+      "bytes": 5402598,
+      "sha256": "ba9e899c8128e83a76ea145880772d43b88b479c879fd29d450d9321c276c3a9"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-117-handled-advance-modal.png",
+      "bytes": 2232986,
+      "sha256": "671e06cdf36244d868a1143862fbf49dc078b8c45dfdf309717b64b179e077ac"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-118-turn-7-strategic-recruitment.png",
+      "bytes": 2334293,
+      "sha256": "c1eb91d4b3792a4cd4fda7c6b84a009156ef8b46fb2ee8293bf0c58477958bc5"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-119-handled-event-notice.png",
+      "bytes": 2253204,
+      "sha256": "e7944f823c422a29f55596242adb7a47e3362046f7487d65c50003df1d43dca9"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-120-handled-event-notice.png",
+      "bytes": 2657019,
+      "sha256": "77ae9be0f91a3088349d13e4b393a509561557ddcbfe5423d24575d3cbbbe76d"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-121-handled-event-notice.png",
+      "bytes": 5390190,
+      "sha256": "1f7a8fd1a51bc7e6cf72494d6d1b3989a52eb3385308d53b5cbc465bbf3ee21d"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-122-handled-advance-modal.png",
+      "bytes": 4600370,
+      "sha256": "0b6842d1b2b4cdf12a52eb670965bc6e979409fdc40bb0253be77f84bb3b9d89"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-123-light-turn-8-pre-checkpoint-after-drain.png",
+      "bytes": 4600370,
+      "sha256": "0b6842d1b2b4cdf12a52eb670965bc6e979409fdc40bb0253be77f84bb3b9d89"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-124-light-turn-8-map.png",
+      "bytes": 4675998,
+      "sha256": "6d4de4e06309e18c06f164a7d086b362cfc9b44055db6ad5c7a96e928be5edaf"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-125-light-turn-8-command-surface.png",
+      "bytes": 2026106,
+      "sha256": "c2f98dbb8e6f2ce19f3ef6bd55ef351fd9fd5bc22c35709f181b739b4861b3e1"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-126-light-turn-8-decision-room.png",
+      "bytes": 1312094,
+      "sha256": "2966986074ebaac386053d8a0e10a5ac8949602531e20e563c59cd2f84fd1f05"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-127-light-turn-8-army-hq.png",
+      "bytes": 196886,
+      "sha256": "5e7fb4b1d114ccc069011b6076b3e4054c914b741a56d88f97cc81ba107d7dd3"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-128-turn-8-strategic-recruitment.png",
+      "bytes": 5353191,
+      "sha256": "1b1c3fecd8eb8ed6773bba8ce18fcafcebd75f432e2d2069f7d96548867c5b81"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-129-handled-advance-modal.png",
+      "bytes": 2207817,
+      "sha256": "0c6f6e9e4d554e5f500bf688e6d9100b09f15ec021920b1eb6ec132bf05008a4"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-130-turn-9-strategic-recruitment.png",
+      "bytes": 4564822,
+      "sha256": "e9d6ab5fe5cf74a050c5d945a062901e568981f86320a60e6c5d7f875c4a3462"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-131-handled-advance-modal.png",
+      "bytes": 4562368,
+      "sha256": "fc83193f08547a3ecec49fbb2f388ffa17f1450b88996e33985bc170329925f7"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-132-handled-advance-modal.png",
+      "bytes": 2602551,
+      "sha256": "3b618ea82ce192857218f905f5103c8bdbe84eced3e6d3909abd4c68adea1267"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-133-handled-event-notice.png",
+      "bytes": 4545659,
+      "sha256": "4357ef4f08c6ba30e6f39987c25b5f49b951af3478d97acb11db8788fa56c612"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-134-handled-advance-modal.png",
+      "bytes": 2833094,
+      "sha256": "3d32d680cc91ded21ffb8bef0811f697362c5944d1e3285658780434ae256679"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-135-strategic-pending-event-before-response.png",
+      "bytes": 2858644,
+      "sha256": "4d67293ec457499dd56b6f294624caae72f91116262fad9b46637f38bb42d20a"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-136-strategic-pending-event-after-response.png",
+      "bytes": 2149755,
+      "sha256": "af2b2dd759f6467435070295388ef4dd2e34781a46909c7f49b49eb6eb3bb903"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-137-handled-event-notice.png",
+      "bytes": 2236013,
+      "sha256": "d68baffcdb28bf7153e7b738d1c4f11febbb0f1d45c3e1bbbbebf1b195a5e2b3"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-138-handled-event-notice.png",
+      "bytes": 4543902,
+      "sha256": "2e7ccf9e859c330b4d4dcca62630d1186dc2e4a0691d8e6409982fb9488a3d1b"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-139-light-turn-12-pre-checkpoint-after-drain.png",
+      "bytes": 4543902,
+      "sha256": "2e7ccf9e859c330b4d4dcca62630d1186dc2e4a0691d8e6409982fb9488a3d1b"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-140-light-turn-12-map.png",
+      "bytes": 4616295,
+      "sha256": "544b2deada222cb5bdee417e2c7b2723975bc118c456e9443d1011caf97bafb6"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-141-light-turn-12-command-surface.png",
+      "bytes": 2023957,
+      "sha256": "68ddd45bde006f645df181ce8ae4b463c2bcfc45b29e5847be2fe31652c09da5"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-142-light-turn-12-decision-room.png",
+      "bytes": 1314578,
+      "sha256": "24aac808909b35f4c080943254ffb3b05a1daf72c1f22ec83844f30efcf51c2d"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-143-light-turn-12-army-hq.png",
+      "bytes": 198884,
+      "sha256": "e450dc17d7adfaf34e4e0f9efaaf5e0749d8a3e77b89b19c1e2afb1dfd0bbab1"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-144-handled-advance-modal.png",
+      "bytes": 2152689,
+      "sha256": "e982892dae700e34dafe8b4535926f644e2eaa36ccc6530743f16a06e6097a6d"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-145-handled-event-notice.png",
+      "bytes": 4545351,
+      "sha256": "7cc43f0bc647155e773231eca572a4b96b63d3c61ff64ba0a401e26403538fb7"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-146-handled-advance-modal.png",
+      "bytes": 2177241,
+      "sha256": "0c928859eab3b20c332e540e6bab290161a32517124ce6647ba88165cde6f507"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-147-handled-event-notice.png",
+      "bytes": 2201596,
+      "sha256": "f34f3aa6a8ef94162f02582ca8e1b8f41ead15b2e4c066510c44f29c1e6034f3"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-148-handled-event-notice.png",
+      "bytes": 2260619,
+      "sha256": "9103d597b6052d61632d00bfecea5f2694811e6e1ac32ac8f2186853b70f1b9f"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-149-handled-event-notice.png",
+      "bytes": 2200472,
+      "sha256": "0458dd7952d4e0a2e0bbc14655fbedc0a05ee8b8dfa44eb733244dfe77fd9565"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-150-handled-event-notice.png",
+      "bytes": 4544899,
+      "sha256": "f5971bc0ef1386938fb42c5de438a69202a71ab377c44cc2a0de27a8960ffb44"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-151-handled-advance-modal.png",
+      "bytes": 4532788,
+      "sha256": "25665aefde12e5a8a351fb142efaae759fbe4101ca8db14390b5cbae9732450f"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-152-handled-advance-modal.png",
+      "bytes": 4497458,
+      "sha256": "ee8638050dbce0ccc8b6228d7d9d3ff1cd6b06c94da9ddefa41c048f9373c5e3"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-153-light-turn-16-pre-checkpoint-after-drain.png",
+      "bytes": 4497458,
+      "sha256": "ee8638050dbce0ccc8b6228d7d9d3ff1cd6b06c94da9ddefa41c048f9373c5e3"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-154-light-turn-16-map.png",
+      "bytes": 4605013,
+      "sha256": "c6f1fadc41a87b6c385b0c275deef219c3e01a48e42d562f04d01e3074f7b5aa"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-155-light-turn-16-command-surface.png",
+      "bytes": 2022137,
+      "sha256": "e021eab343110ae0e0aeb95ad79ef58ea6adaaa9ce7632d403c66f83ab382906"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-156-light-turn-16-decision-room.png",
+      "bytes": 1312734,
+      "sha256": "feca3ba5eacb9710c5dd09d2a0b447e951db5affaa90bc68c9295d145aad4c55"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-157-light-turn-16-army-hq.png",
+      "bytes": 199053,
+      "sha256": "dbdb7cdd2af32c3cc3fcafbfd52e1349dba8817520cd97f7d0e406bc7cd4e5f9"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-158-turn-16-pre-final-tour-drain-after-drain.png",
+      "bytes": 5278407,
+      "sha256": "f44af97e195c786e5f4b1bba5d88400f12736e800d88cb5313c3a565a3e4f5df"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-159-turn-16-final-drain-after-drain.png",
+      "bytes": 5278407,
+      "sha256": "f44af97e195c786e5f4b1bba5d88400f12736e800d88cb5313c3a565a3e4f5df"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/screenshots/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih-160-playthrough-final.png",
+      "bytes": 5278407,
+      "sha256": "f44af97e195c786e5f4b1bba5d88400f12736e800d88cb5313c3a565a3e4f5df"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih/runtime-output/data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 53083,
+      "sha256": "819fab55b9ac2a9f0f1b10b756835da0b95c3fa3cae6d00242483a3814550545"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/user-data/r8-shakedown-20261023-rbih-ajnie-w16-02-rbih/saves/autosave.json",
+      "bytes": 4462538,
+      "sha256": "23338eff9062317501f05034ca44c4b679b0bbd34cc701f4ec70d809549fa091"
+    }
+  ],
+  "harnessSourceCommit": "2d1872e15",
+  "packageBuildSourceCommit": "8a3accc9b",
+  "exactTrajectoryEquivalence": false,
+  "trajectoryLimitation": "Additional successful RBiH recruitment on turn 9; same initial bytes, historical receipts, corresponding control hashes and RS formation counts do not establish a fully identical replay."
+}

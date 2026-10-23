@@ -243,9 +243,12 @@ gates:
       native zero-turn Save/load passes all three factions with exact canonical bytes.
       This does not accept the 24-week shakedown: nine retained ambient aborts remain
       unclassified and Ajnie genuinely fails the turn-16 final sector seal.
-      RS/HRHB 24-week runs remain unlaunched. The authorized diagnostic wrapper failed
-      before game launch on a locked fingerprint input; corrected start awaits owner
-      decision. Original packages, n91/n92 and telemetry are preserved. No baseline adoption.
+      RS/HRHB 24-week runs remain unlaunched. Owner-approved corrected diagnostic 02
+      reaches turn 16 in 823.623 seconds and reproduces an operation-release ownership
+      gap plus three unresolved ambient aborts. Exact replay equivalence is unmet due
+      to extra RBiH recruitment; no gameplay repair or adoption is authorized by diagnosis.
+      Both startup failure and corrected evidence are retained. Packages, n91/n92 and
+      telemetry remain preserved. No baseline adoption or full campaign.
 
   - id: R8-FINAL-CAMPAIGNS
     lane: R8
