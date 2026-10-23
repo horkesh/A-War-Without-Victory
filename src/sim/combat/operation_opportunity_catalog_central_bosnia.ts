@@ -4,7 +4,7 @@
  * Phase 2 operation-opportunity family: Central Bosnia / Vlasic / Kupres.
  *
  * Non-sensitive Ring 1 territorial operation family. The proposal authorizes
- * ARBiH 3rd Corps and HRHB/HVO/HV territorial military operations in Central
+ * ARBiH 1st/3rd Corps and HRHB/HVO/HV territorial military operations in Central
  * Bosnia. It does not add civilian-harm levers, new rupture behavior, or
  * combat math.
  */
@@ -28,6 +28,28 @@ const PRIMARY_CORPS = 'arbih_3rd_corps';
 // operation empty before launch.
 const DONJI_VAKUF_PRIMARY_CORPS = 'arbih_3rd_corps';
 const KUPRES_CINCAR_PRIMARY_CORPS = 'hvo_tomislavgrad';
+const BEHAR_I_PRIMARY_CORPS = 'arbih_1st_corps';
+
+const BEHAR_I_STAGING_BUDOZELJE = 'op:vares:budozelje_2';
+const BEHAR_I_OBJECTIVE_TOLJENAK = 'op:vares:toljenak';
+const BEHAR_I_READINESS_FLOOR = 0.36;
+const BEHAR_I_AXIS_COORDINATION_FLOOR = 0.35;
+const BEHAR_I_SUPPLY_PRESSURE_CEILING = 90;
+
+const BEHAR_I_AXES: readonly OpportunityAxisDef[] = [{
+    axis_id: 'nisici_plateau',
+    name: 'Nišići Plateau',
+    corps: BEHAR_I_PRIMARY_CORPS,
+    // These are current-model allocations for the Vareš/Breza predecessor force
+    // pool. Their displayed later formation names are not claims that a historical
+    // 162nd, 164th, or 126th Brigade captured Toljenak in November 1994.
+    brigades: [
+        'arbih_162nd_mountain' as FormationId,
+        'arbih_164th_mountain' as FormationId,
+    ],
+    objectives: [BEHAR_I_OBJECTIVE_TOLJENAK],
+    staging_osid: BEHAR_I_STAGING_BUDOZELJE,
+}];
 
 const STAGING_TRAVNIK = 'op:travnik:travnik_2';
 const STAGING_TURBE = 'op:travnik:turbe_2';
@@ -579,6 +601,115 @@ const weatherSeasonKupresCincar: AxisPredicate = (_state, turn) => {
 
 const alwaysGreen: AxisPredicate = () => ({ green: true, reason: 'not applicable for this family' });
 
+// One admission week keeps the canonical earliest-ready boundary at t134 and,
+// on the retained-like two-proxy route, delivers both brigades for t135 execution.
+const dateWindowBeharI: AxisPredicate = (_state, turn) => {
+    if (turn < 133) return { green: false, reason: 'BEHAR-I preparation window not yet open' };
+    if (turn > 133) return { green: false, reason: 'BEHAR-I preparation window has closed' };
+    return { green: true, reason: 'within the bounded BEHAR-I preparation window' };
+};
+
+const stagingAccessBeharI: AxisPredicate = (state) => {
+    return getPoliticalControllerOSID(state, BEHAR_I_STAGING_BUDOZELJE, undefined) === 'RBiH'
+        ? { green: true, reason: 'Budoželje assembly area remains RBiH-held' }
+        : { green: false, reason: 'Budoželje assembly area is not RBiH-held' };
+};
+
+const enemyWeaknessBeharI: AxisPredicate = (state) => {
+    return getPoliticalControllerOSID(state, BEHAR_I_OBJECTIVE_TOLJENAK, undefined) === 'RS'
+        ? { green: true, reason: 'Toljenak remains an RS-held objective' }
+        : { green: false, reason: 'Toljenak is no longer an RS-held objective' };
+};
+
+const corpsReadinessBeharI: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[BEHAR_I_PRIMARY_CORPS]) {
+        return { green: false, reason: '1st Corps command not present in this scenario' };
+    }
+    const traits = computeCorpsOperationReadiness(state, BEHAR_I_PRIMARY_CORPS as FormationId);
+    return traits.operation_readiness >= BEHAR_I_READINESS_FLOOR
+        ? { green: true, reason: '1st Corps readiness sufficient for BEHAR-I allocation' }
+        : { green: false, reason: '1st Corps readiness below BEHAR-I operation floor' };
+};
+
+const logisticsBeharI: AxisPredicate = (state) => {
+    const pressure = getFactionLiveSupplyPressure(state, 'RBiH');
+    return pressure < BEHAR_I_SUPPLY_PRESSURE_CEILING
+        ? { green: true, reason: 'RBiH live supply pressure within ordinary operation margin' }
+        : { green: false, reason: 'RBiH live supply pressure too high for BEHAR-I allocation' };
+};
+
+const commanderConfidenceBeharI: AxisPredicate = (state) => {
+    return state.military.corps_command?.[BEHAR_I_PRIMARY_CORPS]?.commander_state
+        ? { green: true, reason: '1st Corps commander state present' }
+        : { green: false, reason: '1st Corps commander state unavailable' };
+};
+
+const forceQualityBeharI: AxisPredicate = (state) => {
+    if (!state.military.corps_command?.[BEHAR_I_PRIMARY_CORPS]) {
+        return { green: false, reason: '1st Corps command not present in this scenario' };
+    }
+    const traits = computeCorpsOperationReadiness(state, BEHAR_I_PRIMARY_CORPS as FormationId);
+    return traits.axis_coordination >= BEHAR_I_AXIS_COORDINATION_FLOOR
+        ? { green: true, reason: '1st Corps axis coordination supports BEHAR-I allocation' }
+        : { green: false, reason: '1st Corps axis coordination below BEHAR-I threshold' };
+};
+
+const allianceContextBeharI: AxisPredicate = (state) => {
+    return (state.political?.war_alliance_rbih_hrhb ?? 0) >= FEDERATION_ALLIANCE_FLOOR
+        ? { green: true, reason: 'post-Washington Federation context holds' }
+        : { green: false, reason: 'post-Washington Federation context below threshold' };
+};
+
+const weatherSeasonBeharI: AxisPredicate = () => ({
+    green: true,
+    reason: 'bounded October-November mountain operation window',
+});
+
+export const BEHAR_I_94_OPPORTUNITY: OperationOpportunityDef = {
+    opportunity_id: 'behar_i_94',
+    name: 'Operation Behar-I',
+    tier: 'T1',
+    faction: 'RBiH',
+    primary_corps: BEHAR_I_PRIMARY_CORPS,
+    family: 'central_bosnia_vlasic',
+    axes: BEHAR_I_AXES,
+    staging_osid: BEHAR_I_STAGING_BUDOZELJE,
+    planning_duration: 3,
+    citations: [
+        'docs/40_reports/implemented/20261023_BEHAR_I_TOLJENAK_CANDIDATE.md - medium-confidence Nišići/Toljenak regional allocation; current-model predecessor allocation only, with no exact capturing formation claim',
+        'Prvi korpus ARBiH, printed p.279 / PDF p.281 - 5-6 November Nišići plateau offensive and Toljenak result',
+        'Rasim Delić vol. 2 pp.68-69 - BEHAR-I, 6-7 November, Toljenak among captured places',
+        'Balkan Battlegrounds vol. 1, printed pp.237-238 / PDF pp.274-275 - regional offensive and retained gains',
+    ],
+    historical_exit_class: 'partial_success',
+    prerequisites: {
+        date_window: 'required',
+        political_authorization: 'n_a',
+        corps_readiness: 'required',
+        logistics: 'optional',
+        staging_access: 'required',
+        weather_season: 'optional',
+        commander_confidence: 'optional',
+        enemy_weakness: 'required',
+        alliance_context: 'required',
+        force_quality: 'optional',
+        min_optional_axes: 2,
+    },
+    evaluators: {
+        date_window: dateWindowBeharI,
+        political_authorization: alwaysGreen,
+        corps_readiness: corpsReadinessBeharI,
+        logistics: logisticsBeharI,
+        staging_access: stagingAccessBeharI,
+        weather_season: weatherSeasonBeharI,
+        commander_confidence: commanderConfidenceBeharI,
+        enemy_weakness: enemyWeaknessBeharI,
+        alliance_context: allianceContextBeharI,
+        force_quality: forceQualityBeharI,
+    },
+    staff_recommendation: 'approve',
+};
+
 export const KUPRES_CINCAR_94_OPPORTUNITY: OperationOpportunityDef = {
     opportunity_id: 'kupres_cincar_94',
     name: 'Operation Cincar / Kupres',
@@ -1049,6 +1180,7 @@ export const KUPRES_PHASE_2_94_OPPORTUNITY: OperationOpportunityDef = {
 // Removing the array entry is the smallest surface-area fix; re-enable by
 // reintroducing one identifier in the array.
 export const CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES: readonly OperationOpportunityDef[] = [
+    BEHAR_I_94_OPPORTUNITY,
     KUPRES_CINCAR_94_OPPORTUNITY,
     VLASIC_RIDGE_95_OPPORTUNITY,
     DONJI_VAKUF_95_OPPORTUNITY,

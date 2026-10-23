@@ -1,3 +1,15 @@
+## 2026-10-23 — Keep a reference correction distinct from historical run provenance
+
+For an explicitly owner-approved paint correction, preserve the original reference and raw run metadata. Prove that the controller map changes only the named cell, metadata remains consistent, and every other consumed input is exact. If consumer review proves paint is post-simulation scoring only, re-evaluate the retained campaign with one exact old/new reference-hash exception; do not relabel its historical stamp current-exact or rerun unchanged gameplay for reassurance. Keep raw failed suites RED and close documentation-only corrections with fresh affected checks plus unaffected broad coverage. See [Toljenak repaint](PROJECT_LEDGER.md#2026-10-23--owner-approved-toljenak-april-repaint-and-validation-closure).
+
+## 2026-10-23 — Separate native causality from an overconstrained calibration reader
+
+An authored staging anchor need not be a mandatory waypoint for a brigade already adjacent to the objective. Inspect ordinary column orders/transit and the full contact graph before treating saved positions as failed delivery. Nongated ownership can be proven by exact native operation/attacker/battle/control-event joins; do not demand a gated receipt or invent an absent artifact. Check reference chronology before expensive validation: a historically earlier capture held continuously cannot also match an intervening enemy-painted checkpoint. Preserve the failed reader and record the explicit authority conflict instead of manufacturing a recapture or silently waiving a gate. See [n92 measurement](PROJECT_LEDGER.md#2026-10-23--toljenak-n92-measured-result-and-reference-conflict).
+
+## 2026-10-23 — Date opportunity admission from the real operation clock
+
+`planning_duration` is a march/preparation budget, not a mandatory delay: ready operations may execute after one full planning turn. Prove authored timing with the real preparation, movement and order-emission chain before selecting a date window. A late `ALL_PRE_PLANNED` roster can reserve participants from the start of a campaign; a dated opportunity avoids that earlier reservation effect. Modern OOB availability does not establish historical formation existence: label predecessor/model allocations and reject later-created formations. See [Toljenak Behar-I](PROJECT_LEDGER.md#2026-10-23--toljenak-behar-i-focused-candidate).
+
 ## 2026-10-22 — Pair selected-pool write operands with phase continuity
 
 A transfer receipt cannot identify earlier pool credits. Record actual reached write operands alongside selected-pool phase snapshots and terminal attempt/error manifests; reject missing zero-change records and cross-turn discontinuity. Default-off hooks must preserve original guard/access order, and output errors must remain outside gameplay. This qualifies future measurement, not a recovered historical writer receipt. See [Pale observer](PROJECT_LEDGER.md#2026-10-22--pale-pool-flow-observer-preparation-825828).

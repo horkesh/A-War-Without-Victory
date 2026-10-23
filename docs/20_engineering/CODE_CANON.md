@@ -1,5 +1,11 @@
 # Code Canon (AWWV)
 
+## Behar-I catalog allocation (2026-10-23, candidate)
+
+`operation_opportunity_catalog_central_bosnia.ts` adds `behar_i_94`: RBiH/1st Corps, t133-only admission, two ordered current-model predecessor allocations (162nd/164th slots), Budoželje staging and Toljenak-only objective. The ordinary three-turn assembly budget permits early readiness after the existing one-full-planning-turn floor; the focused legal movement chain executes at t135. Approval, brigade eligibility, movement, bot orders and resolver ownership use existing consumers. It is absent from future preplanned reservations and introduces no generic rule, direct control write or save field. Ordinary nongated battle attribution uses `operation_id`/`contributing_operation_ids`; no artificial phase-gate receipt is added. [Focused evidence and campaign limits](../40_reports/implemented/20261023_BEHAR_I_TOLJENAK_CANDIDATE.md).
+
+Actual n92 confirms lawful split delivery:164th columns to Budoželje while162nd attacks over direct Ravne adjacency. An authored staging anchor is not a mandatory physical waypoint for an already-adjacent participant. The resolver produces contributor IDs, but the weekly projection omits that field; exact native operation ID, attackers, battle/control-event join, `operation_diagnostics` and AAR establish `operation_owned` through the existing provenance classifier. There is no `operation_execution_records` artifact. These are corrected proof descriptions, not new engine behavior. The owner resolved the April-reference conflict by repainting only Toljenak RBiH. Paint is scoring/diagnostic data; native campaign provenance is retained, with an explicit one-file reference exception in re-evaluation, not rewritten as a new run stamp.
+
 ## Canon Precedence for Code
 The codebase follows the same precedence rules as canonical docs:
 - Engine invariants: `docs/10_canon/Engine_Invariants_v0_9_0.md`

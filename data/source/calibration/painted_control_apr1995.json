@@ -6,13 +6,20 @@
     "description": "Painted control target: April 1995",
     "total_osids": 712,
     "counts": {
-      "RS": 389,
-      "RBiH": 247,
+      "RS": 388,
+      "RBiH": 248,
       "HRHB": 76
     },
     "source": "painted_control_targets",
-    "revision": 7,
+    "revision": 8,
     "changelog": [
+      {
+        "date": "2026-10-23",
+        "osid": "op:vares:toljenak",
+        "from": "RS",
+        "to": "RBiH",
+        "rationale": "Owner determination, 2026-10-23: repaint April 1995 so Toljenak is RBiH. This supersedes only the April RS reference for the 14-settlement aggregate. The 1st Corps monograph printed p279 names Toljenak among the 5-6 November 1994 Nisici plateau gains and subsequent firm defence; Delic vol2 pp68-69 dates Behar-I to 6-7 November; Balkan Battlegrounds vol1 pp237-238 corroborates the regional clearing and retained gains. Applying this result to the aggregate is a medium-confidence reference allocation, not a common constituent capture date, an exact capturing-unit attribution, or independently documented continuous possession of every constituent. See docs/40_reports/implemented/20261023_BEHAR_I_TOLJENAK_CANDIDATE.md."
+      },
       {
         "date": "2026-09-29",
         "osid": "op:donji_vakuf:prusac_2",
@@ -873,7 +880,7 @@
     "op:vares:budozelje_2": "RBiH",
     "op:vares:gornja_borovica_2": "RBiH",
     "op:vares:ravne": "RBiH",
-    "op:vares:toljenak": "RS",
+    "op:vares:toljenak": "RBiH",
     "op:vares:vares_2": "RBiH",
     "op:velika_kladusa:poljana_2": "RBiH",
     "op:velika_kladusa:vejinac_2": "RBiH",

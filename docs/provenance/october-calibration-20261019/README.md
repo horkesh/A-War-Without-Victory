@@ -1,5 +1,11 @@
 # October calibration preservation checkpoint — 2026-10-19
 
+## 2026-10-23 Toljenak owner-approved April repaint
+
+[Portable Toljenak result](toljenak-20261023-owner-repaint-result.json) records the exact one-cell April RS→RBiH correction, old/new reference hashes, unchanged historical run provenance and n92's corrected707/707/706/706 evaluation. Toljenak is captured by ordinary Behar-I combat at135 and held through188; zero formerly correct losses or unrelated control changes, with n91/HVO outcomes preserved. The paint has only post-simulation scoring/diagnostic consumers, so no second campaign ran.
+
+The full suite's raw14,884 pass/2 documentation failures/33 skip receipt remains RED. Both affected files pass50/50 after archived documentation-only corrections, and unaffected coverage is reused. All receipt/source/preservation gates pass. This is composed validation, not a fictional all-green rerun. Large raw evidence and full telemetry archives remain local under `tmp/behar-i-toljenak-20261023/`; portable hashes are an index, not remote byte copies. Global calibration remains NO-GO with six other October mismatches; no baseline or pin adoption.
+
 ## 2026-10-23 two-HVO closeout
 
 The bounded 829–881 packet closes implementation validation for the two requested HVO outcomes. Authoritative n91 scores 707/707/706/705 and records HRHB Prisoje through a decisive Mistral 2 capture and HRHB Donji Vrbljani through a costly Southern Move capture. It loses zero formerly correct cells versus n80/n90, binds 32 normalized inputs, passes 16 anchors and all nine core checks, and retains a 31-file native inventory. The final 880 suite passes all 11 result checks with child/wrapper 0/0, 14,882 passed, 0 failed and 33 skipped tests. Independent 881 review accepts the two-target implementation validation with no findings.

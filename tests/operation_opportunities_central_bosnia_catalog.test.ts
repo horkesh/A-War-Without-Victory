@@ -7,10 +7,18 @@ import {
     evaluateAxes,
     isOpportunityEligible,
     linkOpportunityResolutionToAAR,
+    preflightOpportunityAdmission,
     runOpportunityEvaluationStep,
 } from '../src/sim/combat/operation_opportunities.js';
 import { advanceSectorOffensives } from '../src/sim/combat/sector_offensive.js';
+import { resolveAttackOrdersOsid } from '../src/sim/combat/attack_resolution_osid.js';
+import { generateAllBotOrdersOsid } from '../src/sim/combat/bot_brigade_ai_osid.js';
+import { processOsidColumnMovement } from '../src/sim/combat/osid_column_movement.js';
+import { buildAttackOrderOwner } from '../src/sim/combat/operation_phase_gate.js';
+import { canFormationReachAssemblyInTime } from '../src/sim/combat/sector_offensive_launch_helpers.js';
+import { initializeCasualtyLedger } from '../src/state/casualty_ledger.js';
 import {
+    BEHAR_I_94_OPPORTUNITY,
     CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES,
     DONJI_VAKUF_95_OPPORTUNITY,
     KUPRES_CINCAR_94_OPPORTUNITY,
@@ -18,6 +26,7 @@ import {
 } from '../src/sim/combat/operation_opportunity_catalog_central_bosnia.js';
 import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
 import type { CorpsCommandState, FactionId, GameState } from '../src/state/game_state.js';
+import type { EdgeRecord } from '../src/map/settlements.js';
 
 const STAGING_ANCHORS = [
     'op:travnik:travnik_2',
@@ -95,6 +104,168 @@ const KUPRES_BRIGADES = [
     'hv_5th_guards_karlovac',
     'hv_7th_guards_varazdin',
 ];
+
+const BEHAR_I_BRIGADES = [
+    'arbih_162nd_mountain',
+    'arbih_164th_mountain',
+];
+const BEHAR_I_STAGING = 'op:vares:budozelje_2';
+const BEHAR_I_TARGET = 'op:vares:toljenak';
+const BEHAR_I_GRAPH = new Map<string, string[]>([
+    ['op:vares:ravne', ['op:vares:vares_2', BEHAR_I_TARGET]],
+    ['op:vares:vares_2', ['op:vares:ravne', BEHAR_I_STAGING, BEHAR_I_TARGET]],
+    ['op:vares:gornja_borovica_2', [BEHAR_I_STAGING]],
+    [BEHAR_I_STAGING, ['op:vares:vares_2', 'op:vares:gornja_borovica_2', BEHAR_I_TARGET]],
+    [BEHAR_I_TARGET, ['op:vares:ravne', 'op:vares:vares_2', BEHAR_I_STAGING]],
+]);
+const BEHAR_I_EDGES: EdgeRecord[] = [
+    { edge_id: 'ravne-vares', a: 'op:vares:ravne', b: 'op:vares:vares_2' } as EdgeRecord,
+    { edge_id: 'ravne-toljenak', a: 'op:vares:ravne', b: BEHAR_I_TARGET } as EdgeRecord,
+    { edge_id: 'vares-budozelje', a: 'op:vares:vares_2', b: BEHAR_I_STAGING } as EdgeRecord,
+    { edge_id: 'vares-toljenak', a: 'op:vares:vares_2', b: BEHAR_I_TARGET } as EdgeRecord,
+    { edge_id: 'borovica-budozelje', a: 'op:vares:gornja_borovica_2', b: BEHAR_I_STAGING } as EdgeRecord,
+    { edge_id: 'budozelje-toljenak', a: BEHAR_I_STAGING, b: BEHAR_I_TARGET } as EdgeRecord,
+];
+const BEHAR_I_TARGET_SECTOR = 'sector:arbih_1st_corps:behar_target';
+
+function buildBeharIState(opts: {
+    turn: number;
+    targetHeldByRs?: boolean;
+    stagingHeld?: boolean;
+    reverseInsertion?: boolean;
+}): GameState {
+    const cmd: CorpsCommandState = {
+        command_span: 2,
+        subordinate_count: 2,
+        og_slots: 1,
+        active_ogs: [],
+        corps_exhaustion: 8,
+        stance: 'offensive',
+        active_operations: [],
+        commander_state: { current_plan: null, decision_trace: null, operation_history: [] } as unknown as CorpsCommandState['commander_state'],
+    };
+    const rows = BEHAR_I_BRIGADES.map((id, index) => [id, {
+        id,
+        name: id,
+        kind: 'brigade',
+        status: 'active',
+        faction: 'RBiH',
+        corps_id: 'arbih_1st_corps',
+        personnel: 1800,
+        strength: 1800,
+        officer_quality: 0.7,
+        cohesion: 62,
+        morale: 100,
+        location_osid: index === 0 ? 'op:vares:ravne' : 'op:vares:gornja_borovica_2',
+        composition: {
+            infantry: 1800,
+            tanks: 0,
+            artillery: 1,
+            aa_systems: 0,
+            tank_condition: { operational: 0 },
+            artillery_condition: { operational: 1 },
+        },
+        ops: { fatigue: 0, last_supplied_turn: opts.turn },
+        disrupted_turns: 0,
+        readiness: 'active',
+        created_turn: 0,
+        posture: 'attack',
+    }] as const);
+    if (opts.reverseInsertion) rows.reverse();
+    const formations = Object.fromEntries([
+        ...rows,
+        ['arbih_1st_corps', {
+            id: 'arbih_1st_corps', name: 'ARBiH 1st Corps', kind: 'corps', status: 'active', faction: 'RBiH',
+        }],
+    ]);
+    return {
+        schema_version: 0,
+        meta: { turn: opts.turn, seed: 'behar-i-test', phase: 'war' },
+        factions: [{
+            id: 'RBiH',
+            capability_profile: {
+                training_quality: 0.7,
+                organizational_maturity: 0.7,
+                equipment_access: 0.5,
+                equipment_operational: 0.5,
+                doctrine_effectiveness: { ATTACK: 0.6, COORDINATED_STRIKE: 0.6 },
+            },
+        }],
+        military: {
+            formations,
+            front_segments: {},
+            front_posture: {},
+            front_posture_regions: {},
+            front_pressure: {},
+            militia_pools: {},
+            corps_command: { arbih_1st_corps: cmd },
+            corps_front_sectors: {
+                [BEHAR_I_TARGET_SECTOR]: {
+                    sector_id: BEHAR_I_TARGET_SECTOR,
+                    corps_id: 'arbih_1st_corps',
+                    faction: 'RBiH',
+                    edge_ids: ['budozelje-toljenak', 'ravne-toljenak'],
+                    territory_osids: [BEHAR_I_STAGING, 'op:vares:ravne'],
+                    sub_segments: [{
+                        sub_segment_id: `subseg:${BEHAR_I_TARGET_SECTOR}:0`,
+                        edge_ids: ['budozelje-toljenak', 'ravne-toljenak'],
+                        friendly_osids: [BEHAR_I_STAGING, 'op:vares:ravne'],
+                        enemy_osids: [BEHAR_I_TARGET],
+                    }],
+                    assigned_brigade_ids: [],
+                    reserve_brigade_ids: [],
+                    rear_brigade_ids: [],
+                },
+                'sector:arbih_1st_corps:behar_ravne': {
+                    sector_id: 'sector:arbih_1st_corps:behar_ravne',
+                    corps_id: 'arbih_1st_corps', faction: 'RBiH', edge_ids: [],
+                    territory_osids: ['op:vares:ravne', 'op:vares:vares_2'], sub_segments: [],
+                    assigned_brigade_ids: ['arbih_162nd_mountain'], reserve_brigade_ids: [], rear_brigade_ids: [],
+                },
+                'sector:arbih_1st_corps:behar_borovica': {
+                    sector_id: 'sector:arbih_1st_corps:behar_borovica',
+                    corps_id: 'arbih_1st_corps', faction: 'RBiH', edge_ids: [],
+                    territory_osids: ['op:vares:gornja_borovica_2'], sub_segments: [],
+                    assigned_brigade_ids: ['arbih_164th_mountain'], reserve_brigade_ids: [], rear_brigade_ids: [],
+                },
+            },
+            sector_intel: {
+                [BEHAR_I_TARGET_SECTOR]: [{
+                    enemy_sector_id: 'sector:vrs_sarajevo_romanija:behar', enemy_faction: 'RS',
+                    enemy_corps_id: 'vrs_sarajevo_romanija', front_edge_count: 1,
+                    strength_category: 'thin', posture_observed: 'defensive', offensive_signs: false,
+                    confidence: 1, turns_in_contact: 3, visible_brigade_ids: [], last_updated_turn: opts.turn,
+                }],
+            },
+            war_front_edges_osid: [{
+                edge_id: 'budozelje-toljenak', a: BEHAR_I_STAGING, b: BEHAR_I_TARGET,
+                side_a: 'RBiH', side_b: 'RS',
+            }, {
+                edge_id: 'ravne-toljenak', a: 'op:vares:ravne', b: BEHAR_I_TARGET,
+                side_a: 'RBiH', side_b: 'RS',
+            }],
+            brigade_attack_orders: {},
+            brigade_movement_orders: {},
+            brigade_posture_orders: [],
+            faction_officer_maturity: { RBiH: 3.5 },
+        },
+        political: {
+            political_controllers: {
+                [BEHAR_I_STAGING]: (opts.stagingHeld ?? true) ? 'RBiH' : 'RS',
+                [BEHAR_I_TARGET]: (opts.targetHeldByRs ?? true) ? 'RS' : 'RBiH',
+                'op:vares:ravne': 'RBiH',
+                'op:vares:vares_2': 'RBiH',
+                'op:vares:gornja_borovica_2': 'RBiH',
+            },
+            war_alliance_rbih_hrhb: 1,
+            // Retained n91 carries the live condition and a legacy report pressure of 100.
+            // The production helper correctly derives live pressure 16 from condition 84.
+            war_supply_condition: { RBiH: 84 },
+            war_supply_pressure: { RBiH: 100 },
+        } as unknown as GameState['political'],
+        displacement: {} as GameState['displacement'],
+    } as unknown as GameState;
+}
 
 function buildVlasicState(opts: {
     turn: number;
@@ -370,8 +541,222 @@ function buildKupresCincarState(opts: {
 }
 
 describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
+    it('authors BEHAR-I as a two-proxy Toljenak-only allocation in the bounded preparation window', () => {
+        expect(BEHAR_I_94_OPPORTUNITY).toMatchObject({
+            opportunity_id: 'behar_i_94',
+            name: 'Operation Behar-I',
+            faction: 'RBiH',
+            primary_corps: 'arbih_1st_corps',
+            staging_osid: BEHAR_I_STAGING,
+            planning_duration: 3,
+        });
+        expect(BEHAR_I_94_OPPORTUNITY).not.toHaveProperty('min_attack_outcome');
+        expect(BEHAR_I_94_OPPORTUNITY).not.toHaveProperty('coordinated_advance');
+        expect(BEHAR_I_94_OPPORTUNITY.axes).toEqual([expect.objectContaining({
+            axis_id: 'nisici_plateau',
+            brigades: BEHAR_I_BRIGADES,
+            staging_osid: BEHAR_I_STAGING,
+            objectives: [BEHAR_I_TARGET],
+        })]);
+        expect(BEHAR_I_94_OPPORTUNITY.citations.join('\n')).toContain(
+            'docs/40_reports/implemented/20261023_BEHAR_I_TOLJENAK_CANDIDATE.md',
+        );
+        expect(BEHAR_I_94_OPPORTUNITY.citations.join('\n')).toContain(
+            'current-model predecessor allocation only, with no exact capturing formation claim',
+        );
+        expect(CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES).toContain(BEHAR_I_94_OPPORTUNITY);
+        expect(OPERATION_OPPORTUNITY_CATALOG).toContain(BEHAR_I_94_OPPORTUNITY);
+
+        const eligible = buildBeharIState({ turn: 133 });
+        expect(isOpportunityEligible(
+            BEHAR_I_94_OPPORTUNITY,
+            evaluateAxes(eligible, 133, BEHAR_I_94_OPPORTUNITY),
+        )).toBe(true);
+        for (const turn of [132, 134]) {
+            const state = buildBeharIState({ turn });
+            expect(isOpportunityEligible(
+                BEHAR_I_94_OPPORTUNITY,
+                evaluateAxes(state, turn, BEHAR_I_94_OPPORTUNITY),
+            )).toBe(false);
+        }
+    });
+
+    it('admits both live proxies deterministically and rejects an unavailable or committed proxy', () => {
+        const state = buildBeharIState({ turn: 133 });
+        expect(preflightOpportunityAdmission(state, BEHAR_I_94_OPPORTUNITY))
+            .toEqual({ admitted: true, selected_participants: 2, required_participants: 2, reason: null });
+
+        const reversed = buildBeharIState({ turn: 133, reverseInsertion: true });
+        runOpportunityEvaluationStep(state, 133);
+        runOpportunityEvaluationStep(reversed, 133);
+        applyOpportunityDecision(state, 133, buildProposalId('behar_i_94', 133), 'approve');
+        applyOpportunityDecision(reversed, 133, buildProposalId('behar_i_94', 133), 'approve');
+        const operation = state.military.corps_command!.arbih_1st_corps.active_operations[0];
+        const reversedOperation = reversed.military.corps_command!.arbih_1st_corps.active_operations[0];
+        expect(operation).toEqual(reversedOperation);
+        expect(operation).toMatchObject({
+            name: 'Operation Behar-I',
+            phase: 'planning',
+            phase_started_turn: 133,
+            planning_duration: 3,
+            participating_brigades: BEHAR_I_BRIGADES,
+            objectives: [BEHAR_I_TARGET],
+        });
+        expect(state.political.political_controllers![BEHAR_I_TARGET]).toBe('RS');
+        expect(JSON.parse(JSON.stringify(operation))).toEqual(operation);
+
+        const unavailable = buildBeharIState({ turn: 133 });
+        unavailable.military.formations!.arbih_164th_mountain!.status = 'inactive';
+        expect(preflightOpportunityAdmission(unavailable, BEHAR_I_94_OPPORTUNITY))
+            .toMatchObject({ admitted: false, selected_participants: 1, required_participants: 2 });
+
+        const committed = buildBeharIState({ turn: 133 });
+        committed.military.corps_command!.arbih_1st_corps.active_operations.push({
+            name: 'Existing operation', type: 'sector_attack', phase: 'execution', started_turn: 120,
+            phase_started_turn: 120, participating_brigades: ['arbih_162nd_mountain'], objectives: ['op:test:other'],
+        } as never);
+        expect(preflightOpportunityAdmission(committed, BEHAR_I_94_OPPORTUNITY))
+            .toMatchObject({ admitted: false, selected_participants: 1, required_participants: 2 });
+    });
+
+    it('uses ordinary friendly routes to assemble both proxies within the three-turn assembly budget', () => {
+        const state = buildBeharIState({ turn: 133 });
+        for (const id of BEHAR_I_BRIGADES) {
+            expect(canFormationReachAssemblyInTime(
+                state,
+                id,
+                'arbih_1st_corps',
+                'RBiH',
+                BEHAR_I_TARGET,
+                3,
+                BEHAR_I_GRAPH,
+                new Map(),
+                { by_sid: {} },
+            )).toBe(true);
+        }
+        const broken = new Map(BEHAR_I_GRAPH);
+        // Ravne is already in the objective's assembly sector. Isolate the
+        // 164th's actual approach instead of treating the staged 162nd as remote.
+        for (const [osid, neighbours] of broken) {
+            broken.set(osid, neighbours.filter((neighbour) => neighbour !== 'op:vares:gornja_borovica_2'));
+        }
+        broken.set('op:vares:gornja_borovica_2', []);
+        expect(canFormationReachAssemblyInTime(
+            state,
+            'arbih_164th_mountain',
+            'arbih_1st_corps',
+            'RBiH',
+            BEHAR_I_TARGET,
+            3,
+            broken,
+            new Map(),
+            { by_sid: {} },
+        )).toBe(false);
+    });
+
+    it('uses the real planning clock, normal march, order emitter, and ordinary combat resolver', () => {
+        const state = buildBeharIState({ turn: 133 });
+        state.factions!.push({ id: 'RS' } as never);
+        // Constructed thin defender: proves ordinary defended-combat capability only.
+        // The retained n91 evidence does not identify a Toljenak-resident formation at t130-136.
+        state.military.formations!.toljenak_defender = {
+            id: 'toljenak_defender', name: 'Constructed Toljenak defender', kind: 'brigade', status: 'active',
+            faction: 'RS', corps_id: 'vrs_sarajevo_romanija', personnel: 100, cohesion: 20, morale: 20,
+            location_osid: BEHAR_I_TARGET, posture: 'defend',
+            composition: {
+                infantry: 100, tanks: 0, artillery: 0, aa_systems: 0,
+                tank_condition: { operational: 0 }, artillery_condition: { operational: 0 },
+            },
+        } as never;
+        state.military.casualty_ledger = initializeCasualtyLedger(['RBiH', 'RS']);
+        runOpportunityEvaluationStep(state, 133);
+        applyOpportunityDecision(state, 133, buildProposalId('behar_i_94', 133), 'approve');
+        const operation = state.military.corps_command!.arbih_1st_corps.active_operations[0]!;
+        const ctx = {
+            edges: BEHAR_I_EDGES,
+            adjacency: BEHAR_I_GRAPH,
+            reverseMap: new Map(),
+            supplyStateByOsid: {} as never,
+            osidPopulationMap: new Map(),
+        };
+
+        // Match the production turn order: advance existing column movement before
+        // generating this turn's bot orders. The 162nd is already on the real
+        // Ravne-Toljenak contact; the 164th alone marches one hop to Budozelje.
+        state.meta.turn = 133;
+        processOsidColumnMovement(state, BEHAR_I_EDGES, new Map(), { by_sid: {} }, BEHAR_I_GRAPH);
+        advanceSectorOffensives(state, undefined, undefined, BEHAR_I_GRAPH);
+        expect(operation.phase).toBe('planning');
+        generateAllBotOrdersOsid(state, ['RBiH'], ctx, {
+            brigadeFilter: (formation) => BEHAR_I_BRIGADES.includes(formation.id),
+        });
+        expect(state.military.brigade_attack_orders).toEqual({});
+        expect(state.military.formations!.arbih_162nd_mountain!.location_osid).toBe('op:vares:ravne');
+        expect(state.military.brigade_movement_orders?.arbih_162nd_mountain).toBeUndefined();
+        expect(state.military.formations!.arbih_164th_mountain!.location_osid).toBe('op:vares:gornja_borovica_2');
+        expect(state.military.brigade_movement_orders?.arbih_164th_mountain?.destination_sids)
+            .toEqual([BEHAR_I_STAGING]);
+
+        state.meta.turn = 134;
+        processOsidColumnMovement(state, BEHAR_I_EDGES, new Map(), { by_sid: {} }, BEHAR_I_GRAPH);
+        advanceSectorOffensives(state, undefined, undefined, BEHAR_I_GRAPH);
+        expect(operation.phase).toBe('planning');
+        expect(state.political.political_controllers![BEHAR_I_TARGET]).toBe('RS');
+        generateAllBotOrdersOsid(state, ['RBiH'], ctx, {
+            brigadeFilter: (formation) => BEHAR_I_BRIGADES.includes(formation.id),
+        });
+        expect(state.military.brigade_attack_orders).toEqual({});
+        expect(state.military.formations!.arbih_162nd_mountain!.location_osid).toBe('op:vares:ravne');
+        expect(state.military.formations!.arbih_164th_mountain!.location_osid).toBe('op:vares:gornja_borovica_2');
+        expect(state.military.brigade_movement_state?.arbih_164th_mountain).toMatchObject({
+            status: 'in_transit',
+            destination_sids: [BEHAR_I_STAGING],
+            path: ['op:vares:gornja_borovica_2', BEHAR_I_STAGING],
+            turns_remaining: 1,
+        });
+
+        state.meta.turn = 135;
+        processOsidColumnMovement(state, BEHAR_I_EDGES, new Map(), { by_sid: {} }, BEHAR_I_GRAPH);
+        expect(state.military.formations!.arbih_162nd_mountain!.location_osid).toBe('op:vares:ravne');
+        expect(state.military.formations!.arbih_164th_mountain!.location_osid).toBe(BEHAR_I_STAGING);
+        advanceSectorOffensives(state, undefined, undefined, BEHAR_I_GRAPH);
+        expect(operation).toMatchObject({ phase: 'execution', phase_started_turn: 135 });
+
+        const negative = structuredClone(state);
+        const negativeReport = resolveAttackOrdersOsid(negative, BEHAR_I_EDGES, BEHAR_I_GRAPH);
+        expect(negativeReport.flips_applied).toBe(0);
+        expect(negative.political.political_controllers![BEHAR_I_TARGET]).toBe('RS');
+
+        generateAllBotOrdersOsid(state, ['RBiH'], ctx, {
+            brigadeFilter: (formation) => BEHAR_I_BRIGADES.includes(formation.id),
+        });
+        expect(state.military.brigade_attack_orders).toEqual(Object.fromEntries(
+            BEHAR_I_BRIGADES.map((id) => [id, BEHAR_I_TARGET]),
+        ));
+        // Ordinary nongated operations do not synthesize a phase-gate owner receipt.
+        // Resolver attribution below proves these emitted orders belong to the live operation.
+        expect(BEHAR_I_BRIGADES.map((id) => buildAttackOrderOwner(state, id, BEHAR_I_TARGET, 135)))
+            .toEqual([null, null]);
+        const report = resolveAttackOrdersOsid(state, BEHAR_I_EDGES, BEHAR_I_GRAPH);
+
+        expect(report.flips_applied).toBe(1);
+        expect(state.political.political_controllers![BEHAR_I_TARGET]).toBe('RBiH');
+        expect(report.battles).toHaveLength(1);
+        expect(report.battles[0]).toMatchObject({
+            target_osid: BEHAR_I_TARGET,
+            attacker_faction: 'RBiH',
+            attacker_won: true,
+            operation_id: 'arbih_1st_corps:Operation Behar-I:t133',
+            operation_name: 'Operation Behar-I',
+        });
+        expect(report.battles[0]!.attacker_brigades).toEqual(BEHAR_I_BRIGADES);
+        expect(report.battles[0]!.contributing_operation_ids)
+            .toEqual(['arbih_1st_corps:Operation Behar-I:t133']);
+    });
+
     it('exposes Central Bosnia opportunities through their family export and the canonical catalog', () => {
         expect(CENTRAL_BOSNIA_VLASIC_OPPORTUNITIES).toEqual([
+            BEHAR_I_94_OPPORTUNITY,
             KUPRES_CINCAR_94_OPPORTUNITY,
             VLASIC_RIDGE_95_OPPORTUNITY,
             DONJI_VAKUF_95_OPPORTUNITY,
