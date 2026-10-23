@@ -1,10 +1,15 @@
 import assert from 'node:assert';
-import { readFileSync } from 'node:fs';
+import * as nodeFs from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { tmpdir } from 'node:os';
+import * as nodePath from 'node:path';
 import { join } from 'node:path';
 import { runInNewContext } from 'node:vm';
 import { test } from 'vitest';
 
 const harnessPath = join(process.cwd(), 'tools', 'ui', 'paradox_local_qa.cjs');
+const nodeRequire = createRequire(import.meta.url);
 
 function readHarness(): string {
     return readFileSync(harnessPath, 'utf8');
@@ -260,7 +265,8 @@ test('packaged startup waits for the embedded React owner and follows its comple
     assert.equal(await commandSurfaceVisible(commandFrame(null)), false);
 
     const saveLoad = extractFunctionSource(harness, 'exerciseFinalSaveLoad');
-    assert.match(saveLoad, /waitForCampaignCommandReady\(frame, faction/);
+    assert.match(saveLoad, /completeObservedSaveLoadRoute/);
+    assert.match(extractFunctionSource(harness, 'completeObservedSaveLoadRoute'), /waitForCampaignCommandReady\(restoredFrame, faction/);
     assert.doesNotMatch(saveLoad, /getByTestId\('toolbar-route-desk'\)\.waitFor/);
 });
 
@@ -798,29 +804,7 @@ test('diagnostics attach before game-page waiting and abort allowlisting is name
         teardownStarted: false,
         ambientLifecycleStop: { url: ambientFieldUrl, observedAtMs: 1_900 },
         observedAtMs: 2_000,
-    }), 'ambient-bed-lifecycle');
-    assert.equal(classifyExpectedRequestAbort({
-        failure: { errorText: 'net::ERR_ABORTED' },
-        method: 'GET',
-        url: ambientFieldUrl,
-        resourceType: 'media',
-        isMainFrame: false,
-        eventCount: 22,
-        teardownStarted: false,
-        ambientLifecycleStop: null,
-        observedAtMs: 2_000,
-    }), null, 'ambient media without an observed pause must remain a failure');
-    assert.equal(classifyExpectedRequestAbort({
-        failure: { errorText: 'net::ERR_ABORTED' },
-        method: 'GET',
-        url: ambientFieldUrl,
-        resourceType: 'media',
-        isMainFrame: false,
-        eventCount: 22,
-        teardownStarted: false,
-        ambientLifecycleStop: { url: ambientFieldUrl, observedAtMs: 1_000 },
-        observedAtMs: 7_001,
-    }), null, 'an old same-URL pause must not clear a later abort');
+    }), null, 'a pause alone must never clear an ambient request failure');
     assert.equal(classifyExpectedRequestAbort({
         failure: { errorText: 'net::ERR_ABORTED' },
         method: 'GET',
@@ -881,35 +865,452 @@ test('sector warnings remain fatal when final serialized state cannot prove same
     assert.match(harness, /unexpectedMainProcessStderr = mainProcessStderr\.filter\(\(line\) => !isExpectedInspectorTeardownLine\(line\)\)/);
 });
 
-test('one ambient pause can clear at most one matching request failure', () => {
+test('ambient abort attribution requires one exact element/source epoch and consumes it once', () => {
     const harness = readHarness();
-    const classifySource = extractFunctionSource(harness, 'classifyExpectedRequestAbort');
+    const classifySource = extractFunctionSource(harness, 'classifyExpectedAmbientLifecycleAbort');
     const attributeSource = extractFunctionSource(harness, 'attributeAmbientLifecycleAborts');
     const attribute = runInNewContext(
-        `(() => { const classifyExpectedRequestAbort = ${classifySource}; return (${attributeSource}); })()`,
+        `(() => { const classifyExpectedAmbientLifecycleAbort = ${classifySource}; return (${attributeSource}); })()`,
         { URL },
     ) as (failures: Array<Record<string, unknown>>, stops: Array<Record<string, unknown>>, expected: Array<Record<string, unknown>>) => void;
     const url = 'http://127.0.0.1:3002/assets/ambient_field-D4f9a2.ogg';
-    const failure = (observedAtMs: number) => ({
-        failure: { errorText: 'net::ERR_ABORTED' }, method: 'GET', url,
+    const failure = (observedAtMs: number, requestInitiatedAtMs = 1_000, failureUrl = url) => ({
+        failure: { errorText: 'net::ERR_ABORTED' }, method: 'GET', url: failureUrl,
         resourceType: 'media', isMainFrame: false, eventCount: 22,
-        teardownStarted: false, observedAtMs,
+        teardownStarted: false, observedAtMs, requestInitiatedAtMs,
+    });
+    const start = (elementId = 'media:1', sourceEpoch = 1, signalUrl = url, observedAtMs = 1_050) => ({
+        kind: 'request-start', elementId, sourceEpoch, url: signalUrl, origin: 'http://127.0.0.1:3002', observedAtMs,
+    });
+    const abort = (elementId = 'media:1', sourceEpoch = 1, signalUrl = url, observedAtMs = 1_950) => ({
+        kind: 'browser-abort', elementId, sourceEpoch, url: signalUrl, origin: 'http://127.0.0.1:3002', observedAtMs,
     });
     const failures = [failure(2_000), failure(2_100)];
     const expected: Array<Record<string, unknown>> = [];
-    attribute(failures, [{ url, observedAtMs: 1_900 }], expected);
+    attribute(failures, [start(), abort()], expected);
     assert.equal(expected.length, 1);
     assert.equal(failures.length, 1);
     assert.equal(failures[0]?.observedAtMs, 2_100);
+
+    for (const signals of [
+        [start()],
+        [start(), abort('media:2')],
+        [start(), abort('media:1', 2)],
+        [start(), abort('media:1', 1, 'http://127.0.0.1:3002/assets/ambient_warroom-D4f9a2.ogg')],
+        [start(), start('media:1', 1, url, 1_100), abort()],
+        [start('media:1'), start('media:2'), abort('media:1')],
+        [start('media:1', 1, url, 4_001), abort('media:1', 1, url, 4_100)],
+        [start(), abort('media:1', 1, url, 4_001)],
+    ]) {
+        const rejectedFailures = [failure(2_000)];
+        const rejectedExpected: Array<Record<string, unknown>> = [];
+        attribute(rejectedFailures, signals, rejectedExpected);
+        assert.equal(rejectedExpected.length, 0);
+        assert.equal(rejectedFailures.length, 1);
+    }
+    const wrongOrigin = 'http://127.0.0.1:3003/assets/ambient_field-D4f9a2.ogg';
+    const wrongOriginFailures = [failure(2_000, 1_000, wrongOrigin)];
+    const wrongOriginExpected: Array<Record<string, unknown>> = [];
+    attribute(wrongOriginFailures, [start('media:1', 1, wrongOrigin), abort('media:1', 1, wrongOrigin)], wrongOriginExpected);
+    assert.equal(wrongOriginExpected.length, 0);
 });
 
-test('ambient lifecycle attribution runs after optional final Save/load transitions', () => {
+test('main-process evidence preserves ordered output beyond the bounded progress tail and rejects collisions', () => {
+    const captureFactory = loadFunction<(path: string, now: () => number) => {
+        handler: (stream: string, target: string[]) => (chunk: string) => void;
+        flush: () => void;
+    }>(
+            readHarness(), 'createMainProcessOutputCapture', { fs: nodeFs, Date, JSON, String },
+        );
+    const root = mkdtempSync(join(tmpdir(), 'awwv-main-output-'));
+    try {
+        const evidencePath = join(root, 'ordered.jsonl');
+        let clock = 10_000;
+        const capture = captureFactory(evidencePath, () => ++clock);
+        const stdout: string[] = [];
+        const stderr: string[] = [];
+        const onStdout = capture.handler('stdout', stdout);
+        const onStderr = capture.handler('stderr', stderr);
+        onStdout('out-0 split');
+        onStderr('warning-0\n');
+        onStdout('-complete\nout-1\n');
+        for (let index = 2; index < 501; index += 1) onStdout(`out-${index}\n`);
+        onStdout('stdout-final-tail');
+        onStderr('stderr-final-tail');
+        capture.flush();
+        const records = readFileSync(evidencePath, 'utf8').trim().split(/\r?\n/).map((line) => JSON.parse(line));
+        assert.equal(records.length, 504);
+        assert.deepEqual(records.map((record) => record.sequence), Array.from({ length: 504 }, (_, index) => index + 1));
+        assert.deepEqual(records.slice(0, 3).map((record) => [record.stream, record.line]), [
+            ['stderr', 'warning-0'],
+            ['stdout', 'out-0 split-complete'],
+            ['stdout', 'out-1'],
+        ]);
+        assert.deepEqual(records.slice(-2).map((record) => [record.stream, record.line]), [
+            ['stdout', 'stdout-final-tail'],
+            ['stderr', 'stderr-final-tail'],
+        ]);
+        assert.equal(stdout.length, 500);
+        assert.equal(stdout[0], 'out-2');
+        assert.deepEqual(stderr, ['warning-0', 'stderr-final-tail']);
+        assert.equal(records.some((record) => record.line === 'out-0 split'), false, 'split chunks must not invent lines');
+        assert.throws(() => captureFactory(evidencePath, () => 1), /exist|EEXIST/i);
+    } finally {
+        rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test('user-data setup rejects every existing profile without deleting retained bytes', () => {
+    const prepare = loadFunction<(profilePath: string, isResume: boolean) => void>(
+        readHarness(), 'prepareFreshUserDataDirectory', { fs: nodeFs },
+    );
+    const root = mkdtempSync(join(tmpdir(), 'awwv-user-data-'));
+    try {
+        const existing = join(root, 'retained-profile');
+        nodeFs.mkdirSync(join(existing, 'nested'), { recursive: true });
+        const sentinel = join(existing, 'nested', 'sentinel.bin');
+        writeFileSync(sentinel, Buffer.from([0, 1, 2, 255]));
+        for (const isResume of [false, true]) {
+            assert.throws(() => prepare(existing, isResume), /already exists.*refusing/i);
+            assert.deepEqual(readFileSync(sentinel), Buffer.from([0, 1, 2, 255]));
+        }
+        const fresh = join(root, 'fresh-profile');
+        prepare(fresh, false);
+        assert.equal(nodeFs.statSync(fresh).isDirectory(), true);
+    } finally {
+        rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test('run faction uses fresh-profile setup and flushes buffered process tails after teardown', () => {
+    const runFactionSource = extractFunctionSource(readHarness(), 'runFaction');
+    assert.match(runFactionSource, /prepareFreshUserDataDirectory\(userDataDir, Boolean\(resumeSavePath\)\)/);
+    assert.doesNotMatch(runFactionSource, /rmSync\(userDataDir/);
+    const closeIndex = runFactionSource.indexOf("optionalCleanup('electron application teardown'");
+    const flushIndex = runFactionSource.indexOf('mainProcessOutputCapture.flush()');
+    const finalProgressIndex = runFactionSource.indexOf('writeProgress(result)', flushIndex);
+    assert.ok(closeIndex >= 0 && flushIndex > closeIndex, 'buffered tails must flush after process teardown');
+    assert.ok(finalProgressIndex > flushIndex, 'failure and success progress must be rewritten after tail flush');
+});
+
+test('completed-turn autosave evidence is exact, exclusive, and idempotent per observed turn', () => {
     const harness = readHarness();
+    const archiveSource = extractFunctionSource(harness, 'archiveAutosaveEvidence');
+    const completedTurnSource = extractFunctionSource(harness, 'archiveCompletedTurnAutosave');
+    const archiveTurn = runInNewContext(
+        `(() => { const archiveAutosaveEvidence = ${archiveSource}; return (${completedTurnSource}); })()`,
+        { fs: nodeFs, path: nodePath, fileSha256: (filePath: string) => nodeRequire('node:crypto').createHash('sha256').update(readFileSync(filePath)).digest('hex') },
+    ) as (sourcePath: string, evidenceRoot: string, faction: string, turn: number, records: Map<number, unknown>) => any;
+    const root = mkdtempSync(join(tmpdir(), 'awwv-turn-autosaves-'));
+    try {
+        const sourcePath = join(root, 'autosave.json');
+        writeFileSync(sourcePath, JSON.stringify({ meta: { turn: 16 }, military: { formations: { ajnie: { assignment: null } } } }));
+        const records = new Map<number, unknown>();
+        const first = archiveTurn(sourcePath, join(root, 'evidence'), 'RBiH', 16, records);
+        assert.equal(first.turn, 16);
+        assert.equal(JSON.parse(readFileSync(first.path, 'utf8')).meta.turn, 16);
+        assert.equal(archiveTurn(sourcePath, join(root, 'evidence'), 'RBiH', 16, records), first);
+        writeFileSync(sourcePath, JSON.stringify({ meta: { turn: 17 } }));
+        assert.throws(() => archiveTurn(sourcePath, join(root, 'evidence'), 'RBiH', 16, new Map()), /turn mismatch/i);
+        writeFileSync(sourcePath, JSON.stringify({ meta: { turn: 16 } }));
+        assert.throws(() => archiveTurn(sourcePath, join(root, 'evidence'), 'RBiH', 16, new Map()), /exist|EEXIST/i);
+    } finally {
+        rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test('tile fetch abort attribution requires and consumes an exact renderer AbortSignal identity', () => {
+    const harness = readHarness();
+    const classifySource = extractFunctionSource(harness, 'classifyExpectedTileFetchAbort');
+    const attributeSource = extractFunctionSource(harness, 'attributeTileFetchAborts');
+    const attribute = runInNewContext(
+        `(() => { const classifyExpectedTileFetchAbort = ${classifySource}; return (${attributeSource}); })()`,
+        { URL },
+    ) as (failures: Array<Record<string, unknown>>, signals: Array<Record<string, unknown>>, expected: Array<Record<string, unknown>>) => void;
+    const url = 'http://127.0.0.1:3002/data/derived/tiles/hillshade.pmtiles';
+    const failure = (id: string, observedAtMs: number, failureUrl = url) => ({
+        failure: { errorText: 'net::ERR_ABORTED' }, method: 'GET', url: failureUrl,
+        resourceType: 'fetch', isMainFrame: false, observedAtMs,
+        tileFetchIdentity: { id, url: failureUrl, method: 'GET', range: 'bytes=0-16383', origin: 'http://127.0.0.1:3002' },
+    });
+    const signal = (id: string, observedAtMs: number, signalUrl = url) => ({
+        id, url: signalUrl, method: 'GET', range: 'bytes=0-16383', origin: 'http://127.0.0.1:3002', observedAtMs,
+    });
+
+    const failures = [failure('tile-1', 2_000), failure('tile-1', 2_100)];
+    const expected: Array<Record<string, unknown>> = [];
+    attribute(failures, [signal('tile-1', 1_900)], expected);
+    assert.equal(expected.length, 1, 'one signal must classify at most one request failure');
+    assert.equal(failures.length, 1);
+    assert.equal(failures[0]?.observedAtMs, 2_100);
+
+    for (const badSignal of [
+        signal('other-id', 1_900),
+        signal('tile-1', 1_900, 'https://example.invalid/data/derived/tiles/hillshade.pmtiles'),
+        signal('tile-1', -4_001),
+        { ...signal('tile-1', 1_900), range: 'bytes=16384-32767' },
+        signal('tile-1', 1_900, 'http://127.0.0.1:3003/data/derived/tiles/hillshade.pmtiles'),
+    ]) {
+        const rejectedFailures = [failure('tile-1', 2_000)];
+        const rejectedExpected: Array<Record<string, unknown>> = [];
+        attribute(rejectedFailures, [badSignal], rejectedExpected);
+        assert.equal(rejectedExpected.length, 0);
+        assert.equal(rejectedFailures.length, 1);
+    }
+    const wrongPortUrl = 'http://127.0.0.1:3003/data/derived/tiles/hillshade.pmtiles';
+    const wrongPortFailures = [failure('tile-1', 2_000, wrongPortUrl)];
+    const wrongPortExpected: Array<Record<string, unknown>> = [];
+    attribute(wrongPortFailures, [signal('tile-1', 1_900, wrongPortUrl)], wrongPortExpected);
+    assert.equal(wrongPortExpected.length, 0, 'a different localhost origin must not inherit the tile allowance');
+    assert.equal(wrongPortFailures.length, 1);
+});
+
+test('tile AbortSignal observer is installed as an init script and attributed after Save/load', () => {
+    const harness = readHarness();
+    assert.match(harness, /page\.addInitScript\(installTileFetchAbortObserver/);
+    assert.match(harness, /x-awwv-qa-tile-request-id/);
+    assert.match(harness, /const requestHeaders = request\.headers\(\);[\s\S]*requestHeaders\['x-awwv-qa-tile-request-id'\]/);
     const playIndex = harness.indexOf('const playtest = await playTurns(');
     const saveLoadIndex = harness.indexOf('playtest.saveLoadProof = await exerciseFinalSaveLoad(', playIndex);
-    const readSignalsIndex = harness.indexOf('await readAmbientLifecycleStopSignals(frame)', playIndex);
+    const tileReadIndex = harness.indexOf('await readTileFetchAbortSignals(frame)', playIndex);
+    const tileAttributeIndex = harness.indexOf('attributeTileFetchAborts(', tileReadIndex);
+    assert.ok(saveLoadIndex > playIndex && tileReadIndex > saveLoadIndex && tileAttributeIndex > tileReadIndex);
+});
+
+test('ambient lifecycle observer starts before campaign and attribution runs after optional Save/load transitions', () => {
+    const harness = readHarness();
+    assert.match(harness, /page\.addInitScript\(installAmbientLifecycleObserver/);
+    assert.match(harness, /document\.addEventListener\('abort'/);
+    const playIndex = harness.indexOf('const playtest = await playTurns(');
+    const saveLoadIndex = harness.indexOf('playtest.saveLoadProof = await exerciseFinalSaveLoad(', playIndex);
+    const readSignalsIndex = harness.indexOf('await readAmbientLifecycleSignals(frame)', playIndex);
     assert.ok(playIndex >= 0 && saveLoadIndex > playIndex);
     assert.ok(readSignalsIndex > saveLoadIndex);
+});
+
+test('final Save/load enters the tactical map through the visible War Map route before pressing Escape', () => {
+    const harness = readHarness();
+    const openPause = extractFunctionSource(harness, 'openSaveLoadPause');
+
+    assert.match(openPause, /clickByTestId\(frame, 'warroom-toolbar-war-map', 'save-load war map route'/);
+    assert.match(openPause, /waitForMap\(frame, expectedTurn, false/);
+    assert.ok(
+        openPause.indexOf("clickByTestId(frame, 'warroom-toolbar-war-map'")
+            < openPause.indexOf("tacticalMap.press('Escape')"),
+        'the user-visible War Map click must precede Escape',
+    );
+});
+
+test('final Save/load pins the post-save close and current tactical owner before one second Escape', () => {
+    const harness = readHarness();
+    const saveLoad = extractFunctionSource(harness, 'exerciseFinalSaveLoad');
+    const openPause = extractFunctionSource(harness, 'openSaveLoadPause');
+    const saveClickIndex = saveLoad.indexOf('saveButton.click()');
+    const saveHiddenIndex = saveLoad.indexOf("saveButton.waitFor({ state: 'hidden'", saveClickIndex);
+    const secondPauseIndex = saveLoad.indexOf("await openSaveLoadPause(frame, expectedTurn, 'post-save')", saveHiddenIndex);
+    assert.ok(saveClickIndex >= 0 && saveHiddenIndex > saveClickIndex && secondPauseIndex > saveHiddenIndex);
+    assert.match(openPause, /waitForMap\(frame, expectedTurn, false/);
+    assert.match(openPause, /tacticalMap\.press\('Escape'\)/);
+    assert.doesNotMatch(openPause, /for \(let attempt = 0; attempt < 5/);
+});
+
+test('save-load-only is a bounded zero-turn diagnostic and failure paths retain raw lifecycle signals', () => {
+    const harness = readHarness();
+    assert.match(harness, /const saveLoadOnly = args\.has\('--save-load-only'\)/);
+    assert.match(harness, /--save-load-only requires --turns=0 and --save-load-proof/);
+    assert.match(harness, /resolvePendingEventDecisionsBeforeFreeNavigation[\s\S]*if \(saveLoadOnly\)/);
+    assert.match(harness, /if \(saveLoadOnly\)[\s\S]*else if \(!skipInitialTour\)[\s\S]*mapInteractionProbe/);
+    assert.match(harness, /failureTileFetchAbortSignals/);
+    assert.match(harness, /failureAmbientLifecycleSignals/);
+    assert.match(harness, /catch \(error\)[\s\S]*readTileFetchAbortSignals\(frame\)[\s\S]*readAmbientLifecycleSignals\(frame\)/);
+});
+
+test('save menu route retains every owner boundary without a temporary inspection flag', () => {
+    const harness = readHarness();
+    assert.doesNotMatch(harness, /--inspect-save-load-menu-route/);
+    const inspect = extractFunctionSource(harness, 'completeObservedSaveLoadRoute');
+    for (const boundary of [
+        'before-main-menu-click',
+        'after-main-menu-click',
+        'after-main-menu-entry',
+        'after-field-records-click',
+        'resume-quicksave-visible',
+        'after-resume-click',
+    ]) {
+        assert.match(inspect, new RegExp(boundary));
+    }
+    assert.match(inspect, /captureSaveLoadSurfaceInventory/);
+    assert.match(extractFunctionSource(harness, 'inspectFrameSurface'), /opening-splash-art/);
+    assert.match(extractFunctionSource(harness, 'inspectFrameSurface'), /accessibleLabel/);
+    assert.match(extractFunctionSource(harness, 'inspectFrameSurface'), /\[aria-hidden="true"\]/);
+    assert.match(inspect, /Assume responsibility/);
+    assert.match(inspect, /Field Records/);
+    assert.match(inspect, /chooseObservedQuicksaveControl/);
+    assert.doesNotMatch(extractFunctionSource(harness, 'resolveObservedFrame'), /frameIndex/);
+    assert.match(harness, /saveLoadMenuInspectionPath/);
+});
+
+test('save menu inspection emits deterministic exact projected-state and canonical-save payload evidence', () => {
+    const harness = readHarness();
+    const diff = loadFunction<(before: unknown, after: unknown) => Array<{ path: string }>>(
+        harness,
+        'deterministicStructuralDiff',
+    );
+    assert.deepEqual(
+        diff({ z: 1, nested: { b: 2, a: 1 } }, { z: 3, nested: { b: 4, a: 1 }, added: true })
+            .map((entry) => entry.path),
+        ['added', 'nested.b', 'z'],
+    );
+    const inspect = extractFunctionSource(harness, 'completeObservedSaveLoadRoute');
+    assert.match(inspect, /before-projected\.json/);
+    assert.match(inspect, /after-projected\.json/);
+    assert.match(inspect, /before-canonical-autosave\.json/);
+    assert.match(inspect, /after-canonical-autosave\.json/);
+    assert.match(inspect, /structural-diff\.json/);
+});
+
+test('save menu payload directory creates a missing parent and refuses to overwrite a retained attempt', () => {
+    const harness = readHarness();
+    const create = loadFunction<(parent: string, child: string) => string>(
+        harness,
+        'createFreshNestedEvidenceDirectory',
+        { fs: nodeFs, path: nodePath },
+    );
+    const root = mkdtempSync(join(tmpdir(), 'awwv-save-menu-payload-'));
+    try {
+        const created = create(join(root, 'missing-parent'), 'attempt-01');
+        const sentinel = join(created, 'sentinel.txt');
+        writeFileSync(sentinel, 'retain');
+        assert.throws(() => create(join(root, 'missing-parent'), 'attempt-01'), /EEXIST/);
+        assert.equal(readFileSync(sentinel, 'utf8'), 'retain');
+    } finally {
+        rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test('Save/load requires the exact authoritative hydrated projection and ratings-only expected delta', () => {
+    const harness = readHarness();
+    const validateDelta = loadFunction<(
+        before: string,
+        expected: string,
+        faction: string,
+        turn: number,
+    ) => unknown>(harness, 'validateExpectedLoadHydrationDelta', {
+        deterministicStructuralDiff: loadFunction(harness, 'deterministicStructuralDiff'),
+    });
+    const assertExpected = loadFunction<(actual: string, expected: string) => unknown>(
+        harness,
+        'assertExactExpectedLoadedProjection',
+        { crypto: nodeRequire('node:crypto') },
+    );
+    const base = {
+        meta: { player_faction: 'RBiH', turn: 4 },
+        military: {
+            corps_front_sectors: {
+                own: { sector_id: 'own', faction: 'RBiH' },
+                enemy: { sector_id: 'enemy', faction: 'RS' },
+            },
+        },
+    };
+    const hydrated = structuredClone(base) as any;
+    hydrated.military.sector_combat_ratings = { own: { sector_id: 'own', personnel: 10 } };
+    assert.doesNotThrow(() => validateDelta(JSON.stringify(base), JSON.stringify(hydrated), 'RBiH', 4));
+    assert.throws(
+        () => validateDelta(JSON.stringify(base), JSON.stringify({ ...hydrated, unrelated: true }), 'RBiH', 4),
+        /outside sector combat ratings/,
+    );
+    assert.throws(
+        () => validateDelta(JSON.stringify(base), JSON.stringify({ ...hydrated, military: { ...hydrated.military, sector_combat_ratings: { enemy: {} } } }), 'RBiH', 4),
+        /player-owned sectors/,
+    );
+    assert.doesNotThrow(() => assertExpected(JSON.stringify(hydrated), JSON.stringify(hydrated)));
+    assert.throws(() => assertExpected(JSON.stringify({ ...hydrated, extra: 1 }), JSON.stringify(hydrated)), /exact authoritative/);
+    assert.throws(() => assertExpected(JSON.stringify(base), JSON.stringify(hydrated)), /exact authoritative/);
+    const wrongRating = structuredClone(hydrated);
+    wrongRating.military.sector_combat_ratings.own.personnel = 11;
+    assert.throws(() => assertExpected(JSON.stringify(wrongRating), JSON.stringify(hydrated)), /exact authoritative/);
+
+    const route = extractFunctionSource(harness, 'completeObservedSaveLoadRoute');
+    const expectedIndex = route.indexOf('buildAuthoritativeExpectedLoadedProjection');
+    const resumeIndex = route.indexOf("getByRole('button', { name: owner.label, exact: true }).click()", expectedIndex);
+    const exactIndex = route.indexOf('assertExactExpectedLoadedProjection', resumeIndex);
+    assert.ok(expectedIndex >= 0 && resumeIndex > expectedIndex && exactIndex > resumeIndex);
+    const exercise = extractFunctionSource(harness, 'exerciseFinalSaveLoad');
+    assert.match(exercise, /return completeObservedSaveLoadRoute\(/);
+});
+
+test('Save/load owner selection rejects stale, ambiguous, hidden, and wrong restored identities', () => {
+    const harness = readHarness();
+    const select = loadFunction<(observation: any, predicate: (record: any) => boolean, label: string) => any>(
+        harness,
+        'chooseObservedOwner',
+    );
+    const chooseQuicksave = loadFunction<(observation: any) => any>(harness, 'chooseObservedQuicksaveControl');
+    const frame = (overrides: Record<string, unknown> = {}) => ({
+        detached: false,
+        controls: [],
+        markers: {},
+        frameId: 'frame-1',
+        url: 'http://127.0.0.1/index.html?embedded=1',
+        ...overrides,
+    });
+    const observation = (frames: any[]) => ({ pages: [{ pageIndex: 0, frames }] });
+    assert.throws(() => select(observation([]), () => true, 'owner'), /observed 0/);
+    assert.throws(() => select(observation([frame(), frame({ frameId: 'frame-2' })]), () => true, 'owner'), /observed 2/);
+    assert.equal(
+        select(observation([frame({ detached: true }), frame({ frameId: 'frame-2' })]), () => true, 'owner').frameRecord.frameId,
+        'frame-2',
+    );
+    assert.throws(
+        () => chooseQuicksave(observation([frame({ controls: [{ ariaLabel: 'Resume quicksave', disabled: true }] })])),
+        /observed 0/,
+    );
+    assert.throws(
+        () => chooseQuicksave(observation([frame({ controls: [{ ariaLabel: 'Resume QuickSave', disabled: false }] })])),
+        /observed 0/,
+    );
+    assert.throws(
+        () => chooseQuicksave(observation([
+            frame({ controls: [{ ariaLabel: 'Resume quicksave', disabled: false }] }),
+            frame({ frameId: 'frame-2', controls: [{ ariaLabel: 'Resume quicksave', disabled: false }] }),
+        ])),
+        /observed 2/,
+    );
+    const route = extractFunctionSource(harness, 'completeObservedSaveLoadRoute');
+    assert.match(route, /Diagnostic Save\/load restored identity mismatch/);
+});
+
+test('Save/load pause route fails closed for absent owners, failed route, stale readiness, and second-pause failure', async () => {
+    const harness = readHarness();
+    const openPause = runInNewContext(
+        `(async ${extractFunctionSource(harness, 'openSaveLoadPause')})`,
+    ) as (frame: unknown, turn: number, stage: string, deps: Record<string, unknown>) => Promise<void>;
+    const makeFrame = ({ warroom = false, tactical = true, saveVisible = false, waitFails = false } = {}) => {
+        const saveButton = {
+            isVisible: async () => saveVisible,
+            waitFor: async () => { if (waitFails) throw new Error('not visible'); },
+        };
+        return {
+            locator: (selector: string) => ({
+                first() { return this; },
+                isVisible: async () => selector.includes('warroom-shell') ? warroom : tactical,
+                press: async () => {},
+            }),
+            getByRole: () => saveButton,
+        };
+    };
+    const deps = (overrides: Record<string, unknown> = {}) => ({
+        clearOpenSurfaces: async () => 0,
+        clickTestId: async () => true,
+        waitForTacticalMapReady: async () => true,
+        tacticalMapReadinessDiagnostics: async () => ({}),
+        ...overrides,
+    });
+
+    await assert.rejects(() => openPause(makeFrame({ tactical: false }), 1, 'initial', deps()), /absent or hidden/);
+    await assert.rejects(() => openPause(makeFrame({ warroom: true }), 1, 'initial', deps({ clickTestId: async () => false })), /could not click/);
+    await assert.rejects(() => openPause(makeFrame(), 1, 'initial', deps({ waitForTacticalMapReady: async () => false })), /did not become interaction-ready/);
+    await assert.rejects(() => openPause(makeFrame({ waitFails: true }), 1, 'post-save', deps()), /Second pause did not open/);
 });
 
 test('events proposals and peace plans resolve only through exact visible UI controls', () => {

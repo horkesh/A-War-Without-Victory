@@ -354,7 +354,7 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
               <div className="text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
                 {t('directive.issueDirective')}
               </div>
-              <div className="mt-0.5 truncate text-xs font-bold text-text-primary">
+              <div className="mt-0.5 break-words text-xs font-bold leading-snug text-text-primary">
                 {leverLabel(directive.lever)}{tgt ? ` · ${tgt}` : ''}
               </div>
             </div>
@@ -644,7 +644,7 @@ export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCard
           <div className="text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
             {t('directive.issueDirective')}
           </div>
-          <div className="mt-0.5 truncate text-xs font-bold text-text-primary">
+          <div className="mt-0.5 break-words text-xs font-bold leading-snug text-text-primary">
             {leverLabel(directive.lever)}{tgt ? ` · ${tgt}` : ''}
           </div>
         </div>

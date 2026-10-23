@@ -17,6 +17,37 @@
 
 ## Package/shakedown repair — owner authorized 2026-10-23
 
+**Current bounded result:** the first immutable package remains exact (1,213 files).
+Native zero-turn Save/load passes for RBiH, RS and HRHB with unchanged canonical bytes
+and exact independently hydrated projected-state bytes. These are prerequisites only.
+The fresh RBiH 24-week shakedown fails before Save/load: 22 diagnostics identify one
+clipped DirectiveCard instruction, seven ambient aborts lack qualifying causal evidence,
+and `rs_ajnie_brigade` is genuinely unresolved at the turn-16 final sector seal.
+No turn-15/16 state was retained in that attempt; turn-17+ recovery cannot waive it.
+RS/HRHB 24-week runs remain unlaunched.
+
+The minimal follow-up wraps both DirectiveCard instruction branches. Focused UI checks
+pass 30/30 and typecheck exits 0. Independent review accepts the source and corrected
+QA harness (70/70): current native Save/load routing, exact expected load projection,
+strict request/media causality, fail-closed existing profiles, buffered complete process
+lines and opt-in exclusive per-turn save archives. The old package reproduces clipping
+in the retained week-24 current dossier (214 px client / 279 px scroll width); its paired
+All/Command probe selected the wrong title, so that probe exits 1 and remains failed.
+The supported fixture route is fresh isolated quicksave -> Field Records -> Resume ->
+Desk -> command surface. A new immutable `r8-shakedown-20261023-clip2` package and one
+correctly scoped rendered check are the next affected presentation gate (several minutes,
+twenty-minute build cap, eight-minute route cap; stop on unexpected failure, no blind retry).
+No gameplay or calibration changes are included.
+
+The owner separately authorized one diagnostic-only replay through turn 16, twenty-minute
+cap and no automatic retry. Its first wrapper exits 1 before game launch: fingerprinting
+encounters a locked file in the concurrently open read-only probe profile. That failed
+attempt is preserved; a corrected start is pending an explicit owner decision under the
+recorded stop rule. No diagnostic turns ran. Any actual sector-assignment repair still
+requires exact evidence and separate gameplay validation scope; no warning suppression.
+Evidence and independent review are under `tmp/r8-shakedown-20261023/`; all earlier
+attempts, n91/n92 and telemetry remain retained. No baseline adoption or full campaign.
+
 The owner authorized cheap reproductions, retained-failure repairs, Save/load and all three
 faction shakedowns in the October checkpoint worktree at starting commit `668de6f80`.
 Calibration tuning, baseline adoption and full campaigns remain outside this packet.

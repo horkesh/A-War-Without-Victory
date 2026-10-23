@@ -28,7 +28,12 @@ const requireRecruitment = args.has('--require-recruitment');
 const contextChurnCycles = Number(process.argv.find((arg) => arg.startsWith('--context-churn='))?.split('=')[1] ?? '0');
 const finalCheckpointTour = args.has('--final-checkpoint-tour');
 const saveLoadProof = args.has('--save-load-proof');
+const saveLoadOnly = args.has('--save-load-only');
 const historicalChoice = args.has('--historical-choice');
+const archiveTurnAutosaves = args.has('--archive-turn-autosaves');
+if (saveLoadOnly && (maxTurns !== 0 || !saveLoadProof)) {
+  throw new Error('--save-load-only requires --turns=0 and --save-load-proof');
+}
 let eventChoiceTranscript = [];
 
 function selectHistoricalEventChoice(decision) {
@@ -620,6 +625,7 @@ const progressPath = path.join(outDir, `paradox-local-qa-progress-${runSlug}.jso
 const liveEventsPath = path.join(outDir, `paradox-local-qa-live-events-${runSlug}.json`);
 const netLogPath = path.join(outDir, `paradox-local-qa-netlog-${runSlug}.json`);
 const readabilityDiagnosticsPath = path.join(outDir, `paradox-local-qa-readability-${runSlug}.json`);
+const saveLoadMenuInspectionPath = path.join(outDir, `paradox-local-qa-save-menu-inspection-${runSlug}.json`);
 const harnessSnapshotsDir = path.join(outDir, 'harness-snapshots');
 const evidenceDir = path.join(outDir, 'evidence', runSlug);
 
@@ -630,6 +636,7 @@ function cleanupRunArtifacts() {
     liveEventsPath,
     netLogPath,
     readabilityDiagnosticsPath,
+    saveLoadMenuInspectionPath,
     path.join(outDir, `paradox-local-qa-error-${runSlug}.txt`),
   ]) fs.rmSync(filePath, { force: true });
   const screenshotPrefix = `${runSlug}-`;
@@ -649,6 +656,13 @@ function reserveEvidenceDirectory() {
     }
     throw error;
   }
+}
+
+function createFreshNestedEvidenceDirectory(parentDirectory, childName) {
+  fs.mkdirSync(parentDirectory, { recursive: true });
+  const childDirectory = path.join(parentDirectory, childName);
+  fs.mkdirSync(childDirectory, { recursive: false });
+  return childDirectory;
 }
 
 fs.mkdirSync(path.dirname(evidenceDir), { recursive: true });
@@ -1633,13 +1647,17 @@ async function readState(frame) {
 }
 
 async function readRawStateHash(frame) {
-  const serialized = await frame.evaluate(async () => {
+  const serialized = await readRawStateProjection(frame);
+  if (typeof serialized !== 'string') return null;
+  return crypto.createHash('sha256').update(serialized).digest('hex');
+}
+
+async function readRawStateProjection(frame) {
+  return frame.evaluate(async () => {
     if (!window.awwv?.getCurrentGameState) return null;
     const state = await window.awwv.getCurrentGameState();
     return typeof state === 'string' ? state : JSON.stringify(state);
   });
-  if (typeof serialized !== 'string') return null;
-  return crypto.createHash('sha256').update(serialized).digest('hex');
 }
 
 function fileSha256(filePath) {
@@ -1692,6 +1710,27 @@ function archiveAutosaveEvidence(sourcePath, destinationPath) {
     sha256: archivedHash,
     bytes: fs.statSync(destinationPath).size,
   };
+}
+
+function archiveCompletedTurnAutosave(sourcePath, evidenceRoot, faction, turn, recordsByTurn) {
+  if (!Number.isSafeInteger(turn) || turn < 1) {
+    throw new Error(`Completed-turn autosave requires a positive integer turn: ${turn}`);
+  }
+  if (recordsByTurn.has(turn)) return recordsByTurn.get(turn);
+  const source = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
+  if (source?.meta?.turn !== turn) {
+    throw new Error(`Completed-turn autosave turn mismatch: expected ${turn}, observed ${source?.meta?.turn ?? 'unavailable'}`);
+  }
+  const factionSlug = String(faction).replace(/[^a-z0-9_-]+/gi, '-').replace(/^-|-$/g, '').toLowerCase();
+  const record = {
+    turn,
+    ...archiveAutosaveEvidence(
+      sourcePath,
+      path.join(evidenceRoot, factionSlug, 'turn-autosaves', `turn-${String(turn).padStart(3, '0')}.json`),
+    ),
+  };
+  recordsByTurn.set(turn, record);
+  return record;
 }
 
 function verifyArchivedEvidence(record, label) {
@@ -4931,6 +4970,7 @@ async function exerciseContextChurn(page, frame, faction, events, cycles) {
 
 async function playTurns(page, frame, faction, events, targetTurn) {
   const turnEvents = [];
+  const turnAutosaveEvidenceByTurn = new Map();
   const recruitmentAttemptTurns = new Set();
   let recruitmentSucceeded = !autoRecruit;
   let lastTurn = (await readState(frame))?.turn ?? 0;
@@ -4974,6 +5014,15 @@ async function playTurns(page, frame, faction, events, targetTurn) {
       maxObservedTurn = Math.max(maxObservedTurn, afterHandle?.turn ?? maxObservedTurn);
       stagnantSteps = 0;
       turnEvents.push({ guard, step: 'handled', action: handled.action, before, after: afterHandle });
+      if (archiveTurnAutosaves && afterHandle?.turn > (before?.turn ?? -1)) {
+        archiveCompletedTurnAutosave(
+          canonicalAutosavePath,
+          evidenceDir,
+          faction,
+          afterHandle.turn,
+          turnAutosaveEvidenceByTurn,
+        );
+      }
       if (afterHandle?.turn > (before?.turn ?? -1) && checkpointTurns.has(afterHandle.turn)) {
         await checkpointTour(page, frame, faction, events, afterHandle.turn);
       }
@@ -4999,6 +5048,15 @@ async function playTurns(page, frame, faction, events, targetTurn) {
     if ((after?.turn ?? lastTurn) > (before?.turn ?? lastTurn)) stagnantSteps = 0;
     else stagnantSteps += 1;
     turnEvents.push({ guard, step: 'advance-click', advanced, before, after, surface: handled.text });
+    if (archiveTurnAutosaves && after?.turn > (before?.turn ?? -1)) {
+      archiveCompletedTurnAutosave(
+        canonicalAutosavePath,
+        evidenceDir,
+        faction,
+        after.turn,
+        turnAutosaveEvidenceByTurn,
+      );
+    }
     await snapshot(page, frame, faction, events, `turn-loop-${guard}`, { turnLoopTail: turnEvents.slice(-6), advanced });
     if (after?.turn > (before?.turn ?? -1) && checkpointTurns.has(after.turn)) {
       await checkpointTour(page, frame, faction, events, after.turn);
@@ -5102,6 +5160,7 @@ async function playTurns(page, frame, faction, events, targetTurn) {
     finalAutosaveEvidence,
     requiredEventReceiptIds,
     historicalEventAnchorResults,
+    turnAutosaveEvidence: Array.from(turnAutosaveEvidenceByTurn.values()),
   };
 }
 
@@ -5116,7 +5175,6 @@ function classifyExpectedRequestAbort({
   observedAtMs,
   requestInitiatedAtMs,
   mapNavigationWindow,
-  ambientLifecycleStop = null,
 }) {
   if (failure?.errorText !== 'net::ERR_ABORTED' || method !== 'GET') return null;
   let parsed;
@@ -5150,21 +5208,6 @@ function classifyExpectedRequestAbort({
     && exactPackagedLocalNavigationWindow
     && navigationAbortAllowlist.has(parsed.pathname);
   if (canceledMapSourceOnNavigation) return navigationAbortAllowlist.get(parsed.pathname);
-  const canceledAmbientBedOnSurfaceChange = !teardownStarted
-    && eventCount > 0
-    && !isMainFrame
-    && resourceType === 'media'
-    && parsed.protocol === 'http:'
-    && parsed.hostname === '127.0.0.1'
-    && parsed.search === ''
-    && parsed.hash === ''
-    && ambientLifecycleStop?.url === url
-    && Number.isFinite(ambientLifecycleStop.observedAtMs)
-    && Number.isFinite(observedAtMs)
-    && ambientLifecycleStop.observedAtMs <= observedAtMs
-    && observedAtMs - ambientLifecycleStop.observedAtMs <= 5_000
-    && /^\/assets\/ambient_(?:warroom|field|archive)-[A-Za-z0-9_-]+\.ogg$/.test(parsed.pathname);
-  if (canceledAmbientBedOnSurfaceChange) return 'ambient-bed-lifecycle';
   if (resourceType !== 'document') return null;
   const embeddedWarroomDocument = parsed.origin === 'http://127.0.0.1:3002'
     && parsed.pathname === '/index.html'
@@ -5192,6 +5235,115 @@ function isExpectedInspectorTeardownLine(line) {
     || line === 'For help, see: https://nodejs.org/en/docs/inspector';
 }
 
+function installTileFetchAbortObserver() {
+  if (window.__AWWV_QA_TILE_FETCH_ABORT_OBSERVER_INSTALLED__) return;
+  window.__AWWV_QA_TILE_FETCH_ABORT_OBSERVER_INSTALLED__ = true;
+  window.__AWWV_QA_TILE_FETCH_ABORT_SIGNALS__ = [];
+  let requestSequence = 0;
+  const originalFetch = window.fetch.bind(window);
+  window.fetch = function observedTileFetch(input, init) {
+    let request;
+    try {
+      request = new Request(input, init);
+      const parsed = new URL(request.url);
+      const exactLocalTile = parsed.protocol === 'http:'
+        && parsed.hostname === '127.0.0.1'
+        && parsed.origin === window.location.origin
+        && parsed.search === ''
+        && (parsed.pathname === '/data/derived/tiles/hillshade.pmtiles'
+          || parsed.pathname === '/data/derived/tiles/osm.pmtiles');
+      if (!exactLocalTile || request.method !== 'GET') return originalFetch(input, init);
+      const id = `tile-fetch:${performance.timeOrigin}:${++requestSequence}`;
+      const headers = new Headers(request.headers);
+      headers.set('x-awwv-qa-tile-request-id', id);
+      const observedRequest = new Request(request, { headers });
+      const range = headers.get('range') ?? '';
+      const recordAbort = () => window.__AWWV_QA_TILE_FETCH_ABORT_SIGNALS__.push({
+        id,
+        url: observedRequest.url,
+        method: observedRequest.method,
+        range,
+        origin: window.location.origin,
+        observedAtMs: Date.now(),
+      });
+      if (observedRequest.signal.aborted) recordAbort();
+      else observedRequest.signal.addEventListener('abort', recordAbort, { once: true });
+      return originalFetch(observedRequest).finally(() => {
+        observedRequest.signal.removeEventListener('abort', recordAbort);
+      });
+    } catch {
+      return originalFetch(input, init);
+    }
+  };
+}
+
+async function installTileFetchAbortObserverBeforeStartup(page) {
+  await page.addInitScript(installTileFetchAbortObserver);
+  await Promise.all(page.frames().map((frame) => frame.evaluate(installTileFetchAbortObserver).catch(() => {})));
+}
+
+async function readTileFetchAbortSignals(frame) {
+  return frame.evaluate(() => [...(window.__AWWV_QA_TILE_FETCH_ABORT_SIGNALS__ ?? [])]);
+}
+
+function classifyExpectedTileFetchAbort(record, tileFetchAbortSignal) {
+  if (record.failure?.errorText !== 'net::ERR_ABORTED'
+    || record.method !== 'GET'
+    || record.resourceType !== 'fetch'
+    || record.isMainFrame
+    || !record.tileFetchIdentity
+    || !tileFetchAbortSignal) return null;
+  let parsed;
+  try {
+    parsed = new URL(record.url);
+  } catch {
+    return null;
+  }
+  const exactLocalTile = parsed.protocol === 'http:'
+    && parsed.hostname === '127.0.0.1'
+    && parsed.search === ''
+    && (parsed.pathname === '/data/derived/tiles/hillshade.pmtiles'
+      || parsed.pathname === '/data/derived/tiles/osm.pmtiles');
+  const identity = record.tileFetchIdentity;
+  const exactIdentity = exactLocalTile
+    && typeof identity.id === 'string'
+    && identity.id === tileFetchAbortSignal.id
+    && identity.url === record.url
+    && tileFetchAbortSignal.url === record.url
+    && identity.origin === parsed.origin
+    && tileFetchAbortSignal.origin === parsed.origin
+    && identity.method === record.method
+    && tileFetchAbortSignal.method === record.method
+    && typeof identity.range === 'string'
+    && /^bytes=\d+-\d+$/.test(identity.range)
+    && tileFetchAbortSignal.range === identity.range;
+  const exactAbortTime = Number.isFinite(record.observedAtMs)
+    && Number.isFinite(tileFetchAbortSignal.observedAtMs)
+    && tileFetchAbortSignal.observedAtMs <= record.observedAtMs
+    && record.observedAtMs - tileFetchAbortSignal.observedAtMs <= 5_000;
+  return exactIdentity && exactAbortTime ? 'tile-fetch-abort-signal' : null;
+}
+
+function attributeTileFetchAborts(networkFailures, abortSignals, expectedTileFetchAborts) {
+  const availableSignals = [...abortSignals];
+  const attributedFailureIndexes = new Set();
+  for (let index = 0; index < networkFailures.length; index += 1) {
+    const record = networkFailures[index];
+    const signalIndex = availableSignals.findIndex((signal) =>
+      classifyExpectedTileFetchAbort(record, signal) === 'tile-fetch-abort-signal');
+    if (signalIndex < 0) continue;
+    const [tileFetchAbortSignal] = availableSignals.splice(signalIndex, 1);
+    expectedTileFetchAborts.push({
+      ...record,
+      tileFetchAbortSignal,
+      allowlist: 'tile-fetch-abort-signal',
+    });
+    attributedFailureIndexes.add(index);
+  }
+  const remaining = networkFailures.filter((_record, index) => !attributedFailureIndexes.has(index));
+  networkFailures.splice(0, networkFailures.length, ...remaining);
+}
+
 function attachPageDiagnostics(page, diagnostics) {
   if (diagnostics.attachedPages.has(page)) return;
   diagnostics.attachedPages.add(page);
@@ -5212,6 +5364,7 @@ function attachPageDiagnostics(page, diagnostics) {
   });
   page.on('request', (request) => {
     const requestInitiatedAtMs = Date.now();
+    diagnostics.requestStartTimes.set(request, requestInitiatedAtMs);
     const mapNavigationWindow = diagnostics.getMapNavigationAbortWindow(requestInitiatedAtMs);
     if (mapNavigationWindow) {
       diagnostics.requestNavigationWindows.set(request, {
@@ -5224,6 +5377,12 @@ function attachPageDiagnostics(page, diagnostics) {
     const failure = request.failure();
     const observedAtMs = Date.now();
     const navigationAttribution = diagnostics.requestNavigationWindows.get(request) ?? null;
+    const requestHeaders = request.headers();
+    const tileRequestId = requestHeaders['x-awwv-qa-tile-request-id'] ?? null;
+    let requestFrameOrigin = null;
+    try {
+      requestFrameOrigin = new URL(request.frame().url()).origin;
+    } catch {}
     const record = {
       kind: 'requestfailed',
       method: request.method(),
@@ -5234,8 +5393,15 @@ function attachPageDiagnostics(page, diagnostics) {
       eventCount: diagnostics.events.length,
       teardownStarted: diagnostics.isTeardownStarted(),
       observedAtMs,
-      requestInitiatedAtMs: navigationAttribution?.requestInitiatedAtMs ?? null,
+      requestInitiatedAtMs: diagnostics.requestStartTimes.get(request) ?? null,
       mapNavigationWindow: navigationAttribution,
+      tileFetchIdentity: tileRequestId ? {
+        id: tileRequestId,
+        url: request.url(),
+        method: request.method(),
+        range: requestHeaders.range ?? '',
+        origin: requestFrameOrigin,
+      } : null,
     };
     const expectedAbort = classifyExpectedRequestAbort(record);
     if (expectedAbort === 'startup-embedded-warroom-document') {
@@ -5263,42 +5429,590 @@ function attachPageDiagnostics(page, diagnostics) {
   });
 }
 
-async function installAmbientLifecycleObserver(frame) {
-  await frame.evaluate(() => {
-    if (window.__AWWV_QA_AMBIENT_PAUSE_OBSERVER_INSTALLED__) return;
-    window.__AWWV_QA_AMBIENT_PAUSE_OBSERVER_INSTALLED__ = true;
-    window.__AWWV_QA_AMBIENT_PAUSE_SIGNALS__ = [];
-    const originalPause = HTMLMediaElement.prototype.pause;
-    HTMLMediaElement.prototype.pause = function observedAmbientPause() {
-      const url = this.currentSrc || this.src;
-      if (url) window.__AWWV_QA_AMBIENT_PAUSE_SIGNALS__.push({ url, observedAtMs: Date.now() });
-      return originalPause.call(this);
-    };
-  });
+function installAmbientLifecycleObserver() {
+  if (window.__AWWV_QA_AMBIENT_LIFECYCLE_OBSERVER_INSTALLED__) return;
+  window.__AWWV_QA_AMBIENT_LIFECYCLE_OBSERVER_INSTALLED__ = true;
+  window.__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__ = [];
+  let nextElementId = 0;
+  const metadata = new WeakMap();
+  const ambientUrl = (element) => {
+    const url = element.currentSrc || element.src || '';
+    return /\/assets\/ambient_(?:warroom|field|archive)-[A-Za-z0-9_-]+\.ogg(?:$|[?#])/.test(url) ? url : '';
+  };
+  const getMetadata = (element) => {
+    let value = metadata.get(element);
+    if (!value) {
+      value = { elementId: `media:${++nextElementId}`, sourceEpoch: 0, url: '' };
+      metadata.set(element, value);
+    }
+    return value;
+  };
+  const record = (kind, element, forceNewEpoch = false) => {
+    const value = getMetadata(element);
+    const url = ambientUrl(element) || value.url;
+    if (!url) return;
+    if (forceNewEpoch || value.sourceEpoch === 0 || value.url !== url) value.sourceEpoch += 1;
+    value.url = url;
+    window.__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__.push({
+      kind,
+      elementId: value.elementId,
+      sourceEpoch: value.sourceEpoch,
+      url,
+      origin: window.location.origin,
+      observedAtMs: Date.now(),
+    });
+  };
+  const originalPlay = HTMLMediaElement.prototype.play;
+  const originalPause = HTMLMediaElement.prototype.pause;
+  const originalLoad = HTMLMediaElement.prototype.load;
+  HTMLMediaElement.prototype.play = function observedAmbientPlay(...args) {
+    record('play', this);
+    return originalPlay.apply(this, args);
+  };
+  HTMLMediaElement.prototype.pause = function observedAmbientPause(...args) {
+    record('pause', this);
+    return originalPause.apply(this, args);
+  };
+  HTMLMediaElement.prototype.load = function observedAmbientLoad(...args) {
+    record('load', this, true);
+    return originalLoad.apply(this, args);
+  };
+  document.addEventListener('loadstart', (event) => {
+    if (event.target instanceof HTMLMediaElement) record('request-start', event.target);
+  }, true);
+  document.addEventListener('abort', (event) => {
+    if (event.target instanceof HTMLMediaElement) record('browser-abort', event.target);
+  }, true);
+  document.addEventListener('emptied', (event) => {
+    if (event.target instanceof HTMLMediaElement) record('emptied', event.target);
+  }, true);
+  document.addEventListener('error', (event) => {
+    if (event.target instanceof HTMLMediaElement) record('error', event.target);
+  }, true);
 }
 
-async function readAmbientLifecycleStopSignals(frame) {
-  return frame.evaluate(() => [...(window.__AWWV_QA_AMBIENT_PAUSE_SIGNALS__ ?? [])]);
+async function installAmbientLifecycleObserverBeforeStartup(page) {
+  await page.addInitScript(installAmbientLifecycleObserver);
+  await Promise.all(page.frames().map((frame) => frame.evaluate(installAmbientLifecycleObserver).catch(() => {})));
 }
 
-function attributeAmbientLifecycleAborts(networkFailures, stopSignals, expectedAmbientLifecycleAborts) {
-  const availableStops = [...stopSignals];
+async function readAmbientLifecycleSignals(frame) {
+  return frame.evaluate(() => [...(window.__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__ ?? [])]);
+}
+
+function classifyExpectedAmbientLifecycleAbort(record, lifecycleSignals) {
+  if (record.failure?.errorText !== 'net::ERR_ABORTED'
+    || record.method !== 'GET'
+    || record.resourceType !== 'media'
+    || record.isMainFrame
+    || !Number.isFinite(record.requestInitiatedAtMs)
+    || !Number.isFinite(record.observedAtMs)) return null;
+  let parsed;
+  try {
+    parsed = new URL(record.url);
+  } catch {
+    return null;
+  }
+  const exactLocalAmbient = parsed.protocol === 'http:'
+    && parsed.hostname === '127.0.0.1'
+    && parsed.search === ''
+    && parsed.hash === ''
+    && /^\/assets\/ambient_(?:warroom|field|archive)-[A-Za-z0-9_-]+\.ogg$/.test(parsed.pathname);
+  if (!exactLocalAmbient) return null;
+  const starts = lifecycleSignals.filter((signal) => signal.kind === 'request-start'
+    && signal.url === record.url
+    && signal.origin === parsed.origin
+    && typeof signal.elementId === 'string'
+    && Number.isInteger(signal.sourceEpoch)
+    && Number.isFinite(signal.observedAtMs)
+    && Math.abs(signal.observedAtMs - record.requestInitiatedAtMs) <= 2_000);
+  if (starts.length !== 1) return null;
+  const requestStart = starts[0];
+  const identity = `${requestStart.elementId}:${requestStart.sourceEpoch}`;
+  const browserAborts = lifecycleSignals.filter((signal) => signal.kind === 'browser-abort'
+    && `${signal.elementId}:${signal.sourceEpoch}` === identity
+    && signal.url === record.url
+    && signal.origin === parsed.origin
+    && Number.isFinite(signal.observedAtMs)
+    && signal.observedAtMs >= requestStart.observedAtMs
+    && Math.abs(signal.observedAtMs - record.observedAtMs) <= 2_000);
+  if (browserAborts.length !== 1) return null;
+  return { requestStart, browserAbort: browserAborts[0] };
+}
+
+function attributeAmbientLifecycleAborts(networkFailures, lifecycleSignals, expectedAmbientLifecycleAborts) {
+  const availableSignals = [...lifecycleSignals];
   const attributedFailureIndexes = new Set();
   for (let index = 0; index < networkFailures.length; index += 1) {
     const record = networkFailures[index];
-    const stopIndex = availableStops.findIndex((ambientLifecycleStop) =>
-      classifyExpectedRequestAbort({ ...record, ambientLifecycleStop }) === 'ambient-bed-lifecycle');
-    if (stopIndex < 0) continue;
-    const [ambientLifecycleStop] = availableStops.splice(stopIndex, 1);
+    const attribution = classifyExpectedAmbientLifecycleAbort(record, availableSignals);
+    if (!attribution) continue;
+    const consumed = new Set([attribution.requestStart, attribution.browserAbort]);
+    availableSignals.splice(0, availableSignals.length, ...availableSignals.filter((signal) => !consumed.has(signal)));
     expectedAmbientLifecycleAborts.push({
       ...record,
-      ambientLifecycleStop,
-      allowlist: 'ambient-bed-lifecycle',
+      ambientLifecycle: attribution,
+      allowlist: 'ambient-browser-abort-lifecycle',
     });
     attributedFailureIndexes.add(index);
   }
   const remaining = networkFailures.filter((_record, index) => !attributedFailureIndexes.has(index));
   networkFailures.splice(0, networkFailures.length, ...remaining);
+}
+
+async function openSaveLoadPause(frame, expectedTurn, stage, dependencies = {}) {
+  const clearSurfaces = dependencies.clearOpenSurfaces ?? clearOpenSurfaces;
+  const clickByTestId = dependencies.clickTestId ?? clickTestId;
+  const waitForMap = dependencies.waitForTacticalMapReady ?? waitForTacticalMapReady;
+  const readMapDiagnostics = dependencies.tacticalMapReadinessDiagnostics ?? tacticalMapReadinessDiagnostics;
+  await clearSurfaces(frame);
+  const warroomVisible = await frame.locator('[data-testid="warroom-shell"]').isVisible().catch(() => false);
+  if (warroomVisible) {
+    const openedWarMap = await clickByTestId(frame, 'warroom-toolbar-war-map', 'save-load war map route', { afterMs: 0 });
+    if (!openedWarMap) throw new Error('Save/load could not click the visible War Map route');
+  }
+  const tacticalMap = frame.locator('[data-testid="tactical-map"]').first();
+  if (!warroomVisible && !await tacticalMap.isVisible().catch(() => false)) {
+    throw new Error(`Save/load tactical owner was absent or hidden at ${stage}`);
+  }
+  if (!await waitForMap(frame, expectedTurn, false, 15000)) {
+    const diagnostics = await readMapDiagnostics(frame, expectedTurn, false);
+    throw new Error(`Save/load tactical owner did not become interaction-ready at ${stage}: ${JSON.stringify(diagnostics)}`);
+  }
+  if (!await tacticalMap.isVisible().catch(() => false)) {
+    throw new Error(`Save/load tactical owner was absent or hidden after readiness at ${stage}`);
+  }
+  const saveButton = frame.getByRole('button', { name: 'Save Game', exact: true });
+  if (await saveButton.isVisible().catch(() => false)) {
+    throw new Error(`Save/load pause was already open before ${stage}`);
+  }
+  await tacticalMap.press('Escape');
+  try {
+    await saveButton.waitFor({ state: 'visible', timeout: 5000 });
+  } catch (error) {
+    if (stage === 'post-save') throw new Error(`Second pause did not open after the completed Save Game transition: ${error.message}`);
+    throw error;
+  }
+}
+
+async function inspectFrameSurface(frame) {
+  const detached = frame.isDetached();
+  if (detached) return { detached, controls: [], markers: {}, focused: null, text: '' };
+  try {
+    return await frame.evaluate((selector) => {
+      const visible = (element) => {
+        const style = window.getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return style.display !== 'none'
+          && style.visibility !== 'hidden'
+          && Number(style.opacity) !== 0
+          && rect.width > 0
+          && rect.height > 0;
+      };
+      const controls = [...document.querySelectorAll(selector)]
+        .filter(visible)
+        .map((element) => {
+          const accessibleClone = element.cloneNode(true);
+          accessibleClone.querySelectorAll('[aria-hidden="true"]').forEach((node) => node.remove());
+          const ariaLabel = element.getAttribute('aria-label');
+          return {
+            tag: element.tagName.toLowerCase(),
+            text: (element.textContent ?? '').replace(/\s+/g, ' ').trim(),
+            accessibleLabel: (ariaLabel ?? accessibleClone.textContent ?? '').replace(/\s+/g, ' ').trim(),
+            ariaLabel,
+            testId: element.getAttribute('data-testid'),
+            id: element.id || null,
+            disabled: Boolean(element.disabled || element.getAttribute('aria-disabled') === 'true'),
+          };
+        });
+      const markerVisible = (selectorValue) => {
+        const element = document.querySelector(selectorValue);
+        return Boolean(element && visible(element));
+      };
+      const active = document.activeElement;
+      return {
+        detached: false,
+        controls,
+        markers: {
+          openingSplash: markerVisible('[data-testid="opening-splash-art"]'),
+          mainMenuOpening: markerVisible('.main-menu-opening'),
+          warroom: markerVisible('[data-testid="warroom-shell"]'),
+          tacticalMap: markerVisible('[data-testid="tactical-map"]'),
+        },
+        focused: active ? {
+          tag: active.tagName.toLowerCase(),
+          text: (active.textContent ?? '').replace(/\s+/g, ' ').trim(),
+          ariaLabel: active.getAttribute('aria-label'),
+          testId: active.getAttribute('data-testid'),
+        } : null,
+        text: (document.body?.innerText ?? '').replace(/\s+/g, ' ').trim().slice(0, 4000),
+      };
+    }, buttonSelector);
+  } catch (error) {
+    return { detached: frame.isDetached(), controls: [], markers: {}, focused: null, text: '', error: String(error?.message ?? error) };
+  }
+}
+
+async function captureSaveLoadSurfaceInventory(page, boundary, chosenFrame, observations, frameIds) {
+  const pages = page.context().pages();
+  const pageRecords = [];
+  for (let pageIndex = 0; pageIndex < pages.length; pageIndex += 1) {
+    const candidatePage = pages[pageIndex];
+    const pageRecord = {
+      pageIndex,
+      url: candidatePage.url(),
+      closed: candidatePage.isClosed(),
+      screenshot: null,
+      screenshotHash: null,
+      frames: [],
+    };
+    if (!candidatePage.isClosed()) {
+      const screenshot = path.join(
+        screenshotsDir,
+        `${safeName(runLabel)}-save-menu-${String(observations.length).padStart(2, '0')}-${safeName(boundary)}-page-${pageIndex}.png`,
+      );
+      const screenshotBuffer = await captureScreenshotBuffer(candidatePage, `save-menu-${boundary}-page-${pageIndex}`);
+      fs.writeFileSync(screenshot, screenshotBuffer);
+      pageRecord.screenshot = screenshot;
+      pageRecord.screenshotHash = crypto.createHash('sha256').update(screenshotBuffer).digest('hex');
+    }
+    const frames = candidatePage.frames();
+    for (let frameIndex = 0; frameIndex < frames.length; frameIndex += 1) {
+      const candidateFrame = frames[frameIndex];
+      if (!frameIds.ids.has(candidateFrame)) {
+        const frameId = `frame-${++frameIds.next}`;
+        frameIds.ids.set(candidateFrame, frameId);
+        frameIds.refs.set(frameId, candidateFrame);
+      }
+      pageRecord.frames.push({
+        frameId: frameIds.ids.get(candidateFrame),
+        frameIndex,
+        name: candidateFrame.name(),
+        url: candidateFrame.url(),
+        parentFrameId: candidateFrame.parentFrame() ? frameIds.ids.get(candidateFrame.parentFrame()) ?? null : null,
+        chosenOwner: candidateFrame === chosenFrame,
+        ...await inspectFrameSurface(candidateFrame),
+      });
+    }
+    pageRecords.push(pageRecord);
+  }
+  const observation = {
+    boundary,
+    observedAt: new Date().toISOString(),
+    chosenOwnerFrameId: chosenFrame ? frameIds.ids.get(chosenFrame) ?? null : null,
+    pages: pageRecords,
+  };
+  observations.push(observation);
+  writeJsonAtomic(saveLoadMenuInspectionPath, {
+    runLabel,
+    saveLoadRouteEvidence: true,
+    observations,
+  });
+  return observation;
+}
+
+function frameHasVisibleExactControl(frameRecord, label) {
+  return frameRecord.controls.some((control) => control.accessibleLabel === label && !control.disabled);
+}
+
+function chooseObservedOwner(observation, predicate, description) {
+  const matches = [];
+  for (const pageRecord of observation.pages) {
+    for (const frameRecord of pageRecord.frames) {
+      if (!frameRecord.detached && predicate(frameRecord)) matches.push({ pageRecord, frameRecord });
+    }
+  }
+  if (matches.length !== 1) {
+    throw new Error(`Save menu inspection expected one visible ${description} owner, observed ${matches.length}`);
+  }
+  return matches[0];
+}
+
+function resolveObservedFrame(page, owner, frameIds) {
+  const candidateFrame = frameIds.refs.get(owner.frameRecord.frameId);
+  const stillAttached = page.context().pages().some((candidatePage) =>
+    !candidatePage.isClosed() && candidatePage.frames().includes(candidateFrame));
+  if (!candidateFrame || !stillAttached || candidateFrame.isDetached() || candidateFrame.url() !== owner.frameRecord.url) {
+    throw new Error('Observed save menu owner frame became stale or detached');
+  }
+  return candidateFrame;
+}
+
+function markSaveLoadObservationOwner(observation, owner, observations) {
+  observation.chosenOwnerFrameId = owner.frameRecord.frameId;
+  owner.frameRecord.chosenOwner = true;
+  writeJsonAtomic(saveLoadMenuInspectionPath, {
+    runLabel,
+    saveLoadRouteEvidence: true,
+    observations,
+  });
+}
+
+function chooseObservedQuicksaveControl(observation) {
+  const matches = [];
+  for (const pageRecord of observation.pages) {
+    for (const frameRecord of pageRecord.frames) {
+      for (const control of frameRecord.controls) {
+        if (!frameRecord.detached
+            && !control.disabled
+            && typeof control.ariaLabel === 'string'
+            && control.ariaLabel === 'Resume quicksave') {
+          matches.push({ pageRecord, frameRecord, label: control.ariaLabel });
+        }
+      }
+    }
+  }
+  if (matches.length !== 1) {
+    throw new Error(`Save menu inspection expected one enabled quicksave row, observed ${matches.length}`);
+  }
+  return matches[0];
+}
+
+function deterministicStructuralDiff(before, after) {
+  const changes = [];
+  const summarize = (value) => {
+    if (value === undefined) return { kind: 'missing' };
+    if (value === null || typeof value !== 'object') return value;
+    if (Array.isArray(value)) return { kind: 'array', length: value.length };
+    return { kind: 'object', keys: Object.keys(value).sort() };
+  };
+  const visit = (left, right, currentPath) => {
+    if (Object.is(left, right)) return;
+    const leftObject = left !== null && typeof left === 'object';
+    const rightObject = right !== null && typeof right === 'object';
+    if (!leftObject || !rightObject || Array.isArray(left) !== Array.isArray(right)) {
+      changes.push({ path: currentPath || '$', before: summarize(left), after: summarize(right) });
+      return;
+    }
+    if (Array.isArray(left)) {
+      const length = Math.max(left.length, right.length);
+      for (let index = 0; index < length; index += 1) visit(left[index], right[index], `${currentPath}[${index}]`);
+      return;
+    }
+    const keys = [...new Set([...Object.keys(left), ...Object.keys(right)])].sort();
+    for (const key of keys) visit(left[key], right[key], currentPath ? `${currentPath}.${key}` : key);
+  };
+  visit(before, after, '');
+  return changes;
+}
+
+function validateExpectedLoadHydrationDelta(beforeProjection, expectedProjection, faction, expectedTurn) {
+  const before = JSON.parse(beforeProjection);
+  const expected = JSON.parse(expectedProjection);
+  for (const [label, state] of [['before', before], ['expected', expected]]) {
+    if (state?.meta?.player_faction !== faction || state?.meta?.turn !== expectedTurn) {
+      throw new Error(`Save/load ${label} projection identity mismatch`);
+    }
+  }
+  const changes = deterministicStructuralDiff(before, expected);
+  if (changes.some((change) => change.path !== 'military.sector_combat_ratings'
+      && !change.path.startsWith('military.sector_combat_ratings.'))) {
+    throw new Error('Authoritative load hydration changed state outside sector combat ratings');
+  }
+  const sectors = Object.values(expected.military?.corps_front_sectors ?? {});
+  const ownSectorIds = sectors
+    .filter((sector) => sector?.faction === faction)
+    .map((sector) => sector.sector_id)
+    .sort();
+  const ratingIds = Object.keys(expected.military?.sector_combat_ratings ?? {}).sort();
+  if (JSON.stringify(ratingIds) !== JSON.stringify(ownSectorIds)) {
+    throw new Error('Authoritative loaded projection ratings do not match player-owned sectors');
+  }
+  return { changes, ownSectorIds };
+}
+
+function assertExactExpectedLoadedProjection(actualProjection, expectedProjection) {
+  const actualHash = crypto.createHash('sha256').update(actualProjection).digest('hex');
+  const expectedHash = crypto.createHash('sha256').update(expectedProjection).digest('hex');
+  if (actualProjection !== expectedProjection) {
+    throw new Error(`Loaded projection did not match the exact authoritative hydrated projection: ${expectedHash} -> ${actualHash}`);
+  }
+  return { actualHash, expectedHash, exactBytes: true };
+}
+
+async function buildAuthoritativeExpectedLoadedProjection(savePath, payloadDir) {
+  const localProjectorPath = path.join(repo, 'src', 'desktop', 'player_visible_state.cjs');
+  let simBundlePath = path.join(repo, 'dist', 'desktop', 'desktop_sim.cjs');
+  let projectorPath = localProjectorPath;
+  let packagedProjectorHash = null;
+  if (packagedExecutablePath) {
+    const resourcesDir = path.join(path.dirname(packagedExecutablePath), 'resources');
+    simBundlePath = path.join(resourcesDir, 'dist', 'desktop', 'desktop_sim.cjs');
+    const asar = require('@electron/asar');
+    const packagedProjector = asar.extractFile(
+      path.join(resourcesDir, 'app.asar'),
+      'src\\desktop\\player_visible_state.cjs',
+    );
+    packagedProjectorHash = crypto.createHash('sha256').update(packagedProjector).digest('hex');
+    const localProjectorHash = fileSha256(localProjectorPath);
+    if (packagedProjectorHash !== localProjectorHash) {
+      throw new Error(`Packaged player projector differs from reviewed source: ${packagedProjectorHash} != ${localProjectorHash}`);
+    }
+    projectorPath = path.join(payloadDir, 'packaged-player-visible-state.cjs');
+    fs.writeFileSync(projectorPath, packagedProjector, { flag: 'wx' });
+  }
+  const sim = require(simBundlePath);
+  const projector = require(projectorPath);
+  const sourceBytes = fs.readFileSync(savePath);
+  const { state } = await sim.loadStateFromPath(savePath);
+  const canonicalAfterHydration = sim.serializeState(state);
+  if (!sourceBytes.equals(Buffer.from(canonicalAfterHydration))) {
+    throw new Error('Authoritative load hydration changed canonical save bytes');
+  }
+  const expectedProjection = projector.projectPlayerVisibleStateJson(
+    sim.serializeRuntimeState(state),
+    undefined,
+    sim.getOpportunityOwnershipMetadata(),
+  );
+  return {
+    expectedProjection,
+    expectedProjectionHash: crypto.createHash('sha256').update(expectedProjection).digest('hex'),
+    canonicalHash: crypto.createHash('sha256').update(sourceBytes).digest('hex'),
+    simBundlePath,
+    simBundleHash: fileSha256(simBundlePath),
+    projectorPath,
+    projectorHash: fileSha256(projectorPath),
+    packagedProjectorHash,
+  };
+}
+
+async function completeObservedSaveLoadRoute(
+  page,
+  frame,
+  faction,
+  expectedTurn,
+  savedEvidence,
+  beforeState,
+  beforeProjection,
+  beforeStateHash,
+  beforeAutosaveHash,
+) {
+  const observations = [];
+  const frameIds = { ids: new WeakMap(), refs: new Map(), next: 0 };
+  const payloadDir = createFreshNestedEvidenceDirectory(
+    path.join(outDir, 'save-menu-inspection-payloads'),
+    runSlug,
+  );
+  const beforeProjectionPath = path.join(payloadDir, 'before-projected.json');
+  const beforeCanonicalPath = path.join(payloadDir, 'before-canonical-autosave.json');
+  fs.writeFileSync(beforeProjectionPath, beforeProjection, { flag: 'wx' });
+  fs.copyFileSync(canonicalAutosavePath, beforeCanonicalPath, fs.constants.COPYFILE_EXCL);
+  const expectedLoad = await buildAuthoritativeExpectedLoadedProjection(savedEvidence.path, payloadDir);
+  const expectedProjectionPath = path.join(payloadDir, 'expected-hydrated-projected.json');
+  fs.writeFileSync(expectedProjectionPath, expectedLoad.expectedProjection, { flag: 'wx' });
+  const expectedHydration = validateExpectedLoadHydrationDelta(
+    beforeProjection,
+    expectedLoad.expectedProjection,
+    faction,
+    expectedTurn,
+  );
+  let observation = await captureSaveLoadSurfaceInventory(page, 'before-main-menu-click', frame, observations, frameIds);
+  let owner = chooseObservedOwner(
+    observation,
+    (record) => frameHasVisibleExactControl(record, 'Main Menu'),
+    'Main Menu control',
+  );
+  markSaveLoadObservationOwner(observation, owner, observations);
+  let ownerFrame = resolveObservedFrame(page, owner, frameIds);
+  await ownerFrame.getByRole('button', { name: 'Main Menu', exact: true }).click();
+  await sleep(500);
+
+  observation = await captureSaveLoadSurfaceInventory(page, 'after-main-menu-click', null, observations, frameIds);
+  owner = chooseObservedOwner(
+    observation,
+    (record) => record.markers.openingSplash,
+    'opening splash',
+  );
+  markSaveLoadObservationOwner(observation, owner, observations);
+  ownerFrame = resolveObservedFrame(page, owner, frameIds);
+  await ownerFrame.getByRole('button', { name: 'Assume responsibility', exact: true }).click();
+  await sleep(500);
+
+  observation = await captureSaveLoadSurfaceInventory(page, 'after-main-menu-entry', ownerFrame, observations, frameIds);
+  owner = chooseObservedOwner(
+    observation,
+    (record) => record.markers.mainMenuOpening && frameHasVisibleExactControl(record, 'Field Records'),
+    'Field Records control',
+  );
+  markSaveLoadObservationOwner(observation, owner, observations);
+  ownerFrame = resolveObservedFrame(page, owner, frameIds);
+  await ownerFrame.getByRole('button', { name: 'Field Records', exact: true }).click();
+  await sleep(500);
+
+  observation = await captureSaveLoadSurfaceInventory(page, 'after-field-records-click', ownerFrame, observations, frameIds);
+  owner = chooseObservedQuicksaveControl(observation);
+  markSaveLoadObservationOwner(observation, owner, observations);
+  ownerFrame = resolveObservedFrame(page, owner, frameIds);
+  await ownerFrame.getByRole('button', { name: owner.label, exact: true }).waitFor({ state: 'visible', timeout: 10000 });
+  observation = await captureSaveLoadSurfaceInventory(page, 'resume-quicksave-visible', ownerFrame, observations, frameIds);
+  owner = chooseObservedQuicksaveControl(observation);
+  markSaveLoadObservationOwner(observation, owner, observations);
+  const preResumeFrame = resolveObservedFrame(page, owner, frameIds);
+  await preResumeFrame.getByRole('button', { name: owner.label, exact: true }).click();
+  await sleep(1000);
+
+  observation = await captureSaveLoadSurfaceInventory(page, 'after-resume-click', null, observations, frameIds);
+  owner = chooseObservedOwner(
+    observation,
+    (record) => record.markers.tacticalMap || record.markers.warroom,
+    'restored campaign',
+  );
+  markSaveLoadObservationOwner(observation, owner, observations);
+  const restoredFrame = resolveObservedFrame(page, owner, frameIds);
+  await waitForCampaignCommandReady(restoredFrame, faction, 15000);
+  const afterState = await readState(restoredFrame);
+  const afterProjection = await readRawStateProjection(restoredFrame);
+  const afterStateHash = typeof afterProjection === 'string'
+    ? crypto.createHash('sha256').update(afterProjection).digest('hex')
+    : null;
+  const afterAutosaveHash = fileSha256(canonicalAutosavePath);
+  const afterProjectionPath = path.join(payloadDir, 'after-projected.json');
+  const afterCanonicalPath = path.join(payloadDir, 'after-canonical-autosave.json');
+  fs.writeFileSync(afterProjectionPath, afterProjection, { flag: 'wx' });
+  fs.copyFileSync(canonicalAutosavePath, afterCanonicalPath, fs.constants.COPYFILE_EXCL);
+  const structuralDiff = deterministicStructuralDiff(JSON.parse(beforeProjection), JSON.parse(afterProjection));
+  const structuralDiffPath = path.join(payloadDir, 'structural-diff.json');
+  writeJsonExclusive(structuralDiffPath, {
+    beforeProjectionPath,
+    afterProjectionPath,
+    beforeCanonicalPath,
+    afterCanonicalPath,
+    beforeStateHash,
+    afterStateHash,
+    expectedStateHash: expectedLoad.expectedProjectionHash,
+    beforeAutosaveHash,
+    afterAutosaveHash,
+    canonicalBytesEqual: fs.readFileSync(beforeCanonicalPath).equals(fs.readFileSync(afterCanonicalPath)),
+    changedPathCount: structuralDiff.length,
+    changes: structuralDiff,
+    expectedHydrationChangedPathCount: expectedHydration.changes.length,
+    expectedHydrationChanges: expectedHydration.changes,
+    authoritativeLoad: { ...expectedLoad, expectedProjection: undefined },
+  });
+  const loadedProjectionProof = assertExactExpectedLoadedProjection(afterProjection, expectedLoad.expectedProjection);
+  if (!fs.readFileSync(beforeCanonicalPath).equals(fs.readFileSync(afterCanonicalPath))) {
+    throw new Error('Save/load canonical autosave bytes changed');
+  }
+  const hashProof = {
+    beforeStateHash,
+    expectedStateHash: expectedLoad.expectedProjectionHash,
+    afterStateHash,
+    beforeAutosaveHash,
+    afterAutosaveHash,
+    loadedProjectionProof,
+    canonicalBytesEqual: true,
+  };
+  if (afterState?.turn !== expectedTurn || afterState?.playerFaction !== faction) {
+    throw new Error(`Diagnostic Save/load restored identity mismatch: ${JSON.stringify({ beforeState, afterState })}`);
+  }
+  return {
+    route: 'Pause -> Save Game -> Main Menu -> opening splash -> Field Records -> Resume quicksave',
+    inspectionPath: saveLoadMenuInspectionPath,
+    savedEvidence,
+    hashProof,
+    beforeState,
+    afterState,
+  };
 }
 
 async function exerciseFinalSaveLoad(page, frame, faction, events, userDataDir, expectedTurn) {
@@ -5307,21 +6021,18 @@ async function exerciseFinalSaveLoad(page, frame, faction, events, userDataDir, 
     throw new Error(`Save/load starting identity mismatch: expected ${faction} turn ${expectedTurn}`);
   }
   const beforeStateHash = await readRawStateHash(frame);
+  const beforeProjection = await readRawStateProjection(frame);
+  if (crypto.createHash('sha256').update(beforeProjection).digest('hex') !== beforeStateHash) {
+    throw new Error('Save/load before-projection changed during capture');
+  }
   const beforeAutosaveHash = fileSha256(canonicalAutosavePath);
   const quicksavePath = path.join(userDataDir, 'saves', 'quicksave.json');
   const beforeQuicksaveFingerprint = filePersistenceFingerprint(quicksavePath);
-  async function openPause() {
-    await clearOpenSurfaces(frame);
-    const saveButton = frame.getByRole('button', { name: 'Save Game', exact: true });
-    for (let attempt = 0; attempt < 5 && !await saveButton.isVisible(); attempt += 1) {
-      await frame.locator('body').press('Escape');
-      await sleep(200);
-    }
-    await saveButton.waitFor({ state: 'visible', timeout: 5000 });
-  }
-  await openPause();
+  const saveButton = frame.getByRole('button', { name: 'Save Game', exact: true });
+  await openSaveLoadPause(frame, expectedTurn, 'initial');
   await snapshot(page, frame, faction, events, 'save-load-pause');
-  await frame.getByRole('button', { name: 'Save Game', exact: true }).click();
+  await saveButton.click();
+  await saveButton.waitFor({ state: 'hidden', timeout: 5000 });
   for (let attempt = 0; attempt < 100 && filePersistenceFingerprint(quicksavePath) === beforeQuicksaveFingerprint; attempt += 1) {
     await sleep(100);
   }
@@ -5330,23 +6041,81 @@ async function exerciseFinalSaveLoad(page, frame, faction, events, userDataDir, 
   }
   const savedEvidence = archiveAutosaveEvidence(quicksavePath, path.join(evidenceDir, safeName(faction), 'manual-quicksave.json'));
   if (savedEvidence.sha256 !== beforeAutosaveHash) throw new Error('Manual save differs from final canonical autosave');
-  await openPause();
-  await frame.getByRole('button', { name: 'Main Menu', exact: true }).click();
-  await frame.getByRole('button', { name: 'Field Records', exact: true }).click();
-  const resume = frame.getByRole('button', { name: 'Resume quicksave', exact: true });
-  await resume.waitFor({ state: 'visible', timeout: 10000 });
-  await snapshot(page, frame, faction, events, 'save-load-field-records', { savedEvidence });
-  await resume.click();
-  await waitForCampaignCommandReady(frame, faction, 15000);
-  const afterState = await readState(frame);
-  const afterStateHash = await readRawStateHash(frame);
-  const afterAutosaveHash = fileSha256(canonicalAutosavePath);
-  const hashProof = assertStableProjectionAndAutosaveHashes('Final Save Game -> Field Records load', beforeStateHash, beforeAutosaveHash, afterStateHash, afterAutosaveHash);
-  if (afterState?.turn !== expectedTurn || afterState?.playerFaction !== faction) {
-    throw new Error(`Save/load turn or faction mismatch: ${JSON.stringify({ beforeState, afterState })}`);
+  if (!await waitForTacticalMapReady(frame, expectedTurn, false, 15000)) {
+    const diagnostics = await tacticalMapReadinessDiagnostics(frame, expectedTurn, false);
+    throw new Error(`Save Game did not return to a current tactical owner: ${JSON.stringify(diagnostics)}`);
   }
-  await snapshot(page, frame, faction, events, 'save-load-restored', { savedEvidence, hashProof });
-  return { route: 'Pause -> Save Game -> Main Menu -> Field Records -> Resume quicksave', savedEvidence, hashProof, beforeState, afterState };
+  const postSaveOwner = await tacticalMapReadinessDiagnostics(frame, expectedTurn, false);
+  await snapshot(page, frame, faction, events, 'save-load-post-save', { savedEvidence, postSaveOwner });
+  await openSaveLoadPause(frame, expectedTurn, 'post-save');
+  return completeObservedSaveLoadRoute(
+    page,
+    frame,
+    faction,
+    expectedTurn,
+    savedEvidence,
+    beforeState,
+    beforeProjection,
+    beforeStateHash,
+    beforeAutosaveHash,
+  );
+}
+
+function createMainProcessOutputCapture(evidencePath, now = Date.now) {
+  fs.writeFileSync(evidencePath, '', { flag: 'wx' });
+  let sequence = 0;
+  let rawChunkSequence = 0;
+  const streams = new Map();
+  const emit = (stream, target, rawLine) => {
+    const line = rawLine.trim();
+    if (!line) return;
+    fs.appendFileSync(evidencePath, `${JSON.stringify({
+      sequence: ++sequence,
+      observedAtMs: now(),
+      stream,
+      line,
+    })}\n`);
+    target.push(line.slice(0, 2000));
+    if (target.length > 500) target.shift();
+  };
+  const handler = (stream, target) => {
+    if (streams.has(stream)) throw new Error(`Main-process output stream already bound: ${stream}`);
+    const state = { stream, target, buffer: '', pendingOrder: null };
+    streams.set(stream, state);
+    return (chunk) => {
+      const text = String(chunk ?? '');
+      if (!text) return;
+      const chunkOrder = ++rawChunkSequence;
+      if (!state.buffer) state.pendingOrder = chunkOrder;
+      state.buffer += text;
+      let newlineIndex = state.buffer.indexOf('\n');
+      while (newlineIndex >= 0) {
+        emit(stream, target, state.buffer.slice(0, newlineIndex).replace(/\r$/, ''));
+        state.buffer = state.buffer.slice(newlineIndex + 1);
+        state.pendingOrder = state.buffer ? chunkOrder : null;
+        newlineIndex = state.buffer.indexOf('\n');
+      }
+    };
+  };
+  const flush = () => {
+    const pending = Array.from(streams.values())
+      .filter((state) => state.buffer)
+      .sort((left, right) => left.pendingOrder - right.pendingOrder);
+    for (const state of pending) {
+      emit(state.stream, state.target, state.buffer.replace(/\r$/, ''));
+      state.buffer = '';
+      state.pendingOrder = null;
+    }
+  };
+  return { handler, flush };
+}
+
+function prepareFreshUserDataDirectory(userDataDir, isResume) {
+  if (fs.existsSync(userDataDir)) {
+    const mode = isResume ? 'resume-save' : 'new-campaign';
+    throw new Error(`User-data profile already exists for ${mode}; refusing to modify retained bytes: ${userDataDir}`);
+  }
+  fs.mkdirSync(userDataDir, { recursive: false });
 }
 
 async function runFaction(faction, result) {
@@ -5357,18 +6126,22 @@ async function runFaction(faction, result) {
   canonicalAutosavePath = packagedExecutablePath
     ? path.join(userDataDir, 'saves', 'autosave.json')
     : developmentCanonicalAutosavePath;
-  if (!resumeSavePath) fs.rmSync(userDataDir, { recursive: true, force: true });
-  fs.mkdirSync(userDataDir, { recursive: true });
+  prepareFreshUserDataDirectory(userDataDir, Boolean(resumeSavePath));
   const events = [];
   const consoleMessages = [];
   const networkFailures = [];
   const expectedStartupAborts = [];
   const expectedTeardownAborts = [];
   const expectedNavigationAborts = [];
+  const expectedTileFetchAborts = [];
   const expectedAmbientLifecycleAborts = [];
   const pageErrors = [];
   const mainProcessStdout = [];
   const mainProcessStderr = [];
+  const mainProcessOutputDir = path.join(outDir, 'main-process-output');
+  fs.mkdirSync(mainProcessOutputDir, { recursive: true });
+  const mainProcessOutputEvidencePath = path.join(mainProcessOutputDir, `${runSlug}-${safeName(faction)}.jsonl`);
+  const mainProcessOutputCapture = createMainProcessOutputCapture(mainProcessOutputEvidencePath);
   const attachedPages = new WeakSet();
   const requestNavigationWindows = new WeakMap();
   let teardownStarted = false;
@@ -5381,15 +6154,9 @@ async function runFaction(faction, result) {
     env: { ...process.env, ELECTRON_DISABLE_SECURITY_WARNINGS: 'true' },
     timeout: 90000,
   });
-  const captureMainProcessOutput = (target) => (chunk) => {
-    for (const line of String(chunk ?? '').split(/\r?\n/).map((value) => value.trim()).filter(Boolean)) {
-      target.push(line.slice(0, 2000));
-      if (target.length > 500) target.shift();
-    }
-  };
   const electronProcess = app.process();
-  electronProcess.stdout?.on('data', captureMainProcessOutput(mainProcessStdout));
-  electronProcess.stderr?.on('data', captureMainProcessOutput(mainProcessStderr));
+  electronProcess.stdout?.on('data', mainProcessOutputCapture.handler('stdout', mainProcessStdout));
+  electronProcess.stderr?.on('data', mainProcessOutputCapture.handler('stderr', mainProcessStderr));
   const diagnostics = {
     events,
     consoleMessages,
@@ -5398,9 +6165,11 @@ async function runFaction(faction, result) {
     expectedStartupAborts,
     expectedTeardownAborts,
     expectedNavigationAborts,
+    expectedTileFetchAborts,
     expectedAmbientLifecycleAborts,
     attachedPages,
     requestNavigationWindows,
+    requestStartTimes: new WeakMap(),
     isTeardownStarted: () => teardownStarted,
     getMapNavigationAbortWindow: getActiveMapNavigationAbortWindow,
   };
@@ -5409,10 +6178,12 @@ async function runFaction(faction, result) {
   for (const existingPage of app.windows()) attachDiagnostics(existingPage);
   let entry = null;
   let initialEvidence = null;
+  let frame = null;
   try {
     const page = await waitForGamePage(app);
     attachDiagnostics(page);
-    let frame;
+    await installTileFetchAbortObserverBeforeStartup(page);
+    await installAmbientLifecycleObserverBeforeStartup(page);
     if (resumeSavePath) {
       if (!fs.existsSync(resumeSavePath)) throw new Error(`Resume save not found: ${resumeSavePath}`);
       await app.evaluate(({ dialog }, filePath) => {
@@ -5429,7 +6200,6 @@ async function runFaction(faction, result) {
     } else {
       frame = await startCampaign(page, faction, events);
     }
-    await installAmbientLifecycleObserver(frame);
     const initialAutosavePath = resolveDecisionReceiptAutosavePath(
       canonicalAutosavePath,
       resumeSavePath,
@@ -5478,7 +6248,9 @@ async function runFaction(faction, result) {
         { allowAdvanceModal: false },
       );
     }
-    if (!skipInitialTour) {
+    if (saveLoadOnly) {
+      await drainTransientSurfaces(page, frame, faction, events, 'save-load-only-pre-route', 40, { allowAdvanceModal: false });
+    } else if (!skipInitialTour) {
       await surfaceTour(page, frame, faction, events);
     } else {
       await mapInteractionProbe(page, frame, faction, events, 'initial-map-probe');
@@ -5487,7 +6259,7 @@ async function runFaction(faction, result) {
     if (contextChurnCycles > 0) {
       await exerciseContextChurn(page, frame, faction, events, contextChurnCycles);
     }
-    if (strategicRun) {
+    if (strategicRun && !saveLoadOnly) {
       strategicConfiguration = await configureStrategicRun(frame);
       await snapshot(page, frame, faction, events, 'strategic-run-configured', { strategicConfiguration });
       if (!strategicConfiguration.ok) {
@@ -5506,10 +6278,12 @@ async function runFaction(faction, result) {
     if (saveLoadProof) {
       playtest.saveLoadProof = await exerciseFinalSaveLoad(page, frame, faction, events, userDataDir, maxTurns);
     }
-    const ambientLifecycleStopSignals = await readAmbientLifecycleStopSignals(frame);
+    const tileFetchAbortSignals = await readTileFetchAbortSignals(frame);
+    attributeTileFetchAborts(networkFailures, tileFetchAbortSignals, expectedTileFetchAborts);
+    const ambientLifecycleSignals = await readAmbientLifecycleSignals(frame);
     attributeAmbientLifecycleAborts(
       networkFailures,
-      ambientLifecycleStopSignals,
+      ambientLifecycleSignals,
       expectedAmbientLifecycleAborts,
     );
     if (strategicRun && maxTurns > 0 && playtest.finalState?.autonomyLevel !== 1) {
@@ -5525,8 +6299,11 @@ async function runFaction(faction, result) {
       expectedStartupAborts,
       expectedTeardownAborts,
       expectedNavigationAborts,
+      expectedTileFetchAborts,
+      tileFetchAbortSignals,
       expectedAmbientLifecycleAborts,
-      ambientLifecycleStopSignals,
+      ambientLifecycleSignals,
+      mainProcessOutputEvidencePath,
       mainProcessStdout,
       mainProcessStderr,
       initialEvidence,
@@ -5540,6 +6317,12 @@ async function runFaction(faction, result) {
     result.factions.push(entry);
     writeProgress(result);
   } catch (error) {
+    const failureTileFetchAbortSignals = frame
+      ? await readTileFetchAbortSignals(frame).catch(() => [])
+      : [];
+    const failureAmbientLifecycleSignals = frame
+      ? await readAmbientLifecycleSignals(frame).catch(() => [])
+      : [];
     result.factions.push({
       faction,
       failed: true,
@@ -5553,7 +6336,11 @@ async function runFaction(faction, result) {
       expectedStartupAborts,
       expectedTeardownAborts,
       expectedNavigationAborts,
+      expectedTileFetchAborts,
       expectedAmbientLifecycleAborts,
+      failureTileFetchAbortSignals,
+      failureAmbientLifecycleSignals,
+      mainProcessOutputEvidencePath,
       mainProcessStdout,
       mainProcessStderr,
       events,
@@ -5563,6 +6350,8 @@ async function runFaction(faction, result) {
   } finally {
     teardownStarted = true;
     await optionalCleanup('electron application teardown', () => app.close());
+    mainProcessOutputCapture.flush();
+    writeProgress(result);
   }
   const expectedMainProcessStderr = mainProcessStderr.filter(isExpectedInspectorTeardownLine);
   const unexpectedMainProcessStderr = mainProcessStderr.filter((line) => !isExpectedInspectorTeardownLine(line));
