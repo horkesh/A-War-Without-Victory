@@ -6145,3 +6145,7 @@ Document capture listeners cannot observe events from detached new Audio element
 ## 2026-10-24 — Keep telemetry identities separate until a real join is proved
 
 Playwright/CDP request identity and Chromium NetLog source identity are separate in the inspected producer. Same URL, nearby times, Range and complete byte counts can support a hypothesis without establishing a unique cross-layer join. Preserve that distinction in fixtures and admission rules; an authentic-looking synthetic identifier cannot prove a producer contract. The warroom v2 development stopped at that approved evidence boundary. See the [warroom ledger entry](PROJECT_LEDGER.md#2026-10-24--warroom-loop-diagnosis-diagnostic-repair-go-and-v2-identity-hard-stop).
+
+## 2026-10-24 — Preserve Git porcelain status columns in validation
+
+Git porcelain begins with two meaningful status columns. Calling trim() destroys a leading blank index column and can reject the intended ` M path` state. Keep the raw prefix, remove only terminal newlines, then parse the two columns and path separately. Positive expected-path and negative staged/extra-path controls must exercise the parser before costly work. The retained baseline producer succeeded; its faulty wrapper stays RED while a separate reviewed read-only qualifier proves the resulting state. See the [baseline adoption ledger](PROJECT_LEDGER.md#2026-10-24--eight-pin-baseline-adoption-qualified-without-gameplay-changes).

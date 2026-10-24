@@ -1,0 +1,974 @@
+{
+  "schema": "awwv.baseline-rebless-candidate-evaluation.v1",
+  "pass": true,
+  "candidate": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94",
+  "baselines": {
+    "n91": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n91",
+    "n92": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n92"
+  },
+  "inventory": {
+    "expected_count": 40,
+    "actual_count": 40,
+    "missing": [],
+    "extra": []
+  },
+  "save_bindings": [
+    {
+      "name": "save_w104.json",
+      "expected": 104,
+      "actual": 104,
+      "pass": true
+    },
+    {
+      "name": "save_w111.json",
+      "expected": 111,
+      "actual": 111,
+      "pass": true
+    },
+    {
+      "name": "save_w112.json",
+      "expected": 112,
+      "actual": 112,
+      "pass": true
+    },
+    {
+      "name": "save_w113.json",
+      "expected": 113,
+      "actual": 113,
+      "pass": true
+    },
+    {
+      "name": "save_w130.json",
+      "expected": 130,
+      "actual": 130,
+      "pass": true
+    },
+    {
+      "name": "save_w131.json",
+      "expected": 131,
+      "actual": 131,
+      "pass": true
+    },
+    {
+      "name": "save_w132.json",
+      "expected": 132,
+      "actual": 132,
+      "pass": true
+    },
+    {
+      "name": "save_w133.json",
+      "expected": 133,
+      "actual": 133,
+      "pass": true
+    },
+    {
+      "name": "save_w134.json",
+      "expected": 134,
+      "actual": 134,
+      "pass": true
+    },
+    {
+      "name": "save_w135.json",
+      "expected": 135,
+      "actual": 135,
+      "pass": true
+    },
+    {
+      "name": "save_w136.json",
+      "expected": 136,
+      "actual": 136,
+      "pass": true
+    },
+    {
+      "name": "save_w15.json",
+      "expected": 15,
+      "actual": 15,
+      "pass": true
+    },
+    {
+      "name": "save_w156.json",
+      "expected": 156,
+      "actual": 156,
+      "pass": true
+    },
+    {
+      "name": "save_w16.json",
+      "expected": 16,
+      "actual": 16,
+      "pass": true
+    },
+    {
+      "name": "save_w178.json",
+      "expected": 178,
+      "actual": 178,
+      "pass": true
+    },
+    {
+      "name": "save_w179.json",
+      "expected": 179,
+      "actual": 179,
+      "pass": true
+    },
+    {
+      "name": "save_w180.json",
+      "expected": 180,
+      "actual": 180,
+      "pass": true
+    },
+    {
+      "name": "save_w181.json",
+      "expected": 181,
+      "actual": 181,
+      "pass": true
+    },
+    {
+      "name": "save_w182.json",
+      "expected": 182,
+      "actual": 182,
+      "pass": true
+    },
+    {
+      "name": "save_w183.json",
+      "expected": 183,
+      "actual": 183,
+      "pass": true
+    },
+    {
+      "name": "save_w184.json",
+      "expected": 184,
+      "actual": 184,
+      "pass": true
+    },
+    {
+      "name": "save_w185.json",
+      "expected": 185,
+      "actual": 185,
+      "pass": true
+    },
+    {
+      "name": "save_w186.json",
+      "expected": 186,
+      "actual": 186,
+      "pass": true
+    },
+    {
+      "name": "save_w187.json",
+      "expected": 187,
+      "actual": 187,
+      "pass": true
+    },
+    {
+      "name": "save_w39.json",
+      "expected": 39,
+      "actual": 39,
+      "pass": true
+    }
+  ],
+  "checkpoints": {
+    "jan1993": {
+      "turn": 39,
+      "denominator": 712,
+      "floor": 707,
+      "score": 707,
+      "against": {
+        "n91": {
+          "formerly_correct": 707,
+          "lost": []
+        },
+        "n92": {
+          "formerly_correct": 707,
+          "lost": []
+        }
+      }
+    },
+    "apr1994": {
+      "turn": 104,
+      "denominator": 712,
+      "floor": 707,
+      "score": 707,
+      "against": {
+        "n91": {
+          "formerly_correct": 707,
+          "lost": []
+        },
+        "n92": {
+          "formerly_correct": 707,
+          "lost": []
+        }
+      }
+    },
+    "apr1995": {
+      "turn": 156,
+      "denominator": 712,
+      "floor": 706,
+      "score": 706,
+      "against": {
+        "n91": {
+          "formerly_correct": 705,
+          "lost": []
+        },
+        "n92": {
+          "formerly_correct": 706,
+          "lost": []
+        }
+      }
+    },
+    "oct1995": {
+      "turn": 188,
+      "denominator": 712,
+      "floor": 706,
+      "score": 706,
+      "against": {
+        "n91": {
+          "formerly_correct": 705,
+          "lost": []
+        },
+        "n92": {
+          "formerly_correct": 706,
+          "lost": []
+        }
+      }
+    }
+  },
+  "shared_control_deltas": {
+    "39": {
+      "n91": [],
+      "n92": []
+    },
+    "104": {
+      "n91": [],
+      "n92": []
+    },
+    "111": {
+      "n91": [],
+      "n92": []
+    },
+    "112": {
+      "n91": [],
+      "n92": []
+    },
+    "113": {
+      "n91": [],
+      "n92": []
+    },
+    "156": {
+      "n91": [
+        {
+          "id": "op:vares:toljenak",
+          "baseline": "RS",
+          "candidate": "RBiH"
+        }
+      ],
+      "n92": []
+    },
+    "178": {
+      "n91": [
+        {
+          "id": "op:vares:toljenak",
+          "baseline": "RS",
+          "candidate": "RBiH"
+        }
+      ],
+      "n92": []
+    },
+    "179": {
+      "n91": [
+        {
+          "id": "op:vares:toljenak",
+          "baseline": "RS",
+          "candidate": "RBiH"
+        }
+      ],
+      "n92": []
+    },
+    "180": {
+      "n91": [
+        {
+          "id": "op:vares:toljenak",
+          "baseline": "RS",
+          "candidate": "RBiH"
+        }
+      ],
+      "n92": []
+    },
+    "181": {
+      "n91": [
+        {
+          "id": "op:vares:toljenak",
+          "baseline": "RS",
+          "candidate": "RBiH"
+        }
+      ],
+      "n92": []
+    },
+    "182": {
+      "n91": [
+        {
+          "id": "op:vares:toljenak",
+          "baseline": "RS",
+          "candidate": "RBiH"
+        }
+      ],
+      "n92": []
+    },
+    "183": {
+      "n91": [
+        {
+          "id": "op:vares:toljenak",
+          "baseline": "RS",
+          "candidate": "RBiH"
+        }
+      ],
+      "n92": []
+    },
+    "184": {
+      "n91": [
+        {
+          "id": "op:vares:toljenak",
+          "baseline": "RS",
+          "candidate": "RBiH"
+        }
+      ],
+      "n92": []
+    },
+    "185": {
+      "n91": [
+        {
+          "id": "op:vares:toljenak",
+          "baseline": "RS",
+          "candidate": "RBiH"
+        }
+      ],
+      "n92": []
+    },
+    "186": {
+      "n91": [
+        {
+          "id": "op:vares:toljenak",
+          "baseline": "RS",
+          "candidate": "RBiH"
+        }
+      ],
+      "n92": []
+    },
+    "187": {
+      "n91": [
+        {
+          "id": "op:vares:toljenak",
+          "baseline": "RS",
+          "candidate": "RBiH"
+        }
+      ],
+      "n92": []
+    },
+    "188": {
+      "n91": [
+        {
+          "id": "op:vares:toljenak",
+          "baseline": "RS",
+          "candidate": "RBiH"
+        }
+      ],
+      "n92": []
+    }
+  },
+  "toljenak": {
+    "timeline": [
+      {
+        "turn": 130,
+        "actual": "RS",
+        "expected": "RS"
+      },
+      {
+        "turn": 131,
+        "actual": "RS",
+        "expected": "RS"
+      },
+      {
+        "turn": 132,
+        "actual": "RS",
+        "expected": "RS"
+      },
+      {
+        "turn": 133,
+        "actual": "RS",
+        "expected": "RS"
+      },
+      {
+        "turn": 134,
+        "actual": "RS",
+        "expected": "RS"
+      },
+      {
+        "turn": 135,
+        "actual": "RBiH",
+        "expected": "RBiH"
+      },
+      {
+        "turn": 136,
+        "actual": "RBiH",
+        "expected": "RBiH"
+      },
+      {
+        "turn": 156,
+        "actual": "RBiH",
+        "expected": "RBiH"
+      },
+      {
+        "turn": 178,
+        "actual": "RBiH",
+        "expected": "RBiH"
+      },
+      {
+        "turn": 179,
+        "actual": "RBiH",
+        "expected": "RBiH"
+      },
+      {
+        "turn": 180,
+        "actual": "RBiH",
+        "expected": "RBiH"
+      },
+      {
+        "turn": 181,
+        "actual": "RBiH",
+        "expected": "RBiH"
+      },
+      {
+        "turn": 182,
+        "actual": "RBiH",
+        "expected": "RBiH"
+      },
+      {
+        "turn": 183,
+        "actual": "RBiH",
+        "expected": "RBiH"
+      },
+      {
+        "turn": 184,
+        "actual": "RBiH",
+        "expected": "RBiH"
+      },
+      {
+        "turn": 185,
+        "actual": "RBiH",
+        "expected": "RBiH"
+      },
+      {
+        "turn": 186,
+        "actual": "RBiH",
+        "expected": "RBiH"
+      },
+      {
+        "turn": 187,
+        "actual": "RBiH",
+        "expected": "RBiH"
+      },
+      {
+        "turn": 188,
+        "actual": "RBiH",
+        "expected": "RBiH"
+      }
+    ],
+    "battles": [
+      {
+        "turn": 135,
+        "attacker_brigade": "arbih_162nd_mountain",
+        "attacker_brigades": [
+          "arbih_162nd_mountain",
+          "arbih_164th_mountain"
+        ],
+        "attacker_casualties": 374,
+        "attacker_faction": "RBiH",
+        "attacker_won": true,
+        "battle_id": "135:op:vares:toljenak:arbih_162nd_mountain:rs_ilidza_brigade",
+        "defender_brigade": "rs_ilidza_brigade",
+        "defender_casualties": 749,
+        "defender_contributions": [
+          {
+            "brigade_id": "F_RS_0001",
+            "casualties_taken": 357,
+            "distance_hops": 1,
+            "is_home_municipality": false,
+            "reactive_weight": 80.57
+          },
+          {
+            "brigade_id": "rs_ilidza_brigade",
+            "casualties_taken": 392,
+            "distance_hops": 1,
+            "is_home_municipality": false,
+            "reactive_weight": 88.56
+          }
+        ],
+        "defender_faction": "RS",
+        "equipment": {
+          "attacker_artillery_lost": 1,
+          "attacker_tanks_lost": 0,
+          "captured_artillery": 1,
+          "captured_by": "RBiH",
+          "captured_tanks": 0,
+          "defender_artillery_lost": 1,
+          "defender_tanks_lost": 0,
+          "scavenged_artillery": 0,
+          "scavenged_tanks": 0
+        },
+        "operation_id": "arbih_1st_corps:Operation Behar-I:t133",
+        "operation_name": "Operation Behar-I",
+        "outcome": "decisive_victory",
+        "power_ratio": 2.45,
+        "target_osid": "op:vares:toljenak"
+      }
+    ],
+    "events": [
+      {
+        "attacker_brigade": "arbih_162nd_mountain",
+        "battle_id": "135:op:vares:toljenak:arbih_162nd_mountain:rs_ilidza_brigade",
+        "from": "RS",
+        "mechanism": "combat",
+        "mun_id": "vares",
+        "settlement_id": "op:vares:toljenak",
+        "to": "RBiH",
+        "turn": 135
+      }
+    ],
+    "diagnostics": [
+      {
+        "attack_attempt_count": 2,
+        "attack_order_targets": [
+          {
+            "battle_count": 1,
+            "current_objective": false,
+            "order_count": 2,
+            "target_osid": "op:vares:toljenak"
+          }
+        ],
+        "battle_count": 1,
+        "corps_id": "arbih_1st_corps",
+        "current_objective": null,
+        "current_objective_attack_count": 0,
+        "current_objective_battle_count": 0,
+        "current_objectives": [],
+        "eligible_attacker_count": 2,
+        "faction_id": "RBiH",
+        "idle_execution_turn_streak": 0,
+        "invalid_for_combat_calibration": false,
+        "invalidation_reasons": [],
+        "movement_only_execution_turns": 0,
+        "movement_order_count": 1,
+        "objective_attempt_count": 1,
+        "objective_capture_count": 1,
+        "operation_name": "Operation Behar-I",
+        "operation_phase": "recovery",
+        "operation_type": "sector_attack",
+        "participant_attack_orders": [
+          {
+            "battle_count": 1,
+            "brigade_id": "arbih_162nd_mountain",
+            "location_osid": "op:vares:toljenak",
+            "resolver_seen_target_osid": "op:vares:toljenak",
+            "target_is_current_objective": false,
+            "target_osid": "op:vares:toljenak"
+          },
+          {
+            "battle_count": 1,
+            "brigade_id": "arbih_164th_mountain",
+            "location_osid": "op:vares:budozelje_2",
+            "resolver_seen_target_osid": "op:vares:toljenak",
+            "target_is_current_objective": false,
+            "target_osid": "op:vares:toljenak"
+          }
+        ],
+        "participating_brigades": [
+          "arbih_162nd_mountain",
+          "arbih_164th_mountain",
+          "arbih_guards_brigade"
+        ],
+        "recovery_reason": "completed",
+        "skipped_attack_orders": []
+      }
+    ],
+    "aars": [
+      {
+        "axis_summaries": [
+          {
+            "axis_id": "nisici_plateau",
+            "axis_name": "Nišići Plateau",
+            "brigades": [
+              "arbih_162nd_mountain",
+              "arbih_164th_mountain",
+              "arbih_guards_brigade"
+            ],
+            "casualties_inflicted": {
+              "killed": 165,
+              "wounded": 554
+            },
+            "casualties_suffered": {
+              "killed": 82,
+              "wounded": 277
+            },
+            "equipment_captured": {
+              "artillery": 3,
+              "tanks": 2
+            },
+            "equipment_destroyed": {
+              "artillery": 3,
+              "tanks": 2
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "objectives_captured": [
+              "op:vares:toljenak"
+            ],
+            "objectives_targeted": [
+              "op:vares:toljenak"
+            ],
+            "staging_osid": "op:vares:budozelje_2",
+            "total_attacks": 1
+          }
+        ],
+        "capture_provenance": "logged_capture",
+        "casualties_inflicted": {
+          "killed": 165,
+          "wounded": 554
+        },
+        "casualties_suffered": {
+          "killed": 82,
+          "wounded": 277
+        },
+        "commander_name": "Safet Zajko",
+        "commander_officer_id": "arbih_zajko",
+        "commander_rank": "corps_commander",
+        "corps_id": "arbih_1st_corps",
+        "duration_turns": 3,
+        "ended_turn": 136,
+        "equipment_captured": {
+          "artillery": 3,
+          "tanks": 2
+        },
+        "equipment_destroyed": {
+          "artillery": 3,
+          "tanks": 2
+        },
+        "equipment_lost": {
+          "artillery": 0,
+          "tanks": 0
+        },
+        "faction": "RBiH",
+        "final_strength": 4560,
+        "force_ratio_estimate": 5.553383920614678,
+        "grade": {
+          "factors": {
+            "exchange_ratio": 66.09192200557104,
+            "objective_completion": 100,
+            "preservation": 100,
+            "tempo": 87.5
+          },
+          "stars": 5,
+          "verdict": "Brilliant Victory"
+        },
+        "initial_strength": 3600,
+        "objectives_captured": [
+          "op:vares:toljenak"
+        ],
+        "objectives_held_without_logged_capture": [],
+        "objectives_logged_captured": [
+          "op:vares:toljenak"
+        ],
+        "objectives_targeted": [
+          "op:vares:toljenak"
+        ],
+        "operation_id": "arbih_1st_corps:Operation Behar-I:t133",
+        "operation_name": "Operation Behar-I",
+        "outcome": "success",
+        "participating_brigades": [
+          "arbih_162nd_mountain",
+          "arbih_164th_mountain",
+          "arbih_guards_brigade"
+        ],
+        "recovery_reason": "completed",
+        "started_turn": 133,
+        "total_attacks": 1,
+        "type": "sector_attack",
+        "weekly_log": [
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 2,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 0,
+            "notable_events": [],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "planning",
+            "turn": 133
+          },
+          {
+            "attacks_this_turn": 0,
+            "brigade_count": 2,
+            "casualties_inflicted": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "casualties_suffered": {
+              "killed": 0,
+              "wounded": 0
+            },
+            "equipment_captured": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_destroyed": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 0,
+            "notable_events": [],
+            "objectives_captured_this_turn": [],
+            "objectives_lost_this_turn": [],
+            "phase": "planning",
+            "turn": 134
+          },
+          {
+            "attacks_this_turn": 1,
+            "axis_entries": {
+              "nisici_plateau": {
+                "attacks_this_turn": 1,
+                "casualties_inflicted": {
+                  "killed": 165,
+                  "wounded": 554
+                },
+                "casualties_suffered": {
+                  "killed": 82,
+                  "wounded": 277
+                },
+                "equipment_captured": {
+                  "artillery": 3,
+                  "tanks": 2
+                },
+                "equipment_destroyed": {
+                  "artillery": 3,
+                  "tanks": 2
+                },
+                "equipment_lost": {
+                  "artillery": 0,
+                  "tanks": 0
+                },
+                "objectives_captured_this_turn": [],
+                "objectives_lost_this_turn": []
+              }
+            },
+            "brigade_count": 3,
+            "casualties_inflicted": {
+              "killed": 165,
+              "wounded": 554
+            },
+            "casualties_suffered": {
+              "killed": 82,
+              "wounded": 277
+            },
+            "equipment_captured": {
+              "artillery": 3,
+              "tanks": 2
+            },
+            "equipment_destroyed": {
+              "artillery": 3,
+              "tanks": 2
+            },
+            "equipment_lost": {
+              "artillery": 0,
+              "tanks": 0
+            },
+            "momentum": 1,
+            "notable_events": [
+              "first_blood",
+              "breakthrough"
+            ],
+            "objectives_captured_this_turn": [
+              "op:vares:toljenak"
+            ],
+            "objectives_lost_this_turn": [],
+            "phase": "recovery",
+            "turn": 135
+          }
+        ]
+      }
+    ]
+  },
+  "protected_16_anchors": [
+    {
+      "id": "op:sanski_most:ostra_luka",
+      "expected": "RS",
+      "actual": "RS",
+      "pass": true
+    },
+    {
+      "id": "op:bosanska_krupa:veliki_badic",
+      "expected": "RBiH",
+      "actual": "RBiH",
+      "pass": true
+    },
+    {
+      "id": "op:bosanska_krupa:ivanjska_2",
+      "expected": "RBiH",
+      "actual": "RBiH",
+      "pass": true
+    },
+    {
+      "id": "op:bosanska_krupa:arapusa_2",
+      "expected": "RBiH",
+      "actual": "RBiH",
+      "pass": true
+    },
+    {
+      "id": "op:bosanska_krupa:donji_dubovik_2",
+      "expected": "RBiH",
+      "actual": "RBiH",
+      "pass": true
+    },
+    {
+      "id": "op:bosanska_krupa:vranjska_2",
+      "expected": "RBiH",
+      "actual": "RBiH",
+      "pass": true
+    },
+    {
+      "id": "op:bosanska_krupa:jasenica_2",
+      "expected": "RBiH",
+      "actual": "RBiH",
+      "pass": true
+    },
+    {
+      "id": "op:bosanska_krupa:gornja_suvaja",
+      "expected": "RBiH",
+      "actual": "RBiH",
+      "pass": true
+    },
+    {
+      "id": "op:bosanski_petrovac:krnjeusa",
+      "expected": "RBiH",
+      "actual": "RBiH",
+      "pass": true
+    },
+    {
+      "id": "op:bosanski_novi:krslje_2",
+      "expected": "RBiH",
+      "actual": "RBiH",
+      "pass": true
+    },
+    {
+      "id": "op:bosanski_novi:matavazi_2",
+      "expected": "RBiH",
+      "actual": "RBiH",
+      "pass": true
+    },
+    {
+      "id": "op:mrkonjic_grad:majdan_2",
+      "expected": "HRHB",
+      "actual": "HRHB",
+      "pass": true
+    },
+    {
+      "id": "op:mrkonjic_grad:podrasnica_2",
+      "expected": "HRHB",
+      "actual": "HRHB",
+      "pass": true
+    },
+    {
+      "id": "op:mrkonjic_grad:mrkonjic_grad_2",
+      "expected": "HRHB",
+      "actual": "HRHB",
+      "pass": true
+    },
+    {
+      "id": "op:mrkonjic_grad:bjelajce_2",
+      "expected": "HRHB",
+      "actual": "HRHB",
+      "pass": true
+    },
+    {
+      "id": "op:mrkonjic_grad:baljvine_2",
+      "expected": "HRHB",
+      "actual": "HRHB",
+      "pass": true
+    }
+  ],
+  "retained_hvo": [
+    {
+      "name": "prisoje",
+      "osid": "op:jajce:prisoje",
+      "controller": "HRHB",
+      "battle_count": 1,
+      "event_count": 1,
+      "pass": true
+    },
+    {
+      "name": "donji_vrbljani",
+      "osid": "op:kljuc:donji_vrbljani_2",
+      "controller": "HRHB",
+      "battle_count": 1,
+      "event_count": 1,
+      "pass": true
+    }
+  ],
+  "accepted_ci_artifact_hashes": {
+    "pass": true,
+    "failures": [],
+    "actual_hashes": {
+      "activity_summary.json": "a59b868cdde127a35b0a6012ff72848808f73a0a888e44732442c5bf42771ce5",
+      "control_delta.json": "de5cb5b59eb0abb2aba9f45a75e774d5d44bf73ed3f785fb59f2ed02d3da840c",
+      "end_report.md": "c559c5ef8e9fc2ee7ab79028c77e986c463462168f4e563f5f7dc3f6253dde7a",
+      "final_save.json": "ff003195e966d163c27916cb0b9bb6293e9e8b0f2312684688318761cf6def34",
+      "formation_delta.json": "ba416ce5b450f027a5cbbba941c9a68a286d8dbcb4f75041a1ef2279d4626c72",
+      "run_summary.json": "f8429e29760314d256f822d2f4d5aa9c997d5cfc053035e1859dcac560df71d5",
+      "watched_operations.json": "41d0d2a62eac1d57c3d0bd1f53d5a46df3857b0d3598bc971af7bfa96b9858b6"
+    },
+    "weekly_projection_sha256": "b7024560561a2e8eceae114c77b6003d939163d81971e9f610842f2e90de296f"
+  },
+  "weekly_diagnostic_projection": {
+    "source_bytes": 33185387,
+    "source_sha256": "08b8e8cc74f7945ac4066edbce6cddfce74c40180c6fa013a6cb6c9997637669",
+    "projected_bytes": 2008722,
+    "projected_sha256": "b7024560561a2e8eceae114c77b6003d939163d81971e9f610842f2e90de296f",
+    "expected_ci_sha256": "b7024560561a2e8eceae114c77b6003d939163d81971e9f610842f2e90de296f",
+    "rows": 188,
+    "removed": {
+      "movement_phase_diagnostics_rows": 188,
+      "attacker_brigades_rows": 517,
+      "defender_contributions_rows": 281
+    },
+    "pass": true
+  },
+  "provenance": {
+    "git_commit": "a913286803a095b6dc3f57a44175081d6ae4b8eb",
+    "git_dirty": false,
+    "count": 32,
+    "recorded_digest": "88cf2d9ad4913bc62dde684d71465a28622c28b559713e4d0f13124ad8031c69",
+    "recomputed_digest": "88cf2d9ad4913bc62dde684d71465a28622c28b559713e4d0f13124ad8031c69",
+    "input_mismatches": []
+  },
+  "failures": []
+}

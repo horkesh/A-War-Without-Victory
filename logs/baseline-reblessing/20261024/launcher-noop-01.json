@@ -1,0 +1,8 @@
+{
+  "shellExit": 0,
+  "cause": "Renamed $args array but left @args splat, so node received no arguments.",
+  "preflightAttemptExists": false,
+  "originalScriptSha256": "0bd1c363a367005ddd5783441888b9bfca546c6473d7905af25a3d47394d2dda",
+  "campaignInvocations": 0,
+  "preflightInvocations": 0
+}

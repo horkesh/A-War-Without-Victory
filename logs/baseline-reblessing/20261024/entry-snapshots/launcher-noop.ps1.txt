@@ -1,0 +1,34 @@
+$node = (Get-Command node).Source
+$head = (git rev-parse HEAD).Trim().ToLower()
+$packet = 'tmp/baseline-rebless-20261024'
+$attempt = "$packet/campaign-01"
+$inventory = 'logs/baseline-reblessing/20261024/PRESERVATION_BEFORE.json'
+$dependencies = 'logs/baseline-reblessing/20261024/PACKET_DEPENDENCIES.json'
+$allowed = @(
+  'dependency-verification.json',
+  'baseline-target-before.json','baseline-target-after.json',
+  'preservation-before.json','preservation-after.json',
+  'source-before.json','source-after.json',
+  'campaign-launch.json','campaign-execution.json','packet-summary.json',
+  'postrun/evaluation.json',
+  'postrun/timeline-vs-n91.json','postrun/timeline-vs-n92.json',
+  'postrun/protected-vs-n91.json','postrun/protected-vs-n92.json',
+  'postrun/summary.json'
+)
+$tasks = @('evaluation','timeline-vs-n91','timeline-vs-n92','checkpoints','consistency','health','protected-vs-n91','protected-vs-n92','producer','movement')
+foreach ($task in $tasks) {
+  $allowed += "postrun/$task.stdout.log","postrun/$task.stderr.log","postrun/$task.execution.json"
+}
+$packetArgs = @(
+  'tools/diagnostics/run_preserved_preflight.cjs',
+  '--attempt-dir',$attempt,
+  '--entry-script',"$packet/campaign_entry.cjs",
+  '--timeout-ms','2100000'
+)
+foreach ($file in $allowed) { $packetArgs += '--allow-artifact',$file }
+$packetArgs += '--',$node,"$packet/campaign_entry.cjs",'{evidenceDir}',
+  '--expected-head',$head,
+  '--preservation-inventory',$inventory,
+  '--dependency-inventory',$dependencies,
+  '--owner-authorized-once'
+& $node @args

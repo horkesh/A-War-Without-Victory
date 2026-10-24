@@ -1,0 +1,117 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-24T13:47:44.032Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/baseline-rebless-20261024/update-01",
+  "timeout_ms": 2100000,
+  "original_argv": [
+    "C:\\Program Files\\Volta\\node.exe",
+    "tmp/baseline-rebless-20261024/baseline_update_entry.cjs",
+    "{evidenceDir}",
+    "--expected-head",
+    "a913286803a095b6dc3f57a44175081d6ae4b8eb",
+    "--expected-manifest-sha",
+    "67774c275f206633a931d1d1aa3990336d1dd0e0877ebaaf924feb6f75378888",
+    "--preservation-inventory",
+    "logs/baseline-reblessing/20261024/PRESERVATION_BEFORE.json",
+    "--dependency-inventory",
+    "logs/baseline-reblessing/20261024/PACKET_DEPENDENCIES.json",
+    "--owner-authorized-once"
+  ],
+  "argv": [
+    "C:\\Program Files\\Volta\\node.exe",
+    "tmp/baseline-rebless-20261024/baseline_update_entry.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\baseline-rebless-20261024\\update-01",
+    "--expected-head",
+    "a913286803a095b6dc3f57a44175081d6ae4b8eb",
+    "--expected-manifest-sha",
+    "67774c275f206633a931d1d1aa3990336d1dd0e0877ebaaf924feb6f75378888",
+    "--preservation-inventory",
+    "logs/baseline-reblessing/20261024/PRESERVATION_BEFORE.json",
+    "--dependency-inventory",
+    "logs/baseline-reblessing/20261024/PACKET_DEPENDENCIES.json",
+    "--owner-authorized-once"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "dependency-verification.json",
+    "baseline-target-before.json",
+    "preservation-before.json",
+    "preservation-after.json",
+    "update-launch.json",
+    "update-execution.json",
+    "update-result.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/baseline-rebless-20261024/baseline_update_entry.cjs",
+    "bytes": 10309,
+    "raw_sha256": "0a410b85706feedd17019b0cac312a55e9c59c5c1ddf014580de6ce24da1cfa1",
+    "normalized_text_sha256": "0a410b85706feedd17019b0cac312a55e9c59c5c1ddf014580de6ce24da1cfa1",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 10309,
+      "sha256": "0a410b85706feedd17019b0cac312a55e9c59c5c1ddf014580de6ce24da1cfa1"
+    }
+  },
+  "end_utc": "2026-10-24T13:50:13.406Z",
+  "pid": 9744,
+  "child_exit": 1,
+  "wrapper_exit": 126,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/baseline-rebless-20261024/baseline_update_entry.cjs",
+    "bytes": 10309,
+    "raw_sha256": "0a410b85706feedd17019b0cac312a55e9c59c5c1ddf014580de6ce24da1cfa1",
+    "normalized_text_sha256": "0a410b85706feedd17019b0cac312a55e9c59c5c1ddf014580de6ce24da1cfa1",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 878596,
+    "sha256": "b6841d8cedddfc4ee555fe4bf8ebda4dc161793886d00551e2c6f07aa4d42543"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 1145,
+    "sha256": "6eafa0368876d800975c78fa89b1f735e6f9c4b9f823eafd6ebbebab471b7b08"
+  },
+  "retained_artifacts": [
+    {
+      "path": "dependency-verification.json",
+      "bytes": 753,
+      "sha256": "8700590418ae20e8c74bc868b5c2819cb04fcfd9854e4a7819915cefab880e64"
+    },
+    {
+      "path": "baseline-target-before.json",
+      "bytes": 191,
+      "sha256": "b70b99e596ccedc4cadf50d031c066294a94f26a1f86b3391523609e1d8cc991"
+    },
+    {
+      "path": "preservation-before.json",
+      "bytes": 1916745,
+      "sha256": "9e4bddb626dce0368bd973c6fde028ab7f6b5946b79d9825887b419b5db9dac5"
+    },
+    {
+      "path": "update-launch.json",
+      "bytes": 886,
+      "sha256": "7e1efb34637d9a1b8513ea3a723aeec1c9820b14f4f0f72f98c4d4e40f03f2ab"
+    },
+    {
+      "path": "update-execution.json",
+      "bytes": 100,
+      "sha256": "adec593c1276cab529f5603b6ddaa00d8a2b8b9a9a568faf55a8959470d9dfb2"
+    }
+  ],
+  "artifact_contract": {
+    "pass": false,
+    "unexpected": [],
+    "missing_allowed": [
+      "preservation-after.json",
+      "update-result.json"
+    ]
+  }
+}

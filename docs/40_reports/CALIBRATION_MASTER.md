@@ -1,3 +1,11 @@
+## Current eight-pin baseline adoption — 2026-10-24
+
+Owner explicitly authorizes evidence-backed adoption of the accepted gameplay state. Clean Node22.23.2 source a91328680 produces n94 at707/707/706/706, with zero formerly-correct n91/n92 losses, lawful Toljenak t135 capture/retention, retained HVO outcomes,16 protected anchors,9 enclave cells/schedule, eastern CLEAN, Farz and all required health/provenance readers passing. Exactly32 consumed inputs match. No gameplay, threshold, reference or calibration tuning change accompanies adoption.
+
+The default-observer production baseline run exits0 and reproduces all8 Linux CI hashes. n93/n94 weekly diagnostics explain their larger report; the exact diagnostic-only projection reproduces the default weekly bytes, while the manifest pins the actual default output. Original update wrapper remains RED child1/wrapper126 after a Git porcelain trim bug; its producer is not rerun. A separate read-only qualification passes0/0, proves the exact eight-value-only raw manifest change, clean provenance, all source bytes outside the manifest,3,226 old bindings with telemetry-prefix semantics, n94's40 files, and fresh protected/health readers. Independent historical, scenario and engine review approve the bounded adoption.
+
+This adopts the stored fingerprints only. Normal pushed Baseline Pins and Event System CI remain mandatory verification on the adoption commit. Raw n93 full-suite failures and their qualified focused corrections remain transparent; unaffected gameplay coverage is reused. Native R8 remains blocked at warroom identity, and six October mismatches/global gates remain open. Full raw evidence is preserved locally; [portable result](../../logs/baseline-reblessing/20261024/RESULT.json) and [reblessing packet](../plans/2026-09-10-baseline-reblessing-packet.md) bind the evidence.
+
 ## Native package follow-up blocked before gameplay (2026-10-24)
 
 One qualified-source package builds0/0; its first native turn0 prerequisite fails at the

@@ -1,0 +1,62 @@
+=== AWWV Run Consistency Validation ===
+Run: data/derived/scenario/_baseline_tmp/apr1992_188w
+Turn: 188
+
+--- Casualty Accounting ---
+  HRHB   taken=44026  inflicted=27508
+  RBiH   taken=302942  inflicted=83311
+  RS     taken=149042  inflicted=145223
+  Total taken: 496010  Total inflicted: 256042  Gap: 239968
+  NOTE: Gap includes friction/siege attrition (no opposing brigade)
+
+--- Peak Personnel ---
+  OK: 0 violations
+
+--- Brigade Assignment ---
+  ? NOT ESTABLISHED: military.unresolved_sector_brigades is absent from this artifact
+
+--- Ghost Paramilitaries ---
+  OK: 0 ghosts
+
+--- Intel System ---
+  Offensive signs: 12/74 records
+  OK: Intel system functional (turn 188)
+
+--- Assignment Sync ---
+  OK: 0 missing
+
+--- Sector Role Buckets ---
+  OK: sector bucket roles match formation assignment and physical position
+
+--- Reserve Cap ---
+  OK: 0 sectors with >1 reserve
+
+--- Physical Sector Ownership ---
+  OK: 0 false owners
+
+--- War-Front Faction-Side Coverage ---
+  OK: sector faction-side coverage exactly matches military.war_front_edges_osid
+
+--- Sector Geometry ---
+  OK: 0 disconnected sectors
+
+--- Empty Contested Sectors ---
+  OK: 0 empty contested sectors with missed legal donors
+  ~ sector:vrs_1st_krajina:3 remains empty with no legal same-corps donor under current rules (2 front edge(s))
+
+--- Sector Floor Shortfalls ---
+  OK: 0 below-floor sectors with missed legal donors
+  ~ sector:arbih_1st_corps:0 remains below floor 1/2 with no legal same-corps donor under current rules
+  ~ sector:vrs_1st_krajina:0 remains below floor 1/2 with no legal same-corps donor under current rules
+  ~ sector:vrs_sarajevo_romanija:0 remains below floor 1/2 with no legal same-corps donor under current rules
+
+--- Undefended Front Subsegments ---
+  OK: 0 wide gap=true subsegments with missed legal donors
+  OK: 0 wide gap=true subsegments inside partially covered sectors
+  OK: 0 unavoidable wide gap=true subsegments
+
+--- Adjacent Uncontested Territory ---
+  OK: 0 actionable undefended OSIDs adjacent to enemy brigades
+  OK: 0 unavoidable adjacent exposures
+
+=== RESULT: PASS ===

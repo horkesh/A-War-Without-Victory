@@ -80,7 +80,7 @@ lanes:
   - lane: R6
     title: "Historical gameplay depth and final calibration"
     lane_open: true
-    status: "TOLJENAK VALIDATED; GLOBAL NO-GO. n92 is707/707/706/706 under the owner-corrected April reference; zero formerly correct losses. HVO outcomes/n91 preserved; ful"
+    status: "TOLJENAK VALIDATED; GLOBAL NO-GO. n94 clean707/707/706/706, zero n91/n92 losses; eight baseline pins adopted from reproduced default CI bytes. No tuning; six mi"
     plans:
       - path: docs/plans/2026-07-31-historical-gameplay-depth-calibration-plan.md
         exists: true
@@ -164,7 +164,7 @@ lanes:
     plans:
       - path: docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
         exists: true
-        tokens: 50221
+        tokens: 50341
         fits_context: false
         tasks: null
   - lane: R9

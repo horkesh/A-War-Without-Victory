@@ -1,0 +1,439 @@
+{
+  "schema": "awwv.retained-baseline-update-qualification.v1",
+  "pass": true,
+  "read_only": true,
+  "expected_head": "a913286803a095b6dc3f57a44175081d6ae4b8eb",
+  "elapsed_ms": 11825,
+  "cap_ms": 180000,
+  "gates": {
+    "runtime_and_head": {
+      "node": "v22.23.2",
+      "head": "a913286803a095b6dc3f57a44175081d6ae4b8eb",
+      "pass": true
+    },
+    "manifest_only_status": {
+      "pass": true,
+      "rows": [
+        {
+          "index": " ",
+          "worktree": "M",
+          "path": "data/derived/scenario/baselines/manifest.json",
+          "raw": " M data/derived/scenario/baselines/manifest.json"
+        }
+      ],
+      "error": null
+    },
+    "retained_execution": {
+      "pass": true,
+      "producer_exit": 0,
+      "producer_timed_out": false,
+      "remaining_ms": 1968714,
+      "outer_duration_ms": 149374,
+      "outer_child_exit": 1,
+      "outer_wrapper_exit": 126,
+      "receipt_binding_pass": true,
+      "preflight_binding_pass": true,
+      "retained_files_exact": true,
+      "retained_files": [
+        {
+          "name": "baseline-target-before.json",
+          "is_file": true,
+          "bytes": 191,
+          "sha256": "b70b99e596ccedc4cadf50d031c066294a94f26a1f86b3391523609e1d8cc991",
+          "pass": true
+        },
+        {
+          "name": "dependency-verification.json",
+          "is_file": true,
+          "bytes": 753,
+          "sha256": "8700590418ae20e8c74bc868b5c2819cb04fcfd9854e4a7819915cefab880e64",
+          "pass": true
+        },
+        {
+          "name": "entry-script.snapshot",
+          "is_file": true,
+          "bytes": 10309,
+          "sha256": "0a410b85706feedd17019b0cac312a55e9c59c5c1ddf014580de6ce24da1cfa1",
+          "pass": true
+        },
+        {
+          "name": "preservation-before.json",
+          "is_file": true,
+          "bytes": 1916745,
+          "sha256": "9e4bddb626dce0368bd973c6fde028ab7f6b5946b79d9825887b419b5db9dac5",
+          "pass": true
+        },
+        {
+          "name": "receipt.json",
+          "is_file": true,
+          "bytes": 4325,
+          "sha256": "23220ec0415c802306d25b5647ea65f301c3234dc37ad516ea3abfb35c032dac",
+          "pass": true
+        },
+        {
+          "name": "start.json",
+          "is_file": true,
+          "bytes": 2409,
+          "sha256": "4afd8ce00f8c81fbe7097672298e458da6eacde67635227157a2c35f87be4a12",
+          "pass": true
+        },
+        {
+          "name": "stderr.log",
+          "is_file": true,
+          "bytes": 1145,
+          "sha256": "6eafa0368876d800975c78fa89b1f735e6f9c4b9f823eafd6ebbebab471b7b08",
+          "pass": true
+        },
+        {
+          "name": "stdout.log",
+          "is_file": true,
+          "bytes": 878596,
+          "sha256": "b6841d8cedddfc4ee555fe4bf8ebda4dc161793886d00551e2c6f07aa4d42543",
+          "pass": true
+        },
+        {
+          "name": "update-execution.json",
+          "is_file": true,
+          "bytes": 100,
+          "sha256": "adec593c1276cab529f5603b6ddaa00d8a2b8b9a9a568faf55a8959470d9dfb2",
+          "pass": true
+        },
+        {
+          "name": "update-launch.json",
+          "is_file": true,
+          "bytes": 886,
+          "sha256": "7e1efb34637d9a1b8513ea3a723aeec1c9820b14f4f0f72f98c4d4e40f03f2ab",
+          "pass": true
+        }
+      ],
+      "status_failure_only": true,
+      "expected_red_reason": "post-producer manifest-only porcelain leading-space loss",
+      "travnik_warnings": [
+        "[brigade_assignment] UNRESOLVED hrhb_travnik_brigade (1311 pers): fell through sector pipeline, corps=hvo_central_bosnia",
+        "[brigade_assignment] UNRESOLVED hrhb_travnik_brigade (1370 pers): fell through sector pipeline, corps=hvo_central_bosnia"
+      ],
+      "warnings_match_stage1": true,
+      "command": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "node_modules/tsx/dist/cli.mjs",
+        "tools/scenario_runner/run_baseline_regression.ts"
+      ]
+    },
+    "manifest_delta": {
+      "pass": true,
+      "old_sha256": "67774c275f206633a931d1d1aa3990336d1dd0e0877ebaaf924feb6f75378888",
+      "expected_old_sha256": "67774c275f206633a931d1d1aa3990336d1dd0e0877ebaaf924feb6f75378888",
+      "changed": [
+        "activity_summary.json",
+        "control_delta.json",
+        "end_report.md",
+        "final_save.json",
+        "formation_delta.json",
+        "run_summary.json",
+        "watched_operations.json",
+        "weekly_report.jsonl"
+      ],
+      "after": {
+        "activity_summary.json": "a59b868cdde127a35b0a6012ff72848808f73a0a888e44732442c5bf42771ce5",
+        "control_delta.json": "de5cb5b59eb0abb2aba9f45a75e774d5d44bf73ed3f785fb59f2ed02d3da840c",
+        "end_report.md": "c559c5ef8e9fc2ee7ab79028c77e986c463462168f4e563f5f7dc3f6253dde7a",
+        "final_save.json": "ff003195e966d163c27916cb0b9bb6293e9e8b0f2312684688318761cf6def34",
+        "formation_delta.json": "ba416ce5b450f027a5cbbba941c9a68a286d8dbcb4f75041a1ef2279d4626c72",
+        "run_summary.json": "f8429e29760314d256f822d2f4d5aa9c997d5cfc053035e1859dcac560df71d5",
+        "watched_operations.json": "41d0d2a62eac1d57c3d0bd1f53d5a46df3857b0d3598bc971af7bfa96b9858b6",
+        "weekly_report.jsonl": "b7024560561a2e8eceae114c77b6003d939163d81971e9f610842f2e90de296f"
+      },
+      "raw_replacement": {
+        "pass": true,
+        "rows": [
+          {
+            "name": "activity_summary.json",
+            "old_hash": "7d10356d0715db21370c3f7d6acc15db7948856c80962363f505641b48bfbd4e",
+            "new_hash": "a59b868cdde127a35b0a6012ff72848808f73a0a888e44732442c5bf42771ce5",
+            "old_occurrences": 1,
+            "new_occurrences": 1,
+            "pass": true
+          },
+          {
+            "name": "control_delta.json",
+            "old_hash": "4cb8219cf3b7dcbfdd66476a7af5bbfa0709fdd24e0a37d6900a9b808d6acb85",
+            "new_hash": "de5cb5b59eb0abb2aba9f45a75e774d5d44bf73ed3f785fb59f2ed02d3da840c",
+            "old_occurrences": 1,
+            "new_occurrences": 1,
+            "pass": true
+          },
+          {
+            "name": "end_report.md",
+            "old_hash": "fea39f3bf7eda907b290e3bd2579ac050c847ae2f783153117f95f1f94d0cf8d",
+            "new_hash": "c559c5ef8e9fc2ee7ab79028c77e986c463462168f4e563f5f7dc3f6253dde7a",
+            "old_occurrences": 1,
+            "new_occurrences": 1,
+            "pass": true
+          },
+          {
+            "name": "final_save.json",
+            "old_hash": "e414dc69f6e875fcd2a7394582921f20ca03123112baf12e9308c50035c29c50",
+            "new_hash": "ff003195e966d163c27916cb0b9bb6293e9e8b0f2312684688318761cf6def34",
+            "old_occurrences": 1,
+            "new_occurrences": 1,
+            "pass": true
+          },
+          {
+            "name": "formation_delta.json",
+            "old_hash": "bbd7260e219d311bea201053d0d7c913f4b30b83bcead72b05d5f2c957566cb1",
+            "new_hash": "ba416ce5b450f027a5cbbba941c9a68a286d8dbcb4f75041a1ef2279d4626c72",
+            "old_occurrences": 1,
+            "new_occurrences": 1,
+            "pass": true
+          },
+          {
+            "name": "run_summary.json",
+            "old_hash": "b8ebc2c1ff4522fed0651be224ba360fcfeff0da4e6983f27d9df008eeba98cb",
+            "new_hash": "f8429e29760314d256f822d2f4d5aa9c997d5cfc053035e1859dcac560df71d5",
+            "old_occurrences": 1,
+            "new_occurrences": 1,
+            "pass": true
+          },
+          {
+            "name": "watched_operations.json",
+            "old_hash": "785a073b9312e34d20ba143915478ab768ce7847ad337b121f98491df8325b18",
+            "new_hash": "41d0d2a62eac1d57c3d0bd1f53d5a46df3857b0d3598bc971af7bfa96b9858b6",
+            "old_occurrences": 1,
+            "new_occurrences": 1,
+            "pass": true
+          },
+          {
+            "name": "weekly_report.jsonl",
+            "old_hash": "4c5cb00bde51a15e2f7766d31ececb03e86d81bfcf1f93a4c04c01cbda31b9cf",
+            "new_hash": "b7024560561a2e8eceae114c77b6003d939163d81971e9f610842f2e90de296f",
+            "old_occurrences": 1,
+            "new_occurrences": 1,
+            "pass": true
+          }
+        ],
+        "reconstructed_sha256": "67774c275f206633a931d1d1aa3990336d1dd0e0877ebaaf924feb6f75378888",
+        "old_sha256": "67774c275f206633a931d1d1aa3990336d1dd0e0877ebaaf924feb6f75378888",
+        "bytes_exact_after_replacing_eight_hashes": true
+      }
+    },
+    "target_inventory_and_hashes": {
+      "pass": true,
+      "names": [
+        "activity_summary.json",
+        "brigade_temporal_log.jsonl",
+        "control_delta.json",
+        "destroyed_brigades.json",
+        "displacement_event_log.jsonl",
+        "end_report.md",
+        "final_save.json",
+        "formation_delta.json",
+        "initial_save.json",
+        "operation_aars.json",
+        "replay_save_manifest.json",
+        "run_meta.json",
+        "run_summary.json",
+        "watched_operations.json",
+        "weekly_report.jsonl"
+      ],
+      "non_files": [],
+      "hashes": {
+        "activity_summary.json": "a59b868cdde127a35b0a6012ff72848808f73a0a888e44732442c5bf42771ce5",
+        "control_delta.json": "de5cb5b59eb0abb2aba9f45a75e774d5d44bf73ed3f785fb59f2ed02d3da840c",
+        "end_report.md": "c559c5ef8e9fc2ee7ab79028c77e986c463462168f4e563f5f7dc3f6253dde7a",
+        "final_save.json": "ff003195e966d163c27916cb0b9bb6293e9e8b0f2312684688318761cf6def34",
+        "formation_delta.json": "ba416ce5b450f027a5cbbba941c9a68a286d8dbcb4f75041a1ef2279d4626c72",
+        "run_summary.json": "f8429e29760314d256f822d2f4d5aa9c997d5cfc053035e1859dcac560df71d5",
+        "watched_operations.json": "41d0d2a62eac1d57c3d0bd1f53d5a46df3857b0d3598bc971af7bfa96b9858b6",
+        "weekly_report.jsonl": "b7024560561a2e8eceae114c77b6003d939163d81971e9f610842f2e90de296f"
+      }
+    },
+    "target_provenance": {
+      "pass": true,
+      "git_commit": "a913286803a095b6dc3f57a44175081d6ae4b8eb",
+      "git_dirty": false,
+      "input_count": 32,
+      "input_mismatches": [],
+      "recorded_digest": "88cf2d9ad4913bc62dde684d71465a28622c28b559713e4d0f13124ad8031c69",
+      "recomputed_digest": "88cf2d9ad4913bc62dde684d71465a28622c28b559713e4d0f13124ad8031c69"
+    },
+    "source_outside_manifest": {
+      "expected_count": 10154,
+      "checked_count": 10153,
+      "excluded_count": 1,
+      "failures": [],
+      "pass": true
+    },
+    "preservation_3226": {
+      "expected_count": 3226,
+      "checked_count": 3226,
+      "excluded_count": 0,
+      "unique_files_hashed": 1956,
+      "telemetry": [
+        {
+          "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+          "expected_bytes": 121114591,
+          "expected_sha256": "7160ff4b4c13f564a5ef25986b96e95004b39707dde5fffb067c471b77fe7e20",
+          "mode": "append_prefix",
+          "current_bytes": 123007933,
+          "opening_prefix_sha256": "7160ff4b4c13f564a5ef25986b96e95004b39707dde5fffb067c471b77fe7e20",
+          "append_bytes": 1893342,
+          "pass": true
+        },
+        {
+          "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+          "expected_bytes": 1041,
+          "expected_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+          "mode": "append_prefix",
+          "current_bytes": 1041,
+          "opening_prefix_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+          "append_bytes": 0,
+          "pass": true
+        }
+      ],
+      "failures": [],
+      "pass": true
+    },
+    "n94_inventory_40": {
+      "expected_count": 40,
+      "checked_count": 40,
+      "excluded_count": 0,
+      "failures": [],
+      "pass": true,
+      "actual_count": 40
+    },
+    "n94_same_gameplay_artifacts": {
+      "pass": true,
+      "scope": "seven non-weekly baseline artifacts; default-profile weekly identity is checked directly against accepted CI",
+      "rows": [
+        {
+          "name": "activity_summary.json",
+          "n94_sha256": "a59b868cdde127a35b0a6012ff72848808f73a0a888e44732442c5bf42771ce5",
+          "target_sha256": "a59b868cdde127a35b0a6012ff72848808f73a0a888e44732442c5bf42771ce5",
+          "pass": true
+        },
+        {
+          "name": "control_delta.json",
+          "n94_sha256": "de5cb5b59eb0abb2aba9f45a75e774d5d44bf73ed3f785fb59f2ed02d3da840c",
+          "target_sha256": "de5cb5b59eb0abb2aba9f45a75e774d5d44bf73ed3f785fb59f2ed02d3da840c",
+          "pass": true
+        },
+        {
+          "name": "end_report.md",
+          "n94_sha256": "c559c5ef8e9fc2ee7ab79028c77e986c463462168f4e563f5f7dc3f6253dde7a",
+          "target_sha256": "c559c5ef8e9fc2ee7ab79028c77e986c463462168f4e563f5f7dc3f6253dde7a",
+          "pass": true
+        },
+        {
+          "name": "final_save.json",
+          "n94_sha256": "ff003195e966d163c27916cb0b9bb6293e9e8b0f2312684688318761cf6def34",
+          "target_sha256": "ff003195e966d163c27916cb0b9bb6293e9e8b0f2312684688318761cf6def34",
+          "pass": true
+        },
+        {
+          "name": "formation_delta.json",
+          "n94_sha256": "ba416ce5b450f027a5cbbba941c9a68a286d8dbcb4f75041a1ef2279d4626c72",
+          "target_sha256": "ba416ce5b450f027a5cbbba941c9a68a286d8dbcb4f75041a1ef2279d4626c72",
+          "pass": true
+        },
+        {
+          "name": "run_summary.json",
+          "n94_sha256": "f8429e29760314d256f822d2f4d5aa9c997d5cfc053035e1859dcac560df71d5",
+          "target_sha256": "f8429e29760314d256f822d2f4d5aa9c997d5cfc053035e1859dcac560df71d5",
+          "pass": true
+        },
+        {
+          "name": "watched_operations.json",
+          "n94_sha256": "41d0d2a62eac1d57c3d0bd1f53d5a46df3857b0d3598bc971af7bfa96b9858b6",
+          "target_sha256": "41d0d2a62eac1d57c3d0bd1f53d5a46df3857b0d3598bc971af7bfa96b9858b6",
+          "pass": true
+        }
+      ]
+    }
+  },
+  "readers": {
+    "checkpoints": {
+      "pass": true,
+      "exit": 0,
+      "timed_out": false,
+      "signal": null,
+      "error": null,
+      "argv": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "tools/verify_checkpoints.cjs",
+        "data/derived/scenario/_baseline_tmp/apr1992_188w",
+        "--base",
+        "jan=707,apr94=707,apr95=706,oct=706",
+        "--cascade-base",
+        "41"
+      ],
+      "remaining_ms": 169019
+    },
+    "consistency": {
+      "pass": true,
+      "exit": 0,
+      "timed_out": false,
+      "signal": null,
+      "error": null,
+      "argv": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "tools/validate_run_consistency.cjs",
+        "data/derived/scenario/_baseline_tmp/apr1992_188w"
+      ],
+      "remaining_ms": 168866
+    },
+    "health": {
+      "pass": true,
+      "exit": 0,
+      "timed_out": false,
+      "signal": null,
+      "error": null,
+      "argv": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "tools/engine_health_gate.cjs",
+        "data/derived/scenario/_baseline_tmp/apr1992_188w",
+        "--horizon",
+        "188w",
+        "--json"
+      ],
+      "remaining_ms": 168571
+    },
+    "protected-vs-n91": {
+      "pass": true,
+      "exit": 0,
+      "timed_out": false,
+      "signal": null,
+      "error": null,
+      "argv": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "logs/claude-channel-20261004/221-campaign-gate-v2.cjs",
+        "data/derived/scenario/_baseline_tmp/apr1992_188w",
+        "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n91",
+        "--out",
+        "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\baseline-rebless-20261024\\update-qualification-01\\protected-vs-n91.json",
+        "--horizon",
+        "188"
+      ],
+      "remaining_ms": 168374
+    },
+    "protected-vs-n92": {
+      "pass": true,
+      "exit": 0,
+      "timed_out": false,
+      "signal": null,
+      "error": null,
+      "argv": [
+        "C:\\Users\\User\\AppData\\Local\\Volta\\tools\\image\\node\\22.23.2\\node.exe",
+        "logs/claude-channel-20261004/221-campaign-gate-v2.cjs",
+        "data/derived/scenario/_baseline_tmp/apr1992_188w",
+        "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n92",
+        "--out",
+        "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\baseline-rebless-20261024\\update-qualification-01\\protected-vs-n92.json",
+        "--horizon",
+        "188"
+      ],
+      "remaining_ms": 168175
+    }
+  },
+  "failures": [],
+  "retained_red_receipt": "tmp/baseline-rebless-20261024/update-01/receipt.json"
+}
