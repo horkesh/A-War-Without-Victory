@@ -1,5 +1,22 @@
 # Determinism Test Matrix (AWWV)
 
+## Native player-mode calibration diagnostic contract (2026-10-24)
+
+- The packaged harness records requested faction, visible Historical selection, shipped autonomy2,
+  headless=false, seed, action/decision audit, canonical t0 and one immutable settled save per turn.
+  Every actual Advance is serialized after a zero-blocker settlement boundary; provisional snapshots
+  remain diagnostic and can never be relabelled settled.
+- The read-only outcome comparator reconstructs accepted control by replaying ordered
+  `political.control_events` from the byte-bound initial controller map, checks every `from` lineage,
+  self-checks available accepted saves and compares native t0 plus each archived turn. Raw save hashes
+  and player-state differences remain visible; this is outcome comparison, not engine/full-state
+  determinism.
+- Packaged Historical player-mode at t39 is a retained negative: capture/infrastructure pass, while
+  exact daily control fails39/39, score is700/712 versus required707 and seven formerly-correct cells
+  are lost against n91 and n92. The earliest split is an intentional player/no-player input-policy
+  boundary, so equal seed and autonomy do not imply identical phase inputs. No188/all-faction/Farz
+  determinism claim follows. [Evidence](../../logs/r8-native-calibration-parity-20261024/RESULT.json).
+
 ## Toljenak Behar-I catalog candidate (2026-10-23)
 
 The t133-only `behar_i_94` entry uses the existing Central Bosnia opportunity substrate, fixed162/164 model-proxy order, Budoželje staging and a sole Toljenak objective. Focused22/22 covers date/eligibility rejection, reversed insertion, operation JSON round-trip and normal planning/movement/emitter/resolver attribution. Related catalog/substrate101/101 pass; the final real-graph fixture correction passes22/22 plus fresh nonincremental noEmit0/0. No persisted field/schema, generic lifecycle, combat or reservation logic changes. The ordinary three-turn planning value is an assembly budget, not an arithmetic launch guarantee.
@@ -190,6 +207,7 @@ Real production-function stdout fixtures qualify schema 2 ordered close manifest
 - **Replay startup capture:** the harness waits for the embedded tactical frame to reach network idle before dismissing the intro. Local startup navigation/chunk cancellations are failures, not teardown allowances. Gate: `tests/paradox_local_qa_harness.test.ts`.
 - **Readability:** essential text must compute to at least 12px and remain unclipped without horizontal overflow at the tested viewport. Contact sheets and final screenshots are required evidence, not substitutes for runtime assertions.
 - **Scrollable completion actions:** a blocking or dismissible modal's only completion action must remain outside its narrative scroll region. `tests/ui/event_modal_dismissal.test.ts` pins this for long informational events; Electron screenshot review remains required for real viewport proof.
+- **Opt-in CDP collection:** `--cdp-network-collection-v3` produces diagnostic schema `awwv.r8-warroom.cdp-network-collection.v3` in a separate exclusive sidecar. Session-scoped CDP identity, redirect history, finite timestamps, bounded redaction, direct body commands, caps and shared-deadline setup/body/detach cleanup are covered by `tests/cdp_network_collector.test.ts`; opt-in/disabled lifecycle and failure preservation by `tests/paradox_local_qa_harness.test.ts`. It changes no GameState/save/baseline or existing abort admission. Zero candidates does not establish embedded-frame coverage.
 - **Runtime:** console warnings/errors, page errors, request failures, and HTTP responses at or above 400 fail unless a narrowly named deliberate teardown/noise exception applies.
 - **Replay binding:** comparator provenance must match scenario, faction, requested/final turn, initial controls, every per-turn control snapshot, and final controls before deltas are interpreted.
 - **Direct harness precondition:** direct Playwright/Electron runs require the tactical Vite host to be started and HTTP-verified on port 3002. Missing-host startup timeouts are harness precondition failures, not simulation or product-runtime results.
@@ -257,3 +275,8 @@ Real production-function stdout fixtures qualify schema 2 ordered close manifest
   first_handler, final/pre_cap/snapshot orders, postures, location and transit. A qualified selected-artifact replication; it does NOT prove unsaved-frame identity or retroactive n25 causality.
 
 - Prisoje phase-boundary characterization: `tests/mistral_prisoje_turn_order.test.ts` follows production movement, late correction and bot owners. Its injected one-cell topology is explicitly counterfactual; selective scope/hostile-route controls preserve loan and operation commitments. A separate retained-save184 cloned-prefix diagnostic identifies T6 transit deletion and following Jajce_3 bot order under current source. The portable test alone does not establish n80 topology, historical causality, gameplay neutrality or calibration gain. See CALIBRATION_MASTER 748–751.
+
+
+### Army HQ delegated-staff routing — 2026-10-24
+
+`tests/army_hq_gathering_phase_routing.test.ts` exercises the exported production phase with its real producer and plan consumer: selected-player autonomy0/1/2/3, null-player and selected-player headless paths; fixed RS→RBiH→HRHB mutation order; and no implicit operation launch or level1 authorization. The repair reuses existing staff selection and adds no persisted fields. Required188-week regression and full-suite evidence are recorded in the active Electron-validation plan; focused routing proof does not establish calibration or engine health.

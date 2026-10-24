@@ -1,0 +1,46 @@
+{
+  "schema": "awwv.native-calibration-closeout-verification.v1",
+  "date": "2026-10-24",
+  "commands": [
+    {
+      "command": "node tools/derive_plan_index.cjs",
+      "exit": 0,
+      "result": "11 lanes, 4 open, 10 plans on open lanes"
+    },
+    {
+      "command": "node node_modules/vitest/vitest.mjs run tests/paradox_local_qa_harness.test.ts --pool=forks --reporter=dot",
+      "exit": 0,
+      "result": "90/90"
+    },
+    {
+      "command": "node node_modules/vitest/vitest.mjs run tests/ui/advance_turn_button_gated_feedback.test.ts tests/ui/shell_navigation_ownership.test.ts --pool=forks --reporter=dot",
+      "exit": 0,
+      "result": "33/33"
+    },
+    {
+      "command": "node --check tools/ui/paradox_local_qa.cjs",
+      "exit": 0
+    },
+    {
+      "command": "node node_modules/typescript/bin/tsc --noEmit --incremental false",
+      "exit": 0
+    },
+    {
+      "command": "node tools/derive_plan_index.cjs --check",
+      "exit": 0
+    },
+    {
+      "command": "git diff --check",
+      "exit": 0
+    },
+    {
+      "command": "PowerShell ConvertFrom-Json over portable JSON files",
+      "exit": 0,
+      "result": "34/34 before receipt generation"
+    }
+  ],
+  "limitations": [
+    "The 90-test harness scope includes the native calibration outcome helper imports; the 33 production DOM/source tests are a separate scope and are not added to 90.",
+    "No native run, simulation, package build, gameplay edit, commit or push occurred during closeout."
+  ]
+}

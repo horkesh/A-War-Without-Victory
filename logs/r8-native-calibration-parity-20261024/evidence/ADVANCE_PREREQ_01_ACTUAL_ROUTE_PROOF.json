@@ -1,0 +1,425 @@
+{
+  "schema": "awwv.native-calibration.actual-route-proof.v1",
+  "generatedAt": "2026-10-24T16:56:05.287Z",
+  "verdicts": {
+    "gameplayRoute": "PASS",
+    "settledArchive": "PASS",
+    "saveRecordsResume": "PASS",
+    "engineTurnSeal": "PASS",
+    "strictNativeRuntime": "FAIL_KNOWN_WARROOM_MEDIA_ABORT",
+    "dailyN94Parity": "FAILED_PREVIOUSLY_2_OSIDS",
+    "checkpoint39": "UNREACHED"
+  },
+  "run": {
+    "label": "native-calibration-rbih-advance-prereq-20261024-01",
+    "startUtc": "2026-10-24T16:50:22.078Z",
+    "endUtc": "2026-10-24T16:53:09.850Z",
+    "durationMs": 167772,
+    "childExit": 1,
+    "wrapperExit": 1,
+    "timedOut": false,
+    "command": [
+      "--turns=1",
+      "--faction=RBiH",
+      "--label=native-calibration-rbih-advance-prereq-20261024-01",
+      "--historical-choice",
+      "--skip-initial-tour",
+      "--no-checkpoint-tour",
+      "--archive-turn-autosaves",
+      "--save-load-proof",
+      "--packaged-executable=dist-packaged/r8-native-shakedown-20261024-qualified/win-unpacked/A War Without Victory.exe"
+    ]
+  },
+  "binding": {
+    "harnessSha256": "e47dce360ea538ccdae4fff4cc183d4c6166c64c4dd7f46585db285fc9ab6086",
+    "testSha256": "9e978fd94759b767dfbf3acd37eb6b9c23a81bd702acc1f806d836c6acd6e955",
+    "gitHead": "81a65d76fce4936ea39c6d4b4d5df144139c8ba5",
+    "workingTreeContentSha256": "ffbfdc9eea5be5ae635c3c3f051e3d387127a8fc41bef62231fae775385efb74",
+    "scenario": {
+      "sourceKind": "new_campaign",
+      "scenarioKey": "apr_1992",
+      "scenarioId": "apr1992_definitive_188w",
+      "scenarioSeed": "harness-seed",
+      "requestedFaction": "RBiH",
+      "calibrationScenario": true,
+      "decisionMode": "historical",
+      "autonomyLevel": 2,
+      "headless": false,
+      "scenarioSourcePath": "data/scenarios/apr1992_definitive_188w.json",
+      "scenarioSourceSha256": "4257b039f5b1dbb7f21d940ec656b2d0b787856f27e7c26b6f3f57f256d82ecf",
+      "startupSnapshotPath": "data/derived/startup/apr_1992_initial_save.json",
+      "startupSnapshotSha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+      "initialAutosaveSha256": "c34d43651f08dc02aaf9f7fe0d71586b950f02995d446c6d2b6f4e289b726da2"
+    },
+    "modeSelection": {
+      "requested": "historical",
+      "ariaChecked": "true"
+    }
+  },
+  "actualRoute": {
+    "requestedTurn": 1,
+    "eventIndex": 29,
+    "action": "advance-direct-transition",
+    "outcome": {
+      "kind": "direct-turn-transition",
+      "turn": 1
+    },
+    "beforeTurn": 0,
+    "afterTurn": 1,
+    "beforeBlockerInventory": {
+      "eventDecisions": 0,
+      "proposals": 0,
+      "paramilitary": 0,
+      "reserves": 0,
+      "convoys": 0,
+      "officerEvents": 0,
+      "peacePlan": 0,
+      "counterOffers": 0,
+      "dayton": 0,
+      "operationOpportunities": 0
+    },
+    "afterBlockerInventory": {
+      "eventDecisions": 0,
+      "proposals": 0,
+      "paramilitary": 0,
+      "reserves": 0,
+      "convoys": 0,
+      "officerEvents": 0,
+      "peacePlan": 0,
+      "counterOffers": 0,
+      "dayton": 0,
+      "operationOpportunities": 0
+    },
+    "screenshot": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\screenshots\\native-calibration-rbih-advance-prereq-20261024-01-rbih-029-turn-loop-1.png",
+    "screenshotHash": "302077678f2042b1f50a4485ace9c0d3dc46a12bb4fbc31aa134a2a80ba52917"
+  },
+  "archives": {
+    "initial": {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-advance-prereq-20261024-01\\rbih\\initial-autosave.json",
+      "sha256": "c34d43651f08dc02aaf9f7fe0d71586b950f02995d446c6d2b6f4e289b726da2",
+      "bytes": 1456429,
+      "verifiedSha256": "c34d43651f08dc02aaf9f7fe0d71586b950f02995d446c6d2b6f4e289b726da2",
+      "verifiedBytes": 1456429
+    },
+    "provisional": [
+      {
+        "turn": 1,
+        "kind": "provisional",
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp-paradox-qa-20260710/evidence/native-calibration-rbih-advance-prereq-20261024-01/rbih/turn-autosaves-pre-settlement/turn-001.json",
+        "sha256": "0b67f4bfb319a524251bc4941e17414fa122bb8f8a9058a9860d9d1f4228e64f",
+        "bytes": 3476848
+      }
+    ],
+    "settled": [
+      {
+        "turn": 1,
+        "kind": "settled",
+        "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp-paradox-qa-20260710/evidence/native-calibration-rbih-advance-prereq-20261024-01/rbih/turn-autosaves/turn-001.json",
+        "sha256": "0b67f4bfb319a524251bc4941e17414fa122bb8f8a9058a9860d9d1f4228e64f",
+        "bytes": 3476848
+      }
+    ],
+    "final": {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-advance-prereq-20261024-01\\rbih\\final-autosave.json",
+      "sha256": "0b67f4bfb319a524251bc4941e17414fa122bb8f8a9058a9860d9d1f4228e64f",
+      "bytes": 3476848,
+      "verifiedSha256": "0b67f4bfb319a524251bc4941e17414fa122bb8f8a9058a9860d9d1f4228e64f",
+      "verifiedBytes": 3476848
+    },
+    "counts": {
+      "provisional": 1,
+      "settled": 1
+    }
+  },
+  "saveLoad": {
+    "route": "Pause -> Save Game -> Main Menu -> opening splash -> Field Records -> Resume quicksave",
+    "savedEvidence": {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-advance-prereq-20261024-01\\rbih\\manual-quicksave.json",
+      "sha256": "0b67f4bfb319a524251bc4941e17414fa122bb8f8a9058a9860d9d1f4228e64f",
+      "bytes": 3476848
+    },
+    "hashProof": {
+      "beforeStateHash": "bf01847972e9fd13c3c9bb0c6e378049a106f5665fe3b567acb97ed441d7596b",
+      "expectedStateHash": "e8e2c770387f5c7f16af45131b38826b5c9bd9fe39a7a944cc4f104fe64c799b",
+      "afterStateHash": "e8e2c770387f5c7f16af45131b38826b5c9bd9fe39a7a944cc4f104fe64c799b",
+      "beforeAutosaveHash": "0b67f4bfb319a524251bc4941e17414fa122bb8f8a9058a9860d9d1f4228e64f",
+      "afterAutosaveHash": "0b67f4bfb319a524251bc4941e17414fa122bb8f8a9058a9860d9d1f4228e64f",
+      "loadedProjectionProof": {
+        "actualHash": "e8e2c770387f5c7f16af45131b38826b5c9bd9fe39a7a944cc4f104fe64c799b",
+        "expectedHash": "e8e2c770387f5c7f16af45131b38826b5c9bd9fe39a7a944cc4f104fe64c799b",
+        "exactBytes": true
+      },
+      "canonicalBytesEqual": true
+    },
+    "hydrationChangeClasses": {
+      "homeDistanceCacheRemovals": 78,
+      "sectorCombatRatingChanges": 136
+    },
+    "allowedPrefixes": [
+      "military.home_distance_cache",
+      "military.sector_combat_ratings"
+    ]
+  },
+  "engineHealth": {
+    "mainProcessOutputPath": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp-paradox-qa-20260710/main-process-output/native-calibration-rbih-advance-prereq-20261024-01-rbih.jsonl",
+    "sha256": "641b17900a4e16c10dda6f320ba2c310738096c800b18633e443e6cc3ab859e5",
+    "lineCount": 6,
+    "turnSealLines": [
+      "{\"sequence\":4,\"observedAtMs\":1792860756897,\"stream\":\"stdout\",\"line\":\"[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0\"}"
+    ],
+    "consoleMessageCount": 0,
+    "pageErrorCount": 0,
+    "mainProcessErrorCount": 0,
+    "unexpectedMainProcessStderrCount": 0,
+    "stderrTeardownLines": [
+      "Debugger ending on ws://127.0.0.1:62170/a57eb9f4-1b0d-4701-adcb-21b5c20c9fce",
+      "For help, see: https://nodejs.org/en/docs/inspector"
+    ]
+  },
+  "strictAudioFailure": {
+    "status": "RETAINS_STRICT_NATIVE_R8_FAILURE",
+    "sameKnownClass": true,
+    "basis": "Exact same packaged ambient_warroom asset, GET/media/non-main-frame/net::ERR_ABORTED, bytes=0-, outside teardown/navigation/tile windows, at a loop=true seek-to-zero boundary; aligned NetLog request read all 206420 cached bytes and ended normally. This does not reclassify or waive the failure.",
+    "failure": {
+      "kind": "requestfailed",
+      "method": "GET",
+      "url": "http://127.0.0.1:62174/assets/ambient_warroom-CO4FPnyV.ogg",
+      "resourceType": "media",
+      "isMainFrame": false,
+      "failure": {
+        "errorText": "net::ERR_ABORTED"
+      },
+      "eventCount": 32,
+      "teardownStarted": false,
+      "observedAtMs": 1792860770127,
+      "requestInitiatedAtMs": 1792860770127,
+      "requestRange": {
+        "status": "present",
+        "value": "bytes=0-"
+      },
+      "mapNavigationWindow": null,
+      "tileFetchIdentity": null
+    },
+    "rawNetworkFailureCount": 1,
+    "expectedAmbientLifecycleAbortCount": 0,
+    "ambientLifecycleSignalCount": 62,
+    "exactBoundarySignals": [
+      {
+        "kind": "seeking",
+        "signalSequence": 43,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:62174/assets/ambient_warroom-CO4FPnyV.ogg",
+        "observedAtMs": 1792860770121,
+        "deltaFromFailureMs": -6,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        }
+      },
+      {
+        "kind": "waiting",
+        "signalSequence": 44,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:62174/assets/ambient_warroom-CO4FPnyV.ogg",
+        "observedAtMs": 1792860770121,
+        "deltaFromFailureMs": -6,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        }
+      },
+      {
+        "kind": "progress",
+        "signalSequence": 45,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:62174/assets/ambient_warroom-CO4FPnyV.ogg",
+        "observedAtMs": 1792860770124,
+        "deltaFromFailureMs": -3,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        }
+      },
+      {
+        "kind": "suspend",
+        "signalSequence": 46,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:62174/assets/ambient_warroom-CO4FPnyV.ogg",
+        "observedAtMs": 1792860770124,
+        "deltaFromFailureMs": -3,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 1,
+          "paused": false,
+          "ended": false,
+          "seeking": true,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        }
+      },
+      {
+        "kind": "seeked",
+        "signalSequence": 47,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:62174/assets/ambient_warroom-CO4FPnyV.ogg",
+        "observedAtMs": 1792860770124,
+        "deltaFromFailureMs": -3,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        }
+      },
+      {
+        "kind": "canplay",
+        "signalSequence": 48,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:62174/assets/ambient_warroom-CO4FPnyV.ogg",
+        "observedAtMs": 1792860770124,
+        "deltaFromFailureMs": -3,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        }
+      },
+      {
+        "kind": "playing",
+        "signalSequence": 49,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:62174/assets/ambient_warroom-CO4FPnyV.ogg",
+        "observedAtMs": 1792860770124,
+        "deltaFromFailureMs": -3,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 0,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        }
+      },
+      {
+        "kind": "pause",
+        "signalSequence": 50,
+        "elementId": "media:1",
+        "sourceEpoch": 1,
+        "url": "http://127.0.0.1:62174/assets/ambient_warroom-CO4FPnyV.ogg",
+        "observedAtMs": 1792860771673,
+        "deltaFromFailureMs": 1546,
+        "mediaState": {
+          "networkState": 1,
+          "readyState": 4,
+          "paused": false,
+          "ended": false,
+          "seeking": false,
+          "currentTime": 1.479396,
+          "duration": 30,
+          "loop": true,
+          "mediaError": null
+        }
+      }
+    ],
+    "netlogAlignedSource": {
+      "id": 810,
+      "startEpochMs": 1792860770118,
+      "range": "Range: bytes=0-",
+      "filteredBytes": 206420,
+      "requestAliveEnded": true,
+      "cacheOpened": true,
+      "deltaToPlaywrightInitiationMs": -9,
+      "deltaToPlaywrightFailureMs": -9
+    },
+    "oldKnownClass": {
+      "path": "tmp/r8-warroom-abort-20261024/DIAGNOSIS.json",
+      "oldUrlAsset": "ambient_warroom-CO4FPnyV.ogg",
+      "oldMethod": "GET",
+      "oldResourceType": "media",
+      "oldErrorText": "net::ERR_ABORTED",
+      "oldRange": "bytes=0-",
+      "oldNetlogFilteredBytes": 206420
+    },
+    "gameplayOrDataImpactObserved": false,
+    "impactEvidence": [
+      "advance-direct-transition reached turn 1",
+      "one immutable settled turn-1 archive retained",
+      "canonical save bytes equal before/after Save -> Records -> Resume",
+      "expected loaded projection exact",
+      "turn-1 FINAL_SEAL unresolved=0",
+      "console/page/main-process-error counts zero"
+    ]
+  },
+  "retainedArtifacts": {
+    "progress": {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-progress-native-calibration-rbih-advance-prereq-20261024-01.json",
+      "bytes": 1800884,
+      "sha256": "9963ee0f5b99b48d3e10f44da6ef758587b15ad1375928f7c5fc4aa0580a2003"
+    },
+    "netlog": {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-netlog-native-calibration-rbih-advance-prereq-20261024-01.json",
+      "bytes": 3836215,
+      "sha256": "a8ab202effb0adffa8f06fef7798a891f0541fca98a3306e8edf714d8e0c49ad"
+    },
+    "inspection": {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-save-menu-inspection-native-calibration-rbih-advance-prereq-20261024-01.json",
+      "bytes": 97326,
+      "sha256": "61f46ff9e798397bcf776e18281fa3e3556016f33e8680f65382e4e852b3c419"
+    },
+    "wrapper": {
+      "path": "tmp/r8-native-calibration-parity-20261024/native-advance-prereq-01/receipt.json",
+      "bytes": 2738,
+      "sha256": "af9306bbcc2255f06eea76edce9d79f344a8a666f217d38d067a8e9c11e03fc1"
+    }
+  },
+  "stopRules": {
+    "noAutomaticRetry": true,
+    "noT39PassClaim": true,
+    "noStrictRuntimePassClaim": true,
+    "noDailyParityWaiver": true
+  }
+}

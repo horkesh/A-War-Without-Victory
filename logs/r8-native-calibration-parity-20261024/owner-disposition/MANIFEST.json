@@ -1,0 +1,67 @@
+[
+  {
+    "path": "governance-01/receipt.json",
+    "bytes": 2682,
+    "sha256": "32a222bcc9ab26ec7ef46ab8ee6da2fb062b0c2fbd0d34d58a36bc4280ab1670"
+  },
+  {
+    "path": "governance-01/stderr.log",
+    "bytes": 61757,
+    "sha256": "5c8c15e261761f7d982616c31666315720020f206a26d44c85c775054654756b"
+  },
+  {
+    "path": "governance-01/stdout.log",
+    "bytes": 787,
+    "sha256": "2c13f15ebdba59bbaec46293eff9dff46fe57f2eba5162d7ef854d0429238abf"
+  },
+  {
+    "path": "governance-final-index-01/receipt.json",
+    "bytes": 2726,
+    "sha256": "6759bbcdfa66fe76153e6fd462cb3454726cb463945374a877d1abba7a068e99"
+  },
+  {
+    "path": "governance-final-index-01/stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "governance-final-index-01/stdout.log",
+    "bytes": 359,
+    "sha256": "d5923313c3240713345a916072666857ee102f85bb526c9c2bdbb570adb50f9f"
+  },
+  {
+    "path": "governance-targeted-01/receipt.json",
+    "bytes": 2713,
+    "sha256": "186b0f7484871628492f8ff50dcd9ae121b46350152d94a2163510ba3e1b64e4"
+  },
+  {
+    "path": "governance-targeted-01/stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "governance-targeted-01/stdout.log",
+    "bytes": 417,
+    "sha256": "d718eb6276474a01bb6c84f2fecebcb961923cc0acac60ab376b265c69f1e76f"
+  },
+  {
+    "path": "INDEPENDENT_REVIEW.md",
+    "bytes": 2543,
+    "sha256": "bdf8b564b6c047debce49cf99b7a079b2827d68ca076789a341890c1f231743e"
+  },
+  {
+    "path": "RESULT.json",
+    "bytes": 3304,
+    "sha256": "0521322a633e609cf80b9d931fa5094caba46db778bac39dd011a0b24b7e3319"
+  },
+  {
+    "path": "UNCHANGED_AFTER.json",
+    "bytes": 2168,
+    "sha256": "a2222781df5555c43fa34043fc3a0f8b050be60b3da3e5938c01400f0e0b11b5"
+  },
+  {
+    "path": "UNCHANGED_BEFORE.json",
+    "bytes": 1976,
+    "sha256": "22199a3c77f0df9648a96afa2fa5b585671205bba4a59377f18ae48fa56cdd4f"
+  }
+]

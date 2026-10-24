@@ -1,0 +1,8 @@
+{
+  "supersedes": "clean-freeze-review--INITIAL_COVERAGE_MAP.md",
+  "reason": "Original review exit-order typo corrected; correct scenario child1 / entry2 / wrapper126. Original copy retained.",
+  "source": "tmp/player-bot-capability-parity-20261024/clean-freeze-review/INITIAL_COVERAGE_MAP.md",
+  "copy": "clean-freeze-review--INITIAL_COVERAGE_MAP.corrected.md",
+  "bytes": 6785,
+  "sha256": "e7ca3abb9ed2ae2b4d79b375612ebf3b9f2ee741648b712a1fe66eb4d609ee95"
+}

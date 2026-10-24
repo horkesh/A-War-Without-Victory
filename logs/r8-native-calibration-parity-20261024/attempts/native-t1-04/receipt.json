@@ -1,0 +1,72 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-24T16:07:56.760Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/r8-native-calibration-parity-20261024/native-t1-04",
+  "timeout_ms": 900000,
+  "original_argv": [
+    "node",
+    "tmp/r8-shakedown-20261023/root/run-command.cjs",
+    "{evidenceDir}",
+    "tmp/r8-native-calibration-parity-20261024/native-t1-04-config.json"
+  ],
+  "argv": [
+    "node",
+    "tmp/r8-shakedown-20261023/root/run-command.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\r8-native-calibration-parity-20261024\\native-t1-04",
+    "tmp/r8-native-calibration-parity-20261024/native-t1-04-config.json"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "command.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/r8-shakedown-20261023/root/run-command.cjs",
+    "bytes": 790,
+    "raw_sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584",
+    "normalized_text_sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    }
+  },
+  "end_utc": "2026-10-24T16:10:44.171Z",
+  "pid": 20520,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/r8-shakedown-20261023/root/run-command.cjs",
+    "bytes": 790,
+    "raw_sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584",
+    "normalized_text_sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 12775,
+    "sha256": "e50e24c92c89f33509543e4979005aafb13cff83d14cde5d44dfb004116d4cd4"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "command.json",
+      "bytes": 982,
+      "sha256": "0d332e8230ddac26fa936422c8c6f4a8a66c620d4e5c731d6cee40a8c8449e0e"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

@@ -75,7 +75,7 @@ The player is the faction president (wartime political leader). Shell ownership 
 
 | Concept | Canonical owner | Allowed summaries / links | Notes |
 |---|---|---|---|
-| Opening experience | React `MainMenu` + shared `WarroomScenePlate` | Outer Warroom host; bounded legacy recovery | One healthy owner in browser/Electron: splash → neutral selector → faction preview → dossier/mode → same selected room. |
+| Opening experience | React `MainMenu` + shared `WarroomScenePlate` | Outer Warroom host; bounded legacy recovery | One healthy owner in browser/Electron: splash → neutral selector → faction preview → dossier/mode → same selected room. Desktop Field Records import uses the canonical load-state-dialog owner; the outer host admits its returned replacement before the React MainMenu/App consumes the same projection for its distinct iframe owner. Direct recovery import also uses the host replacement gate and fails closed without a projection. FileReader import is browser-only. |
 | Campaign shell | Warroom | Tactical toolbar return affordance | Warroom is the president's desk, not a records browser. |
 | Battlespace inspection | Tactical Map | Army HQ map links and highlights | Tactical Map owns spatial truth and selection context. |
 | Military command review | Army HQ | Toolbar alerts, Inbox rows, Warroom hotspots | Army HQ owns depth; other shells route into it. |

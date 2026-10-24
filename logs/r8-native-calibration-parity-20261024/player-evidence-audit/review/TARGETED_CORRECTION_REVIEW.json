@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "reviewId": "player-validation-evidence-audit-20261024-targeted-correction-review",
+  "verdict": "GO",
+  "reviewed": {
+    "auditJsonSha256": "2aa3b161828dfca4d880a14e51d103853893a07615fcf03ea4d5445b7b71c94f",
+    "auditMarkdownSha256": "116f8a488e4c525cbff905ee2f208c4f129454cfbf610ffb1e59ec23bd49a2eb"
+  },
+  "resolvedFindings": [
+    "Farz authority path and ruling traceability",
+    "No nonexistent executable reader command",
+    "Replay-input feasibility separated from all-faction opening qualification",
+    "Built-in RS event-reader scope separated from retained RBiH t39 post-run reader",
+    "RS and HRHB zero-turn Save/load PARTIAL cells bound to exact native receipts and older-package scope"
+  ],
+  "checks": {
+    "auditJsonParsed": true,
+    "diffCheck": "pass",
+    "allCitedNextStepSourcePathsExist": true,
+    "nativeOrSimulationOrReplayExecuted": false,
+    "testsExecuted": false,
+    "rsWrapper": {"childExit": 0, "wrapperExit": 0, "timedOut": false},
+    "hrhbWrapper": {"childExit": 0, "wrapperExit": 0, "timedOut": false},
+    "rsResultSha256": "2adac984fb8c91d3739b47d256c3183722e3b1598a96dde86824001eeaff5880",
+    "hrhbResultSha256": "35d00e079a4256f62fb37f033fc08b73273d310d5724b5e25f175c0accf8801e",
+    "rsDirectManifestSha256": "0a95104be37ab992c21f4d6cd148453bd08eb5acbb92bde4d16e4ca2a52b89e1",
+    "hrhbDirectManifestSha256": "9f5c25b27d27ad3b1910f3af2a3d9d950bfab2dab92b5cc24961ebf425bb3bb2",
+    "saveLoadSummarySha256": "465db34ddc602f28ec3f65e8aea3ac8508241bc67cc8a54269424b9a02503e08"
+  },
+  "findings": []
+}

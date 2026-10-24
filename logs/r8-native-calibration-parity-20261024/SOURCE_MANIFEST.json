@@ -1,0 +1,28 @@
+{
+  "schema": "awwv.native-calibration-source-manifest.v1",
+  "captured_utc": "2026-10-24T17:19:04.2695470Z",
+  "source_head": "81a65d76",
+  "scope": "working-tree harness and read-only comparator; retained qualified package was not rebuilt",
+  "files": [
+    {
+      "path": "tools/ui/paradox_local_qa.cjs",
+      "bytes": 343860,
+      "sha256": "e47dce360ea538ccdae4fff4cc183d4c6166c64c4dd7f46585db285fc9ab6086"
+    },
+    {
+      "path": "tests/paradox_local_qa_harness.test.ts",
+      "bytes": 186066,
+      "sha256": "9e978fd94759b767dfbf3acd37eb6b9c23a81bd702acc1f806d836c6acd6e955"
+    },
+    {
+      "path": "tools/diagnostics/native_calibration_outcome_compare.cjs",
+      "bytes": 24284,
+      "sha256": "ab2afc3f8b3106b33db55c3235f4bd10bd130b998d11cb919be981e6640d79b8"
+    },
+    {
+      "path": "tests/native_calibration_outcome_compare.test.ts",
+      "bytes": 7013,
+      "sha256": "7fe58af33bc554035a78b97ff470aa24a96346589c3d07ad3e3f5b6a7268bc39"
+    }
+  ]
+}

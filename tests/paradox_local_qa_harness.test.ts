@@ -7,6 +7,8 @@ import * as nodePath from 'node:path';
 import { join } from 'node:path';
 import { runInNewContext } from 'node:vm';
 import { test, vi } from 'vitest';
+import { deriveInboxItems } from '../src/ui/map/data/inboxItems.js';
+import type { LoadedGameState } from '../src/ui/map/data/types.js';
 
 const harnessPath = join(process.cwd(), 'tools', 'ui', 'paradox_local_qa.cjs');
 const nodeRequire = createRequire(import.meta.url);
@@ -209,24 +211,31 @@ test('packaged startup waits for the embedded React owner and follows its comple
     const harness = readHarness();
     const startReactCampaign = runInNewContext(
         `(async ${extractFunctionSource(harness, 'startReactCampaign')})`,
-    ) as (surface: any, faction: string) => Promise<void>;
+        { historicalChoice: true },
+    ) as (surface: any, faction: string, onStep?: (step: string) => Promise<void>) => Promise<{ requested: string; ariaChecked: string } | null>;
     const actions: string[] = [];
+    const steps: string[] = [];
+    const productionRadioNames = ['Let it run from here', 'Let history run as it did'];
     const control = (name: string) => ({
         waitFor: async ({ state }: { state: string }) => actions.push(`wait:${name}:${state}`),
         click: async () => actions.push(`click:${name}`),
+        getAttribute: async (attribute: string) => attribute === 'aria-checked' && name === '/^Let history run as it did$/i' ? 'true' : null,
         first() { return this; },
     });
     const surface = {
         getByTestId: (testid: string) => testid === 'opening-splash-art'
             ? { isVisible: async () => true }
             : control(testid),
-        getByRole: (_role: string, options: { name: RegExp }) => ({
-            first: () => control(String(options.name)),
-        }),
+        getByRole: (role: string, options: { name: RegExp }) => {
+            if (role === 'radio' && !productionRadioNames.some((name) => options.name.test(name))) {
+                throw new Error(`No production radio has accessible name ${String(options.name)}`);
+            }
+            return { first: () => control(String(options.name)) };
+        },
         locator: (selector: string) => control(selector),
     };
 
-    await startReactCampaign(surface, 'RBiH');
+    const modeSelection = await startReactCampaign(surface, 'RBiH', async (step: string) => { steps.push(step); });
 
     assert.deepEqual(actions, [
         'wait:[aria-labelledby="opening-splash-title"] button:visible',
@@ -237,10 +246,14 @@ test('packaged startup waits for the embedded React owner and follows its comple
         'click:main-menu-faction-RBiH',
         'wait:/^Take command$/i:visible',
         'click:/^Take command$/i',
+        'wait:/^Let history run as it did$/i:visible',
+        'click:/^Let history run as it did$/i',
         'wait:/^Begin$/i:visible',
         'click:/^Begin$/i',
         'wait:/^Begin$/i:hidden',
     ]);
+    assert.deepEqual(modeSelection, { requested: 'historical', ariaChecked: 'true' });
+    assert.deepEqual(steps, ['side-picker', 'faction-dossier', 'command-mode', 'command-mode-historical-selected']);
     const startCampaign = extractFunctionSource(harness, 'startCampaign');
     assert.match(startCampaign, /waitForCampaignOpeningOwner/);
     assert.match(startCampaign, /opening\.kind === 'react'/);
@@ -1157,6 +1170,108 @@ test('request failure diagnostics retain only Range metadata with explicit absen
     assert.equal(diagnostics.networkFailures.every((record) => record.failure.errorText === 'net::ERR_ABORTED'), true);
 });
 
+test('CDP collection lifecycle writes the settled sidecar before returning an incomplete fatal result', async () => {
+    const createLifecycle = loadFunction<(options: any) => any>(
+        readHarness(),
+        'createCdpNetworkCollectionLifecycle',
+        { Error, Promise },
+    );
+    const order: string[] = [];
+    let resolveClose: (value: any) => void = () => {};
+    const collector = {
+        awaitReady: async () => { order.push('ready'); },
+        closeAndFlush: () => new Promise((resolve) => {
+            order.push('close-start');
+            resolveClose = resolve;
+        }),
+    };
+    const lifecycle = createLifecycle({
+        enabled: true,
+        startCollector: () => collector,
+        collectorOptions: {},
+        sidecarPath: 'evidence/cdp-network-collection-v3.json',
+        writeSidecar: (_path: string, artifact: any) => order.push(`write:${artifact.status}`),
+        digestSidecar: () => 'a'.repeat(64),
+    });
+    await lifecycle.awaitReady();
+    const pending = lifecycle.finalize().then((value: any) => {
+        order.push('finalize-return');
+        return value;
+    });
+    await Promise.resolve();
+    assert.deepEqual(order, ['ready', 'close-start']);
+    resolveClose({
+        schema: 'awwv.r8-warroom.cdp-network-collection.v3',
+        status: 'flush-timeout',
+        summary: { pending_at_flush: 1 },
+    });
+    const result = await pending;
+    assert.deepEqual(order, ['ready', 'close-start', 'write:flush-timeout', 'finalize-return']);
+    assert.equal(result.receipt.status, 'flush-timeout');
+    assert.match(result.error, /incomplete.*flush-timeout/i);
+    assert.deepEqual(await lifecycle.finalize(), result, 'finalization must be idempotent');
+});
+
+test('disabled CDP collection lifecycle is inert and the harness wiring is opt-in', async () => {
+    const harness = readHarness();
+    const createLifecycle = loadFunction<(options: any) => any>(
+        harness,
+        'createCdpNetworkCollectionLifecycle',
+        { Error, Promise },
+    );
+    let starts = 0;
+    const lifecycle = createLifecycle({
+        enabled: false,
+        startCollector: () => { starts += 1; throw new Error('must not start'); },
+        collectorOptions: {},
+        sidecarPath: 'unused.json',
+        writeSidecar: () => { throw new Error('must not write'); },
+        digestSidecar: () => { throw new Error('must not digest'); },
+    });
+    await lifecycle.awaitReady();
+    assert.deepEqual(await lifecycle.finalize(), { receipt: null, error: null });
+    assert.equal(starts, 0);
+    assert.match(harness, /args\.has\('--cdp-network-collection-v3'\)/);
+    assert.match(harness, /newCDPSession\(page\)/);
+    assert.match(harness, /await cdpCollectionLifecycle\.finalize\(\)/);
+});
+
+test.each(['write', 'digest'])('CDP collection lifecycle makes a %s sidecar failure independently fatal', async (failurePoint) => {
+    const createLifecycle = loadFunction<(options: any) => any>(
+        readHarness(),
+        'createCdpNetworkCollectionLifecycle',
+        { Error, Promise },
+    );
+    const lifecycle = createLifecycle({
+        enabled: true,
+        startCollector: () => ({
+            awaitReady: async () => {},
+            closeAndFlush: async () => ({ schema: 'v3', status: 'complete', summary: {} }),
+        }),
+        collectorOptions: {},
+        sidecarPath: 'evidence/cdp-network-collection-v3.json',
+        writeSidecar: () => { if (failurePoint === 'write') throw new Error('write-secret'); },
+        digestSidecar: () => {
+            if (failurePoint === 'digest') throw new Error('digest-secret');
+            return 'a'.repeat(64);
+        },
+    });
+    await lifecycle.awaitReady();
+    const result = await lifecycle.finalize();
+    assert.equal(result.receipt, null);
+    assert.match(result.error, /sidecar failed/i);
+    assert.equal(result.error.includes(`${failurePoint}-secret`), false);
+});
+
+test('failure wiring preserves the original harness error and an independently fatal collector result', () => {
+    const harness = readHarness();
+    assert.match(harness, /cdpNetworkCollection = cdpNetworkCollection \?\? cdpFinalization\.receipt/);
+    assert.match(harness, /cdpNetworkCollectionError = cdpNetworkCollectionError \?\? cdpFinalization\.error/);
+    assert.match(harness, /error: String\(error\?\.stack \?\? error\)/);
+    assert.match(harness, /\{ cdpNetworkCollection, cdpNetworkCollectionError \}/);
+    assert.match(harness, /throw error;/);
+});
+
 test('main-process evidence preserves ordered output beyond the bounded progress tail and rejects collisions', () => {
     const captureFactory = loadFunction<(path: string, now: () => number) => {
         handler: (stream: string, target: string[]) => (chunk: string) => void;
@@ -1235,30 +1350,313 @@ test('run faction uses fresh-profile setup and flushes buffered process tails af
     assert.ok(finalProgressIndex > flushIndex, 'failure and success progress must be rewritten after tail flush');
 });
 
-test('completed-turn autosave evidence is exact, exclusive, and idempotent per observed turn', () => {
+test('turn autosave evidence keeps provisional bytes separate from one immutable settled archive', () => {
     const harness = readHarness();
     const archiveSource = extractFunctionSource(harness, 'archiveAutosaveEvidence');
-    const completedTurnSource = extractFunctionSource(harness, 'archiveCompletedTurnAutosave');
+    const turnSource = extractFunctionSource(harness, 'archiveTurnAutosaveSnapshot');
     const archiveTurn = runInNewContext(
-        `(() => { const archiveAutosaveEvidence = ${archiveSource}; return (${completedTurnSource}); })()`,
+        `(() => { const archiveAutosaveEvidence = ${archiveSource}; return (${turnSource}); })()`,
         { fs: nodeFs, path: nodePath, fileSha256: (filePath: string) => nodeRequire('node:crypto').createHash('sha256').update(readFileSync(filePath)).digest('hex') },
-    ) as (sourcePath: string, evidenceRoot: string, faction: string, turn: number, records: Map<number, unknown>) => any;
+    ) as (sourcePath: string, evidenceRoot: string, faction: string, turn: number, records: Map<number, unknown>, kind: string) => any;
     const root = mkdtempSync(join(tmpdir(), 'awwv-turn-autosaves-'));
     try {
         const sourcePath = join(root, 'autosave.json');
         writeFileSync(sourcePath, JSON.stringify({ meta: { turn: 16 }, military: { formations: { ajnie: { assignment: null } } } }));
-        const records = new Map<number, unknown>();
-        const first = archiveTurn(sourcePath, join(root, 'evidence'), 'RBiH', 16, records);
-        assert.equal(first.turn, 16);
-        assert.equal(JSON.parse(readFileSync(first.path, 'utf8')).meta.turn, 16);
-        assert.equal(archiveTurn(sourcePath, join(root, 'evidence'), 'RBiH', 16, records), first);
+        const provisionalRecords = new Map<number, unknown>();
+        const settledRecords = new Map<number, unknown>();
+        const provisional = archiveTurn(sourcePath, join(root, 'evidence'), 'RBiH', 16, provisionalRecords, 'provisional');
+        assert.equal(provisional.turn, 16);
+        assert.equal(provisional.kind, 'provisional');
+        assert.match(provisional.path, /turn-autosaves-pre-settlement/);
+        writeFileSync(sourcePath, JSON.stringify({ meta: { turn: 16 }, receipts: ['post-advance-decision'] }));
+        const settled = archiveTurn(sourcePath, join(root, 'evidence'), 'RBiH', 16, settledRecords, 'settled');
+        assert.equal(settled.kind, 'settled');
+        assert.match(settled.path, /turn-autosaves[\\/]turn-016\.json$/);
+        assert.notEqual(settled.sha256, provisional.sha256, 'a same-turn receipt may change only the settled snapshot');
+        assert.deepEqual(JSON.parse(readFileSync(provisional.path, 'utf8')).military.formations.ajnie.assignment, null);
+        assert.deepEqual(JSON.parse(readFileSync(settled.path, 'utf8')).receipts, ['post-advance-decision']);
+        assert.equal(archiveTurn(sourcePath, join(root, 'evidence'), 'RBiH', 16, settledRecords, 'settled'), settled);
         writeFileSync(sourcePath, JSON.stringify({ meta: { turn: 17 } }));
-        assert.throws(() => archiveTurn(sourcePath, join(root, 'evidence'), 'RBiH', 16, new Map()), /turn mismatch/i);
+        assert.throws(() => archiveTurn(sourcePath, join(root, 'evidence'), 'RBiH', 16, new Map(), 'settled'), /turn mismatch/i);
         writeFileSync(sourcePath, JSON.stringify({ meta: { turn: 16 } }));
-        assert.throws(() => archiveTurn(sourcePath, join(root, 'evidence'), 'RBiH', 16, new Map()), /exist|EEXIST/i);
+        assert.throws(() => archiveTurn(sourcePath, join(root, 'evidence'), 'RBiH', 16, new Map(), 'settled'), /exist|EEXIST/i);
     } finally {
         rmSync(root, { recursive: true, force: true });
     }
+});
+
+test('settled turn readiness fails closed for blockers, exact owned modals, wrong turn, and unstable autosave identity', async () => {
+    const harness = readHarness();
+    const validate = loadFunction<(beforeState: any, afterState: any, beforeInventory: any, afterInventory: any, turn: number, before: string, after: string) => unknown>(
+        harness,
+        'validateSettledTurnArchiveReadiness',
+    );
+    const ready = { turn: 16, blockerInventory: { decisions: 0, aftermath: 0 } };
+    const clearInventory = { turnAftermath: 0, eventDecision: 0, paramilitary: 0, reserveRequest: 0, decisionRoom: 0 };
+    assert.doesNotThrow(() => validate(ready, ready, clearInventory, clearInventory, 16, 'hash:10:20', 'hash:10:20'));
+    assert.throws(() => validate({ ...ready, blockerInventory: { decisions: 1 } }, ready, clearInventory, clearInventory, 16, 'same', 'same'), /blocker/i);
+    assert.throws(() => validate(ready, ready, { ...clearInventory, decisionRoom: 1 }, clearInventory, 16, 'same', 'same'), /modal|surface/i);
+    assert.throws(() => validate(ready, { ...ready, turn: 17 }, clearInventory, clearInventory, 16, 'same', 'same'), /turn mismatch/i);
+    assert.throws(() => validate(ready, ready, clearInventory, clearInventory, 16, 'before', 'after'), /stable/i);
+    assert.doesNotThrow(
+        () => validate(ready, ready, clearInventory, clearInventory, 16, 'same', 'same'),
+        'footer-only REVIEW BEFORE ADVANCE 1 / REQ 0 text is deliberately outside exact modal inventory',
+    );
+    const inventorySource = extractFunctionSource(harness, 'readOwnedModalInventory');
+    assert.match(inventorySource, /turn-aftermath-close/);
+    assert.match(inventorySource, /event-decision-response-rail/);
+    assert.match(inventorySource, /paramilitary-submit-decisions/);
+    assert.match(inventorySource, /reserve-request-modal/);
+    assert.match(inventorySource, /warroom-decision-room-host/);
+    assert.doesNotMatch(inventorySource, /advance-turn-title/, 'expected pre-dispatch Advance confirmation is not an owned blocker modal');
+    const readInventory = runInNewContext(
+        `(async ${inventorySource})`,
+    ) as (frame: any) => Promise<Record<string, number>>;
+    const queried: string[] = [];
+    const decisionRoomSelector = '[data-testid="warroom-decision-room-host"]';
+    const observedInventory = await readInventory({
+        locator: (selector: string) => {
+            queried.push(selector);
+            return {
+                count: async () => 1,
+                nth: () => ({ isVisible: async () => selector === decisionRoomSelector }),
+            };
+        },
+    });
+    assert.equal(observedInventory.decisionRoom, 1);
+    assert.equal(Object.values(observedInventory).reduce((sum, count) => sum + count, 0), 1);
+    assert.equal(queried.some((selector) => selector.includes('advance-turn-title')), false);
+    assert.throws(() => validate(ready, ready, observedInventory, clearInventory, 16, 'same', 'same'), /modal|surface/i);
+    await assert.rejects(
+        () => readInventory({ locator: () => ({ count: async () => { throw new Error('detached frame'); } }) }),
+        /detached frame/,
+        'owner-query errors must prevent settlement instead of becoming a zero count',
+    );
+    await assert.rejects(
+        () => readInventory({ locator: () => ({ count: async () => 1, nth: () => ({ isVisible: async () => { throw new Error('destroyed execution context'); } }) }) }),
+        /destroyed execution context/,
+        'owner-visibility errors must prevent settlement instead of becoming hidden',
+    );
+});
+
+test('turn loop captures provisional increments but settles only before the next Advance or after terminal drain', () => {
+    const source = extractFunctionSource(readHarness(), 'playTurns');
+    assert.match(source, /handleCurrentSurface\(page, frame, faction, events, \{ allowAdvanceModal: false \}\)/);
+    assert.match(source, /afterHandle[\s\S]*archiveProvisionalTurn\(afterHandle\.turn\)/);
+    assert.match(source, /advance-click[\s\S]*archiveProvisionalTurn\(after\.turn\)/);
+    const prepareAdvance = source.indexOf('await prepareAdvanceDispatch(');
+    const advanceDispatch = source.indexOf('await dispatchAdvanceAfterSettlement(', prepareAdvance);
+    assert.ok(prepareAdvance >= 0 && advanceDispatch > prepareAdvance);
+    assert.match(source.slice(advanceDispatch, advanceDispatch + 240), /handled\.action/);
+    const prepareSource = extractFunctionSource(readHarness(), 'prepareAdvanceDispatch');
+    const settleBeforeAdvance = prepareSource.indexOf('await archiveSettledTurn(before.turn)');
+    const prerequisiteBeforeAdvance = prepareSource.indexOf('assertAdvanceDispatchPrerequisites(');
+    assert.ok(settleBeforeAdvance >= 0 && prerequisiteBeforeAdvance > settleBeforeAdvance);
+    const terminalDrain = source.indexOf(`turn-${'${targetTurn}'}-pre-final-tour-drain`);
+    const terminalSettle = source.indexOf('await archiveSettledTurn(targetTurn)', terminalDrain);
+    const terminalCheckpoint = source.indexOf('await runCheckpointTourAfterSettlement(targetTurn)', terminalSettle);
+    assert.ok(terminalDrain >= 0 && terminalSettle > terminalDrain && terminalCheckpoint > terminalSettle);
+    assert.doesNotMatch(source, /archiveCompletedTurnAutosave/);
+});
+
+test('advance dispatch prerequisites reject unresolved blockers and missing settled evidence', async () => {
+    const assertReady = loadFunction<(state: any, archivesRequired: boolean, settledTurns: Map<number, unknown>) => unknown>(
+        readHarness(),
+        'assertAdvanceDispatchPrerequisites',
+    );
+    const settled = new Map<number, unknown>([[15, { turn: 15, kind: 'settled' }]]);
+    assert.throws(
+        () => assertReady({ turn: 15, blockerInventory: { decisions: 1 } }, true, settled),
+        /blocker/i,
+    );
+    assert.throws(
+        () => assertReady({ turn: 15, blockerInventory: { decisions: 0 } }, true, new Map()),
+        /settled/i,
+    );
+    assert.doesNotThrow(() => assertReady({ turn: 15, blockerInventory: { decisions: 0 } }, true, settled));
+    assert.doesNotThrow(
+        () => assertReady({ turn: 0, blockerInventory: { decisions: 0 } }, true, new Map()),
+        'turn zero is the separately captured canonical initial boundary',
+    );
+    assert.throws(() => assertReady(null, true, settled), /turn/i);
+
+    const prepareSource = extractFunctionSource(readHarness(), 'prepareAdvanceDispatch');
+    let archiveCalls = 0;
+    let surfaceCalls = 0;
+    let readStateResult = { turn: 15, blockerInventory: { decisions: 1 } };
+    const prepare = runInNewContext(
+        `(async ${prepareSource})`,
+        {
+            readState: async () => readStateResult,
+            assertAdvanceDispatchPrerequisites: assertReady,
+        },
+    ) as (input: Record<string, unknown>) => Promise<unknown>;
+    await assert.rejects(() => prepare({
+        frame: {},
+        before: { turn: 15, blockerInventory: { decisions: 1 } },
+        handledAction: 'none',
+        unresolvedStateBlocker: true,
+        archiveTurnAutosaves: true,
+        turnAutosaveEvidenceByTurn: settled,
+        ensureAdvanceSurface: async () => { surfaceCalls += 1; return true; },
+        archiveSettledTurn: async () => { archiveCalls += 1; },
+        runCheckpointTourAfterSettlement: async () => {},
+    }), /blocker/i);
+    assert.equal(surfaceCalls, 0);
+    assert.equal(archiveCalls, 0, 'a missed blocker surface must never archive or reach dispatch preparation');
+
+    const order: string[] = [];
+    const normalSettled = new Map<number, unknown>();
+    readStateResult = { turn: 15, blockerInventory: { decisions: 0 } };
+    const prepared: any = await prepare({
+        frame: {},
+        before: readStateResult,
+        handledAction: 'none',
+        unresolvedStateBlocker: false,
+        archiveTurnAutosaves: true,
+        turnAutosaveEvidenceByTurn: normalSettled,
+        ensureAdvanceSurface: async () => { order.push('surface'); return true; },
+        archiveSettledTurn: async (turn: number) => {
+            order.push(`archive:${turn}`);
+            normalSettled.set(turn, { turn, kind: 'settled' });
+        },
+        runCheckpointTourAfterSettlement: async (turn: number) => { order.push(`checkpoint:${turn}`); },
+    });
+    assert.deepEqual(order, ['surface', 'archive:15', 'checkpoint:15']);
+    assert.equal(prepared.prerequisites.boundary, 'settled-turn');
+    assert.equal(prepared.state.turn, 15);
+
+    const playSource = extractFunctionSource(readHarness(), 'playTurns');
+    const prerequisiteIndex = playSource.indexOf('await prepareAdvanceDispatch(');
+    const dispatchIndex = playSource.indexOf('await dispatchAdvanceAfterSettlement(');
+    assert.ok(prerequisiteIndex >= 0 && dispatchIndex > prerequisiteIndex);
+});
+
+test('advance confirmation classification requires one exact visible owner and fails closed on ambiguity', async () => {
+    const source = readHarness();
+    const reader = runInNewContext(
+        `(async ${extractFunctionSource(source, 'readAdvanceConfirmation')})`,
+    ) as (frame: any) => Promise<Record<string, unknown>>;
+    const exactModalSelector = '[aria-labelledby="advance-turn-title"]';
+    const frame = (ownerCount: number, visible = true) => ({
+        locator: (selector: string) => {
+            assert.equal(selector, exactModalSelector);
+            return {
+                count: async () => ownerCount,
+                first: () => ({
+                    isVisible: async () => visible,
+                    getByRole: () => ({
+                        count: async () => 1,
+                        first: () => ({ isVisible: async () => true, isEnabled: async () => true }),
+                    }),
+                }),
+            };
+        },
+    });
+    assert.deepEqual(await reader(frame(0)), { present: false });
+    assert.equal((await reader(frame(1))).present, true);
+    await assert.rejects(() => reader(frame(2)), /exactly one|found 2/i);
+    await assert.rejects(() => reader(frame(1, false)), /not visible/i);
+    await assert.rejects(
+        () => reader({ locator: () => ({ count: async () => { throw new Error('query failed'); } }) }),
+        /query failed/,
+    );
+});
+
+test('toolbar advance outcome accepts exactly direct transition or exact confirmation and rejects neither or both', async () => {
+    const outcomeSource = extractFunctionSource(readHarness(), 'waitForToolbarAdvanceOutcome');
+    let stateTurn = 1;
+    let modalPresent = false;
+    const outcome = runInNewContext(
+        `(async ${outcomeSource})`,
+        {
+            readState: async () => ({ turn: stateTurn }),
+            readAdvanceConfirmation: async () => ({ present: modalPresent }),
+            sleep: async () => {},
+        },
+    ) as (frame: any, turn: number, attempts?: number) => Promise<Record<string, unknown>>;
+    assert.deepEqual(await outcome({}, 0, 1), { kind: 'direct-turn-transition', turn: 1 });
+    stateTurn = 0;
+    modalPresent = true;
+    assert.deepEqual(await outcome({}, 0, 1), { kind: 'confirmation-opened', turn: 0 });
+    stateTurn = 1;
+    await assert.rejects(() => outcome({}, 0, 1), /ambiguous/i);
+    stateTurn = 0;
+    modalPresent = false;
+    await assert.rejects(() => outcome({}, 0, 2), /neither|outcome/i);
+});
+
+test('settled advance dispatch follows the production direct-or-confirmation bifurcation', async () => {
+    const source = readHarness();
+    const dispatchSource = extractFunctionSource(source, 'dispatchAdvanceAfterSettlement');
+    const exactModalSelector = '[aria-labelledby="advance-turn-title"]';
+    const exactToolbarSelector = '[data-testid="warroom-toolbar-advance"]';
+    const clicks: string[] = [];
+    const button = (name: string) => ({
+        count: async () => 1,
+        first: () => ({ isVisible: async () => true, isEnabled: async () => true, click: async () => { clicks.push(name); } }),
+    });
+    const frame = {
+        locator: (selector: string) => {
+            if (selector === exactToolbarSelector) {
+                return button('toolbar');
+            }
+            assert.equal(selector, exactModalSelector);
+            return {
+                count: async () => 1,
+                first: () => ({
+                    isVisible: async () => true,
+                    getByRole: (_role: string, options: { name: RegExp }) => {
+                        assert.match('Advance while holding present policy', options.name);
+                        return button('modal-confirm');
+                    },
+                }),
+            };
+        },
+    };
+    const waits: string[] = [];
+    let toolbarOutcome = { kind: 'direct-turn-transition', turn: 1 };
+    const dispatch = runInNewContext(
+        `(async ${dispatchSource})`,
+        {
+            waitForAdvanceTransition: async () => { waits.push('transition'); },
+            readAdvanceConfirmation: async () => {
+                const modal: any = frame.locator(exactModalSelector).first();
+                return {
+                    present: true,
+                    buttonVisible: true,
+                    buttonEnabled: true,
+                    button: modal.getByRole('button', { name: /^Advance while holding present policy$/i }).first(),
+                };
+            },
+            readState: async () => ({ turn: 1 }),
+            waitForToolbarAdvanceOutcome: async () => toolbarOutcome,
+        },
+    ) as (frame: any, heldAction: string, beforeTurn: number) => Promise<Record<string, unknown>>;
+
+    const held = await dispatch(frame, 'advance-turn-modal-held-for-checkpoint', 0);
+    assert.deepEqual(clicks, ['modal-confirm'], 'DOM-earlier toolbar must remain untouched');
+    assert.deepEqual(waits, ['transition']);
+    assert.equal(held.action, 'advance-confirmation-dispatched');
+    assert.equal(held.turn, 1);
+
+    clicks.length = 0;
+    waits.length = 0;
+    const direct = await dispatch(frame, 'none', 0);
+    assert.deepEqual(clicks, ['toolbar']);
+    assert.equal(direct.action, 'advance-direct-transition');
+    toolbarOutcome = { kind: 'confirmation-opened', turn: 0 };
+    clicks.length = 0;
+    const opened = await dispatch(frame, 'none', 0);
+    assert.deepEqual(clicks, ['toolbar']);
+    assert.equal(opened.action, 'advance-confirmation-opened');
+});
+
+test('current-surface held classification uses exact modal ownership instead of persistent toolbar text', () => {
+    const source = extractFunctionSource(readHarness(), 'handleCurrentSurface');
+    assert.match(source, /readAdvanceConfirmation\(frame\)/);
+    assert.doesNotMatch(source, /\/ADVANCE TURN\/i\.test\(text\)/);
+    assert.match(source, /advance-turn-modal-held-for-checkpoint/);
 });
 
 test('tile fetch abort attribution requires and consumes an exact renderer AbortSignal identity', () => {
@@ -1368,6 +1766,13 @@ test('save-load-only is a bounded zero-turn diagnostic and failure paths retain 
     assert.match(harness, /failureTileFetchAbortSignals/);
     assert.match(harness, /failureAmbientLifecycleSignals/);
     assert.match(harness, /catch \(error\)[\s\S]*readTileFetchAbortSignals\(frame\)[\s\S]*readAmbientLifecycleSignals\(frame\)/);
+    const catchIndex = harness.indexOf('} catch (error) {', harness.indexOf('async function runFaction'));
+    const catchSource = harness.slice(catchIndex, harness.indexOf('} finally {', catchIndex));
+    assert.match(catchSource, /attributeTileFetchAborts\(networkFailures, failureTileFetchAbortSignals, expectedTileFetchAborts\)/);
+    assert.ok(catchSource.indexOf('attributeTileFetchAborts(') < catchSource.indexOf('result.factions.push('));
+    assert.match(catchSource, /failureTileFetchAbortSignals/);
+    assert.match(catchSource, /failureRawNetworkFailures/);
+    assert.match(catchSource, /expectedTileFetchAborts/);
 });
 
 test('save menu route retains every owner boundary without a temporary inspection flag', () => {
@@ -1393,6 +1798,145 @@ test('save menu route retains every owner boundary without a temporary inspectio
     assert.match(inspect, /chooseObservedQuicksaveControl/);
     assert.doesNotMatch(extractFunctionSource(harness, 'resolveObservedFrame'), /frameIndex/);
     assert.match(harness, /saveLoadMenuInspectionPath/);
+});
+
+test('resume-save follows unique observed Main Menu owners and fails closed before import or Advance', async () => {
+    const harness = readHarness();
+    const exactCount = loadFunction<(record: any, label: string) => number>(harness, 'frameVisibleExactControlCount');
+    const resume = loadAsyncFunction<(
+        page: unknown,
+        faction: string,
+        savePath: string,
+        dependencies: Record<string, unknown>,
+    ) => Promise<any>>(harness, 'resumeThroughObservedMainMenu', {
+        frameVisibleExactControlCount: exactCount,
+        compactText: (value: unknown) => String(value),
+        canonicalAutosavePath: 'canonical-autosave.json',
+    });
+    const selectOwner = loadFunction<(observation: any, predicate: (record: any) => boolean, label: string) => any>(
+        harness,
+        'chooseObservedOwner',
+    );
+    const clicked: string[] = [];
+    const frames = new Map<string, any>();
+    for (const frameId of ['opening', 'landing', 'records', 'restored']) {
+        frames.set(frameId, {
+            getByRole: (_role: string, options: { name: string }) => ({
+                count: async () => 1,
+                isVisible: async () => true,
+                isEnabled: async () => true,
+                click: async () => { clicked.push(options.name); },
+            }),
+        });
+    }
+    const observation = (frameId: string, controls: string[], markers: Record<string, boolean>) => ({
+        boundary: frameId,
+        chosenOwnerFrameId: null,
+        pages: [{ pageIndex: 0, frames: [{
+            frameId,
+            url: `https://example.invalid/${frameId}`,
+            detached: false,
+            controls: controls.map((accessibleLabel) => ({ accessibleLabel, disabled: false })),
+            markers,
+        }] }],
+    });
+    const routeObservations = () => [
+        observation('opening', ['Assume responsibility'], { openingSplash: true }),
+        observation('landing', ['Field Records'], { mainMenuOpening: true }),
+        observation('records', ['Import file…'], { mainMenuOpening: true }),
+        observation('restored', [], { tacticalMap: true }),
+    ];
+    const invoke = async (observations: any[], diagnostics: any[], overrides: Record<string, unknown> = {}) => resume(
+        {},
+        'RBiH',
+        'C:\\evidence\\turn-39.json',
+        {
+            captureSaveLoadSurfaceInventory: async () => observations.shift(),
+            chooseObservedOwner: selectOwner,
+            markSaveLoadObservationOwner: (item: any, owner: any) => { item.chosenOwnerFrameId = owner.frameRecord.frameId; },
+            resolveObservedFrame: (_page: unknown, owner: any) => frames.get(owner.frameRecord.frameId),
+            sleep: async () => {},
+            waitForCampaignCommandReady: async () => {},
+            readState: async () => ({ turn: 39, playerFaction: 'RBiH' }),
+            readResumeIdentity: () => ({ turn: 39, playerFaction: 'RBiH' }),
+            assertCanonicalResumeAutosave: () => 'autosave-hash:1:2',
+            readAmbientLifecycleSignals: async () => [{ kind: 'playing' }],
+            failureEvidence: {
+                consoleMessages: [{ type: 'error', text: 'renderer-error' }],
+                pageErrors: [{ message: 'page-error' }],
+                networkFailures: [{ kind: 'request-failed', url: 'https://example.invalid/fail' }],
+                mainProcessStdout: ['main-out'],
+                mainProcessStderr: ['main-err'],
+                mainProcessOutputEvidencePath: 'C:\\evidence\\main.jsonl',
+            },
+            writeResumeRouteDiagnostics: (value: unknown) => { diagnostics.push(value); },
+            ...overrides,
+        },
+    );
+
+    const successDiagnostics: any[] = [];
+    const success = await invoke(routeObservations(), successDiagnostics);
+    assert.equal(success.frame, frames.get('restored'));
+    assert.deepEqual(clicked, ['Assume responsibility', 'Field Records', 'Import file…']);
+    assert.equal(successDiagnostics.at(-1)?.status, 'loaded');
+    assert.equal(successDiagnostics.at(-1)?.canonicalAutosaveIdentity, 'autosave-hash:1:2');
+
+    for (const controls of [[], ['Assume responsibility', 'Assume responsibility']]) {
+        clicked.length = 0;
+        const failureDiagnostics: any[] = [];
+        await assert.rejects(
+            () => invoke([observation('opening', controls, { openingSplash: true })], failureDiagnostics),
+            /observed 0/,
+        );
+        assert.deepEqual(clicked, []);
+        assert.equal(failureDiagnostics.at(-1)?.status, 'failed');
+        assert.deepEqual(failureDiagnostics.at(-1)?.failureEvidence.consoleMessages, [{ type: 'error', text: 'renderer-error' }]);
+        assert.deepEqual(failureDiagnostics.at(-1)?.failureEvidence.rawNetworkFailures, [{ kind: 'request-failed', url: 'https://example.invalid/fail' }]);
+        assert.equal(failureDiagnostics.at(-1)?.failureEvidence.mainProcessOutputEvidencePath, 'C:\\evidence\\main.jsonl');
+        assert.equal(failureDiagnostics.at(-1)?.failureEvidence.ambientLifecycleSignals.available, false);
+    }
+
+    clicked.length = 0;
+    const ambiguousImportDiagnostics: any[] = [];
+    await assert.rejects(
+        () => invoke([
+            observation('opening', ['Assume responsibility'], { openingSplash: true }),
+            observation('landing', ['Field Records'], { mainMenuOpening: true }),
+            observation('records', ['Import file…', 'Import file…'], { mainMenuOpening: true }),
+        ], ambiguousImportDiagnostics),
+        /observed 0/,
+    );
+    assert.deepEqual(clicked, ['Assume responsibility', 'Field Records']);
+    assert.equal(ambiguousImportDiagnostics.at(-1)?.status, 'failed');
+
+    clicked.length = 0;
+    const wrongIdentityDiagnostics: any[] = [];
+    await assert.rejects(
+        () => invoke(routeObservations(), wrongIdentityDiagnostics, {
+            readState: async () => ({ turn: 40, playerFaction: 'RS' }),
+        }),
+        /loaded identity mismatch/,
+    );
+    assert.deepEqual(clicked, ['Assume responsibility', 'Field Records', 'Import file…']);
+    assert.equal(wrongIdentityDiagnostics.at(-1)?.status, 'failed');
+
+    clicked.length = 0;
+    const enrichmentDiagnostics: any[] = [];
+    await assert.rejects(
+        () => invoke(routeObservations(), enrichmentDiagnostics, {
+            waitForCampaignCommandReady: async () => { throw new Error('enrichment-failed'); },
+        }),
+        /enrichment-failed/,
+    );
+    assert.deepEqual(clicked, ['Assume responsibility', 'Field Records', 'Import file…']);
+    assert.equal(enrichmentDiagnostics.at(-1)?.status, 'failed');
+    assert.match(enrichmentDiagnostics.at(-1)?.error, /enrichment-failed/);
+
+    const helper = extractFunctionSource(harness, 'resumeThroughObservedMainMenu');
+    assert.doesNotMatch(helper, /Advance|advanceTurn|setInputFiles|loadStateDialog/);
+    const runFaction = extractFunctionSource(harness, 'runFaction');
+    assert.match(runFaction, /resumeThroughObservedMainMenu\(page, faction, resumeSavePath/);
+    assert.doesNotMatch(runFaction, /getByRole\('button', \{ name: \/Load Save\/i \}\)/);
 });
 
 test('save menu inspection emits deterministic exact projected-state and canonical-save payload evidence', () => {
@@ -1433,7 +1977,7 @@ test('save menu payload directory creates a missing parent and refuses to overwr
     }
 });
 
-test('Save/load requires the exact authoritative hydrated projection and ratings-only expected delta', () => {
+test('Save/load hydration permits only cache removal and owned-sector rating recomputation', () => {
     const harness = readHarness();
     const validateDelta = loadFunction<(
         before: string,
@@ -1448,22 +1992,97 @@ test('Save/load requires the exact authoritative hydrated projection and ratings
         'assertExactExpectedLoadedProjection',
         { crypto: nodeRequire('node:crypto') },
     );
+    const rating = (sectorId: string, personnel: number, strengthClass: string) => ({
+        sector_id: sectorId,
+        faction: 'RBiH',
+        offensive_power: 100,
+        defensive_power: 200,
+        defense_per_edge: 100,
+        personnel,
+        morale_avg: 60,
+        cohesion_avg: 70,
+        fatigue_avg: 0,
+        edge_count: 2,
+        brigade_count: 1,
+        strength_class: strengthClass,
+    });
     const base = {
         meta: { player_faction: 'RBiH', turn: 4 },
         military: {
+            home_distance_cache: { brigade_a: 3, brigade_b: 0 },
             corps_front_sectors: {
                 own: { sector_id: 'own', faction: 'RBiH' },
+                own_new: { sector_id: 'own_new', faction: 'RBiH' },
                 enemy: { sector_id: 'enemy', faction: 'RS' },
             },
+            // Live transient ratings may be a subset before authoritative load hydration.
+            sector_combat_ratings: { own: rating('own', 9, 'thin') },
         },
     };
     const hydrated = structuredClone(base) as any;
-    hydrated.military.sector_combat_ratings = { own: { sector_id: 'own', personnel: 10 } };
-    assert.doesNotThrow(() => validateDelta(JSON.stringify(base), JSON.stringify(hydrated), 'RBiH', 4));
+    hydrated.military.home_distance_cache = {};
+    hydrated.military.sector_combat_ratings = {
+        own: rating('own', 10, 'adequate'),
+        own_new: rating('own_new', 5, 'critical'),
+    };
+    const receipt = validateDelta(JSON.stringify(base), JSON.stringify(hydrated), 'RBiH', 4) as any;
+    assert.deepEqual(receipt.allowedPrefixes, ['military.home_distance_cache', 'military.sector_combat_ratings']);
+    assert.equal(receipt.changeClasses.homeDistanceCacheRemovals > 0, true);
+    assert.equal(receipt.changeClasses.sectorCombatRatingChanges > 0, true);
+    const emptyTransient = structuredClone(base) as any;
+    emptyTransient.military.home_distance_cache = {};
+    emptyTransient.military.sector_combat_ratings = {};
+    assert.doesNotThrow(() => validateDelta(JSON.stringify(emptyTransient), JSON.stringify(hydrated), 'RBiH', 4));
     assert.throws(
         () => validateDelta(JSON.stringify(base), JSON.stringify({ ...hydrated, unrelated: true }), 'RBiH', 4),
-        /outside sector combat ratings/,
+        /outside declared hydration fields/,
     );
+    const populatedAfterCache = structuredClone(hydrated);
+    populatedAfterCache.military.home_distance_cache = { brigade_a: 4 };
+    assert.throws(() => validateDelta(JSON.stringify(base), JSON.stringify(populatedAfterCache), 'RBiH', 4), /cache.*empty/i);
+    const missingAfterCache = structuredClone(hydrated);
+    delete missingAfterCache.military.home_distance_cache;
+    assert.throws(() => validateDelta(JSON.stringify(base), JSON.stringify(missingAfterCache), 'RBiH', 4), /cache.*own.*plain/i);
+    const replacedAfterCache = structuredClone(hydrated);
+    replacedAfterCache.military.home_distance_cache = [];
+    assert.throws(() => validateDelta(JSON.stringify(base), JSON.stringify(replacedAfterCache), 'RBiH', 4), /cache.*own.*plain/i);
+    const invalidBeforeCache = structuredClone(base);
+    invalidBeforeCache.military.home_distance_cache.brigade_a = Number.POSITIVE_INFINITY;
+    assert.throws(() => validateDelta(JSON.stringify(invalidBeforeCache), JSON.stringify(hydrated), 'RBiH', 4), /cache.*finite.*non-negative/i);
+    const negativeBeforeCache = structuredClone(base);
+    negativeBeforeCache.military.home_distance_cache.brigade_a = -1;
+    assert.throws(() => validateDelta(JSON.stringify(negativeBeforeCache), JSON.stringify(hydrated), 'RBiH', 4), /cache.*finite.*non-negative/i);
+    const nestedBeforeCache = structuredClone(base) as any;
+    nestedBeforeCache.military.home_distance_cache = { brigade_a: { hops: 3 } };
+    assert.throws(() => validateDelta(JSON.stringify(nestedBeforeCache), JSON.stringify(hydrated), 'RBiH', 4), /cache.*flat/i);
+    const thirdTransient = structuredClone(hydrated);
+    thirdTransient.military.militia_garrison = { own: 1 };
+    assert.throws(() => validateDelta(JSON.stringify(base), JSON.stringify(thirdTransient), 'RBiH', 4), /outside declared hydration fields/);
+    const missingRating = structuredClone(hydrated);
+    missingRating.military.sector_combat_ratings = {};
+    assert.throws(() => validateDelta(JSON.stringify(base), JSON.stringify(missingRating), 'RBiH', 4), /rating ids.*player-owned sectors/i);
+    const extraRating = structuredClone(hydrated);
+    extraRating.military.sector_combat_ratings.enemy = rating('enemy', 5, 'thin');
+    assert.throws(() => validateDelta(JSON.stringify(base), JSON.stringify(extraRating), 'RBiH', 4), /rating ids.*player-owned sectors/i);
+    const nonnumericRating = structuredClone(hydrated);
+    nonnumericRating.military.sector_combat_ratings.own.personnel = 'ten';
+    assert.throws(() => validateDelta(JSON.stringify(base), JSON.stringify(nonnumericRating), 'RBiH', 4), /rating.*(schema|numeric)/i);
+    const arbitraryStringBefore = structuredClone(base);
+    const arbitraryStringAfter = structuredClone(hydrated);
+    (arbitraryStringBefore.military.sector_combat_ratings.own as any).note = 'before';
+    arbitraryStringAfter.military.sector_combat_ratings.own.note = 'after';
+    assert.throws(() => validateDelta(JSON.stringify(arbitraryStringBefore), JSON.stringify(arbitraryStringAfter), 'RBiH', 4), /rating.*(schema|numeric|strength_class)/i);
+    const invalidBeforeEnum = structuredClone(base);
+    invalidBeforeEnum.military.sector_combat_ratings.own.strength_class = 'invalid';
+    assert.throws(() => validateDelta(JSON.stringify(invalidBeforeEnum), JSON.stringify(hydrated), 'RBiH', 4), /rating.*(schema|strength_class)/i);
+    const invalidAfterEnum = structuredClone(hydrated);
+    invalidAfterEnum.military.sector_combat_ratings.own.strength_class = 'invalid';
+    assert.throws(() => validateDelta(JSON.stringify(base), JSON.stringify(invalidAfterEnum), 'RBiH', 4), /rating.*(schema|strength_class)/i);
+    const nestedBefore = structuredClone(base);
+    const nestedAfter = structuredClone(hydrated);
+    (nestedBefore.military.sector_combat_ratings.own as any).nested = { strength_class: 'thin' };
+    nestedAfter.military.sector_combat_ratings.own.nested = { strength_class: 'adequate' };
+    assert.throws(() => validateDelta(JSON.stringify(nestedBefore), JSON.stringify(nestedAfter), 'RBiH', 4), /rating.*(schema|strength_class)/i);
     assert.throws(
         () => validateDelta(JSON.stringify(base), JSON.stringify({ ...hydrated, military: { ...hydrated.military, sector_combat_ratings: { enemy: {} } } }), 'RBiH', 4),
         /player-owned sectors/,
@@ -1476,6 +2095,8 @@ test('Save/load requires the exact authoritative hydrated projection and ratings
     assert.throws(() => assertExpected(JSON.stringify(wrongRating), JSON.stringify(hydrated)), /exact authoritative/);
 
     const route = extractFunctionSource(harness, 'completeObservedSaveLoadRoute');
+    assert.match(route, /expectedHydrationAllowedPrefixes/);
+    assert.match(route, /expectedHydrationChangeClasses/);
     const expectedIndex = route.indexOf('buildAuthoritativeExpectedLoadedProjection');
     const resumeIndex = route.indexOf("getByRole('button', { name: owner.label, exact: true }).click()", expectedIndex);
     const exactIndex = route.indexOf('assertExactExpectedLoadedProjection', resumeIndex);
@@ -2129,19 +2750,330 @@ test('officer handling opens the exact grouped matter and attributes its durable
     );
 
     assert.match(readState, /pendingOfficerMatterItems/);
-    assert.match(readState, /officerEventDedupeKey/);
+    assert.match(readState, /projectPendingOfficerMatterItems/);
     assert.match(handler, /pendingOfficerMatterItems\?\.\[0\]/);
     assert.match(handler, /openDeskInboxItem\(frame, 'officer_event', officerMatter\.inboxItemId\)/);
     assert.equal(officerResponseLabel({ eventType: 'officer_available' }), 'File availability notice');
     assert.equal(officerResponseLabel({ eventType: 'replacement_suggested' }), 'Keep current commander');
     assert.equal(officerResponseLabel({ eventType: 'order_pushback' }), 'Acknowledge');
-    assert.match(handler, /const responseLabel = officerResponseLabel\(officerMatter\)/);
+    assert.match(handler, /const officerResponse = selectOfficerSuccessionResponse\(officerMatter, officerSuccessionPolicy\)/);
+    assert.match(handler, /const responseLabel = officerResponse\.responseLabel/);
     assert.match(handler, /waitForNewExactDecisionReceipt\([\s\S]*?'officer'[\s\S]*?'eventId'[\s\S]*?officerEventId/);
     assert.match(extractFunctionSource(harness, 'waitForNewExactDecisionReceipt'), /readState\(frame\)/);
     assert.doesNotMatch(
         handler.slice(handler.indexOf("if ((pendingState?.pendingOfficerEvents ?? 0) > 0)")),
         /openDeskInboxItem\(frame, 'officer_event'\)/,
         'officer routing must never fall back to the first family-level card',
+    );
+});
+
+test('officer succession policy is explicit, versioned, defaults to keep, and rejects unknown values', () => {
+    const parse = loadFunction<(argv: string[]) => { requested: string; version: number; explicit: boolean }>(
+        readHarness(),
+        'parseOfficerSuccessionPolicy',
+    );
+
+    assert.deepEqual(parse(['node', 'harness']), { requested: 'keep', version: 1, explicit: false });
+    assert.deepEqual(
+        parse(['node', 'harness', '--officer-succession-policy=historical']),
+        { requested: 'historical', version: 1, explicit: true },
+    );
+    assert.deepEqual(
+        parse(['node', 'harness', '--officer-succession-policy=keep']),
+        { requested: 'keep', version: 1, explicit: true },
+    );
+    assert.throws(
+        () => parse(['node', 'harness', '--officer-succession-policy=automatic']),
+        /Unknown officer succession policy: automatic/,
+    );
+    assert.throws(
+        () => parse(['node', 'harness', '--officer-succession-policy=keep', '--officer-succession-policy=historical']),
+        /exactly once/,
+    );
+});
+
+test('historical officer succession strategy accepts only the exact live player offer and preserves default keep', () => {
+    const harness = readHarness();
+    const fixture = JSON.parse(readFileSync(join(
+        process.cwd(),
+        'tmp',
+        'player-bot-capability-parity-20261024',
+        'native104-failure-inventory-02',
+        'failure-state44.json',
+    ), 'utf8'));
+    const events = fixture.military.pending_officer_events;
+    const officerData = fixture.military.named_officer_data;
+    const projected = projectHarnessOfficerMatters(harness, events, fixture.meta.player_faction, officerData);
+    const matter = projected.find((item) => item.eventId === 'replacement:arbih_knez:arbih_2nd_corps:arbih_sadic');
+    assert.ok(matter);
+    assert.deepEqual(matter, {
+        inboxItemId: 'officer:replacement_suggested:arbih_knez',
+        eventId: 'replacement:arbih_knez:arbih_2nd_corps:arbih_sadic',
+        eventType: 'replacement_suggested',
+        officerId: 'arbih_sadic',
+        officerName: 'Hazim Šadić',
+        currentCommanderId: 'arbih_knez',
+        currentCommanderName: 'Željko Knez',
+        corpsId: 'arbih_2nd_corps',
+        overrideAction: null,
+    });
+
+    const choose = loadFunction<(
+        officerMatter: Record<string, unknown>,
+        policy: { requested: string; version: number },
+    ) => Record<string, unknown>>(harness, 'selectOfficerSuccessionResponse');
+    assert.deepEqual(choose(matter, { requested: 'keep', version: 1 }), {
+        responseLabel: 'Keep current commander',
+        expectedDecision: 'acknowledged',
+        route: 'desk',
+        policy: 'keep',
+        policyVersion: 1,
+        candidateOfficerId: 'arbih_sadic',
+    });
+    assert.deepEqual(choose(matter, { requested: 'historical', version: 1 }), {
+        responseLabel: 'Appoint Historical Successor',
+        expectedDecision: 'replacement_accepted',
+        route: 'personnel',
+        policy: 'historical',
+        policyVersion: 1,
+        candidateOfficerId: 'arbih_sadic',
+    });
+
+    const exactEvent = events.find((event: Record<string, unknown>) => event.event_id === matter.eventId);
+    assert.ok(exactEvent);
+    const foreign = { ...exactEvent, event_id: 'foreign-replacement', faction: 'RS' };
+    assert.equal(projectHarnessOfficerMatters(harness, [foreign], 'RBiH', officerData).length, 0);
+    assert.equal(projectHarnessOfficerMatters(harness, [{ ...exactEvent, acknowledged: true }], 'RBiH', officerData).length, 0);
+    assert.throws(
+        () => choose({ ...matter, officerId: null }, { requested: 'historical', version: 1 }),
+        /exact proposed officer/,
+    );
+});
+
+test('historical officer succession handler uses the owned personnel surface and exact durable appointment receipt', () => {
+    const harness = readHarness();
+    const handler = extractFunctionSource(harness, 'handleCurrentSurface');
+    const clickOffer = extractFunctionSource(harness, 'clickHistoricalOfficerSuccessionOffer');
+    assert.match(clickOffer, /Open personnel/);
+    assert.match(clickOffer, /Appoint Historical Successor/);
+    assert.match(clickOffer, /officerMatter\.officerName/);
+    assert.match(clickOffer, /officerMatter\.currentCommanderName/);
+    assert.match(handler, /clickHistoricalOfficerSuccessionOffer/);
+    assert.match(handler, /replacement_accepted/);
+    assert.match(handler, /newOfficerId: officerMatter\.officerId/);
+    assert.match(handler, /outgoingOfficerId: officerMatter\.currentCommanderId/);
+    assert.match(handler, /officerSuccessionChoiceTranscript\.push/);
+    assert.match(handler, /waitForNewExactDecisionReceipt/);
+});
+
+test('historical officer succession receipt carries exact candidate and incumbent and rejects a stale replay', () => {
+    const harness = readHarness();
+    const strictAsciiCompare = loadFunction<(left: string, right: string) => number>(harness, 'strictAsciiCompare');
+    const decisionReceiptKey = loadFunction<(receipt: Record<string, unknown>) => string>(
+        harness,
+        'decisionReceiptKey',
+        { strictAsciiCompare },
+    );
+    const project = loadFunction<(
+        state: Record<string, unknown>,
+        faction: string,
+    ) => Record<string, Array<Record<string, unknown>>>>(
+        harness,
+        'projectCanonicalDecisionReceipts',
+        { decisionReceiptKey, strictAsciiCompare },
+    );
+    const assertReceipt = loadFunction<(
+        family: string,
+        identityField: string,
+        identity: string,
+        before: Array<Record<string, unknown>>,
+        after: Array<Record<string, unknown>>,
+        expected: Record<string, unknown>,
+    ) => Record<string, unknown>>(
+        harness,
+        'assertNewExactDecisionReceipt',
+        { decisionReceiptKey, strictAsciiCompare },
+    );
+    const eventId = 'replacement:arbih_knez:arbih_2nd_corps:arbih_sadic';
+    const receipt = project({
+        military: {
+            officer_decision_history: [{
+                id: `officer-decision:${eventId}`,
+                event_id: eventId,
+                event_type: 'replacement_suggested',
+                faction: 'RBiH',
+                decision: 'replacement_accepted',
+                new_officer_id: 'arbih_sadic',
+                outgoing_officer_id: 'arbih_knez',
+                turn: 44,
+            }],
+        },
+    }, 'RBiH').officerDecisionReceipts[0];
+    const expected = {
+        faction: 'RBiH',
+        decision: 'replacement_accepted',
+        newOfficerId: 'arbih_sadic',
+        outgoingOfficerId: 'arbih_knez',
+    };
+    assert.deepEqual(assertReceipt('officer', 'eventId', eventId, [], [receipt], expected), receipt);
+    assert.throws(
+        () => assertReceipt('officer', 'eventId', eventId, [receipt], [receipt], expected),
+        /No new exact officer decision receipt/,
+    );
+});
+
+function projectHarnessOfficerMatters(
+    harness: string,
+    events: Array<Record<string, unknown>>,
+    playerFaction: string,
+    officerData: Array<Record<string, unknown>> = [],
+) {
+    const normalizeOfficerSubject = loadFunction<(value: unknown) => string | null>(harness, 'normalizeOfficerSubject');
+    const officerEventDedupeKey = loadFunction<(event: Record<string, unknown>) => string>(
+        harness,
+        'officerEventDedupeKey',
+        { normalizeOfficerSubject },
+    );
+    const strictAsciiCompare = loadFunction<(left: string, right: string) => number>(harness, 'strictAsciiCompare');
+    const project = loadFunction<(
+        input: Array<Record<string, unknown>>,
+        faction: string,
+        officerData?: Array<Record<string, unknown>>,
+    ) => Array<Record<string, unknown>>>(
+        harness,
+        'projectPendingOfficerMatterItems',
+        { officerEventDedupeKey, strictAsciiCompare },
+    );
+    return project(events, playerFaction, officerData);
+}
+
+function productionOfficerItems(events: Array<Record<string, unknown>>, playerFaction = 'RBiH') {
+    return deriveInboxItems({
+        label: `${playerFaction} officer fixture`,
+        turn: 44,
+        phase: 'war',
+        player_faction: playerFaction,
+        formations: [],
+        militiaPools: [],
+        controlBySettlement: {},
+        statusBySettlement: {},
+        brigadeAorByFormationId: {},
+        attackOrders: [],
+        aorOrders: [],
+        recentControlEvents: [],
+        allControlEvents: [],
+        displacementEventLog: [],
+        battlesByOsid: {},
+        movementsByOsid: {},
+        supplyTransitionsByOsid: {},
+        historicalEventsByTurn: [],
+        pressureWarning: false,
+        latestTurnSummary: null,
+        turnSummaries: [],
+        pendingOfficerEvents: events,
+    } as unknown as LoadedGameState, null).filter((item) => item.type === 'officer_event');
+}
+
+test('officer harness projects the exact turn-44 replacement card and event identity from production input', () => {
+    const events = [{
+        acknowledged: false,
+        corps_id: 'arbih_2nd_corps',
+        current_commander_id: 'arbih_knez',
+        event_id: 'replacement:arbih_knez:arbih_2nd_corps:arbih_sadic',
+        faction: 'RBiH',
+        officer_id: 'arbih_sadic',
+        turn: 44,
+        type: 'replacement_suggested',
+    }];
+    const production = productionOfficerItems(events);
+    const harness = readHarness();
+    const normalizeOfficerSubject = loadFunction<(value: unknown) => string | null>(harness, 'normalizeOfficerSubject');
+    const officerEventDedupeKey = loadFunction<(event: Record<string, unknown>) => string>(
+        harness,
+        'officerEventDedupeKey',
+        { normalizeOfficerSubject },
+    );
+
+    assert.equal(production.length, 1);
+    assert.equal(`officer:${officerEventDedupeKey(events[0])}`, production[0].id);
+    const projected = projectHarnessOfficerMatters(harness, events, 'RBiH');
+    assert.deepEqual(projected, [{
+        inboxItemId: production[0].id,
+        eventId: events[0].event_id,
+        eventType: events[0].type,
+        officerId: events[0].officer_id,
+        officerName: null,
+        currentCommanderId: events[0].current_commander_id,
+        currentCommanderName: null,
+        corpsId: events[0].corps_id,
+        overrideAction: null,
+    }]);
+    assert.equal(production[0].id, 'officer:replacement_suggested:arbih_knez');
+});
+
+test('officer harness matches production identity fallbacks and chooses the newest replacement with a stable tie break', () => {
+    const events = [
+        { event_id: 'replacement-old', type: 'replacement_suggested', faction: 'RBiH', turn: 42, acknowledged: false, current_commander_id: 'incumbent-alpha', officer_id: 'candidate-old' },
+        { event_id: 'replacement-z', type: 'replacement_suggested', faction: 'RBiH', turn: 44, acknowledged: false, current_commander_id: 'incumbent-alpha', officer_id: 'candidate-z' },
+        { event_id: 'replacement-a', type: 'replacement_suggested', faction: 'RBiH', turn: 44, acknowledged: false, current_commander_id: 'incumbent-alpha', officer_id: 'candidate-a' },
+        { event_id: 'replacement-name', type: 'replacement_suggested', faction: 'RBiH', turn: 44, acknowledged: false, current_commander_name: 'Incumbent Name', officer_id: 'candidate-name' },
+        { event_id: 'replacement-candidate', type: 'replacement_suggested', faction: 'RBiH', turn: 44, acknowledged: false, officer_id: 'candidate-only' },
+        { event_id: 'replacement-corps', type: 'replacement_suggested', faction: 'RBiH', turn: 44, acknowledged: false, corps_id: 'RBiH 3rd Corps' },
+        { event_id: 'pushback-current', type: 'order_pushback', faction: 'RBiH', turn: 44, acknowledged: false, current_commander_id: 'current-only' },
+    ];
+    const production = productionOfficerItems(events);
+    const projected = projectHarnessOfficerMatters(readHarness(), [...events].reverse(), 'RBiH');
+
+    assert.deepEqual(
+        projected.map((item) => item.inboxItemId),
+        production.map((item) => item.id).sort(),
+    );
+    assert.equal(
+        projected.find((item) => item.inboxItemId === 'officer:replacement_suggested:incumbent_alpha')?.eventId,
+        'replacement-a',
+    );
+    assert.ok(projected.some((item) => item.inboxItemId === 'officer:replacement_suggested:incumbent_name'));
+    assert.ok(projected.some((item) => item.inboxItemId === 'officer:replacement_suggested:candidate_only'));
+    assert.ok(projected.some((item) => item.inboxItemId === 'officer:replacement_suggested:rbih_3rd_corps'));
+    assert.ok(projected.some((item) => item.inboxItemId === 'officer:order_pushback:current_only'));
+});
+
+test('officer harness excludes foreign and resolved events and exact receipt validation rejects a stale identity', () => {
+    const events = [
+        { event_id: 'live-player', type: 'officer_available', faction: 'RBiH', turn: 44, acknowledged: false, officer_id: 'player-officer' },
+        { event_id: 'resolved-player', type: 'officer_available', faction: 'RBiH', turn: 44, acknowledged: true, officer_id: 'resolved-officer' },
+        { event_id: 'foreign-live', type: 'officer_available', faction: 'RS', turn: 44, acknowledged: false, officer_id: 'foreign-officer' },
+    ];
+    const harness = readHarness();
+    const projected = projectHarnessOfficerMatters(harness, events, 'RBiH');
+    assert.deepEqual(projected.map((item) => item.eventId), ['live-player']);
+
+    const strictAsciiCompare = loadFunction<(left: string, right: string) => number>(harness, 'strictAsciiCompare');
+    const decisionReceiptKey = loadFunction<(receipt: Record<string, unknown>) => string>(
+        harness,
+        'decisionReceiptKey',
+        { strictAsciiCompare },
+    );
+    const assertReceipt = loadFunction<(
+        family: string,
+        identityField: string,
+        identity: string,
+        before: Array<Record<string, unknown>>,
+        after: Array<Record<string, unknown>>,
+        expected: Record<string, unknown>,
+    ) => Record<string, unknown>>(
+        harness,
+        'assertNewExactDecisionReceipt',
+        { decisionReceiptKey, strictAsciiCompare },
+    );
+    const receipt = { eventId: 'live-player', faction: 'RBiH', decision: 'acknowledged' };
+    assert.deepEqual(assertReceipt('officer', 'eventId', 'live-player', [], [receipt], {
+        faction: 'RBiH',
+        decision: 'acknowledged',
+    }), receipt);
+    assert.throws(
+        () => assertReceipt('officer', 'eventId', 'resolved-player', [], [receipt], { faction: 'RBiH' }),
+        /No new exact officer decision receipt/,
     );
 });
 
@@ -2322,6 +3254,13 @@ test('reserve request handling captures the blocking surface before attempting n
     assert.ok(reserveModalIndex > aftermathActionIndex, 'reserve request route must verify the exact modal identity');
     assert.ok(suggestedReviewIndex > reserveModalIndex, 'reserve request route must use the visible suggested-force review');
     assert.ok(routeIndex > suggestedReviewIndex, 'direct command-surface navigation must remain a fallback');
+    assert.match(requestBranch, /decision-room-active-dossier/);
+    assert.match(requestBranch, /command:elite-deploy:\$\{requestId\}/);
+    assert.match(requestBranch, /activeDossier[\s\S]*clickMatch\(/, 'Issue must be scoped to the exact active reserve dossier');
+    const receiptIndex = requestBranch.indexOf("assertNewExactDecisionReceipt(");
+    const closeIndex = requestBranch.indexOf("'warroom-decision-room-close'", receiptIndex);
+    const hiddenIndex = requestBranch.indexOf("waitFor({ state: 'hidden'", closeIndex);
+    assert.ok(receiptIndex >= 0 && closeIndex > receiptIndex && hiddenIndex > closeIndex, 'exact receipt must precede exact Decision Room close and hidden proof');
 });
 
 test('campaign runner closes aftermath by stable identity and proves the exact turn before the final tour', () => {
@@ -2339,9 +3278,9 @@ test('campaign runner closes aftermath by stable identity and proves the exact t
         'historical notices must use their stable test id, not broad page text',
     );
     const ensureAdvanceSurfaceIndex = playSource.indexOf('campaign advance surface');
-    const advanceClickIndex = playSource.indexOf("'advance toolbar'");
+    const advanceClickIndex = playSource.indexOf('await dispatchAdvanceAfterSettlement(');
     assert.ok(ensureAdvanceSurfaceIndex >= 0, 'unblocked turns must return from drill-down surfaces before advancing');
-    assert.ok(advanceClickIndex > ensureAdvanceSurfaceIndex, 'Warroom recovery must precede the advance click');
+    assert.ok(advanceClickIndex > ensureAdvanceSurfaceIndex, 'Warroom recovery must precede the exact advance dispatch');
     assert.match(
         lightCheckpointSource,
         /`light-turn-\$\{turn\}-pre-checkpoint`, 40, \{ allowAdvanceModal: false \}/,
@@ -2882,12 +3821,20 @@ test('run evidence is isolated, archived, and binds initial and final state', ()
     assert.match(harness, /scenarioId/);
     assert.match(harness, /scenarioSeed/);
     assert.match(harness, /initialScenarioProvenance/);
+    assert.match(harness, /campaignModeSelectionEvidence/);
     assert.match(harness, /scenarioSourceSha256/);
     assert.match(harness, /startupSnapshotSha256/);
     assert.match(harness, /workingTreeContentSha256/);
     assert.match(harness, /initialAutosaveSha256/);
-    assert.match(extractFunctionSource(harness, 'buildInitialScenarioProvenance'), /apr1992_definitive_52w\.json/);
+    assert.match(extractFunctionSource(harness, 'buildInitialScenarioProvenance'), /apr1992_definitive_188w\.json/);
+    assert.doesNotMatch(extractFunctionSource(harness, 'buildInitialScenarioProvenance'), /apr1992_definitive_52w\.json/);
     assert.match(extractFunctionSource(harness, 'buildInitialScenarioProvenance'), /apr_1992_initial_save\.json/);
+    assert.match(extractFunctionSource(harness, 'buildInitialScenarioProvenance'), /requestedFaction/);
+    assert.match(extractFunctionSource(harness, 'buildInitialScenarioProvenance'), /calibrationScenario/);
+    assert.match(extractFunctionSource(harness, 'buildInitialScenarioProvenance'), /decisionMode/);
+    assert.match(extractFunctionSource(harness, 'buildInitialScenarioProvenance'), /autonomyLevel/);
+    assert.match(extractFunctionSource(harness, 'buildInitialScenarioProvenance'), /headless/);
+    assert.match(extractFunctionSource(harness, 'readState'), /decisionMode/);
     assert.match(extractFunctionSource(harness, 'computeWorkingTreeContentFingerprint'), /untracked-files=all/);
     assert.match(harness, /historicalEventAnchorResults/);
     assert.match(harness, /operation_corridor_1992/);

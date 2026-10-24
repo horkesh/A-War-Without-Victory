@@ -1,0 +1,50 @@
+{
+  "question": "Can ordinary unchanged Historical RBiH packaged play reach accepted January1993 calibration at turn39 despite disclosed daily divergence?",
+  "knownResult": "Exact daily replay FAILED from turn1; not waived. t1-04 infrastructure and actual Save/Resume PASS0/0.",
+  "configuration": "tmp/r8-native-calibration-parity-20261024/native-t39-01-config.json",
+  "expectedMinutes": [
+    8,
+    20
+  ],
+  "capMs": 1800000,
+  "automaticRetry": false,
+  "pass": [
+    "ordinary visible Historical/Advance route",
+    "settled canonical archives turns1 through39",
+    "turn39 exact accepted n94 map and707/712",
+    "zero formerly correct n91/n92 cells lost at reached saved checkpoints",
+    "January OSID and event anchors",
+    "runtime FINAL_SEAL unresolved0 every turn",
+    "canonical save/load and exact independently hydrated loaded projection",
+    "bound accepted inputs, immutable reference and retained evidence",
+    "exact settled and provisional archive inventories1..39 with immutable hashes and turn identities",
+    "exactly n91 and n92 turn39 protection rows; no vacuous future acceptance",
+    "final result runtime diagnostics after teardown plus full main-process stream",
+    "overall/daily comparator FAIL retained separately from checkpoint outcome"
+  ],
+  "stop": [
+    "unexpected runtime,input,archive,save/load or engine failure stops attempt",
+    "failed turn39 checkpoint prevents188 expansion; diagnose retained evidence",
+    "daily differences retained as FAILED and not reclassified",
+    "strict legacy audio failures remain open separately"
+  ],
+  "review": "tmp/r8-native-calibration-parity-20261024/review/T1_04_LATE_HYDRATION_TARGETED_REVIEW.md",
+  "sources": [
+    {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tools\\ui\\paradox_local_qa.cjs",
+      "sha256": "2b5276097dccb125605221520846a2f65d34982cf8817a0ca4b9a27c4b313e82"
+    },
+    {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tests\\paradox_local_qa_harness.test.ts",
+      "sha256": "594fe06dca43f9354e43d99510bc0d5fcb07e4e05eba88d9c3cf3aa573a119f7"
+    },
+    {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tools\\diagnostics\\native_calibration_outcome_compare.cjs",
+      "sha256": "ab2afc3f8b3106b33db55c3235f4bd10bd130b998d11cb919be981e6640d79b8"
+    },
+    {
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tests\\native_calibration_outcome_compare.test.ts",
+      "sha256": "7fe58af33bc554035a78b97ff470aa24a96346589c3d07ad3e3f5b6a7268bc39"
+    }
+  ]
+}

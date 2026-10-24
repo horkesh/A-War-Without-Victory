@@ -1,3 +1,46 @@
+## Active owner priority — player/bot capability parity (2026-10-24)
+
+The owner requires normal player gameplay to be capable of the accepted bot calibration, with the same historical operations available, before divergence experiments. Retained RBiH700 remains below the accepted January707 target. Diagnose accessible offers, timing/policy and production execution; implement only proven gaps with focused checks and independent review before packaged validation. n91–n94, all telemetry, references and pins remain immutable. No threshold tuning, forced ownership or hidden sensitive authorization. The earlier separate-player contract below is historical context and cannot waive an unexplained capability gap. [Active plan](../plans/2026-07-31-full-campaign-electron-validation-plan.md#active-owner-priority--playerbot-capability-parity-2026-10-24).
+
+**Current repair checkpoint:** delegated-player Army HQ planning was incorrectly skipped; the minimal membership repair passed145 focused tests and independent review. Canonical file Import/host replacement and officer-card harness repairs have measured native40/44 proofs. Explicit historical succession is an opt-in player input, not hidden consent. These do not prove707 or later operation delivery. Production refused the first HQ regression before turns because Git was dirty; preserve it and qualify one clean committed candidate before rebuilding the game. No n94/reference/pin change.
+
+## Owner disposition — no-player calibration and player acceptance separated (2026-10-24)
+
+The owner selected: **keep n94 as the no-player benchmark and define separate player-campaign
+criteria**. n94, its707/707/706/706 checkpoints, protected/formerly-correct gates and baseline pins
+remain unchanged. Exact n94 daily/map/score equality and its formerly-correct-map comparison are
+retired only as ordinary player pass/fail requirements. Historical scores remain diagnostics;
+700 is not adopted. No gameplay, policy, reference, protected-invariant or engine rule changes.
+
+The [player contract](../plans/2026-07-31-full-campaign-electron-validation-plan.md#player-campaign-acceptance-contract--owner-decision-2026-10-24)
+retains player authority, lawful combat, source-bound protected/anchor/enclave requirements,
+same-input production determinism, exact Save/load for all factions, strict runtime/audio and
+the existing24/188-turn and product-quality requirements. Gate applicability must be audited
+before costly sessions; no choice-conditional exemption is invented from an observed mismatch.
+The cheap player-evidence audit is complete: the retained RBiH packet does not establish a complete ordered production-consumable input replay contract; older RS/HRHB turn0 Save/load proofs are limited prerequisites. Offline feasibility now confirms missing complete consumed action order and stored-frame-only playback in the inspected chain. A bounded recorder/production-consumer packet is proposed; same-input determinism remains unproved and no campaign or implementation is included. [Feasibility](../../logs/r8-native-calibration-parity-20261024/replay-input-feasibility/FEASIBILITY.md). [Audit](../../logs/r8-native-calibration-parity-20261024/player-evidence-audit/AUDIT.md). The original failed experiment below and its immutable receipts remain history. Its infrastructure
+proof may be reused at measured scope, but full player acceptance is unproved. No new campaign,
+observer mode or baseline adoption is included in this decision.
+
+## Retained native equality experiment — FAILED at turn 39 (2026-10-24)
+
+The ordinary packaged New War → RBiH → Historical route and its evidence pipeline are qualified:
+`native-t39-03` exits0/0 in739.398seconds with all12 infrastructure gates PASS, exact39 provisional
+and39 settled archives,1,188 JSONL records,39 zero-unresolved turn seals,126 events, exact canonical
+Save/load bytes and exact loaded projection. Thirty January OSID anchors and the Brčko band/five event
+anchors pass.
+
+It does **not** reproduce accepted n94. Exact daily controller parity fails on every turn1–39; the
+turn39 score is700/712 against required707, with seven formerly-correct losses against each of n91
+and n92. The earliest source-backed split is the intentional normal-player/no-player contract:
+player identity timing differs before the first Advance, and the no-player bot receives two t1 RBiH
+paramilitary captures that the player route holds behind authored authorization; the Historical
+player policy later establishes standing denial and suppresses deployment. Only those two endpoint differences are directly proven;
+the other five are correlated downstream. This establishes no production gameplay bug and supplies
+no authority to rewrite Historical policy, hide player input, or adopt700. Retain n94 as the headless
+calibration result. A separate player-mode acceptance or an explicit observer-mode product contract
+requires owner, canon and calibration authority. The188-week, all-faction and Farz gates are
+UNREACHED. The known strict native audio failure remains open. [Portable evidence](../../logs/r8-native-calibration-parity-20261024/RESULT.json).
+
 ## Current eight-pin baseline adoption — 2026-10-24
 
 Owner explicitly authorizes evidence-backed adoption of the accepted gameplay state. Clean Node22.23.2 source a91328680 produces n94 at707/707/706/706, with zero formerly-correct n91/n92 losses, lawful Toljenak t135 capture/retention, retained HVO outcomes,16 protected anchors,9 enclave cells/schedule, eastern CLEAN, Farz and all required health/provenance readers passing. Exactly32 consumed inputs match. No gameplay, threshold, reference or calibration tuning change accompanies adoption.

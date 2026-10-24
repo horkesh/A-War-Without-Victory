@@ -2356,9 +2356,10 @@ export const warPhases: NamedPhase[] = [
         name: 'evaluate-army-hq-gathering',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
+            const botFactions = new Set(selectBotBrigadeOrderFactions(context.state));
             const factions: FactionId[] = ['RS', 'RBiH', 'HRHB'];
             for (const faction of factions) {
-                if (faction === context.state.meta.player_faction) continue;
+                if (!botFactions.has(faction)) continue;
                 evaluateArmyHQGathering(context.state, faction, context.state.meta.turn);
             }
         },

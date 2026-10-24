@@ -1,0 +1,169 @@
+{
+  "pass": true,
+  "source": [
+    {
+      "path": "tools/ui/cdp_network_collector.cjs",
+      "bytes": 26866,
+      "sha256": "02e5d8306a0f8e3ac082a56d33e12898d9d88bc54f9a0023d79ccf9af82c6607",
+      "pass": true
+    },
+    {
+      "path": "tools/ui/paradox_local_qa.cjs",
+      "bytes": 325225,
+      "sha256": "f2e5c9681d449fc4aec1271a7e9152cdeeaf50bca0925c1d6827bf3745d4ecd0",
+      "pass": true
+    },
+    {
+      "path": "tests/cdp_network_collector.test.ts",
+      "bytes": 30395,
+      "sha256": "c34f24f38a75f856204b4d5d2005d4fc13a4c46534b578d5da702b2d4a3bc772",
+      "pass": true
+    },
+    {
+      "path": "tests/paradox_local_qa_harness.test.ts",
+      "bytes": 161910,
+      "sha256": "d1a4288ece34f43dd3d944f9c3f1c51e12dc36ad6a756ce5a5a08166197fa061",
+      "pass": true
+    }
+  ],
+  "portable": [
+    {
+      "path": "logs\\r8-warroom-collection-v3-20261024\\CONTRACT.md",
+      "bytes": 24218,
+      "sha256": "1b8bd2f1dfcf757c802599d8723b60b670e381dc5132c440c992b1911e92de37",
+      "pass": true
+    },
+    {
+      "path": "logs\\r8-warroom-collection-v3-20261024\\REVIEW_CONTRACT.md",
+      "bytes": 11002,
+      "sha256": "0f9ad7b1a77caaeddb41081b76cb77233aed6e276dcf68b0bd15ab79add6d048",
+      "pass": true
+    },
+    {
+      "path": "logs\\r8-warroom-collection-v3-20261024\\INDEPENDENT_REVIEW.md",
+      "bytes": 12266,
+      "sha256": "f7433e0eed92679c1074788da967ac7397f94e5de3a10589392149621fe3deda",
+      "pass": true
+    },
+    {
+      "path": "logs\\r8-warroom-collection-v3-20261024\\PRESERVATION.json",
+      "bytes": 2612,
+      "sha256": "948b7764cc0b72d1501c3ce89c6c17586d1ba0a65c420387658c50e0ca2c45ba",
+      "pass": true
+    },
+    {
+      "path": "logs\\r8-warroom-collection-v3-20261024\\CORRECTED_FINAL_RECEIPT.json",
+      "bytes": 3373,
+      "sha256": "3e1d0205d87dc35cceb9bc53f151ba920cc171dd12411dd24bbc3eecfab3ef6f",
+      "pass": true
+    },
+    {
+      "path": "logs\\r8-warroom-collection-v3-20261024\\HISTORY_BOUND_CORRECTION_RECEIPT.json",
+      "bytes": 1916,
+      "sha256": "790c19303a3260ca4076395d6e80dd46980cd16fe7fbce5f661f813456174c33",
+      "pass": true
+    },
+    {
+      "path": "logs\\r8-warroom-collection-v3-20261024\\RETAINED_REQUEST_VOLUME.json",
+      "bytes": 406,
+      "sha256": "d2093757f0ace9b2f928a9645f3d52b9d60751e471dad2de48099f317f526ab4",
+      "pass": true
+    }
+  ],
+  "exact": [
+    {
+      "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+      "bytes": 123007933,
+      "sha256": "b6abcbe9523fe1d07694684ff5a0e61d69505a70958dab3c3383d5da30d4fb54",
+      "pass": true
+    },
+    {
+      "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+      "bytes": 1041,
+      "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+      "pass": true
+    },
+    {
+      "path": "tmp/r8-native-shakedown-20261024/prep/read_native_result.cjs",
+      "bytes": 7150,
+      "sha256": "4acc5c288d25aefaba70231bd2646cd871fdd39083bc9d5173639bad2e5e590d",
+      "pass": true
+    }
+  ],
+  "diff": {
+    "args": [
+      "diff",
+      "--check"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "warning: in the working copy of 'docs/PROJECT_LEDGER.md', CRLF will be replaced by LF the next time Git touches it\nwarning: in the working copy of 'docs/PROJECT_LEDGER_KNOWLEDGE.md', CRLF will be replaced by LF the next time Git touches it\n"
+  },
+  "protectedPaths": {
+    "args": [
+      "diff",
+      "--exit-code",
+      "HEAD",
+      "--",
+      "src",
+      "data",
+      ".github"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "trackedChangedPaths": [
+    ".claude/napkin/qa_gates.md",
+    ".gitignore",
+    "docs/20_engineering/DETERMINISM_TEST_MATRIX.md",
+    "docs/20_engineering/REPO_MAP.md",
+    "docs/PROJECT_LEDGER.md",
+    "docs/PROJECT_LEDGER_KNOWLEDGE.md",
+    "docs/plans/2026-07-31-full-campaign-electron-validation-plan.md",
+    "docs/plans/COMMAND_BOARD.md",
+    "docs/plans/MASTER_ROADMAP.md",
+    "docs/plans/plan_index.yml",
+    "tests/paradox_local_qa_harness.test.ts",
+    "tools/ui/paradox_local_qa.cjs"
+  ],
+  "unexpected": [],
+  "links": [
+    {
+      "from": "docs/plans/2026-07-31-full-campaign-electron-validation-plan.md",
+      "to": "../../logs/r8-warroom-collection-v3-20261024/RESULT.json",
+      "pass": true
+    },
+    {
+      "from": "docs/plans/2026-07-31-full-campaign-electron-validation-plan.md",
+      "to": "../../logs/r8-warroom-collection-v3-20261024/CONTRACT.md",
+      "pass": true
+    },
+    {
+      "from": "docs/plans/2026-07-31-full-campaign-electron-validation-plan.md",
+      "to": "../../logs/r8-warroom-collection-v3-20261024/INDEPENDENT_REVIEW.md",
+      "pass": true
+    },
+    {
+      "from": "docs/PROJECT_LEDGER_KNOWLEDGE.md",
+      "to": "../logs/r8-warroom-collection-v3-20261024/RESULT.json",
+      "pass": true
+    },
+    {
+      "from": ".claude/napkin/qa_gates.md",
+      "to": "../../logs/r8-warroom-collection-v3-20261024/CONTRACT.md",
+      "pass": true
+    },
+    {
+      "from": ".claude/napkin/qa_gates.md",
+      "to": "../../logs/r8-warroom-collection-v3-20261024/RESULT.json",
+      "pass": true
+    },
+    {
+      "from": "docs/20_engineering/REPO_MAP.md",
+      "to": "../../logs/r8-warroom-collection-v3-20261024/CONTRACT.md",
+      "pass": true
+    }
+  ],
+  "independentReview": "logs/r8-warroom-collection-v3-20261024/INDEPENDENT_REVIEW.md"
+}

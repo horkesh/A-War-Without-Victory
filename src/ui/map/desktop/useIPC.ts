@@ -266,7 +266,7 @@ interface WindowAwwv {
     getMapServerUrl: () => Promise<string | null>;
     focusWarroom: () => Promise<void>;
     loadScenarioDialog: () => Promise<{ ok: boolean; error?: string }>;
-    loadStateDialog: () => Promise<{ ok: boolean; error?: string }>;
+    loadStateDialog: () => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
     listSaveRecords: () => Promise<ListSaveRecordsResult>;
     loadSaveRecord: (filename: string) => Promise<LoadSaveRecordResult>;
     saveGame: (payload?: { filename?: string }) => Promise<{ ok: boolean; filePath?: string; error?: string }>;
@@ -639,7 +639,7 @@ export function useIPC() {
 
             loadStateDialog: awwv
                 ? () => awwv.loadStateDialog()
-                : makeNoop<{ ok: boolean; error?: string }>(),
+                : makeNoop<{ ok: boolean; stateJson?: string; error?: string }>(),
 
             listSaveRecords: awwv
                 ? () => awwv.listSaveRecords()

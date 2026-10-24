@@ -527,6 +527,8 @@ Elapsed turns alone are not a recall condition. A healthy brigade supporting an 
 
 ### 7.8 Army HQ Gathering (Adaptive Doctrine)
 
+Army HQ gathering follows the existing deterministic staff-execution boundary: it includes the selected player faction at autonomy 1 and above, excludes that faction at manual autonomy 0, and includes all factions in headless auto-control. Producing a campaign plan does not authorize or launch an operation; existing presidential authorization gates still apply. The phase retains its RS → RBiH → HRHB evaluation order.
+
 **Implementation-note (2026-03-17, v0.4.7):** Periodic army-level command meetings (`evaluateArmyHQGathering`, step 134 in `war_phases.ts`) produce multi-turn `CampaignPlan` objects stored on `state.military.campaign_plans`. After the first gathering, adaptive doctrine overrides replace calendar-driven `doctrine_phases` — attack share, aggression, corps stances, and front priorities are derived from the campaign plan rather than from the timeline JSON. Front priorities (`primary` / `secondary` / `economy` / `contain`) are consumed by `generateCorpsDirectives()` to weight offensive targeting. Synchronized multi-corps operations use a `waiting_for_sync` preparation sub-phase so that participating corps begin execution simultaneously. Module: `src/sim/combat/army_hq_gathering.ts`. Types: `src/sim/combat/army_hq_gathering_types.ts`. Constants: `src/sim/combat/army_hq_gathering_constants.ts`. 54 new tests. Report: [20260317_ARMY_HQ_GATHERING_V047.md](../40_reports/implemented/20260317_ARMY_HQ_GATHERING_V047.md).
 
 ### 7.9 AI Commander System

@@ -1,0 +1,84 @@
+{
+  "schema": "awwv.officer-succession-strategy.evidence-correction.v1",
+  "created_utc": "2026-10-24T20:34:30Z",
+  "purpose": "Correct the evidence inventory without changing or overwriting the original RESULT.json, logs, review, source, or tests.",
+  "original_packet": {
+    "path": "tmp/player-bot-capability-parity-20261024/officer-succession-strategy/RESULT.json",
+    "sha256": "F567CBF0181978AC047DB5F6851E0243B4B2664533E71E8521A8994147ABADF7",
+    "preserved": true
+  },
+  "superseded_inventory_claims": [
+    {
+      "original_missing_path": "tmp/player-bot-capability-parity-20261024/officer-succession-strategy/tsc-noemit-nonincremental-final.txt",
+      "correction": "No such file was retained. The final typecheck claim is bound only to the fresh preserved receipt directory tmp/player-bot-capability-parity-20261024/typecheck-final-01."
+    },
+    {
+      "original_missing_path": "tmp/player-bot-capability-parity-20261024/officer-succession-strategy/diff-check-final.txt",
+      "correction": "No such file was retained. The final diff-check claim is bound only to the fresh preserved receipt directory tmp/player-bot-capability-parity-20261024/diff-check-final-01."
+    },
+    {
+      "original_missing_path": "tmp/player-bot-capability-parity-20261024/officer-succession-strategy/10-hash-evidence.json",
+      "correction": "No such file exists and none is fabricated. This correction manifest inventories the actual retained artifacts."
+    }
+  ],
+  "source_bindings": {
+    "tools/ui/paradox_local_qa.cjs": "9A1BEFED6CAA79CD617EF8598546F5BD00752B64B73403E683A2CAF90B52FD10",
+    "tests/paradox_local_qa_harness.test.ts": "580178A4A493E16AE2BFEC821C28FAD92B47D997D5B0A34C0CD734BCB52B9760",
+    "tmp/player-bot-capability-parity-20261024/officer-succession-strategy/paradox_local_qa.pre-edit.cjs": "649169D3A750D784EE8BC074C779B5542AD192492FDAA1A2FC3163460A4CDF31",
+    "tmp/player-bot-capability-parity-20261024/officer-succession-strategy/paradox_local_qa.post-edit.cjs": "9A1BEFED6CAA79CD617EF8598546F5BD00752B64B73403E683A2CAF90B52FD10"
+  },
+  "test_result": {
+    "claim": "98 passed, 0 failed",
+    "path": "tmp/player-bot-capability-parity-20261024/officer-succession-strategy/harness-contract-tests-final-98.txt",
+    "bytes": 356,
+    "sha256": "AFD3A4A73A0345E41A345F09CEDDB250F93CE74AE11B892B553520BF03A31D09"
+  },
+  "final_typecheck": {
+    "claim": "nonincremental TypeScript check passed",
+    "command": ["node", "node_modules/typescript/bin/tsc", "--noEmit", "--incremental", "false"],
+    "receipt_path": "tmp/player-bot-capability-parity-20261024/typecheck-final-01/receipt.json",
+    "receipt_sha256": "2DC2A5E571F1BA5A91CCA6CD0A0E18E4E275E857F0C075CF26820D6ECBC55CDD",
+    "command_path": "tmp/player-bot-capability-parity-20261024/typecheck-final-01/command.json",
+    "command_sha256": "3625361898A36FBB000EB7230DD8A4C71EDB2C4CA63D877376AC162CD2F07211",
+    "stdout_path": "tmp/player-bot-capability-parity-20261024/typecheck-final-01/stdout.log",
+    "stdout_sha256": "91E0225603863BFF7BFBA2454B7AE4EB8D4EC8722F9FFA08FC263BF857E4F9AF",
+    "stderr_path": "tmp/player-bot-capability-parity-20261024/typecheck-final-01/stderr.log",
+    "stderr_sha256": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false,
+    "stderr_bytes": 0
+  },
+  "final_diff_check": {
+    "claim": "git diff --check passed",
+    "command": ["git", "diff", "--check"],
+    "receipt_path": "tmp/player-bot-capability-parity-20261024/diff-check-final-01/receipt.json",
+    "receipt_sha256": "EFD70A2C72B3A691836B6AF07E447B152192CCA1857AE439676BAE40E44A13D6",
+    "command_path": "tmp/player-bot-capability-parity-20261024/diff-check-final-01/command.json",
+    "command_sha256": "7FE7356B89C37A4CA43AC7F3ECDB358DBA6C3FDB616136E112F4218FF68D34D7",
+    "stdout_path": "tmp/player-bot-capability-parity-20261024/diff-check-final-01/stdout.log",
+    "stdout_sha256": "91E0225603863BFF7BFBA2454B7AE4EB8D4EC8722F9FFA08FC263BF857E4F9AF",
+    "stderr_path": "tmp/player-bot-capability-parity-20261024/diff-check-final-01/stderr.log",
+    "stderr_sha256": "9586163A6E8ACB3C41939F34365F2D28AB2D368A654C57AA7AEC7B980E0B1CE0",
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "timed_out": false,
+    "stderr_classification": "line-ending warnings only; no diff-check error"
+  },
+  "retained_failed_attempt": {
+    "path": "tmp/player-bot-capability-parity-20261024/officer-succession-strategy/tsc-noemit-nonincremental.txt",
+    "bytes": 97,
+    "sha256": "EE241E204F8FB43B4B8083124343F2BC56F6C68953018520BEC07FEF1E959A04",
+    "verdict": "failed",
+    "diagnostic": "TS2554: Expected 2 arguments, but got 3.",
+    "qualifies_as_final_pass": false
+  },
+  "independent_review_binding": {
+    "path": "tmp/player-bot-capability-parity-20261024/officer-succession-strategy/INDEPENDENT_REVIEW.json",
+    "sha256": "748EE568ACC8E10EC7CD74027CAF5FB5792DC046F9CA750D851C20965F794BE9",
+    "review_verdict": "CONDITIONAL_GO_ONE_OLD_PACKAGE02_NATIVE_43_TO_44_WITH_EXPLICIT_HISTORICAL_POLICY",
+    "code_blocker": false,
+    "packet_defect_addressed_by_this_manifest": true
+  },
+  "scope_statement": "Evidence correction only. No source, test, package, native run, build, campaign, or gameplay behavior was changed."
+}

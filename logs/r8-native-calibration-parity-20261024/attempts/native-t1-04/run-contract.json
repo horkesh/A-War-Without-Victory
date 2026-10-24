@@ -1,0 +1,33 @@
+{
+  "question": "Actual normal UI Save/Field Records/Resume after source-backed empty-object-cache and enum-rating hydration correction. Known daily controller parity remains FAILED.",
+  "expectedMinutes": [
+    3,
+    8
+  ],
+  "capMs": 900000,
+  "automaticRetry": false,
+  "configuration": "tmp/r8-native-calibration-parity-20261024/native-t1-04-config.json",
+  "sources": [
+    {
+      "path": "tools/ui/paradox_local_qa.cjs",
+      "bytes": 334690,
+      "sha256": "187f333a62254d4cc1b0a9c630780403f72d665d5dbb9db8fdf2749f92e93ae2"
+    },
+    {
+      "path": "tests/paradox_local_qa_harness.test.ts",
+      "bytes": 171561,
+      "sha256": "97130e34263d3a7c05aac7ae717ad490c0764943b4d005f5bc13b58a3e5b88a0"
+    }
+  ],
+  "review": "tmp/r8-native-calibration-parity-20261024/review/T1_03_HYDRATION_CORRECTION_REVIEW.md",
+  "offlineReplay": "Both retained attempts02/03 actual packaged loader/projector/helper PASS; canonical bytes exact and all214 transient leaves retained",
+  "pass": [
+    "normal historicalUI/turn1",
+    "provisional+settled archive correct",
+    "canonical save/load bytes exact",
+    "actual Records Resume",
+    "actual loaded projection exact to independently hydrated expected",
+    "zero unmatched runtime categories",
+    "child/wrapper0"
+  ]
+}

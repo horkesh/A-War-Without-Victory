@@ -50,30 +50,42 @@ describe('desktop_replay_live_wire_smoke — electron-main.cjs', () => {
     });
 
     it('load-state-dialog handler resets liveReplayManifestFrames', () => {
-        const handlerIdx = electronMain.indexOf("ipcMain.handle('load-state-dialog'");
-        expect(handlerIdx).toBeGreaterThan(-1);
-        const resetIdx = electronMain.indexOf('liveReplayManifestFrames = []', handlerIdx);
-        expect(resetIdx).toBeGreaterThan(handlerIdx);
+        const handlerStart = electronMain.indexOf("ipcMain.handle('load-state-dialog'");
+        const handlerEnd = electronMain.indexOf('});', handlerStart);
+        const helperStart = electronMain.indexOf('async function loadStatePathIntoDesktop');
+        const helperEnd = electronMain.indexOf('\n}', helperStart);
+        expect(electronMain.slice(handlerStart, handlerEnd)).toContain('loadStatePathIntoDesktop(');
+        expect(electronMain.slice(helperStart, helperEnd)).toContain('liveReplayManifestFrames = [];');
     });
 
-    it('load-state-dialog broadcasts loaded state to the initiating renderer', () => {
+    it('load-state-dialog excludes its initiating renderer from the returned-state broadcast', () => {
         const handlerStart = electronMain.indexOf("ipcMain.handle('load-state-dialog'");
         const handlerEnd = electronMain.indexOf('});', handlerStart);
         const handlerBody = electronMain.slice(handlerStart, handlerEnd);
+        const helperStart = electronMain.indexOf('async function loadStatePathIntoDesktop');
+        const helperEnd = electronMain.indexOf('\n}', helperStart);
+        const helperBody = electronMain.slice(helperStart, helperEnd);
 
-        expect(handlerBody).toContain('sendGameStateToRenderer(currentGameStateJson, undefined, CAMPAIGN_REPLACEMENT_UPDATE);');
-        expect(handlerBody).not.toContain('sendGameStateToRenderer(currentGameStateJson, _event.sender);');
+        expect(handlerBody).toContain('loadStatePathIntoDesktop(result.filePaths[0], _event.sender)');
+        expect(helperBody).toContain('sendGameStateToRenderer(currentGameStateJson, excludeSender, CAMPAIGN_REPLACEMENT_UPDATE);');
     });
 
     it('load-state-dialog broadcasts replay sidecars to the initiating renderer', () => {
         const handlerStart = electronMain.indexOf("ipcMain.handle('load-state-dialog'");
         const handlerEnd = electronMain.indexOf('});', handlerStart);
         const handlerBody = electronMain.slice(handlerStart, handlerEnd);
+        const helperStart = electronMain.indexOf('async function loadStatePathIntoDesktop');
+        const helperEnd = electronMain.indexOf('\n}', helperStart);
+        const helperBody = electronMain.slice(helperStart, helperEnd);
 
-        expect(handlerBody).toContain('sendReplayManifestToRenderer(manifestJson);');
-        expect(handlerBody).toContain('sendReplaySequenceToRenderer(sequenceJson);');
-        expect(handlerBody).not.toContain('sendReplayManifestToRenderer(manifestJson, _event.sender);');
-        expect(handlerBody).not.toContain('sendReplaySequenceToRenderer(sequenceJson, _event.sender);');
+        expect(handlerBody).toContain('loadStatePathIntoDesktop(result.filePaths[0], _event.sender)');
+        expect(helperBody).toContain('sendReplayManifestToRenderer(manifestJson);');
+        expect(helperBody).toContain('sendReplaySequenceToRenderer(sequenceJson);');
+        expect(helperBody).not.toContain('sendReplayManifestToRenderer(manifestJson, _event.sender);');
+        expect(helperBody).not.toContain('sendReplaySequenceToRenderer(sequenceJson, _event.sender);');
+        expect(helperBody.indexOf('sendReplayManifestToRenderer(manifestJson);')).toBeLessThan(
+            helperBody.indexOf('sendGameStateToRenderer(currentGameStateJson, excludeSender, CAMPAIGN_REPLACEMENT_UPDATE);'),
+        );
     });
 
     it('load-scenario-dialog handler resets liveReplayManifestFrames', () => {
@@ -94,8 +106,8 @@ describe('desktop_replay_live_wire_smoke — electron-main.cjs', () => {
     it('menu Load state file click handler resets liveReplayManifestFrames', () => {
         const menuIdx = electronMain.indexOf("label: 'Load state file...'");
         expect(menuIdx).toBeGreaterThan(-1);
-        const resetIdx = electronMain.indexOf('liveReplayManifestFrames = []', menuIdx);
-        expect(resetIdx).toBeGreaterThan(menuIdx);
+        const helperCallIdx = electronMain.indexOf('loadStatePathIntoDesktop(result.filePaths[0])', menuIdx);
+        expect(helperCallIdx).toBeGreaterThan(menuIdx);
     });
 
     it('menu Load state file sends replay sidecars before loaded state', () => {
@@ -103,15 +115,7 @@ describe('desktop_replay_live_wire_smoke — electron-main.cjs', () => {
         const menuEnd = electronMain.indexOf("{ type: 'separator' }", menuStart);
         const menuBody = electronMain.slice(menuStart, menuEnd);
 
-        expect(menuBody).toContain('readReplaySaveManifestSidecar(result.filePaths[0])');
-        expect(menuBody).toContain('sendReplayManifestToRenderer(manifestJson);');
-        expect(menuBody).toContain('sendReplaySequenceToRenderer(sequenceJson);');
-        expect(menuBody.indexOf('sendReplayManifestToRenderer(manifestJson);')).toBeLessThan(
-            menuBody.indexOf('sendGameStateToRenderer(currentGameStateJson, undefined, CAMPAIGN_REPLACEMENT_UPDATE);'),
-        );
-        expect(menuBody.indexOf('sendReplaySequenceToRenderer(sequenceJson);')).toBeLessThan(
-            menuBody.indexOf('sendGameStateToRenderer(currentGameStateJson, undefined, CAMPAIGN_REPLACEMENT_UPDATE);'),
-        );
+        expect(menuBody).toContain('loadStatePathIntoDesktop(result.filePaths[0])');
     });
 
     it('does not call buildReplayFrameSummary from the load-state-dialog handler (no double accumulation)', () => {

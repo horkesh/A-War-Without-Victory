@@ -1,0 +1,42 @@
+[
+  {
+    "path": "tools\\ui\\paradox_local_qa.cjs",
+    "sha256": "e47dce360ea538ccdae4fff4cc183d4c6166c64c4dd7f46585db285fc9ab6086"
+  },
+  {
+    "path": "tests\\paradox_local_qa_harness.test.ts",
+    "sha256": "9e978fd94759b767dfbf3acd37eb6b9c23a81bd702acc1f806d836c6acd6e955"
+  },
+  {
+    "path": "src\\desktop\\electron-main.cjs",
+    "sha256": "01368717a936f87ebbffa32510325844922cfddf132c1a29937ed42e1b779be1"
+  },
+  {
+    "path": "src\\desktop\\preload.cjs",
+    "sha256": "9005220ac06eda985c884e96a035f9f20747b6955e3d1e5d29f0c4e32902d2ac"
+  },
+  {
+    "path": "src\\desktop\\desktop_sim.ts",
+    "sha256": "e5954acf23516721bea57c6a1274d184c90358f46e91178770898d3c2eb965a1"
+  },
+  {
+    "path": "src\\scenario\\replay_save_emit.ts",
+    "sha256": "9df2f13d3fec9b81bab1e1b4432c3c691acc6033835402f8edb0498a9f190056"
+  },
+  {
+    "path": "src\\scenario\\scenario_runner.ts",
+    "sha256": "74125b6227ab10516466621a66b55e1fd698f7e6abdbe3e5468947a510684a86"
+  },
+  {
+    "path": "src\\sim\\replay\\replay_player.ts",
+    "sha256": "5333a9b0451c9013cae8b4da76bc25dbbcd356e3bd65686ca6578615fa947cc4"
+  },
+  {
+    "path": "src\\sim\\replay\\replay_summary_player.ts",
+    "sha256": "76a1e59f06a2754de60450a6fa6575458c449719875ab11618d4273447539f3c"
+  },
+  {
+    "path": "src\\sim\\replay\\replay_manifest.ts",
+    "sha256": "649212c3e844d7698ddc9955266a085ce7ea140cd0ea226f86c8c2ba8926ca18"
+  }
+]

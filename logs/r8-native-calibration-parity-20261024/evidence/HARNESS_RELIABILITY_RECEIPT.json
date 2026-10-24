@@ -1,0 +1,45 @@
+{
+  "scope": "harness-reliability-repairs",
+  "files": [
+    "tools/ui/paradox_local_qa.cjs",
+    "tests/paradox_local_qa_harness.test.ts"
+  ],
+  "source_sha256": {
+    "harness": "14faffa17bcc04612cc441ed870449e8cb769743e5343e5fa74e79d33b92a291",
+    "tests": "ae5887f223d77f734d360ea4118a0b1d98e2c5366d44e9aa12db3fab94b67a19"
+  },
+  "evidence": {
+    "red": {
+      "path": "tmp\\r8-native-calibration-parity-20261024/harness-reliability-red-02",
+      "exit": 1,
+      "counts": "80 passed, 4 failed",
+      "expected_failures": [
+        "missing archiveTurnAutosaveSnapshot",
+        "missing validateSettledTurnArchiveReadiness",
+        "missing failure-path tile attribution",
+        "home_distance_cache removal rejected"
+      ]
+    },
+    "green": {
+      "path": "tmp\\r8-native-calibration-parity-20261024/harness-reliability-green-02",
+      "exit": 0,
+      "counts": "85 passed, 0 failed"
+    },
+    "syntax": {
+      "path": "tmp\\r8-native-calibration-parity-20261024/harness-reliability-syntax-01",
+      "exit": 0
+    },
+    "typecheck": {
+      "path": "tmp\\r8-native-calibration-parity-20261024/harness-reliability-typecheck-01",
+      "exit": 0,
+      "incremental": false
+    }
+  },
+  "constraints": [
+    "no production UI/gameplay changes",
+    "no policy/timing changes",
+    "no native launch",
+    "no package/build",
+    "daily n94 parity remains failed"
+  ]
+}

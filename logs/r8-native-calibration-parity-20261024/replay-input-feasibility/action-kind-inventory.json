@@ -1,0 +1,98 @@
+{
+  "handledActionCounts": [
+    {
+      "action": "acknowledge-visible-event-notice",
+      "count": 27
+    },
+    {
+      "action": "event-ui:ic_pressure_vopp_engagement",
+      "count": 1
+    },
+    {
+      "action": "event-ui:london_conference_1992",
+      "count": 1
+    },
+    {
+      "action": "event-ui:rbih_minority_retention_1992",
+      "count": 1
+    },
+    {
+      "action": "event-ui:rbih_paramilitary_policy_1992",
+      "count": 1
+    },
+    {
+      "action": "officer-acknowledge:arrival_arbih_hadzihasanovic_t22",
+      "count": 1
+    },
+    {
+      "action": "officer-acknowledge:arrival_arbih_pasalic_t24",
+      "count": 1
+    },
+    {
+      "action": "reserve-cautious-action",
+      "count": 1
+    },
+    {
+      "action": "reserve-issue:req:15:arbih_2nd_corps:offensive_support",
+      "count": 1
+    },
+    {
+      "action": "reserve-issue:req:22:arbih_1st_corps:defensive_gap",
+      "count": 1
+    }
+  ],
+  "evidenceLabelCounts": [
+    {
+      "label": "handled-event-notice",
+      "count": 28
+    },
+    {
+      "label": "handled-reserve-request",
+      "count": 1
+    },
+    {
+      "label": "officer-event-after-acknowledge",
+      "count": 2
+    },
+    {
+      "label": "officer-event-before-acknowledge",
+      "count": 2
+    },
+    {
+      "label": "pre-tour-event-after-response",
+      "count": 1
+    },
+    {
+      "label": "pre-tour-event-before-response",
+      "count": 1
+    },
+    {
+      "label": "reserve-request-after-close",
+      "count": 2
+    },
+    {
+      "label": "reserve-request-after-response",
+      "count": 2
+    },
+    {
+      "label": "reserve-request-before-response",
+      "count": 2
+    },
+    {
+      "label": "reserve-request-before-route",
+      "count": 2
+    },
+    {
+      "label": "reserve-request-modal",
+      "count": 2
+    },
+    {
+      "label": "strategic-pending-event-after-response",
+      "count": 5
+    },
+    {
+      "label": "strategic-pending-event-before-response",
+      "count": 5
+    }
+  ]
+}

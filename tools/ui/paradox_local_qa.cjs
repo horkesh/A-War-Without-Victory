@@ -3,6 +3,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { execFileSync } = require('node:child_process');
 const { _electron: electron } = require('playwright');
+const { startCdpNetworkCollection } = require('./cdp_network_collector.cjs');
 
 const repo = path.resolve(__dirname, '..', '..');
 const outDir = path.join(repo, 'tmp-paradox-qa-20260710');
@@ -15,6 +16,19 @@ fs.mkdirSync(userDataRoot, { recursive: true });
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const buttonSelector = 'button, [role="button"], input[type="button"], input[type="submit"], a[href]';
 const args = new Set(process.argv.slice(2));
+
+function parseOfficerSuccessionPolicy(argv) {
+  const prefix = '--officer-succession-policy=';
+  const values = argv.filter((arg) => arg.startsWith(prefix)).map((arg) => arg.slice(prefix.length));
+  if (values.length > 1) throw new Error('--officer-succession-policy must be provided exactly once');
+  const requested = values[0] ?? 'keep';
+  if (requested !== 'keep' && requested !== 'historical') {
+    throw new Error(`Unknown officer succession policy: ${requested}`);
+  }
+  return { requested, version: 1, explicit: values.length === 1 };
+}
+
+const officerSuccessionPolicy = parseOfficerSuccessionPolicy(process.argv);
 const maxTurns = Number(process.argv.find((arg) => arg.startsWith('--turns='))?.split('=')[1] ?? '10');
 const runLabel = process.argv.find((arg) => arg.startsWith('--label='))?.split('=')[1] ?? 'run';
 const skipInitialTour = args.has('--skip-initial-tour');
@@ -31,10 +45,13 @@ const saveLoadProof = args.has('--save-load-proof');
 const saveLoadOnly = args.has('--save-load-only');
 const historicalChoice = args.has('--historical-choice');
 const archiveTurnAutosaves = args.has('--archive-turn-autosaves');
+const collectCdpNetworkV3 = args.has('--cdp-network-collection-v3');
 if (saveLoadOnly && (maxTurns !== 0 || !saveLoadProof)) {
   throw new Error('--save-load-only requires --turns=0 and --save-load-proof');
 }
 let eventChoiceTranscript = [];
+let campaignModeSelectionEvidence = null;
+let officerSuccessionChoiceTranscript = [];
 
 function selectHistoricalEventChoice(decision) {
   const options = decision?.response_options ?? [];
@@ -467,6 +484,16 @@ function normalizeOfficerSubject(value) {
 }
 
 function officerEventDedupeKey(event) {
+  if (event?.type === 'replacement_suggested') {
+    const incumbent = normalizeOfficerSubject(event?.current_commander_id)
+      ?? normalizeOfficerSubject(event?.current_commander_name)
+      ?? normalizeOfficerSubject(event?.officer_id)
+      ?? normalizeOfficerSubject(event?.officer_name)
+      ?? normalizeOfficerSubject(event?.corps_id)
+      ?? normalizeOfficerSubject(event?.event_id)
+      ?? 'unknown';
+    return `${event.type}:${incumbent}`;
+  }
   const subject = normalizeOfficerSubject(event?.officer_id)
     ?? normalizeOfficerSubject(event?.current_commander_id)
     ?? normalizeOfficerSubject(event?.officer_name)
@@ -474,6 +501,43 @@ function officerEventDedupeKey(event) {
     ?? normalizeOfficerSubject(event?.event_id)
     ?? 'unknown';
   return `${event?.type ?? 'officer_event'}:${subject}`;
+}
+
+function projectPendingOfficerMatterItems(events, playerFaction, officerData = []) {
+  const officerDataById = new Map(
+    (Array.isArray(officerData) ? officerData : [])
+      .filter((officer) => officer && typeof officer.id === 'string')
+      .map((officer) => [officer.id, officer]),
+  );
+  const grouped = new Map();
+  for (const event of Array.isArray(events) ? events : []) {
+    if (!event || (playerFaction && event.faction !== playerFaction) || event.acknowledged === true) continue;
+    const key = officerEventDedupeKey(event);
+    const existing = grouped.get(key);
+    if (existing) existing.push(event);
+    else grouped.set(key, [event]);
+  }
+  return [...grouped.entries()]
+    .map(([key, groupedEvents]) => {
+      const orderedEvents = groupedEvents[0]?.type === 'replacement_suggested'
+        ? [...groupedEvents].sort((left, right) => right.turn - left.turn
+          || strictAsciiCompare(left.event_id, right.event_id))
+        : groupedEvents;
+      const event = orderedEvents[0];
+      return {
+        inboxItemId: `officer:${key}`,
+        eventId: event?.event_id ?? null,
+        eventType: event?.type ?? null,
+        officerId: event?.officer_id ?? null,
+        officerName: event?.officer_name ?? officerDataById.get(event?.officer_id)?.name ?? null,
+        currentCommanderId: event?.current_commander_id ?? null,
+        currentCommanderName: event?.current_commander_name ?? officerDataById.get(event?.current_commander_id)?.name ?? null,
+        corpsId: event?.corps_id ?? null,
+        overrideAction: event?.override_action ?? null,
+      };
+    })
+    .filter((item) => typeof item.eventId === 'string' && item.eventId.length > 0)
+    .sort((left, right) => strictAsciiCompare(left.inboxItemId, right.inboxItemId));
 }
 
 function isPlayerVisibleCounterOffer(offer, playerFaction) {
@@ -534,6 +598,8 @@ function projectCanonicalDecisionReceipts(state, playerFaction) {
           turn: receipt.turn ?? null,
           faction: receipt.faction ?? null,
           decision: receipt.decision ?? null,
+          newOfficerId: receipt.new_officer_id ?? null,
+          outgoingOfficerId: receipt.outgoing_officer_id ?? null,
         }))
         .filter((receipt) => typeof receipt.eventId === 'string' && receipt.eventId.length > 0),
     ),
@@ -626,6 +692,7 @@ const liveEventsPath = path.join(outDir, `paradox-local-qa-live-events-${runSlug
 const netLogPath = path.join(outDir, `paradox-local-qa-netlog-${runSlug}.json`);
 const readabilityDiagnosticsPath = path.join(outDir, `paradox-local-qa-readability-${runSlug}.json`);
 const saveLoadMenuInspectionPath = path.join(outDir, `paradox-local-qa-save-menu-inspection-${runSlug}.json`);
+const resumeSaveRouteInspectionPath = path.join(outDir, `paradox-local-qa-resume-route-${runSlug}.json`);
 const harnessSnapshotsDir = path.join(outDir, 'harness-snapshots');
 const evidenceDir = path.join(outDir, 'evidence', runSlug);
 
@@ -637,6 +704,7 @@ function cleanupRunArtifacts() {
     netLogPath,
     readabilityDiagnosticsPath,
     saveLoadMenuInspectionPath,
+    resumeSaveRouteInspectionPath,
     path.join(outDir, `paradox-local-qa-error-${runSlug}.txt`),
   ]) fs.rmSync(filePath, { force: true });
   const screenshotPrefix = `${runSlug}-`;
@@ -695,6 +763,7 @@ const provenance = {
   packagedExecutableSha256: packagedExecutablePath ? fileSha256(packagedExecutablePath) : null,
   packagedAsarSha256: packagedExecutablePath ? fileSha256(path.join(path.dirname(packagedExecutablePath), 'resources', 'app.asar')) : null,
   requiredMapOrigin,
+  officerSuccessionPolicy,
   electronMainSha256: fileSha256(path.join(repo, 'src', 'desktop', 'electron-main.cjs')),
   warroomIndexSha256: fileSha256(path.join(repo, 'dist', 'warroom', 'index.html')),
   tacticalMapIndexSha256: fileSha256(path.join(repo, 'dist', 'tactical-map', 'index.html')),
@@ -788,6 +857,50 @@ function writeTextAtomic(filePath, value) {
 
 function writeJsonExclusive(filePath, value) {
   fs.writeFileSync(filePath, JSON.stringify(value, null, 2), { flag: 'wx' });
+}
+
+function createCdpNetworkCollectionLifecycle(options) {
+  const redactedLifecycleError = () => 'redacted-error';
+  if (!options.enabled) {
+    const disabled = { receipt: null, error: null };
+    return {
+      awaitReady: async () => {},
+      finalize: async () => disabled,
+    };
+  }
+  const collector = options.startCollector(options.collectorOptions);
+  let finalization = null;
+  return {
+    awaitReady: () => collector.awaitReady(),
+    finalize: () => {
+      if (finalization) return finalization;
+      finalization = (async () => {
+        let artifact;
+        try {
+          artifact = await collector.closeAndFlush();
+        } catch (error) {
+          return { receipt: null, error: `CDP network collection v3 close failed: ${redactedLifecycleError(error)}` };
+        }
+        try {
+          options.writeSidecar(options.sidecarPath, artifact);
+          const receipt = {
+            path: options.sidecarPath,
+            sha256: options.digestSidecar(options.sidecarPath),
+            schema: artifact.schema,
+            status: artifact.status,
+            summary: artifact.summary,
+          };
+          const error = artifact.status === 'complete'
+            ? null
+            : `CDP network collection v3 incomplete: ${artifact.status}`;
+          return { receipt, error };
+        } catch (error) {
+          return { receipt: null, error: `CDP network collection v3 sidecar failed: ${redactedLifecycleError(error)}` };
+        }
+      })();
+      return finalization;
+    },
+  };
 }
 
 function writeProgress(result) {
@@ -1387,6 +1500,70 @@ function officerResponseLabel(officerMatter) {
   return 'Acknowledge';
 }
 
+function selectOfficerSuccessionResponse(officerMatter, policy) {
+  if (officerMatter?.eventType !== 'replacement_suggested') {
+    return {
+      responseLabel: officerMatter?.eventType === 'officer_available' ? 'File availability notice' : 'Acknowledge',
+      expectedDecision: officerMatter?.overrideAction === 'override-officer-interpretation' ? 'override_confirmed' : 'acknowledged',
+      route: 'desk',
+      policy: policy.requested,
+      policyVersion: policy.version,
+      candidateOfficerId: officerMatter?.officerId ?? null,
+    };
+  }
+  if (policy.requested === 'historical') {
+    if (!officerMatter?.eventId || !officerMatter?.officerId || !officerMatter?.currentCommanderId || !officerMatter?.corpsId) {
+      throw new Error('Historical officer succession requires the exact proposed officer, incumbent, corps, and event identity');
+    }
+    return {
+      responseLabel: 'Appoint Historical Successor',
+      expectedDecision: 'replacement_accepted',
+      route: 'personnel',
+      policy: policy.requested,
+      policyVersion: policy.version,
+      candidateOfficerId: officerMatter.officerId,
+    };
+  }
+  return {
+    responseLabel: 'Keep current commander',
+    expectedDecision: 'acknowledged',
+    route: 'desk',
+    policy: policy.requested,
+    policyVersion: policy.version,
+    candidateOfficerId: officerMatter?.officerId ?? null,
+  };
+}
+
+async function clickHistoricalOfficerSuccessionOffer(frame, officerMatter) {
+  if (!officerMatter?.officerName || !officerMatter?.currentCommanderName) {
+    throw new Error(`Historical officer succession lacks visible candidate or incumbent identity: ${officerMatter?.eventId ?? 'unknown'}`);
+  }
+  const openedPersonnel = await clickExactVisibleButton(
+    frame,
+    'Open personnel',
+    `open personnel for officer event ${officerMatter.eventId}`,
+    { afterMs: 800 },
+  );
+  if (!openedPersonnel) throw new Error(`Historical officer succession could not open personnel: ${officerMatter.eventId}`);
+  const controls = frame.getByRole('button', { name: 'Appoint Historical Successor', exact: true });
+  const matches = [];
+  for (let index = 0; index < await controls.count(); index += 1) {
+    const control = controls.nth(index);
+    if (!await control.isVisible().catch(() => false) || !await control.isEnabled().catch(() => false)) continue;
+    const cardText = await control.locator('xpath=../..').innerText().catch(() => '');
+    if (cardText.includes(officerMatter.officerName) && cardText.includes(officerMatter.currentCommanderName)) {
+      matches.push(control);
+    }
+  }
+  if (matches.length !== 1) {
+    throw new Error(`Historical officer succession exact visible offer is absent or ambiguous: ${officerMatter.eventId}/${officerMatter.officerId}`);
+  }
+  await matches[0].scrollIntoViewIfNeeded();
+  await matches[0].click({ timeout: 8000 });
+  await sleep(1200);
+  return true;
+}
+
 async function readState(frame) {
   const raw = await frame.evaluate(async () => {
     if (!window.awwv?.getCurrentGameState) return null;
@@ -1427,23 +1604,11 @@ async function readState(frame) {
     .filter((event) => event
       && (!playerFaction || event.faction === playerFaction)
       && event.acknowledged !== true);
-  const pendingOfficerMatterItems = (() => {
-    const grouped = new Map();
-    for (const event of playerPendingOfficerEvents) {
-      const key = officerEventDedupeKey(event);
-      if (grouped.has(key)) continue;
-      grouped.set(key, {
-        inboxItemId: `officer:${key}`,
-        eventId: event.event_id ?? null,
-        eventType: event.type ?? null,
-        officerId: event.officer_id ?? null,
-        overrideAction: event.override_action ?? null,
-      });
-    }
-    return [...grouped.values()]
-      .filter((item) => typeof item.eventId === 'string' && item.eventId.length > 0)
-      .sort((left, right) => strictAsciiCompare(left.inboxItemId, right.inboxItemId));
-  })();
+  const pendingOfficerMatterItems = projectPendingOfficerMatterItems(
+    playerPendingOfficerEvents,
+    playerFaction,
+    raw.military?.named_officer_data,
+  );
   const playerPendingCounterOffers = (Array.isArray(raw.military?.negotiation?.pending_counter_offers)
     ? raw.military.negotiation.pending_counter_offers
     : [])
@@ -1562,6 +1727,7 @@ async function readState(frame) {
     turn: raw.meta?.turn ?? raw.turn ?? null,
     date: raw.meta?.date ?? raw.date ?? null,
     phase: raw.meta?.phase ?? raw.phase ?? null,
+    decisionMode: raw.meta?.decision_mode ?? null,
     playerFaction,
     autonomyLevel: raw.meta?.autonomy_level ?? null,
     autonomyLevelPending: raw.meta?.autonomy_level_pending ?? null,
@@ -1672,11 +1838,11 @@ function filePersistenceFingerprint(filePath) {
   return `${fileSha256(filePath)}:${stat.size}:${stat.mtimeMs}`;
 }
 
-function buildInitialScenarioProvenance(initialAutosaveEvidence, isResume) {
+function buildInitialScenarioProvenance(initialAutosaveEvidence, isResume, requestedFaction) {
   const archivedAutosave = JSON.parse(fs.readFileSync(initialAutosaveEvidence.path, 'utf8'));
   const scenarioSourcePath = isResume
     ? null
-    : path.join(repo, 'data', 'scenarios', 'apr1992_definitive_52w.json');
+    : path.join(repo, 'data', 'scenarios', 'apr1992_definitive_188w.json');
   const startupSnapshotPath = isResume
     ? null
     : path.join(repo, 'data', 'derived', 'startup', 'apr_1992_initial_save.json');
@@ -1688,6 +1854,11 @@ function buildInitialScenarioProvenance(initialAutosaveEvidence, isResume) {
     scenarioKey: isResume ? null : 'apr_1992',
     scenarioId: archivedAutosave.meta?.scenario_id ?? scenarioSource?.scenario_id ?? null,
     scenarioSeed: archivedAutosave.meta?.seed ?? null,
+    requestedFaction,
+    calibrationScenario: scenarioSource?.calibration_scenario ?? null,
+    decisionMode: archivedAutosave.meta?.decision_mode ?? null,
+    autonomyLevel: archivedAutosave.meta?.autonomy_level ?? null,
+    headless: archivedAutosave.meta?.headless_scenario_auto_control === true,
     scenarioSourcePath: scenarioSourcePath ? path.relative(repo, scenarioSourcePath).replaceAll('\\', '/') : null,
     scenarioSourceSha256: scenarioSourcePath ? fileSha256(scenarioSourcePath) : null,
     startupSnapshotPath: startupSnapshotPath ? path.relative(repo, startupSnapshotPath).replaceAll('\\', '/') : null,
@@ -1712,25 +1883,217 @@ function archiveAutosaveEvidence(sourcePath, destinationPath) {
   };
 }
 
-function archiveCompletedTurnAutosave(sourcePath, evidenceRoot, faction, turn, recordsByTurn) {
+function archiveTurnAutosaveSnapshot(sourcePath, evidenceRoot, faction, turn, recordsByTurn, kind) {
   if (!Number.isSafeInteger(turn) || turn < 1) {
-    throw new Error(`Completed-turn autosave requires a positive integer turn: ${turn}`);
+    throw new Error(`Turn autosave snapshot requires a positive integer turn: ${turn}`);
   }
+  if (kind !== 'provisional' && kind !== 'settled') throw new Error(`Unknown turn autosave snapshot kind: ${kind}`);
   if (recordsByTurn.has(turn)) return recordsByTurn.get(turn);
   const source = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
   if (source?.meta?.turn !== turn) {
-    throw new Error(`Completed-turn autosave turn mismatch: expected ${turn}, observed ${source?.meta?.turn ?? 'unavailable'}`);
+    throw new Error(`Turn autosave snapshot turn mismatch: expected ${turn}, observed ${source?.meta?.turn ?? 'unavailable'}`);
   }
   const factionSlug = String(faction).replace(/[^a-z0-9_-]+/gi, '-').replace(/^-|-$/g, '').toLowerCase();
+  const directory = kind === 'provisional' ? 'turn-autosaves-pre-settlement' : 'turn-autosaves';
   const record = {
     turn,
+    kind,
     ...archiveAutosaveEvidence(
       sourcePath,
-      path.join(evidenceRoot, factionSlug, 'turn-autosaves', `turn-${String(turn).padStart(3, '0')}.json`),
+      path.join(evidenceRoot, factionSlug, directory, `turn-${String(turn).padStart(3, '0')}.json`),
     ),
   };
   recordsByTurn.set(turn, record);
   return record;
+}
+
+function validateSettledTurnArchiveReadiness(
+  beforeState,
+  afterState,
+  beforeModalInventory,
+  afterModalInventory,
+  turn,
+  beforeAutosaveIdentity,
+  afterAutosaveIdentity,
+) {
+  for (const [label, state] of [['before', beforeState], ['after', afterState]]) {
+    if (state?.turn !== turn) {
+      throw new Error(`Settled-turn archive ${label} turn mismatch: expected ${turn}, observed ${state?.turn ?? 'unavailable'}`);
+    }
+    const blockers = Object.entries(state?.blockerInventory ?? {})
+      .filter(([, count]) => Number(count) > 0);
+    if (blockers.length > 0) {
+      throw new Error(`Settled-turn archive still has state blockers: ${JSON.stringify(blockers)}`);
+    }
+  }
+  const expectedModalKeys = ['decisionRoom', 'eventDecision', 'paramilitary', 'reserveRequest', 'turnAftermath'];
+  for (const [label, inventory] of [['before', beforeModalInventory], ['after', afterModalInventory]]) {
+    if (!inventory || JSON.stringify(Object.keys(inventory).sort()) !== JSON.stringify(expectedModalKeys)
+        || Object.values(inventory).some((count) => !Number.isInteger(count) || count < 0)) {
+      throw new Error(`Settled-turn archive ${label} owned modal inventory is invalid`);
+    }
+    const visibleOwnedModals = Object.entries(inventory).filter(([, count]) => count > 0);
+    if (visibleOwnedModals.length > 0) {
+      throw new Error(`Settled-turn archive still has an owned decision or aftermath modal surface: ${JSON.stringify(visibleOwnedModals)}`);
+    }
+  }
+  if (!beforeAutosaveIdentity || beforeAutosaveIdentity !== afterAutosaveIdentity) {
+    throw new Error(`Settled-turn archive requires stable canonical autosave identity: ${beforeAutosaveIdentity} -> ${afterAutosaveIdentity}`);
+  }
+  return { turn, autosaveIdentity: afterAutosaveIdentity, blockers: 0, ownedModal: false };
+}
+
+async function readOwnedModalInventory(frame) {
+  const selectors = {
+    turnAftermath: '[data-testid="turn-aftermath-close"]',
+    eventDecision: '[data-testid="event-decision-response-rail"]',
+    paramilitary: '[data-testid="paramilitary-submit-decisions"]',
+    reserveRequest: '[data-testid="reserve-request-modal"]',
+    decisionRoom: '[data-testid="warroom-decision-room-host"]',
+  };
+  const inventory = {};
+  for (const [owner, selector] of Object.entries(selectors)) {
+    const candidates = frame.locator(selector);
+    const count = await candidates.count();
+    let visible = 0;
+    for (let index = 0; index < count; index += 1) {
+      if (await candidates.nth(index).isVisible()) visible += 1;
+    }
+    inventory[owner] = visible;
+  }
+  return inventory;
+}
+
+async function readAdvanceConfirmation(frame) {
+  const owners = frame.locator('[aria-labelledby="advance-turn-title"]');
+  const ownerCount = await owners.count();
+  if (ownerCount === 0) return { present: false };
+  if (ownerCount !== 1) {
+    throw new Error(`Expected zero or exactly one Advance confirmation owner, found ${ownerCount}`);
+  }
+  const owner = owners.first();
+  if (!await owner.isVisible()) throw new Error('Advance confirmation owner exists but is not visible');
+  const buttons = owner.getByRole('button', {
+    name: /^(Advance turn|Advance while holding present policy|Advance with recorded decisions)$/i,
+  });
+  const buttonCount = await buttons.count();
+  if (buttonCount !== 1) {
+    throw new Error(`Expected exactly one source-owned Advance confirmation action, found ${buttonCount}`);
+  }
+  const button = buttons.first();
+  const buttonVisible = await button.isVisible();
+  const buttonEnabled = await button.isEnabled();
+  return { present: true, owner, button, buttonVisible, buttonEnabled };
+}
+
+async function waitForToolbarAdvanceOutcome(frame, beforeTurn, maxAttempts = 75) {
+  if (!Number.isInteger(beforeTurn)) throw new Error(`Advance outcome requires an exact prior turn, got ${beforeTurn}`);
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const state = await readState(frame);
+    const confirmation = await readAdvanceConfirmation(frame);
+    if (!Number.isInteger(state?.turn)) throw new Error('Advance outcome could not read the canonical turn');
+    const advanced = state.turn > beforeTurn;
+    if (advanced && confirmation.present) {
+      throw new Error(`Ambiguous Advance outcome exposed a confirmation after turn changed ${beforeTurn} -> ${state.turn}`);
+    }
+    if (advanced) {
+      if (state.turn !== beforeTurn + 1) {
+        throw new Error(`Advance outcome skipped turns: ${beforeTurn} -> ${state.turn}`);
+      }
+      return { kind: 'direct-turn-transition', turn: state.turn };
+    }
+    if (confirmation.present) return { kind: 'confirmation-opened', turn: state.turn };
+    if (attempt < maxAttempts) await sleep(200);
+  }
+  throw new Error(`Advance toolbar produced neither a turn transition nor an exact confirmation owner from turn ${beforeTurn}`);
+}
+
+function assertAdvanceDispatchPrerequisites(state, archivesRequired, settledTurns) {
+  if (!Number.isInteger(state?.turn)) {
+    throw new Error(`Advance dispatch requires an exact current turn, got ${state?.turn ?? 'unavailable'}`);
+  }
+  const blockerInventory = state?.blockerInventory ?? {};
+  const blockers = Object.entries(blockerInventory)
+    .filter(([, count]) => Number(count) > 0);
+  if (blockers.length > 0) {
+    throw new Error(`Advance dispatch still has canonical blockers: ${JSON.stringify(blockerInventory)}`);
+  }
+  if (archivesRequired && state.turn > 0 && !settledTurns.has(state.turn)) {
+    throw new Error(`Advance dispatch requires immutable settled evidence for turn ${state.turn}`);
+  }
+  return {
+    turn: state.turn,
+    boundary: state.turn === 0 ? 'canonical-initial' : 'settled-turn',
+    blockerInventory,
+  };
+}
+
+async function prepareAdvanceDispatch({
+  frame,
+  before,
+  handledAction,
+  unresolvedStateBlocker,
+  archiveTurnAutosaves,
+  turnAutosaveEvidenceByTurn,
+  ensureAdvanceSurface,
+  archiveSettledTurn,
+  runCheckpointTourAfterSettlement,
+}) {
+  if (unresolvedStateBlocker) {
+    throw new Error(`Advance surface handler returned without resolving canonical blockers: ${JSON.stringify(before?.blockerInventory ?? {})}`);
+  }
+  const heldAdvanceModal = handledAction === 'advance-turn-modal-held-for-checkpoint';
+  if (!heldAdvanceModal && !await ensureAdvanceSurface()) {
+    throw new Error(`Campaign advance surface was unreachable at turn ${before?.turn ?? 'unavailable'}`);
+  }
+  if ((before?.turn ?? 0) > 0) {
+    await archiveSettledTurn(before.turn);
+    await runCheckpointTourAfterSettlement(before.turn);
+  }
+  const state = await readState(frame);
+  const prerequisites = assertAdvanceDispatchPrerequisites(
+    state,
+    archiveTurnAutosaves,
+    turnAutosaveEvidenceByTurn,
+  );
+  return { state, heldAdvanceModal, prerequisites };
+}
+
+async function dispatchAdvanceAfterSettlement(frame, heldAction, beforeTurn) {
+  if (heldAction === 'advance-turn-modal-held-for-checkpoint') {
+    const confirmation = await readAdvanceConfirmation(frame);
+    if (!confirmation.present) throw new Error('Held Advance confirmation owner disappeared before dispatch');
+    if (!confirmation.buttonVisible || !confirmation.buttonEnabled) {
+      throw new Error('Held Advance confirmation action is not visible and enabled');
+    }
+    await confirmation.button.click({ timeout: 8000 });
+    await waitForAdvanceTransition(frame);
+    const after = await readState(frame);
+    if (after?.turn !== beforeTurn + 1) {
+      throw new Error(`Held Advance confirmation did not produce one turn transition: ${beforeTurn} -> ${after?.turn ?? 'unavailable'}`);
+    }
+    return { clicked: true, action: 'advance-confirmation-dispatched', turn: after.turn };
+  }
+
+  const toolbarCandidates = frame.locator('[data-testid="warroom-toolbar-advance"]');
+  const toolbarCount = await toolbarCandidates.count();
+  if (toolbarCount !== 1) {
+    throw new Error(`Expected exactly one Advance toolbar action, found ${toolbarCount}`);
+  }
+  const toolbar = toolbarCandidates.first();
+  if (!await toolbar.isVisible() || !await toolbar.isEnabled()) {
+    throw new Error('Advance toolbar action is not visible and enabled');
+  }
+  await toolbar.click({ timeout: 8000 });
+  const outcome = await waitForToolbarAdvanceOutcome(frame, beforeTurn);
+  return {
+    clicked: true,
+    action: outcome.kind === 'direct-turn-transition'
+      ? 'advance-direct-transition'
+      : 'advance-confirmation-opened',
+    turn: outcome.turn,
+    outcome,
+  };
 }
 
 function verifyArchivedEvidence(record, label) {
@@ -2308,6 +2671,7 @@ async function waitForCampaignOpeningOwner(page, timeoutMs = 90000) {
 }
 
 async function startReactCampaign(surface, faction, onStep = async () => {}) {
+  let modeSelection = null;
   if (await surface.getByTestId('opening-splash-art').isVisible().catch(() => false)) {
     const enter = surface.locator('[aria-labelledby="opening-splash-title"] button').first();
     await enter.waitFor({ state: 'visible', timeout: 30000 });
@@ -2325,10 +2689,22 @@ async function startReactCampaign(surface, faction, onStep = async () => {}) {
   await takeCommand.waitFor({ state: 'visible', timeout: 30000 });
   await takeCommand.click({ timeout: 10000 });
   await onStep('command-mode');
+  if (historicalChoice) {
+    const historicalMode = surface.getByRole('radio', { name: /^Let history run as it did$/i }).first();
+    await historicalMode.waitFor({ state: 'visible', timeout: 30000 });
+    await historicalMode.click({ timeout: 10000 });
+    const selected = await historicalMode.getAttribute('aria-checked');
+    if (selected !== 'true') {
+      throw new Error(`Historical campaign mode selection did not persist (aria-checked=${selected})`);
+    }
+    modeSelection = { requested: 'historical', ariaChecked: selected };
+    await onStep('command-mode-historical-selected');
+  }
   const begin = surface.getByRole('button', { name: /^Begin$/i }).first();
   await begin.waitFor({ state: 'visible', timeout: 30000 });
   await begin.click({ timeout: 10000 });
   await begin.waitFor({ state: 'hidden', timeout: 120000 });
+  return modeSelection;
 }
 
 async function isCampaignCommandSurfaceVisible(frame) {
@@ -2378,7 +2754,7 @@ async function startCampaign(page, faction, events) {
   await snapshot(page, opening.kind === 'react' ? opening.surface : null, faction, events, 'launch-screen');
   let frame;
   if (opening.kind === 'react') {
-    await startReactCampaign(opening.surface, faction, async (label) => {
+    campaignModeSelectionEvidence = await startReactCampaign(opening.surface, faction, async (label) => {
       await snapshot(page, opening.surface, faction, events, label);
     });
     frame = opening.surface;
@@ -4755,9 +5131,20 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     const dossier = card.getByRole('button', { name: 'Dossier', exact: true }).first();
     await dossier.click({ timeout: 5000 });
     await sleep(700);
-    await snapshot(page, frame, faction, events, 'reserve-request-before-response', { requestId, before: pendingState });
     const host = frame.locator('[data-testid="warroom-decision-room-host"]').first();
-    const issued = await clickMatch(host, /^Issue\b|^Authorize\b/i, `reserve request ${requestId} issue`, { afterMs: 1200 });
+    const activeDossier = host.locator('[data-testid="decision-room-active-dossier"]').first();
+    await activeDossier.waitFor({ state: 'visible', timeout: 5000 });
+    const expectedDossierCardId = `command:elite-deploy:${requestId}`;
+    const activeDossierCardId = await activeDossier.getAttribute('data-card-id');
+    if (activeDossierCardId !== expectedDossierCardId) {
+      throw new Error(`Reserve request active dossier identity mismatch: expected ${expectedDossierCardId}, received ${activeDossierCardId ?? 'none'}`);
+    }
+    await snapshot(page, frame, faction, events, 'reserve-request-before-response', {
+      requestId,
+      activeDossierCardId,
+      before: pendingState,
+    });
+    const issued = await clickMatch(activeDossier, /^Issue\b|^Authorize\b/i, `reserve request ${requestId} issue`, { afterMs: 1200 });
     if (!issued) throw new Error(`Pending reserve request exposed no usable Issue action: ${requestId}`);
     const after = await readState(frame);
     const cleared = !(after?.pendingReserveRequestIds ?? []).includes(requestId);
@@ -4777,6 +5164,20 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
       after,
     });
     if (!cleared) throw new Error(`Pending reserve request remained after visible response: ${requestId}`);
+    const decisionRoomClosed = await clickTestId(
+      frame,
+      'warroom-decision-room-close',
+      `close resolved reserve request ${requestId} Decision Room`,
+      { afterMs: 500 },
+    );
+    if (!decisionRoomClosed) throw new Error(`Resolved reserve request Decision Room did not expose its exact close action: ${requestId}`);
+    await host.waitFor({ state: 'hidden', timeout: 5000 });
+    await snapshot(page, frame, faction, events, 'reserve-request-after-close', {
+      requestId,
+      decisionRoomClosed,
+      reserveReceipt,
+      after,
+    });
     return { handled: true, action: `reserve-issue:${requestId}` };
   }
   if ((pendingState?.convoyDecisions ?? 0) > 0) {
@@ -4816,35 +5217,63 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     if (!openedDeskItem) {
       throw new Error(`Pending officer event exact desk item did not open: ${officerEventId} (${officerMatter.inboxItemId})`);
     }
-    const responseLabel = officerResponseLabel(officerMatter);
+    const officerResponse = selectOfficerSuccessionResponse(officerMatter, officerSuccessionPolicy);
+    const responseLabel = officerResponse.responseLabel;
     await snapshot(page, frame, faction, events, 'officer-event-before-acknowledge', {
       officerEventId,
       officerMatter,
+      officerSuccessionPolicy,
+      officerResponse,
       responseLabel,
       before: pendingState,
     });
-    const responded = await clickExactVisibleButton(
-      frame,
-      responseLabel,
-      `officer event ${officerEventId} ${responseLabel}`,
-      { afterMs: 1200 },
-    );
+    const responded = officerResponse.route === 'personnel'
+      ? await clickHistoricalOfficerSuccessionOffer(frame, officerMatter)
+      : await clickExactVisibleButton(
+        frame,
+        responseLabel,
+        `officer event ${officerEventId} ${responseLabel}`,
+        { afterMs: 1200 },
+      );
     if (!responded) throw new Error(`Pending officer event exposed no exact visible response: ${officerEventId}`);
-    const expectedOfficerDecision = officerMatter.overrideAction === 'override-officer-interpretation'
-      ? 'override_confirmed'
-      : 'acknowledged';
+    const expectedOfficerDecision = officerResponse.expectedDecision;
+    const expectedOfficerReceipt = {
+      faction,
+      decision: expectedOfficerDecision,
+      ...(expectedOfficerDecision === 'replacement_accepted'
+        ? {
+          newOfficerId: officerMatter.officerId,
+          outgoingOfficerId: officerMatter.currentCommanderId,
+        }
+        : {}),
+    };
     const { after, receipt: officerReceipt } = await waitForNewExactDecisionReceipt(
       frame,
       'officer',
       'eventId',
       officerEventId,
       pendingState?.officerDecisionReceipts ?? [],
-      { faction, decision: expectedOfficerDecision },
+      expectedOfficerReceipt,
     );
-    const cleared = !(after?.pendingOfficerEventIds ?? []).includes(officerEventId)
-      || (after?.pendingOfficerEvents ?? Number.POSITIVE_INFINITY) < pendingState.pendingOfficerEvents;
+    const cleared = !(after?.pendingOfficerEventIds ?? []).includes(officerEventId);
+    const officerSuccessionChoice = officerMatter.eventType === 'replacement_suggested'
+      ? {
+        policy: officerResponse.policy,
+        policyVersion: officerResponse.policyVersion,
+        eventId: officerEventId,
+        candidateOfficerId: officerMatter.officerId,
+        currentCommanderId: officerMatter.currentCommanderId,
+        corpsId: officerMatter.corpsId,
+        visibleResponseLabel: responseLabel,
+        receipt: officerReceipt,
+        cleared,
+      }
+      : null;
+    if (officerSuccessionChoice) officerSuccessionChoiceTranscript.push(officerSuccessionChoice);
     await snapshot(page, frame, faction, events, 'officer-event-after-acknowledge', {
       officerEventId,
+      officerSuccessionPolicy,
+      officerSuccessionChoice,
       responseLabel,
       responded,
       officerReceipt,
@@ -4965,12 +5394,17 @@ async function handleCurrentSurface(page, frame, faction, events, options = {}) 
     await snapshot(page, frame, faction, events, 'handled-advance-blocker-review', { handledAction: 'advance-blocker-review', clicked });
     return { handled: clicked, action: 'advance-blocker-review' };
   }
-  if (/ADVANCE TURN/i.test(text)) {
+  const advanceConfirmation = await readAdvanceConfirmation(frame);
+  if (advanceConfirmation.present) {
     if (options.allowAdvanceModal === false) {
       return { handled: false, action: 'advance-turn-modal-held-for-checkpoint', text: compactText(text, 1600) };
     }
-    const clicked = await clickMatch(frame, /Advance Turn/i, 'advance modal', { afterMs: 1500 });
-    if (clicked) await waitForAdvanceTransition(frame);
+    if (!advanceConfirmation.buttonVisible || !advanceConfirmation.buttonEnabled) {
+      throw new Error('Advance confirmation action is not visible and enabled');
+    }
+    await advanceConfirmation.button.click({ timeout: 8000 });
+    const clicked = true;
+    await waitForAdvanceTransition(frame);
     await snapshot(page, frame, faction, events, 'handled-advance-modal', { handledAction: 'advance-turn-modal', clicked });
     return { handled: clicked, action: 'advance-turn-modal' };
   }
@@ -5241,6 +5675,8 @@ async function exerciseContextChurn(page, frame, faction, events, cycles) {
 async function playTurns(page, frame, faction, events, targetTurn) {
   const turnEvents = [];
   const turnAutosaveEvidenceByTurn = new Map();
+  const provisionalTurnAutosaveEvidenceByTurn = new Map();
+  const checkpointTourTurns = new Set();
   const recruitmentAttemptTurns = new Set();
   let recruitmentSucceeded = !autoRecruit;
   let lastTurn = (await readState(frame))?.turn ?? 0;
@@ -5250,6 +5686,51 @@ async function playTurns(page, frame, faction, events, targetTurn) {
   const guardLimit = Math.max(120, targetTurn * 8 + 60);
   const checkpointTurns = selectCheckpointTurns(checkpointTurnsArg, targetTurn, skipCheckpointTour);
   const checkpointTour = lightCheckpointTour ? lightTurnCheckpointTour : turnCheckpointTour;
+  const archiveProvisionalTurn = (turn) => archiveTurnAutosaveSnapshot(
+    canonicalAutosavePath,
+    evidenceDir,
+    faction,
+    turn,
+    provisionalTurnAutosaveEvidenceByTurn,
+    'provisional',
+  );
+  const archiveSettledTurn = async (turn) => {
+    if (!archiveTurnAutosaves || turn < 1 || turnAutosaveEvidenceByTurn.has(turn)) return null;
+    const beforeState = await readState(frame);
+    const beforeModalInventory = await readOwnedModalInventory(frame);
+    const beforeAutosaveIdentity = filePersistenceFingerprint(canonicalAutosavePath);
+    await sleep(250);
+    const afterState = await readState(frame);
+    const afterModalInventory = await readOwnedModalInventory(frame);
+    const afterAutosaveIdentity = filePersistenceFingerprint(canonicalAutosavePath);
+    const readiness = validateSettledTurnArchiveReadiness(
+      beforeState,
+      afterState,
+      beforeModalInventory,
+      afterModalInventory,
+      turn,
+      beforeAutosaveIdentity,
+      afterAutosaveIdentity,
+    );
+    const record = archiveTurnAutosaveSnapshot(
+      canonicalAutosavePath,
+      evidenceDir,
+      faction,
+      turn,
+      turnAutosaveEvidenceByTurn,
+      'settled',
+    );
+    turnEvents.push({ guard, step: 'settled-turn-archive', readiness, record });
+    return record;
+  };
+  const runCheckpointTourAfterSettlement = async (turn) => {
+    if (!checkpointTurns.has(turn) || checkpointTourTurns.has(turn)) return;
+    if (archiveTurnAutosaves && !turnAutosaveEvidenceByTurn.has(turn)) {
+      throw new Error(`Checkpoint tour cannot precede settled turn ${turn} autosave archive`);
+    }
+    await checkpointTour(page, frame, faction, events, turn);
+    checkpointTourTurns.add(turn);
+  };
   while (lastTurn < targetTurn && guard < guardLimit) {
     guard += 1;
     const before = await readState(frame).catch(() => null);
@@ -5275,7 +5756,7 @@ async function playTurns(page, frame, faction, events, targetTurn) {
         continue;
       }
     }
-    const handled = await handleCurrentSurface(page, frame, faction, events);
+    const handled = await handleCurrentSurface(page, frame, faction, events, { allowAdvanceModal: false });
     if (handled.handled) {
       const afterHandle = await readState(frame).catch(() => null);
       if (strategicRun && !resumeSavePath && afterHandle?.turn === 1) {
@@ -5285,30 +5766,31 @@ async function playTurns(page, frame, faction, events, targetTurn) {
       stagnantSteps = 0;
       turnEvents.push({ guard, step: 'handled', action: handled.action, before, after: afterHandle });
       if (archiveTurnAutosaves && afterHandle?.turn > (before?.turn ?? -1)) {
-        archiveCompletedTurnAutosave(
-          canonicalAutosavePath,
-          evidenceDir,
-          faction,
-          afterHandle.turn,
-          turnAutosaveEvidenceByTurn,
-        );
-      }
-      if (afterHandle?.turn > (before?.turn ?? -1) && checkpointTurns.has(afterHandle.turn)) {
-        await checkpointTour(page, frame, faction, events, afterHandle.turn);
+        archiveProvisionalTurn(afterHandle.turn);
       }
       lastTurn = afterHandle?.turn ?? lastTurn;
       continue;
     }
-    if (!unresolvedStateBlocker) {
-      const advanceSurfaceReady = await ensureWarroom(
+    const advancePreparation = await prepareAdvanceDispatch({
+      frame,
+      before,
+      handledAction: handled.action,
+      unresolvedStateBlocker,
+      archiveTurnAutosaves,
+      turnAutosaveEvidenceByTurn,
+      ensureAdvanceSurface: () => ensureWarroom(
         frame,
         `turn ${before?.turn ?? lastTurn} campaign advance surface`,
-      );
-      if (!advanceSurfaceReady) {
-        throw new Error(`Campaign advance surface was unreachable at turn ${before?.turn ?? lastTurn}`);
-      }
-    }
-    const advanced = await clickMatch(frame, /warroom-toolbar-advance|^Advance$|Advance|Review Blockers|Review Before Advance|Review paramilitary/i, 'advance toolbar', { afterMs: 1500 });
+      ),
+      archiveSettledTurn,
+      runCheckpointTourAfterSettlement,
+    });
+    const advanceDispatch = await dispatchAdvanceAfterSettlement(
+      frame,
+      handled.action,
+      advancePreparation.state.turn,
+    );
+    const advanced = advanceDispatch.clicked;
     await sleep(2200);
     const after = await readState(frame).catch(() => null);
     if (strategicRun && !resumeSavePath && after?.turn === 1) {
@@ -5317,20 +5799,11 @@ async function playTurns(page, frame, faction, events, targetTurn) {
     maxObservedTurn = Math.max(maxObservedTurn, after?.turn ?? maxObservedTurn);
     if ((after?.turn ?? lastTurn) > (before?.turn ?? lastTurn)) stagnantSteps = 0;
     else stagnantSteps += 1;
-    turnEvents.push({ guard, step: 'advance-click', advanced, before, after, surface: handled.text });
+    turnEvents.push({ guard, step: 'advance-click', advanced, advanceDispatch, before, after, surface: handled.text });
     if (archiveTurnAutosaves && after?.turn > (before?.turn ?? -1)) {
-      archiveCompletedTurnAutosave(
-        canonicalAutosavePath,
-        evidenceDir,
-        faction,
-        after.turn,
-        turnAutosaveEvidenceByTurn,
-      );
+      archiveProvisionalTurn(after.turn);
     }
     await snapshot(page, frame, faction, events, `turn-loop-${guard}`, { turnLoopTail: turnEvents.slice(-6), advanced });
-    if (after?.turn > (before?.turn ?? -1) && checkpointTurns.has(after.turn)) {
-      await checkpointTour(page, frame, faction, events, after.turn);
-    }
     if (stagnantSteps >= 4) {
       throw new Error(`Campaign progress stalled at turn ${after?.turn ?? lastTurn} after ${stagnantSteps} unproductive advance attempts`);
     }
@@ -5343,6 +5816,8 @@ async function playTurns(page, frame, faction, events, targetTurn) {
   await drainTransientSurfaces(page, frame, faction, events, `turn-${targetTurn}-pre-final-tour-drain`, 40, {
     allowAdvanceModal: false,
   });
+  await archiveSettledTurn(targetTurn);
+  await runCheckpointTourAfterSettlement(targetTurn);
   const finalTourProof = finalCheckpointTour
     ? await fullFinalStateTour(page, frame, faction, events, targetTurn)
     : null;
@@ -5430,6 +5905,7 @@ async function playTurns(page, frame, faction, events, targetTurn) {
     finalAutosaveEvidence,
     requiredEventReceiptIds,
     historicalEventAnchorResults,
+    provisionalTurnAutosaveEvidence: Array.from(provisionalTurnAutosaveEvidenceByTurn.values()),
     turnAutosaveEvidence: Array.from(turnAutosaveEvidenceByTurn.values()),
   };
 }
@@ -6099,6 +6575,10 @@ function frameHasVisibleExactControl(frameRecord, label) {
   return frameRecord.controls.some((control) => control.accessibleLabel === label && !control.disabled);
 }
 
+function frameVisibleExactControlCount(frameRecord, label) {
+  return frameRecord.controls.filter((control) => control.accessibleLabel === label && !control.disabled).length;
+}
+
 function chooseObservedOwner(observation, predicate, description) {
   const matches = [];
   for (const pageRecord of observation.pages) {
@@ -6130,6 +6610,172 @@ function markSaveLoadObservationOwner(observation, owner, observations) {
     saveLoadRouteEvidence: true,
     observations,
   });
+}
+
+function assertCanonicalResumeAutosave(filePath) {
+  const identity = filePersistenceFingerprint(filePath);
+  if (!identity) throw new Error(`Canonical resume autosave was not persisted: ${filePath}`);
+  return identity;
+}
+
+async function resumeThroughObservedMainMenu(page, faction, savePath, dependencies = {}) {
+  const capture = dependencies.captureSaveLoadSurfaceInventory ?? captureSaveLoadSurfaceInventory;
+  const chooseOwner = dependencies.chooseObservedOwner ?? chooseObservedOwner;
+  const markOwner = dependencies.markSaveLoadObservationOwner ?? markSaveLoadObservationOwner;
+  const resolveFrame = dependencies.resolveObservedFrame ?? resolveObservedFrame;
+  const pause = dependencies.sleep ?? sleep;
+  const waitForReady = dependencies.waitForCampaignCommandReady ?? waitForCampaignCommandReady;
+  const readLoadedState = dependencies.readState ?? readState;
+  const readResumeIdentity = dependencies.readResumeIdentity ?? ((sourcePath) => {
+    const source = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
+    return { turn: source?.meta?.turn ?? null, playerFaction: source?.meta?.player_faction ?? null };
+  });
+  const requireCanonicalAutosave = dependencies.assertCanonicalResumeAutosave ?? assertCanonicalResumeAutosave;
+  const failureEvidence = dependencies.failureEvidence ?? {};
+  const readAmbientSignals = dependencies.readAmbientLifecycleSignals ?? readAmbientLifecycleSignals;
+  const writeDiagnostics = dependencies.writeResumeRouteDiagnostics ?? ((value) => writeJsonAtomic(
+    resumeSaveRouteInspectionPath,
+    { runLabel, resumeSaveRouteEvidence: true, ...value },
+  ));
+  const observations = [];
+  const frameIds = { ids: new WeakMap(), refs: new Map(), next: 0 };
+  let ownerFrame = null;
+  const remember = (observation) => {
+    if (!observations.includes(observation)) observations.push(observation);
+    return observation;
+  };
+  const summarizeObservations = () => observations.map((observation) => ({
+    boundary: observation.boundary ?? null,
+    chosenOwnerFrameId: observation.chosenOwnerFrameId ?? null,
+    frames: observation.pages.flatMap((pageRecord) => pageRecord.frames.map((frameRecord) => ({
+      pageIndex: pageRecord.pageIndex,
+      frameId: frameRecord.frameId,
+      url: frameRecord.url,
+      detached: frameRecord.detached,
+      markers: frameRecord.markers,
+      controls: frameRecord.controls.map((control) => ({
+        accessibleLabel: control.accessibleLabel,
+        disabled: control.disabled,
+      })),
+    }))),
+  }));
+  try {
+    let observation = remember(await capture(page, 'resume-opening-splash', null, observations, frameIds));
+    let owner = chooseOwner(
+      observation,
+      (record) => record.markers.openingSplash
+        && frameVisibleExactControlCount(record, 'Assume responsibility') === 1,
+      'opening splash with one Assume responsibility control',
+    );
+    markOwner(observation, owner, observations);
+    ownerFrame = resolveFrame(page, owner, frameIds);
+    const assumeResponsibility = ownerFrame.getByRole('button', { name: 'Assume responsibility', exact: true });
+    if (await assumeResponsibility.count() !== 1
+        || !await assumeResponsibility.isVisible() || !await assumeResponsibility.isEnabled()) {
+      throw new Error('Resume route expected one enabled visible Assume responsibility control');
+    }
+    await assumeResponsibility.click({ timeout: 10000 });
+    await pause(500);
+
+    observation = remember(await capture(page, 'resume-main-menu', ownerFrame, observations, frameIds));
+    owner = chooseOwner(
+      observation,
+      (record) => record.markers.mainMenuOpening
+        && frameVisibleExactControlCount(record, 'Field Records') === 1,
+      'Main Menu with one Field Records control',
+    );
+    markOwner(observation, owner, observations);
+    ownerFrame = resolveFrame(page, owner, frameIds);
+    const fieldRecords = ownerFrame.getByRole('button', { name: 'Field Records', exact: true });
+    if (await fieldRecords.count() !== 1 || !await fieldRecords.isVisible() || !await fieldRecords.isEnabled()) {
+      throw new Error('Resume route expected one enabled visible Field Records control');
+    }
+    await fieldRecords.click({ timeout: 10000 });
+    await pause(500);
+
+    observation = remember(await capture(page, 'resume-field-records', ownerFrame, observations, frameIds));
+    owner = chooseOwner(
+      observation,
+      (record) => record.markers.mainMenuOpening
+        && frameVisibleExactControlCount(record, 'Import file…') === 1,
+      'Field Records with one Import file control',
+    );
+    markOwner(observation, owner, observations);
+    ownerFrame = resolveFrame(page, owner, frameIds);
+    const importButton = ownerFrame.getByRole('button', { name: 'Import file…', exact: true });
+    if (await importButton.count() !== 1 || !await importButton.isVisible() || !await importButton.isEnabled()) {
+      throw new Error('Resume route expected one enabled visible Import file control');
+    }
+    await importButton.click({ timeout: 10000 });
+    await pause(1800);
+
+    observation = remember(await capture(page, 'resume-loaded-campaign', null, observations, frameIds));
+    owner = chooseOwner(
+      observation,
+      (record) => record.markers.tacticalMap || record.markers.warroom,
+      'loaded campaign',
+    );
+    markOwner(observation, owner, observations);
+    const restoredFrame = resolveFrame(page, owner, frameIds);
+    await waitForReady(restoredFrame, faction, 30000);
+    const [loadedState, expectedIdentity] = await Promise.all([
+      readLoadedState(restoredFrame),
+      readResumeIdentity(savePath),
+    ]);
+    if (expectedIdentity?.playerFaction !== faction
+        || loadedState?.playerFaction !== expectedIdentity?.playerFaction
+        || loadedState?.turn !== expectedIdentity?.turn) {
+      throw new Error(`Resume route loaded identity mismatch: ${JSON.stringify({ faction, expectedIdentity, loadedState })}`);
+    }
+    const canonicalAutosaveIdentity = requireCanonicalAutosave(canonicalAutosavePath);
+    const receipt = {
+      status: 'loaded',
+      route: 'opening splash -> Field Records -> Import file -> loaded campaign',
+      savePath,
+      expectedIdentity,
+      loadedIdentity: { turn: loadedState.turn, playerFaction: loadedState.playerFaction },
+      canonicalAutosaveIdentity,
+      observations: summarizeObservations(),
+    };
+    writeDiagnostics(receipt);
+    return { frame: restoredFrame, receipt };
+  } catch (error) {
+    let ambientLifecycleSignals;
+    if (ownerFrame) {
+      try {
+        ambientLifecycleSignals = { available: true, values: await readAmbientSignals(ownerFrame) };
+      } catch (ambientError) {
+        ambientLifecycleSignals = { available: false, error: compactText(ambientError?.stack ?? ambientError) };
+      }
+    } else {
+      ambientLifecycleSignals = { available: false, error: 'No observed owner frame was resolved before failure' };
+    }
+    const copyRecords = (records) => JSON.parse(JSON.stringify(Array.isArray(records) ? records : []));
+    const failure = {
+      status: 'failed',
+      route: 'opening splash -> Field Records -> Import file -> loaded campaign',
+      savePath,
+      error: compactText(error?.stack ?? error),
+      observations: summarizeObservations(),
+      failureEvidence: {
+        consoleMessages: copyRecords(failureEvidence.consoleMessages),
+        pageErrors: copyRecords(failureEvidence.pageErrors),
+        rawNetworkFailures: copyRecords(failureEvidence.networkFailures),
+        ambientLifecycleSignals,
+        mainProcessOutputEvidencePath: failureEvidence.mainProcessOutputEvidencePath ?? null,
+        mainProcessStdout: copyRecords(failureEvidence.mainProcessStdout),
+        mainProcessStderr: copyRecords(failureEvidence.mainProcessStderr),
+      },
+    };
+    try {
+      writeDiagnostics(failure);
+    } catch (diagnosticError) {
+      if (error && typeof error === 'object') {
+        error.resumeRouteDiagnosticError = compactText(diagnosticError?.stack ?? diagnosticError);
+      }
+    }
+    throw error;
+  }
 }
 
 function chooseObservedQuicksaveControl(observation) {
@@ -6189,20 +6835,105 @@ function validateExpectedLoadHydrationDelta(beforeProjection, expectedProjection
     }
   }
   const changes = deterministicStructuralDiff(before, expected);
-  if (changes.some((change) => change.path !== 'military.sector_combat_ratings'
-      && !change.path.startsWith('military.sector_combat_ratings.'))) {
-    throw new Error('Authoritative load hydration changed state outside sector combat ratings');
+  const allowedPrefixes = ['military.home_distance_cache', 'military.sector_combat_ratings'];
+  const belongsTo = (change, prefix) => change.path === prefix || change.path.startsWith(`${prefix}.`);
+  const isPlainJsonObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
+  if (changes.some((change) => !allowedPrefixes.some((prefix) => belongsTo(change, prefix)))) {
+    throw new Error('Authoritative load hydration changed state outside declared hydration fields');
   }
+  const beforeMilitary = before.military ?? {};
+  const expectedMilitary = expected.military ?? {};
+  const beforeOwnsCache = Object.hasOwn(beforeMilitary, 'home_distance_cache');
+  const expectedOwnsCache = Object.hasOwn(expectedMilitary, 'home_distance_cache');
+  const beforeCache = beforeMilitary.home_distance_cache;
+  const expectedCache = expectedMilitary.home_distance_cache;
+  if (!beforeOwnsCache || !expectedOwnsCache
+      || !isPlainJsonObject(beforeCache) || !isPlainJsonObject(expectedCache)) {
+    throw new Error('Authoritative load hydration requires before and after cache to be own plain JSON objects');
+  }
+  const cacheKeys = Object.keys(beforeCache).sort();
+  if (cacheKeys.some((key) => typeof beforeCache[key] !== 'number'
+      || !Number.isFinite(beforeCache[key]) || beforeCache[key] < 0)) {
+    throw new Error('Authoritative load hydration before cache must be a flat record of finite non-negative numbers');
+  }
+  if (Object.keys(expectedCache).length !== 0) {
+    throw new Error('Authoritative load hydration requires after cache to be empty');
+  }
+  const homeDistanceCacheChanges = changes.filter((change) => belongsTo(change, allowedPrefixes[0]));
+  const expectedCacheLeafPaths = cacheKeys.map((key) => `${allowedPrefixes[0]}.${key}`).sort();
+  const changedCacheLeafPaths = homeDistanceCacheChanges.map((change) => change.path).sort();
+  if (JSON.stringify(changedCacheLeafPaths) !== JSON.stringify(expectedCacheLeafPaths)
+      || homeDistanceCacheChanges.some((change) => change.path === allowedPrefixes[0]
+        || typeof change.before !== 'number' || !Number.isFinite(change.before) || change.before < 0
+        || change.after?.kind !== 'missing')) {
+    throw new Error('Authoritative load hydration cache delta must directly remove every finite non-negative entry without replacing its root');
+  }
+  const sectorCombatRatingChanges = changes.filter((change) => belongsTo(change, allowedPrefixes[1]));
   const sectors = Object.values(expected.military?.corps_front_sectors ?? {});
   const ownSectorIds = sectors
     .filter((sector) => sector?.faction === faction)
     .map((sector) => sector.sector_id)
     .sort();
-  const ratingIds = Object.keys(expected.military?.sector_combat_ratings ?? {}).sort();
-  if (JSON.stringify(ratingIds) !== JSON.stringify(ownSectorIds)) {
-    throw new Error('Authoritative loaded projection ratings do not match player-owned sectors');
+  const beforeRatings = beforeMilitary.sector_combat_ratings;
+  const expectedRatings = expectedMilitary.sector_combat_ratings;
+  if (!Object.hasOwn(beforeMilitary, 'sector_combat_ratings')
+      || !Object.hasOwn(expectedMilitary, 'sector_combat_ratings')
+      || !isPlainJsonObject(beforeRatings) || !isPlainJsonObject(expectedRatings)) {
+    throw new Error('Authoritative load hydration requires before and after sector rating records');
   }
-  return { changes, ownSectorIds };
+  const beforeRatingIds = Object.keys(beforeRatings).sort();
+  const ratingIds = Object.keys(expectedRatings).sort();
+  if (beforeRatingIds.some((sectorId) => !ownSectorIds.includes(sectorId))
+      || JSON.stringify(ratingIds) !== JSON.stringify(ownSectorIds)) {
+    throw new Error('Authoritative loaded projection before rating IDs must be a subset and after rating IDs must exactly match player-owned sectors');
+  }
+  const strengthClasses = new Set(['fortress', 'strong', 'adequate', 'thin', 'critical']);
+  const numericRatingFields = [
+    'offensive_power', 'defensive_power', 'defense_per_edge', 'personnel', 'morale_avg',
+    'cohesion_avg', 'fatigue_avg', 'edge_count', 'brigade_count',
+  ];
+  const ratingKeys = ['sector_id', 'faction', ...numericRatingFields, 'strength_class'].sort();
+  const validateRatingRecord = (rating, sectorId, label) => {
+    if (!isPlainJsonObject(rating)
+        || JSON.stringify(Object.keys(rating).sort()) !== JSON.stringify(ratingKeys)
+        || rating.sector_id !== sectorId || rating.faction !== faction
+        || numericRatingFields.some((field) => typeof rating[field] !== 'number' || !Number.isFinite(rating[field]))
+        || !strengthClasses.has(rating.strength_class)) {
+      throw new Error(`Authoritative load hydration ${label} rating has invalid source schema for player-owned sector ${sectorId}`);
+    }
+  };
+  for (const sectorId of ownSectorIds) validateRatingRecord(expectedRatings[sectorId], sectorId, 'after');
+  for (const sectorId of beforeRatingIds) {
+    validateRatingRecord(beforeRatings[sectorId], sectorId, 'before');
+    if (JSON.stringify(Object.keys(beforeRatings[sectorId]).sort()) !== JSON.stringify(Object.keys(expectedRatings[sectorId]).sort())) {
+      throw new Error(`Authoritative load hydration rating record schema changed for player-owned sector ${sectorId}`);
+    }
+  }
+  if (sectorCombatRatingChanges.some((change) => {
+    const addedOwner = ownSectorIds.find((sectorId) => !beforeRatingIds.includes(sectorId)
+      && change.path === `${allowedPrefixes[1]}.${sectorId}`);
+    if (addedOwner) {
+      return change.before?.kind !== 'missing' || change.after?.kind !== 'object';
+    }
+    const owner = beforeRatingIds.find((sectorId) => change.path.startsWith(`${allowedPrefixes[1]}.${sectorId}.`));
+    if (!owner) return true;
+    const numericChange = typeof change.before === 'number' && Number.isFinite(change.before)
+      && typeof change.after === 'number' && Number.isFinite(change.after);
+    const strengthClassChange = change.path === `${allowedPrefixes[1]}.${owner}.strength_class`
+      && strengthClasses.has(change.before) && strengthClasses.has(change.after);
+    return !numericChange && !strengthClassChange;
+  })) {
+    throw new Error('Authoritative load hydration sector rating delta must be finite numeric to numeric or an exact direct strength_class enum change beneath a player-owned sector ID');
+  }
+  return {
+    changes,
+    allowedPrefixes,
+    changeClasses: {
+      homeDistanceCacheRemovals: homeDistanceCacheChanges.length,
+      sectorCombatRatingChanges: sectorCombatRatingChanges.length,
+    },
+    ownSectorIds,
+  };
 }
 
 function assertExactExpectedLoadedProjection(actualProjection, expectedProjection) {
@@ -6371,6 +7102,8 @@ async function completeObservedSaveLoadRoute(
     changes: structuralDiff,
     expectedHydrationChangedPathCount: expectedHydration.changes.length,
     expectedHydrationChanges: expectedHydration.changes,
+    expectedHydrationAllowedPrefixes: expectedHydration.allowedPrefixes,
+    expectedHydrationChangeClasses: expectedHydration.changeClasses,
     authoritativeLoad: { ...expectedLoad, expectedProjection: undefined },
   });
   const loadedProjectionProof = assertExactExpectedLoadedProjection(afterProjection, expectedLoad.expectedProjection);
@@ -6394,6 +7127,7 @@ async function completeObservedSaveLoadRoute(
     inspectionPath: saveLoadMenuInspectionPath,
     savedEvidence,
     hashProof,
+    expectedHydration,
     beforeState,
     afterState,
   };
@@ -6504,6 +7238,8 @@ function prepareFreshUserDataDirectory(userDataDir, isResume) {
 
 async function runFaction(faction, result) {
   eventChoiceTranscript = [];
+  campaignModeSelectionEvidence = null;
+  officerSuccessionChoiceTranscript = [];
   canonicalAutosavePersistenceAtResumeLoad = null;
   activeMapNavigationAbortWindow = null;
   const userDataDir = path.join(userDataRoot, safeName(`${runSlug}-${faction}`));
@@ -6563,9 +7299,28 @@ async function runFaction(faction, result) {
   let entry = null;
   let initialEvidence = null;
   let frame = null;
+  let cdpCollectionLifecycle = null;
+  let cdpNetworkCollection = null;
+  let cdpNetworkCollectionError = null;
   try {
     const page = await waitForGamePage(app);
     attachDiagnostics(page);
+    const cdpSidecarPath = path.join(evidenceDir, safeName(faction), 'cdp-network-collection-v3.json');
+    cdpCollectionLifecycle = createCdpNetworkCollectionLifecycle({
+      enabled: collectCdpNetworkV3,
+      startCollector: startCdpNetworkCollection,
+      collectorOptions: {
+        artifactIdentity: `${runSlug}/${safeName(faction)}/cdp-network-collection-v3.json`,
+        createSession: () => page.context().newCDPSession(page),
+      },
+      sidecarPath: cdpSidecarPath,
+      writeSidecar: (filePath, artifact) => {
+        fs.mkdirSync(path.dirname(filePath), { recursive: true });
+        writeJsonExclusive(filePath, artifact);
+      },
+      digestSidecar: fileSha256,
+    });
+    await cdpCollectionLifecycle.awaitReady();
     await installTileFetchAbortObserverBeforeStartup(page);
     await installAmbientLifecycleObserverBeforeStartup(page);
     if (resumeSavePath) {
@@ -6573,14 +7328,23 @@ async function runFaction(faction, result) {
       await app.evaluate(({ dialog }, filePath) => {
         dialog.showOpenDialog = async () => ({ canceled: false, filePaths: [filePath] });
       }, resumeSavePath);
-      const loadSaveButton = page.getByRole('button', { name: /Load Save/i }).first();
-      await loadSaveButton.waitFor({ state: 'visible', timeout: 30000 });
-      await loadSaveButton.click({ timeout: 10000 });
-      const loaded = true;
-      await sleep(1800);
-      frame = await waitForEmbeddedFrame(page);
+      const resumed = await resumeThroughObservedMainMenu(page, faction, resumeSavePath, {
+        failureEvidence: {
+          consoleMessages,
+          pageErrors,
+          networkFailures,
+          mainProcessOutputEvidencePath,
+          mainProcessStdout,
+          mainProcessStderr,
+        },
+      });
+      frame = resumed.frame;
       canonicalAutosavePersistenceAtResumeLoad = filePersistenceFingerprint(canonicalAutosavePath);
-      await snapshot(page, frame, faction, events, 'resume-save-loaded', { resumeSavePath, loaded });
+      await snapshot(page, frame, faction, events, 'resume-save-loaded', {
+        resumeSavePath,
+        loaded: true,
+        resumeRoute: resumed.receipt,
+      });
     } else {
       frame = await startCampaign(page, faction, events);
     }
@@ -6606,11 +7370,12 @@ async function runFaction(faction, result) {
     );
     initialEvidence = {
       state: initialState,
+      officerSuccessionPolicy,
       initialStateHash,
       initialAutosaveHash,
       initialHashProof,
     initialAutosaveEvidence,
-      initialScenarioProvenance: buildInitialScenarioProvenance(initialAutosaveEvidence, Boolean(resumeSavePath)),
+      initialScenarioProvenance: buildInitialScenarioProvenance(initialAutosaveEvidence, Boolean(resumeSavePath), faction),
       scenarioId: initialState?.scenarioId ?? null,
       scenarioSeed: initialState?.scenarioSeed ?? null,
       controlMapHash: initialState?.controlMapHash ?? null,
@@ -6673,6 +7438,10 @@ async function runFaction(faction, result) {
     if (strategicRun && maxTurns > 0 && playtest.finalState?.autonomyLevel !== 1) {
       throw new Error(`Strategic autonomy did not apply: expected level 1, observed ${playtest.finalState?.autonomyLevel}`);
     }
+    const cdpFinalization = await cdpCollectionLifecycle.finalize();
+    cdpNetworkCollection = cdpFinalization.receipt;
+    cdpNetworkCollectionError = cdpFinalization.error;
+    if (cdpNetworkCollectionError) throw new Error(cdpNetworkCollectionError);
     const evidenceManifest = finalizeEvidenceManifest(faction, initialEvidence, playtest);
     entry = {
       faction,
@@ -6697,13 +7466,23 @@ async function runFaction(faction, result) {
       events,
       playtest,
       eventChoiceTranscript,
+      officerSuccessionChoiceTranscript,
+      campaignModeSelectionEvidence,
+      ...(collectCdpNetworkV3 ? { cdpNetworkCollection } : {}),
     };
     result.factions.push(entry);
     writeProgress(result);
   } catch (error) {
+    const cdpFinalization = cdpCollectionLifecycle
+      ? await cdpCollectionLifecycle.finalize()
+      : { receipt: null, error: null };
+    cdpNetworkCollection = cdpNetworkCollection ?? cdpFinalization.receipt;
+    cdpNetworkCollectionError = cdpNetworkCollectionError ?? cdpFinalization.error;
     const failureTileFetchAbortSignals = frame
       ? await readTileFetchAbortSignals(frame).catch(() => [])
       : [];
+    const failureRawNetworkFailures = structuredClone(networkFailures);
+    attributeTileFetchAborts(networkFailures, failureTileFetchAbortSignals, expectedTileFetchAborts);
     const failureAmbientLifecycleSignals = frame
       ? await readAmbientLifecycleSignals(frame).catch(() => [])
       : [];
@@ -6713,9 +7492,12 @@ async function runFaction(faction, result) {
       userDataDir,
       error: String(error?.stack ?? error),
       eventChoiceTranscript,
+      officerSuccessionChoiceTranscript,
+      campaignModeSelectionEvidence,
       initialEvidence,
       consoleMessages,
       pageErrors,
+      failureRawNetworkFailures,
       networkFailures,
       expectedStartupAborts,
       expectedTeardownAborts,
@@ -6724,6 +7506,7 @@ async function runFaction(faction, result) {
       expectedAmbientLifecycleAborts,
       failureTileFetchAbortSignals,
       failureAmbientLifecycleSignals,
+      ...(collectCdpNetworkV3 ? { cdpNetworkCollection, cdpNetworkCollectionError } : {}),
       mainProcessOutputEvidencePath,
       mainProcessStdout,
       mainProcessStderr,
@@ -6733,6 +7516,7 @@ async function runFaction(faction, result) {
     throw error;
   } finally {
     teardownStarted = true;
+    if (cdpCollectionLifecycle) await cdpCollectionLifecycle.finalize();
     await optionalCleanup('electron application teardown', () => app.close());
     mainProcessOutputCapture.flush();
     writeProgress(result);

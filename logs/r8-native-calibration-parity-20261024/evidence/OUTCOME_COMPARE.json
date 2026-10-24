@@ -1,0 +1,858 @@
+{
+  "schemaVersion": "awwv.native-calibration-outcome-compare.v1",
+  "pass": false,
+  "gates": {
+    "referenceIntegrity": {
+      "pass": true,
+      "failures": []
+    },
+    "controllerTimeline": {
+      "pass": false,
+      "failures": [
+        "Controller map mismatch at turn 1: native 91ef4c69f97512623c27ac9d09e12280630d35f1a999d186d710b85e5925223d != accepted 600b55d559a23152c6fe94b1f81558a2fe600c2ade709106b4d7aa92ee7dbb14",
+        "Ordered control-event timeline mismatch at turn 1: native 5dad35af4eb8ccb933fd289db9e07007d72bc70d64523d3942e800aa638d4a08 != accepted 511a065669658fa4c11dfdc599fec441d2c4d670351f0b0f78ba9e04baf30bd5",
+        "Controller map mismatch at turn 2: native 2faab7c35f653211f418a18ded4a83c2b8b3feab36263dcbc3d52441792fdaf5 != accepted 9838f07c0ede86c51bb68b1297692ef11565933c9b1752eb8b993f65215b1228",
+        "Ordered control-event timeline mismatch at turn 2: native 1059f4ba1bc77a9d82ea3a9896ed14ef757c87515ff5f101b722c9fa6b0c6ae1 != accepted 48bd0ca6b0ca122f64f890871b1362cb0c33a03d6854c9738c6dd11855218391",
+        "Controller map mismatch at turn 3: native 925843fa49272b0ab54018d6bf2052f0ee3e6c5d171870b3fa7f1cf0d2806368 != accepted 4ab7bc5a35375e495ca71974fb648e1e440764c5fa27135aaae1f9643b17940c",
+        "Ordered control-event timeline mismatch at turn 3: native 69fffd343b08f79ddd62b09a3b2002afaa3d2b0096a816caf5bb136aa7b876d1 != accepted 92d00c5473e509942a618b7289ec372dc20f7c7e7bdd228e7b23ff470727d574",
+        "Controller map mismatch at turn 4: native fa21227310ef301fb1608e10b6b704cd6de9e65c69806773eef79af802e0e6dd != accepted 642dc0a04a79aa61f0149049004256e1beef7546e9e106bb71d325e5158374da",
+        "Ordered control-event timeline mismatch at turn 4: native a99479104575fa791ee5c5d4b693b164e6827b941fb2f8f43f7e0432165aec44 != accepted 438423412962478b9ad1ebb43286888801bdc6fa947bc9c13e80c4110d19dd65",
+        "Controller map mismatch at turn 5: native af4b42b97210100c1ddb62bc0bd6001d9bce0cddf8a329d019fdd9499ed04e45 != accepted c0b11ed18629b9589d49068fae98e86814c9887c32e5e64b9d9e2791134a17ef",
+        "Ordered control-event timeline mismatch at turn 5: native b36739c6d5a3f14597c0e5537984c3f5a484f7b72ebe2c04cfcd71f0e54df7ea != accepted 1b28d7c73998c4c61e996fabda36b8dec55676a3170f66173e9a54a0b5937403",
+        "Controller map mismatch at turn 6: native 5ebab29411956d75dfef0ed52892fcf071cd235acbb5d01d0e34aa87d0df50df != accepted ba76d169cae0643ff17528327c1f121aae2bada6d247ca2b9f7896314f4bfe4b",
+        "Ordered control-event timeline mismatch at turn 6: native 77159b8f27f4ff436fc1bbc05c3f0944dd729357974a417a9b0bde8188d84882 != accepted d35c06934e03df3a4d4ec8fe8afe7000105672f0068b418f5dde0edbf700ca92",
+        "Controller map mismatch at turn 7: native 7fa7384bd0ca78520e2f2f6eaf5ae85cad2b1c6e7eb3bc026d40f0e21738e4ba != accepted 7da9a5a8031bacf01ded7649a0f5a2fc8decfc53b7a2e920ae21ce529ed327ea",
+        "Ordered control-event timeline mismatch at turn 7: native ca8cfabd70a089bfd272b22c6c5f3b17b3807c517b9f5b8f397eabbd4f83f910 != accepted cd26c832f6084a648d4ca223c9bd85172c3f064c179d1d8c4c42d56b4a65d15f",
+        "Controller map mismatch at turn 8: native cdfc500519b660028b00495ad6e2f5f34778f5f95bcf31933ce6d8f0c7a760db != accepted fd6b41b0b9bdd4db684fd268329559719a29ce3068beaad0824e4e11a92c5747",
+        "Ordered control-event timeline mismatch at turn 8: native 8b26892098a47a49b5f74d73a0c8c0185fea1785e2050e33d312d00c04e74696 != accepted 35741a8c0fc23f34ccadecf5988f4d2ecca66293297848a529c3d356260e772f",
+        "Controller map mismatch at turn 9: native c88281631c442d52616a791b29dd099ffc519e0734460b656914a6bf00c204b6 != accepted df99f741c946f6e79dfde7f94e4a03322d7aa01201c56d307074b17de5a92c5f",
+        "Ordered control-event timeline mismatch at turn 9: native b6da56d2ea3e57afa41c9b32cb6226ab08fbf782207ce1df420fc716b82298c3 != accepted a42d10a49ef0a17d4f9d3d77c7dac3027f91be55cd038ec1adfbb3a672816f22",
+        "Controller map mismatch at turn 10: native b6684ed5f5e3a8b15261e7622005c83422fcd5a9cc2fa2b64518d32d89137449 != accepted 3fefb9dcec410a09d42f17fe0154290b0ec4a232f403e7652f54701438424a8a",
+        "Ordered control-event timeline mismatch at turn 10: native 8177c60672f08cd82938d501b7ddd74d2d198e5e52b8d4068997119e3f96aa9f != accepted 7e04b1e80e1715f89caf0d47294b421e88d0c01729758e7749817fc90c3070e0",
+        "Controller map mismatch at turn 11: native 6813e8fb14c173629a389d6b428a60bf845875527fda896a5838107945f468a2 != accepted 0247b76110bab361e6f9561faa6a7ad986c563798c9a3711c4fffaba5fd551d0",
+        "Ordered control-event timeline mismatch at turn 11: native 83ef29c498f2a65eb551e4d7d5f8debced0017fba9566953b715516f4f001ad0 != accepted 69b89d93e05dcb36ca4b70e19dd57a3208b9458fea72e394ba4dbcb625bed940",
+        "Controller map mismatch at turn 12: native b874d3602ab4feab6e081a1dc58105a23f820d5e0c4f83cc654060c614fb0f23 != accepted aa0b76b8780a993051b3ca1739bbe83c0151ce59a3bb68a3469b5a55d38f24cc",
+        "Ordered control-event timeline mismatch at turn 12: native 46a807caf8d2c53006fdce1172381f0968339ffa533c965fb7b4405befed41b8 != accepted c75ce8a3a8d76d10d9aecaf95ea54b8d973e866dc59c9d27c27126d98248a480",
+        "Controller map mismatch at turn 13: native 9af3646c437feb17688f8ab5365074ca9e94d41f32896341fea08c240d1aa424 != accepted 0ac51835fed482695efbc18effd4d05a8f37738bf124dedaa6a1dc8ad08c317d",
+        "Ordered control-event timeline mismatch at turn 13: native ddcac478b34238415c344faa0d5a627e5957c6f40ff4050ca47c48a1eef9181d != accepted 974d1830d844208f1b815b92c20265c8f466569cf77e09fecbe5527a8cecddfa",
+        "Controller map mismatch at turn 14: native fe5fc369f2cba1383400347d81a09904734f07f89973127d60a0b86729049a45 != accepted 745e111814bfa262a9ba6b009133c1c4d192eb1cea0d4fe2f750a2265b5dc20e",
+        "Ordered control-event timeline mismatch at turn 14: native 9b513bde5252655e48ce90b2b90b249efb8bbdae964f36496e092aa32ced3a89 != accepted 77c8eaff6cdbcfaa6b4f8d2fb21956dbac059edcd4314b9ba8914f5d10b174a9",
+        "Controller map mismatch at turn 15: native 1e99ee73b31d384e12a1b970a7aa922e2fe9a79f685c0433539cdaacdb150fe6 != accepted 60cbae6df2bb3abe9c6ffe4d7b4dc725c99a0e92d2c95291f2ccd3ea5bb7e928",
+        "Ordered control-event timeline mismatch at turn 15: native 043f6b70508957e8dd272e4c8fb87c2b5459a6d298bc42cfa57762675d0c4584 != accepted dac0117e1a00e116240ed24bdbbd039242181413d432fdea4e10b756cd812bfa",
+        "Controller map mismatch at turn 16: native ba868629388dbe8dafc59042bfd835c2d58f151c5f3734be7347bb90bf8969bd != accepted bbb315d3567a8d8581ffc56efd89f6e336ffc83d6ae219fb6bf81cbc645d58b9",
+        "Ordered control-event timeline mismatch at turn 16: native 68d37d20f79c68080d082536ff4ff69f84764fba797e9ad7bd4a5ba512c4c0d1 != accepted a8d84ab0f0f00e531a8f11d00474e64cab3941fd079ff264cac62449850f7359",
+        "Controller map mismatch at turn 17: native 84301256e175cd812e83fa1f0737e5b9a45353dca3fd22c16f5a59c9480d9f2e != accepted bbb315d3567a8d8581ffc56efd89f6e336ffc83d6ae219fb6bf81cbc645d58b9",
+        "Ordered control-event timeline mismatch at turn 17: native c9d7e1f87bb5212f4f4f23f290241fd005663b0dd77b4ecf988e933e2920b6f9 != accepted a8d84ab0f0f00e531a8f11d00474e64cab3941fd079ff264cac62449850f7359",
+        "Controller map mismatch at turn 18: native 9cda216bc906e5d2c318ab0e8117e7914f82355a19d757d49dd14118541b1a48 != accepted cfcbafd8f7e3a3ffaf4531dff00ddc353804ec1c4366526f1bd6921d8ea559ce",
+        "Ordered control-event timeline mismatch at turn 18: native a0f940f023a8494b72a76fd360871df95636067581fd54a97bb6dc24eab73ba0 != accepted aa43d852d1e0ddd61ada688880ecc7dae2a730e70df4787817d7b6d834ff4537",
+        "Controller map mismatch at turn 19: native 20cc4250012a5257fdbf7c22b428be6fdf16477b5fa279f0105ee8452ab49a3a != accepted 457676d43876e3bceacf58f64e156481338b48c4de60210d6f9d2af852d1fe9e",
+        "Ordered control-event timeline mismatch at turn 19: native ceda634f4584587b82cc9f7464bb83a9c95507434719642863a8aa8d496d2bd5 != accepted bc5f7b5a0dbc587cedf40904f68664476c882b280ef0caeaef5c1465b7e7bac9",
+        "Controller map mismatch at turn 20: native 20cc4250012a5257fdbf7c22b428be6fdf16477b5fa279f0105ee8452ab49a3a != accepted f0427190facbaea80af8dfd21474025f911f4c6e0f5feb192726032c52345928",
+        "Ordered control-event timeline mismatch at turn 20: native ceda634f4584587b82cc9f7464bb83a9c95507434719642863a8aa8d496d2bd5 != accepted c6e8517fef7c4699f45f08ba5c79cda30ead51f2167cdde94d42b451f3b9493e",
+        "Controller map mismatch at turn 21: native 20cc4250012a5257fdbf7c22b428be6fdf16477b5fa279f0105ee8452ab49a3a != accepted f0427190facbaea80af8dfd21474025f911f4c6e0f5feb192726032c52345928",
+        "Ordered control-event timeline mismatch at turn 21: native ceda634f4584587b82cc9f7464bb83a9c95507434719642863a8aa8d496d2bd5 != accepted c6e8517fef7c4699f45f08ba5c79cda30ead51f2167cdde94d42b451f3b9493e",
+        "Controller map mismatch at turn 22: native 20cc4250012a5257fdbf7c22b428be6fdf16477b5fa279f0105ee8452ab49a3a != accepted f0427190facbaea80af8dfd21474025f911f4c6e0f5feb192726032c52345928",
+        "Ordered control-event timeline mismatch at turn 22: native ceda634f4584587b82cc9f7464bb83a9c95507434719642863a8aa8d496d2bd5 != accepted c6e8517fef7c4699f45f08ba5c79cda30ead51f2167cdde94d42b451f3b9493e",
+        "Controller map mismatch at turn 23: native 8b994675d99bd32b652ee7da96951d1909c087d5f21e7def518a07a2bd7f174f != accepted 2f9fa8e48a73c6417a148352f50331a2b1754de576741f147706c592e593e6fd",
+        "Ordered control-event timeline mismatch at turn 23: native 9373b3da208a9fa636951a4392577c4396d89f97b253aa0529c7d4fadba69bce != accepted 0f7672aee4e4b3819840edb3caca3a87e1946015dfb4ccb9207dac768bd0e7b4",
+        "Controller map mismatch at turn 24: native c81052db209ffbeb35e1145d152e54304dfde0d6b3dff829d18b95bc5d35a8c0 != accepted 7001f1ba7af4bf3466b4eee7bc833ff1a833d8022c179db47e2c66cc215470e8",
+        "Ordered control-event timeline mismatch at turn 24: native 77b4363b8b37aa76cb28d9e16f4368f6861ef0c86d1961bfba98e11da7b7c819 != accepted 64da2df25ecd50e9ef9349fced26258842ce5ae8588585b88d5f7e1b3dc11fcf",
+        "Controller map mismatch at turn 25: native 798ea8f746e8adb884ef109d30f5135c46715776629df25fbca79f7589324b58 != accepted ee32d91042609735d41ed39170cd768aab349cc528c5f69f050d72618d203c47",
+        "Ordered control-event timeline mismatch at turn 25: native 3ad9677c446e84c5aa2255c6eb437d1342f76ae0c02e996727a3d4279b04327d != accepted 19cb338e749a6ea63224f7e54b03378994e2d96d273607e3e46babe2391b3362",
+        "Controller map mismatch at turn 26: native 3e69688ef78304b0198c38fff3b6d552091bb94df95477d8a0e9fd1091a2db78 != accepted b391f371bf06a160554fbad394bc3365fe5c9a9cb197f8c3ff94f69454fb11ce",
+        "Ordered control-event timeline mismatch at turn 26: native 48de784bf2d8c442deebd18edc170d847afaa6024628693f5b7114af023f6d97 != accepted 2637d05fb0742c7f44dbf9463a38ded15f1ffeabbb81e12af83cf0a7ccb1d109",
+        "Controller map mismatch at turn 27: native 3e69688ef78304b0198c38fff3b6d552091bb94df95477d8a0e9fd1091a2db78 != accepted b391f371bf06a160554fbad394bc3365fe5c9a9cb197f8c3ff94f69454fb11ce",
+        "Ordered control-event timeline mismatch at turn 27: native 48de784bf2d8c442deebd18edc170d847afaa6024628693f5b7114af023f6d97 != accepted 2637d05fb0742c7f44dbf9463a38ded15f1ffeabbb81e12af83cf0a7ccb1d109",
+        "Controller map mismatch at turn 28: native f348e9f0a360897d7293f347697509797523cd6e7cff5d594528b6159d8eb17c != accepted d45ef128432b881341c35327532168a4f758f4ae12d8eb734bc9a96fd5e4c67c",
+        "Ordered control-event timeline mismatch at turn 28: native 733f1dcc017841b977ee6b3cd658ed5706ef693d97eeaf0b7c8c3b72b0338b55 != accepted 1cbfe09764c4ee12a1248dc0b7fedb33ab1a398ed9d13df9c81e1f15a340fd1b",
+        "Controller map mismatch at turn 29: native b3ae25b1f40c171dfceade551b0afe05f6ff4339324222ed0452a0672bd80496 != accepted 86b48fe38c84600e5ae3ce6e7389d8b0f47285064873f4053645cdd0c2c9bc31",
+        "Ordered control-event timeline mismatch at turn 29: native 085f2bcb706aa99cc9d4856dcbb11cd0bfd81b1aa8a35e1a69ef90d0f10c1691 != accepted 8a9a80cc1a41ab4c91cfe17e330e272d065436ab2cd4380206ee05c54688237f",
+        "Controller map mismatch at turn 30: native 1fadd1703cccf6dd37a069e38bd995986d34c733a694bea1f45ecdda91571500 != accepted 86b48fe38c84600e5ae3ce6e7389d8b0f47285064873f4053645cdd0c2c9bc31",
+        "Ordered control-event timeline mismatch at turn 30: native 46c5fb92608d9e324dce9a8f9718ca84c6d5cdcf8298426bedc04a4571afe60a != accepted 8a9a80cc1a41ab4c91cfe17e330e272d065436ab2cd4380206ee05c54688237f",
+        "Controller map mismatch at turn 31: native 8a2f86d137cd50f3d3193b54dc65f91eb2c9df17241caa92949da25a12d90eda != accepted 9e144f772a1a1d03397f58ddff1c85dc263f697bbddc0a279e2ef7e0d23676d7",
+        "Ordered control-event timeline mismatch at turn 31: native 01801b64c9fb204263a6dc255aafca84e5d27c5b9212da1a88f5053668fb6526 != accepted 4aeef81fc1c27740a57d10433f04cc4e20117c515692c8af35909799736aa62e",
+        "Controller map mismatch at turn 32: native 8a2f86d137cd50f3d3193b54dc65f91eb2c9df17241caa92949da25a12d90eda != accepted ced3773354d9d19a25609b99e291c882865430be9ad2dfdfc3c2dc6856c0bf9f",
+        "Ordered control-event timeline mismatch at turn 32: native 01801b64c9fb204263a6dc255aafca84e5d27c5b9212da1a88f5053668fb6526 != accepted b053ef083291fd841e832c8ccf9fee153d3c536bd2a523a1229bd4398ff1b813",
+        "Controller map mismatch at turn 33: native ba2b7a8607d9bcf6328a7d29562e28967ddf5640caab9736599cc9a6b2846fa9 != accepted 4edb58a84c34d8ec04553e3ef0b8cf85a65f0907ebee84a676f4cd63308268bd",
+        "Ordered control-event timeline mismatch at turn 33: native 1088308575d9264a61c8477bc772eb74e30f79e0b76534c786e65714246009bb != accepted 0e41664e3e444563ca9ecb83b9c454d6804aebe99a8a238dfd8bed59f99d88cc",
+        "Controller map mismatch at turn 34: native f821ba9070574d3d31e9fd0ede35e3fb21c7bee342f79d7678612080dfdf461a != accepted 2e8c6876e4da9f3b9593d8237266bff8f567c6e98b20816998a5b5bfd09fa988",
+        "Ordered control-event timeline mismatch at turn 34: native c8f00b867915e54ab45064732759f1ef002b8d3adaf98a79ffc2b73580fbcc56 != accepted ed25e828f80377d43f07b64f05a2af131791f27c469f2099620a7928cc593aed",
+        "Controller map mismatch at turn 35: native 4ada5d78c5f6b76ded4f1b071f9413e606b0750a2e9ec25ce649741d9e605f7f != accepted 6eb6bd1f23f4cc572407a6e022db44797b7223a200892dc3d151afe791c55206",
+        "Ordered control-event timeline mismatch at turn 35: native e4eb7a408cb9db9016f3696533f78633646b59dfcf529b48017ecaf3b238ffd2 != accepted 1bc6605392b9993da9fd67ebceb3d9146a41a144c1cb879ac3d22e48f8373f9a",
+        "Controller map mismatch at turn 36: native 4ada5d78c5f6b76ded4f1b071f9413e606b0750a2e9ec25ce649741d9e605f7f != accepted 6eb6bd1f23f4cc572407a6e022db44797b7223a200892dc3d151afe791c55206",
+        "Ordered control-event timeline mismatch at turn 36: native e4eb7a408cb9db9016f3696533f78633646b59dfcf529b48017ecaf3b238ffd2 != accepted 1bc6605392b9993da9fd67ebceb3d9146a41a144c1cb879ac3d22e48f8373f9a",
+        "Controller map mismatch at turn 37: native 4ada5d78c5f6b76ded4f1b071f9413e606b0750a2e9ec25ce649741d9e605f7f != accepted c21a55c5f3a3d49f60220196cfd6c2ff9a00c4a3e24d7481126c13e60e6a3f95",
+        "Ordered control-event timeline mismatch at turn 37: native e4eb7a408cb9db9016f3696533f78633646b59dfcf529b48017ecaf3b238ffd2 != accepted 9f9e5bc20391072b87a3b0e109af89788390f08d3050fe40909bee44f0686804",
+        "Controller map mismatch at turn 38: native 0d8c6b32d09dd6f3c586b1133d166da4045544fbc095b25d9c003a628666fe4a != accepted c21a55c5f3a3d49f60220196cfd6c2ff9a00c4a3e24d7481126c13e60e6a3f95",
+        "Ordered control-event timeline mismatch at turn 38: native d4d5001b615ef7f107262b78b5855f883dcae636f1af5763af906187ab09f39d != accepted 9f9e5bc20391072b87a3b0e109af89788390f08d3050fe40909bee44f0686804",
+        "Controller map mismatch at turn 39: native 0d8c6b32d09dd6f3c586b1133d166da4045544fbc095b25d9c003a628666fe4a != accepted c21a55c5f3a3d49f60220196cfd6c2ff9a00c4a3e24d7481126c13e60e6a3f95",
+        "Ordered control-event timeline mismatch at turn 39: native d4d5001b615ef7f107262b78b5855f883dcae636f1af5763af906187ab09f39d != accepted 9f9e5bc20391072b87a3b0e109af89788390f08d3050fe40909bee44f0686804"
+      ]
+    },
+    "checkpointScores": {
+      "pass": false,
+      "failures": [
+        "Checkpoint score mismatch at turn 39: 700 != 707"
+      ]
+    },
+    "inputPolicy": {
+      "pass": true,
+      "failures": []
+    },
+    "protectedControl": {
+      "pass": false,
+      "failures": [
+        "Protected control check failed: apr1992_definitive_188w__6deb5845c150c196__w188_n91:turn-39",
+        "Protected control check failed: apr1992_definitive_188w__6deb5845c150c196__w188_n92:turn-39"
+      ]
+    },
+    "calibrationEngineHealth": {
+      "pass": true,
+      "failures": []
+    },
+    "initialControl": {
+      "pass": true,
+      "failures": []
+    },
+    "inputBinding": {
+      "pass": true,
+      "failures": []
+    },
+    "referenceIdentity": {
+      "pass": true,
+      "failures": []
+    }
+  },
+  "reference": {
+    "eventCount": 268,
+    "finalControllerMapHash": "d6a9de62b3cf2c60f730ae2942cdb33c2e855b5111ddcd00a17663be5d18aa55"
+  },
+  "turns": [
+    {
+      "turn": 1,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "91ef4c69f97512623c27ac9d09e12280630d35f1a999d186d710b85e5925223d",
+      "acceptedControllerMapHash": "600b55d559a23152c6fe94b1f81558a2fe600c2ade709106b4d7aa92ee7dbb14",
+      "nativeEventPrefixHash": "5dad35af4eb8ccb933fd289db9e07007d72bc70d64523d3942e800aa638d4a08",
+      "acceptedEventPrefixHash": "511a065669658fa4c11dfdc599fec441d2c4d670351f0b0f78ba9e04baf30bd5"
+    },
+    {
+      "turn": 2,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "2faab7c35f653211f418a18ded4a83c2b8b3feab36263dcbc3d52441792fdaf5",
+      "acceptedControllerMapHash": "9838f07c0ede86c51bb68b1297692ef11565933c9b1752eb8b993f65215b1228",
+      "nativeEventPrefixHash": "1059f4ba1bc77a9d82ea3a9896ed14ef757c87515ff5f101b722c9fa6b0c6ae1",
+      "acceptedEventPrefixHash": "48bd0ca6b0ca122f64f890871b1362cb0c33a03d6854c9738c6dd11855218391"
+    },
+    {
+      "turn": 3,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "925843fa49272b0ab54018d6bf2052f0ee3e6c5d171870b3fa7f1cf0d2806368",
+      "acceptedControllerMapHash": "4ab7bc5a35375e495ca71974fb648e1e440764c5fa27135aaae1f9643b17940c",
+      "nativeEventPrefixHash": "69fffd343b08f79ddd62b09a3b2002afaa3d2b0096a816caf5bb136aa7b876d1",
+      "acceptedEventPrefixHash": "92d00c5473e509942a618b7289ec372dc20f7c7e7bdd228e7b23ff470727d574"
+    },
+    {
+      "turn": 4,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "fa21227310ef301fb1608e10b6b704cd6de9e65c69806773eef79af802e0e6dd",
+      "acceptedControllerMapHash": "642dc0a04a79aa61f0149049004256e1beef7546e9e106bb71d325e5158374da",
+      "nativeEventPrefixHash": "a99479104575fa791ee5c5d4b693b164e6827b941fb2f8f43f7e0432165aec44",
+      "acceptedEventPrefixHash": "438423412962478b9ad1ebb43286888801bdc6fa947bc9c13e80c4110d19dd65"
+    },
+    {
+      "turn": 5,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "af4b42b97210100c1ddb62bc0bd6001d9bce0cddf8a329d019fdd9499ed04e45",
+      "acceptedControllerMapHash": "c0b11ed18629b9589d49068fae98e86814c9887c32e5e64b9d9e2791134a17ef",
+      "nativeEventPrefixHash": "b36739c6d5a3f14597c0e5537984c3f5a484f7b72ebe2c04cfcd71f0e54df7ea",
+      "acceptedEventPrefixHash": "1b28d7c73998c4c61e996fabda36b8dec55676a3170f66173e9a54a0b5937403"
+    },
+    {
+      "turn": 6,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "5ebab29411956d75dfef0ed52892fcf071cd235acbb5d01d0e34aa87d0df50df",
+      "acceptedControllerMapHash": "ba76d169cae0643ff17528327c1f121aae2bada6d247ca2b9f7896314f4bfe4b",
+      "nativeEventPrefixHash": "77159b8f27f4ff436fc1bbc05c3f0944dd729357974a417a9b0bde8188d84882",
+      "acceptedEventPrefixHash": "d35c06934e03df3a4d4ec8fe8afe7000105672f0068b418f5dde0edbf700ca92"
+    },
+    {
+      "turn": 7,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "7fa7384bd0ca78520e2f2f6eaf5ae85cad2b1c6e7eb3bc026d40f0e21738e4ba",
+      "acceptedControllerMapHash": "7da9a5a8031bacf01ded7649a0f5a2fc8decfc53b7a2e920ae21ce529ed327ea",
+      "nativeEventPrefixHash": "ca8cfabd70a089bfd272b22c6c5f3b17b3807c517b9f5b8f397eabbd4f83f910",
+      "acceptedEventPrefixHash": "cd26c832f6084a648d4ca223c9bd85172c3f064c179d1d8c4c42d56b4a65d15f"
+    },
+    {
+      "turn": 8,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "cdfc500519b660028b00495ad6e2f5f34778f5f95bcf31933ce6d8f0c7a760db",
+      "acceptedControllerMapHash": "fd6b41b0b9bdd4db684fd268329559719a29ce3068beaad0824e4e11a92c5747",
+      "nativeEventPrefixHash": "8b26892098a47a49b5f74d73a0c8c0185fea1785e2050e33d312d00c04e74696",
+      "acceptedEventPrefixHash": "35741a8c0fc23f34ccadecf5988f4d2ecca66293297848a529c3d356260e772f"
+    },
+    {
+      "turn": 9,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "c88281631c442d52616a791b29dd099ffc519e0734460b656914a6bf00c204b6",
+      "acceptedControllerMapHash": "df99f741c946f6e79dfde7f94e4a03322d7aa01201c56d307074b17de5a92c5f",
+      "nativeEventPrefixHash": "b6da56d2ea3e57afa41c9b32cb6226ab08fbf782207ce1df420fc716b82298c3",
+      "acceptedEventPrefixHash": "a42d10a49ef0a17d4f9d3d77c7dac3027f91be55cd038ec1adfbb3a672816f22"
+    },
+    {
+      "turn": 10,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "b6684ed5f5e3a8b15261e7622005c83422fcd5a9cc2fa2b64518d32d89137449",
+      "acceptedControllerMapHash": "3fefb9dcec410a09d42f17fe0154290b0ec4a232f403e7652f54701438424a8a",
+      "nativeEventPrefixHash": "8177c60672f08cd82938d501b7ddd74d2d198e5e52b8d4068997119e3f96aa9f",
+      "acceptedEventPrefixHash": "7e04b1e80e1715f89caf0d47294b421e88d0c01729758e7749817fc90c3070e0"
+    },
+    {
+      "turn": 11,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "6813e8fb14c173629a389d6b428a60bf845875527fda896a5838107945f468a2",
+      "acceptedControllerMapHash": "0247b76110bab361e6f9561faa6a7ad986c563798c9a3711c4fffaba5fd551d0",
+      "nativeEventPrefixHash": "83ef29c498f2a65eb551e4d7d5f8debced0017fba9566953b715516f4f001ad0",
+      "acceptedEventPrefixHash": "69b89d93e05dcb36ca4b70e19dd57a3208b9458fea72e394ba4dbcb625bed940"
+    },
+    {
+      "turn": 12,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "b874d3602ab4feab6e081a1dc58105a23f820d5e0c4f83cc654060c614fb0f23",
+      "acceptedControllerMapHash": "aa0b76b8780a993051b3ca1739bbe83c0151ce59a3bb68a3469b5a55d38f24cc",
+      "nativeEventPrefixHash": "46a807caf8d2c53006fdce1172381f0968339ffa533c965fb7b4405befed41b8",
+      "acceptedEventPrefixHash": "c75ce8a3a8d76d10d9aecaf95ea54b8d973e866dc59c9d27c27126d98248a480"
+    },
+    {
+      "turn": 13,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "9af3646c437feb17688f8ab5365074ca9e94d41f32896341fea08c240d1aa424",
+      "acceptedControllerMapHash": "0ac51835fed482695efbc18effd4d05a8f37738bf124dedaa6a1dc8ad08c317d",
+      "nativeEventPrefixHash": "ddcac478b34238415c344faa0d5a627e5957c6f40ff4050ca47c48a1eef9181d",
+      "acceptedEventPrefixHash": "974d1830d844208f1b815b92c20265c8f466569cf77e09fecbe5527a8cecddfa"
+    },
+    {
+      "turn": 14,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "fe5fc369f2cba1383400347d81a09904734f07f89973127d60a0b86729049a45",
+      "acceptedControllerMapHash": "745e111814bfa262a9ba6b009133c1c4d192eb1cea0d4fe2f750a2265b5dc20e",
+      "nativeEventPrefixHash": "9b513bde5252655e48ce90b2b90b249efb8bbdae964f36496e092aa32ced3a89",
+      "acceptedEventPrefixHash": "77c8eaff6cdbcfaa6b4f8d2fb21956dbac059edcd4314b9ba8914f5d10b174a9"
+    },
+    {
+      "turn": 15,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "1e99ee73b31d384e12a1b970a7aa922e2fe9a79f685c0433539cdaacdb150fe6",
+      "acceptedControllerMapHash": "60cbae6df2bb3abe9c6ffe4d7b4dc725c99a0e92d2c95291f2ccd3ea5bb7e928",
+      "nativeEventPrefixHash": "043f6b70508957e8dd272e4c8fb87c2b5459a6d298bc42cfa57762675d0c4584",
+      "acceptedEventPrefixHash": "dac0117e1a00e116240ed24bdbbd039242181413d432fdea4e10b756cd812bfa"
+    },
+    {
+      "turn": 16,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "ba868629388dbe8dafc59042bfd835c2d58f151c5f3734be7347bb90bf8969bd",
+      "acceptedControllerMapHash": "bbb315d3567a8d8581ffc56efd89f6e336ffc83d6ae219fb6bf81cbc645d58b9",
+      "nativeEventPrefixHash": "68d37d20f79c68080d082536ff4ff69f84764fba797e9ad7bd4a5ba512c4c0d1",
+      "acceptedEventPrefixHash": "a8d84ab0f0f00e531a8f11d00474e64cab3941fd079ff264cac62449850f7359"
+    },
+    {
+      "turn": 17,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "84301256e175cd812e83fa1f0737e5b9a45353dca3fd22c16f5a59c9480d9f2e",
+      "acceptedControllerMapHash": "bbb315d3567a8d8581ffc56efd89f6e336ffc83d6ae219fb6bf81cbc645d58b9",
+      "nativeEventPrefixHash": "c9d7e1f87bb5212f4f4f23f290241fd005663b0dd77b4ecf988e933e2920b6f9",
+      "acceptedEventPrefixHash": "a8d84ab0f0f00e531a8f11d00474e64cab3941fd079ff264cac62449850f7359"
+    },
+    {
+      "turn": 18,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "9cda216bc906e5d2c318ab0e8117e7914f82355a19d757d49dd14118541b1a48",
+      "acceptedControllerMapHash": "cfcbafd8f7e3a3ffaf4531dff00ddc353804ec1c4366526f1bd6921d8ea559ce",
+      "nativeEventPrefixHash": "a0f940f023a8494b72a76fd360871df95636067581fd54a97bb6dc24eab73ba0",
+      "acceptedEventPrefixHash": "aa43d852d1e0ddd61ada688880ecc7dae2a730e70df4787817d7b6d834ff4537"
+    },
+    {
+      "turn": 19,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "20cc4250012a5257fdbf7c22b428be6fdf16477b5fa279f0105ee8452ab49a3a",
+      "acceptedControllerMapHash": "457676d43876e3bceacf58f64e156481338b48c4de60210d6f9d2af852d1fe9e",
+      "nativeEventPrefixHash": "ceda634f4584587b82cc9f7464bb83a9c95507434719642863a8aa8d496d2bd5",
+      "acceptedEventPrefixHash": "bc5f7b5a0dbc587cedf40904f68664476c882b280ef0caeaef5c1465b7e7bac9"
+    },
+    {
+      "turn": 20,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "20cc4250012a5257fdbf7c22b428be6fdf16477b5fa279f0105ee8452ab49a3a",
+      "acceptedControllerMapHash": "f0427190facbaea80af8dfd21474025f911f4c6e0f5feb192726032c52345928",
+      "nativeEventPrefixHash": "ceda634f4584587b82cc9f7464bb83a9c95507434719642863a8aa8d496d2bd5",
+      "acceptedEventPrefixHash": "c6e8517fef7c4699f45f08ba5c79cda30ead51f2167cdde94d42b451f3b9493e"
+    },
+    {
+      "turn": 21,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "20cc4250012a5257fdbf7c22b428be6fdf16477b5fa279f0105ee8452ab49a3a",
+      "acceptedControllerMapHash": "f0427190facbaea80af8dfd21474025f911f4c6e0f5feb192726032c52345928",
+      "nativeEventPrefixHash": "ceda634f4584587b82cc9f7464bb83a9c95507434719642863a8aa8d496d2bd5",
+      "acceptedEventPrefixHash": "c6e8517fef7c4699f45f08ba5c79cda30ead51f2167cdde94d42b451f3b9493e"
+    },
+    {
+      "turn": 22,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "20cc4250012a5257fdbf7c22b428be6fdf16477b5fa279f0105ee8452ab49a3a",
+      "acceptedControllerMapHash": "f0427190facbaea80af8dfd21474025f911f4c6e0f5feb192726032c52345928",
+      "nativeEventPrefixHash": "ceda634f4584587b82cc9f7464bb83a9c95507434719642863a8aa8d496d2bd5",
+      "acceptedEventPrefixHash": "c6e8517fef7c4699f45f08ba5c79cda30ead51f2167cdde94d42b451f3b9493e"
+    },
+    {
+      "turn": 23,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "8b994675d99bd32b652ee7da96951d1909c087d5f21e7def518a07a2bd7f174f",
+      "acceptedControllerMapHash": "2f9fa8e48a73c6417a148352f50331a2b1754de576741f147706c592e593e6fd",
+      "nativeEventPrefixHash": "9373b3da208a9fa636951a4392577c4396d89f97b253aa0529c7d4fadba69bce",
+      "acceptedEventPrefixHash": "0f7672aee4e4b3819840edb3caca3a87e1946015dfb4ccb9207dac768bd0e7b4"
+    },
+    {
+      "turn": 24,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "c81052db209ffbeb35e1145d152e54304dfde0d6b3dff829d18b95bc5d35a8c0",
+      "acceptedControllerMapHash": "7001f1ba7af4bf3466b4eee7bc833ff1a833d8022c179db47e2c66cc215470e8",
+      "nativeEventPrefixHash": "77b4363b8b37aa76cb28d9e16f4368f6861ef0c86d1961bfba98e11da7b7c819",
+      "acceptedEventPrefixHash": "64da2df25ecd50e9ef9349fced26258842ce5ae8588585b88d5f7e1b3dc11fcf"
+    },
+    {
+      "turn": 25,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "798ea8f746e8adb884ef109d30f5135c46715776629df25fbca79f7589324b58",
+      "acceptedControllerMapHash": "ee32d91042609735d41ed39170cd768aab349cc528c5f69f050d72618d203c47",
+      "nativeEventPrefixHash": "3ad9677c446e84c5aa2255c6eb437d1342f76ae0c02e996727a3d4279b04327d",
+      "acceptedEventPrefixHash": "19cb338e749a6ea63224f7e54b03378994e2d96d273607e3e46babe2391b3362"
+    },
+    {
+      "turn": 26,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "3e69688ef78304b0198c38fff3b6d552091bb94df95477d8a0e9fd1091a2db78",
+      "acceptedControllerMapHash": "b391f371bf06a160554fbad394bc3365fe5c9a9cb197f8c3ff94f69454fb11ce",
+      "nativeEventPrefixHash": "48de784bf2d8c442deebd18edc170d847afaa6024628693f5b7114af023f6d97",
+      "acceptedEventPrefixHash": "2637d05fb0742c7f44dbf9463a38ded15f1ffeabbb81e12af83cf0a7ccb1d109"
+    },
+    {
+      "turn": 27,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "3e69688ef78304b0198c38fff3b6d552091bb94df95477d8a0e9fd1091a2db78",
+      "acceptedControllerMapHash": "b391f371bf06a160554fbad394bc3365fe5c9a9cb197f8c3ff94f69454fb11ce",
+      "nativeEventPrefixHash": "48de784bf2d8c442deebd18edc170d847afaa6024628693f5b7114af023f6d97",
+      "acceptedEventPrefixHash": "2637d05fb0742c7f44dbf9463a38ded15f1ffeabbb81e12af83cf0a7ccb1d109"
+    },
+    {
+      "turn": 28,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "f348e9f0a360897d7293f347697509797523cd6e7cff5d594528b6159d8eb17c",
+      "acceptedControllerMapHash": "d45ef128432b881341c35327532168a4f758f4ae12d8eb734bc9a96fd5e4c67c",
+      "nativeEventPrefixHash": "733f1dcc017841b977ee6b3cd658ed5706ef693d97eeaf0b7c8c3b72b0338b55",
+      "acceptedEventPrefixHash": "1cbfe09764c4ee12a1248dc0b7fedb33ab1a398ed9d13df9c81e1f15a340fd1b"
+    },
+    {
+      "turn": 29,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "b3ae25b1f40c171dfceade551b0afe05f6ff4339324222ed0452a0672bd80496",
+      "acceptedControllerMapHash": "86b48fe38c84600e5ae3ce6e7389d8b0f47285064873f4053645cdd0c2c9bc31",
+      "nativeEventPrefixHash": "085f2bcb706aa99cc9d4856dcbb11cd0bfd81b1aa8a35e1a69ef90d0f10c1691",
+      "acceptedEventPrefixHash": "8a9a80cc1a41ab4c91cfe17e330e272d065436ab2cd4380206ee05c54688237f"
+    },
+    {
+      "turn": 30,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "1fadd1703cccf6dd37a069e38bd995986d34c733a694bea1f45ecdda91571500",
+      "acceptedControllerMapHash": "86b48fe38c84600e5ae3ce6e7389d8b0f47285064873f4053645cdd0c2c9bc31",
+      "nativeEventPrefixHash": "46c5fb92608d9e324dce9a8f9718ca84c6d5cdcf8298426bedc04a4571afe60a",
+      "acceptedEventPrefixHash": "8a9a80cc1a41ab4c91cfe17e330e272d065436ab2cd4380206ee05c54688237f"
+    },
+    {
+      "turn": 31,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "8a2f86d137cd50f3d3193b54dc65f91eb2c9df17241caa92949da25a12d90eda",
+      "acceptedControllerMapHash": "9e144f772a1a1d03397f58ddff1c85dc263f697bbddc0a279e2ef7e0d23676d7",
+      "nativeEventPrefixHash": "01801b64c9fb204263a6dc255aafca84e5d27c5b9212da1a88f5053668fb6526",
+      "acceptedEventPrefixHash": "4aeef81fc1c27740a57d10433f04cc4e20117c515692c8af35909799736aa62e"
+    },
+    {
+      "turn": 32,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "8a2f86d137cd50f3d3193b54dc65f91eb2c9df17241caa92949da25a12d90eda",
+      "acceptedControllerMapHash": "ced3773354d9d19a25609b99e291c882865430be9ad2dfdfc3c2dc6856c0bf9f",
+      "nativeEventPrefixHash": "01801b64c9fb204263a6dc255aafca84e5d27c5b9212da1a88f5053668fb6526",
+      "acceptedEventPrefixHash": "b053ef083291fd841e832c8ccf9fee153d3c536bd2a523a1229bd4398ff1b813"
+    },
+    {
+      "turn": 33,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "ba2b7a8607d9bcf6328a7d29562e28967ddf5640caab9736599cc9a6b2846fa9",
+      "acceptedControllerMapHash": "4edb58a84c34d8ec04553e3ef0b8cf85a65f0907ebee84a676f4cd63308268bd",
+      "nativeEventPrefixHash": "1088308575d9264a61c8477bc772eb74e30f79e0b76534c786e65714246009bb",
+      "acceptedEventPrefixHash": "0e41664e3e444563ca9ecb83b9c454d6804aebe99a8a238dfd8bed59f99d88cc"
+    },
+    {
+      "turn": 34,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "f821ba9070574d3d31e9fd0ede35e3fb21c7bee342f79d7678612080dfdf461a",
+      "acceptedControllerMapHash": "2e8c6876e4da9f3b9593d8237266bff8f567c6e98b20816998a5b5bfd09fa988",
+      "nativeEventPrefixHash": "c8f00b867915e54ab45064732759f1ef002b8d3adaf98a79ffc2b73580fbcc56",
+      "acceptedEventPrefixHash": "ed25e828f80377d43f07b64f05a2af131791f27c469f2099620a7928cc593aed"
+    },
+    {
+      "turn": 35,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "4ada5d78c5f6b76ded4f1b071f9413e606b0750a2e9ec25ce649741d9e605f7f",
+      "acceptedControllerMapHash": "6eb6bd1f23f4cc572407a6e022db44797b7223a200892dc3d151afe791c55206",
+      "nativeEventPrefixHash": "e4eb7a408cb9db9016f3696533f78633646b59dfcf529b48017ecaf3b238ffd2",
+      "acceptedEventPrefixHash": "1bc6605392b9993da9fd67ebceb3d9146a41a144c1cb879ac3d22e48f8373f9a"
+    },
+    {
+      "turn": 36,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "4ada5d78c5f6b76ded4f1b071f9413e606b0750a2e9ec25ce649741d9e605f7f",
+      "acceptedControllerMapHash": "6eb6bd1f23f4cc572407a6e022db44797b7223a200892dc3d151afe791c55206",
+      "nativeEventPrefixHash": "e4eb7a408cb9db9016f3696533f78633646b59dfcf529b48017ecaf3b238ffd2",
+      "acceptedEventPrefixHash": "1bc6605392b9993da9fd67ebceb3d9146a41a144c1cb879ac3d22e48f8373f9a"
+    },
+    {
+      "turn": 37,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "4ada5d78c5f6b76ded4f1b071f9413e606b0750a2e9ec25ce649741d9e605f7f",
+      "acceptedControllerMapHash": "c21a55c5f3a3d49f60220196cfd6c2ff9a00c4a3e24d7481126c13e60e6a3f95",
+      "nativeEventPrefixHash": "e4eb7a408cb9db9016f3696533f78633646b59dfcf529b48017ecaf3b238ffd2",
+      "acceptedEventPrefixHash": "9f9e5bc20391072b87a3b0e109af89788390f08d3050fe40909bee44f0686804"
+    },
+    {
+      "turn": 38,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "0d8c6b32d09dd6f3c586b1133d166da4045544fbc095b25d9c003a628666fe4a",
+      "acceptedControllerMapHash": "c21a55c5f3a3d49f60220196cfd6c2ff9a00c4a3e24d7481126c13e60e6a3f95",
+      "nativeEventPrefixHash": "d4d5001b615ef7f107262b78b5855f883dcae636f1af5763af906187ab09f39d",
+      "acceptedEventPrefixHash": "9f9e5bc20391072b87a3b0e109af89788390f08d3050fe40909bee44f0686804"
+    },
+    {
+      "turn": 39,
+      "mapMatch": false,
+      "timelineMatch": false,
+      "nativeControllerMapHash": "0d8c6b32d09dd6f3c586b1133d166da4045544fbc095b25d9c003a628666fe4a",
+      "acceptedControllerMapHash": "c21a55c5f3a3d49f60220196cfd6c2ff9a00c4a3e24d7481126c13e60e6a3f95",
+      "nativeEventPrefixHash": "d4d5001b615ef7f107262b78b5855f883dcae636f1af5763af906187ab09f39d",
+      "acceptedEventPrefixHash": "9f9e5bc20391072b87a3b0e109af89788390f08d3050fe40909bee44f0686804"
+    }
+  ],
+  "checkpointScores": [
+    {
+      "turn": 39,
+      "matchedOsids": 700,
+      "expectedMatchedOsids": 707,
+      "totalOsids": 712
+    }
+  ],
+  "protectedChecks": [
+    {
+      "id": "apr1992_definitive_188w__6deb5845c150c196__w188_n91:turn-39",
+      "turn": 39,
+      "baseline": "apr1992_definitive_188w__6deb5845c150c196__w188_n91",
+      "protectedOsids": 712,
+      "losses": [
+        "op:brcko:bukvik_gornji_2",
+        "op:cajnice:batotici",
+        "op:foca:brusna_2",
+        "op:foca:donje_zesce",
+        "op:gorazde:kolovarice",
+        "op:srebrenica:obadi",
+        "op:trnovo:tosici"
+      ],
+      "pass": false
+    },
+    {
+      "id": "apr1992_definitive_188w__6deb5845c150c196__w188_n92:turn-39",
+      "turn": 39,
+      "baseline": "apr1992_definitive_188w__6deb5845c150c196__w188_n92",
+      "protectedOsids": 712,
+      "losses": [
+        "op:brcko:bukvik_gornji_2",
+        "op:cajnice:batotici",
+        "op:foca:brusna_2",
+        "op:foca:donje_zesce",
+        "op:gorazde:kolovarice",
+        "op:srebrenica:obadi",
+        "op:trnovo:tosici"
+      ],
+      "pass": false
+    }
+  ],
+  "healthChecks": {
+    "canonicalTurnArchives": true,
+    "controllerCardinality": true,
+    "exactTurnIdentity": true,
+    "saveLoadRoundTrip": true,
+    "evidenceManifest": true
+  },
+  "inputBindingChecks": {
+    "schema": true,
+    "acceptedManifest": true,
+    "packagedRuntimeInputs": true,
+    "startupInputs": true,
+    "startupSnapshot": true,
+    "packagedSim": true
+  },
+  "referenceIdentityChecks": {
+    "scenarioId": true,
+    "weeks": true,
+    "consumedInputs": true,
+    "immutableHashes": true
+  },
+  "initial": {
+    "nativeControllerMapHash": "14f8e393d2614afd8af07292b8e09917f8246ad5f69f97dff0163fa9b8fe0673",
+    "acceptedControllerMapHash": "14f8e393d2614afd8af07292b8e09917f8246ad5f69f97dff0163fa9b8fe0673"
+  },
+  "provenance": {
+    "nativeProgressPath": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\paradox-local-qa-progress-native-calibration-rbih-t39-20261024-03.json",
+    "acceptedRunDirectory": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\runs\\apr1992_definitive_188w__6deb5845c150c196__w188_n94",
+    "acceptedInitialSha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+    "acceptedFinalSha256": "ff003195e966d163c27916cb0b9bb6293e9e8b0f2312684688318761cf6def34",
+    "acceptedSummarySha256": "f8429e29760314d256f822d2f4d5aa9c997d5cfc053035e1859dcac560df71d5",
+    "acceptedMetaSha256": "0bb77fb1bf4b50456265f4839d934fd837d7ff5a569a590887d32e4cfa41b5b0",
+    "inputBindingPath": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\r8-native-calibration-parity-20261024\\input-binding-classification-02\\INPUT_BINDING_CLASSIFICATION.json",
+    "inputBindingSha256": "cf37ff15f97e50426a364e240b179f424ee04279366307a7f0e8f7d39e829f86"
+  },
+  "rawSaveEvidence": [
+    {
+      "turn": 0,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\initial-autosave.json",
+      "sha256": "c34d43651f08dc02aaf9f7fe0d71586b950f02995d446c6d2b6f4e289b726da2",
+      "bytes": 1456429
+    },
+    {
+      "turn": 1,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-001.json",
+      "sha256": "0b67f4bfb319a524251bc4941e17414fa122bb8f8a9058a9860d9d1f4228e64f",
+      "bytes": 3476848
+    },
+    {
+      "turn": 2,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-002.json",
+      "sha256": "096ce25ef4af5959d89a270589f246069cf8181a444f3d0728d997f7880f554b",
+      "bytes": 3583830
+    },
+    {
+      "turn": 3,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-003.json",
+      "sha256": "c2235be1a52fba0303506507192ca832f5c2cf739a66a32931e9c80851ad420e",
+      "bytes": 3668247
+    },
+    {
+      "turn": 4,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-004.json",
+      "sha256": "0fbd987d3482fbd1414f90e10e51dbcf15d198efa6051e406fc7d9c3da457bbc",
+      "bytes": 3752315
+    },
+    {
+      "turn": 5,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-005.json",
+      "sha256": "e5bada02c23ecc1ef0140f18739a6586169bf9406d2f41a4a8243d06ec293ed1",
+      "bytes": 4006157
+    },
+    {
+      "turn": 6,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-006.json",
+      "sha256": "03ed38de0e8d694f6ccb847ba383df31e23849e7d296c8b0450fe0b20d22918f",
+      "bytes": 4042934
+    },
+    {
+      "turn": 7,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-007.json",
+      "sha256": "33c0aa8aef7675cdf3df4e3d30ac07948768c754b313f43fe8c18152c9cb3fb7",
+      "bytes": 4059347
+    },
+    {
+      "turn": 8,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-008.json",
+      "sha256": "572eb04543f5199725c9c3d0cc59285d7667c369f856958f4962f06bd5a58272",
+      "bytes": 4131038
+    },
+    {
+      "turn": 9,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-009.json",
+      "sha256": "432946c94abbed60d2ca2ce2c791a49c69ccf58aadc29e4583f494b4e2b2ba85",
+      "bytes": 4182339
+    },
+    {
+      "turn": 10,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-010.json",
+      "sha256": "74abac39adf5db943b2808452cfa3c23c15e8951ce584bd3c1bc50db0afa5bdc",
+      "bytes": 4299885
+    },
+    {
+      "turn": 11,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-011.json",
+      "sha256": "51815d797e3a174899a4f3f30acd2517f8da12aeb10b9df99455131588353637",
+      "bytes": 4361252
+    },
+    {
+      "turn": 12,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-012.json",
+      "sha256": "9e3445b8880d8ca37db818364a6cf5c15e3e664b4f6d9e15698b1d10608fb466",
+      "bytes": 4419622
+    },
+    {
+      "turn": 13,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-013.json",
+      "sha256": "d13de42af711276048b28104d6a966703cdc15cb86a596d282c554d793c73828",
+      "bytes": 4503037
+    },
+    {
+      "turn": 14,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-014.json",
+      "sha256": "f3f7d816ecfd563b296f28e81d27b7bef531c2a74d2d93675b7c2302130fa799",
+      "bytes": 4550991
+    },
+    {
+      "turn": 15,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-015.json",
+      "sha256": "593a277d2fc2fdd270f2e9bacf747eba2ebe83d48afcbe7f5fc794dcb74966a3",
+      "bytes": 4584827
+    },
+    {
+      "turn": 16,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-016.json",
+      "sha256": "eae2ac6303196ac3515f2e58f7cfea609e50d60b1cc877eed5a03a926f8928a3",
+      "bytes": 4679737
+    },
+    {
+      "turn": 17,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-017.json",
+      "sha256": "bbd9b8906d44cafe262b844ec3e1b86b3568a69f8da8ec43934befacfaee3ffe",
+      "bytes": 4760739
+    },
+    {
+      "turn": 18,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-018.json",
+      "sha256": "dc5ae33795b1aa1f3a1661d7116b243ec079f4d07efb60d93be115be7648d093",
+      "bytes": 4861871
+    },
+    {
+      "turn": 19,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-019.json",
+      "sha256": "e3b4fc4b1b8a4b0eab87cff57a6a63efbd908c4b2052a7af03f42363ca702953",
+      "bytes": 4915713
+    },
+    {
+      "turn": 20,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-020.json",
+      "sha256": "74ccb87e8e9c7e9898eb970d1b1d7739b85a8d343ba42e2c935824fd561c7b86",
+      "bytes": 4964031
+    },
+    {
+      "turn": 21,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-021.json",
+      "sha256": "5e72ff6265f0731967f0dd11d45ab09c3822e9edc8539e42e884d8cefa34d105",
+      "bytes": 4998702
+    },
+    {
+      "turn": 22,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-022.json",
+      "sha256": "fa373f6b8871dd8cc8d7810c377348871086286d9f6525bc1e3010206b299d7f",
+      "bytes": 5013651
+    },
+    {
+      "turn": 23,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-023.json",
+      "sha256": "fc80928c36789f297ec3e23b14ba750ce32243e23231010f443b0733f8e3fbdd",
+      "bytes": 5069923
+    },
+    {
+      "turn": 24,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-024.json",
+      "sha256": "174751cd45fad256384bab54728ab99a681d633d661fba0032cacbffd605d3e6",
+      "bytes": 5080196
+    },
+    {
+      "turn": 25,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-025.json",
+      "sha256": "9370bb5a0b54423bfaeac98d376683885ccc6017939b37913fa16f3e42e734ce",
+      "bytes": 5084880
+    },
+    {
+      "turn": 26,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-026.json",
+      "sha256": "2567d27eec329761ea733c4b414ceb44ac237125df44bdc13f6504b0099eae8c",
+      "bytes": 5092010
+    },
+    {
+      "turn": 27,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-027.json",
+      "sha256": "b6553bec221b9d916147793482111129f79010a6add549387e7dc0e246b334e2",
+      "bytes": 5084502
+    },
+    {
+      "turn": 28,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-028.json",
+      "sha256": "d4401eb6e84bb3bd72a147d4ab034996feb6867d48ffcc170aaa2cbc1bce852b",
+      "bytes": 5134450
+    },
+    {
+      "turn": 29,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-029.json",
+      "sha256": "6a7ccdd9bbcf7c6766378e26833f4a167ddea0f3a3dda1d8e9acbdfaae929d65",
+      "bytes": 5133531
+    },
+    {
+      "turn": 30,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-030.json",
+      "sha256": "097caa7d0ffc5f3d12bc48e3644cf592f8ee68981573e1123e018b8560df7b56",
+      "bytes": 5121004
+    },
+    {
+      "turn": 31,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-031.json",
+      "sha256": "b7bd7344a80684283d98b76538d55bd5ae0b9be17fa8a9124e528c0a513f74d5",
+      "bytes": 5133565
+    },
+    {
+      "turn": 32,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-032.json",
+      "sha256": "faf63a16abb4d5fa5442cf1ef73a88e7913d5b95669255eb9aeda29fdfc09a33",
+      "bytes": 5172497
+    },
+    {
+      "turn": 33,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-033.json",
+      "sha256": "2bc0dd1d801fb77431369b6c11e9501b8a5f67ba254bc4d266cb4e2c1ce7df2c",
+      "bytes": 5190017
+    },
+    {
+      "turn": 34,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-034.json",
+      "sha256": "d1ded1879657049893364378321dc3f5c37379dab38c8cb2169d88767fc6217d",
+      "bytes": 5214384
+    },
+    {
+      "turn": 35,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-035.json",
+      "sha256": "c3dea455f5937c93e11e994a996d9bd53c4dd6ac68af40ad3d10f2da2a8ad1a2",
+      "bytes": 5224798
+    },
+    {
+      "turn": 36,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-036.json",
+      "sha256": "a8313d2e8603c83673a10fc0cec37d9ead1119cedc954e65fb560a057df2c902",
+      "bytes": 5221034
+    },
+    {
+      "turn": 37,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-037.json",
+      "sha256": "42e2130bfe2edab953e558b872015bbfabbae49db211565f0d1fe2c11e60d942",
+      "bytes": 5225791
+    },
+    {
+      "turn": 38,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-038.json",
+      "sha256": "4d1b7c2d47528f2da2441a8fb1f46b1b37e433fd6bc41f74733a21c17b1fb2b7",
+      "bytes": 5264378
+    },
+    {
+      "turn": 39,
+      "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\turn-autosaves\\turn-039.json",
+      "sha256": "52dead08cc8e6f1d33ca26e1585666ee1db84fc4edb7bef59647449f69a1fc7e",
+      "bytes": 5249464
+    }
+  ],
+  "rawCheckpointDifferences": [
+    {
+      "turn": 15,
+      "nativeStateHash": "b1e7d751f9b3277fbe29c3d7543d6bce9b817b0cf7fa88cb8b997249e3531c8c",
+      "acceptedStateHash": "f6f8c7c8d0d24e23b6c4433770ae6d8ee3ad74d82ef1ca8d453798376e78f019",
+      "fullStateEqual": false,
+      "changedTopLevelCategories": [
+        "displacement",
+        "factions",
+        "meta",
+        "military",
+        "operation_history",
+        "paramilitary_deployment_count",
+        "paramilitary_policy",
+        "political",
+        "turn_summaries"
+      ]
+    },
+    {
+      "turn": 16,
+      "nativeStateHash": "4cbe4c4cdfed83365a697b4c934e32433c55fa729617cd9584396ffb325c35da",
+      "acceptedStateHash": "1938bebc20cd987176dba7020027cc9f08be32c7215c1a1f404b7abd6cc9ac70",
+      "fullStateEqual": false,
+      "changedTopLevelCategories": [
+        "displacement",
+        "factions",
+        "meta",
+        "military",
+        "operation_history",
+        "paramilitary_deployment_count",
+        "paramilitary_policy",
+        "political",
+        "turn_summaries"
+      ]
+    },
+    {
+      "turn": 39,
+      "nativeStateHash": "0856923d901053727da6658a7463135d8fa547bfce11ccee5dc66e48ca513c3d",
+      "acceptedStateHash": "f018e1875a7db70089ca0e1c0e4e5813bcb811b3bab6f1a5c03031afece41785",
+      "fullStateEqual": false,
+      "changedTopLevelCategories": [
+        "displacement",
+        "factions",
+        "meta",
+        "military",
+        "operation_history",
+        "paramilitary_deployment_count",
+        "paramilitary_policy",
+        "political",
+        "turn_summaries"
+      ]
+    }
+  ],
+  "notes": [
+    "Full save equality is reported as evidence only; it is not an acceptance gate because player metadata and receipts are legitimate differences."
+  ]
+}

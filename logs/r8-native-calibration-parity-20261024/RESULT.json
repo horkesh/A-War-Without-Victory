@@ -1,0 +1,176 @@
+{
+  "schema": "awwv.r8-native-calibration-parity-result.v1",
+  "date": "2026-10-24",
+  "overall": "FAILED_OWNER_DECISION_REQUIRED",
+  "claim": "Normal packaged Historical player-mode calibration does not reproduce the accepted n94 no-player result through turn 39.",
+  "gates": {
+    "route_and_capture": "PASS",
+    "infrastructure": "PASS_12_OF_12",
+    "exact_daily_control": "FAIL_39_OF_39",
+    "checkpoint_score": "FAIL_700_OF_REQUIRED_707",
+    "formerly_correct_n91": "FAIL_7_LOSSES",
+    "formerly_correct_n92": "FAIL_7_LOSSES",
+    "strict_native_audio": "FAILED_RETAINED_KNOWN_CLASS",
+    "turn188": "UNREACHED",
+    "all_factions": "UNREACHED",
+    "farz": "UNREACHED"
+  },
+  "native_t39_03": {
+    "child_exit": 0,
+    "wrapper_exit": 0,
+    "elapsed_seconds": 739.398,
+    "provisional_archives": 39,
+    "settled_archives": 39,
+    "jsonl_records": 1188,
+    "zero_unresolved_turn_seals": 39,
+    "event_count": 126,
+    "canonical_bytes_exact": true,
+    "loaded_projection_exact": true,
+    "score": 700,
+    "required_score": 707,
+    "daily_control_mismatch_turns": 39,
+    "january_osid_anchors": 30,
+    "brcko_band_anchors": 1,
+    "event_anchors": 5
+  },
+  "causal_disposition": {
+    "finding": "The earliest split is an intentional normal-player versus no-player bot contract: visible player identity timing and authored historical paramilitary authorization differ before/at turn 1. No production gameplay bug is proven.",
+    "directly_proven_endpoint_differences": 2,
+    "correlated_downstream_endpoint_differences": 5,
+    "recommendation": "Retain n94 as the headless calibration reference. Define a separate player-mode acceptance with owner/canon/calibration authority, or explicitly authorize an observer-mode product contract. Do not auto-adopt score 700."
+  },
+  "attempts": [
+    {
+      "label": "native-t1-01",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "timed_out": false,
+      "elapsed_seconds": 36.233,
+      "portable_receipt": "attempts/native-t1-01/receipt.json",
+      "portable_config": "attempts/native-t1-01/config.json",
+      "portable_contract": null
+    },
+    {
+      "label": "native-t1-02",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "timed_out": false,
+      "elapsed_seconds": 157.666,
+      "portable_receipt": "attempts/native-t1-02/receipt.json",
+      "portable_config": "attempts/native-t1-02/config.json",
+      "portable_contract": null
+    },
+    {
+      "label": "native-t1-03",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "timed_out": false,
+      "elapsed_seconds": 158.907,
+      "portable_receipt": "attempts/native-t1-03/receipt.json",
+      "portable_config": "attempts/native-t1-03/config.json",
+      "portable_contract": "attempts/native-t1-03/run-contract.json"
+    },
+    {
+      "label": "native-t1-04",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "elapsed_seconds": 167.411,
+      "portable_receipt": "attempts/native-t1-04/receipt.json",
+      "portable_config": "attempts/native-t1-04/config.json",
+      "portable_contract": "attempts/native-t1-04/run-contract.json"
+    },
+    {
+      "label": "native-t39-01",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "timed_out": false,
+      "elapsed_seconds": 296.652,
+      "portable_receipt": "attempts/native-t39-01/receipt.json",
+      "portable_config": "attempts/native-t39-01/config.json",
+      "portable_contract": "attempts/native-t39-01/run-contract.json"
+    },
+    {
+      "label": "native-t39-02",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "timed_out": false,
+      "elapsed_seconds": 132.373,
+      "portable_receipt": "attempts/native-t39-02/receipt.json",
+      "portable_config": "attempts/native-t39-02/config.json",
+      "portable_contract": "attempts/native-t39-02/run-contract.json"
+    },
+    {
+      "label": "native-advance-prereq-01",
+      "child_exit": 1,
+      "wrapper_exit": 1,
+      "timed_out": false,
+      "elapsed_seconds": 167.772,
+      "portable_receipt": "attempts/native-advance-prereq-01/receipt.json",
+      "portable_config": "attempts/native-advance-prereq-01/config.json",
+      "portable_contract": "attempts/native-advance-prereq-01/run-contract.json"
+    },
+    {
+      "label": "native-t39-03",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "timed_out": false,
+      "elapsed_seconds": 739.398,
+      "portable_receipt": "attempts/native-t39-03/receipt.json",
+      "portable_config": "attempts/native-t39-03/config.json",
+      "portable_contract": "attempts/native-t39-03/run-contract.json"
+    }
+  ],
+  "preservation": {
+    "pass": true,
+    "prior_bindings": 3226,
+    "n94_exact_files": 40,
+    "telemetry_appended_bytes": 0,
+    "legacy_functions_unchanged": 5,
+    "package_files": 1213,
+    "package_bytes": 1914184685
+  },
+  "portable_evidence": [
+    "evidence/POSTRUN_T39_AUDIT.json",
+    "evidence/OUTCOME_COMPARE.json",
+    "evidence/NATIVE_T39_03_MISMATCH_DIAGNOSIS.json",
+    "evidence/NATIVE_PLAYER_VS_N94_CAUSAL_AUDIT.md",
+    "evidence/ADVANCE_PREREQ_01_ACTUAL_ROUTE_PROOF.json",
+    "evidence/INPUT_BINDING_CLASSIFICATION.json",
+    "evidence/PACKAGE_EXACT.json",
+    "evidence/PRESERVATION.json",
+    "SOURCE_MANIFEST.json",
+    "reviews/"
+  ],
+  "raw_local_evidence": [
+    {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-native-calibration-rbih-t39-20261024-03.json",
+      "kind": "file",
+      "bytes": 24118454,
+      "sha256": "4cd3b3b1c02975cb52003154a314ae395f8e3769c345b6f4f4c5251ec7bb26d5"
+    },
+    {
+      "path": "tmp-paradox-qa-20260710/paradox-local-qa-progress-native-calibration-rbih-t39-20261024-03.json",
+      "kind": "file",
+      "bytes": 24118172,
+      "sha256": "cbc7ec0d07caebe911bab3cf9a9672cf3a976ce2d21ecf962d706e00fa056409"
+    },
+    {
+      "path": "tmp/r8-native-calibration-parity-20261024/native-t39-03",
+      "kind": "directory",
+      "bytes": null,
+      "sha256": null
+    },
+    {
+      "path": "tmp/r8-native-calibration-parity-20261024/native-t39-03-postrun-audit-01",
+      "kind": "directory",
+      "bytes": null,
+      "sha256": null
+    }
+  ],
+  "limitations": [
+    "Raw profiles, screenshots, autosaves, stdout/stderr, and large result/progress JSON remain local under the inventoried tmp paths and are not remotely backed up by this packet.",
+    "The 188-turn and RS/HRHB lanes were not run after the turn-39 player/no-player contract conflict was established.",
+    "This result does not revise the accepted n94 calibration baseline or waive the strict native audio failure."
+  ]
+}

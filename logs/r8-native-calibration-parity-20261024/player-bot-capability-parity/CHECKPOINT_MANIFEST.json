@@ -1,0 +1,71 @@
+{
+  "status": "ACTIVE_CLEAN_QUALIFICATION_PENDING",
+  "files": [
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/hq-gathering-repair/INDEPENDENT_REVIEW.md",
+      "copy": "hq-gathering-repair--INDEPENDENT_REVIEW.md",
+      "bytes": 5362,
+      "sha256": "4296facd205b7a9e2b69ed06d3eb4e26f665e911053e675b2c2c4b2ecc13878e"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/hq-gathering-repair/RESULT.json",
+      "copy": "hq-gathering-repair--RESULT.json",
+      "bytes": 1222,
+      "sha256": "5364ec03d1ff4727c38e2cdec4e449a8a3ba9192dd3c54a2065ce6591c06a525"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/root/AUDIT_NATIVE_T40_03.json",
+      "copy": "root--AUDIT_NATIVE_T40_03.json",
+      "bytes": 12614,
+      "sha256": "ac2b1084910648ea2eac4a1022daeaba36b239724d19f3c6125c2401aec30834"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/root/AUDIT_NATIVE_OFFICER44_01.json",
+      "copy": "root--AUDIT_NATIVE_OFFICER44_01.json",
+      "bytes": 12638,
+      "sha256": "50a3217ddef6f3e360a76553b016b1e48025c88e4dacb2733f4cc26104032e06"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/root/AUDIT_NATIVE_HISTORICAL_OFFICER44_01.json",
+      "copy": "root--AUDIT_NATIVE_HISTORICAL_OFFICER44_01.json",
+      "bytes": 12726,
+      "sha256": "d91f4b818f423136eaff2ff8ec1bcac70d181da904ea04028560a62ea1fd136f"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/root/HISTORICAL_OFFICER44_ACTUAL_RECEIPT_PROOF.json",
+      "copy": "root--HISTORICAL_OFFICER44_ACTUAL_RECEIPT_PROOF.json",
+      "bytes": 2781,
+      "sha256": "e9e2b07f3f9f1fca4616f214f5de26c1ac2da184ea4f5d6e8d745d7527b18139"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/officer-succession-strategy/EVIDENCE_CORRECTION.json",
+      "copy": "officer-succession-strategy--EVIDENCE_CORRECTION.json",
+      "bytes": 5289,
+      "sha256": "bde9934fdc58a4f370e50f6ec7fa64bf23acfc2bc51bf682eedb6075378f8b87"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/canon-review/BATCH3_SETTLED_CORRECTIONS.md",
+      "copy": "canon-review--BATCH3_SETTLED_CORRECTIONS.md",
+      "bytes": 7088,
+      "sha256": "b083a46292e55d6aa60de184aace750aae3410966cdbebec9357c5d167087f26"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/hq-validation/campaign-01/child/campaign-execution.json",
+      "copy": "child--campaign-execution.json",
+      "bytes": 167,
+      "sha256": "8077a77635c758dc34a72ea76a9df2a3b6a351f4120b94e835a1f14fd68df6fb"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/hq-validation/campaign-01/receipt.json",
+      "copy": "campaign-01--receipt.json",
+      "bytes": 8640,
+      "sha256": "ebdc68b65d79324890f7f06e0ceb86f4fda268fef7c388c28dbe3c4b5cecbdc7"
+    },
+    {
+      "source": "tmp/player-bot-capability-parity-20261024/clean-freeze-review/INITIAL_COVERAGE_MAP.md",
+      "copy": "clean-freeze-review--INITIAL_COVERAGE_MAP.md",
+      "bytes": 6745,
+      "sha256": "7df25719609ceea89e1fb07796022cab3615126befb0763aa0105d4239be4424"
+    }
+  ]
+}

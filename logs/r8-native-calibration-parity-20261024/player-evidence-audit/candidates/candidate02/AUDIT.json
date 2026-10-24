@@ -1,0 +1,193 @@
+{
+  "schemaVersion": 1,
+  "auditId": "player-validation-evidence-audit-20261024-worker",
+  "scope": {
+    "kind": "retained-evidence-read-only-audit",
+    "repository": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+    "executedNativeOrSimulationOrReplay": false,
+    "modifiedProductionOrPlanFiles": false,
+    "numericPlayerFloorAdopted": false
+  },
+  "statusVocabulary": [
+    "PASS_CURRENT_EVIDENCE",
+    "PARTIAL",
+    "FAILED",
+    "UNREACHED",
+    "INAPPLICABILITY_REQUIRES_AUTHORITY"
+  ],
+  "summaryCounts": {
+    "cells": 21,
+    "PASS_CURRENT_EVIDENCE": 2,
+    "PARTIAL": 7,
+    "FAILED": 1,
+    "UNREACHED": 11,
+    "INAPPLICABILITY_REQUIRES_AUTHORITY": 0
+  },
+  "matrix": [
+    {
+      "gate": "player_agency_and_lawful_input",
+      "RBiH": {"status": "PARTIAL", "basis": "The retained t39 result binds the visible faction/scenario/mode/seed/autonomy and records six event choices/receipts, two reserve receipts, four proposal records, two officer receipts, and 39 Advance clicks. It has no complete ordered replayable transcript, strategic command authority is null, and final tour proof is null."},
+      "RS": {"status": "UNREACHED", "basis": "No qualified RS player campaign evidence."},
+      "HRHB": {"status": "UNREACHED", "basis": "No qualified HRHB player campaign evidence."}
+    },
+    {
+      "gate": "same_input_determinism",
+      "RBiH": {"status": "UNREACHED", "basis": "Only one production-path execution exists. Save/load equality is reconstruction evidence, not a same-input repeat or replay. No complete production-consumable input transcript is retained."},
+      "RS": {"status": "UNREACHED", "basis": "No repeat/replay evidence."},
+      "HRHB": {"status": "UNREACHED", "basis": "No repeat/replay evidence."}
+    },
+    {
+      "gate": "save_load_per_faction",
+      "RBiH": {"status": "PASS_CURRENT_EVIDENCE", "basis": "The current t39 RBiH run proves exact immutable canonical bytes and exact authoritative loaded projection for its real Save, Main Menu, Field Records, Resume path."},
+      "RS": {"status": "PARTIAL", "basis": "Retained zero-turn exact Save/load evidence is reusable only as a prerequisite; no qualified RS player campaign Save/load is established."},
+      "HRHB": {"status": "PARTIAL", "basis": "Retained zero-turn exact Save/load evidence is reusable only as a prerequisite; no qualified HRHB player campaign Save/load is established."}
+    },
+    {
+      "gate": "legal_protected_and_historical",
+      "RBiH": {"status": "PARTIAL", "basis": "Canonical consistency, 30 January OSID anchors, the Brcko band, and five January event anchors pass. The retained readers do not cover the full canonical protected/enclave/supply/alliance/control-writer/lifecycle contract, and Farz is not reached."},
+      "RS": {"status": "UNREACHED", "basis": "No qualified RS player campaign protected/history reader evidence."},
+      "HRHB": {"status": "UNREACHED", "basis": "No qualified HRHB player campaign protected/history reader evidence."}
+    },
+    {
+      "gate": "engine_and_runtime_health",
+      "RBiH": {"status": "FAILED", "basis": "The t39 capture has 12/12 measured infrastructure gates, but the required inherited full-tour strict audio gate remains failed. The current comparator's health object is thinner than the canonical engine-health reader."},
+      "RS": {"status": "UNREACHED", "basis": "No qualified RS player campaign runtime-health evidence."},
+      "HRHB": {"status": "UNREACHED", "basis": "No qualified HRHB player campaign runtime-health evidence."}
+    },
+    {
+      "gate": "coverage_and_product_quality",
+      "RBiH": {"status": "PARTIAL", "basis": "A capture-only t39 run and an earlier partial full initial tour exist. No clean full tour, qualified 24-turn session, 188-turn session, production replay/endgame, diary pair, or campaign performance result exists."},
+      "RS": {"status": "UNREACHED", "basis": "No qualified 24-turn or 188-turn RS player session, tour, diary, replay/endgame, or performance evidence."},
+      "HRHB": {"status": "UNREACHED", "basis": "No qualified 24-turn or 188-turn HRHB player session, tour, diary, replay/endgame, or performance evidence."}
+    },
+    {
+      "gate": "preservation_and_provenance",
+      "RBiH": {"status": "PASS_CURRENT_EVIDENCE", "basis": "The t39 result binds the package, source manifest, executable/resources, raw result, evidence manifest, and preserved n91-n94/telemetry scope. Raw local evidence remains local and is referenced through manifests."},
+      "RS": {"status": "PARTIAL", "basis": "Shared package/source and preservation evidence exists, but there is no current qualified RS campaign result/evidence manifest."},
+      "HRHB": {"status": "PARTIAL", "basis": "Shared package/source and preservation evidence exists, but there is no current qualified HRHB campaign result/evidence manifest."}
+    }
+  ],
+  "applicability": [
+    {
+      "subject": "january_anchor_and_event_checks_under_different_player_choices",
+      "status": "INAPPLICABILITY_REQUIRES_AUTHORITY",
+      "finding": "The anchor source defines historical observations, not source-conditioned player-choice exemptions. The player contract keeps protected/history gates hard. A waiver or conditional applicability rule needs governing authority and a predeclared condition. RBiH currently passes the measured January subset; RS and HRHB remain unreached."
+    },
+    {
+      "subject": "farz_gate",
+      "status": "UNREACHED",
+      "finding": "Farz is a week-188 hard gate for all three player campaigns. The accepted rule permits either 2nd or 3rd Corps to make the final blow, requires the four authored late operation capture receipts and RBiH control at week 188, and treats 2nd Corps participation as diagnostic. No retained player campaign reaches it."
+    },
+    {
+      "subject": "score_700",
+      "status": "PARTIAL",
+      "finding": "The retained t39 score is diagnostic only. It is neither a player floor nor a replacement for hard gates."
+    }
+  ],
+  "artifactSufficiency": {
+    "manifestResolution": {
+      "portableManifest": "logs/r8-native-calibration-parity-20261024/MANIFEST.json",
+      "portableResult": "logs/r8-native-calibration-parity-20261024/RESULT.json",
+      "actualResult": "tmp-paradox-qa-20260710/paradox-local-qa-native-calibration-rbih-t39-20261024-03.json",
+      "actualEvidenceManifest": "tmp-paradox-qa-20260710/evidence/native-calibration-rbih-t39-20261024-03/rbih/manifest.json",
+      "rawPostrunAudit": "tmp/r8-native-calibration-parity-20261024/native-t39-03-postrun-audit-01"
+    },
+    "sameInput": {
+      "status": "UNREACHED",
+      "finding": "The actual result contains event-choice receipts and other action-specific records, but no standalone complete ordered action/input/command transcript and no production replay consumer binding. Save/load proves serialization/hydration at one point and cannot establish repeated identical production inputs. Equal seed/autonomy is insufficient because selected-player authorization changes phase inputs."
+    },
+    "retiredComparator": {
+      "status": "PARTIAL",
+      "finding": "native_calibration_outcome_compare reconstructs n94 and compares the player run to it. Its protected set is the 712 cells equal across n91/n92/n94, not the canonical protected-control contract, and it hard-codes the retired score/equality checks. Its health object omits the full engine_health_gate contract. Keep its output diagnostic; do not use it as player pass/fail or protected/health proof."
+    },
+    "canonicalReaders": {
+      "status": "UNREACHED",
+      "finding": "engine_health_gate and verify_checkpoints expect a complete 188-style run directory with run_summary, final_save, weekly reports, operation AARs, and checkpoints. The t39 player artifact shape cannot be qualified by those readers without a source-authorized player reader/adaptor."
+    },
+    "crossFactionOpeningPreflight": {
+      "status": "UNREACHED",
+      "finding": "The harness has faction and historical-selector fixtures, but map counter coverage samples up to 12 formations dynamically from the current runtime and reduces the target to the available sample. It does not establish a frozen required all-faction counter set. Recruitment is enforced only with strategic/auto-recruit/require-recruitment flags, which the t39 command did not use. The harness's built-in required event receipts and historical-event assertions apply only to fresh, non-resume RS runs at target turn 52 or later; they are distinct from the separate retained RBiH t39 post-run reader that checked five January event anchors. The retained RBiH opening proves 11/11 available members of a frozen 12-member RBiH set, with 17th Vitezka unavailable; RBiH-only arguments or fixtures cannot qualify RS or HRHB."
+    },
+    "missingCampaignEvidence": [
+      "three qualified 24-turn packaged player sessions",
+      "three qualified 188-turn packaged player sessions",
+      "production same-input replay/repeat",
+      "replay and endgame behavior",
+      "two clean player diaries and President-feel assessment",
+      "recorded campaign performance",
+      "full canonical protected/health reader coverage",
+      "RS and HRHB production-shaped opening counter/choice/recruitment qualification"
+    ]
+  },
+  "cheapestRejectingNextStep": {
+    "verdict": "OFFLINE_REPLAY_INPUT_CONTRACT_FEASIBILITY_FIRST",
+    "why": "The first dependency is whether the existing harness/source and retained RBiH result contain enough information to establish a complete ordered input serialization that an existing production replay path actually consumes. A new zero-turn Save/load run tests a different prerequisite and cannot answer this question. Cross-faction opening qualification is a separate later gate.",
+    "boundedScope": [
+      "tools/ui/paradox_local_qa.cjs",
+      "tests/paradox_local_qa_harness.test.ts",
+      "tmp-paradox-qa-20260710/paradox-local-qa-native-calibration-rbih-t39-20261024-03.json",
+      "tmp-paradox-qa-20260710/evidence/native-calibration-rbih-t39-20261024-03/rbih/manifest.json"
+    ],
+    "existingChecksFirst": [
+      {
+        "command": "node --check tools/ui/paradox_local_qa.cjs",
+        "purpose": "Reject a syntactically invalid current harness without launching the game."
+      },
+      {
+        "command": "node -e \"const fs=require('fs'); for(const p of process.argv.slice(1)) JSON.parse(fs.readFileSync(p,'utf8'))\" tmp-paradox-qa-20260710/paradox-local-qa-native-calibration-rbih-t39-20261024-03.json tmp-paradox-qa-20260710/evidence/native-calibration-rbih-t39-20261024-03/rbih/manifest.json",
+        "purpose": "Reject unreadable retained result or manifest inputs."
+      },
+      {
+        "command": "rg -n \"replay|inputTranscript|actionTranscript|commandTranscript|playerInput|eventChoiceTranscript|decisionAudit|advance\" tools/ui/paradox_local_qa.cjs tests/paradox_local_qa_harness.test.ts tmp-paradox-qa-20260710/paradox-local-qa-native-calibration-rbih-t39-20261024-03.json",
+        "purpose": "Bound the source/evidence feasibility review to actual capture, ordering, serialization, and replay-consumer references. Matches are evidence locations, not proof by themselves."
+      },
+      {
+        "command": "node node_modules/vitest/vitest.mjs run tests/paradox_local_qa_harness.test.ts --pool=forks --reporter=dot",
+        "purpose": "Confirm existing harness fixture behavior only after readability and source inspection. It does not prove production replay."
+      }
+    ],
+    "prerequisites": [
+      "Exact retained raw-result and manifest paths and readable JSON",
+      "Existing harness and test source readable at the retained source state",
+      "No historical inference or invented action ordering"
+    ],
+    "passCriteria": [
+      "Existing source identifies capture and serialization for every state-mutating player action in complete consumed order",
+      "An existing production replay path consumes that serialization without reselection",
+      "The retained result and manifest bind each required action to actor, faction, turn, selection/receipt, and comparable settled archives",
+      "The conclusion follows from explicit source/artifact fields without reconstructing player intent or historical choice"
+    ],
+    "expectedCost": "Seconds to about three minutes of offline Node checks; zero native minutes.",
+    "cap": "180000 ms per command.",
+    "automaticRetry": false,
+    "stoppingRule": "Stop as soon as complete consumed order cannot be established from explicit existing source and retained fields without invention or historical inference. Record MISSING_REPLAYABLE_INPUT_CONTRACT and do not launch native. This fail-closed label means evidence is insufficient; it does not claim a production bug or that the input is immutably unrecoverable.",
+    "implementationIfFeasibilityFails": {
+      "status": "PROPOSED_NOT_IMPLEMENTED_NOT_EXECUTABLE_NOW",
+      "authorizedByThisAudit": false,
+      "need": "A source-authorized read-only input-contract reader and, if absent, explicit production capture/serialization/replay-consumer support. No command is specified because no such reader entrypoint currently exists."
+    },
+    "laterSeparateOpeningGate": {
+      "status": "DEFERRED_UNTIL_REPLAY_FEASIBILITY_RESOLVED",
+      "finding": "Qualify frozen counter, choice, proposal, reserve, officer, and recruitment expectations separately for RBiH, RS, and HRHB. RBiH-only arguments cannot qualify all three factions. The harness's built-in RS event assertions require a fresh non-resume RS target of at least 52 turns and are not the retained RBiH t39 five-event post-run reader.",
+      "failureLabel": "OPENING_CONTRACT_UNQUALIFIED",
+      "failureMeaning": "Evidence is insufficient for a faction opening; this is not by itself a production bug."
+    }
+  },
+  "sources": [
+    {"path": "docs/plans/2026-07-31-full-campaign-electron-validation-plan.md", "lines": "12-40, 85-89, 195-202, 683-689, 1128-1174, 2045-2080"},
+    {"path": "docs/10_canon/Engine_Invariants_v0_9_0.md", "lines": "285-301, 317-345, 455-467"},
+    {"path": "docs/20_engineering/DETERMINISM_TEST_MATRIX.md", "lines": "3-18, 90-94, 200-214"},
+    {"path": "docs/20_engineering/AGENT_WORKFLOW.md", "lines": "47-60"},
+    {"path": "logs/r8-native-calibration-parity-20261024/RESULT.json", "lines": "7-29, 145-180"},
+    {"path": "logs/r8-native-calibration-parity-20261024/owner-disposition/RESULT.json", "lines": "4-35"},
+    {"path": "logs/r8-native-calibration-parity-20261024/evidence/OUTCOME_COMPARE.json", "lines": "95-115, 496-515"},
+    {"path": "tools/diagnostics/native_calibration_outcome_compare.cjs", "lines": "33-190, 218-282, 320-417"},
+    {"path": "tools/engine_health_gate.cjs", "lines": "6-20, 67-85, 195-208, 300-375"},
+    {"path": "tools/verify_checkpoints.cjs", "lines": "3-44, 74-89, 145-163, 364-380"},
+    {"path": "tools/ui/paradox_local_qa.cjs", "lines": "20-40, 185-210, 3744-3834, 5724-5725"},
+    {"path": "src/scenario/historical_anchors.ts", "lines": "142-199, 330-397"},
+    {"path": "docs/40_reports/CALIBRATION_MASTER.md", "lines": "20-42, 2536-2549, 2991-2994"},
+    {"path": "tools/lib/farz_objective_gate.cjs", "lines": "5-23"},
+    {"path": "tmp-paradox-qa-20260710/paradox-local-qa-native-calibration-rbih-t39-20261024-03.json", "lines": "4130-4131, 460064, 627814, 628107-628382, 631931 onward"}
+  ]
+}

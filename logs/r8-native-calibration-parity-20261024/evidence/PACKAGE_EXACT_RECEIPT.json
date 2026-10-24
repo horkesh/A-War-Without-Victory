@@ -1,0 +1,70 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-24T17:10:10.724Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/r8-native-calibration-parity-20261024/package-exact-post-01",
+  "timeout_ms": 180000,
+  "original_argv": [
+    "node",
+    "tmp/r8-native-calibration-parity-20261024/verify-package.cjs",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "node",
+    "tmp/r8-native-calibration-parity-20261024/verify-package.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\r8-native-calibration-parity-20261024\\package-exact-post-01"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "PACKAGE_EXACT.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/r8-native-calibration-parity-20261024/verify-package.cjs",
+    "bytes": 922,
+    "raw_sha256": "3a0c0d823a232ee206981b6a05ddc41ec55ec0431264f8ff36df37e11b4d4c98",
+    "normalized_text_sha256": "c99bebbcfdf5c898cb2754c2152e2a834680ad0b74687ec8d3a845add464362f",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 922,
+      "sha256": "3a0c0d823a232ee206981b6a05ddc41ec55ec0431264f8ff36df37e11b4d4c98"
+    }
+  },
+  "end_utc": "2026-10-24T17:10:14.269Z",
+  "pid": 14472,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/r8-native-calibration-parity-20261024/verify-package.cjs",
+    "bytes": 922,
+    "raw_sha256": "3a0c0d823a232ee206981b6a05ddc41ec55ec0431264f8ff36df37e11b4d4c98",
+    "normalized_text_sha256": "c99bebbcfdf5c898cb2754c2152e2a834680ad0b74687ec8d3a845add464362f",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 320,
+    "sha256": "c994ff57b5fa57e804f48d3afca440a3e2da8eabd92f9e3fcfe3db76d78537ae"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "PACKAGE_EXACT.json",
+      "bytes": 345,
+      "sha256": "63b7920a091afbcef3c9a360ccb98e837b5d45dadbf113c50c57eee01f2ef417"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

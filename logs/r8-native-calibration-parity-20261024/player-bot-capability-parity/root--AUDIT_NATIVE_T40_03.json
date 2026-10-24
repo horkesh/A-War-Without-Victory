@@ -1,0 +1,359 @@
+{
+  "schema": "awwv.native-segment-observation.v1",
+  "from": 39,
+  "to": 40,
+  "faction": "RBiH",
+  "gates": [
+    {
+      "name": "wrapper",
+      "pass": true,
+      "details": {
+        "child": 0,
+        "wrapper": 0,
+        "timeout": false
+      }
+    },
+    {
+      "name": "successful-result",
+      "pass": true,
+      "details": {
+        "completedAt": "2026-10-24T19:59:55.718Z",
+        "count": 1
+      }
+    },
+    {
+      "name": "start-binding",
+      "pass": true,
+      "details": {
+        "path": "tmp-paradox-qa-20260710/evidence/native-calibration-rbih-t39-20261024-03/rbih/turn-autosaves/turn-039.json",
+        "sha256": "52dead08cc8e6f1d33ca26e1585666ee1db84fc4edb7bef59647449f69a1fc7e",
+        "turn": 39
+      }
+    },
+    {
+      "name": "initial-real-load",
+      "pass": true,
+      "details": {
+        "turn": 39,
+        "faction": "RBiH",
+        "initialFile": {
+          "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-capability-rbih-t40-20261024-03\\rbih\\initial-autosave.json",
+          "sha256": "52dead08cc8e6f1d33ca26e1585666ee1db84fc4edb7bef59647449f69a1fc7e",
+          "bytes": 5249464
+        }
+      }
+    },
+    {
+      "name": "target-and-blockers",
+      "pass": true,
+      "details": {
+        "turn": 40,
+        "max": 40,
+        "blockers": {
+          "eventDecisions": 0,
+          "proposals": 0,
+          "paramilitary": 0,
+          "reserves": 0,
+          "convoys": 0,
+          "officerEvents": 0,
+          "peacePlan": 0,
+          "counterOffers": 0,
+          "dayton": 0,
+          "operationOpportunities": 0
+        }
+      }
+    },
+    {
+      "name": "consoleMessages",
+      "pass": true,
+      "details": {
+        "count": 0
+      }
+    },
+    {
+      "name": "pageErrors",
+      "pass": true,
+      "details": {
+        "count": 0
+      }
+    },
+    {
+      "name": "networkFailures",
+      "pass": true,
+      "details": {
+        "count": 0
+      }
+    },
+    {
+      "name": "unexpectedMainProcessStderr",
+      "pass": true,
+      "details": {
+        "count": 0
+      }
+    },
+    {
+      "name": "settled-archive-coverage",
+      "pass": true,
+      "details": {
+        "expected": [
+          39,
+          40
+        ],
+        "actual": [
+          39,
+          40
+        ]
+      }
+    },
+    {
+      "name": "provisional-archive-coverage",
+      "pass": true,
+      "details": {
+        "expected": [
+          40
+        ],
+        "actual": [
+          40
+        ]
+      }
+    },
+    {
+      "name": "canonical-final-player",
+      "pass": true,
+      "details": {
+        "meta": {
+          "autonomy_level": 2,
+          "decision_mode": "historical",
+          "firepower_deficit_penalty_enabled": true,
+          "game_over": false,
+          "headless_scenario_auto_control": false,
+          "peace_scheduled_referendum_turn": null,
+          "peace_scheduled_war_start_turn": null,
+          "peace_war_start_control_path": null,
+          "pending_proposal_reviews": [
+            {
+              "accepted": true,
+              "current_value": "awaiting_authorization",
+              "description": "Maglaj Local Counterattack - staff proceeded under standing authorization.",
+              "domain": "ops",
+              "faction": "RBiH",
+              "id": "PROP_14_historical_op_preplanned_arbih_3rd_corps_maglaj_local_counterattack",
+              "proposed_action": "HISTORICAL_OP:preplanned:arbih_3rd_corps:Maglaj Local Counterattack",
+              "proposed_value": "authorize",
+              "resolved_turn": 14,
+              "turn": 14
+            },
+            {
+              "accepted": true,
+              "current_value": "awaiting_authorization",
+              "description": "Operation Circle - staff proceeded under standing authorization.",
+              "domain": "ops",
+              "faction": "RBiH",
+              "id": "PROP_16_historical_op_preplanned_arbih_1st_corps_operation_circle",
+              "proposed_action": "HISTORICAL_OP:preplanned:arbih_1st_corps:Operation Circle",
+              "proposed_value": "authorize",
+              "resolved_turn": 16,
+              "turn": 16
+            },
+            {
+              "accepted": true,
+              "current_value": "awaiting_authorization",
+              "description": "Srebrenica–Cerska Link-Up - staff proceeded under standing authorization.",
+              "domain": "ops",
+              "faction": "RBiH",
+              "id": "PROP_4_historical_op_preplanned_arbih_2nd_corps_srebrenica_cerska_link_up",
+              "proposed_action": "HISTORICAL_OP:preplanned:arbih_2nd_corps:Srebrenica–Cerska Link-Up",
+              "proposed_value": "authorize",
+              "resolved_turn": 4,
+              "turn": 4
+            },
+            {
+              "accepted": true,
+              "current_value": "awaiting_authorization",
+              "description": "Visoko–Breza Line Clearing - staff proceeded under standing authorization.",
+              "domain": "ops",
+              "faction": "RBiH",
+              "id": "PROP_8_historical_op_preplanned_arbih_1st_corps_visoko_breza_line_clearing",
+              "proposed_action": "HISTORICAL_OP:preplanned:arbih_1st_corps:Visoko–Breza Line Clearing",
+              "proposed_value": "authorize",
+              "resolved_turn": 8,
+              "turn": 8
+            }
+          ],
+          "phase": "war",
+          "player_faction": "RBiH",
+          "rbih_hrhb_war_earliest_turn": 40,
+          "recruitment_mode": "player_choice",
+          "referendum_deadline_turn": null,
+          "referendum_eligible_turn": null,
+          "referendum_held": true,
+          "referendum_turn": 0,
+          "scenario_start_date": {
+            "day": 6,
+            "month": 3,
+            "year": 1992
+          },
+          "seed": "harness-seed",
+          "turn": 40,
+          "war_force_transition_after_turns": 52,
+          "war_start_turn": 0
+        }
+      }
+    },
+    {
+      "name": "save-load-canonical-and-loaded-projection",
+      "pass": true,
+      "details": {
+        "route": "Pause -> Save Game -> Main Menu -> opening splash -> Field Records -> Resume quicksave",
+        "hashProof": {
+          "beforeStateHash": "1bcbad2bc096aad91efc739b7ca90b38b9b0420ada68601f732f56f6cc8347fd",
+          "expectedStateHash": "9e871f4024788acc9fe7a3dd154844a09e76a59c0b516ca02553fa9798a3e4ab",
+          "afterStateHash": "9e871f4024788acc9fe7a3dd154844a09e76a59c0b516ca02553fa9798a3e4ab",
+          "beforeAutosaveHash": "98cb04f465bf1bdea1de1bd5b721294b64c5dcc7c9dcfccd6e566b16a04c5737",
+          "afterAutosaveHash": "98cb04f465bf1bdea1de1bd5b721294b64c5dcc7c9dcfccd6e566b16a04c5737",
+          "loadedProjectionProof": {
+            "actualHash": "9e871f4024788acc9fe7a3dd154844a09e76a59c0b516ca02553fa9798a3e4ab",
+            "expectedHash": "9e871f4024788acc9fe7a3dd154844a09e76a59c0b516ca02553fa9798a3e4ab",
+            "exactBytes": true
+          },
+          "canonicalBytesEqual": true
+        },
+        "savedEvidence": {
+          "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-capability-rbih-t40-20261024-03\\rbih\\manual-quicksave.json",
+          "sha256": "98cb04f465bf1bdea1de1bd5b721294b64c5dcc7c9dcfccd6e566b16a04c5737",
+          "bytes": 5284671
+        }
+      }
+    },
+    {
+      "name": "manifest-file",
+      "pass": true,
+      "details": {
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-capability-rbih-t40-20261024-03\\rbih\\manifest.json",
+        "sha256": "ef7672edc203ec4c3fd07f496b8a3ef0b5997c66da19a10ec262d46f742b5fc5"
+      }
+    },
+    {
+      "name": "main-stream-contiguous",
+      "pass": true,
+      "details": {
+        "records": 35
+      }
+    },
+    {
+      "name": "assignment-seals",
+      "pass": true,
+      "details": {
+        "expected": [
+          40
+        ],
+        "seals": [
+          {
+            "turn": 40,
+            "unresolved": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "stderr-classification",
+      "pass": true,
+      "details": {
+        "recorded": 2,
+        "classified": 2
+      }
+    }
+  ],
+  "limits": [
+    "Measured infrastructure/Save-load scope only, not full canonical engine-health or unconditional-anchor qualification",
+    "Resumed segment does not replace fresh full188/all-faction qualification",
+    "Different player choices are not identical-input determinism proof",
+    "Map differences are reported separately; January700/707 remains unmet"
+  ],
+  "archives": {
+    "settled": [
+      {
+        "turn": 39,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-capability-rbih-t40-20261024-03\\rbih\\turn-autosaves\\turn-039.json",
+        "sha256": "52dead08cc8e6f1d33ca26e1585666ee1db84fc4edb7bef59647449f69a1fc7e",
+        "pass": true
+      },
+      {
+        "turn": 40,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-capability-rbih-t40-20261024-03\\rbih\\turn-autosaves\\turn-040.json",
+        "sha256": "98cb04f465bf1bdea1de1bd5b721294b64c5dcc7c9dcfccd6e566b16a04c5737",
+        "pass": true
+      }
+    ],
+    "provisional": [
+      {
+        "turn": 40,
+        "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-capability-rbih-t40-20261024-03\\rbih\\turn-autosaves-pre-settlement\\turn-040.json",
+        "sha256": "98cb04f465bf1bdea1de1bd5b721294b64c5dcc7c9dcfccd6e566b16a04c5737",
+        "pass": true
+      }
+    ]
+  },
+  "finalCanonical": {
+    "path": "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp-paradox-qa-20260710\\evidence\\player-capability-rbih-t40-20261024-03\\rbih\\turn-autosaves\\turn-040.json",
+    "sha256": "98cb04f465bf1bdea1de1bd5b721294b64c5dcc7c9dcfccd6e566b16a04c5737"
+  },
+  "operations": {
+    "authorizationReceipts": [
+      {
+        "accepted": true,
+        "current_value": "awaiting_authorization",
+        "description": "Maglaj Local Counterattack - staff proceeded under standing authorization.",
+        "domain": "ops",
+        "faction": "RBiH",
+        "id": "PROP_14_historical_op_preplanned_arbih_3rd_corps_maglaj_local_counterattack",
+        "proposed_action": "HISTORICAL_OP:preplanned:arbih_3rd_corps:Maglaj Local Counterattack",
+        "proposed_value": "authorize",
+        "resolved_turn": 14,
+        "turn": 14
+      },
+      {
+        "accepted": true,
+        "current_value": "awaiting_authorization",
+        "description": "Operation Circle - staff proceeded under standing authorization.",
+        "domain": "ops",
+        "faction": "RBiH",
+        "id": "PROP_16_historical_op_preplanned_arbih_1st_corps_operation_circle",
+        "proposed_action": "HISTORICAL_OP:preplanned:arbih_1st_corps:Operation Circle",
+        "proposed_value": "authorize",
+        "resolved_turn": 16,
+        "turn": 16
+      },
+      {
+        "accepted": true,
+        "current_value": "awaiting_authorization",
+        "description": "Srebrenica–Cerska Link-Up - staff proceeded under standing authorization.",
+        "domain": "ops",
+        "faction": "RBiH",
+        "id": "PROP_4_historical_op_preplanned_arbih_2nd_corps_srebrenica_cerska_link_up",
+        "proposed_action": "HISTORICAL_OP:preplanned:arbih_2nd_corps:Srebrenica–Cerska Link-Up",
+        "proposed_value": "authorize",
+        "resolved_turn": 4,
+        "turn": 4
+      },
+      {
+        "accepted": true,
+        "current_value": "awaiting_authorization",
+        "description": "Visoko–Breza Line Clearing - staff proceeded under standing authorization.",
+        "domain": "ops",
+        "faction": "RBiH",
+        "id": "PROP_8_historical_op_preplanned_arbih_1st_corps_visoko_breza_line_clearing",
+        "proposed_action": "HISTORICAL_OP:preplanned:arbih_1st_corps:Visoko–Breza Line Clearing",
+        "proposed_value": "authorize",
+        "resolved_turn": 8,
+        "turn": 8
+      }
+    ],
+    "opportunities": []
+  },
+  "resultIdentity": {
+    "path": "tmp-paradox-qa-20260710/paradox-local-qa-player-capability-rbih-t40-20261024-03.json",
+    "sha256": "5c6d8f1ebb22f201fdcecfaa7b28b9bc5c563eae9bc1ab4e2e2eeb32ec9d59bb"
+  },
+  "pass": true
+}

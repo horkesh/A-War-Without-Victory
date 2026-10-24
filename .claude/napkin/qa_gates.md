@@ -119,3 +119,25 @@ remain active evidence/QA guidance.
 - **To promote an entry:** state the failure as a predicate over a concrete ACTION (not advice); find the earliest point that predicate is decidable; install at the strongest tier available there; PROVE it fires by mutation, or it is tier 5 in costume; record the tier reached. Templates: `tools/hooks/guard_stash_pop.sh` (blocks on command POSITION, so prose mentions stay writable) and `guard_pipe_exit_code.sh` (blocks only the narrow shape that is never intentional, advisory elsewhere). **Write the ALLOW cases first — all six defects across both guards were found by allow-cases, none by deny-cases, and a guard that blocks real work gets switched off.** Most entries here cannot be mechanised; the point is to find the few that can.
 - Full pre-restructure archive: [full_archive_20260708.md](full_archive_20260708.md).
 - Topic archives: [QA gates](qa_gates.md), [unreported sparse truth](unreported.md), [map counters](map_counters.md), [release process](release_process.md), [engine runtime](engine_runtime.md), [Warroom/legacy](warroom_and_legacy.md).
+
+## Passive CDP diagnostics and absence claims (2026-10-24)
+
+Public Playwright `Response.body()` may refetch in the installed runtime. Use direct CDP body reads only under the same observed session/request identity when passive provenance is required; keep Playwright and NetLog separate. Preserve redirect history after terminal events, distinguish live and lifetime budgets, and require target coverage before interpreting zero observed failures. See [collection contract](../../logs/r8-warroom-collection-v3-20261024/CONTRACT.md) and [qualified scope](../../logs/r8-warroom-collection-v3-20261024/RESULT.json).
+
+## Native calibration: archive settled turns and compare input contracts (2026-10-24)
+
+Write a provisional snapshot for diagnosis, then write the sole acceptance archive only after owned
+surfaces close and before any path can dispatch Advance. Treat toolbar text, a true confirmation
+dialog and a direct transition as distinct states; owner queries and duplicate owners fail closed.
+When a player run differs from a no-player reference, audit visible decisions, authored defaults,
+autonomy and phase timing before calling it nondeterminism. Equal seeds do not make unequal inputs
+equivalent, and a later checkpoint score cannot waive daily control failures.
+
+## Owner-approved player acceptance split (2026-10-24)
+
+n94 remains the no-player benchmark. The owner retired exact n94 outcome equality only for normal
+player qualification;700 is not an adopted baseline. Same-input production determinism, protected
+invariants, per-faction exact Save/load, strict runtime/audio and24/188 coverage remain required.
+Reuse prior t39 infrastructure only at measured scope. Audit source-owned anchor applicability
+before new costly sessions; do not invent choice exceptions after failures. See the
+[player contract](../../docs/plans/2026-07-31-full-campaign-electron-validation-plan.md#player-campaign-acceptance-contract--owner-decision-2026-10-24).

@@ -47,7 +47,7 @@ interface DesktopBridge {
     subscribeTurnReportUpdated?: (cb: (report: unknown) => void) => (() => void);
     getCurrentGameState?: () => Promise<string | null>;
     getMapServerUrl?: () => Promise<string | null>;
-    loadStateDialog?: () => Promise<{ ok: boolean; error?: string }>;
+    loadStateDialog?: () => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
     openTacticalMapWindow?: (payload?: { mode?: 'operational' | 'sandbox' }) => Promise<unknown>;
     [key: string]: unknown;
 }
@@ -488,13 +488,34 @@ class WarroomApp {
         if (loadSaveBtn && fileInput) {
             loadSaveBtn.onclick = async () => {
                 if (this.desktopBridge?.loadStateDialog) {
+                    const loadReservation = this.desktopStateGate.reserveReplacement();
+                    this.legacyRecoveryCampaignMutationInFlight = true;
+                    let loadMutationSucceeded = false;
                     try {
                         const result = await this.desktopBridge.loadStateDialog();
-                        if (result?.ok) {
+                        if (!result?.ok) {
+                            console.error('[warroom] Desktop state load failed:', result?.error ?? 'Unknown load failure');
+                            return;
+                        }
+                        if (typeof result.stateJson !== 'string') {
+                            console.error('[warroom] Desktop state load returned no player-visible state.');
+                            return;
+                        }
+                        if (this.desktopStateGate.admitReserved(result.stateJson, loadReservation)) {
+                            this.applyAdmittedDesktopGameStateUpdate(
+                                result.stateJson,
+                                CAMPAIGN_REPLACEMENT_UPDATE,
+                            );
                             this.showScreen('none');
+                            loadMutationSucceeded = true;
                         }
                     } catch (error) {
                         console.error('[warroom] Failed to load state through desktop bridge:', error);
+                    } finally {
+                        this.legacyRecoveryCampaignMutationInFlight = false;
+                        if (loadMutationSucceeded) {
+                            this.flushReactOpeningReadyDeferredByRecoveryMutation();
+                        }
                     }
                     return;
                 }
@@ -1027,7 +1048,9 @@ class WarroomApp {
             target.postMessage({ type: 'awwv-bridge:response', id: data.id, ok: false, error: `Bridge method not found: ${data.method}` }, origin);
             return;
         }
-        const campaignReservation = data.method === 'startNewCampaign'
+        const isCampaignReplacement = data.method === 'startNewCampaign'
+            || data.method === 'loadStateDialog';
+        const campaignReservation = isCampaignReplacement
             ? this.desktopStateGate.reserveReplacement()
             : null;
         this.embeddedBridgeInvokeDepth += 1;
@@ -1035,7 +1058,7 @@ class WarroomApp {
             const args = Array.isArray(data.args) ? data.args : [];
             const result = await (method as (...fnArgs: unknown[]) => unknown)(...args);
             if (
-                data.method === 'startNewCampaign'
+                isCampaignReplacement
                 && campaignReservation
                 && result != null
                 && typeof result === 'object'
@@ -1046,12 +1069,14 @@ class WarroomApp {
                 if (this.desktopStateGate.admitReserved(stateJson, campaignReservation)) {
                     this.applyGameStateFromJson(stateJson, { showShell: false });
                 }
-            } else if (campaignReservation) {
+            } else if (campaignReservation && data.method === 'startNewCampaign') {
                 await this.pullLatestGameState({ showShell: false });
             }
             target.postMessage({ type: 'awwv-bridge:response', id: data.id, ok: true, result }, origin);
         } catch (err) {
-            if (campaignReservation) await this.pullLatestGameState({ showShell: false });
+            if (campaignReservation && data.method === 'startNewCampaign') {
+                await this.pullLatestGameState({ showShell: false });
+            }
             const message = err instanceof Error ? err.message : String(err);
             target.postMessage({ type: 'awwv-bridge:response', id: data.id, ok: false, error: message }, origin);
         } finally {

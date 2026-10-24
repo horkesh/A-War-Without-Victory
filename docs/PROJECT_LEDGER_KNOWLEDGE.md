@@ -6149,3 +6149,51 @@ Playwright/CDP request identity and Chromium NetLog source identity are separate
 ## 2026-10-24 — Preserve Git porcelain status columns in validation
 
 Git porcelain begins with two meaningful status columns. Calling trim() destroys a leading blank index column and can reject the intended ` M path` state. Keep the raw prefix, remove only terminal newlines, then parse the two columns and path separately. Positive expected-path and negative staged/extra-path controls must exercise the parser before costly work. The retained baseline producer succeeded; its faulty wrapper stays RED while a separate reviewed read-only qualifier proves the resulting state. See the [baseline adoption ledger](PROJECT_LEDGER.md#2026-10-24--eight-pin-baseline-adoption-qualified-without-gameplay-changes).
+
+## 2026-10-24 — Separate passive evidence collection from abort admission
+
+In installed Playwright1.60, public `Response.body()` can fall back from `Network.getResponseBody` to `Network.loadNetworkResource`; wrapper identity does not prove returned bytes came from the original request. Passive collection uses genuine public CDP session IDs and direct `Network.getResponseBody` only, with explicit unavailable/error/pending outcomes and no inferred Playwright/NetLog join. CDP redirect history must survive terminal cleanup; bound live requests separately from lifetime history. A page session may miss OOPIF network activity, so absence requires target-coverage evidence. Diagnostic qualification cannot waive a retained runtime failure. [Reviewed evidence](../logs/r8-warroom-collection-v3-20261024/RESULT.json).
+
+## 2026-10-24 — Equal seed and engine do not erase player-policy inputs
+
+A packaged Historical run can use the same startup, seed, autonomy and engine yet diverge from a
+no-player calibration before turn1 because the player route owns visible identity timing and sensitive
+event authorization. Compare the actual ordered inputs before attributing endpoint deltas to
+nondeterminism. Preserve daily mismatches, separate directly caused endpoints from downstream
+correlation, and require owner/canon/calibration authority before defining a new player-mode target.
+Do not silently adopt the observed score or add hidden approvals to manufacture parity. See the
+[native parity result](../logs/r8-native-calibration-parity-20261024/RESULT.json).
+
+## 2026-10-24 — Separate no-player calibration from player-campaign acceptance
+
+The owner explicitly retained n94 for no-player calibration while defining player criteria
+separately. Exact headless-map equality cannot judge unequal player choices/timing. Retiring that
+comparison is not adopting the observed score, waiving protected invariants, or relabeling a failed
+experiment. Judge player sessions through recorded canonical choices, same-input determinism,
+lawful production outcomes, exact per-faction Save/load and unchanged runtime/coverage gates.
+Use historical scores diagnostically and preserve original negative evidence. See the
+[owner-disposition ledger](PROJECT_LEDGER.md#2026-10-24--owner-separates-no-player-calibration-from-player-campaign-acceptance).
+
+## 2026-10-24 — Replay names do not prove player-input replay
+
+A replay viewer may consume state snapshots or summaries rather than rerun ordered inputs.
+Separate record producer, serialization, phase/actor binding and actual production consumer before
+claiming same-input determinism. Save/load proves reconstruction, not repeatability. Equally,
+headless-map “protected” equality and a small native infrastructure checker do not substitute for
+canonical protection/full-health readers. Older faction-specific zero-turn receipts can be reused
+only at their bound package/turn scope. See the [audit ledger](PROJECT_LEDGER.md#2026-10-24--cheap-player-validation-coverage-and-reader-audit).
+
+### Replay-input feasibility result — 2026-10-24
+
+The inspected native player packet splits pre-tour/post-loop choices and loop actions across
+arrays without a complete shared consumed ordinal. Its production ReplayScrubber consumers
+select stored frames/summaries rather than calling the real Advance path. Any future recorder
+must bind successful mutation-commit order, exact payloads and authoritative receipts; neither
+wall-clock order nor final-state reconstruction supplies missing inputs. Existing runs remain
+valuable evidence, but this contract does not prove same-input reexecution. See the
+[feasibility ledger](PROJECT_LEDGER.md#2026-10-24--offline-player-replay-input-feasibility).
+
+
+### Player parity and clean qualification — 2026-10-24
+
+Use the production delegated-faction selector consistently at Army HQ and downstream staff boundaries; a missing plan producer is distinct from consent or operation admission. Compare actual player inputs before attributing bot/player divergence to engine nondeterminism. Native inbox grouping uses the canonical incumbent and latest event, not the proposed successor. File Import must update both canonical desktop state and the outer host projection. Current S6 production grading requires clean Git: old dirty-run metadata is not authority to bypass it. Tests must allocate fresh retained fixtures rather than overwrite historical evidence. See the player-capability checkpoint ledger.

@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "reviewId": "player-validation-evidence-audit-20261024-independent-review",
+  "verdict": "CORRECTION_REQUIRED",
+  "matrixAssessment": "Materially conservative and aligned with the owner decision, subject to the cited corrections.",
+  "findings": [
+    {
+      "priority": "P1",
+      "id": "broken-farz-authority-path",
+      "finding": "The audit cites docs/30_planning/CALIBRATION_MASTER.md, which does not exist. The Farz ruling is in docs/40_reports/CALIBRATION_MASTER.md."
+    },
+    {
+      "priority": "P1",
+      "id": "nonexistent-next-entrypoint-and-bundled-questions",
+      "finding": "tools/diagnostics/player_input_contract_audit.cjs does not exist, implementation is not authorized by the audit, and the recommendation combines replay-input contract qualification with all-faction opening fixtures. Record the current fail-closed gaps and sequence any separately authorized implementation from the replay-input dependency first."
+    },
+    {
+      "priority": "P2",
+      "id": "command-does-not-cover-pass-criteria",
+      "finding": "The proposed command accepts only the RBiH result and manifest but requires all three faction opening fixtures to pass. Future command feasibility requires explicit fixture inputs or a separate executable test invocation."
+    },
+    {
+      "priority": "P2",
+      "id": "historical-event-reader-scope",
+      "finding": "The harness built-in historical event assertion covers only RS targetTurn>=52 non-resume. The RBiH t39 five-event result is from a separate post-run reader and does not establish cross-faction or resume-path coverage."
+    }
+  ],
+  "preservation": {
+    "childExit": 0,
+    "wrapperExit": 0,
+    "priorBindings": 3226,
+    "n94Files": 40,
+    "telemetryPrefixesExact": true,
+    "legacyFunctionsExact": 5
+  },
+  "determinism": "No determinism risks introduced by this read-only audit; same-input production replay remains UNREACHED."
+}

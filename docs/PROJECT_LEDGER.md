@@ -11792,3 +11792,115 @@ Owner-authorized clean a91328680 qualification run n94 completes0/0,707/707/706/
 Original update wrapper remains RED child1/wrapper126: its git().trim() erased the leading porcelain status column after successful production. No campaign/producer retry. Fresh status positive/negative controls plus engine-reviewed read-only qualification pass0/0 in11.825seconds, preserving the exact ten-file RED attempt and proving all original post-run predicates. Sources outside manifest,3,226 prior bindings with telemetry-prefix semantics,n94 40files and all8 default artifacts remain qualified; actual protected/health readers pass. The earlier shell no-op launched no preflight/game and is retained separately. Full raw attempts, n91/n92/n93/n94, packages and telemetry remain; no logs restored or truncated.
 
 Determinism/save impact: no simulation or state/schema change; baseline fingerprints adopt the accepted state. n93 unchanged gameplay/composed-suite evidence is reused without relabelling its raw failures. All six other October mismatches, native warroom identity/Ajnie/faction shakedown gates and optional unresolved-sector NOT ESTABLISHED note remain open. Normal pushed Baseline Pins and Event System CI remain required external verification. Portable receipts/reviews: logs/baseline-reblessing/20261024/RESULT.json.
+
+### 2026-10-24 — Reviewed non-admitting warroom CDP collection v3
+
+Owner authorizes a revised evidence contract, independent review and smallest diagnostic repair, excluding native retry and calibration tuning. Added require-safe `tools/ui/cdp_network_collector.cjs`, opt-in harness wiring and production-helper/lifecycle fixtures. Public session request IDs remain independent of Playwright and NetLog; only direct `Network.getResponseBody` is allowed after an exact candidate failure. Bounded redacted events, permanent redirect history, finite timestamps, separate live/history caps, idempotent shared-deadline flush and exclusive sidecar preserve all existing verdicts. No gameplay, save schema, asset, cache, threshold, classifier, reader or baseline change.
+
+Preserved initial contract/implementation NO-GOs,91/91 first candidate, seven targeted RED failures, redaction-assertion correction,128/128 corrected candidate and subsequent history-cap RED/revised approach with both candidate snapshots. Final affected helper47/47, unchanged harness83/83 reused, syntax and nonincremental TypeScript0/0; independent final GO. Final preservation0/0:3226 prior bindings,n94 40files, exact C/D telemetry,five classifier/attribution functions and frozen reader. Unaffected three-package inventories and n93/n94 gameplay evidence reused; no full-suite or campaign rerun.
+
+Roadmap, board, derived index, Electron plan, engineering references and reusable diagnostic lessons synchronized. Native acceptance remains FAILED: body availability/asset identity/cross-stream proof unmeasured, and one target may omit OOPIF media; zero candidates means coverage NOT ESTABLISHED. All native/Ajnie/faction gates remain. No browser/native/build/campaign/tuning/commit/push. Evidence: logs/r8-warroom-collection-v3-20261024/RESULT.json; raw retained packet tmp/r8-warroom-collection-v3-20261024/.
+
+## 2026-10-24 — Packaged Historical player-mode calibration stops at turn39
+
+Owner-authorized real-game calibration used the retained qualified package through the normal visible
+New War → RBiH → Historical route, IPC Advance, canonical autosaves and Save → Field Records → Resume.
+Harness-only corrections were developed with production-shaped RED/GREEN and independent review for
+the actual accessible label, exact hydration ownership, immutable settled archives, Decision Room
+closure and direct/modal Advance bifurcation. All eight native attempts and every failure remain
+preserved; no gameplay, reference, threshold, package or policy change was made.
+
+Final `native-t39-03` exits child/wrapper0/0 in739.398seconds. All12 infrastructure gates pass: exact39
+provisional and39 settled archives,1,188 JSONL records, exactly39 zero-unresolved assignment seals,
+126 events, canonical bytes and loaded projection exact. Thirty January OSID anchors and the Brčko
+band/five event anchors pass. Outcome parity fails: all39 daily controller maps differ, t39 is700/712
+against required707, and seven formerly-correct cells are lost against each of n91 and n92. The
+source/state causal audit proves only the first two endpoint differences directly: no-player RBiH
+receives t1 paramilitary captures while normal player Historical holds the sensitive action behind
+authorization and later applies the authored deny response. The other five are downstream
+correlations. No production gameplay bug is proven.
+
+The188-week, RS/HRHB and Farz gates are UNREACHED. Accepted n94 remains the headless calibration
+reference; score700 is not adopted. A player-mode target or observer-mode contract requires an
+explicit owner/canon/calibration decision. The earlier known native audio strict failure remains open
+and is not waived by the clean final39-turn runtime. Preservation passes3226 prior bindings,40 exact
+n94 files, zero telemetry append and five unchanged legacy functions; the retained package remains
+exact at1213 files/1,914,184,685 bytes. Portable result:
+`logs/r8-native-calibration-parity-20261024/RESULT.json`; raw profiles, saves and telemetry remain
+local under the ignored `tmp/r8-native-calibration-parity-20261024/` inventory.
+
+### 2026-10-24 — Owner separates no-player calibration from player-campaign acceptance
+
+Owner selected “Keep n94 as the no-player benchmark; define separate player-campaign criteria.”
+Amended the existing Electron validation contract and synchronized roadmap, board, derived index
+and Calibration Master. Retired exact n94 daily/outcome/score-floor and formerly-correct-map equality
+only as ordinary player pass/fail gates; n94's no-player calibration, protected gates and baseline
+pins remain unchanged. Historical scores stay diagnostic;700 is not an adopted floor. Original
+failed reports remain immutable, rather than being rewritten as passes.
+
+Player hard gates retain canonical visible choices and receipts, same-package/runtime/initial
+state/seed/ordered-input determinism, lawful capture and protected control/supply/alliance/enclave
+boundaries, per-faction exact Save/load and authoritative hydrated projection, strict runtime/audio,
+provenance and evidence preservation. Existing3x24/3x188 sessions, surface/performance/diary/replay
+requirements remain. Applicable source-owned anchors cannot be waived by calling a result
+choice-dependent. The prior RBiH t39 is positive infrastructure evidence only; full qualification,
+later checkpoints and RS/HRHB remain unproved. Next is a cheap retained-evidence coverage and
+reader-applicability audit, not another campaign or automatic replay.
+
+Determinism impact: none in simulation, schemas, serialization or inputs; this is documentation
+and acceptance-scope only. No gameplay, code/test, package, painted reference, baseline pin,
+observer mode, native/campaign run, commit or push. Raw prior receipts and telemetry preserved.
+
+### 2026-10-24 — Cheap player-validation coverage and reader audit
+
+Audited the adopted player contract using retained files/source only. Matrix21 faction/gate cells:
+2 current-evidence passes,7 partial,1 failed,11 unreached. RBiH t39 remains measured UI/capture/
+measured infrastructure/Save-load evidence, not full acceptance;700 remains diagnostic. Found exact older RS/HRHB
+turn0 native Save→Menu→Records→Resume receipts and package bindings, reusable only at that scope.
+
+The earliest missing dependency is a complete ordered production-consumable player-input contract;
+Save/load and replay-named snapshot/summary viewing do not establish same-input re-execution.
+The old n94 equality comparator is not a canonical protection/full-health reader. The RS52+
+fresh/non-resume built-in event assertion does not supply RBiH's separate t39 five-event proof or
+all-faction coverage. Unconditional protection and source-bound Farz/anchor requirements remain;
+no player-choice waiver is inferred.
+
+Smallest next step is offline record/serialization/consumer feasibility with existing source and
+retained inputs, fresh preserved output,180-second per-command cap,no automatic retry and explicit
+owner-discovery/missing-contract stop labels. All-faction opening fixtures are a later independent
+gate. No reader/consumer implementation or new native command is claimed available/authorized.
+
+Independent review required citation/command/scope corrections; all prior candidate bytes and
+rejections are retained. Preservation0/0 proves3226 prior bindings,n94 40files,C/D telemetry exact,
+and five legacy functions unchanged. No source/test/gameplay, engine/replay/native/campaign/build,
+reference, baseline, commit or push change. Determinism impact:none; only documentation/evidence.
+Portable audit: logs/r8-native-calibration-parity-20261024/player-evidence-audit/.
+
+### 2026-10-24 — Offline player replay-input feasibility
+
+Completed the authorized retained-file/source trace without engine or native execution.
+The bounded production owners were found; stop label MISSING_REPLAYABLE_INPUT_CONTRACT.
+Split arrays lack one complete consumed action order (including pre-tour/post-loop choices);
+final proposal records do not supply command positions. Existing replay consumes stored frames/
+summaries and never dispatches inputs or advances the engine. Same-input determinism remains
+unproved; no gameplay defect or global impossibility is inferred.
+
+Proposed next packet: versioned successful-mutation/Advance stream and consumer using existing
+production owners, deterministic order/payload/receipt/state bindings, focused negative/order
+and production-path fixtures, and independent review. No implementation is authorized by this
+check. Preservation0/0:3226 prior bindings,n94 40files,C/D exact,legacy functions unchanged.
+Qualified90/90 harness evidence reused by exact hashes; documentation checks recorded in the
+portable packet. No source/test/gameplay/native/replay/build/campaign,tuning,reference,baseline,
+commit or push change. Determinism impact:none; evidence/docs only.
+Evidence: logs/r8-native-calibration-parity-20261024/replay-input-feasibility/. Original worker report and raw matches retained under tmp/player-replay-input-feasibility-20261024/.
+
+
+### 2026-10-24 — Player capability and native handoff repair checkpoint
+
+Owner prioritizes normal player access to bot operations and calibration capability before divergence. Fixed the proven WAR-phase omission: Army HQ gathering now uses the existing delegated-faction selector, preserving RS/RBiH/HRHB order, excluding manual level0, and adding no launch/authorization. Focused production-path145/145 and independent canon/determinism review pass. No RNG, save schema, ownership flip or calibration constant change.
+
+Canonical file Import now transactionally updates the desktop runtime and player-visible return; outer host adopts that return without duplicate iframe broadcast. Native retained39→40 proves Save/load/Advance; default Keep and explicit historical succession probes each prove the actual offered officer44 card, visible click and durable receipt. The failed104 continuation stopped at44 due to a stale harness identity; all partial/provisional evidence is retained. General replay-sidecar forwarding and same-input replay remain unqualified. The opt-in historical strategy changes recorded test choices, not game policy or sensitive consent.
+
+The Sarajevo regression allocates a fresh retained fixture instead of overwriting45 legacy files; existing assertions1/1 and legacy bytes exact. A first188 attempt was rejected before any turn by the production clean-Git guard: scenario child1, helper2, preserved wrapper126. No campaign/full-suite pass is claimed. A clean reviewed checkpoint commit is necessary for real provenance; no override, adoption, threshold/reference change, deletion or telemetry truncation. One new clean frozen188 gate requires exact n94 states and all established readers; only GO permits the full suite. New packaged player calibration remains unmeasured;700/707 remains unmet.
+
+Raw evidence: tmp/player-bot-capability-parity-20261024/. Portable checkpoint: logs/r8-native-calibration-parity-20261024/player-bot-capability-parity/. n91–n94 and all earlier failed/native/package evidence retained.

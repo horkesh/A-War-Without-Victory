@@ -8,6 +8,7 @@ const warPlanningMapMetrics = vi.hoisted(() => ({
   loadData: vi.fn().mockResolvedValue(undefined),
   setGameState: vi.fn(),
 }));
+const visibleStateMetrics = vi.hoisted(() => ({ parse: vi.fn() }));
 
 vi.mock('../src/ui/warroom/components/WarPlanningMap.js', () => ({
   WarPlanningMap: class {
@@ -27,12 +28,17 @@ vi.mock('../src/ui/warroom/components/ModalManager.js', () => ({
 }));
 
 vi.mock('../src/ui/warroom/data/player_visible_state_adapter.js', () => ({
-  parsePlayerVisibleWarroomState: () => ({
-    meta: { turn: 0, phase: 'war', player_faction: 'RBiH' },
-    factions: [],
-    military: { formations: {} },
-    political: { political_controllers: {} },
-  }),
+  parsePlayerVisibleWarroomState: (stateJson: string) => {
+    visibleStateMetrics.parse(stateJson);
+    const parsed = JSON.parse(stateJson) as { meta?: Record<string, unknown> };
+    return {
+      ...parsed,
+      meta: { turn: 0, phase: 'war', player_faction: 'RBiH', ...parsed.meta },
+      factions: [],
+      military: { formations: {} },
+      political: { political_controllers: {} },
+    };
+  },
 }));
 
 function installHostDom(): void {
@@ -101,6 +107,7 @@ describe('desktop React opening lifecycle', () => {
     warPlanningMapMetrics.construct.mockClear();
     warPlanningMapMetrics.loadData.mockReset().mockResolvedValue(undefined);
     warPlanningMapMetrics.setGameState.mockClear();
+    visibleStateMetrics.parse.mockClear();
     vi.useFakeTimers();
     installHostDom();
   });
@@ -171,7 +178,8 @@ describe('desktop React opening lifecycle', () => {
   });
 
   it('reuses one legacy map setup across repeated fallback signals and recovery load paths', async () => {
-    const loadStateDialog = vi.fn().mockResolvedValue({ ok: true });
+    const stateJson = '{"meta":{"turn":39,"player_faction":"RBiH"}}';
+    const loadStateDialog = vi.fn().mockResolvedValue({ ok: true, stateJson });
     const { iframe } = await bootHost({ loadStateDialog });
 
     iframe.dispatchEvent(new Event('error'));
@@ -181,8 +189,71 @@ describe('desktop React opening lifecycle', () => {
     await flushMicrotasks();
 
     expect(loadStateDialog).toHaveBeenCalledTimes(1);
+    expect(visibleStateMetrics.parse).toHaveBeenCalledWith(stateJson);
+    expect(document.getElementById('main-menu')!.classList.contains('mm-hidden')).toBe(true);
     expect(warPlanningMapMetrics.construct).toHaveBeenCalledTimes(1);
     expect(warPlanningMapMetrics.loadData).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    { ok: false, error: 'Canceled' },
+    { ok: true },
+  ])('keeps legacy recovery visible when desktop load cannot return replacement state: %j', async (result) => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const loadStateDialog = vi.fn().mockResolvedValue(result);
+    await bootHost({ loadStateDialog });
+    vi.advanceTimersByTime(8000);
+
+    document.getElementById('mm-load-save')!.click();
+    await flushMicrotasks();
+
+    expect(visibleStateMetrics.parse).not.toHaveBeenCalled();
+    expect(document.getElementById('main-menu')!.classList.contains('mm-hidden')).toBe(false);
+    expect(consoleError).toHaveBeenCalled();
+  });
+
+  it('applies embedded load replacement to the host before returning it to React', async () => {
+    const stateJson = '{"meta":{"turn":39,"player_faction":"RS"}}';
+    const loadStateDialog = vi.fn().mockResolvedValue({ ok: true, stateJson });
+    const { iframe } = await bootHost({ loadStateDialog });
+    const postMessage = vi.spyOn(iframe.contentWindow!, 'postMessage');
+
+    window.dispatchEvent(new MessageEvent('message', {
+      data: { type: 'awwv-bridge:invoke', id: 'load-1', method: 'loadStateDialog', args: [] },
+      source: iframe.contentWindow,
+      origin: 'https://map.local',
+    }));
+    await flushMicrotasks();
+
+    expect(loadStateDialog).toHaveBeenCalledTimes(1);
+    expect(visibleStateMetrics.parse).toHaveBeenCalledWith(stateJson);
+    expect(postMessage).toHaveBeenCalledWith({
+      type: 'awwv-bridge:response',
+      id: 'load-1',
+      ok: true,
+      result: { ok: true, stateJson },
+    }, 'https://map.local');
+    expect(visibleStateMetrics.parse.mock.invocationCallOrder[0]).toBeLessThan(postMessage.mock.invocationCallOrder[0]);
+  });
+
+  it.each([
+    { ok: false, error: 'Canceled' },
+    { ok: true },
+  ])('does not apply embedded load without a successful replacement projection: %j', async (result) => {
+    const loadStateDialog = vi.fn().mockResolvedValue(result);
+    const getCurrentGameState = vi.fn().mockResolvedValue('{"meta":{"turn":99}}');
+    const { iframe } = await bootHost({ loadStateDialog, getCurrentGameState });
+    const parseCallsAfterBoot = visibleStateMetrics.parse.mock.calls.length;
+
+    window.dispatchEvent(new MessageEvent('message', {
+      data: { type: 'awwv-bridge:invoke', id: 'load-failed', method: 'loadStateDialog', args: [] },
+      source: iframe.contentWindow,
+      origin: 'https://map.local',
+    }));
+    await flushMicrotasks();
+
+    expect(visibleStateMetrics.parse.mock.calls).toHaveLength(parseCallsAfterBoot);
+    expect(getCurrentGameState).toHaveBeenCalledTimes(1);
   });
 
   it('discards a failed provisional map and retries with the latest recovery state', async () => {

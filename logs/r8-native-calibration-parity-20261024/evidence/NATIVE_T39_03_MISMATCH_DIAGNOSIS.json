@@ -1,0 +1,290 @@
+{
+  "schema": "awwv.native-calibration.t39-mismatch-diagnosis.v1",
+  "status": "CHECKPOINT_FAILED_NO_188_EXPANSION",
+  "conclusion": "The normal packaged Historical RBiH player lane does not reproduce the accepted turn-39 outcome. It is seven controller cells and seven score points below the accepted checkpoint. Two endpoint differences are the already-proven authored RBiH Historical paramilitary refusal at turn 1; five more endpoint differences arise later in the deterministically diverged control history. Retained evidence does not justify attributing every later difference solely to the opening policy without a forbidden counterfactual gameplay change.",
+  "inputs": {
+    "native": {
+      "path": "tmp-paradox-qa-20260710/evidence/native-calibration-rbih-t39-20261024-03/rbih/turn-autosaves/turn-039.json",
+      "sha256": "52dead08cc8e6f1d33ca26e1585666ee1db84fc4edb7bef59647449f69a1fc7e"
+    },
+    "accepted": {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94/save_w39.json",
+      "sha256": "e51224ac22a839d4c1af35a0ea828afb79b62f0ed56559c3b47dcda45578eec5"
+    },
+    "comparison": {
+      "path": "tmp/r8-native-calibration-parity-20261024/native-t39-03-postrun-audit-01/OUTCOME_COMPARE.json",
+      "sha256": "3c7fbec68839d04a4ba6322a459d7fe152aa145ee34930b375468ba2f87d8935"
+    }
+  },
+  "checkpoint": {
+    "turn": 39,
+    "nativeHistoricalScore": 700,
+    "acceptedHistoricalScore": 707,
+    "totalOsids": 712,
+    "nativeControllerHash": "0d8c6b32d09dd6f3c586b1133d166da4045544fbc095b25d9c003a628666fe4a",
+    "acceptedControllerHash": "c21a55c5f3a3d49f60220196cfd6c2ff9a00c4a3e24d7481126c13e60e6a3f95",
+    "endpointMismatchCount": 7,
+    "endpoint": [
+      {
+        "id": "op:brcko:bukvik_gornji_2",
+        "native": "RS",
+        "accepted": "RBiH",
+        "nativeEvents": [],
+        "acceptedEvents": [
+          {
+            "from": "RS",
+            "mechanism": "paramilitary",
+            "settlement_id": "op:brcko:bukvik_gornji_2",
+            "to": "RBiH",
+            "turn": 1
+          }
+        ]
+      },
+      {
+        "id": "op:cajnice:batotici",
+        "native": "RBiH",
+        "accepted": "RS",
+        "nativeEvents": [],
+        "acceptedEvents": [
+          {
+            "attacker_brigade": "rs_ajnie_brigade",
+            "battle_id": "7:op:cajnice:batotici:rs_ajnie_brigade:null",
+            "from": "RBiH",
+            "mechanism": "combat",
+            "mun_id": "cajnice",
+            "settlement_id": "op:cajnice:batotici",
+            "to": "RS",
+            "turn": 7
+          }
+        ]
+      },
+      {
+        "id": "op:foca:brusna_2",
+        "native": "RBiH",
+        "accepted": "RS",
+        "nativeEvents": [],
+        "acceptedEvents": [
+          {
+            "from": "RBiH",
+            "mechanism": "paramilitary",
+            "settlement_id": "op:foca:brusna_2",
+            "to": "RS",
+            "turn": 8
+          }
+        ]
+      },
+      {
+        "id": "op:foca:donje_zesce",
+        "native": "RS",
+        "accepted": "RBiH",
+        "nativeEvents": [],
+        "acceptedEvents": [
+          {
+            "attacker_brigade": "arbih_843rd_light",
+            "battle_id": "18:op:foca:donje_zesce:arbih_843rd_light:rs_ajnie_brigade",
+            "from": "RS",
+            "mechanism": "combat",
+            "mun_id": "foca",
+            "settlement_id": "op:foca:donje_zesce",
+            "to": "RBiH",
+            "turn": 18
+          }
+        ]
+      },
+      {
+        "id": "op:gorazde:kolovarice",
+        "native": "RBiH",
+        "accepted": "RS",
+        "nativeEvents": [],
+        "acceptedEvents": [
+          {
+            "attacker_brigade": "rs_ajnie_brigade",
+            "battle_id": "14:op:gorazde:kolovarice:rs_ajnie_brigade:null",
+            "from": "RBiH",
+            "mechanism": "combat",
+            "mun_id": "gorazde",
+            "settlement_id": "op:gorazde:kolovarice",
+            "to": "RS",
+            "turn": 14
+          }
+        ]
+      },
+      {
+        "id": "op:srebrenica:obadi",
+        "native": "RS",
+        "accepted": "RBiH",
+        "nativeEvents": [],
+        "acceptedEvents": [
+          {
+            "from": "RS",
+            "mechanism": "paramilitary",
+            "settlement_id": "op:srebrenica:obadi",
+            "to": "RBiH",
+            "turn": 1
+          }
+        ]
+      },
+      {
+        "id": "op:trnovo:tosici",
+        "native": "RS",
+        "accepted": "RBiH",
+        "nativeEvents": [],
+        "acceptedEvents": [
+          {
+            "attacker_brigade": "arbih_109th_mountain",
+            "battle_id": "18:op:trnovo:tosici:arbih_109th_mountain:null",
+            "from": "RS",
+            "mechanism": "combat",
+            "mun_id": "trnovo",
+            "settlement_id": "op:trnovo:tosici",
+            "to": "RBiH",
+            "turn": 18
+          }
+        ]
+      }
+    ]
+  },
+  "trajectory": {
+    "dailyMapMismatchTurns": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39
+    ],
+    "dailyTimelineMismatchTurns": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39
+    ],
+    "nativeControlEventCount": 117,
+    "acceptedControlEventCount": 124,
+    "acceptedOnlyExactEvents": 49,
+    "nativeOnlyExactEvents": 42,
+    "acceptedOnlyByMechanism": {
+      "combat": 35,
+      "paramilitary": 14
+    },
+    "nativeOnlyByMechanism": {
+      "combat": 33,
+      "paramilitary": 9
+    },
+    "note": "The event histories are broadly different (49 accepted-only and 42 native-only exact event records), even though only seven endpoint controllers differ. This is a path divergence, not seven isolated missing writes."
+  },
+  "protected": {
+    "n91": {
+      "id": "apr1992_definitive_188w__6deb5845c150c196__w188_n91:turn-39",
+      "turn": 39,
+      "baseline": "apr1992_definitive_188w__6deb5845c150c196__w188_n91",
+      "protectedOsids": 712,
+      "losses": [
+        "op:brcko:bukvik_gornji_2",
+        "op:cajnice:batotici",
+        "op:foca:brusna_2",
+        "op:foca:donje_zesce",
+        "op:gorazde:kolovarice",
+        "op:srebrenica:obadi",
+        "op:trnovo:tosici"
+      ],
+      "pass": false
+    },
+    "n92": {
+      "id": "apr1992_definitive_188w__6deb5845c150c196__w188_n92:turn-39",
+      "turn": 39,
+      "baseline": "apr1992_definitive_188w__6deb5845c150c196__w188_n92",
+      "protectedOsids": 712,
+      "losses": [
+        "op:brcko:bukvik_gornji_2",
+        "op:cajnice:batotici",
+        "op:foca:brusna_2",
+        "op:foca:donje_zesce",
+        "op:gorazde:kolovarice",
+        "op:srebrenica:obadi",
+        "op:trnovo:tosici"
+      ],
+      "pass": false
+    }
+  },
+  "sourceBackedBoundary": {
+    "historicalPolicy": "data/scenarios/events/war_1992.json:2144 sets rbih_paramilitary_policy_1992 historical_default_response_id=always_deny; :2345 states the canon/sensitive-history basis.",
+    "normalPlayerExecution": "src/sim/turn_phases/war_phases.ts:948-957 retains player faction unless headless auto-control and admits player brigade-order assistance at autonomy >=1; :2701-2728 splits ordinary bot factions and explicit player assisted/historical-operation work.",
+    "observedPolicy": "Historical, playerFaction=RBiH, autonomyLevel=2, headless=false. No hidden authorization, forced control, direct state write, or tuning occurred."
+  },
+  "disposition": {
+    "exactDailyParity": "FAILED",
+    "turn39Checkpoint": "FAILED_700_NOT_707",
+    "n91n92Protection": "FAILED_7_EACH",
+    "engineAndCapture": "PASSED",
+    "next188Run": "STOPPED_NOT_JUSTIFIED"
+  }
+}

@@ -1,6 +1,33 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { runInNewContext } from 'node:vm';
+
+function extractFunctionSource(source: string, name: string): string {
+  let start = source.indexOf(`function ${name}(`);
+  expect(start, `missing function ${name}`).toBeGreaterThanOrEqual(0);
+  const asyncStart = source.lastIndexOf('async ', start);
+  if (asyncStart >= 0 && asyncStart + 'async '.length === start) start = asyncStart;
+  const paramsStart = source.indexOf('(', start);
+  let paramsDepth = 0;
+  let paramsEnd = -1;
+  for (let index = paramsStart; index < source.length; index += 1) {
+    if (source[index] === '(') paramsDepth += 1;
+    if (source[index] === ')') paramsDepth -= 1;
+    if (paramsDepth === 0) {
+      paramsEnd = index;
+      break;
+    }
+  }
+  const bodyStart = source.indexOf('{', paramsEnd);
+  let depth = 0;
+  for (let index = bodyStart; index < source.length; index += 1) {
+    if (source[index] === '{') depth += 1;
+    if (source[index] === '}') depth -= 1;
+    if (depth === 0) return source.slice(start, index + 1);
+  }
+  throw new Error(`unterminated function ${name}`);
+}
 
 describe('desktop persistence contract', () => {
   it('routes every simulation IPC dependency through the built desktop bundle', () => {
@@ -54,17 +81,125 @@ describe('desktop persistence contract', () => {
       resolve(process.cwd(), 'src/desktop/electron-main.cjs'),
       'utf8',
     );
-    const helperStart = source.indexOf('function writeCanonicalCurrentState');
-    const helperEnd = source.indexOf('function ensureCorpsCommandEntry', helperStart);
-    const helper = source.slice(helperStart, helperEnd);
+    const persist = extractFunctionSource(source, 'persistCurrentStateSnapshots');
+    const writer = extractFunctionSource(source, 'writeCanonicalCurrentState');
 
-    expect(helper).toContain('setCurrentStateSnapshots(sim, state);');
-    expect(helper).toContain('autoSave();');
-    expect(helper.indexOf('autoSave();')).toBeGreaterThan(helper.indexOf('setCurrentStateSnapshots(sim, state);'));
-    expect(helper).toContain('sendGameStateToRenderer(currentGameStateJson);');
-    expect(helper).not.toContain('sendGameStateToRenderer(currentGameStateJson, excludeSender);');
-    expect(helper).toContain('currentGameStateJson = previousGameStateJson;');
-    expect(helper).toContain('currentCanonicalSaveJson = previousCanonicalSaveJson;');
+    expect(persist).toContain('setCurrentStateSnapshots(sim, state);');
+    expect(persist).toContain('autoSave();');
+    expect(persist.indexOf('autoSave();')).toBeGreaterThan(persist.indexOf('setCurrentStateSnapshots(sim, state);'));
+    expect(persist).toContain('currentGameStateJson = previousGameStateJson;');
+    expect(persist).toContain('currentCanonicalSaveJson = previousCanonicalSaveJson;');
+    expect(writer).toContain('persistCurrentStateSnapshots(sim, state);');
+    expect(writer).toContain('sendGameStateToRenderer(currentGameStateJson);');
+    expect(writer).not.toContain('sendGameStateToRenderer(currentGameStateJson, excludeSender);');
+  });
+
+  it('transactionally persists replacement snapshots and rolls memory back when autosave fails', () => {
+    const source = readFileSync(resolve(process.cwd(), 'src/desktop/electron-main.cjs'), 'utf8');
+    const helper = extractFunctionSource(source, 'persistCurrentStateSnapshots');
+    const makeSubject = (failSave: boolean) => runInNewContext(`(() => {
+      let currentGameStateJson = 'runtime-before';
+      let currentCanonicalSaveJson = 'canonical-before';
+      const setCurrentStateSnapshots = (_sim, state) => {
+        currentGameStateJson = 'runtime-' + state.id;
+        currentCanonicalSaveJson = 'canonical-' + state.id;
+      };
+      const autoSave = () => { if (${failSave}) throw new Error('disk-full'); };
+      const persistCurrentStateSnapshots = ${helper};
+      return {
+        persistCurrentStateSnapshots,
+        snapshots: () => ({ currentGameStateJson, currentCanonicalSaveJson }),
+      };
+    })()`, { Error }) as {
+      persistCurrentStateSnapshots: (sim: unknown, state: { id: string }) => void;
+      snapshots: () => { currentGameStateJson: string; currentCanonicalSaveJson: string };
+    };
+
+    const success = makeSubject(false);
+    success.persistCurrentStateSnapshots({}, { id: 'after' });
+    expect(success.snapshots()).toEqual({
+      currentGameStateJson: 'runtime-after',
+      currentCanonicalSaveJson: 'canonical-after',
+    });
+
+    const failure = makeSubject(true);
+    expect(() => failure.persistCurrentStateSnapshots({}, { id: 'after' })).toThrow('disk-full');
+    expect(failure.snapshots()).toEqual({
+      currentGameStateJson: 'runtime-before',
+      currentCanonicalSaveJson: 'canonical-before',
+    });
+  });
+
+  it('loads a selected state through canonical persistence before replay sidecars and replacement broadcast', async () => {
+    const source = readFileSync(resolve(process.cwd(), 'src/desktop/electron-main.cjs'), 'utf8');
+    const helper = extractFunctionSource(source, 'loadStatePathIntoDesktop');
+    const order: string[] = [];
+    const subject = runInNewContext(`(() => {
+      let liveReplayManifestFrames = ['stale'];
+      const currentGameStateJson = 'runtime-loaded';
+      const loadStatePathIntoDesktop = ${helper};
+      return { loadStatePathIntoDesktop, ledger: () => liveReplayManifestFrames };
+    })()`, {
+      getDesktopSim: () => ({
+        loadStateFromPath: async (filePath: string) => { order.push('load:' + filePath); return { state: { id: 'loaded' } }; },
+      }),
+      readReplaySaveManifestSidecar: () => { order.push('read-manifest'); return 'manifest-json'; },
+      readReplaySaveSequenceSidecar: () => { order.push('read-sequence'); return 'sequence-json'; },
+      persistCurrentStateSnapshots: () => { order.push('persist-autosave'); },
+      sendReplayManifestToRenderer: () => { order.push('send-manifest'); },
+      sendReplaySequenceToRenderer: () => { order.push('send-sequence'); },
+      sendGameStateToRenderer: () => { order.push('broadcast-state'); },
+      projectCurrentGameStateForRenderer: () => { order.push('project-state'); return 'projected-json'; },
+      CAMPAIGN_REPLACEMENT_UPDATE: { campaignReplacement: true },
+    }) as {
+      loadStatePathIntoDesktop: (filePath: string, sender: unknown) => Promise<{ ok: boolean; stateJson: string }>;
+      ledger: () => unknown[];
+    };
+
+    await expect(subject.loadStatePathIntoDesktop('resume.json', 'initiating-renderer')).resolves.toEqual({ ok: true, stateJson: 'projected-json' });
+    expect(order).toEqual([
+      'load:resume.json',
+      'read-manifest',
+      'persist-autosave',
+      'send-manifest',
+      'broadcast-state',
+      'project-state',
+    ]);
+    expect(subject.ledger()).toEqual([]);
+
+    const handlerStart = source.indexOf("ipcMain.handle('load-state-dialog'");
+    const handlerEnd = source.indexOf("ipcMain.handle('list-save-records'", handlerStart);
+    const handler = source.slice(handlerStart, handlerEnd);
+    expect(handler).toContain('loadStatePathIntoDesktop(result.filePaths[0], _event.sender)');
+  });
+
+  it('does not release replay or renderer state when imported-state autosave fails', async () => {
+    const source = readFileSync(resolve(process.cwd(), 'src/desktop/electron-main.cjs'), 'utf8');
+    const helper = extractFunctionSource(source, 'loadStatePathIntoDesktop');
+    const released: string[] = [];
+    const subject = runInNewContext(`(() => {
+      let liveReplayManifestFrames = ['stale'];
+      const currentGameStateJson = 'runtime-before';
+      const loadStatePathIntoDesktop = ${helper};
+      return { loadStatePathIntoDesktop, ledger: () => liveReplayManifestFrames };
+    })()`, {
+      getDesktopSim: () => ({ loadStateFromPath: async () => ({ state: { id: 'loaded' } }) }),
+      readReplaySaveManifestSidecar: () => 'manifest-json',
+      readReplaySaveSequenceSidecar: () => null,
+      persistCurrentStateSnapshots: () => { throw new Error('disk-full'); },
+      sendReplayManifestToRenderer: () => { released.push('manifest'); },
+      sendReplaySequenceToRenderer: () => { released.push('sequence'); },
+      sendGameStateToRenderer: () => { released.push('state'); },
+      projectCurrentGameStateForRenderer: () => { released.push('projection'); return 'projected-json'; },
+      CAMPAIGN_REPLACEMENT_UPDATE: { campaignReplacement: true },
+    }) as {
+      loadStatePathIntoDesktop: (filePath: string, sender: unknown) => Promise<unknown>;
+      ledger: () => unknown[];
+    };
+
+    await expect(subject.loadStatePathIntoDesktop('resume.json', 'initiating-renderer')).rejects.toThrow('disk-full');
+    expect(released).toEqual([]);
+    expect(subject.ledger()).toEqual(['stale']);
   });
 
   it('does not report a canonical mutation as successful when autosave fails', () => {
@@ -90,6 +225,8 @@ describe('desktop persistence contract', () => {
     const handler = source.slice(handlerStart, handlerEnd);
 
     expect(handler).toContain('writeCanonicalCurrentState(sim, result.state, _event.sender);');
+    expect(handler).toContain('sim.deserializeState(currentGameStateJson)');
+    expect(handler).not.toMatch(/deserializeState\([^)]*(?:payload|stateJson)/);
     expect(handler).not.toContain('currentGameStateJson = sim.serializeState(result.state);');
   });
 
@@ -245,10 +382,9 @@ describe('desktop persistence contract', () => {
     expect(handler).toContain('writeCanonicalCurrentState(sim, state, _event.sender);');
     // Every war-ending IPC path saves through this choke point, which writes owed
     // no-choice records before the snapshot/autosave.
-    const writerStart = electronMain.indexOf('function writeCanonicalCurrentState(');
-    const writer = electronMain.slice(writerStart, electronMain.indexOf('\n}\n', writerStart));
+    const writer = extractFunctionSource(electronMain, 'writeCanonicalCurrentState');
     expect(writer).toContain('if (state?.meta?.game_over === true) sim.writeOwedTerminationRecords(state, getBaseDir());');
-    expect(writer.indexOf('sim.writeOwedTerminationRecords(')).toBeLessThan(writer.indexOf('setCurrentStateSnapshots(sim, state);'));
+    expect(writer.indexOf('sim.writeOwedTerminationRecords(')).toBeLessThan(writer.indexOf('persistCurrentStateSnapshots(sim, state);'));
     expect(handler).not.toContain("import('../sim/events/resolve_decision.js')");
     expect(desktopSim).toContain("from '../sim/events/resolve_decision.js'");
     expect(desktopSim).toContain('resolveEventDecision');

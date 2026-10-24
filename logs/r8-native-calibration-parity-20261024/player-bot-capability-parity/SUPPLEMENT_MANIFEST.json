@@ -1,0 +1,40 @@
+{
+  "scope": "All supplement evidence files added after original manifest; original eleven bindings retained",
+  "files": [
+    {
+      "path": "REVIEW_CORRECTION.json",
+      "bytes": 462,
+      "sha256": "4a79f1d8c4181fbcaaf3ea8a07d65bd3b91490790b7b19172e8ff6068cf5a429"
+    },
+    {
+      "path": "clean-freeze-review--INITIAL_COVERAGE_MAP.corrected.md",
+      "bytes": 6785,
+      "sha256": "e7ca3abb9ed2ae2b4d79b375612ebf3b9f2ee741648b712a1fe66eb4d609ee95"
+    },
+    {
+      "path": "diff-check-final-02--receipt.json",
+      "bytes": 2710,
+      "sha256": "06ed65f7f4e75b62896e926590c3fda853da5b86e0ec3480c401610b0ab1294f"
+    },
+    {
+      "path": "docs-focused-04--receipt.json",
+      "bytes": 2694,
+      "sha256": "917af1f41a0e5c3c1cac8f47d9d05ab4a8b6e6726c56030ca312e3ca2121e0f6"
+    },
+    {
+      "path": "docs-focused-05--receipt.json",
+      "bytes": 2694,
+      "sha256": "fdb0b73b7416582250fd705f5072ae5c021bcfddec63507b87ddd2523fd2c69d"
+    },
+    {
+      "path": "plan-index-derive-04--receipt.json",
+      "bytes": 2712,
+      "sha256": "0bd7808419a2ca446799d14ca1caecce1ac6afd1e7754f570fdb9d0309c9c50a"
+    },
+    {
+      "path": "preservation-03--receipt.json",
+      "bytes": 2659,
+      "sha256": "5945ef17d38b2c722eb766e12459b5ab3277adc4850e8b0bc0f935557a4a36f5"
+    }
+  ]
+}

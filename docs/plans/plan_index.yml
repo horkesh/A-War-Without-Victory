@@ -160,11 +160,11 @@ lanes:
   - lane: R8
     title: "Full-campaign packaged-Electron validation and diaries"
     lane_open: true
-    status: "WARROOM IDENTITY BLOCKED — 2026-10-24. Diagnostic repair78/78/syntax/TS0 and review GO. Conditional v2 development authorized then hard-stopped: explicit reques"
+    status: "PLAYER/BOT CAPABILITY PARITY ACTIVE — 2026-10-24. Owner requires normal player access to bot historical operations and capability to meet accepted calibration; "
     plans:
       - path: docs/plans/2026-07-31-full-campaign-electron-validation-plan.md
         exists: true
-        tokens: 50341
+        tokens: 58435
         fits_context: false
         tasks: null
   - lane: R9

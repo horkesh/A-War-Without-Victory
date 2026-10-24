@@ -1,0 +1,22 @@
+[
+  {
+    "path": "tmp-paradox-qa-20260710\\paradox-local-qa-native-calibration-rbih-t39-20261024-03.json",
+    "sha256": "4cd3b3b1c02975cb52003154a314ae395f8e3769c345b6f4f4c5251ec7bb26d5"
+  },
+  {
+    "path": "tmp-paradox-qa-20260710\\evidence\\native-calibration-rbih-t39-20261024-03\\rbih\\manifest.json",
+    "sha256": "c23800eb6531937da8e95cf39b9ce634ed0418e295095ada8ef2ce0c8aa3aeff"
+  },
+  {
+    "path": "logs\\r8-native-calibration-parity-20261024\\player-evidence-audit\\AUDIT.json",
+    "sha256": "2aa3b161828dfca4d880a14e51d103853893a07615fcf03ea4d5445b7b71c94f"
+  },
+  {
+    "path": "logs\\r8-native-calibration-parity-20261024\\SOURCE_MANIFEST.json",
+    "sha256": "8125a4efd49b4c91384c7ddac3d5da4807b834d25b8f10ea63a7421ce59f231e"
+  },
+  {
+    "path": "logs\\r8-native-calibration-parity-20261024\\VERIFICATION.json",
+    "sha256": "e53b0e90ea886b3024d5b96b10f22a2e75611b786cae429b9e3aaf8dd22e3265"
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "source": "tmp-paradox-qa-20260710/paradox-local-qa-netlog-r8-native-opening-20261024-media-observer-rbih-01.json",
+  "sourceSha256": "65a287c0e66efb153c16af1b1ff575eaa91aadacd7bffd9aae13bb564e8d87e9",
+  "URL_REQUEST_START_JOB": 126,
+  "rows": 606,
+  "uniqueNetLogSources": 303,
+  "limitation": "Not a CDP count or cross-stream identity mapping; contextual check of accidental lifetime128 cap only."
+}
