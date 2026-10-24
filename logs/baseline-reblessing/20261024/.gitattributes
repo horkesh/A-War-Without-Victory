@@ -1,0 +1,2 @@
+# Captured evidence retains CRLF, Markdown hard breaks and terminal blank lines.
+* -text whitespace=cr-at-eol,-blank-at-eof,-blank-at-eol

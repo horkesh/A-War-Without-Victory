@@ -1,0 +1,122 @@
+{
+  "purpose": "Exact retained generated evidence roots and one-off untracked helpers only. No production directory wildcard; originals remain in place.",
+  "entries": [
+    "tmp/behar-i-toljenak-20261023/",
+    "tmp/ci-sync-20261024/",
+    "tmp/r8-counter-selection-20261024/",
+    "tmp/r8-media-abort-20261024/",
+    "tmp/r8-media-abort-detached-20261024/",
+    "tmp/r8-native-opening-20261024-counter-repair/",
+    "tmp/r8-native-opening-20261024-media-observer/",
+    "tmp/r8-native-shakedown-20261024/",
+    "tmp/r8-operation-release-regression-20261024/",
+    "tmp/r8-operation-release-repair-20261023/",
+    "tmp/r8-shakedown-20261023/",
+    "tmp/r8-warroom-abort-20261024/",
+    "tmp/r8-warroom-loop-v2-20261024/",
+    "tmp/toljenak-20261023-production/",
+    "tmp/toljenak-constituents-20261023/",
+    "tmp/toljenak-history-20261023/",
+    "tmp/toljenak-nisici-20261023/",
+    "tmp/toljenak-wartime-20261023/",
+    "tools/diagnostics/842_archive_rejected_test.cjs",
+    "tools/diagnostics/842_donji_planning_extract.cjs",
+    "tools/diagnostics/842_donji_predecessor_extract.cjs",
+    "tools/diagnostics/842_donji_predecessor_extract_v2.cjs",
+    "tools/diagnostics/842_donji_turn_extract.cjs",
+    "tools/diagnostics/842_donji_turn_extract_v2.cjs",
+    "tools/diagnostics/842_donji_turn_extract_v3.cjs",
+    "tools/diagnostics/842_finalize.cjs",
+    "tools/diagnostics/853_finalize.cjs",
+    "tools/diagnostics/853_prisoje_actual_save_pipeline.ts",
+    "tools/diagnostics/853_run_checks.cjs",
+    "tools/diagnostics/854_finalize_failed.cjs",
+    "tools/diagnostics/854_prisoje_isolated_factory_runtime.ts",
+    "tools/diagnostics/856_finalize.cjs",
+    "tools/diagnostics/856_prisoje_isolated_factory_runtime_v2.ts",
+    "tools/diagnostics/859_donji_rama_n90.ts"
+  ],
+  "helpers": [
+    {
+      "path": "tools/diagnostics/842_archive_rejected_test.cjs",
+      "bytes": 1441,
+      "sha256": "2c56e867b5897b8f2a93f6ccdf32da7ff25ffe8f3c3dadacb36d0fc2b1b38794"
+    },
+    {
+      "path": "tools/diagnostics/842_donji_planning_extract.cjs",
+      "bytes": 3444,
+      "sha256": "534f421c3dfafebfe1f637d141e91ec4660f13f04f4ce20aab3e2c0ceaaa2bfd"
+    },
+    {
+      "path": "tools/diagnostics/842_donji_predecessor_extract.cjs",
+      "bytes": 7409,
+      "sha256": "c5bbeffc2d26590ee3be8686e78add607a4fa323b06a94052bb88acaf56baa62"
+    },
+    {
+      "path": "tools/diagnostics/842_donji_predecessor_extract_v2.cjs",
+      "bytes": 4041,
+      "sha256": "b542c6c58244c10c95083e350302df9e76d5e3f9f39f22ab372ad167de4648b3"
+    },
+    {
+      "path": "tools/diagnostics/842_donji_turn_extract.cjs",
+      "bytes": 3517,
+      "sha256": "af389b91d16d07e7931c5eac4e1aeb435c2862d383eb72f20ba07d8110d3e120"
+    },
+    {
+      "path": "tools/diagnostics/842_donji_turn_extract_v2.cjs",
+      "bytes": 2588,
+      "sha256": "be469ae4a768b8f9d6cad878bbc5d5ab0221c5b51826711242940e8c62a384de"
+    },
+    {
+      "path": "tools/diagnostics/842_donji_turn_extract_v3.cjs",
+      "bytes": 2225,
+      "sha256": "41a7839679fd6485f61cc6bfbd2d1de128683f1c0dcde31657216a792ed7b9dc"
+    },
+    {
+      "path": "tools/diagnostics/842_finalize.cjs",
+      "bytes": 10767,
+      "sha256": "33b4bc5ede53025a59f1cb9c68b0b8706c61166025fa6c7b59952c2ecc415cb5"
+    },
+    {
+      "path": "tools/diagnostics/853_finalize.cjs",
+      "bytes": 8632,
+      "sha256": "245baf0d4273de7185f42fc00f4dbf928edda9f4ff64984f12945502fe4c8b4c"
+    },
+    {
+      "path": "tools/diagnostics/853_prisoje_actual_save_pipeline.ts",
+      "bytes": 10215,
+      "sha256": "d5c9b22b33aee2f65fd7f055560bec0db5d46443fad9518184225ff3238881c5"
+    },
+    {
+      "path": "tools/diagnostics/853_run_checks.cjs",
+      "bytes": 1545,
+      "sha256": "99d468a3f48218c5047f221a5f6bb8ffaa3d112eb0b0687d47b7a5d859f3ace7"
+    },
+    {
+      "path": "tools/diagnostics/854_finalize_failed.cjs",
+      "bytes": 4755,
+      "sha256": "286745f726da7b3e4b52aba61c6aa0b3f1fc08ddc281dc3b67800b1e2120048c"
+    },
+    {
+      "path": "tools/diagnostics/854_prisoje_isolated_factory_runtime.ts",
+      "bytes": 17193,
+      "sha256": "2b99403130ede0b06c77507eac5d02e8e80c716b51ab64118dbe2eaaf506684e"
+    },
+    {
+      "path": "tools/diagnostics/856_finalize.cjs",
+      "bytes": 6913,
+      "sha256": "411429e4f66817406982b55846c1ed7f7a84176617cd691077d6bd5660a3943a"
+    },
+    {
+      "path": "tools/diagnostics/856_prisoje_isolated_factory_runtime_v2.ts",
+      "bytes": 17763,
+      "sha256": "e95e555582d24850148b19b637eb97786a506b8e2d9a35d3014e8f17d38fa5a9"
+    },
+    {
+      "path": "tools/diagnostics/859_donji_rama_n90.ts",
+      "bytes": 16965,
+      "sha256": "1ffccdc00133a8dbf542981f81bb0a4a4e35f248a6ed555ad39a857ada466977"
+    }
+  ],
+  "trackedLiveReferences": []
+}

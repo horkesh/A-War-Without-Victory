@@ -165,3 +165,41 @@ logs/session-closeout-20260924/
 
 # Claude scheduler session lease; keep live lock local.
 /.claude/scheduled_tasks.lock
+
+# Retained October diagnostic output and one-off helpers (preserved locally).
+/tmp/behar-i-toljenak-20261023/
+/tmp/ci-sync-20261024/
+/tmp/r8-counter-selection-20261024/
+/tmp/r8-media-abort-20261024/
+/tmp/r8-media-abort-detached-20261024/
+/tmp/r8-native-opening-20261024-counter-repair/
+/tmp/r8-native-opening-20261024-media-observer/
+/tmp/r8-native-shakedown-20261024/
+/tmp/r8-operation-release-regression-20261024/
+/tmp/r8-operation-release-repair-20261023/
+/tmp/r8-shakedown-20261023/
+/tmp/r8-warroom-abort-20261024/
+/tmp/r8-warroom-loop-v2-20261024/
+/tmp/toljenak-20261023-production/
+/tmp/toljenak-constituents-20261023/
+/tmp/toljenak-history-20261023/
+/tmp/toljenak-nisici-20261023/
+/tmp/toljenak-wartime-20261023/
+/tools/diagnostics/842_archive_rejected_test.cjs
+/tools/diagnostics/842_donji_planning_extract.cjs
+/tools/diagnostics/842_donji_predecessor_extract.cjs
+/tools/diagnostics/842_donji_predecessor_extract_v2.cjs
+/tools/diagnostics/842_donji_turn_extract.cjs
+/tools/diagnostics/842_donji_turn_extract_v2.cjs
+/tools/diagnostics/842_donji_turn_extract_v3.cjs
+/tools/diagnostics/842_finalize.cjs
+/tools/diagnostics/853_finalize.cjs
+/tools/diagnostics/853_prisoje_actual_save_pipeline.ts
+/tools/diagnostics/853_run_checks.cjs
+/tools/diagnostics/854_finalize_failed.cjs
+/tools/diagnostics/854_prisoje_isolated_factory_runtime.ts
+/tools/diagnostics/856_finalize.cjs
+/tools/diagnostics/856_prisoje_isolated_factory_runtime_v2.ts
+/tools/diagnostics/859_donji_rama_n90.ts
+/tmp/baseline-rebless-20261024/
+/logs/baseline-reblessing/20261024/

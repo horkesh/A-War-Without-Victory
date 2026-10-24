@@ -1,0 +1,40 @@
+{
+  "artifacts": [
+    "activity_summary.json",
+    "control_delta.json",
+    "end_report.md",
+    "final_save.json",
+    "formation_delta.json",
+    "run_summary.json",
+    "watched_operations.json",
+    "weekly_report.jsonl"
+  ],
+  "scenarios": [
+    {
+      "expected_files": [
+        "activity_summary.json",
+        "control_delta.json",
+        "end_report.md",
+        "final_save.json",
+        "formation_delta.json",
+        "run_summary.json",
+        "watched_operations.json",
+        "weekly_report.jsonl"
+      ],
+      "hashes": {
+        "activity_summary.json": "7d10356d0715db21370c3f7d6acc15db7948856c80962363f505641b48bfbd4e",
+        "control_delta.json": "4cb8219cf3b7dcbfdd66476a7af5bbfa0709fdd24e0a37d6900a9b808d6acb85",
+        "end_report.md": "fea39f3bf7eda907b290e3bd2579ac050c847ae2f783153117f95f1f94d0cf8d",
+        "final_save.json": "e414dc69f6e875fcd2a7394582921f20ca03123112baf12e9308c50035c29c50",
+        "formation_delta.json": "bbd7260e219d311bea201053d0d7c913f4b30b83bcead72b05d5f2c957566cb1",
+        "run_summary.json": "b8ebc2c1ff4522fed0651be224ba360fcfeff0da4e6983f27d9df008eeba98cb",
+        "watched_operations.json": "785a073b9312e34d20ba143915478ab768ce7847ad337b121f98491df8325b18",
+        "weekly_report.jsonl": "4c5cb00bde51a15e2f7766d31ececb03e86d81bfcf1f93a4c04c01cbda31b9cf"
+      },
+      "id": "apr1992_188w",
+      "scenario_path": "data/scenarios/apr1992_definitive_188w.json",
+      "weeks": 188
+    }
+  ],
+  "schema_version": 1
+}

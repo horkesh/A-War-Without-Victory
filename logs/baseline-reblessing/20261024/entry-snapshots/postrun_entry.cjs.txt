@@ -1,0 +1,69 @@
+'use strict';
+
+const cp = require('node:child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const ROOT = path.resolve(__dirname, '..', '..');
+const N91 = 'runs/apr1992_definitive_188w__6deb5845c150c196__w188_n91';
+const N92 = 'runs/apr1992_definitive_188w__6deb5845c150c196__w188_n92';
+const EVALUATOR = path.join(__dirname, 'evaluate_candidate.cjs');
+
+function arg(name) {
+  const at = process.argv.indexOf(name);
+  if (at < 0 || !process.argv[at + 1]) throw new Error(`${name} is required`);
+  return process.argv[at + 1];
+}
+
+const writeExclusive = (file, value) => fs.writeFileSync(file, JSON.stringify(value, null, 2) + '\n', { flag: 'wx' });
+
+function main() {
+  process.chdir(ROOT);
+  const candidate = arg('--candidate').replaceAll('\\', '/');
+  const out = path.resolve(arg('--evidence-dir'));
+  const expectedHead = arg('--expected-head').toLowerCase();
+  const deadline = Number(arg('--deadline-ms'));
+  if (!/^[0-9a-f]{40}$/.test(expectedHead)) throw new Error('expected head must be a 40-character commit');
+  if (!Number.isFinite(deadline)) throw new Error('deadline must be an epoch-millisecond number');
+  fs.mkdirSync(out, { recursive: false });
+  const results = {};
+  const failures = [];
+  const remaining = () => Math.max(0, deadline - Date.now());
+  const run = (name, executable, args) => {
+    const budget = remaining();
+    if (budget <= 0) {
+      const result = { exit: null, timed_out: true, error: 'shared campaign/reader deadline exhausted before start', argv: [executable, ...args] };
+      results[name] = result;
+      failures.push({ category: name, detail: result.error });
+      return;
+    }
+    const child = cp.spawnSync(executable, args, { cwd: ROOT, encoding: 'utf8', windowsHide: true, timeout: budget, killSignal: 'SIGKILL' });
+    const exit = child.error?.code === 'ETIMEDOUT' ? 124 : child.status;
+    fs.writeFileSync(path.join(out, `${name}.stdout.log`), child.stdout ?? '', { flag: 'wx' });
+    fs.writeFileSync(path.join(out, `${name}.stderr.log`), child.stderr ?? '', { flag: 'wx' });
+    const result = { exit, signal: child.signal, timed_out: exit === 124, error: child.error ? String(child.error.message) : null, argv: [executable, ...args], remaining_ms_after: remaining() };
+    writeExclusive(path.join(out, `${name}.execution.json`), result);
+    results[name] = result;
+    if (exit !== 0) failures.push({ category: name, detail: `exit ${exit}` });
+  };
+
+  run('evaluation', process.execPath, [EVALUATOR, '--run', candidate, '--out', path.join(out, 'evaluation.json'), '--expected-head', expectedHead]);
+  run('timeline-vs-n91', process.execPath, ['tools/diagnostics/compare_control_timelines.cjs', '--baseline', N91, '--candidate', candidate, '--out', path.join(out, 'timeline-vs-n91.json')]);
+  run('timeline-vs-n92', process.execPath, ['tools/diagnostics/compare_control_timelines.cjs', '--baseline', N92, '--candidate', candidate, '--out', path.join(out, 'timeline-vs-n92.json')]);
+  run('checkpoints', process.execPath, ['tools/verify_checkpoints.cjs', candidate, '--base', 'jan=707,apr94=707,apr95=706,oct=706', '--cascade-base', '41']);
+  run('consistency', process.execPath, ['tools/validate_run_consistency.cjs', candidate]);
+  run('health', process.execPath, ['tools/engine_health_gate.cjs', candidate, '--horizon', '188w', '--json']);
+  run('protected-vs-n91', process.execPath, ['logs/claude-channel-20261004/221-campaign-gate-v2.cjs', candidate, N91, '--out', path.join(out, 'protected-vs-n91.json'), '--horizon', '188']);
+  run('protected-vs-n92', process.execPath, ['logs/claude-channel-20261004/221-campaign-gate-v2.cjs', candidate, N92, '--out', path.join(out, 'protected-vs-n92.json'), '--horizon', '188']);
+  run('producer', process.execPath, ['node_modules/tsx/dist/cli.mjs', 'logs/claude-channel-20261004/262-producer-proof/producer.ts', candidate, '188']);
+  const movementArgs = ['tools/diagnostics/movement_phase_coverage.cjs', candidate, '--json'];
+  for (let turn = 1; turn <= 188; turn += 1) movementArgs.push(turn < 80 ? '--expect-inactive-boundary' : '--expect-active-boundary', `hvo_1st_guard_abb:${turn}`);
+  run('movement', process.execPath, movementArgs);
+
+  const summary = { schema: 'awwv.baseline-rebless-postrun.v1', pass: failures.length === 0, candidate, expected_head: expectedHead, deadline_ms: deadline, remaining_ms: remaining(), results, failures };
+  writeExclusive(path.join(out, 'summary.json'), summary);
+  process.stdout.write(JSON.stringify(summary) + '\n');
+  process.exit(summary.pass ? 0 : 2);
+}
+
+try { main(); } catch (error) { process.stderr.write(String(error.stack ?? error) + '\n'); process.exit(1); }
