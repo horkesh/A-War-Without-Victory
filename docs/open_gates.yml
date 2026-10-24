@@ -248,8 +248,10 @@ gates:
       gap plus three unresolved ambient aborts. Exact replay equivalence is unmet due
       to extra RBiH recruitment. The owner separately authorized a bounded handoff repair;
       its five-file candidate passes 60 focused tests, nonincremental TypeScript and
-      independent canon/determinism review. Required gameplay regression/adoption remains
-      open; no new package/campaign or full suite ran. Ambient aborts remain unresolved.
+      independent canon/determinism review. Authorized n93 regression passes707/707/706/706
+      with zero n91/n92 losses. Required suite remains raw RED5 with bounded test/doc
+      corrections and reused unaffected coverage. No adoption or new package; native
+      shakedown and ambient aborts remain unresolved.
       Startup/diagnostic failures, packages, n91/n92 and telemetry are preserved. No baseline adoption.
 
   - id: R8-FINAL-CAMPAIGNS

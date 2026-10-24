@@ -9,13 +9,51 @@
 **Tech stack:** Electron, Playwright/CDP, packaged directory build, `paradox_local_qa.cjs`, deterministic autosave/replay comparison, Markdown diary template.
 
 **Date:** 2026-07-31
-**Status:** ACTIVE — readability/runtime-output and all-faction zero-turn Save/load verified; the operation-completion handoff candidate passes focused tests and canon/determinism review. Gameplay regression/adoption and audio/shakedown gates remain open. No calibration tuning or full campaign.
+**Status:** ACTIVE — readability/runtime-output and all-faction zero-turn Save/load verified; the operation-completion handoff candidate passes focused tests and canon/determinism review. n93 gameplay regression passes; the retained full-suite RED has bounded test/documentation corrections. Adoption and native audio/shakedown gates remain open. No tuning or baseline adoption.
 **Roadmap workstream:** R8
 **Canonical owner:** packaged Electron UI and bound autosave/replay; diary is the product verdict
 **Collision rule:** This plan does not repair source while a session is running. Findings are routed to the owning plan, verified, then the affected session restarts from a fresh campaign.
 **Activation:** `Execute the master roadmap` authorizes transient local directory packages for this validation, but not installer publication, signing, upload, tag, or release.
 
 ## Package/shakedown repair — owner authorized 2026-10-23
+
+**Gameplay regression result 2026-10-24:** n93 passes707/707/706/706, zero formerly
+correct losses versus n91/n92, all shared n92 controls, Toljenak/HVO outcomes,16anchors and
+all required readers. Campaign/evaluation closes inside its original35-minute cap with no
+retry. The separately capped single full suite closes in18m50s, raw14,911pass/5fail/33skip,
+child/wrapper1/1, no timeout. All outer coverage/source/preservation gates pass. Independent
+review identifies only stale generated index (2), stale startup source assertions (2) and
+an unstripped source-absence assertion (1). Test/doc-only corrections retain the intended
+production contract and reuse unaffected broad coverage. Exact focused checks and final
+independent integration are bound in the portable result; the raw suite remains RED.
+No new campaign, broad retry, production change, package, tuning or baseline adoption.
+Native packaged/all-faction shakedowns, audio and old replay equivalence remain open.
+See [portable result](../../logs/r8-operation-release-regression-20261024/RESULT.json).
+
+**Gameplay regression authorized 2026-10-24:** the owner authorizes one authoritative
+188-week run of `32057d766` against retained n91/n92, with cheap prerequisites first,
+one shared 35-minute campaign/evaluation cap and no automatic retry. No tuning or baseline
+adoption. Reuse unchanged focused60/60, final nonincremental typecheck and independent
+source/canon/determinism evidence after exact source-hash checks. Use the existing definitive
+188-week scenario/preflight runner, native n92 debug environment and shared checkpoint
+snapshots plus output-only turn15/16 snapshots. Exact launch argv, opening source/reference/
+telemetry inventories and preflight results are frozen under
+`tmp/r8-operation-release-regression-20261024/` before launch. Expected campaign/reader cost
+is 3–10 minutes (prior n92 campaign121.5seconds), subject to the hard cap. Acceptance requires
+checkpoint floors707/707/706/706 under the approved April reference, zero formerly correct
+n91/n92 cell losses at every authoritative/shared checkpoint, retained lawful Toljenak and
+HVO outcomes, all protected anchors, engine-health/provenance and byte/prefix-preservation
+gates. Any campaign/evaluation failure stops expensive work without retry. Only a qualifying
+candidate proceeds to the required full suite, separately recorded with its exact command,
+cost and stop rule. Package/audio/three-faction shakedown and adoption gates remain open.
+
+Frozen campaign command (run once from this worktree):
+```powershell
+node tools/diagnostics/run_preserved_preflight.cjs --attempt-dir tmp/r8-operation-release-regression-20261024/campaign-01 --entry-script tmp/r8-operation-release-regression-20261024/regression_entry.cjs --timeout-ms 2100000 --allow-artifact launch.json --allow-artifact execution.json --allow-artifact source-before.json --allow-artifact source-after.json -- node tmp/r8-operation-release-regression-20261024/regression_entry.cjs '{evidenceDir}' --owner-authorized-once
+```
+The entry script (SHA256 `03d4797586bcd363d6d27240ac71eee92143cbbd891b6b7fa6d90b2438de3ec2`)
+records the full scenario argv/environment and shared deadline. Preflight01 passes child/wrapper0/0;
+the source and retained-test evidence is reusable and both telemetry opening hashes match.
 
 **Current bounded result:** the first immutable package remains exact (1,213 files).
 Native zero-turn Save/load passes for RBiH, RS and HRHB with unchanged canonical bytes

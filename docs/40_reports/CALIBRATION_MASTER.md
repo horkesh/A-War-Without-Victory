@@ -1,3 +1,30 @@
+## Operation-release n93 regression — retained suite RED and focused corrections (2026-10-24)
+
+The separately authorized single188-week run of `32057d766` completed as n93, child/wrapper0/0,
+in about4m30s including source fingerprints, within the shared35-minute campaign/evaluation cap.
+Scores are **707/707/706/706** under the approved April reference, with zero formerly correct
+losses separately versus n91/n92. All17 shared saves match n92 controls; versus n91, only
+approved Toljenak retention differs at12saves. Normal t135 Behar-I combat capture/retention
+through188, both exact turn188 HVO outcomes, all16anchors and every required reader pass.
+All32 current inputs bind exactly; final hash `ff003195e966d163` and health match n92. The two
+transient Travnik warnings match n92 and final seals are unresolved0; no warning waiver.
+
+The one required full suite remains raw **14,911 passed /5 failed /33 skipped**, child/wrapper1/1,
+without timeout or retry. Exact five outer summaries/receipt coverage, source, scratch archives
+and telemetry preservation pass. Independent review establishes five test/documentation failures:
+two stale plan-index assertions, two startup regexes contradicting the existing enforced
+output-root-before-cwd contract, and one new unstripped source-absence assertion. Correction
+is confined to generated index and the two affected test files; no production/gameplay change,
+test baseline or assertion waiver. Focused correction and final documentation/index checks are
+bound in the portable result. Unaffected full-suite coverage is reused, without claiming the
+original whole suite green or adding overlapping test totals.
+
+n91/n92 and all40 native n93 artifacts remain exact; telemetry and every failed attempt remain
+preserved. No tuning, baseline/pin adoption, package build or push. This establishes bounded
+scenario regression, not packaged handoff/replay or all-faction shakedown acceptance. Audio,
+old recruitment/replay-equivalence, six other October mismatches and inherited global gates
+remain open. [Portable result](../../logs/r8-operation-release-regression-20261024/RESULT.json).
+
 ## Operation-completion handoff — focused candidate, campaign unmeasured (2026-10-23)
 
 The owner separately authorized the R8 operation-release ownership repair and focused checks.
