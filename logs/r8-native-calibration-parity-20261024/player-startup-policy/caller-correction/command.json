@@ -1,0 +1,10 @@
+{
+  "command": "node",
+  "args": [
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "tests/ui/event_decision_auto_launch_contract.test.ts",
+    "--pool=forks",
+    "--maxWorkers=1"
+  ]
+}

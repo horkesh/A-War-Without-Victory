@@ -1,0 +1,89 @@
+{
+  "schema": "awwv.sensitive-history.ui-ux-review.v1",
+  "seat": "ui-ux-developer",
+  "proposal": "pre-first-Advance RBiH paramilitary policy availability",
+  "verdict": "GO_WITH_BINDING_CONDITIONS",
+  "implementation_authorized_by_this_seat": false,
+  "decision": {
+    "approved_surface": "existing EventDecisionModal",
+    "approved_resolver": "respond-to-event-decision with canonical browser-equivalent fallback",
+    "opening_sequence": [
+      "rbih_state_identity",
+      "rbih_paramilitary_policy_1992"
+    ],
+    "option_ids_in_authored_order": [
+      "always_deny",
+      "ask",
+      "always_allow"
+    ],
+    "unresolved_policy": "ask",
+    "preselection_allowed": false,
+    "advance_block_required": true,
+    "reward_framing_allowed": false
+  },
+  "bindings": [
+    {
+      "source": "docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md",
+      "lines": "128-143",
+      "requirement": "sole explicit policy surface; ask default; no optimization or military-necessity framing"
+    },
+    {
+      "source": "docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md",
+      "lines": "207-233",
+      "requirement": "UI/UX plus game-design and unanimous section-6 review before implementation"
+    },
+    {
+      "source": "data/scenarios/events/war_1992.json",
+      "lines": "2103-2345",
+      "requirement": "preserve all three authored choices, historical marker, consequences, effects, and citations"
+    },
+    {
+      "source": "src/ui/map/components/EventDecisionModal.tsx",
+      "lines": "381-447,541-687",
+      "requirement": "existing option cards, required modal, consequence previews, and source display remain the player surface"
+    },
+    {
+      "source": "src/ui/shared/Modal.tsx",
+      "lines": "232-287,300-324",
+      "requirement": "labelled dialog, focus trap, keyboard traversal, and focus restoration"
+    },
+    {
+      "source": "src/state/player_decision_manifest.ts",
+      "lines": "58-68,239-248",
+      "requirement": "event_modal ownership and hard-block policy"
+    },
+    {
+      "source": "src/desktop/electron-main.cjs",
+      "lines": "2405-2418",
+      "requirement": "Advance rejects unresolved required player decisions"
+    },
+    {
+      "source": "docs/20_engineering/UI_OWNERSHIP_MATRIX.md",
+      "lines": "74-93",
+      "requirement": "one canonical decision owner; no hidden second logic owner"
+    },
+    {
+      "source": "docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md",
+      "lines": "255-257",
+      "requirement": "canonical state mutation is persisted before broadcast"
+    }
+  ],
+  "conditions": [
+    "Queue only after an explicit identity receipt for an ordinary turn-0 RBiH player; leave policy ask until a visible response.",
+    "Render exactly always_deny, ask, and always_allow once in authored order with no preselection or implicit Historical-mode choice.",
+    "Preserve and display the existing descriptions, compact cited source note, historical marker, and immediate consequence rows; retain all source and future-consequence fields in the pending payload.",
+    "Keep civilian-casualty, war-crime, documented-posture, recruitment, staff-priority, international-standing, and negotiating-leverage consequences visible for always_allow.",
+    "Do not describe always_allow as parity, recovery, optimal play, territorial opportunity, or a required choice.",
+    "Keep EventDecisionModal and canonical event-decision resolution as the sole owners; do not enable or repurpose an empty ParamilitaryReviewModal.",
+    "Fail closed on rejected or stale resolution and prove save/reload and duplicate-delivery idempotence in Electron and browser fallback.",
+    "Prove labelled-dialog semantics, focus containment, keyboard access to three named buttons, no focus-only selection, and no Escape/backdrop/hotkey bypass; add minimal aria-describedby wiring only if the rendered accessibility query cannot associate option consequences reliably.",
+    "Obtain every remaining required game-design and section-6 GO before implementation."
+  ],
+  "out_of_scope": [
+    "event-data or option-semantic changes",
+    "new paramilitary controls or policy values",
+    "headless or no-player behavior",
+    "capture, control, sweep, scoring, telemetry, or calibration adoption changes",
+    "approval or recommendation of always_allow"
+  ]
+}

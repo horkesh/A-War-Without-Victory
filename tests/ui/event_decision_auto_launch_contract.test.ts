@@ -159,7 +159,7 @@ describe('event decision modal auto-launch contract', () => {
       app.indexOf('<ConvoyDecisionModal'),
     );
 
-    expect(modalRenderBlock).toContain('resolveBrowserEventDecision(nextState, eventId, responseId)');
+    expect(modalRenderBlock).toContain('resolveBrowserEventDecision(nextState, eventId, responseId, eventCatalogFull)');
     expect(modalRenderBlock).toContain('console.warn(\'[EventDecisionModal] browser fallback failed\', err)');
     expect(modalRenderBlock).toContain('setLoadError(\'Failed to record event decision.\')');
     expect(modalRenderBlock).toContain('errorMessage={loadError}');

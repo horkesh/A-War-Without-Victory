@@ -3403,8 +3403,8 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const state = readCanonicalCurrentState(sim);
-      sim.resolveEventDecision(state, eventId, responseId);
-      writeCanonicalCurrentState(sim, state, _event.sender);
+      const nextState = sim.resolveDesktopEventDecision(state, eventId, responseId, getBaseDir());
+      writeCanonicalCurrentState(sim, nextState, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };

@@ -1,0 +1,11 @@
+{
+  "head": "b371adc3e0935825649e5eda4e6bbd45a44a359d",
+  "sourcePath": "src/sim/negotiation/compute_capital.ts",
+  "blob": "1e5dd691b03d625f93e5a7dcc2cf50f89273d2f3",
+  "sourceSha256": "9d819698d632cdfffc41730987be3361d33816d60602e41d041afc77171a1501",
+  "instrumentation": [
+    "replace updateFactionCapital call with no-op comment",
+    "replace updateParamilitaryInternationalStanding call with no-op comment"
+  ],
+  "command": "node tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/correction-01/legacy/generate-and-compare.mjs"
+}

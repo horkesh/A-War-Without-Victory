@@ -1,0 +1,17 @@
+{
+  "schema": "awwv.player-startup-policy.supplemental-inputs.v1",
+  "files": [
+    {
+      "path": "review/EOF_FORMAT_ADDENDUM.md",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/EOF_FORMAT_ADDENDUM.md",
+      "bytes": 1537,
+      "sha256": "b247c95b787c5b837994880aabf92f1471c68f2f42d2556a671e6869412100ec"
+    },
+    {
+      "path": "review/EOF_FORMAT_ADDENDUM.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/EOF_FORMAT_ADDENDUM.json",
+      "bytes": 1198,
+      "sha256": "3a983189480906c7ac4e42633900acc573e73757a8ac3a8d8c20ee6bc67ce125"
+    }
+  ]
+}

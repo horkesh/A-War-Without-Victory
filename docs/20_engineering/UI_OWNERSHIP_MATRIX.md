@@ -85,6 +85,8 @@ The player is the faction president (wartime political leader). Shell ownership 
 | Active-campaign cost so far | Turn aftermath + War Summary | Records and Chronicle | Final historical comparison remains game-over-only until intentionally expanded. |
 | Final campaign judgment | VerdictScreen | Chronicle, Wrapped, Codex | VerdictScreen owns endgame presentation; other shells may point to it or feed context. |
 
+The existing `EventDecisionModal` owns the explicit RBiH opening command-policy response after identity and before first Advance. It uses the authored three options, historical marker, consequence rows and blocking behavior; neither the Inbox nor startup initialization supplies consent. Browser and Electron share the same transition/resolution owner. The per-request paramilitary surface continues to own requests under `ask` and the existing standing-policy controls.
+
 ## Ownership rules
 
 1. If a concept appears in multiple places, one surface must be named canonical.

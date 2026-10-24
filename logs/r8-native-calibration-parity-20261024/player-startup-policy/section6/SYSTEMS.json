@@ -1,0 +1,270 @@
+{
+  "schema": "awwv.sensitive-history.engine-systems-review.v1",
+  "date": "2026-10-24",
+  "seat": "Engine/systems",
+  "independent": true,
+  "implementerExcluded": true,
+  "scope": "static_read_only_proposal_and_source_review",
+  "reviewedHead": "b371adc3e0935825649e5eda4e6bbd45a44a359d",
+  "verdict": "GO_WITH_BINDING_CONDITIONS",
+  "implementationAuthorizedByThisSeat": false,
+  "systemsRuling": {
+    "approvedShape": "After a successful turn-0 RBiH identity player receipt, atomically queue exactly one complete existing rbih_paramilitary_policy_1992 decision before first Advance and resolve it through canonical event semantics.",
+    "newSchemaRequired": false,
+    "newPolicyWriterAllowed": false,
+    "newRequestSpawnCaptureOrControlWriterAllowed": false,
+    "headlessOrBotChangeAllowed": false,
+    "rewardForAtrocityBrightLineEngaged": true,
+    "historicalDefault": "always_deny",
+    "unresolvedDefault": "ask",
+    "alwaysAllowClassification": "counterfactual explicit player input"
+  },
+  "findings": [
+    {
+      "id": "SYS-F1",
+      "severity": "binding",
+      "risk": "browser_electron_resolver_divergence",
+      "evidence": "Electron reaches resolveEventDecisionCore and emits notifications; resolveBrowserEventDecision independently duplicates effects/flags/dimensions/receipt/causality and omits emitEventNotifications.",
+      "resolution": "Use one browser-safe shared decision and follow-on queue transition, or prove exact canonical full-state equivalence including notifications. Do not copy a second sensitive queue implementation."
+    },
+    {
+      "id": "SYS-F2",
+      "severity": "binding",
+      "risk": "forged_or_cross_faction_ipc",
+      "evidence": "The generic IPC accepts arbitrary string eventId/responseId and the core checks pending ID and option but not ownership against meta.player_faction.",
+      "resolution": "Bind the timing transition to current canonical state, RBiH player ownership, War turn 0, non-headless mode, the actual pending identity decision, and a newly appended identity receipt; reject stale/cross-faction/non-pending/duplicate input without mutation."
+    },
+    {
+      "id": "SYS-F3",
+      "severity": "binding",
+      "risk": "partial_identity_commit_without_policy_blocker",
+      "evidence": "Identity resolution enables the policy event before the proposed queue validation runs.",
+      "resolution": "Resolve and queue on one uncommitted candidate and persist/broadcast once only after both succeed; any validation error retains the prior canonical state."
+    },
+    {
+      "id": "SYS-F4",
+      "severity": "binding",
+      "risk": "effect_clock_or_receipt_drift",
+      "evidence": "apply_effects stamps expires_turn from state.meta.turn; moving the whole response to turn 0 changes persisted expiry and receipt turns.",
+      "resolution": "Pin turn_fired and receipt turn 0, ask recruitment expiry 52, allow recruitment expiry 52 and priority expiry 104, deny no modifier, with all flags/dimensions/causality/notifications applied exactly once."
+    },
+    {
+      "id": "SYS-F5",
+      "severity": "scope",
+      "risk": "overclaim_from_retained_bot_prefix",
+      "evidence": "Retained evidence proves only two immediate no-player/player differences at Bukvik Gornji 2 and Obadi; it does not execute the proposed player branch.",
+      "resolution": "Require focused first-Advance proof and make no inference about seven January cells, score 707, turn 39/188, or calibration adoption."
+    }
+  ],
+  "bindings": [
+    {
+      "id": "SYS-1",
+      "requirement": "Create one browser-safe shared owner for follow-on eligibility, validation, firing bookkeeping, and pending-decision construction. Electron and browser fallback must consume it, and ordinary identity/policy responses must use canonical event-core semantics including notifications."
+    },
+    {
+      "id": "SYS-2",
+      "requirement": "After resolveEventDecision appends exactly one new rbih_state_identity player receipt at War turn 0 for the current RBiH player, validate and queue exactly one policy decision in the same uncommitted state; persist and broadcast once after both steps succeed, with rollback-by-noncommit on error."
+    },
+    {
+      "id": "SYS-3",
+      "requirement": "Require player_faction RBiH, headless_scenario_auto_control false, matching pending-decision faction, valid pending identity response, enabled policy event, and a fixed policy definition contract: War phase, responding faction RBiH, requires_enabled/once/requires_player_response true, historical default always_deny, and exact authored option order always_deny/ask/always_allow. Reject all stale, duplicate, malformed, fired, closed, pending, decided, later-turn, non-RBiH, and headless cases without mutation."
+    },
+    {
+      "id": "SYS-4",
+      "requirement": "Keep top-level paramilitary_policy ask and Advance hard-blocked before explicit policy response. Historical mode may mark always_deny as historical but must not select it. The IPC accepts only eventId and a response present on the current pending decision; no policy patch, synthetic request, spawn, target, or control instruction is accepted."
+    },
+    {
+      "id": "SYS-5",
+      "requirement": "Apply the whole existing event exactly once and pin turn_fired/receipt turn 0, ask recruitment expires_turn 52, allow recruitment expires_turn 52 plus priority-shift expires_turn 104, deny no modifier, and exact flags, dimension shifts, causality, notifications, and receipt provenance."
+    },
+    {
+      "id": "SYS-6",
+      "requirement": "Prove save/reload and duplicate-delivery idempotence before and after every option: one firing count, last-fired turn 0, one fired ID, one pending item before response, one receipt after response, and no duplicated effect or notification. Require byte-identical canonical serialization for identical logical input, including reversed object insertion order."
+    },
+    {
+      "id": "SYS-7",
+      "requirement": "Leave event data, resolver option semantics, paramilitary detection/spawn/advance, War phase order, request/capture/control/displacement/casualty/war-crime writers, scoring, thresholds, references, protected controls, headless/no-player behavior, and telemetry unchanged. Do not tune downstream mechanics if either expected target does not appear."
+    },
+    {
+      "id": "SYS-8",
+      "requirement": "Extend the focused RED/GREEN proof to compare Electron and browser canonical serialized states for identity-to-policy and all three responses, including notifications, clocks, receipts, persistence, duplicate calls, and hostile IPC. At first Advance prove deny/ask/allow semantics and only the exact candidate/capture OSIDs Bukvik Gornji 2 and Obadi."
+    },
+    {
+      "id": "SYS-9",
+      "requirement": "Preserve n91-n95, all telemetry, reference/pin files, and protected controls byte-identical. The running clean b371adc3e full suite qualifies only that source; any implementation validation follows the already recorded cheap-first commands, caps, and stop rules."
+    },
+    {
+      "id": "SYS-10",
+      "requirement": "Keep always_deny historical and ask/always_allow counterfactual; never frame allow or the two captures as optimization, recovery, stronger play, Historical parity, or calibration reward. This review approves no score, threshold, baseline, or adoption claim; any failed condition or scope change returns to the owner under Gate sections 6 and 8."
+    }
+  ],
+  "determinismGuaranteesRequired": {
+    "randomnessAdded": false,
+    "wallClockStateAdded": false,
+    "stableTraversalRequired": true,
+    "identicalInputByteIdentityRequired": true,
+    "authoredOptionOrderPreserved": [
+      "always_deny",
+      "ask",
+      "always_allow"
+    ],
+    "phaseOrderChanged": false,
+    "saveSchemaChanged": false
+  },
+  "causalBoundary": {
+    "provenImmediateDifferences": [
+      "op:brcko:bukvik_gornji_2",
+      "op:srebrenica:obadi"
+    ],
+    "proposedPlayerBranchExecuted": false,
+    "allSevenJanuaryDifferencesProven": false,
+    "score707Proven": false,
+    "turn39Or188Qualified": false,
+    "calibrationAdoptionAuthorized": false
+  },
+  "frozenFullSuiteContext": {
+    "sourceHead": "b371adc3e0935825649e5eda4e6bbd45a44a359d",
+    "passed": 15020,
+    "failed": 0,
+    "skipped": 33,
+    "childExit": 0,
+    "outerExit": 126,
+    "outerExitReason": "36 file_added scratch outputs",
+    "priorBytesChanged": false,
+    "sourceRuntimeChanged": false,
+    "reviewSeatInspectedOrReran": false,
+    "qualifiesTimingImplementation": false
+  },
+  "preserve": [
+    "n91",
+    "n92",
+    "n93",
+    "n94",
+    "n95",
+    "all telemetry",
+    "reference and pin files",
+    "protected controls",
+    "data/scenarios/events/war_1992.json",
+    "headless and bot behavior",
+    "paramilitary sweep, phase order, capture, control, displacement, casualty, war-crime, and scoring semantics"
+  ],
+  "sourceBindings": [
+    {
+      "path": "docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md",
+      "lines": "128-143,207-233,250-256",
+      "sha256": "4945b9a0bb7d300a5185ac09e069cac9911e3c4a88d01f963ff5699adea40247"
+    },
+    {
+      "path": "docs/10_canon/Engine_Invariants_v0_9_0.md",
+      "lines": "7-13,21-25,51-56,534-536",
+      "sha256": "445c3a78304c8a84db9ba7c94403f183882d6128947a3da5ec2e9235287c7227"
+    },
+    {
+      "path": "docs/20_engineering/DETERMINISM_TEST_MATRIX.md",
+      "lines": "3-18,68-95",
+      "sha256": "5ae5cb2d39e26967fa4cb5b11091228818eff4af66cc48a199008f80e533d98f"
+    },
+    {
+      "path": "docs/20_engineering/CODE_CANON.md",
+      "lines": "36-42,197-206,222-230",
+      "sha256": "4363e1eb941b22980108ec5acd33c9861f59dc4644e372ea74cd570abb483f34"
+    },
+    {
+      "path": "docs/20_engineering/DESKTOP_GUI_IPC_CONTRACT.md",
+      "lines": "18-22,253-257",
+      "sha256": "002e4f46bf3dd11024ea5f1566b799f200115e5b31d9807cf344ae61e4d3f67b"
+    },
+    {
+      "path": "docs/20_engineering/UI_OWNERSHIP_MATRIX.md",
+      "lines": "9-20,76-93,128-129",
+      "sha256": "2a3271354752fdd5291f7f44ea5c161ea34d5a5f3f0eb9592bb5cc21299fa042"
+    },
+    {
+      "path": "data/scenarios/events/war_1992.json",
+      "lines": "2103-2345",
+      "sha256": "7596df56b934be4334ab8bffe51cf92f439c1fec238d6b82c21e68f25c61162a"
+    },
+    {
+      "path": "src/desktop/desktop_sim.ts",
+      "lines": "138-142,170-262,327-357",
+      "sha256": "e5954acf23516721bea57c6a1274d184c90358f46e91178770898d3c2eb965a1"
+    },
+    {
+      "path": "src/desktop/electron-main.cjs",
+      "lines": "2389-2425,3398-3411",
+      "sha256": "3d994d859f251d41d42ea6458629786b432a2d715b3bb7b788fa1dbf8ce20dd0"
+    },
+    {
+      "path": "src/sim/events/resolve_decision_core.ts",
+      "lines": "58-103",
+      "sha256": "f5b58b2843de998930abe2050bf5579fdefb70c6e97aa49772a54cc7d1fe4953"
+    },
+    {
+      "path": "src/sim/events/evaluate_events.ts",
+      "lines": "149-178,181-203,218-230,760-867",
+      "sha256": "b321d84be99af871bb3c62cfd57faade1dddfd1e81923a044192dd18341d8d80"
+    },
+    {
+      "path": "src/sim/events/apply_effects.ts",
+      "lines": "580-604,713-731",
+      "sha256": "7c50ad5293adaf987b34d97f0471455028272e19dee91247446896df4e036dde"
+    },
+    {
+      "path": "src/sim/combat/paramilitary_sweep.ts",
+      "lines": "83-101,413-549,841-851,864-1007",
+      "sha256": "4976275cdc33eaede2d0abf907b2c20ad4b059fb0188711c97168fad1570d550"
+    },
+    {
+      "path": "src/sim/turn_phases/war_phases.ts",
+      "lines": "1063-1081,1715-1749",
+      "sha256": "0d11a7c5fbf73f19e1a30256218a48c482a76042d620b8107fd1f7b06b799d2d"
+    },
+    {
+      "path": "src/state/player_decision_manifest.ts",
+      "lines": "58-68,90-97,239-248",
+      "sha256": "587ef6d32f9aac3c76bf68f9c575b46d90246d1fef3618ebff988f2f0d4539fd"
+    },
+    {
+      "path": "src/state/serializeGameState.ts",
+      "lines": "1-9,16-30,53-61",
+      "sha256": "a4010315c439eb0901a53d8166a8c44cb08427aff5d994e51e05ddb64657be97"
+    },
+    {
+      "path": "src/ui/map/desktop/campaignRecruitmentActions.ts",
+      "lines": "24-219,221-247",
+      "sha256": "910e149239bdc7f00a959f27b57a75f33ffe8b905a25b703ffcdf5f07b38d564"
+    },
+    {
+      "path": "src/ui/map/App.tsx",
+      "lines": "957-989,1933-1985",
+      "sha256": "66db2a7f9fa465e1ede9b6b9633ea872a6b1712a7712d6c368205b7a07d7c7ad"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/clean-freeze-review/PARAMILITARY_TIMING_AUTHORITY_AUDIT.md",
+      "lines": "3-56",
+      "sha256": "8b5716f8628ad6400616e0b36498e57bf875a889e473cf8976a762fa906b0c90"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/PROPOSAL.md",
+      "sha256": "12ff5263e6c9236b6db1812cc9e7052b405e7037111ae510730883758e0dc109"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/RED_FIXTURE_DESIGN.md",
+      "sha256": "0d18b1b250645a6b254ab9694b6496af10a3166ccde6fd392592af4a945c4b77"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/SOURCE_AUDIT.json",
+      "sha256": "5bef240dab4e171f52ca8ec205be01fe623e8e17ec3b81b670177f2a9605fd54"
+    }
+  ],
+  "execution": {
+    "implementation": false,
+    "tests": false,
+    "build": false,
+    "campaign": false,
+    "native": false,
+    "sourceRuntimeDocsTestBuildRunWrites": false,
+    "reviewArtifactWritesOnly": true,
+    "frozenFullSuiteTouched": false
+  }
+}

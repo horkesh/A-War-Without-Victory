@@ -1,0 +1,185 @@
+{
+  "schema": "awwv.sensitive-history.scenario-calibration-initialization-addendum.v1",
+  "date": "2026-10-24",
+  "seat": "scenario-tester/calibration",
+  "independent": true,
+  "implementerExcluded": true,
+  "scope": "static_read_only_revised_initializer_delta_review",
+  "reviewedHead": "b371adc3e0935825649e5eda4e6bbd45a44a359d",
+  "verdict": "GO_WITH_BINDING_CONDITIONS",
+  "implementationAuthorizedByThisSeat": false,
+  "originalCalibrationVerdictPreserved": true,
+  "ruling": {
+    "failedQueueOnlyCandidateAcceptable": false,
+    "rootCauseConfirmed": true,
+    "ordinaryPlayerFillOnlyInitializationAcceptable": true,
+    "allThreePlayableFactionsRequired": ["RBiH", "RS", "HRHB"],
+    "hrhbUnitedFrontCrossFactionShiftRequired": true,
+    "headlessLatentWarCrimeUndercountConfirmed": true,
+    "headlessRepairAuthorized": false,
+    "rewardForAtrocityBrightLineEngaged": true,
+    "allSevenJanuaryDifferencesProven": false,
+    "score707Proven": false,
+    "calibrationAdoptionAuthorized": false
+  },
+  "failedCandidateEvidence": {
+    "deny": "no request, deployment, or capture",
+    "askTargets": ["op:srebrenica:obadi", "op:brcko:bukvik_gornji_2"],
+    "allowCaptures": ["op:srebrenica:obadi", "op:brcko:bukvik_gornji_2"],
+    "allowCivilianDeaths": 200,
+    "observedDimensionDeltas": "zero_due_to_absent_strategic_dimensions",
+    "observedWarCrimesEventsDelta": 0,
+    "requiredWarCrimesEventsDelta": 2,
+    "requiredWarCrimesEventsEmergentDelta": 2
+  },
+  "bindings": [
+    {
+      "id": "CAL-INIT-1",
+      "requirement": "Use one Node-free fill-only initializer with CANONICAL_FACTIONS and the existing capital, patron, and whole-dimension-store factories; perform no tick, derived computation, reset, event, policy, receipt, target, capture, control, score, or UI action."
+    },
+    {
+      "id": "CAL-INIT-2",
+      "requirement": "Preserve every present valid container, entry, nested reference, array, optional field, counter, partial dimension store, extra faction, and unknown key; add only absent containers and missing canonical capital/patron entries; fail closed on malformed present containers; one and two calls must be byte-identical."
+    },
+    {
+      "id": "CAL-INIT-3",
+      "requirement": "Characterize the old compute_capital prelude before production edits and require exact canonical pre-update and final-output equality after extraction across absent, empty, complete, missing-entry, sentinel-rich, extra-key, malformed, and partial-dimension cases. Any valid-case delta is BLOCK."
+    },
+    {
+      "id": "CAL-INIT-4",
+      "requirement": "Call the initializer only in ordinary Electron after observerParity returns and in the browser explicit player fallback, after metadata/defer work and before foundational queueing; prohibit scenario, snapshot, migration, deserialization, load, runTurn, phase, observer, and headless calls."
+    },
+    {
+      "id": "CAL-INIT-5",
+      "requirement": "Statically inventory every pre-compute-negotiation-capital reader/writer of initialized substrate. Explicitly characterize observe-threshold-flags, compute-dimension-bases, paramilitary harm, command-lever, command-authority, event predicates, and dynamic consumers. Existing first-turn base computation may only preserve authored event modifiers and apply unchanged formulas; any additional unreviewed action is STOP."
+    },
+    {
+      "id": "CAL-INIT-6",
+      "requirement": "Prove complete canonical substrate and every authored dimension shift for every option of all three foundational events in ordinary Electron and browser starts, including HRHB united_front applying RBiH internal_cohesion +5; preserve flags, effects, receipts, notifications, clocks, and first-Advance persistence."
+    },
+    {
+      "id": "CAL-INIT-7",
+      "requirement": "Restore the separate shared opening_policy_transition owner and retain exact three-option explicit consent, unresolved ask, Historical deny, no preselection, complete disclosure, hard block, one receipt, turn-0 and 52/104 clocks, Electron/browser parity, and save/retry idempotence."
+    },
+    {
+      "id": "CAL-INIT-8",
+      "requirement": "From one serialized pre-policy state, require deny no request/deployment/capture, ask exact two requests only, and allow exactly Obadi and Bukvik Gornji 2 captures with 200 civilian deaths and exact +2 war_crimes_events/+2 war_crimes_events_emergent through unchanged writers."
+    },
+    {
+      "id": "CAL-INIT-9",
+      "requirement": "Treat allow as a counterfactual harm-accounting fixture, never a KPI, reward, historical parity, stronger opening, or calibration target; make no all-seven, 707, turn-39, turn-188, acceptance, tuning, or adoption claim."
+    },
+    {
+      "id": "CAL-INIT-10",
+      "requirement": "Preserve n91-n95 and all artifacts, baked/n94/n95 initial bytes, references, pins, protected controls, floors, event data, phase order, scoring, and telemetry exactly. Record the headless four-capture counter undercount as known unfixed incomplete evidence and never use it morally or historically."
+    },
+    {
+      "id": "CAL-INIT-11",
+      "requirement": "Limit changes to the exact seven production and six test files in this verdict. Any additional file, call site, phase, writer, event-data, control, scoring, calibration, reference, telemetry, or documentation need is STOP pending owner decision and renewed review."
+    },
+    {
+      "id": "CAL-INIT-12",
+      "requirement": "Require compatible renewed Game Design, UI/UX, Historian, scenario-tester/calibration, Engine/systems, and Red-team GO addenda before implementation; any BLOCK, split, missing seat, or unmet condition returns to the owner."
+    }
+  ],
+  "allowedProductionFiles": [
+    "src/sim/negotiation/initialize_negotiation_state.ts",
+    "src/sim/negotiation/compute_capital.ts",
+    "src/sim/events/opening_policy_transition.ts",
+    "src/desktop/desktop_sim.ts",
+    "src/ui/map/desktop/campaignRecruitmentActions.ts",
+    "src/desktop/electron-main.cjs",
+    "src/ui/map/App.tsx"
+  ],
+  "allowedTestFiles": [
+    "tests/negotiation_capital.test.ts",
+    "tests/startup_snapshot_contract.test.ts",
+    "tests/browser_campaign_start_fallback.test.ts",
+    "tests/player_start_surface_contracts.test.ts",
+    "tests/pre_first_advance_paramilitary_policy.test.ts",
+    "tests/desktop_persistence_contract.test.ts"
+  ],
+  "frozenInputs": {
+    "paths": [
+      "data/derived/startup/apr_1992_initial_save.json",
+      "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94/initial_save.json",
+      "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n95/initial_save.json"
+    ],
+    "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+  },
+  "validationPlan": [
+    {
+      "order": 1,
+      "gate": "static_scope_and_pre_capital_reader_map",
+      "expectedCost": "under_one_minute",
+      "pass": "one initializer, one policy-transition owner, exact allowed call sites/files, old private prelude only removed, complete classified reader/writer map, no unexplained mutation",
+      "stop": "any extra file, call, phase, writer, consumer action, or uncertainty"
+    },
+    {
+      "order": 2,
+      "gate": "pre_edit_characterization",
+      "capSeconds": 180,
+      "pass": "old compute behavior fully characterized and only established ordinary-start substrate expectations RED",
+      "stop": "unexpected failure or ambiguous fixture before production edits"
+    },
+    {
+      "order": 3,
+      "gate": "initializer_startup_green",
+      "command": "npx.cmd vitest run tests/negotiation_capital.test.ts tests/startup_snapshot_contract.test.ts tests/browser_campaign_start_fallback.test.ts tests/player_start_surface_contracts.test.ts",
+      "capSeconds": 180,
+      "pass": "all green with exact compute differential, all factions/options, reader map expectations, preservation, idempotence, frozen hashes, and observer parity",
+      "stop": "timeout or first unexpected failure; at most one targeted correction after written diagnosis"
+    },
+    {
+      "order": 4,
+      "gate": "policy_green",
+      "command": "npx.cmd vitest run tests/pre_first_advance_paramilitary_policy.test.ts tests/player_start_surface_contracts.test.ts tests/desktop_persistence_contract.test.ts",
+      "capSeconds": 180,
+      "pass": "all green including exact branches, effects, clocks, notifications, receipts, hostile cases, idempotence, 200 civilian deaths, and +2/+2 counters",
+      "stop": "timeout, missing consequence, extra target, or frozen-input mutation"
+    },
+    {
+      "order": 5,
+      "gate": "typecheck_and_review",
+      "command": "npx.cmd tsc --noEmit --incremental false --pretty false",
+      "capSeconds": 180,
+      "pass": "exit 0 followed by one fresh independent implementation GO",
+      "stop": "timeout, nonzero exit, or unresolved review finding; at most one targeted correction verification"
+    }
+  ],
+  "priorEvidenceLimits": {
+    "n95QualifiesNewBehavior": false,
+    "fullSuitePassingTests": 15020,
+    "fullSuiteOverallExit": 126,
+    "fullSuiteFailureClass": "protected_scratch_root_outputs",
+    "fixtureCorrectionIndependentGoCount": 3,
+    "fixtureCorrectionQualifiesInitializationCandidate": false,
+    "broadSuiteRerunAutomatic": false
+  },
+  "sourceHashes": [
+    {"path": "tmp/player-bot-capability-parity-20261024/startup-consequence-diagnosis/DIAGNOSIS.md", "sha256": "bab4297842f8434f4cddcacd5b5d93609688cbeff0d51e2df1fe975772b266c9"},
+    {"path": "tmp/player-bot-capability-parity-20261024/startup-consequence-diagnosis/PROPOSAL.md", "sha256": "270e018da91d48ae350a5460c6fe3d02a892406e53d130d6e609b78942fe24ab"},
+    {"path": "tmp/player-bot-capability-parity-20261024/startup-consequence-diagnosis/EVIDENCE.json", "sha256": "a1d57ca9210586812424c30aebcb303b75e7b20879dfb8ed72fbec7daf6d6f3d"},
+    {"path": "tmp/player-bot-capability-parity-20261024/opening-policy-implementation/failed-candidate/FINDINGS.md", "sha256": "2db6dbd68c713be1144ea40a40dbd1be6eb3d31ff33a4622482a16f63446fe12"},
+    {"path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/SYSTEMS_INITIALIZATION_ADDENDUM.md", "sha256": "67d8c00e02922660e5a19892876710e40f7e35f29cd69bfe3525c130b08adb66"},
+    {"path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/RED_TEAM_INITIALIZATION_ADDENDUM.md", "sha256": "c69f418328ad98c9eae2586fa1b45fb2a4f1dc8a072dd1de0bef11cccf2fb8a7"},
+    {"path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/GAME_DESIGN_INITIALIZATION_ADDENDUM.md", "sha256": "70f9478a0a2045ead952becadb3e08a1a125a3d75b0c452b5b4f120ee9870329"},
+    {"path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/UI_UX_INITIALIZATION_ADDENDUM.md", "sha256": "66f22d3f9a5c35bc289c0305f094f2488b8ef8c8ef960fe86e52c1f8155b83f3d"},
+    {"path": "src/sim/negotiation/compute_capital.ts", "sha256": "9d819698d632cdfffc41730987be3361d33816d60602e41d041afc77171a1501"},
+    {"path": "src/sim/events/strategic_dimensions.ts", "sha256": "5344a47d97a7c582406d05a7312738e4025c5abfca43070884d28e7286891e97"},
+    {"path": "data/scenarios/events/war_1992.json", "sha256": "7596df56b934be4334ab8bffe51cf92f439c1fec238d6b82c21e68f25c61162a"},
+    {"path": "docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md", "sha256": "4945b9a0bb7d300a5185ac09e069cac9911e3c4a88d01f963ff5699adea40247"},
+    {"path": "docs/40_reports/CALIBRATION_MASTER.md", "sha256": "dd885ad4b6e2d5658ffbc0263f50b1a4f73415d89d89347dfa1df0701fb4d302"},
+    {"path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/CALIBRATION.md", "sha256": "273068e4325b67d2e070e2af02399cdbd4b51b3110459418e2ae1c1c3637b87f"}
+  ],
+  "execution": {
+    "implementation": false,
+    "tests": false,
+    "build": false,
+    "package": false,
+    "campaign": false,
+    "native": false,
+    "sourceRuntimeDocsTestBuildRunWrites": false,
+    "reviewArtifactWritesOnly": true
+  }
+}

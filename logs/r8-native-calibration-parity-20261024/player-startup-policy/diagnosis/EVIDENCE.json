@@ -1,0 +1,135 @@
+{
+  "schema": "awwv.startup-consequence-diagnosis.v1",
+  "date": "2026-10-24",
+  "head": "b371adc3e0935825649e5eda4e6bbd45a44a359d",
+  "status": "root_cause_established_implementation_requires_renewed_review",
+  "execution": {
+    "sourceChanges": false,
+    "testChanges": false,
+    "campaignRuns": false,
+    "builds": false,
+    "nativeRuns": false,
+    "fullSuiteRuns": false,
+    "artifactWritesOnly": true
+  },
+  "facts": [
+    {
+      "id": "F1",
+      "claim": "The baked snapshot and n94/n95 initial saves are byte-identical and contain empty negotiation capital/patron maps with no strategic_dimensions.",
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+      "paths": [
+        "data/derived/startup/apr_1992_initial_save.json",
+        "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94/initial_save.json",
+        "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n95/initial_save.json"
+      ]
+    },
+    {
+      "id": "F2",
+      "claim": "Electron ordinary startup and browser fallback load that snapshot and queue a foundational decision before any negotiation-substrate initializer is called.",
+      "bindings": [
+        "src/desktop/desktop_sim.ts:277-357",
+        "src/ui/map/desktop/campaignRecruitmentActions.ts:253-320"
+      ]
+    },
+    {
+      "id": "F3",
+      "claim": "RBiH, RS, and HRHB foundational response options all author strategic dimension shifts, but the dimension writer returns when the store is absent.",
+      "bindings": [
+        "data/scenarios/events/war_1992.json: rbih_state_identity, rs_strategic_goals, hrhb_political_goal",
+        "src/sim/events/resolve_decision_core.ts:75-89",
+        "src/sim/events/evaluate_events.ts:149-157"
+      ]
+    },
+    {
+      "id": "F4",
+      "claim": "First-turn paramilitary detection/advance precedes negotiation capital computation at phase indices 43/44 versus 184 in retained n94 evidence.",
+      "bindings": [
+        "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94/weekly_report.jsonl:first record",
+        "src/sim/turn_phases/war_phases.ts:1715-1749,4359-4361",
+        "src/sim/turn_phases/war_phase_negotiation_steps.ts:59-64"
+      ]
+    },
+    {
+      "id": "F5",
+      "claim": "recordWarCrime returns when faction capital is absent; later computeNegotiationBreakdown creates a zeroed record and reads the war-crime count from that same record, so a missed increment cannot be reconstructed.",
+      "bindings": [
+        "src/sim/combat/paramilitary_sweep.ts:841-850,964-1000",
+        "src/sim/negotiation/compute_capital.ts:45-85,221-282"
+      ]
+    },
+    {
+      "id": "F6",
+      "claim": "The failed real candidate produced exact allow captures at Obadi and Bukvik Gornji 2 and persisted 200 civilian casualties, but dimension deltas were zero and war_crimes_events delta was zero instead of two.",
+      "bindings": [
+        "tmp/player-bot-capability-parity-20261024/opening-policy-implementation/failed-candidate/FINDINGS.md",
+        "tmp/player-bot-capability-parity-20261024/opening-policy-implementation/focused-new-02.log"
+      ]
+    }
+  ],
+  "inference": {
+    "claim": "A single fill-only browser-safe initializer, called only in ordinary player startup before opening queueing, supplies the preconditions required by the existing consequence writers without changing phase order or writer semantics.",
+    "confidence": "high",
+    "requiresRedGreenProof": true
+  },
+  "latentOutOfScopeBug": {
+    "claim": "Current headless n94/n95 first-turn paramilitary captures also lose early war-crime increments because their capital is absent until phase 184.",
+    "disposition": "record_only_no_baseline_or_phase_or_writer_change",
+    "bindingCriterion": "n94_n95_and_baked_no_player_initial_bytes_remain_exact"
+  },
+  "proposedOwner": {
+    "path": "src/sim/negotiation/initialize_negotiation_state.ts",
+    "properties": [
+      "browser_safe",
+      "single_owner",
+      "fill_missing_only",
+      "canonical_faction_order",
+      "idempotent",
+      "no_derived_computation",
+      "no_counter_reset",
+      "no_existing_field_overwrite"
+    ]
+  },
+  "allowedProductionFiles": [
+    "src/sim/negotiation/initialize_negotiation_state.ts",
+    "src/sim/negotiation/compute_capital.ts",
+    "src/desktop/desktop_sim.ts",
+    "src/ui/map/desktop/campaignRecruitmentActions.ts",
+    "src/desktop/electron-main.cjs",
+    "src/ui/map/App.tsx"
+  ],
+  "forbiddenScope": [
+    "data/scenarios/events/war_1992.json",
+    "data/derived/startup/apr_1992_initial_save.json",
+    "scenario factory or headless initialization",
+    "save migration or deserialization",
+    "war phase order",
+    "paramilitary detection spawn capture control displacement casualty or war-crime writers",
+    "scoring thresholds references protected controls telemetry or calibration adoption",
+    "n91 through n95 artifacts"
+  ],
+  "renewedReviewSeats": [
+    "game-designer",
+    "ui-ux-developer",
+    "Historian",
+    "scenario-tester/calibration",
+    "Engine/systems",
+    "Red-team"
+  ],
+  "sourceHashes": [
+    { "path": "src/sim/negotiation/compute_capital.ts", "sha256": "9d819698d632cdfffc41730987be3361d33816d60602e41d041afc77171a1501" },
+    { "path": "src/desktop/desktop_sim.ts", "sha256": "e5954acf23516721bea57c6a1274d184c90358f46e91178770898d3c2eb965a1" },
+    { "path": "src/ui/map/desktop/campaignRecruitmentActions.ts", "sha256": "910e149239bdc7f00a959f27b57a75f33ffe8b905a25b703ffcdf5f07b38d564" },
+    { "path": "src/sim/combat/paramilitary_sweep.ts", "sha256": "4976275cdc33eaede2d0abf907b2c20ad4b059fb0188711c97168fad1570d550" },
+    { "path": "src/sim/events/evaluate_events.ts", "sha256": "b321d84be99af871bb3c62cfd57faade1dddfd1e81923a044192dd18341d8d80" },
+    { "path": "src/sim/events/resolve_decision_core.ts", "sha256": "f5b58b2843de998930abe2050bf5579fdefb70c6e97aa49772a54cc7d1fe4953" },
+    { "path": "src/sim/turn_phases/war_phases.ts", "sha256": "0d11a7c5fbf73f19e1a30256218a48c482a76042d620b8107fd1f7b06b799d2d" },
+    { "path": "data/scenarios/events/war_1992.json", "sha256": "7596df56b934be4334ab8bffe51cf92f439c1fec238d6b82c21e68f25c61162a" },
+    { "path": "tmp/player-bot-capability-parity-20261024/opening-policy-implementation/focused-new-02.log", "sha256": "72e701aced8291d1c6ae386a4cc33c134f2698c83f4245da8174e7ef8f67afbc" }
+  ],
+  "retainedDirtyPathsUntouched": [
+    "docs/plans/2026-07-31-full-campaign-electron-validation-plan.md",
+    "tests/fixtures/vitest_balanced/receipt_nested_child.fixture.ts",
+    "tests/run_vitest_balanced.test.ts",
+    "tests/vitest_balanced_receipts.test.ts"
+  ]
+}

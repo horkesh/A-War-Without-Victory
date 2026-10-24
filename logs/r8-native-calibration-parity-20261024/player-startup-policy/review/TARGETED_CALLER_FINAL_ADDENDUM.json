@@ -1,0 +1,60 @@
+{
+  "schema": "awwv.targeted-caller-final-addendum.v1",
+  "verdict": "GO",
+  "critical_findings": [],
+  "authorized_delta": {
+    "path": "tests/ui/event_decision_auto_launch_contract.test.ts",
+    "line": 162,
+    "change": "expected call literal gains the fourth eventCatalogFull argument",
+    "diff_deletions": 1,
+    "diff_additions": 1,
+    "other_changes_in_file": false,
+    "production_change": false
+  },
+  "hashes": {
+    "pre_edit_test_sha256": "834b13dd48be89769a0bef2df02e7726cc3dc521706843fccdb9ddec9e94dda1",
+    "corrected_test_sha256": "fd398880b43984934afbbc87d4dfaa65d7e2bc60c640eb9c3a87830587582976",
+    "app_tsx_sha256": "8cfae1653dcd81fde35f25af60624aef6da479c5188ca06b50d51a56c0dea672",
+    "scope_exception_md_sha256": "06eded380754e522e70e22008fb88ba97e15d55a25737d566397350f668dd8be",
+    "scope_exception_json_sha256": "7ca1ecb852061bc13c7cb5c3645d1a887e0770cf3059be56c30302fc3599f3dd"
+  },
+  "preserved_checks": {
+    "changed_test": {
+      "receipt": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/related-caller-correction-01/receipt.json",
+      "receipt_sha256": "f5626b1dce9b12cdbc982bc3b6b60d27efe8c9086e9bf1662fd80f0f3a16928c",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true,
+      "files": "1/1",
+      "tests": "18/18",
+      "stdout_sha256": "3377f4d395d709a19ec5a5b4a7e12b159da0bd7e59fc4fbe38a35cd78b1e2ef2",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "remaining_callers": {
+      "receipt": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/remaining-callers-01/receipt.json",
+      "receipt_sha256": "3517dbaf4639d0f3e8f38750885dd3f89df6440ff5b822e58b36d6f56f1a4355",
+      "child_exit": 0,
+      "wrapper_exit": 0,
+      "artifact_contract_pass": true,
+      "files": "3/3",
+      "tests": "20/20",
+      "stdout_sha256": "691dea32c740787715d601f6e0b0a6229a4d49bae39325962ff15149cdb1a154",
+      "stderr_sha256": "2fa64f3a3cdff61f72a687ea177ad5d2644fde95adcde1ca18ca7c3ef180b758"
+    }
+  },
+  "reuse_basis": "The other three caller tests are distinct from the corrected static-contract test and production source is byte-identical; the test-only string correction cannot invalidate their earlier preserved results or the existing 94/94 focused and TypeScript 0/0 evidence.",
+  "unchanged_conditions": [
+    "original 13 candidate hashes",
+    "Systems and canon findings",
+    "six historical/UI review-seat conditions"
+  ],
+  "excluded_claims": [
+    "campaign",
+    "full suite",
+    "package",
+    "build",
+    "native run",
+    "baseline",
+    "calibration result"
+  ]
+}

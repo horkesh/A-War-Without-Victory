@@ -1,0 +1,432 @@
+{
+  "schema": "awwv.player-startup-policy.curated-inputs.v1",
+  "status": "SOURCE_CHECKPOINT_NOT_GAMEPLAY_ACCEPTANCE",
+  "files": [
+    {
+      "path": "review/FINAL_IMPLEMENTATION_REVIEW.md",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/FINAL_IMPLEMENTATION_REVIEW.md",
+      "bytes": 6052,
+      "sha256": "99d5de1f0942d4bdad9297c8a9541d5d6d50f383f62d16167464d682b144286f"
+    },
+    {
+      "path": "review/FINAL_IMPLEMENTATION_REVIEW.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/FINAL_IMPLEMENTATION_REVIEW.json",
+      "bytes": 4895,
+      "sha256": "ea48a1d0b2f86a52a9d580767bcbf39dba55353add4b2f0852e21e9e4c0b1d59"
+    },
+    {
+      "path": "review/TARGETED_CALLER_FINAL_ADDENDUM.md",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/TARGETED_CALLER_FINAL_ADDENDUM.md",
+      "bytes": 2577,
+      "sha256": "eca3241eedc2bf60dbbf99926ad4612ebcea2322addd5922fcd6915d57e05fd3"
+    },
+    {
+      "path": "review/TARGETED_CALLER_FINAL_ADDENDUM.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/TARGETED_CALLER_FINAL_ADDENDUM.json",
+      "bytes": 2655,
+      "sha256": "5282073ab50938efe813084619ff85f312c86aa17887cc8e7a5d38cdd8b4c595"
+    },
+    {
+      "path": "review/RELATED_CALLER_SCOPE_EXCEPTION_REVIEW.md",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/RELATED_CALLER_SCOPE_EXCEPTION_REVIEW.md",
+      "bytes": 2871,
+      "sha256": "06eded380754e522e70e22008fb88ba97e15d55a25737d566397350f668dd8be"
+    },
+    {
+      "path": "review/RELATED_CALLER_SCOPE_EXCEPTION_REVIEW.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/RELATED_CALLER_SCOPE_EXCEPTION_REVIEW.json",
+      "bytes": 2097,
+      "sha256": "7ca1ecb852061bc13c7cb5c3645d1a887e0770cf3059be56c30302fc3599f3dd"
+    },
+    {
+      "path": "review/TARGETED_CORRECTION_VERIFICATION.md",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/TARGETED_CORRECTION_VERIFICATION.md",
+      "bytes": 6048,
+      "sha256": "cedf2c03156769450766a9e60290db3d927b285d3ac0a7bcab6b8f4b88c9d7c0"
+    },
+    {
+      "path": "review/TARGETED_CORRECTION_VERIFICATION.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/TARGETED_CORRECTION_VERIFICATION.json",
+      "bytes": 3625,
+      "sha256": "9534465206c6c20786519e0ea284eb405ae29838c98df665dfa2de6a990d7bc9"
+    },
+    {
+      "path": "review/TARGETED_CORRECTION_VERIFICATION_ADDENDUM.md",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/TARGETED_CORRECTION_VERIFICATION_ADDENDUM.md",
+      "bytes": 3832,
+      "sha256": "6d6b4d2d1770363422843f3b64c41d89ca8e4c5d285ce8a374904cceaf9454ee"
+    },
+    {
+      "path": "review/TARGETED_CORRECTION_VERIFICATION_ADDENDUM.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/TARGETED_CORRECTION_VERIFICATION_ADDENDUM.json",
+      "bytes": 2172,
+      "sha256": "761b5601104b259f28f93c5dc6156762a62e276dabb403e5cad5bdc5bba1c497"
+    },
+    {
+      "path": "scratch/INDEPENDENT_REVIEW.md",
+      "source": "tmp/player-bot-capability-parity-20261024/suite-scratch-repair/INDEPENDENT_REVIEW.md",
+      "bytes": 4852,
+      "sha256": "1221330c707daa121197789e6a17a00c0711e3b6e33f08c6fd4262aae4103984"
+    },
+    {
+      "path": "scratch/INDEPENDENT_REVIEW.json",
+      "source": "tmp/player-bot-capability-parity-20261024/suite-scratch-repair/INDEPENDENT_REVIEW.json",
+      "bytes": 3448,
+      "sha256": "2914563650034cbdd396c296b130e94e28bfe939e9c79f9862b5657e0f211bca"
+    },
+    {
+      "path": "section6/GAME_DESIGN.json",
+      "source": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/GAME_DESIGN.json",
+      "bytes": 6010,
+      "sha256": "2ebd8cf4890112f30cf9f3a9576503abbb24c6230e05358656aefb25f531d366"
+    },
+    {
+      "path": "section6/GAME_DESIGN_INITIALIZATION_ADDENDUM.json",
+      "source": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/GAME_DESIGN_INITIALIZATION_ADDENDUM.json",
+      "bytes": 9589,
+      "sha256": "9c44b49479730b5f689dc29a2498d9aa68d5d5a63e49b98523fb309528ea76fd"
+    },
+    {
+      "path": "section6/UI_UX.json",
+      "source": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/UI_UX.json",
+      "bytes": 4297,
+      "sha256": "2d78935d9e84550a917700432d7f625fa4d6c6475c67bdeca3cdfa64592b9401"
+    },
+    {
+      "path": "section6/UI_UX_INITIALIZATION_ADDENDUM.json",
+      "source": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/UI_UX_INITIALIZATION_ADDENDUM.json",
+      "bytes": 8827,
+      "sha256": "7f914517b47b414dbb3706224edd3dd0ad484e9c99867f16dfb97f6012acdf42"
+    },
+    {
+      "path": "section6/HISTORIAN.json",
+      "source": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/HISTORIAN.json",
+      "bytes": 6216,
+      "sha256": "fef9ca9be2e910e5d20c631908e44c350cee7dff221a128ad62ef8ad4e015ac5"
+    },
+    {
+      "path": "section6/HISTORIAN_INITIALIZATION_ADDENDUM.json",
+      "source": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/HISTORIAN_INITIALIZATION_ADDENDUM.json",
+      "bytes": 7651,
+      "sha256": "22bcebd59fa0624c77568326312b00f52745511b54b4ef3112080f75f356fe9d"
+    },
+    {
+      "path": "section6/CALIBRATION.json",
+      "source": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/CALIBRATION.json",
+      "bytes": 8811,
+      "sha256": "bb5673f48163071a3ed4942ebaa75a9f0d699aadeb9e611f337f6dfeed550995"
+    },
+    {
+      "path": "section6/CALIBRATION_INITIALIZATION_ADDENDUM.json",
+      "source": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/CALIBRATION_INITIALIZATION_ADDENDUM.json",
+      "bytes": 11892,
+      "sha256": "53b42c2f24cf5582806d79049cf656a957dc1ce69fe8b27e069038ca6d7c6607"
+    },
+    {
+      "path": "section6/SYSTEMS.json",
+      "source": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/SYSTEMS.json",
+      "bytes": 13357,
+      "sha256": "7cee7ca703fa87912093e0bcb7713919e07480e646d614ad4d8372527c4dd3d6"
+    },
+    {
+      "path": "section6/SYSTEMS_INITIALIZATION_ADDENDUM.json",
+      "source": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/SYSTEMS_INITIALIZATION_ADDENDUM.json",
+      "bytes": 13222,
+      "sha256": "40e0d4670c885c05d0e927486da934024a58b9767d145af941af8a9543c73591"
+    },
+    {
+      "path": "section6/RED_TEAM.json",
+      "source": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/RED_TEAM.json",
+      "bytes": 7418,
+      "sha256": "3c6fd84bd3dc7dcff16dc8960876c8798ba784cbe3c7bdf1dfad1a82fdb21047"
+    },
+    {
+      "path": "section6/RED_TEAM_INITIALIZATION_ADDENDUM.json",
+      "source": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/RED_TEAM_INITIALIZATION_ADDENDUM.json",
+      "bytes": 8962,
+      "sha256": "d399c582952a2d5302d0cf8d636a751e207e801ae3a7417ea482bd4f84024465"
+    },
+    {
+      "path": "section6/INTEGRATION_DECISION_V2.json",
+      "source": "tmp/player-bot-capability-parity-20261024/timing-proposal/INTEGRATION_DECISION_V2.json",
+      "bytes": 5767,
+      "sha256": "fcb8e8b5104bdcf066855d5fae257cd88eb9f9cd59a10bda670cde1cd9c22eb3"
+    },
+    {
+      "path": "diagnosis/PROPOSAL.md",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-consequence-diagnosis/PROPOSAL.md",
+      "bytes": 8480,
+      "sha256": "270e018da91d48ae350a5460c6fe3d02a892406e53d130d6e609b78942fe24ab"
+    },
+    {
+      "path": "diagnosis/DIAGNOSIS.md",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-consequence-diagnosis/DIAGNOSIS.md",
+      "bytes": 6340,
+      "sha256": "bab4297842f8434f4cddcacd5b5d93609688cbeff0d51e2df1fe975772b266c9"
+    },
+    {
+      "path": "diagnosis/EVIDENCE.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-consequence-diagnosis/EVIDENCE.json",
+      "bytes": 6600,
+      "sha256": "a1d57ca9210586812424c30aebcb303b75e7b20879dfb8ed72fbec7daf6d6f3d"
+    },
+    {
+      "path": "diagnosis/STATIC_INVENTORY.md",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/STATIC_INVENTORY.md",
+      "bytes": 2424,
+      "sha256": "5537dd661553d35891e4a5e23761dd4ab1219e98bd32399f4dce9cad563780de"
+    },
+    {
+      "path": "implementation/RESULT.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/RESULT.json",
+      "bytes": 3662,
+      "sha256": "e6095b221173cb5e941242bde3c448770141b5ff90478232de5d76127eb7dc2f"
+    },
+    {
+      "path": "implementation/FINAL_HASHES.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/FINAL_HASHES.json",
+      "bytes": 1942,
+      "sha256": "16d1eb21642452b3046190a56679cee8c1b1905ef48d68d8e1f83154916591a7"
+    },
+    {
+      "path": "implementation/FINAL_BINDING.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/FINAL_BINDING.json",
+      "bytes": 615,
+      "sha256": "3fe25ab751a5a1c68cbbd6d20bba79afb3192d1560d5a6ba7d976dbec85b332b"
+    },
+    {
+      "path": "implementation/FINAL_CANDIDATE.diff",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/FINAL_CANDIDATE.diff",
+      "bytes": 42065,
+      "sha256": "691d9bac92b91523eb928e775c1b1799ec1eb5f949a960faa62b925e17be5226"
+    },
+    {
+      "path": "legacy-compute/SOURCE_BINDING.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/correction-01/legacy/SOURCE_BINDING.json",
+      "bytes": 554,
+      "sha256": "2d40c06bb91f7c504f2d0a17cc40789d7711f8bc6a640e6fc29779973de19d86"
+    },
+    {
+      "path": "legacy-compute/DIFFERENTIAL_RESULT.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/correction-01/legacy/DIFFERENTIAL_RESULT.json",
+      "bytes": 1818,
+      "sha256": "2063faec5c73d175b904272e15a4a4c433dc6441e4e30149f770cc889ef28904"
+    },
+    {
+      "path": "focused/receipt.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/focused-preserved-final-01/receipt.json",
+      "bytes": 2945,
+      "sha256": "346a76912d66ee9a085a5f29f7ab1d4b48af8f5cf3a458b0a46a4b7cc0f63e07"
+    },
+    {
+      "path": "focused/start.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/focused-preserved-final-01/start.json",
+      "bytes": 1754,
+      "sha256": "1153f2095a224c592d9485165634fab69fbe68b874e9ae947be5ac74f82510ce"
+    },
+    {
+      "path": "focused/entry-script.snapshot",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/focused-preserved-final-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "focused/command.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/focused-preserved-final-01/command.json",
+      "bytes": 433,
+      "sha256": "478531ad9e93c014a5dddf18ef0df79974d1acfbde76608a43ea8eed385b9e68"
+    },
+    {
+      "path": "focused/stdout.log",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/focused-preserved-final-01/stdout.log",
+      "bytes": 20337,
+      "sha256": "8870ddac8bc7ec210dcf1a1f9efe971df83839c6af597175f663f836b1347d4e"
+    },
+    {
+      "path": "focused/stderr.log",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/focused-preserved-final-01/stderr.log",
+      "bytes": 1780,
+      "sha256": "4de98b51e282855b95b7be7b96a6d7a2f42919fdcd6ab0d6875860f68f55ad06"
+    },
+    {
+      "path": "typecheck/receipt.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/tsc-preserved-final-01/receipt.json",
+      "bytes": 2922,
+      "sha256": "e7ebae4717cb8f0fc0c59584fae4f40d425b5a73f1fbddcab537b95a0bc4af24"
+    },
+    {
+      "path": "typecheck/start.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/tsc-preserved-final-01/start.json",
+      "bytes": 1738,
+      "sha256": "a6290a58bc6e179491437becf923947bc781fcb7208608266e6627d218362b5d"
+    },
+    {
+      "path": "typecheck/entry-script.snapshot",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/tsc-preserved-final-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "typecheck/command.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/tsc-preserved-final-01/command.json",
+      "bytes": 160,
+      "sha256": "2fffc10faad5b875feebc6100bc4acf970dc6503b2797cf9c638a23b30a6bb9a"
+    },
+    {
+      "path": "typecheck/stdout.log",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/tsc-preserved-final-01/stdout.log",
+      "bytes": 31,
+      "sha256": "91e0225603863bff7bfba2454b7ae4eb8d4ec8722f9ffa08fc263bf857e4f9af"
+    },
+    {
+      "path": "typecheck/stderr.log",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/tsc-preserved-final-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "caller-correction/receipt.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/related-caller-correction-01/receipt.json",
+      "bytes": 2847,
+      "sha256": "f5626b1dce9b12cdbc982bc3b6b60d27efe8c9086e9bf1662fd80f0f3a16928c"
+    },
+    {
+      "path": "caller-correction/start.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/related-caller-correction-01/start.json",
+      "bytes": 1661,
+      "sha256": "ff7a95b37a92f8831e0b9c0d7acf410ef5311baea5b7f56d6f6601f68b3f7a58"
+    },
+    {
+      "path": "caller-correction/entry-script.snapshot",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/related-caller-correction-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "caller-correction/command.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/related-caller-correction-01/command.json",
+      "bytes": 191,
+      "sha256": "113b1bcee5a6713f0fb427b31c9d92d0c9852c4af1469386d3fe9f7fa42a4359"
+    },
+    {
+      "path": "caller-correction/stdout.log",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/related-caller-correction-01/stdout.log",
+      "bytes": 387,
+      "sha256": "3377f4d395d709a19ec5a5b4a7e12b159da0bd7e59fc4fbe38a35cd78b1e2ef2"
+    },
+    {
+      "path": "caller-correction/stderr.log",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/related-caller-correction-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "remaining-callers/receipt.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/remaining-callers-01/receipt.json",
+      "bytes": 2817,
+      "sha256": "3517dbaf4639d0f3e8f38750885dd3f89df6440ff5b822e58b36d6f56f1a4355"
+    },
+    {
+      "path": "remaining-callers/start.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/remaining-callers-01/start.json",
+      "bytes": 1629,
+      "sha256": "c95d7f724e11d86e4f1ab2f2eb790d985d4215fe177fb953871c597085401159"
+    },
+    {
+      "path": "remaining-callers/entry-script.snapshot",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/remaining-callers-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "remaining-callers/command.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/remaining-callers-01/command.json",
+      "bytes": 285,
+      "sha256": "dc33806b12d3d6a6c12b4b41d98f6f56f73962feba5e61c71a8a918209774353"
+    },
+    {
+      "path": "remaining-callers/stdout.log",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/remaining-callers-01/stdout.log",
+      "bytes": 4573,
+      "sha256": "691dea32c740787715d601f6e0b0a6229a4d49bae39325962ff15149cdb1a154"
+    },
+    {
+      "path": "remaining-callers/stderr.log",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/remaining-callers-01/stderr.log",
+      "bytes": 351,
+      "sha256": "2fa64f3a3cdff61f72a687ea177ad5d2644fde95adcde1ca18ca7c3ef180b758"
+    },
+    {
+      "path": "caller-failure/receipt.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/related-callers-01/receipt.json",
+      "bytes": 2812,
+      "sha256": "8390811fdd0e6e5b803bb49d2020e56486966096a10ceca455273785ae1c1451"
+    },
+    {
+      "path": "caller-failure/start.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/related-callers-01/start.json",
+      "bytes": 1621,
+      "sha256": "032e973eaa62c75b61243ad9a68813a1e654a54c71da25515e8f44c9598bd384"
+    },
+    {
+      "path": "caller-failure/entry-script.snapshot",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/related-callers-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "caller-failure/command.json",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/related-callers-01/command.json",
+      "bytes": 500,
+      "sha256": "0548482bdbdcad18c848694739eaf103071f7522233bee8227c0727852ebef8c"
+    },
+    {
+      "path": "caller-failure/stdout.log",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/related-callers-01/stdout.log",
+      "bytes": 10241,
+      "sha256": "b17e6c22be2e635fff64b3a1f8e8ec489da28d941f853d23363a0b148005acbc"
+    },
+    {
+      "path": "caller-failure/stderr.log",
+      "source": "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/related-callers-01/stderr.log",
+      "bytes": 3090,
+      "sha256": "d7c544577676e24e10bad6ebe032a29a61e5fa44184d4cfd8027c4fbf7028904"
+    },
+    {
+      "path": "n95/RESULT.json",
+      "source": "tmp/player-bot-capability-parity-20261024/hq-clean-validation/campaign-01/child/result.json",
+      "bytes": 73819,
+      "sha256": "9fcf5f0ff5f1600eb7298f3e0630dbea2bd488a3f49abdcadc56784fef70200a"
+    },
+    {
+      "path": "n95/EXACT_STATE_VS_N94.json",
+      "source": "tmp/player-bot-capability-parity-20261024/hq-clean-validation/campaign-01/child/postrun/exact-state-vs-n94.json",
+      "bytes": 7711,
+      "sha256": "192f30c846986644fc2f7ff37ba0e2198a37dcfef553ba7041e7771afcc8bde9"
+    },
+    {
+      "path": "n95/EVALUATION.json",
+      "source": "tmp/player-bot-capability-parity-20261024/hq-clean-validation/campaign-01/child/postrun/evaluation.json",
+      "bytes": 27388,
+      "sha256": "37e020aa54205ee2e7cde833ea1024f308a35d667c395fe97a3ed0de5965a59d"
+    },
+    {
+      "path": "retained-suite-failure/RESULT.json",
+      "source": "tmp/player-bot-capability-parity-20261024/hq-clean-validation/full-suite-01/child/result.json",
+      "bytes": 105969,
+      "sha256": "272c37c78120ab2d98946eecacda2c96e82864e754ad2371800277bc7cbf824d"
+    },
+    {
+      "path": "n95/INVENTORY.json",
+      "source": "tmp/player-bot-capability-parity-20261024/root/N95_RETAINED_INVENTORY.json",
+      "bytes": 8507,
+      "sha256": "d50b330738176fd33bd3847d5a16c76df1f39faf5cef8977cf9061c7cec61b4c"
+    },
+    {
+      "path": "preservation/PRESERVATION.json",
+      "source": "tmp/player-bot-capability-parity-20261024/preservation-04/PRESERVATION.json",
+      "bytes": 2161,
+      "sha256": "3a6474c1cf5677f27c80106376f9ec87e6726ab8626de15e301e8b16250e506e"
+    }
+  ]
+}

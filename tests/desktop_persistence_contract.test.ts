@@ -378,8 +378,10 @@ describe('desktop persistence contract', () => {
     const handler = electronMain.slice(handlerStart, handlerEnd);
 
     expect(handler).toContain('const state = readCanonicalCurrentState(sim);');
-    expect(handler).toContain('sim.resolveEventDecision(state, eventId, responseId)');
-    expect(handler).toContain('writeCanonicalCurrentState(sim, state, _event.sender);');
+    expect(handler).toContain('sim.resolveDesktopEventDecision(state, eventId, responseId, getBaseDir())');
+    expect(handler).toContain('writeCanonicalCurrentState(sim, nextState, _event.sender);');
+    expect(handler).not.toContain('state.paramilitary_policy =');
+    expect(handler).not.toContain('pending_paramilitary_requests');
     // Every war-ending IPC path saves through this choke point, which writes owed
     // no-choice records before the snapshot/autosave.
     const writer = extractFunctionSource(electronMain, 'writeCanonicalCurrentState');

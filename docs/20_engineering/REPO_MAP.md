@@ -35,8 +35,10 @@ Populate this section from the discovery checklist.
   - `event_loader.ts` — loads `data/scenarios/events/war_*.json`
   - `apply_effects.ts` — deterministic effect application (10 effect kinds)
   - `resolve_decision.ts` — player decision resolution
+  - `opening_policy_transition.ts` — shared browser/Electron atomic opening identity-to-policy transition and catalog-bound policy response; preserves the authored legacy response path.
   - `pressure_system.ts` — readiness counters (increment/decay/threshold)
   - `strategic_dimensions.ts` — 6-dimension hybrid store (base + modifier = effective)
+  - `../negotiation/initialize_negotiation_state.ts` — fill-only negotiation substrate for ordinary player startup and the unchanged per-turn compute prelude; no derived tick or headless startup owner.
   - `event_constraints.ts` — operation blocks, scope restrictions, doctrine overrides
   - `bot_response.ts` — personality-weighted bot decision selection
   - `turn_incidents.ts` — per-turn incident collection (battles, flips, dissolutions)

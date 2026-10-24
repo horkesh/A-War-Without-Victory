@@ -1,0 +1,10 @@
+const fs = require('node:fs');
+const path = require('node:path');
+const {spawn} = require('node:child_process');
+const evidence = process.argv[2];
+const config = JSON.parse(fs.readFileSync(process.argv[3], 'utf8'));
+fs.writeFileSync(path.join(evidence, 'command.json'), JSON.stringify(config, null, 2)+'\n', {flag:'wx'});
+for(const name of config.requireAbsent??[])if(fs.existsSync(name))throw new Error(`Required fresh output already exists: ${name}`);
+const child=spawn(config.command,config.args,{cwd:process.cwd(),env:{...process.env,...config.env},stdio:['ignore','inherit','inherit'],windowsHide:true});
+child.on('error',err=>{console.error(err);process.exitCode=1;});
+child.on('exit',(code,signal)=>{console.log(JSON.stringify({child_exit:code,signal}));process.exitCode=code??1;});

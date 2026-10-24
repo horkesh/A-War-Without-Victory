@@ -13,7 +13,7 @@ channel remains closed history at `b711cffa9`. R7 continues; R8 follows; R9 foll
 their original wording as a record of how decisions were reached; where they say calibration is
 paused or RE is blocked, they are describing 2026-08-28, not today.
 
-**Last updated:** 2026-10-24 — owner prioritizes player capability to achieve bot calibration and access the same operations; diagnose and repair proven gaps before divergence experiments. n94 remains the no-player benchmark.
+**Last updated:** 2026-10-25 — owner prioritizes player capability to achieve bot calibration and access the same operations; diagnose and repair proven gaps before divergence experiments. n94 remains the no-player benchmark.
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
@@ -77,15 +77,16 @@ The execution-branch paragraph below records the earlier January checkpoint.
 
 **Authority:** This file is the sole source of truth for unfinished product work.
 
-**Current R8 — separate player-campaign acceptance defined by owner.** Keep n94 as the no-player
-benchmark; retire its exact daily/checkpoint map, score-floor and formerly-correct-map equality
-requirements only for ordinary player campaigns. The retained RBiH t39 equality experiment still
-failed (700/712 versus707; seven differences against n91/n92), while its measured infrastructure and Save/load evidence remain valid. No score700 floor or new baseline is adopted.
-The [player contract](2026-07-31-full-campaign-electron-validation-plan.md#player-campaign-acceptance-contract--owner-decision-2026-10-24)
-retains canonical UI/player authority, same-input determinism, per-faction exact Save/load,
-protected/canon/supply/enclave gates, strict runtime/audio, all required24/188-turn coverage and
-product-quality gates. Offline replay feasibility is complete; same-input reexecution is unproved and deferred. The proven delegated-player HQ omission is repaired/reviewed. Next: clean checkpoint, frozen188 regression and conditional full suite, then a newly bound package and real player calibration. Full player qualification, later checkpoints and RS/HRHB remain unproved; old audio
-failures stay open. [Retained original result](../../logs/r8-native-calibration-parity-20261024/RESULT.json).
+**Current R8 — player capability before divergence.** The latest owner priority requires normal
+gameplay to reach accepted707/707/706/706 calibration with the same operations available. Different
+choices need not reproduce bot save bytes. Retained player700 and seven n91/n92 losses remain
+unmet; no700 floor or baseline adoption. [Electron-validation plan](2026-07-31-full-campaign-electron-validation-plan.md)
+governs player authority, identical-input determinism, all-faction Save/load, protected/canon/supply/
+enclave gates and strict runtime/audio. The delegated HQ repair's n95 exactly reproduces n94;
+its suite had15,020 passes but overall126 from36 new fixture outputs, now isolated by a reviewed
+test-only repair. Startup policy/substrate and legacy-save focused94/94/type0/independent GO; next
+clean188 qualification and required suite, then a new package and real turn1→fresh39 measurement.
+Later player checkpoints, Behar-I delivery, RS/HRHB and replay remain unproved; old failures remain.
 
 **Execution view:** [COMMAND_BOARD.md](COMMAND_BOARD.md) is a derived convenience view; this roadmap wins if they differ.
 

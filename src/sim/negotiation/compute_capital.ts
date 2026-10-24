@@ -7,16 +7,13 @@
  * Deterministic: sorted iteration, no Math.random().
  */
 
-import type { GameState, FactionId } from '../../state/game_state.js';
+import { CANONICAL_FACTIONS, type GameState, type FactionId } from '../../state/game_state.js';
 import type { NegotiationBreakdown, NegotiationState } from '../../state/negotiation_types.js';
-import { createEmptyCapital, createDefaultPatronRelationship } from '../../state/negotiation_types.js';
-import { initializeStrategicDimensions } from '../events/strategic_dimensions.js';
+import { initializeNegotiationState } from './initialize_negotiation_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { ParamilitarySeverityBand } from '../combat/paramilitary_sweep.js';
 
 import { getOsidAreas } from '../osid_areas.js';
-
-const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
 
 const PARAMILITARY_MINOR_PENALTY_PER_DEPLOYMENT = 2;
 const PARAMILITARY_MID_PENALTY_PER_DEPLOYMENT = 4;
@@ -43,45 +40,11 @@ export function computeParamilitaryInternationalStandingPenalty(
  * Called once per turn from war_phases pipeline.
  */
 export function computeNegotiationBreakdown(state: GameState): void {
-    if (!state.military.negotiation) {
-        state.military.negotiation = initializeNegotiationState(state);
-    }
-
-    const neg = state.military.negotiation;
-
-    // Initialize strategic dimensions if missing (existing saves)
-    if (!neg.strategic_dimensions) {
-        neg.strategic_dimensions = initializeStrategicDimensions();
-    }
-
+    const neg = initializeNegotiationState(state);
     for (const faction of CANONICAL_FACTIONS) {
-        if (!neg.capital[faction]) {
-            neg.capital[faction] = createEmptyCapital();
-        }
-        if (!neg.patron_relationships[faction]) {
-            neg.patron_relationships[faction] = createDefaultPatronRelationship(faction);
-        }
-
         updateFactionCapital(state, faction, neg.capital[faction]);
         updateParamilitaryInternationalStanding(state, faction, neg);
     }
-}
-
-function initializeNegotiationState(state: GameState): NegotiationState {
-    const capital: Record<string, NegotiationBreakdown> = {};
-    const patron_relationships: Record<string, import('../../state/negotiation_types.js').PatronRelationship> = {};
-
-    for (const faction of CANONICAL_FACTIONS) {
-        capital[faction] = createEmptyCapital();
-        patron_relationships[faction] = createDefaultPatronRelationship(faction);
-    }
-
-    return {
-        capital,
-        patron_relationships,
-        peace_plan_history: [],
-        strategic_dimensions: initializeStrategicDimensions(),
-    };
 }
 
 function updateParamilitaryInternationalStanding(state: GameState, faction: FactionId, neg: NegotiationState): void {

@@ -311,6 +311,8 @@ The `awwv` custom protocol is registered as standard+privileged with `supportFet
 
 ## Determinism Notes
 
+**Ordinary startup/event ownership (2026-10-25 candidate):** browser and Electron startup fill absent negotiation capital/patron containers and the absent whole strategic-dimension store before the selected faction's opening decision, using `initializeNegotiationState`. Existing values and partial stores remain intact; no derived tick, load migration or observer/headless initialization is added. After explicit RBiH turn-0 identity resolution, `resolvePlayerEventDecisionWithOpeningPolicy` queues the complete existing command-policy decision before first Advance. Both adapters use that atomic owner and the canonical resolver; persistence/broadcast still belongs to the desktop mutation transaction. Historical default remains `always_deny`, default policy remains `ask`, and consent is explicit. Catalog-authored legacy identity/policy responses retain their ordinary later-turn path without an early queue. Invalid, forged, duplicate or mixed-state rejection must leave the original state unchanged. See the controlling Electron-validation plan for current qualification status.
+
 - UI does not mutate canonical sim ordering.
 - Turn execution remains with the desktop simulation owner through IPC and the existing bounded `runPhaseITurn` browser fallback when the bridge is unavailable.
 - IPC reports are metadata only and do not affect game-state evolution.

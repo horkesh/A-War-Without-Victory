@@ -654,6 +654,10 @@ Each dimension: `base_value` (computed from game state each turn) + `event_modif
 
 Stored on `NegotiationState.strategic_dimensions`. Module: `src/sim/events/strategic_dimensions.ts`.
 
+**Ordinary-player startup initialization (2026-10-25 candidate):** `initializeNegotiationState()` supplies absent negotiation containers and canonical capital/patron entries before the selected faction's foundational decision in Electron and browser startup. It preserves present values, references and partial dimension stores; it performs no derived update. The existing per-turn compute call retains its old initialization position and behavior. Observer/no-player startup, baked snapshots and save migration are unchanged. The retained no-player first-turn crime-counter undercount remains unresolved and cannot be used as moral or historical comparison evidence.
+
+**RBiH opening policy (2026-10-25 candidate):** after the explicit turn-0 identity response, the existing complete command-policy event is presented before first Advance through the ordinary event modal and canonical resolver. All three authored choices and consequences remain intact, with default `ask`, no preselection and historical default `always_deny`. This is an explicit policy decision, not a capture award. Catalog-authored later identity/policy decisions in older saves retain their ordinary response path and do not acquire an early policy queue. Qualification and real packaged calibration remain pending in the controlling Electron-validation plan.
+
 #### §7.10.4 Event Flags and Metagame State
 
 `event_flags: Record<string, string | number | boolean>` on MilitaryState. Set by `sets_flags` on EventDefinition or EventResponseOption. Read by `flag_equals` / `flag_not_set` conditions.

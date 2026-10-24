@@ -31,6 +31,8 @@ import { assertTurnSuccess, runTurn } from '../sim/turn_pipeline.js';
 import { loadEventDefinitionsFromDir } from '../sim/events/event_loader.js';
 import { applyEventEffects } from '../sim/events/apply_effects.js';
 import { resolveEventDecision } from '../sim/events/resolve_decision.js';
+import { resolvePlayerEventDecisionWithOpeningPolicy } from '../sim/events/opening_policy_transition.js';
+import { initializeNegotiationState } from '../sim/negotiation/initialize_negotiation_state.js';
 import { deferUnauthorizedHistoricalOperationsForPlayer } from '../sim/combat/historical_operation_authorization.js';
 import {
     applyDefinitionDimensionShifts,
@@ -352,6 +354,7 @@ export async function startNewCampaign(
     const canonicalState = canonicalizeStartupState(state).state;
     canonicalState.political.control_events = [];
     if (key === 'apr_1992') {
+        initializeNegotiationState(canonicalState);
         queueOpeningFoundationalDecision(canonicalState, loadDesktopEventDefinitions(baseDir), playerFaction);
     }
     return { state: canonicalizeStartupState(canonicalState).state };
@@ -781,6 +784,20 @@ export async function getPlayerRecruitmentCatalog(state: GameState, baseDir: str
 export function writeOwedTerminationRecords(state: GameState, baseDir: string): string[] {
     return writeOwedRecordsAtTermination(state, loadDesktopEventDefinitions(baseDir))
         .map((fired) => fired.id);
+}
+
+export function resolveDesktopEventDecision(
+    state: GameState,
+    eventId: string,
+    responseId: string,
+    baseDir: string,
+): GameState {
+    return resolvePlayerEventDecisionWithOpeningPolicy(
+        state,
+        loadDesktopEventDefinitions(baseDir),
+        eventId,
+        responseId,
+    );
 }
 
 /** Re-export for main process (serialize/deserialize state for IPC). */

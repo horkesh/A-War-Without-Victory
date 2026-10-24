@@ -1,6 +1,8 @@
+import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { join, sep } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import {
   createReceiptRun,
@@ -26,7 +28,24 @@ type ReceiptEvent = {
 
 const root = process.cwd();
 const vitestCli = join(root, 'node_modules', 'vitest', 'vitest.mjs');
-const receiptRoot = join(root, '.tmp_vitest_balanced_receipts', 'receipt-contract-tests');
+const retainedRunsRoot = join(
+  root,
+  'tmp/player-bot-capability-parity-20261024/suite-scratch-repair/runs',
+);
+mkdirSync(retainedRunsRoot, { recursive: true });
+const fixtureOutputRoot = join(
+  retainedRunsRoot,
+  `vitest-balanced-receipts-${process.pid}-${randomUUID()}`,
+);
+mkdirSync(fixtureOutputRoot);
+const receiptRoot = join(fixtureOutputRoot, 'receipts');
+
+function renderRetainedVitestConfig(files: string[]): string {
+  return renderBalancedVitestConfig(files).replace(
+    '../../tools/test/discover_test_files.mjs',
+    pathToFileURL(join(root, 'tools/test/discover_test_files.mjs')).href,
+  );
+}
 
 function readEvents(path: string): ReceiptEvent[] {
   return readFileSync(path, 'utf8').trim().split('\n').filter(Boolean).map((line) => JSON.parse(line));
@@ -34,10 +53,10 @@ function readEvents(path: string): ReceiptEvent[] {
 
 async function runFixtures(names: string[], passthrough: string[] = [], runner?: string) {
   const run = createReceiptRun(root, receiptRoot, { shard_count: 1 });
-  const configRoot = join(root, '.tmp_vitest_balanced_test', `${process.pid}-${run.runId}`);
+  const configRoot = join(fixtureOutputRoot, 'configs', run.runId);
   mkdirSync(configRoot, { recursive: true });
   const config = join(configRoot, 'receipt.config.mjs');
-  const generated = renderBalancedVitestConfig(names.map(
+  const generated = renderRetainedVitestConfig(names.map(
     (name) => `tests/fixtures/vitest_balanced/${name}.fixture.ts`,
   ));
   writeFileSync(config, runner
@@ -47,6 +66,7 @@ async function runFixtures(names: string[], passthrough: string[] = [], runner?:
     workerId: 'worker-0',
     lane: 'parallel-0',
   });
+  env.AWWV_VITEST_FIXTURE_OUTPUT_ROOT = fixtureOutputRoot;
   const status = await runVitestChild(vitestCli, config, passthrough, root, env);
   return { status, events: readEvents(env.AWWV_VITEST_RECEIPT_FILE), run, env };
 }
@@ -90,13 +110,14 @@ describe('balanced Vitest per-file receipts', () => {
 
   it('persists a collection start before synchronous work and does not fabricate a finish when killed', async () => {
     const run = createReceiptRun(root, receiptRoot, { shard_count: 1 });
-    const configRoot = join(root, '.tmp_vitest_balanced_test', `${process.pid}-${run.runId}`);
+    const configRoot = join(fixtureOutputRoot, 'configs', run.runId);
     mkdirSync(configRoot, { recursive: true });
     const config = join(configRoot, 'receipt-block.config.mjs');
-    writeFileSync(config, renderBalancedVitestConfig([
+    writeFileSync(config, renderRetainedVitestConfig([
       'tests/fixtures/vitest_balanced/receipt_block.fixture.ts',
     ]), 'utf8');
     const env = receiptEnvironmentForLane(run, { workerId: 'worker-0', lane: 'parallel-0' });
+    env.AWWV_VITEST_FIXTURE_OUTPUT_ROOT = fixtureOutputRoot;
     const child = spawn(process.execPath, [
       vitestCli, 'run', '--config', config, '--reporter=dot', '--silent',
     ], { cwd: root, env, stdio: 'ignore', shell: false });

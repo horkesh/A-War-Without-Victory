@@ -1,0 +1,158 @@
+{
+  "schema": "awwv.pre-first-advance-paramilitary-policy.historian-initialization-addendum.v1",
+  "date": "2026-10-24",
+  "seat": "Historian",
+  "independent": true,
+  "implementerExcluded": true,
+  "scope": "static_read_only_initialization_delta_review",
+  "reviewedHead": "b371adc3e0935825649e5eda4e6bbd45a44a359d",
+  "verdict": "GO_WITH_BINDING_CONDITIONS",
+  "implementationAuthorizedByThisSeat": false,
+  "priorHistorianReviewRetained": true,
+  "deltaRuling": {
+    "initializerHistoricallyAcceptable": true,
+    "classification": "neutral consequence bookkeeping",
+    "newHistoricalClaimCreated": false,
+    "restoresExistingAuthoredConsequences": true,
+    "createsHistoricalAuthorityOrEffectiveControl": false,
+    "createsRing3Surface": false,
+    "rewardBrightLinePreservedConditionally": true
+  },
+  "allFactionOptionAudit": {
+    "RBiH": {
+      "event": "rbih_state_identity",
+      "historicalDefault": "civic",
+      "counterfactualOptions": [
+        "bosniak_national",
+        "pragmatic"
+      ],
+      "ruling": "Restored political and diplomatic shifts record the explicit state-project choice and do not establish immediate control over armed groups, municipalities, or institutions."
+    },
+    "RS": {
+      "event": "rs_strategic_goals",
+      "historicalDefault": "all_six",
+      "otherOptions": [
+        "selective",
+        "aggressive"
+      ],
+      "ruling": "Restored strategic-platform shifts may not be interpreted as moral validation, historical necessity, authorization of atrocity, or compensation for civilian harm."
+    },
+    "HRHB": {
+      "event": "hrhb_political_goal",
+      "historicalDefault": "croat_republic",
+      "counterfactualOptions": [
+        "united_front",
+        "strategic_ambiguity"
+      ],
+      "crossFactionShift": "united_front -> RBiH.internal_cohesion +5",
+      "ruling": "The cross-faction shift is alliance-political abstraction only and grants no HRHB authority over RBiH, no RBiH policy adoption, no joint-command fact, and no control or capture."
+    },
+    "RBiHParamilitaryPolicy": {
+      "event": "rbih_paramilitary_policy_1992",
+      "historicalDefault": "always_deny",
+      "counterfactualOptions": [
+        "ask",
+        "always_allow"
+      ],
+      "ruling": "Restored dimensions and war-crime counters complete the existing consequence record and do not make always_allow historical, desirable, or useful for calibration."
+    }
+  },
+  "conditions": [
+    {
+      "id": "HIST-INIT-1",
+      "requirement": "Use the initializer only for missing neutral/default storage. Never describe container existence or zero/default values as policy, authority, capability, control, legitimacy, or a historical event."
+    },
+    {
+      "id": "HIST-INIT-2",
+      "requirement": "Initialize ordinary Electron and browser starts for RBiH, RS, and HRHB before the foundational decision is queued or resolved; the helper must never select, infer, apply, or recommend a response."
+    },
+    {
+      "id": "HIST-INIT-3",
+      "requirement": "Prove every foundational option retains its exact existing effects, flags, notifications, clocks, dimensions, and receipt, or use one representative response per faction plus a source-complete assertion covering every remaining option."
+    },
+    {
+      "id": "HIST-INIT-4",
+      "requirement": "Treat restored dimensions as choice consequences, not proof of effective command, institutional reach, territorial control, or implementation. HRHB united_front's RBiH cohesion shift may imply no RBiH consent, subordination, policy, formation, control, or capture."
+    },
+    {
+      "id": "HIST-INIT-5",
+      "requirement": "Do not reinterpret positive credibility, cohesion, patron, or legitimacy shifts as rewards for atrocity or offsets against civilian harm. Add no KPI, score floor, recommendation, territorial comparison, or acceptance benefit."
+    },
+    {
+      "id": "HIST-INIT-6",
+      "requirement": "Preserve the complete explicit RBiH policy flow. The reviewed allow fork must retain two unchanged captures and 200 civilian deaths while recording exactly +2 war_crimes_events and +2 war_crimes_events_emergent in the same returned state."
+    },
+    {
+      "id": "HIST-INIT-7",
+      "requirement": "Retain all prior timing and source conditions: counterfactual command abstraction; policy-versus-capacity distinction; ICTY IT-01-47-T paragraphs 312-313 and BB1 pages 166-169 as timing anchors; no use of UN A/54/549 paragraph 35 for Sarajevo April timing."
+    },
+    {
+      "id": "HIST-INIT-8",
+      "requirement": "Preserve the baked snapshot and n94/n95 initial-save bytes at SHA-256 413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1, but label their early war-crime counters incomplete wherever compared with the repaired ordinary-player path and never use them as moral, historical, comparative, scoring, or calibration evidence."
+    },
+    {
+      "id": "HIST-INIT-9",
+      "requirement": "Use the two reviewed captures only as capability evidence. Make no historical-capture claim, all-seven-differences causal claim, initialization-based historical validation, or calibration adoption claim."
+    },
+    {
+      "id": "HIST-INIT-10",
+      "requirement": "Stay within the exact seven-production/six-test allowlist and leave event data, snapshots, migrations, phase order, headless paths, writers, scoring, n91-n95, telemetry, references, protected controls, and acceptance criteria unchanged."
+    },
+    {
+      "id": "HIST-INIT-11",
+      "requirement": "Preserve every present valid negotiation value and reference, never repair a present partial dimensions store or reset a counter, and prove exact old per-turn initialization and final-output equivalence after extraction."
+    },
+    {
+      "id": "HIST-INIT-12",
+      "requirement": "Treat this as one renewed independent Historian seat only; implementation requires all six renewed reviews to be present and compatible."
+    }
+  ],
+  "headlessResidual": {
+    "finding": "n94 and n95 early paramilitary captures occurred before negotiation capital existed, so their early war-crime counters are incomplete.",
+    "disposition": "preserve_bytes_record_defect_do_not_repair_in_scope",
+    "prohibitedUses": [
+      "moral comparison",
+      "historical truth claim",
+      "player versus no-player conduct comparison",
+      "score or grade evidence",
+      "calibration evidence",
+      "acceptance criterion evidence"
+    ]
+  },
+  "allowedProductionFiles": [
+    "src/sim/negotiation/initialize_negotiation_state.ts",
+    "src/sim/negotiation/compute_capital.ts",
+    "src/sim/events/opening_policy_transition.ts",
+    "src/desktop/desktop_sim.ts",
+    "src/ui/map/desktop/campaignRecruitmentActions.ts",
+    "src/desktop/electron-main.cjs",
+    "src/ui/map/App.tsx"
+  ],
+  "allowedTestFiles": [
+    "tests/negotiation_capital.test.ts",
+    "tests/startup_snapshot_contract.test.ts",
+    "tests/browser_campaign_start_fallback.test.ts",
+    "tests/player_start_surface_contracts.test.ts",
+    "tests/pre_first_advance_paramilitary_policy.test.ts",
+    "tests/desktop_persistence_contract.test.ts"
+  ],
+  "preserve": [
+    "event data and historical labels",
+    "baked startup snapshot",
+    "observer and headless behavior",
+    "n91 through n95",
+    "all telemetry and references",
+    "phase order and consequence writers",
+    "protected controls and acceptance criteria"
+  ],
+  "execution": {
+    "sourceOrRuntimeWrites": false,
+    "documentationWrites": false,
+    "testWrites": false,
+    "testsRun": false,
+    "build": false,
+    "campaign": false,
+    "package": false,
+    "reviewArtifactWritesOnly": true
+  }
+}

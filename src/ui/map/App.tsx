@@ -1973,7 +1973,7 @@ function App() {
               }
               try {
                 const nextState = structuredClone(rawGameState);
-                resolveBrowserEventDecision(nextState, eventId, responseId);
+                resolveBrowserEventDecision(nextState, eventId, responseId, eventCatalogFull);
                 await loadSave(nextState);
                 setRecentlyAcceptedEventDecisionId(eventId);
                 setActiveEventDecisionId(null);

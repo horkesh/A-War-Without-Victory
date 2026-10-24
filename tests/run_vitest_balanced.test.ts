@@ -1,6 +1,8 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { VITEST_ALIASED_PACKAGES, VITEST_SETUP_FILE } from '../tools/test/vitest_shared_config.mjs';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import {
   aggregateChildStatuses,
@@ -12,6 +14,25 @@ import {
   runBalancedVitest,
   runVitestChild,
 } from '../tools/test/run_vitest_balanced.mjs';
+
+const root = process.cwd();
+const retainedRunsRoot = join(
+  root,
+  'tmp/player-bot-capability-parity-20261024/suite-scratch-repair/runs',
+);
+mkdirSync(retainedRunsRoot, { recursive: true });
+const fixtureOutputRoot = join(
+  retainedRunsRoot,
+  `run-vitest-balanced-${process.pid}-${randomUUID()}`,
+);
+mkdirSync(fixtureOutputRoot);
+
+function renderRetainedVitestConfig(files: string[]): string {
+  return renderBalancedVitestConfig(files).replace(
+    '../../tools/test/discover_test_files.mjs',
+    pathToFileURL(join(root, 'tools/test/discover_test_files.mjs')).href,
+  );
+}
 
 describe('balanced Vitest execution plan', () => {
   const inventory = [
@@ -73,29 +94,24 @@ describe('balanced Vitest execution plan', () => {
   });
 
   it('propagates a deliberately failing real Vitest child', async () => {
-    const root = process.cwd();
-    const generatedRoot = join(root, '.tmp_vitest_balanced_test', String(process.pid));
+    const generatedRoot = join(fixtureOutputRoot, 'deliberate-failure');
     const configPath = join(generatedRoot, 'deliberate-failure.config.mjs');
     mkdirSync(generatedRoot, { recursive: true });
-    try {
-      writeFileSync(configPath, renderBalancedVitestConfig([
-        'tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts',
-      ]), 'utf8');
-      const status = await runVitestChild(
-        join(root, 'node_modules', 'vitest', 'vitest.mjs'),
-        configPath,
-        ['--reporter=dot', '--silent'],
-        root,
-      );
-      expect(status).toBe(1);
-    } finally {
-      rmSync(generatedRoot, { recursive: true, force: true });
-    }
+    writeFileSync(configPath, renderRetainedVitestConfig([
+      'tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts',
+    ]), 'utf8');
+    const status = await runVitestChild(
+      join(root, 'node_modules', 'vitest', 'vitest.mjs'),
+      configPath,
+      ['--reporter=dot', '--silent'],
+      root,
+    );
+    expect(status).toBe(1);
   }, 30_000);
 
   it('returns failure when a planned worker child fails', async () => {
-    const root = process.cwd();
     const status = await runBalancedVitest(['--shards=1'], root, {
+      receiptRoot: join(fixtureOutputRoot, 'planned-worker-failure-receipts'),
       inventory: [{ file: 'tests/run_vitest_balanced.test.ts', durationMs: 1, serial: false, reasons: [] }],
       runVitestChild: async () => 1,
     });
@@ -103,8 +119,7 @@ describe('balanced Vitest execution plan', () => {
   });
 
   it('allocates one create-new receipt per worker lane without filtering reporter flags', async () => {
-    const root = process.cwd();
-    const receiptRoot = join(root, '.tmp_vitest_balanced_receipts', 'balanced-wiring-tests');
+    const receiptRoot = join(fixtureOutputRoot, 'balanced-wiring-receipts');
     const calls: Array<{ passthrough: string[]; env: NodeJS.ProcessEnv }> = [];
     const status = await runBalancedVitest([
       '--shards=2', '--', '--reporter=dot', '--silent',
@@ -144,9 +159,7 @@ describe('balanced Vitest execution plan', () => {
   });
 
   it('fails receipt-root startup before invoking a test child', async () => {
-    const root = process.cwd();
-    const occupied = join(root, '.tmp_vitest_balanced_test', `receipt-root-file-${process.pid}`);
-    mkdirSync(join(root, '.tmp_vitest_balanced_test'), { recursive: true });
+    const occupied = join(fixtureOutputRoot, 'occupied-receipt-root');
     writeFileSync(occupied, 'not a directory', { flag: existsSync(occupied) ? 'w' : 'wx' });
     let childCalls = 0;
     const status = await runBalancedVitest(['--shards=1'], root, {

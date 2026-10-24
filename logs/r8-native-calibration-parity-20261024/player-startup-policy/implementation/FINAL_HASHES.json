@@ -1,0 +1,54 @@
+[
+  {
+    "path": "src/sim/negotiation/initialize_negotiation_state.ts",
+    "sha256": "65ff81ed92f9b03b64d3a661a3fe247612110feece4aaa41a7e11425ba844c00"
+  },
+  {
+    "path": "src/sim/negotiation/compute_capital.ts",
+    "sha256": "07eeb251ddaa13dafc749128caec3c3caa81fd4fb1f66083aa71a6279bdfbca4"
+  },
+  {
+    "path": "src/sim/events/opening_policy_transition.ts",
+    "sha256": "3c9e8c5ed2bcdb668d5b264292cf8fdbc0098f06aefa472c259c69d8ded6b80e"
+  },
+  {
+    "path": "src/desktop/desktop_sim.ts",
+    "sha256": "3fd6d5e5e1a2bda9640ae2889ab8d8d26c220bcd329944a764567b6d3f6f8813"
+  },
+  {
+    "path": "src/ui/map/desktop/campaignRecruitmentActions.ts",
+    "sha256": "dfb48a8196b4602c49817ae2c25faf4d7edbea8db92735822cf990dd99a0c639"
+  },
+  {
+    "path": "src/desktop/electron-main.cjs",
+    "sha256": "3d68cf41fc91e27876d3c8191907e4ba6bfb58557b93f5733353e3c8f0ee2345"
+  },
+  {
+    "path": "src/ui/map/App.tsx",
+    "sha256": "8cfae1653dcd81fde35f25af60624aef6da479c5188ca06b50d51a56c0dea672"
+  },
+  {
+    "path": "tests/negotiation_capital.test.ts",
+    "sha256": "42289b4ee9ed1b0483852f0ca6b4f811225a9094339dc2fe7f3d4a071509b9e3"
+  },
+  {
+    "path": "tests/startup_snapshot_contract.test.ts",
+    "sha256": "33746e4db1fb9b77d58c4b4d5ba8430c3a57fc47e1e87b5f44a23d181aeefb63"
+  },
+  {
+    "path": "tests/browser_campaign_start_fallback.test.ts",
+    "sha256": "b93f00cc67d84bc78c34aaa77e4ac9561f4fc8bfeab439c177e76ad5af15c49f"
+  },
+  {
+    "path": "tests/player_start_surface_contracts.test.ts",
+    "sha256": "620f3b197392dc3dde086846dac0fd56ef524bea28477df2b053169b6034d520"
+  },
+  {
+    "path": "tests/pre_first_advance_paramilitary_policy.test.ts",
+    "sha256": "a6f66ba823871b72bac3ccabee5ccca36d59b845d63a7394898476dee96feae1"
+  },
+  {
+    "path": "tests/desktop_persistence_contract.test.ts",
+    "sha256": "01e8b18faf4a8a367748ab5d4d4bdd03f6e9c3611f8c3813a41cb28b94e528db"
+  }
+]

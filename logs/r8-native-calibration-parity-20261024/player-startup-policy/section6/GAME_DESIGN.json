@@ -1,0 +1,133 @@
+{
+  "schema": "awwv.pre-first-advance-paramilitary-policy.game-design-review.v1",
+  "date": "2026-10-24",
+  "seat": "game-designer",
+  "independent": true,
+  "scope": "static_read_only_proposal_review",
+  "reviewedHead": "b371adc3e0935825649e5eda4e6bbd45a44a359d",
+  "verdict": "GO_WITH_CONDITIONS",
+  "implementationAuthorized": false,
+  "designRuling": {
+    "ring": "Ring 1 existing bounded authorization surface",
+    "ring3RefusedSurfaceCreated": false,
+    "rewardForAtrocityBrightLineEngaged": true,
+    "reason": "The complete existing three-choice policy can be surfaced before first Advance without a new atrocity mechanic, target selector, or metric, but retained evidence proves two immediate territorial captures can follow always_allow, so unanimous section 6 review remains mandatory."
+  },
+  "conditions": [
+    {
+      "id": "GD-1",
+      "requirement": "Queue exactly one existing rbih_paramilitary_policy_1992 decision only after a successful turn-0 RBiH identity receipt and before first Advance; keep Advance hard-blocked until response; fail closed for observer/headless, non-RBiH, later-turn, disabled, fired, closed, pending, and already-decided states."
+    },
+    {
+      "id": "GD-2",
+      "requirement": "Render all three authored options in authored order with complete existing disclosure and historical/counterfactual context; do not preselect, auto-resolve, or infer a choice from Historical mode; keep policy ask until explicit response."
+    },
+    {
+      "id": "GD-3",
+      "requirement": "Use the existing event resolver and canonical persistence/receipt path; prohibit direct policy assignment, synthetic requests, direct spawn/control writes, duplicate queueing, duplicate effects, and duplicate receipts."
+    },
+    {
+      "id": "GD-4",
+      "requirement": "Move the complete event consequences together, including flags, dimensions, modifiers, notifications, receipt provenance, civilian casualties, and war-crime accounting; any split or reduced cost voids this verdict."
+    },
+    {
+      "id": "GD-5",
+      "requirement": "Add no target selector, brutality scale, specialized atrocity doctrine, casualty-to-territory comparison, risk/reward tooltip, score incentive, achievement, or territorial-efficiency/calibration-reward framing."
+    },
+    {
+      "id": "GD-6",
+      "requirement": "Preserve always_deny as the historical default and ask/always_allow as counterfactual; label any always_allow measurement counterfactual; leave event data, headless/bot behavior, and historical default unchanged."
+    },
+    {
+      "id": "GD-7",
+      "requirement": "Limit causal claims to proven pre-first-Advance capability and exact immediate effects; do not infer all seven January differences, tune/adopt scores, change thresholds or protected controls, or modify n91-n95/all telemetry."
+    },
+    {
+      "id": "GD-8",
+      "requirement": "Before implementation, obtain separate UI/UX review and unanimous Historian, scenario-tester/calibration, Engine/systems, and Red-team GO; any BLOCK, split, or unmet condition returns to the owner."
+    }
+  ],
+  "causalBoundary": {
+    "proven": "Two immediate turn-1 RBiH paramilitary captures differ between the retained no-player n94 lane and the ordinary player lane.",
+    "notProven": "The timing difference causes all seven later January control differences or satisfies any calibration floor."
+  },
+  "preserve": [
+    "n91",
+    "n92",
+    "n93",
+    "n94",
+    "n95",
+    "all telemetry",
+    "event data",
+    "headless and bot behavior",
+    "sweep, threshold, capture, and scoring semantics",
+    "protected controls and acceptance criteria"
+  ],
+  "remainingRequiredSeats": [
+    "ui-ux-developer",
+    "Historian",
+    "scenario-tester/calibration",
+    "Engine/systems",
+    "Red-team"
+  ],
+  "sourceBindings": [
+    {
+      "path": "docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md",
+      "lines": "21,25-66,128-143,207-233,250-256",
+      "sha256": "4945b9a0bb7d300a5185ac09e069cac9911e3c4a88d01f963ff5699adea40247"
+    },
+    {
+      "path": "docs/10_canon/Rulebook_v0_9_0.md",
+      "lines": "486-505",
+      "sha256": "3af8cbc4dab090d307ada0d5b72cf96aed4a0dd367aabeae8a137ea9c4858772"
+    },
+    {
+      "path": "data/scenarios/events/war_1992.json",
+      "lines": "2103-2146,2151-2305",
+      "sha256": "7596df56b934be4334ab8bffe51cf92f439c1fec238d6b82c21e68f25c61162a"
+    },
+    {
+      "path": "src/desktop/desktop_sim.ts",
+      "lines": "138-142,227-260,351-357",
+      "sha256": "e5954acf23516721bea57c6a1274d184c90358f46e91178770898d3c2eb965a1"
+    },
+    {
+      "path": "src/sim/combat/paramilitary_sweep.ts",
+      "lines": "83-101,419-425,448-450,512-545",
+      "sha256": "4976275cdc33eaede2d0abf907b2c20ad4b059fb0188711c97168fad1570d550"
+    },
+    {
+      "path": "src/state/player_decision_manifest.ts",
+      "lines": "58-68,90-97",
+      "sha256": "587ef6d32f9aac3c76bf68f9c575b46d90246d1fef3618ebff988f2f0d4539fd"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/clean-freeze-review/PARAMILITARY_TIMING_AUTHORITY_AUDIT.md",
+      "lines": "3-7,19-56",
+      "sha256": "8b5716f8628ad6400616e0b36498e57bf875a889e473cf8976a762fa906b0c90"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/PROPOSAL.md",
+      "lines": "5-37,51-74",
+      "sha256": "12ff5263e6c9236b6db1812cc9e7052b405e7037111ae510730883758e0dc109"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/RED_FIXTURE_DESIGN.md",
+      "lines": "5-61",
+      "sha256": "0d18b1b250645a6b254ab9694b6496af10a3166ccde6fd392592af4a945c4b77"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/SOURCE_AUDIT.json",
+      "lines": "1-50",
+      "sha256": "5bef240dab4e171f52ca8ec205be01fe623e8e17ec3b81b670177f2a9605fd54"
+    }
+  ],
+  "execution": {
+    "implementation": false,
+    "tests": false,
+    "build": false,
+    "campaign": false,
+    "package": false,
+    "sourceOrRuntimeWrites": false
+  }
+}

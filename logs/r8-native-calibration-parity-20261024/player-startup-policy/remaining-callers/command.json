@@ -1,0 +1,12 @@
+{
+  "command": "node",
+  "args": [
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "tests/desktop_calibration_compare.test.ts",
+    "tests/desktop_campaign_start_contract.test.ts",
+    "tests/turn_result_production_callers.test.ts",
+    "--pool=forks",
+    "--maxWorkers=1"
+  ]
+}

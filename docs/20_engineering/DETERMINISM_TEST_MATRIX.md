@@ -1,5 +1,11 @@
 # Determinism Test Matrix (AWWV)
 
+## Ordinary-player startup and retained regression boundary (2026-10-25 candidate)
+
+The shared fill-only initializer is characterized against immutable `b371adc3e0935825649e5eda4e6bbd45a44a359d` compute source: complete canonical pre-update and final states for absent, empty, complete, missing-entry, sentinel, extra-key and partial-dimension shapes; malformed containers fail closed. Observer startup and the baked artifact remain exact. Production adapter fixtures cover all factions/options, opening policy consent, effects, serialization and first Advance; their latest receipts and independent verdict must be bound before qualification.
+
+n95 reproduces n94 byte-for-byte at 27 saved boundaries and four control maps, scoring707/707/706/706. That qualifies the earlier HQ-only checkpoint, not this startup candidate. Its full suite had15,020 passes/zero failures/33 skips but overall wrapper126 because36 fixture outputs were added to protected scratch roots. Preserve that failure. The test-only output relocation retains strict scratch comparison and all prior files. New source requires its own clean frozen188 gate, then the required suite; packaged player calibration and same-input replay remain unproved.
+
 ## Native player-mode calibration diagnostic contract (2026-10-24)
 
 - The packaged harness records requested faction, visible Historical selection, shipped autonomy2,

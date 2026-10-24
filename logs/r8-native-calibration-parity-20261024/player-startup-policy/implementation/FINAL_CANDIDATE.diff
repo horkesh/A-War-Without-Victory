@@ -1,0 +1,761 @@
+diff --git a/src/desktop/desktop_sim.ts b/src/desktop/desktop_sim.ts
+index 0069f2977..97a394f5f 100644
+--- a/src/desktop/desktop_sim.ts
++++ b/src/desktop/desktop_sim.ts
+@@ -31,6 +31,8 @@ import { assertTurnSuccess, runTurn } from '../sim/turn_pipeline.js';
+ import { loadEventDefinitionsFromDir } from '../sim/events/event_loader.js';
+ import { applyEventEffects } from '../sim/events/apply_effects.js';
+ import { resolveEventDecision } from '../sim/events/resolve_decision.js';
++import { resolvePlayerEventDecisionWithOpeningPolicy } from '../sim/events/opening_policy_transition.js';
++import { initializeNegotiationState } from '../sim/negotiation/initialize_negotiation_state.js';
+ import { deferUnauthorizedHistoricalOperationsForPlayer } from '../sim/combat/historical_operation_authorization.js';
+ import {
+     applyDefinitionDimensionShifts,
+@@ -352,6 +354,7 @@ export async function startNewCampaign(
+     const canonicalState = canonicalizeStartupState(state).state;
+     canonicalState.political.control_events = [];
+     if (key === 'apr_1992') {
++        initializeNegotiationState(canonicalState);
+         queueOpeningFoundationalDecision(canonicalState, loadDesktopEventDefinitions(baseDir), playerFaction);
+     }
+     return { state: canonicalizeStartupState(canonicalState).state };
+@@ -783,6 +786,20 @@ export function writeOwedTerminationRecords(state: GameState, baseDir: string):
+         .map((fired) => fired.id);
+ }
+ 
++export function resolveDesktopEventDecision(
++    state: GameState,
++    eventId: string,
++    responseId: string,
++    baseDir: string,
++): GameState {
++    return resolvePlayerEventDecisionWithOpeningPolicy(
++        state,
++        loadDesktopEventDefinitions(baseDir),
++        eventId,
++        responseId,
++    );
++}
++
+ /** Re-export for main process (serialize/deserialize state for IPC). */
+ export {
+     deserializeState,
+diff --git a/src/desktop/electron-main.cjs b/src/desktop/electron-main.cjs
+index b871d4a5e..393cb3a78 100644
+--- a/src/desktop/electron-main.cjs
++++ b/src/desktop/electron-main.cjs
+@@ -3403,8 +3403,8 @@ app.whenReady().then(() => {
+     try {
+       const sim = getDesktopSim();
+       const state = readCanonicalCurrentState(sim);
+-      sim.resolveEventDecision(state, eventId, responseId);
+-      writeCanonicalCurrentState(sim, state, _event.sender);
++      const nextState = sim.resolveDesktopEventDecision(state, eventId, responseId, getBaseDir());
++      writeCanonicalCurrentState(sim, nextState, _event.sender);
+       return { ok: true };
+     } catch (e) {
+       return { ok: false, error: e.message || String(e) };
+diff --git a/src/sim/negotiation/compute_capital.ts b/src/sim/negotiation/compute_capital.ts
+index 1e5dd691b..461c37a6f 100644
+--- a/src/sim/negotiation/compute_capital.ts
++++ b/src/sim/negotiation/compute_capital.ts
+@@ -7,17 +7,14 @@
+  * Deterministic: sorted iteration, no Math.random().
+  */
+ 
+-import type { GameState, FactionId } from '../../state/game_state.js';
++import { CANONICAL_FACTIONS, type GameState, type FactionId } from '../../state/game_state.js';
+ import type { NegotiationBreakdown, NegotiationState } from '../../state/negotiation_types.js';
+-import { createEmptyCapital, createDefaultPatronRelationship } from '../../state/negotiation_types.js';
+-import { initializeStrategicDimensions } from '../events/strategic_dimensions.js';
++import { initializeNegotiationState } from './initialize_negotiation_state.js';
+ import { strictCompare } from '../../state/validateGameState.js';
+ import type { ParamilitarySeverityBand } from '../combat/paramilitary_sweep.js';
+ 
+ import { getOsidAreas } from '../osid_areas.js';
+ 
+-const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
+-
+ const PARAMILITARY_MINOR_PENALTY_PER_DEPLOYMENT = 2;
+ const PARAMILITARY_MID_PENALTY_PER_DEPLOYMENT = 4;
+ const PARAMILITARY_SEVERE_PENALTY_PER_DEPLOYMENT = 5;
+@@ -43,47 +40,13 @@ export function computeParamilitaryInternationalStandingPenalty(
+  * Called once per turn from war_phases pipeline.
+  */
+ export function computeNegotiationBreakdown(state: GameState): void {
+-    if (!state.military.negotiation) {
+-        state.military.negotiation = initializeNegotiationState(state);
+-    }
+-
+-    const neg = state.military.negotiation;
+-
+-    // Initialize strategic dimensions if missing (existing saves)
+-    if (!neg.strategic_dimensions) {
+-        neg.strategic_dimensions = initializeStrategicDimensions();
+-    }
+-
++    const neg = initializeNegotiationState(state);
+     for (const faction of CANONICAL_FACTIONS) {
+-        if (!neg.capital[faction]) {
+-            neg.capital[faction] = createEmptyCapital();
+-        }
+-        if (!neg.patron_relationships[faction]) {
+-            neg.patron_relationships[faction] = createDefaultPatronRelationship(faction);
+-        }
+-
+         updateFactionCapital(state, faction, neg.capital[faction]);
+         updateParamilitaryInternationalStanding(state, faction, neg);
+     }
+ }
+ 
+-function initializeNegotiationState(state: GameState): NegotiationState {
+-    const capital: Record<string, NegotiationBreakdown> = {};
+-    const patron_relationships: Record<string, import('../../state/negotiation_types.js').PatronRelationship> = {};
+-
+-    for (const faction of CANONICAL_FACTIONS) {
+-        capital[faction] = createEmptyCapital();
+-        patron_relationships[faction] = createDefaultPatronRelationship(faction);
+-    }
+-
+-    return {
+-        capital,
+-        patron_relationships,
+-        peace_plan_history: [],
+-        strategic_dimensions: initializeStrategicDimensions(),
+-    };
+-}
+-
+ function updateParamilitaryInternationalStanding(state: GameState, faction: FactionId, neg: NegotiationState): void {
+     const dimension = neg.strategic_dimensions?.[faction]?.international_standing;
+     if (!dimension) return;
+diff --git a/src/ui/map/App.tsx b/src/ui/map/App.tsx
+index c370d2d5e..178d83804 100644
+--- a/src/ui/map/App.tsx
++++ b/src/ui/map/App.tsx
+@@ -1973,7 +1973,7 @@ function App() {
+               }
+               try {
+                 const nextState = structuredClone(rawGameState);
+-                resolveBrowserEventDecision(nextState, eventId, responseId);
++                resolveBrowserEventDecision(nextState, eventId, responseId, eventCatalogFull);
+                 await loadSave(nextState);
+                 setRecentlyAcceptedEventDecisionId(eventId);
+                 setActiveEventDecisionId(null);
+diff --git a/src/ui/map/desktop/campaignRecruitmentActions.ts b/src/ui/map/desktop/campaignRecruitmentActions.ts
+index 77f6b6eff..6d59383bf 100644
+--- a/src/ui/map/desktop/campaignRecruitmentActions.ts
++++ b/src/ui/map/desktop/campaignRecruitmentActions.ts
+@@ -1,10 +1,15 @@
+ import type { IPC } from './useIPC';
+ import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './types';
+-import type { CausalityLogEntry, FactionId, GameState } from '../../../state/game_state.js';
+-import type { DimensionShift, EventDefinition, EventEffect, EventResponseOption, PendingEventDecision } from '../../../sim/events/event_types.js';
++import type { FactionId, GameState } from '../../../state/game_state.js';
++import type { DimensionShift, EventDefinition, EventEffect, PendingEventDecision } from '../../../sim/events/event_types.js';
+ import { applyEventEffects } from '../../../sim/events/apply_effects.js';
+ import { applyDimensionShift, type DimensionStore } from '../../../sim/events/strategic_dimensions.js';
+ import { deferUnauthorizedHistoricalOperationsForPlayer } from '../../../sim/combat/historical_operation_authorization.js';
++import { initializeNegotiationState } from '../../../sim/negotiation/initialize_negotiation_state.js';
++import {
++    resolvePlayerEventDecisionWithOpeningPolicy,
++    type EventDefinitionCatalog,
++} from '../../../sim/events/opening_policy_transition.js';
+ 
+ const BROWSER_STARTUP_SNAPSHOT_PATH = '/data/derived/startup/apr_1992_initial_save.json';
+ const BROWSER_EVENT_CATALOG_PATH = '/data/scenarios/events/war_1992.json';
+@@ -63,100 +68,6 @@ function applyBrowserDefinitionFlags(state: GameState, flags: Record<string, str
+     }
+ }
+ 
+-function strictTextCompare(a: string, b: string): number {
+-    return a < b ? -1 : a > b ? 1 : 0;
+-}
+-
+-function recordBrowserEventDecision(
+-    state: GameState,
+-    eventId: string,
+-    responseId: string,
+-    faction: FactionId | null,
+-    currentTurn: number,
+-): void {
+-    state.military.event_decision_log ??= [];
+-    state.military.event_decision_log.push({
+-        event_id: eventId,
+-        response_id: responseId,
+-        decision_source: 'player',
+-        faction,
+-        turn: currentTurn,
+-    });
+-}
+-
+-function sortedUniqueAppend(target: string[] | undefined, values: readonly string[] | undefined): string[] {
+-    const arr = target ? [...target] : [];
+-    let mutated = false;
+-    for (const value of values ?? []) {
+-        if (!arr.includes(value)) {
+-            arr.push(value);
+-            mutated = true;
+-        }
+-    }
+-    return mutated ? arr.sort(strictTextCompare) : arr;
+-}
+-
+-function compareBrowserCausality(a: CausalityLogEntry, b: CausalityLogEntry): number {
+-    if (a.turn !== b.turn) return a.turn - b.turn;
+-    return (
+-        strictTextCompare(a.from_event, b.from_event) ||
+-        strictTextCompare(a.to_event ?? '', b.to_event ?? '') ||
+-        strictTextCompare(a.to_flag ?? '', b.to_flag ?? '') ||
+-        strictTextCompare(a.kind, b.kind) ||
+-        strictTextCompare(a.source_response_id ?? '', b.source_response_id ?? '')
+-    );
+-}
+-
+-function recordBrowserCausality(state: GameState, entry: CausalityLogEntry): void {
+-    state.military.event_causality_log ??= [];
+-    const exists = state.military.event_causality_log
+-        .some((existing) => compareBrowserCausality(existing, entry) === 0);
+-    if (exists) return;
+-    state.military.event_causality_log.push(entry);
+-    state.military.event_causality_log.sort(compareBrowserCausality);
+-}
+-
+-function applyBrowserResponseRuntimeCausality(
+-    state: GameState,
+-    eventId: string,
+-    responseId: string,
+-    chosen: EventResponseOption,
+-    turn: number,
+-): void {
+-    const firedIds = state.military.fired_event_ids ?? [];
+-    const enablesToWrite: string[] = [];
+-    for (const targetId of chosen.enables_events_runtime ?? []) {
+-        if (!firedIds.includes(targetId)) enablesToWrite.push(targetId);
+-        recordBrowserCausality(state, {
+-            turn,
+-            from_event: eventId,
+-            to_event: targetId,
+-            to_flag: null,
+-            kind: 'enables',
+-            source_response_id: responseId,
+-        });
+-    }
+-    if (enablesToWrite.length > 0) {
+-        state.military.enabled_event_ids = sortedUniqueAppend(state.military.enabled_event_ids, enablesToWrite);
+-    }
+-
+-    const closesToWrite: string[] = [];
+-    for (const targetId of chosen.closes_events_runtime ?? []) {
+-        if (!firedIds.includes(targetId)) closesToWrite.push(targetId);
+-        recordBrowserCausality(state, {
+-            turn,
+-            from_event: eventId,
+-            to_event: targetId,
+-            to_flag: null,
+-            kind: 'closes',
+-            source_response_id: responseId,
+-        });
+-    }
+-    if (closesToWrite.length > 0) {
+-        state.military.closed_event_ids = sortedUniqueAppend(state.military.closed_event_ids, closesToWrite);
+-    }
+-}
+-
+ function buildOpeningPendingDecision(
+     def: EventDefinition,
+     playerFaction: FactionId,
+@@ -222,28 +133,12 @@ export function resolveBrowserEventDecision(
+     state: GameState,
+     eventId: string,
+     responseId: string,
+-): void {
+-    const pending = state.military.pending_event_decisions;
+-    if (!pending) {
+-        throw new Error(`No pending event decisions found (looking for ${eventId})`);
+-    }
+-    const idx = pending.findIndex((decision) => decision.event_id === eventId);
+-    if (idx === -1) {
+-        throw new Error(`No pending decision for event_id "${eventId}"`);
+-    }
+-    const decision = pending[idx];
+-    const chosen = decision.response_options.find((option) => option.id === responseId);
+-    if (!chosen) {
+-        throw new Error(`No response option "${responseId}" for event "${eventId}"`);
+-    }
+-
+-    applyEventEffects(state, chosen.effects ?? []);
+-    applyBrowserDefinitionFlags(state, chosen.sets_flags);
+-    applyBrowserDefinitionDimensionShifts(state, chosen.dimension_shifts);
+-    const turn = state.meta.turn ?? decision.turn_fired;
+-    recordBrowserEventDecision(state, eventId, chosen.id, decision.faction, turn);
+-    applyBrowserResponseRuntimeCausality(state, eventId, chosen.id, chosen, turn);
+-    pending.splice(idx, 1);
++    eventCatalog?: EventDefinitionCatalog,
++): GameState {
++    const candidate = resolvePlayerEventDecisionWithOpeningPolicy(state, eventCatalog, eventId, responseId);
++    for (const key of Object.keys(state) as Array<keyof GameState>) delete state[key];
++    Object.assign(state, candidate);
++    return state;
+ }
+ 
+ /**
+@@ -306,6 +201,7 @@ export async function startCampaignFromSidePicker(
+             state.meta.decision_mode = decisionMode;
+             state.political = { ...(state.political ?? {}), control_events: [] };
+             deferUnauthorizedHistoricalOperationsForPlayer(state as GameState);
++            initializeNegotiationState(state as GameState);
+             const eventResponse = await fetch(BROWSER_EVENT_CATALOG_PATH);
+             if (!eventResponse.ok) {
+                 setLoadError(`Browser event catalog unavailable (${eventResponse.status}).`);
+diff --git a/tests/browser_campaign_start_fallback.test.ts b/tests/browser_campaign_start_fallback.test.ts
+index e87e21f1a..35b7298fe 100644
+--- a/tests/browser_campaign_start_fallback.test.ts
++++ b/tests/browser_campaign_start_fallback.test.ts
+@@ -8,6 +8,14 @@ import {
+ } from '../src/ui/map/desktop/campaignRecruitmentActions';
+ import { parseGameState } from '../src/ui/map/data/GameStateAdapter';
+ import type { IPC } from '../src/ui/map/desktop/useIPC';
++import {
++  advanceTurn,
++  deserializeState,
++  resolveDesktopEventDecision,
++  serializeState,
++  startNewCampaign,
++} from '../src/desktop/desktop_sim';
++import type { EventDefinition } from '../src/sim/events/event_types';
+ 
+ const STARTUP = JSON.parse(readFileSync(
+   join(process.cwd(), 'data', 'derived', 'startup', 'apr_1992_initial_save.json'),
+@@ -105,6 +113,9 @@ describe('browser new-campaign fallback', () => {
+       expect(state.meta.player_faction).toBe(faction);
+       expect(state.meta.decision_mode).toBe('emergent');
+       expect(state.meta.headless_scenario_auto_control).not.toBe(true);
++      expect(Object.keys((state.military as any).negotiation?.capital ?? {})).toEqual(['RBiH', 'RS', 'HRHB']);
++      expect(Object.keys((state.military as any).negotiation?.patron_relationships ?? {})).toEqual(['RBiH', 'RS', 'HRHB']);
++      expect(Object.keys((state.military as any).negotiation?.strategic_dimensions ?? {})).toEqual(['RBiH', 'RS', 'HRHB']);
+       expect(state.political?.control_events ?? []).toHaveLength(0);
+       expect(pending).toHaveLength(1);
+       expect(pending[0]).toMatchObject({
+@@ -216,4 +227,158 @@ describe('browser new-campaign fallback', () => {
+       narrative: 'Presidential response filed in the campaign record.',
+     });
+   });
++
++  it('keeps every foundational option byte-identical across Electron and browser adapters', async () => {
++    const catalog = WAR_1992 as EventDefinition[];
++    const openingProjection = (state: any) => ({
++      negotiation: state.military.negotiation,
++      pending_event_decisions: state.military.pending_event_decisions,
++      fired_event_ids: state.military.fired_event_ids,
++      event_fire_counts: state.military.event_fire_counts,
++      event_last_fired_turn: state.military.event_last_fired_turn,
++      event_readiness: state.military.event_readiness,
++      event_flags: state.military.event_flags,
++      enabled_event_ids: state.military.enabled_event_ids,
++      closed_event_ids: state.military.closed_event_ids,
++      event_decision_log: state.military.event_decision_log,
++      pending_event_notifications: state.military.pending_event_notifications,
++      recruitment_modifiers: state.military.recruitment_modifiers,
++      bot_priority_shifts: state.military.bot_priority_shifts,
++      event_aggression_modifiers: state.military.event_aggression_modifiers,
++      equipment_quality_modifiers: state.military.equipment_quality_modifiers,
++      formation_morale: Object.fromEntries(Object.entries(state.military.formations)
++        .map(([id, formation]: [string, any]) => [id, formation.morale])),
++      war_alliance_rbih_hrhb: state.political.war_alliance_rbih_hrhb,
++      paramilitary_policy: state.paramilitary_policy,
++    });
++    for (const { faction, eventId } of [
++      { faction: 'RBiH' as const, eventId: 'rbih_state_identity' },
++      { faction: 'RS' as const, eventId: 'rs_strategic_goals' },
++      { faction: 'HRHB' as const, eventId: 'hrhb_political_goal' },
++    ]) {
++      const loaded: unknown[] = [];
++      vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: RequestInfo | URL) => {
++        const url = String(input);
++        if (url.endsWith('/data/derived/startup/apr_1992_initial_save.json')) return response(STARTUP);
++        if (url.endsWith('/data/scenarios/events/war_1992.json')) return response(WAR_1992);
++        throw new Error(`Unexpected fetch: ${url}`);
++      });
++      await startCampaignFromSidePicker({
++        ipc: { isAvailable: false } as IPC,
++        loadSave: async (state) => { loaded.push(state); },
++        setLoadError: vi.fn(),
++      }, { playerFaction: faction, decisionMode: 'emergent', scenarioKey: 'apr_1992' });
++      const browserStart = loaded[0] as typeof STARTUP;
++      const desktopStart = (await startNewCampaign(process.cwd(), faction, 'apr_1992', 'emergent')).state;
++      expect(openingProjection(browserStart)).toEqual(openingProjection(desktopStart));
++
++      const definition = catalog.find((entry) => entry.id === eventId)!;
++      expect(browserStart.military.pending_event_decisions[0].response_options).toEqual(definition.response_options);
++      for (const option of definition.response_options ?? []) {
++        const browser = structuredClone(browserStart);
++        const desktop = structuredClone(desktopStart);
++        resolveBrowserEventDecision(browser, eventId, option.id, catalog);
++        const desktopResolved = resolveDesktopEventDecision(desktop, eventId, option.id, process.cwd());
++        expect(openingProjection(browser), `${eventId}:${option.id}`).toEqual(openingProjection(desktopResolved));
++        expect(openingProjection(JSON.parse(serializeState(browser)))).toEqual(openingProjection(browser));
++        expect(browser.military.event_decision_log.filter((receipt: any) => receipt.event_id === eventId)).toEqual([{
++          event_id: eventId,
++          response_id: option.id,
++          decision_source: 'player',
++          faction,
++          turn: 0,
++        }]);
++        expect(browser.military.event_fire_counts[eventId]).toBe(1);
++        expect(browser.military.event_last_fired_turn[eventId]).toBe(0);
++        expect(browser.military.event_readiness[eventId]).toBe(0);
++
++        const authoredNotifications = definition.notifications_to_other_factions?.[option.id] ?? {};
++        expect(browser.military.pending_event_notifications
++          .filter((notification: any) => notification.event_id === eventId && notification.response_id === option.id)
++          .sort((a: any, b: any) => a.target_faction.localeCompare(b.target_faction)))
++          .toEqual(Object.entries(authoredNotifications)
++            .map(([target, content]) => {
++              if (!content) throw new Error(`Missing authored notification ${eventId}:${option.id}:${target}`);
++              return {
++                notification_id: `${eventId}:${faction}:${target}`,
++                event_id: eventId,
++                response_id: option.id,
++                source_faction: faction,
++                target_faction: target,
++                headline: content.headline,
++                body: content.body,
++                surfaced_on_turn: 1,
++                consumed: false,
++              };
++            })
++            .sort((a, b) => a.target_faction.localeCompare(b.target_faction)));
++
++        for (const effect of option.effects ?? []) {
++          if (effect.kind === 'morale_change') {
++            for (const [formationId, beforeFormation] of Object.entries(browserStart.military.formations) as Array<[string, any]>) {
++              if (beforeFormation.faction !== effect.faction || beforeFormation.status !== 'active' || beforeFormation.morale == null) continue;
++              expect(browser.military.formations[formationId].morale, `${eventId}:${option.id}:morale:${formationId}`)
++                .toBe(Math.max(0, Math.min(100, beforeFormation.morale + effect.delta)));
++            }
++          } else if (effect.kind === 'alliance_change') {
++            const beforeAlliance = browserStart.political.war_alliance_rbih_hrhb ?? 0;
++            expect(browser.political.war_alliance_rbih_hrhb).toBe(Math.max(-1, Math.min(1, beforeAlliance + effect.delta)));
++          } else if (effect.kind === 'aggression_modifier') {
++            expect(browser.military.event_aggression_modifiers).toContainEqual({
++              faction: effect.faction,
++              delta: effect.delta,
++              expires_turn: effect.duration_turns,
++            });
++          } else if (effect.kind === 'equipment_quality_modifier') {
++            expect(browser.military.equipment_quality_modifiers).toContainEqual({
++              faction: effect.faction,
++              multiplier: effect.multiplier,
++              expires_turn: effect.duration_turns,
++            });
++          }
++        }
++
++        let browserReady = deserializeState(serializeState(browser));
++        let desktopReady = deserializeState(serializeState(desktopResolved));
++        if (faction === 'RBiH') {
++          resolveBrowserEventDecision(browserReady, 'rbih_paramilitary_policy_1992', 'always_deny', catalog);
++          desktopReady = resolveDesktopEventDecision(
++            desktopReady,
++            'rbih_paramilitary_policy_1992',
++            'always_deny',
++            process.cwd(),
++          );
++        }
++        const [browserAdvanced, desktopAdvanced] = await Promise.all([
++          advanceTurn(browserReady, process.cwd()),
++          advanceTurn(desktopReady, process.cwd()),
++        ]);
++        expect(browserAdvanced.error, `browser advance ${eventId}:${option.id}`).toBeUndefined();
++        expect(desktopAdvanced.error, `desktop advance ${eventId}:${option.id}`).toBeUndefined();
++        for (const effect of option.effects ?? []) {
++          if (effect.kind === 'aggression_modifier') {
++            const expected = { faction: effect.faction, delta: effect.delta, expires_turn: effect.duration_turns };
++            expect(browserAdvanced.state.military.event_aggression_modifiers).toContainEqual(expected);
++            expect(desktopAdvanced.state.military.event_aggression_modifiers).toContainEqual(expected);
++          } else if (effect.kind === 'equipment_quality_modifier') {
++            const expected = { faction: effect.faction, multiplier: effect.multiplier, expires_turn: effect.duration_turns };
++            expect(browserAdvanced.state.military.equipment_quality_modifiers).toContainEqual(expected);
++            expect(desktopAdvanced.state.military.equipment_quality_modifiers).toContainEqual(expected);
++          }
++        }
++        for (const [flag, value] of Object.entries(option.sets_flags ?? {})) {
++          expect(browserAdvanced.state.military.event_flags[flag]).toEqual(value);
++          expect(desktopAdvanced.state.military.event_flags[flag]).toEqual(value);
++        }
++        for (const shift of option.dimension_shifts ?? []) {
++          const before = browserReady.military.negotiation!.strategic_dimensions![shift.faction][shift.dimension].event_modifier;
++          expect(browserAdvanced.state.military.negotiation!.strategic_dimensions![shift.faction][shift.dimension].event_modifier)
++            .toBe(before);
++          expect(desktopAdvanced.state.military.negotiation!.strategic_dimensions![shift.faction][shift.dimension].event_modifier)
++            .toBe(before);
++        }
++      }
++      vi.restoreAllMocks();
++    }
++  });
+ });
+diff --git a/tests/desktop_persistence_contract.test.ts b/tests/desktop_persistence_contract.test.ts
+index c6f93baca..ef5da9dbc 100644
+--- a/tests/desktop_persistence_contract.test.ts
++++ b/tests/desktop_persistence_contract.test.ts
+@@ -378,8 +378,10 @@ describe('desktop persistence contract', () => {
+     const handler = electronMain.slice(handlerStart, handlerEnd);
+ 
+     expect(handler).toContain('const state = readCanonicalCurrentState(sim);');
+-    expect(handler).toContain('sim.resolveEventDecision(state, eventId, responseId)');
+-    expect(handler).toContain('writeCanonicalCurrentState(sim, state, _event.sender);');
++    expect(handler).toContain('sim.resolveDesktopEventDecision(state, eventId, responseId, getBaseDir())');
++    expect(handler).toContain('writeCanonicalCurrentState(sim, nextState, _event.sender);');
++    expect(handler).not.toContain('state.paramilitary_policy =');
++    expect(handler).not.toContain('pending_paramilitary_requests');
+     // Every war-ending IPC path saves through this choke point, which writes owed
+     // no-choice records before the snapshot/autosave.
+     const writer = extractFunctionSource(electronMain, 'writeCanonicalCurrentState');
+diff --git a/tests/negotiation_capital.test.ts b/tests/negotiation_capital.test.ts
+index e00a41a8d..543931742 100644
+--- a/tests/negotiation_capital.test.ts
++++ b/tests/negotiation_capital.test.ts
+@@ -1,7 +1,11 @@
+ import { describe, it, expect } from 'vitest';
++import { createHash } from 'node:crypto';
++import { readFileSync } from 'node:fs';
+ import { computeNegotiationBreakdown } from '../src/sim/negotiation/compute_capital.js';
++import { initializeNegotiationState } from '../src/sim/negotiation/initialize_negotiation_state.js';
+ import { createEmptyCapital, createDefaultPatronRelationship } from '../src/state/negotiation_types.js';
+-import { DIMENSION_WEIGHTS } from '../src/sim/events/strategic_dimensions.js';
++import { DIMENSION_WEIGHTS, initializeStrategicDimensions } from '../src/sim/events/strategic_dimensions.js';
++import { deserializeState, serializeState } from '../src/state/serialize.js';
+ import type { GameState } from '../src/state/game_state.js';
+ 
+ function makeState(overrides: Partial<GameState> = {}): GameState {
+@@ -26,6 +30,88 @@ function makeState(overrides: Partial<GameState> = {}): GameState {
+ }
+ 
+ describe('Negotiation Capital', () => {
++    it('matches the immutable b371 legacy prelude and final canonical-byte matrix', () => {
++        const startup = readFileSync('data/derived/startup/apr_1992_initial_save.json', 'utf8');
++        const digest = (value: string) => createHash('sha256').update(value).digest('hex');
++        const complete = () => ({
++            capital: { RBiH: createEmptyCapital(), RS: createEmptyCapital(), HRHB: createEmptyCapital() },
++            patron_relationships: {
++                RBiH: createDefaultPatronRelationship('RBiH'),
++                RS: createDefaultPatronRelationship('RS'),
++                HRHB: createDefaultPatronRelationship('HRHB'),
++            },
++            peace_plan_history: [],
++            strategic_dimensions: initializeStrategicDimensions(),
++        });
++        const cases: Array<[string, (state: GameState) => void, string, string]> = [
++            ['absent', (state) => { delete state.military.negotiation; }, '7276b261009c9ff9599ea34c2d2a2a246d08ed08ac9ed1d01cf85b0230c8c8b0', 'ae2ee8e40a7f4110d369ee97f7b87d8376a4b058275d17468f1fa6de7b494553'],
++            ['empty', (state) => { state.military.negotiation = { capital: {}, patron_relationships: {}, peace_plan_history: [] }; }, '7276b261009c9ff9599ea34c2d2a2a246d08ed08ac9ed1d01cf85b0230c8c8b0', 'ae2ee8e40a7f4110d369ee97f7b87d8376a4b058275d17468f1fa6de7b494553'],
++            ['complete', (state) => { state.military.negotiation = complete(); }, '7276b261009c9ff9599ea34c2d2a2a246d08ed08ac9ed1d01cf85b0230c8c8b0', 'ae2ee8e40a7f4110d369ee97f7b87d8376a4b058275d17468f1fa6de7b494553'],
++            ['missing_entry', (state) => { const n = complete() as any; delete n.capital.HRHB; delete n.patron_relationships.RS; state.military.negotiation = n; }, '7276b261009c9ff9599ea34c2d2a2a246d08ed08ac9ed1d01cf85b0230c8c8b0', 'ae2ee8e40a7f4110d369ee97f7b87d8376a4b058275d17468f1fa6de7b494553'],
++            ['sentinel', (state) => { const n = complete() as any; n.capital.RBiH.war_crimes_events = 7; n.capital.RBiH.war_crimes_events_emergent = 11; n.pending_offer = { sentinel: true }; state.military.negotiation = n; }, '76b1b864fba31de6943d9ba92dc8953637252b9ccd4643eb5da12906fd793976', '1d66f5abfb9ad968943ece46003818105adf5efd04e7d6e4b80282bb3cc76672'],
++            ['extra_key', (state) => { const n = complete() as any; n.capital.EXTRA = { keep: 'capital' }; n.patron_relationships.EXTRA = { keep: 'patron' }; n.forward_compatible = { keep: true }; state.military.negotiation = n; }, '32af20a4870f70647263226c4d77e6c266b2a6f21042333815446d88fcf054d3', '309d766d28e91dee4115a69e076af77c498a5cd64cd1989fafd292ee039c78cd'],
++            ['partial_dimensions', (state) => { const n = complete() as any; n.strategic_dimensions = { RBiH: { internal_cohesion: { base_value: 9, event_modifier: 4, effective_value: 13 } } }; state.military.negotiation = n; }, '9b5e14afb9f0f7666865e14cf08ec82cca11b87cf652fa2928bb08d2996072d6', 'd5bdb0a72a6b75d53ce940bd1df3ecdbc3503b6e857890ab1463131a709c93be'],
++        ];
++        for (const [name, arrange, preludeDigest, finalDigest] of cases) {
++            const input = deserializeState(startup);
++            arrange(input);
++            const prelude = deserializeState(serializeState(input));
++            initializeNegotiationState(prelude);
++            expect(digest(serializeState(prelude)), `${name}:prelude`).toBe(preludeDigest);
++            const final = deserializeState(serializeState(input));
++            computeNegotiationBreakdown(final);
++            expect(digest(serializeState(final)), `${name}:final`).toBe(finalDigest);
++        }
++        const malformed = deserializeState(startup);
++        (malformed.military as any).negotiation = { capital: null, patron_relationships: {}, peace_plan_history: [] };
++        expect(() => computeNegotiationBreakdown(malformed)).toThrow();
++    });
++    it('characterizes the legacy initialization prelude across compatibility shapes', () => {
++        const absent = makeState();
++        computeNegotiationBreakdown(absent);
++        expect(Object.keys(absent.military.negotiation!.capital)).toEqual(['RBiH', 'RS', 'HRHB']);
++        expect(Object.keys(absent.military.negotiation!.patron_relationships)).toEqual(['RBiH', 'RS', 'HRHB']);
++        expect(Object.keys(absent.military.negotiation!.strategic_dimensions!)).toEqual(['RBiH', 'RS', 'HRHB']);
++
++        const empty = makeState({ military: { formations: {}, negotiation: {
++            capital: {}, patron_relationships: {}, peace_plan_history: [],
++        } } as any });
++        const emptyNegotiation = empty.military.negotiation;
++        computeNegotiationBreakdown(empty);
++        expect(empty.military.negotiation).toBe(emptyNegotiation);
++        expect(Object.keys(empty.military.negotiation!.capital)).toEqual(['RBiH', 'RS', 'HRHB']);
++
++        const sentinelCapital = createEmptyCapital() as any;
++        sentinelCapital.war_crimes_events = 7;
++        sentinelCapital.forward_compatible = { retained: true };
++        const partialDimensions = { RBiH: { internal_cohesion: { base_value: 9, event_modifier: 4, effective_value: 13 } } } as any;
++        const rich = makeState({ military: { formations: {}, negotiation: {
++            capital: { RBiH: sentinelCapital, EXTRA: { keep: 'capital' } },
++            patron_relationships: { RBiH: createDefaultPatronRelationship('RBiH'), EXTRA: { keep: 'patron' } },
++            peace_plan_history: [],
++            strategic_dimensions: partialDimensions,
++            forward_compatible: { keep: true },
++        } } as any });
++        const negotiationRef = rich.military.negotiation!;
++        const capitalRef = negotiationRef.capital;
++        const patronRef = negotiationRef.patron_relationships;
++        computeNegotiationBreakdown(rich);
++        expect(rich.military.negotiation).toBe(negotiationRef);
++        expect(negotiationRef.capital).toBe(capitalRef);
++        expect(negotiationRef.patron_relationships).toBe(patronRef);
++        expect(negotiationRef.capital.RBiH).toBe(sentinelCapital);
++        expect((negotiationRef.capital as any).EXTRA).toEqual({ keep: 'capital' });
++        expect((negotiationRef.patron_relationships as any).EXTRA).toEqual({ keep: 'patron' });
++        expect(negotiationRef.strategic_dimensions).toBe(partialDimensions);
++        expect((negotiationRef as any).forward_compatible).toEqual({ keep: true });
++        expect(sentinelCapital.war_crimes_events).toBe(7);
++        expect(sentinelCapital.forward_compatible).toEqual({ retained: true });
++
++        const malformed = makeState({ military: { formations: {}, negotiation: {
++            capital: null, patron_relationships: {}, peace_plan_history: [],
++        } } as any });
++        expect(() => computeNegotiationBreakdown(malformed)).toThrow();
++    });
+     it('initializes negotiation state with all 3 factions', () => {
+         const state = makeState();
+         computeNegotiationBreakdown(state);
+diff --git a/tests/player_start_surface_contracts.test.ts b/tests/player_start_surface_contracts.test.ts
+index faf9a9000..e66ce7efe 100644
+--- a/tests/player_start_surface_contracts.test.ts
++++ b/tests/player_start_surface_contracts.test.ts
+@@ -1,14 +1,15 @@
+ // @vitest-environment jsdom
+ import { readFileSync } from 'node:fs';
+ import { resolve } from 'node:path';
+-import { describe, expect, it } from 'vitest';
++import { describe, expect, it, vi } from 'vitest';
+ import React from 'react';
+-import { render, screen, cleanup } from '@testing-library/react';
++import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+ import { afterEach } from 'vitest';
+ import { startNewCampaign } from '../src/desktop/desktop_sim';
+ import { resolveEventDecision } from '../src/sim/events/resolve_decision';
+ import { EventDecisionModal } from '../src/ui/map/components/EventDecisionModal';
+-import type { EventDefinition, PendingEventDecision } from '../src/sim/events/event_types';
++import type { DimensionShift, EventDefinition, EventEffect, PendingEventDecision } from '../src/sim/events/event_types';
++import { isDisplayEventEffect } from '../src/ui/map/utils/eventEffectDisplay';
+ import war1992Events from '../data/scenarios/events/war_1992.json';
+ 
+ const FOUNDATIONAL_FLOWS = [
+@@ -53,6 +54,34 @@ function pendingDecisionFromEvent(eventDef: EventDefinition): PendingEventDecisi
+   };
+ }
+ 
++function signedDelta(delta: number): string {
++  return `${delta > 0 ? '+' : ''}${delta}`;
++}
++
++function factionLabel(faction: string | undefined): string {
++  return ({ RBiH: 'Republic of Bosnia and Herzegovina', RS: 'Republika Srpska', HRHB: 'Herzeg-Bosna' } as Record<string, string>)[faction ?? ''] ?? faction ?? '';
++}
++
++function dimensionLabel(dimension: string): string {
++  return ({
++    military_credibility: 'Military Credibility', territorial_legitimacy: 'Territorial Legitimacy',
++    international_standing: "Int'l Standing", patron_confidence: 'Patron Confidence',
++    internal_cohesion: 'Internal Cohesion', negotiating_leverage: 'Negotiating Leverage',
++  } as Record<string, string>)[dimension] ?? dimension;
++}
++
++function displayedEffectRow(effect: EventEffect): string | null {
++  if (!isDisplayEventEffect(effect) || effect.kind === 'narrative') return null;
++  if (effect.kind === 'morale_change') return `${factionLabel(effect.faction)} morale ${signedDelta(effect.delta)}`;
++  if (effect.kind === 'alliance_change') return `${factionLabel('RBiH')} / ${factionLabel('HRHB')} alliance ${signedDelta(effect.delta)}`;
++  if (effect.kind === 'aggression_modifier') return `${factionLabel(effect.faction)} operational aggression ${signedDelta(effect.delta)} for ${effect.duration_turns} turns`;
++  throw new Error(`Unhandled display-safe foundational effect: ${effect.kind}`);
++}
++
++function displayedDimensionRow(shift: DimensionShift): string {
++  return `${factionLabel(shift.faction)} ${dimensionLabel(shift.dimension)} ${signedDelta(shift.delta)}`;
++}
++
+ describe('player start surface contracts', () => {
+   it('the first-hour browser gate asserts against pre-choice player-knowledge leaks', () => {
+     const source = readFileSync(resolve('tools/ui/first_hour_browser_gate.cjs'), 'utf8');
+@@ -79,6 +108,14 @@ describe('player start surface contracts', () => {
+       expect(container.textContent).toContain(eventDef!.title);
+       for (const option of eventDef!.response_options ?? []) {
+         expect(container.textContent).toContain(option.label);
++        for (const effect of option.effects ?? []) {
++          const row = displayedEffectRow(effect);
++          if (row) expect(container.textContent, `${flow.eventId}:${option.id}:${effect.kind}`).toContain(row);
++        }
++        for (const shift of option.dimension_shifts ?? []) {
++          expect(container.textContent, `${flow.eventId}:${option.id}:${shift.faction}:${shift.dimension}`)
++            .toContain(displayedDimensionRow(shift));
++        }
+       }
+       for (const pattern of FORBIDDEN_PRE_CHOICE_PATTERNS) {
+         expect(container.textContent).not.toMatch(pattern);
+@@ -88,6 +125,46 @@ describe('player start surface contracts', () => {
+     }
+   });
+ 
++  it('renders the real policy decision with complete authored content and no implicit response', () => {
++    const catalog = eventCatalog();
++    const policy = catalog.get('rbih_paramilitary_policy_1992')!;
++    const onRespond = vi.fn();
++    const { container } = render(React.createElement(EventDecisionModal, {
++      decision: pendingDecisionFromEvent(policy),
++      eventCatalog: catalog,
++      onRespond,
++    }));
++
++    const dialog = screen.getByRole('dialog');
++    expect(dialog.getAttribute('aria-modal')).toBe('true');
++    expect(container.textContent).toContain(policy.source_note);
++    expect(pendingDecisionFromEvent(policy).historical_source).toBe(policy.historical_source);
++    for (const option of policy.response_options ?? []) {
++      expect(container.textContent).toContain(option.label);
++      expect(container.textContent).toContain(option.description);
++      for (const effect of option.effects ?? []) {
++        const row = displayedEffectRow(effect);
++        if (row) expect(container.textContent, `${policy.id}:${option.id}:${effect.kind}`).toContain(row);
++      }
++      for (const shift of option.dimension_shifts ?? []) {
++        expect(container.textContent, `${policy.id}:${option.id}:${shift.faction}:${shift.dimension}`)
++          .toContain(displayedDimensionRow(shift));
++      }
++      const button = screen.getByRole('button', { name: `Choose response: ${option.label}` });
++      expect((button as HTMLButtonElement).disabled).toBe(false);
++      button.focus();
++      expect(onRespond).not.toHaveBeenCalled();
++    }
++    expect(policy.response_options?.map((option) => option.historical_marker)).toEqual([
++      'historical_default', 'counterfactual', 'counterfactual',
++    ]);
++    expect(container.textContent).toMatch(/Historical default/i);
++    expect(container.textContent).toMatch(/historically attested choice/i);
++    fireEvent.keyDown(window, { key: 'Escape' });
++    expect(screen.getByRole('dialog')).toBeTruthy();
++    expect(onRespond).not.toHaveBeenCalled();
++  });
++
+   it('queues only the selected faction foundational decision and resolves every response option', async () => {
+     const catalog = eventCatalog();
+ 
+@@ -101,6 +178,7 @@ describe('player start surface contracts', () => {
+ 
+       for (const option of eventDef!.response_options ?? []) {
+         const nextState = structuredClone(state);
++        const beforeDimensions = structuredClone(nextState.military.negotiation!.strategic_dimensions!);
+         resolveEventDecision(nextState, flow.eventId, option.id);
+         expect(nextState.military.pending_event_decisions ?? []).toHaveLength(0);
+         expect(nextState.military.event_decision_log?.at(-1)).toMatchObject({
+@@ -108,6 +186,12 @@ describe('player start surface contracts', () => {
+           response_id: option.id,
+           decision_source: 'player',
+         });
++        for (const shift of option.dimension_shifts ?? []) {
++          const targetFaction = shift.faction ?? flow.faction;
++          const before = beforeDimensions[targetFaction]![shift.dimension]!.effective_value;
++          const after = nextState.military.negotiation!.strategic_dimensions![targetFaction]![shift.dimension]!.effective_value;
++          expect(after - before, `${flow.eventId}:${option.id}:${targetFaction}:${shift.dimension}`).toBe(shift.delta);
++        }
+       }
+     }
+   });

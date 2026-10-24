@@ -1,5 +1,6 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { expect, test } from 'vitest';
 import {
   renderBalancedVitestConfig,
@@ -8,12 +9,23 @@ import {
 
 test('runs an expected failing nested child without explicit receipt ownership', async () => {
   const root = process.cwd();
-  const generatedRoot = join(root, '.tmp_vitest_balanced_test', `nested-${process.pid}`);
+  const fixtureOutputRoot = process.env.AWWV_VITEST_FIXTURE_OUTPUT_ROOT;
+  if (!fixtureOutputRoot) {
+    throw new Error('AWWV_VITEST_FIXTURE_OUTPUT_ROOT is required for retained nested fixture output');
+  }
+  const generatedRoot = join(fixtureOutputRoot, 'nested-child');
   mkdirSync(generatedRoot, { recursive: true });
   const config = join(generatedRoot, 'nested.config.mjs');
-  writeFileSync(config, renderBalancedVitestConfig([
-    'tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts',
-  ]), 'utf8');
+  writeFileSync(
+    config,
+    renderBalancedVitestConfig([
+      'tests/fixtures/vitest_balanced/deliberate_failure.fixture.ts',
+    ]).replace(
+      '../../tools/test/discover_test_files.mjs',
+      pathToFileURL(join(root, 'tools/test/discover_test_files.mjs')).href,
+    ),
+    'utf8',
+  );
   const status = await runVitestChild(
     join(root, 'node_modules', 'vitest', 'vitest.mjs'),
     config,

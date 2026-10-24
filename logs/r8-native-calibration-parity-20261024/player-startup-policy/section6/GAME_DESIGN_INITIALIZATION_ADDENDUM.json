@@ -1,0 +1,197 @@
+{
+  "schema": "awwv.pre-first-advance-paramilitary-policy.game-design-initialization-addendum.v1",
+  "date": "2026-10-24",
+  "seat": "game-designer",
+  "independent": true,
+  "scope": "static_read_only_delta_review_of_fill_only_opening_consequence_initialization",
+  "reviewedHead": "b371adc3e0935825649e5eda4e6bbd45a44a359d",
+  "verdict": "GO_WITH_BINDING_CONDITIONS",
+  "implementationAuthorized": false,
+  "priorReviewRetained": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/GAME_DESIGN.md",
+  "designRuling": {
+    "classification": "conformity_bugfix_restoring_existing_authored_consequences",
+    "newMechanic": false,
+    "newOptimizationSurface": false,
+    "ring3RefusedSurfaceCreated": false,
+    "rewardForAtrocityBrightLineStillEngaged": true,
+    "reason": "All three foundational events already author dimension shifts and the canonical resolver already invokes the writer; the startup substrate makes those calls no-op. Empty canonical capital likewise restores the existing capture writer's required war-crime increments. No new choice, target, score, derived calculation, or consequence rule is added."
+  },
+  "conditions": [
+    {
+      "id": "GD-I1",
+      "requirement": "Add one browser-safe fill-only initializer using existing constructors and canonical faction order; add only absent substrate and perform no derived computation."
+    },
+    {
+      "id": "GD-I2",
+      "requirement": "Add no mechanic, event effect, policy value, option, recommendation, score input, UI owner, phase, writer, migration, target selector, or automatic response."
+    },
+    {
+      "id": "GD-I3",
+      "requirement": "Preserve all present valid state and references; never merge defaults into existing entries or repair a present partial dimension store; fail closed on malformed present containers."
+    },
+    {
+      "id": "GD-I4",
+      "requirement": "Replace only the existing compute_capital initialization prelude and prove exact pre-update serialization and final-output equivalence across the required state matrix; any delta is BLOCK."
+    },
+    {
+      "id": "GD-I5",
+      "requirement": "Call the initializer only in ordinary Electron startup after observerParity returns and in the explicit browser player branch before foundational queueing; no scenario, snapshot, migration, load, runTurn, phase, observer, or headless call."
+    },
+    {
+      "id": "GD-I6",
+      "requirement": "Prove complete substrate and exact authored foundational option consequences for RBiH, RS, and HRHB, including the HRHB united_front cross-faction RBiH shift, while preserving all existing effects, receipts, notifications, and clocks."
+    },
+    {
+      "id": "GD-I7",
+      "requirement": "Retain every prior policy condition through a separate shared opening_policy_transition owner: explicit choice, ask until response, three options in authored order, historical always_deny, counterfactual labels, complete disclosure, no hidden consent, one receipt, hard block, turn-0 timing, 52/104 clocks, parity, and idempotence."
+    },
+    {
+      "id": "GD-I8",
+      "requirement": "Prove deny/ask/allow branch behavior; allow must capture exactly Obadi and Bukvik Gornji 2 through unchanged mechanics, record 200 civilian deaths, and increment both RBiH war-crime counters by exactly two; failure cannot expand into downstream writer changes."
+    },
+    {
+      "id": "GD-I9",
+      "requirement": "Preserve frozen snapshot and n94/n95 initial-save hash, observer bytes, n91-n95, telemetry, references, pins, controls, criteria, event data, scoring, and headless behavior; keep the lost headless early war-crime increments documented as an unresolved defect and make no parity claim."
+    },
+    {
+      "id": "GD-I10",
+      "requirement": "Stay within the exact seven-production/six-test allowlist and obtain compatible renewed GO from UI/UX, Historian, scenario-tester/calibration, Engine/systems, and Red-team before implementation."
+    }
+  ],
+  "allowedProductionFiles": [
+    "src/sim/negotiation/initialize_negotiation_state.ts",
+    "src/sim/negotiation/compute_capital.ts",
+    "src/sim/events/opening_policy_transition.ts",
+    "src/desktop/desktop_sim.ts",
+    "src/ui/map/desktop/campaignRecruitmentActions.ts",
+    "src/desktop/electron-main.cjs",
+    "src/ui/map/App.tsx"
+  ],
+  "allowedTestFiles": [
+    "tests/negotiation_capital.test.ts",
+    "tests/startup_snapshot_contract.test.ts",
+    "tests/browser_campaign_start_fallback.test.ts",
+    "tests/player_start_surface_contracts.test.ts",
+    "tests/pre_first_advance_paramilitary_policy.test.ts",
+    "tests/desktop_persistence_contract.test.ts"
+  ],
+  "causalBoundary": {
+    "proven": "The rejected candidate produced the exact two allow captures and 200 civilian deaths while missing authored dimension deltas and both war-crime counter increments because startup substrate was absent.",
+    "notProven": "The candidate causes all seven January differences, reaches any score or acceptance floor, repairs headless consequence loss, or establishes player/bot outcome parity."
+  },
+  "knownResidual": {
+    "id": "headless_early_war_crime_counter_loss",
+    "status": "documented_out_of_scope_not_accepted_as_correct",
+    "reason": "Repairing the no-player/headless substrate would change frozen n94/n95 and requires separate owner authority and review."
+  },
+  "frozenStartupSha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1",
+  "sourceBindings": [
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/startup-consequence-diagnosis/DIAGNOSIS.md",
+      "lines": "3-42",
+      "sha256": "bab4297842f8434f4cddcacd5b5d93609688cbeff0d51e2df1fe975772b266c9"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/startup-consequence-diagnosis/PROPOSAL.md",
+      "lines": "3-76",
+      "sha256": "270e018da91d48ae350a5460c6fe3d02a892406e53d130d6e609b78942fe24ab"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/startup-consequence-diagnosis/EVIDENCE.json",
+      "lines": "1-76",
+      "sha256": "a1d57ca9210586812424c30aebcb303b75e7b20879dfb8ed72fbec7daf6d6f3d"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/opening-policy-implementation/failed-candidate/FINDINGS.md",
+      "lines": "3-32",
+      "sha256": "2db6dbd68c713be1144ea40a40dbd1be6eb3d31ff33a4622482a16f63446fe12"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/SYSTEMS_INITIALIZATION_ADDENDUM.md",
+      "lines": "3-88",
+      "sha256": "67d8c00e02922660e5a19892876710e40f7e35f29cd69bfe3525c130b08adb66"
+    },
+    {
+      "path": "tmp/player-bot-capability-parity-20261024/timing-proposal/reviews/GAME_DESIGN.md",
+      "lines": "3-50",
+      "sha256": "0fd8878eebfcef39159d944533ec1e99d2928ce5c1e27b7dfad80bcb57faa976"
+    },
+    {
+      "path": "docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md",
+      "lines": "21,25-66,128-143,207-233,250-256",
+      "sha256": "4945b9a0bb7d300a5185ac09e069cac9911e3c4a88d01f963ff5699adea40247"
+    },
+    {
+      "path": "data/scenarios/events/war_1992.json",
+      "lines": "3-965,1174-2101,2103-2308,2348-3259",
+      "sha256": "7596df56b934be4334ab8bffe51cf92f439c1fec238d6b82c21e68f25c61162a"
+    },
+    {
+      "path": "src/sim/negotiation/compute_capital.ts",
+      "lines": "41-102",
+      "sha256": "9d819698d632cdfffc41730987be3361d33816d60602e41d041afc77171a1501"
+    },
+    {
+      "path": "src/sim/events/strategic_dimensions.ts",
+      "lines": "3-40",
+      "sha256": "5344a47d97a7c582406d05a7312738e4025c5abfca43070884d28e7286891e97"
+    },
+    {
+      "path": "src/state/game_state.ts",
+      "lines": "42-49",
+      "sha256": "7031fe1b94dc5d6702476068678aa7ed1bcd72373f039cff51f7227e5a093828"
+    },
+    {
+      "path": "src/state/save_migration.ts",
+      "lines": "279-291",
+      "sha256": "9b9f6d6c22cb246e6f4b683b2b1afbbc011cc33bf5e665cbb6a1082061e3d45d"
+    },
+    {
+      "path": "src/desktop/desktop_sim.ts",
+      "lines": "277-357",
+      "sha256": "e5954acf23516721bea57c6a1274d184c90358f46e91178770898d3c2eb965a1"
+    },
+    {
+      "path": "src/ui/map/desktop/campaignRecruitmentActions.ts",
+      "lines": "253-327",
+      "sha256": "910e149239bdc7f00a959f27b57a75f33ffe8b905a25b703ffcdf5f07b38d564"
+    },
+    {
+      "path": "src/sim/events/resolve_decision_core.ts",
+      "lines": "58-103",
+      "sha256": "f5b58b2843de998930abe2050bf5579fdefb70c6e97aa49772a54cc7d1fe4953"
+    },
+    {
+      "path": "src/sim/events/evaluate_events.ts",
+      "lines": "149-178",
+      "sha256": "b321d84be99af871bb3c62cfd57faade1dddfd1e81923a044192dd18341d8d80"
+    },
+    {
+      "path": "src/sim/combat/paramilitary_sweep.ts",
+      "lines": "841-850",
+      "sha256": "4976275cdc33eaede2d0abf907b2c20ad4b059fb0188711c97168fad1570d550"
+    },
+    {
+      "path": "data/derived/startup/apr_1992_initial_save.json",
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n94/initial_save.json",
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+    },
+    {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n95/initial_save.json",
+      "sha256": "413ce64acaa420e130e293230dfa470dcaa46c5b4df2c6d3706d7e31cb8455e1"
+    }
+  ],
+  "execution": {
+    "implementation": false,
+    "tests": false,
+    "build": false,
+    "campaign": false,
+    "native": false,
+    "package": false,
+    "sourceRuntimeTestOrDocumentationWrites": false,
+    "artifactWritesOnly": true
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-24T22:28:42.580Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/focused-preserved-final-01",
+  "timeout_ms": 180000,
+  "original_argv": [
+    "node",
+    "tmp/r8-shakedown-20261023/root/run-command.cjs",
+    "{evidenceDir}",
+    "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/focused-preserved.config.json"
+  ],
+  "argv": [
+    "node",
+    "tmp/r8-shakedown-20261023/root/run-command.cjs",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\startup-policy-repair-v2\\compatibility-correction-03\\focused-preserved-final-01",
+    "tmp/player-bot-capability-parity-20261024/startup-policy-repair-v2/compatibility-correction-03/focused-preserved.config.json"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "command.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/r8-shakedown-20261023/root/run-command.cjs",
+    "bytes": 790,
+    "raw_sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584",
+    "normalized_text_sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    }
+  },
+  "end_utc": "2026-10-24T22:29:37.217Z",
+  "pid": 18508,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/r8-shakedown-20261023/root/run-command.cjs",
+    "bytes": 790,
+    "raw_sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584",
+    "normalized_text_sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 20337,
+    "sha256": "8870ddac8bc7ec210dcf1a1f9efe971df83839c6af597175f663f836b1347d4e"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 1780,
+    "sha256": "4de98b51e282855b95b7be7b96a6d7a2f42919fdcd6ab0d6875860f68f55ad06"
+  },
+  "retained_artifacts": [
+    {
+      "path": "command.json",
+      "bytes": 433,
+      "sha256": "478531ad9e93c014a5dddf18ef0df79974d1acfbde76608a43ea8eed385b9e68"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}
