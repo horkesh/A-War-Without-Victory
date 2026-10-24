@@ -1,0 +1,59 @@
+{
+  "pass": true,
+  "head": "7e51339e2e90e035748d2a3d19827cd55d05e284",
+  "runningNative": 0,
+  "expected": 3210,
+  "exact": 3210,
+  "mismatch": [],
+  "forbidden": [],
+  "runs": {
+    "n91": {
+      "files": 31,
+      "mismatches": 0
+    },
+    "n92": {
+      "files": 38,
+      "mismatches": 0
+    },
+    "n93": {
+      "files": 40,
+      "mismatches": 0
+    }
+  },
+  "packages": [
+    {
+      "manifest": "tmp/r8-shakedown-20261023/root/package-freeze.json",
+      "files": 1213,
+      "expected": 1213,
+      "extra": [],
+      "mismatches": [],
+      "pass": true
+    },
+    {
+      "manifest": "tmp/r8-shakedown-20261023/root/package-freeze-02.json",
+      "files": 1213,
+      "expected": 1213,
+      "extra": [],
+      "mismatches": [],
+      "pass": true
+    },
+    {
+      "manifest": "tmp/r8-native-shakedown-20261024/root/package-bind-02/package-manifest.json",
+      "files": 1213,
+      "expected": 1213,
+      "extra": [],
+      "mismatches": [],
+      "pass": true
+    }
+  ],
+  "changed": [
+    "docs/PROJECT_LEDGER.md",
+    "docs/PROJECT_LEDGER_KNOWLEDGE.md",
+    "docs/plans/2026-07-31-full-campaign-electron-validation-plan.md",
+    "docs/plans/COMMAND_BOARD.md",
+    "docs/plans/MASTER_ROADMAP.md",
+    "docs/plans/plan_index.yml",
+    "tests/paradox_local_qa_harness.test.ts",
+    "tools/ui/paradox_local_qa.cjs"
+  ]
+}

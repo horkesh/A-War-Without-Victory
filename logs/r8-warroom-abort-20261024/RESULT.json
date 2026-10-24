@@ -1,0 +1,937 @@
+{
+  "schema": "awwv.r8.warroom-diagnostic-and-v2-feasibility.v1",
+  "status": "DIAGNOSTIC_REPAIR_GO_V2_STOPPED_UNPROVEN_IDENTITY",
+  "sourceCommit": "7e51339e2e90e035748d2a3d19827cd55d05e284",
+  "integration": "working-tree diagnostic repair, no commit or push",
+  "source": [
+    {
+      "path": "tools/ui/paradox_local_qa.cjs",
+      "bytes": 321923,
+      "sha256": "2a7b4632adc2549b905573ee2dae629a9e83108a5f57cc5330d82fed178de9fa",
+      "expected": "2a7b4632adc2549b905573ee2dae629a9e83108a5f57cc5330d82fed178de9fa",
+      "exact": true
+    },
+    {
+      "path": "tests/paradox_local_qa_harness.test.ts",
+      "bytes": 157456,
+      "sha256": "51c0f6e1d82704b9c846bce993fe45ab1dba3488bc192606eccd44c039d39f85",
+      "expected": "51c0f6e1d82704b9c846bce993fe45ab1dba3488bc192606eccd44c039d39f85",
+      "exact": true
+    }
+  ],
+  "diagnosis": {
+    "conclusion": "Probable automatic loop restart at fixed-track end; not proven expected abort.",
+    "retainedEvidence": {
+      "path": "tmp/r8-warroom-abort-20261024/DIAGNOSIS.json",
+      "bytes": 7282,
+      "sha256": "f2924d0b82c01898b5c898f5e0d64630b5fdea5c3d57bc97568d0d685a6fee15"
+    },
+    "exactVersionQualification": {
+      "path": "tmp/r8-warroom-abort-20261024/QUALIFICATION_ADDENDUM.md",
+      "bytes": 1701,
+      "sha256": "454f5db397e33059b6a7d8f5b49883cd82fb0e9f328ebb3375f7c5de4571a73a"
+    },
+    "limit": "Observed seeking/resumed playback/cache reads do not supply automatic-loop or unique cross-layer request provenance."
+  },
+  "diagnosticRepair": {
+    "realEventsAdded": [
+      "seeking",
+      "seeked"
+    ],
+    "mediaStateField": "loop",
+    "networkField": "requestRange: present/absent/read-error",
+    "fullHeadersRetained": false,
+    "legacyClassifierChanged": false,
+    "legacyAttributorChanged": false,
+    "reader": {
+      "path": "tmp/r8-native-shakedown-20261024/prep/read_native_result.cjs",
+      "bytes": 7150,
+      "sha256": "4acc5c288d25aefaba70231bd2646cd871fdd39083bc9d5173639bad2e5e590d"
+    }
+  },
+  "focused": {
+    "tests": 78,
+    "path": "tmp/r8-warroom-abort-20261024/focused-02/receipt.json",
+    "bytes": 2635,
+    "sha256": "23fe7ccb6f6c6d9485ac808a25cca575ddcaeac4cbe0155969c48286b2f6d17b",
+    "childExit": 0,
+    "wrapperExit": 0,
+    "timedOut": false,
+    "capMs": 180000
+  },
+  "syntax": {
+    "path": "tmp/r8-warroom-abort-20261024/syntax-01/receipt.json",
+    "bytes": 2620,
+    "sha256": "f243fd620fb92a0316fbd90a4d22431a87338f2b9f86de12171d606851d1c61b",
+    "childExit": 0,
+    "wrapperExit": 0,
+    "timedOut": false,
+    "capMs": 180000
+  },
+  "nonincrementalTypecheck": {
+    "path": "tmp/r8-warroom-abort-20261024/typecheck-01/receipt.json",
+    "bytes": 2633,
+    "sha256": "beb02ec10502727c85b38718c3a1290e1f5c32dc4d29edc901a152dcd5ebb4ce",
+    "childExit": 0,
+    "wrapperExit": 0,
+    "timedOut": false,
+    "capMs": 180000
+  },
+  "diagnosticReview": {
+    "verdict": "GO",
+    "path": {
+      "path": "tmp/r8-warroom-abort-20261024/review/FINAL_REVIEW.md",
+      "bytes": 5093,
+      "sha256": "989f577d811c72e2041aa33bc943cbe33f16be522e915482e620ae22b1956f17"
+    },
+    "correctedManifest": {
+      "path": "tmp/r8-warroom-abort-20261024/IMPLEMENTATION_EVIDENCE_V2.json",
+      "bytes": 3840,
+      "sha256": "2c8d272dfa18820fde2e951c96b42fd70e8308be6d64d31308d29f943cea8cb3"
+    },
+    "originalManifestPreserved": {
+      "path": "tmp/r8-warroom-abort-20261024/IMPLEMENTATION_EVIDENCE.json",
+      "bytes": 3789,
+      "sha256": "8ce0f563bc83d96bf3a2aa6bf22baeb34b78a4d2b2c4a0df5979e9a380155090"
+    }
+  },
+  "v2": {
+    "ownerAuthorized": true,
+    "ownerAnswer": "Authorize fail-closed v2 development",
+    "contract": {
+      "path": "tmp/r8-warroom-abort-20261024/NEW_ADMISSION_PROPOSAL_V2.md",
+      "bytes": 7374,
+      "sha256": "c214bded2c0a17af8dbc2fa51ae1ddb24ad4990c63fd512e12422677faf9d244"
+    },
+    "originalProposal": {
+      "path": "tmp/r8-warroom-abort-20261024/NEW_ADMISSION_PROPOSAL.md",
+      "bytes": 5860,
+      "sha256": "17aa1590479dde5910ef7062fe19dea4cedd902aafc75469432ea40eb3a58f1e"
+    },
+    "status": "STOP_V2_ADMISSION",
+    "reason": "Required non-heuristic Playwright/CDP Request to NetLogSource identity is not established in inspected retained producer/exact-version paths.",
+    "feasibility": {
+      "path": "tmp/r8-warroom-loop-v2-20261024/FEASIBILITY.md",
+      "bytes": 3413,
+      "sha256": "53466e58f1cd3c4f8b10b63cb032bd4e4006538f8a3f072e2b473203fa9ad3cd"
+    },
+    "audit": {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-03/FEASIBILITY_AUDIT.json",
+      "bytes": 4668,
+      "sha256": "905b5b40b4809a3f382893e93938512e577d13f2cfa5e765de048a155cbaccf1"
+    },
+    "auditReceipt": {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-03/receipt.json",
+      "bytes": 2850,
+      "sha256": "11ccf227411e0de38af37b470fde1c27485e64dcd60f83607c9bce07fec6efe5",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "capMs": 180000
+    },
+    "primarySourceProvenance": {
+      "path": "tmp/r8-warroom-loop-v2-20261024/CHROMIUM_SOURCE_PROVENANCE.json",
+      "bytes": 2996,
+      "sha256": "4e7861b1fe844af0f64ce227ea91e99043cfc0fabc4d8b15eeab654d5b7a8c36"
+    },
+    "independentReview": {
+      "verdict": "GO for hard stop; NO-GO admission deliverable",
+      "path": {
+        "path": "tmp/r8-warroom-loop-v2-20261024/review/INDEPENDENT_REVIEW.md",
+        "bytes": 3907,
+        "sha256": "5e1090b5d65e88a94479feab803ff3a52fd88298a71134c60da5d1e0e5e54e54"
+      },
+      "reproducedAudit": {
+        "path": "tmp/r8-warroom-loop-v2-20261024/review/verification-01/FEASIBILITY_AUDIT.json",
+        "bytes": 4668,
+        "sha256": "905b5b40b4809a3f382893e93938512e577d13f2cfa5e765de048a155cbaccf1"
+      }
+    },
+    "classifierCreated": false,
+    "readerCreated": false,
+    "schemaActivated": false,
+    "nativeReadiness": false,
+    "limit": "Bounded conclusion for inspected sources/evidence, not universal API impossibility. No authentic-looking fixture or URL/time/Range/bytes inference is accepted as identity."
+  },
+  "preservation": {
+    "path": "tmp/r8-warroom-abort-20261024/final-preservation.json",
+    "bytes": 1339,
+    "sha256": "3a938d5aef5864db5f1de1c6863999c98ce33ca9a33c81162e4431e183de6f16",
+    "pass": true,
+    "bindingsExact": 3210,
+    "runs": {
+      "n91": {
+        "files": 31,
+        "mismatches": 0
+      },
+      "n92": {
+        "files": 38,
+        "mismatches": 0
+      },
+      "n93": {
+        "files": 40,
+        "mismatches": 0
+      }
+    },
+    "packages": [
+      {
+        "manifest": "tmp/r8-shakedown-20261023/root/package-freeze.json",
+        "files": 1213,
+        "expected": 1213,
+        "extra": [],
+        "mismatches": [],
+        "pass": true
+      },
+      {
+        "manifest": "tmp/r8-shakedown-20261023/root/package-freeze-02.json",
+        "files": 1213,
+        "expected": 1213,
+        "extra": [],
+        "mismatches": [],
+        "pass": true
+      },
+      {
+        "manifest": "tmp/r8-native-shakedown-20261024/root/package-bind-02/package-manifest.json",
+        "files": 1213,
+        "expected": 1213,
+        "extra": [],
+        "mismatches": [],
+        "pass": true
+      }
+    ],
+    "telemetry": [
+      {
+        "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+        "bytes": 121114591,
+        "sha256": "7160ff4b4c13f564a5ef25986b96e95004b39707dde5fffb067c471b77fe7e20"
+      },
+      {
+        "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+        "bytes": 1041,
+        "sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3"
+      }
+    ],
+    "runningNative": 0
+  },
+  "documentation": {
+    "tests": 81,
+    "path": "tmp/r8-warroom-abort-20261024/root/docs-final-01/receipt.json",
+    "bytes": 2647,
+    "sha256": "091786c9b0078d887e449233c47c82a7ee875c2a3a5ac404b442e58d67545967",
+    "childExit": 0,
+    "wrapperExit": 0,
+    "timedOut": false,
+    "capMs": 180000,
+    "index": {
+      "path": "tmp/r8-warroom-abort-20261024/root/index-final-01/receipt.json",
+      "bytes": 2648,
+      "sha256": "0dce43ceb2e9cc2b65b72b0e0e806130c054dac9865b9d5fa1b716b49c8b5f68",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "capMs": 180000
+    },
+    "files": [
+      {
+        "path": "docs/PROJECT_LEDGER.md",
+        "bytes": 1250037,
+        "sha256": "78e6173f0fbd45c8536456b061e1e4f65621df96ade311ebf51aa69c5b1c8b68"
+      },
+      {
+        "path": "docs/PROJECT_LEDGER_KNOWLEDGE.md",
+        "bytes": 1338231,
+        "sha256": "e0eef950503168630c92986b0fcdaa92b8605a89ef4b99cd8068236fb42795ec"
+      },
+      {
+        "path": "docs/plans/2026-07-31-full-campaign-electron-validation-plan.md",
+        "bytes": 199986,
+        "sha256": "db7866f701607fef6e6d9a091d8bdd11db6a25b901c0ed8484efd43ec9bd7095"
+      },
+      {
+        "path": "docs/plans/COMMAND_BOARD.md",
+        "bytes": 19535,
+        "sha256": "1eb974fba6fb37eefb3d403e106afdc942577e125c74661160ff5ba7421f8a7d"
+      },
+      {
+        "path": "docs/plans/MASTER_ROADMAP.md",
+        "bytes": 58528,
+        "sha256": "c84a408e0a35a95d56e049d05b2d380ebced3cd4e3b31cd1936e501a61e7b97c"
+      },
+      {
+        "path": "docs/plans/plan_index.yml",
+        "bytes": 7155,
+        "sha256": "7d8419ad5c82d5dad349ae093fec4f069dc6ed15004c07e848f8eafced084519"
+      }
+    ]
+  },
+  "nativeLaunches": 0,
+  "nativeRetries": 0,
+  "packageBuilds": 0,
+  "campaigns": 0,
+  "broadSuiteReruns": 0,
+  "gameplayChanges": false,
+  "calibrationTuning": false,
+  "baselineAdoption": false,
+  "push": false,
+  "reused": [
+    {
+      "path": "logs/r8-native-opening-20261024-media-observer/RESULT.json",
+      "bytes": 96398,
+      "sha256": "15be972a0897963caca811bf182906e0f44d1c4acb8f30a86ec5ddb6f1150616"
+    },
+    {
+      "path": "logs/r8-media-abort-20261024/RESULT.json",
+      "bytes": 46821,
+      "sha256": "756ef5e3710898b5b8219e057063f5ae7963e708c654733cdbddb0adfe3f3b13"
+    },
+    {
+      "path": "logs/r8-operation-release-regression-20261024/RESULT.json",
+      "bytes": 271796,
+      "sha256": "c228e045ab277024b1660ffa311c847824a6604f4802b0d19c9ec6626c16040e"
+    },
+    {
+      "path": "tmp/r8-native-shakedown-20261024/reader-closure-03/CLOSURE.json",
+      "bytes": 10683,
+      "sha256": "8a923d09836a443d569d69ee67399f12e5d402129738ec2e0efdb8d4219518d8"
+    }
+  ],
+  "retainedNativeGate": "FAILED: unpaired event36 warroom ERR_ABORTED; no retroactive reclassification",
+  "remaining": [
+    "Non-mutating explicit request/NetLog identity and automatic-loop provenance mechanism before v2 implementation",
+    "Qualifying native evidence only after separate run authorization",
+    "Ajnie native15/16, RS/HRHB and all24-week/final native gates"
+  ],
+  "attempts": [
+    {
+      "path": "tmp/r8-warroom-abort-20261024/focused-01/receipt.json",
+      "childExit": 1,
+      "wrapperExit": 1,
+      "timedOut": false,
+      "spawnError": null
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/focused-02/receipt.json",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "spawnError": null
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/green-01/receipt.json",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "spawnError": null
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/red-01/receipt.json",
+      "childExit": 1,
+      "wrapperExit": 126,
+      "timedOut": false,
+      "spawnError": null
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/docs-final-01/receipt.json",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "spawnError": null
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/index-final-01/receipt.json",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "spawnError": null
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/preservation-final-01/receipt.json",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "spawnError": null
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/syntax-01/receipt.json",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "spawnError": null
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/typecheck-01/receipt.json",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "spawnError": null
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-01/receipt.json",
+      "childExit": 1,
+      "wrapperExit": 126,
+      "timedOut": false,
+      "spawnError": null
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-02/receipt.json",
+      "childExit": 1,
+      "wrapperExit": 126,
+      "timedOut": false,
+      "spawnError": null
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-03/receipt.json",
+      "childExit": 0,
+      "wrapperExit": 0,
+      "timedOut": false,
+      "spawnError": null
+    }
+  ],
+  "evidence": [
+    {
+      "path": "tmp/r8-warroom-abort-20261024/DIAGNOSIS.json",
+      "bytes": 7282,
+      "sha256": "f2924d0b82c01898b5c898f5e0d64630b5fdea5c3d57bc97568d0d685a6fee15"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/DIAGNOSIS.md",
+      "bytes": 6831,
+      "sha256": "03fb8d3dfc7f4dda5229bd7469d32a11e1360162da0a1884cf493853e46052e3"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/IMPLEMENTATION_DELTA.txt",
+      "bytes": 375,
+      "sha256": "7bdf42850ec8c1c9efcee502f778d01fc3280dd15564bd88748f88e2ddf6b765"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/IMPLEMENTATION_EVIDENCE.json",
+      "bytes": 3789,
+      "sha256": "8ce0f563bc83d96bf3a2aa6bf22baeb34b78a4d2b2c4a0df5979e9a380155090"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/IMPLEMENTATION_EVIDENCE.md",
+      "bytes": 1298,
+      "sha256": "e07f571cc9ba5d90fbb5d1a8e6316e19f3af4770a1e0b94c1ba3f20143570265"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/IMPLEMENTATION_EVIDENCE_V2.json",
+      "bytes": 3840,
+      "sha256": "2c8d272dfa18820fde2e951c96b42fd70e8308be6d64d31308d29f943cea8cb3"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/IMPLEMENTATION_EVIDENCE_V2.md",
+      "bytes": 780,
+      "sha256": "772d13fd0e6db130727b23bcddc46dcce3d7375c9c657cca502fd8b9ca3ff329"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/NEW_ADMISSION_PROPOSAL.md",
+      "bytes": 5860,
+      "sha256": "17aa1590479dde5910ef7062fe19dea4cedd902aafc75469432ea40eb3a58f1e"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/NEW_ADMISSION_PROPOSAL_V2.md",
+      "bytes": 7374,
+      "sha256": "c214bded2c0a17af8dbc2fa51ae1ddb24ad4990c63fd512e12422677faf9d244"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/QUALIFICATION_ADDENDUM.md",
+      "bytes": 1701,
+      "sha256": "454f5db397e33059b6a7d8f5b49883cd82fb0e9f328ebb3375f7c5de4571a73a"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/final-preservation.json",
+      "bytes": 1339,
+      "sha256": "3a938d5aef5864db5f1de1c6863999c98ce33ca9a33c81162e4431e183de6f16"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/focused-01/command.json",
+      "bytes": 249,
+      "sha256": "cc4eefe644278e5169ade873a8b7513be7d4e422083ed1ed16a278b61b19c104"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/focused-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/focused-01/receipt.json",
+      "bytes": 2643,
+      "sha256": "e4fd2b4c128e4900276fa26a8228fa78f41352cc1ce1e7d91cb2d031514ad03e"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/focused-01/start.json",
+      "bytes": 1450,
+      "sha256": "13154bae0f77027e15badd09b55c70be5e44667de0eb6857bce1b4d641fc4b15"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/focused-01/stderr.log",
+      "bytes": 335031,
+      "sha256": "8bfd42ca856bc0f1724f6e329467b43ad88ee3999a2c5043ef14d54d6cea1dc5"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/focused-01/stdout.log",
+      "bytes": 12158,
+      "sha256": "948889659967a77f78b4d77f9abeabaf3cd5a0e5b8b52068298de16fb63066f6"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/focused-02/command.json",
+      "bytes": 249,
+      "sha256": "cc4eefe644278e5169ade873a8b7513be7d4e422083ed1ed16a278b61b19c104"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/focused-02/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/focused-02/receipt.json",
+      "bytes": 2635,
+      "sha256": "23fe7ccb6f6c6d9485ac808a25cca575ddcaeac4cbe0155969c48286b2f6d17b"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/focused-02/start.json",
+      "bytes": 1450,
+      "sha256": "6d1acd6005f85f6a444d7a34e2c02575bc3fe5de1a7a5841eedc70f38deb0036"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/focused-02/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/focused-02/stdout.log",
+      "bytes": 377,
+      "sha256": "0accdd0e6dcea15dc643fd3f8b4022bfd13bc1394913120beb0efa1218778ac8"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/focused-test-config.json",
+      "bytes": 249,
+      "sha256": "cc4eefe644278e5169ade873a8b7513be7d4e422083ed1ed16a278b61b19c104"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/green-01/command.json",
+      "bytes": 339,
+      "sha256": "92968776844a23f5b6a7b5773d53bb6607a7ac4059f42b222372edf9d930d983"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/green-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/green-01/receipt.json",
+      "bytes": 2624,
+      "sha256": "e7e84d0b5005a16dd894f560382e8d733781d5ff55ee91567c1211d86217976b"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/green-01/start.json",
+      "bytes": 1438,
+      "sha256": "be77ef6c7f93a188412d267eff35f4ab28e331331765d67466928f35da73da6e"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/green-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/green-01/stdout.log",
+      "bytes": 402,
+      "sha256": "8da73cca14e9977791da21a3c7780981d2b615a138e28696089e00ee5964b219"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/opening-preservation.json",
+      "bytes": 720776,
+      "sha256": "5d94f42d50184357f00aa7182d1ebfa1ab97addc5e5bf6ed72d74e9644964264"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/originals/paradox_local_qa.cjs",
+      "bytes": 321118,
+      "sha256": "2dcf3219852bbe97712de54ad5d65d503b382a8b06729fbc72b72ebb59b239b3"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/originals/paradox_local_qa_harness.test.ts",
+      "bytes": 154125,
+      "sha256": "9c8cc0eb0f9010f54b3db7adfcf4edd5c3a2d4943227cb629fef298960cc7790"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/preservation.cjs",
+      "bytes": 5245,
+      "sha256": "0d4974ed5608ba7362a7e5db0a7ddaca85c9f3662b1f64189dd8b01f705d7c69"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/red-01/command.json",
+      "bytes": 339,
+      "sha256": "92968776844a23f5b6a7b5773d53bb6607a7ac4059f42b222372edf9d930d983"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/red-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/red-01/receipt.json",
+      "bytes": 2483,
+      "sha256": "cd59c7021508eea03208529e35707255341b2bc8836473b3d17365d2254a11a7"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/red-01/start.json",
+      "bytes": 1412,
+      "sha256": "2ccd8cf4f121f12659a78e1a7e4101082e806d86a92fff6d7b437b3fce25f823"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/red-01/stderr.log",
+      "bytes": 2785,
+      "sha256": "24f339ac7c0abc1e620ca2adb492d9cd13f1ff484dedc21de285e941f345ec40"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/red-01/stdout.log",
+      "bytes": 1223,
+      "sha256": "c7db7bc8cbdca11e647d104d41d5b9382006e69e062737303cd52f6425c3707f"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/red-test-config.json",
+      "bytes": 339,
+      "sha256": "92968776844a23f5b6a7b5773d53bb6607a7ac4059f42b222372edf9d930d983"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/review/FINAL_REVIEW.md",
+      "bytes": 5093,
+      "sha256": "989f577d811c72e2041aa33bc943cbe33f16be522e915482e620ae22b1956f17"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/review/PRE_ADMISSION_REVIEW.md",
+      "bytes": 7414,
+      "sha256": "b48799fe2a5e3368acbe8b50dfe39aec85a01ac09071edc124eabaa3a9e5712a"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/closeout-docs.cjs",
+      "bytes": 7620,
+      "sha256": "53264866b349adaaf53b6c05bff7f02c0e28d8493c04986c222cac33d7d91a8b"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/docs-config.json",
+      "bytes": 276,
+      "sha256": "5845be7c6a6b2b1f483914774b0038dfb0a1fd0fc05f053e0f0b6b373859175d"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/docs-final-01/command.json",
+      "bytes": 331,
+      "sha256": "468acef293cff86bc1301aad9d548f74ee99501c7b0d8f750bb0546bf7586e97"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/docs-final-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/docs-final-01/receipt.json",
+      "bytes": 2647,
+      "sha256": "091786c9b0078d887e449233c47c82a7ee875c2a3a5ac404b442e58d67545967"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/docs-final-01/start.json",
+      "bytes": 1461,
+      "sha256": "e682372c6343ad016a9b591acd57872f8ef63f73c151ff3bebc2fe80013e1007"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/docs-final-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/docs-final-01/stdout.log",
+      "bytes": 529,
+      "sha256": "a7ec34cec625399ad1430ce8329f36d49c87b09f5a311bf0549713682692a680"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/index-config.json",
+      "bytes": 58,
+      "sha256": "e4ee75d984a075615da246791edceef3b96cedd6c3803ee7c2aa3a05f75572f3"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/index-final-01/command.json",
+      "bytes": 75,
+      "sha256": "ddecba25e8a17c4626a18320bff01f5461bba3f4c4994288b7ddedd675206dce"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/index-final-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/index-final-01/receipt.json",
+      "bytes": 2648,
+      "sha256": "0dce43ceb2e9cc2b65b72b0e0e806130c054dac9865b9d5fa1b716b49c8b5f68"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/index-final-01/start.json",
+      "bytes": 1465,
+      "sha256": "53d1095e80ad12f931f67881e4459271fec7731c431177a1f9183b8d5061469a"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/index-final-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/index-final-01/stdout.log",
+      "bytes": 88,
+      "sha256": "7d7dffb5d8435c8284802747afcbce5d80d67756ebd3ef4043b0cb2b79743c5c"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/preservation-config.json",
+      "bytes": 85,
+      "sha256": "6c228e5c7f497b4c6566a10e78b7a61405dd21f9ac12b7563df8e9ca4ae71980"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/preservation-final-01/command.json",
+      "bytes": 107,
+      "sha256": "5556e069215de083dfb10bd8ea080d124410e0a18722d6fc305e6362a5032e90"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/preservation-final-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/preservation-final-01/receipt.json",
+      "bytes": 2680,
+      "sha256": "e96b77208317d0b86eab5474601b021dfb8b249bd017df40e4c6a67d35ff43aa"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/preservation-final-01/start.json",
+      "bytes": 1493,
+      "sha256": "d6a4fba57e61327ca177d41d0465af7868ffdb6aa72b5fc2e13f301d0d1235b4"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/preservation-final-01/stderr.log",
+      "bytes": 240,
+      "sha256": "97f0bac2fa0cb77e3609203b39ccbe9d33607ba491999482dc82b3925458cfff"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/preservation-final-01/stdout.log",
+      "bytes": 1025,
+      "sha256": "d9de0322f23198c840ffe7221fe716340845c6a92c49bc6a74e128f288054667"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/root/write-result.cjs",
+      "bytes": 6942,
+      "sha256": "f3d30a8cb561fc132593cf0c1a9725def1c4a86a1dc55f77daf05a339a810f55"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/syntax-01/command.json",
+      "bytes": 164,
+      "sha256": "17eaf2902750d22c6e14785fb53fd5bb68d70a454d26007d5abeb00e4ece2ed1"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/syntax-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/syntax-01/receipt.json",
+      "bytes": 2620,
+      "sha256": "f243fd620fb92a0316fbd90a4d22431a87338f2b9f86de12171d606851d1c61b"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/syntax-01/start.json",
+      "bytes": 1436,
+      "sha256": "7317d1e3a31d9567ba5340dab2f0df5cdd877ddff76e9af31976bac14b5b69ee"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/syntax-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/syntax-01/stdout.log",
+      "bytes": 31,
+      "sha256": "91e0225603863bff7bfba2454b7ae4eb8d4ec8722f9ffa08fc263bf857e4f9af"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/syntax-config.json",
+      "bytes": 152,
+      "sha256": "f0d2fe8ffb326ea3537c0c928790c55df098b78a33401cebe22cc2ddea52c090"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/typecheck-01/command.json",
+      "bytes": 232,
+      "sha256": "4385b0892a7835a1e474196230758e202b9b2375c7fe65bc0c9d14704aba88d2"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/typecheck-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/typecheck-01/receipt.json",
+      "bytes": 2633,
+      "sha256": "beb02ec10502727c85b38718c3a1290e1f5c32dc4d29edc901a152dcd5ebb4ce"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/typecheck-01/start.json",
+      "bytes": 1448,
+      "sha256": "a8f31acb81cae2594b862f619113e76a3f63d430e25d348af391693e793554bc"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/typecheck-01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/typecheck-01/stdout.log",
+      "bytes": 31,
+      "sha256": "91e0225603863bff7bfba2454b7ae4eb8d4ec8722f9ffa08fc263bf857e4f9af"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/typecheck-config.json",
+      "bytes": 204,
+      "sha256": "dfdf215ffa55f31b8354eb910c0e98a33d91d2a23710880f71b297c3b0a53959"
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/verify_legacy_immutability.cjs",
+      "bytes": 1464,
+      "sha256": "27ce2c449f7a34e8c9bddb4bb049fa9815bad1e1447a77fa7539a44858cbe236"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/CHROMIUM_SOURCE_PROVENANCE.json",
+      "bytes": 2996,
+      "sha256": "4e7861b1fe844af0f64ce227ea91e99043cfc0fabc4d8b15eeab654d5b7a8c36"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/FEASIBILITY.md",
+      "bytes": 3413,
+      "sha256": "53466e58f1cd3c4f8b10b63cb032bd4e4006538f8a3f072e2b473203fa9ad3cd"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/prep/audit-config-v2.json",
+      "bytes": 202,
+      "sha256": "9ea26b51ad7011dfdf911a2944fc4ad9410e4764065cf989c9714c229ee93653"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/prep/audit-config-v3.json",
+      "bytes": 324,
+      "sha256": "5a19f3b0c78638b4988c69dd75e43ec70ca0cc7cb89a49756df5f2537126104c"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/prep/audit-config.json",
+      "bytes": 199,
+      "sha256": "f1bd5b2843cd9059ca79168b8530a7c102e147e600d18f037488cb24c6751eaf"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/prep/audit_feasibility.cjs",
+      "bytes": 6406,
+      "sha256": "b72e9fdd438abd2c87e813ba2e73df82fe9597f136a6634ee6ba8f769cb4fb52"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/prep/audit_feasibility_v2.cjs",
+      "bytes": 6273,
+      "sha256": "a925eda79ac8126d455e1c33960e70547565405f4e66a2a9dfcd69126e420b4d"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/review/INDEPENDENT_REVIEW.md",
+      "bytes": 3907,
+      "sha256": "5e1090b5d65e88a94479feab803ff3a52fd88298a71134c60da5d1e0e5e54e54"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/review/verification-01/FEASIBILITY_AUDIT.json",
+      "bytes": 4668,
+      "sha256": "905b5b40b4809a3f382893e93938512e577d13f2cfa5e765de048a155cbaccf1"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-01/command.json",
+      "bytes": 199,
+      "sha256": "f1bd5b2843cd9059ca79168b8530a7c102e147e600d18f037488cb24c6751eaf"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-01/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-01/receipt.json",
+      "bytes": 2730,
+      "sha256": "6a5dd5fe34ada5d0b3107926b5bf01da382ec888b788dd1eb96847ab85cb4ca6"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-01/start.json",
+      "bytes": 1503,
+      "sha256": "8e79d1289b7f8d99cefee3a21f3936403cd2fe08486cb131702cf709b44219fa"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-01/stderr.log",
+      "bytes": 1022,
+      "sha256": "22baf87c6f2925407209587ee6f4fa1257b2d868bd89cfb0b35f07e200aa576c"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-01/stdout.log",
+      "bytes": 31,
+      "sha256": "935f5e7229c60dd0425c7096c17f97493c1e4300c3cbf04a2e4ccb94d625d945"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-02/command.json",
+      "bytes": 202,
+      "sha256": "9ea26b51ad7011dfdf911a2944fc4ad9410e4764065cf989c9714c229ee93653"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-02/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-02/receipt.json",
+      "bytes": 2736,
+      "sha256": "5614acba507410b29d2455f326204ba79e7d9afb4934aef3cad470d524b98a52"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-02/start.json",
+      "bytes": 1509,
+      "sha256": "472eee224c7c015afccf0ab0f6fcb00be17b600ead791475a6cbe7b13ee3ad34"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-02/stderr.log",
+      "bytes": 1183,
+      "sha256": "a41f6f0f61d99e68a5398a634339a5eb10c3ceff4ff721bd44dad2647ebcf959"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-02/stdout.log",
+      "bytes": 31,
+      "sha256": "935f5e7229c60dd0425c7096c17f97493c1e4300c3cbf04a2e4ccb94d625d945"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-03/FEASIBILITY_AUDIT.json",
+      "bytes": 4668,
+      "sha256": "905b5b40b4809a3f382893e93938512e577d13f2cfa5e765de048a155cbaccf1"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-03/command.json",
+      "bytes": 324,
+      "sha256": "5a19f3b0c78638b4988c69dd75e43ec70ca0cc7cb89a49756df5f2537126104c"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-03/entry-script.snapshot",
+      "bytes": 790,
+      "sha256": "3e083a4bac92e0993966aea6a5b7ec1e7b67c6143fb25536595338236510e584"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-03/receipt.json",
+      "bytes": 2850,
+      "sha256": "11ccf227411e0de38af37b470fde1c27485e64dcd60f83607c9bce07fec6efe5"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-03/start.json",
+      "bytes": 1509,
+      "sha256": "b7e1f7ccbe19b5d9c3cd84f256544e64eb55683cacb870ba6919f72e3cc07ce6"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-03/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "tmp/r8-warroom-loop-v2-20261024/root/feasibility-03/stdout.log",
+      "bytes": 31,
+      "sha256": "91e0225603863bff7bfba2454b7ae4eb8d4ec8722f9ffa08fc263bf857e4f9af"
+    }
+  ]
+}

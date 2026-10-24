@@ -6,10 +6,11 @@ import { tmpdir } from 'node:os';
 import * as nodePath from 'node:path';
 import { join } from 'node:path';
 import { runInNewContext } from 'node:vm';
-import { test } from 'vitest';
+import { test, vi } from 'vitest';
 
 const harnessPath = join(process.cwd(), 'tools', 'ui', 'paradox_local_qa.cjs');
 const nodeRequire = createRequire(import.meta.url);
+const { JSDOM } = nodeRequire('jsdom') as { JSDOM: new (html?: string) => { window: Window & typeof globalThis } };
 
 function readHarness(): string {
     return readFileSync(harnessPath, 'utf8');
@@ -915,6 +916,247 @@ test('ambient abort attribution requires one exact element/source epoch and cons
     assert.equal(wrongOriginExpected.length, 0);
 });
 
+test('ambient lifecycle observer records browser media progress with exact element state and ignores other audio', () => {
+    const dom = new JSDOM(`
+        <audio id="ambient" src="http://127.0.0.1:3002/assets/ambient_field-D4f9a2.ogg"></audio>
+        <audio id="ui" src="http://127.0.0.1:3002/assets/ui_click-D4f9a2.ogg"></audio>
+    `);
+    const { window } = dom;
+    const ambient = window.document.querySelector<HTMLAudioElement>('#ambient')!;
+    const ui = window.document.querySelector<HTMLAudioElement>('#ui')!;
+    Object.defineProperties(ambient, {
+        currentSrc: { configurable: true, value: ambient.src },
+        networkState: { configurable: true, value: 2 },
+        readyState: { configurable: true, value: 3 },
+        paused: { configurable: true, value: false },
+        ended: { configurable: true, value: false },
+        seeking: { configurable: true, value: false },
+        currentTime: { configurable: true, value: 12.5 },
+        duration: { configurable: true, value: 88 },
+        loop: { configurable: true, value: true },
+    });
+    let now = 1_000;
+    const install = loadFunction<() => void>(readHarness(), 'installAmbientLifecycleObserver', {
+        window,
+        document: window.document,
+        HTMLMediaElement: window.HTMLMediaElement,
+        Date: { now: () => ++now },
+    });
+
+    install();
+    install();
+    ambient.dispatchEvent(new window.Event('progress'));
+    ambient.dispatchEvent(new window.Event('suspend'));
+    ambient.dispatchEvent(new window.Event('seeking'));
+    ambient.dispatchEvent(new window.Event('seeked'));
+    Object.defineProperties(ambient, {
+        currentTime: { configurable: true, get: () => { throw new Error('currentTime blocked'); } },
+        seeking: { configurable: true, value: undefined },
+        error: { configurable: true, value: { code: 3, message: 'decode failed' } },
+    });
+    ambient.dispatchEvent(new window.Event('error'));
+    ui.dispatchEvent(new window.Event('suspend'));
+
+    const signals = (window as any).__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__;
+    assert.deepEqual(signals.map((signal: any) => signal.kind), ['progress', 'suspend', 'seeking', 'seeked', 'error']);
+    assert.deepEqual(signals.map((signal: any) => signal.signalSequence), [1, 2, 3, 4, 5]);
+    assert.equal(signals[0].elementId, 'media:1');
+    assert.equal(signals[0].sourceEpoch, 1);
+    assert.deepEqual(signals[0].mediaState, {
+        networkState: 2,
+        readyState: 3,
+        paused: false,
+        ended: false,
+        seeking: false,
+        currentTime: 12.5,
+        duration: 88,
+        loop: true,
+        mediaError: null,
+    });
+    assert.deepEqual(signals[0].mediaStateUnavailable, ['mediaError']);
+    assert.deepEqual(signals[0].mediaStateReadErrors, {});
+    assert.equal(signals[4].mediaState.currentTime, null);
+    assert.equal(signals[4].mediaState.seeking, null);
+    assert.deepEqual(signals[4].mediaState.mediaError, { code: 3, message: 'decode failed' });
+    assert.deepEqual(signals[4].mediaStateUnavailable, ['seeking']);
+    assert.match(signals[4].mediaStateReadErrors.currentTime, /currentTime blocked/);
+});
+
+test('ambient lifecycle observer follows detached Audio elements created by the production audio bus exactly once', async () => {
+    const dom = new (JSDOM as any)('', { url: 'http://127.0.0.1:3002/index.html?embedded=1' });
+    const { window } = dom;
+    const playReturn = Promise.resolve('played');
+    const loadReturn = { loaded: true };
+    const pauseError = new Error('pause identity');
+    Object.defineProperties(window.HTMLMediaElement.prototype, {
+        play: { configurable: true, writable: true, value: () => playReturn },
+        pause: { configurable: true, writable: true, value: () => { throw pauseError; } },
+        load: { configurable: true, writable: true, value: () => loadReturn },
+    });
+    let now = 2_000;
+    const install = loadFunction<() => void>(readHarness(), 'installAmbientLifecycleObserver', {
+        window,
+        document: window.document,
+        HTMLMediaElement: window.HTMLMediaElement,
+        Date: { now: () => ++now },
+    });
+    install();
+    install();
+
+    const fixtureUrl = 'http://127.0.0.1:3002/assets/ambient_field-ProductionPath.ogg';
+    const created: HTMLAudioElement[] = [];
+    const productConstructorUrls: string[] = [];
+    const NativeAudio = window.Audio;
+    function CapturingAudio(src?: string) {
+        productConstructorUrls.push(src ?? '');
+        const element = new NativeAudio(fixtureUrl);
+        created.push(element);
+        return element;
+    }
+    CapturingAudio.prototype = NativeAudio.prototype;
+    Object.setPrototypeOf(CapturingAudio, NativeAudio);
+    vi.stubGlobal('Audio', CapturingAudio);
+    const audioBus = await import('../src/ui/map/audio/audio_engine.js');
+    audioBus.resetAudioForTests();
+    audioBus.setEnabled(true);
+    audioBus.unlockAudioForUserGesture();
+    await audioBus.playAmbientBed('ambient_field');
+
+    try {
+        assert.equal(created.length, 1);
+        assert.match(productConstructorUrls[0], /ambient_field.*\.ogg/u);
+        const detached = created[0];
+        assert.equal(detached.isConnected, false);
+        assert.equal(detached.preload, 'auto');
+        assert.equal(detached.play(), playReturn, 'the wrapper must preserve the original play return identity');
+        assert.throws(
+            () => detached.pause(),
+            (error: unknown) => error === pauseError,
+            'the wrapper must preserve the original pause error identity',
+        );
+        for (const kind of ['loadstart', 'progress', 'seeking', 'seeked', 'abort', 'error']) {
+            detached.dispatchEvent(new window.Event(kind));
+        }
+
+        const firstUrl = detached.src;
+        const firstSignals = (window as any).__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__
+            .filter((signal: any) => signal.url === firstUrl);
+        assert.deepEqual(
+            firstSignals.filter((signal: any) => ['request-start', 'progress', 'seeking', 'seeked', 'browser-abort', 'error'].includes(signal.kind))
+                .map((signal: any) => signal.kind),
+            ['request-start', 'progress', 'seeking', 'seeked', 'browser-abort', 'error'],
+        );
+        assert.equal(firstSignals.find((signal: any) => signal.kind === 'seeking').mediaState.loop, true);
+        const requestStart = firstSignals.find((signal: any) => signal.kind === 'request-start');
+        const browserAbort = firstSignals.find((signal: any) => signal.kind === 'browser-abort');
+        assert.equal(requestStart.elementId, browserAbort.elementId);
+        assert.equal(requestStart.sourceEpoch, browserAbort.sourceEpoch);
+
+        const classify = loadFunction<(record: Record<string, any>, signals: Array<Record<string, any>>) => any>(
+            readHarness(),
+            'classifyExpectedAmbientLifecycleAbort',
+            { URL },
+        );
+        const failure = {
+            failure: { errorText: 'net::ERR_ABORTED' },
+            method: 'GET',
+            url: firstUrl,
+            resourceType: 'media',
+            isMainFrame: false,
+            requestInitiatedAtMs: requestStart.observedAtMs,
+            observedAtMs: browserAbort.observedAtMs,
+        };
+        assert.ok(classify(failure, firstSignals.filter((signal: any) => signal.kind !== 'error')));
+        assert.equal(classify(failure, [requestStart]), null);
+        assert.equal(classify(failure, [requestStart, { ...browserAbort, sourceEpoch: browserAbort.sourceEpoch + 1 }]), null);
+
+        const connected = new NativeAudio(firstUrl);
+        window.document.body.append(connected);
+        connected.play();
+        connected.dispatchEvent(new window.Event('loadstart', { bubbles: false }));
+        const connectedSeeking = new window.Event('seeking');
+        connected.dispatchEvent(connectedSeeking);
+        const connectedStarts = (window as any).__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__
+            .filter((signal: any) => signal.kind === 'request-start' && signal.elementId !== requestStart.elementId);
+        assert.equal(connectedStarts.length, 1, 'document and element listeners must deduplicate the same connected event');
+        const connectedSeekingSignals = (window as any).__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__
+            .filter((signal: any) => signal.kind === 'seeking' && signal.elementId !== requestStart.elementId);
+        assert.equal(connectedSeekingSignals.length, 1, 'connected seeking must be observed once');
+
+        const nextUrl = 'http://127.0.0.1:3002/assets/ambient_warroom-NextEpoch.ogg';
+        detached.src = nextUrl;
+        assert.equal(detached.load(), loadReturn, 'the wrapper must preserve the original load return identity');
+        detached.dispatchEvent(new window.Event('loadstart'));
+        detached.dispatchEvent(new window.Event('abort'));
+        const nextSignals = (window as any).__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__
+            .filter((signal: any) => signal.url === nextUrl);
+        assert.equal(nextSignals.find((signal: any) => signal.kind === 'load').sourceEpoch, requestStart.sourceEpoch + 1);
+        assert.deepEqual(
+            nextSignals.filter((signal: any) => ['request-start', 'browser-abort'].includes(signal.kind))
+                .map((signal: any) => signal.sourceEpoch),
+            [requestStart.sourceEpoch + 1, requestStart.sourceEpoch + 1],
+        );
+    } finally {
+        audioBus.resetAudioForTests();
+        vi.unstubAllGlobals();
+    }
+});
+
+test('request failure diagnostics retain only Range metadata with explicit absent and read-error states', () => {
+    const attach = loadFunction<(page: any, diagnostics: any) => void>(readHarness(), 'attachPageDiagnostics', {
+        Date: { now: () => 5_000 },
+        URL,
+        classifyExpectedRequestAbort: () => null,
+    });
+    const handlers = new Map<string, (value: any) => void>();
+    const mainFrame = {};
+    const page = {
+        on: (kind: string, handler: (value: any) => void) => handlers.set(kind, handler),
+        mainFrame: () => mainFrame,
+    };
+    const diagnostics = {
+        attachedPages: new Set(),
+        consoleMessages: [],
+        pageErrors: [],
+        events: [],
+        requestStartTimes: new WeakMap(),
+        requestNavigationWindows: new WeakMap(),
+        getMapNavigationAbortWindow: () => null,
+        isTeardownStarted: () => false,
+        expectedStartupAborts: [],
+        expectedTeardownAborts: [],
+        expectedNavigationAborts: [],
+        expectedAmbientLifecycleAborts: [],
+        networkFailures: [] as any[],
+    };
+    attach(page, diagnostics);
+    const request = (headers: () => Record<string, string>) => ({
+        failure: () => ({ errorText: 'net::ERR_ABORTED' }),
+        headers,
+        frame: () => ({}),
+        method: () => 'GET',
+        url: () => 'http://127.0.0.1:3002/assets/ambient_field-D4f9a2.ogg',
+        resourceType: () => 'media',
+    });
+    const present = request(() => ({ Range: 'bytes=0-', authorization: 'secret-must-not-be-retained' }));
+    handlers.get('request')!(present);
+    handlers.get('requestfailed')!(present);
+    const absent = request(() => ({ accept: '*/*' }));
+    handlers.get('request')!(absent);
+    handlers.get('requestfailed')!(absent);
+    const failed = request(() => { throw new Error('header read blocked'); });
+    handlers.get('request')!(failed);
+    handlers.get('requestfailed')!(failed);
+
+    assert.deepEqual(diagnostics.networkFailures.map((record) => record.requestRange), [
+        { status: 'present', value: 'bytes=0-' },
+        { status: 'absent', value: null },
+        { status: 'read-error', value: null, error: 'header read blocked' },
+    ]);
+    assert.equal(JSON.stringify(diagnostics.networkFailures).includes('secret-must-not-be-retained'), false);
+    assert.equal(diagnostics.networkFailures.every((record) => record.failure.errorText === 'net::ERR_ABORTED'), true);
+});
+
 test('main-process evidence preserves ordered output beyond the bounded progress tail and rejects collisions', () => {
     const captureFactory = loadFunction<(path: string, now: () => number) => {
         handler: (stream: string, target: string[]) => (chunk: string) => void;
@@ -1069,7 +1311,9 @@ test('tile AbortSignal observer is installed as an init script and attributed af
     const harness = readHarness();
     assert.match(harness, /page\.addInitScript\(installTileFetchAbortObserver/);
     assert.match(harness, /x-awwv-qa-tile-request-id/);
-    assert.match(harness, /const requestHeaders = request\.headers\(\);[\s\S]*requestHeaders\['x-awwv-qa-tile-request-id'\]/);
+    const diagnosticsSource = extractFunctionSource(harness, 'attachPageDiagnostics');
+    assert.match(diagnosticsSource, /headerValue\('x-awwv-qa-tile-request-id'\)/);
+    assert.match(diagnosticsSource, /headerValue\('range'\)/);
     const playIndex = harness.indexOf('const playtest = await playTurns(');
     const saveLoadIndex = harness.indexOf('playtest.saveLoadProof = await exerciseFinalSaveLoad(', playIndex);
     const tileReadIndex = harness.indexOf('await readTileFetchAbortSignals(frame)', playIndex);
@@ -1080,7 +1324,8 @@ test('tile AbortSignal observer is installed as an init script and attributed af
 test('ambient lifecycle observer starts before campaign and attribution runs after optional Save/load transitions', () => {
     const harness = readHarness();
     assert.match(harness, /page\.addInitScript\(installAmbientLifecycleObserver/);
-    assert.match(harness, /document\.addEventListener\('abort'/);
+    assert.match(harness, /\['abort', 'browser-abort'\]/);
+    assert.match(harness, /document\.addEventListener\(binding\.eventKind, binding\.listener, true\)/);
     const playIndex = harness.indexOf('const playtest = await playTurns(');
     const saveLoadIndex = harness.indexOf('playtest.saveLoadProof = await exerciseFinalSaveLoad(', playIndex);
     const readSignalsIndex = harness.indexOf('await readAmbientLifecycleSignals(frame)', playIndex);
@@ -2237,6 +2482,334 @@ test('counter proof never substitutes newly visible counters for its declared in
         ),
         null,
     );
+});
+
+test('stable counter activation resolves an overlay replacement and clicks the replacement once', async () => {
+    const dom = new JSDOM('<div data-awwv-dom-formation-counters="true"></div>');
+    const { document } = dom.window;
+    const overlay = document.querySelector<HTMLElement>('[data-awwv-dom-formation-counters="true"]')!;
+    Object.assign(overlay.dataset, {
+        awwvFormationCounterSourceGate: 'ready',
+        awwvFormationCounterNeedsUpdate: 'false',
+        awwvFormationCounterSourceCount: '1',
+        awwvFormationCounterRenderedCount: '1',
+    });
+    const clicks = new Map<HTMLElement, number>();
+    const makeCounter = (label: string) => {
+        const node = document.createElement('button');
+        node.setAttribute('data-awwv-formation-counter-id', 'formation-1');
+        node.setAttribute('aria-label', label);
+        node.getBoundingClientRect = () => ({
+            x: 100, y: 120, left: 100, top: 120, right: 144, bottom: 144, width: 44, height: 24,
+            toJSON: () => ({}),
+        });
+        node.addEventListener('click', () => clicks.set(node, (clicks.get(node) ?? 0) + 1));
+        return node;
+    };
+    const original = makeCounter('Original');
+    overlay.append(original);
+    let replacement: HTMLElement | null = null;
+    let lateReplacement: HTMLElement | null = null;
+    let settles = 0;
+    let samples = 0;
+    let lateReplacementArmed = false;
+    const documentWithHitTest = document as Document & { elementFromPoint: (x: number, y: number) => Element | null };
+    documentWithHitTest.elementFromPoint = () => document.querySelector('[data-awwv-formation-counter-id="formation-1"]');
+    const sample = <T,>(predicate: (...args: any[]) => T, ...args: any[]) => {
+        const result = predicate(...args);
+        samples += 1;
+        if (samples === 2) lateReplacementArmed = true;
+        return result;
+    };
+    const frame = {
+        evaluate: async (predicate: (arg: string) => unknown, arg: string) => sample(predicate, arg),
+        locator: (selector: string) => ({
+            count: async () => {
+                if (lateReplacementArmed) {
+                    lateReplacement = makeCounter('Late replacement');
+                    document.querySelector('[data-awwv-formation-counter-id="formation-1"]')?.replaceWith(lateReplacement);
+                    lateReplacementArmed = false;
+                }
+                return document.querySelectorAll(selector).length;
+            },
+            elementHandle: async () => {
+                const bound = document.querySelector(selector) as HTMLElement | null;
+                if (!bound) return null;
+                return {
+                    evaluate: async (predicate: (node: HTMLElement, id: string) => unknown, id: string) => sample(predicate, bound, id),
+                    click: async () => bound.click(),
+                };
+            },
+            click: async () => (document.querySelector(selector) as HTMLElement | null)?.click(),
+        }),
+    };
+    const activate = loadAsyncFunction<(frame: any, id: string) => Promise<any>>(
+        readHarness(),
+        'activateStableFormationCounter',
+        {
+            document,
+            sleep: async () => {
+                settles += 1;
+                if (settles === 1) {
+                    replacement = makeCounter('Replacement');
+                    original.replaceWith(replacement);
+                }
+            },
+        },
+    );
+
+    const stable = await activate(frame, 'formation-1');
+
+    assert.ok(replacement, 'fixture must replace the original counter');
+    assert.ok(lateReplacement, 'fixture must replace again after the second sample');
+    assert.notEqual(stable.first.nodeGeneration, 1, 'activation must not retain the replaced node generation');
+    assert.equal(stable.first.matchCount, 1);
+    assert.equal(stable.second.matchCount, 1);
+    assert.equal(stable.first.nodeGeneration, stable.second.nodeGeneration);
+    assert.equal(stable.second.outerIdentity.ariaLabel, 'Late replacement');
+    assert.equal(clicks.get(original) ?? 0, 0);
+    assert.equal(clicks.get(replacement!) ?? 0, 0);
+    assert.equal(clicks.get(lateReplacement!) ?? 0, 1);
+    assert.equal(Array.from(clicks.values()).reduce((sum, count) => sum + count, 0), 1);
+});
+
+test('counter detail wait is identity-bound and rejects wrong or missing detail rails', async () => {
+    const dom = new JSDOM('<section data-testid="formation-detail-panel" data-formation-id="formation-other"></section>');
+    const { document } = dom.window;
+    const frame = {
+        locator: (selector: string) => ({
+            waitFor: async () => {
+                if (!document.querySelector(selector)) throw new Error('not visible');
+            },
+        }),
+    };
+    const waitForExactDetail = loadAsyncFunction<(frame: any, id: string, timeout?: number) => Promise<boolean>>(
+        readHarness(),
+        'waitForExactFormationDetail',
+    );
+
+    assert.equal(await waitForExactDetail(frame, 'formation-1', 1), false);
+    document.body.innerHTML = '<section data-testid="formation-detail-panel" data-formation-id="formation-1"></section>';
+    assert.equal(await waitForExactDetail(frame, 'formation-1', 1), true);
+    document.body.innerHTML = '';
+    assert.equal(await waitForExactDetail(frame, 'formation-1', 1), false);
+});
+
+test('counter selection failure diagnostics retain immediate DOM and selected rail identities', async () => {
+    const dom = new JSDOM(`
+        <div data-awwv-dom-formation-counters="true"
+            data-awwv-formation-counter-source-gate="ready"
+            data-awwv-formation-counter-needs-update="false"
+            data-awwv-formation-counter-rendered-count="1">
+            <button data-awwv-formation-counter-id="formation-1" aria-label="Formation 1"></button>
+        </div>
+        <section data-testid="formation-detail-panel" data-formation-id="formation-other"></section>
+        <section data-testid="corps-front-panel" data-sector-id="sector-7" data-corps-id="corps-2"></section>
+        <section data-testid="corps-detail-panel" data-corps-id="corps-3"></section>
+    `);
+    const { document } = dom.window;
+    const counter = document.querySelector<HTMLElement>('[data-awwv-formation-counter-id="formation-1"]')!;
+    counter.getBoundingClientRect = () => ({
+        x: 100, y: 120, left: 100, top: 120, right: 144, bottom: 144, width: 44, height: 24,
+        toJSON: () => ({}),
+    });
+    for (const rail of document.querySelectorAll<HTMLElement>('[data-testid$="-panel"]')) {
+        rail.getBoundingClientRect = () => ({
+            x: 200, y: 100, left: 200, top: 100, right: 500, bottom: 600, width: 300, height: 500,
+            toJSON: () => ({}),
+        });
+    }
+    const documentWithHitTest = document as Document & { elementFromPoint: (x: number, y: number) => Element | null };
+    documentWithHitTest.elementFromPoint = () => counter;
+    const frame = {
+        evaluate: async (predicate: (arg: string) => unknown, arg: string) => predicate(arg),
+    };
+    const diagnostics = loadAsyncFunction<(frame: any, id: string) => Promise<any>>(
+        readHarness(),
+        'formationCounterSelectionFailureDiagnostics',
+        { document, HTMLElement: dom.window.HTMLElement, getComputedStyle: dom.window.getComputedStyle },
+    );
+
+    const result = await diagnostics(frame, 'formation-1');
+
+    assert.deepEqual(JSON.parse(JSON.stringify(result.counter.rect)), { x: 100, y: 120, width: 44, height: 24 });
+    assert.equal(result.counter.outerIdentity.formationCounterId, 'formation-1');
+    assert.equal(result.hitOwner.formationCounterId, 'formation-1');
+    assert.equal(result.rawElementFromPoint.formationCounterId, 'formation-1');
+    assert.equal(result.overlayDataset.awwvFormationCounterSourceGate, 'ready');
+    assert.deepEqual(JSON.parse(JSON.stringify(result.visibleRailIds)), [
+        'formation-detail-panel:formation-other',
+        'corps-front-panel:sector-7:corps-2',
+        'corps-detail-panel:corps-3',
+    ]);
+    assert.deepEqual(JSON.parse(JSON.stringify(result.railDerivedSelection)), {
+        formationId: 'formation-other',
+        sectorId: 'sector-7',
+        corpsId: 'corps-2',
+        corpsIds: ['corps-2', 'corps-3'],
+    });
+    assert.deepEqual(JSON.parse(JSON.stringify(result.storeSelection)), {
+        status: 'unavailable',
+        reason: 'No supported player-visible UI selection-state API is exposed to the harness.',
+    });
+});
+
+test('counter selection orchestration snapshots activation and detail failures once while preserving failure identity', async () => {
+    const events: any[] = [];
+    const snapshots: any[] = [];
+    const primary = new Error('stable counter activation failed');
+    const diagnostics: any = {
+        targetId: 'formation-1',
+        railDerivedSelection: { formationId: null, sectorId: null, corpsId: null, corpsIds: [] },
+        storeSelection: {
+            status: 'unavailable',
+            reason: 'No supported player-visible UI selection-state API is exposed to the harness.',
+        },
+    };
+    const loadVerify = (activation: () => Promise<any>, exactDetail: () => Promise<boolean>, currentDiagnostics = diagnostics) => (
+        loadAsyncFunction<(...args: any[]) => Promise<any>>(
+            readHarness(),
+            'verifyExactFormationCounterSelection',
+            {
+                activateStableFormationCounter: activation,
+                waitForExactFormationDetail: exactDetail,
+                formationCounterSelectionFailureDiagnostics: async () => currentDiagnostics,
+                writeCounterSelectionFailureSidecar: () => ({ path: 'counter-selection-failure.json', sha256: 'sidecar-sha' }),
+                snapshot: async (...args: any[]) => snapshots.push(args.at(-1)),
+                safeName: (value: string) => value,
+                sleep: async () => {},
+            },
+        )
+    );
+    const args = [{}, {}, 'RBiH', events, 'initial-map-probe', { id: 'formation-1' }];
+
+    const activationFailure = loadVerify(async () => { throw primary; }, async () => false);
+    await assert.rejects(
+        () => activationFailure(...args),
+        (error: unknown) => error === primary,
+    );
+    assert.equal(snapshots.length, 1);
+    assert.equal(snapshots[0].selectionFailure, diagnostics);
+    assert.equal(snapshots[0].selectionError, 'stable counter activation failed');
+
+    snapshots.length = 0;
+    const wrongDetailDiagnostics = {
+        ...diagnostics,
+        railDerivedSelection: { formationId: 'formation-other', sectorId: null, corpsId: null, corpsIds: [] },
+    };
+    const detailFailure = loadVerify(
+        async () => ({ first: { nodeGeneration: 3 }, second: { nodeGeneration: 3 } }),
+        async () => false,
+        wrongDetailDiagnostics,
+    );
+    await assert.rejects(() => detailFailure(...args), /opened the wrong detail: expected formation-1, observed formation-other/);
+    assert.equal(snapshots.length, 1);
+    assert.equal(snapshots[0].selectionFailure, wrongDetailDiagnostics);
+});
+
+test('duplicate exact counter during settled reads clicks nothing and persists diagnostics before throwing enrichment', async () => {
+    const tempRoot = mkdtempSync(join(tmpdir(), 'awwv-counter-selection-'));
+    try {
+        const dom = new JSDOM('<div data-awwv-dom-formation-counters="true"></div>');
+        const { document } = dom.window;
+        const overlay = document.querySelector<HTMLElement>('[data-awwv-dom-formation-counters="true"]')!;
+        Object.assign(overlay.dataset, {
+            awwvFormationCounterSourceGate: 'ready',
+            awwvFormationCounterNeedsUpdate: 'false',
+            awwvFormationCounterSourceCount: '1',
+            awwvFormationCounterRenderedCount: '1',
+        });
+        let clicks = 0;
+        const makeCounter = (label: string) => {
+            const node = document.createElement('button');
+            node.setAttribute('data-awwv-formation-counter-id', 'formation-duplicate');
+            node.setAttribute('aria-label', label);
+            node.getBoundingClientRect = () => ({
+                x: 100, y: 120, left: 100, top: 120, right: 144, bottom: 144, width: 44, height: 24,
+                toJSON: () => ({}),
+            });
+            node.addEventListener('click', () => { clicks += 1; });
+            return node;
+        };
+        const original = makeCounter('Original');
+        overlay.append(original);
+        let duplicateAdded = false;
+        const documentWithHitTest = document as Document & { elementFromPoint: (x: number, y: number) => Element | null };
+        documentWithHitTest.elementFromPoint = () => original;
+        const frame = {
+            evaluate: async (predicate: (arg: string) => unknown, arg: string) => predicate(arg),
+            locator: (selector: string) => ({
+                count: async () => document.querySelectorAll(selector).length,
+                elementHandle: async () => {
+                    const bound = document.querySelector(selector) as HTMLElement | null;
+                    if (!bound) return null;
+                    if (!duplicateAdded) {
+                        overlay.append(makeCounter('Duplicate'));
+                        duplicateAdded = true;
+                    }
+                    return {
+                        evaluate: async (predicate: (node: HTMLElement, id: string) => unknown, id: string) => predicate(bound, id),
+                        click: async () => bound.click(),
+                    };
+                },
+            }),
+        };
+        const activate = loadAsyncFunction<(frame: any, id: string) => Promise<any>>(
+            readHarness(),
+            'activateStableFormationCounter',
+            { document, sleep: async () => {} },
+        );
+        const diagnostics = loadAsyncFunction<(frame: any, id: string) => Promise<any>>(
+            readHarness(),
+            'formationCounterSelectionFailureDiagnostics',
+            { document, getComputedStyle: dom.window.getComputedStyle },
+        );
+        const sidecar = loadFunction<(...args: any[]) => any>(
+            readHarness(),
+            'writeCounterSelectionFailureSidecar',
+            {
+                Buffer,
+                crypto: nodeRequire('node:crypto'),
+                evidenceDir: tempRoot,
+                fs: nodeFs,
+                path: nodePath,
+                process,
+                runLabel: 'fixture-run',
+                safeName: (value: string) => value.replace(/[^a-z0-9-]+/gi, '-'),
+            },
+        );
+        const verify = loadAsyncFunction<(...args: any[]) => Promise<any>>(
+            readHarness(),
+            'verifyExactFormationCounterSelection',
+            {
+                activateStableFormationCounter: activate,
+                waitForExactFormationDetail: async () => false,
+                formationCounterSelectionFailureDiagnostics: diagnostics,
+                writeCounterSelectionFailureSidecar: sidecar,
+                snapshot: async () => { throw new Error('rich snapshot failed'); },
+                safeName: (value: string) => value.replace(/[^a-z0-9-]+/gi, '-'),
+                sleep: async () => {},
+            },
+        );
+
+        await assert.rejects(
+            () => verify({}, frame, 'RBiH', [], 'initial-map-probe', { id: 'formation-duplicate' }),
+            /identity is not unique during stable resolution/,
+        );
+
+        assert.equal(clicks, 0);
+        const factionDir = join(tempRoot, 'RBiH');
+        const files = nodeFs.readdirSync(factionDir).sort();
+        assert.deepEqual(files, ['initial-map-probe-counter-formation-duplicate-selection-failure.json']);
+        const persisted = JSON.parse(readFileSync(join(factionDir, files[0]), 'utf8'));
+        assert.equal(persisted.schema, 'awwv.counter-selection-failure.v1');
+        assert.match(persisted.selectionError, /identity is not unique during stable resolution/);
+        assert.equal(persisted.selectionFailure.matchCount, 2);
+        assert.equal(persisted.richSnapshot.status, 'pending');
+        assert.equal(nodeFs.readdirSync(factionDir).some((name) => name.includes('.tmp-')), false);
+    } finally {
+        rmSync(tempRoot, { recursive: true, force: true });
+    }
 });
 
 test('pending event order and visible modal identity match the app selector', () => {

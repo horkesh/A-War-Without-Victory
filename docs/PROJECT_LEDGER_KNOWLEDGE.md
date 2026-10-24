@@ -6133,3 +6133,15 @@ Elite-loan ownership is equally local. Resolve the receiving corps only to valid
 ## 2026-10-24 — Capture the counter activation boundary before guessing a fix
 
 A valid canonical brigade and a unique visible DOM counter do not prove that an imperatively redrawn overlay preserves the same activation target. Preserve target/node identity, rect, hit-test owner, overlay readiness, selected state and the identity-bound detail panel at failure; keep the single activation and fail-closed coverage. A prior successful screenshot cannot establish the later failed click's cause. Compare renderer projection with canonical projection, rather than full-save bytes, while keeping native Save/load acceptance separate. See [native blocker](PROJECT_LEDGER.md#2026-10-24--native-shakedown-initial-counter-blocker).
+
+## 2026-10-24 — Persist boundary diagnostics before screenshot enrichment
+
+A screenshot/event helper can fail before appending its event. Write compact structured failure evidence atomically before invoking screenshots and secondary readers; test the actual filesystem output with enrichment deliberately throwing. For imperatively replaced controls, keep the sampled element handle, include current exact-ID match count in both settled reads, and never re-resolve a new target for activation. Visible rail identity is evidence about rendering, not internal selection-store truth. See the [counter-selection ledger entry](PROJECT_LEDGER.md#2026-10-24--counter-selection-harness-synchronization-and-durable-failure-evidence).
+
+## 2026-10-24 — Observe detached media at its actual owner
+
+Document capture listeners cannot observe events from detached new Audio elements. A connected-markup fixture can falsely qualify an observer used by a detached production audio bus. Exercise the actual creation/preload/play path; bind real element listeners before existing playback/load calls, deduplicate connected delivery, and preserve native returns/errors. Missing lifecycle evidence never justifies inventing an abort pair or reclassifying a retained failure. See the [detached-media ledger entry](PROJECT_LEDGER.md#2026-10-24--detached-ambient-media-observation-repair-native-acceptance-unchanged).
+
+## 2026-10-24 — Keep telemetry identities separate until a real join is proved
+
+Playwright/CDP request identity and Chromium NetLog source identity are separate in the inspected producer. Same URL, nearby times, Range and complete byte counts can support a hypothesis without establishing a unique cross-layer join. Preserve that distinction in fixtures and admission rules; an authentic-looking synthetic identifier cannot prove a producer contract. The warroom v2 development stopped at that approved evidence boundary. See the [warroom ledger entry](PROJECT_LEDGER.md#2026-10-24--warroom-loop-diagnosis-diagnostic-repair-go-and-v2-identity-hard-stop).

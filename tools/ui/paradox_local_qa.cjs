@@ -3202,6 +3202,287 @@ async function drainVisibleEventNotices(page, frame, faction, events, label, set
   return handled;
 }
 
+async function activateStableFormationCounter(frame, counterId) {
+  const read = (handle) => handle.evaluate((node, expectedId) => {
+    const generationStateKey = '__awwvQaFormationCounterGenerations';
+    const root = globalThis;
+    if (!root[generationStateKey]) {
+      root[generationStateKey] = { next: 1, nodes: new WeakMap() };
+    }
+    const generations = root[generationStateKey];
+    const overlay = document.querySelector('[data-awwv-dom-formation-counters="true"]');
+    const overlayDataset = overlay ? { ...overlay.dataset } : null;
+    const overlayReady = overlayDataset?.awwvFormationCounterSourceGate === 'ready'
+      && overlayDataset?.awwvFormationCounterNeedsUpdate === 'false';
+    const matchCount = [...document.querySelectorAll('[data-awwv-formation-counter-id]')]
+      .filter((candidate) => candidate.getAttribute('data-awwv-formation-counter-id') === expectedId)
+      .length;
+    if (!generations.nodes.has(node)) {
+      generations.nodes.set(node, generations.next);
+      generations.next += 1;
+    }
+    const identity = (element) => element ? {
+      tagName: element.tagName?.toLowerCase() ?? null,
+      id: element.getAttribute?.('id') ?? null,
+      testId: element.getAttribute?.('data-testid') ?? null,
+      formationCounterId: element.getAttribute?.('data-awwv-formation-counter-id') ?? null,
+      ariaLabel: element.getAttribute?.('aria-label') ?? null,
+    } : null;
+    const rect = node.getBoundingClientRect();
+    const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    return {
+      targetId: expectedId,
+      matchCount,
+      exactIdentity: node.getAttribute('data-awwv-formation-counter-id') === expectedId,
+      nodeGeneration: generations.nodes.get(node),
+      outerIdentity: identity(node),
+      rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+      hitOwner: identity(hit?.closest?.('[data-awwv-formation-counter-id]') ?? hit),
+      overlayDataset,
+      overlayReady,
+      connected: node.isConnected,
+      accessible: node.isConnected
+        && node.getAttribute('data-awwv-formation-counter-id') === expectedId
+        && node.tagName?.toLowerCase() === 'button'
+        && !node.disabled
+        && node.getAttribute('aria-hidden') !== 'true'
+        && rect.width > 1
+        && rect.height > 1
+        && Boolean(hit && (hit === node || node.contains(hit))),
+    };
+  }, counterId);
+  const signature = (value) => JSON.stringify({
+    targetId: value?.targetId ?? null,
+    matchCount: value?.matchCount ?? null,
+    exactIdentity: value?.exactIdentity ?? false,
+    nodeGeneration: value?.nodeGeneration ?? null,
+    outerIdentity: value?.outerIdentity ?? null,
+    rect: value?.rect ?? null,
+    hitOwner: value?.hitOwner ?? null,
+    overlayDataset: value?.overlayDataset ?? null,
+    overlayReady: value?.overlayReady ?? false,
+    connected: value?.connected ?? false,
+    accessible: value?.accessible ?? false,
+  });
+  let lastRead = null;
+  for (let readIndex = 0; readIndex < 8; readIndex += 1) {
+    const counterLocator = frame.locator(`[data-awwv-formation-counter-id=${JSON.stringify(counterId)}]`);
+    if (await counterLocator.count() !== 1) {
+      throw new Error(`Formation counter identity is not unique during stable resolution: ${counterId}`);
+    }
+    const counterHandle = await counterLocator.elementHandle();
+    if (!counterHandle) throw new Error(`Formation counter handle unavailable during stable resolution: ${counterId}`);
+    const first = await read(counterHandle);
+    await sleep(120);
+    const second = await read(counterHandle);
+    lastRead = second;
+    if (first.matchCount === 1
+      && first.overlayReady
+      && first.accessible
+      && signature(first) === signature(second)) {
+      await counterHandle.click({ timeout: 5000 });
+      return { first, second };
+    }
+  }
+  throw new Error(`Formation counter did not reach a stable accessible generation: ${counterId}; ${JSON.stringify(lastRead)}`);
+}
+
+async function waitForExactFormationDetail(frame, formationId, timeout = 5000) {
+  const detail = frame.locator(
+    `[data-testid="formation-detail-panel"][data-formation-id=${JSON.stringify(formationId)}]`,
+  );
+  return detail.waitFor({ state: 'visible', timeout }).then(() => true).catch(() => false);
+}
+
+async function formationCounterSelectionFailureDiagnostics(frame, counterId) {
+  return frame.evaluate((expectedId) => {
+    const identity = (element) => element ? {
+      tagName: element.tagName?.toLowerCase() ?? null,
+      id: element.getAttribute?.('id') ?? null,
+      testId: element.getAttribute?.('data-testid') ?? null,
+      formationCounterId: element.getAttribute?.('data-awwv-formation-counter-id') ?? null,
+      ariaLabel: element.getAttribute?.('aria-label') ?? null,
+    } : null;
+    const matches = [...document.querySelectorAll('[data-awwv-formation-counter-id]')]
+      .filter((node) => node.getAttribute('data-awwv-formation-counter-id') === expectedId);
+    const counter = matches.length === 1 ? matches[0] : null;
+    const counterRect = counter?.getBoundingClientRect() ?? null;
+    const hit = counterRect
+      ? document.elementFromPoint(counterRect.left + counterRect.width / 2, counterRect.top + counterRect.height / 2)
+      : null;
+    const hitOwner = hit?.closest?.('[data-awwv-formation-counter-id]') ?? hit;
+    const railSelectors = [
+      '[data-testid="formation-detail-panel"]',
+      '[data-testid="corps-front-panel"]',
+      '[data-testid="corps-detail-panel"]',
+    ];
+    const visibleRails = [...document.querySelectorAll(railSelectors.join(','))].filter((node) => {
+      const rect = node.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      return rect.width > 1
+        && rect.height > 1
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0
+        && node.getAttribute('aria-hidden') !== 'true';
+    });
+    const formationRail = visibleRails.find((node) => node.getAttribute('data-testid') === 'formation-detail-panel');
+    const sectorRail = visibleRails.find((node) => node.getAttribute('data-testid') === 'corps-front-panel');
+    const corpsIds = [...new Set(visibleRails
+      .map((node) => node.getAttribute('data-corps-id'))
+      .filter(Boolean))];
+    const railIdentity = (node) => {
+      const testId = node.getAttribute('data-testid') ?? 'unknown';
+      if (testId === 'formation-detail-panel') return `${testId}:${node.getAttribute('data-formation-id') ?? 'none'}`;
+      if (testId === 'corps-front-panel') {
+        return `${testId}:${node.getAttribute('data-sector-id') ?? 'none'}:${node.getAttribute('data-corps-id') ?? 'none'}`;
+      }
+      return `${testId}:${node.getAttribute('data-corps-id') ?? 'none'}`;
+    };
+    const overlay = document.querySelector('[data-awwv-dom-formation-counters="true"]');
+    return {
+      targetId: expectedId,
+      matchCount: matches.length,
+      counter: counter ? {
+        outerIdentity: identity(counter),
+        outerHtml: counter.outerHTML.slice(0, 1200),
+        connected: counter.isConnected,
+        rect: {
+          x: counterRect.x,
+          y: counterRect.y,
+          width: counterRect.width,
+          height: counterRect.height,
+        },
+      } : null,
+      hitOwner: identity(hitOwner),
+      rawElementFromPoint: identity(hit),
+      overlayDataset: overlay ? { ...overlay.dataset } : null,
+      visibleRailIds: visibleRails.map(railIdentity),
+      railDerivedSelection: {
+        formationId: formationRail?.getAttribute('data-formation-id') ?? null,
+        sectorId: sectorRail?.getAttribute('data-sector-id') ?? null,
+        corpsId: corpsIds[0] ?? null,
+        corpsIds,
+      },
+      storeSelection: {
+        status: 'unavailable',
+        reason: 'No supported player-visible UI selection-state API is exposed to the harness.',
+      },
+    };
+  }, counterId);
+}
+
+function writeCounterSelectionFailureSidecar(
+  faction,
+  labelPrefix,
+  counter,
+  stableCounterActivation,
+  error,
+  selectionFailure,
+) {
+  const factionEvidenceDir = path.join(evidenceDir, safeName(faction));
+  fs.mkdirSync(factionEvidenceDir, { recursive: true });
+  const sidecarPath = path.join(
+    factionEvidenceDir,
+    `${safeName(labelPrefix)}-counter-${safeName(counter.id)}-selection-failure.json`,
+  );
+  if (fs.existsSync(sidecarPath)) {
+    throw new Error(`Counter-selection failure sidecar already exists: ${sidecarPath}`);
+  }
+  const payload = {
+    schema: 'awwv.counter-selection-failure.v1',
+    runLabel,
+    faction,
+    labelPrefix,
+    counter,
+    stableCounterActivation,
+    selectionError: String(error?.message ?? error),
+    selectionErrorStack: String(error?.stack ?? error).slice(0, 4000),
+    selectionFailure,
+    richSnapshot: { status: 'pending' },
+  };
+  const bytes = Buffer.from(`${JSON.stringify(payload, null, 2)}\n`, 'utf8');
+  const temporaryPath = `${sidecarPath}.tmp-${process.pid}`;
+  fs.writeFileSync(temporaryPath, bytes, { flag: 'wx' });
+  try {
+    fs.renameSync(temporaryPath, sidecarPath);
+  } catch (writeError) {
+    fs.rmSync(temporaryPath, { force: true });
+    throw writeError;
+  }
+  return {
+    path: sidecarPath,
+    sha256: crypto.createHash('sha256').update(bytes).digest('hex'),
+  };
+}
+
+async function verifyExactFormationCounterSelection(page, frame, faction, events, labelPrefix, counter) {
+  let stableCounterActivation = null;
+  try {
+    stableCounterActivation = await activateStableFormationCounter(frame, counter.id);
+    await sleep(550);
+    if (!await waitForExactFormationDetail(frame, counter.id)) {
+      const detailError = new Error(`Formation counter did not open detail: ${counter.id}`);
+      detailError.code = 'exact-formation-detail-missing';
+      throw detailError;
+    }
+    const detail = frame.locator(
+      `[data-testid="formation-detail-panel"][data-formation-id=${JSON.stringify(counter.id)}]`,
+    );
+    return {
+      stableCounterActivation,
+      detail,
+      openedFormationId: await detail.getAttribute('data-formation-id'),
+    };
+  } catch (error) {
+    const selectionFailure = await formationCounterSelectionFailureDiagnostics(frame, counter.id)
+      .catch((diagnosticError) => ({ diagnosticError: String(diagnosticError?.message ?? diagnosticError) }));
+    let selectionFailureSidecar;
+    try {
+      selectionFailureSidecar = writeCounterSelectionFailureSidecar(
+        faction,
+        labelPrefix,
+        counter,
+        stableCounterActivation,
+        error,
+        selectionFailure,
+      );
+    } catch (sidecarError) {
+      if (error && typeof error === 'object') {
+        error.counterSelectionSidecarError = String(sidecarError?.message ?? sidecarError);
+      }
+      throw error;
+    }
+    try {
+      await snapshot(
+        page,
+        frame,
+        faction,
+        events,
+        `${labelPrefix}-counter-${safeName(counter.id)}-selection-failure`,
+        {
+          counter,
+          stableCounterActivation,
+          selectionFailure,
+          selectionFailureSidecar,
+          selectionError: String(error?.message ?? error),
+        },
+      );
+    } catch (snapshotError) {
+      if (error && typeof error === 'object') {
+        error.counterSelectionSnapshotError = String(snapshotError?.message ?? snapshotError);
+      }
+    }
+    if (error?.code === 'exact-formation-detail-missing'
+      && selectionFailure?.railDerivedSelection?.formationId) {
+      throw new Error(
+        `Formation counter opened the wrong detail: expected ${counter.id}, observed ${selectionFailure.railDerivedSelection.formationId}`,
+      );
+    }
+    throw error;
+  }
+}
+
 async function mapInteractionProbe(page, frame, faction, events, labelPrefix = 'map') {
   await clearOpenSurfaces(frame);
   const openedWarMap = await openExactWarMapRoute(frame, `${labelPrefix} exact War Map`, { afterMs: 2000 });
@@ -3271,21 +3552,10 @@ async function mapInteractionProbe(page, frame, faction, events, labelPrefix = '
       );
       if (!counter) break;
       attemptedCounterIds.add(counter.id);
-      const counterLocator = frame.locator(`[data-awwv-formation-counter-id="${counter.id}"]`);
-      if (await counterLocator.count() !== 1) {
-        throw new Error(`Formation counter identity is not unique: ${counter.id}`);
-      }
-      await counterLocator.click({ timeout: 5000 });
-      await sleep(550);
-      const detail = frame.locator('[data-testid="formation-detail-panel"]');
-      const detailVisible = await detail.waitFor({ state: 'visible', timeout: 5000 }).then(() => true).catch(() => false);
-      if (!detailVisible) {
-        throw new Error(`Formation counter did not open detail: ${counter.id}`);
-      }
-      const openedFormationId = await detail.getAttribute('data-formation-id');
-      if (openedFormationId !== counter.id) {
-        throw new Error(`Formation counter opened the wrong detail: expected ${counter.id}, observed ${openedFormationId ?? 'none'}`);
-      }
+      const {
+        detail,
+        openedFormationId,
+      } = await verifyExactFormationCounterSelection(page, frame, faction, events, labelPrefix, counter);
       clickResults.push({ id: counter.id, clicked: true, openedFormationId });
       verifiedCounterIds.add(counter.id);
       await snapshot(page, frame, faction, events, `${labelPrefix}-counter-${safeName(counter.id)}`, { counter });
@@ -5377,8 +5647,24 @@ function attachPageDiagnostics(page, diagnostics) {
     const failure = request.failure();
     const observedAtMs = Date.now();
     const navigationAttribution = diagnostics.requestNavigationWindows.get(request) ?? null;
-    const requestHeaders = request.headers();
-    const tileRequestId = requestHeaders['x-awwv-qa-tile-request-id'] ?? null;
+    let requestHeaders = null;
+    let requestHeadersReadError = null;
+    try {
+      requestHeaders = request.headers();
+    } catch (error) {
+      requestHeadersReadError = String(error?.message ?? error).slice(0, 400);
+    }
+    const headerValue = (name) => {
+      const entry = Object.entries(requestHeaders ?? {}).find(([key]) => key.toLowerCase() === name);
+      return typeof entry?.[1] === 'string' ? entry[1] : null;
+    };
+    const requestRangeValue = headerValue('range');
+    const requestRange = requestHeadersReadError !== null
+      ? { status: 'read-error', value: null, error: requestHeadersReadError }
+      : requestRangeValue === null
+        ? { status: 'absent', value: null }
+        : { status: 'present', value: requestRangeValue };
+    const tileRequestId = headerValue('x-awwv-qa-tile-request-id');
     let requestFrameOrigin = null;
     try {
       requestFrameOrigin = new URL(request.frame().url()).origin;
@@ -5394,12 +5680,13 @@ function attachPageDiagnostics(page, diagnostics) {
       teardownStarted: diagnostics.isTeardownStarted(),
       observedAtMs,
       requestInitiatedAtMs: diagnostics.requestStartTimes.get(request) ?? null,
+      requestRange,
       mapNavigationWindow: navigationAttribution,
       tileFetchIdentity: tileRequestId ? {
         id: tileRequestId,
         url: request.url(),
         method: request.method(),
-        range: requestHeaders.range ?? '',
+        range: requestRangeValue ?? '',
         origin: requestFrameOrigin,
       } : null,
     };
@@ -5434,6 +5721,7 @@ function installAmbientLifecycleObserver() {
   window.__AWWV_QA_AMBIENT_LIFECYCLE_OBSERVER_INSTALLED__ = true;
   window.__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__ = [];
   let nextElementId = 0;
+  let nextSignalSequence = 0;
   const metadata = new WeakMap();
   const ambientUrl = (element) => {
     const url = element.currentSrc || element.src || '';
@@ -5447,48 +5735,144 @@ function installAmbientLifecycleObserver() {
     }
     return value;
   };
+  const readMediaState = (element) => {
+    const mediaState = {};
+    const mediaStateUnavailable = [];
+    const mediaStateReadErrors = {};
+    const read = (field, accept) => {
+      let raw;
+      try {
+        raw = element[field];
+      } catch (error) {
+        mediaState[field] = null;
+        mediaStateReadErrors[field] = String(error?.message ?? error).slice(0, 400);
+        return;
+      }
+      const accepted = accept(raw);
+      if (accepted === undefined) {
+        mediaState[field] = null;
+        mediaStateUnavailable.push(field);
+        return;
+      }
+      mediaState[field] = accepted;
+    };
+    const finiteNumber = (value) => Number.isFinite(value) ? value : undefined;
+    const boolean = (value) => typeof value === 'boolean' ? value : undefined;
+    read('networkState', finiteNumber);
+    read('readyState', finiteNumber);
+    read('paused', boolean);
+    read('ended', boolean);
+    read('seeking', boolean);
+    read('currentTime', finiteNumber);
+    read('duration', finiteNumber);
+    read('loop', boolean);
+    try {
+      const mediaError = element.error;
+      if (mediaError === null) {
+        mediaState.mediaError = null;
+      } else if (mediaError === undefined) {
+        mediaState.mediaError = null;
+        mediaStateUnavailable.push('mediaError');
+      } else {
+        const errorSnapshot = {};
+        try {
+          errorSnapshot.code = Number.isFinite(mediaError.code) ? mediaError.code : null;
+          if (errorSnapshot.code === null) mediaStateUnavailable.push('mediaError.code');
+        } catch (error) {
+          errorSnapshot.code = null;
+          mediaStateReadErrors['mediaError.code'] = String(error?.message ?? error).slice(0, 400);
+        }
+        try {
+          errorSnapshot.message = typeof mediaError.message === 'string' ? mediaError.message : null;
+          if (errorSnapshot.message === null) mediaStateUnavailable.push('mediaError.message');
+        } catch (error) {
+          errorSnapshot.message = null;
+          mediaStateReadErrors['mediaError.message'] = String(error?.message ?? error).slice(0, 400);
+        }
+        mediaState.mediaError = errorSnapshot;
+      }
+    } catch (error) {
+      mediaState.mediaError = null;
+      mediaStateReadErrors.mediaError = String(error?.message ?? error).slice(0, 400);
+    }
+    return { mediaState, mediaStateUnavailable, mediaStateReadErrors };
+  };
   const record = (kind, element, forceNewEpoch = false) => {
     const value = getMetadata(element);
     const url = ambientUrl(element) || value.url;
     if (!url) return;
     if (forceNewEpoch || value.sourceEpoch === 0 || value.url !== url) value.sourceEpoch += 1;
     value.url = url;
+    const stateSnapshot = readMediaState(element);
     window.__AWWV_QA_AMBIENT_LIFECYCLE_SIGNALS__.push({
       kind,
+      signalSequence: ++nextSignalSequence,
       elementId: value.elementId,
       sourceEpoch: value.sourceEpoch,
       url,
       origin: window.location.origin,
       observedAtMs: Date.now(),
+      ...stateSnapshot,
     });
+  };
+  const observedElements = new WeakSet();
+  const observedEvents = new WeakSet();
+  const mediaEventBindings = [
+    ['loadstart', 'request-start'],
+    ['abort', 'browser-abort'],
+    ['emptied', 'emptied'],
+    ['error', 'error'],
+    ['progress', 'progress'],
+    ['suspend', 'suspend'],
+    ['loadedmetadata', 'loadedmetadata'],
+    ['loadeddata', 'loadeddata'],
+    ['canplay', 'canplay'],
+    ['playing', 'playing'],
+    ['waiting', 'waiting'],
+    ['stalled', 'stalled'],
+    ['seeking', 'seeking'],
+    ['seeked', 'seeked'],
+  ].map(([eventKind, signalKind]) => ({
+    eventKind,
+    listener: (event) => {
+      if (!(event.target instanceof HTMLMediaElement) || observedEvents.has(event)) return;
+      observedEvents.add(event);
+      try {
+        record(signalKind, event.target);
+      } catch {}
+    },
+  }));
+  const observeElement = (element) => {
+    if (observedElements.has(element)) return;
+    for (const binding of mediaEventBindings) {
+      element.addEventListener(binding.eventKind, binding.listener);
+    }
+    observedElements.add(element);
+  };
+  const observeAndRecordMethod = (kind, element, forceNewEpoch = false) => {
+    try {
+      observeElement(element);
+      record(kind, element, forceNewEpoch);
+    } catch {}
   };
   const originalPlay = HTMLMediaElement.prototype.play;
   const originalPause = HTMLMediaElement.prototype.pause;
   const originalLoad = HTMLMediaElement.prototype.load;
   HTMLMediaElement.prototype.play = function observedAmbientPlay(...args) {
-    record('play', this);
+    observeAndRecordMethod('play', this);
     return originalPlay.apply(this, args);
   };
   HTMLMediaElement.prototype.pause = function observedAmbientPause(...args) {
-    record('pause', this);
+    observeAndRecordMethod('pause', this);
     return originalPause.apply(this, args);
   };
   HTMLMediaElement.prototype.load = function observedAmbientLoad(...args) {
-    record('load', this, true);
+    observeAndRecordMethod('load', this, true);
     return originalLoad.apply(this, args);
   };
-  document.addEventListener('loadstart', (event) => {
-    if (event.target instanceof HTMLMediaElement) record('request-start', event.target);
-  }, true);
-  document.addEventListener('abort', (event) => {
-    if (event.target instanceof HTMLMediaElement) record('browser-abort', event.target);
-  }, true);
-  document.addEventListener('emptied', (event) => {
-    if (event.target instanceof HTMLMediaElement) record('emptied', event.target);
-  }, true);
-  document.addEventListener('error', (event) => {
-    if (event.target instanceof HTMLMediaElement) record('error', event.target);
-  }, true);
+  for (const binding of mediaEventBindings) {
+    document.addEventListener(binding.eventKind, binding.listener, true);
+  }
 }
 
 async function installAmbientLifecycleObserverBeforeStartup(page) {

@@ -1,0 +1,16 @@
+
+ RUN  v2.1.9 C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory
+
+ ✓ tests/ci_workflow_test_paths_exist.test.ts > CI workflow test-path references > finds live references across more than one workflow file
+ ✓ tests/ci_workflow_test_paths_exist.test.ts > CI workflow test-path references > partitions every reference into exactly one of gate or commentary
+ ✓ tests/ci_workflow_test_paths_exist.test.ts > CI workflow test-path references > resolves every gate-referenced test file on disk
+ ✓ tests/baseline_regression_ci_guardrails.test.ts > baseline regression workflow keeps the canonical typecheck and Vitest gates
+ ✓ tests/baseline_regression_ci_guardrails.test.ts > baseline regression is the sole always-run typecheck owner on main pushes and pull requests
+ ✓ tests/baseline_regression_ci_guardrails.test.ts > event CI retains development-branch type feedback and every distinct event contract
+ ✓ tests/baseline_regression_ci_guardrails.test.ts > always-report engine health fails when its required scenario parent fails
+
+ Test Files  2 passed (2)
+      Tests  7 passed (7)
+   Start at  13:21:51
+   Duration  776ms (transform 38ms, setup 14ms, collect 54ms, tests 25ms, environment 0ms, prepare 145ms)
+

@@ -1,0 +1,77 @@
+{
+  "scope": "Portable closeout summaries. Full raw runs, profiles, screenshots, failed attempts and telemetry remain in retained local paths; they are not moved or removed.",
+  "files": [
+    {
+      "source": "tmp/ci-sync-20261024/preservation.json",
+      "path": "logs/ci-sync-20261024/preservation.json",
+      "bytes": 1339,
+      "sha256": "3a938d5aef5864db5f1de1c6863999c98ce33ca9a33c81162e4431e183de6f16"
+    },
+    {
+      "source": "tmp/ci-sync-20261024/focused-01/receipt.json",
+      "path": "logs/ci-sync-20261024/focused/receipt.json",
+      "bytes": 2589,
+      "sha256": "1f1912b7c4583324ae516c4045b36edbdf538e22e53b726f3875dd05501d29fb"
+    },
+    {
+      "source": "tmp/ci-sync-20261024/focused-01/stdout.log",
+      "path": "logs/ci-sync-20261024/focused/stdout.txt",
+      "bytes": 593,
+      "sha256": "9a9d36d8ce6e98d6242ca6d647e73bbf25c7b78c3dbb89ff548ba3b40efe71e6"
+    },
+    {
+      "source": "tmp/r8-warroom-abort-20261024/review/FINAL_REVIEW.md",
+      "path": "logs/ci-sync-20261024/warroom/DIAGNOSTIC_REVIEW.md",
+      "bytes": 5093,
+      "sha256": "989f577d811c72e2041aa33bc943cbe33f16be522e915482e620ae22b1956f17"
+    },
+    {
+      "source": "tmp/r8-warroom-loop-v2-20261024/review/INDEPENDENT_REVIEW.md",
+      "path": "logs/ci-sync-20261024/warroom/V2_REVIEW.md",
+      "bytes": 3907,
+      "sha256": "5e1090b5d65e88a94479feab803ff3a52fd88298a71134c60da5d1e0e5e54e54"
+    },
+    {
+      "source": "tmp/r8-warroom-loop-v2-20261024/FEASIBILITY.md",
+      "path": "logs/ci-sync-20261024/warroom/FEASIBILITY.md",
+      "bytes": 3413,
+      "sha256": "53466e58f1cd3c4f8b10b63cb032bd4e4006538f8a3f072e2b473203fa9ad3cd"
+    },
+    {
+      "source": "tmp/r8-warroom-abort-20261024/NEW_ADMISSION_PROPOSAL_V2.md",
+      "path": "logs/ci-sync-20261024/warroom/NEW_ADMISSION_PROPOSAL_V2.md",
+      "bytes": 7374,
+      "sha256": "c214bded2c0a17af8dbc2fa51ae1ddb24ad4990c63fd512e12422677faf9d244"
+    },
+    {
+      "source": "tmp/r8-warroom-abort-20261024/IMPLEMENTATION_EVIDENCE_V2.json",
+      "path": "logs/ci-sync-20261024/warroom/IMPLEMENTATION_EVIDENCE_V2.json",
+      "bytes": 3840,
+      "sha256": "2c8d272dfa18820fde2e951c96b42fd70e8308be6d64d31308d29f943cea8cb3"
+    },
+    {
+      "source": "tmp/ci-sync-20261024/CI_DIAGNOSIS.md",
+      "path": "logs/ci-sync-20261024/CI_DIAGNOSIS.md",
+      "bytes": 4631,
+      "sha256": "bcd2a2ce8073bb899a6d93f88898b4db196525897fe72dc5e7b9d239ea86bf3c"
+    },
+    {
+      "source": "tmp/ci-sync-20261024/focused-vitest.log",
+      "path": "logs/ci-sync-20261024/ci-focused.txt",
+      "bytes": 2944,
+      "sha256": "ba6b109d87dfdf67af5b237f722c729a47d800463fdc8d77b6c4ca9e6f33bb17"
+    },
+    {
+      "source": "tmp/ci-sync-20261024/post-comment-focused-vitest.log",
+      "path": "logs/ci-sync-20261024/ci-post-comment.txt",
+      "bytes": 1270,
+      "sha256": "0428a0cdb8f86c53b1e78690305989bda1ed2b604c504770f93cba2b39638e6b"
+    },
+    {
+      "source": "tmp/ci-sync-20261024/review/INDEPENDENT_REVIEW.md",
+      "path": "logs/ci-sync-20261024/INDEPENDENT_REVIEW.md",
+      "bytes": 4233,
+      "sha256": "f9cf757975e336c01cb620687583f5296d1b5581b6fa1a56199508ed4975954d"
+    }
+  ]
+}

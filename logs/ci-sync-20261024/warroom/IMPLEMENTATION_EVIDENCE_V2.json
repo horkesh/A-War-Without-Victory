@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-24T09:40:33.1125978Z",
+  "scope": "diagnostic-only; no admission/classifier/reader/native-run change",
+  "implementation": {
+    "files": [
+      {
+        "path": "tools/ui/paradox_local_qa.cjs",
+        "sha256": "2a7b4632adc2549b905573ee2dae629a9e83108a5f57cc5330d82fed178de9fa",
+        "bytes": 321923
+      },
+      {
+        "path": "tests/paradox_local_qa_harness.test.ts",
+        "sha256": "51c0f6e1d82704b9c846bce993fe45ab1dba3488bc192606eccd44c039d39f85",
+        "bytes": 157456
+      }
+    ],
+    "changes": [
+      "observe real seeking and seeked media events",
+      "persist mediaState.loop boolean",
+      "persist requestRange as present/absent/read-error using existing request.headers path without full header dump"
+    ]
+  },
+  "verification": [
+    {
+      "path": "tmp/r8-warroom-abort-20261024/focused-02",
+      "failed": 0,
+      "wrapperExit": 0,
+      "childExit": 0,
+      "name": "focused-file",
+      "passed": 78
+    },
+    {
+      "childExit": 0,
+      "name": "syntax",
+      "path": "tmp/r8-warroom-abort-20261024/syntax-01",
+      "wrapperExit": 0
+    },
+    {
+      "childExit": 0,
+      "name": "nonincremental-typecheck",
+      "path": "tmp/r8-warroom-abort-20261024/typecheck-01",
+      "wrapperExit": 0,
+      "capMs": 180000
+    },
+    {
+      "exit": 0,
+      "name": "diff-check"
+    },
+    {
+      "pass": true,
+      "name": "legacy-immutability",
+      "classifierSha256": "976dc36dd4e912a3febb9eec7cd476f2d18063cc9e4b98b65c22800e149736b8",
+      "frozenReaderSha256": "4acc5c288d25aefaba70231bd2646cd871fdd39083bc9d5173639bad2e5e590d",
+      "attributorSha256": "32bb789cc7b247aba4780262fd809b34f9ce1a047b05e96734354f4a075c1363"
+    }
+  ],
+  "tddAttempts": [
+    {
+      "name": "red-01",
+      "note": "expected missing diagnostic behavior; wrapper artifact config also omitted command.json",
+      "failedAssertions": 3
+    },
+    {
+      "name": "green-01",
+      "skipped": 74,
+      "failed": 0,
+      "passed": 4
+    },
+    {
+      "name": "focused-01",
+      "note": "stale syntax-source assertion corrected",
+      "failed": 1,
+      "passed": 77
+    },
+    {
+      "name": "focused-02",
+      "failed": 0,
+      "passed": 78
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "tmp/r8-warroom-abort-20261024/DIAGNOSIS.md",
+      "sha256": "03fb8d3dfc7f4dda5229bd7469d32a11e1360162da0a1884cf493853e46052e3",
+      "bytes": 6831
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/DIAGNOSIS.json",
+      "sha256": "f2924d0b82c01898b5c898f5e0d64630b5fdea5c3d57bc97568d0d685a6fee15",
+      "bytes": 7282
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/NEW_ADMISSION_PROPOSAL.md",
+      "sha256": "17aa1590479dde5910ef7062fe19dea4cedd902aafc75469432ea40eb3a58f1e",
+      "bytes": 5860
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/NEW_ADMISSION_PROPOSAL_V2.md",
+      "sha256": "c214bded2c0a17af8dbc2fa51ae1ddb24ad4990c63fd512e12422677faf9d244",
+      "bytes": 7374
+    },
+    {
+      "path": "tmp/r8-warroom-abort-20261024/QUALIFICATION_ADDENDUM.md",
+      "sha256": "454f5db397e33059b6a7d8f5b49883cd82fb0e9f328ebb3375f7c5de4571a73a",
+      "bytes": 1701
+    },
+    {
+      "path": "tmp/r8-native-shakedown-20261024/prep/read_native_result.cjs",
+      "sha256": "4acc5c288d25aefaba70231bd2646cd871fdd39083bc9d5173639bad2e5e590d",
+      "bytes": 7150
+    }
+  ],
+  "remainingGate": {
+    "nativeStrict": "FAILED",
+    "reason": "retained event 36 still lacks qualifying browser-abort provenance; diagnostic evidence does not retroclassify it",
+    "admissionChanged": false,
+    "nativeRerunPerformed": false
+  },
+  "supersedes": "IMPLEMENTATION_EVIDENCE.json (receipt path bindings only)"
+}

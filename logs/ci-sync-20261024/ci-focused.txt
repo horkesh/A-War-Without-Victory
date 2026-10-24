@@ -1,0 +1,25 @@
+
+ RUN  v2.1.9 C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory
+
+ ✓ tests/baseline_regression_collects_all_failures.test.ts > diffScenarioHashes — every mismatching artifact, not just the first > reports ALL mismatches in one scenario
+ ✓ tests/baseline_regression_collects_all_failures.test.ts > diffScenarioHashes — every mismatching artifact, not just the first > distinguishes a missing artifact from a drifted one
+ ✓ tests/baseline_regression_collects_all_failures.test.ts > diffScenarioHashes — every mismatching artifact, not just the first > returns nothing when everything matches, and ignores unpinned artifacts
+ ✓ tests/baseline_regression_collects_all_failures.test.ts > compareAgainstBaselines — one failing scenario must not mask the others > CHECKS EVERY SCENARIO even when an early one fails
+ ✓ tests/baseline_regression_collects_all_failures.test.ts > compareAgainstBaselines — one failing scenario must not mask the others > names EVERY failing scenario and EVERY failing artifact in one message
+ ✓ tests/baseline_regression_collects_all_failures.test.ts > compareAgainstBaselines — one failing scenario must not mask the others > a scenario whose RUN throws is recorded, and later scenarios are still checked
+ ✓ tests/baseline_regression_collects_all_failures.test.ts > compareAgainstBaselines — one failing scenario must not mask the others > still RESOLVES when everything matches (the gate must not fail open or closed wrongly)
+ ✓ tests/baseline_regression_collects_all_failures.test.ts > formatFailureSummary > counts per scenario and lists every failure line
+ ✓ tests/baseline_regression_collects_all_failures.test.ts > formatFailureSummary > singularises a lone failure
+ ✓ tests/ci_workflow_test_paths_exist.test.ts > CI workflow test-path references > finds live references across more than one workflow file
+ ✓ tests/ci_workflow_test_paths_exist.test.ts > CI workflow test-path references > partitions every reference into exactly one of gate or commentary
+ ✓ tests/ci_workflow_test_paths_exist.test.ts > CI workflow test-path references > resolves every gate-referenced test file on disk
+ ✓ tests/baseline_regression_ci_guardrails.test.ts > baseline regression workflow keeps the canonical typecheck and Vitest gates
+ ✓ tests/baseline_regression_ci_guardrails.test.ts > baseline regression is the sole always-run typecheck owner on main pushes and pull requests
+ ✓ tests/baseline_regression_ci_guardrails.test.ts > event CI retains development-branch type feedback and every distinct event contract
+ ✓ tests/baseline_regression_ci_guardrails.test.ts > always-report engine health fails when its required scenario parent fails
+
+ Test Files  3 passed (3)
+      Tests  16 passed (16)
+   Start at  13:20:58
+   Duration  9.46s (transform 2.98s, setup 15ms, collect 8.47s, tests 71ms, environment 1ms, prepare 216ms)
+
