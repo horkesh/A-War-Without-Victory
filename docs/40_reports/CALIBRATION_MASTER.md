@@ -1,3 +1,12 @@
+## Native package follow-up blocked before gameplay (2026-10-24)
+
+One qualified-source package builds0/0; its first native turn0 prerequisite fails at the
+161st Olovo map-counter detail, before Save/load or any turn. No native retry or RS/HRHB/
+24-week session runs. Ajnie native proof and all three Save/load gates are UNREACHED.
+The n93 scenario qualification below remains source-bound and unchanged; n91/n92/n93,
+three package inventories and telemetry are preserved. No calibration tuning, reference
+edit or baseline adoption. [Native blocked result](../../logs/r8-native-shakedown-20261024/RESULT.json).
+
 ## Operation-release n93 regression — retained suite RED and focused corrections (2026-10-24)
 
 The separately authorized single188-week run of `32057d766` completed as n93, child/wrapper0/0,

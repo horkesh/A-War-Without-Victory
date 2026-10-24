@@ -252,7 +252,10 @@ gates:
       with zero n91/n92 losses. Required suite remains raw RED5 with bounded test/doc
       corrections and reused unaffected coverage. No adoption or new package; native
       shakedown and ambient aborts remain unresolved.
-      Startup/diagnostic failures, packages, n91/n92 and telemetry are preserved. No baseline adoption.
+      One qualified-source package now builds0/0, but the first native turn0 RBiH
+      initial tour fails at the 161st formation-counter detail before Save/load.
+      Native Ajnie, all-faction Save/load and 24-week gates are unreached; no retry.
+      Source, n91/n92/n93, all three packages and telemetry remain exact. No baseline adoption.
 
   - id: R8-FINAL-CAMPAIGNS
     lane: R8

@@ -9,13 +9,71 @@
 **Tech stack:** Electron, Playwright/CDP, packaged directory build, `paradox_local_qa.cjs`, deterministic autosave/replay comparison, Markdown diary template.
 
 **Date:** 2026-07-31
-**Status:** ACTIVE — readability/runtime-output and all-faction zero-turn Save/load verified; the operation-completion handoff candidate passes focused tests and canon/determinism review. n93 gameplay regression passes; the retained full-suite RED has bounded test/documentation corrections. Adoption and native audio/shakedown gates remain open. No tuning or baseline adoption.
+**Status:** BLOCKED — qualified package builds, but the first native prerequisite fails at the 161st formation-counter detail before Save/load. n93 gameplay qualification remains valid; native Ajnie/all-faction acceptance is unproved. No retry, tuning or baseline adoption.
 **Roadmap workstream:** R8
 **Canonical owner:** packaged Electron UI and bound autosave/replay; diary is the product verdict
 **Collision rule:** This plan does not repair source while a session is running. Findings are routed to the owning plan, verified, then the affected session restarts from a fresh campaign.
 **Activation:** `Execute the master roadmap` authorizes transient local directory packages for this validation, but not installer publication, signing, upload, tag, or release.
 
 ## Package/shakedown repair — owner authorized 2026-10-23
+
+**Native result 2026-10-24 — BLOCKED, no retry:** one new package builds0/0 in139.4seconds,
+1,213files/1,914,184,685bytes, with source/resources and immutable inventory bound. Native
+RBiH full-initial-tour turn0 prerequisite exits1/1 after87.074seconds, no timeout: the valid,
+visible, unique161st Olovo counter does not open detail after17completed events. Six previous
+counter details passed. Evidence bounds the failure to sequential harness/UI selection;
+failure-time DOM/store/hit-owner capture is missing, so no narrower cause or UI fix is claimed.
+No Save/load starts, no turn advances, and no RS/HRHB/24-week session launches. Ajnie proof
+and all faction Save/load gates remain UNREACHED. Console/page/network failures are0;
+five ambient play/pause observations contain no error/abort. The event36 audio boundary
+is also UNREACHED. Read-only reconstruction proves initial renderer projection equals raw
+canonical projection; hydration adds exactly72ownedRBiHsector-rating paths. This is not
+native Save/load proof. Source unchanged; all539 retained records,109 n91/n92/n93 files,
+all three1,213-file packages and telemetry remain exact. Final preservation passes11/11.
+External reader qualification ends42/42 after preserving rejected earlier matrices/reviews;
+no package/native attempt is retried. The next bounded scope is harness synchronization
+and failure-time diagnostics with focused tests before a separately decided new opening.
+[Portable blocked result](../../logs/r8-native-shakedown-20261024/RESULT.json).
+
+**Native packaged shakedown authorized 2026-10-24:** the owner requests native Ajnie
+repair verification and Save/load for all three factions in this worktree, cheap checks
+first, no automatic retries, tuning or baseline adoption. Base is `87ea45e47`; reuse the
+qualified n93 regression, unchanged production/test/type evidence and transparent composed
+suite qualification. Preserve n91/n92/n93, both earlier packages, all profiles, failed
+attempts and telemetry. Execution evidence is under `tmp/r8-native-shakedown-20261024/`.
+Before long work, freeze exact commands/inputs, dependency/resource/profile readiness and
+the independent acceptance matrix. One fresh transient directory package (expected several
+minutes, twenty-minute cap) must pass complete immutable inventory and source binding.
+Run cheap native opening and all-faction zero-turn Save/load prerequisites before the
+sequential RBiH, RS, HRHB24-week shakedowns (expected30–90minutes total, forty-five-minute
+cap each), using the existing historical-choice/recruitment/checkpoint-tour contract and
+real Save→MainMenu→FieldRecords→Resume route. Capture raw canonical turn archives so the
+RBiH session can prove the actual Ajnie completion-to-holding handoff and final seal without
+a separate replay. Require exact saved canonical bytes and expected hydrated projection
+at each final Save/load. No raw-state diagnosis through a rebuilding loader. Old ambient
+aborts remain open; strict native diagnostics are not waived. Cheap reproduction of a
+known blocker stops the affected long run; any failure/timeout is retained with no retry.
+No source changes during sessions, calibration campaign, baseline adoption or publication.
+
+Native preflight passes80/80 focused tests and539 retained-record hashes; both old1,213-file
+package inventories and telemetry match. Diagnostic-only preflight/parser and npm-launch
+failures are retained before any package/native attempt. The new RBiH turn-zero prerequisite
+must include the full initial tour (omit `--save-load-only`) plus Save/load, because the known
+audio boundary occurs at initial-tour event36. Expected ambient lifecycle records must satisfy
+the existing exact URL/request/element/source-epoch/one-to-one browser-abort attribution;
+unmatched failures and media errors remain blocking. Do not invent a blanket allowance or a
+new zero-expected-lifecycle criterion. The old12 unresolved ambient aborts remain historical.
+
+One-package command, expected several minutes/hard cap20minutes, no retry:
+```powershell
+node tools/diagnostics/run_preserved_preflight.cjs --attempt-dir tmp/r8-native-shakedown-20261024/root/package-01 --entry-script tmp/r8-shakedown-20261023/root/run-command.cjs --timeout-ms 1200000 --allow-artifact command.json -- node tmp/r8-shakedown-20261023/root/run-command.cjs '{evidenceDir}' tmp/r8-native-shakedown-20261024/prep/package.json
+```
+The exact config runs Node22/npm `desktop:package:dir` with
+`--config.directories.output=dist-packaged/r8-native-shakedown-20261024-qualified` and refuses
+existing output. Package success requires0/0, complete immutable inventory, exact built sim
+and packaged projector/resource binding. Package failure stops native launches. All six native
+sessions retain fresh labels/configs in the same packet; long runs remain contingent on cheap
+native prerequisites and independent fail-closed evidence readers.
 
 **Gameplay regression result 2026-10-24:** n93 passes707/707/706/706, zero formerly
 correct losses versus n91/n92, all shared n92 controls, Toljenak/HVO outcomes,16anchors and
