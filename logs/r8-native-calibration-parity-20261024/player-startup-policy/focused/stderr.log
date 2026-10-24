@@ -1,0 +1,20 @@
+stderr | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > queues the selected faction foundational decision when Electron IPC is unavailable
+[dev-map] Desktop bridge unavailable, using baked startup snapshot fallback for scenario: apr_1992
+[dev-map] Desktop bridge unavailable, using baked startup snapshot fallback for scenario: apr_1992
+[dev-map] Desktop bridge unavailable, using baked startup snapshot fallback for scenario: apr_1992
+
+stderr | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > records historical mode explicitly in browser fallback
+[dev-map] Desktop bridge unavailable, using baked startup snapshot fallback for scenario: apr_1992
+
+stderr | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > resolves a browser-fallback foundational decision locally
+[dev-map] Desktop bridge unavailable, using baked startup snapshot fallback for scenario: apr_1992
+
+stderr | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[dev-map] Desktop bridge unavailable, using baked startup snapshot fallback for scenario: apr_1992
+
+stderr | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[dev-map] Desktop bridge unavailable, using baked startup snapshot fallback for scenario: apr_1992
+
+stderr | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[dev-map] Desktop bridge unavailable, using baked startup snapshot fallback for scenario: apr_1992
+

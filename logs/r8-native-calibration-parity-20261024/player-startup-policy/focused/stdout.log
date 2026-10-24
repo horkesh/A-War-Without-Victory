@@ -1,0 +1,230 @@
+
+ RUN  v2.1.9 C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory
+
+[E5] Political control initialized (hybrid_1992, threshold=0.7): 5822 canonical graph nodes (SID-keyed), RBiH=2297, RS=2507, HRHB=1018. Promoted to OSID when operational data present.
+stdout | tests/startup_snapshot_contract.test.ts > baked April 1992 startup artifact matches canonical builder truth after checkout normalization
+[Recruitment] Mandatory: 182, Elective: 2, Skipped: control=0 manpower=5 capital=0 equipment=0
+  RBiH: capital=400 equipment=100
+  RS: capital=600 equipment=800
+  HRHB: capital=280 equipment=350
+[Placement] Spread 0 brigades to front; 135 front OSIDs now covered
+  HRHB: spread=0 covered=23
+  RBiH: spread=0 covered=51
+  RS: spread=0 covered=61
+
+stdout | tests/startup_snapshot_contract.test.ts > baked April 1992 startup artifact matches canonical builder truth after checkout normalization
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+[brigade_assignment] Rehomed arbih_448th_liberation into truthful sector owner sector:arbih_4th_corps:2 (reserve)
+[brigade_assignment] Rehomed arbih_4th_muslim_light into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/startup_snapshot_contract.test.ts > baked April 1992 startup sector truth audits clean without rebuilt-state mutation
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:22 (front)
+
+stdout | tests/startup_snapshot_contract.test.ts > rebuilt April 1992 Bosanska Krupa frontage belongs to 2nd Krajina Corps
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:22 (front)
+
+[E5] Political control initialized (hybrid_1992, threshold=0.7): 5822 canonical graph nodes (SID-keyed), RBiH=2297, RS=2507, HRHB=1018. Promoted to OSID when operational data present.
+stdout | tests/startup_snapshot_contract.test.ts > startup snapshot validator reports the committed artifact as current
+[Recruitment] Mandatory: 182, Elective: 2, Skipped: control=0 manpower=5 capital=0 equipment=0
+  RBiH: capital=400 equipment=100
+  RS: capital=600 equipment=800
+  HRHB: capital=280 equipment=350
+
+stdout | tests/startup_snapshot_contract.test.ts > startup snapshot validator reports the committed artifact as current
+[Placement] Spread 0 brigades to front; 135 front OSIDs now covered
+  HRHB: spread=0 covered=23
+  RBiH: spread=0 covered=51
+  RS: spread=0 covered=61
+
+stdout | tests/startup_snapshot_contract.test.ts > startup snapshot validator reports the committed artifact as current
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+[brigade_assignment] Rehomed arbih_448th_liberation into truthful sector owner sector:arbih_4th_corps:2 (reserve)
+[brigade_assignment] Rehomed arbih_4th_muslim_light into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+ ✓ tests/startup_snapshot_contract.test.ts (19 tests) 2077ms
+   ✓ baked April 1992 startup artifact matches canonical builder truth after checkout normalization 602ms
+   ✓ startup snapshot validator reports the committed artifact as current 421ms
+ ✓ tests/desktop_persistence_contract.test.ts (21 tests) 25ms
+stdout | tests/pre_first_advance_paramilitary_policy.test.ts > pre-first-Advance RBiH paramilitary policy > preserves exact deny, ask, and allow first-Advance semantics through existing writers
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/pre_first_advance_paramilitary_policy.test.ts > pre-first-Advance RBiH paramilitary policy > preserves exact deny, ask, and allow first-Advance semantics through existing writers
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/pre_first_advance_paramilitary_policy.test.ts > pre-first-Advance RBiH paramilitary policy > preserves exact deny, ask, and allow first-Advance semantics through existing writers
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/pre_first_advance_paramilitary_policy.test.ts > pre-first-Advance RBiH paramilitary policy > preserves exact deny, ask, and allow first-Advance semantics through existing writers
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/pre_first_advance_paramilitary_policy.test.ts > pre-first-Advance RBiH paramilitary policy > preserves exact deny, ask, and allow first-Advance semantics through existing writers
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/pre_first_advance_paramilitary_policy.test.ts > pre-first-Advance RBiH paramilitary policy > preserves exact deny, ask, and allow first-Advance semantics through existing writers
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:8 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+ ✓ tests/pre_first_advance_paramilitary_policy.test.ts (34 tests) 9919ms
+   ✓ pre-first-Advance RBiH paramilitary policy > keeps Electron and browser fallback byte-identical through identity and every policy response 420ms
+   ✓ pre-first-Advance RBiH paramilitary policy > rejects a changed reviewed catalog and forged response without partial identity effects 309ms
+   ✓ pre-first-Advance RBiH paramilitary policy > preserves serialized legacy identity and naturally authored policy decisions through both adapters 374ms
+   ✓ pre-first-Advance RBiH paramilitary policy > preserves exact deny, ask, and allow first-Advance semantics through existing writers 3683ms
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:8 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:8 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:8 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:8 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:8 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:8 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:8 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:8 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:8 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:8 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:8 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/browser_campaign_start_fallback.test.ts > browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:8 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+ ✓ tests/browser_campaign_start_fallback.test.ts (5 tests) 18763ms
+   ✓ browser new-campaign fallback > keeps every foundational option byte-identical across Electron and browser adapters 18649ms
+ ✓ tests/negotiation_capital.test.ts (11 tests) 849ms
+   ✓ Negotiation Capital > matches the immutable b371 legacy prelude and final canonical-byte matrix 844ms
+ ✓ tests/player_start_surface_contracts.test.ts (4 tests) 641ms
+   ✓ player start surface contracts > queues only the selected faction foundational decision and resolves every response option 493ms
+
+ Test Files  6 passed (6)
+      Tests  94 passed (94)
+   Start at  00:28:43
+   Duration  53.66s (transform 6.57s, setup 23ms, collect 19.10s, tests 32.27s, environment 578ms, prepare 442ms)
+
+{"child_exit":0,"signal":null}

@@ -1,0 +1,103 @@
+
+ RUN  v2.1.9 C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory
+
+stdout | tests/desktop_player_visible_state.test.ts > desktop player-visible state projection > keeps only the player faction durable proposal receipt through Advance, save/load, and Electron projection
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/desktop_player_visible_state.test.ts > desktop player-visible state projection > keeps only the player faction durable proposal receipt through Advance, save/load, and Electron projection
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:8 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=3 unresolved=0
+
+ ✓ tests/desktop_player_visible_state.test.ts (21 tests) 2000ms
+   ✓ desktop player-visible state projection > keeps only the player faction durable proposal receipt through Advance, save/load, and Electron projection 1944ms
+stdout | tests/desktop_start_campaign_authorization.test.ts > desktop startNewCampaign historical operation authorization > carries resolved historical operation receipts through an advance
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/desktop_start_campaign_authorization.test.ts > desktop startNewCampaign historical operation authorization > carries resolved historical operation receipts through an advance
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:8 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/desktop_start_campaign_authorization.test.ts > desktop startNewCampaign historical operation authorization > launches an accepted selected player-faction historical operation on advance
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/desktop_start_campaign_authorization.test.ts > desktop startNewCampaign historical operation authorization > launches an accepted selected player-faction historical operation on advance
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:8 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/desktop_start_campaign_authorization.test.ts > desktop startNewCampaign historical operation authorization > gives accepted and preserved staged opening operations the same first-advance planning credit
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/desktop_start_campaign_authorization.test.ts > desktop startNewCampaign historical operation authorization > gives accepted and preserved staged opening operations the same first-advance planning credit
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/desktop_start_campaign_authorization.test.ts > desktop startNewCampaign historical operation authorization > gives accepted and preserved staged opening operations the same first-advance planning credit
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:6 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:12 (front)
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:6 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:12 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/desktop_start_campaign_authorization.test.ts > desktop startNewCampaign historical operation authorization > gives accepted and preserved staged opening operations the same first-advance planning credit
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:6 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:12 (front)
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:6 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:12 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+stdout | tests/desktop_start_campaign_authorization.test.ts > desktop startNewCampaign historical operation authorization > assists only participants of accepted selected player-faction historical operations
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/desktop_start_campaign_authorization.test.ts > desktop startNewCampaign historical operation authorization > assists only participants of accepted selected player-faction historical operations
+[brigade_assignment] Rehomed arbih_285th_light into truthful sector owner sector:arbih_2nd_corps:8 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] Rehomed rs_11th_mrkonji_light_infantry into truthful sector owner sector:vrs_1st_krajina:21 (front)
+[brigade_assignment] Rehomed rs_31st_light_infantry into truthful sector owner sector:vrs_1st_krajina:13 (front)
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+ ✓ tests/desktop_start_campaign_authorization.test.ts (6 tests) 5963ms
+   ✓ desktop startNewCampaign historical operation authorization > carries resolved historical operation receipts through an advance 1531ms
+   ✓ desktop startNewCampaign historical operation authorization > launches an accepted selected player-faction historical operation on advance 1153ms
+   ✓ desktop startNewCampaign historical operation authorization > gives accepted and preserved staged opening operations the same first-advance planning credit 2088ms
+   ✓ desktop startNewCampaign historical operation authorization > assists only participants of accepted selected player-faction historical operations 1035ms
+ ❯ tests/ui/event_decision_auto_launch_contract.test.ts (18 tests | 1 failed) 22ms
+   × event decision modal auto-launch contract > logs raw browser fallback event-decision errors while showing generic player copy 11ms
+     → expected '<EventDecisionModal\n            deci…' to contain 'resolveBrowserEventDecision(nextState…'
+ ✓ tests/warroom_new_campaign_flow_truth.test.ts (9 tests) 8ms
+ ✓ tests/officer_state_persistence.test.ts (3 tests) 213ms
+stdout | tests/desktop_persisted_sector_continuity.test.ts > desktop persisted sector continuity > loads the exact standing OG, assignments, command query, and player-visible projection without mutation
+[brigade_assignment] Rehomed arbih_447th_liberation into truthful sector owner sector:arbih_4th_corps:3 (reserve)
+
+stdout | tests/desktop_persisted_sector_continuity.test.ts > desktop persisted sector continuity > loads the exact standing OG, assignments, command query, and player-visible projection without mutation
+[brigade_assignment] FINAL_SEAL kind=turn turn=1 unresolved=0
+
+ ✓ tests/desktop_persisted_sector_continuity.test.ts (1 test) 1847ms
+   ✓ desktop persisted sector continuity > loads the exact standing OG, assignments, command query, and player-visible projection without mutation 1846ms
+ ✓ tests/officer_bio_read_model.test.ts (3 tests) 228ms
+
+ Test Files  1 failed | 6 passed (7)
+      Tests  1 failed | 60 passed (61)
+   Start at  00:30:47
+   Duration  23.21s (transform 3.23s, setup 18ms, collect 11.17s, tests 10.28s, environment 1ms, prepare 500ms)
+
+{"child_exit":1,"signal":null}
