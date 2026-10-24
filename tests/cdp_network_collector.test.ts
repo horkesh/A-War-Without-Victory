@@ -1,9 +1,13 @@
 import assert from 'node:assert';
 import { EventEmitter } from 'node:events';
 import { createRequire } from 'node:module';
-import { test } from 'vitest';
+import { afterEach, test, vi } from 'vitest';
 
 const require = createRequire(import.meta.url);
+
+afterEach(() => {
+    vi.useRealTimers();
+});
 
 type Collector = {
     awaitReady(): Promise<void>;
@@ -359,6 +363,8 @@ test.each([
 });
 
 test('late setup rejection cannot reset the active close deadline for detach', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(0);
     const session = new FakeSession();
     session.enablePromise = new Promise((_resolve, reject) => setTimeout(() => reject(new Error('late secret')), 20));
     const collector = loadCollector()({
@@ -366,12 +372,36 @@ test('late setup rejection cannot reset the active close deadline for detach', a
         createSession: async () => session,
         closeTimeoutMs: 10,
     });
-    const started = Date.now();
-    await collector.closeAndFlush();
-    const elapsed = Date.now() - started;
-    await new Promise((resolve) => setTimeout(resolve, 25));
-    assert.equal(elapsed < 20, true);
+
+    let artifact: any = null;
+    let closeSettled = false;
+    let twentyMillisecondControlSettled = false;
+    const twentyMillisecondControl = new Promise<void>((resolve) => setTimeout(resolve, 20)).then(() => {
+        twentyMillisecondControlSettled = true;
+    });
+    const closing = collector.closeAndFlush().then((value) => {
+        artifact = value;
+        closeSettled = true;
+        return value;
+    });
+
+    await vi.advanceTimersByTimeAsync(9);
+    assert.equal(closeSettled, false, 'the close must not settle before its active deadline');
+    await vi.advanceTimersByTimeAsync(1);
+    assert.equal(closeSettled, true, 'close must settle at the original 10ms deadline');
+    assert.equal(twentyMillisecondControlSettled, false, 'the clock control must remain pending at 10ms');
+    await closing;
+    assert.equal(Date.now(), 10);
+    assert.equal(artifact.status, 'flush-timeout');
+    assert.equal(artifact.flush.detach, 'detach-timeout');
     assert.equal(session.detachCalls, 0);
+
+    await vi.advanceTimersByTimeAsync(10);
+    await twentyMillisecondControl;
+    await Promise.resolve();
+    assert.equal(Date.now(), 20);
+    assert.equal(twentyMillisecondControlSettled, true, 'the clock control must settle at 20ms');
+    assert.equal(session.detachCalls, 0, 'the late setup rejection must not start detach after close');
 });
 
 test('retained setup, detach, body, failure, and protocol values do not disclose injected secrets', async () => {

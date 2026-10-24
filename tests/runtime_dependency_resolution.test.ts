@@ -1,5 +1,5 @@
 import { createRequire } from 'node:module';
-import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -22,9 +22,11 @@ type VitestConfig = {
 };
 
 const root = process.cwd();
-const generatedBalancedRoot = join(root, '.tmp_vitest_balanced', 'runtime-dependency-resolution');
+const generatedBalancedParent = join(root, '.tmp_vitest_balanced');
+mkdirSync(generatedBalancedParent, { recursive: true });
+const generatedBalancedRoot = mkdtempSync(join(generatedBalancedParent, 'runtime-dependency-resolution-'));
 const generatedBalancedConfig = join(generatedBalancedRoot, 'worker.config.mjs');
-const generatedSliceRoot = join(root, '.tmp_vitest_slice_runtime_dependency_resolution');
+const generatedSliceRoot = mkdtempSync(join(root, '.tmp_vitest_slice_runtime-dependency-resolution-'));
 const generatedSliceConfig = join(generatedSliceRoot, 'vitest.slice.config.mjs');
 
 const runtimeConsumers: Record<string, string> = {
@@ -102,12 +104,22 @@ export function runtimeIdentityMismatches(
     ));
 }
 
+export function projectProductionResolutionConfig(config: UserConfig): UserConfig {
+  return {
+    root: config.root,
+    resolve: config.resolve,
+  };
+}
+
 let sliceConfig: VitestConfig;
 let balancedConfig: VitestConfig;
 let resolveProductionId: ReturnType<Awaited<ReturnType<typeof resolveConfig>>['createResolver']>;
 
 beforeAll(async () => {
-  const resolvedProductionConfig = await resolveConfig(productionMapConfig as UserConfig, 'build');
+  const resolvedProductionConfig = await resolveConfig(
+    projectProductionResolutionConfig(productionMapConfig as UserConfig),
+    'build',
+  );
   resolveProductionId = resolvedProductionConfig.createResolver();
   writeVitestSliceConfig(
     root,
@@ -131,6 +143,13 @@ afterAll(() => {
 });
 
 describe('runtime dependency resolution authority', () => {
+  it('projects only root and resolve from the production Vite config', () => {
+    const projected = projectProductionResolutionConfig(productionMapConfig as UserConfig);
+    expect(Object.keys(projected).sort()).toEqual(['resolve', 'root']);
+    expect(projected.root).toBe(productionMapConfig.root);
+    expect(projected.resolve).toBe(productionMapConfig.resolve);
+  });
+
   it('detects a deliberate runner mismatch', () => {
     const production = { packageName: 'example-runtime', version: '1.0.0', packageRoot: '/runtime/v1' };
     const mismatches = runtimeIdentityMismatches(production, {
@@ -148,6 +167,7 @@ describe('runtime dependency resolution authority', () => {
       expect(productionPath, `production Vite must resolve ${packageName}`).toBeTruthy();
       const production = packageIdentityFromResolvedPath(packageName, productionPath!);
       expect(production.version).toBe(expectedRuntimeVersions[packageName]);
+      expect(production).toEqual(resolveFromConsumer(packageName, consumer));
 
       const mismatches = runtimeIdentityMismatches(production, {
         direct: resolveForRunner(packageName, directConfig as VitestConfig),
