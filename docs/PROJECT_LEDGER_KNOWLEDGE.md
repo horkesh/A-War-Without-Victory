@@ -6229,3 +6229,8 @@ Desktop load hydration computes terrain-dependent sector ratings. Prime both exi
 ## 2026-10-25 — Failed request is a lawful observed terminal sequence
 
 CDP loadingFailed can follow a known request before response headers. Preserve the failure row without inventing a completeness error; require response count/timestamp for body admission, and keep requestless failures inconsistent. Zero body attempts is expected when observed OGG requests finish206 and body retrieval is failure-triggered. A failure before finalization does not manufacture success-only normalized audio/stderr fields. Package EXE integrity metadata must be proved against actual ASAR-header hashes, not dismissed as build noise. [selected proof](../logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/MANIFEST.json)
+
+
+## 2026-10-25 — Match producer success shapes and raw-state boundaries
+
+Success may omit failure-only own properties: require the actual producer shape rather than false/null fields invented by a fixture. Compute empty-list hashes from bytes. Preserve a rejected reader result and qualify the same raw run through a separately reviewed offline amendment. Runtime success and calibration failure are separate verdicts. Historical operation admission does not prove its combat outcome. Canonical saves that normalize/default fields cannot stand in for pre-serialization runtime state; a fidelity refusal is evidence, not a reason to weaken the gate. A synchronous optional observer must receive direct defensive structured clones and preserve own undefined properties; state alone does not bind the next turn's orders/context. [dated ledger](PROJECT_LEDGER.md#2026-10-25--qualified-native-opening-retained-player705-raw-boundary-observer)

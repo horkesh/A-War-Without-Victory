@@ -1,0 +1,130 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T10:48:23.304Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/run-actual-01",
+  "timeout_ms": 2160000,
+  "original_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/native39.cjs",
+    "run",
+    "{evidenceDir}",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/CONFIG.actual.json",
+    "bdbcca5d65d128e6d33855122f82458368546f2f1859c13a8fd6750132f6a137",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/check-actual-01/receipt.json",
+    "f9ce4f9f1d26191c0dc0f1370fe8d3103601a1cf094b7a5ebae1c7febf941a9d",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/check-actual-01/NATIVE39_READY.json",
+    "06bd2b9c6743a99039d5e5807fcec8f595b6ff47bf8487f2f4b0935350d1e285",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/INDEPENDENT_PREP_REVIEW.json",
+    "ae73dfccc30f5dc2403c0f279bc06a92c8a2a80b050648868cbb6ac72ada26a1"
+  ],
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/native39.cjs",
+    "run",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\cold-load-validation-v2\\native39-validation-v1\\run-actual-01",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/CONFIG.actual.json",
+    "bdbcca5d65d128e6d33855122f82458368546f2f1859c13a8fd6750132f6a137",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/check-actual-01/receipt.json",
+    "f9ce4f9f1d26191c0dc0f1370fe8d3103601a1cf094b7a5ebae1c7febf941a9d",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/check-actual-01/NATIVE39_READY.json",
+    "06bd2b9c6743a99039d5e5807fcec8f595b6ff47bf8487f2f4b0935350d1e285",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/INDEPENDENT_PREP_REVIEW.json",
+    "ae73dfccc30f5dc2403c0f279bc06a92c8a2a80b050648868cbb6ac72ada26a1"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "config.json",
+    "result.json",
+    "progress.json",
+    "netlog.json",
+    "harness.stdout.log",
+    "harness.stderr.log",
+    "external-inventory.json",
+    "exit.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/native39.cjs",
+    "bytes": 22138,
+    "raw_sha256": "1489e240ba459caa9efe58cb3e37f0f0e5e811c83c24aab485f524044ebce824",
+    "normalized_text_sha256": "1489e240ba459caa9efe58cb3e37f0f0e5e811c83c24aab485f524044ebce824",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 22138,
+      "sha256": "1489e240ba459caa9efe58cb3e37f0f0e5e811c83c24aab485f524044ebce824"
+    }
+  },
+  "end_utc": "2026-10-25T11:00:40.001Z",
+  "pid": 20668,
+  "child_exit": 0,
+  "wrapper_exit": 0,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/native39.cjs",
+    "bytes": 22138,
+    "raw_sha256": "1489e240ba459caa9efe58cb3e37f0f0e5e811c83c24aab485f524044ebce824",
+    "normalized_text_sha256": "1489e240ba459caa9efe58cb3e37f0f0e5e811c83c24aab485f524044ebce824",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "config.json",
+      "bytes": 9250,
+      "sha256": "bdbcca5d65d128e6d33855122f82458368546f2f1859c13a8fd6750132f6a137"
+    },
+    {
+      "path": "result.json",
+      "bytes": 24320780,
+      "sha256": "fc07daa8c583a6f1f3b7f42844245713ab5299b911aa83ff4dbcd1db5d786e20"
+    },
+    {
+      "path": "progress.json",
+      "bytes": 24320498,
+      "sha256": "b686fdfe7f6b2fd5e686e2115577603f6eb6217af922a6d87a51541cf0484368"
+    },
+    {
+      "path": "netlog.json",
+      "bytes": 4469216,
+      "sha256": "932b660c4aca4ca18707ce29ec5c9a44eec7ff08f715171973d4a2af1554bf9f"
+    },
+    {
+      "path": "harness.stdout.log",
+      "bytes": 34008,
+      "sha256": "48b84585d5364235ac944d66a866cc940d801b87eea8f44b611459b26bc12cc8"
+    },
+    {
+      "path": "harness.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "external-inventory.json",
+      "bytes": 72726,
+      "sha256": "46702f62a56450052388f440dd66353fa061c679a2905b8bb70d66cfd6b8041f"
+    },
+    {
+      "path": "exit.json",
+      "bytes": 665,
+      "sha256": "e0c53b2503f1994cb7a0cfe3d47ffee10a59fe3b2b12cf0ec4ad244cfe459fa9"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

@@ -1,8 +1,12 @@
 # Determinism Test Matrix (AWWV)
 
+## Raw scenario observation (2026-10-25)
+
+The optional `diagnosticTurnBoundaryObserver` receives direct structured clones after checkpoint capture. Focused3/3 proves zero observer work when absent, exact ordinary artifact bytes, correct boundary/count, detached state/report mutation, own undefined preservation, and clone/callback failure propagation. No default gameplay/order/artifact change follows. Canonical replay fidelity failed before native comparison; raw snapshot normalization evidence must not be promoted to uninterrupted turn17 causality without matching context.
+
 ## Desktop terrain prerequisites (2026-10-25)
 
-The real desktop Advance/Load callers prime terrain from explicit roots. Cold/warm/stale/missing/malformed load, canonical-save identity and exact next-advance state/report pass focused170/170. Package02 at12a independently passes cold compiled source/package projection and next-turn byte equality. n98/suite15082/0/33 retain true2ca provenance plus the reviewed delta. The external collector now accepts known-request→loadingFailed without response as a complete observed sequence, while retaining all failure rows and requiring response evidence for body eligibility. Requestless failures/orphans/duplicates/frame/session loss remain guarded; focused55/55 and static checks pass. The retained native opening still fails; another fully gated opening precedes39. No new188, full suite, tuning or baseline adoption. [selected proof](../../logs/r8-native-calibration-parity-20261024/request-failure-terminal-20261025/MANIFEST.json)
+The desktop terrain and cold-load proof remains qualified at12a, composed with no-player n98/suite at2ca. Collector55/55 and terminal77a CI precede an independently qualified native opening25/25. Fresh normal-player39 passes runtime/Save-load but fails705/712, losing Donje Zesce/Tosici against the707 criterion; it is not accepted calibration. [selected proof](../../logs/r8-native-calibration-parity-20261024/native-player39-20261025/MANIFEST.json)
 
 ## Ordinary-player startup and retained regression boundary (2026-10-25 candidate)
 

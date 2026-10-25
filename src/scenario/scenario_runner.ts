@@ -378,6 +378,12 @@ export function hasCivilianCasualtyRecords(casualties: unknown): boolean {
 export type BaselineOpsScopeMode = 'all_front_active' | 'static_front_only' | 'fluid_front_only';
 export type ReplayPayloadMode = 'manifest_only' | 'full';
 
+export interface DiagnosticTurnBoundaryObservation {
+    readonly week_index: number;
+    readonly state: GameState;
+    readonly report: TurnReport;
+}
+
 export interface RunScenarioOptions {
     scenarioPath: string;
     /** Deterministic verification override; canonical scenarios default to `harness-seed`. */
@@ -429,6 +435,12 @@ export interface RunScenarioOptions {
     emitTimingJson?: boolean;
     /** Replay payload policy. Default manifest_only avoids full-state replay bloat; full preserves legacy sidecars. */
     replayPayloadMode?: ReplayPayloadMode;
+    /**
+     * Diagnostic/test-only observation of the authentic in-memory state after a
+     * completed scenario week. Receives detached structured clones and cannot
+     * influence simulation state. Clone or callback failures reject the run.
+     */
+    diagnosticTurnBoundaryObserver?: (observation: DiagnosticTurnBoundaryObservation) => void;
 }
 
 export interface RunScenarioResult {
@@ -2406,6 +2418,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
         consoleDiagnostics = process.env.VITEST !== 'true',
         emitTimingJson = false,
         replayPayloadMode = 'manifest_only',
+        diagnosticTurnBoundaryObserver,
     } = options;
     if (replayPayloadMode !== 'manifest_only' && replayPayloadMode !== 'full') {
         throw new Error(`Unsupported replayPayloadMode: ${String(replayPayloadMode)}`);
@@ -3478,6 +3491,15 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     checkpointHere.week,
                     extractSettlementControlSnapshot(state, graph)
                 );
+            }
+            if (diagnosticTurnBoundaryObserver) {
+                const detachedState = structuredClone(state);
+                const detachedReport = structuredClone(turnReport);
+                diagnosticTurnBoundaryObserver({
+                    week_index,
+                    state: detachedState,
+                    report: detachedReport,
+                });
             }
         }
 

@@ -1,0 +1,24 @@
+{
+  "schema": "awwv.native-ci-terminal.v1",
+  "pass": true,
+  "status": "TERMINAL_SUCCESS",
+  "expectedHead": "77a2cc8e6b270474d0c3beef48b655c2903192e8",
+  "runs": [
+    {
+      "conclusion": "success",
+      "databaseId": 40184165853,
+      "headSha": "77a2cc8e6b270474d0c3beef48b655c2903192e8",
+      "name": "Baseline Pins",
+      "status": "completed",
+      "url": "https://github.com/horkesh/A-War-Without-Victory/actions/runs/40184165853"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 40184165862,
+      "headSha": "77a2cc8e6b270474d0c3beef48b655c2903192e8",
+      "name": "Event System CI",
+      "status": "completed",
+      "url": "https://github.com/horkesh/A-War-Without-Victory/actions/runs/40184165862"
+    }
+  ]
+}

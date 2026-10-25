@@ -1,5 +1,9 @@
 # Code Canon (AWWV)
 
+## Diagnostic scenario turn-boundary observer (2026-10-25)
+
+`RunScenarioOptions.diagnosticTurnBoundaryObserver` is an optional synchronous evidence-only observer after ordinary checkpoint capture and before loop close. It receives direct `structuredClone` copies of state and report, including own undefined properties. Absence performs no observer clone/callback; mutation stays detached and clone/callback errors propagate. It exposes no state transform, CLI, save schema or gameplay writer. A raw state snapshot does not supply the next iteration's BotManager/orders/context and cannot by itself prove a turn17 causal fork. `tests/scenario_turn_boundary_observer.test.ts` covers default byte neutrality, boundary/count, copy fidelity and failure honesty.
+
 ## Desktop combat terrain prerequisites (2026-10-25)
 
 `desktop_sim.advanceTurn(state, baseDir)` and `loadStateFromPath(statePath, baseDir)` prime both existing urban/forest OSID sets from the selected explicit root before their terrain consumers. The shared helper replaces stale sets, including empty results for missing/malformed inputs. Electron New Campaign/Load, calibration comparison, and the QA authoritative projection builder pass the correct source/package root. Standalone Node loaders retain their optional cwd default; production desktop load has no implicit cwd fallback. Terrain data, multipliers, canonical save bytes and turn ordering remain unchanged. Cold/warm/stale/missing/malformed load and exact next-advance state/report tests cover this boundary. Packaged and native qualification remain separate measured gates.

@@ -1,0 +1,134 @@
+{
+  "schema": "awwv.native39.commander-probe-independent-review.v1",
+  "reviewer": "desktop_terrain_canon_review",
+  "independent": true,
+  "verdict": "VALID_DIAGNOSTIC_STOP",
+  "causal_verdict": "UNESTABLISHED",
+  "scope": "Independent review of the retained accepted-first commander-creation probe, its preserved execution receipt, bounded stop rule, trace-reader postprocess, and preexisting telemetry prefixes. This review does not repeat the runtime serialization audit, authorize implementation or another run, or qualify the native39 calibration result.",
+  "candidate": {
+    "head": "77a2cc8e6b270474d0c3beef48b655c2903192e8",
+    "entry": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/native39-w17-commander-creation-probe.mts",
+      "bytes": 11493,
+      "sha256": "a6c54c6bbd4ce6da340a1e3fa2a1c001afc789f06b4c287d68b6352204a572b4"
+    }
+  },
+  "evidence": {
+    "attempt": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/first-divergence-commander-probe-01",
+    "launch": {
+      "bytes": 3663,
+      "sha256": "d7c027140566b252dc3019c1fb9fa91942dc2ccc52612d9ec179887b81e49f5a"
+    },
+    "receipt": {
+      "bytes": 3960,
+      "sha256": "86a01ecf39bbaccff9caf6d0241fee4e7baff83a21bc7cb08789bd7125375f45",
+      "child_exit": 2,
+      "wrapper_exit": 2,
+      "timed_out": false,
+      "spawn_error": null,
+      "elapsed_ms": 2702,
+      "artifact_contract_pass": true,
+      "entry_start_post_snapshot_exact": true
+    },
+    "result": {
+      "bytes": 18015,
+      "sha256": "bca1f87f7dc6efa65d5d38523e8a70584d2a32b15491aadaabecad3b8dd9afe5",
+      "pass": false,
+      "interpretation_allowed": false,
+      "accepted_fidelity": false,
+      "stopped_after": "accepted-first",
+      "executed_advances": 1,
+      "planned_advances": 4
+    },
+    "retained_outputs": {
+      "accepted_first_state": {
+        "bytes": 4853142,
+        "sha256": "7b668a000a8e85a77b4874564b9ade6949abe6d71082a56805a8779f89d7889c"
+      },
+      "accepted_first_report": {
+        "bytes": 676361,
+        "sha256": "b3358ae1745438e5e378d453526f567efb26badff4de43960fe917c8b1c8b303"
+      },
+      "stdout": {
+        "bytes": 85484,
+        "sha256": "db7c9eed1582323742cba76f55a20de065db95e8b459cfa31fbdf6956ee04a20"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "postprocess": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/first-divergence-commander-probe-01-postprocess/POSTPROCESS.json",
+      "bytes": 1878,
+      "sha256": "033018bb2692286bbbb79eb344a1c0c7586078bfe0773ec468d8889ad13b3837",
+      "reader_exit": 0,
+      "input_stdout_sha256_exact": true,
+      "records": 23,
+      "completion_rows": 17,
+      "violations": 0
+    }
+  },
+  "stop_rule_review": {
+    "declared_order": [
+      "accepted-first",
+      "native-first",
+      "native-repeat",
+      "accepted-repeat"
+    ],
+    "required_behavior": "Stop immediately if accepted-first does not reproduce the exact retained probe.",
+    "observed_behavior_exact": true,
+    "reason": "accepted-first did not reproduce probe_vrs_herzegovina_t17 with Foča Brigade at Faocici, so the script wrote the failed result, set exit code 2, and returned before any native or repeat advance.",
+    "hidden_overreach_found": false,
+    "allowed_artifacts_exact": true
+  },
+  "accepted_first_finding": {
+    "turn": 17,
+    "corps": "vrs_herzegovina",
+    "exit": "completed_no_operation",
+    "selected_brigade": "rs_gacko_brigade",
+    "selected_location": "op:kalinovik:sela_2",
+    "direct_candidates": [
+      "op:konjic:ljuta"
+    ],
+    "target_status": "all_filtered",
+    "first_rejecting_filter": "predicted_viable",
+    "prediction_outcome": "repulsed",
+    "returned_operations": [],
+    "target_probe_exact": false,
+    "interpretation": "This is valid evidence that a cold canonical accepted save does not reproduce the retained turn-17 Foča/Faocici probe. It is not evidence for the uninterrupted native branch's cause because canonical saves omit runtime transients and the native comparisons were correctly not executed."
+  },
+  "preservation": {
+    "telemetry_prefixes": {
+      "c_lane": {
+        "path": "data/derived/_debug/c_lane_corps_directive_telemetry.jsonl",
+        "prefix_bytes": 140097015,
+        "expected_sha256": "40e25ae15966d04006287209632c5b9db95fefb6eb9ada2eb203a46fc1d2627c",
+        "actual_sha256": "40e25ae15966d04006287209632c5b9db95fefb6eb9ada2eb203a46fc1d2627c",
+        "pass": true
+      },
+      "d_lane": {
+        "path": "data/derived/_debug/d_lane_persona_decisions.jsonl",
+        "prefix_bytes": 1041,
+        "expected_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+        "actual_sha256": "ff120d4aab551ad703cac3b1dc260d71cab1464b9bf5a57dba76c86baf3346e3",
+        "pass": true
+      }
+    },
+    "probe_outputs_fresh_and_bounded": true,
+    "source_tree_clean_at_review": true
+  },
+  "warm_capture_requirements": [
+    "Use one uninterrupted real Electron execution on the same ordinary-player policy path; do not substitute a canonical save reload for the turn-16 runtime state.",
+    "Capture immediately before the turn-17 buildOperations boundary: runtime turn-16 state identity, canonical state identity, turn/seed and available RNG cursor identity, policy inputs, package/code/harness hashes, and terrain binding.",
+    "Capture the complete commander_creation.v1 receipt for vrs_herzegovina, including brigade candidates and locations, direct and enemy target candidates, every reached filter and rejection reason, prediction inputs/outcome, returned operation, and resulting assignment/live-operation state.",
+    "Retain raw output and produced state/report under a preserved wrapper with exact entry snapshot, artifact allowlist, bounded timeout, no retry, and telemetry-prefix checks.",
+    "Compare the warm trace with the retained uninterrupted native turn and with n98 only after input and policy fidelity is established. A trace produced under different always-allow/always-deny choices may explain a branch but cannot by itself establish a defect.",
+    "Fail closed if the warm boundary cannot be captured or its input identity is incomplete; do not infer uninterrupted causation from the present cold replay."
+  ],
+  "conclusions": [
+    "The diagnostic probe was executed and stopped exactly as designed; exits 2/2 represent the retained fidelity failure, not a wrapper or artifact failure.",
+    "The probe narrows the next evidence need but establishes no simulation defect, no policy defect, and no uninterrupted first cause.",
+    "Native39 remains calibration-failed at 705/712; this review neither waives 707/712 nor authorizes tuning, implementation, or a new expensive run."
+  ]
+}

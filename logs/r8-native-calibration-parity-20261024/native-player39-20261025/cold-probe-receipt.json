@@ -1,0 +1,92 @@
+{
+  "schema": "awwv.preserved-preflight.receipt.v1",
+  "start_utc": "2026-10-25T11:16:22.927Z",
+  "cwd": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory",
+  "attempt_dir": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/first-divergence-commander-probe-01",
+  "timeout_ms": 30000,
+  "original_argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "node_modules/tsx/dist/cli.mjs",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/native39-w17-commander-creation-probe.mts",
+    "--evidence-dir",
+    "{evidenceDir}"
+  ],
+  "argv": [
+    "C:/Users/User/AppData/Local/Volta/tools/image/node/22.23.2/node.exe",
+    "node_modules/tsx/dist/cli.mjs",
+    "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/native39-w17-commander-creation-probe.mts",
+    "--evidence-dir",
+    "C:\\Users\\User\\.codex\\worktrees\\october-calibration-checkpoint\\A-War-Without-Victory\\tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\cold-load-validation-v2\\native39-validation-v1\\first-divergence-commander-probe-01"
+  ],
+  "placeholder_contract": "{evidenceDir}",
+  "allowed_artifacts": [
+    "launch.json",
+    "result.json",
+    "accepted-first-state.json",
+    "accepted-first-report.json"
+  ],
+  "entry_script": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/native39-w17-commander-creation-probe.mts",
+    "bytes": 11493,
+    "raw_sha256": "a6c54c6bbd4ce6da340a1e3fa2a1c001afc789f06b4c287d68b6352204a572b4",
+    "normalized_text_sha256": "a6c54c6bbd4ce6da340a1e3fa2a1c001afc789f06b4c287d68b6352204a572b4",
+    "snapshot": {
+      "path": "entry-script.snapshot",
+      "bytes": 11493,
+      "sha256": "a6c54c6bbd4ce6da340a1e3fa2a1c001afc789f06b4c287d68b6352204a572b4"
+    }
+  },
+  "end_utc": "2026-10-25T11:16:25.629Z",
+  "pid": 15036,
+  "child_exit": 2,
+  "wrapper_exit": 2,
+  "signal": null,
+  "timed_out": false,
+  "timeout_cleanup": null,
+  "spawn_error": null,
+  "entry_script_post": {
+    "path": "C:/Users/User/.codex/worktrees/october-calibration-checkpoint/A-War-Without-Victory/tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/native39-w17-commander-creation-probe.mts",
+    "bytes": 11493,
+    "raw_sha256": "a6c54c6bbd4ce6da340a1e3fa2a1c001afc789f06b4c287d68b6352204a572b4",
+    "normalized_text_sha256": "a6c54c6bbd4ce6da340a1e3fa2a1c001afc789f06b4c287d68b6352204a572b4",
+    "matches_start_raw_sha256": true,
+    "read_error": null
+  },
+  "stdout": {
+    "path": "stdout.log",
+    "bytes": 85484,
+    "sha256": "db7c9eed1582323742cba76f55a20de065db95e8b459cfa31fbdf6956ee04a20"
+  },
+  "stderr": {
+    "path": "stderr.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "retained_artifacts": [
+    {
+      "path": "launch.json",
+      "bytes": 3663,
+      "sha256": "d7c027140566b252dc3019c1fb9fa91942dc2ccc52612d9ec179887b81e49f5a"
+    },
+    {
+      "path": "result.json",
+      "bytes": 18015,
+      "sha256": "bca1f87f7dc6efa65d5d38523e8a70584d2a32b15491aadaabecad3b8dd9afe5"
+    },
+    {
+      "path": "accepted-first-state.json",
+      "bytes": 4853142,
+      "sha256": "7b668a000a8e85a77b4874564b9ade6949abe6d71082a56805a8779f89d7889c"
+    },
+    {
+      "path": "accepted-first-report.json",
+      "bytes": 676361,
+      "sha256": "b3358ae1745438e5e378d453526f567efb26badff4de43960fe917c8b1c8b303"
+    }
+  ],
+  "artifact_contract": {
+    "pass": true,
+    "unexpected": [],
+    "missing_allowed": []
+  }
+}

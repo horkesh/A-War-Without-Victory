@@ -1,0 +1,168 @@
+{
+  "schema": "awwv.native39.first-divergence-diagnosis.v1",
+  "date": "2026-10-25",
+  "mode": "offline-read-only",
+  "verdict": "FIRST_CAUSAL_BRANCH_FOUND_EXACT_REJECTING_PREDICATE_UNRETAINED",
+  "scope": "The retained actual native 0->39 execution was compared with accepted n98/n94 evidence only far enough to locate the first branch that causes the two missing turn-39 cells. No engine, package, browser, native run, campaign, full suite, or source edit was performed.",
+  "result": {
+    "firstCausalDivergence": {
+      "turn": 17,
+      "boundary": "generate-bot-corps-orders -> commander buildOperations for vrs_herzegovina",
+      "accepted": {
+        "operationId": "probe_vrs_herzegovina_t17",
+        "objective": "op:gorazde:faocici_2",
+        "participant": "rs_foa_brigade"
+      },
+      "native": {
+        "operationId": null,
+        "existingOperation": "Operation Herzegovina Consolidation",
+        "existingOperationPhase": "recovery"
+      },
+      "causalChain": [
+        "Accepted n98 assigns rs_foa_brigade to the turn-17 Faocici probe; native creates no such probe.",
+        "At turn 18 the uncommitted native Foča Brigade can defend both Donje Žešće and Tošići.",
+        "Accepted n98 instead records rs_ajnie_brigade at Donje Žešće and militia/null at Tošići and captures both objectives.",
+        "Native Operation Circle fails those two objectives and ends partial/max_failures, producing the exact two-cell 705-versus-707 residual."
+      ]
+    },
+    "firstRetainedPreBranchInputDifference": {
+      "turn": 16,
+      "path": "military.corps_command[vrs_herzegovina].commander_state.zone_assessments[0].surplus_brigades",
+      "native": [
+        "rs_gacko_brigade",
+        "rs_nevesinje_brigade",
+        "rs_ajnie_brigade"
+      ],
+      "acceptedN98": [
+        "rs_foa_brigade",
+        "rs_nevesinje_brigade",
+        "rs_ajnie_brigade"
+      ],
+      "sharedContext": {
+        "corpsStance": "defensive",
+        "decisionTraceHardConstraints": [
+          "corps_stance_forbids_offensive"
+        ],
+        "controlProjection": "all 712 OSID controllers exact at turn 16"
+      },
+      "interpretation": "The first slot of the eligible surplus pool differs before probe construction. This is a concrete input to commander operation creation, but the retained saves contain no commander_creation receipt, so they do not reveal whether brigade eligibility, target reachability, predicted viability, cooldown, or another buildOperations gate was the exact rejection. The shared defensive stance is not that predicate because accepted n98 still creates the generic probe."
+    },
+    "operationPipeline": {
+      "offerAndAdmission": "PASS: native Operation Circle authorization is retained at turn 16 and all four historical operations join accepted receipt -> live operation -> named officer -> operation history.",
+      "assignmentAndDelivery": "PASS for the disputed operation: native and accepted have the same Circle objectives, five participants, axes, and the 843rd movement order toward op:gorazde:faocici_2. Native turn-16 provisional and settled saves are byte-identical.",
+      "attackAndOwnership": "DIVERGES at turn 18 after the missing VRS probe changes defender availability. Accepted captures Donje Žešće and Tošići; native does not.",
+      "failureCategory": "VRS commander probe creation/defender allocation before combat, not missing RBiH historical-operation capability."
+    },
+    "productionBoundaryAssessment": {
+      "desktopLiveState": "Consecutive desktop Advance calls deserialize currentGameStateJson populated with serializeRuntimeState, while canonical serializeState is maintained separately for disk autosave. The actual turns 14..19 are direct advances; Save/Load occurs only after turn 39.",
+      "source": [
+        "src/desktop/electron-main.cjs:427-431",
+        "src/desktop/electron-main.cjs:447-457",
+        "src/desktop/electron-main.cjs:2389-2424",
+        "src/state/serializeGameState.ts:167-205",
+        "src/sim/turn_phases/war_phases.ts:2446-2499",
+        "src/sim/combat/commander/emit.ts:2287-2347"
+      ],
+      "conclusion": "Canonical transient stripping is not the live boundary in this uninterrupted native execution. The proven production branch is commander operation construction on turn 17. A native-only IPC/canonicalization defect is rejected by the call chain.",
+      "headlessComparisonLimit": "The accepted headless run and actual native run do not have identical player inputs or identical turn-16 military operands. N98 used the bot default civic choice and deny response while native selected civic and always_allow at turn 0. The policy field alone is not causal: by turn 16 both states contain exactly 4 RBiH and 28 RS deployed paramilitary formations, and the turn-15 Black Swans reserve request has the same accepted outcome and brigade/corps assignment (only decided_by differs). Concrete military differences remain: native Foča is 760 personnel/morale 64 versus n98 751/62, native Ajnie is 489/55 versus 480/53, and native 109th is 682 versus 685. Circle itself differs only 4310 versus 4313 initial strength while retaining the same roster and axes. The retained evidence therefore cannot classify the missing enemy probe as a missing native capability rather than a legitimate response to accumulated state differences."
+    },
+    "ordinaryPlayerActionAvailability": {
+      "finding": "No retained ordinary player action was available before the critical turn-18 resolution that is shown to strengthen or retry this already-authorized historical Circle operation.",
+      "details": [
+        "At turn 16 ARBiH 1st Corps has both operation slots occupied: the recovering turn-12 probe and planning Operation Circle; there is no pending operation directive or halt.",
+        "The operation-decision IPC supports launch, postpone, abort, and probe. It does not add a participant, replace an axis brigade, or retry a failed objective, and the actual transcript does not show a Circle operation-decision surface before turn-18 combat.",
+        "The player can approve an Army Reserve request only when one exists. The accepted turn-15 request sends Black Swans to 2nd Corps, not Circle. The later 1st Corps request names a Sarajevo OG recipient and appears after Circle's first failed attacks; it is not retained as a Circle participant or reinforcement.",
+        "Author/request-operation levers exist, but a turn-16 request to 1st Corps would meet a full two-slot state and is not evidence of strengthening Circle."
+      ],
+      "qualification": "Mechanism existence does not satisfy the 707/no-loss acceptance criterion. Any claimed player-action route still needs a visible production command before the critical resolution, persistence through Save/Load, and an actual 707/no-loss result."
+    },
+    "excludedHypotheses": [
+      "Historical Operation Circle was never offered, admitted, assigned, or delivered.",
+      "The final Save/Load stripped a transient before turn-17 commander creation.",
+      "active_offensives_against_corps caused this branch; the retained bounded A/B produced an exact empty production cache in both branches and did not restore the probe.",
+      "The two-cell gap first originates in turn-18 combat resolution; defender availability already differs at turn 17."
+    ],
+    "unresolved": "The exact rejecting predicate within turn-17 buildOperations is not observable in the retained ordinary save/report schema. Existing source instrumentation can expose it when AWWV_DEBUG_REASON_CODES=commander_creation is enabled."
+  },
+  "nextCheapestProductionCheck": {
+    "question": "Which buildOperations gate rejects the VRS Herzegovina probe from the native turn-16 state, and does the accepted n98 turn-16 state pass that same gate with Foča Brigade?",
+    "scope": "Four bounded one-turn offline advances: each exact turn-16 input twice to prove self-reproducibility, using desktop advanceTurn (which primes production terrain) and the existing commander_creation instrumentation and commander_target_selection_reader.cjs; do not continue beyond turn 17.",
+    "inputs": [
+      "tmp-paradox-qa-20260710/evidence/player-parity-rbih-t39-20261025-04/rbih/turn-autosaves/turn-016.json",
+      "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n98/save_w16.json"
+    ],
+    "environment": "AWWV_DEBUG_REASON_CODES=commander_creation",
+    "proposedEntry": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/native39-w17-commander-creation-probe.mts (new bounded evidence script, modeled on the retained n97-w17-desktop-terrain-prerequisite-probe.mts; not created by this diagnosis)",
+    "proposedCommands": [
+      "$attempt='tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\cold-load-validation-v2\\native39-validation-v1\\first-divergence-commander-probe-01'; New-Item -ItemType Directory -Path $attempt | Out-Null; $env:AWWV_DEBUG_REASON_CODES='commander_creation'; .\\node_modules\\.bin\\tsx.cmd tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\cold-load-validation-v2\\native39-validation-v1\\native39-w17-commander-creation-probe.mts --native tmp-paradox-qa-20260710\\evidence\\player-parity-rbih-t39-20261025-04\\rbih\\turn-autosaves\\turn-016.json --accepted runs\\apr1992_definitive_188w__6deb5845c150c196__w188_n98\\save_w16.json --repeat 2 --evidence-dir $attempt 1> \"$attempt\\stdout.log\" 2> \"$attempt\\stderr.log\"",
+      "node tools\\diagnostics\\commander_target_selection_reader.cjs tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\cold-load-validation-v2\\native39-validation-v1\\first-divergence-commander-probe-01\\stdout.log tmp\\player-bot-capability-parity-20261024\\terrain-parity-repair\\cold-load-validation-v2\\native39-validation-v1\\first-divergence-commander-probe-01\\commander-target-selection.json"
+    ],
+    "receiptRequirements": [
+      "For vrs_herzegovina turn 17: allocation surplus pool, every brigade candidate's four eligibility stages, offense fitness, rank, selected brigade and location.",
+      "Local-opportunity operands, active slot usage, commitments/active operations, selected sector, every enemy/direct candidate, every target filter and first rejection, and returned operation tuple.",
+      "RNG position recorded as not_applicable: commander emit/buildOperations is explicitly deterministic and contains no Math.random or Date.now path."
+    ],
+    "expectedRejectingGate": "Native is expected to select rs_gacko_brigade from its different surplus pool and end target selection as all_filtered, most likely at the direct filter because Gacko's location does not supply Foča's accepted direct Faocici approach. predicted_viable is the bounded alternate. This is a prediction for the receipt to test, not a retained conclusion.",
+    "passCriteria": [
+      "The two native advances are byte/semantic exact for the VRS receipt and both reproduce absence of probe_vrs_herzegovina_t17 with one identical first rejecting gate.",
+      "The two accepted advances are byte/semantic exact for the VRS receipt and both emit probe_vrs_herzegovina_t17 with rs_foa_brigade and op:gorazde:faocici_2.",
+      "The receipt binds candidate pool, eligibility, rank, selected brigade, commitments/slots, target filters, and the deterministic no-RNG fact.",
+      "Relevant production sources and terrain files are unchanged between package code 12a4680f and observer HEAD 77a2cc8e; desktop advanceTurn primes urban/forest data on each advance."
+    ],
+    "stoppingRule": "One four-advance attempt with a 30-second hard cap. If either repeated pair is non-self-reproducible or either branch fails its retained operation-envelope fidelity, stop without interpreting the predicate or retrying. Canonical archives omit runtime transients, so success identifies the persistent-state branch; failure means an exact uninterrupted-runtime receipt requires a future native capture and is outside this check.",
+    "expectedCost": "under 20 seconds, hard cap 30 seconds; no package build or campaign",
+    "launched": false
+  },
+  "evidence": {
+    "actualNativeReview": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/ACTUAL_NATIVE39_REVIEW.json",
+      "sha256": "0b165d782a9b44cd9d078bb942b44ebd5a9f469db369fd350329c02416a42373"
+    },
+    "actualResult": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/run-actual-01/result.json",
+      "sha256": "fc07daa8c583a6f1f3b7f42844245713ab5299b911aa83ff4dbcd1db5d786e20"
+    },
+    "actualPostcheck": {
+      "path": "tmp/player-bot-capability-parity-20261024/terrain-parity-repair/cold-load-validation-v2/native39-validation-v1/postcheck-actual-01/NATIVE39_POSTCHECK.json",
+      "sha256": "cd3aa7ef60286950385e91622e688c0ae56fb6d2471c1a6800ffa8d7b932645e",
+      "score": 705,
+      "passed": 34,
+      "total": 38
+    },
+    "nativeTurn16": {
+      "path": "tmp-paradox-qa-20260710/evidence/player-parity-rbih-t39-20261025-04/rbih/turn-autosaves/turn-016.json",
+      "sha256": "87cb05d1f4abbecffe73b7938b3357e5c267551d12c5f0fc80548e7c34ff3bf9"
+    },
+    "nativeTurn17": {
+      "path": "tmp-paradox-qa-20260710/evidence/player-parity-rbih-t39-20261025-04/rbih/turn-autosaves/turn-017.json",
+      "sha256": "83c656d4bfb26028485d1a66d72be5350f7f70a8d7a8d273fbecc52fb081b974"
+    },
+    "nativeTurn18": {
+      "path": "tmp-paradox-qa-20260710/evidence/player-parity-rbih-t39-20261025-04/rbih/turn-autosaves/turn-018.json",
+      "sha256": "86b88d36dd222c87a30e4528cd11aca239101217145c87e9f1a10666e7339ef2"
+    },
+    "acceptedTurn16": {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n98/save_w16.json",
+      "sha256": "22ef518bb1f894d0afb450643a21d4a628f8f5c1462a80ebda498f81ece943ca"
+    },
+    "acceptedWeeklyReport": {
+      "path": "runs/apr1992_definitive_188w__6deb5845c150c196__w188_n98/weekly_report.jsonl",
+      "sha256": "08b8e8cc74f7945ac4066edbce6cddfce74c40180c6fa013a6cb6c9997637669"
+    },
+    "priorRetainedDiagnosis": {
+      "path": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/V4-RETAINED-DIAGNOSIS.md",
+      "sha256": "f1be3ebee5656c536a9be5480438dcd54fb7516a74210b3185ddc5388b6fd316"
+    },
+    "rejectedCacheProbe": {
+      "path": "tmp/player-bot-capability-parity-20261024/native703-capability-diagnosis/N97-W17-ACTIVE-OFFENSIVES-FAILED-PROBE-OFFLINE-DIAGNOSIS.md",
+      "sha256": "51b8447ce34c7387119c6423c506b558fe225a3d7099565df92469c7da1ce6f3"
+    }
+  },
+  "offlineChecks": {
+    "sourceAndEvidenceReadsExit": 0,
+    "hashReadsExit": 0,
+    "stateExtractionExit": 0,
+    "newExecutionCount": 0,
+    "sourceEdits": 0
+  }
+}

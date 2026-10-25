@@ -15,7 +15,7 @@ paused or RE is blocked, they are describing 2026-08-28, not today.
 
 **Last updated:** 2026-10-25 — owner prioritizes player capability to achieve bot calibration and access the same operations; diagnose and repair proven gaps before divergence experiments. n94 remains the no-player benchmark.
 
-**Player parity:** n98/suite qualify; package02 cold compiled proof and real Save/load pass. Opening remains failed on CDP request→failure completeness. Reviewed observer-only repair55/55 needs new CI/provenance and one opening before39. Preserve n91–n98; no tuning/adoption. Later checkpoints/resume/all-faction remain open. [Plan](2026-07-31-full-campaign-electron-validation-plan.md).
+**Player parity:** n98/suite and package02 remain qualified; native opening25/25. Real RBiH39 runtime passes but705/712 loses Donje Zesce/Tosici. All4 operations execute; turn17 Foča probe differs. Reviewed raw-state observer3/3 enables diagnosis, not a fix. Preserve n91–n98; no tuning/adoption. [Plan](2026-07-31-full-campaign-electron-validation-plan.md).
 
 **Owner delegation — 2026-10-06:** Codex is the approval authority for routine
 work within the current goal and drives prioritization, implementation, targeted
